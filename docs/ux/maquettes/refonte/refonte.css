@@ -254,7 +254,7 @@ body {
   grid-template-columns: repeat(14, minmax(0, 1fr));
   align-items: end;
   gap: var(--fd-space-3);
-  height: 220px;
+  height: 300px;
   padding-top: var(--fd-space-6);
 }
 .bars .col {
@@ -292,12 +292,9 @@ body {
   border-radius: 50%;
   position: relative;
 }
-.donut::after {
-  content: '';
+.donut__svg {
   position: absolute;
-  inset: 28px;
-  border-radius: 50%;
-  background: var(--fd-color-surface);
+  inset: 0;
 }
 .donut__center {
   position: relative;
