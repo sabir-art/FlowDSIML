@@ -96,6 +96,28 @@ export function DemoAside() {
   );
 }
 
+/** Panneau de l'inscription (maquette inscription.html) : accroche + trois étapes. */
+export function StepsAside() {
+  const { t } = useTranslation();
+  return (
+    <aside className="auth-aside auth-aside--steps" aria-hidden="true">
+      <p className="t-display aside-title">{t('auth.stepsTitle')}</p>
+      <ol className="aside-list">
+        {[1, 2, 3].map((n) => (
+          <li key={n}>
+            <span className="n">{n}</span>
+            <div>
+              <b>{t(`auth.step${n}Title`)}</b>
+              <br />
+              {t(`auth.step${n}Body`)}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </aside>
+  );
+}
+
 /**
  * Écrans d'authentification, reconstruits à l'identique de la maquette (règle D13) :
  * formulaire à gauche, panneau illustré à droite (masqué sous 900 px), pied de page langue + liens.
@@ -104,11 +126,17 @@ export function AuthLayout({
   title,
   subtitle,
   aside,
+  compact,
+  footer = true,
   children,
 }: {
   title: string;
   subtitle?: string;
   aside?: ReactNode;
+  /** Logo plus proche du titre (inscription : 40 px au lieu de 48) */
+  compact?: boolean;
+  /** Pied de page langue / liens légaux (absent de la maquette d'inscription) */
+  footer?: boolean;
   children: ReactNode;
 }) {
   const { t, i18n } = useTranslation();
@@ -117,30 +145,36 @@ export function AuthLayout({
     <div className="mk">
       <div className="auth">
         <main className="auth-form" id="main">
-          <Link to="/" className="auth-logo-link" aria-label={t('auth.home', { app: APP_NAME })}>
+          <Link
+            to="/"
+            className={`auth-logo-link${compact ? ' auth-logo-link--compact' : ''}`}
+            aria-label={t('auth.home', { app: APP_NAME })}
+          >
             <BrandMark size={36} />
           </Link>
           <h1>{title}</h1>
           {subtitle && <p className="muted t-lg auth-sub">{subtitle}</p>}
           {children}
-          <div className="row auth-footer">
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              aria-label={t('auth.changeLanguage')}
-              lang={other}
-              onClick={() => setLocale(other)}
-            >
-              <Globe aria-hidden="true" />
-              {i18n.language === 'en' ? 'English' : 'Français'}
-            </button>
-            {/* Pages légales pas encore rédigées : visibles, non cliquables, badge Bientôt */}
-            <span className="row auth-legal">
-              <span className="t-caption subtle">{t('auth.privacy')}</span>
-              <span className="t-caption subtle">{t('auth.terms')}</span>
-              <span className="badge">{t('shell.soon')}</span>
-            </span>
-          </div>
+          {footer && (
+            <div className="row auth-footer">
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                aria-label={t('auth.changeLanguage')}
+                lang={other}
+                onClick={() => setLocale(other)}
+              >
+                <Globe aria-hidden="true" />
+                {i18n.language === 'en' ? 'English' : 'Français'}
+              </button>
+              {/* Pages légales pas encore rédigées : visibles, non cliquables, badge Bientôt */}
+              <span className="row auth-legal">
+                <span className="t-caption subtle">{t('auth.privacy')}</span>
+                <span className="t-caption subtle">{t('auth.terms')}</span>
+                <span className="badge">{t('shell.soon')}</span>
+              </span>
+            </div>
+          )}
         </main>
         {aside ?? <DemoAside />}
       </div>

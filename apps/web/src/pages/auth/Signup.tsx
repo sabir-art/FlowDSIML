@@ -1,8 +1,7 @@
-import { UserPlus } from 'lucide-react';
+import { CircleAlert, Mail } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Field } from '@flowdsiml/ui';
 import { authRedirect, supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import {
@@ -13,9 +12,9 @@ import {
   type FieldErrors,
 } from '../../lib/validation';
 import { useAuth } from '../../auth/AuthProvider';
-import { FieldError } from '../../components/FieldError';
-import { AuthLayout } from './AuthLayout';
+import { AuthLayout, GoogleMark, MkFieldError, StepsAside } from './AuthLayout';
 
+/** Inscription (INS-01), à l'identique de la maquette inscription.html. */
 export function Signup() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
@@ -24,9 +23,14 @@ export function Signup() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [consent, setConsent] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const { busy, error, success, run } = useAction();
+  const [sentTo, setSentTo] = useState('');
+  const { busy, error, run } = useAction();
+  const resend = useAction();
   const strength = passwordStrength(password);
+  // Jauge à 4 segments de la maquette : 1 segment sous 8 caractères, puis 2 à 4 selon la robustesse
+  const segments = password ? strength + 1 : 0;
 
   if (user) return <Navigate to={redirect} replace />;
 
@@ -36,104 +40,180 @@ export function Signup() {
     const errs = validateForm(form, t);
     setErrors(errs);
     if (focusFirstError(form, errs)) return;
-    await run(
-      async () =>
-        check(
-          await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              emailRedirectTo: authRedirect(redirect),
-              data: { full_name: fullName, locale: i18n.language === 'en' ? 'en' : 'fr' },
-            },
-          }),
-        ),
-      t('auth.checkEmail'),
+    const r = await run(async () =>
+      check(
+        await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: authRedirect(redirect),
+            data: { full_name: fullName, locale: i18n.language === 'en' ? 'en' : 'fr' },
+          },
+        }),
+      ),
     );
+    if (r !== undefined) setSentTo(email);
   }
 
+  const help = password
+    ? strength === 0
+      ? t('auth.passwordHelpWeak', { min: 8 })
+      : t('auth.passwordHelp', { min: 8, level: t(`auth.strength_${strength}`) })
+    : t('auth.passwordMinShort', { min: 8 });
+
   return (
-    <AuthLayout title={t('auth.signupTitle')} subtitle={t('auth.signupSubtitle')}>
-      {error && <Alert kind="error">{error}</Alert>}
-      {success ? (
-        <Alert kind="success">{success}</Alert>
-      ) : (
-        <form onSubmit={submit} noValidate>
-          <Field label={t('auth.fullName')} htmlFor="name">
-            <input
-              id="name"
-              className="fd-input"
-              autoComplete="name"
-              required
-              maxLength={120}
-              value={fullName}
-              onChange={(e) => {
-                setFullName(e.target.value);
-                setErrors((x) => ({ ...x, name: '' }));
-              }}
-              {...fieldA11y('name', errors)}
-            />
-            <FieldError id="name" errors={errors} />
-          </Field>
-          <Field label={t('auth.workEmail')} htmlFor="email">
-            <input
-              id="email"
-              className="fd-input"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setErrors((x) => ({ ...x, email: '' }));
-              }}
-              {...fieldA11y('email', errors)}
-            />
-            <FieldError id="email" errors={errors} />
-          </Field>
-          <Field label={t('auth.password')} htmlFor="password">
-            <input
-              id="password"
-              className="fd-input"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setErrors((x) => ({ ...x, password: '' }));
-              }}
-              {...fieldA11y('password', errors)}
-            />
-            <FieldError id="password" errors={errors} />
-            {password && (
-              <div className="strength" data-score={strength} aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </div>
+    <AuthLayout
+      title={t('auth.signupTitle')}
+      subtitle={t('auth.signupSubtitle')}
+      aside={<StepsAside />}
+      compact
+      footer={false}
+    >
+      {sentTo ? (
+        <div className="alert alert-success auth-sent" role="status">
+          <Mail aria-hidden="true" />
+          <div>
+            <b>{t('auth.sentTitle')}</b>
+            <br />
+            <span className="muted">{t('auth.sentBody', { email: sentTo })}</span>{' '}
+            <button
+              type="button"
+              className="mk-link"
+              disabled={resend.busy}
+              onClick={() =>
+                void resend.run(
+                  async () =>
+                    check(
+                      await supabase.auth.resend({
+                        type: 'signup',
+                        email: sentTo,
+                        options: { emailRedirectTo: authRedirect(redirect) },
+                      }),
+                    ),
+                  t('auth.resent'),
+                )
+              }
+            >
+              {t('auth.resend')}
+            </button>
+            {(resend.success || resend.error) && (
+              <span className={resend.error ? 'error-msg' : 'help'} role="status">
+                {resend.error || resend.success}
+              </span>
             )}
-            <p className="fd-help strength-text" aria-live="polite">
-              {password
-                ? `${t('auth.strengthLabel', { level: t(`auth.strength_${Math.max(1, strength)}`) })}${
-                    strength === 0 ? ` · ${t('auth.passwordMinShort', { min: 8 })}` : ''
-                  }`
-                : t('auth.passwordMinShort', { min: 8 })}
-            </p>
-          </Field>
-          <Button
-            icon={<UserPlus />}
-            type="submit"
-            variant="primary"
-            disabled={busy}
-            style={{ width: '100%' }}
-          >
-            {t('auth.signUp')}
-          </Button>
-        </form>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="oauth oauth--signup">
+            {/* Inscription Google : prévue (V2), visible mais inactive */}
+            <button
+              type="button"
+              className="btn btn-secondary btn-lg btn-block"
+              aria-disabled="true"
+              aria-describedby="oauth-soon"
+            >
+              <GoogleMark />
+              {t('auth.googleSignup')}
+              <span className="badge" id="oauth-soon">
+                {t('shell.soon')}
+              </span>
+            </button>
+          </div>
+          <div className="or">{t('auth.orEmail')}</div>
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              <CircleAlert aria-hidden="true" />
+              {error}
+            </div>
+          )}
+          <form onSubmit={submit} noValidate>
+            <div className="field">
+              <label htmlFor="name">{t('auth.fullName')}</label>
+              <input
+                id="name"
+                className="input"
+                autoComplete="name"
+                placeholder={t('auth.namePlaceholder')}
+                required
+                maxLength={120}
+                value={fullName}
+                onChange={(e) => {
+                  setFullName(e.target.value);
+                  setErrors((x) => ({ ...x, name: '' }));
+                }}
+                {...fieldA11y('name', errors)}
+              />
+              <MkFieldError id="name" errors={errors} />
+            </div>
+            <div className="field">
+              <label htmlFor="email">{t('auth.workEmail')}</label>
+              <input
+                id="email"
+                className="input"
+                type="email"
+                autoComplete="email"
+                placeholder={t('auth.emailPlaceholder')}
+                required
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setErrors((x) => ({ ...x, email: '' }));
+                }}
+                {...fieldA11y('email', errors)}
+              />
+              <MkFieldError id="email" errors={errors} />
+            </div>
+            <div className="field">
+              <label htmlFor="password">{t('auth.password')}</label>
+              <input
+                id="password"
+                className="input"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrors((x) => ({ ...x, password: '' }));
+                }}
+                aria-describedby={errors.password ? 'password-error pwd-help' : 'pwd-help'}
+                aria-invalid={errors.password ? true : undefined}
+              />
+              <div className="pwd-meter" aria-hidden="true">
+                {[0, 1, 2, 3].map((i) => (
+                  <span key={i} className={i < segments ? 'on' : undefined} />
+                ))}
+              </div>
+              <MkFieldError id="password" errors={errors} />
+              <span className="help" id="pwd-help" aria-live="polite">
+                {help}
+              </span>
+            </div>
+            <label className="check auth-consent">
+              <input
+                type="checkbox"
+                id="consent"
+                required
+                checked={consent}
+                onChange={(e) => {
+                  setConsent(e.target.checked);
+                  setErrors((x) => ({ ...x, consent: '' }));
+                }}
+                {...fieldA11y('consent', errors)}
+              />
+              {/* Pages légales pas encore rédigées : mentionnées sans lien (badge Bientôt en pied de page) */}
+              <span className="muted">{t('auth.consent')}</span>
+            </label>
+            <MkFieldError id="consent" errors={errors} />
+            <button className="btn btn-primary btn-lg btn-block auth-submit" type="submit" disabled={busy}>
+              {t('auth.signUp')}
+            </button>
+          </form>
+        </>
       )}
-      <p className="auth-foot">
+      <p className="muted auth-switch auth-switch--signup">
         {t('auth.hasAccount')} <Link to="/login">{t('auth.loginLink')}</Link>
       </p>
     </AuthLayout>

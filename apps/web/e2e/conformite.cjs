@@ -34,6 +34,16 @@ const SCREENS = {
       await p.locator('#password').blur();
     },
   },
+  'INS-01': {
+    maquette: 'inscription.html',
+    route: '/#/signup',
+    signedOut: true,
+    // État de la maquette : mot de passe saisi (robustesse « bonne »), autres champs vides
+    async prepare(p) {
+      await p.fill('#password', 'Demo-2026!');
+      await p.locator('#password').blur();
+    },
+  },
 };
 
 async function shotMaquette(b, file, theme) {

@@ -11,7 +11,7 @@ export function validateForm(form: HTMLFormElement, t: TFunction): FieldErrors {
   for (const el of Array.from(form.querySelectorAll<HTMLInputElement>('input[id]'))) {
     const v = el.type === 'checkbox' ? '' : el.value.trim();
     if (el.type === 'checkbox' && el.required && !el.checked) errors[el.id] = t('validation.consent');
-    else if (el.required && !v) errors[el.id] = t('validation.required');
+    else if (el.type !== 'checkbox' && el.required && !v) errors[el.id] = t('validation.required');
     else if (el.type === 'email' && v && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))
       errors[el.id] = t('validation.email');
     else if (el.minLength > 0 && v && v.length < el.minLength)

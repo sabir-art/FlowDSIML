@@ -153,3 +153,77 @@
 .mk .auth-legal {
   gap: 12px;
 }
+
+/* ---- Inscription (INS-01) : styles de page et styles en ligne d'inscription.html ---- */
+.mk .aside-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px;
+  display: grid;
+  gap: 20px;
+  max-width: 420px;
+}
+.mk .aside-list li {
+  display: flex;
+  gap: 14px;
+  color: var(--fd-lagoon-100);
+}
+.mk .aside-list li b {
+  color: #fff;
+}
+.mk .aside-list .n {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: grid;
+  place-items: center;
+  font: 700 13px var(--fd-font-display);
+  color: #fff;
+}
+.mk .aside-list li:last-child .n {
+  background: var(--fd-ember-500);
+}
+.mk .pwd-meter {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+.mk .pwd-meter span {
+  height: 4px;
+  border-radius: 4px;
+  background: var(--fd-color-surface-sunken);
+}
+.mk .pwd-meter span.on {
+  background: var(--fd-color-success);
+}
+.mk .auth-aside--steps {
+  justify-content: center;
+}
+.mk .aside-title {
+  color: #fff;
+  font-size: 2rem;
+  max-width: 440px;
+  margin-bottom: 40px;
+}
+.mk .auth-logo-link--compact {
+  margin-bottom: 40px;
+}
+.mk .oauth--signup {
+  margin-top: 28px;
+}
+.mk .auth-consent {
+  margin-top: 20px;
+}
+.mk .auth-switch--signup {
+  margin-top: 28px;
+}
+.mk .auth-sent {
+  margin-top: 28px;
+}
+.mk .auth-sent .help,
+.mk .auth-sent .error-msg {
+  display: block;
+  margin-top: 4px;
+}
