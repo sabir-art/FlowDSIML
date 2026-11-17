@@ -5,6 +5,7 @@ import {
   EyeOff,
   ImageOff,
   ImagePlus,
+  MessageSquare,
   MousePointerClick,
   Plus,
   Target,
@@ -22,11 +23,14 @@ export function StepList({
   current,
   onSelect,
   readOnly,
+  openComments = {},
 }: {
   editor: DemoEditor;
   current: number;
   onSelect: (i: number) => void;
   readOnly: boolean;
+  /** Nombre de commentaires ouverts par étape (badge du rail). */
+  openComments?: Record<string, number>;
 }) {
   const { t } = useTranslation();
   const [dragFrom, setDragFrom] = useState<number | null>(null);
@@ -83,6 +87,16 @@ export function StepList({
                   </span>
                 )}
                 <span className="steplist-title">{s.title || t('editor.untitled')}</span>
+                {(openComments[s.id] ?? 0) > 0 && (
+                  <span
+                    className="steplist-comments"
+                    title={t('comments.openCount', { count: openComments[s.id] })}
+                  >
+                    <MessageSquare aria-hidden="true" />
+                    {openComments[s.id]}
+                    <span className="sr-only">{t('comments.openCount', { count: openComments[s.id] })}</span>
+                  </span>
+                )}
                 <StepBadges step={s} hotspots={editor.hotspots.filter((h) => h.step_id === s.id).length} />
               </button>
               {!readOnly && (

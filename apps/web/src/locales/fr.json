@@ -526,5 +526,30 @@
     "confirmLabel": "Publier sans formulaire",
     "sharePublished": "Publiée sans formulaire de lead (plan Free).",
     "previewBanner": "Aperçu : non publié avec votre plan"
+  },
+  "comments": {
+    "title": "Commentaires",
+    "internal": "Internes à l’équipe, jamais publiés",
+    "openCount_one": "{{count}} commentaire ouvert",
+    "openCount_other": "{{count}} commentaires ouverts",
+    "showResolved": "Afficher les résolus ({{count}})",
+    "collapse": "Replier",
+    "expand": "Déplier",
+    "resize": "Redimensionner le panneau des commentaires",
+    "empty": "Aucun commentaire sur cette étape. Notez ici une remarque pour l’équipe.",
+    "allResolved": "Tous les commentaires de cette étape sont résolus.",
+    "you": "Vous",
+    "formerMember": "Ancien membre",
+    "edited": "modifié",
+    "resolved": "Résolu",
+    "resolve": "Résoudre",
+    "reopen": "Rouvrir",
+    "edit": "Modifier le commentaire",
+    "editLabel": "Modifier le commentaire",
+    "delete": "Supprimer le commentaire",
+    "confirmDelete": "Supprimer ce commentaire ?",
+    "placeholder": "Ajouter un commentaire…",
+    "send": "Envoyer",
+    "hint": "Entrée pour envoyer, Maj+Entrée pour aller à la ligne."
   }
 }

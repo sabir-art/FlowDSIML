@@ -10,6 +10,8 @@ import { Loading } from '../../components/guards';
 import { useDemoEditor } from './useDemoEditor';
 import { Canvas, type Tool } from './Canvas';
 import { StepList } from './StepList';
+import { CommentsPanel } from './comments/CommentsPanel';
+import { useStepComments } from './comments/useStepComments';
 import { StepPanel } from './panels/StepPanel';
 import { HotspotPanel } from './panels/HotspotPanel';
 import { BlurPanel } from './panels/BlurPanel';
@@ -46,6 +48,7 @@ export function EditorPage() {
   const { demoId = '' } = useParams();
   const { can, current: ws } = useWorkspace();
   const editor = useDemoEditor(demoId);
+  const comments = useStepComments(demoId, ws?.id);
   const [index, setIndex] = useState(0);
   const [tool, setTool] = useState<Tool>('select');
   const [selection, setSelection] = useState<Selection>({ kind: 'step' });
@@ -184,25 +187,34 @@ export function EditorPage() {
       )}
       <div className="editor-body">
         <aside className="editor-left">
-          <StepList editor={editor} current={index} onSelect={setIndex} readOnly={readOnly} />
+          <StepList
+            editor={editor}
+            current={index}
+            onSelect={setIndex}
+            readOnly={readOnly}
+            openComments={comments.openByStep}
+          />
         </aside>
-        <section className="editor-center">
-          {step ? (
-            <Canvas
-              editor={editor}
-              step={step}
-              tool={tool}
-              setTool={setTool}
-              selection={selection}
-              setSelection={setSelection}
-              readOnly={readOnly}
-              onEditForm={() => setTab('settings')}
-            />
-          ) : (
-            <div className="center fd-muted">{t('editor.empty')}</div>
-          )}
-          {tool !== 'select' && <p className="fd-muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
-        </section>
+        <div className="editor-center-col">
+          <section className="editor-center">
+            {step ? (
+              <Canvas
+                editor={editor}
+                step={step}
+                tool={tool}
+                setTool={setTool}
+                selection={selection}
+                setSelection={setSelection}
+                readOnly={readOnly}
+                onEditForm={() => setTab('settings')}
+              />
+            ) : (
+              <div className="center fd-muted">{t('editor.empty')}</div>
+            )}
+            {tool !== 'select' && <p className="fd-muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
+          </section>
+          <CommentsPanel stepId={step?.id ?? null} api={comments} />
+        </div>
         <aside className="editor-right">
           <div className="fd-tabs" role="tablist">
             {(['step', 'design', 'settings'] as Tab[]).map((k) => (

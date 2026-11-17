@@ -381,6 +381,18 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"step_comments": {
+                  Row: {
+                    "author_id": string,"body": string,"created_at": string,"demo_id": string,"id": string,"resolved_at": string | null,"resolved_by": string | null,"step_id": string,"updated_at": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id"?: string,"body": string,"created_at"?: string,"demo_id"?: string,"id"?: string,"resolved_at"?: string | null,"resolved_by"?: string | null,"step_id": string,"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Update: {
+                    "author_id"?: string,"body"?: string,"created_at"?: string,"demo_id"?: string,"id"?: string,"resolved_at"?: string | null,"resolved_by"?: string | null,"step_id"?: string,"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Relationships: []
                 },"steps": {
                   Row: {
                     "blurs": NonNullable<Json>,"body": string,"chapter_id": string | null,"created_at": string,"cta": Json | null,"demo_id": string,"element_meta": NonNullable<Json>,"gate_form_id": string | null,"id": string,"image_height": number | null,"image_path": string | null,"image_width": number | null,"kind": Database["public"]['Enums']["step_kind"],"page_title": string | null,"page_url": string | null,"position": number,"snapshot_path": string | null,"title": string,"updated_at": string,"workspace_id": string,"zoom": Json | null
@@ -594,6 +606,9 @@ isOneToOne: false
 { Args: { "p_days"?: number,"p_workspace": string }; Returns: {
               "completions": number,"demo_id": string,"leads": number,"views": number,"visitors": number
             }[]
+                           },
+"set_comment_resolved":
+{ Args: { "p_comment": string,"p_resolved": boolean }; Returns: undefined
                            },
 "workspace_kpis":
 { Args: { "p_from": string,"p_to"?: string,"p_workspace": string }; Returns: Json
