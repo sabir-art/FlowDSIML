@@ -571,7 +571,8 @@ input[type='radio'] {
   margin: 0;
   font: var(--fd-text-h3-weight) var(--fd-text-h3-size) / var(--fd-text-h3-line) var(--fd-font-sans);
 }
-.fd-card__head > :last-child:not(:first-child) {
+/* Action en bout d'en-tête (bouton, lien, segmenté) poussée à droite ; jamais le libellé. */
+.fd-card__head > :is(button, a, .fd-btn, .fd-segmented):last-child:not(:first-child) {
   margin-left: auto;
 }
 
