@@ -72,7 +72,7 @@ export function StepList({
                   <img src={url} alt="" />
                 ) : (
                   <span
-                    className={`steplist-text ${s.kind === 'text' ? 'steplist-text--card' : ''}`}
+                    className={`steplist-text fd-player-scope ${s.kind === 'text' ? 'steplist-text--card' : ''}`}
                     aria-hidden="true"
                   >
                     {s.kind === 'text' ? (
