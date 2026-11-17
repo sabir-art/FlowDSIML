@@ -146,7 +146,7 @@ Points positifs : flou irréversible côté pixels (très bon pour la confidenti
 | P4 | Majeur | Player, accès | Pas d'écran **mot de passe** ; un lien personnalisé **expiré** affiche le message générique « n'existe pas ». | Écrans `player.password.*` et `player.expired.*` (maquettes `player.html#password` / `#expired`) ; le mot de passe peut rester en V2 mais l'expiration doit avoir son message. |
 | P5 | Majeur | Player, navigation | Pas de bouton **Précédent** dans la première bulle ni de contrôles hors bulle (précédent, suivant, plein écran) ; barre de progression collée en bas de l'écran, peu visible. | Contrôles sous le cadre (desktop), progression segmentée en haut du cadre (§13.6). |
 | P6 | Majeur | Player, page publique | En-tête réduit au titre de la démo ; pas de **logo ni de CTA** du client (« Essai gratuit », « Voir les tarifs »). | Page publique de la maquette ; réglages `settings.brand.publicPage` (V2 possible, mais prévoir l'emplacement). |
-| P7 | Majeur | Player, filigrane | « Créé avec FlowDSIML » en texte 11 px gris sur fond sombre (contraste insuffisant), non cliquable. | Pastille « Fait avec FlowDSIML » (logo + lien `rel="noopener"`), contraste AA, en bas à droite. |
+| P7 | Majeur | Player, filigrane | « Créé avec TutoClick » en texte 11 px gris sur fond sombre (contraste insuffisant), non cliquable. | Pastille « Fait avec TutoClick » (logo + lien `rel="noopener"`), contraste AA, en bas à droite. |
 | P8 | Majeur | Partage | Page en **cartes empilées** (lien, iframe, liens perso, versions) sur toute la hauteur ; « **Dépublier** » en bouton rouge plein juste à côté d'« Ouvrir ». | Onglets Lien · Intégrer · Liens personnalisés · Accès + aperçu à droite (maquette `partage.html`) ; « Dépublier » dans un menu avec confirmation. |
 | P9 | Majeur | Partage | « Versions publiées : v1 — **Invalid Date** » ; date d'expiration en `mm/dd/yyyy` (sélecteur natif en anglais). | Dates via `Intl.DateTimeFormat(locale)` ; corriger le champ `published_at` lu. |
 | P10 | Majeur | Partage | Formulaire de lien personnalisé : libellé technique « {{company}} — Entreprise » ; le lien créé n'est pas **copié automatiquement**. | Libellé « Entreprise » avec la variable en pastille mono discrète ; « Créer et copier le lien » + toast (maquette). |
@@ -393,7 +393,7 @@ Re-capture avec le script du dev et mesures DOM. Captures : `docs/ux/recette/fin
 | Données fictives | ✅ `globex.example` dans le faux Supabase |
 | FI8 partage | ⚠️ En partie : « Dépublier » a bien l'icône `GlobeLock`, mais reste un **bouton rouge plein** à côté d'« Ouvrir ». « Versions publiées » affiche toujours « v1 · — » avec une puce native. Le champ Expiration est toujours au format `mm/dd/yyyy` |
 | FI10 entonnoir | ⚠️ En partie : le libellé « 90 (100 %) » est maintenant collé au bord gauche **dans** la barre, en vert foncé sur du vert. Il est encore moins lisible |
-| Nouveau | ⚠️ `editor.showBranding` = « Afficher «␣␣Créé avec FlowDSIML␣␣» » : **deux espaces** de chaque côté des guillemets → une seule espace fine insécable (U+202F) |
+| Nouveau | ⚠️ `editor.showBranding` = « Afficher «␣␣Créé avec TutoClick␣␣» » : **deux espaces** de chaque côté des guillemets → une seule espace fine insécable (U+202F) |
 | Nouveau (mineur) | Couleurs hexadécimales en casse mixte (`#0E7C71` / `#ffffff`) → majuscules partout |
 
 **Bilan** : 10 écarts sur 12 sont corrigés, 2 le sont en partie (FI8, FI10), et il y a 2 petits points nouveaux. Il ne reste plus aucun bloquant de finition.
@@ -405,7 +405,7 @@ Re-capture avec le script du dev et mesures DOM. Captures : `docs/ux/recette/fin
   - date d'expiration au format de la langue (sélecteur maison ou `lang` sur l'`input`).
 - **FI10** : libellé **hors** de la barre, à droite de la piste, en `text-muted` et chiffres tabulaires.
 
-## Recette finale sur le site en ligne (https://sabir-art.github.io/FlowDSIML/, dazzling @ `c848fbc`)
+## Recette finale sur le site en ligne (https://sabir-art.github.io/TutoClick/, dazzling @ `c848fbc`)
 
 Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** : écrans publics à 1 440 et 390 px, locales `fr-FR` et `en-US`, connexion refusée avec un compte fictif (`recette.ux@example.com`), et le player sur une démo qui n'existe pas. Captures : `docs/ux/recette/live/`.
 
@@ -437,7 +437,7 @@ Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** :
 |---|---|
 | FI8 partage | ✅ « Dépublier » en bouton `ghost` danger (`GlobeLock`) avec confirmation. Versions sans puce : « v1 · 17 nov. 2026 » et badge « en ligne » aligné à droite. Expiration choisie en durée (Jamais / 7 / 30 / 90 jours), plus de `mm/dd/yyyy` |
 | FI10 entonnoir | ✅ Libellé « 90 · 100 % » hors de la barre, en texte discret |
-| Guillemets FR | ✅ « Créé avec FlowDSIML » avec une espace fine insécable, plus aucun double espace dans `fr.json` |
+| Guillemets FR | ✅ « Créé avec TutoClick » avec une espace fine insécable, plus aucun double espace dans `fr.json` |
 | Couleurs hexadécimales | ✅ Affichées et enregistrées en majuscules dans l'interface. Dans les fichiers `.css`, Prettier les remet en minuscules : sans effet sur le rendu, accepté |
 | L1 `Sparkles` (auth) | ❌ Toujours dans `AuthLayout.tsx:30`. Le retour L1 est parti après `4cac555` |
 | Nouveau (mineur) | Variations des KPI (A1) : « Taux de complétion » et « Leads » n'ont pas de variation, contrairement aux trois autres tuiles → afficher la variation partout, ou « — » quand il n'y a pas de période de référence, pour garder des tuiles homogènes |
@@ -716,4 +716,4 @@ Exclus, reportés par le dev : le cadre Navigateur / Mobile et le fond Image.
 | F1-5 | **Titre de la checklist** vide dans l'éditeur, sans placeholder, alors que le player affiche « Votre progression » | Mineure | Placeholder « Votre progression » dans le champ |
 | F1-6 | **Commentaires à 1 024 px** : l'état vide déborde sur la saisie (texte superposé au champ) | Mineure | Hauteur minimale du panneau pour l'état vide, ou texte sur une seule ligne avec ellipse |
 
-**Hors F1, à noter :** le pied du player affiche encore « Créé avec FlowDSIML ». Le nom choisi est **Tutoclic** : à changer quand le chef d'équipe lance le renommage.
+**Hors F1, à noter :** le pied du player affichait « Créé avec FlowDSIML ». Le nom définitif est **TutoClick** (logo client) : renommage transmis au dev avec les fichiers de `brand-tutoclic/production/`.

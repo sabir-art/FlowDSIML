@@ -90,7 +90,7 @@ Après accès accordé, le player s'ouvre directement à l'étape 1 et l'accès 
 - titre `display` de 40 px en 800, description en `body-lg` `text-muted` ;
 - badges « Environ n min · n étapes · Mis à jour le … » ;
 - player en 16:9 avec un rayon de 20 px ;
-- **carte CTA héro** (vert DSI avec texte noir, bouton pilule noir), « Créé avec FlowDSIML » + lien de politique de confidentialité ;
+- **carte CTA héro** (vert DSI avec texte noir, bouton pilule noir), « Créé avec TutoClick » + lien de politique de confidentialité ;
 - largeur maximale de 1 120 px. Sous 900 px, la carte CTA passe en colonne.
 - **SEO et partage social** : `<title>` = titre, `meta description`, image Open Graph = capture de l'étape 1, `noindex` sauf si l'interrupteur est activé.
 

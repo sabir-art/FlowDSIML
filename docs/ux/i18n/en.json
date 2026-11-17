@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "FlowDSIML",
+    "appName": "TutoClick",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved",
@@ -175,7 +175,7 @@
     "stepsCaptured_one": "{{count}} step captured",
     "stepsCaptured_other": "{{count}} steps captured",
     "uploading": "Uploading step {{current}} of {{total}}…",
-    "notLoggedIn": "Log in to FlowDSIML to start capturing.",
+    "notLoggedIn": "Log in to TutoClick to start capturing.",
     "protectedPage": "This page can't be captured (browser system page).",
     "piiCheck": {
       "title": "Check data before sending",
@@ -487,7 +487,7 @@
     },
     "narrow": {
       "title": "The editor works on desktop",
-      "body": "Open FlowDSIML on a screen at least 1,024 px wide to edit this demo. You can still preview and share it from this phone.",
+      "body": "Open TutoClick on a screen at least 1,024 px wide to edit this demo. You can still preview and share it from this phone.",
       "view": "View demo"
     },
     "comments": {
@@ -987,7 +987,7 @@
         "duration": "About {{count}} min",
         "steps": "{{count}} steps",
         "updated": "Updated on {{date}}",
-        "madeWith": "Made with FlowDSIML"
+        "madeWith": "Made with TutoClick"
       },
       "summary": {
         "title": "Summary",
@@ -1030,7 +1030,7 @@
         "resumeValue": "Last step viewed",
         "time": "Time spent",
         "timeValue": "Session length",
-        "alsoTrack": "Also record results in Tutoclic tracking",
+        "alsoTrack": "Also record results in TutoClick tracking",
         "download": "Download the package (.zip)",
         "noQuiz": "This module has no quiz: the LMS will only receive \"completed\"."
       },
@@ -1050,7 +1050,7 @@
       },
       "mail": {
         "title": "Send by email",
-        "intro": "Copy this text into your email client. Tutoclic sends nothing on your behalf, except invitations.",
+        "intro": "Copy this text into your email client. TutoClick sends nothing on your behalf, except invitations.",
         "subject": "New tool training · {{title}} ({{min}} min)",
         "body": "Hello,\n\nTo get ready for the new tool, here is a {{min}}-minute interactive tutorial. Follow it at your own pace and pick up where you left off.",
         "cta": "Start the tutorial",
@@ -1081,7 +1081,7 @@
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen",
     "restart": "Restart the tour",
-    "watermark": "Made with FlowDSIML",
+    "watermark": "Made with TutoClick",
     "form": {
       "submit": "Submit",
       "skip": "Skip",
@@ -1478,7 +1478,7 @@
       "publicPageHint": "The header shown around demos shared by link.",
       "primaryButton": "Primary button",
       "secondaryButton": "Secondary button",
-      "hideWatermark": "Hide \"Made with FlowDSIML\""
+      "hideWatermark": "Hide \"Made with TutoClick\""
     },
     "variables": {
       "title": "Variables",
@@ -1664,7 +1664,7 @@
     "seconds": "{{count}} seconds",
     "showCursor": "Show cursor and click animation",
     "includeForms": "Include form and survey steps",
-    "showBranding": "Show “Made with FlowDSIML”",
+    "showBranding": "Show “Made with TutoClick”",
     "pdfLayout": "Layout",
     "pdfPortrait": "Portrait",
     "pdfLandscape": "Landscape",
@@ -1750,7 +1750,7 @@
         "runningHead": "User guide · {{title}}",
         "footer": "Version {{n}} · {{date}} · {{workspace}}",
         "page": "Page {{n}} / {{total}}",
-        "madeWith": "Made with Tutoclic",
+        "madeWith": "Made with TutoClick",
         "internal": "Internal document"
       }
     }
@@ -2025,13 +2025,13 @@
       "test": "Send a test message",
       "disconnect": "Disconnect",
       "msgLead": "New lead on \"{{demo}}\"",
-      "openInApp": "View in Tutoclic"
+      "openInApp": "View in TutoClick"
     },
     "snippets": {
       "title": "Embed snippets",
       "tool": "Your tool",
       "relayTitle": "Relay to your analytics tool",
-      "relayHelp": "The player sends its events to the host page. This script forwards them to the tool already installed on your site: no cookie or tracker added by Tutoclic.",
+      "relayHelp": "The player sends its events to the host page. This script forwards them to the tool already installed on your site: no cookie or tracker added by TutoClick.",
       "relayTool": "Analytics tool",
       "copy": "Copy",
       "copied": "Copied"

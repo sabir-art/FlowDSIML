@@ -7,7 +7,7 @@
 
 ## 1. Popup de l'extension
 
-- **En-tête** : wordmark Tutoclic (version claire ou sombre selon le thème), nom du workspace à droite. Titre « Nouvelle capture ».
+- **En-tête** : wordmark TutoClick (version claire ou sombre selon le thème), nom du workspace à droite. Titre « Nouvelle capture ».
 - **Type de capture** : `fieldset` de 3 cartes radio. Chaque carte contient une puce d'icône, un titre et une description, puis le rond radio. La carte choisie a une bordure prune sur fond prune pâle, et le focus est visible.
 
   | Type | Icône | Description |

@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "FlowDSIML",
+    "appName": "TutoClick",
     "save": "Enregistrer",
     "saving": "Enregistrement…",
     "saved": "Enregistré",
@@ -175,7 +175,7 @@
     "stepsCaptured_one": "{{count}} étape capturée",
     "stepsCaptured_other": "{{count}} étapes capturées",
     "uploading": "Envoi de {{current}} étapes sur {{total}}…",
-    "notLoggedIn": "Connectez-vous à FlowDSIML pour capturer.",
+    "notLoggedIn": "Connectez-vous à TutoClick pour capturer.",
     "protectedPage": "Cette page ne peut pas être capturée (page système du navigateur).",
     "piiCheck": {
       "title": "Vérifier les données avant l'envoi",
@@ -487,7 +487,7 @@
     },
     "narrow": {
       "title": "L'éditeur s'utilise sur ordinateur",
-      "body": "Ouvrez FlowDSIML sur un écran d'au moins 1 024 px de large pour modifier cette démo. Vous pouvez la prévisualiser et la partager depuis ce téléphone.",
+      "body": "Ouvrez TutoClick sur un écran d'au moins 1 024 px de large pour modifier cette démo. Vous pouvez la prévisualiser et la partager depuis ce téléphone.",
       "view": "Voir la démo"
     },
     "comments": {
@@ -987,7 +987,7 @@
         "duration": "Environ {{count}} min",
         "steps": "{{count}} étapes",
         "updated": "Mis à jour le {{date}}",
-        "madeWith": "Créé avec FlowDSIML"
+        "madeWith": "Créé avec TutoClick"
       },
       "summary": {
         "title": "Récapitulatif",
@@ -1030,7 +1030,7 @@
         "resumeValue": "Dernière étape vue",
         "time": "Temps passé",
         "timeValue": "Durée de la session",
-        "alsoTrack": "Aussi enregistrer les résultats dans le suivi Tutoclic",
+        "alsoTrack": "Aussi enregistrer les résultats dans le suivi TutoClick",
         "download": "Télécharger le paquet (.zip)",
         "noQuiz": "Ce module n'a pas de quiz : le LMS recevra seulement « completed »."
       },
@@ -1050,7 +1050,7 @@
       },
       "mail": {
         "title": "Envoyer par e-mail",
-        "intro": "Copiez ce texte dans votre messagerie. Tutoclic n'envoie rien à votre place, sauf les invitations.",
+        "intro": "Copiez ce texte dans votre messagerie. TutoClick n'envoie rien à votre place, sauf les invitations.",
         "subject": "Formation au nouvel outil · {{title}} ({{min}} min)",
         "body": "Bonjour,\n\nPour vous préparer au nouvel outil, voici un tutoriel interactif de {{min}} minutes. Vous pouvez le suivre à votre rythme et reprendre où vous en étiez.",
         "cta": "Commencer le tutoriel",
@@ -1081,7 +1081,7 @@
     "fullscreen": "Plein écran",
     "exitFullscreen": "Quitter le plein écran",
     "restart": "Recommencer la visite",
-    "watermark": "Fait avec FlowDSIML",
+    "watermark": "Fait avec TutoClick",
     "form": {
       "submit": "Envoyer",
       "skip": "Passer",
@@ -1478,7 +1478,7 @@
       "publicPageHint": "L'en-tête affiché autour de vos démos partagées par lien.",
       "primaryButton": "Bouton principal",
       "secondaryButton": "Bouton secondaire",
-      "hideWatermark": "Masquer « Fait avec FlowDSIML »"
+      "hideWatermark": "Masquer « Fait avec TutoClick »"
     },
     "variables": {
       "title": "Variables",
@@ -1664,7 +1664,7 @@
     "seconds": "{{count}} secondes",
     "showCursor": "Afficher le curseur et l'animation de clic",
     "includeForms": "Inclure les étapes de formulaire et de sondage",
-    "showBranding": "Afficher « Créé avec FlowDSIML »",
+    "showBranding": "Afficher « Créé avec TutoClick »",
     "pdfLayout": "Mise en page",
     "pdfPortrait": "Portrait",
     "pdfLandscape": "Paysage",
@@ -1750,7 +1750,7 @@
         "runningHead": "Mode d'emploi · {{title}}",
         "footer": "Version {{n}} · {{date}} · {{workspace}}",
         "page": "Page {{n}} / {{total}}",
-        "madeWith": "Créé avec Tutoclic",
+        "madeWith": "Créé avec TutoClick",
         "internal": "Document interne"
       }
     }
@@ -2025,13 +2025,13 @@
       "test": "Envoyer un message de test",
       "disconnect": "Déconnecter",
       "msgLead": "Nouveau lead sur « {{demo}} »",
-      "openInApp": "Voir dans Tutoclic"
+      "openInApp": "Voir dans TutoClick"
     },
     "snippets": {
       "title": "Snippets d'intégration",
       "tool": "Votre outil",
       "relayTitle": "Relais vers votre outil d'analytics",
-      "relayHelp": "Le player envoie ses événements à la page hôte. Ce script les transmet à l'outil déjà installé sur votre site : aucun cookie ni traceur ajouté par Tutoclic.",
+      "relayHelp": "Le player envoie ses événements à la page hôte. Ce script les transmet à l'outil déjà installé sur votre site : aucun cookie ni traceur ajouté par TutoClick.",
       "relayTool": "Outil d'analytics",
       "copy": "Copier",
       "copied": "Copié"

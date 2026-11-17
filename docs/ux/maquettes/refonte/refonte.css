@@ -1902,3 +1902,7 @@ body:has(.mock-state) .ed {
 .soon-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--fd-color-text-muted); font-size: var(--fd-text-body-size); }
 .soon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--fd-space-4); }
 .soon-why { margin: 0; padding: 12px 14px; border-radius: var(--fd-radius-lg); background: var(--fd-color-surface-sunken); font-size: var(--fd-text-label-size); color: var(--fd-color-text-muted); }
+/* Logo TutoClick (version compacte) dans la barre latérale */
+.brand { flex-direction: column; align-items: flex-start; gap: 6px; }
+.brand img.brand__logo { width: auto; height: 44px; }
+.brand .brand__sub { margin: 0 0 0 4px; }

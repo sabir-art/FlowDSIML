@@ -1,4 +1,4 @@
-# FlowDSIML : spécifications des composants
+# TutoClick : spécifications des composants
 
 > Livrable 3 de la phase 2, design. Ce document est la référence pour `packages/ui` (shadcn/ui et Radix, stylés par les tokens).
 > Tous les noms de tokens renvoient à `packages/ui/src/tokens.ts` (préfixe CSS `--fd-`).

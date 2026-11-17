@@ -28,7 +28,7 @@ Trois sections de cartes, chacune avec puce d'icône, titre, badge d'état, desc
     - URL ;
     - **événements à cocher** : `lead.created`, `demo.completed`, `demo.published`, `learner.module_validated`, `learner.quiz_failed`, `alert.triggered` ;
     - **secret de signature** : champ pilule masqué (`whsec_…`), « Afficher » / « Masquer », « Renouveler » (`ConfirmDialog` `rotateConfirm` ; l'ancien secret reste valable 24 h) ;
-    - aide sur l'en-tête `Tutoclic-Signature: t=…, v1=…` (HMAC-SHA256 de `t.corps`, tolérance de 5 min contre le rejeu malveillant) et lien vers la doc.
+    - aide sur l'en-tête `TutoClick-Signature: t=…, v1=…` (HMAC-SHA256 de `t.corps`, tolérance de 5 min contre le rejeu malveillant) et lien vers la doc.
   - **Journal des envois** (7 jours) : statut HTTP en pastille mono (vert pour 2xx, framboise pâle pour 4xx/5xx, orange pâle pour « … » en attente), événement en mono, date, durée ou « nouvel essai dans … », bouton « Rejouer » sur les échecs.
   - **Actions** : « Envoyer un test » (événement `ping`), « Mettre en pause », « Supprimer » (`ConfirmDialog`).
   - **droite** (envoi sélectionné) : statut, « essai n sur 6 », politique de nouvel essai, **corps JSON** (bloc de code), **réponse** (code et 2 Ko au maximum), « Rejouer maintenant » en primaire, avec un toast `replayed`.
@@ -43,7 +43,7 @@ Trois sections de cartes, chacune avec puce d'icône, titre, badge d'état, desc
 
 - Champ « URL du webhook entrant » (en mono, masqué après l'enregistrement), avec l'aide pour le créer côté Slack.
 - **Envoyer dans Slack** (cases) : nouveaux leads, alertes (A4), modules validés, résumé hebdomadaire.
-- **Aperçu** du message : symbole, nom Tutoclic, heure, encadré avec un filet prune de 4 px, lien « Voir dans Tutoclic ».
+- **Aperçu** du message : symbole, nom TutoClick, heure, encadré avec un filet prune de 4 px, lien « Voir dans TutoClick ».
 - « Envoyer un message de test » ; « Déconnecter ».
 
 ## 4. Clés d'API
@@ -57,12 +57,12 @@ Trois sections de cartes, chacune avec puce d'icône, titre, badge d'état, desc
 ## 5. Snippets et relais d'analytics
 
 - **Snippets** : select de l'outil (WordPress, Webflow, Notion, Confluence, SharePoint, Google Sites, HTML générique). Le code iframe et l'instruction courte s'adaptent au choix. Bloc de code avec « Copier » (le slug est surligné).
-- **Relais vers un outil d'analytics** : segmenté **Matomo** (en premier, l'outil courant dans le public), GA4, Segment, Mixpanel, Amplitude. Script d'écoute des `postMessage` du player, avec **vérification de l'origine** et de `source: 'tutoclic'`.
-- Le texte d'aide précise que Tutoclic n'ajoute aucun cookie ni traceur : le relais utilise l'outil déjà installé (et consenti) sur la page hôte.
+- **Relais vers un outil d'analytics** : segmenté **Matomo** (en premier, l'outil courant dans le public), GA4, Segment, Mixpanel, Amplitude. Script d'écoute des `postMessage` du player, avec **vérification de l'origine** et de `source: 'tutoclick'`.
+- Le texte d'aide précise que TutoClick n'ajoute aucun cookie ni traceur : le relais utilise l'outil déjà installé (et consenti) sur la page hôte.
 
 ## 6. Pilotage du player
 
-- Objet `Tutoclic.get(slug)` exposé par le script d'intégration (A1 §5) :
+- Objet `TutoClick.get(slug)` exposé par le script d'intégration (A1 §5) :
   - méthodes `open({ step, variables, mode })`, `goTo(n)`, `next()`, `prev()`, `close()` ;
   - événements `ready`, `step`, `choice`, `lead`, `cta`, `complete`, `quiz`.
 - Tableau méthode / rôle, exemple de code.
