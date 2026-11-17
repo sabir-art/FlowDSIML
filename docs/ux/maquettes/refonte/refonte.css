@@ -1906,3 +1906,4 @@ body:has(.mock-state) .ed {
 .brand { flex-direction: column; align-items: flex-start; gap: 6px; }
 .brand img.brand__logo { width: auto; height: 44px; }
 .brand .brand__sub { margin: 0 0 0 4px; }
+.summary-line > span:last-child { min-width: 0; overflow-wrap: anywhere; }
