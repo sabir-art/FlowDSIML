@@ -542,3 +542,38 @@ Points d'attention pour la passe débordements et thème sombre :
 - les trois boutons du sélecteur de thème n'ont que des icônes : vérifier leur `aria-label` et leur info-bulle (« Clair », « Sombre », « Système ») ;
 - vérifier dans le menu de compte, en sombre, le contraste du segment actif (fond `primary-soft`) par rapport au segment au survol ;
 - vérifier l'éditeur, les tableaux et les modales en sombre : le canevas et l'aperçu doivent rester en `.fd-player-scope` (clair).
+
+### Passe « débordements » (§15.7) — `claude/dev-mvp` @ `8c6c9b0`, faux Supabase
+
+Écrans testés en 1 440, 1 024 et 390 px, en thème clair et sombre (6 configurations, 36 mesures automatiques) :
+- tableau de bord ;
+- éditeur (ordinateur uniquement) ;
+- tiroir de navigation mobile ;
+- page de partage d'une démo publiée.
+
+Pour chaque overlay ouvert, je vérifie :
+- que sa boîte est entièrement dans le viewport, à 8 px au moins des bords ;
+- qu'il est rendu dans `#fd-portal` ou dans la *top layer*, sans ancêtre qui le coupe ;
+- qu'aucun libellé n'est tronqué (`scrollWidth`) ;
+- que `Échap` le ferme et rend le focus au déclencheur.
+
+Captures : `docs/ux/recette/debordements/`.
+
+| Overlay | 1 440 | 1 024 | 390 | Clair / sombre |
+|---|---|---|---|---|
+| Menu du compte (bas de la barre latérale) | ✅ au-dessus, dans le portail, focus rendu | ✅ | ✅ dans le tiroir, ouvert vers la gauche, à 8 px du bord | ✅ |
+| Menus ⋯ des cartes de démo (6 actions) | ✅ en dessous, aligné à droite, complet | ✅ | ✅ retourné au-dessus du déclencheur, complet | ✅ |
+| Menu « Ajouter une étape » (éditeur) | ✅ | ✅ | sans objet | ✅ |
+| Modales de confirmation (supprimer, dépublier) | ✅ `<dialog>` natif en *top layer*, 440 px, centrée | ✅ | ✅ 356 px avec 17 px de marge | ✅ |
+| Retour « Copié » sur le bouton Copier | ✅ retour dans le bouton, pas de toast (il n'y a pas de système de toasts) | ✅ | ✅ | ✅ |
+| Libellés tronqués | ✅ aucun | ✅ | ✅ | ✅ |
+
+**Bilan** : le correctif portail règle le problème du client. Aucun overlay n'est coupé ni ne sort du viewport, dans aucune des 6 configurations. J'ai ajouté le `<dialog>` natif en *top layer* comme équivalent accepté du portail pour les modales dans §15.7.
+
+**Écarts trouvés pendant la passe**
+
+| # | Gravité | Écart | Correction attendue |
+|---|---|---|---|
+| DB1 | ⚠️ Accessibilité | En 390 px, **`Échap` ne ferme pas le tiroir de navigation**. Le voile reste affiché et bloque la page jusqu'à un clic dessus | `Échap` ferme le tiroir et rend le focus au bouton menu. Piéger le focus dans le tiroir tant qu'il est ouvert |
+| DB2 | ❌ Contraste (sombre) | Aperçu de partage vide en thème sombre : le texte « L'aperçu apparaîtra après la première capture. » est en `rgb(179,173,164)` sur le cadre clair `rgb(247,246,244)`, soit un contraste de **2,06:1** (AA demande 4,5:1). Le cadre a le fond clair du player mais pas la classe `.fd-player-scope`, donc il reçoit les couleurs de texte du thème sombre | Ajouter `.fd-player-scope` au cadre de l'aperçu (`SharePreview`), y compris pour l'état vide. Même vérification sur les vignettes du tableau de bord et le canevas de l'éditeur |
+| DB3 | ⚠️ Mise en page | Éditeur en 1 024 px (largeur minimale) : la barre du haut passe sur **2 lignes** (105 px au lieu de 57). Les outils Sélection / Hotspot / Flou passent sous le titre et réduisent la hauteur du canevas | En dessous de 1 280 px : champ de titre en `flex: 1` avec `min-width: 160px`, sans largeur fixe. Outils en icônes seules avec info-bulle. « Aperçu » et « Partager » en icônes seules si besoin. Une seule ligne de 56 px |

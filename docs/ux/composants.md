@@ -426,7 +426,7 @@ Exception unique : 6 px (libellé → champ, gap des boutons `sm`). **Interdits*
 
 S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, info-bulles, toasts, modales et tiroirs, dans l'app comme dans le player.
 
-1. **Portail obligatoire.** Tout overlay est rendu dans un conteneur unique en fin de `<body>` (`#fd-portal`), jamais dans le DOM de son déclencheur. Un parent en `overflow: hidden | auto | clip`, `transform`, `filter`, `contain` ou `will-change` ne doit jamais pouvoir le couper ni le décaler. Dans le player intégré en iframe, le portail est le `<body>` de l'iframe.
+1. **Portail obligatoire.** Tout overlay est rendu dans un conteneur unique en fin de `<body>` (`#fd-portal`), jamais dans le DOM de son déclencheur. **Équivalent accepté pour les modales** : `<dialog>` natif ouvert avec `showModal()`, qui passe dans la *top layer* du navigateur et ne peut pas être coupé. Un parent en `overflow: hidden | auto | clip`, `transform`, `filter`, `contain` ou `will-change` ne doit jamais pouvoir le couper ni le décaler. Dans le player intégré en iframe, le portail est le `<body>` de l'iframe.
 2. **Positionnement avec gestion des collisions.** Ancrage au déclencheur (`position: fixed` + coordonnées calculées, ou Floating UI) avec :
    - **retournement** (`flip`) quand la place manque du côté préféré ;
    - **décalage** (`shift`) pour rester à **8 px** minimum des bords du viewport ;
