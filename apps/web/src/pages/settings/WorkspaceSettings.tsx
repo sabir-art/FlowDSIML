@@ -1,10 +1,10 @@
 import { CardHead } from '../../components/CardHead';
-import { Check, Trash2, TriangleAlert } from 'lucide-react';
+import { Check, Link2, Trash2, TriangleAlert } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Card, Field } from '@flowdsiml/ui';
+import { Alert, Button, Card, Field, Switch } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -115,6 +115,28 @@ export function WorkspaceSettings() {
             </Button>
           )}
         </form>
+      </Card>
+      <Card>
+        <CardHead icon={<Link2 />} title={t('workspace.publicLinks')} />
+        <Switch
+          label={t('workspace.publicLinks')}
+          checked={ws.public_links_enabled}
+          disabled={!editable || busy}
+          aria-describedby="ws-public-help"
+          onChange={(e) => {
+            const enabled = e.target.checked;
+            void run(async () => {
+              check(
+                await supabase.from('workspaces').update({ public_links_enabled: enabled }).eq('id', ws.id),
+              );
+              await reload();
+            }, t('common.saved'));
+          }}
+        />
+        <p id="ws-public-help" className="fd-help">
+          {t('workspace.publicLinksHelp')}
+          {!editable && ` ${t('workspace.publicLinksAdmin')}`}
+        </p>
       </Card>
       <PlanUsage />
       {can('workspace.delete') && (

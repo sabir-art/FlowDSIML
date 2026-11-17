@@ -53,3 +53,44 @@ Spec UX : `docs/ux/specs/f1-formation.md` §1 (branche de la Lead UX).
 ## Correctif au passage
 
 Le badge « REC » pouvait apparaître sur la capture. Le content script attend maintenant deux images d'affichage avant d'envoyer le clic, et le service worker ne répond qu'une fois la capture faite.
+
+## Liens publics et avertissement RGPD (spec f1-formation §2)
+
+Migration : `20261117131100_donnees_sensibles.sql`.
+
+### Réglage `workspaces.public_links_enabled`
+
+- Valeur `true` pour les workspaces existants : aucun lien en ligne n'est cassé. Valeur `false` par défaut pour les nouveaux.
+- Seul un admin+ le modifie (Paramètres → Workspace → « Autoriser les liens publics »).
+- Quand il vaut `false` :
+  - `publish_demo` et l'insertion dans `share_links` échouent (`PUBLIC_DISABLED`) ;
+  - l'éditeur l'explique et renvoie vers les paramètres.
+
+### `publish_demo(p_demo, p_ack)`
+
+- Remplace `publish_demo(p_demo)` : la signature change, d'où un `drop` puis un `create`.
+- Exige `p_ack = { reviewed: true, fictional: true }`, sinon `GDPR_ACK_REQUIRED`.
+- Journalise dans `demo_versions.public_ack` : auteur, date, et un bilan calculé côté serveur (zones floutées, étapes avec détections non floutées).
+
+### Modale (`GdprDialog.tsx`)
+
+- Elle s'affiche à **chaque** publication, puisque toute publication est publique jusqu'à F3.
+- Elle présente :
+  - un bilan ;
+  - deux cases obligatoires : « Publier en public » reste désactivé, avec `aria-describedby` ;
+  - le bouton « Revoir l'étape n », qui sélectionne cette étape.
+- Le lien « Choisir Invitation, Domaine e-mail ou Mot de passe » est masqué : ces modes arrivent avec F3.
+
+### Tests
+
+- pgTAP : `supabase/tests/donnees.test.sql` (10).
+- Unitaire : `GdprDialog.test.ts`.
+- e2e : `publish-player.e2e.cjs` (cases obligatoires, confirmation transmise).
+- Capture : `captures/f1/f1-rgpd.png`.
+
+## Commentaires : ouverture sur le premier non lu
+
+- La dernière lecture de chaque étape est gardée dans `localStorage` (`fd.editor.comments.seen`).
+- À l'ouverture d'une étape, la liste se place sur le premier commentaire d'un autre membre arrivé depuis cette lecture. Les non-lus portent le badge « Nouveau ».
+- Une pilule « n commentaires plus anciens ↑ » remonte en haut de la liste.
+- e2e : `comments-unread.e2e.cjs`. Capture : `captures/f1/cm-premier-non-lu.png`.

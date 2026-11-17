@@ -208,7 +208,16 @@ export function EditorPage() {
             <Share2 size={16} aria-hidden="true" />
             {t('editor.share')}
           </Link>
-          {can('demo.publish') && <PublishButton editor={editor} />}
+          {can('demo.publish') && (
+            <PublishButton
+              editor={editor}
+              onReviewStep={(i) => {
+                setIndex(i);
+                setSelection({ kind: 'step' });
+                setTab('step');
+              }}
+            />
+          )}
         </div>
       </header>
       {editor.lastError != null && (

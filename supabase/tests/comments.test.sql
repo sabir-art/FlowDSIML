@@ -77,7 +77,8 @@ select throws_ok($$ select public.set_comment_resolved('00000000-0000-0000-0000-
 
 -- Jamais dans le manifeste publié
 select pg_temp.login('00000000-0000-0000-0000-0000000000c1');
-select ok(position('confidentiel' in public.publish_demo('00000000-0000-0000-0000-00000000cd01')::text) = 0,
+update public.workspaces set public_links_enabled = true; -- F1 : liens publics activés pour les tests de publication
+select ok(position('confidentiel' in public.publish_demo('00000000-0000-0000-0000-00000000cd01', '{"reviewed": true, "fictional": true}')::text) = 0,
   'les commentaires ne sont jamais publiés dans le manifeste');
 
 -- Owner : supprime le commentaire d'un autre ; suppression de l'étape → commentaires supprimés

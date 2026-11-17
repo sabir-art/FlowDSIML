@@ -145,7 +145,10 @@
     "deleteConfirm": "Type “{{slug}}” to confirm deletion.",
     "slugHelp": "Lowercase letters, digits and hyphens. Changing the address breaks old links.",
     "privacyUrl": "Privacy policy (URL)",
-    "privacyUrlHelp": "Shown below the lead forms of your demos, from the next publication."
+    "privacyUrlHelp": "Shown below the lead forms of your demos, from the next publication.",
+    "publicLinks": "Allow public links",
+    "publicLinksHelp": "Anyone with the link can view published demos without signing in. When off, no demo can be published or shared by link. Restricted access (invitation, email domain, password) is coming soon.",
+    "publicLinksAdmin": "Only an administrator can change this setting."
   },
   "plan": {
     "title": "Plan",
@@ -186,7 +189,9 @@
     "inviteExpired": "This invitation has expired.",
     "inviteUsed": "This invitation has already been used.",
     "inviteNotFound": "Invitation not found.",
-    "demoEmpty": "Add at least one step before publishing."
+    "demoEmpty": "Add at least one step before publishing.",
+    "publicDisabled": "Public links are disabled for this workspace. An administrator can allow them in Settings.",
+    "gdprAck": "Confirm both checks before publishing with public access."
   },
   "editor": {
     "steps": "Steps",
@@ -388,7 +393,9 @@
       "mobileNoticeBody": "Open this demo on a computer to edit it. You can read and reply to comments here.",
       "step": "Step",
       "newBelow_one": "{{count}} new comment",
-      "newBelow_other": "{{count}} new comments"
+      "newBelow_other": "{{count}} new comments",
+      "olderAbove_one": "{{count}} older comment",
+      "olderAbove_other": "{{count}} older comments"
     },
     "autoplay": "Autoplay",
     "autoplayHelp": "Advances on its own; stops on a form, a choice menu or the last step.",
@@ -470,7 +477,29 @@
         "help": "Each choice leads to a step, a chapter, the end or a link (6 max)."
       }
     },
-    "checklistNoChapter": "Without chapters, the checklist lists the steps."
+    "checklistNoChapter": "Without chapters, the checklist lists the steps.",
+    "gdpr": {
+      "title": "Publish with public access?",
+      "body": "Anyone with the link will be able to view this module without signing in. Before publishing, make sure it contains no real personal data (users, colleagues, partners).",
+      "blurred_one": "{{count}} blurred area",
+      "blurred_other": "{{count}} blurred areas",
+      "pending_one": "{{count}} detection not blurred (<strong>{{steps}}</strong>)",
+      "pending_other": "{{count}} detections not blurred (<strong>{{steps}}</strong>)",
+      "commentsNote": "Internal comments: never published",
+      "checkReviewed": "I have reviewed every step, including bubble and form text.",
+      "checkFictional": "Visible data is fictional or blurred.",
+      "restrict": "Need to restrict access?",
+      "restrictLink": "Choose Invitation, Email domain or Password",
+      "review": "Review step {{n}}",
+      "cancel": "Cancel",
+      "publish": "Publish publicly",
+      "why": "Tick both confirmations to publish.",
+      "disabledTitle": "Public links disabled",
+      "disabledBody": "This workspace does not allow public links: the demo cannot be published with public access. An administrator can allow them in Settings.",
+      "openSettings": "Open settings",
+      "close": "Close",
+      "none": "No unblurred detection"
+    }
   },
   "status": {
     "draft": "Draft",

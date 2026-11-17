@@ -9,8 +9,17 @@ import { usePlan } from '../../lib/plan';
 import { publishDemo } from '../../lib/publish';
 import { errorMessage } from '../../lib/errors';
 import type { DemoEditor } from './useDemoEditor';
+import { GdprDialog, type GdprAck } from './GdprDialog';
+import { useWorkspace } from '../../workspace/WorkspaceProvider';
 
-export function PublishButton({ editor }: { editor: DemoEditor }) {
+export function PublishButton({
+  editor,
+  onReviewStep,
+}: {
+  editor: DemoEditor;
+  /** « Revoir l'étape n » depuis l'avertissement RGPD. */
+  onReviewStep?: (index: number) => void;
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [progress, setProgress] = useState<string | null>(null);
@@ -18,6 +27,8 @@ export function PublishButton({ editor }: { editor: DemoEditor }) {
   const demo = editor.demo!;
   const plan = usePlan();
   const [dialog, ask] = useConfirm();
+  const [gdprOpen, setGdprOpen] = useState(false);
+  const { current: ws } = useWorkspace();
 
   async function publish() {
     // Plan sans formulaires de lead : prévenir que le formulaire sera retiré de la version publiée
@@ -40,11 +51,17 @@ export function PublishButton({ editor }: { editor: DemoEditor }) {
       });
       if (!yes) return;
     }
+    // F1 : avertissement RGPD à chaque publication publique (toute publication l'est jusqu'à F3)
+    setGdprOpen(true);
+  }
+
+  async function doPublish(ack: GdprAck) {
+    setGdprOpen(false);
     setProgress('…');
     setError(null);
     try {
       await editor.flush();
-      await publishDemo(demo.id, (d, total) => setProgress(`${Math.round((d / total) * 100)} %`));
+      await publishDemo(demo.id, ack, (d, total) => setProgress(`${Math.round((d / total) * 100)} %`));
       await editor.reload();
       navigate(`/demos/${demo.id}/share?published=1`);
     } catch (e) {
@@ -57,6 +74,18 @@ export function PublishButton({ editor }: { editor: DemoEditor }) {
   return (
     <>
       {dialog}
+      <GdprDialog
+        open={gdprOpen}
+        steps={editor.steps}
+        publicEnabled={ws?.public_links_enabled !== false}
+        onConfirm={(ack) => void doPublish(ack)}
+        onReview={(i) => {
+          setGdprOpen(false);
+          onReviewStep?.(i);
+        }}
+        onSettings={() => navigate('/settings/workspace')}
+        onClose={() => setGdprOpen(false)}
+      />
       {error && (
         <span role="alert" className="publish-error">
           <AlertTriangle size={16} aria-hidden="true" />

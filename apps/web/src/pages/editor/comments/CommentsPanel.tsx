@@ -40,6 +40,15 @@ const STEP_H = 24;
 const MAX_LEN = 2000;
 const COUNT_FROM = 1800;
 const NEW_MS = 4000;
+/** Dernière lecture des commentaires, par étape (ouverture sur le premier non lu). */
+const SEEN_KEY = 'fd.editor.comments.seen';
+function readSeen(): Record<string, string> {
+  try {
+    return JSON.parse(read(SEEN_KEY) ?? '{}') as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
 
 const defaultHeight = () => (window.innerWidth < 1280 ? 220 : 280);
 function read(key: string): string | null {
@@ -133,6 +142,11 @@ export function CommentsPanel({
   const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
   const [fresh, setFresh] = useState<Record<string, true>>({});
   const [pending, setPending] = useState(0);
+  /** Commentaires lus plus haut que le premier non lu (pilule « n plus anciens ↑ »). */
+  const [olderAbove, setOlderAbove] = useState(0);
+  const unreadDoneFor = useRef<string | null>(null);
+  /** Étape dont la liste est positionnée sur le premier non lu (pas de défilement automatique en bas). */
+  const anchoredFor = useRef<{ step: string; len: number } | null>(null);
   const [live, setLive] = useState('');
   const sectionRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
@@ -198,8 +212,34 @@ export function CommentsPanel({
   // Nouvelle étape ou nouveau commentaire : défilement en bas, sauf si l'utilisateur lit plus haut
   useLayoutEffect(() => {
     const el = listRef.current;
+    const a = anchoredFor.current;
+    if (a && a.step === stepId && a.len === forStep.length) return; // positionné sur le premier non lu
     if (el && !pendingRef.current) el.scrollTop = el.scrollHeight;
   }, [stepId, forStep.length]);
+
+  // Ouverture sur le premier commentaire non lu (d'un autre membre, posté depuis la dernière lecture)
+  useLayoutEffect(() => {
+    if (!stepId || api.loading || unreadDoneFor.current === stepId) return;
+    if (visible.length && !listRef.current?.querySelector('[data-comment]')) return; // liste pas encore rendue
+    unreadDoneFor.current = stepId;
+    anchoredFor.current = null;
+    const seenMap = readSeen();
+    const seenAt = seenMap[stepId] ? Date.parse(seenMap[stepId]!) : 0;
+    const idx = visible.findIndex((c) => c.author_id !== user?.id && Date.parse(c.created_at) > seenAt);
+    store(SEEN_KEY, JSON.stringify({ ...seenMap, [stepId]: new Date().toISOString() }));
+    setOlderAbove(0);
+    if (idx < 0 || !seenAt) return; // tout est lu, ou première visite : comportement habituel (bas de liste)
+    const unread = visible.slice(idx);
+    setFresh((f) => ({ ...f, ...Object.fromEntries(unread.map((c) => [c.id, true as const])) }));
+    const list = listRef.current;
+    const item = list?.querySelector<HTMLElement>(`[data-comment="${visible[idx]!.id}"]`);
+    if (list && item) {
+      anchoredFor.current = { step: stepId, len: forStep.length };
+      if (mobile) item.scrollIntoView({ block: 'center' });
+      else list.scrollTop = Math.max(0, item.offsetTop - 8);
+    }
+    if (idx > 0) setOlderAbove(idx);
+  }, [stepId, api.loading, visible.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Champ de saisie : 40 px qui grandit jusqu'à 120 px puis défile
   useLayoutEffect(() => {
@@ -425,6 +465,7 @@ export function CommentsPanel({
               onScroll={(e) => {
                 const el = e.currentTarget;
                 if (el.scrollHeight - el.scrollTop - el.clientHeight < 24) setPending(0);
+                if (el.scrollTop < 8) setOlderAbove(0);
               }}
             >
               {visible.map((c) => {
@@ -450,6 +491,7 @@ export function CommentsPanel({
                 return (
                   <li
                     key={c.id}
+                    data-comment={c.id}
                     className={`cm-item${c.resolved_at ? ' cm-item--resolved' : ''}${isFresh ? ' cm-item--new' : ''}`}
                     onMouseEnter={() => isFresh && unfresh(c.id)}
                   >
@@ -533,6 +575,19 @@ export function CommentsPanel({
                 );
               })}
             </ol>
+          )}
+          {olderAbove > 0 && (
+            <button
+              type="button"
+              className="cm-pending cm-pending--top"
+              onClick={() => {
+                listRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                setOlderAbove(0);
+              }}
+            >
+              {t('editor.comments.olderAbove', { count: olderAbove })}
+              <ArrowUp aria-hidden="true" />
+            </button>
           )}
           {pending > 0 && (
             <button

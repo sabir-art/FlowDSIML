@@ -145,7 +145,10 @@
     "deleteConfirm": "Tapez « {{slug}} » pour confirmer la suppression.",
     "slugHelp": "Lettres minuscules, chiffres et tirets. Changer l'adresse casse les anciens liens.",
     "privacyUrl": "Politique de confidentialité (URL)",
-    "privacyUrlHelp": "Lien affiché sous les formulaires de lead de vos démos, à la prochaine publication."
+    "privacyUrlHelp": "Lien affiché sous les formulaires de lead de vos démos, à la prochaine publication.",
+    "publicLinks": "Autoriser les liens publics",
+    "publicLinksHelp": "Toute personne disposant du lien pourra voir les démos publiées, sans connexion. Désactivé, aucune démo ne peut être publiée ni partagée par lien. Les accès restreints (invitation, domaine e-mail, mot de passe) arrivent prochainement.",
+    "publicLinksAdmin": "Seul un administrateur peut modifier ce réglage."
   },
   "plan": {
     "title": "Plan",
@@ -186,7 +189,9 @@
     "inviteExpired": "Cette invitation a expiré.",
     "inviteUsed": "Cette invitation a déjà été utilisée.",
     "inviteNotFound": "Invitation introuvable.",
-    "demoEmpty": "Ajoutez au moins une étape avant de publier."
+    "demoEmpty": "Ajoutez au moins une étape avant de publier.",
+    "publicDisabled": "Les liens publics sont désactivés pour ce workspace. Un administrateur peut les autoriser dans Paramètres.",
+    "gdprAck": "Confirmez les deux vérifications avant de publier en accès public."
   },
   "editor": {
     "steps": "Étapes",
@@ -388,7 +393,9 @@
       "mobileNoticeBody": "Ouvrez cette démo sur un ordinateur pour la modifier. Vous pouvez lire et répondre aux commentaires ici.",
       "step": "Étape",
       "newBelow_one": "{{count}} nouveau commentaire",
-      "newBelow_other": "{{count}} nouveaux commentaires"
+      "newBelow_other": "{{count}} nouveaux commentaires",
+      "olderAbove_one": "{{count}} commentaire plus ancien",
+      "olderAbove_other": "{{count}} commentaires plus anciens"
     },
     "autoplay": "Lecture automatique",
     "autoplayHelp": "Avance seule ; s’arrête sur un formulaire, un menu de choix ou la dernière étape.",
@@ -470,7 +477,29 @@
         "help": "Chaque choix mène à une étape, un chapitre, la fin ou un lien (6 au maximum)."
       }
     },
-    "checklistNoChapter": "Sans chapitre, la checklist liste les étapes."
+    "checklistNoChapter": "Sans chapitre, la checklist liste les étapes.",
+    "gdpr": {
+      "title": "Publier en accès public ?",
+      "body": "Toute personne disposant du lien pourra voir ce module, sans connexion. Avant de publier, vérifiez qu'il ne contient aucune donnée personnelle réelle (usagers, collègues, partenaires).",
+      "blurred_one": "{{count}} zone floutée",
+      "blurred_other": "{{count}} zones floutées",
+      "pending_one": "{{count}} détection non floutée (<strong>{{steps}}</strong>)",
+      "pending_other": "{{count}} détections non floutées (<strong>{{steps}}</strong>)",
+      "commentsNote": "Commentaires internes : jamais publiés",
+      "checkReviewed": "J'ai relu chaque étape, y compris les textes des bulles et du formulaire.",
+      "checkFictional": "Les données visibles sont fictives ou floutées.",
+      "restrict": "Besoin de restreindre l'accès ?",
+      "restrictLink": "Choisir Invitation, Domaine e-mail ou Mot de passe",
+      "review": "Revoir l'étape {{n}}",
+      "cancel": "Annuler",
+      "publish": "Publier en public",
+      "why": "Cochez les deux confirmations pour publier.",
+      "disabledTitle": "Liens publics désactivés",
+      "disabledBody": "Ce workspace n’autorise pas les liens publics : la démo ne peut pas être publiée en accès public. Un administrateur peut les autoriser dans Paramètres.",
+      "openSettings": "Ouvrir les paramètres",
+      "close": "Fermer",
+      "none": "Aucune détection non floutée"
+    }
   },
   "status": {
     "draft": "Brouillon",

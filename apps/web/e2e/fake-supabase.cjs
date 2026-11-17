@@ -405,6 +405,12 @@ async function install(page, state = seed()) {
           const d = t.demos.find((x) => x.id === a.p_demo);
           const steps = t.steps.filter((s) => s.demo_id === d.id).sort((x, y) => x.position - y.position);
           if (!steps.length) return json(route, 400, { message: 'DEMO_EMPTY', code: 'P0001' });
+          const ws = t.workspaces?.find((w) => w.id === d.workspace_id);
+          if (ws && ws.public_links_enabled === false)
+            return json(route, 400, { message: 'PUBLIC_DISABLED', code: 'P0001' });
+          if (!a.p_ack?.reviewed || !a.p_ack?.fictional)
+            return json(route, 400, { message: 'GDPR_ACK_REQUIRED', code: 'P0001' });
+          state.lastAck = a.p_ack;
           const versionId = crypto.randomUUID();
           const number = t.demo_versions.filter((v) => v.demo_id === d.id).length + 1;
           const manifest = {
