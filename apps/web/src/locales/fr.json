@@ -297,5 +297,39 @@
     "enable": "Activer",
     "versions": "Versions publiées",
     "live": "en ligne"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "workspaceTitle": "Analytics du workspace",
+    "views": "Vues",
+    "visitors": "Visiteurs uniques",
+    "completion": "Taux de complétion",
+    "completionHint": "{{n}} sessions terminées",
+    "ctaClicks": "Clics CTA",
+    "leads": "Leads",
+    "viewsPerDay": "Vues par jour",
+    "noData": "Pas encore de données sur la période.",
+    "funnel": "Parcours par étape (drop-off)",
+    "step": "Étape",
+    "reach": "Visiteurs ayant atteint l'étape",
+    "dropOff": "Perte",
+    "exportCsv": "Exporter en CSV",
+    "period": "Période",
+    "lastDays_one": "{{count}} jour",
+    "lastDays_other": "{{count}} jours",
+    "byDemo": "Par démo"
+  },
+  "leads": {
+    "title": "Leads",
+    "search": "Rechercher un email",
+    "count_one": "{{count}} lead",
+    "count_other": "{{count}} leads",
+    "empty": "Aucun lead pour l'instant.",
+    "demo": "Démo",
+    "consent": "Consentement",
+    "date": "Date",
+    "delete": "Supprimer {{email}}",
+    "confirmDelete": "Supprimer définitivement le lead {{email}} (droit à l'effacement) ?",
+    "gdpr": "Données personnelles : exportez-les ou supprimez-les sur demande de la personne concernée (RGPD). Seuls les éditeurs et plus y ont accès."
   }
 }

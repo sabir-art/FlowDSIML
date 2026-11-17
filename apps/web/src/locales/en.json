@@ -297,5 +297,39 @@
     "enable": "Enable",
     "versions": "Published versions",
     "live": "live"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "workspaceTitle": "Workspace analytics",
+    "views": "Views",
+    "visitors": "Unique visitors",
+    "completion": "Completion rate",
+    "completionHint": "{{n}} completed sessions",
+    "ctaClicks": "CTA clicks",
+    "leads": "Leads",
+    "viewsPerDay": "Views per day",
+    "noData": "No data for this period yet.",
+    "funnel": "Step funnel (drop-off)",
+    "step": "Step",
+    "reach": "Visitors reaching the step",
+    "dropOff": "Drop-off",
+    "exportCsv": "Export CSV",
+    "period": "Period",
+    "lastDays_one": "{{count}} day",
+    "lastDays_other": "{{count}} days",
+    "byDemo": "By demo"
+  },
+  "leads": {
+    "title": "Leads",
+    "search": "Search email",
+    "count_one": "{{count}} lead",
+    "count_other": "{{count}} leads",
+    "empty": "No leads yet.",
+    "demo": "Demo",
+    "consent": "Consent",
+    "date": "Date",
+    "delete": "Delete {{email}}",
+    "confirmDelete": "Permanently delete lead {{email}} (right to erasure)?",
+    "gdpr": "Personal data: export or delete on request of the person concerned (GDPR). Only editors and above can access it."
   }
 }
