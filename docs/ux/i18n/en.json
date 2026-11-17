@@ -1048,6 +1048,18 @@
       "reviewModule": "Review the module",
       "nextModule": "Next module: {{module}}",
       "finish": "Finish"
+    },
+    "resume": {
+      "badge": "Path in progress",
+      "title": "Welcome back, {{name}}",
+      "titleAnon": "Welcome back",
+      "body": "You stopped at step {{n}} of {{total}} in the module \"{{module}}\".",
+      "stepsLabel": "Step {{n}} of {{total}}",
+      "modulesLabel": "Path modules",
+      "validated": "Completed",
+      "locked": "After module {{n}}",
+      "restart": "Restart the module",
+      "resume": "Resume at step {{n}}"
     }
   },
   "analytics": {
@@ -1419,5 +1431,88 @@
     "retry": "Try again",
     "retry1080": "Try again in 1080p",
     "unsupported": "Your browser doesn't support video export. Use a recent version of Chrome, Edge or Firefox."
+  },
+  "learners": {
+    "nav": "Learners",
+    "title": "Training tracking",
+    "subtitle": "Path \"{{path}}\" · {{modules}} modules · {{count}} learners",
+    "tabs": {
+      "learners": "Learners",
+      "structures": "By organisation"
+    },
+    "export": "Export CSV",
+    "invite": "Invite learners",
+    "search": "Search a learner",
+    "filters": {
+      "module": "Module",
+      "structure": "Organisation",
+      "status": "Status",
+      "all": "All",
+      "allStatus": "All",
+      "remove": "Remove filter {{name}}",
+      "change": "Change filter {{name}}"
+    },
+    "kpi": {
+      "validated": "Module completed",
+      "validatedFoot": "{{n}} learners out of {{total}}",
+      "inProgress": "In progress",
+      "inactiveFoot": "incl. {{count}} inactive for 7 days",
+      "failed": "Not completed",
+      "noAttemptFoot": "incl. {{count}} with no attempts left",
+      "avgScore": "Average quiz score",
+      "thresholdFoot": "pass mark {{value}}%"
+    },
+    "table": {
+      "title_one": "{{count}} learner",
+      "title_other": "{{count}} learners",
+      "learner": "Learner",
+      "structure": "Organisation",
+      "progress": "Progress",
+      "progressLabel": "{{value}}% of the module viewed",
+      "score": "Score",
+      "status": "Status",
+      "attempts": "Attempts",
+      "lastActivity": "Last activity",
+      "actions": "Actions",
+      "actionsFor": "Actions for {{name}}",
+      "invitedOn": "Invited on {{date}}"
+    },
+    "status": {
+      "validated": "Module completed",
+      "inProgress": "In progress",
+      "failed": "Not completed",
+      "notStarted": "Not started"
+    },
+    "remind_one": "Remind {{count}} inactive learner",
+    "remind_other": "Remind {{count}} inactive learners",
+    "remindDone_one": "{{count}} reminder sent.",
+    "remindDone_other": "{{count}} reminders sent.",
+    "menu": {
+      "detail": "View details",
+      "remind": "Send an email reminder",
+      "grantAttempt": "Grant an attempt",
+      "revoke": "Remove access"
+    },
+    "privacyNote": "Learners never see other people's results.",
+    "empty": {
+      "title": "No learners yet",
+      "body": "Invite people by email or open access to a domain to track their progress.",
+      "cta": "Invite learners"
+    },
+    "structures": {
+      "kpiTrained": "People trained",
+      "kpiTrainedFoot": "{{modules}} modules completed · target {{target}}%",
+      "kpiAbove": "Organisations above target",
+      "kpiWeek": "Progress · 7 days",
+      "kpiWeekFoot": "from {{from}}% to {{to}}%",
+      "kpiWeakest": "Least completed module",
+      "kpiWeakestFoot": "{{value}}% on average",
+      "heatTitle": "Completion by organisation and module",
+      "heatCaption": "Share of learners who completed each module, by organisation",
+      "trendTitle": "People trained over time",
+      "target": "Target {{value}}%",
+      "definition": "\"Trained\" = completed every required module of the path. Aggregated data: no names at this level.",
+      "minGroup": "Fewer than 5 people: value hidden to protect anonymity."
+    }
   }
 }

@@ -1048,6 +1048,18 @@
       "reviewModule": "Revoir le module",
       "nextModule": "Module suivant : {{module}}",
       "finish": "Terminer"
+    },
+    "resume": {
+      "badge": "Parcours en cours",
+      "title": "Bon retour, {{name}}",
+      "titleAnon": "Bon retour",
+      "body": "Vous vous étiez arrêté à l'étape {{n}} sur {{total}} du module « {{module}} ».",
+      "stepsLabel": "Étape {{n}} sur {{total}}",
+      "modulesLabel": "Modules du parcours",
+      "validated": "Validé",
+      "locked": "Après le module {{n}}",
+      "restart": "Recommencer le module",
+      "resume": "Reprendre à l'étape {{n}}"
     }
   },
   "analytics": {
@@ -1419,5 +1431,88 @@
     "retry": "Réessayer",
     "retry1080": "Réessayer en 1080p",
     "unsupported": "Votre navigateur ne permet pas l'export vidéo. Utilisez une version récente de Chrome, Edge ou Firefox."
+  },
+  "learners": {
+    "nav": "Apprenants",
+    "title": "Suivi de la formation",
+    "subtitle": "Parcours « {{path}} » · {{modules}} modules · {{count}} apprenants",
+    "tabs": {
+      "learners": "Apprenants",
+      "structures": "Pilotage par structure"
+    },
+    "export": "Exporter CSV",
+    "invite": "Inviter des apprenants",
+    "search": "Rechercher un apprenant",
+    "filters": {
+      "module": "Module",
+      "structure": "Structure",
+      "status": "Statut",
+      "all": "Toutes",
+      "allStatus": "Tous",
+      "remove": "Retirer le filtre {{name}}",
+      "change": "Changer le filtre {{name}}"
+    },
+    "kpi": {
+      "validated": "Module validé",
+      "validatedFoot": "{{n}} apprenants sur {{total}}",
+      "inProgress": "En cours",
+      "inactiveFoot": "dont {{count}} inactifs depuis 7 j",
+      "failed": "Non validé",
+      "noAttemptFoot": "dont {{count}} sans tentative restante",
+      "avgScore": "Score moyen au quiz",
+      "thresholdFoot": "seuil {{value}} %"
+    },
+    "table": {
+      "title_one": "{{count}} apprenant",
+      "title_other": "{{count}} apprenants",
+      "learner": "Apprenant",
+      "structure": "Structure",
+      "progress": "Progression",
+      "progressLabel": "{{value}} % du module parcouru",
+      "score": "Score",
+      "status": "Statut",
+      "attempts": "Tentatives",
+      "lastActivity": "Dernière activité",
+      "actions": "Actions",
+      "actionsFor": "Actions pour {{name}}",
+      "invitedOn": "Invité le {{date}}"
+    },
+    "status": {
+      "validated": "Module validé",
+      "inProgress": "En cours",
+      "failed": "Non validé",
+      "notStarted": "Non commencé"
+    },
+    "remind_one": "Relancer {{count}} inactif",
+    "remind_other": "Relancer les {{count}} inactifs",
+    "remindDone_one": "{{count}} relance envoyée.",
+    "remindDone_other": "{{count}} relances envoyées.",
+    "menu": {
+      "detail": "Voir le détail",
+      "remind": "Relancer par e-mail",
+      "grantAttempt": "Accorder une tentative",
+      "revoke": "Retirer l'accès"
+    },
+    "privacyNote": "Les apprenants ne voient jamais les résultats des autres.",
+    "empty": {
+      "title": "Aucun apprenant pour l'instant",
+      "body": "Invitez des personnes par e-mail ou ouvrez l'accès à un domaine pour suivre leur progression.",
+      "cta": "Inviter des apprenants"
+    },
+    "structures": {
+      "kpiTrained": "Personnes formées",
+      "kpiTrainedFoot": "{{modules}} modules validés · objectif {{target}} %",
+      "kpiAbove": "Structures au-dessus de l'objectif",
+      "kpiWeek": "Progression · 7 jours",
+      "kpiWeekFoot": "de {{from}} % à {{to}} %",
+      "kpiWeakest": "Module le moins validé",
+      "kpiWeakestFoot": "{{value}} % en moyenne",
+      "heatTitle": "Validation par structure et par module",
+      "heatCaption": "Part des apprenants ayant validé chaque module, par structure",
+      "trendTitle": "Personnes formées dans le temps",
+      "target": "Objectif {{value}} %",
+      "definition": "« Formée » = a validé tous les modules obligatoires du parcours. Données agrégées : pas de nom à ce niveau.",
+      "minGroup": "Moins de 5 personnes : valeur masquée pour protéger l'anonymat."
+    }
   }
 }
