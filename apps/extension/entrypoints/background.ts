@@ -1,16 +1,15 @@
 import { defineBackground } from 'wxt/utils/define-background';
 import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
-import { APP_URL } from '@/lib/config';
-import { defaultHotspotTitle, hotspotRect, toRelRect } from '@/lib/geometry';
-import { pngDataUrlToWebp } from '@/lib/image';
-import type { Json } from '@flowdsiml/supabase-types';
+import { toRelRect } from '@/lib/geometry';
+import { pending } from '@/lib/pending';
 import type { ClickPayload, PopupRequest, RecordingStatus } from '@/lib/messages';
 
 /**
  * Service worker MV3. L'état d'enregistrement vit dans storage.session (le worker peut être arrêté).
- * Chaque clic → capture → WebP → upload Storage (captures/<ws>/<demo>/<id>.webp) → insertion step + hotspot.
- * Rien n'est gardé en mémoire : un arrêt du worker ne perd pas les étapes déjà envoyées.
+ * Chaque clic → capture PNG gardée dans IndexedDB avec les détections (spec f1-formation §1).
+ * Rien n'est envoyé pendant la capture : à la fin, l'écran de vérification (review.html) floute les
+ * pixels puis envoie. Un arrêt du worker ne perd pas les captures déjà prises.
  */
 const KEY = 'fd.recording';
 const EMPTY: RecordingStatus = {
@@ -18,6 +17,7 @@ const EMPTY: RecordingStatus = {
   paused: false,
   demoId: null,
   workspaceId: null,
+  title: '',
   tabId: null,
   steps: 0,
   lastError: null,
@@ -59,57 +59,35 @@ function enqueue<T>(fn: () => Promise<T>): Promise<T> {
 
 async function handleClick(msg: ClickPayload, windowId: number) {
   const state = await getState();
-  if (!state.recording || state.paused || !state.demoId || !state.workspaceId) return;
+  if (!state.recording || state.paused || !state.workspaceId) return;
   try {
     const dataUrl = await enqueue(() => browser.tabs.captureVisibleTab(windowId, { format: 'png' }));
-    const { blob, width, height } = await pngDataUrlToWebp(dataUrl);
-    const stepId = crypto.randomUUID();
-    const path = `${state.workspaceId}/${state.demoId}/${stepId}.webp`;
-    const up = await supabase.storage
-      .from('captures')
-      .upload(path, blob, { contentType: 'image/webp', upsert: false });
-    if (up.error) throw up.error;
-
-    const position = (await getState()).steps;
-    const blurs = msg.sensitive
-      .map((r) => toRelRect(r, msg.viewport))
-      .filter((r): r is NonNullable<typeof r> => r !== null);
-    const ins = await supabase.from('steps').insert({
-      id: stepId,
-      demo_id: state.demoId,
-      workspace_id: state.workspaceId,
-      position,
-      kind: 'image',
-      image_path: path,
-      image_width: width,
-      image_height: height,
-      title: msg.title.slice(0, 200),
-      page_url: msg.url.slice(0, 2000),
-      page_title: msg.title.slice(0, 300),
-      blurs: blurs as unknown as NonNullable<Json>,
-      element_meta: JSON.parse(
-        JSON.stringify({
-          selector: msg.selector,
-          tag: msg.tag,
-          label: msg.label,
-          element: msg.element,
-          viewport: msg.viewport,
-          dpr: msg.dpr,
-          click: msg.click,
-        }),
-      ) as NonNullable<Json>,
+    const image = await (await fetch(dataUrl)).blob();
+    const bitmap = await createImageBitmap(image);
+    const { width, height } = bitmap;
+    bitmap.close();
+    const order = (await getState()).steps;
+    await pending.put({
+      id: crypto.randomUUID(),
+      order,
+      image,
+      width,
+      height,
+      viewport: msg.viewport,
+      dpr: msg.dpr,
+      url: msg.url.slice(0, 2000),
+      title: msg.title.slice(0, 300),
+      label: msg.label,
+      selector: msg.selector,
+      tag: msg.tag,
+      element: msg.element,
+      click: msg.click,
+      zones: msg.detections.flatMap((d) => {
+        const rect = toRelRect(d.rect, msg.viewport);
+        return rect ? [{ id: crypto.randomUUID(), type: d.type, rect, excerpt: d.excerpt, blur: true }] : [];
+      }),
     });
-    if (ins.error) throw ins.error;
-    const hs = hotspotRect(msg.click, msg.element, msg.viewport);
-    const hot = await supabase.from('hotspots').insert({
-      step_id: stepId,
-      demo_id: state.demoId,
-      workspace_id: state.workspaceId,
-      ...hs,
-      title: defaultHotspotTitle(msg.label),
-    });
-    if (hot.error) throw hot.error;
-    await setState({ steps: position + 1, lastError: null });
+    await setState({ steps: order + 1, lastError: null });
   } catch (e) {
     await setState({
       lastError: e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e),
@@ -120,16 +98,12 @@ async function handleClick(msg: ClickPayload, windowId: number) {
 async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<RecordingStatus> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) throw new Error('Non connecté');
-  const { data, error } = await supabase
-    .from('demos')
-    .insert({ workspace_id: req.workspaceId, title: req.title || 'Nouvelle démo', created_by: auth.user.id })
-    .select('id')
-    .single();
-  if (error) throw error;
+  await pending.clear();
   const state = await setState({
     recording: true,
-    demoId: data.id,
+    demoId: null,
     workspaceId: req.workspaceId,
+    title: req.title,
     tabId: req.tabId,
     steps: 0,
     lastError: null,
@@ -138,30 +112,27 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
   return state;
 }
 
+/** Fin de capture : ouvre l'écran de vérification (rien n'a encore été envoyé). */
 async function stop(): Promise<RecordingStatus> {
   const state = await getState();
   if (state.tabId !== null) {
     await browser.tabs.sendMessage(state.tabId, { type: 'fd:recorder-stop' }).catch(() => undefined);
   }
-  if (state.demoId) {
-    await browser.tabs.create({ url: `${APP_URL.replace(/\/$/, '')}/#/demos/${state.demoId}/edit` });
+  if (state.workspaceId && (await pending.count()) > 0) {
+    await browser.storage.local.set({
+      'fd.review': { workspaceId: state.workspaceId, title: state.title || 'Nouvelle démo' },
+    });
+    await browser.tabs.create({ url: browser.runtime.getURL('/review.html') });
   }
   return setState({ ...EMPTY });
 }
 
-/** Annule : arrête la capture et supprime la démo créée (et ses étapes, en cascade). */
+/** Annule : arrête la capture et efface les captures gardées dans le navigateur. */
 async function cancel(): Promise<RecordingStatus> {
   const state = await getState();
   if (state.tabId !== null)
     await browser.tabs.sendMessage(state.tabId, { type: 'fd:recorder-stop' }).catch(() => undefined);
-  if (state.demoId) {
-    await supabase.from('demos').delete().eq('id', state.demoId);
-    if (state.workspaceId) {
-      const dir = `${state.workspaceId}/${state.demoId}`;
-      const { data } = await supabase.storage.from('captures').list(dir);
-      if (data?.length) await supabase.storage.from('captures').remove(data.map((f) => `${dir}/${f.name}`));
-    }
-  }
+  await pending.clear();
   return setState({ ...EMPTY });
 }
 
@@ -169,7 +140,8 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener((msg: unknown, sender) => {
     const m = msg as ClickPayload | PopupRequest;
     if (m.type === 'fd:click') {
-      if (sender.tab?.windowId !== undefined) void handleClick(m, sender.tab.windowId);
+      // On répond après la capture : le badge REC reste masqué jusque-là (il n'apparaît pas à l'image)
+      if (sender.tab?.windowId !== undefined) return handleClick(m, sender.tab.windowId).then(() => true);
       return undefined;
     }
     if (m.type === 'fd:status') return getState();

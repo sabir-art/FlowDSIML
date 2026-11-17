@@ -1,0 +1,103 @@
+/** Chaînes de l'écran de vérification (clés extension.piiCheck.* de docs/ux/i18n, plus IBAN et identifiant). */
+const fr = {
+  pageTitle: 'Vérifier les données avant l’envoi',
+  subtitle: '{{demo}} · {{count}} captures · rien n’a encore quitté votre navigateur',
+  analyzing: 'Analyse des captures…',
+  done: 'Analyse terminée',
+  summary_one: '{{count}} donnée personnelle possible détectée sur {{captures}} capture(s).',
+  summary_other: '{{count}} données personnelles possibles détectées sur {{captures}} capture(s).',
+  summaryHelp:
+    'Elles seront floutées à l’envoi. Décochez une détection seulement si ce n’est pas une donnée réelle (exemple fictif, libellé).',
+  none: 'Aucune donnée personnelle détectée. Relisez quand même vos captures : la détection ne voit pas tout.',
+  captureCount_one: '{{count}} détection',
+  captureCount_other: '{{count}} détections',
+  captureNone: 'Aucune détection',
+  captureN: 'Capture {{n}}',
+  captures: 'Captures',
+  toggle: 'Flouter : {{type}}',
+  blurAll: 'Tout flouter sur cette capture',
+  addZone: 'Glissez sur la capture pour ajouter une zone.',
+  legendBlur: 'Sera floutée',
+  legendDetected: 'Détectée, non floutée',
+  legendSelected: 'Sélectionnée',
+  zoneBlurred: '{{type}}, floutée',
+  zoneNotBlurred: '{{type}}, non floutée',
+  notBlurredWarning: '{{types}} ne seront pas floutés. Vérifiez qu’il s’agit bien de données fictives.',
+  privacy: 'Détection faite dans votre navigateur : aucune image n’est envoyée avant votre validation.',
+  cancel: 'Annuler la capture',
+  cancelConfirm: 'Annuler la capture ? Les captures seront effacées de ce navigateur.',
+  cancelYes: 'Effacer les captures',
+  back: 'Revenir',
+  send_one: 'Flouter et envoyer {{count}} capture',
+  send_other: 'Flouter et envoyer {{count}} captures',
+  sending: 'Envoi {{done}} sur {{total}}…',
+  removeZone: 'Retirer la zone',
+  empty: 'Aucune capture à vérifier.',
+  types: {
+    name: 'Nom',
+    nir: 'N° de sécurité sociale',
+    phone: 'Téléphone',
+    email: 'E-mail',
+    address: 'Adresse',
+    birthdate: 'Date de naissance',
+    iban: 'IBAN',
+    identifier: 'Identifiant',
+    zone: 'Zone masquée',
+  },
+};
+const en: typeof fr = {
+  pageTitle: 'Check data before sending',
+  subtitle: '{{demo}} · {{count}} captures · nothing has left your browser yet',
+  analyzing: 'Analyzing captures…',
+  done: 'Analysis complete',
+  summary_one: '{{count}} possible personal data item found on {{captures}} capture(s).',
+  summary_other: '{{count}} possible personal data items found on {{captures}} capture(s).',
+  summaryHelp:
+    'They will be blurred when sent. Only untick a detection if it is not real data (fictional example, label).',
+  none: 'No personal data detected. Still review your captures: detection does not catch everything.',
+  captureCount_one: '{{count}} detection',
+  captureCount_other: '{{count}} detections',
+  captureNone: 'No detection',
+  captureN: 'Capture {{n}}',
+  captures: 'Captures',
+  toggle: 'Blur: {{type}}',
+  blurAll: 'Blur everything on this capture',
+  addZone: 'Drag on the capture to add an area.',
+  legendBlur: 'Will be blurred',
+  legendDetected: 'Detected, not blurred',
+  legendSelected: 'Selected',
+  zoneBlurred: '{{type}}, blurred',
+  zoneNotBlurred: '{{type}}, not blurred',
+  notBlurredWarning: '{{types}} will not be blurred. Make sure this is fictional data.',
+  privacy: 'Detection runs in your browser: no image is sent before you confirm.',
+  cancel: 'Discard capture',
+  cancelConfirm: 'Discard the capture? Captures will be erased from this browser.',
+  cancelYes: 'Erase captures',
+  back: 'Go back',
+  send_one: 'Blur and send {{count}} capture',
+  send_other: 'Blur and send {{count}} captures',
+  sending: 'Sending {{done}} of {{total}}…',
+  removeZone: 'Remove area',
+  empty: 'No capture to check.',
+  types: {
+    name: 'Name',
+    nir: 'Social security number',
+    phone: 'Phone',
+    email: 'Email',
+    address: 'Address',
+    birthdate: 'Date of birth',
+    iban: 'IBAN',
+    identifier: 'Username',
+    zone: 'Masked area',
+  },
+};
+
+export const rs = (globalThis.navigator?.language ?? 'fr').toLowerCase().startsWith('en') ? en : fr;
+
+/** Interpolation {{x}} et pluriel _one / _other. */
+export function tr(key: string, vars: Record<string, string | number> = {}): string {
+  const plural = typeof vars.count === 'number' ? (vars.count === 1 ? '_one' : '_other') : '';
+  const k = plural && `${key}${plural}` in rs ? `${key}${plural}` : key;
+  const raw = (rs as unknown as Record<string, string>)[k] ?? key;
+  return raw.replace(/{{(\w+)}}/g, (_, v: string) => String(vars[v] ?? ''));
+}

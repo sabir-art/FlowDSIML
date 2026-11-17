@@ -45,12 +45,19 @@ http
         ]);
       if (req.url.startsWith('/rest/v1/demos'))
         return send(201, { id: '22222222-2222-2222-2222-222222222222' });
-      if (req.url.startsWith('/storage/v1/object/')) return send(200, { Key: req.url, Id: 'x' });
+      if (req.url.startsWith('/storage/v1/object/')) {
+        if (process.env.MOCK_DUMP) require('fs').writeFileSync(process.env.MOCK_DUMP, buf);
+        return send(200, { Key: req.url, Id: 'x' });
+      }
       if (req.url.startsWith('/rest/v1/')) return send(201, null);
       if (req.url.startsWith('/page')) {
         res.writeHead(200, { 'content-type': 'text/html' });
         return res.end(
-          '<html><head><meta charset="utf-8"><title>Page test</title></head><body style="font-family:sans-serif"><h1>App de test</h1><button id="go" style="font-size:20px;padding:10px">Créer un projet</button><p><input type="password" value="secret"></p><a href="/page2">Suivant</a></body></html>',
+          '<html><head><meta charset="utf-8"><title>Page test</title></head><body style="font-family:sans-serif"><h1>App de test</h1><button id="go" style="font-size:20px;padding:10px">Créer un projet</button><p><input type="password" value="secret"></p><a href="/page2">Suivant</a>' +
+            // Fiche fictive (données inventées, domaine .example) pour la détection F1
+            '<h2>Fiche usager</h2><table><thead><tr><th>Nom</th><th>Statut</th></tr></thead><tbody><tr><td>DURAND</td><td>Actif</td></tr></tbody></table>' +
+            '<p>Suivi par Camille MARTIN</p><p>Tél. 06 12 34 56 78</p><p>Contact : camille.martin@exemple.example</p>' +
+            '<p>NIR 2 04 07 75 123 456 78</p><p>Née le 14/02/2007</p><p>12 rue des Lilas</p><p>Rendez-vous le 12/03/2026</p></body></html>',
         );
       }
       send(404, {});
