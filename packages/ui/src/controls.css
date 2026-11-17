@@ -195,3 +195,17 @@
   color: var(--fd-color-text);
   box-shadow: var(--fd-shadow-xs);
 }
+/* Segment avec icône Lucide : 16 px, gap 6 px */
+.fd-segmented > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.fd-segmented > button > svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  stroke-width: 1.75;
+}
