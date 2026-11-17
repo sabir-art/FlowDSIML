@@ -717,3 +717,61 @@ Exclus, reportés par le dev : le cadre Navigateur / Mobile et le fond Image.
 | F1-6 | **Commentaires à 1 024 px** : l'état vide déborde sur la saisie (texte superposé au champ) | Mineure | Hauteur minimale du panneau pour l'état vide, ou texte sur une seule ligne avec ellipse |
 
 **Hors F1, à noter :** le pied du player affichait « Créé avec FlowDSIML ». Le nom définitif est **TutoClick** (logo client) : renommage transmis au dev avec les fichiers de `brand-tutoclic/production/`.
+
+### Recette F1, suite : données sensibles, RGPD, commentaires (dev d6e105b, 19131d1)
+
+Faite sur les captures du dev (`docs/tech/captures/f1/`).
+
+**Conforme :**
+- **Vérification avant envoi** :
+  - en-tête avec le badge « Analyse terminée » ;
+  - alerte qui résume les détections ;
+  - tout est coché par défaut ;
+  - extraits masqués en mono ;
+  - légende des 3 états ;
+  - pied fixe avec la mention de confidentialité ;
+  - types ajoutés à la demande du chef d'équipe (IBAN, identifiant).
+- **Modale RGPD** : bilan (zones floutées, détections non floutées, commentaires jamais publiés), 2 cases obligatoires, bouton désactivé avec aide. Le lien « Choisir Invitation… » est masqué tant que F3 n'existe pas : accepté.
+- **Commentaires** : la liste s'ouvre sur le premier commentaire non lu, avec la pilule « n commentaires plus anciens ↑ ». Le point mineur de la recette précédente est réglé.
+
+**Écarts :**
+
+| N° | Écart | Gravité | Correction attendue |
+|---|---|---|---|
+| F1-7 | « Test · **1 captures** » et « sur 1 **capture(s)** » : pluriels non gérés | Mineure | Utiliser les clés `_one` / `_other` (`extension.piiCheck.summary_*`, et un nouveau `subtitle_one` / `subtitle_other`) |
+| F1-8 | La pilule « n commentaires plus anciens » recouvre l'en-tête du premier commentaire affiché | Mineure | La poser dans une bande de 40 px au-dessus de la liste, ou décaler la liste de sa hauteur |
+| F1-9 | Nom du produit : `7189281` utilise « Tutoclic ». Le nom définitif est **TutoClick** (logo client) | Moyenne | Changer la constante et brancher les fichiers de `docs/ux/brand-tutoclic/production/` (a73672b) |
+
+## Recette F2 : quiz de validation (dev 020450e, côté player)
+
+**Conditions :**
+- player de `claude/dev-mvp` en local, avec le manifeste du test du dev ;
+- test `quiz-player.e2e.cjs` relancé : **21 vérifications sur 21**, sans erreur JS ;
+- mes contrôles : clavier seul, 390 et 1 280 px.
+
+L'**éditeur de quiz** (spec §2) n'est pas encore livré : la recette porte seulement sur le player.
+
+**Conforme :**
+- `fieldset` / `legend` avec l'énoncé, aide « Une seule réponse possible », vrais `input` dans des `label` ;
+- **anneau de focus bleu** sur l'option au clavier ;
+- sans réponse, message en `role="alert"` et focus sur la première option ;
+- correction par **texte et icône** (« Bonne réponse », « Votre réponse », « Bonne réponse non cochée »), options désactivées, explication en `role="status"`, focus sur le titre de la correction ;
+- « Revoir l'étape n du module », puis retour sur la même question ;
+- résultat :
+  - anneau décoratif avec le trait du seuil ;
+  - badge « Module validé » vert avec texte noir, ou « Pas encore validé » neutre, jamais en framboise ;
+  - phrase de score complète, détail par question avec « Revoir » ;
+  - focus sur le titre ;
+  - tentatives décomptées et score recalculé côté serveur.
+- **Mobile 390 px** : boutons pleine largeur, pas de défilement horizontal.
+
+**Écarts :**
+
+| N° | Écart | Gravité | Correction attendue |
+|---|---|---|---|
+| F2-1 | « Score : **1 bonnes réponses** sur 3 » : pluriel non géré | Mineure | Ajouter `player.quiz.scoreLine_one` / `_other` (ou `correct_one` / `_other`) |
+| F2-2 | Pendant le quiz et sur l'écran de résultat, la **barre du player** reste active : compteur incohérent (« 1/2 » sur le résultat, « 2/2 » pendant les questions), bouton Précédent actif, et flèches ← → du clavier | Moyenne | Pendant le quiz : remplacer le compteur par « Quiz », désactiver Précédent / Suivant et les raccourcis ← → (la navigation se fait dans la carte du quiz) |
+| F2-3 | La barre de progression du quiz est **orange** (couleur des graphiques). La spec et la maquette la prévoient **prune** | Mineure | `primary` sur piste `chart-track`, comme la maquette `f2-quiz.html` |
+| F2-4 | À 390 px, un aplat clair dépasse sous la carte du quiz (la scène du player visible derrière) | Mineure | Masquer la scène derrière la carte, ou lui donner le fond du player |
+| F2-5 | « Créé avec Tutoclic » : le nom définitif est **TutoClick** | Moyenne | Voir F1-9 |
+| F2-6 | Éditeur de quiz (§2) non livré | Info | À planifier : liste des questions, types, bonne réponse avec contour vert, explication, étape liée, seuil et tentatives, « Tester le quiz » |
