@@ -374,3 +374,219 @@ Base : les 20 captures du dev (`docs/tech/captures/finition/`, prises sur `40224
 | FI12 | Éditeur, flou et zoom (M-A6) | ❌ `#ffcc00` codé en dur (`editor.css:233` et `:237`), hors palette | `var(--fd-color-accent)` (Ember) ou `--fd-color-focus` |
 
 **Bilan** : 5 points résolus. 12 écarts ouverts, dont 4 bloquants pour la finition : le menu ⋯ coupé (FI1), les cases à cocher (FI2 et FI3) et le hotspot sur le canevas (FI4). Aucun de ces écarts n'est dans `packages/ui` : tous relèvent du code applicatif.
+
+### Re-vérification FI1–FI12 (`claude/dev-mvp` @ `83c1644`)
+
+Re-capture avec le script du dev et mesures DOM. Captures : `docs/ux/recette/finition4/`.
+
+| # | Statut |
+|---|---|
+| FI1 menu ⋯ | ✅ Les 6 actions sont visibles, le menu déborde de la carte |
+| FI2 / FI3 cases à cocher | ✅ Composant `Checkbox` (`label.fd-check`) partout : x = 1137 pour toutes les cases, alignées sur les champs, 8 px entre la case et le libellé |
+| FI4 hotspot sur le canevas | ✅ Pastille et bulle rendues avec `player-core` ; zone cliquable en pointillés fins, sans aplat |
+| FI5 rythme des panneaux | ✅ 20 px entre les champs (au lieu de 36) |
+| FI6 logo | ✅ Aperçu 40 px + bouton « Choisir un logo » (`ImageUp`) |
+| FI7 variables | ✅ Carte avec un en-tête `{}` `{{company}}`, sans `legend` |
+| FI9 hauteurs | ✅ Recherche et « Exporter en CSV » à 40 px |
+| FI11 dégradé du player | ✅ Retiré |
+| FI12 `#ffcc00` | ✅ Retiré |
+| Données fictives | ✅ `globex.example` dans le faux Supabase |
+| FI8 partage | ⚠️ En partie : « Dépublier » a bien l'icône `GlobeLock`, mais reste un **bouton rouge plein** à côté d'« Ouvrir ». « Versions publiées » affiche toujours « v1 · — » avec une puce native. Le champ Expiration est toujours au format `mm/dd/yyyy` |
+| FI10 entonnoir | ⚠️ En partie : le libellé « 90 (100 %) » est maintenant collé au bord gauche **dans** la barre, en vert foncé sur du vert. Il est encore moins lisible |
+| Nouveau | ⚠️ `editor.showBranding` = « Afficher «␣␣Créé avec FlowDSIML␣␣» » : **deux espaces** de chaque côté des guillemets → une seule espace fine insécable (U+202F) |
+| Nouveau (mineur) | Couleurs hexadécimales en casse mixte (`#0E7C71` / `#ffffff`) → majuscules partout |
+
+**Bilan** : 10 écarts sur 12 sont corrigés, 2 le sont en partie (FI8, FI10), et il y a 2 petits points nouveaux. Il ne reste plus aucun bloquant de finition.
+
+**Corrections attendues**
+- **FI8** :
+  - « Dépublier » en `variant="ghost"` (texte et icône rouges, sans fond), avec la modale de confirmation ;
+  - versions affichées sur une ligne, sans puce : « v1 · 17 nov. 2026 · En ligne » ;
+  - date d'expiration au format de la langue (sélecteur maison ou `lang` sur l'`input`).
+- **FI10** : libellé **hors** de la barre, à droite de la piste, en `text-muted` et chiffres tabulaires.
+
+## Recette finale sur le site en ligne (https://sabir-art.github.io/FlowDSIML/, dazzling @ `c848fbc`)
+
+Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** : écrans publics à 1 440 et 390 px, locales `fr-FR` et `en-US`, connexion refusée avec un compte fictif (`recette.ux@example.com`), et le player sur une démo qui n'existe pas. Captures : `docs/ux/recette/live/`.
+
+| Contrôle | Résultat |
+|---|---|
+| Disponibilité de l'app et du player (`/player/`) | ✅ 200 |
+| Polices chargées (Bricolage Grotesque, Instrument Sans) | ✅ |
+| Glyphes ou emojis utilisés comme icônes, dégradés, barres latérales | ✅ 0 |
+| Routes privées sans session | ✅ Redirection vers `#/login?redirect=…` |
+| Connexion refusée | ✅ Message « Email ou mot de passe incorrect. », champ en erreur, mot de passe vidé |
+| Inscription, validation | ✅ Erreurs par champ, indicateur de robustesse |
+| Player, démo inexistante | ✅ État « Démo introuvable » avec icône, traduit selon la langue du navigateur (FR / EN) |
+| Bascule FR / EN | ✅ |
+
+**Écarts (dev)**
+
+| # | Écran | Écart | Correction attendue |
+|---|---|---|---|
+| L1 | Connexion, inscription, mot de passe oublié (panneau gauche) | ❌ Première puce « Capturez un parcours » avec l'icône `Sparkles` (motif proscrit, §15.6) | `MousePointerClick` (une capture = des clics) ou `Camera` |
+| L2 | Connexion refusée | ⚠️ Le message ne porte que sur le champ **mot de passe**, alors qu'il concerne le couple email + mot de passe. Il n'est pas annoncé aux lecteurs d'écran : aucun `role="alert"` ni `aria-live` | `Alert kind="error"` au-dessus des champs (`role="alert"`), sans mettre en erreur un champ en particulier |
+| L3 | Inscription, mobile (390 px) | ⚠️ Le texte « Robustesse : Le mot de passe doit contenir au moins 8 caractères. » est décalé de 16 px et **déborde à droite** (coupé). Il répète aussi le libellé « (8 caractères min.) ». Le « L » majuscule après les deux-points est fautif | Aligner l'aide sur le champ (`padding-left: 0`, retour à la ligne). Texte : « Robustesse : faible · 8 caractères minimum » |
+| L4 | Player, démo inexistante | ℹ️ La requête Storage répond **400** (et non 404), ce qui fait une erreur dans la console. L'affichage est correct | Côté dev, à confirmer : vérifier l'existence avant le fetch ou ignorer ce 400 |
+
+**Pas encore testé sur le site réel** : les écrans connectés (tableau de bord, éditeur, partage, analytics, leads, membres) et le parcours player + `track` sur une démo publiée. Il faut un **compte de recette fictif** (créé par le chef d'équipe, sur un domaine `.example`) et l'**identifiant d'une démo publiée**. Ces écrans ont été vérifiés sur la même version avec le faux Supabase (section précédente, `finition4`).
+
+### Re-vérification des mineurs (`claude/dev-mvp` @ `4cac555`, captures du dev)
+
+| # | Statut |
+|---|---|
+| FI8 partage | ✅ « Dépublier » en bouton `ghost` danger (`GlobeLock`) avec confirmation. Versions sans puce : « v1 · 17 nov. 2026 » et badge « en ligne » aligné à droite. Expiration choisie en durée (Jamais / 7 / 30 / 90 jours), plus de `mm/dd/yyyy` |
+| FI10 entonnoir | ✅ Libellé « 90 · 100 % » hors de la barre, en texte discret |
+| Guillemets FR | ✅ « Créé avec FlowDSIML » avec une espace fine insécable, plus aucun double espace dans `fr.json` |
+| Couleurs hexadécimales | ✅ Affichées et enregistrées en majuscules dans l'interface. Dans les fichiers `.css`, Prettier les remet en minuscules : sans effet sur le rendu, accepté |
+| L1 `Sparkles` (auth) | ❌ Toujours dans `AuthLayout.tsx:30`. Le retour L1 est parti après `4cac555` |
+| Nouveau (mineur) | Variations des KPI (A1) : « Taux de complétion » et « Leads » n'ont pas de variation, contrairement aux trois autres tuiles → afficher la variation partout, ou « — » quand il n'y a pas de période de référence, pour garder des tuiles homogènes |
+
+### Arbitrages design (questions du dev, 17 nov., `ff3c5ee`)
+
+- **W18, espacements** : on **garde 24 px et 20 px**, qui sont les valeurs du rythme de référence (`composants.md` §15.4). Pas de passage de `space-6` à `space-8`. Les seules valeurs à 32 px sont le padding de page sur ordinateur et celui des modales. La ligne W18 est close.
+- **P12, aperçu sur la page de partage** : une **capture statique de la première étape**, pas d'iframe. Raisons :
+  1. Une iframe chargerait le vrai player, donc compterait des vues et des événements `track` et fausserait les analytics du client.
+  2. Elle est lourde à charger.
+  3. Elle peut être bloquée par la liste des sites autorisés à intégrer la démo.
+
+  Spécification :
+  - image de l'étape 1 au ratio 16:10, rayon `lg`, bordure 1 px, fond `player-backdrop` ;
+  - pastille du hotspot rendue avec `player-core` en mode statique, sans pulsation ;
+  - titre de la démo et « N étapes » sous l'image ;
+  - bouton secondaire « Ouvrir l'aperçu » (`ExternalLink`) qui ouvre le player dans un nouvel onglet **avec `?preview=1`**, pour que ces visites ne soient pas comptées ;
+  - si la démo n'a pas encore d'étape : état vide avec l'icône `Image` et le texte « L'aperçu apparaîtra après la première capture ».
+
+### Recette du player en ligne : « Nordline CRM — découverte » (17 nov.)
+
+Démo publiée `24da9e7a…`, testée sur le site réel en deux versions :
+- lien public en 1 280 px ;
+- lien personnalisé `#/l/atelier-brume` en 390 px (mobile tactile).
+
+Locale `fr-FR`. Aucun lead envoyé : le formulaire n'est pas apparu (PL1). Captures : `docs/ux/recette/live-player/`.
+
+**Fonctionne**
+
+| Contrôle | Résultat |
+|---|---|
+| Chargement (`latest.json` et images en webp) | ✅ 200, aucune erreur dans la console |
+| Parcours complet 1 → 6 (boutons, flèche ← → du clavier) | ✅ Compteur, barre de progression, « Précédent » désactivé à l'étape 1 et « Suivant » à l'étape 6 |
+| Suivi des vues | ✅ `POST /functions/v1/track` → **200**, regroupé en 2 envois par session, `linkToken` renseigné sur le lien personnalisé |
+| Lien personnalisé | ✅ `resolve_share_link` → 200 ; variables appliquées (« Bienvenue Léa », « Atelier Brume ») |
+| CTA « Réserver une démo » | ✅ S'ouvre dans un nouvel onglet (`example.com/rendez-vous`) et l'événement est suivi |
+| Chapitres | ✅ Menu avec le chapitre courant mis en évidence |
+| Écran de fin | ✅ « Précédent », CTA, « Recommencer » |
+| Mobile 390 px | ✅ Bulle en feuille du bas, boutons de 44 px, écran de fin en colonne |
+| Flou (étape 3) | ✅ Les lignes d'activité sont floutées |
+
+**Écarts**
+
+| # | Gravité | Écart | Correction attendue |
+|---|---|---|---|
+| PL1 | ❌ Bloquant (recette) | **Aucun formulaire de lead** avant l'étape 4 : `latest.json` contient `"forms": []`. Le formulaire annoncé n'a pas été publié, ou le seed ne l'a pas créé | Chef d'équipe : vérifier le seed et republier. Dev : si un formulaire est configuré mais absent de la version publiée, c'est un bug de publication |
+| PL2 | ❌ Majeur | **Étape zoomée (3)** : la bulle subit aussi le zoom (texte environ 1,4 fois plus grand) et sort du cadre à droite (« Tout l'historique au même endro… », « Suiva… »). En mobile, la capture zoomée est coupée et la pastille du hotspot n'est plus visible | Appliquer la transformation de zoom **uniquement à l'image et aux hotspots**. Rendre la bulle hors du calque zoomé, à sa taille normale, en la gardant dans le cadre. Recentrer le zoom pour que le hotspot reste visible |
+| PL3 | ⚠️ Contenu et produit | Valeur par défaut « vous » de `first_name` : on obtient **« Bienvenue vous »** et **« Merci vous ! »** | Contenu : valeur par défaut vide. Produit : quand une variable est vide, retirer l'espace qui la précède et éviter « mot ! » avec une espace orpheline (« Bienvenue ! », « Merci ! »). Dans l'éditeur, afficher un aperçu de la phrase avec la valeur par défaut |
+| PL4 | ⚠️ Mineur | En mobile, le titre est tronqué (« Nordline CRM … ») parce que le CTA occupe l'en-tête | Sous 480 px : CTA de l'en-tête en `sm`, sans icône, ou déplacé dans la barre du bas. Titre sur 2 lignes maximum |
+| PL5 | ℹ️ V2 | En mobile, la capture d'écran est trop petite pour être lue (texte d'environ 5 px) | Zoom automatique sur la zone du hotspot en mobile, ou pincer pour zoomer (à arbitrer) |
+
+#### Re-test après la republication v2 (workspace passé en Pro, `first_name` sans valeur par défaut)
+
+| # | Statut |
+|---|---|
+| PL1 formulaire | ✅ Il s'affiche avant l'étape 4 en 1 280 et 390 px. L'envoi avec `recette.player@example.com` + consentement donne `rpc/submit_lead` → **200**, puis le parcours reprend à l'étape 4. « Passer » est disponible |
+| Suivi des vues (v2) | ✅ `track` → 200 avec la nouvelle `versionId` |
+| PL3 contenu | ✅ « Bienvenue » sans « vous ». Le point produit reste ouvert : retirer l'espace quand une variable est vide |
+| PL6 (nouveau) | ⚠️ En mobile, pendant le formulaire, la bulle de l'étape 4 (feuille du bas) reste **visible et active** sous le formulaire : « Suivant » permet de contourner le formulaire sans « Passer ». En ordinateur, la bulle n'est qu'assombrie. → Pendant un formulaire, masquer la bulle et la barre de navigation, ou les recouvrir du voile (règle §15.7 : un seul overlay modal à la fois) |
+| PL7 (nouveau) | ⚠️ La case de consentement du player est la case native de 13 px, avec une cible tactile trop petite en mobile → case de 20 px avec une zone cliquable de 44 px de haut sur toute la ligne (libellé compris), comme `.fd-check` |
+
+#### Formulaire de lead en plan Free : avertissements à ajouter (retour du chef d'équipe)
+
+Constat dans le code (`dev-mvp`) :
+- le seul signal est un `fd-alert` **d'information** dans l'onglet Réglages (`FormPanel`), avec le texte « Les formulaires de lead ne sont pas inclus dans votre plan. » Il ne dit pas que le formulaire **ne sera pas publié** ;
+- rien dans le panneau Étape (sélecteur « Formulaire de lead avant cette étape ») ;
+- **rien au moment de publier** : la publication retire le formulaire sans prévenir.
+
+Spécification :
+
+1. **Onglet Réglages, carte du formulaire** :
+   - `Alert kind="warning"` (icône `TriangleAlert`) en tête de la section ;
+   - FR : « **Ce formulaire ne sera pas publié.** Votre plan Free n'inclut pas les formulaires de lead : vous pouvez le préparer, mais les visiteurs ne le verront pas. » + lien « Voir les plans » ;
+   - EN : « **This form won't be published.** Your Free plan doesn't include lead forms: you can set it up, but visitors won't see it. » + « See plans » ;
+   - badge `warning` « Non publié » / « Not published » sur chaque formulaire de la liste.
+2. **Panneau Étape** :
+   - sous le sélecteur « Formulaire de lead avant cette étape », quand un formulaire est choisi, texte d'aide en couleur `warning` avec l'icône `TriangleAlert` de 16 px : « Non publié avec le plan Free » / « Not published on the Free plan ».
+3. **Au moment de publier** (bouton « Publier »), si la démo contient au moins un formulaire et que le plan ne les inclut pas :
+   - **modale de confirmation** avant l'appel à `publish_demo` ;
+   - titre FR : « Publier sans le formulaire de lead ? » ;
+   - texte FR : « Votre plan Free n'inclut pas les formulaires. La démo sera publiée **sans** le formulaire « {{name}} » (avant l'étape {{n}}) : aucun lead ne sera collecté. » ;
+   - boutons FR : « Voir les plans » (secondaire) et « Publier sans formulaire » (primaire) ; `Échap` annule ;
+   - EN : « Publish without the lead form? » / « Your Free plan doesn't include forms. The demo will be published **without** the "{{name}}" form (before step {{n}}): no leads will be collected. » / « See plans » / « Publish without form ».
+4. **Page de partage** après une publication de ce type :
+   - `Alert kind="warning"` : « Publiée sans formulaire de lead (plan Free). » / « Published without lead form (Free plan). » + « Voir les plans ».
+5. **Aperçu dans l'éditeur** :
+   - le formulaire reste montré, avec un bandeau en haut de la modale : « Aperçu : non publié avec votre plan ».
+
+### Re-vérification L1–L3, A1, P12 et thème sombre (`claude/dev-mvp` @ `edf1b36`, captures du dev)
+
+| # | Statut |
+|---|---|
+| L1 | ✅ `MousePointerClick` à la place de `Sparkles` |
+| L2 | ✅ Alerte `role="alert"` au-dessus des champs, `aria-invalid` et `aria-describedby` (vérifié dans le code d'après la description du dev) |
+| L3 | ✅ Jauge en 3 segments sur toute la largeur et texte en dessous (« Robustesse : forte »). Le libellé ne répète plus le minimum |
+| A1 | ✅ Variation du taux de complétion, « — » plus un texte pour lecteur d'écran quand il n'y a pas de période de référence |
+| P12 | ✅ Colonne d'aperçu de 320 px conforme à la spec (capture de l'étape 1, pastille statique, « 3 étapes », « Ouvrir l'aperçu ») |
+| Thème Clair / Sombre / Système | ✅ Premier rendu correct (`21-theme-sombre-menu`) :<br>- surfaces Stone sombres hiérarchisées ;<br>- marque Lagoon éclaircie ;<br>- alerte info sombre avec bordure de 1 px ;<br>- vignettes de capture restées claires (`.fd-player-scope`) ;<br>- sélecteur segmenté `Sun` / `Moon` / `Monitor` dans le menu du compte |
+| Menu du compte | ✅ Il s'ouvre au-dessus du déclencheur et n'est plus coupé dans cette capture. La passe « débordements » complète (§15.7) reste à faire sur le build intégré, dans les deux thèmes |
+
+Points d'attention pour la passe débordements et thème sombre :
+- les trois boutons du sélecteur de thème n'ont que des icônes : vérifier leur `aria-label` et leur info-bulle (« Clair », « Sombre », « Système ») ;
+- vérifier dans le menu de compte, en sombre, le contraste du segment actif (fond `primary-soft`) par rapport au segment au survol ;
+- vérifier l'éditeur, les tableaux et les modales en sombre : le canevas et l'aperçu doivent rester en `.fd-player-scope` (clair).
+
+### Passe « débordements » (§15.7) — `claude/dev-mvp` @ `8c6c9b0`, faux Supabase
+
+Écrans testés en 1 440, 1 024 et 390 px, en thème clair et sombre (6 configurations, 36 mesures automatiques) :
+- tableau de bord ;
+- éditeur (ordinateur uniquement) ;
+- tiroir de navigation mobile ;
+- page de partage d'une démo publiée.
+
+Pour chaque overlay ouvert, je vérifie :
+- que sa boîte est entièrement dans le viewport, à 8 px au moins des bords ;
+- qu'il est rendu dans `#fd-portal` ou dans la *top layer*, sans ancêtre qui le coupe ;
+- qu'aucun libellé n'est tronqué (`scrollWidth`) ;
+- que `Échap` le ferme et rend le focus au déclencheur.
+
+Captures : `docs/ux/recette/debordements/`.
+
+| Overlay | 1 440 | 1 024 | 390 | Clair / sombre |
+|---|---|---|---|---|
+| Menu du compte (bas de la barre latérale) | ✅ au-dessus, dans le portail, focus rendu | ✅ | ✅ dans le tiroir, ouvert vers la gauche, à 8 px du bord | ✅ |
+| Menus ⋯ des cartes de démo (6 actions) | ✅ en dessous, aligné à droite, complet | ✅ | ✅ retourné au-dessus du déclencheur, complet | ✅ |
+| Menu « Ajouter une étape » (éditeur) | ✅ | ✅ | sans objet | ✅ |
+| Modales de confirmation (supprimer, dépublier) | ✅ `<dialog>` natif en *top layer*, 440 px, centrée | ✅ | ✅ 356 px avec 17 px de marge | ✅ |
+| Retour « Copié » sur le bouton Copier | ✅ retour dans le bouton, pas de toast (il n'y a pas de système de toasts) | ✅ | ✅ | ✅ |
+| Libellés tronqués | ✅ aucun | ✅ | ✅ | ✅ |
+
+**Bilan** : le correctif portail règle le problème du client. Aucun overlay n'est coupé ni ne sort du viewport, dans aucune des 6 configurations. J'ai ajouté le `<dialog>` natif en *top layer* comme équivalent accepté du portail pour les modales dans §15.7.
+
+**Écarts trouvés pendant la passe**
+
+| # | Gravité | Écart | Correction attendue |
+|---|---|---|---|
+| DB1 | ⚠️ Accessibilité | En 390 px, **`Échap` ne ferme pas le tiroir de navigation**. Le voile reste affiché et bloque la page jusqu'à un clic dessus | `Échap` ferme le tiroir et rend le focus au bouton menu. Piéger le focus dans le tiroir tant qu'il est ouvert |
+| DB2 | ❌ Contraste (sombre) | Aperçu de partage vide en thème sombre : le texte « L'aperçu apparaîtra après la première capture. » est en `rgb(179,173,164)` sur le cadre clair `rgb(247,246,244)`, soit un contraste de **2,06:1** (AA demande 4,5:1). Le cadre a le fond clair du player mais pas la classe `.fd-player-scope`, donc il reçoit les couleurs de texte du thème sombre | Ajouter `.fd-player-scope` au cadre de l'aperçu (`SharePreview`), y compris pour l'état vide. Même vérification sur les vignettes du tableau de bord et le canevas de l'éditeur |
+| DB3 | ⚠️ Mise en page | Éditeur en 1 024 px (largeur minimale) : la barre du haut passe sur **2 lignes** (105 px au lieu de 57). Les outils Sélection / Hotspot / Flou passent sous le titre et réduisent la hauteur du canevas | En dessous de 1 280 px : champ de titre en `flex: 1` avec `min-width: 160px`, sans largeur fixe. Outils en icônes seules avec info-bulle. « Aperçu » et « Partager » en icônes seules si besoin. Une seule ligne de 56 px |
+
+### Re-vérification PL2–PL7 et formulaires en plan Free (`claude/dev-mvp` @ `42711b3`, captures du dev 22–24)
+
+| # | Statut |
+|---|---|
+| PL2 bulle zoomée | ✅ La bulle et la pastille sont hors du calque zoomé, à taille normale, et restent dans le cadre en 1 280 et 390 px |
+| PL2b (nouveau) | ⚠️ Avec le recalage de l'origine du zoom, l'image zoomée ne couvre plus tout le cadre : **bande blanche à droite** (environ 42 px en 1 280, 14 px en 390). → Borner la translation pour que l'image couvre toujours tout le cadre : l'origine reste dans `[0 ; 1 − 1/scale]`. Si le hotspot est près d'un bord, on accepte qu'il soit plus près que 12 % plutôt que de montrer un vide |
+| PL3 variables vides | ✅ La variable vide disparaît avec l'espace qui la précède. « Aperçu : … » sous les champs qui contiennent une variable (code) |
+| PL4 titre mobile | ✅ Titre sur 2 lignes, CTA `sm` sans icône. **Décision** : on garde le CTA dans l'en-tête, qui est l'emplacement attendu pour une action de conversion. La barre du bas reste réservée à la navigation |
+| PL6 un seul overlay modal | ✅ La feuille de la bulle est retirée, l'en-tête et les contrôles sont `inert` et atténués pendant le formulaire |
+| PL7 case de consentement | ✅ 20 px, ligne cliquable de 44 px |
+| Avertissements en plan Free | ✅ dans le code et les libellés : les 5 points de la spec, avec les textes FR et EN repris tels quels (`notPublishedTitle`, `badge`, `stepHelp`, `confirmTitle` / `confirmLabel`, `sharePublished`, `previewBanner`). Pas encore de capture d'un workspace Free : à vérifier visuellement à la prochaine passe |
+| Alertes (M-A1) | ✅ `Alert` de type `warning`, avec une icône Lucide par état (`Info`, `CircleAlert`, `CircleCheck`, `TriangleAlert`) |
