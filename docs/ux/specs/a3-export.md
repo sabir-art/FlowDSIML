@@ -2,7 +2,7 @@
 
 > Lot A3 de la parité Guideflow (Share : Video / GIF / PDF export, Offline demos).
 > Maquette : `docs/ux/maquettes/refonte/export.html` (`?view=choose|progress|done|error`, `&theme=dark`).
-> Microcopie : `export.*` dans `docs/ux/i18n` (66 clés).
+> Microcopie : `export.*` dans `docs/ux/i18n` (50 clés).
 
 ## 1. Points d'entrée
 
