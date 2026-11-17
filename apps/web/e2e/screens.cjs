@@ -58,6 +58,8 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await shot(p, '13-membres');
   await go('/settings/workspace', '#ws-name');
   await shot(p, '14-parametres', true);
+  await go('/settings/plans', '.plan-card');
+  await shot(p, '15b-plans', true);
   await go('/settings/profile', '#fn');
   await shot(p, '15-profil');
 

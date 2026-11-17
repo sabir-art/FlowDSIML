@@ -17,6 +17,7 @@ import { AcceptInvite } from './pages/AcceptInvite';
 import { Profile } from './pages/settings/Profile';
 import { Members } from './pages/settings/Members';
 import { WorkspaceSettings } from './pages/settings/WorkspaceSettings';
+import { PlansPage } from './pages/settings/PlansPage';
 import { DemosPage } from './pages/demos/DemosPage';
 
 // Pages lourdes chargées à la demande (éditeur, analytics, partage).
@@ -112,6 +113,7 @@ export function App() {
                 <Route path="/settings/profile" element={<Profile />} />
                 <Route path="/settings/members" element={<Members />} />
                 <Route path="/settings/workspace" element={<WorkspaceSettings />} />
+                <Route path="/settings/plans" element={<PlansPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

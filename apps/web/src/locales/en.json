@@ -30,7 +30,8 @@
     "profile": "My profile",
     "newWorkspace": "New workspace",
     "openMenu": "Open menu",
-    "account": "My account"
+    "account": "My account",
+    "plans": "Plans"
   },
   "roles": {
     "owner": "Owner",
@@ -408,5 +409,11 @@
     "email": "Enter a valid email address, for example name@company.com.",
     "passwordMin": "Password must be at least {{min}} characters.",
     "consent": "Check the box to continue."
+  },
+  "plans": {
+    "title": "Plans",
+    "current": "Current plan",
+    "unlimited": "Unlimited",
+    "manualNotice": "Online payment coming soon. To change plans now, contact us: your plan will be activated within 24 hours."
   }
 }

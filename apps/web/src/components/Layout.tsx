@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   BarChart3,
+  CreditCard,
   Building2,
   Contact,
   Languages,
@@ -49,6 +50,7 @@ export function Layout() {
   const admin = [
     { to: '/settings/members', icon: <Users {...ICON} />, label: t('nav.members') },
     { to: '/settings/workspace', icon: <Settings {...ICON} />, label: t('nav.workspaceSettings') },
+    { to: '/settings/plans', icon: <CreditCard {...ICON} />, label: t('nav.plans') },
   ];
 
   return (
