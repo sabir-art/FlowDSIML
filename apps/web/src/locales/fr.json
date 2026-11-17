@@ -15,7 +15,7 @@
     "back": "Retour",
     "search": "Rechercher",
     "none": "Aucun",
-    "typeToConfirm": "Saisissez « {{text}} » pour confirmer",
+    "typeToConfirm": "Saisissez «  {{text}}  » pour confirmer",
     "yes": "Oui",
     "no": "Non"
   },
@@ -72,18 +72,31 @@
     "strength": "Robustesse",
     "strength_1": "faible",
     "strength_2": "correcte",
-    "strength_3": "forte"
+    "strength_3": "forte",
+    "pitchTitle": "Des démos interactives qui vendent votre produit pendant que vous dormez.",
+    "pitch1": "Capturez un parcours en quelques clics",
+    "pitch2": "Partagez par lien ou intégrez sur votre site",
+    "pitch3": "Mesurez l’engagement et collectez des leads"
   },
   "onboarding": {
     "title": "Créez votre workspace",
     "subtitle": "Un workspace regroupe vos démos et votre équipe.",
     "name": "Nom de l'entreprise ou de l'équipe",
     "placeholder": "Acme",
-    "create": "Créer le workspace"
+    "create": "Créer le workspace",
+    "progress": "Progression",
+    "step1": "Workspace",
+    "step2": "Extension",
+    "extTitle": "Installez l’extension de capture",
+    "extSubtitle": "Votre workspace est prêt. Encore 3 étapes pour votre première démo.",
+    "ext1": "Installez l’extension FlowDSIML dans Chrome (en attendant sa publication : chargez-la « non empaquetée », voir le README).",
+    "ext2": "Ouvrez votre application, cliquez sur l’icône FlowDSIML puis sur « Démarrer la capture » et parcourez le workflow à montrer.",
+    "ext3": "Terminez : l’éditeur s’ouvre. Ajustez les textes puis publiez.",
+    "goDashboard": "Accéder à mes démos"
   },
   "invite": {
     "title": "Invitation",
-    "body": "Vous êtes invité·e à rejoindre « {{workspace}} » en tant que {{role}}.",
+    "body": "Vous êtes invité·e à rejoindre «  {{workspace}}  » en tant que {{role}}.",
     "loginFirst": "Connectez-vous ou créez un compte avec l'adresse {{email}} pour accepter.",
     "accept": "Accepter l'invitation"
   },
@@ -105,7 +118,12 @@
     "remove": "Retirer",
     "leave": "Quitter",
     "confirmRemove": "Retirer {{email}} du workspace ?",
-    "confirmLeave": "Quitter ce workspace ?"
+    "confirmLeave": "Quitter ce workspace ?",
+    "emails": "Emails (un ou plusieurs)",
+    "emailsPlaceholder": "marie@acme.com, paul@acme.com",
+    "invalidEmails": "Adresses invalides : {{list}}",
+    "invitesCreated_one": "Invitation créée. Envoyez ce lien :",
+    "invitesCreated_other": "{{count}} invitations créées. Envoyez à chacun son lien :"
   },
   "workspace": {
     "title": "Paramètres du workspace",
@@ -114,7 +132,7 @@
     "danger": "Zone dangereuse",
     "delete": "Supprimer le workspace",
     "deleteHint": "Supprime définitivement le workspace, ses démos, analytics et leads.",
-    "deleteConfirm": "Tapez « {{slug}} » pour confirmer la suppression."
+    "deleteConfirm": "Tapez «  {{slug}}  » pour confirmer la suppression."
   },
   "plan": {
     "title": "Plan",
@@ -183,7 +201,7 @@
     "zoom_y": "Centre vertical",
     "zoomScale": "Grossissement ×{{v}}",
     "hotspots": "Hotspots",
-    "noHotspot": "Aucun hotspot. Utilisez l'outil « Hotspot ».",
+    "noHotspot": "Aucun hotspot. Utilisez l'outil «  Hotspot  ».",
     "blurs": "Zones floutées",
     "blurN": "Flou {{n}}",
     "capturedOn": "Capturé sur",
@@ -218,7 +236,7 @@
     "radius": "Arrondi : {{v}} px",
     "logo": "Logo",
     "removeLogo": "Retirer le logo",
-    "showBranding": "Afficher « Créé avec FlowDSIML »",
+    "showBranding": "Afficher «  Créé avec FlowDSIML  »",
     "brandingHint": "Sur le plan Free, la mention reste affichée.",
     "locale": "Langue du player",
     "variables": "Variables de personnalisation",
@@ -229,7 +247,7 @@
     "addVariable": "Ajouter",
     "leadForm": "Formulaire de lead",
     "leadFormHint": "Collectez l'email des visiteurs avant une étape clé.",
-    "leadFormGateHint": "Choisissez l'étape concernée dans l'onglet Étape (« Formulaire de lead avant cette étape »).",
+    "leadFormGateHint": "Choisissez l'étape concernée dans l'onglet Étape («  Formulaire de lead avant cette étape  »).",
     "createForm": "Créer le formulaire",
     "formTitle": "Titre",
     "formDescription": "Description",
@@ -298,7 +316,7 @@
     "badgeZoom": "Zoom",
     "badgeBlurs_one": "{{count}} zone floutée",
     "badgeBlurs_other": "{{count}} zones floutées",
-    "formOnStep": "Formulaire « {{title}} » affiché avant cette étape",
+    "formOnStep": "Formulaire « {{title}} » affiché avant cette étape",
     "editForm": "Modifier"
   },
   "status": {
@@ -387,14 +405,14 @@
     "newFolder": "Nouveau dossier",
     "folderName": "Nom du dossier",
     "renameFolder": "Renommer {{name}}",
-    "deleteFolder": "Supprimer le dossier « {{name}} » ?",
-    "confirmDeleteFolder": "Les démos qu’il contient ne sont pas supprimées : elles passent dans « Sans dossier ».",
+    "deleteFolder": "Supprimer le dossier «  {{name}}  » ?",
+    "confirmDeleteFolder": "Les démos qu’il contient ne sont pas supprimées : elles passent dans «  Sans dossier  ».",
     "search": "Rechercher une démo",
     "status": "Statut",
     "allStatuses": "Tous les statuts",
     "emptyTitle": "Créez votre première démo interactive",
     "emptyStep1": "Installez l'extension Chrome FlowDSIML et connectez-vous.",
-    "emptyStep2": "Ouvrez votre application, cliquez sur « Démarrer l'enregistrement » puis parcourez le workflow à montrer.",
+    "emptyStep2": "Ouvrez votre application, cliquez sur «  Démarrer l'enregistrement  » puis parcourez le workflow à montrer.",
     "emptyStep3": "Terminez : l'éditeur s'ouvre, ajustez les textes puis publiez.",
     "emptyCta": "Ou partir d'une démo vide",
     "noMatch": "Aucune démo ne correspond.",
@@ -410,7 +428,7 @@
     "sortUpdated": "Modifiées récemment",
     "sortTitle": "Titre (A → Z)",
     "sortViews": "Les plus vues",
-    "deleteTitle": "Supprimer « {{title}} » ?",
+    "deleteTitle": "Supprimer «  {{title}}  » ?",
     "views_one": "{{n}} vue",
     "views_other": "{{n}} vues",
     "leads_one": "{{n}} lead",
@@ -429,6 +447,6 @@
     "title": "Plans",
     "current": "Plan actuel",
     "unlimited": "Illimité",
-    "manualNotice": "Paiement en ligne bientôt disponible. Pour changer de plan dès maintenant, contactez-nous : votre plan sera activé sous 24 h."
+    "manualNotice": "Paiement en ligne bientôt disponible. Pour changer de plan dès maintenant, contactez-nous : votre plan sera activé sous 24 h."
   }
 }

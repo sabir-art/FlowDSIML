@@ -278,34 +278,6 @@
   border-color: transparent;
   padding: 0;
 }
-.segmented {
-  display: inline-flex;
-  border: 1px solid var(--fd-color-border-strong);
-  border-radius: var(--fd-radius-md);
-  overflow: hidden;
-}
-.segmented button {
-  border: 0;
-  background: var(--fd-color-surface);
-  color: var(--fd-color-text);
-  font: inherit;
-  font-size: var(--fd-font-xs);
-  padding: 6px 10px;
-  cursor: pointer;
-}
-.segmented button + button {
-  border-left: 1px solid var(--fd-color-border);
-}
-.segmented button[aria-pressed='true'] {
-  background: var(--fd-color-primary-soft);
-  color: var(--fd-color-primary-soft-text);
-  font-weight: 600;
-}
-.segmented button:focus-visible {
-  outline: none;
-  box-shadow: var(--fd-shadow-focus);
-  position: relative;
-}
 .canvas-hotspot:focus-visible,
 .canvas-blur:focus-visible {
   outline: none;
@@ -354,11 +326,6 @@
   color: var(--fd-color-danger);
 }
 
-.segmented button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
 .save-state {
   font-size: var(--fd-font-xs);
   color: var(--fd-color-text-muted);
