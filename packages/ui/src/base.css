@@ -119,18 +119,22 @@ a {
   width: 100%;
 }
 
-/* Icônes dans les boutons (lucide-react, stroke 1.75) */
-.fd-btn svg {
+/* Icônes dans les boutons (lucide-react, stroke 1.75) : 18 px (md), 16 px (sm), 20 px (lg).
+   Couvre l'icône directe et celle du composant Button (`.fd-btn__icon`). */
+.fd-btn > svg,
+.fd-btn .fd-btn__icon > svg {
   width: 18px;
   height: 18px;
   flex: none;
   stroke-width: 1.75;
 }
-.fd-btn--sm svg {
+.fd-btn--sm > svg,
+.fd-btn.fd-btn--sm .fd-btn__icon > svg {
   width: 16px;
   height: 16px;
 }
-.fd-btn--lg svg {
+.fd-btn--lg > svg,
+.fd-btn.fd-btn--lg .fd-btn__icon > svg {
   width: 20px;
   height: 20px;
 }
@@ -191,6 +195,11 @@ select.fd-select:not([multiple]):not([size]) {
 }
 select.fd-select.fd-select--sm:not([multiple]):not([size]) {
   padding-right: 32px !important;
+}
+/* Composant Select de packages/ui (chevron Lucide dessiné dans .fd-select-wrap) :
+   pas de second chevron en image de fond. */
+.fd-select-wrap > .fd-select {
+  background-image: none !important;
 }
 .fd-select::-ms-expand {
   display: none;
