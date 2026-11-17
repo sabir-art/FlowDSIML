@@ -1,6 +1,6 @@
 import { formatDate } from '../../lib/format';
 import { useConfirm } from '../../components/ConfirmDialog';
-import { Copy, Send, Trash2 } from 'lucide-react';
+import { Copy, LogOut, Send, Trash2, UserMinus } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { assignableRoles, type Role } from '@flowdsiml/core';
@@ -23,6 +23,15 @@ export function inviteUrl(token: string) {
   return `${APP_URL}#/invite/${token}`;
 }
 
+/** Initiales pour l'avatar : « Marie Durand » → « MD », « jean@x.fr » → « J ». */
+export function initials(nameOrEmail: string) {
+  const base =
+    nameOrEmail.includes('@') && !nameOrEmail.includes(' ') ? nameOrEmail.split('@')[0]! : nameOrEmail;
+  const parts = base.split(/[\s._-]+/).filter(Boolean);
+  const letters = parts.length > 1 ? parts[0]![0]! + parts[parts.length - 1]![0]! : (parts[0]?.[0] ?? '?');
+  return letters.toUpperCase();
+}
+
 export function Members() {
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
@@ -32,7 +41,8 @@ export function Members() {
   const [invites, setInvites] = useState<Tables<'invitations'>[]>([]);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<WorkspaceRole>('editor');
-  const [lastLink, setLastLink] = useState<string | null>(null);
+  const [lastLinks, setLastLinks] = useState<Array<{ email: string; url: string }>>([]);
+  const [inviteError, setInviteError] = useState<string | null>(null);
   const { busy, error, success, run } = useAction();
   const ws = current!;
   const myRole = ws.role as Role;
@@ -56,19 +66,36 @@ export function Members() {
     void load();
   }, [load]);
 
+  /** Invitations multiples (W9) : emails séparés par virgule, point-virgule, espace ou retour à la ligne. */
   async function invite(e: FormEvent) {
     e.preventDefault();
-    const inv = await run(async () =>
+    const list = [
+      ...new Set(
+        email
+          .split(/[\s,;]+/)
+          .map((x) => x.trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    ];
+    const invalid = list.filter((x) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));
+    if (!list.length || invalid.length) {
+      setInviteError(
+        list.length ? t('members.invalidEmails', { list: invalid.join(', ') }) : t('validation.required'),
+      );
+      document.getElementById('inv-email')?.focus();
+      return;
+    }
+    setInviteError(null);
+    const rows = await run(async () =>
       check(
         await supabase
           .from('invitations')
-          .insert({ workspace_id: ws.id, email: email.trim().toLowerCase(), role, invited_by: user!.id })
-          .select()
-          .single(),
+          .insert(list.map((addr) => ({ workspace_id: ws.id, email: addr, role, invited_by: user!.id })))
+          .select(),
       ),
     );
-    if (inv) {
-      setLastLink(inviteUrl(inv.token));
+    if (rows) {
+      setLastLinks(rows.map((r) => ({ email: r.email, url: inviteUrl(r.token) })));
       setEmail('');
       await load();
     }
@@ -88,17 +115,27 @@ export function Members() {
       {can('members.invite') && (
         <Card>
           <h2 style={{ marginTop: 0 }}>{t('members.invite')}</h2>
-          <form onSubmit={invite} className="row" style={{ alignItems: 'flex-end' }}>
+          <form onSubmit={invite} className="row" style={{ alignItems: 'flex-start' }} noValidate>
             <div style={{ flex: '1 1 240px' }}>
-              <Field label={t('auth.email')} htmlFor="inv-email">
-                <input
+              <Field label={t('members.emails')} htmlFor="inv-email">
+                <textarea
                   id="inv-email"
-                  className="fd-input"
-                  type="email"
-                  required
+                  className="fd-textarea"
+                  rows={2}
+                  placeholder={t('members.emailsPlaceholder')}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setInviteError(null);
+                  }}
+                  aria-invalid={inviteError ? true : undefined}
+                  aria-describedby={inviteError ? 'inv-email-error' : undefined}
                 />
+                {inviteError && (
+                  <p id="inv-email-error" className="field-error">
+                    {inviteError}
+                  </p>
+                )}
               </Field>
             </div>
             <Field label={t('members.role')} htmlFor="inv-role">
@@ -111,17 +148,31 @@ export function Members() {
               </Select>
             </Field>
             <div className="fd-field">
+              <span className="fd-label" aria-hidden="true">
+                &nbsp;
+              </span>
               <Button icon={<Send />} type="submit" variant="primary" disabled={busy}>
                 {t('members.sendInvite')}
               </Button>
             </div>
           </form>
-          {lastLink && (
+          {lastLinks.length > 0 && (
             <Alert kind="success">
-              {t('members.inviteCreated')} <code style={{ wordBreak: 'break-all' }}>{lastLink}</code>{' '}
-              <Button icon={<Copy />} size="sm" onClick={() => void navigator.clipboard.writeText(lastLink)}>
-                {t('common.copy')}
-              </Button>
+              <p style={{ margin: '0 0 8px' }}>{t('members.invitesCreated', { count: lastLinks.length })}</p>
+              <ul className="invite-links">
+                {lastLinks.map((l) => (
+                  <li key={l.url}>
+                    <span>{l.email}</span>
+                    <Button
+                      icon={<Copy />}
+                      size="sm"
+                      onClick={() => void navigator.clipboard.writeText(l.url)}
+                    >
+                      {t('members.copyLink')}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
             </Alert>
           )}
           <p className="fd-muted">{t('members.inviteHint')}</p>
@@ -132,8 +183,7 @@ export function Members() {
         <table className="fd-table">
           <thead>
             <tr>
-              <th>{t('auth.fullName')}</th>
-              <th>{t('auth.email')}</th>
+              <th>{t('members.member')}</th>
               <th>{t('members.role')}</th>
               <th />
             </tr>
@@ -144,8 +194,17 @@ export function Members() {
                 canManage && m.user_id !== user?.id && (m.role !== 'owner' || myRole === 'owner');
               return (
                 <tr key={m.user_id}>
-                  <td>{m.full_name || '—'}</td>
-                  <td>{m.email}</td>
+                  <td>
+                    <div className="member-cell">
+                      <span className="avatar" aria-hidden="true">
+                        {initials(m.full_name || m.email)}
+                      </span>
+                      <span className="member-cell__text">
+                        <span className="member-cell__name">{m.full_name || m.email}</span>
+                        {m.full_name && <span className="member-cell__email">{m.email}</span>}
+                      </span>
+                    </div>
+                  </td>
                   <td>
                     {editable ? (
                       <Select
@@ -180,7 +239,7 @@ export function Members() {
                         size="sm"
                         variant="ghost"
                         className="btn-danger-ghost"
-                        icon={<Trash2 />}
+                        icon={m.user_id === user?.id ? <LogOut /> : <UserMinus />}
                         onClick={async () => {
                           const self = m.user_id === user?.id;
                           if (

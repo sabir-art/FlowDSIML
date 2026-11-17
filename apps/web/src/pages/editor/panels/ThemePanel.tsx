@@ -1,11 +1,12 @@
-import { X } from 'lucide-react';
-import { useState } from 'react';
+import { Image as ImageIcon, ImageUp, X } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { themeSchema, type Theme } from '@flowdsiml/manifest';
-import { Alert, Button, Field, Select } from '@flowdsiml/ui';
+import { Alert, Button, Checkbox, Field, Select } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { SUPABASE_URL } from '../../../lib/env';
 import type { DemoEditor } from '../useDemoEditor';
+import { CtaFields } from './CtaFields';
 import { asSettings } from '../types';
 
 const FONTS = [
@@ -20,6 +21,8 @@ const FONTS = [
 export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly: boolean }) {
   const { t } = useTranslation();
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [logoName, setLogoName] = useState<string | null>(null);
+  const logoInput = useRef<HTMLInputElement>(null);
   const demo = editor.demo!;
   const settings = asSettings(demo.settings);
   const theme: Theme = themeSchema.parse(settings.theme ?? {});
@@ -42,9 +45,9 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
           type="color"
           disabled={readOnly}
           value={theme[key]}
-          onChange={(e) => set({ [key]: e.target.value })}
+          onChange={(e) => set({ [key]: e.target.value.toUpperCase() })}
         />
-        <code>{theme[key]}</code>
+        <code>{theme[key].toUpperCase()}</code>
       </div>
     </Field>
   );
@@ -82,35 +85,68 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
           onChange={(e) => set({ radius: Number(e.target.value) })}
         />
       </Field>
-      <Field label={t('editor.logo')} htmlFor="th-logo">
-        {theme.logoUrl && <img src={theme.logoUrl} alt="" style={{ maxHeight: 40, maxWidth: 160 }} />}
-        {!readOnly && (
-          <input
-            id="th-logo"
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/svg+xml"
-            onChange={(e) => e.target.files?.[0] && void uploadLogo(e.target.files[0])}
-          />
-        )}
-        {theme.logoUrl && !readOnly && (
-          <Button icon={<X />} size="sm" variant="ghost" onClick={() => set({ logoUrl: null })}>
-            {t('editor.removeLogo')}
-          </Button>
-        )}
-      </Field>
+      <div className="fd-field">
+        <span className="fd-label">{t('editor.logo')}</span>
+        <div className="logo-row">
+          <span className="logo-preview">
+            {theme.logoUrl ? <img src={theme.logoUrl} alt="" /> : <ImageIcon size={18} aria-hidden="true" />}
+          </span>
+          {!readOnly && (
+            <>
+              <input
+                ref={logoInput}
+                id="th-logo"
+                type="file"
+                hidden
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) {
+                    setLogoName(f.name);
+                    void uploadLogo(f);
+                  }
+                  e.target.value = '';
+                }}
+              />
+              <Button size="sm" icon={<ImageUp />} onClick={() => logoInput.current?.click()}>
+                {theme.logoUrl ? t('editor.changeLogo') : t('editor.chooseLogo')}
+              </Button>
+              {theme.logoUrl && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  icon={<X />}
+                  aria-label={t('editor.removeLogo')}
+                  onClick={() => set({ logoUrl: null })}
+                />
+              )}
+            </>
+          )}
+        </div>
+        {logoName && <span className="fd-muted logo-name">{logoName}</span>}
+      </div>
       {uploadError && <Alert kind="error">{uploadError}</Alert>}
-      <label className="row">
-        <input
-          type="checkbox"
-          disabled={readOnly}
-          checked={theme.showBranding}
-          onChange={(e) => set({ showBranding: e.target.checked })}
-        />{' '}
-        {t('editor.showBranding')}
-      </label>
+      <Checkbox
+        disabled={readOnly}
+        checked={theme.showBranding}
+        onChange={(e) => set({ showBranding: e.target.checked })}
+        label={t('editor.showBranding')}
+      />
       <p className="fd-muted" style={{ fontSize: 12 }}>
         {t('editor.brandingHint')}
       </p>
+      <div className="panel-group">
+        <span className="fd-label">{t('editor.pageCta')}</span>
+        <p className="fd-muted" style={{ fontSize: 12, margin: 0 }}>
+          {t('editor.pageCtaHint')}
+        </p>
+        <CtaFields
+          idPrefix="page"
+          value={settings.cta ?? null}
+          disabled={readOnly}
+          onChange={(v) => editor.updateDemo({ settings: { ...settings, cta: v } })}
+        />
+      </div>
       <Field label={t('editor.locale')} htmlFor="th-locale">
         <Select
           id="th-locale"

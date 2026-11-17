@@ -8,6 +8,7 @@ import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
 import { Player } from './Player';
 import { Ban, Link2Off, SearchX } from 'lucide-preact';
+import '@flowdsiml/player-core/player-core.css';
 import './player.css';
 
 type State =
@@ -61,7 +62,11 @@ function App() {
             });
         };
         addEventListener('message', onMsg);
-        window.opener?.postMessage({ type: 'fd:preview-ready' }, APP_ORIGIN);
+        // Aperçu en onglet (opener) ou intégré dans l'éditeur (parent)
+        (window.opener ?? (window.parent !== window ? window.parent : null))?.postMessage(
+          { type: 'fd:preview-ready' },
+          APP_ORIGIN,
+        );
         return;
       }
       let demoId: string;
@@ -94,13 +99,15 @@ function App() {
         ...variablesFromSearch(search, keys),
         ...variablesFromSearch(location.search, keys),
       };
-      if (!cancelled) setState({ status: 'ready', manifest, values, linkToken, preview: false });
+      // P12 : « Ouvrir l'aperçu » depuis l'app (?preview=1) n'enregistre pas de statistiques
+      const preview = [search, location.search].some((q) => new URLSearchParams(q).get('preview') === '1');
+      if (!cancelled) setState({ status: 'ready', manifest, values, linkToken, preview });
     }
     void boot();
     return () => {
       cancelled = true;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const tracker = useMemo(
     () =>

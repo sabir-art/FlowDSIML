@@ -77,11 +77,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await player.waitForSelector('.p-form');
   ok(true, 'formulaire de lead affiché avant l’étape 2');
   if (SHOTS) await player.screenshot({ path: `${SHOTS}/player-form.png` });
-  await player.fill('.p-form input[type=email]', 'marie@globex.com');
+  await player.fill('.p-form input[type=email]', 'marie@globex.example');
   await player.click('.p-form button[type=submit]');
   await player.waitForSelector('.p-form', { state: 'detached' });
   ok(
-    state.tables.leads.some((l) => l.email === 'marie@globex.com'),
+    state.tables.leads.some((l) => l.email === 'marie@globex.example'),
     'lead enregistré',
   );
   await player.keyboard.press('ArrowRight');

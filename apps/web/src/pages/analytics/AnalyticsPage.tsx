@@ -61,7 +61,6 @@ export function AnalyticsPage() {
           <h2 style={{ marginTop: 0 }}>{t('analytics.byDemo')}</h2>
           <Button
             icon={<Download />}
-            size="sm"
             onClick={() =>
               downloadText(
                 `analytics-${days}j.csv`,

@@ -10,7 +10,8 @@ import {
   Minimize2,
   RotateCcw,
 } from 'lucide-preact';
-import { nextIndex, resolvePlacement } from './logic';
+import { nextIndex } from './logic';
+import { beaconCenter, zoomBox, zoomOrigin, themeVars, tipClass } from '@flowdsiml/player-core';
 import { strings, type Dict } from './i18n';
 import type { Tracker } from './api';
 import { LeadForm } from './LeadForm';
@@ -121,7 +122,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if ((e.target as HTMLElement)?.closest?.('form')) return;
+      if ((e.target as HTMLElement)?.closest?.('form') || gateForm) return;
       if (e.key === 'ArrowRight') go(index + 1);
       if (e.key === 'ArrowLeft') go(index - 1);
     }
@@ -129,15 +130,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
     return () => removeEventListener('keydown', onKey);
   });
 
-  const style = {
-    '--p-primary': theme.primary,
-    '--p-hotspot': theme.hotspot,
-    '--p-bg': theme.background,
-    '--p-surface': theme.surface,
-    '--p-text': theme.text,
-    '--p-radius': `${theme.radius}px`,
-    fontFamily: theme.fontFamily,
-  } as Record<string, string>;
+  const style = themeVars(theme);
 
   const chapterOf = (s: Step) => m.chapters.find((c) => c.id === s.chapterId);
   const progress = ((index + 1) / m.steps.length) * 100;
@@ -156,9 +149,20 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
   return (
     <div class={`p-root ${compact ? 'is-compact' : ''}`} style={style} ref={rootRef}>
       {preview && <div class="p-preview">{t.preview}</div>}
-      <header class="p-top">
+      <header class="p-top" inert={!!gateForm}>
         {theme.logoUrl ? <img class="p-logo" src={theme.logoUrl} alt="" /> : null}
         <span class="p-title">{sub(m.title)}</span>
+        {m.cta && (
+          <button
+            class="p-btn p-btn-primary p-btn-sm p-top-cta"
+            onClick={() => onCta(m.cta!.url, m.cta!.label)}
+          >
+            {sub(m.cta.label)}
+            <span class="p-top-cta-icon">
+              <ExternalLink {...ICON} size={14} />
+            </span>
+          </button>
+        )}
         {m.chapters.length > 0 && (
           <button
             class="p-icon-btn"
@@ -170,7 +174,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
           </button>
         )}
       </header>
-      {menu && (
+      {menu && !gateForm && (
         <nav class="p-menu" aria-label={t.chapters}>
           {m.chapters.map((c) => {
             const i = m.steps.findIndex((s) => s.chapterId === c.id);
@@ -207,7 +211,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
             sub={sub}
             onHotspot={onHotspot}
             onCta={onCta}
-            tip={!compact ? tipProps : undefined}
+            tip={!compact && !gateForm ? tipProps : undefined}
           />
         ) : (
           <div class="p-text-step">
@@ -246,6 +250,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
         {gateForm && (
           <LeadForm
             form={gateForm}
+            privacyUrl={m.privacyUrl}
             t={t}
             sub={sub}
             onSkip={() => markGate(gateForm.id)}
@@ -258,9 +263,11 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
         )}
       </div>
 
-      {compact && tipProps && <Tooltip {...tipProps} sheet />}
+      {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
+          navigation sont retirées (rien ne permet de le contourner). */}
+      {compact && tipProps && !gateForm && <Tooltip {...tipProps} sheet />}
 
-      <footer class="p-controls">
+      <footer class="p-controls" inert={!!gateForm} aria-hidden={gateForm ? true : undefined}>
         <button class="p-icon-btn" onClick={() => go(index - 1)} disabled={index === 0} aria-label={t.prev}>
           <ChevronLeft {...ICON} />
         </button>
@@ -347,8 +354,14 @@ function ImageStep({
     const id = requestAnimationFrame(() => setZoomed(true));
     return () => cancelAnimationFrame(id);
   }, [zoom]);
-  const transform = zoom && zoomed ? `scale(${zoom.scale})` : 'none';
-  const origin = zoom ? `${zoom.x * 100}% ${zoom.y * 100}%` : '50% 50%';
+  // PL2 : seule l'image (et ses zones floutées) est agrandie. Pastilles et bulle restent hors du calque
+  // zoomé, à leur taille normale, positionnées en coordonnées écran ; l'origine est recalée pour que
+  // le premier hotspot reste visible.
+  const o = zoom ? zoomOrigin(zoom, step.hotspots[0]) : { x: 0.5, y: 0.5 };
+  const scale = zoom && zoomed ? zoom.scale : 1;
+  const transform = scale !== 1 ? `scale(${scale})` : 'none';
+  const origin = `${o.x * 100}% ${o.y * 100}%`;
+  const screen = <T extends Hotspot>(h: T): T => zoomBox(h, o, scale);
 
   return (
     <div class="p-stage" style={{ '--ratio': String(img.width / img.height) }}>
@@ -366,11 +379,11 @@ function ImageStep({
             }}
           />
         ))}
-        {step.hotspots.map((h) => (
-          <Beacon key={h.id} h={h} label={sub(h.title)} onClick={() => onHotspot(h)} />
-        ))}
-        {tip && (tip.h.title || tip.h.body || tip.h.cta) && <Tooltip {...tip} />}
       </div>
+      {step.hotspots.map((h) => (
+        <Beacon key={h.id} h={screen(h)} label={sub(h.title)} onClick={() => onHotspot(h)} />
+      ))}
+      {tip && (tip.h.title || tip.h.body || tip.h.cta) && <Tooltip {...tip} h={screen(tip.h)} />}
       {!step.hotspots.length && step.cta && (
         <button
           class="p-btn p-btn-primary p-floating-cta"
@@ -389,7 +402,7 @@ function Beacon({ h, label, onClick }: { h: Hotspot; label: string; onClick: () 
   return (
     <button
       class={`p-beacon ${h.pulse ? 'p-pulse' : ''}`}
-      style={{ left: `${(h.x + h.w / 2) * 100}%`, top: `${(h.y + h.h / 2) * 100}%` }}
+      style={beaconCenter(h)}
       aria-label={label}
       onClick={onClick}
     >
@@ -411,21 +424,10 @@ function Tooltip({
   t,
   sheet,
 }: TipProps & { sheet?: boolean }) {
-  const place = resolvePlacement(h.placement, h);
-  const cx = (h.x + h.w / 2) * 100;
-  const cy = (h.y + h.h / 2) * 100;
-  const pos: Record<string, string> = sheet ? {} : { left: `${cx}%`, top: `${cy}%` };
-  const shift =
-    !sheet && (place === 'top' || place === 'bottom')
-      ? cx < 22
-        ? 'p-tip-shift-r'
-        : cx > 78
-          ? 'p-tip-shift-l'
-          : ''
-      : '';
+  const pos: Record<string, string> = sheet ? {} : beaconCenter(h);
   return (
     <div
-      class={sheet ? 'p-sheet' : `p-tip p-tip-${place} ${shift}`}
+      class={sheet ? 'p-sheet' : tipClass(h, h.placement)}
       style={pos}
       role="dialog"
       aria-label={sub(h.title)}

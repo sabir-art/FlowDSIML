@@ -30,7 +30,8 @@
     "profile": "My profile",
     "newWorkspace": "New workspace",
     "openMenu": "Open menu",
-    "account": "My account"
+    "account": "My account",
+    "plans": "Plans"
   },
   "roles": {
     "owner": "Owner",
@@ -41,7 +42,7 @@
   "auth": {
     "loginTitle": "Sign in",
     "loginSubtitle": "Access your interactive demos.",
-    "signupTitle": "Create an account",
+    "signupTitle": "Create your account",
     "signupSubtitle": "Build interactive demos in minutes.",
     "withPassword": "Password",
     "withMagicLink": "Magic link",
@@ -58,8 +59,7 @@
     "magicSent": "If an account exists for this address, a sign-in link has been sent.",
     "checkEmail": "Account created: confirm your address using the email we just sent.",
     "forgot": "Forgot password?",
-    "noAccount": "No account yet? Sign up",
-    "haveAccount": "Already have an account? Sign in",
+    "noAccount": "No account yet?",
     "forgotTitle": "Forgot password",
     "forgotSubtitle": "We'll email you a link to choose a new password.",
     "sendResetLink": "Send link",
@@ -71,14 +71,35 @@
     "strength": "Strength",
     "strength_1": "weak",
     "strength_2": "fair",
-    "strength_3": "strong"
+    "strength_3": "strong",
+    "pitchTitle": "Interactive demos that sell your product while you sleep.",
+    "pitch1": "Capture a flow in a few clicks",
+    "pitch2": "Share by link or embed on your website",
+    "pitch3": "Measure engagement and collect leads",
+    "workEmail": "Work email",
+    "signupLink": "Create a free account",
+    "orMagic": "Or get a sign-in link by email.",
+    "usePassword": "Sign in with a password",
+    "hasAccount": "Already have an account?",
+    "loginLink": "Sign in",
+    "strengthLabel": "Strength: {{level}}",
+    "passwordMinShort": "{{min}} characters minimum"
   },
   "onboarding": {
     "title": "Create your workspace",
     "subtitle": "A workspace holds your demos and your team.",
     "name": "Company or team name",
     "placeholder": "Acme",
-    "create": "Create workspace"
+    "create": "Create workspace",
+    "progress": "Progress",
+    "step1": "Workspace",
+    "step2": "Extension",
+    "extTitle": "Install the capture extension",
+    "extSubtitle": "Your workspace is ready. Three more steps to your first demo.",
+    "ext1": "Install the FlowDSIML extension in Chrome (until it is published, load it unpacked: see the README).",
+    "ext2": "Open your app, click the FlowDSIML icon, then “Start capture” and walk through the workflow.",
+    "ext3": "Finish: the editor opens. Adjust the texts, then publish.",
+    "goDashboard": "Go to my demos"
   },
   "invite": {
     "title": "Invitation",
@@ -89,7 +110,8 @@
   "profile": {
     "title": "My profile",
     "changePassword": "Change password",
-    "passwordUpdated": "Password updated."
+    "passwordUpdated": "Password updated.",
+    "emailHint": "Contact support to change your email."
   },
   "members": {
     "title": "Members",
@@ -104,16 +126,25 @@
     "remove": "Remove",
     "leave": "Leave",
     "confirmRemove": "Remove {{email}} from the workspace?",
-    "confirmLeave": "Leave this workspace?"
+    "confirmLeave": "Leave this workspace?",
+    "emails": "Emails (one or more)",
+    "emailsPlaceholder": "mary@acme.example, paul@acme.example",
+    "invalidEmails": "Invalid addresses: {{list}}",
+    "invitesCreated_one": "Invitation created. Send this link:",
+    "invitesCreated_other": "{{count}} invitations created. Send each person their link:",
+    "member": "Member"
   },
   "workspace": {
     "title": "Workspace settings",
     "name": "Name",
-    "slug": "Identifier (URL)",
+    "slug": "Custom address",
     "danger": "Danger zone",
     "delete": "Delete workspace",
     "deleteHint": "Permanently deletes the workspace, its demos, analytics and leads.",
-    "deleteConfirm": "Type “{{slug}}” to confirm deletion."
+    "deleteConfirm": "Type “{{slug}}” to confirm deletion.",
+    "slugHelp": "Lowercase letters, digits and hyphens. Changing the address breaks old links.",
+    "privacyUrl": "Privacy policy (URL)",
+    "privacyUrlHelp": "Shown below the lead forms of your demos, from the next publication."
   },
   "plan": {
     "title": "Plan",
@@ -252,8 +283,8 @@
     "moveUp": "Move up",
     "moveDown": "Move down",
     "newTextStep": "New screen",
-    "addTextStep": "Text screen",
-    "addImageStep": "Image",
+    "addTextStep": "Text step",
+    "addImageStep": "Uploaded image",
     "notFound": "Demo not found or access denied.",
     "demoTitle": "Demo title",
     "save_idle": "—",
@@ -282,7 +313,29 @@
     "narrowTitle": "The editor needs a wider screen",
     "narrowBody": "Open this demo on a computer (1024 px minimum) to edit it. You can still share it from this phone.",
     "colorHotspot": "Hotspot beacon",
-    "chars": "{{n}} / {{max}} characters"
+    "chars": "{{n}} / {{max}} characters",
+    "previewNext": "Next",
+    "previewDevice": "Device",
+    "desktop": "Desktop",
+    "mobile": "Mobile",
+    "previewTimeout": "The player is not responding. Check that VITE_PLAYER_URL points to the deployed player.",
+    "previewOpenTab": "Open in a tab",
+    "addStep": "Add a step",
+    "badgeHotspots_one": "{{count}} hotspot",
+    "badgeHotspots_other": "{{count}} hotspots",
+    "badgeForm": "Lead form before the step",
+    "badgeCta": "Call to action",
+    "badgeZoom": "Zoom",
+    "badgeBlurs_one": "{{count}} blurred area",
+    "badgeBlurs_other": "{{count}} blurred areas",
+    "formOnStep": "Form “{{title}}” shown before this step",
+    "editForm": "Edit",
+    "chooseLogo": "Choose a logo",
+    "changeLogo": "Change logo",
+    "pageCta": "Page call to action",
+    "pageCtaHint": "Always visible at the top of the player (e.g. “Book a demo”).",
+    "pageTitle": "Editor: {{title}}",
+    "variablePreview": "Preview:"
   },
   "status": {
     "draft": "Draft",
@@ -323,7 +376,15 @@
     "enable": "Enable",
     "versions": "Published versions",
     "live": "live",
-    "linkCreatedCopied": "Link created and copied to the clipboard."
+    "linkCreatedCopied": "Link created and copied to the clipboard.",
+    "expiresNever": "Never",
+    "expiresIn_one": "In {{count}} day ({{date}})",
+    "expiresIn_other": "In {{count}} days ({{date}})",
+    "preview": "Preview",
+    "previewEmpty": "The preview will appear after the first capture.",
+    "stepCount_one": "{{count}} step",
+    "stepCount_other": "{{count}} steps",
+    "openPreview": "Open preview"
   },
   "analytics": {
     "title": "Analytics",
@@ -336,7 +397,7 @@
     "leads": "Leads",
     "viewsPerDay": "Views per day",
     "noData": "No data for this period yet.",
-    "funnel": "Step funnel (drop-off)",
+    "funnel": "Step-by-step journey",
     "step": "Step",
     "reach": "Visitors reaching the step",
     "dropOff": "Drop-off",
@@ -344,7 +405,9 @@
     "period": "Period",
     "lastDays_one": "{{count}} day",
     "lastDays_other": "{{count}} days",
-    "byDemo": "By demo"
+    "byDemo": "By demo",
+    "vsPrevious": "vs previous period",
+    "noComparison": "No reference period"
   },
   "leads": {
     "title": "Leads",
@@ -357,7 +420,11 @@
     "date": "Date",
     "delete": "Delete {{email}}",
     "confirmDelete": "Permanently delete lead {{email}} (right to erasure)?",
-    "gdpr": "Personal data: export or delete on request of the person concerned (GDPR). Only editors and above can access it."
+    "gdpr": "Personal data: export or delete on request of the person concerned (GDPR). Only editors and above can access it.",
+    "emptyHint": "Add a form to a demo to collect leads.",
+    "addForm": "Add a form",
+    "noExport": "No leads to export",
+    "noMatch": "No leads match this search."
   },
   "demos": {
     "title": "Demos",
@@ -406,6 +473,31 @@
     "required": "This field is required.",
     "email": "Enter a valid email address, for example name@company.com.",
     "passwordMin": "Password must be at least {{min}} characters.",
-    "consent": "Check the box to continue."
+    "consent": "Check the box to continue.",
+    "httpsUrl": "Enter an address starting with https://."
+  },
+  "plans": {
+    "title": "Plans",
+    "current": "Current plan",
+    "unlimited": "Unlimited",
+    "manualNotice": "Online payment coming soon. To change plans now, contact us: your plan will be activated within 24 hours."
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "planForms": {
+    "notPublishedTitle": "This form won't be published.",
+    "notPublishedBody": "Your Free plan doesn't include lead forms: you can set it up, but visitors won't see it.",
+    "seePlans": "See plans",
+    "badge": "Not published",
+    "stepHelp": "Not published on the Free plan",
+    "confirmTitle": "Publish without the lead form?",
+    "confirmBody": "Your Free plan doesn't include forms. The demo will be published <strong>without</strong> the “{{name}}” form (before step {{n}}): no leads will be collected.",
+    "confirmLabel": "Publish without form",
+    "sharePublished": "Published without lead form (Free plan).",
+    "previewBanner": "Preview: not published with your plan"
   }
 }

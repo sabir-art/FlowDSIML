@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { useAuth } from '../../auth/AuthProvider';
 import { setLocale } from '../../i18n';
+import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 
 export function Profile() {
   const { t } = useTranslation();
@@ -49,8 +50,17 @@ export function Profile() {
         <form onSubmit={saveProfile}>
           {info.error && <Alert kind="error">{info.error}</Alert>}
           {info.success && <Alert kind="success">{info.success}</Alert>}
-          <Field label={t('auth.email')}>
-            <input className="fd-input" value={user?.email ?? ''} disabled />
+          <Field label={t('auth.email')} htmlFor="pf-email">
+            <input
+              id="pf-email"
+              className="fd-input"
+              value={user?.email ?? ''}
+              readOnly
+              aria-describedby="pf-email-hint"
+            />
+            <p id="pf-email-hint" className="fd-help">
+              {t('profile.emailHint')}
+            </p>
           </Field>
           <Field label={t('auth.fullName')} htmlFor="fn">
             <input
@@ -61,6 +71,12 @@ export function Profile() {
               onChange={(e) => setFullName(e.target.value)}
             />
           </Field>
+          <div className="fd-field">
+            <span className="fd-label" id="theme-label">
+              {t('theme.label')}
+            </span>
+            <ThemeSwitcher withLabels />
+          </div>
           <Field label={t('common.language')} htmlFor="loc">
             <Select id="loc" value={locale} onChange={(e) => setLoc(e.target.value === 'en' ? 'en' : 'fr')}>
               <option value="fr">Français</option>

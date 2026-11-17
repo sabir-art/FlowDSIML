@@ -1,10 +1,11 @@
 import { ChevronLeft, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { HotspotAction } from '@flowdsiml/manifest';
-import { Button, Field, Select } from '@flowdsiml/ui';
+import { Button, Checkbox, Field, Select } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asAction, asCta, type HotspotRow, type Selection } from '../types';
 import { RichTextField } from '../RichTextField';
+import { VariablePreview } from '../VariablePreview';
 import { CtaFields } from './CtaFields';
 
 export function HotspotPanel({
@@ -55,6 +56,7 @@ export function HotspotPanel({
           value={hotspot.title}
           onChange={(e) => set({ title: e.target.value })}
         />
+        <VariablePreview text={hotspot.title} variables={editor.variables} />
       </Field>
       <RichTextField
         id="hs-body"
@@ -64,6 +66,7 @@ export function HotspotPanel({
         disabled={readOnly}
         onChange={(v) => set({ body: v })}
       />
+      <VariablePreview text={hotspot.body} variables={editor.variables} />
       <Field label={t('editor.placement')} htmlFor="hs-place">
         <Select
           id="hs-place"
@@ -126,15 +129,12 @@ export function HotspotPanel({
         disabled={readOnly}
         onChange={(v) => set({ cta: v })}
       />
-      <label className="row">
-        <input
-          type="checkbox"
-          checked={hotspot.pulse}
-          disabled={readOnly}
-          onChange={(e) => set({ pulse: e.target.checked })}
-        />{' '}
-        {t('editor.pulse')}
-      </label>
+      <Checkbox
+        checked={hotspot.pulse}
+        disabled={readOnly}
+        onChange={(e) => set({ pulse: e.target.checked })}
+        label={t('editor.pulse')}
+      />
       {!readOnly && (
         <Button
           variant="ghost"

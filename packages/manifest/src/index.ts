@@ -86,7 +86,7 @@ export const themeSchema = z.object({
   primary: z.string().default('#0E7C71'),
   hotspot: z.string().default('#E8541F'),
   background: z.string().default('#F7F6F4'),
-  surface: z.string().default('#ffffff'),
+  surface: z.string().default('#FFFFFF'),
   text: z.string().default('#1F1D1A'),
   fontFamily: z.string().default("'Instrument Sans', system-ui, sans-serif"),
   radius: z.number().min(0).max(32).default(16),
@@ -134,6 +134,10 @@ export const manifestSchema = z.object({
   forms: z.array(formSchema).default([]),
   /** Origines autorisées à embarquer la démo (vide = toutes). Contrôle côté player, contournable. */
   allowedEmbedOrigins: z.array(z.string()).default([]),
+  /** Bouton d'action du client, affiché en permanence dans la barre du player (P6). */
+  cta: ctaSchema.nullable().default(null),
+  /** P13 : politique de confidentialité du workspace (https), affichée sous les formulaires de lead. */
+  privacyUrl: z.string().url().startsWith('https://').nullable().default(null).catch(null),
   /** URL de l'endpoint d'ingestion analytics. */
   trackUrl: z.string().nullable().default(null),
 });

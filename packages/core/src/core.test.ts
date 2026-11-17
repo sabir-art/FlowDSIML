@@ -20,6 +20,12 @@ describe('variables', () => {
     );
     expect(applyVariables('{{company}}', {}, { company: 'Votre société' })).toBe('Votre société');
   });
+  it('variable vide : pas de double espace ni d’espace orpheline (PL3)', () => {
+    expect(applyVariables('Bienvenue {{first_name}}', {})).toBe('Bienvenue');
+    expect(applyVariables('Merci {{first_name}} !', { first_name: '' })).toBe('Merci !');
+    expect(applyVariables('Merci {{first_name}}\u202f!', { first_name: '  ' })).toBe('Merci\u202f!');
+    expect(applyVariables('Merci {{first_name}} !', { first_name: 'Léa' })).toBe('Merci Léa !');
+  });
   it('extrait les clés', () => {
     expect(extractVariableKeys('{{a}} {{ b_2 | x }} {{a}}')).toEqual(['a', 'b_2']);
   });

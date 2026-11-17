@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Button } from '@flowdsiml/ui';
 import { PLAN_DEFAULTS, type PlanCode } from '@flowdsiml/core';
 import { errorMessage } from '../../lib/errors';
-import { PLAYER_URL } from '../../lib/env';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { useDemoEditor } from './useDemoEditor';
@@ -21,6 +20,9 @@ import { ChaptersPanel } from './panels/ChaptersPanel';
 import { buildDraftManifest } from './draftManifest';
 import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
+import { PreviewDialog } from './PreviewDialog';
+import type { Manifest } from '@flowdsiml/manifest';
+import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
 
 /** Vrai si la fenêtre est plus étroite que `px` (ED11 : l'éditeur exige un écran large). */
@@ -49,6 +51,7 @@ export function EditorPage() {
   const [tab, setTab] = useState<Tab>('step');
   const readOnly = !can('demo.edit');
   const narrow = useNarrow(1024);
+  const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);
 
   const step = editor.steps[Math.min(index, editor.steps.length - 1)];
 
@@ -108,25 +111,14 @@ export function EditorPage() {
     selection.kind === 'hotspot' ? editor.hotspots.find((h) => h.id === selection.id) : undefined;
 
   function preview() {
-    const manifest = buildDraftManifest(editor);
-    const win = window.open(`${PLAYER_URL}/#/preview`, '_blank');
-    if (!win) return;
-    const origin = new URL(PLAYER_URL).origin;
-    const onMsg = (e: MessageEvent) => {
-      if (
-        e.source === win &&
-        e.origin === origin &&
-        (e.data as { type?: string })?.type === 'fd:preview-ready'
-      ) {
-        win.postMessage({ type: 'fd:preview', manifest }, origin);
-      }
-    };
-    window.addEventListener('message', onMsg);
-    setTimeout(() => window.removeEventListener('message', onMsg), 60_000);
+    setPreviewManifest(buildDraftManifest(editor));
   }
 
   return (
     <main className="editor" id="main">
+      <h1 className="sr-only">
+        {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
+      </h1>
       <header className="editor-bar">
         <Link to="/" className="fd-btn fd-btn--ghost fd-btn--icon" aria-label={t('common.back')}>
           <ArrowLeft size={18} aria-hidden="true" />
@@ -195,6 +187,7 @@ export function EditorPage() {
               selection={selection}
               setSelection={setSelection}
               readOnly={readOnly}
+              onEditForm={() => setTab('settings')}
             />
           ) : (
             <div className="center fd-muted">{t('editor.empty')}</div>
@@ -240,6 +233,7 @@ export function EditorPage() {
           )}
         </aside>
       </div>
+      <PreviewDialog manifest={previewManifest} onClose={() => setPreviewManifest(null)} />
     </main>
   );
 }

@@ -147,13 +147,67 @@ function seed() {
           version_id: 'v-2',
           link_id: null,
           visitor_id: 'v1',
-          email: 'prospect@globex.com',
+          email: 'prospect@globex.example',
           fields: { company: 'Globex' },
           consent: true,
           created_at: now,
         },
       ],
       demo_versions: [],
+      plans: [
+        {
+          code: 'free',
+          name: 'Free',
+          sort: 0,
+          limits: {
+            published_demos: 3,
+            members: 2,
+            steps_per_demo: 30,
+            remove_branding: false,
+            lead_forms: false,
+            analytics_retention_days: 30,
+          },
+        },
+        {
+          code: 'pro',
+          name: 'Pro',
+          sort: 1,
+          limits: {
+            published_demos: 25,
+            members: 5,
+            steps_per_demo: 100,
+            remove_branding: true,
+            lead_forms: true,
+            analytics_retention_days: 365,
+          },
+        },
+        {
+          code: 'business',
+          name: 'Business',
+          sort: 2,
+          limits: {
+            published_demos: null,
+            members: 25,
+            steps_per_demo: null,
+            remove_branding: true,
+            lead_forms: true,
+            analytics_retention_days: 730,
+          },
+        },
+        {
+          code: 'enterprise',
+          name: 'Enterprise',
+          sort: 3,
+          limits: {
+            published_demos: null,
+            members: null,
+            steps_per_demo: null,
+            remove_branding: true,
+            lead_forms: true,
+            analytics_retention_days: 1095,
+          },
+        },
+      ],
     },
     calls: [],
     storage: {},
@@ -242,7 +296,11 @@ async function install(page, state = seed()) {
       state.events.push(...(batch.events || []));
       return json(route, 200, { inserted: (batch.events || []).length });
     }
-    if (p.startsWith('/auth/v1/user')) return json(route, 200, state.user);
+    if (p.startsWith('/auth/v1/user')) {
+      if (method === 'PUT' && body?.data)
+        state.user.user_metadata = { ...state.user.user_metadata, ...body.data };
+      return json(route, 200, state.user);
+    }
     if (p.startsWith('/auth/v1/')) return json(route, 200, {});
 
     if (p.startsWith('/rest/v1/rpc/')) {
@@ -287,6 +345,16 @@ async function install(page, state = seed()) {
             })),
           );
         case 'demo_analytics':
+          if (a.p_to && Date.parse(a.p_to) < Date.now() - 86400000)
+            return json(route, 200, {
+              views: 96,
+              visitors: 80,
+              completions: 30,
+              ctaClicks: 14,
+              leads: 0,
+              steps: [],
+              daily: [],
+            });
           return json(route, 200, {
             views: 120,
             visitors: 90,
@@ -377,7 +445,13 @@ async function install(page, state = seed()) {
                 })),
             })),
           };
-          t.demo_versions.push({ id: versionId, demo_id: d.id, number, manifest });
+          t.demo_versions.push({
+            id: versionId,
+            demo_id: d.id,
+            number,
+            manifest,
+            published_at: new Date().toISOString(),
+          });
           return json(route, 200, {
             versionId,
             number,
@@ -514,6 +588,11 @@ async function install(page, state = seed()) {
     if (p.startsWith('/storage/v1/object/') && method === 'DELETE') {
       for (const k of body.prefixes || []) delete state.storage[`${p.split('/')[4]}/${k}`];
       return json(route, 200, []);
+    }
+    if (p.startsWith('/storage/v1/object/sign/') && method === 'POST' && !body?.paths) {
+      // Signature d'un seul fichier : /object/sign/<bucket>/<chemin>
+      const rest = p.slice('/storage/v1/object/sign/'.length);
+      return json(route, 200, { signedURL: `/object/sign/${rest}?token=t` });
     }
     if (p.startsWith('/storage/v1/object/sign/') && method === 'POST') {
       const paths = body.paths || [];

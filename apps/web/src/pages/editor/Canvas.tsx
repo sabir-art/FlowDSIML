@@ -5,10 +5,13 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { richTextToHtml } from '@flowdsiml/core';
+import { applyVariables, richTextToHtml } from '@flowdsiml/core';
+import { themeSchema } from '@flowdsiml/manifest';
+import { beaconCenter, themeVars, tipClass } from '@flowdsiml/player-core';
+import { ChevronRight, ClipboardList } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
-import { asRects, asZoom, type Selection, type StepRow } from './types';
+import { asAction, asCta, asRects, asSettings, asZoom, type Selection, type StepRow } from './types';
 
 export type Tool = 'select' | 'hotspot' | 'blur';
 
@@ -20,6 +23,7 @@ interface Props {
   selection: Selection;
   setSelection: (s: Selection) => void;
   readOnly: boolean;
+  onEditForm?: () => void;
 }
 
 const clamp = (v: number, min = 0, max = 1) => Math.min(max, Math.max(min, v));
@@ -31,7 +35,16 @@ type Drag =
   | { kind: 'draw'; x0: number; y0: number; rect: Rect }
   | { kind: 'blur-move'; index: number; dx: number; dy: number };
 
-export function Canvas({ editor, step, tool, setTool, selection, setSelection, readOnly }: Props) {
+export function Canvas({
+  editor,
+  step,
+  tool,
+  setTool,
+  selection,
+  setSelection,
+  readOnly,
+  onEditForm,
+}: Props) {
   const { t } = useTranslation();
   const frame = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
@@ -150,9 +163,24 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
     }
   }
 
+  // ED8 : formulaire de lead visible sur le canevas
+  const gateForm = step.gate_form_id ? editor.forms.find((f) => f.id === step.gate_form_id) : undefined;
+  const formChip = gateForm && (
+    <div className="canvas-form-chip">
+      <ClipboardList size={16} aria-hidden="true" />
+      <span>{t('editor.formOnStep', { title: gateForm.title })}</span>
+      {onEditForm && (
+        <button type="button" className="fd-btn fd-btn--sm fd-btn--ghost" onClick={onEditForm}>
+          {t('editor.editForm')}
+        </button>
+      )}
+    </div>
+  );
+
   if (step.kind === 'text' || !step.image_path) {
     return (
       <div className="canvas-text" onPointerDown={() => setSelection({ kind: 'step' })}>
+        {formChip}
         <h2>{step.title || t('editor.untitled')}</h2>
         <div dangerouslySetInnerHTML={{ __html: richTextToHtml(step.body) }} />
       </div>
@@ -160,19 +188,27 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
   }
 
   const url = editor.imageUrls[step.image_path];
+  // Aperçu WYSIWYG (ED2) : mêmes classes et même thème que le player.
+  const theme = themeSchema.parse(asSettings(editor.demo?.settings).theme ?? {});
+  const defaults = Object.fromEntries(editor.variables.map((v) => [v.key, v.default_value]));
+  const sub = (txt: string) => applyVariables(txt, {}, defaults);
+  const tipHotspot =
+    (selection.kind === 'hotspot' ? hotspots.find((h) => h.id === selection.id) : undefined) ?? hotspots[0];
+  const stepIndex = editor.steps.findIndex((x) => x.id === step.id);
   const ratio = `${step.image_width ?? 16} / ${step.image_height ?? 10}`;
   return (
     <div
       ref={frame}
-      className={`canvas-frame tool-${tool}`}
-      style={{ aspectRatio: ratio }}
+      className={`canvas-frame fd-player-scope tool-${tool}`}
+      style={{ aspectRatio: ratio, ...themeVars(theme) }}
       onPointerDown={onFrameDown}
       onPointerMove={onMove}
       onPointerUp={onUp}
       onPointerCancel={onUp}
     >
+      {formChip}
       {url ? (
-        <img src={url} alt="" draggable={false} />
+        <img src={url} alt={step.title || t('editor.untitled')} draggable={false} />
       ) : (
         <div className="canvas-missing">{t('common.loading')}</div>
       )}
@@ -231,6 +267,49 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
       <span className="sr-only" aria-live="polite">
         {announce}
       </span>
+      {hotspots.map((h) => (
+        <span
+          key={`b-${h.id}`}
+          className={`p-beacon canvas-beacon ${h.pulse ? 'p-pulse' : ''}`}
+          style={beaconCenter(h)}
+          aria-hidden="true"
+        >
+          <span className="p-beacon-dot" />
+        </span>
+      ))}
+      {tipHotspot &&
+        tool === 'select' &&
+        !drag &&
+        (tipHotspot.title || tipHotspot.body || asCta(tipHotspot.cta)) && (
+          <div
+            className={`${tipClass(tipHotspot, tipHotspot.placement)} canvas-tip`}
+            style={beaconCenter(tipHotspot)}
+            aria-hidden="true"
+          >
+            {tipHotspot.title && <div className="p-tip-title">{sub(tipHotspot.title)}</div>}
+            {tipHotspot.body && (
+              <div
+                className="p-rich"
+                dangerouslySetInnerHTML={{ __html: richTextToHtml(sub(tipHotspot.body)) }}
+              />
+            )}
+            <div className="p-actions">
+              <span className="p-tip-count">
+                {stepIndex + 1}/{editor.steps.length}
+              </span>
+              {asCta(tipHotspot.cta) ? (
+                <span className="p-btn p-btn-primary p-btn-sm">{sub(asCta(tipHotspot.cta)!.label)}</span>
+              ) : (
+                asAction(tipHotspot.action).type !== 'none' && (
+                  <span className="p-btn p-btn-primary p-btn-sm">
+                    {t('editor.previewNext')}
+                    <ChevronRight size={14} aria-hidden="true" />
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+        )}
       {hotspots.map((h, i) => {
         const selected = selection.kind === 'hotspot' && selection.id === h.id;
         return (

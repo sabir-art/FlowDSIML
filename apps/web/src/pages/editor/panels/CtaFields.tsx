@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { Cta } from '@flowdsiml/manifest';
-import { Field } from '@flowdsiml/ui';
+import { Field, Switch } from '@flowdsiml/ui';
 
 export function CtaFields({
   idPrefix,
@@ -15,20 +15,15 @@ export function CtaFields({
 }) {
   const { t } = useTranslation();
   return (
-    <fieldset className="panel-fieldset">
-      <legend>
-        <label>
-          <input
-            type="checkbox"
-            checked={!!value}
-            disabled={disabled}
-            onChange={(e) =>
-              onChange(e.target.checked ? { label: t('editor.ctaDefault'), url: 'https://' } : null)
-            }
-          />{' '}
-          {t('editor.cta')}
-        </label>
-      </legend>
+    <div className="panel-group">
+      <Switch
+        label={t('editor.cta')}
+        checked={!!value}
+        disabled={disabled}
+        onChange={(e) =>
+          onChange(e.target.checked ? { label: t('editor.ctaDefault'), url: 'https://' } : null)
+        }
+      />
       {value && (
         <>
           <Field label={t('editor.ctaLabel')} htmlFor={`${idPrefix}-cta-l`}>
@@ -53,6 +48,6 @@ export function CtaFields({
           </Field>
         </>
       )}
-    </fieldset>
+    </div>
   );
 }

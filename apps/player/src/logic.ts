@@ -1,19 +1,7 @@
 /** Logique pure du player (testée). */
 import type { Manifest, Step } from '@flowdsiml/manifest';
 
-export type Placement = 'top' | 'bottom' | 'left' | 'right';
-
-/** Position de l'info-bulle : celle demandée, ou automatique selon la place disponible. */
-export function resolvePlacement(
-  requested: string,
-  h: { x: number; y: number; w: number; h: number },
-): Placement {
-  if (requested === 'top' || requested === 'bottom' || requested === 'left' || requested === 'right')
-    return requested;
-  if (h.y + h.h < 0.62) return 'bottom';
-  if (h.y > 0.38) return 'top';
-  return h.x + h.w / 2 < 0.5 ? 'right' : 'left';
-}
+export { resolvePlacement, type Placement } from '@flowdsiml/player-core';
 
 /** L'origine qui embarque le player est-elle autorisée ? (contrôle côté client, contournable) */
 export function embedAllowed(allowed: string[], inIframe: boolean, parentOrigin: string | null): boolean {

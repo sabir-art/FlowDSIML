@@ -75,7 +75,7 @@ export function Signup() {
             />
             <FieldError id="name" errors={errors} />
           </Field>
-          <Field label={t('auth.email')} htmlFor="email">
+          <Field label={t('auth.workEmail')} htmlFor="email">
             <input
               id="email"
               className="fd-input"
@@ -91,7 +91,7 @@ export function Signup() {
             />
             <FieldError id="email" errors={errors} />
           </Field>
-          <Field label={t('auth.passwordNew')} htmlFor="password">
+          <Field label={t('auth.password')} htmlFor="password">
             <input
               id="password"
               className="fd-input"
@@ -108,16 +108,19 @@ export function Signup() {
             />
             <FieldError id="password" errors={errors} />
             {password && (
-              <div className="strength" data-score={strength} aria-live="polite">
+              <div className="strength" data-score={strength} aria-hidden="true">
                 <span />
                 <span />
                 <span />
-                <em>
-                  {t('auth.strength')} :{' '}
-                  {strength ? t(`auth.strength_${strength}`) : t('validation.passwordMin', { min: 8 })}
-                </em>
               </div>
             )}
+            <p className="fd-help strength-text" aria-live="polite">
+              {password
+                ? `${t('auth.strengthLabel', { level: t(`auth.strength_${Math.max(1, strength)}`) })}${
+                    strength === 0 ? ` · ${t('auth.passwordMinShort', { min: 8 })}` : ''
+                  }`
+                : t('auth.passwordMinShort', { min: 8 })}
+            </p>
           </Field>
           <Button
             icon={<UserPlus />}
@@ -130,9 +133,9 @@ export function Signup() {
           </Button>
         </form>
       )}
-      <div className="auth-links">
-        <Link to="/login">{t('auth.haveAccount')}</Link>
-      </div>
+      <p className="auth-foot">
+        {t('auth.hasAccount')} <Link to="/login">{t('auth.loginLink')}</Link>
+      </p>
     </AuthLayout>
   );
 }

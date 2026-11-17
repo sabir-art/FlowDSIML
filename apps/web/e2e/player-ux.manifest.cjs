@@ -1,0 +1,70 @@
+/** Manifeste de test du player (PL2–PL7). */
+const DEMO = '0b5c1f0e-0000-4000-8000-0000000000aa';
+module.exports = {
+  schemaVersion: 1,
+  demoId: DEMO,
+  versionId: '0b5c1f0e-0000-4000-8000-0000000000ab',
+  workspaceId: 'w',
+  title: 'Nordline CRM — découverte guidée du pipeline commercial',
+  locale: 'fr',
+  publishedAt: '2026-11-17T10:00:00Z',
+  theme: {},
+  variables: [{ key: 'first_name', label: 'Prénom', default: '' }],
+  chapters: [],
+  forms: [
+    {
+      id: 'f1',
+      title: 'Recevez la suite',
+      description: '',
+      submitLabel: 'Continuer',
+      fields: [{ key: 'email', label: 'Email', type: 'email', required: true }],
+      consentText: 'J’accepte d’être recontacté.',
+      skippable: false,
+    },
+  ],
+  cta: { label: 'Réserver une démo', url: 'https://example.com' },
+  steps: [
+    {
+      id: 's1',
+      kind: 'image',
+      image: { url: 'assets/a.webp', width: 1280, height: 800 },
+      title: 'Bienvenue {{first_name}} !',
+      body: '',
+      zoom: { x: 0.2, y: 0.5, scale: 1.4 },
+      hotspots: [
+        {
+          id: 'h1',
+          x: 0.88,
+          y: 0.45,
+          w: 0.04,
+          h: 0.04,
+          title: 'Merci {{first_name}} !',
+          body: 'Une bulle assez longue pour vérifier qu’elle reste dans le cadre.',
+          placement: 'auto',
+          action: { type: 'next' },
+          pulse: true,
+        },
+      ],
+    },
+    {
+      id: 's2',
+      kind: 'image',
+      image: { url: 'assets/a.webp', width: 1280, height: 800 },
+      title: 'Étape 2',
+      gateFormId: 'f1',
+      hotspots: [
+        {
+          id: 'h2',
+          x: 0.4,
+          y: 0.4,
+          w: 0.05,
+          h: 0.05,
+          title: 'Ici',
+          body: '',
+          placement: 'auto',
+          action: { type: 'next' },
+        },
+      ],
+    },
+  ],
+};

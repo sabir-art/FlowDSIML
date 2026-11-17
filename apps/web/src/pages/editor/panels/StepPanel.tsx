@@ -1,11 +1,13 @@
 import { useConfirm } from '../../../components/ConfirmDialog';
-import { EyeOff, Target, Trash2 } from 'lucide-react';
+import { EyeOff, Target, Trash2, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Button, Field, Select } from '@flowdsiml/ui';
+import { Button, Field, Select, Switch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asCta, asRects, asZoom, type Selection, type StepRow } from '../types';
 import { RichTextField } from '../RichTextField';
+import { VariablePreview } from '../VariablePreview';
 import { CtaFields } from './CtaFields';
+import { usePlan } from '../../../lib/plan';
 
 export function StepPanel({
   editor,
@@ -25,6 +27,7 @@ export function StepPanel({
   const zoom = asZoom(step.zoom);
   const blurs = asRects(step.blurs);
   const varKeys = editor.variables.map((v) => v.key);
+  const plan = usePlan();
   const hotspots = editor.hotspots.filter((h) => h.step_id === step.id);
 
   return (
@@ -40,6 +43,7 @@ export function StepPanel({
           value={step.title}
           onChange={(e) => editor.updateStep(step.id, { title: e.target.value })}
         />
+        <VariablePreview text={step.title} variables={editor.variables} />
       </Field>
       {step.kind === 'text' && (
         <RichTextField
@@ -51,6 +55,7 @@ export function StepPanel({
           onChange={(v) => editor.updateStep(step.id, { body: v })}
         />
       )}
+      {step.kind === 'text' && <VariablePreview text={step.body} variables={editor.variables} />}
 
       <Field label={t('editor.chapter')} htmlFor="st-chapter">
         <Select
@@ -82,25 +87,24 @@ export function StepPanel({
             </option>
           ))}
         </Select>
+        {step.gate_form_id && !plan.leadForms && (
+          <p className="fd-help help-warning">
+            <TriangleAlert size={16} aria-hidden="true" />
+            {t('planForms.stepHelp')}
+          </p>
+        )}
       </Field>
 
       {step.kind === 'image' && (
-        <fieldset className="panel-fieldset">
-          <legend>
-            <label>
-              <input
-                type="checkbox"
-                checked={!!zoom}
-                disabled={readOnly}
-                onChange={(e) =>
-                  editor.updateStep(step.id, {
-                    zoom: e.target.checked ? { x: 0.5, y: 0.5, scale: 1.5 } : null,
-                  })
-                }
-              />{' '}
-              {t('editor.zoom')}
-            </label>
-          </legend>
+        <div className="panel-group">
+          <Switch
+            label={t('editor.zoom')}
+            checked={!!zoom}
+            disabled={readOnly}
+            onChange={(e) =>
+              editor.updateStep(step.id, { zoom: e.target.checked ? { x: 0.5, y: 0.5, scale: 1.5 } : null })
+            }
+          />
           {zoom && (
             <>
               {(['x', 'y'] as const).map((k) => (
@@ -135,7 +139,7 @@ export function StepPanel({
               </Field>
             </>
           )}
-        </fieldset>
+        </div>
       )}
 
       <CtaFields

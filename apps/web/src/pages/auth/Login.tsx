@@ -19,6 +19,7 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [badCredentials, setBadCredentials] = useState(false);
   const pwdRef = useRef<HTMLInputElement>(null);
   const { busy, error, success, run } = useAction();
 
@@ -29,13 +30,15 @@ export function Login() {
     const form = e.currentTarget;
     const errs = validateForm(form, t);
     setErrors(errs);
+    setBadCredentials(false);
     if (focusFirstError(form, errs)) return;
     if (mode === 'password') {
       const r = await run(async () => check(await supabase.auth.signInWithPassword({ email, password })));
       if (r === undefined) {
-        // W20 : mot de passe vidé, focalisé et marqué en erreur
+        // L2 : erreur portée par le formulaire (alerte annoncée), les deux champs marqués invalides,
+        // mot de passe vidé et focalisé (W20)
         setPassword('');
-        setErrors({ password: t('errors.badCredentials') });
+        setBadCredentials(true);
         pwdRef.current?.focus();
       }
     } else {
@@ -54,18 +57,16 @@ export function Login() {
 
   return (
     <AuthLayout title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')}>
-      <div className="tabs" role="tablist">
-        <button role="tab" aria-selected={mode === 'password'} onClick={() => setMode('password')}>
-          {t('auth.withPassword')}
-        </button>
-        <button role="tab" aria-selected={mode === 'magic'} onClick={() => setMode('magic')}>
-          {t('auth.withMagicLink')}
-        </button>
-      </div>
-      {error && !errors.password && <Alert kind="error">{error}</Alert>}
+      {badCredentials ? (
+        <Alert kind="error">
+          <span id="login-error">{t('errors.badCredentials')}</span>
+        </Alert>
+      ) : (
+        error && <Alert kind="error">{error}</Alert>
+      )}
       {success && <Alert kind="success">{success}</Alert>}
       <form onSubmit={submit} noValidate>
-        <Field label={t('auth.email')} htmlFor="email">
+        <Field label={t('auth.workEmail')} htmlFor="email">
           <input
             id="email"
             className="fd-input"
@@ -77,12 +78,22 @@ export function Login() {
               setEmail(e.target.value);
               setErrors((x) => ({ ...x, email: '' }));
             }}
-            {...fieldA11y('email', errors)}
+            {...(badCredentials
+              ? { 'aria-invalid': true as const, 'aria-describedby': 'login-error' }
+              : fieldA11y('email', errors))}
           />
           <FieldError id="email" errors={errors} />
         </Field>
         {mode === 'password' && (
-          <Field label={t('auth.password')} htmlFor="password">
+          <div className="fd-field">
+            <div className="label-row">
+              <label className="fd-label" htmlFor="password">
+                {t('auth.password')}
+              </label>
+              <Link to="/forgot-password" className="label-link">
+                {t('auth.forgot')}
+              </Link>
+            </div>
             <input
               ref={pwdRef}
               id="password"
@@ -95,21 +106,35 @@ export function Login() {
                 setPassword(e.target.value);
                 setErrors((x) => ({ ...x, password: '' }));
               }}
-              {...fieldA11y('password', errors)}
+              {...(badCredentials
+                ? { 'aria-invalid': true as const, 'aria-describedby': 'login-error' }
+                : fieldA11y('password', errors))}
             />
             <FieldError id="password" errors={errors} />
-          </Field>
+          </div>
         )}
         <Button icon={<LogIn />} type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
           {mode === 'password' ? t('auth.signIn') : t('auth.sendMagicLink')}
         </Button>
       </form>
-      <div className="auth-links">
-        <Link to="/forgot-password">{t('auth.forgot')}</Link>
+      <p className="auth-alt">
+        <button
+          type="button"
+          className="link-button"
+          onClick={() => {
+            setMode(mode === 'password' ? 'magic' : 'password');
+            setErrors({});
+          }}
+        >
+          {mode === 'password' ? t('auth.orMagic') : t('auth.usePassword')}
+        </button>
+      </p>
+      <p className="auth-foot">
+        {t('auth.noAccount')}{' '}
         <Link to={`/signup${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}>
-          {t('auth.noAccount')}
+          {t('auth.signupLink')}
         </Link>
-      </div>
+      </p>
     </AuthLayout>
   );
 }

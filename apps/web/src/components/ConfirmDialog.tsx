@@ -10,6 +10,7 @@ export function ConfirmDialog({
   confirmLabel,
   danger,
   requireText,
+  secondary,
   onConfirm,
   onClose,
 }: {
@@ -19,6 +20,8 @@ export function ConfirmDialog({
   confirmLabel: string;
   danger?: boolean;
   requireText?: string;
+  /** Action secondaire à la place de « Annuler » (ex. « Voir les plans ») ; Échap annule toujours. */
+  secondary?: { label: string; onSelect: () => void };
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
 }) {
@@ -62,7 +65,18 @@ export function ConfirmDialog({
           </label>
         )}
         <div className="dialog-actions">
-          <Button onClick={onClose}>{t('common.cancel')}</Button>
+          {secondary ? (
+            <Button
+              onClick={() => {
+                onClose();
+                secondary.onSelect();
+              }}
+            >
+              {secondary.label}
+            </Button>
+          ) : (
+            <Button onClick={onClose}>{t('common.cancel')}</Button>
+          )}
           <Button type="submit" variant={danger ? 'danger' : 'primary'} disabled={blocked || busy}>
             {confirmLabel}
           </Button>
@@ -78,6 +92,7 @@ interface AskOptions {
   confirmLabel: string;
   danger?: boolean;
   requireText?: string;
+  secondary?: { label: string; onSelect: () => void };
 }
 
 /**
@@ -95,6 +110,7 @@ export function useConfirm(): [ReactNode, (o: AskOptions) => Promise<boolean>] {
       confirmLabel={state?.confirmLabel ?? ''}
       danger={state?.danger}
       requireText={state?.requireText}
+      secondary={state?.secondary}
       onConfirm={() => {
         state?.resolve(true);
       }}

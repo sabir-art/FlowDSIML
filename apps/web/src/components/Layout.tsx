@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   BarChart3,
+  CreditCard,
   Building2,
   Contact,
   Languages,
@@ -21,11 +22,14 @@ import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { setLocale } from '../i18n';
 import { supabase } from '../lib/supabase';
 import { Menu } from './Menu';
+import { THEME_OPTIONS, chooseTheme } from './ThemeSwitcher';
+import { useTheme, type ThemePref } from '../lib/theme';
 
 const ICON = { size: 18, strokeWidth: 1.75, 'aria-hidden': true } as const;
 
 export function Layout() {
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut, user, profile } = useAuth();
@@ -49,6 +53,7 @@ export function Layout() {
   const admin = [
     { to: '/settings/members', icon: <Users {...ICON} />, label: t('nav.members') },
     { to: '/settings/workspace', icon: <Settings {...ICON} />, label: t('nav.workspaceSettings') },
+    { to: '/settings/plans', icon: <CreditCard {...ICON} />, label: t('nav.plans') },
   ];
 
   return (
@@ -120,7 +125,7 @@ export function Layout() {
           </span>
           <Menu
             label={t('nav.account')}
-            align="start"
+            placement="top-start"
             items={[
               { label: t('nav.profile'), icon: <UserRound />, onSelect: () => navigate('/settings/profile') },
               { label: t('nav.newWorkspace'), icon: <Plus />, onSelect: () => navigate('/onboarding') },
@@ -128,6 +133,18 @@ export function Layout() {
                 label: i18n.language === 'en' ? 'Français' : 'English',
                 icon: <Languages />,
                 onSelect: switchLang,
+              },
+              {
+                radios: {
+                  label: t('theme.label'),
+                  value: theme,
+                  options: THEME_OPTIONS.map(({ value, icon: Icon }) => ({
+                    value,
+                    label: t(`theme.${value}`),
+                    icon: <Icon size={16} aria-hidden="true" />,
+                  })),
+                  onChange: (v) => void chooseTheme(v as ThemePref),
+                },
               },
               'separator',
               { label: t('auth.signOut'), icon: <LogOut />, onSelect: () => void signOut() },

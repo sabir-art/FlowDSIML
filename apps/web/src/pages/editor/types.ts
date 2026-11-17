@@ -12,6 +12,7 @@ export type DemoSettings = {
   locale?: 'fr' | 'en';
   allowedEmbedOrigins?: string[];
   theme?: Partial<Theme>;
+  cta?: Cta | null;
 };
 
 export type FormField = {

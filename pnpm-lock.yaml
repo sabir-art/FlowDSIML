@@ -72,6 +72,9 @@ importers:
       '@flowdsiml/manifest':
         specifier: workspace:*
         version: link:../../packages/manifest
+      '@flowdsiml/player-core':
+        specifier: workspace:*
+        version: link:../../packages/player-core
       lucide-preact:
         specifier: ^0.577.0
         version: 0.577.0(preact@10.29.8)
@@ -103,6 +106,9 @@ importers:
       '@flowdsiml/manifest':
         specifier: workspace:*
         version: link:../../packages/manifest
+      '@flowdsiml/player-core':
+        specifier: workspace:*
+        version: link:../../packages/player-core
       '@flowdsiml/supabase-types':
         specifier: workspace:*
         version: link:../../packages/supabase-types
@@ -170,6 +176,19 @@ importers:
       zod:
         specifier: ^4.6.7
         version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.7
+        version: 3.2.7(@types/node@26.6.6)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.33.0)
+
+  packages/player-core:
+    dependencies:
+      '@flowdsiml/manifest':
+        specifier: workspace:*
+        version: link:../manifest
     devDependencies:
       typescript:
         specifier: ~5.9.3

@@ -1,9 +1,10 @@
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { ClipboardList, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Button, Field } from '@flowdsiml/ui';
+import { Button, Checkbox, Field } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asFields, type FormField } from '../types';
+import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
 
 const OPTIONAL: Array<Omit<FormField, 'label'> & { labelKey: string }> = [
   { key: 'full_name', type: 'text', required: false, labelKey: 'editor.fieldName' },
@@ -30,7 +31,7 @@ export function FormPanel({
       <div className="stack">
         <h3 className="panel-title">{t('editor.leadForm')}</h3>
         <p className="fd-muted">{t('editor.leadFormHint')}</p>
-        {!leadFormsAllowed && <p className="fd-alert">{t('errors.planLeadForms')}</p>}
+        {!leadFormsAllowed && <PlanFormsWarning />}
         {!readOnly && (
           <Button icon={<ClipboardList />} onClick={() => void editor.createForm()}>
             {t('editor.createForm')}
@@ -51,8 +52,11 @@ export function FormPanel({
   return (
     <div className="stack">
       {dialog}
-      <h3 className="panel-title">{t('editor.leadForm')}</h3>
-      {!leadFormsAllowed && <p className="fd-alert">{t('errors.planLeadForms')}</p>}
+      <div className="panel-title-row">
+        <h3 className="panel-title">{t('editor.leadForm')}</h3>
+        {!leadFormsAllowed && <span className="fd-badge badge-warning">{t('planForms.badge')}</span>}
+      </div>
+      {!leadFormsAllowed && <PlanFormsWarning />}
       <p className="fd-muted" style={{ fontSize: 12 }}>
         {t('editor.leadFormGateHint')}
       </p>
@@ -88,38 +92,28 @@ export function FormPanel({
       </Field>
       <div>
         <div className="fd-label">{t('editor.formFields')}</div>
-        <label className="row">
-          <input type="checkbox" checked disabled /> {t('editor.fieldEmail')}
-        </label>
+        <Checkbox checked disabled label={t('editor.fieldEmail')} />
         {OPTIONAL.map((o) => {
           const f = fields.find((x) => x.key === o.key);
           return (
             <div key={o.key} className="row">
-              <label className="row">
-                <input
-                  type="checkbox"
-                  disabled={readOnly}
-                  checked={!!f}
-                  onChange={(e) => toggle(o, e.target.checked)}
-                />{' '}
-                {t(o.labelKey)}
-              </label>
+              <Checkbox
+                disabled={readOnly}
+                checked={!!f}
+                onChange={(e) => toggle(o, e.target.checked)}
+                label={t(o.labelKey)}
+              />
               {f && (
-                <label className="row fd-muted" style={{ fontSize: 12 }}>
-                  <input
-                    type="checkbox"
-                    disabled={readOnly}
-                    checked={f.required}
-                    onChange={(e) =>
-                      set({
-                        fields: fields.map((x) =>
-                          x.key === o.key ? { ...x, required: e.target.checked } : x,
-                        ),
-                      })
-                    }
-                  />
-                  {t('editor.required')}
-                </label>
+                <Checkbox
+                  disabled={readOnly}
+                  checked={f.required}
+                  onChange={(e) =>
+                    set({
+                      fields: fields.map((x) => (x.key === o.key ? { ...x, required: e.target.checked } : x)),
+                    })
+                  }
+                  label={t('editor.required')}
+                />
               )}
             </div>
           );
@@ -136,15 +130,12 @@ export function FormPanel({
           onChange={(e) => set({ consent_text: e.target.value })}
         />
       </Field>
-      <label className="row">
-        <input
-          type="checkbox"
-          disabled={readOnly}
-          checked={form.skippable}
-          onChange={(e) => set({ skippable: e.target.checked })}
-        />{' '}
-        {t('editor.skippable')}
-      </label>
+      <Checkbox
+        disabled={readOnly}
+        checked={form.skippable}
+        onChange={(e) => set({ skippable: e.target.checked })}
+        label={t('editor.skippable')}
+      />
       {!readOnly && (
         <Button
           variant="ghost"
