@@ -4,12 +4,12 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { Alert, Button, Card, Field } from '@flowdsiml/ui';
+import { Alert, Button, Card, Field, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { embedSnippet, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
 import { unpublishDemo } from '../../lib/publish';
-import { formatDate, formatDateTime } from '../../lib/format';
+import { formatDate } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { asSettings } from '../editor/types';
@@ -120,7 +120,7 @@ export function SharePage() {
             workspace_id: demo!.workspace_id,
             name,
             variables: vars,
-            expires_at: expires ? new Date(expires).toISOString() : null,
+            expires_at: expires ? new Date(Date.now() + Number(expires) * 86400_000).toISOString() : null,
           })
           .select('token')
           .single(),
@@ -180,7 +180,8 @@ export function SharePage() {
               {editable && (
                 <Button
                   icon={<GlobeLock />}
-                  variant="danger"
+                  variant="ghost"
+                  className="btn-danger-ghost"
                   onClick={() =>
                     void ask({
                       title: t('share.unpublish'),
@@ -280,13 +281,17 @@ export function SharePage() {
               </Field>
             ))}
             <Field label={t('share.expires')} htmlFor="lx">
-              <input
-                id="lx"
-                className="fd-input"
-                type="date"
-                value={expires}
-                onChange={(e) => setExpires(e.target.value)}
-              />
+              <Select id="lx" value={expires} onChange={(e) => setExpires(e.target.value)}>
+                <option value="">{t('share.expiresNever')}</option>
+                {[7, 30, 90].map((d) => (
+                  <option key={d} value={String(d)}>
+                    {t('share.expiresIn', {
+                      count: d,
+                      date: formatDate(new Date(Date.now() + d * 86400_000).toISOString()),
+                    })}
+                  </option>
+                ))}
+              </Select>
             </Field>
             <div>
               <Button icon={<Link2 />} type="submit" variant="primary">
@@ -369,11 +374,15 @@ export function SharePage() {
       {versions.length > 0 && (
         <Card>
           <h2 style={{ marginTop: 0 }}>{t('share.versions')}</h2>
-          <ul>
+          <ul className="version-list">
             {versions.map((v) => (
               <li key={v.id}>
-                v{v.number} · {formatDateTime(v.published_at)}{' '}
-                {v.id === demo.current_version_id && <span className="fd-badge">{t('share.live')}</span>}
+                <span>
+                  v{v.number} · {formatDate(v.published_at)}
+                </span>
+                {v.id === demo.current_version_id && (
+                  <span className="fd-badge status-published">{t('share.live')}</span>
+                )}
               </li>
             ))}
           </ul>

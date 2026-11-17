@@ -45,9 +45,9 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
           type="color"
           disabled={readOnly}
           value={theme[key]}
-          onChange={(e) => set({ [key]: e.target.value })}
+          onChange={(e) => set({ [key]: e.target.value.toUpperCase() })}
         />
-        <code>{theme[key]}</code>
+        <code>{theme[key].toUpperCase()}</code>
       </div>
     </Field>
   );

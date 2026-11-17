@@ -814,3 +814,22 @@
 .stat-delta-label {
   flex-basis: 100%;
 }
+.version-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.version-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fd-space-3);
+  padding: var(--fd-space-2) 0;
+  border-bottom: 1px solid var(--fd-color-border);
+  font-variant-numeric: tabular-nums;
+}
+.version-list li:last-child {
+  border-bottom: 0;
+}

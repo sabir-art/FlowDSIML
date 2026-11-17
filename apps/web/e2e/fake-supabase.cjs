@@ -441,7 +441,13 @@ async function install(page, state = seed()) {
                 })),
             })),
           };
-          t.demo_versions.push({ id: versionId, demo_id: d.id, number, manifest });
+          t.demo_versions.push({
+            id: versionId,
+            demo_id: d.id,
+            number,
+            manifest,
+            published_at: new Date().toISOString(),
+          });
           return json(route, 200, {
             versionId,
             number,
