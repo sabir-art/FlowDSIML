@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { parseManifest } from '@flowdsiml/manifest';
-import { embedAllowed, nextIndex, parseRoute, resolveAssets, resolvePlacement } from './logic';
+import {
+  backdropIndex,
+  canAutoAdvance,
+  checklistItems,
+  choiceTarget,
+  embedAllowed,
+  nextIndex,
+  parseRoute,
+  resolveAssets,
+  resolvePlacement,
+} from './logic';
 
 const m = parseManifest({
   schemaVersion: 1,
@@ -50,5 +60,60 @@ describe('player logic', () => {
     expect(parseRoute('#/l/abcdef123456')).toEqual({ kind: 'link', token: 'abcdef123456', search: '?' });
     expect(parseRoute('#/d/not-a-uuid')).toEqual({ kind: 'none' });
     expect(parseRoute('#/preview')).toEqual({ kind: 'preview' });
+  });
+  it('F1 : fond des pop-up, checklist, choix, autoplay', () => {
+    expect(backdropIndex(m, 1)).toBe(0);
+    expect(backdropIndex(m, 0)).toBe(null);
+    const items = checklistItems(m, new Set([0, 1]), 1);
+    expect(items.map((x) => [x.done, x.current])).toEqual([
+      [true, false],
+      [true, true],
+      [false, false],
+    ]);
+    const withChapters = parseManifest({
+      ...m,
+      chapters: [
+        { id: 'k1', title: 'Un' },
+        { id: 'k2', title: 'Deux' },
+        { id: 'k3', title: 'Vide' },
+      ],
+      steps: m.steps.map((s, i) => ({ ...s, chapterId: i < 2 ? 'k1' : 'k2' })),
+    });
+    const ch = checklistItems(withChapters, new Set([0]), 0);
+    expect(ch.map((x) => [x.id, x.target, x.done, x.current])).toEqual([
+      ['k1', 0, false, true],
+      ['k2', 2, false, false],
+    ]);
+    // coché dès que la dernière étape du chapitre est vue (embranchement)
+    expect(checklistItems(withChapters, new Set([1]), 1)[0]?.done).toBe(true);
+    expect(choiceTarget(withChapters, { type: 'chapter', chapterId: 'k2' })).toEqual({
+      kind: 'step',
+      index: 2,
+    });
+    expect(choiceTarget(m, { type: 'goto', stepId: 'c' })).toEqual({ kind: 'step', index: 2 });
+    expect(choiceTarget(m, { type: 'goto', stepId: 'zz' })).toBe(null);
+    expect(choiceTarget(m, { type: 'end' })).toEqual({ kind: 'end' });
+    expect(canAutoAdvance(m, 0, false)).toBe(true);
+    expect(canAutoAdvance(m, 0, true)).toBe(false);
+    expect(canAutoAdvance(m, 2, false)).toBe(false);
+    const branching = parseManifest({
+      ...m,
+      steps: m.steps.map((s, i) =>
+        i === 1
+          ? {
+              ...s,
+              options: {
+                choices: [
+                  { label: 'A', action: { type: 'goto', stepId: 'c' } },
+                  { label: 'Lien cassé', action: { type: 'url', url: 'javascript:alert(1)' } },
+                ],
+              },
+            }
+          : s,
+      ),
+    });
+    expect(branching.steps[1]?.options.choices).toHaveLength(1);
+    expect(canAutoAdvance(branching, 1, false)).toBe(false);
+    expect(branching.steps[1]?.options.display).toBe('screen');
   });
 });

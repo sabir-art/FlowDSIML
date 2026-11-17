@@ -88,3 +88,43 @@ export function zoomBox<T extends Box>(b: T, origin: { x: number; y: number }, s
     h: b.h * scale,
   };
 }
+
+/** Position d'une zone Spotlight (fractions → pourcentages CSS). */
+export function boxStyle(b: Box): { left: string; top: string; width: string; height: string } {
+  const pct = (v: number) => `${Math.round(v * 100000) / 1000}%`;
+  return { left: pct(b.x), top: pct(b.y), width: pct(b.w), height: pct(b.h) };
+}
+
+/**
+ * Ancre de la bulle d'une zone Spotlight : un point sur le bord de la zone, du côté où la bulle
+ * s'affiche, pour que la bulle ne recouvre jamais la zone éclairée.
+ */
+export function spotlightAnchor<T extends Box>(h: T, requested: string): { box: T; placement: Placement } {
+  const place = resolvePlacement(requested, h);
+  const e = 0.0001;
+  const cx = h.x + h.w / 2;
+  const cy = h.y + h.h / 2;
+  const at = (x: number, y: number) => ({ ...h, x: x - e, y: y - e, w: 2 * e, h: 2 * e });
+  const box =
+    place === 'top'
+      ? at(cx, h.y)
+      : place === 'bottom'
+        ? at(cx, h.y + h.h)
+        : place === 'left'
+          ? at(h.x, cy)
+          : at(h.x + h.w, cy);
+  return { box, placement: place };
+}
+
+/**
+ * Voile Spotlight unique (spec a2 §1) : tracé SVG (viewBox 0 0 100 100, fill-rule evenodd) qui
+ * couvre tout le cadre sauf les zones éclairées. Un seul voile, pour que plusieurs zones restent
+ * toutes éclairées (des ombres superposées s'assombriraient l'une l'autre).
+ */
+export function spotlightVeilPath(boxes: Box[]): string {
+  const r = (n: number) => Math.round(n * 100000) / 1000;
+  return [
+    'M0 0H100V100H0Z',
+    ...boxes.map((b) => `M${r(b.x)} ${r(b.y)}V${r(b.y + b.h)}H${r(b.x + b.w)}V${r(b.y)}Z`),
+  ].join('');
+}

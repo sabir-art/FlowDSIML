@@ -219,14 +219,14 @@ isOneToOne: false
                   ]
                 },"hotspots": {
                   Row: {
-                    "action": NonNullable<Json>,"body": string,"created_at": string,"cta": Json | null,"demo_id": string,"h": number,"id": string,"placement": string,"position": number,"pulse": boolean,"step_id": string,"title": string,"updated_at": string,"w": number,"workspace_id": string,"x": number,"y": number
+                    "action": NonNullable<Json>,"body": string,"created_at": string,"cta": Json | null,"demo_id": string,"h": number,"id": string,"placement": string,"position": number,"pulse": boolean,"step_id": string,"title": string,"updated_at": string,"w": number,"workspace_id": string,"x": number,"y": number,"style": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "action"?: NonNullable<Json>,"body"?: string,"created_at"?: string,"cta"?: Json | null,"demo_id": string,"h"?: number,"id"?: string,"placement"?: string,"position"?: number,"pulse"?: boolean,"step_id": string,"title"?: string,"updated_at"?: string,"w"?: number,"workspace_id": string,"x": number,"y": number
+                    "action"?: NonNullable<Json>,"body"?: string,"created_at"?: string,"cta"?: Json | null,"demo_id": string,"h"?: number,"id"?: string,"placement"?: string,"position"?: number,"pulse"?: boolean,"step_id": string,"title"?: string,"updated_at"?: string,"w"?: number,"workspace_id": string,"x": number,"y": number,"style"?: string
                   }
                   Update: {
-                    "action"?: NonNullable<Json>,"body"?: string,"created_at"?: string,"cta"?: Json | null,"demo_id"?: string,"h"?: number,"id"?: string,"placement"?: string,"position"?: number,"pulse"?: boolean,"step_id"?: string,"title"?: string,"updated_at"?: string,"w"?: number,"workspace_id"?: string,"x"?: number,"y"?: number
+                    "action"?: NonNullable<Json>,"body"?: string,"created_at"?: string,"cta"?: Json | null,"demo_id"?: string,"h"?: number,"id"?: string,"placement"?: string,"position"?: number,"pulse"?: boolean,"step_id"?: string,"title"?: string,"updated_at"?: string,"w"?: number,"workspace_id"?: string,"x"?: number,"y"?: number,"style"?: string
                   }
                   Relationships: [
                     {
@@ -395,14 +395,14 @@ isOneToOne: false
                   Relationships: []
                 },"steps": {
                   Row: {
-                    "blurs": NonNullable<Json>,"body": string,"chapter_id": string | null,"created_at": string,"cta": Json | null,"demo_id": string,"element_meta": NonNullable<Json>,"gate_form_id": string | null,"id": string,"image_height": number | null,"image_path": string | null,"image_width": number | null,"kind": Database["public"]['Enums']["step_kind"],"page_title": string | null,"page_url": string | null,"position": number,"snapshot_path": string | null,"title": string,"updated_at": string,"workspace_id": string,"zoom": Json | null
+                    "blurs": NonNullable<Json>,"body": string,"chapter_id": string | null,"created_at": string,"cta": Json | null,"demo_id": string,"element_meta": NonNullable<Json>,"gate_form_id": string | null,"id": string,"image_height": number | null,"image_path": string | null,"image_width": number | null,"kind": Database["public"]['Enums']["step_kind"],"page_title": string | null,"page_url": string | null,"position": number,"snapshot_path": string | null,"title": string,"updated_at": string,"workspace_id": string,"zoom": Json | null,"options": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "blurs"?: NonNullable<Json>,"body"?: string,"chapter_id"?: string | null,"created_at"?: string,"cta"?: Json | null,"demo_id": string,"element_meta"?: NonNullable<Json>,"gate_form_id"?: string | null,"id"?: string,"image_height"?: number | null,"image_path"?: string | null,"image_width"?: number | null,"kind"?: Database["public"]['Enums']["step_kind"],"page_title"?: string | null,"page_url"?: string | null,"position"?: number,"snapshot_path"?: string | null,"title"?: string,"updated_at"?: string,"workspace_id": string,"zoom"?: Json | null
+                    "blurs"?: NonNullable<Json>,"body"?: string,"chapter_id"?: string | null,"created_at"?: string,"cta"?: Json | null,"demo_id": string,"element_meta"?: NonNullable<Json>,"gate_form_id"?: string | null,"id"?: string,"image_height"?: number | null,"image_path"?: string | null,"image_width"?: number | null,"kind"?: Database["public"]['Enums']["step_kind"],"page_title"?: string | null,"page_url"?: string | null,"position"?: number,"snapshot_path"?: string | null,"title"?: string,"updated_at"?: string,"workspace_id": string,"zoom"?: Json | null,"options"?: NonNullable<Json>
                   }
                   Update: {
-                    "blurs"?: NonNullable<Json>,"body"?: string,"chapter_id"?: string | null,"created_at"?: string,"cta"?: Json | null,"demo_id"?: string,"element_meta"?: NonNullable<Json>,"gate_form_id"?: string | null,"id"?: string,"image_height"?: number | null,"image_path"?: string | null,"image_width"?: number | null,"kind"?: Database["public"]['Enums']["step_kind"],"page_title"?: string | null,"page_url"?: string | null,"position"?: number,"snapshot_path"?: string | null,"title"?: string,"updated_at"?: string,"workspace_id"?: string,"zoom"?: Json | null
+                    "blurs"?: NonNullable<Json>,"body"?: string,"chapter_id"?: string | null,"created_at"?: string,"cta"?: Json | null,"demo_id"?: string,"element_meta"?: NonNullable<Json>,"gate_form_id"?: string | null,"id"?: string,"image_height"?: number | null,"image_path"?: string | null,"image_width"?: number | null,"kind"?: Database["public"]['Enums']["step_kind"],"page_title"?: string | null,"page_url"?: string | null,"position"?: number,"snapshot_path"?: string | null,"title"?: string,"updated_at"?: string,"workspace_id"?: string,"zoom"?: Json | null,"options"?: NonNullable<Json>
                   }
                   Relationships: [
                     {

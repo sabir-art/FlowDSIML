@@ -7,11 +7,27 @@ import {
 import { useTranslation } from 'react-i18next';
 import { applyVariables, richTextToHtml } from '@flowdsiml/core';
 import { themeSchema } from '@flowdsiml/manifest';
-import { beaconCenter, themeVars, tipClass } from '@flowdsiml/player-core';
-import { ChevronRight, ClipboardList } from 'lucide-react';
+import {
+  beaconCenter,
+  boxStyle,
+  spotlightAnchor,
+  spotlightVeilPath,
+  themeVars,
+  tipClass,
+} from '@flowdsiml/player-core';
+import { ChevronRight, ClipboardList, Info } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
-import { asAction, asCta, asRects, asSettings, asZoom, type Selection, type StepRow } from './types';
+import {
+  asAction,
+  asCta,
+  asRects,
+  asSettings,
+  asStepOptions,
+  asZoom,
+  type Selection,
+  type StepRow,
+} from './types';
 
 export type Tool = 'select' | 'hotspot' | 'blur';
 
@@ -178,14 +194,52 @@ export function Canvas({
   );
 
   if (step.kind === 'text' || !step.image_path) {
-    return (
-      <div className="canvas-text" onPointerDown={() => setSelection({ kind: 'step' })}>
-        {formChip}
+    const opts = asStepOptions(step.options);
+    const popup = step.kind === 'text' && opts.display === 'popup';
+    const card = (
+      <>
+        {popup && (
+          <span className={`canvas-variant canvas-variant--${opts.variant}`}>
+            {opts.showIcon &&
+              (opts.variant === 'instruction' ? (
+                <ClipboardList size={14} aria-hidden="true" />
+              ) : (
+                <Info size={14} aria-hidden="true" />
+              ))}
+            {t(
+              opts.variant === 'instruction'
+                ? 'editor.advanced.popup.variantInstruction'
+                : 'editor.advanced.popup.variantInfo',
+            )}
+          </span>
+        )}
         <h2>{step.title || t('editor.untitled')}</h2>
         <div dangerouslySetInnerHTML={{ __html: richTextToHtml(step.body) }} />
+        {opts.choices.length > 0 && (
+          <ul className="canvas-choices" aria-label={t('editor.advanced.choice.title')}>
+            {opts.choices.map((c, i) => (
+              <li key={i}>
+                <span>{c.label || t('editor.advanced.choice.option', { n: i + 1 })}</span>
+                <ChevronRight size={16} aria-hidden="true" />
+              </li>
+            ))}
+          </ul>
+        )}
+      </>
+    );
+    return (
+      <div
+        className={`canvas-text${popup ? ' canvas-text--popup' : ''}`}
+        style={popup && opts.background === 'color' ? { background: opts.bgColor } : undefined}
+        onPointerDown={() => setSelection({ kind: 'step' })}
+      >
+        {formChip}
+        {popup ? <div className="canvas-popup">{card}</div> : card}
       </div>
     );
   }
+  const spotlightMode = asSettings(editor.demo?.settings).mode === 'spotlight';
+  const isSpot = (h: { style: string }) => spotlightMode || h.style === 'spotlight';
 
   const url = editor.imageUrls[step.image_path];
   // Aperçu WYSIWYG (ED2) : mêmes classes et même thème que le player.
@@ -195,6 +249,14 @@ export function Canvas({
   const tipHotspot =
     (selection.kind === 'hotspot' ? hotspots.find((h) => h.id === selection.id) : undefined) ?? hotspots[0];
   const stepIndex = editor.steps.findIndex((x) => x.id === step.id);
+  // Spotlight : la bulle est ancrée au bord de la zone éclairée, comme dans le player
+  const tipAnchor =
+    tipHotspot && isSpot(tipHotspot)
+      ? (() => {
+          const a = spotlightAnchor(tipHotspot, tipHotspot.placement);
+          return { ...a.box, placement: a.placement };
+        })()
+      : tipHotspot;
   const ratio = `${step.image_width ?? 16} / ${step.image_height ?? 10}`;
   return (
     <div
@@ -267,23 +329,38 @@ export function Canvas({
       <span className="sr-only" aria-live="polite">
         {announce}
       </span>
-      {hotspots.map((h) => (
+      {hotspots.some(isSpot) && (
+        <svg className="p-veil" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path fillRule="evenodd" d={spotlightVeilPath(hotspots.filter(isSpot))} />
+        </svg>
+      )}
+      {hotspots.filter(isSpot).map((h) => (
         <span
-          key={`b-${h.id}`}
-          className={`p-beacon canvas-beacon ${h.pulse ? 'p-pulse' : ''}`}
-          style={beaconCenter(h)}
+          key={`s-${h.id}`}
+          className="p-spotlight canvas-spotlight"
+          style={boxStyle(h)}
           aria-hidden="true"
-        >
-          <span className="p-beacon-dot" />
-        </span>
+        />
       ))}
+      {hotspots
+        .filter((h) => !isSpot(h))
+        .map((h) => (
+          <span
+            key={`b-${h.id}`}
+            className={`p-beacon canvas-beacon ${h.pulse ? 'p-pulse' : ''}`}
+            style={beaconCenter(h)}
+            aria-hidden="true"
+          >
+            <span className="p-beacon-dot" />
+          </span>
+        ))}
       {tipHotspot &&
         tool === 'select' &&
         !drag &&
         (tipHotspot.title || tipHotspot.body || asCta(tipHotspot.cta)) && (
           <div
-            className={`${tipClass(tipHotspot, tipHotspot.placement)} canvas-tip`}
-            style={beaconCenter(tipHotspot)}
+            className={`${tipClass(tipAnchor!, tipAnchor!.placement)} canvas-tip`}
+            style={beaconCenter(tipAnchor!)}
             aria-hidden="true"
           >
             {tipHotspot.title && <div className="p-tip-title">{sub(tipHotspot.title)}</div>}

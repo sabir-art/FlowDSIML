@@ -1,8 +1,10 @@
 import {
   ArrowDown,
+  AppWindow,
   ArrowUp,
   ClipboardList,
   EyeOff,
+  GitBranch,
   ImageOff,
   ImagePlus,
   MessageSquare,
@@ -13,7 +15,7 @@ import {
   ZoomIn,
 } from 'lucide-react';
 import { Menu } from '../../components/Menu';
-import type { StepRow } from './types';
+import { asStepOptions, type StepRow } from './types';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from './useDemoEditor';
@@ -133,6 +135,28 @@ export function StepList({
                 onSelect: () =>
                   void editor.addTextStep(current, t('editor.newTextStep')).then(() => onSelect(current + 1)),
               },
+              {
+                label: t('editor.advanced.stepTypes.popup'),
+                icon: <AppWindow />,
+                onSelect: () =>
+                  void editor
+                    .addTextStep(current, t('editor.advanced.stepTypes.popup'), { display: 'popup' })
+                    .then(() => onSelect(current + 1)),
+              },
+              {
+                label: t('editor.advanced.stepTypes.choice'),
+                icon: <GitBranch />,
+                onSelect: () =>
+                  void editor
+                    .addTextStep(current, t('editor.advanced.choice.question'), {
+                      display: 'popup',
+                      choices: [1, 2].map((n) => ({
+                        label: t('editor.advanced.choice.option', { n }),
+                        action: { type: 'end' },
+                      })),
+                    })
+                    .then(() => onSelect(current + 1)),
+              },
               { label: t('editor.addImageStep'), icon: <ImagePlus />, onSelect: () => file.current?.click() },
             ]}
           />
@@ -157,7 +181,15 @@ export function StepList({
 function StepBadges({ step, hotspots }: { step: StepRow; hotspots: number }) {
   const { t } = useTranslation();
   const blurs = Array.isArray(step.blurs) ? step.blurs.length : 0;
+  const opts = asStepOptions(step.options);
   const items = [
+    opts.choices.length > 0 && {
+      icon: <GitBranch />,
+      label: t('editor.advanced.choice.railBadge', { count: opts.choices.length }),
+    },
+    !opts.choices.length &&
+      step.kind === 'text' &&
+      opts.display === 'popup' && { icon: <AppWindow />, label: t('editor.advanced.stepTypes.popup') },
     hotspots > 0 && { icon: <Target />, label: t('editor.badgeHotspots', { count: hotspots }) },
     step.gate_form_id && { icon: <ClipboardList />, label: t('editor.badgeForm') },
     step.cta && { icon: <MousePointerClick />, label: t('editor.badgeCta') },

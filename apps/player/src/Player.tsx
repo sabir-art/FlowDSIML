@@ -4,14 +4,28 @@ import { applyVariables, richTextToHtml, type VariableValues } from '@flowdsiml/
 import {
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   ExternalLink,
+  Info,
   List,
+  Pause,
+  Play,
   Maximize2,
   Minimize2,
   RotateCcw,
 } from 'lucide-preact';
-import { nextIndex } from './logic';
-import { beaconCenter, zoomBox, zoomOrigin, themeVars, tipClass } from '@flowdsiml/player-core';
+import { backdropIndex, canAutoAdvance, checklistItems, choiceTarget, nextIndex } from './logic';
+import { Checklist } from './Checklist';
+import {
+  beaconCenter,
+  boxStyle,
+  spotlightAnchor,
+  spotlightVeilPath,
+  themeVars,
+  tipClass,
+  zoomBox,
+  zoomOrigin,
+} from '@flowdsiml/player-core';
 import { strings, type Dict } from './i18n';
 import type { Tracker } from './api';
 import { LeadForm } from './LeadForm';
@@ -73,6 +87,15 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
       : undefined;
   const primary = step.kind === 'image' ? step.hotspots[0] : undefined;
   const last = index === m.steps.length - 1;
+  const popup = step.kind !== 'image' && step.options.display === 'popup';
+  const bgBlur = popup && step.options.background === 'blur';
+  const backdrop = bgBlur ? backdropIndex(m, index) : null;
+  /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
+  const choices = step.options.choices.filter((c) => choiceTarget(m, c.action));
+  const [visited, setVisited] = useState<Set<number>>(() => new Set([0]));
+  /** Choix « Fin de la démo » : écran de fin sans changer d'étape. */
+  const [ended, setEnded] = useState(false);
+  const [playing, setPlaying] = useState(() => !!m.autoplay?.enabled && !preview);
 
   useEffect(() => {
     tracker.track('demo_view');
@@ -80,6 +103,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
 
   useEffect(() => {
     tracker.track('step_view', { stepId: step.id, stepIndex: index });
+    setVisited((v) => (v.has(index) ? v : new Set(v).add(index)));
     if (last && !completed.current) {
       completed.current = true;
       tracker.track('demo_complete', { stepIndex: index });
@@ -95,10 +119,37 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
     return () => document.removeEventListener('fullscreenchange', on);
   }, []);
 
+  // F1 : lecture automatique, arrêtée sur un formulaire, un menu de choix ou la dernière étape.
+  const autoplay = m.autoplay?.enabled ? m.autoplay : null;
+  useEffect(() => {
+    if (!autoplay || !playing || !canAutoAdvance(m, index, !!gateForm)) return;
+    const id = setTimeout(() => go(index + 1), autoplay.delayMs);
+    return () => clearTimeout(id);
+  }, [autoplay, playing, index, gateForm]); // eslint-disable-line react-hooks/exhaustive-deps
+
   function go(i: number | null) {
     if (i === null || i < 0 || i >= m.steps.length) return;
     setIndex(i);
     setMenu(false);
+    setEnded(false);
+  }
+
+  function onChoice(c: (typeof choices)[number]) {
+    tracker.track('hotspot_click', {
+      stepId: step.id,
+      stepIndex: index,
+      props: { choice: c.label.slice(0, 80) },
+    });
+    const target = choiceTarget(m, c.action);
+    if (!target) return;
+    if (target.kind === 'url') window.open(target.url, '_blank', 'noopener');
+    else if (target.kind === 'end') {
+      setEnded(true);
+      if (!completed.current) {
+        completed.current = true;
+        tracker.track('demo_complete', { stepIndex: index });
+      }
+    } else go(target.index);
   }
 
   function onHotspot(h: Hotspot) {
@@ -122,6 +173,11 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        if (menu) return setMenu(false);
+        // Spec a2 §2 : Échap vaut « Suivant » sur une pop-up sans choix
+        if (popup && !choices.length && !last && !gateForm) return go(index + 1);
+      }
       if ((e.target as HTMLElement)?.closest?.('form') || gateForm) return;
       if (e.key === 'ArrowRight') go(index + 1);
       if (e.key === 'ArrowLeft') go(index - 1);
@@ -134,6 +190,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
 
   const chapterOf = (s: Step) => m.chapters.find((c) => c.id === s.chapterId);
   const progress = ((index + 1) / m.steps.length) * 100;
+  const items = m.checklist ? checklistItems(m, visited, index) : [];
   const tipProps = primary && {
     h: primary,
     html,
@@ -214,38 +271,112 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
             tip={!compact && !gateForm ? tipProps : undefined}
           />
         ) : (
-          <div class="p-text-step">
-            <h1>{sub(step.title)}</h1>
-            {step.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(step.body) }} />}
+          <>
+            {popup && backdrop !== null && (
+              <ImageStep
+                key={`bg-${m.steps[backdrop]!.id}`}
+                step={m.steps[backdrop]!}
+                sub={sub}
+                onHotspot={onHotspot}
+                onCta={onCta}
+                dimmed
+              />
+            )}
+            {popup && backdrop === null && (
+              <div
+                class="p-popup-bg"
+                style={{ background: step.options.background === 'color' ? step.options.bgColor : undefined }}
+                aria-hidden="true"
+              />
+            )}
+            <div
+              class={`p-text-step${popup ? ' p-popup' : ''}`}
+              role={popup ? 'dialog' : undefined}
+              aria-labelledby={`p-step-title-${step.id}`}
+            >
+              {popup && (
+                <span class={`p-variant p-variant--${step.options.variant}`}>
+                  {step.options.showIcon &&
+                    (step.options.variant === 'instruction' ? (
+                      <ClipboardList {...ICON} size={14} />
+                    ) : (
+                      <Info {...ICON} size={14} />
+                    ))}
+                  {step.options.variant === 'instruction' ? t.instruction : t.info}
+                </span>
+              )}
+              <h1 id={`p-step-title-${step.id}`}>{sub(step.title)}</h1>
+              {step.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(step.body) }} />}
+              {choices.length > 0 && (
+                <div class="p-choices" role="group" aria-label={t.choose}>
+                  {choices.map((c, ci) => (
+                    <button key={ci} class="p-choice" onClick={() => onChoice(c)} autoFocus={ci === 0}>
+                      <span>{sub(c.label)}</span>
+                      {c.action.type === 'url' ? (
+                        <ExternalLink {...ICON} size={16} />
+                      ) : (
+                        <ChevronRight {...ICON} size={16} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div class="p-actions">
+                {index > 0 && (
+                  <button class="p-btn p-btn-ghost" onClick={() => go(index - 1)}>
+                    {t.prev}
+                  </button>
+                )}
+                {step.cta && (
+                  <button class="p-btn p-btn-primary" onClick={() => onCta(step.cta!.url, step.cta!.label)}>
+                    {sub(step.cta.label)}
+                    <ExternalLink {...ICON} size={16} />
+                  </button>
+                )}
+                {choices.length > 0 ? null : !last ? (
+                  <button
+                    class={`p-btn ${step.cta ? 'p-btn-ghost' : 'p-btn-primary'}`}
+                    onClick={() => go(index + 1)}
+                    autoFocus
+                  >
+                    {step.options.buttonLabel
+                      ? sub(step.options.buttonLabel)
+                      : index === 0
+                        ? t.start
+                        : t.next}
+                    <ChevronRight {...ICON} size={16} />
+                  </button>
+                ) : (
+                  <button class="p-btn p-btn-ghost" onClick={() => go(0)}>
+                    <RotateCcw {...ICON} size={16} />
+                    {t.restart}
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+        {ended && <div class="p-popup-bg" aria-hidden="true" />}
+        {ended && (
+          <div class="p-text-step p-popup p-end" role="dialog" aria-labelledby="p-end-title">
+            <h1 id="p-end-title">{t.end}</h1>
             <div class="p-actions">
-              {index > 0 && (
-                <button class="p-btn p-btn-ghost" onClick={() => go(index - 1)}>
-                  {t.prev}
-                </button>
-              )}
-              {step.cta && (
-                <button class="p-btn p-btn-primary" onClick={() => onCta(step.cta!.url, step.cta!.label)}>
-                  {sub(step.cta.label)}
-                  <ExternalLink {...ICON} size={16} />
-                </button>
-              )}
-              {!last ? (
-                <button
-                  class={`p-btn ${step.cta ? 'p-btn-ghost' : 'p-btn-primary'}`}
-                  onClick={() => go(index + 1)}
-                  autoFocus
-                >
-                  {index === 0 ? t.start : t.next}
-                  <ChevronRight {...ICON} size={16} />
-                </button>
-              ) : (
-                <button class="p-btn p-btn-ghost" onClick={() => go(0)}>
-                  <RotateCcw {...ICON} size={16} />
-                  {t.restart}
-                </button>
-              )}
+              <button class="p-btn p-btn-primary" onClick={() => go(0)} autoFocus>
+                <RotateCcw {...ICON} size={16} />
+                {t.restart}
+              </button>
             </div>
           </div>
+        )}
+        {m.checklist && items.length > 0 && !gateForm && !compact && (
+          <Checklist
+            title={m.checklist.title}
+            position={m.checklist.position}
+            items={items}
+            t={t}
+            sub={sub}
+            onGo={go}
+          />
         )}
         {gateForm && (
           <LeadForm
@@ -266,11 +397,24 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
       {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
           navigation sont retirées (rien ne permet de le contourner). */}
       {compact && tipProps && !gateForm && <Tooltip {...tipProps} sheet />}
+      {compact && m.checklist && items.length > 0 && !gateForm && (
+        <Checklist title={m.checklist.title} position="collapsed" items={items} t={t} sub={sub} onGo={go} />
+      )}
 
       <footer class="p-controls" inert={!!gateForm} aria-hidden={gateForm ? true : undefined}>
         <button class="p-icon-btn" onClick={() => go(index - 1)} disabled={index === 0} aria-label={t.prev}>
           <ChevronLeft {...ICON} />
         </button>
+        {autoplay && (
+          <button
+            class="p-icon-btn p-play"
+            onClick={() => setPlaying(!playing)}
+            aria-pressed={playing}
+            aria-label={playing ? t.pause : t.play}
+          >
+            {playing ? <Pause {...ICON} /> : <Play {...ICON} />}
+          </button>
+        )}
         <div
           class="p-progress"
           role="progressbar"
@@ -339,12 +483,15 @@ function ImageStep({
   onHotspot,
   onCta,
   tip,
+  dimmed = false,
 }: {
   step: Step;
   sub: (s: string) => string;
   onHotspot: (h: Hotspot) => void;
   onCta: (url: string, label: string) => void;
   tip?: TipProps;
+  /** F1 : écran de fond d'une étape pop-up (assombri, sans pastille ni bulle). */
+  dimmed?: boolean;
 }) {
   const img = step.image!;
   const zoom = step.zoom;
@@ -364,7 +511,10 @@ function ImageStep({
   const screen = <T extends Hotspot>(h: T): T => zoomBox(h, o, scale);
 
   return (
-    <div class="p-stage" style={{ '--ratio': String(img.width / img.height) }}>
+    <div
+      class={`p-stage${dimmed ? ' is-backdrop' : ''}`}
+      style={{ '--ratio': String(img.width / img.height) }}
+    >
       <div class="p-zoom" style={{ transform, transformOrigin: origin }}>
         <img class="p-img" src={img.url} alt={sub(step.title)} draggable={false} />
         {step.blurs.map((b, i) => (
@@ -380,11 +530,41 @@ function ImageStep({
           />
         ))}
       </div>
-      {step.hotspots.map((h) => (
-        <Beacon key={h.id} h={screen(h)} label={sub(h.title)} onClick={() => onHotspot(h)} />
-      ))}
-      {tip && (tip.h.title || tip.h.body || tip.h.cta) && <Tooltip {...tip} h={screen(tip.h)} />}
-      {!step.hotspots.length && step.cta && (
+      {!dimmed && step.hotspots.some((h) => h.style === 'spotlight') && (
+        <svg class="p-veil" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            d={spotlightVeilPath(step.hotspots.filter((h) => h.style === 'spotlight').map(screen))}
+          />
+        </svg>
+      )}
+      {!dimmed &&
+        step.hotspots.map((h) =>
+          h.style === 'spotlight' ? (
+            <button
+              key={h.id}
+              class="p-spotlight"
+              style={boxStyle(screen(h))}
+              aria-label={sub(h.title)}
+              onClick={() => onHotspot(h)}
+            />
+          ) : (
+            <Beacon key={h.id} h={screen(h)} label={sub(h.title)} onClick={() => onHotspot(h)} />
+          ),
+        )}
+      {!dimmed && tip && (tip.h.title || tip.h.body || tip.h.cta) && (
+        <Tooltip
+          {...tip}
+          {...(tip.h.style === 'spotlight'
+            ? (() => {
+                const a = spotlightAnchor(screen(tip.h), tip.h.placement);
+                return { h: { ...a.box, placement: a.placement } };
+              })()
+            : { h: screen(tip.h) })}
+        />
+      )}
+      {dimmed && <div class="p-dim" aria-hidden="true" />}
+      {!dimmed && !step.hotspots.length && step.cta && (
         <button
           class="p-btn p-btn-primary p-floating-cta"
           onClick={() => onCta(step.cta!.url, step.cta!.label)}

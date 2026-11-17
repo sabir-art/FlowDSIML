@@ -1,3 +1,4 @@
+import { GuidedTourPanel, ReadingModePanel } from './panels/GuidedDemoPanels';
 import { ArrowLeft, Eye, EyeOff, MousePointer2, Share2, Target } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -278,12 +279,18 @@ export function EditorPage() {
               setSelection={setSelection}
             />
           )}
-          {tab === 'design' && <ThemePanel editor={editor} readOnly={readOnly} />}
+          {tab === 'design' && (
+            <div className="stack panel-sections">
+              <ReadingModePanel editor={editor} readOnly={readOnly} />
+              <ThemePanel editor={editor} readOnly={readOnly} />
+            </div>
+          )}
           {tab === 'settings' && (
             <div className="stack panel-sections">
               <FormPanel editor={editor} readOnly={readOnly} leadFormsAllowed={plan.leadForms} />
               <VariablesPanel editor={editor} readOnly={readOnly} />
               <ChaptersPanel editor={editor} readOnly={readOnly} />
+              <GuidedTourPanel editor={editor} readOnly={readOnly} />
             </div>
           )}
         </aside>

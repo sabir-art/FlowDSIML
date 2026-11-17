@@ -42,6 +42,8 @@ export const hotspotSchema = rectSchema.extend({
   action: hotspotActionSchema.default({ type: 'next' }),
   cta: ctaSchema.nullable().default(null),
   pulse: z.boolean().default(true),
+  /** F1 : « beacon » = Walkthrough (pastille + bulle) ; « spotlight » = zone éclairée, reste assombri. */
+  style: z.enum(['beacon', 'spotlight']).default('beacon').catch('beacon'),
 });
 export type Hotspot = z.infer<typeof hotspotSchema>;
 
@@ -57,6 +59,59 @@ export const imageRefSchema = z.object({
   width: z.number().int().positive(),
   height: z.number().int().positive(),
 });
+
+/** F1 : destination d'un choix de parcours (étape, chapitre, fin de la démo ou lien). */
+export const choiceActionSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('goto'), stepId: z.string() }),
+  z.object({ type: z.literal('chapter'), chapterId: z.string() }),
+  z.object({ type: z.literal('end') }),
+  z.object({ type: z.literal('url'), url: z.string().url().startsWith('https://') }),
+]);
+export type ChoiceAction = z.infer<typeof choiceActionSchema>;
+
+/** F1 : choix de parcours (« Vous êtes conseiller → parcours A »). */
+export const choiceSchema = z.object({ label: z.string().max(80), action: choiceActionSchema });
+export type Choice = z.infer<typeof choiceSchema>;
+
+/** F1 : options d'affichage d'une étape (pop-up, variante, menu de choix). */
+export const stepOptionsSchema = z
+  .object({
+    /** « popup » : carte centrée par-dessus l'écran précédent ; « screen » : écran plein. */
+    display: z.enum(['screen', 'popup']).default('screen').catch('screen'),
+    variant: z.enum(['info', 'instruction']).default('info').catch('info'),
+    /** Fond d'une pop-up : capture précédente floutée, ou couleur unie. */
+    background: z.enum(['blur', 'color']).default('blur').catch('blur'),
+    bgColor: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/)
+      .default('#080808')
+      .catch('#080808'),
+    showIcon: z.boolean().default(true).catch(true),
+    /** Libellé du bouton principal (vide = « Suivant »). */
+    buttonLabel: z.string().max(40).default('').catch(''),
+    /** Choix invalides ignorés un par un (un lien mal formé n'invalide pas la démo). */
+    choices: z
+      .array(z.unknown())
+      .max(6)
+      .default([])
+      .catch([])
+      .transform((list) =>
+        list.flatMap((c) => {
+          const r = choiceSchema.safeParse(c);
+          return r.success ? [r.data] : [];
+        }),
+      ),
+  })
+  .default({
+    display: 'screen',
+    variant: 'info',
+    background: 'blur',
+    bgColor: '#080808',
+    showIcon: true,
+    buttonLabel: '',
+    choices: [],
+  });
+export type StepOptions = z.infer<typeof stepOptionsSchema>;
 
 export const stepSchema = z.object({
   id: z.string(),
@@ -75,6 +130,7 @@ export const stepSchema = z.object({
   /** Formulaire de lead affiché avant cette étape. */
   gateFormId: z.string().nullable().default(null),
   cta: ctaSchema.nullable().default(null),
+  options: stepOptionsSchema,
 });
 export type Step = z.infer<typeof stepSchema>;
 
@@ -135,6 +191,24 @@ export const manifestSchema = z.object({
   forms: z.array(formSchema).default([]),
   /** Origines autorisées à embarquer la démo (vide = toutes). Contrôle côté player, contournable. */
   allowedEmbedOrigins: z.array(z.string()).default([]),
+  /** F1 : checklist de progression (un élément par chapitre, sinon par étape) dans le player. */
+  checklist: z
+    .object({
+      title: z.string().max(80).default(''),
+      position: z.enum(['left', 'right', 'collapsed']).default('right').catch('right'),
+    })
+    .nullable()
+    .default(null)
+    .catch(null),
+  /** F1 : lecture automatique (avance seule après delayMs, avec pause). */
+  autoplay: z
+    .object({
+      enabled: z.boolean().default(false),
+      delayMs: z.number().int().min(1500).max(30000).default(4000),
+    })
+    .nullable()
+    .default(null)
+    .catch(null),
   /** Bouton d'action du client, affiché en permanence dans la barre du player (P6). */
   cta: ctaSchema.nullable().default(null),
   /** P13 : politique de confidentialité du workspace (https), affichée sous les formulaires de lead. */
