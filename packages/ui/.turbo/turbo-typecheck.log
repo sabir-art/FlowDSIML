@@ -1,0 +1,4 @@
+
+> @flowdsiml/ui@0.1.0 typecheck /home/user/FlowDSIML/packages/ui
+> tsc -p tsconfig.json
+

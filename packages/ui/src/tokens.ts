@@ -256,7 +256,8 @@ export const player = {
   'overlay': 'rgba(20, 19, 17, 0.55)',
   'radius': '16px',
   'font': fontFamily.sans,
-  'backdrop': `linear-gradient(160deg, ${lagoon[50]} 0%, ${stone[50]} 60%, ${ember[50]} 100%)`,
+  // Fond uni : pas de dégradé décoratif (motif proscrit, composants.md §15.6).
+  'backdrop': stone[50],
   'browser-bar': stone[100],
   'browser-bar-dark': '#26241F',
   'shadow': shadow.light.lg,
@@ -310,6 +311,27 @@ export const aliases = {
 // conversion). Pour la couleur Ember, utiliser `--fd-color-accent`.
 
 /* ------------------------------------------------------------------ */
+/* 7 bis. Alias de compatibilité avec les tokens provisoires du MVP     */
+/*    (variables utilisées dans apps/web avant l'arrivée du design      */
+/*    system). Nouveau code : utiliser les tokens sémantiques ci-dessus. */
+/* ------------------------------------------------------------------ */
+
+export const legacyAliases = {
+  '--fd-color-primary-contrast': 'var(--fd-color-on-primary)',
+  '--fd-color-surface-muted': 'var(--fd-color-surface-sunken)',
+  '--fd-font-family': 'var(--fd-font-sans)',
+  '--fd-font-xs': 'var(--fd-text-caption-size)',
+  '--fd-font-sm': 'var(--fd-text-body-size)',
+  '--fd-font-md': 'var(--fd-text-body-lg-size)',
+  '--fd-font-lg': '1.25rem',
+  '--fd-font-xl': 'var(--fd-text-h1-size)',
+  '--fd-space-7': 'var(--fd-space-12)',
+} as const;
+// Valeurs qui changent volontairement (même nom, nouvelle échelle) :
+//   --fd-space-5 : 24px → 20px · --fd-space-6 : 32px → 24px (échelle en multiples de 4 px)
+//   --fd-radius-md : 10px → 8px · --fd-radius-lg : 16px → 12px
+
+/* ------------------------------------------------------------------ */
 /* 8. Helpers                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -318,7 +340,9 @@ export const cssVar = (group: string, name: string): string => `var(--fd-${group
 
 export const tokens = {
   palette, colors, fontFamily, fontWeight, textStyles, space, radius, shadow, borderWidth,
-  motion, zIndex, layout, breakpoints, player, aliases, googleFontsUrl,
+  motion, zIndex, layout, breakpoints, player, aliases, legacyAliases, googleFontsUrl,
 } as const;
+
+export type Tokens = typeof tokens;
 
 export default tokens;

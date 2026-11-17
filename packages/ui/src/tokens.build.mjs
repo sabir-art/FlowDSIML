@@ -66,6 +66,9 @@ ${block(':root:not([data-theme="light"]):not([data-theme="dark"])', [...themed('
 /* Alias de compatibilité shadcn/ui + Tailwind */
 ${block(':root', Object.entries(t.aliases))}
 
+/* Alias de compatibilité avec les tokens provisoires du MVP */
+${block(':root', Object.entries(t.legacyAliases))}
+
 /* Le player et ses aperçus n'héritent jamais du mode sombre de l'app */
 ${block('.fd-player-scope', [...themed('light'), ['color-scheme', 'light']])}
 

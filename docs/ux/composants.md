@@ -134,15 +134,15 @@ Espace de 8 px entre l'icône et le texte. Les **boutons-icônes** sont carrés 
 
 - **Position** : en bas à droite sur desktop (24 px des bords), en bas au centre sur mobile. Pile de 3 au maximum, la plus récente en bas.
 - **Largeur** : 360 px maximum. Anatomie : icône d'état, titre (label 600), description facultative, une action facultative (« Annuler », « Voir »), bouton de fermeture.
-- **Variantes** : `neutral` (surface inversée), `success`, `warning`, `danger`, `info` ; fond `surface-raised` et barre latérale de 3 px dans la couleur d'état.
+- **Variantes** : `neutral` (surface inversée), `success`, `warning`, `danger`, `info` ; fond `surface-raised`, bordure fine 1 px `border`, état porté par **l'icône Lucide colorée** (`CircleCheck`, `TriangleAlert`, `CircleAlert`, `Info`) — pas de barre latérale (§15.6).
 - **Durée** : 5 s, 8 s avec une action. Les erreurs **ne disparaissent pas** seules. Pause au survol et au focus.
 - **Accessibilité** : `role="status"` (`polite`) ; `role="alert"` pour les erreurs. Le toast ne prend pas le focus. Son action reste accessible au clavier (raccourci `F6` pour atteindre la région des notifications).
 - **Ne pas utiliser** pour une erreur de formulaire (message en ligne) ni pour une information qu'il faut garder (bannière).
 
 ## 5. Bannières et alertes en ligne
 
-- **Bannière de page** (pleine largeur sous la barre du haut) : quota atteint, essai, maintenance. Elle se ferme sauf si elle est bloquante.
-- **Alerte en ligne** (dans le contenu) : fond `*-soft`, icône et texte de la couleur d'état, rayon `lg`, padding de 12 × 16 px, action facultative en `link`.
+- **Bannière de page** (pleine largeur sous la barre du haut, fond `*-soft`, bordure basse 1 px, icône Lucide d'état) : quota atteint, essai, maintenance. Elle se ferme sauf si elle est bloquante.
+- **Alerte en ligne** (dans le contenu) : fond `*-soft`, **bordure fine 1 px uniforme** (couleur d'état à 30 %), icône Lucide 18 px de la couleur d'état, texte `text`, rayon `lg`, padding de 12 × 16 px, action facultative en `link`. Jamais de barre épaisse sur un seul côté.
 
 ## 6. Tableaux
 
@@ -160,7 +160,7 @@ Espace de 8 px entre l'icône et le texte. Les **boutons-icônes** sont carrés 
 
 - **Style souligné** (navigation de section, onglets de l'éditeur) : texte `label`, `text-muted`. L'onglet actif est en `text` 600 avec un soulignement de 2 px `primary`. Hauteur de 40 px, espacement de 24 px.
 - **Style segmenté** (bascules locales : Général / Sessions, Mensuel / Annuel) : conteneur `surface-sunken`, rayon `md`, élément actif `surface` et `shadow-xs`.
-- **Comportement** : Radix `Tabs`, `role="tablist"`, flèches, activation automatique. Badge de compteur facultatif (« Leads 12 »). Au-delà de la largeur disponible, défilement horizontal avec dégradés, sans retour à la ligne.
+- **Comportement** : Radix `Tabs`, `role="tablist"`, flèches, activation automatique. Badge de compteur facultatif (« Leads 12 »). Au-delà de la largeur disponible, défilement horizontal (boutons chevrons aux extrémités si besoin), sans retour à la ligne.
 
 ## 8. Menus, popovers, infobulles
 
@@ -218,7 +218,7 @@ Il apparaît sous un sélecteur de couleur quand le ratio est inférieur à 4,5:
 | **Badge** | Hauteur de 20 px, `caption` 600, rayon `xs`, fond `*-soft` et texte de la couleur d'état. Statuts : `Brouillon` (stone), `Publiée` (success), `Modifiée` (warning : des modifications non publiées), `Archivée` (stone). Toujours un texte, pas seulement une pastille. |
 | **Avatar** | 24, 32 ou 40 px, rond. Initiales sur fond Lagoon 100 / Lagoon 800 si pas de photo. Pile de 3 au maximum puis « +N ». |
 | **Carte de démo** (tableau de bord) | Vignette 16:10 (première étape), titre (1 ligne, tronqué, titre complet en infobulle), méta (« 12 étapes · modifiée il y a 2 h »), badge de statut, menu « ⋯ ». Survol : `shadow-sm` et bouton « Ouvrir ». Toute la carte est un lien. Le menu est un bouton distinct, hors du lien. |
-| **Barre latérale** | 240 px, éléments de 36 px, icône de 20 px. Actif : fond `surface-selected` et texte `primary-soft-text`, plus un repère de 3 px à gauche. Sélecteur de workspace en haut. Usage du plan et profil en bas. Repliable (64 px, infobulles). |
+| **Barre latérale** | 240 px, éléments de 36 px, icône de 20 px. Actif : fond `surface-selected`, texte et icône `primary-soft-text`, graisse 600 (pas de barre à gauche, §15.6). Sélecteur de workspace en haut. Usage du plan et profil en bas. Repliable (64 px, infobulles). |
 | **Barre du haut** | 56 px : fil d'Ariane, recherche (`/`), aide, notifications, bouton principal contextuel. |
 | **Fil d'Ariane** | `caption`, séparateur `/` ou chevron, dernier élément non cliquable (`aria-current="page"`). |
 | **Jauge d'usage** | Barre de 6 px, `primary` ; `warning` à partir de 80 %, `danger` à 100 %. Texte « 4 / 5 démos ». |
@@ -397,3 +397,26 @@ Exception unique : 6 px (libellé → champ, gap des boutons `sm`). **Interdits*
 - Espace insécable avant `: ; ! ? »` et après `«` (français).
 - Pas de texte en MAJUSCULES saisi en dur ; utiliser `text-transform` si besoin (titres de section 11 px de la maquette).
 - Les nombres, dates et pluriels passent par `Intl` et i18n (« 0 vue », « 17 nov. 2026 »), jamais par concaténation.
+
+### 15.6 Motifs proscrits (« effet IA générique »)
+
+> Retour client du 17 nov. : le bloc arrondi avec une **barre de couleur épaisse sur le bord gauche** est jugé « trop slop IA ». Plus largement, tout ornement qui ne porte pas d'information est proscrit. Chaque motif ci-dessous est un **défaut de recette** ; l'alternative est obligatoire.
+
+| # | Motif proscrit | Pourquoi | Alternative sobre (à utiliser) |
+|---|---|---|---|
+| M1 | **Barre d'accent latérale** : `border-left` (ou `inset` / `::before`) de 2 à 6 px colorée sur un bloc arrondi — callouts, alertes, toasts, cartes, citations, bandeaux | Ornement cliché, lisible seulement par la couleur | Bordure **fine 1 px uniforme** (couleur d'état à 30 % ou `border`) + **icône Lucide** d'état 18 px + fond `*-soft` si besoin. `.fd-alert` le fait déjà. |
+| M2 | **Élément actif signalé par une barre à gauche** (navigation, onglet vertical, étape sélectionnée, ligne de tableau) | Même motif ; ambigu avec un statut | Fond `surface-selected` + texte/icône `primary-soft-text` + graisse 600 ; étape sélectionnée : **contour 2 px** sur tout le pourtour (`border-selected`). |
+| M3 | **Dégradés décoratifs** (fonds de page, de carte « recommandée », de héros, de bouton) | Bruit visuel, effet « landing page générée » | Aplats de la palette (`bg`, `surface`, `*-soft`) ; mise en avant par **bordure `border-strong`** et badge texte. Seuls dégradés tolérés : *shimmer* fonctionnel des squelettes, masques de défilement. |
+| M4 | **Titres ou textes en dégradé** (`background-clip: text`) | Illisible, cliché | Couleur `text` ; l'emphase passe par la taille et la graisse (Bricolage 700). |
+| M5 | **Glassmorphism gratuit** (`backdrop-filter: blur` + transparence sur des cartes, barres, modales) | Coûteux, contraste aléatoire | Surfaces opaques `surface` / `surface-raised` + ombre `sm`/`md`. Le flou n'est autorisé que là où il **est la fonction** (outil de floutage des données). |
+| M6 | **Emojis** dans l'interface (titres, boutons, toasts, dossiers, messages : 👋 🚀 ✨ 📁 ✅ 🔒…) | Ton infantilisant, rendu variable selon l'OS | Icône Lucide (§15.1) ou rien. Texte simple : « Bienvenue, Camille ». |
+| M7 | **« Sparkles » ✨ (ou baguette magique) pour signaler l'IA** | Cliché du marché, n'explique pas l'action | Libellé d'action explicite (« Rédiger les textes », « Traduire ») + icône de l'action (`PenLine`, `Languages`) ; la mention « IA » éventuelle en texte dans l'aide. |
+| M8 | **Cartes à icône dans un cercle/carré coloré**, répétées partout (grilles de fonctionnalités, menus, listes de choix, en-têtes de section) | Remplissage décoratif, toutes les cartes se ressemblent | Icône Lucide **nue** 20 px en `text-muted` (ou `primary` si active), alignée avec le titre ; une pastille colorée seulement pour un **statut** (badge) ou un avatar. |
+| M9 | **Ombres colorées** / halos (`box-shadow` teinté de la couleur d'accent, glow au survol) | Effet néon | Ombres neutres de la palette (`shadow-xs` → `lg`, brun chaud) ; l'anneau de focus est la seule ombre colorée autorisée. |
+| M10 | **Contours colorés épais** autour de cartes « mises en avant » | Lourd, concurrence les états de sélection | Bordure `border-strong` 1 px + badge « Recommandé » ; l'épaisseur 2 px est réservée à la **sélection** et au focus. |
+| M11 | **Pastilles numérotées colorées décoratives** (1 · 2 · 3 dans des cercles accent) pour de simples listes | Gadget | Liste ordonnée typographique (numéro `text-subtle` tabulaire) ; les pastilles restent pour le hotspot et les étapes du rail. |
+| M12 | **Majuscules espacées partout**, sur-titres colorés au-dessus de chaque titre (« ✦ NOUVEAU ✦ ») | Mise en forme marketing gratuite | Un seul niveau de titre par bloc ; sur-titre uniquement pour les groupes de navigation (11 px, `text-subtle`, sans couleur). |
+| M13 | **Animations décoratives** (rebonds, flottement, confettis, gradients animés) | Distrait, ignore `prefers-reduced-motion` | Transitions d'état uniquement (`duration-fast/base`), pulsation du hotspot seulement. |
+| M14 | **Arrondis excessifs** (`radius` ≥ 20 px) sur des cartes et champs d'interface | Aspect « jouet » | Échelle `radius` : 6–8 px pour les contrôles, 12 px cartes/menus, 16 px modales et bulles du player. |
+
+**Contrôle automatique conseillé (CI)** : refuser dans `apps/**/*.css` et `packages/ui/**/*.css` : `border-left: [2-9]px`, `border-inline-start: [2-9]px`, `background-clip: text`, `linear-gradient(` hors `.skeleton`/masques, `backdrop-filter` hors classes de floutage ; et dans les `.tsx`/`.json` : les emojis (plage Unicode U+1F300–U+1FAFF, U+2728).

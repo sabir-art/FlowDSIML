@@ -115,7 +115,7 @@
   <div class="menu" id="more-menu" role="menu" hidden style="position:fixed;top:48px;right:180px">
     <button role="menuitem"><i data-icon="clock"></i>Historique des versions</button>
     <button role="menuitem"><i data-icon="palette"></i>Thème de la démo</button>
-    <button role="menuitem"><i data-icon="sparkles"></i>Générer les textes avec l'IA<span class="badge" style="margin-left:auto">V2</span></button>
+    <button role="menuitem"><i data-icon="edit"></i>Rédiger les textes (assistant)<span class="badge" style="margin-left:auto">V2</span></button>
     <button role="menuitem"><i data-icon="keyboard"></i>Raccourcis clavier<span class="kbd">?</span></button>
     <hr><button role="menuitem"><i data-icon="duplicate"></i>Dupliquer la démo</button>
   </div>
@@ -176,7 +176,6 @@
             <!-- Contexte CTA de fin -->
             <div class="ctx" data-ctx="cta" hidden>
               <div class="popup-ov"><div class="popup" style="text-align:center">
-                <div style="width:44px;height:44px;border-radius:12px;background:var(--fd-lagoon-50);display:grid;place-items:center;margin:0 auto 12px;color:var(--fd-lagoon-700)">✓</div>
                 <h2 style="font-size:20px">Prêt à essayer avec vos données ?</h2>
                 <p style="color:var(--fd-stone-600);margin:6px 0 18px;font-size:14px">Réservez 20 minutes avec notre équipe, ou revoyez la démo.</p>
                 <button class="pbtn p" style="width:100%;height:42px">Réserver une démo</button>
@@ -329,7 +328,7 @@
           <div class="sec">
             <div class="sec-title">Cadre</div>
             <div class="setting"><span class="t-label">Barre de navigateur</span><span class="switch"><input type="checkbox" checked aria-label="Barre de navigateur"><span></span></span></div>
-            <div class="setting"><span class="t-label">Fond dégradé</span><span class="switch"><input type="checkbox" checked aria-label="Fond dégradé"><span></span></span></div>
+            <div class="field" style="margin:8px 0 0"><label for="c-bg">Fond</label><div class="color-row"><span class="swatch" style="background:var(--fd-stone-50)"></span><input id="c-bg" class="input input-sm t-mono" value="#F7F6F4"></div></div>
           </div>
         </div>
         <div role="tabpanel" id="tp-settings" aria-labelledby="tb-settings" hidden>

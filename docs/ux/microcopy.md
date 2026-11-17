@@ -18,7 +18,7 @@
 | Honnête : on dit ce qui se passe, y compris nos erreurs | Vague (« Une erreur est survenue » sans issue) |
 
 Le ton s'adapte au moment :
-- **Onboarding et états vides** : encourageant, orienté vers la première réussite. Un emoji au maximum (« Bienvenue Camille 👋 »).
+- **Onboarding et états vides** : encourageant, orienté vers la première réussite. **Aucun emoji** dans l'interface (« Bienvenue, Camille »).
 - **Travail dans l'éditeur** : neutre et concis, on ne dérange pas.
 - **Erreurs et actions destructives** : calme et précis. Jamais d'humour.
 - **Player (côté prospect)** : c'est la voix de **notre client**, pas la nôtre. Les textes par défaut restent sobres et neutres, la marque FlowDSIML s'efface (sauf le filigrane du plan Free).
