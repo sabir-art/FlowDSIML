@@ -177,6 +177,8 @@ export const themeSchema = z.object({
   radius: z.number().min(0).max(32).default(20),
   logoUrl: z.string().nullable().default(null),
   showBranding: z.boolean().default(true),
+  /** Fond dégradé du lecteur (maquette editeur.html, onglet Design › Cadre). */
+  backgroundGradient: z.boolean().default(false),
 });
 export type Theme = z.infer<typeof themeSchema>;
 

@@ -46,6 +46,7 @@ body {
   display: flex;
   flex-direction: column;
   background: var(--p-bg);
+  background-image: var(--p-bg-image, none);
   color: var(--p-text);
   position: relative;
   overflow: hidden;

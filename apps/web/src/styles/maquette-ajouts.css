@@ -1831,3 +1831,149 @@
   display: block;
   margin-bottom: 6px;
 }
+/* ---- Éditeur : onglets Design et Réglages, formulaire de lead (EDT-08, EDT-10, EDT-11) ---- */
+.mk .sec > .field + .field,
+.mk .sec > .setting + .field,
+.mk .sec > .field + .setting {
+  margin-top: 12px;
+}
+.mk .sec .sec-help {
+  margin: -4px 0 12px;
+}
+.mk .color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mk .color-row input[type='color'].swatch {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--fd-color-border-strong);
+  border-radius: 6px;
+  background: none;
+  flex: none;
+  cursor: pointer;
+}
+.mk .color-row input[type='color'].swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.mk .color-row input[type='color'].swatch::-webkit-color-swatch {
+  border: 0;
+  border-radius: 5px;
+}
+.mk .th-warn {
+  margin-top: 8px;
+  padding: 8px 10px;
+}
+.mk .th-warn .mk-link {
+  font-size: inherit;
+}
+.mk .th-panel .segmented,
+.mk .st-panel .segmented {
+  display: flex;
+  width: 100%;
+}
+.mk .th-panel .segmented button,
+.mk .st-panel .segmented button {
+  flex: 1;
+  justify-content: center;
+}
+.mk .th-panel .sec > .check,
+.mk .th-panel .sec > .help {
+  margin-top: 8px;
+}
+.mk .th-panel .th-help-top {
+  margin: -4px 0 8px;
+}
+.mk .th-panel .logo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mk .field-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface);
+  min-height: 46px;
+}
+.mk .field-row + .field-row {
+  margin-top: 6px;
+}
+.mk .field-row svg {
+  width: 14px;
+  height: 14px;
+}
+.mk .field-row .fr-spacer {
+  width: 28px;
+  flex: none;
+}
+.mk .chip-var {
+  font: 500 12px var(--fd-font-mono);
+  background: var(--fd-color-accent-soft);
+  color: var(--fd-color-accent-soft-text);
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.mk .var-row {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.mk .var-row .var-default {
+  order: 3;
+  flex: 1 0 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.mk .var-row .var-default .input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  height: 28px;
+}
+.mk .var-add {
+  margin-top: 8px;
+}
+.mk .st-panel .sec .help {
+  display: block;
+}
+.mk .sec .f-delete {
+  margin-top: 12px;
+  color: var(--fd-color-danger);
+}
+.mk .sec-title .menu-trigger {
+  text-transform: none;
+  letter-spacing: 0;
+  height: 28px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--fd-color-text);
+}
+.mk .sp-panel .sp-item {
+  width: 100%;
+  cursor: pointer;
+  color: var(--fd-color-text);
+  font: inherit;
+  text-align: left;
+}
+.mk .sp-panel .sp-item:hover {
+  background: var(--fd-color-surface-hover);
+}
+.mk .sp-panel .sp-url {
+  margin-top: 8px;
+  word-break: break-all;
+}
+.mk .cta-fields .field {
+  margin-top: 12px;
+}
+.mk .cta-fields .help {
+  display: block;
+}

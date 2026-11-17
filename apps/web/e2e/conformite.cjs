@@ -34,6 +34,61 @@ const SCREENS = {
       await p.mouse.move(0, 0);
     },
   },
+  'EDT-08': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async maquettePrep(p) {
+      await p.locator('#rail .step[data-i="5"]').click();
+      await p.waitForTimeout(200);
+    },
+    // Le formulaire de lead est réglé au niveau de la démo (onglet Réglages)
+    async prepare(p) {
+      await p.getByRole('tab', { name: 'Réglages' }).click();
+      await p.getByRole('button', { name: 'Créer le formulaire' }).click();
+      await p.waitForSelector('#f-title');
+      await p.locator('.panel-body').evaluate((el) => {
+        const t = el.querySelector('#f-title').closest('.sec');
+        el.scrollTop = t.offsetTop - el.offsetTop - 8;
+      });
+      await p.waitForTimeout(300);
+    },
+  },
+  'EDT-09': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async maquettePrep(p) {
+      await p.locator('#rail .step[data-i="7"]').click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.locator('.rail-list .step').nth(2).click();
+      await p.waitForTimeout(400);
+    },
+  },
+  'EDT-10': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async maquettePrep(p) {
+      await p.locator('#tb-design').click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.getByRole('tab', { name: 'Design' }).click();
+      await p.waitForTimeout(400);
+    },
+  },
+  'EDT-11': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async maquettePrep(p) {
+      await p.locator('#tb-settings').click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.getByRole('tab', { name: 'Réglages' }).click();
+      await p.waitForTimeout(400);
+    },
+  },
   'PRT-01': {
     maquette: 'reference/partage.html',
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',

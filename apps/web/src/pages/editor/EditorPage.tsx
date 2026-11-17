@@ -1,4 +1,4 @@
-import { GuidedTourPanel, ReadingModePanel } from './panels/GuidedDemoPanels';
+import { SettingsTab } from './panels/SettingsTab';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -35,9 +35,6 @@ import { StepPanel } from './panels/StepPanel';
 import { HotspotPanel } from './panels/HotspotPanel';
 import { BlurPanel } from './panels/BlurPanel';
 import { ThemePanel } from './panels/ThemePanel';
-import { VariablesPanel } from './panels/VariablesPanel';
-import { FormPanel } from './panels/FormPanel';
-import { ChaptersPanel } from './panels/ChaptersPanel';
 import { buildDraftManifest } from './draftManifest';
 import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
@@ -479,19 +476,9 @@ export function EditorPage() {
                 setSelection={setSelection}
               />
             )}
-            {tab === 'design' && (
-              <div className="stack panel-sections">
-                <ReadingModePanel editor={editor} readOnly={readOnly} />
-                <ThemePanel editor={editor} readOnly={readOnly} />
-              </div>
-            )}
+            {tab === 'design' && <ThemePanel editor={editor} readOnly={readOnly} />}
             {tab === 'settings' && (
-              <div className="stack panel-sections">
-                <FormPanel editor={editor} readOnly={readOnly} leadFormsAllowed={plan.leadForms} />
-                <VariablesPanel editor={editor} readOnly={readOnly} />
-                <ChaptersPanel editor={editor} readOnly={readOnly} />
-                <GuidedTourPanel editor={editor} readOnly={readOnly} />
-              </div>
+              <SettingsTab editor={editor} readOnly={readOnly} leadFormsAllowed={plan.leadForms} />
             )}
           </div>
         </aside>

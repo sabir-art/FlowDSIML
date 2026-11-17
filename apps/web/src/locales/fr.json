@@ -709,7 +709,64 @@
       "cta": "Bouton d’appel à l’action"
     },
     "variable": "Variable",
-    "v2": "V2"
+    "v2": "V2",
+    "design": {
+      "theme": "Thème",
+      "themeDemo": "Thème de cette démo",
+      "themeWorkspace": "Thème du workspace",
+      "colors": "Couleurs",
+      "lowContrast": "Contraste faible ({{ratio}}:1) : le texte des boutons sera difficile à lire.",
+      "useColor": "Utiliser {{color}}",
+      "shape": "Forme",
+      "shape_square": "Carré",
+      "shape_soft": "Doux",
+      "shape_round": "Rond",
+      "frame": "Cadre",
+      "browserBar": "Barre de navigateur",
+      "background": "Fond",
+      "gradient": "Fond dégradé",
+      "typography": "Typographie",
+      "brand": "Logo et marque"
+    },
+    "settings": {
+      "reading": "Lecture",
+      "progress": "Barre de progression",
+      "progressHelp": "La barre de progression est toujours affichée dans le lecteur.",
+      "language": "Langue de la démo",
+      "variables": "Variables utilisées",
+      "defaultIs": "par défaut :",
+      "deleteVariable": "Supprimer la variable {{key}}",
+      "add": "Ajouter"
+    },
+    "form": {
+      "addField": "Ajouter un champ",
+      "required": "Obligatoire",
+      "optional": "Facultatif",
+      "fieldOptions": "Options du champ {{field}}",
+      "makeRequired": "Rendre obligatoire",
+      "makeOptional": "Rendre facultatif",
+      "removeField": "Retirer le champ",
+      "behavior": "Comportement",
+      "mandatory": "Formulaire obligatoire",
+      "consentBox": "Case de consentement",
+      "sendTo": "Envoyer les leads vers",
+      "webhook": "Webhook",
+      "leadsTab": "Les leads sont toujours visibles dans l’onglet Leads.",
+      "email": "Email"
+    },
+    "ctaNewTabHelp": "Le lien s’ouvre dans un nouvel onglet.",
+    "end": {
+      "title": "Écran de fin",
+      "textTitle": "Écran de texte",
+      "primary": "Bouton principal (CTA)",
+      "stepCta": "Bouton d’action",
+      "showButton": "Afficher le bouton",
+      "secondary": "Bouton secondaire",
+      "restart": "Recommencer",
+      "elements": "Hotspots et zones de flou",
+      "zoomOn": "Zoom sur une zone",
+      "organisation": "Organisation"
+    }
   },
   "status": {
     "draft": "Brouillon",

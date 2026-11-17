@@ -119,20 +119,44 @@ const SHOTS = process.env.SHOTS_DIR;
 
   // Onglets thème, formulaire, variables
   await page.getByRole('tab', { name: 'Design' }).click();
-  await page.locator('#th-radius').fill('12');
+  await page.getByRole('radio', { name: 'Doux' }).click();
+  // EDT-10 : fond dégradé (nouvelle option du thème) et alerte de contraste
+  await page.getByLabel('Fond dégradé').check();
+  await page.locator('#th-primary-hex').fill('#9AD1C8');
+  await page.locator('#th-primary-hex').blur();
+  await page.waitForTimeout(300);
+  ok((await page.locator('.th-warn').count()) === 1, 'alerte de contraste sur une couleur principale claire');
+  await page.locator('.th-warn button').click();
+  await page.waitForTimeout(300);
+  ok((await page.locator('.th-warn').count()) === 0, 'couleur proposée appliquée (contraste ≥ 4,5:1)');
   await page.getByRole('tab', { name: 'Réglages' }).click();
   await page.getByRole('button', { name: 'Créer le formulaire' }).click();
   await page.waitForSelector('#f-title');
   ok(state.tables.forms.length === 1, 'formulaire de lead créé');
+  await page.getByLabel('Formulaire obligatoire').uncheck();
+  await page.waitForTimeout(900);
+  ok(
+    state.calls.some((c) => c.method === 'PATCH' && c.path.endsWith('/forms') && c.body?.skippable === true),
+    'EDT-08 : « Formulaire obligatoire » désactivé = formulaire passable',
+  );
   ok((await page.locator('text={{company}}').count()) > 0, 'variables du workspace listées');
   await page.getByRole('tab', { name: 'Étape' }).click();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/editor-after.png` });
   await page.waitForTimeout(900);
   ok(
     state.calls.some(
-      (c) => c.method === 'PATCH' && c.path.endsWith('/demos') && c.body?.settings?.theme?.radius === 12,
+      (c) => c.method === 'PATCH' && c.path.endsWith('/demos') && c.body?.settings?.theme?.radius === 10,
     ),
     'thème enregistré dans la démo',
+  );
+  ok(
+    state.calls.some(
+      (x) =>
+        x.method === 'PATCH' &&
+        x.path.endsWith('/demos') &&
+        x.body?.settings?.theme?.backgroundGradient === true,
+    ),
+    'EDT-10 : fond dégradé enregistré',
   );
   // F1 : mode de lecture Spotlight (onglet Design)
   await page.getByRole('tab', { name: 'Design' }).click();

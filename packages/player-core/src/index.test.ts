@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { beaconCenter, resolvePlacement, tipClass, zoomBox, zoomOrigin } from './index';
+import { beaconCenter, resolvePlacement, themeVars, tipClass, zoomBox, zoomOrigin } from './index';
+import { themeSchema } from '@flowdsiml/manifest';
 
 describe('player-core', () => {
   it('place la bulle', () => {
@@ -37,5 +38,16 @@ describe('spotlightVeilPath', () => {
     const { spotlightVeilPath } = await import('./index');
     expect(spotlightVeilPath([])).toBe('M0 0H100V100H0Z');
     expect(spotlightVeilPath([{ x: 0.1, y: 0.2, w: 0.3, h: 0.1 }])).toBe('M0 0H100V100H0ZM10 20V30H40V20Z');
+  });
+});
+
+describe('themeVars : fond dégradé (EDT-10)', () => {
+  it('aucun dégradé par défaut', () => {
+    expect(themeVars(themeSchema.parse({}))['--p-bg-image']).toBe('none');
+  });
+  it('dégradé à partir des couleurs du thème', () => {
+    const v = themeVars(themeSchema.parse({ backgroundGradient: true }))['--p-bg-image'];
+    expect(v).toContain('linear-gradient');
+    expect(v).toContain('#A3195B');
   });
 });

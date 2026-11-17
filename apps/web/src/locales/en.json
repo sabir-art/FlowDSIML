@@ -709,7 +709,64 @@
       "cta": "Call-to-action button"
     },
     "variable": "Variable",
-    "v2": "V2"
+    "v2": "V2",
+    "design": {
+      "theme": "Theme",
+      "themeDemo": "This demo’s theme",
+      "themeWorkspace": "Workspace theme",
+      "colors": "Colors",
+      "lowContrast": "Low contrast ({{ratio}}:1): button text will be hard to read.",
+      "useColor": "Use {{color}}",
+      "shape": "Shape",
+      "shape_square": "Square",
+      "shape_soft": "Soft",
+      "shape_round": "Round",
+      "frame": "Frame",
+      "browserBar": "Browser bar",
+      "background": "Background",
+      "gradient": "Gradient background",
+      "typography": "Typography",
+      "brand": "Logo and brand"
+    },
+    "settings": {
+      "reading": "Playback",
+      "progress": "Progress bar",
+      "progressHelp": "The progress bar is always shown in the player.",
+      "language": "Demo language",
+      "variables": "Variables used",
+      "defaultIs": "default:",
+      "deleteVariable": "Delete variable {{key}}",
+      "add": "Add"
+    },
+    "form": {
+      "addField": "Add a field",
+      "required": "Required",
+      "optional": "Optional",
+      "fieldOptions": "{{field}} field options",
+      "makeRequired": "Make required",
+      "makeOptional": "Make optional",
+      "removeField": "Remove field",
+      "behavior": "Behavior",
+      "mandatory": "Required form",
+      "consentBox": "Consent checkbox",
+      "sendTo": "Send leads to",
+      "webhook": "Webhook",
+      "leadsTab": "Leads are always visible in the Leads tab.",
+      "email": "Email"
+    },
+    "ctaNewTabHelp": "The link opens in a new tab.",
+    "end": {
+      "title": "End screen",
+      "textTitle": "Text screen",
+      "primary": "Primary button (CTA)",
+      "stepCta": "Action button",
+      "showButton": "Show the button",
+      "secondary": "Secondary button",
+      "restart": "Restart",
+      "elements": "Hotspots and blur areas",
+      "zoomOn": "Zoom on an area",
+      "organisation": "Organization"
+    }
   },
   "status": {
     "draft": "Draft",

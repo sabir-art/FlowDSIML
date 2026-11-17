@@ -1,13 +1,14 @@
-import { PanelTitle } from './PanelTitle';
-import { Image as ImageIcon, ImageUp, Palette, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Image as ImageIcon, ImageUp, TriangleAlert, X } from 'lucide-react';
+import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { themeSchema, type Theme } from '@flowdsiml/manifest';
-import { Alert, Button, Checkbox, Field, Select } from '@flowdsiml/ui';
+import { Alert } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { SUPABASE_URL } from '../../../lib/env';
+import { contrastRatio, darkenToContrast } from '../../../lib/contrast';
 import type { DemoEditor } from '../useDemoEditor';
 import { CtaFields } from './CtaFields';
+import { ReadingModePanel } from './GuidedDemoPanels';
 import { asSettings } from '../types';
 
 const FONTS = [
@@ -20,6 +21,16 @@ const FONTS = [
   "'Courier New', monospace",
 ];
 
+/** Forme des bulles et boutons (maquette : Carré / Doux / Rond) → rayon du thème. */
+const SHAPES = [
+  { key: 'square', radius: 0 },
+  { key: 'soft', radius: 10 },
+  { key: 'round', radius: 20 },
+] as const;
+
+type ColorKey = 'primary' | 'hotspot' | 'background' | 'surface' | 'text';
+
+/** Onglet Design de l'éditeur (maquette editeur.html, EDT-10). */
 export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly: boolean }) {
   const { t } = useTranslation();
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -39,32 +50,142 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
     set({ logoUrl: `${SUPABASE_URL}/storage/v1/object/public/branding/${path}` });
   }
 
-  const color = (key: 'primary' | 'hotspot' | 'background' | 'surface' | 'text', label: string) => (
-    <Field label={label} htmlFor={`th-${key}`}>
-      <div className="row">
+  const color = (key: ColorKey, label: string, extra?: ReactNode) => (
+    <div className="field">
+      <label htmlFor={`th-${key}-hex`}>{label}</label>
+      <div className="color-row">
         <input
           id={`th-${key}`}
+          className="swatch"
           type="color"
+          aria-label={label}
           disabled={readOnly}
           value={theme[key]}
           onChange={(e) => set({ [key]: e.target.value.toUpperCase() })}
         />
-        <code>{theme[key].toUpperCase()}</code>
+        <input
+          id={`th-${key}-hex`}
+          className="input input-sm t-mono"
+          maxLength={7}
+          disabled={readOnly}
+          defaultValue={theme[key].toUpperCase()}
+          key={theme[key]}
+          onBlur={(e) => {
+            const v = e.target.value.trim().toUpperCase();
+            if (/^#[0-9A-F]{6}$/.test(v) && v !== theme[key]) set({ [key]: v });
+            else e.target.value = theme[key].toUpperCase();
+          }}
+        />
       </div>
-    </Field>
+      {extra}
+    </div>
   );
 
+  // Texte blanc des boutons sur la couleur principale (AA : 4,5:1)
+  const ratio = contrastRatio(theme.primary, '#FFFFFF');
+  const fix = ratio < 4.5 ? darkenToContrast(theme.primary) : null;
+  const ratioText = ratio.toFixed(1).replace('.', ',');
+
   return (
-    <div className="stack">
-      <PanelTitle icon={<Palette />}>{t('editor.theme')}</PanelTitle>
-      {color('primary', t('editor.colorPrimary'))}
-      {color('hotspot', t('editor.colorHotspot'))}
-      {color('background', t('editor.colorBackground'))}
-      {color('surface', t('editor.colorSurface'))}
-      {color('text', t('editor.colorText'))}
-      <Field label={t('editor.font')} htmlFor="th-font">
-        <Select
+    <div className="th-panel">
+      <div className="sec">
+        <div className="sec-title">{t('editor.design.theme')}</div>
+        <select
+          className="select input-sm"
+          aria-label={t('editor.design.theme')}
+          value="demo"
+          disabled={readOnly}
+          onChange={() => {}}
+        >
+          <option value="demo">{t('editor.design.themeDemo')}</option>
+          <option value="workspace" disabled>
+            {t('editor.design.themeWorkspace')} ({t('shell.soon')})
+          </option>
+        </select>
+      </div>
+
+      <div className="sec">
+        <div className="sec-title">{t('editor.design.colors')}</div>
+        {color(
+          'primary',
+          t('editor.colorPrimary'),
+          ratio < 4.5 && (
+            <div className="alert alert-warning th-warn" role="status">
+              <TriangleAlert aria-hidden="true" />
+              <span className="t-caption">
+                {t('editor.design.lowContrast', { ratio: ratioText })}{' '}
+                {fix && !readOnly && (
+                  <button type="button" className="mk-link" onClick={() => set({ primary: fix })}>
+                    {t('editor.design.useColor', { color: fix })}
+                  </button>
+                )}
+              </span>
+            </div>
+          ),
+        )}
+        {color('hotspot', t('editor.colorHotspot'))}
+        {color('surface', t('editor.colorSurface'))}
+        {color('text', t('editor.colorText'))}
+      </div>
+
+      <div className="sec">
+        <div className="sec-title">{t('editor.design.shape')}</div>
+        <div className="segmented" role="radiogroup" aria-label={t('editor.design.shape')}>
+          {SHAPES.map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              role="radio"
+              aria-checked={theme.radius === s.radius}
+              disabled={readOnly}
+              onClick={() => set({ radius: s.radius })}
+            >
+              {t(`editor.design.shape_${s.key}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="sec">
+        <div className="sec-title">{t('editor.design.frame')}</div>
+        <div className="setting">
+          <span className="t-label">
+            {t('editor.design.browserBar')} <span className="badge badge-xs">{t('shell.soon')}</span>
+          </span>
+          <span className="switch">
+            <input type="checkbox" checked disabled aria-label={t('editor.design.browserBar')} readOnly />
+            <span />
+          </span>
+        </div>
+        {color('background', t('editor.design.background'))}
+        <div className="setting">
+          <span className="t-label" id="th-grad-l">
+            {t('editor.design.gradient')}
+          </span>
+          <span className="switch">
+            <input
+              id="th-grad"
+              type="checkbox"
+              aria-labelledby="th-grad-l"
+              checked={theme.backgroundGradient}
+              disabled={readOnly}
+              onChange={(e) => set({ backgroundGradient: e.target.checked })}
+            />
+            <span />
+          </span>
+        </div>
+      </div>
+
+      <div className="sec">
+        <ReadingModePanel editor={editor} readOnly={readOnly} />
+      </div>
+
+      <div className="sec">
+        <div className="sec-title">{t('editor.design.typography')}</div>
+        <select
           id="th-font"
+          className="select input-sm"
+          aria-label={t('editor.font')}
           disabled={readOnly}
           value={theme.fontFamily}
           onChange={(e) => set({ fontFamily: e.target.value })}
@@ -74,21 +195,11 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
               {f.split(',')[0]!.replace(/'/g, '')}
             </option>
           ))}
-        </Select>
-      </Field>
-      <Field label={t('editor.radius', { v: theme.radius })} htmlFor="th-radius">
-        <input
-          id="th-radius"
-          type="range"
-          min={0}
-          max={24}
-          disabled={readOnly}
-          value={theme.radius}
-          onChange={(e) => set({ radius: Number(e.target.value) })}
-        />
-      </Field>
-      <div className="fd-field">
-        <span className="fd-label">{t('editor.logo')}</span>
+        </select>
+      </div>
+
+      <div className="sec">
+        <div className="sec-title">{t('editor.design.brand')}</div>
         <div className="logo-row">
           <span className="logo-preview">
             {theme.logoUrl ? <img src={theme.logoUrl} alt="" /> : <ImageIcon size={18} aria-hidden="true" />}
@@ -110,38 +221,44 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
                   e.target.value = '';
                 }}
               />
-              <Button size="sm" icon={<ImageUp />} onClick={() => logoInput.current?.click()}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => logoInput.current?.click()}
+              >
+                <ImageUp aria-hidden="true" />
                 {theme.logoUrl ? t('editor.changeLogo') : t('editor.chooseLogo')}
-              </Button>
+              </button>
               {theme.logoUrl && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  icon={<X />}
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm btn-icon"
                   aria-label={t('editor.removeLogo')}
                   onClick={() => set({ logoUrl: null })}
-                />
+                >
+                  <X aria-hidden="true" />
+                </button>
               )}
             </>
           )}
         </div>
-        {logoName && <span className="fd-muted logo-name">{logoName}</span>}
+        {logoName && <span className="help">{logoName}</span>}
+        {uploadError && <Alert kind="error">{uploadError}</Alert>}
+        <label className="check">
+          <input
+            type="checkbox"
+            disabled={readOnly}
+            checked={theme.showBranding}
+            onChange={(e) => set({ showBranding: e.target.checked })}
+          />
+          {t('editor.showBranding')}
+        </label>
+        <p className="help">{t('editor.brandingHint')}</p>
       </div>
-      {uploadError && <Alert kind="error">{uploadError}</Alert>}
-      <Checkbox
-        disabled={readOnly}
-        checked={theme.showBranding}
-        onChange={(e) => set({ showBranding: e.target.checked })}
-        label={t('editor.showBranding')}
-      />
-      <p className="fd-muted" style={{ fontSize: 12 }}>
-        {t('editor.brandingHint')}
-      </p>
-      <div className="panel-group">
-        <span className="fd-label">{t('editor.pageCta')}</span>
-        <p className="fd-muted" style={{ fontSize: 12, margin: 0 }}>
-          {t('editor.pageCtaHint')}
-        </p>
+
+      <div className="sec">
+        <div className="sec-title">{t('editor.pageCta')}</div>
+        <p className="help th-help-top">{t('editor.pageCtaHint')}</p>
         <CtaFields
           idPrefix="page"
           value={settings.cta ?? null}
@@ -149,19 +266,6 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
           onChange={(v) => editor.updateDemo({ settings: { ...settings, cta: v } })}
         />
       </div>
-      <Field label={t('editor.locale')} htmlFor="th-locale">
-        <Select
-          id="th-locale"
-          disabled={readOnly}
-          value={settings.locale ?? 'fr'}
-          onChange={(e) =>
-            editor.updateDemo({ settings: { ...settings, locale: e.target.value === 'en' ? 'en' : 'fr' } })
-          }
-        >
-          <option value="fr">Français</option>
-          <option value="en">English</option>
-        </Select>
-      </Field>
     </div>
   );
 }
