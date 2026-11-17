@@ -15,7 +15,7 @@
 
 | | Bloquant | Majeur | Mineur |
 |---|---|---|---|
-| Web (lot 3) | 1 | 9 | 7 |
+| Web (lot 3) | 1 | 10 | 8 |
 | Extension (lot 4) | 2 | 2 | 2 |
 
 Points positifs : i18n FR/EN en place (116 clés, aucune manquante), `lang` correct, libellés de champs reliés, rôles D8 respectés, liens de navigation avec `aria-current` (NavLink), confirmation avant suppression, mode sombre fonctionnel grâce aux tokens.
@@ -42,6 +42,17 @@ Points positifs : i18n FR/EN en place (116 clés, aucune manquante), `lang` corr
 | W16 | Mineur | Profil | Champ email désactivé sans libellé associé (`<label>` sans `for`). | `htmlFor` + `id`, ou champ en lecture seule avec `aria-describedby` « Contactez le support pour changer d'email ». |
 | W17 | Mineur | Typo | `h1` des pages de paramètres : OK (Bricolage). Les titres de cartes (`h2`) sont en display 22 px : un peu lourds empilés. | `h3` (Instrument 600, 18 px) pour les titres de cartes, `h2` réservé aux sections de page. |
 | W18 | Mineur | Valeurs d'espacement | `app.css` utilise `--fd-space-6` (désormais 24 px) et `--fd-space-5` (20 px) : légère réduction des marges. | Si les anciennes valeurs sont voulues : `--fd-space-5` → `--fd-space-6`, `--fd-space-6` → `--fd-space-8`. |
+
+#### Compléments sur l'API réelle (clé publique fournie par le chef d'équipe)
+
+Testé sans créer de compte (aucune adresse fictive inscrite, aucun email envoyé) : connexion avec de mauvais identifiants (`POST /auth/v1/token` → 400) et inscription avec un mot de passe trop court.
+
+| # | Gravité | Écran | Écart | Attendu |
+|---|---|---|---|---|
+| W19 | Majeur | Inscription, connexion | La validation des champs repose sur les **bulles natives du navigateur** (« Please fill out this field. », « Please lengthen this text to 8 characters… ») : langue du navigateur et non de l'app, non stylées, un seul message à la fois, pas de `aria-invalid`. | `noValidate` sur le formulaire + validation applicative : messages en ligne sous chaque champ (`validation.*` de `docs/ux/i18n`), `aria-invalid` + `aria-describedby`, focus sur le premier champ en erreur (`composants.md` §2.2). |
+| W20 | Mineur | Connexion | Erreur « Email ou mot de passe incorrect. » bien annoncée (`role="alert"`), mais le champ mot de passe n'est ni marqué en erreur ni refocalisé, et le message ne dit pas quoi faire. | `auth.login.invalidCredentials` (« … Vérifiez vos informations et réessayez. »), focus sur le mot de passe, vidé. |
+
+Captures : `lot3/real-login-error.png`, `lot3/real-signup-short.png`. Le parcours complet inscription → confirmation → onboarding reste à tester avec un compte de test réel (SMTP limité aux membres de l'organisation).
 
 ### Extension : popup (lot 4)
 
