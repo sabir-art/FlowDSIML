@@ -120,7 +120,7 @@
     "confirmRemove": "Remove {{email}} from the workspace?",
     "confirmLeave": "Leave this workspace?",
     "emails": "Emails (one or more)",
-    "emailsPlaceholder": "mary@acme.com, paul@acme.com",
+    "emailsPlaceholder": "mary@acme.example, paul@acme.example",
     "invalidEmails": "Invalid addresses: {{list}}",
     "invitesCreated_one": "Invitation created. Send this link:",
     "invitesCreated_other": "{{count}} invitations created. Send each person their link:"
@@ -317,7 +317,9 @@
     "badgeBlurs_one": "{{count}} blurred area",
     "badgeBlurs_other": "{{count}} blurred areas",
     "formOnStep": "Form “{{title}}” shown before this step",
-    "editForm": "Edit"
+    "editForm": "Edit",
+    "chooseLogo": "Choose a logo",
+    "changeLogo": "Change logo"
   },
   "status": {
     "draft": "Draft",

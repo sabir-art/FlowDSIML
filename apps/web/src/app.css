@@ -296,15 +296,21 @@
   opacity: 0.8;
   border-radius: 0 4px 4px 0;
 }
+.funnel-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-3);
+}
+.funnel-cell .funnel-track {
+  flex: 1;
+  height: 10px;
+}
 .funnel-value {
-  position: relative;
-  padding-left: 8px;
-  font-size: 12px;
-  line-height: 22px;
+  flex: none;
+  min-width: 84px;
+  font-size: var(--fd-font-xs);
   font-variant-numeric: tabular-nums;
   color: var(--fd-color-text);
-  mix-blend-mode: normal;
-  text-shadow: 0 0 3px var(--fd-color-surface);
 }
 .funnel-drop-high {
   color: var(--fd-color-danger);
@@ -775,4 +781,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+.menu-item {
+  white-space: nowrap;
 }

@@ -78,7 +78,7 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
-        <Button icon={<Download />} size="sm" onClick={exportCsv} disabled={!leads.length}>
+        <Button icon={<Download />} onClick={exportCsv} disabled={!leads.length}>
           {t('analytics.exportCsv')}
         </Button>
         <span className="fd-muted">{t('leads.count', { count: leads.length })}</span>

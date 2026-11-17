@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 type Variant = 'default' | 'primary' | 'accent' | 'danger' | 'ghost';
@@ -88,5 +88,23 @@ export function Alert({
     <div className={`fd-alert fd-alert--${kind}`} role={kind === 'error' ? 'alert' : 'status'}>
       {children}
     </div>
+  );
+}
+
+/** Case à cocher alignée sur son libellé (.fd-check). */
+export function Checkbox({
+  label,
+  hint,
+  className = '',
+  ...props
+}: Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & { label: ReactNode; hint?: ReactNode }) {
+  return (
+    <label className={`fd-check ${className}`.trim()}>
+      <input type="checkbox" {...props} />
+      <span>
+        {label}
+        {hint && <span className="fd-check__hint">{hint}</span>}
+      </span>
+    </label>
   );
 }

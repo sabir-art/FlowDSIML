@@ -21,8 +21,8 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   ok((await page.locator('.stat-value').first().textContent()) === '120', 'KPI vues');
   ok((await page.locator('.chart-bar').count()) === 3, 'histogramme des vues par jour');
   ok((await page.locator('.funnel tbody tr').count()) >= 1, 'entonnoir par étape');
-  await page.waitForSelector('text=prospect@globex.com', { timeout: 3000 }).catch(() => null);
-  ok((await page.locator('text=prospect@globex.com').count()) === 1, 'leads de la démo listés');
+  await page.waitForSelector('text=prospect@globex.example', { timeout: 3000 }).catch(() => null);
+  ok((await page.locator('text=prospect@globex.example').count()) === 1, 'leads de la démo listés');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/analytics-demo.png`, fullPage: true });
   const [dl] = await Promise.all([
     page.waitForEvent('download'),
@@ -41,14 +41,14 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   );
 
   await page.goto(`${APP}/#/leads`);
-  await page.waitForSelector('text=prospect@globex.com');
+  await page.waitForSelector('text=prospect@globex.example');
   const [dl2] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('button', { name: 'Exporter en CSV' }).click(),
   ]);
   const csv = require('fs').readFileSync(await dl2.path(), 'utf8');
-  ok(csv.includes('prospect@globex.com') && csv.includes('Globex'), 'export CSV des leads');
-  await page.getByRole('button', { name: 'Supprimer prospect@globex.com' }).click();
+  ok(csv.includes('prospect@globex.example') && csv.includes('Globex'), 'export CSV des leads');
+  await page.getByRole('button', { name: 'Supprimer prospect@globex.example' }).click();
   await page.locator('dialog[open]').getByRole('button', { name: 'Supprimer' }).click();
   await page.waitForTimeout(500);
   ok(state.tables.leads.length === 0, 'suppression d’un lead (RGPD)');

@@ -1,7 +1,7 @@
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { ClipboardList, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Button, Field } from '@flowdsiml/ui';
+import { Button, Checkbox, Field } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asFields, type FormField } from '../types';
 
@@ -88,38 +88,28 @@ export function FormPanel({
       </Field>
       <div>
         <div className="fd-label">{t('editor.formFields')}</div>
-        <label className="row">
-          <input type="checkbox" checked disabled /> {t('editor.fieldEmail')}
-        </label>
+        <Checkbox checked disabled label={t('editor.fieldEmail')} />
         {OPTIONAL.map((o) => {
           const f = fields.find((x) => x.key === o.key);
           return (
             <div key={o.key} className="row">
-              <label className="row">
-                <input
-                  type="checkbox"
-                  disabled={readOnly}
-                  checked={!!f}
-                  onChange={(e) => toggle(o, e.target.checked)}
-                />{' '}
-                {t(o.labelKey)}
-              </label>
+              <Checkbox
+                disabled={readOnly}
+                checked={!!f}
+                onChange={(e) => toggle(o, e.target.checked)}
+                label={t(o.labelKey)}
+              />
               {f && (
-                <label className="row fd-muted" style={{ fontSize: 12 }}>
-                  <input
-                    type="checkbox"
-                    disabled={readOnly}
-                    checked={f.required}
-                    onChange={(e) =>
-                      set({
-                        fields: fields.map((x) =>
-                          x.key === o.key ? { ...x, required: e.target.checked } : x,
-                        ),
-                      })
-                    }
-                  />
-                  {t('editor.required')}
-                </label>
+                <Checkbox
+                  disabled={readOnly}
+                  checked={f.required}
+                  onChange={(e) =>
+                    set({
+                      fields: fields.map((x) => (x.key === o.key ? { ...x, required: e.target.checked } : x)),
+                    })
+                  }
+                  label={t('editor.required')}
+                />
               )}
             </div>
           );
@@ -136,15 +126,12 @@ export function FormPanel({
           onChange={(e) => set({ consent_text: e.target.value })}
         />
       </Field>
-      <label className="row">
-        <input
-          type="checkbox"
-          disabled={readOnly}
-          checked={form.skippable}
-          onChange={(e) => set({ skippable: e.target.checked })}
-        />{' '}
-        {t('editor.skippable')}
-      </label>
+      <Checkbox
+        disabled={readOnly}
+        checked={form.skippable}
+        onChange={(e) => set({ skippable: e.target.checked })}
+        label={t('editor.skippable')}
+      />
       {!readOnly && (
         <Button
           variant="ghost"

@@ -25,11 +25,11 @@ describe('player logic', () => {
   });
   it('contrôle l’origine d’embed', () => {
     expect(embedAllowed([], true, null)).toBe(true);
-    expect(embedAllowed(['acme.com'], false, null)).toBe(true);
-    expect(embedAllowed(['acme.com'], true, 'https://acme.com')).toBe(true);
-    expect(embedAllowed(['*.acme.com'], true, 'https://www.acme.com')).toBe(true);
-    expect(embedAllowed(['acme.com'], true, 'https://evil.com')).toBe(false);
-    expect(embedAllowed(['acme.com'], true, null)).toBe(false);
+    expect(embedAllowed(['acme.example'], false, null)).toBe(true);
+    expect(embedAllowed(['acme.example'], true, 'https://acme.example')).toBe(true);
+    expect(embedAllowed(['*.acme.example'], true, 'https://www.acme.example')).toBe(true);
+    expect(embedAllowed(['acme.example'], true, 'https://evil.example')).toBe(false);
+    expect(embedAllowed(['acme.example'], true, null)).toBe(false);
   });
   it('résout les assets relatifs uniquement', () => {
     const r = resolveAssets(m, 'https://s/published/d/');

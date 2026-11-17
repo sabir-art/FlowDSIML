@@ -147,7 +147,7 @@ function seed() {
           version_id: 'v-2',
           link_id: null,
           visitor_id: 'v1',
-          email: 'prospect@globex.com',
+          email: 'prospect@globex.example',
           fields: { company: 'Globex' },
           consent: true,
           created_at: now,

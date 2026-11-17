@@ -120,7 +120,7 @@
     "confirmRemove": "Retirer {{email}} du workspace ?",
     "confirmLeave": "Quitter ce workspace ?",
     "emails": "Emails (un ou plusieurs)",
-    "emailsPlaceholder": "marie@acme.com, paul@acme.com",
+    "emailsPlaceholder": "marie@acme.example, paul@acme.example",
     "invalidEmails": "Adresses invalides : {{list}}",
     "invitesCreated_one": "Invitation créée. Envoyez ce lien :",
     "invitesCreated_other": "{{count}} invitations créées. Envoyez à chacun son lien :"
@@ -317,7 +317,9 @@
     "badgeBlurs_one": "{{count}} zone floutée",
     "badgeBlurs_other": "{{count}} zones floutées",
     "formOnStep": "Formulaire « {{title}} » affiché avant cette étape",
-    "editForm": "Modifier"
+    "editForm": "Modifier",
+    "chooseLogo": "Choisir un logo",
+    "changeLogo": "Changer le logo"
   },
   "status": {
     "draft": "Brouillon",

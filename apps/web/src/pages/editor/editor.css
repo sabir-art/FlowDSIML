@@ -230,11 +230,11 @@
   cursor: move;
 }
 .canvas-blur.selected {
-  border: 2px solid #ffcc00;
+  border: 2px solid var(--fd-color-border-selected);
 }
 .canvas-zoom {
   position: absolute;
-  border: 2px dashed #ffcc00;
+  border: 2px dashed var(--fd-color-border-selected);
   pointer-events: none;
 }
 .canvas-text {
@@ -457,4 +457,63 @@
 }
 .canvas-text {
   position: relative;
+}
+/* Panneaux : rythme vertical régulier (20 px entre champs) */
+.editor-right .stack {
+  gap: var(--fd-space-5, 20px);
+}
+.editor-right .fd-field {
+  margin-bottom: 0;
+}
+.panel-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-3);
+}
+.panel-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-3);
+  padding: var(--fd-space-3);
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-md);
+}
+.panel-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+  color: var(--fd-color-text-muted);
+}
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+}
+.logo-preview {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-subtle);
+  overflow: hidden;
+  flex: none;
+}
+.logo-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.logo-name {
+  font-size: var(--fd-font-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* FI4 : zone cliquable en pointillés fins, sans aplat */
+.canvas-hotspot {
+  background: transparent !important;
+  border-width: 1px !important;
 }
