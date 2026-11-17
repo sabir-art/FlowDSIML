@@ -65,7 +65,13 @@
 }
 
 /* ---- Appels forts : la teinte chaude d'origine (orange) devient framboise DSI ---- */
-.btn-accent { background: linear-gradient(135deg, var(--fd-orange-500) -40%, var(--ref-hot) 45%); color: #FFFFFF; }
+.btn-accent {
+  /* L'orange d'origine reste dans l'angle haut gauche (24 px) et en halo : sous le texte, au moins 70 % de framboise, soit un contraste d'au moins 4,5:1 avec le blanc. */
+  background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 24px);
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--fd-orange-500) 75%, transparent);
+  color: #FFFFFF;
+}
+.btn-accent.btn-block { background: linear-gradient(90deg, var(--fd-orange-500) 0%, var(--ref-hot) 22%); } /* texte centré : il commence après 25 % de la largeur */
 .btn-accent:hover { background: var(--ref-hot-hover); }
 .badge-accent { background: linear-gradient(90deg, var(--ref-reco-from), var(--ref-reco-mid)); color: var(--fd-color-accent-soft-text); }
 
@@ -94,3 +100,4 @@
 /* ---- Sommaire : pastilles d'icône colorées d'origine ---- */
 .screen .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); display: grid; place-items: center; margin-bottom: 6px; }
 .screen .ic svg { width: 18px; height: 18px; }
+.btn-accent.btn-sm { background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 16px); } /* petit bouton : le texte commence plus près de l'angle */
