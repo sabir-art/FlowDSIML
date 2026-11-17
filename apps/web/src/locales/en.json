@@ -769,13 +769,17 @@
     "leads_one": "{{n}} lead",
     "leads_other": "{{n}} leads",
     "subtitle": "Your interactive journeys, ready to share.",
-    "usageShort": "{{used}} / {{limit}} published demos",
     "kpiViews": "Views (30 days)",
     "filter_all": "All",
     "filter_published": "Published",
     "filter_draft": "Drafts",
     "allFolders": "All folders",
-    "newHint": "Capture a journey with the extension"
+    "newHint": "Capture a journey with the extension",
+    "seeAnalytics": "See analytics",
+    "pts": " pts",
+    "steps_one": "{{count}} step",
+    "steps_other": "{{count}} steps",
+    "deleteFolderShort": "Delete folder"
   },
   "a11y": {
     "skip": "Skip to content"

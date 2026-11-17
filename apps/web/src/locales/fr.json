@@ -769,13 +769,17 @@
     "leads_one": "{{n}} lead",
     "leads_other": "{{n}} leads",
     "subtitle": "Vos parcours interactifs, prêts à partager.",
-    "usageShort": "{{used}} / {{limit}} démos publiées",
     "kpiViews": "Vues (30 jours)",
     "filter_all": "Toutes",
     "filter_published": "Publiées",
     "filter_draft": "Brouillons",
     "allFolders": "Tous les dossiers",
-    "newHint": "Capturer un parcours avec l'extension"
+    "newHint": "Capturer un parcours avec l'extension",
+    "seeAnalytics": "Voir les analytics",
+    "pts": " pts",
+    "steps_one": "{{count}} étape",
+    "steps_other": "{{count}} étapes",
+    "deleteFolderShort": "Supprimer le dossier"
   },
   "a11y": {
     "skip": "Aller au contenu"

@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowDownUp,
+  ArrowUpRight,
   BarChart3,
   Check,
   Eye,
@@ -20,7 +20,6 @@ import {
   Search,
   Share2,
   Trash2,
-  X,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Card, Select } from '@flowdsiml/ui';
@@ -53,10 +52,7 @@ export function DemosPage() {
   const [folders, setFolders] = useState<FolderRow[]>([]);
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [covers, setCovers] = useState<Record<string, string>>({});
-  const [usage, setUsage] = useState<{
-    published_demos: number;
-    limits: { published_demos: number | null };
-  } | null>(null);
+  const [stepCounts, setStepCounts] = useState<Record<string, number>>({});
   const [folder, setFolder] = useState<string | 'all' | 'none'>('all');
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
@@ -71,7 +67,7 @@ export function DemosPage() {
   const [kpis, setKpis] = useState<{ cur: Kpis; prev: Kpis | null } | null>(null);
 
   const load = useCallback(async () => {
-    const [d, f, o, u] = await Promise.all([
+    const [d, f, o] = await Promise.all([
       supabase
         .from('demos')
         .select('*')
@@ -80,7 +76,6 @@ export function DemosPage() {
         .order('updated_at', { ascending: false }),
       supabase.from('folders').select('*').eq('workspace_id', ws.id).order('name'),
       supabase.rpc('workspace_overview', { p_workspace: ws.id, p_days: 30 }),
-      supabase.rpc('workspace_usage', { p_workspace: ws.id }),
     ]);
     const list = d.data ?? [];
     setDemos(list);
@@ -88,7 +83,6 @@ export function DemosPage() {
     setStats(
       Object.fromEntries(((o.data ?? []) as Array<Stats & { demo_id: string }>).map((r) => [r.demo_id, r])),
     );
-    setUsage(u.data as never);
     // KPI du workspace sur 30 jours (et les 30 précédents pour les variations). Repli sur la somme
     // de workspace_overview si la RPC workspace_kpis (migration 130800) n'est pas encore en place.
     const now = Date.now();
@@ -117,6 +111,16 @@ export function DemosPage() {
       });
     }
     if (list.length) {
+      const all = await supabase
+        .from('steps')
+        .select('demo_id')
+        .in(
+          'demo_id',
+          list.map((x) => x.id),
+        );
+      const n: Record<string, number> = {};
+      for (const r of all.data ?? []) n[r.demo_id] = (n[r.demo_id] ?? 0) + 1;
+      setStepCounts(n);
       const s = await supabase
         .from('steps')
         .select('demo_id, image_path, position')
@@ -174,8 +178,8 @@ export function DemosPage() {
     if (d) navigate(`/demos/${d.id}/edit`);
   }
 
-  async function saveFolder(e: FormEvent) {
-    e.preventDefault();
+  async function saveFolder(e?: FormEvent) {
+    e?.preventDefault();
     const name = (renaming ? renaming.name : (newFolder ?? '')).trim().slice(0, 80);
     if (!name) return;
     await run(async () => {
@@ -188,7 +192,6 @@ export function DemosPage() {
   }
 
   if (!demos) return <Loading />;
-  const limit = usage?.limits?.published_demos;
 
   const menuFor = (d: Demo): Array<MenuItem | 'separator'> => [
     { label: t('demos.edit'), icon: <Pencil />, onSelect: () => navigate(`/demos/${d.id}/edit`) },
@@ -213,22 +216,6 @@ export function DemosPage() {
       : []),
   ];
 
-  const folderInput = (value: string, onChange: (v: string) => void, onCancel: () => void) => (
-    <form className="folder-form" onSubmit={saveFolder}>
-      <input
-        className="fd-input"
-        autoFocus
-        maxLength={80}
-        aria-label={t('demos.folderName')}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => e.key === 'Escape' && onCancel()}
-      />
-      <Button type="submit" size="sm" variant="ghost" icon={<Check />} aria-label={t('common.save')} />
-      <Button size="sm" variant="ghost" icon={<X />} aria-label={t('common.cancel')} onClick={onCancel} />
-    </form>
-  );
-
   const counts = {
     all: demos.length,
     published: demos.filter((d) => d.status === 'published').length,
@@ -245,33 +232,12 @@ export function DemosPage() {
     title: t('demos.sortTitle'),
     views: t('demos.sortViews'),
   };
-  const folderPill = (id: string | 'all' | 'none', label: string, count: number, icon: ReactNode) => (
-    <button type="button" className="folder-pill" aria-pressed={folder === id} onClick={() => setFolder(id)}>
-      {icon}
-      <span className="folder-pill__name">{label}</span>
-      <span className="folder-pill__count">{count}</span>
-    </button>
-  );
-
   return (
     <div className="stack page-wide">
       <header className="page-head page-head--refonte">
         <div className="page-head__titles">
           <h1>{t('demos.title')}</h1>
-          <p className="page-head__sub">
-            {t('demos.subtitle')}
-            {usage && limit !== null && limit !== undefined && (
-              <>
-                {' · '}
-                <Link
-                  to="/settings/plans"
-                  className={usage.published_demos >= limit ? 'usage-link usage-link--full' : 'usage-link'}
-                >
-                  {t('demos.usageShort', { used: usage.published_demos, limit })}
-                </Link>
-              </>
-            )}
-          </p>
+          <p className="page-head__sub">{t('demos.subtitle')}</p>
         </div>
         <div className="page-head__actions">
           <label className="search-pill">
@@ -301,6 +267,15 @@ export function DemosPage() {
             icon={<Eye />}
             label={t('demos.kpiViews')}
             value={formatNumber(kpis.cur.views)}
+            action={
+              <Link
+                to="/analytics"
+                className="fd-btn fd-btn--round fd-btn--inverse fd-btn--sm kpi-action"
+                aria-label={t('demos.seeAnalytics')}
+              >
+                <ArrowUpRight aria-hidden="true" />
+              </Link>
+            }
             delta={kpis.prev ? variation(kpis.cur.views, kpis.prev.views) : undefined}
             {...kpi}
           />
@@ -315,13 +290,17 @@ export function DemosPage() {
             icon={<Route />}
             label={t('analytics.completion')}
             value={`${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)} %`}
-            delta={
+            deltaAbs={
               kpis.prev
                 ? kpis.prev.visitors > 0
-                  ? variation(
-                      completionRate(kpis.cur.visitors, kpis.cur.completions),
-                      completionRate(kpis.prev.visitors, kpis.prev.completions),
-                    )
+                  ? {
+                      value: Math.round(
+                        (completionRate(kpis.cur.visitors, kpis.cur.completions) -
+                          completionRate(kpis.prev.visitors, kpis.prev.completions)) *
+                          100,
+                      ),
+                      unit: t('demos.pts'),
+                    }
                   : null
                 : undefined
             }
@@ -331,7 +310,7 @@ export function DemosPage() {
             icon={<Mail />}
             label={t('analytics.leads')}
             value={formatNumber(kpis.cur.leads)}
-            delta={kpis.prev ? variation(kpis.cur.leads, kpis.prev.leads) : undefined}
+            deltaAbs={kpis.prev ? { value: kpis.cur.leads - kpis.prev.leads } : undefined}
             {...kpi}
           />
         </section>
@@ -348,25 +327,66 @@ export function DemosPage() {
             ))}
           </div>
           <div className="filter-bar__end">
-            {folders.length > 5 && (
-              <Menu
-                label={t('demos.folders')}
-                trigger={{ icon: <Folder />, text: t('demos.folders') }}
-                items={[
-                  { label: t('demos.allFolders'), icon: <Layers />, onSelect: () => setFolder('all') },
-                  { label: t('demos.noFolder'), icon: <FolderOpen />, onSelect: () => setFolder('none') },
-                  'separator',
-                  ...folders.map((f) => ({
-                    label: f.name,
-                    icon: <Folder />,
-                    onSelect: () => setFolder(f.id),
-                  })),
-                ]}
-              />
-            )}
+            <Menu
+              label={t('demos.folders')}
+              trigger={{
+                icon: <Folder />,
+                text:
+                  folder === 'all'
+                    ? t('demos.folders')
+                    : folder === 'none'
+                      ? t('demos.noFolder')
+                      : (folders.find((f) => f.id === folder)?.name ?? t('demos.folders')),
+                chevron: true,
+              }}
+              items={[
+                {
+                  label: `${t('demos.allFolders')} · ${demos.length}`,
+                  icon: folder === 'all' ? <Check /> : <Layers />,
+                  onSelect: () => setFolder('all'),
+                },
+                {
+                  label: `${t('demos.noFolder')} · ${inFolder('none')}`,
+                  icon: folder === 'none' ? <Check /> : <FolderOpen />,
+                  onSelect: () => setFolder('none'),
+                },
+                ...(folders.length ? (['separator'] as const) : []),
+                ...folders.map((f) => ({
+                  label: `${f.name} · ${inFolder(f.id)}`,
+                  icon: folder === f.id ? <Check /> : <Folder />,
+                  onSelect: () => setFolder(f.id),
+                })),
+                ...(editable
+                  ? ([
+                      'separator',
+                      { label: t('demos.newFolder'), icon: <FolderPlus />, onSelect: () => setNewFolder('') },
+                      ...(current && folder !== 'all' && folder !== 'none'
+                        ? [
+                            {
+                              label: t('demos.renameFolder', {
+                                name: folders.find((f) => f.id === folder)?.name ?? '',
+                              }),
+                              icon: <Pencil />,
+                              onSelect: () => {
+                                const f = folders.find((x) => x.id === folder);
+                                if (f) setRenaming({ id: f.id, name: f.name });
+                              },
+                            },
+                            {
+                              label: t('demos.deleteFolderShort'),
+                              icon: <Trash2 />,
+                              danger: true,
+                              onSelect: () => setFolderToDelete(folders.find((x) => x.id === folder) ?? null),
+                            },
+                          ]
+                        : []),
+                    ] as Array<MenuItem | 'separator'>)
+                  : []),
+              ]}
+            />
             <Menu
               label={t('demos.sort')}
-              trigger={{ icon: <ArrowDownUp />, text: sortLabels[sort] }}
+              trigger={{ text: sortLabels[sort], chevron: true }}
               items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
                 label: sortLabels[k],
                 icon: sort === k ? <Check /> : <span />,
@@ -375,53 +395,6 @@ export function DemosPage() {
             />
           </div>
         </div>
-
-        <nav className="folder-pills" aria-label={t('demos.folders')}>
-          {folderPill('all', t('demos.allFolders'), demos.length, <Layers aria-hidden="true" />)}
-          {folderPill('none', t('demos.noFolder'), inFolder('none'), <FolderOpen aria-hidden="true" />)}
-          {(folders.length <= 5 ? folders : folders.filter((f) => f.id === folder)).map((f) =>
-            renaming?.id === f.id ? (
-              <div key={f.id}>
-                {folderInput(
-                  renaming.name,
-                  (name) => setRenaming({ id: f.id, name }),
-                  () => setRenaming(null),
-                )}
-              </div>
-            ) : (
-              <span key={f.id} className="folder-pill-group">
-                {folderPill(f.id, f.name, inFolder(f.id), <Folder aria-hidden="true" />)}
-                {editable && (
-                  <Menu
-                    label={t('demos.folderActions', { name: f.name })}
-                    items={[
-                      {
-                        label: t('demos.rename'),
-                        icon: <Pencil />,
-                        onSelect: () => setRenaming({ id: f.id, name: f.name }),
-                      },
-                      {
-                        label: t('common.delete'),
-                        icon: <Trash2 />,
-                        danger: true,
-                        onSelect: () => setFolderToDelete(f),
-                      },
-                    ]}
-                  />
-                )}
-              </span>
-            ),
-          )}
-          {editable &&
-            (newFolder !== null ? (
-              folderInput(newFolder, setNewFolder, () => setNewFolder(null))
-            ) : (
-              <button type="button" className="folder-pill folder-pill--add" onClick={() => setNewFolder('')}>
-                <FolderPlus aria-hidden="true" />
-                {t('demos.newFolder')}
-              </button>
-            ))}
-        </nav>
 
         {demos.length === 0 ? (
           <Card>
@@ -445,18 +418,13 @@ export function DemosPage() {
               const s = stats[d.id];
               return (
                 <li key={d.id} className="fd-card demo-card">
-                  <div className="demo-cover fd-player-scope" aria-hidden="true">
+                  <div className={`demo-cover${covers[d.id] ? ' fd-player-scope' : ''}`} aria-hidden="true">
                     {covers[d.id] ? (
                       <img src={covers[d.id]} alt="" loading="lazy" />
                     ) : (
                       <span className="demo-cover-empty">
-                        <svg viewBox="0 0 120 48" className="demo-trail">
-                          <path d="M12 38c18 0 22-14 48-14s30-14 48-14" />
-                          <circle cx="12" cy="38" r="5" />
-                          <circle cx="60" cy="24" r="5" />
-                          <circle cx="108" cy="10" r="7" className="demo-trail-hot" />
-                        </svg>
-                        <span className="demo-cover-title">{d.title}</span>
+                        <span className="fake fd-player-scope" />
+                        <span className="dot" style={dotPosition(d.id)} />
                       </span>
                     )}
                   </div>
@@ -473,8 +441,15 @@ export function DemosPage() {
                     <div className="demo-meta">
                       <span className={`fd-badge status-${d.status}`}>{t(`status.${d.status}`)}</span>
                       <span>
-                        {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })} ·{' '}
-                        {t('demos.leads', { count: s?.leads ?? 0, n: formatNumber(s?.leads ?? 0) })} ·{' '}
+                        {d.status === 'published' ? (
+                          <>
+                            {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })} ·{' '}
+                            {t('demos.leads', { count: s?.leads ?? 0, n: formatNumber(s?.leads ?? 0) })}{' '}
+                            ·{' '}
+                          </>
+                        ) : (
+                          <>{t('demos.steps', { count: stepCounts[d.id] ?? 0 })} · </>
+                        )}
                         <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
                           {formatRelative(d.updated_at)}
                         </time>
@@ -499,6 +474,31 @@ export function DemosPage() {
         )}
       </section>
 
+      <ConfirmDialog
+        open={newFolder !== null || renaming !== null}
+        title={renaming ? t('demos.renameFolder', { name: '' }).trim() : t('demos.newFolder')}
+        body={
+          <form onSubmit={saveFolder}>
+            <input
+              className="fd-input"
+              autoFocus
+              maxLength={80}
+              aria-label={t('demos.folderName')}
+              placeholder={t('demos.folderName')}
+              value={renaming ? renaming.name : (newFolder ?? '')}
+              onChange={(e) =>
+                renaming ? setRenaming({ ...renaming, name: e.target.value }) : setNewFolder(e.target.value)
+              }
+            />
+          </form>
+        }
+        confirmLabel={t('common.save')}
+        onClose={() => {
+          setNewFolder(null);
+          setRenaming(null);
+        }}
+        onConfirm={() => saveFolder()}
+      />
       <ConfirmDialog
         open={!!toDelete}
         title={t('demos.deleteTitle', { title: toDelete?.title ?? '' })}
@@ -568,4 +568,12 @@ export function DemosPage() {
       />
     </div>
   );
+}
+
+/** Position stable du point chaud d'une vignette sans capture (comme les vignettes de la maquette). */
+function dotPosition(id: string) {
+  let h = 0;
+  for (const c of id) h = Math.imul(h ^ c.charCodeAt(0), 0x01000193) >>> 0;
+  h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d) >>> 0;
+  return { left: `${22 + (h % 46)}%`, top: `${30 + ((h >>> 8) % 34)}%` };
 }

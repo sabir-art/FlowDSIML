@@ -20,6 +20,7 @@ const VIEW = { width: 1440, height: 900 };
 // (docs/ux/maquettes/*.html) ou refonte (docs/ux/maquettes/refonte/*.html).
 const SCREENS = {
   'CAD-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
+  'DSH-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
   'CNX-01': {
     maquette: 'connexion.html',
     route: '/#/login',

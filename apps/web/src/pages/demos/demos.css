@@ -23,13 +23,6 @@
   border-color: transparent;
   box-shadow: var(--fd-shadow-xs);
 }
-.usage-link {
-  color: inherit;
-}
-.usage-link--full {
-  color: var(--fd-color-danger);
-  font-weight: 600;
-}
 
 /* Barre de filtres : titre, segmenté de statut, tri et dossiers à droite */
 .demos-section {
@@ -52,85 +45,6 @@
   margin-left: auto;
   display: flex;
   gap: var(--fd-space-2);
-}
-
-/* Dossiers en pilules de filtre */
-.folder-pills {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--fd-space-2);
-}
-.folder-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--fd-space-2);
-  height: 36px;
-  padding: 0 var(--fd-space-3) 0 var(--fd-space-4);
-  border: 1px solid transparent;
-  border-radius: var(--fd-radius-full);
-  background: var(--fd-color-surface);
-  box-shadow: var(--fd-shadow-xs);
-  color: var(--fd-color-text);
-  font: 600 var(--fd-text-label-size) / 1 var(--fd-font-sans);
-  cursor: pointer;
-}
-.folder-pill > svg {
-  width: 16px;
-  height: 16px;
-  flex: none;
-  color: var(--fd-color-text-muted);
-}
-.folder-pill:hover {
-  background: var(--fd-color-surface-hover);
-}
-.folder-pill[aria-pressed='true'] {
-  background: var(--fd-color-nav-active);
-  color: var(--fd-color-on-nav-active);
-}
-.folder-pill[aria-pressed='true'] > svg {
-  color: inherit;
-}
-.folder-pill__name {
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.folder-pill__count {
-  min-width: 22px;
-  padding: 2px 6px;
-  border-radius: var(--fd-radius-full);
-  background: var(--fd-color-icon-chip);
-  color: var(--fd-color-text-muted);
-  font-size: var(--fd-text-caption-size);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-.folder-pill[aria-pressed='true'] .folder-pill__count {
-  background: rgb(255 255 255 / 0.18);
-  color: inherit;
-}
-.folder-pill--add {
-  background: transparent;
-  box-shadow: none;
-  border: 1px dashed var(--fd-color-border-strong);
-  color: var(--fd-color-text-muted);
-  padding-right: var(--fd-space-4);
-}
-.folder-pill-group {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-.folder-form {
-  display: flex;
-  align-items: center;
-  gap: var(--fd-space-1);
-}
-.folder-form .fd-input {
-  height: 36px;
-  border-radius: var(--fd-radius-full);
 }
 
 /* Grille de cartes de démo */
@@ -264,46 +178,40 @@
   padding-left: var(--fd-space-5);
 }
 
-/* D5 : démo sans capture, illustration « sentier » et titre */
+/* Démo sans capture : cadre gris de la maquette (écran factice + point chaud) */
+.demo-cover {
+  position: relative;
+}
 .demo-cover-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--fd-space-2);
-  width: 100%;
-  height: 100%;
-  padding: var(--fd-space-4);
-  background: var(--fd-color-primary-soft);
+  position: absolute;
+  inset: 0;
 }
-.demo-trail {
-  width: 96px;
-  height: auto;
+.demo-cover-empty .fake {
+  position: absolute;
+  inset: 12px;
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface);
+  box-shadow: var(--fd-shadow-xs);
 }
-.demo-trail path {
-  fill: none;
-  stroke: var(--fd-color-chart-5);
-  stroke-width: 3;
-  stroke-linecap: round;
+.demo-cover-empty .fake::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 14px;
+  border-radius: var(--fd-radius-md) var(--fd-radius-md) 0 0;
+  background: var(--fd-color-border);
 }
-.demo-trail circle {
-  fill: var(--fd-color-surface);
-  stroke: var(--fd-color-chart-5);
-  stroke-width: 2;
+.demo-cover-empty .dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--fd-color-hotspot);
+  box-shadow: 0 0 0 4px var(--fd-color-surface);
 }
-.demo-trail .demo-trail-hot {
-  fill: var(--fd-color-hotspot);
-  stroke: none;
-}
-.demo-cover-title {
-  max-width: 100%;
-  font-weight: 600;
-  font-size: var(--fd-font-sm);
-  color: var(--fd-color-primary-soft-text);
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Bouton rond ↗ du KPI héros, en haut à droite */
+.kpi-action {
+  margin-left: auto;
 }
 
 @media (max-width: 640px) {

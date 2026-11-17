@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, ChevronDown } from 'lucide-react';
 import { computePosition, getPortal, type Placement } from '../lib/floating';
 
 /** Groupe de choix exclusifs affiché en contrôle segmenté dans le menu (menuitemradio). */
@@ -42,7 +42,12 @@ export function Menu({
   /** Côté préféré (par défaut bottom-<align>) ; menu de compte : top-start. */
   placement?: Placement;
   /** Bouton déclencheur visible (icône + libellé) au lieu du « ⋯ ». */
-  trigger?: { icon: ReactNode; text: string; block?: boolean };
+  trigger?: {
+    icon?: ReactNode;
+    text: string;
+    block?: boolean;
+    /** Chevron ▾ après le texte */ chevron?: boolean;
+  };
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -152,10 +157,13 @@ export function Menu({
       >
         {trigger ? (
           <>
-            <span className="fd-btn__icon" aria-hidden="true">
-              {trigger.icon}
-            </span>
+            {trigger.icon && (
+              <span className="fd-btn__icon" aria-hidden="true">
+                {trigger.icon}
+              </span>
+            )}
             {trigger.text}
+            {trigger.chevron && <ChevronDown size={16} aria-hidden="true" />}
           </>
         ) : (
           <MoreHorizontal size={18} aria-hidden="true" />

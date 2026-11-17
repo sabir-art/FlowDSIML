@@ -15,6 +15,8 @@ export function StatTile({
   delta,
   deltaLabel,
   noDeltaLabel,
+  deltaAbs,
+  action,
 }: {
   label: string;
   value: string;
@@ -26,9 +28,15 @@ export function StatTile({
   deltaLabel?: string;
   /** Texte pour lecteur d'écran quand la comparaison est impossible (delta === null). */
   noDeltaLabel?: string;
+  /** Écart absolu vs période précédente (ex. +12 leads, −4 pts) : remplace `delta` (maquette dashboard). */
+  deltaAbs?: { value: number; unit?: string } | null;
+  /** Action en haut à droite de la carte (ex. bouton rond vers Analytics). */
+  action?: ReactNode;
 }) {
+  if (deltaAbs !== undefined) delta = deltaAbs === null ? null : deltaAbs.value;
+  const eps = deltaAbs ? 0 : 0.005;
   const dir =
-    delta === undefined || delta === null ? null : delta > 0.005 ? 'up' : delta < -0.005 ? 'down' : 'flat';
+    delta === undefined || delta === null ? null : delta > eps ? 'up' : delta < -eps ? 'down' : 'flat';
   const Icon = dir === 'up' ? TrendingUp : dir === 'down' ? TrendingDown : Minus;
   return (
     <article className={`fd-card fd-kpi stat-tile${hero ? ' fd-card--hero' : ''}`}>
@@ -41,6 +49,7 @@ export function StatTile({
         <span className="fd-kpi__label stat-label" title={label}>
           {label}
         </span>
+        {action}
       </div>
       <span className="fd-kpi__value stat-value">{value}</span>
       {(delta !== undefined || hint) && (
@@ -57,7 +66,9 @@ export function StatTile({
             >
               <Icon aria-hidden="true" />
               {delta! > 0 ? '+' : delta! < 0 ? '−' : ''}
-              {formatPercent(Math.abs(delta!))}
+              {deltaAbs
+                ? `${formatNumber(Math.abs(deltaAbs.value))}${deltaAbs.unit ?? ''}`
+                : formatPercent(Math.abs(delta!))}
             </span>
           )}
           {delta !== undefined && deltaLabel && <span className="stat-delta-label">{deltaLabel}</span>}

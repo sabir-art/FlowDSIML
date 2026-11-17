@@ -20,7 +20,8 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.waitForSelector('.demo-card');
   ok((await page.locator('.demo-card').count()) === 2, 'deux démos affichées');
   ok((await page.locator('.demo-cover img').count()) >= 1, 'vignette de la première étape');
-  ok((await page.textContent('main')).includes('1 / 25'), 'usage du plan affiché');
+  ok(!(await page.textContent('main')).includes('1 / 25'), 'pas de quota dans le sous-titre (il est dans Plans)');
+  ok((await page.locator('.stat-tile a[href="#/analytics"]').count()) === 1, 'KPI Vues : bouton ↗ vers Analytics');
   ok(!/Invalid Date/.test(await page.textContent('main')), 'dates formatées (pas de « Invalid Date »)');
 
   await page.fill('input[type=search]', 'onboard');
@@ -33,11 +34,14 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: /^Toutes · 2/ }).click();
   ok((await page.locator('.demo-new__btn').count()) === 1, 'carte « Nouvelle démo » en fin de grille');
 
-  await page.getByRole('button', { name: 'Nouveau dossier' }).click();
-  await page.fill('.folder-form input', 'Ventes');
-  await page.keyboard.press('Enter');
-  await page.waitForSelector('text=Ventes');
-  ok(state.tables.folders.length === 1, 'dossier créé (saisie en ligne, sans prompt natif)');
+  // Dossiers : menu « Dossiers ▾ » (pas de rangée de pilules)
+  ok((await page.locator('.folder-pills').count()) === 0, 'pas de rangée de dossiers');
+  await page.getByRole('button', { name: 'Dossiers' }).click();
+  await page.getByRole('menuitem', { name: 'Nouveau dossier' }).click();
+  await page.fill('dialog[open] input', 'Ventes');
+  await page.locator('dialog[open]').getByRole('button', { name: 'Enregistrer' }).click();
+  await page.waitForTimeout(400);
+  ok(state.tables.folders.length === 1, 'dossier créé (modale, sans prompt natif)');
 
   // Menu ⋯ d'une carte → Déplacer
   await page.getByRole('button', { name: 'Actions pour Démo CRM' }).click();
@@ -46,9 +50,11 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.locator('dialog[open] select').selectOption({ label: 'Ventes' });
   await page.waitForTimeout(300);
   await page.locator('dialog[open]').getByRole('button', { name: 'Fermer' }).click();
-  await page.getByRole('button', { name: /^Ventes/ }).click();
+  await page.getByRole('button', { name: 'Dossiers' }).click();
+  await page.getByRole('menuitem', { name: /^Ventes/ }).click();
   ok((await page.locator('.demo-card').count()) === 1, 'démo rangée dans le dossier');
-  await page.getByRole('button', { name: /^Tous les dossiers/ }).click();
+  await page.getByRole('button', { name: 'Ventes' }).click();
+  await page.getByRole('menuitem', { name: /^Tous les dossiers/ }).click();
 
   await page.getByRole('button', { name: 'Actions pour Onboarding' }).click();
   await page.getByRole('menuitem', { name: 'Dupliquer' }).click();
