@@ -285,7 +285,7 @@ export function PlansPage() {
       {upgrade && (
         <UpgradeDialog
           planName={name(upgrade.code)}
-          minMembers={(upgrade.limits as unknown as Limits).members}
+          minMembers={(upgrade.limits as unknown as Limits).members ?? usage?.members ?? null}
           mailto={(body) => mailto(changeSubject(upgrade), body)}
           onClose={() => setUpgrade(null)}
         />
