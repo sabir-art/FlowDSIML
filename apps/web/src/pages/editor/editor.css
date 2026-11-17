@@ -435,9 +435,6 @@
 .steplist .menu {
   display: flex;
 }
-.steplist .menu-list {
-  width: 100%;
-}
 .canvas-form-chip {
   position: absolute;
   top: var(--fd-space-3);

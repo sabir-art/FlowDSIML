@@ -181,20 +181,6 @@
 .user-text span {
   color: var(--fd-color-text-muted);
 }
-.user-block {
-  position: relative;
-}
-/* Le menu du compte s'ancre sur tout le bloc utilisateur (et non sur le bouton ⋯) pour rester dans la barre latérale */
-.user-block .menu {
-  position: static;
-}
-.user-block .menu-list {
-  top: auto;
-  bottom: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  min-width: 0;
-}
 .scrim {
   display: none;
 }
@@ -471,11 +457,14 @@
   position: relative;
   display: inline-flex;
 }
+/* Menus : rendus dans #fd-portal, positionnés en fixed par lib/floating.ts (composants.md §15.7) */
 .menu-list {
-  position: absolute;
-  top: calc(100% + 4px);
-  z-index: 40;
-  min-width: 200px;
+  position: fixed;
+  z-index: var(--fd-z-dropdown);
+  min-width: 180px;
+  max-width: min(320px, calc(100vw - 16px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--fd-space-1);
   background: var(--fd-color-surface-raised, var(--fd-color-surface));
   border: 1px solid var(--fd-color-border);
@@ -483,12 +472,6 @@
   box-shadow: var(--fd-shadow-md);
   display: flex;
   flex-direction: column;
-}
-.menu-list--end {
-  right: 0;
-}
-.menu-list--start {
-  left: 0;
 }
 .menu-item {
   display: flex;
@@ -834,7 +817,16 @@
   gap: 6px;
 }
 .menu-item {
-  white-space: nowrap;
+  white-space: normal;
+  text-align: left;
+}
+/* Mobile : feuille du bas pour les menus longs */
+.menu-list--sheet {
+  inset: auto 0 0 0;
+  max-width: none;
+  max-height: 80vh;
+  border-radius: var(--fd-radius-lg) var(--fd-radius-lg) 0 0;
+  padding-bottom: calc(var(--fd-space-2) + env(safe-area-inset-bottom));
 }
 .stat-delta {
   display: inline-flex;
