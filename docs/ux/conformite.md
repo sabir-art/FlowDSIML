@@ -84,7 +84,7 @@ Maquette : `refonte/editeur.html` (état Hotspot et bulle, commentaires en liste
 |---|---|---|---|---|---|
 | ED-1 | Barre du haut, symbole | Symbole TutoClick | Symbole DSI | `symbole-tutoclick.svg` | — |
 | ED-2 | État d'enregistrement | Pilule unique « Brouillon · enregistré » | Badge « Brouillon », et « Enregistré » ailleurs | Une seule pilule : statut · état d'enregistrement | — |
-| ED-3 | Bouton « Quiz » | Absent (maquette antérieure à F2) | Présent entre « Aperçu » et « Partager » | Garder | **À ajouter à la maquette** |
+| ED-3 | Bouton « Quiz » | Absent (maquette antérieure à F2) | Présent entre « Aperçu » et « Partager » | Garder | **Ajouté à la maquette** |
 | ED-4 | En-tête du panneau Hotspot | Puce + « Hotspot et bulle » | En plus : lien « ‹ Étape » | Garder (retour au panneau de l'étape) | **À ajouter à la maquette** (lien fantôme à droite du titre) |
 | ED-5 | Barre d'outils du texte | Gras, italique, lien | En plus : select « Insérer une variable » | Garder (fonction des variables) | **À ajouter à la maquette** |
 | ED-6 | Sous le texte | Rien | Compteur « 31 / 4000 caractères », **aperçu rendu** en bande grise, **et** ligne « Aperçu : … » | Supprimer la bande grise. Garder la ligne « Aperçu : » seulement si le texte contient une variable. Afficher le compteur à partir de 3 600 caractères | — |
@@ -302,12 +302,12 @@ Maquette : `refonte/f2-quiz.html` (`?view=build,q,ok,ko,pass,fail`). Images : `c
 
 | N° | Zone | Maquette | App | Correction | Décision |
 |---|---|---|---|---|---|
-| QE-1 | En-tête | Titre « Quiz du module » au-dessus de la liste, bouton « Tester le quiz » dans la carte « Validation » | Barre d'en-tête avec retour ←, titre, « Enregistré », et « Tester le quiz » en haut à droite | Garder l'en-tête de l'app (cohérent avec l'éditeur) ; retirer « Tester le quiz » de la carte | **À ajouter à la maquette** |
+| QE-1 | En-tête | Titre « Quiz du module » au-dessus de la liste, bouton « Tester le quiz » dans la carte « Validation » | Barre d'en-tête avec retour ←, titre, « Enregistré », et « Tester le quiz » en haut à droite | Garder l'en-tête de l'app (cohérent avec l'éditeur) ; retirer « Tester le quiz » de la carte | **Ajouté à la maquette** |
 | QE-2 | Liste des questions | Cartes posées sur le fond, sans carte englobante | Carte « Questions » qui englobe la liste | Retirer la carte englobante | — |
 | QE-3 | Carte de la question | Puce d'icône « ? » devant « Question n » ; pas d'alerte | Pas de puce ; alerte info « Choix unique : seule la première bonne réponse est gardée. » | Ajouter la puce ; retirer l'alerte (le bouton radio suffit) | — |
 | QE-4 | Seuil de réussite | Libellé seul, valeur « 70 % » **à droite du curseur** | Valeur dans le libellé (« Seuil de réussite : 80 % ») | Comme la maquette | — |
-| QE-5 | Bas de la carte | Rien | « Supprimer la question » centré | Garder, en bouton fantôme danger **aligné à gauche** | **À ajouter à la maquette** |
-| QE-6 | Carte « Réussite par question » | Absente | Présente (« Aucune tentative pour l'instant. ») | Garder | **À ajouter à la maquette** |
+| QE-5 | Bas de la carte | Rien | « Supprimer la question » centré | Garder, en bouton fantôme danger **aligné à gauche** | **Ajouté à la maquette** |
+| QE-6 | Carte « Réussite par question » | Absente | Présente (« Aucune tentative pour l'instant. ») | Garder | **Ajouté à la maquette** |
 
 ### Quiz dans le player
 
