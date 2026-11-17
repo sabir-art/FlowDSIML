@@ -16,6 +16,8 @@ import {
 } from 'lucide-preact';
 import { backdropIndex, canAutoAdvance, checklistItems, choiceTarget, nextIndex } from './logic';
 import { Checklist } from './Checklist';
+import { Quiz } from './Quiz';
+import { submitQuizAttempt } from './api';
 import {
   beaconCenter,
   boxStyle,
@@ -35,6 +37,8 @@ interface Props {
   values: VariableValues;
   tracker: Tracker;
   preview?: boolean;
+  /** F2 : aperçu « Tester le quiz » ouvert directement sur le quiz. */
+  startQuiz?: boolean;
   onLead: (
     form: LeadFormT,
     data: { email: string; fields: Record<string, string>; consent: boolean },
@@ -57,7 +61,7 @@ function useCompact() {
   return compact;
 }
 
-export function Player({ manifest: m, values, tracker, preview, onLead }: Props) {
+export function Player({ manifest: m, values, tracker, preview, startQuiz, onLead }: Props) {
   const t = strings(m.locale);
   const compact = useCompact();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -93,6 +97,12 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
   /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
   const choices = step.options.choices.filter((c) => choiceTarget(m, c.action));
   const [visited, setVisited] = useState<Set<number>>(() => new Set([0]));
+  /** F2 : quiz du module (après la dernière étape) ; gardé monté pendant « Revoir l'étape ». */
+  const [view, setView] = useState<'steps' | 'quiz'>(() => (startQuiz && m.quiz ? 'quiz' : 'steps'));
+  const [quizOpened, setQuizOpened] = useState(() => !!(startQuiz && m.quiz));
+  const [reviewing, setReviewing] = useState(false);
+  const quizGate = !!m.quiz && m.quiz.required && m.quiz.mode === 'quiz';
+  const QUIZ_KEY = `fd.quiz.${m.demoId}`;
   /** Choix « Fin de la démo » : écran de fin sans changer d'étape. */
   const [ended, setEnded] = useState(false);
   const [playing, setPlaying] = useState(() => !!m.autoplay?.enabled && !preview);
@@ -104,7 +114,8 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
   useEffect(() => {
     tracker.track('step_view', { stepId: step.id, stepIndex: index });
     setVisited((v) => (v.has(index) ? v : new Set(v).add(index)));
-    if (last && !completed.current) {
+    // Un quiz obligatoire conditionne la fin du module (demo_complete à la réussite)
+    if (last && !completed.current && !quizGate) {
       completed.current = true;
       tracker.track('demo_complete', { stepIndex: index });
     }
@@ -128,10 +139,29 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
   }, [autoplay, playing, index, gateForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function go(i: number | null) {
+    if (i === m.steps.length && m.quiz) return openQuiz();
     if (i === null || i < 0 || i >= m.steps.length) return;
+    setView('steps');
+    setReviewing(false);
     setIndex(i);
     setMenu(false);
     setEnded(false);
+  }
+
+  function openQuiz() {
+    setQuizOpened(true);
+    setView('quiz');
+    setReviewing(false);
+    setMenu(false);
+    setEnded(false);
+  }
+
+  function quizAttemptsUsed() {
+    try {
+      return Number(localStorage.getItem(QUIZ_KEY) ?? '0') || 0;
+    } catch {
+      return 0;
+    }
   }
 
   function onChoice(c: (typeof choices)[number]) {
@@ -158,7 +188,8 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
       window.open(h.action.url, h.action.newTab ? '_blank' : '_top', 'noopener');
       return;
     }
-    go(nextIndex(m, index, h.action));
+    const n = nextIndex(m, index, h.action);
+    go(n === null && h.action.type === 'next' && last && m.quiz ? m.steps.length : n);
   }
 
   function onCta(url: string, label: string) {
@@ -261,7 +292,66 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
           go(x1 < x0 ? index + 1 : index - 1);
         }}
       >
-        {step.kind === 'image' && step.image ? (
+        {reviewing && view === 'steps' && (
+          <div class="p-review-bar">
+            <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={openQuiz}>
+              <ChevronLeft {...ICON} size={16} />
+              {t.quiz.backToQuiz}
+            </button>
+          </div>
+        )}
+        {quizOpened && m.quiz && (
+          <div class="p-quiz-wrap" hidden={view !== 'quiz'}>
+            <Quiz
+              quiz={m.quiz}
+              module={m.title}
+              t={t}
+              sub={sub}
+              stepNumber={(id) => {
+                const i = id ? m.steps.findIndex((s) => s.id === id) : -1;
+                return i >= 0 ? i + 1 : null;
+              }}
+              attemptsUsed={quizAttemptsUsed()}
+              onSubmit={async (answers) => {
+                if (preview) return null; // « Tester le quiz » : tentative non comptée
+                const res = await submitQuizAttempt({
+                  demoId: m.demoId,
+                  versionId: m.versionId,
+                  visitorId: tracker.visitorId,
+                  sessionId: tracker.sessionId,
+                  linkToken: tracker.linkToken,
+                  answers: Object.entries(answers).map(([questionId, answerIds]) => ({
+                    questionId,
+                    answerIds,
+                  })),
+                });
+                try {
+                  localStorage.setItem(QUIZ_KEY, String(quizAttemptsUsed() + 1));
+                } catch {
+                  /* stockage indisponible */
+                }
+                if (res.passed && !completed.current) {
+                  completed.current = true;
+                  tracker.track('demo_complete', { stepIndex: m.steps.length - 1 });
+                }
+                return res;
+              }}
+              onReviewStep={(id) => {
+                const i = m.steps.findIndex((s) => s.id === id);
+                if (i < 0) return;
+                setIndex(i);
+                setView('steps');
+                setReviewing(true);
+              }}
+              onRestartModule={() => go(0)}
+              onFinish={() => {
+                setView('steps');
+                setEnded(true);
+              }}
+            />
+          </div>
+        )}
+        {view === 'quiz' ? null : step.kind === 'image' && step.image ? (
           <ImageStep
             key={step.id}
             step={step}
@@ -346,6 +436,11 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
                         : t.next}
                     <ChevronRight {...ICON} size={16} />
                   </button>
+                ) : m.quiz ? (
+                  <button class="p-btn p-btn-primary" onClick={openQuiz} autoFocus>
+                    {t.quiz.start}
+                    <ChevronRight {...ICON} size={16} />
+                  </button>
                 ) : (
                   <button class="p-btn p-btn-ghost" onClick={() => go(0)}>
                     <RotateCcw {...ICON} size={16} />
@@ -396,7 +491,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
 
       {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
           navigation sont retirées (rien ne permet de le contourner). */}
-      {compact && tipProps && !gateForm && <Tooltip {...tipProps} sheet />}
+      {compact && tipProps && !gateForm && view === 'steps' && <Tooltip {...tipProps} sheet />}
       {compact && m.checklist && items.length > 0 && !gateForm && (
         <Checklist title={m.checklist.title} position="collapsed" items={items} t={t} sub={sub} onGo={go} />
       )}
@@ -428,7 +523,12 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
         <span class="p-count" aria-hidden="true">
           {index + 1}/{m.steps.length}
         </span>
-        <button class="p-icon-btn" onClick={() => go(index + 1)} disabled={last} aria-label={t.next}>
+        <button
+          class="p-icon-btn"
+          onClick={() => go(index + 1)}
+          disabled={(last && !m.quiz) || view === 'quiz'}
+          aria-label={t.next}
+        >
           <ChevronRight {...ICON} />
         </button>
         {document.fullscreenEnabled && (

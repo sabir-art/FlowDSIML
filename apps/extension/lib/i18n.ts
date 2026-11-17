@@ -1,4 +1,6 @@
 /** Chaînes de l'extension (formulations de docs/ux/i18n, clés extension.*). FR par défaut. */
+import { APP_NAME } from '@flowdsiml/core';
+
 const fr = {
   subtitle: 'Capture',
   email: 'Email',
@@ -21,7 +23,7 @@ const fr = {
   confirmCancel: 'Annuler la capture ? Les captures seront effacées de ce navigateur.',
   stepsCaptured_one: '{{count}} étape capturée',
   stepsCaptured_other: '{{count}} étapes capturées',
-  notLoggedIn: 'Connectez-vous à FlowDSIML pour capturer.',
+  notLoggedIn: `Connectez-vous à ${APP_NAME} pour capturer.`,
   protectedPage: 'Cette page ne peut pas être capturée (page système du navigateur).',
   badCredentials: 'Email ou mot de passe incorrect.',
   noWorkspace: "Aucun workspace où vous êtes éditeur. Créez-en un dans l'application.",
@@ -48,7 +50,7 @@ const en: typeof fr = {
   confirmCancel: 'Cancel the capture? Captures will be erased from this browser.',
   stepsCaptured_one: '{{count}} step captured',
   stepsCaptured_other: '{{count}} steps captured',
-  notLoggedIn: 'Sign in to FlowDSIML to capture.',
+  notLoggedIn: `Sign in to ${APP_NAME} to capture.`,
   protectedPage: 'This page cannot be captured (browser system page).',
   badCredentials: 'Wrong email or password.',
   noWorkspace: 'No workspace where you are an editor. Create one in the app.',

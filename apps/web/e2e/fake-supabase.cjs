@@ -127,6 +127,7 @@ function seed() {
       ],
       chapters: [],
       forms: [],
+      quiz_questions: [],
       variables: [
         {
           id: 'var-1',
@@ -379,6 +380,12 @@ async function install(page, state = seed()) {
             ],
             sources: { direct: 62, embed: 34, link: 24 },
           });
+        case 'quiz_stats':
+          return json(
+            route,
+            200,
+            state.quizStats ?? { attempts: 0, visitors: 0, passRate: 0, avgScore: 0, questions: [] },
+          );
         case 'workspace_kpis': {
           const previous = a.p_to && Date.parse(a.p_to) < Date.now() - 86400000;
           const pub = t.demos.filter((d) => d.status === 'published' && !d.deleted_at).length;

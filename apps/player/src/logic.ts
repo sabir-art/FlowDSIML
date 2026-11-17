@@ -1,5 +1,5 @@
 /** Logique pure du player (testée). */
-import type { ChoiceAction, Manifest, Step } from '@flowdsiml/manifest';
+import type { ChoiceAction, Manifest, Quiz, QuizQuestion, Step } from '@flowdsiml/manifest';
 
 export { resolvePlacement, type Placement } from '@flowdsiml/player-core';
 
@@ -127,4 +127,51 @@ export function canAutoAdvance(m: Manifest, i: number, gated: boolean): boolean 
   const s = m.steps[i];
   if (!s || gated || i >= m.steps.length - 1) return false;
   return s.options.choices.length === 0;
+}
+
+/** F2 : une question est juste si l'ensemble coché = l'ensemble des bonnes réponses (tout ou rien). */
+export function isCorrect(q: QuizQuestion, chosen: readonly string[]): boolean {
+  if (!chosen.length) return false;
+  const good = new Set(q.answers.filter((a) => a.correct).map((a) => a.id));
+  return chosen.length === good.size && chosen.every((id) => good.has(id));
+}
+
+/** F2 : réponse incomplète = au moins une bonne réponse cochée, aucune mauvaise, mais pas toutes. */
+export function isPartial(q: QuizQuestion, chosen: readonly string[]): boolean {
+  const good = new Set(q.answers.filter((a) => a.correct).map((a) => a.id));
+  return chosen.length > 0 && chosen.every((id) => good.has(id)) && chosen.length < good.size;
+}
+
+/** F2 : score local (aperçu ou repli hors ligne), même calcul que submit_quiz_attempt. */
+export function scoreQuiz(quiz: Quiz, answers: Record<string, string[]>) {
+  let points = 0;
+  let total = 0;
+  let correct = 0;
+  const questions = quiz.questions.map((q) => {
+    total += q.points;
+    const ok = isCorrect(q, answers[q.id] ?? []);
+    if (ok) {
+      correct++;
+      points += q.points;
+    }
+    return { questionId: q.id, correct: ok };
+  });
+  const score = total ? Math.round((100 * points) / total) : 0;
+  return {
+    score,
+    correct,
+    total: quiz.questions.length,
+    passed: quiz.mode === 'survey' || score >= quiz.threshold,
+    questions,
+  };
+}
+
+/** Mélange de Fisher-Yates (aléa injectable pour les tests). */
+export function shuffled<T>(list: readonly T[], rnd: () => number = Math.random): T[] {
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
 }

@@ -15,6 +15,7 @@ export type HotspotRow = Tables<'hotspots'>;
 export type ChapterRow = Tables<'chapters'>;
 export type FormRow = Tables<'forms'>;
 export type VariableRow = Tables<'variables'>;
+export type QuestionRow = Tables<'quiz_questions'>;
 
 export type DemoSettings = {
   locale?: 'fr' | 'en';
@@ -27,6 +28,15 @@ export type DemoSettings = {
   checklist?: { enabled: boolean; title?: string; position?: 'left' | 'right' | 'collapsed' };
   /** F1 : lecture automatique (délai en ms, 1500–30000). */
   autoplay?: { enabled: boolean; delayMs: number };
+  /** F2 : réglages du quiz du module. */
+  quiz?: {
+    mode?: 'quiz' | 'survey';
+    threshold?: number;
+    attempts?: number;
+    feedback?: 'each' | 'end';
+    shuffle?: boolean;
+    required?: boolean;
+  };
 };
 
 export type FormField = {
@@ -49,3 +59,7 @@ export const asFields = (v: unknown): FormField[] => (Array.isArray(v) ? (v as F
 
 export type Selection = { kind: 'step' } | { kind: 'hotspot'; id: string } | { kind: 'blur'; index: number };
 export const asStepOptions = (v: unknown): StepOptions => stepOptionsSchema.parse(v ?? {});
+
+/** F2 : réponse d'une question (jsonb answers). */
+export type QuizAnswer = { id: string; label: string; correct: boolean };
+export const asAnswers = (v: unknown): QuizAnswer[] => (Array.isArray(v) ? (v as QuizAnswer[]) : []);

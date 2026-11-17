@@ -18,6 +18,7 @@ import {
   type IconNode,
 } from 'lucide';
 import { APP_URL } from '@/lib/config';
+import { APP_NAME } from '@flowdsiml/core';
 import { pending, type PendingCapture, type PendingZone } from '@/lib/pending';
 import type { PiiType } from '@/lib/pii';
 import { sendCaptures } from '@/lib/upload';
@@ -75,7 +76,7 @@ const save = (c: PendingCapture) => void pending.put(c);
 
 async function boot() {
   document.documentElement.lang = navigator.language.toLowerCase().startsWith('en') ? 'en' : 'fr';
-  document.title = tr('pageTitle');
+  document.title = `${tr('pageTitle')} · ${APP_NAME}`;
   $('title').textContent = tr('pageTitle');
   $('rail-title').textContent = tr('captures');
   $('privacy').textContent = tr('privacy');

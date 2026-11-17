@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { moveItem } from '@flowdsiml/core';
 import type { Json, TablesUpdate } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
-import type { ChapterRow, DemoRow, FormRow, HotspotRow, StepRow, VariableRow } from './types';
+import type { ChapterRow, DemoRow, FormRow, HotspotRow, QuestionRow, StepRow, VariableRow } from './types';
 
-type Table = 'demos' | 'steps' | 'hotspots' | 'chapters' | 'forms' | 'variables';
+type Table = 'demos' | 'steps' | 'hotspots' | 'chapters' | 'forms' | 'variables' | 'quiz_questions';
 type Patch = Record<string, unknown>;
 
 export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
@@ -22,6 +22,7 @@ export function useDemoEditor(demoId: string) {
   const [chapters, setChapters] = useState<ChapterRow[]>([]);
   const [forms, setForms] = useState<FormRow[]>([]);
   const [variables, setVariables] = useState<VariableRow[]>([]);
+  const [questions, setQuestions] = useState<QuestionRow[]>([]);
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [lastError, setLastError] = useState<unknown>(null);
@@ -90,12 +91,13 @@ export function useDemoEditor(demoId: string) {
       setLoading(false);
       return;
     }
-    const [s, h, c, f, v] = await Promise.all([
+    const [s, h, c, f, v, q] = await Promise.all([
       supabase.from('steps').select('*').eq('demo_id', demoId).order('position').order('created_at'),
       supabase.from('hotspots').select('*').eq('demo_id', demoId).order('position').order('created_at'),
       supabase.from('chapters').select('*').eq('demo_id', demoId).order('position'),
       supabase.from('forms').select('*').eq('demo_id', demoId).order('created_at'),
       supabase.from('variables').select('*').eq('workspace_id', d.data.workspace_id).order('key'),
+      supabase.from('quiz_questions').select('*').eq('demo_id', demoId).order('position').order('created_at'),
     ]);
     setDemo(d.data);
     setSteps(s.data ?? []);
@@ -103,6 +105,7 @@ export function useDemoEditor(demoId: string) {
     setChapters(c.data ?? []);
     setForms(f.data ?? []);
     setVariables(v.data ?? []);
+    setQuestions(q.data ?? []);
     await signImages(s.data ?? []);
     setLoading(false);
   }, [demoId, signImages]);
@@ -142,6 +145,10 @@ export function useDemoEditor(demoId: string) {
       updateForm(id: string, patch: Partial<FormRow>) {
         setForms((list) => list.map((f) => (f.id === id ? { ...f, ...patch } : f)));
         queue('forms', id, patch);
+      },
+      updateQuestion(id: string, patch: Partial<QuestionRow>) {
+        setQuestions((list) => list.map((q) => (q.id === id ? { ...q, ...patch } : q)));
+        queue('quiz_questions', id, patch);
       },
       updateVariable(id: string, patch: Partial<VariableRow>) {
         setVariables((list) => list.map((v) => (v.id === id ? { ...v, ...patch } : v)));
@@ -300,11 +307,56 @@ export function useDemoEditor(demoId: string) {
           setVariables((l) => l.filter((v) => v.id !== id));
         }),
 
+      /** F2 : questions du quiz (après la dernière étape). */
+      addQuestion: (row: Pick<QuestionRow, 'type' | 'answers'>) =>
+        run(async () => {
+          await flush();
+          const { data, error } = await supabase
+            .from('quiz_questions')
+            .insert({
+              demo_id: demoId,
+              workspace_id: demo!.workspace_id,
+              position: questions.length,
+              prompt: '',
+              explanation: '',
+              points: 1,
+              step_id: null,
+              ...row,
+            })
+            .select()
+            .single();
+          if (error) throw error;
+          setQuestions((l) => [...l, data]);
+          return data;
+        }),
+
+      deleteQuestion: (id: string) =>
+        run(async () => {
+          const { error } = await supabase.from('quiz_questions').delete().eq('id', id);
+          if (error) throw error;
+          setQuestions((l) => l.filter((q) => q.id !== id).map((q, i) => ({ ...q, position: i })));
+        }),
+
+      moveQuestion: (from: number, to: number) =>
+        run(async () => {
+          await flush();
+          const next = moveItem(questions, from, to).map((q, i) => ({ ...q, position: i }));
+          setQuestions(next);
+          for (const q of next) {
+            if (questions.find((o) => o.id === q.id)?.position === q.position) continue;
+            const { error } = await supabase
+              .from('quiz_questions')
+              .update({ position: q.position })
+              .eq('id', q.id);
+            if (error) throw error;
+          }
+        }),
+
       flush,
       reload: load,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [demoId, demo, steps, hotspots, chapters, queue, run, flush, load, signImages],
+    [demoId, demo, steps, hotspots, chapters, questions, queue, run, flush, load, signImages],
   );
 
   async function persistOrder(next: StepRow[]) {
@@ -326,6 +378,7 @@ export function useDemoEditor(demoId: string) {
     chapters,
     forms,
     variables,
+    questions,
     imageUrls,
     saveState,
     lastError,

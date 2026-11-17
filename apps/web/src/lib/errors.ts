@@ -27,6 +27,8 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/permission denied|Accès refusé|42501|row-level security/i, 'errors.forbidden'],
     [/Failed to fetch|NetworkError/i, 'errors.network'],
   ];
+  const quiz = /QUIZ_INVALID:(\d+)/.exec(msg);
+  if (quiz) return t('errors.quizInvalid', { n: quiz[1] });
   for (const [re, key] of known) if (re.test(msg)) return t(key);
   return t('errors.generic', { message: msg });
 }

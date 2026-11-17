@@ -134,6 +134,34 @@ export const stepSchema = z.object({
 });
 export type Step = z.infer<typeof stepSchema>;
 
+/** F2 : question de quiz (réponses : 2 à 6 ; vrai/faux : 2 réponses fixes). */
+export const quizQuestionSchema = z.object({
+  id: z.string(),
+  type: z.enum(['single', 'multiple', 'truefalse']),
+  prompt: z.string().max(200),
+  answers: z
+    .array(z.object({ id: z.string(), label: z.string().max(200), correct: z.boolean().default(false) }))
+    .min(2)
+    .max(6),
+  explanation: z.string().max(1000).default(''),
+  stepId: z.string().nullable().default(null),
+  points: z.number().int().min(1).max(100).default(1),
+});
+export type QuizQuestion = z.infer<typeof quizQuestionSchema>;
+
+/** F2 : quiz de validation du module (ou sondage : même moteur, sans bonne réponse ni seuil). */
+export const quizSchema = z.object({
+  mode: z.enum(['quiz', 'survey']).default('quiz').catch('quiz'),
+  threshold: z.number().int().min(0).max(100).default(70),
+  /** 0 = illimitées. */
+  attempts: z.number().int().min(0).max(5).default(3),
+  feedback: z.enum(['each', 'end']).default('each').catch('each'),
+  shuffle: z.boolean().default(true),
+  required: z.boolean().default(true),
+  questions: z.array(quizQuestionSchema).min(1),
+});
+export type Quiz = z.infer<typeof quizSchema>;
+
 export const chapterSchema = z.object({ id: z.string(), title: z.string().max(120) });
 export type Chapter = z.infer<typeof chapterSchema>;
 
@@ -209,6 +237,8 @@ export const manifestSchema = z.object({
     .nullable()
     .default(null)
     .catch(null),
+  /** F2 : quiz après la dernière étape (null si le module n'en a pas). */
+  quiz: quizSchema.nullable().default(null).catch(null),
   /** Bouton d'action du client, affiché en permanence dans la barre du player (P6). */
   cta: ctaSchema.nullable().default(null),
   /** P13 : politique de confidentialité du workspace (https), affichée sous les formulaires de lead. */
