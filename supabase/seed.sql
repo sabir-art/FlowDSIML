@@ -1,0 +1,2 @@
+-- Données de développement local (supabase db reset). Aucune donnée réelle.
+-- Les plans sont insérés par la migration principale.

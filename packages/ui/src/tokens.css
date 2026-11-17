@@ -368,6 +368,19 @@
   --chart-5: var(--fd-color-chart-5);
 }
 
+/* Alias de compatibilité avec les tokens provisoires du MVP */
+:root {
+  --fd-color-primary-contrast: var(--fd-color-on-primary);
+  --fd-color-surface-muted: var(--fd-color-surface-sunken);
+  --fd-font-family: var(--fd-font-sans);
+  --fd-font-xs: var(--fd-text-caption-size);
+  --fd-font-sm: var(--fd-text-body-size);
+  --fd-font-md: var(--fd-text-body-lg-size);
+  --fd-font-lg: 1.25rem;
+  --fd-font-xl: var(--fd-text-h1-size);
+  --fd-space-7: var(--fd-space-12);
+}
+
 /* Le player et ses aperçus n'héritent jamais du mode sombre de l'app */
 .fd-player-scope {
   --fd-color-bg: #F7F6F4;

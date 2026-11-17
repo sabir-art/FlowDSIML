@@ -1,0 +1,6 @@
+dist
+.output
+.wxt
+pnpm-lock.yaml
+packages/supabase-types/src/database.ts
+docs
