@@ -90,7 +90,7 @@
       "email": "Email professionnel",
       "emailPlaceholder": "nom@entreprise.com",
       "password": "Mot de passe",
-      "passwordHelp": "10 caractères minimum.",
+      "passwordHelp": "8 caractères minimum.",
       "strength": {
         "weak": "Robustesse : faible",
         "fair": "Robustesse : moyenne",
