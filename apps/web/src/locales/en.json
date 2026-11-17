@@ -483,7 +483,15 @@
     "views_one": "{{n}} view",
     "views_other": "{{n}} views",
     "leads_one": "{{n}} lead",
-    "leads_other": "{{n}} leads"
+    "leads_other": "{{n}} leads",
+    "subtitle": "Your interactive journeys, ready to share.",
+    "usageShort": "{{used}} / {{limit}} published demos",
+    "kpiViews": "Views (30 days)",
+    "filter_all": "All",
+    "filter_published": "Published",
+    "filter_draft": "Drafts",
+    "allFolders": "All folders",
+    "newHint": "Capture a journey with the extension"
   },
   "a11y": {
     "skip": "Skip to content"

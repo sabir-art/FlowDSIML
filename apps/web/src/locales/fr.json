@@ -483,7 +483,15 @@
     "views_one": "{{n}} vue",
     "views_other": "{{n}} vues",
     "leads_one": "{{n}} lead",
-    "leads_other": "{{n}} leads"
+    "leads_other": "{{n}} leads",
+    "subtitle": "Vos parcours interactifs, prêts à partager.",
+    "usageShort": "{{used}} / {{limit}} démos publiées",
+    "kpiViews": "Vues (30 jours)",
+    "filter_all": "Toutes",
+    "filter_published": "Publiées",
+    "filter_draft": "Brouillons",
+    "allFolders": "Tous les dossiers",
+    "newHint": "Capturer un parcours avec l'extension"
   },
   "a11y": {
     "skip": "Aller au contenu"

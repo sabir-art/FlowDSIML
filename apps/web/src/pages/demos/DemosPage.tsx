@@ -1,9 +1,14 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
+  ArrowDownUp,
   BarChart3,
   Check,
+  Eye,
+  Mail,
+  Route,
+  Users,
   Copy,
   Folder,
   FolderInput,
@@ -19,6 +24,8 @@ import {
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Card, Select } from '@flowdsiml/ui';
+import { completionRate } from '@flowdsiml/core';
+import { StatTile, variation } from '../../components/charts';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { formatDateTime, formatNumber, formatRelative } from '../../lib/format';
@@ -32,6 +39,7 @@ import './demos.css';
 type Demo = Tables<'demos'>;
 type FolderRow = Tables<'folders'>;
 type Stats = { views: number; completions: number; visitors: number; leads: number };
+type Kpis = Stats;
 type StatusFilter = 'all' | 'draft' | 'published';
 type Sort = 'updated' | 'title' | 'views';
 
@@ -60,6 +68,7 @@ export function DemosPage() {
   const [moving, setMoving] = useState<Demo | null>(null);
   const { error, run } = useAction();
   const editable = can('demo.edit');
+  const [kpis, setKpis] = useState<{ cur: Kpis; prev: Kpis | null } | null>(null);
 
   const load = useCallback(async () => {
     const [d, f, o, u] = await Promise.all([
@@ -80,6 +89,33 @@ export function DemosPage() {
       Object.fromEntries(((o.data ?? []) as Array<Stats & { demo_id: string }>).map((r) => [r.demo_id, r])),
     );
     setUsage(u.data as never);
+    // KPI du workspace sur 30 jours (et les 30 précédents pour les variations). Repli sur la somme
+    // de workspace_overview si la RPC workspace_kpis (migration 130800) n'est pas encore en place.
+    const now = Date.now();
+    const iso = (days: number) => new Date(now - days * 86400_000).toISOString();
+    const [cur, prev] = await Promise.all([
+      supabase.rpc('workspace_kpis', {
+        p_workspace: ws.id,
+        p_from: iso(30),
+        p_to: new Date(now).toISOString(),
+      }),
+      supabase.rpc('workspace_kpis', { p_workspace: ws.id, p_from: iso(60), p_to: iso(30) }),
+    ]);
+    if (!cur.error && cur.data)
+      setKpis({ cur: cur.data as unknown as Kpis, prev: (prev.data as unknown as Kpis) ?? null });
+    else {
+      const rows = (o.data ?? []) as Array<Stats>;
+      const sum = (k: keyof Kpis) => rows.reduce((acc, r) => acc + Number(r[k] ?? 0), 0);
+      setKpis({
+        cur: {
+          views: sum('views'),
+          visitors: sum('visitors'),
+          completions: sum('completions'),
+          leads: sum('leads'),
+        },
+        prev: null,
+      });
+    }
     if (list.length) {
       const s = await supabase
         .from('steps')
@@ -193,44 +229,157 @@ export function DemosPage() {
     </form>
   );
 
+  const counts = {
+    all: demos.length,
+    published: demos.filter((d) => d.status === 'published').length,
+    draft: demos.filter((d) => d.status === 'draft').length,
+  };
+  const inFolder = (id: string | 'none') =>
+    demos.filter((d) => (id === 'none' ? !d.folder_id : d.folder_id === id)).length;
+  const kpi = {
+    deltaLabel: t('analytics.vsPreviousDays', { count: 30 }),
+    noDeltaLabel: t('analytics.noComparison'),
+  };
+  const sortLabels: Record<Sort, string> = {
+    updated: t('demos.sortUpdated'),
+    title: t('demos.sortTitle'),
+    views: t('demos.sortViews'),
+  };
+  const folderPill = (id: string | 'all' | 'none', label: string, count: number, icon: ReactNode) => (
+    <button type="button" className="folder-pill" aria-pressed={folder === id} onClick={() => setFolder(id)}>
+      {icon}
+      <span className="folder-pill__name">{label}</span>
+      <span className="folder-pill__count">{count}</span>
+    </button>
+  );
+
   return (
-    <div className="stack">
-      <div className="page-head">
-        <h1>{t('demos.title')}</h1>
-        {editable && (
-          <Button variant="primary" icon={<Plus />} onClick={() => void createDemo()}>
-            {t('demos.new')}
-          </Button>
-        )}
-      </div>
+    <div className="stack page-wide">
+      <header className="page-head page-head--refonte">
+        <div className="page-head__titles">
+          <h1>{t('demos.title')}</h1>
+          <p className="page-head__sub">
+            {t('demos.subtitle')}
+            {usage && limit !== null && limit !== undefined && (
+              <>
+                {' · '}
+                <Link
+                  to="/settings/plans"
+                  className={usage.published_demos >= limit ? 'usage-link usage-link--full' : 'usage-link'}
+                >
+                  {t('demos.usageShort', { used: usage.published_demos, limit })}
+                </Link>
+              </>
+            )}
+          </p>
+        </div>
+        <div className="page-head__actions">
+          <label className="search-pill">
+            <Search aria-hidden="true" />
+            <input
+              className="fd-input"
+              type="search"
+              placeholder={t('demos.search')}
+              aria-label={t('demos.search')}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </label>
+          {editable && (
+            <Button variant="primary" size="lg" icon={<Plus />} onClick={() => void createDemo()}>
+              {t('demos.new')}
+            </Button>
+          )}
+        </div>
+      </header>
       {error && <Alert kind="error">{error}</Alert>}
-      {usage && limit !== null && limit !== undefined && (
-        <Alert kind={usage.published_demos >= limit ? 'error' : 'info'}>
-          {t('demos.usage', { used: usage.published_demos, limit })}
-        </Alert>
+
+      {kpis && (
+        <section className="stat-row" aria-label={t('analytics.kpis', { count: 30 })}>
+          <StatTile
+            hero
+            icon={<Eye />}
+            label={t('demos.kpiViews')}
+            value={formatNumber(kpis.cur.views)}
+            delta={kpis.prev ? variation(kpis.cur.views, kpis.prev.views) : undefined}
+            {...kpi}
+          />
+          <StatTile
+            icon={<Users />}
+            label={t('analytics.visitors')}
+            value={formatNumber(kpis.cur.visitors)}
+            delta={kpis.prev ? variation(kpis.cur.visitors, kpis.prev.visitors) : undefined}
+            {...kpi}
+          />
+          <StatTile
+            icon={<Route />}
+            label={t('analytics.completion')}
+            value={`${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)} %`}
+            delta={
+              kpis.prev
+                ? kpis.prev.visitors > 0
+                  ? variation(
+                      completionRate(kpis.cur.visitors, kpis.cur.completions),
+                      completionRate(kpis.prev.visitors, kpis.prev.completions),
+                    )
+                  : null
+                : undefined
+            }
+            {...kpi}
+          />
+          <StatTile
+            icon={<Mail />}
+            label={t('analytics.leads')}
+            value={formatNumber(kpis.cur.leads)}
+            delta={kpis.prev ? variation(kpis.cur.leads, kpis.prev.leads) : undefined}
+            {...kpi}
+          />
+        </section>
       )}
 
-      <div className="demos-layout">
-        <nav className="folders" aria-label={t('demos.folders')}>
-          <button
-            className={folder === 'all' ? 'active' : ''}
-            aria-current={folder === 'all'}
-            onClick={() => setFolder('all')}
-          >
-            <Layers size={16} aria-hidden="true" />
-            {t('demos.allDemos')}
-            <span className="count">{demos.length}</span>
-          </button>
-          <button
-            className={folder === 'none' ? 'active' : ''}
-            aria-current={folder === 'none'}
-            onClick={() => setFolder('none')}
-          >
-            <FolderOpen size={16} aria-hidden="true" />
-            {t('demos.noFolder')}
-            <span className="count">{demos.filter((d) => !d.folder_id).length}</span>
-          </button>
-          {folders.map((f) =>
+      <section aria-labelledby="demos-list-title" className="demos-section">
+        <div className="filter-bar">
+          <h2 id="demos-list-title">{t('demos.allDemos')}</h2>
+          <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
+            {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
+              <button key={k} type="button" aria-pressed={status === k} onClick={() => setStatus(k)}>
+                {t(`demos.filter_${k}`)} · {counts[k]}
+              </button>
+            ))}
+          </div>
+          <div className="filter-bar__end">
+            {folders.length > 5 && (
+              <Menu
+                label={t('demos.folders')}
+                trigger={{ icon: <Folder />, text: t('demos.folders') }}
+                items={[
+                  { label: t('demos.allFolders'), icon: <Layers />, onSelect: () => setFolder('all') },
+                  { label: t('demos.noFolder'), icon: <FolderOpen />, onSelect: () => setFolder('none') },
+                  'separator',
+                  ...folders.map((f) => ({
+                    label: f.name,
+                    icon: <Folder />,
+                    onSelect: () => setFolder(f.id),
+                  })),
+                ]}
+              />
+            )}
+            <Menu
+              label={t('demos.sort')}
+              trigger={{ icon: <ArrowDownUp />, text: sortLabels[sort] }}
+              items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
+                label: sortLabels[k],
+                icon: sort === k ? <Check /> : <span />,
+                onSelect: () => setSort(k),
+              }))}
+            />
+          </div>
+        </div>
+
+        <nav className="folder-pills" aria-label={t('demos.folders')}>
+          {folderPill('all', t('demos.allFolders'), demos.length, <Layers aria-hidden="true" />)}
+          {folderPill('none', t('demos.noFolder'), inFolder('none'), <FolderOpen aria-hidden="true" />)}
+          {(folders.length <= 5 ? folders : folders.filter((f) => f.id === folder)).map((f) =>
             renaming?.id === f.id ? (
               <div key={f.id}>
                 {folderInput(
@@ -240,16 +389,8 @@ export function DemosPage() {
                 )}
               </div>
             ) : (
-              <div key={f.id} className="folder-row">
-                <button
-                  className={folder === f.id ? 'active' : ''}
-                  aria-current={folder === f.id}
-                  onClick={() => setFolder(f.id)}
-                >
-                  <Folder size={16} aria-hidden="true" />
-                  <span className="folder-name">{f.name}</span>
-                  <span className="count">{demos.filter((d) => d.folder_id === f.id).length}</span>
-                </button>
+              <span key={f.id} className="folder-pill-group">
+                {folderPill(f.id, f.name, inFolder(f.id), <Folder aria-hidden="true" />)}
                 {editable && (
                   <Menu
                     label={t('demos.folderActions', { name: f.name })}
@@ -268,121 +409,95 @@ export function DemosPage() {
                     ]}
                   />
                 )}
-              </div>
+              </span>
             ),
           )}
           {editable &&
             (newFolder !== null ? (
               folderInput(newFolder, setNewFolder, () => setNewFolder(null))
             ) : (
-              <button className="folder-add" onClick={() => setNewFolder('')}>
-                <FolderPlus size={16} aria-hidden="true" />
+              <button type="button" className="folder-pill folder-pill--add" onClick={() => setNewFolder('')}>
+                <FolderPlus aria-hidden="true" />
                 {t('demos.newFolder')}
               </button>
             ))}
         </nav>
 
-        <section aria-label={t('demos.title')}>
-          <div className="toolbar">
-            <div className="search">
-              <Search size={16} aria-hidden="true" />
-              <input
-                className="fd-input"
-                type="search"
-                placeholder={t('demos.search')}
-                aria-label={t('demos.search')}
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-              />
-            </div>
-            <Select
-              inline
-              aria-label={t('demos.status')}
-              value={status}
-              onChange={(e) => setStatus(e.target.value as StatusFilter)}
-            >
-              <option value="all">{t('demos.allStatuses')}</option>
-              <option value="published">{t('status.published')}</option>
-              <option value="draft">{t('status.draft')}</option>
-            </Select>
-            <Select
-              inline
-              aria-label={t('demos.sort')}
-              value={sort}
-              onChange={(e) => setSort(e.target.value as Sort)}
-            >
-              <option value="updated">{t('demos.sortUpdated')}</option>
-              <option value="title">{t('demos.sortTitle')}</option>
-              <option value="views">{t('demos.sortViews')}</option>
-            </Select>
-          </div>
-
-          {demos.length === 0 ? (
-            <Card>
-              <h2 className="card-title">{t('demos.emptyTitle')}</h2>
-              <ol className="onboarding-steps">
-                <li>{t('demos.emptyStep1')}</li>
-                <li>{t('demos.emptyStep2')}</li>
-                <li>{t('demos.emptyStep3')}</li>
-              </ol>
-              {editable && (
-                <Button icon={<Plus />} onClick={() => void createDemo()}>
-                  {t('demos.emptyCta')}
-                </Button>
-              )}
-            </Card>
-          ) : visible.length === 0 ? (
-            <p className="fd-muted">{t('demos.noMatch')}</p>
-          ) : (
-            <ul className="grid-cards demo-grid">
-              {visible.map((d) => {
-                const s = stats[d.id];
-                return (
-                  <li key={d.id} className="fd-card demo-card">
-                    <div className="demo-cover fd-player-scope" aria-hidden="true">
-                      {covers[d.id] ? (
-                        <img src={covers[d.id]} alt="" loading="lazy" />
-                      ) : (
-                        <span className="demo-cover-empty">
-                          <svg viewBox="0 0 120 48" className="demo-trail">
-                            <path d="M12 38c18 0 22-14 48-14s30-14 48-14" />
-                            <circle cx="12" cy="38" r="5" />
-                            <circle cx="60" cy="24" r="5" />
-                            <circle cx="108" cy="10" r="7" className="demo-trail-hot" />
-                          </svg>
-                          <span className="demo-cover-title">{d.title}</span>
-                        </span>
-                      )}
+        {demos.length === 0 ? (
+          <Card>
+            <h2 className="card-title">{t('demos.emptyTitle')}</h2>
+            <ol className="onboarding-steps">
+              <li>{t('demos.emptyStep1')}</li>
+              <li>{t('demos.emptyStep2')}</li>
+              <li>{t('demos.emptyStep3')}</li>
+            </ol>
+            {editable && (
+              <Button icon={<Plus />} onClick={() => void createDemo()}>
+                {t('demos.emptyCta')}
+              </Button>
+            )}
+          </Card>
+        ) : visible.length === 0 ? (
+          <p className="fd-muted">{t('demos.noMatch')}</p>
+        ) : (
+          <ul className="demo-grid">
+            {visible.map((d) => {
+              const s = stats[d.id];
+              return (
+                <li key={d.id} className="fd-card demo-card">
+                  <div className="demo-cover fd-player-scope" aria-hidden="true">
+                    {covers[d.id] ? (
+                      <img src={covers[d.id]} alt="" loading="lazy" />
+                    ) : (
+                      <span className="demo-cover-empty">
+                        <svg viewBox="0 0 120 48" className="demo-trail">
+                          <path d="M12 38c18 0 22-14 48-14s30-14 48-14" />
+                          <circle cx="12" cy="38" r="5" />
+                          <circle cx="60" cy="24" r="5" />
+                          <circle cx="108" cy="10" r="7" className="demo-trail-hot" />
+                        </svg>
+                        <span className="demo-cover-title">{d.title}</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="demo-body">
+                    <div className="demo-head">
+                      <h3>
+                        {/* Lien étendu : toute la carte est cliquable */}
+                        <Link className="demo-link" to={`/demos/${d.id}/edit`}>
+                          {d.title}
+                        </Link>
+                      </h3>
+                      <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
                     </div>
-                    <div className="demo-body">
-                      <div className="demo-head">
-                        <h3>
-                          {/* Lien étendu : toute la carte est cliquable */}
-                          <Link className="demo-link" to={`/demos/${d.id}/edit`}>
-                            {d.title}
-                          </Link>
-                        </h3>
-                        <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
-                      </div>
-                      <div className="demo-meta">
-                        <span className={`fd-badge status-${d.status}`}>{t(`status.${d.status}`)}</span>
-                        <span>
-                          {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })} ·{' '}
-                          {t('demos.leads', { count: s?.leads ?? 0, n: formatNumber(s?.leads ?? 0) })}
-                        </span>
-                        <span aria-hidden="true">·</span>
+                    <div className="demo-meta">
+                      <span className={`fd-badge status-${d.status}`}>{t(`status.${d.status}`)}</span>
+                      <span>
+                        {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })} ·{' '}
+                        {t('demos.leads', { count: s?.leads ?? 0, n: formatNumber(s?.leads ?? 0) })} ·{' '}
                         <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
                           {formatRelative(d.updated_at)}
                         </time>
-                      </div>
+                      </span>
                     </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section>
-      </div>
+                  </div>
+                </li>
+              );
+            })}
+            {editable && (
+              <li className="demo-new">
+                <button type="button" className="demo-new__btn" onClick={() => void createDemo()}>
+                  <span className="fd-btn fd-btn--round" aria-hidden="true">
+                    <Plus />
+                  </span>
+                  <strong>{t('demos.new')}</strong>
+                  <span className="fd-muted">{t('demos.newHint')}</span>
+                </button>
+              </li>
+            )}
+          </ul>
+        )}
+      </section>
 
       <ConfirmDialog
         open={!!toDelete}

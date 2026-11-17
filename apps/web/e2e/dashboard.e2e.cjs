@@ -26,9 +26,12 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.fill('input[type=search]', 'onboard');
   ok((await page.locator('.demo-card').count()) === 1, 'recherche par titre');
   await page.fill('input[type=search]', '');
-  await page.selectOption('select[aria-label="Statut"]', 'draft');
-  ok((await page.locator('.demo-card').count()) === 1, 'filtre par statut');
-  await page.selectOption('select[aria-label="Statut"]', 'all');
+  ok((await page.locator('.stat-tile').count()) === 4, 'KPI du workspace (4 cartes)');
+  ok((await page.locator('.stat-tile.fd-card--hero').count()) === 1, 'une seule carte héro');
+  await page.getByRole('button', { name: /^Brouillons · 1/ }).click();
+  ok((await page.locator('.demo-card').count()) === 1, 'filtre par statut (segmenté)');
+  await page.getByRole('button', { name: /^Toutes · 2/ }).click();
+  ok((await page.locator('.demo-new__btn').count()) === 1, 'carte « Nouvelle démo » en fin de grille');
 
   await page.getByRole('button', { name: 'Nouveau dossier' }).click();
   await page.fill('.folder-form input', 'Ventes');
@@ -45,7 +48,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.locator('dialog[open]').getByRole('button', { name: 'Fermer' }).click();
   await page.getByRole('button', { name: /^Ventes/ }).click();
   ok((await page.locator('.demo-card').count()) === 1, 'démo rangée dans le dossier');
-  await page.getByRole('button', { name: /Toutes les démos/ }).click();
+  await page.getByRole('button', { name: /^Tous les dossiers/ }).click();
 
   await page.getByRole('button', { name: 'Actions pour Onboarding' }).click();
   await page.getByRole('menuitem', { name: 'Dupliquer' }).click();
