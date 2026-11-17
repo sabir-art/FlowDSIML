@@ -253,3 +253,29 @@ La barre latérale (W3), le responsive mobile de l'app (W4), les confirmations n
 | Corrigé côté `packages/ui` | 6 correctifs (F0.1–F0.6) | | |
 
 **Ordre conseillé** : installer Lucide + composant `Icon` (1 h), F1–F3 et F12 (bloquants), puis F6–F9, F13–F16, F24 (grep des accents). La table d'icônes complète est dans `composants.md` §15.1.
+
+---
+
+## Re-vérification des correctifs du dev (17 nov., `claude/dev-mvp` @ `61d8217` + `claude/ux-finition`)
+
+Bancs e2e du dev : **4/4 sans erreur** (éditeur, publication/player, analytics, dashboard). Captures : `docs/ux/recette/reverif/`.
+
+| Point | Statut | Constat |
+|---|---|---|
+| P1 thème du player | ✅ Corrigé | Fond `player-backdrop` clair, primaire Lagoon, police Instrument. |
+| P2 hotspot | ✅ Corrigé | Pastille Ember pulsée + bulle fléchée vers la cible. |
+| P3 mobile | ✅ Corrigé | Bulle en feuille ancrée en bas, boutons 44 px, contrôles sous la capture. |
+| P4 lien expiré | ✅ Corrigé | Écran dédié avec icône `LinkOff`, titre et action ; (texte en anglais dans la capture car navigateur de test en `en-US` : OK). |
+| P5 contrôles | ✅ Corrigé | Précédent / progression / suivant / plein écran sous le cadre, icônes chevrons. |
+| P7 filigrane | ⚠️ Partiel | Lien centré, souligné, sans logo ; à passer en pastille avec logo (§13.6). |
+| ED1 clavier canevas | ✅ Corrigé | Hotspot `tabindex=0`, `aria-label` « Hotspot 1 : … », flèches déplacent. |
+| ED4/ED5 outils, onglets | ✅ Corrigé | 3 onglets Étape · Design · Réglages ; outils segmentés. |
+| ED9 suppression | ✅ Corrigé | « Supprimer l'étape » en lien `danger` discret. |
+| ED11 mobile | ✅ Corrigé | Écran « L'éditeur nécessite un écran plus large ». |
+| ED14 état de sauvegarde | ✅ Corrigé | « Enregistrement… » / « Enregistré ». |
+| F1 glyphes « + » / « ← » | ❌ Ouvert | Toujours « ← », « + Hotspot », « + Flou », « + Écran texte », « + Image » (scan DOM). |
+| F12 hauteurs barre de mise en forme | ❌ Ouvert | B / I / Lien 32 px vs select de variable 40 px. |
+| F16 alignement des cases | ❌ Ouvert | « Bouton d'action (CTA) » toujours décalée. |
+| ED2 rendu WYSIWYG | ❌ Ouvert (annoncé) | Les écrans texte sont rendus ; la bulle du hotspot reste absente du canevas. |
+
+Reste prioritaire : **Lucide + F1–F3, F12, F16**, puis ED2.
