@@ -90,6 +90,7 @@ export function GuidedTourPanel({ editor, readOnly }: { editor: DemoEditor; read
                 maxLength={80}
                 disabled={readOnly}
                 value={checklist.title}
+                placeholder={t('editor.advanced.checklist.headingPlaceholder')}
                 onChange={(e) => set({ checklist: { ...checklist, title: e.target.value } })}
               />
             </Field>

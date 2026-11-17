@@ -96,13 +96,30 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
   const backdrop = bgBlur ? backdropIndex(m, index) : null;
   /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
   const choices = step.options.choices.filter((c) => choiceTarget(m, c.action));
-  const [visited, setVisited] = useState<Set<number>>(() => new Set([0]));
+  const [visited, setVisited] = useState<Set<number>>(() => new Set());
+  const prevIndex = useRef<number | null>(null);
+  const markSeen = (i: number) => setVisited((v) => (v.has(i) ? v : new Set(v).add(i)));
   /** F2 : quiz du module (après la dernière étape) ; gardé monté pendant « Revoir l'étape ». */
   const [view, setView] = useState<'steps' | 'quiz'>(() => (startQuiz && m.quiz ? 'quiz' : 'steps'));
   const [quizOpened, setQuizOpened] = useState(() => !!(startQuiz && m.quiz));
   const [reviewing, setReviewing] = useState(false);
   const quizGate = !!m.quiz && m.quiz.required && m.quiz.mode === 'quiz';
   const QUIZ_KEY = `fd.quiz.${m.demoId}`;
+  /** F1-3 : la checklist ne recouvre jamais la capture : à côté si la place le permet, sinon dans l'en-tête. */
+  const [checklistDocked, setChecklistDocked] = useState(false);
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || !m.checklist) return;
+    const measure = () => {
+      const stage = root.querySelector('.p-stage, .p-text-step, .p-quiz-card') as HTMLElement | null;
+      const free = stage ? (root.clientWidth - stage.getBoundingClientRect().width) / 2 : 0;
+      setChecklistDocked(free < 260 + 32);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(root);
+    return () => ro.disconnect();
+  }, [index, view, m.checklist]);
   /** Choix « Fin de la démo » : écran de fin sans changer d'étape. */
   const [ended, setEnded] = useState(false);
   const [playing, setPlaying] = useState(() => !!m.autoplay?.enabled && !preview);
@@ -113,7 +130,10 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
 
   useEffect(() => {
     tracker.track('step_view', { stepId: step.id, stepIndex: index });
-    setVisited((v) => (v.has(index) ? v : new Set(v).add(index)));
+    // F1-4 : une étape (et donc un chapitre) est « vue » quand on la quitte
+    const left = prevIndex.current;
+    prevIndex.current = index;
+    if (left !== null && left !== index) markSeen(left);
     // Un quiz obligatoire conditionne la fin du module (demo_complete à la réussite)
     if (last && !completed.current && !quizGate) {
       completed.current = true;
@@ -149,6 +169,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
   }
 
   function openQuiz() {
+    markSeen(index); // fin du parcours : la dernière étape compte comme vue
     setQuizOpened(true);
     setView('quiz');
     setReviewing(false);
@@ -174,6 +195,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
     if (!target) return;
     if (target.kind === 'url') window.open(target.url, '_blank', 'noopener');
     else if (target.kind === 'end') {
+      markSeen(index);
       setEnded(true);
       if (!completed.current) {
         completed.current = true;
@@ -209,7 +231,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
         // Spec a2 §2 : Échap vaut « Suivant » sur une pop-up sans choix
         if (popup && !choices.length && !last && !gateForm) return go(index + 1);
       }
-      if ((e.target as HTMLElement)?.closest?.('form') || gateForm) return;
+      if ((e.target as HTMLElement)?.closest?.('form') || gateForm || view === 'quiz') return;
       if (e.key === 'ArrowRight') go(index + 1);
       if (e.key === 'ArrowLeft') go(index - 1);
     }
@@ -251,6 +273,17 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
             </span>
           </button>
         )}
+        {m.checklist && items.length > 0 && !compact && checklistDocked && (
+          <Checklist
+            title={m.checklist.title}
+            position="collapsed"
+            items={items}
+            t={t}
+            sub={sub}
+            onGo={go}
+            docked
+          />
+        )}
         {m.chapters.length > 0 && (
           <button
             class="p-icon-btn"
@@ -289,6 +322,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
           const x1 = e.changedTouches[0]?.clientX;
           touchX.current = null;
           if (x0 === null || x1 === undefined || Math.abs(x1 - x0) < 50 || gateForm) return;
+          if (view === 'quiz') return;
           go(x1 < x0 ? index + 1 : index - 1);
         }}
       >
@@ -463,7 +497,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
             </div>
           </div>
         )}
-        {m.checklist && items.length > 0 && !gateForm && !compact && (
+        {m.checklist && items.length > 0 && !gateForm && !compact && !checklistDocked && (
           <Checklist
             title={m.checklist.title}
             position={m.checklist.position}
@@ -497,7 +531,12 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
       )}
 
       <footer class="p-controls" inert={!!gateForm} aria-hidden={gateForm ? true : undefined}>
-        <button class="p-icon-btn" onClick={() => go(index - 1)} disabled={index === 0} aria-label={t.prev}>
+        <button
+          class="p-icon-btn"
+          onClick={() => go(index - 1)}
+          disabled={index === 0 || view === 'quiz'}
+          aria-label={t.prev}
+        >
           <ChevronLeft {...ICON} />
         </button>
         {autoplay && (
@@ -515,13 +554,13 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
           role="progressbar"
           aria-valuemin={1}
           aria-valuemax={m.steps.length}
-          aria-valuenow={index + 1}
-          aria-label={`${index + 1} ${t.of} ${m.steps.length}`}
+          aria-valuenow={view === 'quiz' ? m.steps.length : index + 1}
+          aria-label={view === 'quiz' ? t.quiz.label : `${index + 1} ${t.of} ${m.steps.length}`}
         >
-          <div style={{ width: `${progress}%` }} />
+          <div style={{ width: `${view === 'quiz' ? 100 : progress}%` }} />
         </div>
         <span class="p-count" aria-hidden="true">
-          {index + 1}/{m.steps.length}
+          {view === 'quiz' ? t.quiz.label : `${index + 1}/${m.steps.length}`}
         </span>
         <button
           class="p-icon-btn"

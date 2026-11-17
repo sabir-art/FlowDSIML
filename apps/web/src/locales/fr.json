@@ -456,7 +456,8 @@
         "left": "Gauche",
         "right": "Droite",
         "collapsed": "Repliée",
-        "progress": "{{done}} sur {{total}} terminées"
+        "progress": "{{done}} sur {{total}} terminées",
+        "headingPlaceholder": "Votre progression"
       },
       "choice": {
         "title": "Menu de choix",

@@ -426,6 +426,19 @@ export function CommentsPanel({
         {header}
 
         <div className="cm-scroll">
+          {olderAbove > 0 && (
+            <button
+              type="button"
+              className="cm-older"
+              onClick={() => {
+                listRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                setOlderAbove(0);
+              }}
+            >
+              {t('editor.comments.olderAbove', { count: olderAbove })}
+              <ArrowUp aria-hidden="true" />
+            </button>
+          )}
           {api.loading ? (
             <div className="cm-skeletons" aria-hidden="true">
               {[0, 1].map((i) => (
@@ -575,19 +588,6 @@ export function CommentsPanel({
                 );
               })}
             </ol>
-          )}
-          {olderAbove > 0 && (
-            <button
-              type="button"
-              className="cm-pending cm-pending--top"
-              onClick={() => {
-                listRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                setOlderAbove(0);
-              }}
-            >
-              {t('editor.comments.olderAbove', { count: olderAbove })}
-              <ArrowUp aria-hidden="true" />
-            </button>
           )}
           {pending > 0 && (
             <button

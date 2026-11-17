@@ -44,7 +44,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const firstUnread = await page.locator('[data-comment="c7"]').evaluate((el) => el.offsetTop);
   ok(top > 0 && Math.abs(top - (firstUnread - 8)) < 4, 'liste ouverte sur le premier non lu (remarque 8)');
   ok((await page.locator('.cm-item--new').count()) === 3, 'les 3 non lus sont marqués « Nouveau »');
-  const pill = page.locator('.cm-pending--top');
+  const pill = page.locator('.cm-older');
   ok(
     (await pill.textContent()).includes('7 commentaires plus anciens'),
     'pilule « 7 commentaires plus anciens ↑ »',

@@ -227,12 +227,21 @@ export function Canvas({
         )}
       </>
     );
+    // F1-2 : fond « Capture floutée » = dernière étape image précédente, floutée comme dans le player
+    const here = editor.steps.findIndex((x) => x.id === step.id);
+    const prevImage = [...editor.steps.slice(0, Math.max(0, here))]
+      .reverse()
+      .find((x) => x.kind === 'image' && x.image_path);
+    const bgUrl =
+      popup && opts.background === 'blur' && prevImage ? editor.imageUrls[prevImage.image_path!] : undefined;
     return (
+      // F1-1 : le canevas suit le thème de la démo (clair), pas le thème sombre de l'app
       <div
-        className={`canvas-text${popup ? ' canvas-text--popup' : ''}`}
+        className={`canvas-text fd-player-scope${popup ? ' canvas-text--popup' : ''}`}
         style={popup && opts.background === 'color' ? { background: opts.bgColor } : undefined}
         onPointerDown={() => setSelection({ kind: 'step' })}
       >
+        {bgUrl && <img className="canvas-popup-bg" src={bgUrl} alt="" aria-hidden="true" />}
         {formChip}
         {popup ? <div className="canvas-popup">{card}</div> : card}
       </div>

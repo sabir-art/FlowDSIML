@@ -1498,3 +1498,51 @@
   top: var(--fd-space-2);
   bottom: auto;
 }
+
+/* F1-2 : fond « Capture floutée » de la pop-up dans le canevas */
+.canvas-text--popup {
+  overflow: hidden;
+}
+.canvas-popup-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(6px) brightness(0.55);
+  transform: scale(1.04);
+}
+.canvas-popup {
+  position: relative;
+}
+/* F1-6 : l'état vide des commentaires défile au lieu de passer sous le champ de saisie */
+.cm-scroll {
+  overflow: hidden;
+}
+.cm-scroll > .cm-state {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  align-content: start;
+  padding-block: var(--fd-space-3);
+}
+/* F1-8 : bande « n commentaires plus anciens » au-dessus de la liste (ne recouvre rien) */
+.cm-older {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 32px;
+  border: 0;
+  border-bottom: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text);
+  font: 600 var(--fd-text-label-size, 13px) / 1 var(--fd-font-sans);
+  cursor: pointer;
+}
+.cm-older svg {
+  width: 14px;
+  height: 14px;
+}

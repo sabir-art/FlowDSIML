@@ -23,15 +23,21 @@ export function Checklist({
   t,
   sub,
   onGo,
+  docked = false,
 }: {
   title: string;
   position: 'left' | 'right' | 'collapsed';
+  /** F1-3 : pas de place à côté de la capture → pilule dans l'en-tête, carte ouverte à la demande. */
+  docked?: boolean;
   items: ChecklistItem[];
   t: Dict;
   sub: (s: string) => string;
   onGo: (index: number) => void;
 }) {
-  const [open, setOpen] = useState(position !== 'collapsed');
+  const [open, setOpen] = useState(position !== 'collapsed' && !docked);
+  useEffect(() => {
+    if (docked) setOpen(false);
+  }, [docked]);
   const [announce, setAnnounce] = useState('');
   const done = items.filter((x) => x.done).length;
   const prevDone = useRef(new Set(items.filter((x) => x.done).map((x) => x.id)));
@@ -49,7 +55,7 @@ export function Checklist({
   }, [items.map((x) => (x.done ? 1 : 0)).join('')]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div class={`p-checklist p-checklist--${side}`}>
+    <div class={`p-checklist ${docked ? 'p-checklist--docked' : `p-checklist--${side}`}`}>
       <span class="sr-only" aria-live="polite">
         {announce}
       </span>

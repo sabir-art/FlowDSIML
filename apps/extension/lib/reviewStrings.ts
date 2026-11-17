@@ -1,11 +1,12 @@
 /** Chaînes de l'écran de vérification (clés extension.piiCheck.* de docs/ux/i18n, plus IBAN et identifiant). */
 const fr = {
   pageTitle: 'Vérifier les données avant l’envoi',
-  subtitle: '{{demo}} · {{count}} captures · rien n’a encore quitté votre navigateur',
+  subtitle_one: '{{demo}} · {{count}} capture · rien n’a encore quitté votre navigateur',
+  subtitle_other: '{{demo}} · {{count}} captures · rien n’a encore quitté votre navigateur',
   analyzing: 'Analyse des captures…',
   done: 'Analyse terminée',
-  summary_one: '{{count}} donnée personnelle possible détectée sur {{captures}} capture(s).',
-  summary_other: '{{count}} données personnelles possibles détectées sur {{captures}} capture(s).',
+  summary_one: '{{count}} donnée personnelle possible détectée sur {{captures}}.',
+  summary_other: '{{count}} données personnelles possibles détectées sur {{captures}}.',
   summaryHelp:
     'Elles seront floutées à l’envoi. Décochez une détection seulement si ce n’est pas une donnée réelle (exemple fictif, libellé).',
   none: 'Aucune donnée personnelle détectée. Relisez quand même vos captures : la détection ne voit pas tout.',
@@ -13,6 +14,8 @@ const fr = {
   captureCount_other: '{{count}} détections',
   captureNone: 'Aucune détection',
   captureN: 'Capture {{n}}',
+  capturesCount_one: '{{count}} capture',
+  capturesCount_other: '{{count}} captures',
   captures: 'Captures',
   toggle: 'Flouter : {{type}}',
   blurAll: 'Tout flouter sur cette capture',
@@ -47,11 +50,12 @@ const fr = {
 };
 const en: typeof fr = {
   pageTitle: 'Check data before sending',
-  subtitle: '{{demo}} · {{count}} captures · nothing has left your browser yet',
+  subtitle_one: '{{demo}} · {{count}} capture · nothing has left your browser yet',
+  subtitle_other: '{{demo}} · {{count}} captures · nothing has left your browser yet',
   analyzing: 'Analyzing captures…',
   done: 'Analysis complete',
-  summary_one: '{{count}} possible personal data item found on {{captures}} capture(s).',
-  summary_other: '{{count}} possible personal data items found on {{captures}} capture(s).',
+  summary_one: '{{count}} possible personal data item found on {{captures}}.',
+  summary_other: '{{count}} possible personal data items found on {{captures}}.',
   summaryHelp:
     'They will be blurred when sent. Only untick a detection if it is not real data (fictional example, label).',
   none: 'No personal data detected. Still review your captures: detection does not catch everything.',
@@ -59,6 +63,8 @@ const en: typeof fr = {
   captureCount_other: '{{count}} detections',
   captureNone: 'No detection',
   captureN: 'Capture {{n}}',
+  capturesCount_one: '{{count}} capture',
+  capturesCount_other: '{{count}} captures',
   captures: 'Captures',
   toggle: 'Blur: {{type}}',
   blurAll: 'Blur everything on this capture',

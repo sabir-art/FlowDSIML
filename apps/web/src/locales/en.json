@@ -456,7 +456,8 @@
         "left": "Left",
         "right": "Right",
         "collapsed": "Collapsed",
-        "progress": "{{done}} of {{total}} done"
+        "progress": "{{done}} of {{total}} done",
+        "headingPlaceholder": "Your progress"
       },
       "choice": {
         "title": "Choice menu",

@@ -116,7 +116,11 @@ async function boot() {
       ? h(
           'p',
           {},
-          h('strong', {}, tr('summary', { count: total, captures: withHits })),
+          h(
+            'strong',
+            {},
+            tr('summary', { count: total, captures: tr('capturesCount', { count: withHits }) }),
+          ),
           ' ',
           tr('summaryHelp'),
         )

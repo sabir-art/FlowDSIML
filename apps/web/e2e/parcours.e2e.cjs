@@ -143,12 +143,17 @@ const manifest = {
   ok((await page.locator('.p-popup').count()) === 1, 'autoplay arrêté sur un menu de choix');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-popup-choix.png` });
 
-  // Checklist (carte en bas à droite, repliable)
-  ok((await page.locator('.p-checklist-card').count()) === 1, 'checklist : carte affichée');
+  // Checklist à 1280 : pas de place à côté de la capture → pilule dans l'en-tête (F1-3)
+  ok(
+    (await page.locator('.p-top .p-checklist--docked .p-checklist-pill').count()) === 1,
+    'checklist : pilule dans l’en-tête à 1280',
+  );
+  ok((await page.locator('.p-checklist-card').count()) === 0, 'checklist : ne recouvre pas la capture');
+  await page.locator('.p-checklist-pill').click();
   ok((await page.locator('.p-checklist-item').count()) === 3, 'checklist : 3 chapitres');
   ok(
-    (await page.locator('.p-checklist-progress').textContent()) === '1 sur 3 terminées',
-    'checklist : Découverte terminée (1 sur 3)',
+    (await page.locator('.p-checklist-progress').textContent()) === '0 sur 3 terminées',
+    'checklist : rien de coché tant qu’on n’a pas quitté la dernière étape du chapitre (F1-4)',
   );
   ok(
     (await page.locator('.p-checklist-item.is-current').textContent()).includes('Découverte'),
@@ -157,7 +162,6 @@ const manifest = {
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-checklist.png` });
   await page.getByRole('button', { name: 'Replier' }).click();
   ok((await page.locator('.p-checklist-pill').count()) === 1, 'checklist : repliée en pilule');
-  await page.locator('.p-checklist-pill').click();
 
   // Branching : gestionnaire → s4 (autoplay en pause : l'envoi groupé n'est plus repoussé)
   await play.click();
@@ -167,9 +171,10 @@ const manifest = {
     (await page.locator('.p-count').textContent()).trim() === '4/5',
     'choix : saut vers le chapitre gestionnaire',
   );
+  await page.locator('.p-checklist-pill').click();
   ok(
-    (await page.locator('.p-checklist-item.is-done').count()) === 2,
-    'checklist : chapitre gestionnaire coché (dernière étape vue)',
+    (await page.locator('.p-checklist-item.is-done').count()) === 1,
+    'checklist : Découverte cochée une fois quittée',
   );
   await page.waitForTimeout(3500); // envoi groupé, 2 s après le dernier événement
   ok(
@@ -185,6 +190,24 @@ const manifest = {
   await page.getByRole('button', { name: 'Plus tard' }).click();
   ok((await page.locator('#p-end-title').textContent()) === 'Fin de la démo', 'choix : fin de la démo');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-fin.png` });
+
+  // Grand écran : carte à côté de la capture, sans la recouvrir
+  const wide = await b.newPage({ viewport: { width: 1920, height: 900 } });
+  await wide.route('**/latest.json', (r) =>
+    r.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(manifest),
+      headers: { 'access-control-allow-origin': '*' },
+    }),
+  );
+  await wide.route('**/assets/a.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));
+  await wide.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, body: '{}' }));
+  await wide.goto(`${PLAYER}/#/d/${DEMO}`);
+  await wide.waitForSelector('.p-stage');
+  await wide.waitForSelector('.p-checklist-card');
+  const card = await wide.locator('.p-checklist-card').boundingBox();
+  const st = await wide.locator('.p-stage').boundingBox();
+  ok(card.x >= st.x + st.width, 'grand écran : carte à droite de la capture, sans recouvrement');
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();

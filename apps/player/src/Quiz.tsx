@@ -151,21 +151,21 @@ export function Quiz({
               ? q.surveyLine
               : passed
                 ? fmt(q, 'scoreLine', {
-                    correct: result.correct,
+                    correctText: fmt(q, 'correctCount', { count: result.correct }),
                     total: result.total,
                     score: result.score,
                     threshold: quiz.threshold,
                   })
                 : canRetry && Number.isFinite(left)
                   ? fmt(q, 'failLine', {
-                      correct: result.correct,
+                      correctText: fmt(q, 'correctCount', { count: result.correct }),
                       total: result.total,
                       score: result.score,
                       threshold: quiz.threshold,
                       count: left,
                     })
                   : fmt(q, 'scoreLine', {
-                      correct: result.correct,
+                      correctText: fmt(q, 'correctCount', { count: result.correct }),
                       total: result.total,
                       score: result.score,
                       threshold: quiz.threshold,

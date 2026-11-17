@@ -663,13 +663,13 @@ body {
   height: 6px;
   margin: 10px 0 20px;
   border-radius: 999px;
-  background: #fde9cc;
+  background: color-mix(in srgb, var(--p-text) 10%, transparent);
   overflow: hidden;
 }
 .p-quiz-progress > div {
   height: 100%;
   border-radius: 999px;
-  background: #f39200;
+  background: var(--p-primary);
   transition: width 0.3s;
 }
 .p-quiz-fieldset {
@@ -931,4 +931,25 @@ body {
 .p-root .p-quiz-result h2:focus-visible,
 .p-root .p-quiz-fieldset legend:focus-visible {
   box-shadow: none;
+}
+
+/* F1-3 : checklist dans l'en-tête quand la capture occupe toute la largeur */
+.p-checklist--docked {
+  position: relative;
+  bottom: auto;
+  z-index: 30;
+}
+.p-checklist--docked .p-checklist-pill {
+  min-height: 36px;
+  box-shadow: none;
+}
+.p-checklist--docked .p-checklist-card {
+  position: absolute;
+  top: 0;
+  right: 0;
+  box-shadow: var(--p-shadow);
+}
+/* F2-4 : en mobile, ombre courte (la grande ombre formait un aplat sous la carte) */
+.is-compact .p-quiz-card {
+  box-shadow: 0 1px 3px rgb(8 8 8 / 0.12);
 }
