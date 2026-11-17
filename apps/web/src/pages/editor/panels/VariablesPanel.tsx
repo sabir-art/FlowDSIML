@@ -1,3 +1,4 @@
+import { PanelTitle } from './PanelTitle';
 import { Braces } from 'lucide-react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
@@ -19,7 +20,7 @@ export function VariablesPanel({ editor, readOnly }: { editor: DemoEditor; readO
 
   return (
     <div className="stack">
-      <h3 className="panel-title">{t('editor.variables')}</h3>
+      <PanelTitle icon={<Braces />}>{t('editor.variables')}</PanelTitle>
       <p className="fd-muted" style={{ fontSize: 12 }}>
         {t('editor.variablesHint')}
       </p>

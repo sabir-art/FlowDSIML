@@ -560,7 +560,182 @@
   .editor-bar .bar-label {
     display: none;
   }
-  .editor-bar .segmented button {
+  .editor-bar .fd-segmented > button {
     padding-inline: 9px;
   }
+}
+
+/* ===================================================================== */
+/* Refonte DSI §6 : fond bg visible entre trois cartes (maquette editeur) */
+/* ===================================================================== */
+.editor {
+  background: var(--fd-color-bg);
+}
+.editor-bar {
+  border-bottom: 0;
+  background: transparent;
+  padding: var(--fd-space-4);
+  gap: var(--fd-space-3);
+}
+.editor-bar .editor-symbol {
+  flex: none;
+  display: block;
+}
+.editor-bar .editor-title {
+  height: 44px;
+  max-width: 320px;
+  border-radius: var(--fd-radius-full);
+  border-color: transparent;
+  box-shadow: var(--fd-shadow-xs);
+  font-weight: 700;
+  padding-inline: var(--fd-space-5);
+}
+.editor-bar .save-state {
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+  white-space: nowrap;
+}
+.editor-body {
+  grid-template-columns: 248px minmax(0, 1fr) 340px;
+  gap: var(--fd-space-4);
+  padding: 0 var(--fd-space-4) var(--fd-space-4);
+}
+.editor-left,
+.editor-right {
+  border: 1px solid transparent;
+  border-radius: var(--fd-radius-2xl);
+  background: var(--fd-color-surface);
+  box-shadow: var(--fd-shadow-sm);
+}
+.editor-left {
+  padding: var(--fd-space-4);
+}
+.editor-right {
+  padding: var(--fd-space-5);
+}
+.editor-center {
+  border-radius: var(--fd-radius-2xl);
+  background: var(--fd-color-canvas-editor);
+  padding: var(--fd-space-8) var(--fd-space-6);
+  justify-content: center;
+}
+.canvas-frame {
+  border-radius: var(--fd-player-radius);
+  box-shadow: var(--fd-shadow-md);
+}
+
+/* Rail des étapes : cartes sunken, numéro en pastille noire, étape courante bordée primary */
+.steplist ol {
+  padding: 0;
+  gap: var(--fd-space-3);
+}
+.steplist li {
+  border: 0;
+  border-radius: var(--fd-radius-xl);
+}
+.steplist-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--fd-space-2);
+  padding: var(--fd-space-2) var(--fd-space-2) var(--fd-space-3);
+  border: 2px solid transparent;
+  border-radius: var(--fd-radius-xl);
+  background: var(--fd-color-surface-sunken);
+}
+.steplist li.active .steplist-item,
+.steplist-item[aria-current='true'] {
+  border-color: var(--fd-color-primary);
+  background: var(--fd-color-primary-soft);
+}
+.steplist li.over .steplist-item {
+  border-style: dashed;
+  border-color: var(--fd-color-primary);
+}
+.steplist-n {
+  position: absolute;
+  top: var(--fd-space-3);
+  left: var(--fd-space-3);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--fd-radius-full);
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-on-nav-active);
+  font-size: 11px;
+  font-weight: 700;
+}
+.steplist-item img,
+.steplist-text {
+  border-radius: var(--fd-radius-lg);
+}
+.steplist-title {
+  padding: 0 var(--fd-space-1);
+  font-size: 13px;
+  font-weight: 600;
+}
+.steplist-badges {
+  padding: 0 var(--fd-space-1);
+}
+.steplist-move {
+  top: var(--fd-space-3);
+  right: var(--fd-space-3);
+}
+.steplist-move button {
+  border-radius: var(--fd-radius-full);
+  padding: 0 6px;
+}
+.steplist-chapter {
+  text-transform: none;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-subtle);
+  padding: var(--fd-space-2) var(--fd-space-1) 0;
+}
+
+/* Panneau de droite : onglets pilules, champs espacés de 20 px */
+.editor-right .fd-tabs {
+  margin-bottom: var(--fd-space-5);
+}
+.editor-right .stack {
+  gap: var(--fd-space-5);
+}
+.editor-right .panel-title {
+  font-size: var(--fd-text-h3-size);
+}
+.editor-right hr {
+  border: 0;
+  border-top: 1px solid var(--fd-color-border);
+  margin: 0;
+}
+
+@media (max-width: 1279px) {
+  .editor-body {
+    grid-template-columns: 220px minmax(0, 1fr) 320px;
+  }
+  .editor-bar .editor-symbol {
+    display: none;
+  }
+}
+.editor-bar .fd-segmented > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.editor-bar .fd-segmented > button > svg {
+  flex: none;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-3);
+  min-width: 0;
+}
+.panel-head .panel-title {
+  margin: 0;
+  font-size: var(--fd-text-h3-size);
+  font-weight: 700;
 }

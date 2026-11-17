@@ -1,4 +1,5 @@
-import { ChevronLeft, Trash2 } from 'lucide-react';
+import { PanelTitle } from './PanelTitle';
+import { ChevronLeft, EyeOff, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
@@ -21,7 +22,7 @@ export function BlurPanel({
   return (
     <div className="stack">
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h3 className="panel-title">{t('editor.blurN', { n: index + 1 })}</h3>
+        <PanelTitle icon={<EyeOff />}>{t('editor.blurN', { n: index + 1 })}</PanelTitle>
         <Button
           size="sm"
           variant="ghost"

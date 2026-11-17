@@ -11,7 +11,7 @@ body,
 body {
   background: transparent;
   font-family:
-    'Instrument Sans',
+    'Plus Jakarta Sans',
     ui-sans-serif,
     system-ui,
     -apple-system,
@@ -24,20 +24,20 @@ body {
   place-items: center;
   padding: 24px;
   text-align: center;
-  color: #5f5a52;
-  background: var(--fd-player-backdrop, #f7f6f4);
+  color: #4f5966;
+  background: var(--fd-player-backdrop, #eef2f6);
 }
 .p-center h1 {
   margin: 12px 0 6px;
   font-size: 20px;
-  color: #1f1d1a;
+  color: #080808;
 }
 .p-center p {
   margin: 0;
   max-width: 420px;
 }
 .p-center svg {
-  color: #8c857b;
+  color: #8793a3;
 }
 
 .p-root {
@@ -283,7 +283,7 @@ body {
 .p-field input {
   height: 40px;
   padding: 0 12px;
-  border: 1px solid #8c857b;
+  border: 1px solid #8793a3;
   border-radius: 8px;
   font: inherit;
   font-weight: 400;
@@ -307,7 +307,7 @@ body {
   width: 20px;
   height: 20px;
   margin: 0;
-  border: 1.5px solid #8c857b;
+  border: 1.5px solid #8793a3;
   border-radius: 5px;
   background: var(--p-surface) center / 14px 14px no-repeat;
   cursor: pointer;
@@ -322,7 +322,7 @@ body {
   outline-offset: 2px;
 }
 .p-error {
-  color: #c4320a;
+  color: #d60b52;
   font-size: 13px;
 }
 
@@ -385,4 +385,26 @@ body {
 .p-controls[inert],
 .p-top[inert] > :not(.p-title):not(.p-logo) {
   opacity: 0.4;
+}
+
+/* Refonte DSI §7 : contrôles ronds de 44 px, boutons en pilules, progression orange sur piste pâle
+   (le compteur « n/N » écrit à côté porte l'information : l'orange seul ne suffit pas). */
+.p-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border-color: transparent;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.08);
+}
+.p-btn {
+  border-radius: 999px;
+}
+.p-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: #fde9cc;
+}
+.p-progress > div {
+  border-radius: 999px;
+  background: #f39200;
 }

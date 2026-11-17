@@ -83,13 +83,14 @@ export type Chapter = z.infer<typeof chapterSchema>;
 
 export const themeSchema = z.object({
   // Valeurs par défaut = tokens --fd-player-* (packages/ui/src/tokens.ts)
-  primary: z.string().default('#0E7C71'),
-  hotspot: z.string().default('#E8541F'),
-  background: z.string().default('#F7F6F4'),
+  // Charte DSI des Missions Locales (refonte) : prune, framboise, fond ardoise 100
+  primary: z.string().default('#A3195B'),
+  hotspot: z.string().default('#D60B52'),
+  background: z.string().default('#EEF2F6'),
   surface: z.string().default('#FFFFFF'),
-  text: z.string().default('#1F1D1A'),
-  fontFamily: z.string().default("'Instrument Sans', system-ui, sans-serif"),
-  radius: z.number().min(0).max(32).default(16),
+  text: z.string().default('#080808'),
+  fontFamily: z.string().default("'Plus Jakarta Sans', system-ui, sans-serif"),
+  radius: z.number().min(0).max(32).default(20),
   logoUrl: z.string().nullable().default(null),
   showBranding: z.boolean().default(true),
 });

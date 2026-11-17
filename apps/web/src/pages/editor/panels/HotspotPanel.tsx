@@ -1,4 +1,5 @@
-import { ChevronLeft, Trash2 } from 'lucide-react';
+import { PanelTitle } from './PanelTitle';
+import { ChevronLeft, Target, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { HotspotAction } from '@flowdsiml/manifest';
 import { Button, Checkbox, Field, Select } from '@flowdsiml/ui';
@@ -37,7 +38,7 @@ export function HotspotPanel({
   return (
     <div className="stack">
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h3 className="panel-title">{t('editor.hotspotSettings')}</h3>
+        <PanelTitle icon={<Target />}>{t('editor.hotspotSettings')}</PanelTitle>
         <Button
           size="sm"
           variant="ghost"

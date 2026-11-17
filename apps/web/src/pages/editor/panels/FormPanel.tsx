@@ -1,3 +1,4 @@
+import { PanelTitle } from './PanelTitle';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { ClipboardList, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +30,7 @@ export function FormPanel({
   if (!form)
     return (
       <div className="stack">
-        <h3 className="panel-title">{t('editor.leadForm')}</h3>
+        <PanelTitle icon={<ClipboardList />}>{t('editor.leadForm')}</PanelTitle>
         <p className="fd-muted">{t('editor.leadFormHint')}</p>
         {!leadFormsAllowed && <PlanFormsWarning />}
         {!readOnly && (
@@ -53,7 +54,7 @@ export function FormPanel({
     <div className="stack">
       {dialog}
       <div className="panel-title-row">
-        <h3 className="panel-title">{t('editor.leadForm')}</h3>
+        <PanelTitle icon={<ClipboardList />}>{t('editor.leadForm')}</PanelTitle>
         {!leadFormsAllowed && <span className="fd-badge badge-warning">{t('planForms.badge')}</span>}
       </div>
       {!leadFormsAllowed && <PlanFormsWarning />}

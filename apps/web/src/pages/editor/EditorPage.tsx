@@ -24,6 +24,7 @@ import { PreviewDialog } from './PreviewDialog';
 import type { Manifest } from '@flowdsiml/manifest';
 import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
+import symbol from '../../assets/dsi-symbole.svg';
 
 /** Vrai si la fenêtre est plus étroite que `px` (ED11 : l'éditeur exige un écran large). */
 function useNarrow(px: number) {
@@ -120,9 +121,10 @@ export function EditorPage() {
         {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
       </h1>
       <header className="editor-bar">
-        <Link to="/" className="fd-btn fd-btn--ghost fd-btn--icon" aria-label={t('common.back')}>
+        <Link to="/" className="fd-btn fd-btn--round btn-surface" aria-label={t('common.back')}>
           <ArrowLeft size={18} aria-hidden="true" />
         </Link>
+        <img className="editor-symbol" src={symbol} alt="" width={28} height={28} />
         <input
           className="fd-input editor-title"
           aria-label={t('editor.demoTitle')}
@@ -137,7 +139,7 @@ export function EditorPage() {
         <span className="fd-badge">{t(`status.${editor.demo.status}`)}</span>
         <div className="row" style={{ marginLeft: 'auto' }}>
           {!readOnly && step?.kind === 'image' && (
-            <div className="segmented" role="toolbar" aria-label={t('editor.tools')}>
+            <div className="fd-segmented fd-segmented--strong" role="toolbar" aria-label={t('editor.tools')}>
               {(['select', 'hotspot', 'blur'] as Tool[]).map((k) => {
                 const label = t(
                   k === 'select'
@@ -202,7 +204,7 @@ export function EditorPage() {
           {tool !== 'select' && <p className="fd-muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
         </section>
         <aside className="editor-right">
-          <div className="tabs" role="tablist">
+          <div className="fd-tabs" role="tablist">
             {(['step', 'design', 'settings'] as Tab[]).map((k) => (
               <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
                 {t(`editor.tab_${k}`)}

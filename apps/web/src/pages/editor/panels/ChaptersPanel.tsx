@@ -1,4 +1,5 @@
-import { Plus } from 'lucide-react';
+import { PanelTitle } from './PanelTitle';
+import { ListTree, Plus } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
@@ -8,7 +9,7 @@ export function ChaptersPanel({ editor, readOnly }: { editor: DemoEditor; readOn
   const { t } = useTranslation();
   return (
     <div className="stack">
-      <h3 className="panel-title">{t('editor.chapters')}</h3>
+      <PanelTitle icon={<ListTree />}>{t('editor.chapters')}</PanelTitle>
       <p className="fd-muted" style={{ fontSize: 12 }}>
         {t('editor.chaptersHint')}
       </p>

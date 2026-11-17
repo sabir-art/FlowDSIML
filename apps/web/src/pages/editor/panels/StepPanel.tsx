@@ -1,5 +1,6 @@
+import { PanelTitle } from './PanelTitle';
 import { useConfirm } from '../../../components/ConfirmDialog';
-import { EyeOff, Target, Trash2, TriangleAlert } from 'lucide-react';
+import { EyeOff, Layers, Target, Trash2, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button, Field, Select, Switch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
@@ -33,7 +34,7 @@ export function StepPanel({
   return (
     <div className="stack">
       {dialog}
-      <h3 className="panel-title">{t('editor.stepN', { n: index + 1 })}</h3>
+      <PanelTitle icon={<Layers />}>{t('editor.stepN', { n: index + 1 })}</PanelTitle>
       <Field label={t('editor.stepTitle')} htmlFor="st-title">
         <input
           id="st-title"

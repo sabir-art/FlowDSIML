@@ -95,7 +95,7 @@ const SHOTS = process.env.SHOTS_DIR;
 
   // Onglets thème, formulaire, variables
   await page.getByRole('tab', { name: 'Design' }).click();
-  await page.locator('#th-radius').fill('20');
+  await page.locator('#th-radius').fill('12');
   await page.getByRole('tab', { name: 'Réglages' }).click();
   await page.getByRole('button', { name: 'Créer le formulaire' }).click();
   await page.waitForSelector('#f-title');
@@ -106,7 +106,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.waitForTimeout(900);
   ok(
     state.calls.some(
-      (c) => c.method === 'PATCH' && c.path.endsWith('/demos') && c.body?.settings?.theme?.radius === 20,
+      (c) => c.method === 'PATCH' && c.path.endsWith('/demos') && c.body?.settings?.theme?.radius === 12,
     ),
     'thème enregistré dans la démo',
   );

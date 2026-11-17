@@ -1,4 +1,5 @@
-import { Image as ImageIcon, ImageUp, X } from 'lucide-react';
+import { PanelTitle } from './PanelTitle';
+import { Image as ImageIcon, ImageUp, Palette, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { themeSchema, type Theme } from '@flowdsiml/manifest';
@@ -10,6 +11,7 @@ import { CtaFields } from './CtaFields';
 import { asSettings } from '../types';
 
 const FONTS = [
+  "'Plus Jakarta Sans', system-ui, sans-serif",
   "'Instrument Sans', system-ui, sans-serif",
   'Inter, system-ui, sans-serif',
   'system-ui, sans-serif',
@@ -54,7 +56,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
 
   return (
     <div className="stack">
-      <h3 className="panel-title">{t('editor.theme')}</h3>
+      <PanelTitle icon={<Palette />}>{t('editor.theme')}</PanelTitle>
       {color('primary', t('editor.colorPrimary'))}
       {color('hotspot', t('editor.colorHotspot'))}
       {color('background', t('editor.colorBackground'))}

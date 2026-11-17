@@ -64,7 +64,7 @@ export function PublishButton({ editor }: { editor: DemoEditor }) {
         </span>
       )}
       <Button
-        variant="accent"
+        variant="primary"
         icon={progress ? <Loader2 className="spin" /> : <Rocket />}
         onClick={() => void publish()}
         disabled={progress !== null || !editor.steps.length}
