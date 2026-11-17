@@ -135,7 +135,7 @@ export function Layout() {
         aria-label={drawer ? t('nav.main') : undefined}
       >
         <div className="brand">
-          <BrandMark size={28} />
+          <BrandMark size={36} subtitle={t('app.org')} />
         </div>
         {workspaces.length > 0 && (
           <div className="ws-switch">
@@ -153,16 +153,16 @@ export function Layout() {
             </Select>
           </div>
         )}
-        <nav aria-label={t('nav.main')} className="nav">
+        <nav aria-label={t('nav.main')} className="fd-nav">
           {nav.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end}>
+            <NavLink key={n.to} to={n.to} end={n.end} className="fd-nav__item">
               {n.icon}
               {n.label}
             </NavLink>
           ))}
-          <div className="nav-section">{t('nav.workspace')}</div>
+          <div className="fd-nav__section">{t('nav.workspace')}</div>
           {admin.map((n) => (
-            <NavLink key={n.to} to={n.to}>
+            <NavLink key={n.to} to={n.to} className="fd-nav__item">
               {n.icon}
               {n.label}
             </NavLink>

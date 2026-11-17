@@ -43,7 +43,11 @@ function contrast(a, b) {
       return [
         ['texte / fond', cs('h1', 'color'), bodyBg],
         ['texte muted / fond', cs('.user-text span', 'color'), cs('.sidebar', 'backgroundColor') || bodyBg],
-        ['lien de nav / fond', cs('.nav a', 'color'), cs('.sidebar', 'backgroundColor') || bodyBg],
+        [
+          'lien de nav / fond',
+          cs('.fd-nav__item:not([aria-current])', 'color'),
+          cs('.sidebar', 'backgroundColor') || bodyBg,
+        ],
       ].filter(([, c, k]) => c && k && !/rgba\(0, 0, 0, 0\)/.test(k));
     });
 

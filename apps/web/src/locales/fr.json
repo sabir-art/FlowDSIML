@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "FlowDSIML"
+    "name": "FlowDSIML",
+    "org": "DSI des Missions Locales"
   },
   "common": {
     "loading": "Chargement…",

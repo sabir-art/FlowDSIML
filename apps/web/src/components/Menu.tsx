@@ -65,6 +65,8 @@ export function Menu({
     if (!el || !anchor) return;
     const vw = document.documentElement.clientWidth;
     const vh = window.innerHeight;
+    // Menu ouvert depuis une modale ou le tiroir mobile : au-dessus (popover), sinon dropdown (§15.7)
+    el.style.zIndex = anchor.closest('dialog, [aria-modal="true"]') ? 'var(--fd-z-popover)' : '';
     const asSheet = vw < 480 && count >= SHEET_MIN_ITEMS;
     setSheet(asSheet);
     if (asSheet) {
