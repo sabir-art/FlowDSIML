@@ -107,6 +107,81 @@ Points positifs : structure à trois colonnes conforme (rail, canevas, panneau),
 
 **Priorités proposées au dev** : ED1, ED2 (le rendu WYSIWYG via `player-core` règle aussi ED7 et ED8 côté visuel), ED5, ED4, puis ED11 (simple écran de garde).
 
-## Lot 6 : player
+## Lots 6, 7, 8 : publication, partage, player · analytics, leads · tableau de bord, dossiers, plans
 
-À faire dès sa livraison, avec la même méthode.
+**Branche testée** : `claude/dazzling-lamport-bu517g` (commit `f9ecf9e`, tokens réconciliés intégrés).
+**Méthode** : les 4 bancs e2e du dev (`apps/web/e2e`, faux Supabase, app sur :5173 et player sur :5174) et le banc de l'extension (`apps/extension/e2e`). Captures en 1 280 et 390 px, lecture du code pour les états non couverts. Références : maquettes `partage.html`, `player.html` (desktop, mobile, `#password`, `#expired`), `analytics.html`, `dashboard.html`, `plans.html`. Captures : `docs/ux/recette/lot6-8/`.
+
+### Parcours de bout en bout : capture → éditeur → publication → player → lead → analytics
+
+| Étape | Résultat | Source |
+|---|---|---|
+| Capture (extension) : popup, démarrage, badge REC, clic → étape, WebP téléversé, mot de passe flouté, libellé du hotspot | ✅ 7/7 | `apps/extension/e2e/capture.e2e.cjs` |
+| Éditeur : étapes, hotspot, flou, réordonnancement, formulaire, variables, thème | ✅ 11/11 | `editor.e2e.cjs` |
+| Publication : manifeste, **flou appliqué dans les pixels** (WebP régénéré, zones retirées du manifeste), lien public, iframe, lien personnalisé | ✅ | `publish-player.e2e.cjs` |
+| Player : variable `{{company}}` depuis l'URL et depuis le lien personnalisé, formulaire avant l'étape 2, lead enregistré, clavier `→`, écran final, démo introuvable, mobile | ✅ 17/17 | `publish-player.e2e.cjs` |
+| Événements : `demo_view`, `step_view`, `hotspot_click`, `form_view`, `form_submit`, `demo_complete` | ✅ | idem |
+| Analytics et leads : KPI, histogramme, entonnoir, CSV, analytics du workspace, période, suppression d'un lead (RGPD) | ✅ 10/10 | `analytics.e2e.cjs` |
+| Tableau de bord : vignettes, usage du plan, recherche, filtre, dossiers, duplication, suppression logique, nouvelle démo | ✅ 11/11 | `dashboard.e2e.cjs` |
+
+**Fonctionnellement, la boucle MVP est complète et testée.** Limite : chaque banc a son propre jeu de données simulé. Le chaînage réel (la démo capturée par l'extension → éditée → publiée → vue → lead visible dans les analytics de cette même démo) reste à rejouer sur Supabase avec un compte de test.
+
+### Bilan design
+
+| Lot | Bloquant | Majeur | Mineur |
+|---|---|---|---|
+| 6 (publication, partage, player) | 3 | 7 | 4 |
+| 7 (analytics, leads) | 0 | 4 | 4 |
+| 8 (tableau de bord, dossiers, plans) | 0 | 4 | 3 |
+
+Points positifs : flou irréversible côté pixels (très bon pour la confidentialité), compteur d'étapes `aria-live`, barre de progression `role="progressbar"`, formulaire en `role="dialog" aria-modal`, consentement non coché par défaut, `prefers-reduced-motion` respecté dans le player, liste de sites autorisés pour l'intégration, export CSV et suppression RGPD des leads, entonnoir lisible avec pertes en rouge.
+
+### Lot 6 : publication, partage, player
+
+| # | Gravité | Zone | Écart | Attendu (référence) |
+|---|---|---|---|---|
+| P1 | **Bloquant** | Player, identité | Thème par défaut **violet provisoire** (`#5b4cf0`) sur fond **noir** `#0f0f17` : la démo publiée chez les prospects ne porte ni l'identité du client ni la nôtre. | Valeurs par défaut de `tokens.ts → player` (Lagoon 600, hotspot Ember 500, fond `player-backdrop` clair, rayon 16), surchargées par le thème de la démo. |
+| P2 | **Bloquant** | Player, hotspot | Le hotspot est un **rectangle semi-transparent** autour de la cible (style « zone »), pas le point pulsant ; la bulle n'a pas de flèche vers la cible. | `composants.md` §13.3–13.4 : pastille 20 px pulsée (cible tactile 44 px), bulle avec flèche ; le style « zone » reste une option de guidage. |
+| P3 | **Bloquant** | Player, mobile | À 390 px, la capture fait ~140 px de haut et la **bulle flotte par-dessus et masque la cible**. | Sous 640 px : bulle en **feuille ancrée en bas**, boutons 44 px, balayage gauche/droite (maquette `player.html`, mobile). |
+| P4 | Majeur | Player, accès | Pas d'écran **mot de passe** ; un lien personnalisé **expiré** affiche le message générique « n'existe pas ». | Écrans `player.password.*` et `player.expired.*` (maquettes `player.html#password` / `#expired`) ; le mot de passe peut rester en V2 mais l'expiration doit avoir son message. |
+| P5 | Majeur | Player, navigation | Pas de bouton **Précédent** dans la première bulle ni de contrôles hors bulle (précédent, suivant, plein écran) ; barre de progression collée en bas de l'écran, peu visible. | Contrôles sous le cadre (desktop), progression segmentée en haut du cadre (§13.6). |
+| P6 | Majeur | Player, page publique | En-tête réduit au titre de la démo ; pas de **logo ni de CTA** du client (« Essai gratuit », « Voir les tarifs »). | Page publique de la maquette ; réglages `settings.brand.publicPage` (V2 possible, mais prévoir l'emplacement). |
+| P7 | Majeur | Player, filigrane | « Créé avec FlowDSIML » en texte 11 px gris sur fond sombre (contraste insuffisant), non cliquable. | Pastille « Fait avec FlowDSIML » (logo + lien `rel="noopener"`), contraste AA, en bas à droite. |
+| P8 | Majeur | Partage | Page en **cartes empilées** (lien, iframe, liens perso, versions) sur toute la hauteur ; « **Dépublier** » en bouton rouge plein juste à côté d'« Ouvrir ». | Onglets Lien · Intégrer · Liens personnalisés · Accès + aperçu à droite (maquette `partage.html`) ; « Dépublier » dans un menu avec confirmation. |
+| P9 | Majeur | Partage | « Versions publiées : v1 — **Invalid Date** » ; date d'expiration en `mm/dd/yyyy` (sélecteur natif en anglais). | Dates via `Intl.DateTimeFormat(locale)` ; corriger le champ `published_at` lu. |
+| P10 | Majeur | Partage | Formulaire de lien personnalisé : libellé technique « {{company}} — Entreprise » ; le lien créé n'est pas **copié automatiquement**. | Libellé « Entreprise » avec la variable en pastille mono discrète ; « Créer et copier le lien » + toast (maquette). |
+| P11 | Mineur | Partage | Aide « Personnalisez avec des paramètres d'URL » : URL entière en mono gris sur une ligne qui déborde. | Bloc de code avec la partie variable mise en évidence (maquette). |
+| P12 | Mineur | Partage | Pas d'**aperçu** de la démo ni d'aperçu réseaux sociaux. | Colonne d'aperçu (maquette) ; l'image OG dépend de l'hébergement (limite GitHub Pages connue). |
+| P13 | Mineur | Player | Formulaire de lead sans description ni lien de confidentialité quand le texte de consentement est vide. | Description facultative + lien « Confidentialité » si fourni par le workspace. |
+| P14 | Mineur | Player | Bulle sans bouton « Précédent » visible à l'étape 1 : normal, mais il manque aussi à l'étape 2 dans la capture du formulaire (à vérifier). | Précédent dès l'étape 2. |
+
+### Lot 7 : analytics, leads
+
+| # | Gravité | Zone | Écart | Attendu |
+|---|---|---|---|---|
+| A1 | Majeur | Analytics | KPI **sans variation** par rapport à la période précédente ; pas de filtre par source (lien, embed, lien perso). | Maquette `analytics.html` : variation ▲▼ avec signe et couleur, filtre Source. |
+| A2 | Majeur | Analytics | Histogramme : barres sans **libellés ni alternative textuelle** (lecteurs d'écran), axe X en ISO `2026-11-15`. | `role="img"` + `aria-label` résumant la tendance (ou tableau masqué), dates localisées « 15 nov. ». |
+| A3 | Majeur | Leads | Date en **format US** « 11/17/2026, 2:15:48 PM » dans l'interface française ; colonne « **company** » (clé brute). | `Intl.DateTimeFormat('fr-FR')` ; en-têtes traduits (`analytics.leads.*`). |
+| A4 | Majeur | Leads | Suppression d'un lead par un **bouton rouge plein « ✕ »** sur chaque ligne. | Menu « ⋯ » ou icône corbeille `ghost` + modale de confirmation (suppression définitive RGPD). |
+| A5 | Mineur | Analytics | Libellés de l'entonnoir « 1. », « 2. » sans le **titre de l'étape**. | « 1 · Introduction » (titre de l'étape). |
+| A6 | Mineur | Analytics | « Parcours par étape (drop-off) » : anglicisme. | « Parcours étape par étape » / « Abandon » (glossaire). |
+| A7 | Mineur | Leads | Bouton « Exporter en CSV » désactivé sans explication quand il n'y a aucun lead. | Le masquer, ou infobulle « Aucun lead à exporter ». |
+| A8 | Mineur | Leads | État vide texte seul. | État vide illustré avec action « Ajouter un formulaire » (`empty.noLeads`). |
+
+### Lot 8 : tableau de bord, dossiers, plans
+
+| # | Gravité | Zone | Écart | Attendu |
+|---|---|---|---|---|
+| D1 | Majeur | Cartes de démo | **5 contrôles visibles par carte** (Partager, Analytics, Dupliquer, select de dossier, ✕ rouge) : carte chargée, risque de suppression accidentelle. | Carte entièrement cliquable (ouvre l'éditeur) + menu « ⋯ » (Partager, Copier le lien, Dupliquer, Déplacer vers…, Archiver, Supprimer) — maquette `dashboard.html`. |
+| D2 | Majeur | Tableau de bord | Pas de bascule grille/liste, pas de tri, pas d'état « Premiers pas ». | Maquette : tri, vue liste (tableau), bandeau d'onboarding. |
+| D3 | Majeur | Plans | Pas de **page Plans** : seul un encart « Démos publiées : 1 / 25 (plan actuel) » et le tableau d'usage des paramètres. | Page `plans.html` (usage, plans, demande de changement manuel selon D6, factures plus tard). |
+| D4 | Majeur | Dossiers | Dossiers dans une colonne séparée **dans la page**, en plus de la navigation latérale. | Dossiers dans la barre latérale (section « Dossiers »), glisser-déposer des cartes vers un dossier. |
+| D5 | Mineur | Cartes | Démo sans capture : vignette grise avec ▶ : peu informatif. | Vignette de la première étape, ou illustration « sentier » + titre. |
+| D6 | Mineur | Cartes | Méta « 0 vues · 0 leads (30 j) · 11/17/2026 » : pluriel « 0 vues », date US. | `dashboard.card.views_*` (« 0 vue »), date relative « il y a 2 h ». |
+| D7 | Mineur | Nouveau dossier | Lien texte « + Nouveau dossier » avec emoji 📁. | Bouton `ghost sm` avec icône, nom saisi en ligne. |
+
+### Rappels transverses (lots 3 et 5 toujours ouverts)
+
+La barre latérale (W3), le responsive mobile de l'app (W4), les confirmations natives (W8, W11, ED9) et le rendu WYSIWYG de l'éditeur (ED2) concernent aussi ces écrans. Les dates et pluriels non localisés (P9, A3, D6) se règlent d'un coup avec un helper `formatDate` / `formatNumber` basé sur `Intl` et la langue i18n courante.
+
+**Priorités proposées** : P1 + P2 + P3 (le player est ce que voient les prospects : il doit être irréprochable), puis P4, D1, A3/P9/D6 (helper `Intl`), P8.
