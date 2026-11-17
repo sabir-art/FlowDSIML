@@ -97,9 +97,9 @@
     "emailPlaceholder": "name@company.example",
     "passwordHelp": "{{min}} characters minimum. Strength: {{level}}.",
     "passwordHelpWeak": "{{min}} characters minimum.",
-    "consent": "I accept the terms of use and the privacy policy.",
+    "consent": "I accept the <terms>terms of use</terms> and the <privacy>privacy policy</privacy>.",
     "sentTitle": "Check your inbox",
-    "sentBody": "We sent a confirmation link to {{email}}. It expires in 24 h.",
+    "sentBody": "We sent a confirmation link to {{email}}. It expires in 1 h.",
     "resend": "Resend the email",
     "resent": "Email sent again.",
     "stepsTitle": "Three steps, and your product presents itself.",
@@ -840,5 +840,11 @@
     "notifications": "Notifications",
     "skip": "Skip to content",
     "unlimited": "∞"
+  },
+  "legal": {
+    "terms": "Terms of use",
+    "privacy": "Privacy policy",
+    "soon": "This page is being written.",
+    "back": "Back to home"
   }
 }

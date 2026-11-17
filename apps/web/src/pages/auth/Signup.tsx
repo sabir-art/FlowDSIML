@@ -1,7 +1,7 @@
 import { CircleAlert, Mail } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { authRedirect, supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import {
@@ -203,8 +203,16 @@ export function Signup() {
                 }}
                 {...fieldA11y('consent', errors)}
               />
-              {/* Pages légales pas encore rédigées : mentionnées sans lien (badge Bientôt en pied de page) */}
-              <span className="muted">{t('auth.consent')}</span>
+              {/* Pages légales pas encore rédigées : liens vers une page « Bientôt », ouverts dans un nouvel onglet */}
+              <span className="muted">
+                <Trans
+                  i18nKey="auth.consent"
+                  components={{
+                    terms: <a href="#/legal/terms" target="_blank" rel="noopener" />,
+                    privacy: <a href="#/legal/privacy" target="_blank" rel="noopener" />,
+                  }}
+                />
+              </span>
             </label>
             <MkFieldError id="consent" errors={errors} />
             <button className="btn btn-primary btn-lg btn-block auth-submit" type="submit" disabled={busy}>

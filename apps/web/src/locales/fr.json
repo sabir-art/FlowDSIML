@@ -97,9 +97,9 @@
     "emailPlaceholder": "nom@entreprise.example",
     "passwordHelp": "{{min}} caractères minimum. Robustesse : {{level}}.",
     "passwordHelpWeak": "{{min}} caractères minimum.",
-    "consent": "J’accepte les conditions d’utilisation et la politique de confidentialité.",
+    "consent": "J’accepte les <terms>conditions d’utilisation</terms> et la <privacy>politique de confidentialité</privacy>.",
     "sentTitle": "Vérifiez votre boîte mail",
-    "sentBody": "Nous avons envoyé un lien de confirmation à {{email}}. Il expire dans 24 h.",
+    "sentBody": "Nous avons envoyé un lien de confirmation à {{email}}. Il expire dans 1 h.",
     "resend": "Renvoyer l’email",
     "resent": "Email renvoyé.",
     "stepsTitle": "Trois étapes, et votre produit se présente tout seul.",
@@ -840,5 +840,11 @@
     "notifications": "Notifications",
     "skip": "Aller au contenu",
     "unlimited": "∞"
+  },
+  "legal": {
+    "terms": "Conditions d’utilisation",
+    "privacy": "Politique de confidentialité",
+    "soon": "Cette page est en cours de rédaction.",
+    "back": "Retour à l’accueil"
   }
 }
