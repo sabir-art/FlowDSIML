@@ -1772,3 +1772,14 @@
   color: var(--fd-color-text-subtle);
   cursor: not-allowed;
 }
+.mk .sh-embed-actions {
+  align-items: center;
+  gap: 12px;
+}
+.mk .sh-guides {
+  color: var(--fd-color-primary);
+  cursor: not-allowed;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

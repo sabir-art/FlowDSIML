@@ -38,6 +38,18 @@ const SCREENS = {
     maquette: 'reference/partage.html',
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',
   },
+  'PRT-02': {
+    maquette: 'reference/partage.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',
+    async maquettePrep(p) {
+      await p.locator('#tab-embed').click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.getByRole('tab', { name: 'Intégrer' }).click();
+      await p.waitForTimeout(300);
+    },
+  },
   'CNX-01': {
     maquette: 'reference/connexion.html',
     route: '/#/login',

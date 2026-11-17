@@ -821,7 +821,8 @@
     "invalidEmail": "Enter a valid email address.",
     "expiresAfter": "Expires",
     "createAndCopy": "Create and copy the link",
-    "publishChanges": "Publish changes"
+    "publishChanges": "Publish changes",
+    "guides": "Guides: Webflow, WordPress, HubSpot, Framer…"
   },
   "analytics": {
     "title": "Analytics",

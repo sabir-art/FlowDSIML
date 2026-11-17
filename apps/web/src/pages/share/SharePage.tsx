@@ -1,6 +1,6 @@
 import { Copy, Download, Eye, Info, Mail, Play, Plus, Power, Trash2, X } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
@@ -629,6 +629,36 @@ export function SharePage() {
   );
 }
 
+/** Coloration du code d'intégration comme la maquette : noms de balise (.k) et URL src (.s). */
+function highlightHtml(code: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  const re = /(<\/?)([a-z]+)|(src=")([^"]*)(")/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(code))) {
+    out.push(code.slice(last, m.index));
+    if (m[2]) {
+      out.push(
+        m[1],
+        <span key={m.index} className="k">
+          {m[2]}
+        </span>,
+      );
+    } else {
+      out.push(
+        m[3],
+        <span key={m.index} className="s">
+          {m[4]}
+        </span>,
+        m[5],
+      );
+    }
+    last = re.lastIndex;
+  }
+  out.push(code.slice(last));
+  return out;
+}
+
 function EmbedPanel({
   url,
   title,
@@ -678,7 +708,7 @@ function EmbedPanel({
           {t('share.popup')} <span className="badge sh-badge-xs">{t('shell.soon')}</span>
         </button>
       </div>
-      <pre className="code sh-code">{code}</pre>
+      <pre className="code sh-code">{highlightHtml(code)}</pre>
       <div className="row sh-embed-actions">
         {published ? (
           <CopyButton value={code} label={t('share.copyCode')} primary />
@@ -688,6 +718,9 @@ function EmbedPanel({
             {t('share.copyCode')}
           </span>
         )}
+        <span className="t-label sh-guides" aria-disabled="true">
+          {t('share.guides')} <span className="badge sh-badge-xs">{t('shell.soon')}</span>
+        </span>
       </div>
       <hr className="divider sh-hr" />
       <div className="setting">
