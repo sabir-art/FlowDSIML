@@ -86,7 +86,7 @@ export const themeSchema = z.object({
   primary: z.string().default('#0E7C71'),
   hotspot: z.string().default('#E8541F'),
   background: z.string().default('#F7F6F4'),
-  surface: z.string().default('#ffffff'),
+  surface: z.string().default('#FFFFFF'),
   text: z.string().default('#1F1D1A'),
   fontFamily: z.string().default("'Instrument Sans', system-ui, sans-serif"),
   radius: z.number().min(0).max(32).default(16),

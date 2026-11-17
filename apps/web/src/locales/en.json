@@ -362,7 +362,10 @@
     "enable": "Enable",
     "versions": "Published versions",
     "live": "live",
-    "linkCreatedCopied": "Link created and copied to the clipboard."
+    "linkCreatedCopied": "Link created and copied to the clipboard.",
+    "expiresNever": "Never",
+    "expiresIn_one": "In {{count}} day ({{date}})",
+    "expiresIn_other": "In {{count}} days ({{date}})"
   },
   "analytics": {
     "title": "Analytics",
