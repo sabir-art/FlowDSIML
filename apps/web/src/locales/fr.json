@@ -331,5 +331,33 @@
     "delete": "Supprimer {{email}}",
     "confirmDelete": "Supprimer définitivement le lead {{email}} (droit à l'effacement) ?",
     "gdpr": "Données personnelles : exportez-les ou supprimez-les sur demande de la personne concernée (RGPD). Seuls les éditeurs et plus y ont accès."
+  },
+  "demos": {
+    "title": "Démos",
+    "new": "Nouvelle démo",
+    "untitled": "Nouvelle démo",
+    "usage": "Démos publiées : {{used}} / {{limit}} (plan actuel).",
+    "folders": "Dossiers",
+    "allDemos": "Toutes les démos",
+    "noFolder": "Sans dossier",
+    "newFolder": "Nouveau dossier",
+    "folderName": "Nom du dossier",
+    "renameFolder": "Renommer {{name}}",
+    "deleteFolder": "Supprimer {{name}}",
+    "confirmDeleteFolder": "Supprimer le dossier « {{name}} » ? Les démos ne sont pas supprimées.",
+    "search": "Rechercher une démo",
+    "status": "Statut",
+    "allStatuses": "Tous les statuts",
+    "emptyTitle": "Créez votre première démo interactive",
+    "emptyStep1": "Installez l'extension Chrome FlowDSIML et connectez-vous.",
+    "emptyStep2": "Ouvrez votre application, cliquez sur « Démarrer l'enregistrement » puis parcourez le workflow à montrer.",
+    "emptyStep3": "Terminez : l'éditeur s'ouvre, ajustez les textes puis publiez.",
+    "emptyCta": "Ou partir d'une démo vide",
+    "noMatch": "Aucune démo ne correspond.",
+    "stats": "{{views}} vues · {{leads}} leads (30 j)",
+    "duplicate": "Dupliquer",
+    "moveTo": "Déplacer vers un dossier",
+    "delete": "Supprimer {{title}}",
+    "confirmDelete": "Supprimer « {{title}} » ? Elle sera dépubliée et retirée de la liste."
   }
 }

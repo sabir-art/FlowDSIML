@@ -331,5 +331,33 @@
     "delete": "Delete {{email}}",
     "confirmDelete": "Permanently delete lead {{email}} (right to erasure)?",
     "gdpr": "Personal data: export or delete on request of the person concerned (GDPR). Only editors and above can access it."
+  },
+  "demos": {
+    "title": "Demos",
+    "new": "New demo",
+    "untitled": "New demo",
+    "usage": "Published demos: {{used}} / {{limit}} (current plan).",
+    "folders": "Folders",
+    "allDemos": "All demos",
+    "noFolder": "No folder",
+    "newFolder": "New folder",
+    "folderName": "Folder name",
+    "renameFolder": "Rename {{name}}",
+    "deleteFolder": "Delete {{name}}",
+    "confirmDeleteFolder": "Delete folder “{{name}}”? Demos are kept.",
+    "search": "Search demos",
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "emptyTitle": "Create your first interactive demo",
+    "emptyStep1": "Install the FlowDSIML Chrome extension and sign in.",
+    "emptyStep2": "Open your app, click “Start recording” and walk through the workflow.",
+    "emptyStep3": "Finish: the editor opens; adjust texts and publish.",
+    "emptyCta": "Or start from a blank demo",
+    "noMatch": "No matching demo.",
+    "stats": "{{views}} views · {{leads}} leads (30 d)",
+    "duplicate": "Duplicate",
+    "moveTo": "Move to folder",
+    "delete": "Delete {{title}}",
+    "confirmDelete": "Delete “{{title}}”? It will be unpublished and removed from the list."
   }
 }
