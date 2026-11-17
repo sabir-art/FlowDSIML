@@ -887,4 +887,35 @@
   max-width: none !important;
 }
 /* Le composant Menu de l'app (enveloppe .menu du bouton ⋯) n'est pas le panneau .menu de la maquette */
-.mk div.menu:not([role='menu']) { position: relative; display: inline-flex; min-width: 0; padding: 0; background: none; border: 0; box-shadow: none; z-index: auto; }
+.mk div.menu:not([role='menu']) {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  z-index: auto;
+}
+.mk .an-bulk {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mk .an-danger {
+  color: var(--fd-color-danger);
+}
+.mk .an-leads-alert {
+  margin: 12px 16px;
+}
+.mk .an-empty-ic {
+  width: 32px;
+  height: 32px;
+  color: var(--fd-color-text-subtle);
+}
+.mk .yesno {
+  display: inline-flex;
+  color: var(--fd-color-text-muted);
+}
+.mk .yesno.yes {
+  color: var(--fd-color-success);
+}

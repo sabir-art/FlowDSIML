@@ -719,6 +719,9 @@ isOneToOne: false
 "workspace_kpis":
 { Args: { "p_from": string,"p_to"?: string,"p_workspace": string }; Returns: Json
                            },
+"workspace_leads":
+{ Args: { "p_demo"?: string | null,"p_from": string,"p_limit"?: number,"p_offset"?: number,"p_to"?: string,"p_workspace": string }; Returns: Json
+                           },
 "workspace_sessions":
 { Args: { "p_demo"?: string | null,"p_from": string,"p_limit"?: number,"p_offset"?: number,"p_source"?: string | null,"p_to"?: string,"p_workspace": string }; Returns: Json
                            },

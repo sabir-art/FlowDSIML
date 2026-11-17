@@ -805,7 +805,8 @@
     "durSec": "{{s}} s",
     "range": "{{from}}–{{to}} of {{total}}",
     "prev": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "identified": "Identified visitor"
   },
   "leads": {
     "title": "Leads",
@@ -822,7 +823,21 @@
     "emptyHint": "Add a form to a demo to collect leads.",
     "addForm": "Add a form",
     "noExport": "No leads to export",
-    "noMatch": "No leads match this search."
+    "noMatch": "No leads match this search.",
+    "email": "Email",
+    "company": "Company",
+    "collected": "Collected",
+    "selectAll": "Select all",
+    "select": "Select {{email}}",
+    "selected_one": "{{count}} lead selected",
+    "selected_other": "{{count}} leads selected",
+    "deleteSelected": "Delete selection",
+    "deleteOne": "Delete {{email}}",
+    "deleteTitle_one": "Permanently delete this lead?",
+    "deleteTitle_other": "Permanently delete these {{count}} leads?",
+    "deleteBody": "Right to erasure (GDPR): the data is deleted and cannot be recovered.",
+    "emptyTitle": "No leads yet",
+    "emptyBody": "Add a form to a demo to collect emails, or share personalised links to identify your visitors."
   },
   "demos": {
     "title": "Demos",

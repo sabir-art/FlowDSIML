@@ -805,7 +805,8 @@
     "durSec": "{{s}} s",
     "range": "{{from}}–{{to}} sur {{total}}",
     "prev": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "identified": "Visiteur identifié"
   },
   "leads": {
     "title": "Leads",
@@ -822,7 +823,21 @@
     "emptyHint": "Ajoutez un formulaire à une démo pour collecter des leads.",
     "addForm": "Ajouter un formulaire",
     "noExport": "Aucun lead à exporter",
-    "noMatch": "Aucun lead ne correspond à cette recherche."
+    "noMatch": "Aucun lead ne correspond à cette recherche.",
+    "email": "Email",
+    "company": "Entreprise",
+    "collected": "Collecté",
+    "selectAll": "Tout sélectionner",
+    "select": "Sélectionner {{email}}",
+    "selected_one": "{{count}} lead sélectionné",
+    "selected_other": "{{count}} leads sélectionnés",
+    "deleteSelected": "Supprimer la sélection",
+    "deleteOne": "Supprimer {{email}}",
+    "deleteTitle_one": "Supprimer définitivement ce lead ?",
+    "deleteTitle_other": "Supprimer définitivement ces {{count}} leads ?",
+    "deleteBody": "Droit à l’effacement (RGPD) : les données sont supprimées et ne peuvent pas être récupérées.",
+    "emptyTitle": "Aucun lead pour l’instant",
+    "emptyBody": "Ajoutez un formulaire à une démo pour collecter des emails, ou partagez des liens personnalisés pour identifier vos visiteurs."
   },
   "demos": {
     "title": "Démos",

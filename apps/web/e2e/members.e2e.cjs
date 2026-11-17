@@ -44,7 +44,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: 'Fermer' }).last().click();
 
   await page.getByRole('button', { name: 'Actions pour Nina Roux' }).click();
-  ok((await page.getByRole('menuitem', { name: /Transférer la propriété/ }).isDisabled()), 'transfert : Bientôt');
+  ok(
+    await page.getByRole('menuitem', { name: /Transférer la propriété/ }).isDisabled(),
+    'transfert : Bientôt',
+  );
   await page.getByRole('menuitem', { name: 'Retirer du workspace' }).click();
   await page.locator('dialog[open]').getByRole('button', { name: 'Retirer le membre' }).click();
   await page.waitForTimeout(400);

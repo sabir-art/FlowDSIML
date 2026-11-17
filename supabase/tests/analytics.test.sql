@@ -1,11 +1,12 @@
 -- Tests pgTAP : analytics du workspace (ANA-01) — workspace_analytics, workspace_sessions.
 begin;
 set search_path = public, extensions;
-select plan(12);
+select plan(19);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000a1', 'admin@example.com'),
-  ('00000000-0000-0000-0000-0000000000a2', 'autre@example.com');
+  ('00000000-0000-0000-0000-0000000000a2', 'autre@example.com'),
+  ('00000000-0000-0000-0000-0000000000a3', 'lecteur@example.com');
 create function pg_temp.login(uid uuid) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claim.sub', uid::text, true);
@@ -55,6 +56,35 @@ select is((select r->>'lead_email' from jsonb_array_elements((select j from s)->
   'lea@example.com', 'session reliée au lead du visiteur');
 select is((select (r->>'duration_s')::int from jsonb_array_elements((select j from s)->'rows') r where r->>'session_id' = 's1'),
   120, 'durée de session');
+
+-- Données personnelles : un viewer ne reçoit ni email ni champs de lead, seulement has_lead
+reset role;
+insert into public.members (workspace_id, user_id, role)
+  values ((select ws from ctx), '00000000-0000-0000-0000-0000000000a3', 'viewer');
+-- lead d'une autre démo pour le même visiteur : ne doit pas être rattaché à s1
+insert into public.leads (workspace_id, demo_id, visitor_id, email)
+  values ((select ws from ctx), '00000000-0000-0000-0000-00000000a0d2', 'v1', 'autre-demo@example.com');
+select pg_temp.login('00000000-0000-0000-0000-0000000000a3');
+create temp table sv as select public.workspace_sessions((select ws from ctx), now() - interval '30 days') as j;
+select is((select r->>'lead_email' from jsonb_array_elements((select j from sv)->'rows') r where r->>'session_id' = 's1'),
+  null, 'viewer : pas d''email de lead');
+select is((select r->'lead_fields' from jsonb_array_elements((select j from sv)->'rows') r where r->>'session_id' = 's1'),
+  'null'::jsonb, 'viewer : pas de champs de lead');
+select is((select (r->>'has_lead')::boolean from jsonb_array_elements((select j from sv)->'rows') r where r->>'session_id' = 's1'),
+  true, 'viewer : seulement le booléen has_lead');
+select pg_temp.login('00000000-0000-0000-0000-0000000000a1');
+select is((select r->>'lead_email' from jsonb_array_elements(
+  public.workspace_sessions((select ws from ctx), now() - interval '30 days')->'rows') r where r->>'session_id' = 's1'),
+  'lea@example.com', 'editor+ : lead de la même démo seulement');
+
+create temp table wl as select public.workspace_leads((select ws from ctx), now() - interval '30 days',
+  now(), '00000000-0000-0000-0000-00000000a0d1') as j;
+select is(((select j from wl)->>'total')::int, 1, 'leads de la démo');
+select is(((select j from wl)->'rows'->0->>'completed')::boolean, true, 'progression : démo terminée');
+select pg_temp.login('00000000-0000-0000-0000-0000000000a3');
+select throws_ok(
+  format('select public.workspace_leads(%L::uuid, now() - interval ''30 days'')', (select ws from ctx)),
+  '42501', null, 'viewer : liste des leads refusée');
 
 select pg_temp.login('00000000-0000-0000-0000-0000000000a2');
 select throws_ok(

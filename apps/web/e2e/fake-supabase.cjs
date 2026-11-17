@@ -425,6 +425,23 @@ async function install(page, state = seed()) {
             },
           });
         }
+        case 'workspace_leads': {
+          const rows = t.leads
+            .filter((l) => !a.p_demo || l.demo_id === a.p_demo)
+            .map((l, i) => ({
+              id: l.id,
+              email: l.email,
+              fields: l.fields,
+              consent: l.consent,
+              created_at: l.created_at,
+              demo_id: l.demo_id,
+              max_step: i % 2 ? 4 : 5,
+              completed: i % 2 === 0,
+              steps_total: 6,
+            }));
+          const off = a.p_offset || 0;
+          return json(route, 200, { total: rows.length, rows: rows.slice(off, off + (a.p_limit || 50)) });
+        }
         case 'workspace_sessions': {
           const rows = t.leads.slice(0, 30).map((l, i) => ({
             session_id: `s${i}`,
@@ -435,8 +452,9 @@ async function install(page, state = seed()) {
             max_step: i % 2 ? 3 : 5,
             completed: i % 2 === 0,
             steps_total: 6,
-            lead_email: i % 3 === 1 ? null : l.email,
-            lead_fields: i % 3 === 1 ? null : l.fields,
+            has_lead: i % 3 !== 1,
+            lead_email: i % 3 === 1 || state.role === 'viewer' ? null : l.email,
+            lead_fields: i % 3 === 1 || state.role === 'viewer' ? null : l.fields,
           }));
           const off = a.p_offset || 0;
           return json(route, 200, { total: rows.length, rows: rows.slice(off, off + (a.p_limit || 25)) });

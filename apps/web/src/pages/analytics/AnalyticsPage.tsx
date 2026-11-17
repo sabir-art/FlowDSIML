@@ -8,7 +8,8 @@ import { downloadText } from '../../lib/download';
 import { formatDate, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
-import { LeadsTable } from './LeadsTable';
+import { LeadsMkTable } from './LeadsMkTable';
+import { initials } from '../../lib/initials';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 
@@ -31,6 +32,7 @@ interface Session {
   max_step: number | null;
   completed: boolean;
   steps_total: number;
+  has_lead?: boolean;
   lead_email: string | null;
   lead_fields: Record<string, unknown> | null;
 }
@@ -41,8 +43,11 @@ const PAGE = 25;
 /** Analytics du workspace (ANA-01), à l'identique de la maquette analytics.html, sur les données réelles. */
 export function AnalyticsPage() {
   const { t } = useTranslation();
-  const { current } = useWorkspace();
+  const { current, can } = useWorkspace();
   const ws = current!;
+  // Données personnelles des leads : rôles editor et plus (comme la RLS leads_select)
+  const canLeads = can('leads.view');
+  const tabs: Tab[] = canLeads ? ['overview', 'sessions', 'leads'] : ['overview', 'sessions'];
   const [days, setDays] = useState<number>(30);
   const [demo, setDemo] = useState<string>('');
   const [source, setSource] = useState<Source | ''>('');
@@ -86,7 +91,39 @@ export function AnalyticsPage() {
   if (!data) return <Loading />;
   const title = (id: string) => demos.find((d) => d.id === id)?.title ?? '—';
 
-  const exportCsv = () =>
+  const exportCsv = async () => {
+    // Onglet Leads : export des leads de la période (rôle editor et plus) ; sinon la série quotidienne
+    if (tab === 'leads' && canLeads) {
+      const { data: r } = await supabase.rpc('workspace_leads', {
+        p_workspace: ws.id,
+        p_from: new Date(Date.now() - days * 86400_000).toISOString(),
+        p_to: new Date().toISOString(),
+        p_demo: demo || null,
+        p_limit: 200,
+      });
+      const rows = ((r as unknown as { rows?: Array<Record<string, unknown>> })?.rows ?? []) as Array<{
+        email: string;
+        fields: Record<string, unknown> | null;
+        demo_id: string | null;
+        completed: boolean;
+        consent: boolean;
+        created_at: string;
+      }>;
+      return downloadText(
+        `leads-${days}j.csv`,
+        toCsv(
+          ['email', 'company', 'demo', 'completed', 'consent', 'created_at'],
+          rows.map((x) => [
+            x.email,
+            typeof x.fields?.company === 'string' ? x.fields.company : '',
+            x.demo_id ? title(x.demo_id) : '',
+            x.completed ? 'oui' : 'non',
+            x.consent ? 'oui' : 'non',
+            x.created_at,
+          ]),
+        ),
+      );
+    }
     downloadText(
       `analytics-${days}j.csv`,
       toCsv(
@@ -94,6 +131,7 @@ export function AnalyticsPage() {
         data.daily.map((d) => [d.day, d.views, d.completions]),
       ),
     );
+  };
 
   return (
     <div className="mk an">
@@ -146,7 +184,7 @@ export function AnalyticsPage() {
               <span className="badge an-soon">{t('shell.soon')}</span>
             </button>
           </div>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={exportCsv}>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={() => void exportCsv()}>
             <Download aria-hidden="true" />
             {t('analytics.export')}
           </button>
@@ -154,7 +192,7 @@ export function AnalyticsPage() {
       </div>
 
       <div className="tabs an-tabs" role="tablist" aria-label={t('analytics.views_label')}>
-        {(['overview', 'sessions', 'leads'] as Tab[]).map((k) => (
+        {tabs.map((k) => (
           <button
             key={k}
             type="button"
@@ -165,10 +203,9 @@ export function AnalyticsPage() {
             tabIndex={tab === k ? 0 : -1}
             onClick={() => setTab(k)}
             onKeyDown={(e) => {
-              const order: Tab[] = ['overview', 'sessions', 'leads'];
-              const i = order.indexOf(k);
+              const i = tabs.indexOf(k);
               if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                const n = order[(i + (e.key === 'ArrowRight' ? 1 : 2)) % 3]!;
+                const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]!;
                 setTab(n);
                 document.getElementById(`an-tab-${n}`)?.focus();
               }
@@ -200,11 +237,9 @@ export function AnalyticsPage() {
           <Sessions wsId={ws.id} days={days} demo={demo} source={source} title={title} />
         </section>
       )}
-      {tab === 'leads' && (
+      {tab === 'leads' && canLeads && (
         <section role="tabpanel" id="an-panel-leads" aria-labelledby="an-tab-leads">
-          <div className="card an-leads">
-            <LeadsTable demoId={demo || undefined} />
-          </div>
+          <LeadsMkTable wsId={ws.id} days={days} demo={demo} title={title} onChange={setLeadCount} />
         </section>
       )}
     </div>
@@ -602,7 +637,6 @@ function Sessions({
     s >= 60
       ? t('analytics.durMin', { m: Math.floor(s / 60), s: String(s % 60).padStart(2, '0') })
       : t('analytics.durSec', { s });
-  const initials = (email: string) => email.slice(0, 2).toUpperCase();
   const from = res.total ? page * PAGE + 1 : 0;
   const to = Math.min(res.total, (page + 1) * PAGE);
   return (
@@ -629,7 +663,18 @@ function Sessions({
               </tr>
             )}
             {res.rows.map((s) => {
-              const company = typeof s.lead_fields?.company === 'string' ? s.lead_fields.company : '';
+              const f = s.lead_fields ?? {};
+              const str = (k: string) => (typeof f[k] === 'string' ? (f[k] as string).trim() : '');
+              const company = str('company');
+              const name =
+                str('name') ||
+                str('full_name') ||
+                [str('first_name'), str('last_name')].filter(Boolean).join(' ');
+              // Ligne 1 : nom (ou email) ; ligne 2 : « email · entreprise ». Lieu et navigateur des anonymes
+              // ne sont pas enregistrés. Un viewer ne voit pas le lead (has_lead seulement).
+              const main =
+                name || s.lead_email || (s.has_lead ? t('analytics.identified') : t('analytics.anonymous'));
+              const sub = [name ? s.lead_email : null, company || null].filter(Boolean).join(' · ');
               return (
                 <tr key={s.session_id}>
                   <td>
@@ -638,11 +683,11 @@ function Sessions({
                         className={`avatar avatar-sm${s.lead_email ? '' : ' an-anon'}`}
                         aria-hidden="true"
                       >
-                        {s.lead_email ? initials(s.lead_email) : '?'}
+                        {s.lead_email ? initials(name || s.lead_email) : '?'}
                       </span>
                       <div>
-                        <b>{s.lead_email ?? t('analytics.anonymous')}</b>
-                        {company && <div className="t-caption subtle">{company}</div>}
+                        <b>{main}</b>
+                        {sub && <div className="t-caption subtle">{sub}</div>}
                       </div>
                     </div>
                   </td>

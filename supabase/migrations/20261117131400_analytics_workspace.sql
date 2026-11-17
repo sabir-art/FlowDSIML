@@ -2,7 +2,10 @@
 -- 1. workspace_analytics : indicateurs, série quotidienne (vues, démos terminées) et sources des vues,
 --    filtrables par démo et par source, sur une période.
 -- 2. workspace_sessions : sessions de visite (démo, source, durée, progression, lead associé), paginées.
+-- 3. workspace_leads : leads avec leur progression (rôle editor et plus).
 -- Les deux exigent le rôle viewer sur le workspace ; aucune écriture.
+-- Données personnelles : les leads (email, champs) ne sont renvoyés qu'aux rôles editor et plus, comme la
+-- politique RLS leads_select. Un viewer ne reçoit que des agrégats (nombre de leads) et un booléen has_lead.
 
 create or replace function public.workspace_analytics(
   p_workspace uuid,
@@ -34,6 +37,7 @@ begin
       'visitors', (select count(distinct visitor_id) from v),
       'completions', (select count(distinct session_id) from f where type = 'demo_complete'),
       'ctaClicks', (select count(*) from f where type = 'cta_click'),
+      -- agrégat seulement (aucune donnée personnelle) : visible dès le rôle viewer
       'leads', (select count(*) from public.leads l
                 join public.demos d on d.id = l.demo_id and d.deleted_at is null
                 where l.workspace_id = p_workspace and l.created_at >= p_from and l.created_at <= p_to
@@ -63,6 +67,9 @@ create or replace function public.workspace_sessions(
   p_offset int default 0
 )
 returns jsonb language plpgsql stable security definer set search_path = '' as $$
+declare
+  -- Mêmes droits que la RLS leads_select : email et champs des leads réservés aux rôles editor et plus
+  can_leads boolean := public.has_role(p_workspace, 'editor');
 begin
   if not public.has_role(p_workspace, 'viewer') then raise exception 'Accès refusé' using errcode = '42501'; end if;
   return (
@@ -89,11 +96,13 @@ begin
       'rows', coalesce((select jsonb_agg(r order by r.started_at desc) from (
         select sf.session_id, sf.demo_id, sf.source, sf.started_at, sf.duration_s, sf.max_step, sf.completed,
           (select count(*) from public.steps st where st.demo_id = sf.demo_id) as steps_total,
-          l.email as lead_email, l.fields as lead_fields
+          (l.email is not null) as has_lead,
+          case when can_leads then l.email end as lead_email,
+          case when can_leads then l.fields end as lead_fields
         from sf
         left join lateral (
           select email, fields from public.leads l
-          where l.workspace_id = p_workspace and l.visitor_id = sf.visitor_id
+          where l.workspace_id = p_workspace and l.visitor_id = sf.visitor_id and l.demo_id = sf.demo_id
           order by l.created_at desc limit 1
         ) l on true
         order by sf.started_at desc
@@ -103,7 +112,49 @@ begin
   );
 end $$;
 
+-- 3. workspace_leads : leads de la période avec leur progression dans la démo (onglet Leads de l'écran).
+--    Réservé aux rôles editor et plus (comme la RLS leads_select) : données personnelles.
+create or replace function public.workspace_leads(
+  p_workspace uuid,
+  p_from timestamptz,
+  p_to timestamptz default now(),
+  p_demo uuid default null,
+  p_limit int default 50,
+  p_offset int default 0
+)
+returns jsonb language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not public.has_role(p_workspace, 'editor') then raise exception 'Accès refusé' using errcode = '42501'; end if;
+  return (
+    with l as (
+      select l.* from public.leads l
+      left join public.demos d on d.id = l.demo_id
+      where l.workspace_id = p_workspace and l.created_at >= p_from and l.created_at <= p_to
+        and (d.id is null or d.deleted_at is null)
+        and (p_demo is null or l.demo_id = p_demo)
+    )
+    select jsonb_build_object(
+      'total', (select count(*) from l),
+      'rows', coalesce((select jsonb_agg(r order by r.created_at desc) from (
+        select l.id, l.email, l.fields, l.consent, l.created_at, l.demo_id,
+          p.max_step, coalesce(p.completed, false) as completed,
+          (select count(*) from public.steps st where st.demo_id = l.demo_id) as steps_total
+        from l
+        left join lateral (
+          select max(e.step_index) as max_step, bool_or(e.type = 'demo_complete') as completed
+          from public.events e
+          where e.workspace_id = p_workspace and e.demo_id = l.demo_id and e.visitor_id = l.visitor_id
+        ) p on true
+        order by l.created_at desc
+        limit greatest(1, least(p_limit, 200)) offset greatest(0, p_offset)
+      ) r), '[]'::jsonb)
+    )
+  );
+end $$;
+
 revoke all on function public.workspace_analytics(uuid, timestamptz, timestamptz, uuid, text) from public, anon;
 grant execute on function public.workspace_analytics(uuid, timestamptz, timestamptz, uuid, text) to authenticated;
 revoke all on function public.workspace_sessions(uuid, timestamptz, timestamptz, uuid, text, int, int) from public, anon;
 grant execute on function public.workspace_sessions(uuid, timestamptz, timestamptz, uuid, text, int, int) to authenticated;
+revoke all on function public.workspace_leads(uuid, timestamptz, timestamptz, uuid, int, int) from public, anon;
+grant execute on function public.workspace_leads(uuid, timestamptz, timestamptz, uuid, int, int) to authenticated;

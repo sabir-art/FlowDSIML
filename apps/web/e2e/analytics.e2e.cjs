@@ -70,6 +70,26 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await page.waitForSelector('#an-panel-leads');
   ok(true, 'onglet Leads');
 
+  // Lecteur (viewer) : pas d'onglet Leads, pas d'email de lead dans les sessions (données personnelles)
+  {
+    const { seed } = require('./fake-supabase.cjs');
+    const vs = seed();
+    vs.tables.members[0].role = 'viewer';
+    vs.role = 'viewer';
+    const v = await b.newPage({ viewport: { width: 1440, height: 900 } });
+    await install(v, vs);
+    await v.goto(`${APP}/#/analytics`);
+    await v.waitForSelector('.kpis');
+    ok((await v.getByRole('tab', { name: /Leads/ }).count()) === 0, 'lecteur : pas d’onglet Leads');
+    await v.getByRole('tab', { name: 'Sessions' }).click();
+    await v.waitForSelector('#an-panel-sessions table');
+    ok(
+      !(await v.locator('#an-panel-sessions').textContent()).includes('@'),
+      'lecteur : aucun email dans les sessions',
+    );
+    await v.close();
+  }
+
   await page.goto(`${APP}/#/leads`);
   await page.waitForSelector('text=prospect@globex.example');
   const [dl2] = await Promise.all([

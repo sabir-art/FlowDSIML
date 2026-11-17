@@ -53,8 +53,20 @@ function seedMaquette() {
     id: `lead-${i + 1}`,
     workspace_id: ws.id,
     demo_id: t.demos[i % 6].id,
-    email: `contact${i + 1}@exemple.example`,
-    fields: {},
+    email:
+      i === 0
+        ? 'lea@globex.example'
+        : i === 1
+          ? 'j.martin@umbrella.example'
+          : `contact${i + 1}@exemple.example`,
+    fields:
+      i === 0
+        ? { name: 'Léa Dupont', company: 'Globex' }
+        : i === 1
+          ? { company: 'Umbrella' }
+          : i % 4 === 0
+            ? { company: 'Initech' }
+            : {},
     consent: true,
     created_at: new Date(now - i * 3600e3).toISOString(),
   }));
