@@ -11,6 +11,8 @@
 >
 > **Ce que la maquette ne prévoit pas** : un élément de l'app absent de la maquette est un écart, **sauf** si la Lead UX le déclare « à ajouter à la maquette » (colonne « Décision »). Dans ce cas, la maquette est mise à jour et sert de référence.
 
+> **Référence et règle D13 (décision client)** : la référence de structure est la maquette d'origine (`docs/ux/maquettes/*.html`), dans sa version DSI `docs/ux/maquettes/reference/`, sauf pour les écrans où le client a choisi une autre version dans l'outil de suivi « Conformité TutoClick ». C'est cet outil qui porte la matrice ; ce fichier n'en est qu'une copie. **La peau DSI transpose les couleurs, elle ne supprime aucun effet** : dégradés, accents multiples, couleur par catégorie, halos, badges colorés. Voir `reference/README.md` pour la table de transposition.
+
 ## Synthèse
 
 | Écran | Maquette | Image | Statut |
