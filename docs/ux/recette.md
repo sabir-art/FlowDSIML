@@ -525,3 +525,20 @@ Spécification :
    - `Alert kind="warning"` : « Publiée sans formulaire de lead (plan Free). » / « Published without lead form (Free plan). » + « Voir les plans ».
 5. **Aperçu dans l'éditeur** :
    - le formulaire reste montré, avec un bandeau en haut de la modale : « Aperçu : non publié avec votre plan ».
+
+### Re-vérification L1–L3, A1, P12 et thème sombre (`claude/dev-mvp` @ `edf1b36`, captures du dev)
+
+| # | Statut |
+|---|---|
+| L1 | ✅ `MousePointerClick` à la place de `Sparkles` |
+| L2 | ✅ Alerte `role="alert"` au-dessus des champs, `aria-invalid` et `aria-describedby` (vérifié dans le code d'après la description du dev) |
+| L3 | ✅ Jauge en 3 segments sur toute la largeur et texte en dessous (« Robustesse : forte »). Le libellé ne répète plus le minimum |
+| A1 | ✅ Variation du taux de complétion, « — » plus un texte pour lecteur d'écran quand il n'y a pas de période de référence |
+| P12 | ✅ Colonne d'aperçu de 320 px conforme à la spec (capture de l'étape 1, pastille statique, « 3 étapes », « Ouvrir l'aperçu ») |
+| Thème Clair / Sombre / Système | ✅ Premier rendu correct (`21-theme-sombre-menu`) :<br>- surfaces Stone sombres hiérarchisées ;<br>- marque Lagoon éclaircie ;<br>- alerte info sombre avec bordure de 1 px ;<br>- vignettes de capture restées claires (`.fd-player-scope`) ;<br>- sélecteur segmenté `Sun` / `Moon` / `Monitor` dans le menu du compte |
+| Menu du compte | ✅ Il s'ouvre au-dessus du déclencheur et n'est plus coupé dans cette capture. La passe « débordements » complète (§15.7) reste à faire sur le build intégré, dans les deux thèmes |
+
+Points d'attention pour la passe débordements et thème sombre :
+- les trois boutons du sélecteur de thème n'ont que des icônes : vérifier leur `aria-label` et leur info-bulle (« Clair », « Sombre », « Système ») ;
+- vérifier dans le menu de compte, en sombre, le contraste du segment actif (fond `primary-soft`) par rapport au segment au survol ;
+- vérifier l'éditeur, les tableaux et les modales en sombre : le canevas et l'aperçu doivent rester en `.fd-player-scope` (clair).
