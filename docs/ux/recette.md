@@ -317,3 +317,27 @@ Audit de **tout le code** (`apps/web`, `apps/player`, `apps/extension`, `package
 | `identite-visuelle.md`, `microcopy.md`, `composants.md` §4/§5/§7/§12 | Règles qui prescrivaient barre latérale de toast, repère de 3 px, dégradés, « un emoji au maximum » | Règles réécrites ; liste **§15.6 Motifs proscrits** (M1–M14) avec alternatives |
 
 **Reste au dev** : M-A3, M-A4, M-A5 (majeurs), M-A6 (mineur), et l'icône dans `<Alert>` (M-A1). Contrôle CI suggéré : voir `composants.md` §15.6 (grep des motifs).
+
+### Re-vérification finition (`claude/dev-mvp` @ `40224b7` + `claude/ux-finition` @ `c1d79a9`)
+
+Fusion des deux branches **sans conflit**, 4 bancs e2e sans erreur, nouvel audit 2x (14 états, 1 440 et 390 px) + scan DOM. Captures : `docs/ux/recette/finition2/`.
+
+**Résultat du scan** : **0 glyphe** utilisé comme icône, **0 emoji**, **0 barre latérale épaisse**, **0 dégradé** ; **14/14 selects** à `padding-right` 36 px avec un seul chevron (Lucide dans `.fd-select-wrap` ; le chevron de fond de `base.css` est neutralisé dans ce cas). Icônes Lucide partout (navigation, barre de l'éditeur, rail, boutons, menus ⋯), cartes de démo avec menu, navigation mobile en tiroir, dates `Intl` (« 17 nov. 2026 », « 0 vue »).
+
+| Point | Statut |
+|---|---|
+| F1–F11 icônes et glyphes | ✅ Corrigés |
+| F12 hauteurs de la barre de mise en forme | ✅ Corrigé (32 px partout) |
+| F13 cartes de démo, D1/D2/D4 | ✅ Corrigés (menu ⋯, dossiers avec icônes) |
+| F19 / W3 / W4 navigation et mobile | ✅ Corrigés (navigation avec icônes, tiroir mobile) |
+| M-A4 emoji 📁 | ✅ Corrigé (`FolderOpen`) |
+| P9 / A3 / D6 dates et pluriels | ✅ Corrigés |
+| F16 case « Bouton d'action (CTA) » | ❌ Toujours décalée de 4 px par rapport à « Animation de pulsation » → `.fd-check` |
+| F14 logo | ⚠️ Bouton natif « Choose File / No file chosen » (texte du navigateur) → bouton secondaire `ImageUp` « Choisir un logo » + nom du fichier |
+| P8 page de partage | ⚠️ Toujours en cartes empilées ; « Dépublier » en **bouton rouge plein** à côté d'« Ouvrir » → menu ⋯ ou bouton `ghost` + confirmation |
+| Mise en page | ❌ **Nouveau** : sur les pages longues (partage), la barre latérale blanche **s'arrête à 900 px** (hauteur de l'écran) au lieu de suivre la page → `position: sticky; top: 0; height: 100vh` sur la barre, ou `min-height: 100vh` sur le conteneur en grille |
+| Hauteurs mélangées | ⚠️ Leads : champ de recherche 40 px + bouton « Exporter » 32 px sur la même rangée ; idem dans les analytics d'une démo → même taille (`md`) |
+| ED2 rendu WYSIWYG | ❌ Ouvert : le hotspot reste un rectangle orangé sur le canevas, sans bulle |
+| M-A3 dégradé codé en dur du player, M-A5 « ● » de la popup, M-A6 jaune du flou | à vérifier à la prochaine livraison du player / de l'extension |
+
+**Table d'icônes alignée** avec les choix du dev (`composants.md` §15.1) : Hotspot `Target`, Modifier `Pencil`, Flou `EyeOff` ; « Dépublier » passe à `GlobeLock` pour ne plus partager `EyeOff` avec le flou.
