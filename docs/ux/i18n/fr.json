@@ -176,7 +176,39 @@
     "stepsCaptured_other": "{{count}} étapes capturées",
     "uploading": "Envoi de {{current}} étapes sur {{total}}…",
     "notLoggedIn": "Connectez-vous à FlowDSIML pour capturer.",
-    "protectedPage": "Cette page ne peut pas être capturée (page système du navigateur)."
+    "protectedPage": "Cette page ne peut pas être capturée (page système du navigateur).",
+    "piiCheck": {
+      "title": "Vérifier les données avant l'envoi",
+      "subtitle": "{{demo}} · {{count}} captures · rien n'a encore quitté votre navigateur",
+      "analyzing": "Analyse des captures…",
+      "done": "Analyse terminée",
+      "summary_one": "{{count}} donnée personnelle possible détectée sur {{captures}} capture(s).",
+      "summary_other": "{{count}} données personnelles possibles détectées sur {{captures}} capture(s).",
+      "summaryHelp": "Elles seront floutées à l'envoi. Décochez une détection seulement si ce n'est pas une donnée réelle (exemple fictif, libellé).",
+      "none": "Aucune donnée personnelle détectée. Relisez quand même vos captures : la détection ne voit pas tout.",
+      "captureCount_one": "{{count}} détection",
+      "captureCount_other": "{{count}} détections",
+      "captureNone": "Aucune détection",
+      "types": {
+        "name": "Nom",
+        "nir": "N° de sécurité sociale",
+        "phone": "Téléphone",
+        "email": "E-mail",
+        "address": "Adresse",
+        "birthdate": "Date de naissance"
+      },
+      "toggle": "Flouter : {{type}}",
+      "blurAll": "Tout flouter sur cette capture",
+      "addZone": "Glissez sur la capture pour ajouter une zone.",
+      "legendBlur": "Sera floutée",
+      "legendDetected": "Détectée, non floutée",
+      "legendSelected": "Sélectionnée",
+      "notBlurredWarning": "{{types}} ne seront pas floutés. Vérifiez qu'il s'agit bien de données fictives.",
+      "privacy": "Détection faite dans votre navigateur : aucune image n'est envoyée avant votre validation.",
+      "cancel": "Annuler la capture",
+      "send_one": "Flouter et envoyer {{count}} capture",
+      "send_other": "Flouter et envoyer {{count}} captures"
+    }
   },
   "dashboard": {
     "title": "Démos",
@@ -644,6 +676,53 @@
         "done_other": "Appliqué à {{count}} étapes.",
         "undo": "Annuler"
       }
+    },
+    "gdpr": {
+      "title": "Publier en accès public ?",
+      "body": "Toute personne disposant du lien pourra voir ce module, sans connexion. Avant de publier, vérifiez qu'il ne contient aucune donnée personnelle réelle (usagers, collègues, partenaires).",
+      "blurred_one": "{{count}} zone floutée",
+      "blurred_other": "{{count}} zones floutées",
+      "pending_one": "{{count}} détection non floutée ({{steps}})",
+      "pending_other": "{{count}} détections non floutées ({{steps}})",
+      "commentsNote": "Commentaires internes : jamais publiés",
+      "checkReviewed": "J'ai relu chaque étape, y compris les textes des bulles et du formulaire.",
+      "checkFictional": "Les données visibles sont fictives ou floutées.",
+      "restrict": "Besoin de restreindre l'accès ?",
+      "restrictLink": "Choisir Invitation, Domaine e-mail ou Mot de passe",
+      "review": "Revoir l'étape {{n}}",
+      "cancel": "Annuler",
+      "publish": "Publier en public",
+      "why": "Cochez les deux confirmations pour publier."
+    },
+    "beforeAfter": {
+      "title": "Avant / Après",
+      "proposal": "Proposition à valider",
+      "before": "Avant",
+      "after": "Maintenant",
+      "oldTool": "Ancien outil",
+      "newTool": "Nouvel outil",
+      "captureBefore": "Capture « Avant »",
+      "captureAfter": "Capture « Après »",
+      "pick": "Choisir une capture ou importer",
+      "layout": "Disposition",
+      "layoutSide": "Côte à côte",
+      "layoutSlider": "Curseur",
+      "layoutToggle": "Bascule",
+      "labels": "Libellés",
+      "mobileHelp": "En mobile, la disposition « Bascule » est imposée : un écran à la fois."
+    },
+    "glossary": {
+      "title": "Glossaire",
+      "workspaceTitle_one": "Glossaire du workspace · {{count}} terme",
+      "workspaceTitle_other": "Glossaire du workspace · {{count}} termes",
+      "add": "Ajouter un terme",
+      "oldTerm": "Ancien terme",
+      "newTerm": "Nouveau terme",
+      "definition": "Définition courte",
+      "modules": "Modules",
+      "search": "Rechercher un terme",
+      "help": "Import et export CSV. Dans les bulles, un terme du glossaire est souligné en pointillé ; sa définition s'affiche au survol ou au focus.",
+      "empty": "Aucun terme pour l'instant."
     }
   },
   "share": {

@@ -176,7 +176,39 @@
     "stepsCaptured_other": "{{count}} steps captured",
     "uploading": "Uploading step {{current}} of {{total}}…",
     "notLoggedIn": "Log in to FlowDSIML to start capturing.",
-    "protectedPage": "This page can't be captured (browser system page)."
+    "protectedPage": "This page can't be captured (browser system page).",
+    "piiCheck": {
+      "title": "Check data before sending",
+      "subtitle": "{{demo}} · {{count}} captures · nothing has left your browser yet",
+      "analyzing": "Analyzing captures…",
+      "done": "Analysis complete",
+      "summary_one": "{{count}} possible personal data item found on {{captures}} capture(s).",
+      "summary_other": "{{count}} possible personal data items found on {{captures}} capture(s).",
+      "summaryHelp": "They will be blurred when sent. Only untick a detection if it is not real data (fictional example, label).",
+      "none": "No personal data detected. Still review your captures: detection does not catch everything.",
+      "captureCount_one": "{{count}} detection",
+      "captureCount_other": "{{count}} detections",
+      "captureNone": "No detection",
+      "types": {
+        "name": "Name",
+        "nir": "Social security number",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "birthdate": "Date of birth"
+      },
+      "toggle": "Blur: {{type}}",
+      "blurAll": "Blur everything on this capture",
+      "addZone": "Drag on the capture to add an area.",
+      "legendBlur": "Will be blurred",
+      "legendDetected": "Detected, not blurred",
+      "legendSelected": "Selected",
+      "notBlurredWarning": "{{types}} will not be blurred. Make sure this is fictional data.",
+      "privacy": "Detection runs in your browser: no image is sent before you confirm.",
+      "cancel": "Discard capture",
+      "send_one": "Blur and send {{count}} capture",
+      "send_other": "Blur and send {{count}} captures"
+    }
   },
   "dashboard": {
     "title": "Demos",
@@ -644,6 +676,53 @@
         "done_other": "Applied to {{count}} steps.",
         "undo": "Undo"
       }
+    },
+    "gdpr": {
+      "title": "Publish with public access?",
+      "body": "Anyone with the link will be able to view this module without signing in. Before publishing, make sure it contains no real personal data (users, colleagues, partners).",
+      "blurred_one": "{{count}} blurred area",
+      "blurred_other": "{{count}} blurred areas",
+      "pending_one": "{{count}} detection not blurred ({{steps}})",
+      "pending_other": "{{count}} detections not blurred ({{steps}})",
+      "commentsNote": "Internal comments: never published",
+      "checkReviewed": "I have reviewed every step, including bubble and form text.",
+      "checkFictional": "Visible data is fictional or blurred.",
+      "restrict": "Need to restrict access?",
+      "restrictLink": "Choose Invitation, Email domain or Password",
+      "review": "Review step {{n}}",
+      "cancel": "Cancel",
+      "publish": "Publish publicly",
+      "why": "Tick both confirmations to publish."
+    },
+    "beforeAfter": {
+      "title": "Before / After",
+      "proposal": "Proposal to validate",
+      "before": "Before",
+      "after": "Now",
+      "oldTool": "Previous tool",
+      "newTool": "New tool",
+      "captureBefore": "\"Before\" capture",
+      "captureAfter": "\"After\" capture",
+      "pick": "Pick a capture or upload",
+      "layout": "Layout",
+      "layoutSide": "Side by side",
+      "layoutSlider": "Slider",
+      "layoutToggle": "Toggle",
+      "labels": "Labels",
+      "mobileHelp": "On mobile, the Toggle layout is used: one screen at a time."
+    },
+    "glossary": {
+      "title": "Glossary",
+      "workspaceTitle_one": "Workspace glossary · {{count}} term",
+      "workspaceTitle_other": "Workspace glossary · {{count}} terms",
+      "add": "Add a term",
+      "oldTerm": "Previous term",
+      "newTerm": "New term",
+      "definition": "Short definition",
+      "modules": "Modules",
+      "search": "Search a term",
+      "help": "CSV import and export. In bubbles, glossary terms get a dotted underline; the definition shows on hover or focus.",
+      "empty": "No terms yet."
     }
   },
   "share": {
