@@ -1,4 +1,4 @@
-import { BarChart3, Check, Copy, ExternalLink, EyeOff, Link2, Pencil, Power } from 'lucide-react';
+import { BarChart3, Check, Copy, ExternalLink, GlobeLock, Link2, Pencil, Power } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -179,7 +179,7 @@ export function SharePage() {
               </a>
               {editable && (
                 <Button
-                  icon={<EyeOff />}
+                  icon={<GlobeLock />}
                   variant="danger"
                   onClick={() =>
                     void ask({
@@ -216,7 +216,7 @@ export function SharePage() {
                 className="fd-textarea"
                 rows={3}
                 disabled={!editable}
-                placeholder={'www.acme.com\n*.acme.com'}
+                placeholder={'www.acme.example\n*.acme.example'}
                 value={origins}
                 onChange={(e) => setOrigins(e.target.value)}
               />
@@ -372,7 +372,7 @@ export function SharePage() {
           <ul>
             {versions.map((v) => (
               <li key={v.id}>
-                v{v.number} — {formatDateTime(v.published_at)}{' '}
+                v{v.number} · {formatDateTime(v.published_at)}{' '}
                 {v.id === demo.current_version_id && <span className="fd-badge">{t('share.live')}</span>}
               </li>
             ))}

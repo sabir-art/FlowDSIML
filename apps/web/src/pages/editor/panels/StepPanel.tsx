@@ -1,7 +1,7 @@
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { EyeOff, Target, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Button, Field, Select } from '@flowdsiml/ui';
+import { Button, Checkbox, Field, Select } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asCta, asRects, asZoom, type Selection, type StepRow } from '../types';
 import { RichTextField } from '../RichTextField';
@@ -85,22 +85,15 @@ export function StepPanel({
       </Field>
 
       {step.kind === 'image' && (
-        <fieldset className="panel-fieldset">
-          <legend>
-            <label>
-              <input
-                type="checkbox"
-                checked={!!zoom}
-                disabled={readOnly}
-                onChange={(e) =>
-                  editor.updateStep(step.id, {
-                    zoom: e.target.checked ? { x: 0.5, y: 0.5, scale: 1.5 } : null,
-                  })
-                }
-              />{' '}
-              {t('editor.zoom')}
-            </label>
-          </legend>
+        <div className="panel-group">
+          <Checkbox
+            label={t('editor.zoom')}
+            checked={!!zoom}
+            disabled={readOnly}
+            onChange={(e) =>
+              editor.updateStep(step.id, { zoom: e.target.checked ? { x: 0.5, y: 0.5, scale: 1.5 } : null })
+            }
+          />
           {zoom && (
             <>
               {(['x', 'y'] as const).map((k) => (
@@ -135,7 +128,7 @@ export function StepPanel({
               </Field>
             </>
           )}
-        </fieldset>
+        </div>
       )}
 
       <CtaFields

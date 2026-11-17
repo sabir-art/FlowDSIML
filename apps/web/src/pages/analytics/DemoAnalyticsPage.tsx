@@ -119,7 +119,6 @@ export function DemoAnalyticsPage() {
               <h2 style={{ marginTop: 0 }}>{t('analytics.funnel')}</h2>
               <Button
                 icon={<Download />}
-                size="sm"
                 onClick={() =>
                   downloadText(
                     `funnel-${demo.title}.csv`,

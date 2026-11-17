@@ -1,7 +1,7 @@
 import { ChevronLeft, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { HotspotAction } from '@flowdsiml/manifest';
-import { Button, Field, Select } from '@flowdsiml/ui';
+import { Button, Checkbox, Field, Select } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asAction, asCta, type HotspotRow, type Selection } from '../types';
 import { RichTextField } from '../RichTextField';
@@ -126,15 +126,12 @@ export function HotspotPanel({
         disabled={readOnly}
         onChange={(v) => set({ cta: v })}
       />
-      <label className="row">
-        <input
-          type="checkbox"
-          checked={hotspot.pulse}
-          disabled={readOnly}
-          onChange={(e) => set({ pulse: e.target.checked })}
-        />{' '}
-        {t('editor.pulse')}
-      </label>
+      <Checkbox
+        checked={hotspot.pulse}
+        disabled={readOnly}
+        onChange={(e) => set({ pulse: e.target.checked })}
+        label={t('editor.pulse')}
+      />
       {!readOnly && (
         <Button
           variant="ghost"

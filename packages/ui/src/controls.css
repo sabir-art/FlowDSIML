@@ -45,3 +45,18 @@
 .fd-btn--icon.fd-btn--sm {
   width: var(--fd-layout-control-height-sm, 32px);
 }
+.fd-check {
+  align-items: center;
+  min-height: 24px;
+}
+.fd-check input {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.fd-check__hint {
+  display: block;
+  font-size: var(--fd-font-xs);
+  color: var(--fd-color-text-muted);
+}

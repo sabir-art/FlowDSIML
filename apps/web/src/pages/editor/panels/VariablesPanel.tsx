@@ -1,3 +1,4 @@
+import { Braces } from 'lucide-react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,10 +24,11 @@ export function VariablesPanel({ editor, readOnly }: { editor: DemoEditor; readO
         {t('editor.variablesHint')}
       </p>
       {editor.variables.map((v) => (
-        <fieldset key={v.id} className="panel-fieldset">
-          <legend>
+        <section key={v.id} className="panel-card" aria-label={v.key}>
+          <header className="panel-card-head">
+            <Braces size={16} aria-hidden="true" />
             <code>{`{{${v.key}}}`}</code>
-          </legend>
+          </header>
           <Field label={t('editor.variableLabel')} htmlFor={`v-l-${v.id}`}>
             <input
               id={`v-l-${v.id}`}
@@ -57,7 +59,7 @@ export function VariablesPanel({ editor, readOnly }: { editor: DemoEditor; readO
               {t('common.delete')}
             </Button>
           )}
-        </fieldset>
+        </section>
       ))}
       {!readOnly && (
         <form onSubmit={add} className="row">
