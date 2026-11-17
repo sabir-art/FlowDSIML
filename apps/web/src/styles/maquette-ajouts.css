@@ -440,3 +440,143 @@
   gap: 8px;
   align-items: center;
 }
+
+/* ---- Plans et facturation (PLN-01) : styles de page et styles en ligne de plans.html ---- */
+.mk.pl {
+  background: transparent;
+}
+.mk .plans {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+@media (max-width: 1180px) {
+  .mk .plans {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .mk .plans {
+    grid-template-columns: 1fr;
+  }
+}
+.mk .plan {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  position: relative;
+}
+.mk .plan.current {
+  border: 2px solid var(--fd-color-primary);
+  padding: 23px;
+}
+.mk .plan.reco {
+  border-color: var(--fd-color-border-strong);
+}
+.mk .plan .price {
+  font: 700 2.25rem/1 var(--fd-font-display);
+  letter-spacing: -0.02em;
+  margin: 16px 0 4px;
+}
+.mk .plan .price small {
+  font: 500 14px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+  letter-spacing: 0;
+}
+.mk .plan ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 24px;
+  display: grid;
+  gap: 10px;
+  flex: 1;
+  align-content: start;
+}
+.mk .plan li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: var(--fd-text-body-size);
+}
+.mk .plan li svg {
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-success);
+  flex: none;
+  margin-top: 2px;
+}
+.mk .plan li svg.pl-no {
+  color: var(--fd-color-text-subtle);
+}
+.mk .plan .tag {
+  position: absolute;
+  top: -11px;
+  left: 24px;
+}
+.mk .usage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .mk .usage-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.mk .pl-sub {
+  margin-top: 4px;
+}
+.mk .pl-alert {
+  margin-bottom: 24px;
+}
+.mk .pl-usage-grid {
+  margin-top: 16px;
+}
+.mk .pl-progress {
+  margin-top: 8px;
+}
+.mk .pl-track {
+  width: 100%;
+  background: var(--fd-color-surface-sunken) !important;
+}
+.mk .pl-help {
+  margin-top: 6px;
+}
+.mk .pl-choose {
+  margin: 40px 0 20px;
+  gap: 12px;
+}
+.mk .pl-choose .segmented {
+  align-items: center;
+}
+.mk .pl-choose .segmented button[aria-disabled='true'] {
+  cursor: default;
+}
+.mk .pl-soon {
+  margin: 0 4px;
+}
+.mk .pl-quote {
+  font-size: 1.75rem;
+}
+.mk .pl-foot {
+  margin-top: 16px;
+}
+.mk .pl-invoices {
+  margin-top: 40px;
+}
+.mk .pl-empty {
+  padding: var(--fd-space-5) var(--fd-space-6);
+  margin: 0;
+}
+.mk .pl-limit {
+  margin-top: 40px;
+  gap: 16px;
+  border-color: var(--fd-color-warning);
+}
+.mk .pl-field {
+  margin-top: 16px;
+}
+.mk a.btn {
+  text-decoration: none;
+}

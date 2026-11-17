@@ -150,7 +150,7 @@ export function AuthLayout({
             className={`auth-logo-link${compact ? ' auth-logo-link--compact' : ''}`}
             aria-label={t('auth.home', { app: APP_NAME })}
           >
-            <BrandMark size={36} />
+            <BrandMark size={40} />
           </Link>
           <h1>{title}</h1>
           {subtitle && <p className="muted t-lg auth-sub">{subtitle}</p>}

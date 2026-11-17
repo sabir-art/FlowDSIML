@@ -312,21 +312,19 @@ async function install(page, state = seed()) {
       const fn = p.split('/').pop();
       const a = body || {};
       switch (fn) {
-        case 'workspace_usage':
+        case 'workspace_usage': {
+          // Calculé depuis l'espace demandé (plan, démos, membres), comme la RPC réelle
+          const w = t.workspaces.find((x) => x.id === a.p_workspace) || t.workspaces[0];
+          const plan = t.plans.find((x) => x.code === w.plan_code) || t.plans[0];
+          const live = t.demos.filter((d) => d.workspace_id === w.id && !d.deleted_at);
           return json(route, 200, {
-            plan: 'pro',
-            limits: {
-              published_demos: 25,
-              members: 5,
-              steps_per_demo: 100,
-              lead_forms: true,
-              remove_branding: true,
-              analytics_retention_days: 365,
-            },
-            published_demos: 1,
-            demos: 2,
-            members: 1,
+            plan: plan.code,
+            limits: plan.limits,
+            published_demos: live.filter((d) => d.status === 'published').length,
+            demos: live.length,
+            members: t.members.filter((m) => m.workspace_id === w.id).length,
           });
+        }
         case 'set_comment_resolved': {
           const c = (t.step_comments || []).find((x) => x.id === a.p_comment);
           if (c) Object.assign(c, { resolved_at: a.p_resolved ? new Date().toISOString() : null });
