@@ -65,6 +65,7 @@
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     zap: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
     star: '<path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1 6.2L12 17.4 6.5 20.3l1-6.2L3 9.7l6.2-.9z"/>',
+    menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
     keyboard: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
   };
   const svg = (name, extra = '') =>
@@ -115,7 +116,7 @@
       </aside>
       <div class="main">
         <header class="topbar">
-          <button class="btn btn-ghost btn-icon mobile-bar" aria-label="Ouvrir la navigation" data-toggle-sidebar>${svg('layers')}</button>
+          <button class="btn btn-ghost btn-icon mobile-bar" aria-label="Ouvrir la navigation" data-toggle-sidebar>${svg('menu')}</button>
           <nav class="crumbs" aria-label="Fil d'Ariane">${b.dataset.crumbs || ''}</nav>
           <span class="grow"></span>
           <div class="input-affix hide-sm" style="width:260px">${svg('search')}<input class="input input-sm" type="search" placeholder="Rechercher…  /" aria-label="Rechercher"></div>
@@ -135,7 +136,7 @@
   function mockNav() {
     if (document.body.dataset.nomocknav !== undefined) return;
     const el = document.createElement('div'); el.className = 'mock-nav'; el.setAttribute('aria-label', 'Navigation des maquettes');
-    el.innerHTML = `<span>Maquette FlowDSIML</span><a href="index.html">Sommaire</a><button type="button" data-theme-toggle>${svg('moon', 'width="14" height="14"')}<span>Thème</span></button>`;
+    el.innerHTML = `<span class="hide-sm">Maquette FlowDSIML</span><a href="index.html">Sommaire</a><button type="button" data-theme-toggle>${svg('moon', 'width="14" height="14"')}<span>Thème</span></button>`;
     document.body.append(el);
   }
   const themes = ['system', 'light', 'dark'];
