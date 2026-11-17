@@ -50,7 +50,7 @@
   | Temps passé | `cmi.core.session_time` | `cmi.session_time` |
 
   Sans quiz, le LMS reçoit seulement `completed` (`noQuiz`).
-- **Interrupteur « Aussi enregistrer les résultats dans le suivi Tutoclic »** (activé par défaut) : le paquet envoie aussi les événements à Tutoclic, et l'apprenant est identifié par l'identifiant fourni par le LMS (`cmi.core.student_id`), haché.
+- **Interrupteur « Aussi enregistrer les résultats dans le suivi TutoClick »** (activé par défaut) : le paquet envoie aussi les événements à TutoClick, et l'apprenant est identifié par l'identifiant fourni par le LMS (`cmi.core.student_id`), haché.
 - **Téléchargement** : nom de fichier `{{slug}}-scorm12.zip` ou `-scorm2004.zip`, avec le poids. Le paquet est listé dans « Exports récents » (A3 §5).
 - **Pas de xAPI ni de LTI** dans cette version. Ce sont des évolutions possibles (à noter dans la matrice, vague A+).
 
@@ -60,7 +60,7 @@
 - Boutons :
   - « Copier le texte » : copie en HTML et en texte brut, toast « Texte copié » ;
   - « Joindre le mode d'emploi (PDF) » : lance l'export F5.
-- Tutoclic **n'envoie aucun e-mail** depuis ce panneau (`intro`). Les invitations restent dans Accès (A1).
+- TutoClick **n'envoie aucun e-mail** depuis ce panneau (`intro`). Les invitations restent dans Accès (A1).
 
 ## 5. Accessibilité
 

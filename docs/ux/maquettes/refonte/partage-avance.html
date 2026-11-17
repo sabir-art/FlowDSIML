@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Partage avancé — FlowDSIML (lot A1)</title>
-<link rel="icon" href="../../assets/symbole-dsi.svg">
+<title>Partage avancé — TutoClick (lot A1)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
 <link rel="stylesheet" href="refonte.css">
 <script src="refonte.js" defer></script>
 </head>
@@ -12,8 +12,8 @@
 <div class="app">
   <aside class="side" aria-label="Navigation principale">
     <a class="brand" href="dashboard.html">
-      <img src="../../assets/symbole-dsi.svg" alt="">
-      <span><span class="brand__name">FlowDSIML</span><span class="brand__sub">DSI des Missions Locales</span></span>
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
     </a>
     <nav class="fd-nav">
       <a class="fd-nav__item" href="dashboard.html" aria-current="page"><i data-icon="grid"></i>Démos</a>
@@ -54,13 +54,13 @@
         <div data-pane="lien">
           <div class="fd-field" style="margin:0">
             <label class="fd-label" for="slug">Adresse de la démo</label>
-            <div class="slug"><span class="slug__prefix">demos.flowdsiml.example/acme/</span><input id="slug" value="creer-une-fiche-usager" aria-describedby="slug-st slug-h"><button class="fd-btn" type="button"><i data-icon="copy"></i>Copier</button></div>
+            <div class="slug"><span class="slug__prefix">demos.tutoclick.example/acme/</span><input id="slug" value="creer-une-fiche-usager" aria-describedby="slug-st slug-h"><button class="fd-btn" type="button"><i data-icon="copy"></i>Copier</button></div>
             <span class="field-status field-status--ok" id="slug-st" role="status"><i data-icon="checkCircle"></i>Adresse disponible</span>
             <span class="fd-help" id="slug-h">Lettres minuscules, chiffres et tirets (3 à 60 caractères). Changer l'adresse redirige l'ancienne pendant 90 jours.</span>
           </div>
           <div class="fd-field" style="margin:0">
             <span class="fd-label">Variables d'URL</span>
-            <pre class="code">demos.flowdsiml.example/acme/creer-une-fiche-usager<span class="k">?first_name=Léa&amp;company=Atelier%20Brume</span></pre>
+            <pre class="code">demos.tutoclick.example/acme/creer-une-fiche-usager<span class="k">?first_name=Léa&amp;company=Atelier%20Brume</span></pre>
             <span class="fd-help">Pré-remplit les variables de la démo. Pour un suivi par prospect, créez plutôt un lien personnalisé.</span>
           </div>
           <div class="fd-field" style="margin:0">
@@ -101,8 +101,8 @@
           </div>
           <label class="fd-switch"><span>Ouvrir automatiquement après 10 secondes</span><input type="checkbox"><span class="fd-switch__track"></span></label>
           <div class="fd-field" style="margin:0"><span class="fd-label">Code à coller avant &lt;/body&gt;</span>
-<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>&lt;script src="https://demos.flowdsiml.example/embed.js" defer&gt;&lt;/script&gt;
-&lt;button <span class="k">data-flowdsiml="creer-une-fiche-usager"</span>
+<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>&lt;script src="https://demos.tutoclick.example/embed.js" defer&gt;&lt;/script&gt;
+&lt;button <span class="k">data-tutoclick="creer-une-fiche-usager"</span>
         <span class="k">data-mode="popup"</span>&gt;Voir la démo&lt;/button&gt;</pre></div>
           <div class="fd-field" style="margin:0"><label class="fd-label" for="dom">Sites autorisés</label><div class="chips" id="dom"><span class="chip">www.mission-locale.example<button type="button" aria-label="Retirer www.mission-locale.example"><i data-icon="x"></i></button></span><span class="chip">*.dsi-ml.example<button type="button" aria-label="Retirer *.dsi-ml.example"><i data-icon="x"></i></button></span><input aria-label="Ajouter un site" placeholder="Ajouter un site…"></div><span class="fd-help">Vide = tous les sites. Pris en compte à la prochaine publication.</span></div>
         </div>
@@ -110,7 +110,7 @@
         <!-- Onglet Page publique -->
         <div data-pane="page">
           <label class="fd-switch"><span><b>Page publique activée</b><br><small class="fd-muted">Une page dédiée avec titre, description et bouton d'action, autour de la démo.</small></span><input type="checkbox" checked><span class="fd-switch__track"></span></label>
-          <div class="fd-field" style="margin:0"><label class="fd-label" for="pt">Titre de la page</label><input class="fd-input" id="pt" value="Découvrez votre inscription au Contrat d'engagement jeune"></div>
+          <div class="fd-field" style="margin:0"><label class="fd-label" for="pt">Titre de la page</label><input class="fd-input" id="pt" value="Créer une fiche usager pas à pas"></div>
           <div class="fd-field" style="margin:0"><label class="fd-label" for="pd">Description</label><textarea class="fd-textarea" id="pd">En 2 minutes, suivez les étapes de l'inscription en ligne, de la vérification d'éligibilité à la prise de rendez-vous avec votre conseiller.</textarea></div>
           <div class="row-2">
             <div class="fd-field" style="margin:0"><label class="fd-label" for="pc">Bouton d'action</label><input class="fd-input" id="pc" value="Prendre rendez-vous"></div>
@@ -130,7 +130,7 @@
         </div>
         <div class="fd-card side-summary">
           <h2 class="fd-card__title">Récapitulatif</h2>
-          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="link"></i></span><span>demos.flowdsiml.example/acme/creer-une-fiche-usager<small>Lien permanent</small></span></div>
+          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="link"></i></span><span>demos.tutoclick.example/acme/creer-une-fiche-usager<small>Lien permanent</small></span></div>
           <div class="summary-line"><span class="fd-icon-chip"><i data-icon="key"></i></span><span>Mot de passe<small>Changé il y a 2 jours</small></span></div>
           <div class="summary-line"><span class="fd-icon-chip"><i data-icon="popup"></i></span><span>Bouton pop-up<small>2 sites autorisés</small></span></div>
           <div class="summary-line"><span class="fd-icon-chip"><i data-icon="layout"></i></span><span>Page publique active<small>Non indexée</small></span></div>

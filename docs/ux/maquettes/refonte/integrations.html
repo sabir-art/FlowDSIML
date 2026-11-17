@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Intégrations — Tutoclic (lot A5)</title>
-<link rel="icon" href="../../assets/symbole-dsi.svg">
+<title>Intégrations — TutoClick (lot A5)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
 <link rel="stylesheet" href="refonte.css">
 <script src="refonte.js" defer></script>
 </head>
@@ -12,8 +12,8 @@
 <div class="app">
   <aside class="side" aria-label="Navigation principale">
     <a class="brand" href="dashboard.html">
-      <img src="../../assets/symbole-dsi.svg" alt="">
-      <span><span class="brand__name">FlowDSIML</span><span class="brand__sub">DSI des Missions Locales</span></span>
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
     </a>
     <nav class="fd-nav">
       <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
@@ -68,7 +68,7 @@
             <label class="fd-check"><input type="checkbox" checked> lead.created</label><label class="fd-check"><input type="checkbox" checked> demo.completed</label>
             <label class="fd-check"><input type="checkbox" checked> learner.module_validated</label><label class="fd-check"><input type="checkbox"> learner.quiz_failed</label>
             <label class="fd-check"><input type="checkbox"> demo.published</label><label class="fd-check"><input type="checkbox"> alert.triggered</label></div></div>
-          <div class="fd-field" style="margin:0"><span class="fd-label">Secret de signature</span><div class="secret"><span class="mono">whsec_••••••••••••••••••••3f9a</span><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"><i data-icon="eye"></i>Afficher</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"><i data-icon="rotate"></i>Renouveler</button></div><span class="fd-help">En-tête <span class="mono">Tutoclic-Signature: t=…, v1=…</span> (HMAC-SHA256 du corps). <a href="#">Vérifier la signature</a></span></div>
+          <div class="fd-field" style="margin:0"><span class="fd-label">Secret de signature</span><div class="secret"><span class="mono">whsec_••••••••••••••••••••3f9a</span><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"><i data-icon="eye"></i>Afficher</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"><i data-icon="rotate"></i>Renouveler</button></div><span class="fd-help">En-tête <span class="mono">TutoClick-Signature: t=…, v1=…</span> (HMAC-SHA256 du corps). <a href="#">Vérifier la signature</a></span></div>
           <h3 style="margin:8px 0 0;font-size:var(--fd-text-h3-size)">Journal des envois · 7 jours</h3>
           <table class="fd-table"><thead><tr><th>Statut</th><th>Événement</th><th>Date</th><th>Durée</th><th><span class="cm-sr">Actions</span></th></tr></thead><tbody>
             <tr aria-selected="true"><td><span class="st-code ko">500</span></td><td class="mono">lead.created</td><td>17 nov., 15:42</td><td>1,2 s</td><td><button class="fd-btn fd-btn--sm" type="button"><i data-icon="rotate"></i>Rejouer</button></td></tr>
@@ -115,7 +115,7 @@
         <div class="fd-field" style="margin:0"><label class="fd-label" for="sl1">URL du webhook entrant</label><input class="fd-input mono" id="sl1" value="https://hooks.slack.com/services/T000/B000/••••••••"><span class="fd-help">Créée dans Slack (application « Incoming Webhooks »). Elle désigne le canal.</span></div>
         <div class="fd-field" style="margin:0"><span class="fd-label">Envoyer dans Slack</span><div class="evt-list"><label class="fd-check"><input type="checkbox" checked> Nouveaux leads</label><label class="fd-check"><input type="checkbox" checked> Alertes (A4)</label><label class="fd-check"><input type="checkbox"> Modules validés</label><label class="fd-check"><input type="checkbox"> Résumé hebdomadaire</label></div></div>
         <span class="fd-label">Aperçu</span>
-        <div class="slack-prev"><span class="ava"><img src="../../assets/symbole-dsi.svg" alt=""></span><div><b>Tutoclic</b> <span style="color:#616061;font-size:12px">15:42</span><div class="att"><b>Nouveau lead</b> sur « Créer une fiche usager »<br>lea.martin@example.org · Lien perso « Atelier Brume »<br><a href="#" style="color:#1264A3">Voir dans Tutoclic</a></div></div></div>
+        <div class="slack-prev"><span class="ava"><img src="../../brand-tutoclic/production/symbole-tutoclick.svg" alt=""></span><div><b>TutoClick</b> <span style="color:#616061;font-size:12px">15:42</span><div class="att"><b>Nouveau lead</b> sur « Créer une fiche usager »<br>lea.martin@example.org · Lien perso « Atelier Brume »<br><a href="#" style="color:#1264A3">Voir dans TutoClick</a></div></div></div>
         <div style="display:flex;gap:8px"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="send"></i>Envoyer un message de test</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Déconnecter</button></div>
       </article>
     </section>
@@ -124,17 +124,17 @@
       <article class="fd-card" style="display:flex;flex-direction:column;gap:14px">
         <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="code"></i></span><h2 class="fd-card__title">Snippets d'intégration</h2></div>
         <div class="fd-field" style="margin:0"><label class="fd-label" for="sn1">Votre outil</label><select class="fd-select" id="sn1"><option>WordPress (bloc HTML personnalisé)</option><option>Webflow (élément Embed)</option><option>Notion (/embed)</option><option>Confluence (macro iFrame)</option><option>SharePoint (composant Incorporer)</option><option>Google Sites (Intégrer)</option><option>HTML générique</option></select></div>
-<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>&lt;iframe src="https://demos.tutoclic.example/dsi/<span class="k">creer-une-fiche-usager</span>?embed=1"
+<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>&lt;iframe src="https://demos.tutoclick.example/dsi/<span class="k">creer-une-fiche-usager</span>?embed=1"
   title="Tutoriel : créer une fiche usager" loading="lazy"
   style="width:100%;aspect-ratio:16/10;border:0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
         <p class="fd-help" style="margin:0">WordPress : ajoutez un bloc « HTML personnalisé » et collez le code. Pensez aux sites autorisés (Partager → Intégrer).</p>
         <hr style="border:0;border-top:1px solid var(--fd-color-border);margin:4px 0">
         <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="activity"></i></span><h2 class="fd-card__title">Relais vers votre outil d'analytics</h2></div>
-        <p class="fd-help" style="margin:0">Le player envoie ses événements à la page hôte. Ce script les transmet à l'outil déjà installé sur votre site : aucun cookie ni traceur ajouté par Tutoclic.</p>
+        <p class="fd-help" style="margin:0">Le player envoie ses événements à la page hôte. Ce script les transmet à l'outil déjà installé sur votre site : aucun cookie ni traceur ajouté par TutoClick.</p>
         <div class="fd-segmented" role="group" aria-label="Outil d'analytics"><button type="button" aria-pressed="true">Matomo</button><button type="button" aria-pressed="false">Google Analytics 4</button><button type="button" aria-pressed="false">Segment</button><button type="button" aria-pressed="false">Mixpanel</button><button type="button" aria-pressed="false">Amplitude</button></div>
 <pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>window.addEventListener('message', (e) =&gt; {
-  if (e.origin !== 'https://demos.tutoclic.example' || e.data?.source !== 'tutoclic') return;
-  window._paq?.push(['trackEvent', 'Tutoclic', <span class="k">e.data.type</span>, e.data.demoTitle]);
+  if (e.origin !== 'https://demos.tutoclick.example' || e.data?.source !== 'tutoclick') return;
+  window._paq?.push(['trackEvent', 'TutoClick', <span class="k">e.data.type</span>, e.data.demoTitle]);
 });</pre>
       </article>
     </section>
@@ -142,8 +142,8 @@
     <section data-pane="remote" style="display:none;max-width:980px">
       <article class="fd-card" style="display:flex;flex-direction:column;gap:14px">
         <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="terminal"></i></span><h2 class="fd-card__title">Pilotage du player depuis la page hôte</h2></div>
-        <p class="fd-help" style="margin:0">Avec le script d'intégration, l'objet <span class="mono">Tutoclic</span> permet d'ouvrir une démo, d'aller à une étape, de passer des variables et d'écouter les événements.</p>
-<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>const player = Tutoclic.get('creer-une-fiche-usager');
+        <p class="fd-help" style="margin:0">Avec le script d'intégration, l'objet <span class="mono">TutoClick</span> permet d'ouvrir une démo, d'aller à une étape, de passer des variables et d'écouter les événements.</p>
+<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>const player = TutoClick.get('creer-une-fiche-usager');
 player.<span class="k">open</span>({ step: 3, variables: { first_name: 'Léa' } });
 player.<span class="k">goTo</span>(5);          // aller à l'étape 5
 player.<span class="k">on</span>('step', (e) =&gt; console.log(e.index, e.title));

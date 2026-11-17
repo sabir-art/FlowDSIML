@@ -18,10 +18,10 @@
 
 | Format | Options |
 |---|---|
-| MP4 | Qualité (1080p par défaut, 720p, 4K), durée par étape (Automatique = 2 s + 60 ms par caractère de bulle, plafonnée à 8 s), curseur et animation de clic, inclure les formulaires et sondages, mention FlowDSIML (forcée en plan Free) |
+| MP4 | Qualité (1080p par défaut, 720p, 4K), durée par étape (Automatique = 2 s + 60 ms par caractère de bulle, plafonnée à 8 s), curseur et animation de clic, inclure les formulaires et sondages, mention TutoClick (forcée en plan Free) |
 | GIF | Largeur (640 par défaut, 480, 960), durée par étape, curseur. Pas d'option de son |
 | PDF | Mise en page Portrait / Paysage, une étape par page, texte de bulle en légende numérotée, sommaire des chapitres |
-| Hors ligne | Inclure les formulaires (désactivé : pas d'envoi de lead hors ligne, ce qu'une `fd-help` explique), mention FlowDSIML |
+| Hors ligne | Inclure les formulaires (désactivé : pas d'envoi de lead hors ligne, ce qu'une `fd-help` explique), mention TutoClick |
 
 - Ligne d'estimation (`fd-help`) : durée et poids, recalculés à chaque changement d'option, plus la note « variables par défaut, zones floutées conservées ». **Les flous sont toujours appliqués** à l'export : aucune option ne permet de les retirer.
 - Pied : « Annuler » et « Exporter en {{format}} » (primaire, `Download`).

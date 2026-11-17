@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "FlowDSIML",
+    "appName": "TutoClick",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved",
@@ -175,7 +175,7 @@
     "stepsCaptured_one": "{{count}} step captured",
     "stepsCaptured_other": "{{count}} steps captured",
     "uploading": "Uploading step {{current}} of {{total}}…",
-    "notLoggedIn": "Log in to FlowDSIML to start capturing.",
+    "notLoggedIn": "Log in to TutoClick to start capturing.",
     "protectedPage": "This page can't be captured (browser system page).",
     "piiCheck": {
       "title": "Check data before sending",
@@ -487,7 +487,7 @@
     },
     "narrow": {
       "title": "The editor works on desktop",
-      "body": "Open FlowDSIML on a screen at least 1,024 px wide to edit this demo. You can still preview and share it from this phone.",
+      "body": "Open TutoClick on a screen at least 1,024 px wide to edit this demo. You can still preview and share it from this phone.",
       "view": "View demo"
     },
     "comments": {
@@ -987,7 +987,7 @@
         "duration": "About {{count}} min",
         "steps": "{{count}} steps",
         "updated": "Updated on {{date}}",
-        "madeWith": "Made with FlowDSIML"
+        "madeWith": "Made with TutoClick"
       },
       "summary": {
         "title": "Summary",
@@ -1030,7 +1030,7 @@
         "resumeValue": "Last step viewed",
         "time": "Time spent",
         "timeValue": "Session length",
-        "alsoTrack": "Also record results in Tutoclic tracking",
+        "alsoTrack": "Also record results in TutoClick tracking",
         "download": "Download the package (.zip)",
         "noQuiz": "This module has no quiz: the LMS will only receive \"completed\"."
       },
@@ -1050,7 +1050,7 @@
       },
       "mail": {
         "title": "Send by email",
-        "intro": "Copy this text into your email client. Tutoclic sends nothing on your behalf, except invitations.",
+        "intro": "Copy this text into your email client. TutoClick sends nothing on your behalf, except invitations.",
         "subject": "New tool training · {{title}} ({{min}} min)",
         "body": "Hello,\n\nTo get ready for the new tool, here is a {{min}}-minute interactive tutorial. Follow it at your own pace and pick up where you left off.",
         "cta": "Start the tutorial",
@@ -1081,7 +1081,7 @@
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen",
     "restart": "Restart the tour",
-    "watermark": "Made with FlowDSIML",
+    "watermark": "Made with TutoClick",
     "form": {
       "submit": "Submit",
       "skip": "Skip",
@@ -1478,7 +1478,7 @@
       "publicPageHint": "The header shown around demos shared by link.",
       "primaryButton": "Primary button",
       "secondaryButton": "Secondary button",
-      "hideWatermark": "Hide \"Made with FlowDSIML\""
+      "hideWatermark": "Hide \"Made with TutoClick\""
     },
     "variables": {
       "title": "Variables",
@@ -1664,7 +1664,7 @@
     "seconds": "{{count}} seconds",
     "showCursor": "Show cursor and click animation",
     "includeForms": "Include form and survey steps",
-    "showBranding": "Show “Made with FlowDSIML”",
+    "showBranding": "Show “Made with TutoClick”",
     "pdfLayout": "Layout",
     "pdfPortrait": "Portrait",
     "pdfLandscape": "Landscape",
@@ -1750,7 +1750,7 @@
         "runningHead": "User guide · {{title}}",
         "footer": "Version {{n}} · {{date}} · {{workspace}}",
         "page": "Page {{n}} / {{total}}",
-        "madeWith": "Made with Tutoclic",
+        "madeWith": "Made with TutoClick",
         "internal": "Internal document"
       }
     }
@@ -2025,13 +2025,13 @@
       "test": "Send a test message",
       "disconnect": "Disconnect",
       "msgLead": "New lead on \"{{demo}}\"",
-      "openInApp": "View in Tutoclic"
+      "openInApp": "View in TutoClick"
     },
     "snippets": {
       "title": "Embed snippets",
       "tool": "Your tool",
       "relayTitle": "Relay to your analytics tool",
-      "relayHelp": "The player sends its events to the host page. This script forwards them to the tool already installed on your site: no cookie or tracker added by Tutoclic.",
+      "relayHelp": "The player sends its events to the host page. This script forwards them to the tool already installed on your site: no cookie or tracker added by TutoClick.",
       "relayTool": "Analytics tool",
       "copy": "Copy",
       "copied": "Copied"
@@ -2129,5 +2129,101 @@
       "publicHelp": "Open the audience screen on the projector: it follows your step changes, without the notes.",
       "notesField": "Presenter notes (not published)"
     }
+  },
+  "html": {
+    "editor": {
+      "stepBadge": "HTML step",
+      "crumbs": "Selected element",
+      "hint": "Hover to locate, click to select · Esc: parent element",
+      "toolbar": "Element actions",
+      "editText": "Edit text",
+      "replaceImage": "Replace image",
+      "hide": "Hide",
+      "blur": "Blur",
+      "remove": "Remove element",
+      "linkStep": "Link to a step",
+      "copySelector": "Copy selector",
+      "more": "More actions",
+      "element": "Element",
+      "text": "Text",
+      "variableTip": "Tip: insert a variable, for example {{example}}.",
+      "scope": "Apply to",
+      "scopeStep": "This step",
+      "scopeAll": "All steps ({{count}})",
+      "scopeHelp": "\"All steps\" replaces the same element wherever it appears.",
+      "changes": "Step changes · {{count}}",
+      "undoChange": "Undo this change",
+      "changedText": "\"{{from}}\" → \"{{to}}\"",
+      "hidden": "\"{{text}}\" hidden",
+      "blurred": "Blurred",
+      "sanitized": "HTML capture: a sanitised copy of the page (scripts removed, forms disabled), served from the content domain. Changes never touch the real site.",
+      "notFound": "This element no longer exists in the new capture: the change is set aside."
+    },
+    "sandbox": {
+      "title": "Sandbox · {{name}}",
+      "intro": "{{count}} linked HTML pages. Visitors browse freely, like in the real tool, with no risk.",
+      "mapLabel": "Sandbox map",
+      "start": "Start",
+      "links_one": "{{count}} link",
+      "links_other": "{{count}} links",
+      "noLinks": "No linked page",
+      "toLink": "To link",
+      "orphan": "\"{{page}}\" isn't linked from any page: visitors can't reach it.",
+      "linkIt": "Link a menu item",
+      "settings": "Sandbox settings",
+      "startPage": "Start page",
+      "autolink": "Automatically link identical links",
+      "autolinkHelp": "A menu link leads to the same page on every page.",
+      "unlinked": "Click on an unlinked element",
+      "unlinkedMsg": "Show \"This part isn't available in the demo\"",
+      "unlinkedNothing": "Do nothing",
+      "unlinkedHighlight": "Highlight clickable areas",
+      "notAvailable": "This part isn't available in the demo.",
+      "guide": "Add an optional guide (steps on top)",
+      "addPage": "Add a page (HTML capture)"
+    },
+    "center": {
+      "title": "Demo Center",
+      "heading": "{{workspace}} demos",
+      "contact": "Contact us",
+      "search": "Search a demo…",
+      "searchLabel": "Search a demo",
+      "categories": "Filter by category",
+      "all": "All",
+      "count_one": "{{count}} demo",
+      "count_other": "{{count}} demos",
+      "guided": "Guided demo · {{min}} min",
+      "sandboxMeta": "Sandbox · {{count}} pages",
+      "footer": "{{workspace}} · public demos",
+      "mode": "Center type",
+      "modeTraining": "Training center (learners, progress)",
+      "modeDemo": "Demo Center (public, no account)"
+    }
+  },
+  "soon": {
+    "badge": "Coming soon",
+    "pageTitle": "Upcoming features",
+    "aiNotice": "AI assistance features: in preparation.",
+    "aiNoticeBody": "They are not active. No data is sent to any AI service, and enabling them will require a workspace admin's approval.",
+    "aiGenerate": "Generate a demo",
+    "aiGenerateDesc": "Suggest a first draft of steps (titles, bubble text) from the captures.",
+    "aiTranslate": "Translate the demo",
+    "aiTranslateDesc": "Translate bubbles, buttons, quizzes and subtitles into another language.",
+    "aiVoice": "Subtitles and voiceover",
+    "aiVoiceDesc": "Transcribe the voice of a video step and generate a voiceover from text.",
+    "aiAssistant": "Writing assistant",
+    "aiAssistantDesc": "Rephrase a bubble, simplify a text (easy-to-read), suggest quiz questions.",
+    "crm": "CRM",
+    "crmDesc": "Automatically send leads and demo activity to your CRM.",
+    "emailing": "Email marketing tools",
+    "emailingDesc": "Add leads to a list or trigger an email sequence.",
+    "enrich": "Visitor enrichment",
+    "enrichDesc": "Identify the organisation of an anonymous visitor.",
+    "sso": "Single sign-on (SSO / SAML)",
+    "ssoDesc": "Sign in with your organisation account and manage access from your directory.",
+    "useWebhooks": "Use webhooks",
+    "whyAi": "Requires an AI provider.",
+    "whyLegal": "Not planned without a legal review: personal data processed by a third party (GDPR).",
+    "meanwhile": "Meanwhile: {{alternative}}"
   }
 }

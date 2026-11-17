@@ -40,8 +40,8 @@ A4, marges de 15 mm, Plus Jakarta Sans embarquée, couleurs du **thème de la d�
 | **Étapes** (2 par page) | Bloc numéro (pastille noire) + titre (`h3`) + texte de la bulle. Capture avec un **cadre framboise de 2 px** autour de la zone du hotspot et une **pastille numérotée** framboise (même numéro que l'étape). Si l'étape a des notes ou une étape Avant / Après : encadré « À retenir » (fond vert pâle, filet vert DSI de 3 px, texte noir) |
 | **Auto-évaluation** | Questions du quiz en liste, avec cases à cocher vides à imprimer. Réponses en petit en bas de page. Une phrase renvoie vers le quiz en ligne pour **valider** le module (le papier ne valide rien) |
 
-- **En-tête courant** (à partir de la page 2) : « Mode d'emploi · {{titre}} » à gauche, logo du workspace à droite. La maquette montre le wordmark Tutoclic à cette place.
-- **Pied** : « Version n · date · workspace » et « Page n / N ». La mention « Créé avec Tutoclic » n'apparaît qu'en plan Free.
+- **En-tête courant** (à partir de la page 2) : « Mode d'emploi · {{titre}} » à gauche, logo du workspace à droite. La maquette montre le wordmark TutoClick à cette place.
+- **Pied** : « Version n · date · workspace » et « Page n / N ». La mention « Créé avec TutoClick » n'apparaît qu'en plan Free.
 - Les étapes de type pop-up, checklist ou choix (A2) sont rendues en texte : titre + texte + liste des choix. Une étape de choix (branching) donne une liste « Si vous êtes… → voir étape n ».
 - **Zones floutées** : le flou est déjà appliqué dans les pixels (F1 §1), donc rien ne peut être dé-flouté à l'export.
 

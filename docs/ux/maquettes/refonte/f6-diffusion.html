@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>F6 : diffusion — Tutoclic</title>
-<link rel="icon" href="../../assets/symbole-dsi.svg">
+<title>F6 : diffusion — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
 <link rel="stylesheet" href="refonte.css">
 <script src="refonte.js" defer></script>
 </head>
@@ -12,8 +12,8 @@
 <div class="app">
   <aside class="side" aria-label="Navigation principale">
     <a class="brand" href="dashboard.html" aria-current="page">
-      <img src="../../assets/symbole-dsi.svg" alt="">
-      <span><span class="brand__name">FlowDSIML</span><span class="brand__sub">DSI des Missions Locales</span></span>
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
     </a>
     <nav class="fd-nav">
       <a class="fd-nav__item" href="dashboard.html" aria-current="page"><i data-icon="grid"></i>Démos</a>
@@ -56,14 +56,14 @@
               <tr><td>Reprise</td><td>Dernière étape vue (l'apprenant reprend là où il était)</td></tr>
               <tr><td>Temps passé</td><td>Durée de la session</td></tr>
             </tbody></table></div>
-          <label class="fd-check" style="justify-content:space-between"><span>Aussi enregistrer les résultats dans le suivi Tutoclic (F3)</span><span class="fd-switch"><input type="checkbox" checked aria-label="Enregistrer aussi dans le suivi"><span class="fd-switch__track"></span></span></label>
+          <label class="fd-check" style="justify-content:space-between"><span>Aussi enregistrer les résultats dans le suivi TutoClick (F3)</span><span class="fd-switch"><input type="checkbox" checked aria-label="Enregistrer aussi dans le suivi"><span class="fd-switch__track"></span></span></label>
           <div style="display:flex;gap:8px;align-items:center"><button class="fd-btn fd-btn--primary" type="button"><i data-icon="download"></i>Télécharger le paquet (.zip)</button><span class="fd-help">creer-une-fiche-usager-scorm12.zip · 40 Ko</span></div>
         </section>
 
         <section data-pane="intranet" style="display:none">
           <h2 style="margin:0;font-size:var(--fd-text-h2-size)">Intégrer dans l'intranet</h2>
           <div class="fd-field" style="margin:0"><span class="fd-label">Outil de l'intranet</span><select class="fd-select"><option>SharePoint (composant « Incorporer »)</option><option>Wiki ou CMS (HTML)</option><option>Lien texte seulement</option></select></div>
-<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>&lt;iframe src="https://demos.tutoclic.example/dsi/<span class="k">creer-une-fiche-usager</span>?embed=1"
+<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>&lt;iframe src="https://demos.tutoclick.example/dsi/<span class="k">creer-une-fiche-usager</span>?embed=1"
   title="Tutoriel : créer une fiche usager"
   style="width:100%;aspect-ratio:16/10;border:0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
           <ol style="margin:0;padding-left:20px;display:grid;gap:6px;font-size:var(--fd-text-body-size)"><li>Dans SharePoint, ajoutez le composant « Incorporer » à la page.</li><li>Collez le code ci-dessus.</li><li>Ajoutez le domaine de l'intranet aux sites autorisés (Partager → Intégrer).</li></ol>
@@ -73,7 +73,7 @@
 
         <section data-pane="mail" style="display:none">
           <h2 style="margin:0;font-size:var(--fd-text-h2-size)">Envoyer par e-mail</h2>
-          <p class="fd-help" style="margin:0">Copiez ce texte dans votre messagerie. Tutoclic n'envoie rien à votre place, sauf les invitations (Partager → Accès).</p>
+          <p class="fd-help" style="margin:0">Copiez ce texte dans votre messagerie. TutoClick n'envoie rien à votre place, sauf les invitations (Partager → Accès).</p>
           <div class="mail-prev"><b>Objet : Formation au nouvel outil · Créer une fiche usager (8 min)</b><span>Bonjour,</span><span>Pour vous préparer au nouvel outil, voici un tutoriel interactif de 8 minutes. Vous pouvez le suivre à votre rythme et reprendre où vous en étiez.</span><span class="cta">Commencer le tutoriel</span><span style="font-size:12px;color:#4A5562">Un quiz de 5 questions valide le module. Mode d'emploi PDF en pièce jointe si besoin.</span></div>
           <div style="display:flex;gap:8px"><button class="fd-btn fd-btn--primary" type="button"><i data-icon="copy"></i>Copier le texte</button><button class="fd-btn" type="button"><i data-icon="fileText"></i>Joindre le mode d'emploi (PDF)</button></div>
         </section>
