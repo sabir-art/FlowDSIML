@@ -1,0 +1,28 @@
+{
+  "name": "@flowdsiml/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "zip": "wxt zip",
+    "postinstall": "wxt prepare",
+    "lint": "eslint entrypoints lib",
+    "e2e": "node e2e/capture.e2e.cjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@flowdsiml/core": "workspace:*",
+    "@flowdsiml/supabase-types": "workspace:*",
+    "@flowdsiml/ui": "workspace:*",
+    "@supabase/supabase-js": "^2.119.0",
+    "lucide": "^0.577.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.7",
+    "wxt": "^0.20.27"
+  }
+}

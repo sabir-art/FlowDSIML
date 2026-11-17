@@ -1,0 +1,8 @@
+dist
+.output
+.wxt
+pnpm-lock.yaml
+packages/supabase-types/src/database.ts
+docs
+packages/ui/src/tokens.css
+packages/ui/src/tokens.ts

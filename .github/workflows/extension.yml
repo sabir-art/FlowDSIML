@@ -1,0 +1,31 @@
+name: Extension
+
+# Construit l'archive de l'extension Chrome (à téléverser sur le Chrome Web Store).
+on:
+  push:
+    tags: ['ext-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    env:
+      WXT_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      WXT_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      WXT_APP_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @flowdsiml/extension zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flowdsiml-extension
+          path: apps/extension/.output/*.zip

@@ -1,0 +1,154 @@
+import { render } from 'preact';
+import { useEffect, useMemo, useState } from 'preact/hooks';
+import { manifestSchema, type Manifest } from '@flowdsiml/manifest';
+import { variablesFromSearch, type VariableValues } from '@flowdsiml/core';
+import { loadManifest, resolveLink, submitLead, Tracker } from './api';
+import { embedAllowed, parseRoute } from './logic';
+import { strings } from './i18n';
+import { APP_ORIGIN } from './config';
+import { Player } from './Player';
+import { Ban, Link2Off, SearchX } from 'lucide-preact';
+import './player.css';
+
+type State =
+  | { status: 'loading' }
+  | { status: 'error'; kind: 'notFound' | 'expired' | 'blocked'; locale: string }
+  | {
+      status: 'ready';
+      manifest: Manifest;
+      values: VariableValues;
+      linkToken: string | null;
+      preview: boolean;
+    };
+
+const inIframe = window.parent !== window;
+const parentOrigin = (() => {
+  const a = location.ancestorOrigins?.[0];
+  if (a) return a;
+  try {
+    return document.referrer ? new URL(document.referrer).origin : null;
+  } catch {
+    return null;
+  }
+})();
+
+function App() {
+  const [state, setState] = useState<State>({ status: 'loading' });
+  const t = strings(navigator.language.startsWith('en') ? 'en' : 'fr');
+
+  useEffect(() => {
+    const route = parseRoute(location.hash);
+    let cancelled = false;
+    const fail = (kind: 'notFound' | 'expired' | 'blocked', locale = navigator.language) =>
+      !cancelled && setState({ status: 'error', kind, locale });
+
+    async function boot() {
+      if (route.kind === 'preview') {
+        // Aperçu : le manifeste vient de l'éditeur (origine vérifiée), rien n'est enregistré.
+        const onMsg = (e: MessageEvent) => {
+          if (e.origin !== APP_ORIGIN || (e.data as { type?: string })?.type !== 'fd:preview') return;
+          const parsed = manifestSchema.safeParse((e.data as { manifest: unknown }).manifest);
+          if (parsed.success)
+            setState({
+              status: 'ready',
+              manifest: parsed.data,
+              values: variablesFromSearch(
+                location.search,
+                parsed.data.variables.map((v) => v.key),
+              ),
+              linkToken: null,
+              preview: true,
+            });
+        };
+        addEventListener('message', onMsg);
+        window.opener?.postMessage({ type: 'fd:preview-ready' }, APP_ORIGIN);
+        return;
+      }
+      let demoId: string;
+      let linkVars: VariableValues = {};
+      let linkToken: string | null = null;
+      let search = '';
+      if (route.kind === 'demo') {
+        demoId = route.id;
+        search = route.search;
+      } else if (route.kind === 'link') {
+        const link = await resolveLink(route.token).catch(() => null);
+        if (!link) return fail('expired');
+        demoId = link.demoId;
+        linkVars = link.variables ?? {};
+        linkToken = route.token;
+        search = route.search;
+      } else {
+        return fail('notFound');
+      }
+      const manifest = await loadManifest(demoId).catch(() => null);
+      if (!manifest) return fail('notFound');
+      if (!embedAllowed(manifest.allowedEmbedOrigins, inIframe, parentOrigin))
+        return fail('blocked', manifest.locale);
+      document.title = manifest.title;
+      document.documentElement.lang = manifest.locale;
+      const keys = manifest.variables.map((v) => v.key);
+      // Priorité : URL (?company=…) > lien personnalisé > valeurs par défaut
+      const values = {
+        ...linkVars,
+        ...variablesFromSearch(search, keys),
+        ...variablesFromSearch(location.search, keys),
+      };
+      if (!cancelled) setState({ status: 'ready', manifest, values, linkToken, preview: false });
+    }
+    void boot();
+    return () => {
+      cancelled = true;
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const tracker = useMemo(
+    () =>
+      state.status === 'ready'
+        ? new Tracker(state.manifest.demoId, state.manifest.versionId, state.linkToken, !state.preview)
+        : null,
+    [state],
+  );
+
+  if (state.status === 'loading') return <div class="p-center">{t.loading}</div>;
+  if (state.status === 'error') {
+    const e = strings(state.locale.startsWith('en') ? 'en' : 'fr');
+    const view = {
+      notFound: { Icon: SearchX, title: e.notFoundTitle, text: e.notFound },
+      expired: { Icon: Link2Off, title: e.expiredTitle, text: e.expired },
+      blocked: { Icon: Ban, title: e.blockedTitle, text: e.embedBlocked },
+    }[state.kind];
+    return (
+      <main class="p-center" role="alert">
+        <div>
+          <view.Icon size={40} strokeWidth={1.5} aria-hidden="true" />
+          <h1>{view.title}</h1>
+          <p>{view.text}</p>
+        </div>
+      </main>
+    );
+  }
+  const m = state.manifest;
+  return (
+    <Player
+      manifest={m}
+      values={state.values}
+      tracker={tracker!}
+      preview={state.preview}
+      onLead={async (_form, data) => {
+        if (state.preview) return;
+        await submitLead({
+          demoId: m.demoId,
+          versionId: m.versionId,
+          email: data.email,
+          fields: data.fields,
+          consent: data.consent,
+          visitorId: tracker!.visitorId,
+          linkToken: state.linkToken,
+        });
+      }}
+    />
+  );
+}
+
+render(<App />, document.getElementById('root')!);

@@ -1,0 +1,30 @@
+import type { TFunction } from 'i18next';
+
+/** Traduit une erreur Supabase / RPC en message utilisateur. */
+export function errorMessage(t: TFunction, err: unknown): string {
+  const msg =
+    typeof err === 'object' && err && 'message' in err
+      ? String((err as { message: unknown }).message)
+      : String(err);
+  const known: Array<[RegExp, string]> = [
+    [/PLAN_LIMIT:published_demos/, 'errors.planPublished'],
+    [/PLAN_LIMIT:members/, 'errors.planMembers'],
+    [/PLAN_LIMIT:steps_per_demo/, 'errors.planSteps'],
+    [/PLAN_LIMIT:lead_forms/, 'errors.planLeadForms'],
+    [/INVITATION_EMAIL_MISMATCH/, 'errors.inviteEmail'],
+    [/INVITATION_EXPIRED/, 'errors.inviteExpired'],
+    [/INVITATION_ALREADY_USED/, 'errors.inviteUsed'],
+    [/INVITATION_NOT_FOUND/, 'errors.inviteNotFound'],
+    [/DEMO_EMPTY/, 'errors.demoEmpty'],
+    [/Invalid login credentials/i, 'errors.badCredentials'],
+    [/Email not confirmed/i, 'errors.emailNotConfirmed'],
+    [/User already registered/i, 'errors.alreadyRegistered'],
+    [/Password should be/i, 'errors.weakPassword'],
+    [/rate limit|too many/i, 'errors.rateLimited'],
+    [/owner/i, 'errors.ownerRule'],
+    [/permission denied|Accès refusé|42501|row-level security/i, 'errors.forbidden'],
+    [/Failed to fetch|NetworkError/i, 'errors.network'],
+  ];
+  for (const [re, key] of known) if (re.test(msg)) return t(key);
+  return t('errors.generic', { message: msg });
+}

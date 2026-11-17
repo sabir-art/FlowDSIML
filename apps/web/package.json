@@ -1,0 +1,38 @@
+{
+  "name": "@flowdsiml/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "e2e": "node e2e/editor.e2e.cjs && node e2e/publish-player.e2e.cjs && node e2e/analytics.e2e.cjs && node e2e/dashboard.e2e.cjs"
+  },
+  "dependencies": {
+    "@flowdsiml/core": "workspace:*",
+    "@flowdsiml/manifest": "workspace:*",
+    "@flowdsiml/supabase-types": "workspace:*",
+    "@flowdsiml/ui": "workspace:*",
+    "@supabase/supabase-js": "^2.119.0",
+    "i18next": "^25.10.10",
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-i18next": "^15.7.4",
+    "react-router-dom": "^7.18.5"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "jsdom": "^26.1.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.8",
+    "vitest": "^3.2.7"
+  }
+}

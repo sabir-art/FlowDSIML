@@ -1,0 +1,14 @@
+node_modules
+dist
+.output
+.wxt
+.turbo
+*.log
+.env
+.env.*
+!.env.example
+supabase/.temp
+supabase/.branches
+.DS_Store
+coverage
+site

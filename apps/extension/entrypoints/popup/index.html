@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>FlowDSIML</title>
+  </head>
+  <body>
+    <main>
+      <header><strong>FlowDSIML</strong> <span class="muted" data-i18n="subtitle"></span></header>
+      <div id="error" class="alert" role="alert" hidden></div>
+
+      <form id="login" hidden novalidate>
+        <label for="email" data-i18n="email"></label>
+        <input id="email" type="email" autocomplete="email" required />
+        <label for="password" data-i18n="password"></label>
+        <input id="password" type="password" autocomplete="current-password" required />
+        <button type="submit" class="btn btn-primary">
+          <i data-lucide="log-in"></i><span data-i18n="signIn"></span>
+        </button>
+        <p class="muted small">
+          <span data-i18n="noAccount"></span>
+          <a id="signup-link" target="_blank" rel="noopener" data-i18n="signUp"></a>
+        </p>
+      </form>
+
+      <section id="setup" hidden>
+        <label for="workspace" data-i18n="workspace"></label>
+        <select id="workspace"></select>
+        <label for="title" data-i18n="demoTitle"></label>
+        <input id="title" maxlength="160" />
+        <button id="start" class="btn btn-accent">
+          <i data-lucide="video"></i><span data-i18n="start"></span>
+        </button>
+        <p class="muted small" data-i18n="hint"></p>
+        <p class="small">
+          <a id="logout" href="#" class="link-icon"
+            ><i data-lucide="log-out"></i><span data-i18n="signOut"></span
+          ></a>
+        </p>
+      </section>
+
+      <section id="recording" hidden>
+        <p class="rec" id="rec-label" aria-live="polite"></p>
+        <p id="count" aria-live="polite"></p>
+        <div class="row">
+          <button id="pause" class="btn">
+            <i data-lucide="pause" id="pause-icon"></i><span id="pause-label"></span>
+          </button>
+          <button id="stop" class="btn btn-primary">
+            <i data-lucide="check"></i><span data-i18n="finish"></span>
+          </button>
+        </div>
+        <button id="cancel" class="btn btn-ghost-danger">
+          <i data-lucide="x"></i><span data-i18n="cancel"></span>
+        </button>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
