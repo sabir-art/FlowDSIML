@@ -7,11 +7,12 @@ import { embedAllowed, parseRoute } from './logic';
 import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
 import { Player } from './Player';
+import { Ban, Link2Off, SearchX } from 'lucide-preact';
 import './player.css';
 
 type State =
   | { status: 'loading' }
-  | { status: 'error'; message: string }
+  | { status: 'error'; kind: 'notFound' | 'expired' | 'blocked'; locale: string }
   | {
       status: 'ready';
       manifest: Manifest;
@@ -38,7 +39,8 @@ function App() {
   useEffect(() => {
     const route = parseRoute(location.hash);
     let cancelled = false;
-    const fail = (message: string) => !cancelled && setState({ status: 'error', message });
+    const fail = (kind: 'notFound' | 'expired' | 'blocked', locale = navigator.language) =>
+      !cancelled && setState({ status: 'error', kind, locale });
 
     async function boot() {
       if (route.kind === 'preview') {
@@ -71,18 +73,18 @@ function App() {
         search = route.search;
       } else if (route.kind === 'link') {
         const link = await resolveLink(route.token).catch(() => null);
-        if (!link) return fail(t.notFound);
+        if (!link) return fail('expired');
         demoId = link.demoId;
         linkVars = link.variables ?? {};
         linkToken = route.token;
         search = route.search;
       } else {
-        return fail(t.notFound);
+        return fail('notFound');
       }
       const manifest = await loadManifest(demoId).catch(() => null);
-      if (!manifest) return fail(t.notFound);
+      if (!manifest) return fail('notFound');
       if (!embedAllowed(manifest.allowedEmbedOrigins, inIframe, parentOrigin))
-        return fail(strings(manifest.locale).embedBlocked);
+        return fail('blocked', manifest.locale);
       document.title = manifest.title;
       document.documentElement.lang = manifest.locale;
       const keys = manifest.variables.map((v) => v.key);
@@ -109,7 +111,23 @@ function App() {
   );
 
   if (state.status === 'loading') return <div class="p-center">{t.loading}</div>;
-  if (state.status === 'error') return <div class="p-center">{state.message}</div>;
+  if (state.status === 'error') {
+    const e = strings(state.locale.startsWith('en') ? 'en' : 'fr');
+    const view = {
+      notFound: { Icon: SearchX, title: e.notFoundTitle, text: e.notFound },
+      expired: { Icon: Link2Off, title: e.expiredTitle, text: e.expired },
+      blocked: { Icon: Ban, title: e.blockedTitle, text: e.embedBlocked },
+    }[state.kind];
+    return (
+      <main class="p-center" role="alert">
+        <div>
+          <view.Icon size={40} strokeWidth={1.5} aria-hidden="true" />
+          <h1>{view.title}</h1>
+          <p>{view.text}</p>
+        </div>
+      </main>
+    );
+  }
   const m = state.manifest;
   return (
     <Player

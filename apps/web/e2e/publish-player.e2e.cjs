@@ -73,7 +73,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'variable {{company}} remplacée depuis l’URL',
   );
   if (SHOTS) await player.screenshot({ path: `${SHOTS}/player-1.png` });
-  await player.click('.p-hotspot');
+  await player.click('.p-beacon');
   await player.waitForSelector('.p-form');
   ok(true, 'formulaire de lead affiché avant l’étape 2');
   if (SHOTS) await player.screenshot({ path: `${SHOTS}/player-form.png` });
@@ -109,6 +109,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
 
   // Démo inexistante
+  const p4 = await ctx.newPage();
+  await install(p4, state);
+  await p4.goto(`${PLAYER}/#/l/inconnu123`);
+  await p4.waitForSelector('.p-center h1');
+  ok(/expiré|expired/i.test(await p4.textContent('.p-center h1')), 'écran dédié pour un lien expiré');
+  if (SHOTS) await p4.screenshot({ path: `${SHOTS}/player-expired.png` });
+
   const p3 = await ctx.newPage();
   await install(p3, state);
   await p3.goto(`${PLAYER}/#/d/0b5c1f0e-0000-4000-8000-0000000000ff`);
@@ -123,9 +130,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await m.setViewportSize({ width: 390, height: 720 });
   await install(m, state);
   await m.goto(publicUrl);
-  await m.waitForSelector('.p-tip');
+  await m.waitForSelector('.p-sheet');
   const box = await m.locator('.p-stage').boundingBox();
   ok(box.width <= 390, 'player responsive sur mobile');
+  const sheet = await m.locator('.p-sheet').boundingBox();
+  ok(sheet.y >= box.y + box.height, 'mobile : la feuille est sous l’image et ne masque pas la cible');
+  const beacon = await m.locator('.p-beacon').first().boundingBox();
+  ok(beacon.width >= 44 && beacon.height >= 44, 'cible tactile du hotspot ≥ 44 px');
   if (SHOTS) await m.screenshot({ path: `${SHOTS}/player-mobile.png` });
 
   ok(errors.length === 0, `aucune erreur (${errors.join(' | ')})`);

@@ -33,7 +33,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
     set({ logoUrl: `${SUPABASE_URL}/storage/v1/object/public/branding/${path}` });
   }
 
-  const color = (key: 'primary' | 'background' | 'surface' | 'text', label: string) => (
+  const color = (key: 'primary' | 'hotspot' | 'background' | 'surface' | 'text', label: string) => (
     <Field label={label} htmlFor={`th-${key}`}>
       <div className="row">
         <input
@@ -52,6 +52,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
     <div className="stack">
       <h3 className="panel-title">{t('editor.theme')}</h3>
       {color('primary', t('editor.colorPrimary'))}
+      {color('hotspot', t('editor.colorHotspot'))}
       {color('background', t('editor.colorBackground'))}
       {color('surface', t('editor.colorSurface'))}
       {color('text', t('editor.colorText'))}

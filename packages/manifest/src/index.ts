@@ -82,12 +82,14 @@ export const chapterSchema = z.object({ id: z.string(), title: z.string().max(12
 export type Chapter = z.infer<typeof chapterSchema>;
 
 export const themeSchema = z.object({
+  // Valeurs par défaut = tokens --fd-player-* (packages/ui/src/tokens.ts)
   primary: z.string().default('#0E7C71'),
-  background: z.string().default('#1F1D1A'),
+  hotspot: z.string().default('#E8541F'),
+  background: z.string().default('#F7F6F4'),
   surface: z.string().default('#ffffff'),
   text: z.string().default('#1F1D1A'),
   fontFamily: z.string().default("'Instrument Sans', system-ui, sans-serif"),
-  radius: z.number().min(0).max(32).default(10),
+  radius: z.number().min(0).max(32).default(16),
   logoUrl: z.string().nullable().default(null),
   showBranding: z.boolean().default(true),
 });

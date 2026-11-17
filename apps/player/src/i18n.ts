@@ -17,6 +17,13 @@ const dict = {
     end: 'Fin de la démo',
     close: 'Fermer',
     preview: 'Aperçu — les statistiques ne sont pas enregistrées',
+    fullscreen: 'Plein écran',
+    exitFullscreen: 'Quitter le plein écran',
+    expiredTitle: 'Lien expiré',
+    expired: 'Ce lien a expiré ou a été désactivé. Demandez un nouveau lien à votre interlocuteur.',
+    notFoundTitle: 'Démo introuvable',
+    blockedTitle: 'Intégration non autorisée',
+    menu: 'Menu',
   },
   en: {
     next: 'Next',
@@ -36,6 +43,13 @@ const dict = {
     end: 'End of demo',
     close: 'Close',
     preview: 'Preview — analytics are not recorded',
+    fullscreen: 'Full screen',
+    exitFullscreen: 'Exit full screen',
+    expiredTitle: 'Link expired',
+    expired: 'This link has expired or was disabled. Ask your contact for a new link.',
+    notFoundTitle: 'Demo not found',
+    blockedTitle: 'Embedding not allowed',
+    menu: 'Menu',
   },
 };
 export type Dict = (typeof dict)['fr'];
