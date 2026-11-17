@@ -208,6 +208,44 @@
       "cancel": "Discard capture",
       "send_one": "Blur and send {{count}} capture",
       "send_other": "Blur and send {{count}} captures"
+    },
+    "capture": {
+      "title": "New capture",
+      "type": "Capture type",
+      "clicks": "Capture on each click",
+      "clicksDesc": "Interactive tutorial, step by step",
+      "video": "Tab video",
+      "videoDesc": "Continuous action: typing, dragging, scrolling",
+      "mobile": "Mobile format",
+      "mobileDesc": "Phone or tablet sized captures",
+      "voice": "Record my voice",
+      "webcam": "Webcam in a corner",
+      "piiAlways": "Check data before sending",
+      "piiAlwaysLabel": "Data check, always on",
+      "limit": "{{min}} minutes maximum. Only this tab is recorded, never the rest of your screen.",
+      "startRecording": "Start recording",
+      "startClicks": "Start capture",
+      "device": "Device",
+      "phone": "Phone · {{w}} × {{h}}",
+      "phoneLarge": "Large phone · {{w}} × {{h}}",
+      "tablet": "Tablet · {{w}} × {{h}}",
+      "custom": "Custom size…",
+      "orientation": "Orientation",
+      "portrait": "Portrait",
+      "landscape": "Landscape",
+      "mobileHelp": "The tab is resized and switches to touch mode during capture. The site must be responsive.",
+      "resizeAndCapture": "Resize and capture",
+      "rec": {
+        "toolbar": "Recording in progress",
+        "pause": "Pause",
+        "resume": "Resume",
+        "mark": "Mark a step",
+        "finish": "Finish",
+        "limitSoon": "One minute of recording left.",
+        "shortcuts": "Shortcuts: Alt + Shift + P (pause), Alt + Shift + M (mark), Alt + Shift + S (finish)."
+      },
+      "permMic": "Allow the microphone in the browser prompt to record your voice.",
+      "permDenied": "Access denied. You can record without sound, or change the permission in browser settings."
     }
   },
   "dashboard": {
@@ -759,6 +797,28 @@
       "errNoCorrect": "Mark at least one correct answer.",
       "errTwoAnswers": "Add at least 2 answers.",
       "errEmpty": "The question is empty."
+    },
+    "video": {
+      "title": "Video",
+      "stepTitle": "Video step · {{title}}",
+      "play": "Play",
+      "time": "{{current}} / {{total}} · after cuts {{cut}}",
+      "cutHere": "Cut here",
+      "addPause": "Add a pause step",
+      "trackVideo": "Video track",
+      "trackSubs": "Subtitle track",
+      "pauseLabel": "Pause step {{n}} · {{time}}",
+      "pauseHelp": "The video stops here and shows a bubble. The learner clicks to continue.",
+      "subtitles": "Subtitles",
+      "editSubs": "Edit ({{count}})",
+      "importVtt": "Import .vtt",
+      "autoTranscript": "Automatic transcription:",
+      "comingSoon": "Coming soon",
+      "autoplay": "Autoplay, muted at start",
+      "convert": "Convert",
+      "convertBtn_one": "Turn the pause into {{count}} capture step",
+      "convertBtn_other": "Turn the pauses into {{count}} capture steps",
+      "convertHelp": "One capture per pause step, with the bubble text. The video stays available."
     }
   },
   "share": {
@@ -1125,6 +1185,10 @@
       "locked": "After module {{n}}",
       "restart": "Restart the module",
       "resume": "Resume at step {{n}}"
+    },
+    "mobile": {
+      "tap": "Tap",
+      "click": "Click"
     }
   },
   "analytics": {

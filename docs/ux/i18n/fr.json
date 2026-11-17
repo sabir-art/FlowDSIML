@@ -208,6 +208,44 @@
       "cancel": "Annuler la capture",
       "send_one": "Flouter et envoyer {{count}} capture",
       "send_other": "Flouter et envoyer {{count}} captures"
+    },
+    "capture": {
+      "title": "Nouvelle capture",
+      "type": "Type de capture",
+      "clicks": "Captures à chaque clic",
+      "clicksDesc": "Tutoriel interactif, étape par étape",
+      "video": "Vidéo de l'onglet",
+      "videoDesc": "Geste continu : saisie, glisser, défilement",
+      "mobile": "Format mobile",
+      "mobileDesc": "Captures en taille téléphone ou tablette",
+      "voice": "Enregistrer ma voix",
+      "webcam": "Webcam dans un coin",
+      "piiAlways": "Vérifier les données avant l'envoi",
+      "piiAlwaysLabel": "Vérification des données, toujours active",
+      "limit": "{{min}} minutes au maximum. Seul cet onglet est enregistré, jamais le reste de l'écran.",
+      "startRecording": "Démarrer l'enregistrement",
+      "startClicks": "Démarrer la capture",
+      "device": "Appareil",
+      "phone": "Téléphone · {{w}} × {{h}}",
+      "phoneLarge": "Grand téléphone · {{w}} × {{h}}",
+      "tablet": "Tablette · {{w}} × {{h}}",
+      "custom": "Taille personnalisée…",
+      "orientation": "Orientation",
+      "portrait": "Portrait",
+      "landscape": "Paysage",
+      "mobileHelp": "L'onglet est redimensionné et passe en mode tactile le temps de la capture. Le site doit être responsive.",
+      "resizeAndCapture": "Redimensionner et capturer",
+      "rec": {
+        "toolbar": "Enregistrement en cours",
+        "pause": "Pause",
+        "resume": "Reprendre",
+        "mark": "Marquer une étape",
+        "finish": "Terminer",
+        "limitSoon": "Plus qu'une minute d'enregistrement.",
+        "shortcuts": "Raccourcis : Alt + Maj + P (pause), Alt + Maj + M (marquer), Alt + Maj + S (terminer)."
+      },
+      "permMic": "Autorisez le micro dans la fenêtre du navigateur pour enregistrer votre voix.",
+      "permDenied": "Accès refusé. Vous pouvez enregistrer sans le son, ou modifier l'autorisation dans les réglages du navigateur."
     }
   },
   "dashboard": {
@@ -759,6 +797,28 @@
       "errNoCorrect": "Indiquez au moins une bonne réponse.",
       "errTwoAnswers": "Ajoutez au moins 2 réponses.",
       "errEmpty": "La question est vide."
+    },
+    "video": {
+      "title": "Vidéo",
+      "stepTitle": "Étape vidéo · {{title}}",
+      "play": "Lire",
+      "time": "{{current}} / {{total}} · après coupe {{cut}}",
+      "cutHere": "Couper ici",
+      "addPause": "Ajouter une pause-étape",
+      "trackVideo": "Piste vidéo",
+      "trackSubs": "Piste de sous-titres",
+      "pauseLabel": "Pause-étape {{n}} · {{time}}",
+      "pauseHelp": "La vidéo s'arrête ici et affiche une bulle. L'apprenant clique pour continuer.",
+      "subtitles": "Sous-titres",
+      "editSubs": "Modifier ({{count}})",
+      "importVtt": "Importer .vtt",
+      "autoTranscript": "Transcription automatique :",
+      "comingSoon": "Bientôt disponible",
+      "autoplay": "Lecture automatique, sans son au départ",
+      "convert": "Convertir",
+      "convertBtn_one": "Transformer la pause en {{count}} étape capture",
+      "convertBtn_other": "Transformer les pauses en {{count}} étapes captures",
+      "convertHelp": "Une capture par pause-étape, avec le texte de la bulle. La vidéo reste disponible."
     }
   },
   "share": {
@@ -1125,6 +1185,10 @@
       "locked": "Après le module {{n}}",
       "restart": "Recommencer le module",
       "resume": "Reprendre à l'étape {{n}}"
+    },
+    "mobile": {
+      "tap": "Touchez",
+      "click": "Cliquez"
     }
   },
   "analytics": {

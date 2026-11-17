@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F7 : capture vidéo et mobile — Tutoclic</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div data-view="popup">
+  <section data-pane="popup" class="f7-stage xpop-wrap" style="display:none">
+    <div class="xpop" role="dialog" aria-labelledby="xp-t">
+      <header><img class="wm-l" src="../../brand-tutoclic/wordmark/tutoclic-wordmark.svg" alt="Tutoclic"><img class="wm-d" src="../../brand-tutoclic/wordmark/tutoclic-wordmark-sombre.svg" alt="Tutoclic"><span class="sp fd-help">Workspace DSI</span></header>
+      <h1 id="xp-t" style="margin:0;font-size:var(--fd-text-h3-size)">Nouvelle capture</h1>
+      <fieldset class="xmode" style="border:0;margin:0;padding:0"><legend class="cm-sr">Type de capture</legend>
+        <label><span class="fd-icon-chip"><i data-icon="cursorClick"></i></span><span><b>Captures à chaque clic</b><small>Tutoriel interactif, étape par étape</small></span><input type="radio" name="m"></label>
+        <label><span class="fd-icon-chip"><i data-icon="video"></i></span><span><b>Vidéo de l'onglet</b><small>Geste continu : saisie, glisser, défilement</small></span><input type="radio" name="m" checked></label>
+        <label><span class="fd-icon-chip"><i data-icon="smartphone"></i></span><span><b>Format mobile</b><small>Captures en taille téléphone ou tablette</small></span><input type="radio" name="m"></label>
+      </fieldset>
+      <div class="xsub">
+        <label class="fd-check" style="justify-content:space-between"><span style="display:inline-flex;gap:8px;align-items:center"><i data-icon="mic"></i>Enregistrer ma voix</span><span class="fd-switch"><input type="checkbox" aria-label="Enregistrer ma voix"><span class="fd-switch__track"></span></span></label>
+        <label class="fd-check" style="justify-content:space-between"><span style="display:inline-flex;gap:8px;align-items:center"><i data-icon="camera"></i>Webcam dans un coin</span><span class="fd-switch"><input type="checkbox" aria-label="Webcam"><span class="fd-switch__track"></span></span></label>
+        <label class="fd-check" style="justify-content:space-between"><span style="display:inline-flex;gap:8px;align-items:center"><i data-icon="eyeOff"></i>Vérifier les données avant l'envoi</span><span class="fd-switch"><input type="checkbox" checked disabled aria-label="Vérification des données, toujours active"><span class="fd-switch__track"></span></span></label>
+      </div>
+      <p class="fd-help" style="margin:0">10 minutes au maximum. Seul cet onglet est enregistré, jamais le reste de l'écran.</p>
+      <button class="fd-btn fd-btn--primary" type="button" style="justify-content:center"><i data-icon="circleDot"></i>Démarrer l'enregistrement</button>
+    </div>
+    <div class="xpop" aria-label="Variante : format mobile">
+      <h2 style="margin:0;font-size:var(--fd-text-h3-size)">Format mobile</h2>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="dv">Appareil</label><select class="fd-select" id="dv"><option>Téléphone · 390 × 844</option><option>Grand téléphone · 430 × 932</option><option>Tablette · 820 × 1180</option><option>Taille personnalisée…</option></select></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Orientation</span><div class="fd-segmented" role="group" aria-label="Orientation"><button type="button" aria-pressed="true">Portrait</button><button type="button" aria-pressed="false">Paysage</button></div></div>
+      <p class="fd-help" style="margin:0">L'onglet est redimensionné et passe en mode tactile le temps de la capture. Le site doit être responsive.</p>
+      <button class="fd-btn fd-btn--primary" type="button" style="justify-content:center"><i data-icon="smartphone"></i>Redimensionner et capturer</button>
+    </div>
+  </section>
+
+  <section data-pane="rec" class="f7-stage" style="display:none;flex-direction:column;align-items:center;gap:20px">
+    <div style="width:min(980px,100%);position:relative">
+      <div class="vplayer"><div class="fakeapp"><div class="nav"><b>Logiciel métier</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Agenda de l'équipe</h4><dl><dt>Lundi</dt><dd>3 rendez-vous</dd><dt>Mardi</dt><dd>5 rendez-vous</dd></dl><span class="btnx">+ Nouveau rendez-vous</span></div></div></div>
+      <div class="recbar" role="toolbar" aria-label="Enregistrement en cours" style="position:absolute;left:50%;bottom:-24px;transform:translateX(-50%)"><span class="dot" aria-hidden="true"></span><span class="t" role="timer" aria-live="off">02:14</span><span style="opacity:.75">/ 10:00</span><button class="ghost" type="button"><i data-icon="pause"></i>Pause</button><button class="ghost" type="button"><i data-icon="target"></i>Marquer une étape</button><button class="stop" type="button">Terminer</button></div>
+    </div>
+    <p class="fd-help" style="margin-top:24px;text-align:center">Barre flottante dans l'onglet, déplaçable. Raccourcis : Alt + Maj + P (pause), Alt + Maj + M (marquer), Alt + Maj + S (terminer). Les clics sont détectés et proposés comme étapes.</p>
+  </section>
+
+  <section data-pane="video" class="f7-stage vid-grid" style="display:none">
+    <div>
+      <h1 style="margin:0 0 12px;font-size:var(--fd-text-h1-size)">Étape vidéo · Planifier un rendez-vous</h1>
+      <div class="vplayer"><div class="fakeapp"><div class="nav"><b>Logiciel métier</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Agenda de l'équipe</h4><dl><dt>Lundi</dt><dd>3 rendez-vous</dd><dt>Mardi</dt><dd>5 rendez-vous</dd></dl><span class="btnx">+ Nouveau rendez-vous</span></div></div><span class="sub">Cliquez sur « + Nouveau rendez-vous » en bas de l'agenda.</span></div>
+      <div class="tl" aria-label="Montage de la vidéo">
+        <div class="tl-tools"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="play"></i>Lire</button><span class="fd-help" style="font-variant-numeric:tabular-nums">00:42 / 02:14 · après coupe 01:38</span><span style="margin-left:auto;display:flex;gap:8px"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="scissors"></i>Couper ici</button><button class="fd-btn fd-btn--sm" type="button"><i data-icon="target"></i>Ajouter une pause-étape</button></span></div>
+        <div class="tl-row" role="img" aria-label="Piste vidéo : 3 segments, une coupe de 00:58 à 01:34, 3 pauses-étapes">
+          <span class="seg" style="left:0;width:43%">Ouvrir l'agenda</span><span class="cut" style="left:43%;width:27%"></span><span class="seg" style="left:70%;width:30%">Valider le rendez-vous</span>
+          <span class="mk" style="left:12%">1</span><span class="mk" style="left:31%">2</span><span class="mk" style="left:88%">3</span><span class="head" style="left:31%"></span>
+        </div>
+        <div class="tl-row" style="height:36px" role="img" aria-label="Piste de sous-titres : 4 sous-titres"><span class="seg" style="left:2%;width:20%;top:4px;bottom:4px">Ouvrez l'agenda…</span><span class="seg" style="left:24%;width:18%;top:4px;bottom:4px">Cliquez sur « + Nouveau…</span><span class="seg" style="left:72%;width:24%;top:4px;bottom:4px">Validez avec « Enregistrer »</span></div>
+        <div class="tl-scale" aria-hidden="true"><span>00:00</span><span>00:30</span><span>01:00</span><span>01:30</span><span>02:00</span></div>
+      </div>
+    </div>
+    <aside class="fd-card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="video"></i></span><h2 class="fd-card__title">Vidéo</h2></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Pause-étape 2 · 00:42</span><input class="fd-input" value="Cliquez sur « + Nouveau rendez-vous »" aria-label="Texte de la pause-étape 2"><span class="fd-help">La vidéo s'arrête ici et affiche une bulle. L'apprenant clique pour continuer.</span></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Sous-titres</span><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="captions"></i>Modifier (3)</button><button class="fd-btn fd-btn--sm" type="button"><i data-icon="upload"></i>Importer .vtt</button></div><span class="fd-help">Transcription automatique : <span class="fd-badge">Bientôt disponible</span></span></div>
+      <label class="fd-check" style="justify-content:space-between"><span>Lecture automatique, sans son au départ</span><span class="fd-switch"><input type="checkbox" checked aria-label="Lecture automatique"><span class="fd-switch__track"></span></span></label>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Convertir</span><button class="fd-btn fd-btn--sm" type="button" style="align-self:flex-start"><i data-icon="layers"></i>Transformer les pauses en 3 étapes captures</button><span class="fd-help">Une capture par pause-étape, avec le texte de la bulle. La vidéo reste disponible.</span></div>
+    </aside>
+  </section>
+
+  <section data-pane="mobile" class="f7-stage mob-grid" style="display:none">
+    <div class="phone" role="img" aria-label="Aperçu du player en cadre téléphone : étape 3 sur 6, bulle en feuille du bas">
+      <span class="notch"></span>
+      <div class="scr fd-player-scope">
+        <div class="apph">Agenda</div>
+        <div class="row">Lundi · 3 rendez-vous</div><div class="row">Mardi · 5 rendez-vous</div><div class="row">Mercredi · 2 rendez-vous</div>
+        <span class="fab">+</span><span class="hs"></span>
+        <div class="sheet"><span style="font-size:11px;color:#4A5562">Étape 3 sur 6</span><b>Touchez « + » pour créer un rendez-vous</b><span class="nx">Suivant</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;max-width:520px">
+      <h1 style="margin:0;font-size:var(--fd-text-h1-size)">Démo mobile</h1>
+      <p class="sub" style="margin:0">Capturée en format téléphone (390 × 844), lue dans un cadre d'appareil.</p>
+      <ul style="margin:0;padding-left:20px;display:grid;gap:8px;font-size:var(--fd-text-body-size)">
+        <li>Sur grand écran : cadre téléphone centré (A2 §1, cadre « Mobile »).</li>
+        <li>Sur un vrai téléphone : plein écran, sans cadre.</li>
+        <li>La bulle devient une <b>feuille du bas</b> qui ne cache jamais le hotspot ; si le hotspot est en bas, la feuille passe en haut.</li>
+        <li>Hotspot tactile : 44 px minimum, libellé « Touchez » au lieu de « Cliquez » (variable de microcopie selon l'appareil de capture).</li>
+      </ul>
+    </div>
+  </section>
+</div>
+<div class="mock-state fd-segmented" role="group" aria-label="Écran (maquette)" style="left:50%;transform:translateX(-50%);top:16px;bottom:auto">
+  <button type="button" data-view-set="popup" aria-pressed="true">Extension</button>
+  <button type="button" data-view-set="rec" aria-pressed="false">Enregistrement</button>
+  <button type="button" data-view-set="video" aria-pressed="false">Montage vidéo</button>
+  <button type="button" data-view-set="mobile" aria-pressed="false">Mobile</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>
