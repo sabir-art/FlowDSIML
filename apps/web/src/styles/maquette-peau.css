@@ -48,7 +48,10 @@
 :root:not([data-theme="light"]):not([data-theme="dark"]) .mk .tc-logo--l {display: none;}
 :root:not([data-theme="light"]):not([data-theme="dark"]) .mk .tc-logo--d {display: block;}
 }
-.mk .btn-accent {background: linear-gradient(135deg, var(--fd-orange-500) -40%, var(--ref-hot) 45%); color: #FFFFFF;}
+.mk .btn-accent {background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 24px);
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--fd-orange-500) 75%, transparent);
+  color: #FFFFFF;}
+.mk .btn-accent.btn-block {background: linear-gradient(90deg, var(--fd-orange-500) 0%, var(--ref-hot) 22%);}
 .mk .btn-accent:hover {background: var(--ref-hot-hover);}
 .mk .badge-accent {background: linear-gradient(90deg, var(--ref-reco-from), var(--ref-reco-mid)); color: var(--fd-color-accent-soft-text);}
 .mk .plans .plan.reco {border-color: var(--ref-reco-border);
@@ -66,3 +69,4 @@
 .mk .toast {border-left: 3px solid var(--fd-color-success);}
 .mk .screen .ic {width: 36px; height: 36px; border-radius: 10px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); display: grid; place-items: center; margin-bottom: 6px;}
 .mk .screen .ic svg {width: 18px; height: 18px;}
+.mk .btn-accent.btn-sm {background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 16px);}

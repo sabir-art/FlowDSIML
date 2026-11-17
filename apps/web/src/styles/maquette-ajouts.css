@@ -1135,19 +1135,33 @@
 /* ---- Peau DSI : effets des maquettes d'origine regroupés en jetons réutilisables ----
    La palette finale sera appliquée d'un coup en ne modifiant que ces jetons. */
 :root {
-  /* même effet que .btn-accent de la référence DSI : orange discret puis framboise (texte blanc lisible) */
-  --tc-grad-cta: linear-gradient(135deg, var(--fd-orange-500) -40%, var(--fd-framboise-600) 45%);
+  /* Appel fort (référence DSI corrigée, b806cb4) : orange dans l'angle et le halo, texte blanc sur framboise (≥ 5:1) */
+  --tc-grad-cta: linear-gradient(135deg, var(--fd-orange-500) 0, var(--fd-framboise-600) 24px);
+  --tc-grad-cta-sm: linear-gradient(135deg, var(--fd-orange-500) 0, var(--fd-framboise-600) 16px);
+  --tc-grad-cta-block: linear-gradient(90deg, var(--fd-orange-500) 0%, var(--fd-framboise-600) 22%);
+  --tc-grad-cta-halo: 0 6px 16px -6px color-mix(in srgb, var(--fd-orange-500) 75%, transparent);
   --tc-grad-cta-hover: var(--fd-framboise-700);
   --tc-on-grad: #fff;
 }
-/* Bouton d'appel principal en dégradé (ex. « Publier les modifications ») */
+/* Bouton d'appel fort (Publier, Passer à …, Démarrer la capture) */
 .tc-cta-grad .fd-btn--primary,
 .mk .btn.tc-cta-grad {
   background: var(--tc-grad-cta);
+  box-shadow: var(--tc-grad-cta-halo);
   border-color: transparent;
   color: var(--tc-on-grad);
+}
+.tc-cta-grad .fd-btn--primary.fd-btn--sm,
+.mk .btn.btn-sm.tc-cta-grad {
+  background: var(--tc-grad-cta-sm);
+}
+.mk .btn.btn-block.tc-cta-grad {
+  background: var(--tc-grad-cta-block);
 }
 .tc-cta-grad .fd-btn--primary:hover,
 .mk .btn.tc-cta-grad:hover {
   background: var(--tc-grad-cta-hover);
 }
+.mk .sh-perso-head { flex-wrap: nowrap; }
+.mk .sh-perso-head p { margin: 0; flex: 1 1 auto; min-width: 0; }
+.mk .sh-perso-head .btn { flex: none; }
