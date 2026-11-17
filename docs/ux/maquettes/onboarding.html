@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding · FlowDSIML (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .ob { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+  .ob-top { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; }
+  .ob-steps { display: flex; gap: 8px; align-items: center; }
+  .ob-steps span { width: 40px; height: 4px; border-radius: 4px; background: var(--fd-color-border); }
+  .ob-steps span.on { background: var(--fd-color-primary); }
+  .ob-body { display: grid; place-items: start center; padding: 24px 16px 96px; }
+  .ob-card { width: min(640px, 100%); }
+  .choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .choice { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--fd-color-border-strong); border-radius: var(--fd-radius-lg); background: var(--fd-color-surface); cursor: pointer; }
+  .choice input { position: absolute; opacity: 0; }
+  .choice:has(input:checked) { border: 2px solid var(--fd-color-primary); background: var(--fd-color-surface-selected); padding: 15px; }
+  .choice:has(input:focus-visible) { box-shadow: var(--fd-shadow-focus); }
+  .choice svg { width: 22px; height: 22px; color: var(--fd-color-primary); }
+  .panel { display: none; } .panel.on { display: block; }
+  .ext-visual { border-radius: var(--fd-radius-xl); background: var(--fd-color-surface-sunken); padding: 24px; display: grid; grid-template-columns: 1fr 220px; gap: 24px; align-items: center; }
+  .ext-pop { background: var(--fd-color-surface); border-radius: var(--fd-radius-lg); box-shadow: var(--fd-shadow-lg); padding: 14px; display: grid; gap: 10px; }
+  .checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .checklist li { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-md); background: var(--fd-color-surface); }
+  .checklist .ok { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--fd-color-success); color: #fff; flex: none; }
+  .checklist .ok svg { width: 14px; height: 14px; }
+  .checklist .todo { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--fd-color-border-strong); flex: none; }
+  @media (max-width: 640px) { .ext-visual { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="ob">
+  <header class="ob-top">
+    <span class="row" style="gap:10px"><span data-logo></span><b style="font:700 18px var(--fd-font-display)">FlowDSIML</b></span>
+    <div class="ob-steps" aria-label="Progression"><span class="on"></span><span id="s2"></span><span id="s3"></span><span class="t-caption muted" id="steplabel" style="width:auto;height:auto;background:none;margin-left:6px">Étape 1 sur 3</span></div>
+    <a href="dashboard.html" class="t-label">Passer</a>
+  </header>
+  <main class="ob-body" id="contenu">
+    <div class="ob-card">
+      <!-- Étape 1 -->
+      <section class="panel on" id="p1" aria-labelledby="h1">
+        <p class="t-label" style="color:var(--fd-color-primary)">Bienvenue Camille 👋</p>
+        <h1 id="h1" style="margin-top:6px">Configurons votre espace</h1>
+        <p class="muted t-lg" style="margin-top:8px">Deux questions pour vous proposer les bons modèles. Vous pourrez tout modifier plus tard.</p>
+        <div class="field" style="margin-top:28px"><label for="ws">Nom du workspace</label><input class="input" id="ws" value="Acme Analytics"><span class="help">En général, le nom de votre entreprise ou de votre équipe.</span></div>
+        <fieldset style="border:0;padding:0;margin:24px 0 0">
+          <legend class="label" style="margin-bottom:10px">À quoi serviront vos démos ?</legend>
+          <div class="choice-grid">
+            <label class="choice"><input type="radio" name="use" checked><i data-icon="globe"></i><b>Site web</b><span class="t-caption muted">Tours produit sur vos landing pages</span></label>
+            <label class="choice"><input type="radio" name="use"><i data-icon="mail"></i><b>Prospection</b><span class="t-caption muted">Démos personnalisées par email</span></label>
+            <label class="choice"><input type="radio" name="use"><i data-icon="monitor"></i><b>Avant-vente</b><span class="t-caption muted">Démos pendant et après les appels</span></label>
+          </div>
+        </fieldset>
+        <div class="row between" style="margin-top:32px"><span></span><button class="btn btn-primary btn-lg" data-next="2">Continuer<i data-icon="arrowRight"></i></button></div>
+      </section>
+      <!-- Étape 2 -->
+      <section class="panel" id="p2" aria-labelledby="h2">
+        <h1 id="h2">Installez l'extension de capture</h1>
+        <p class="muted t-lg" style="margin-top:8px">Elle enregistre une capture à chaque clic dans votre produit. Rien n'est envoyé tant que vous n'avez pas cliqué sur « Terminer ».</p>
+        <div class="ext-visual" style="margin-top:24px">
+          <div class="col" style="gap:14px">
+            <div class="row-3"><span class="badge badge-primary">1</span>Ajoutez l'extension à Chrome</div>
+            <div class="row-3"><span class="badge badge-primary">2</span>Épinglez-la dans la barre d'outils</div>
+            <div class="row-3"><span class="badge badge-primary">3</span>Ouvrez votre produit et cliquez sur « Démarrer »</div>
+            <div class="row" style="margin-top:8px;flex-wrap:wrap"><button class="btn btn-primary" data-toast="Extension détectée ✓"><i data-icon="chrome"></i>Ajouter à Chrome</button><button class="btn btn-ghost" data-open="m-import"><i data-icon="upload"></i>Importer des captures à la place</button></div>
+          </div>
+          <div class="ext-pop" aria-label="Aperçu de l'extension">
+            <div class="row between"><span class="row" style="gap:6px"><span data-logo-sm></span><b class="t-label">FlowDSIML</b></span><i data-icon="settings"></i></div>
+            <div class="segmented" role="radiogroup" data-seg><button role="radio" aria-checked="true">Captures</button><button role="radio" aria-checked="false" aria-disabled="true" title="Bientôt">HTML <span class="badge" style="height:16px">V2</span></button></div>
+            <label class="setting" style="padding:0"><span class="t-caption">Plusieurs onglets</span><span class="switch"><input type="checkbox" checked aria-label="Plusieurs onglets"><span></span></span></label>
+            <button class="btn btn-accent btn-block"><span style="width:8px;height:8px;border-radius:50%;background:currentColor"></span>Démarrer la capture</button>
+          </div>
+        </div>
+        <div class="alert" style="margin-top:16px"><i data-icon="info"></i><span>Vous utilisez un autre navigateur ? L'extension fonctionne sur Chrome, Edge, Brave et Arc.</span></div>
+        <div class="row between" style="margin-top:32px"><button class="btn btn-ghost" data-next="1"><i data-icon="arrowLeft"></i>Retour</button><button class="btn btn-primary btn-lg" data-next="3">J'ai installé l'extension</button></div>
+      </section>
+      <!-- Étape 3 -->
+      <section class="panel" id="p3" aria-labelledby="h3">
+        <h1 id="h3">Votre première démo vous attend</h1>
+        <p class="muted t-lg" style="margin-top:8px">Suivez ces étapes. Nous avons ajouté une démo d'exemple pour vous inspirer.</p>
+        <ol class="checklist" style="margin-top:24px">
+          <li><span class="ok"><i data-icon="check"></i></span><span class="grow"><s class="muted">Créer votre compte</s></span></li>
+          <li><span class="ok"><i data-icon="check"></i></span><span class="grow"><s class="muted">Installer l'extension</s></span></li>
+          <li><span class="todo" aria-hidden="true"></span><span class="grow"><b>Capturer votre premier parcours</b><br><span class="t-caption muted">5 à 10 clics suffisent pour une bonne démo.</span></span><button class="btn btn-primary btn-sm">Démarrer</button></li>
+          <li><span class="todo" aria-hidden="true"></span><span class="grow">Partager le lien</span></li>
+          <li><span class="todo" aria-hidden="true"></span><span class="grow">Recevoir votre première vue</span></li>
+        </ol>
+        <div class="row between" style="margin-top:32px"><button class="btn btn-ghost" data-next="2"><i data-icon="arrowLeft"></i>Retour</button><a class="btn btn-secondary btn-lg" href="dashboard.html">Explorer la démo d'exemple</a></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="m-import" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-import-t">
+    <div class="modal-head"><h2 id="m-import-t">Importer des captures</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div style="border:2px dashed var(--fd-color-border-strong);border-radius:var(--fd-radius-lg);padding:32px;text-align:center" class="col">
+        <i data-icon="image"></i><b>Glissez vos images ici</b><span class="t-caption muted">PNG, JPG ou WebP · 10 Mo maximum par image · une image = une étape</span>
+        <div><button class="btn btn-secondary btn-sm" style="margin-top:8px">Parcourir les fichiers</button></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" aria-disabled="true">Créer la démo</button></div>
+  </div>
+</div>
+<script>
+document.addEventListener('fd:ready',()=>{
+  document.querySelectorAll('[data-logo]').forEach(e=>e.outerHTML=fdLogo);
+  document.querySelectorAll('[data-logo-sm]').forEach(e=>e.outerHTML=fdLogo.replace(/28/g,'18'));
+  document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>{
+    const n=+b.dataset.next; document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('on',i===n-1));
+    ['s2','s3'].forEach((id,i)=>document.getElementById(id).classList.toggle('on',n>i+1));
+    document.getElementById('steplabel').textContent=`Étape ${n} sur 3`; document.querySelector(`#h${n}`).setAttribute('tabindex','-1'); document.querySelector(`#h${n}`).focus();
+  }));
+});
+</script>
+</body>
+</html>
