@@ -5,7 +5,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { applyVariables, richTextToHtml } from '@flowdsiml/core';
+import { applyVariables, escapeHtml, richTextToHtml } from '@flowdsiml/core';
 import { themeSchema } from '@flowdsiml/manifest';
 import {
   beaconCenter,
@@ -18,6 +18,7 @@ import {
 import { ChevronRight, ClipboardList, Info } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
+import { withVariablePills } from './RichTextField';
 import {
   asAction,
   asCta,
@@ -372,17 +373,24 @@ export function Canvas({
             style={beaconCenter(tipAnchor!)}
             aria-hidden="true"
           >
-            {tipHotspot.title && <div className="p-tip-title">{sub(tipHotspot.title)}</div>}
+            {/* Maquette EDT-01 : compteur en haut, variables en pastilles (valeurs dans l'Aperçu) */}
+            <span className="p-tip-count canvas-tip-count">
+              {stepIndex + 1} / {editor.steps.length}
+            </span>
+            {tipHotspot.title && (
+              <div
+                className="p-tip-title"
+                dangerouslySetInnerHTML={{ __html: withVariablePills(escapeHtml(tipHotspot.title)) }}
+              />
+            )}
             {tipHotspot.body && (
               <div
                 className="p-rich"
-                dangerouslySetInnerHTML={{ __html: richTextToHtml(sub(tipHotspot.body)) }}
+                dangerouslySetInnerHTML={{ __html: withVariablePills(richTextToHtml(tipHotspot.body)) }}
               />
             )}
             <div className="p-actions">
-              <span className="p-tip-count">
-                {stepIndex + 1}/{editor.steps.length}
-              </span>
+              <span />
               {asCta(tipHotspot.cta) ? (
                 <span className="p-btn p-btn-primary p-btn-sm">{sub(asCta(tipHotspot.cta)!.label)}</span>
               ) : (

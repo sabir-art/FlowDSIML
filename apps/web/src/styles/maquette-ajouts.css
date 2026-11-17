@@ -1783,3 +1783,51 @@
   align-items: center;
   gap: 6px;
 }
+/* Variables en pastilles (maquette EDT-01) : champ Texte et bulle du canevas */
+.mk .rte-area {
+  position: relative;
+}
+.mk .rte-hl,
+.mk .rte-area .rte-text {
+  padding: 10px 12px;
+  font: 400 var(--fd-text-body-size) / 1.5 var(--fd-font-sans);
+  letter-spacing: normal;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+.mk .rte-hl {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: var(--fd-color-text);
+  pointer-events: none;
+}
+.mk .rte-area .rte-text {
+  position: relative;
+  color: transparent;
+  caret-color: var(--fd-color-text);
+  overflow: auto;
+}
+.mk .rte-area .rte-text::selection {
+  color: transparent;
+  background: color-mix(in srgb, var(--fd-color-primary) 25%, transparent);
+}
+.mk .rte-var {
+  background: var(--fd-color-accent-soft);
+  color: var(--fd-color-accent-soft-text);
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--fd-color-accent-soft);
+}
+.mk .canvas-tip .var-pill {
+  display: inline;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font: 500 12px var(--fd-font-mono);
+  background: var(--fd-framboise-50);
+  color: var(--fd-framboise-700);
+}
+.mk .canvas-tip-count {
+  display: block;
+  margin-bottom: 6px;
+}

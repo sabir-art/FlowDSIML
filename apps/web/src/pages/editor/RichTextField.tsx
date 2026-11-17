@@ -6,11 +6,30 @@ import { Button, Select } from '@flowdsiml/ui';
 import { Menu } from '../../components/Menu';
 
 /** Remplace {{clé|défaut}} (déjà échappé, clé contrainte) par une pastille lisible (ED6). */
-function withVariablePills(html: string): string {
+export function withVariablePills(html: string): string {
   return html.replace(
     /\{\{\s*([a-z][a-z0-9_]{0,39})\s*(?:\|[^}]*)?\}\}/g,
-    '<span class="var-pill">$1</span>',
+    '<span class="var-pill">{{$1}}</span>',
   );
+}
+
+const VAR_RE = /\{\{\s*[a-z][a-z0-9_]{0,39}\s*(?:\|[^}]*)?\}\}/g;
+
+/** Calque sous le champ : même texte, variables en pastilles (le champ reste un textarea natif). */
+function highlightVariables(text: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(VAR_RE)) {
+    out.push(text.slice(last, m.index));
+    out.push(
+      <span key={m.index} className="rte-var">
+        {m[0]}
+      </span>,
+    );
+    last = m.index! + m[0].length;
+  }
+  out.push(text.slice(last) + '\n');
+  return out;
 }
 
 /** Texte riche restreint : **gras**, *italique*, [lien](url), {{variable}}. Rendu sûr (échappé). */
@@ -39,6 +58,7 @@ export function RichTextField({
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLTextAreaElement>(null);
+  const hl = useRef<HTMLDivElement>(null);
 
   function wrap(before: string, after = before, placeholder = '') {
     const el = ref.current;
@@ -82,16 +102,24 @@ export function RichTextField({
               )}
             </div>
           )}
-          <textarea
-            id={id}
-            ref={ref}
-            className="rte-text"
-            rows={rows}
-            value={value}
-            disabled={disabled}
-            maxLength={4000}
-            onChange={(e) => onChange(e.target.value)}
-          />
+          <div className="rte-area">
+            <div className="rte-hl" ref={hl} aria-hidden="true">
+              {highlightVariables(value)}
+            </div>
+            <textarea
+              id={id}
+              ref={ref}
+              className="rte-text"
+              rows={rows}
+              value={value}
+              disabled={disabled}
+              maxLength={4000}
+              onChange={(e) => onChange(e.target.value)}
+              onScroll={(e) => {
+                if (hl.current) hl.current.scrollTop = e.currentTarget.scrollTop;
+              }}
+            />
+          </div>
         </div>
         <span className="help">
           {t('editor.chars', { n: value.length, max: 4000 })}
