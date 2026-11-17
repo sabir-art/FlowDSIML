@@ -1,0 +1,811 @@
+{
+  "common": {
+    "appName": "FlowDSIML",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "continue": "Continuer",
+    "skip": "Passer",
+    "done": "Terminé",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "duplicate": "Dupliquer",
+    "archive": "Archiver",
+    "restore": "Restaurer",
+    "rename": "Renommer",
+    "copy": "Copier",
+    "copied": "Copié",
+    "search": "Rechercher",
+    "searchShortcut": "Rechercher…  /",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "retry": "Réessayer",
+    "learnMore": "En savoir plus",
+    "optional": "(facultatif)",
+    "required": "Obligatoire",
+    "loading": "Chargement",
+    "more": "Plus d'options",
+    "actionsFor": "Actions pour {{name}}",
+    "you": "Vous",
+    "skipToContent": "Aller au contenu",
+    "comingSoon": "Bientôt disponible",
+    "upgradeRequired": "Disponible à partir du plan {{plan}}",
+    "relative": {
+      "justNow": "à l'instant",
+      "minutesAgo_one": "il y a {{count}} min",
+      "minutesAgo_other": "il y a {{count}} min",
+      "hoursAgo_one": "il y a {{count}} h",
+      "hoursAgo_other": "il y a {{count}} h",
+      "yesterday": "hier",
+      "daysAgo_one": "il y a {{count}} jour",
+      "daysAgo_other": "il y a {{count}} jours"
+    }
+  },
+  "nav": {
+    "demos": "Démos",
+    "demoCenters": "Démo centers",
+    "analytics": "Analytics",
+    "leads": "Leads",
+    "folders": "Dossiers",
+    "archived": "Archivées",
+    "workspace": "Workspace",
+    "settings": "Paramètres",
+    "billing": "Plans et facturation",
+    "help": "Aide",
+    "notifications": "Notifications",
+    "logout": "Se déconnecter",
+    "openNav": "Ouvrir la navigation",
+    "newWorkspace": "Nouveau workspace",
+    "breadcrumb": "Fil d'Ariane",
+    "usage": {
+      "publishedDemos": "Démos publiées",
+      "aiCredits": "Crédits IA"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Bon retour parmi nous",
+      "subtitle": "Connectez-vous pour retrouver vos démos.",
+      "google": "Continuer avec Google",
+      "orEmail": "ou avec votre email",
+      "email": "Email professionnel",
+      "password": "Mot de passe",
+      "forgot": "Mot de passe oublié ?",
+      "submit": "Se connecter",
+      "magicLink": "Ou recevez un lien de connexion par email.",
+      "noAccount": "Pas encore de compte ?",
+      "signupLink": "Créer un compte gratuit",
+      "invalidCredentials": "Email ou mot de passe incorrect. Vérifiez vos informations et réessayez."
+    },
+    "signup": {
+      "title": "Créez votre compte",
+      "subtitle": "Gratuit, sans carte bancaire. Votre première démo en 5 minutes.",
+      "google": "S'inscrire avec Google",
+      "name": "Nom complet",
+      "email": "Email professionnel",
+      "emailPlaceholder": "nom@entreprise.com",
+      "password": "Mot de passe",
+      "passwordHelp": "10 caractères minimum.",
+      "strength": {
+        "weak": "Robustesse : faible",
+        "fair": "Robustesse : moyenne",
+        "good": "Robustesse : bonne",
+        "strong": "Robustesse : excellente"
+      },
+      "terms": "J'accepte les <terms>conditions d'utilisation</terms> et la <privacy>politique de confidentialité</privacy>.",
+      "submit": "Créer mon compte",
+      "hasAccount": "Déjà inscrit ?",
+      "loginLink": "Se connecter",
+      "checkEmailTitle": "Vérifiez votre boîte mail",
+      "checkEmailBody": "Nous avons envoyé un lien de confirmation à {{email}}. Il expire dans 24 h.",
+      "resend": "Renvoyer l'email"
+    },
+    "reset": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Saisissez votre email : nous vous envoyons un lien pour choisir un nouveau mot de passe.",
+      "submit": "Envoyer le lien",
+      "sent": "Si un compte existe pour {{email}}, vous allez recevoir un email.",
+      "newPassword": "Nouveau mot de passe",
+      "update": "Mettre à jour le mot de passe"
+    },
+    "invite": {
+      "title": "{{inviter}} vous invite à rejoindre {{workspace}}",
+      "accept": "Rejoindre le workspace",
+      "expired": "Cette invitation a expiré. Demandez-en une nouvelle à {{inviter}}."
+    }
+  },
+  "onboarding": {
+    "step": "Étape {{current}} sur {{total}}",
+    "welcome": "Bienvenue {{name}} 👋",
+    "workspace": {
+      "title": "Configurons votre espace",
+      "subtitle": "Deux questions pour vous proposer les bons modèles. Vous pourrez tout modifier plus tard.",
+      "name": "Nom du workspace",
+      "nameHelp": "En général, le nom de votre entreprise ou de votre équipe.",
+      "useCase": "À quoi serviront vos démos ?",
+      "useCases": {
+        "website": "Site web",
+        "websiteHint": "Tours produit sur vos landing pages",
+        "outbound": "Prospection",
+        "outboundHint": "Démos personnalisées par email",
+        "presales": "Avant-vente",
+        "presalesHint": "Démos pendant et après les appels"
+      }
+    },
+    "extension": {
+      "title": "Installez l'extension de capture",
+      "subtitle": "Elle enregistre une capture à chaque clic dans votre produit. Rien n'est envoyé tant que vous n'avez pas cliqué sur « Terminer ».",
+      "step1": "Ajoutez l'extension à Chrome",
+      "step2": "Épinglez-la dans la barre d'outils",
+      "step3": "Ouvrez votre produit et cliquez sur « Démarrer »",
+      "install": "Ajouter à Chrome",
+      "importInstead": "Importer des captures à la place",
+      "browsers": "Vous utilisez un autre navigateur ? L'extension fonctionne sur Chrome, Edge, Brave et Arc.",
+      "installed": "J'ai installé l'extension",
+      "detected": "Extension détectée ✓"
+    },
+    "checklist": {
+      "title": "Votre première démo vous attend",
+      "subtitle": "Suivez ces étapes. Nous avons ajouté une démo d'exemple pour vous inspirer.",
+      "account": "Créer votre compte",
+      "extension": "Installer l'extension",
+      "capture": "Capturer votre premier parcours",
+      "captureHint": "5 à 10 clics suffisent pour une bonne démo.",
+      "share": "Partager le lien",
+      "firstView": "Recevoir votre première vue",
+      "explore": "Explorer la démo d'exemple",
+      "banner": "Premiers pas · {{done}} sur {{total}}",
+      "hide": "Masquer les premiers pas"
+    }
+  },
+  "extension": {
+    "modeScreenshots": "Captures",
+    "modeHtml": "HTML",
+    "multiTab": "Plusieurs onglets",
+    "start": "Démarrer la capture",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "finish": "Terminer",
+    "cancel": "Annuler la capture",
+    "stepsCaptured_one": "{{count}} étape capturée",
+    "stepsCaptured_other": "{{count}} étapes capturées",
+    "uploading": "Envoi de {{current}} étapes sur {{total}}…",
+    "notLoggedIn": "Connectez-vous à FlowDSIML pour capturer.",
+    "protectedPage": "Cette page ne peut pas être capturée (page système du navigateur)."
+  },
+  "dashboard": {
+    "title": "Démos",
+    "summary": "{{total}} démos · {{published}} publiées",
+    "new": "Nouvelle démo",
+    "import": "Importer",
+    "searchPlaceholder": "Rechercher une démo",
+    "filters": {
+      "allStatuses": "Tous les statuts",
+      "allCreators": "Tous les créateurs",
+      "me": "Moi"
+    },
+    "sort": {
+      "updated": "Modifiées récemment",
+      "created": "Créées récemment",
+      "name": "Nom (A-Z)",
+      "views": "Plus vues"
+    },
+    "view": { "grid": "Grille", "list": "Liste" },
+    "status": {
+      "draft": "Brouillon",
+      "published": "Publiée",
+      "modified": "Modifiée",
+      "archived": "Archivée"
+    },
+    "card": {
+      "steps_one": "{{count}} étape",
+      "steps_other": "{{count}} étapes",
+      "views_one": "{{count}} vue",
+      "views_other": "{{count}} vues"
+    },
+    "columns": {
+      "name": "Nom",
+      "status": "Statut",
+      "folder": "Dossier",
+      "views30": "Vues (30 j)",
+      "completion": "Complétion",
+      "updated": "Modifiée"
+    },
+    "menu": {
+      "open": "Ouvrir dans l'éditeur",
+      "share": "Partager",
+      "copyLink": "Copier le lien",
+      "duplicate": "Dupliquer",
+      "move": "Déplacer vers…",
+      "archive": "Archiver",
+      "delete": "Supprimer"
+    },
+    "newDialog": {
+      "title": "Nouvelle démo",
+      "capture": "Capturer avec l'extension",
+      "captureHint": "Recommandé. Une étape par clic, avec la position du clic.",
+      "upload": "Importer des images",
+      "uploadHint": "Partez de captures d'écran ou de maquettes existantes.",
+      "folder": "Dossier"
+    },
+    "importDialog": {
+      "title": "Importer des captures",
+      "drop": "Glissez vos images ici",
+      "formats": "PNG, JPG ou WebP · 10 Mo maximum par image · une image = une étape",
+      "browse": "Parcourir les fichiers",
+      "progress": "Téléversement de {{current}} images sur {{total}}…",
+      "skipped_one": "{{count}} fichier ignoré",
+      "skipped_other": "{{count}} fichiers ignorés",
+      "create": "Créer la démo"
+    },
+    "deleteDialog": {
+      "title": "Supprimer « {{name}} » ?",
+      "body": "La démo, ses liens et ses statistiques seront supprimés définitivement. Les leads déjà collectés sont conservés. Pour la mettre de côté, archivez-la plutôt.",
+      "confirm": "Supprimer la démo"
+    }
+  },
+  "editor": {
+    "back": "Retour aux démos",
+    "demoName": "Nom de la démo",
+    "unpublished": "Modifications non publiées",
+    "upToDate": "Publiée",
+    "saveState": {
+      "saving": "Enregistrement…",
+      "saved": "Enregistré",
+      "offline": "Hors ligne : modifications en attente",
+      "error": "Échec de l'enregistrement. Nouvel essai dans quelques secondes."
+    },
+    "undo": "Annuler",
+    "redo": "Rétablir",
+    "modeEdit": "Édition",
+    "modePreview": "Aperçu",
+    "share": "Partager",
+    "publish": "Publier",
+    "publishing": "Publication…",
+    "published": "Démo publiée · les visiteurs voient la nouvelle version",
+    "moreMenu": {
+      "history": "Historique des versions",
+      "theme": "Thème de la démo",
+      "ai": "Générer les textes avec l'IA",
+      "shortcuts": "Raccourcis clavier",
+      "duplicate": "Dupliquer la démo"
+    },
+    "rail": {
+      "title": "Étapes",
+      "label": "Étapes, réordonnables avec Espace puis les flèches",
+      "add": "Ajouter une étape",
+      "addCapture": "Capturer de nouvelles étapes",
+      "addImage": "Importer une image",
+      "addPopup": "Ajouter une pop-up",
+      "addForm": "Ajouter un formulaire",
+      "grabbed": "Étape {{position}} saisie. Utilisez les flèches pour la déplacer, Espace pour la déposer, Échap pour annuler.",
+      "moved": "Étape déplacée en position {{position}} sur {{total}}.",
+      "dropped": "Étape déposée en position {{position}}."
+    },
+    "canvas": {
+      "label": "Canevas",
+      "stepTitle": "Étape {{position}} · {{title}}",
+      "zoom": "Zoom du canevas",
+      "fit": "Ajuster",
+      "tools": "Outils du canevas",
+      "toolHotspot": "Hotspot et bulle",
+      "toolBlur": "Ajouter une zone de flou",
+      "toolZoom": "Zoom sur une zone",
+      "toolCrop": "Recadrer la capture",
+      "toolReplace": "Remplacer l'image"
+    },
+    "tabs": { "step": "Étape", "design": "Design", "settings": "Réglages" },
+    "guide": {
+      "type": "Type de guidage",
+      "hotspot": "Hotspot",
+      "area": "Zone",
+      "free": "Libre",
+      "hotspotHint": "Hotspot : un point pulsant à l'endroit du clic, avec une bulle.",
+      "areaHint": "Zone : la cible est mise en évidence, le reste de l'écran est assombri.",
+      "freeHint": "Libre : une carte sans cible, à placer où vous voulez.",
+      "text": "Texte de la bulle",
+      "title": "Titre",
+      "titlePlaceholder": "Ex. : Nouveau rapport",
+      "body": "Texte",
+      "insertVariable": "Variable",
+      "chars": "{{count}} / {{max}} caractères",
+      "improveWithAi": "Améliorer avec l'IA",
+      "position": "Position de la bulle",
+      "autoPlacement": "Placement automatique",
+      "autoPlacementHint": "La bulle change de côté si elle sort du cadre.",
+      "buttons": "Boutons",
+      "advanceOnHotspot": "Avancer au clic sur le hotspot",
+      "clickAction": "Action au clic",
+      "actions": {
+        "next": "Étape suivante",
+        "goto": "Aller à l'étape…",
+        "url": "Ouvrir une URL",
+        "demo": "Ouvrir une autre démo",
+        "form": "Afficher un formulaire"
+      }
+    },
+    "blur": {
+      "title": "Zone de flou",
+      "delete": "Supprimer la zone de flou",
+      "style": "Style de masquage",
+      "styleBlur": "Flou",
+      "stylePixel": "Pixels",
+      "styleSolid": "Aplat",
+      "intensity": "Intensité",
+      "scope": "Appliquer à",
+      "scopeStep": "Cette étape seulement",
+      "scopeAll": "Toutes les étapes (même position)",
+      "privacyNote": "Le flou est appliqué à l'image publiée. Les données d'origine ne sont jamais envoyées aux visiteurs."
+    },
+    "form": {
+      "title": "Formulaire de lead",
+      "heading": "Titre",
+      "description": "Description",
+      "fields": "Champs",
+      "addField": "Ajouter",
+      "fieldOptions": "Options du champ {{name}}",
+      "variablesNote": "Les réponses alimentent les variables pour la suite de la démo.",
+      "behavior": "Comportement",
+      "mandatory": "Formulaire obligatoire",
+      "consent": "Case de consentement",
+      "consentDefault": "J'accepte d'être recontacté·e par {{company}}.",
+      "submitLabel": "Texte du bouton",
+      "destination": "Envoyer les leads vers",
+      "webhook": "Webhook",
+      "webhookNote": "Les leads sont toujours visibles dans l'onglet Leads.",
+      "fieldTypes": {
+        "email": "Email professionnel",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "company": "Entreprise",
+        "phone": "Téléphone",
+        "jobTitle": "Poste",
+        "text": "Texte libre"
+      }
+    },
+    "end": {
+      "title": "Écran de fin",
+      "heading": "Titre",
+      "text": "Texte",
+      "primary": "Bouton principal (CTA)",
+      "secondary": "Bouton secondaire",
+      "label": "Libellé",
+      "action": "Action",
+      "url": "URL",
+      "urlHelp": "Les variables sont transmises dans l'URL.",
+      "newTab": "Ouvrir dans un nouvel onglet",
+      "restart": "Recommencer la visite"
+    },
+    "design": {
+      "theme": "Thème",
+      "workspaceDefault": "{{name}} (par défaut du workspace)",
+      "colors": "Couleurs",
+      "primary": "Couleur principale",
+      "hotspot": "Hotspot",
+      "lowContrast": "Contraste faible ({{ratio}}:1) : le texte des boutons sera difficile à lire.",
+      "useAccessible": "Utiliser {{color}}",
+      "shape": "Forme",
+      "shapes": { "square": "Carré", "soft": "Doux", "round": "Rond", "extra": "Très rond" },
+      "frame": "Cadre",
+      "browserBar": "Barre de navigateur",
+      "gradient": "Fond dégradé"
+    },
+    "settings": {
+      "playback": "Lecture",
+      "autoplay": "Lecture automatique",
+      "progressBar": "Barre de progression",
+      "language": "Langue de la démo",
+      "variables": "Variables utilisées",
+      "defaultValue": "par défaut : « {{value}} »"
+    },
+    "narrow": {
+      "title": "L'éditeur s'utilise sur ordinateur",
+      "body": "Ouvrez FlowDSIML sur un écran d'au moins 1 024 px de large pour modifier cette démo. Vous pouvez la prévisualiser et la partager depuis ce téléphone.",
+      "view": "Voir la démo"
+    }
+  },
+  "share": {
+    "title": "Partager la démo",
+    "publishedAt": "Version publiée le {{date}}",
+    "pendingChanges_one": "{{count}} modification non publiée",
+    "pendingChanges_other": "{{count}} modifications non publiées",
+    "publishChanges": "Publier les modifications",
+    "preview": "Aperçu",
+    "tabs": { "link": "Lien", "embed": "Intégrer", "custom": "Liens personnalisés", "access": "Accès" },
+    "publicAccess": "Accès public",
+    "publicAccessHint": "Toute personne disposant du lien peut voir la démo, sans compte.",
+    "publicLink": "Lien public",
+    "linkCopied": "Lien copié",
+    "slug": "Adresse personnalisée",
+    "slugHelp": "Lettres minuscules, chiffres et tirets. Changer l'adresse casse les anciens liens.",
+    "urlParams": "Personnaliser par paramètres d'URL",
+    "urlParamsHelp": "Dans vos emails, utilisez les champs de fusion de votre outil, par exemple {{example}}.",
+    "elsewhere": "Partager ailleurs",
+    "embed": {
+      "format": "Format d'intégration",
+      "responsive": "Responsive",
+      "fixed": "Taille fixe",
+      "popup": "Bouton + pop-up",
+      "copyCode": "Copier le code",
+      "codeCopied": "Code d'intégration copié",
+      "guides": "Guides : Webflow, WordPress, HubSpot, Framer…",
+      "hideWatermark": "Masquer le filigrane",
+      "clickToStart": "Démarrer au clic (couverture + bouton « Lancer la démo »)",
+      "cspNote": "Le site d'accueil doit autoriser les iframes provenant de {{host}} (en-tête CSP frame-src).",
+      "iframeTitle": "Démo : {{name}}"
+    },
+    "custom": {
+      "intro": "Un lien par prospect, avec ses variables pré-remplies et ses propres statistiques.",
+      "new": "Nouveau lien",
+      "name": "Nom du lien",
+      "namePlaceholder": "Ex. : Globex — Léa Dupont",
+      "nameHelp": "Visible uniquement par votre équipe.",
+      "expiresOn": "Expire le {{date}}",
+      "create": "Créer et copier le lien",
+      "created": "Lien créé et copié",
+      "lastView": "Dernière vue"
+    },
+    "access": {
+      "password": "Mot de passe",
+      "passwordHint": "Les visiteurs doivent saisir un mot de passe avant de voir la démo.",
+      "expiration": "Date d'expiration",
+      "expirationHint": "Après cette date, le lien affiche « Cette démo n'est plus disponible ».",
+      "domains": "Domaines email autorisés",
+      "domainsHint": "Seuls les visiteurs avec une adresse @{{domain}} peuvent ouvrir la démo.",
+      "gate": "Formulaire avant la démo",
+      "gateHint": "Demander l'email avant la première étape. À configurer dans l'éditeur.",
+      "configure": "Configurer"
+    },
+    "socialPreview": "Aperçu sur les réseaux",
+    "socialPreviewHint": "Image générée automatiquement à la publication.",
+    "thisWeek": "Cette semaine"
+  },
+  "player": {
+    "regionLabel": "démo interactive",
+    "skip": "Aller à la démo",
+    "start": "Lancer la démo",
+    "startMeta": "Environ {{minutes}} min · aucune inscription",
+    "stepOf": "{{current}} / {{total}}",
+    "stepAnnounce": "Étape {{current}} sur {{total}} : {{title}}",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "prevStep": "Étape précédente",
+    "nextStep": "Étape suivante",
+    "language": "Changer de langue",
+    "fullscreen": "Plein écran",
+    "exitFullscreen": "Quitter le plein écran",
+    "restart": "Recommencer la visite",
+    "watermark": "Fait avec FlowDSIML",
+    "form": {
+      "submit": "Envoyer",
+      "skip": "Passer",
+      "thanks": "Merci, c'est noté !",
+      "privacy": "Confidentialité"
+    },
+    "password": {
+      "title": "Cette démo est protégée",
+      "body": "Saisissez le mot de passe communiqué par {{company}}.",
+      "submit": "Accéder à la démo",
+      "wrong": "Mot de passe incorrect. Réessayez."
+    },
+    "expired": {
+      "title": "Cette démo n'est plus disponible",
+      "body": "Le lien a expiré le {{date}}. Contactez {{company}} pour recevoir un nouveau lien."
+    },
+    "notFound": {
+      "title": "Démo introuvable",
+      "body": "Le lien est peut-être incorrect, ou la démo a été retirée par son auteur."
+    },
+    "domainDenied": {
+      "title": "Accès réservé",
+      "body": "Cette démo est réservée aux adresses {{domains}}."
+    },
+    "rotateHint": "Tournez votre téléphone pour agrandir la démo."
+  },
+  "analytics": {
+    "title": "Analytics",
+    "updated": "Données mises à jour {{when}}",
+    "allDemos": "Toutes les démos",
+    "allSources": "Toutes les sources",
+    "period": "Période",
+    "range": { "7d": "7 j", "30d": "30 j", "90d": "90 j", "custom": "Dates" },
+    "exportStarted": "Export CSV en préparation : vous recevrez un email",
+    "tabs": { "overview": "Vue d'ensemble", "sessions": "Sessions", "leads": "Leads" },
+    "kpi": {
+      "views": "Vues",
+      "visitors": "Visiteurs uniques",
+      "completion": "Taux de complétion",
+      "leads": "Leads collectés",
+      "ctaClicks": "Clics sur le CTA final",
+      "vsPrevious": "vs {{period}} précédents",
+      "ofVisitors": "{{percent}} des visiteurs"
+    },
+    "chart": {
+      "viewsAndCompletions": "Vues et complétions",
+      "views": "Vues",
+      "completed": "Démos terminées"
+    },
+    "sources": {
+      "title": "Sources",
+      "embed": "Intégration sur le site",
+      "custom": "Liens personnalisés",
+      "public": "Lien public",
+      "internal": "Aperçus internes",
+      "excluded": "exclus",
+      "devices": "Appareils"
+    },
+    "funnel": {
+      "title": "Parcours étape par étape",
+      "subtitle": "Part des visiteurs ayant vu chaque étape",
+      "step": "Étape",
+      "visitors": "Visiteurs",
+      "dropoff": "Abandon",
+      "openEditor": "Ouvrir dans l'éditeur",
+      "insight": "L'étape « {{step}} » fait perdre {{percent}} des visiteurs."
+    },
+    "sessions": {
+      "visitor": "Visiteur",
+      "anonymous": "Visiteur anonyme",
+      "demo": "Démo",
+      "source": "Source",
+      "duration": "Durée",
+      "progress": "Progression",
+      "completed": "Terminée",
+      "date": "Date",
+      "range": "{{from}}–{{to}} sur {{total}}"
+    },
+    "leads": {
+      "email": "Email",
+      "company": "Entreprise",
+      "collected": "Collecté",
+      "selectAll": "Tout sélectionner"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "sections": {
+      "general": "Général",
+      "members": "Membres",
+      "brand": "Marque",
+      "variables": "Variables",
+      "profile": "Mon profil",
+      "billing": "Plans et facturation"
+    },
+    "general": {
+      "identity": "Identité",
+      "identityHint": "Visible par les membres et dans les emails d'invitation.",
+      "changeLogo": "Changer le logo",
+      "logoHelp": "PNG ou SVG carré, 512 px minimum",
+      "name": "Nom du workspace",
+      "website": "Site web",
+      "locale": "Langue et région",
+      "defaultLanguage": "Langue par défaut des nouvelles démos",
+      "timezone": "Fuseau horaire des analytics",
+      "saved": "Paramètres enregistrés",
+      "danger": "Zone de danger",
+      "dangerHint": "Actions irréversibles.",
+      "deleteWorkspace": "Supprimer le workspace",
+      "deleteWorkspaceHint": "Supprime toutes les démos, leurs statistiques et leurs leads. Les membres perdent l'accès.",
+      "deleteConfirmTitle": "Supprimer « {{name}} » ?",
+      "deleteConfirmLabel": "Saisissez {{name}} pour confirmer",
+      "deleteConfirm": "Supprimer définitivement"
+    },
+    "members": {
+      "summary": "{{count}} membres sur {{seats}} inclus dans le plan {{plan}}.",
+      "invite": "Inviter des membres",
+      "search": "Rechercher un membre",
+      "allRoles": "Tous les rôles",
+      "member": "Membre",
+      "role": "Rôle",
+      "lastActive": "Dernière activité",
+      "activeNow": "Active maintenant",
+      "pending": "En attente",
+      "invitedOn": "Invitation envoyée le {{date}}",
+      "resend": "Renvoyer l'invitation",
+      "transfer": "Transférer la propriété",
+      "remove": "Retirer du workspace",
+      "removeTitle": "Retirer {{name}} ?",
+      "removeBody": "{{name}} perdra l'accès au workspace. Ses démos restent dans le workspace, et vous en devenez propriétaire.",
+      "removeConfirm": "Retirer le membre",
+      "removed": "{{name}} a été retiré",
+      "inviteDialog": {
+        "emails": "Adresses email",
+        "emailsHelp": "Séparez les adresses par une virgule ou un retour à la ligne.",
+        "seats": "{{count}} sièges seront utilisés. Il en restera {{left}} sur les {{total}} de votre plan.",
+        "send": "Envoyer les invitations",
+        "sent_one": "{{count}} invitation envoyée",
+        "sent_other": "{{count}} invitations envoyées"
+      },
+      "rolesTitle": "Ce que chaque rôle peut faire",
+      "permissions": {
+        "view": "Voir les démos et les analytics",
+        "edit": "Créer, modifier, publier des démos",
+        "leads": "Voir et exporter les leads",
+        "manage": "Inviter et gérer les membres, marque, intégrations",
+        "billing": "Facturation, suppression du workspace, transfert"
+      }
+    },
+    "roles": {
+      "owner": "Propriétaire",
+      "admin": "Admin",
+      "editor": "Éditeur",
+      "viewer": "Lecteur",
+      "ownerHint": "Tous les droits, y compris la facturation",
+      "adminHint": "Gère aussi les membres et la marque",
+      "editorHint": "Crée et publie des démos",
+      "viewerHint": "Consulte les démos et les analytics"
+    },
+    "brand": {
+      "theme": "Thème des démos",
+      "themeHint": "Appliqué par défaut à toutes les nouvelles démos. Chaque démo peut le modifier.",
+      "contrastOk": "Contraste avec le texte blanc : {{ratio}}:1 ✓",
+      "font": "Police",
+      "publicPage": "Page publique",
+      "publicPageHint": "L'en-tête affiché autour de vos démos partagées par lien.",
+      "primaryButton": "Bouton principal",
+      "secondaryButton": "Bouton secondaire",
+      "hideWatermark": "Masquer « Fait avec FlowDSIML »"
+    },
+    "variables": {
+      "title": "Variables",
+      "intro": "Personnalisez les textes avec des variables. Elles sont remplies par l'URL, un lien personnalisé ou un formulaire.",
+      "new": "Nouvelle variable",
+      "type": "Type",
+      "types": { "text": "Texte", "number": "Nombre", "image": "Image" },
+      "default": "Valeur par défaut",
+      "usedIn_one": "{{count}} démo",
+      "usedIn_other": "{{count}} démos"
+    },
+    "profile": {
+      "name": "Nom",
+      "email": "Email",
+      "preferences": "Préférences",
+      "language": "Langue de l'interface",
+      "appearance": "Apparence",
+      "system": "Système",
+      "light": "Clair",
+      "dark": "Sombre",
+      "notifyLead": "Email quand un lead est collecté",
+      "weeklyDigest": "Résumé hebdomadaire des vues"
+    }
+  },
+  "billing": {
+    "title": "Plans et facturation",
+    "perWorkspace": "Facturation par workspace",
+    "manualNotice": "Paiement en ligne bientôt disponible. Pour changer de plan dès maintenant, contactez-nous. Votre plan sera activé sous 24 h.",
+    "usageTitle": "Plan {{plan}} · utilisation ce mois-ci",
+    "renewal": "Renouvellement le {{date}}",
+    "members": "Membres",
+    "aiCredits": "Crédits IA",
+    "aiCreditsWarning": "{{percent}} utilisés : les crédits se rechargent le {{date}}.",
+    "retention": "Rétention des analytics",
+    "choose": "Choisir un plan",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "perMonth": "/ mois",
+    "current": "Plan actuel",
+    "recommended": "Recommandé pour vous",
+    "choosePlan": "Choisir {{plan}}",
+    "upgradeTo": "Passer à {{plan}}",
+    "downgrade": "Rétrograder",
+    "allOf": "Tout {{plan}}, plus :",
+    "enterprise": "Besoin de SSO, de SCIM ou d'un contrat ? Parlons Enterprise.",
+    "invoices": "Factures",
+    "paid": "Payée",
+    "limitReached": "Vous avez atteint la limite de {{limit}} démos publiées",
+    "limitReachedHint": "Dépubliez une démo, ou passez au plan {{plan}} pour publier sans limite.",
+    "requestSent": "Demande envoyée : nous revenons vers vous sous 24 h",
+    "upgradeDialog": {
+      "title": "Passer au plan {{plan}}",
+      "body": "Notre équipe active votre plan et vous envoie la facture. Vous ne payez rien en ligne pour l'instant.",
+      "seats": "Nombre de membres",
+      "message": "Message",
+      "messagePlaceholder": "Votre besoin, vos délais…",
+      "total": "Total annuel estimé",
+      "send": "Envoyer la demande"
+    }
+  },
+  "empty": {
+    "noDemos": {
+      "title": "Créez votre première démo",
+      "body": "Installez l'extension, cliquez dans votre produit : chaque clic devient une étape.",
+      "cta": "Installer l'extension",
+      "secondary": "Importer des captures"
+    },
+    "emptyFolder": {
+      "title": "Ce dossier est vide",
+      "body": "Glissez des démos ici depuis la liste, ou créez-en une nouvelle directement dans ce dossier.",
+      "cta": "Nouvelle démo"
+    },
+    "noResults": {
+      "title": "Aucun résultat pour « {{query}} »",
+      "body": "Vérifiez l'orthographe ou essayez un autre mot-clé.",
+      "cta": "Effacer la recherche"
+    },
+    "filtered": {
+      "title": "Aucune démo ne correspond à ces filtres",
+      "cta": "Réinitialiser les filtres"
+    },
+    "noViews": {
+      "title": "Pas encore de vues",
+      "body": "Partagez votre démo : les statistiques apparaissent dès la première visite.",
+      "cta": "Copier le lien de la démo"
+    },
+    "noLeads": {
+      "title": "Aucun lead pour l'instant",
+      "body": "Ajoutez un formulaire à une démo pour collecter des emails, ou partagez des liens personnalisés pour identifier vos prospects.",
+      "cta": "Ajouter un formulaire"
+    },
+    "aloneInWorkspace": {
+      "title": "Travaillez en équipe",
+      "body": "Invitez vos collègues pour créer et partager des démos ensemble.",
+      "cta": "Inviter des membres"
+    }
+  },
+  "errors": {
+    "generic": "Un problème est survenu. Réessayez dans un instant.",
+    "network": "Connexion impossible. Vérifiez votre réseau, puis réessayez.",
+    "offline": "Vous êtes hors ligne : vos modifications seront enregistrées à la reconnexion.",
+    "sessionExpired": "Votre session a expiré. Reconnectez-vous pour continuer.",
+    "forbidden": "Vous n'avez pas les droits pour cette action. Demandez à un admin du workspace.",
+    "publishFailed": "La démo n'a pas pu être publiée. Réessayer.",
+    "uploadFailed": "L'image « {{file}} » n'a pas pu être envoyée.",
+    "loadFailed": "Impossible de charger {{what}}.",
+    "quotaReached": "Limite de votre plan atteinte : {{what}}.",
+    "details": "Détails",
+    "requestId": "Identifiant de la requête : {{id}}",
+    "page404": {
+      "title": "Cette page n'existe pas",
+      "body": "Le lien est peut-être incorrect, ou la page a été déplacée.",
+      "cta": "Retour aux démos"
+    },
+    "page403": {
+      "title": "Accès réservé",
+      "body": "Cette page est réservée à certains membres du workspace.",
+      "cta": "Retour aux démos"
+    },
+    "page500": {
+      "title": "Un problème est survenu de notre côté",
+      "body": "Nous avons été prévenus. Réessayez dans quelques minutes.",
+      "cta": "Réessayer"
+    }
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire.",
+    "email": "Saisissez une adresse email valide, par exemple nom@entreprise.com.",
+    "passwordMin": "Le mot de passe doit contenir au moins {{min}} caractères.",
+    "url": "Saisissez une URL complète, commençant par https://.",
+    "slug": "Utilisez uniquement des lettres minuscules, des chiffres et des tirets.",
+    "slugTaken": "Cette adresse est déjà utilisée. Essayez {{suggestion}}.",
+    "maxLength": "{{max}} caractères maximum.",
+    "fileType": "Format non pris en charge. Utilisez PNG, JPG ou WebP.",
+    "fileSize": "Fichier trop lourd : {{max}} Mo maximum.",
+    "summary_one": "{{count}} champ à corriger.",
+    "summary_other": "{{count}} champs à corriger.",
+    "consent": "Cochez la case pour continuer."
+  },
+  "toasts": {
+    "linkCopied": "Lien copié",
+    "demoArchived": "Démo archivée",
+    "demoDeleted": "Démo supprimée",
+    "demoDuplicated": "Démo dupliquée",
+    "undo": "Annuler",
+    "view": "Voir",
+    "saved": "Modifications enregistrées",
+    "invitationsSent": "Invitations envoyées"
+  },
+  "a11y": {
+    "loading": "Chargement",
+    "closeDialog": "Fermer la fenêtre",
+    "sortAscending": "Trié par ordre croissant",
+    "sortDescending": "Trié par ordre décroissant",
+    "selected": "Sélectionné",
+    "hotspotLabel": "Hotspot : {{text}}",
+    "newTab": "(s'ouvre dans un nouvel onglet)"
+  }
+}
