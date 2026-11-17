@@ -88,7 +88,7 @@
       "google": "Sign up with Google",
       "name": "Full name",
       "email": "Work email",
-      "emailPlaceholder": "name@company.com",
+      "emailPlaceholder": "name@company.example",
       "password": "Password",
       "passwordHelp": "At least 8 characters.",
       "strength": {
@@ -777,7 +777,7 @@
   },
   "validation": {
     "required": "This field is required.",
-    "email": "Enter a valid email address, for example name@company.com.",
+    "email": "Enter a valid email address, for example name@company.example.",
     "passwordMin": "Password must be at least {{min}} characters.",
     "url": "Enter a full URL starting with https://.",
     "slug": "Use only lowercase letters, numbers and hyphens.",
