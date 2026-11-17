@@ -176,7 +176,7 @@ export function SharePage() {
             {t('share.preview')}
           </a>
           {editable && editor.demo && (!published || pending) && (
-            <span className="sh-publish">
+            <span className="sh-publish tc-cta-grad">
               <PublishButton editor={editor} republishLabel={t('share.publishChanges')} />
             </span>
           )}
