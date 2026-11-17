@@ -27,7 +27,7 @@ module.exports = {
     {
       id: 's1',
       kind: 'image',
-      image: { url: 'assets/a.webp', width: 1280, height: 800 },
+      image: { url: 'assets/a.webp', width: 1100, height: 750 },
       title: 'Bienvenue {{first_name}} !',
       body: '',
       zoom: { x: 0.2, y: 0.5, scale: 1.4 },
@@ -49,7 +49,7 @@ module.exports = {
     {
       id: 's2',
       kind: 'image',
-      image: { url: 'assets/a.webp', width: 1280, height: 800 },
+      image: { url: 'assets/a.webp', width: 1100, height: 750 },
       title: 'Étape 2',
       gateFormId: 'f1',
       hotspots: [

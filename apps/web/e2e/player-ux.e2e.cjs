@@ -54,6 +54,15 @@ const DEMO = manifest.demoId;
   ok(inside(await page.locator('.p-beacon').first().boundingBox(), stage), 'PL2 : la pastille reste visible');
   const tipText = await tip.textContent();
   ok(tipText.includes('Merci !') && !/Merci\s{2,}/.test(tipText), 'PL3 : variable vide sans double espace');
+  // PL2b : l'image zoomée couvre tout le cadre (aucune bande vide)
+  const img = await page.locator('.p-img').boundingBox();
+  ok(
+    img.x <= stage.x + 0.5 &&
+      img.y <= stage.y + 0.5 &&
+      img.x + img.width >= stage.x + stage.width - 0.5 &&
+      img.y + img.height >= stage.y + stage.height - 0.5,
+    'PL2b : l’image zoomée couvre tout le cadre',
+  );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/22-player-zoom.png` });
   await page.close();
 
