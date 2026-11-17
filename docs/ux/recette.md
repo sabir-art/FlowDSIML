@@ -184,3 +184,73 @@ Points positifs : flou irréversible côté pixels (très bon pour la confidenti
 La barre latérale (W3), le responsive mobile de l'app (W4), les confirmations natives (W8, W11, ED9) et le rendu WYSIWYG de l'éditeur (ED2) concernent aussi ces écrans. Les dates et pluriels non localisés (P9, A3, D6) se règlent d'un coup avec un helper `formatDate` / `formatNumber` basé sur `Intl` et la langue i18n courante.
 
 **Priorités proposées** : P1 + P2 + P3 (le player est ce que voient les prospects : il doit être irréprochable), puis P4, D1, A3/P9/D6 (helper `Intl`), P8.
+
+---
+
+## Finition : icônes, champs, espacements, accents (retour client du 17 nov.)
+
+**Branche testée** : `claude/dazzling-lamport-bu517g` (`f9ecf9e`) + correctifs de base de `claude/ux-finition` (`0ccd1e6`).
+**Méthode** : 19 états d'écran (auth, dashboard, analytics, leads, partage, paramètres, membres, profil, éditeur et ses 6 panneaux, player, page 404) en **1 440 et 390 px à 2x**, recadrages zoomés des composants (`docs/ux/recette/finition/`), plus un **scan automatique du DOM** : glyphes utilisés comme icônes, accents manquants, hauteur et `padding-right` des selects, champs non stylés, cibles < 24 px. Popup de l'extension et player : captures des recettes précédentes. Règles : `composants.md` §15.
+
+### Déjà corrigé dans `packages/ui` (branche `claude/ux-finition`, à fusionner)
+
+| # | Défaut | Correction |
+|---|---|---|
+| F0.1 | Chevron natif du `<select>` collé à la bordure droite (capture client n° 1) | `appearance: none` + chevron SVG `ChevronDown` 16 px à **12 px du bord**, `padding-right: 36 px` (32 px en `sm`), variante sombre ; garde-fou `!important` contre les paddings locaux (`.demo-move`, style inline du sélecteur de variables). **Vérifié : 15/15 selects à 36 px.** |
+| F0.2 | `input type=file` natif « Choose File / No file chosen » non stylé | `::file-selector-button` stylé en bouton secondaire (texte natif du navigateur encore en anglais : voir F14). |
+| F0.3 | `input type=color` : cadre gris natif | Pastille 40 × 40, rayon 8, bordure `border-strong`. |
+| F0.4 | Cases à cocher / radios / curseurs bleus natifs | `accent-color: primary`, 16 px. |
+| F0.5 | Pas de règle de taille pour les icônes dans les boutons | `.fd-btn svg` 18 px (16 en `sm`, 20 en `lg`), stroke 1,75 ; `.fd-btn--icon` carré. |
+| F0.6 | Champs sans état survol / erreur au focus / désactivé cohérents | Survol `text-subtle`, focus erreur `shadow-focus-danger`, désactivé `surface-sunken`. |
+
+### À corriger dans l'application (dev)
+
+**Icônes et glyphes** (scan DOM : 14 occurrences) — installer `lucide-react` (web), `lucide-preact` (player), `lucide` (extension) et appliquer la table `composants.md` §15.1.
+
+| # | Gravité | Écran | Défaut constaté | Correction |
+|---|---|---|---|---|
+| F1 | **Bloquant** (retour client) | Éditeur, barre et rail | « **+ Hotspot** », « **+ Flou** », « **+ Écran texte** », « **+ Image** » : « + » en caractère texte. | `MousePointerClick` « Hotspot », `Droplet` « Flou », `Type` « Écran texte », `ImagePlus` « Image » (libellés sans « + »). |
+| F2 | **Bloquant** | Dashboard | « **+ Nouvelle démo** », « **+ Nouveau dossier** » ; bouton « **✕** » rouge pour supprimer ; « **▶** » en texte dans la vignette vide ; emoji « **📁** » devant les dossiers. | `Plus` « Nouvelle démo », `FolderPlus` « Nouveau dossier », `Trash2` dans le menu `MoreHorizontal`, `PlayCircle` (ou illustration), `Folder`. |
+| F3 | **Bloquant** | Leads, analytics de démo | Suppression d'un lead : « **✕** » ; consentement : « **✓** » texte dans le tableau. | `Trash2` (ghost, `aria-label`), `Check` 16 px `success` + texte masqué « Oui ». |
+| F4 | Majeur | Éditeur | Retour : « **←** » texte ; panneau hotspot : « **← Étape** ». | `ArrowLeft` (bouton icône 40 px, `aria-label` « Retour aux démos ») ; fil d'Ariane « Étape 1 › Hotspot » avec `ChevronRight`. |
+| F5 | Majeur | Éditeur, rail | « Monter / Descendre » en boutons texte. | `ArrowUp` / `ArrowDown` (boutons icône `sm` + infobulle), poignée `GripVertical`. |
+| F6 | Majeur | Éditeur, barre | Outils, Aperçu, Partager, Publier **sans icône** ; badge de sauvegarde « **—** ». | `MousePointer2` Sélection, `Eye` Aperçu, `Share2` Partager, `Rocket` Publier ; sauvegarde `CheckCircle2` « Enregistré » / `Loader2` « Enregistrement… ». |
+| F7 | Majeur | Éditeur, mise en forme | « B », « I », « Lien » en lettres ; sélecteur de variable « **{{ }}** ». | `Bold`, `Italic`, `Link` (boutons icône `sm` 32 px) ; bouton `Braces` « Variable » ouvrant un menu. |
+| F8 | Majeur | Navigation latérale | Aucune icône (Démos, Analytics, Leads, Paramètres, Membres, Profil, Nouveau workspace). | `PlayCircle`, `BarChart3`, `Users`, `Settings`, `UserPlus`/`Users`, `CircleUser`, `Plus` — 20 px, gap 12 px. |
+| F9 | Majeur | Partage, analytics, membres | Boutons Copier / Ouvrir / Exporter CSV / Dépublier / Révoquer / Quitter / Créer l'invitation sans icône. | `ClipboardCopy`, `ExternalLink`, `Download`, `EyeOff`, `Ban`, `LogOut`, `UserPlus`. |
+| F10 | Majeur | Player | Pas d'icônes (précédent/suivant, chapitres, plein écran) ; filigrane sans logo. | `ChevronLeft`/`ChevronRight`, `ListOrdered`, `Maximize2` (lucide-preact) ; logo SVG 14 px. |
+| F11 | Majeur | Popup extension | « **●** Démarrer l'enregistrement » (point en texte). | `Circle` plein 10 px `aria-hidden` (ou pastille CSS), `Pause`, `Square` (terminer). |
+
+**Champs, alignements, espacements**
+
+| # | Gravité | Écran | Défaut constaté (capture) | Correction |
+|---|---|---|---|---|
+| F12 | **Bloquant** | Éditeur, barre de mise en forme | Boutons B / I / Lien en **32 px** à côté d'un select de variable en **40 px** : hauteurs mélangées dans la même rangée (`crop-editor-panel.png`). | Tous en `sm` 32 px (`fd-select fd-select--sm`), gap 4 px dans la barre. |
+| F13 | Majeur | Dashboard, cartes | Rangée « Sans dossier ▾ » (select 40 px) + « ✕ » (32 px) : **hauteurs et alignements différents** ; 3 boutons texte qui débordent de la carte à 1 280 px (`crop-dash-cards.png`). | Menu `MoreHorizontal` unique (D1) ; à défaut, tous les contrôles en `sm` 32 px, gap 8 px, `flex-wrap`. |
+| F14 | Majeur | Éditeur, thème | Logo : bouton natif « **Choose File / No file chosen** » (anglais, non traduisible). Couleurs : valeur hex en mono **non éditable** à côté de la pastille. | Bouton secondaire `ImageUp` « Choisir un logo » + nom du fichier + `X` ; champ hex éditable 40 px, gap 8 px (§15.2). |
+| F15 | Majeur | Éditeur, panneaux | **Rythme vertical irrégulier** : ~44 px entre deux champs (au lieu de 20), ~45 px avant « Position de l'info-bulle », cases à cocher collées entre elles (~4 px) puis grand vide (`crop-form-panel.png`, `crop-theme-panel.png`). | `fd-field` seul (20 px) sans marge supplémentaire du parent ; listes de cases : `.fd-check` + gap 8 px ; sections séparées par un trait avec 16 px dessus/dessous. |
+| F16 | Majeur | Éditeur, panneau hotspot | Case « Bouton d'action (CTA) » décalée de **4 px** à droite par rapport à « Animation de pulsation » ; libellé non aligné sur le centre de la case. | `.fd-check` (gap 8 px, `align-items:flex-start`, `margin-top:2px` sur la case) pour toutes les cases. |
+| F17 | Majeur | Éditeur, onglets du panneau | 5 onglets sur **2 lignes** (« Chapitres » seul en dessous) : alignement cassé. | Voir ED5 : 3 onglets, ou défilement horizontal sans retour à la ligne. |
+| F18 | Majeur | Éditeur, rail | Vignette **collée au bord supérieur** de la carte d'étape (pas de padding haut), numéro non aligné avec le haut de la vignette ; boutons « + Écran texte / + Image » pleine largeur empilés (`crop-rail.png`). | Carte d'étape : padding 8 px, grille `18px 1fr` gap 8, numéro aligné en haut ; menu « Ajouter une étape » unique (`Plus`). |
+| F19 | Majeur | Mobile 390 px (toutes pages connectées) | La navigation (selects workspace + langue, 7 liens, déconnexion) occupe **tout le premier écran** avant le titre. | W4 : menu repliable (`Menu`), langue dans le profil. |
+| F20 | Mineur | Connexion | Onglets « Mot de passe / Lien magique » : boutons **sans classe** (style navigateur résiduel possible). | Composant onglets segmentés (`composants.md` §7). |
+| F21 | Mineur | Dashboard, dossiers | « Sans dossier » : bouton sans classe ; compteur `2` aligné par espace insécable variable. | Bouton de liste `ghost` pleine largeur, compteur en `badge` aligné à droite (`margin-left:auto`). |
+| F22 | Mineur | Éditeur, panneau hotspot | Aperçu du texte sous le champ (« Bienvenue {{company|chez vous}} ») **identique au champ** : redondant, fond gris collé au champ (8 px). | Supprimer, ou montrer la valeur résolue (« Bienvenue chez vous ») avec le libellé « Aperçu », 6 px sous le champ. |
+| F23 | Mineur | Player | Page « démo introuvable » : une ligne de texte gris centrée, sans logo, titre ni action. | Écran système (`player.notFound`) : `CircleAlert` 24 px, titre, texte, lien vers le site du client. |
+
+**Accents et typographie**
+
+| # | Gravité | Écran | Défaut | Correction |
+|---|---|---|---|---|
+| F24 | Majeur | Bouton d'ajout d'étape | « + **Ecran** » sans accent (capture client n° 2 ; corrigé sur la branche d'intégration en « + Écran texte », à vérifier partout : extension, player, CSV, emails). | Grep `Ecran\|Etape\|Editeur\|Equipe\|Etat` sur tout le dépôt, `fr.json` inclus. |
+| F25 | Mineur | Leads, dashboard, partage | Dates US « 11/17/2026, 2:15:48 PM », « Invalid Date », « 0 vues ». | Helper `Intl` (voir P9/A3/D6). |
+| F26 | Mineur | Divers | Espaces avant `: ! ?` parfois manquantes ou sécables (« Merci! » vs « Merci ! »). | Espaces insécables dans `fr.json` (U+202F avant `! ? ;`, U+00A0 avant `:`). |
+
+### Synthèse
+
+| | Bloquant | Majeur | Mineur |
+|---|---|---|---|
+| Finition (app, éditeur, player, extension) | 4 | 15 | 7 |
+| Corrigé côté `packages/ui` | 6 correctifs (F0.1–F0.6) | | |
+
+**Ordre conseillé** : installer Lucide + composant `Icon` (1 h), F1–F3 et F12 (bloquants), puis F6–F9, F13–F16, F24 (grep des accents). La table d'icônes complète est dans `composants.md` §15.1.

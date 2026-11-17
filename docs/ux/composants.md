@@ -274,3 +274,126 @@ Il apparaît sous un sélecteur de couleur quand le ratio est inférieur à 4,5:
 - [ ] `prefers-reduced-motion` respecté
 - [ ] Test lecteur d'écran (NVDA + Firefox, VoiceOver + Safari) sur le player et le formulaire de lead
 - [ ] axe-core sans violation « serious » ou « critical » (à intégrer aux tests Playwright)
+
+---
+
+## 15. Finition : icônes, champs, espacements (règles obligatoires)
+
+> Ajoutée après le retour client du 17 nov. : « les icônes doivent être de belles icônes qui correspondent à ce qu'elles représentent, les champs doivent être bien faits, attention aux margin, padding, gap ». Ces règles sont **non négociables** : un écart est un défaut de recette.
+
+### 15.1 Icônes
+
+- **Bibliothèque unique : [`lucide-react`](https://lucide.dev)** (licence ISC). Aucune autre source (emoji, caractères Unicode, SVG copiés d'ailleurs). Dans le player (Preact) : `lucide-preact`. Dans la popup de l'extension (vanilla) : `lucide` (ou les SVG Lucide inlinés).
+- **Tailles** : **16 px** (boutons `sm`, champs, tableaux, menus), **20 px** (boutons `md`/`lg`, navigation), 24 px (états vides uniquement). Toujours `strokeWidth={1.75}`, couleur `currentColor`.
+- **Import** : `import { Plus } from 'lucide-react'` puis `<Plus size={16} strokeWidth={1.75} aria-hidden />`. Recommandé : un composant `<Icon as={Plus} size="sm|md" />` dans `packages/ui` qui fixe taille et trait.
+- **Accessibilité** : icône décorative → `aria-hidden`. Bouton icône seule → `aria-label` + infobulle (§1.2).
+- **Interdits** : les caractères `+`, `×`, `✕`, `✖`, `▾`, `▸`, `▶`, `←`, `→`, `✓`, `●`, `⋯`, `📁` (et tout emoji) **utilisés comme icônes**. Un libellé ne commence jamais par « + » : on écrit « Ajouter une étape » avec l'icône `Plus`.
+- **Alignement** : icône et libellé centrés verticalement (`display:inline-flex; align-items:center`), **gap 8 px** (6 px en `sm`). L'icône précède le libellé, sauf chevron de menu/déroulant (après, gap 4 px).
+
+#### Table de correspondance action → icône Lucide
+
+| Action / objet | Icône | | Action / objet | Icône |
+|---|---|---|---|---|
+| Ajouter (générique) | `Plus` | | Supprimer | `Trash2` |
+| Nouvelle démo | `Plus` (+ libellé) | | Retirer / révoquer (membre, invitation) | `UserMinus` / `Ban` |
+| Écran texte (étape texte) | `Type` | | Fermer, effacer un champ | `X` |
+| Image (importer) | `ImagePlus` | | Dupliquer | `Copy` |
+| Capturer (extension) | `ScreenShare` | | Copier un lien / du code | `Link` / `ClipboardCopy` |
+| Démarrer l'enregistrement | `Circle` plein (`fill="currentColor"`) | | Copié (confirmation) | `Check` |
+| Pause / reprendre | `Pause` / `Play` | | Partager | `Share2` |
+| Hotspot | `MousePointerClick` | | Publier | `Rocket` |
+| Bulle (tooltip) | `MessageSquare` | | Dépublier | `EyeOff` |
+| Zone mise en évidence | `SquareDashedMousePointer` | | Aperçu | `Eye` |
+| Flou | `Droplet` | | Ouvrir (nouvel onglet) | `ExternalLink` |
+| Zoom sur une zone | `ZoomIn` | | Intégrer (iframe) | `Code` |
+| Recadrer | `Crop` | | Analytics | `BarChart3` |
+| Sélection (outil) | `MousePointer2` | | Leads | `Users` |
+| Remplacer l'image | `ImageUp` | | Lead (individuel) / formulaire | `UserRound` / `ClipboardList` |
+| Monter / descendre une étape | `ArrowUp` / `ArrowDown` | | Exporter CSV | `Download` |
+| Poignée de glisser | `GripVertical` | | Importer | `Upload` |
+| Chapitres | `ListOrdered` | | Dossier / nouveau dossier | `Folder` / `FolderPlus` |
+| Variables | `Braces` | | Déplacer vers un dossier | `FolderInput` |
+| Thème / design | `Palette` | | Archiver / restaurer | `Archive` / `ArchiveRestore` |
+| Police | `Type` | | Réglages, paramètres | `Settings` |
+| Logo (téléverser) | `ImageUp` | | Membres / inviter | `Users` / `UserPlus` |
+| Lien (mise en forme) | `Link` | | Mon profil | `CircleUser` |
+| Gras / italique | `Bold` / `Italic` | | Plans et facturation | `CreditCard` |
+| Insérer une variable | `Braces` | | Workspace (sélecteur) | `Building2` + `ChevronsUpDown` |
+| CTA (bouton d'action) | `MousePointerClick` / `ArrowRight` | | Langue | `Languages` |
+| Retour | `ArrowLeft` | | Se déconnecter | `LogOut` |
+| Précédent / suivant (player) | `ChevronLeft` / `ChevronRight` | | Rechercher | `Search` |
+| Plein écran / quitter | `Maximize2` / `Minimize2` | | Filtrer | `ListFilter` |
+| Menu d'actions | `MoreHorizontal` | | Trier | `ArrowUpDown` |
+| Déroulant (chevron) | `ChevronDown` | | Calendrier / période | `CalendarDays` |
+| Mot de passe / accès protégé | `Lock` | | Expiration | `Clock` |
+| Sauvegarde : en cours / OK / erreur | `Loader2` (rotation) / `CheckCircle2` / `CloudOff` | | Alerte : info / attention / erreur / succès | `Info` / `TriangleAlert` / `CircleAlert` / `CircleCheck` |
+| Aide | `CircleHelp` | | Notifications | `Bell` |
+| Démo (lecture) | `PlayCircle` | | Démo centers | `LayoutGrid` |
+
+Une action absente de cette table : choisir l'icône Lucide la plus littérale, l'ajouter ici (PR sur `docs/ux/composants.md`).
+
+### 15.2 Champs : spécifications exactes
+
+| Élément | Valeur |
+|---|---|
+| Hauteur | **40 px** (`md`, défaut) · **32 px** (`sm`, barres d'outils, tableaux, filtres) · 48 px (`lg`, auth) |
+| Padding horizontal (`padding-inline`) | **12 px** (`md`) · 10 px (`sm`) |
+| Bordure / rayon | 1 px `border-strong` · rayon **8 px** (`md`) · 6 px (`sm`) |
+| Texte | `body` 14 px, interligne 1,3 ; placeholder `text-subtle` (opacité 1) |
+| Libellé → champ | **6 px** · champ → aide/erreur : **6 px** · entre deux champs : **20 px** (pas plus) |
+| Textarea | hauteur min. 84 px, padding 10 px 12 px |
+| **Select** | `appearance: none` ; **chevron SVG `ChevronDown` 16 px, à 12 px du bord droit**, `padding-right: 36 px` (sm : 14 px à 10 px, `padding-right: 32 px`) ; texte tronqué avec ellipse, jamais sous le chevron |
+| Champ avec icône à gauche (recherche) | icône 16 px à **12 px** du bord, `padding-left: 36 px` |
+| Groupe champ + bouton | même hauteur (40/40 ou 32/32), **gap 8 px**, alignés au centre |
+| Case à cocher / radio | 16 px, `accent-color: primary`, **gap 8 px** avec le libellé, alignée sur la première ligne ; une liste de cases : **gap 8 px** entre lignes |
+| Interrupteur | 36 × 20 px, libellé à gauche, interrupteur à droite, ligne de 40 px |
+| Fichier | jamais l'`input type=file` natif visible : zone de dépôt ou bouton secondaire « Choisir un fichier » (`ImageUp`) + nom du fichier ; à défaut, `::file-selector-button` stylé (fait dans `base.css`) |
+| Couleur | pastille 40 × 40 rayon 8 + champ hexadécimal mono 40 px, **gap 8 px** |
+| Curseur (range) | piste pleine largeur, valeur affichée à droite dans un champ `sm` de 56 px |
+| Focus | bordure `primary` + `shadow-focus` (3 px Lagoon 45 %) ; erreur : bordure `danger` + `shadow-focus-danger` |
+| Désactivé | fond `surface-sunken`, texte `text-disabled`, `cursor: not-allowed` |
+
+Implémenté dans `packages/ui/src/base.css` (classes `fd-input`, `fd-select`, `fd-textarea`, `fd-input--sm`, `fd-select--sm`, `fd-check`, `fd-input-group`, `fd-input-icon`). **Ne pas redéfinir `padding` d'un `.fd-select` localement** (un garde-fou force `padding-right` à 36 px).
+
+### 15.3 Boutons : spécifications exactes
+
+| | `sm` | `md` | `lg` |
+|---|---|---|---|
+| Hauteur | 32 px | 40 px | 48 px |
+| Padding horizontal | 12 px | 16 px | 20 px |
+| Icône | 16 px | 18–20 px | 20 px |
+| Gap icône/libellé | 6 px | **8 px** | 8 px |
+| Bouton icône seule | 32 × 32 | 40 × 40 | 48 × 48 |
+
+- Dans une même rangée, **tous les contrôles ont la même hauteur** (bouton `sm` avec champ `sm`, etc.). Gap entre boutons d'une rangée : **8 px**.
+- Une seule action principale par zone ; les actions destructives en ligne sont `ghost` (icône `Trash2`) ou dans un menu, jamais un bouton rouge plein en ligne.
+
+### 15.4 Échelle d'espacement obligatoire
+
+Seules ces valeurs sont autorisées pour `margin`, `padding` et `gap` (tokens `--fd-space-*`) :
+
+| Token | 0-5 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 12 | 16 | 20 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| px | 2 | 4 | 8 | 12 | 16 | 20 | 24 | 32 | 40 | 48 | 64 | 80 |
+
+Exception unique : 6 px (libellé → champ, gap des boutons `sm`). **Interdits** : valeurs « au jugé » (3, 5, 7, 10, 14, 18 px…) et `<br>` pour espacer.
+
+**Rythme vertical de référence**
+
+| Contexte | Valeur |
+|---|---|
+| Entre deux champs d'un formulaire | 20 px (`space-5`) |
+| Entre sections d'un panneau (avec séparateur) | 16 px au-dessus et au-dessous du trait |
+| Padding d'une carte | 24 px (`space-6`) ; carte compacte : 16 px |
+| Padding du panneau de propriétés de l'éditeur | 16 px |
+| Entre cartes d'une grille | 20 px |
+| Titre de page → contenu | 24 px |
+| Padding de page (app) | 32 px desktop, 16 px mobile |
+| Élément de liste (rail, menu, navigation) | padding 8 px, gap 4 px entre éléments |
+
+### 15.5 Typographie et accents
+
+- **Accents sur les capitales obligatoires** : « Écran », « Étape », « État », « À propos ». Jamais « Ecran ».
+- Espace insécable avant `: ; ! ? »` et après `«` (français).
+- Pas de texte en MAJUSCULES saisi en dur ; utiliser `text-transform` si besoin (titres de section 11 px de la maquette).
+- Les nombres, dates et pluriels passent par `Intl` et i18n (« 0 vue », « 17 nov. 2026 »), jamais par concaténation.
