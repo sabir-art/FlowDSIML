@@ -2046,5 +2046,88 @@
       "on": "Listen to events (same data as the analytics relay)",
       "note": "Only works from allowed sites. A lead's personal data is never sent to the host page, only the event."
     }
+  },
+  "collab": {
+    "notif": {
+      "bell": "Notifications",
+      "bellUnread_one": "Notifications, {{count}} unread",
+      "bellUnread_other": "Notifications, {{count}} unread",
+      "title": "Notifications",
+      "markAll": "Mark all as read",
+      "settings": "Notification settings",
+      "filter": "Filter",
+      "all": "All",
+      "mentions": "Mentions · {{count}}",
+      "unread": "Unread · {{count}}",
+      "today": "Today",
+      "week": "This week",
+      "older": "Older",
+      "unreadDot": "Unread",
+      "history": "See full history (30 days)",
+      "empty": "Nothing new. Mentions, leads and alerts will show up here.",
+      "types": {
+        "mention": "{{name}} mentioned you in \"{{demo}}\" · step {{n}}",
+        "reply": "{{name}} replied to your comment",
+        "resolved": "{{name}} resolved your comment",
+        "lead": "New lead on \"{{demo}}\"",
+        "modules_one": "{{count}} learner completed \"{{module}}\"",
+        "modules_other": "{{count}} learners completed \"{{module}}\"",
+        "alert": "Alert: {{text}}",
+        "webhookPaused": "Webhook paused after 6 failures",
+        "published": "{{name}} published \"{{demo}}\"",
+        "invited": "{{name}} invited you to the {{workspace}} workspace"
+      },
+      "prefs": {
+        "title": "Notification preferences",
+        "inApp": "In app",
+        "email": "Email",
+        "digest": "Daily email digest instead of one email per event",
+        "mentionsAlways": "Mentions are always notified in the app.",
+        "mute": "Mute notifications for this demo",
+        "muted": "Notifications muted for this demo"
+      }
+    },
+    "mention": {
+      "listbox": "Workspace members",
+      "online": "online",
+      "help": "Arrows to choose, Enter or Tab to insert, Escape to close.",
+      "noAccess": "{{name}} has no access to this demo: the mention won't be notified.",
+      "none": "No member matches."
+    },
+    "presence": {
+      "group_one": "{{count}} person on this demo: {{list}}",
+      "group_other": "{{count}} people on this demo: {{list}}",
+      "here": "{{name}} is here",
+      "title": "On this demo",
+      "you": "You",
+      "onStep": "Step {{n}}",
+      "editing": "editing {{field}}",
+      "idle": "idle for {{time}}",
+      "goTo": "Go to {{name}}'s step",
+      "editingBanner": "{{name}} is editing this step. Your changes are merged field by field; the last saved wins on the same field.",
+      "cursors": "Show other people's cursors",
+      "help": "Click a person to jump to their step."
+    },
+    "presenter": {
+      "start": "Present",
+      "toolbar": "Presenter mode",
+      "stepOf": "Step {{n}} of {{total}}",
+      "prev": "Previous",
+      "next": "Next",
+      "publicScreen": "Audience screen",
+      "quit": "Exit",
+      "notes": "Presenter notes",
+      "noNotes": "No notes for this step.",
+      "nextStep": "Next step · {{n}}",
+      "lastStep": "Last step",
+      "shortcuts": "Shortcuts",
+      "kNext": "Next step",
+      "kPrev": "Previous step",
+      "kNotes": "Hide notes",
+      "kBlack": "Black screen",
+      "kQuit": "Exit",
+      "publicHelp": "Open the audience screen on the projector: it follows your step changes, without the notes.",
+      "notesField": "Presenter notes (not published)"
+    }
   }
 }

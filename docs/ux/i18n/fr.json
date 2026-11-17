@@ -2046,5 +2046,88 @@
       "on": "Écoute des événements (mêmes données que le relais analytics)",
       "note": "Fonctionne uniquement depuis les sites autorisés. Les données personnelles d'un lead ne sont jamais transmises à la page hôte, seulement l'événement."
     }
+  },
+  "collab": {
+    "notif": {
+      "bell": "Notifications",
+      "bellUnread_one": "Notifications, {{count}} non lue",
+      "bellUnread_other": "Notifications, {{count}} non lues",
+      "title": "Notifications",
+      "markAll": "Tout marquer comme lu",
+      "settings": "Réglages des notifications",
+      "filter": "Filtrer",
+      "all": "Toutes",
+      "mentions": "Mentions · {{count}}",
+      "unread": "Non lues · {{count}}",
+      "today": "Aujourd'hui",
+      "week": "Cette semaine",
+      "older": "Plus ancien",
+      "unreadDot": "Non lue",
+      "history": "Voir tout l'historique (30 jours)",
+      "empty": "Rien de nouveau. Vous serez prévenu·e ici des mentions, leads et alertes.",
+      "types": {
+        "mention": "{{name}} vous a mentionné·e dans « {{demo}} » · étape {{n}}",
+        "reply": "{{name}} a répondu à votre commentaire",
+        "resolved": "{{name}} a résolu votre commentaire",
+        "lead": "Nouveau lead sur « {{demo}} »",
+        "modules_one": "{{count}} apprenant a validé « {{module}} »",
+        "modules_other": "{{count}} apprenants ont validé « {{module}} »",
+        "alert": "Alerte : {{text}}",
+        "webhookPaused": "Webhook mis en pause après 6 échecs",
+        "published": "{{name}} a publié « {{demo}} »",
+        "invited": "{{name}} vous a invité·e dans le workspace {{workspace}}"
+      },
+      "prefs": {
+        "title": "Préférences de notification",
+        "inApp": "Dans l'app",
+        "email": "E-mail",
+        "digest": "Résumé quotidien par e-mail au lieu d'un e-mail par événement",
+        "mentionsAlways": "Les mentions sont toujours notifiées dans l'app.",
+        "mute": "Couper les notifications de cette démo",
+        "muted": "Notifications coupées pour cette démo"
+      }
+    },
+    "mention": {
+      "listbox": "Membres du workspace",
+      "online": "en ligne",
+      "help": "Flèches pour choisir, Entrée ou Tab pour insérer, Échap pour fermer.",
+      "noAccess": "{{name}} n'a pas accès à cette démo : la mention ne sera pas notifiée.",
+      "none": "Aucun membre ne correspond."
+    },
+    "presence": {
+      "group_one": "{{count}} personne sur cette démo : {{list}}",
+      "group_other": "{{count}} personnes sur cette démo : {{list}}",
+      "here": "{{name}} est ici",
+      "title": "Sur cette démo",
+      "you": "Vous",
+      "onStep": "Étape {{n}}",
+      "editing": "modifie {{field}}",
+      "idle": "inactif depuis {{time}}",
+      "goTo": "Aller à l'étape de {{name}}",
+      "editingBanner": "{{name}} modifie cette étape. Vos changements sont fusionnés champ par champ ; le dernier enregistré l'emporte sur un même champ.",
+      "cursors": "Afficher les curseurs des autres",
+      "help": "Un clic sur une personne vous amène à son étape."
+    },
+    "presenter": {
+      "start": "Présenter",
+      "toolbar": "Mode présentateur",
+      "stepOf": "Étape {{n}} sur {{total}}",
+      "prev": "Précédente",
+      "next": "Suivante",
+      "publicScreen": "Écran public",
+      "quit": "Quitter",
+      "notes": "Notes du présentateur",
+      "noNotes": "Pas de note pour cette étape.",
+      "nextStep": "Étape suivante · {{n}}",
+      "lastStep": "Dernière étape",
+      "shortcuts": "Raccourcis",
+      "kNext": "Étape suivante",
+      "kPrev": "Étape précédente",
+      "kNotes": "Masquer les notes",
+      "kBlack": "Écran noir",
+      "kQuit": "Quitter",
+      "publicHelp": "Ouvrez l'écran public sur le vidéoprojecteur : il suit vos changements d'étape, sans les notes.",
+      "notesField": "Notes du présentateur (non publiées)"
+    }
   }
 }
