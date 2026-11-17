@@ -31,3 +31,11 @@ describe('zoom (PL2)', () => {
     expect(o.y).toBe(0.5);
   });
 });
+
+describe('spotlightVeilPath', () => {
+  it('cadre plein + un trou par zone (evenodd)', async () => {
+    const { spotlightVeilPath } = await import('./index');
+    expect(spotlightVeilPath([])).toBe('M0 0H100V100H0Z');
+    expect(spotlightVeilPath([{ x: 0.1, y: 0.2, w: 0.3, h: 0.1 }])).toBe('M0 0H100V100H0ZM10 20V30H40V20Z');
+  });
+});

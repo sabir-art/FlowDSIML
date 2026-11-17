@@ -1,6 +1,6 @@
 import { MANIFEST_SCHEMA_VERSION, manifestSchema, type Manifest } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
-import { asAction, asCta, asFields, asRects, asSettings, asZoom } from './types';
+import { asAction, asCta, asFields, asRects, asSettings, asStepOptions, asZoom } from './types';
 
 /**
  * Manifeste de prévisualisation construit côté client (miroir de publish_demo en SQL),
@@ -37,6 +37,7 @@ export function buildDraftManifest(ed: DemoEditor): Manifest {
       zoom: asZoom(s.zoom),
       cta: asCta(s.cta),
       gateFormId: s.gate_form_id,
+      options: asStepOptions(s.options),
       hotspots: ed.hotspots
         .filter((h) => h.step_id === s.id)
         .map((h) => ({
@@ -51,6 +52,7 @@ export function buildDraftManifest(ed: DemoEditor): Manifest {
           action: asAction(h.action),
           cta: asCta(h.cta),
           pulse: h.pulse,
+          style: settings.mode === 'spotlight' ? 'spotlight' : h.style,
         })),
     })),
     forms: ed.forms.map((f) => ({
@@ -66,5 +68,17 @@ export function buildDraftManifest(ed: DemoEditor): Manifest {
     })),
     allowedEmbedOrigins: settings.allowedEmbedOrigins ?? [],
     cta: settings.cta ?? null,
+    checklist: settings.checklist?.enabled
+      ? {
+          title: (settings.checklist.title ?? '').slice(0, 80),
+          position: settings.checklist.position ?? 'right',
+        }
+      : null,
+    autoplay: settings.autoplay?.enabled
+      ? {
+          enabled: true,
+          delayMs: Math.min(30000, Math.max(1500, Math.round(settings.autoplay.delayMs || 4000))),
+        }
+      : null,
   });
 }

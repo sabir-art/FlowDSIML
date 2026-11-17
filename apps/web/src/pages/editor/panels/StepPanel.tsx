@@ -8,6 +8,7 @@ import { asCta, asRects, asZoom, type Selection, type StepRow } from '../types';
 import { RichTextField } from '../RichTextField';
 import { VariablePreview } from '../VariablePreview';
 import { CtaFields } from './CtaFields';
+import { GuidedStepFields } from './GuidedStepFields';
 import { usePlan } from '../../../lib/plan';
 
 export function StepPanel({
@@ -142,6 +143,8 @@ export function StepPanel({
           )}
         </div>
       )}
+
+      <GuidedStepFields editor={editor} step={step} index={index} readOnly={readOnly} />
 
       <CtaFields
         idPrefix="st"

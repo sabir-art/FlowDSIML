@@ -1,5 +1,13 @@
 import type { Tables } from '@flowdsiml/supabase-types';
-import type { Cta, HotspotAction, Rect, Theme, Zoom } from '@flowdsiml/manifest';
+import {
+  stepOptionsSchema,
+  type Cta,
+  type HotspotAction,
+  type Rect,
+  type StepOptions,
+  type Theme,
+  type Zoom,
+} from '@flowdsiml/manifest';
 
 export type DemoRow = Tables<'demos'>;
 export type StepRow = Tables<'steps'>;
@@ -13,6 +21,12 @@ export type DemoSettings = {
   allowedEmbedOrigins?: string[];
   theme?: Partial<Theme>;
   cta?: Cta | null;
+  /** F1 : mode de lecture de toute la démo (visite guidée = pastille + bulle). */
+  mode?: 'walkthrough' | 'spotlight';
+  /** F1 : checklist de progression dans le player (un élément par chapitre). */
+  checklist?: { enabled: boolean; title?: string; position?: 'left' | 'right' | 'collapsed' };
+  /** F1 : lecture automatique (délai en ms, 1500–30000). */
+  autoplay?: { enabled: boolean; delayMs: number };
 };
 
 export type FormField = {
@@ -34,3 +48,4 @@ export const asSettings = (v: unknown): DemoSettings =>
 export const asFields = (v: unknown): FormField[] => (Array.isArray(v) ? (v as FormField[]) : []);
 
 export type Selection = { kind: 'step' } | { kind: 'hotspot'; id: string } | { kind: 'blur'; index: number };
+export const asStepOptions = (v: unknown): StepOptions => stepOptionsSchema.parse(v ?? {});

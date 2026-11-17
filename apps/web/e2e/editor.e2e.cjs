@@ -110,6 +110,58 @@ const SHOTS = process.env.SHOTS_DIR;
     ),
     'thème enregistré dans la démo',
   );
+  // F1 : mode de lecture Spotlight (onglet Design)
+  await page.getByRole('tab', { name: 'Design' }).click();
+  await page.getByRole('button', { name: /Spotlight/ }).click();
+  await page.waitForTimeout(900);
+  ok(
+    state.calls.some(
+      (c) => c.method === 'PATCH' && c.path.endsWith('/demos') && c.body?.settings?.mode === 'spotlight',
+    ),
+    'F1 : mode Spotlight enregistré pour la démo',
+  );
+  await page.getByRole('tab', { name: 'Étape' }).click();
+  await page.locator('.steplist-item').first().click();
+  ok((await page.locator('.canvas-spotlight').count()) >= 1, 'F1 : canevas en mode Spotlight (WYSIWYG)');
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-editor-spotlight.png` });
+
+  // F1 : checklist (onglet Réglages)
+  await page.getByRole('tab', { name: 'Réglages' }).click();
+  await page.getByLabel('Afficher la checklist dans le player').check();
+  await page.waitForTimeout(900);
+  ok(
+    state.calls.some(
+      (c) =>
+        c.method === 'PATCH' && c.path.endsWith('/demos') && c.body?.settings?.checklist?.enabled === true,
+    ),
+    'F1 : checklist activée',
+  );
+
+  // F1 : menu de choix ajouté depuis le rail
+  await page.getByRole('tab', { name: 'Étape' }).click();
+  await page.getByRole('button', { name: 'Ajouter une étape' }).click();
+  await page.getByRole('menuitem', { name: 'Menu de choix' }).click();
+  await page.waitForSelector('.canvas-popup');
+  ok((await page.locator('.canvas-choices li').count()) === 2, 'F1 : étape menu de choix (2 choix) créée');
+  await page.getByLabel('Destination du choix 1').selectOption({ index: 0 });
+  await page.fill('#gc-label-0', 'Je suis conseiller');
+  await page.waitForTimeout(900);
+  ok(
+    state.calls.some(
+      (c) =>
+        c.method === 'PATCH' &&
+        c.path.endsWith('/steps') &&
+        c.body?.options?.choices?.[0]?.label === 'Je suis conseiller' &&
+        c.body.options.choices[0].action.type === 'goto',
+    ),
+    'F1 : choix et destination enregistrés',
+  );
+  ok(
+    (await page.locator('.steplist-badges [aria-label="2 choix"]').count()) === 1,
+    'F1 : badge « 2 choix » dans le rail',
+  );
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-editor-choix.png` });
+
   // Aperçu intégré (ED12)
   await page.getByRole('button', { name: 'Aperçu' }).click();
   const pf = page.frameLocator('iframe.preview-frame');

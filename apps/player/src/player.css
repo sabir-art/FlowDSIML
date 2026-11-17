@@ -408,3 +408,221 @@ body {
   border-radius: 999px;
   background: #f39200;
 }
+
+/* ---------- F1 : parcours guidés ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.p-dim {
+  position: absolute;
+  inset: 0;
+  background: rgb(8 8 8 / 0.35);
+  z-index: 4;
+}
+/* Fond « Capture floutée » d'une pop-up (spec a2 §2) */
+.p-stage.is-backdrop .p-zoom {
+  filter: blur(6px);
+  transform: scale(1.03);
+}
+.p-popup-bg {
+  position: absolute;
+  inset: 4px 16px 12px;
+  border-radius: var(--p-radius);
+  background: rgb(8 8 8 / 0.6);
+  z-index: 4;
+}
+.p-popup {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(380px, calc(100% - 32px));
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  z-index: 6;
+  padding: 28px 24px 24px;
+  box-shadow: 0 24px 48px rgb(8 8 8 / 0.28);
+}
+.p-popup h1 {
+  font-size: 22px;
+}
+.p-popup .p-actions {
+  margin-top: 20px;
+}
+.p-variant {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--p-text);
+  background: color-mix(in srgb, var(--p-primary) 12%, var(--p-surface));
+}
+.p-variant--instruction {
+  background: color-mix(in srgb, var(--p-hotspot) 14%, var(--p-surface));
+}
+.p-choices {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+  text-align: left;
+}
+.p-choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 1px solid color-mix(in srgb, var(--p-text) 16%, transparent);
+  border-radius: 12px;
+  background: var(--p-surface);
+  color: var(--p-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.p-choice:hover {
+  border-color: var(--p-primary);
+  background: color-mix(in srgb, var(--p-primary) 6%, var(--p-surface));
+}
+
+/* Checklist (spec a2 §3) */
+.p-checklist {
+  position: absolute;
+  bottom: 84px;
+  z-index: 20;
+}
+.p-checklist--right {
+  right: 16px;
+}
+.p-checklist--left {
+  left: 16px;
+}
+.is-compact .p-checklist {
+  position: static;
+  margin: 0 12px 8px;
+}
+.p-checklist-card {
+  width: 260px;
+  max-height: min(420px, calc(100vh - 180px));
+  overflow: auto;
+  background: var(--p-surface);
+  color: var(--p-text);
+  border-radius: 16px;
+  box-shadow: var(--p-shadow);
+  padding: 14px 12px 10px;
+}
+.p-checklist-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--p-text) 14%, transparent);
+  border-radius: 999px;
+  background: var(--p-surface);
+  color: var(--p-text);
+  box-shadow: var(--p-shadow);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.p-checklist-count {
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--p-text) 70%, transparent);
+}
+.p-checklist-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px;
+}
+.p-checklist-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+.p-checklist-progress {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--p-text) 70%, transparent);
+}
+.p-icon-btn--sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+.p-checklist-bar {
+  height: 6px;
+  margin: 10px 4px 8px;
+  border-radius: 3px;
+  background: #fde9cc;
+  overflow: hidden;
+}
+.p-checklist-bar > div {
+  height: 100%;
+  border-radius: 3px;
+  background: #f39200;
+  transition: width 0.3s;
+}
+.p-checklist ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.p-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.p-checklist-item:hover {
+  background: color-mix(in srgb, var(--p-text) 6%, transparent);
+}
+.p-checklist-item.is-current {
+  font-weight: 700;
+  background: color-mix(in srgb, var(--p-primary) 10%, var(--p-surface));
+}
+.p-checklist-item.is-done .p-checklist-label {
+  text-decoration: line-through;
+  color: color-mix(in srgb, var(--p-text) 60%, transparent);
+}
+.p-check {
+  flex: none;
+  color: color-mix(in srgb, var(--p-text) 35%, transparent);
+}
+.p-check.is-on {
+  color: var(--p-primary);
+}
+.p-checklist-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

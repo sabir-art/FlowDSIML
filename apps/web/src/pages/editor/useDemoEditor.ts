@@ -148,13 +148,20 @@ export function useDemoEditor(demoId: string) {
         queue('variables', id, patch);
       },
 
-      addTextStep: (afterIndex: number, title: string) =>
+      addTextStep: (afterIndex: number, title: string, options?: StepRow['options']) =>
         run(async () => {
           await flush();
           const position = afterIndex + 1;
           const { data, error } = await supabase
             .from('steps')
-            .insert({ demo_id: demoId, workspace_id: demo!.workspace_id, kind: 'text', title, position })
+            .insert({
+              demo_id: demoId,
+              workspace_id: demo!.workspace_id,
+              kind: 'text',
+              title,
+              position,
+              ...(options ? { options } : {}),
+            })
             .select()
             .single();
           if (error) throw error;
