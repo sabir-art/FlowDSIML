@@ -1,6 +1,6 @@
 # Déploiement FlowDSIML (GitHub + Supabase)
 
-Ce document décrit la mise en production : base de données, Edge Functions, front (app + player) sur GitHub Pages **du dépôt public séparé `sabir-art/flowdsiml-app`** (le dépôt de code `FlowDSIML` est privé, et Pages y serait payant), extension Chrome. **Aucune valeur secrète ne figure dans le dépôt.**
+Ce document décrit la mise en production : base de données, Edge Functions, front (app + player) sur GitHub Pages, extension Chrome. **Aucune valeur secrète ne figure dans le dépôt.**
 
 ## 1. Vue d'ensemble
 
@@ -8,8 +8,8 @@ Ce document décrit la mise en production : base de données, Edge Functions, fr
 |---|---|---|
 | Schéma SQL, RLS, RPC, buckets, pg_cron | Supabase `ffzlhlxfratcbitkuvli` | `.github/workflows/deploy.yml`, job `supabase` (`supabase db push`) |
 | Edge Function `track` | Supabase | même job (`supabase functions deploy`) |
-| App (éditeur, dashboard) | `https://sabir-art.github.io/flowdsiml-app/` (branche `gh-pages` de `flowdsiml-app`) | job `pages` |
-| Player public | `https://sabir-art.github.io/flowdsiml-app/player/` | job `pages` |
+| App (éditeur, dashboard) | GitHub Pages `/<repo>/` | job `pages` |
+| Player public | GitHub Pages `/<repo>/player/` | job `pages` |
 | Extension Chrome (.zip) | artefact GitHub Actions → Chrome Web Store (manuel) | `.github/workflows/extension.yml` (tag `ext-v*`) |
 
 Le workflow `Deploy` se lance sur un push sur `main`, ou à la main (*Actions → Deploy → Run workflow*). L'option « skip_database » permet de ne redéployer que le front.
@@ -24,7 +24,6 @@ Le workflow `Deploy` se lance sur un push sur `main`, ou à la main (*Actions �
 |---|---|---|
 | `SUPABASE_ACCESS_TOKEN` | supabase.com → *Account → Access Tokens* (jeton personnel d'un membre du projet) | CLI : `link`, `db push`, `functions deploy` |
 | `SUPABASE_DB_PASSWORD` | *Project Settings → Database → Database password* (le réinitialiser si inconnu) | `db push` |
-| `PAGES_DEPLOY_TOKEN` | GitHub → *Settings → Developer settings → Fine-grained tokens* : accès limité au dépôt `flowdsiml-app`, permission **Contents : Read and write** | publication du site compilé vers `flowdsiml-app` (branche `gh-pages`) |
 
 ### Variables (non secrètes)
 
@@ -34,8 +33,7 @@ Le workflow `Deploy` se lance sur un push sur `main`, ou à la main (*Actions �
 | `VITE_SUPABASE_URL` | `https://ffzlhlxfratcbitkuvli.supabase.co` | builds web, player, extension |
 | `VITE_SUPABASE_ANON_KEY` | *Project Settings → API → anon / publishable key*. Publique par conception, car la sécurité repose sur RLS | builds web, player, extension |
 | `SITE_URL` *(optionnel)* | URL publique de l'app si domaine perso, ex. `https://app.exemple.com` | job `pages`, extension |
-| `PAGES_REPO` *(optionnel)* | dépôt public cible (défaut : `flowdsiml-app`) | job `pages` |
-| `BASE_PATH` *(optionnel)* | `/` avec un domaine perso (défaut : `/flowdsiml-app/`) | job `pages` |
+| `BASE_PATH` *(optionnel)* | `/` avec un domaine perso (défaut : `/<repo>/`) | job `pages` |
 | `VITE_PLAYER_URL` *(optionnel)* | URL du player si elle est séparée de l'app (recommandé avant la bêta) | job `pages` |
 
 **Ne jamais** mettre la clé `service_role` dans GitHub ni dans le front. Les Edge Functions la reçoivent automatiquement de Supabase (`SUPABASE_SERVICE_ROLE_KEY`).
@@ -53,11 +51,11 @@ Aucun n'est nécessaire au MVP. Ils seront à ajouter plus tard via `supabase se
 ## 3. Première mise en production (checklist)
 
 1. **Supabase, Auth** (*Authentication → URL Configuration*) :
-   - Site URL : `https://sabir-art.github.io/flowdsiml-app/` (ou le domaine perso) ; **déjà configuré** ;
+   - Site URL : `https://sabir-art.github.io/FlowDSIML/` (ou le domaine perso) ;
    - Redirect URLs : la même URL suivie de `**`, et `http://localhost:5173/**` pour le dev.
 2. **Supabase, Auth → Providers** : Email activé, confirmation d'email activée. Google est optionnel (client OAuth Google requis).
 3. **Supabase, SMTP** (*Authentication → Emails → SMTP Settings*) : **obligatoire avant la bêta**. Le SMTP intégré n'envoie qu'aux membres de l'équipe du projet, avec un débit très faible.
-4. **GitHub Pages** : créer le dépôt **public** `sabir-art/flowdsiml-app`. Après le premier déploiement (création de la branche `gh-pages`), dans *flowdsiml-app → Settings → Pages* : Source « Deploy from a branch », branche `gh-pages`, dossier `/ (root)`.
+4. **GitHub Pages** : *Settings → Pages → Build and deployment → Source : GitHub Actions*.
 5. **Secrets et variables** du §2.
 6. **Branche `main`** : la créer à partir de la branche d'intégration validée, puis pousser. Le workflow `Deploy` :
    - affiche les migrations (`--dry-run`) puis les applique ;
@@ -95,6 +93,6 @@ Aucun n'est nécessaire au MVP. Ils seront à ajouter plus tard via `supabase se
 
 ## 6. Retour arrière
 
-- **Front** : relancer `Deploy` (option `skip_database`) sur un commit antérieur, ou revenir à un commit précédent de la branche `gh-pages` de `flowdsiml-app`.
+- **Front** : relancer `Deploy` (option `skip_database`) sur un commit antérieur, ou rétablir un déploiement précédent dans *Settings → Pages*.
 - **Démo publiée** : chaque publication crée un manifeste versionné (`published/<demo>/v<n>.json`). Republier remet `latest.json` à jour.
 - **Base** : pas de retour automatique. Toute correction se fait par une nouvelle migration additive.

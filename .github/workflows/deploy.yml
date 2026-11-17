@@ -1,6 +1,6 @@
 name: Deploy
 
-# Déploie la base (migrations), les Edge Functions et le front (GitHub Pages du dépôt public flowdsiml-app).
+# Déploie la base (migrations), les Edge Functions et le front (GitHub Pages).
 # Prérequis : voir docs/tech/deploiement.md (secrets, variables, activation de Pages).
 on:
   push:
@@ -48,21 +48,21 @@ jobs:
         run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"
 
   pages:
-    name: Front (dépôt public flowdsiml-app, branche gh-pages)
+    name: Front (GitHub Pages)
     needs: [supabase]
     if: ${{ always() && (needs.supabase.result == 'success' || needs.supabase.result == 'skipped') }}
     runs-on: ubuntu-24.04
+    environment: github-pages
     permissions:
       contents: read
+      pages: write
+      id-token: write
     env:
-      # Le dépôt de code est privé : le site compilé est publié dans un dépôt PUBLIC séparé
-      # (GitHub Pages gratuit), servi sur https://<owner>.github.io/<PAGES_REPO>/
-      PAGES_REPO: ${{ vars.PAGES_REPO || 'flowdsiml-app' }}
-      SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, vars.PAGES_REPO || 'flowdsiml-app') }}
-      BASE_PATH: ${{ vars.BASE_PATH || format('/{0}/', vars.PAGES_REPO || 'flowdsiml-app') }}
+      # Site de projet : https://<owner>.github.io/<repo>/  (surchargeable par un domaine perso)
+      SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+      BASE_PATH: ${{ vars.BASE_PATH || format('/{0}/', github.event.repository.name) }}
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
-      PAGES_DEPLOY_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -71,27 +71,17 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Vérifier la configuration
-        run: |
-          test -n "$VITE_SUPABASE_ANON_KEY" || { echo "::error::variable VITE_SUPABASE_ANON_KEY manquante"; exit 1; }
-          test -n "$PAGES_DEPLOY_TOKEN" || { echo "::error::secret PAGES_DEPLOY_TOKEN manquant"; exit 1; }
       - name: Build app + player
         run: |
+          test -n "$VITE_SUPABASE_ANON_KEY" || { echo "::error::variable VITE_SUPABASE_ANON_KEY manquante"; exit 1; }
           ORIGIN=$(node -e "console.log(new URL(process.env.SITE_URL).origin)")
           PLAYER_URL="${{ vars.VITE_PLAYER_URL }}"; PLAYER_URL="${PLAYER_URL:-${SITE_URL%/}/player}"
           VITE_PLAYER_URL="$PLAYER_URL" pnpm --filter @flowdsiml/web build
           BASE_PATH="${BASE_PATH%/}/player/" VITE_APP_ORIGIN="$ORIGIN" pnpm --filter @flowdsiml/player build
           mkdir -p site && cp -r apps/web/dist/. site/ && mkdir -p site/player && cp -r apps/player/dist/. site/player/
-          cp site/index.html site/404.html
           touch site/.nojekyll
-      - name: Publier vers ${{ github.repository_owner }}/${{ env.PAGES_REPO }} (gh-pages)
-        uses: peaceiris/actions-gh-pages@v4
+      - uses: actions/upload-pages-artifact@v3
         with:
-          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
-          external_repository: ${{ github.repository_owner }}/${{ env.PAGES_REPO }}
-          publish_branch: gh-pages
-          publish_dir: ./site
-          force_orphan: true
-          user_name: github-actions[bot]
-          user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          commit_message: 'deploy: ${{ github.sha }}'
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
