@@ -939,6 +939,71 @@
         "notIndexed": "Non indexée",
         "indexed": "Indexée"
       }
+    },
+    "distribute": {
+      "title": "Diffuser",
+      "channel": "Canal de diffusion",
+      "chSite": "Site ou pop-up",
+      "chSiteDesc": "Iframe ou bouton",
+      "chIntranet": "Intranet",
+      "chIntranetDesc": "SharePoint, wiki, CMS",
+      "chLms": "LMS",
+      "chLmsDesc": "Paquet SCORM",
+      "chMail": "E-mail",
+      "chMailDesc": "Lien et texte prêts",
+      "lms": {
+        "title": "Paquet SCORM pour votre LMS",
+        "intro": "Compatible avec la plupart des plateformes de formation. Le LMS reçoit la progression, le score du quiz et le statut de réussite.",
+        "version": "Version",
+        "packageType": "Type de paquet",
+        "light": "Léger (en ligne)",
+        "full": "Complet (hors ligne)",
+        "typeHelp": "Léger : charge toujours la dernière version publiée (accès Internet requis). Complet : toutes les captures incluses, figé sur la version {{n}}.",
+        "mapping": "Ce que reçoit le LMS",
+        "colData": "Donnée",
+        "colValue": "Valeur envoyée",
+        "status": "Statut",
+        "statusValue": "« completed » quand toutes les étapes sont vues ; « passed » ou « failed » selon le quiz (seuil {{value}} %)",
+        "score": "Score",
+        "scoreValue": "Meilleur score du quiz, de 0 à 100",
+        "resume": "Reprise",
+        "resumeValue": "Dernière étape vue",
+        "time": "Temps passé",
+        "timeValue": "Durée de la session",
+        "alsoTrack": "Aussi enregistrer les résultats dans le suivi Tutoclic",
+        "download": "Télécharger le paquet (.zip)",
+        "noQuiz": "Ce module n'a pas de quiz : le LMS recevra seulement « completed »."
+      },
+      "intranet": {
+        "title": "Intégrer dans l'intranet",
+        "tool": "Outil de l'intranet",
+        "sharepoint": "SharePoint (composant « Incorporer »)",
+        "html": "Wiki ou CMS (HTML)",
+        "linkOnly": "Lien texte seulement",
+        "step1": "Dans SharePoint, ajoutez le composant « Incorporer » à la page.",
+        "step2": "Collez le code ci-dessus.",
+        "step3": "Ajoutez le domaine de l'intranet aux sites autorisés.",
+        "notAllowed": "{{domain}} n'est pas encore dans les sites autorisés : le tutoriel ne s'affichera pas.",
+        "addIt": "L'ajouter",
+        "domainNote": "Accès « Domaine e-mail » : les personnes connectées avec leur adresse professionnelle sont reconnues et suivies.",
+        "iframeTitle": "Tutoriel : {{title}}"
+      },
+      "mail": {
+        "title": "Envoyer par e-mail",
+        "intro": "Copiez ce texte dans votre messagerie. Tutoclic n'envoie rien à votre place, sauf les invitations.",
+        "subject": "Formation au nouvel outil · {{title}} ({{min}} min)",
+        "body": "Bonjour,\n\nPour vous préparer au nouvel outil, voici un tutoriel interactif de {{min}} minutes. Vous pouvez le suivre à votre rythme et reprendre où vous en étiez.",
+        "cta": "Commencer le tutoriel",
+        "quizNote": "Un quiz de {{count}} questions valide le module.",
+        "copy": "Copier le texte",
+        "attachPdf": "Joindre le mode d'emploi (PDF)"
+      },
+      "where": {
+        "title": "Où ce module est diffusé",
+        "active": "Actif",
+        "outdated": "Version ancienne",
+        "scormNote": "Un paquet SCORM complet est une copie : republiez-le dans le LMS après chaque nouvelle version, ou choisissez le paquet léger."
+      }
     }
   },
   "player": {

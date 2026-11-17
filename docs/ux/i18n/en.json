@@ -939,6 +939,71 @@
         "notIndexed": "Not indexed",
         "indexed": "Indexed"
       }
+    },
+    "distribute": {
+      "title": "Distribute",
+      "channel": "Distribution channel",
+      "chSite": "Website or pop-up",
+      "chSiteDesc": "Iframe or button",
+      "chIntranet": "Intranet",
+      "chIntranetDesc": "SharePoint, wiki, CMS",
+      "chLms": "LMS",
+      "chLmsDesc": "SCORM package",
+      "chMail": "Email",
+      "chMailDesc": "Ready-made link and text",
+      "lms": {
+        "title": "SCORM package for your LMS",
+        "intro": "Works with most learning platforms. The LMS receives progress, quiz score and pass status.",
+        "version": "Version",
+        "packageType": "Package type",
+        "light": "Light (online)",
+        "full": "Full (offline)",
+        "typeHelp": "Light: always loads the latest published version (Internet required). Full: all captures included, frozen at version {{n}}.",
+        "mapping": "What the LMS receives",
+        "colData": "Data",
+        "colValue": "Value sent",
+        "status": "Status",
+        "statusValue": "\"completed\" when all steps are viewed; \"passed\" or \"failed\" based on the quiz (pass mark {{value}}%)",
+        "score": "Score",
+        "scoreValue": "Best quiz score, from 0 to 100",
+        "resume": "Resume",
+        "resumeValue": "Last step viewed",
+        "time": "Time spent",
+        "timeValue": "Session length",
+        "alsoTrack": "Also record results in Tutoclic tracking",
+        "download": "Download the package (.zip)",
+        "noQuiz": "This module has no quiz: the LMS will only receive \"completed\"."
+      },
+      "intranet": {
+        "title": "Embed in the intranet",
+        "tool": "Intranet tool",
+        "sharepoint": "SharePoint (\"Embed\" web part)",
+        "html": "Wiki or CMS (HTML)",
+        "linkOnly": "Text link only",
+        "step1": "In SharePoint, add the \"Embed\" web part to the page.",
+        "step2": "Paste the code above.",
+        "step3": "Add the intranet domain to allowed sites.",
+        "notAllowed": "{{domain}} is not in allowed sites yet: the tutorial will not display.",
+        "addIt": "Add it",
+        "domainNote": "\"Email domain\" access: people signed in with their work address are recognised and tracked.",
+        "iframeTitle": "Tutorial: {{title}}"
+      },
+      "mail": {
+        "title": "Send by email",
+        "intro": "Copy this text into your email client. Tutoclic sends nothing on your behalf, except invitations.",
+        "subject": "New tool training · {{title}} ({{min}} min)",
+        "body": "Hello,\n\nTo get ready for the new tool, here is a {{min}}-minute interactive tutorial. Follow it at your own pace and pick up where you left off.",
+        "cta": "Start the tutorial",
+        "quizNote": "A {{count}}-question quiz completes the module.",
+        "copy": "Copy the text",
+        "attachPdf": "Attach the user guide (PDF)"
+      },
+      "where": {
+        "title": "Where this module is distributed",
+        "active": "Active",
+        "outdated": "Outdated version",
+        "scormNote": "A full SCORM package is a copy: re-upload it to the LMS after each new version, or choose the light package."
+      }
     }
   },
   "player": {

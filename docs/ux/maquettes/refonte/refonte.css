@@ -1670,3 +1670,21 @@ body:has(.mock-state) .ed {
 @media (max-width: 1100px) { .pdf-opt { grid-template-columns: minmax(0, 1fr); } .tpl-grid { grid-template-columns: 1fr 1fr; } }
 .pdf-prev .pg { width: 420px; zoom: .72; }
 .tpl .mini { width: 96px; }
+
+/* ---- Lot F6 : diffusion ---- */
+[data-view='lms'] [data-pane='lms'], [data-view='intranet'] [data-pane='intranet'], [data-view='mail'] [data-pane='mail'] { display: flex !important; flex-direction: column; gap: var(--fd-space-4); }
+.dif-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--fd-space-5); align-items: start; }
+.chan { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.chan button { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 14px; border-radius: var(--fd-radius-xl); border: 2px solid var(--fd-color-border); background: var(--fd-color-surface); font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.chan button[aria-pressed='true'] { border-color: var(--fd-color-primary); background: var(--fd-color-primary-soft); }
+.chan b { font-size: var(--fd-text-body-size); }
+.chan small { color: var(--fd-color-text-muted); font-size: var(--fd-text-caption-size); }
+.map-tbl td:first-child { font-weight: 600; white-space: nowrap; }
+.mail-prev { padding: 20px; border-radius: var(--fd-radius-xl); background: #FFFFFF; color: #12161B; box-shadow: var(--fd-shadow-sm); font-size: 14px; display: flex; flex-direction: column; gap: 10px; }
+.mail-prev .cta { align-self: flex-start; padding: 10px 18px; border-radius: 999px; background: #A3195B; color: #FFFFFF; font-weight: 700; }
+@media (max-width: 1100px) { .dif-grid { grid-template-columns: minmax(0, 1fr); } .chan { grid-template-columns: 1fr 1fr; } }
+.chan svg { width: 22px; height: 22px; }
+.dif-grid .pii-list small { font-family: var(--fd-font-sans); }
+.dif-grid .pii-list li { grid-template-columns: 32px minmax(0, 1fr) auto; }
+[data-theme='dark'] .code .k { color: var(--fd-prune-600); }
+.code:has(> .fd-btn) { padding-right: 112px; }
