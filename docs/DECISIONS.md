@@ -14,11 +14,10 @@ Quand le client n'a pas tranché, la valeur ci-dessous est un **choix par défau
 | D7 | Emails | SMTP intégré de Supabase en dev. Un SMTP perso sera nécessaire avant la bêta. |
 | D8 | Rôles | Workspace : `owner`, `admin`, `editor`, `viewer`. |
 | D9 | Domaine | GitHub Pages par défaut. Un domaine perso est requis avant la bêta, pour isoler le player. |
+| D10 | Charte | Charte officielle **DSI des Missions Locales** (docs/ux/brand-dsi/), style « dashboard moderne » validé par le client. |
+| D11 | Périmètre | Parité avec le tableau de tarifs Guideflow : voir docs/product/matrice-fonctionnalites.md (vagues A, B, C). |
 
 ## Organisation Git
 - Branche d'intégration : `claude/dazzling-lamport-bu517g`, gérée par le chef d'équipe.
 - Chaque membre travaille sur sa propre branche, créée à partir de la branche d'intégration, et le chef d'équipe fusionne.
 - Le code applicatif appartient au développeur. Le design system (`packages/ui/src/tokens*`, `docs/ux/`) appartient à la Lead UX.
-
-| D10 | Charte | Charte officielle **DSI des Missions Locales** (docs/ux/brand-dsi/), style « dashboard moderne » validé par le client. |
-| D11 | Périmètre | Parité avec le tableau de tarifs Guideflow : voir docs/product/matrice-fonctionnalites.md (vagues A, B, C). |
