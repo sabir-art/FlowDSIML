@@ -27,7 +27,10 @@ function rateLimited(ip: string): boolean {
 }
 
 const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'content-type': 'application/json' } });
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'content-type': 'application/json' },
+  });
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
@@ -44,7 +47,8 @@ Deno.serve(async (req) => {
   } catch {
     return json(400, { error: 'bad_json' });
   }
-  if (!batch || typeof batch !== 'object' || !Array.isArray(batch.events)) return json(400, { error: 'bad_batch' });
+  if (!batch || typeof batch !== 'object' || !Array.isArray(batch.events))
+    return json(400, { error: 'bad_batch' });
 
   // L'IP n'est jamais stockée (minimisation RGPD).
   const { data, error } = await supabase.rpc('track_events', { p_batch: batch });
