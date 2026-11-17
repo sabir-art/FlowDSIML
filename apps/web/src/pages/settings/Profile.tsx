@@ -1,3 +1,4 @@
+import { CardHead } from '../../components/CardHead';
 import { Check, KeyRound } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -89,7 +90,7 @@ export function Profile() {
         </form>
       </Card>
       <Card>
-        <h2 style={{ marginTop: 0 }}>{t('profile.changePassword')}</h2>
+        <CardHead icon={<KeyRound />} title={t('profile.changePassword')} />
         <form onSubmit={savePassword}>
           {pwd.error && <Alert kind="error">{pwd.error}</Alert>}
           {pwd.success && <Alert kind="success">{pwd.success}</Alert>}

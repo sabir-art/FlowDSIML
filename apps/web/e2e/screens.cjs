@@ -4,17 +4,31 @@ const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
-const OUT = path.resolve(__dirname, '../../../docs/tech/captures/finition');
+// THEME=dark : mêmes captures en thème sombre, dans finition/sombre/
+const THEME = process.env.THEME === 'dark' ? 'dark' : 'light';
+const OUT = path.resolve(__dirname, '../../../docs/tech/captures/finition', THEME === 'dark' ? 'sombre' : '');
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
 
 (async () => {
   const b = await chromium.launch();
+  require('fs').mkdirSync(OUT, { recursive: true });
+  const newPage = async (opts) => {
+    const ctx = await b.newContext(opts);
+    await ctx.addInitScript((t) => {
+      try {
+        localStorage.setItem('fd.theme', t);
+      } catch {
+        /* stockage indisponible */
+      }
+    }, THEME);
+    return ctx.newPage();
+  };
   const state = seed();
   const shot = async (page, name, full = false) =>
     page.screenshot({ path: `${OUT}/${name}.png`, fullPage: full });
 
-  const anon = await b.newPage({ viewport: { width: 1280, height: 820 } });
+  const anon = await newPage({ viewport: { width: 1280, height: 820 } });
   await anon.goto(`${APP}/#/login`);
   await anon.waitForSelector('form');
   await shot(anon, '01-connexion');
@@ -23,7 +37,7 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await anon.fill('#password', 'Correct-Horse-9');
   await shot(anon, '02-inscription-validation');
 
-  const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  const p = await newPage({ viewport: { width: 1440, height: 900 } });
   await install(p, state);
   await p.goto(`${APP}/#/onboarding`);
   await p.waitForSelector('#ws-name');
@@ -66,22 +80,22 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await go('/settings/profile', '#fn');
   await shot(p, '15-profil');
 
-  const pl = await b.newPage({ viewport: { width: 1280, height: 820 } });
+  const pl = await newPage({ viewport: { width: 1280, height: 820 } });
   await install(pl, state);
   await pl.goto(`${PLAYER}/#/d/${DEMO}?company=Acme`);
   await pl.waitForSelector('.p-tip');
   await shot(pl, '16-player');
-  const m = await b.newPage({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 1 });
+  const m = await newPage({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 1 });
   await install(m, state);
   await m.goto(`${PLAYER}/#/d/${DEMO}`);
   await m.waitForSelector('.p-sheet');
   await shot(m, '17-player-mobile');
-  const ex = await b.newPage({ viewport: { width: 390, height: 780 } });
+  const ex = await newPage({ viewport: { width: 390, height: 780 } });
   await install(ex, state);
   await ex.goto(`${PLAYER}/#/l/inconnu123`);
   await ex.waitForSelector('.p-center h1');
   await shot(ex, '18-player-lien-expire');
-  const mm = await b.newPage({ viewport: { width: 390, height: 780 } });
+  const mm = await newPage({ viewport: { width: 390, height: 780 } });
   await install(mm, state);
   await mm.goto(`${APP}/#/`);
   await mm.waitForSelector('.demo-card');

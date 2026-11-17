@@ -434,9 +434,20 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--fd-space-4);
 }
-.plan-card.is-current {
-  border-color: var(--fd-color-primary);
-  box-shadow: var(--fd-shadow-focus);
+.plans-grid {
+  gap: var(--fd-space-5);
+}
+/* Plan courant : carte héro verte, tout le texte en noir (refonte §7, garde-fou AA n° 1) */
+.plan-card.is-current .fd-badge.status-published {
+  background: var(--fd-color-on-hero);
+  color: var(--fd-color-hero);
+}
+.plan-card.is-current,
+.plan-card.is-current :is(span, strong, h2, .yesno) {
+  color: var(--fd-color-on-hero);
+}
+.plan-card.is-current .plan-features li {
+  border-color: rgb(8 8 8 / 0.15);
 }
 .plan-head {
   display: flex;
@@ -1288,4 +1299,84 @@
 .fd-card > .fd-table {
   width: calc(100% + 2 * var(--fd-space-6));
   margin-inline: calc(-1 * var(--fd-space-6));
+}
+
+/* Refonte §7 : authentification — panneau prune (couleur institutionnelle, identique en sombre),
+   logo DSI blanc officiel, texte et icônes blancs ; formulaire en champs pilules de 48 px */
+.auth-brand {
+  background: #a3195b;
+  color: #ffffff;
+}
+.auth-logo--dsi {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--fd-space-4);
+}
+.auth-logo--dsi img {
+  display: block;
+  width: 260px;
+  max-width: 100%;
+  height: auto;
+}
+.auth-product {
+  font: 800 1.25rem / 1 var(--fd-font-display, var(--fd-font-sans));
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+.auth-pitch h2 {
+  color: #ffffff;
+  font-weight: 800;
+}
+.auth-pitch li {
+  color: #ffffff;
+}
+.auth-pitch li svg {
+  color: #ffffff;
+}
+.auth-card .fd-input {
+  height: 48px;
+  border-radius: var(--fd-radius-full);
+  padding-inline: var(--fd-space-5);
+}
+.auth-card .fd-btn--primary {
+  height: 48px;
+}
+
+.icon-chip--danger {
+  background: var(--fd-color-danger-soft);
+  color: var(--fd-color-danger);
+}
+.card-head-badge {
+  margin-left: auto;
+}
+/* Ancien contrôle segmenté (langue, thème) aligné sur les pilules de la refonte */
+.segmented {
+  border-radius: var(--fd-radius-full);
+  padding: 2px;
+  gap: 2px;
+  background: var(--fd-color-surface);
+}
+.segmented button {
+  border-radius: var(--fd-radius-full);
+}
+.segmented button + button {
+  border-left: 0;
+}
+/* Refonte §7 : URL publique en champ pilule readonly, « Copier » pilule accolé */
+.copy-field--pill {
+  gap: 0;
+  flex-wrap: nowrap;
+}
+.copy-field--pill .fd-input {
+  height: 44px;
+  border-radius: var(--fd-radius-full) 0 0 var(--fd-radius-full);
+  border-right: 0;
+  padding-left: var(--fd-space-5);
+  background: var(--fd-color-surface-sunken);
+  min-width: 0;
+}
+.copy-field--pill .fd-btn {
+  height: 44px;
+  border-radius: 0 var(--fd-radius-full) var(--fd-radius-full) 0;
+  flex: none;
 }

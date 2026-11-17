@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Info, Minus } from 'lucide-react';
+import { Check, Minus } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Card } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
@@ -45,18 +45,13 @@ export function PlansPage() {
       <div className="page-head">
         <h1>{t('plans.title')}</h1>
       </div>
-      <Alert kind="info">
-        <span className="row" style={{ gap: 8 }}>
-          <Info size={16} aria-hidden="true" />
-          {t('plans.manualNotice')}
-        </span>
-      </Alert>
+      <Alert kind="info">{t('plans.manualNotice')}</Alert>
       <div className="plans-grid">
         {plans.map((p) => {
           const l = p.limits as unknown as Limits;
           const isCurrent = current?.plan_code === p.code;
           return (
-            <Card key={p.code} className={`plan-card ${isCurrent ? 'is-current' : ''}`}>
+            <Card key={p.code} className={`plan-card${isCurrent ? ' is-current fd-card--hero' : ''}`}>
               <div className="plan-head">
                 <h2>{t(`plan.names.${p.code}`, { defaultValue: p.name })}</h2>
                 {isCurrent && <span className="fd-badge status-published">{t('plans.current')}</span>}

@@ -1,4 +1,5 @@
-import { Check, Trash2 } from 'lucide-react';
+import { CardHead } from '../../components/CardHead';
+import { Check, Trash2, TriangleAlert } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -118,7 +119,7 @@ export function WorkspaceSettings() {
       <PlanUsage />
       {can('workspace.delete') && (
         <Card>
-          <h2 style={{ marginTop: 0 }}>{t('workspace.danger')}</h2>
+          <CardHead icon={<TriangleAlert />} title={t('workspace.danger')} tone="danger" />
           <p className="fd-muted">{t('workspace.deleteHint')}</p>
           <Button
             icon={<Trash2 />}

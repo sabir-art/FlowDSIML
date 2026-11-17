@@ -1,4 +1,17 @@
-import { BarChart3, Check, Copy, ExternalLink, GlobeLock, Link2, Pencil, Power } from 'lucide-react';
+import { CardHead } from '../../components/CardHead';
+import {
+  BarChart3,
+  Check,
+  Code2,
+  Copy,
+  ExternalLink,
+  Globe,
+  GlobeLock,
+  History,
+  Link2,
+  Pencil,
+  Power,
+} from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -32,7 +45,10 @@ function CopyField({
   const [copied, setCopied] = useState(false);
   return (
     <Field label={label} htmlFor={id}>
-      <div className="row" style={{ alignItems: 'stretch' }}>
+      <div
+        className={`row copy-field${multiline ? '' : ' copy-field--pill'}`}
+        style={{ alignItems: 'stretch' }}
+      >
         {multiline ? (
           <textarea
             id={id}
@@ -181,7 +197,7 @@ export function SharePage() {
           ) : (
             <>
               <Card>
-                <h2 style={{ marginTop: 0 }}>{t('share.publicLink')}</h2>
+                <CardHead icon={<Globe />} title={t('share.publicLink')} />
                 <CopyField id="pub-url" label={t('share.publicLinkHint')} value={url} />
                 <div className="url-params">
                   <p className="fd-muted">{t('share.urlVariables')}</p>
@@ -225,7 +241,7 @@ export function SharePage() {
                 </div>
               </Card>
               <Card>
-                <h2 style={{ marginTop: 0 }}>{t('share.embed')}</h2>
+                <CardHead icon={<Code2 />} title={t('share.embed')} />
                 <CopyField
                   id="embed"
                   label={t('share.embedHint')}
@@ -274,7 +290,7 @@ export function SharePage() {
           )}
 
           <Card>
-            <h2 style={{ marginTop: 0 }}>{t('share.personalLinks')}</h2>
+            <CardHead icon={<Link2 />} title={t('share.personalLinks')} />
             <p className="fd-muted">{t('share.personalLinksHint')}</p>
             {editable && (
               <form onSubmit={createLink} className="stack" style={{ gap: 0 }}>
@@ -394,7 +410,7 @@ export function SharePage() {
 
           {versions.length > 0 && (
             <Card>
-              <h2 style={{ marginTop: 0 }}>{t('share.versions')}</h2>
+              <CardHead icon={<History />} title={t('share.versions')} />
               <ul className="version-list">
                 {versions.map((v) => (
                   <li key={v.id}>
