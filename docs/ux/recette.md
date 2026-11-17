@@ -404,3 +404,29 @@ Re-capture avec le script du dev et mesures DOM. Captures : `docs/ux/recette/fin
   - versions affichées sur une ligne, sans puce : « v1 · 17 nov. 2026 · En ligne » ;
   - date d'expiration au format de la langue (sélecteur maison ou `lang` sur l'`input`).
 - **FI10** : libellé **hors** de la barre, à droite de la piste, en `text-muted` et chiffres tabulaires.
+
+## Recette finale sur le site en ligne (https://sabir-art.github.io/FlowDSIML/, dazzling @ `c848fbc`)
+
+Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** : écrans publics à 1 440 et 390 px, locales `fr-FR` et `en-US`, connexion refusée avec un compte fictif (`recette.ux@example.com`), et le player sur une démo qui n'existe pas. Captures : `docs/ux/recette/live/`.
+
+| Contrôle | Résultat |
+|---|---|
+| Disponibilité de l'app et du player (`/player/`) | ✅ 200 |
+| Polices chargées (Bricolage Grotesque, Instrument Sans) | ✅ |
+| Glyphes ou emojis utilisés comme icônes, dégradés, barres latérales | ✅ 0 |
+| Routes privées sans session | ✅ Redirection vers `#/login?redirect=…` |
+| Connexion refusée | ✅ Message « Email ou mot de passe incorrect. », champ en erreur, mot de passe vidé |
+| Inscription, validation | ✅ Erreurs par champ, indicateur de robustesse |
+| Player, démo inexistante | ✅ État « Démo introuvable » avec icône, traduit selon la langue du navigateur (FR / EN) |
+| Bascule FR / EN | ✅ |
+
+**Écarts (dev)**
+
+| # | Écran | Écart | Correction attendue |
+|---|---|---|---|
+| L1 | Connexion, inscription, mot de passe oublié (panneau gauche) | ❌ Première puce « Capturez un parcours » avec l'icône `Sparkles` (motif proscrit, §15.6) | `MousePointerClick` (une capture = des clics) ou `Camera` |
+| L2 | Connexion refusée | ⚠️ Le message ne porte que sur le champ **mot de passe**, alors qu'il concerne le couple email + mot de passe. Il n'est pas annoncé aux lecteurs d'écran : aucun `role="alert"` ni `aria-live` | `Alert kind="error"` au-dessus des champs (`role="alert"`), sans mettre en erreur un champ en particulier |
+| L3 | Inscription, mobile (390 px) | ⚠️ Le texte « Robustesse : Le mot de passe doit contenir au moins 8 caractères. » est décalé de 16 px et **déborde à droite** (coupé). Il répète aussi le libellé « (8 caractères min.) ». Le « L » majuscule après les deux-points est fautif | Aligner l'aide sur le champ (`padding-left: 0`, retour à la ligne). Texte : « Robustesse : faible · 8 caractères minimum » |
+| L4 | Player, démo inexistante | ℹ️ La requête Storage répond **400** (et non 404), ce qui fait une erreur dans la console. L'affichage est correct | Côté dev, à confirmer : vérifier l'existence avant le fetch ou ignorer ce 400 |
+
+**Pas encore testé sur le site réel** : les écrans connectés (tableau de bord, éditeur, partage, analytics, leads, membres) et le parcours player + `track` sur une démo publiée. Il faut un **compte de recette fictif** (créé par le chef d'équipe, sur un domaine `.example`) et l'**identifiant d'une démo publiée**. Ces écrans ont été vérifiés sur la même version avec le faux Supabase (section précédente, `finition4`).
