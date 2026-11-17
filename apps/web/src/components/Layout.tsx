@@ -123,7 +123,7 @@ export function Layout() {
           {open ? <X {...ICON} /> : <MenuIcon {...ICON} />}
         </button>
         <span className="brand">
-          <BrandMark size={24} />
+          <BrandMark size={32} />
         </span>
       </header>
       <aside
@@ -136,7 +136,7 @@ export function Layout() {
         aria-label={drawer ? t('nav.main') : undefined}
       >
         <div className="brand">
-          <BrandMark size={36} subtitle={t('app.org')} />
+          <BrandMark size={40} subtitle={t('app.org')} />
         </div>
         {workspaces.length > 0 && (
           <div className="ws-switch">

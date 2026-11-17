@@ -978,26 +978,32 @@
 /* Logo : symbole DSI + nom du produit */
 .brand-mark {
   display: inline-flex;
-  align-items: center;
-  gap: var(--fd-space-2);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   color: var(--fd-color-text);
 }
-.brand-mark__symbol {
-  flex: none;
+/* Logo clair par défaut, sombre selon le thème choisi (ou le système si « auto ») */
+.brand-mark__logo {
+  display: block;
+  height: auto;
+}
+.brand-mark__logo--dark {
+  display: none;
+}
+:root[data-theme='dark'] .brand-mark__logo--light {
+  display: none;
+}
+:root[data-theme='dark'] .brand-mark__logo--dark {
   display: block;
 }
-.brand-mark__text {
-  display: flex;
-  flex-direction: column;
-}
-.brand-mark__name {
-  font-family: var(--fd-font-display, var(--fd-font-sans));
-  font-weight: 800;
-  font-size: 1.125rem;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .brand-mark__logo--light {
+    display: none;
+  }
+  :root:not([data-theme='light']) .brand-mark__logo--dark {
+    display: block;
+  }
 }
 .brand-mark__sub {
   margin-top: 2px;
@@ -1372,8 +1378,7 @@
   height: auto;
 }
 .auth-product {
-  font: 800 1.25rem / 1 var(--fd-font-display, var(--fd-font-sans));
-  letter-spacing: -0.02em;
+  font: 600 0.8125rem / 1.2 var(--fd-font-sans);
   color: #ffffff;
 }
 .auth-pitch h2 {

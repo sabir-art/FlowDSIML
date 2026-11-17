@@ -28,7 +28,7 @@ import { PreviewDialog } from './PreviewDialog';
 import type { Manifest } from '@flowdsiml/manifest';
 import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
-import symbol from '../../assets/dsi-symbole.svg';
+import symbol from '../../assets/symbole-tutoclick.svg';
 
 /** Vrai si la fenêtre est plus étroite que `px` (ED11 : l'éditeur exige un écran large). */
 function useNarrow(px: number) {

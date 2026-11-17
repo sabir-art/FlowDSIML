@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { BarChart3, MousePointerClick, Share2 } from 'lucide-react';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { BrandMark } from '../../components/BrandMark';
-import logoDsiBlanc from '../../assets/logo-dsi-blanc.svg';
+import logoMonoBlanc from '../../assets/logo-tutoclick-mono-blanc.svg';
 import { setLocale } from '../../i18n';
 
 /** Écrans d'authentification (W5) : panneau de marque + formulaire, sélecteur de langue compact. */
@@ -22,8 +22,9 @@ export function AuthLayout({
     <main className="auth-shell" id="main">
       <aside className="auth-brand" aria-hidden="true">
         <div className="auth-logo auth-logo--dsi">
-          <img src={logoDsiBlanc} alt="" width={260} height={79} />
-          <span className="auth-product">{APP_NAME}</span>
+          {/* Fond prune : version monochrome blanche (jamais la version couleur sur prune) */}
+          <img src={logoMonoBlanc} alt={APP_NAME} width={240} height={69} />
+          <span className="auth-product">{t('app.org')}</span>
         </div>
         <div className="auth-pitch">
           <h2>{t('auth.pitchTitle')}</h2>
@@ -62,7 +63,7 @@ export function AuthLayout({
         </div>
         <div className="auth-card">
           <div className="auth-logo auth-logo--compact">
-            <BrandMark size={28} />
+            <BrandMark size={36} />
           </div>
           <h1>{title}</h1>
           {subtitle && <p className="fd-muted auth-subtitle">{subtitle}</p>}

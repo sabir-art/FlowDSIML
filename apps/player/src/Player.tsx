@@ -541,16 +541,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
           </button>
         )}
       </footer>
-      {theme.showBranding && (
-        <a
-          class="p-branding"
-          href="https://github.com/sabir-art/FlowDSIML"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {t.madeWith}
-        </a>
-      )}
+      {theme.showBranding && <p class="p-branding">{t.madeWith}</p>}
     </div>
   );
 
