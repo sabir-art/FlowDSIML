@@ -34,10 +34,10 @@
   <main class="main" data-view="lien">
     <header class="topbar">
       <a class="icon-btn" href="dashboard.html" aria-label="Retour aux démos"><i data-icon="arrowLeft"></i></a>
-      <div><h1>Partager</h1><p class="sub">Créer une fiche usager · publiée, version 3</p></div>
+      <div><h1>Partager</h1><p class="sub">Créer une fiche usager · <span class="only-pub">publiée, version 3</span><span class="only-draft">brouillon, jamais publiée</span></p></div>
       <div class="topbar__actions">
-        <button class="fd-btn" type="button"><i data-icon="external"></i>Ouvrir</button>
-        <button class="fd-btn fd-btn--primary" type="button"><i data-icon="copy"></i>Copier le lien</button>
+        <button class="fd-btn only-pub" type="button"><i data-icon="external"></i>Ouvrir</button><button class="fd-btn only-draft" type="button"><i data-icon="eye"></i>Aperçu</button>
+        <button class="fd-btn fd-btn--primary only-pub" type="button"><i data-icon="copy"></i>Copier le lien</button><button class="fd-btn fd-btn--primary only-draft" type="button"><i data-icon="rocket"></i>Publier</button>
       </div>
     </header>
 
@@ -48,6 +48,17 @@
           <button role="tab" type="button" aria-selected="false" data-view-set="acces"><i data-icon="lock"></i>Accès</button>
           <button role="tab" type="button" aria-selected="false" data-view-set="integrer"><i data-icon="code"></i>Intégrer</button>
           <button role="tab" type="button" aria-selected="false" data-view-set="page"><i data-icon="layout"></i>Page publique</button>
+        </div>
+
+        <!-- État « démo non publiée » -->
+        <div data-pane="nonpubliee">
+          <div class="fd-alert fd-alert--warning" role="status"><i data-icon="alert"></i><div><b>Cette démo n'est pas encore publiée.</b> Vous pouvez préparer son adresse dès maintenant. Le lien, l'intégration et la page publique fonctionneront après la publication.</div></div>
+          <div class="fd-field" style="margin:0">
+            <label class="fd-label" for="slug2">Adresse de la démo</label>
+            <div class="slug"><span class="slug__prefix">demos.tutoclick.example/acme/</span><input id="slug2" value="creer-une-fiche-usager" aria-describedby="slug2-h"><button class="fd-btn" type="button" disabled><i data-icon="copy"></i>Copier</button></div>
+            <span class="fd-help" id="slug2-h">Lettres minuscules, chiffres et tirets (3 à 60 caractères). L'adresse sera active à la publication.</span>
+          </div>
+          <div class="draft-cta"><button class="fd-btn fd-btn--primary" type="button"><i data-icon="rocket"></i>Publier la démo</button><span class="fd-help">Les autres onglets se débloquent après la publication.</span></div>
         </div>
 
         <!-- Onglet Lien -->
@@ -130,14 +141,19 @@
         </div>
         <div class="fd-card side-summary">
           <h2 class="fd-card__title">Récapitulatif</h2>
-          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="link"></i></span><span>demos.tutoclick.example/acme/creer-une-fiche-usager<small>Lien permanent</small></span></div>
-          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="key"></i></span><span>Mot de passe<small>Changé il y a 2 jours</small></span></div>
-          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="popup"></i></span><span>Bouton pop-up<small>2 sites autorisés</small></span></div>
-          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="layout"></i></span><span>Page publique active<small>Non indexée</small></span></div>
+          <p class="fd-help only-draft" style="margin:0">Aucune diffusion active : la démo n'est pas publiée.</p>
+          <div class="summary-line only-pub"><span class="fd-icon-chip"><i data-icon="link"></i></span><span>demos.tutoclick.example/acme/creer-une-fiche-usager<small>Lien permanent</small></span></div>
+          <div class="summary-line only-pub"><span class="fd-icon-chip"><i data-icon="key"></i></span><span>Mot de passe<small>Changé il y a 2 jours</small></span></div>
+          <div class="summary-line only-pub"><span class="fd-icon-chip"><i data-icon="popup"></i></span><span>Bouton pop-up<small>2 sites autorisés</small></span></div>
+          <div class="summary-line only-pub"><span class="fd-icon-chip"><i data-icon="layout"></i></span><span>Page publique active<small>Non indexée</small></span></div>
         </div>
       </aside>
     </div>
   </main>
+</div>
+<div class="mock-state fd-segmented" role="group" aria-label="État de la démo (maquette)" style="left:50%;transform:translateX(-50%)">
+  <button type="button" data-view-set="lien" aria-pressed="true">Publiée</button>
+  <button type="button" data-view-set="nonpubliee" aria-pressed="false">Non publiée</button>
 </div>
 <div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
   <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>

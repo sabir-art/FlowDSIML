@@ -1064,6 +1064,15 @@
         "outdated": "Version ancienne",
         "scormNote": "Un paquet SCORM complet est une copie : republiez-le dans le LMS après chaque nouvelle version, ou choisissez le paquet léger."
       }
+    },
+    "unpublished": {
+      "status": "brouillon, jamais publiée",
+      "alertTitle": "Cette démo n'est pas encore publiée.",
+      "alertBody": "Vous pouvez préparer son adresse dès maintenant. Le lien, l'intégration et la page publique fonctionneront après la publication.",
+      "slugHelp": "Lettres minuscules, chiffres et tirets (3 à 60 caractères). L'adresse sera active à la publication.",
+      "publish": "Publier la démo",
+      "tabsLocked": "Les autres onglets se débloquent après la publication.",
+      "summaryEmpty": "Aucune diffusion active : la démo n'est pas publiée."
     }
   },
   "player": {
@@ -1086,7 +1095,10 @@
       "submit": "Envoyer",
       "skip": "Passer",
       "thanks": "Merci, c'est noté !",
-      "privacy": "Confidentialité"
+      "privacy": "Confidentialité",
+      "processedBy": "Données traitées par {{workspace}}.",
+      "privacyPolicy": "Politique de confidentialité",
+      "emailPro": "E-mail professionnel"
     },
     "password": {
       "title": "Cette démo est protégée",
@@ -1189,6 +1201,15 @@
     "mobile": {
       "tap": "Touchez",
       "click": "Cliquez"
+    },
+    "finish": "Terminer",
+    "chapters": "Chapitres",
+    "meta": "{{workspace}} · {{count}} étapes · {{duration}}",
+    "progress": "Progression",
+    "end": {
+      "title": "Tutoriel terminé",
+      "body": "Vous avez parcouru les {{count}} étapes de « {{title}} ».",
+      "restart": "Recommencer"
     }
   },
   "analytics": {

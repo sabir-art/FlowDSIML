@@ -23,18 +23,18 @@
 | Éditeur, état Design | `refonte/editeur.html?view=design` | `conformite/editeur-design.png` | ❌ NON CONFORME (5 écarts) |
 | Éditeur, état Réglages | `refonte/editeur.html?view=reglages` | `conformite/editeur-reglages.png` | ❌ NON CONFORME (6 écarts) |
 | Partager | `refonte/partage-avance.html` (A1) | `conformite/partage.png` | ❌ NON CONFORME : A1 non développé, structure entièrement différente |
-| Connexion, inscription, mot de passe, invitation | `refonte/auth.html?view=login|signup|forgot|reset|invite` | `conformite/connexion.png`, `inscription.png` | ❌ NON CONFORME (8 écarts) |
-| Onboarding | `refonte/auth.html?view=onb1|onb2` | `conformite/onboarding.png` | ❌ NON CONFORME (3 écarts + panneau de marque) |
+| Connexion, inscription, mot de passe, invitation | `refonte/auth.html?view=login,signup,forgot,reset,invite` | `conformite/connexion.png`, `inscription.png` | ❌ NON CONFORME (8 écarts) |
+| Onboarding | `refonte/auth.html?view=onb1,onb2` | `conformite/onboarding.png` | ❌ NON CONFORME (3 écarts + panneau de marque) |
 | Leads | `refonte/ecrans-compte.html?view=leads` | `conformite/leads.png` | ❌ NON CONFORME (6 écarts) |
 | Membres | `refonte/ecrans-compte.html?view=membres` | `conformite/parametres-membres.png` | ❌ NON CONFORME (6 écarts) |
 | Profil | `refonte/ecrans-compte.html?view=profil` | `conformite/parametres-profil.png` | ❌ NON CONFORME (4 écarts) |
 | Paramètres du workspace | `refonte/ecrans-compte.html?view=workspace` | `conformite/parametres-workspace.png` | ❌ NON CONFORME (5 écarts) |
 | Plans | `refonte/ecrans-compte.html?view=plans` | `conformite/plans.png` | ❌ NON CONFORME (4 écarts) |
-| Player | ancienne maquette, **obsolète** | — | ⏳ MAQUETTE À FOURNIR (Lead UX, en cours) |
+| Player : étape et bulle, formulaire de lead, fin | `refonte/player.html?view=etape,formulaire,fin` | `conformite/player-*.png` | ❌ NON CONFORME (7 écarts) |
 | F1 : vérification des flous, modale RGPD | `refonte/f1-formation.html` | à produire | 🔜 |
 | F2 : quiz (éditeur et player) | `refonte/f2-quiz.html` | `conformite/quiz-editeur.png` | 🔜 |
 
-> **Maquettes obsolètes.** Les maquettes d'origine (`docs/ux/maquettes/*.html`) datent d'avant la refonte. Elles portent l'ancienne identité et des contenus abandonnés : prix, offres Solo / Team, « Démo centers V2 », factures, connexion Google. **Elles ne sont plus une référence.** Les maquettes de refonte qui les remplacent sont `refonte/ecrans-compte.html` et `refonte/auth.html` (lot 2). Le player reste à maquetter : le dev **ne le modifie pas** d'ici là.
+> **Maquettes obsolètes.** Les maquettes d'origine (`docs/ux/maquettes/*.html`) datent d'avant la refonte. Elles portent l'ancienne identité et des contenus abandonnés : prix, offres Solo / Team, « Démo centers V2 », factures, connexion Google. **Elles ne sont plus une référence.** Les maquettes de refonte qui les remplacent sont `refonte/ecrans-compte.html` et `refonte/auth.html` (lot 2). Le player a sa maquette de refonte : `refonte/player.html`.
 >
 > **Écart transversal G-1 (tous les écrans avec barre latérale).** Le logo de la barre latérale est le symbole DSI suivi du texte HTML « TutoClick ». Il doit être le SVG `brand-tutoclic/production/logo-tutoclick-compact.svg` (`-sombre` en thème sombre), à 44 px de haut, avec « DSI des Missions Locales » dessous (voir D-1). Il n'est pas répété dans chaque tableau.
 
@@ -150,7 +150,15 @@ Maquette : `refonte/partage-avance.html` (A1 : onglets Lien, Accès, Intégrer, 
 | Intégrer | `?view=integrer` |
 | Page publique | `?view=page` |
 
-État « démo non publiée » : il n'est pas maquetté. Je l'ajoute (carte d'alerte en haut de l'onglet Lien, onglets désactivés sauf Lien).
+**État « démo non publiée »** : `refonte/partage-avance.html?view=nonpubliee`. Il fait partie de la refonte A1 :
+- sous-titre « brouillon, jamais publiée » ;
+- en-tête « Aperçu » et « Publier » (au lieu de « Ouvrir » et « Copier le lien ») ;
+- alerte warning en haut de l'onglet Lien, puis le champ d'adresse modifiable (bouton « Copier » désactivé), puis le bouton « Publier la démo » avec l'aide « Les autres onglets se débloquent après la publication. » ;
+- onglets Accès, Intégrer et Page publique désactivés ;
+- aperçu grisé ;
+- récapitulatif réduit à « Aucune diffusion active : la démo n'est pas publiée. »
+
+Microcopie FR/EN : `share.unpublished.*`.
 
 ---
 
@@ -227,7 +235,7 @@ Maquette : `refonte/ecrans-compte.html?view=plans`. Image : `conformite/plans.pn
 
 ## 11. Connexion, inscription, mot de passe, invitation
 
-Maquette : `refonte/auth.html` (`?view=login|signup|forgot|reset|invite`). Images : `conformite/connexion.png`, `conformite/inscription.png`.
+Maquette : `refonte/auth.html` (`?view=login,signup,forgot,reset,invite`). Images : `conformite/connexion.png`, `conformite/inscription.png`.
 
 | N° | Zone | Maquette | App | Correction | Décision |
 |---|---|---|---|---|---|
@@ -244,10 +252,24 @@ Les vues « Mot de passe oublié », « Nouveau mot de passe » et « Invitation
 
 ## 12. Onboarding (`/onboarding`)
 
-Maquette : `refonte/auth.html?view=onb1|onb2`. Image : `conformite/onboarding.png`. Le panneau de marque suit AU-1 à AU-4.
+Maquette : `refonte/auth.html?view=onb1,onb2`. Image : `conformite/onboarding.png`. Le panneau de marque suit AU-1 à AU-4.
 
 | N° | Zone | Maquette | App | Correction | Décision |
 |---|---|---|---|---|---|
 | ON-1 | Indicateur d'étapes | **Au-dessus** du titre | Entre le sous-titre et le champ | Au-dessus du titre | — |
 | ON-2 | Libellé du champ | « Nom de la structure ou de l'équipe » | « Nom de l'entreprise ou de l'équipe » | Libellé de la maquette | — |
 | ON-3 | « Annuler » | Lien souligné prune | Texte gris | Lien | — |
+
+## 13. Player (`/#/d/:id`)
+
+Maquette : `refonte/player.html` (`?view=etape,formulaire,fin`, `&theme=dark`, et à 390 px). Images : `conformite/player-etape.png`, `player-formulaire.png`, `player-fin.png`. App : build intégré, port 5179, manifeste de test à 3 étapes dont un formulaire. Microcopie FR/EN : `player.finish`, `player.chapters`, `player.meta`, `player.progress`, `player.end.*`, `player.form.processedBy`, `player.form.privacyPolicy`, `player.form.emailPro`.
+
+| N° | Zone | Maquette | App | Correction | Décision |
+|---|---|---|---|---|---|
+| PY-1 | En-tête, gauche | Pastille du workspace (logo, ou initiales sur fond blanc), titre de la démo en gras, méta « workspace · n étapes · durée » | Titre seul, petit, sans pastille ni méta | Comme la maquette | — |
+| PY-2 | En-tête, droite | Bouton fantôme « Chapitres » (seulement si la démo a des chapitres), puis le CTA de la page en primaire avec icône `external` | CTA seul | Ajouter « Chapitres » (ouvre le menu des chapitres) | — |
+| PY-3 | Barre de navigation | **Une pilule** blanche centrée : ←, barre de progression **prune** (240 px), « n / N », →, séparateur, langue (globe), plein écran | Boutons séparés, barre de progression **orange** pleine largeur, compteur à droite, pas de bouton de langue | Pilule de la maquette. L'orange est réservé au logo et à la marque, jamais à l'interface | — |
+| PY-4 | Bulle | Titre, texte, pied « n / N » + « Suivant » (avec chevron). « Précédent » est dans la barre, pas dans la bulle | « Précédent » ajouté dans la bulle à partir de l'étape 2 | Retirer « Précédent » de la bulle | — |
+| PY-5 | Formulaire de lead | Voile **sur la capture seulement** (l'en-tête et le CTA restent lisibles) ; titre, description, « E-mail professionnel * », case de consentement, ligne « Données traitées par {{workspace}}. Politique de confidentialité » (lien), bouton « Continuer » avec flèche à droite | Voile sur toute la page (CTA grisé), libellé « Email * », pas de ligne sur le traitement des données | Comme la maquette. La ligne « Données traitées par… » est **toujours** affichée ; le lien n'apparaît que si une politique est renseignée (Paramètres du workspace) | — |
+| PY-6 | Fin d'une démo simple | Dernière étape : le bouton de la bulle devient « **Terminer** » et ouvre la modale de fin (puce de succès, « Tutoriel terminé », « Vous avez parcouru les n étapes de « titre ». », CTA de la page en primaire, « Recommencer » en fantôme) | **Pas d'écran de fin** : le → de la barre est désactivé et la bulle garde « Suivant » sans effet | Ajouter l'écran de fin. Sans CTA de page, seul « Recommencer » est affiché, en secondaire. Avec un quiz (F2), la fin du quiz garde son propre écran | — |
+| PY-7 | Mobile (≤ 720 px) | La bulle devient une **feuille du bas** au-dessus de la barre ; le formulaire et la fin s'ouvrent en feuille du bas ; « Chapitres », méta, langue et plein écran sont masqués | Non vérifié sur l'app à 390 px | À appliquer, puis je le vérifie en recette | — |
