@@ -656,3 +656,19 @@ Points ouverts : RF6 (pas d'entrée de navigation active sur `/demos/:id/*`, vis
 - `mailto:` vers l'adresse de support **configurable** (`VITE_SUPPORT_EMAIL`, jamais en dur dans le code, puisque le dépôt est public) ;
 - objet pré-rempli : « Changement de plan : {{workspace}} → {{plan}} » / « Plan change: {{workspace}} → {{plan}} » ;
 - si la variable n'est pas définie, le bouton est masqué et le texte actuel reste affiché.
+
+### Panneau Commentaires (`claude/dev-mvp` @ `5981de9`, captures du dev 25, clair et sombre)
+
+Le dev a livré **sans avoir vu `commentaires.md`**. Il a pourtant bien suivi la grammaire de la refonte : carte de rayon 24 px sous le canevas, poignée accessible au clavier et repli au double-clic, saisie avec Entrée et Maj+Entrée et consigne en `sr-only`, compteur dans le rail, rendu correct en sombre. Écarts par rapport à la spec :
+
+| # | Gravité | Écart | Attendu (`commentaires.md`) |
+|---|---|---|---|
+| CM1 | ⚠️ | Hauteur par défaut trop basse : on ne voit qu'un commentaire et demi, et le premier est coupé sous l'en-tête (« Résoudre » tranché) | Hauteur par défaut de **280 px** (220 px entre 1 024 et 1 280 px). À l'ouverture d'une étape, liste positionnée sur le dernier commentaire. Bord haut de la liste net (padding-top de 4 px, pas d'élément sous l'en-tête) |
+| CM2 | ⚠️ | Le champ de saisie a le **focus au chargement** (double anneau bleu et prune) | Pas de focus automatique au chargement : seulement quand l'utilisateur ouvre ou déplie le panneau. Un seul anneau de focus (`--fd-shadow-focus`), pas de bordure prune en plus |
+| CM3 | ⚠️ | Compteur de l'en-tête en pastille noire avec le chiffre seul (« 2 » : 2 quoi ?) | Badge « **2 ouverts** » en `accent-soft` / `accent-soft-text` (clé `openCount_*`), masqué à 0 |
+| CM4 | ⚠️ | Badge du rail en pilule noire **sous** le titre | Pilule **framboise** (`accent`) en haut à droite de la vignette, avec `MessageSquare` de 12 px et le nombre (99+ au-delà), ajoutée au nom accessible de l'étape. Le framboise signale « à traiter », le noir est réservé à la navigation active |
+| CM5 | ⚠️ | Crayon, corbeille et « Résoudre » visibles en permanence sur chaque commentaire : la liste est chargée | Actions visibles au survol et au focus (toujours visibles en tactile, `@media (hover: none)`). « Modifier » et « Supprimer » dans un menu ⋯ en portail (§15.7), réservé à l'auteur (et aux admins pour « Supprimer ») |
+| CM6 | ℹ️ | L'auteur courant s'affiche « Vous », et tous les avatars sont prune | « Alice Martin **(vous)** ». Couleur d'avatar stable par membre, choisie parmi `chart-1` à `chart-5` (texte noir sur orange, vert et bleu ; blanc sur prune et framboise) |
+| CM7 | ℹ️ | Mention « Internes à l'équipe, jamais publiés », sans icône | Clé `private` : « Interne à l'équipe · jamais publié », avec l'icône `Lock` de 14 px, **sous** le titre. Utiliser les **49 clés `editor.comments.*`** de `docs/ux/i18n` |
+| CM8 | ℹ️ | Poignée de 40 × 4 px, hauteur minimale de 120 px, icône d'envoi `Send` | Accepté tel quel : écarts mineurs sans effet sur l'usage |
+| CM9 | ? | États non visibles sur les captures : vide, tout résolu, filtre « résolus », modification, replié, chargement, erreur d'envoi, lecture seule, **mobile** (lire et répondre depuis l'écran « écran plus large ») | Ajouter des captures `25b` à `25h` pour ces états. Je les vérifierai contre `maquettes/refonte/editeur.html` (barre d'états) et `commentaires-mobile.html` |

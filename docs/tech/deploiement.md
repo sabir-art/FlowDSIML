@@ -34,6 +34,7 @@ Le workflow `Deploy` se lance sur un push sur `main`, ou à la main (*Actions �
 | `VITE_SUPABASE_ANON_KEY` | *Project Settings → API → anon / publishable key*. Publique par conception, car la sécurité repose sur RLS | builds web, player, extension |
 | `SITE_URL` *(optionnel)* | URL publique de l'app si domaine perso, ex. `https://app.exemple.com` | job `pages`, extension |
 | `BASE_PATH` *(optionnel)* | `/` avec un domaine perso (défaut : `/<repo>/`) | job `pages` |
+| `VITE_SUPPORT_EMAIL` *(optionnel)* | Adresse du bouton « Nous contacter » (page Plans) ; bouton masqué si vide | job `pages` |
 | `VITE_PLAYER_URL` *(optionnel)* | URL du player si elle est séparée de l'app (recommandé avant la bêta) | job `pages` |
 
 **Ne jamais** mettre la clé `service_role` dans GitHub ni dans le front. Les Edge Functions la reçoivent automatiquement de Supabase (`SUPABASE_SERVICE_ROLE_KEY`).
