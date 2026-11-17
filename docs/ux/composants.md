@@ -295,16 +295,17 @@ Il apparaît sous un sélecteur de couleur quand le ratio est inférieur à 4,5:
 | Action / objet | Icône | | Action / objet | Icône |
 |---|---|---|---|---|
 | Ajouter (générique) | `Plus` | | Supprimer | `Trash2` |
+| Modifier / ouvrir dans l'éditeur | `Pencil` | | Dépublier | `GlobeLock` |
 | Nouvelle démo | `Plus` (+ libellé) | | Retirer / révoquer (membre, invitation) | `UserMinus` / `Ban` |
 | Écran texte (étape texte) | `Type` | | Fermer, effacer un champ | `X` |
 | Image (importer) | `ImagePlus` | | Dupliquer | `Copy` |
 | Capturer (extension) | `ScreenShare` | | Copier un lien / du code | `Link` / `ClipboardCopy` |
 | Démarrer l'enregistrement | `Circle` plein (`fill="currentColor"`) | | Copié (confirmation) | `Check` |
 | Pause / reprendre | `Pause` / `Play` | | Partager | `Share2` |
-| Hotspot | `MousePointerClick` | | Publier | `Rocket` |
-| Bulle (tooltip) | `MessageSquare` | | Dépublier | `EyeOff` |
+| Hotspot | `Target` | | Publier | `Rocket` |
+| Bulle (tooltip) | `MessageSquare` | | Masquer (générique) | `EyeOff` |
 | Zone mise en évidence | `SquareDashedMousePointer` | | Aperçu | `Eye` |
-| Flou | `Droplet` | | Ouvrir (nouvel onglet) | `ExternalLink` |
+| Flou | `EyeOff` (aligné sur l'app ; « Dépublier » prend `GlobeLock` pour lever l'ambiguïté) | | Ouvrir (nouvel onglet) | `ExternalLink` |
 | Zoom sur une zone | `ZoomIn` | | Intégrer (iframe) | `Code` |
 | Recadrer | `Crop` | | Analytics | `BarChart3` |
 | Sélection (outil) | `MousePointer2` | | Leads | `Users` |
