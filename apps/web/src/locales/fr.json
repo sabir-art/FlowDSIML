@@ -262,5 +262,40 @@
     "draft": "Brouillon",
     "published": "Publiée",
     "archived": "Archivée"
+  },
+  "publish": {
+    "publish": "Publier",
+    "republish": "Republier",
+    "publishing": "Publication…"
+  },
+  "share": {
+    "title": "Partager",
+    "backToEditor": "Éditeur",
+    "justPublished": "Démo publiée ! Partagez le lien ou intégrez-la sur votre site.",
+    "notPublished": "Cette démo n'est pas publiée. Publiez-la depuis l'éditeur pour obtenir un lien public.",
+    "goPublish": "Ouvrir l'éditeur",
+    "publicLink": "Lien public",
+    "publicLinkHint": "Toute personne disposant du lien peut voir la démo.",
+    "urlVariables": "Personnalisez avec des paramètres d'URL :",
+    "open": "Ouvrir",
+    "unpublish": "Dépublier",
+    "confirmUnpublish": "Dépublier ? Le lien et les intégrations cesseront de fonctionner.",
+    "unpublished": "Démo dépubliée.",
+    "embed": "Intégration (iframe)",
+    "embedHint": "Collez ce code dans votre site, landing page ou CMS.",
+    "allowedOrigins": "Sites autorisés à intégrer la démo (un par ligne, vide = tous)",
+    "allowedOriginsHint": "Pris en compte à la prochaine publication. Contrôle effectué par le player : il dissuade mais ne remplace pas un accès privé.",
+    "originsSaved": "Enregistré. Republiez pour appliquer.",
+    "personalLinks": "Liens personnalisés",
+    "personalLinksHint": "Un lien par prospect : variables pré-remplies, suivi dédié dans les analytics, expiration possible.",
+    "linkName": "Nom du lien",
+    "linkNamePlaceholder": "Ex. : Globex — Marie Dupont",
+    "expires": "Expiration",
+    "createLink": "Créer le lien",
+    "linkCreated": "Lien créé.",
+    "disable": "Désactiver",
+    "enable": "Activer",
+    "versions": "Versions publiées",
+    "live": "en ligne"
   }
 }

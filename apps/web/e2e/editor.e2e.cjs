@@ -15,7 +15,7 @@ const SHOTS = process.env.SHOTS_DIR;
     if (!cond) process.exitCode = 1;
   };
 
-  await page.goto(`${BASE}/#/demos/demo-1/edit`);
+  await page.goto(`${BASE}/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit`);
   await page.waitForSelector('.canvas-frame img');
   ok((await page.locator('.steplist li').count()) === 3, 'liste des 3 étapes');
   ok((await page.locator('.canvas-hotspot').count()) === 1, 'hotspot affiché sur l’étape 1');

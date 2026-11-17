@@ -262,5 +262,40 @@
     "draft": "Draft",
     "published": "Published",
     "archived": "Archived"
+  },
+  "publish": {
+    "publish": "Publish",
+    "republish": "Republish",
+    "publishing": "Publishing…"
+  },
+  "share": {
+    "title": "Share",
+    "backToEditor": "Editor",
+    "justPublished": "Demo published! Share the link or embed it on your website.",
+    "notPublished": "This demo is not published. Publish it from the editor to get a public link.",
+    "goPublish": "Open editor",
+    "publicLink": "Public link",
+    "publicLinkHint": "Anyone with the link can view the demo.",
+    "urlVariables": "Personalize with URL parameters:",
+    "open": "Open",
+    "unpublish": "Unpublish",
+    "confirmUnpublish": "Unpublish? The link and embeds will stop working.",
+    "unpublished": "Demo unpublished.",
+    "embed": "Embed (iframe)",
+    "embedHint": "Paste this code into your website, landing page or CMS.",
+    "allowedOrigins": "Websites allowed to embed the demo (one per line, empty = all)",
+    "allowedOriginsHint": "Applied on next publish. Checked by the player: it deters but does not replace private access.",
+    "originsSaved": "Saved. Republish to apply.",
+    "personalLinks": "Personalized links",
+    "personalLinksHint": "One link per prospect: prefilled variables, dedicated tracking, optional expiry.",
+    "linkName": "Link name",
+    "linkNamePlaceholder": "E.g. Globex — Jane Doe",
+    "expires": "Expiry",
+    "createLink": "Create link",
+    "linkCreated": "Link created.",
+    "disable": "Disable",
+    "enable": "Enable",
+    "versions": "Published versions",
+    "live": "live"
   }
 }

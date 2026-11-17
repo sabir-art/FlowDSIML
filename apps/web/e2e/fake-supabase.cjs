@@ -42,7 +42,7 @@ function seed() {
   };
   const now = new Date().toISOString();
   const demo = {
-    id: 'demo-1',
+    id: '0b5c1f0e-0000-4000-8000-000000000001',
     workspace_id: ws.id,
     folder_id: null,
     title: 'Démo CRM',
@@ -91,7 +91,13 @@ function seed() {
       invitations: [],
       demos: [
         demo,
-        { ...demo, id: 'demo-2', title: 'Onboarding', status: 'published', current_version_id: 'v-2' },
+        {
+          ...demo,
+          id: '0b5c1f0e-0000-4000-8000-000000000002',
+          title: 'Onboarding',
+          status: 'published',
+          current_version_id: 'v-2',
+        },
       ],
       steps: [
         step('s1', 0),
@@ -137,7 +143,7 @@ function seed() {
         {
           id: 'l1',
           workspace_id: ws.id,
-          demo_id: 'demo-2',
+          demo_id: '0b5c1f0e-0000-4000-8000-000000000002',
           version_id: 'v-2',
           link_id: null,
           visitor_id: 'v1',
@@ -150,6 +156,8 @@ function seed() {
       demo_versions: [],
     },
     calls: [],
+    storage: {},
+    events: [],
   };
 }
 
@@ -229,6 +237,11 @@ async function install(page, state = seed()) {
         : null;
     state.calls.push({ method, path: p, query: url.search, body });
 
+    if (p.startsWith('/functions/v1/track')) {
+      const batch = JSON.parse(req.postData() || '{}');
+      state.events.push(...(batch.events || []));
+      return json(route, 200, { inserted: (batch.events || []).length });
+    }
     if (p.startsWith('/auth/v1/user')) return json(route, 200, state.user);
     if (p.startsWith('/auth/v1/')) return json(route, 200, {});
 
@@ -318,10 +331,20 @@ async function install(page, state = seed()) {
             locale: 'fr',
             publishedAt: new Date().toISOString(),
             theme: { ...(d.settings.theme || {}) },
-            variables: [],
+            variables: t.variables.map((v) => ({ key: v.key, label: v.label, default: v.default_value })),
             chapters: [],
-            forms: [],
-            allowedEmbedOrigins: [],
+            forms: t.forms
+              .filter((f) => f.demo_id === d.id)
+              .map((f) => ({
+                id: f.id,
+                title: f.title,
+                description: f.description,
+                submitLabel: f.submit_label,
+                fields: f.fields,
+                consentText: f.consent_text,
+                skippable: f.skippable,
+              })),
+            allowedEmbedOrigins: d.settings.allowedEmbedOrigins || [],
             trackUrl: null,
             steps: steps.map((s) => ({
               id: s.id,
@@ -336,8 +359,22 @@ async function install(page, state = seed()) {
               blurs: s.blurs,
               zoom: s.zoom,
               cta: s.cta,
-              gateFormId: null,
-              hotspots: t.hotspots.filter((h) => h.step_id === s.id),
+              gateFormId: s.gate_form_id,
+              hotspots: t.hotspots
+                .filter((h) => h.step_id === s.id)
+                .map((h) => ({
+                  id: h.id,
+                  x: h.x,
+                  y: h.y,
+                  w: h.w,
+                  h: h.h,
+                  title: h.title,
+                  body: h.body,
+                  placement: h.placement,
+                  action: h.action,
+                  cta: h.cta,
+                  pulse: h.pulse,
+                })),
             })),
           };
           t.demo_versions.push({ id: versionId, demo_id: d.id, number, manifest });
@@ -363,6 +400,23 @@ async function install(page, state = seed()) {
         }
         case 'create_workspace':
           return json(route, 200, t.workspaces[0]);
+        case 'track_events':
+          state.events.push(...(a.p_batch?.events || []));
+          return json(route, 200, (a.p_batch?.events || []).length);
+        case 'submit_lead':
+          t.leads.push({
+            id: crypto.randomUUID(),
+            email: a.p_email,
+            fields: a.p_fields,
+            demo_id: a.p_demo,
+            consent: a.p_consent,
+            created_at: new Date().toISOString(),
+          });
+          return json(route, 200, 'lead-id');
+        case 'resolve_share_link': {
+          const l = t.share_links.find((x) => x.token === a.p_token && x.is_active);
+          return json(route, 200, l ? { demoId: l.demo_id, linkId: l.id, variables: l.variables } : null);
+        }
         default:
           return json(route, 200, null);
       }
@@ -429,6 +483,34 @@ async function install(page, state = seed()) {
       }
     }
 
+    if (p.startsWith('/storage/v1/object/list/')) {
+      const bucket = p.split('/')[5];
+      const prefix = (body.prefix || '').replace(/\/$/, '');
+      const names = Object.keys(state.storage)
+        .filter((k) => k.startsWith(`${bucket}/${prefix}/`))
+        .map((k) => k.slice(bucket.length + prefix.length + 2))
+        .filter((n) => !n.includes('/') && (!body.search || n.includes(body.search)));
+      return json(
+        route,
+        200,
+        names.map((name) => ({ name, id: name, metadata: {} })),
+      );
+    }
+    if (p.startsWith('/storage/v1/object/public/')) {
+      const key = decodeURIComponent(p.slice('/storage/v1/object/public/'.length));
+      const f = state.storage[key];
+      if (!f) return json(route, 400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
+      return route.fulfill({
+        status: 200,
+        contentType: f.type,
+        body: f.data,
+        headers: { 'access-control-allow-origin': '*' },
+      });
+    }
+    if (p.startsWith('/storage/v1/object/') && method === 'DELETE') {
+      for (const k of body.prefixes || []) delete state.storage[`${p.split('/')[4]}/${k}`];
+      return json(route, 200, []);
+    }
     if (p.startsWith('/storage/v1/object/sign/') && method === 'POST') {
       const paths = body.paths || [];
       return json(
@@ -438,8 +520,14 @@ async function install(page, state = seed()) {
       );
     }
     if (p.startsWith('/storage/v1/object/copy')) return json(route, 200, { Key: body.destinationKey });
-    if (p.startsWith('/storage/v1/object/') && (method === 'POST' || method === 'PUT'))
-      return json(route, 200, { Key: p, Id: 'x' });
+    if (p.startsWith('/storage/v1/object/') && (method === 'POST' || method === 'PUT')) {
+      const key = decodeURIComponent(p.slice('/storage/v1/object/'.length));
+      state.storage[key] = parseUpload(
+        req.postDataBuffer() || Buffer.alloc(0),
+        req.headers()['content-type'] || '',
+      );
+      return json(route, 200, { Key: key, Id: 'x' });
+    }
     if (p.startsWith('/storage/v1/object/'))
       return route.fulfill({
         status: 200,
@@ -450,6 +538,26 @@ async function install(page, state = seed()) {
     return json(route, 404, { message: 'not mocked ' + p });
   });
   return state;
+}
+
+/** storage-js envoie les Blob en multipart/form-data : on extrait la partie fichier. */
+function parseUpload(buf, contentType) {
+  const m = /boundary=(.+)$/.exec(contentType);
+  if (!m) return { data: buf, type: contentType || 'application/octet-stream' };
+  const boundary = Buffer.from(`--${m[1]}`);
+  let start = 0;
+  while ((start = buf.indexOf(boundary, start)) !== -1) {
+    const headerEnd = buf.indexOf('\r\n\r\n', start);
+    if (headerEnd === -1) break;
+    const headers = buf.slice(start, headerEnd).toString();
+    const next = buf.indexOf(boundary, headerEnd);
+    const ct = /content-type:\s*([^\r\n]+)/i.exec(headers);
+    if ((ct && /filename=|name=""/i.test(headers)) || (ct && !/cacheControl/.test(headers))) {
+      return { data: buf.slice(headerEnd + 4, next - 2), type: ct[1].trim() };
+    }
+    start = next;
+  }
+  return { data: buf, type: contentType };
 }
 
 function defaults(table, r) {
