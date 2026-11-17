@@ -1,13 +1,115 @@
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Alert } from '@flowdsiml/ui';
+import './app.css';
+import { AuthProvider, useAuth } from './auth/AuthProvider';
+import { WorkspaceProvider } from './workspace/WorkspaceProvider';
+import { isConfigured } from './lib/supabase';
+import { RequireAuth, RequireWorkspace } from './components/guards';
+import { Layout } from './components/Layout';
+import { Login } from './pages/auth/Login';
+import { Signup } from './pages/auth/Signup';
+import { ForgotPassword } from './pages/auth/ForgotPassword';
+import { ResetPassword } from './pages/auth/ResetPassword';
+import { Onboarding } from './pages/Onboarding';
+import { AcceptInvite } from './pages/AcceptInvite';
+import { Profile } from './pages/settings/Profile';
+import { Members } from './pages/settings/Members';
+import { WorkspaceSettings } from './pages/settings/WorkspaceSettings';
+import { DemosPage } from './pages/demos/DemosPage';
+import { EditorPage } from './pages/editor/EditorPage';
+import { DemoAnalyticsPage } from './pages/analytics/DemoAnalyticsPage';
+import { AnalyticsPage } from './pages/analytics/AnalyticsPage';
+import { LeadsPage } from './pages/analytics/LeadsPage';
+import { SharePage } from './pages/share/SharePage';
+
+/**
+ * Après un lien email (PKCE), Supabase renvoie vers /?code=…&next=/route.
+ * supabase-js échange le code ; on nettoie l'URL et on navigue vers `next`.
+ */
+function EmailRedirectHandler() {
+  const navigate = useNavigate();
+  const { loading, recovery } = useAuth();
+  useEffect(() => {
+    if (loading) return;
+    const url = new URL(window.location.href);
+    const next = url.searchParams.get('next');
+    if (url.searchParams.has('code') || next) {
+      url.searchParams.delete('code');
+      url.searchParams.delete('next');
+      window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+      navigate(recovery ? '/reset-password' : next && next.startsWith('/') ? next : '/', { replace: true });
+    } else if (recovery) {
+      navigate('/reset-password', { replace: true });
+    }
+  }, [loading, recovery, navigate]);
+  return null;
+}
+
+function ConfigWarning() {
+  const { t } = useTranslation();
+  if (isConfigured) return null;
+  return (
+    <div style={{ position: 'fixed', bottom: 12, left: 12, right: 12, zIndex: 50 }}>
+      <Alert kind="error">{t('errors.notConfigured')}</Alert>
+    </div>
+  );
+}
 
 export function App() {
-  const { t } = useTranslation();
   return (
     <HashRouter>
-      <Routes>
-        <Route path="*" element={<h1>{t('app.name')}</h1>} />
-      </Routes>
+      <AuthProvider>
+        <WorkspaceProvider>
+          <EmailRedirectHandler />
+          <ConfigWarning />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/invite/:token" element={<AcceptInvite />} />
+            <Route
+              path="/onboarding"
+              element={
+                <RequireAuth>
+                  <Onboarding />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/demos/:demoId/edit"
+              element={
+                <RequireAuth>
+                  <RequireWorkspace>
+                    <EditorPage />
+                  </RequireWorkspace>
+                </RequireAuth>
+              }
+            />
+            <Route
+              element={
+                <RequireAuth>
+                  <RequireWorkspace>
+                    <Layout />
+                  </RequireWorkspace>
+                </RequireAuth>
+              }
+            >
+              <Route index element={<DemosPage />} />
+              <Route path="/demos/:demoId/share" element={<SharePage />} />
+              <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/leads" element={<LeadsPage />} />
+              <Route path="/settings/profile" element={<Profile />} />
+              <Route path="/settings/members" element={<Members />} />
+              <Route path="/settings/workspace" element={<WorkspaceSettings />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </WorkspaceProvider>
+      </AuthProvider>
     </HashRouter>
   );
 }
