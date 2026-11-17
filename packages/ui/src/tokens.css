@@ -1,0 +1,52 @@
+/* DESIGN TOKENS PROVISOIRES — la Lead UX remplacera ce fichier (garder les noms --fd-*). */
+:root {
+  --fd-color-primary: #5b4cf0;
+  --fd-color-primary-hover: #4a3bd9;
+  --fd-color-primary-contrast: #ffffff;
+  --fd-color-bg: #f7f7fb;
+  --fd-color-surface: #ffffff;
+  --fd-color-surface-muted: #f0f0f6;
+  --fd-color-border: #e2e2ec;
+  --fd-color-text: #1b1b24;
+  --fd-color-text-muted: #5d5d70;
+  --fd-color-danger: #d93f4c;
+  --fd-color-success: #1f9d63;
+  --fd-color-warning: #c98a00;
+  --fd-radius-sm: 6px;
+  --fd-radius-md: 10px;
+  --fd-radius-lg: 16px;
+  --fd-radius-full: 999px;
+  --fd-space-1: 4px;
+  --fd-space-2: 8px;
+  --fd-space-3: 12px;
+  --fd-space-4: 16px;
+  --fd-space-5: 24px;
+  --fd-space-6: 32px;
+  --fd-space-7: 48px;
+  --fd-font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fd-font-xs: 12px;
+  --fd-font-sm: 14px;
+  --fd-font-md: 16px;
+  --fd-font-lg: 20px;
+  --fd-font-xl: 28px;
+  --fd-shadow-sm: 0 1px 2px rgb(16 16 40 / 6%);
+  --fd-shadow-md: 0 6px 24px rgb(16 16 40 / 10%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --fd-color-bg: #111118;
+    --fd-color-surface: #1a1a24;
+    --fd-color-surface-muted: #23232f;
+    --fd-color-border: #2f2f3d;
+    --fd-color-text: #ececf3;
+    --fd-color-text-muted: #a3a3b5;
+  }
+}
+:root[data-theme='dark'] {
+  --fd-color-bg: #111118;
+  --fd-color-surface: #1a1a24;
+  --fd-color-surface-muted: #23232f;
+  --fd-color-border: #2f2f3d;
+  --fd-color-text: #ececf3;
+  --fd-color-text-muted: #a3a3b5;
+}
