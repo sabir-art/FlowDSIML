@@ -355,9 +355,69 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"quiz_attempts": {
+                },"learner_progress": {
         Row: {
-                    "answers": NonNullable<Json>,"correct": number,"created_at": string,"demo_id": string,"id": string,"link_id": string | null,"passed": boolean,"score": number,"session_id": string | null,"total": number,"version_id": string,"visitor_id": string,"workspace_id": string
+                    "attempts_used": number,"best_score": number | null,"demo_id": string,"extra_attempts": number,"last_step": number,"learner_id": string,"started_at": string,"status": string,"steps_seen": number,"total_steps": number,"updated_at": string,"validated_at": string | null,"workspace_id": string
+                  }
+        Insert: {
+                    "attempts_used"?: number,"best_score"?: number | null,"demo_id": string,"extra_attempts"?: number,"last_step"?: number,"learner_id": string,"started_at"?: string,"status"?: string,"steps_seen"?: number,"total_steps"?: number,"updated_at"?: string,"validated_at"?: string | null,"workspace_id": string
+                  }
+        Update: {
+                    "attempts_used"?: number,"best_score"?: number | null,"demo_id"?: string,"extra_attempts"?: number,"last_step"?: number,"learner_id"?: string,"started_at"?: string,"status"?: string,"steps_seen"?: number,"total_steps"?: number,"updated_at"?: string,"validated_at"?: string | null,"workspace_id"?: string
+                  }
+        Relationships: []
+      }
+"learners": {
+        Row: {
+                    "created_at": string,"email": string,"full_name": string,"id": string,"invited_at": string,"last_reminded_at": string | null,"removed_at": string | null,"structure_id": string | null,"token": string,"workspace_id": string
+                  }
+        Insert: {
+                    "created_at"?: string,"email": string,"full_name"?: string,"id"?: string,"invited_at"?: string,"last_reminded_at"?: string | null,"removed_at"?: string | null,"structure_id"?: string | null,"token"?: string,"workspace_id": string
+                  }
+        Update: {
+                    "created_at"?: string,"email"?: string,"full_name"?: string,"id"?: string,"invited_at"?: string,"last_reminded_at"?: string | null,"removed_at"?: string | null,"structure_id"?: string | null,"token"?: string,"workspace_id"?: string
+                  }
+        Relationships: []
+      }
+"path_modules": {
+        Row: {
+                    "demo_id": string,"path_id": string,"position": number,"required": boolean,"workspace_id": string
+                  }
+        Insert: {
+                    "demo_id": string,"path_id": string,"position"?: number,"required"?: boolean,"workspace_id"?: string
+                  }
+        Update: {
+                    "demo_id"?: string,"path_id"?: string,"position"?: number,"required"?: boolean,"workspace_id"?: string
+                  }
+        Relationships: []
+      }
+"paths": {
+        Row: {
+                    "created_at": string,"goal": number,"id": string,"ordered": boolean,"title": string,"updated_at": string,"workspace_id": string
+                  }
+        Insert: {
+                    "created_at"?: string,"goal"?: number,"id"?: string,"ordered"?: boolean,"title"?: string,"updated_at"?: string,"workspace_id": string
+                  }
+        Update: {
+                    "created_at"?: string,"goal"?: number,"id"?: string,"ordered"?: boolean,"title"?: string,"updated_at"?: string,"workspace_id"?: string
+                  }
+        Relationships: []
+      }
+"structures": {
+        Row: {
+                    "created_at": string,"domains": string[],"id": string,"name": string,"workspace_id": string
+                  }
+        Insert: {
+                    "created_at"?: string,"domains"?: string[],"id"?: string,"name": string,"workspace_id": string
+                  }
+        Update: {
+                    "created_at"?: string,"domains"?: string[],"id"?: string,"name"?: string,"workspace_id"?: string
+                  }
+        Relationships: []
+      }
+"quiz_attempts": {
+        Row: {
+                    "answers": NonNullable<Json>,"correct": number,"created_at": string,"demo_id": string,"id": string,"learner_id": string | null,"link_id": string | null,"passed": boolean,"score": number,"session_id": string | null,"total": number,"version_id": string,"visitor_id": string,"workspace_id": string
                   }
         Insert: {
                     "answers": NonNullable<Json>,"correct": number,"created_at"?: string,"demo_id": string,"id"?: string,"link_id"?: string | null,"passed": boolean,"score": number,"session_id"?: string | null,"total": number,"version_id": string,"visitor_id": string,"workspace_id": string
@@ -615,8 +675,20 @@ isOneToOne: false
 "quiz_stats":
 { Args: { "p_demo": string }; Returns: Json
                            },
+"structure_overview":
+{ Args: { "p_path": string }; Returns: Json
+                           },
 "submit_quiz_attempt":
 { Args: { "p_batch": Json }; Returns: Json
+                           },
+"learner_resume":
+{ Args: { "p_demo": string,"p_token": string }; Returns: Json
+                           },
+"learner_track":
+{ Args: { "p_demo": string,"p_step": number,"p_token": string,"p_total": number }; Returns: undefined
+                           },
+"mark_learners_reminded":
+{ Args: { "p_learners": string[] }; Returns: string[]
                            },
 "purge_old_events":
 { Args: Record<PropertyKey, never>; Returns: number
