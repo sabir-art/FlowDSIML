@@ -195,7 +195,10 @@
       "name": "Nom (A-Z)",
       "views": "Plus vues"
     },
-    "view": { "grid": "Grille", "list": "Liste" },
+    "view": {
+      "grid": "Grille",
+      "list": "Liste"
+    },
     "status": {
       "draft": "Brouillon",
       "published": "Publiée",
@@ -299,7 +302,11 @@
       "toolCrop": "Recadrer la capture",
       "toolReplace": "Remplacer l'image"
     },
-    "tabs": { "step": "Étape", "design": "Design", "settings": "Réglages" },
+    "tabs": {
+      "step": "Étape",
+      "design": "Design",
+      "settings": "Réglages"
+    },
     "guide": {
       "type": "Type de guidage",
       "hotspot": "Hotspot",
@@ -390,7 +397,12 @@
       "lowContrast": "Contraste faible ({{ratio}}:1) : le texte des boutons sera difficile à lire.",
       "useAccessible": "Utiliser {{color}}",
       "shape": "Forme",
-      "shapes": { "square": "Carré", "soft": "Doux", "round": "Rond", "extra": "Très rond" },
+      "shapes": {
+        "square": "Carré",
+        "soft": "Doux",
+        "round": "Rond",
+        "extra": "Très rond"
+      },
       "frame": "Cadre",
       "browserBar": "Barre de navigateur",
       "gradient": "Couleur de fond"
@@ -407,6 +419,57 @@
       "title": "L'éditeur s'utilise sur ordinateur",
       "body": "Ouvrez FlowDSIML sur un écran d'au moins 1 024 px de large pour modifier cette démo. Vous pouvez la prévisualiser et la partager depuis ce téléphone.",
       "view": "Voir la démo"
+    },
+    "comments": {
+      "title": "Commentaires",
+      "titleStep": "Commentaires · Étape {{n}}",
+      "openCount_one": "{{count}} ouvert",
+      "openCount_other": "{{count}} ouverts",
+      "private": "Interne à l'équipe · jamais publié",
+      "showResolved": "Afficher les résolus ({{count}})",
+      "collapse": "Replier les commentaires",
+      "expand": "Afficher les commentaires",
+      "resize": "Redimensionner le panneau Commentaires",
+      "resizeHint": "Glisser pour redimensionner · Entrée pour replier",
+      "placeholder": "Ajouter un commentaire pour l'équipe…",
+      "placeholderShort": "Ajouter un commentaire…",
+      "send": "Envoyer le commentaire",
+      "composeHint": "Entrée pour envoyer · Maj + Entrée pour aller à la ligne",
+      "resolve": "Résoudre",
+      "reopen": "Rouvrir",
+      "resolvedBy": "Résolu par {{name}}",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "actionsFor": "Actions sur le commentaire de {{name}}",
+      "actionsMine": "Actions sur votre commentaire",
+      "editLabel": "Modifier votre commentaire",
+      "editHint": "Échap pour annuler",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "you": "(vous)",
+      "edited": "modifié",
+      "new": "Nouveau",
+      "emptyTitle": "Aucun commentaire sur cette étape",
+      "emptyBody": "Notez une remarque pour l'équipe : elle reste dans l'éditeur et n'est jamais publiée.",
+      "allResolvedTitle": "Tout est résolu",
+      "allResolvedBody_one": "{{count}} commentaire résolu sur cette étape.",
+      "allResolvedBody_other": "{{count}} commentaires résolus sur cette étape.",
+      "showThem": "Les afficher",
+      "deleteTitle": "Supprimer ce commentaire ?",
+      "deleteBody": "Il sera supprimé pour toute l'équipe. Cette action est définitive.",
+      "deleteConfirm": "Supprimer",
+      "railBadge_one": "{{count}} commentaire ouvert",
+      "railBadge_other": "{{count}} commentaires ouverts",
+      "liveAdded": "{{name}} a ajouté un commentaire.",
+      "liveResolved": "{{name}} a résolu un commentaire.",
+      "liveDeleted": "Un commentaire a été supprimé.",
+      "errorSend": "Le commentaire n'a pas pu être envoyé. Votre texte est conservé.",
+      "retry": "Réessayer",
+      "offline": "Hors ligne : les nouveaux commentaires s'afficheront au retour de la connexion.",
+      "tooLong": "{{count}} / 2000 caractères",
+      "mobileNoticeTitle": "L'éditeur nécessite un écran plus large",
+      "mobileNoticeBody": "Ouvrez cette démo sur un ordinateur pour la modifier. Vous pouvez lire et répondre aux commentaires ici.",
+      "step": "Étape"
     }
   },
   "share": {
@@ -416,7 +479,12 @@
     "pendingChanges_other": "{{count}} modifications non publiées",
     "publishChanges": "Publier les modifications",
     "preview": "Aperçu",
-    "tabs": { "link": "Lien", "embed": "Intégrer", "custom": "Liens personnalisés", "access": "Accès" },
+    "tabs": {
+      "link": "Lien",
+      "embed": "Intégrer",
+      "custom": "Liens personnalisés",
+      "access": "Accès"
+    },
     "publicAccess": "Accès public",
     "publicAccessHint": "Toute personne disposant du lien peut voir la démo, sans compte.",
     "publicLink": "Lien public",
@@ -513,9 +581,18 @@
     "allDemos": "Toutes les démos",
     "allSources": "Toutes les sources",
     "period": "Période",
-    "range": { "7d": "7 j", "30d": "30 j", "90d": "90 j", "custom": "Dates" },
+    "range": {
+      "7d": "7 j",
+      "30d": "30 j",
+      "90d": "90 j",
+      "custom": "Dates"
+    },
     "exportStarted": "Export CSV en préparation : vous recevrez un email",
-    "tabs": { "overview": "Vue d'ensemble", "sessions": "Sessions", "leads": "Leads" },
+    "tabs": {
+      "overview": "Vue d'ensemble",
+      "sessions": "Sessions",
+      "leads": "Leads"
+    },
     "kpi": {
       "views": "Vues",
       "visitors": "Visiteurs uniques",
@@ -656,7 +733,11 @@
       "intro": "Personnalisez les textes avec des variables. Elles sont remplies par l'URL, un lien personnalisé ou un formulaire.",
       "new": "Nouvelle variable",
       "type": "Type",
-      "types": { "text": "Texte", "number": "Nombre", "image": "Image" },
+      "types": {
+        "text": "Texte",
+        "number": "Nombre",
+        "image": "Image"
+      },
       "default": "Valeur par défaut",
       "usedIn_one": "{{count}} démo",
       "usedIn_other": "{{count}} démos"

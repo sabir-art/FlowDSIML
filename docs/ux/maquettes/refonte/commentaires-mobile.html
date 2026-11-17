@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Commentaires (mobile) — FlowDSIML (refonte DSI)</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<main class="m-cm">
+  <header class="m-cm__top">
+    <a class="icon-btn" href="dashboard.html" aria-label="Retour aux démos"><i data-icon="arrowLeft"></i></a>
+    <h1>Inscription au parcours CEJ</h1>
+  </header>
+
+  <div class="fd-card m-cm__notice">
+    <span class="fd-icon-chip"><i data-icon="grid"></i></span>
+    <p><b>L'éditeur nécessite un écran plus large</b>Ouvrez cette démo sur un ordinateur pour la modifier. Vous pouvez lire et répondre aux commentaires ici.</p>
+  </div>
+
+  <div class="fd-field" style="margin:0">
+    <label class="fd-label" for="m-step">Étape</label>
+    <select class="fd-select" id="m-step" style="border-radius:var(--fd-radius-full)">
+      <option>1 · Accueil du parcours — 3 ouverts</option>
+      <option>2 · Vérifier l'éligibilité</option>
+      <option>3 · Créer son espace — 1 ouvert</option>
+      <option>4 · Formulaire de contact</option>
+    </select>
+  </div>
+
+  <section class="fd-card cm-panel" data-cm-state="list" aria-labelledby="m-cm-title">
+    <header class="cm-head">
+      <span class="fd-icon-chip"><i data-icon="message"></i></span>
+      <div class="cm-title"><h2 class="fd-card__title" id="m-cm-title">Commentaires <span class="fd-badge cm-open-count">3 ouverts</span></h2>
+        <span class="cm-private"><i data-icon="lock"></i>Interne à l'équipe · jamais publié</span></div>
+    </header>
+    <div class="cm-body">
+      <ol class="cm-list" aria-label="Commentaires de l'étape 1">
+        <li class="cm-item">
+          <span class="avatar" style="background:var(--fd-color-chart-3);color:var(--fd-color-text)" aria-hidden="true">CB</span>
+          <div class="cm-main"><div class="cm-meta"><b>Camille Bernard</b><time datetime="2026-11-17T14:12">il y a 2 h</time></div>
+            <p>Le libellé du bouton a changé dans I-Milo : c'est « Commencer mon inscription » maintenant. Il faudra recapturer.</p></div>
+          <div class="cm-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="checkCircle"></i>Résoudre</button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions sur le commentaire de Camille Bernard"><i data-icon="more"></i></button></div>
+        </li>
+        <li class="cm-item">
+          <span class="avatar" aria-hidden="true">AM</span>
+          <div class="cm-main"><div class="cm-meta"><b>Alice Martin <span class="cm-you">(vous)</span></b><time datetime="2026-11-17T15:02">il y a 40 min</time></div>
+            <p>OK, je le fais demain. On en profite pour flouter le numéro de dossier en haut à droite ?</p></div>
+          <div class="cm-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="checkCircle"></i>Résoudre</button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions sur votre commentaire"><i data-icon="more"></i></button></div>
+        </li>
+        <li class="cm-item is-new">
+          <span class="avatar" style="background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)" aria-hidden="true">YL</span>
+          <div class="cm-main"><div class="cm-meta"><b>Yanis Lefèvre</b><time datetime="2026-11-17T15:41">à l'instant</time><span class="fd-badge cm-new">Nouveau</span></div>
+            <p>Oui, et le nom du jeune aussi dans l'en-tête.</p></div>
+          <div class="cm-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="checkCircle"></i>Résoudre</button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions sur le commentaire de Yanis Lefèvre"><i data-icon="more"></i></button></div>
+        </li>
+      </ol>
+    </div>
+    <form class="cm-compose" onsubmit="return false">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <label class="cm-sr" for="m-new">Ajouter un commentaire</label>
+      <textarea class="fd-textarea" id="m-new" rows="1" placeholder="Ajouter un commentaire…"></textarea>
+      <button class="fd-btn fd-btn--round" type="submit" aria-label="Envoyer le commentaire"><i data-icon="arrowUp"></i></button>
+    </form>
+  </section>
+</main>
+</body>
+</html>

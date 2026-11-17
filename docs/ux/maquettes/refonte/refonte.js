@@ -37,9 +37,24 @@
     grip: '<circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>',
     bold: '<path d="M6 12h9a4 4 0 0 1 0 8H6zM6 4h7a4 4 0 0 1 0 8H6z"/>',
     italic: '<path d="M19 4h-9M14 20H5M15 4 9 20"/>',
+    message: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+    checkCircle: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+    rotateCcw: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+    chevronUp: '<path d="m18 15-6-6-6 6"/>',
+    arrowUp: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+    pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>',
     link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
   };
   const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${P[n] || ''}</svg>`;
+  const applyCm = (st) => {
+    const c = document.querySelector('[data-cm-state]'); if (!c) return; c.dataset.cmState = st;
+    const ta = document.getElementById('cm-new'); if (ta) ta.value = st === 'compose' ? 'Pensez à mettre à jour la capture après la mise en production du 20 nov.' : '';
+    const f = document.querySelector('.cm-filter input'); if (f) f.checked = st === 'resolved';
+    document.querySelectorAll('[data-cm-set]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cmSet === st)));
+  };
+  window.fdApplyCm = applyCm;
   const theme = (t) => { document.documentElement.dataset.theme = t; document.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeSet === t))); try { localStorage.setItem('fd-refonte-theme', t); } catch (e) {} };
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('i[data-icon]').forEach((el) => { el.outerHTML = svg(el.dataset.icon); });
@@ -49,7 +64,23 @@
     document.addEventListener('click', (e) => {
       const b = e.target.closest('[data-theme-set]'); if (b) theme(b.dataset.themeSet);
       const s = e.target.closest('.fd-segmented > button, .fd-tabs > [role=tab]');
+      const cs = e.target.closest('[data-cm-set]');
+      if (cs) applyCm(cs.dataset.cmSet);
+      const tg = e.target.closest('[data-cm-toggle]');
+      if (tg) { const c = document.querySelector('[data-cm-state]'); applyCm(c.dataset.cmState === 'collapsed' ? 'list' : 'collapsed'); }
       if (s && !s.dataset.themeSet) { const attr = s.getAttribute('role') === 'tab' ? 'aria-selected' : 'aria-pressed'; s.parentElement.querySelectorAll(':scope > *').forEach((x) => x.setAttribute(attr, String(x === s))); }
     });
+    /* Poignée de redimensionnement du panneau Commentaires (souris, tactile, flèches du clavier) */
+    const h = document.querySelector('.cm-handle'); const panel = document.querySelector('.cm-panel');
+    if (h && panel) {
+      const set = (px) => { const v = Math.max(160, Math.min(520, px)); panel.style.height = v + 'px'; h.setAttribute('aria-valuenow', String(v)); };
+      h.addEventListener('pointerdown', (e) => { const y0 = e.clientY, h0 = panel.offsetHeight; h.setPointerCapture(e.pointerId);
+        const mv = (ev) => set(h0 - (ev.clientY - y0)); const up = () => { h.removeEventListener('pointermove', mv); h.removeEventListener('pointerup', up); };
+        h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up); });
+      h.addEventListener('keydown', (e) => { if (e.key === 'ArrowUp') { set(panel.offsetHeight + 24); e.preventDefault(); } if (e.key === 'ArrowDown') { set(panel.offsetHeight - 24); e.preventDefault(); }
+        if (e.key === 'Enter') { const c = document.querySelector('[data-cm-state]'); c.dataset.cmState = c.dataset.cmState === 'collapsed' ? 'list' : 'collapsed'; } });
+    }
+    const st = new URLSearchParams(location.search).get('cm'); if (st) applyCm(st);
+    const fi = document.querySelector('.cm-filter input'); if (fi) fi.addEventListener('change', () => applyCm(fi.checked ? 'resolved' : 'list'));
   });
 })();

@@ -195,7 +195,10 @@
       "name": "Name (A–Z)",
       "views": "Most viewed"
     },
-    "view": { "grid": "Grid", "list": "List" },
+    "view": {
+      "grid": "Grid",
+      "list": "List"
+    },
     "status": {
       "draft": "Draft",
       "published": "Published",
@@ -299,7 +302,11 @@
       "toolCrop": "Crop screenshot",
       "toolReplace": "Replace image"
     },
-    "tabs": { "step": "Step", "design": "Design", "settings": "Settings" },
+    "tabs": {
+      "step": "Step",
+      "design": "Design",
+      "settings": "Settings"
+    },
     "guide": {
       "type": "Guide type",
       "hotspot": "Hotspot",
@@ -390,7 +397,12 @@
       "lowContrast": "Low contrast ({{ratio}}:1): button text will be hard to read.",
       "useAccessible": "Use {{color}}",
       "shape": "Shape",
-      "shapes": { "square": "Square", "soft": "Soft", "round": "Round", "extra": "Extra round" },
+      "shapes": {
+        "square": "Square",
+        "soft": "Soft",
+        "round": "Round",
+        "extra": "Extra round"
+      },
       "frame": "Frame",
       "browserBar": "Browser bar",
       "gradient": "Background color"
@@ -407,6 +419,57 @@
       "title": "The editor works on desktop",
       "body": "Open FlowDSIML on a screen at least 1,024 px wide to edit this demo. You can still preview and share it from this phone.",
       "view": "View demo"
+    },
+    "comments": {
+      "title": "Comments",
+      "titleStep": "Comments · Step {{n}}",
+      "openCount_one": "{{count}} open",
+      "openCount_other": "{{count}} open",
+      "private": "Team only · never published",
+      "showResolved": "Show resolved ({{count}})",
+      "collapse": "Collapse comments",
+      "expand": "Show comments",
+      "resize": "Resize the comments panel",
+      "resizeHint": "Drag to resize · Enter to collapse",
+      "placeholder": "Add a comment for your team…",
+      "placeholderShort": "Add a comment…",
+      "send": "Send comment",
+      "composeHint": "Enter to send · Shift + Enter for a new line",
+      "resolve": "Resolve",
+      "reopen": "Reopen",
+      "resolvedBy": "Resolved by {{name}}",
+      "edit": "Edit",
+      "delete": "Delete",
+      "actionsFor": "Actions for {{name}}'s comment",
+      "actionsMine": "Actions for your comment",
+      "editLabel": "Edit your comment",
+      "editHint": "Esc to cancel",
+      "cancel": "Cancel",
+      "save": "Save",
+      "you": "(you)",
+      "edited": "edited",
+      "new": "New",
+      "emptyTitle": "No comments on this step",
+      "emptyBody": "Leave a note for your team: it stays in the editor and is never published.",
+      "allResolvedTitle": "All resolved",
+      "allResolvedBody_one": "{{count}} resolved comment on this step.",
+      "allResolvedBody_other": "{{count}} resolved comments on this step.",
+      "showThem": "Show them",
+      "deleteTitle": "Delete this comment?",
+      "deleteBody": "It will be deleted for the whole team. This can't be undone.",
+      "deleteConfirm": "Delete",
+      "railBadge_one": "{{count}} open comment",
+      "railBadge_other": "{{count}} open comments",
+      "liveAdded": "{{name}} added a comment.",
+      "liveResolved": "{{name}} resolved a comment.",
+      "liveDeleted": "A comment was deleted.",
+      "errorSend": "Your comment couldn't be sent. Your text has been kept.",
+      "retry": "Retry",
+      "offline": "Offline: new comments will appear when you're back online.",
+      "tooLong": "{{count}} / 2000 characters",
+      "mobileNoticeTitle": "The editor needs a larger screen",
+      "mobileNoticeBody": "Open this demo on a computer to edit it. You can read and reply to comments here.",
+      "step": "Step"
     }
   },
   "share": {
@@ -416,7 +479,12 @@
     "pendingChanges_other": "{{count}} unpublished changes",
     "publishChanges": "Publish changes",
     "preview": "Preview",
-    "tabs": { "link": "Link", "embed": "Embed", "custom": "Custom links", "access": "Access" },
+    "tabs": {
+      "link": "Link",
+      "embed": "Embed",
+      "custom": "Custom links",
+      "access": "Access"
+    },
     "publicAccess": "Public access",
     "publicAccessHint": "Anyone with the link can view the demo, no account needed.",
     "publicLink": "Public link",
@@ -513,9 +581,18 @@
     "allDemos": "All demos",
     "allSources": "All sources",
     "period": "Period",
-    "range": { "7d": "7 d", "30d": "30 d", "90d": "90 d", "custom": "Dates" },
+    "range": {
+      "7d": "7 d",
+      "30d": "30 d",
+      "90d": "90 d",
+      "custom": "Dates"
+    },
     "exportStarted": "CSV export in progress: we'll email it to you",
-    "tabs": { "overview": "Overview", "sessions": "Sessions", "leads": "Leads" },
+    "tabs": {
+      "overview": "Overview",
+      "sessions": "Sessions",
+      "leads": "Leads"
+    },
     "kpi": {
       "views": "Views",
       "visitors": "Unique visitors",
@@ -656,7 +733,11 @@
       "intro": "Personalize text with variables. They are filled in from the URL, a custom link or a form.",
       "new": "New variable",
       "type": "Type",
-      "types": { "text": "Text", "number": "Number", "image": "Image" },
+      "types": {
+        "text": "Text",
+        "number": "Number",
+        "image": "Image"
+      },
       "default": "Default value",
       "usedIn_one": "{{count}} demo",
       "usedIn_other": "{{count}} demos"

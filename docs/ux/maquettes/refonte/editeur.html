@@ -27,32 +27,122 @@
 
   <div class="ed-body">
     <nav class="fd-card ed-rail" aria-label="Étapes">
-      <a class="step" href="#" aria-current="step"><span class="step__num">1</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Accueil du parcours<i data-icon="target"></i></span></a>
+      <a class="step" href="#" aria-current="step"><span class="step__num">1</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Accueil du parcours<i data-icon="target"></i></span><span class="step__cm" aria-label="3 commentaires ouverts"><i data-icon="message"></i>3</span></a>
       <a class="step" href="#"><span class="step__num">2</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Vérifier l'éligibilité<i data-icon="target"></i></span></a>
-      <a class="step" href="#"><span class="step__num">3</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Créer son espace<i data-icon="eyeOff"></i></span></a>
+      <a class="step" href="#"><span class="step__num">3</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Créer son espace<i data-icon="eyeOff"></i></span><span class="step__cm" aria-label="1 commentaire ouvert"><i data-icon="message"></i>1</span></a>
       <a class="step" href="#"><span class="step__num">4</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Formulaire de contact<i data-icon="mail"></i></span></a>
       <button class="fd-btn fd-btn--block" type="button"><i data-icon="plus"></i>Ajouter une étape</button>
     </nav>
 
+    <div class="ed-center" data-cm-state="list">
     <section class="ed-canvas" aria-label="Canevas de l'étape 1">
-      <div class="shot fd-player-scope">
-        <div class="shot__bar"></div>
-        <div class="shot__side"></div>
-        <span class="shot__line" style="left:27%;top:16%;width:30%;height:18px"></span>
-        <span class="shot__line" style="left:27%;top:26%;width:52%"></span>
-        <span class="shot__line" style="left:27%;top:32%;width:44%"></span>
-        <span class="shot__btn" style="left:27%;top:44%"></span>
-        <span class="shot__line" style="left:27%;top:62%;width:66%"></span>
-        <span class="shot__line" style="left:27%;top:68%;width:58%"></span>
-        <span class="hs-zone" style="left:26.2%;top:42.6%;width:20.2%;height:9.5%"></span>
-        <span class="hs-dot" style="left:46.4%;top:47.4%"></span>
-        <div class="bubble" style="left:50%;top:30%">
-          <b>Commencez ici</b>
-          <p>Cliquez sur « Je m'inscris » pour démarrer votre parcours Contrat d'engagement jeune.</p>
-          <footer>1 / 6<button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Suivant</button></footer>
+        <div class="shot fd-player-scope">
+          <div class="shot__bar"></div>
+          <div class="shot__side"></div>
+          <span class="shot__line" style="left:27%;top:16%;width:30%;height:18px"></span>
+          <span class="shot__line" style="left:27%;top:26%;width:52%"></span>
+          <span class="shot__line" style="left:27%;top:32%;width:44%"></span>
+          <span class="shot__btn" style="left:27%;top:44%"></span>
+          <span class="shot__line" style="left:27%;top:62%;width:66%"></span>
+          <span class="shot__line" style="left:27%;top:68%;width:58%"></span>
+          <span class="hs-zone" style="left:26.2%;top:42.6%;width:20.2%;height:9.5%"></span>
+          <span class="hs-dot" style="left:46.4%;top:47.4%"></span>
+          <div class="bubble" style="left:50%;top:30%">
+            <b>Commencez ici</b>
+            <p>Cliquez sur « Je m'inscris » pour démarrer votre parcours Contrat d'engagement jeune.</p>
+            <footer>1 / 6<button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Suivant</button></footer>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <div class="cm-handle" role="separator" aria-orientation="horizontal" aria-label="Redimensionner le panneau Commentaires" aria-controls="cm" aria-valuemin="160" aria-valuemax="520" aria-valuenow="280" tabindex="0" title="Glisser pour redimensionner · Entrée pour replier"><span></span></div>
+
+      <section class="fd-card cm-panel" id="cm" aria-labelledby="cm-title">
+        <header class="cm-head">
+          <span class="fd-icon-chip"><i data-icon="message"></i></span>
+          <div class="cm-title"><h2 class="fd-card__title" id="cm-title">Commentaires <span class="cm-step">· Étape 1</span> <span class="fd-badge cm-open-count">3 ouverts</span></h2>
+            <span class="cm-private"><i data-icon="lock"></i>Interne à l'équipe · jamais publié</span></div>
+          <label class="fd-switch cm-filter"><span>Afficher les résolus (2)</span><input type="checkbox" data-cm-set-resolved><span class="fd-switch__track"></span></label>
+          <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon cm-collapse" type="button" data-cm-toggle aria-expanded="true" aria-controls="cm-body" aria-label="Replier les commentaires"><i data-icon="chevronDown"></i></button>
+        </header>
+
+        <div class="cm-body" id="cm-body">
+          <!-- État : liste -->
+          <ol class="cm-list" aria-label="Commentaires de l'étape 1">
+            <li class="cm-item">
+              <span class="avatar" style="background:var(--fd-color-chart-3);color:var(--fd-color-text)" aria-hidden="true">CB</span>
+              <div class="cm-main">
+                <div class="cm-meta"><b>Camille Bernard</b><time datetime="2026-11-17T14:12">il y a 2 h</time></div>
+                <p>Le libellé du bouton a changé dans I-Milo : c'est « Commencer mon inscription » maintenant. Il faudra recapturer.</p>
+              </div>
+              <div class="cm-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="checkCircle"></i>Résoudre</button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions sur le commentaire de Camille Bernard"><i data-icon="more"></i></button></div>
+            </li>
+            <li class="cm-item is-mine">
+              <span class="avatar" aria-hidden="true">AM</span>
+              <div class="cm-main">
+                <div class="cm-meta"><b>Alice Martin <span class="cm-you">(vous)</span></b><time datetime="2026-11-17T15:02">il y a 40 min</time><span class="cm-edited">· modifié</span></div>
+                <p>OK, je le fais demain. On en profite pour flouter le numéro de dossier en haut à droite ?</p>
+              </div>
+              <div class="cm-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="checkCircle"></i>Résoudre</button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions sur votre commentaire" aria-haspopup="menu" aria-expanded="false"><i data-icon="more"></i></button>
+                <div class="cm-menu" role="menu" aria-label="Actions sur votre commentaire"><button role="menuitem" type="button"><i data-icon="pencil"></i>Modifier</button><button role="menuitem" type="button" class="is-danger"><i data-icon="trash"></i>Supprimer</button></div></div>
+            </li>
+            <li class="cm-item is-new">
+              <span class="avatar" style="background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)" aria-hidden="true">YL</span>
+              <div class="cm-main">
+                <div class="cm-meta"><b>Yanis Lefèvre</b><time datetime="2026-11-17T15:41">à l'instant</time><span class="fd-badge cm-new">Nouveau</span></div>
+                <p>Oui, et le nom du jeune aussi dans l'en-tête.</p>
+              </div>
+              <div class="cm-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="checkCircle"></i>Résoudre</button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions sur le commentaire de Yanis Lefèvre"><i data-icon="more"></i></button></div>
+            </li>
+            <!-- résolus : visibles seulement avec le filtre -->
+            <li class="cm-item is-resolved">
+              <span class="avatar" style="background:var(--fd-color-chart-1);color:var(--fd-color-text)" aria-hidden="true">NP</span>
+              <div class="cm-main">
+                <div class="cm-meta"><b>Nadia Petit</b><time datetime="2026-11-16T10:20">hier</time><span class="cm-resolved"><i data-icon="checkCircle"></i>Résolu par Alice Martin</span></div>
+                <p>Mettre « Contrat d'engagement jeune » en toutes lettres la première fois.</p>
+              </div>
+              <div class="cm-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="rotateCcw"></i>Rouvrir</button></div>
+            </li>
+          </ol>
+
+          <!-- État : modification d'un commentaire -->
+          <div class="cm-edit">
+            <span class="avatar" aria-hidden="true">AM</span>
+            <div class="cm-main">
+              <label class="cm-sr" for="cm-edit-t">Modifier votre commentaire</label>
+              <textarea class="fd-textarea" id="cm-edit-t" rows="2">OK, je le fais demain. On en profite pour flouter le numéro de dossier en haut à droite ?</textarea>
+              <div class="cm-edit__bar"><span class="fd-help">Échap pour annuler</span><button class="fd-btn fd-btn--sm" type="button">Annuler</button><button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Enregistrer</button></div>
+            </div>
+          </div>
+
+          <!-- État : vide -->
+          <div class="cm-empty">
+            <span class="fd-icon-chip"><i data-icon="message"></i></span>
+            <p><b>Aucun commentaire sur cette étape</b>Notez une remarque pour l'équipe : elle reste dans l'éditeur et n'est jamais publiée.</p>
+          </div>
+
+          <!-- État : tout est résolu -->
+          <div class="cm-allresolved">
+            <span class="fd-icon-chip"><i data-icon="checkCircle"></i></span>
+            <p><b>Tout est résolu</b>2 commentaires résolus sur cette étape. <button class="cm-link" type="button">Les afficher</button></p>
+          </div>
+        </div>
+
+        <form class="cm-compose" onsubmit="return false">
+          <span class="avatar" aria-hidden="true">AM</span>
+          <label class="cm-sr" for="cm-new">Ajouter un commentaire</label>
+          <textarea class="fd-textarea" id="cm-new" rows="1" placeholder="Ajouter un commentaire pour l'équipe…"></textarea>
+          <button class="fd-btn fd-btn--round" type="submit" aria-label="Envoyer le commentaire"><i data-icon="arrowUp"></i></button>
+          <span class="fd-help cm-hint">Entrée pour envoyer · Maj + Entrée pour aller à la ligne</span>
+        </form>
+
+        <!-- État : replié -->
+        <button class="cm-collapsed" type="button" data-cm-toggle aria-expanded="false" aria-controls="cm-body">
+          <span class="fd-icon-chip"><i data-icon="message"></i></span><b>Commentaires</b><span class="fd-badge cm-open-count">3 ouverts</span><span class="cm-private"><i data-icon="lock"></i>Interne à l'équipe</span><i data-icon="chevronUp"></i>
+        </button>
+        <div class="cm-live" role="status" aria-live="polite">Yanis Lefèvre a ajouté un commentaire.</div>
+      </section>
+    </div>
 
     <aside class="fd-card ed-panel" aria-label="Propriétés">
       <div class="fd-tabs" role="tablist" aria-label="Panneau">
@@ -77,6 +167,15 @@
   </div>
 </div>
 
+<div class="mock-state fd-segmented" role="group" aria-label="État du panneau Commentaires (maquette)">
+  <button type="button" data-cm-set="list" aria-pressed="true">Liste</button>
+  <button type="button" data-cm-set="resolved" aria-pressed="false">+ résolus</button>
+  <button type="button" data-cm-set="compose" aria-pressed="false">Saisie</button>
+  <button type="button" data-cm-set="edit" aria-pressed="false">Modification</button>
+  <button type="button" data-cm-set="empty" aria-pressed="false">Vide</button>
+  <button type="button" data-cm-set="allresolved" aria-pressed="false">Tout résolu</button>
+  <button type="button" data-cm-set="collapsed" aria-pressed="false">Replié</button>
+</div>
 <div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
   <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
   <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>

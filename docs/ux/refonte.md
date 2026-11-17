@@ -32,7 +32,7 @@
 | Sélecteur de workspace | Select en haut | Inchangé, mais en champ pilule (`border-radius: var(--fd-radius-full)`) |
 | Bloc utilisateur (bas) | Ligne avec bordure supérieure | Carte compacte blanche (`radius-xl`, ombre `xs`) : avatar rond prune avec initiales, nom, rôle, menu ⋯ |
 | Contenu | Padding de 24 px | Padding de **32 px** sur ordinateur (16 px sur mobile). Largeur maximale de 1 200 px conservée |
-| En-tête de page | Titre `h1` + actions | `h1` en 32 px 800 (déjà appliqué par `base.css`) + sous-titre `text-muted`. À droite : recherche en pilule de 44 px sans bordure avec ombre `xs`, boutons ronds d'icône de 44 px, action principale en `fd-btn--primary fd-btn--lg` |
+| En-tête de page | Titre `h1` + actions | `h1` en 32 px 800 (déjà appliqué par `base.css`) + sous-titre `text-muted`. À droite : recherche en pilule de 44 px sans bordure avec ombre `xs`, puis action principale en `fd-btn--primary fd-btn--lg`. **Pas de cloche de notifications** : aucune fonctionnalité derrière, elle a été retirée de la maquette |
 | Mobile (< 1 024 px) | Barre du haut + tiroir | Inchangé. Le tiroir reprend `.fd-nav`. Corriger DB1 au passage (Échap ferme le tiroir) |
 
 ## 2. Cartes KPI (`components/charts.tsx` → `StatTile`, `.stat-row`)
@@ -54,7 +54,11 @@ Règles :
 - **Une seule carte héro par rangée**, toujours la première, sur la mesure principale (Vues). Fond vert DSI, **tout le texte en noir**, badge de tendance inversé (pilule noire, texte vert). Ces styles sont déjà fournis par `.fd-card--hero`.
 - Icônes Lucide par KPI : Vues `Eye`, Visiteurs `Users`, Complétion `Route`, Clics CTA `MousePointerClick`, Leads `Mail`.
 - `stat-delta--up` devient `.fd-trend--up` (`TrendingUp`), `--down` devient `.fd-trend--down` (`TrendingDown`). Sans période de référence : `.fd-trend` neutre avec « — », plus le texte pour lecteur d'écran déjà en place.
-- La rangée `.stat-row` passe en grille de 4 colonnes avec un gap de 20 px (2 colonnes sous 1 100 px, 1 sous 480 px). Pour 5 KPI : 5 colonnes au-dessus de 1 280 px.
+- La rangée `.stat-row` passe en grille avec un gap de 20 px :
+  - **4 KPI** : 4 colonnes, puis 2 sous 1 100 px ;
+  - **5 KPI** : 5 colonnes au-dessus de 1 280 px, 3 colonnes (3 + 2) entre 1 024 et 1 279 px, puis 2 en dessous ;
+  - **sous 480 px** : toujours **2 colonnes**, la carte héro en pleine largeur (`grid-column: 1 / -1`), valeur en 28 px, pied réduit au badge de tendance (texte « vs … » en `sr-only`). C'est une révision après la recette RF1 : 1 colonne repoussait le contenu de 2 écrans.
+- `.fd-kpi__label` reste sur une ligne (`nowrap` + ellipse, libellé complet dans `title`).
 - Valeur en `.fd-kpi__value` : 40 px, 800, chiffres tabulaires.
 
 ## 3. Graphiques (`components/charts.tsx` → `DailyBars`, entonnoir)
@@ -66,10 +70,20 @@ Règles :
 - Pas de lignes de grille horizontales. Graduations `0 / max` supprimées, puisque les valeurs sont écrites. Dates sous les barres en 11 px `text-subtle`.
 - Le titre de la carte suit le motif `.fd-card__head` : `fd-icon-chip` (`BarChart3`) + `h2.fd-card__title` + segmenté `Vues | Visiteurs` à droite si utile.
 
-**Donut « Origine des vues »** (nouveau, si la donnée `source` est disponible dans `track` ; sinon à prévoir en V2) :
+**Donut « Origine des vues »** : **en V1** (révision du 17 nov.). Il s'appuie sur l'agrégation `demo_analytics.sources` (migration 130800), déduite de `link_id` et `embed_origin`. Trois sources, toujours dans cet ordre et avec ces couleurs :
+
+| Source (`sources.*`) | Libellé FR / EN | Couleur |
+|---|---|---|
+| `direct` | Lien direct / Direct link | `chart-2` framboise |
+| `embed` (intégration) | Intégration site / Website embed | `chart-3` bleu |
+| `personal_link` (lien personnalisé) | Liens personnalisés / Personal links | `chart-4` vert |
+
 - SVG avec un cercle de rayon 70, un trait de 22 px et `stroke-linecap: round`, un segment par `stroke-dasharray`, et un espace de 4 px entre segments. Pas de `conic-gradient`.
-- Couleurs dans l'ordre : `chart-2` framboise, `chart-3` bleu, `chart-4` vert, `chart-1` orange (au plus 4 segments, le reste regroupé en « Autres » en `chart-5`).
-- Total au centre (28 px, 800) et légende en dessous avec une pastille de 10 px, un libellé et un pourcentage aligné à droite.
+- Une source à 0 n'a pas de segment, mais **reste dans la légende** avec « 0 % ». S'il n'y a qu'une seule source non nulle : anneau complet, sans espace.
+- Total des vues au centre (28 px, 800) avec « vues » en dessous. Légende sous l'anneau : pastille de 10 px, libellé, **pourcentage aligné à droite** et nombre de vues en `text-subtle`. C'est le texte qui porte l'information, pas la couleur seule.
+- La table `sr-only` (Source / Vues / %) suit le même modèle que `DailyBars`, et l'anneau a `role="img"` avec un `aria-label` qui résume les 3 valeurs.
+- État vide (0 vue sur la période) : anneau `chart-track` complet, « 0 » au centre et légende à 0 %.
+- Les noms techniques des clés sont à confirmer avec la migration ; les libellés et l'ordre ci-dessus font foi.
 
 **Entonnoir « Parcours étape par étape »** :
 - Barres horizontales `.fd-bar.fd-bar--h` de 12 px de haut, avec la piste pâle et le remplissage orange.
@@ -94,7 +108,8 @@ Voir `maquettes/refonte/dashboard.html`.
 
 Voir `maquettes/refonte/analytics.html`.
 - **En-tête** : bouton rond de retour, titre de la démo en `h1`, sous-titre « Publiée · version n · n étapes ». À droite : segmenté de période `7 j | 30 j | 90 j` (remplace les 3 boutons), puis « Partager » et « Exporter » en pilules.
-- Rangée de KPI (§2), puis une grille en 2/3 + 1/3 : « Vues par jour » à gauche, « Origine des vues » à droite (si la donnée existe ; sinon « Leads récents »). Entonnoir sur toute la largeur, puis tableau des leads dans une carte.
+- Rangée de KPI (§2), puis une grille en 2/3 + 1/3 : « Vues par jour » à gauche, **« Origine des vues »** (donut, §3) à droite. Entonnoir sur toute la largeur, puis tableau des leads dans une carte.
+- Pas de carte « Leads récents » séparée : le tableau des leads de la page la rend redondante. Sur le **dashboard**, elle n'a pas sa place non plus, car la grille des démos doit rester visible sans défiler sous les KPI. Les leads du workspace restent dans l'entrée « Leads » de la navigation.
 - **Tableaux** (`.fd-table`) :
   - en-têtes en 12 px 600 `text-muted`, sans fond ;
   - lignes de 52 px ;
