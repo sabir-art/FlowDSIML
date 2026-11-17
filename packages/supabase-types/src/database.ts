@@ -355,7 +355,31 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"share_links": {
+                },"quiz_attempts": {
+        Row: {
+                    "answers": NonNullable<Json>,"correct": number,"created_at": string,"demo_id": string,"id": string,"link_id": string | null,"passed": boolean,"score": number,"session_id": string | null,"total": number,"version_id": string,"visitor_id": string,"workspace_id": string
+                  }
+        Insert: {
+                    "answers": NonNullable<Json>,"correct": number,"created_at"?: string,"demo_id": string,"id"?: string,"link_id"?: string | null,"passed": boolean,"score": number,"session_id"?: string | null,"total": number,"version_id": string,"visitor_id": string,"workspace_id": string
+                  }
+        Update: {
+                    "answers"?: NonNullable<Json>,"correct"?: number,"created_at"?: string,"demo_id"?: string,"id"?: string,"link_id"?: string | null,"passed"?: boolean,"score"?: number,"session_id"?: string | null,"total"?: number,"version_id"?: string,"visitor_id"?: string,"workspace_id"?: string
+                  }
+        Relationships: []
+      }
+"quiz_questions": {
+        Row: {
+                    "answers": NonNullable<Json>,"created_at": string,"demo_id": string,"explanation": string,"id": string,"points": number,"position": number,"prompt": string,"step_id": string | null,"type": string,"updated_at": string,"workspace_id": string
+                  }
+        Insert: {
+                    "answers"?: NonNullable<Json>,"created_at"?: string,"demo_id": string,"explanation"?: string,"id"?: string,"points"?: number,"position"?: number,"prompt"?: string,"step_id"?: string | null,"type"?: string,"updated_at"?: string,"workspace_id"?: string
+                  }
+        Update: {
+                    "answers"?: NonNullable<Json>,"created_at"?: string,"demo_id"?: string,"explanation"?: string,"id"?: string,"points"?: number,"position"?: number,"prompt"?: string,"step_id"?: string | null,"type"?: string,"updated_at"?: string,"workspace_id"?: string
+                  }
+        Relationships: []
+      }
+"share_links": {
                   Row: {
                     "created_at": string,"created_by": string | null,"demo_id": string,"expires_at": string | null,"id": string,"is_active": boolean,"name": string,"token": string,"variables": NonNullable<Json>,"workspace_id": string
                   }
@@ -587,6 +611,12 @@ isOneToOne: false
                            },
 "publish_demo":
 { Args: { "p_ack"?: Json,"p_demo": string }; Returns: Json
+                           },
+"quiz_stats":
+{ Args: { "p_demo": string }; Returns: Json
+                           },
+"submit_quiz_attempt":
+{ Args: { "p_batch": Json }; Returns: Json
                            },
 "purge_old_events":
 { Args: Record<PropertyKey, never>; Returns: number

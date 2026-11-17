@@ -6,6 +6,10 @@ import {
   checklistItems,
   choiceTarget,
   embedAllowed,
+  isCorrect,
+  isPartial,
+  scoreQuiz,
+  shuffled,
   nextIndex,
   parseRoute,
   resolveAssets,
@@ -115,5 +119,51 @@ describe('player logic', () => {
     expect(branching.steps[1]?.options.choices).toHaveLength(1);
     expect(canAutoAdvance(branching, 1, false)).toBe(false);
     expect(branching.steps[1]?.options.display).toBe('screen');
+  });
+  it('F2 : score du quiz (tout ou rien, points, seuil exact)', () => {
+    const quiz = {
+      mode: 'quiz' as const,
+      threshold: 75,
+      attempts: 3,
+      feedback: 'each' as const,
+      shuffle: false,
+      required: true,
+      questions: [
+        {
+          id: 'q1',
+          type: 'single' as const,
+          prompt: 'Q1',
+          explanation: '',
+          stepId: null,
+          points: 1,
+          answers: [
+            { id: 'a', label: 'A', correct: true },
+            { id: 'b', label: 'B', correct: false },
+          ],
+        },
+        {
+          id: 'q2',
+          type: 'multiple' as const,
+          prompt: 'Q2',
+          explanation: '',
+          stepId: null,
+          points: 3,
+          answers: [
+            { id: 'a', label: 'A', correct: true },
+            { id: 'b', label: 'B', correct: true },
+            { id: 'c', label: 'C', correct: false },
+          ],
+        },
+      ],
+    };
+    const q2 = quiz.questions[1]!;
+    expect(isCorrect(q2, ['b', 'a'])).toBe(true);
+    expect(isCorrect(q2, ['a'])).toBe(false);
+    expect(isPartial(q2, ['a'])).toBe(true);
+    expect(isPartial(q2, ['a', 'c'])).toBe(false);
+    expect(scoreQuiz(quiz, { q1: ['a'], q2: ['a'] })).toMatchObject({ score: 25, correct: 1, passed: false });
+    // seuil atteint à la valeur exacte
+    expect(scoreQuiz(quiz, { q1: ['b'], q2: ['a', 'b'] })).toMatchObject({ score: 75, passed: true });
+    expect(shuffled([1, 2, 3], () => 0)).toEqual([2, 3, 1]);
   });
 });

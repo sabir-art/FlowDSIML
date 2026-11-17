@@ -83,7 +83,7 @@ export class Tracker {
   constructor(
     private readonly demoId: string,
     private readonly versionId: string,
-    private readonly linkToken: string | null,
+    readonly linkToken: string | null,
     private readonly enabled: boolean,
   ) {
     addEventListener('pagehide', () => this.flush(true));
@@ -141,4 +141,25 @@ export class Tracker {
     // 2) Repli : RPC directe
     void rpc('track_events', { p_batch: batch }, true).catch(() => undefined);
   }
+}
+
+export interface QuizResult {
+  score: number;
+  correct: number;
+  total: number;
+  passed: boolean;
+  attemptsLeft: number | null;
+  questions: Array<{ questionId: string; correct: boolean }>;
+}
+
+/** F2 : enregistre une tentative ; le score fait foi côté serveur (recalculé à partir du manifeste). */
+export function submitQuizAttempt(batch: {
+  demoId: string;
+  versionId: string;
+  visitorId: string;
+  sessionId: string;
+  linkToken: string | null;
+  answers: Array<{ questionId: string; answerIds: string[] }>;
+}) {
+  return rpc<QuizResult>('submit_quiz_attempt', { p_batch: batch });
 }
