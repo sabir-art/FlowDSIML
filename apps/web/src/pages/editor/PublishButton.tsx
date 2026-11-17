@@ -17,8 +17,11 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 export function PublishButton({
   editor,
   onReviewStep,
+  republishLabel,
 }: {
   editor: DemoEditor;
+  /** Libellé quand la démo est déjà publiée (page Partager : « Publier les modifications »). */
+  republishLabel?: string;
   /** « Revoir l'étape n » depuis l'avertissement RGPD. */
   onReviewStep?: (index: number) => void;
 }) {
@@ -113,7 +116,7 @@ export function PublishButton({
         {progress
           ? `${t('publish.publishing')} ${progress}`
           : demo.status === 'published'
-            ? t('publish.republish')
+            ? (republishLabel ?? t('publish.republish'))
             : t('publish.publish')}
       </Button>
     </>

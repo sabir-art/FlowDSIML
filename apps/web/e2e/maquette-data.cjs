@@ -45,6 +45,32 @@ function seedMaquette() {
       updated_at: at,
     };
   });
+  // Versions publiées (date de publication) ; la démo 1 a des modifications non publiées
+  t.demo_versions = t.demos
+    .filter((d) => d.current_version_id)
+    .map((d) => ({ id: d.current_version_id, demo_id: d.id, number: 1, published_at: d.updated_at }));
+  t.demo_versions[0].published_at = new Date(Date.parse(t.demos[0].updated_at) - 3 * 3600e3).toISOString();
+  // Variables et liens personnalisés de la maquette partage.html
+  t.variables = [
+    { id: 'var-1', workspace_id: ws.id, key: 'first_name', label: 'Prénom', default_value: 'vous' },
+    { id: 'var-2', workspace_id: ws.id, key: 'company', label: 'Entreprise', default_value: 'votre équipe' },
+  ];
+  t.share_links = [
+    ['Globex — Léa Dupont', { first_name: 'Léa', company: 'Globex' }, null],
+    ['Initech — Marc Petit', { first_name: 'Marc', company: 'Initech' }, null],
+    ['Salon de l’emploi', {}, '2026-11-30T23:00:00Z'],
+  ].map(([name, variables, expires_at], i) => ({
+    id: `sl-${i + 1}`,
+    demo_id: t.demos[0].id,
+    workspace_id: ws.id,
+    token: `tok-${i + 1}`,
+    name,
+    variables,
+    expires_at,
+    is_active: true,
+    created_by: s.user.id,
+    created_at: new Date(now - i * 86400e3).toISOString(),
+  }));
   t.demos[3].status = 'draft';
   t.demos[3].current_version_id = null;
   t.demos[18].status = 'published';

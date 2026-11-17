@@ -1,130 +1,131 @@
-import { CardHead } from '../../components/CardHead';
-import {
-  BarChart3,
-  Check,
-  Code2,
-  Copy,
-  ExternalLink,
-  Globe,
-  GlobeLock,
-  History,
-  Link2,
-  Pencil,
-  Power,
-} from 'lucide-react';
+import { Copy, Download, Eye, Info, Mail, Play, Plus, Power, Trash2, X } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { Alert, Button, Card, Field, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { embedSnippet, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
 import { unpublishDemo } from '../../lib/publish';
-import { formatDate } from '../../lib/format';
+import { formatDate, formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
+import { Menu } from '../../components/Menu';
 import { asSettings } from '../editor/types';
-import { SharePreview } from './SharePreview';
+import { useDemoEditor } from '../editor/useDemoEditor';
+import { PublishButton } from '../editor/PublishButton';
 import { usePlan } from '../../lib/plan';
 import { PlanFormsWarning } from '../../components/PlanFormsWarning';
+import '../../styles/maquette.css';
+import '../../styles/maquette-ajouts.css';
 
-function CopyField({
-  id,
-  label,
-  value,
-  multiline,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  multiline?: boolean;
-}) {
+type Tab = 'link' | 'embed' | 'perso' | 'access';
+type LinkStats = Record<string, { views: number; last: string | null }>;
+
+/** Bouton de copie avec retour « Copié ». */
+function CopyButton({ value, label, primary }: { value: string; label?: string; primary?: boolean }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   return (
-    <Field label={label} htmlFor={id}>
-      <div
-        className={`row copy-field${multiline ? '' : ' copy-field--pill'}`}
-        style={{ alignItems: 'stretch' }}
-      >
-        {multiline ? (
-          <textarea
-            id={id}
-            className="fd-textarea"
-            readOnly
-            rows={5}
-            value={value}
-            style={{ flex: 1, fontFamily: 'monospace', fontSize: 12 }}
-          />
-        ) : (
-          <input id={id} className="fd-input" readOnly value={value} style={{ flex: 1 }} />
-        )}
-        <Button
-          icon={<Copy />}
-          onClick={() => {
-            void navigator.clipboard.writeText(value);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-          }}
-        >
-          {copied ? t('common.copied') : t('common.copy')}
-        </Button>
-      </div>
-    </Field>
+    <button
+      type="button"
+      className={`btn ${primary ? 'btn-primary' : 'btn-secondary'}`}
+      onClick={() => {
+        void navigator.clipboard?.writeText(value);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+    >
+      <Copy aria-hidden="true" />
+      <span aria-live="polite">{copied ? t('common.copied') : (label ?? t('common.copy'))}</span>
+    </button>
   );
 }
 
+/** Partager une démo (PRT-01), à l'identique de la maquette partage.html, sur les données réelles. */
 export function SharePage() {
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
   const { demoId = '' } = useParams();
   const [params] = useSearchParams();
-  const { can } = useWorkspace();
+  const { can, current } = useWorkspace();
+  const editor = useDemoEditor(demoId);
   const [demo, setDemo] = useState<Tables<'demos'> | null>(null);
   const [links, setLinks] = useState<Tables<'share_links'>[]>([]);
-  const [versions, setVersions] = useState<Pick<Tables<'demo_versions'>, 'id' | 'number' | 'published_at'>[]>(
-    [],
-  );
+  const [linkStats, setLinkStats] = useState<LinkStats>({});
+  const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [variables, setVariables] = useState<Tables<'variables'>[]>([]);
-  const [name, setName] = useState('');
-  const [values, setValues] = useState<Record<string, string>>({});
-  const [expires, setExpires] = useState('');
   const [origins, setOrigins] = useState('');
+  const [tab, setTab] = useState<Tab>('link');
+  const [creating, setCreating] = useState(false);
+  const [week, setWeek] = useState<{ views: number; leads: number } | null>(null);
+  const [gatedSteps, setGatedSteps] = useState(0);
   const { error, success, run } = useAction();
   const editable = can('demo.edit');
   const plan = usePlan();
-  const [gatedSteps, setGatedSteps] = useState(0);
 
   const load = useCallback(async () => {
     const d = await supabase.from('demos').select('*').eq('id', demoId).maybeSingle();
     setDemo(d.data);
     if (!d.data) return;
     setOrigins((asSettings(d.data.settings).allowedEmbedOrigins ?? []).join('\n'));
-    const [l, v, vars] = await Promise.all([
+    const [l, v, vars, gated, a] = await Promise.all([
       supabase
         .from('share_links')
         .select('*')
         .eq('demo_id', demoId)
         .order('created_at', { ascending: false }),
-      supabase
-        .from('demo_versions')
-        .select('id, number, published_at')
-        .eq('demo_id', demoId)
-        .order('number', { ascending: false })
-        .limit(10),
+      d.data.current_version_id
+        ? supabase
+            .from('demo_versions')
+            .select('published_at')
+            .eq('id', d.data.current_version_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
       supabase.from('variables').select('*').eq('workspace_id', d.data.workspace_id).order('key'),
+      supabase
+        .from('steps')
+        .select('id', { count: 'exact', head: true })
+        .eq('demo_id', demoId)
+        .not('gate_form_id', 'is', null),
+      supabase.rpc('demo_analytics', {
+        p_demo: demoId,
+        p_from: new Date(Date.now() - 7 * 86400_000).toISOString(),
+        p_to: new Date().toISOString(),
+      }),
     ]);
-    setLinks(l.data ?? []);
-    setVersions(v.data ?? []);
+    const list = l.data ?? [];
+    setLinks(list);
+    setPublishedAt((v.data as { published_at: string } | null)?.published_at ?? null);
     setVariables(vars.data ?? []);
-    const gated = await supabase
-      .from('steps')
-      .select('id', { count: 'exact', head: true })
-      .eq('demo_id', demoId)
-      .not('gate_form_id', 'is', null);
     setGatedSteps(gated.count ?? 0);
+    const w = a.data as unknown as { views: number; leads: number } | null;
+    setWeek(w ? { views: Number(w.views), leads: Number(w.leads) } : null);
+    // Vues et dernière vue de chaque lien personnalisé (événements demo_view portant le lien)
+    const stats: LinkStats = {};
+    await Promise.all(
+      list.map(async (x) => {
+        const [c, last] = await Promise.all([
+          supabase
+            .from('events')
+            .select('id', { count: 'exact', head: true })
+            .eq('demo_id', demoId)
+            .eq('link_id', x.id)
+            .eq('type', 'demo_view'),
+          supabase
+            .from('events')
+            .select('occurred_at')
+            .eq('demo_id', demoId)
+            .eq('link_id', x.id)
+            .eq('type', 'demo_view')
+            .order('occurred_at', { ascending: false })
+            .limit(1),
+        ]);
+        stats[x.id] = { views: c.count ?? 0, last: last.data?.[0]?.occurred_at ?? null };
+      }),
+    );
+    setLinkStats(stats);
   }, [demoId]);
 
   useEffect(() => {
@@ -134,92 +135,113 @@ export function SharePage() {
   if (!demo) return <Loading />;
   const published = demo.status === 'published';
   const url = publicDemoUrl(demo.id);
+  const publicLinksOff = current?.public_links_enabled === false;
+  // Modifications non publiées : démo modifiée après la publication de la version en ligne
+  const pending =
+    published && publishedAt ? Date.parse(demo.updated_at) > Date.parse(publishedAt) + 2000 : false;
+  const firstVar = variables[0];
+  const secondVar = variables[1];
+  const paramExample = [firstVar, secondVar]
+    .filter(Boolean)
+    .map((v, i) => [i ? '&' : '?', `${v!.key}=`, v!.default_value || v!.key] as const);
 
-  async function createLink(e: FormEvent) {
-    e.preventDefault();
-    const vars = Object.fromEntries(Object.entries(values).filter(([, v]) => v.trim()));
-    await run(async () => {
-      const created = check(
-        await supabase
-          .from('share_links')
-          .insert({
-            demo_id: demoId,
-            workspace_id: demo!.workspace_id,
-            name,
-            variables: vars,
-            expires_at: expires ? new Date(Date.now() + Number(expires) * 86400_000).toISOString() : null,
-          })
-          .select('token')
-          .single(),
-      );
-      // P10 : le lien créé est copié automatiquement
-      await navigator.clipboard?.writeText(shareLinkUrl(created.token)).catch(() => undefined);
-      setName('');
-      setValues({});
-      setExpires('');
-      await load();
-    }, t('share.linkCreatedCopied'));
-  }
+  // Onglets texte seul, comme le rendu de la maquette
+  const tabs: Array<{ id: Tab }> = [{ id: 'link' }, { id: 'embed' }, { id: 'perso' }, { id: 'access' }];
 
   return (
-    <div className="stack" style={{ maxWidth: 1180 }}>
+    <div className="mk sh">
       {dialog}
       <div className="page-head">
-        <h1>
-          {t('share.title')} — {demo.title}
-        </h1>
+        <div>
+          <h1>{t('share.pageTitle')}</h1>
+          <p className="muted sh-sub">
+            {published && publishedAt ? (
+              <>
+                {t('share.publishedOn', { date: formatDateTime(publishedAt) })}
+                {pending && (
+                  <>
+                    {' · '}
+                    <Link to={`/demos/${demoId}/edit`}>{t('share.pendingChanges')}</Link>
+                  </>
+                )}
+              </>
+            ) : (
+              t('share.neverPublished', { title: demo.title })
+            )}
+          </p>
+        </div>
         <div className="row">
-          <Link className="fd-btn" to={`/demos/${demoId}/edit`}>
-            <Pencil size={16} aria-hidden="true" />
-            {t('share.backToEditor')}
-          </Link>
-          <Link className="fd-btn" to={`/demos/${demoId}/analytics`}>
-            <BarChart3 size={16} aria-hidden="true" />
-            {t('nav.analytics')}
-          </Link>
+          <a className="btn btn-secondary" href={`${url}?preview=1`} target="_blank" rel="noreferrer">
+            <Eye aria-hidden="true" />
+            {t('share.preview')}
+          </a>
+          {editable && editor.demo && (!published || pending) && (
+            <span className="sh-publish">
+              <PublishButton editor={editor} republishLabel={t('share.publishChanges')} />
+            </span>
+          )}
         </div>
       </div>
-      {params.get('published') && <Alert kind="success">{t('share.justPublished')}</Alert>}
+      {params.get('published') && (
+        <div className="alert alert-success sh-alert" role="status">
+          {t('share.justPublished')}
+        </div>
+      )}
       {published && !plan.leadForms && gatedSteps > 0 && <PlanFormsWarning variant="share" />}
-      {error && <Alert kind="error">{error}</Alert>}
-      {success && <Alert kind="success">{success}</Alert>}
+      {error && (
+        <div className="alert alert-danger sh-alert" role="alert">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="alert alert-success sh-alert" role="status">
+          {success}
+        </div>
+      )}
 
       <div className="share-layout">
-        <div className="stack">
-          {!published ? (
-            <Card>
-              <p>{t('share.notPublished')}</p>
-              <Link className="fd-btn fd-btn--primary" to={`/demos/${demoId}/edit`}>
-                <Pencil size={16} aria-hidden="true" />
-                {t('share.goPublish')}
-              </Link>
-            </Card>
-          ) : (
-            <>
-              <Card>
-                <CardHead icon={<Globe />} title={t('share.publicLink')} />
-                <CopyField id="pub-url" label={t('share.publicLinkHint')} value={url} />
-                <div className="url-params">
-                  <p className="fd-muted">{t('share.urlVariables')}</p>
-                  <code className="code-block">
-                    <span className="code-block__base">{url}</span>
-                    <mark className="code-block__var">
-                      ?{variables[0]?.key ?? 'company'}=
-                      {encodeURIComponent(variables[0]?.default_value || 'Acme')}
-                    </mark>
-                  </code>
-                </div>
-                <div className="row">
-                  <a className="fd-btn" href={url} target="_blank" rel="noreferrer">
-                    <ExternalLink size={16} aria-hidden="true" />
-                    {t('share.open')}
-                  </a>
-                  {editable && (
-                    <Button
-                      icon={<GlobeLock />}
-                      variant="ghost"
-                      className="btn-danger-ghost"
-                      onClick={() =>
+        <div className="card">
+          <div className="sh-tabs-wrap">
+            <div className="tabs" role="tablist" aria-label={t('share.mode')}>
+              {tabs.map(({ id }) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  id={`sh-tab-${id}`}
+                  aria-selected={tab === id}
+                  aria-controls={`sh-panel-${id}`}
+                  tabIndex={tab === id ? 0 : -1}
+                  onClick={() => setTab(id)}
+                  onKeyDown={(e) => {
+                    const i = tabs.findIndex((x) => x.id === id);
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                      const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]!.id;
+                      setTab(n);
+                      document.getElementById(`sh-tab-${n}`)?.focus();
+                    }
+                  }}
+                >
+                  {t(`share.tab.${id}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="card-pad">
+            {tab === 'link' && (
+              <section role="tabpanel" id="sh-panel-link" aria-labelledby="sh-tab-link">
+                <div className="setting sh-first">
+                  <div>
+                    <b>{t('share.publicAccess')}</b>
+                    <p className="t-caption muted">{t('share.publicAccessHelp')}</p>
+                  </div>
+                  <span className="switch">
+                    <input
+                      type="checkbox"
+                      aria-label={t('share.publicAccess')}
+                      checked={published}
+                      disabled={!editable || !published}
+                      onChange={() =>
                         void ask({
                           title: t('share.unpublish'),
                           body: t('share.confirmUnpublish'),
@@ -234,202 +256,674 @@ export function SharePage() {
                             }, t('share.unpublished')),
                         )
                       }
-                    >
-                      {t('share.unpublish')}
-                    </Button>
+                    />
+                    <span />
+                  </span>
+                </div>
+                {!published && (
+                  <div className="alert alert-warning sh-note">
+                    <Info aria-hidden="true" />
+                    <span>{t('share.notPublishedNote')}</span>
+                  </div>
+                )}
+                {publicLinksOff && (
+                  <div className="alert sh-note">
+                    <Info aria-hidden="true" />
+                    <span>{t('share.publicLinksOff')}</span>
+                  </div>
+                )}
+                <div className="field sh-field">
+                  <label htmlFor="sh-pub">{t('share.publicLink')}</label>
+                  <div className="input-group">
+                    <input id="sh-pub" className="input t-mono" readOnly value={url} disabled={!published} />
+                    <CopyButton value={url} />
+                  </div>
+                </div>
+                <div className="field">
+                  <label htmlFor="sh-slug">
+                    {t('share.customAddress')} <span className="badge">{t('shell.soon')}</span>
+                  </label>
+                  <div className="input-group">
+                    <span className="input t-mono muted sh-prefix">{url.replace(/[^/]+$/, '')}</span>
+                    <input
+                      id="sh-slug"
+                      className="input t-mono sh-slug"
+                      disabled
+                      value={demo.id.slice(0, 8)}
+                    />
+                  </div>
+                  <span className="help">{t('share.customAddressHelp')}</span>
+                </div>
+                <hr className="divider sh-hr" />
+                <h3 className="t-label sh-h3">{t('share.urlParams')}</h3>
+                <div className="code">
+                  {url}
+                  {paramExample.length ? (
+                    paramExample.map(([sep, k, v]) => (
+                      <span key={k}>
+                        <span className="k">
+                          {sep}
+                          {k}
+                        </span>
+                        <span className="s">{encodeURIComponent(v)}</span>
+                      </span>
+                    ))
+                  ) : (
+                    <>
+                      <span className="k">?first_name=</span>
+                      <span className="s">Léa</span>
+                    </>
                   )}
                 </div>
-              </Card>
-              <Card>
-                <CardHead icon={<Code2 />} title={t('share.embed')} />
-                <CopyField
-                  id="embed"
-                  label={t('share.embedHint')}
-                  value={embedSnippet(url, demo.title)}
-                  multiline
-                />
-                <Field label={t('share.allowedOrigins')} htmlFor="origins">
-                  <textarea
-                    id="origins"
-                    className="fd-textarea"
-                    rows={3}
-                    disabled={!editable}
-                    placeholder={'www.acme.example\n*.acme.example'}
-                    value={origins}
-                    onChange={(e) => setOrigins(e.target.value)}
-                  />
-                </Field>
-                <p className="fd-muted" style={{ fontSize: 12 }}>
-                  {t('share.allowedOriginsHint')}
-                </p>
-                {editable && (
-                  <Button
-                    icon={<Check />}
-                    onClick={() =>
-                      void run(async () => {
-                        const list = origins
-                          .split(/\s+/)
-                          .map((o) => o.trim())
-                          .filter(Boolean)
-                          .slice(0, 20);
-                        check(
-                          await supabase
-                            .from('demos')
-                            .update({ settings: { ...asSettings(demo.settings), allowedEmbedOrigins: list } })
-                            .eq('id', demoId),
-                        );
-                        await load();
-                      }, t('share.originsSaved'))
-                    }
+                <p className="help sh-help">{t('share.urlParamsHelp')}</p>
+                <hr className="divider sh-hr" />
+                <h3 className="t-label sh-h3">{t('share.elsewhere')}</h3>
+                <div className="row wrap">
+                  <a
+                    className="btn btn-secondary btn-sm"
+                    href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(url)}`}
+                    aria-disabled={published ? undefined : 'true'}
                   >
-                    {t('common.save')}
-                  </Button>
-                )}
-              </Card>
-            </>
-          )}
-
-          <Card>
-            <CardHead icon={<Link2 />} title={t('share.personalLinks')} />
-            <p className="fd-muted">{t('share.personalLinksHint')}</p>
-            {editable && (
-              <form onSubmit={createLink} className="stack" style={{ gap: 0 }}>
-                <Field label={t('share.linkName')} htmlFor="ln">
-                  <input
-                    id="ln"
-                    className="fd-input"
-                    required
-                    maxLength={120}
-                    placeholder={t('share.linkNamePlaceholder')}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </Field>
-                {variables.map((v) => (
-                  <Field key={v.id} label={v.label || v.key} htmlFor={`lv-${v.key}`}>
-                    <input
-                      id={`lv-${v.key}`}
-                      className="fd-input"
-                      maxLength={200}
-                      placeholder={v.default_value}
-                      value={values[v.key] ?? ''}
-                      onChange={(e) => setValues({ ...values, [v.key]: e.target.value })}
-                    />
-                  </Field>
-                ))}
-                <Field label={t('share.expires')} htmlFor="lx">
-                  <Select id="lx" value={expires} onChange={(e) => setExpires(e.target.value)}>
-                    <option value="">{t('share.expiresNever')}</option>
-                    {[7, 30, 90].map((d) => (
-                      <option key={d} value={String(d)}>
-                        {t('share.expiresIn', {
-                          count: d,
-                          date: formatDate(new Date(Date.now() + d * 86400_000).toISOString()),
-                        })}
-                      </option>
-                    ))}
-                  </Select>
-                </Field>
-                <div>
-                  <Button icon={<Link2 />} type="submit" variant="primary">
-                    {t('share.createLink')}
-                  </Button>
+                    <Mail aria-hidden="true" />
+                    {t('share.email')}
+                  </a>
+                  <a
+                    className="btn btn-secondary btn-sm"
+                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-disabled={published ? undefined : 'true'}
+                  >
+                    LinkedIn
+                  </a>
+                  <a
+                    className="btn btn-secondary btn-sm"
+                    href={`https://x.com/intent/post?url=${encodeURIComponent(url)}&text=${encodeURIComponent(demo.title)}`}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-disabled={published ? undefined : 'true'}
+                  >
+                    X
+                  </a>
+                  <span className="btn btn-secondary btn-sm" aria-disabled="true" title={t('share.v2')}>
+                    <Download aria-hidden="true" />
+                    {t('share.gif')}
+                    <span className="badge sh-badge-xs">V2</span>
+                  </span>
                 </div>
-              </form>
+              </section>
             )}
-            {links.length > 0 && (
-              <table className="fd-table" style={{ marginTop: 16 }}>
-                <thead>
-                  <tr>
-                    <th>{t('share.linkName')}</th>
-                    <th>{t('editor.variables')}</th>
-                    <th>{t('share.expires')}</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {links.map((l) => (
-                    <tr key={l.id} style={{ opacity: l.is_active ? 1 : 0.5 }}>
-                      <td>{l.name || '—'}</td>
-                      <td style={{ fontSize: 12 }}>
-                        {Object.entries((l.variables as Record<string, string>) ?? {})
-                          .map(([k, v]) => `${k}=${v}`)
-                          .join(', ') || '—'}
-                      </td>
-                      <td>{l.expires_at ? formatDate(l.expires_at) : '—'}</td>
-                      <td>
-                        <div className="row" style={{ justifyContent: 'flex-end' }}>
-                          <Button
-                            icon={<Copy />}
-                            size="sm"
-                            onClick={() => void navigator.clipboard.writeText(shareLinkUrl(l.token))}
-                          >
-                            {t('members.copyLink')}
-                          </Button>
-                          {editable && (
-                            <>
-                              <Button
-                                icon={<Power />}
-                                size="sm"
-                                onClick={() =>
-                                  void run(async () => {
-                                    check(
-                                      await supabase
-                                        .from('share_links')
-                                        .update({ is_active: !l.is_active })
-                                        .eq('id', l.id),
-                                    );
-                                    await load();
-                                  })
-                                }
-                              >
-                                {l.is_active ? t('share.disable') : t('share.enable')}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="danger"
-                                onClick={() =>
-                                  void run(async () => {
-                                    check(await supabase.from('share_links').delete().eq('id', l.id));
-                                    await load();
-                                  })
-                                }
-                              >
-                                {t('common.delete')}
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </Card>
 
-          {versions.length > 0 && (
-            <Card>
-              <CardHead icon={<History />} title={t('share.versions')} />
-              <ul className="version-list">
-                {versions.map((v) => (
-                  <li key={v.id}>
-                    <span>
-                      v{v.number} · {formatDate(v.published_at)}
-                    </span>
-                    {v.id === demo.current_version_id && (
-                      <span className="fd-badge status-published">{t('share.live')}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )}
+            {tab === 'embed' && (
+              <section role="tabpanel" id="sh-panel-embed" aria-labelledby="sh-tab-embed">
+                <EmbedPanel
+                  url={url}
+                  title={demo.title}
+                  published={published}
+                  editable={editable}
+                  origins={origins}
+                  setOrigins={setOrigins}
+                  removeBranding={plan.removeBranding}
+                  onSaveOrigins={() =>
+                    void run(async () => {
+                      const list = origins
+                        .split(/\s+/)
+                        .map((o) => o.trim())
+                        .filter(Boolean)
+                        .slice(0, 20);
+                      check(
+                        await supabase
+                          .from('demos')
+                          .update({ settings: { ...asSettings(demo.settings), allowedEmbedOrigins: list } })
+                          .eq('id', demoId),
+                      );
+                      await load();
+                    }, t('share.originsSaved'))
+                  }
+                />
+              </section>
+            )}
+
+            {tab === 'perso' && (
+              <section role="tabpanel" id="sh-panel-perso" aria-labelledby="sh-tab-perso">
+                <div className="row between sh-perso-head">
+                  <p className="muted">{t('share.persoHelp')}</p>
+                  {editable && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => setCreating(true)}
+                    >
+                      <Plus aria-hidden="true" />
+                      {t('share.newLink')}
+                    </button>
+                  )}
+                </div>
+                {links.length === 0 ? (
+                  <p className="muted sh-empty">{t('share.noLinks')}</p>
+                ) : (
+                  <div className="table-wrap">
+                    <table className="table">
+                      <caption className="sr-only">{t('share.tab.perso')}</caption>
+                      <thead>
+                        <tr>
+                          <th>{t('share.linkNameShort')}</th>
+                          <th>{t('editor.variables')}</th>
+                          <th className="r">{t('analytics.views')}</th>
+                          <th>{t('share.lastView')}</th>
+                          <th>
+                            <span className="sr-only">{t('members.actions')}</span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {links.map((l) => {
+                          const vars = Object.values((l.variables as Record<string, string>) ?? {}).filter(
+                            Boolean,
+                          );
+                          const expired = l.expires_at && Date.parse(l.expires_at) < Date.now();
+                          const st = linkStats[l.id];
+                          return (
+                            <tr key={l.id} className={l.is_active && !expired ? undefined : 'sh-off'}>
+                              <th scope="row" className="sh-row-h">
+                                {l.name || '—'}
+                                {!l.is_active && (
+                                  <span className="badge sh-state">{t('share.disabled')}</span>
+                                )}
+                              </th>
+                              <td>
+                                {vars.map((v) => (
+                                  <span key={v} className="badge sh-var">
+                                    {v}
+                                  </span>
+                                ))}
+                                {l.expires_at && (
+                                  <span className={`badge ${expired ? '' : 'badge-warning'}`}>
+                                    {expired
+                                      ? t('share.expired')
+                                      : t('share.expiresOn', {
+                                          date: formatDate(l.expires_at, { day: 'numeric', month: 'short' }),
+                                        })}
+                                  </span>
+                                )}
+                                {!vars.length && !l.expires_at && <span className="muted">—</span>}
+                              </td>
+                              <td className="r">{formatNumber(st?.views ?? 0)}</td>
+                              <td className="muted">{st?.last ? formatRelativeShort(st.last) : '—'}</td>
+                              <td className="r">
+                                <div className="row sh-actions">
+                                  <button
+                                    type="button"
+                                    className="btn btn-ghost btn-sm btn-icon"
+                                    aria-label={t('share.copyLinkOf', { name: l.name || '—' })}
+                                    onClick={() =>
+                                      void navigator.clipboard
+                                        ?.writeText(shareLinkUrl(l.token))
+                                        .then(() => run(async () => undefined, t('members.linkCopied')))
+                                    }
+                                  >
+                                    <Copy aria-hidden="true" />
+                                  </button>
+                                  {editable && (
+                                    <Menu
+                                      label={t('members.actionsFor', { name: l.name || '—' })}
+                                      items={[
+                                        {
+                                          label: l.is_active ? t('share.disable') : t('share.enable'),
+                                          icon: <Power />,
+                                          onSelect: () =>
+                                            void run(async () => {
+                                              check(
+                                                await supabase
+                                                  .from('share_links')
+                                                  .update({ is_active: !l.is_active })
+                                                  .eq('id', l.id),
+                                              );
+                                              await load();
+                                            }),
+                                        },
+                                        'separator',
+                                        {
+                                          label: t('common.delete'),
+                                          icon: <Trash2 />,
+                                          danger: true,
+                                          onSelect: () =>
+                                            void run(async () => {
+                                              check(
+                                                await supabase.from('share_links').delete().eq('id', l.id),
+                                              );
+                                              await load();
+                                            }),
+                                        },
+                                      ]}
+                                    />
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {tab === 'access' && (
+              <section role="tabpanel" id="sh-panel-access" aria-labelledby="sh-tab-access">
+                {/* Accès restreint (mot de passe, expiration, domaines) : lot L11, pas encore disponible */}
+                <div className="setting sh-first">
+                  <div>
+                    <b>{t('share.password')}</b> <span className="badge">{t('shell.soon')}</span>
+                    <p className="t-caption muted">{t('share.passwordHelp')}</p>
+                  </div>
+                  <span className="switch">
+                    <input type="checkbox" disabled aria-label={t('share.password')} />
+                    <span />
+                  </span>
+                </div>
+                <div className="setting">
+                  <div>
+                    <b>{t('share.expiration')}</b> <span className="badge">{t('shell.soon')}</span>
+                    <p className="t-caption muted">{t('share.expirationHelp')}</p>
+                  </div>
+                  <span className="switch">
+                    <input type="checkbox" disabled aria-label={t('share.expiration')} />
+                    <span />
+                  </span>
+                </div>
+                <div className="setting">
+                  <div>
+                    <b>{t('share.domains')}</b> <span className="badge">V2</span>
+                    <p className="t-caption muted">{t('share.domainsHelp')}</p>
+                  </div>
+                  <span className="switch">
+                    <input type="checkbox" disabled aria-label={t('share.domains')} />
+                    <span />
+                  </span>
+                </div>
+                <div className="setting">
+                  <div>
+                    <b>{t('share.formFirst')}</b>
+                    <p className="t-caption muted">{t('share.formFirstHelp')}</p>
+                  </div>
+                  <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/edit`}>
+                    {t('share.configure')}
+                  </Link>
+                </div>
+              </section>
+            )}
+          </div>
         </div>
-        <aside className="share-aside">
-          <SharePreview demo={demo} playerUrl={url} published={published} />
+
+        <aside className="col sh-aside" aria-label={t('share.preview')}>
+          <MiniPreview demoId={demo.id} previewUrl={`${url}?preview=1`} />
+          <div className="card card-pad">
+            <h3 className="t-label">{t('share.socialPreview')}</h3>
+            <div className="sh-og">
+              <div className="sh-og-img fd-player-scope">
+                <b>{demo.title}</b>
+              </div>
+              <div className="sh-og-txt">
+                <span className="t-caption subtle">{new URL(url).host}</span>
+                <p className="t-label">
+                  {demo.title} · {t('share.interactiveDemo')}
+                </p>
+              </div>
+            </div>
+            <p className="help sh-help">
+              {t('share.ogHelp')} <span className="badge">{t('shell.soon')}</span>
+            </p>
+          </div>
+          <div className="card card-pad">
+            <div className="row between">
+              <h3 className="t-label">{t('share.thisWeek')}</h3>
+              <Link to={`/demos/${demoId}/analytics`} className="t-caption">
+                {t('share.seeAnalytics')}
+              </Link>
+            </div>
+            <div className="grid sh-week">
+              <div>
+                <span className="t-caption muted">{t('analytics.views')}</span>
+                <div className="num sh-num">{formatNumber(week?.views ?? 0)}</div>
+              </div>
+              <div>
+                <span className="t-caption muted">{t('analytics.leads')}</span>
+                <div className="num sh-num">{formatNumber(week?.leads ?? 0)}</div>
+              </div>
+            </div>
+          </div>
         </aside>
       </div>
+
+      {creating && (
+        <NewLinkDialog
+          variables={variables}
+          onClose={() => setCreating(false)}
+          onCreate={async (name, vars, days) => {
+            await run(async () => {
+              const created = check(
+                await supabase
+                  .from('share_links')
+                  .insert({
+                    demo_id: demoId,
+                    workspace_id: demo.workspace_id,
+                    name,
+                    variables: vars,
+                    expires_at: days ? new Date(Date.now() + days * 86400_000).toISOString() : null,
+                  })
+                  .select('token')
+                  .single(),
+              );
+              // P10 : le lien créé est copié automatiquement
+              await navigator.clipboard?.writeText(shareLinkUrl(created.token)).catch(() => undefined);
+              setCreating(false);
+              await load();
+            }, t('share.linkCreatedCopied'));
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EmbedPanel({
+  url,
+  title,
+  published,
+  editable,
+  origins,
+  setOrigins,
+  removeBranding,
+  onSaveOrigins,
+}: {
+  url: string;
+  title: string;
+  published: boolean;
+  editable: boolean;
+  origins: string;
+  setOrigins: (v: string) => void;
+  removeBranding: boolean;
+  onSaveOrigins: () => void;
+}) {
+  const { t } = useTranslation();
+  const [format, setFormat] = useState<'responsive' | 'fixed'>('responsive');
+  const safe = title.replace(/[<>"&]/g, '');
+  const code =
+    format === 'responsive'
+      ? embedSnippet(url, title)
+      : `<iframe src="${url}" title="${safe}" width="960" height="644" loading="lazy" allow="fullscreen; clipboard-write" style="border:0;border-radius:12px"></iframe>`;
+  return (
+    <>
+      <div className="segmented" role="radiogroup" aria-label={t('share.embedFormat')}>
+        <button
+          type="button"
+          role="radio"
+          aria-checked={format === 'responsive'}
+          onClick={() => setFormat('responsive')}
+        >
+          {t('share.responsive')}
+        </button>
+        <button
+          type="button"
+          role="radio"
+          aria-checked={format === 'fixed'}
+          onClick={() => setFormat('fixed')}
+        >
+          {t('share.fixed')}
+        </button>
+        <button type="button" role="radio" aria-checked="false" aria-disabled="true">
+          {t('share.popup')} <span className="badge sh-badge-xs">{t('shell.soon')}</span>
+        </button>
+      </div>
+      <pre className="code sh-code">{code}</pre>
+      <div className="row sh-embed-actions">
+        {published ? (
+          <CopyButton value={code} label={t('share.copyCode')} primary />
+        ) : (
+          <span className="btn btn-primary" aria-disabled="true">
+            <Copy aria-hidden="true" />
+            {t('share.copyCode')}
+          </span>
+        )}
+      </div>
+      <hr className="divider sh-hr" />
+      <div className="setting">
+        <span className="t-label">{t('share.hideBranding')}</span>
+        {removeBranding ? (
+          <span className="badge badge-success">{t('share.included')}</span>
+        ) : (
+          <Link to="/settings/plans" className="badge badge-accent">
+            {t('share.upgradePlan')}
+          </Link>
+        )}
+      </div>
+      <div className="setting">
+        <span className="t-label">
+          {t('share.clickToStart')} <span className="badge">{t('shell.soon')}</span>
+        </span>
+        <span className="switch">
+          <input type="checkbox" disabled aria-label={t('share.clickToStart')} />
+          <span />
+        </span>
+      </div>
+      <div className="field sh-field">
+        <label htmlFor="sh-origins">{t('share.allowedOrigins')}</label>
+        <textarea
+          id="sh-origins"
+          className="textarea"
+          rows={3}
+          disabled={!editable}
+          placeholder={'www.exemple.org\n*.exemple.org'}
+          value={origins}
+          onChange={(e) => setOrigins(e.target.value)}
+        />
+        <span className="help">{t('share.allowedOriginsHint')}</span>
+        {editable && (
+          <div>
+            <button type="button" className="btn btn-secondary btn-sm sh-save" onClick={onSaveOrigins}>
+              {t('common.save')}
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="alert sh-note">
+        <Info aria-hidden="true" />
+        <span className="t-caption">{t('share.cspNote', { host: new URL(url).host })}</span>
+      </div>
+    </>
+  );
+}
+
+/** Aperçu de la maquette : mini-lecteur (capture de l'étape 1) et bouton « Lancer la démo ». */
+function MiniPreview({ demoId, previewUrl }: { demoId: string; previewUrl: string }) {
+  const { t } = useTranslation();
+  const [image, setImage] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      const { data } = await supabase
+        .from('steps')
+        .select('image_path')
+        .eq('demo_id', demoId)
+        .not('image_path', 'is', null)
+        .order('position')
+        .limit(1);
+      const path = data?.[0]?.image_path;
+      if (!path) return;
+      const s = await supabase.storage.from('captures').createSignedUrl(path, 3600);
+      if (alive) setImage(s.data?.signedUrl ?? null);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [demoId]);
+  return (
+    <div className="preview-box fd-player-scope">
+      <div className="mini-player">
+        <div className="bar">
+          <i />
+          <i />
+          <i />
+        </div>
+        <div className="sh-screen">
+          {image ? <img src={image} alt="" /> : <div className="sh-blank" />}
+          <div className="sh-overlay">
+            <a className="btn btn-primary sh-launch" href={previewUrl} target="_blank" rel="noreferrer">
+              <Play aria-hidden="true" />
+              {t('share.launch')}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Modale « Nouveau lien personnalisé » (PRT-05). */
+function NewLinkDialog({
+  variables,
+  onClose,
+  onCreate,
+}: {
+  variables: Tables<'variables'>[];
+  onClose: () => void;
+  onCreate: (name: string, vars: Record<string, string>, days: number | null) => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [name, setName] = useState('');
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [expires, setExpires] = useState(false);
+  const [days, setDays] = useState(30);
+  const [err, setErr] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    const errs: Record<string, string> = {};
+    if (!name.trim()) errs.name = t('validation.required');
+    for (const v of variables) {
+      const val = (values[v.key] ?? '').trim();
+      if (v.key.includes('email') && val && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val))
+        errs[v.key] = t('share.invalidEmail');
+    }
+    setErr(errs);
+    if (Object.keys(errs).length) return;
+    const vars = Object.fromEntries(Object.entries(values).filter(([, v]) => v.trim()));
+    await onCreate(name.trim(), vars, expires ? days : null);
+  }
+  return (
+    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <form
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sh-link-t"
+        onSubmit={submit}
+        noValidate
+      >
+        <div className="modal-head">
+          <h2 id="sh-link-t">{t('share.newLinkTitle')}</h2>
+          <button
+            type="button"
+            className="btn btn-ghost btn-icon btn-sm"
+            aria-label={t('common.close')}
+            onClick={onClose}
+          >
+            <X aria-hidden="true" />
+          </button>
+        </div>
+        <div className="modal-body">
+          <div className="field">
+            <label htmlFor="sh-ln">{t('share.linkName')}</label>
+            <input
+              id="sh-ln"
+              className="input"
+              autoFocus
+              maxLength={120}
+              placeholder={t('share.linkNamePlaceholder')}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              aria-invalid={err.name ? true : undefined}
+              aria-describedby={err.name ? 'sh-ln-e sh-ln-h' : 'sh-ln-h'}
+            />
+            {err.name && (
+              <span className="error-msg" id="sh-ln-e">
+                {err.name}
+              </span>
+            )}
+            <span className="help" id="sh-ln-h">
+              {t('share.linkNameHelp')}
+            </span>
+          </div>
+          {variables.length > 0 && (
+            <div className="grid sh-vars">
+              {variables.map((v) => (
+                <div key={v.id} className="field">
+                  <label htmlFor={`sh-v-${v.key}`}>
+                    <span className="t-mono">{`{{${v.key}}}`}</span>{' '}
+                    <span className="opt">{t('plans.optional')}</span>
+                  </label>
+                  <input
+                    id={`sh-v-${v.key}`}
+                    className="input"
+                    maxLength={200}
+                    placeholder={v.default_value}
+                    value={values[v.key] ?? ''}
+                    onChange={(e) => setValues({ ...values, [v.key]: e.target.value })}
+                    aria-invalid={err[v.key] ? true : undefined}
+                  />
+                  {err[v.key] && <span className="error-msg">{err[v.key]}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="setting sh-exp">
+            <span className="t-label">{t('share.expiration')}</span>
+            <span className="switch">
+              <input
+                type="checkbox"
+                aria-label={t('share.expiration')}
+                checked={expires}
+                onChange={(e) => setExpires(e.target.checked)}
+              />
+              <span />
+            </span>
+          </div>
+          {expires && (
+            <div className="field">
+              <label htmlFor="sh-days">{t('share.expiresAfter')}</label>
+              <select
+                id="sh-days"
+                className="select"
+                value={days}
+                onChange={(e) => setDays(Number(e.target.value))}
+              >
+                {[7, 30, 90].map((d) => (
+                  <option key={d} value={d}>
+                    {t('share.expiresIn', {
+                      count: d,
+                      date: formatDate(new Date(Date.now() + d * 86400_000).toISOString()),
+                    })}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+        <div className="modal-foot">
+          <button type="button" className="btn btn-secondary" onClick={onClose}>
+            {t('common.cancel')}
+          </button>
+          <button type="submit" className="btn btn-primary">
+            {t('share.createAndCopy')}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

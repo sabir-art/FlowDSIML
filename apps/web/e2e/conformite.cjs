@@ -24,6 +24,7 @@ const SCREENS = {
   'PLN-01': { maquette: 'plans.html', route: '/#/settings/plans' },
   'ANA-01': { maquette: 'analytics.html', route: '/#/analytics' },
   'PRM-01': { maquette: 'parametres.html', route: '/#/settings/members' },
+  'PRT-01': { maquette: 'partage.html', route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share' },
   'CNX-01': {
     maquette: 'connexion.html',
     route: '/#/login',

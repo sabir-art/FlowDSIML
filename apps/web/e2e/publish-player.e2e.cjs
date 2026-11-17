@@ -61,15 +61,18 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     manifest.steps.every((s) => s.blurs.length === 0),
     'le manifeste ne renvoie plus les zones à flouter',
   );
-  const publicUrl = await app.inputValue('#pub-url');
+  const publicUrl = await app.inputValue('#sh-pub');
   ok(publicUrl === `${PLAYER}/#/d/${DEMO}`, 'lien public affiché');
-  ok((await app.inputValue('#embed')).includes('<iframe'), 'snippet d’intégration affiché');
+  await app.getByRole('tab', { name: 'Intégrer' }).click();
+  ok((await app.textContent('.sh-code')).includes('<iframe'), 'snippet d’intégration affiché');
   if (SHOTS) await app.screenshot({ path: `${SHOTS}/share.png`, fullPage: true });
 
-  // Lien personnalisé
-  await app.fill('#ln', 'Globex — Marie');
-  await app.fill('#lv-company', 'Globex');
-  await app.getByRole('button', { name: 'Créer le lien' }).click();
+  // Lien personnalisé (onglet dédié, modale « Nouveau lien personnalisé »)
+  await app.getByRole('tab', { name: 'Liens personnalisés' }).click();
+  await app.getByRole('button', { name: 'Nouveau lien' }).click();
+  await app.fill('#sh-ln', 'Globex — Marie');
+  await app.fill('#sh-v-company', 'Globex');
+  await app.getByRole('button', { name: 'Créer et copier le lien' }).click();
   await app.waitForTimeout(500);
   const link = state.tables.share_links[0];
   ok(link && link.variables.company === 'Globex', 'lien personnalisé créé avec variables');
