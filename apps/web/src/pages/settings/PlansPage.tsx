@@ -1,6 +1,7 @@
+import { SUPPORT_EMAIL } from '../../lib/env';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Minus } from 'lucide-react';
+import { Check, Mail, Minus } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Card } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
@@ -40,12 +41,37 @@ export function PlansPage() {
       <Minus size={16} className="plan-no" aria-label={t('common.no')} />
     );
 
+  /** « Nous contacter » : mailto vers VITE_SUPPORT_EMAIL ; masqué si la variable est absente. */
+  const contact = (planName: string | null) => {
+    if (!SUPPORT_EMAIL) return null;
+    const subject = t('plans.contactSubject', {
+      workspace: current?.name ?? '',
+      plan: planName ?? '…',
+    });
+    return (
+      <a
+        className="fd-btn fd-btn--sm plan-contact"
+        href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`}
+      >
+        <span className="fd-btn__icon" aria-hidden="true">
+          <Mail />
+        </span>
+        {t('plans.contact')}
+      </a>
+    );
+  };
+
   return (
     <div className="stack" style={{ maxWidth: 1080 }}>
       <div className="page-head">
         <h1>{t('plans.title')}</h1>
       </div>
-      <Alert kind="info">{t('plans.manualNotice')}</Alert>
+      <Alert kind="info">
+        <div className="plans-notice">
+          <span>{t('plans.manualNotice')}</span>
+          {contact(null)}
+        </div>
+      </Alert>
       <div className="plans-grid">
         {plans.map((p) => {
           const l = p.limits as unknown as Limits;
@@ -82,6 +108,7 @@ export function PlansPage() {
                   <strong>{t('plan.days', { count: l.analytics_retention_days, formatParams: {} })}</strong>
                 </li>
               </ul>
+              {!isCurrent && contact(t(`plan.names.${p.code}`, { defaultValue: p.name }))}
             </Card>
           );
         })}

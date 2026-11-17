@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from '../lib/useMediaQuery';
 import { BrandMark } from './BrandMark';
 import { initials } from '../lib/initials';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   BarChart3,
@@ -155,12 +155,29 @@ export function Layout() {
           </div>
         )}
         <nav aria-label={t('nav.main')} className="fd-nav">
-          {nav.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end} className="fd-nav__item">
-              {n.icon}
-              {n.label}
-            </NavLink>
-          ))}
+          {nav.map((n) => {
+            // RF6 : « Démos » reste actif dans les sous-pages d'une démo (analytics, partage…)
+            if (n.to === '/') {
+              const active = location.pathname === '/' || location.pathname.startsWith('/demos/');
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  className={`fd-nav__item${active ? ' active' : ''}`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {n.icon}
+                  {n.label}
+                </Link>
+              );
+            }
+            return (
+              <NavLink key={n.to} to={n.to} end={n.end} className="fd-nav__item">
+                {n.icon}
+                {n.label}
+              </NavLink>
+            );
+          })}
           <div className="fd-nav__section">{t('nav.workspace')}</div>
           {admin.map((n) => (
             <NavLink key={n.to} to={n.to} className="fd-nav__item">

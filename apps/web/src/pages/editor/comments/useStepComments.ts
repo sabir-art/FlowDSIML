@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../../../lib/supabase';
 import { check } from '../../../lib/useAction';
@@ -9,41 +9,82 @@ export interface CommentAuthor {
   email: string;
   full_name: string;
 }
+/** Événement reçu d'un autre membre (annonce aria-live, mise en évidence « Nouveau »). */
+export interface RemoteEvent {
+  kind: 'added' | 'resolved' | 'deleted';
+  authorId: string | null;
+  commentId: string;
+  at: number;
+}
 
 /**
  * Commentaires internes d'une démo (toutes étapes), rafraîchis en temps réel via Supabase Realtime.
  * Jamais publiés : la table n'est lue ni par publish_demo ni par le player.
  */
-export function useStepComments(demoId: string, workspaceId: string | undefined) {
+export function useStepComments(demoId: string, workspaceId: string | undefined, myId: string | undefined) {
   const [comments, setComments] = useState<StepComment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [authors, setAuthors] = useState<Record<string, CommentAuthor>>({});
-  const [error, setError] = useState<unknown>(null);
+  const [remote, setRemote] = useState<RemoteEvent | null>(null);
+  const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
+  const mine = useRef(new Set<string>());
 
   const reload = useCallback(async () => {
-    const { data, error: e } = await supabase
+    const { data, error } = await supabase
       .from('step_comments')
       .select('*')
       .eq('demo_id', demoId)
       .order('created_at', { ascending: true });
-    if (e) setError(e);
-    else setComments(data ?? []);
+    if (!error) setComments(data ?? []);
+    setLoading(false);
   }, [demoId]);
 
   useEffect(() => {
+    setLoading(true);
     void reload();
-    // Temps réel : un collègue commente → rafraîchissement (best effort, sans bloquer l'éditeur).
+    // Temps réel (best effort) : un collègue commente, résout ou supprime → rafraîchissement + annonce.
     const channel = supabase
       .channel(`step_comments:${demoId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'step_comments', filter: `demo_id=eq.${demoId}` },
-        () => void reload(),
+        (payload) => {
+          void reload();
+          const n = payload.new as Partial<StepComment>;
+          const o = payload.old as Partial<StepComment>;
+          if (payload.eventType === 'INSERT' && n.id && n.author_id !== myId && !mine.current.has(n.id))
+            setRemote({ kind: 'added', authorId: n.author_id ?? null, commentId: n.id, at: Date.now() });
+          else if (
+            payload.eventType === 'UPDATE' &&
+            n.id &&
+            n.resolved_at &&
+            !o.resolved_at &&
+            n.resolved_by !== myId
+          )
+            setRemote({ kind: 'resolved', authorId: n.resolved_by ?? null, commentId: n.id, at: Date.now() });
+          else if (payload.eventType === 'DELETE' && o.id && !mine.current.has(o.id))
+            setRemote({ kind: 'deleted', authorId: null, commentId: o.id, at: Date.now() });
+        },
       )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [demoId, reload]);
+  }, [demoId, reload, myId]);
+
+  useEffect(() => {
+    const up = () => {
+      setOnline(true);
+      void reload();
+    };
+    const down = () => setOnline(false);
+    window.addEventListener('online', up);
+    window.addEventListener('offline', down);
+    return () => {
+      window.removeEventListener('online', up);
+      window.removeEventListener('offline', down);
+    };
+  }, [reload]);
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -60,17 +101,34 @@ export function useStepComments(demoId: string, workspaceId: string | undefined)
     return m;
   }, [comments]);
 
-  const add = useCallback(async (stepId: string, body: string) => {
-    const row = check(
-      await supabase.from('step_comments').insert({ step_id: stepId, body }).select().single(),
-    );
-    setComments((list) => (list.some((c) => c.id === row.id) ? list : [...list, row]));
-  }, []);
+  /** Attend le retour du réseau avant d'envoyer (la saisie reste possible hors ligne). */
+  const whenOnline = useCallback(
+    () =>
+      navigator.onLine
+        ? Promise.resolve()
+        : new Promise<void>((resolve) => window.addEventListener('online', () => resolve(), { once: true })),
+    [],
+  );
+
+  const add = useCallback(
+    async (stepId: string, body: string) => {
+      await whenOnline();
+      const row = check(
+        await supabase.from('step_comments').insert({ step_id: stepId, body }).select().single(),
+      );
+      mine.current.add(row.id);
+      setComments((list) => (list.some((c) => c.id === row.id) ? list : [...list, row]));
+    },
+    [whenOnline],
+  );
   const update = useCallback(async (id: string, body: string) => {
     check(await supabase.from('step_comments').update({ body }).eq('id', id));
-    setComments((list) => list.map((c) => (c.id === id ? { ...c, body } : c)));
+    setComments((list) =>
+      list.map((c) => (c.id === id ? { ...c, body, updated_at: new Date().toISOString() } : c)),
+    );
   }, []);
   const remove = useCallback(async (id: string) => {
+    mine.current.add(id);
     check(await supabase.from('step_comments').delete().eq('id', id));
     setComments((list) => list.filter((c) => c.id !== id));
   }, []);
@@ -82,7 +140,7 @@ export function useStepComments(demoId: string, workspaceId: string | undefined)
     [reload],
   );
 
-  return { comments, authors, openByStep, error, reload, add, update, remove, setResolved };
+  return { comments, loading, authors, openByStep, remote, online, reload, add, update, remove, setResolved };
 }
 
 export type StepCommentsApi = ReturnType<typeof useStepComments>;

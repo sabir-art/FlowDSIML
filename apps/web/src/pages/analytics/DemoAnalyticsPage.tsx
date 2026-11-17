@@ -243,10 +243,11 @@ export function DemoAnalyticsPage() {
                 </span>
                 <h2 className="fd-card__title">{t('analytics.sources')}</h2>
               </div>
-              {sources && data.views > 0 ? (
+              {sources ? (
                 <Donut
                   label={t('analytics.sources')}
                   totalLabel={t('analytics.viewsUnit', { count: data.views })}
+                  valueLabel={(n) => t('demos.views', { count: n, n: formatNumber(n) })}
                   segments={[
                     {
                       label: t('analytics.source_direct'),

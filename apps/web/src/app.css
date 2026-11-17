@@ -1016,21 +1016,70 @@
 .stat-row--5 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
+/* RF2 : 5 KPI → 3 colonnes (3 + 2) entre 768 et 1 279 px */
 @media (max-width: 1279px) {
   .stat-row--5 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 @media (max-width: 1099px) {
-  .stat-row,
+  .stat-row:not(.stat-row--5) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
   .stat-row--5 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* RF3 : libellé sur une ligne (ellipse + title), pied sur une ligne */
+.stat-tile .fd-kpi__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stat-tile .fd-kpi__foot {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.stat-tile .stat-delta-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.stat-tile .fd-trend {
+  flex: none;
+}
+/* RF1 : sous 480 px, 2 colonnes, héro en pleine largeur, valeur 28 px, pied réduit au badge */
 @media (max-width: 479px) {
   .stat-row,
   .stat-row--5 {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--fd-space-3);
+  }
+  .stat-row > .fd-card--hero {
+    grid-column: 1 / -1;
+  }
+  .stat-tile {
+    padding: var(--fd-space-4);
+    gap: var(--fd-space-2);
+  }
+  .stat-tile .fd-kpi__value {
+    font-size: 1.75rem;
+  }
+  .stat-tile .fd-icon-chip {
+    width: 28px;
+    height: 28px;
+  }
+  .stat-tile .stat-delta-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }
 .stat-delta--none,
@@ -1042,9 +1091,6 @@
 .fd-card--hero .stat-delta--flat {
   background: var(--fd-color-on-hero);
   color: var(--fd-color-hero);
-}
-.fd-kpi__foot {
-  flex-wrap: wrap;
 }
 
 /* ---- Refonte DSI §3 : barres par jour ---- */
@@ -1204,8 +1250,15 @@
   flex: none;
   border-radius: 50%;
 }
-.legend b {
+.legend__n {
   margin-left: auto;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.legend b {
+  min-width: 44px;
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1379,4 +1432,71 @@
   height: 44px;
   border-radius: 0 var(--fd-radius-full) var(--fd-radius-full) 0;
   flex: none;
+}
+
+/* RF4 : en-têtes de carte qui passent à la ligne sur mobile, action sur sa propre ligne */
+@media (max-width: 640px) {
+  .fd-card__head {
+    flex-wrap: wrap;
+  }
+  .fd-card__head > :is(button, a, .fd-btn, .fd-segmented):last-child:not(:first-child) {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+  .fd-card__head > .fd-segmented:last-child {
+    flex-basis: auto;
+  }
+  /* Entonnoir : titre de l'étape sur une ligne, barre + nombre + perte sur la suivante */
+  .funnel,
+  .funnel tbody {
+    display: block;
+  }
+  .funnel__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 4px var(--fd-space-3);
+    margin-bottom: var(--fd-space-3);
+  }
+  .funnel__label {
+    grid-column: 1 / -1;
+    width: auto;
+    padding-right: 0 !important;
+  }
+  .funnel__n,
+  .funnel__loss {
+    width: auto;
+  }
+}
+/* RF5 : tableau qui défile horizontalement — ombre interne du côté où il reste du contenu (sans dégradé) */
+.table-scroll {
+  overflow-x: auto;
+  transition: box-shadow var(--fd-motion-duration-fast, 120ms);
+}
+.table-scroll.has-more-end {
+  box-shadow: inset -14px 0 10px -12px rgb(8 8 8 / 0.28);
+}
+.table-scroll.has-more-start {
+  box-shadow: inset 14px 0 10px -12px rgb(8 8 8 / 0.28);
+}
+.table-scroll.has-more-start.has-more-end {
+  box-shadow:
+    inset 14px 0 10px -12px rgb(8 8 8 / 0.28),
+    inset -14px 0 10px -12px rgb(8 8 8 / 0.28);
+}
+
+/* Plans : « Nous contacter » dans l'alerte et sous chaque plan non actuel */
+.plans-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fd-space-3);
+  flex-wrap: wrap;
+}
+.plan-card .plan-contact {
+  margin-top: var(--fd-space-4);
+  align-self: flex-start;
+}
+.plan-card {
+  display: flex;
+  flex-direction: column;
 }

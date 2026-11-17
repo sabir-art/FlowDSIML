@@ -7,3 +7,5 @@ export const PLAYER_URL: string = (import.meta.env.VITE_PLAYER_URL || 'http://lo
 );
 /** URL absolue de l'app (pour les redirections d'auth). */
 export const APP_URL = `${window.location.origin}${import.meta.env.BASE_URL}`;
+/** Adresse de support pour les demandes de changement de plan (variable de build, jamais en dur : dépôt public). */
+export const SUPPORT_EMAIL: string = (import.meta.env.VITE_SUPPORT_EMAIL || '').trim();
