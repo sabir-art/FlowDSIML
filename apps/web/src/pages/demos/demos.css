@@ -207,3 +207,45 @@
     width: auto;
   }
 }
+
+/* D5 : démo sans capture, illustration « sentier » et titre */
+.demo-cover-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fd-space-2);
+  width: 100%;
+  height: 100%;
+  padding: var(--fd-space-4);
+  background: var(--fd-color-primary-soft);
+}
+.demo-trail {
+  width: 96px;
+  height: auto;
+}
+.demo-trail path {
+  fill: none;
+  stroke: var(--fd-lagoon-300);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.demo-trail circle {
+  fill: var(--fd-color-surface);
+  stroke: var(--fd-lagoon-300);
+  stroke-width: 2;
+}
+.demo-trail .demo-trail-hot {
+  fill: var(--fd-ember-400);
+  stroke: none;
+}
+.demo-cover-title {
+  max-width: 100%;
+  font-weight: 600;
+  font-size: var(--fd-font-sm);
+  color: var(--fd-color-primary-soft-text);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

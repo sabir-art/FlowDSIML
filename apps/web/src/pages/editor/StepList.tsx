@@ -71,11 +71,14 @@ export function StepList({
                 {url ? (
                   <img src={url} alt="" />
                 ) : (
-                  <span className="steplist-text">
+                  <span
+                    className={`steplist-text ${s.kind === 'text' ? 'steplist-text--card' : ''}`}
+                    aria-hidden="true"
+                  >
                     {s.kind === 'text' ? (
-                      <Type size={20} aria-hidden="true" />
+                      <span className="steplist-text__card">{s.title || t('editor.untitled')}</span>
                     ) : (
-                      <ImageOff size={20} aria-hidden="true" />
+                      <ImageOff size={20} />
                     )}
                   </span>
                 )}

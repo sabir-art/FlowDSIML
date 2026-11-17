@@ -49,8 +49,17 @@ export function Profile() {
         <form onSubmit={saveProfile}>
           {info.error && <Alert kind="error">{info.error}</Alert>}
           {info.success && <Alert kind="success">{info.success}</Alert>}
-          <Field label={t('auth.email')}>
-            <input className="fd-input" value={user?.email ?? ''} disabled />
+          <Field label={t('auth.email')} htmlFor="pf-email">
+            <input
+              id="pf-email"
+              className="fd-input"
+              value={user?.email ?? ''}
+              readOnly
+              aria-describedby="pf-email-hint"
+            />
+            <p id="pf-email-hint" className="fd-help">
+              {t('profile.emailHint')}
+            </p>
           </Field>
           <Field label={t('auth.fullName')} htmlFor="fn">
             <input

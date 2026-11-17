@@ -23,6 +23,15 @@ export function inviteUrl(token: string) {
   return `${APP_URL}#/invite/${token}`;
 }
 
+/** Initiales pour l'avatar : « Marie Durand » → « MD », « jean@x.fr » → « J ». */
+export function initials(nameOrEmail: string) {
+  const base =
+    nameOrEmail.includes('@') && !nameOrEmail.includes(' ') ? nameOrEmail.split('@')[0]! : nameOrEmail;
+  const parts = base.split(/[\s._-]+/).filter(Boolean);
+  const letters = parts.length > 1 ? parts[0]![0]! + parts[parts.length - 1]![0]! : (parts[0]?.[0] ?? '?');
+  return letters.toUpperCase();
+}
+
 export function Members() {
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
@@ -174,8 +183,7 @@ export function Members() {
         <table className="fd-table">
           <thead>
             <tr>
-              <th>{t('auth.fullName')}</th>
-              <th>{t('auth.email')}</th>
+              <th>{t('members.member')}</th>
               <th>{t('members.role')}</th>
               <th />
             </tr>
@@ -186,8 +194,17 @@ export function Members() {
                 canManage && m.user_id !== user?.id && (m.role !== 'owner' || myRole === 'owner');
               return (
                 <tr key={m.user_id}>
-                  <td>{m.full_name || '—'}</td>
-                  <td>{m.email}</td>
+                  <td>
+                    <div className="member-cell">
+                      <span className="avatar" aria-hidden="true">
+                        {initials(m.full_name || m.email)}
+                      </span>
+                      <span className="member-cell__text">
+                        <span className="member-cell__name">{m.full_name || m.email}</span>
+                        {m.full_name && <span className="member-cell__email">{m.email}</span>}
+                      </span>
+                    </div>
+                  </td>
                   <td>
                     {editable ? (
                       <Select

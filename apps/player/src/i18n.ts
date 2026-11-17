@@ -24,6 +24,7 @@ const dict = {
     notFoundTitle: 'Démo introuvable',
     blockedTitle: 'Intégration non autorisée',
     menu: 'Menu',
+    privacy: 'Politique de confidentialité',
   },
   en: {
     next: 'Next',
@@ -50,6 +51,7 @@ const dict = {
     notFoundTitle: 'Demo not found',
     blockedTitle: 'Embedding not allowed',
     menu: 'Menu',
+    privacy: 'Privacy policy',
   },
 };
 export type Dict = (typeof dict)['fr'];

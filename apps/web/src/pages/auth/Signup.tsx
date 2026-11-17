@@ -75,7 +75,7 @@ export function Signup() {
             />
             <FieldError id="name" errors={errors} />
           </Field>
-          <Field label={t('auth.email')} htmlFor="email">
+          <Field label={t('auth.workEmail')} htmlFor="email">
             <input
               id="email"
               className="fd-input"
@@ -130,9 +130,9 @@ export function Signup() {
           </Button>
         </form>
       )}
-      <div className="auth-links">
-        <Link to="/login">{t('auth.haveAccount')}</Link>
-      </div>
+      <p className="auth-foot">
+        {t('auth.hasAccount')} <Link to="/login">{t('auth.loginLink')}</Link>
+      </p>
     </AuthLayout>
   );
 }

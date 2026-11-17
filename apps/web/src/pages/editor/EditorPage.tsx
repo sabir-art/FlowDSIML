@@ -116,6 +116,9 @@ export function EditorPage() {
 
   return (
     <main className="editor" id="main">
+      <h1 className="sr-only">
+        {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
+      </h1>
       <header className="editor-bar">
         <Link to="/" className="fd-btn fd-btn--ghost fd-btn--icon" aria-label={t('common.back')}>
           <ArrowLeft size={18} aria-hidden="true" />

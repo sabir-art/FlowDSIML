@@ -517,3 +517,25 @@
   background: transparent !important;
   border-width: 1px !important;
 }
+
+/* Vignette d'étape texte (ED18) : carte avec le titre sur le fond du player */
+.steplist-text--card {
+  background: var(--fd-player-backdrop);
+  padding: 6px;
+}
+.steplist-text__card {
+  max-width: 100%;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: var(--fd-color-surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--fd-color-text);
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}

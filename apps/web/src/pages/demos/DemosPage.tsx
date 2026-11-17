@@ -11,7 +11,6 @@ import {
   FolderPlus,
   Layers,
   Pencil,
-  PlayCircle,
   Plus,
   Search,
   Share2,
@@ -22,7 +21,7 @@ import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Card, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
-import { formatDate, formatNumber } from '../../lib/format';
+import { formatDateTime, formatNumber, formatRelative } from '../../lib/format';
 import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
@@ -344,7 +343,15 @@ export function DemosPage() {
                       {covers[d.id] ? (
                         <img src={covers[d.id]} alt="" loading="lazy" />
                       ) : (
-                        <PlayCircle size={32} strokeWidth={1.5} />
+                        <span className="demo-cover-empty">
+                          <svg viewBox="0 0 120 48" className="demo-trail">
+                            <path d="M12 38c18 0 22-14 48-14s30-14 48-14" />
+                            <circle cx="12" cy="38" r="5" />
+                            <circle cx="60" cy="24" r="5" />
+                            <circle cx="108" cy="10" r="7" className="demo-trail-hot" />
+                          </svg>
+                          <span className="demo-cover-title">{d.title}</span>
+                        </span>
                       )}
                     </div>
                     <div className="demo-body">
@@ -364,7 +371,9 @@ export function DemosPage() {
                           {t('demos.leads', { count: s?.leads ?? 0, n: formatNumber(s?.leads ?? 0) })}
                         </span>
                         <span aria-hidden="true">·</span>
-                        <time dateTime={d.updated_at}>{formatDate(d.updated_at)}</time>
+                        <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
+                          {formatRelative(d.updated_at)}
+                        </time>
                       </div>
                     </div>
                   </li>

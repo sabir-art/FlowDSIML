@@ -1,7 +1,8 @@
 import { formatDateTime } from '../../lib/format';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { YesNo } from '../../components/YesNo';
-import { Download, Trash2 } from 'lucide-react';
+import { Download, Inbox, Plus, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toCsv } from '@flowdsiml/core';
@@ -78,13 +79,31 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
-        <Button icon={<Download />} onClick={exportCsv} disabled={!leads.length}>
-          {t('analytics.exportCsv')}
-        </Button>
+        {leads.length > 0 && (
+          <Button icon={<Download />} onClick={exportCsv}>
+            {t('analytics.exportCsv')}
+          </Button>
+        )}
         <span className="fd-muted">{t('leads.count', { count: leads.length })}</span>
       </div>
-      {leads.length === 0 ? (
-        <p className="fd-muted">{t('leads.empty')}</p>
+      {leads.length === 0 && q.trim() ? (
+        <p className="fd-muted">{t('leads.noMatch')}</p>
+      ) : leads.length === 0 ? (
+        <div className="empty-state">
+          <span className="empty-state__icon" aria-hidden="true">
+            <Inbox size={24} />
+          </span>
+          <p className="empty-state__title">{t('leads.empty')}</p>
+          <p className="fd-muted">{t('leads.emptyHint')}</p>
+          {can('demo.edit') && (
+            <Link className="fd-btn fd-btn--sm" to={demoId ? `/demos/${demoId}/edit` : '/'}>
+              <span className="fd-btn__icon" aria-hidden="true">
+                <Plus />
+              </span>
+              {t('leads.addForm')}
+            </Link>
+          )}
+        </div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="fd-table">

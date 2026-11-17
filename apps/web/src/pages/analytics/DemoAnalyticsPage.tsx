@@ -158,7 +158,7 @@ export function DemoAnalyticsPage() {
                         t('analytics.dropOff'),
                       ],
                       funnel.map((r) => [
-                        r.stepIndex + 1 + '. ' + (labels[r.stepIndex] ?? ''),
+                        `${r.stepIndex + 1} · ${labels[r.stepIndex] ?? ''}`,
                         r.visitors,
                         r.reach.toFixed(3),
                         r.dropOff.toFixed(3),

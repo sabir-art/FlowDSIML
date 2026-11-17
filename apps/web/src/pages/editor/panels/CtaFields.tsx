@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { Cta } from '@flowdsiml/manifest';
-import { Checkbox, Field } from '@flowdsiml/ui';
+import { Field, Switch } from '@flowdsiml/ui';
 
 export function CtaFields({
   idPrefix,
@@ -16,7 +16,7 @@ export function CtaFields({
   const { t } = useTranslation();
   return (
     <div className="panel-group">
-      <Checkbox
+      <Switch
         label={t('editor.cta')}
         checked={!!value}
         disabled={disabled}

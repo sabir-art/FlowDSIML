@@ -151,7 +151,9 @@ export function Funnel({
         {rows.map((r) => (
           <tr key={r.stepIndex} title={`${r.visitors} · ${pct(r.reach)}`}>
             <td>
-              {r.stepIndex + 1}. {labels[r.stepIndex] ?? ''}
+              <span className="funnel-step-num">{r.stepIndex + 1}</span>
+              <span aria-hidden="true"> · </span>
+              {labels[r.stepIndex] ?? ''}
             </td>
             <td>
               <div className="funnel-cell">

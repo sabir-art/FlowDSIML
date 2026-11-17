@@ -169,9 +169,16 @@ export function SharePage() {
           <Card>
             <h2 style={{ marginTop: 0 }}>{t('share.publicLink')}</h2>
             <CopyField id="pub-url" label={t('share.publicLinkHint')} value={url} />
-            <p className="fd-muted" style={{ fontSize: 12 }}>
-              {t('share.urlVariables')} <code>{`${url}?company=Acme`}</code>
-            </p>
+            <div className="url-params">
+              <p className="fd-muted">{t('share.urlVariables')}</p>
+              <code className="code-block">
+                <span className="code-block__base">{url}</span>
+                <mark className="code-block__var">
+                  ?{variables[0]?.key ?? 'company'}=
+                  {encodeURIComponent(variables[0]?.default_value || 'Acme')}
+                </mark>
+              </code>
+            </div>
             <div className="row">
               <a className="fd-btn" href={url} target="_blank" rel="noreferrer">
                 <ExternalLink size={16} aria-hidden="true" />
