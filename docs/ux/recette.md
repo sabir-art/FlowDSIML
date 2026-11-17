@@ -638,3 +638,21 @@ Captures : `docs/ux/recette/refonte/`.
 | RF8 | — | Connexion (site réel) | Pas encore refondue : panneau gauche gris, pas de logo DSI blanc sur prune | Prévu au §7 (« Authentification »), en cours chez le dev. À revoir à la prochaine passe |
 
 **Bilan** : la refonte est **fidèle aux maquettes** sur les trois écrans, dans les deux thèmes, et DB2 et DB3 sont confirmés corrigés. 7 écarts, aucun bloquant : 5 d'ajustement responsive (RF1 à RF5, surtout en mobile), 1 de navigation (RF6) et 1 de détail (RF7). La connexion (RF8) reste à refondre au §7.
+
+### Refonte §7 (`claude/dev-mvp` @ `16f9d34`, inclus dans `main`) : captures du dev en clair et en sombre + site réel
+
+| Écran | Statut |
+|---|---|
+| Connexion / inscription | ✅ Panneau prune (identique en sombre) avec le logo DSI blanc officiel nettoyé, titre et arguments en blanc, champs pilules de 48 px, bouton prune pleine largeur. **En ligne sur le site réel** : RF8 est résolu |
+| Partage | ✅ Cartes avec puces d'icône (`Globe`, `Code`, `Link`, `History`), URL en pilule `readonly` avec « Copier » accolé, aperçu P12 dans une carte, « Dépublier » en `ghost` danger |
+| Paramètres | ✅ Formulaire en carte. Carte « Plan » avec jauges prune. **Zone de danger** : puce `TriangleAlert` sur `danger-soft` et bouton danger plein, conforme en sombre |
+| Plans | ✅ Plan actuel en carte **héro** verte avec texte noir et badge « Plan actuel » en pilule noire, les autres en blanc. Alerte info « Paiement en ligne bientôt disponible… » |
+| Leads, membres, profil | ✅ Même grammaire : tableaux en carte, actions en pilules |
+| Thème sombre | ✅ 22 captures `sombre/` cohérentes avec les maquettes |
+
+Points ouverts : RF6 (pas d'entrée de navigation active sur `/demos/:id/*`, visible aussi sur le partage) et RF1 à RF5, RF7.
+
+**Décision « Plans » (question du dev)** : pas de bouton « Choisir » tant que le changement de plan est manuel (D6). À la place, un **bouton secondaire « Nous contacter »** (`Mail`) dans l'alerte info et sous chaque plan non actuel :
+- `mailto:` vers l'adresse de support **configurable** (`VITE_SUPPORT_EMAIL`, jamais en dur dans le code, puisque le dépôt est public) ;
+- objet pré-rempli : « Changement de plan : {{workspace}} → {{plan}} » / « Plan change: {{workspace}} → {{plan}} » ;
+- si la variable n'est pas définie, le bouton est masqué et le texte actuel reste affiché.
