@@ -35,4 +35,7 @@ jobs:
           sudo apt-get install -y -q postgresql-16-pgtap
           sudo systemctl start postgresql.service
       - name: Rejouer les migrations et lancer les tests
-        run: sudo -u postgres env PGHOST=/var/run/postgresql PGUSER=postgres bash supabase/tests/local/run.sh
+        # L'utilisateur postgres ne peut pas lire le dossier du runner : copie dans /tmp.
+        run: |
+          mkdir -p /tmp/fdrepo && cp -r supabase /tmp/fdrepo/ && chmod -R a+rX /tmp/fdrepo
+          sudo -u postgres env PGHOST=/var/run/postgresql PGUSER=postgres bash /tmp/fdrepo/supabase/tests/local/run.sh

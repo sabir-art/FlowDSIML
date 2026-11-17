@@ -125,3 +125,93 @@
     padding: var(--fd-space-4);
   }
 }
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--fd-space-3);
+}
+.stat-tile {
+  padding: var(--fd-space-4);
+}
+.stat-label {
+  font-size: var(--fd-font-xs);
+  color: var(--fd-color-text-muted);
+}
+.stat-value {
+  font-size: var(--fd-font-xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.stat-hint {
+  font-size: var(--fd-font-xs);
+  color: var(--fd-color-text-muted);
+}
+.chart {
+  margin: 0;
+  position: relative;
+}
+.chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.chart-grid {
+  stroke: var(--fd-color-border);
+  stroke-width: 1;
+}
+.chart-axis {
+  fill: var(--fd-color-text-muted);
+  font-size: 11px;
+}
+.chart-bar {
+  fill: var(--fd-color-primary);
+  opacity: 0.85;
+}
+.chart-bar.is-hover {
+  opacity: 1;
+}
+.chart-tip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--fd-color-surface);
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-sm);
+  padding: 2px 8px;
+  font-size: 12px;
+  box-shadow: var(--fd-shadow-sm);
+}
+.funnel-track {
+  position: relative;
+  height: 22px;
+  background: var(--fd-color-surface-muted);
+  border-radius: 4px;
+}
+.funnel-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--fd-color-primary);
+  opacity: 0.8;
+  border-radius: 0 4px 4px 0;
+}
+.funnel-value {
+  position: relative;
+  padding-left: 8px;
+  font-size: 12px;
+  line-height: 22px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fd-color-text);
+  mix-blend-mode: normal;
+  text-shadow: 0 0 3px var(--fd-color-surface);
+}
+.funnel-drop-high {
+  color: var(--fd-color-danger);
+  font-weight: 600;
+}
+.toolbar {
+  display: flex;
+  gap: var(--fd-space-2);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--fd-space-4);
+}
