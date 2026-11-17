@@ -1,0 +1,47 @@
+/* Contrôles complémentaires (Select à chevron dessiné, boutons avec icône). Utilise les tokens --fd-*. */
+.fd-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+}
+.fd-select-wrap--inline {
+  width: auto;
+}
+.fd-select-wrap > .fd-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  padding-right: calc(var(--fd-space-3, 12px) + 24px);
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.fd-select-wrap__chevron {
+  position: absolute;
+  right: var(--fd-space-3, 12px);
+  pointer-events: none;
+  color: var(--fd-color-text-muted);
+}
+.fd-select-wrap > .fd-select:disabled + .fd-select-wrap__chevron {
+  opacity: 0.5;
+}
+.fd-btn__icon {
+  display: inline-flex;
+  flex: none;
+}
+.fd-btn__icon svg {
+  width: 16px;
+  height: 16px;
+}
+.fd-btn--sm .fd-btn__icon svg {
+  width: 14px;
+  height: 14px;
+}
+.fd-btn--icon {
+  padding: 0;
+  width: var(--fd-layout-control-height-md, 40px);
+  justify-content: center;
+}
+.fd-btn--icon.fd-btn--sm {
+  width: var(--fd-layout-control-height-sm, 32px);
+}

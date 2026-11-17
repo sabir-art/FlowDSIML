@@ -1,3 +1,5 @@
+import { Plus } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
@@ -26,15 +28,16 @@ export function ChaptersPanel({ editor, readOnly }: { editor: DemoEditor; readOn
               size="sm"
               variant="ghost"
               className="btn-danger-ghost"
+              icon={<Trash2 />}
+              aria-label={t('common.delete')}
               onClick={() => void editor.deleteChapter(c.id)}
-            >
-              ✕
-            </Button>
+            />
           )}
         </div>
       ))}
       {!readOnly && (
         <Button
+          icon={<Plus />}
           onClick={() => void editor.addChapter(t('editor.chapterN', { n: editor.chapters.length + 1 }))}
         >
           {t('editor.addChapter')}

@@ -15,9 +15,10 @@
   },
   "dependencies": {
     "@flowdsiml/core": "workspace:*",
-    "@supabase/supabase-js": "^2.119.0",
     "@flowdsiml/supabase-types": "workspace:*",
-    "@flowdsiml/ui": "workspace:*"
+    "@flowdsiml/ui": "workspace:*",
+    "@supabase/supabase-js": "^2.119.0",
+    "lucide": "^0.577.0"
   },
   "devDependencies": {
     "typescript": "~5.9.3",

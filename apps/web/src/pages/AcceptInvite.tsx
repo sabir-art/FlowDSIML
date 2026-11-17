@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -56,6 +57,7 @@ export function AcceptInvite() {
             !info.expired &&
             !info.accepted && (
               <Button
+                icon={<Check />}
                 variant="primary"
                 disabled={busy}
                 onClick={async () => {

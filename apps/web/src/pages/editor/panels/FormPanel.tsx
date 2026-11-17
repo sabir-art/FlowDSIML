@@ -1,3 +1,5 @@
+import { useConfirm } from '../../../components/ConfirmDialog';
+import { ClipboardList, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button, Field } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
@@ -20,6 +22,7 @@ export function FormPanel({
   leadFormsAllowed: boolean;
 }) {
   const { t } = useTranslation();
+  const [dialog, ask] = useConfirm();
   const form = editor.forms[0];
 
   if (!form)
@@ -28,7 +31,11 @@ export function FormPanel({
         <h3 className="panel-title">{t('editor.leadForm')}</h3>
         <p className="fd-muted">{t('editor.leadFormHint')}</p>
         {!leadFormsAllowed && <p className="fd-alert">{t('errors.planLeadForms')}</p>}
-        {!readOnly && <Button onClick={() => void editor.createForm()}>{t('editor.createForm')}</Button>}
+        {!readOnly && (
+          <Button icon={<ClipboardList />} onClick={() => void editor.createForm()}>
+            {t('editor.createForm')}
+          </Button>
+        )}
       </div>
     );
 
@@ -43,6 +50,7 @@ export function FormPanel({
 
   return (
     <div className="stack">
+      {dialog}
       <h3 className="panel-title">{t('editor.leadForm')}</h3>
       {!leadFormsAllowed && <p className="fd-alert">{t('errors.planLeadForms')}</p>}
       <p className="fd-muted" style={{ fontSize: 12 }}>
@@ -141,7 +149,14 @@ export function FormPanel({
         <Button
           variant="ghost"
           className="btn-danger-ghost"
-          onClick={() => confirm(t('editor.confirmDeleteForm')) && void editor.deleteForm(form.id)}
+          icon={<Trash2 />}
+          onClick={() =>
+            void ask({
+              title: t('editor.confirmDeleteForm'),
+              confirmLabel: t('common.delete'),
+              danger: true,
+            }).then((yes) => yes && void editor.deleteForm(form.id))
+          }
         >
           {t('editor.deleteForm')}
         </Button>

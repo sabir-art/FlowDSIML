@@ -1,3 +1,4 @@
+import { Select } from '@flowdsiml/ui';
 import { useTranslation } from 'react-i18next';
 import { setLocale } from '../i18n';
 import { supabase } from '../lib/supabase';
@@ -9,8 +10,7 @@ export function LanguageSwitch() {
   return (
     <label className="fd-field">
       <span className="fd-label">{t('common.language')}</span>
-      <select
-        className="fd-select"
+      <Select
         value={i18n.language}
         onChange={(e) => {
           const lng = e.target.value === 'en' ? 'en' : 'fr';
@@ -20,7 +20,7 @@ export function LanguageSwitch() {
       >
         <option value="fr">Français</option>
         <option value="en">English</option>
-      </select>
+      </Select>
     </label>
   );
 }

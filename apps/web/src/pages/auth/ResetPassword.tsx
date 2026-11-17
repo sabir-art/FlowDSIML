@@ -1,3 +1,4 @@
+import { KeyRound } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -60,7 +61,7 @@ export function ResetPassword() {
             onChange={(e) => setConfirm(e.target.value)}
           />
         </Field>
-        <Button type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
+        <Button icon={<KeyRound />} type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
           {t('auth.updatePassword')}
         </Button>
       </form>

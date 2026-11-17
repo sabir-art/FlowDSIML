@@ -1,3 +1,4 @@
+import { ArrowLeft, Eye, EyeOff, MousePointer2, Share2, Target } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -127,8 +128,8 @@ export function EditorPage() {
   return (
     <main className="editor" id="main">
       <header className="editor-bar">
-        <Link to="/" className="fd-btn fd-btn--ghost" aria-label={t('common.back')}>
-          ←
+        <Link to="/" className="fd-btn fd-btn--ghost fd-btn--icon" aria-label={t('common.back')}>
+          <ArrowLeft size={18} aria-hidden="true" />
         </Link>
         <input
           className="fd-input editor-title"
@@ -138,12 +139,8 @@ export function EditorPage() {
           value={editor.demo.title}
           onChange={(e) => editor.updateDemo({ title: e.target.value })}
         />
-        <span
-          className={`fd-badge save-${editor.saveState}`}
-          role="status"
-          hidden={editor.saveState === 'idle'}
-        >
-          {t(`editor.save_${editor.saveState}`)}
+        <span className={`save-state save-${editor.saveState}`} role="status">
+          {editor.saveState !== 'idle' && t(`editor.save_${editor.saveState}`)}
         </span>
         <span className="fd-badge">{t(`status.${editor.demo.status}`)}</span>
         <div className="row" style={{ marginLeft: 'auto' }}>
@@ -151,17 +148,29 @@ export function EditorPage() {
             <div className="segmented" role="toolbar" aria-label={t('editor.tools')}>
               {(['select', 'hotspot', 'blur'] as Tool[]).map((k) => (
                 <button key={k} type="button" aria-pressed={tool === k} onClick={() => setTool(k)}>
-                  {k === 'select'
-                    ? t('editor.toolSelect')
-                    : `+ ${t(k === 'hotspot' ? 'editor.toolHotspot' : 'editor.toolBlur')}`}
+                  {k === 'select' ? (
+                    <MousePointer2 size={15} aria-hidden="true" />
+                  ) : k === 'hotspot' ? (
+                    <Target size={15} aria-hidden="true" />
+                  ) : (
+                    <EyeOff size={15} aria-hidden="true" />
+                  )}
+                  {t(
+                    k === 'select'
+                      ? 'editor.toolSelect'
+                      : k === 'hotspot'
+                        ? 'editor.toolHotspot'
+                        : 'editor.toolBlur',
+                  )}
                 </button>
               ))}
             </div>
           )}
-          <Button onClick={preview} disabled={!editor.steps.length}>
+          <Button icon={<Eye />} onClick={preview} disabled={!editor.steps.length}>
             {t('editor.preview')}
           </Button>
           <Link className="fd-btn" to={`/demos/${demoId}/share`}>
+            <Share2 size={16} aria-hidden="true" />
             {t('editor.share')}
           </Link>
           {can('demo.publish') && <PublishButton editor={editor} />}

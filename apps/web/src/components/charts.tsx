@@ -1,3 +1,4 @@
+import { formatDate, formatNumber } from '../lib/format';
 import { useState } from 'react';
 
 /** Tuile KPI : valeur héros + libellé (pas de graphique). */
@@ -36,7 +37,7 @@ export function DailyBars({
   const h = hover !== null ? data[hover] : null;
   return (
     <figure className="chart" aria-label={label}>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label} onMouseLeave={() => setHover(null)}>
+      <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true" onMouseLeave={() => setHover(null)}>
         {[0, 0.5, 1].map((f) => (
           <g key={f}>
             <line x1={pad.l} x2={W} y1={y(max * f)} y2={y(max * f)} className="chart-grid" />
@@ -64,15 +65,26 @@ export function DailyBars({
           );
         })}
         <text x={pad.l} y={H - 6} className="chart-axis">
-          {data[0]!.day}
+          {formatDate(data[0]!.day, { day: 'numeric', month: 'short' })}
         </text>
         <text x={W} y={H - 6} textAnchor="end" className="chart-axis">
-          {data[data.length - 1]!.day}
+          {formatDate(data[data.length - 1]!.day, { day: 'numeric', month: 'short' })}
         </text>
       </svg>
+      <table className="sr-only">
+        <caption>{label}</caption>
+        <tbody>
+          {data.map((d) => (
+            <tr key={d.day}>
+              <th scope="row">{formatDate(d.day)}</th>
+              <td>{d.views}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       {h && (
         <div className="chart-tip" role="status">
-          <strong>{h.views}</strong> · {h.day}
+          <strong>{formatNumber(h.views)}</strong> · {formatDate(h.day)}
         </div>
       )}
     </figure>

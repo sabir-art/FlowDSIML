@@ -1,3 +1,7 @@
+import { formatDateTime } from '../../lib/format';
+import { useConfirm } from '../../components/ConfirmDialog';
+import { YesNo } from '../../components/YesNo';
+import { Download, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toCsv } from '@flowdsiml/core';
@@ -13,6 +17,7 @@ type Lead = Tables<'leads'> & { demos: { title: string } | null };
 /** Liste des leads (d'une démo ou de tout le workspace), recherche, export CSV, suppression (RGPD). */
 export function LeadsTable({ demoId }: { demoId?: string }) {
   const { t } = useTranslation();
+  const [dialog, ask] = useConfirm();
   const { current, can } = useWorkspace();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [q, setQ] = useState('');
@@ -36,6 +41,13 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
     return () => clearTimeout(id);
   }, [load]);
 
+  const known: Record<string, string> = {
+    full_name: t('editor.fieldName'),
+    company: t('editor.fieldCompany'),
+    job_title: t('editor.fieldJob'),
+    phone: t('editor.fieldPhone'),
+  };
+  const fieldLabel = (k: string) => known[k] ?? k;
   const fieldKeys = [
     ...new Set(leads.flatMap((l) => Object.keys((l.fields as Record<string, unknown>) ?? {}))),
   ];
@@ -54,6 +66,7 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
 
   return (
     <div className="stack" style={{ gap: 8 }}>
+      {dialog}
       {error && <Alert kind="error">{error}</Alert>}
       <div className="toolbar" style={{ marginBottom: 0 }}>
         <input
@@ -65,7 +78,7 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
-        <Button size="sm" onClick={exportCsv} disabled={!leads.length}>
+        <Button icon={<Download />} size="sm" onClick={exportCsv} disabled={!leads.length}>
           {t('analytics.exportCsv')}
         </Button>
         <span className="fd-muted">{t('leads.count', { count: leads.length })}</span>
@@ -79,7 +92,7 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
               <tr>
                 <th>Email</th>
                 {fieldKeys.map((k) => (
-                  <th key={k}>{k}</th>
+                  <th key={k}>{fieldLabel(k)}</th>
                 ))}
                 {!demoId && <th>{t('leads.demo')}</th>}
                 <th>{t('leads.consent')}</th>
@@ -95,25 +108,33 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
                     <td key={k}>{String((l.fields as Record<string, unknown>)?.[k] ?? '')}</td>
                   ))}
                   {!demoId && <td>{l.demos?.title ?? '—'}</td>}
-                  <td>{l.consent ? '✓' : '—'}</td>
-                  <td>{new Date(l.created_at).toLocaleString()}</td>
+                  <td>
+                    <YesNo value={l.consent} />
+                  </td>
+                  <td>{formatDateTime(l.created_at)}</td>
                   <td>
                     {can('members.manage') && (
                       <Button
                         size="sm"
                         variant="ghost"
                         className="btn-danger-ghost"
+                        icon={<Trash2 />}
                         aria-label={t('leads.delete', { email: l.email })}
                         onClick={() =>
-                          confirm(t('leads.confirmDelete', { email: l.email })) &&
-                          void run(async () => {
-                            check(await supabase.from('leads').delete().eq('id', l.id));
-                            await load();
-                          })
+                          void ask({
+                            title: t('leads.confirmDelete', { email: l.email }),
+                            confirmLabel: t('common.delete'),
+                            danger: true,
+                          }).then(
+                            (yes) =>
+                              yes &&
+                              void run(async () => {
+                                check(await supabase.from('leads').delete().eq('id', l.id));
+                                await load();
+                              }),
+                          )
                         }
-                      >
-                        ✕
-                      </Button>
+                      />
                     )}
                   </td>
                 </tr>

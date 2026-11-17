@@ -1,8 +1,11 @@
+import { formatDate } from '../../lib/format';
+import { useConfirm } from '../../components/ConfirmDialog';
+import { Copy, Send, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { assignableRoles, type Role } from '@flowdsiml/core';
 import type { Tables, WorkspaceRole } from '@flowdsiml/supabase-types';
-import { Alert, Button, Card, Field } from '@flowdsiml/ui';
+import { Alert, Button, Card, Field, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { APP_URL } from '../../lib/env';
 import { check, useAction } from '../../lib/useAction';
@@ -22,6 +25,7 @@ export function inviteUrl(token: string) {
 
 export function Members() {
   const { t } = useTranslation();
+  const [dialog, ask] = useConfirm();
   const { user } = useAuth();
   const { current, can, reload: reloadWs } = useWorkspace();
   const [members, setMembers] = useState<MemberRow[]>([]);
@@ -74,6 +78,7 @@ export function Members() {
 
   return (
     <div className="stack">
+      {dialog}
       <div className="page-head">
         <h1>{t('members.title')}</h1>
       </div>
@@ -97,21 +102,16 @@ export function Members() {
               </Field>
             </div>
             <Field label={t('members.role')} htmlFor="inv-role">
-              <select
-                id="inv-role"
-                className="fd-select"
-                value={role}
-                onChange={(e) => setRole(e.target.value as WorkspaceRole)}
-              >
+              <Select id="inv-role" value={role} onChange={(e) => setRole(e.target.value as WorkspaceRole)}>
                 {roles.map((r) => (
                   <option key={r} value={r}>
                     {t(`roles.${r}`)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
             <div className="fd-field">
-              <Button type="submit" variant="primary" disabled={busy}>
+              <Button icon={<Send />} type="submit" variant="primary" disabled={busy}>
                 {t('members.sendInvite')}
               </Button>
             </div>
@@ -119,7 +119,7 @@ export function Members() {
           {lastLink && (
             <Alert kind="success">
               {t('members.inviteCreated')} <code style={{ wordBreak: 'break-all' }}>{lastLink}</code>{' '}
-              <Button size="sm" onClick={() => void navigator.clipboard.writeText(lastLink)}>
+              <Button icon={<Copy />} size="sm" onClick={() => void navigator.clipboard.writeText(lastLink)}>
                 {t('common.copy')}
               </Button>
             </Alert>
@@ -148,8 +148,7 @@ export function Members() {
                   <td>{m.email}</td>
                   <td>
                     {editable ? (
-                      <select
-                        className="fd-select"
+                      <Select
                         value={m.role}
                         aria-label={t('members.role')}
                         onChange={(e) =>
@@ -170,7 +169,7 @@ export function Members() {
                             {t(`roles.${r}`)}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     ) : (
                       <span className="fd-badge">{t(`roles.${m.role}`)}</span>
                     )}
@@ -181,14 +180,17 @@ export function Members() {
                         size="sm"
                         variant="ghost"
                         className="btn-danger-ghost"
-                        onClick={() => {
+                        icon={<Trash2 />}
+                        onClick={async () => {
                           const self = m.user_id === user?.id;
                           if (
-                            !confirm(
-                              self
+                            !(await ask({
+                              title: self
                                 ? t('members.confirmLeave')
                                 : t('members.confirmRemove', { email: m.email }),
-                            )
+                              confirmLabel: self ? t('members.leave') : t('members.remove'),
+                              danger: true,
+                            }))
                           )
                             return;
                           void run(async () => {
@@ -226,15 +228,20 @@ export function Members() {
                   <td>
                     <span className="fd-badge">{t(`roles.${i.role}`)}</span>
                   </td>
-                  <td className="fd-muted">{new Date(i.expires_at).toLocaleDateString()}</td>
+                  <td className="fd-muted">{formatDate(i.expires_at)}</td>
                   <td style={{ textAlign: 'right' }} className="row">
-                    <Button size="sm" onClick={() => void navigator.clipboard.writeText(inviteUrl(i.token))}>
+                    <Button
+                      icon={<Copy />}
+                      size="sm"
+                      onClick={() => void navigator.clipboard.writeText(inviteUrl(i.token))}
+                    >
                       {t('members.copyLink')}
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
                       className="btn-danger-ghost"
+                      icon={<Trash2 />}
                       onClick={() =>
                         void run(async () => {
                           check(await supabase.from('invitations').delete().eq('id', i.id));

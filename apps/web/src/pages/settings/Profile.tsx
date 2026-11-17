@@ -1,6 +1,7 @@
+import { Check, KeyRound } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Card, Field } from '@flowdsiml/ui';
+import { Alert, Button, Card, Field, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { useAuth } from '../../auth/AuthProvider';
@@ -61,17 +62,12 @@ export function Profile() {
             />
           </Field>
           <Field label={t('common.language')} htmlFor="loc">
-            <select
-              id="loc"
-              className="fd-select"
-              value={locale}
-              onChange={(e) => setLoc(e.target.value === 'en' ? 'en' : 'fr')}
-            >
+            <Select id="loc" value={locale} onChange={(e) => setLoc(e.target.value === 'en' ? 'en' : 'fr')}>
               <option value="fr">Français</option>
               <option value="en">English</option>
-            </select>
+            </Select>
           </Field>
-          <Button type="submit" variant="primary" disabled={info.busy}>
+          <Button icon={<Check />} type="submit" variant="primary" disabled={info.busy}>
             {t('common.save')}
           </Button>
         </form>
@@ -93,7 +89,7 @@ export function Profile() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field>
-          <Button type="submit" disabled={pwd.busy}>
+          <Button icon={<KeyRound />} type="submit" disabled={pwd.busy}>
             {t('auth.updatePassword')}
           </Button>
         </form>

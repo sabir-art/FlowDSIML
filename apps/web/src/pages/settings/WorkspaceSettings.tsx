@@ -1,3 +1,5 @@
+import { Check, Trash2 } from 'lucide-react';
+import { useConfirm } from '../../components/ConfirmDialog';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +11,7 @@ import { PlanUsage } from './PlanUsage';
 
 export function WorkspaceSettings() {
   const { t } = useTranslation();
+  const [dialog, ask] = useConfirm();
   const navigate = useNavigate();
   const { current, can, reload } = useWorkspace();
   const ws = current!;
@@ -32,6 +35,7 @@ export function WorkspaceSettings() {
 
   return (
     <div className="stack" style={{ maxWidth: 720 }}>
+      {dialog}
       <div className="page-head">
         <h1>{t('workspace.title')}</h1>
       </div>
@@ -62,7 +66,7 @@ export function WorkspaceSettings() {
             />
           </Field>
           {editable && (
-            <Button type="submit" variant="primary" disabled={busy}>
+            <Button icon={<Check />} type="submit" variant="primary" disabled={busy}>
               {t('common.save')}
             </Button>
           )}
@@ -74,9 +78,19 @@ export function WorkspaceSettings() {
           <h2 style={{ marginTop: 0 }}>{t('workspace.danger')}</h2>
           <p className="fd-muted">{t('workspace.deleteHint')}</p>
           <Button
+            icon={<Trash2 />}
             variant="danger"
-            onClick={() => {
-              if (prompt(t('workspace.deleteConfirm', { slug: ws.slug })) !== ws.slug) return;
+            onClick={async () => {
+              if (
+                !(await ask({
+                  title: t('workspace.delete'),
+                  body: t('workspace.deleteHint'),
+                  confirmLabel: t('workspace.delete'),
+                  danger: true,
+                  requireText: ws.slug,
+                }))
+              )
+                return;
               void run(async () => {
                 check(await supabase.from('workspaces').delete().eq('id', ws.id));
                 await reload();

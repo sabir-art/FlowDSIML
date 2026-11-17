@@ -8,14 +8,16 @@
   "exports": {
     ".": "./src/index.ts",
     "./tokens.css": "./src/tokens.css",
-    "./base.css": "./src/base.css"
+    "./base.css": "./src/base.css",
+    "./controls.css": "./src/controls.css"
   },
   "scripts": {
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json"
   },
   "peerDependencies": {
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "lucide-react": ">=0.400.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
