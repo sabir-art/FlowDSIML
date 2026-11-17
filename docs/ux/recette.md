@@ -265,7 +265,7 @@ Bancs e2e du dev : **4/4 sans erreur** (éditeur, publication/player, analytics,
 | P1 thème du player | ✅ Corrigé | Fond `player-backdrop` clair, primaire Lagoon, police Instrument. |
 | P2 hotspot | ✅ Corrigé | Pastille Ember pulsée + bulle fléchée vers la cible. |
 | P3 mobile | ✅ Corrigé | Bulle en feuille ancrée en bas, boutons 44 px, contrôles sous la capture. |
-| P4 lien expiré | ✅ Corrigé | Écran dédié avec icône `LinkOff`, titre et action ; (texte en anglais dans la capture car navigateur de test en `en-US` : OK). |
+| P4 lien expiré | ✅ Corrigé | Écran dédié avec icône de lien barré, titre et action ; (texte en anglais dans la capture car navigateur de test en `en-US` : OK). |
 | P5 contrôles | ✅ Corrigé | Précédent / progression / suivant / plein écran sous le cadre, icônes chevrons. |
 | P7 filigrane | ⚠️ Partiel | Lien centré, souligné, sans logo ; à passer en pastille avec logo (§13.6). |
 | ED1 clavier canevas | ✅ Corrigé | Hotspot `tabindex=0`, `aria-label` « Hotspot 1 : … », flèches déplacent. |
