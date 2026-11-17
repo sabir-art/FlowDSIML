@@ -32,7 +32,7 @@
 | Sélecteur de workspace | Select en haut | Inchangé, mais en champ pilule (`border-radius: var(--fd-radius-full)`) |
 | Bloc utilisateur (bas) | Ligne avec bordure supérieure | Carte compacte blanche (`radius-xl`, ombre `xs`) : avatar rond prune avec initiales, nom, rôle, menu ⋯ |
 | Contenu | Padding de 24 px | Padding de **32 px** sur ordinateur (16 px sur mobile). Largeur maximale de 1 200 px conservée |
-| En-tête de page | Titre `h1` + actions | `h1` en 32 px 800 (déjà appliqué par `base.css`) + sous-titre `text-muted`. À droite : recherche en pilule de 44 px sans bordure avec ombre `xs`, boutons ronds d'icône de 44 px, action principale en `fd-btn--primary fd-btn--lg` |
+| En-tête de page | Titre `h1` + actions | `h1` en 32 px 800 (déjà appliqué par `base.css`) + sous-titre `text-muted`. À droite : recherche en pilule de 44 px sans bordure avec ombre `xs`, puis action principale en `fd-btn--primary fd-btn--lg`. **Pas de cloche de notifications** : aucune fonctionnalité derrière, elle a été retirée de la maquette |
 | Mobile (< 1 024 px) | Barre du haut + tiroir | Inchangé. Le tiroir reprend `.fd-nav`. Corriger DB1 au passage (Échap ferme le tiroir) |
 
 ## 2. Cartes KPI (`components/charts.tsx` → `StatTile`, `.stat-row`)
@@ -66,7 +66,7 @@ Règles :
 - Pas de lignes de grille horizontales. Graduations `0 / max` supprimées, puisque les valeurs sont écrites. Dates sous les barres en 11 px `text-subtle`.
 - Le titre de la carte suit le motif `.fd-card__head` : `fd-icon-chip` (`BarChart3`) + `h2.fd-card__title` + segmenté `Vues | Visiteurs` à droite si utile.
 
-**Donut « Origine des vues »** (nouveau, si la donnée `source` est disponible dans `track` ; sinon à prévoir en V2) :
+**Donut « Origine des vues »** : **reporté en V2** (décision du 17 nov.). Le champ `source` des événements n'est pas encore agrégé, et le filtre par source est lui-même en V2. En V1, la colonne de droite affiche la carte « Leads récents » (5 derniers : avatar à initiales, e-mail, date relative, lien « Voir tous les leads »). Spécification du donut pour la V2 :
 - SVG avec un cercle de rayon 70, un trait de 22 px et `stroke-linecap: round`, un segment par `stroke-dasharray`, et un espace de 4 px entre segments. Pas de `conic-gradient`.
 - Couleurs dans l'ordre : `chart-2` framboise, `chart-3` bleu, `chart-4` vert, `chart-1` orange (au plus 4 segments, le reste regroupé en « Autres » en `chart-5`).
 - Total au centre (28 px, 800) et légende en dessous avec une pastille de 10 px, un libellé et un pourcentage aligné à droite.
@@ -94,7 +94,7 @@ Voir `maquettes/refonte/dashboard.html`.
 
 Voir `maquettes/refonte/analytics.html`.
 - **En-tête** : bouton rond de retour, titre de la démo en `h1`, sous-titre « Publiée · version n · n étapes ». À droite : segmenté de période `7 j | 30 j | 90 j` (remplace les 3 boutons), puis « Partager » et « Exporter » en pilules.
-- Rangée de KPI (§2), puis une grille en 2/3 + 1/3 : « Vues par jour » à gauche, « Origine des vues » à droite (si la donnée existe ; sinon « Leads récents »). Entonnoir sur toute la largeur, puis tableau des leads dans une carte.
+- Rangée de KPI (§2), puis une grille en 2/3 + 1/3 : « Vues par jour » à gauche, **« Leads récents » à droite en V1** (« Origine des vues » en V2, cf. §3). Entonnoir sur toute la largeur, puis tableau des leads dans une carte.
 - **Tableaux** (`.fd-table`) :
   - en-têtes en 12 px 600 `text-muted`, sans fond ;
   - lignes de 52 px ;
