@@ -1,13 +1,13 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-type Variant = 'default' | 'primary' | 'danger' | 'ghost';
+type Variant = 'default' | 'primary' | 'accent' | 'danger' | 'ghost';
 
 export function Button({
   variant = 'default',
   size,
   className = '',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: 'sm' }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: 'sm' | 'lg' }) {
   const cls = ['fd-btn', variant !== 'default' && `fd-btn--${variant}`, size && `fd-btn--${size}`, className]
     .filter(Boolean)
     .join(' ');
