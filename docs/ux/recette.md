@@ -374,3 +374,33 @@ Base : les 20 captures du dev (`docs/tech/captures/finition/`, prises sur `40224
 | FI12 | Éditeur, flou et zoom (M-A6) | ❌ `#ffcc00` codé en dur (`editor.css:233` et `:237`), hors palette | `var(--fd-color-accent)` (Ember) ou `--fd-color-focus` |
 
 **Bilan** : 5 points résolus. 12 écarts ouverts, dont 4 bloquants pour la finition : le menu ⋯ coupé (FI1), les cases à cocher (FI2 et FI3) et le hotspot sur le canevas (FI4). Aucun de ces écarts n'est dans `packages/ui` : tous relèvent du code applicatif.
+
+### Re-vérification FI1–FI12 (`claude/dev-mvp` @ `83c1644`)
+
+Re-capture avec le script du dev et mesures DOM. Captures : `docs/ux/recette/finition4/`.
+
+| # | Statut |
+|---|---|
+| FI1 menu ⋯ | ✅ Les 6 actions sont visibles, le menu déborde de la carte |
+| FI2 / FI3 cases à cocher | ✅ Composant `Checkbox` (`label.fd-check`) partout : x = 1137 pour toutes les cases, alignées sur les champs, 8 px entre la case et le libellé |
+| FI4 hotspot sur le canevas | ✅ Pastille et bulle rendues avec `player-core` ; zone cliquable en pointillés fins, sans aplat |
+| FI5 rythme des panneaux | ✅ 20 px entre les champs (au lieu de 36) |
+| FI6 logo | ✅ Aperçu 40 px + bouton « Choisir un logo » (`ImageUp`) |
+| FI7 variables | ✅ Carte avec un en-tête `{}` `{{company}}`, sans `legend` |
+| FI9 hauteurs | ✅ Recherche et « Exporter en CSV » à 40 px |
+| FI11 dégradé du player | ✅ Retiré |
+| FI12 `#ffcc00` | ✅ Retiré |
+| Données fictives | ✅ `globex.example` dans le faux Supabase |
+| FI8 partage | ⚠️ En partie : « Dépublier » a bien l'icône `GlobeLock`, mais reste un **bouton rouge plein** à côté d'« Ouvrir ». « Versions publiées » affiche toujours « v1 · — » avec une puce native. Le champ Expiration est toujours au format `mm/dd/yyyy` |
+| FI10 entonnoir | ⚠️ En partie : le libellé « 90 (100 %) » est maintenant collé au bord gauche **dans** la barre, en vert foncé sur du vert. Il est encore moins lisible |
+| Nouveau | ⚠️ `editor.showBranding` = « Afficher «␣␣Créé avec FlowDSIML␣␣» » : **deux espaces** de chaque côté des guillemets → une seule espace fine insécable (U+202F) |
+| Nouveau (mineur) | Couleurs hexadécimales en casse mixte (`#0E7C71` / `#ffffff`) → majuscules partout |
+
+**Bilan** : 10 écarts sur 12 sont corrigés, 2 le sont en partie (FI8, FI10), et il y a 2 petits points nouveaux. Il ne reste plus aucun bloquant de finition.
+
+**Corrections attendues**
+- **FI8** :
+  - « Dépublier » en `variant="ghost"` (texte et icône rouges, sans fond), avec la modale de confirmation ;
+  - versions affichées sur une ligne, sans puce : « v1 · 17 nov. 2026 · En ligne » ;
+  - date d'expiration au format de la langue (sélecteur maison ou `lang` sur l'`input`).
+- **FI10** : libellé **hors** de la barre, à droite de la piste, en `text-muted` et chiffres tabulaires.
