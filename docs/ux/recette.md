@@ -717,3 +717,27 @@ Exclus, reportés par le dev : le cadre Navigateur / Mobile et le fond Image.
 | F1-6 | **Commentaires à 1 024 px** : l'état vide déborde sur la saisie (texte superposé au champ) | Mineure | Hauteur minimale du panneau pour l'état vide, ou texte sur une seule ligne avec ellipse |
 
 **Hors F1, à noter :** le pied du player affichait « Créé avec FlowDSIML ». Le nom définitif est **TutoClick** (logo client) : renommage transmis au dev avec les fichiers de `brand-tutoclic/production/`.
+
+### Recette F1, suite : données sensibles, RGPD, commentaires (dev d6e105b, 19131d1)
+
+Faite sur les captures du dev (`docs/tech/captures/f1/`).
+
+**Conforme :**
+- **Vérification avant envoi** :
+  - en-tête avec le badge « Analyse terminée » ;
+  - alerte qui résume les détections ;
+  - tout est coché par défaut ;
+  - extraits masqués en mono ;
+  - légende des 3 états ;
+  - pied fixe avec la mention de confidentialité ;
+  - types ajoutés à la demande du chef d'équipe (IBAN, identifiant).
+- **Modale RGPD** : bilan (zones floutées, détections non floutées, commentaires jamais publiés), 2 cases obligatoires, bouton désactivé avec aide. Le lien « Choisir Invitation… » est masqué tant que F3 n'existe pas : accepté.
+- **Commentaires** : la liste s'ouvre sur le premier commentaire non lu, avec la pilule « n commentaires plus anciens ↑ ». Le point mineur de la recette précédente est réglé.
+
+**Écarts :**
+
+| N° | Écart | Gravité | Correction attendue |
+|---|---|---|---|
+| F1-7 | « Test · **1 captures** » et « sur 1 **capture(s)** » : pluriels non gérés | Mineure | Utiliser les clés `_one` / `_other` (`extension.piiCheck.summary_*`, et un nouveau `subtitle_one` / `subtitle_other`) |
+| F1-8 | La pilule « n commentaires plus anciens » recouvre l'en-tête du premier commentaire affiché | Mineure | La poser dans une bande de 40 px au-dessus de la liste, ou décaler la liste de sa hauteur |
+| F1-9 | Nom du produit : `7189281` utilise « Tutoclic ». Le nom définitif est **TutoClick** (logo client) | Moyenne | Changer la constante et brancher les fichiers de `docs/ux/brand-tutoclic/production/` (a73672b) |
