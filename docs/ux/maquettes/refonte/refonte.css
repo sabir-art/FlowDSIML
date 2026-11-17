@@ -1057,3 +1057,9 @@ body:has(.mock-state) .ed {
     min-width: 44px;
   }
 }
+.legend small {
+  min-width: 36px;
+  text-align: right;
+  color: var(--fd-color-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
