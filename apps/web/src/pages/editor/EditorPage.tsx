@@ -1,9 +1,26 @@
 import { GuidedTourPanel, ReadingModePanel } from './panels/GuidedDemoPanels';
-import { ArrowLeft, Eye, EyeOff, GraduationCap, MousePointer2, Share2, Target } from 'lucide-react';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Copy,
+  Crop,
+  Droplet,
+  GraduationCap,
+  Image as ImageIcon,
+  Keyboard,
+  Palette,
+  PenLine,
+  Redo2,
+  Share2,
+  Target,
+  Undo2,
+  ZoomIn,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Select } from '@flowdsiml/ui';
+import { Alert, Select } from '@flowdsiml/ui';
 import { PLAN_DEFAULTS, type PlanCode } from '@flowdsiml/core';
 import { errorMessage } from '../../lib/errors';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -28,7 +45,11 @@ import { PreviewDialog } from './PreviewDialog';
 import type { Manifest } from '@flowdsiml/manifest';
 import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
-import symbol from '../../assets/symbole-tutoclick.svg';
+import { Menu } from '../../components/Menu';
+import { supabase } from '../../lib/supabase';
+import '../../styles/maquette.css';
+import '../../styles/maquette-ajouts.css';
+import '../../styles/maquette-peau.css';
 
 /** Vrai si la fenêtre est plus étroite que `px` (ED11 : l'éditeur exige un écran large). */
 function useNarrow(px: number) {
@@ -44,6 +65,7 @@ function useNarrow(px: number) {
 }
 
 type Tab = 'step' | 'design' | 'settings';
+type Zoom = 'fit' | '50' | '100';
 
 export function EditorPage() {
   const { t } = useTranslation();
@@ -59,6 +81,19 @@ export function EditorPage() {
   const readOnly = !can('demo.edit');
   const narrow = useNarrow(1024);
   const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);
+  const [zoom, setZoom] = useState<Zoom>('fit');
+  const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const versionId = editor.demo?.current_version_id;
+  useEffect(() => {
+    if (!versionId) return setPublishedAt(null);
+    void supabase
+      .from('demo_versions')
+      .select('published_at')
+      .eq('id', versionId)
+      .maybeSingle()
+      .then(({ data }) => setPublishedAt(data?.published_at ?? null));
+  }, [versionId]);
 
   const step = editor.steps[Math.min(index, editor.steps.length - 1)];
 
@@ -149,89 +184,159 @@ export function EditorPage() {
     setPreviewManifest(buildDraftManifest(editor));
   }
 
+  const safeIndex = Math.min(index, editor.steps.length - 1);
+  // Modifications non publiées : démo modifiée après sa publication (ou jamais publiée)
+  const unpublished =
+    editor.demo.status !== 'published' ||
+    (publishedAt !== null && Date.parse(editor.demo.updated_at) > Date.parse(publishedAt) + 2000);
+  const toolBtn = (k: Tool, Icon: typeof Target, label: string) => (
+    <button
+      key={k}
+      type="button"
+      className="btn btn-ghost btn-icon"
+      aria-pressed={tool === k}
+      aria-label={label}
+      title={label}
+      onClick={() => setTool(tool === k ? 'select' : k)}
+      disabled={readOnly || step?.kind !== 'image'}
+    >
+      <Icon aria-hidden="true" />
+    </button>
+  );
+
   return (
-    <main className="editor" id="main">
+    <main className="mk ed" id="main">
       <h1 className="sr-only">
         {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
       </h1>
-      <header className="editor-bar">
-        <Link to="/" className="fd-btn fd-btn--round btn-surface" aria-label={t('common.back')}>
-          <ArrowLeft size={18} aria-hidden="true" />
+      <header className="ed-bar">
+        <Link to="/" className="btn btn-ghost btn-sm btn-icon" aria-label={t('editor.backToDemos')}>
+          <ArrowLeft aria-hidden="true" />
         </Link>
-        <img className="editor-symbol" src={symbol} alt="" width={28} height={28} />
         <input
-          className="fd-input editor-title"
+          className="ed-title"
           aria-label={t('editor.demoTitle')}
           maxLength={160}
           disabled={readOnly}
           value={editor.demo.title}
           onChange={(e) => editor.updateDemo({ title: e.target.value })}
         />
-        <span className={`save-state save-${editor.saveState}`} role="status">
-          {editor.saveState !== 'idle' && t(`editor.save_${editor.saveState}`)}
-        </span>
-        <span className="fd-badge">{t(`status.${editor.demo.status}`)}</span>
-        <div className="row" style={{ marginLeft: 'auto' }}>
-          {!readOnly && step?.kind === 'image' && (
-            <div className="fd-segmented fd-segmented--strong" role="toolbar" aria-label={t('editor.tools')}>
-              {(['select', 'hotspot', 'blur'] as Tool[]).map((k) => {
-                const label = t(
-                  k === 'select'
-                    ? 'editor.toolSelect'
-                    : k === 'hotspot'
-                      ? 'editor.toolHotspot'
-                      : 'editor.toolBlur',
-                );
-                const Icon = k === 'select' ? MousePointer2 : k === 'hotspot' ? Target : EyeOff;
-                return (
-                  <button
-                    key={k}
-                    type="button"
-                    aria-pressed={tool === k}
-                    aria-label={label}
-                    title={label}
-                    onClick={() => setTool(k)}
-                  >
-                    <Icon size={15} aria-hidden="true" />
-                    <span className="bar-label" aria-hidden="true">
-                      {label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+        {unpublished && (
+          <span className="badge badge-warning">
+            {editor.demo.status === 'published' ? t('editor.unpublishedChanges') : t('status.draft')}
+          </span>
+        )}
+        <span className="save-state" role="status" aria-live="polite">
+          {(editor.saveState === 'saved' || editor.saveState === 'idle') && (
+            <CheckCircle2 aria-hidden="true" />
           )}
-          <Button icon={<Eye />} onClick={preview} disabled={!editor.steps.length}>
+          {t(`editor.save_${editor.saveState === 'idle' ? 'saved' : editor.saveState}`)}
+        </span>
+        <span className="grow" />
+        {/* Annuler / rétablir : pas encore disponibles */}
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm btn-icon"
+          aria-label={`${t('editor.undo')} · ${t('shell.soon')}`}
+          title={t('shell.soon')}
+          aria-disabled="true"
+        >
+          <Undo2 aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm btn-icon"
+          aria-label={`${t('editor.redo')} · ${t('shell.soon')}`}
+          title={t('shell.soon')}
+          aria-disabled="true"
+        >
+          <Redo2 aria-hidden="true" />
+        </button>
+        <div className="segmented" role="radiogroup" aria-label={t('editor.mode')}>
+          <button type="button" aria-checked="true" role="radio">
+            {t('editor.modeEdit')}
+          </button>
+          <button
+            type="button"
+            aria-checked="false"
+            role="radio"
+            onClick={preview}
+            disabled={!editor.steps.length}
+          >
             {t('editor.preview')}
-          </Button>
-          <Link className="fd-btn" to={`/demos/${demoId}/quiz`}>
-            <GraduationCap size={16} aria-hidden="true" />
-            {t('editor.quiz.open')}
-            {editor.questions.length > 0 && <span className="fd-badge">{editor.questions.length}</span>}
-          </Link>
-          <Link className="fd-btn" to={`/demos/${demoId}/share`}>
-            <Share2 size={16} aria-hidden="true" />
-            {t('editor.share')}
-          </Link>
-          {can('demo.publish') && (
+          </button>
+        </div>
+        <Menu
+          label={t('editor.more')}
+          items={[
+            {
+              label: `${t('editor.versions')} · ${t('shell.soon')}`,
+              icon: <Clock />,
+              disabled: true,
+              onSelect: () => undefined,
+            },
+            { label: t('editor.themeOfDemo'), icon: <Palette />, onSelect: () => setTab('design') },
+            {
+              label: t('editor.quiz.open') + (editor.questions.length ? ` (${editor.questions.length})` : ''),
+              icon: <GraduationCap />,
+              onSelect: () => navigate(`/demos/${demoId}/quiz`),
+            },
+            {
+              label: `${t('editor.aiWriter')} · V2`,
+              icon: <PenLine />,
+              disabled: true,
+              onSelect: () => undefined,
+            },
+            {
+              label: `${t('editor.shortcuts')} · ${t('shell.soon')}`,
+              icon: <Keyboard />,
+              disabled: true,
+              onSelect: () => undefined,
+            },
+            'separator',
+            ...(can('demo.edit')
+              ? [
+                  {
+                    label: t('demos.duplicate'),
+                    icon: <Copy />,
+                    onSelect: () =>
+                      void supabase.rpc('duplicate_demo', { p_demo: demoId }).then(({ data }) => {
+                        const id =
+                          typeof data === 'string' ? data : (data as unknown as { id?: string } | null)?.id;
+                        navigate(id ? `/demos/${id}/edit` : '/');
+                      }),
+                  },
+                ]
+              : []),
+          ]}
+        />
+        <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/share`}>
+          <Share2 aria-hidden="true" />
+          {t('editor.share')}
+        </Link>
+        {can('demo.publish') && (
+          <span className="tc-cta-grad ed-publish">
             <PublishButton
               editor={editor}
+              republishLabel={t('publish.publish')}
               onReviewStep={(i) => {
                 setIndex(i);
                 setSelection({ kind: 'step' });
                 setTab('step');
               }}
             />
-          )}
-        </div>
+          </span>
+        )}
       </header>
       {editor.lastError != null && (
-        <div style={{ padding: '0 16px' }}>
-          <Alert kind="error">{errorMessage(t, editor.lastError)}</Alert>
+        <div className="ed-error">
+          <div className="alert alert-danger" role="alert">
+            {errorMessage(t, editor.lastError)}
+          </div>
         </div>
       )}
-      <div className="editor-body">
-        <aside className="editor-left">
+      <div className="ed-body">
+        <nav className="rail" aria-label={t('editor.steps')}>
           <StepList
             editor={editor}
             current={index}
@@ -239,74 +344,156 @@ export function EditorPage() {
             readOnly={readOnly}
             openComments={comments.openByStep}
           />
-        </aside>
-        <div className="editor-center-col">
-          <section className="editor-center">
-            {step ? (
-              <Canvas
-                editor={editor}
-                step={step}
-                tool={tool}
-                setTool={setTool}
-                selection={selection}
-                setSelection={setSelection}
-                readOnly={readOnly}
-                onEditForm={() => setTab('settings')}
-              />
-            ) : (
-              <div className="center fd-muted">{t('editor.empty')}</div>
-            )}
-            {tool !== 'select' && <p className="fd-muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
-          </section>
-          <CommentsPanel
-            stepId={step?.id ?? null}
-            stepIndex={Math.min(index, editor.steps.length - 1)}
-            api={comments}
-          />
-        </div>
-        <aside className="editor-right">
-          <div className="fd-tabs" role="tablist">
+        </nav>
+        <section className="stage" aria-label={t('editor.canvas')} id="canvas">
+          <div className="row stage-head">
+            <span className="t-caption muted">
+              {step
+                ? `${t('editor.stepN', { n: safeIndex + 1 })} · ${step.title || t('editor.untitled')}`
+                : ''}
+            </span>
+            <span className="grow" />
+            <select
+              className="select input-sm stage-zoom"
+              aria-label={t('editor.zoom')}
+              value={zoom}
+              onChange={(e) => setZoom(e.target.value as Zoom)}
+            >
+              <option value="fit">{t('editor.zoomFit')}</option>
+              <option value="50">50 %</option>
+              <option value="100">100 %</option>
+            </select>
+          </div>
+          <div className="stage-main">
+            <div className="stage-inner">
+              {step ? (
+                <div className={`frame fd-player-scope frame--${zoom}`}>
+                  <div className="browser" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                    {step.page_url && (
+                      <span className="url">{step.page_url.replace(/^https?:\/\//, '')}</span>
+                    )}
+                  </div>
+                  <div className="shot">
+                    <Canvas
+                      editor={editor}
+                      step={step}
+                      tool={tool}
+                      setTool={setTool}
+                      selection={selection}
+                      setSelection={setSelection}
+                      readOnly={readOnly}
+                      onEditForm={() => setTab('settings')}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="muted">{t('editor.empty')}</div>
+              )}
+              {tool !== 'select' && <p className="muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
+            </div>
+            <div className="floatbar" role="toolbar" aria-label={t('editor.tools')}>
+              {toolBtn('hotspot', Target, t('editor.toolHotspot'))}
+              {toolBtn('blur', Droplet, t('editor.toolBlur'))}
+              <button
+                type="button"
+                className="btn btn-ghost btn-icon"
+                aria-label={t('editor.toolZoom')}
+                title={t('editor.toolZoom')}
+                disabled={readOnly || step?.kind !== 'image'}
+                onClick={() => {
+                  setSelection({ kind: 'step' });
+                  setTab('step');
+                }}
+              >
+                <ZoomIn aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-icon"
+                aria-disabled="true"
+                aria-label={`${t('editor.toolCrop')} · ${t('shell.soon')}`}
+                title={t('shell.soon')}
+              >
+                <Crop aria-hidden="true" />
+              </button>
+              <span className="sep" />
+              <button
+                type="button"
+                className="btn btn-ghost btn-icon"
+                aria-disabled="true"
+                aria-label={`${t('editor.toolReplace')} · ${t('shell.soon')}`}
+                title={t('shell.soon')}
+              >
+                <ImageIcon aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+          {/* Commentaires d'équipe (lot A6) : gardés sous le canevas, repliables */}
+          <div className="stage-comments">
+            <CommentsPanel stepId={step?.id ?? null} stepIndex={safeIndex} api={comments} />
+          </div>
+        </section>
+        <aside className="panel" aria-label={t('editor.properties')}>
+          <div className="tabs" role="tablist" aria-label={t('editor.properties')}>
             {(['step', 'design', 'settings'] as Tab[]).map((k) => (
-              <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
+              <button
+                key={k}
+                type="button"
+                role="tab"
+                id={`ed-tab-${k}`}
+                aria-selected={tab === k}
+                tabIndex={tab === k ? 0 : -1}
+                onClick={() => setTab(k)}
+              >
                 {t(`editor.tab_${k}`)}
               </button>
             ))}
           </div>
-          {tab === 'step' && step && selection.kind === 'step' && (
-            <StepPanel
-              editor={editor}
-              step={step}
-              index={index}
-              readOnly={readOnly}
-              setSelection={setSelection}
-            />
-          )}
-          {tab === 'step' && step && hotspot && (
-            <HotspotPanel editor={editor} hotspot={hotspot} readOnly={readOnly} setSelection={setSelection} />
-          )}
-          {tab === 'step' && step && selection.kind === 'blur' && (
-            <BlurPanel
-              editor={editor}
-              step={step}
-              index={selection.index}
-              readOnly={readOnly}
-              setSelection={setSelection}
-            />
-          )}
-          {tab === 'design' && (
-            <div className="stack panel-sections">
-              <ReadingModePanel editor={editor} readOnly={readOnly} />
-              <ThemePanel editor={editor} readOnly={readOnly} />
-            </div>
-          )}
-          {tab === 'settings' && (
-            <div className="stack panel-sections">
-              <FormPanel editor={editor} readOnly={readOnly} leadFormsAllowed={plan.leadForms} />
-              <VariablesPanel editor={editor} readOnly={readOnly} />
-              <ChaptersPanel editor={editor} readOnly={readOnly} />
-              <GuidedTourPanel editor={editor} readOnly={readOnly} />
-            </div>
-          )}
+          <div className="panel-body" role="tabpanel" aria-labelledby={`ed-tab-${tab}`}>
+            {tab === 'step' && step && selection.kind === 'step' && (
+              <StepPanel
+                editor={editor}
+                step={step}
+                index={index}
+                readOnly={readOnly}
+                setSelection={setSelection}
+              />
+            )}
+            {tab === 'step' && step && hotspot && (
+              <HotspotPanel
+                editor={editor}
+                hotspot={hotspot}
+                readOnly={readOnly}
+                setSelection={setSelection}
+              />
+            )}
+            {tab === 'step' && step && selection.kind === 'blur' && (
+              <BlurPanel
+                editor={editor}
+                step={step}
+                index={selection.index}
+                readOnly={readOnly}
+                setSelection={setSelection}
+              />
+            )}
+            {tab === 'design' && (
+              <div className="stack panel-sections">
+                <ReadingModePanel editor={editor} readOnly={readOnly} />
+                <ThemePanel editor={editor} readOnly={readOnly} />
+              </div>
+            )}
+            {tab === 'settings' && (
+              <div className="stack panel-sections">
+                <FormPanel editor={editor} readOnly={readOnly} leadFormsAllowed={plan.leadForms} />
+                <VariablesPanel editor={editor} readOnly={readOnly} />
+                <ChaptersPanel editor={editor} readOnly={readOnly} />
+                <GuidedTourPanel editor={editor} readOnly={readOnly} />
+              </div>
+            )}
+          </div>
         </aside>
       </div>
       <PreviewDialog manifest={previewManifest} onClose={() => setPreviewManifest(null)} />

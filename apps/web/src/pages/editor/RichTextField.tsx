@@ -1,8 +1,9 @@
-import { Bold, Italic, Link2 } from 'lucide-react';
-import { useRef } from 'react';
+import { Bold, Braces, Italic, Link2 } from 'lucide-react';
+import { useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { richTextToHtml } from '@flowdsiml/core';
 import { Button, Select } from '@flowdsiml/ui';
+import { Menu } from '../../components/Menu';
 
 /** Remplace {{clé|défaut}} (déjà échappé, clé contrainte) par une pastille lisible (ED6). */
 function withVariablePills(html: string): string {
@@ -21,6 +22,8 @@ export function RichTextField({
   variables,
   disabled,
   rows = 4,
+  mk = false,
+  extra,
 }: {
   id: string;
   label: string;
@@ -29,6 +32,10 @@ export function RichTextField({
   variables: string[];
   disabled?: boolean;
   rows?: number;
+  /** Habillage maquette (éditeur .mk) : cadre .rte, barre d'outils compacte, menu « Variable ». */
+  mk?: boolean;
+  /** Contenu ajouté après le compteur (ex. lien IA en V2). */
+  extra?: ReactNode;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -44,6 +51,54 @@ export function RichTextField({
       el.focus();
       el.setSelectionRange(s + before.length, s + before.length + sel.length);
     });
+  }
+
+  if (mk) {
+    const toolBtn = (icon: ReactNode, label: string, onClick: () => void) => (
+      <button type="button" aria-label={label} title={label} onClick={onClick}>
+        {icon}
+      </button>
+    );
+    return (
+      <div className="field">
+        <label className="label" htmlFor={id}>
+          {label}
+        </label>
+        <div className={`rte${disabled ? ' is-disabled' : ''}`}>
+          {!disabled && (
+            <div className="rte-tools">
+              {toolBtn(<Bold aria-hidden="true" />, t('editor.bold'), () => wrap('**'))}
+              {toolBtn(<Italic aria-hidden="true" />, t('editor.italic'), () => wrap('*'))}
+              {toolBtn(<Link2 aria-hidden="true" />, t('editor.link'), () =>
+                wrap('[', '](https://)', t('editor.linkText')),
+              )}
+              <span className="grow" />
+              {variables.length > 0 && (
+                <Menu
+                  label={t('editor.insertVariable')}
+                  trigger={{ icon: <Braces />, text: t('editor.variable') }}
+                  items={variables.map((v) => ({ label: v, onSelect: () => wrap(`{{${v}}}`, '') }))}
+                />
+              )}
+            </div>
+          )}
+          <textarea
+            id={id}
+            ref={ref}
+            className="rte-text"
+            rows={rows}
+            value={value}
+            disabled={disabled}
+            maxLength={4000}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+        <span className="help">
+          {t('editor.chars', { n: value.length, max: 4000 })}
+          {extra}
+        </span>
+      </div>
+    );
   }
 
   return (

@@ -7,6 +7,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 (async () => {
   const b = await chromium.launch();
   const page = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  // Panneau Commentaires replié par défaut depuis la conformité EDT-01 : on l'ouvre pour ces tests
+  await page.addInitScript(() => {
+    if (localStorage.getItem('fd.editor.comments.collapsed') === null)
+      localStorage.setItem('fd.editor.comments.collapsed', '0');
+  });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const ok = (c, l) => {

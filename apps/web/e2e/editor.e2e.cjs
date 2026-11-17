@@ -17,7 +17,7 @@ const SHOTS = process.env.SHOTS_DIR;
 
   await page.goto(`${BASE}/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit`);
   await page.waitForSelector('.canvas-frame img');
-  ok((await page.locator('.steplist li').count()) === 3, 'liste des 3 étapes');
+  ok((await page.locator('.rail-li').count()) === 3, 'liste des 3 étapes');
   ok((await page.locator('.canvas-hotspot').count()) === 1, 'hotspot affiché sur l’étape 1');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/editor.png` });
 
@@ -33,6 +33,27 @@ const SHOTS = process.env.SHOTS_DIR;
     ),
     'modification du hotspot enregistrée',
   );
+  // Panneau « Hotspot et bulle » (maquette EDT-01) : type de guidage et position en grille
+  await page.getByRole('radio', { name: 'Zone' }).click();
+  await page.getByRole('button', { name: 'Au-dessus' }).click();
+  await page.waitForTimeout(900);
+  ok(
+    state.calls.some(
+      (c) => c.method === 'PATCH' && c.path.endsWith('/hotspots') && c.body?.style === 'spotlight',
+    ),
+    'type de guidage « Zone » enregistré (style spotlight)',
+  );
+  ok(
+    state.calls.some(
+      (c) => c.method === 'PATCH' && c.path.endsWith('/hotspots') && c.body?.placement === 'top',
+    ),
+    'position « Au-dessus » enregistrée depuis la grille',
+  );
+  ok(
+    (await page.getByRole('button', { name: /En haut à gauche/ }).isDisabled()) === true,
+    'coins de la grille inactifs (Bientôt)',
+  );
+  await page.getByRole('radio', { name: 'Hotspot' }).click();
 
   // Déplacement du hotspot
   const box = await page.locator('.canvas-hotspot').first().boundingBox();
@@ -57,7 +78,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.keyboard.press('Shift+ArrowRight');
   const after = Number((await hs.getAttribute('style')).match(/left: ([\d.]+)%/)[1]);
   ok(Math.abs(after - before - 5) < 0.6, 'hotspot déplacé au clavier (Maj+→ = 5 %)');
-  ok((await page.textContent('[aria-live="polite"]')).includes('%'), 'annonce aria-live du déplacement');
+  ok(
+    (await page.textContent('.sr-only[aria-live="polite"]')).includes('%'),
+    'annonce aria-live du déplacement',
+  );
 
   // Ajout d'un hotspot avec l'outil
   await page.getByRole('button', { name: 'Hotspot', exact: true }).click();
@@ -85,11 +109,11 @@ const SHOTS = process.env.SHOTS_DIR;
   );
 
   // Réordonnancement
-  await page.locator('.steplist li').nth(2).hover();
-  await page.locator('.steplist li').nth(2).getByRole('button', { name: 'Monter' }).click();
+  await page.locator('.rail-li').nth(2).hover();
+  await page.locator('.rail-li').nth(2).getByRole('button', { name: 'Monter' }).click();
   await page.waitForTimeout(300);
   ok(
-    (await page.locator('.steplist-title').nth(1).textContent()) === 'Merci !',
+    (await page.locator('.rail-list .step .meta b').nth(1).textContent()) === 'Merci !',
     'étape déplacée vers le haut',
   );
 
@@ -121,7 +145,7 @@ const SHOTS = process.env.SHOTS_DIR;
     'F1 : mode Spotlight enregistré pour la démo',
   );
   await page.getByRole('tab', { name: 'Étape' }).click();
-  await page.locator('.steplist-item').first().click();
+  await page.locator('.rail-list .step').first().click();
   ok((await page.locator('.canvas-spotlight').count()) >= 1, 'F1 : canevas en mode Spotlight (WYSIWYG)');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-editor-spotlight.png` });
 
@@ -139,7 +163,7 @@ const SHOTS = process.env.SHOTS_DIR;
 
   // F1 : menu de choix ajouté depuis le rail
   await page.getByRole('tab', { name: 'Étape' }).click();
-  await page.getByRole('button', { name: 'Ajouter une étape' }).click();
+  await page.locator('.rail-foot').getByRole('button', { name: 'Ajouter une étape' }).click();
   await page.getByRole('menuitem', { name: 'Menu de choix' }).click();
   await page.waitForSelector('.canvas-popup');
   ok((await page.locator('.canvas-choices li').count()) === 2, 'F1 : étape menu de choix (2 choix) créée');
@@ -157,13 +181,13 @@ const SHOTS = process.env.SHOTS_DIR;
     'F1 : choix et destination enregistrés',
   );
   ok(
-    (await page.locator('.steplist-badges [aria-label="2 choix"]').count()) === 1,
+    (await page.locator('.rail-list .icons [aria-label="2 choix"]').count()) === 1,
     'F1 : badge « 2 choix » dans le rail',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-editor-choix.png` });
 
   // Aperçu intégré (ED12)
-  await page.getByRole('button', { name: 'Aperçu' }).click();
+  await page.getByRole('radio', { name: 'Aperçu' }).click();
   const pf = page.frameLocator('iframe.preview-frame');
   await pf.locator('.p-tip, .p-text-step').first().waitFor({ timeout: 10000 });
   ok(true, 'aperçu intégré : le player affiche la démo brouillon');

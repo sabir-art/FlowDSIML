@@ -30,7 +30,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await app.getByRole('button', { name: 'Créer le formulaire' }).click();
   await app.waitForSelector('#f-title');
   await app.getByRole('tab', { name: 'Étape' }).click();
-  await app.locator('.steplist-item').nth(1).click();
+  await app.locator('.rail-list .step').nth(1).click();
   await app.selectOption('#st-gate', { index: 1 });
   await app.waitForTimeout(900);
   app.on('dialog', (d) => {

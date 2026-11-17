@@ -7,6 +7,7 @@ import {
   GitBranch,
   ImageOff,
   ImagePlus,
+  GripVertical,
   MessageSquare,
   MousePointerClick,
   Plus,
@@ -40,9 +41,47 @@ export function StepList({
   const file = useRef<HTMLInputElement>(null);
   const chapterTitle = (id: string | null) => editor.chapters.find((c) => c.id === id)?.title;
 
+  const addItems = [
+    {
+      label: t('editor.addTextStep'),
+      icon: <Type />,
+      onSelect: () =>
+        void editor.addTextStep(current, t('editor.newTextStep')).then(() => onSelect(current + 1)),
+    },
+    {
+      label: t('editor.advanced.stepTypes.popup'),
+      icon: <AppWindow />,
+      onSelect: () =>
+        void editor
+          .addTextStep(current, t('editor.advanced.stepTypes.popup'), { display: 'popup' })
+          .then(() => onSelect(current + 1)),
+    },
+    {
+      label: t('editor.advanced.stepTypes.choice'),
+      icon: <GitBranch />,
+      onSelect: () =>
+        void editor
+          .addTextStep(current, t('editor.advanced.choice.question'), {
+            display: 'popup',
+            choices: [1, 2].map((n) => ({
+              label: t('editor.advanced.choice.option', { n }),
+              action: { type: 'end' as const },
+            })),
+          })
+          .then(() => onSelect(current + 1)),
+    },
+    { label: t('editor.addImageStep'), icon: <ImagePlus />, onSelect: () => file.current?.click() },
+  ];
+
   return (
-    <div className="steplist">
-      <ol aria-label={t('editor.steps')}>
+    <>
+      <div className="rail-head">
+        <b className="t-label">
+          {t('editor.steps')} <span className="subtle">· {editor.steps.length}</span>
+        </b>
+        {!readOnly && <Menu label={t('editor.addStep')} align="end" icon={<Plus />} items={addItems} />}
+      </div>
+      <ol className="rail-list" aria-label={t('editor.steps')}>
         {editor.steps.map((s, i) => {
           const url = s.image_path ? editor.imageUrls[s.image_path] : undefined;
           const chapter = chapterTitle(s.chapter_id);
@@ -69,52 +108,72 @@ export function StepList({
                 setDragFrom(null);
                 setOver(null);
               }}
-              className={`${i === current ? 'active' : ''} ${over === i ? 'over' : ''}`}
+              className="rail-li"
             >
-              {showChapter && <div className="steplist-chapter">{chapter}</div>}
-              <button className="steplist-item" onClick={() => onSelect(i)} aria-current={i === current}>
-                <span className="steplist-n">{i + 1}</span>
-                {url ? (
-                  <img src={url} alt="" />
-                ) : (
-                  <span
-                    className={`steplist-text fd-player-scope ${s.kind === 'text' ? 'steplist-text--card' : ''}`}
-                    aria-hidden="true"
-                  >
-                    {s.kind === 'text' ? (
-                      <span className="steplist-text__card">{s.title || t('editor.untitled')}</span>
-                    ) : (
-                      <ImageOff size={20} />
+              {showChapter && <div className="rail-chapter">{chapter}</div>}
+              {over === i && dragFrom !== null && dragFrom !== i && (
+                <div className="insert" aria-hidden="true" />
+              )}
+              <button
+                type="button"
+                className="step"
+                aria-current={i === current ? 'step' : undefined}
+                aria-selected={i === current}
+                onClick={() => onSelect(i)}
+              >
+                {!readOnly && (
+                  <span className="grip" aria-hidden="true">
+                    <GripVertical />
+                  </span>
+                )}
+                <span className="n">{i + 1}</span>
+                <span className="th">
+                  {url ? (
+                    <img src={url} alt="" />
+                  ) : s.kind === 'text' ? (
+                    <span className="th-card fd-player-scope">{s.title || t('editor.untitled')}</span>
+                  ) : (
+                    <ImageOff aria-hidden="true" className="th-missing" />
+                  )}
+                </span>
+                <span className="meta">
+                  <b>{s.title || t('editor.untitled')}</b>
+                  <span className="icons">
+                    <StepBadges
+                      step={s}
+                      hotspots={editor.hotspots.filter((h) => h.step_id === s.id).length}
+                    />
+                    {(openComments[s.id] ?? 0) > 0 && (
+                      <span className="rail-comments">
+                        <MessageSquare aria-hidden="true" />
+                        <span aria-hidden="true">
+                          {openComments[s.id]! > 99 ? '99+' : openComments[s.id]}
+                        </span>
+                        <span className="sr-only">
+                          {t('editor.comments.railBadge', { count: openComments[s.id] })}
+                        </span>
+                      </span>
                     )}
                   </span>
-                )}
-                <span className="steplist-title">{s.title || t('editor.untitled')}</span>
-                {(openComments[s.id] ?? 0) > 0 && (
-                  <span className="steplist-comments">
-                    <MessageSquare aria-hidden="true" />
-                    <span aria-hidden="true">{openComments[s.id]! > 99 ? '99+' : openComments[s.id]}</span>
-                    <span className="sr-only">
-                      {t('editor.comments.railBadge', { count: openComments[s.id] })}
-                    </span>
-                  </span>
-                )}
-                <StepBadges step={s} hotspots={editor.hotspots.filter((h) => h.step_id === s.id).length} />
+                </span>
               </button>
               {!readOnly && (
-                <span className="steplist-move">
+                <span className="rail-move">
                   <button
+                    type="button"
                     aria-label={t('editor.moveUp')}
                     disabled={i === 0}
                     onClick={() => void editor.moveStep(i, i - 1).then(() => onSelect(i - 1))}
                   >
-                    <ArrowUp size={14} aria-hidden="true" />
+                    <ArrowUp aria-hidden="true" />
                   </button>
                   <button
+                    type="button"
                     aria-label={t('editor.moveDown')}
                     disabled={i === editor.steps.length - 1}
                     onClick={() => void editor.moveStep(i, i + 1).then(() => onSelect(i + 1))}
                   >
-                    <ArrowDown size={14} aria-hidden="true" />
+                    <ArrowDown aria-hidden="true" />
                   </button>
                 </span>
               )}
@@ -123,42 +182,12 @@ export function StepList({
         })}
       </ol>
       {!readOnly && (
-        <div className="stack" style={{ gap: 6, padding: 8 }}>
+        <div className="rail-foot">
           <Menu
             label={t('editor.addStep')}
             align="start"
             trigger={{ icon: <Plus />, text: t('editor.addStep'), block: true }}
-            items={[
-              {
-                label: t('editor.addTextStep'),
-                icon: <Type />,
-                onSelect: () =>
-                  void editor.addTextStep(current, t('editor.newTextStep')).then(() => onSelect(current + 1)),
-              },
-              {
-                label: t('editor.advanced.stepTypes.popup'),
-                icon: <AppWindow />,
-                onSelect: () =>
-                  void editor
-                    .addTextStep(current, t('editor.advanced.stepTypes.popup'), { display: 'popup' })
-                    .then(() => onSelect(current + 1)),
-              },
-              {
-                label: t('editor.advanced.stepTypes.choice'),
-                icon: <GitBranch />,
-                onSelect: () =>
-                  void editor
-                    .addTextStep(current, t('editor.advanced.choice.question'), {
-                      display: 'popup',
-                      choices: [1, 2].map((n) => ({
-                        label: t('editor.advanced.choice.option', { n }),
-                        action: { type: 'end' },
-                      })),
-                    })
-                    .then(() => onSelect(current + 1)),
-              },
-              { label: t('editor.addImageStep'), icon: <ImagePlus />, onSelect: () => file.current?.click() },
-            ]}
+            items={addItems}
           />
           <input
             ref={file}
@@ -173,7 +202,7 @@ export function StepList({
           />
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -198,12 +227,12 @@ function StepBadges({ step, hotspots }: { step: StepRow; hotspots: number }) {
   ].filter(Boolean) as Array<{ icon: React.ReactNode; label: string }>;
   if (!items.length) return null;
   return (
-    <span className="steplist-badges">
+    <>
       {items.map((b) => (
         <span key={b.label} title={b.label} aria-label={b.label} role="img">
           {b.icon}
         </span>
       ))}
-    </span>
+    </>
   );
 }

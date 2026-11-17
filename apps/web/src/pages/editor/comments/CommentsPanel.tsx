@@ -133,7 +133,8 @@ export function CommentsPanel({
     const v = Number(read(HEIGHT_KEY));
     return Number.isFinite(v) && v >= MIN_H ? Math.min(v, MAX_H) : defaultHeight();
   });
-  const [collapsed, setCollapsed] = useState(() => !mobile && read(COLLAPSED_KEY) === '1');
+  // Replié par défaut (absent de la maquette d'origine de l'éditeur) ; l'état choisi est mémorisé
+  const [collapsed, setCollapsed] = useState(() => !mobile && read(COLLAPSED_KEY) !== '0');
   const [showResolved, setShowResolved] = useState(false);
   const [draft, setDraft] = useState('');
   const [composeFocus, setComposeFocus] = useState(false);
@@ -251,7 +252,9 @@ export function CommentsPanel({
 
   /** Jamais plus de 60 % de la colonne : le canevas garde au moins 240 px. */
   function clamp(h: number) {
-    const col = sectionRef.current?.parentElement?.clientHeight ?? window.innerHeight;
+    // Hauteur de la colonne centrale (.stage) : le parent direct (.stage-comments) épouse le panneau.
+    const el = sectionRef.current;
+    const col = (el?.closest('.stage') ?? el?.parentElement)?.clientHeight ?? window.innerHeight;
     const max = Math.max(MIN_H, Math.min(MAX_H, col * 0.6, col - 240));
     return Math.round(Math.max(MIN_H, Math.min(max, h)));
   }

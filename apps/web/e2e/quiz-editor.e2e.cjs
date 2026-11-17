@@ -19,7 +19,9 @@ const SHOTS = process.env.SHOTS_DIR;
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
-  await page.getByRole('link', { name: /Quiz/ }).click();
+  // Le lien Quiz est dans le menu « … » de la barre de l'éditeur (maquette EDT-01)
+  await page.locator('.ed-bar').getByRole('button', { name: 'Plus d’options' }).click();
+  await page.getByRole('menuitem', { name: /Quiz/ }).click();
   await page.waitForSelector('.quiz-page');
   ok((await page.locator('h1').textContent()) === 'Quiz du module', 'page « Quiz du module »');
 

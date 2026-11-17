@@ -24,7 +24,20 @@ const SCREENS = {
   'PLN-01': { maquette: 'reference/plans.html', route: '/#/settings/plans' },
   'ANA-01': { maquette: 'reference/analytics.html', route: '/#/analytics' },
   'PRM-01': { maquette: 'reference/parametres.html', route: '/#/settings/members' },
-  'PRT-01': { maquette: 'reference/partage.html', route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share' },
+  'EDT-01': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    // État de la maquette : hotspot de l'étape sélectionné (panneau Étape › bulle)
+    async prepare(p) {
+      await p.locator('.canvas-frame [data-canvas-item]').first().click();
+      await p.waitForTimeout(300);
+      await p.mouse.move(0, 0);
+    },
+  },
+  'PRT-01': {
+    maquette: 'reference/partage.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',
+  },
   'CNX-01': {
     maquette: 'reference/connexion.html',
     route: '/#/login',

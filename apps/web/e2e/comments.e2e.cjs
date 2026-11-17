@@ -8,6 +8,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
+  // Panneau Commentaires replié par défaut depuis la conformité EDT-01 : on l'ouvre pour ces tests
+  await ctx.addInitScript(() => {
+    if (localStorage.getItem('fd.editor.comments.collapsed') === null)
+      localStorage.setItem('fd.editor.comments.collapsed', '0');
+  });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const state = await install(page);
@@ -47,12 +52,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok((await page.locator('.cm-meta').textContent()).includes('(vous)'), 'mention « (vous) » pour l’auteur');
   ok((await input.inputValue()) === '', 'champ vidé après envoi');
   ok(
-    (await page.locator('.steplist-comments').first().textContent()).includes('1'),
+    (await page.locator('.rail-comments').first().textContent()).includes('1'),
     'badge sur la vignette du rail',
   );
   ok((await page.locator('.cm-count').textContent()) === '1 ouvert', 'badge « n ouverts »');
   ok(
-    (await page.locator('.steplist-item').first().textContent()).includes('1 commentaire ouvert'),
+    (await page.locator('.rail-list .step').first().textContent()).includes('1 commentaire ouvert'),
     'nombre de commentaires dans le nom accessible de l’étape',
   );
 
@@ -73,7 +78,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.waitForTimeout(400);
   ok((await page.locator('.cm-item').count()) === 0, 'commentaire résolu masqué par défaut');
   ok((await page.locator('.cm-state').textContent()).includes('Tout est résolu'), 'état « Tout est résolu »');
-  ok((await page.locator('.steplist-comments').count()) === 0, 'badge retiré quand tout est résolu');
+  ok((await page.locator('.rail-comments').count()) === 0, 'badge retiré quand tout est résolu');
   await page.getByRole('button', { name: 'Les afficher' }).click();
   ok(
     (await page.locator('.cm-item--resolved').count()) === 1,
@@ -85,10 +90,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok((await page.locator('.cm-item--resolved').count()) === 0, 'commentaire rouvert');
 
   // Commentaires par étape
-  await page.locator('.steplist-item').nth(1).click();
+  await page.locator('.rail-list .step').nth(1).click();
   await page.waitForTimeout(200);
   ok((await page.locator('.cm-item').count()) === 0, 'les commentaires sont propres à chaque étape');
-  await page.locator('.steplist-item').first().click();
+  await page.locator('.rail-list .step').first().click();
 
   // Poignée : flèches du clavier, repli mémorisé
   const handle = page.getByRole('separator', { name: 'Redimensionner le panneau Commentaires' });

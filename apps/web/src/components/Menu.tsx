@@ -35,6 +35,7 @@ export function Menu({
   align = 'end',
   placement,
   trigger,
+  icon,
 }: {
   label: string;
   items: Array<MenuItem | MenuRadioGroup | 'separator'>;
@@ -48,6 +49,8 @@ export function Menu({
     block?: boolean;
     /** Chevron ▾ après le texte */ chevron?: boolean;
   };
+  /** Icône du bouton seul (par défaut « ⋯ »), ex. « + » du rail des étapes. */
+  icon?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -166,7 +169,7 @@ export function Menu({
             {trigger.chevron && <ChevronDown size={16} aria-hidden="true" />}
           </>
         ) : (
-          <MoreHorizontal size={18} aria-hidden="true" />
+          (icon ?? <MoreHorizontal size={18} aria-hidden="true" />)
         )}
       </button>
       {open &&

@@ -65,7 +65,7 @@ function withComments(state, { resolvedAll = false } = {}) {
       const ctx = await b.newContext({ viewport: { width, height } });
       await ctx.addInitScript((t) => {
         localStorage.setItem('fd.theme', t);
-        localStorage.removeItem('fd.editor.comments.collapsed');
+        localStorage.setItem('fd.editor.comments.collapsed', '0');
       }, theme);
       const page = await ctx.newPage();
       if (role) state.tables.members[0].role = role;
