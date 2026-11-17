@@ -144,29 +144,49 @@
       </section>
     </div>
 
-    <aside class="fd-card ed-panel" aria-label="Propriétés">
-      <div class="fd-tabs" role="tablist" aria-label="Panneau">
-        <button role="tab" type="button" aria-selected="true">Étape</button>
-        <button role="tab" type="button" aria-selected="false">Design</button>
-        <button role="tab" type="button" aria-selected="false">Réglages</button>
-      </div>
-      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="target"></i></span><h2 class="fd-card__title">Hotspot et bulle</h2></div>
-      <div class="stack">
+    <aside class="fd-card ed-panel" aria-label="Propriétés" data-view="hotspot">
+      <div data-pane="hotspot" class="stack"><div class="fd-tabs" role="tablist" aria-label="Panneau"><button role="tab" type="button" aria-selected="true">Étape</button><button role="tab" type="button" aria-selected="false">Design</button><button role="tab" type="button" aria-selected="false">Réglages</button></div><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="target"></i></span><h2 class="fd-card__title">Hotspot et bulle</h2><a href="?view=etape" class="fd-btn fd-btn--ghost fd-btn--sm" style="margin-left:auto"><i data-icon="arrowLeft"></i>Étape</a></div>
         <div class="fd-field"><label class="fd-label" for="t">Titre de la bulle</label><input class="fd-input" id="t" value="Commencez ici"></div>
-        <div class="fd-field"><label class="fd-label" for="x">Texte de la bulle</label>
-          <div class="rt"><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Gras"><i data-icon="bold"></i></button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Italique"><i data-icon="italic"></i></button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Lien"><i data-icon="link"></i></button></div>
-          <textarea class="fd-textarea" id="x">Cliquez sur « + Ajouter » pour créer une fiche usager.</textarea></div>
+        <div class="fd-field"><label class="fd-label" for="x">Texte de la bulle</label><div class="rt"><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Gras"><i data-icon="bold"></i></button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Italique"><i data-icon="italic"></i></button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Lien"><i data-icon="link"></i></button><select class="fd-select rt-var" aria-label="Insérer une variable"><option>Insérer une variable</option><option>{{company}}</option></select></div>
+          <textarea class="fd-textarea" id="x">Cliquez sur « + Ajouter » pour créer une fiche usager chez {{company}}.</textarea></div>
         <div class="fd-field"><label class="fd-label" for="pos">Position de la bulle</label><select class="fd-select" id="pos"><option>Automatique</option></select></div>
-        <hr>
-        <label class="fd-switch"><span>Bouton d'action (CTA)</span><input type="checkbox"><span class="fd-switch__track"></span></label>
-        <label class="fd-switch"><span>Animation de pulsation</span><input type="checkbox" checked><span class="fd-switch__track"></span></label>
-        <hr>
-        <button class="fd-btn fd-btn--ghost" type="button" style="color:var(--fd-color-danger)"><i data-icon="trash"></i>Supprimer le hotspot</button>
-      </div>
+        <div class="fd-field"><label class="fd-label" for="act">Action au clic</label><select class="fd-select" id="act"><option>Étape suivante</option><option>Aller à l'étape…</option><option>Ouvrir un lien</option></select></div>
+        <hr><label class="fd-switch"><span>Bouton d'action (CTA)</span><input type="checkbox"><span class="fd-switch__track"></span></label><label class="fd-switch"><span>Animation de pulsation</span><input type="checkbox" checked><span class="fd-switch__track"></span></label><hr>
+        <button class="fd-btn fd-btn--ghost" type="button" style="color:var(--fd-color-danger);align-self:flex-start"><i data-icon="trash"></i>Supprimer le hotspot</button></div>
+      <div data-pane="etape" class="stack"><div class="fd-tabs" role="tablist" aria-label="Panneau"><button role="tab" type="button" aria-selected="true">Étape</button><button role="tab" type="button" aria-selected="false">Design</button><button role="tab" type="button" aria-selected="false">Réglages</button></div><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="layers"></i></span><h2 class="fd-card__title">Étape 1</h2></div>
+        <div class="fd-field"><label class="fd-label" for="et">Titre de l'étape</label><input class="fd-input" id="et" value="Accueil du parcours"></div>
+        <div class="fd-field"><label class="fd-label" for="ec">Chapitre</label><select class="fd-select" id="ec"><option>Aucun</option></select></div>
+        <div class="fd-field"><label class="fd-label" for="ef">Formulaire de lead avant cette étape</label><select class="fd-select" id="ef" disabled><option>Aucun</option></select><span class="fd-help">Créez d'abord un formulaire dans l'onglet Réglages.</span></div>
+        <hr><label class="fd-switch"><span>Zoom sur une zone</span><input type="checkbox"><span class="fd-switch__track"></span></label><label class="fd-switch"><span>Bouton d'action (CTA)</span><input type="checkbox"><span class="fd-switch__track"></span></label><hr>
+        <div class="fd-field"><span class="fd-label">Hotspots · 1</span><ul class="obj-list"><li><a href="?view=hotspot"><i data-icon="target"></i>Commencez ici<i data-icon="chevronRight"></i></a></li></ul></div>
+        <div class="fd-field"><span class="fd-label">Zones floutées · 1</span><ul class="obj-list"><li><a href="#"><i data-icon="eyeOff"></i>Flou 1<i data-icon="chevronRight"></i></a></li></ul></div>
+        <p class="fd-help" style="margin:0">Capturé sur https://app.exemple.fr/usagers</p><hr>
+        <button class="fd-btn fd-btn--ghost" type="button" style="color:var(--fd-color-danger);align-self:flex-start"><i data-icon="trash"></i>Supprimer l'étape</button></div>
+      <div data-pane="design" class="stack"><div class="fd-tabs" role="tablist" aria-label="Panneau"><button role="tab" type="button" aria-selected="false">Étape</button><button role="tab" type="button" aria-selected="true">Design</button><button role="tab" type="button" aria-selected="false">Réglages</button></div><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="cursorClick"></i></span><h2 class="fd-card__title">Mode de lecture</h2></div>
+        <div class="mode-cards2"><button type="button" aria-pressed="true" class="mc"><b>Visite guidée</b><small>Pastille et bulle sur la capture.</small></button><button type="button" aria-pressed="false" class="mc"><b>Spotlight</b><small>Assombrit tout sauf la zone.</small></button></div>
+        <p class="fd-help" style="margin:0">Ces réglages valent pour toute la démo.</p><hr>
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="palette"></i></span><h2 class="fd-card__title">Thème et branding</h2></div>
+        <div class="color-row"><span class="swatch" style="background:#A3195B"></span><span>Couleur principale</span><input class="fd-input mono" value="#A3195B" aria-label="Couleur principale"></div><div class="color-row"><span class="swatch" style="background:#D60B52"></span><span>Pastille du hotspot</span><input class="fd-input mono" value="#D60B52" aria-label="Pastille du hotspot"></div><div class="color-row"><span class="swatch" style="background:#EEF2F6"></span><span>Fond</span><input class="fd-input mono" value="#EEF2F6" aria-label="Fond"></div><div class="color-row"><span class="swatch" style="background:#FFFFFF"></span><span>Bulles</span><input class="fd-input mono" value="#FFFFFF" aria-label="Bulles"></div><div class="color-row"><span class="swatch" style="background:#080808"></span><span>Texte</span><input class="fd-input mono" value="#080808" aria-label="Texte"></div>
+        <div class="fd-field"><label class="fd-label" for="df">Police</label><select class="fd-select" id="df"><option>Plus Jakarta Sans</option></select></div>
+        <div class="fd-field"><span class="fd-label">Arrondi</span><div class="fd-segmented" role="group" aria-label="Arrondi"><button type="button" aria-pressed="false">Net</button><button type="button" aria-pressed="true">Doux</button><button type="button" aria-pressed="false">Rond</button></div></div>
+        <div class="fd-field"><span class="fd-label">Logo</span><div class="logo-row"><span class="logo-box"><i data-icon="image"></i></span><button class="fd-btn fd-btn--sm" type="button"><i data-icon="upload"></i>Choisir un logo</button></div></div>
+        <label class="fd-switch"><span>Afficher « Créé avec TutoClick »</span><input type="checkbox" checked><span class="fd-switch__track"></span></label><p class="fd-help" style="margin:-8px 0 0">Retrait possible à partir du plan Pro.</p><hr>
+        <div class="fd-field"><label class="fd-label" for="dl">Langue du player</label><select class="fd-select" id="dl"><option>Français</option><option>English</option></select></div>
+        <div class="fd-field"><label class="fd-label" for="dc">Bouton de fin (CTA)</label><input class="fd-input" id="dc" value="Revenir au centre de formation"></div></div>
+      <div data-pane="reglages" class="stack"><div class="fd-tabs" role="tablist" aria-label="Panneau"><button role="tab" type="button" aria-selected="false">Étape</button><button role="tab" type="button" aria-selected="false">Design</button><button role="tab" type="button" aria-selected="true">Réglages</button></div><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="fileText"></i></span><h2 class="fd-card__title">Formulaire de lead</h2></div>
+        <p class="fd-help" style="margin:0">Collectez l'e-mail des visiteurs avant une étape clé.</p><button class="fd-btn fd-btn--sm" type="button" style="align-self:flex-start"><i data-icon="plus"></i>Créer le formulaire</button><hr>
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="code"></i></span><h2 class="fd-card__title">Variables de personnalisation</h2></div>
+        <p class="fd-help" style="margin:0">Utilisez {{company}} dans vos textes. La valeur vient de l'URL (?company=…), d'un lien personnalisé ou de la valeur par défaut.</p>
+        <ul class="var-list"><li><span class="mono">{{company}}</span><span>Entreprise<small>Par défaut : votre entreprise</small></span><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Modifier la variable company"><i data-icon="pencil"></i></button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Supprimer la variable company"><i data-icon="trash"></i></button></li></ul>
+        <button class="fd-btn fd-btn--sm" type="button" style="align-self:flex-start"><i data-icon="plus"></i>Ajouter une variable</button><hr>
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="listChecks"></i></span><h2 class="fd-card__title">Chapitres</h2></div><p class="fd-help" style="margin:0">Regroupez les étapes en sections : le player affiche un menu.</p><button class="fd-btn fd-btn--sm" type="button" style="align-self:flex-start"><i data-icon="plus"></i>Ajouter un chapitre</button><hr>
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="checkAll"></i></span><h2 class="fd-card__title">Checklist</h2></div><label class="fd-switch"><span>Afficher la checklist dans le player</span><input type="checkbox"><span class="fd-switch__track"></span></label><hr>
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="play"></i></span><h2 class="fd-card__title">Lecture automatique</h2></div><label class="fd-switch"><span>Avancer seule</span><input type="checkbox"><span class="fd-switch__track"></span></label><p class="fd-help" style="margin:-8px 0 0">S'arrête sur un formulaire, un menu de choix ou la dernière étape.</p></div>
     </aside>
   </div>
 </div>
 
+<div class="mock-state fd-segmented" role="group" aria-label="Panneau Propriétés (maquette)" style="bottom:64px"><button type="button" data-view-set="hotspot" aria-pressed="true">Hotspot</button><button type="button" data-view-set="etape" aria-pressed="false">Étape</button><button type="button" data-view-set="design" aria-pressed="false">Design</button><button type="button" data-view-set="reglages" aria-pressed="false">Réglages</button></div>
 <div class="mock-state fd-segmented" role="group" aria-label="État du panneau Commentaires (maquette)">
   <button type="button" data-cm-set="list" aria-pressed="true">Liste</button>
   <button type="button" data-cm-set="resolved" aria-pressed="false">+ résolus</button>
