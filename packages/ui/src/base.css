@@ -57,9 +57,6 @@ a {
 .fd-btn:hover {
   background: var(--fd-color-surface-hover);
 }
-.fd-btn:focus-visible {
-  border-radius: var(--fd-radius-md);
-}
 .fd-btn:disabled,
 .fd-btn[aria-disabled='true'] {
   opacity: 0.5;
@@ -92,9 +89,6 @@ a {
 .fd-btn--danger:hover {
   background: var(--fd-color-danger-hover);
 }
-.fd-btn--danger:focus-visible {
-  box-shadow: var(--fd-shadow-focus-danger);
-}
 .fd-btn--ghost {
   background: transparent;
   border-color: transparent;
@@ -104,6 +98,12 @@ a {
 .fd-btn--ghost:hover {
   background: var(--fd-color-surface-hover);
   color: var(--fd-color-text);
+}
+.fd-btn:focus-visible {
+  box-shadow: var(--fd-shadow-focus);
+}
+.fd-btn--danger:focus-visible {
+  box-shadow: var(--fd-shadow-focus-danger);
 }
 .fd-btn--sm {
   height: var(--fd-layout-control-height-sm);
