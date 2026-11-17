@@ -1,8 +1,9 @@
+import { CardHead } from '../../components/CardHead';
 import { formatDate } from '../../lib/format';
 import { initials } from '../../lib/initials';
 export { initials };
 import { useConfirm } from '../../components/ConfirmDialog';
-import { Copy, LogOut, Send, Trash2, UserMinus } from 'lucide-react';
+import { Clock, Copy, LogOut, Send, Trash2, UserMinus, UserPlus } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { assignableRoles, type Role } from '@flowdsiml/core';
@@ -107,7 +108,7 @@ export function Members() {
 
       {can('members.invite') && (
         <Card>
-          <h2 style={{ marginTop: 0 }}>{t('members.invite')}</h2>
+          <CardHead icon={<UserPlus />} title={t('members.invite')} />
           <form onSubmit={invite} className="row" style={{ alignItems: 'flex-start' }} noValidate>
             <div style={{ flex: '1 1 240px' }}>
               <Field label={t('members.emails')} htmlFor="inv-email">
@@ -271,7 +272,7 @@ export function Members() {
 
       {canManage && invites.length > 0 && (
         <Card>
-          <h2 style={{ marginTop: 0 }}>{t('members.pending')}</h2>
+          <CardHead icon={<Clock />} title={t('members.pending')} />
           <table className="fd-table">
             <tbody>
               {invites.map((i) => (

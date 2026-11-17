@@ -137,3 +137,13 @@ a {
   align-items: center;
   gap: 6px;
 }
+
+/* Refonte DSI §7 : boutons en pilules, champs arrondis (le point d'enregistrement suit l'accent framboise) */
+.btn {
+  border-radius: var(--fd-radius-full, 999px);
+}
+input,
+select {
+  border-radius: var(--fd-radius-md, 12px);
+  padding: 9px 12px;
+}

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { BarChart3, MousePointerClick, Share2 } from 'lucide-react';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { BrandMark } from '../../components/BrandMark';
+import logoDsiBlanc from '../../assets/logo-dsi-blanc.svg';
 import { setLocale } from '../../i18n';
 
 /** Écrans d'authentification (W5) : panneau de marque + formulaire, sélecteur de langue compact. */
@@ -19,8 +20,9 @@ export function AuthLayout({
   return (
     <main className="auth-shell" id="main">
       <aside className="auth-brand" aria-hidden="true">
-        <div className="auth-logo">
-          <BrandMark size={36} />
+        <div className="auth-logo auth-logo--dsi">
+          <img src={logoDsiBlanc} alt="" width={260} height={79} />
+          <span className="auth-product">FlowDSIML</span>
         </div>
         <div className="auth-pitch">
           <h2>{t('auth.pitchTitle')}</h2>

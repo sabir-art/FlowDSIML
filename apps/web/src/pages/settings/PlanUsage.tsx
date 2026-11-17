@@ -1,3 +1,5 @@
+import { CardHead } from '../../components/CardHead';
+import { Gauge as GaugeIcon } from 'lucide-react';
 import { YesNo } from '../../components/YesNo';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,10 +31,15 @@ export function PlanUsage() {
   const fmt = (v: unknown) => (v === null || v === undefined ? '∞' : String(v));
   return (
     <Card>
-      <h2 style={{ marginTop: 0 }}>
-        {t('plan.title')} :{' '}
-        <span className="fd-badge">{t(`plan.names.${usage.plan}`, { defaultValue: usage.plan })}</span>
-      </h2>
+      <CardHead
+        icon={<GaugeIcon />}
+        title={t('plan.title')}
+        action={
+          <span className="fd-badge card-head-badge">
+            {t(`plan.names.${usage.plan}`, { defaultValue: usage.plan })}
+          </span>
+        }
+      />
       <table className="fd-table">
         <tbody>
           <tr>
