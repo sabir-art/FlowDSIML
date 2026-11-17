@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Analytics avancées — FlowDSIML (lot A4)</title>
+<title>Analytics avancées — Tutoclic (lot A4)</title>
 <link rel="icon" href="../../assets/symbole-dsi.svg">
 <link rel="stylesheet" href="refonte.css">
 <script src="refonte.js" defer></script>
@@ -33,15 +33,16 @@
   <main class="main" data-view="live">
     <header class="topbar">
       <a class="icon-btn" href="analytics.html" aria-label="Retour"><i data-icon="arrowLeft"></i></a>
-      <div><h1>Inscription au parcours CEJ</h1><p class="sub">Analytics · publiée, version 3</p></div>
+      <div><h1>Créer une fiche usager</h1><p class="sub">Analytics · publiée, version 3</p></div>
       <div class="topbar__actions"><button class="fd-btn" type="button" data-view-set="alerts"><i data-icon="bell"></i>Alertes · 2</button><button class="fd-btn" type="button"><i data-icon="download"></i>Exporter</button></div>
     </header>
-    <div class="fd-tabs" role="tablist" aria-label="Vues analytics" style="max-width:720px;margin-bottom:20px">
+    <div class="fd-tabs" role="tablist" aria-label="Vues analytics" style="max-width:900px;margin-bottom:20px">
       <button role="tab" type="button" aria-selected="false">Vue d'ensemble</button>
       <button role="tab" type="button" aria-selected="true" data-view-set="live">Temps réel</button>
       <button role="tab" type="button" aria-selected="false" data-view-set="sessions">Sessions</button>
       <button role="tab" type="button" aria-selected="false" data-view-set="devices">Appareils</button>
       <button role="tab" type="button" aria-selected="false" data-view-set="surveys">Sondages et tests</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="segments">Segments</button>
     </div>
     <div class="filterbar" aria-label="Filtres actifs">
       <div class="fd-segmented" role="group" aria-label="Période"><button type="button" aria-pressed="false">7 j</button><button type="button" aria-pressed="true">30 j</button><button type="button" aria-pressed="false">90 j</button><button type="button" aria-pressed="false"><i data-icon="calendar"></i>Dates</button></div>
@@ -89,6 +90,7 @@
           <li><span class="ic"><i data-icon="gitBranch"></i></span><span>Choix : « Je cherche un emploi »</span><small>1:52</small></li>
           <li><span class="ic cta"><i data-icon="cursorClick"></i></span><span>Clic CTA « Prendre rendez-vous »</span><small>3:12</small></li>
         </ol>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px"><a class="fd-btn fd-btn--sm" href="f3-suivi.html?view=learners"><i data-icon="graduation"></i>Voir dans le suivi des apprenants</a><span class="fd-help">Visite n° 3 · visiteur récurrent</span></div>
       </aside>
     </section>
 
@@ -98,7 +100,7 @@
         <div class="hbar"><span>Ordinateur</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:58%"></span></span><b>58 %</b></div>
         <div class="hbar"><span>Mobile</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:37%"></span></span><b>37 %</b></div>
         <div class="hbar"><span>Tablette</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:5%"></span></span><b>5 %</b></div>
-        <p class="fd-help">Taux de complétion : ordinateur 56 % · mobile 44 % · tablette 50 %.</p></article>
+        <p class="fd-help">Taux de complétion : ordinateur 56 % · mobile 44 % · tablette 50 %.</p><div class="hbar" style="margin-top:12px"><span>Récurrents</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:27%"></span></span><b>27 %</b></div><p class="fd-help">Visiteur récurrent : même navigateur revenu après 30 min, ou apprenant identifié déjà venu.</p></article>
       <article class="fd-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="globe"></i></span><h2 class="fd-card__title">Navigateurs</h2></div>
         <div class="hbar"><span>Chrome</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:61%"></span></span><b>61 %</b></div>
         <div class="hbar"><span>Safari</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:22%"></span></span><b>22 %</b></div>
@@ -129,6 +131,37 @@
         <p style="margin:0">B mène de 11 points sur 412 visiteurs. <span class="fd-help">Résultat fiable à partir d'environ 1 000 visiteurs.</span></p></article>
     </section>
 
+    <!-- Segments et filtres -->
+    <section data-pane="segments" class="seg-grid">
+      <article class="fd-card" style="display:flex;flex-direction:column;gap:16px">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="filter"></i></span><h2 class="fd-card__title">Nouveau segment</h2><span class="fd-badge">138 visiteurs correspondent</span></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="sg0">Nom du segment</label><input class="fd-input" id="sg0" value="Apprenants mobiles qui abandonnent"></div>
+        <div class="seg-rules" role="group" aria-label="Conditions">
+          <div class="seg-rule"><span class="seg-op">Si</span><select class="fd-select" aria-label="Critère 1"><option>Appareil</option></select><select class="fd-select" aria-label="Opérateur 1"><option>est</option></select><select class="fd-select" aria-label="Valeur 1"><option>Mobile</option></select><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Retirer la condition 1"><i data-icon="x"></i></button></div>
+          <div class="seg-rule"><span class="seg-op">et</span><select class="fd-select" aria-label="Critère 2"><option>Dernière étape vue</option></select><select class="fd-select" aria-label="Opérateur 2"><option>avant</option></select><select class="fd-select" aria-label="Valeur 2"><option>Étape 4 · Formulaire</option></select><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Retirer la condition 2"><i data-icon="x"></i></button></div>
+          <div class="seg-rule"><span class="seg-op">et</span><select class="fd-select" aria-label="Critère 3"><option>Structure (suivi)</option></select><select class="fd-select" aria-label="Opérateur 3"><option>est l'une de</option></select><select class="fd-select" aria-label="Valeur 3"><option>Antenne Nord, Antenne Sud</option></select><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Retirer la condition 3"><i data-icon="x"></i></button></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="plus"></i>Ajouter une condition</button><div class="fd-segmented" role="group" aria-label="Combinaison"><button type="button" aria-pressed="true">Toutes (ET)</button><button type="button" aria-pressed="false">Au moins une (OU)</button></div></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button class="fd-btn" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button"><i data-icon="save"></i>Enregistrer le segment</button></div>
+      </article>
+      <aside class="fd-card" style="display:flex;flex-direction:column;gap:12px">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="users"></i></span><h2 class="fd-card__title">Critères disponibles</h2></div>
+        <dl class="seg-crit">
+          <dt>Visite</dt><dd>Source, lien personnalisé, variable d'URL, date, nouveau ou récurrent</dd>
+          <dt>Appareil</dt><dd>Type, navigateur, système, langue, pays et ville (approximatifs)</dd>
+          <dt>Parcours</dt><dd>Étape atteinte, dernière étape vue, choix fait, durée, démo terminée</dd>
+          <dt>Actions</dt><dd>Clic CTA, lead envoyé, réponse à un sondage, variante A/B</dd>
+          <dt>Formation</dt><dd>Structure, équipe, statut du module, score au quiz (apprenants identifiés seulement)</dd>
+        </dl>
+        <div class="fd-card__head" style="margin:8px 0 0"><span class="fd-icon-chip"><i data-icon="save"></i></span><h2 class="fd-card__title">Segments enregistrés</h2></div>
+        <ul class="pii-list">
+          <li><span class="fd-icon-chip"><i data-icon="smartphone"></i></span><span><b>Jeunes en mobile</b><small>2 conditions · 412 visiteurs</small></span><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Options du segment"><i data-icon="more"></i></button></li>
+          <li><span class="fd-icon-chip"><i data-icon="link"></i></span><span><b>Liens conseillers</b><small>1 condition · 88 visiteurs</small></span><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Options du segment"><i data-icon="more"></i></button></li>
+        </ul>
+        <p class="fd-help" style="margin:0">Les segments sont partagés dans le workspace et utilisables sur toutes les démos, les alertes et les exports.</p>
+      </aside>
+    </section>
+
     <!-- Alertes -->
     <section data-pane="alerts" style="flex-direction:column;gap:20px;max-width:860px">
       <article class="fd-card" style="display:flex;flex-direction:column;gap:12px">
@@ -139,8 +172,8 @@
       </article>
       <article class="fd-card" style="display:flex;flex-direction:column;gap:16px">
         <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="plus"></i></span><h2 class="fd-card__title">Nouvelle alerte</h2></div>
-        <div class="row-2"><div class="fd-field" style="margin:0"><label class="fd-label" for="al1">Quand</label><select class="fd-select" id="al1"><option>Un nouveau lead arrive</option><option>Un CTA est cliqué</option><option>Un lien personnalisé est ouvert</option><option>Le taux de complétion passe sous…</option><option>Les vues dépassent…</option></select></div><div class="fd-field" style="margin:0"><label class="fd-label" for="al2">Seuil</label><input class="fd-input" id="al2" value="40 %"></div></div>
-        <div class="fd-field" style="margin:0"><span class="fd-label">Prévenir par</span><div style="display:flex;gap:16px;flex-wrap:wrap"><label class="fd-check"><input type="checkbox" checked> Dans l'app</label><label class="fd-check"><input type="checkbox" checked> E-mail</label><label class="fd-check"><input type="checkbox"> Slack (lot A5)</label></div></div>
+        <div class="row-2"><div class="fd-field" style="margin:0"><label class="fd-label" for="al1">Quand</label><select class="fd-select" id="al1"><option>Un nouveau lead arrive</option><option>Un CTA est cliqué</option><option>Un lien personnalisé est ouvert</option><option>Le taux de complétion passe sous…</option><option>Les vues dépassent…</option><option>Un apprenant échoue au quiz (dernière tentative)</option><option>Une structure passe sous l'objectif de formation</option></select></div><div class="fd-field" style="margin:0"><label class="fd-label" for="al2">Seuil</label><input class="fd-input" id="al2" value="40 %"></div></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Prévenir par</span><div style="display:flex;gap:16px;flex-wrap:wrap"><label class="fd-check"><input type="checkbox" checked> Dans l'app</label><label class="fd-check"><input type="checkbox" checked> E-mail</label><label class="fd-check"><input type="checkbox"> Slack</label><label class="fd-check"><input type="checkbox"> Webhook</label></div></div>
         <div class="fd-field" style="margin:0"><span class="fd-label">Fréquence</span><div class="fd-segmented" role="group" aria-label="Fréquence"><button type="button" aria-pressed="true">Immédiate</button><button type="button" aria-pressed="false">Résumé quotidien</button><button type="button" aria-pressed="false">Hebdomadaire</button></div></div>
         <div style="display:flex;gap:8px;justify-content:flex-end"><button class="fd-btn" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button">Créer l'alerte</button></div>
       </article>

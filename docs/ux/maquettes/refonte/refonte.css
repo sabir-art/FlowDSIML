@@ -1292,7 +1292,7 @@ body:has(.mock-state) .ed {
 
 /* ---- Lot A4 : analytics avancées ---- */
 [data-view='live'] [data-pane='live'], [data-view='alerts'] [data-pane='alerts'] { display: flex; }
-[data-view='surveys'] [data-pane='surveys'] { display: grid; }
+[data-view='surveys'] [data-pane='surveys'], [data-view='segments'] [data-pane='segments'] { display: grid; }
 [data-view='sessions'] [data-pane='sessions'], [data-view='devices'] [data-pane='devices'] { display: grid; }
 .filterbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); margin-bottom: var(--fd-space-5); }
 .fchip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 6px 0 14px; border-radius: 999px; background: var(--fd-color-surface); box-shadow: var(--fd-shadow-xs); font: 600 var(--fd-text-label-size) var(--fd-font-sans); }
@@ -1749,3 +1749,12 @@ body:has(.mock-state) .ed {
 .wm-d { display: none; }
 [data-theme='dark'] .wm-l { display: none; } [data-theme='dark'] .wm-d { display: inline; }
 .phone .hs { right: 12px; bottom: 186px; width: 56px; height: 56px; background: transparent; border: 3px solid #D60B52; box-shadow: 0 0 0 6px rgba(214, 11, 82, .2); }
+.seg-grid { grid-template-columns: minmax(0, 1fr) 360px; gap: var(--fd-space-5); align-items: start; }
+.seg-rules { display: grid; gap: 8px; }
+.seg-rule { display: grid; grid-template-columns: 44px repeat(3, minmax(0, 1fr)) 36px; gap: 8px; align-items: center; padding: 8px; border-radius: var(--fd-radius-lg); background: var(--fd-color-surface-sunken); }
+.seg-op { font-weight: 700; font-size: var(--fd-text-label-size); text-align: center; color: var(--fd-color-primary-soft-text); }
+.seg-crit { display: grid; grid-template-columns: 90px 1fr; gap: 8px 12px; margin: 0; font-size: var(--fd-text-body-size); }
+.seg-crit dt { font-weight: 700; }
+.seg-crit dd { margin: 0; color: var(--fd-color-text-muted); }
+@media (max-width: 1100px) { .seg-grid { grid-template-columns: minmax(0, 1fr); } .seg-rule { grid-template-columns: 36px minmax(0, 1fr) 36px; } .seg-rule .fd-select:nth-of-type(n+2) { grid-column: 2; } }
+.seg-grid .pii-list small { font-family: var(--fd-font-sans); }
