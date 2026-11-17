@@ -296,7 +296,11 @@ async function install(page, state = seed()) {
       state.events.push(...(batch.events || []));
       return json(route, 200, { inserted: (batch.events || []).length });
     }
-    if (p.startsWith('/auth/v1/user')) return json(route, 200, state.user);
+    if (p.startsWith('/auth/v1/user')) {
+      if (method === 'PUT' && body?.data)
+        state.user.user_metadata = { ...state.user.user_metadata, ...body.data };
+      return json(route, 200, state.user);
+    }
     if (p.startsWith('/auth/v1/')) return json(route, 200, {});
 
     if (p.startsWith('/rest/v1/rpc/')) {
@@ -584,6 +588,11 @@ async function install(page, state = seed()) {
     if (p.startsWith('/storage/v1/object/') && method === 'DELETE') {
       for (const k of body.prefixes || []) delete state.storage[`${p.split('/')[4]}/${k}`];
       return json(route, 200, []);
+    }
+    if (p.startsWith('/storage/v1/object/sign/') && method === 'POST' && !body?.paths) {
+      // Signature d'un seul fichier : /object/sign/<bucket>/<chemin>
+      const rest = p.slice('/storage/v1/object/sign/'.length);
+      return json(route, 200, { signedURL: `/object/sign/${rest}?token=t` });
     }
     if (p.startsWith('/storage/v1/object/sign/') && method === 'POST') {
       const paths = body.paths || [];

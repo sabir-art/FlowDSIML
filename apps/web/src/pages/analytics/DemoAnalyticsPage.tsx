@@ -109,29 +109,43 @@ export function DemoAnalyticsPage() {
               value={formatNumber(data.views)}
               delta={prev && variation(data.views, prev.views)}
               deltaLabel={t('analytics.vsPrevious')}
+              noDeltaLabel={t('analytics.noComparison')}
             />
             <StatTile
               label={t('analytics.visitors')}
               value={formatNumber(data.visitors)}
               delta={prev && variation(data.visitors, prev.visitors)}
               deltaLabel={t('analytics.vsPrevious')}
+              noDeltaLabel={t('analytics.noComparison')}
             />
             <StatTile
               label={t('analytics.completion')}
               value={pct(completionRate(data.visitors, data.completions))}
               hint={t('analytics.completionHint', { n: data.completions })}
+              delta={
+                prev && prev.visitors > 0
+                  ? variation(
+                      completionRate(data.visitors, data.completions),
+                      completionRate(prev.visitors, prev.completions),
+                    )
+                  : null
+              }
+              deltaLabel={t('analytics.vsPrevious')}
+              noDeltaLabel={t('analytics.noComparison')}
             />
             <StatTile
               label={t('analytics.ctaClicks')}
               value={formatNumber(data.ctaClicks)}
               delta={prev && variation(data.ctaClicks, prev.ctaClicks)}
               deltaLabel={t('analytics.vsPrevious')}
+              noDeltaLabel={t('analytics.noComparison')}
             />
             <StatTile
               label={t('analytics.leads')}
               value={formatNumber(data.leads)}
               delta={prev && variation(data.leads, prev.leads)}
               deltaLabel={t('analytics.vsPrevious')}
+              noDeltaLabel={t('analytics.noComparison')}
             />
           </div>
           <Card>

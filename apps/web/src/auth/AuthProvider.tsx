@@ -3,6 +3,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../lib/supabase';
 import { setLocale } from '../i18n';
+import { getTheme, isThemePref, setTheme } from '../lib/theme';
 
 interface AuthState {
   loading: boolean;
@@ -22,6 +23,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Tables<'profiles'> | null>(null);
   const [recovery, setRecovery] = useState(false);
 
+  /** Thème mémorisé sur le compte (user_metadata.theme) : prioritaire sur le choix local à la connexion. */
+  function syncTheme(s: Session | null) {
+    const remote = s?.user.user_metadata?.theme;
+    if (isThemePref(remote) && remote !== getTheme()) setTheme(remote);
+  }
+
   async function loadProfile(userId: string | undefined) {
     if (!userId) return setProfile(null);
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
@@ -34,12 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void supabase.auth.getSession().then(async ({ data }) => {
       if (!active) return;
       setSession(data.session);
+      syncTheme(data.session);
       await loadProfile(data.session?.user.id);
       setLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       if (event === 'PASSWORD_RECOVERY') setRecovery(true);
+      if (event === 'SIGNED_IN') syncTheme(s);
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
         // Hors du callback (recommandation supabase-js : pas d'await dans onAuthStateChange)
         setTimeout(() => void loadProfile(s?.user.id), 0);

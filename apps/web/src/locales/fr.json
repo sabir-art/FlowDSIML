@@ -81,7 +81,9 @@
     "orMagic": "Ou recevez un lien de connexion par email.",
     "usePassword": "Se connecter avec un mot de passe",
     "hasAccount": "Déjà inscrit ?",
-    "loginLink": "Se connecter"
+    "loginLink": "Se connecter",
+    "strengthLabel": "Robustesse : {{level}}",
+    "passwordMinShort": "{{min}} caractères minimum"
   },
   "onboarding": {
     "title": "Créez votre workspace",
@@ -376,7 +378,12 @@
     "linkCreatedCopied": "Lien créé et copié dans le presse-papiers.",
     "expiresNever": "Jamais",
     "expiresIn_one": "Dans {{count}} jour ({{date}})",
-    "expiresIn_other": "Dans {{count}} jours ({{date}})"
+    "expiresIn_other": "Dans {{count}} jours ({{date}})",
+    "preview": "Aperçu",
+    "previewEmpty": "L'aperçu apparaîtra après la première capture.",
+    "stepCount_one": "{{count}} étape",
+    "stepCount_other": "{{count}} étapes",
+    "openPreview": "Ouvrir l'aperçu"
   },
   "analytics": {
     "title": "Analytics",
@@ -398,7 +405,8 @@
     "lastDays_one": "{{count}} jour",
     "lastDays_other": "{{count}} jours",
     "byDemo": "Par démo",
-    "vsPrevious": "vs période précédente"
+    "vsPrevious": "vs période précédente",
+    "noComparison": "Pas de période de référence"
   },
   "leads": {
     "title": "Leads",
@@ -472,5 +480,11 @@
     "current": "Plan actuel",
     "unlimited": "Illimité",
     "manualNotice": "Paiement en ligne bientôt disponible. Pour changer de plan dès maintenant, contactez-nous : votre plan sera activé sous 24 h."
+  },
+  "theme": {
+    "label": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
   }
 }

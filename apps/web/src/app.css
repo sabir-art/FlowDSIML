@@ -181,9 +181,19 @@
 .user-text span {
   color: var(--fd-color-text-muted);
 }
+.user-block {
+  position: relative;
+}
+/* Le menu du compte s'ancre sur tout le bloc utilisateur (et non sur le bouton ⋯) pour rester dans la barre latérale */
+.user-block .menu {
+  position: static;
+}
 .user-block .menu-list {
   top: auto;
   bottom: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  min-width: 0;
 }
 .scrim {
   display: none;
@@ -424,10 +434,9 @@
 .strength[data-score='3'] span:nth-child(-n + 3) {
   background: var(--fd-color-success);
 }
-.strength em {
-  flex: 0 0 auto;
-  font-style: normal;
-  margin-left: 4px;
+.strength-text {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
 }
 .gauge {
   display: flex;
@@ -682,10 +691,12 @@
   padding: var(--fd-space-6) var(--fd-space-4);
   background: var(--fd-color-surface);
 }
-.auth-lang {
+.auth-prefs {
   position: absolute;
   top: var(--fd-space-4);
   right: var(--fd-space-4);
+  display: flex;
+  gap: var(--fd-space-2);
 }
 .auth-card {
   width: 100%;
@@ -806,7 +817,8 @@
 .segmented button + button {
   border-left: 1px solid var(--fd-color-border);
 }
-.segmented button[aria-pressed='true'] {
+.segmented button[aria-pressed='true'],
+.segmented button[aria-checked='true'] {
   background: var(--fd-color-primary-soft);
   color: var(--fd-color-primary-soft-text);
   font-weight: 600;
@@ -971,4 +983,107 @@
   background: var(--fd-color-primary-soft);
   color: var(--fd-color-primary-soft-text);
   font-weight: 500;
+}
+
+/* Sélecteur de thème dans le menu du compte */
+.menu-radios {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fd-space-3);
+  padding: var(--fd-space-1) var(--fd-space-2) var(--fd-space-1) var(--fd-space-3);
+  font-size: var(--fd-font-sm);
+}
+.menu-radios__label {
+  color: var(--fd-color-text);
+}
+.menu-radios .segmented button,
+.theme-switch button {
+  padding: 6px 8px;
+}
+.stat-delta--none {
+  color: var(--fd-color-text-muted);
+}
+
+/* P12 : page de partage en deux colonnes, aperçu statique à droite */
+.share-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--fd-space-6);
+  align-items: start;
+}
+.share-layout > .share-aside {
+  order: -1;
+}
+@media (min-width: 1100px) {
+  .share-layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+  .share-layout > .share-aside {
+    order: 0;
+    position: sticky;
+    top: var(--fd-space-6);
+  }
+}
+.share-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-3);
+}
+.share-preview__frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-lg);
+  background: var(--fd-player-backdrop);
+  display: grid;
+  place-items: center;
+}
+.share-preview__frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+}
+.share-preview__frame .p-beacon {
+  pointer-events: none;
+  cursor: default;
+}
+.share-preview__text {
+  padding: var(--fd-space-3) var(--fd-space-4);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface);
+  font-weight: 600;
+  text-align: center;
+}
+.share-preview__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fd-space-2);
+  aspect-ratio: 16 / 10;
+  border: 1px dashed var(--fd-color-border-strong);
+  border-radius: var(--fd-radius-lg);
+  background: var(--fd-player-backdrop);
+  color: var(--fd-color-text-muted);
+  text-align: center;
+  padding: var(--fd-space-4);
+}
+.share-preview__empty p {
+  margin: 0;
+  font-size: var(--fd-font-sm);
+}
+.share-preview__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--fd-space-2);
+}
+.share-preview__meta strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

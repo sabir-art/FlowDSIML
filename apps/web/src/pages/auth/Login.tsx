@@ -19,6 +19,7 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [badCredentials, setBadCredentials] = useState(false);
   const pwdRef = useRef<HTMLInputElement>(null);
   const { busy, error, success, run } = useAction();
 
@@ -29,13 +30,15 @@ export function Login() {
     const form = e.currentTarget;
     const errs = validateForm(form, t);
     setErrors(errs);
+    setBadCredentials(false);
     if (focusFirstError(form, errs)) return;
     if (mode === 'password') {
       const r = await run(async () => check(await supabase.auth.signInWithPassword({ email, password })));
       if (r === undefined) {
-        // W20 : mot de passe vidé, focalisé et marqué en erreur
+        // L2 : erreur portée par le formulaire (alerte annoncée), les deux champs marqués invalides,
+        // mot de passe vidé et focalisé (W20)
         setPassword('');
-        setErrors({ password: t('errors.badCredentials') });
+        setBadCredentials(true);
         pwdRef.current?.focus();
       }
     } else {
@@ -54,7 +57,13 @@ export function Login() {
 
   return (
     <AuthLayout title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')}>
-      {error && !errors.password && <Alert kind="error">{error}</Alert>}
+      {badCredentials ? (
+        <Alert kind="error">
+          <span id="login-error">{t('errors.badCredentials')}</span>
+        </Alert>
+      ) : (
+        error && <Alert kind="error">{error}</Alert>
+      )}
       {success && <Alert kind="success">{success}</Alert>}
       <form onSubmit={submit} noValidate>
         <Field label={t('auth.workEmail')} htmlFor="email">
@@ -69,7 +78,9 @@ export function Login() {
               setEmail(e.target.value);
               setErrors((x) => ({ ...x, email: '' }));
             }}
-            {...fieldA11y('email', errors)}
+            {...(badCredentials
+              ? { 'aria-invalid': true as const, 'aria-describedby': 'login-error' }
+              : fieldA11y('email', errors))}
           />
           <FieldError id="email" errors={errors} />
         </Field>
@@ -95,7 +106,9 @@ export function Login() {
                 setPassword(e.target.value);
                 setErrors((x) => ({ ...x, password: '' }));
               }}
-              {...fieldA11y('password', errors)}
+              {...(badCredentials
+                ? { 'aria-invalid': true as const, 'aria-describedby': 'login-error' }
+                : fieldA11y('password', errors))}
             />
             <FieldError id="password" errors={errors} />
           </div>

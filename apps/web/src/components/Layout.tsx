@@ -22,11 +22,14 @@ import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { setLocale } from '../i18n';
 import { supabase } from '../lib/supabase';
 import { Menu } from './Menu';
+import { THEME_OPTIONS, chooseTheme } from './ThemeSwitcher';
+import { useTheme, type ThemePref } from '../lib/theme';
 
 const ICON = { size: 18, strokeWidth: 1.75, 'aria-hidden': true } as const;
 
 export function Layout() {
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut, user, profile } = useAuth();
@@ -130,6 +133,18 @@ export function Layout() {
                 label: i18n.language === 'en' ? 'Français' : 'English',
                 icon: <Languages />,
                 onSelect: switchLang,
+              },
+              {
+                radios: {
+                  label: t('theme.label'),
+                  value: theme,
+                  options: THEME_OPTIONS.map(({ value, icon: Icon }) => ({
+                    value,
+                    label: t(`theme.${value}`),
+                    icon: <Icon size={16} aria-hidden="true" />,
+                  })),
+                  onChange: (v) => void chooseTheme(v as ThemePref),
+                },
               },
               'separator',
               { label: t('auth.signOut'), icon: <LogOut />, onSelect: () => void signOut() },

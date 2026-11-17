@@ -1,6 +1,16 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 
+/** Groupe de choix exclusifs affiché en contrôle segmenté dans le menu (menuitemradio). */
+export interface MenuRadioGroup {
+  radios: {
+    label: string;
+    value: string;
+    options: Array<{ value: string; label: string; icon: ReactNode }>;
+    onChange: (value: string) => void;
+  };
+}
+
 export interface MenuItem {
   label: string;
   icon?: ReactNode;
@@ -17,7 +27,7 @@ export function Menu({
   trigger,
 }: {
   label: string;
-  items: Array<MenuItem | 'separator'>;
+  items: Array<MenuItem | MenuRadioGroup | 'separator'>;
   align?: 'start' | 'end';
   /** Bouton déclencheur visible (icône + libellé) au lieu du « ⋯ ». */
   trigger?: { icon: ReactNode; text: string; block?: boolean };
@@ -30,13 +40,13 @@ export function Menu({
     if (!open) return;
     const onDoc = (e: MouseEvent) => !root.current?.contains(e.target as Node) && setOpen(false);
     document.addEventListener('mousedown', onDoc);
-    root.current?.querySelector<HTMLButtonElement>('[role="menuitem"]:not(:disabled)')?.focus();
+    root.current?.querySelector<HTMLButtonElement>('[role^="menuitem"]:not(:disabled)')?.focus();
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open]);
 
   function onKey(e: React.KeyboardEvent) {
     const els = Array.from(
-      root.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)') ?? [],
+      root.current?.querySelectorAll<HTMLButtonElement>('[role^="menuitem"]:not(:disabled)') ?? [],
     );
     const i = els.indexOf(document.activeElement as HTMLButtonElement);
     if (e.key === 'Escape') {
@@ -86,6 +96,30 @@ export function Menu({
           {items.map((it, i) =>
             it === 'separator' ? (
               <div key={`s${i}`} className="menu-sep" role="separator" />
+            ) : 'radios' in it ? (
+              <div key={`r${i}`} role="group" aria-label={it.radios.label} className="menu-radios">
+                <span className="menu-radios__label" aria-hidden="true">
+                  {it.radios.label}
+                </span>
+                <span className="segmented">
+                  {it.radios.options.map((o) => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={it.radios.value === o.value}
+                      aria-label={o.label}
+                      title={o.label}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        it.radios.onChange(o.value);
+                      }}
+                    >
+                      {o.icon}
+                    </button>
+                  ))}
+                </span>
+              </div>
             ) : (
               <button
                 key={it.label}

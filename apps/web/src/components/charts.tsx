@@ -9,6 +9,7 @@ export function StatTile({
   hint,
   delta,
   deltaLabel,
+  noDeltaLabel,
 }: {
   label: string;
   value: string;
@@ -16,6 +17,8 @@ export function StatTile({
   /** Variation relative vs période précédente (0.12 = +12 %) ; null = pas de comparaison possible. */
   delta?: number | null;
   deltaLabel?: string;
+  /** Texte pour lecteur d'écran quand la comparaison est impossible (delta === null). */
+  noDeltaLabel?: string;
 }) {
   const dir =
     delta === undefined || delta === null ? null : delta > 0.005 ? 'up' : delta < -0.005 ? 'down' : 'flat';
@@ -24,6 +27,17 @@ export function StatTile({
     <div className="fd-card stat-tile">
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
+      {delta === null && (
+        <div className="stat-delta stat-delta--none" title={noDeltaLabel}>
+          <span aria-hidden="true">—</span>
+          {noDeltaLabel && <span className="sr-only">{noDeltaLabel}</span>}
+          {deltaLabel && (
+            <span className="stat-delta-label" aria-hidden="true">
+              {deltaLabel}
+            </span>
+          )}
+        </div>
+      )}
       {dir && (
         <div className={`stat-delta stat-delta--${dir}`}>
           <Icon size={14} aria-hidden="true" />
