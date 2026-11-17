@@ -42,7 +42,7 @@
   "auth": {
     "loginTitle": "Connexion",
     "loginSubtitle": "Accédez à vos démos interactives.",
-    "signupTitle": "Créer un compte",
+    "signupTitle": "Créez votre compte",
     "signupSubtitle": "Créez des démos interactives en quelques minutes.",
     "withPassword": "Mot de passe",
     "withMagicLink": "Lien magique",
@@ -59,8 +59,7 @@
     "magicSent": "Si un compte existe pour cette adresse, un lien de connexion vient d'être envoyé.",
     "checkEmail": "Compte créé : confirmez votre adresse via l'email que nous venons d'envoyer.",
     "forgot": "Mot de passe oublié ?",
-    "noAccount": "Pas encore de compte ? S'inscrire",
-    "haveAccount": "Déjà un compte ? Se connecter",
+    "noAccount": "Pas encore de compte ?",
     "forgotTitle": "Mot de passe oublié",
     "forgotSubtitle": "Nous vous envoyons un lien pour choisir un nouveau mot de passe.",
     "sendResetLink": "Envoyer le lien",
@@ -76,7 +75,13 @@
     "pitchTitle": "Des démos interactives qui vendent votre produit pendant que vous dormez.",
     "pitch1": "Capturez un parcours en quelques clics",
     "pitch2": "Partagez par lien ou intégrez sur votre site",
-    "pitch3": "Mesurez l’engagement et collectez des leads"
+    "pitch3": "Mesurez l’engagement et collectez des leads",
+    "workEmail": "Email professionnel",
+    "signupLink": "Créer un compte gratuit",
+    "orMagic": "Ou recevez un lien de connexion par email.",
+    "usePassword": "Se connecter avec un mot de passe",
+    "hasAccount": "Déjà inscrit ?",
+    "loginLink": "Se connecter"
   },
   "onboarding": {
     "title": "Créez votre workspace",
@@ -103,7 +108,8 @@
   "profile": {
     "title": "Mon profil",
     "changePassword": "Changer de mot de passe",
-    "passwordUpdated": "Mot de passe mis à jour."
+    "passwordUpdated": "Mot de passe mis à jour.",
+    "emailHint": "Contactez le support pour changer d'email."
   },
   "members": {
     "title": "Membres",
@@ -123,16 +129,20 @@
     "emailsPlaceholder": "marie@acme.example, paul@acme.example",
     "invalidEmails": "Adresses invalides : {{list}}",
     "invitesCreated_one": "Invitation créée. Envoyez ce lien :",
-    "invitesCreated_other": "{{count}} invitations créées. Envoyez à chacun son lien :"
+    "invitesCreated_other": "{{count}} invitations créées. Envoyez à chacun son lien :",
+    "member": "Membre"
   },
   "workspace": {
     "title": "Paramètres du workspace",
     "name": "Nom",
-    "slug": "Identifiant (URL)",
-    "danger": "Zone dangereuse",
+    "slug": "Adresse personnalisée",
+    "danger": "Zone de danger",
     "delete": "Supprimer le workspace",
     "deleteHint": "Supprime définitivement le workspace, ses démos, analytics et leads.",
-    "deleteConfirm": "Tapez « {{slug}} » pour confirmer la suppression."
+    "deleteConfirm": "Tapez « {{slug}} » pour confirmer la suppression.",
+    "slugHelp": "Lettres minuscules, chiffres et tirets. Changer l'adresse casse les anciens liens.",
+    "privacyUrl": "Politique de confidentialité (URL)",
+    "privacyUrlHelp": "Lien affiché sous les formulaires de lead de vos démos, à la prochaine publication."
   },
   "plan": {
     "title": "Plan",
@@ -207,11 +217,11 @@
     "capturedOn": "Capturé sur",
     "confirmDeleteStep": "Supprimer cette étape ?",
     "deleteStep": "Supprimer l'étape",
-    "hotspotSettings": "Hotspot et info-bulle",
+    "hotspotSettings": "Hotspot et bulle",
     "backToStep": "Étape",
     "tooltipTitle": "Titre de la bulle",
     "tooltipBody": "Texte de la bulle",
-    "placement": "Position de l'info-bulle",
+    "placement": "Position de la bulle",
     "placement_auto": "Automatique",
     "placement_top": "Au-dessus",
     "placement_bottom": "En dessous",
@@ -221,7 +231,7 @@
     "action_next": "Étape suivante",
     "action_goto": "Aller à une étape",
     "action_url": "Ouvrir une URL",
-    "action_none": "Rien (info-bulle seule)",
+    "action_none": "Rien (bulle seule)",
     "targetStep": "Étape cible",
     "pulse": "Animation de pulsation",
     "deleteHotspot": "Supprimer le hotspot",
@@ -230,7 +240,7 @@
     "theme": "Thème et branding",
     "colorPrimary": "Couleur principale",
     "colorBackground": "Fond",
-    "colorSurface": "Info-bulles",
+    "colorSurface": "Bulles",
     "colorText": "Texte",
     "font": "Police",
     "radius": "Arrondi : {{v}} px",
@@ -270,8 +280,8 @@
     "addChapter": "Ajouter un chapitre",
     "moveUp": "Monter",
     "moveDown": "Descendre",
-    "newTextStep": "Nouvel écran",
-    "addTextStep": "Écran texte",
+    "newTextStep": "Nouvelle étape",
+    "addTextStep": "Étape texte",
     "addImageStep": "Image importée",
     "notFound": "Démo introuvable ou accès refusé.",
     "demoTitle": "Titre de la démo",
@@ -321,7 +331,8 @@
     "chooseLogo": "Choisir un logo",
     "changeLogo": "Changer le logo",
     "pageCta": "Bouton d’action de la page",
-    "pageCtaHint": "Toujours visible en haut du player (ex. « Réserver une démo »)."
+    "pageCtaHint": "Toujours visible en haut du player (ex. « Réserver une démo »).",
+    "pageTitle": "Éditeur : {{title}}"
   },
   "status": {
     "draft": "Brouillon",
@@ -378,10 +389,10 @@
     "leads": "Leads",
     "viewsPerDay": "Vues par jour",
     "noData": "Pas encore de données sur la période.",
-    "funnel": "Parcours par étape (drop-off)",
+    "funnel": "Parcours étape par étape",
     "step": "Étape",
     "reach": "Visiteurs ayant atteint l'étape",
-    "dropOff": "Perte",
+    "dropOff": "Abandon",
     "exportCsv": "Exporter en CSV",
     "period": "Période",
     "lastDays_one": "{{count}} jour",
@@ -400,7 +411,11 @@
     "date": "Date",
     "delete": "Supprimer {{email}}",
     "confirmDelete": "Supprimer définitivement le lead {{email}} (droit à l'effacement) ?",
-    "gdpr": "Données personnelles : exportez-les ou supprimez-les sur demande de la personne concernée (RGPD). Seuls les éditeurs et plus y ont accès."
+    "gdpr": "Données personnelles : exportez-les ou supprimez-les sur demande de la personne concernée (RGPD). Seuls les éditeurs et plus y ont accès.",
+    "emptyHint": "Ajoutez un formulaire à une démo pour collecter des leads.",
+    "addForm": "Ajouter un formulaire",
+    "noExport": "Aucun lead à exporter",
+    "noMatch": "Aucun lead ne correspond à cette recherche."
   },
   "demos": {
     "title": "Démos",
@@ -449,7 +464,8 @@
     "required": "Ce champ est obligatoire.",
     "email": "Saisissez une adresse email valide, par exemple nom@entreprise.com.",
     "passwordMin": "Le mot de passe doit contenir au moins {{min}} caractères.",
-    "consent": "Cochez la case pour continuer."
+    "consent": "Cochez la case pour continuer.",
+    "httpsUrl": "Saisissez une adresse commençant par https://."
   },
   "plans": {
     "title": "Plans",

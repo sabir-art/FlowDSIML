@@ -4,12 +4,14 @@ import type { Dict } from './i18n';
 
 export function LeadForm({
   form,
+  privacyUrl,
   t,
   sub,
   onSubmit,
   onSkip,
 }: {
   form: LeadFormT;
+  privacyUrl?: string | null;
   t: Dict;
   sub: (s: string) => string;
   onSubmit: (d: { email: string; fields: Record<string, string>; consent: boolean }) => Promise<void>;
@@ -79,6 +81,13 @@ export function LeadForm({
             />
             <span>{sub(form.consentText)}</span>
           </label>
+        )}
+        {privacyUrl && (
+          <p class="p-privacy">
+            <a href={privacyUrl} target="_blank" rel="noopener noreferrer">
+              {t.privacy}
+            </a>
+          </p>
         )}
         {error && <p class="p-error">{t.formError}</p>}
         <div class="p-actions">

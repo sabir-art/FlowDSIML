@@ -248,6 +248,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
         {gateForm && (
           <LeadForm
             form={gateForm}
+            privacyUrl={m.privacyUrl}
             t={t}
             sub={sub}
             onSkip={() => markGate(gateForm.id)}

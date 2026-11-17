@@ -1,7 +1,7 @@
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { EyeOff, Target, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Button, Checkbox, Field, Select } from '@flowdsiml/ui';
+import { Button, Field, Select, Switch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asCta, asRects, asZoom, type Selection, type StepRow } from '../types';
 import { RichTextField } from '../RichTextField';
@@ -86,7 +86,7 @@ export function StepPanel({
 
       {step.kind === 'image' && (
         <div className="panel-group">
-          <Checkbox
+          <Switch
             label={t('editor.zoom')}
             checked={!!zoom}
             disabled={readOnly}

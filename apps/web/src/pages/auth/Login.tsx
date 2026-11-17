@@ -54,18 +54,10 @@ export function Login() {
 
   return (
     <AuthLayout title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')}>
-      <div className="tabs" role="tablist">
-        <button role="tab" aria-selected={mode === 'password'} onClick={() => setMode('password')}>
-          {t('auth.withPassword')}
-        </button>
-        <button role="tab" aria-selected={mode === 'magic'} onClick={() => setMode('magic')}>
-          {t('auth.withMagicLink')}
-        </button>
-      </div>
       {error && !errors.password && <Alert kind="error">{error}</Alert>}
       {success && <Alert kind="success">{success}</Alert>}
       <form onSubmit={submit} noValidate>
-        <Field label={t('auth.email')} htmlFor="email">
+        <Field label={t('auth.workEmail')} htmlFor="email">
           <input
             id="email"
             className="fd-input"
@@ -82,7 +74,15 @@ export function Login() {
           <FieldError id="email" errors={errors} />
         </Field>
         {mode === 'password' && (
-          <Field label={t('auth.password')} htmlFor="password">
+          <div className="fd-field">
+            <div className="label-row">
+              <label className="fd-label" htmlFor="password">
+                {t('auth.password')}
+              </label>
+              <Link to="/forgot-password" className="label-link">
+                {t('auth.forgot')}
+              </Link>
+            </div>
             <input
               ref={pwdRef}
               id="password"
@@ -98,18 +98,30 @@ export function Login() {
               {...fieldA11y('password', errors)}
             />
             <FieldError id="password" errors={errors} />
-          </Field>
+          </div>
         )}
         <Button icon={<LogIn />} type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
           {mode === 'password' ? t('auth.signIn') : t('auth.sendMagicLink')}
         </Button>
       </form>
-      <div className="auth-links">
-        <Link to="/forgot-password">{t('auth.forgot')}</Link>
+      <p className="auth-alt">
+        <button
+          type="button"
+          className="link-button"
+          onClick={() => {
+            setMode(mode === 'password' ? 'magic' : 'password');
+            setErrors({});
+          }}
+        >
+          {mode === 'password' ? t('auth.orMagic') : t('auth.usePassword')}
+        </button>
+      </p>
+      <p className="auth-foot">
+        {t('auth.noAccount')}{' '}
         <Link to={`/signup${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}>
-          {t('auth.noAccount')}
+          {t('auth.signupLink')}
         </Link>
-      </div>
+      </p>
     </AuthLayout>
   );
 }

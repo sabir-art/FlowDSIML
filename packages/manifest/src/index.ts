@@ -136,6 +136,8 @@ export const manifestSchema = z.object({
   allowedEmbedOrigins: z.array(z.string()).default([]),
   /** Bouton d'action du client, affiché en permanence dans la barre du player (P6). */
   cta: ctaSchema.nullable().default(null),
+  /** P13 : politique de confidentialité du workspace (https), affichée sous les formulaires de lead. */
+  privacyUrl: z.string().url().startsWith('https://').nullable().default(null).catch(null),
   /** URL de l'endpoint d'ingestion analytics. */
   trackUrl: z.string().nullable().default(null),
 });

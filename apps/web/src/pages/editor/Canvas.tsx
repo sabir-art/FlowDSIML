@@ -208,7 +208,7 @@ export function Canvas({
     >
       {formChip}
       {url ? (
-        <img src={url} alt="" draggable={false} />
+        <img src={url} alt={step.title || t('editor.untitled')} draggable={false} />
       ) : (
         <div className="canvas-missing">{t('common.loading')}</div>
       )}

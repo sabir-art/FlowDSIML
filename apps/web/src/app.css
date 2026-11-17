@@ -1,10 +1,49 @@
-.auth-links {
+.label-row {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--fd-space-2);
-  margin-top: var(--fd-space-4);
+}
+.label-row .fd-label {
+  margin-bottom: 0;
+}
+.label-link {
   font-size: var(--fd-font-xs);
-  flex-wrap: wrap;
+  font-weight: 500;
+}
+.auth-alt {
+  margin: var(--fd-space-3) 0 0;
+  text-align: center;
+  font-size: var(--fd-font-sm);
+}
+.auth-foot {
+  margin: var(--fd-space-6) 0 0;
+  padding-top: var(--fd-space-4);
+  border-top: 1px solid var(--fd-color-border);
+  text-align: center;
+  font-size: var(--fd-font-sm);
+  color: var(--fd-color-text-muted);
+}
+.auth-foot a {
+  font-weight: 600;
+}
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--fd-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.link-button:hover {
+  color: var(--fd-color-primary-hover);
+}
+.link-button:focus-visible {
+  outline: none;
+  box-shadow: var(--fd-shadow-focus);
+  border-radius: 2px;
 }
 .tabs {
   display: flex;
@@ -832,4 +871,104 @@
 }
 .version-list li:last-child {
   border-bottom: 0;
+}
+
+/* État vide illustré (A8) */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fd-space-2);
+  padding: var(--fd-space-8) var(--fd-space-4);
+  text-align: center;
+}
+.empty-state p {
+  margin: 0;
+}
+.empty-state__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--fd-space-2);
+  border-radius: 50%;
+  background: var(--fd-color-primary-soft, var(--fd-color-surface-hover));
+  color: var(--fd-color-primary);
+}
+.empty-state__title {
+  font-weight: 600;
+}
+.empty-state .fd-btn {
+  margin-top: var(--fd-space-2);
+}
+.funnel-step-num {
+  font-variant-numeric: tabular-nums;
+  color: var(--fd-color-text-muted);
+}
+
+/* W17 : titres de cartes au style h3 (Instrument 600, 18 px) ; h2 garde sa place dans la hiérarchie */
+.fd-card > h2,
+.fd-card > form > h2,
+.fd-card > .row > h2,
+.card-title {
+  font-family: var(--fd-text-h3-family);
+  font-size: var(--fd-text-h3-size);
+  line-height: var(--fd-text-h3-line);
+  font-weight: var(--fd-text-h3-weight);
+  letter-spacing: var(--fd-text-h3-tracking);
+}
+
+/* W15 : ligne membre (avatar à initiales, email en titre si pas de nom) */
+.member-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-3);
+  min-width: 0;
+}
+.member-cell__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.member-cell__name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.member-cell__email {
+  font-size: var(--fd-font-xs);
+  color: var(--fd-color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* P11 : exemple de paramètres d'URL, partie variable mise en évidence */
+.url-params {
+  margin: var(--fd-space-3) 0;
+}
+.url-params p {
+  margin: 0 0 var(--fd-space-1);
+  font-size: var(--fd-font-xs);
+}
+.code-block {
+  display: block;
+  padding: var(--fd-space-2) var(--fd-space-3);
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-sm);
+  background: var(--fd-color-surface-sunken);
+  font-family: var(--fd-font-mono);
+  font-size: var(--fd-font-xs);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.code-block__base {
+  color: var(--fd-color-text-muted);
+}
+.code-block__var {
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  font-weight: 500;
 }

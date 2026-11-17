@@ -108,3 +108,22 @@ export function Checkbox({
     </label>
   );
 }
+
+/** Interrupteur (réglage appliqué immédiatement) : libellé à gauche, piste 36 × 20 px à droite. */
+export function Switch({
+  label,
+  hint,
+  className = '',
+  ...props
+}: Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'role'> & { label: ReactNode; hint?: ReactNode }) {
+  return (
+    <label className={`fd-switch ${className}`.trim()}>
+      <span className="fd-switch__text">
+        {label}
+        {hint && <span className="fd-check__hint">{hint}</span>}
+      </span>
+      <input type="checkbox" role="switch" {...props} />
+      <span className="fd-switch__track" aria-hidden="true" />
+    </label>
+  );
+}

@@ -43,9 +43,9 @@ export function ForgotPassword() {
           {t('auth.sendResetLink')}
         </Button>
       </form>
-      <div className="auth-links">
+      <p className="auth-foot">
         <Link to="/login">{t('auth.backToLogin')}</Link>
-      </div>
+      </p>
     </AuthLayout>
   );
 }
