@@ -90,7 +90,7 @@
       "email": "Work email",
       "emailPlaceholder": "name@company.com",
       "password": "Password",
-      "passwordHelp": "At least 10 characters.",
+      "passwordHelp": "At least 8 characters.",
       "strength": {
         "weak": "Strength: weak",
         "fair": "Strength: fair",

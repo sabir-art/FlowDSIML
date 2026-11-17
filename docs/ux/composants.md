@@ -188,7 +188,7 @@ Le texte complet est dans `microcopy.md`. Un **état vide filtré** (des filtres
 
 | Niveau | Composant | Exemple |
 |---|---|---|
-| Champ | Message en ligne sous le champ (§2.2) | « Le mot de passe doit contenir au moins 10 caractères. » |
+| Champ | Message en ligne sous le champ (§2.2) | « Le mot de passe doit contenir au moins 8 caractères. » |
 | Formulaire | Alerte `danger` en tête, focus sur le premier champ | « 2 champs à corriger. » |
 | Action | Toast `danger` persistant, avec « Réessayer » | « La démo n'a pas pu être publiée. Réessayer. » |
 | Bloc | Encart dans la zone concernée (tableau, graphique) | « Impossible de charger les sessions. Réessayer. » |
