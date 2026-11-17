@@ -52,6 +52,7 @@
   .ctl:focus-visible { box-shadow: 0 0 0 3px var(--fd-player-primary); }
   .wm { position: fixed; right: 16px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 99px; background: rgba(255,255,255,.85); color: var(--fd-stone-700); font: 600 12px var(--fd-font-sans); text-decoration: none !important; box-shadow: var(--fd-shadow-sm); }
   .sheet-handle { display: none; }
+  .pl-controls[hidden] { display: none; }
   /* ---- Mobile : bulle en feuille du bas ---- */
   @media (max-width: 639px) {
     .pl-top { padding: 10px 14px; } .pl-cta .pbtn.s { display: none; }
@@ -96,7 +97,7 @@
 <script>
 const S = [
   { type: 'start' },
-  { fake: 'dashboard', x: 88.5, y: 10.5, tipPos: { right: '2%', top: '19%' }, title: 'Bienvenue {{first_name}} 👋', text: 'Voici votre tableau de bord. Créons ensemble votre premier rapport.' },
+  { fake: 'dashboard', x: 88.5, y: 10.5, tipPos: { right: '2%', top: '19%' }, title: 'Bienvenue {{first_name}}', text: 'Voici votre tableau de bord. Créons ensemble votre premier rapport.' },
   { fake: 'dashboard', x: 88.5, y: 10.5, tipPos: { right: '2%', top: '19%' }, text: 'Cliquez sur « Nouveau rapport » pour commencer.' },
   { fake: 'modal', x: 64, y: 66, tipPos: { left: '20%', top: '78%' }, up: true, text: 'Choisissez un modèle. Les données de {{company}} sont importées automatiquement.' },
   { type: 'form' },
@@ -144,8 +145,8 @@ document.addEventListener('fd:ready', () => {
   if (st === 'password' || st === 'expired') {
     document.querySelector('.pl-controls').hidden = true;
     shot.innerHTML = `<div class="ov" style="background:var(--fd-stone-50)">${st === 'password'
-      ? `<form class="pop sys" onsubmit="event.preventDefault()"><div style="font-size:28px">🔒</div><h2 style="margin-top:8px">Cette démo est protégée</h2><p>Saisissez le mot de passe communiqué par Acme Analytics.</p><div class="field" style="text-align:left"><label for="pw">Mot de passe</label><input id="pw" class="input" type="password" aria-invalid="true" aria-describedby="pwe"><span class="error-msg" id="pwe">Mot de passe incorrect. Réessayez.</span></div><button class="pbtn p" style="width:100%;height:44px;justify-content:center;margin-top:16px">Accéder à la démo</button></form>`
-      : `<div class="pop sys"><div style="font-size:28px">⏳</div><h2 style="margin-top:8px">Cette démo n'est plus disponible</h2><p>Le lien a expiré le 30 novembre 2026. Contactez Acme Analytics pour recevoir un nouveau lien.</p><a class="pbtn s" href="#">Visiter acme-analytics.io</a></div>`}</div>`;
+      ? `<form class="pop sys" onsubmit="event.preventDefault()">${fdIcon('lock','width="28" height="28" style="color:var(--fd-stone-500)"')}<h2 style="margin-top:8px">Cette démo est protégée</h2><p>Saisissez le mot de passe communiqué par Acme Analytics.</p><div class="field" style="text-align:left"><label for="pw">Mot de passe</label><input id="pw" class="input" type="password" aria-invalid="true" aria-describedby="pwe"><span class="error-msg" id="pwe">Mot de passe incorrect. Réessayez.</span></div><button class="pbtn p" style="width:100%;height:44px;justify-content:center;margin-top:16px">Accéder à la démo</button></form>`
+      : `<div class="pop sys">${fdIcon('clock','width="28" height="28" style="color:var(--fd-stone-500)"')}<h2 style="margin-top:8px">Cette démo n'est plus disponible</h2><p>Le lien a expiré le 30 novembre 2026. Contactez Acme Analytics pour recevoir un nouveau lien.</p><a class="pbtn s" href="#">Visiter acme-analytics.io</a></div>`}</div>`;
     return;
   }
   render();

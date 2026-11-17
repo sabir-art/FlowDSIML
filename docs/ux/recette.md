@@ -253,3 +253,67 @@ La barre latérale (W3), le responsive mobile de l'app (W4), les confirmations n
 | Corrigé côté `packages/ui` | 6 correctifs (F0.1–F0.6) | | |
 
 **Ordre conseillé** : installer Lucide + composant `Icon` (1 h), F1–F3 et F12 (bloquants), puis F6–F9, F13–F16, F24 (grep des accents). La table d'icônes complète est dans `composants.md` §15.1.
+
+---
+
+## Re-vérification des correctifs du dev (17 nov., `claude/dev-mvp` @ `61d8217` + `claude/ux-finition`)
+
+Bancs e2e du dev : **4/4 sans erreur** (éditeur, publication/player, analytics, dashboard). Captures : `docs/ux/recette/reverif/`.
+
+| Point | Statut | Constat |
+|---|---|---|
+| P1 thème du player | ✅ Corrigé | Fond `player-backdrop` clair, primaire Lagoon, police Instrument. |
+| P2 hotspot | ✅ Corrigé | Pastille Ember pulsée + bulle fléchée vers la cible. |
+| P3 mobile | ✅ Corrigé | Bulle en feuille ancrée en bas, boutons 44 px, contrôles sous la capture. |
+| P4 lien expiré | ✅ Corrigé | Écran dédié avec icône de lien barré, titre et action ; (texte en anglais dans la capture car navigateur de test en `en-US` : OK). |
+| P5 contrôles | ✅ Corrigé | Précédent / progression / suivant / plein écran sous le cadre, icônes chevrons. |
+| P7 filigrane | ⚠️ Partiel | Lien centré, souligné, sans logo ; à passer en pastille avec logo (§13.6). |
+| ED1 clavier canevas | ✅ Corrigé | Hotspot `tabindex=0`, `aria-label` « Hotspot 1 : … », flèches déplacent. |
+| ED4/ED5 outils, onglets | ✅ Corrigé | 3 onglets Étape · Design · Réglages ; outils segmentés. |
+| ED9 suppression | ✅ Corrigé | « Supprimer l'étape » en lien `danger` discret. |
+| ED11 mobile | ✅ Corrigé | Écran « L'éditeur nécessite un écran plus large ». |
+| ED14 état de sauvegarde | ✅ Corrigé | « Enregistrement… » / « Enregistré ». |
+| F1 glyphes « + » / « ← » | ❌ Ouvert | Toujours « ← », « + Hotspot », « + Flou », « + Écran texte », « + Image » (scan DOM). |
+| F12 hauteurs barre de mise en forme | ❌ Ouvert | B / I / Lien 32 px vs select de variable 40 px. |
+| F16 alignement des cases | ❌ Ouvert | « Bouton d'action (CTA) » toujours décalée. |
+| ED2 rendu WYSIWYG | ❌ Ouvert (annoncé) | Les écrans texte sont rendus ; la bulle du hotspot reste absente du canevas. |
+
+Reste prioritaire : **Lucide + F1–F3, F12, F16**, puis ED2.
+
+### Finition (suite) : motifs proscrits (retour client du 17 nov., §15.6)
+
+Audit de **tout le code** (`apps/web`, `apps/player`, `apps/extension`, `packages/ui` sur `claude/dev-mvp` + `claude/dazzling-lamport-bu517g`) par recherche systématique des motifs M1–M14 (`border-left` épais, `::before` en barre, dégradés, `backdrop-filter`, `background-clip:text`, ombres colorées, emojis U+1F300–1FAFF/✨, pastilles colorées), complété par les captures de finition. Puis audit des **maquettes**.
+
+**Application — constats**
+
+| # | Gravité | Fichier | Motif | Correction |
+|---|---|---|---|---|
+| M-A1 | ✅ Corrigé (chef d'équipe, `a69e35d`) | `packages/ui/src/base.css` `.fd-alert` | M1 barre d'accent latérale sur les alertes | Bordure fine 1 px à 30 % ; **+ icône Lucide** désormais stylée (`.fd-alert > svg`, `claude/ux-finition` `e05e357`). Ajouter l'icône dans `<Alert>` : `Info`, `CircleAlert`, `CircleCheck`, `TriangleAlert`. |
+| M-A2 | ✅ Corrigé (`claude/ux-finition` `e05e357`) | `packages/ui/src/tokens.ts` → `--fd-player-backdrop` | M3 dégradé décoratif (lagon → pierre → corail) en fond du player | Aplat Stone 50 `#F7F6F4`. |
+| M-A3 | Majeur | `apps/player/src/player.css:28` | M3 dégradé **codé en dur** (`linear-gradient(160deg, #eefbf8 …)`) : ignore le token | `background: var(--fd-player-backdrop)` (ou `var(--p-backdrop)` alimenté par le thème). |
+| M-A4 | Majeur | `apps/web/src/pages/demos/DemosPage.tsx:154` | M6 emoji **📁** devant chaque dossier | Icône Lucide `Folder` 16 px `text-muted`. |
+| M-A5 | Majeur | `apps/extension/entrypoints/popup/style.css:105` (`.rec::before { content: '● ' }`) | M6/§15.1 glyphe « ● » comme indicateur d'enregistrement | Pastille CSS 8 px (`border-radius:50%`, `background: var(--fd-color-accent)`, `aria-hidden`) ou Lucide `Circle` plein. |
+| M-A6 | Mineur | `apps/web/src/pages/editor/editor.css:233-237` | Contour de sélection du flou en **jaune `#ffcc00`** hors palette | `border-selected` (Lagoon) 2 px comme les autres sélections ; pointillés conservés pour l'état « en cours de tracé ». |
+| — | ✅ Conforme | `app.css` `.sidebar nav a.active`, `editor.css` `.steplist li.active`, `.tabs` | M2 : élément actif sans barre latérale (fond / contour complet / soulignement d'onglet) | — |
+| — | ✅ Conforme | `player.css` `.p-blur`, `editor.css` `.canvas-blur` | M5 : `backdrop-filter` = fonction de floutage, autorisé | — |
+| — | ✅ Conforme | tout `apps/` | M4, M7, M9 : aucun texte en dégradé, aucun « sparkles », aucune ombre colorée | — |
+
+**Maquettes (`docs/ux/maquettes/`) — corrigées** (branche `claude/ux-design-system`)
+
+| Fichier | Motif retiré | Remplacement |
+|---|---|---|
+| `assets/mockup.css` `.nav a[aria-current]::before` | M2 barre de 3 px à gauche de l'élément de navigation actif | Fond `surface-selected` + texte `primary-soft-text` seuls |
+| `assets/mockup.css` `.toast` | M1 `border-left: 3px` vert | Bordure 1 px `border` + icône d'état colorée |
+| `assets/mockup.css` `.alert*` | (alignement) fond seul | Bordure fine 1 px à 30 % de la couleur d'état + icône |
+| `plans.html` `.plan.reco` | M3 dégradé corail → blanc sur la carte « recommandée » | Bordure `border-strong` + badge texte |
+| `index.html` `.screen .ic` | M8 icône dans un carré coloré sur chaque carte | Icône Lucide nue 20 px `text-muted` |
+| `partage.html` `.icon-tile` | M8 (style mort) | Supprimé |
+| `editeur.html` menu « … » | M7 icône *sparkles* « Générer les textes avec l'IA » | `PenLine` « Rédiger les textes (assistant) » |
+| `editeur.html` écran de fin | M8 + glyphe : pastille lagon avec « ✓ » | Supprimée (titre + texte + boutons) |
+| `editeur.html` Design | M3 interrupteur « Fond dégradé » | Champ « Fond » (couleur unie) |
+| `onboarding.html`, `player.html` | M6 emojis 👋 🔒 ⏳, « ✓ » dans un toast | Texte simple ; icônes Lucide `Lock`, `Clock` |
+| `parametres.html` | « ✓ » texte dans la matrice des rôles et l'aide de contraste | Icône `Check` (masque SVG, `aria-label` « Oui »), texte « conforme AA » |
+| `i18n/fr.json`, `i18n/en.json` | M6 emoji 👋, « ✓ » dans 3 chaînes ; « Fond dégradé » | « Bienvenue, {{name}} », texte sans glyphe, « Couleur de fond » |
+| `identite-visuelle.md`, `microcopy.md`, `composants.md` §4/§5/§7/§12 | Règles qui prescrivaient barre latérale de toast, repère de 3 px, dégradés, « un emoji au maximum » | Règles réécrites ; liste **§15.6 Motifs proscrits** (M1–M14) avec alternatives |
+
+**Reste au dev** : M-A3, M-A4, M-A5 (majeurs), M-A6 (mineur), et l'icône dans `<Alert>` (M-A1). Contrôle CI suggéré : voir `composants.md` §15.6 (grep des motifs).

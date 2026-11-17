@@ -121,7 +121,7 @@
   },
   "onboarding": {
     "step": "Step {{current}} of {{total}}",
-    "welcome": "Welcome {{name}} 👋",
+    "welcome": "Welcome, {{name}}",
     "workspace": {
       "title": "Let's set up your workspace",
       "subtitle": "Two quick questions so we can suggest the right templates. You can change everything later.",
@@ -147,7 +147,7 @@
       "importInstead": "Import screenshots instead",
       "browsers": "Using another browser? The extension works on Chrome, Edge, Brave and Arc.",
       "installed": "I've installed the extension",
-      "detected": "Extension detected ✓"
+      "detected": "Extension detected"
     },
     "checklist": {
       "title": "Your first demo is waiting",
@@ -393,7 +393,7 @@
       "shapes": { "square": "Square", "soft": "Soft", "round": "Round", "extra": "Extra round" },
       "frame": "Frame",
       "browserBar": "Browser bar",
-      "gradient": "Gradient background"
+      "gradient": "Background color"
     },
     "settings": {
       "playback": "Playback",
@@ -643,7 +643,7 @@
     "brand": {
       "theme": "Demo theme",
       "themeHint": "Applied by default to all new demos. Each demo can override it.",
-      "contrastOk": "Contrast with white text: {{ratio}}:1 ✓",
+      "contrastOk": "Contrast with white text: {{ratio}}:1, meets AA",
       "font": "Font",
       "publicPage": "Public page",
       "publicPageHint": "The header shown around demos shared by link.",

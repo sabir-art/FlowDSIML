@@ -8,7 +8,7 @@
 <style>
   .share-layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; }
   @media (max-width: 1100px) { .share-layout { grid-template-columns: 1fr; } }
-  .preview-box { border-radius: var(--fd-radius-xl); overflow: hidden; background: var(--fd-player-backdrop); padding: 28px; }
+  .preview-box { border-radius: var(--fd-radius-xl); overflow: hidden; background: var(--fd-player-backdrop); border: 1px solid var(--fd-color-border); padding: 28px; }
   .mini-player { border-radius: 12px; overflow: hidden; box-shadow: var(--fd-shadow-lg); background: #fff; }
   .mini-player .bar { height: 26px; background: var(--fd-stone-100); display: flex; gap: 5px; align-items: center; padding: 0 10px; }
   .mini-player .bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--fd-stone-300); }
@@ -16,8 +16,6 @@
   .code .k { color: var(--fd-color-primary); } .code .s { color: var(--fd-color-accent); }
   .opt-card { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-md); }
   .opt-card + .opt-card { margin-top: 8px; }
-  .icon-tile { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); flex: none; }
-  .icon-tile svg { width: 18px; height: 18px; }
 </style>
 </head>
 <body data-shell="app" data-page="demos" data-crumbs='<a href="dashboard.html">Démos</a><span>/</span><a href="editeur.html">Créer un rapport en 2 minutes</a><span>/</span><span aria-current="page">Partager</span>'>

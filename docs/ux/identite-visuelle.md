@@ -13,7 +13,7 @@
 1. **Le sentier**. Une démo est un parcours d'étapes reliées. Le logo, les connecteurs du rail d'étapes et les barres de progression reprennent ce motif : des points reliés par une courbe.
 2. **Le signal**. Le hotspot est le seul élément qui doit attirer l'œil. Une couleur chaude (*Ember*) lui est réservée, ainsi qu'aux actions de conversion. Le reste de l'interface reste calme : neutres chauds et vert lagon.
 
-Ton visuel : professionnel, chaleureux, net. Pas de dégradés violets ni d'effets néon. Beaucoup d'espace et une hiérarchie typographique forte.
+Ton visuel : professionnel, chaleureux, net. Aplats, bordures fines, aucun ornement gratuit : pas de dégradés décoratifs, d'effets néon, de verre dépoli, d'emojis ni de barres d'accent (liste complète : `composants.md` §15.6). Beaucoup d'espace et une hiérarchie typographique forte.
 
 ## 2. Logo
 
@@ -164,6 +164,6 @@ Le player expose des tokens `--fd-player-*`, surchargés par le thème de démo 
 | `player-overlay` | `rgba(20,19,17,.55)` | couleur et opacité |
 | `player-radius` | 16 px | 0, 8, 16 ou 24 (« Carré », « Doux », « Rond », « Très rond ») |
 | `player-font` | Instrument Sans | police du workspace |
-| `player-backdrop` | Lagoon 50 vers Stone 50 (dégradé doux) | couleur, dégradé ou image |
+| `player-backdrop` | Stone 50 `#F7F6F4` (aplat) | couleur unie ou image |
 
 **Règle produit** : quand l'utilisateur choisit une couleur principale de contraste insuffisant (moins de 4,5:1 avec le texte du bouton), l'éditeur l'avertit (« Contraste faible : le texte sera difficile à lire ») et propose la variante accessible la plus proche.

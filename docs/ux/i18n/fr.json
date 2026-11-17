@@ -121,7 +121,7 @@
   },
   "onboarding": {
     "step": "Étape {{current}} sur {{total}}",
-    "welcome": "Bienvenue {{name}} 👋",
+    "welcome": "Bienvenue, {{name}}",
     "workspace": {
       "title": "Configurons votre espace",
       "subtitle": "Deux questions pour vous proposer les bons modèles. Vous pourrez tout modifier plus tard.",
@@ -147,7 +147,7 @@
       "importInstead": "Importer des captures à la place",
       "browsers": "Vous utilisez un autre navigateur ? L'extension fonctionne sur Chrome, Edge, Brave et Arc.",
       "installed": "J'ai installé l'extension",
-      "detected": "Extension détectée ✓"
+      "detected": "Extension détectée"
     },
     "checklist": {
       "title": "Votre première démo vous attend",
@@ -393,7 +393,7 @@
       "shapes": { "square": "Carré", "soft": "Doux", "round": "Rond", "extra": "Très rond" },
       "frame": "Cadre",
       "browserBar": "Barre de navigateur",
-      "gradient": "Fond dégradé"
+      "gradient": "Couleur de fond"
     },
     "settings": {
       "playback": "Lecture",
@@ -643,7 +643,7 @@
     "brand": {
       "theme": "Thème des démos",
       "themeHint": "Appliqué par défaut à toutes les nouvelles démos. Chaque démo peut le modifier.",
-      "contrastOk": "Contraste avec le texte blanc : {{ratio}}:1 ✓",
+      "contrastOk": "Contraste avec le texte blanc : {{ratio}}:1, conforme AA",
       "font": "Police",
       "publicPage": "Page publique",
       "publicPageHint": "L'en-tête affiché autour de vos démos partagées par lien.",
