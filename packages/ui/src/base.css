@@ -388,6 +388,29 @@ input[type='radio'] {
   /* Bordure fine et uniforme : pas de barre d'accent latérale (motif proscrit, cf. composants.md). */
   border: 1px solid color-mix(in srgb, var(--fd-color-info) 30%, transparent);
 }
+.fd-alert:has(> svg) {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fd-space-3);
+}
+/* L'état est porté par une icône Lucide (Info, CircleAlert, CircleCheck, TriangleAlert), pas par une barre. */
+.fd-alert > svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-top: 1px;
+  stroke-width: 1.75;
+  color: var(--fd-color-info);
+}
+.fd-alert--error > svg {
+  color: var(--fd-color-danger);
+}
+.fd-alert--success > svg {
+  color: var(--fd-color-success);
+}
+.fd-alert--warning > svg {
+  color: var(--fd-color-warning);
+}
 .fd-alert--error {
   background: var(--fd-color-danger-soft);
   border-color: color-mix(in srgb, var(--fd-color-danger) 30%, transparent);

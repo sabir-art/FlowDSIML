@@ -256,7 +256,8 @@ export const player = {
   'overlay': 'rgba(20, 19, 17, 0.55)',
   'radius': '16px',
   'font': fontFamily.sans,
-  'backdrop': `linear-gradient(160deg, ${lagoon[50]} 0%, ${stone[50]} 60%, ${ember[50]} 100%)`,
+  // Fond uni : pas de dégradé décoratif (motif proscrit, composants.md §15.6).
+  'backdrop': stone[50],
   'browser-bar': stone[100],
   'browser-bar-dark': '#26241F',
   'shadow': shadow.light.lg,

@@ -152,7 +152,7 @@
   --fd-player-overlay: rgba(20, 19, 17, 0.55);
   --fd-player-radius: 16px;
   --fd-player-font: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --fd-player-backdrop: linear-gradient(160deg, #EEFBF8 0%, #F7F6F4 60%, #FFF4EF 100%);
+  --fd-player-backdrop: #F7F6F4;
   --fd-player-browser-bar: #EFEDEA;
   --fd-player-browser-bar-dark: #26241F;
   --fd-player-shadow: 0 4px 8px rgba(31, 29, 26, 0.06), 0 18px 40px rgba(31, 29, 26, 0.16);
