@@ -577,3 +577,16 @@ Captures : `docs/ux/recette/debordements/`.
 | DB1 | ⚠️ Accessibilité | En 390 px, **`Échap` ne ferme pas le tiroir de navigation**. Le voile reste affiché et bloque la page jusqu'à un clic dessus | `Échap` ferme le tiroir et rend le focus au bouton menu. Piéger le focus dans le tiroir tant qu'il est ouvert |
 | DB2 | ❌ Contraste (sombre) | Aperçu de partage vide en thème sombre : le texte « L'aperçu apparaîtra après la première capture. » est en `rgb(179,173,164)` sur le cadre clair `rgb(247,246,244)`, soit un contraste de **2,06:1** (AA demande 4,5:1). Le cadre a le fond clair du player mais pas la classe `.fd-player-scope`, donc il reçoit les couleurs de texte du thème sombre | Ajouter `.fd-player-scope` au cadre de l'aperçu (`SharePreview`), y compris pour l'état vide. Même vérification sur les vignettes du tableau de bord et le canevas de l'éditeur |
 | DB3 | ⚠️ Mise en page | Éditeur en 1 024 px (largeur minimale) : la barre du haut passe sur **2 lignes** (105 px au lieu de 57). Les outils Sélection / Hotspot / Flou passent sous le titre et réduisent la hauteur du canevas | En dessous de 1 280 px : champ de titre en `flex: 1` avec `min-width: 160px`, sans largeur fixe. Outils en icônes seules avec info-bulle. « Aperçu » et « Partager » en icônes seules si besoin. Une seule ligne de 56 px |
+
+### Re-vérification PL2–PL7 et formulaires en plan Free (`claude/dev-mvp` @ `42711b3`, captures du dev 22–24)
+
+| # | Statut |
+|---|---|
+| PL2 bulle zoomée | ✅ La bulle et la pastille sont hors du calque zoomé, à taille normale, et restent dans le cadre en 1 280 et 390 px |
+| PL2b (nouveau) | ⚠️ Avec le recalage de l'origine du zoom, l'image zoomée ne couvre plus tout le cadre : **bande blanche à droite** (environ 42 px en 1 280, 14 px en 390). → Borner la translation pour que l'image couvre toujours tout le cadre : l'origine reste dans `[0 ; 1 − 1/scale]`. Si le hotspot est près d'un bord, on accepte qu'il soit plus près que 12 % plutôt que de montrer un vide |
+| PL3 variables vides | ✅ La variable vide disparaît avec l'espace qui la précède. « Aperçu : … » sous les champs qui contiennent une variable (code) |
+| PL4 titre mobile | ✅ Titre sur 2 lignes, CTA `sm` sans icône. **Décision** : on garde le CTA dans l'en-tête, qui est l'emplacement attendu pour une action de conversion. La barre du bas reste réservée à la navigation |
+| PL6 un seul overlay modal | ✅ La feuille de la bulle est retirée, l'en-tête et les contrôles sont `inert` et atténués pendant le formulaire |
+| PL7 case de consentement | ✅ 20 px, ligne cliquable de 44 px |
+| Avertissements en plan Free | ✅ dans le code et les libellés : les 5 points de la spec, avec les textes FR et EN repris tels quels (`notPublishedTitle`, `badge`, `stepHelp`, `confirmTitle` / `confirmLabel`, `sharePublished`, `previewBanner`). Pas encore de capture d'un workspace Free : à vérifier visuellement à la prochaine passe |
+| Alertes (M-A1) | ✅ `Alert` de type `warning`, avec une icône Lucide par état (`Info`, `CircleAlert`, `CircleCheck`, `TriangleAlert`) |
