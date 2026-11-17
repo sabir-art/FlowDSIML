@@ -301,3 +301,10 @@ body {
   color: #c4320a;
   font-size: 13px;
 }
+
+.p-top-cta {
+  flex: none;
+}
+.is-compact .p-top-cta {
+  min-height: 36px;
+}

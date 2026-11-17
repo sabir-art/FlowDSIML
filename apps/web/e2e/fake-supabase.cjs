@@ -341,6 +341,16 @@ async function install(page, state = seed()) {
             })),
           );
         case 'demo_analytics':
+          if (a.p_to && Date.parse(a.p_to) < Date.now() - 86400000)
+            return json(route, 200, {
+              views: 96,
+              visitors: 80,
+              completions: 30,
+              ctaClicks: 14,
+              leads: 0,
+              steps: [],
+              daily: [],
+            });
           return json(route, 200, {
             views: 120,
             visitors: 90,

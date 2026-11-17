@@ -6,6 +6,7 @@ import { Alert, Button, Checkbox, Field, Select } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { SUPABASE_URL } from '../../../lib/env';
 import type { DemoEditor } from '../useDemoEditor';
+import { CtaFields } from './CtaFields';
 import { asSettings } from '../types';
 
 const FONTS = [
@@ -134,6 +135,18 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
       <p className="fd-muted" style={{ fontSize: 12 }}>
         {t('editor.brandingHint')}
       </p>
+      <div className="panel-group">
+        <span className="fd-label">{t('editor.pageCta')}</span>
+        <p className="fd-muted" style={{ fontSize: 12, margin: 0 }}>
+          {t('editor.pageCtaHint')}
+        </p>
+        <CtaFields
+          idPrefix="page"
+          value={settings.cta ?? null}
+          disabled={readOnly}
+          onChange={(v) => editor.updateDemo({ settings: { ...settings, cta: v } })}
+        />
+      </div>
       <Field label={t('editor.locale')} htmlFor="th-locale">
         <Select
           id="th-locale"
