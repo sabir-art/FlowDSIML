@@ -193,7 +193,6 @@
 }
 .page-head h1 {
   margin: 0;
-  font-size: var(--fd-font-xl);
 }
 .row {
   display: flex;
@@ -220,95 +219,6 @@
   .main {
     padding: var(--fd-space-4);
   }
-}
-.stat-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--fd-space-3);
-}
-.stat-tile {
-  padding: var(--fd-space-4);
-}
-.stat-label {
-  font-size: var(--fd-font-xs);
-  color: var(--fd-color-text-muted);
-}
-.stat-value {
-  font-size: var(--fd-font-xl);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.stat-hint {
-  font-size: var(--fd-font-xs);
-  color: var(--fd-color-text-muted);
-}
-.chart {
-  margin: 0;
-  position: relative;
-}
-.chart svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-.chart-grid {
-  stroke: var(--fd-color-border);
-  stroke-width: 1;
-}
-.chart-axis {
-  fill: var(--fd-color-text-muted);
-  font-size: 11px;
-}
-.chart-bar {
-  fill: var(--fd-color-primary);
-  opacity: 0.85;
-}
-.chart-bar.is-hover {
-  opacity: 1;
-}
-.chart-tip {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: var(--fd-color-surface);
-  border: 1px solid var(--fd-color-border);
-  border-radius: var(--fd-radius-sm);
-  padding: 2px 8px;
-  font-size: 12px;
-  box-shadow: var(--fd-shadow-sm);
-}
-.funnel-track {
-  position: relative;
-  height: 22px;
-  background: var(--fd-color-surface-muted);
-  border-radius: 4px;
-}
-.funnel-bar {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--fd-color-primary);
-  opacity: 0.8;
-  border-radius: 0 4px 4px 0;
-}
-.funnel-cell {
-  display: flex;
-  align-items: center;
-  gap: var(--fd-space-3);
-}
-.funnel-cell .funnel-track {
-  flex: 1;
-  height: 10px;
-}
-.funnel-value {
-  flex: none;
-  min-width: 84px;
-  font-size: var(--fd-font-xs);
-  font-variant-numeric: tabular-nums;
-  color: var(--fd-color-text);
-}
-.funnel-drop-high {
-  color: var(--fd-color-danger);
-  font-weight: 600;
 }
 .toolbar {
   display: flex;
@@ -787,35 +697,6 @@
   border-radius: var(--fd-radius-lg) var(--fd-radius-lg) 0 0;
   padding-bottom: calc(var(--fd-space-2) + env(safe-area-inset-bottom));
 }
-.stat-delta {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--fd-space-1);
-  margin-top: var(--fd-space-1);
-  font-size: var(--fd-font-xs);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.stat-delta--up {
-  color: var(--fd-color-success);
-}
-.stat-delta--down {
-  color: var(--fd-color-danger);
-}
-.stat-delta--flat {
-  color: var(--fd-color-text-muted);
-}
-.stat-delta-label {
-  font-weight: 400;
-  color: var(--fd-color-text-muted);
-}
-
-.stat-delta {
-  flex-wrap: wrap;
-}
-.stat-delta-label {
-  flex-basis: 100%;
-}
 .version-list {
   list-style: none;
   margin: 0;
@@ -951,9 +832,6 @@
 .menu-radios .segmented button,
 .theme-switch button {
   padding: 6px 8px;
-}
-.stat-delta--none {
-  color: var(--fd-color-text-muted);
 }
 
 /* P12 : page de partage en deux colonnes, aperçu statique à droite */
@@ -1116,4 +994,298 @@
   font-weight: 600;
   line-height: 1.2;
   color: var(--fd-color-text-subtle);
+}
+
+/* ---- Refonte DSI §2 : rangée de KPI ---- */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--fd-space-5);
+}
+.stat-row--5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+@media (max-width: 1279px) {
+  .stat-row--5 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1099px) {
+  .stat-row,
+  .stat-row--5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 479px) {
+  .stat-row,
+  .stat-row--5 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.stat-delta--none,
+.stat-delta--flat {
+  background: var(--fd-color-icon-chip);
+  color: var(--fd-color-text-muted);
+}
+.fd-card--hero .stat-delta--none,
+.fd-card--hero .stat-delta--flat {
+  background: var(--fd-color-on-hero);
+  color: var(--fd-color-hero);
+}
+.fd-kpi__foot {
+  flex-wrap: wrap;
+}
+
+/* ---- Refonte DSI §3 : barres par jour ---- */
+.chart-bars-wrap {
+  margin: 0;
+}
+.chart-bars {
+  display: grid;
+  align-items: end;
+  gap: var(--fd-space-3);
+  height: 300px;
+  padding-top: var(--fd-space-2);
+}
+.chart-bars--dense {
+  gap: 3px;
+}
+.chart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fd-space-2);
+  height: 100%;
+  min-width: 0;
+}
+.chart-col__bar {
+  flex: 1;
+  width: 100%;
+  max-width: 28px;
+}
+.chart-col__v {
+  font: 700 0.6875rem / 1 var(--fd-font-sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--fd-color-text);
+  white-space: nowrap;
+}
+.chart-col__d {
+  min-height: 1em;
+  font-size: 0.6875rem;
+  line-height: 1;
+  color: var(--fd-color-text-subtle);
+  white-space: nowrap;
+}
+.chart-col.is-peak .fd-bar__fill,
+.chart-col:hover .fd-bar__fill {
+  background: var(--fd-color-nav-active);
+}
+/* 90 jours : valeur au survol seulement (la table sr-only et l'info-bulle restent) */
+.chart-bars--dense .chart-col__v {
+  visibility: hidden;
+}
+.chart-bars--dense .chart-col:hover .chart-col__v,
+.chart-bars--dense .chart-col.is-peak .chart-col__v {
+  visibility: visible;
+}
+@media (max-width: 640px) {
+  .chart-bars {
+    gap: 4px;
+    height: 220px;
+  }
+}
+
+/* ---- Refonte DSI §3 : entonnoir ---- */
+.funnel {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 var(--fd-space-2);
+}
+.funnel__row th,
+.funnel__row td {
+  padding: 0;
+  font-size: var(--fd-text-body-size);
+  vertical-align: middle;
+}
+.funnel__label {
+  width: 30%;
+  padding-right: var(--fd-space-4) !important;
+  text-align: left;
+  font-weight: 500;
+}
+.funnel__bar {
+  display: block;
+  height: 12px;
+}
+.funnel__n,
+.funnel__loss {
+  width: 72px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.funnel__n {
+  font-weight: 700;
+}
+.funnel__loss {
+  font-weight: 600;
+  color: var(--fd-color-trend-down);
+}
+.funnel__loss.is-none {
+  color: var(--fd-color-text-subtle);
+}
+@media (max-width: 640px) {
+  .funnel__label {
+    width: 45%;
+  }
+  .funnel__loss {
+    width: 52px;
+  }
+}
+
+/* ---- Refonte DSI §3 : donut ---- */
+.donut-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-5);
+}
+.donut {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 180px;
+  height: 180px;
+  margin: var(--fd-space-2) auto 0;
+}
+.donut__svg {
+  position: absolute;
+  inset: 0;
+}
+.donut__track {
+  stroke: var(--fd-color-chart-track);
+}
+.donut__center {
+  position: relative;
+  text-align: center;
+}
+.donut__center b {
+  display: block;
+  font: 800 1.75rem / 1 var(--fd-font-display);
+  font-variant-numeric: tabular-nums;
+}
+.donut__center small {
+  color: var(--fd-color-text-muted);
+}
+.legend {
+  display: grid;
+  gap: var(--fd-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+}
+.legend i {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 50%;
+}
+.legend b {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Refonte DSI : en-tête de page, grilles ---- */
+.page-wide {
+  max-width: 1200px;
+}
+.page-head--refonte {
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: var(--fd-space-6);
+}
+.page-head__titles {
+  min-width: 0;
+}
+.page-head__titles h1 {
+  overflow-wrap: anywhere;
+}
+.page-head__sub {
+  margin: 4px 0 0;
+  color: var(--fd-color-text-muted);
+}
+.page-head__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+@media (max-width: 1099px) {
+  .page-head--refonte {
+    flex-wrap: wrap;
+  }
+  .page-head__actions {
+    margin-left: 0;
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+.grid-2-1 {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--fd-space-5);
+  align-items: stretch;
+}
+@media (max-width: 1099px) {
+  .grid-2-1 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.page-wide.stack {
+  gap: var(--fd-space-5);
+}
+
+/* Bouton rond neutre (retour, actions d'icône) : blanc avec ombre xs, comme la maquette */
+.fd-btn--round.btn-surface {
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: var(--fd-shadow-xs);
+}
+.fd-btn--round.btn-surface:hover {
+  background: var(--fd-color-surface-hover);
+}
+
+/* Refonte §1 : avatar prune à initiales, sélecteur de workspace en pilule */
+.avatar--brand {
+  width: 36px;
+  height: 36px;
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary);
+  font-size: var(--fd-text-caption-size);
+}
+.ws-switch .fd-select {
+  border-radius: var(--fd-radius-full);
+}
+.user-text strong {
+  font-size: var(--fd-text-label-size);
+}
+/* Refonte §5 : tableaux en carte — lignes de 52 px, première et dernière cellule alignées sur la carte */
+.fd-card .fd-table td {
+  height: 52px;
+}
+.fd-card .fd-table :is(th, td):first-child {
+  padding-left: var(--fd-space-6);
+}
+.fd-card .fd-table :is(th, td):last-child {
+  padding-right: var(--fd-space-6);
+}
+.fd-card > .fd-table {
+  width: calc(100% + 2 * var(--fd-space-6));
+  margin-inline: calc(-1 * var(--fd-space-6));
 }

@@ -19,8 +19,16 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await page.goto(`${APP}/#/demos/${DEMO2}/analytics`);
   await page.waitForSelector('.stat-tile');
   ok((await page.locator('.stat-value').first().textContent()) === '120', 'KPI vues');
-  ok((await page.locator('.chart-bar').count()) === 3, 'histogramme des vues par jour');
+  ok((await page.locator('.chart-col').count()) === 3, 'histogramme des vues par jour');
   ok((await page.locator('.funnel tbody tr').count()) >= 1, 'entonnoir par étape');
+  ok(
+    (await page.locator('.chart-col__v').first().textContent()) === '30',
+    'valeur écrite au-dessus de chaque barre',
+  );
+  ok((await page.locator('.donut circle').count()) === 4, 'donut : piste + 3 origines');
+  ok((await page.locator('.stat-tile.fd-card--hero').count()) === 1, 'une seule carte KPI héro');
+  await page.getByRole('button', { name: 'Visiteurs', exact: true }).click();
+  ok((await page.locator('.chart-col__v').first().textContent()) === '24', 'bascule Vues / Visiteurs');
   await page.waitForSelector('text=prospect@globex.example', { timeout: 3000 }).catch(() => null);
   ok((await page.locator('text=prospect@globex.example').count()) === 1, 'leads de la démo listés');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/analytics-demo.png`, fullPage: true });

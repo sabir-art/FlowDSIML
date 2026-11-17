@@ -367,11 +367,22 @@ async function install(page, state = seed()) {
               { stepIndex: 2, visitors: 41 },
             ],
             daily: [
-              { day: '2026-11-15', views: 30 },
-              { day: '2026-11-16', views: 50 },
-              { day: '2026-11-17', views: 40 },
+              { day: '2026-11-15', views: 30, visitors: 24 },
+              { day: '2026-11-16', views: 50, visitors: 38 },
+              { day: '2026-11-17', views: 40, visitors: 28 },
             ],
+            sources: { direct: 62, embed: 34, link: 24 },
           });
+        case 'workspace_kpis': {
+          const previous = a.p_to && Date.parse(a.p_to) < Date.now() - 86400000;
+          const pub = t.demos.filter((d) => d.status === 'published' && !d.deleted_at).length;
+          return json(route, 200, {
+            views: (previous ? 96 : 120) * pub,
+            visitors: (previous ? 80 : 90) * pub,
+            completions: (previous ? 30 : 40) * pub,
+            leads: (previous ? 0 : 1) * pub,
+          });
+        }
         case 'duplicate_demo': {
           const src = t.demos.find((d) => d.id === a.p_demo);
           const id = `demo-${crypto.randomUUID().slice(0, 6)}`;

@@ -1,4 +1,5 @@
-import { Download } from 'lucide-react';
+import { BarChart3, Download, Eye, Mail, Route, Users } from 'lucide-react';
+import { formatNumber } from '../../lib/format';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -42,23 +43,32 @@ export function AnalyticsPage() {
   const pct = (v: number) => `${Math.round(v * 100)} %`;
 
   return (
-    <div className="stack">
-      <div className="page-head">
-        <h1>{t('analytics.workspaceTitle')}</h1>
-      </div>
-      <PeriodPicker days={days} setDays={setDays} />
-      <div className="stat-row">
-        <StatTile label={t('analytics.views')} value={String(sum('views'))} />
-        <StatTile label={t('analytics.visitors')} value={String(sum('visitors'))} />
+    <div className="stack page-wide">
+      <header className="page-head page-head--refonte">
+        <div className="page-head__titles">
+          <h1>{t('analytics.workspaceTitle')}</h1>
+          <p className="page-head__sub">{t('analytics.kpis', { count: days })}</p>
+        </div>
+        <div className="page-head__actions">
+          <PeriodPicker days={days} setDays={setDays} />
+        </div>
+      </header>
+      <section className="stat-row" aria-label={t('analytics.kpis', { count: days })}>
+        <StatTile hero icon={<Eye />} label={t('analytics.views')} value={formatNumber(sum('views'))} />
+        <StatTile icon={<Users />} label={t('analytics.visitors')} value={formatNumber(sum('visitors'))} />
         <StatTile
+          icon={<Route />}
           label={t('analytics.completion')}
           value={pct(completionRate(sum('visitors'), sum('completions')))}
         />
-        <StatTile label={t('analytics.leads')} value={String(sum('leads'))} />
-      </div>
+        <StatTile icon={<Mail />} label={t('analytics.leads')} value={formatNumber(sum('leads'))} />
+      </section>
       <Card>
-        <div className="row" style={{ justifyContent: 'space-between' }}>
-          <h2 style={{ marginTop: 0 }}>{t('analytics.byDemo')}</h2>
+        <div className="fd-card__head">
+          <span className="fd-icon-chip" aria-hidden="true">
+            <BarChart3 />
+          </span>
+          <h2 className="fd-card__title">{t('analytics.byDemo')}</h2>
           <Button
             icon={<Download />}
             onClick={() =>

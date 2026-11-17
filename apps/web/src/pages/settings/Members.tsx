@@ -1,4 +1,6 @@
 import { formatDate } from '../../lib/format';
+import { initials } from '../../lib/initials';
+export { initials };
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Copy, LogOut, Send, Trash2, UserMinus } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
@@ -21,15 +23,6 @@ interface MemberRow {
 
 export function inviteUrl(token: string) {
   return `${APP_URL}#/invite/${token}`;
-}
-
-/** Initiales pour l'avatar : « Marie Durand » → « MD », « jean@x.fr » → « J ». */
-export function initials(nameOrEmail: string) {
-  const base =
-    nameOrEmail.includes('@') && !nameOrEmail.includes(' ') ? nameOrEmail.split('@')[0]! : nameOrEmail;
-  const parts = base.split(/[\s._-]+/).filter(Boolean);
-  const letters = parts.length > 1 ? parts[0]![0]! + parts[parts.length - 1]![0]! : (parts[0]?.[0] ?? '?');
-  return letters.toUpperCase();
 }
 
 export function Members() {

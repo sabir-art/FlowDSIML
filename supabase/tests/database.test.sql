@@ -2,7 +2,7 @@
 -- Exécution : `supabase test db` (Docker) ou supabase/tests/local/run.sh (Postgres nu).
 begin;
 set search_path = public, extensions;
-select plan(38);
+select plan(41);
 
 -- Utilisateurs de test
 insert into auth.users (id, email) values
@@ -130,6 +130,9 @@ reset role;
 
 select pg_temp.login('00000000-0000-0000-0000-00000000000a', 'alice@example.com');
 select is((select (public.demo_analytics('00000000-0000-0000-0000-0000000000d1') ->> 'completions')::int), 1, 'analytics : 1 complétion');
+select is((select (public.demo_analytics('00000000-0000-0000-0000-0000000000d1') -> 'sources' ->> 'link')::int), 1, 'analytics : vue attribuée au lien personnalisé (origine des vues)');
+select is((select (public.workspace_kpis((select workspace_id from public.demos where id = '00000000-0000-0000-0000-0000000000d1'), now() - interval '1 day') ->> 'views')::int), 1, 'KPI du workspace : 1 vue');
+select throws_ok($$ select public.workspace_kpis(gen_random_uuid(), now() - interval '1 day') $$, '42501', null, 'KPI du workspace : refusé hors membre');
 
 -- ===== Duplication =====
 create temp table dup as select public.duplicate_demo('00000000-0000-0000-0000-0000000000d1') as id;

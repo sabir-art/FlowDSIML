@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from '../lib/useMediaQuery';
 import { BrandMark } from './BrandMark';
+import { initials } from '../lib/initials';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -170,12 +171,12 @@ export function Layout() {
         </nav>
         <div className="spacer" />
         <div className="user-block">
-          <span className="avatar" aria-hidden="true">
-            {(profile?.full_name || user?.email || '?').slice(0, 1).toUpperCase()}
+          <span className="avatar avatar--brand" aria-hidden="true">
+            {initials(profile?.full_name || user?.email || '?')}
           </span>
           <span className="user-text">
-            <strong>{profile?.full_name || t('nav.profile')}</strong>
-            <span>{user?.email}</span>
+            <strong>{profile?.full_name || user?.email}</strong>
+            <span>{current ? t(`roles.${current.role}`) : user?.email}</span>
           </span>
           <Menu
             label={t('nav.account')}

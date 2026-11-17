@@ -595,6 +595,9 @@ isOneToOne: false
               "completions": number,"demo_id": string,"leads": number,"views": number,"visitors": number
             }[]
                            },
+"workspace_kpis":
+{ Args: { "p_from": string,"p_to"?: string,"p_workspace": string }; Returns: Json
+                           },
 "workspace_usage":
 { Args: { "p_workspace": string }; Returns: Json
                            }
