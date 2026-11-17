@@ -341,3 +341,36 @@ Fusion des deux branches **sans conflit**, 4 bancs e2e sans erreur, nouvel audit
 | M-A3 dégradé codé en dur du player, M-A5 « ● » de la popup, M-A6 jaune du flou | à vérifier à la prochaine livraison du player / de l'extension |
 
 **Table d'icônes alignée** avec les choix du dev (`composants.md` §15.1) : Hotspot `Target`, Modifier `Pencil`, Flou `EyeOff` ; « Dépublier » passe à `GlobeLock` pour ne plus partager `EyeOff` avec le flou.
+
+### Recette finition, version intégrée (`claude/dazzling-lamport-bu517g` @ `b43619a`)
+
+Base : les 20 captures du dev (`docs/tech/captures/finition/`, prises sur `40224b7`, **avant** le correctif d'alerte `a69e35d`) puis une **re-capture sur la version intégrée** avec le même script (`apps/web/e2e/screens.cjs` + faux Supabase) et des mesures DOM. Captures : `docs/ux/recette/finition3/`.
+
+**Résolu depuis la dernière vérification**
+
+| Point | Constat |
+|---|---|
+| Alertes (M1) | ✅ Bordure fine uniforme, plus de barre à gauche. La barre visible dans `03`, `04` et `09` du dev date d'avant `a69e35d` |
+| Curseur « Arrondi » | ✅ Couleur de la marque (`accent-color`), plus le bleu du navigateur |
+| Pastilles de couleur | ✅ 40 × 40 px, alignées sur les champs |
+| M-A5 popup de l'extension | ✅ Le « ● » est remplacé par une pastille CSS de 8 px (indicateur d'enregistrement, acceptable) |
+| Barre latérale « coupée à 900 px » | ✅ Sans objet : la barre est `sticky` en `100vh`, elle suit le défilement. Ce n'est qu'un effet des captures pleine page (`fullPage`). Je retire ce point de la liste précédente |
+
+**Écarts restants (dev)**
+
+| # | Écran | Écart | Correction attendue |
+|---|---|---|---|
+| FI1 | Tableau de bord, menu ⋯ d'une carte | ❌ **Bloquant** : le menu a 6 actions mais **une seule est visible** (« Modifier »). Il est coupé par `overflow: hidden` sur `.demo-card` (`demos.css:109`). Bas du menu à 712 px, bas de la carte à 488 px | Rendre le menu dans un portail (ou `position: fixed`), ou retirer `overflow: hidden` de la carte et arrondir la vignette à part |
+| FI2 | Éditeur, panneau Étape (« Zoom sur une zone », « Bouton d'action (CTA) ») | ❌ Cases à cocher natives placées dans un `<legend>` de `fieldset` : décalage de **3 px** vers la droite par rapport aux champs (x = 1140 contre 1137), **3 px** seulement entre la case et le libellé (8 px attendus), case non centrée verticalement sur le texte | Sortir la case du `<legend>` et utiliser `.fd-check` (case 16 px, `gap` 8 px, `align-items: center`), alignée sur le bord gauche des champs |
+| FI3 | Éditeur, panneau Hotspot | ❌ Même cause : « Bouton d'action (CTA) » (dans un `legend`, x = 1140) n'est pas alignée avec « Animation de pulsation » (x = 1137) juste en dessous | Idem FI2 ; les deux cases doivent partager la même colonne |
+| FI4 | Éditeur, canevas (ED2) | ❌ Le hotspot est un **rectangle saumon/rose** (fond Ember à 18 % et bordure de 2 px) avec un numéro. La bulle n'est pas prévisualisée, alors que le player affiche une pastille et une bulle (`16-player`) | Afficher sur le canevas ce que verra le visiteur : la pastille Ember (pulsation désactivable) et la bulle avec titre, texte et « Suivant », positionnée comme dans le player. La zone cliquable reste en pointillés fins au survol et à la sélection, sans aplat coloré |
+| FI5 | Panneaux de l'éditeur (Étape, Design, Hotspot) | ⚠️ **36 px** entre deux champs au lieu de 20 px (marge de `.fd-field` de 20 px **plus** le `gap` de 16 px du conteneur). Le panneau paraît « troué » (captures `05`, `06`, `08`) | Dans les conteneurs en `flex`/`grid` avec `gap`, mettre `margin-bottom: 0` sur `.fd-field` et un `gap: 20px`, ou retirer le `gap` du conteneur |
+| FI6 | Design, champ Logo (F14) | ⚠️ Toujours « Choose File / No file chosen » en anglais, texte du navigateur même en `lang="fr"`, et décalé de 6 px | Masquer l'`input` natif et afficher un bouton secondaire `ImageUp` « Choisir un logo » + le nom du fichier ou « Aucun fichier » (i18n) |
+| FI7 | Réglages, variables | ⚠️ `fieldset` natif : la légende `{{company}}` coupe la bordure du cadre | Carte simple (bordure 1 px, rayon `md`) avec un en-tête « `{{company}}` + Supprimer » sur une ligne, sans `legend` |
+| FI8 | Partage (P8) | ⚠️ « Dépublier » reste un **bouton rouge plein** au même niveau qu'« Ouvrir ». Version publiée affichée « v1 — — en ligne » (date vide, puce native). Champ Expiration « mm/dd/yyyy » au format US | « Dépublier » en bouton `ghost` ou menu ⋯, avec confirmation. Versions : « v1 · 17 nov. 2026 · En ligne », sans puce. Date au format de la langue |
+| FI9 | Leads et analytics d'une démo | ⚠️ Recherche 40 px à côté de « Exporter en CSV » à 36 px sur la même rangée | Même hauteur (`md`, 40 px) |
+| FI10 | Analytics, entonnoir | ⚠️ Libellés « 90 (100 %) » en texte foncé **dans** la barre Lagoon : contraste insuffisant | Libellé hors de la barre, à droite, en `text-muted` |
+| FI11 | Player (M-A3) | ❌ Dégradé codé en dur toujours présent (`apps/player/src/player.css:28`) | `background: var(--fd-player-backdrop)` (couleur unie `stone-50`) |
+| FI12 | Éditeur, flou et zoom (M-A6) | ❌ `#ffcc00` codé en dur (`editor.css:233` et `:237`), hors palette | `var(--fd-color-accent)` (Ember) ou `--fd-color-focus` |
+
+**Bilan** : 5 points résolus. 12 écarts ouverts, dont 4 bloquants pour la finition : le menu ⋯ coupé (FI1), les cases à cocher (FI2 et FI3) et le hotspot sur le canevas (FI4). Aucun de ces écarts n'est dans `packages/ui` : tous relèvent du code applicatif.

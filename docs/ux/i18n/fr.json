@@ -88,7 +88,7 @@
       "google": "S'inscrire avec Google",
       "name": "Nom complet",
       "email": "Email professionnel",
-      "emailPlaceholder": "nom@entreprise.com",
+      "emailPlaceholder": "nom@entreprise.example",
       "password": "Mot de passe",
       "passwordHelp": "8 caractères minimum.",
       "strength": {
@@ -777,7 +777,7 @@
   },
   "validation": {
     "required": "Ce champ est obligatoire.",
-    "email": "Saisissez une adresse email valide, par exemple nom@entreprise.com.",
+    "email": "Saisissez une adresse email valide, par exemple nom@entreprise.example.",
     "passwordMin": "Le mot de passe doit contenir au moins {{min}} caractères.",
     "url": "Saisissez une URL complète, commençant par https://.",
     "slug": "Utilisez uniquement des lettres minuscules, des chiffres et des tirets.",

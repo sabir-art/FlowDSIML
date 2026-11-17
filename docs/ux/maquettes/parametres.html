@@ -46,7 +46,7 @@
           <div class="form-sec"><div class="intro"><h2 class="t-h3">Identité</h2><p class="t-caption muted">Visible par les membres et dans les emails d'invitation.</p></div>
             <div><div class="logo-up"><span class="ws-logo">A</span><div class="col"><button class="btn btn-secondary btn-sm">Changer le logo</button><span class="help">PNG ou SVG carré, 512 px minimum</span></div></div>
               <div class="field" style="margin-top:20px"><label for="wn">Nom du workspace</label><input id="wn" class="input" value="Acme Analytics"></div>
-              <div class="field"><label for="wu">Site web</label><input id="wu" class="input" value="https://acme-analytics.io"></div></div></div>
+              <div class="field"><label for="wu">Site web</label><input id="wu" class="input" value="https://acme-analytics.example"></div></div></div>
           <div class="form-sec"><div class="intro"><h2 class="t-h3">Langue et région</h2></div>
             <div><div class="field"><label for="wl">Langue par défaut des nouvelles démos</label><select id="wl" class="select"><option>Français</option><option>English</option></select></div>
             <div class="field"><label for="wt">Fuseau horaire des analytics</label><select id="wt" class="select"><option>Europe/Paris (UTC+1)</option></select></div></div></div>
@@ -94,8 +94,8 @@
               <div class="field"><label for="bh">Couleur du hotspot</label><div class="row"><span style="width:32px;height:32px;border-radius:8px;background:#E8541F;flex:none"></span><input id="bh" class="input t-mono" value="#E8541F"></div></div>
               <div class="field"><label for="bf">Police</label><select id="bf" class="select"><option>Instrument Sans (par défaut)</option><option>Inter</option><option>Police personnalisée…</option></select></div></div></div>
           <div class="form-sec"><div class="intro"><h2 class="t-h3">Page publique</h2><p class="t-caption muted">L'en-tête affiché autour de vos démos partagées par lien.</p></div>
-            <div><div class="field"><label for="pl1">Bouton principal</label><div class="grid" style="grid-template-columns:1fr 1.4fr;gap:8px"><input id="pl1" class="input" value="Essai gratuit"><input class="input t-mono" aria-label="URL du bouton principal" value="https://acme-analytics.io/signup"></div></div>
-              <div class="field"><label for="pl2">Bouton secondaire <span class="opt">(facultatif)</span></label><div class="grid" style="grid-template-columns:1fr 1.4fr;gap:8px"><input id="pl2" class="input" value="Voir les tarifs"><input class="input t-mono" aria-label="URL du bouton secondaire" value="https://acme-analytics.io/pricing"></div></div>
+            <div><div class="field"><label for="pl1">Bouton principal</label><div class="grid" style="grid-template-columns:1fr 1.4fr;gap:8px"><input id="pl1" class="input" value="Essai gratuit"><input class="input t-mono" aria-label="URL du bouton principal" value="https://acme-analytics.example/signup"></div></div>
+              <div class="field"><label for="pl2">Bouton secondaire <span class="opt">(facultatif)</span></label><div class="grid" style="grid-template-columns:1fr 1.4fr;gap:8px"><input id="pl2" class="input" value="Voir les tarifs"><input class="input t-mono" aria-label="URL du bouton secondaire" value="https://acme-analytics.example/pricing"></div></div>
               <div class="setting" style="margin-top:12px"><div><b>Masquer « Fait avec FlowDSIML »</b><p class="t-caption muted">Disponible à partir du plan Solo.</p></div><span class="switch"><input type="checkbox" checked aria-label="Masquer le filigrane"><span></span></span></div></div></div>
         </section>
 
@@ -113,7 +113,7 @@
         <!-- Profil -->
         <section role="tabpanel" id="s-me" aria-labelledby="st-me" hidden class="card">
           <div class="form-sec"><div class="intro"><h2 class="t-h3">Profil</h2></div>
-            <div><div class="field"><label for="pn">Nom</label><input id="pn" class="input" value="Camille Martin"></div><div class="field"><label for="pe">Email</label><input id="pe" class="input" value="camille@acme.io"></div></div></div>
+            <div><div class="field"><label for="pn">Nom</label><input id="pn" class="input" value="Camille Martin"></div><div class="field"><label for="pe">Email</label><input id="pe" class="input" value="camille@acme.example"></div></div></div>
           <div class="form-sec"><div class="intro"><h2 class="t-h3">Préférences</h2></div>
             <div><div class="field"><label for="pl">Langue de l'interface</label><select id="pl" class="select"><option>Français</option><option>English</option></select></div>
               <fieldset class="field" style="border:0;padding:0"><legend class="label" style="margin-bottom:6px">Apparence</legend><div class="segmented" role="radiogroup" data-seg><button role="radio" aria-checked="true"><i data-icon="monitor"></i>Système</button><button role="radio" aria-checked="false"><i data-icon="sun"></i>Clair</button><button role="radio" aria-checked="false"><i data-icon="moon"></i>Sombre</button></div></fieldset>
@@ -135,7 +135,7 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-invite-t">
     <div class="modal-head"><h2 id="m-invite-t">Inviter des membres</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
     <div class="modal-body">
-      <div class="field"><label for="ie">Adresses email</label><textarea id="ie" class="textarea" placeholder="nom@acme.io, autre@acme.io">paul@acme.io, sarah@acme.io</textarea><span class="help">Séparez les adresses par une virgule ou un retour à la ligne.</span></div>
+      <div class="field"><label for="ie">Adresses email</label><textarea id="ie" class="textarea" placeholder="nom@acme.example, autre@acme.example">paul@acme.example, sarah@acme.example</textarea><span class="help">Séparez les adresses par une virgule ou un retour à la ligne.</span></div>
       <div class="field"><label for="ir">Rôle</label><select id="ir" class="select"><option>Éditeur : crée et publie des démos</option><option>Lecteur : consulte les démos et les analytics</option><option>Admin : gère aussi les membres et la marque</option></select></div>
       <div class="alert" style="margin-top:20px"><i data-icon="info"></i><span>2 sièges seront utilisés. Il en restera 2 sur les 10 de votre plan.</span></div>
     </div>
@@ -157,7 +157,7 @@
   </div>
 </div>
 <script>
-const M = [['Camille Martin','camille@acme.io','Propriétaire','Active maintenant','CM',true],['Thomas Bernard','thomas@acme.io','Admin','il y a 2 h','TB'],['Inès Haddad','ines@acme.io','Éditeur','hier','IH'],['Hugo Lefèvre','hugo@acme.io','Éditeur','il y a 4 j','HL'],['Nina Roux','nina@acme.io','Lecteur','il y a 2 sem.','NR'],['paul@acme.io','Invitation envoyée le 15 nov.','Éditeur',null,'P']];
+const M = [['Camille Martin','camille@acme.example','Propriétaire','Active maintenant','CM',true],['Thomas Bernard','thomas@acme.example','Admin','il y a 2 h','TB'],['Inès Haddad','ines@acme.example','Éditeur','hier','IH'],['Hugo Lefèvre','hugo@acme.example','Éditeur','il y a 4 j','HL'],['Nina Roux','nina@acme.example','Lecteur','il y a 2 sem.','NR'],['paul@acme.example','Invitation envoyée le 15 nov.','Éditeur',null,'P']];
 document.addEventListener('fd:ready', () => {
   const tb = document.getElementById('members');
   M.forEach(([n,e,r,a,i,me]) => tb.insertAdjacentHTML('beforeend', `<tr><td><div class="row"><span class="avatar" ${a===null?'style="background:var(--fd-stone-100);color:var(--fd-stone-600)"':''}>${i}</span><div><b>${n}</b>${me?' <span class="badge">Vous</span>':''}<div class="t-caption subtle">${e}</div></div></div></td>
