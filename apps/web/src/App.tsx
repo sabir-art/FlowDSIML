@@ -22,6 +22,9 @@ import { DemosPage } from './pages/demos/DemosPage';
 
 // Pages lourdes chargées à la demande (éditeur, analytics, partage).
 const EditorPage = lazy(() => import('./pages/editor/EditorPage').then((m) => ({ default: m.EditorPage })));
+const QuizEditorPage = lazy(() =>
+  import('./pages/editor/quiz/QuizEditorPage').then((m) => ({ default: m.QuizEditorPage })),
+);
 const DemoAnalyticsPage = lazy(() =>
   import('./pages/analytics/DemoAnalyticsPage').then((m) => ({ default: m.DemoAnalyticsPage })),
 );
@@ -83,6 +86,16 @@ export function App() {
                 element={
                   <RequireAuth>
                     <Onboarding />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/demos/:demoId/quiz"
+                element={
+                  <RequireAuth>
+                    <RequireWorkspace>
+                      <QuizEditorPage />
+                    </RequireWorkspace>
                   </RequireAuth>
                 }
               />

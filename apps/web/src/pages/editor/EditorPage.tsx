@@ -1,5 +1,5 @@
 import { GuidedTourPanel, ReadingModePanel } from './panels/GuidedDemoPanels';
-import { ArrowLeft, Eye, EyeOff, MousePointer2, Share2, Target } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, GraduationCap, MousePointer2, Share2, Target } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -204,6 +204,11 @@ export function EditorPage() {
           <Button icon={<Eye />} onClick={preview} disabled={!editor.steps.length}>
             {t('editor.preview')}
           </Button>
+          <Link className="fd-btn" to={`/demos/${demoId}/quiz`}>
+            <GraduationCap size={16} aria-hidden="true" />
+            {t('editor.quiz.open')}
+            {editor.questions.length > 0 && <span className="fd-badge">{editor.questions.length}</span>}
+          </Link>
           <Link className="fd-btn" to={`/demos/${demoId}/share`}>
             <Share2 size={16} aria-hidden="true" />
             {t('editor.share')}

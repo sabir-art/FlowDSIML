@@ -37,6 +37,8 @@ interface Props {
   values: VariableValues;
   tracker: Tracker;
   preview?: boolean;
+  /** F2 : aperçu « Tester le quiz » ouvert directement sur le quiz. */
+  startQuiz?: boolean;
   onLead: (
     form: LeadFormT,
     data: { email: string; fields: Record<string, string>; consent: boolean },
@@ -59,7 +61,7 @@ function useCompact() {
   return compact;
 }
 
-export function Player({ manifest: m, values, tracker, preview, onLead }: Props) {
+export function Player({ manifest: m, values, tracker, preview, startQuiz, onLead }: Props) {
   const t = strings(m.locale);
   const compact = useCompact();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -96,8 +98,8 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
   const choices = step.options.choices.filter((c) => choiceTarget(m, c.action));
   const [visited, setVisited] = useState<Set<number>>(() => new Set([0]));
   /** F2 : quiz du module (après la dernière étape) ; gardé monté pendant « Revoir l'étape ». */
-  const [view, setView] = useState<'steps' | 'quiz'>('steps');
-  const [quizOpened, setQuizOpened] = useState(false);
+  const [view, setView] = useState<'steps' | 'quiz'>(() => (startQuiz && m.quiz ? 'quiz' : 'steps'));
+  const [quizOpened, setQuizOpened] = useState(() => !!(startQuiz && m.quiz));
   const [reviewing, setReviewing] = useState(false);
   const quizGate = !!m.quiz && m.quiz.required && m.quiz.mode === 'quiz';
   const QUIZ_KEY = `fd.quiz.${m.demoId}`;

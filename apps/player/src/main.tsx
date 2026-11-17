@@ -20,6 +20,7 @@ type State =
       values: VariableValues;
       linkToken: string | null;
       preview: boolean;
+      startQuiz?: boolean;
     };
 
 const inIframe = window.parent !== window;
@@ -59,6 +60,8 @@ function App() {
               ),
               linkToken: null,
               preview: true,
+              // « Tester le quiz » (éditeur) : l'aperçu s'ouvre directement sur le quiz
+              startQuiz: (e.data as { startQuiz?: boolean }).startQuiz === true,
             });
         };
         addEventListener('message', onMsg);
@@ -142,6 +145,7 @@ function App() {
       values={state.values}
       tracker={tracker!}
       preview={state.preview}
+      startQuiz={state.startQuiz}
       onLead={async (_form, data) => {
         if (state.preview) return;
         await submitLead({

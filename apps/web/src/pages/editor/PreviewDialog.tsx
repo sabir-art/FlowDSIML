@@ -10,7 +10,16 @@ import { usePlan } from '../../lib/plan';
  * Aperçu intégré (ED12) : le player réel dans une iframe, alimenté par postMessage avec le
  * manifeste brouillon. Message d'erreur si le player ne répond pas en 8 s.
  */
-export function PreviewDialog({ manifest, onClose }: { manifest: Manifest | null; onClose: () => void }) {
+export function PreviewDialog({
+  manifest,
+  onClose,
+  startQuiz = false,
+}: {
+  manifest: Manifest | null;
+  onClose: () => void;
+  /** F2 : « Tester le quiz » ouvre l'aperçu directement sur le quiz (tentatives non comptées). */
+  startQuiz?: boolean;
+}) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
@@ -33,7 +42,7 @@ export function PreviewDialog({ manifest, onClose }: { manifest: Manifest | null
     const onMsg = (e: MessageEvent) => {
       if (e.origin !== origin || e.source !== frame.current?.contentWindow) return;
       if ((e.data as { type?: string })?.type === 'fd:preview-ready') {
-        frame.current?.contentWindow?.postMessage({ type: 'fd:preview', manifest }, origin);
+        frame.current?.contentWindow?.postMessage({ type: 'fd:preview', manifest, startQuiz }, origin);
         setStatus('ready');
       }
     };
@@ -43,7 +52,7 @@ export function PreviewDialog({ manifest, onClose }: { manifest: Manifest | null
       removeEventListener('message', onMsg);
       clearTimeout(timer);
     };
-  }, [manifest, origin, device]);
+  }, [manifest, origin, device, startQuiz]);
 
   return (
     <dialog ref={ref} className="preview-dialog" onClose={onClose} aria-label={t('editor.preview')}>

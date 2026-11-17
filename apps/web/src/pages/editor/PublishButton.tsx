@@ -10,6 +10,8 @@ import { publishDemo } from '../../lib/publish';
 import { errorMessage } from '../../lib/errors';
 import type { DemoEditor } from './useDemoEditor';
 import { GdprDialog, type GdprAck } from './GdprDialog';
+import { firstInvalid } from './quizValidation';
+import { asAnswers, asSettings } from './types';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 
 export function PublishButton({
@@ -50,6 +52,16 @@ export function PublishButton({
         secondary: { label: t('planForms.seePlans'), onSelect: () => navigate('/settings/plans') },
       });
       if (!yes) return;
+    }
+    // F2 : publication bloquée tant qu'une question du quiz est incomplète
+    const mode = asSettings(demo.settings).quiz?.mode === 'survey' ? 'survey' : 'quiz';
+    const bad = firstInvalid(
+      editor.questions.map((q) => ({ prompt: q.prompt, answers: asAnswers(q.answers) })),
+      mode,
+    );
+    if (bad) {
+      setError(t('errors.quizInvalid', { n: bad }));
+      return;
     }
     // F1 : avertissement RGPD à chaque publication publique (toute publication l'est jusqu'à F3)
     setGdprOpen(true);

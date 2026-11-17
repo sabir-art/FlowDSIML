@@ -1,6 +1,7 @@
 import { MANIFEST_SCHEMA_VERSION, manifestSchema, type Manifest } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
-import { asAction, asCta, asFields, asRects, asSettings, asStepOptions, asZoom } from './types';
+import { asAction, asAnswers, asCta, asFields, asRects, asSettings, asStepOptions, asZoom } from './types';
+import { questionErrors } from './quizValidation';
 
 /**
  * Manifeste de prévisualisation construit côté client (miroir de publish_demo en SQL),
@@ -68,6 +69,7 @@ export function buildDraftManifest(ed: DemoEditor): Manifest {
     })),
     allowedEmbedOrigins: settings.allowedEmbedOrigins ?? [],
     cta: settings.cta ?? null,
+    quiz: draftQuiz(ed, settings),
     checklist: settings.checklist?.enabled
       ? {
           title: (settings.checklist.title ?? '').slice(0, 80),
@@ -81,4 +83,32 @@ export function buildDraftManifest(ed: DemoEditor): Manifest {
         }
       : null,
   });
+}
+
+/** F2 : quiz du brouillon (questions valides seulement : l'aperçu reste jouable pendant l'édition). */
+function draftQuiz(ed: DemoEditor, settings: ReturnType<typeof asSettings>) {
+  const q = settings.quiz ?? {};
+  const mode = q.mode === 'survey' ? 'survey' : 'quiz';
+  const questions = ed.questions
+    .map((x) => ({ ...x, answers: asAnswers(x.answers) }))
+    .filter((x) => Object.keys(questionErrors(x, mode)).length === 0)
+    .map((x) => ({
+      id: x.id,
+      type: x.type,
+      prompt: x.prompt,
+      answers: x.answers,
+      explanation: x.explanation,
+      stepId: x.step_id,
+      points: x.points,
+    }));
+  if (!questions.length) return null;
+  return {
+    mode,
+    threshold: q.threshold ?? 70,
+    attempts: q.attempts ?? 3,
+    feedback: q.feedback ?? 'each',
+    shuffle: q.shuffle ?? true,
+    required: q.required ?? true,
+    questions,
+  };
 }
