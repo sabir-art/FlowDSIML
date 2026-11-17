@@ -1,169 +1,154 @@
-# FlowDSIML : identité visuelle
+# FlowDSIML : identité visuelle (refonte DSI des Missions Locales)
 
-> Livrable 1 de la phase 2, design. Il définit l'identité de l'**application** (dashboard, éditeur), le **thème par défaut du player** et les règles de déclinaison.
-> L'identité est originale : elle ne reprend ni la palette, ni le logo, ni la typographie de Guideflow ou d'un concurrent.
-> Les valeurs font foi dans `packages/ui/src/tokens.ts`. `tokens.css` en est la traduction.
-
----
+> Version du 17 nov. 2026. Elle remplace l'identité Lagoon / Ember / Stone, **abandonnée** à la demande du client.
+> Charte source : `docs/ux/brand-dsi/` (logos officiels et couleurs extraites du Figma client).
+> Tokens : `packages/ui/src/tokens.ts`, générés en `tokens.css` avec `node packages/ui/src/tokens.build.mjs`.
+> Maquettes de référence : `docs/ux/maquettes/refonte/` (dashboard, analytics, éditeur, en clair et en sombre).
+> Spec pour le développement : `docs/ux/refonte.md`.
 
 ## 1. Intention
 
-**FlowDSIML trace le chemin à travers un produit.** L'identité s'appuie sur deux idées :
-
-1. **Le sentier**. Une démo est un parcours d'étapes reliées. Le logo, les connecteurs du rail d'étapes et les barres de progression reprennent ce motif : des points reliés par une courbe.
-2. **Le signal**. Le hotspot est le seul élément qui doit attirer l'œil. Une couleur chaude (*Ember*) lui est réservée, ainsi qu'aux actions de conversion. Le reste de l'interface reste calme : neutres chauds et vert lagon.
-
-Ton visuel : professionnel, chaleureux, net. Aplats, bordures fines, aucun ornement gratuit : pas de dégradés décoratifs, d'effets néon, de verre dépoli, d'emojis ni de barres d'accent (liste complète : `composants.md` §15.6). Beaucoup d'espace et une hiérarchie typographique forte.
+FlowDSIML est l'outil de démos interactives de la **DSI des Missions Locales**. L'interface doit :
+- reprendre sans ambiguïté la charte institutionnelle : prune, framboise, bleu, vert, orange ;
+- avoir l'allure d'un tableau de bord moderne : fond gris-bleuté clair, grandes cartes blanches très arrondies, navigation en pilules, gros chiffres, beaucoup d'air ;
+- rester sobre et accessible (WCAG 2.1 AA). Les couleurs vives servent à **signaler** (KPI héro, graphiques, hotspot), jamais à décorer.
 
 ## 2. Logo
 
-![Logo FlowDSIML](assets/logo.svg)
+| Fichier | Usage |
+|---|---|
+| `assets/logo-app.svg` | Logo de l'application sur fond clair : symbole DSI + « FlowDSIML » + mention « DSI des Missions Locales » |
+| `assets/logo-app-sombre.svg` | Même logo sur fond sombre (texte clair) |
+| `assets/symbole-dsi.svg` | Symbole « circuit » seul, nettoyé des fonds de l'export Figma : favicon, avatar, barre de l'éditeur, extension |
+| `brand-dsi/logo-dsi-horizontal.svg` | Logo officiel complet de la DSI (pages institutionnelles, mentions) |
+| `brand-dsi/logo-dsi-blanc.svg` | Logo officiel blanc, sur fond prune uniquement |
 
-- **Symbole** : carré arrondi (rayon 8/32) *Lagoon 600*, trois étapes blanches reliées par un sentier, la dernière en *Ember 400* (le hotspot).
-- **Logotype** : « Flow » en *Bricolage Grotesque* 700, « DSIML » en 500. Le nom reste provisoire (décision D2).
-- **Zone de protection** : ¼ de la hauteur du symbole. **Taille minimale** : 16 px pour le symbole, 80 px de large pour le logotype.
-- **Interdits** : déformer le logo, changer les couleurs du hotspot, poser le symbole sur un fond lagon sans contour.
-- **Filigrane du player** (plan Free) : symbole de 14 px et texte « Fait avec FlowDSIML » (anglais : « Made with FlowDSIML »), en bas à droite, opacité 0,9.
+Règles :
+- **Composition de l'app** : symbole de 36 × 40 px, gap de 12 px, « FlowDSIML » en Plus Jakarta Sans 800 (18 px, interlettrage −0,02 em), mention « DSI des Missions Locales » en dessous (11 px, 600, `text-subtle`).
+- Dans l'interface, composer le logo **en HTML** (image du symbole + texte), pour que le texte utilise la vraie police. Les fichiers `logo-app*.svg` servent hors de l'app (documents, e-mails) : leur texte retombe sur une police système si Plus Jakarta Sans n'est pas installée.
+- Zone de protection : la hauteur d'un rond du symbole tout autour. Taille minimale du symbole : 20 px de haut.
+- Interdits :
+  - recolorer le symbole (ses 4 couleurs sont celles de la charte) ;
+  - le poser sur un fond prune, framboise ou vert, où les traits se perdent ;
+  - l'étirer, lui ajouter une ombre ou un contour.
+- Favicon : `symbole-dsi.svg`.
 
 ## 3. Couleurs
 
-### 3.1 Palettes de base
+### 3.1 Couleurs de la charte
 
-| Échelle | 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950 |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| **Lagoon** (marque) | `#EEFBF8` | `#D3F4EC` | `#A8E8DA` | `#70D4C2` | `#38B8A5` | `#16998A` | `#0E7C71` | `#0D635B` | `#0F4F4A` | `#0F413D` | `#052624` |
-| **Ember** (signal) | `#FFF4EF` | `#FFE5D9` | `#FFC7AE` | `#FFA07A` | `#FF7447` | `#E8541F` | `#C93A0E` | `#A8300C` | `#872912` | `#6E2413` | `#3D0F06` |
-| **Stone** (neutres chauds) | `#F7F6F4` | `#EFEDEA` | `#E2DFDA` | `#CBC6BF` | `#8C857B` | `#77716A` | `#5F5A52` | `#48443E` | `#302D29` | `#1F1D1A` | `#141311` |
-
-Couleurs d'état. La valeur **texte** est la couleur foncée qui passe l'AA. Le **fond** est la teinte claire utilisée pour les badges et les alertes.
-
-| État | Texte et icône (clair) | Fond (clair) | Texte et icône (sombre) | Fond (sombre) |
-|---|---|---|---|---|
-| Succès | `#15803D` | `#ECFDF3` | `#4ADE80` | `#0F2A1B` |
-| Attention | `#B45309` | `#FFF7E6` | `#FBBF24` | `#2E2208` |
-| Danger | `#C9302C` | `#FEF1F1` | `#F87171` | `#331312` |
-| Info | `#2563EB` | `#EFF5FF` | `#60A5FA` | `#0F1E38` |
-
-### 3.2 Rôles sémantiques (app)
-
-| Rôle | Clair | Sombre | Usage |
-|---|---|---|---|
-| `bg` (canvas) | Stone 50 `#F7F6F4` | `#141311` | Fond de l'app, derrière les cartes |
-| `surface` | `#FFFFFF` | `#1C1A18` | Cartes, panneaux, modales |
-| `surface-sunken` | Stone 100 | `#100F0E` | Zones de travail : canevas de l'éditeur, champs désactivés |
-| `surface-raised` | `#FFFFFF` + ombre | `#24221F` | Menus, popovers |
-| `border` | Stone 200 | `#34312D` | Séparateurs décoratifs |
-| `border-strong` | Stone 400 `#8C857B` | `#7A746B` | Contour des champs et des contrôles (≥ 3:1) |
-| `text` | Stone 900 | `#F2F0EC` | Texte principal |
-| `text-muted` | Stone 600 | `#B3ADA4` | Texte secondaire |
-| `text-subtle` | Stone 500 `#77716A` | `#8F897F` | Méta-infos, placeholders (≥ 4,5:1) |
-| `primary` | Lagoon 600 | Lagoon 400 | Action principale, liens, sélection |
-| `on-primary` | `#FFFFFF` | Lagoon 950 | Texte sur `primary` |
-| `accent` | Ember 600 | Ember 400 | Conversion (CTA « Publier », « Passer au plan supérieur »), hotspot |
-| `focus` | Lagoon 500 | Lagoon 400 | Anneau de focus |
-
-**Règle d'usage** : *Lagoon* sert à **naviguer et agir**, *Ember* à **attirer et convertir**. Un écran ne doit avoir qu'un seul bouton *accent* visible.
-
-### 3.3 Contrastes vérifiés (WCAG 2.1)
-
-| Paire | Ratio | Niveau |
+| Nom | Hex | Rôle dans l'app |
 |---|---|---|
-| Texte `#1F1D1A` / blanc | 16,8:1 | AAA |
-| Texte secondaire `#5F5A52` / blanc | 6,8:1 | AA |
-| Texte discret `#77716A` / blanc | 4,8:1 | AA |
-| Blanc / primary `#0E7C71` | 5,1:1 | AA |
-| Blanc / accent `#C93A0E` | 5,1:1 | AA |
-| Contour de champ `#8C857B` / blanc | 3,7:1 | AA (composant d'interface ≥ 3:1) |
-| Sombre : texte `#F2F0EC` / `#141311` | 16,3:1 | AAA |
-| Sombre : texte discret `#8F897F` / `#1C1A18` | 5,0:1 | AA |
-| Sombre : Lagoon 950 / primary `#38B8A5` | 6,5:1 | AA |
-| Hotspot Ember 500 `#E8541F` / blanc | 3,8:1 | ≥ 3:1 (objet graphique) |
+| **Prune** | `#A3195B` | Couleur institutionnelle : action primaire (boutons pleins, liens, sélection), avatar |
+| **Framboise** | `#D60B52` | Signal : hotspot du player, erreurs et suppression, baisse dans les tendances |
+| **Bleu** | `#2897D5` | Anneau de focus, informations, série de graphique |
+| **Vert** | `#95C11F` | Carte KPI « héro » (**texte noir uniquement**), hausse dans les tendances, série de graphique |
+| **Orange** | `#F39200` | Barres des graphiques et surfaces. **Jamais pour du texte** |
+| **Noir** | `#080808` | Texte principal, pilule de navigation active, segment actif |
 
-Le script de vérification est décrit dans `docs/ux/composants.md`, § Accessibilité.
+Chaque couleur est déclinée en échelle de 50 à 950 (`--fd-prune-50` … `--fd-orange-950`), avec la teinte officielle à sa place (prune et framboise en 600, bleu et orange en 500, vert en 400). Les neutres sont une échelle **ardoise** froide (`--fd-ardoise-0` … `950`) accordée au fond `#EEF2F6`.
+
+Les anciennes variables `--fd-lagoon-*`, `--fd-ember-*` et `--fd-stone-*` restent définies comme alias vers prune, framboise et ardoise pour ne rien casser. Ne plus les utiliser dans du nouveau code.
+
+### 3.2 Rôles sémantiques (extraits)
+
+| Token `--fd-color-*` | Clair | Sombre |
+|---|---|---|
+| `bg` | ardoise 100 `#EEF2F6` | ardoise 950 `#0B0D10` |
+| `surface` (cartes) | blanc | `#15191F` |
+| `text` / `text-muted` | noir `#080808` / ardoise 600 | `#F3F5F8` / `#A9B3BF` |
+| `primary` / `on-primary` | prune 600 / blanc | prune 300 / noir |
+| `accent`, `hotspot` | framboise 600 | framboise 400 / 500 |
+| `nav-active` / `on-nav-active` | noir / blanc | `#F3F5F8` / noir |
+| `hero` / `on-hero` | vert 400 / noir | vert 400 / noir |
+| `icon-chip` (rond derrière les icônes de titre) | ardoise 100 | `#222831` |
+| `trend-up` / `trend-up-soft` | `#3F5410` / vert 100 | vert 300 / `#1C2409` |
+| `trend-down` / `trend-down-soft` | framboise 700 / framboise 50 | framboise 300 / `#36101D` |
+| `chart-1` … `chart-5` | orange, framboise, bleu, vert, prune | mêmes teintes, plus claires |
+| `chart-track` (fond des barres) | orange 100 | `#33270F` |
+| `focus` | bleu 500 | bleu 400 |
+
+### 3.3 Contrastes vérifiés (WCAG 2.1, calcul automatique sur les tokens)
+
+| Paire | Ratio | Seuil |
+|---|---|---|
+| Blanc sur prune (bouton primaire) | 7,38:1 | AA ✅ |
+| Prune sur blanc (lien) | 7,38:1 | AA ✅ |
+| Prune sur fond `#EEF2F6` | 6,56:1 | AA ✅ |
+| Blanc sur framboise | 5,21:1 | AA ✅ |
+| Noir sur vert (KPI héro) | 9,47:1 | AA ✅ |
+| Blanc sur noir (navigation active) | 20:1 | AAA ✅ |
+| Noir sur orange | 8,51:1 | AA ✅ (surfaces orange avec texte noir) |
+| ~~Blanc sur vert~~ | 2,12:1 | ❌ interdit |
+| ~~Blanc sur orange, orange sur blanc~~ | 2,35:1 | ❌ interdit pour du texte |
+| ~~Blanc sur bleu~~ | 3,24:1 | ❌ texte normal ; ✅ anneau de focus (≥ 3:1) |
+
+Les 27 paires sémantiques testées passent en sombre. En clair, une seule exception est assumée : les barres orange (`chart-1`) ont un contraste de 2,35:1 sur blanc. Comme l'information ne doit pas reposer sur la couleur seule, la **valeur est toujours écrite en texte** (étiquette au-dessus de la barre ou colonne de chiffres), et le pic est distingué par une barre noire.
 
 ## 4. Typographie
 
-Trois familles **Google Fonts**, toutes sous licence **SIL OFL**.
+- **Plus Jakarta Sans** (Google Fonts, 400 à 800) pour toute l'interface : titres et texte. Géométrique et ronde, conforme à la référence de style.
+- **JetBrains Mono** pour le code (iframe, URL, variables `{{…}}`).
+- Chargement : `@import` en tête de `packages/ui/src/base.css`.
 
-| Rôle | Famille | Graisses | Usage |
+| Style | Taille | Graisse | Usage |
 |---|---|---|---|
-| Display | **Bricolage Grotesque** | 600, 700 | Titres H1-H3, chiffres clés des analytics, logotype |
-| Texte et UI | **Instrument Sans** | 400, 500, 600 | Tout le reste : corps, libellés, boutons, tableaux |
-| Mono | **JetBrains Mono** | 400, 500 | Code d'embed, URL, variables `{{first_name}}` |
+| `display` | 40 px | 800 | Écrans d'accueil |
+| `h1` | 32 px | 800, −0,02 em | Titre de page (« grand et gras ») |
+| `kpi` | 40 px | 800, −0,03 em, chiffres tabulaires | Valeur des cartes KPI |
+| `h2` | 20 px | 700 | Titre de section |
+| `h3` | 16 px | 700 | Titre de carte (à côté de la puce d'icône) |
+| `body` / `body-lg` | 14 / 16 px | 400 | Texte |
+| `label` | 13 px | 600 | Libellés, boutons |
+| `caption` | 12 px | 500 | Métadonnées, aides |
 
-Chargement : `https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..700&family=Instrument+Sans:wght@400..600&family=JetBrains+Mono:wght@400;500&display=swap`.
-Polices de secours : `ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif`. Le **player** utilise par défaut *Instrument Sans*, remplaçable par la police du workspace.
+## 5. Formes, espacements, ombres
 
-### Échelle typographique (rem, base 16 px)
+- **Rayons** : `xs` 6 · `sm` 8 · `md` 12 (champs) · `lg` 16 (vignettes) · `xl` 20 (bulles, alertes) · `2xl` 24 (**cartes**) · `3xl` 32 · `full` (**boutons, badges, navigation, segmentés**).
+- **Cartes** : fond `surface`, sans bordure en clair (bordure 1 px en sombre), ombre `sm` très douce, padding de 24 px, gap de 20 px entre cartes.
+- **Ombres** : neutres et diffuses, jamais colorées (motif proscrit §15.6).
+- **Espacements** : échelle inchangée, en multiples de 4 px (`composants.md` §15.4). Padding de page porté à 32 px, et beaucoup d'air autour des titres.
+- **Hauteurs** : contrôles de 40 px (32 en `sm`, 48 en `lg`), éléments de navigation de 44 px.
 
-| Token | Taille / interligne | Famille, graisse | Usage |
-|---|---|---|---|
-| `display` | 2,25 rem / 1,1 | Bricolage 700 | Titre d'onboarding, chiffres clés |
-| `h1` | 1,75 rem / 1,2 | Bricolage 700 | Titre de page |
-| `h2` | 1,375 rem / 1,25 | Bricolage 600 | Titre de section, titre de modale |
-| `h3` | 1,125 rem / 1,3 | Instrument 600 | Titre de carte, de panneau |
-| `body-lg` | 1 rem / 1,5 | Instrument 400 | Texte courant du player, descriptions |
-| `body` | 0,875 rem / 1,45 | Instrument 400 | **Taille par défaut de l'app** |
-| `label` | 0,8125 rem / 1,3 | Instrument 500 | Libellés de champs, onglets, boutons sm |
-| `caption` | 0,75 rem / 1,35 | Instrument 500 | Méta-infos, badges, aide |
-| `mono` | 0,8125 rem / 1,5 | JetBrains 400 | Code |
+## 6. Composants signature
 
-Chiffres tabulaires (`font-variant-numeric: tabular-nums`) dans les tableaux et les KPI.
+Détail et règles d'usage dans `refonte.md` :
+1. **Navigation en pilules** : élément actif en pilule noire pleine, texte et icône blancs ; les autres en texte gris avec icône.
+2. **Carte KPI héro** remplie de vert DSI, avec texte noir. Une seule par rangée. Les autres KPI sont blancs.
+3. **Puce d'icône** : rond gris clair de 36 px devant le titre de chaque carte.
+4. **Badge de tendance** en pilule : vert si hausse, framboise si baisse, avec les icônes `TrendingUp` / `TrendingDown`.
+5. **Boutons** : pilules blanches pour les actions secondaires, pilule prune pour l'action principale, rond plein pour les actions iconiques (`+`, flèche).
+6. **Graphiques** :
+   - barres verticales arrondies orange sur des barres pâles, valeur affichée au-dessus, pic en noir ;
+   - donut SVG aux 4 couleurs DSI (framboise, bleu, vert, orange), avec légende et pourcentages.
 
-## 5. Espacements, grille, rayons, ombres
+## 7. Iconographie
 
-- **Espacements** : base 4 px. Échelle `0, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80` (tokens `space-0` à `space-20`, nommés en unités de 4 px).
-- **Grille de l'app** : barre latérale de 240 px (64 px repliée), contenu fluide avec un maximum de 1 200 px pour les pages de liste. L'éditeur est en **plein écran** : rail de 248 px, canevas fluide, panneau de propriétés de 320 px.
-- **Points de rupture** : `sm 640`, `md 768`, `lg 1024`, `xl 1280`, `2xl 1536`. L'éditeur exige au moins `lg`. En dessous, un écran invite à ouvrir l'éditeur sur ordinateur, alors que le player et le dashboard sont responsives.
-- **Rayons** : `xs 4` (badges), `sm 6` (champs, boutons sm), `md 8` (boutons, champs), `lg 12` (cartes, menus), `xl 16` (modales, tooltips du player), `2xl 24` (bulles d'onboarding), `full` (pastilles, hotspots, avatars).
-- **Ombres** : teintées de brun chaud (`rgba(31,29,26,…)`), jamais noir pur.
-  - `xs` : séparation subtile (boutons secondaires)
-  - `sm` : cartes
-  - `md` : menus, popovers
-  - `lg` : modales, tooltip du player
-  - `focus` : anneau de focus de 3 px *Lagoon 500* à 45 %, plus 1 px blanc
-- **Bordures** : 1 px par défaut, 2 px pour une sélection (étape active, élément sélectionné sur le canevas).
-
-## 6. Mouvement
-
-| Token | Valeur | Usage |
-|---|---|---|
-| `duration-fast` | 120 ms | Survol, pression |
-| `duration-base` | 200 ms | Ouverture d'un menu, d'un onglet ou d'un tooltip |
-| `duration-slow` | 320 ms | Modale, transition d'étape du player |
-| `ease-standard` | `cubic-bezier(.2,.8,.2,1)` | Défaut |
-| `ease-emphasized` | `cubic-bezier(.3,0,0,1.3)` | Apparition du hotspot (léger rebond) |
-| Pulsation du hotspot | 1,8 s, infinie | Anneau qui s'étend de 1× à 2,4×, opacité de 0,55 à 0 |
-
-`prefers-reduced-motion: reduce` : transitions de 0 ms, pulsation **remplacée par un anneau statique** (le hotspot reste repérable).
-
-## 7. Iconographie et illustration
-
-- **Icônes** : [Lucide](https://lucide.dev) (licence ISC). Trait de 1,75 px, tailles de 16, 20 et 24 px, couleur `currentColor`. Pas d'icônes pleines, sauf pour l'état actif d'une navigation.
-- **Illustrations d'états vides** : compositions géométriques simples (sentier, points, cadres de fenêtre) en Lagoon 100-300 et Stone 200, avec une touche Ember. Pas de personnages.
-- **Captures dans le dashboard** : vignettes 16:10, rayon `md`, bordure `border`.
+Inchangée : uniquement **Lucide** (`lucide-react` / `lucide-preact`), en 16, 18 ou 20 px avec un trait de 1,75 (`composants.md` §15.1). Dans un titre de carte, l'icône est posée dans la puce ronde `icon-chip`. Pas d'emoji ni de glyphe utilisé comme icône.
 
 ## 8. Mode sombre
 
-- Disponible pour l'**application** (dashboard, éditeur, paramètres). Choix dans le profil : Système (par défaut), Clair, Sombre. Il est appliqué par `data-theme="dark"` sur `<html>`.
-- Principe : élévation par la **luminosité de la surface** (canvas, surface, raised), pas par l'ombre. Les ombres sont plus denses mais peu visibles.
-- Le **canevas de l'éditeur** reste neutre en mode sombre, pour ne pas fausser la perception des captures : fond `#100F0E` et fine bordure.
-- Le **player** n'hérite pas du mode sombre de l'app. Il suit le thème de la démo, dont le cadre navigateur a sa propre option clair ou sombre.
+Le sélecteur Clair / Sombre / Système reste disponible, en clair par défaut.
+- Fond `#0B0D10` et cartes `#15191F` avec bordure de 1 px, car les ombres ne suffisent plus à séparer les surfaces.
+- Navigation active et segment actif en pilule claire avec texte noir.
+- Primaire prune 300 avec texte noir.
+- La carte héro garde le vert DSI avec texte noir.
+- Les captures (canevas de l'éditeur, vignettes, aperçu de partage, player) restent **claires** grâce à `.fd-player-scope`.
 
-## 9. Thème du player (personnalisable)
+## 9. Thème du player (valeurs par défaut)
 
-Le player expose des tokens `--fd-player-*`, surchargés par le thème de démo du workspace (table `themes.tokens`). Valeurs par défaut :
+- Primaire prune `#A3195B` et pastille du hotspot framboise `#D60B52`.
+- Bulle blanche avec un rayon de 20 px, police Plus Jakarta Sans.
+- Fond du player ardoise 100 `#EEF2F6`, uni (sans dégradé).
 
-| Token | Défaut | Personnalisable |
-|---|---|---|
-| `player-primary` | Lagoon 600 | oui (couleur principale) |
-| `player-on-primary` | `#FFFFFF` | calculé automatiquement (noir ou blanc selon le contraste) |
-| `player-hotspot` | Ember 500 | oui |
-| `player-tooltip-bg` | `#FFFFFF` | oui |
-| `player-tooltip-text` | Stone 900 | calculé |
-| `player-overlay` | `rgba(20,19,17,.55)` | couleur et opacité |
-| `player-radius` | 16 px | 0, 8, 16 ou 24 (« Carré », « Doux », « Rond », « Très rond ») |
-| `player-font` | Instrument Sans | police du workspace |
-| `player-backdrop` | Stone 50 `#F7F6F4` (aplat) | couleur unie ou image |
+Les workspaces peuvent toujours surcharger ces couleurs dans l'onglet Design.
 
-**Règle produit** : quand l'utilisateur choisit une couleur principale de contraste insuffisant (moins de 4,5:1 avec le texte du bouton), l'éditeur l'avertit (« Contraste faible : le texte sera difficile à lire ») et propose la variante accessible la plus proche.
+## 10. Motifs proscrits (rappel, `composants.md` §15.6)
+
+Restent interdits :
+- emojis (dont 👋), dégradés décoratifs, verre dépoli, ombres colorées, barres d'accent latérales ;
+- étincelles et icônes « IA » ;
+- texte blanc sur vert ou sur orange ;
+- orange pour du texte.
+
+Le donut est dessiné en SVG (`stroke-dasharray`), pas en `conic-gradient`.
