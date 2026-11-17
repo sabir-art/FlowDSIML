@@ -2199,5 +2199,31 @@
       "modeTraining": "Training center (learners, progress)",
       "modeDemo": "Demo Center (public, no account)"
     }
+  },
+  "soon": {
+    "badge": "Coming soon",
+    "pageTitle": "Upcoming features",
+    "aiNotice": "AI assistance features: in preparation.",
+    "aiNoticeBody": "They are not active. No data is sent to any AI service, and enabling them will require a workspace admin's approval.",
+    "aiGenerate": "Generate a demo",
+    "aiGenerateDesc": "Suggest a first draft of steps (titles, bubble text) from the captures.",
+    "aiTranslate": "Translate the demo",
+    "aiTranslateDesc": "Translate bubbles, buttons, quizzes and subtitles into another language.",
+    "aiVoice": "Subtitles and voiceover",
+    "aiVoiceDesc": "Transcribe the voice of a video step and generate a voiceover from text.",
+    "aiAssistant": "Writing assistant",
+    "aiAssistantDesc": "Rephrase a bubble, simplify a text (easy-to-read), suggest quiz questions.",
+    "crm": "CRM",
+    "crmDesc": "Automatically send leads and demo activity to your CRM.",
+    "emailing": "Email marketing tools",
+    "emailingDesc": "Add leads to a list or trigger an email sequence.",
+    "enrich": "Visitor enrichment",
+    "enrichDesc": "Identify the organisation of an anonymous visitor.",
+    "sso": "Single sign-on (SSO / SAML)",
+    "ssoDesc": "Sign in with your organisation account and manage access from your directory.",
+    "useWebhooks": "Use webhooks",
+    "whyAi": "Requires an AI provider.",
+    "whyLegal": "Not planned without a legal review: personal data processed by a third party (GDPR).",
+    "meanwhile": "Meanwhile: {{alternative}}"
   }
 }

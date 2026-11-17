@@ -2199,5 +2199,31 @@
       "modeTraining": "Centre de formation (apprenants, progression)",
       "modeDemo": "Demo Center (public, sans compte)"
     }
+  },
+  "soon": {
+    "badge": "Bientôt disponible",
+    "pageTitle": "Fonctions à venir",
+    "aiNotice": "Fonctions d'assistance par IA : en préparation.",
+    "aiNoticeBody": "Elles ne sont pas actives. Aucune donnée n'est envoyée à un service d'IA, et leur activation demandera l'accord d'un admin du workspace.",
+    "aiGenerate": "Générer une démo",
+    "aiGenerateDesc": "Proposer un premier jet d'étapes (titres, textes de bulles) à partir des captures.",
+    "aiTranslate": "Traduire la démo",
+    "aiTranslateDesc": "Traduire bulles, boutons, quiz et sous-titres dans une autre langue.",
+    "aiVoice": "Sous-titres et voix off",
+    "aiVoiceDesc": "Transcrire la voix d'une étape vidéo et générer une voix off à partir du texte.",
+    "aiAssistant": "Assistant de rédaction",
+    "aiAssistantDesc": "Reformuler une bulle, simplifier un texte (FALC), suggérer des questions de quiz.",
+    "crm": "CRM",
+    "crmDesc": "Envoyer automatiquement les leads et l'activité des démos vers votre CRM.",
+    "emailing": "Outils d'e-mailing",
+    "emailingDesc": "Ajouter les leads à une liste ou déclencher un scénario d'e-mails.",
+    "enrich": "Enrichissement des visiteurs",
+    "enrichDesc": "Identifier l'organisation d'un visiteur anonyme.",
+    "sso": "Connexion unique (SSO / SAML)",
+    "ssoDesc": "Se connecter avec le compte de votre organisation et gérer les accès depuis votre annuaire.",
+    "useWebhooks": "Utiliser les webhooks",
+    "whyAi": "Nécessite un fournisseur d'IA.",
+    "whyLegal": "Non prévu sans analyse juridique : traitement de données personnelles par un tiers (RGPD).",
+    "meanwhile": "En attendant : {{alternative}}"
   }
 }
