@@ -488,3 +488,40 @@ Locale `fr-FR`. Aucun lead envoyé : le formulaire n'est pas apparu (PL1). Captu
 | PL3 | ⚠️ Contenu et produit | Valeur par défaut « vous » de `first_name` : on obtient **« Bienvenue vous »** et **« Merci vous ! »** | Contenu : valeur par défaut vide. Produit : quand une variable est vide, retirer l'espace qui la précède et éviter « mot ! » avec une espace orpheline (« Bienvenue ! », « Merci ! »). Dans l'éditeur, afficher un aperçu de la phrase avec la valeur par défaut |
 | PL4 | ⚠️ Mineur | En mobile, le titre est tronqué (« Nordline CRM … ») parce que le CTA occupe l'en-tête | Sous 480 px : CTA de l'en-tête en `sm`, sans icône, ou déplacé dans la barre du bas. Titre sur 2 lignes maximum |
 | PL5 | ℹ️ V2 | En mobile, la capture d'écran est trop petite pour être lue (texte d'environ 5 px) | Zoom automatique sur la zone du hotspot en mobile, ou pincer pour zoomer (à arbitrer) |
+
+#### Re-test après la republication v2 (workspace passé en Pro, `first_name` sans valeur par défaut)
+
+| # | Statut |
+|---|---|
+| PL1 formulaire | ✅ Il s'affiche avant l'étape 4 en 1 280 et 390 px. L'envoi avec `recette.player@example.com` + consentement donne `rpc/submit_lead` → **200**, puis le parcours reprend à l'étape 4. « Passer » est disponible |
+| Suivi des vues (v2) | ✅ `track` → 200 avec la nouvelle `versionId` |
+| PL3 contenu | ✅ « Bienvenue » sans « vous ». Le point produit reste ouvert : retirer l'espace quand une variable est vide |
+| PL6 (nouveau) | ⚠️ En mobile, pendant le formulaire, la bulle de l'étape 4 (feuille du bas) reste **visible et active** sous le formulaire : « Suivant » permet de contourner le formulaire sans « Passer ». En ordinateur, la bulle n'est qu'assombrie. → Pendant un formulaire, masquer la bulle et la barre de navigation, ou les recouvrir du voile (règle §15.7 : un seul overlay modal à la fois) |
+| PL7 (nouveau) | ⚠️ La case de consentement du player est la case native de 13 px, avec une cible tactile trop petite en mobile → case de 20 px avec une zone cliquable de 44 px de haut sur toute la ligne (libellé compris), comme `.fd-check` |
+
+#### Formulaire de lead en plan Free : avertissements à ajouter (retour du chef d'équipe)
+
+Constat dans le code (`dev-mvp`) :
+- le seul signal est un `fd-alert` **d'information** dans l'onglet Réglages (`FormPanel`), avec le texte « Les formulaires de lead ne sont pas inclus dans votre plan. » Il ne dit pas que le formulaire **ne sera pas publié** ;
+- rien dans le panneau Étape (sélecteur « Formulaire de lead avant cette étape ») ;
+- **rien au moment de publier** : la publication retire le formulaire sans prévenir.
+
+Spécification :
+
+1. **Onglet Réglages, carte du formulaire** :
+   - `Alert kind="warning"` (icône `TriangleAlert`) en tête de la section ;
+   - FR : « **Ce formulaire ne sera pas publié.** Votre plan Free n'inclut pas les formulaires de lead : vous pouvez le préparer, mais les visiteurs ne le verront pas. » + lien « Voir les plans » ;
+   - EN : « **This form won't be published.** Your Free plan doesn't include lead forms: you can set it up, but visitors won't see it. » + « See plans » ;
+   - badge `warning` « Non publié » / « Not published » sur chaque formulaire de la liste.
+2. **Panneau Étape** :
+   - sous le sélecteur « Formulaire de lead avant cette étape », quand un formulaire est choisi, texte d'aide en couleur `warning` avec l'icône `TriangleAlert` de 16 px : « Non publié avec le plan Free » / « Not published on the Free plan ».
+3. **Au moment de publier** (bouton « Publier »), si la démo contient au moins un formulaire et que le plan ne les inclut pas :
+   - **modale de confirmation** avant l'appel à `publish_demo` ;
+   - titre FR : « Publier sans le formulaire de lead ? » ;
+   - texte FR : « Votre plan Free n'inclut pas les formulaires. La démo sera publiée **sans** le formulaire « {{name}} » (avant l'étape {{n}}) : aucun lead ne sera collecté. » ;
+   - boutons FR : « Voir les plans » (secondaire) et « Publier sans formulaire » (primaire) ; `Échap` annule ;
+   - EN : « Publish without the lead form? » / « Your Free plan doesn't include forms. The demo will be published **without** the "{{name}}" form (before step {{n}}): no leads will be collected. » / « See plans » / « Publish without form ».
+4. **Page de partage** après une publication de ce type :
+   - `Alert kind="warning"` : « Publiée sans formulaire de lead (plan Free). » / « Published without lead form (Free plan). » + « Voir les plans ».
+5. **Aperçu dans l'éditeur** :
+   - le formulaire reste montré, avec un bandeau en haut de la modale : « Aperçu : non publié avec votre plan ».
