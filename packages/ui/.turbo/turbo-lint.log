@@ -1,0 +1,4 @@
+
+> @flowdsiml/ui@0.1.0 lint /home/user/FlowDSIML/packages/ui
+> eslint src
+

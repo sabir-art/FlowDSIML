@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inscription · FlowDSIML (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .aside-list { list-style: none; padding: 0; margin: 0 0 40px; display: grid; gap: 20px; max-width: 420px; }
+  .aside-list li { display: flex; gap: 14px; color: var(--fd-lagoon-100); }
+  .aside-list .n { flex: none; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.1); display: grid; place-items: center; font: 700 13px var(--fd-font-display); color: #fff; }
+  .aside-list li:last-child .n { background: var(--fd-ember-500); }
+  .pwd-meter { display: grid; grid-template-columns: repeat(4,1fr); gap: 4px; }
+  .pwd-meter span { height: 4px; border-radius: 4px; background: var(--fd-color-surface-sunken); }
+  .pwd-meter span.on { background: var(--fd-color-success); }
+</style>
+</head>
+<body>
+<div class="auth">
+  <main class="auth-form" id="contenu">
+    <a href="index.html" class="row" style="gap:10px;color:var(--fd-color-text);margin-bottom:40px" aria-label="FlowDSIML, accueil"><span data-logo></span><span style="font:700 20px var(--fd-font-display)">Flow<span style="font-weight:500">DSIML</span></span></a>
+    <h1>Créez votre compte</h1>
+    <p class="muted t-lg" style="margin-top:8px">Gratuit, sans carte bancaire. Votre première démo en 5 minutes.</p>
+
+    <div class="oauth" style="margin-top:28px">
+      <button class="btn btn-secondary btn-lg btn-block"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.6 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.2a6.6 6.6 0 0 1 0-4.3V7.1H2.1a11 11 0 0 0 0 9.9z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>S'inscrire avec Google</button>
+    </div>
+    <div class="or">ou avec votre email</div>
+
+    <form onsubmit="event.preventDefault(); location.href='onboarding.html'">
+      <div class="field"><label for="name">Nom complet</label><input class="input" id="name" autocomplete="name" placeholder="Camille Martin"></div>
+      <div class="field"><label for="email">Email professionnel</label><input class="input" id="email" type="email" autocomplete="email" placeholder="nom@entreprise.com"></div>
+      <div class="field">
+        <label for="pwd">Mot de passe</label>
+        <input class="input" id="pwd" type="password" autocomplete="new-password" aria-describedby="pwd-help" value="Demo-2026!">
+        <div class="pwd-meter" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="on"></span><span></span></div>
+        <span class="help" id="pwd-help">8 caractères minimum. Robustesse : bonne.</span>
+      </div>
+      <label class="check" style="margin-top:20px"><input type="checkbox"><span class="muted">J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a>.</span></label>
+      <button class="btn btn-primary btn-lg btn-block" style="margin-top:24px">Créer mon compte</button>
+    </form>
+    <p class="muted" style="margin-top:28px">Déjà inscrit ? <a href="connexion.html">Se connecter</a></p>
+
+    <hr class="divider" style="margin:32px 0 20px">
+    <p class="t-label">Variante : email de confirmation envoyé</p>
+    <div class="alert alert-success" style="margin-top:8px"><i data-icon="mail"></i><div><b>Vérifiez votre boîte mail</b><br><span class="muted">Nous avons envoyé un lien de confirmation à camille@acme.io. Il expire dans 24 h.</span> <a href="#">Renvoyer l'email</a></div></div>
+  </main>
+  <aside class="auth-aside" aria-hidden="true" style="justify-content:center">
+    <p class="t-display" style="color:#fff;font-size:2rem;max-width:440px;margin-bottom:40px">Trois étapes, et votre produit se présente tout seul.</p>
+    <ol class="aside-list">
+      <li><span class="n">1</span><div><b style="color:#fff">Capturez</b><br>Cliquez dans votre produit, l'extension enregistre chaque écran.</div></li>
+      <li><span class="n">2</span><div><b style="color:#fff">Guidez</b><br>Ajoutez des bulles, floutez les données sensibles, personnalisez avec le prénom du prospect.</div></li>
+      <li><span class="n">3</span><div><b style="color:#fff">Partagez et mesurez</b><br>Un lien, un embed sur votre site, et les leads arrivent.</div></li>
+    </ol>
+  </aside>
+</div>
+<script>document.addEventListener('fd:ready',()=>document.querySelectorAll('[data-logo]').forEach(e=>e.outerHTML=fdLogo));</script>
+</body>
+</html>

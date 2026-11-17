@@ -1,0 +1,811 @@
+{
+  "common": {
+    "appName": "FlowDSIML",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "continue": "Continue",
+    "skip": "Skip",
+    "done": "Done",
+    "edit": "Edit",
+    "delete": "Delete",
+    "duplicate": "Duplicate",
+    "archive": "Archive",
+    "restore": "Restore",
+    "rename": "Rename",
+    "copy": "Copy",
+    "copied": "Copied",
+    "search": "Search",
+    "searchShortcut": "Search…  /",
+    "filter": "Filter",
+    "export": "Export",
+    "retry": "Try again",
+    "learnMore": "Learn more",
+    "optional": "(optional)",
+    "required": "Required",
+    "loading": "Loading",
+    "more": "More options",
+    "actionsFor": "Actions for {{name}}",
+    "you": "You",
+    "skipToContent": "Skip to content",
+    "comingSoon": "Coming soon",
+    "upgradeRequired": "Available on the {{plan}} plan and above",
+    "relative": {
+      "justNow": "just now",
+      "minutesAgo_one": "{{count}} min ago",
+      "minutesAgo_other": "{{count}} min ago",
+      "hoursAgo_one": "{{count}} hour ago",
+      "hoursAgo_other": "{{count}} hours ago",
+      "yesterday": "yesterday",
+      "daysAgo_one": "{{count}} day ago",
+      "daysAgo_other": "{{count}} days ago"
+    }
+  },
+  "nav": {
+    "demos": "Demos",
+    "demoCenters": "Demo centers",
+    "analytics": "Analytics",
+    "leads": "Leads",
+    "folders": "Folders",
+    "archived": "Archived",
+    "workspace": "Workspace",
+    "settings": "Settings",
+    "billing": "Plans & billing",
+    "help": "Help",
+    "notifications": "Notifications",
+    "logout": "Log out",
+    "openNav": "Open navigation",
+    "newWorkspace": "New workspace",
+    "breadcrumb": "Breadcrumb",
+    "usage": {
+      "publishedDemos": "Published demos",
+      "aiCredits": "AI credits"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Log in to get back to your demos.",
+      "google": "Continue with Google",
+      "orEmail": "or with your email",
+      "email": "Work email",
+      "password": "Password",
+      "forgot": "Forgot password?",
+      "submit": "Log in",
+      "magicLink": "Or get a login link by email.",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Create a free account",
+      "invalidCredentials": "Incorrect email or password. Check your details and try again."
+    },
+    "signup": {
+      "title": "Create your account",
+      "subtitle": "Free, no credit card. Your first demo in 5 minutes.",
+      "google": "Sign up with Google",
+      "name": "Full name",
+      "email": "Work email",
+      "emailPlaceholder": "name@company.com",
+      "password": "Password",
+      "passwordHelp": "At least 8 characters.",
+      "strength": {
+        "weak": "Strength: weak",
+        "fair": "Strength: fair",
+        "good": "Strength: good",
+        "strong": "Strength: strong"
+      },
+      "terms": "I agree to the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
+      "submit": "Create my account",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Log in",
+      "checkEmailTitle": "Check your inbox",
+      "checkEmailBody": "We sent a confirmation link to {{email}}. It expires in 24 hours.",
+      "resend": "Resend email"
+    },
+    "reset": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a link to choose a new password.",
+      "submit": "Send link",
+      "sent": "If an account exists for {{email}}, you'll receive an email.",
+      "newPassword": "New password",
+      "update": "Update password"
+    },
+    "invite": {
+      "title": "{{inviter}} invited you to join {{workspace}}",
+      "accept": "Join workspace",
+      "expired": "This invitation has expired. Ask {{inviter}} for a new one."
+    }
+  },
+  "onboarding": {
+    "step": "Step {{current}} of {{total}}",
+    "welcome": "Welcome, {{name}}",
+    "workspace": {
+      "title": "Let's set up your workspace",
+      "subtitle": "Two quick questions so we can suggest the right templates. You can change everything later.",
+      "name": "Workspace name",
+      "nameHelp": "Usually your company or team name.",
+      "useCase": "What will your demos be used for?",
+      "useCases": {
+        "website": "Website",
+        "websiteHint": "Product tours on your landing pages",
+        "outbound": "Outbound",
+        "outboundHint": "Personalized demos in emails",
+        "presales": "Pre-sales",
+        "presalesHint": "Demos during and after calls"
+      }
+    },
+    "extension": {
+      "title": "Install the capture extension",
+      "subtitle": "It takes a screenshot each time you click in your product. Nothing is uploaded until you click \"Finish\".",
+      "step1": "Add the extension to Chrome",
+      "step2": "Pin it to your toolbar",
+      "step3": "Open your product and click \"Start\"",
+      "install": "Add to Chrome",
+      "importInstead": "Import screenshots instead",
+      "browsers": "Using another browser? The extension works on Chrome, Edge, Brave and Arc.",
+      "installed": "I've installed the extension",
+      "detected": "Extension detected"
+    },
+    "checklist": {
+      "title": "Your first demo is waiting",
+      "subtitle": "Follow these steps. We've added a sample demo to inspire you.",
+      "account": "Create your account",
+      "extension": "Install the extension",
+      "capture": "Capture your first flow",
+      "captureHint": "5 to 10 clicks make a great demo.",
+      "share": "Share the link",
+      "firstView": "Get your first view",
+      "explore": "Explore the sample demo",
+      "banner": "Getting started · {{done}} of {{total}}",
+      "hide": "Hide getting started"
+    }
+  },
+  "extension": {
+    "modeScreenshots": "Screenshots",
+    "modeHtml": "HTML",
+    "multiTab": "Multiple tabs",
+    "start": "Start capture",
+    "pause": "Pause",
+    "resume": "Resume",
+    "finish": "Finish",
+    "cancel": "Cancel capture",
+    "stepsCaptured_one": "{{count}} step captured",
+    "stepsCaptured_other": "{{count}} steps captured",
+    "uploading": "Uploading step {{current}} of {{total}}…",
+    "notLoggedIn": "Log in to FlowDSIML to start capturing.",
+    "protectedPage": "This page can't be captured (browser system page)."
+  },
+  "dashboard": {
+    "title": "Demos",
+    "summary": "{{total}} demos · {{published}} published",
+    "new": "New demo",
+    "import": "Import",
+    "searchPlaceholder": "Search demos",
+    "filters": {
+      "allStatuses": "All statuses",
+      "allCreators": "All creators",
+      "me": "Me"
+    },
+    "sort": {
+      "updated": "Recently edited",
+      "created": "Recently created",
+      "name": "Name (A–Z)",
+      "views": "Most viewed"
+    },
+    "view": { "grid": "Grid", "list": "List" },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "modified": "Edited",
+      "archived": "Archived"
+    },
+    "card": {
+      "steps_one": "{{count}} step",
+      "steps_other": "{{count}} steps",
+      "views_one": "{{count}} view",
+      "views_other": "{{count}} views"
+    },
+    "columns": {
+      "name": "Name",
+      "status": "Status",
+      "folder": "Folder",
+      "views30": "Views (30 d)",
+      "completion": "Completion",
+      "updated": "Edited"
+    },
+    "menu": {
+      "open": "Open in editor",
+      "share": "Share",
+      "copyLink": "Copy link",
+      "duplicate": "Duplicate",
+      "move": "Move to…",
+      "archive": "Archive",
+      "delete": "Delete"
+    },
+    "newDialog": {
+      "title": "New demo",
+      "capture": "Capture with the extension",
+      "captureHint": "Recommended. One step per click, with the click position.",
+      "upload": "Import images",
+      "uploadHint": "Start from existing screenshots or mockups.",
+      "folder": "Folder"
+    },
+    "importDialog": {
+      "title": "Import screenshots",
+      "drop": "Drop your images here",
+      "formats": "PNG, JPG or WebP · 10 MB max per image · one image = one step",
+      "browse": "Browse files",
+      "progress": "Uploading image {{current}} of {{total}}…",
+      "skipped_one": "{{count}} file skipped",
+      "skipped_other": "{{count}} files skipped",
+      "create": "Create demo"
+    },
+    "deleteDialog": {
+      "title": "Delete \"{{name}}\"?",
+      "body": "The demo, its links and its analytics will be permanently deleted. Leads already collected are kept. To set it aside, archive it instead.",
+      "confirm": "Delete demo"
+    }
+  },
+  "editor": {
+    "back": "Back to demos",
+    "demoName": "Demo name",
+    "unpublished": "Unpublished changes",
+    "upToDate": "Published",
+    "saveState": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "offline": "Offline: changes pending",
+      "error": "Couldn't save. Retrying in a few seconds."
+    },
+    "undo": "Undo",
+    "redo": "Redo",
+    "modeEdit": "Edit",
+    "modePreview": "Preview",
+    "share": "Share",
+    "publish": "Publish",
+    "publishing": "Publishing…",
+    "published": "Demo published · viewers now see the new version",
+    "moreMenu": {
+      "history": "Version history",
+      "theme": "Demo theme",
+      "ai": "Generate text with AI",
+      "shortcuts": "Keyboard shortcuts",
+      "duplicate": "Duplicate demo"
+    },
+    "rail": {
+      "title": "Steps",
+      "label": "Steps, reorder with Space then arrow keys",
+      "add": "Add a step",
+      "addCapture": "Capture new steps",
+      "addImage": "Import an image",
+      "addPopup": "Add a pop-up",
+      "addForm": "Add a form",
+      "grabbed": "Step {{position}} grabbed. Use the arrow keys to move it, Space to drop, Escape to cancel.",
+      "moved": "Step moved to position {{position}} of {{total}}.",
+      "dropped": "Step dropped at position {{position}}."
+    },
+    "canvas": {
+      "label": "Canvas",
+      "stepTitle": "Step {{position}} · {{title}}",
+      "zoom": "Canvas zoom",
+      "fit": "Fit",
+      "tools": "Canvas tools",
+      "toolHotspot": "Hotspot and tooltip",
+      "toolBlur": "Add a blur area",
+      "toolZoom": "Zoom into an area",
+      "toolCrop": "Crop screenshot",
+      "toolReplace": "Replace image"
+    },
+    "tabs": { "step": "Step", "design": "Design", "settings": "Settings" },
+    "guide": {
+      "type": "Guide type",
+      "hotspot": "Hotspot",
+      "area": "Area",
+      "free": "Free",
+      "hotspotHint": "Hotspot: a pulsing dot where the user clicked, with a tooltip.",
+      "areaHint": "Area: the target is highlighted and the rest of the screen is dimmed.",
+      "freeHint": "Free: a card with no target, placed anywhere.",
+      "text": "Tooltip text",
+      "title": "Title",
+      "titlePlaceholder": "E.g. New report",
+      "body": "Text",
+      "insertVariable": "Variable",
+      "chars": "{{count}} / {{max}} characters",
+      "improveWithAi": "Improve with AI",
+      "position": "Tooltip position",
+      "autoPlacement": "Automatic placement",
+      "autoPlacementHint": "The tooltip flips to the other side if it would leave the frame.",
+      "buttons": "Buttons",
+      "advanceOnHotspot": "Advance when the hotspot is clicked",
+      "clickAction": "On click",
+      "actions": {
+        "next": "Next step",
+        "goto": "Go to step…",
+        "url": "Open a URL",
+        "demo": "Open another demo",
+        "form": "Show a form"
+      }
+    },
+    "blur": {
+      "title": "Blur area",
+      "delete": "Delete blur area",
+      "style": "Masking style",
+      "styleBlur": "Blur",
+      "stylePixel": "Pixelate",
+      "styleSolid": "Solid",
+      "intensity": "Intensity",
+      "scope": "Apply to",
+      "scopeStep": "This step only",
+      "scopeAll": "All steps (same position)",
+      "privacyNote": "Blur is applied to the published image. The original data is never sent to viewers."
+    },
+    "form": {
+      "title": "Lead form",
+      "heading": "Title",
+      "description": "Description",
+      "fields": "Fields",
+      "addField": "Add",
+      "fieldOptions": "Options for the {{name}} field",
+      "variablesNote": "Answers fill in variables for the rest of the demo.",
+      "behavior": "Behavior",
+      "mandatory": "Required form",
+      "consent": "Consent checkbox",
+      "consentDefault": "I agree to be contacted by {{company}}.",
+      "submitLabel": "Button text",
+      "destination": "Send leads to",
+      "webhook": "Webhook",
+      "webhookNote": "Leads are always available in the Leads tab.",
+      "fieldTypes": {
+        "email": "Work email",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "company": "Company",
+        "phone": "Phone",
+        "jobTitle": "Job title",
+        "text": "Free text"
+      }
+    },
+    "end": {
+      "title": "End screen",
+      "heading": "Title",
+      "text": "Text",
+      "primary": "Primary button (CTA)",
+      "secondary": "Secondary button",
+      "label": "Label",
+      "action": "Action",
+      "url": "URL",
+      "urlHelp": "Variables are passed in the URL.",
+      "newTab": "Open in a new tab",
+      "restart": "Restart the tour"
+    },
+    "design": {
+      "theme": "Theme",
+      "workspaceDefault": "{{name}} (workspace default)",
+      "colors": "Colors",
+      "primary": "Primary color",
+      "hotspot": "Hotspot",
+      "lowContrast": "Low contrast ({{ratio}}:1): button text will be hard to read.",
+      "useAccessible": "Use {{color}}",
+      "shape": "Shape",
+      "shapes": { "square": "Square", "soft": "Soft", "round": "Round", "extra": "Extra round" },
+      "frame": "Frame",
+      "browserBar": "Browser bar",
+      "gradient": "Background color"
+    },
+    "settings": {
+      "playback": "Playback",
+      "autoplay": "Autoplay",
+      "progressBar": "Progress bar",
+      "language": "Demo language",
+      "variables": "Variables in use",
+      "defaultValue": "default: \"{{value}}\""
+    },
+    "narrow": {
+      "title": "The editor works on desktop",
+      "body": "Open FlowDSIML on a screen at least 1,024 px wide to edit this demo. You can still preview and share it from this phone.",
+      "view": "View demo"
+    }
+  },
+  "share": {
+    "title": "Share demo",
+    "publishedAt": "Version published on {{date}}",
+    "pendingChanges_one": "{{count}} unpublished change",
+    "pendingChanges_other": "{{count}} unpublished changes",
+    "publishChanges": "Publish changes",
+    "preview": "Preview",
+    "tabs": { "link": "Link", "embed": "Embed", "custom": "Custom links", "access": "Access" },
+    "publicAccess": "Public access",
+    "publicAccessHint": "Anyone with the link can view the demo, no account needed.",
+    "publicLink": "Public link",
+    "linkCopied": "Link copied",
+    "slug": "Custom address",
+    "slugHelp": "Lowercase letters, numbers and hyphens. Changing the address breaks old links.",
+    "urlParams": "Personalize with URL parameters",
+    "urlParamsHelp": "In your emails, use your tool's merge fields, for example {{example}}.",
+    "elsewhere": "Share elsewhere",
+    "embed": {
+      "format": "Embed format",
+      "responsive": "Responsive",
+      "fixed": "Fixed size",
+      "popup": "Button + pop-up",
+      "copyCode": "Copy code",
+      "codeCopied": "Embed code copied",
+      "guides": "Guides: Webflow, WordPress, HubSpot, Framer…",
+      "hideWatermark": "Hide watermark",
+      "clickToStart": "Start on click (cover + \"Start demo\" button)",
+      "cspNote": "The host site must allow iframes from {{host}} (CSP frame-src header).",
+      "iframeTitle": "Demo: {{name}}"
+    },
+    "custom": {
+      "intro": "One link per prospect, with pre-filled variables and its own analytics.",
+      "new": "New link",
+      "name": "Link name",
+      "namePlaceholder": "E.g. Globex — Léa Dupont",
+      "nameHelp": "Only visible to your team.",
+      "expiresOn": "Expires on {{date}}",
+      "create": "Create and copy link",
+      "created": "Link created and copied",
+      "lastView": "Last view"
+    },
+    "access": {
+      "password": "Password",
+      "passwordHint": "Viewers must enter a password before seeing the demo.",
+      "expiration": "Expiration date",
+      "expirationHint": "After this date, the link shows \"This demo is no longer available\".",
+      "domains": "Allowed email domains",
+      "domainsHint": "Only viewers with an @{{domain}} address can open the demo.",
+      "gate": "Form before the demo",
+      "gateHint": "Ask for an email before the first step. Set it up in the editor.",
+      "configure": "Set up"
+    },
+    "socialPreview": "Social preview",
+    "socialPreviewHint": "Image generated automatically when you publish.",
+    "thisWeek": "This week"
+  },
+  "player": {
+    "regionLabel": "interactive demo",
+    "skip": "Skip to demo",
+    "start": "Start demo",
+    "startMeta": "About {{minutes}} min · no sign-up",
+    "stepOf": "{{current}} / {{total}}",
+    "stepAnnounce": "Step {{current}} of {{total}}: {{title}}",
+    "previous": "Previous",
+    "next": "Next",
+    "prevStep": "Previous step",
+    "nextStep": "Next step",
+    "language": "Change language",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen",
+    "restart": "Restart the tour",
+    "watermark": "Made with FlowDSIML",
+    "form": {
+      "submit": "Submit",
+      "skip": "Skip",
+      "thanks": "Thanks, got it!",
+      "privacy": "Privacy"
+    },
+    "password": {
+      "title": "This demo is protected",
+      "body": "Enter the password shared by {{company}}.",
+      "submit": "Open demo",
+      "wrong": "Incorrect password. Try again."
+    },
+    "expired": {
+      "title": "This demo is no longer available",
+      "body": "The link expired on {{date}}. Contact {{company}} to get a new link."
+    },
+    "notFound": {
+      "title": "Demo not found",
+      "body": "The link may be wrong, or the author has removed the demo."
+    },
+    "domainDenied": {
+      "title": "Restricted access",
+      "body": "This demo is only available to {{domains}} addresses."
+    },
+    "rotateHint": "Rotate your phone to enlarge the demo."
+  },
+  "analytics": {
+    "title": "Analytics",
+    "updated": "Data updated {{when}}",
+    "allDemos": "All demos",
+    "allSources": "All sources",
+    "period": "Period",
+    "range": { "7d": "7 d", "30d": "30 d", "90d": "90 d", "custom": "Dates" },
+    "exportStarted": "CSV export in progress: we'll email it to you",
+    "tabs": { "overview": "Overview", "sessions": "Sessions", "leads": "Leads" },
+    "kpi": {
+      "views": "Views",
+      "visitors": "Unique visitors",
+      "completion": "Completion rate",
+      "leads": "Leads collected",
+      "ctaClicks": "Final CTA clicks",
+      "vsPrevious": "vs previous {{period}}",
+      "ofVisitors": "{{percent}} of visitors"
+    },
+    "chart": {
+      "viewsAndCompletions": "Views and completions",
+      "views": "Views",
+      "completed": "Completed demos"
+    },
+    "sources": {
+      "title": "Sources",
+      "embed": "Website embed",
+      "custom": "Custom links",
+      "public": "Public link",
+      "internal": "Internal previews",
+      "excluded": "excluded",
+      "devices": "Devices"
+    },
+    "funnel": {
+      "title": "Step-by-step journey",
+      "subtitle": "Share of visitors who saw each step",
+      "step": "Step",
+      "visitors": "Visitors",
+      "dropoff": "Drop-off",
+      "openEditor": "Open in editor",
+      "insight": "The \"{{step}}\" step loses {{percent}} of visitors."
+    },
+    "sessions": {
+      "visitor": "Visitor",
+      "anonymous": "Anonymous visitor",
+      "demo": "Demo",
+      "source": "Source",
+      "duration": "Duration",
+      "progress": "Progress",
+      "completed": "Completed",
+      "date": "Date",
+      "range": "{{from}}–{{to}} of {{total}}"
+    },
+    "leads": {
+      "email": "Email",
+      "company": "Company",
+      "collected": "Collected",
+      "selectAll": "Select all"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "sections": {
+      "general": "General",
+      "members": "Members",
+      "brand": "Brand",
+      "variables": "Variables",
+      "profile": "My profile",
+      "billing": "Plans & billing"
+    },
+    "general": {
+      "identity": "Identity",
+      "identityHint": "Visible to members and in invitation emails.",
+      "changeLogo": "Change logo",
+      "logoHelp": "Square PNG or SVG, at least 512 px",
+      "name": "Workspace name",
+      "website": "Website",
+      "locale": "Language and region",
+      "defaultLanguage": "Default language for new demos",
+      "timezone": "Analytics time zone",
+      "saved": "Settings saved",
+      "danger": "Danger zone",
+      "dangerHint": "Irreversible actions.",
+      "deleteWorkspace": "Delete workspace",
+      "deleteWorkspaceHint": "Deletes all demos, their analytics and leads. Members lose access.",
+      "deleteConfirmTitle": "Delete \"{{name}}\"?",
+      "deleteConfirmLabel": "Type {{name}} to confirm",
+      "deleteConfirm": "Delete permanently"
+    },
+    "members": {
+      "summary": "{{count}} of {{seats}} members included in the {{plan}} plan.",
+      "invite": "Invite members",
+      "search": "Search members",
+      "allRoles": "All roles",
+      "member": "Member",
+      "role": "Role",
+      "lastActive": "Last active",
+      "activeNow": "Active now",
+      "pending": "Pending",
+      "invitedOn": "Invitation sent on {{date}}",
+      "resend": "Resend invitation",
+      "transfer": "Transfer ownership",
+      "remove": "Remove from workspace",
+      "removeTitle": "Remove {{name}}?",
+      "removeBody": "{{name}} will lose access to the workspace. Their demos stay in the workspace and you become their owner.",
+      "removeConfirm": "Remove member",
+      "removed": "{{name}} has been removed",
+      "inviteDialog": {
+        "emails": "Email addresses",
+        "emailsHelp": "Separate addresses with a comma or a new line.",
+        "seats": "{{count}} seats will be used. {{left}} of the {{total}} seats in your plan will remain.",
+        "send": "Send invitations",
+        "sent_one": "{{count}} invitation sent",
+        "sent_other": "{{count}} invitations sent"
+      },
+      "rolesTitle": "What each role can do",
+      "permissions": {
+        "view": "View demos and analytics",
+        "edit": "Create, edit and publish demos",
+        "leads": "View and export leads",
+        "manage": "Invite and manage members, brand, integrations",
+        "billing": "Billing, workspace deletion, ownership transfer"
+      }
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "editor": "Editor",
+      "viewer": "Viewer",
+      "ownerHint": "Full access, including billing",
+      "adminHint": "Also manages members and brand",
+      "editorHint": "Creates and publishes demos",
+      "viewerHint": "Views demos and analytics"
+    },
+    "brand": {
+      "theme": "Demo theme",
+      "themeHint": "Applied by default to all new demos. Each demo can override it.",
+      "contrastOk": "Contrast with white text: {{ratio}}:1, meets AA",
+      "font": "Font",
+      "publicPage": "Public page",
+      "publicPageHint": "The header shown around demos shared by link.",
+      "primaryButton": "Primary button",
+      "secondaryButton": "Secondary button",
+      "hideWatermark": "Hide \"Made with FlowDSIML\""
+    },
+    "variables": {
+      "title": "Variables",
+      "intro": "Personalize text with variables. They are filled in from the URL, a custom link or a form.",
+      "new": "New variable",
+      "type": "Type",
+      "types": { "text": "Text", "number": "Number", "image": "Image" },
+      "default": "Default value",
+      "usedIn_one": "{{count}} demo",
+      "usedIn_other": "{{count}} demos"
+    },
+    "profile": {
+      "name": "Name",
+      "email": "Email",
+      "preferences": "Preferences",
+      "language": "Interface language",
+      "appearance": "Appearance",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark",
+      "notifyLead": "Email me when a lead is collected",
+      "weeklyDigest": "Weekly views digest"
+    }
+  },
+  "billing": {
+    "title": "Plans & billing",
+    "perWorkspace": "Billed per workspace",
+    "manualNotice": "Online payment coming soon. To change plans now, contact us. Your plan will be activated within 24 hours.",
+    "usageTitle": "{{plan}} plan · usage this month",
+    "renewal": "Renews on {{date}}",
+    "members": "Members",
+    "aiCredits": "AI credits",
+    "aiCreditsWarning": "{{percent}} used: credits refill on {{date}}.",
+    "retention": "Analytics retention",
+    "choose": "Choose a plan",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "perMonth": "/ month",
+    "current": "Current plan",
+    "recommended": "Recommended for you",
+    "choosePlan": "Choose {{plan}}",
+    "upgradeTo": "Upgrade to {{plan}}",
+    "downgrade": "Downgrade",
+    "allOf": "Everything in {{plan}}, plus:",
+    "enterprise": "Need SSO, SCIM or a contract? Let's talk Enterprise.",
+    "invoices": "Invoices",
+    "paid": "Paid",
+    "limitReached": "You've reached the limit of {{limit}} published demos",
+    "limitReachedHint": "Unpublish a demo, or upgrade to {{plan}} to publish without limits.",
+    "requestSent": "Request sent: we'll get back to you within 24 hours",
+    "upgradeDialog": {
+      "title": "Upgrade to {{plan}}",
+      "body": "Our team activates your plan and sends you the invoice. Nothing to pay online for now.",
+      "seats": "Number of members",
+      "message": "Message",
+      "messagePlaceholder": "Your needs, your timeline…",
+      "total": "Estimated yearly total",
+      "send": "Send request"
+    }
+  },
+  "empty": {
+    "noDemos": {
+      "title": "Create your first demo",
+      "body": "Install the extension and click through your product: every click becomes a step.",
+      "cta": "Install the extension",
+      "secondary": "Import screenshots"
+    },
+    "emptyFolder": {
+      "title": "This folder is empty",
+      "body": "Drag demos here from the list, or create a new one directly in this folder.",
+      "cta": "New demo"
+    },
+    "noResults": {
+      "title": "No results for \"{{query}}\"",
+      "body": "Check the spelling or try another keyword.",
+      "cta": "Clear search"
+    },
+    "filtered": {
+      "title": "No demos match these filters",
+      "cta": "Reset filters"
+    },
+    "noViews": {
+      "title": "No views yet",
+      "body": "Share your demo: analytics appear as soon as someone visits.",
+      "cta": "Copy demo link"
+    },
+    "noLeads": {
+      "title": "No leads yet",
+      "body": "Add a form to a demo to collect emails, or share custom links to identify your prospects.",
+      "cta": "Add a form"
+    },
+    "aloneInWorkspace": {
+      "title": "Work as a team",
+      "body": "Invite your colleagues to create and share demos together.",
+      "cta": "Invite members"
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again in a moment.",
+    "network": "Can't connect. Check your network, then try again.",
+    "offline": "You're offline: your changes will be saved when you reconnect.",
+    "sessionExpired": "Your session has expired. Log in again to continue.",
+    "forbidden": "You don't have permission for this action. Ask a workspace admin.",
+    "publishFailed": "The demo couldn't be published. Try again.",
+    "uploadFailed": "The image \"{{file}}\" couldn't be uploaded.",
+    "loadFailed": "Couldn't load {{what}}.",
+    "quotaReached": "Plan limit reached: {{what}}.",
+    "details": "Details",
+    "requestId": "Request ID: {{id}}",
+    "page404": {
+      "title": "This page doesn't exist",
+      "body": "The link may be wrong, or the page has moved.",
+      "cta": "Back to demos"
+    },
+    "page403": {
+      "title": "Restricted access",
+      "body": "This page is only available to some workspace members.",
+      "cta": "Back to demos"
+    },
+    "page500": {
+      "title": "Something went wrong on our end",
+      "body": "We've been notified. Please try again in a few minutes.",
+      "cta": "Try again"
+    }
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email address, for example name@company.com.",
+    "passwordMin": "Password must be at least {{min}} characters.",
+    "url": "Enter a full URL starting with https://.",
+    "slug": "Use only lowercase letters, numbers and hyphens.",
+    "slugTaken": "This address is already taken. Try {{suggestion}}.",
+    "maxLength": "{{max}} characters max.",
+    "fileType": "Unsupported format. Use PNG, JPG or WebP.",
+    "fileSize": "File too large: {{max}} MB max.",
+    "summary_one": "{{count}} field to fix.",
+    "summary_other": "{{count}} fields to fix.",
+    "consent": "Check the box to continue."
+  },
+  "toasts": {
+    "linkCopied": "Link copied",
+    "demoArchived": "Demo archived",
+    "demoDeleted": "Demo deleted",
+    "demoDuplicated": "Demo duplicated",
+    "undo": "Undo",
+    "view": "View",
+    "saved": "Changes saved",
+    "invitationsSent": "Invitations sent"
+  },
+  "a11y": {
+    "loading": "Loading",
+    "closeDialog": "Close dialog",
+    "sortAscending": "Sorted ascending",
+    "sortDescending": "Sorted descending",
+    "selected": "Selected",
+    "hotspotLabel": "Hotspot: {{text}}",
+    "newTab": "(opens in a new tab)"
+  }
+}

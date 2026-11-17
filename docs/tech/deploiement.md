@@ -51,7 +51,7 @@ Aucun n'est nécessaire au MVP. Ils seront à ajouter plus tard via `supabase se
 ## 3. Première mise en production (checklist)
 
 1. **Supabase, Auth** (*Authentication → URL Configuration*) :
-   - Site URL : `https://sabir-art.github.io/FlowDSIML/` (ou le domaine perso) ;
+   - Site URL : `https://sabir-art.github.io/FlowDSIML/` (ou le domaine perso) ; **déjà configuré** ;
    - Redirect URLs : la même URL suivie de `**`, et `http://localhost:5173/**` pour le dev.
 2. **Supabase, Auth → Providers** : Email activé, confirmation d'email activée. Google est optionnel (client OAuth Google requis).
 3. **Supabase, SMTP** (*Authentication → Emails → SMTP Settings*) : **obligatoire avant la bêta**. Le SMTP intégré n'envoie qu'aux membres de l'équipe du projet, avec un débit très faible.

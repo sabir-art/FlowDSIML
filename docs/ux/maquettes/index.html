@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquettes FlowDSIML</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .wrap-i { max-width: 1120px; margin: 0 auto; padding: 48px 24px 120px; }
+  .screens { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin-top: 24px; }
+  .screen { display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: var(--fd-radius-lg); background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); color: var(--fd-color-text); text-decoration: none !important; transition: box-shadow var(--fd-motion-duration-base); }
+  .screen:hover { box-shadow: var(--fd-shadow-md); }
+  .screen .ic { color: var(--fd-color-text-muted); display: inline-flex; margin-bottom: 4px; }
+  .screen .ic svg { width: 20px; height: 20px; }
+  .phones { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 24px; align-items: flex-start; }
+  .phone { width: 300px; height: 620px; border-radius: 40px; background: #141311; padding: 12px; box-shadow: var(--fd-shadow-lg); }
+  .phone iframe { width: 390px; height: 844px; border: 0; border-radius: 30px; transform: scale(.7179); transform-origin: 0 0; }
+  .phone-wrap { width: 276px; height: 596px; overflow: hidden; border-radius: 30px; }
+  .sw { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .sw span { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: flex-end; padding: 6px; font: 600 10px var(--fd-font-mono); color: #fff; }
+</style>
+</head>
+<body>
+<div class="wrap-i">
+  <div class="row" style="gap:12px"><span data-logo></span><span class="t-caption muted">Phase 2 · Design · v1 · 17 nov. 2026</span></div>
+  <h1 class="t-display" style="margin-top:20px">Maquettes FlowDSIML</h1>
+  <p class="muted t-lg" style="margin-top:12px;max-width:680px">Maquettes HTML statiques et cliquables, construites uniquement avec les tokens de <span class="t-mono">packages/ui/src/tokens.css</span>. Elles servent de référence au développement : structure, états, libellés et comportements. Le bouton « Thème » du bandeau bascule entre système, clair et sombre.</p>
+  <div class="row wrap" style="margin-top:16px">
+    <a class="btn btn-secondary btn-sm" href="../identite-visuelle.md">Identité visuelle</a>
+    <a class="btn btn-secondary btn-sm" href="../composants.md">Composants</a>
+    <a class="btn btn-secondary btn-sm" href="../tokens.md">Tokens</a>
+    <a class="btn btn-secondary btn-sm" href="../microcopy.md">Microcopie</a>
+  </div>
+
+  <h2 style="margin-top:48px">Écrans</h2>
+  <div class="screens">
+    <a class="screen" href="connexion.html"><span class="ic"><i data-icon="lock"></i></span><b>Connexion</b><span class="t-caption muted">Google, email, erreur d'identifiants</span></a>
+    <a class="screen" href="inscription.html"><span class="ic"><i data-icon="users"></i></span><b>Inscription</b><span class="t-caption muted">Robustesse du mot de passe, email de confirmation</span></a>
+    <a class="screen" href="onboarding.html"><span class="ic"><i data-icon="zap"></i></span><b>Onboarding</b><span class="t-caption muted">3 étapes : workspace, extension, checklist</span></a>
+    <a class="screen" href="dashboard.html"><span class="ic"><i data-icon="play"></i></span><b>Tableau de bord des démos</b><span class="t-caption muted">Grille et liste, filtres, menu d'actions, nouvelle démo, import, suppression, état vide</span></a>
+    <a class="screen" href="editeur.html"><span class="ic"><i data-icon="edit"></i></span><b>Éditeur</b><span class="t-caption muted">Rail des étapes, canevas, hotspot et bulle, flou, formulaire de lead, CTA de fin, design, réglages</span></a>
+    <a class="screen" href="partage.html"><span class="ic"><i data-icon="share"></i></span><b>Aperçu et partage</b><span class="t-caption muted">Lien, intégration iframe, liens personnalisés, accès</span></a>
+    <a class="screen" href="player.html"><span class="ic"><i data-icon="monitor"></i></span><b>Player (desktop)</b><span class="t-caption muted">Introduction, bulles, formulaire, fin ; clavier ← → ; variables par URL</span></a>
+    <a class="screen" href="player.html#password"><span class="ic"><i data-icon="lock"></i></span><b>Player : mot de passe</b><span class="t-caption muted">Écran système d'accès protégé</span></a>
+    <a class="screen" href="player.html#expired"><span class="ic"><i data-icon="clock"></i></span><b>Player : lien expiré</b><span class="t-caption muted">Écran système d'expiration</span></a>
+    <a class="screen" href="analytics.html"><span class="ic"><i data-icon="chart"></i></span><b>Analytics</b><span class="t-caption muted">KPI, courbe, sources, entonnoir par étape, sessions, leads</span></a>
+    <a class="screen" href="parametres.html"><span class="ic"><i data-icon="settings"></i></span><b>Paramètres et membres</b><span class="t-caption muted">Général, membres et rôles, marque, variables, profil</span></a>
+    <a class="screen" href="plans.html"><span class="ic"><i data-icon="card"></i></span><b>Plans et facturation</b><span class="t-caption muted">Utilisation, plans, demande de changement, factures, limite atteinte</span></a>
+  </div>
+
+  <h2 style="margin-top:56px">Player sur mobile</h2>
+  <p class="muted" style="margin-top:8px">Sous 640 px, la bulle devient une feuille ancrée en bas, les boutons font 44 px et le balayage fait avancer la démo.</p>
+  <div class="phones">
+    <div class="phone"><div class="phone-wrap"><iframe src="player.html?first_name=Léa&amp;company=Globex" title="Player mobile : démo"></iframe></div></div>
+    <div class="phone"><div class="phone-wrap"><iframe src="player.html#password" title="Player mobile : mot de passe"></iframe></div></div>
+  </div>
+
+  <h2 style="margin-top:56px">Palette en un coup d'œil</h2>
+  <div class="sw">
+    <span style="background:#0E7C71">Lagoon 600</span><span style="background:#38B8A5">Lagoon 400</span><span style="background:#D3F4EC;color:#0D635B">Lagoon 100</span>
+    <span style="background:#C93A0E">Ember 600</span><span style="background:#E8541F">Ember 500</span><span style="background:#FFE5D9;color:#A8300C">Ember 100</span>
+    <span style="background:#1F1D1A">Stone 900</span><span style="background:#5F5A52">Stone 600</span><span style="background:#E2DFDA;color:#48443E">Stone 200</span><span style="background:#F7F6F4;color:#48443E;box-shadow:inset 0 0 0 1px #E2DFDA">Stone 50</span>
+  </div>
+</div>
+<script>document.addEventListener('fd:ready',()=>document.querySelectorAll('[data-logo]').forEach(e=>e.outerHTML=fdLogo));</script>
+</body>
+</html>

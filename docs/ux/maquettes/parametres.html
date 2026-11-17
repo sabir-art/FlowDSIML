@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paramètres · FlowDSIML (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .settings { display: grid; grid-template-columns: 200px 1fr; gap: 32px; align-items: start; }
+  .snav { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 80px; }
+  .snav [role="tab"] { all: unset; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: var(--fd-radius-md); color: var(--fd-color-text-muted); font-weight: 500; cursor: pointer; }
+  .snav [role="tab"]:hover { background: var(--fd-color-surface-hover); }
+  .snav [role="tab"][aria-selected="true"] { background: var(--fd-color-surface-selected); color: var(--fd-color-primary-soft-text); font-weight: 600; }
+  .snav [role="tab"]:focus-visible { box-shadow: var(--fd-shadow-focus); }
+  .snav svg { width: 18px; height: 18px; }
+  .snav .grp { font: 600 11px var(--fd-font-sans); text-transform: uppercase; letter-spacing: .04em; color: var(--fd-color-text-subtle); padding: 14px 10px 4px; }
+  .form-sec { display: grid; grid-template-columns: 240px 1fr; gap: 24px; padding: 24px; }
+  .form-sec + .form-sec { border-top: 1px solid var(--fd-color-border); }
+  .form-sec .intro p { margin-top: 4px; }
+  .logo-up { display: flex; align-items: center; gap: 16px; }
+  .logo-up .ws-logo { width: 56px; height: 56px; border-radius: 14px; font-size: 22px; }
+  .role-select { height: 32px; width: auto; }
+  @media (max-width: 900px) { .settings { grid-template-columns: 1fr; } .snav { position: static; flex-direction: row; overflow-x: auto; } .snav .grp { display: none; } .form-sec { grid-template-columns: 1fr; } }
+  .ok-ic { display: inline-block; width: 16px; height: 16px; background: currentColor; color: var(--fd-color-success); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5L20 7'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5L20 7'/%3E%3C/svg%3E") center/contain no-repeat; vertical-align: -3px; }
+</style>
+</head>
+<body data-shell="app" data-page="settings" data-crumbs='<span>Paramètres</span><span>/</span><span aria-current="page" id="crumb">Membres</span>'>
+<main>
+  <div class="content">
+    <div class="page-head"><h1>Paramètres</h1></div>
+    <div class="settings">
+      <div class="snav" role="tablist" aria-label="Sections des paramètres" aria-orientation="vertical">
+        <span class="grp">Workspace</span>
+        <button role="tab" aria-selected="false" aria-controls="s-gen" id="st-gen" tabindex="-1"><i data-icon="settings"></i>Général</button>
+        <button role="tab" aria-selected="true" aria-controls="s-mem" id="st-mem"><i data-icon="users"></i>Membres</button>
+        <button role="tab" aria-selected="false" aria-controls="s-brand" id="st-brand" tabindex="-1"><i data-icon="palette"></i>Marque</button>
+        <button role="tab" aria-selected="false" aria-controls="s-var" id="st-var" tabindex="-1"><i data-icon="code"></i>Variables</button>
+        <span class="grp">Compte</span>
+        <button role="tab" aria-selected="false" aria-controls="s-me" id="st-me" tabindex="-1"><i data-icon="users"></i>Mon profil</button>
+        <a class="row" href="plans.html" style="height:36px;padding:0 10px;color:var(--fd-color-text-muted);font-weight:500;gap:10px"><i data-icon="card"></i>Plans et facturation</a>
+      </div>
+
+      <div>
+        <!-- Général -->
+        <section role="tabpanel" id="s-gen" aria-labelledby="st-gen" hidden class="card">
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Identité</h2><p class="t-caption muted">Visible par les membres et dans les emails d'invitation.</p></div>
+            <div><div class="logo-up"><span class="ws-logo">A</span><div class="col"><button class="btn btn-secondary btn-sm">Changer le logo</button><span class="help">PNG ou SVG carré, 512 px minimum</span></div></div>
+              <div class="field" style="margin-top:20px"><label for="wn">Nom du workspace</label><input id="wn" class="input" value="Acme Analytics"></div>
+              <div class="field"><label for="wu">Site web</label><input id="wu" class="input" value="https://acme-analytics.io"></div></div></div>
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Langue et région</h2></div>
+            <div><div class="field"><label for="wl">Langue par défaut des nouvelles démos</label><select id="wl" class="select"><option>Français</option><option>English</option></select></div>
+            <div class="field"><label for="wt">Fuseau horaire des analytics</label><select id="wt" class="select"><option>Europe/Paris (UTC+1)</option></select></div></div></div>
+          <div class="form-sec" style="justify-content:end;display:flex;gap:8px"><button class="btn btn-secondary">Annuler</button><button class="btn btn-primary" data-toast="Paramètres enregistrés">Enregistrer</button></div>
+          <div class="form-sec" style="border-top:1px solid var(--fd-color-border)"><div class="intro"><h2 class="t-h3" style="color:var(--fd-color-danger)">Zone de danger</h2><p class="t-caption muted">Actions irréversibles.</p></div>
+            <div class="row between wrap" style="gap:12px"><div><b>Supprimer le workspace</b><p class="t-caption muted">Supprime les 24 démos, leurs statistiques et leurs leads. Les membres perdent l'accès.</p></div><button class="btn btn-secondary" style="color:var(--fd-color-danger)" data-open="m-delws">Supprimer le workspace</button></div></div>
+        </section>
+
+        <!-- Membres -->
+        <section role="tabpanel" id="s-mem" aria-labelledby="st-mem">
+          <div class="row between wrap" style="margin-bottom:16px;gap:12px">
+            <div><h2 class="t-h2">Membres</h2><p class="muted" style="margin-top:4px">6 membres sur 10 inclus dans le plan Team.</p></div>
+            <button class="btn btn-primary" data-open="m-invite"><i data-icon="plus"></i>Inviter des membres</button>
+          </div>
+          <div class="card">
+            <div class="row" style="padding:12px 16px;border-bottom:1px solid var(--fd-color-border);gap:12px">
+              <div class="input-affix grow" style="max-width:320px"><i data-icon="search"></i><input class="input input-sm" type="search" placeholder="Rechercher un membre" aria-label="Rechercher un membre"></div>
+              <select class="select input-sm" style="width:auto" aria-label="Filtrer par rôle"><option>Tous les rôles</option><option>Propriétaire</option><option>Admin</option><option>Éditeur</option><option>Lecteur</option></select>
+            </div>
+            <div class="table-wrap"><table class="table">
+              <caption class="sr-only">Membres du workspace</caption>
+              <thead><tr><th>Membre</th><th>Rôle</th><th>Dernière activité</th><th><span class="sr-only">Actions</span></th></tr></thead>
+              <tbody id="members"></tbody>
+            </table></div>
+          </div>
+          <div class="card card-pad" style="margin-top:16px">
+            <h3 class="t-h3">Ce que chaque rôle peut faire</h3>
+            <div class="table-wrap" style="margin-top:12px"><table class="table">
+              <thead><tr><th>Permission</th><th class="r">Propriétaire</th><th class="r">Admin</th><th class="r">Éditeur</th><th class="r">Lecteur</th></tr></thead>
+              <tbody>
+                <tr><td>Voir les démos et les analytics</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td></tr>
+                <tr><td>Créer, modifier, publier des démos</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td></tr>
+                <tr><td>Voir et exporter les leads</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td></tr>
+                <tr><td>Inviter et gérer les membres, marque, intégrations</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td></tr>
+                <tr><td>Facturation, suppression du workspace, transfert</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td></tr>
+              </tbody></table></div>
+            <p class="help" style="margin-top:8px">« — » : action non autorisée. Les rôles suivent la décision D8 (owner, admin, editor, viewer).</p>
+          </div>
+        </section>
+
+        <!-- Marque -->
+        <section role="tabpanel" id="s-brand" aria-labelledby="st-brand" hidden class="card">
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Thème des démos</h2><p class="t-caption muted">Appliqué par défaut à toutes les nouvelles démos. Chaque démo peut le modifier.</p></div>
+            <div><div class="field"><label for="bp">Couleur principale</label><div class="row"><span style="width:32px;height:32px;border-radius:8px;background:#0E7C71;flex:none"></span><input id="bp" class="input t-mono" value="#0E7C71"></div><span class="help">Contraste avec le texte blanc : 5,1:1, conforme AA</span></div>
+              <div class="field"><label for="bh">Couleur du hotspot</label><div class="row"><span style="width:32px;height:32px;border-radius:8px;background:#E8541F;flex:none"></span><input id="bh" class="input t-mono" value="#E8541F"></div></div>
+              <div class="field"><label for="bf">Police</label><select id="bf" class="select"><option>Instrument Sans (par défaut)</option><option>Inter</option><option>Police personnalisée…</option></select></div></div></div>
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Page publique</h2><p class="t-caption muted">L'en-tête affiché autour de vos démos partagées par lien.</p></div>
+            <div><div class="field"><label for="pl1">Bouton principal</label><div class="grid" style="grid-template-columns:1fr 1.4fr;gap:8px"><input id="pl1" class="input" value="Essai gratuit"><input class="input t-mono" aria-label="URL du bouton principal" value="https://acme-analytics.io/signup"></div></div>
+              <div class="field"><label for="pl2">Bouton secondaire <span class="opt">(facultatif)</span></label><div class="grid" style="grid-template-columns:1fr 1.4fr;gap:8px"><input id="pl2" class="input" value="Voir les tarifs"><input class="input t-mono" aria-label="URL du bouton secondaire" value="https://acme-analytics.io/pricing"></div></div>
+              <div class="setting" style="margin-top:12px"><div><b>Masquer « Fait avec FlowDSIML »</b><p class="t-caption muted">Disponible à partir du plan Solo.</p></div><span class="switch"><input type="checkbox" checked aria-label="Masquer le filigrane"><span></span></span></div></div></div>
+        </section>
+
+        <!-- Variables -->
+        <section role="tabpanel" id="s-var" aria-labelledby="st-var" hidden class="card">
+          <div class="card-head"><div><h2 class="t-h3">Variables</h2><p class="t-caption muted">Personnalisez les textes avec <span class="t-mono">{{nom}}</span>. Remplies par l'URL, un lien personnalisé ou un formulaire.</p></div><button class="btn btn-primary btn-sm"><i data-icon="plus"></i>Nouvelle variable</button></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Variable</th><th>Type</th><th>Valeur par défaut</th><th class="r">Utilisée dans</th></tr></thead>
+            <tbody>
+              <tr><td><span class="t-mono badge badge-primary">{{first_name}}</span></td><td>Texte</td><td class="muted">vous</td><td class="r">12 démos</td></tr>
+              <tr><td><span class="t-mono badge badge-primary">{{company}}</span></td><td>Texte</td><td class="muted">votre équipe</td><td class="r">9 démos</td></tr>
+              <tr><td><span class="t-mono badge badge-primary">{{logo_url}}</span></td><td>Image</td><td class="muted">Logo Acme</td><td class="r">2 démos</td></tr>
+            </tbody></table></div>
+        </section>
+
+        <!-- Profil -->
+        <section role="tabpanel" id="s-me" aria-labelledby="st-me" hidden class="card">
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Profil</h2></div>
+            <div><div class="field"><label for="pn">Nom</label><input id="pn" class="input" value="Camille Martin"></div><div class="field"><label for="pe">Email</label><input id="pe" class="input" value="camille@acme.io"></div></div></div>
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Préférences</h2></div>
+            <div><div class="field"><label for="pl">Langue de l'interface</label><select id="pl" class="select"><option>Français</option><option>English</option></select></div>
+              <fieldset class="field" style="border:0;padding:0"><legend class="label" style="margin-bottom:6px">Apparence</legend><div class="segmented" role="radiogroup" data-seg><button role="radio" aria-checked="true"><i data-icon="monitor"></i>Système</button><button role="radio" aria-checked="false"><i data-icon="sun"></i>Clair</button><button role="radio" aria-checked="false"><i data-icon="moon"></i>Sombre</button></div></fieldset>
+              <div class="setting" style="margin-top:12px"><div><b>Email quand un lead est collecté</b></div><span class="switch"><input type="checkbox" checked aria-label="Email quand un lead est collecté"><span></span></span></div>
+              <div class="setting"><div><b>Résumé hebdomadaire des vues</b></div><span class="switch"><input type="checkbox" checked aria-label="Résumé hebdomadaire"><span></span></span></div></div></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="menu" id="mem-menu" role="menu" hidden>
+  <button role="menuitem"><i data-icon="mail"></i>Renvoyer l'invitation</button>
+  <button role="menuitem"><i data-icon="star"></i>Transférer la propriété</button>
+  <hr><button role="menuitem" class="danger" data-open="m-remove"><i data-icon="trash"></i>Retirer du workspace</button>
+</div>
+
+<div class="modal-backdrop" id="m-invite" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-invite-t">
+    <div class="modal-head"><h2 id="m-invite-t">Inviter des membres</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label for="ie">Adresses email</label><textarea id="ie" class="textarea" placeholder="nom@acme.io, autre@acme.io">paul@acme.io, sarah@acme.io</textarea><span class="help">Séparez les adresses par une virgule ou un retour à la ligne.</span></div>
+      <div class="field"><label for="ir">Rôle</label><select id="ir" class="select"><option>Éditeur : crée et publie des démos</option><option>Lecteur : consulte les démos et les analytics</option><option>Admin : gère aussi les membres et la marque</option></select></div>
+      <div class="alert" style="margin-top:20px"><i data-icon="info"></i><span>2 sièges seront utilisés. Il en restera 2 sur les 10 de votre plan.</span></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close data-toast="2 invitations envoyées">Envoyer les invitations</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-remove" hidden>
+  <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="m-remove-t">
+    <div class="modal-head"><h2 id="m-remove-t">Retirer Thomas Bernard ?</h2></div>
+    <div class="modal-body"><p class="muted">Thomas perdra l'accès au workspace. Ses 4 démos restent dans le workspace, et vous en devenez propriétaire.</p></div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-danger" data-close data-toast="Thomas Bernard a été retiré">Retirer le membre</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-delws" hidden>
+  <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="m-delws-t">
+    <div class="modal-head"><h2 id="m-delws-t">Supprimer « Acme Analytics » ?</h2></div>
+    <div class="modal-body"><p class="muted">Cette action est définitive : 24 démos, leurs statistiques et 128 leads seront supprimés.</p><div class="field" style="margin-top:16px"><label for="cfm">Saisissez <b>Acme Analytics</b> pour confirmer</label><input id="cfm" class="input"></div></div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-danger" aria-disabled="true">Supprimer définitivement</button></div>
+  </div>
+</div>
+<script>
+const M = [['Camille Martin','camille@acme.io','Propriétaire','Active maintenant','CM',true],['Thomas Bernard','thomas@acme.io','Admin','il y a 2 h','TB'],['Inès Haddad','ines@acme.io','Éditeur','hier','IH'],['Hugo Lefèvre','hugo@acme.io','Éditeur','il y a 4 j','HL'],['Nina Roux','nina@acme.io','Lecteur','il y a 2 sem.','NR'],['paul@acme.io','Invitation envoyée le 15 nov.','Éditeur',null,'P']];
+document.addEventListener('fd:ready', () => {
+  const tb = document.getElementById('members');
+  M.forEach(([n,e,r,a,i,me]) => tb.insertAdjacentHTML('beforeend', `<tr><td><div class="row"><span class="avatar" ${a===null?'style="background:var(--fd-stone-100);color:var(--fd-stone-600)"':''}>${i}</span><div><b>${n}</b>${me?' <span class="badge">Vous</span>':''}<div class="t-caption subtle">${e}</div></div></div></td>
+    <td>${me?'<span class="badge badge-primary">Propriétaire</span>':`<select class="select role-select input-sm" aria-label="Rôle de ${n}"><option ${r==='Admin'?'selected':''}>Admin</option><option ${r==='Éditeur'?'selected':''}>Éditeur</option><option ${r==='Lecteur'?'selected':''}>Lecteur</option></select>`}</td>
+    <td class="muted">${a===null?'<span class="badge badge-warning">En attente</span>':a}</td>
+    <td class="r">${me?'':`<button class="btn btn-ghost btn-sm btn-icon" data-menu="mem-menu" aria-label="Actions pour ${n}">${fdIcon('more')}</button>`}</td></tr>`));
+  document.addEventListener('click', e => { const b = e.target.closest('[data-menu="mem-menu"]'); if (b) { const m = document.getElementById('mem-menu'), rc = b.getBoundingClientRect(); m.style.position='fixed'; m.style.top=(rc.bottom+4)+'px'; m.style.left=(rc.right-220)+'px'; } }, true);
+  document.querySelectorAll('.snav [role=tab]').forEach(t => t.addEventListener('click', () => document.getElementById('crumb').textContent = t.textContent.trim()));
+  const h = location.hash.slice(1); if (h) { const t = document.getElementById('st-' + h); t && t.click(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Démos · FlowDSIML (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+  .thumb .hs { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--fd-ember-500); box-shadow: 0 0 0 4px rgba(232,84,31,.25); }
+  .view-list[hidden], .demo-grid[hidden] { display: none; }
+  .banner-ob { display: flex; gap: 20px; align-items: center; padding: 16px 20px; border-radius: var(--fd-radius-lg); background: var(--fd-color-primary-soft); margin-bottom: 24px; }
+  .banner-ob .progress { width: 160px; }
+</style>
+</head>
+<body data-shell="app" data-page="demos" data-crumbs='<span aria-current="page">Démos</span>'>
+<main>
+  <div class="content">
+    <div class="banner-ob" role="region" aria-label="Premiers pas">
+      <div class="grow"><b>Premiers pas · 3 sur 5</b><p class="t-caption muted" style="margin-top:2px">Prochaine étape : partagez votre démo « Créer un rapport » pour recevoir vos premières vues.</p></div>
+      <div class="progress hide-sm"><span style="width:60%"></span></div>
+      <a class="btn btn-secondary btn-sm" href="partage.html">Partager</a>
+      <button class="btn btn-ghost btn-sm btn-icon" aria-label="Masquer les premiers pas"><i data-icon="x"></i></button>
+    </div>
+
+    <div class="page-head">
+      <div><h1>Démos</h1><p class="muted" style="margin-top:4px">24 démos · 18 publiées</p></div>
+      <div class="row">
+        <button class="btn btn-secondary" data-open="m-import"><i data-icon="upload"></i>Importer</button>
+        <button class="btn btn-primary" data-open="m-new"><i data-icon="plus"></i>Nouvelle démo</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="input-affix" style="width:280px;max-width:100%"><i data-icon="search"></i><input class="input input-sm" type="search" placeholder="Rechercher une démo" aria-label="Rechercher une démo"></div>
+      <select class="select input-sm" style="width:auto" aria-label="Statut"><option>Tous les statuts</option><option>Publiées</option><option>Brouillons</option><option>Modifiées</option></select>
+      <select class="select input-sm" style="width:auto" aria-label="Créateur"><option>Tous les créateurs</option><option>Moi</option></select>
+      <select class="select input-sm" style="width:auto" aria-label="Trier"><option>Modifiées récemment</option><option>Créées récemment</option><option>Nom (A-Z)</option><option>Plus vues</option></select>
+      <span class="grow"></span>
+      <div class="segmented" role="radiogroup" aria-label="Affichage" data-seg id="viewseg"><button role="radio" aria-checked="true" data-value="grid" aria-label="Grille"><i data-icon="layers"></i></button><button role="radio" aria-checked="false" data-value="list" aria-label="Liste"><i data-icon="form"></i></button></div>
+    </div>
+
+    <div class="demo-grid" id="grid"></div>
+
+    <div class="card view-list" id="list" hidden>
+      <div class="table-wrap"><table class="table">
+        <caption class="sr-only">Liste des démos</caption>
+        <thead><tr><th scope="col"><button>Nom <i data-icon="chevronDown"></i></button></th><th>Statut</th><th>Dossier</th><th class="r">Vues (30 j)</th><th class="r">Complétion</th><th>Modifiée</th><th><span class="sr-only">Actions</span></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+    </div>
+
+    <h2 class="t-h3" style="margin:40px 0 12px">Exemple d'état vide (dossier sans démo)</h2>
+    <div class="card"><div class="empty">
+      <svg class="illu" viewBox="0 0 140 100" aria-hidden="true"><rect x="10" y="14" width="120" height="76" rx="10" fill="var(--fd-lagoon-50)" stroke="var(--fd-lagoon-200)"/><path d="M28 70c14 0 18-22 34-22s20-18 36-18" fill="none" stroke="var(--fd-lagoon-300)" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 7"/><circle cx="28" cy="70" r="6" fill="var(--fd-lagoon-300)"/><circle cx="62" cy="48" r="6" fill="var(--fd-lagoon-300)"/><circle cx="98" cy="30" r="9" fill="var(--fd-ember-400)"/><circle cx="98" cy="30" r="3.5" fill="#fff"/></svg>
+      <h3>Ce dossier est vide</h3><p class="muted">Glissez des démos ici depuis la liste, ou créez-en une nouvelle directement dans ce dossier.</p>
+      <button class="btn btn-primary" data-open="m-new"><i data-icon="plus"></i>Nouvelle démo</button>
+    </div></div>
+  </div>
+</main>
+
+<div class="menu" id="card-menu" role="menu" hidden>
+  <a role="menuitem" href="editeur.html"><i data-icon="edit"></i>Ouvrir dans l'éditeur</a>
+  <a role="menuitem" href="partage.html"><i data-icon="share"></i>Partager</a>
+  <button role="menuitem" data-toast="Lien copié"><i data-icon="link"></i>Copier le lien</button>
+  <button role="menuitem"><i data-icon="duplicate"></i>Dupliquer<span class="kbd">⌘D</span></button>
+  <button role="menuitem"><i data-icon="folder"></i>Déplacer vers…</button>
+  <hr>
+  <button role="menuitem" data-toast="Démo archivée · Annuler"><i data-icon="archive"></i>Archiver</button>
+  <button role="menuitem" class="danger" data-open="m-del"><i data-icon="trash"></i>Supprimer</button>
+</div>
+
+<div class="modal-backdrop" id="m-new" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-new-t">
+    <div class="modal-head"><h2 id="m-new-t">Nouvelle démo</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <button class="card card-pad col" style="text-align:left;cursor:pointer;border:2px solid var(--fd-color-primary);background:var(--fd-color-surface-selected)" data-toast="Ouverture de l'extension…"><i data-icon="chrome"></i><b>Capturer avec l'extension</b><span class="t-caption muted">Recommandé. Une étape par clic, avec la position du clic.</span></button>
+        <button class="card card-pad col" style="text-align:left;cursor:pointer" data-open="m-import"><i data-icon="image"></i><b>Importer des images</b><span class="t-caption muted">Partez de captures d'écran ou de maquettes existantes.</span></button>
+      </div>
+      <div class="field" style="margin-top:20px"><label for="nd-folder">Dossier</label><select id="nd-folder" class="select"><option>Site web</option><option>Sales — Outbound</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-import" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-import-t">
+    <div class="modal-head"><h2 id="m-import-t">Importer des captures</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body col" style="gap:12px">
+      <p class="muted">Téléversement de 12 images sur 18…</p>
+      <div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="Téléversement"><span style="width:66%"></span></div>
+      <div class="alert alert-warning"><i data-icon="alert"></i><span><b>2 fichiers ignorés</b> : « video.mov » n'est pas une image, « scan.tiff » n'est pas un format pris en charge.</span></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" aria-disabled="true"><span class="spinner"></span>Import en cours…</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-del" hidden>
+  <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="m-del-t" aria-describedby="m-del-d">
+    <div class="modal-head"><h2 id="m-del-t">Supprimer « Créer un rapport » ?</h2></div>
+    <div class="modal-body"><p id="m-del-d" class="muted">La démo, ses liens et ses statistiques seront supprimés définitivement. Les leads déjà collectés sont conservés. Pour la mettre de côté, archivez-la plutôt.</p></div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-danger" data-close data-toast="Démo supprimée">Supprimer la démo</button></div>
+  </div>
+</div>
+
+<script>
+const demos = [
+  ['Créer un rapport en 2 minutes','Publiée','success','Site web',1284,'72 %','il y a 2 h','dashboard'],
+  ['Onboarding — import de données','Modifiée','warning','Onboarding',402,'64 %','hier','list'],
+  ['Démo Acme × Globex (perso)','Publiée','success','Sales — Outbound',37,'91 %','il y a 3 j','modal'],
+  ['Tableau de bord temps réel','Brouillon','','Site web',0,'—','il y a 5 j','dashboard'],
+  ['Intégration HubSpot','Publiée','success','Site web',856,'58 %','12 nov.','list'],
+  ['Nouveautés de novembre','Publiée','success','Onboarding',219,'80 %','10 nov.','modal'],
+];
+document.addEventListener('fd:ready', () => {
+  const g = document.getElementById('grid'), r = document.getElementById('rows');
+  demos.forEach(([t,s,c,f,v,cp,m,fk],i) => {
+    g.insertAdjacentHTML('beforeend', `<article class="demo-card">
+      <div class="thumb"><div data-fake="${fk}" style="position:absolute;inset:0"></div><span class="hs" style="left:${40+i*7}%;top:${30+i*5}%"></span></div>
+      <span class="status badge ${c?'badge-'+c:''}"><span class="dot"></span>${s}</span>
+      <div class="body"><a class="title stretch" href="editeur.html">${t}</a><span class="t-caption subtle">${8+i} étapes · ${f} · ${m}</span>
+      <span class="t-caption muted row" style="gap:4px">${fdIcon('eye','width="14" height="14"')}<span class="num">${v.toLocaleString('fr-FR')}</span> vues</span></div>
+      <button class="btn btn-ghost btn-sm btn-icon more" data-menu="card-menu" aria-haspopup="menu" aria-label="Actions pour ${t}">${fdIcon('more')}</button></article>`);
+    r.insertAdjacentHTML('beforeend', `<tr><th scope="row" style="font-weight:600;text-align:left"><a href="editeur.html" style="color:var(--fd-color-text)">${t}</a></th>
+      <td><span class="badge ${c?'badge-'+c:''}">${s}</span></td><td class="muted">${f}</td><td class="r">${v.toLocaleString('fr-FR')}</td><td class="r">${cp}</td><td class="muted">${m}</td>
+      <td class="r"><button class="btn btn-ghost btn-sm btn-icon" data-menu="card-menu" aria-label="Actions pour ${t}">${fdIcon('more')}</button></td></tr>`);
+  });
+  // re-render fakes for injected cards
+  document.querySelectorAll('#grid [data-fake]').forEach(el => { el.innerHTML = document.querySelector('.fake') ? '' : ''; });
+  const s = document.createElement('script'); s.textContent='';
+  document.getElementById('viewseg').addEventListener('seg', e => { document.getElementById('grid').hidden = e.detail==='list'; document.getElementById('list').hidden = e.detail!=='list'; });
+  // menu positioning
+  document.addEventListener('click', e => { const b = e.target.closest('[data-menu="card-menu"]'); if (!b) return; const m = document.getElementById('card-menu'); const rc = b.getBoundingClientRect(); m.style.position='fixed'; m.style.top = Math.min(rc.bottom+4, innerHeight-330)+'px'; m.style.left = Math.max(8, rc.right-220)+'px'; }, true);
+  window.fdRenderFakes && fdRenderFakes();
+});
+</script>
+</body>
+</html>

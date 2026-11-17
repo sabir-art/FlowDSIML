@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plans et facturation · FlowDSIML (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .plans { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
+  @media (max-width: 1180px) { .plans { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .plans { grid-template-columns: 1fr; } }
+  .plan { display: flex; flex-direction: column; padding: 24px; position: relative; }
+  .plan.current { border: 2px solid var(--fd-color-primary); padding: 23px; }
+  .plan.reco { border-color: var(--fd-color-border-strong); }
+  .plan .price { font: 700 2.25rem/1 var(--fd-font-display); letter-spacing: -.02em; margin: 16px 0 4px; }
+  .plan .price small { font: 500 14px var(--fd-font-sans); color: var(--fd-color-text-muted); letter-spacing: 0; }
+  .plan ul { list-style: none; padding: 0; margin: 20px 0 24px; display: grid; gap: 10px; flex: 1; }
+  .plan li { display: flex; gap: 8px; align-items: flex-start; font-size: var(--fd-text-body-size); }
+  .plan li svg { width: 16px; height: 16px; color: var(--fd-color-success); flex: none; margin-top: 2px; }
+  .plan .tag { position: absolute; top: -11px; left: 24px; }
+  .usage-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 900px) { .usage-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body data-shell="app" data-page="plans" data-crumbs='<span aria-current="page">Plans et facturation</span>'>
+<main>
+  <div class="content">
+    <div class="page-head"><div><h1>Plans et facturation</h1><p class="muted" style="margin-top:4px">Workspace Acme Analytics · facturation par workspace</p></div></div>
+
+    <div class="alert" style="margin-bottom:24px"><i data-icon="info"></i><span><b>Paiement en ligne bientôt disponible.</b> Pour changer de plan dès maintenant, <a href="#">contactez-nous</a>. Votre plan sera activé sous 24 h. <span class="subtle">(Décision D6 : le paiement Stripe est repoussé.)</span></span></div>
+
+    <section class="card card-pad" aria-labelledby="u-t">
+      <div class="row between wrap"><h2 class="t-h3" id="u-t">Plan Team · utilisation ce mois-ci</h2><span class="t-caption muted">Renouvellement le 1 déc. 2026</span></div>
+      <div class="usage-grid" style="margin-top:16px">
+        <div><div class="row between t-label"><span>Membres</span><span class="num">6 / 10</span></div><div class="progress" style="margin-top:8px"><span style="width:60%"></span></div></div>
+        <div><div class="row between t-label"><span>Crédits IA</span><span class="num">820 / 1 000</span></div><div class="progress warn" style="margin-top:8px"><span style="width:82%"></span></div><p class="help" style="margin-top:6px">82 % utilisés : les crédits se rechargent le 1 déc.</p></div>
+        <div><div class="row between t-label"><span>Rétention des analytics</span><span>24 mois</span></div><div class="progress" style="margin-top:8px"><span style="width:100%;background:var(--fd-color-surface-sunken)"></span></div></div>
+      </div>
+    </section>
+
+    <div class="row between wrap" style="margin:40px 0 20px;gap:12px">
+      <h2>Choisir un plan</h2>
+      <div class="segmented" role="radiogroup" aria-label="Période de facturation" data-seg id="period"><button role="radio" aria-checked="false" data-value="m">Mensuel</button><button role="radio" aria-checked="true" data-value="y">Annuel <span class="badge badge-success" style="height:18px">−20 %</span></button></div>
+    </div>
+
+    <div class="plans">
+      <article class="card plan">
+        <h3>Free</h3><p class="t-caption muted">Pour découvrir</p>
+        <div class="price">0 €<small> / mois</small></div><p class="t-caption subtle">1 membre</p>
+        <ul><li><i data-icon="check"></i>5 démos publiées</li><li><i data-icon="check"></i>Capture par l'extension Chrome</li><li><i data-icon="check"></i>Lien public et intégration</li><li><i data-icon="check"></i>Analytics sur 7 jours</li><li class="muted"><i data-icon="x" style="color:var(--fd-color-text-subtle)"></i>Filigrane FlowDSIML</li></ul>
+        <button class="btn btn-secondary btn-block">Rétrograder</button>
+      </article>
+      <article class="card plan">
+        <h3>Solo</h3><p class="t-caption muted">Pour un créateur</p>
+        <div class="price" data-m="39 €" data-y="31 €">31 €<small> / mois</small></div><p class="t-caption subtle">1 membre · +29 € / membre</p>
+        <ul><li><i data-icon="check"></i>Démos illimitées</li><li><i data-icon="check"></i>Sans filigrane</li><li><i data-icon="check"></i>Formulaires de leads</li><li><i data-icon="check"></i>Liens personnalisés et variables</li><li><i data-icon="check"></i>Analytics sur 12 mois</li></ul>
+        <button class="btn btn-secondary btn-block">Choisir Solo</button>
+      </article>
+      <article class="card plan current">
+        <span class="badge badge-primary tag">Plan actuel</span>
+        <h3>Team</h3><p class="t-caption muted">Pour les équipes marketing et sales</p>
+        <div class="price" data-m="249 €" data-y="199 €">199 €<small> / mois</small></div><p class="t-caption subtle">10 membres inclus · +39 € / membre</p>
+        <ul><li><i data-icon="check"></i>Tout Solo, plus :</li><li><i data-icon="check"></i>Dossiers et rôles</li><li><i data-icon="check"></i>Thèmes et page publique à vos couleurs</li><li><i data-icon="check"></i>Webhooks et Zapier</li><li><i data-icon="check"></i>1 000 crédits IA / mois</li><li><i data-icon="check"></i>Analytics sur 24 mois</li></ul>
+        <button class="btn btn-secondary btn-block" aria-disabled="true">Plan actuel</button>
+      </article>
+      <article class="card plan reco">
+        <span class="badge badge-accent tag">Recommandé pour vous</span>
+        <h3>Business</h3><p class="t-caption muted">Pour passer à l'échelle</p>
+        <div class="price" data-m="749 €" data-y="599 €">599 €<small> / mois</small></div><p class="t-caption subtle">20 membres inclus</p>
+        <ul><li><i data-icon="check"></i>Tout Team, plus :</li><li><i data-icon="check"></i>Capture HTML et édition du contenu <span class="badge">V2</span></li><li><i data-icon="check"></i>Démo centers <span class="badge">V2</span></li><li><i data-icon="check"></i>Domaine personnalisé</li><li><i data-icon="check"></i>Intégration CRM (HubSpot)</li><li><i data-icon="check"></i>Support prioritaire</li></ul>
+        <button class="btn btn-accent btn-block" data-open="m-up">Passer à Business</button>
+      </article>
+    </div>
+    <p class="t-caption muted" style="margin-top:16px">Prix HT, indicatifs : à valider par le client (question ouverte n° 17 de l'analyse). Besoin de SSO, de SCIM ou d'un contrat ? <a href="#">Parlons Enterprise</a>.</p>
+
+    <section class="card" style="margin-top:40px" aria-labelledby="inv-t">
+      <div class="card-head"><h2 class="t-h3" id="inv-t">Factures</h2></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Date</th><th>Plan</th><th class="r">Montant</th><th>Statut</th><th><span class="sr-only">Télécharger</span></th></tr></thead>
+        <tbody>
+          <tr><td>1 nov. 2026</td><td>Team · annuel</td><td class="r">2 388,00 €</td><td><span class="badge badge-success">Payée</span></td><td class="r"><button class="btn btn-ghost btn-sm"><i data-icon="download"></i>PDF</button></td></tr>
+          <tr><td>1 nov. 2025</td><td>Solo · annuel</td><td class="r">372,00 €</td><td><span class="badge badge-success">Payée</span></td><td class="r"><button class="btn btn-ghost btn-sm"><i data-icon="download"></i>PDF</button></td></tr>
+        </tbody></table></div>
+    </section>
+
+    <h2 class="t-h3" style="margin:40px 0 12px">Limite atteinte (exemple en plan Free)</h2>
+    <div class="card card-pad row wrap" style="gap:16px;border-color:var(--fd-color-warning)">
+      <span class="badge badge-warning">5 / 5</span>
+      <div class="grow"><b>Vous avez atteint la limite de 5 démos publiées</b><p class="t-caption muted">Dépubliez une démo, ou passez au plan Solo pour publier sans limite.</p></div>
+      <button class="btn btn-secondary btn-sm">Gérer mes démos</button><button class="btn btn-accent btn-sm">Passer à Solo</button>
+    </div>
+  </div>
+</main>
+<div class="modal-backdrop" id="m-up" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-up-t">
+    <div class="modal-head"><h2 id="m-up-t">Passer au plan Business</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <p class="muted">Notre équipe active votre plan et vous envoie la facture. Vous ne payez rien en ligne pour l'instant.</p>
+      <div class="field" style="margin-top:16px"><label for="up-n">Nombre de membres</label><input id="up-n" class="input" type="number" value="20" min="20"></div>
+      <div class="field"><label for="up-m">Message <span class="opt">(facultatif)</span></label><textarea id="up-m" class="textarea" placeholder="Votre besoin, vos délais…"></textarea></div>
+      <div class="row between" style="margin-top:20px;padding:12px 14px;border-radius:var(--fd-radius-md);background:var(--fd-color-surface-sunken)"><span>Total annuel estimé</span><b class="num">7 188 € HT</b></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close data-toast="Demande envoyée : nous revenons vers vous sous 24 h">Envoyer la demande</button></div>
+  </div>
+</div>
+<script>document.addEventListener('fd:ready',()=>document.getElementById('period').addEventListener('seg',e=>document.querySelectorAll('.price[data-m]').forEach(p=>p.firstChild.textContent=p.dataset[e.detail])));</script>
+</body>
+</html>

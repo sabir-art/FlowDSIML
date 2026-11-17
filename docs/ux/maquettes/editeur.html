@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Éditeur · FlowDSIML (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  body { overflow: hidden; }
+  .ed { height: 100vh; display: grid; grid-template-rows: var(--fd-layout-editor-toolbar-height) 1fr; }
+  .ed-bar { display: flex; align-items: center; gap: 8px; padding: 0 12px; background: var(--fd-color-surface); border-bottom: 1px solid var(--fd-color-border); }
+  .ed-title { font: 600 var(--fd-text-body-size) var(--fd-font-sans); border: 1px solid transparent; background: none; color: var(--fd-color-text); padding: 4px 8px; border-radius: var(--fd-radius-sm); width: 260px; }
+  .ed-title:hover { border-color: var(--fd-color-border); }
+  .save-state { display: inline-flex; align-items: center; gap: 6px; color: var(--fd-color-text-subtle); font-size: var(--fd-text-caption-size); }
+  .ed-body { display: grid; grid-template-columns: var(--fd-layout-editor-rail-width) 1fr var(--fd-layout-editor-panel-width); min-height: 0; }
+  /* Rail */
+  .rail { background: var(--fd-color-surface); border-right: 1px solid var(--fd-color-border); display: flex; flex-direction: column; min-height: 0; }
+  .rail-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 12px 8px 16px; }
+  .rail-list { list-style: none; margin: 0; padding: 4px 8px 12px; overflow: auto; flex: 1; }
+  .step { position: relative; display: grid; grid-template-columns: 18px 96px 1fr; gap: 8px; align-items: start; padding: 8px; border-radius: var(--fd-radius-md); border: 2px solid transparent; cursor: pointer; }
+  .step:hover { background: var(--fd-color-surface-hover); }
+  .step[aria-selected="true"] { background: var(--fd-color-surface-selected); border-color: var(--fd-color-border-selected); }
+  .step .n { font: 600 11px var(--fd-font-sans); color: var(--fd-color-text-subtle); text-align: center; padding-top: 4px; }
+  .step .th { position: relative; aspect-ratio: 16/10; border-radius: 6px; overflow: hidden; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface-sunken); }
+  .step .th .dot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--fd-ember-500); box-shadow: 0 0 0 3px rgba(232,84,31,.25); }
+  .step .meta { min-width: 0; }
+  .step .meta b { display: block; font-size: 12px; line-height: 1.3; font-weight: 600; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .step .icons { display: flex; gap: 4px; margin-top: 4px; color: var(--fd-color-text-subtle); }
+  .step .icons svg { width: 13px; height: 13px; }
+  .step + .step::before { content: ""; position: absolute; left: 16px; top: -8px; height: 12px; border-left: 2px dotted var(--fd-color-border-strong); }
+  .step .grip { position: absolute; left: 0; top: 50%; translate: 0 -50%; opacity: 0; color: var(--fd-color-text-subtle); }
+  .step:hover .grip { opacity: 1; }
+  .step .grip svg { width: 14px; height: 14px; }
+  .insert { height: 2px; background: var(--fd-color-primary); border-radius: 2px; margin: 2px 8px; position: relative; }
+  .insert::before { content: ""; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--fd-color-primary); }
+  .rail-foot { border-top: 1px solid var(--fd-color-border); padding: 12px; }
+  /* Canevas */
+  .stage { background: var(--fd-color-canvas-editor); position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .stage-inner { flex: 1; display: grid; place-items: center; padding: 32px 40px 120px; min-height: 0; overflow: auto; }
+  .frame { width: min(100%, 980px); border-radius: 12px; overflow: hidden; box-shadow: var(--fd-shadow-lg); background: #fff; }
+  .browser { height: 34px; background: var(--fd-stone-100); display: flex; align-items: center; gap: 6px; padding: 0 12px; border-bottom: 1px solid var(--fd-stone-200); }
+  .browser i { width: 10px; height: 10px; border-radius: 50%; background: var(--fd-stone-300); display: block; }
+  .browser .url { margin-left: 16px; flex: 1; max-width: 360px; height: 22px; border-radius: 6px; background: #fff; font: 11px var(--fd-font-sans); color: var(--fd-stone-500); display: flex; align-items: center; padding: 0 10px; }
+  .shot { position: relative; aspect-ratio: 16/9.2; }
+  .hotspot { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; background: var(--fd-player-hotspot); border: 0; cursor: pointer; padding: 0; }
+  .hotspot::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: #fff; }
+  .hotspot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--fd-player-hotspot); opacity: .55; animation: pulse var(--fd-motion-duration-pulse) infinite; z-index: -1; }
+  @keyframes pulse { to { transform: scale(2.4); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .hotspot::after { animation: none; transform: scale(1.7); opacity: .3; } }
+  .sel { outline: 2px solid var(--fd-color-primary); outline-offset: 6px; border-radius: 50%; }
+  .tip { position: absolute; width: 300px; background: var(--fd-player-tooltip-bg); color: var(--fd-player-tooltip-text); border-radius: var(--fd-player-radius); box-shadow: var(--fd-shadow-lg); padding: 16px; font-family: var(--fd-player-font); }
+  .tip::before { content: ""; position: absolute; top: -7px; right: 36px; width: 14px; height: 14px; background: inherit; transform: rotate(45deg); border-radius: 2px; }
+  .tip .cnt { font: 500 12px var(--fd-font-sans); color: var(--fd-player-tooltip-muted); }
+  .tip p { font-size: 15px; line-height: 1.45; margin: 6px 0 14px; }
+  .tip .var { font: 500 12px var(--fd-font-mono); background: var(--fd-lagoon-50); color: var(--fd-lagoon-700); padding: 1px 5px; border-radius: 4px; }
+  .tip .acts { display: flex; justify-content: space-between; align-items: center; }
+  .pbtn { height: 34px; padding: 0 14px; border-radius: 10px; border: 0; font: 600 13px var(--fd-font-sans); cursor: pointer; }
+  .pbtn.p { background: var(--fd-player-primary); color: var(--fd-player-on-primary); }
+  .pbtn.g { background: transparent; color: var(--fd-player-tooltip-muted); }
+  .blurbox { position: absolute; backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); background: rgba(225,229,238,.55); box-shadow: inset 0 0 0 1px rgba(30,36,51,.08); border-radius: 4px; cursor: pointer; }
+  .blurbox.selected, .zoombox.selected { outline: 2px solid var(--fd-color-primary); }
+  .blurbox .tag, .zoombox .tag { position: absolute; top: -24px; left: -2px; background: var(--fd-color-primary); color: var(--fd-color-on-primary); font: 600 11px var(--fd-font-sans); padding: 3px 6px; border-radius: 4px; }
+  .handles i { position: absolute; width: 8px; height: 8px; background: #fff; border: 1.5px solid var(--fd-color-primary); border-radius: 2px; }
+  .handles i:nth-child(1){left:-5px;top:-5px} .handles i:nth-child(2){right:-5px;top:-5px} .handles i:nth-child(3){left:-5px;bottom:-5px} .handles i:nth-child(4){right:-5px;bottom:-5px}
+  .popup-ov { position: absolute; inset: 0; background: var(--fd-player-overlay); display: grid; place-items: center; }
+  .popup { width: 360px; background: #fff; color: var(--fd-stone-900); border-radius: var(--fd-player-radius); padding: 24px; box-shadow: var(--fd-shadow-lg); font-family: var(--fd-player-font); }
+  .popup .input { background: #fff; color: var(--fd-stone-900); border-color: var(--fd-stone-400); height: 38px; }
+  .popup label { color: var(--fd-stone-900); }
+  .floatbar { position: absolute; left: 50%; bottom: 64px; translate: -50% 0; display: flex; gap: 2px; padding: 4px; background: var(--fd-color-surface-raised); border: 1px solid var(--fd-color-border); border-radius: 12px; box-shadow: var(--fd-shadow-md); }
+  .floatbar .sep { width: 1px; background: var(--fd-color-border); margin: 6px 4px; }
+  /* Panneau */
+  .panel { background: var(--fd-color-surface); border-left: 1px solid var(--fd-color-border); display: flex; flex-direction: column; min-height: 0; }
+  .panel .tabs { padding: 0 16px; gap: 20px; }
+  .panel-body { overflow: auto; padding: 16px; flex: 1; }
+  .sec { padding: 16px 0; border-top: 1px solid var(--fd-color-border); }
+  .sec:first-child { border-top: 0; padding-top: 4px; }
+  .sec-title { font: 600 12px var(--fd-font-sans); color: var(--fd-color-text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .chip-var { font: 500 12px var(--fd-font-mono); background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); padding: 1px 6px; border-radius: 4px; }
+  .rte { border: 1px solid var(--fd-color-border-strong); border-radius: var(--fd-radius-md); background: var(--fd-color-surface); }
+  .rte-tools { display: flex; gap: 2px; padding: 4px; border-bottom: 1px solid var(--fd-color-border); }
+  .rte-tools button { width: 28px; height: 28px; border: 0; background: none; border-radius: 6px; color: var(--fd-color-text-muted); font: 700 13px var(--fd-font-sans); cursor: pointer; }
+  .rte-tools button:hover { background: var(--fd-color-surface-hover); }
+  .rte-text { padding: 10px 12px; min-height: 76px; line-height: 1.5; }
+  .pos-grid { display: grid; grid-template-columns: repeat(3, 28px); gap: 4px; }
+  .pos-grid button { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--fd-color-border-strong); background: var(--fd-color-surface); cursor: pointer; }
+  .pos-grid button[aria-pressed="true"] { background: var(--fd-color-primary); border-color: var(--fd-color-primary); }
+  .pos-grid .c { visibility: hidden; }
+  .color-row { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--fd-color-border-strong); flex: none; }
+  .field-row { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-md); background: var(--fd-color-surface); }
+  .field-row + .field-row { margin-top: 6px; }
+  .field-row svg { width: 14px; height: 14px; color: var(--fd-color-text-subtle); }
+  .ctx[hidden] { display: none; }
+  .narrow-warning { display: none; }
+  @media (max-width: 1023px) { .ed { display: none; } .narrow-warning { display: grid; place-items: center; min-height: 100vh; padding: 24px; text-align: center; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#canvas">Aller au canevas</a>
+<div class="ed">
+  <!-- Barre d'outils -->
+  <header class="ed-bar">
+    <a class="btn btn-ghost btn-sm btn-icon" href="dashboard.html" aria-label="Retour aux démos"><i data-icon="arrowLeft"></i></a>
+    <input class="ed-title" value="Créer un rapport en 2 minutes" aria-label="Nom de la démo">
+    <span class="badge badge-warning">Modifications non publiées</span>
+    <span class="save-state" role="status" aria-live="polite"><i data-icon="checkCircle"></i>Enregistré</span>
+    <span class="grow"></span>
+    <button class="btn btn-ghost btn-sm btn-icon" aria-label="Annuler (⌘Z)"><i data-icon="undo"></i></button>
+    <button class="btn btn-ghost btn-sm btn-icon" aria-label="Rétablir (⌘⇧Z)"><i data-icon="redo"></i></button>
+    <div class="segmented" role="tablist" aria-label="Mode"><button role="tab" aria-selected="true">Édition</button><a class="btn" role="tab" aria-selected="false" href="player.html?preview=1" style="height:30px;padding:0 12px;font-weight:500;color:var(--fd-color-text-muted)">Aperçu</a></div>
+    <button class="btn btn-ghost btn-sm" data-menu="more-menu" aria-haspopup="menu"><i data-icon="more"></i><span class="sr-only">Plus d'options</span></button>
+    <a class="btn btn-secondary btn-sm" href="partage.html"><i data-icon="share"></i>Partager</a>
+    <button class="btn btn-accent btn-sm" data-toast="Démo publiée · les visiteurs voient la nouvelle version">Publier</button>
+  </header>
+  <div class="menu" id="more-menu" role="menu" hidden style="position:fixed;top:48px;right:180px">
+    <button role="menuitem"><i data-icon="clock"></i>Historique des versions</button>
+    <button role="menuitem"><i data-icon="palette"></i>Thème de la démo</button>
+    <button role="menuitem"><i data-icon="edit"></i>Rédiger les textes (assistant)<span class="badge" style="margin-left:auto">V2</span></button>
+    <button role="menuitem"><i data-icon="keyboard"></i>Raccourcis clavier<span class="kbd">?</span></button>
+    <hr><button role="menuitem"><i data-icon="duplicate"></i>Dupliquer la démo</button>
+  </div>
+
+  <div class="ed-body">
+    <!-- Rail des étapes -->
+    <nav class="rail" aria-label="Étapes de la démo">
+      <div class="rail-head"><b class="t-label">Étapes <span class="subtle">· 8</span></b><button class="btn btn-ghost btn-sm btn-icon" aria-label="Ajouter une étape" data-menu="add-menu"><i data-icon="plus"></i></button></div>
+      <div class="menu" id="add-menu" role="menu" hidden style="position:fixed;top:96px;left:200px">
+        <button role="menuitem"><i data-icon="chrome"></i>Capturer de nouvelles étapes</button>
+        <button role="menuitem"><i data-icon="image"></i>Importer une image</button>
+        <button role="menuitem"><i data-icon="message"></i>Ajouter une pop-up</button>
+        <button role="menuitem"><i data-icon="form"></i>Ajouter un formulaire</button>
+      </div>
+      <ul class="rail-list" role="listbox" aria-label="Étapes, réordonnables avec Espace puis les flèches" id="rail"></ul>
+      <div class="rail-foot"><button class="btn btn-secondary btn-sm btn-block" data-menu="add-menu"><i data-icon="plus"></i>Ajouter une étape</button></div>
+    </nav>
+
+    <!-- Canevas -->
+    <section class="stage" aria-label="Canevas" id="canvas">
+      <div class="row" style="padding:10px 16px 0;gap:8px">
+        <span class="t-caption muted" id="stepTitle">Étape 3 · Ouvrir le menu « Nouveau rapport »</span><span class="grow"></span>
+        <select class="select input-sm" style="width:auto" aria-label="Zoom du canevas"><option>Ajuster</option><option>50 %</option><option>100 %</option></select>
+      </div>
+      <div class="stage-inner">
+        <div class="frame fd-player-scope">
+          <div class="browser" aria-hidden="true"><i></i><i></i><i></i><span class="url">app.acme-analytics.io/reports</span></div>
+          <div class="shot" id="shot">
+            <div data-fake="dashboard" style="position:absolute;inset:0"></div>
+            <!-- Contexte bulle -->
+            <div class="ctx" data-ctx="hotspot">
+              <button class="hotspot sel" style="left:88.5%;top:10.5%" aria-label="Hotspot de l'étape 3 (sélectionné)" data-select="hotspot"></button>
+              <div class="tip" style="right:2%;top:19%">
+                <span class="cnt">3 / 8</span>
+                <p>Bonjour <span class="var">{{first_name}}</span>, cliquez ici pour créer votre premier rapport.</p>
+                <div class="acts"><button class="pbtn g">Précédent</button><button class="pbtn p">Suivant</button></div>
+              </div>
+              <div class="blurbox" style="left:34%;top:61%;width:44%;height:14%" data-select="blur" role="button" tabindex="0" aria-label="Zone de flou 1"></div>
+            </div>
+            <!-- Contexte flou -->
+            <div class="ctx" data-ctx="blur" hidden>
+              <button class="hotspot" style="left:88.5%;top:10.5%" aria-label="Hotspot de l'étape 3" data-select="hotspot"></button>
+              <div class="blurbox selected" style="left:34%;top:61%;width:44%;height:14%" data-select="blur"><span class="tag">Flou</span><span class="handles"><i></i><i></i><i></i><i></i></span></div>
+              <div class="blurbox" style="left:34%;top:80%;width:26%;height:7%" data-select="blur"></div>
+            </div>
+            <!-- Contexte formulaire -->
+            <div class="ctx" data-ctx="form" hidden>
+              <div class="popup-ov"><div class="popup">
+                <h2 style="font-size:20px">Recevez la démo complète</h2>
+                <p style="color:var(--fd-stone-600);margin:6px 0 16px;font-size:14px">Laissez vos coordonnées, nous vous envoyons l'accès au parcours avancé.</p>
+                <div class="field"><label>Email professionnel</label><input class="input" placeholder="nom@entreprise.com"></div>
+                <div class="field"><label>Entreprise</label><input class="input"></div>
+                <label class="check" style="margin-top:14px;font-size:12px;color:var(--fd-stone-600)"><input type="checkbox">J'accepte d'être recontacté·e. <a href="#" style="color:var(--fd-player-primary)">Confidentialité</a></label>
+                <button class="pbtn p" style="width:100%;margin-top:16px;height:40px">Recevoir l'accès</button>
+                <button class="pbtn g" style="width:100%;margin-top:4px">Passer</button>
+              </div></div>
+            </div>
+            <!-- Contexte CTA de fin -->
+            <div class="ctx" data-ctx="cta" hidden>
+              <div class="popup-ov"><div class="popup" style="text-align:center">
+                <h2 style="font-size:20px">Prêt à essayer avec vos données ?</h2>
+                <p style="color:var(--fd-stone-600);margin:6px 0 18px;font-size:14px">Réservez 20 minutes avec notre équipe, ou revoyez la démo.</p>
+                <button class="pbtn p" style="width:100%;height:42px">Réserver une démo</button>
+                <button class="pbtn g" style="width:100%;margin-top:6px">Recommencer la visite</button>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="floatbar" role="toolbar" aria-label="Outils du canevas">
+        <button class="btn btn-ghost btn-icon" aria-pressed="true" aria-label="Hotspot et bulle"><i data-icon="target"></i></button>
+        <button class="btn btn-ghost btn-icon" aria-label="Ajouter une zone de flou" data-select="blur"><i data-icon="blur"></i></button>
+        <button class="btn btn-ghost btn-icon" aria-label="Zoom sur une zone"><i data-icon="zoom"></i></button>
+        <button class="btn btn-ghost btn-icon" aria-label="Recadrer la capture"><i data-icon="crop"></i></button>
+        <span class="sep"></span>
+        <button class="btn btn-ghost btn-icon" aria-label="Remplacer l'image"><i data-icon="image"></i></button>
+      </div>
+    </section>
+
+    <!-- Panneau de propriétés -->
+    <aside class="panel" aria-label="Propriétés">
+      <div class="tabs" role="tablist" aria-label="Propriétés">
+        <button role="tab" aria-selected="true" aria-controls="tp-step" id="tb-step">Étape</button>
+        <button role="tab" aria-selected="false" aria-controls="tp-design" id="tb-design" tabindex="-1">Design</button>
+        <button role="tab" aria-selected="false" aria-controls="tp-settings" id="tb-settings" tabindex="-1">Réglages</button>
+      </div>
+      <div class="panel-body">
+        <div role="tabpanel" id="tp-step" aria-labelledby="tb-step">
+          <!-- Hotspot -->
+          <div class="ctx" data-ctx="hotspot">
+            <div class="sec">
+              <div class="sec-title">Type de guidage</div>
+              <div class="segmented" role="radiogroup" aria-label="Type de guidage" data-seg style="width:100%">
+                <button role="radio" aria-checked="true" style="flex:1"><i data-icon="target"></i>Hotspot</button>
+                <button role="radio" aria-checked="false" style="flex:1"><i data-icon="crop"></i>Zone</button>
+                <button role="radio" aria-checked="false" style="flex:1"><i data-icon="message"></i>Libre</button>
+              </div>
+              <p class="help" style="margin-top:8px">Hotspot : un point pulsant à l'endroit du clic, avec une bulle.</p>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Texte de la bulle</div>
+              <div class="field"><label for="tt">Titre <span class="opt">(facultatif)</span></label><input class="input input-sm" id="tt" placeholder="Ex. : Nouveau rapport"></div>
+              <div class="field" style="margin-top:12px">
+                <span class="label" id="lbl-body">Texte</span>
+                <div class="rte" role="group" aria-labelledby="lbl-body">
+                  <div class="rte-tools"><button aria-label="Gras">B</button><button aria-label="Italique" style="font-style:italic">I</button><button aria-label="Lien">🔗</button><span class="grow"></span><button style="width:auto;padding:0 8px;font-size:12px;color:var(--fd-color-primary)" aria-haspopup="menu">{ } Variable</button></div>
+                  <div class="rte-text" contenteditable="true" aria-label="Texte de la bulle">Bonjour <span class="chip-var" contenteditable="false">{{first_name}}</span>, cliquez ici pour créer votre premier rapport.</div>
+                </div>
+                <span class="help">82 / 280 caractères · <a href="#">Améliorer avec l'IA</a> <span class="badge" style="height:16px">V2</span></span>
+              </div>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Position de la bulle</div>
+              <div class="row-3">
+                <div class="pos-grid" role="group" aria-label="Position de la bulle">
+                  <button aria-label="En haut à gauche"></button><button aria-label="En haut"></button><button aria-label="En haut à droite"></button>
+                  <button aria-label="À gauche"></button><button class="c" tabindex="-1" aria-hidden="true"></button><button aria-label="À droite"></button>
+                  <button aria-label="En bas à gauche" aria-pressed="true"></button><button aria-label="En bas"></button><button aria-label="En bas à droite"></button>
+                </div>
+                <div class="col t-caption muted" style="gap:6px"><label class="check"><input type="checkbox" checked>Placement automatique</label><span>La bulle change de côté si elle sort du cadre.</span></div>
+              </div>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Boutons</div>
+              <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+                <div class="field"><label for="b1">Précédent</label><input id="b1" class="input input-sm" value="Précédent"></div>
+                <div class="field" style="margin:0"><label for="b2">Suivant</label><input id="b2" class="input input-sm" value="Suivant"></div>
+              </div>
+              <div class="setting" style="padding-bottom:0"><span class="t-label">Avancer au clic sur le hotspot</span><span class="switch"><input type="checkbox" checked aria-label="Avancer au clic sur le hotspot"><span></span></span></div>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Action au clic</div>
+              <select class="select input-sm" aria-label="Action au clic"><option>Étape suivante</option><option>Aller à l'étape…</option><option>Ouvrir une URL</option><option>Ouvrir une autre démo</option></select>
+            </div>
+          </div>
+          <!-- Flou -->
+          <div class="ctx" data-ctx="blur" hidden>
+            <div class="sec">
+              <div class="sec-title">Zone de flou <button class="btn btn-ghost btn-sm btn-icon" aria-label="Supprimer la zone de flou"><i data-icon="trash"></i></button></div>
+              <div class="segmented" role="radiogroup" data-seg aria-label="Style de masquage" style="width:100%"><button role="radio" aria-checked="true" style="flex:1">Flou</button><button role="radio" aria-checked="false" style="flex:1">Pixels</button><button role="radio" aria-checked="false" style="flex:1">Aplat</button></div>
+              <div class="field" style="margin-top:16px"><label for="intens">Intensité</label><div class="row-3"><input id="intens" type="range" min="2" max="20" value="8" class="grow" style="accent-color:var(--fd-color-primary)"><input class="input input-sm num" style="width:56px" value="8" aria-label="Intensité, valeur"></div></div>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Appliquer à</div>
+              <label class="check"><input type="radio" name="scope" checked>Cette étape seulement</label>
+              <label class="check" style="margin-top:8px"><input type="radio" name="scope">Toutes les étapes (même position)</label>
+            </div>
+            <div class="alert"><i data-icon="info"></i><span class="t-caption">Le flou est appliqué à l'image publiée. Les données d'origine ne sont jamais envoyées aux visiteurs.</span></div>
+          </div>
+          <!-- Formulaire -->
+          <div class="ctx" data-ctx="form" hidden>
+            <div class="sec">
+              <div class="sec-title">Formulaire de lead</div>
+              <div class="field"><label for="ft">Titre</label><input id="ft" class="input input-sm" value="Recevez la démo complète"></div>
+              <div class="field"><label for="fd">Description</label><textarea id="fd" class="textarea" style="min-height:64px">Laissez vos coordonnées, nous vous envoyons l'accès au parcours avancé.</textarea></div>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Champs <button class="btn btn-ghost btn-sm"><i data-icon="plus"></i>Ajouter</button></div>
+              <div class="field-row"><i data-icon="grip"></i><span class="grow">Email professionnel</span><span class="badge">Obligatoire</span><button class="btn btn-ghost btn-sm btn-icon" aria-label="Options du champ Email"><i data-icon="more"></i></button></div>
+              <div class="field-row"><i data-icon="grip"></i><span class="grow">Entreprise</span><span class="badge">Facultatif</span><button class="btn btn-ghost btn-sm btn-icon" aria-label="Options du champ Entreprise"><i data-icon="more"></i></button></div>
+              <p class="help" style="margin-top:8px">Les réponses alimentent les variables (<span class="chip-var">{{email}}</span>, <span class="chip-var">{{company}}</span>) pour la suite de la démo.</p>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Comportement</div>
+              <div class="setting"><span class="t-label">Formulaire obligatoire</span><span class="switch"><input type="checkbox" aria-label="Formulaire obligatoire"><span></span></span></div>
+              <div class="setting"><span class="t-label">Case de consentement</span><span class="switch"><input type="checkbox" checked aria-label="Case de consentement"><span></span></span></div>
+              <div class="field" style="margin-top:8px"><label for="fb">Texte du bouton</label><input id="fb" class="input input-sm" value="Recevoir l'accès"></div>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Envoyer les leads vers</div>
+              <div class="field"><label for="wh">Webhook <span class="opt">(facultatif)</span></label><input id="wh" class="input input-sm t-mono" placeholder="https://hooks.exemple.com/…"></div>
+              <p class="help" style="margin-top:6px">Les leads sont toujours visibles dans l'onglet Leads.</p>
+            </div>
+          </div>
+          <!-- CTA de fin -->
+          <div class="ctx" data-ctx="cta" hidden>
+            <div class="sec">
+              <div class="sec-title">Écran de fin</div>
+              <div class="field"><label for="ct">Titre</label><input id="ct" class="input input-sm" value="Prêt à essayer avec vos données ?"></div>
+              <div class="field"><label for="cd">Texte</label><textarea id="cd" class="textarea" style="min-height:56px">Réservez 20 minutes avec notre équipe, ou revoyez la démo.</textarea></div>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Bouton principal (CTA)</div>
+              <div class="field"><label for="c1">Libellé</label><input id="c1" class="input input-sm" value="Réserver une démo"></div>
+              <div class="field"><label for="c1a">Action</label><select id="c1a" class="select input-sm"><option>Ouvrir une URL</option><option>Ouvrir une autre démo</option><option>Aller à l'étape…</option><option>Afficher un formulaire</option></select></div>
+              <div class="field"><label for="c1u">URL</label><input id="c1u" class="input input-sm t-mono" value="https://cal.com/acme/demo?email={{email}}"><span class="help">Les variables sont transmises dans l'URL.</span></div>
+              <label class="check" style="margin-top:12px"><input type="checkbox" checked>Ouvrir dans un nouvel onglet</label>
+            </div>
+            <div class="sec">
+              <div class="sec-title">Bouton secondaire</div>
+              <div class="field"><label for="c2">Libellé</label><input id="c2" class="input input-sm" value="Recommencer la visite"></div>
+            </div>
+          </div>
+        </div>
+        <div role="tabpanel" id="tp-design" aria-labelledby="tb-design" hidden>
+          <div class="sec">
+            <div class="sec-title">Thème</div>
+            <select class="select input-sm" aria-label="Thème"><option>Acme (par défaut du workspace)</option><option>FlowDSIML</option></select>
+          </div>
+          <div class="sec">
+            <div class="sec-title">Couleurs</div>
+            <div class="field"><label for="c-p">Couleur principale</label><div class="color-row"><span class="swatch" style="background:#9AD1C8"></span><input id="c-p" class="input input-sm t-mono" value="#9AD1C8" aria-describedby="c-warn"></div>
+              <div class="alert alert-warning" id="c-warn" style="margin-top:8px;padding:8px 10px"><i data-icon="alert"></i><span class="t-caption">Contraste faible (1,7:1) : le texte des boutons sera difficile à lire. <a href="#">Utiliser #0B6B62</a></span></div></div>
+            <div class="field"><label for="c-h">Hotspot</label><div class="color-row"><span class="swatch" style="background:var(--fd-ember-500)"></span><input id="c-h" class="input input-sm t-mono" value="#E8541F"></div></div>
+          </div>
+          <div class="sec">
+            <div class="sec-title">Forme</div>
+            <div class="segmented" role="radiogroup" data-seg style="width:100%"><button role="radio" aria-checked="false" style="flex:1">Carré</button><button role="radio" aria-checked="false" style="flex:1">Doux</button><button role="radio" aria-checked="true" style="flex:1">Rond</button></div>
+          </div>
+          <div class="sec">
+            <div class="sec-title">Cadre</div>
+            <div class="setting"><span class="t-label">Barre de navigateur</span><span class="switch"><input type="checkbox" checked aria-label="Barre de navigateur"><span></span></span></div>
+            <div class="field" style="margin:8px 0 0"><label for="c-bg">Fond</label><div class="color-row"><span class="swatch" style="background:var(--fd-stone-50)"></span><input id="c-bg" class="input input-sm t-mono" value="#F7F6F4"></div></div>
+          </div>
+        </div>
+        <div role="tabpanel" id="tp-settings" aria-labelledby="tb-settings" hidden>
+          <div class="sec">
+            <div class="sec-title">Lecture</div>
+            <div class="setting"><span class="t-label">Lecture automatique</span><span class="switch"><input type="checkbox" aria-label="Lecture automatique"><span></span></span></div>
+            <div class="setting"><span class="t-label">Barre de progression</span><span class="switch"><input type="checkbox" checked aria-label="Barre de progression"><span></span></span></div>
+          </div>
+          <div class="sec">
+            <div class="sec-title">Langue de la démo</div>
+            <select class="select input-sm" aria-label="Langue de la démo"><option>Français</option><option>English</option></select>
+          </div>
+          <div class="sec">
+            <div class="sec-title">Variables utilisées</div>
+            <div class="field-row"><span class="chip-var">{{first_name}}</span><span class="grow muted t-caption">par défaut : « vous »</span></div>
+            <div class="field-row"><span class="chip-var">{{company}}</span><span class="grow muted t-caption">par défaut : « votre équipe »</span></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+<div class="narrow-warning"><div class="col" style="align-items:center;max-width:360px"><i data-icon="monitor"></i><h1 class="t-h2">L'éditeur s'utilise sur ordinateur</h1><p class="muted">Ouvrez FlowDSIML sur un écran d'au moins 1 024 px de large pour modifier cette démo. Vous pouvez la prévisualiser et la partager depuis ce téléphone.</p><a class="btn btn-primary" href="player.html">Voir la démo</a></div></div>
+
+<script>
+const steps = [
+  ['Page d\'accueil des rapports','dashboard',['target'],'hotspot'],
+  ['Cliquer sur « Rapports »','list',['target','blur'],'hotspot'],
+  ['Ouvrir le menu « Nouveau rapport »','dashboard',['target','blur'],'hotspot'],
+  ['Choisir un modèle','modal',['target'],'hotspot'],
+  ['Renseigner la source de données','modal',['target'],'hotspot'],
+  ['Recevez la démo complète','dashboard',['form'],'form'],
+  ['Visualiser le rapport','list',['target'],'hotspot'],
+  ['Écran de fin','dashboard',['message'],'cta'],
+];
+let current = 2;
+function setCtx(ctx){ document.querySelectorAll('.ctx').forEach(c => c.hidden = c.dataset.ctx !== ctx); }
+document.addEventListener('fd:ready', () => {
+  const rail = document.getElementById('rail');
+  steps.forEach(([t, fk, ic, ctx], i) => {
+    if (i === 5) rail.insertAdjacentHTML('beforeend', '<li class="insert" aria-hidden="true"></li>');
+    rail.insertAdjacentHTML('beforeend', `<li class="step" role="option" tabindex="${i===current?0:-1}" aria-selected="${i===current}" data-i="${i}">
+      <span class="grip">${fdIcon('grip')}</span><span class="n">${i+1}</span>
+      <span class="th"><span data-fake="${fk}" style="position:absolute;inset:0"></span>${ctx==='hotspot'?`<span class="dot" style="left:${30+i*8}%;top:${20+i*6}%"></span>`:''}</span>
+      <span class="meta"><b>${t}</b><span class="icons">${ic.map(n=>fdIcon(n)).join('')}</span></span></li>`);
+  });
+  fdRenderFakes();
+  const select = (i) => { current = i; rail.querySelectorAll('.step').forEach(s => { const on = +s.dataset.i === i; s.setAttribute('aria-selected', on); s.tabIndex = on ? 0 : -1; });
+    setCtx(steps[i][3]); document.getElementById('stepTitle').textContent = `Étape ${i+1} · ${steps[i][0]}`; };
+  rail.addEventListener('click', e => { const s = e.target.closest('.step'); if (s) select(+s.dataset.i); });
+  rail.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); const n = Math.max(0, Math.min(steps.length-1, current + (e.key==='ArrowDown'?1:-1))); select(n); rail.querySelector(`[data-i="${n}"]`).focus(); } });
+  document.addEventListener('click', e => { const t = e.target.closest('[data-select]'); if (t) setCtx(t.dataset.select); });
+  document.querySelectorAll('.pos-grid button:not(.c)').forEach(b => b.addEventListener('click', () => document.querySelectorAll('.pos-grid button').forEach(x => x.setAttribute('aria-pressed', x === b))));
+});
+</script>
+</body>
+</html>
