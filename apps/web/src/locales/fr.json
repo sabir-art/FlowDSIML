@@ -275,7 +275,8 @@
     "tab_design": "Design",
     "tab_settings": "Réglages",
     "narrowTitle": "L'éditeur nécessite un écran plus large",
-    "narrowBody": "Ouvrez cette démo sur un ordinateur (1024 px minimum) pour la modifier. Vous pouvez la partager depuis ce téléphone."
+    "narrowBody": "Ouvrez cette démo sur un ordinateur (1024 px minimum) pour la modifier. Vous pouvez la partager depuis ce téléphone.",
+    "colorHotspot": "Pastille du hotspot"
   },
   "status": {
     "draft": "Brouillon",

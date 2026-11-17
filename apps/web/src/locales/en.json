@@ -275,7 +275,8 @@
     "tab_design": "Design",
     "tab_settings": "Settings",
     "narrowTitle": "The editor needs a wider screen",
-    "narrowBody": "Open this demo on a computer (1024 px minimum) to edit it. You can still share it from this phone."
+    "narrowBody": "Open this demo on a computer (1024 px minimum) to edit it. You can still share it from this phone.",
+    "colorHotspot": "Hotspot beacon"
   },
   "status": {
     "draft": "Draft",

@@ -19,6 +19,7 @@
     "@flowdsiml/ui": "workspace:*",
     "@supabase/supabase-js": "^2.119.0",
     "i18next": "^25.10.10",
+    "lucide-react": "^0.577.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^15.7.4",

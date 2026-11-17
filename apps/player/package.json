@@ -14,6 +14,7 @@
   "dependencies": {
     "@flowdsiml/core": "workspace:*",
     "@flowdsiml/manifest": "workspace:*",
+    "lucide-preact": "^0.577.0",
     "preact": "^10.29.8"
   },
   "devDependencies": {
