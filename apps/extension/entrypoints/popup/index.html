@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>FlowDSIML</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header><strong>FlowDSIML</strong> <span class="muted">Capture</span></header>
+    <div id="error" class="alert error" hidden></div>
+
+    <form id="login" hidden>
+      <label>Email <input id="email" type="email" autocomplete="email" required /></label>
+      <label
+        >Mot de passe <input id="password" type="password" autocomplete="current-password" required
+      /></label>
+      <button type="submit" class="primary">Se connecter</button>
+      <p class="muted small">
+        Pas de compte ? <a id="signup-link" target="_blank" rel="noopener">Créer un compte</a>
+      </p>
+    </form>
+
+    <section id="setup" hidden>
+      <label
+        >Workspace
+        <select id="workspace"></select
+      ></label>
+      <label>Titre de la démo <input id="title" maxlength="160" placeholder="Ex. : Créer un projet" /></label>
+      <button id="start" class="primary">● Démarrer l'enregistrement</button>
+      <p class="muted small">
+        Chaque clic dans l'onglet courant crée une étape (capture d'écran + hotspot). Les mots de passe et
+        champs de carte sont floutés automatiquement.
+      </p>
+      <p class="small"><a id="logout" href="#">Se déconnecter</a></p>
+    </section>
+
+    <section id="recording" hidden>
+      <p class="rec">● Enregistrement en cours</p>
+      <p><strong id="count">0</strong> étape(s) capturée(s)</p>
+      <button id="stop" class="primary">Terminer et ouvrir l'éditeur</button>
+    </section>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

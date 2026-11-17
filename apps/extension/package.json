@@ -9,12 +9,14 @@
     "zip": "wxt zip",
     "postinstall": "wxt prepare",
     "lint": "eslint entrypoints lib",
+    "e2e": "node e2e/capture.e2e.cjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@flowdsiml/core": "workspace:*",
-    "@supabase/supabase-js": "^2.119.0"
+    "@supabase/supabase-js": "^2.119.0",
+    "@flowdsiml/supabase-types": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
