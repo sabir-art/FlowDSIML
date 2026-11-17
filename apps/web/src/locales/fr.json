@@ -851,7 +851,8 @@
       "pro": "Pour un créateur",
       "business": "Pour les équipes",
       "enterprise": "Pour passer à l’échelle"
-    }
+    },
+    "activation": "Votre plan sera activé sous 24 h."
   },
   "theme": {
     "label": "Thème",

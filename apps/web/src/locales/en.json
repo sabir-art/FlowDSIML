@@ -851,7 +851,8 @@
       "pro": "For a creator",
       "business": "For teams",
       "enterprise": "To scale up"
-    }
+    },
+    "activation": "Your plan will be activated within 24 h."
   },
   "theme": {
     "label": "Theme",

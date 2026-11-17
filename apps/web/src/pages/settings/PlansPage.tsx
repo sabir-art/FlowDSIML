@@ -139,7 +139,7 @@ export function PlansPage() {
           ) : (
             t('plans.contactUs')
           )}
-          .
+          . {t('plans.activation')}
         </span>
       </div>
 
