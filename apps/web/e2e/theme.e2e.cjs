@@ -79,6 +79,24 @@ function contrast(a, b) {
   for (const [l, c, k] of await pairs())
     ok(contrast(c, k) >= 4.5, `contraste AA en sombre : ${l} (${contrast(c, k).toFixed(2)})`);
 
+  // DB2 : en sombre, les aperçus du player restent en clair (texte compris)
+  await page.goto(`${APP}/#/`);
+  await page.waitForSelector('.demo-cover');
+  const cover = await page
+    .locator('.demo-cover')
+    .last()
+    .evaluate((el) => {
+      const c = el.querySelector('.demo-cover-title') || el;
+      return [
+        getComputedStyle(c).color,
+        getComputedStyle(el.querySelector('.demo-cover-empty') || el).backgroundColor,
+      ];
+    });
+  ok(
+    contrast(cover[0], cover[1]) >= 4.5,
+    `contraste AA en sombre : vignette de démo (${contrast(cover[0], cover[1]).toFixed(2)})`,
+  );
+
   // Rechargement : pas de retour au clair
   await page.reload();
   ok((await theme()) === 'dark', 'thème conservé au rechargement (posé avant le rendu)');

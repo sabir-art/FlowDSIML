@@ -69,7 +69,7 @@ export function SharePreview({
         {t('share.preview')}
       </h2>
       {count === 0 ? (
-        <div className="share-preview__empty">
+        <div className="share-preview__empty fd-player-scope">
           <ImageIcon size={24} aria-hidden="true" />
           <p>{t('share.previewEmpty')}</p>
         </div>

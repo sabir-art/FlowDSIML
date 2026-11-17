@@ -138,24 +138,31 @@ export function EditorPage() {
         <div className="row" style={{ marginLeft: 'auto' }}>
           {!readOnly && step?.kind === 'image' && (
             <div className="segmented" role="toolbar" aria-label={t('editor.tools')}>
-              {(['select', 'hotspot', 'blur'] as Tool[]).map((k) => (
-                <button key={k} type="button" aria-pressed={tool === k} onClick={() => setTool(k)}>
-                  {k === 'select' ? (
-                    <MousePointer2 size={15} aria-hidden="true" />
-                  ) : k === 'hotspot' ? (
-                    <Target size={15} aria-hidden="true" />
-                  ) : (
-                    <EyeOff size={15} aria-hidden="true" />
-                  )}
-                  {t(
-                    k === 'select'
-                      ? 'editor.toolSelect'
-                      : k === 'hotspot'
-                        ? 'editor.toolHotspot'
-                        : 'editor.toolBlur',
-                  )}
-                </button>
-              ))}
+              {(['select', 'hotspot', 'blur'] as Tool[]).map((k) => {
+                const label = t(
+                  k === 'select'
+                    ? 'editor.toolSelect'
+                    : k === 'hotspot'
+                      ? 'editor.toolHotspot'
+                      : 'editor.toolBlur',
+                );
+                const Icon = k === 'select' ? MousePointer2 : k === 'hotspot' ? Target : EyeOff;
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    aria-pressed={tool === k}
+                    aria-label={label}
+                    title={label}
+                    onClick={() => setTool(k)}
+                  >
+                    <Icon size={15} aria-hidden="true" />
+                    <span className="bar-label" aria-hidden="true">
+                      {label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
           <Button icon={<Eye />} onClick={preview} disabled={!editor.steps.length}>

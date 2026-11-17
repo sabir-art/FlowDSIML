@@ -132,3 +132,10 @@
 .fd-alert__body > :last-child {
   margin-bottom: 0;
 }
+
+/* Aperçus du player (canevas, vignettes, aperçu de partage) : toujours en clair, texte compris
+   (la couleur héritée du thème sombre ne doit pas fuir dans le cadre). */
+.fd-player-scope {
+  color: var(--fd-color-text);
+  color-scheme: light;
+}

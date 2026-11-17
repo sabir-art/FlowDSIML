@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useMediaQuery } from '../lib/useMediaQuery';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -36,8 +37,47 @@ export function Layout() {
   const { workspaces, current, select } = useWorkspace();
   const [open, setOpen] = useState(false);
 
+  const menuBtn = useRef<HTMLButtonElement>(null);
+  const sidebar = useRef<HTMLElement>(null);
+  const drawer = useMediaQuery('(max-width: 1023px)');
+
   // Ferme le menu mobile à chaque navigation.
   useEffect(() => setOpen(false), [location.pathname]);
+
+  // DB1 : tiroir de navigation modal (< 1024 px) — focus piégé, Échap ferme et rend le focus au bouton.
+  useEffect(() => {
+    if (!drawer || !open) return;
+    const panel = sidebar.current;
+    const focusables = () =>
+      Array.from(
+        panel?.querySelectorAll<HTMLElement>(
+          'a[href], button:not(:disabled), select, input, [tabindex="0"]',
+        ) ?? [],
+      ).filter((el) => el.offsetParent !== null);
+    focusables()[0]?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (document.querySelector('#fd-portal [role=menu]')) return; // un menu ouvert gère sa propre touche Échap
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setOpen(false);
+        menuBtn.current?.focus();
+      } else if (e.key === 'Tab') {
+        const els = focusables();
+        const first = els[0];
+        const last = els[els.length - 1];
+        if (!first || !last) return;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [drawer, open]);
 
   const switchLang = () => {
     const lng = i18n.language === 'en' ? 'fr' : 'en';
@@ -70,6 +110,7 @@ export function Layout() {
       </a>
       <header className="topbar">
         <button
+          ref={menuBtn}
           type="button"
           className="fd-btn fd-btn--ghost fd-btn--icon"
           aria-label={open ? t('common.close') : t('nav.openMenu')}
@@ -81,7 +122,15 @@ export function Layout() {
         </button>
         <span className="brand">{t('app.name')}</span>
       </header>
-      <aside className="sidebar" id="sidebar">
+      <aside
+        className="sidebar"
+        id="sidebar"
+        ref={sidebar}
+        inert={drawer && !open}
+        role={drawer ? 'dialog' : undefined}
+        aria-modal={drawer && open ? true : undefined}
+        aria-label={drawer ? t('nav.main') : undefined}
+      >
         <div className="brand">{t('app.name')}</div>
         {workspaces.length > 0 && (
           <div className="ws-switch">
@@ -152,7 +201,14 @@ export function Layout() {
           />
         </div>
       </aside>
-      <div className="scrim" aria-hidden="true" onClick={() => setOpen(false)} />
+      <div
+        className="scrim"
+        aria-hidden="true"
+        onClick={() => {
+          setOpen(false);
+          menuBtn.current?.focus();
+        }}
+      />
       <main className="main" id="main" tabIndex={-1}>
         <Outlet />
       </main>

@@ -339,7 +339,7 @@ export function DemosPage() {
                 const s = stats[d.id];
                 return (
                   <li key={d.id} className="fd-card demo-card">
-                    <div className="demo-cover" aria-hidden="true">
+                    <div className="demo-cover fd-player-scope" aria-hidden="true">
                       {covers[d.id] ? (
                         <img src={covers[d.id]} alt="" loading="lazy" />
                       ) : (

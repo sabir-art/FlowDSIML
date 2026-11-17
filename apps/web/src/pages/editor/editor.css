@@ -542,3 +542,25 @@
 .var-preview__label {
   font-weight: 600;
 }
+
+/* DB3 : barre du haut sur une seule ligne de 56 px ; sous 1280 px, outils en icônes (info-bulle title) */
+.editor-bar {
+  flex-wrap: nowrap;
+  min-height: 56px;
+}
+.editor-bar .editor-title {
+  flex: 1 1 auto;
+  min-width: 160px;
+}
+.editor-bar > .row {
+  flex: none;
+  flex-wrap: nowrap;
+}
+@media (max-width: 1279px) {
+  .editor-bar .bar-label {
+    display: none;
+  }
+  .editor-bar .segmented button {
+    padding-inline: 9px;
+  }
+}

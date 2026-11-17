@@ -57,7 +57,40 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     await install(page);
     await page.goto(`${APP}/#/`);
     await page.waitForSelector('.demo-card');
-    if (w < 1024) await page.getByRole('button', { name: 'Ouvrir le menu' }).click();
+    if (w < 1024) {
+      // DB1 : Échap ferme le tiroir de navigation et rend le focus au bouton menu
+      const burger = page.getByRole('button', { name: 'Ouvrir le menu' });
+      await burger.click();
+      await page.waitForTimeout(300);
+      ok(
+        await page.evaluate(() => document.getElementById('sidebar').contains(document.activeElement)),
+        `${w}px : focus placé dans le tiroir`,
+      );
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
+      ok(
+        !(await page.locator('.shell').evaluate((el) => el.classList.contains('nav-open'))),
+        `${w}px : Échap ferme le tiroir`,
+      );
+      ok(
+        await page
+          .getByRole('button', { name: 'Ouvrir le menu' })
+          .evaluate((el) => el === document.activeElement),
+        `${w}px : focus rendu au bouton menu`,
+      );
+      for (let i = 0; i < 30; i++) await page.keyboard.press('Tab');
+      ok(
+        await page.evaluate(() => !document.getElementById('sidebar').contains(document.activeElement)),
+        `${w}px : tiroir fermé hors de l'ordre de tabulation`,
+      );
+      await page.getByRole('button', { name: 'Ouvrir le menu' }).click();
+      await page.waitForTimeout(300);
+      for (let i = 0; i < 30; i++) await page.keyboard.press('Tab');
+      ok(
+        await page.evaluate(() => document.getElementById('sidebar').contains(document.activeElement)),
+        `${w}px : focus piégé dans le tiroir ouvert`,
+      );
+    }
     const account = page.getByRole('button', { name: 'Mon compte' });
     await account.click();
     await checkMenu(page, `${w}px menu du compte`);
