@@ -374,3 +374,59 @@ Base : les 20 captures du dev (`docs/tech/captures/finition/`, prises sur `40224
 | FI12 | Éditeur, flou et zoom (M-A6) | ❌ `#ffcc00` codé en dur (`editor.css:233` et `:237`), hors palette | `var(--fd-color-accent)` (Ember) ou `--fd-color-focus` |
 
 **Bilan** : 5 points résolus. 12 écarts ouverts, dont 4 bloquants pour la finition : le menu ⋯ coupé (FI1), les cases à cocher (FI2 et FI3) et le hotspot sur le canevas (FI4). Aucun de ces écarts n'est dans `packages/ui` : tous relèvent du code applicatif.
+
+### Re-vérification FI1–FI12 (`claude/dev-mvp` @ `83c1644`)
+
+Re-capture avec le script du dev et mesures DOM. Captures : `docs/ux/recette/finition4/`.
+
+| # | Statut |
+|---|---|
+| FI1 menu ⋯ | ✅ Les 6 actions sont visibles, le menu déborde de la carte |
+| FI2 / FI3 cases à cocher | ✅ Composant `Checkbox` (`label.fd-check`) partout : x = 1137 pour toutes les cases, alignées sur les champs, 8 px entre la case et le libellé |
+| FI4 hotspot sur le canevas | ✅ Pastille et bulle rendues avec `player-core` ; zone cliquable en pointillés fins, sans aplat |
+| FI5 rythme des panneaux | ✅ 20 px entre les champs (au lieu de 36) |
+| FI6 logo | ✅ Aperçu 40 px + bouton « Choisir un logo » (`ImageUp`) |
+| FI7 variables | ✅ Carte avec un en-tête `{}` `{{company}}`, sans `legend` |
+| FI9 hauteurs | ✅ Recherche et « Exporter en CSV » à 40 px |
+| FI11 dégradé du player | ✅ Retiré |
+| FI12 `#ffcc00` | ✅ Retiré |
+| Données fictives | ✅ `globex.example` dans le faux Supabase |
+| FI8 partage | ⚠️ En partie : « Dépublier » a bien l'icône `GlobeLock`, mais reste un **bouton rouge plein** à côté d'« Ouvrir ». « Versions publiées » affiche toujours « v1 · — » avec une puce native. Le champ Expiration est toujours au format `mm/dd/yyyy` |
+| FI10 entonnoir | ⚠️ En partie : le libellé « 90 (100 %) » est maintenant collé au bord gauche **dans** la barre, en vert foncé sur du vert. Il est encore moins lisible |
+| Nouveau | ⚠️ `editor.showBranding` = « Afficher «␣␣Créé avec FlowDSIML␣␣» » : **deux espaces** de chaque côté des guillemets → une seule espace fine insécable (U+202F) |
+| Nouveau (mineur) | Couleurs hexadécimales en casse mixte (`#0E7C71` / `#ffffff`) → majuscules partout |
+
+**Bilan** : 10 écarts sur 12 sont corrigés, 2 le sont en partie (FI8, FI10), et il y a 2 petits points nouveaux. Il ne reste plus aucun bloquant de finition.
+
+**Corrections attendues**
+- **FI8** :
+  - « Dépublier » en `variant="ghost"` (texte et icône rouges, sans fond), avec la modale de confirmation ;
+  - versions affichées sur une ligne, sans puce : « v1 · 17 nov. 2026 · En ligne » ;
+  - date d'expiration au format de la langue (sélecteur maison ou `lang` sur l'`input`).
+- **FI10** : libellé **hors** de la barre, à droite de la piste, en `text-muted` et chiffres tabulaires.
+
+## Recette finale sur le site en ligne (https://sabir-art.github.io/FlowDSIML/, dazzling @ `c848fbc`)
+
+Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** : écrans publics à 1 440 et 390 px, locales `fr-FR` et `en-US`, connexion refusée avec un compte fictif (`recette.ux@example.com`), et le player sur une démo qui n'existe pas. Captures : `docs/ux/recette/live/`.
+
+| Contrôle | Résultat |
+|---|---|
+| Disponibilité de l'app et du player (`/player/`) | ✅ 200 |
+| Polices chargées (Bricolage Grotesque, Instrument Sans) | ✅ |
+| Glyphes ou emojis utilisés comme icônes, dégradés, barres latérales | ✅ 0 |
+| Routes privées sans session | ✅ Redirection vers `#/login?redirect=…` |
+| Connexion refusée | ✅ Message « Email ou mot de passe incorrect. », champ en erreur, mot de passe vidé |
+| Inscription, validation | ✅ Erreurs par champ, indicateur de robustesse |
+| Player, démo inexistante | ✅ État « Démo introuvable » avec icône, traduit selon la langue du navigateur (FR / EN) |
+| Bascule FR / EN | ✅ |
+
+**Écarts (dev)**
+
+| # | Écran | Écart | Correction attendue |
+|---|---|---|---|
+| L1 | Connexion, inscription, mot de passe oublié (panneau gauche) | ❌ Première puce « Capturez un parcours » avec l'icône `Sparkles` (motif proscrit, §15.6) | `MousePointerClick` (une capture = des clics) ou `Camera` |
+| L2 | Connexion refusée | ⚠️ Le message ne porte que sur le champ **mot de passe**, alors qu'il concerne le couple email + mot de passe. Il n'est pas annoncé aux lecteurs d'écran : aucun `role="alert"` ni `aria-live` | `Alert kind="error"` au-dessus des champs (`role="alert"`), sans mettre en erreur un champ en particulier |
+| L3 | Inscription, mobile (390 px) | ⚠️ Le texte « Robustesse : Le mot de passe doit contenir au moins 8 caractères. » est décalé de 16 px et **déborde à droite** (coupé). Il répète aussi le libellé « (8 caractères min.) ». Le « L » majuscule après les deux-points est fautif | Aligner l'aide sur le champ (`padding-left: 0`, retour à la ligne). Texte : « Robustesse : faible · 8 caractères minimum » |
+| L4 | Player, démo inexistante | ℹ️ La requête Storage répond **400** (et non 404), ce qui fait une erreur dans la console. L'affichage est correct | Côté dev, à confirmer : vérifier l'existence avant le fetch ou ignorer ce 400 |
+
+**Pas encore testé sur le site réel** : les écrans connectés (tableau de bord, éditeur, partage, analytics, leads, membres) et le parcours player + `track` sur une démo publiée. Il faut un **compte de recette fictif** (créé par le chef d'équipe, sur un domaine `.example`) et l'**identifiant d'une démo publiée**. Ces écrans ont été vérifiés sur la même version avec le faux Supabase (section précédente, `finition4`).
