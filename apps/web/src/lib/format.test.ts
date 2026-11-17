@@ -24,3 +24,17 @@ describe('format', () => {
     expect(formatRelative('2026-09-01T12:00:00Z', now)).toBe('1 sept. 2026');
   });
 });
+
+describe('formatRelativeShort', () => {
+  it('format abrégé de la maquette', async () => {
+    const { formatRelativeShort } = await import('./format');
+    const i18n = (await import('../i18n')).default;
+    await i18n.changeLanguage('fr');
+    const now = Date.parse('2026-11-17T12:00:00Z');
+    const ago = (s: number) => new Date(now - s * 1000).toISOString();
+    expect(formatRelativeShort(ago(2 * 3600), now)).toBe('il y a 2 h');
+    expect(formatRelativeShort(ago(30 * 3600), now)).toBe('hier');
+    expect(formatRelativeShort(ago(3 * 86400), now)).toBe('il y a 3 j');
+    expect(formatRelativeShort('2026-11-05T10:00:00Z', now)).toBe('5 nov.');
+  });
+});

@@ -27,7 +27,7 @@ import { completionRate } from '@flowdsiml/core';
 import { StatTile, variation } from '../../components/charts';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
-import { formatDateTime, formatNumber, formatRelative } from '../../lib/format';
+import { formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
@@ -451,7 +451,7 @@ export function DemosPage() {
                           <>{t('demos.steps', { count: stepCounts[d.id] ?? 0 })} · </>
                         )}
                         <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
-                          {formatRelative(d.updated_at)}
+                          {formatRelativeShort(d.updated_at)}
                         </time>
                       </span>
                     </div>

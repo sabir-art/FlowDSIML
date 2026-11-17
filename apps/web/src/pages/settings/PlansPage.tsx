@@ -50,7 +50,8 @@ export function PlansPage() {
   }, [current]);
 
   if (!plans) return <Loading />;
-  const name = (code: string) => t(`plan.names.${code}`, { defaultValue: code });
+  // Noms des plans tels qu'en base (Free / Pro / Business / Enterprise) tant que le client n'a pas tranché
+  const name = (code: string) => plans.find((p) => p.code === code)?.name ?? code;
   const currentIdx = plans.findIndex((p) => p.code === current?.plan_code);
   // « Recommandé pour vous » : le plan immédiatement supérieur au plan actuel
   const reco = currentIdx >= 0 ? plans[currentIdx + 1] : undefined;

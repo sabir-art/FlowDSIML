@@ -44,3 +44,27 @@ export function formatRelative(iso: string | null | undefined, now: number = Dat
   if (abs < 30 * 86400) return rtf.format(Math.round(sec / 86400), 'day');
   return formatDate(iso);
 }
+
+/**
+ * Date relative abrégée des cartes (maquette dashboard) : « à l’instant », « il y a 5 min »,
+ * « il y a 2 h », « hier », « il y a 3 j », puis « 12 nov. » (année ajoutée si elle diffère).
+ */
+export function formatRelativeShort(iso: string | null | undefined, now: number = Date.now()): string {
+  if (!iso) return '—';
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '—';
+  const sec = Math.max(0, Math.round((now - t) / 1000));
+  const en = i18n.language === 'en';
+  const ago = (n: number, unit: string) => (en ? `${n}${unit} ago` : `il y a ${n} ${unit}`);
+  if (sec < 60) return en ? 'just now' : 'à l’instant';
+  if (sec < 3600) return ago(Math.round(sec / 60), en ? 'min' : 'min');
+  if (sec < 86400) return ago(Math.round(sec / 3600), 'h');
+  const days = Math.floor(sec / 86400);
+  if (days === 1) return en ? 'yesterday' : 'hier';
+  if (days < 7) return ago(days, en ? 'd' : 'j');
+  const sameYear = new Date(t).getFullYear() === new Date(now).getFullYear();
+  return formatDate(
+    iso,
+    sameYear ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' },
+  );
+}
