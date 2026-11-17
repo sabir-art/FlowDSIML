@@ -2,7 +2,10 @@ import { AlertTriangle, Loader2, Rocket } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
+import { useConfirm } from '../../components/ConfirmDialog';
+import { usePlan } from '../../lib/plan';
 import { publishDemo } from '../../lib/publish';
 import { errorMessage } from '../../lib/errors';
 import type { DemoEditor } from './useDemoEditor';
@@ -13,8 +16,30 @@ export function PublishButton({ editor }: { editor: DemoEditor }) {
   const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const demo = editor.demo!;
+  const plan = usePlan();
+  const [dialog, ask] = useConfirm();
 
   async function publish() {
+    // Plan sans formulaires de lead : prévenir que le formulaire sera retiré de la version publiée
+    const gated = plan.leadForms ? -1 : editor.steps.findIndex((s) => s.gate_form_id);
+    if (gated >= 0) {
+      const form = editor.forms.find((f) => f.id === editor.steps[gated]!.gate_form_id);
+      const yes = await ask({
+        title: t('planForms.confirmTitle'),
+        body: (
+          <p>
+            <Trans
+              i18nKey="planForms.confirmBody"
+              values={{ name: form?.title ?? '', n: gated + 1 }}
+              components={{ strong: <strong /> }}
+            />
+          </p>
+        ),
+        confirmLabel: t('planForms.confirmLabel'),
+        secondary: { label: t('planForms.seePlans'), onSelect: () => navigate('/settings/plans') },
+      });
+      if (!yes) return;
+    }
     setProgress('…');
     setError(null);
     try {
@@ -31,6 +56,7 @@ export function PublishButton({ editor }: { editor: DemoEditor }) {
 
   return (
     <>
+      {dialog}
       {error && (
         <span role="alert" className="publish-error">
           <AlertTriangle size={16} aria-hidden="true" />

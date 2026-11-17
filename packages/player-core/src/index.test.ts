@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { beaconCenter, resolvePlacement, tipClass } from './index';
+import { beaconCenter, resolvePlacement, tipClass, zoomBox, zoomOrigin } from './index';
 
 describe('player-core', () => {
   it('place la bulle', () => {
@@ -13,5 +13,21 @@ describe('player-core', () => {
   });
   it('centre la pastille', () => {
     expect(beaconCenter({ x: 0.2, y: 0.4, w: 0.2, h: 0.2 })).toEqual({ left: '30%', top: '50%' });
+  });
+});
+
+describe('zoom (PL2)', () => {
+  it('projette une boîte en coordonnées écran', () => {
+    const b = zoomBox({ x: 0.5, y: 0.5, w: 0.1, h: 0.1 }, { x: 0.5, y: 0.5 }, 2);
+    expect(b).toMatchObject({ x: 0.5, y: 0.5, w: 0.2, h: 0.2 });
+  });
+  it('recale l’origine pour garder le hotspot dans le cadre', () => {
+    const focus = { x: 0.9, y: 0.45, w: 0.04, h: 0.04 };
+    const zoom = { x: 0.2, y: 0.5, scale: 1.4 };
+    const o = zoomOrigin(zoom, focus);
+    const c = zoomBox(focus, o, 1.4);
+    expect(c.x + c.w / 2).toBeLessThan(0.9);
+    expect(c.x + c.w / 2).toBeGreaterThanOrEqual(0.12);
+    expect(o.y).toBe(0.5);
   });
 });

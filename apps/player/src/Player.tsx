@@ -11,7 +11,7 @@ import {
   RotateCcw,
 } from 'lucide-preact';
 import { nextIndex } from './logic';
-import { beaconCenter, themeVars, tipClass } from '@flowdsiml/player-core';
+import { beaconCenter, zoomBox, zoomOrigin, themeVars, tipClass } from '@flowdsiml/player-core';
 import { strings, type Dict } from './i18n';
 import type { Tracker } from './api';
 import { LeadForm } from './LeadForm';
@@ -122,7 +122,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if ((e.target as HTMLElement)?.closest?.('form')) return;
+      if ((e.target as HTMLElement)?.closest?.('form') || gateForm) return;
       if (e.key === 'ArrowRight') go(index + 1);
       if (e.key === 'ArrowLeft') go(index - 1);
     }
@@ -149,7 +149,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
   return (
     <div class={`p-root ${compact ? 'is-compact' : ''}`} style={style} ref={rootRef}>
       {preview && <div class="p-preview">{t.preview}</div>}
-      <header class="p-top">
+      <header class="p-top" inert={!!gateForm}>
         {theme.logoUrl ? <img class="p-logo" src={theme.logoUrl} alt="" /> : null}
         <span class="p-title">{sub(m.title)}</span>
         {m.cta && (
@@ -158,7 +158,9 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
             onClick={() => onCta(m.cta!.url, m.cta!.label)}
           >
             {sub(m.cta.label)}
-            <ExternalLink {...ICON} size={14} />
+            <span class="p-top-cta-icon">
+              <ExternalLink {...ICON} size={14} />
+            </span>
           </button>
         )}
         {m.chapters.length > 0 && (
@@ -172,7 +174,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
           </button>
         )}
       </header>
-      {menu && (
+      {menu && !gateForm && (
         <nav class="p-menu" aria-label={t.chapters}>
           {m.chapters.map((c) => {
             const i = m.steps.findIndex((s) => s.chapterId === c.id);
@@ -209,7 +211,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
             sub={sub}
             onHotspot={onHotspot}
             onCta={onCta}
-            tip={!compact ? tipProps : undefined}
+            tip={!compact && !gateForm ? tipProps : undefined}
           />
         ) : (
           <div class="p-text-step">
@@ -261,9 +263,11 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
         )}
       </div>
 
-      {compact && tipProps && <Tooltip {...tipProps} sheet />}
+      {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
+          navigation sont retirées (rien ne permet de le contourner). */}
+      {compact && tipProps && !gateForm && <Tooltip {...tipProps} sheet />}
 
-      <footer class="p-controls">
+      <footer class="p-controls" inert={!!gateForm} aria-hidden={gateForm ? true : undefined}>
         <button class="p-icon-btn" onClick={() => go(index - 1)} disabled={index === 0} aria-label={t.prev}>
           <ChevronLeft {...ICON} />
         </button>
@@ -350,8 +354,14 @@ function ImageStep({
     const id = requestAnimationFrame(() => setZoomed(true));
     return () => cancelAnimationFrame(id);
   }, [zoom]);
-  const transform = zoom && zoomed ? `scale(${zoom.scale})` : 'none';
-  const origin = zoom ? `${zoom.x * 100}% ${zoom.y * 100}%` : '50% 50%';
+  // PL2 : seule l'image (et ses zones floutées) est agrandie. Pastilles et bulle restent hors du calque
+  // zoomé, à leur taille normale, positionnées en coordonnées écran ; l'origine est recalée pour que
+  // le premier hotspot reste visible.
+  const o = zoom ? zoomOrigin(zoom, step.hotspots[0]) : { x: 0.5, y: 0.5 };
+  const scale = zoom && zoomed ? zoom.scale : 1;
+  const transform = scale !== 1 ? `scale(${scale})` : 'none';
+  const origin = `${o.x * 100}% ${o.y * 100}%`;
+  const screen = <T extends Hotspot>(h: T): T => zoomBox(h, o, scale);
 
   return (
     <div class="p-stage" style={{ '--ratio': String(img.width / img.height) }}>
@@ -369,11 +379,11 @@ function ImageStep({
             }}
           />
         ))}
-        {step.hotspots.map((h) => (
-          <Beacon key={h.id} h={h} label={sub(h.title)} onClick={() => onHotspot(h)} />
-        ))}
-        {tip && (tip.h.title || tip.h.body || tip.h.cta) && <Tooltip {...tip} />}
       </div>
+      {step.hotspots.map((h) => (
+        <Beacon key={h.id} h={screen(h)} label={sub(h.title)} onClick={() => onHotspot(h)} />
+      ))}
+      {tip && (tip.h.title || tip.h.body || tip.h.cta) && <Tooltip {...tip} h={screen(tip.h)} />}
       {!step.hotspots.length && step.cta && (
         <button
           class="p-btn p-btn-primary p-floating-cta"

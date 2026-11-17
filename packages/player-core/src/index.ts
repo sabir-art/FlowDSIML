@@ -55,3 +55,36 @@ export function themeVars(theme: Theme): Record<string, string> {
     fontFamily: theme.fontFamily,
   };
 }
+
+/** Marge (fraction du cadre) dans laquelle le hotspot doit rester visible une fois zoomé. */
+const ZOOM_SAFE = 0.12;
+
+/**
+ * Origine du zoom (fractions 0–1) : le point choisi dans l'éditeur, recalé si besoin pour que le
+ * centre du hotspot `focus` reste dans le cadre une fois agrandi (PL2). L'origine reste dans [0, 1],
+ * l'image couvre donc toujours le cadre.
+ */
+export function zoomOrigin(zoom: { x: number; y: number; scale: number }, focus?: Box | null) {
+  const s = zoom.scale;
+  if (!focus || s <= 1) return { x: zoom.x, y: zoom.y };
+  const fit = (o: number, c: number) => {
+    const projected = o + (c - o) * s;
+    const target = Math.min(Math.max(projected, ZOOM_SAFE), 1 - ZOOM_SAFE);
+    if (target === projected) return o;
+    // o + (c − o)·s = target  ⇒  o = (target − c·s) / (1 − s)
+    return Math.min(Math.max((target - c * s) / (1 - s), 0), 1);
+  };
+  return { x: fit(zoom.x, focus.x + focus.w / 2), y: fit(zoom.y, focus.y + focus.h / 2) };
+}
+
+/** Projette une boîte de l'image dans le cadre une fois l'image agrandie (coordonnées écran, fractions). */
+export function zoomBox<T extends Box>(b: T, origin: { x: number; y: number }, scale: number): T {
+  if (scale === 1) return b;
+  return {
+    ...b,
+    x: origin.x + (b.x - origin.x) * scale,
+    y: origin.y + (b.y - origin.y) * scale,
+    w: b.w * scale,
+    h: b.h * scale,
+  };
+}

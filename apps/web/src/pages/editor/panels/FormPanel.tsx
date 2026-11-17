@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Checkbox, Field } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asFields, type FormField } from '../types';
+import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
 
 const OPTIONAL: Array<Omit<FormField, 'label'> & { labelKey: string }> = [
   { key: 'full_name', type: 'text', required: false, labelKey: 'editor.fieldName' },
@@ -30,7 +31,7 @@ export function FormPanel({
       <div className="stack">
         <h3 className="panel-title">{t('editor.leadForm')}</h3>
         <p className="fd-muted">{t('editor.leadFormHint')}</p>
-        {!leadFormsAllowed && <p className="fd-alert">{t('errors.planLeadForms')}</p>}
+        {!leadFormsAllowed && <PlanFormsWarning />}
         {!readOnly && (
           <Button icon={<ClipboardList />} onClick={() => void editor.createForm()}>
             {t('editor.createForm')}
@@ -51,8 +52,11 @@ export function FormPanel({
   return (
     <div className="stack">
       {dialog}
-      <h3 className="panel-title">{t('editor.leadForm')}</h3>
-      {!leadFormsAllowed && <p className="fd-alert">{t('errors.planLeadForms')}</p>}
+      <div className="panel-title-row">
+        <h3 className="panel-title">{t('editor.leadForm')}</h3>
+        {!leadFormsAllowed && <span className="fd-badge badge-warning">{t('planForms.badge')}</span>}
+      </div>
+      {!leadFormsAllowed && <PlanFormsWarning />}
       <p className="fd-muted" style={{ fontSize: 12 }}>
         {t('editor.leadFormGateHint')}
       </p>

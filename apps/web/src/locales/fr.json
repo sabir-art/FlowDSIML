@@ -334,7 +334,8 @@
     "changeLogo": "Changer le logo",
     "pageCta": "Bouton d’action de la page",
     "pageCtaHint": "Toujours visible en haut du player (ex. « Réserver une démo »).",
-    "pageTitle": "Éditeur : {{title}}"
+    "pageTitle": "Éditeur : {{title}}",
+    "variablePreview": "Aperçu :"
   },
   "status": {
     "draft": "Brouillon",
@@ -486,5 +487,17 @@
     "light": "Clair",
     "dark": "Sombre",
     "system": "Système"
+  },
+  "planForms": {
+    "notPublishedTitle": "Ce formulaire ne sera pas publié.",
+    "notPublishedBody": "Votre plan Free n'inclut pas les formulaires de lead : vous pouvez le préparer, mais les visiteurs ne le verront pas.",
+    "seePlans": "Voir les plans",
+    "badge": "Non publié",
+    "stepHelp": "Non publié avec le plan Free",
+    "confirmTitle": "Publier sans le formulaire de lead ?",
+    "confirmBody": "Votre plan Free n'inclut pas les formulaires. La démo sera publiée <strong>sans</strong> le formulaire « {{name}} » (avant l'étape {{n}}) : aucun lead ne sera collecté.",
+    "confirmLabel": "Publier sans formulaire",
+    "sharePublished": "Publiée sans formulaire de lead (plan Free).",
+    "previewBanner": "Aperçu : non publié avec votre plan"
   }
 }

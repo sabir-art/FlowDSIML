@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, CircleAlert, CircleCheck, Info, TriangleAlert } from 'lucide-react';
 
 type Variant = 'default' | 'primary' | 'accent' | 'danger' | 'ghost';
 
@@ -77,16 +77,21 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
   return <div className={`fd-card ${className}`}>{children}</div>;
 }
 
+const ALERT_ICONS = { info: Info, error: CircleAlert, success: CircleCheck, warning: TriangleAlert };
+
+/** Message d'état : l'état est porté par une icône Lucide (composants.md), jamais par une barre latérale. */
 export function Alert({
   kind = 'info',
   children,
 }: {
-  kind?: 'info' | 'error' | 'success';
+  kind?: 'info' | 'error' | 'success' | 'warning';
   children: ReactNode;
 }) {
+  const Icon = ALERT_ICONS[kind];
   return (
     <div className={`fd-alert fd-alert--${kind}`} role={kind === 'error' ? 'alert' : 'status'}>
-      {children}
+      <Icon aria-hidden="true" />
+      <div className="fd-alert__body">{children}</div>
     </div>
   );
 }

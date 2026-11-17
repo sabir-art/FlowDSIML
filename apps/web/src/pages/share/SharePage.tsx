@@ -14,6 +14,8 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { asSettings } from '../editor/types';
 import { SharePreview } from './SharePreview';
+import { usePlan } from '../../lib/plan';
+import { PlanFormsWarning } from '../../components/PlanFormsWarning';
 
 function CopyField({
   id,
@@ -76,6 +78,8 @@ export function SharePage() {
   const [origins, setOrigins] = useState('');
   const { error, success, run } = useAction();
   const editable = can('demo.edit');
+  const plan = usePlan();
+  const [gatedSteps, setGatedSteps] = useState(0);
 
   const load = useCallback(async () => {
     const d = await supabase.from('demos').select('*').eq('id', demoId).maybeSingle();
@@ -99,6 +103,12 @@ export function SharePage() {
     setLinks(l.data ?? []);
     setVersions(v.data ?? []);
     setVariables(vars.data ?? []);
+    const gated = await supabase
+      .from('steps')
+      .select('id', { count: 'exact', head: true })
+      .eq('demo_id', demoId)
+      .not('gate_form_id', 'is', null);
+    setGatedSteps(gated.count ?? 0);
   }, [demoId]);
 
   useEffect(() => {
@@ -154,6 +164,7 @@ export function SharePage() {
         </div>
       </div>
       {params.get('published') && <Alert kind="success">{t('share.justPublished')}</Alert>}
+      {published && !plan.leadForms && gatedSteps > 0 && <PlanFormsWarning variant="share" />}
       {error && <Alert kind="error">{error}</Alert>}
       {success && <Alert kind="success">{success}</Alert>}
 
