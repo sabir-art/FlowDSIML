@@ -302,7 +302,8 @@ export function DemosPage() {
                             </select>
                             <Button
                               size="sm"
-                              variant="danger"
+                              variant="ghost"
+                              className="btn-danger-ghost"
                               aria-label={t('demos.delete', { title: d.title })}
                               onClick={() => {
                                 if (!confirm(t('demos.confirmDelete', { title: d.title }))) return;

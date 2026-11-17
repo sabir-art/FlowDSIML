@@ -22,7 +22,20 @@ import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
 import './editor.css';
 
-type Tab = 'step' | 'theme' | 'variables' | 'form' | 'chapters';
+/** Vrai si la fenêtre est plus étroite que `px` (ED11 : l'éditeur exige un écran large). */
+function useNarrow(px: number) {
+  const query = `(max-width: ${px - 1}px)`;
+  const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setNarrow(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, [query]);
+  return narrow;
+}
+
+type Tab = 'step' | 'design' | 'settings';
 
 export function EditorPage() {
   const { t } = useTranslation();
@@ -34,6 +47,7 @@ export function EditorPage() {
   const [selection, setSelection] = useState<Selection>({ kind: 'step' });
   const [tab, setTab] = useState<Tab>('step');
   const readOnly = !can('demo.edit');
+  const narrow = useNarrow(1024);
 
   const step = editor.steps[Math.min(index, editor.steps.length - 1)];
 
@@ -45,6 +59,7 @@ export function EditorPage() {
     function onKey(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if ((e.target as HTMLElement)?.closest?.('[data-canvas-item]')) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight')
         setIndex((i) => Math.min(i + 1, editor.steps.length - 1));
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') setIndex((i) => Math.max(i - 1, 0));
@@ -61,6 +76,23 @@ export function EditorPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [editor, selection, readOnly]);
 
+  if (narrow)
+    return (
+      <main className="center" id="main" style={{ padding: 24, textAlign: 'center' }}>
+        <div className="stack" style={{ maxWidth: 420 }}>
+          <h1>{t('editor.narrowTitle')}</h1>
+          <p className="fd-muted">{t('editor.narrowBody')}</p>
+          <div className="row" style={{ justifyContent: 'center' }}>
+            <Link className="fd-btn" to="/">
+              {t('common.back')}
+            </Link>
+            <Link className="fd-btn" to={`/demos/${demoId}/share`}>
+              {t('editor.share')}
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
   if (editor.loading) return <Loading />;
   if (editor.notFound || !editor.demo)
     return (
@@ -93,7 +125,7 @@ export function EditorPage() {
   }
 
   return (
-    <div className="editor">
+    <main className="editor" id="main">
       <header className="editor-bar">
         <Link to="/" className="fd-btn fd-btn--ghost" aria-label={t('common.back')}>
           ←
@@ -106,34 +138,24 @@ export function EditorPage() {
           value={editor.demo.title}
           onChange={(e) => editor.updateDemo({ title: e.target.value })}
         />
-        <span className={`fd-badge save-${editor.saveState}`} role="status">
+        <span
+          className={`fd-badge save-${editor.saveState}`}
+          role="status"
+          hidden={editor.saveState === 'idle'}
+        >
           {t(`editor.save_${editor.saveState}`)}
         </span>
         <span className="fd-badge">{t(`status.${editor.demo.status}`)}</span>
         <div className="row" style={{ marginLeft: 'auto' }}>
           {!readOnly && step?.kind === 'image' && (
-            <div className="row tools" role="toolbar" aria-label={t('editor.tools')}>
-              <Button
-                size="sm"
-                variant={tool === 'select' ? 'primary' : 'default'}
-                onClick={() => setTool('select')}
-              >
-                {t('editor.toolSelect')}
-              </Button>
-              <Button
-                size="sm"
-                variant={tool === 'hotspot' ? 'primary' : 'default'}
-                onClick={() => setTool('hotspot')}
-              >
-                + {t('editor.toolHotspot')}
-              </Button>
-              <Button
-                size="sm"
-                variant={tool === 'blur' ? 'primary' : 'default'}
-                onClick={() => setTool('blur')}
-              >
-                + {t('editor.toolBlur')}
-              </Button>
+            <div className="segmented" role="toolbar" aria-label={t('editor.tools')}>
+              {(['select', 'hotspot', 'blur'] as Tool[]).map((k) => (
+                <button key={k} type="button" aria-pressed={tool === k} onClick={() => setTool(k)}>
+                  {k === 'select'
+                    ? t('editor.toolSelect')
+                    : `+ ${t(k === 'hotspot' ? 'editor.toolHotspot' : 'editor.toolBlur')}`}
+                </button>
+              ))}
             </div>
           )}
           <Button onClick={preview} disabled={!editor.steps.length}>
@@ -172,7 +194,7 @@ export function EditorPage() {
         </section>
         <aside className="editor-right">
           <div className="tabs" role="tablist">
-            {(['step', 'theme', 'form', 'variables', 'chapters'] as Tab[]).map((k) => (
+            {(['step', 'design', 'settings'] as Tab[]).map((k) => (
               <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
                 {t(`editor.tab_${k}`)}
               </button>
@@ -199,14 +221,16 @@ export function EditorPage() {
               setSelection={setSelection}
             />
           )}
-          {tab === 'theme' && <ThemePanel editor={editor} readOnly={readOnly} />}
-          {tab === 'form' && (
-            <FormPanel editor={editor} readOnly={readOnly} leadFormsAllowed={plan.leadForms} />
+          {tab === 'design' && <ThemePanel editor={editor} readOnly={readOnly} />}
+          {tab === 'settings' && (
+            <div className="stack panel-sections">
+              <FormPanel editor={editor} readOnly={readOnly} leadFormsAllowed={plan.leadForms} />
+              <VariablesPanel editor={editor} readOnly={readOnly} />
+              <ChaptersPanel editor={editor} readOnly={readOnly} />
+            </div>
           )}
-          {tab === 'variables' && <VariablesPanel editor={editor} readOnly={readOnly} />}
-          {tab === 'chapters' && <ChaptersPanel editor={editor} readOnly={readOnly} />}
         </aside>
       </div>
-    </div>
+    </main>
   );
 }

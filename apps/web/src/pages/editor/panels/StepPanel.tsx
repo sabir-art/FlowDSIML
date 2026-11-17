@@ -181,7 +181,8 @@ export function StepPanel({
 
       {!readOnly && (
         <Button
-          variant="danger"
+          variant="ghost"
+          className="btn-danger-ghost"
           onClick={() => {
             if (confirm(t('editor.confirmDeleteStep'))) void editor.deleteStep(step.id);
           }}

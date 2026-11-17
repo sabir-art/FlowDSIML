@@ -11,6 +11,16 @@ export function Layout() {
   const { workspaces, current, select } = useWorkspace();
   return (
     <div className="shell">
+      <a
+        className="skip-link"
+        href="#main"
+        onClick={(e) => {
+          e.preventDefault();
+          document.getElementById('main')?.focus();
+        }}
+      >
+        {t('a11y.skip')}
+      </a>
       <aside className="sidebar">
         <div className="brand">{t('app.name')}</div>
         {workspaces.length > 0 && (
@@ -43,7 +53,7 @@ export function Layout() {
         </div>
         <Button onClick={() => void signOut()}>{t('auth.signOut')}</Button>
       </aside>
-      <main className="main">
+      <main className="main" id="main" tabIndex={-1}>
         <Outlet />
       </main>
     </div>

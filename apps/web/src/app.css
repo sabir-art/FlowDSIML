@@ -215,3 +215,98 @@
   flex-wrap: wrap;
   margin-bottom: var(--fd-space-4);
 }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -40px;
+  z-index: 100;
+  padding: 8px 12px;
+  background: var(--fd-color-surface);
+  border-radius: var(--fd-radius-md);
+  box-shadow: var(--fd-shadow-md);
+}
+.skip-link:focus {
+  top: 8px;
+}
+.btn-danger-ghost {
+  color: var(--fd-color-danger);
+}
+.btn-danger-ghost:hover {
+  background: var(--fd-color-danger-soft);
+}
+.field-error {
+  color: var(--fd-color-danger);
+  font-size: var(--fd-font-xs);
+  margin: 2px 0 0;
+}
+.fd-input[aria-invalid='true'] {
+  border-color: var(--fd-color-danger);
+}
+.strength {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  align-items: center;
+  font-size: var(--fd-font-xs);
+  color: var(--fd-color-text-muted);
+}
+.strength span {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fd-color-border);
+}
+.strength[data-score='1'] span:nth-child(-n + 1) {
+  background: var(--fd-color-danger);
+}
+.strength[data-score='2'] span:nth-child(-n + 2) {
+  background: var(--fd-color-warning);
+}
+.strength[data-score='3'] span:nth-child(-n + 3) {
+  background: var(--fd-color-success);
+}
+.strength em {
+  flex: 0 0 auto;
+  font-style: normal;
+  margin-left: 4px;
+}
+.gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+}
+.gauge-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--fd-color-surface-sunken, var(--fd-color-border));
+  overflow: hidden;
+}
+.gauge-track > div {
+  height: 100%;
+  background: var(--fd-color-primary);
+}
+.gauge-warning .gauge-track > div {
+  background: var(--fd-color-warning);
+}
+.gauge-danger .gauge-track > div {
+  background: var(--fd-color-danger);
+}
+.gauge small {
+  font-size: var(--fd-font-xs);
+  color: var(--fd-color-text-muted);
+}
+.gauge-danger small {
+  color: var(--fd-color-danger);
+}

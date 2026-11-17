@@ -35,7 +35,7 @@ export function ResetPassword() {
   return (
     <AuthLayout title={t('auth.resetTitle')}>
       {error && <Alert kind="error">{error}</Alert>}
-      <form onSubmit={submit}>
+      <form onSubmit={submit} noValidate>
         <Field label={t('auth.passwordNew')} htmlFor="password">
           <input
             id="password"

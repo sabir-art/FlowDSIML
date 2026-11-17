@@ -139,7 +139,8 @@ export function FormPanel({
       </label>
       {!readOnly && (
         <Button
-          variant="danger"
+          variant="ghost"
+          className="btn-danger-ghost"
           onClick={() => confirm(t('editor.confirmDeleteForm')) && void editor.deleteForm(form.id)}
         >
           {t('editor.deleteForm')}

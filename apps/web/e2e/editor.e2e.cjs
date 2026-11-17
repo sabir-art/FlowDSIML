@@ -48,6 +48,17 @@ const SHOTS = process.env.SHOTS_DIR;
     'déplacement du hotspot enregistré',
   );
 
+  // Clavier (ED1) : focus, flèche droite ×5 avec Maj, Suppr
+  await page.getByRole('tab', { name: 'Étape' }).click();
+  const hs = page.locator('.canvas-hotspot').first();
+  await hs.focus();
+  await page.keyboard.press('Enter');
+  const before = Number((await hs.getAttribute('style')).match(/left: ([\d.]+)%/)[1]);
+  await page.keyboard.press('Shift+ArrowRight');
+  const after = Number((await hs.getAttribute('style')).match(/left: ([\d.]+)%/)[1]);
+  ok(Math.abs(after - before - 5) < 0.6, 'hotspot déplacé au clavier (Maj+→ = 5 %)');
+  ok((await page.textContent('[aria-live="polite"]')).includes('%'), 'annonce aria-live du déplacement');
+
   // Ajout d'un hotspot avec l'outil
   await page.getByRole('button', { name: '+ Hotspot' }).click();
   const frame = await page.locator('.canvas-frame').boundingBox();
@@ -83,13 +94,12 @@ const SHOTS = process.env.SHOTS_DIR;
   );
 
   // Onglets thème, formulaire, variables
-  await page.getByRole('tab', { name: 'Thème' }).click();
+  await page.getByRole('tab', { name: 'Design' }).click();
   await page.locator('#th-radius').fill('20');
-  await page.getByRole('tab', { name: 'Formulaire' }).click();
+  await page.getByRole('tab', { name: 'Réglages' }).click();
   await page.getByRole('button', { name: 'Créer le formulaire' }).click();
   await page.waitForSelector('#f-title');
   ok(state.tables.forms.length === 1, 'formulaire de lead créé');
-  await page.getByRole('tab', { name: 'Variables' }).click();
   ok((await page.locator('text={{company}}').count()) > 0, 'variables du workspace listées');
   await page.getByRole('tab', { name: 'Étape' }).click();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/editor-after.png` });

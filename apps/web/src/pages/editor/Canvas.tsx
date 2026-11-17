@@ -1,4 +1,9 @@
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { richTextToHtml } from '@flowdsiml/core';
 import type { Rect } from '@flowdsiml/manifest';
@@ -101,6 +106,50 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
     setDrag(null);
   }
 
+  const [announce, setAnnounce] = useState('');
+  const pct = (v: number) => Math.round(v * 100);
+
+  /** Clavier (ED1) : Entrée sélectionne, flèches déplacent de 1 % (Maj : 5 %), Suppr supprime. */
+  function onItemKey(e: ReactKeyboardEvent, kind: 'hotspot' | 'blur', id: string, index: number) {
+    const isHot = kind === 'hotspot';
+    const rect = isHot ? hotspots.find((h) => h.id === id)! : blurs[index]!;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelection(isHot ? { kind: 'hotspot', id } : { kind: 'blur', index });
+      setAnnounce(t('editor.a11ySelected', { x: pct(rect.x), y: pct(rect.y) }));
+      return;
+    }
+    if (readOnly) return;
+    const delta = e.shiftKey ? 0.05 : 0.01;
+    const moves: Record<string, [number, number]> = {
+      ArrowLeft: [-delta, 0],
+      ArrowRight: [delta, 0],
+      ArrowUp: [0, -delta],
+      ArrowDown: [0, delta],
+    };
+    const mv = moves[e.key];
+    if (mv) {
+      e.preventDefault();
+      e.stopPropagation();
+      const x = r4(clamp(rect.x + mv[0], 0, 1 - rect.w));
+      const y = r4(clamp(rect.y + mv[1], 0, 1 - rect.h));
+      if (isHot) editor.updateHotspot(id, { x, y });
+      else {
+        const next = blurs.slice();
+        next[index] = { ...rect, x, y };
+        editor.updateStep(step.id, { blurs: next });
+      }
+      setAnnounce(t('editor.a11yMoved', { x: pct(x), y: pct(y) }));
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isHot) void editor.deleteHotspot(id);
+      else editor.updateStep(step.id, { blurs: blurs.filter((_, i) => i !== index) });
+      setSelection({ kind: 'step' });
+      setAnnounce(t('editor.a11yDeleted'));
+    }
+  }
+
   if (step.kind === 'text' || !step.image_path) {
     return (
       <div className="canvas-text" onPointerDown={() => setSelection({ kind: 'step' })}>
@@ -132,6 +181,12 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
         <div
           key={`b${i}`}
           className={`canvas-blur ${selection.kind === 'blur' && selection.index === i ? 'selected' : ''}`}
+          role="button"
+          tabIndex={0}
+          data-canvas-item=""
+          aria-label={t('editor.blurN', { n: i + 1 })}
+          aria-pressed={selection.kind === 'blur' && selection.index === i}
+          onKeyDown={(e) => onItemKey(e, 'blur', '', i)}
           style={{
             left: `${b.x * 100}%`,
             top: `${b.y * 100}%`,
@@ -173,6 +228,9 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
         />
       )}
 
+      <span className="sr-only" aria-live="polite">
+        {announce}
+      </span>
       {hotspots.map((h, i) => {
         const selected = selection.kind === 'hotspot' && selection.id === h.id;
         return (
@@ -186,7 +244,11 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
               height: `${h.h * 100}%`,
             }}
             role="button"
-            aria-label={h.title || t('editor.hotspot', { n: i + 1 })}
+            tabIndex={0}
+            data-canvas-item=""
+            aria-pressed={selected}
+            aria-label={`${t('editor.hotspot', { n: i + 1 })}${h.title ? ` : ${h.title}` : ''}`}
+            onKeyDown={(e) => onItemKey(e, 'hotspot', h.id, i)}
             onPointerDown={(e) => {
               if (tool !== 'select') return;
               e.stopPropagation();
