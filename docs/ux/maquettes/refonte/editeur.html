@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Éditeur — FlowDSIML (refonte DSI)</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div class="ed">
+  <header class="ed-top">
+    <a class="icon-btn" href="dashboard.html" aria-label="Retour aux démos"><i data-icon="arrowLeft"></i></a>
+    <img src="../../assets/symbole-dsi.svg" alt="" width="28" height="31">
+    <label><span hidden>Titre de la démo</span><input class="fd-input title" value="Inscription au parcours CEJ"></label>
+    <span class="fd-badge fd-badge--draft">Brouillon · enregistré</span>
+    <div class="fd-segmented fd-segmented--strong tools" role="group" aria-label="Outil">
+      <button type="button" aria-pressed="true"><i data-icon="pointer"></i>Sélection</button>
+      <button type="button" aria-pressed="false"><i data-icon="target"></i>Hotspot</button>
+      <button type="button" aria-pressed="false"><i data-icon="eyeOff"></i>Flou</button>
+    </div>
+    <button class="fd-btn" type="button"><i data-icon="eye"></i>Aperçu</button>
+    <button class="fd-btn" type="button"><i data-icon="share"></i>Partager</button>
+    <button class="fd-btn fd-btn--primary" type="button"><i data-icon="rocket"></i>Publier</button>
+  </header>
+
+  <div class="ed-body">
+    <nav class="fd-card ed-rail" aria-label="Étapes">
+      <a class="step" href="#" aria-current="step"><span class="step__num">1</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Accueil du parcours<i data-icon="target"></i></span></a>
+      <a class="step" href="#"><span class="step__num">2</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Vérifier l'éligibilité<i data-icon="target"></i></span></a>
+      <a class="step" href="#"><span class="step__num">3</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Créer son espace<i data-icon="eyeOff"></i></span></a>
+      <a class="step" href="#"><span class="step__num">4</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Formulaire de contact<i data-icon="mail"></i></span></a>
+      <button class="fd-btn fd-btn--block" type="button"><i data-icon="plus"></i>Ajouter une étape</button>
+    </nav>
+
+    <section class="ed-canvas" aria-label="Canevas de l'étape 1">
+      <div class="shot fd-player-scope">
+        <div class="shot__bar"></div>
+        <div class="shot__side"></div>
+        <span class="shot__line" style="left:27%;top:16%;width:30%;height:18px"></span>
+        <span class="shot__line" style="left:27%;top:26%;width:52%"></span>
+        <span class="shot__line" style="left:27%;top:32%;width:44%"></span>
+        <span class="shot__btn" style="left:27%;top:44%"></span>
+        <span class="shot__line" style="left:27%;top:62%;width:66%"></span>
+        <span class="shot__line" style="left:27%;top:68%;width:58%"></span>
+        <span class="hs-zone" style="left:26.2%;top:42.6%;width:20.2%;height:9.5%"></span>
+        <span class="hs-dot" style="left:46.4%;top:47.4%"></span>
+        <div class="bubble" style="left:50%;top:30%">
+          <b>Commencez ici</b>
+          <p>Cliquez sur « Je m'inscris » pour démarrer votre parcours Contrat d'engagement jeune.</p>
+          <footer>1 / 6<button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Suivant</button></footer>
+        </div>
+      </div>
+    </section>
+
+    <aside class="fd-card ed-panel" aria-label="Propriétés">
+      <div class="fd-tabs" role="tablist" aria-label="Panneau">
+        <button role="tab" type="button" aria-selected="true">Étape</button>
+        <button role="tab" type="button" aria-selected="false">Design</button>
+        <button role="tab" type="button" aria-selected="false">Réglages</button>
+      </div>
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="target"></i></span><h2 class="fd-card__title">Hotspot et bulle</h2></div>
+      <div class="stack">
+        <div class="fd-field"><label class="fd-label" for="t">Titre de la bulle</label><input class="fd-input" id="t" value="Commencez ici"></div>
+        <div class="fd-field"><label class="fd-label" for="x">Texte de la bulle</label>
+          <div class="rt"><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Gras"><i data-icon="bold"></i></button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Italique"><i data-icon="italic"></i></button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Lien"><i data-icon="link"></i></button></div>
+          <textarea class="fd-textarea" id="x">Cliquez sur « Je m'inscris » pour démarrer votre parcours Contrat d'engagement jeune.</textarea></div>
+        <div class="fd-field"><label class="fd-label" for="pos">Position de la bulle</label><select class="fd-select" id="pos"><option>Automatique</option></select></div>
+        <hr>
+        <label class="fd-switch"><span>Bouton d'action (CTA)</span><input type="checkbox"><span class="fd-switch__track"></span></label>
+        <label class="fd-switch"><span>Animation de pulsation</span><input type="checkbox" checked><span class="fd-switch__track"></span></label>
+        <hr>
+        <button class="fd-btn fd-btn--ghost" type="button" style="color:var(--fd-color-danger)"><i data-icon="trash"></i>Supprimer le hotspot</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>
