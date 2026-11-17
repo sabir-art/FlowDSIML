@@ -1,3 +1,4 @@
+import { ArrowDown, ArrowUp, ImageOff, ImagePlus, Type } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
@@ -57,7 +58,13 @@ export function StepList({
                 {url ? (
                   <img src={url} alt="" />
                 ) : (
-                  <span className="steplist-text">{s.kind === 'text' ? 'Aa' : '…'}</span>
+                  <span className="steplist-text">
+                    {s.kind === 'text' ? (
+                      <Type size={20} aria-hidden="true" />
+                    ) : (
+                      <ImageOff size={20} aria-hidden="true" />
+                    )}
+                  </span>
                 )}
                 <span className="steplist-title">{s.title || t('editor.untitled')}</span>
               </button>
@@ -68,14 +75,14 @@ export function StepList({
                     disabled={i === 0}
                     onClick={() => void editor.moveStep(i, i - 1).then(() => onSelect(i - 1))}
                   >
-                    ↑
+                    <ArrowUp size={14} aria-hidden="true" />
                   </button>
                   <button
                     aria-label={t('editor.moveDown')}
                     disabled={i === editor.steps.length - 1}
                     onClick={() => void editor.moveStep(i, i + 1).then(() => onSelect(i + 1))}
                   >
-                    ↓
+                    <ArrowDown size={14} aria-hidden="true" />
                   </button>
                 </span>
               )}
@@ -87,14 +94,15 @@ export function StepList({
         <div className="stack" style={{ gap: 6, padding: 8 }}>
           <Button
             size="sm"
+            icon={<Type />}
             onClick={() =>
               void editor.addTextStep(current, t('editor.newTextStep')).then(() => onSelect(current + 1))
             }
           >
-            + {t('editor.addTextStep')}
+            {t('editor.addTextStep')}
           </Button>
-          <Button size="sm" onClick={() => file.current?.click()}>
-            + {t('editor.addImageStep')}
+          <Button size="sm" icon={<ImagePlus />} onClick={() => file.current?.click()}>
+            {t('editor.addImageStep')}
           </Button>
           <input
             ref={file}

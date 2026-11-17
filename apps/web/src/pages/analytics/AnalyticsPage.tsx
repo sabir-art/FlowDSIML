@@ -1,3 +1,4 @@
+import { Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -59,6 +60,7 @@ export function AnalyticsPage() {
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <h2 style={{ marginTop: 0 }}>{t('analytics.byDemo')}</h2>
           <Button
+            icon={<Download />}
             size="sm"
             onClick={() =>
               downloadText(

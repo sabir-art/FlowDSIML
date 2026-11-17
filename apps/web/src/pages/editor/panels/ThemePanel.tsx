@@ -1,7 +1,8 @@
+import { X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { themeSchema, type Theme } from '@flowdsiml/manifest';
-import { Alert, Button, Field } from '@flowdsiml/ui';
+import { Alert, Button, Field, Select } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { SUPABASE_URL } from '../../../lib/env';
 import type { DemoEditor } from '../useDemoEditor';
@@ -57,9 +58,8 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
       {color('surface', t('editor.colorSurface'))}
       {color('text', t('editor.colorText'))}
       <Field label={t('editor.font')} htmlFor="th-font">
-        <select
+        <Select
           id="th-font"
-          className="fd-select"
           disabled={readOnly}
           value={theme.fontFamily}
           onChange={(e) => set({ fontFamily: e.target.value })}
@@ -69,7 +69,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
               {f.split(',')[0]!.replace(/'/g, '')}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field label={t('editor.radius', { v: theme.radius })} htmlFor="th-radius">
         <input
@@ -93,7 +93,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
           />
         )}
         {theme.logoUrl && !readOnly && (
-          <Button size="sm" variant="ghost" onClick={() => set({ logoUrl: null })}>
+          <Button icon={<X />} size="sm" variant="ghost" onClick={() => set({ logoUrl: null })}>
             {t('editor.removeLogo')}
           </Button>
         )}
@@ -112,9 +112,8 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
         {t('editor.brandingHint')}
       </p>
       <Field label={t('editor.locale')} htmlFor="th-locale">
-        <select
+        <Select
           id="th-locale"
-          className="fd-select"
           disabled={readOnly}
           value={settings.locale ?? 'fr'}
           onChange={(e) =>
@@ -123,7 +122,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
         >
           <option value="fr">Français</option>
           <option value="en">English</option>
-        </select>
+        </Select>
       </Field>
     </div>
   );

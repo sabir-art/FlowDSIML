@@ -1,3 +1,4 @@
+import { Plus, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Field } from '@flowdsiml/ui';
@@ -50,6 +51,7 @@ export function VariablesPanel({ editor, readOnly }: { editor: DemoEditor; readO
               size="sm"
               variant="ghost"
               className="btn-danger-ghost"
+              icon={<Trash2 />}
               onClick={() => void editor.deleteVariable(v.id)}
             >
               {t('common.delete')}
@@ -67,7 +69,7 @@ export function VariablesPanel({ editor, readOnly }: { editor: DemoEditor; readO
             value={key}
             onChange={(e) => setKey(e.target.value.toLowerCase())}
           />
-          <Button type="submit" disabled={!valid}>
+          <Button icon={<Plus />} type="submit" disabled={!valid}>
             {t('editor.addVariable')}
           </Button>
         </form>

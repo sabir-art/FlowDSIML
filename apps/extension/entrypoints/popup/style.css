@@ -103,11 +103,30 @@ a:focus-visible {
   margin: 0 0 4px;
 }
 .rec::before {
-  content: '● ';
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 1px;
 }
 .rec.paused {
   color: var(--fd-color-text-muted);
 }
 a {
   color: var(--fd-color-primary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.link-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }

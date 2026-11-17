@@ -1,6 +1,7 @@
+import { ChevronLeft, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { HotspotAction } from '@flowdsiml/manifest';
-import { Button, Field } from '@flowdsiml/ui';
+import { Button, Field, Select } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asAction, asCta, type HotspotRow, type Selection } from '../types';
 import { RichTextField } from '../RichTextField';
@@ -36,8 +37,13 @@ export function HotspotPanel({
     <div className="stack">
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <h3 className="panel-title">{t('editor.hotspotSettings')}</h3>
-        <Button size="sm" variant="ghost" onClick={() => setSelection({ kind: 'step' })}>
-          ← {t('editor.backToStep')}
+        <Button
+          size="sm"
+          variant="ghost"
+          icon={<ChevronLeft />}
+          onClick={() => setSelection({ kind: 'step' })}
+        >
+          {t('editor.backToStep')}
         </Button>
       </div>
       <Field label={t('editor.tooltipTitle')} htmlFor="hs-title">
@@ -59,9 +65,8 @@ export function HotspotPanel({
         onChange={(v) => set({ body: v })}
       />
       <Field label={t('editor.placement')} htmlFor="hs-place">
-        <select
+        <Select
           id="hs-place"
-          className="fd-select"
           disabled={readOnly}
           value={hotspot.placement}
           onChange={(e) => set({ placement: e.target.value })}
@@ -71,12 +76,11 @@ export function HotspotPanel({
               {t(`editor.placement_${p}`)}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field label={t('editor.action')} htmlFor="hs-action">
-        <select
+        <Select
           id="hs-action"
-          className="fd-select"
           disabled={readOnly}
           value={action.type}
           onChange={(e) => setActionType(e.target.value as HotspotAction['type'])}
@@ -86,13 +90,12 @@ export function HotspotPanel({
               {t(`editor.action_${a}`)}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       {action.type === 'goto' && (
         <Field label={t('editor.targetStep')} htmlFor="hs-goto">
-          <select
+          <Select
             id="hs-goto"
-            className="fd-select"
             disabled={readOnly}
             value={action.stepId}
             onChange={(e) => set({ action: { type: 'goto', stepId: e.target.value } })}
@@ -102,7 +105,7 @@ export function HotspotPanel({
                 {i + 1}. {s.title || t('editor.untitled')}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
       )}
       {action.type === 'url' && (
@@ -136,6 +139,7 @@ export function HotspotPanel({
         <Button
           variant="ghost"
           className="btn-danger-ghost"
+          icon={<Trash2 />}
           onClick={() => {
             void editor.deleteHotspot(hotspot.id);
             setSelection({ kind: 'step' });

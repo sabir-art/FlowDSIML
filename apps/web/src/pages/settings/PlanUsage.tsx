@@ -1,3 +1,4 @@
+import { YesNo } from '../../components/YesNo';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@flowdsiml/ui';
@@ -52,11 +53,15 @@ export function PlanUsage() {
           </tr>
           <tr>
             <td>{t('plan.leadForms')}</td>
-            <td>{usage.limits.lead_forms ? '✓' : '—'}</td>
+            <td>
+              <YesNo value={!!usage.limits.lead_forms} />
+            </td>
           </tr>
           <tr>
             <td>{t('plan.removeBranding')}</td>
-            <td>{usage.limits.remove_branding ? '✓' : '—'}</td>
+            <td>
+              <YesNo value={!!usage.limits.remove_branding} />
+            </td>
           </tr>
           <tr>
             <td>{t('plan.retention')}</td>

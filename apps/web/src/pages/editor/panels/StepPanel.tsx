@@ -1,5 +1,7 @@
+import { useConfirm } from '../../../components/ConfirmDialog';
+import { EyeOff, Target, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Button, Field } from '@flowdsiml/ui';
+import { Button, Field, Select } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asCta, asRects, asZoom, type Selection, type StepRow } from '../types';
 import { RichTextField } from '../RichTextField';
@@ -19,6 +21,7 @@ export function StepPanel({
   setSelection: (s: Selection) => void;
 }) {
   const { t } = useTranslation();
+  const [dialog, ask] = useConfirm();
   const zoom = asZoom(step.zoom);
   const blurs = asRects(step.blurs);
   const varKeys = editor.variables.map((v) => v.key);
@@ -26,6 +29,7 @@ export function StepPanel({
 
   return (
     <div className="stack">
+      {dialog}
       <h3 className="panel-title">{t('editor.stepN', { n: index + 1 })}</h3>
       <Field label={t('editor.stepTitle')} htmlFor="st-title">
         <input
@@ -49,9 +53,8 @@ export function StepPanel({
       )}
 
       <Field label={t('editor.chapter')} htmlFor="st-chapter">
-        <select
+        <Select
           id="st-chapter"
-          className="fd-select"
           disabled={readOnly}
           value={step.chapter_id ?? ''}
           onChange={(e) => editor.updateStep(step.id, { chapter_id: e.target.value || null })}
@@ -62,13 +65,12 @@ export function StepPanel({
               {c.title || t('editor.untitled')}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
 
       <Field label={t('editor.gateForm')} htmlFor="st-gate">
-        <select
+        <Select
           id="st-gate"
-          className="fd-select"
           disabled={readOnly || !editor.forms.length}
           value={step.gate_form_id ?? ''}
           onChange={(e) => editor.updateStep(step.id, { gate_form_id: e.target.value || null })}
@@ -79,7 +81,7 @@ export function StepPanel({
               {f.title}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
 
       {step.kind === 'image' && (
@@ -150,6 +152,7 @@ export function StepPanel({
           {hotspots.map((h, i) => (
             <Button
               key={h.id}
+              icon={<Target />}
               size="sm"
               variant="ghost"
               onClick={() => setSelection({ kind: 'hotspot', id: h.id })}
@@ -163,6 +166,7 @@ export function StepPanel({
           {blurs.map((_, i) => (
             <Button
               key={i}
+              icon={<EyeOff />}
               size="sm"
               variant="ghost"
               onClick={() => setSelection({ kind: 'blur', index: i })}
@@ -183,8 +187,13 @@ export function StepPanel({
         <Button
           variant="ghost"
           className="btn-danger-ghost"
+          icon={<Trash2 />}
           onClick={() => {
-            if (confirm(t('editor.confirmDeleteStep'))) void editor.deleteStep(step.id);
+            void ask({
+              title: t('editor.confirmDeleteStep'),
+              confirmLabel: t('common.delete'),
+              danger: true,
+            }).then((yes) => yes && void editor.deleteStep(step.id));
           }}
         >
           {t('editor.deleteStep')}

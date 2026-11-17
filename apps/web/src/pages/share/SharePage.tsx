@@ -1,3 +1,5 @@
+import { BarChart3, Check, Copy, ExternalLink, EyeOff, Link2, Pencil, Power } from 'lucide-react';
+import { useConfirm } from '../../components/ConfirmDialog';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +9,7 @@ import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { embedSnippet, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
 import { unpublishDemo } from '../../lib/publish';
+import { formatDate, formatDateTime } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { asSettings } from '../editor/types';
@@ -40,6 +43,7 @@ function CopyField({
           <input id={id} className="fd-input" readOnly value={value} style={{ flex: 1 }} />
         )}
         <Button
+          icon={<Copy />}
           onClick={() => {
             void navigator.clipboard.writeText(value);
             setCopied(true);
@@ -55,6 +59,7 @@ function CopyField({
 
 export function SharePage() {
   const { t } = useTranslation();
+  const [dialog, ask] = useConfirm();
   const { demoId = '' } = useParams();
   const [params] = useSearchParams();
   const { can } = useWorkspace();
@@ -107,33 +112,42 @@ export function SharePage() {
     e.preventDefault();
     const vars = Object.fromEntries(Object.entries(values).filter(([, v]) => v.trim()));
     await run(async () => {
-      check(
-        await supabase.from('share_links').insert({
-          demo_id: demoId,
-          workspace_id: demo!.workspace_id,
-          name,
-          variables: vars,
-          expires_at: expires ? new Date(expires).toISOString() : null,
-        }),
+      const created = check(
+        await supabase
+          .from('share_links')
+          .insert({
+            demo_id: demoId,
+            workspace_id: demo!.workspace_id,
+            name,
+            variables: vars,
+            expires_at: expires ? new Date(expires).toISOString() : null,
+          })
+          .select('token')
+          .single(),
       );
+      // P10 : le lien créé est copié automatiquement
+      await navigator.clipboard?.writeText(shareLinkUrl(created.token)).catch(() => undefined);
       setName('');
       setValues({});
       setExpires('');
       await load();
-    }, t('share.linkCreated'));
+    }, t('share.linkCreatedCopied'));
   }
 
   return (
     <div className="stack" style={{ maxWidth: 860 }}>
+      {dialog}
       <div className="page-head">
         <h1>
           {t('share.title')} — {demo.title}
         </h1>
         <div className="row">
           <Link className="fd-btn" to={`/demos/${demoId}/edit`}>
+            <Pencil size={16} aria-hidden="true" />
             {t('share.backToEditor')}
           </Link>
           <Link className="fd-btn" to={`/demos/${demoId}/analytics`}>
+            <BarChart3 size={16} aria-hidden="true" />
             {t('nav.analytics')}
           </Link>
         </div>
@@ -146,6 +160,7 @@ export function SharePage() {
         <Card>
           <p>{t('share.notPublished')}</p>
           <Link className="fd-btn fd-btn--primary" to={`/demos/${demoId}/edit`}>
+            <Pencil size={16} aria-hidden="true" />
             {t('share.goPublish')}
           </Link>
         </Card>
@@ -159,17 +174,27 @@ export function SharePage() {
             </p>
             <div className="row">
               <a className="fd-btn" href={url} target="_blank" rel="noreferrer">
+                <ExternalLink size={16} aria-hidden="true" />
                 {t('share.open')}
               </a>
               {editable && (
                 <Button
+                  icon={<EyeOff />}
                   variant="danger"
                   onClick={() =>
-                    confirm(t('share.confirmUnpublish')) &&
-                    void run(async () => {
-                      await unpublishDemo(demoId);
-                      await load();
-                    }, t('share.unpublished'))
+                    void ask({
+                      title: t('share.unpublish'),
+                      body: t('share.confirmUnpublish'),
+                      confirmLabel: t('share.unpublish'),
+                      danger: true,
+                    }).then(
+                      (yes) =>
+                        yes &&
+                        void run(async () => {
+                          await unpublishDemo(demoId);
+                          await load();
+                        }, t('share.unpublished')),
+                    )
                   }
                 >
                   {t('share.unpublish')}
@@ -201,6 +226,7 @@ export function SharePage() {
             </p>
             {editable && (
               <Button
+                icon={<Check />}
                 onClick={() =>
                   void run(async () => {
                     const list = origins
@@ -242,7 +268,7 @@ export function SharePage() {
               />
             </Field>
             {variables.map((v) => (
-              <Field key={v.id} label={`{{${v.key}}} — ${v.label}`} htmlFor={`lv-${v.key}`}>
+              <Field key={v.id} label={v.label || v.key} htmlFor={`lv-${v.key}`}>
                 <input
                   id={`lv-${v.key}`}
                   className="fd-input"
@@ -263,7 +289,7 @@ export function SharePage() {
               />
             </Field>
             <div>
-              <Button type="submit" variant="primary">
+              <Button icon={<Link2 />} type="submit" variant="primary">
                 {t('share.createLink')}
               </Button>
             </div>
@@ -288,10 +314,11 @@ export function SharePage() {
                       .map(([k, v]) => `${k}=${v}`)
                       .join(', ') || '—'}
                   </td>
-                  <td>{l.expires_at ? new Date(l.expires_at).toLocaleDateString() : '—'}</td>
+                  <td>{l.expires_at ? formatDate(l.expires_at) : '—'}</td>
                   <td>
                     <div className="row" style={{ justifyContent: 'flex-end' }}>
                       <Button
+                        icon={<Copy />}
                         size="sm"
                         onClick={() => void navigator.clipboard.writeText(shareLinkUrl(l.token))}
                       >
@@ -300,6 +327,7 @@ export function SharePage() {
                       {editable && (
                         <>
                           <Button
+                            icon={<Power />}
                             size="sm"
                             onClick={() =>
                               void run(async () => {
@@ -344,7 +372,7 @@ export function SharePage() {
           <ul>
             {versions.map((v) => (
               <li key={v.id}>
-                v{v.number} — {new Date(v.published_at).toLocaleString()}{' '}
+                v{v.number} — {formatDateTime(v.published_at)}{' '}
                 {v.id === demo.current_version_id && <span className="fd-badge">{t('share.live')}</span>}
               </li>
             ))}

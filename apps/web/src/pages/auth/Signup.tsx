@@ -1,3 +1,4 @@
+import { UserPlus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -118,7 +119,13 @@ export function Signup() {
               </div>
             )}
           </Field>
-          <Button type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
+          <Button
+            icon={<UserPlus />}
+            type="submit"
+            variant="primary"
+            disabled={busy}
+            style={{ width: '100%' }}
+          >
             {t('auth.signUp')}
           </Button>
         </form>

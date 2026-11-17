@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -39,7 +40,7 @@ export function Onboarding() {
             placeholder={t('onboarding.placeholder')}
           />
         </Field>
-        <Button type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
+        <Button icon={<Plus />} type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
           {t('onboarding.create')}
         </Button>
       </form>

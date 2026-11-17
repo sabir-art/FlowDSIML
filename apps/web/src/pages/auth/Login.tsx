@@ -1,3 +1,4 @@
+import { LogIn } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -99,7 +100,7 @@ export function Login() {
             <FieldError id="password" errors={errors} />
           </Field>
         )}
-        <Button type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
+        <Button icon={<LogIn />} type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
           {mode === 'password' ? t('auth.signIn') : t('auth.sendMagicLink')}
         </Button>
       </form>

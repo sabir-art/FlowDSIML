@@ -1,3 +1,4 @@
+import { Mail } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +39,7 @@ export function ForgotPassword() {
             onChange={(e) => setEmail(e.target.value)}
           />
         </Field>
-        <Button type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
+        <Button icon={<Mail />} type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
           {t('auth.sendResetLink')}
         </Button>
       </form>

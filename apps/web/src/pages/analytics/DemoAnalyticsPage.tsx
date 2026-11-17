@@ -1,3 +1,4 @@
+import { Download, Pencil, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -79,9 +80,11 @@ export function DemoAnalyticsPage() {
         </h1>
         <div className="row">
           <Link className="fd-btn" to={`/demos/${demoId}/edit`}>
+            <Pencil size={16} aria-hidden="true" />
             {t('share.backToEditor')}
           </Link>
           <Link className="fd-btn" to={`/demos/${demoId}/share`}>
+            <Share2 size={16} aria-hidden="true" />
             {t('editor.share')}
           </Link>
         </div>
@@ -115,6 +118,7 @@ export function DemoAnalyticsPage() {
             <div className="row" style={{ justifyContent: 'space-between' }}>
               <h2 style={{ marginTop: 0 }}>{t('analytics.funnel')}</h2>
               <Button
+                icon={<Download />}
                 size="sm"
                 onClick={() =>
                   downloadText(

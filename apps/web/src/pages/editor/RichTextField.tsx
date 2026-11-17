@@ -1,7 +1,16 @@
+import { Bold, Italic, Link2 } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { richTextToHtml } from '@flowdsiml/core';
-import { Button } from '@flowdsiml/ui';
+import { Button, Select } from '@flowdsiml/ui';
+
+/** Remplace {{clé|défaut}} (déjà échappé, clé contrainte) par une pastille lisible (ED6). */
+function withVariablePills(html: string): string {
+  return html.replace(
+    /\{\{\s*([a-z][a-z0-9_]{0,39})\s*(?:\|[^}]*)?\}\}/g,
+    '<span class="var-pill">$1</span>',
+  );
+}
 
 /** Texte riche restreint : **gras**, *italique*, [lien](url), {{variable}}. Rendu sûr (échappé). */
 export function RichTextField({
@@ -44,30 +53,45 @@ export function RichTextField({
       </label>
       {!disabled && (
         <div className="row rt-toolbar">
-          <Button size="sm" onClick={() => wrap('**')} aria-label={t('editor.bold')}>
-            <b>B</b>
-          </Button>
-          <Button size="sm" onClick={() => wrap('*')} aria-label={t('editor.italic')}>
-            <i>I</i>
-          </Button>
-          <Button size="sm" onClick={() => wrap('[', '](https://)', t('editor.linkText'))}>
-            {t('editor.link')}
-          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Bold />}
+            onClick={() => wrap('**')}
+            aria-label={t('editor.bold')}
+            title={t('editor.bold')}
+          />
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Italic />}
+            onClick={() => wrap('*')}
+            aria-label={t('editor.italic')}
+            title={t('editor.italic')}
+          />
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Link2 />}
+            onClick={() => wrap('[', '](https://)', t('editor.linkText'))}
+            aria-label={t('editor.link')}
+            title={t('editor.link')}
+          />
           {variables.length > 0 && (
-            <select
-              className="fd-select"
-              style={{ width: 'auto', padding: '3px 6px' }}
+            <Select
+              inline
+              className="rt-var"
               value=""
               aria-label={t('editor.insertVariable')}
               onChange={(e) => e.target.value && wrap(`{{${e.target.value}}}`, '')}
             >
-              <option value="">{`{{ }}`}</option>
+              <option value="">{t('editor.insertVariable')}</option>
               {variables.map((v) => (
                 <option key={v} value={v}>
                   {v}
                 </option>
               ))}
-            </select>
+            </Select>
           )}
         </div>
       )}
@@ -81,7 +105,15 @@ export function RichTextField({
         maxLength={4000}
         onChange={(e) => onChange(e.target.value)}
       />
-      {value && <div className="rt-preview" dangerouslySetInnerHTML={{ __html: richTextToHtml(value) }} />}
+      <div className="rt-meta">
+        <span className="fd-muted">{t('editor.chars', { n: value.length, max: 4000 })}</span>
+      </div>
+      {value && (
+        <div
+          className="rt-preview"
+          dangerouslySetInnerHTML={{ __html: withVariablePills(richTextToHtml(value)) }}
+        />
+      )}
     </div>
   );
 }

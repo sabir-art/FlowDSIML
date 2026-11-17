@@ -60,14 +60,14 @@ const SHOTS = process.env.SHOTS_DIR;
   ok((await page.textContent('[aria-live="polite"]')).includes('%'), 'annonce aria-live du déplacement');
 
   // Ajout d'un hotspot avec l'outil
-  await page.getByRole('button', { name: '+ Hotspot' }).click();
+  await page.getByRole('button', { name: 'Hotspot', exact: true }).click();
   const frame = await page.locator('.canvas-frame').boundingBox();
   await page.mouse.click(frame.x + frame.width * 0.8, frame.y + frame.height * 0.2);
   await page.waitForTimeout(300);
   ok((await page.locator('.canvas-hotspot').count()) === 2, 'nouveau hotspot ajouté');
 
   // Flou
-  await page.getByRole('button', { name: '+ Flou' }).click();
+  await page.getByRole('button', { name: 'Flou', exact: true }).click();
   await page.mouse.move(frame.x + 50, frame.y + 50);
   await page.mouse.down();
   await page.mouse.move(frame.x + 250, frame.y + 100, { steps: 4 });
