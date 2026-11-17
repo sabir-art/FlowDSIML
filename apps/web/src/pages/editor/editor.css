@@ -739,3 +739,223 @@
   font-size: var(--fd-text-h3-size);
   font-weight: 700;
 }
+
+/* ===================================================================== */
+/* Panneau Commentaires : sous le canevas, toute la largeur de la zone   */
+/* centrale, poignée horizontale (redimensionner, replier / déplier)     */
+/* ===================================================================== */
+.editor-center-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-3);
+  min-height: 0;
+  min-width: 0;
+}
+.editor-center-col > .editor-center {
+  flex: 1;
+  min-height: 0;
+}
+.comments {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  min-height: 0;
+  border: 1px solid transparent;
+  border-radius: var(--fd-radius-2xl);
+  background: var(--fd-color-surface);
+  box-shadow: var(--fd-shadow-sm);
+}
+.comments--collapsed {
+  height: auto;
+}
+.comments__handle {
+  display: grid;
+  place-items: center;
+  height: 14px;
+  flex: none;
+  cursor: ns-resize;
+  touch-action: none;
+  border-radius: var(--fd-radius-2xl) var(--fd-radius-2xl) 0 0;
+}
+.comments--collapsed .comments__handle {
+  cursor: pointer;
+}
+.comments__grip {
+  width: 40px;
+  height: 4px;
+  border-radius: var(--fd-radius-full);
+  background: var(--fd-color-border-strong);
+}
+.comments__handle:hover .comments__grip,
+.comments__handle:focus-visible .comments__grip {
+  background: var(--fd-color-text-muted);
+}
+.comments__handle:focus-visible {
+  outline: none;
+  box-shadow: var(--fd-shadow-focus);
+}
+.comments__head {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-3);
+  padding: 0 var(--fd-space-4) var(--fd-space-3);
+  flex-wrap: wrap;
+}
+.comments--collapsed .comments__head {
+  padding-bottom: var(--fd-space-3);
+}
+.comments__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+  margin: 0;
+  font-size: var(--fd-text-h3-size);
+  font-weight: 700;
+}
+.comments__count {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--fd-radius-full);
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-on-nav-active);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+}
+.comments__internal {
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-subtle);
+}
+.comments__resolved-toggle {
+  margin-left: auto;
+  font-size: var(--fd-text-label-size);
+}
+.comments__head > .fd-btn:last-child {
+  margin-left: auto;
+}
+.comments__resolved-toggle + .fd-btn:last-child {
+  margin-left: 0;
+}
+.comments__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 0 var(--fd-space-4) var(--fd-space-4);
+  gap: var(--fd-space-3);
+}
+.comments__empty {
+  margin: 0;
+  flex: 1;
+}
+.comments__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-2);
+}
+.comment {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--fd-space-3);
+  padding: var(--fd-space-2) var(--fd-space-3);
+  border-radius: var(--fd-radius-xl);
+  background: var(--fd-color-surface-sunken);
+}
+.comment--resolved {
+  opacity: 0.75;
+}
+.comment__avatar {
+  width: 32px;
+  height: 32px;
+}
+.comment__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+  flex-wrap: wrap;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+}
+.comment__meta strong {
+  color: var(--fd-color-text);
+  font-size: var(--fd-text-label-size);
+}
+.comment__edited {
+  font-style: italic;
+}
+.comment__body {
+  margin-top: 2px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.comment__body a {
+  color: var(--fd-color-primary);
+}
+.comment__edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-2);
+  margin-top: var(--fd-space-1);
+}
+.comment__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.comments__form {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--fd-space-2);
+  flex: none;
+}
+.comments__form .fd-textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 140px;
+  resize: vertical;
+  border-radius: var(--fd-radius-xl);
+}
+.comments__form .fd-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  padding: 0;
+  flex: none;
+}
+
+/* Badge de commentaires ouverts sur la vignette du rail */
+.steplist-comments {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  margin-left: var(--fd-space-1);
+  padding: 0 8px;
+  border-radius: var(--fd-radius-full);
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-on-nav-active);
+  font-size: 11px;
+  font-weight: 700;
+}
+.steplist-comments svg {
+  width: 12px;
+  height: 12px;
+}
+/* Le cadre du canevas garde son ratio : la zone centrale défile plutôt que de l'écraser */
+.editor-center > .canvas-frame {
+  flex: none;
+}
+.editor-center {
+  justify-content: safe center;
+}

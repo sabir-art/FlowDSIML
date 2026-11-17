@@ -322,6 +322,11 @@ async function install(page, state = seed()) {
             demos: 2,
             members: 1,
           });
+        case 'set_comment_resolved': {
+          const c = (t.step_comments || []).find((x) => x.id === a.p_comment);
+          if (c) Object.assign(c, { resolved_at: a.p_resolved ? new Date().toISOString() : null });
+          return json(route, 200, null);
+        }
         case 'list_members':
           return json(route, 200, [
             {
@@ -557,6 +562,18 @@ async function install(page, state = seed()) {
           ...defaults(table, r),
           ...r,
         }));
+        // step_comments : contexte et auteur posés comme le trigger SQL
+        if (table === 'step_comments')
+          for (const it of items) {
+            const st = t.steps.find((x) => x.id === it.step_id);
+            Object.assign(it, {
+              author_id: state.user.id,
+              demo_id: st?.demo_id,
+              workspace_id: st?.workspace_id,
+              resolved_at: null,
+              resolved_by: null,
+            });
+          }
         rows.push(...items);
         return respond(items);
       }

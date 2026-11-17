@@ -526,5 +526,30 @@
     "confirmLabel": "Publish without form",
     "sharePublished": "Published without lead form (Free plan).",
     "previewBanner": "Preview: not published with your plan"
+  },
+  "comments": {
+    "title": "Comments",
+    "internal": "Internal to the team, never published",
+    "openCount_one": "{{count}} open comment",
+    "openCount_other": "{{count}} open comments",
+    "showResolved": "Show resolved ({{count}})",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "resize": "Resize the comments panel",
+    "empty": "No comments on this step yet. Leave a note for the team here.",
+    "allResolved": "All comments on this step are resolved.",
+    "you": "You",
+    "formerMember": "Former member",
+    "edited": "edited",
+    "resolved": "Resolved",
+    "resolve": "Resolve",
+    "reopen": "Reopen",
+    "edit": "Edit comment",
+    "editLabel": "Edit comment",
+    "delete": "Delete comment",
+    "confirmDelete": "Delete this comment?",
+    "placeholder": "Add a comment…",
+    "send": "Send",
+    "hint": "Enter to send, Shift+Enter for a new line."
   }
 }
