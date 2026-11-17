@@ -1,15 +1,47 @@
-import { formatDate, formatNumber } from '../lib/format';
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { formatDate, formatNumber, formatPercent } from '../lib/format';
 import { useState } from 'react';
 
 /** Tuile KPI : valeur héros + libellé (pas de graphique). */
-export function StatTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
+export function StatTile({
+  label,
+  value,
+  hint,
+  delta,
+  deltaLabel,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  /** Variation relative vs période précédente (0.12 = +12 %) ; null = pas de comparaison possible. */
+  delta?: number | null;
+  deltaLabel?: string;
+}) {
+  const dir =
+    delta === undefined || delta === null ? null : delta > 0.005 ? 'up' : delta < -0.005 ? 'down' : 'flat';
+  const Icon = dir === 'up' ? TrendingUp : dir === 'down' ? TrendingDown : Minus;
   return (
     <div className="fd-card stat-tile">
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
+      {dir && (
+        <div className={`stat-delta stat-delta--${dir}`}>
+          <Icon size={14} aria-hidden="true" />
+          <span>
+            {delta! > 0 ? '+' : ''}
+            {formatPercent(delta!)}
+          </span>
+          {deltaLabel && <span className="stat-delta-label">{deltaLabel}</span>}
+        </div>
+      )}
       {hint && <div className="stat-hint">{hint}</div>}
     </div>
   );
+}
+
+/** Variation relative entre deux valeurs (null si la période précédente est vide). */
+export function variation(current: number, previous: number): number | null {
+  return previous > 0 ? (current - previous) / previous : null;
 }
 
 /**
@@ -122,13 +154,15 @@ export function Funnel({
               {r.stepIndex + 1}. {labels[r.stepIndex] ?? ''}
             </td>
             <td>
-              <div className="funnel-track">
-                <div
-                  className="funnel-bar"
-                  style={{ width: `${Math.max(r.reach * 100, r.visitors ? 1 : 0)}%` }}
-                />
+              <div className="funnel-cell">
+                <div className="funnel-track" aria-hidden="true">
+                  <div
+                    className="funnel-bar"
+                    style={{ width: `${Math.max(r.reach * 100, r.visitors ? 1 : 0)}%` }}
+                  />
+                </div>
                 <span className="funnel-value">
-                  {r.visitors} ({pct(r.reach)})
+                  {formatNumber(r.visitors)} · {pct(r.reach)}
                 </span>
               </div>
             </td>

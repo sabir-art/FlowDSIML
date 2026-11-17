@@ -319,7 +319,9 @@
     "formOnStep": "Form “{{title}}” shown before this step",
     "editForm": "Edit",
     "chooseLogo": "Choose a logo",
-    "changeLogo": "Change logo"
+    "changeLogo": "Change logo",
+    "pageCta": "Page call to action",
+    "pageCtaHint": "Always visible at the top of the player (e.g. “Book a demo”)."
   },
   "status": {
     "draft": "Draft",
@@ -381,7 +383,8 @@
     "period": "Period",
     "lastDays_one": "{{count}} day",
     "lastDays_other": "{{count}} days",
-    "byDemo": "By demo"
+    "byDemo": "By demo",
+    "vsPrevious": "vs previous period"
   },
   "leads": {
     "title": "Leads",

@@ -785,3 +785,32 @@
 .menu-item {
   white-space: nowrap;
 }
+.stat-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-space-1);
+  margin-top: var(--fd-space-1);
+  font-size: var(--fd-font-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.stat-delta--up {
+  color: var(--fd-color-success);
+}
+.stat-delta--down {
+  color: var(--fd-color-danger);
+}
+.stat-delta--flat {
+  color: var(--fd-color-text-muted);
+}
+.stat-delta-label {
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
+}
+
+.stat-delta {
+  flex-wrap: wrap;
+}
+.stat-delta-label {
+  flex-basis: 100%;
+}

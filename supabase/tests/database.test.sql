@@ -2,7 +2,7 @@
 -- Exécution : `supabase test db` (Docker) ou supabase/tests/local/run.sh (Postgres nu).
 begin;
 set search_path = public, extensions;
-select plan(36);
+select plan(37);
 
 -- Utilisateurs de test
 insert into auth.users (id, email) values
@@ -96,12 +96,14 @@ select is((select title from public.demos where id = '00000000-0000-0000-0000-00
 select throws_ok($$ delete from public.members where user_id = auth.uid() $$, 'P0001', 'Le workspace doit garder au moins un owner', 'le dernier owner ne peut pas partir');
 
 -- ===== Publication =====
+update public.demos set settings = '{"cta":{"label":"Réserver","url":"https://example.com/rdv"}}' where id = '00000000-0000-0000-0000-0000000000d1';
 create temp table pub as select public.publish_demo('00000000-0000-0000-0000-0000000000d1') as r;
 grant all on pub to authenticated, anon;
 select is((select (r ->> 'number')::int from pub), 1, 'version 1 créée');
 select is((select jsonb_array_length(r -> 'manifest' -> 'steps') from pub), 2, 'le manifeste contient 2 étapes');
 select is((select jsonb_array_length(r -> 'copies') from pub), 2, '2 images à copier');
 select is((select r -> 'manifest' -> 'steps' -> 0 -> 'hotspots' -> 0 ->> 'title' from pub), 'Cliquez ici', 'hotspot dans le manifeste');
+select is((select r -> 'manifest' -> 'cta' ->> 'label' from pub), 'Réserver', 'CTA client dans le manifeste (P6)');
 select is((select status from public.demos where id = '00000000-0000-0000-0000-0000000000d1'), 'draft'::public.demo_status, 'pas en ligne avant finalisation');
 select lives_ok($$ select public.finalize_publication((select (r ->> 'versionId')::uuid from pub)) $$, 'finalisation');
 select is((select status from public.demos where id = '00000000-0000-0000-0000-0000000000d1'), 'published'::public.demo_status, 'démo publiée');

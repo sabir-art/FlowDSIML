@@ -134,6 +134,8 @@ export const manifestSchema = z.object({
   forms: z.array(formSchema).default([]),
   /** Origines autorisées à embarquer la démo (vide = toutes). Contrôle côté player, contournable. */
   allowedEmbedOrigins: z.array(z.string()).default([]),
+  /** Bouton d'action du client, affiché en permanence dans la barre du player (P6). */
+  cta: ctaSchema.nullable().default(null),
   /** URL de l'endpoint d'ingestion analytics. */
   trackUrl: z.string().nullable().default(null),
 });

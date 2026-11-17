@@ -65,5 +65,6 @@ export function buildDraftManifest(ed: DemoEditor): Manifest {
       skippable: f.skippable,
     })),
     allowedEmbedOrigins: settings.allowedEmbedOrigins ?? [],
+    cta: settings.cta ?? null,
   });
 }

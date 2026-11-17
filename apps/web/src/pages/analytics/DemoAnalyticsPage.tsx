@@ -8,7 +8,8 @@ import { Alert, Button, Card } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { errorMessage } from '../../lib/errors';
 import { downloadText } from '../../lib/download';
-import { DailyBars, Funnel, StatTile } from '../../components/charts';
+import { DailyBars, Funnel, StatTile, variation } from '../../components/charts';
+import { formatNumber } from '../../lib/format';
 import { Loading } from '../../components/guards';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { LeadsTable } from './LeadsTable';
@@ -33,6 +34,7 @@ export function DemoAnalyticsPage() {
   const [demo, setDemo] = useState<Tables<'demos'> | null>(null);
   const [steps, setSteps] = useState<Pick<Tables<'steps'>, 'id' | 'title'>[]>([]);
   const [data, setData] = useState<Analytics | null>(null);
+  const [prev, setPrev] = useState<Analytics | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,7 +58,13 @@ export function DemoAnalyticsPage() {
 
   useEffect(() => {
     setData(null);
+    setPrev(null);
     const from = new Date(Date.now() - days * 86400_000).toISOString();
+    // A1 : même durée, période précédente, pour les variations
+    const prevFrom = new Date(Date.now() - 2 * days * 86400_000).toISOString();
+    void supabase
+      .rpc('demo_analytics', { p_demo: demoId, p_from: prevFrom, p_to: from })
+      .then(({ data: r }) => setPrev((r as unknown as Analytics) ?? null));
     void supabase
       .rpc('demo_analytics', { p_demo: demoId, p_from: from, p_to: new Date().toISOString() })
       .then(({ data: r, error: e }) => {
@@ -96,15 +104,35 @@ export function DemoAnalyticsPage() {
       ) : (
         <>
           <div className="stat-row">
-            <StatTile label={t('analytics.views')} value={String(data.views)} />
-            <StatTile label={t('analytics.visitors')} value={String(data.visitors)} />
+            <StatTile
+              label={t('analytics.views')}
+              value={formatNumber(data.views)}
+              delta={prev && variation(data.views, prev.views)}
+              deltaLabel={t('analytics.vsPrevious')}
+            />
+            <StatTile
+              label={t('analytics.visitors')}
+              value={formatNumber(data.visitors)}
+              delta={prev && variation(data.visitors, prev.visitors)}
+              deltaLabel={t('analytics.vsPrevious')}
+            />
             <StatTile
               label={t('analytics.completion')}
               value={pct(completionRate(data.visitors, data.completions))}
               hint={t('analytics.completionHint', { n: data.completions })}
             />
-            <StatTile label={t('analytics.ctaClicks')} value={String(data.ctaClicks)} />
-            <StatTile label={t('analytics.leads')} value={String(data.leads)} />
+            <StatTile
+              label={t('analytics.ctaClicks')}
+              value={formatNumber(data.ctaClicks)}
+              delta={prev && variation(data.ctaClicks, prev.ctaClicks)}
+              deltaLabel={t('analytics.vsPrevious')}
+            />
+            <StatTile
+              label={t('analytics.leads')}
+              value={formatNumber(data.leads)}
+              delta={prev && variation(data.leads, prev.leads)}
+              deltaLabel={t('analytics.vsPrevious')}
+            />
           </div>
           <Card>
             <h2 style={{ marginTop: 0 }}>{t('analytics.viewsPerDay')}</h2>

@@ -152,6 +152,15 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
       <header class="p-top">
         {theme.logoUrl ? <img class="p-logo" src={theme.logoUrl} alt="" /> : null}
         <span class="p-title">{sub(m.title)}</span>
+        {m.cta && (
+          <button
+            class="p-btn p-btn-primary p-btn-sm p-top-cta"
+            onClick={() => onCta(m.cta!.url, m.cta!.label)}
+          >
+            {sub(m.cta.label)}
+            <ExternalLink {...ICON} size={14} />
+          </button>
+        )}
         {m.chapters.length > 0 && (
           <button
             class="p-icon-btn"
