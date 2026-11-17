@@ -1,0 +1,23 @@
+/* Compléments à la maquette (comportements qu'un écran statique ne montre pas). Garder minimal. */
+/* Tiroir de navigation < 1 024 px : voile derrière la barre latérale ouverte */
+.mk-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--fd-z-modal) - 1);
+  background: rgb(8 8 8 / 0.4);
+}
+/* Entrée de navigation à venir (V2) : visible, non cliquable */
+.mk .nav a[aria-disabled='true'] {
+  cursor: default;
+}
+.mk .nav a[aria-disabled='true']:hover {
+  background: none;
+  color: var(--fd-color-text-muted);
+}
+.mk main:focus {
+  outline: none;
+}
+/* Neutralise des classes globales de l'app qui portent le même nom que celles de la maquette */
+.mk .row {
+  color: inherit;
+}

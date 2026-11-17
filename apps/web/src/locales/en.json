@@ -755,5 +755,33 @@
     "confirmLabel": "Publish without form",
     "sharePublished": "Published without lead form (Free plan).",
     "previewBanner": "Preview: not published with your plan"
+  },
+  "shell": {
+    "sections": "Sections",
+    "main": "Main navigation",
+    "demos": "Demos",
+    "centers": "Demo centers",
+    "analytics": "Analytics",
+    "leads": "Leads",
+    "folders": "Folders",
+    "archived": "Archived",
+    "workspace": "Workspace",
+    "settings": "Settings",
+    "plans": "Plans and billing",
+    "publishedDemos": "Published demos",
+    "aiCredits": "AI credits",
+    "soon": "Soon",
+    "logout": "Sign out",
+    "wsPlan_one": "{{plan}} plan · {{count}} member",
+    "wsPlan_other": "{{plan}} plan · {{count}} members",
+    "newWorkspace": "New workspace",
+    "openNav": "Open navigation",
+    "crumbs": "Breadcrumb",
+    "search": "Search…  /",
+    "searchLabel": "Search",
+    "help": "Help",
+    "notifications": "Notifications",
+    "skip": "Skip to content",
+    "unlimited": "∞"
   }
 }

@@ -89,7 +89,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: 'Tester le quiz' }).click();
   const pf = page.frameLocator('iframe.preview-frame');
   await pf.locator('.p-quiz-card').waitFor({ timeout: 10000 });
-  ok((await pf.locator('legend').textContent()) === 'Où créer un rendez-vous ?', 'aperçu : le quiz s’ouvre directement');
+  ok(
+    (await pf.locator('legend').textContent()) === 'Où créer un rendez-vous ?',
+    'aperçu : le quiz s’ouvre directement',
+  );
   await page.getByRole('button', { name: 'Fermer' }).click();
 
   // Seconde question incomplète → publication bloquée avec le numéro

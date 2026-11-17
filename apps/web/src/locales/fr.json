@@ -755,5 +755,33 @@
     "confirmLabel": "Publier sans formulaire",
     "sharePublished": "Publiée sans formulaire de lead (plan Free).",
     "previewBanner": "Aperçu : non publié avec votre plan"
+  },
+  "shell": {
+    "sections": "Sections",
+    "main": "Navigation principale",
+    "demos": "Démos",
+    "centers": "Démo centers",
+    "analytics": "Analytics",
+    "leads": "Leads",
+    "folders": "Dossiers",
+    "archived": "Archivées",
+    "workspace": "Workspace",
+    "settings": "Paramètres",
+    "plans": "Plans et facturation",
+    "publishedDemos": "Démos publiées",
+    "aiCredits": "Crédits IA",
+    "soon": "Bientôt",
+    "logout": "Se déconnecter",
+    "wsPlan_one": "Plan {{plan}} · {{count}} membre",
+    "wsPlan_other": "Plan {{plan}} · {{count}} membres",
+    "newWorkspace": "Nouveau workspace",
+    "openNav": "Ouvrir la navigation",
+    "crumbs": "Fil d’Ariane",
+    "search": "Rechercher…  /",
+    "searchLabel": "Rechercher",
+    "help": "Aide",
+    "notifications": "Notifications",
+    "skip": "Aller au contenu",
+    "unlimited": "∞"
   }
 }

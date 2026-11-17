@@ -560,6 +560,12 @@ async function install(page, state = seed()) {
       };
       if (method === 'GET' || method === 'HEAD') {
         let list = filtered().map(embed);
+        // count=exact (head:true) : nombre total dans Content-Range, comme PostgREST
+        if ((req.headers()['prefer'] || '').includes('count=exact'))
+          return json(route, 200, method === 'HEAD' ? null : list, {
+            'content-range': `0-${Math.max(0, list.length - 1)}/${list.length}`,
+            'access-control-expose-headers': 'Content-Range',
+          });
         if (order) {
           const [col, dir] = order.split(',')[0].split('.');
           list = list

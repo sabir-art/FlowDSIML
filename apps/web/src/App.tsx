@@ -8,6 +8,7 @@ import { WorkspaceProvider } from './workspace/WorkspaceProvider';
 import { isConfigured } from './lib/supabase';
 import { Loading, RequireAuth, RequireWorkspace } from './components/guards';
 import { Layout } from './components/Layout';
+import { CrumbsProvider } from './components/crumbs';
 import { Login } from './pages/auth/Login';
 import { Signup } from './pages/auth/Signup';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
@@ -113,7 +114,9 @@ export function App() {
                 element={
                   <RequireAuth>
                     <RequireWorkspace>
-                      <Layout />
+                      <CrumbsProvider>
+                        <Layout />
+                      </CrumbsProvider>
                     </RequireWorkspace>
                   </RequireAuth>
                 }
