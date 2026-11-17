@@ -135,9 +135,11 @@ export function AuthLayout({
               {i18n.language === 'en' ? 'English' : 'Français'}
             </button>
             {/* Pages légales pas encore rédigées : visibles, non cliquables, badge Bientôt */}
-            <span className="t-caption subtle">{t('auth.privacy')}</span>
-            <span className="t-caption subtle">{t('auth.terms')}</span>
-            <span className="badge">{t('shell.soon')}</span>
+            <span className="row auth-legal">
+              <span className="t-caption subtle">{t('auth.privacy')}</span>
+              <span className="t-caption subtle">{t('auth.terms')}</span>
+              <span className="badge">{t('shell.soon')}</span>
+            </span>
           </div>
         </main>
         {aside ?? <DemoAside />}

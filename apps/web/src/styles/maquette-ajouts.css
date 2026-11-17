@@ -140,3 +140,16 @@
     display: block;
   }
 }
+/* Pied de page de connexion : tient sur une ligne à 390 px (badge Bientôt en plus de la maquette) */
+.mk .auth-footer {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+@media (max-width: 480px) {
+  .mk .auth-footer {
+    gap: 12px;
+  }
+}
+.mk .auth-legal {
+  gap: 12px;
+}
