@@ -96,7 +96,7 @@ Espace de 8 px entre l'icône et le texte. Les **boutons-icônes** sont carrés 
 ### 2.2 Champ texte, zone de texte, recherche
 - Hauteur de 40 px (32 px en `sm`), padding horizontal de 12 px, rayon `md`, bordure de 1 px `border-strong`, fond `surface`.
 - **Focus** : bordure `primary`, plus `shadow-focus`.
-- **Erreur** : bordure `danger`, plus `aria-invalid="true"` et `aria-describedby` vers le message. Le message dit **quoi corriger** (« Saisissez une adresse email valide, par exemple nom@entreprise.com »).
+- **Erreur** : bordure `danger`, plus `aria-invalid="true"` et `aria-describedby` vers le message. Le message dit **quoi corriger** (« Saisissez une adresse email valide, par exemple nom@entreprise.example »).
 - **Désactivé** : fond `surface-sunken`, texte `text-disabled`. **Lecture seule** : fond `surface-sunken`, texte `text`, sélectionnable.
 - Préfixe ou suffixe possible (icône, `https://`, unité). Recherche : icône loupe et bouton « Effacer » (`aria-label`).
 - Zone de texte : 3 lignes minimum, redimensionnable verticalement, compteur de caractères en `caption` si une limite existe (bulle : 280 caractères conseillés).

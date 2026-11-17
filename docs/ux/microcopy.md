@@ -42,10 +42,10 @@ Le ton s'adapte au moment :
 
 ### 2.3 Dans les deux langues
 - **Une idée par phrase.** Les phrases d'aide font au maximum 2 lignes.
-- **Messages d'erreur** : ce qui s'est passé, puis quoi faire (« Saisissez une adresse email valide, par exemple nom@entreprise.com. »). Pas de « Erreur : », pas de code en premier plan, pas de reproche (« Vous avez saisi… »).
+- **Messages d'erreur** : ce qui s'est passé, puis quoi faire (« Saisissez une adresse email valide, par exemple nom@entreprise.example. »). Pas de « Erreur : », pas de code en premier plan, pas de reproche (« Vous avez saisi… »).
 - **Confirmations destructives** : le titre reprend l'objet (« Supprimer “Nom” ? »), le corps dit ce qui sera perdu et ce qui est conservé, le bouton répète l'action (« Supprimer la démo »), jamais « OK » ni « Oui ».
 - **Toasts** : participe passé ou constat court (« Lien copié », « Démo archivée »), avec une action d'annulation quand c'est possible.
-- **Placeholders** : un exemple, pas une consigne (« nom@entreprise.com », « Ex. : Nouveau rapport »). La consigne va dans l'aide.
+- **Placeholders** : un exemple, pas une consigne (« nom@entreprise.example », « Ex. : Nouveau rapport »). La consigne va dans l'aide.
 - **Limites de longueur** : bouton ≤ 24 caractères (FR) ; titre de bulle ≤ 60 ; texte de bulle conseillé ≤ 280. Le français est environ 20 % plus long que l'anglais : on conçoit à partir du FR.
 
 ## 3. Glossaire

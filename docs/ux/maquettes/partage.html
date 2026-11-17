@@ -91,7 +91,7 @@
             <div class="setting" style="padding-top:0"><div><b>Mot de passe</b><p class="t-caption muted">Les visiteurs doivent saisir un mot de passe avant de voir la démo.</p></div><span class="switch"><input type="checkbox" checked aria-label="Mot de passe"><span></span></span></div>
             <div class="field" style="margin:4px 0 12px"><label for="pw">Mot de passe</label><input id="pw" class="input" type="password" value="demo2026"></div>
             <div class="setting"><div><b>Date d'expiration</b><p class="t-caption muted">Après cette date, le lien affiche « Cette démo n'est plus disponible ».</p></div><span class="switch"><input type="checkbox" aria-label="Date d'expiration"><span></span></span></div>
-            <div class="setting"><div><b>Domaines email autorisés</b> <span class="badge">V2</span><p class="t-caption muted">Seuls les visiteurs avec une adresse @globex.com peuvent ouvrir la démo.</p></div><span class="switch"><input type="checkbox" disabled aria-label="Domaines email autorisés"><span></span></span></div>
+            <div class="setting"><div><b>Domaines email autorisés</b> <span class="badge">V2</span><p class="t-caption muted">Seuls les visiteurs avec une adresse @globex.example peuvent ouvrir la démo.</p></div><span class="switch"><input type="checkbox" disabled aria-label="Domaines email autorisés"><span></span></span></div>
             <div class="setting"><div><b>Formulaire avant la démo</b><p class="t-caption muted">Demander l'email avant la première étape. À configurer dans l'éditeur.</p></div><a class="btn btn-secondary btn-sm" href="editeur.html">Configurer</a></div>
           </section>
         </div>
@@ -131,7 +131,7 @@
         <div class="field"><label for="v1"><span class="t-mono">{{first_name}}</span></label><input id="v1" class="input" value="Léa"></div>
         <div class="field" style="margin:0"><label for="v2"><span class="t-mono">{{company}}</span></label><input id="v2" class="input" value="Globex"></div>
       </div>
-      <div class="field"><label for="v3"><span class="t-mono">{{email}}</span> <span class="opt">(facultatif)</span></label><input id="v3" class="input" type="email" placeholder="lea@globex.com" aria-invalid="true" value="lea@globex" aria-describedby="v3e"><span class="error-msg" id="v3e"><i data-icon="alert"></i>Saisissez une adresse email valide, par exemple lea@globex.com.</span></div>
+      <div class="field"><label for="v3"><span class="t-mono">{{email}}</span> <span class="opt">(facultatif)</span></label><input id="v3" class="input" type="email" placeholder="lea@globex.example" aria-invalid="true" value="lea@globex" aria-describedby="v3e"><span class="error-msg" id="v3e"><i data-icon="alert"></i>Saisissez une adresse email valide, par exemple lea@globex.example.</span></div>
       <div class="setting" style="margin-top:12px"><span class="t-label">Expiration</span><span class="switch"><input type="checkbox" aria-label="Expiration"><span></span></span></div>
     </div>
     <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close data-toast="Lien créé et copié">Créer et copier le lien</button></div>

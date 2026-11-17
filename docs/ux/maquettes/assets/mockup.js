@@ -110,7 +110,7 @@
           <div class="usage"><div class="row between t-caption"><span>Démos publiées</span><span class="num">18 / ∞</span></div>
             <div class="row between t-caption" style="margin-top:8px"><span>Crédits IA</span><span class="num">820 / 1 000</span></div>
             <div class="progress warn" style="margin-top:6px"><span style="width:82%"></span></div></div>
-          <div class="row"><span class="avatar">CM</span><span class="grow"><span class="t-label" style="display:block">Camille Martin</span><span class="t-caption subtle">camille@acme.io</span></span>
+          <div class="row"><span class="avatar">CM</span><span class="grow"><span class="t-label" style="display:block">Camille Martin</span><span class="t-caption subtle">camille@acme.example</span></span>
           <button class="btn btn-ghost btn-sm btn-icon" aria-label="Se déconnecter">${svg('logout')}</button></div>
         </div>
       </aside>
