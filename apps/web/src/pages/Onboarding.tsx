@@ -117,7 +117,7 @@ export function Onboarding() {
       <div className="ob">
         <header className="ob-top">
           <span className="row ob-brand">
-            <BrandMark size={28} />
+            <BrandMark size={40} />
           </span>
           <div className="ob-steps" aria-label={t('onboarding.progress')}>
             {[1, 2, 3].map((n) => (
