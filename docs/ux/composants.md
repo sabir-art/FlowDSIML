@@ -421,3 +421,43 @@ Exception unique : 6 px (libellé → champ, gap des boutons `sm`). **Interdits*
 | M14 | **Arrondis excessifs** (`radius` ≥ 20 px) sur des cartes et champs d'interface | Aspect « jouet » | Échelle `radius` : 6–8 px pour les contrôles, 12 px cartes/menus, 16 px modales et bulles du player. |
 
 **Contrôle automatique conseillé (CI)** : refuser dans `apps/**/*.css` et `packages/ui/**/*.css` : `border-left: [2-9]px`, `border-inline-start: [2-9]px`, `background-clip: text`, `linear-gradient(` hors `.skeleton`/masques, `backdrop-filter` hors classes de floutage ; et dans les `.tsx`/`.json` : les emojis (plage Unicode U+1F300–U+1FAFF, U+2728).
+
+### 15.7 Overlays : toujours dans un portail, jamais coupés (règle obligatoire)
+
+S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, info-bulles, toasts, modales et tiroirs, dans l'app comme dans le player.
+
+1. **Portail obligatoire.** Tout overlay est rendu dans un conteneur unique en fin de `<body>` (`#fd-portal`), jamais dans le DOM de son déclencheur. Un parent en `overflow: hidden | auto | clip`, `transform`, `filter`, `contain` ou `will-change` ne doit jamais pouvoir le couper ni le décaler. Dans le player intégré en iframe, le portail est le `<body>` de l'iframe.
+2. **Positionnement avec gestion des collisions.** Ancrage au déclencheur (`position: fixed` + coordonnées calculées, ou Floating UI) avec :
+   - **retournement** (`flip`) quand la place manque du côté préféré ;
+   - **décalage** (`shift`) pour rester à **8 px** minimum des bords du viewport ;
+   - **taille maximale** (`size`) : `max-height` = espace disponible − 16 px, avec défilement interne ;
+   - recalcul au défilement, au redimensionnement et à l'ouverture du clavier virtuel.
+3. **Côté préféré par type.**
+
+   | Type | Côté préféré |
+   |---|---|
+   | Menu ⋯ | sous le déclencheur, aligné à droite (`bottom-end`) |
+   | Menu de compte (bas de la barre latérale) | au-dessus et vers la droite (`top-start`). Il peut dépasser de la barre latérale sur le contenu |
+   | Select | sous le champ, même largeur que le champ |
+   | Info-bulle | au-dessus (`top`) |
+   | Toast | en bas à droite (en bas au centre en mobile) |
+   | Modale | centrée ; feuille du bas sous 480 px |
+
+4. **Superposition.** Seulement les jetons `--fd-z-*` : `dropdown` 1000, `overlay` 1100, `modal` 1200, `popover` 1300, `toast` 1400, `tooltip` 1500. Aucune valeur de `z-index` au jugé. Un menu ouvert depuis une modale utilise `popover`, pour passer au-dessus de la modale.
+5. **Thème.** L'overlay hérite de `data-theme` (le portail est sous `<html>`). Dans le player, il reste dans `.fd-player-scope`.
+6. **Mobile (< 480 px).** Les menus de plus de 6 éléments et les modales s'affichent en feuille du bas, en pleine largeur, avec une zone sûre (`env(safe-area-inset-bottom)`).
+7. **Comportement.**
+   - `Échap` ferme l'overlay.
+   - Un clic à l'extérieur ferme menus et popovers, jamais une modale contenant un formulaire en cours de saisie.
+   - Le focus revient au déclencheur à la fermeture.
+   - Le focus reste piégé dans les modales.
+8. **Interdit.**
+   - `position: absolute` dans une carte ou une barre latérale pour un overlay.
+   - Augmenter le `z-index` du parent pour « faire passer » un menu.
+   - Retirer l'`overflow` d'un conteneur pour laisser sortir un menu.
+   - Coder une largeur en dur qui tronque les libellés : `min-width` 180 px, `max-width` 320 px, et retour à la ligne plutôt que des points de suspension pour les actions.
+
+**Recette « débordements »** (à chaque livraison qui touche un overlay), en 1 440, 1 024 et 390 px, thèmes clair et sombre :
+- ouvrir chaque overlay près des quatre bords et dans les conteneurs défilants (barre latérale, panneau de l'éditeur, tableau) ;
+- vérifier que la boîte de chaque overlay est **entièrement dans le viewport**, à 8 px au moins des bords, et qu'aucun ancêtre en `overflow` autre que `#fd-portal` ne le contient ;
+- vérifier qu'aucun libellé n'est coupé.
