@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="t">
+  <title id="t">FlowDSIML</title>
+  <rect width="32" height="32" rx="8" fill="#0E7C71"/>
+  <!-- Le « sentier » : trois étapes reliées par une courbe, la dernière est le hotspot -->
+  <path d="M8 22.5c3.5 0 4.5-6 8-6s4.5-6 8-6" fill="none" stroke="#D3F4EC" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="8" cy="22.5" r="2.6" fill="#FFFFFF"/>
+  <circle cx="16" cy="16.5" r="2.6" fill="#FFFFFF"/>
+  <circle cx="24" cy="10.5" r="3.6" fill="#FF7447"/>
+  <circle cx="24" cy="10.5" r="1.4" fill="#FFFFFF"/>
+</svg>
