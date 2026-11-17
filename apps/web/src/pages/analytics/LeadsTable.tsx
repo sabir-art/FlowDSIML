@@ -101,7 +101,8 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
                     {can('members.manage') && (
                       <Button
                         size="sm"
-                        variant="danger"
+                        variant="ghost"
+                        className="btn-danger-ghost"
                         aria-label={t('leads.delete', { email: l.email })}
                         onClick={() =>
                           confirm(t('leads.confirmDelete', { email: l.email })) &&

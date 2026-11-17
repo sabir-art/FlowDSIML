@@ -28,7 +28,8 @@ export function BlurPanel({
       <p className="fd-muted">{t('editor.blurHint')}</p>
       {!readOnly && (
         <Button
-          variant="danger"
+          variant="ghost"
+          className="btn-danger-ghost"
           onClick={() => {
             editor.updateStep(step.id, { blurs: asRects(step.blurs).filter((_, i) => i !== index) });
             setSelection({ kind: 'step' });

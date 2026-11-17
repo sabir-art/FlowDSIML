@@ -46,7 +46,12 @@ export function VariablesPanel({ editor, readOnly }: { editor: DemoEditor; readO
             />
           </Field>
           {!readOnly && (
-            <Button size="sm" variant="danger" onClick={() => void editor.deleteVariable(v.id)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="btn-danger-ghost"
+              onClick={() => void editor.deleteVariable(v.id)}
+            >
               {t('common.delete')}
             </Button>
           )}

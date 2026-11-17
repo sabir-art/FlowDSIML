@@ -12,7 +12,7 @@ export function AuthLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="auth-page">
+    <main className="auth-page" id="main">
       <Card className="auth-card">
         <h1>{title}</h1>
         {subtitle && <p className="fd-muted">{subtitle}</p>}
@@ -21,6 +21,6 @@ export function AuthLayout({
           <LanguageSwitch />
         </div>
       </Card>
-    </div>
+    </main>
   );
 }

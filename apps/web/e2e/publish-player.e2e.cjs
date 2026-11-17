@@ -26,7 +26,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // Formulaire de lead sur l'étape 2 + publication
   await app.goto(`${APP}/#/demos/${DEMO}/edit`);
   await app.waitForSelector('.canvas-frame img');
-  await app.getByRole('tab', { name: 'Formulaire' }).click();
+  await app.getByRole('tab', { name: 'Réglages' }).click();
   await app.getByRole('button', { name: 'Créer le formulaire' }).click();
   await app.waitForSelector('#f-title');
   await app.getByRole('tab', { name: 'Étape' }).click();

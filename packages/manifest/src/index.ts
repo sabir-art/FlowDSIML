@@ -82,11 +82,11 @@ export const chapterSchema = z.object({ id: z.string(), title: z.string().max(12
 export type Chapter = z.infer<typeof chapterSchema>;
 
 export const themeSchema = z.object({
-  primary: z.string().default('#5b4cf0'),
-  background: z.string().default('#0f0f17'),
+  primary: z.string().default('#0E7C71'),
+  background: z.string().default('#1F1D1A'),
   surface: z.string().default('#ffffff'),
-  text: z.string().default('#1b1b24'),
-  fontFamily: z.string().default('Inter, system-ui, sans-serif'),
+  text: z.string().default('#1F1D1A'),
+  fontFamily: z.string().default("'Instrument Sans', system-ui, sans-serif"),
   radius: z.number().min(0).max(32).default(10),
   logoUrl: z.string().nullable().default(null),
   showBranding: z.boolean().default(true),

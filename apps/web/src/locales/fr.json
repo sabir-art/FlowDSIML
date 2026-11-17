@@ -62,7 +62,11 @@
     "backToLogin": "Retour à la connexion",
     "resetTitle": "Nouveau mot de passe",
     "resetLinkInvalid": "Lien invalide ou expiré. Demandez un nouveau lien.",
-    "updatePassword": "Mettre à jour le mot de passe"
+    "updatePassword": "Mettre à jour le mot de passe",
+    "strength": "Robustesse",
+    "strength_1": "faible",
+    "strength_2": "correcte",
+    "strength_3": "forte"
   },
   "onboarding": {
     "title": "Créez votre workspace",
@@ -116,7 +120,15 @@
     "retention": "Conservation des analytics",
     "days_one": "{{count}} jour",
     "days_other": "{{count}} jours",
-    "upgradeHint": "Le changement de plan sera disponible avec le paiement en ligne. Contactez-nous en attendant."
+    "upgradeHint": "Le changement de plan sera disponible avec le paiement en ligne. Contactez-nous en attendant.",
+    "names": {
+      "free": "Gratuit",
+      "pro": "Pro",
+      "business": "Business",
+      "enterprise": "Entreprise"
+    },
+    "nearLimit": "Vous approchez de la limite de votre plan.",
+    "overLimit": "Limite atteinte : passez à un plan supérieur pour continuer."
   },
   "errors": {
     "generic": "Une erreur est survenue : {{message}}",
@@ -159,7 +171,7 @@
     "stepBody": "Texte",
     "chapter": "Chapitre",
     "gateForm": "Formulaire de lead avant cette étape",
-    "noForm": "Créez d'abord un formulaire (onglet Formulaire)",
+    "noForm": "Créez d'abord un formulaire (onglet Réglages)",
     "zoom": "Zoom sur une zone",
     "zoom_x": "Centre horizontal",
     "zoom_y": "Centre vertical",
@@ -173,15 +185,15 @@
     "deleteStep": "Supprimer l'étape",
     "hotspotSettings": "Hotspot et info-bulle",
     "backToStep": "Étape",
-    "tooltipTitle": "Titre de l'info-bulle",
-    "tooltipBody": "Texte de l'info-bulle",
+    "tooltipTitle": "Titre de la bulle",
+    "tooltipBody": "Texte de la bulle",
     "placement": "Position de l'info-bulle",
     "placement_auto": "Automatique",
     "placement_top": "Au-dessus",
     "placement_bottom": "En dessous",
     "placement_left": "À gauche",
     "placement_right": "À droite",
-    "action": "Au clic",
+    "action": "Action au clic",
     "action_next": "Étape suivante",
     "action_goto": "Aller à une étape",
     "action_url": "Ouvrir une URL",
@@ -256,7 +268,14 @@
     "tab_theme": "Thème",
     "tab_form": "Formulaire",
     "tab_variables": "Variables",
-    "tab_chapters": "Chapitres"
+    "tab_chapters": "Chapitres",
+    "a11ySelected": "Sélectionné, position {{x}} %, {{y}} %. Flèches pour déplacer, Suppr pour supprimer.",
+    "a11yMoved": "Déplacé à {{x}} %, {{y}} %",
+    "a11yDeleted": "Supprimé",
+    "tab_design": "Design",
+    "tab_settings": "Réglages",
+    "narrowTitle": "L'éditeur nécessite un écran plus large",
+    "narrowBody": "Ouvrez cette démo sur un ordinateur (1024 px minimum) pour la modifier. Vous pouvez la partager depuis ce téléphone."
   },
   "status": {
     "draft": "Brouillon",
@@ -359,5 +378,14 @@
     "moveTo": "Déplacer vers un dossier",
     "delete": "Supprimer {{title}}",
     "confirmDelete": "Supprimer « {{title}} » ? Elle sera dépubliée et retirée de la liste."
+  },
+  "a11y": {
+    "skip": "Aller au contenu"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire.",
+    "email": "Saisissez une adresse email valide, par exemple nom@entreprise.com.",
+    "passwordMin": "Le mot de passe doit contenir au moins {{min}} caractères.",
+    "consent": "Cochez la case pour continuer."
   }
 }

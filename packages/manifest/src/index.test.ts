@@ -15,7 +15,7 @@ const base = {
 describe('manifest', () => {
   it('applique les valeurs par défaut', () => {
     const m = parseManifest(base);
-    expect(m.theme.primary).toBe('#5b4cf0');
+    expect(m.theme.primary).toBe('#0E7C71');
     expect(m.steps[0]?.hotspots).toEqual([]);
     expect(m.locale).toBe('fr');
   });

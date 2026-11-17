@@ -179,7 +179,8 @@ export function Members() {
                     {(editable || m.user_id === user?.id) && (
                       <Button
                         size="sm"
-                        variant="danger"
+                        variant="ghost"
+                        className="btn-danger-ghost"
                         onClick={() => {
                           const self = m.user_id === user?.id;
                           if (
@@ -232,7 +233,8 @@ export function Members() {
                     </Button>
                     <Button
                       size="sm"
-                      variant="danger"
+                      variant="ghost"
+                      className="btn-danger-ghost"
                       onClick={() =>
                         void run(async () => {
                           check(await supabase.from('invitations').delete().eq('id', i.id));

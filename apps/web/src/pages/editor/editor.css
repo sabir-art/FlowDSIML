@@ -187,8 +187,8 @@
 }
 .canvas-hotspot {
   position: absolute;
-  border: 2px solid var(--fd-color-primary);
-  background: rgb(91 76 240 / 18%);
+  border: 2px solid var(--fd-color-hotspot);
+  background: color-mix(in srgb, var(--fd-color-hotspot) 18%, transparent);
   border-radius: 6px;
   cursor: move;
 }
@@ -203,7 +203,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--fd-color-primary);
+  background: var(--fd-color-hotspot);
   color: #fff;
   font-size: 11px;
   display: grid;
@@ -277,4 +277,48 @@
 .panel-fieldset:not(:has(> :not(legend))) {
   border-color: transparent;
   padding: 0;
+}
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--fd-color-border-strong);
+  border-radius: var(--fd-radius-md);
+  overflow: hidden;
+}
+.segmented button {
+  border: 0;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  font: inherit;
+  font-size: var(--fd-font-xs);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.segmented button + button {
+  border-left: 1px solid var(--fd-color-border);
+}
+.segmented button[aria-pressed='true'] {
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  font-weight: 600;
+}
+.segmented button:focus-visible {
+  outline: none;
+  box-shadow: var(--fd-shadow-focus);
+  position: relative;
+}
+.canvas-hotspot:focus-visible,
+.canvas-blur:focus-visible {
+  outline: none;
+  box-shadow: var(--fd-shadow-focus);
+}
+.panel-sections > * + * {
+  border-top: 1px solid var(--fd-color-border);
+  padding-top: var(--fd-space-4);
+}
+.editor-right .tabs {
+  flex-wrap: nowrap;
+}
+.editor-right .tabs button {
+  font-size: var(--fd-font-sm);
+  padding: 8px 12px;
 }

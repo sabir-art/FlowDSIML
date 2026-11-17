@@ -22,7 +22,12 @@ export function ChaptersPanel({ editor, readOnly }: { editor: DemoEditor; readOn
             onChange={(e) => editor.updateChapter(c.id, { title: e.target.value })}
           />
           {!readOnly && (
-            <Button size="sm" variant="danger" onClick={() => void editor.deleteChapter(c.id)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="btn-danger-ghost"
+              onClick={() => void editor.deleteChapter(c.id)}
+            >
               ✕
             </Button>
           )}

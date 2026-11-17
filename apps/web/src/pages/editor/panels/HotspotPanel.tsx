@@ -134,7 +134,8 @@ export function HotspotPanel({
       </label>
       {!readOnly && (
         <Button
-          variant="danger"
+          variant="ghost"
+          className="btn-danger-ghost"
           onClick={() => {
             void editor.deleteHotspot(hotspot.id);
             setSelection({ kind: 'step' });

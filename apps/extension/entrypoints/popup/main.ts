@@ -1,7 +1,15 @@
+import '@flowdsiml/ui/tokens.css';
+import './style.css';
 import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
 import { APP_URL } from '@/lib/config';
 import type { PopupRequest, RecordingStatus } from '@/lib/messages';
+import { lang, stepsCaptured, strings } from '@/lib/i18n';
+
+document.documentElement.lang = lang;
+for (const el of document.querySelectorAll<HTMLElement>('[data-i18n]'))
+  el.textContent = strings[el.dataset.i18n as keyof typeof strings];
+(document.getElementById('title') as HTMLInputElement).placeholder = strings.demoTitlePlaceholder;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const show = (id: string, visible: boolean) => ($(id).hidden = !visible);
@@ -34,7 +42,7 @@ async function loadWorkspaces() {
     o.textContent = ws.name;
     select.appendChild(o);
   }
-  if (!select.options.length) error("Aucun workspace où vous êtes éditeur. Créez-en un dans l'application.");
+  if (!select.options.length) error(strings.noWorkspace);
   const saved = (await browser.storage.local.get('fd.lastWorkspace'))['fd.lastWorkspace'] as
     string | undefined;
   if (saved && [...select.options].some((o) => o.value === saved)) select.value = saved;
@@ -47,7 +55,10 @@ async function render() {
     show('login', false);
     show('setup', false);
     show('recording', true);
-    $('count').textContent = String(status.steps);
+    $('count').textContent = stepsCaptured(status.steps);
+    $('rec-label').textContent = status.paused ? strings.paused : strings.recording;
+    $('rec-label').classList.toggle('paused', status.paused);
+    $('pause').textContent = status.paused ? strings.resume : strings.pause;
     return;
   }
   show('recording', false);
@@ -67,6 +78,12 @@ $<HTMLAnchorElement>('signup-link').href = `${APP_URL.replace(/\/$/, '')}/#/sign
 $('login').addEventListener('submit', async (e) => {
   e.preventDefault();
   error(null);
+  const form = e.currentTarget as HTMLFormElement;
+  const invalid = [...form.querySelectorAll<HTMLInputElement>('input')].find((i) => !i.checkValidity());
+  if (invalid) {
+    invalid.focus();
+    return error(invalid.type === 'email' ? strings.email + ' ?' : strings.password + ' ?');
+  }
   const { error: err } = await supabase.auth.signInWithPassword({
     email: $<HTMLInputElement>('email').value,
     password: $<HTMLInputElement>('password').value,
@@ -106,6 +123,17 @@ $('start').addEventListener('click', async () => {
   } finally {
     btn.disabled = false;
   }
+});
+
+$('pause').addEventListener('click', async () => {
+  await send({ type: 'fd:pause' });
+  await render();
+});
+
+$('cancel').addEventListener('click', async () => {
+  if (!confirm(strings.confirmCancel)) return;
+  await send({ type: 'fd:cancel' });
+  await render();
 });
 
 $('stop').addEventListener('click', async () => {

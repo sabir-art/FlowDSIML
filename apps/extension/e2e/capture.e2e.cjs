@@ -51,6 +51,19 @@ const { chromium } = require('playwright');
   await page.click('#go');
   await page.waitForTimeout(2500);
   const status = await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:status' }));
+  // Pause : un clic pendant la pause ne crée pas d'étape
+  await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:pause' }));
+  await page.bringToFront();
+  await page.click('#go');
+  await page.waitForTimeout(1500);
+  const paused = await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:status' }));
+  await popup.bringToFront();
+  await popup.reload();
+  await popup.waitForSelector('#recording:not([hidden])');
+  if (process.env.SHOTS_DIR) await popup.screenshot({ path: `${process.env.SHOTS_DIR}/popup-recording.png` });
+  const pauseLabel = await popup.textContent('#pause');
+  await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:cancel' }));
+  const cancelled = await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:status' }));
   const log = await (await fetch('http://localhost:54400/__log')).json();
   await ctx.close();
   const ok = (cond, label) => {
@@ -70,6 +83,12 @@ const { chromium } = require('playwright');
   ok(
     log.some((l) => l.u.startsWith('/rest/v1/hotspots') && l.body.includes('Créer un projet')),
     'le hotspot porte le libellé du bouton',
+  );
+  ok(paused.paused && paused.steps === 1, 'la pause suspend la capture');
+  ok(/Reprendre|Resume/.test(pauseLabel), 'bouton Reprendre affiché pendant la pause');
+  ok(
+    !cancelled.recording && log.some((l) => l.m === 'DELETE' && l.u.startsWith('/rest/v1/demos')),
+    'annuler supprime la démo créée',
   );
 })().catch((e) => {
   console.error(e);

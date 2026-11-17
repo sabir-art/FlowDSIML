@@ -44,6 +44,9 @@ importers:
       '@flowdsiml/supabase-types':
         specifier: workspace:*
         version: link:../../packages/supabase-types
+      '@flowdsiml/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@supabase/supabase-js':
         specifier: ^2.119.0
         version: 2.119.0

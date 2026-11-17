@@ -15,6 +15,7 @@ import type { ClickPayload, PopupRequest, RecordingStatus } from '@/lib/messages
 const KEY = 'fd.recording';
 const EMPTY: RecordingStatus = {
   recording: false,
+  paused: false,
   demoId: null,
   workspaceId: null,
   tabId: null,
@@ -58,7 +59,7 @@ function enqueue<T>(fn: () => Promise<T>): Promise<T> {
 
 async function handleClick(msg: ClickPayload, windowId: number) {
   const state = await getState();
-  if (!state.recording || !state.demoId || !state.workspaceId) return;
+  if (!state.recording || state.paused || !state.demoId || !state.workspaceId) return;
   try {
     const dataUrl = await enqueue(() => browser.tabs.captureVisibleTab(windowId, { format: 'png' }));
     const { blob, width, height } = await pngDataUrlToWebp(dataUrl);
@@ -148,6 +149,22 @@ async function stop(): Promise<RecordingStatus> {
   return setState({ ...EMPTY });
 }
 
+/** Annule : arrête la capture et supprime la démo créée (et ses étapes, en cascade). */
+async function cancel(): Promise<RecordingStatus> {
+  const state = await getState();
+  if (state.tabId !== null)
+    await browser.tabs.sendMessage(state.tabId, { type: 'fd:recorder-stop' }).catch(() => undefined);
+  if (state.demoId) {
+    await supabase.from('demos').delete().eq('id', state.demoId);
+    if (state.workspaceId) {
+      const dir = `${state.workspaceId}/${state.demoId}`;
+      const { data } = await supabase.storage.from('captures').list(dir);
+      if (data?.length) await supabase.storage.from('captures').remove(data.map((f) => `${dir}/${f.name}`));
+    }
+  }
+  return setState({ ...EMPTY });
+}
+
 export default defineBackground(() => {
   browser.runtime.onMessage.addListener((msg: unknown, sender) => {
     const m = msg as ClickPayload | PopupRequest;
@@ -159,6 +176,8 @@ export default defineBackground(() => {
     if (m.type === 'fd:start')
       return start(m).catch((e: unknown) => setState({ lastError: (e as Error).message ?? String(e) }));
     if (m.type === 'fd:stop') return stop();
+    if (m.type === 'fd:pause') return getState().then((s) => setState({ paused: !s.paused }));
+    if (m.type === 'fd:cancel') return cancel();
     return undefined;
   });
 

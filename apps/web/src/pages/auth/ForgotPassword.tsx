@@ -26,7 +26,7 @@ export function ForgotPassword() {
     <AuthLayout title={t('auth.forgotTitle')} subtitle={t('auth.forgotSubtitle')}>
       {error && <Alert kind="error">{error}</Alert>}
       {success && <Alert kind="success">{success}</Alert>}
-      <form onSubmit={submit}>
+      <form onSubmit={submit} noValidate>
         <Field label={t('auth.email')} htmlFor="email">
           <input
             id="email"

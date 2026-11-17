@@ -8,6 +8,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import { asSettings } from '../types';
 
 const FONTS = [
+  "'Instrument Sans', system-ui, sans-serif",
   'Inter, system-ui, sans-serif',
   'system-ui, sans-serif',
   "Georgia, 'Times New Roman', serif",

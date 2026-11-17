@@ -4,7 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Button, Field } from '@flowdsiml/ui';
 import { authRedirect, supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
+import {
+  fieldA11y,
+  focusFirstError,
+  passwordStrength,
+  validateForm,
+  type FieldErrors,
+} from '../../lib/validation';
 import { useAuth } from '../../auth/AuthProvider';
+import { FieldError } from '../../components/FieldError';
 import { AuthLayout } from './AuthLayout';
 
 export function Signup() {
@@ -15,12 +23,18 @@ export function Signup() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<FieldErrors>({});
   const { busy, error, success, run } = useAction();
+  const strength = passwordStrength(password);
 
   if (user) return <Navigate to={redirect} replace />;
 
-  async function submit(e: FormEvent) {
+  async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
+    const errs = validateForm(form, t);
+    setErrors(errs);
+    if (focusFirstError(form, errs)) return;
     await run(
       async () =>
         check(
@@ -43,7 +57,7 @@ export function Signup() {
       {success ? (
         <Alert kind="success">{success}</Alert>
       ) : (
-        <form onSubmit={submit}>
+        <form onSubmit={submit} noValidate>
           <Field label={t('auth.fullName')} htmlFor="name">
             <input
               id="name"
@@ -52,8 +66,13 @@ export function Signup() {
               required
               maxLength={120}
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                setErrors((x) => ({ ...x, name: '' }));
+              }}
+              {...fieldA11y('name', errors)}
             />
+            <FieldError id="name" errors={errors} />
           </Field>
           <Field label={t('auth.email')} htmlFor="email">
             <input
@@ -63,8 +82,13 @@ export function Signup() {
               autoComplete="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrors((x) => ({ ...x, email: '' }));
+              }}
+              {...fieldA11y('email', errors)}
             />
+            <FieldError id="email" errors={errors} />
           </Field>
           <Field label={t('auth.passwordNew')} htmlFor="password">
             <input
@@ -75,8 +99,24 @@ export function Signup() {
               required
               minLength={8}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrors((x) => ({ ...x, password: '' }));
+              }}
+              {...fieldA11y('password', errors)}
             />
+            <FieldError id="password" errors={errors} />
+            {password && (
+              <div className="strength" data-score={strength} aria-live="polite">
+                <span />
+                <span />
+                <span />
+                <em>
+                  {t('auth.strength')} :{' '}
+                  {strength ? t(`auth.strength_${strength}`) : t('validation.passwordMin', { min: 8 })}
+                </em>
+              </div>
+            )}
           </Field>
           <Button type="submit" variant="primary" disabled={busy} style={{ width: '100%' }}>
             {t('auth.signUp')}
