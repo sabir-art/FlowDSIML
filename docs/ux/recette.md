@@ -430,3 +430,14 @@ Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** :
 | L4 | Player, démo inexistante | ℹ️ La requête Storage répond **400** (et non 404), ce qui fait une erreur dans la console. L'affichage est correct | Côté dev, à confirmer : vérifier l'existence avant le fetch ou ignorer ce 400 |
 
 **Pas encore testé sur le site réel** : les écrans connectés (tableau de bord, éditeur, partage, analytics, leads, membres) et le parcours player + `track` sur une démo publiée. Il faut un **compte de recette fictif** (créé par le chef d'équipe, sur un domaine `.example`) et l'**identifiant d'une démo publiée**. Ces écrans ont été vérifiés sur la même version avec le faux Supabase (section précédente, `finition4`).
+
+### Re-vérification des mineurs (`claude/dev-mvp` @ `4cac555`, captures du dev)
+
+| # | Statut |
+|---|---|
+| FI8 partage | ✅ « Dépublier » en bouton `ghost` danger (`GlobeLock`) avec confirmation. Versions sans puce : « v1 · 17 nov. 2026 » et badge « en ligne » aligné à droite. Expiration choisie en durée (Jamais / 7 / 30 / 90 jours), plus de `mm/dd/yyyy` |
+| FI10 entonnoir | ✅ Libellé « 90 · 100 % » hors de la barre, en texte discret |
+| Guillemets FR | ✅ « Créé avec FlowDSIML » avec une espace fine insécable, plus aucun double espace dans `fr.json` |
+| Couleurs hexadécimales | ✅ Affichées et enregistrées en majuscules dans l'interface. Dans les fichiers `.css`, Prettier les remet en minuscules : sans effet sur le rendu, accepté |
+| L1 `Sparkles` (auth) | ❌ Toujours dans `AuthLayout.tsx:30`. Le retour L1 est parti après `4cac555` |
+| Nouveau (mineur) | Variations des KPI (A1) : « Taux de complétion » et « Leads » n'ont pas de variation, contrairement aux trois autres tuiles → afficher la variation partout, ou « — » quand il n'y a pas de période de référence, pour garder des tuiles homogènes |
