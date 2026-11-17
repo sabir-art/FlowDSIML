@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Alert } from '@flowdsiml/ui';
@@ -6,7 +6,7 @@ import './app.css';
 import { AuthProvider, useAuth } from './auth/AuthProvider';
 import { WorkspaceProvider } from './workspace/WorkspaceProvider';
 import { isConfigured } from './lib/supabase';
-import { RequireAuth, RequireWorkspace } from './components/guards';
+import { Loading, RequireAuth, RequireWorkspace } from './components/guards';
 import { Layout } from './components/Layout';
 import { Login } from './pages/auth/Login';
 import { Signup } from './pages/auth/Signup';
@@ -18,11 +18,17 @@ import { Profile } from './pages/settings/Profile';
 import { Members } from './pages/settings/Members';
 import { WorkspaceSettings } from './pages/settings/WorkspaceSettings';
 import { DemosPage } from './pages/demos/DemosPage';
-import { EditorPage } from './pages/editor/EditorPage';
-import { DemoAnalyticsPage } from './pages/analytics/DemoAnalyticsPage';
-import { AnalyticsPage } from './pages/analytics/AnalyticsPage';
-import { LeadsPage } from './pages/analytics/LeadsPage';
-import { SharePage } from './pages/share/SharePage';
+
+// Pages lourdes chargées à la demande (éditeur, analytics, partage).
+const EditorPage = lazy(() => import('./pages/editor/EditorPage').then((m) => ({ default: m.EditorPage })));
+const DemoAnalyticsPage = lazy(() =>
+  import('./pages/analytics/DemoAnalyticsPage').then((m) => ({ default: m.DemoAnalyticsPage })),
+);
+const AnalyticsPage = lazy(() =>
+  import('./pages/analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
+);
+const LeadsPage = lazy(() => import('./pages/analytics/LeadsPage').then((m) => ({ default: m.LeadsPage })));
+const SharePage = lazy(() => import('./pages/share/SharePage').then((m) => ({ default: m.SharePage })));
 
 /**
  * Après un lien email (PKCE), Supabase renvoie vers /?code=…&next=/route.
@@ -64,50 +70,52 @@ export function App() {
         <WorkspaceProvider>
           <EmailRedirectHandler />
           <ConfigWarning />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/invite/:token" element={<AcceptInvite />} />
-            <Route
-              path="/onboarding"
-              element={
-                <RequireAuth>
-                  <Onboarding />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/demos/:demoId/edit"
-              element={
-                <RequireAuth>
-                  <RequireWorkspace>
-                    <EditorPage />
-                  </RequireWorkspace>
-                </RequireAuth>
-              }
-            />
-            <Route
-              element={
-                <RequireAuth>
-                  <RequireWorkspace>
-                    <Layout />
-                  </RequireWorkspace>
-                </RequireAuth>
-              }
-            >
-              <Route index element={<DemosPage />} />
-              <Route path="/demos/:demoId/share" element={<SharePage />} />
-              <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="/leads" element={<LeadsPage />} />
-              <Route path="/settings/profile" element={<Profile />} />
-              <Route path="/settings/members" element={<Members />} />
-              <Route path="/settings/workspace" element={<WorkspaceSettings />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <Suspense fallback={<Loading />}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/invite/:token" element={<AcceptInvite />} />
+              <Route
+                path="/onboarding"
+                element={
+                  <RequireAuth>
+                    <Onboarding />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/demos/:demoId/edit"
+                element={
+                  <RequireAuth>
+                    <RequireWorkspace>
+                      <EditorPage />
+                    </RequireWorkspace>
+                  </RequireAuth>
+                }
+              />
+              <Route
+                element={
+                  <RequireAuth>
+                    <RequireWorkspace>
+                      <Layout />
+                    </RequireWorkspace>
+                  </RequireAuth>
+                }
+              >
+                <Route index element={<DemosPage />} />
+                <Route path="/demos/:demoId/share" element={<SharePage />} />
+                <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
+                <Route path="/leads" element={<LeadsPage />} />
+                <Route path="/settings/profile" element={<Profile />} />
+                <Route path="/settings/members" element={<Members />} />
+                <Route path="/settings/workspace" element={<WorkspaceSettings />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </WorkspaceProvider>
       </AuthProvider>
     </HashRouter>

@@ -55,6 +55,21 @@ PGHOST=/tmp PGPORT=5432 PGUSER=postgres supabase/tests/local/run.sh
 
 Le script applique une imitation minimale de Supabase (rôles, `auth.uid()`, `storage`), rejoue les migrations deux fois pour vérifier qu'elles sont idempotentes, puis lance les tests pgTAP.
 
+### Tests de bout en bout (Playwright, faux Supabase)
+
+```bash
+# app sur :5173 et player sur :5174, avec une clé factice
+VITE_SUPABASE_ANON_KEY=test VITE_PLAYER_URL=http://localhost:5174 pnpm --filter @flowdsiml/web dev
+VITE_SUPABASE_ANON_KEY=test VITE_APP_ORIGIN=http://localhost:5173 pnpm --filter @flowdsiml/player dev
+pnpm --filter @flowdsiml/web e2e          # éditeur, publication → player, analytics, tableau de bord
+```
+
+L'extension a son propre test (`apps/extension/e2e`, voir l'en-tête du fichier).
+
+## Déploiement
+
+Voir [`docs/tech/deploiement.md`](docs/tech/deploiement.md) : secrets et variables GitHub Actions, configuration Supabase Auth et SMTP, GitHub Pages, publication de l'extension.
+
 ## Sécurité
 
 - Aucun secret dans le dépôt. La clé `anon` est publique par conception : la sécurité repose sur RLS.

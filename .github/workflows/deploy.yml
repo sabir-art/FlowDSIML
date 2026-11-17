@@ -1,0 +1,87 @@
+name: Deploy
+
+# Déploie la base (migrations), les Edge Functions et le front (GitHub Pages).
+# Prérequis : voir docs/tech/deploiement.md (secrets, variables, activation de Pages).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_database:
+        description: 'Ne pas appliquer les migrations / functions'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  supabase:
+    name: Base + Edge Functions
+    if: ${{ !inputs.skip_database }}
+    runs-on: ubuntu-24.04
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Vérifier la configuration
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN" || { echo "::error::secret SUPABASE_ACCESS_TOKEN manquant"; exit 1; }
+          test -n "$SUPABASE_DB_PASSWORD" || { echo "::error::secret SUPABASE_DB_PASSWORD manquant"; exit 1; }
+          test -n "$SUPABASE_PROJECT_REF" || { echo "::error::variable SUPABASE_PROJECT_REF manquante"; exit 1; }
+      - run: supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+      - name: Migrations (aperçu puis application)
+        run: |
+          supabase db push --dry-run --password "$SUPABASE_DB_PASSWORD"
+          supabase db push --password "$SUPABASE_DB_PASSWORD"
+      - name: Edge Functions
+        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"
+
+  pages:
+    name: Front (GitHub Pages)
+    needs: [supabase]
+    if: ${{ always() && (needs.supabase.result == 'success' || needs.supabase.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    environment: github-pages
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    env:
+      # Site de projet : https://<owner>.github.io/<repo>/  (surchargeable par un domaine perso)
+      SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+      BASE_PATH: ${{ vars.BASE_PATH || format('/{0}/', github.event.repository.name) }}
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build app + player
+        run: |
+          test -n "$VITE_SUPABASE_ANON_KEY" || { echo "::error::variable VITE_SUPABASE_ANON_KEY manquante"; exit 1; }
+          ORIGIN=$(node -e "console.log(new URL(process.env.SITE_URL).origin)")
+          PLAYER_URL="${{ vars.VITE_PLAYER_URL }}"; PLAYER_URL="${PLAYER_URL:-${SITE_URL%/}/player}"
+          VITE_PLAYER_URL="$PLAYER_URL" pnpm --filter @flowdsiml/web build
+          BASE_PATH="${BASE_PATH%/}/player/" VITE_APP_ORIGIN="$ORIGIN" pnpm --filter @flowdsiml/player build
+          mkdir -p site && cp -r apps/web/dist/. site/ && mkdir -p site/player && cp -r apps/player/dist/. site/player/
+          touch site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
