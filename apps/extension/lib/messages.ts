@@ -19,10 +19,13 @@ export interface ClickPayload {
 export type PopupRequest =
   | { type: 'fd:start'; workspaceId: string; title: string; tabId: number }
   | { type: 'fd:stop' }
+  | { type: 'fd:pause' }
+  | { type: 'fd:cancel' }
   | { type: 'fd:status' };
 
 export interface RecordingStatus {
   recording: boolean;
+  paused: boolean;
   demoId: string | null;
   workspaceId: string | null;
   tabId: number | null;

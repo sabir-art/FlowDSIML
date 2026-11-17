@@ -16,7 +16,8 @@
   "dependencies": {
     "@flowdsiml/core": "workspace:*",
     "@supabase/supabase-js": "^2.119.0",
-    "@flowdsiml/supabase-types": "workspace:*"
+    "@flowdsiml/supabase-types": "workspace:*",
+    "@flowdsiml/ui": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
