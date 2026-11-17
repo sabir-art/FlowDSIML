@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics d'une démo — FlowDSIML (refonte DSI)</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img src="../../assets/symbole-dsi.svg" alt="">
+      <span><span class="brand__name">FlowDSIML</span><span class="brand__sub">DSI des Missions Locales</span></span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html" aria-current="page"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Éditrice</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <a class="icon-btn" href="dashboard.html" aria-label="Retour aux démos"><i data-icon="arrowLeft"></i></a>
+      <div>
+        <h1>Inscription au parcours CEJ</h1>
+        <p class="sub">Publiée · version 3 · 6 étapes</p>
+      </div>
+      <div class="topbar__actions">
+        <div class="fd-segmented" role="group" aria-label="Période">
+          <button type="button" aria-pressed="false">7 j</button>
+          <button type="button" aria-pressed="true">30 j</button>
+          <button type="button" aria-pressed="false">90 j</button>
+        </div>
+        <button class="fd-btn" type="button"><i data-icon="share"></i>Partager</button>
+        <button class="fd-btn" type="button"><i data-icon="download"></i>Exporter</button>
+      </div>
+    </header>
+
+    <section class="kpis" aria-label="Indicateurs des 30 derniers jours">
+      <article class="fd-card fd-card--hero fd-kpi">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="eye"></i></span><span class="fd-kpi__label">Vues</span></div>
+        <span class="fd-kpi__value">1 204</span>
+        <span class="fd-kpi__foot"><span class="fd-trend"><i data-icon="trendUp"></i>+22 %</span>vs 30 jours précédents</span>
+      </article>
+      <article class="fd-card fd-kpi">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="users"></i></span><span class="fd-kpi__label">Visiteurs uniques</span></div>
+        <span class="fd-kpi__value">731</span>
+        <span class="fd-kpi__foot"><span class="fd-trend fd-trend--up"><i data-icon="trendUp"></i>+14 %</span>vs 30 jours précédents</span>
+      </article>
+      <article class="fd-card fd-kpi">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="route"></i></span><span class="fd-kpi__label">Taux de complétion</span></div>
+        <span class="fd-kpi__value">52 %</span>
+        <span class="fd-kpi__foot"><span class="fd-trend fd-trend--down"><i data-icon="trendDown"></i>−3 pts</span>vs 30 jours précédents</span>
+      </article>
+      <article class="fd-card fd-kpi">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="mail"></i></span><span class="fd-kpi__label">Leads</span></div>
+        <span class="fd-kpi__value">41</span>
+        <span class="fd-kpi__foot"><span class="fd-trend fd-trend--up"><i data-icon="trendUp"></i>+9</span>5,6 % des visiteurs</span>
+      </article>
+    </section>
+
+    <div class="row row--2-1">
+      <article class="fd-card">
+        <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="chart"></i></span><h2 class="fd-card__title">Vues par jour</h2>
+          <div class="fd-segmented" role="group" aria-label="Mesure"><button type="button" aria-pressed="true">Vues</button><button type="button" aria-pressed="false">Visiteurs</button></div></div>
+        <div class="bars" role="img" aria-label="Vues par jour du 4 au 17 novembre : de 41 à 128, pic de 128 le 13 novembre">
+          <div class="col"><span class="v">52</span><span class="fd-bar"><span class="fd-bar__fill" style="height:41%"></span></span><span class="d">4</span></div>
+          <div class="col"><span class="v">68</span><span class="fd-bar"><span class="fd-bar__fill" style="height:53%"></span></span><span class="d">5</span></div>
+          <div class="col"><span class="v">74</span><span class="fd-bar"><span class="fd-bar__fill" style="height:58%"></span></span><span class="d">6</span></div>
+          <div class="col"><span class="v">61</span><span class="fd-bar"><span class="fd-bar__fill" style="height:48%"></span></span><span class="d">7</span></div>
+          <div class="col"><span class="v">41</span><span class="fd-bar"><span class="fd-bar__fill" style="height:32%"></span></span><span class="d">8</span></div>
+          <div class="col"><span class="v">44</span><span class="fd-bar"><span class="fd-bar__fill" style="height:34%"></span></span><span class="d">9</span></div>
+          <div class="col"><span class="v">89</span><span class="fd-bar"><span class="fd-bar__fill" style="height:70%"></span></span><span class="d">10</span></div>
+          <div class="col"><span class="v">97</span><span class="fd-bar"><span class="fd-bar__fill" style="height:76%"></span></span><span class="d">11</span></div>
+          <div class="col"><span class="v">104</span><span class="fd-bar"><span class="fd-bar__fill" style="height:81%"></span></span><span class="d">12</span></div>
+          <div class="col is-peak"><span class="v">128</span><span class="fd-bar"><span class="fd-bar__fill" style="height:100%"></span></span><span class="d">13</span></div>
+          <div class="col"><span class="v">112</span><span class="fd-bar"><span class="fd-bar__fill" style="height:88%"></span></span><span class="d">14</span></div>
+          <div class="col"><span class="v">58</span><span class="fd-bar"><span class="fd-bar__fill" style="height:45%"></span></span><span class="d">15</span></div>
+          <div class="col"><span class="v">47</span><span class="fd-bar"><span class="fd-bar__fill" style="height:37%"></span></span><span class="d">16</span></div>
+          <div class="col"><span class="v">93</span><span class="fd-bar"><span class="fd-bar__fill" style="height:73%"></span></span><span class="d">17</span></div>
+        </div>
+      </article>
+
+      <article class="fd-card">
+        <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="pie"></i></span><h2 class="fd-card__title">Origine des vues</h2></div>
+        <div class="donut" role="img" aria-label="Origine des vues : lien direct 42 %, intégration site 28 %, liens personnalisés 18 %, e-mail 12 %"><svg class="donut__svg" viewBox="0 0 180 180" width="180" height="180" aria-hidden="true"><circle r="70" cx="90" cy="90" fill="none" stroke="var(--fd-color-chart-2)" stroke-width="22" stroke-linecap="round" stroke-dasharray="180.7 439.8" stroke-dashoffset="0.0" transform="rotate(-90 90 90)"/><circle r="70" cx="90" cy="90" fill="none" stroke="var(--fd-color-chart-3)" stroke-width="22" stroke-linecap="round" stroke-dasharray="119.2 439.8" stroke-dashoffset="-184.7" transform="rotate(-90 90 90)"/><circle r="70" cx="90" cy="90" fill="none" stroke="var(--fd-color-chart-4)" stroke-width="22" stroke-linecap="round" stroke-dasharray="75.2 439.8" stroke-dashoffset="-307.9" transform="rotate(-90 90 90)"/><circle r="70" cx="90" cy="90" fill="none" stroke="var(--fd-color-chart-1)" stroke-width="22" stroke-linecap="round" stroke-dasharray="48.8 439.8" stroke-dashoffset="-387.0" transform="rotate(-90 90 90)"/></svg>
+          <div class="donut__center"><b>1 204</b><small>vues</small></div>
+        </div>
+        <ul class="legend">
+          <li><i style="background:var(--fd-color-chart-2)"></i>Lien direct<b>42 %</b></li>
+          <li><i style="background:var(--fd-color-chart-3)"></i>Intégration site<b>28 %</b></li>
+          <li><i style="background:var(--fd-color-chart-4)"></i>Liens personnalisés<b>18 %</b></li>
+          <li><i style="background:var(--fd-color-chart-1)"></i>E-mail<b>12 %</b></li>
+        </ul>
+      </article>
+    </div>
+
+    <article class="fd-card">
+      <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="route"></i></span><h2 class="fd-card__title">Parcours étape par étape</h2>
+        <button class="fd-btn fd-btn--sm" type="button"><i data-icon="download"></i>Exporter en CSV</button></div>
+      <div class="funnel" role="table" aria-label="Visiteurs ayant atteint chaque étape">
+        <div class="funnel__row" role="row"><span role="cell">1 · Accueil du parcours</span><span class="fd-bar fd-bar--h" role="cell"><span class="fd-bar__fill" style="width:100%"></span></span><span class="n" role="cell">731</span><span class="loss" role="cell" style="color:var(--fd-color-text-subtle)">—</span></div>
+        <div class="funnel__row" role="row"><span role="cell">2 · Vérifier l'éligibilité</span><span class="fd-bar fd-bar--h" role="cell"><span class="fd-bar__fill" style="width:84%"></span></span><span class="n" role="cell">614</span><span class="loss" role="cell">−16 %</span></div>
+        <div class="funnel__row" role="row"><span role="cell">3 · Créer son espace</span><span class="fd-bar fd-bar--h" role="cell"><span class="fd-bar__fill" style="width:71%"></span></span><span class="n" role="cell">519</span><span class="loss" role="cell">−15 %</span></div>
+        <div class="funnel__row" role="row"><span role="cell">4 · Formulaire de contact</span><span class="fd-bar fd-bar--h" role="cell"><span class="fd-bar__fill" style="width:58%"></span></span><span class="n" role="cell">424</span><span class="loss" role="cell">−18 %</span></div>
+        <div class="funnel__row" role="row"><span role="cell">5 · Choisir un rendez-vous</span><span class="fd-bar fd-bar--h" role="cell"><span class="fd-bar__fill" style="width:55%"></span></span><span class="n" role="cell">402</span><span class="loss" role="cell">−5 %</span></div>
+        <div class="funnel__row" role="row"><span role="cell">6 · Confirmation</span><span class="fd-bar fd-bar--h" role="cell"><span class="fd-bar__fill" style="width:52%"></span></span><span class="n" role="cell">380</span><span class="loss" role="cell">−5 %</span></div>
+      </div>
+    </article>
+  </main>
+</div>
+
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>
