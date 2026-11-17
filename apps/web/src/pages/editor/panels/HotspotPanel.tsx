@@ -5,6 +5,7 @@ import { Button, Checkbox, Field, Select } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asAction, asCta, type HotspotRow, type Selection } from '../types';
 import { RichTextField } from '../RichTextField';
+import { VariablePreview } from '../VariablePreview';
 import { CtaFields } from './CtaFields';
 
 export function HotspotPanel({
@@ -55,6 +56,7 @@ export function HotspotPanel({
           value={hotspot.title}
           onChange={(e) => set({ title: e.target.value })}
         />
+        <VariablePreview text={hotspot.title} variables={editor.variables} />
       </Field>
       <RichTextField
         id="hs-body"
@@ -64,6 +66,7 @@ export function HotspotPanel({
         disabled={readOnly}
         onChange={(v) => set({ body: v })}
       />
+      <VariablePreview text={hotspot.body} variables={editor.variables} />
       <Field label={t('editor.placement')} htmlFor="hs-place">
         <Select
           id="hs-place"

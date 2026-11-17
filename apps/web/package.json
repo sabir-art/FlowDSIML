@@ -10,7 +10,7 @@
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
-    "e2e": "node e2e/editor.e2e.cjs && node e2e/publish-player.e2e.cjs && node e2e/analytics.e2e.cjs && node e2e/dashboard.e2e.cjs && node e2e/theme.e2e.cjs && node e2e/menus.e2e.cjs"
+    "e2e": "node e2e/editor.e2e.cjs && node e2e/publish-player.e2e.cjs && node e2e/analytics.e2e.cjs && node e2e/dashboard.e2e.cjs && node e2e/theme.e2e.cjs && node e2e/menus.e2e.cjs && node e2e/player-ux.e2e.cjs"
   },
   "dependencies": {
     "@flowdsiml/core": "workspace:*",

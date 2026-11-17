@@ -1079,3 +1079,42 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Formulaires non inclus dans le plan */
+.badge-warning {
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-text);
+}
+.help-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 0;
+  color: var(--fd-color-text);
+}
+.help-warning svg,
+.preview-plan-banner svg {
+  flex: none;
+  color: var(--fd-color-warning);
+}
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fd-space-2);
+}
+.panel-title-row .panel-title {
+  margin: 0;
+}
+.preview-plan-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 16px;
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-text);
+  font-size: var(--fd-font-sm);
+  font-weight: 500;
+}

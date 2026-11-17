@@ -334,7 +334,8 @@
     "changeLogo": "Change logo",
     "pageCta": "Page call to action",
     "pageCtaHint": "Always visible at the top of the player (e.g. “Book a demo”).",
-    "pageTitle": "Editor: {{title}}"
+    "pageTitle": "Editor: {{title}}",
+    "variablePreview": "Preview:"
   },
   "status": {
     "draft": "Draft",
@@ -486,5 +487,17 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "planForms": {
+    "notPublishedTitle": "This form won't be published.",
+    "notPublishedBody": "Your Free plan doesn't include lead forms: you can set it up, but visitors won't see it.",
+    "seePlans": "See plans",
+    "badge": "Not published",
+    "stepHelp": "Not published on the Free plan",
+    "confirmTitle": "Publish without the lead form?",
+    "confirmBody": "Your Free plan doesn't include forms. The demo will be published <strong>without</strong> the “{{name}}” form (before step {{n}}): no leads will be collected.",
+    "confirmLabel": "Publish without form",
+    "sharePublished": "Published without lead form (Free plan).",
+    "previewBanner": "Preview: not published with your plan"
   }
 }

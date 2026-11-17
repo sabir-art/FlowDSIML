@@ -120,3 +120,15 @@
     transition: none;
   }
 }
+
+/* Corps de l'Alert à côté de son icône */
+.fd-alert__body {
+  flex: 1;
+  min-width: 0;
+}
+.fd-alert__body > :first-child {
+  margin-top: 0;
+}
+.fd-alert__body > :last-child {
+  margin-bottom: 0;
+}

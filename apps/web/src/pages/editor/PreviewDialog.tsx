@@ -4,6 +4,7 @@ import { AlertTriangle, ExternalLink, Monitor, Smartphone, X } from 'lucide-reac
 import type { Manifest } from '@flowdsiml/manifest';
 import { Button } from '@flowdsiml/ui';
 import { PLAYER_URL } from '../../lib/env';
+import { usePlan } from '../../lib/plan';
 
 /**
  * Aperçu intégré (ED12) : le player réel dans une iframe, alimenté par postMessage avec le
@@ -16,6 +17,8 @@ export function PreviewDialog({ manifest, onClose }: { manifest: Manifest | null
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [status, setStatus] = useState<'loading' | 'ready' | 'timeout'>('loading');
   const origin = new URL(PLAYER_URL).origin;
+  const plan = usePlan();
+  const formsHidden = !plan.leadForms && !!manifest?.steps.some((s) => s.gateFormId);
 
   useEffect(() => {
     const d = ref.current;
@@ -58,6 +61,12 @@ export function PreviewDialog({ manifest, onClose }: { manifest: Manifest | null
         </div>
         <Button variant="ghost" icon={<X />} aria-label={t('common.close')} onClick={onClose} />
       </header>
+      {formsHidden && (
+        <p className="preview-plan-banner" role="note">
+          <AlertTriangle size={16} aria-hidden="true" />
+          {t('planForms.previewBanner')}
+        </p>
+      )}
       <div className="preview-body">
         {status === 'timeout' && (
           <div className="preview-error" role="alert">
