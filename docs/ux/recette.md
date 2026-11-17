@@ -456,3 +456,35 @@ Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** :
   - titre de la démo et « N étapes » sous l'image ;
   - bouton secondaire « Ouvrir l'aperçu » (`ExternalLink`) qui ouvre le player dans un nouvel onglet **avec `?preview=1`**, pour que ces visites ne soient pas comptées ;
   - si la démo n'a pas encore d'étape : état vide avec l'icône `Image` et le texte « L'aperçu apparaîtra après la première capture ».
+
+### Recette du player en ligne : « Nordline CRM — découverte » (17 nov.)
+
+Démo publiée `24da9e7a…`, testée sur le site réel en deux versions :
+- lien public en 1 280 px ;
+- lien personnalisé `#/l/atelier-brume` en 390 px (mobile tactile).
+
+Locale `fr-FR`. Aucun lead envoyé : le formulaire n'est pas apparu (PL1). Captures : `docs/ux/recette/live-player/`.
+
+**Fonctionne**
+
+| Contrôle | Résultat |
+|---|---|
+| Chargement (`latest.json` et images en webp) | ✅ 200, aucune erreur dans la console |
+| Parcours complet 1 → 6 (boutons, flèche ← → du clavier) | ✅ Compteur, barre de progression, « Précédent » désactivé à l'étape 1 et « Suivant » à l'étape 6 |
+| Suivi des vues | ✅ `POST /functions/v1/track` → **200**, regroupé en 2 envois par session, `linkToken` renseigné sur le lien personnalisé |
+| Lien personnalisé | ✅ `resolve_share_link` → 200 ; variables appliquées (« Bienvenue Léa », « Atelier Brume ») |
+| CTA « Réserver une démo » | ✅ S'ouvre dans un nouvel onglet (`example.com/rendez-vous`) et l'événement est suivi |
+| Chapitres | ✅ Menu avec le chapitre courant mis en évidence |
+| Écran de fin | ✅ « Précédent », CTA, « Recommencer » |
+| Mobile 390 px | ✅ Bulle en feuille du bas, boutons de 44 px, écran de fin en colonne |
+| Flou (étape 3) | ✅ Les lignes d'activité sont floutées |
+
+**Écarts**
+
+| # | Gravité | Écart | Correction attendue |
+|---|---|---|---|
+| PL1 | ❌ Bloquant (recette) | **Aucun formulaire de lead** avant l'étape 4 : `latest.json` contient `"forms": []`. Le formulaire annoncé n'a pas été publié, ou le seed ne l'a pas créé | Chef d'équipe : vérifier le seed et republier. Dev : si un formulaire est configuré mais absent de la version publiée, c'est un bug de publication |
+| PL2 | ❌ Majeur | **Étape zoomée (3)** : la bulle subit aussi le zoom (texte environ 1,4 fois plus grand) et sort du cadre à droite (« Tout l'historique au même endro… », « Suiva… »). En mobile, la capture zoomée est coupée et la pastille du hotspot n'est plus visible | Appliquer la transformation de zoom **uniquement à l'image et aux hotspots**. Rendre la bulle hors du calque zoomé, à sa taille normale, en la gardant dans le cadre. Recentrer le zoom pour que le hotspot reste visible |
+| PL3 | ⚠️ Contenu et produit | Valeur par défaut « vous » de `first_name` : on obtient **« Bienvenue vous »** et **« Merci vous ! »** | Contenu : valeur par défaut vide. Produit : quand une variable est vide, retirer l'espace qui la précède et éviter « mot ! » avec une espace orpheline (« Bienvenue ! », « Merci ! »). Dans l'éditeur, afficher un aperçu de la phrase avec la valeur par défaut |
+| PL4 | ⚠️ Mineur | En mobile, le titre est tronqué (« Nordline CRM … ») parce que le CTA occupe l'en-tête | Sous 480 px : CTA de l'en-tête en `sm`, sans icône, ou déplacé dans la barre du bas. Titre sur 2 lignes maximum |
+| PL5 | ℹ️ V2 | En mobile, la capture d'écran est trop petite pour être lue (texte d'environ 5 px) | Zoom automatique sur la zone du hotspot en mobile, ou pincer pour zoomer (à arbitrer) |
