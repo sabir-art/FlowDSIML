@@ -1253,3 +1253,25 @@
 .editor-center {
   justify-content: safe center;
 }
+/* Mobile : la page défile (pas la liste), actions sous le texte, saisie collée en bas de l'écran */
+.cm--mobile .cm-card {
+  flex: none;
+}
+.cm--mobile .cm-scroll,
+.cm--mobile .cm-list {
+  flex: none;
+  overflow: visible;
+}
+.cm--mobile .cm-item {
+  grid-template-columns: 32px minmax(0, 1fr);
+}
+.cm--mobile .cm-actions {
+  grid-column: 2;
+  opacity: 1;
+  flex-wrap: wrap;
+}
+.cm--mobile .cm-head__end {
+  margin-left: 0;
+  width: 100%;
+  justify-content: flex-start;
+}

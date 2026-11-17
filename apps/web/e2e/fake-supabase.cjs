@@ -329,6 +329,7 @@ async function install(page, state = seed()) {
         }
         case 'list_members':
           return json(route, 200, [
+            ...(state.extraMembers || []),
             {
               user_id: state.user.id,
               email: state.user.email,
