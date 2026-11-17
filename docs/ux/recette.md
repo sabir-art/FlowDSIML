@@ -234,7 +234,7 @@ La barre latérale (W3), le responsive mobile de l'app (W4), les confirmations n
 | F18 | Majeur | Éditeur, rail | Vignette **collée au bord supérieur** de la carte d'étape (pas de padding haut), numéro non aligné avec le haut de la vignette ; boutons « + Écran texte / + Image » pleine largeur empilés (`crop-rail.png`). | Carte d'étape : padding 8 px, grille `18px 1fr` gap 8, numéro aligné en haut ; menu « Ajouter une étape » unique (`Plus`). |
 | F19 | Majeur | Mobile 390 px (toutes pages connectées) | La navigation (selects workspace + langue, 7 liens, déconnexion) occupe **tout le premier écran** avant le titre. | W4 : menu repliable (`Menu`), langue dans le profil. |
 | F20 | Mineur | Connexion | Onglets « Mot de passe / Lien magique » : boutons **sans classe** (style navigateur résiduel possible). | Composant onglets segmentés (`composants.md` §7). |
-| F21 | Mineur | Dashboard, dossiers | « Sans dossier » : bouton sans classe ; compteur `2` aligné par espace insécable variable. | Bouton de liste `ghost` pleine largeur, compteur en `badge` aligné à droite (`margin-left:auto`). |
+| F21 | Mineur | Dashboard, dossiers | « Sans dossier » / « Toutes les démos » : boutons sans classe de composant (style ad hoc). | Bouton de liste `ghost` pleine largeur, compteur en `badge` aligné à droite (`margin-left:auto`). |
 | F22 | Mineur | Éditeur, panneau hotspot | Aperçu du texte sous le champ (« Bienvenue {{company|chez vous}} ») **identique au champ** : redondant, fond gris collé au champ (8 px). | Supprimer, ou montrer la valeur résolue (« Bienvenue chez vous ») avec le libellé « Aperçu », 6 px sous le champ. |
 | F23 | Mineur | Player | Page « démo introuvable » : une ligne de texte gris centrée, sans logo, titre ni action. | Écran système (`player.notFound`) : `CircleAlert` 24 px, titre, texte, lien vers le site du client. |
 
@@ -244,13 +244,12 @@ La barre latérale (W3), le responsive mobile de l'app (W4), les confirmations n
 |---|---|---|---|---|
 | F24 | Majeur | Bouton d'ajout d'étape | « + **Ecran** » sans accent (capture client n° 2 ; corrigé sur la branche d'intégration en « + Écran texte », à vérifier partout : extension, player, CSV, emails). | Grep `Ecran\|Etape\|Editeur\|Equipe\|Etat` sur tout le dépôt, `fr.json` inclus. |
 | F25 | Mineur | Leads, dashboard, partage | Dates US « 11/17/2026, 2:15:48 PM », « Invalid Date », « 0 vues ». | Helper `Intl` (voir P9/A3/D6). |
-| F26 | Mineur | Divers | Espaces avant `: ! ?` parfois manquantes ou sécables (« Merci! » vs « Merci ! »). | Espaces insécables dans `fr.json` (U+202F avant `! ? ;`, U+00A0 avant `:`). |
 
 ### Synthèse
 
 | | Bloquant | Majeur | Mineur |
 |---|---|---|---|
-| Finition (app, éditeur, player, extension) | 4 | 15 | 7 |
+| Finition (app, éditeur, player, extension) | 4 | 16 | 5 |
 | Corrigé côté `packages/ui` | 6 correctifs (F0.1–F0.6) | | |
 
 **Ordre conseillé** : installer Lucide + composant `Icon` (1 h), F1–F3 et F12 (bloquants), puis F6–F9, F13–F16, F24 (grep des accents). La table d'icônes complète est dans `composants.md` §15.1.
