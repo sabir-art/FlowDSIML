@@ -99,7 +99,9 @@ function App() {
         ...variablesFromSearch(search, keys),
         ...variablesFromSearch(location.search, keys),
       };
-      if (!cancelled) setState({ status: 'ready', manifest, values, linkToken, preview: false });
+      // P12 : « Ouvrir l'aperçu » depuis l'app (?preview=1) n'enregistre pas de statistiques
+      const preview = [search, location.search].some((q) => new URLSearchParams(q).get('preview') === '1');
+      if (!cancelled) setState({ status: 'ready', manifest, values, linkToken, preview });
     }
     void boot();
     return () => {

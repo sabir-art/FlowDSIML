@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BarChart3, MousePointerClick, Share2, Sparkles } from 'lucide-react';
+import { BarChart3, MousePointerClick, Share2 } from 'lucide-react';
+import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { setLocale } from '../../i18n';
 
 /** Écrans d'authentification (W5) : panneau de marque + formulaire, sélecteur de langue compact. */
@@ -27,7 +28,7 @@ export function AuthLayout({
           <h2>{t('auth.pitchTitle')}</h2>
           <ul>
             <li>
-              <Sparkles size={18} />
+              <MousePointerClick size={18} />
               {t('auth.pitch1')}
             </li>
             <li>
@@ -42,18 +43,21 @@ export function AuthLayout({
         </div>
       </aside>
       <section className="auth-main">
-        <div className="segmented auth-lang" role="group" aria-label={t('common.language')}>
-          {(['fr', 'en'] as const).map((l) => (
-            <button
-              key={l}
-              type="button"
-              lang={l}
-              aria-pressed={i18n.language === l}
-              onClick={() => setLocale(l)}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
+        <div className="auth-prefs">
+          <ThemeSwitcher />
+          <div className="segmented" role="group" aria-label={t('common.language')}>
+            {(['fr', 'en'] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                lang={l}
+                aria-pressed={i18n.language === l}
+                onClick={() => setLocale(l)}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="auth-card">
           <div className="auth-logo auth-logo--compact">

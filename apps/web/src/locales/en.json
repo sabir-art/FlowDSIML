@@ -81,7 +81,9 @@
     "orMagic": "Or get a sign-in link by email.",
     "usePassword": "Sign in with a password",
     "hasAccount": "Already have an account?",
-    "loginLink": "Sign in"
+    "loginLink": "Sign in",
+    "strengthLabel": "Strength: {{level}}",
+    "passwordMinShort": "{{min}} characters minimum"
   },
   "onboarding": {
     "title": "Create your workspace",
@@ -376,7 +378,12 @@
     "linkCreatedCopied": "Link created and copied to the clipboard.",
     "expiresNever": "Never",
     "expiresIn_one": "In {{count}} day ({{date}})",
-    "expiresIn_other": "In {{count}} days ({{date}})"
+    "expiresIn_other": "In {{count}} days ({{date}})",
+    "preview": "Preview",
+    "previewEmpty": "The preview will appear after the first capture.",
+    "stepCount_one": "{{count}} step",
+    "stepCount_other": "{{count}} steps",
+    "openPreview": "Open preview"
   },
   "analytics": {
     "title": "Analytics",
@@ -398,7 +405,8 @@
     "lastDays_one": "{{count}} day",
     "lastDays_other": "{{count}} days",
     "byDemo": "By demo",
-    "vsPrevious": "vs previous period"
+    "vsPrevious": "vs previous period",
+    "noComparison": "No reference period"
   },
   "leads": {
     "title": "Leads",
@@ -472,5 +480,11 @@
     "current": "Current plan",
     "unlimited": "Unlimited",
     "manualNotice": "Online payment coming soon. To change plans now, contact us: your plan will be activated within 24 hours."
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }
