@@ -2003,3 +2003,8 @@ body:has(.mock-state) .ed {
 .var-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .var-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 10px; background: var(--fd-color-surface-sunken); font-size: var(--fd-text-body-size); }
 .var-list small { display: block; color: var(--fd-color-text-muted); font-size: var(--fd-text-caption-size); }
+.mc-thumb { position: relative; display: block; width: 100%; height: 52px; margin-bottom: 8px; border-radius: 8px; background: var(--fd-color-surface-sunken); }
+.mc-thumb--dark { background: #5B6670; }
+.mc-bubble { position: absolute; left: 16%; top: 12px; width: 44%; height: 18px; border-radius: 6px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(8, 8, 8, .12); }
+.mc-dot { position: absolute; left: 66%; top: 26px; width: 12px; height: 12px; border-radius: 50%; background: var(--fd-color-accent, #D60B52); }
+.mc-hole { position: absolute; left: 30%; top: 16px; width: 40%; height: 20px; border-radius: 6px; background: #FFFFFF; box-shadow: 0 0 0 2px var(--fd-color-accent, #D60B52); }
