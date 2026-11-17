@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intégrations — TutoClick (lot A5)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="#" aria-current="page"><i data-icon="plug"></i>Intégrations</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Éditrice</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main" data-view="hub">
+    <header class="topbar"><div><h1>Intégrations</h1><p class="sub">Workspace DSI · réservé aux propriétaires et admins</p></div></header>
+    <div class="fd-tabs" role="tablist" aria-label="Intégrations" style="max-width:860px;margin-bottom:20px">
+      <button role="tab" type="button" aria-selected="true" data-view-set="hub">Vue d'ensemble</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="webhooks">Webhooks</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="slack">Slack</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="keys">Clés d'API</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="snippets">Snippets</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="remote">Pilotage</button>
+    </div>
+
+    <section data-pane="hub" style="display:none">
+      <div class="int-sec"><h2>Automatiser</h2><div class="int-grid">
+        <article class="int-card"><header><span class="fd-icon-chip"><i data-icon="webhook"></i></span><b>Webhooks</b><span class="fd-badge fd-badge--live">2 actifs</span></header><p>Envoyez les événements (lead, démo terminée, module validé…) à votre outil, signés et rejouables.</p><button class="fd-btn fd-btn--sm" type="button" data-view-set="webhooks">Gérer</button></article>
+        <article class="int-card"><header><span class="fd-icon-chip"><i data-icon="hash"></i></span><b>Slack</b><span class="fd-badge fd-badge--live">Connecté</span></header><p>Recevez les nouveaux leads et les alertes dans un canal.</p><button class="fd-btn fd-btn--sm" type="button" data-view-set="slack">Configurer</button></article>
+        <article class="int-card"><header><span class="fd-icon-chip"><i data-icon="keyRound"></i></span><b>Clés d'API</b><span class="fd-badge">1 clé</span></header><p>Lisez les analytics et pilotez les démos depuis vos scripts.</p><button class="fd-btn fd-btn--sm" type="button" data-view-set="keys">Gérer</button></article>
+        <article class="int-card"><header><span class="fd-icon-chip"><i data-icon="zap"></i></span><b>Zapier, Make, n8n</b></header><p>Via les webhooks et les « REST hooks » : aucun compte à relier ici.</p><button class="fd-btn fd-btn--sm" type="button">Voir le guide</button></article>
+      </div></div>
+      <div class="int-sec"><h2>Intégrer et mesurer</h2><div class="int-grid">
+        <article class="int-card"><header><span class="fd-icon-chip"><i data-icon="code"></i></span><b>Snippets d'intégration</b></header><p>CMS, constructeurs de sites, documentation, intranet : le bon code pour chaque outil.</p><button class="fd-btn fd-btn--sm" type="button" data-view-set="snippets">Ouvrir</button></article>
+        <article class="int-card"><header><span class="fd-icon-chip"><i data-icon="activity"></i></span><b>Outils d'analytics</b></header><p>Relayez les événements du player vers votre outil de mesure déjà présent sur la page.</p><button class="fd-btn fd-btn--sm" type="button" data-view-set="snippets">Ouvrir</button></article>
+        <article class="int-card"><header><span class="fd-icon-chip"><i data-icon="terminal"></i></span><b>Pilotage du player</b></header><p>Ouvrir, aller à une étape, écouter les événements depuis la page hôte.</p><button class="fd-btn fd-btn--sm" type="button" data-view-set="remote">Documentation</button></article>
+      </div></div>
+      <div class="int-sec"><h2>Bientôt disponible</h2><div class="int-grid">
+        <article class="int-card"><header><span class="fd-icon-chip"><i data-icon="building2"></i></span><b>CRM (HubSpot, Salesforce…)</b><span class="fd-badge">Bientôt disponible</span></header><p>Synchronisation des leads avec votre CRM.</p><button class="fd-btn fd-btn--sm" type="button" disabled aria-disabled="true">Bientôt disponible</button></article>
+        <article class="int-card"><header><span class="fd-icon-chip"><i data-icon="shield"></i></span><b>SSO / SAML</b><span class="fd-badge">Bientôt disponible</span></header><p>Connexion avec le compte de votre organisation.</p><button class="fd-btn fd-btn--sm" type="button" disabled aria-disabled="true">Bientôt disponible</button></article>
+      </div></div>
+    </section>
+
+    <section data-pane="webhooks" style="display:none">
+      <div class="wh-grid">
+        <article class="fd-card" style="display:flex;flex-direction:column;gap:14px">
+          <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="webhook"></i></span><h2 class="fd-card__title">https://hooks.exemple.fr/tutoclic</h2><span class="fd-badge fd-badge--live">Actif</span></div>
+          <div class="fd-field" style="margin:0"><span class="fd-label">Événements</span><div class="evt-list">
+            <label class="fd-check"><input type="checkbox" checked> lead.created</label><label class="fd-check"><input type="checkbox" checked> demo.completed</label>
+            <label class="fd-check"><input type="checkbox" checked> learner.module_validated</label><label class="fd-check"><input type="checkbox"> learner.quiz_failed</label>
+            <label class="fd-check"><input type="checkbox"> demo.published</label><label class="fd-check"><input type="checkbox"> alert.triggered</label></div></div>
+          <div class="fd-field" style="margin:0"><span class="fd-label">Secret de signature</span><div class="secret"><span class="mono">whsec_••••••••••••••••••••3f9a</span><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"><i data-icon="eye"></i>Afficher</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"><i data-icon="rotate"></i>Renouveler</button></div><span class="fd-help">En-tête <span class="mono">TutoClick-Signature: t=…, v1=…</span> (HMAC-SHA256 du corps). <a href="#">Vérifier la signature</a></span></div>
+          <h3 style="margin:8px 0 0;font-size:var(--fd-text-h3-size)">Journal des envois · 7 jours</h3>
+          <table class="fd-table"><thead><tr><th>Statut</th><th>Événement</th><th>Date</th><th>Durée</th><th><span class="cm-sr">Actions</span></th></tr></thead><tbody>
+            <tr aria-selected="true"><td><span class="st-code ko">500</span></td><td class="mono">lead.created</td><td>17 nov., 15:42</td><td>1,2 s</td><td><button class="fd-btn fd-btn--sm" type="button"><i data-icon="rotate"></i>Rejouer</button></td></tr>
+            <tr><td><span class="st-code ok">200</span></td><td class="mono">learner.module_validated</td><td>17 nov., 15:30</td><td>180 ms</td><td></td></tr>
+            <tr><td><span class="st-code wait">…</span></td><td class="mono">demo.completed</td><td>17 nov., 15:29</td><td>nouvel essai dans 4 min</td><td></td></tr>
+            <tr><td><span class="st-code ok">200</span></td><td class="mono">lead.created</td><td>17 nov., 14:02</td><td>210 ms</td><td></td></tr>
+          </tbody></table>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="send"></i>Envoyer un test</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Mettre en pause</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button" style="color:var(--fd-color-danger)"><i data-icon="trash"></i>Supprimer</button></div>
+        </article>
+        <aside class="fd-card" style="display:flex;flex-direction:column;gap:12px">
+          <div class="fd-card__head" style="margin:0"><span class="st-code ko">500</span><h2 class="fd-card__title">lead.created · essai 3 sur 6</h2></div>
+          <p class="fd-help" style="margin:0">Nouvel essai automatique : 1 min, 5 min, 30 min, 2 h, 6 h. Après 6 échecs, le webhook est mis en pause et les admins sont prévenus.</p>
+<pre class="code">{
+  "id": "evt_01JD…",
+  "type": "lead.created",
+  "created_at": "2026-11-17T14:42:10Z",
+  "data": {
+    "demo": { "id": "…", "title": "Créer une fiche usager" },
+    "lead": { "email": "lea.martin@example.org" }
+  }
+}</pre>
+          <span class="fd-label">Réponse</span>
+<pre class="code">HTTP 500 · Internal Server Error</pre>
+          <button class="fd-btn fd-btn--primary" type="button" style="align-self:flex-start"><i data-icon="rotate"></i>Rejouer maintenant</button>
+        </aside>
+      </div>
+    </section>
+
+    <section data-pane="keys" style="display:none;max-width:900px">
+      <div class="newkey" role="status"><b><i data-icon="checkCircle"></i> Clé « Tableau de bord interne » créée</b><span>Copiez-la maintenant : elle ne sera plus affichée.</span><div class="secret"><span class="mono">tc_live_7f3k9q…………………x2pa</span><button class="fd-btn fd-btn--primary fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button></div></div>
+      <article class="fd-card">
+        <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="keyRound"></i></span><h2 class="fd-card__title">Clés d'API</h2><button class="fd-btn fd-btn--primary fd-btn--sm" type="button"><i data-icon="plus"></i>Créer une clé</button></div>
+        <table class="fd-table"><thead><tr><th>Nom</th><th>Clé</th><th>Droits</th><th>Dernière utilisation</th><th>Expire</th><th><span class="cm-sr">Actions</span></th></tr></thead><tbody>
+          <tr><td><b>Tableau de bord interne</b></td><td class="mono">tc_live_…x2pa</td><td><span class="fd-badge">Lecture analytics</span></td><td>Jamais</td><td>17 nov. 2027</td><td><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Révoquer</button></td></tr>
+          <tr><td><b>Script de publication</b></td><td class="mono">tc_live_…9mfe</td><td><span class="fd-badge">Lecture</span> <span class="fd-badge">Démos : écriture</span></td><td>Il y a 2 h</td><td>Jamais</td><td><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Révoquer</button></td></tr>
+        </tbody></table>
+        <p class="fd-help">Droits par clé : lecture des analytics, lecture des démos, écriture des démos (publier, dépublier), suivi des apprenants (lecture). Une clé n'a jamais plus de droits que la personne qui l'a créée. Limite : 60 requêtes par minute.</p>
+      </article>
+    </section>
+
+    <section data-pane="slack" style="display:none;max-width:900px">
+      <article class="fd-card" style="display:flex;flex-direction:column;gap:14px">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="hash"></i></span><h2 class="fd-card__title">Slack</h2><span class="fd-badge fd-badge--live">Connecté</span></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="sl1">URL du webhook entrant</label><input class="fd-input mono" id="sl1" value="https://hooks.slack.com/services/T000/B000/••••••••"><span class="fd-help">Créée dans Slack (application « Incoming Webhooks »). Elle désigne le canal.</span></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Envoyer dans Slack</span><div class="evt-list"><label class="fd-check"><input type="checkbox" checked> Nouveaux leads</label><label class="fd-check"><input type="checkbox" checked> Alertes (A4)</label><label class="fd-check"><input type="checkbox"> Modules validés</label><label class="fd-check"><input type="checkbox"> Résumé hebdomadaire</label></div></div>
+        <span class="fd-label">Aperçu</span>
+        <div class="slack-prev"><span class="ava"><img src="../../brand-tutoclic/production/symbole-tutoclick.svg" alt=""></span><div><b>TutoClick</b> <span style="color:#616061;font-size:12px">15:42</span><div class="att"><b>Nouveau lead</b> sur « Créer une fiche usager »<br>lea.martin@example.org · Lien perso « Atelier Brume »<br><a href="#" style="color:#1264A3">Voir dans TutoClick</a></div></div></div>
+        <div style="display:flex;gap:8px"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="send"></i>Envoyer un message de test</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Déconnecter</button></div>
+      </article>
+    </section>
+
+    <section data-pane="snippets" style="display:none;max-width:980px">
+      <article class="fd-card" style="display:flex;flex-direction:column;gap:14px">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="code"></i></span><h2 class="fd-card__title">Snippets d'intégration</h2></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="sn1">Votre outil</label><select class="fd-select" id="sn1"><option>WordPress (bloc HTML personnalisé)</option><option>Webflow (élément Embed)</option><option>Notion (/embed)</option><option>Confluence (macro iFrame)</option><option>SharePoint (composant Incorporer)</option><option>Google Sites (Intégrer)</option><option>HTML générique</option></select></div>
+<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>&lt;iframe src="https://demos.tutoclick.example/dsi/<span class="k">creer-une-fiche-usager</span>?embed=1"
+  title="Tutoriel : créer une fiche usager" loading="lazy"
+  style="width:100%;aspect-ratio:16/10;border:0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
+        <p class="fd-help" style="margin:0">WordPress : ajoutez un bloc « HTML personnalisé » et collez le code. Pensez aux sites autorisés (Partager → Intégrer).</p>
+        <hr style="border:0;border-top:1px solid var(--fd-color-border);margin:4px 0">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="activity"></i></span><h2 class="fd-card__title">Relais vers votre outil d'analytics</h2></div>
+        <p class="fd-help" style="margin:0">Le player envoie ses événements à la page hôte. Ce script les transmet à l'outil déjà installé sur votre site : aucun cookie ni traceur ajouté par TutoClick.</p>
+        <div class="fd-segmented" role="group" aria-label="Outil d'analytics"><button type="button" aria-pressed="true">Matomo</button><button type="button" aria-pressed="false">Google Analytics 4</button><button type="button" aria-pressed="false">Segment</button><button type="button" aria-pressed="false">Mixpanel</button><button type="button" aria-pressed="false">Amplitude</button></div>
+<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>window.addEventListener('message', (e) =&gt; {
+  if (e.origin !== 'https://demos.tutoclick.example' || e.data?.source !== 'tutoclick') return;
+  window._paq?.push(['trackEvent', 'TutoClick', <span class="k">e.data.type</span>, e.data.demoTitle]);
+});</pre>
+      </article>
+    </section>
+
+    <section data-pane="remote" style="display:none;max-width:980px">
+      <article class="fd-card" style="display:flex;flex-direction:column;gap:14px">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="terminal"></i></span><h2 class="fd-card__title">Pilotage du player depuis la page hôte</h2></div>
+        <p class="fd-help" style="margin:0">Avec le script d'intégration, l'objet <span class="mono">TutoClick</span> permet d'ouvrir une démo, d'aller à une étape, de passer des variables et d'écouter les événements.</p>
+<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>const player = TutoClick.get('creer-une-fiche-usager');
+player.<span class="k">open</span>({ step: 3, variables: { first_name: 'Léa' } });
+player.<span class="k">goTo</span>(5);          // aller à l'étape 5
+player.<span class="k">on</span>('step', (e) =&gt; console.log(e.index, e.title));
+player.<span class="k">on</span>('complete', () =&gt; afficherLaSuite());</pre>
+        <table class="fd-table"><thead><tr><th>Méthode ou événement</th><th>Rôle</th></tr></thead><tbody>
+          <tr><td class="mono">open(options)</td><td>Ouvre la démo (pop-up ou dans la page), à une étape donnée, avec des variables</td></tr>
+          <tr><td class="mono">goTo(n) · next() · prev() · close()</td><td>Navigation</td></tr>
+          <tr><td class="mono">on('ready' | 'step' | 'choice' | 'lead' | 'cta' | 'complete' | 'quiz')</td><td>Écoute des événements (mêmes données que le relais analytics)</td></tr>
+        </tbody></table>
+        <p class="fd-help" style="margin:0">Fonctionne uniquement depuis les sites autorisés. Les données personnelles d'un lead ne sont jamais transmises à la page hôte, seulement l'événement.</p>
+      </article>
+    </section>
+  </main>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

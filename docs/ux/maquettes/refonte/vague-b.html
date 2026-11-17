@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vague B, bientôt disponible — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#" aria-current="page"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="integrations.html"><i data-icon="plug"></i>Intégrations</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Éditrice</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main" data-view="ia">
+    <header class="topbar"><div><h1>Fonctions à venir</h1><p class="sub">Vague B · « Bientôt disponible », jamais présentées comme actives</p></div></header>
+    <div class="fd-tabs" role="tablist" aria-label="Fonctions à venir" style="max-width:640px;margin-bottom:20px">
+      <button role="tab" type="button" aria-selected="true" data-view-set="ia">Assistance IA</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="crm">CRM et e-mailing</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="sso">SSO</button>
+    </div>
+
+    <section data-pane="ia" style="display:none">
+      <div class="fd-alert" style="background:var(--fd-color-info-soft)"><i data-icon="sparkle"></i><div><b>Fonctions d'assistance par IA : en préparation.</b> Elles ne sont pas actives. Aucune donnée n'est envoyée à un service d'IA, et leur activation demandera l'accord d'un admin du workspace.</div></div>
+      <div class="soon-grid"><article class="soon-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="wand"></i></span><h2 class="fd-card__title">Générer une démo</h2><span class="soon-badge"><i data-icon="clock"></i>Bientôt disponible</span></div><p style="margin:0">Proposer un premier jet d'étapes (titres, textes de bulles) à partir des captures.</p><ul class="soon-list"><li>Textes de bulles et titres suggérés</li><li>Découpage en chapitres</li><li>Toujours relu avant publication</li></ul><button class="fd-btn fd-btn--sm" type="button" disabled style="align-self:flex-start">Générer</button><p class="soon-why">Nécessite un fournisseur d'IA et une validation RGPD (données des captures).</p></article><article class="soon-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="languages"></i></span><h2 class="fd-card__title">Traduire la démo</h2><span class="soon-badge"><i data-icon="clock"></i>Bientôt disponible</span></div><p style="margin:0">Traduire bulles, boutons, quiz et sous-titres dans une autre langue.</p><ul class="soon-list"><li>Une version par langue</li><li>Glossaire respecté</li><li>Relecture humaine conseillée</li></ul><button class="fd-btn fd-btn--sm" type="button" disabled style="align-self:flex-start">Traduire</button><p class="soon-why">Nécessite un fournisseur d'IA. En attendant : traduction manuelle.</p></article><article class="soon-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="captions"></i></span><h2 class="fd-card__title">Sous-titres et voix off</h2><span class="soon-badge"><i data-icon="clock"></i>Bientôt disponible</span></div><p style="margin:0">Transcrire la voix d'une étape vidéo et générer une voix off à partir du texte.</p><ul class="soon-list"><li>Transcription automatique</li><li>Voix off synthétique</li><li>Sous-titres modifiables</li></ul><button class="fd-btn fd-btn--sm" type="button" disabled style="align-self:flex-start">Transcrire</button><p class="soon-why">Nécessite des services de transcription et de synthèse vocale. En attendant : import de sous-titres .vtt.</p></article><article class="soon-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="message"></i></span><h2 class="fd-card__title">Assistant de rédaction</h2><span class="soon-badge"><i data-icon="clock"></i>Bientôt disponible</span></div><p style="margin:0">Reformuler une bulle, simplifier un texte (FALC), suggérer des questions de quiz.</p><ul class="soon-list"><li>Reformulation</li><li>Facile à lire et à comprendre</li><li>Suggestions de quiz</li></ul><button class="fd-btn fd-btn--sm" type="button" disabled style="align-self:flex-start">Ouvrir l’assistant</button><p class="soon-why">Nécessite un fournisseur d'IA.</p></article>
+      </div>
+    </section>
+    <section data-pane="crm" style="display:none;max-width:1080px">
+      <div class="soon-grid"><article class="soon-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="building2"></i></span><h2 class="fd-card__title">CRM</h2><span class="soon-badge"><i data-icon="clock"></i>Bientôt disponible</span></div><p style="margin:0">Envoyer automatiquement les leads et l'activité des démos vers votre CRM.</p><ul class="soon-list"><li>HubSpot, Salesforce, Pipedrive, Zoho</li><li>Création ou mise à jour du contact</li><li>Activité de démo sur la fiche</li></ul><a class="fd-btn fd-btn--sm" href="integrations.html?view=webhooks" style="align-self:flex-start">Utiliser les webhooks</a><p class="soon-why">Nécessite des applications OAuth et des comptes développeur. En attendant : webhooks signés vers votre outil.</p></article><article class="soon-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="mail"></i></span><h2 class="fd-card__title">Outils d'e-mailing</h2><span class="soon-badge"><i data-icon="clock"></i>Bientôt disponible</span></div><p style="margin:0">Ajouter les leads à une liste ou déclencher un scénario d'e-mails.</p><ul class="soon-list"><li>Listes et scénarios</li><li>Respect du consentement du formulaire</li></ul><button class="fd-btn fd-btn--sm" type="button" disabled style="align-self:flex-start">Connecter</button><p class="soon-why">Nécessite des comptes et des clés des éditeurs. En attendant : webhooks.</p></article><article class="soon-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="users"></i></span><h2 class="fd-card__title">Enrichissement des visiteurs</h2><span class="soon-badge"><i data-icon="clock"></i>Bientôt disponible</span></div><p style="margin:0">Identifier l'organisation d'un visiteur anonyme.</p><ul class="soon-list"><li>Entreprise à partir du réseau</li><li>Taille, secteur</li></ul><button class="fd-btn fd-btn--sm" type="button" disabled style="align-self:flex-start">Activer</button><p class="soon-why">Non prévu sans analyse juridique : traitement de données personnelles par un tiers (RGPD).</p></article>
+      </div>
+    </section>
+    <section data-pane="sso" style="display:none;max-width:980px"><article class="soon-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="lock2"></i></span><h2 class="fd-card__title">Connexion unique (SSO / SAML)</h2><span class="soon-badge"><i data-icon="clock"></i>Bientôt disponible</span></div><p style="margin:0">Se connecter avec le compte de votre organisation et gérer les accès depuis votre annuaire.</p><ul class="soon-list"><li>SAML 2.0 (Microsoft Entra ID, Okta…)</li><li>Provisionnement des comptes (SCIM)</li><li>Connexion obligatoire par SSO</li></ul><div class="fd-field" style="margin:0"><label class="fd-label" for="ss1">URL des métadonnées du fournisseur</label><input class="fd-input" id="ss1" disabled placeholder="https://…"></div><p class="soon-why">Nécessite une offre d'hébergement compatible SAML. En attendant : invitation par e-mail et domaines autorisés.</p></article>
+    </section>
+  </main>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

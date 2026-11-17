@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F1 compléments : flous, RGPD, Avant / Après, glossaire — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div data-view="flous">
+
+  <!-- 1. Vérification des flous avant envoi (page de l'extension) -->
+  <section data-pane="flous" class="ext" style="display:none">
+    <div style="grid-column:1/-1">
+      <header class="ext-top">
+        <img src="../../brand-tutoclic/production/symbole-tutoclick.svg" alt="" width="32" height="32">
+        <div><h1>Vérifier les données avant l'envoi</h1><p class="sub" style="margin:2px 0 0">Prise en main du logiciel métier · 6 captures · rien n'a encore quitté votre navigateur</p></div>
+        <div class="sp"><span class="fd-badge fd-badge--live" style="white-space:nowrap"><i data-icon="scan"></i> Analyse terminée</span></div>
+      </header>
+      <div role="alert" class="fd-alert" style="margin-bottom:20px;background:var(--fd-color-warning-soft)"><i data-icon="alert"></i><div><b>7 données personnelles possibles détectées sur 3 captures.</b> Elles seront floutées à l'envoi. Décochez une détection seulement si ce n'est pas une donnée réelle (exemple fictif, libellé).</div></div>
+      <div class="pii-grid" style="display:grid">
+        <nav class="pii-rail" aria-label="Captures">
+          <button type="button" aria-current="true"><span class="mini"></span><span class="lbl">1 · Fiche usager <span class="pii-count" aria-label="5 détections">5</span></span></button>
+          <button type="button"><span class="mini"></span><span class="lbl">2 · Rendez-vous <span class="pii-count" aria-label="1 détection">1</span></span></button>
+          <button type="button"><span class="mini"></span><span class="lbl">3 · Agenda <span class="pii-count" aria-label="1 détection">1</span></span></button>
+          <button type="button"><span class="mini"></span><span class="lbl">4 · Recherche <span class="pii-count ok" aria-label="Aucune détection">0</span></span></button>
+          <button type="button"><span class="mini"></span><span class="lbl">5 · Export <span class="pii-count ok" aria-label="Aucune détection">0</span></span></button>
+        </nav>
+        <div>
+          <div class="fakeapp" aria-label="Capture 1 : fiche usager, avec les zones détectées">
+            <div class="nav"><b>Logiciel métier</b><span>Accueil</span><span>Usagers</span><span>Rendez-vous</span><span>Statistiques</span></div>
+            <div class="body">
+              <h4>Fiche usager · <span class="pii blurred">Camille Exemple</span></h4>
+              <dl>
+                <dt>N° de sécurité sociale</dt><dd><span class="pii blurred">1 99 99 99 999 999 99</span></dd>
+                <dt>Date de naissance</dt><dd><span class="pii sel">01/01/2000</span></dd>
+                <dt>Téléphone</dt><dd><span class="pii blurred">06 00 00 00 00</span></dd>
+                <dt>E-mail</dt><dd><span class="pii blurred">camille.exemple@example.org</span></dd>
+                <dt>Adresse</dt><dd><span class="pii">1 rue de l'Exemple, 00000 Ville</span></dd>
+                <dt>Conseiller référent</dt><dd>Équipe accueil</dd>
+              </dl>
+              <span class="btnx">Enregistrer</span>
+            </div>
+          </div>
+          <div class="pii-legend"><span><i class="k" style="outline:2px solid var(--fd-color-primary);background:var(--fd-color-surface-sunken)"></i>Sera floutée</span><span><i class="k" style="outline:2px dashed var(--fd-color-danger)"></i>Détectée, non floutée</span><span><i class="k" style="outline:3px solid #2897D5"></i>Sélectionnée</span><span>Glissez sur la capture pour ajouter une zone.</span></div>
+        </div>
+        <aside class="fd-card" style="display:flex;flex-direction:column;gap:12px">
+          <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="eyeOff"></i></span><h2 class="fd-card__title">Capture 1 · 5 détections</h2></div>
+          <ul class="pii-list">
+            <li><span class="fd-icon-chip"><i data-icon="user"></i></span><span><b>Nom</b><small>C••••• E••••••</small></span><label class="fd-switch"><span class="cm-sr">Flouter le nom</span><input type="checkbox" checked><span class="fd-switch__track"></span></label></li>
+            <li><span class="fd-icon-chip"><i data-icon="idCard"></i></span><span><b>N° de sécurité sociale</b><small>1 •• •• •• ••• ••• ••</small></span><label class="fd-switch"><span class="cm-sr">Flouter le numéro</span><input type="checkbox" checked><span class="fd-switch__track"></span></label></li>
+            <li class="sel"><span class="fd-icon-chip"><i data-icon="cake"></i></span><span><b>Date de naissance</b><small>••/••/2000</small></span><label class="fd-switch"><span class="cm-sr">Flouter la date</span><input type="checkbox"><span class="fd-switch__track"></span></label></li>
+            <li><span class="fd-icon-chip"><i data-icon="phone"></i></span><span><b>Téléphone</b><small>06 •• •• •• ••</small></span><label class="fd-switch"><span class="cm-sr">Flouter le téléphone</span><input type="checkbox" checked><span class="fd-switch__track"></span></label></li>
+            <li><span class="fd-icon-chip"><i data-icon="mail"></i></span><span><b>E-mail</b><small>c•••••@example.org</small></span><label class="fd-switch"><span class="cm-sr">Flouter l'e-mail</span><input type="checkbox" checked><span class="fd-switch__track"></span></label></li>
+            <li><span class="fd-icon-chip"><i data-icon="home"></i></span><span><b>Adresse</b><small>1 rue de l'•••••••</small></span><label class="fd-switch"><span class="cm-sr">Flouter l'adresse</span><input type="checkbox"><span class="fd-switch__track"></span></label></li>
+          </ul>
+          <p class="fd-help" style="margin:0">La date de naissance et l'adresse ne seront <b>pas</b> floutées. Vérifiez qu'il s'agit bien de données fictives.</p>
+          <button class="fd-btn fd-btn--sm" type="button" style="align-self:flex-start"><i data-icon="check"></i>Tout flouter sur cette capture</button>
+        </aside>
+      </div>
+    </div>
+    <footer class="ext-foot">
+      <span class="fd-help"><i data-icon="lock"></i> Détection faite dans votre navigateur : aucune image n'est envoyée avant votre validation.</span>
+      <div class="sp"><button class="fd-btn" type="button">Annuler la capture</button><button class="fd-btn fd-btn--primary" type="button"><i data-icon="send"></i>Flouter et envoyer 6 captures</button></div>
+    </footer>
+  </section>
+
+  <!-- 2. Avertissement RGPD avant publication publique -->
+  <section data-pane="rgpd" class="rgpd-wrap" style="display:none">
+    <div role="dialog" aria-modal="true" aria-labelledby="rg-t" aria-describedby="rg-d" class="rgpd">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip" style="background:var(--fd-color-warning-soft)"><i data-icon="shield"></i></span><h2 id="rg-t">Publier en accès public ?</h2></div>
+      <p id="rg-d" style="margin:0">Toute personne disposant du lien pourra voir ce module, sans connexion. Avant de publier, vérifiez qu'il ne contient <b>aucune donnée personnelle réelle</b> (usagers, collègues, partenaires).</p>
+      <div class="stat" aria-label="Bilan des données"><span><i data-icon="eyeOff"></i>12 zones floutées</span><span><i data-icon="alert"></i><b>2 détections non floutées</b> (étape 1)</span><span><i data-icon="message"></i>Commentaires internes : jamais publiés</span></div>
+      <div class="checks">
+        <label class="fd-check"><input type="checkbox" checked> <span>J'ai relu chaque étape, y compris les textes des bulles et du formulaire.</span></label>
+        <label class="fd-check"><input type="checkbox"> <span>Les données visibles sont fictives ou floutées.</span></label>
+      </div>
+      <div class="fd-help" style="margin:0">Besoin de restreindre l'accès ? <a href="partage-avance.html?view=acces">Choisir Invitation, Domaine e-mail ou Mot de passe</a>.</div>
+      <div class="acts"><button class="fd-btn" type="button"><i data-icon="eye"></i>Revoir l'étape 1</button><button class="fd-btn" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button" disabled aria-describedby="rg-why">Publier en public</button></div>
+      <p id="rg-why" class="fd-help" style="margin:0;text-align:right">Cochez les deux confirmations pour publier.</p>
+    </div>
+  </section>
+
+  <!-- 3. Proposition : étape Avant / Après -->
+  <section data-pane="avap" class="ext avap-grid" style="display:none">
+    <div class="prop-banner"><i data-icon="sparkle"></i><span><b>Proposition</b> à valider avec le chef d'équipe : non prévue pour le développement à ce stade.</span></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h1 style="margin:0;font-size:var(--fd-text-h1-size)">Étape « Avant / Après »</h1>
+      <p class="sub" style="margin:0">Montrer l'ancien geste à côté du nouveau, pour accompagner un changement d'outil.</p>
+      <div class="avap fd-player-scope">
+        <figure><figcaption><span class="tagb old">Avant</span>Ancien outil</figcaption>
+          <div class="fakeapp old"><div class="nav"><b>Ancien</b><span>Dossiers</span><span>Agenda</span></div><div class="body"><h4>Dossier</h4><span>Menu Dossiers › Nouveau › Usager</span><span class="btnx">Créer</span></div></div></figure>
+        <figure><figcaption><span class="tagb new">Après</span>Nouvel outil</figcaption>
+          <div class="fakeapp"><div class="nav"><b>Nouveau</b><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><span>Bouton « + Ajouter » en haut à droite</span><span class="btnx">+ Ajouter</span></div></div></figure>
+        <div class="avap-note"><b>Avant :</b><span>Dossiers › Nouveau › Usager (3 clics).</span><b>Maintenant :</b><span>« + Ajouter » directement depuis la liste des usagers.</span></div>
+      </div>
+    </div>
+    <aside class="fd-card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="columns"></i></span><h2 class="fd-card__title">Avant / Après</h2></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Capture « Avant »</span><button class="fd-btn fd-btn--sm" type="button"><i data-icon="image"></i>Choisir une capture ou importer</button></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Capture « Après »</span><button class="fd-btn fd-btn--sm" type="button"><i data-icon="image"></i>Étape 4 · Liste des usagers</button></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Disposition</span><div class="fd-segmented" role="group" aria-label="Disposition"><button type="button" aria-pressed="true">Côte à côte</button><button type="button" aria-pressed="false">Curseur</button><button type="button" aria-pressed="false">Bascule</button></div></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="av1">Libellés</label><input class="fd-input" id="av1" value="Avant · Maintenant"></div>
+      <p class="fd-help" style="margin:0">En mobile : « Bascule » imposé (un écran à la fois, bouton Avant / Après). La pastille « Avant » reste neutre, jamais rouge : l'ancien outil n'est pas une erreur.</p>
+    </aside>
+  </section>
+
+  <!-- 4. Proposition : glossaire de correspondance -->
+  <section data-pane="gloss" class="ext gloss-grid" style="display:none">
+    <div class="prop-banner"><i data-icon="sparkle"></i><span><b>Proposition</b> à valider : glossaire partagé par le workspace, affiché dans le player et le centre de formation.</span></div>
+    <article class="fd-card">
+      <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="book"></i></span><h2 class="fd-card__title">Glossaire du workspace · 24 termes</h2><button class="fd-btn fd-btn--primary fd-btn--sm" type="button"><i data-icon="plus"></i>Ajouter un terme</button></div>
+      <table class="fd-table"><thead><tr><th>Ancien terme</th><th>Nouveau terme</th><th>Définition courte</th><th>Modules</th></tr></thead><tbody>
+        <tr><td>Dossier</td><td><b>Fiche usager</b></td><td>Toutes les informations d'une personne accompagnée.</td><td>3</td></tr>
+        <tr><td>Entretien</td><td><b>Rendez-vous</b></td><td>Échange planifié, en présentiel ou à distance.</td><td>2</td></tr>
+        <tr><td>Clôture</td><td><b>Fin d'accompagnement</b></td><td>Statut à saisir quand le suivi s'arrête.</td><td>1</td></tr>
+      </tbody></table>
+      <p class="fd-help">Import et export CSV. Dans les bulles, un terme du glossaire est souligné en pointillé ; au survol ou au focus, sa définition s'affiche (infobulle en portail, §15.7).</p>
+    </article>
+    <aside class="gloss-drawer fd-player-scope" aria-label="Aperçu dans le player">
+      <h3>Glossaire</h3>
+      <input type="search" value="" placeholder="Rechercher un terme" aria-label="Rechercher un terme">
+      <dl>
+        <div><dt>Dossier</dt><dd>Fiche usager<small>Toutes les informations d'une personne accompagnée.</small></dd></div>
+        <div><dt>Entretien</dt><dd>Rendez-vous<small>Échange planifié, en présentiel ou à distance.</small></dd></div>
+        <div><dt>Clôture</dt><dd>Fin d'accompagnement<small>Statut à saisir quand le suivi s'arrête.</small></dd></div>
+      </dl>
+    </aside>
+  </section>
+</div>
+<div class="mock-state mock-state--top fd-segmented" role="group" aria-label="Écran (maquette)" style="left:auto;right:16px">
+  <button type="button" data-view-set="flous" aria-pressed="true">Flous</button>
+  <button type="button" data-view-set="rgpd" aria-pressed="false">RGPD</button>
+  <button type="button" data-view-set="avap" aria-pressed="false">Avant / Après</button>
+  <button type="button" data-view-set="gloss" aria-pressed="false">Glossaire</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

@@ -1,41 +1,78 @@
-# FlowDSIML : identité visuelle (refonte DSI des Missions Locales)
+# TutoClick : identité visuelle
 
-> Version du 17 nov. 2026. Elle remplace l'identité Lagoon / Ember / Stone, **abandonnée** à la demande du client.
-> Charte source : `docs/ux/brand-dsi/` (logos officiels et couleurs extraites du Figma client).
+> Version du 17 nov. 2026. Le produit s'appelle **TutoClick** (graphie exacte : T et C majuscules, avec un k). Il est porté par la **DSI des Missions Locales**.
+> Logo : fourni par le client, vectorisé dans `docs/ux/brand-tutoclic/production/`.
+> Charte institutionnelle de l'interface : `docs/ux/brand-dsi/` (couleurs DSI).
 > Tokens : `packages/ui/src/tokens.ts`, générés en `tokens.css` avec `node packages/ui/src/tokens.build.mjs`.
-> Maquettes de référence : `docs/ux/maquettes/refonte/` (dashboard, analytics, éditeur, en clair et en sombre).
-> Spec pour le développement : `docs/ux/refonte.md`.
+> Maquettes de référence : `docs/ux/maquettes/refonte/`. Spec de la refonte : `docs/ux/refonte.md`.
+> Cette identité remplace « FlowDSIML » (nom de projet) et la piste « Tutoclic » (abandonnée).
 
 ## 1. Intention
 
-FlowDSIML est l'outil de démos interactives de la **DSI des Missions Locales**. L'interface doit :
-- reprendre sans ambiguïté la charte institutionnelle : prune, framboise, bleu, vert, orange ;
-- avoir l'allure d'un tableau de bord moderne : fond gris-bleuté clair, grandes cartes blanches très arrondies, navigation en pilules, gros chiffres, beaucoup d'air ;
-- rester sobre et accessible (WCAG 2.1 AA). Les couleurs vives servent à **signaler** (KPI héro, graphiques, hotspot), jamais à décorer.
+TutoClick est l'outil de tutoriels et de démos interactives de la DSI des Missions Locales, d'abord pour **former** les équipes à leurs outils. On distingue deux niveaux :
+- **La marque**, c'est-à-dire le logo TutoClick. Elle est chaleureuse et reconnaissable : bulle bordeaux en dégradé, curseur blanc, éclat orange, « Tuto » en encre, « Click » en bleu, trait vert.
+- **L'interface**, qui suit la charte institutionnelle DSI (prune, framboise, bleu, vert, orange). Elle a l'allure d'un tableau de bord moderne : fond gris-bleuté, grandes cartes blanches très arrondies, navigation en pilules, beaucoup d'air. Elle reste sobre et accessible (WCAG 2.1 AA, RGAA) : les couleurs vives **signalent**, elles ne décorent pas.
 
-## 2. Logo
+## 2. Logo TutoClick
+
+### 2.1 Fichiers (`docs/ux/brand-tutoclic/production/`)
 
 | Fichier | Usage |
 |---|---|
-| `assets/logo-app.svg` | Logo de l'application sur fond clair : symbole DSI + « FlowDSIML » + mention « DSI des Missions Locales » |
-| `assets/logo-app-sombre.svg` | Même logo sur fond sombre (texte clair) |
-| `assets/symbole-dsi.svg` | Symbole « circuit » seul, nettoyé des fonds de l'export Figma : favicon, avatar, barre de l'éditeur, extension |
-| `brand-dsi/logo-dsi-horizontal.svg` | Logo officiel complet de la DSI (pages institutionnelles, mentions) |
-| `brand-dsi/logo-dsi-blanc.svg` | Logo officiel blanc, sur fond prune uniquement |
+| `logo-tutoclick.svg` | **Logo de référence du client**, texte vectorisé (Inter 750, interlettrage −5), sur fond clair. Dessin et cadrage inchangés (900 × 260) |
+| `logo-tutoclick-sombre.svg` | Même logo sur fond sombre : « Tuto » en blanc |
+| `logo-tutoclick-compact.svg` / `-compact-sombre.svg` | **Version horizontale compacte** : cadrage serré, sans ombre portée, pour la barre latérale (40 px de haut) et l'en-tête de l'extension |
+| `logo-tutoclick-mono-noir.svg` / `-mono-blanc.svg` | Une couleur. Le curseur et l'éclat sont **évidés** dans la bulle. Pour l'impression, le tampon et les fonds photo |
+| `symbole-tutoclick.svg` | Bulle, curseur et éclat seuls, sans ombre : avatar d'app, écran de chargement |
+| `symbole-tutoclick-mono-noir.svg` / `-mono-blanc.svg` | Symbole en une couleur |
+| `symbole-tutoclick-petit.svg` | **Adaptation optique pour 16 et 32 px** : curseur un peu plus grand, éclat réduit à un disque (les rayons disparaissent à cette taille) |
+| `favicon.svg`, `favicon.ico` (16, 32, 48) | Onglet du navigateur. Le `.ico` utilise la version petite pour 16 et 32 |
+| `icon-16/32/48/128.png` | Icônes de l'extension Chrome (`manifest.icons`) |
+| `icon-180.png`, `icon-192.png`, `icon-512.png` | Apple touch icon, manifeste web (PWA) |
+| `apercu.html` | Planche de contrôle de toutes les déclinaisons, sur fond clair et sombre |
 
-Règles :
-- **Composition de l'app** : symbole de 36 × 40 px, gap de 12 px, « FlowDSIML » en Plus Jakarta Sans 800 (18 px, interlettrage −0,02 em), mention « DSI des Missions Locales » en dessous (11 px, 600, `text-subtle`).
-- Dans l'interface, composer le logo **en HTML** (image du symbole + texte), pour que le texte utilise la vraie police. Les fichiers `logo-app*.svg` servent hors de l'app (documents, e-mails) : leur texte retombe sur une police système si Plus Jakarta Sans n'est pas installée.
-- Zone de protection : la hauteur d'un rond du symbole tout autour. Taille minimale du symbole : 20 px de haut.
-- Interdits :
-  - recolorer le symbole (ses 4 couleurs sont celles de la charte) ;
-  - le poser sur un fond prune, framboise ou vert, où les traits se perdent ;
-  - l'étirer, lui ajouter une ombre ou un contour.
-- Favicon : `symbole-dsi.svg`.
+### 2.2 Règles
+
+- **Ne pas redessiner** le logo. Les seules adaptations admises sont celles listées ci-dessus : cadrage compact, mono, version petite.
+- **Dans l'interface**, on utilise le fichier SVG compact (`<img>` avec `alt="TutoClick"`), et non une recomposition en texte HTML : le texte est vectorisé et ne dépend pas de la police.
+- La mention « DSI des Missions Locales » peut accompagner le logo **à côté**, en texte HTML (11 px, 600, `text-subtle`). Elle ne doit jamais être intégrée au dessin.
+- **Zone de protection** : la moitié de la hauteur de la bulle, tout autour.
+- **Tailles minimales** : logo compact 28 px de haut ; symbole 16 px (avec la version petite).
+- **Fonds** : clair (`bg`, `surface`) → version claire ; sombre (`#0B0D10`, `#15191F`) → version sombre. Sur une photo ou une couleur vive → mono.
+- **Interdits** : recolorer les éléments ; poser la version couleur sur un fond bordeaux, prune ou framboise (la bulle disparaît) ; étirer ; ajouter un contour ; séparer « Tuto » et « Click » ; écrire le nom autrement que « TutoClick ».
+
+### 2.3 Exception de marque : le dégradé
+
+Le **dégradé de la bulle** (`#A52B60` → `#7D204C`) et sa **légère ombre portée** font partie du dessin du client. Ils sont **acceptés dans le logo seulement**. C'est une exception de marque : l'interface reste **sans dégradé ni ombre colorée** (§10). Les versions compactes, mono et petites n'ont pas d'ombre, car elle salit le rendu aux petites tailles.
+
+### 2.4 Logos institutionnels DSI (inchangés)
+
+- `brand-dsi/logo-dsi-horizontal.svg` et `logo-dsi-blanc.svg` : mentions institutionnelles, page « À propos », documents officiels.
+- `assets/symbole-dsi.svg` n'est plus le favicon. Il reste le symbole de la DSI, à ne pas confondre avec celui de TutoClick.
 
 ## 3. Couleurs
 
-### 3.1 Couleurs de la charte
+### 3.0 Deux palettes, deux rôles
+
+| Palette | Où | Tokens |
+|---|---|---|
+| **Marque TutoClick** : bordeaux `#A52B60` → `#7D204C`, orange `#E49A32`, bleu `#4A9BCB`, vert `#91B83E`, encre `#25232A` | Logo, icônes d'app, favicon, supports de marque (page d'accueil publique, documents, e-mails) | `--fd-brand-bordeaux`, `-bordeaux-fonce`, `-orange`, `-bleu`, `-vert`, `-encre` |
+| **Charte DSI** : prune, framboise, bleu, vert, orange, noir | **Toute l'interface** : boutons, liens, états, graphiques, player par défaut | `--fd-prune-*` … et rôles `--fd-color-*` |
+
+**Cohabitation :**
+- Les deux palettes sont **de la même famille**. Le bordeaux `#A52B60` du logo est presque identique au prune `#A3195B` de la DSI, et les bleus, verts et oranges sont proches. Le logo s'intègre donc naturellement à côté de l'interface, sans qu'il soit nécessaire de les aligner.
+- On **ne crée pas** de rôle d'interface à partir des couleurs de la marque. Les tokens `--fd-brand-*` sont réservés au logo et aux supports de marque. Dans l'interface, on utilise toujours `--fd-color-*`.
+- **Contrastes de la marque** (en usage graphique, pas comme texte d'interface) :
+
+  | Paire | Ratio | Usage |
+  |---|---|---|
+  | Blanc sur bordeaux `#A52B60` | 6,74:1 | Curseur sur la bulle ✅ |
+  | Encre `#25232A` sur fond `#EEF2F6` | 13,8:1 | ✅ |
+  | Bleu `#4A9BCB` sur blanc | 3,07:1 | Partie « Click » du logo : élément graphique d'un logo, ce qui est admis par les WCAG (exception logotype). **Ne pas utiliser ce bleu pour du texte d'interface** |
+  | Bleu `#4A9BCB` sur `#0B0D10` | 6,34:1 | Logo sombre ✅ |
+  | Vert `#91B83E` sur blanc | 2,30:1 | Trait décoratif seulement |
+
+### 3.1 Couleurs de la charte DSI (interface)
 
 | Nom | Hex | Rôle dans l'app |
 |---|---|---|
@@ -137,6 +174,8 @@ Le sélecteur Clair / Sombre / Système reste disponible, en clair par défaut.
 
 ## 9. Thème du player (valeurs par défaut)
 
+Le player n'affiche pas le logo TutoClick, sauf la mention « Créé avec TutoClick » en plan Free (texte, sans logo).
+
 - Primaire prune `#A3195B` et pastille du hotspot framboise `#D60B52`.
 - Bulle blanche avec un rayon de 20 px, police Plus Jakarta Sans.
 - Fond du player ardoise 100 `#EEF2F6`, uni (sans dégradé).
@@ -146,7 +185,7 @@ Les workspaces peuvent toujours surcharger ces couleurs dans l'onglet Design.
 ## 10. Motifs proscrits (rappel, `composants.md` §15.6)
 
 Restent interdits :
-- emojis (dont 👋), dégradés décoratifs, verre dépoli, ombres colorées, barres d'accent latérales ;
+- emojis (dont 👋), dégradés décoratifs (**seule exception : la bulle du logo, §2.3**), verre dépoli, ombres colorées, barres d'accent latérales ;
 - étincelles et icônes « IA » ;
 - texte blanc sur vert ou sur orange ;
 - orange pour du texte.

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F2 : quiz de validation — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div data-view="build">
+
+  <section data-pane="build" class="qz-build" style="display:none">
+    <aside style="display:flex;flex-direction:column;gap:12px">
+      <h1 style="margin:0;font-size:var(--fd-text-h2-size)">Quiz du module</h1>
+      <p class="fd-help" style="margin:0">« Créer une fiche usager » · 5 questions</p>
+      <ol class="qz-qlist" aria-label="Questions">
+        <li><span class="n">1</span><span>Où se trouve la liste des usagers ?<small>Choix unique</small></span></li>
+        <li aria-current="true"><span class="n">2</span><span>Comment créer une fiche usager ?<small>Choix unique · lié à l'étape 4</small></span></li>
+        <li><span class="n">3</span><span>L'agenda est partagé par l'équipe.<small>Vrai / Faux</small></span></li>
+        <li><span class="n">4</span><span>Quelles informations sont obligatoires ?<small>Choix multiples</small></span></li>
+        <li><span class="n">5</span><span>Comment clôturer un accompagnement ?<small>Choix unique</small></span></li>
+      </ol>
+      <button class="fd-btn" type="button"><i data-icon="plus"></i>Ajouter une question</button>
+    </aside>
+    <article class="fd-card qz-edit">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="help"></i></span><h2 class="fd-card__title">Question 2</h2><div class="fd-segmented" role="group" aria-label="Type de question"><button type="button" aria-pressed="true">Choix unique</button><button type="button" aria-pressed="false">Choix multiples</button><button type="button" aria-pressed="false">Vrai / Faux</button></div></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="qq">Question</label><input class="fd-input" id="qq" value="Comment créer une nouvelle fiche usager dans le nouvel outil ?"></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Réponses</span><div style="display:flex;flex-direction:column;gap:8px">
+        <div class="qz-ans good"><i data-icon="grip"></i><input class="fd-input" aria-label="Réponse 1" value="Depuis le menu « Usagers », bouton « + Ajouter »"><label class="ok-lbl"><input type="radio" name="good" checked> <i data-icon="checkCircle"></i>Bonne réponse</label><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Supprimer la réponse 1"><i data-icon="trash"></i></button></div>
+        <div class="qz-ans"><i data-icon="grip"></i><input class="fd-input" aria-label="Réponse 2" value="Depuis l'agenda, en créant un rendez-vous"><label class="ok-lbl"><input type="radio" name="good"> Bonne réponse</label><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Supprimer la réponse 2"><i data-icon="trash"></i></button></div>
+        <div class="qz-ans"><i data-icon="grip"></i><input class="fd-input" aria-label="Réponse 3" value="En important un fichier"><label class="ok-lbl"><input type="radio" name="good"> Bonne réponse</label><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Supprimer la réponse 3"><i data-icon="trash"></i></button></div>
+        <div class="qz-ans"><i data-icon="grip"></i><input class="fd-input" aria-label="Réponse 4" value="En demandant à un administrateur"><label class="ok-lbl"><input type="radio" name="good"> Bonne réponse</label><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Supprimer la réponse 4"><i data-icon="trash"></i></button></div>
+        <button class="fd-btn fd-btn--ghost fd-btn--sm" type="button" style="align-self:flex-start"><i data-icon="plus"></i>Ajouter une réponse</button>
+      </div></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="qe">Explication (affichée après la réponse)</label><textarea class="fd-input" id="qe" rows="3" style="height:auto;padding-top:10px;border-radius:16px">La création se fait depuis la liste des usagers : le bouton « + Ajouter » est en haut à droite. L'agenda ne crée que des rendez-vous.</textarea></div>
+      <div class="row-2"><div class="fd-field" style="margin:0"><label class="fd-label" for="ql">Étape à revoir en cas d'erreur</label><select class="fd-select" id="ql"><option>4 · Liste des usagers</option></select></div><div class="fd-field" style="margin:0"><label class="fd-label" for="qp">Points</label><input class="fd-input" id="qp" value="1" inputmode="numeric"></div></div>
+    </article>
+    <aside class="fd-card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="award"></i></span><h2 class="fd-card__title">Validation du module</h2></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="qs">Seuil de réussite</label><div style="display:flex;align-items:center;gap:12px"><input type="range" id="qs" min="0" max="100" step="5" value="70" style="flex:1;accent-color:var(--fd-color-primary)" aria-valuetext="70 %"><b>70 %</b></div></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="qt">Tentatives</label><select class="fd-select" id="qt"><option>3 tentatives</option><option>Illimitées</option><option>1 tentative</option></select></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Afficher la correction</span><div class="fd-segmented" role="group" aria-label="Afficher la correction"><button type="button" aria-pressed="true">Après chaque question</button><button type="button" aria-pressed="false">À la fin</button></div></div>
+      <label class="fd-check" style="justify-content:space-between"><span>Mélanger les questions et les réponses</span><span class="fd-switch"><input type="checkbox" checked aria-label="Mélanger"><span class="fd-switch__track"></span></span></label>
+      <label class="fd-check" style="justify-content:space-between"><span>Quiz obligatoire pour terminer le module</span><span class="fd-switch"><input type="checkbox" checked aria-label="Obligatoire"><span class="fd-switch__track"></span></span></label>
+      <p class="fd-help" style="margin:0">Position : après la dernière étape du module. Les résultats alimentent le suivi des apprenants (F3).</p>
+      <button class="fd-btn" type="button"><i data-icon="eye"></i>Tester le quiz</button>
+    </aside>
+  </section>
+
+  <section data-pane="q" class="qz-play fd-player-scope" style="display:none">
+    <div class="qz-card" role="region" aria-label="Quiz : Créer une fiche usager">
+      <div class="qz-top"><span>Question <b>2</b> sur 5</span><span class="qz-prog" role="progressbar" aria-label="Progression du quiz" aria-valuemin="0" aria-valuemax="5" aria-valuenow="1"><span style="width:20%"></span></span><span>Seuil : 70 %</span></div>
+      <fieldset>
+        <legend>Comment créer une nouvelle fiche usager dans le nouvel outil ?</legend>
+        <p class="hint">Une seule réponse possible.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label class="qz-opt"><input type="radio" name="q2q" checked><span>Depuis le menu « Usagers », bouton « + Ajouter »</span></label>
+          <label class="qz-opt"><input type="radio" name="q2q"><span>Depuis l'agenda, en créant un rendez-vous</span></label>
+          <label class="qz-opt"><input type="radio" name="q2q"><span>En important un fichier</span></label>
+          <label class="qz-opt"><input type="radio" name="q2q"><span>En demandant à un administrateur</span></label>
+        </div>
+      </fieldset>
+      
+      <div class="qz-acts"><button class="qz-btn qz-btn--ghost" type="button" aria-label="Question précédente"><i data-icon="arrowLeft"></i>Précédente</button><button class="qz-btn" type="button">Valider ma réponse</button></div>
+    </div>
+  </section>
+
+  <section data-pane="ok" class="qz-play fd-player-scope" style="display:none">
+    <div class="qz-card" role="region" aria-label="Quiz : Créer une fiche usager">
+      <div class="qz-top"><span>Question <b>2</b> sur 5</span><span class="qz-prog" role="progressbar" aria-label="Progression du quiz" aria-valuemin="0" aria-valuemax="5" aria-valuenow="1"><span style="width:40%"></span></span><span>Seuil : 70 %</span></div>
+      <fieldset>
+        <legend>Comment créer une nouvelle fiche usager dans le nouvel outil ?</legend>
+        <p class="hint">Une seule réponse possible.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label class="qz-opt right" aria-disabled="true"><input type="radio" name="q2ok" checked disabled><span>Depuis le menu « Usagers », bouton « + Ajouter »</span><span class="mark"><i data-icon="checkCircle"></i>Bonne réponse</span></label>
+          <label class="qz-opt" aria-disabled="true"><input type="radio" name="q2ok" disabled><span>Depuis l'agenda, en créant un rendez-vous</span></label>
+          <label class="qz-opt" aria-disabled="true"><input type="radio" name="q2ok" disabled><span>En important un fichier</span></label>
+          <label class="qz-opt" aria-disabled="true"><input type="radio" name="q2ok" disabled><span>En demandant à un administrateur</span></label>
+        </div>
+      </fieldset>
+      <div class="qz-fb ok" role="status"><i data-icon="checkCircle"></i><div><b>Bonne réponse.</b>La création se fait depuis la liste des usagers : le bouton « + Ajouter » est en haut à droite. L'agenda ne crée que des rendez-vous.</div></div>
+      <div class="qz-acts"><a class="qz-btn qz-btn--ghost" href="#" style="text-decoration:none"><i data-icon="play"></i>Revoir l'étape 4 du module</a><button class="qz-btn" type="button">Question suivante<i data-icon="arrowRight"></i></button></div>
+    </div>
+  </section>
+
+  <section data-pane="ko" class="qz-play fd-player-scope" style="display:none">
+    <div class="qz-card" role="region" aria-label="Quiz : Créer une fiche usager">
+      <div class="qz-top"><span>Question <b>2</b> sur 5</span><span class="qz-prog" role="progressbar" aria-label="Progression du quiz" aria-valuemin="0" aria-valuemax="5" aria-valuenow="1"><span style="width:40%"></span></span><span>Seuil : 70 %</span></div>
+      <fieldset>
+        <legend>Comment créer une nouvelle fiche usager dans le nouvel outil ?</legend>
+        <p class="hint">Une seule réponse possible.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label class="qz-opt right" aria-disabled="true"><input type="radio" name="q2ko" disabled><span>Depuis le menu « Usagers », bouton « + Ajouter »</span><span class="mark"><i data-icon="checkCircle"></i>Bonne réponse</span></label>
+          <label class="qz-opt wrong" aria-disabled="true"><input type="radio" name="q2ko" checked disabled><span>Depuis l'agenda, en créant un rendez-vous</span><span class="mark"><i data-icon="xCircle"></i>Votre réponse</span></label>
+          <label class="qz-opt" aria-disabled="true"><input type="radio" name="q2ko" disabled><span>En important un fichier</span></label>
+          <label class="qz-opt" aria-disabled="true"><input type="radio" name="q2ko" disabled><span>En demandant à un administrateur</span></label>
+        </div>
+      </fieldset>
+      <div class="qz-fb ko" role="status"><i data-icon="xCircle"></i><div><b>Ce n'est pas la bonne réponse.</b>Il fallait passer par la liste des usagers, avec le bouton « + Ajouter ». L'agenda ne crée que des rendez-vous, pas de fiche usager.</div></div>
+      <div class="qz-acts"><a class="qz-btn qz-btn--ghost" href="#" style="text-decoration:none"><i data-icon="play"></i>Revoir l'étape 4 du module</a><button class="qz-btn" type="button">Question suivante<i data-icon="arrowRight"></i></button></div>
+    </div>
+  </section>
+
+  <section data-pane="pass" class="qz-play fd-player-scope" style="display:none">
+    <div class="qz-card qz-res" role="region" aria-labelledby="rp-t">
+      <div class="qz-score" aria-hidden="true"><svg viewBox="0 0 160 160" width="160" height="160"><circle cx="80" cy="80" r="70" fill="none" stroke="#E3E8EE" stroke-width="12"/><circle cx="80" cy="80" r="70" fill="none" stroke="#A3195B" stroke-width="12" stroke-linecap="round" stroke-dasharray="351.9 439.82"/><circle cx="80" cy="80" r="70" fill="none" stroke="#080808" stroke-width="16" stroke-dasharray="2 439.82" stroke-dashoffset="-307.9"/></svg><div><b>80 %</b><small>seuil 70 %</small></div></div>
+      <span class="qz-badge pass"><i data-icon="award"></i>Module validé</span>
+      <h2 id="rp-t" style="margin:0;font-size:26px;font-weight:800">Bravo, vous avez validé « Créer une fiche usager »</h2>
+      <p style="margin:0;color:#4A5562" role="status">Score : 4 bonnes réponses sur 5, soit 80 %. Le seuil de réussite est de 70 %.</p>
+      <ul class="qz-recap" aria-label="Détail des réponses">
+          <li><span class="y"><i data-icon="checkCircle"></i></span><span>Où se trouve la liste des usagers ?</span><span class="cm-sr">Réponse juste</span></li>
+          <li><span class="n"><i data-icon="xCircle"></i></span><span>Comment créer une fiche usager ?</span><a href="#">Revoir<span class="cm-sr"> : réponse fausse</span></a></li>
+          <li><span class="y"><i data-icon="checkCircle"></i></span><span>Vrai ou faux : l'agenda est partagé par l'équipe.</span><span class="cm-sr">Réponse juste</span></li>
+          <li><span class="y"><i data-icon="checkCircle"></i></span><span>Quelles informations sont obligatoires ? (plusieurs réponses)</span><span class="cm-sr">Réponse juste</span></li>
+          <li><span class="y"><i data-icon="checkCircle"></i></span><span>Comment clôturer un accompagnement ?</span><span class="cm-sr">Réponse juste</span></li>
+      </ul>
+      <div class="qz-acts" style="width:100%"><button class="qz-btn qz-btn--ghost" type="button"><i data-icon="refresh"></i>Repasser le quiz</button><button class="qz-btn" type="button">Module suivant : Gérer l'agenda<i data-icon="arrowRight"></i></button></div>
+    </div>
+  </section>
+  <section data-pane="fail" class="qz-play fd-player-scope" style="display:none">
+    <div class="qz-card qz-res" role="region" aria-labelledby="rf-t">
+      <div class="qz-score" aria-hidden="true"><svg viewBox="0 0 160 160" width="160" height="160"><circle cx="80" cy="80" r="70" fill="none" stroke="#E3E8EE" stroke-width="12"/><circle cx="80" cy="80" r="70" fill="none" stroke="#4A5562" stroke-width="12" stroke-linecap="round" stroke-dasharray="175.9 439.82"/><circle cx="80" cy="80" r="70" fill="none" stroke="#080808" stroke-width="16" stroke-dasharray="2 439.82" stroke-dashoffset="-307.9"/></svg><div><b>40 %</b><small>seuil 70 %</small></div></div>
+      <span class="qz-badge fail"><i data-icon="refresh"></i>Pas encore validé</span>
+      <h2 id="rf-t" style="margin:0;font-size:26px;font-weight:800">Encore un peu d'entraînement</h2>
+      <p style="margin:0;color:#4A5562" role="status">Score : 2 bonnes réponses sur 5, soit 40 %. Il faut 70 % pour valider le module. Revoyez les étapes liées aux erreurs, puis réessayez : il vous reste 2 tentatives.</p>
+      <ul class="qz-recap" aria-label="Détail des réponses">
+          <li><span class="y"><i data-icon="checkCircle"></i></span><span>Où se trouve la liste des usagers ?</span><span class="cm-sr">Réponse juste</span></li>
+          <li><span class="n"><i data-icon="xCircle"></i></span><span>Comment créer une fiche usager ?</span><a href="#">Revoir<span class="cm-sr"> : réponse fausse</span></a></li>
+          <li><span class="n"><i data-icon="xCircle"></i></span><span>Vrai ou faux : l'agenda est partagé par l'équipe.</span><a href="#">Revoir<span class="cm-sr"> : réponse fausse</span></a></li>
+          <li><span class="y"><i data-icon="checkCircle"></i></span><span>Quelles informations sont obligatoires ? (plusieurs réponses)</span><span class="cm-sr">Réponse juste</span></li>
+          <li><span class="n"><i data-icon="xCircle"></i></span><span>Comment clôturer un accompagnement ?</span><a href="#">Revoir<span class="cm-sr"> : réponse fausse</span></a></li>
+      </ul>
+      <div class="qz-acts" style="width:100%"><button class="qz-btn qz-btn--ghost" type="button"><i data-icon="play"></i>Revoir le module</button><button class="qz-btn" type="button"><i data-icon="refresh"></i>Réessayer le quiz</button></div>
+    </div>
+  </section>
+</div>
+<div class="mock-state mock-state--top fd-segmented" role="group" aria-label="Écran (maquette)" style="left:auto;right:16px">
+  <button type="button" data-view-set="build" aria-pressed="true">Éditeur</button>
+  <button type="button" data-view-set="q" aria-pressed="false">Question</button>
+  <button type="button" data-view-set="ok" aria-pressed="false">Juste</button>
+  <button type="button" data-view-set="ko" aria-pressed="false">Faux</button>
+  <button type="button" data-view-set="pass" aria-pressed="false">Validé</button>
+  <button type="button" data-view-set="fail" aria-pressed="false">Non validé</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Éditeur HTML, Sandbox, Demo Center — TutoClick (lot A8)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div data-view="html">
+
+  <section data-pane="html" class="a8" style="display:none">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span class="fd-badge">Étape HTML</span><span class="crumbs" aria-label="Élément sélectionné"><span>body</span><i data-icon="chevronRight"></i><span>main</span><i data-icon="chevronRight"></i><span>div.kpi</span><i data-icon="chevronRight"></i><b>b.value</b></span><span style="margin-left:auto" class="fd-help">Survolez pour repérer, cliquez pour sélectionner · Échap : élément parent</span></div>
+      <div class="hcanvas fd-player-scope">
+        <div class="fakeapp"><div class="nav"><b>Logiciel métier</b><span>Accueil</span><span class="hhover">Usagers</span><span>Agenda</span><span class="hhidden">Facturation</span></div>
+          <div class="body"><h4>Tableau de bord</h4><div class="kpi3"><div>Usagers suivis<b class="hsel" data-tag="b.value">1 248</b></div><div>Rendez-vous cette semaine<b>86</b></div><div>Nouveaux ce mois<b>42</b></div></div>
+          <dl><dt>Référent</dt><dd><span class="blurz" style="width:110px;height:12px"></span></dd><dt>Structure</dt><dd>Antenne Nord</dd></dl><span class="btnx">+ Ajouter un usager</span></div></div>
+        <div class="htool" role="toolbar" aria-label="Actions sur l'élément" style="left:220px;top:120px"><button type="button"><i data-icon="textCursor"></i>Modifier le texte</button><button type="button"><i data-icon="eyeOff"></i>Masquer</button><button type="button"><i data-icon="scan"></i>Flouter</button><button type="button"><i data-icon="link"></i>Lier à une étape</button><button type="button" aria-label="Plus d'actions"><i data-icon="more"></i></button></div>
+      </div>
+      <p class="fd-help" style="margin:0">Capture HTML : copie assainie de la page (scripts retirés, formulaires désactivés), servie depuis le domaine des contenus. Les modifications ne touchent jamais le vrai site.</p>
+    </div>
+    <aside class="fd-card" style="display:flex;flex-direction:column;gap:14px">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="mousePointer"></i></span><h2 class="fd-card__title">Élément</h2></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="ht1">Texte</label><input class="fd-input" id="ht1" value="1 248"><span class="fd-help">Astuce : insérez une variable, par exemple {{company}}.</span></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Appliquer</span><div class="fd-segmented" role="group" aria-label="Portée"><button type="button" aria-pressed="true">Cette étape</button><button type="button" aria-pressed="false">Toutes les étapes (7)</button></div><span class="fd-help">« Toutes les étapes » remplace le même élément partout où il apparaît.</span></div>
+      <div class="fd-card__head" style="margin:6px 0 0"><span class="fd-icon-chip"><i data-icon="layers"></i></span><h2 class="fd-card__title">Modifications de l'étape · 3</h2></div>
+      <ul class="hlayers">
+        <li><i data-icon="textCursor"></i><span>b.value<br><small>« 312 » → « 1 248 »</small></span><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Annuler cette modification"><i data-icon="rotateCcw"></i></button></li>
+        <li><i data-icon="eyeOff"></i><span>nav › span<br><small>« Facturation » masqué</small></span><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Annuler cette modification"><i data-icon="rotateCcw"></i></button></li>
+        <li><i data-icon="scan"></i><span>dd (Référent)<br><small>Flouté</small></span><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Annuler cette modification"><i data-icon="rotateCcw"></i></button></li>
+      </ul>
+      <p class="fd-help" style="margin:0">Menu ⋯ : remplacer l'image, supprimer l'élément, copier le sélecteur. La vérification des données (F1) s'applique aussi au texte HTML.</p>
+    </aside>
+  </section>
+
+  <section data-pane="sandbox" class="a8" style="display:none">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h1 style="margin:0;font-size:var(--fd-text-h1-size)">Sandbox · Logiciel métier</h1>
+      <p class="sub" style="margin:0">5 pages HTML liées. Le visiteur navigue librement, comme dans le vrai outil, sans risque.</p>
+      <div class="sbmap" role="img" aria-label="Plan du sandbox : Tableau de bord mène à Liste des usagers et Agenda ; Liste des usagers mène à Fiche usager ; Paramètres n'est relié à aucune page">
+        <svg class="links" aria-hidden="true"><g stroke="var(--fd-color-primary)" stroke-width="2" fill="none"><path d="M220 110 C 260 110, 260 110, 300 110"/><path d="M220 130 C 260 200, 260 300, 300 320"/><path d="M480 110 C 520 110, 520 110, 560 110"/></g></svg>
+        <div class="sbnode start" style="left:40px;top:40px"><span class="fd-badge fd-badge--live">Départ</span><div class="mini"></div><b>Tableau de bord</b><small>Départ · 3 liens</small></div><div class="sbnode " style="left:300px;top:40px"><div class="mini"></div><b>Liste des usagers</b><small>2 liens</small></div><div class="sbnode " style="left:300px;top:250px"><div class="mini"></div><b>Agenda</b><small>1 lien</small></div><div class="sbnode " style="left:560px;top:40px"><div class="mini"></div><b>Fiche usager</b><small>1 lien</small></div><div class="sbnode warn" style="left:560px;top:250px"><span class="fd-badge" style="background:var(--fd-color-warning-soft)">À relier</span><div class="mini"></div><b>Paramètres</b><small>Aucune page liée</small></div>
+      </div>
+      <div class="fd-alert" style="background:var(--fd-color-warning-soft)"><i data-icon="alert"></i><div><b>« Paramètres »</b> n'est reliée à aucune page : les visiteurs ne peuvent pas l'atteindre. <a href="#">Relier un lien du menu</a></div></div>
+    </div>
+    <aside class="fd-card" style="display:flex;flex-direction:column;gap:14px">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="map"></i></span><h2 class="fd-card__title">Réglages du sandbox</h2></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="sb1">Page de départ</label><select class="fd-select" id="sb1"><option>Tableau de bord</option></select></div>
+      <label class="fd-check" style="justify-content:space-between"><span>Lier automatiquement les liens identiques</span><span class="fd-switch"><input type="checkbox" checked aria-label="Liaison automatique"><span class="fd-switch__track"></span></span></label>
+      <p class="fd-help" style="margin:-6px 0 0">Un lien « Usagers » du menu mène à la même page sur toutes les pages.</p>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="sb2">Clic sur un élément non relié</label><select class="fd-select" id="sb2"><option>Afficher « Cette partie n'est pas disponible dans la démo »</option><option>Ne rien faire</option><option>Mettre en évidence les zones cliquables</option></select></div>
+      <label class="fd-check" style="justify-content:space-between"><span>Ajouter un guide optionnel (étapes F1 par-dessus)</span><span class="fd-switch"><input type="checkbox" aria-label="Guide optionnel"><span class="fd-switch__track"></span></span></label>
+      <button class="fd-btn" type="button" style="align-self:flex-start"><i data-icon="plus"></i>Ajouter une page (capture HTML)</button>
+    </aside>
+  </section>
+
+  <section data-pane="center" class="hub" style="display:none">
+    <header class="hub-top"><img src="../../assets/symbole-dsi.svg" alt="" width="32" height="32"><b>Démos de la DSI</b><div class="sp"><a class="cta" href="#" style="display:inline-flex;align-items:center;height:40px;padding:0 18px;border-radius:999px;background:#080808;color:#FFFFFF;font-weight:700;text-decoration:none">Nous contacter</a></div></header>
+    <div class="hub-in">
+      <div class="center-hero"><div><h1 style="margin:0 0 8px;font-size:36px;font-weight:800">Découvrez nos outils en 3 minutes</h1><p style="margin:0;font-size:17px;color:#4A5562">Des démos interactives, sans inscription. Choisissez un outil ou une fonctionnalité.</p>
+        <label class="hub-search" style="max-width:640px"><i data-icon="search"></i><span class="cm-sr">Rechercher une démo</span><input type="search" placeholder="Rechercher une démo…" style="border:0;outline:0;flex:1;font:inherit;background:transparent"></label></div></div>
+      <div class="hub-chips" role="group" aria-label="Filtrer par catégorie"><button type="button" aria-pressed="true">Toutes</button><button type="button" aria-pressed="false">Logiciel métier</button><button type="button" aria-pressed="false">Nouveautés</button><button type="button" aria-pressed="false">Sandbox</button></div>
+      <section class="hub-sec" aria-labelledby="dc1"><h2 id="dc1">Logiciel métier <small>4 démos</small></h2><div class="hub-grid">
+        <a class="mod" href="#"><span class="th"><span class="fk"></span></span><span class="bd"><h3>Créer une fiche usager</h3><span class="meta">Démo guidée · 3 min</span><span class="dc-tags"><span>Usagers</span></span></span></a><a class="mod" href="#"><span class="th"><span class="fk"></span></span><span class="bd"><h3>Planifier un rendez-vous</h3><span class="meta">Démo guidée · 2 min</span><span class="dc-tags"><span>Agenda</span></span></span></a><a class="mod" href="#"><span class="th"><span class="fk"></span></span><span class="bd"><h3>Explorer librement</h3><span class="meta">Sandbox · 5 pages</span><span class="dc-tags"><span>Sandbox</span></span></span></a><a class="mod" href="#"><span class="th"><span class="fk"></span></span><span class="bd"><h3>Statistiques mensuelles</h3><span class="meta">Démo guidée · 4 min</span><span class="dc-tags"><span>Statistiques</span><span>Nouveau</span></span></span></a>
+      </div></section>
+      <footer class="hub-foot"><span>DSI · démos publiques</span><span><a href="#">Accessibilité : conforme partiellement</a> · <a href="#">Données personnelles</a></span></footer>
+    </div>
+  </section>
+</div>
+<div class="mock-state fd-segmented" role="group" aria-label="Écran (maquette)" style="left:50%;transform:translateX(-50%);top:16px;bottom:auto">
+  <button type="button" data-view-set="html" aria-pressed="true">Éditeur HTML</button>
+  <button type="button" data-view-set="sandbox" aria-pressed="false">Sandbox</button>
+  <button type="button" data-view-set="center" aria-pressed="false">Demo Center</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

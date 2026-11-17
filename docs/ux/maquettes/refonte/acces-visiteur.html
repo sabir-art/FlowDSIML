@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accès visiteur — TutoClick (lot A1)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<main class="gate fd-player-scope" data-view="mdp">
+  <!-- Mot de passe -->
+  <form class="gate__card" data-gate="mdp" onsubmit="return false" aria-labelledby="g1">
+    <div class="gate__brand"><span class="logo" aria-hidden="true">ML</span>Mission Locale de Rennes</div>
+    <span class="fd-icon-chip"><i data-icon="key"></i></span>
+    <h1 id="g1">Cette démo est protégée</h1>
+    <p>Saisissez le mot de passe communiqué par votre conseiller pour découvrir « Créer une fiche usager ».</p>
+    <div class="fd-field" style="margin:0"><label class="fd-label" for="p1">Mot de passe</label><input class="fd-input" id="p1" type="password" autocomplete="current-password"></div>
+    <button class="fd-btn fd-btn--primary fd-btn--block" type="submit">Accéder à la démo</button>
+    <p class="gate__foot">Créé avec TutoClick</p>
+  </form>
+  <!-- Mot de passe : erreur -->
+  <form class="gate__card" data-gate="mdp-err" onsubmit="return false" aria-labelledby="g2">
+    <div class="gate__brand"><span class="logo" aria-hidden="true">ML</span>Mission Locale de Rennes</div>
+    <span class="fd-icon-chip"><i data-icon="key"></i></span>
+    <h1 id="g2">Cette démo est protégée</h1>
+    <p>Saisissez le mot de passe communiqué par votre conseiller pour découvrir « Créer une fiche usager ».</p>
+    <div class="fd-field" style="margin:0"><label class="fd-label" for="p2">Mot de passe</label><input class="fd-input" id="p2" type="password" aria-invalid="true" aria-describedby="p2e" value="xxxxxxxx"><span class="fd-error" id="p2e" role="alert">Mot de passe incorrect. Vérifiez-le ou demandez-le à la personne qui vous a partagé la démo.</span></div>
+    <button class="fd-btn fd-btn--primary fd-btn--block" type="submit">Accéder à la démo</button>
+    <p class="gate__foot">Après 5 essais, patientez 1 minute avant de réessayer.</p>
+  </form>
+  <!-- Invitation e-mail -->
+  <form class="gate__card" data-gate="email" onsubmit="return false" aria-labelledby="g3">
+    <div class="gate__brand"><span class="logo" aria-hidden="true">ML</span>Mission Locale de Rennes</div>
+    <span class="fd-icon-chip"><i data-icon="mail"></i></span>
+    <h1 id="g3">Accès sur invitation</h1>
+    <p>Cette démo est réservée aux personnes invitées. Saisissez votre adresse : si elle figure dans la liste, vous recevrez un lien d'accès.</p>
+    <div class="fd-field" style="margin:0"><label class="fd-label" for="e1">Adresse e-mail</label><input class="fd-input" id="e1" type="email" autocomplete="email" placeholder="prenom.nom@exemple.fr"></div>
+    <button class="fd-btn fd-btn--primary fd-btn--block" type="submit">Recevoir mon lien d'accès</button>
+    <p class="gate__foot">Votre adresse sert uniquement à vérifier l'accès.</p>
+  </form>
+  <!-- E-mail envoyé -->
+  <div class="gate__card" data-gate="email-sent" role="status" aria-labelledby="g4">
+    <div class="gate__brand"><span class="logo" aria-hidden="true">ML</span>Mission Locale de Rennes</div>
+    <span class="fd-icon-chip"><i data-icon="checkCircle"></i></span>
+    <h1 id="g4">Vérifiez votre boîte mail</h1>
+    <p>Si l'adresse <b>lea.martin@exemple.fr</b> est autorisée, un lien d'accès vient de lui être envoyé. Il est valable 30 minutes.</p>
+    <button class="fd-btn fd-btn--block" type="button"><i data-icon="refresh"></i>Renvoyer le lien</button>
+    <p class="gate__foot">Rien reçu ? Pensez aux courriers indésirables.</p>
+  </div>
+  <!-- Domaine -->
+  <form class="gate__card" data-gate="domaine" onsubmit="return false" aria-labelledby="g5">
+    <div class="gate__brand"><span class="logo" aria-hidden="true">ML</span>Mission Locale de Rennes</div>
+    <span class="fd-icon-chip"><i data-icon="building"></i></span>
+    <h1 id="g5">Réservé au réseau des Missions Locales</h1>
+    <p>Utilisez votre adresse professionnelle (<b>@mission-locale.example</b> ou <b>@dsi-ml.example</b>). Nous vous enverrons un lien pour confirmer.</p>
+    <div class="fd-field" style="margin:0"><label class="fd-label" for="d1">Adresse e-mail professionnelle</label><input class="fd-input" id="d1" type="email" aria-invalid="true" aria-describedby="d1e" value="lea@gmail.example"><span class="fd-error" id="d1e" role="alert">Cette adresse n'appartient pas à un domaine autorisé.</span></div>
+    <button class="fd-btn fd-btn--primary fd-btn--block" type="submit">Recevoir mon lien d'accès</button>
+  </form>
+  <!-- Jeton refusé -->
+  <div class="gate__card" data-gate="jeton" role="alert" aria-labelledby="g6">
+    <div class="gate__brand"><span class="logo" aria-hidden="true">ML</span>Mission Locale de Rennes</div>
+    <span class="fd-icon-chip"><i data-icon="shield"></i></span>
+    <h1 id="g6">Accès expiré</h1>
+    <p>Votre session d'accès à cette démo a expiré ou n'est pas valide. Revenez sur le portail qui vous l'a proposée pour l'ouvrir à nouveau.</p>
+    <a class="fd-btn fd-btn--block" href="#"><i data-icon="arrowLeft"></i>Retour au portail</a>
+  </div>
+</main>
+<div class="mock-state mock-state--top fd-segmented" role="group" aria-label="Écran d'accès (maquette)">
+  <button type="button" data-view-set="mdp" aria-pressed="true">Mot de passe</button>
+  <button type="button" data-view-set="mdp-err" aria-pressed="false">Erreur</button>
+  <button type="button" data-view-set="email" aria-pressed="false">Invitation</button>
+  <button type="button" data-view-set="email-sent" aria-pressed="false">Lien envoyé</button>
+  <button type="button" data-view-set="domaine" aria-pressed="false">Domaine</button>
+  <button type="button" data-view-set="jeton" aria-pressed="false">Jeton expiré</button>
+</div>
+</body>
+</html>

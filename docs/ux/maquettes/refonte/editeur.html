@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Éditeur — FlowDSIML (refonte DSI)</title>
-<link rel="icon" href="../../assets/symbole-dsi.svg">
+<title>Éditeur — TutoClick (refonte DSI)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
 <link rel="stylesheet" href="refonte.css">
 <script src="refonte.js" defer></script>
 </head>
@@ -12,8 +12,8 @@
 <div class="ed">
   <header class="ed-top">
     <a class="icon-btn" href="dashboard.html" aria-label="Retour aux démos"><i data-icon="arrowLeft"></i></a>
-    <img src="../../assets/symbole-dsi.svg" alt="" width="28" height="31">
-    <label><span hidden>Titre de la démo</span><input class="fd-input title" value="Inscription au parcours CEJ"></label>
+    <img src="../../brand-tutoclic/production/symbole-tutoclick.svg" alt="" width="28" height="31">
+    <label><span hidden>Titre de la démo</span><input class="fd-input title" value="Créer une fiche usager"></label>
     <span class="fd-badge fd-badge--draft">Brouillon · enregistré</span>
     <div class="fd-segmented fd-segmented--strong tools" role="group" aria-label="Outil">
       <button type="button" aria-pressed="true"><i data-icon="pointer"></i>Sélection</button>
@@ -49,7 +49,7 @@
           <span class="hs-dot" style="left:46.4%;top:47.4%"></span>
           <div class="bubble" style="left:50%;top:30%">
             <b>Commencez ici</b>
-            <p>Cliquez sur « Je m'inscris » pour démarrer votre parcours Contrat d'engagement jeune.</p>
+            <p>Cliquez sur « + Ajouter » pour créer une fiche usager.</p>
             <footer>1 / 6<button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Suivant</button></footer>
           </div>
         </div>
@@ -73,7 +73,7 @@
               <span class="avatar" style="background:var(--fd-color-chart-3);color:var(--fd-color-text)" aria-hidden="true">CB</span>
               <div class="cm-main">
                 <div class="cm-meta"><b>Camille Bernard</b><time datetime="2026-11-17T14:12">il y a 2 h</time></div>
-                <p>Le libellé du bouton a changé dans I-Milo : c'est « Commencer mon inscription » maintenant. Il faudra recapturer.</p>
+                <p>Le libellé du bouton a changé : dans la nouvelle version de l'outil, c'est « Commencer mon inscription » maintenant. Il faudra recapturer.</p>
               </div>
               <div class="cm-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="checkCircle"></i>Résoudre</button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions sur le commentaire de Camille Bernard"><i data-icon="more"></i></button></div>
             </li>
@@ -99,7 +99,7 @@
               <span class="avatar" style="background:var(--fd-color-chart-1);color:var(--fd-color-text)" aria-hidden="true">NP</span>
               <div class="cm-main">
                 <div class="cm-meta"><b>Nadia Petit</b><time datetime="2026-11-16T10:20">hier</time><span class="cm-resolved"><i data-icon="checkCircle"></i>Résolu par Alice Martin</span></div>
-                <p>Mettre « Contrat d'engagement jeune » en toutes lettres la première fois.</p>
+                <p>Écrire « fiche usager » en toutes lettres la première fois.</p>
               </div>
               <div class="cm-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="rotateCcw"></i>Rouvrir</button></div>
             </li>
@@ -155,7 +155,7 @@
         <div class="fd-field"><label class="fd-label" for="t">Titre de la bulle</label><input class="fd-input" id="t" value="Commencez ici"></div>
         <div class="fd-field"><label class="fd-label" for="x">Texte de la bulle</label>
           <div class="rt"><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Gras"><i data-icon="bold"></i></button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Italique"><i data-icon="italic"></i></button><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Lien"><i data-icon="link"></i></button></div>
-          <textarea class="fd-textarea" id="x">Cliquez sur « Je m'inscris » pour démarrer votre parcours Contrat d'engagement jeune.</textarea></div>
+          <textarea class="fd-textarea" id="x">Cliquez sur « + Ajouter » pour créer une fiche usager.</textarea></div>
         <div class="fd-field"><label class="fd-label" for="pos">Position de la bulle</label><select class="fd-select" id="pos"><option>Automatique</option></select></div>
         <hr>
         <label class="fd-switch"><span>Bouton d'action (CTA)</span><input type="checkbox"><span class="fd-switch__track"></span></label>

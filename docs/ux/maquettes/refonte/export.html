@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Export — TutoClick (lot A3)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div class="page-bg"></div>
+<div class="dialog-mock" data-view="choose" style="position:fixed">
+  <!-- Choix du format -->
+  <section data-pane="choose" role="dialog" aria-labelledby="t1" style="flex-direction:column">
+    <div class="dlg-head"><span class="fd-icon-chip"><i data-icon="download"></i></span><h2 id="t1">Exporter « Créer une fiche usager »</h2><button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="exp-formats" role="group" aria-label="Format">
+      <button class="exp-format" type="button" aria-pressed="true"><span class="fd-icon-chip"><i data-icon="film"></i></span><b>Vidéo MP4</b><small>Lecture automatique avec les bulles. Idéal pour un e-mail ou un réseau social.</small></button>
+      <button class="exp-format" type="button" aria-pressed="false"><span class="fd-icon-chip"><i data-icon="gif"></i></span><b>GIF animé</b><small>Boucle courte, sans son. Pour une documentation ou un ticket.</small></button>
+      <button class="exp-format" type="button" aria-pressed="false"><span class="fd-icon-chip"><i data-icon="fileText"></i></span><b>PDF</b><small>Une page par étape, texte des bulles en légende. Imprimable.</small></button>
+      <button class="exp-format" type="button" aria-pressed="false"><span class="fd-icon-chip"><i data-icon="archive"></i></span><b>Hors ligne (.zip)</b><small>Démo interactive autonome, ouvrable sans Internet.</small></button>
+    </div>
+    <div class="row-2">
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="q">Qualité</label><select class="fd-select" id="q"><option>1080p (recommandé)</option><option>720p</option><option>4K</option></select></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="d">Durée par étape</label><select class="fd-select" id="d"><option>Automatique (selon le texte)</option><option>3 secondes</option><option>5 secondes</option></select></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <label class="fd-switch"><span>Afficher le curseur et l'animation de clic</span><input type="checkbox" checked><span class="fd-switch__track"></span></label>
+      <label class="fd-switch"><span>Inclure les étapes de formulaire et de sondage</span><input type="checkbox"><span class="fd-switch__track"></span></label>
+      <label class="fd-switch"><span>Afficher « Créé avec TutoClick »</span><input type="checkbox" checked><span class="fd-switch__track"></span></label>
+    </div>
+    <p class="fd-help" style="margin:0">Durée estimée : 1 min 20 · environ 18 Mo. Les variables utilisent leur valeur par défaut, et les zones floutées restent floutées.</p>
+    <div class="dlg-foot"><button class="fd-btn" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button" data-view-set="progress"><i data-icon="download"></i>Exporter en MP4</button></div>
+  </section>
+  <!-- Progression -->
+  <section data-pane="progress" role="dialog" aria-labelledby="t2" style="flex-direction:column;width:min(520px,92%)">
+    <div class="dlg-head"><span class="fd-icon-chip"><i data-icon="film"></i></span><h2 id="t2">Export MP4 en cours</h2></div>
+    <div class="exp-progress">
+      <div class="exp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62" aria-label="Progression de l'export"><span></span></div>
+      <p class="fd-label" style="margin:0" aria-live="polite">62 % · étape 4 sur 6 · environ 30 secondes restantes</p>
+      <ol class="exp-steps">
+        <li class="done"><i data-icon="checkCircle"></i>Préparation des captures</li>
+        <li class="cur"><span class="spin" aria-hidden="true"></span>Rendu des étapes (4 / 6)</li>
+        <li><span class="todo" aria-hidden="true"></span>Encodage de la vidéo</li>
+      </ol>
+    </div>
+    <p class="fd-help" style="margin:0">Le rendu se fait dans votre navigateur : gardez cet onglet ouvert. Vous pouvez continuer à travailler dans un autre onglet.</p>
+    <div class="dlg-foot"><button class="fd-btn" type="button">Annuler l'export</button></div>
+  </section>
+  <!-- Terminé -->
+  <section data-pane="done" role="dialog" aria-labelledby="t3" style="flex-direction:column;width:min(520px,92%)">
+    <div class="dlg-head"><span class="fd-icon-chip"><i data-icon="checkCircle"></i></span><h2 id="t3">Export terminé</h2><button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="exp-file"><span class="fd-icon-chip"><i data-icon="film"></i></span><span><b>inscription-parcours-cej.mp4</b><small>1 min 18 · 17,6 Mo · 1080p</small></span><button class="fd-btn fd-btn--primary" type="button"><i data-icon="download"></i>Télécharger</button></div>
+    <p class="fd-help" style="margin:0">Le fichier est aussi conservé 7 jours dans Démo → Exports.</p>
+    <div class="dlg-foot"><button class="fd-btn" type="button" data-view-set="choose">Exporter dans un autre format</button></div>
+  </section>
+  <!-- Erreur -->
+  <section data-pane="error" role="alertdialog" aria-labelledby="t4" style="flex-direction:column;width:min(520px,92%)">
+    <div class="dlg-head"><span class="fd-icon-chip" style="background:var(--fd-color-danger-soft);color:var(--fd-color-danger)"><i data-icon="alert"></i></span><h2 id="t4">L'export n'a pas abouti</h2></div>
+    <p style="margin:0">Votre navigateur a manqué de mémoire pendant l'encodage en 4K. Essayez en 1080p, ou exportez depuis un ordinateur avec plus de mémoire.</p>
+    <div class="dlg-foot"><button class="fd-btn" type="button">Fermer</button><button class="fd-btn fd-btn--primary" type="button"><i data-icon="refresh"></i>Réessayer en 1080p</button></div>
+  </section>
+</div>
+<div class="mock-state mock-state--top fd-segmented" role="group" aria-label="État de l'export (maquette)">
+  <button type="button" data-view-set="choose" aria-pressed="true">Choix</button>
+  <button type="button" data-view-set="progress" aria-pressed="false">Progression</button>
+  <button type="button" data-view-set="done" aria-pressed="false">Terminé</button>
+  <button type="button" data-view-set="error" aria-pressed="false">Erreur</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

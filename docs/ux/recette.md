@@ -146,7 +146,7 @@ Points positifs : flou irréversible côté pixels (très bon pour la confidenti
 | P4 | Majeur | Player, accès | Pas d'écran **mot de passe** ; un lien personnalisé **expiré** affiche le message générique « n'existe pas ». | Écrans `player.password.*` et `player.expired.*` (maquettes `player.html#password` / `#expired`) ; le mot de passe peut rester en V2 mais l'expiration doit avoir son message. |
 | P5 | Majeur | Player, navigation | Pas de bouton **Précédent** dans la première bulle ni de contrôles hors bulle (précédent, suivant, plein écran) ; barre de progression collée en bas de l'écran, peu visible. | Contrôles sous le cadre (desktop), progression segmentée en haut du cadre (§13.6). |
 | P6 | Majeur | Player, page publique | En-tête réduit au titre de la démo ; pas de **logo ni de CTA** du client (« Essai gratuit », « Voir les tarifs »). | Page publique de la maquette ; réglages `settings.brand.publicPage` (V2 possible, mais prévoir l'emplacement). |
-| P7 | Majeur | Player, filigrane | « Créé avec FlowDSIML » en texte 11 px gris sur fond sombre (contraste insuffisant), non cliquable. | Pastille « Fait avec FlowDSIML » (logo + lien `rel="noopener"`), contraste AA, en bas à droite. |
+| P7 | Majeur | Player, filigrane | « Créé avec TutoClick » en texte 11 px gris sur fond sombre (contraste insuffisant), non cliquable. | Pastille « Fait avec TutoClick » (logo + lien `rel="noopener"`), contraste AA, en bas à droite. |
 | P8 | Majeur | Partage | Page en **cartes empilées** (lien, iframe, liens perso, versions) sur toute la hauteur ; « **Dépublier** » en bouton rouge plein juste à côté d'« Ouvrir ». | Onglets Lien · Intégrer · Liens personnalisés · Accès + aperçu à droite (maquette `partage.html`) ; « Dépublier » dans un menu avec confirmation. |
 | P9 | Majeur | Partage | « Versions publiées : v1 — **Invalid Date** » ; date d'expiration en `mm/dd/yyyy` (sélecteur natif en anglais). | Dates via `Intl.DateTimeFormat(locale)` ; corriger le champ `published_at` lu. |
 | P10 | Majeur | Partage | Formulaire de lien personnalisé : libellé technique « {{company}} — Entreprise » ; le lien créé n'est pas **copié automatiquement**. | Libellé « Entreprise » avec la variable en pastille mono discrète ; « Créer et copier le lien » + toast (maquette). |
@@ -393,7 +393,7 @@ Re-capture avec le script du dev et mesures DOM. Captures : `docs/ux/recette/fin
 | Données fictives | ✅ `globex.example` dans le faux Supabase |
 | FI8 partage | ⚠️ En partie : « Dépublier » a bien l'icône `GlobeLock`, mais reste un **bouton rouge plein** à côté d'« Ouvrir ». « Versions publiées » affiche toujours « v1 · — » avec une puce native. Le champ Expiration est toujours au format `mm/dd/yyyy` |
 | FI10 entonnoir | ⚠️ En partie : le libellé « 90 (100 %) » est maintenant collé au bord gauche **dans** la barre, en vert foncé sur du vert. Il est encore moins lisible |
-| Nouveau | ⚠️ `editor.showBranding` = « Afficher «␣␣Créé avec FlowDSIML␣␣» » : **deux espaces** de chaque côté des guillemets → une seule espace fine insécable (U+202F) |
+| Nouveau | ⚠️ `editor.showBranding` = « Afficher «␣␣Créé avec TutoClick␣␣» » : **deux espaces** de chaque côté des guillemets → une seule espace fine insécable (U+202F) |
 | Nouveau (mineur) | Couleurs hexadécimales en casse mixte (`#0E7C71` / `#ffffff`) → majuscules partout |
 
 **Bilan** : 10 écarts sur 12 sont corrigés, 2 le sont en partie (FI8, FI10), et il y a 2 petits points nouveaux. Il ne reste plus aucun bloquant de finition.
@@ -405,7 +405,7 @@ Re-capture avec le script du dev et mesures DOM. Captures : `docs/ux/recette/fin
   - date d'expiration au format de la langue (sélecteur maison ou `lang` sur l'`input`).
 - **FI10** : libellé **hors** de la barre, à droite de la piste, en `text-muted` et chiffres tabulaires.
 
-## Recette finale sur le site en ligne (https://sabir-art.github.io/FlowDSIML/, dazzling @ `c848fbc`)
+## Recette finale sur le site en ligne (https://sabir-art.github.io/TutoClick/, dazzling @ `c848fbc`)
 
 Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** : écrans publics à 1 440 et 390 px, locales `fr-FR` et `en-US`, connexion refusée avec un compte fictif (`recette.ux@example.com`), et le player sur une démo qui n'existe pas. Captures : `docs/ux/recette/live/`.
 
@@ -437,7 +437,7 @@ Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** :
 |---|---|
 | FI8 partage | ✅ « Dépublier » en bouton `ghost` danger (`GlobeLock`) avec confirmation. Versions sans puce : « v1 · 17 nov. 2026 » et badge « en ligne » aligné à droite. Expiration choisie en durée (Jamais / 7 / 30 / 90 jours), plus de `mm/dd/yyyy` |
 | FI10 entonnoir | ✅ Libellé « 90 · 100 % » hors de la barre, en texte discret |
-| Guillemets FR | ✅ « Créé avec FlowDSIML » avec une espace fine insécable, plus aucun double espace dans `fr.json` |
+| Guillemets FR | ✅ « Créé avec TutoClick » avec une espace fine insécable, plus aucun double espace dans `fr.json` |
 | Couleurs hexadécimales | ✅ Affichées et enregistrées en majuscules dans l'interface. Dans les fichiers `.css`, Prettier les remet en minuscules : sans effet sur le rendu, accepté |
 | L1 `Sparkles` (auth) | ❌ Toujours dans `AuthLayout.tsx:30`. Le retour L1 est parti après `4cac555` |
 | Nouveau (mineur) | Variations des KPI (A1) : « Taux de complétion » et « Leads » n'ont pas de variation, contrairement aux trois autres tuiles → afficher la variation partout, ou « — » quand il n'y a pas de période de référence, pour garder des tuiles homogènes |
@@ -672,3 +672,106 @@ Le dev a livré **sans avoir vu `commentaires.md`**. Il a pourtant bien suivi la
 | CM7 | ℹ️ | Mention « Internes à l'équipe, jamais publiés », sans icône | Clé `private` : « Interne à l'équipe · jamais publié », avec l'icône `Lock` de 14 px, **sous** le titre. Utiliser les **49 clés `editor.comments.*`** de `docs/ux/i18n` |
 | CM8 | ℹ️ | Poignée de 40 × 4 px, hauteur minimale de 120 px, icône d'envoi `Send` | Accepté tel quel : écarts mineurs sans effet sur l'usage |
 | CM9 | ? | États non visibles sur les captures : vide, tout résolu, filtre « résolus », modification, replié, chargement, erreur d'envoi, lecture seule, **mobile** (lire et répondre depuis l'écran « écran plus large ») | Ajouter des captures `25b` à `25h` pour ces états. Je les vérifierai contre `maquettes/refonte/editeur.html` (barre d'états) et `commentaires-mobile.html` |
+
+## Recette commentaires (79267c3 / e360960) et RF1–RF7
+
+Captures `docs/tech/captures/finition/25*.png` (clair et sombre), relues le 17/11.
+- **CM1–CM9 : conformes.** En-tête avec badge « n ouverts », mention « Interne à l'équipe · jamais publié », avatars de couleur stable avec texte lisible, liens cliquables, saisie en pilule, vue mobile (25i) avec sélecteur d'étape et actions sous le texte.
+- **Arbitrage lecteur** (chef d'équipe) : le lecteur lit et ajoute des commentaires. Il agit seulement sur les siens. `commentaires.md` §3 est mis à jour.
+- Point mineur (non bloquant) : sur 25, le badge annonce « 2 ouverts » et un seul commentaire est visible sans défiler. Vérifier que la liste s'ouvre sur le **plus ancien commentaire non lu**, pas tout en bas. Sinon, afficher la pilule « n autres ↑ ».
+- **RF1–RF7 : conformes** à la lecture des captures 10 et 11 (KPI sans troncature à 1 440 px avec 4 KPI, héro vert avec texte noir, « Analytics » actif). RF3 (ellipse avec 5 KPI) est accepté tel que décrit par le dev.
+
+## Recette F1 : parcours guidés (main @ 15b0a14)
+
+**Périmètre** : `a2-editeur.md` §1 (Spotlight), §2 (pop-up), §3 (checklist), §5 (menu de choix), plus la lecture automatique.
+- **Éditeur** : faux Supabase, 1 440 et 1 024 px, en clair et en sombre.
+- **Player** : `apps/player` en local, avec un manifeste de test (Spotlight, pop-up « Consigne » avec 3 choix, 2 chapitres, checklist), à 1 280 et 390 px.
+
+Le player en production n'a aucune démo F1 publiée, et je ne crée pas de contenu en production : la recette du player sur le site réel reste à faire sur une démo de recette publiée par le chef d'équipe.
+
+Exclus, reportés par le dev : le cadre Navigateur / Mobile et le fond Image.
+
+**Conforme :**
+- **Mode de lecture (éditeur)** : cartes illustrées Visite guidée / Spotlight avec `aria-pressed`, aide « valent pour toute la démo ». L'aperçu du canevas passe en Spotlight : voile, trou et anneau framboise, bulle au-dessus du voile.
+- **Player Spotlight** : voile en SVG avec la zone éclairée, anneau framboise, bulle lisible.
+- **Pop-up** : choix Plein écran / Pop-up, variante, icône, fond « Capture floutée / Couleur », libellé du bouton (« Vide = Suivant »). Dans le player : carte centrée sur la capture floutée, badge Information / Consigne, `role="dialog"`.
+- **Menu de choix** :
+  - éditeur : bloc par choix (libellé, puis destination et corbeille), « Ajouter un choix », icône `GitBranch` sur la vignette du rail ;
+  - player : boutons pleine largeur avec chevron, **focus sur le premier choix**, « Précédent », navigation vers l'étape cible vérifiée.
+- **Checklist** :
+  - réglages : interrupteur, titre, position Gauche / Droite / Repliée, aide « un élément par chapitre » ;
+  - player : carte « n sur N terminées », barre orange sur piste pâle, élément terminé avec `CircleCheck` et texte barré ;
+  - mobile : pilule « Votre progression 1/2 ».
+- **Lecture automatique** : interrupteur avec l'aide « s'arrête sur un formulaire, un menu de choix ou la dernière étape ».
+- **Mobile 390 px** : bulle en feuille du bas, pop-up pleine largeur. Aucune erreur JS dans tous les scénarios.
+
+**Écarts :**
+
+| N° | Écart | Gravité | Correction attendue |
+|---|---|---|---|
+| F1-1 | Dans le **canevas de l'éditeur en sombre**, la pop-up prend le thème sombre de l'app, alors que le player reste au thème de la démo | Moyenne | Envelopper le rendu de l'étape dans `.fd-player-scope`, comme pour les captures |
+| F1-2 | **Fond « Capture floutée »** : le canevas de l'éditeur montre un fond uni sombre. Le player, lui, floute bien l'étape précédente | Mineure | Afficher la capture précédente floutée dans le canevas aussi (WYSIWYG, §0) |
+| F1-3 | **Checklist à 1 280 px** : la carte déborde d'environ 100 px sur la capture, en bas à droite, et peut cacher un hotspot | Moyenne | La placer **hors du cadre** quand la place le permet (largeur de la carte + 16 px de chaque côté). Sinon, la replier en pilule comme en mobile. Elle ne doit jamais recouvrir le hotspot courant |
+| F1-4 | **Checklist** : le chapitre est coché « terminé » dès l'**affichage** de sa dernière étape (élément à la fois barré et « en cours ») | Mineure | Le cocher quand on **quitte** la dernière étape (Suivant ou choix), comme dit la spec |
+| F1-5 | **Titre de la checklist** vide dans l'éditeur, sans placeholder, alors que le player affiche « Votre progression » | Mineure | Placeholder « Votre progression » dans le champ |
+| F1-6 | **Commentaires à 1 024 px** : l'état vide déborde sur la saisie (texte superposé au champ) | Mineure | Hauteur minimale du panneau pour l'état vide, ou texte sur une seule ligne avec ellipse |
+
+**Hors F1, à noter :** le pied du player affichait « Créé avec FlowDSIML ». Le nom définitif est **TutoClick** (logo client) : renommage transmis au dev avec les fichiers de `brand-tutoclic/production/`.
+
+### Recette F1, suite : données sensibles, RGPD, commentaires (dev d6e105b, 19131d1)
+
+Faite sur les captures du dev (`docs/tech/captures/f1/`).
+
+**Conforme :**
+- **Vérification avant envoi** :
+  - en-tête avec le badge « Analyse terminée » ;
+  - alerte qui résume les détections ;
+  - tout est coché par défaut ;
+  - extraits masqués en mono ;
+  - légende des 3 états ;
+  - pied fixe avec la mention de confidentialité ;
+  - types ajoutés à la demande du chef d'équipe (IBAN, identifiant).
+- **Modale RGPD** : bilan (zones floutées, détections non floutées, commentaires jamais publiés), 2 cases obligatoires, bouton désactivé avec aide. Le lien « Choisir Invitation… » est masqué tant que F3 n'existe pas : accepté.
+- **Commentaires** : la liste s'ouvre sur le premier commentaire non lu, avec la pilule « n commentaires plus anciens ↑ ». Le point mineur de la recette précédente est réglé.
+
+**Écarts :**
+
+| N° | Écart | Gravité | Correction attendue |
+|---|---|---|---|
+| F1-7 | « Test · **1 captures** » et « sur 1 **capture(s)** » : pluriels non gérés | Mineure | Utiliser les clés `_one` / `_other` (`extension.piiCheck.summary_*`, et un nouveau `subtitle_one` / `subtitle_other`) |
+| F1-8 | La pilule « n commentaires plus anciens » recouvre l'en-tête du premier commentaire affiché | Mineure | La poser dans une bande de 40 px au-dessus de la liste, ou décaler la liste de sa hauteur |
+| F1-9 | Nom du produit : `7189281` utilise « Tutoclic ». Le nom définitif est **TutoClick** (logo client) | Moyenne | Changer la constante et brancher les fichiers de `docs/ux/brand-tutoclic/production/` (a73672b) |
+
+## Recette F2 : quiz de validation (dev 020450e, côté player)
+
+**Conditions :**
+- player de `claude/dev-mvp` en local, avec le manifeste du test du dev ;
+- test `quiz-player.e2e.cjs` relancé : **21 vérifications sur 21**, sans erreur JS ;
+- mes contrôles : clavier seul, 390 et 1 280 px.
+
+L'**éditeur de quiz** (spec §2) n'est pas encore livré : la recette porte seulement sur le player.
+
+**Conforme :**
+- `fieldset` / `legend` avec l'énoncé, aide « Une seule réponse possible », vrais `input` dans des `label` ;
+- **anneau de focus bleu** sur l'option au clavier ;
+- sans réponse, message en `role="alert"` et focus sur la première option ;
+- correction par **texte et icône** (« Bonne réponse », « Votre réponse », « Bonne réponse non cochée »), options désactivées, explication en `role="status"`, focus sur le titre de la correction ;
+- « Revoir l'étape n du module », puis retour sur la même question ;
+- résultat :
+  - anneau décoratif avec le trait du seuil ;
+  - badge « Module validé » vert avec texte noir, ou « Pas encore validé » neutre, jamais en framboise ;
+  - phrase de score complète, détail par question avec « Revoir » ;
+  - focus sur le titre ;
+  - tentatives décomptées et score recalculé côté serveur.
+- **Mobile 390 px** : boutons pleine largeur, pas de défilement horizontal.
+
+**Écarts :**
+
+| N° | Écart | Gravité | Correction attendue |
+|---|---|---|---|
+| F2-1 | « Score : **1 bonnes réponses** sur 3 » : pluriel non géré | Mineure | Ajouter `player.quiz.scoreLine_one` / `_other` (ou `correct_one` / `_other`) |
+| F2-2 | Pendant le quiz et sur l'écran de résultat, la **barre du player** reste active : compteur incohérent (« 1/2 » sur le résultat, « 2/2 » pendant les questions), bouton Précédent actif, et flèches ← → du clavier | Moyenne | Pendant le quiz : remplacer le compteur par « Quiz », désactiver Précédent / Suivant et les raccourcis ← → (la navigation se fait dans la carte du quiz) |
+| F2-3 | La barre de progression du quiz est **orange** (couleur des graphiques). La spec et la maquette la prévoient **prune** | Mineure | `primary` sur piste `chart-track`, comme la maquette `f2-quiz.html` |
+| F2-4 | À 390 px, un aplat clair dépasse sous la carte du quiz (la scène du player visible derrière) | Mineure | Masquer la scène derrière la carte, ou lui donner le fond du player |
+| F2-5 | « Créé avec Tutoclic » : le nom définitif est **TutoClick** | Moyenne | Voir F1-9 |
+| F2-6 | Éditeur de quiz (§2) non livré | Info | À planifier : liste des questions, types, bonne réponse avec contour vert, explication, étape liée, seuil et tentatives, « Tester le quiz » |
