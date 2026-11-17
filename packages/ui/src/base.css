@@ -385,19 +385,20 @@ input[type='radio'] {
   background: var(--fd-color-info-soft);
   color: var(--fd-color-text);
   margin-bottom: var(--fd-space-4);
-  border-left: 3px solid var(--fd-color-info);
+  /* Bordure fine et uniforme : pas de barre d'accent latérale (motif proscrit, cf. composants.md). */
+  border: 1px solid color-mix(in srgb, var(--fd-color-info) 30%, transparent);
 }
 .fd-alert--error {
   background: var(--fd-color-danger-soft);
-  border-left-color: var(--fd-color-danger);
+  border-color: color-mix(in srgb, var(--fd-color-danger) 30%, transparent);
 }
 .fd-alert--success {
   background: var(--fd-color-success-soft);
-  border-left-color: var(--fd-color-success);
+  border-color: color-mix(in srgb, var(--fd-color-success) 30%, transparent);
 }
 .fd-alert--warning {
   background: var(--fd-color-warning-soft);
-  border-left-color: var(--fd-color-warning);
+  border-color: color-mix(in srgb, var(--fd-color-warning) 30%, transparent);
 }
 .fd-muted {
   color: var(--fd-color-text-muted);
