@@ -441,3 +441,18 @@ Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** :
 | Couleurs hexadécimales | ✅ Affichées et enregistrées en majuscules dans l'interface. Dans les fichiers `.css`, Prettier les remet en minuscules : sans effet sur le rendu, accepté |
 | L1 `Sparkles` (auth) | ❌ Toujours dans `AuthLayout.tsx:30`. Le retour L1 est parti après `4cac555` |
 | Nouveau (mineur) | Variations des KPI (A1) : « Taux de complétion » et « Leads » n'ont pas de variation, contrairement aux trois autres tuiles → afficher la variation partout, ou « — » quand il n'y a pas de période de référence, pour garder des tuiles homogènes |
+
+### Arbitrages design (questions du dev, 17 nov., `ff3c5ee`)
+
+- **W18, espacements** : on **garde 24 px et 20 px**, qui sont les valeurs du rythme de référence (`composants.md` §15.4). Pas de passage de `space-6` à `space-8`. Les seules valeurs à 32 px sont le padding de page sur ordinateur et celui des modales. La ligne W18 est close.
+- **P12, aperçu sur la page de partage** : une **capture statique de la première étape**, pas d'iframe. Raisons :
+  1. Une iframe chargerait le vrai player, donc compterait des vues et des événements `track` et fausserait les analytics du client.
+  2. Elle est lourde à charger.
+  3. Elle peut être bloquée par la liste des sites autorisés à intégrer la démo.
+
+  Spécification :
+  - image de l'étape 1 au ratio 16:10, rayon `lg`, bordure 1 px, fond `player-backdrop` ;
+  - pastille du hotspot rendue avec `player-core` en mode statique, sans pulsation ;
+  - titre de la démo et « N étapes » sous l'image ;
+  - bouton secondaire « Ouvrir l'aperçu » (`ExternalLink`) qui ouvre le player dans un nouvel onglet **avec `?preview=1`**, pour que ces visites ne soient pas comptées ;
+  - si la démo n'a pas encore d'étape : état vide avec l'icône `Image` et le texte « L'aperçu apparaîtra après la première capture ».
