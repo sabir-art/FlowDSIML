@@ -22,6 +22,7 @@ const SCREENS = {
   'CAD-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
   'DSH-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
   'PLN-01': { maquette: 'plans.html', route: '/#/settings/plans' },
+  'ANA-01': { maquette: 'analytics.html', route: '/#/analytics' },
   'CNX-01': {
     maquette: 'connexion.html',
     route: '/#/login',

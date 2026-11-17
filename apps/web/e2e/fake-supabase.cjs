@@ -384,6 +384,55 @@ async function install(page, state = seed()) {
             ],
             sources: { direct: 62, embed: 34, link: 24 },
           });
+        case 'workspace_analytics': {
+          // Agrégats synthétiques déterministes (comme workspace_kpis) + série et sources
+          const previous = a.p_to && Date.parse(a.p_to) < Date.now() - 86400000;
+          const pub = t.demos.filter(
+            (d) => d.status === 'published' && !d.deleted_at && (!a.p_demo || d.id === a.p_demo),
+          ).length;
+          const k = previous ? 0.85 : 1;
+          const views = Math.round(267 * pub * k);
+          const days = Math.max(
+            1,
+            Math.round((Date.parse(a.p_to || new Date().toISOString()) - Date.parse(a.p_from)) / 86400000),
+          );
+          const daily = Array.from({ length: days }, (_, i) => {
+            const day = new Date(Date.parse(a.p_to || new Date().toISOString()) - (days - 1 - i) * 86400000)
+              .toISOString()
+              .slice(0, 10);
+            const v = Math.round((views / days) * (0.7 + 0.6 * Math.abs(Math.sin(i / 3))));
+            return { day, views: v, completions: Math.round(v * 0.62) };
+          });
+          return json(route, 200, {
+            views,
+            visitors: Math.round(views * 0.65),
+            completions: Math.round(views * 0.65 * 0.64),
+            ctaClicks: Math.round(views * 0.05),
+            leads: Math.round(views * 0.0266),
+            daily,
+            sources: {
+              embed: Math.round(views * 0.6),
+              link: Math.round(views * 0.21),
+              direct: Math.round(views * 0.19),
+            },
+          });
+        }
+        case 'workspace_sessions': {
+          const rows = t.leads.slice(0, 30).map((l, i) => ({
+            session_id: `s${i}`,
+            demo_id: l.demo_id,
+            source: ['link', 'embed', 'direct'][i % 3],
+            started_at: new Date(Date.now() - (i + 1) * 3 * 3600000).toISOString(),
+            duration_s: 48 + ((i * 37) % 160),
+            max_step: i % 2 ? 3 : 5,
+            completed: i % 2 === 0,
+            steps_total: 6,
+            lead_email: i % 3 === 1 ? null : l.email,
+            lead_fields: i % 3 === 1 ? null : l.fields,
+          }));
+          const off = a.p_offset || 0;
+          return json(route, 200, { total: rows.length, rows: rows.slice(off, off + (a.p_limit || 25)) });
+        }
         case 'quiz_stats':
           return json(
             route,

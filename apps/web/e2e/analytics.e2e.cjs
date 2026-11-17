@@ -38,15 +38,37 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   ]);
   ok(dl.suggestedFilename().endsWith('.csv'), 'export CSV de l’entonnoir');
 
+  // Analytics du workspace (ANA-01) : 5 KPI, période, filtre par démo, onglets
   await page.goto(`${APP}/#/analytics`);
-  await page.waitForSelector('.fd-table tbody tr');
-  ok((await page.locator('.fd-table tbody tr').count()) === 2, 'analytics du workspace : une ligne par démo');
-  await page.getByRole('button', { name: '7 jours' }).click();
-  await page.waitForTimeout(300);
+  await page.waitForSelector('.mk .kpis .kpi');
+  ok((await page.locator('.kpis .kpi').count()) === 5, 'analytics du workspace : 5 KPI');
+  ok((await page.locator('svg.chart').count()) === 1, 'courbe vues et complétions');
+  ok((await page.locator('.funnel-row[role=row]').count()) >= 2, 'parcours étape par étape');
+  await page.getByRole('radio', { name: '7 j' }).click();
+  await page.waitForTimeout(400);
   ok(
-    state.calls.some((c) => c.path.endsWith('/workspace_overview') && c.body.p_days === 7),
-    'changement de période',
+    state.calls.some(
+      (c) =>
+        c.path.endsWith('/workspace_analytics') &&
+        Math.round((Date.parse(c.body.p_to) - Date.parse(c.body.p_from)) / 86400000) === 7,
+    ),
+    'changement de période (7 j)',
   );
+  await page.getByLabel('Démo', { exact: true }).selectOption({ index: 1 });
+  await page.waitForTimeout(400);
+  ok(
+    state.calls.some((c) => c.path.endsWith('/workspace_analytics') && c.body.p_demo),
+    'filtre par démo',
+  );
+  await page.getByRole('tab', { name: 'Sessions' }).click();
+  await page.waitForSelector('#an-panel-sessions table');
+  ok(
+    state.calls.some((c) => c.path.endsWith('/workspace_sessions')),
+    'onglet Sessions',
+  );
+  await page.getByRole('tab', { name: /Leads/ }).click();
+  await page.waitForSelector('#an-panel-leads');
+  ok(true, 'onglet Leads');
 
   await page.goto(`${APP}/#/leads`);
   await page.waitForSelector('text=prospect@globex.example');

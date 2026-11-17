@@ -713,8 +713,14 @@ isOneToOne: false
 "set_comment_resolved":
 { Args: { "p_comment": string,"p_resolved": boolean }; Returns: undefined
                            },
+"workspace_analytics":
+{ Args: { "p_demo"?: string | null,"p_from": string,"p_source"?: string | null,"p_to"?: string,"p_workspace": string }; Returns: Json
+                           },
 "workspace_kpis":
 { Args: { "p_from": string,"p_to"?: string,"p_workspace": string }; Returns: Json
+                           },
+"workspace_sessions":
+{ Args: { "p_demo"?: string | null,"p_from": string,"p_limit"?: number,"p_offset"?: number,"p_source"?: string | null,"p_to"?: string,"p_workspace": string }; Returns: Json
                            },
 "workspace_usage":
 { Args: { "p_workspace": string }; Returns: Json

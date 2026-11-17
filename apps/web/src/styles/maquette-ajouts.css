@@ -580,3 +580,166 @@
 .mk a.btn {
   text-decoration: none;
 }
+
+/* ---- Analytics du workspace (ANA-01) : styles de page et styles en ligne d'analytics.html ---- */
+.mk.an {
+  background: transparent;
+}
+.mk .chart-card {
+  padding: 20px 24px;
+}
+.mk .chart {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+.mk .chart .grid line {
+  stroke: var(--fd-color-border);
+}
+.mk .chart text {
+  fill: var(--fd-color-text-subtle);
+  font: 11px var(--fd-font-sans);
+}
+.mk .funnel {
+  display: grid;
+  gap: 8px;
+}
+.mk .funnel-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 64px 72px;
+  gap: 12px;
+  align-items: center;
+  font-size: var(--fd-text-body-size);
+}
+.mk .funnel-bar {
+  height: 28px;
+  border-radius: 6px;
+  background: var(--fd-color-surface-sunken);
+  position: relative;
+  overflow: hidden;
+}
+.mk .funnel-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--fd-color-chart-1);
+  opacity: 0.9;
+  border-radius: 6px;
+}
+.mk .funnel-bar > b {
+  position: relative;
+  z-index: 1;
+  padding: 0 10px;
+  line-height: 28px;
+  font-weight: 500;
+  color: var(--fd-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+.mk .funnel-bar > span + b {
+  color: #fff;
+}
+:root[data-theme='dark'] .mk .funnel-bar > span + b {
+  color: var(--fd-lagoon-950);
+}
+.mk .drop {
+  color: var(--fd-color-danger);
+  font-weight: 600;
+}
+.mk .two {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 1100px) {
+  .mk .two {
+    grid-template-columns: 1fr;
+  }
+}
+.mk .legend {
+  display: flex;
+  gap: 16px;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+}
+.mk .legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+.mk .legend .an-l1 {
+  background: var(--fd-color-chart-1);
+}
+.mk .legend .an-l2 {
+  background: var(--fd-color-chart-2);
+}
+.mk .an-sub {
+  margin-top: 4px;
+}
+.mk .an-select {
+  width: auto;
+}
+.mk .an-tabs {
+  margin-bottom: 24px;
+}
+.mk .an-two {
+  margin-top: 16px;
+}
+.mk .an-sources {
+  gap: 14px;
+  margin-top: 16px;
+}
+.mk .an-progress {
+  margin-top: 6px;
+}
+.mk .an-funnel-card {
+  margin-top: 16px;
+}
+.mk .an-funnel-sub {
+  margin-top: 2px;
+}
+.mk .an-funnel {
+  margin-top: 16px;
+}
+.mk .an-r {
+  text-align: right;
+}
+.mk .an-alert {
+  margin-top: 16px;
+}
+.mk .an-empty {
+  margin: 16px 0 0;
+}
+.mk .an-arrow {
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
+  margin-right: 2px;
+}
+.mk .an-warn {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+.mk .an-soon {
+  height: 16px;
+}
+.mk .segmented button svg {
+  width: 16px;
+  height: 16px;
+}
+.mk .an-anon {
+  background: var(--fd-stone-200);
+  color: var(--fd-stone-700);
+}
+.mk .an-pager {
+  padding: 12px 16px;
+}
+.mk .an-leads {
+  padding: var(--fd-space-4);
+}
