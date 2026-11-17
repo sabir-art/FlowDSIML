@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics avancées — FlowDSIML (lot A4)</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img src="../../assets/symbole-dsi.svg" alt="">
+      <span><span class="brand__name">FlowDSIML</span><span class="brand__sub">DSI des Missions Locales</span></span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html" aria-current="page"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Éditrice</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main" data-view="live">
+    <header class="topbar">
+      <a class="icon-btn" href="analytics.html" aria-label="Retour"><i data-icon="arrowLeft"></i></a>
+      <div><h1>Inscription au parcours CEJ</h1><p class="sub">Analytics · publiée, version 3</p></div>
+      <div class="topbar__actions"><button class="fd-btn" type="button" data-view-set="alerts"><i data-icon="bell"></i>Alertes · 2</button><button class="fd-btn" type="button"><i data-icon="download"></i>Exporter</button></div>
+    </header>
+    <div class="fd-tabs" role="tablist" aria-label="Vues analytics" style="max-width:720px;margin-bottom:20px">
+      <button role="tab" type="button" aria-selected="false">Vue d'ensemble</button>
+      <button role="tab" type="button" aria-selected="true" data-view-set="live">Temps réel</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="sessions">Sessions</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="devices">Appareils</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="surveys">Sondages et tests</button>
+    </div>
+    <div class="filterbar" aria-label="Filtres actifs">
+      <div class="fd-segmented" role="group" aria-label="Période"><button type="button" aria-pressed="false">7 j</button><button type="button" aria-pressed="true">30 j</button><button type="button" aria-pressed="false">90 j</button><button type="button" aria-pressed="false"><i data-icon="calendar"></i>Dates</button></div>
+      <span class="fchip">Source : <b>Intégration site</b><button type="button" aria-label="Retirer le filtre Source"><i data-icon="x"></i></button></span>
+      <span class="fchip">Appareil : <b>Mobile</b><button type="button" aria-label="Retirer le filtre Appareil"><i data-icon="x"></i></button></span>
+      <button class="fd-btn fd-btn--sm" type="button"><i data-icon="filter"></i>Ajouter un filtre</button>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"><i data-icon="save"></i>Enregistrer comme segment</button>
+      <span style="margin-left:auto" class="fd-help">Segments : <a href="#">Jeunes en mobile</a> · <a href="#">Liens conseillers</a></span>
+    </div>
+
+    <!-- Temps réel -->
+    <section data-pane="live" style="flex-direction:column;gap:20px">
+      <div class="kpis" style="margin:0">
+        <article class="fd-card fd-card--hero fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="activity"></i></span><span class="fd-kpi__label">Visiteurs en ce moment</span></div><span class="fd-kpi__value">7</span><span class="fd-kpi__foot"><span class="live-dot" aria-hidden="true"></span>Mis à jour en direct</span></article>
+        <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="eye"></i></span><span class="fd-kpi__label">Vues · 30 dernières min</span></div><span class="fd-kpi__value">23</span><span class="fd-kpi__foot">dont 4 terminées</span></article>
+        <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="cursorClick"></i></span><span class="fd-kpi__label">Clics CTA · aujourd'hui</span></div><span class="fd-kpi__value">5</span><span class="fd-kpi__foot">«&nbsp;Prendre rendez-vous&nbsp;»</span></article>
+        <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="mail"></i></span><span class="fd-kpi__label">Leads · aujourd'hui</span></div><span class="fd-kpi__value">2</span><span class="fd-kpi__foot">Dernier il y a 12 min</span></article>
+      </div>
+      <article class="fd-card">
+        <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="users"></i></span><h2 class="fd-card__title">Visiteurs actifs</h2><span class="fd-help">Rafraîchi toutes les 10 s · <button class="cm-link" type="button">Mettre en pause</button></span></div>
+        <ul class="live-list" aria-live="off">
+          <li><span class="avatar" style="background:var(--fd-color-chart-3);color:var(--fd-color-text)">V1</span><span><b>Visiteur anonyme</b><small>Rennes · Mobile · Intégration site</small></span><span><span class="mini-steps" aria-label="Étape 4 sur 6"><span class="on"></span><span class="on"></span><span class="on"></span><span class="cur"></span><span></span><span></span></span><small>Étape 4 · Formulaire de contact</small></span><span class="fd-help">depuis 1 min</span></li>
+          <li><span class="avatar" style="background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)">LM</span><span><b>lea.martin@exemple.fr</b><small>Lien personnalisé « Atelier Brume » · Ordinateur</small></span><span><span class="mini-steps" aria-label="Étape 6 sur 6"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="cur"></span></span><small>Étape 6 · Confirmation</small></span><span class="fd-help">depuis 3 min</span></li>
+          <li><span class="avatar" style="background:var(--fd-color-chart-1);color:var(--fd-color-text)">V2</span><span><b>Visiteur anonyme</b><small>Lyon · Ordinateur · Lien direct</small></span><span><span class="mini-steps" aria-label="Étape 2 sur 6"><span class="on"></span><span class="cur"></span><span></span><span></span><span></span><span></span></span><small>Étape 2 · Éligibilité</small></span><span class="fd-help">depuis 20 s</span></li>
+        </ul>
+      </article>
+    </section>
+
+    <!-- Sessions -->
+    <section data-pane="sessions" class="sess-detail">
+      <article class="fd-card">
+        <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="users"></i></span><h2 class="fd-card__title">Sessions · 412</h2><button class="fd-btn fd-btn--sm" type="button"><i data-icon="download"></i>CSV</button></div>
+        <table class="fd-table"><thead><tr><th>Visiteur</th><th>Début</th><th>Durée</th><th>Progression</th><th>Issue</th></tr></thead><tbody>
+          <tr style="background:var(--fd-color-primary-soft)"><td><b>lea.martin@exemple.fr</b></td><td>17 nov., 15:41</td><td>3 min 12</td><td><span class="mini-steps" style="width:120px" aria-label="6 étapes sur 6"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span></span></td><td><span class="fd-badge fd-badge--live">Lead + CTA</span></td></tr>
+          <tr><td>Visiteur anonyme · Rennes</td><td>17 nov., 15:38</td><td>1 min 05</td><td><span class="mini-steps" style="width:120px" aria-label="3 étapes sur 6"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span></span></td><td><span class="fd-badge">Abandon étape 4</span></td></tr>
+          <tr><td>Visiteur anonyme · Lyon</td><td>17 nov., 15:20</td><td>2 min 40</td><td><span class="mini-steps" style="width:120px" aria-label="6 étapes sur 6"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span></span></td><td><span class="fd-badge">Terminée</span></td></tr>
+        </tbody></table>
+      </article>
+      <aside class="fd-card">
+        <div class="fd-card__head"><span class="avatar" style="background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)">LM</span><div><h2 class="fd-card__title">lea.martin@exemple.fr</h2><span class="fd-help">Ordinateur · Chrome · Paris · Lien perso « Atelier Brume »</span></div></div>
+        <ol class="timeline">
+          <li><span class="ic"><i data-icon="play"></i></span><span>Ouverture de la démo</span><small>0:00</small></li>
+          <li><span class="ic"><i data-icon="target"></i></span><span>Étapes 1 à 3</span><small>0:48</small></li>
+          <li><span class="ic lead"><i data-icon="mail"></i></span><span>Formulaire envoyé</span><small>1:30</small></li>
+          <li><span class="ic"><i data-icon="gitBranch"></i></span><span>Choix : « Je cherche un emploi »</span><small>1:52</small></li>
+          <li><span class="ic cta"><i data-icon="cursorClick"></i></span><span>Clic CTA « Prendre rendez-vous »</span><small>3:12</small></li>
+        </ol>
+      </aside>
+    </section>
+
+    <!-- Appareils -->
+    <section data-pane="devices" class="dev-grid">
+      <article class="fd-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="monitor"></i></span><h2 class="fd-card__title">Appareils</h2></div>
+        <div class="hbar"><span>Ordinateur</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:58%"></span></span><b>58 %</b></div>
+        <div class="hbar"><span>Mobile</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:37%"></span></span><b>37 %</b></div>
+        <div class="hbar"><span>Tablette</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:5%"></span></span><b>5 %</b></div>
+        <p class="fd-help">Taux de complétion : ordinateur 56 % · mobile 44 % · tablette 50 %.</p></article>
+      <article class="fd-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="globe"></i></span><h2 class="fd-card__title">Navigateurs</h2></div>
+        <div class="hbar"><span>Chrome</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:61%"></span></span><b>61 %</b></div>
+        <div class="hbar"><span>Safari</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:22%"></span></span><b>22 %</b></div>
+        <div class="hbar"><span>Edge</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:11%"></span></span><b>11 %</b></div>
+        <div class="hbar"><span>Firefox</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:6%"></span></span><b>6 %</b></div></article>
+      <article class="fd-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="mapPin"></i></span><h2 class="fd-card__title">Villes</h2></div>
+        <div class="hbar"><span>Rennes</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:34%"></span></span><b>34 %</b></div>
+        <div class="hbar"><span>Lyon</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:18%"></span></span><b>18 %</b></div>
+        <div class="hbar"><span>Paris</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:15%"></span></span><b>15 %</b></div>
+        <div class="hbar"><span>Autres</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:33%"></span></span><b>33 %</b></div>
+        <p class="fd-help">Localisation approximative déduite au moment de la visite. L'adresse IP n'est pas conservée.</p></article>
+    </section>
+
+    <!-- Sondages, choix, A/B -->
+    <section data-pane="surveys" class="surv-grid">
+      <article class="fd-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="chart"></i></span><h2 class="fd-card__title">Recommandation · 0 à 10</h2><span class="fd-help">86 réponses</span></div>
+        <p style="margin:0 0 12px"><b style="font-size:1.75rem;font-weight:800">+32</b> <span class="fd-help">score (promoteurs 9-10 moins détracteurs 0-6)</span></p>
+        <div class="nps-bars" aria-hidden="true"><span class="lo" style="height:4%"></span><span class="lo" style="height:2%"></span><span class="lo" style="height:4%"></span><span class="lo" style="height:6%"></span><span class="lo" style="height:4%"></span><span class="lo" style="height:10%"></span><span class="lo" style="height:12%"></span><span style="height:30%"></span><span style="height:52%"></span><span style="height:80%"></span><span style="height:100%"></span></div>
+        <div class="nps-axis" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+        <p class="fd-help">Tableau des valeurs disponible pour les lecteurs d'écran. Réponses libres : <a href="#">voir les 23 commentaires</a>.</p></article>
+      <article class="fd-card"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="gitBranch"></i></span><h2 class="fd-card__title">Menu de choix · étape 3</h2><span class="fd-help">298 visiteurs</span></div>
+        <div class="hbar"><span>Je cherche un emploi</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:54%"></span></span><b>54 %</b></div>
+        <div class="hbar"><span>Je veux me former</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:31%"></span></span><b>31 %</b></div>
+        <div class="hbar"><span>Autre</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:15%"></span></span><b>15 %</b></div>
+        <p class="fd-help">Complétion après le choix : emploi 61 % · formation 48 % · autre 22 %.</p></article>
+      <article class="fd-card" style="grid-column:1/-1"><div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="activity"></i></span><h2 class="fd-card__title">Test A/B · bulle de l'étape 2</h2><span class="fd-badge" style="background:var(--fd-color-trend-up-soft)">En cours · J+6</span></div>
+        <div class="ab-res"><div><span class="fd-help">Variante A · 206 visiteurs</span><b>41 %</b><span class="fd-help">taux de complétion</span></div><div class="win"><span class="fd-help">Variante B · 206 visiteurs</span><b>52 %</b><span class="fd-help">taux de complétion</span></div></div>
+        <p style="margin:0">B mène de 11 points sur 412 visiteurs. <span class="fd-help">Résultat fiable à partir d'environ 1 000 visiteurs.</span></p></article>
+    </section>
+
+    <!-- Alertes -->
+    <section data-pane="alerts" style="flex-direction:column;gap:20px;max-width:860px">
+      <article class="fd-card" style="display:flex;flex-direction:column;gap:12px">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="bell"></i></span><h2 class="fd-card__title">Alertes de la démo</h2><button class="fd-btn fd-btn--primary fd-btn--sm" type="button"><i data-icon="plus"></i>Nouvelle alerte</button></div>
+        <div class="alert-row"><span class="fd-icon-chip"><i data-icon="mail"></i></span><span><b>À chaque nouveau lead</b><small>E-mail à alice@exemple.fr · dans l'app</small></span><span class="fd-badge fd-badge--live">Active</span><label class="fd-switch"><span class="cm-sr">Activer</span><input type="checkbox" checked><span class="fd-switch__track"></span></label></div>
+        <div class="alert-row"><span class="fd-icon-chip"><i data-icon="trendDown"></i></span><span><b>Le taux de complétion passe sous 40 %</b><small>Sur 7 jours glissants · résumé quotidien à 9 h</small></span><span class="fd-badge fd-badge--live">Active</span><label class="fd-switch"><span class="cm-sr">Activer</span><input type="checkbox" checked><span class="fd-switch__track"></span></label></div>
+        <div class="alert-row"><span class="fd-icon-chip"><i data-icon="activity"></i></span><span><b>Visite d'un lien personnalisé</b><small>« Atelier Brume » · dans l'app</small></span><span class="fd-badge">En pause</span><label class="fd-switch"><span class="cm-sr">Activer</span><input type="checkbox"><span class="fd-switch__track"></span></label></div>
+      </article>
+      <article class="fd-card" style="display:flex;flex-direction:column;gap:16px">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="plus"></i></span><h2 class="fd-card__title">Nouvelle alerte</h2></div>
+        <div class="row-2"><div class="fd-field" style="margin:0"><label class="fd-label" for="al1">Quand</label><select class="fd-select" id="al1"><option>Un nouveau lead arrive</option><option>Un CTA est cliqué</option><option>Un lien personnalisé est ouvert</option><option>Le taux de complétion passe sous…</option><option>Les vues dépassent…</option></select></div><div class="fd-field" style="margin:0"><label class="fd-label" for="al2">Seuil</label><input class="fd-input" id="al2" value="40 %"></div></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Prévenir par</span><div style="display:flex;gap:16px;flex-wrap:wrap"><label class="fd-check"><input type="checkbox" checked> Dans l'app</label><label class="fd-check"><input type="checkbox" checked> E-mail</label><label class="fd-check"><input type="checkbox"> Slack (lot A5)</label></div></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Fréquence</span><div class="fd-segmented" role="group" aria-label="Fréquence"><button type="button" aria-pressed="true">Immédiate</button><button type="button" aria-pressed="false">Résumé quotidien</button><button type="button" aria-pressed="false">Hebdomadaire</button></div></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button class="fd-btn" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button">Créer l'alerte</button></div>
+      </article>
+    </section>
+  </main>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

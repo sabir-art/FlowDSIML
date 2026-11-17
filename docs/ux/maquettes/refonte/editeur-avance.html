@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Éditeur avancé — FlowDSIML (lot A2)</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div class="ed" data-view="modes" style="position:relative">
+  <header class="ed-top">
+    <a class="icon-btn" href="dashboard.html" aria-label="Retour aux démos"><i data-icon="arrowLeft"></i></a>
+    <img src="../../assets/symbole-dsi.svg" alt="" width="28" height="31">
+    <label><span hidden>Titre de la démo</span><input class="fd-input title" value="Inscription au parcours CEJ"></label>
+    <span class="fd-badge fd-badge--draft">Brouillon · enregistré</span>
+    <div class="fd-segmented fd-segmented--strong tools" role="group" aria-label="Outil">
+      <button type="button" aria-pressed="true"><i data-icon="pointer"></i>Sélection</button>
+      <button type="button" aria-pressed="false"><i data-icon="target"></i>Hotspot</button>
+      <button type="button" aria-pressed="false"><i data-icon="eyeOff"></i>Flou</button>
+    </div>
+    <button class="fd-btn fd-btn--icon" type="button" aria-label="Rechercher et remplacer (Ctrl+H)" title="Rechercher et remplacer (Ctrl+H)" data-view-set="find"><i data-icon="search"></i></button><button class="fd-btn" type="button"><i data-icon="eye"></i>Aperçu</button>
+    <button class="fd-btn" type="button"><i data-icon="share"></i>Partager</button>
+    <button class="fd-btn fd-btn--primary" type="button"><i data-icon="rocket"></i>Publier</button>
+  </header>
+
+  <div class="ed-body">
+    <nav class="fd-card ed-rail" aria-label="Étapes">
+      <a class="step" href="#" aria-current="step"><span class="step__num">1</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Accueil du parcours<i data-icon="target"></i></span></a>
+      <a class="step" href="#"><span class="step__num">2</span><span class="step__thumb fd-player-scope"></span><span class="step__branch"><i data-icon="gitBranch"></i>3 choix</span><span class="step__label">Quel est votre profil ?<i data-icon="gitBranch"></i></span></a>
+      <a class="step" href="#"><span class="step__num">3</span><span class="step__thumb fd-player-scope"></span><span class="step__label">Vérifier l'éligibilité<i data-icon="target"></i></span></a>
+      <button class="fd-btn fd-btn--block" type="button"><i data-icon="plus"></i>Ajouter une étape</button>
+    </nav>
+
+    <section class="ed-canvas" aria-label="Canevas">
+      <div class="shot fd-player-scope">
+        <div class="shot__bar"></div><div class="shot__side"></div>
+          <span class="shot__line" style="left:27%;top:16%;width:30%;height:18px"></span>
+          <span class="shot__line" style="left:27%;top:26%;width:52%"></span>
+          <span class="shot__line" style="left:27%;top:32%;width:44%"></span>
+          <span class="shot__btn" style="left:27%;top:44%"></span>
+          <span class="shot__line" style="left:27%;top:62%;width:66%"></span>
+          <span class="shot__line" style="left:27%;top:68%;width:58%"></span>
+        <!-- modes : Spotlight + cadre navigateur -->
+        <div data-pane="modes"><div class="frame-chrome"><i></i><i></i><i></i><span>app.outil.example/inscription</span></div><div class="spot"></div><div class="spot-ring"></div>
+          <div class="bubble" style="left:50%;top:22%"><b>Commencez ici</b><p>Cliquez sur « Je m'inscris ».</p><footer>1 / 6<button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Suivant</button></footer></div></div>
+        <!-- étape pop-up -->
+        <div data-pane="popup"><div class="modal-step"><div><span class="fd-icon-chip" style="margin:0 auto"><i data-icon="play"></i></span><b>Bienvenue dans votre espace jeune</b><p>En 2 minutes, découvrez comment vous inscrire au Contrat d'engagement jeune.</p><div class="row"><button class="fd-btn fd-btn--primary" type="button">Commencer la visite</button></div></div></div></div>
+        <!-- checklist -->
+        <div data-pane="checklist"><div class="checklist"><h4>Votre inscription</h4><small style="color:var(--fd-player-tooltip-muted)">2 sur 5 terminées</small><div class="prog"><span></span></div><ol><li class="done"><i data-icon="checkCircle"></i>Créer son espace</li><li class="done"><i data-icon="checkCircle"></i>Vérifier l'éligibilité</li><li class="cur"><span class="c"></span>Compléter son profil</li><li><span class="c"></span>Déposer les pièces</li><li><span class="c"></span>Prendre rendez-vous</li></ol></div></div>
+        <!-- sondage -->
+        <div data-pane="survey"><div class="modal-step"><div style="text-align:left;width:min(440px,80%)"><b style="margin-top:0">Recommanderiez-vous cette démarche à un ami ?</b><div class="survey-scale" role="radiogroup" aria-label="Note de 0 à 10"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span class="sel">8</span><span>9</span><span>10</span></div><div class="survey-legend"><span>Pas du tout</span><span>Tout à fait</span></div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="fd-btn fd-btn--sm" type="button">Passer</button><button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Envoyer</button></div></div></div></div>
+        <!-- menu de choix -->
+        <div data-pane="choix"><div class="modal-step"><div style="text-align:left"><b style="margin-top:0">Quel est votre profil ?</b><p>Nous adaptons la visite à votre situation.</p><span class="choice-btn">Je suis lycéen ou étudiant</span><span class="choice-btn">Je cherche un emploi</span><span class="choice-btn">Je suis en formation</span></div></div></div>
+        <!-- A/B -->
+        <div data-pane="ab"><span class="hs-zone" style="left:26.2%;top:42.6%;width:20.2%;height:9.5%"></span><span class="hs-dot" style="left:46.4%;top:47.4%"></span><div class="bubble" style="left:50%;top:30%"><b>Inscrivez-vous en 2 minutes</b><p>Variante B : titre orienté bénéfice.</p><footer>1 / 6<button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Suivant</button></footer></div></div>
+        <div data-pane="assets"></div><div data-pane="tags"></div><div data-pane="find"></div>
+        <div data-pane="apply"><span class="hs-zone" style="left:26.2%;top:42.6%;width:20.2%;height:9.5%"></span><span class="hs-dot" style="left:46.4%;top:47.4%"></span><div class="bubble" style="left:50%;top:30%"><b>Commencez ici</b><p>Cliquez sur « Je m'inscris ».</p><footer>1 / 6<button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Suivant</button></footer></div></div>
+      </div>
+    </section>
+
+    <aside class="fd-card ed-panel" aria-label="Propriétés" style="position:relative">
+      <div class="fd-tabs" role="tablist" aria-label="Panneau"><button role="tab" type="button" aria-selected="true">Étape</button><button role="tab" type="button" aria-selected="false">Design</button><button role="tab" type="button" aria-selected="false">Réglages</button></div>
+
+      <div data-pane="modes">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="focus"></i></span><h2 class="fd-card__title">Mode de lecture</h2></div>
+        <div class="mode-cards" role="group" aria-label="Mode de lecture">
+          <button class="mode-card" type="button" aria-pressed="false"><span class="mode-card__img"><span class="d"></span></span><b>Visite guidée</b><small>Pastille + bulle sur la capture.</small></button>
+          <button class="mode-card" type="button" aria-pressed="true"><span class="mode-card__img is-spot"><span class="d"></span></span><b>Spotlight</b><small>Assombrit tout sauf la zone.</small></button>
+        </div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Cadre</span><div class="fd-segmented" role="group" aria-label="Cadre"><button type="button" aria-pressed="false">Aucun</button><button type="button" aria-pressed="true"><i data-icon="monitor"></i> Navigateur</button><button type="button" aria-pressed="false"><i data-icon="smartphone"></i> Mobile</button></div></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="url">Adresse affichée</label><input class="fd-input" id="url" value="app.outil.example/inscription"><span class="fd-help">Par défaut, l'adresse de la capture.</span></div>
+        <div class="field-apply"><span class="fd-help">Ces réglages valent pour toute la démo.</span></div>
+      </div>
+
+      <div data-pane="popup">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="popup"></i></span><h2 class="fd-card__title">Étape pop-up</h2></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="pt">Titre</label><input class="fd-input" id="pt" value="Bienvenue dans votre espace jeune"></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="px">Texte</label><textarea class="fd-textarea" id="px">En 2 minutes, découvrez comment vous inscrire au Contrat d'engagement jeune.</textarea></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Fond</span><div class="fd-segmented" role="group" aria-label="Fond"><button type="button" aria-pressed="true">Capture floutée</button><button type="button" aria-pressed="false">Couleur</button><button type="button" aria-pressed="false">Image</button></div></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="pb">Bouton</label><input class="fd-input" id="pb" value="Commencer la visite"></div>
+        <label class="fd-switch"><span>Afficher l'icône</span><input type="checkbox" checked><span class="fd-switch__track"></span></label>
+      </div>
+
+      <div data-pane="checklist">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="listChecks"></i></span><h2 class="fd-card__title">Checklist</h2></div>
+        <label class="fd-switch"><span>Afficher la checklist dans le player</span><input type="checkbox" checked><span class="fd-switch__track"></span></label>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="ct">Titre</label><input class="fd-input" id="ct" value="Votre inscription"></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Éléments</span><span class="fd-help">Un élément par chapitre. Il est coché quand le visiteur termine la dernière étape du chapitre.</span>
+          <div class="variant"><span class="fd-icon-chip"><i data-icon="grip"></i></span><span>Créer son espace<small>Chapitre 1 · étapes 1 à 3</small></span><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions"><i data-icon="more"></i></button></div>
+          <div class="variant"><span class="fd-icon-chip"><i data-icon="grip"></i></span><span>Vérifier l'éligibilité<small>Chapitre 2 · étapes 4 et 5</small></span><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions"><i data-icon="more"></i></button></div></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Position</span><div class="fd-segmented" role="group" aria-label="Position"><button type="button" aria-pressed="false">Gauche</button><button type="button" aria-pressed="true">Droite</button><button type="button" aria-pressed="false">Repliée</button></div></div>
+      </div>
+
+      <div data-pane="survey">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="star"></i></span><h2 class="fd-card__title">Sondage</h2></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Type de question</span><select class="fd-select"><option>Recommandation (0 à 10)</option><option>Note (1 à 5 étoiles)</option><option>Choix unique</option><option>Choix multiples</option><option>Réponse libre</option></select></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="sq">Question</label><input class="fd-input" id="sq" value="Recommanderiez-vous cette démarche à un ami ?"></div>
+        <div class="row-2"><div class="fd-field" style="margin:0"><label class="fd-label" for="s0">Libellé du minimum</label><input class="fd-input" id="s0" value="Pas du tout"></div><div class="fd-field" style="margin:0"><label class="fd-label" for="s1">Libellé du maximum</label><input class="fd-input" id="s1" value="Tout à fait"></div></div>
+        <label class="fd-switch"><span>Réponse obligatoire</span><input type="checkbox"><span class="fd-switch__track"></span></label>
+        <span class="fd-help">Les réponses apparaissent dans Analytics → Sondages et dans l'export CSV.</span>
+      </div>
+
+      <div data-pane="choix">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="gitBranch"></i></span><h2 class="fd-card__title">Menu de choix</h2></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="cq">Question</label><input class="fd-input" id="cq" value="Quel est votre profil ?"></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Choix et destination</span>
+          <div class="branch-row"><input class="fd-input fd-input--sm" aria-label="Choix 1" value="Lycéen ou étudiant"><i data-icon="arrowRight"></i><select class="fd-select fd-select--sm" aria-label="Destination du choix 1"><option>3 · Vérifier l'éligibilité</option></select><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Supprimer le choix 1"><i data-icon="trash"></i></button></div>
+          <div class="branch-row"><input class="fd-input fd-input--sm" aria-label="Choix 2" value="Je cherche un emploi"><i data-icon="arrowRight"></i><select class="fd-select fd-select--sm" aria-label="Destination du choix 2"><option>Chapitre « Emploi »</option></select><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Supprimer le choix 2"><i data-icon="trash"></i></button></div>
+          <div class="branch-row"><input class="fd-input fd-input--sm" aria-label="Choix 3" value="Je suis en formation"><i data-icon="arrowRight"></i><select class="fd-select fd-select--sm" aria-label="Destination du choix 3"><option>Fin de la démo</option></select><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Supprimer le choix 3"><i data-icon="trash"></i></button></div>
+          <button class="fd-btn fd-btn--sm" type="button" style="align-self:flex-start"><i data-icon="plus"></i>Ajouter un choix</button></div>
+        <div class="fd-alert fd-alert--warning" style="margin:0"><span class="fd-alert__body">L'étape 5 n'est atteinte par aucun chemin.</span></div>
+      </div>
+
+      <div data-pane="ab">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="flask"></i></span><h2 class="fd-card__title">Test A/B</h2><span class="fd-badge fd-badge--live">En cours · J+6</span></div>
+        <div class="variant"><span class="vl" style="background:var(--fd-color-chart-5)">A</span><span>Commencez ici<small>Taux de complétion</small></span><b class="n">41 %</b></div>
+        <div class="variant" style="border:2px solid var(--fd-color-chart-3)"><span class="vl" style="background:var(--fd-color-chart-3)">B</span><span>Inscrivez-vous en 2 minutes<small>Taux de complétion</small></span><b class="n">52 %</b></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label">Répartition du trafic : 50 / 50</span><div class="ab-split" aria-hidden="true"><span style="width:50%"></span><span style="width:50%"></span></div></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="am">Objectif</label><select class="fd-select" id="am"><option>Taux de complétion</option><option>Clics CTA</option><option>Leads</option></select></div>
+        <p class="fd-help" style="margin:0">B mène de 11 points sur 412 visiteurs. Résultat fiable à partir d'environ 1 000 visiteurs.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Garder B et terminer</button><button class="fd-btn fd-btn--sm" type="button">Arrêter le test</button></div>
+      </div>
+
+      <div data-pane="tags">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="tag"></i></span><h2 class="fd-card__title">Tags de la démo</h2></div>
+        <div class="chips"><span class="chip">Inscription<button type="button" aria-label="Retirer Inscription"><i data-icon="x"></i></button></span><span class="chip">CEJ<button type="button" aria-label="Retirer CEJ"><i data-icon="x"></i></button></span><input aria-label="Ajouter un tag" placeholder="Ajouter un tag…"></div>
+        <span class="fd-help">Les tags filtrent le tableau de bord et le Demo Center. Entrée pour créer un tag.</span>
+        <span class="fd-label">Tags du workspace</span>
+        <div class="tagline"><span class="tag" style="--tg:var(--fd-color-chart-5)">Inscription</span><span class="tag" style="--tg:var(--fd-color-chart-3)">CEJ</span><span class="tag" style="--tg:var(--fd-color-chart-4)">Emploi</span><span class="tag" style="--tg:var(--fd-color-chart-1)">Formation</span><span class="tag" style="--tg:var(--fd-color-chart-2)">Interne</span></div>
+      </div>
+
+      <div data-pane="apply">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="target"></i></span><h2 class="fd-card__title">Hotspot et bulle</h2></div>
+        <div class="fd-field" style="margin:0"><div class="field-apply"><label class="fd-label" for="bp2">Position de la bulle</label><button class="fd-btn fd-btn--ghost" type="button" aria-haspopup="dialog" aria-expanded="true"><i data-icon="copyAll"></i>Appliquer à…</button></div><select class="fd-select" id="bp2"><option>Automatique</option></select></div>
+        <label class="fd-switch"><span>Animation de pulsation</span><input type="checkbox" checked><span class="fd-switch__track"></span></label>
+        <div class="apply-pop" role="dialog" aria-label="Appliquer la position de la bulle">
+          <h3>Appliquer « Automatique »</h3>
+          <label class="fd-check"><input type="radio" name="ap" checked> Toutes les étapes (6)</label>
+          <label class="fd-check"><input type="radio" name="ap"> Ce chapitre (3)</label>
+          <label class="fd-check"><input type="radio" name="ap"> Étapes choisies…</label>
+          <div style="display:flex;gap:8px;justify-content:flex-end"><button class="fd-btn fd-btn--sm" type="button">Annuler</button><button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Appliquer</button></div>
+        </div>
+      </div>
+      <div data-pane="assets"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="image"></i></span><h2 class="fd-card__title">Logo</h2></div><button class="fd-btn" type="button"><i data-icon="image"></i>Choisir dans la médiathèque</button></div>
+      <div data-pane="find"><p class="fd-help" style="margin:0">Rechercher et remplacer : Ctrl+H (⌘+Maj+H sur Mac), ou le bouton loupe de la barre.</p></div>
+    </aside>
+  </div>
+
+  <!-- Médiathèque -->
+  <div class="dialog-mock" data-pane="assets" role="dialog" aria-labelledby="as-t">
+    <section>
+      <div class="dlg-head"><span class="fd-icon-chip"><i data-icon="image"></i></span><h2 id="as-t">Médiathèque du workspace</h2><button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" aria-label="Fermer"><i data-icon="x"></i></button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><label class="search" style="width:260px"><i data-icon="search"></i><input class="fd-input" type="search" placeholder="Rechercher un fichier" aria-label="Rechercher un fichier"></label><div class="fd-segmented" role="group" aria-label="Type"><button type="button" aria-pressed="true">Tout</button><button type="button" aria-pressed="false">Logos</button><button type="button" aria-pressed="false">Images</button><button type="button" aria-pressed="false">Polices</button></div></div>
+      <div class="assets">
+        <button class="asset asset--drop" type="button"><i data-icon="upload"></i><b>Importer</b><small>PNG, JPG, SVG, WOFF2 · 5 Mo</small></button>
+        <button class="asset" type="button" aria-pressed="true"><span class="asset__img"><img src="../../assets/symbole-dsi.svg" alt="" width="48"></span><small>symbole-dsi.svg</small></button>
+        <button class="asset" type="button" aria-pressed="false"><span class="asset__img"><i data-icon="image"></i></span><small>bandeau-cej.png</small></button>
+        <button class="asset" type="button" aria-pressed="false"><span class="asset__img"><i data-icon="image"></i></span><small>photo-accueil.jpg</small></button>
+        <button class="asset" type="button" aria-pressed="false"><span class="asset__img"><i data-icon="type"></i></span><small>police-titres.woff2</small></button>
+        <button class="asset" type="button" aria-pressed="false"><span class="asset__img"><i data-icon="image"></i></span><small>logo-partenaire.svg</small></button>
+      </div>
+      <div class="dlg-foot"><span class="fd-help" style="margin-right:auto">Utilisé dans 4 démos · 12,4 Mo sur 500 Mo</span><button class="fd-btn" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button">Utiliser ce fichier</button></div>
+    </section>
+  </div>
+  <!-- Rechercher et remplacer -->
+  <div class="dialog-mock" data-pane="find" role="dialog" aria-labelledby="fr-t">
+    <section style="width:min(560px,92%)">
+      <div class="dlg-head"><span class="fd-icon-chip"><i data-icon="replace"></i></span><h2 id="fr-t">Rechercher et remplacer</h2><button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" aria-label="Fermer"><i data-icon="x"></i></button></div>
+      <div class="row-2"><div class="fd-field" style="margin:0"><label class="fd-label" for="f1">Rechercher</label><input class="fd-input" id="f1" value="Portail v1"></div><div class="fd-field" style="margin:0"><label class="fd-label" for="f2">Remplacer par</label><input class="fd-input" id="f2" value="Nouvel outil"></div></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap"><label class="fd-check"><input type="checkbox"> Respecter la casse</label><label class="fd-check"><input type="checkbox" checked> Mot entier</label><label class="fd-check"><input type="checkbox" checked> Inclure les variables et CTA</label></div>
+      <p class="fd-label" style="margin:0" role="status">4 résultats dans 3 étapes</p>
+      <ul class="find-results"><li><span class="n">1</span><span>Le libellé du bouton a changé dans <mark>Portail v1</mark>.</span><button class="fd-btn fd-btn--sm" type="button">Remplacer</button></li><li><span class="n">3</span><span>Connectez-vous à <mark>Portail v1</mark> avec votre identifiant.</span><button class="fd-btn fd-btn--sm" type="button">Remplacer</button></li><li><span class="n">3</span><span>Bouton : « Ouvrir <mark>Portail v1</mark> »</span><button class="fd-btn fd-btn--sm" type="button">Remplacer</button></li><li><span class="n">6</span><span>Votre conseiller vous recontacte via <mark>Portail v1</mark>.</span><button class="fd-btn fd-btn--sm" type="button">Remplacer</button></li></ul>
+      <div class="dlg-foot"><button class="fd-btn" type="button">Fermer</button><button class="fd-btn fd-btn--primary" type="button">Tout remplacer (4)</button></div>
+    </section>
+  </div>
+</div>
+
+<div class="mock-state fd-segmented" role="group" aria-label="Fonction présentée (maquette)">
+  <button type="button" data-view-set="modes" aria-pressed="true">Modes</button>
+  <button type="button" data-view-set="popup" aria-pressed="false">Pop-up</button>
+  <button type="button" data-view-set="checklist" aria-pressed="false">Checklist</button>
+  <button type="button" data-view-set="survey" aria-pressed="false">Sondage</button>
+  <button type="button" data-view-set="choix" aria-pressed="false">Choix</button>
+  <button type="button" data-view-set="ab" aria-pressed="false">A/B</button>
+  <button type="button" data-view-set="assets" aria-pressed="false">Médiathèque</button>
+  <button type="button" data-view-set="tags" aria-pressed="false">Tags</button>
+  <button type="button" data-view-set="find" aria-pressed="false">Remplacer</button>
+  <button type="button" data-view-set="apply" aria-pressed="false">Appliquer à…</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

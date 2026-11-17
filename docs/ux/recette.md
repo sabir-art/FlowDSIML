@@ -672,3 +672,11 @@ Le dev a livré **sans avoir vu `commentaires.md`**. Il a pourtant bien suivi la
 | CM7 | ℹ️ | Mention « Internes à l'équipe, jamais publiés », sans icône | Clé `private` : « Interne à l'équipe · jamais publié », avec l'icône `Lock` de 14 px, **sous** le titre. Utiliser les **49 clés `editor.comments.*`** de `docs/ux/i18n` |
 | CM8 | ℹ️ | Poignée de 40 × 4 px, hauteur minimale de 120 px, icône d'envoi `Send` | Accepté tel quel : écarts mineurs sans effet sur l'usage |
 | CM9 | ? | États non visibles sur les captures : vide, tout résolu, filtre « résolus », modification, replié, chargement, erreur d'envoi, lecture seule, **mobile** (lire et répondre depuis l'écran « écran plus large ») | Ajouter des captures `25b` à `25h` pour ces états. Je les vérifierai contre `maquettes/refonte/editeur.html` (barre d'états) et `commentaires-mobile.html` |
+
+## Recette commentaires (79267c3 / e360960) et RF1–RF7
+
+Captures `docs/tech/captures/finition/25*.png` (clair et sombre), relues le 17/11.
+- **CM1–CM9 : conformes.** En-tête avec badge « n ouverts », mention « Interne à l'équipe · jamais publié », avatars de couleur stable avec texte lisible, liens cliquables, saisie en pilule, vue mobile (25i) avec sélecteur d'étape et actions sous le texte.
+- **Arbitrage lecteur** (chef d'équipe) : le lecteur lit et ajoute des commentaires. Il agit seulement sur les siens. `commentaires.md` §3 est mis à jour.
+- Point mineur (non bloquant) : sur 25, le badge annonce « 2 ouverts » et un seul commentaire est visible sans défiler. Vérifier que la liste s'ouvre sur le **plus ancien commentaire non lu**, pas tout en bas. Sinon, afficher la pilule « n autres ↑ ».
+- **RF1–RF7 : conformes** à la lecture des captures 10 et 11 (KPI sans troncature à 1 440 px avec 4 KPI, héro vert avec texte noir, « Analytics » actif). RF3 (ellipse avec 5 KPI) est accepté tel que décrit par le dev.

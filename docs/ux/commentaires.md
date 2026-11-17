@@ -42,7 +42,7 @@
 | **Chargement** | 2 squelettes de commentaire (avatar rond + 2 lignes) en `skeleton` |
 | **Erreur d'envoi** | Le texte reste dans le champ. Alerte en ligne `fd-alert--error` au-dessus de la saisie : « Le commentaire n'a pas pu être envoyé. Votre texte est conservé. » + « Réessayer » |
 | **Hors ligne** | Bandeau `caption` en `warning` dans l'en-tête : « Hors ligne : les nouveaux commentaires s'afficheront au retour de la connexion. » La saisie reste possible ; l'envoi part au retour du réseau |
-| **Lecture seule** (rôle viewer) | Liste et filtre visibles. La saisie, « Résoudre » et les menus sont masqués |
+| **Rôle lecteur** (viewer, arbitrage du chef d'équipe) | Le lecteur peut lire **et ajouter** des commentaires, sans modifier la démo. Il peut résoudre, modifier ou supprimer **ses propres** commentaires ; sur ceux des autres, « Résoudre » et le menu ⋯ sont masqués (pas grisés) |
 
 ## 4. Rail des étapes
 
