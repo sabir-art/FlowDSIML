@@ -58,14 +58,35 @@ function seedMaquette() {
     consent: true,
     created_at: new Date(now - i * 3600e3).toISOString(),
   }));
+  // Membres de la maquette parametres.html (noms et rôles), plus une invitation en attente
+  const people = [
+    ['u-2', 'Thomas Bernard', 'thomas@acme.example', 'admin'],
+    ['u-3', 'Inès Haddad', 'ines@acme.example', 'editor'],
+    ['u-4', 'Hugo Lefèvre', 'hugo@acme.example', 'editor'],
+    ['u-5', 'Nina Roux', 'nina@acme.example', 'viewer'],
+  ];
   t.members = [
     t.members[0],
-    ...['u-2', 'u-3', 'u-4', 'u-5', 'u-6'].map((id) => ({
+    ...people.map(([id, , , role]) => ({
       workspace_id: ws.id,
       user_id: id,
-      role: 'editor',
+      role,
       created_at: new Date(now).toISOString(),
     })),
+  ];
+  s.memberDirectory = Object.fromEntries(people.map(([id, full_name, email]) => [id, { full_name, email }]));
+  t.invitations = [
+    {
+      id: 'inv-1',
+      workspace_id: ws.id,
+      email: 'paul@acme.example',
+      role: 'editor',
+      token: 'tok-paul',
+      invited_by: s.user.id,
+      accepted_at: null,
+      created_at: '2026-11-15T09:00:00Z',
+      expires_at: '2026-11-22T09:00:00Z',
+    },
   ];
   return s;
 }

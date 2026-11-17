@@ -190,7 +190,50 @@
     "invalidEmails": "Invalid addresses: {{list}}",
     "invitesCreated_one": "Invitation created. Send this link:",
     "invitesCreated_other": "{{count}} invitations created. Send each person their link:",
-    "member": "Member"
+    "member": "Member",
+    "countOf_one": "{{count}} member out of {{limit}} included in the {{plan}} plan.",
+    "countOf_other": "{{count}} members out of {{limit}} included in the {{plan}} plan.",
+    "countUnlimited_one": "{{count}} member, unlimited members in the {{plan}} plan.",
+    "countUnlimited_other": "{{count}} members, unlimited members in the {{plan}} plan.",
+    "inviteMany": "Invite members",
+    "search": "Search a member",
+    "filterRole": "Filter by role",
+    "allRoles": "All roles",
+    "tableCaption": "Workspace members",
+    "lastActivity": "Last activity",
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}",
+    "you": "You",
+    "roleOf": "Role of {{name}}",
+    "transfer": "Transfer ownership",
+    "removeFromWs": "Remove from workspace",
+    "removeMember": "Remove member",
+    "removeBody": "{{name}} will lose access to the workspace. Their demos stay in the workspace.",
+    "invitedOn": "Invitation sent on {{date}}",
+    "pendingBadge": "Pending",
+    "linkCopied": "Invitation link copied.",
+    "permsTitle": "What each role can do",
+    "permission": "Permission",
+    "perm": {
+      "view": "View demos and analytics",
+      "edit": "Create, edit, publish demos",
+      "leads": "View and export leads",
+      "manage": "Invite and manage members, workspace settings",
+      "owner": "Billing, workspace deletion"
+    },
+    "permsHelp": "“—”: action not allowed.",
+    "emailsHelp": "Separate addresses with a comma or a new line.",
+    "roleDesc": {
+      "editor": "Editor: creates and publishes demos",
+      "viewer": "Viewer: views demos and analytics",
+      "admin": "Admin: also manages members and the workspace",
+      "owner": "Owner: all rights"
+    },
+    "seatsUsed_one": "{{count}} seat will be used. {{left}} of the {{limit}} in your plan will remain.",
+    "seatsUsed_other": "{{count}} seats will be used. {{left}} of the {{limit}} in your plan will remain.",
+    "seatsUsedUnlimited_one": "{{count}} seat will be used (unlimited members in your plan).",
+    "seatsUsedUnlimited_other": "{{count}} seats will be used (unlimited members in your plan).",
+    "sendInvites": "Create the invitations"
   },
   "workspace": {
     "title": "Workspace settings",
@@ -957,5 +1000,19 @@
     "privacy": "Privacy policy",
     "soon": "This page is being written.",
     "back": "Back to home"
+  },
+  "settings": {
+    "title": "Settings",
+    "sections": "Settings sections",
+    "workspace": "Workspace",
+    "general": "General",
+    "members": "Members",
+    "brand": "Brand",
+    "variables": "Variables",
+    "account": "Account",
+    "profile": "My profile",
+    "plans": "Plans and billing",
+    "brandSoon": "The workspace default theme (colours, font, public page) is coming soon. Meanwhile, the theme is set in each demo, from the editor.",
+    "variablesSoon": "Shared workspace variables are coming soon. Meanwhile, variables are defined in each demo, from the editor."
   }
 }

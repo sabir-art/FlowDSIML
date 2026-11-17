@@ -1,3 +1,4 @@
+import { SettingsShell } from './SettingsShell';
 import { CardHead } from '../../components/CardHead';
 import { Check, KeyRound } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -43,74 +44,73 @@ export function Profile() {
   }
 
   return (
-    <div className="stack" style={{ maxWidth: 560 }}>
-      <div className="page-head">
-        <h1>{t('profile.title')}</h1>
+    <SettingsShell>
+      <div className="stack st-legacy" style={{ maxWidth: 560 }}>
+        <Card>
+          <form onSubmit={saveProfile}>
+            {info.error && <Alert kind="error">{info.error}</Alert>}
+            {info.success && <Alert kind="success">{info.success}</Alert>}
+            <Field label={t('auth.email')} htmlFor="pf-email">
+              <input
+                id="pf-email"
+                className="fd-input"
+                value={user?.email ?? ''}
+                readOnly
+                aria-describedby="pf-email-hint"
+              />
+              <p id="pf-email-hint" className="fd-help">
+                {t('profile.emailHint')}
+              </p>
+            </Field>
+            <Field label={t('auth.fullName')} htmlFor="fn">
+              <input
+                id="fn"
+                className="fd-input"
+                maxLength={120}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </Field>
+            <div className="fd-field">
+              <span className="fd-label" id="theme-label">
+                {t('theme.label')}
+              </span>
+              <ThemeSwitcher withLabels />
+            </div>
+            <Field label={t('common.language')} htmlFor="loc">
+              <Select id="loc" value={locale} onChange={(e) => setLoc(e.target.value === 'en' ? 'en' : 'fr')}>
+                <option value="fr">Français</option>
+                <option value="en">English</option>
+              </Select>
+            </Field>
+            <Button icon={<Check />} type="submit" variant="primary" disabled={info.busy}>
+              {t('common.save')}
+            </Button>
+          </form>
+        </Card>
+        <Card>
+          <CardHead icon={<KeyRound />} title={t('profile.changePassword')} />
+          <form onSubmit={savePassword}>
+            {pwd.error && <Alert kind="error">{pwd.error}</Alert>}
+            {pwd.success && <Alert kind="success">{pwd.success}</Alert>}
+            <Field label={t('auth.passwordNew')} htmlFor="np">
+              <input
+                id="np"
+                className="fd-input"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Field>
+            <Button icon={<KeyRound />} type="submit" disabled={pwd.busy}>
+              {t('auth.updatePassword')}
+            </Button>
+          </form>
+        </Card>
       </div>
-      <Card>
-        <form onSubmit={saveProfile}>
-          {info.error && <Alert kind="error">{info.error}</Alert>}
-          {info.success && <Alert kind="success">{info.success}</Alert>}
-          <Field label={t('auth.email')} htmlFor="pf-email">
-            <input
-              id="pf-email"
-              className="fd-input"
-              value={user?.email ?? ''}
-              readOnly
-              aria-describedby="pf-email-hint"
-            />
-            <p id="pf-email-hint" className="fd-help">
-              {t('profile.emailHint')}
-            </p>
-          </Field>
-          <Field label={t('auth.fullName')} htmlFor="fn">
-            <input
-              id="fn"
-              className="fd-input"
-              maxLength={120}
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
-          </Field>
-          <div className="fd-field">
-            <span className="fd-label" id="theme-label">
-              {t('theme.label')}
-            </span>
-            <ThemeSwitcher withLabels />
-          </div>
-          <Field label={t('common.language')} htmlFor="loc">
-            <Select id="loc" value={locale} onChange={(e) => setLoc(e.target.value === 'en' ? 'en' : 'fr')}>
-              <option value="fr">Français</option>
-              <option value="en">English</option>
-            </Select>
-          </Field>
-          <Button icon={<Check />} type="submit" variant="primary" disabled={info.busy}>
-            {t('common.save')}
-          </Button>
-        </form>
-      </Card>
-      <Card>
-        <CardHead icon={<KeyRound />} title={t('profile.changePassword')} />
-        <form onSubmit={savePassword}>
-          {pwd.error && <Alert kind="error">{pwd.error}</Alert>}
-          {pwd.success && <Alert kind="success">{pwd.success}</Alert>}
-          <Field label={t('auth.passwordNew')} htmlFor="np">
-            <input
-              id="np"
-              className="fd-input"
-              type="password"
-              autoComplete="new-password"
-              minLength={8}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Field>
-          <Button icon={<KeyRound />} type="submit" disabled={pwd.busy}>
-            {t('auth.updatePassword')}
-          </Button>
-        </form>
-      </Card>
-    </div>
+    </SettingsShell>
   );
 }

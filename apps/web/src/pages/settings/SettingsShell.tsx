@@ -1,0 +1,61 @@
+import type { ReactNode } from 'react';
+import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Code, CreditCard, Palette, Settings, UserRound, Users } from 'lucide-react';
+import '../../styles/maquette.css';
+import '../../styles/maquette-ajouts.css';
+
+/**
+ * Cadre des paramètres (maquette parametres.html) : titre « Paramètres » et navigation interne
+ * WORKSPACE (Général, Membres, Marque, Variables) / COMPTE (Mon profil, Plans et facturation).
+ * Chaque section garde sa route (/settings/…) pour les liens directs.
+ */
+export function SettingsShell({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
+  const item = (to: string, icon: ReactNode, label: string) => (
+    <NavLink to={to} className={({ isActive }) => `snav-item${isActive ? ' is-active' : ''}`}>
+      {icon}
+      {label}
+    </NavLink>
+  );
+  return (
+    <div className="mk st">
+      <div className="page-head">
+        <h1>{t('settings.title')}</h1>
+      </div>
+      <div className="settings">
+        <nav className="snav" aria-label={t('settings.sections')}>
+          <span className="grp">{t('settings.workspace')}</span>
+          {item('/settings/workspace', <Settings aria-hidden="true" />, t('settings.general'))}
+          {item('/settings/members', <Users aria-hidden="true" />, t('settings.members'))}
+          {item('/settings/brand', <Palette aria-hidden="true" />, t('settings.brand'))}
+          {item('/settings/variables', <Code aria-hidden="true" />, t('settings.variables'))}
+          <span className="grp">{t('settings.account')}</span>
+          {item('/settings/profile', <UserRound aria-hidden="true" />, t('settings.profile'))}
+          {item('/settings/plans', <CreditCard aria-hidden="true" />, t('settings.plans'))}
+        </nav>
+        <div className="st-body">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Section des paramètres pas encore disponible au niveau du workspace (Marque, Variables). */
+export function SettingsSoon({ title, body }: { title: string; body: string }) {
+  const { t } = useTranslation();
+  return (
+    <SettingsShell>
+      <section className="card">
+        <div className="form-sec">
+          <div className="intro">
+            <h2 className="t-h3">{title}</h2>
+          </div>
+          <div className="st-soon">
+            <span className="badge">{t('shell.soon')}</span>
+            <p className="muted">{body}</p>
+          </div>
+        </div>
+      </section>
+    </SettingsShell>
+  );
+}

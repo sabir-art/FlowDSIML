@@ -190,7 +190,50 @@
     "invalidEmails": "Adresses invalides : {{list}}",
     "invitesCreated_one": "Invitation créée. Envoyez ce lien :",
     "invitesCreated_other": "{{count}} invitations créées. Envoyez à chacun son lien :",
-    "member": "Membre"
+    "member": "Membre",
+    "countOf_one": "{{count}} membre sur {{limit}} inclus dans le plan {{plan}}.",
+    "countOf_other": "{{count}} membres sur {{limit}} inclus dans le plan {{plan}}.",
+    "countUnlimited_one": "{{count}} membre, membres illimités dans le plan {{plan}}.",
+    "countUnlimited_other": "{{count}} membres, membres illimités dans le plan {{plan}}.",
+    "inviteMany": "Inviter des membres",
+    "search": "Rechercher un membre",
+    "filterRole": "Filtrer par rôle",
+    "allRoles": "Tous les rôles",
+    "tableCaption": "Membres du workspace",
+    "lastActivity": "Dernière activité",
+    "actions": "Actions",
+    "actionsFor": "Actions pour {{name}}",
+    "you": "Vous",
+    "roleOf": "Rôle de {{name}}",
+    "transfer": "Transférer la propriété",
+    "removeFromWs": "Retirer du workspace",
+    "removeMember": "Retirer le membre",
+    "removeBody": "{{name}} perdra l’accès au workspace. Ses démos restent dans le workspace.",
+    "invitedOn": "Invitation envoyée le {{date}}",
+    "pendingBadge": "En attente",
+    "linkCopied": "Lien d’invitation copié.",
+    "permsTitle": "Ce que chaque rôle peut faire",
+    "permission": "Permission",
+    "perm": {
+      "view": "Voir les démos et les analytics",
+      "edit": "Créer, modifier, publier des démos",
+      "leads": "Voir et exporter les leads",
+      "manage": "Inviter et gérer les membres, paramètres du workspace",
+      "owner": "Facturation, suppression du workspace"
+    },
+    "permsHelp": "« — » : action non autorisée.",
+    "emailsHelp": "Séparez les adresses par une virgule ou un retour à la ligne.",
+    "roleDesc": {
+      "editor": "Éditeur : crée et publie des démos",
+      "viewer": "Lecteur : consulte les démos et les analytics",
+      "admin": "Admin : gère aussi les membres et le workspace",
+      "owner": "Propriétaire : tous les droits"
+    },
+    "seatsUsed_one": "{{count}} siège sera utilisé. Il en restera {{left}} sur les {{limit}} de votre plan.",
+    "seatsUsed_other": "{{count}} sièges seront utilisés. Il en restera {{left}} sur les {{limit}} de votre plan.",
+    "seatsUsedUnlimited_one": "{{count}} siège sera utilisé (membres illimités dans votre plan).",
+    "seatsUsedUnlimited_other": "{{count}} sièges seront utilisés (membres illimités dans votre plan).",
+    "sendInvites": "Créer les invitations"
   },
   "workspace": {
     "title": "Paramètres du workspace",
@@ -957,5 +1000,19 @@
     "privacy": "Politique de confidentialité",
     "soon": "Cette page est en cours de rédaction.",
     "back": "Retour à l’accueil"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "sections": "Sections des paramètres",
+    "workspace": "Workspace",
+    "general": "Général",
+    "members": "Membres",
+    "brand": "Marque",
+    "variables": "Variables",
+    "account": "Compte",
+    "profile": "Mon profil",
+    "plans": "Plans et facturation",
+    "brandSoon": "Le thème par défaut du workspace (couleurs, police, page publique) arrive bientôt. En attendant, le thème se règle dans chaque démo, depuis l’éditeur.",
+    "variablesSoon": "Les variables partagées du workspace arrivent bientôt. En attendant, les variables se définissent dans chaque démo, depuis l’éditeur."
   }
 }

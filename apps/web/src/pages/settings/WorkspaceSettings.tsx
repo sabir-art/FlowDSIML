@@ -1,3 +1,4 @@
+import { SettingsShell } from './SettingsShell';
 import { CardHead } from '../../components/CardHead';
 import { Check, Link2, Trash2, TriangleAlert } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
@@ -48,126 +49,125 @@ export function WorkspaceSettings() {
   }
 
   return (
-    <div className="stack" style={{ maxWidth: 720 }}>
-      {dialog}
-      <div className="page-head">
-        <h1>{t('workspace.title')}</h1>
-      </div>
-      <Card>
-        <form onSubmit={save}>
-          {error && <Alert kind="error">{error}</Alert>}
-          {success && <Alert kind="success">{success}</Alert>}
-          <Field label={t('workspace.name')} htmlFor="ws-name">
-            <input
-              id="ws-name"
-              className="fd-input"
-              required
-              maxLength={80}
-              disabled={!editable}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </Field>
-          <Field label={t('workspace.slug')} htmlFor="ws-slug">
-            <input
-              id="ws-slug"
-              className="fd-input"
-              required
-              pattern="[a-z0-9][a-z0-9-]{1,59}"
-              disabled={!editable}
-              value={slug}
-              aria-describedby="ws-slug-help"
-              onChange={(e) => setSlug(e.target.value)}
-            />
-            <p id="ws-slug-help" className="fd-help">
-              {t('workspace.slugHelp')}
-            </p>
-          </Field>
-          <Field label={t('workspace.privacyUrl')} htmlFor="ws-privacy">
-            <input
-              id="ws-privacy"
-              className="fd-input"
-              type="url"
-              inputMode="url"
-              placeholder="https://"
-              maxLength={500}
-              disabled={!editable}
-              value={privacyUrl}
-              aria-invalid={privacyError ? true : undefined}
-              aria-describedby={privacyError ? 'ws-privacy-error ws-privacy-help' : 'ws-privacy-help'}
-              onChange={(e) => {
-                setPrivacyUrl(e.target.value);
-                setPrivacyError(null);
-              }}
-            />
-            {privacyError && (
-              <p id="ws-privacy-error" className="field-error">
-                {privacyError}
-              </p>
-            )}
-            <p id="ws-privacy-help" className="fd-help">
-              {t('workspace.privacyUrlHelp')}
-            </p>
-          </Field>
-          {editable && (
-            <Button icon={<Check />} type="submit" variant="primary" disabled={busy}>
-              {t('common.save')}
-            </Button>
-          )}
-        </form>
-      </Card>
-      <Card>
-        <CardHead icon={<Link2 />} title={t('workspace.publicLinks')} />
-        <Switch
-          label={t('workspace.publicLinks')}
-          checked={ws.public_links_enabled}
-          disabled={!editable || busy}
-          aria-describedby="ws-public-help"
-          onChange={(e) => {
-            const enabled = e.target.checked;
-            void run(async () => {
-              check(
-                await supabase.from('workspaces').update({ public_links_enabled: enabled }).eq('id', ws.id),
-              );
-              await reload();
-            }, t('common.saved'));
-          }}
-        />
-        <p id="ws-public-help" className="fd-help">
-          {t('workspace.publicLinksHelp')}
-          {!editable && ` ${t('workspace.publicLinksAdmin')}`}
-        </p>
-      </Card>
-      <PlanUsage />
-      {can('workspace.delete') && (
+    <SettingsShell>
+      <div className="stack st-legacy" style={{ maxWidth: 720 }}>
+        {dialog}
         <Card>
-          <CardHead icon={<TriangleAlert />} title={t('workspace.danger')} tone="danger" />
-          <p className="fd-muted">{t('workspace.deleteHint')}</p>
-          <Button
-            icon={<Trash2 />}
-            variant="danger"
-            onClick={async () => {
-              if (
-                !(await ask({
-                  title: t('workspace.delete'),
-                  body: t('workspace.deleteHint'),
-                  confirmLabel: t('workspace.delete'),
-                  danger: true,
-                  requireText: ws.slug,
-                }))
-              )
-                return;
-              void run(async () => {
-                check(await supabase.from('workspaces').delete().eq('id', ws.id));
-                await reload();
-                navigate('/', { replace: true });
-              });
-            }}
-          >
-            {t('workspace.delete')}
-          </Button>
+          <form onSubmit={save}>
+            {error && <Alert kind="error">{error}</Alert>}
+            {success && <Alert kind="success">{success}</Alert>}
+            <Field label={t('workspace.name')} htmlFor="ws-name">
+              <input
+                id="ws-name"
+                className="fd-input"
+                required
+                maxLength={80}
+                disabled={!editable}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Field>
+            <Field label={t('workspace.slug')} htmlFor="ws-slug">
+              <input
+                id="ws-slug"
+                className="fd-input"
+                required
+                pattern="[a-z0-9][a-z0-9-]{1,59}"
+                disabled={!editable}
+                value={slug}
+                aria-describedby="ws-slug-help"
+                onChange={(e) => setSlug(e.target.value)}
+              />
+              <p id="ws-slug-help" className="fd-help">
+                {t('workspace.slugHelp')}
+              </p>
+            </Field>
+            <Field label={t('workspace.privacyUrl')} htmlFor="ws-privacy">
+              <input
+                id="ws-privacy"
+                className="fd-input"
+                type="url"
+                inputMode="url"
+                placeholder="https://"
+                maxLength={500}
+                disabled={!editable}
+                value={privacyUrl}
+                aria-invalid={privacyError ? true : undefined}
+                aria-describedby={privacyError ? 'ws-privacy-error ws-privacy-help' : 'ws-privacy-help'}
+                onChange={(e) => {
+                  setPrivacyUrl(e.target.value);
+                  setPrivacyError(null);
+                }}
+              />
+              {privacyError && (
+                <p id="ws-privacy-error" className="field-error">
+                  {privacyError}
+                </p>
+              )}
+              <p id="ws-privacy-help" className="fd-help">
+                {t('workspace.privacyUrlHelp')}
+              </p>
+            </Field>
+            {editable && (
+              <Button icon={<Check />} type="submit" variant="primary" disabled={busy}>
+                {t('common.save')}
+              </Button>
+            )}
+          </form>
         </Card>
-      )}
-    </div>
+        <Card>
+          <CardHead icon={<Link2 />} title={t('workspace.publicLinks')} />
+          <Switch
+            label={t('workspace.publicLinks')}
+            checked={ws.public_links_enabled}
+            disabled={!editable || busy}
+            aria-describedby="ws-public-help"
+            onChange={(e) => {
+              const enabled = e.target.checked;
+              void run(async () => {
+                check(
+                  await supabase.from('workspaces').update({ public_links_enabled: enabled }).eq('id', ws.id),
+                );
+                await reload();
+              }, t('common.saved'));
+            }}
+          />
+          <p id="ws-public-help" className="fd-help">
+            {t('workspace.publicLinksHelp')}
+            {!editable && ` ${t('workspace.publicLinksAdmin')}`}
+          </p>
+        </Card>
+        <PlanUsage />
+        {can('workspace.delete') && (
+          <Card>
+            <CardHead icon={<TriangleAlert />} title={t('workspace.danger')} tone="danger" />
+            <p className="fd-muted">{t('workspace.deleteHint')}</p>
+            <Button
+              icon={<Trash2 />}
+              variant="danger"
+              onClick={async () => {
+                if (
+                  !(await ask({
+                    title: t('workspace.delete'),
+                    body: t('workspace.deleteHint'),
+                    confirmLabel: t('workspace.delete'),
+                    danger: true,
+                    requireText: ws.slug,
+                  }))
+                )
+                  return;
+                void run(async () => {
+                  check(await supabase.from('workspaces').delete().eq('id', ws.id));
+                  await reload();
+                  navigate('/', { replace: true });
+                });
+              }}
+            >
+              {t('workspace.delete')}
+            </Button>
+          </Card>
+        )}
+      </div>
+    </SettingsShell>
   );
 }

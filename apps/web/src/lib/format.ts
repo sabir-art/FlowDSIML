@@ -49,13 +49,15 @@ export function formatRelative(iso: string | null | undefined, now: number = Dat
  * Date relative abrégée des cartes (maquette dashboard) : « à l’instant », « il y a 5 min »,
  * « il y a 2 h », « hier », « il y a 3 j », puis « 12 nov. » (année ajoutée si elle diffère).
  */
+const NBSP = String.fromCharCode(160);
+
 export function formatRelativeShort(iso: string | null | undefined, now: number = Date.now()): string {
   if (!iso) return '—';
   const t = new Date(iso).getTime();
   if (Number.isNaN(t)) return '—';
   const sec = Math.max(0, Math.round((now - t) / 1000));
   const en = i18n.language === 'en';
-  const ago = (n: number, unit: string) => (en ? `${n}${unit} ago` : `il y a ${n} ${unit}`);
+  const ago = (n: number, unit: string) => (en ? `${n}${unit} ago` : `il y a ${n}${NBSP}${unit}`);
   if (sec < 60) return en ? 'just now' : 'à l’instant';
   if (sec < 3600) return ago(Math.round(sec / 60), en ? 'min' : 'min');
   if (sec < 86400) return ago(Math.round(sec / 3600), 'h');

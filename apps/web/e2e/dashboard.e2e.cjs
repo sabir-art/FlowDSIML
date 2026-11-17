@@ -20,8 +20,14 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.waitForSelector('.demo-card');
   ok((await page.locator('.demo-card').count()) === 2, 'deux démos affichées');
   ok((await page.locator('.demo-cover img').count()) >= 1, 'vignette de la première étape');
-  ok(!(await page.textContent('main')).includes('1 / 25'), 'pas de quota dans le sous-titre (il est dans Plans)');
-  ok((await page.locator('.stat-tile a[href="#/analytics"]').count()) === 1, 'KPI Vues : bouton ↗ vers Analytics');
+  ok(
+    !(await page.textContent('main')).includes('1 / 25'),
+    'pas de quota dans le sous-titre (il est dans Plans)',
+  );
+  ok(
+    (await page.locator('.stat-tile a[href="#/analytics"]').count()) === 1,
+    'KPI Vues : bouton ↗ vers Analytics',
+  );
   ok(!/Invalid Date/.test(await page.textContent('main')), 'dates formatées (pas de « Invalid Date »)');
 
   await page.fill('input[type=search]', 'onboard');

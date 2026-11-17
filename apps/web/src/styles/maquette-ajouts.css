@@ -743,3 +743,148 @@
 .mk .an-leads {
   padding: var(--fd-space-4);
 }
+
+/* ---- Paramètres (PRM-01) : styles de page et styles en ligne de parametres.html ---- */
+.mk.st {
+  background: transparent;
+}
+.mk .settings {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+.mk .snav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 24px;
+}
+.mk .snav .snav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--fd-radius-md);
+  color: var(--fd-color-text-muted);
+  font-weight: 500;
+  text-decoration: none;
+}
+.mk .snav .snav-item:hover {
+  background: var(--fd-color-surface-hover);
+  text-decoration: none;
+}
+.mk .snav .snav-item.is-active {
+  background: var(--fd-color-surface-selected);
+  color: var(--fd-color-primary-soft-text);
+  font-weight: 600;
+}
+.mk .snav svg {
+  width: 18px;
+  height: 18px;
+}
+.mk .snav .grp {
+  font: 600 11px var(--fd-font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fd-color-text-subtle);
+  padding: 14px 10px 4px;
+}
+.mk .form-sec {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  padding: 24px;
+}
+.mk .form-sec + .form-sec {
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .form-sec .intro p {
+  margin-top: 4px;
+}
+.mk .role-select {
+  height: 32px;
+  width: auto;
+}
+@media (max-width: 900px) {
+  .mk .settings {
+    grid-template-columns: 1fr;
+  }
+  .mk .snav {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  .mk .snav .grp {
+    display: none;
+  }
+  .mk .form-sec {
+    grid-template-columns: 1fr;
+  }
+}
+.mk .st-head {
+  margin-bottom: 16px;
+  gap: 12px;
+}
+.mk .st-sub {
+  margin-top: 4px;
+}
+.mk .st-alert {
+  margin-bottom: 16px;
+}
+.mk .st-filters {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--fd-color-border);
+  gap: 12px;
+}
+.mk .st-search {
+  max-width: 320px;
+}
+.mk .st-select {
+  width: auto;
+}
+.mk .st-you {
+  margin-left: 6px;
+}
+.mk .st-pending-av {
+  background: var(--fd-stone-100);
+  color: var(--fd-stone-600);
+}
+.mk .st-perms {
+  margin-top: 16px;
+}
+.mk .st-perms-table {
+  margin-top: 12px;
+}
+.mk .st-perms-help {
+  margin-top: 8px;
+}
+.mk .st-ok {
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-success);
+  vertical-align: -3px;
+}
+.mk .st-seats {
+  margin-top: 20px;
+}
+.mk .st-links {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  display: grid;
+  gap: 8px;
+}
+.mk .st-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.mk .st-legacy {
+  max-width: none !important;
+}
+/* Le composant Menu de l'app (enveloppe .menu du bouton ⋯) n'est pas le panneau .menu de la maquette */
+.mk div.menu:not([role='menu']) { position: relative; display: inline-flex; min-width: 0; padding: 0; background: none; border: 0; box-shadow: none; z-index: auto; }

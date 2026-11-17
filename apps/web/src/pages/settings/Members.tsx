@@ -1,19 +1,19 @@
-import { CardHead } from '../../components/CardHead';
 import { formatDate } from '../../lib/format';
 import { initials } from '../../lib/initials';
 export { initials };
 import { useConfirm } from '../../components/ConfirmDialog';
-import { Clock, Copy, LogOut, Send, Trash2, UserMinus, UserPlus } from 'lucide-react';
+import { Check, Copy, Info, LogOut, Plus, Search, Star, Trash2, UserMinus, X } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { assignableRoles, type Role } from '@flowdsiml/core';
+import { assignableRoles, can as roleCan, ROLES, type Action, type Role } from '@flowdsiml/core';
 import type { Tables, WorkspaceRole } from '@flowdsiml/supabase-types';
-import { Alert, Button, Card, Field, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { APP_URL } from '../../lib/env';
 import { check, useAction } from '../../lib/useAction';
 import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
+import { Menu, type MenuItem } from '../../components/Menu';
+import { SettingsShell } from './SettingsShell';
 
 interface MemberRow {
   user_id: string;
@@ -26,6 +26,17 @@ export function inviteUrl(token: string) {
   return `${APP_URL}#/invite/${token}`;
 }
 
+/** Rôles du plus élevé au plus faible, comme le tableau des permissions de la maquette. */
+const ROLE_ORDER = [...ROLES].reverse() as Role[];
+const PERMISSIONS: Array<{ key: string; action: Action }> = [
+  { key: 'view', action: 'analytics.view' },
+  { key: 'edit', action: 'demo.publish' },
+  { key: 'leads', action: 'leads.view' },
+  { key: 'manage', action: 'members.manage' },
+  { key: 'owner', action: 'workspace.delete' },
+];
+
+/** Paramètres › Membres (PRM-01), à l'identique de la maquette parametres.html. */
 export function Members() {
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
@@ -33,18 +44,28 @@ export function Members() {
   const { current, can, reload: reloadWs } = useWorkspace();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [invites, setInvites] = useState<Tables<'invitations'>[]>([]);
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState<WorkspaceRole>('editor');
-  const [lastLinks, setLastLinks] = useState<Array<{ email: string; url: string }>>([]);
-  const [inviteError, setInviteError] = useState<string | null>(null);
-  const { busy, error, success, run } = useAction();
+  const [usage, setUsage] = useState<{ plan: string; limits: { members: number | null } } | null>(null);
+  const [planName, setPlanName] = useState('');
+  const [q, setQ] = useState('');
+  const [roleFilter, setRoleFilter] = useState<WorkspaceRole | ''>('');
+  const [inviting, setInviting] = useState(false);
+  const { error, success, run } = useAction();
   const ws = current!;
   const myRole = ws.role as Role;
   const canManage = can('members.manage');
 
   const load = useCallback(async () => {
-    const m = await supabase.rpc('list_members', { p_workspace: ws.id });
+    const [m, u] = await Promise.all([
+      supabase.rpc('list_members', { p_workspace: ws.id }),
+      supabase.rpc('workspace_usage', { p_workspace: ws.id }),
+    ]);
     setMembers((m.data ?? []) as MemberRow[]);
+    const us = u.data as unknown as { plan: string; limits: { members: number | null } } | null;
+    setUsage(us);
+    if (us) {
+      const p = await supabase.from('plans').select('name').eq('code', us.plan).maybeSingle();
+      setPlanName(p.data?.name ?? us.plan);
+    }
     if (canManage) {
       const i = await supabase
         .from('invitations')
@@ -60,257 +81,491 @@ export function Members() {
     void load();
   }, [load]);
 
-  /** Invitations multiples (W9) : emails séparés par virgule, point-virgule, espace ou retour à la ligne. */
-  async function invite(e: FormEvent) {
+  const roles = assignableRoles(myRole);
+  const needle = q.trim().toLowerCase();
+  const match = (name: string, email: string, role: WorkspaceRole) =>
+    (!needle || name.toLowerCase().includes(needle) || email.toLowerCase().includes(needle)) &&
+    (!roleFilter || role === roleFilter);
+  const limit = usage?.limits?.members;
+
+  async function remove(m: MemberRow) {
+    const self = m.user_id === user?.id;
+    if (
+      !(await ask({
+        title: self
+          ? t('members.confirmLeave')
+          : t('members.confirmRemove', { email: m.full_name || m.email }),
+        body: self ? undefined : t('members.removeBody', { name: m.full_name || m.email }),
+        confirmLabel: self ? t('members.leave') : t('members.removeMember'),
+        danger: true,
+      }))
+    )
+      return;
+    void run(async () => {
+      check(await supabase.from('members').delete().eq('workspace_id', ws.id).eq('user_id', m.user_id));
+      if (self) await reloadWs();
+      else await load();
+    });
+  }
+
+  return (
+    <SettingsShell>
+      {dialog}
+      <section aria-labelledby="mem-title">
+        <div className="row between wrap st-head">
+          <div>
+            <h2 className="t-h2" id="mem-title">
+              {t('settings.members')}
+            </h2>
+            <p className="muted st-sub">
+              {limit === null || limit === undefined
+                ? t('members.countUnlimited', { count: members.length, plan: planName })
+                : t('members.countOf', { count: members.length, limit, plan: planName })}
+            </p>
+          </div>
+          {can('members.invite') && (
+            <button type="button" className="btn btn-primary" onClick={() => setInviting(true)}>
+              <Plus aria-hidden="true" />
+              {t('members.inviteMany')}
+            </button>
+          )}
+        </div>
+        {error && (
+          <div className="alert alert-danger st-alert" role="alert">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="alert alert-success st-alert" role="status">
+            {success}
+          </div>
+        )}
+        <div className="card">
+          <div className="row st-filters">
+            <div className="input-affix grow st-search">
+              <Search aria-hidden="true" />
+              <input
+                className="input input-sm"
+                type="search"
+                placeholder={t('members.search')}
+                aria-label={t('members.search')}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </div>
+            <select
+              className="select input-sm st-select"
+              aria-label={t('members.filterRole')}
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value as WorkspaceRole | '')}
+            >
+              <option value="">{t('members.allRoles')}</option>
+              {ROLE_ORDER.map((r) => (
+                <option key={r} value={r}>
+                  {t(`roles.${r}`)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="table-wrap">
+            <table className="table">
+              <caption className="sr-only">{t('members.tableCaption')}</caption>
+              <thead>
+                <tr>
+                  <th>{t('members.member')}</th>
+                  <th>{t('members.role')}</th>
+                  <th>{t('members.lastActivity')}</th>
+                  <th>
+                    <span className="sr-only">{t('members.actions')}</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {members
+                  .filter((m) => match(m.full_name, m.email, m.role))
+                  .map((m) => {
+                    const me = m.user_id === user?.id;
+                    const editable = canManage && !me && (m.role !== 'owner' || myRole === 'owner');
+                    const items: Array<MenuItem | 'separator'> = [
+                      {
+                        // Transfert de propriété : pas encore disponible
+                        label: `${t('members.transfer')} · ${t('shell.soon')}`,
+                        icon: <Star />,
+                        disabled: true,
+                        onSelect: () => undefined,
+                      },
+                      'separator',
+                      {
+                        label: t('members.removeFromWs'),
+                        icon: <UserMinus />,
+                        danger: true,
+                        onSelect: () => void remove(m),
+                      },
+                    ];
+                    return (
+                      <tr key={m.user_id}>
+                        <td>
+                          <div className="row">
+                            <span className="avatar" aria-hidden="true">
+                              {initials(m.full_name || m.email)}
+                            </span>
+                            <div>
+                              <b>{m.full_name || m.email}</b>
+                              {me && <span className="badge st-you">{t('members.you')}</span>}
+                              {m.full_name && <div className="t-caption subtle">{m.email}</div>}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          {editable ? (
+                            <select
+                              className="select role-select input-sm"
+                              aria-label={t('members.roleOf', { name: m.full_name || m.email })}
+                              value={m.role}
+                              onChange={(e) =>
+                                void run(async () => {
+                                  check(
+                                    await supabase
+                                      .from('members')
+                                      .update({ role: e.target.value as WorkspaceRole })
+                                      .eq('workspace_id', ws.id)
+                                      .eq('user_id', m.user_id),
+                                  );
+                                  await load();
+                                }, t('common.saved'))
+                              }
+                            >
+                              {roles.map((r) => (
+                                <option key={r} value={r}>
+                                  {t(`roles.${r}`)}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className={`badge${m.role === 'owner' ? ' badge-primary' : ''}`}>
+                              {t(`roles.${m.role}`)}
+                            </span>
+                          )}
+                        </td>
+                        {/* La dernière activité n'est pas encore enregistrée */}
+                        <td className="muted">—</td>
+                        <td className="r">
+                          {me ? (
+                            myRole !== 'owner' && (
+                              <button
+                                type="button"
+                                className="btn btn-ghost btn-sm"
+                                onClick={() => void remove(m)}
+                              >
+                                <LogOut aria-hidden="true" />
+                                {t('members.leave')}
+                              </button>
+                            )
+                          ) : editable ? (
+                            <Menu
+                              label={t('members.actionsFor', { name: m.full_name || m.email })}
+                              items={items}
+                            />
+                          ) : null}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                {canManage &&
+                  invites
+                    .filter((i) => match('', i.email, i.role))
+                    .map((i) => (
+                      <tr key={i.id}>
+                        <td>
+                          <div className="row">
+                            <span className="avatar st-pending-av" aria-hidden="true">
+                              {i.email.slice(0, 1).toUpperCase()}
+                            </span>
+                            <div>
+                              <b>{i.email}</b>
+                              <div className="t-caption subtle">
+                                {t('members.invitedOn', {
+                                  date: formatDate(i.created_at, { day: 'numeric', month: 'short' }),
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge">{t(`roles.${i.role}`)}</span>
+                        </td>
+                        <td>
+                          <span className="badge badge-warning">{t('members.pendingBadge')}</span>
+                        </td>
+                        <td className="r">
+                          <Menu
+                            label={t('members.actionsFor', { name: i.email })}
+                            items={[
+                              {
+                                label: t('members.copyLink'),
+                                icon: <Copy />,
+                                onSelect: () =>
+                                  void navigator.clipboard
+                                    .writeText(inviteUrl(i.token))
+                                    .then(() => run(async () => undefined, t('members.linkCopied'))),
+                              },
+                              'separator',
+                              {
+                                label: t('members.revoke'),
+                                icon: <Trash2 />,
+                                danger: true,
+                                onSelect: () =>
+                                  void run(async () => {
+                                    check(await supabase.from('invitations').delete().eq('id', i.id));
+                                    await load();
+                                  }),
+                              },
+                            ]}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="card card-pad st-perms">
+          <h3 className="t-h3">{t('members.permsTitle')}</h3>
+          <div className="table-wrap st-perms-table">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>{t('members.permission')}</th>
+                  {ROLE_ORDER.map((r) => (
+                    <th key={r} className="r">
+                      {t(`roles.${r}`)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {PERMISSIONS.map((p) => (
+                  <tr key={p.key}>
+                    <td>{t(`members.perm.${p.key}`)}</td>
+                    {ROLE_ORDER.map((r) =>
+                      roleCan(r, p.action) ? (
+                        <td key={r} className="r">
+                          <Check className="st-ok" role="img" aria-label={t('common.yes')} />
+                        </td>
+                      ) : (
+                        <td key={r} className="r subtle">
+                          <span className="sr-only">{t('common.no')}</span>
+                          <span aria-hidden="true">—</span>
+                        </td>
+                      ),
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="help st-perms-help">{t('members.permsHelp')}</p>
+        </div>
+      </section>
+
+      {inviting && (
+        <InviteDialog
+          roles={roles}
+          limit={limit ?? null}
+          used={members.length + invites.length}
+          onClose={() => setInviting(false)}
+          onDone={() => void load()}
+        />
+      )}
+    </SettingsShell>
+  );
+}
+
+/** Modale « Inviter des membres » (PRM-04) : crée les invitations et donne leurs liens à transmettre. */
+function InviteDialog({
+  roles,
+  limit,
+  used,
+  onClose,
+  onDone,
+}: {
+  roles: Role[];
+  limit: number | null;
+  used: number;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const { current } = useWorkspace();
+  const [emails, setEmails] = useState('');
+  const [role, setRole] = useState<WorkspaceRole>('editor');
+  const [err, setErr] = useState<string | null>(null);
+  const [links, setLinks] = useState<Array<{ email: string; url: string }>>([]);
+  const { busy, error, run } = useAction();
+  const list = [
+    ...new Set(
+      emails
+        .split(/[\s,;]+/)
+        .map((x) => x.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  async function submit(e: FormEvent) {
     e.preventDefault();
-    const list = [
-      ...new Set(
-        email
-          .split(/[\s,;]+/)
-          .map((x) => x.trim().toLowerCase())
-          .filter(Boolean),
-      ),
-    ];
     const invalid = list.filter((x) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));
     if (!list.length || invalid.length) {
-      setInviteError(
+      setErr(
         list.length ? t('members.invalidEmails', { list: invalid.join(', ') }) : t('validation.required'),
       );
       document.getElementById('inv-email')?.focus();
       return;
     }
-    setInviteError(null);
+    setErr(null);
     const rows = await run(async () =>
       check(
         await supabase
           .from('invitations')
-          .insert(list.map((addr) => ({ workspace_id: ws.id, email: addr, role, invited_by: user!.id })))
+          .insert(
+            list.map((addr) => ({ workspace_id: current!.id, email: addr, role, invited_by: user!.id })),
+          )
           .select(),
       ),
     );
     if (rows) {
-      setLastLinks(rows.map((r) => ({ email: r.email, url: inviteUrl(r.token) })));
-      setEmail('');
-      await load();
+      setLinks(rows.map((r) => ({ email: r.email, url: inviteUrl(r.token) })));
+      onDone();
     }
   }
 
-  const roles = assignableRoles(myRole);
-
+  const left = limit === null ? null : limit - used - list.length;
   return (
-    <div className="stack">
-      {dialog}
-      <div className="page-head">
-        <h1>{t('members.title')}</h1>
-      </div>
-      {error && <Alert kind="error">{error}</Alert>}
-      {success && <Alert kind="success">{success}</Alert>}
-
-      {can('members.invite') && (
-        <Card>
-          <CardHead icon={<UserPlus />} title={t('members.invite')} />
-          <form onSubmit={invite} className="row" style={{ alignItems: 'flex-start' }} noValidate>
-            <div style={{ flex: '1 1 240px' }}>
-              <Field label={t('members.emails')} htmlFor="inv-email">
-                <textarea
-                  id="inv-email"
-                  className="fd-textarea"
-                  rows={2}
-                  placeholder={t('members.emailsPlaceholder')}
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setInviteError(null);
-                  }}
-                  aria-invalid={inviteError ? true : undefined}
-                  aria-describedby={inviteError ? 'inv-email-error' : undefined}
-                />
-                {inviteError && (
-                  <p id="inv-email-error" className="field-error">
-                    {inviteError}
-                  </p>
-                )}
-              </Field>
-            </div>
-            <Field label={t('members.role')} htmlFor="inv-role">
-              <Select id="inv-role" value={role} onChange={(e) => setRole(e.target.value as WorkspaceRole)}>
-                {roles.map((r) => (
-                  <option key={r} value={r}>
-                    {t(`roles.${r}`)}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <div className="fd-field">
-              <span className="fd-label" aria-hidden="true">
-                &nbsp;
-              </span>
-              <Button icon={<Send />} type="submit" variant="primary" disabled={busy}>
-                {t('members.sendInvite')}
-              </Button>
-            </div>
-          </form>
-          {lastLinks.length > 0 && (
-            <Alert kind="success">
-              <p style={{ margin: '0 0 8px' }}>{t('members.invitesCreated', { count: lastLinks.length })}</p>
-              <ul className="invite-links">
-                {lastLinks.map((l) => (
-                  <li key={l.url}>
+    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <form
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="inv-t"
+        onSubmit={submit}
+        noValidate
+      >
+        <div className="modal-head">
+          <h2 id="inv-t">{t('members.inviteMany')}</h2>
+          <button
+            type="button"
+            className="btn btn-ghost btn-icon btn-sm"
+            aria-label={t('common.close')}
+            onClick={onClose}
+          >
+            <X aria-hidden="true" />
+          </button>
+        </div>
+        <div className="modal-body">
+          {links.length > 0 ? (
+            <>
+              <p>{t('members.invitesCreated', { count: links.length })}</p>
+              <ul className="st-links">
+                {links.map((l) => (
+                  <li key={l.url} className="row between">
                     <span>{l.email}</span>
-                    <Button
-                      icon={<Copy />}
-                      size="sm"
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
                       onClick={() => void navigator.clipboard.writeText(l.url)}
                     >
+                      <Copy aria-hidden="true" />
                       {t('members.copyLink')}
-                    </Button>
+                    </button>
                   </li>
                 ))}
               </ul>
-            </Alert>
+              <p className="help">{t('members.inviteHint')}</p>
+            </>
+          ) : (
+            <>
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
+              <div className="field">
+                <label htmlFor="inv-email">{t('members.emails')}</label>
+                <textarea
+                  id="inv-email"
+                  className="textarea"
+                  autoFocus
+                  placeholder={t('members.emailsPlaceholder')}
+                  value={emails}
+                  onChange={(e) => {
+                    setEmails(e.target.value);
+                    setErr(null);
+                  }}
+                  aria-invalid={err ? true : undefined}
+                  aria-describedby={err ? 'inv-email-error inv-help' : 'inv-help'}
+                />
+                {err && (
+                  <span className="error-msg" id="inv-email-error">
+                    {err}
+                  </span>
+                )}
+                <span className="help" id="inv-help">
+                  {t('members.emailsHelp')}
+                </span>
+              </div>
+              <div className="field">
+                <label htmlFor="inv-role">{t('members.role')}</label>
+                <select
+                  id="inv-role"
+                  className="select"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as WorkspaceRole)}
+                >
+                  {(['editor', 'viewer', 'admin', 'owner'] as Role[])
+                    .filter((r) => roles.includes(r))
+                    .map((r) => (
+                      <option key={r} value={r}>
+                        {t(`members.roleDesc.${r}`)}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              {list.length > 0 && (
+                <div className="alert st-seats">
+                  <Info aria-hidden="true" />
+                  <span>
+                    {left === null
+                      ? t('members.seatsUsedUnlimited', { count: list.length })
+                      : t('members.seatsUsed', { count: list.length, left: Math.max(0, left), limit })}
+                  </span>
+                </div>
+              )}
+            </>
           )}
-          <p className="fd-muted">{t('members.inviteHint')}</p>
-        </Card>
-      )}
-
-      <Card>
-        <table className="fd-table">
-          <thead>
-            <tr>
-              <th>{t('members.member')}</th>
-              <th>{t('members.role')}</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {members.map((m) => {
-              const editable =
-                canManage && m.user_id !== user?.id && (m.role !== 'owner' || myRole === 'owner');
-              return (
-                <tr key={m.user_id}>
-                  <td>
-                    <div className="member-cell">
-                      <span className="avatar" aria-hidden="true">
-                        {initials(m.full_name || m.email)}
-                      </span>
-                      <span className="member-cell__text">
-                        <span className="member-cell__name">{m.full_name || m.email}</span>
-                        {m.full_name && <span className="member-cell__email">{m.email}</span>}
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    {editable ? (
-                      <Select
-                        value={m.role}
-                        aria-label={t('members.role')}
-                        onChange={(e) =>
-                          void run(async () => {
-                            check(
-                              await supabase
-                                .from('members')
-                                .update({ role: e.target.value as WorkspaceRole })
-                                .eq('workspace_id', ws.id)
-                                .eq('user_id', m.user_id),
-                            );
-                            await load();
-                          }, t('common.saved'))
-                        }
-                      >
-                        {roles.map((r) => (
-                          <option key={r} value={r}>
-                            {t(`roles.${r}`)}
-                          </option>
-                        ))}
-                      </Select>
-                    ) : (
-                      <span className="fd-badge">{t(`roles.${m.role}`)}</span>
-                    )}
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    {(editable || m.user_id === user?.id) && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="btn-danger-ghost"
-                        icon={m.user_id === user?.id ? <LogOut /> : <UserMinus />}
-                        onClick={async () => {
-                          const self = m.user_id === user?.id;
-                          if (
-                            !(await ask({
-                              title: self
-                                ? t('members.confirmLeave')
-                                : t('members.confirmRemove', { email: m.email }),
-                              confirmLabel: self ? t('members.leave') : t('members.remove'),
-                              danger: true,
-                            }))
-                          )
-                            return;
-                          void run(async () => {
-                            check(
-                              await supabase
-                                .from('members')
-                                .delete()
-                                .eq('workspace_id', ws.id)
-                                .eq('user_id', m.user_id),
-                            );
-                            if (self) await reloadWs();
-                            else await load();
-                          });
-                        }}
-                      >
-                        {m.user_id === user?.id ? t('members.leave') : t('members.remove')}
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </Card>
-
-      {canManage && invites.length > 0 && (
-        <Card>
-          <CardHead icon={<Clock />} title={t('members.pending')} />
-          <table className="fd-table">
-            <tbody>
-              {invites.map((i) => (
-                <tr key={i.id}>
-                  <td>{i.email}</td>
-                  <td>
-                    <span className="fd-badge">{t(`roles.${i.role}`)}</span>
-                  </td>
-                  <td className="fd-muted">{formatDate(i.expires_at)}</td>
-                  <td style={{ textAlign: 'right' }} className="row">
-                    <Button
-                      icon={<Copy />}
-                      size="sm"
-                      onClick={() => void navigator.clipboard.writeText(inviteUrl(i.token))}
-                    >
-                      {t('members.copyLink')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="btn-danger-ghost"
-                      icon={<Trash2 />}
-                      onClick={() =>
-                        void run(async () => {
-                          check(await supabase.from('invitations').delete().eq('id', i.id));
-                          await load();
-                        })
-                      }
-                    >
-                      {t('members.revoke')}
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-      )}
+        </div>
+        <div className="modal-foot">
+          {links.length > 0 ? (
+            <button type="button" className="btn btn-primary" onClick={onClose}>
+              {t('common.close')}
+            </button>
+          ) : (
+            <>
+              <button type="button" className="btn btn-secondary" onClick={onClose}>
+                {t('common.cancel')}
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={busy}>
+                {t('members.sendInvites')}
+              </button>
+            </>
+          )}
+        </div>
+      </form>
     </div>
   );
 }

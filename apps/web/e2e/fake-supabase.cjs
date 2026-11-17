@@ -330,17 +330,25 @@ async function install(page, state = seed()) {
           if (c) Object.assign(c, { resolved_at: a.p_resolved ? new Date().toISOString() : null });
           return json(route, 200, null);
         }
-        case 'list_members':
+        case 'list_members': {
+          // Annuaire facultatif (maquette) : membres de t.members avec nom et email
+          const dir = state.memberDirectory || {};
+          const me = t.profiles?.[0]?.full_name || 'Alice';
+          const others = (t.members || [])
+            .filter((m) => m.user_id !== state.user.id && dir[m.user_id])
+            .map((m) => ({ user_id: m.user_id, role: m.role, created_at: m.created_at, ...dir[m.user_id] }));
           return json(route, 200, [
-            ...(state.extraMembers || []),
             {
               user_id: state.user.id,
               email: state.user.email,
-              full_name: 'Alice',
+              full_name: me === 'Alice' ? 'Alice' : me,
               role: 'owner',
               created_at: '2026-01-01',
             },
+            ...others,
+            ...(state.extraMembers || []),
           ]);
+        }
         case 'workspace_overview':
           return json(
             route,
