@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "FlowDSIML",
+    "name": "{{app}}",
     "org": "DSI des Missions Locales"
   },
   "common": {
@@ -97,8 +97,8 @@
     "step2": "Extension",
     "extTitle": "Install the capture extension",
     "extSubtitle": "Your workspace is ready. Three more steps to your first demo.",
-    "ext1": "Install the FlowDSIML extension in Chrome (until it is published, load it unpacked: see the README).",
-    "ext2": "Open your app, click the FlowDSIML icon, then “Start capture” and walk through the workflow.",
+    "ext1": "Install the {{app}} extension in Chrome (until it is published, load it unpacked: see the README).",
+    "ext2": "Open your app, click the {{app}} icon, then “Start capture” and walk through the workflow.",
     "ext3": "Finish: the editor opens. Adjust the texts, then publish.",
     "goDashboard": "Go to my demos"
   },
@@ -156,7 +156,7 @@
     "members": "Members",
     "stepsPerDemo": "Steps per demo",
     "leadForms": "Lead forms",
-    "removeBranding": "Remove FlowDSIML branding",
+    "removeBranding": "Remove {{app}} branding",
     "retention": "Analytics retention",
     "days_one": "{{count}} day",
     "days_other": "{{count}} days",
@@ -254,7 +254,7 @@
     "radius": "Corner radius: {{v}} px",
     "logo": "Logo",
     "removeLogo": "Remove logo",
-    "showBranding": "Show “Made with FlowDSIML”",
+    "showBranding": "Show “Made with {{app}}”",
     "brandingHint": "On the Free plan, the mention stays visible.",
     "locale": "Player language",
     "variables": "Personalization variables",
@@ -625,7 +625,7 @@
     "status": "Status",
     "allStatuses": "All statuses",
     "emptyTitle": "Create your first interactive demo",
-    "emptyStep1": "Install the FlowDSIML Chrome extension and sign in.",
+    "emptyStep1": "Install the {{app}} Chrome extension and sign in.",
     "emptyStep2": "Open your app, click “Start recording” and walk through the workflow.",
     "emptyStep3": "Finish: the editor opens; adjust texts and publish.",
     "emptyCta": "Or start from a blank demo",

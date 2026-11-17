@@ -1,3 +1,4 @@
+import { APP_NAME } from '@flowdsiml/core';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart3, MousePointerClick, Share2 } from 'lucide-react';
@@ -22,7 +23,7 @@ export function AuthLayout({
       <aside className="auth-brand" aria-hidden="true">
         <div className="auth-logo auth-logo--dsi">
           <img src={logoDsiBlanc} alt="" width={260} height={79} />
-          <span className="auth-product">FlowDSIML</span>
+          <span className="auth-product">{APP_NAME}</span>
         </div>
         <div className="auth-pitch">
           <h2>{t('auth.pitchTitle')}</h2>

@@ -1,3 +1,5 @@
+import { APP_NAME } from '@flowdsiml/core';
+
 const dict = {
   fr: {
     next: 'Suivant',
@@ -9,7 +11,7 @@ const dict = {
     loading: 'Chargement de la démo…',
     notFound: "Cette démo n'existe pas ou n'est plus publiée.",
     embedBlocked: 'Cette démo ne peut pas être affichée sur ce site.',
-    madeWith: 'Créé avec FlowDSIML',
+    madeWith: `Créé avec ${APP_NAME}`,
     skip: 'Passer',
     required: 'obligatoire',
     sending: 'Envoi…',
@@ -46,7 +48,7 @@ const dict = {
     loading: 'Loading demo…',
     notFound: 'This demo does not exist or is no longer published.',
     embedBlocked: 'This demo cannot be displayed on this website.',
-    madeWith: 'Made with FlowDSIML',
+    madeWith: `Made with ${APP_NAME}`,
     skip: 'Skip',
     required: 'required',
     sending: 'Sending…',

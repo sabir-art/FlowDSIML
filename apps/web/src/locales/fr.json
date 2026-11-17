@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "FlowDSIML",
+    "name": "{{app}}",
     "org": "DSI des Missions Locales"
   },
   "common": {
@@ -97,8 +97,8 @@
     "step2": "Extension",
     "extTitle": "Installez l’extension de capture",
     "extSubtitle": "Votre workspace est prêt. Encore 3 étapes pour votre première démo.",
-    "ext1": "Installez l’extension FlowDSIML dans Chrome (en attendant sa publication : chargez-la « non empaquetée », voir le README).",
-    "ext2": "Ouvrez votre application, cliquez sur l’icône FlowDSIML puis sur « Démarrer la capture » et parcourez le workflow à montrer.",
+    "ext1": "Installez l’extension {{app}} dans Chrome (en attendant sa publication : chargez-la « non empaquetée », voir le README).",
+    "ext2": "Ouvrez votre application, cliquez sur l’icône {{app}} puis sur « Démarrer la capture » et parcourez le workflow à montrer.",
     "ext3": "Terminez : l’éditeur s’ouvre. Ajustez les textes puis publiez.",
     "goDashboard": "Accéder à mes démos"
   },
@@ -156,7 +156,7 @@
     "members": "Membres",
     "stepsPerDemo": "Étapes par démo",
     "leadForms": "Formulaires de lead",
-    "removeBranding": "Retrait de la mention FlowDSIML",
+    "removeBranding": "Retrait de la mention {{app}}",
     "retention": "Conservation des analytics",
     "days_one": "{{count}} jour",
     "days_other": "{{count}} jours",
@@ -254,7 +254,7 @@
     "radius": "Arrondi : {{v}} px",
     "logo": "Logo",
     "removeLogo": "Retirer le logo",
-    "showBranding": "Afficher « Créé avec FlowDSIML »",
+    "showBranding": "Afficher « Créé avec {{app}} »",
     "brandingHint": "Sur le plan Free, la mention reste affichée.",
     "locale": "Langue du player",
     "variables": "Variables de personnalisation",
@@ -625,7 +625,7 @@
     "status": "Statut",
     "allStatuses": "Tous les statuts",
     "emptyTitle": "Créez votre première démo interactive",
-    "emptyStep1": "Installez l'extension Chrome FlowDSIML et connectez-vous.",
+    "emptyStep1": "Installez l'extension Chrome {{app}} et connectez-vous.",
     "emptyStep2": "Ouvrez votre application, cliquez sur « Démarrer l'enregistrement » puis parcourez le workflow à montrer.",
     "emptyStep3": "Terminez : l'éditeur s'ouvre, ajustez les textes puis publiez.",
     "emptyCta": "Ou partir d'une démo vide",

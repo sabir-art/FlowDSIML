@@ -5,3 +5,4 @@ export * from './plans';
 export * from './analytics';
 export * from './csv';
 export * from './strings';
+export * from './brand';

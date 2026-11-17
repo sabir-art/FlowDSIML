@@ -3,11 +3,14 @@ import './style.css';
 import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
 import { APP_URL } from '@/lib/config';
+import { APP_NAME } from '@flowdsiml/core';
 import type { PopupRequest, RecordingStatus } from '@/lib/messages';
 import { lang, stepsCaptured, strings } from '@/lib/i18n';
 import { Check, LogIn, LogOut, Pause, Play, Video, X, createIcons } from 'lucide';
 
 document.documentElement.lang = lang;
+document.title = APP_NAME;
+for (const el of document.querySelectorAll<HTMLElement>('[data-app-name]')) el.textContent = APP_NAME;
 for (const el of document.querySelectorAll<HTMLElement>('[data-i18n]'))
   el.textContent = strings[el.dataset.i18n as keyof typeof strings];
 (document.getElementById('title') as HTMLInputElement).placeholder = strings.demoTitlePlaceholder;
