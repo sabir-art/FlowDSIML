@@ -60,6 +60,42 @@ Le dev a déjà ses fichiers `apps/web/src/locales/fr.json` et `en.json` (116 cl
 
 ---
 
-## Lot 5 (éditeur) et lot 6 (player)
+## Lot 5 : éditeur
 
-À faire dès leur livraison, avec la même méthode.
+**Branche testée** : `claude/dev-mvp` (commit `18459bd`) fusionnée localement avec `claude/ux-tokens-merge` (`05ea640`).
+**Méthode** : banc e2e du dev (`apps/web/e2e`, faux Supabase) : ses 11 vérifications passent. Captures supplémentaires de chaque état (hotspot sélectionné, thème, formulaire, sombre, 1 024 px, 390 px), parcours de 30 tabulations au clavier et audit automatique (libellés, noms, sémantique). Référence : `docs/ux/maquettes/editeur.html`, `composants.md` §13. Captures : `docs/ux/recette/lot5/`.
+
+### Bilan
+
+| Bloquant | Majeur | Mineur |
+|---|---|---|
+| 3 | 9 | 6 |
+
+Points positifs : structure à trois colonnes conforme (rail, canevas, panneau), sauvegarde automatique annoncée (`role="status"`), barre d'outils `role="toolbar"`, réordonnancement accessible au clavier (boutons Monter/Descendre), libellés de champs reliés, déplacement à la souris fluide, variables avec valeur par défaut (`{{company|chez vous}}`), chapitres présents, mode sombre correct, le canevas reste clair.
+
+| # | Gravité | Zone | Écart | Attendu (référence) |
+|---|---|---|---|---|
+| ED1 | **Bloquant** | Canevas, accessibilité | Le hotspot est un `div role="button"` **sans `tabindex`** : impossible de le sélectionner, déplacer ou supprimer au clavier. Les zones de flou non plus. | `composants.md` §0.3 et §13.2 : élément focusable, `Entrée` pour sélectionner, flèches pour déplacer de 1 % (`Maj` = 5 %), `Suppr` pour supprimer, annonce `aria-live`. |
+| ED2 | **Bloquant** | Canevas | La **bulle (info-bulle) n'apparaît pas sur le canevas** : on édite le texte à l'aveugle, sans voir le rendu, le placement ni le thème. Le hotspot est rendu comme un **rectangle violet numéroté**, pas comme le point pulsant que verra le prospect. | Maquette `editeur.html` : rendu WYSIWYG dans `.fd-player-scope` (hotspot `player-hotspot` pulsé et bulle avec compteur, texte, variables résolues, boutons). Réutiliser `player-core` pour éviter les écarts éditeur ↔ player. |
+| ED3 | **Bloquant** | Barre du haut | **Pas de bouton « Publier »** (`PublishButton` renvoie `null` jusqu'au lot 6). Statut « Brouillon » seul. | Bouton `accent` « Publier » (unique accent de l'écran) + badge « Modifications non publiées ». À livrer avec le lot 6, mais à signaler car la boucle éditer → publier → partager est le cœur du MVP. |
+| ED4 | Majeur | Outils | « Sélection / + Hotspot / + Flou » sont dans la barre du haut, et l'outil actif est rendu en **bouton primaire plein** : il ressemble à l'action principale de l'écran. | Groupe segmenté (`role="radiogroup"`), ou barre flottante en bas du canevas (§13.2) avec icônes, libellés en infobulle et état `aria-pressed`. |
+| ED5 | Majeur | Panneau | **5 onglets sur 2 lignes** (« Chapitres » passe à la ligne) dans 320 px. | 3 onglets maximum (Étape · Design · Réglages, comme la maquette) : Formulaire dans Étape (contexte), Variables et Chapitres dans Réglages ; ou un défilement horizontal sans retour à la ligne (§7). |
+| ED6 | Majeur | Panneau Hotspot | Le texte de la bulle montre la **syntaxe brute** `{{company|chez vous}}` dans un `textarea` ; la barre de mise en forme mélange B, I, Lien et un `select` natif « {{ }} ». | Pastilles de variable atomiques (`composants.md` §2.5) et bouton « { } Variable » ouvrant un menu ; compteur de caractères (280 conseillés). |
+| ED7 | Majeur | Thème | Couleur principale par défaut **`#5b4cf0` (violet provisoire)** et fond `#0f0f17` ; aucun **avertissement de contraste** ; champ logo en `input file` natif (« Choose File », non traduit) ; le thème ne se voit pas sur le canevas (cf. ED2). | Valeurs par défaut issues de `tokens.ts → player` (Lagoon 600, hotspot Ember 500, rayon 16) ; avertissement §11.1 avec proposition de couleur accessible ; zone de dépôt du logo stylée et traduite. |
+| ED8 | Majeur | Formulaire | Créer le formulaire **ne montre rien sur le canevas** ; le rattachement à une étape se fait dans un autre onglet (« Choisissez l'étape concernée dans l'onglet Étape ») ; 5 cases à cocher sans réordonnancement. | Maquette : le formulaire est une étape (ou une pop-up d'étape) visible dans le rail et sur le canevas ; champs réordonnables avec Obligatoire/Facultatif ; consentement non coché par défaut. |
+| ED9 | Majeur | Actions destructives | « Supprimer l'étape » et « Supprimer le hotspot » en **gros boutons rouges pleins** en bas du panneau ; suppression d'étape par `confirm()` natif. | Icône corbeille `ghost` dans l'en-tête de section ou entrée `danger` du menu « ⋯ » du rail ; suppression **annulable** (toast « Annuler » + `⌘Z`) plutôt qu'une confirmation bloquante. |
+| ED10 | Majeur | Rail | Pas de repère visuel des hotspots/flous/formulaires sur les vignettes, pas de connecteur « sentier », pas de glisser-déposer au clavier ; ajout limité à « + Écran texte » et « + Image ». | §13.1 : icônes d'état, connecteur, `Espace` pour saisir puis flèches ; menu « Ajouter une étape » (capturer, image, pop-up, formulaire). |
+| ED11 | Majeur | Responsive | À 390 px, l'éditeur s'empile (rail horizontal, canevas minuscule, panneau en dessous) : inutilisable. | Sous 1 024 px : écran « L'éditeur s'utilise sur ordinateur » avec liens Aperçu/Partager (maquette, `editor.narrow.*`). |
+| ED12 | Majeur | Aperçu | « Aperçu » ouvre un **nouvel onglet** (player) : rupture de contexte, et rien ne se passe si le player n'est pas lancé (`PLAYER_URL`). | Bascule Édition/Aperçu dans l'éditeur (maquette), le player en `iframe` dans `.fd-player-scope`, ou au minimum message d'erreur si la fenêtre ne répond pas. |
+| ED13 | Mineur | Sémantique | Pas de `<main>` ni de `<h1>` (le titre est un champ). Image d'étape sans `alt`. | `<main>` autour du canevas, `<h1 class="sr-only">` « Éditeur : Démo CRM », `alt` = titre de l'étape. |
+| ED14 | Mineur | Barre du haut | Badge d'état de sauvegarde « — » au repos (illisible) à côté de « Brouillon ». | Icône + « Enregistré » (ou rien au repos), libellés de `editor.saveState.*`. |
+| ED15 | Mineur | Panneau Étape | Cases « Zoom sur une zone » et « Bouton d'action (CTA) » en cases à cocher. | Interrupteurs (réglage immédiat, §2.4). |
+| ED16 | Mineur | Panneau | « ← Étape » en lien texte pour revenir du hotspot à l'étape. | Fil d'Ariane du panneau (« Étape 1 › Hotspot ») ou bouton `ghost` avec icône. |
+| ED17 | Mineur | Libellés | « Info-bulle » (vs « bulle »), « Écran texte », « Au clic ». | Glossaire `microcopy.md` §3 : « bulle », « Action au clic » ; « info-bulle » réservé aux infobulles de l'app. |
+| ED18 | Mineur | Rail | Étape texte : vignette « Aa » grise peu lisible. | Vignette avec le titre de l'étape sur fond `player-backdrop`. |
+
+**Priorités proposées au dev** : ED1, ED2 (le rendu WYSIWYG via `player-core` règle aussi ED7 et ED8 côté visuel), ED5, ED4, puis ED11 (simple écran de garde).
+
+## Lot 6 : player
+
+À faire dès sa livraison, avec la même méthode.
