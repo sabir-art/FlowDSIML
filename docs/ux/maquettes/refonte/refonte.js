@@ -45,6 +45,22 @@
     arrowUp: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
     pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
     x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+    key: '<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M17 6l3 3M15 8l2 2"/>',
+    atSign: '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>',
+    building: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/>',
+    code: '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+    copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+    external: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+    refresh: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
+    check: '<path d="m5 12 5 5L20 7"/>',
+    palette: '<circle cx="13.5" cy="6.5" r="1.2"/><circle cx="17.5" cy="10.5" r="1.2"/><circle cx="8.5" cy="7.5" r="1.2"/><circle cx="6.5" cy="12.5" r="1.2"/><path d="M12 2a10 10 0 0 0 0 20 2 2 0 0 0 2-2c0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3a2 2 0 0 1 2-2h2.4A5.6 5.6 0 0 0 22 12c0-5.5-4.5-10-10-10z"/>',
+    layout: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+    popup: '<rect x="3" y="4" width="18" height="16" rx="2"/><rect x="7" y="8" width="10" height="8" rx="1.5"/>',
+    cursorClick: '<path d="M9.04 9.68a.5.5 0 0 1 .64-.64l11 4.28a.5.5 0 0 1-.05.95l-4.21 1.27a1 1 0 0 0-.67.67l-1.27 4.21a.5.5 0 0 1-.95.05z"/>',
+    eye2: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    alert: '<path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3z"/><path d="M12 9v4M12 17h.01"/>',
     link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
   };
   const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${P[n] || ''}</svg>`;
@@ -64,6 +80,8 @@
     document.addEventListener('click', (e) => {
       const b = e.target.closest('[data-theme-set]'); if (b) theme(b.dataset.themeSet);
       const s = e.target.closest('.fd-segmented > button, .fd-tabs > [role=tab]');
+      const ts = e.target.closest('[data-view-set]');
+      if (ts) { const v = document.querySelector('[data-view]'); if (v) v.dataset.view = ts.dataset.viewSet; ts.parentElement.querySelectorAll('[data-view-set]').forEach((b) => b.setAttribute(b.getAttribute('role') === 'tab' ? 'aria-selected' : 'aria-pressed', String(b === ts))); }
       const cs = e.target.closest('[data-cm-set]');
       if (cs) applyCm(cs.dataset.cmSet);
       const tg = e.target.closest('[data-cm-toggle]');
@@ -81,6 +99,7 @@
         if (e.key === 'Enter') { const c = document.querySelector('[data-cm-state]'); c.dataset.cmState = c.dataset.cmState === 'collapsed' ? 'list' : 'collapsed'; } });
     }
     const st = new URLSearchParams(location.search).get('cm'); if (st) applyCm(st);
+    const vw = new URLSearchParams(location.search).get('view'); if (vw) { const b = document.querySelector(`[data-view-set="${vw}"]`); if (b) b.click(); }
     const fi = document.querySelector('.cm-filter input'); if (fi) fi.addEventListener('change', () => applyCm(fi.checked ? 'resolved' : 'list'));
   });
 })();

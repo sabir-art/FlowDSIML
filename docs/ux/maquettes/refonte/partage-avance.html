@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partage avancé — FlowDSIML (lot A1)</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img src="../../assets/symbole-dsi.svg" alt="">
+      <span><span class="brand__name">FlowDSIML</span><span class="brand__sub">DSI des Missions Locales</span></span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html" aria-current="page"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Éditrice</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+
+  <main class="main" data-view="lien">
+    <header class="topbar">
+      <a class="icon-btn" href="dashboard.html" aria-label="Retour aux démos"><i data-icon="arrowLeft"></i></a>
+      <div><h1>Partager</h1><p class="sub">Inscription au parcours CEJ · publiée, version 3</p></div>
+      <div class="topbar__actions">
+        <button class="fd-btn" type="button"><i data-icon="external"></i>Ouvrir</button>
+        <button class="fd-btn fd-btn--primary" type="button"><i data-icon="copy"></i>Copier le lien</button>
+      </div>
+    </header>
+
+    <div class="share-grid">
+      <section class="fd-card">
+        <div class="fd-tabs share-tabs" role="tablist" aria-label="Options de partage">
+          <button role="tab" type="button" aria-selected="true" data-view-set="lien"><i data-icon="link"></i>Lien</button>
+          <button role="tab" type="button" aria-selected="false" data-view-set="acces"><i data-icon="lock"></i>Accès</button>
+          <button role="tab" type="button" aria-selected="false" data-view-set="integrer"><i data-icon="code"></i>Intégrer</button>
+          <button role="tab" type="button" aria-selected="false" data-view-set="page"><i data-icon="layout"></i>Page publique</button>
+        </div>
+
+        <!-- Onglet Lien -->
+        <div data-pane="lien">
+          <div class="fd-field" style="margin:0">
+            <label class="fd-label" for="slug">Adresse de la démo</label>
+            <div class="slug"><span class="slug__prefix">demos.flowdsiml.example/acme/</span><input id="slug" value="inscription-cej" aria-describedby="slug-st slug-h"><button class="fd-btn" type="button"><i data-icon="copy"></i>Copier</button></div>
+            <span class="field-status field-status--ok" id="slug-st" role="status"><i data-icon="checkCircle"></i>Adresse disponible</span>
+            <span class="fd-help" id="slug-h">Lettres minuscules, chiffres et tirets (3 à 60 caractères). Changer l'adresse redirige l'ancienne pendant 90 jours.</span>
+          </div>
+          <div class="fd-field" style="margin:0">
+            <span class="fd-label">Variables d'URL</span>
+            <pre class="code">demos.flowdsiml.example/acme/inscription-cej<span class="k">?first_name=Léa&amp;company=Atelier%20Brume</span></pre>
+            <span class="fd-help">Pré-remplit les variables de la démo. Pour un suivi par prospect, créez plutôt un lien personnalisé.</span>
+          </div>
+          <div class="fd-field" style="margin:0">
+            <label class="fd-label" for="exp">Expiration du lien</label>
+            <select class="fd-select" id="exp" style="max-width:280px"><option>Jamais</option><option>Dans 7 jours</option><option>Dans 30 jours</option><option>Date précise…</option></select>
+          </div>
+        </div>
+
+        <!-- Onglet Accès -->
+        <div data-pane="acces">
+          <fieldset class="choice-list">
+            <legend class="fd-label" style="margin-bottom:8px">Qui peut voir la démo ?</legend>
+            <label class="choice"><input type="radio" name="acc"><span class="fd-icon-chip"><i data-icon="globe"></i></span><span><b>Toute personne avec le lien</b><small>Accès libre, sans identification.</small></span><span class="choice__check"></span></label>
+            <label class="choice"><input type="radio" name="acc" checked><span class="fd-icon-chip"><i data-icon="key"></i></span><span><b>Avec un mot de passe</b><small>Le visiteur saisit un mot de passe partagé.</small></span><span class="choice__check"></span></label>
+            <div class="choice-config">
+              <div class="fd-field" style="margin:0"><label class="fd-label" for="pw">Mot de passe</label>
+                <div class="fd-input-group"><input class="fd-input" id="pw" type="password" value="parcours-2026" autocomplete="new-password" aria-describedby="pw-h"><button class="fd-btn fd-btn--icon" type="button" aria-label="Afficher le mot de passe"><i data-icon="eye2"></i></button><button class="fd-btn" type="button"><i data-icon="refresh"></i>Générer</button></div>
+                <span class="fd-help" id="pw-h">8 caractères minimum. Le changer déconnecte les visiteurs déjà entrés.</span></div>
+              <label class="fd-switch"><span>Demander aussi l'e-mail du visiteur (pour les analytics)</span><input type="checkbox"><span class="fd-switch__track"></span></label>
+            </div>
+            <label class="choice"><input type="radio" name="acc"><span class="fd-icon-chip"><i data-icon="mail"></i></span><span><b>Sur invitation par e-mail</b><small>Seules les adresses invitées reçoivent un lien d'accès personnel.</small></span><span class="choice__check"></span></label>
+            <label class="choice"><input type="radio" name="acc"><span class="fd-icon-chip"><i data-icon="building"></i></span><span><b>Par domaine e-mail</b><small>Toute adresse d'un domaine autorisé, vérifiée par un lien envoyé par e-mail.</small></span><span class="choice__check"></span></label>
+            <label class="choice"><input type="radio" name="acc"><span class="fd-icon-chip"><i data-icon="shield"></i></span><span><b>Par jeton d'authentification</b><small>Pour un intranet ou un portail : votre site signe l'accès.</small></span><span class="fd-badge">Avancé</span></label>
+          </fieldset>
+          <div class="fd-alert" style="margin:0"><span class="fd-alert__body">Les accès restreints s'appliquent au lien, à l'intégration et à la page publique. Les liens personnalisés restent soumis à la même règle.</span></div>
+        </div>
+
+        <!-- Onglet Intégrer -->
+        <div data-pane="integrer">
+          <div class="fd-segmented" role="group" aria-label="Type d'intégration">
+            <button type="button" aria-pressed="false">Dans la page</button>
+            <button type="button" aria-pressed="true">Bouton pop-up</button>
+            <button type="button" aria-pressed="false">Lien texte</button>
+          </div>
+          <div class="row-2">
+            <div class="fd-field" style="margin:0"><label class="fd-label" for="bl">Texte du bouton</label><input class="fd-input" id="bl" value="Voir la démo"></div>
+            <div class="fd-field" style="margin:0"><label class="fd-label" for="bp">Position</label><select class="fd-select" id="bp"><option>En bas à droite</option><option>En bas à gauche</option><option>Dans le contenu</option></select></div>
+          </div>
+          <label class="fd-switch"><span>Ouvrir automatiquement après 10 secondes</span><input type="checkbox"><span class="fd-switch__track"></span></label>
+          <div class="fd-field" style="margin:0"><span class="fd-label">Code à coller avant &lt;/body&gt;</span>
+<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>&lt;script src="https://demos.flowdsiml.example/embed.js" defer&gt;&lt;/script&gt;
+&lt;button <span class="k">data-flowdsiml="inscription-cej"</span>
+        <span class="k">data-mode="popup"</span>&gt;Voir la démo&lt;/button&gt;</pre></div>
+          <div class="fd-field" style="margin:0"><label class="fd-label" for="dom">Sites autorisés</label><div class="chips" id="dom"><span class="chip">www.mission-locale.example<button type="button" aria-label="Retirer www.mission-locale.example"><i data-icon="x"></i></button></span><span class="chip">*.dsi-ml.example<button type="button" aria-label="Retirer *.dsi-ml.example"><i data-icon="x"></i></button></span><input aria-label="Ajouter un site" placeholder="Ajouter un site…"></div><span class="fd-help">Vide = tous les sites. Pris en compte à la prochaine publication.</span></div>
+        </div>
+
+        <!-- Onglet Page publique -->
+        <div data-pane="page">
+          <label class="fd-switch"><span><b>Page publique activée</b><br><small class="fd-muted">Une page dédiée avec titre, description et bouton d'action, autour de la démo.</small></span><input type="checkbox" checked><span class="fd-switch__track"></span></label>
+          <div class="fd-field" style="margin:0"><label class="fd-label" for="pt">Titre de la page</label><input class="fd-input" id="pt" value="Découvrez votre inscription au Contrat d'engagement jeune"></div>
+          <div class="fd-field" style="margin:0"><label class="fd-label" for="pd">Description</label><textarea class="fd-textarea" id="pd">En 2 minutes, suivez les étapes de l'inscription en ligne, de la vérification d'éligibilité à la prise de rendez-vous avec votre conseiller.</textarea></div>
+          <div class="row-2">
+            <div class="fd-field" style="margin:0"><label class="fd-label" for="pc">Bouton d'action</label><input class="fd-input" id="pc" value="Prendre rendez-vous"></div>
+            <div class="fd-field" style="margin:0"><label class="fd-label" for="pu">Lien du bouton</label><input class="fd-input" id="pu" value="https://www.mission-locale.example/rdv"></div>
+          </div>
+          <div class="fd-field" style="margin:0"><span class="fd-label">Style de la page</span>
+            <div class="fd-segmented" role="group" aria-label="Style de la page"><button type="button" aria-pressed="true">Style de la démo</button><button type="button" aria-pressed="false">Clair</button><button type="button" aria-pressed="false">Sombre</button></div></div>
+          <label class="fd-switch"><span>Proposer d'autres démos du workspace en bas de page</span><input type="checkbox"><span class="fd-switch__track"></span></label>
+          <label class="fd-switch"><span>Indexation par les moteurs de recherche</span><input type="checkbox"><span class="fd-switch__track"></span></label>
+          <div><a class="fd-btn" href="demo-page.html"><i data-icon="external"></i>Voir la page publique</a></div>
+        </div>
+      </section>
+
+      <aside class="side-summary">
+        <div class="fd-card" style="padding:16px">
+          <div class="mini-preview fd-player-scope" data-preview><span class="site"></span><span class="pop-btn"><i data-icon="play"></i>Voir la démo</span></div>
+        </div>
+        <div class="fd-card side-summary">
+          <h2 class="fd-card__title">Récapitulatif</h2>
+          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="link"></i></span><span>demos.flowdsiml.example/acme/inscription-cej<small>Lien permanent</small></span></div>
+          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="key"></i></span><span>Mot de passe<small>Changé il y a 2 jours</small></span></div>
+          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="popup"></i></span><span>Bouton pop-up<small>2 sites autorisés</small></span></div>
+          <div class="summary-line"><span class="fd-icon-chip"><i data-icon="layout"></i></span><span>Page publique active<small>Non indexée</small></span></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

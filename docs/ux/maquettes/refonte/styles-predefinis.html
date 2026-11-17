@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Styles prédéfinis — FlowDSIML (lot A1)</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+/* Valeurs des styles prédéfinis (en production : themes.tokens de la démo) */
+.pr-dsi { --pr-bg:#EEF2F6; --pr-tip:#FFFFFF; --pr-text:#080808; --pr-primary:#A3195B; --pr-on-primary:#FFFFFF; --pr-hotspot:#D60B52; --pr-radius:20px; --pr-btn-radius:999px; --pr-font:'Plus Jakarta Sans',sans-serif; }
+.pr-clair { --pr-bg:#FFFFFF; --pr-tip:#FFFFFF; --pr-text:#161A20; --pr-primary:#2381B5; --pr-on-primary:#FFFFFF; --pr-hotspot:#2897D5; --pr-radius:12px; --pr-btn-radius:8px; --pr-font:'Plus Jakarta Sans',sans-serif; }
+.pr-nuit { --pr-bg:#0B0D10; --pr-tip:#1C2128; --pr-text:#F3F5F8; --pr-primary:#CF86A9; --pr-on-primary:#080808; --pr-hotspot:#E35889; --pr-radius:16px; --pr-btn-radius:999px; --pr-font:'Plus Jakarta Sans',sans-serif; }
+.pr-minimal { --pr-bg:#F6F8FA; --pr-tip:#FFFFFF; --pr-text:#080808; --pr-primary:#080808; --pr-on-primary:#FFFFFF; --pr-hotspot:#080808; --pr-radius:6px; --pr-btn-radius:6px; --pr-font:ui-sans-serif,system-ui,sans-serif; }
+.pr-vert { --pr-bg:#F5F9E8; --pr-tip:#FFFFFF; --pr-text:#080808; --pr-primary:#95C11F; --pr-on-primary:#080808; --pr-hotspot:#557014; --pr-radius:20px; --pr-btn-radius:999px; --pr-font:'Plus Jakarta Sans',sans-serif; }
+.pr-contraste { --pr-bg:#FFFFFF; --pr-tip:#080808; --pr-text:#FFFFFF; --pr-primary:#FFFFFF; --pr-on-primary:#080808; --pr-hotspot:#D60B52; --pr-radius:8px; --pr-btn-radius:8px; --pr-font:'Plus Jakarta Sans',sans-serif; }
+.preset__view { background: var(--pr-bg); }
+</style>
+</head>
+<body>
+<main class="main" style="max-width:1100px;margin:0 auto">
+  <header class="topbar"><div><h1>Styles prédéfinis</h1><p class="sub">Onglet Design de l'éditeur, en tête du panneau. Un clic applique le style à toute la démo ; chaque réglage reste modifiable ensuite.</p></div></header>
+  <section class="fd-card">
+    <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="palette"></i></span><h2 class="fd-card__title">Choisir un style</h2><button class="fd-btn fd-btn--sm" type="button"><i data-icon="plus"></i>Enregistrer le style actuel</button></div>
+    <div class="presets" role="group" aria-label="Styles prédéfinis">
+      <button class="preset pr-dsi" type="button" aria-pressed="true"><span class="preset__view"><span class="preset__bubble">Bienvenue<i></i><span class="preset__btn">Suivant</span></span><span class="preset__dot"></span></span><span class="preset__name">DSI Prune <span class="fd-badge">Par défaut</span></span><span class="preset__swatches"><span style="background:#A3195B"></span><span style="background:#D60B52"></span><span style="background:#EEF2F6"></span></span></button>
+      <button class="preset pr-clair" type="button" aria-pressed="false"><span class="preset__view"><span class="preset__bubble">Bienvenue<i></i><span class="preset__btn">Suivant</span></span><span class="preset__dot"></span></span><span class="preset__name">Bleu institutionnel</span><span class="preset__swatches"><span style="background:#2381B5"></span><span style="background:#2897D5"></span><span style="background:#FFFFFF"></span></span></button>
+      <button class="preset pr-vert" type="button" aria-pressed="false"><span class="preset__view"><span class="preset__bubble">Bienvenue<i></i><span class="preset__btn">Suivant</span></span><span class="preset__dot"></span></span><span class="preset__name">Vert DSI</span><span class="preset__swatches"><span style="background:#95C11F"></span><span style="background:#557014"></span><span style="background:#F5F9E8"></span></span></button>
+      <button class="preset pr-nuit" type="button" aria-pressed="false"><span class="preset__view"><span class="preset__bubble">Bienvenue<i></i><span class="preset__btn">Suivant</span></span><span class="preset__dot"></span></span><span class="preset__name">Nuit</span><span class="preset__swatches"><span style="background:#CF86A9"></span><span style="background:#E35889"></span><span style="background:#0B0D10"></span></span></button>
+      <button class="preset pr-minimal" type="button" aria-pressed="false"><span class="preset__view"><span class="preset__bubble">Bienvenue<i></i><span class="preset__btn">Suivant</span></span><span class="preset__dot"></span></span><span class="preset__name">Minimal</span><span class="preset__swatches"><span style="background:#080808"></span><span style="background:#F6F8FA"></span><span style="background:#FFFFFF"></span></span></button>
+      <button class="preset pr-contraste" type="button" aria-pressed="false"><span class="preset__view"><span class="preset__bubble">Bienvenue<i></i><span class="preset__btn">Suivant</span></span><span class="preset__dot"></span></span><span class="preset__name">Contraste élevé</span><span class="preset__swatches"><span style="background:#080808"></span><span style="background:#D60B52"></span><span style="background:#FFFFFF"></span></span></button>
+    </div>
+    <div class="fd-card__head" style="margin:24px 0 12px"><span class="fd-icon-chip"><i data-icon="type"></i></span><h2 class="fd-card__title">Police</h2></div>
+    <div class="row-2">
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="ff">Police de la démo</label><select class="fd-select" id="ff"><option>Plus Jakarta Sans</option><option>Police du workspace (importée)</option><option>Système</option><option>Importer une police…</option></select><span class="fd-help">Polices personnalisées : fichiers WOFF2, 2 Mo maximum par graisse.</span></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="fr">Arrondi des bulles et boutons</label><div class="fd-segmented" role="group" aria-label="Arrondi"><button type="button" aria-pressed="false">Net</button><button type="button" aria-pressed="false">Doux</button><button type="button" aria-pressed="true">Rond</button></div></div>
+    </div>
+  </section>
+</main>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

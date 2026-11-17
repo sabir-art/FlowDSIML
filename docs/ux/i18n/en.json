@@ -470,6 +470,29 @@
       "mobileNoticeTitle": "The editor needs a larger screen",
       "mobileNoticeBody": "Open this demo on a computer to edit it. You can read and reply to comments here.",
       "step": "Step"
+    },
+    "presets": {
+      "title": "Choose a style",
+      "save": "Save current style",
+      "default": "Default",
+      "applied": "“{{name}}” style applied to the whole demo.",
+      "undo": "Undo",
+      "names": {
+        "dsi": "DSI Plum",
+        "blue": "Institutional blue",
+        "green": "DSI Green",
+        "night": "Night",
+        "minimal": "Minimal",
+        "contrast": "High contrast"
+      },
+      "font": "Demo font",
+      "fontSystem": "System",
+      "fontImport": "Upload a font…",
+      "fontHelp": "Custom fonts: WOFF2 files, 2 MB max per weight.",
+      "radius": "Bubble and button roundness",
+      "radiusSharp": "Sharp",
+      "radiusSoft": "Soft",
+      "radiusRound": "Round"
     }
   },
   "share": {
@@ -531,7 +554,126 @@
     },
     "socialPreview": "Social preview",
     "socialPreviewHint": "Image generated automatically when you publish.",
-    "thisWeek": "This week"
+    "thisWeek": "This week",
+    "advanced": {
+      "tabs": {
+        "link": "Link",
+        "access": "Access",
+        "embed": "Embed",
+        "publicPage": "Public page"
+      },
+      "open": "Open",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "slug": {
+        "label": "Demo address",
+        "available": "Address available",
+        "taken": "This address is already used in the workspace",
+        "invalid": "Use 3 to 60 lowercase letters, numbers or hyphens",
+        "checking": "Checking…",
+        "help": "Lowercase letters, numbers and hyphens (3 to 60 characters). Changing the address redirects the old one for 90 days."
+      },
+      "urlVars": {
+        "label": "URL variables",
+        "help": "Pre-fills the demo variables. To track each prospect, create a personal link instead."
+      },
+      "expiry": {
+        "label": "Link expiration",
+        "never": "Never",
+        "d7": "In 7 days",
+        "d30": "In 30 days",
+        "date": "Specific date…"
+      },
+      "access": {
+        "legend": "Who can view the demo?",
+        "public": {
+          "title": "Anyone with the link",
+          "desc": "Open access, no sign-in."
+        },
+        "password": {
+          "title": "With a password",
+          "desc": "Visitors enter a shared password.",
+          "field": "Password",
+          "show": "Show password",
+          "hide": "Hide password",
+          "generate": "Generate",
+          "help": "At least 8 characters. Changing it signs out visitors already in.",
+          "askEmail": "Also ask for the visitor's email (for analytics)"
+        },
+        "invite": {
+          "title": "By email invitation",
+          "desc": "Only invited addresses get a personal access link.",
+          "field": "Invited addresses",
+          "placeholder": "Add an address…",
+          "send": "Send invitations",
+          "help": "Separate addresses with a comma or Enter. Each guest gets a link valid for 30 days."
+        },
+        "domain": {
+          "title": "By email domain",
+          "desc": "Any address from an allowed domain, verified by an emailed link.",
+          "field": "Allowed domains",
+          "placeholder": "Add a domain…",
+          "help": "Example: mission-locale.example. Subdomains are not included automatically."
+        },
+        "token": {
+          "title": "By authentication token",
+          "desc": "For an intranet or portal: your site signs the access.",
+          "badge": "Advanced",
+          "secret": "Signing key",
+          "regenerate": "Regenerate key",
+          "regenerateConfirm": "Regenerate the key? Tokens signed with the old key will no longer be accepted.",
+          "help": "Your server signs a token (JWT, HS256, 1 h max) with this key and adds ?token=… to the link."
+        },
+        "note": "Restricted access applies to the link, the embed and the public page. Personal links follow the same rule."
+      },
+      "embed": {
+        "type": "Embed type",
+        "inline": "In the page",
+        "popup": "Pop-up button",
+        "textLink": "Text link",
+        "buttonLabel": "Button text",
+        "buttonDefault": "View the demo",
+        "position": "Position",
+        "bottomRight": "Bottom right",
+        "bottomLeft": "Bottom left",
+        "inContent": "In the content",
+        "autoOpen": "Open automatically after 10 seconds",
+        "codeLabel": "Code to paste before </body>",
+        "codeInline": "Code to paste in the page",
+        "allowed": "Allowed sites",
+        "allowedPlaceholder": "Add a site…",
+        "allowedHelp": "Empty = all sites. Applied at the next publication."
+      },
+      "publicPage": {
+        "enabled": "Public page enabled",
+        "enabledDesc": "A dedicated page with a title, description and call to action around the demo.",
+        "title": "Page title",
+        "description": "Description",
+        "cta": "Call to action",
+        "ctaUrl": "Button link",
+        "style": "Page style",
+        "styleDemo": "Demo style",
+        "styleLight": "Light",
+        "styleDark": "Dark",
+        "related": "Suggest other workspace demos at the bottom",
+        "indexing": "Search engine indexing",
+        "view": "View public page",
+        "duration": "About {{count}} min",
+        "steps": "{{count}} steps",
+        "updated": "Updated on {{date}}",
+        "madeWith": "Made with FlowDSIML"
+      },
+      "summary": {
+        "title": "Summary",
+        "permalink": "Permanent link",
+        "popupSites_one": "{{count}} allowed site",
+        "popupSites_other": "{{count}} allowed sites",
+        "pageActive": "Public page enabled",
+        "pageInactive": "Public page disabled",
+        "notIndexed": "Not indexed",
+        "indexed": "Indexed"
+      }
+    }
   },
   "player": {
     "regionLabel": "interactive demo",
@@ -573,7 +715,31 @@
       "title": "Restricted access",
       "body": "This demo is only available to {{domains}} addresses."
     },
-    "rotateHint": "Rotate your phone to enlarge the demo."
+    "rotateHint": "Rotate your phone to enlarge the demo.",
+    "gate": {
+      "protectedTitle": "This demo is protected",
+      "protectedBody": "Enter the password you were given to view “{{title}}”.",
+      "password": "Password",
+      "enter": "View the demo",
+      "wrongPassword": "Incorrect password. Check it or ask the person who shared the demo.",
+      "rateLimit": "After 5 attempts, wait 1 minute before trying again.",
+      "inviteTitle": "Invitation only",
+      "inviteBody": "This demo is for invited people only. Enter your address: if it's on the list, you'll receive an access link.",
+      "email": "Email address",
+      "emailPro": "Work email address",
+      "sendLink": "Get my access link",
+      "emailPurpose": "Your address is only used to check access.",
+      "sentTitle": "Check your inbox",
+      "sentBody": "If {{email}} is allowed, an access link has just been sent. It's valid for 30 minutes.",
+      "resend": "Resend link",
+      "spamHint": "Nothing received? Check your spam folder.",
+      "domainTitle": "Reserved for {{org}}",
+      "domainBody": "Use your work address ({{domains}}). We'll send you a link to confirm.",
+      "domainRefused": "This address isn't from an allowed domain.",
+      "tokenTitle": "Access expired",
+      "tokenBody": "Your access session for this demo has expired or isn't valid. Go back to the portal that offered it to open it again.",
+      "backToPortal": "Back to the portal"
+    }
   },
   "analytics": {
     "title": "Analytics",

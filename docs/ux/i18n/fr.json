@@ -470,6 +470,29 @@
       "mobileNoticeTitle": "L'éditeur nécessite un écran plus large",
       "mobileNoticeBody": "Ouvrez cette démo sur un ordinateur pour la modifier. Vous pouvez lire et répondre aux commentaires ici.",
       "step": "Étape"
+    },
+    "presets": {
+      "title": "Choisir un style",
+      "save": "Enregistrer le style actuel",
+      "default": "Par défaut",
+      "applied": "Style « {{name}} » appliqué à toute la démo.",
+      "undo": "Annuler",
+      "names": {
+        "dsi": "DSI Prune",
+        "blue": "Bleu institutionnel",
+        "green": "Vert DSI",
+        "night": "Nuit",
+        "minimal": "Minimal",
+        "contrast": "Contraste élevé"
+      },
+      "font": "Police de la démo",
+      "fontSystem": "Système",
+      "fontImport": "Importer une police…",
+      "fontHelp": "Polices personnalisées : fichiers WOFF2, 2 Mo maximum par graisse.",
+      "radius": "Arrondi des bulles et boutons",
+      "radiusSharp": "Net",
+      "radiusSoft": "Doux",
+      "radiusRound": "Rond"
     }
   },
   "share": {
@@ -531,7 +554,126 @@
     },
     "socialPreview": "Aperçu sur les réseaux",
     "socialPreviewHint": "Image générée automatiquement à la publication.",
-    "thisWeek": "Cette semaine"
+    "thisWeek": "Cette semaine",
+    "advanced": {
+      "tabs": {
+        "link": "Lien",
+        "access": "Accès",
+        "embed": "Intégrer",
+        "publicPage": "Page publique"
+      },
+      "open": "Ouvrir",
+      "copyLink": "Copier le lien",
+      "copied": "Lien copié",
+      "slug": {
+        "label": "Adresse de la démo",
+        "available": "Adresse disponible",
+        "taken": "Cette adresse est déjà utilisée dans le workspace",
+        "invalid": "Utilisez 3 à 60 lettres minuscules, chiffres ou tirets",
+        "checking": "Vérification…",
+        "help": "Lettres minuscules, chiffres et tirets (3 à 60 caractères). Changer l'adresse redirige l'ancienne pendant 90 jours."
+      },
+      "urlVars": {
+        "label": "Variables d'URL",
+        "help": "Pré-remplit les variables de la démo. Pour un suivi par prospect, créez plutôt un lien personnalisé."
+      },
+      "expiry": {
+        "label": "Expiration du lien",
+        "never": "Jamais",
+        "d7": "Dans 7 jours",
+        "d30": "Dans 30 jours",
+        "date": "Date précise…"
+      },
+      "access": {
+        "legend": "Qui peut voir la démo ?",
+        "public": {
+          "title": "Toute personne avec le lien",
+          "desc": "Accès libre, sans identification."
+        },
+        "password": {
+          "title": "Avec un mot de passe",
+          "desc": "Le visiteur saisit un mot de passe partagé.",
+          "field": "Mot de passe",
+          "show": "Afficher le mot de passe",
+          "hide": "Masquer le mot de passe",
+          "generate": "Générer",
+          "help": "8 caractères minimum. Le changer déconnecte les visiteurs déjà entrés.",
+          "askEmail": "Demander aussi l'e-mail du visiteur (pour les analytics)"
+        },
+        "invite": {
+          "title": "Sur invitation par e-mail",
+          "desc": "Seules les adresses invitées reçoivent un lien d'accès personnel.",
+          "field": "Adresses invitées",
+          "placeholder": "Ajouter une adresse…",
+          "send": "Envoyer les invitations",
+          "help": "Séparez les adresses par une virgule ou Entrée. Chaque invité reçoit un lien valable 30 jours."
+        },
+        "domain": {
+          "title": "Par domaine e-mail",
+          "desc": "Toute adresse d'un domaine autorisé, vérifiée par un lien envoyé par e-mail.",
+          "field": "Domaines autorisés",
+          "placeholder": "Ajouter un domaine…",
+          "help": "Exemple : mission-locale.example. Les sous-domaines ne sont pas inclus automatiquement."
+        },
+        "token": {
+          "title": "Par jeton d'authentification",
+          "desc": "Pour un intranet ou un portail : votre site signe l'accès.",
+          "badge": "Avancé",
+          "secret": "Clé de signature",
+          "regenerate": "Régénérer la clé",
+          "regenerateConfirm": "Régénérer la clé ? Les jetons signés avec l'ancienne clé ne seront plus acceptés.",
+          "help": "Votre serveur signe un jeton (JWT, HS256, durée 1 h maximum) avec cette clé et ajoute ?token=… au lien."
+        },
+        "note": "Les accès restreints s'appliquent au lien, à l'intégration et à la page publique. Les liens personnalisés restent soumis à la même règle."
+      },
+      "embed": {
+        "type": "Type d'intégration",
+        "inline": "Dans la page",
+        "popup": "Bouton pop-up",
+        "textLink": "Lien texte",
+        "buttonLabel": "Texte du bouton",
+        "buttonDefault": "Voir la démo",
+        "position": "Position",
+        "bottomRight": "En bas à droite",
+        "bottomLeft": "En bas à gauche",
+        "inContent": "Dans le contenu",
+        "autoOpen": "Ouvrir automatiquement après 10 secondes",
+        "codeLabel": "Code à coller avant </body>",
+        "codeInline": "Code à coller dans la page",
+        "allowed": "Sites autorisés",
+        "allowedPlaceholder": "Ajouter un site…",
+        "allowedHelp": "Vide = tous les sites. Pris en compte à la prochaine publication."
+      },
+      "publicPage": {
+        "enabled": "Page publique activée",
+        "enabledDesc": "Une page dédiée avec titre, description et bouton d'action, autour de la démo.",
+        "title": "Titre de la page",
+        "description": "Description",
+        "cta": "Bouton d'action",
+        "ctaUrl": "Lien du bouton",
+        "style": "Style de la page",
+        "styleDemo": "Style de la démo",
+        "styleLight": "Clair",
+        "styleDark": "Sombre",
+        "related": "Proposer d'autres démos du workspace en bas de page",
+        "indexing": "Indexation par les moteurs de recherche",
+        "view": "Voir la page publique",
+        "duration": "Environ {{count}} min",
+        "steps": "{{count}} étapes",
+        "updated": "Mis à jour le {{date}}",
+        "madeWith": "Créé avec FlowDSIML"
+      },
+      "summary": {
+        "title": "Récapitulatif",
+        "permalink": "Lien permanent",
+        "popupSites_one": "{{count}} site autorisé",
+        "popupSites_other": "{{count}} sites autorisés",
+        "pageActive": "Page publique active",
+        "pageInactive": "Page publique désactivée",
+        "notIndexed": "Non indexée",
+        "indexed": "Indexée"
+      }
+    }
   },
   "player": {
     "regionLabel": "démo interactive",
@@ -573,7 +715,31 @@
       "title": "Accès réservé",
       "body": "Cette démo est réservée aux adresses {{domains}}."
     },
-    "rotateHint": "Tournez votre téléphone pour agrandir la démo."
+    "rotateHint": "Tournez votre téléphone pour agrandir la démo.",
+    "gate": {
+      "protectedTitle": "Cette démo est protégée",
+      "protectedBody": "Saisissez le mot de passe communiqué par votre conseiller pour découvrir « {{title}} ».",
+      "password": "Mot de passe",
+      "enter": "Accéder à la démo",
+      "wrongPassword": "Mot de passe incorrect. Vérifiez-le ou demandez-le à la personne qui vous a partagé la démo.",
+      "rateLimit": "Après 5 essais, patientez 1 minute avant de réessayer.",
+      "inviteTitle": "Accès sur invitation",
+      "inviteBody": "Cette démo est réservée aux personnes invitées. Saisissez votre adresse : si elle figure dans la liste, vous recevrez un lien d'accès.",
+      "email": "Adresse e-mail",
+      "emailPro": "Adresse e-mail professionnelle",
+      "sendLink": "Recevoir mon lien d'accès",
+      "emailPurpose": "Votre adresse sert uniquement à vérifier l'accès.",
+      "sentTitle": "Vérifiez votre boîte mail",
+      "sentBody": "Si l'adresse {{email}} est autorisée, un lien d'accès vient de lui être envoyé. Il est valable 30 minutes.",
+      "resend": "Renvoyer le lien",
+      "spamHint": "Rien reçu ? Pensez aux courriers indésirables.",
+      "domainTitle": "Réservé à {{org}}",
+      "domainBody": "Utilisez votre adresse professionnelle ({{domains}}). Nous vous enverrons un lien pour confirmer.",
+      "domainRefused": "Cette adresse n'appartient pas à un domaine autorisé.",
+      "tokenTitle": "Accès expiré",
+      "tokenBody": "Votre session d'accès à cette démo a expiré ou n'est pas valide. Revenez sur le portail qui vous l'a proposée pour l'ouvrir à nouveau.",
+      "backToPortal": "Retour au portail"
+    }
   },
   "analytics": {
     "title": "Analytics",
