@@ -25,6 +25,9 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
 
   const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
   await install(p, state);
+  await p.goto(`${APP}/#/onboarding`);
+  await p.waitForSelector('#ws-name');
+  await shot(p, '02b-onboarding');
   const go = async (route, sel) => {
     await p.goto(`${APP}/#${route}`);
     await p.waitForSelector(sel);

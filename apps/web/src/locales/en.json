@@ -72,14 +72,27 @@
     "strength": "Strength",
     "strength_1": "weak",
     "strength_2": "fair",
-    "strength_3": "strong"
+    "strength_3": "strong",
+    "pitchTitle": "Interactive demos that sell your product while you sleep.",
+    "pitch1": "Capture a flow in a few clicks",
+    "pitch2": "Share by link or embed on your website",
+    "pitch3": "Measure engagement and collect leads"
   },
   "onboarding": {
     "title": "Create your workspace",
     "subtitle": "A workspace holds your demos and your team.",
     "name": "Company or team name",
     "placeholder": "Acme",
-    "create": "Create workspace"
+    "create": "Create workspace",
+    "progress": "Progress",
+    "step1": "Workspace",
+    "step2": "Extension",
+    "extTitle": "Install the capture extension",
+    "extSubtitle": "Your workspace is ready. Three more steps to your first demo.",
+    "ext1": "Install the FlowDSIML extension in Chrome (until it is published, load it unpacked: see the README).",
+    "ext2": "Open your app, click the FlowDSIML icon, then “Start capture” and walk through the workflow.",
+    "ext3": "Finish: the editor opens. Adjust the texts, then publish.",
+    "goDashboard": "Go to my demos"
   },
   "invite": {
     "title": "Invitation",
@@ -105,7 +118,12 @@
     "remove": "Remove",
     "leave": "Leave",
     "confirmRemove": "Remove {{email}} from the workspace?",
-    "confirmLeave": "Leave this workspace?"
+    "confirmLeave": "Leave this workspace?",
+    "emails": "Emails (one or more)",
+    "emailsPlaceholder": "mary@acme.com, paul@acme.com",
+    "invalidEmails": "Invalid addresses: {{list}}",
+    "invitesCreated_one": "Invitation created. Send this link:",
+    "invitesCreated_other": "{{count}} invitations created. Send each person their link:"
   },
   "workspace": {
     "title": "Workspace settings",
@@ -254,7 +272,7 @@
     "moveDown": "Move down",
     "newTextStep": "New screen",
     "addTextStep": "Text screen",
-    "addImageStep": "Image",
+    "addImageStep": "Uploaded image",
     "notFound": "Demo not found or access denied.",
     "demoTitle": "Demo title",
     "save_idle": "—",
@@ -284,7 +302,22 @@
     "narrowBody": "Open this demo on a computer (1024 px minimum) to edit it. You can still share it from this phone.",
     "colorHotspot": "Hotspot beacon",
     "chars": "{{n}} / {{max}} characters",
-    "previewNext": "Next"
+    "previewNext": "Next",
+    "previewDevice": "Device",
+    "desktop": "Desktop",
+    "mobile": "Mobile",
+    "previewTimeout": "The player is not responding. Check that VITE_PLAYER_URL points to the deployed player.",
+    "previewOpenTab": "Open in a tab",
+    "addStep": "Add a step",
+    "badgeHotspots_one": "{{count}} hotspot",
+    "badgeHotspots_other": "{{count}} hotspots",
+    "badgeForm": "Lead form before the step",
+    "badgeCta": "Call to action",
+    "badgeZoom": "Zoom",
+    "badgeBlurs_one": "{{count}} blurred area",
+    "badgeBlurs_other": "{{count}} blurred areas",
+    "formOnStep": "Form “{{title}}” shown before this step",
+    "editForm": "Edit"
   },
   "status": {
     "draft": "Draft",

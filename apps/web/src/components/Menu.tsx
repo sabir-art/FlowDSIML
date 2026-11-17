@@ -14,10 +14,13 @@ export function Menu({
   label,
   items,
   align = 'end',
+  trigger,
 }: {
   label: string;
   items: Array<MenuItem | 'separator'>;
   align?: 'start' | 'end';
+  /** Bouton déclencheur visible (icône + libellé) au lieu du « ⋯ ». */
+  trigger?: { icon: ReactNode; text: string; block?: boolean };
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -52,8 +55,12 @@ export function Menu({
     <div className="menu" ref={root} onKeyDown={onKey}>
       <button
         type="button"
-        className="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon menu-trigger"
-        aria-label={label}
+        className={
+          trigger
+            ? `fd-btn fd-btn--sm menu-trigger${trigger.block ? ' fd-btn--block' : ''}`
+            : 'fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon menu-trigger'
+        }
+        aria-label={trigger ? undefined : label}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={id}
@@ -63,7 +70,16 @@ export function Menu({
           setOpen(!open);
         }}
       >
-        <MoreHorizontal size={18} aria-hidden="true" />
+        {trigger ? (
+          <>
+            <span className="fd-btn__icon" aria-hidden="true">
+              {trigger.icon}
+            </span>
+            {trigger.text}
+          </>
+        ) : (
+          <MoreHorizontal size={18} aria-hidden="true" />
+        )}
       </button>
       {open && (
         <div className={`menu-list menu-list--${align}`} role="menu" id={id}>
