@@ -62,7 +62,11 @@ function App() {
             });
         };
         addEventListener('message', onMsg);
-        window.opener?.postMessage({ type: 'fd:preview-ready' }, APP_ORIGIN);
+        // Aperçu en onglet (opener) ou intégré dans l'éditeur (parent)
+        (window.opener ?? (window.parent !== window ? window.parent : null))?.postMessage(
+          { type: 'fd:preview-ready' },
+          APP_ORIGIN,
+        );
         return;
       }
       let demoId: string;

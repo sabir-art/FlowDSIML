@@ -284,7 +284,12 @@
     "narrowBody": "Ouvrez cette démo sur un ordinateur (1024 px minimum) pour la modifier. Vous pouvez la partager depuis ce téléphone.",
     "colorHotspot": "Pastille du hotspot",
     "chars": "{{n}} / {{max}} caractères",
-    "previewNext": "Suivant"
+    "previewNext": "Suivant",
+    "previewDevice": "Appareil",
+    "desktop": "Ordinateur",
+    "mobile": "Mobile",
+    "previewTimeout": "Le player ne répond pas. Vérifiez que VITE_PLAYER_URL pointe vers le player déployé.",
+    "previewOpenTab": "Ouvrir dans un onglet"
   },
   "status": {
     "draft": "Brouillon",

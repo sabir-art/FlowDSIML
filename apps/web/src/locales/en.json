@@ -284,7 +284,12 @@
     "narrowBody": "Open this demo on a computer (1024 px minimum) to edit it. You can still share it from this phone.",
     "colorHotspot": "Hotspot beacon",
     "chars": "{{n}} / {{max}} characters",
-    "previewNext": "Next"
+    "previewNext": "Next",
+    "previewDevice": "Device",
+    "desktop": "Desktop",
+    "mobile": "Mobile",
+    "previewTimeout": "The player is not responding. Check that VITE_PLAYER_URL points to the deployed player.",
+    "previewOpenTab": "Open in a tab"
   },
   "status": {
     "draft": "Draft",
