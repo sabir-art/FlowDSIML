@@ -680,3 +680,40 @@ Captures `docs/tech/captures/finition/25*.png` (clair et sombre), relues le 17/1
 - **Arbitrage lecteur** (chef d'équipe) : le lecteur lit et ajoute des commentaires. Il agit seulement sur les siens. `commentaires.md` §3 est mis à jour.
 - Point mineur (non bloquant) : sur 25, le badge annonce « 2 ouverts » et un seul commentaire est visible sans défiler. Vérifier que la liste s'ouvre sur le **plus ancien commentaire non lu**, pas tout en bas. Sinon, afficher la pilule « n autres ↑ ».
 - **RF1–RF7 : conformes** à la lecture des captures 10 et 11 (KPI sans troncature à 1 440 px avec 4 KPI, héro vert avec texte noir, « Analytics » actif). RF3 (ellipse avec 5 KPI) est accepté tel que décrit par le dev.
+
+## Recette F1 : parcours guidés (main @ 15b0a14)
+
+**Périmètre** : `a2-editeur.md` §1 (Spotlight), §2 (pop-up), §3 (checklist), §5 (menu de choix), plus la lecture automatique.
+- **Éditeur** : faux Supabase, 1 440 et 1 024 px, en clair et en sombre.
+- **Player** : `apps/player` en local, avec un manifeste de test (Spotlight, pop-up « Consigne » avec 3 choix, 2 chapitres, checklist), à 1 280 et 390 px.
+
+Le player en production n'a aucune démo F1 publiée, et je ne crée pas de contenu en production : la recette du player sur le site réel reste à faire sur une démo de recette publiée par le chef d'équipe.
+
+Exclus, reportés par le dev : le cadre Navigateur / Mobile et le fond Image.
+
+**Conforme :**
+- **Mode de lecture (éditeur)** : cartes illustrées Visite guidée / Spotlight avec `aria-pressed`, aide « valent pour toute la démo ». L'aperçu du canevas passe en Spotlight : voile, trou et anneau framboise, bulle au-dessus du voile.
+- **Player Spotlight** : voile en SVG avec la zone éclairée, anneau framboise, bulle lisible.
+- **Pop-up** : choix Plein écran / Pop-up, variante, icône, fond « Capture floutée / Couleur », libellé du bouton (« Vide = Suivant »). Dans le player : carte centrée sur la capture floutée, badge Information / Consigne, `role="dialog"`.
+- **Menu de choix** :
+  - éditeur : bloc par choix (libellé, puis destination et corbeille), « Ajouter un choix », icône `GitBranch` sur la vignette du rail ;
+  - player : boutons pleine largeur avec chevron, **focus sur le premier choix**, « Précédent », navigation vers l'étape cible vérifiée.
+- **Checklist** :
+  - réglages : interrupteur, titre, position Gauche / Droite / Repliée, aide « un élément par chapitre » ;
+  - player : carte « n sur N terminées », barre orange sur piste pâle, élément terminé avec `CircleCheck` et texte barré ;
+  - mobile : pilule « Votre progression 1/2 ».
+- **Lecture automatique** : interrupteur avec l'aide « s'arrête sur un formulaire, un menu de choix ou la dernière étape ».
+- **Mobile 390 px** : bulle en feuille du bas, pop-up pleine largeur. Aucune erreur JS dans tous les scénarios.
+
+**Écarts :**
+
+| N° | Écart | Gravité | Correction attendue |
+|---|---|---|---|
+| F1-1 | Dans le **canevas de l'éditeur en sombre**, la pop-up prend le thème sombre de l'app, alors que le player reste au thème de la démo | Moyenne | Envelopper le rendu de l'étape dans `.fd-player-scope`, comme pour les captures |
+| F1-2 | **Fond « Capture floutée »** : le canevas de l'éditeur montre un fond uni sombre. Le player, lui, floute bien l'étape précédente | Mineure | Afficher la capture précédente floutée dans le canevas aussi (WYSIWYG, §0) |
+| F1-3 | **Checklist à 1 280 px** : la carte déborde d'environ 100 px sur la capture, en bas à droite, et peut cacher un hotspot | Moyenne | La placer **hors du cadre** quand la place le permet (largeur de la carte + 16 px de chaque côté). Sinon, la replier en pilule comme en mobile. Elle ne doit jamais recouvrir le hotspot courant |
+| F1-4 | **Checklist** : le chapitre est coché « terminé » dès l'**affichage** de sa dernière étape (élément à la fois barré et « en cours ») | Mineure | Le cocher quand on **quitte** la dernière étape (Suivant ou choix), comme dit la spec |
+| F1-5 | **Titre de la checklist** vide dans l'éditeur, sans placeholder, alors que le player affiche « Votre progression » | Mineure | Placeholder « Votre progression » dans le champ |
+| F1-6 | **Commentaires à 1 024 px** : l'état vide déborde sur la saisie (texte superposé au champ) | Mineure | Hauteur minimale du panneau pour l'état vide, ou texte sur une seule ligne avec ellipse |
+
+**Hors F1, à noter :** le pied du player affiche encore « Créé avec FlowDSIML ». Le nom choisi est **Tutoclic** : à changer quand le chef d'équipe lance le renommage.

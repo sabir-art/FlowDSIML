@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collaboration — Tutoclic (lot A6)</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div data-view="notif">
+  <section data-pane="notif" class="a6-stage" style="display:none;position:relative">
+    <div class="a6-top"><h1>Démos</h1><div class="sp"><button class="icon-btn bell" type="button" aria-label="Notifications, 3 non lues" aria-expanded="true"><i data-icon="bell"></i><span class="cnt" aria-hidden="true">3</span></button><span class="avatar" style="background:var(--fd-color-primary);color:var(--fd-color-on-primary)">AM</span></div></div>
+    <div class="fd-card" style="height:560px;opacity:.6" aria-hidden="true"></div>
+    <div class="notif-pop" role="dialog" aria-labelledby="np-t">
+      <header><h2 id="np-t">Notifications</h2><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"><i data-icon="checkAll"></i>Tout marquer comme lu</button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Réglages des notifications"><i data-icon="settings"></i></button></header>
+      <div class="fd-segmented" role="tablist" aria-label="Filtrer"><button type="button" role="tab" aria-selected="true" aria-pressed="true">Toutes</button><button type="button" role="tab" aria-selected="false" aria-pressed="false">Mentions · 1</button><button type="button" role="tab" aria-selected="false" aria-pressed="false">Non lues · 3</button></div>
+      <p class="ngroup">Aujourd'hui</p>
+      <ul class="nlist">
+        <li class="unread"><span class="avatar" style="background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)">MD</span><span><b>Marie Durand</b> vous a mentionnée dans « Créer une fiche usager » · étape 4<span class="q"><span class="mtag">@Alice</span> peux-tu vérifier le libellé du bouton ?</span><small>il y a 5 min</small></span><span class="dot" aria-label="Non lue"></span></li>
+        <li class="unread"><span class="fd-icon-chip"><i data-icon="mail"></i></span><span><b>Nouveau lead</b> sur « Créer une fiche usager »<small>lea.martin@example.org · il y a 12 min</small></span><span class="dot" aria-label="Non lue"></span></li>
+        <li class="unread"><span class="fd-icon-chip"><i data-icon="alert"></i></span><span><b>Webhook mis en pause</b> après 6 échecs<small>hooks.exemple.fr · il y a 40 min · <a href="integrations.html?view=webhooks">Voir le journal</a></small></span><span class="dot" aria-label="Non lue"></span></li>
+      </ul>
+      <p class="ngroup">Cette semaine</p>
+      <ul class="nlist">
+        <li><span class="fd-icon-chip"><i data-icon="award"></i></span><span><b>12 apprenants</b> ont validé « Prise en main »<small>Résumé quotidien · lundi</small></span><span></span></li>
+        <li><span class="fd-icon-chip"><i data-icon="trendDown"></i></span><span><b>Alerte</b> : Antenne Ouest passe sous l'objectif (45 %)<small>Pilotage · dimanche</small></span><span></span></li>
+        <li><span class="avatar" style="background:var(--fd-color-chart-3);color:var(--fd-color-text)">SD</span><span><b>Sacha Durand</b> a résolu votre commentaire<small>« Agenda » · étape 2 · samedi</small></span><span></span></li>
+      </ul>
+      <a href="#" class="fd-help" style="text-align:center">Voir tout l'historique (30 jours)</a>
+    </div>
+  </section>
+
+  <section data-pane="mention" class="a6-stage" style="display:none">
+    <div class="a6-top"><h1>Mentionner un membre</h1></div>
+    <article class="fd-card mention-box" style="display:flex;flex-direction:column;gap:12px">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="message"></i></span><h2 class="fd-card__title">Commentaires · Étape 4</h2></div>
+      <p class="fd-help" style="margin:0">Le panneau de commentaires existant (commentaires.md) gagne les mentions.</p>
+      <div style="height:120px"></div>
+      <div class="mention-pop" role="listbox" aria-label="Membres du workspace">
+        <div role="option" aria-selected="true"><span class="avatar" style="background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)">MD</span><span><b>Marie Durand</b><small>Éditrice · en ligne</small></span></div>
+        <div role="option" aria-selected="false"><span class="avatar" style="background:var(--fd-color-chart-1);color:var(--fd-color-text)">MA</span><span><b>Mathis Arnaud</b><small>Lecteur</small></span></div>
+        <div role="option" aria-selected="false"><span class="avatar" style="background:var(--fd-color-chart-3);color:var(--fd-color-text)">MB</span><span><b>Maëlle Bernard</b><small>Admin</small></span></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center"><span class="avatar" style="width:32px;height:32px;background:var(--fd-color-hero);color:var(--fd-color-on-hero)">A</span><div class="fd-input" style="flex:1;border-radius:999px;display:flex;align-items:center" role="combobox" aria-expanded="true" aria-controls="x" aria-label="Ajouter un commentaire">Peux-tu relire&nbsp;<span class="mtag">@Ma</span><span style="border-left:2px solid var(--fd-color-text);height:18px"></span></div><button class="fd-btn fd-btn--primary fd-btn--round" type="button" aria-label="Envoyer"><i data-icon="arrowUp"></i></button></div>
+      <p class="fd-help" style="margin:0">Flèches pour choisir, Entrée ou Tab pour insérer, Échap pour fermer. Seuls les membres qui ont accès à la démo sont proposés.</p>
+    </article>
+  </section>
+
+  <section data-pane="presence" class="a6-stage" style="display:none">
+    <div class="a6-top"><h1 style="font-size:var(--fd-text-h2-size)">Créer une fiche usager</h1><span class="fd-help">Enregistré</span>
+      <div class="sp"><div class="avstack" role="group" aria-label="3 personnes sur cette démo : vous, Marie Durand (étape 4), Sacha Durand (étape 2)"><span class="avatar" style="background:var(--fd-color-hero);color:var(--fd-color-on-hero)">A<span class="on"></span></span><span class="avatar" style="background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)">MD<span class="on"></span></span><span class="avatar" style="background:var(--fd-color-chart-3);color:var(--fd-color-text)">SD<span class="on"></span></span></div><button class="fd-btn" type="button"><i data-icon="presentation"></i>Présenter</button><button class="fd-btn fd-btn--primary" type="button">Publier</button></div></div>
+    <div class="pres-grid">
+      <div class="pres-rail" aria-label="Étapes">
+        <div class="th"><span class="n">1</span></div>
+        <div class="th"><span class="n">2</span><span class="who avatar" style="width:24px;height:24px;font-size:9px;background:var(--fd-color-chart-3);color:var(--fd-color-text)" title="Sacha Durand est ici">SD</span></div>
+        <div class="th"><span class="n">3</span></div>
+        <div class="th me"><span class="n">4</span><span class="who avatar" style="width:24px;height:24px;font-size:9px;background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)" title="Marie Durand est ici">MD</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="lockbar" role="status"><span class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)">MD</span><span><b>Marie Durand</b> modifie cette étape. Vos changements sont fusionnés champ par champ ; le dernier enregistré l'emporte sur un même champ.</span></div>
+        <div class="pres-canvas"><div class="fakeapp"><div class="nav"><b>Logiciel métier</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><dl><dt>Structure</dt><dd>Antenne Nord</dd><dt>Statut</dt><dd>Actif</dd></dl><span class="btnx">+ Ajouter</span></div></div><span class="cursor" style="left:62%;top:40%"><svg viewBox="0 0 24 24" fill="#8E3B8A" stroke="#FFFFFF" stroke-width="1.5"><path d="M4 2l16 9-7 2-3 7z"/></svg><span style="background:#8E3B8A">Marie</span></span></div>
+      </div>
+      <aside class="fd-card" style="display:flex;flex-direction:column;gap:12px">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="users"></i></span><h2 class="fd-card__title">Sur cette démo</h2></div>
+        <ul class="nlist"><li><span class="avatar" style="background:var(--fd-color-hero);color:var(--fd-color-on-hero)">A</span><span><b>Vous</b><small>Étape 4</small></span><span></span></li><li><span class="avatar" style="background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)">MD</span><span><b>Marie Durand</b><small>Étape 4 · modifie le texte de la bulle</small></span><span></span></li><li><span class="avatar" style="background:var(--fd-color-chart-3);color:var(--fd-color-text)">SD</span><span><b>Sacha Durand</b><small>Étape 2 · inactif depuis 3 min</small></span><span></span></li></ul>
+        <p class="fd-help" style="margin:0">Un clic sur une personne vous amène à son étape. Les curseurs des autres sont masquables (Réglages → Afficher les curseurs).</p>
+      </aside>
+    </div>
+  </section>
+
+  <section data-pane="presenter" class="presenter" style="display:none">
+    <div class="main-s">
+      <div class="stage"><div class="fakeapp"><div class="nav"><b>Logiciel métier</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><dl><dt>Structure</dt><dd>Antenne Nord</dd><dt>Statut</dt><dd>Actif</dd></dl><span class="btnx">+ Ajouter</span></div></div><span class="marker" style="left:72%;top:22%">4</span></div>
+      <div class="bar" role="toolbar" aria-label="Mode présentateur"><span class="t" role="timer">06:42</span><span style="color:#B7C0CA">Étape 4 sur 7</span><span style="margin-left:auto;display:flex;gap:8px"><button type="button"><i data-icon="arrowLeft"></i>Précédente</button><button type="button" class="pri">Suivante<i data-icon="arrowRight"></i></button><button type="button"><i data-icon="external"></i>Écran public</button><button type="button">Quitter</button></span></div>
+    </div>
+    <aside>
+      <section class="pcard"><h2>Notes du présentateur</h2><ul class="notes"><li>Insister : le bouton a changé de place.</li><li>Montrer l'astérisque des champs obligatoires.</li><li>Question fréquente : « Et les doublons ? » → étape 6.</li></ul></section>
+      <section class="pcard"><h2>Étape suivante · 5</h2><div class="next"><div class="fakeapp"><div class="nav"><b>Logiciel métier</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><dl><dt>Structure</dt><dd>Antenne Nord</dd><dt>Statut</dt><dd>Actif</dd></dl><span class="btnx">+ Ajouter</span></div></div></div><p style="margin:8px 0 0;font-size:14px">Choisir la structure de rattachement</p></section>
+      <section class="pcard"><h2>Raccourcis</h2><div class="kbd"><kbd>→</kbd><span>Étape suivante</span><kbd>←</kbd><span>Étape précédente</span><kbd>N</kbd><span>Masquer les notes</span><kbd>B</kbd><span>Écran noir</span><kbd>Échap</kbd><span>Quitter</span></div></section>
+    </aside>
+  </section>
+</div>
+<div class="mock-state fd-segmented" role="group" aria-label="Écran (maquette)" style="left:50%;transform:translateX(-50%)">
+  <button type="button" data-view-set="notif" aria-pressed="true">Notifications</button>
+  <button type="button" data-view-set="mention" aria-pressed="false">Mentions</button>
+  <button type="button" data-view-set="presence" aria-pressed="false">Présence</button>
+  <button type="button" data-view-set="presenter" aria-pressed="false">Présentateur</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

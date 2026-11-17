@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F6 : diffusion — Tutoclic</title>
+<link rel="icon" href="../../assets/symbole-dsi.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html" aria-current="page">
+      <img src="../../assets/symbole-dsi.svg" alt="">
+      <span><span class="brand__name">FlowDSIML</span><span class="brand__sub">DSI des Missions Locales</span></span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html" aria-current="page"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Éditrice</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main" data-view="lms">
+    <header class="topbar"><a class="icon-btn" href="#" aria-label="Retour"><i data-icon="arrowLeft"></i></a><div><h1>Diffuser</h1><p class="sub">Créer une fiche usager · publiée, version 3</p></div></header>
+    <div class="dif-grid">
+      <article class="fd-card" style="display:flex;flex-direction:column;gap:20px">
+        <div class="chan" role="group" aria-label="Canal de diffusion">
+          <button type="button" aria-pressed="false"><i data-icon="code"></i><b>Site ou pop-up</b><small>Iframe ou bouton (A1)</small></button>
+          <button type="button" aria-pressed="false" data-view-set="intranet"><i data-icon="network"></i><b>Intranet</b><small>SharePoint, Wiki, CMS</small></button>
+          <button type="button" aria-pressed="true" data-view-set="lms"><i data-icon="package"></i><b>LMS</b><small>Paquet SCORM</small></button>
+          <button type="button" aria-pressed="false" data-view-set="mail"><i data-icon="mail"></i><b>E-mail</b><small>Lien et texte prêts</small></button>
+        </div>
+
+        <section data-pane="lms" style="display:none">
+          <h2 style="margin:0;font-size:var(--fd-text-h2-size)">Paquet SCORM pour votre LMS</h2>
+          <p class="fd-help" style="margin:0">Compatible avec Moodle, Chamilo et la plupart des plateformes de formation. Le LMS reçoit la progression, le score du quiz et le statut de réussite.</p>
+          <div class="row-2">
+            <div class="fd-field" style="margin:0"><span class="fd-label">Version</span><div class="fd-segmented" role="group" aria-label="Version SCORM"><button type="button" aria-pressed="true">SCORM 1.2</button><button type="button" aria-pressed="false">SCORM 2004</button></div></div>
+            <div class="fd-field" style="margin:0"><span class="fd-label">Type de paquet</span><div class="fd-segmented" role="group" aria-label="Type de paquet"><button type="button" aria-pressed="true">Léger (en ligne)</button><button type="button" aria-pressed="false">Complet (hors ligne)</button></div></div>
+          </div>
+          <p class="fd-help" style="margin:-8px 0 0">Léger : 40 Ko, charge toujours la dernière version publiée (accès Internet requis). Complet : toutes les captures incluses, figé sur la version 3.</p>
+          <div class="fd-field" style="margin:0"><span class="fd-label">Ce que reçoit le LMS</span>
+            <table class="fd-table map-tbl"><thead><tr><th>Donnée</th><th>Valeur envoyée</th></tr></thead><tbody>
+              <tr><td>Statut</td><td>« completed » quand toutes les étapes sont vues ; « passed » ou « failed » selon le quiz (seuil 70 %)</td></tr>
+              <tr><td>Score</td><td>Meilleur score du quiz, de 0 à 100</td></tr>
+              <tr><td>Reprise</td><td>Dernière étape vue (l'apprenant reprend là où il était)</td></tr>
+              <tr><td>Temps passé</td><td>Durée de la session</td></tr>
+            </tbody></table></div>
+          <label class="fd-check" style="justify-content:space-between"><span>Aussi enregistrer les résultats dans le suivi Tutoclic (F3)</span><span class="fd-switch"><input type="checkbox" checked aria-label="Enregistrer aussi dans le suivi"><span class="fd-switch__track"></span></span></label>
+          <div style="display:flex;gap:8px;align-items:center"><button class="fd-btn fd-btn--primary" type="button"><i data-icon="download"></i>Télécharger le paquet (.zip)</button><span class="fd-help">creer-une-fiche-usager-scorm12.zip · 40 Ko</span></div>
+        </section>
+
+        <section data-pane="intranet" style="display:none">
+          <h2 style="margin:0;font-size:var(--fd-text-h2-size)">Intégrer dans l'intranet</h2>
+          <div class="fd-field" style="margin:0"><span class="fd-label">Outil de l'intranet</span><select class="fd-select"><option>SharePoint (composant « Incorporer »)</option><option>Wiki ou CMS (HTML)</option><option>Lien texte seulement</option></select></div>
+<pre class="code"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier</button>&lt;iframe src="https://demos.tutoclic.example/dsi/<span class="k">creer-une-fiche-usager</span>?embed=1"
+  title="Tutoriel : créer une fiche usager"
+  style="width:100%;aspect-ratio:16/10;border:0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
+          <ol style="margin:0;padding-left:20px;display:grid;gap:6px;font-size:var(--fd-text-body-size)"><li>Dans SharePoint, ajoutez le composant « Incorporer » à la page.</li><li>Collez le code ci-dessus.</li><li>Ajoutez le domaine de l'intranet aux sites autorisés (Partager → Intégrer).</li></ol>
+          <div class="fd-alert" style="background:var(--fd-color-warning-soft)"><i data-icon="alert"></i><div><b>intranet.exemple.fr</b> n'est pas encore dans les sites autorisés : le tutoriel ne s'affichera pas. <a href="#">L'ajouter</a></div></div>
+          <p class="fd-help" style="margin:0">Accès « Domaine e-mail » : les personnes connectées à l'intranet avec leur adresse professionnelle sont reconnues et suivies (F3).</p>
+        </section>
+
+        <section data-pane="mail" style="display:none">
+          <h2 style="margin:0;font-size:var(--fd-text-h2-size)">Envoyer par e-mail</h2>
+          <p class="fd-help" style="margin:0">Copiez ce texte dans votre messagerie. Tutoclic n'envoie rien à votre place, sauf les invitations (Partager → Accès).</p>
+          <div class="mail-prev"><b>Objet : Formation au nouvel outil · Créer une fiche usager (8 min)</b><span>Bonjour,</span><span>Pour vous préparer au nouvel outil, voici un tutoriel interactif de 8 minutes. Vous pouvez le suivre à votre rythme et reprendre où vous en étiez.</span><span class="cta">Commencer le tutoriel</span><span style="font-size:12px;color:#4A5562">Un quiz de 5 questions valide le module. Mode d'emploi PDF en pièce jointe si besoin.</span></div>
+          <div style="display:flex;gap:8px"><button class="fd-btn fd-btn--primary" type="button"><i data-icon="copy"></i>Copier le texte</button><button class="fd-btn" type="button"><i data-icon="fileText"></i>Joindre le mode d'emploi (PDF)</button></div>
+        </section>
+      </article>
+      <aside class="fd-card" style="display:flex;flex-direction:column;gap:12px">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="activity"></i></span><h2 class="fd-card__title">Où ce module est diffusé</h2></div>
+        <ul class="pii-list">
+          <li><span class="fd-icon-chip"><i data-icon="layout"></i></span><span><b>Centre de formation</b><small>Parcours « Nouvel outil »</small></span><span class="fd-badge fd-badge--live">Actif</span></li>
+          <li><span class="fd-icon-chip"><i data-icon="network"></i></span><span><b>Intranet</b><small>intranet.exemple.fr · 312 vues</small></span><span class="fd-badge fd-badge--live">Actif</span></li>
+          <li><span class="fd-icon-chip"><i data-icon="package"></i></span><span><b>LMS · SCORM 1.2</b><small>Exporté le 12 nov. · version 2</small></span><span class="fd-badge" style="white-space:nowrap">Version ancienne</span></li>
+        </ul>
+        <p class="fd-help" style="margin:0">Un paquet SCORM est une copie : republiez-le dans le LMS après chaque nouvelle version, ou choisissez « Paquet léger » pour qu'il charge toujours la dernière version.</p>
+      </aside>
+    </div>
+  </main>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>
