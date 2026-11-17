@@ -30,7 +30,8 @@
     "profile": "My profile",
     "newWorkspace": "New workspace",
     "openMenu": "Open menu",
-    "account": "My account"
+    "account": "My account",
+    "plans": "Plans"
   },
   "roles": {
     "owner": "Owner",
@@ -282,7 +283,8 @@
     "narrowTitle": "The editor needs a wider screen",
     "narrowBody": "Open this demo on a computer (1024 px minimum) to edit it. You can still share it from this phone.",
     "colorHotspot": "Hotspot beacon",
-    "chars": "{{n}} / {{max}} characters"
+    "chars": "{{n}} / {{max}} characters",
+    "previewNext": "Next"
   },
   "status": {
     "draft": "Draft",
@@ -407,5 +409,11 @@
     "email": "Enter a valid email address, for example name@company.com.",
     "passwordMin": "Password must be at least {{min}} characters.",
     "consent": "Check the box to continue."
+  },
+  "plans": {
+    "title": "Plans",
+    "current": "Current plan",
+    "unlimited": "Unlimited",
+    "manualNotice": "Online payment coming soon. To change plans now, contact us: your plan will be activated within 24 hours."
   }
 }
