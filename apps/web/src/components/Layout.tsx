@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from '../lib/useMediaQuery';
+import { BrandMark } from './BrandMark';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -120,7 +121,9 @@ export function Layout() {
         >
           {open ? <X {...ICON} /> : <MenuIcon {...ICON} />}
         </button>
-        <span className="brand">{t('app.name')}</span>
+        <span className="brand">
+          <BrandMark size={24} />
+        </span>
       </header>
       <aside
         className="sidebar"
@@ -131,7 +134,9 @@ export function Layout() {
         aria-modal={drawer && open ? true : undefined}
         aria-label={drawer ? t('nav.main') : undefined}
       >
-        <div className="brand">{t('app.name')}</div>
+        <div className="brand">
+          <BrandMark size={28} />
+        </div>
         {workspaces.length > 0 && (
           <div className="ws-switch">
             <Building2 {...ICON} />

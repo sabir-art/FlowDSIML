@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart3, MousePointerClick, Share2 } from 'lucide-react';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
+import { BrandMark } from '../../components/BrandMark';
 import { setLocale } from '../../i18n';
 
 /** Écrans d'authentification (W5) : panneau de marque + formulaire, sélecteur de langue compact. */
@@ -19,10 +20,7 @@ export function AuthLayout({
     <main className="auth-shell" id="main">
       <aside className="auth-brand" aria-hidden="true">
         <div className="auth-logo">
-          <span className="auth-logo-mark">
-            <MousePointerClick size={20} />
-          </span>
-          {t('app.name')}
+          <BrandMark size={36} />
         </div>
         <div className="auth-pitch">
           <h2>{t('auth.pitchTitle')}</h2>
@@ -61,10 +59,7 @@ export function AuthLayout({
         </div>
         <div className="auth-card">
           <div className="auth-logo auth-logo--compact">
-            <span className="auth-logo-mark">
-              <MousePointerClick size={18} aria-hidden="true" />
-            </span>
-            {t('app.name')}
+            <BrandMark size={28} />
           </div>
           <h1>{title}</h1>
           {subtitle && <p className="fd-muted auth-subtitle">{subtitle}</p>}
