@@ -1,6 +1,6 @@
-# Tutoclic
+# TutoClick
 
-> Nom du produit : **Tutoclic**. Il est défini une seule fois, dans `packages/core/src/brand.ts` (`APP_NAME`). Les identifiants techniques gardent l'ancien nom : dépôt `FlowDSIML`, paquets `@flowdsiml/*`, variables CSS `--fd-*`.
+> Nom du produit : **TutoClick**. Il est défini une seule fois, dans `packages/core/src/brand.ts` (`APP_NAME`). Les identifiants techniques gardent l'ancien nom : dépôt `FlowDSIML`, paquets `@flowdsiml/*`, variables CSS `--fd-*`.
 
 Plateforme SaaS de démos interactives : capture d'un parcours web par une extension Chrome, édition no-code (étapes, hotspots, textes, variables, formulaires), partage par lien ou embed iframe, analytics et leads.
 

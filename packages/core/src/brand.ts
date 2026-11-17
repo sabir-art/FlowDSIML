@@ -3,4 +3,4 @@
  * filigrane du player, extension, i18n). Les identifiants techniques (paquets @flowdsiml/*,
  * dépôt, classes CSS --fd-*) ne changent pas.
  */
-export const APP_NAME = 'Tutoclic';
+export const APP_NAME = 'TutoClick';
