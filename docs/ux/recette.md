@@ -130,7 +130,7 @@ Points positifs : structure à trois colonnes conforme (rail, canevas, panneau),
 
 | Lot | Bloquant | Majeur | Mineur |
 |---|---|---|---|
-| 6 (publication, partage, player) | 3 | 7 | 4 |
+| 6 (publication, partage, player) | 3 | 7 | 3 |
 | 7 (analytics, leads) | 0 | 4 | 4 |
 | 8 (tableau de bord, dossiers, plans) | 0 | 4 | 3 |
 
@@ -153,7 +153,6 @@ Points positifs : flou irréversible côté pixels (très bon pour la confidenti
 | P11 | Mineur | Partage | Aide « Personnalisez avec des paramètres d'URL » : URL entière en mono gris sur une ligne qui déborde. | Bloc de code avec la partie variable mise en évidence (maquette). |
 | P12 | Mineur | Partage | Pas d'**aperçu** de la démo ni d'aperçu réseaux sociaux. | Colonne d'aperçu (maquette) ; l'image OG dépend de l'hébergement (limite GitHub Pages connue). |
 | P13 | Mineur | Player | Formulaire de lead sans description ni lien de confidentialité quand le texte de consentement est vide. | Description facultative + lien « Confidentialité » si fourni par le workspace. |
-| P14 | Mineur | Player | Bulle sans bouton « Précédent » visible à l'étape 1 : normal, mais il manque aussi à l'étape 2 dans la capture du formulaire (à vérifier). | Précédent dès l'étape 2. |
 
 ### Lot 7 : analytics, leads
 
