@@ -590,3 +590,12 @@ Captures : `docs/ux/recette/debordements/`.
 | PL7 case de consentement | ✅ 20 px, ligne cliquable de 44 px |
 | Avertissements en plan Free | ✅ dans le code et les libellés : les 5 points de la spec, avec les textes FR et EN repris tels quels (`notPublishedTitle`, `badge`, `stepHelp`, `confirmTitle` / `confirmLabel`, `sharePublished`, `previewBanner`). Pas encore de capture d'un workspace Free : à vérifier visuellement à la prochaine passe |
 | Alertes (M-A1) | ✅ `Alert` de type `warning`, avec une icône Lucide par état (`Info`, `CircleAlert`, `CircleCheck`, `TriangleAlert`) |
+
+### Suivi DB1–DB3 et PL2b (annoncés par le dev : `51b8df1`, `6ac3b65`, pas encore revérifiés par l'UX)
+
+- **DB1** : sous 1 024 px, le tiroir est modal ; le focus y est piégé et Échap le ferme en rendant le focus au bouton menu (e2e `menus`).
+- **DB2** : `.fd-player-scope` fixe aussi `color` et `color-scheme: light`. La classe est appliquée à l'aperçu de partage (état vide compris), aux vignettes de démo et aux vignettes d'étape, et le contraste est mesuré en e2e.
+- **DB3** : la barre de l'éditeur tient sur une ligne de 57 px à 1 024, 1 280 et 1 440 px. Sous 1 280 px, les outils passent en icônes avec `aria-label` et `title`.
+- **PL2b** : l'explication du dev est **juste**, et ma recommandation était erronée. Avec un `transform-origin` dans [0 ; 1] et une échelle ≥ 1, l'image agrandie couvre toujours le cadre. La bande blanche venait du manifeste de test (image de 1 100 × 750 annoncée en 1 280 × 800). Corrigé dans `6ac3b65`, avec un contrôle e2e de couverture.
+
+À revérifier lors de la recette « Refonte » sur le build intégré.
