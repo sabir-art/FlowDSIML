@@ -1,4 +1,5 @@
 import type { PxRect, Viewport } from './geometry';
+import type { Detection } from './scan';
 
 /** Clic capturé par le content script et envoyé au service worker. */
 export interface ClickPayload {
@@ -12,8 +13,11 @@ export interface ClickPayload {
   dpr: number;
   url: string;
   title: string;
-  /** Zones sensibles à flouter (champs mot de passe, carte bancaire, data-fd-blur). */
-  sensitive: PxRect[];
+  /**
+   * Données personnelles possibles et zones imposées (mot de passe, carte, data-fd-blur), trouvées
+   * dans la page. Restent dans le navigateur jusqu'à l'écran de vérification.
+   */
+  detections: Detection[];
 }
 
 export type PopupRequest =
@@ -26,8 +30,11 @@ export type PopupRequest =
 export interface RecordingStatus {
   recording: boolean;
   paused: boolean;
+  /** Démo créée à l'envoi (après vérification) ; null pendant la capture. */
   demoId: string | null;
   workspaceId: string | null;
+  /** Titre saisi au démarrage, utilisé à la création de la démo. */
+  title: string;
   tabId: number | null;
   steps: number;
   lastError: string | null;

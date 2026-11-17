@@ -99,7 +99,8 @@ select throws_ok($$ delete from public.members where user_id = auth.uid() $$, 'P
 update public.demos set settings = '{"cta":{"label":"Réserver","url":"https://example.com/rdv"}}' where id = '00000000-0000-0000-0000-0000000000d1';
 update public.workspaces set settings = settings || '{"privacyUrl":"https://example.com/confidentialite"}'
   where id = (select workspace_id from public.demos where id = '00000000-0000-0000-0000-0000000000d1');
-create temp table pub as select public.publish_demo('00000000-0000-0000-0000-0000000000d1') as r;
+update public.workspaces set public_links_enabled = true; -- F1 : liens publics activés pour les tests de publication
+create temp table pub as select public.publish_demo('00000000-0000-0000-0000-0000000000d1', '{"reviewed": true, "fictional": true}') as r;
 grant all on pub to authenticated, anon;
 select is((select (r ->> 'number')::int from pub), 1, 'version 1 créée');
 select is((select jsonb_array_length(r -> 'manifest' -> 'steps') from pub), 2, 'le manifeste contient 2 étapes');

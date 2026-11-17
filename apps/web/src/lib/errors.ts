@@ -16,6 +16,8 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/INVITATION_ALREADY_USED/, 'errors.inviteUsed'],
     [/INVITATION_NOT_FOUND/, 'errors.inviteNotFound'],
     [/DEMO_EMPTY/, 'errors.demoEmpty'],
+    [/PUBLIC_DISABLED/, 'errors.publicDisabled'],
+    [/GDPR_ACK_REQUIRED/, 'errors.gdprAck'],
     [/Invalid login credentials/i, 'errors.badCredentials'],
     [/Email not confirmed/i, 'errors.emailNotConfirmed'],
     [/User already registered/i, 'errors.alreadyRegistered'],

@@ -43,7 +43,8 @@ select throws_ok($$ update public.steps set options = '{"background": "video"}' 
 select throws_ok($$ update public.hotspots set style = 'clignotant' $$, '23514', null, 'style de hotspot inconnu refusé');
 select is((select style from public.hotspots where title = 'Cliquez ici'), 'spotlight', 'style Spotlight enregistré');
 
-create temp table pub as select public.publish_demo('00000000-0000-0000-0000-00000000fd01') as r;
+update public.workspaces set public_links_enabled = true; -- F1 : liens publics activés pour les tests de publication
+create temp table pub as select public.publish_demo('00000000-0000-0000-0000-00000000fd01', '{"reviewed": true, "fictional": true}') as r;
 select is((select r -> 'manifest' -> 'steps' -> 0 -> 'options' ->> 'display' from pub), 'popup', 'étape pop-up dans le manifeste');
 select is((select jsonb_array_length(r -> 'manifest' -> 'steps' -> 0 -> 'options' -> 'choices') from pub), 3, 'menu de choix dans le manifeste');
 select is((select r -> 'manifest' -> 'steps' -> 1 -> 'hotspots' -> 0 ->> 'style' from pub), 'spotlight', 'style du hotspot dans le manifeste');
@@ -52,7 +53,7 @@ select is((select r -> 'manifest' -> 'checklist' from pub), '{"title": "Votre pr
 select is((select (r -> 'manifest' -> 'autoplay' ->> 'delayMs')::int from pub), 1500, 'délai d''autoplay borné (1,5 s minimum)');
 
 update public.demos set settings = settings || '{"mode": "spotlight"}' where id = '00000000-0000-0000-0000-00000000fd01';
-create temp table pub2 as select public.publish_demo('00000000-0000-0000-0000-00000000fd01') as r;
+create temp table pub2 as select public.publish_demo('00000000-0000-0000-0000-00000000fd01', '{"reviewed": true, "fictional": true}') as r;
 select is((select r -> 'manifest' -> 'steps' -> 2 -> 'hotspots' -> 0 ->> 'style' from pub2), 'spotlight',
   'mode Spotlight de la démo appliqué à tous les hotspots');
 

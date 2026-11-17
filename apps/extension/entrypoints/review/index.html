@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FlowDSIML</title>
+  </head>
+  <body>
+    <div class="rv">
+      <header class="rv-head">
+        <img class="rv-logo" src="/icon/32.png" width="28" height="28" alt="" />
+        <div class="rv-head__text">
+          <h1 id="title"></h1>
+          <p id="subtitle" class="muted"></p>
+        </div>
+        <span id="state" class="rv-badge" role="status"></span>
+      </header>
+      <div id="summary" class="rv-alert" role="alert" hidden></div>
+      <div id="error" class="rv-alert rv-alert--error" role="alert" hidden></div>
+      <main id="main" class="rv-main" aria-busy="true">
+        <nav class="rv-rail" id="rail-wrap">
+          <h2 class="sr-only" id="rail-title"></h2>
+          <ol id="rail"></ol>
+        </nav>
+        <section class="rv-capture" aria-labelledby="panel-title">
+          <div id="stage" class="rv-stage"></div>
+          <ul class="rv-legend" id="legend"></ul>
+          <p class="muted small" id="add-hint"></p>
+        </section>
+        <aside class="rv-panel">
+          <h2 id="panel-title"></h2>
+          <ul id="zones" class="rv-zones"></ul>
+          <p id="warning" class="rv-help rv-help--warn" hidden></p>
+          <button id="blur-all" class="btn" type="button"></button>
+        </aside>
+      </main>
+      <footer class="rv-foot">
+        <p class="rv-privacy"><i data-lucide="lock"></i><span id="privacy"></span></p>
+        <button id="cancel" class="btn btn-ghost-danger" type="button"></button>
+        <button id="send" class="btn btn-primary" type="button"></button>
+      </footer>
+    </div>
+    <dialog id="confirm" aria-labelledby="confirm-text">
+      <p id="confirm-text"></p>
+      <div class="row">
+        <button id="confirm-no" class="btn" type="button"></button>
+        <button id="confirm-yes" class="btn btn-danger" type="button"></button>
+      </div>
+    </dialog>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

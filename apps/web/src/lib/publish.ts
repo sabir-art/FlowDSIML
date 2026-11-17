@@ -61,9 +61,11 @@ async function exists(bucket: string, path: string): Promise<boolean> {
  */
 export async function publishDemo(
   demoId: string,
+  /** F1 : confirmation RGPD (deux cases) exigée pour toute publication publique, journalisée. */
+  ack: { reviewed: true; fictional: true },
   onProgress?: (done: number, total: number) => void,
 ): Promise<PublishResult> {
-  const { data, error } = await supabase.rpc('publish_demo', { p_demo: demoId });
+  const { data, error } = await supabase.rpc('publish_demo', { p_demo: demoId, p_ack: ack });
   if (error) throw error;
   const res = data as unknown as PublishResult;
   // Flous par chemin publié (<demo>/assets/…), pour les appliquer dans les pixels.

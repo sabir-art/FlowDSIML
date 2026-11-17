@@ -33,14 +33,14 @@ isOneToOne: false
                   ]
                 },"demo_versions": {
                   Row: {
-                    "demo_id": string,"id": string,"manifest": NonNullable<Json>,"number": number,"published_at": string,"published_by": string | null,"workspace_id": string
+                    "demo_id": string,"id": string,"manifest": NonNullable<Json>,"number": number,"public_ack": Json | null,"published_at": string,"published_by": string | null,"workspace_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "demo_id": string,"id"?: string,"manifest": NonNullable<Json>,"number": number,"published_at"?: string,"published_by"?: string | null,"workspace_id": string
+                    "demo_id": string,"id"?: string,"manifest": NonNullable<Json>,"number": number,"public_ack"?: Json | null,"published_at"?: string,"published_by"?: string | null,"workspace_id": string
                   }
                   Update: {
-                    "demo_id"?: string,"id"?: string,"manifest"?: NonNullable<Json>,"number"?: number,"published_at"?: string,"published_by"?: string | null,"workspace_id"?: string
+                    "demo_id"?: string,"id"?: string,"manifest"?: NonNullable<Json>,"number"?: number,"public_ack"?: Json | null,"published_at"?: string,"published_by"?: string | null,"workspace_id"?: string
                   }
                   Relationships: [
                     {
@@ -499,14 +499,14 @@ isOneToOne: false
                   ]
                 },"workspaces": {
                   Row: {
-                    "created_at": string,"created_by": string | null,"id": string,"logo_path": string | null,"name": string,"plan_code": string,"settings": NonNullable<Json>,"slug": string,"updated_at": string
+                    "created_at": string,"created_by": string | null,"id": string,"logo_path": string | null,"name": string,"plan_code": string,"public_links_enabled": boolean,"settings": NonNullable<Json>,"slug": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"logo_path"?: string | null,"name": string,"plan_code"?: string,"settings"?: NonNullable<Json>,"slug": string,"updated_at"?: string
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"logo_path"?: string | null,"name": string,"plan_code"?: string,"public_links_enabled"?: boolean,"settings"?: NonNullable<Json>,"slug": string,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"logo_path"?: string | null,"name"?: string,"plan_code"?: string,"settings"?: NonNullable<Json>,"slug"?: string,"updated_at"?: string
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"logo_path"?: string | null,"name"?: string,"plan_code"?: string,"public_links_enabled"?: boolean,"settings"?: NonNullable<Json>,"slug"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -534,6 +534,7 @@ isOneToOne: false
 "logo_path": string | null,
 "name": string,
 "plan_code": string,
+"public_links_enabled": boolean,
 "settings": NonNullable<Json>,
 "slug": string,
 "updated_at": string
@@ -585,7 +586,7 @@ isOneToOne: false
 { Args: { "key": string,"ws": string }; Returns: Json
                            },
 "publish_demo":
-{ Args: { "p_demo": string }; Returns: Json
+{ Args: { "p_ack"?: Json,"p_demo": string }; Returns: Json
                            },
 "purge_old_events":
 { Args: Record<PropertyKey, never>; Returns: number

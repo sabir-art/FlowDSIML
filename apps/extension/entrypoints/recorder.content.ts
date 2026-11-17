@@ -3,11 +3,14 @@ import { browser } from 'wxt/browser';
 import { elementLabel } from '@/lib/geometry';
 import { cssSelector } from '@/lib/selector';
 import type { ClickPayload } from '@/lib/messages';
+import { scanPage } from '@/lib/scan';
 
 /**
  * Injecté à la demande (registration: runtime) dans l'onglet enregistré.
  * Écoute les clics en phase de capture et les transmet au service worker,
- * qui prend la capture d'écran. Les valeurs saisies ne sont jamais lues.
+ * qui prend la capture d'écran. Le texte de la page n'est lu que pour repérer les données
+ * personnelles possibles (spec f1-formation §1) : seuls le type, la boîte et un extrait masqué en
+ * sortent, et rien n'est envoyé au serveur avant l'écran de vérification.
  */
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -29,13 +32,6 @@ export default defineContentScript({
       const r = el.getBoundingClientRect();
       return { left: r.left, top: r.top, width: r.width, height: r.height };
     };
-
-    function sensitiveRects() {
-      const sel = 'input[type=password], input[autocomplete^="cc-"], [data-fd-blur]';
-      return Array.from(document.querySelectorAll(sel))
-        .map(rect)
-        .filter((r) => r.width > 0 && r.height > 0 && r.top < innerHeight && r.left < innerWidth);
-    }
 
     let last = 0;
     function onPointerDown(ev: PointerEvent) {
@@ -66,11 +62,13 @@ export default defineContentScript({
         dpr: devicePixelRatio,
         url: location.href,
         title: document.title,
-        sensitive: sensitiveRects(),
+        detections: scanPage(),
       };
       badge.style.visibility = 'hidden';
-      void browser.runtime
-        .sendMessage(payload)
+      // Deux images d'affichage : le badge masqué est bien peint avant la capture
+      const painted = new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      void painted
+        .then(() => browser.runtime.sendMessage(payload))
         .catch(() => undefined)
         .finally(() => {
           badge.style.visibility = 'visible';
