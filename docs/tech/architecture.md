@@ -1,6 +1,6 @@
 # FlowDSIML — Architecture technique (phase 1 : analyse)
 
-> Statut : proposition v0.1 — à valider par le chef d'équipe et la Lead Designer UX.
+> Statut : v0.2. **Décision client : la stack est limitée à GitHub + Supabase.** La section [« Révision : stack GitHub + Supabase »](#révision--stack-github--supabase) en fin de document **remplace** les §3 (stack), §5 (monorepo), §7.2–7.3 (services et secrets) et les ADR 001, 005, 006 et 007. Les §0, 1, 2, 4 et 6 restent valables, avec les adaptations indiquées dans la révision.
 > Auteur : développeur senior / architecte full-stack.
 > Périmètre : ce document décrit **comment** construire une plateforme de démos interactives offrant les capacités de Guideflow (capture → démo guidée → partage → analytics → leads), sans reprendre sa marque. Aucun code applicatif n'est écrit à ce stade.
 
@@ -400,3 +400,218 @@ Enterprise : SSO SAML/OIDC, SCIM, journaux d'audit exposés, résidence des donn
 | ADR-005 | PostgreSQL + RLS ; analytics dans Postgres partitionné puis ClickHouse | Proposé |
 | ADR-006 | Stockage R2 + CDN Cloudflare (pas d'egress) | Proposé |
 | ADR-007 | Jobs asynchrones (pg-boss) pour IA, intégrations, webhooks | Proposé |
+
+---
+
+## Révision : stack GitHub + Supabase
+
+> Décision client (17/11/2026) : on n'utilise **que GitHub et Supabase**. Projet Supabase existant : ref `ffzlhlxfratcbitkuvli`, URL `https://ffzlhlxfratcbitkuvli.supabase.co`. La ref et l'URL sont des identifiants publics. Les clés ne figurent **jamais** dans ce document ni dans le dépôt.
+>
+> Les limites et quotas Supabase et GitHub cités ci-dessous viennent de leur documentation publique telle que je la connais. Il faut **les revérifier** sur la page des prix et la documentation au moment de dimensionner, car ils changent souvent.
+
+### R.1 Correspondance avec l'architecture initiale
+
+| Besoin | Proposition v0.1 | **Révision GitHub + Supabase** |
+|---|---|---|
+| Base de données | Postgres managé + Drizzle | **Supabase Postgres**, migrations SQL dans `supabase/migrations` (Supabase CLI) |
+| Accès aux données | API Hono + ORM | **supabase-js** (PostgREST) + **RLS** partout ; fonctions SQL `security definer` (RPC) pour les opérations sensibles |
+| Types TypeScript | Drizzle | **`supabase gen types typescript`** → `packages/db/types.ts`, régénérés en CI |
+| Auth | Better Auth / Clerk | **Supabase Auth** : email + mot de passe et magic link ; Google OAuth en option |
+| Stockage | Cloudflare R2 + CDN | **Supabase Storage** (CDN intégré) : buckets privés + URLs signées ; un bucket public pour les manifestes publiés |
+| API publique, webhooks entrants (Stripe…) | Hono sur Fly | **Edge Functions** (Deno) |
+| Jobs asynchrones | pg-boss + workers Fly | **pgmq** (Supabase Queues) + **pg_cron** + **pg_net** (pour appeler les Edge Functions) + triggers / Database Webhooks |
+| Analytics | Postgres → ClickHouse, PostHog | **Tables Postgres partitionnées** uniquement ; agrégats précalculés par pg_cron |
+| Front (app + éditeur) | Next.js sur Vercel | **SPA statique Vite + React** sur **GitHub Pages** |
+| Player | Bundle Preact sur CDN | Bundle Preact **statique** sur GitHub Pages (manifeste lu depuis Supabase Storage) |
+| CI/CD | GitHub Actions | **GitHub Actions** : lint, tests, `supabase db push`, `supabase functions deploy`, déploiement Pages |
+| Observabilité | Sentry, Axiom | **Logs Supabase** (Postgres, Auth, Edge Functions) + table `client_errors` alimentée par le front |
+
+**Drizzle : abandonné.** Supabase CLI gère déjà les migrations SQL, les types générés suffisent pour supabase-js, et la logique de sécurité vit dans les politiques RLS, écrites en SQL de toute façon. Un ORM ajouterait une seconde source de vérité du schéma sans rien apporter. On écrit les migrations en SQL à la main et on les teste avec **pgTAP** (`supabase test db`).
+
+Choix entre Vite et Next en export statique : **Vite**. Next en `output: 'export'` perd ce qui justifiait Next (SSR, middleware, routes API) et garde sa complexité. Vite + React Router donne une SPA plus simple, plus rapide à compiler, et naturelle pour un éditeur riche.
+
+### R.2 Architecture révisée
+
+```
+ Extension MV3 ──(supabase-js, session dans chrome.storage)──┐
+   capture PNG → conversion WebP dans l'extension            │
+   upload via URL d'upload signée                            ▼
+                                                  ┌────────── Supabase ──────────┐
+ SPA app/éditeur (GitHub Pages) ──supabase-js──►  │ Auth   Postgres+RLS   Storage │
+                                                  │ Edge Functions  pgmq  pg_cron│
+ Player (GitHub Pages) ──GET manifest public──►   │ bucket `published` (public)  │
+        └──POST événements──► Edge Function `track` (ou RPC) ──► events (partitionnée)
+                                                  └──────────────────────────────┘
+ Stripe (plus tard) ──webhook──► Edge Function `stripe-webhook`
+```
+
+**Flux de publication.** Dans l'éditeur, « Publier » appelle la RPC `publish_demo(demo_id)` (`security definer`). Elle vérifie le rôle du membre et les quotas du plan, construit le manifeste JSON, insère `demo_versions` et place un message dans la file pgmq. Une Edge Function écrit ensuite `published/<workspace>/<demo>/<version>.json` et `published/<demo>/latest.json` dans le bucket public. Le player ne lit **jamais** la base : seulement ce fichier et les images.
+
+**Images.** Les images des démos publiées sont copiées dans un bucket public sous un chemin non devinable (hash), ce qui permet le cache CDN. Les captures des brouillons restent dans un bucket **privé**, lues par l'éditeur via des URLs signées à durée courte.
+
+### R.3 Détail par brique Supabase
+
+**Base et RLS**
+- Fonction `is_member(workspace_id, min_role)` (SQL `stable`, `security definer`) utilisée par toutes les politiques RLS. Index sur `members(user_id, workspace_id)`.
+- Le rôle `anon` n'a **aucun accès** aux tables. Le player passe par le Storage public et par la fonction de tracking.
+- Le `workspace_id` courant reste côté client. Les droits sont toujours vérifiés par RLS, jamais par une valeur envoyée par le client.
+- Extensions à activer : `pgmq`, `pg_cron`, `pg_net`, `pgcrypto`, `pgtap` (tests). Les secrets d'intégration (tokens CRM, V2) vont dans **Supabase Vault**.
+
+**Auth**
+- Email + mot de passe et magic link au MVP ; Google OAuth activable sans code.
+- Un trigger sur `auth.users` crée le profil (`public.users`) et un workspace personnel.
+- Invitations : table `invitations` + Edge Function qui envoie l'email (ou `auth.admin.inviteUserByEmail`).
+- SSO SAML (V3, Enterprise) : proposé par Supabase sur les plans payants (à vérifier).
+- L'extension se connecte avec supabase-js. La session est stockée dans `chrome.storage.local` via un adaptateur `storage` personnalisé.
+
+**Storage**
+
+| Bucket | Accès | Contenu |
+|---|---|---|
+| `captures` | privé (RLS `storage.objects` par workspace) | Captures brutes et brouillons |
+| `published` | **public** | Manifestes publiés + images des versions publiées |
+| `branding` | public | Logos, polices du thème |
+| `snapshots` (V2) | privé, puis copie publique à la publication | Snapshots HTML assainis |
+
+- L'extension convertit en WebP elle-même (`OffscreenCanvas.convertToBlob`) avant l'upload : pas de traitement d'image côté serveur au MVP.
+- Les transformations d'images de Supabase (redimensionnement à la volée) sont une option payante, inutile au MVP.
+
+**Edge Functions** (dossier `supabase/functions/`)
+
+| Fonction | Rôle | Phase |
+|---|---|---|
+| `track` | Ingestion des événements du player : validation du schéma, limite de taille, troncature de l'IP, insertion en lot | MVP |
+| `publish-worker` | Consomme la file pgmq et écrit le manifeste et les images dans `published` | MVP |
+| `lead-submit` | Formulaire de lead (anti-spam par jeton honeypot et limite par IP), puis notification et webhooks | MVP |
+| `webhooks-dispatch` | Livraison signée HMAC des webhooks sortants, avec retries (déclenchée par pg_cron) | MVP |
+| `send-email` | Emails transactionnels via le SMTP personnalisé | MVP |
+| `api-v1` | API publique avec clés API par workspace | V2 |
+| `stripe-webhook`, `billing-portal` | Paiement | Phase billing |
+| `ai-step-text`, `ai-translate`, `ai-tts` | IA | V2 |
+| `crm-sync-*` | HubSpot, Salesforce… | V2 |
+
+Les Edge Functions ont des limites de mémoire, de temps CPU et de durée par requête (de l'ordre de la centaine de Mo et de quelques secondes de CPU ; à vérifier). Elles conviennent aux appels HTTP et aux traitements JSON, **pas** à l'export vidéo ou GIF ni au rendu headless. L'export vidéo (V2) se fera donc **dans le navigateur** (WebCodecs / ffmpeg.wasm), ou nécessitera un service hors Supabase.
+
+**Jobs**
+- `pgmq` : files `publish`, `webhooks`, `emails`, `ai` (V2).
+- `pg_cron` :
+  - chaque minute, appel via `pg_net` des workers qui vident les files ;
+  - chaque nuit, création de la partition `events` du mois suivant, purge selon la rétention, recalcul des agrégats ;
+  - chaque heure, nettoyage des uploads orphelins.
+- Triggers : insertion d'un lead → message dans `webhooks` et `emails`.
+
+**Analytics**
+- Table `events` partitionnée par mois (`PARTITION BY RANGE (occurred_at)`), partitions créées par pg_cron. On n'installe pas d'extension supplémentaire si elle n'est pas disponible.
+- Tables d'agrégats `demo_stats_daily(demo_id, day, views, completions, …)` et `step_stats_daily`, mises à jour toutes les 5 à 15 minutes. Les tableaux de bord lisent les agrégats, jamais les événements bruts.
+- Taille de la base à surveiller : 1 million d'événements représente environ 300 à 500 Mo avec les index. Le plan gratuit (quelques centaines de Mo) **ne tient pas** en production. Il faut une rétention courte des événements bruts (90 jours, par exemple), puis seulement les agrégats.
+- Pas de PostHog : les analytics internes sur l'usage du produit seront, si besoin, une table `product_events` alimentée par la SPA.
+
+### R.4 Front et player sur GitHub Pages : limites et parades
+
+| Limite | Conséquence | Parade |
+|---|---|---|
+| **Pas d'en-têtes HTTP personnalisés** | Pas de CSP en en-tête, pas de `frame-ancestors` ni de `X-Frame-Options`, pas de HSTS configurable | CSP via `<meta http-equiv="Content-Security-Policy">`, qui ignore `frame-ancestors`. Le **contrôle des sites autorisés à embarquer** la démo se fait côté player : il lit `document.referrer` et `location.ancestorOrigins` (Chrome) et les compare à la liste du workspace dans le manifeste. C'est une protection **contournable**, à présenter comme telle. |
+| **Domaine unique `sabir-art.github.io`** | **Tous les sites Pages d'un même compte GitHub partagent la même origine**, même répartis dans plusieurs dépôts. App et player auraient la même origine. Le player, exécuté chez des tiers, partagerait alors le `localStorage` où supabase-js garde la session de l'éditeur. | (1) Au MVP, le player ne lit ni n'écrit jamais la session ; aucune donnée utilisateur n'est rendue en HTML brut (textes échappés, pas de `innerHTML`) ; la CSP `<meta>` limite `script-src` à `'self'`. (2) **Recommandé avant la bêta publique** : un domaine personnalisé avec deux sous-domaines (`app.` et `play.`). Chaque site Pages accepte un domaine personnalisé, donc deux dépôts ou deux sites donnent deux origines. À défaut de domaine : publier le player depuis **une organisation GitHub distincte** (`<org>.github.io`), ce qui donne une autre origine sans frais. |
+| **Pas de rendu serveur** | Démo center et pages publiques peu visibles pour le SEO ; aperçus de partage (Open Graph) identiques pour toutes les démos | Au MVP : génération statique en CI d'une page HTML par démo publiée (déclenchée par `repository_dispatch` depuis une Edge Function), sinon `noindex`. Plus tard : une Edge Function qui sert les métadonnées Open Graph. |
+| **Routage SPA** | Pas de réécriture côté serveur | `HashRouter` pour le player et les liens publics, ou astuce `404.html` pour l'app |
+| **Dépôt privé** | GitHub Pages sur un dépôt privé exige un plan GitHub payant, et le site publié reste **public** | Le site ne contient que du code front compilé, pas de secret. La clé publique Supabase (anon/publishable) peut y figurer, la sécurité reposant sur RLS. |
+| **Quotas Pages** | Taille du site, bande passante mensuelle « souple », builds par heure limités (ordre de grandeur : 1 Go de site, 100 Go/mois ; à vérifier) | Les images et manifestes passent par **Supabase Storage**, pas par Pages. Pages ne sert que le JS et le CSS, quelques Mo. |
+| **Snapshots HTML (V2)** | Exécuter du HTML capturé sur l'origine du player est dangereux | Servir le snapshot assaini depuis Supabase Storage, l'afficher dans `<iframe sandbox>` **sans** `allow-scripts` ni `allow-same-origin` (chargé via `srcdoc` après récupération). Supabase Storage pourrait servir le HTML avec un type restreint (`text/plain`) pour éviter le XSS : à vérifier, et c'est une raison de plus pour passer par `srcdoc`. |
+
+**Embed iframe chez les clients.** Leur CSP doit autoriser `frame-src https://sabir-art.github.io` (ou le futur `play.<domaine>`). Notre player n'envoie aucun en-tête bloquant, l'embed fonctionne donc partout. Le revers : n'importe quel site peut embarquer une démo publique ; voir la parade côté player ci-dessus.
+
+### R.5 Monorepo révisé
+
+```
+flowdsiml/
+├─ apps/
+│  ├─ web/            SPA Vite + React (auth, dashboard, éditeur, démo center) → GitHub Pages
+│  ├─ player/         Bundle Preact + embed.js → GitHub Pages (même site au MVP, origine séparée dès que possible)
+│  └─ extension/      Extension Chrome MV3 (WXT)
+├─ supabase/
+│  ├─ config.toml     Configuration du projet (Auth, Storage, functions)
+│  ├─ migrations/     Migrations SQL horodatées (schéma, RLS, fonctions, cron, buckets)
+│  ├─ functions/      Edge Functions (track, publish-worker, lead-submit, webhooks-dispatch, send-email, _shared/)
+│  ├─ tests/          Tests pgTAP (RLS : un membre d'un workspace ne voit rien d'un autre)
+│  └─ seed.sql        Données de développement
+├─ packages/
+│  ├─ db/             Types générés (supabase gen types) + client supabase-js typé
+│  ├─ manifest/       Schéma Zod du manifeste (contrat éditeur ↔ player ↔ functions)
+│  ├─ player-core/    Moteur de rendu des étapes et bulles
+│  ├─ ui/             Design system (tokens de la Designer)
+│  └─ config/         tsconfig, eslint, prettier
+├─ docs/tech/ · docs/design/
+└─ .github/workflows/ ci.yml · deploy.yml · extension.yml
+```
+
+Le code partagé entre les Edge Functions (Deno) et le front (Node/Vite) se limite à `packages/manifest`, importé dans Deno par chemin relatif ou via `deno.json` `imports`. Pas de dépendance Node dans ce package.
+
+### R.6 CI/CD GitHub Actions
+
+| Workflow | Déclencheur | Étapes |
+|---|---|---|
+| `ci.yml` | PR et push | `pnpm install` → lint → typecheck → tests Vitest → `supabase start` (Postgres local dans Docker) → `supabase db reset` → `supabase test db` (pgTAP) → vérification que les types générés sont à jour → build web, player, extension |
+| `deploy.yml` | push sur `main` (environnement GitHub `production` protégé) | `supabase link --project-ref $SUPABASE_PROJECT_REF` → `supabase db push` → `supabase functions deploy` → `supabase secrets set` (à partir des secrets GitHub) → build Vite avec les variables publiques → `actions/upload-pages-artifact` + `actions/deploy-pages` |
+| `extension.yml` | tag `ext-v*` | Build WXT → archive `.zip` en artefact de release (publication sur le Chrome Web Store manuelle, ou automatisée plus tard) |
+
+Un second projet Supabase « staging » serait préférable pour tester les migrations avant la production. À défaut, on utilise les **branches Supabase** (option payante) ou on teste uniquement en local avec `supabase start` en CI. Décision à prendre (R.8).
+
+**Secrets et variables GitHub Actions** (noms seulement ; les valeurs sont saisies dans *Settings → Secrets and variables → Actions*, environnement `production`) :
+
+| Nom | Type | Usage |
+|---|---|---|
+| `SUPABASE_ACCESS_TOKEN` | secret | Jeton personnel Supabase pour la CLI (`link`, `db push`, `functions deploy`) |
+| `SUPABASE_DB_PASSWORD` | secret | Mot de passe Postgres, requis par `db push` |
+| `SUPABASE_PROJECT_REF` | variable (non secrète) | `ffzlhlxfratcbitkuvli` |
+| `VITE_SUPABASE_URL` | variable | URL du projet, injectée dans le build |
+| `VITE_SUPABASE_ANON_KEY` | variable (publique par conception) | Clé anon/publishable injectée dans le front ; la sécurité repose sur RLS |
+| `SMTP_*` (host, port, user, pass, from) | secrets | Configurés dans Supabase Auth (tableau de bord) ; reportés en secrets si `send-email` les utilise |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | secrets | Phase billing, poussés vers Supabase via `supabase secrets set` |
+| `AI_API_KEY` (ex. `ANTHROPIC_API_KEY`) | secret | V2 |
+| `WEBHOOK_SIGNING_KEY`, `TRACK_SALT` | secrets | Signature des webhooks sortants ; sel du hachage des IP |
+
+Règles :
+- la clé **`service_role`** n'est **jamais** dans le front ni dans un fichier du dépôt. Les Edge Functions la reçoivent automatiquement de Supabase ; il ne faut pas la recopier dans GitHub ;
+- les jetons ne sont jamais affichés dans les logs (`::add-mask::`).
+
+### R.7 Ce qui reste incontournable hors GitHub / Supabase
+
+| Élément | Pourquoi on ne peut pas s'en passer | Quand |
+|---|---|---|
+| **SMTP personnalisé** (Brevo, Resend, Amazon SES, ou le SMTP d'un hébergeur mail existant) | Le SMTP intégré de Supabase sert aux tests. Il est limité à quelques emails par heure et n'envoie qu'aux adresses des membres de l'équipe du projet. Sans SMTP personnalisé, **aucun utilisateur externe ne peut s'inscrire** (confirmation, magic link, invitation). Il faut aussi un domaine d'envoi avec SPF et DKIM. | **Avant la bêta** (vers la semaine 9) ; en développement, le SMTP intégré suffit |
+| **Chrome Web Store** (compte développeur, frais uniques modestes, vérification d'identité, politique de confidentialité publique) | Seule voie de distribution d'une extension Chrome à des utilisateurs normaux | En développement : chargement de l'extension non empaquetée (`chrome://extensions` → mode développeur). Compte à créer **vers la semaine 8**, car la revue peut prendre plusieurs jours, voire semaines |
+| **Stripe** | Paiement par carte, abonnements, TVA. Supabase ne facture pas pour nous | Phase billing (fin du MVP ou V2). Avant cela, plans gérés à la main en base |
+| **Clé API IA** (+ TTS pour la voix-off) | Génération des textes, traductions, voix-off | V2 |
+| **Nom de domaine** | Pas strictement obligatoire, mais **fortement recommandé** : isolation app/player (R.4), domaine d'envoi d'emails, crédibilité, URL stable si on quitte un jour GitHub Pages. Faute de domaine, il faut au minimum une organisation GitHub distincte pour le player | Avant la bêta publique |
+| **Google Cloud** (client OAuth) | Seulement si on active « Se connecter avec Google » | Optionnel |
+| **Fournisseurs CRM** (apps OAuth HubSpot, Salesforce, Slack) | Intégrations | V2 |
+| Export vidéo côté serveur, enrichissement IP → entreprise, app desktop signée | Hors des capacités des Edge Functions, ou service tiers par nature | V2/V3, à décider |
+
+**Plan Supabase.** Un projet gratuit est **mis en pause après une période d'inactivité**, sans sauvegardes quotidiennes et avec des quotas faibles (base de quelques centaines de Mo, 1 Go de stockage). Pour la bêta et la production, il faut passer au **plan Pro**, payant mais toujours chez Supabase. Il faut le budgéter.
+
+### R.8 Impacts sur le reste du document
+
+- **§1** : modules inchangés. L'API publique, les webhooks et les intégrations deviennent des Edge Functions ; les workers deviennent pgmq + pg_cron.
+- **§2** (capture) : recommandation inchangée. Le screenshot au MVP est encore plus pertinent, puisqu'il n'y a pas de serveur pour assainir du HTML lourd.
+- **§4** (modèle de données) : inchangé, avec deux différences :
+  - `users`, `auth_accounts` et `sessions` sont remplacés par `auth.users` (géré par Supabase) et une table `public.profiles` ;
+  - `assets.storage_key` désigne un chemin Supabase Storage (`bucket/chemin`), et les secrets d'intégration passent dans Vault.
+- **§6** (roadmap) : MVP toujours d'environ 12 semaines. Il y a moins d'infrastructure à monter (−1 semaine), mais il faut écrire et tester les politiques RLS et les contraintes de GitHub Pages (+1 semaine). L'export vidéo et ClickHouse passent en « à décider ».
+- **Décisions nouvelles** :
+  1. **Domaine personnalisé**, ou organisation GitHub séparée pour le player.
+  2. Supabase **Pro** à partir de la bêta.
+  3. Projet **staging** séparé ou tests uniquement en local.
+  4. Fournisseur **SMTP**.
+  5. Dépôt public ou privé : avec un dépôt privé, Pages demande un plan GitHub payant.
+- **Accès nécessaires** : rôle *Developer* ou *Admin* sur le projet Supabase `ffzlhlxfratcbitkuvli` (pour générer `SUPABASE_ACCESS_TOKEN` et connaître le mot de passe de la base) ; droits admin sur le dépôt GitHub (secrets, environnements, activation de Pages en mode « GitHub Actions »).
+
+### R.9 ADR révisés
+
+| # | Décision | Statut |
+|---|---|---|
+| ADR-001r | Monorepo pnpm ; front en SPA Vite statique, logique serveur en Edge Functions et SQL | Proposé |
+| ADR-005r | Supabase Postgres + RLS + migrations SQL (pas d'ORM) ; analytics dans des tables partitionnées + agrégats | Proposé |
+| ADR-006r | Supabase Storage : buckets privés + URLs signées ; bucket public pour les versions publiées | Proposé |
+| ADR-007r | Jobs asynchrones avec pgmq + pg_cron + pg_net | Proposé |
+| ADR-008 | Hébergement du front et du player sur GitHub Pages ; domaine personnalisé (ou organisation séparée) requis avant la bêta pour isoler le player | Proposé |
+| ADR-009 | Auth Supabase (email + mot de passe, magic link) ; SMTP personnalisé obligatoire avant toute inscription externe | Proposé |
