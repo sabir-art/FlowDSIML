@@ -125,7 +125,7 @@ export function Layout() {
           </span>
           <Menu
             label={t('nav.account')}
-            align="start"
+            placement="top-start"
             items={[
               { label: t('nav.profile'), icon: <UserRound />, onSelect: () => navigate('/settings/profile') },
               { label: t('nav.newWorkspace'), icon: <Plus />, onSelect: () => navigate('/onboarding') },
