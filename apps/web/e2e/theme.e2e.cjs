@@ -51,14 +51,14 @@ function contrast(a, b) {
       ].filter(([, c, k]) => c && k && !/rgba\(0, 0, 0, 0\)/.test(k));
     });
 
-  // Écran de connexion : sélecteur présent, clair par défaut
+  // Écran de connexion (CNX-01, maquette d'origine : pas de sélecteur de thème) : clair par défaut
   await page.goto(`${APP}/#/login`);
-  await page.waitForSelector('.auth-prefs [role=radiogroup]');
+  await page.waitForSelector('.mk .auth-form');
   ok((await theme()) === 'light', 'clair par défaut, même si le système est en sombre');
-  await page.getByRole('radio', { name: 'Sombre' }).click();
-  ok((await theme()) === 'dark', 'bascule en sombre depuis la page de connexion');
-  ok((await page.evaluate(() => localStorage.getItem('fd.theme'))) === 'dark', 'choix mémorisé localement');
-  await page.getByRole('radio', { name: 'Clair' }).click();
+  ok(
+    (await page.locator('.auth-form [role=radiogroup]').count()) === 0,
+    'connexion : pas de sélecteur de thème',
+  );
 
   // App connectée (nouvel onglet du même contexte : le localStorage est partagé)
   await page.close();

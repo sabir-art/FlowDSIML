@@ -20,6 +20,20 @@ const VIEW = { width: 1440, height: 900 };
 // (docs/ux/maquettes/*.html) ou refonte (docs/ux/maquettes/refonte/*.html).
 const SCREENS = {
   'CAD-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
+  'CNX-01': {
+    maquette: 'connexion.html',
+    route: '/#/login',
+    signedOut: true,
+    // État de la maquette : identifiants saisis, refusés (message sous le mot de passe)
+    async prepare(p) {
+      await p.fill('#email', 'camille@acme.example');
+      await p.fill('#password', 'motdepasse');
+      await p.click('button[type=submit]');
+      await p.waitForSelector('#login-error');
+      await p.fill('#password', 'motdepasse');
+      await p.locator('#password').blur();
+    },
+  },
 };
 
 async function shotMaquette(b, file, theme) {
@@ -37,16 +51,17 @@ async function shotMaquette(b, file, theme) {
   return buf;
 }
 
-async function shotApp(b, route, theme) {
+async function shotApp(b, s, theme) {
   const p = await b.newPage({ viewport: VIEW });
   await p.addInitScript((th) => {
     try {
       localStorage.setItem('fd.theme', th);
     } catch {}
   }, theme);
-  await install(p, seedMaquette());
-  await p.goto(`${APP}${route}`);
+  await install(p, { ...seedMaquette(), signedOut: Boolean(s.signedOut) });
+  await p.goto(`${APP}${s.route}`);
   await p.waitForTimeout(1800);
+  if (s.prepare) await s.prepare(p);
   const buf = await p.screenshot();
   await p.close();
   return buf;
@@ -73,7 +88,7 @@ async function sideBySide(b, left, right, label) {
     if (only.length && !only.includes(name)) continue;
     for (const theme of ['light', 'dark']) {
       const left = await shotMaquette(b, s.maquette, theme);
-      const right = await shotApp(b, s.route, theme);
+      const right = await shotApp(b, s, theme);
       // Capture de l'app seule (téléversée dans l'outil de suivi « Conformité TutoClick »)
       fs.writeFileSync(path.join(OUT, `${name}-app-${theme === 'light' ? 'clair' : 'sombre'}.png`), right);
       fs.writeFileSync(

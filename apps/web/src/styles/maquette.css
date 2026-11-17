@@ -1,9 +1,7 @@
 /* Généré par scripts/maquette-css.py depuis docs/ux/maquettes/assets/mockup.css (règle D13 :
    CSS des maquettes repris à l'identique, préfixé par .mk). Ne pas modifier à la main. */
 .mk { font-family: var(--fd-font-sans); font-size: var(--fd-text-body-size); line-height: var(--fd-text-body-line); color: var(--fd-color-text); background: var(--fd-color-bg); -webkit-font-smoothing: antialiased; }
-.mk 500&display=swap");
-
-*, *::before, *::after {box-sizing: border-box;}
+.mk *, .mk *::before, .mk *::after {box-sizing: border-box;}
 .mk a {color: var(--fd-color-primary); text-decoration: none;}
 .mk a:hover {text-decoration: underline;}
 .mk :focus-visible {outline: none; box-shadow: var(--fd-shadow-focus); border-radius: var(--fd-radius-sm);}

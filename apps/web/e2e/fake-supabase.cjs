@@ -257,20 +257,22 @@ async function install(page, state = seed()) {
       body: JSON.stringify(body),
     });
 
-  await page.addInitScript(
-    ([key, session]) => localStorage.setItem(key, JSON.stringify(session)),
-    [
-      STORAGE_KEY,
-      {
-        access_token: fakeJwt(state.user),
-        refresh_token: 'r',
-        token_type: 'bearer',
-        expires_in: 3600,
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-        user: state.user,
-      },
-    ],
-  );
+  // state.signedOut : visiteur non connecté (écrans d'authentification), identifiants refusés
+  if (!state.signedOut)
+    await page.addInitScript(
+      ([key, session]) => localStorage.setItem(key, JSON.stringify(session)),
+      [
+        STORAGE_KEY,
+        {
+          access_token: fakeJwt(state.user),
+          refresh_token: 'r',
+          token_type: 'bearer',
+          expires_in: 3600,
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+          user: state.user,
+        },
+      ],
+    );
 
   await page.route(`${HOST}/**`, async (route) => {
     const req = route.request();
@@ -297,6 +299,8 @@ async function install(page, state = seed()) {
       state.events.push(...(batch.events || []));
       return json(route, 200, { inserted: (batch.events || []).length });
     }
+    if (state.signedOut && p.startsWith('/auth/v1/token'))
+      return json(route, 400, { error: 'invalid_grant', error_description: 'Invalid login credentials' });
     if (p.startsWith('/auth/v1/user')) {
       if (method === 'PUT' && body?.data)
         state.user.user_metadata = { ...state.user.user_metadata, ...body.data };

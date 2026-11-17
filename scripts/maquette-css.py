@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 src = (ROOT / 'docs/ux/maquettes/assets/mockup.css').read_text()
 src = re.sub(r'/\*.*?\*/', '', src, flags=re.S)
-src = re.sub(r'@import[^;]+;', '', src)
+src = re.sub(r'^@import .*;\s*$', '', src, flags=re.M)
 
 
 def split_selectors(sel: str):

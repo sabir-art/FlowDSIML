@@ -21,3 +21,122 @@
 .mk .row {
   color: inherit;
 }
+
+/* ---- Connexion / inscription (CNX-01, INS-01) : styles de page et styles en ligne de connexion.html ---- */
+.mk .aside-demo {
+  position: absolute;
+  inset: 64px 48px auto 64px;
+  aspect-ratio: 16/10;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  background: #f6f7fb;
+}
+.mk .aside-demo .hs {
+  position: absolute;
+  left: 76%;
+  top: 15%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--fd-ember-500);
+  box-shadow: 0 0 0 6px rgba(232, 84, 31, 0.25);
+}
+.mk .aside-demo .tip {
+  position: absolute;
+  left: 52%;
+  top: 24%;
+  width: 42%;
+  background: #fff;
+  color: var(--fd-stone-900);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: var(--fd-shadow-lg);
+  font-size: 12px;
+}
+.mk .aside-demo .tip-count {
+  color: var(--fd-stone-600);
+  font-size: 11px;
+}
+.mk .aside-demo .tip b {
+  display: block;
+  margin: 2px 0 4px;
+}
+.mk .quote {
+  max-width: 440px;
+}
+.mk .quote .t-display {
+  color: #fff;
+  font-size: 2rem;
+}
+.mk .quote .t-lg {
+  color: var(--fd-lagoon-200);
+  margin-top: 12px;
+}
+.mk .auth-logo-link {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 10px;
+  color: var(--fd-color-text);
+  margin-bottom: 48px;
+}
+.mk .auth-logo-link:hover {
+  text-decoration: none;
+}
+.mk .auth-sub {
+  margin-top: 8px;
+}
+.mk .oauth {
+  margin-top: 32px;
+}
+.mk .oauth .badge {
+  margin-left: 4px;
+}
+.mk .auth-submit {
+  margin-top: 24px;
+}
+.mk .auth-alt {
+  margin-top: 12px;
+  text-align: center;
+}
+.mk .auth-switch {
+  margin-top: 32px;
+}
+.mk .auth-footer {
+  margin-top: 40px;
+  gap: 16px;
+}
+.mk form > .alert,
+.mk .auth-form > .alert {
+  margin-bottom: var(--fd-space-5);
+}
+/* Bouton qui se lit comme un lien de la maquette (changement de mode sans navigation) */
+.mk .mk-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--fd-color-primary);
+  cursor: pointer;
+}
+.mk .mk-link:hover {
+  text-decoration: underline;
+}
+/* Logo TutoClick clair / sombre : `.mk img { display: block }` ne doit pas afficher les deux */
+.mk .brand-mark__logo--dark {
+  display: none;
+}
+:root[data-theme='dark'] .mk .brand-mark__logo--light {
+  display: none;
+}
+:root[data-theme='dark'] .mk .brand-mark__logo--dark {
+  display: block;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .mk .brand-mark__logo--light {
+    display: none;
+  }
+  :root:not([data-theme='light']) .mk .brand-mark__logo--dark {
+    display: block;
+  }
+}
