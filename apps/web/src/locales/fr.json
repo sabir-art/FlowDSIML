@@ -254,7 +254,7 @@
     "moveDown": "Descendre",
     "newTextStep": "Nouvel écran",
     "addTextStep": "Écran texte",
-    "addImageStep": "Image",
+    "addImageStep": "Image importée",
     "notFound": "Démo introuvable ou accès refusé.",
     "demoTitle": "Titre de la démo",
     "save_idle": "—",
@@ -289,7 +289,17 @@
     "desktop": "Ordinateur",
     "mobile": "Mobile",
     "previewTimeout": "Le player ne répond pas. Vérifiez que VITE_PLAYER_URL pointe vers le player déployé.",
-    "previewOpenTab": "Ouvrir dans un onglet"
+    "previewOpenTab": "Ouvrir dans un onglet",
+    "addStep": "Ajouter une étape",
+    "badgeHotspots_one": "{{count}} hotspot",
+    "badgeHotspots_other": "{{count}} hotspots",
+    "badgeForm": "Formulaire de lead avant l’étape",
+    "badgeCta": "Bouton d’action",
+    "badgeZoom": "Zoom",
+    "badgeBlurs_one": "{{count}} zone floutée",
+    "badgeBlurs_other": "{{count}} zones floutées",
+    "formOnStep": "Formulaire « {{title}} » affiché avant cette étape",
+    "editForm": "Modifier"
   },
   "status": {
     "draft": "Brouillon",

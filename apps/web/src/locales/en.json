@@ -254,7 +254,7 @@
     "moveDown": "Move down",
     "newTextStep": "New screen",
     "addTextStep": "Text screen",
-    "addImageStep": "Image",
+    "addImageStep": "Uploaded image",
     "notFound": "Demo not found or access denied.",
     "demoTitle": "Demo title",
     "save_idle": "—",
@@ -289,7 +289,17 @@
     "desktop": "Desktop",
     "mobile": "Mobile",
     "previewTimeout": "The player is not responding. Check that VITE_PLAYER_URL points to the deployed player.",
-    "previewOpenTab": "Open in a tab"
+    "previewOpenTab": "Open in a tab",
+    "addStep": "Add a step",
+    "badgeHotspots_one": "{{count}} hotspot",
+    "badgeHotspots_other": "{{count}} hotspots",
+    "badgeForm": "Lead form before the step",
+    "badgeCta": "Call to action",
+    "badgeZoom": "Zoom",
+    "badgeBlurs_one": "{{count}} blurred area",
+    "badgeBlurs_other": "{{count}} blurred areas",
+    "formOnStep": "Form “{{title}}” shown before this step",
+    "editForm": "Edit"
   },
   "status": {
     "draft": "Draft",

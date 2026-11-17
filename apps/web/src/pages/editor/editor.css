@@ -451,3 +451,43 @@
 .preview-error svg {
   color: var(--fd-color-warning);
 }
+.steplist-badges {
+  grid-column: 2;
+  display: flex;
+  gap: 6px;
+  color: var(--fd-color-text-muted);
+}
+.steplist-badges svg {
+  width: 13px;
+  height: 13px;
+}
+.fd-btn--block {
+  width: 100%;
+  justify-content: center;
+}
+.steplist .menu {
+  display: flex;
+}
+.steplist .menu-list {
+  width: 100%;
+}
+.canvas-form-chip {
+  position: absolute;
+  top: var(--fd-space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+  padding: 4px 4px 4px 12px;
+  border-radius: var(--fd-radius-full, 999px);
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: var(--fd-shadow-md);
+  font-size: var(--fd-font-xs);
+  white-space: nowrap;
+}
+.canvas-text {
+  position: relative;
+}

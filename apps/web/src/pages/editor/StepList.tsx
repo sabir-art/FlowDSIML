@@ -1,7 +1,20 @@
-import { ArrowDown, ArrowUp, ImageOff, ImagePlus, Type } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ClipboardList,
+  EyeOff,
+  ImageOff,
+  ImagePlus,
+  MousePointerClick,
+  Plus,
+  Target,
+  Type,
+  ZoomIn,
+} from 'lucide-react';
+import { Menu } from '../../components/Menu';
+import type { StepRow } from './types';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@flowdsiml/ui';
 import type { DemoEditor } from './useDemoEditor';
 
 export function StepList({
@@ -67,6 +80,7 @@ export function StepList({
                   </span>
                 )}
                 <span className="steplist-title">{s.title || t('editor.untitled')}</span>
+                <StepBadges step={s} hotspots={editor.hotspots.filter((h) => h.step_id === s.id).length} />
               </button>
               {!readOnly && (
                 <span className="steplist-move">
@@ -92,18 +106,20 @@ export function StepList({
       </ol>
       {!readOnly && (
         <div className="stack" style={{ gap: 6, padding: 8 }}>
-          <Button
-            size="sm"
-            icon={<Type />}
-            onClick={() =>
-              void editor.addTextStep(current, t('editor.newTextStep')).then(() => onSelect(current + 1))
-            }
-          >
-            {t('editor.addTextStep')}
-          </Button>
-          <Button size="sm" icon={<ImagePlus />} onClick={() => file.current?.click()}>
-            {t('editor.addImageStep')}
-          </Button>
+          <Menu
+            label={t('editor.addStep')}
+            align="start"
+            trigger={{ icon: <Plus />, text: t('editor.addStep'), block: true }}
+            items={[
+              {
+                label: t('editor.addTextStep'),
+                icon: <Type />,
+                onSelect: () =>
+                  void editor.addTextStep(current, t('editor.newTextStep')).then(() => onSelect(current + 1)),
+              },
+              { label: t('editor.addImageStep'), icon: <ImagePlus />, onSelect: () => file.current?.click() },
+            ]}
+          />
           <input
             ref={file}
             type="file"
@@ -118,5 +134,28 @@ export function StepList({
         </div>
       )}
     </div>
+  );
+}
+
+/** Icônes d'état d'une étape dans le rail (ED10). */
+function StepBadges({ step, hotspots }: { step: StepRow; hotspots: number }) {
+  const { t } = useTranslation();
+  const blurs = Array.isArray(step.blurs) ? step.blurs.length : 0;
+  const items = [
+    hotspots > 0 && { icon: <Target />, label: t('editor.badgeHotspots', { count: hotspots }) },
+    step.gate_form_id && { icon: <ClipboardList />, label: t('editor.badgeForm') },
+    step.cta && { icon: <MousePointerClick />, label: t('editor.badgeCta') },
+    step.zoom && { icon: <ZoomIn />, label: t('editor.badgeZoom') },
+    blurs > 0 && { icon: <EyeOff />, label: t('editor.badgeBlurs', { count: blurs }) },
+  ].filter(Boolean) as Array<{ icon: React.ReactNode; label: string }>;
+  if (!items.length) return null;
+  return (
+    <span className="steplist-badges">
+      {items.map((b) => (
+        <span key={b.label} title={b.label} aria-label={b.label} role="img">
+          {b.icon}
+        </span>
+      ))}
+    </span>
   );
 }

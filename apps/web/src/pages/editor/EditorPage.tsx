@@ -184,6 +184,7 @@ export function EditorPage() {
               selection={selection}
               setSelection={setSelection}
               readOnly={readOnly}
+              onEditForm={() => setTab('settings')}
             />
           ) : (
             <div className="center fd-muted">{t('editor.empty')}</div>

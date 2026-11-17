@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { applyVariables, richTextToHtml } from '@flowdsiml/core';
 import { themeSchema } from '@flowdsiml/manifest';
 import { beaconCenter, themeVars, tipClass } from '@flowdsiml/player-core';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ClipboardList } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
 import { asAction, asCta, asRects, asSettings, asZoom, type Selection, type StepRow } from './types';
@@ -23,6 +23,7 @@ interface Props {
   selection: Selection;
   setSelection: (s: Selection) => void;
   readOnly: boolean;
+  onEditForm?: () => void;
 }
 
 const clamp = (v: number, min = 0, max = 1) => Math.min(max, Math.max(min, v));
@@ -34,7 +35,16 @@ type Drag =
   | { kind: 'draw'; x0: number; y0: number; rect: Rect }
   | { kind: 'blur-move'; index: number; dx: number; dy: number };
 
-export function Canvas({ editor, step, tool, setTool, selection, setSelection, readOnly }: Props) {
+export function Canvas({
+  editor,
+  step,
+  tool,
+  setTool,
+  selection,
+  setSelection,
+  readOnly,
+  onEditForm,
+}: Props) {
   const { t } = useTranslation();
   const frame = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
@@ -153,9 +163,24 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
     }
   }
 
+  // ED8 : formulaire de lead visible sur le canevas
+  const gateForm = step.gate_form_id ? editor.forms.find((f) => f.id === step.gate_form_id) : undefined;
+  const formChip = gateForm && (
+    <div className="canvas-form-chip">
+      <ClipboardList size={16} aria-hidden="true" />
+      <span>{t('editor.formOnStep', { title: gateForm.title })}</span>
+      {onEditForm && (
+        <button type="button" className="fd-btn fd-btn--sm fd-btn--ghost" onClick={onEditForm}>
+          {t('editor.editForm')}
+        </button>
+      )}
+    </div>
+  );
+
   if (step.kind === 'text' || !step.image_path) {
     return (
       <div className="canvas-text" onPointerDown={() => setSelection({ kind: 'step' })}>
+        {formChip}
         <h2>{step.title || t('editor.untitled')}</h2>
         <div dangerouslySetInnerHTML={{ __html: richTextToHtml(step.body) }} />
       </div>
@@ -181,6 +206,7 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
       onPointerUp={onUp}
       onPointerCancel={onUp}
     >
+      {formChip}
       {url ? (
         <img src={url} alt="" draggable={false} />
       ) : (
