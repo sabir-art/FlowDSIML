@@ -44,9 +44,46 @@ const SCREENS = {
       await p.locator('#password').blur();
     },
   },
+  'ONB-01': {
+    maquette: 'onboarding.html',
+    route: '/#/onboarding',
+    // État de la maquette : étape 1, nom de l'espace saisi, « Site web » choisi
+    async prepare(p) {
+      await p.fill('#ws-name', 'Acme Analytics');
+      await p.locator('#ws-name').blur();
+    },
+  },
+  'ONB-02': {
+    maquette: 'onboarding.html',
+    maquettePrep: (p) => p.click('#p1 [data-next="2"]'),
+    route: '/#/onboarding',
+    async prepare(p) {
+      await p.fill('#ws-name', 'Acme Analytics');
+      await p.click('button[type=submit]');
+      await p.waitForSelector('#ob-h2');
+      await p.mouse.move(0, 0);
+    },
+  },
+  'ONB-03': {
+    maquette: 'onboarding.html',
+    maquettePrep: async (p) => {
+      await p.click('#p1 [data-next="2"]');
+      await p.click('#p2 [data-next="3"]');
+      await p.mouse.move(0, 0);
+    },
+    route: '/#/onboarding',
+    async prepare(p) {
+      await p.fill('#ws-name', 'Acme Analytics');
+      await p.click('button[type=submit]');
+      await p.waitForSelector('#ob-h2');
+      await p.getByRole('button', { name: 'J’ai installé l’extension' }).click();
+      await p.waitForTimeout(600);
+      await p.mouse.move(0, 0);
+    },
+  },
 };
 
-async function shotMaquette(b, file, theme) {
+async function shotMaquette(b, file, theme, prep) {
   const p = await b.newPage({ viewport: VIEW });
   await p.goto(`file://${MAQ}/${file}${file.includes('?') ? '&' : '?'}theme=${theme}`);
   await p.evaluate((th) => {
@@ -56,6 +93,7 @@ async function shotMaquette(b, file, theme) {
     document.querySelector('[data-theme-set]')?.parentElement?.remove();
   }, theme);
   await p.waitForTimeout(500);
+  if (prep) await prep(p);
   const buf = await p.screenshot();
   await p.close();
   return buf;
@@ -97,7 +135,7 @@ async function sideBySide(b, left, right, label) {
   for (const [name, s] of Object.entries(SCREENS)) {
     if (only.length && !only.includes(name)) continue;
     for (const theme of ['light', 'dark']) {
-      const left = await shotMaquette(b, s.maquette, theme);
+      const left = await shotMaquette(b, s.maquette, theme, s.maquettePrep);
       const right = await shotApp(b, s, theme);
       // Capture de l'app seule (téléversée dans l'outil de suivi « Conformité TutoClick »)
       fs.writeFileSync(path.join(OUT, `${name}-app-${theme === 'light' ? 'clair' : 'sombre'}.png`), right);

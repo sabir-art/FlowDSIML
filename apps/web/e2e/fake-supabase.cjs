@@ -347,13 +347,15 @@ async function install(page, state = seed()) {
           return json(
             route,
             200,
-            t.demos.map((d) => ({
-              demo_id: d.id,
-              views: d.status === 'published' ? 120 : 0,
-              visitors: d.status === 'published' ? 90 : 0,
-              completions: d.status === 'published' ? 40 : 0,
-              leads: d.status === 'published' ? 1 : 0,
-            })),
+            t.demos
+              .filter((d) => !a.p_workspace || d.workspace_id === a.p_workspace)
+              .map((d) => ({
+                demo_id: d.id,
+                views: d.status === 'published' ? 120 : 0,
+                visitors: d.status === 'published' ? 90 : 0,
+                completions: d.status === 'published' ? 40 : 0,
+                leads: d.status === 'published' ? 1 : 0,
+              })),
           );
         case 'demo_analytics':
           if (a.p_to && Date.parse(a.p_to) < Date.now() - 86400000)
@@ -506,8 +508,12 @@ async function install(page, state = seed()) {
           t.demos.find((x) => x.id === a.p_demo).status = 'draft';
           return json(route, 200, null);
         }
-        case 'create_workspace':
-          return json(route, 200, t.workspaces[0]);
+        case 'create_workspace': {
+          // Nouvel espace vide (comme en vrai) : aucune démo, aucune vue
+          const ws = { ...t.workspaces[0], id: crypto.randomUUID(), name: a.p_name, slug: null };
+          t.workspaces.push(ws);
+          return json(route, 200, ws);
+        }
         case 'track_events':
           state.events.push(...(a.p_batch?.events || []));
           return json(route, 200, (a.p_batch?.events || []).length);
