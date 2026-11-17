@@ -38,7 +38,9 @@ export function StatTile({
             {icon}
           </span>
         )}
-        <span className="fd-kpi__label stat-label">{label}</span>
+        <span className="fd-kpi__label stat-label" title={label}>
+          {label}
+        </span>
       </div>
       <span className="fd-kpi__value stat-value">{value}</span>
       {(delta !== undefined || hint) && (
@@ -203,10 +205,13 @@ export function Donut({
   segments,
   totalLabel,
   label,
+  valueLabel,
 }: {
   segments: Array<{ label: string; value: number; color: string }>;
   totalLabel: string;
   label: string;
+  /** Libellé de la valeur (« 42 vues ») dans la légende et la table sr-only. */
+  valueLabel: (n: number) => string;
 }) {
   const total = segments.reduce((s, x) => s + x.value, 0);
   const visible = segments.filter((s) => s.value > 0);
@@ -218,13 +223,14 @@ export function Donut({
     offset += len;
     return arc;
   });
-  const pct = (v: number) => (total ? formatPercent(v / total) : '—');
+  const pct = (v: number) => formatPercent(total ? v / total : 0);
   return (
     <div className="donut-wrap">
       <div
         className="donut"
         role="img"
         aria-label={`${label} : ${segments.map((s) => `${s.label} ${pct(s.value)}`).join(', ')}`}
+        data-total={total}
       >
         <svg className="donut__svg" viewBox="0 0 180 180" width="180" height="180" aria-hidden="true">
           <circle r={DONUT_R} cx="90" cy="90" fill="none" className="donut__track" strokeWidth="22" />
@@ -249,15 +255,28 @@ export function Donut({
           <small>{totalLabel}</small>
         </div>
       </div>
-      <ul className="legend">
+      <ul className="legend" aria-hidden="true">
         {segments.map((s) => (
           <li key={s.label}>
-            <i style={{ background: s.color }} aria-hidden="true" />
+            <i style={{ background: s.color }} />
             {s.label}
+            <span className="legend__n">{valueLabel(s.value)}</span>
             <b>{pct(s.value)}</b>
           </li>
         ))}
       </ul>
+      <table className="sr-only">
+        <caption>{label}</caption>
+        <tbody>
+          {segments.map((s) => (
+            <tr key={s.label}>
+              <th scope="row">{s.label}</th>
+              <td>{valueLabel(s.value)}</td>
+              <td>{pct(s.value)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

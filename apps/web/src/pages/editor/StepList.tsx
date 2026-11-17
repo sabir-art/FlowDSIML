@@ -88,13 +88,12 @@ export function StepList({
                 )}
                 <span className="steplist-title">{s.title || t('editor.untitled')}</span>
                 {(openComments[s.id] ?? 0) > 0 && (
-                  <span
-                    className="steplist-comments"
-                    title={t('comments.openCount', { count: openComments[s.id] })}
-                  >
+                  <span className="steplist-comments">
                     <MessageSquare aria-hidden="true" />
-                    {openComments[s.id]}
-                    <span className="sr-only">{t('comments.openCount', { count: openComments[s.id] })}</span>
+                    <span aria-hidden="true">{openComments[s.id]! > 99 ? '99+' : openComments[s.id]}</span>
+                    <span className="sr-only">
+                      {t('editor.comments.railBadge', { count: openComments[s.id] })}
+                    </span>
                   </span>
                 )}
                 <StepBadges step={s} hotspots={editor.hotspots.filter((h) => h.step_id === s.id).length} />

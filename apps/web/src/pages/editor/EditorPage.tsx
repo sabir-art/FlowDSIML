@@ -2,7 +2,7 @@ import { ArrowLeft, Eye, EyeOff, MousePointer2, Share2, Target } from 'lucide-re
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button } from '@flowdsiml/ui';
+import { Alert, Button, Select } from '@flowdsiml/ui';
 import { PLAN_DEFAULTS, type PlanCode } from '@flowdsiml/core';
 import { errorMessage } from '../../lib/errors';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -12,6 +12,7 @@ import { Canvas, type Tool } from './Canvas';
 import { StepList } from './StepList';
 import { CommentsPanel } from './comments/CommentsPanel';
 import { useStepComments } from './comments/useStepComments';
+import { useAuth } from '../../auth/AuthProvider';
 import { StepPanel } from './panels/StepPanel';
 import { HotspotPanel } from './panels/HotspotPanel';
 import { BlurPanel } from './panels/BlurPanel';
@@ -48,7 +49,8 @@ export function EditorPage() {
   const { demoId = '' } = useParams();
   const { can, current: ws } = useWorkspace();
   const editor = useDemoEditor(demoId);
-  const comments = useStepComments(demoId, ws?.id);
+  const { user } = useAuth();
+  const comments = useStepComments(demoId, ws?.id, user?.id);
   const [index, setIndex] = useState(0);
   const [tool, setTool] = useState<Tool>('select');
   const [selection, setSelection] = useState<Selection>({ kind: 'step' });
@@ -67,7 +69,7 @@ export function EditorPage() {
     function onKey(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      if ((e.target as HTMLElement)?.closest?.('[data-canvas-item]')) return;
+      if ((e.target as HTMLElement)?.closest?.('[data-canvas-item], .cm, #fd-portal')) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight')
         setIndex((i) => Math.min(i + 1, editor.steps.length - 1));
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') setIndex((i) => Math.max(i - 1, 0));
@@ -84,23 +86,51 @@ export function EditorPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [editor, selection, readOnly]);
 
-  if (narrow)
+  if (narrow) {
+    // Écran étroit : l'éditeur reste indisponible, mais on lit et on répond aux commentaires (commentaires.md §5)
+    if (editor.loading) return <Loading />;
     return (
-      <main className="center" id="main" style={{ padding: 24, textAlign: 'center' }}>
-        <div className="stack" style={{ maxWidth: 420 }}>
-          <h1>{t('editor.narrowTitle')}</h1>
-          <p className="fd-muted">{t('editor.narrowBody')}</p>
-          <div className="row" style={{ justifyContent: 'center' }}>
-            <Link className="fd-btn" to="/">
+      <main className="editor-narrow" id="main">
+        <div className="fd-card editor-narrow__notice">
+          <h1>{t('editor.comments.mobileNoticeTitle')}</h1>
+          <p className="fd-muted">{t('editor.comments.mobileNoticeBody')}</p>
+          <div className="row">
+            <Link className="fd-btn fd-btn--sm" to="/">
               {t('common.back')}
             </Link>
-            <Link className="fd-btn" to={`/demos/${demoId}/share`}>
+            <Link className="fd-btn fd-btn--sm" to={`/demos/${demoId}/share`}>
               {t('editor.share')}
             </Link>
           </div>
         </div>
+        {step && (
+          <CommentsPanel
+            variant="mobile"
+            stepId={step.id}
+            stepIndex={Math.min(index, editor.steps.length - 1)}
+            api={comments}
+            header={
+              <Select
+                className="editor-narrow__steps"
+                aria-label={t('editor.comments.step')}
+                value={String(Math.min(index, editor.steps.length - 1))}
+                onChange={(e) => setIndex(Number(e.target.value))}
+              >
+                {editor.steps.map((s, i) => (
+                  <option key={s.id} value={i}>
+                    {`${t('editor.comments.step')} ${i + 1} · ${s.title || t('editor.untitled')}`}
+                    {comments.openByStep[s.id]
+                      ? ` — ${t('editor.comments.openCount', { count: comments.openByStep[s.id] })}`
+                      : ''}
+                  </option>
+                ))}
+              </Select>
+            }
+          />
+        )}
       </main>
     );
+  }
   if (editor.loading) return <Loading />;
   if (editor.notFound || !editor.demo)
     return (
@@ -213,7 +243,11 @@ export function EditorPage() {
             )}
             {tool !== 'select' && <p className="fd-muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
           </section>
-          <CommentsPanel stepId={step?.id ?? null} api={comments} />
+          <CommentsPanel
+            stepId={step?.id ?? null}
+            stepIndex={Math.min(index, editor.steps.length - 1)}
+            api={comments}
+          />
         </div>
         <aside className="editor-right">
           <div className="fd-tabs" role="tablist">

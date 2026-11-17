@@ -1,3 +1,4 @@
+import { ScrollX } from '../../components/ScrollX';
 import { formatDateTime } from '../../lib/format';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { YesNo } from '../../components/YesNo';
@@ -105,7 +106,7 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
           )}
         </div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <ScrollX label={t('leads.title')}>
           <table className="fd-table">
             <thead>
               <tr>
@@ -160,7 +161,7 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollX>
       )}
     </div>
   );
