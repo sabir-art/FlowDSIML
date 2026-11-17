@@ -775,3 +775,29 @@ L'**éditeur de quiz** (spec §2) n'est pas encore livré : la recette porte seu
 | F2-4 | À 390 px, un aplat clair dépasse sous la carte du quiz (la scène du player visible derrière) | Mineure | Masquer la scène derrière la carte, ou lui donner le fond du player |
 | F2-5 | « Créé avec Tutoclic » : le nom définitif est **TutoClick** | Moyenne | Voir F1-9 |
 | F2-6 | Éditeur de quiz (§2) non livré | Info | À planifier : liste des questions, types, bonne réponse avec contour vert, explication, étape liée, seuil et tentatives, « Tester le quiz » |
+
+### Recette F2, éditeur de quiz (dev 0bad594)
+
+**Conditions** : `claude/dev-mvp` en local avec le faux Supabase, page `/demos/:id/quiz`, en 1 440, 1 024 et 390 px, en clair et en sombre. Aucune erreur JS, pas de défilement horizontal.
+
+**Conforme à la spec §2 et à la maquette :**
+- **Disposition** : 3 colonnes, empilées sous 1 100 px.
+- **Questions** : liste avec pastille noire, type et étape liée ; point framboise sur une question invalide ; flèches ↑ ↓ pour réordonner au clavier.
+- **Type** en segmenté. Bonne réponse avec **contour vert, radio ou case et icône** ; erreurs sous les champs ; explication, étape liée et points.
+- **Validation du module** : curseur du seuil avec valeur écrite, tentatives, correction, 2 interrupteurs, aide sur la position.
+- **Nouveautés** :
+  - « Tester le quiz » ;
+  - carte « Réussite par question » (état vide propre) ;
+  - sous-titre « 1 question » au singulier (corrigé).
+- **Sombre** : lisible, contours et erreurs visibles.
+
+**Écarts :**
+
+| N° | Écart | Gravité | Correction attendue |
+|---|---|---|---|
+| F2-7 | Une question **juste ajoutée** affiche déjà les erreurs (« La question est vide », « Une réponse est vide ») | Moyenne | Afficher les erreurs après la première sortie du champ ou à la tentative de publication. Le point dans la liste peut rester |
+| F2-8 | **390 px** : le champ de réponse est écrasé à environ 60 px (« Répor »), coincé par « Bonne réponse » et la corbeille | Moyenne | Sous 600 px, mettre le champ en pleine largeur, puis la ligne « Bonne réponse » et la corbeille en dessous |
+| F2-9 | **390 px** : en-tête serré (titre sur 2 lignes, « Enregistrem… » coupé) | Mineure | Passer « Tester le quiz » en bouton rond à icône seule (`aria-label`), et l'état d'enregistrement sous le titre |
+| F2-10 | Le message « Choix unique : seule la première bonne réponse est gardée » reste affiché en alerte permanente après un changement de type | Mineure | Toast de 6 s (comme le prévoit la spec), ou alerte avec bouton de fermeture |
+
+Les écarts de player F2-1 à F2-5 restent à corriger. « Module suivant » attend F4 : accepté.
