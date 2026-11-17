@@ -42,14 +42,10 @@ function contrast(a, b) {
       const bodyBg = getComputedStyle(document.body).backgroundColor;
       return [
         ['texte / fond', cs('h1', 'color'), bodyBg],
-        [
-          'texte muted / fond',
-          cs('.sidebar .t-caption.subtle', 'color'),
-          cs('.sidebar', 'backgroundColor') || bodyBg,
-        ],
+        ['texte muted / fond', cs('.user-text span', 'color'), cs('.sidebar', 'backgroundColor') || bodyBg],
         [
           'lien de nav / fond',
-          cs('.nav a:not([aria-current])', 'color'),
+          cs('.fd-nav__item:not([aria-current])', 'color'),
           cs('.sidebar', 'backgroundColor') || bodyBg,
         ],
       ].filter(([, c, k]) => c && k && !/rgba\(0, 0, 0, 0\)/.test(k));
@@ -75,14 +71,13 @@ function contrast(a, b) {
   for (const [l, c, k] of await pairs())
     ok(contrast(c, k) >= 4.5, `contraste AA en clair : ${l} (${contrast(c, k).toFixed(2)})`);
 
-  // Mon profil → Sombre (le menu du compte n'existe plus dans le cadre de la maquette)
-  await page.goto(`${APP}/#/settings/profile`);
-  await page.getByRole('radio', { name: 'Sombre' }).click();
-  ok((await theme()) === 'dark', 'bascule en sombre depuis le profil');
+  // Menu du compte → Sombre
+  await page.getByRole('button', { name: 'Mon compte' }).click();
+  await page.getByRole('menuitemradio', { name: 'Sombre' }).click();
+  ok((await theme()) === 'dark', 'bascule en sombre depuis le menu du compte');
   ok((await bg()) !== lightBg, 'le fond change de couleur');
   ok(state.user.user_metadata.theme === 'dark', 'choix enregistré sur le compte (user_metadata.theme)');
-  await page.goto(`${APP}/#/`);
-  await page.waitForSelector('.demo-card');
+  await page.keyboard.press('Escape');
   await page.waitForTimeout(300);
   ok((await pairs()).length === 3, 'trois paires de contraste mesurées en sombre');
   for (const [l, c, k] of await pairs())

@@ -59,7 +59,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     await page.waitForSelector('.demo-card');
     if (w < 1024) {
       // DB1 : Échap ferme le tiroir de navigation et rend le focus au bouton menu
-      const burger = page.getByRole('button', { name: 'Ouvrir la navigation' });
+      const burger = page.getByRole('button', { name: 'Ouvrir le menu' });
       await burger.click();
       await page.waitForTimeout(300);
       ok(
@@ -69,12 +69,12 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
       await page.keyboard.press('Escape');
       await page.waitForTimeout(300);
       ok(
-        !(await page.locator('#sidebar').evaluate((el) => el.classList.contains('open'))),
+        !(await page.locator('.shell').evaluate((el) => el.classList.contains('nav-open'))),
         `${w}px : Échap ferme le tiroir`,
       );
       ok(
         await page
-          .getByRole('button', { name: 'Ouvrir la navigation' })
+          .getByRole('button', { name: 'Ouvrir le menu' })
           .evaluate((el) => el === document.activeElement),
         `${w}px : focus rendu au bouton menu`,
       );
@@ -83,7 +83,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
         await page.evaluate(() => !document.getElementById('sidebar').contains(document.activeElement)),
         `${w}px : tiroir fermé hors de l'ordre de tabulation`,
       );
-      await page.getByRole('button', { name: 'Ouvrir la navigation' }).click();
+      await page.getByRole('button', { name: 'Ouvrir le menu' }).click();
       await page.waitForTimeout(300);
       for (let i = 0; i < 30; i++) await page.keyboard.press('Tab');
       ok(
@@ -91,13 +91,18 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
         `${w}px : focus piégé dans le tiroir ouvert`,
       );
     }
-    // Sélecteur de workspace de la barre latérale (menu de la maquette)
-    // (< 1 024 px : le tiroir est resté ouvert à l'étape précédente)
-    const ws = page.locator('.ws-switch');
-    await ws.click();
-    ok((await page.locator('#ws-menu [role=menuitem]').count()) >= 2, `${w}px : menu du workspace`);
+    const account = page.getByRole('button', { name: 'Mon compte' });
+    await account.click();
+    await checkMenu(page, `${w}px menu du compte`);
+    ok(
+      (await page.getByRole('menuitemradio').count()) === 3,
+      `${w}px : sélecteur de thème dans le menu du compte`,
+    );
     await page.keyboard.press('Escape');
-    ok((await page.locator('#ws-menu').count()) === 0, `${w}px : Échap ferme le menu du workspace`);
+    ok(
+      await account.evaluate((el) => el === document.activeElement),
+      `${w}px : Échap ferme et rend le focus`,
+    );
     if (w < 1024) {
       await page.mouse.click(w - 6, h / 2); // voile à droite du tiroir
       await page.waitForTimeout(300);

@@ -1,155 +1,79 @@
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useMediaQuery } from '../lib/useMediaQuery';
+import { BrandMark } from './BrandMark';
+import { initials } from '../lib/initials';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Archive,
   BarChart3,
-  Bell,
-  Check,
-  ChevronDown,
-  CircleHelp,
   CreditCard,
-  Folder,
-  Layers,
+  Building2,
+  Contact,
+  Languages,
+  LayoutGrid,
   LogOut,
   Menu as MenuIcon,
   Plus,
-  Search,
   Settings,
-  SquarePlay,
+  UserRound,
   Users,
+  X,
 } from 'lucide-react';
+import { Select } from '@flowdsiml/ui';
 import { useAuth } from '../auth/AuthProvider';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
+import { setLocale } from '../i18n';
 import { supabase } from '../lib/supabase';
-import { usePlan } from '../lib/plan';
-import { initials } from '../lib/initials';
-import { SUPPORT_EMAIL } from '../lib/env';
-import { useMediaQuery } from '../lib/useMediaQuery';
-import { useCrumbs } from './crumbs';
-import '../styles/maquette.css';
-import '../styles/maquette-ajouts.css';
+import { Menu } from './Menu';
+import { THEME_OPTIONS, chooseTheme } from './ThemeSwitcher';
+import { useTheme, type ThemePref } from '../lib/theme';
 
-/** Icônes de la maquette : 20 px dans la navigation, trait 1,75. */
-const NAV_ICON = { size: 20, strokeWidth: 1.75, 'aria-hidden': true } as const;
 const ICON = { size: 18, strokeWidth: 1.75, 'aria-hidden': true } as const;
 
-interface Counts {
-  demos: number;
-  published: number;
-  leads: number;
-  members: number;
-  folders: Array<{ id: string; name: string }>;
-}
-
-/**
- * Cadre commun de l'app (règle D13) : reproduction de la barre latérale et de la barre du haut de
- * la maquette d'origine (docs/ux/maquettes/assets/mockup.js, shell « app »), avec le CSS de la
- * maquette (styles/maquette.css). Données réelles : workspace, plan, membres, compteurs, dossiers,
- * usage, utilisateur. Éléments sans fonction réelle (Démo centers, crédits IA, notifications) :
- * visibles avec un badge, comme dans la maquette.
- */
 export function Layout() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut, user, profile } = useAuth();
   const { workspaces, current, select } = useWorkspace();
-  const plan = usePlan();
-  const crumbs = useCrumbs();
   const [open, setOpen] = useState(false);
-  const [wsMenu, setWsMenu] = useState(false);
-  const [counts, setCounts] = useState<Counts | null>(null);
-  const [query, setQuery] = useState('');
-  const drawer = useMediaQuery('(max-width: 1023px)');
-  const sidebar = useRef<HTMLElement>(null);
+
   const menuBtn = useRef<HTMLButtonElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
+  const sidebar = useRef<HTMLElement>(null);
+  const drawer = useMediaQuery('(max-width: 1023px)');
 
-  useEffect(() => {
-    setOpen(false);
-    setWsMenu(false);
-  }, [location.pathname]);
+  // Ferme le menu mobile à chaque navigation.
+  useEffect(() => setOpen(false), [location.pathname]);
 
-  // Compteurs de la navigation et de la carte d'usage
-  useEffect(() => {
-    if (!current) return;
-    let cancelled = false;
-    const ws = current.id;
-    void Promise.all([
-      supabase
-        .from('demos')
-        .select('id', { count: 'exact', head: true })
-        .eq('workspace_id', ws)
-        .is('deleted_at', null),
-      supabase
-        .from('demos')
-        .select('id', { count: 'exact', head: true })
-        .eq('workspace_id', ws)
-        .eq('status', 'published')
-        .is('deleted_at', null),
-      supabase.from('leads').select('id', { count: 'exact', head: true }).eq('workspace_id', ws),
-      supabase.from('members').select('user_id', { count: 'exact', head: true }).eq('workspace_id', ws),
-      supabase.from('folders').select('id, name').eq('workspace_id', ws).order('created_at'),
-    ]).then(([d, p, l, m, f]) => {
-      if (cancelled) return;
-      setCounts({
-        demos: d.count ?? 0,
-        published: p.count ?? 0,
-        leads: l.count ?? 0,
-        members: m.count ?? 0,
-        folders: (f.data ?? []) as Counts['folders'],
-      });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [current, location.pathname]);
-
-  // Tiroir de navigation (< 1 024 px) : focus placé dans le tiroir et piégé tant qu'il est ouvert
+  // DB1 : tiroir de navigation modal (< 1024 px) — focus piégé, Échap ferme et rend le focus au bouton.
   useEffect(() => {
     if (!drawer || !open) return;
     const panel = sidebar.current;
     const focusables = () =>
       Array.from(
-        panel?.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), input, [tabindex="0"]') ?? [],
+        panel?.querySelectorAll<HTMLElement>(
+          'a[href], button:not(:disabled), select, input, [tabindex="0"]',
+        ) ?? [],
       ).filter((el) => el.offsetParent !== null);
     focusables()[0]?.focus();
-    const onTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      const els = focusables();
-      const first = els[0];
-      const last = els[els.length - 1];
-      if (!first || !last) return;
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener('keydown', onTab);
-    return () => document.removeEventListener('keydown', onTab);
-  }, [drawer, open]);
-
-  // Raccourci « / » : focus sur la recherche (comme la maquette)
-  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName ?? '';
-      if (
-        e.key === '/' &&
-        !/input|textarea|select/i.test(tag) &&
-        !(e.target as HTMLElement)?.isContentEditable
-      ) {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
+      if (document.querySelector('#fd-portal [role=menu]')) return; // un menu ouvert gère sa propre touche Échap
       if (e.key === 'Escape') {
-        setWsMenu(false);
-        if (drawer && open) {
-          setOpen(false);
-          menuBtn.current?.focus();
+        e.preventDefault();
+        setOpen(false);
+        menuBtn.current?.focus();
+      } else if (e.key === 'Tab') {
+        const els = focusables();
+        const first = els[0];
+        const last = els[els.length - 1];
+        if (!first || !last) return;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
         }
       }
     };
@@ -157,254 +81,161 @@ export function Layout() {
     return () => document.removeEventListener('keydown', onKey);
   }, [drawer, open]);
 
-  const path = location.pathname;
-  const params = new URLSearchParams(location.search);
-  const folder = params.get('folder');
-  const cur = (active: boolean) => (active ? ({ 'aria-current': 'page' } as const) : {});
-  const isDemos = (path === '/' || path.startsWith('/demos/')) && !folder;
-  const limit = plan.publishedDemos;
-  const name = profile?.full_name || user?.email || '';
+  const switchLang = () => {
+    const lng = i18n.language === 'en' ? 'fr' : 'en';
+    setLocale(lng);
+    if (user) void supabase.from('profiles').update({ locale: lng }).eq('id', user.id);
+  };
 
-  function onSearch(e: ReactKeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') navigate(`/?q=${encodeURIComponent(query.trim())}`);
-  }
+  const nav = [
+    { to: '/', end: true, icon: <LayoutGrid {...ICON} />, label: t('nav.demos') },
+    { to: '/analytics', icon: <BarChart3 {...ICON} />, label: t('nav.analytics') },
+    { to: '/leads', icon: <Contact {...ICON} />, label: t('nav.leads') },
+  ];
+  const admin = [
+    { to: '/settings/members', icon: <Users {...ICON} />, label: t('nav.members') },
+    { to: '/settings/workspace', icon: <Settings {...ICON} />, label: t('nav.workspaceSettings') },
+    { to: '/settings/plans', icon: <CreditCard {...ICON} />, label: t('nav.plans') },
+  ];
 
   return (
-    <div className="mk">
+    <div className={`shell ${open ? 'nav-open' : ''}`}>
       <a
-        className="skip"
-        href="#contenu"
+        className="skip-link"
+        href="#main"
         onClick={(e) => {
           e.preventDefault();
-          document.getElementById('contenu')?.focus();
+          document.getElementById('main')?.focus();
         }}
       >
-        {t('shell.skip')}
+        {t('a11y.skip')}
       </a>
-      <div className="app">
-        <aside
-          className={`sidebar${open ? ' open' : ''}`}
-          id="sidebar"
-          ref={sidebar}
-          aria-label={t('shell.main')}
-          inert={drawer && !open}
+      <header className="topbar">
+        <button
+          ref={menuBtn}
+          type="button"
+          className="fd-btn fd-btn--ghost fd-btn--icon"
+          aria-label={open ? t('common.close') : t('nav.openMenu')}
+          aria-expanded={open}
+          aria-controls="sidebar"
+          onClick={() => setOpen(!open)}
         >
-          <button
-            className="ws-switch"
-            type="button"
-            aria-haspopup="menu"
-            aria-expanded={wsMenu}
-            aria-controls="ws-menu"
-            onClick={() => setWsMenu(!wsMenu)}
-          >
-            <span className="ws-logo" aria-hidden="true">
-              {(current?.name ?? '?').slice(0, 1).toUpperCase()}
-            </span>
-            <span className="grow">
-              <span className="t-label" style={{ display: 'block', fontWeight: 600 }}>
-                {current?.name}
-              </span>
-              <span className="t-caption subtle">
-                {t('shell.wsPlan', {
-                  plan: t(`plan.names.${current?.plan_code ?? 'free'}`),
-                  count: counts?.members ?? 1,
-                })}
-              </span>
-            </span>
-            <ChevronDown size={16} aria-hidden="true" />
-          </button>
-          {wsMenu && (
-            <div className="menu" id="ws-menu" role="menu" style={{ top: 60, left: 12, width: 216 }}>
-              {workspaces.map((w) => (
-                <button
-                  key={w.id}
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    select(w.id);
-                    setWsMenu(false);
-                  }}
-                >
-                  <span
-                    className="ws-logo"
-                    style={{ width: 20, height: 20, fontSize: 10 }}
-                    aria-hidden="true"
-                  >
-                    {w.name.slice(0, 1).toUpperCase()}
-                  </span>
-                  {w.name}
-                  {w.id === current?.id && (
-                    <Check {...ICON} style={{ marginLeft: 'auto', color: 'var(--fd-color-primary)' }} />
-                  )}
-                </button>
-              ))}
-              <hr />
-              <button type="button" role="menuitem" onClick={() => navigate('/onboarding')}>
-                <Plus {...ICON} />
-                {t('shell.newWorkspace')}
-              </button>
-            </div>
-          )}
-
-          <nav className="nav" aria-label={t('shell.sections')}>
-            <Link to="/" {...cur(isDemos)}>
-              <SquarePlay {...NAV_ICON} />
-              {t('shell.demos')}
-              {counts && <span className="count">{counts.demos}</span>}
-            </Link>
-            <a aria-disabled="true" title={t('shell.soon')} onClick={(e) => e.preventDefault()} href="#">
-              <Layers {...NAV_ICON} />
-              {t('shell.centers')}
-              <span className="badge" style={{ marginLeft: 'auto' }}>
-                V2
-              </span>
-            </a>
-            <Link to="/analytics" {...cur(path.startsWith('/analytics'))}>
-              <BarChart3 {...NAV_ICON} />
-              {t('shell.analytics')}
-            </Link>
-            <Link to="/leads" {...cur(path.startsWith('/leads'))}>
-              <Users {...NAV_ICON} />
-              {t('shell.leads')}
-              {counts && <span className="count">{counts.leads}</span>}
-            </Link>
-            <div className="nav-title">{t('shell.folders')}</div>
-            {counts?.folders.map((f) => (
-              <Link key={f.id} to={`/?folder=${f.id}`} {...cur(folder === f.id)}>
-                <Folder {...NAV_ICON} />
-                {f.name}
-              </Link>
-            ))}
-            <Link to="/?folder=archived" {...cur(folder === 'archived')}>
-              <Archive {...NAV_ICON} />
-              {t('shell.archived')}
-            </Link>
-            <div className="nav-title">{t('shell.workspace')}</div>
-            <Link
-              to="/settings/workspace"
-              {...cur(path.startsWith('/settings') && !path.startsWith('/settings/plans'))}
-            >
-              <Settings {...NAV_ICON} />
-              {t('shell.settings')}
-            </Link>
-            <Link to="/settings/plans" {...cur(path.startsWith('/settings/plans'))}>
-              <CreditCard {...NAV_ICON} />
-              {t('shell.plans')}
-            </Link>
-          </nav>
-
-          <div className="sidebar-foot">
-            <div className="usage">
-              <div className="row between t-caption">
-                <span>{t('shell.publishedDemos')}</span>
-                <span className="num">
-                  {counts?.published ?? 0} / {limit === null ? t('shell.unlimited') : limit}
-                </span>
-              </div>
-              <div className="row between t-caption" style={{ marginTop: 8 }}>
-                <span>{t('shell.aiCredits')}</span>
-                <span className="badge" title={t('shell.soon')}>
-                  {t('shell.soon')}
-                </span>
-              </div>
-              <div className="progress" style={{ marginTop: 6 }}>
-                <span
-                  style={{
-                    width: `${limit ? Math.min(100, ((counts?.published ?? 0) / limit) * 100) : 0}%`,
-                  }}
-                />
-              </div>
-            </div>
-            <div className="row">
-              <span className="avatar" aria-hidden="true">
-                {initials(name || '?')}
-              </span>
-              <span className="grow">
-                <span className="t-label" style={{ display: 'block' }}>
-                  {profile?.full_name || user?.email}
-                </span>
-                <span className="t-caption subtle">{user?.email}</span>
-              </span>
-              <button
-                className="btn btn-ghost btn-sm btn-icon"
-                type="button"
-                aria-label={t('shell.logout')}
-                title={t('shell.logout')}
-                onClick={() => void signOut().then(() => navigate('/login'))}
-              >
-                <LogOut {...ICON} />
-              </button>
-            </div>
-          </div>
-        </aside>
-        <div className="main">
-          <header className="topbar">
-            <button
-              ref={menuBtn}
-              type="button"
-              className="btn btn-ghost btn-icon mobile-bar"
-              aria-label={t('shell.openNav')}
-              aria-expanded={open}
-              aria-controls="sidebar"
-              onClick={() => setOpen(!open)}
-            >
-              <MenuIcon {...ICON} />
-            </button>
-            <nav className="crumbs" aria-label={t('shell.crumbs')}>
-              {crumbs.map((c, i) => (
-                <span key={`${c.label}-${i}`} style={{ display: 'contents' }}>
-                  {i > 0 && <span aria-hidden="true">/</span>}
-                  {i === crumbs.length - 1 ? (
-                    <span aria-current="page">{c.label}</span>
-                  ) : c.to ? (
-                    <Link to={c.to}>{c.label}</Link>
-                  ) : (
-                    <span>{c.label}</span>
-                  )}
-                </span>
-              ))}
-            </nav>
-            <span className="grow" />
-            <div className="input-affix hide-sm" style={{ width: 260 }}>
-              <Search aria-hidden="true" />
-              <input
-                ref={searchRef}
-                className="input input-sm"
-                type="search"
-                placeholder={t('shell.search')}
-                aria-label={t('shell.searchLabel')}
-                aria-keyshortcuts="/"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={onSearch}
-              />
-            </div>
-            <a
-              className="btn btn-ghost btn-icon"
-              aria-label={t('shell.help')}
-              title={t('shell.help')}
-              href={`mailto:${SUPPORT_EMAIL}`}
-            >
-              <CircleHelp {...ICON} />
-            </a>
-            <button
-              className="btn btn-ghost btn-icon"
-              type="button"
-              aria-label={`${t('shell.notifications')} (${t('shell.soon')})`}
-              title={t('shell.soon')}
-              aria-disabled="true"
-            >
-              <Bell {...ICON} />
-            </button>
-          </header>
-          <main id="contenu" tabIndex={-1}>
-            <div className="content">
-              <Outlet />
-            </div>
-          </main>
+          {open ? <X {...ICON} /> : <MenuIcon {...ICON} />}
+        </button>
+        <span className="brand">
+          <BrandMark size={32} />
+        </span>
+      </header>
+      <aside
+        className="sidebar"
+        id="sidebar"
+        ref={sidebar}
+        inert={drawer && !open}
+        role={drawer ? 'dialog' : undefined}
+        aria-modal={drawer && open ? true : undefined}
+        aria-label={drawer ? t('nav.main') : undefined}
+      >
+        <div className="brand">
+          <BrandMark size={44} subtitle={t('app.org')} />
         </div>
-      </div>
-      {drawer && open && <div className="mk-scrim" aria-hidden="true" onClick={() => setOpen(false)} />}
+        {/* D-2 : sélecteur de workspace seulement à partir de 2 workspaces */}
+        {workspaces.length > 1 && (
+          <div className="ws-switch">
+            <Building2 {...ICON} />
+            <Select
+              aria-label={t('nav.workspace')}
+              value={current?.id ?? ''}
+              onChange={(e) => select(e.target.value)}
+            >
+              {workspaces.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
+        <nav aria-label={t('nav.main')} className="fd-nav">
+          {nav.map((n) => {
+            // RF6 : « Démos » reste actif dans les sous-pages d'une démo (analytics, partage…)
+            if (n.to === '/') {
+              const active = location.pathname === '/' || location.pathname.startsWith('/demos/');
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  className={`fd-nav__item${active ? ' active' : ''}`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {n.icon}
+                  {n.label}
+                </Link>
+              );
+            }
+            return (
+              <NavLink key={n.to} to={n.to} end={n.end} className="fd-nav__item">
+                {n.icon}
+                {n.label}
+              </NavLink>
+            );
+          })}
+          <div className="fd-nav__section">{t('nav.workspace')}</div>
+          {admin.map((n) => (
+            <NavLink key={n.to} to={n.to} className="fd-nav__item">
+              {n.icon}
+              {n.label}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="spacer" />
+        <div className="user-block">
+          <span className="avatar avatar--brand" aria-hidden="true">
+            {initials(profile?.full_name || user?.email || '?')}
+          </span>
+          <span className="user-text">
+            <strong>{profile?.full_name || user?.email}</strong>
+            <span>{current ? t(`roles.${current.role}`) : user?.email}</span>
+          </span>
+          <Menu
+            label={t('nav.account')}
+            placement="top-start"
+            items={[
+              { label: t('nav.profile'), icon: <UserRound />, onSelect: () => navigate('/settings/profile') },
+              { label: t('nav.newWorkspace'), icon: <Plus />, onSelect: () => navigate('/onboarding') },
+              {
+                label: i18n.language === 'en' ? 'Français' : 'English',
+                icon: <Languages />,
+                onSelect: switchLang,
+              },
+              {
+                radios: {
+                  label: t('theme.label'),
+                  value: theme,
+                  options: THEME_OPTIONS.map(({ value, icon: Icon }) => ({
+                    value,
+                    label: t(`theme.${value}`),
+                    icon: <Icon size={16} aria-hidden="true" />,
+                  })),
+                  onChange: (v) => void chooseTheme(v as ThemePref),
+                },
+              },
+              'separator',
+              { label: t('auth.signOut'), icon: <LogOut />, onSelect: () => void signOut() },
+            ]}
+          />
+        </div>
+      </aside>
+      <div
+        className="scrim"
+        aria-hidden="true"
+        onClick={() => {
+          setOpen(false);
+          menuBtn.current?.focus();
+        }}
+      />
+      <main className="main" id="main" tabIndex={-1}>
+        <Outlet />
+      </main>
     </div>
   );
 }

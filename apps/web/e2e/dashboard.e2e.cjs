@@ -23,7 +23,7 @@ const SHOTS = process.env.SHOTS_DIR;
   ok((await page.textContent('main')).includes('1 / 25'), 'usage du plan affiché');
   ok(!/Invalid Date/.test(await page.textContent('main')), 'dates formatées (pas de « Invalid Date »)');
 
-  await page.fill('.content input[type=search]', 'onboard');
+  await page.fill('input[type=search]', 'onboard');
   ok((await page.locator('.demo-card').count()) === 1, 'recherche par titre');
   await page.fill('input[type=search]', '');
   ok((await page.locator('.stat-tile').count()) === 4, 'KPI du workspace (4 cartes)');

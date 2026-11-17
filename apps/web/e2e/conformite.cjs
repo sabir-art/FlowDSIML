@@ -16,16 +16,20 @@ const OUT = path.resolve(__dirname, '../../../docs/tech/conformite');
 const VIEW = { width: 1440, height: 900 };
 
 /** Écrans : maquette (fichier + préparation) et route de l'app. */
+// Choix du client par écran (outil de suivi « Conformité TutoClick ») : maquette d'origine
+// (docs/ux/maquettes/*.html) ou refonte (docs/ux/maquettes/refonte/*.html).
 const SCREENS = {
-  cadre: { maquette: 'dashboard.html', route: '/#/' },
+  'CAD-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
 };
 
 async function shotMaquette(b, file, theme) {
   const p = await b.newPage({ viewport: VIEW });
-  await p.goto(`file://${MAQ}/${file}`);
+  await p.goto(`file://${MAQ}/${file}${file.includes('?') ? '&' : '?'}theme=${theme}`);
   await p.evaluate((th) => {
     document.documentElement.dataset.theme = th;
     document.querySelector('.mock-nav')?.remove();
+    // bascule clair / sombre des maquettes de refonte
+    document.querySelector('[data-theme-set]')?.parentElement?.remove();
   }, theme);
   await p.waitForTimeout(500);
   const buf = await p.screenshot();
@@ -70,6 +74,8 @@ async function sideBySide(b, left, right, label) {
     for (const theme of ['light', 'dark']) {
       const left = await shotMaquette(b, s.maquette, theme);
       const right = await shotApp(b, s.route, theme);
+      // Capture de l'app seule (téléversée dans l'outil de suivi « Conformité TutoClick »)
+      fs.writeFileSync(path.join(OUT, `${name}-app-${theme === 'light' ? 'clair' : 'sombre'}.png`), right);
       fs.writeFileSync(
         path.join(OUT, `${name}-${theme === 'light' ? 'clair' : 'sombre'}.png`),
         await sideBySide(b, left, right, `${name} (${theme === 'light' ? 'clair' : 'sombre'})`),

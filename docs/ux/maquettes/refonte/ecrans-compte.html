@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Écrans du compte — TutoClick (refonte)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div data-view="leads">
+<div class="app" data-pane="leads" style="display:none">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <label class="ws-switch"><span class="cm-sr">Workspace</span><i data-icon="building2"></i><select class="fd-select"><option>DSI Missions Locales</option><option>Antenne Nord (formation)</option></select></label>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=analytics"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=leads" aria-current="page"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=membres"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=workspace"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=plans"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Propriétaire</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><h1>Leads</h1><p class="sub">Personnes ayant rempli un formulaire dans vos démos.</p></div><div class="topbar__actions"><button class="fd-btn" type="button"><i data-icon="download"></i>Exporter en CSV</button></div></header>
+    <article class="fd-card">
+      <div class="toolbar-row"><label class="search-pill"><i data-icon="search"></i><span class="cm-sr">Rechercher un e-mail</span><input type="search" placeholder="Rechercher un e-mail ou une entreprise"></label><select class="fd-select pill-select" aria-label="Filtrer par démo"><option>Toutes les démos</option></select><span class="fd-help" style="margin-left:auto">3 leads</span></div>
+      <table class="fd-table"><thead><tr><th>E-mail</th><th>Entreprise</th><th>Démo</th><th>Consentement</th><th>Date</th><th><span class="cm-sr">Actions</span></th></tr></thead><tbody>
+        <tr><td><b>prospect@globex.example</b></td><td>Globex</td><td><a href="#">Onboarding</a></td><td><span class="fd-badge fd-badge--live"><i data-icon="check"></i>Oui</span></td><td>17 nov. 2026, 18:54</td><td><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Supprimer le lead prospect@globex.example"><i data-icon="trash"></i></button></td></tr>
+        <tr><td><b>lea.martin@example.org</b></td><td>Atelier Brume</td><td><a href="#">Créer une fiche usager</a></td><td><span class="fd-badge fd-badge--live"><i data-icon="check"></i>Oui</span></td><td>17 nov. 2026, 15:42</td><td><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Supprimer le lead lea.martin@example.org"><i data-icon="trash"></i></button></td></tr>
+        <tr><td><b>contact@initech.example</b></td><td>—</td><td><a href="#">Onboarding</a></td><td><span class="fd-badge">Non</span></td><td>16 nov. 2026, 09:10</td><td><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Supprimer le lead contact@initech.example"><i data-icon="trash"></i></button></td></tr>
+      </tbody></table>
+      <p class="fd-help">Données personnelles : exportez-les ou supprimez-les sur demande de la personne concernée (RGPD). Seuls les éditeurs et plus y ont accès.</p>
+    </article>
+  </main>
+</div>
+<div class="app" data-pane="membres" style="display:none">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <label class="ws-switch"><span class="cm-sr">Workspace</span><i data-icon="building2"></i><select class="fd-select"><option>DSI Missions Locales</option><option>Antenne Nord (formation)</option></select></label>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=analytics"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=leads"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=membres" aria-current="page"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=workspace"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=plans"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Propriétaire</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><h1>Membres</h1><p class="sub">3 membres · 1 invitation en attente</p></div><div class="topbar__actions"></div></header>
+    <article class="fd-card stack-card">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="users"></i></span><h2 class="fd-card__title">Inviter des membres</h2></div>
+      <div class="invite-row"><div class="fd-field" style="margin:0;flex:1"><label class="fd-label" for="inv">E-mails</label><div class="chips-input" id="inv"><span class="chip">marie@acme.example<button type="button" aria-label="Retirer marie@acme.example"><i data-icon="x"></i></button></span><input placeholder="Ajouter un e-mail, puis Entrée" aria-label="Ajouter un e-mail"></div></div>
+        <div class="fd-field" style="margin:0;width:180px"><label class="fd-label" for="role">Rôle</label><select class="fd-select" id="role"><option>Éditeur</option><option>Lecteur</option><option>Admin</option></select></div>
+        <button class="fd-btn fd-btn--primary" type="button" style="align-self:flex-end"><i data-icon="send"></i>Créer l'invitation</button></div>
+      <p class="fd-help" style="margin:0">L'envoi automatique des e-mails d'invitation arrive bientôt. En attendant, copiez le lien d'invitation et transmettez-le.</p>
+    </article>
+    <article class="fd-card">
+      <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="mail"></i></span><h2 class="fd-card__title">Invitations en attente · 1</h2></div>
+      <table class="fd-table"><thead><tr><th>E-mail</th><th>Rôle</th><th>Expire</th><th><span class="cm-sr">Actions</span></th></tr></thead><tbody>
+        <tr><td>paul@acme.example</td><td><span class="fd-badge">Éditeur</span></td><td>dans 6 jours</td><td class="row-actions"><button class="fd-btn fd-btn--sm" type="button"><i data-icon="copy"></i>Copier le lien</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Révoquer</button></td></tr>
+      </tbody></table>
+    </article>
+    <article class="fd-card">
+      <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="users"></i></span><h2 class="fd-card__title">Membres · 3</h2></div>
+      <table class="fd-table"><thead><tr><th>Membre</th><th>Rôle</th><th><span class="cm-sr">Actions</span></th></tr></thead><tbody>
+        <tr><td><span class="who"><span class="avatar">AM</span><span><b>Alice Martin (vous)</b><small>alice@acme.example</small></span></span></td><td><span class="fd-badge">Propriétaire</span></td><td class="row-actions"><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button" style="color:var(--fd-color-danger)"><i data-icon="external"></i>Quitter</button></td></tr>
+        <tr><td><span class="who"><span class="avatar" style="background:var(--fd-color-chart-4);color:var(--fd-color-on-hero)">MD</span><span><b>Marie Durand</b><small>marie@acme.example</small></span></span></td><td><select class="fd-select pill-select" aria-label="Rôle de Marie Durand"><option>Éditeur</option><option>Lecteur</option><option>Admin</option></select></td><td class="row-actions"><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Retirer Marie Durand"><i data-icon="trash"></i></button></td></tr>
+        <tr><td><span class="who"><span class="avatar" style="background:var(--fd-color-chart-3);color:var(--fd-color-text)">SD</span><span><b>Sacha Durand</b><small>sacha@acme.example</small></span></span></td><td><select class="fd-select pill-select" aria-label="Rôle de Sacha Durand"><option>Lecteur</option></select></td><td class="row-actions"><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Retirer Sacha Durand"><i data-icon="trash"></i></button></td></tr>
+      </tbody></table>
+    </article>
+  </main>
+</div>
+<div class="app" data-pane="profil" style="display:none">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <label class="ws-switch"><span class="cm-sr">Workspace</span><i data-icon="building2"></i><select class="fd-select"><option>DSI Missions Locales</option><option>Antenne Nord (formation)</option></select></label>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=analytics"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=leads"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=membres"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=workspace"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=plans"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Propriétaire</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><h1>Mon profil</h1><p class="sub">Vos informations et préférences personnelles.</p></div><div class="topbar__actions"></div></header>
+    <div class="narrow">
+    <article class="fd-card stack-card">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="user"></i></span><h2 class="fd-card__title">Informations</h2></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="pe">E-mail</label><input class="fd-input" id="pe" value="alice@acme.example" readonly><span class="fd-help">Contactez le support pour changer d'e-mail.</span></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="pn">Nom complet</label><input class="fd-input" id="pn" value="Alice Martin"></div>
+      <div class="fd-field" style="margin:0"><span class="fd-label">Thème</span><div class="fd-segmented" role="group" aria-label="Thème"><button type="button" aria-pressed="true"><i data-icon="sun"></i>Clair</button><button type="button" aria-pressed="false"><i data-icon="moon"></i>Sombre</button><button type="button" aria-pressed="false"><i data-icon="monitor"></i>Système</button></div></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="pl">Langue</label><select class="fd-select" id="pl"><option>Français</option><option>English</option></select></div>
+      <button class="fd-btn fd-btn--primary" type="button" style="align-self:flex-start"><i data-icon="check"></i>Enregistrer</button>
+    </article>
+    <article class="fd-card stack-card">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="key"></i></span><h2 class="fd-card__title">Mot de passe</h2></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="pw">Nouveau mot de passe</label><input class="fd-input" id="pw" type="password" autocomplete="new-password"><span class="fd-help">8 caractères minimum.</span></div>
+      <button class="fd-btn" type="button" style="align-self:flex-start"><i data-icon="key"></i>Mettre à jour le mot de passe</button>
+    </article>
+    </div>
+  </main>
+</div>
+<div class="app" data-pane="workspace" style="display:none">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <label class="ws-switch"><span class="cm-sr">Workspace</span><i data-icon="building2"></i><select class="fd-select"><option>DSI Missions Locales</option><option>Antenne Nord (formation)</option></select></label>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=analytics"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=leads"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=membres"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=workspace" aria-current="page"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=plans"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Propriétaire</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><h1>Paramètres du workspace</h1><p class="sub">Nom, adresse des démos, confidentialité.</p></div><div class="topbar__actions"></div></header>
+    <div class="narrow">
+    <article class="fd-card stack-card">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="building2"></i></span><h2 class="fd-card__title">Identité</h2></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="wn">Nom</label><input class="fd-input" id="wn" value="DSI Missions Locales"></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="ws">Adresse des démos</label><div class="slug-field"><span class="slug-prefix">demos.tutoclick.example/</span><input id="ws" value="dsi"></div><span class="fd-help">Lettres minuscules, chiffres et tirets. Changer l'adresse casse les anciens liens.</span></div>
+      <div class="fd-field" style="margin:0"><label class="fd-label" for="wp">Politique de confidentialité (URL)</label><input class="fd-input" id="wp" placeholder="https://"><span class="fd-help">Lien affiché sous les formulaires de vos démos, à la prochaine publication.</span></div>
+      <button class="fd-btn fd-btn--primary" type="button" style="align-self:flex-start"><i data-icon="check"></i>Enregistrer</button>
+    </article>
+    <article class="fd-card stack-card">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="link"></i></span><h2 class="fd-card__title">Liens publics</h2></div>
+      <label class="fd-check" style="justify-content:space-between"><span>Autoriser les liens publics</span><span class="fd-switch"><input type="checkbox" aria-label="Autoriser les liens publics"><span class="fd-switch__track"></span></span></label>
+      <p class="fd-help" style="margin:0">Toute personne disposant du lien pourra voir les démos publiées, sans connexion. Désactivé : aucune démo ne peut être partagée par lien public.</p>
+    </article>
+    <article class="fd-card stack-card">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="card"></i></span><h2 class="fd-card__title">Plan</h2><span class="fd-badge" style="margin-left:auto">Pro</span></div>
+      <p style="margin:0">1 démo publiée sur 25 · 3 membres sur 5.</p>
+      <a class="fd-btn fd-btn--sm" href="ecrans-compte.html?view=plans" style="align-self:flex-start">Voir le plan et l'utilisation</a>
+    </article>
+    <article class="fd-card stack-card danger-card">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip" style="background:var(--fd-color-danger-soft)"><i data-icon="alert"></i></span><h2 class="fd-card__title">Zone de danger</h2></div>
+      <p style="margin:0">Supprime définitivement le workspace, ses démos, analytics et leads.</p>
+      <button class="fd-btn fd-btn--danger" type="button" style="align-self:flex-start"><i data-icon="trash"></i>Supprimer le workspace</button>
+    </article>
+    </div>
+  </main>
+</div>
+<div class="app" data-pane="plans" style="display:none">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <label class="ws-switch"><span class="cm-sr">Workspace</span><i data-icon="building2"></i><select class="fd-select"><option>DSI Missions Locales</option><option>Antenne Nord (formation)</option></select></label>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=analytics"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=leads"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=membres"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=workspace"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=plans" aria-current="page"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Propriétaire</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><h1>Plans</h1><p class="sub">Plan actuel : Pro.</p></div><div class="topbar__actions"></div></header>
+    <div class="fd-alert" style="background:var(--fd-color-info-soft);margin-bottom:20px"><i data-icon="alert"></i><div>Paiement en ligne bientôt disponible. Pour changer de plan dès maintenant, contactez-nous : votre plan sera activé sous 24 h.</div></div>
+    <div class="plans-grid"><article class="fd-card plan"><header><h2>Gratuit</h2></header><ul><li><span>Démos publiées</span><b>3</b></li><li><span>Membres</span><b>2</b></li><li><span>Étapes par démo</span><b>30</b></li><li><span>Formulaires de lead</span><b>—</b></li><li><span>Retrait de la mention TutoClick</span><b>—</b></li><li><span>Conservation des analytics</span><b>30 jours</b></li></ul><button class="fd-btn fd-btn--sm" type="button"><i data-icon="mail"></i>Nous contacter</button></article><article class="fd-card plan fd-card--hero"><header><h2>Pro</h2><span class="fd-badge plan-badge">Plan actuel</span></header><ul><li><span>Démos publiées</span><b>25</b></li><li><span>Membres</span><b>5</b></li><li><span>Étapes par démo</span><b>100</b></li><li><span>Formulaires de lead</span><b>✓</b></li><li><span>Retrait de la mention TutoClick</span><b>✓</b></li><li><span>Conservation des analytics</span><b>365 jours</b></li></ul></article><article class="fd-card plan"><header><h2>Business</h2></header><ul><li><span>Démos publiées</span><b>Illimité</b></li><li><span>Membres</span><b>25</b></li><li><span>Étapes par démo</span><b>Illimité</b></li><li><span>Formulaires de lead</span><b>✓</b></li><li><span>Retrait de la mention TutoClick</span><b>✓</b></li><li><span>Conservation des analytics</span><b>730 jours</b></li></ul><button class="fd-btn fd-btn--sm" type="button"><i data-icon="mail"></i>Nous contacter</button></article><article class="fd-card plan"><header><h2>Entreprise</h2></header><ul><li><span>Démos publiées</span><b>Illimité</b></li><li><span>Membres</span><b>Illimité</b></li><li><span>Étapes par démo</span><b>Illimité</b></li><li><span>Formulaires de lead</span><b>✓</b></li><li><span>Retrait de la mention TutoClick</span><b>✓</b></li><li><span>Conservation des analytics</span><b>1 095 jours</b></li></ul><button class="fd-btn fd-btn--sm" type="button"><i data-icon="mail"></i>Nous contacter</button></article></div>
+    <article class="fd-card" style="margin-top:20px">
+      <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="activity"></i></span><h2 class="fd-card__title">Utilisation du plan Pro</h2></div>
+      <div class="usage"><span>Démos publiées</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:4%;background:var(--fd-color-primary)"></span></span><b>1 / 25</b></div>
+      <div class="usage"><span>Membres</span><span class="fd-bar fd-bar--h"><span class="fd-bar__fill" style="width:60%;background:var(--fd-color-primary)"></span></span><b>3 / 5</b></div>
+      <p class="fd-help">Le changement de plan sera disponible avec le paiement en ligne. Contactez-nous en attendant.</p>
+    </article>
+  </main>
+</div>
+<div class="app" data-pane="analytics" style="display:none">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <label class="ws-switch"><span class="cm-sr">Workspace</span><i data-icon="building2"></i><select class="fd-select"><option>DSI Missions Locales</option><option>Antenne Nord (formation)</option></select></label>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=analytics" aria-current="page"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=leads"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=membres"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=workspace"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="ecrans-compte.html?view=plans"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Propriétaire</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><h1>Analytics</h1><p class="sub">Toutes les démos du workspace.</p></div><div class="topbar__actions"><div class="fd-segmented" role="group" aria-label="Période"><button type="button" aria-pressed="false">7 j</button><button type="button" aria-pressed="true">30 j</button><button type="button" aria-pressed="false">90 j</button></div></div></header>
+    <div class="kpis">
+      <article class="fd-card fd-card--hero fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="eye"></i></span><span class="fd-kpi__label">Vues</span></div><span class="fd-kpi__value">2 486</span><span class="fd-kpi__foot"><span class="fd-trend fd-trend--up"><i data-icon="trendUp"></i>+18 %</span>vs 30 jours précédents</span></article>
+      <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="users"></i></span><span class="fd-kpi__label">Visiteurs uniques</span></div><span class="fd-kpi__value">1 312</span><span class="fd-kpi__foot"><span class="fd-trend fd-trend--up"><i data-icon="trendUp"></i>+9 %</span>vs 30 jours précédents</span></article>
+      <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="route"></i></span><span class="fd-kpi__label">Taux de complétion</span></div><span class="fd-kpi__value">46 %</span><span class="fd-kpi__foot"><span class="fd-trend fd-trend--down"><i data-icon="trendDown"></i>−4 pts</span>vs 30 jours précédents</span></article>
+      <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="mail"></i></span><span class="fd-kpi__label">Leads</span></div><span class="fd-kpi__value">87</span><span class="fd-kpi__foot"><span class="fd-trend fd-trend--up"><i data-icon="trendUp"></i>+12</span>3,5 % des visiteurs</span></article>
+    </div>
+    <article class="fd-card">
+      <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="chart"></i></span><h2 class="fd-card__title">Par démo</h2><button class="fd-btn fd-btn--sm" type="button"><i data-icon="download"></i>Exporter en CSV</button></div>
+      <table class="fd-table"><thead><tr><th>Démo</th><th>Vues</th><th>Visiteurs uniques</th><th>Taux de complétion</th><th>Leads</th></tr></thead><tbody>
+        <tr><td><a href="analytics.html">Créer une fiche usager</a></td><td>1 204</td><td>731</td><td>52 %</td><td>41</td></tr>
+        <tr><td><a href="analytics.html">Prise de rendez-vous conseiller</a></td><td>682</td><td>401</td><td>44 %</td><td>23</td></tr>
+        <tr><td><a href="analytics.html">Dépôt de pièces justificatives</a></td><td>600</td><td>180</td><td>39 %</td><td>23</td></tr>
+        <tr><td><a href="analytics.html">Prise en main du logiciel métier</a><span class="fd-badge" style="margin-left:8px">Brouillon</span></td><td>0</td><td>0</td><td>—</td><td>0</td></tr>
+      </tbody></table>
+      <p class="fd-help">Un clic sur une démo ouvre ses analytics. Tri par colonne.</p>
+    </article>
+  </main>
+</div>
+</div>
+<div class="mock-state fd-segmented" role="group" aria-label="Écran (maquette)" style="left:50%;transform:translateX(-50%)">
+  <button type="button" data-view-set="leads" aria-pressed="true">Leads</button>
+  <button type="button" data-view-set="membres" aria-pressed="false">Membres</button>
+  <button type="button" data-view-set="profil" aria-pressed="false">Profil</button>
+  <button type="button" data-view-set="workspace" aria-pressed="false">Workspace</button>
+  <button type="button" data-view-set="plans" aria-pressed="false">Plans</button>
+  <button type="button" data-view-set="analytics" aria-pressed="false">Analytics</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

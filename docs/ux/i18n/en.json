@@ -1064,6 +1064,15 @@
         "outdated": "Outdated version",
         "scormNote": "A full SCORM package is a copy: re-upload it to the LMS after each new version, or choose the light package."
       }
+    },
+    "unpublished": {
+      "status": "draft, never published",
+      "alertTitle": "This demo is not published yet.",
+      "alertBody": "You can set its address now. The link, embedding and public page will work once it is published.",
+      "slugHelp": "Lowercase letters, numbers and hyphens (3 to 60 characters). The address goes live on publication.",
+      "publish": "Publish the demo",
+      "tabsLocked": "The other tabs unlock after publication.",
+      "summaryEmpty": "Nothing is shared yet: the demo is not published."
     }
   },
   "player": {
@@ -1086,7 +1095,10 @@
       "submit": "Submit",
       "skip": "Skip",
       "thanks": "Thanks, got it!",
-      "privacy": "Privacy"
+      "privacy": "Privacy",
+      "processedBy": "Data processed by {{workspace}}.",
+      "privacyPolicy": "Privacy policy",
+      "emailPro": "Work email"
     },
     "password": {
       "title": "This demo is protected",
@@ -1189,6 +1201,15 @@
     "mobile": {
       "tap": "Tap",
       "click": "Click"
+    },
+    "finish": "Finish",
+    "chapters": "Chapters",
+    "meta": "{{workspace}} · {{count}} steps · {{duration}}",
+    "progress": "Progress",
+    "end": {
+      "title": "Tutorial complete",
+      "body": "You went through the {{count}} steps of “{{title}}”.",
+      "restart": "Start over"
     }
   },
   "analytics": {
