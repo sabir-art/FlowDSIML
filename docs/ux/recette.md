@@ -441,3 +441,87 @@ Tests faits sur le vrai Supabase, **sans créer de compte ni envoyer d'email** :
 | Couleurs hexadécimales | ✅ Affichées et enregistrées en majuscules dans l'interface. Dans les fichiers `.css`, Prettier les remet en minuscules : sans effet sur le rendu, accepté |
 | L1 `Sparkles` (auth) | ❌ Toujours dans `AuthLayout.tsx:30`. Le retour L1 est parti après `4cac555` |
 | Nouveau (mineur) | Variations des KPI (A1) : « Taux de complétion » et « Leads » n'ont pas de variation, contrairement aux trois autres tuiles → afficher la variation partout, ou « — » quand il n'y a pas de période de référence, pour garder des tuiles homogènes |
+
+### Arbitrages design (questions du dev, 17 nov., `ff3c5ee`)
+
+- **W18, espacements** : on **garde 24 px et 20 px**, qui sont les valeurs du rythme de référence (`composants.md` §15.4). Pas de passage de `space-6` à `space-8`. Les seules valeurs à 32 px sont le padding de page sur ordinateur et celui des modales. La ligne W18 est close.
+- **P12, aperçu sur la page de partage** : une **capture statique de la première étape**, pas d'iframe. Raisons :
+  1. Une iframe chargerait le vrai player, donc compterait des vues et des événements `track` et fausserait les analytics du client.
+  2. Elle est lourde à charger.
+  3. Elle peut être bloquée par la liste des sites autorisés à intégrer la démo.
+
+  Spécification :
+  - image de l'étape 1 au ratio 16:10, rayon `lg`, bordure 1 px, fond `player-backdrop` ;
+  - pastille du hotspot rendue avec `player-core` en mode statique, sans pulsation ;
+  - titre de la démo et « N étapes » sous l'image ;
+  - bouton secondaire « Ouvrir l'aperçu » (`ExternalLink`) qui ouvre le player dans un nouvel onglet **avec `?preview=1`**, pour que ces visites ne soient pas comptées ;
+  - si la démo n'a pas encore d'étape : état vide avec l'icône `Image` et le texte « L'aperçu apparaîtra après la première capture ».
+
+### Recette du player en ligne : « Nordline CRM — découverte » (17 nov.)
+
+Démo publiée `24da9e7a…`, testée sur le site réel en deux versions :
+- lien public en 1 280 px ;
+- lien personnalisé `#/l/atelier-brume` en 390 px (mobile tactile).
+
+Locale `fr-FR`. Aucun lead envoyé : le formulaire n'est pas apparu (PL1). Captures : `docs/ux/recette/live-player/`.
+
+**Fonctionne**
+
+| Contrôle | Résultat |
+|---|---|
+| Chargement (`latest.json` et images en webp) | ✅ 200, aucune erreur dans la console |
+| Parcours complet 1 → 6 (boutons, flèche ← → du clavier) | ✅ Compteur, barre de progression, « Précédent » désactivé à l'étape 1 et « Suivant » à l'étape 6 |
+| Suivi des vues | ✅ `POST /functions/v1/track` → **200**, regroupé en 2 envois par session, `linkToken` renseigné sur le lien personnalisé |
+| Lien personnalisé | ✅ `resolve_share_link` → 200 ; variables appliquées (« Bienvenue Léa », « Atelier Brume ») |
+| CTA « Réserver une démo » | ✅ S'ouvre dans un nouvel onglet (`example.com/rendez-vous`) et l'événement est suivi |
+| Chapitres | ✅ Menu avec le chapitre courant mis en évidence |
+| Écran de fin | ✅ « Précédent », CTA, « Recommencer » |
+| Mobile 390 px | ✅ Bulle en feuille du bas, boutons de 44 px, écran de fin en colonne |
+| Flou (étape 3) | ✅ Les lignes d'activité sont floutées |
+
+**Écarts**
+
+| # | Gravité | Écart | Correction attendue |
+|---|---|---|---|
+| PL1 | ❌ Bloquant (recette) | **Aucun formulaire de lead** avant l'étape 4 : `latest.json` contient `"forms": []`. Le formulaire annoncé n'a pas été publié, ou le seed ne l'a pas créé | Chef d'équipe : vérifier le seed et republier. Dev : si un formulaire est configuré mais absent de la version publiée, c'est un bug de publication |
+| PL2 | ❌ Majeur | **Étape zoomée (3)** : la bulle subit aussi le zoom (texte environ 1,4 fois plus grand) et sort du cadre à droite (« Tout l'historique au même endro… », « Suiva… »). En mobile, la capture zoomée est coupée et la pastille du hotspot n'est plus visible | Appliquer la transformation de zoom **uniquement à l'image et aux hotspots**. Rendre la bulle hors du calque zoomé, à sa taille normale, en la gardant dans le cadre. Recentrer le zoom pour que le hotspot reste visible |
+| PL3 | ⚠️ Contenu et produit | Valeur par défaut « vous » de `first_name` : on obtient **« Bienvenue vous »** et **« Merci vous ! »** | Contenu : valeur par défaut vide. Produit : quand une variable est vide, retirer l'espace qui la précède et éviter « mot ! » avec une espace orpheline (« Bienvenue ! », « Merci ! »). Dans l'éditeur, afficher un aperçu de la phrase avec la valeur par défaut |
+| PL4 | ⚠️ Mineur | En mobile, le titre est tronqué (« Nordline CRM … ») parce que le CTA occupe l'en-tête | Sous 480 px : CTA de l'en-tête en `sm`, sans icône, ou déplacé dans la barre du bas. Titre sur 2 lignes maximum |
+| PL5 | ℹ️ V2 | En mobile, la capture d'écran est trop petite pour être lue (texte d'environ 5 px) | Zoom automatique sur la zone du hotspot en mobile, ou pincer pour zoomer (à arbitrer) |
+
+#### Re-test après la republication v2 (workspace passé en Pro, `first_name` sans valeur par défaut)
+
+| # | Statut |
+|---|---|
+| PL1 formulaire | ✅ Il s'affiche avant l'étape 4 en 1 280 et 390 px. L'envoi avec `recette.player@example.com` + consentement donne `rpc/submit_lead` → **200**, puis le parcours reprend à l'étape 4. « Passer » est disponible |
+| Suivi des vues (v2) | ✅ `track` → 200 avec la nouvelle `versionId` |
+| PL3 contenu | ✅ « Bienvenue » sans « vous ». Le point produit reste ouvert : retirer l'espace quand une variable est vide |
+| PL6 (nouveau) | ⚠️ En mobile, pendant le formulaire, la bulle de l'étape 4 (feuille du bas) reste **visible et active** sous le formulaire : « Suivant » permet de contourner le formulaire sans « Passer ». En ordinateur, la bulle n'est qu'assombrie. → Pendant un formulaire, masquer la bulle et la barre de navigation, ou les recouvrir du voile (règle §15.7 : un seul overlay modal à la fois) |
+| PL7 (nouveau) | ⚠️ La case de consentement du player est la case native de 13 px, avec une cible tactile trop petite en mobile → case de 20 px avec une zone cliquable de 44 px de haut sur toute la ligne (libellé compris), comme `.fd-check` |
+
+#### Formulaire de lead en plan Free : avertissements à ajouter (retour du chef d'équipe)
+
+Constat dans le code (`dev-mvp`) :
+- le seul signal est un `fd-alert` **d'information** dans l'onglet Réglages (`FormPanel`), avec le texte « Les formulaires de lead ne sont pas inclus dans votre plan. » Il ne dit pas que le formulaire **ne sera pas publié** ;
+- rien dans le panneau Étape (sélecteur « Formulaire de lead avant cette étape ») ;
+- **rien au moment de publier** : la publication retire le formulaire sans prévenir.
+
+Spécification :
+
+1. **Onglet Réglages, carte du formulaire** :
+   - `Alert kind="warning"` (icône `TriangleAlert`) en tête de la section ;
+   - FR : « **Ce formulaire ne sera pas publié.** Votre plan Free n'inclut pas les formulaires de lead : vous pouvez le préparer, mais les visiteurs ne le verront pas. » + lien « Voir les plans » ;
+   - EN : « **This form won't be published.** Your Free plan doesn't include lead forms: you can set it up, but visitors won't see it. » + « See plans » ;
+   - badge `warning` « Non publié » / « Not published » sur chaque formulaire de la liste.
+2. **Panneau Étape** :
+   - sous le sélecteur « Formulaire de lead avant cette étape », quand un formulaire est choisi, texte d'aide en couleur `warning` avec l'icône `TriangleAlert` de 16 px : « Non publié avec le plan Free » / « Not published on the Free plan ».
+3. **Au moment de publier** (bouton « Publier »), si la démo contient au moins un formulaire et que le plan ne les inclut pas :
+   - **modale de confirmation** avant l'appel à `publish_demo` ;
+   - titre FR : « Publier sans le formulaire de lead ? » ;
+   - texte FR : « Votre plan Free n'inclut pas les formulaires. La démo sera publiée **sans** le formulaire « {{name}} » (avant l'étape {{n}}) : aucun lead ne sera collecté. » ;
+   - boutons FR : « Voir les plans » (secondaire) et « Publier sans formulaire » (primaire) ; `Échap` annule ;
+   - EN : « Publish without the lead form? » / « Your Free plan doesn't include forms. The demo will be published **without** the "{{name}}" form (before step {{n}}): no leads will be collected. » / « See plans » / « Publish without form ».
+4. **Page de partage** après une publication de ce type :
+   - `Alert kind="warning"` : « Publiée sans formulaire de lead (plan Free). » / « Published without lead form (Free plan). » + « Voir les plans ».
+5. **Aperçu dans l'éditeur** :
+   - le formulaire reste montré, avec un bandeau en haut de la modale : « Aperçu : non publié avec votre plan ».
