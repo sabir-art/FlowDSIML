@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Créer un rapport en 2 minutes · Démo interactive</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  /* Le player n'hérite jamais du thème de l'app : .fd-player-scope force les couleurs claires */
+  html, body { background: var(--fd-player-backdrop); }
+  body { font-family: var(--fd-player-font); min-height: 100vh; }
+  .pl { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+  .pl-top { display: flex; align-items: center; gap: 12px; padding: 14px 24px; }
+  .pl-brand { display: flex; align-items: center; gap: 10px; font: 700 15px var(--fd-font-display); color: var(--fd-stone-900); }
+  .pl-brand .lg { width: 28px; height: 28px; border-radius: 8px; background: var(--fd-ember-100); color: var(--fd-ember-800); display: grid; place-items: center; font: 700 13px var(--fd-font-display); }
+  .pl-cta { margin-left: auto; display: flex; gap: 8px; }
+  .pbtn { height: 38px; padding: 0 16px; border-radius: 10px; border: 0; font: 600 14px var(--fd-player-font); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none !important; }
+  .pbtn.p { background: var(--fd-player-primary); color: var(--fd-player-on-primary); }
+  .pbtn.s { background: #fff; color: var(--fd-stone-900); box-shadow: inset 0 0 0 1px var(--fd-stone-300); }
+  .pbtn.g { background: transparent; color: var(--fd-player-tooltip-muted); }
+  .pbtn:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--fd-player-primary); }
+  .pl-main { display: grid; place-items: center; padding: 8px 24px 16px; }
+  .pl-frame { width: min(1100px, 100%); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: var(--fd-player-shadow); position: relative; }
+  .pl-progress { display: flex; gap: 3px; padding: 0; height: 4px; background: var(--fd-stone-100); }
+  .pl-progress span { flex: 1; background: var(--fd-stone-200); }
+  .pl-progress span.on { background: var(--fd-player-primary); }
+  .browser { height: 34px; background: var(--fd-player-browser-bar); display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+  .browser i { width: 10px; height: 10px; border-radius: 50%; background: var(--fd-stone-300); display: block; }
+  .browser .url { margin-left: 16px; flex: 1; max-width: 360px; height: 22px; border-radius: 6px; background: #fff; font: 11px var(--fd-font-sans); color: var(--fd-stone-500); display: flex; align-items: center; padding: 0 10px; }
+  .shot { position: relative; aspect-ratio: 16/9.2; overflow: hidden; }
+  .shot [data-fake] { transition: opacity var(--fd-motion-duration-slow) var(--fd-motion-ease-standard); }
+  .hotspot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--fd-player-hotspot); border: 0; cursor: pointer; padding: 0; z-index: 2; }
+  .hotspot::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: #fff; }
+  .hotspot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--fd-player-hotspot); opacity: .55; animation: pulse var(--fd-motion-duration-pulse) infinite; z-index: -1; }
+  .hotspot:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--fd-player-primary); }
+  @keyframes pulse { to { transform: scale(2.4); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .hotspot::after { animation: none; transform: scale(1.7); opacity: .3; } }
+  .tip { position: absolute; width: 320px; background: var(--fd-player-tooltip-bg); color: var(--fd-player-tooltip-text); border-radius: var(--fd-player-radius); box-shadow: var(--fd-shadow-lg); padding: 18px; z-index: 3; animation: fd-pop var(--fd-motion-duration-base) var(--fd-motion-ease-standard); }
+  .tip .cnt { font: 500 12px var(--fd-font-sans); color: var(--fd-player-tooltip-muted); }
+  .tip h2 { font: 600 16px/1.3 var(--fd-player-font); margin: 4px 0 0; }
+  .tip p { font-size: 15px; line-height: 1.5; margin: 6px 0 16px; }
+  .tip .acts { display: flex; justify-content: space-between; align-items: center; }
+  .ov { position: absolute; inset: 0; background: var(--fd-player-overlay); display: grid; place-items: center; z-index: 4; padding: 16px; animation: fd-fade var(--fd-motion-duration-slow); }
+  .pop { width: min(420px, 100%); background: #fff; color: var(--fd-stone-900); border-radius: var(--fd-player-radius); padding: 28px; box-shadow: var(--fd-shadow-lg); }
+  .pop h2 { font: 700 22px/1.25 var(--fd-font-display); }
+  .pop p { color: var(--fd-stone-600); margin: 8px 0 18px; }
+  .pop .input { background: #fff; color: var(--fd-stone-900); border-color: var(--fd-stone-400); }
+  .pop .field label { color: var(--fd-stone-900); }
+  .pl-controls { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 4px 24px 20px; color: var(--fd-stone-600); font: 500 13px var(--fd-font-sans); }
+  .ctl { width: 36px; height: 36px; border-radius: 10px; border: 0; background: rgba(255,255,255,.7); color: var(--fd-stone-800); display: grid; place-items: center; cursor: pointer; }
+  .ctl svg { width: 18px; height: 18px; }
+  .ctl:focus-visible { box-shadow: 0 0 0 3px var(--fd-player-primary); }
+  .wm { position: fixed; right: 16px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 99px; background: rgba(255,255,255,.85); color: var(--fd-stone-700); font: 600 12px var(--fd-font-sans); text-decoration: none !important; box-shadow: var(--fd-shadow-sm); }
+  .sheet-handle { display: none; }
+  .pl-controls[hidden] { display: none; }
+  /* ---- Mobile : bulle en feuille du bas ---- */
+  @media (max-width: 639px) {
+    .pl-top { padding: 10px 14px; } .pl-cta .pbtn.s { display: none; }
+    .pl-main { padding: 0; place-items: start stretch; }
+    .pl-frame { border-radius: 0; box-shadow: none; }
+    .browser { display: none; }
+    .tip { position: fixed; left: 0 !important; right: 0 !important; bottom: 0; top: auto !important; width: auto; border-radius: 20px 20px 0 0; padding: 12px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 30px rgba(0,0,0,.15); }
+    .sheet-handle { display: block; width: 36px; height: 4px; border-radius: 4px; background: var(--fd-stone-300); margin: 0 auto 10px; }
+    .tip .pbtn { height: 44px; padding: 0 20px; }
+    .pl-controls { display: none; }
+    .wm { bottom: 230px; right: 12px; }
+  }
+  .sys { width: min(420px, 100%); text-align: center; }
+</style>
+</head>
+<body class="fd-player-scope" data-nomocknav>
+<a class="skip" href="#demo">Aller à la démo</a>
+<div class="pl">
+  <header class="pl-top">
+    <span class="pl-brand"><span class="lg">A</span>Acme Analytics</span>
+    <div class="pl-cta"><a class="pbtn s" href="#">Voir les tarifs</a><a class="pbtn p" href="#">Essai gratuit</a></div>
+  </header>
+  <main class="pl-main">
+    <div class="pl-frame" id="demo" role="region" aria-roledescription="démo interactive" aria-label="Créer un rapport en 2 minutes">
+      <div class="pl-progress" aria-hidden="true" id="prog"></div>
+      <div class="browser" aria-hidden="true"><i></i><i></i><i></i><span class="url">app.acme-analytics.example/reports</span></div>
+      <div class="shot" id="shot"><div data-fake="dashboard" id="fake" style="position:absolute;inset:0"></div></div>
+      <p class="sr-only" aria-live="polite" id="announce"></p>
+    </div>
+  </main>
+  <nav class="pl-controls" aria-label="Navigation de la démo">
+    <button class="ctl" id="prev" aria-label="Étape précédente"><i data-icon="chevronLeft"></i></button>
+    <span class="num" id="counter">1 / 6</span>
+    <button class="ctl" id="next" aria-label="Étape suivante"><i data-icon="chevronRight"></i></button>
+    <span style="width:16px"></span>
+    <button class="ctl" aria-label="Changer de langue"><i data-icon="globe"></i></button>
+    <button class="ctl" aria-label="Plein écran"><i data-icon="maximize"></i></button>
+  </nav>
+</div>
+<a class="wm" href="index.html" target="_blank" rel="noopener"><span data-logo-xs></span>Fait avec TutoClick</a>
+
+<script>
+const S = [
+  { type: 'start' },
+  { fake: 'dashboard', x: 88.5, y: 10.5, tipPos: { right: '2%', top: '19%' }, title: 'Bienvenue {{first_name}}', text: 'Voici votre tableau de bord. Créons ensemble votre premier rapport.' },
+  { fake: 'dashboard', x: 88.5, y: 10.5, tipPos: { right: '2%', top: '19%' }, text: 'Cliquez sur « Nouveau rapport » pour commencer.' },
+  { fake: 'modal', x: 64, y: 66, tipPos: { left: '20%', top: '78%' }, up: true, text: 'Choisissez un modèle. Les données de {{company}} sont importées automatiquement.' },
+  { type: 'form' },
+  { type: 'end' },
+];
+const vars = Object.assign({ first_name: 'Léa', company: 'Globex' }, Object.fromEntries(new URLSearchParams(location.search)));
+const fill = (t) => t.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? '');
+let i = 0;
+const shot = document.getElementById('shot');
+function render() {
+  shot.querySelectorAll('.hotspot,.tip,.ov').forEach(e => e.remove());
+  const s = S[i];
+  document.getElementById('counter').textContent = `${i + 1} / ${S.length}`;
+  document.getElementById('prog').innerHTML = S.map((_, k) => `<span class="${k <= i ? 'on' : ''}"></span>`).join('');
+  document.getElementById('prev').disabled = i === 0;
+  const fakeEl = document.getElementById('fake');
+  const fk = s.fake || 'dashboard';
+  if (fakeEl.dataset.v !== fk) { fakeEl.dataset.v = fk; fakeEl.removeAttribute('data-done'); fakeEl.dataset.fake = fk; fdRenderFakes(); }
+  const say = (t) => document.getElementById('announce').textContent = `Étape ${i + 1} sur ${S.length} : ${t}`;
+  if (s.type === 'start') {
+    shot.insertAdjacentHTML('beforeend', `<div class="ov"><div class="pop" role="dialog" aria-labelledby="st"><h2 id="st">Créer un rapport en 2 minutes</h2><p>${fill('Bonjour {{first_name}}, découvrez en 6 étapes comment {{company}} peut suivre ses KPI sans tableur.')}</p><button class="pbtn p" style="width:100%;height:44px;justify-content:center" data-go="1">${fdIcon('play','width="16" height="16"')}Lancer la démo</button><p class="t-caption" style="margin:10px 0 0;text-align:center">Environ 1 minute · aucune inscription</p></div></div>`);
+    say('Introduction');
+  } else if (s.type === 'form') {
+    shot.insertAdjacentHTML('beforeend', `<div class="ov"><form class="pop" role="dialog" aria-labelledby="ft" onsubmit="event.preventDefault();next()"><h2 id="ft">Recevez la démo complète</h2><p>Laissez votre email, nous vous envoyons l'accès au parcours avancé.</p>
+      <div class="field"><label for="em">Email professionnel</label><input class="input" id="em" type="email" autocomplete="email" value="${vars.email || ''}" placeholder="nom@entreprise.example"></div>
+      <label class="check" style="margin-top:14px;font-size:13px;color:var(--fd-stone-600)"><input type="checkbox" required>J'accepte d'être recontacté·e par Acme. <a href="#" style="color:var(--fd-player-primary)">Confidentialité</a></label>
+      <button class="pbtn p" style="width:100%;height:44px;justify-content:center;margin-top:18px">Recevoir l'accès</button><button type="button" class="pbtn g" style="width:100%;justify-content:center;margin-top:4px" data-go="${i + 1}">Passer</button></form></div>`);
+    say('Formulaire');
+  } else if (s.type === 'end') {
+    shot.insertAdjacentHTML('beforeend', `<div class="ov"><div class="pop" role="dialog" aria-labelledby="et" style="text-align:center"><h2 id="et">${fill('Prêt à essayer, {{first_name}} ?')}</h2><p>Réservez 20 minutes avec notre équipe pour voir TutoClick avec vos propres données.</p><a class="pbtn p" style="width:100%;height:44px;justify-content:center" href="#">Réserver une démo</a><button class="pbtn g" style="width:100%;justify-content:center;margin-top:6px" data-go="0">Recommencer la visite</button></div></div>`);
+    say('Fin de la démo');
+  } else {
+    shot.insertAdjacentHTML('beforeend', `<button class="hotspot" style="left:${s.x}%;top:${s.y}%" aria-label="${fill(s.text)}" data-go="${i + 1}"></button>
+      <div class="tip" role="group" aria-label="Étape ${i + 1} sur ${S.length}" style="${Object.entries(s.tipPos).map(([k, v]) => k + ':' + v).join(';')}"><div class="sheet-handle"></div><span class="cnt">${i + 1} / ${S.length}</span>${s.title ? `<h2>${fill(s.title)}</h2>` : ''}<p>${fill(s.text)}</p>
+      <div class="acts"><button class="pbtn g" data-go="${i - 1}">Précédent</button><button class="pbtn p" data-go="${i + 1}">Suivant</button></div></div>`);
+    say(fill(s.title || s.text));
+  }
+  const f = shot.querySelector('.ov button, .ov input, .hotspot'); if (f && i > 0) f.focus({ preventScroll: true });
+}
+function go(n) { i = Math.max(0, Math.min(S.length - 1, n)); render(); }
+function next() { go(i + 1); }
+document.addEventListener('fd:ready', () => {
+  document.querySelectorAll('[data-logo-xs]').forEach(e => e.outerHTML = fdLogo.replace(/height="40"/g, 'height="16"'));
+  const st = location.hash.slice(1);
+  if (st === 'password' || st === 'expired') {
+    document.querySelector('.pl-controls').hidden = true;
+    shot.innerHTML = `<div class="ov" style="background:var(--fd-stone-50)">${st === 'password'
+      ? `<form class="pop sys" onsubmit="event.preventDefault()">${fdIcon('lock','width="28" height="28" style="color:var(--fd-stone-500)"')}<h2 style="margin-top:8px">Cette démo est protégée</h2><p>Saisissez le mot de passe communiqué par Acme Analytics.</p><div class="field" style="text-align:left"><label for="pw">Mot de passe</label><input id="pw" class="input" type="password" aria-invalid="true" aria-describedby="pwe"><span class="error-msg" id="pwe">Mot de passe incorrect. Réessayez.</span></div><button class="pbtn p" style="width:100%;height:44px;justify-content:center;margin-top:16px">Accéder à la démo</button></form>`
+      : `<div class="pop sys">${fdIcon('clock','width="28" height="28" style="color:var(--fd-stone-500)"')}<h2 style="margin-top:8px">Cette démo n'est plus disponible</h2><p>Le lien a expiré le 30 novembre 2026. Contactez Acme Analytics pour recevoir un nouveau lien.</p><a class="pbtn s" href="#">Visiter acme-analytics.example</a></div>`}</div>`;
+    return;
+  }
+  render();
+  document.addEventListener('click', e => { const t = e.target.closest('[data-go]'); if (t) { e.preventDefault(); go(+t.dataset.go); } });
+  document.getElementById('prev').onclick = () => go(i - 1);
+  document.getElementById('next').onclick = () => go(i + 1);
+  document.addEventListener('keydown', e => { if (/input|textarea/i.test(e.target.tagName)) return; if (e.key === 'ArrowRight') go(i + 1); if (e.key === 'ArrowLeft') go(i - 1); });
+  let x0 = null; shot.addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: true });
+  shot.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1)); x0 = null; });
+});
+</script>
+</body>
+</html>

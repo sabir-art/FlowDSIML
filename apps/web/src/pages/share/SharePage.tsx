@@ -19,6 +19,7 @@ import { usePlan } from '../../lib/plan';
 import { PlanFormsWarning } from '../../components/PlanFormsWarning';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
+import '../../styles/maquette-peau.css';
 
 type Tab = 'link' | 'embed' | 'perso' | 'access';
 type LinkStats = Record<string, { views: number; last: string | null }>;

@@ -11,6 +11,8 @@
 >
 > **Ce que la maquette ne prévoit pas** : un élément de l'app absent de la maquette est un écart, **sauf** si la Lead UX le déclare « à ajouter à la maquette » (colonne « Décision »). Dans ce cas, la maquette est mise à jour et sert de référence.
 
+> **Référence et règle D13 (décision client)** : la référence de structure est la maquette d'origine (`docs/ux/maquettes/*.html`), dans sa version DSI `docs/ux/maquettes/reference/`, sauf pour les écrans où le client a choisi une autre version dans l'outil de suivi « Conformité TutoClick ». C'est cet outil qui porte la matrice ; ce fichier n'en est qu'une copie. **La peau DSI transpose les couleurs, elle ne supprime aucun effet** : dégradés, accents multiples, couleur par catégorie, halos, badges colorés. Voir `reference/README.md` pour la table de transposition.
+
 ## Synthèse
 
 | Écran | Maquette | Image | Statut |
@@ -31,8 +33,10 @@
 | Paramètres du workspace | `refonte/ecrans-compte.html?view=workspace` | `conformite/parametres-workspace.png` | ❌ NON CONFORME (5 écarts) |
 | Plans | `refonte/ecrans-compte.html?view=plans` | `conformite/plans.png` | ❌ NON CONFORME (4 écarts) |
 | Player : étape et bulle, formulaire de lead, fin | `refonte/player.html?view=etape,formulaire,fin` | `conformite/player-*.png` | ❌ NON CONFORME (7 écarts) |
-| F1 : vérification des flous, modale RGPD | `refonte/f1-formation.html` | à produire | 🔜 |
-| F2 : quiz (éditeur et player) | `refonte/f2-quiz.html` | `conformite/quiz-editeur.png` | 🔜 |
+| F1 : vérification des flous | `refonte/f1-formation.html` (vue Flous) | `conformite/f1-flous.png` | ❌ NON CONFORME (6 écarts) |
+| F1 : publication publique (RGPD) | `refonte/f1-formation.html?view=rgpd` | `conformite/f1-rgpd.png` | ❌ NON CONFORME (3 écarts) |
+| F2 : éditeur du quiz | `refonte/f2-quiz.html?view=build` | `conformite/quiz-editeur.png` | ❌ NON CONFORME (5 écarts) |
+| F2 : quiz dans le player (question, correction, résultats) | `refonte/f2-quiz.html?view=q,ok,ko,pass,fail` | `conformite/quiz-*.png` | ❌ NON CONFORME (7 écarts) |
 
 > **Maquettes obsolètes.** Les maquettes d'origine (`docs/ux/maquettes/*.html`) datent d'avant la refonte. Elles portent l'ancienne identité et des contenus abandonnés : prix, offres Solo / Team, « Démo centers V2 », factures, connexion Google. **Elles ne sont plus une référence.** Les maquettes de refonte qui les remplacent sont `refonte/ecrans-compte.html` et `refonte/auth.html` (lot 2). Le player a sa maquette de refonte : `refonte/player.html`.
 >
@@ -82,7 +86,7 @@ Maquette : `refonte/editeur.html` (état Hotspot et bulle, commentaires en liste
 |---|---|---|---|---|---|
 | ED-1 | Barre du haut, symbole | Symbole TutoClick | Symbole DSI | `symbole-tutoclick.svg` | — |
 | ED-2 | État d'enregistrement | Pilule unique « Brouillon · enregistré » | Badge « Brouillon », et « Enregistré » ailleurs | Une seule pilule : statut · état d'enregistrement | — |
-| ED-3 | Bouton « Quiz » | Absent (maquette antérieure à F2) | Présent entre « Aperçu » et « Partager » | Garder | **À ajouter à la maquette** |
+| ED-3 | Bouton « Quiz » | Absent (maquette antérieure à F2) | Présent entre « Aperçu » et « Partager » | Garder | **Ajouté à la maquette** |
 | ED-4 | En-tête du panneau Hotspot | Puce + « Hotspot et bulle » | En plus : lien « ‹ Étape » | Garder (retour au panneau de l'étape) | **À ajouter à la maquette** (lien fantôme à droite du titre) |
 | ED-5 | Barre d'outils du texte | Gras, italique, lien | En plus : select « Insérer une variable » | Garder (fonction des variables) | **À ajouter à la maquette** |
 | ED-6 | Sous le texte | Rien | Compteur « 31 / 4000 caractères », **aperçu rendu** en bande grise, **et** ligne « Aperçu : … » | Supprimer la bande grise. Garder la ligne « Aperçu : » seulement si le texte contient une variable. Afficher le compteur à partir de 3 600 caractères | — |
@@ -273,3 +277,48 @@ Maquette : `refonte/player.html` (`?view=etape,formulaire,fin`, `&theme=dark`, e
 | PY-5 | Formulaire de lead | Voile **sur la capture seulement** (l'en-tête et le CTA restent lisibles) ; titre, description, « E-mail professionnel * », case de consentement, ligne « Données traitées par {{workspace}}. Politique de confidentialité » (lien), bouton « Continuer » avec flèche à droite | Voile sur toute la page (CTA grisé), libellé « Email * », pas de ligne sur le traitement des données | Comme la maquette. La ligne « Données traitées par… » est **toujours** affichée ; le lien n'apparaît que si une politique est renseignée (Paramètres du workspace) | — |
 | PY-6 | Fin d'une démo simple | Dernière étape : le bouton de la bulle devient « **Terminer** » et ouvre la modale de fin (puce de succès, « Tutoriel terminé », « Vous avez parcouru les n étapes de « titre ». », CTA de la page en primaire, « Recommencer » en fantôme) | **Pas d'écran de fin** : le → de la barre est désactivé et la bulle garde « Suivant » sans effet | Ajouter l'écran de fin. Sans CTA de page, seul « Recommencer » est affiché, en secondaire. Avec un quiz (F2), la fin du quiz garde son propre écran | — |
 | PY-7 | Mobile (≤ 720 px) | La bulle devient une **feuille du bas** au-dessus de la barre ; le formulaire et la fin s'ouvrent en feuille du bas ; « Chapitres », méta, langue et plein écran sont masqués | Non vérifié sur l'app à 390 px | À appliquer, puis je le vérifie en recette | — |
+
+## 14. F1 : vérification des flous et publication publique
+
+Maquette : `refonte/f1-formation.html` (vues Flous et RGPD). Images : `conformite/f1-flous.png`, `conformite/f1-rgpd.png` (captures de la recette F1).
+
+| N° | Zone | Maquette | App | Correction | Décision |
+|---|---|---|---|---|---|
+| FL-1 | En-tête | Symbole TutoClick, titre, sous-titre « module · n captures · rien n'a encore quitté votre navigateur », badge « Analyse terminée » | Symbole DSI | Symbole TutoClick (voir G-1) | — |
+| FL-2 | Capture | **Aperçu réel du flou** sur chaque zone, cadre framboise plein si la zone sera floutée, pointillé si elle ne le sera pas, bleu si elle est sélectionnée | Rectangles roses pleins, sans aperçu du flou | Afficher le flou tel qu'il sera appliqué, avec les 3 cadres de la légende | — |
+| FL-3 | Vignettes | Libellé « n · titre » et pastille du nombre de détections **à droite du libellé**, sous la vignette | Pastille en haut à droite de la vignette | Comme la maquette | — |
+| FL-4 | Détections | Chaque détection est une **carte bordée** (puce d'icône, type, valeur masquée en mono, interrupteur) ; la carte sélectionnée a une bordure bleue | Lignes simples, sans carte | Cartes de la maquette | — |
+| FL-5 | Sous la liste | Phrase qui nomme les détections **non floutées** (« La date de naissance et l'adresse ne seront pas floutées. Vérifiez qu'il s'agit bien de données fictives. »), puis « Tout flouter sur cette capture » avec une coche | Bouton sans icône ; phrase non vérifiable (tout était activé) | Icône coche ; phrase affichée dès qu'une détection est désactivée | — |
+| FL-6 | Pied | « Annuler la capture » en **bouton secondaire**, puis le primaire « Flouter et envoyer n captures » avec l'icône d'envoi | « Annuler la capture » en lien framboise ; primaire sans icône | Comme la maquette | — |
+| RP-1 | Résumé de la modale RGPD | Lignes simples, sans fond ; les détections non floutées en **gras** avec l'étape | Encadré sur fond `surface-sunken` | Lignes de la maquette | — |
+| RP-2 | Restreindre l'accès | Ligne « Besoin de restreindre l'accès ? Choisir Invitation, Domaine e-mail ou Mot de passe. » (liens vers l'onglet Accès) | Absente | Ajouter | — |
+| RP-3 | Aide « Cochez les deux confirmations pour publier. » | **Sous** les boutons, alignée à droite | Au-dessus des boutons, à gauche | Comme la maquette | — |
+
+Le bouton « Revoir l'étape n » de la modale n'apparaît que s'il reste des détections non floutées. Il n'a pas pu être vérifié avec les données de test.
+
+## 15. F2 : quiz (éditeur et player)
+
+Maquette : `refonte/f2-quiz.html` (`?view=build,q,ok,ko,pass,fail`). Images : `conformite/quiz-editeur.png`, `quiz-question.png`, `quiz-correction.png`, `quiz-reussite.png`, `quiz-echec.png`. Les captures du player viennent de la recette F2 : la marque y est encore « Tutoclic », ce qui est un écart (G-2 : « TutoClick » partout).
+
+### Éditeur du quiz
+
+| N° | Zone | Maquette | App | Correction | Décision |
+|---|---|---|---|---|---|
+| QE-1 | En-tête | Titre « Quiz du module » au-dessus de la liste, bouton « Tester le quiz » dans la carte « Validation » | Barre d'en-tête avec retour ←, titre, « Enregistré », et « Tester le quiz » en haut à droite | Garder l'en-tête de l'app (cohérent avec l'éditeur) ; retirer « Tester le quiz » de la carte | **Ajouté à la maquette** |
+| QE-2 | Liste des questions | Cartes posées sur le fond, sans carte englobante | Carte « Questions » qui englobe la liste | Retirer la carte englobante | — |
+| QE-3 | Carte de la question | Puce d'icône « ? » devant « Question n » ; pas d'alerte | Pas de puce ; alerte info « Choix unique : seule la première bonne réponse est gardée. » | Ajouter la puce ; retirer l'alerte (le bouton radio suffit) | — |
+| QE-4 | Seuil de réussite | Libellé seul, valeur « 70 % » **à droite du curseur** | Valeur dans le libellé (« Seuil de réussite : 80 % ») | Comme la maquette | — |
+| QE-5 | Bas de la carte | Rien | « Supprimer la question » centré | Garder, en bouton fantôme danger **aligné à gauche** | **Ajouté à la maquette** |
+| QE-6 | Carte « Réussite par question » | Absente | Présente (« Aucune tentative pour l'instant. ») | Garder | **Ajouté à la maquette** |
+
+### Quiz dans le player
+
+| N° | Zone | Maquette | App | Correction | Décision |
+|---|---|---|---|---|---|
+| QP-1 | Barre du player | **Absente** pendant le quiz | Présente, avec progression orange et compteur des étapes | Masquer la barre pendant le quiz (déjà relevé en recette, F2-1) | — |
+| QP-2 | Progression du quiz | Barre **prune** entre « Question n sur N » et « Seuil : x % », sur la même ligne | Barre orange sous la ligne | Comme la maquette (pas d'orange dans l'interface) | — |
+| QP-3 | Question | Bouton « Précédente » en bas à gauche à partir de la question 2 | Absent | Ajouter | — |
+| QP-4 | Correction | Encadré avec icône (`xCircle` ou `checkCircle`), titre en gras et explication ; **sous** l'encadré, bouton secondaire « Revoir l'étape n du module » à gauche et « Question suivante → » à droite | Lien « Revoir l'étape 1 du module » dans l'encadré, sans icône ; pas de flèche sur le bouton | Comme la maquette | — |
+| QP-5 | Résultat, liste | Questions **sans numéro**, « Revoir » à droite de chaque erreur liée à une étape | Questions numérotées | Retirer les numéros | — |
+| QP-6 | Résultat, actions | Réussite : « Repasser le quiz » à gauche, primaire « Module suivant : titre → » à droite (ou CTA de fin s'il n'y a pas de module suivant). Échec : « Revoir le module » avec icône à gauche, « Réessayer le quiz » à droite | Réussite : « Terminer » seul, centré. Échec : 2 boutons centrés | Boutons de la maquette, en bas, aux deux extrémités | — |
+| QP-7 | Marque | « Créé avec TutoClick » | « Créé avec Tutoclic » | Nom exact « TutoClick » (G-2) | — |

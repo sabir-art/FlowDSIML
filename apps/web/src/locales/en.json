@@ -185,7 +185,7 @@
     "leave": "Leave",
     "confirmRemove": "Remove {{email}} from the workspace?",
     "confirmLeave": "Leave this workspace?",
-    "emails": "Emails (one or more)",
+    "emails": "Email addresses",
     "emailsPlaceholder": "mary@acme.example, paul@acme.example",
     "invalidEmails": "Invalid addresses: {{list}}",
     "invitesCreated_one": "Invitation created. Send this link:",

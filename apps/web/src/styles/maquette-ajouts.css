@@ -1135,8 +1135,9 @@
 /* ---- Peau DSI : effets des maquettes d'origine regroupés en jetons réutilisables ----
    La palette finale sera appliquée d'un coup en ne modifiant que ces jetons. */
 :root {
-  --tc-grad-cta: linear-gradient(90deg, var(--fd-orange-500), var(--fd-framboise-600));
-  --tc-grad-cta-hover: linear-gradient(90deg, var(--fd-orange-600), var(--fd-framboise-700));
+  /* même effet que .btn-accent de la référence DSI : orange discret puis framboise (texte blanc lisible) */
+  --tc-grad-cta: linear-gradient(135deg, var(--fd-orange-500) -40%, var(--fd-framboise-600) 45%);
+  --tc-grad-cta-hover: var(--fd-framboise-700);
   --tc-on-grad: #fff;
 }
 /* Bouton d'appel principal en dégradé (ex. « Publier les modifications ») */

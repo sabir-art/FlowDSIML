@@ -21,12 +21,12 @@ const VIEW = { width: 1440, height: 900 };
 const SCREENS = {
   'CAD-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
   'DSH-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
-  'PLN-01': { maquette: 'plans.html', route: '/#/settings/plans' },
-  'ANA-01': { maquette: 'analytics.html', route: '/#/analytics' },
-  'PRM-01': { maquette: 'parametres.html', route: '/#/settings/members' },
-  'PRT-01': { maquette: 'partage.html', route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share' },
+  'PLN-01': { maquette: 'reference/plans.html', route: '/#/settings/plans' },
+  'ANA-01': { maquette: 'reference/analytics.html', route: '/#/analytics' },
+  'PRM-01': { maquette: 'reference/parametres.html', route: '/#/settings/members' },
+  'PRT-01': { maquette: 'reference/partage.html', route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share' },
   'CNX-01': {
-    maquette: 'connexion.html',
+    maquette: 'reference/connexion.html',
     route: '/#/login',
     signedOut: true,
     // État de la maquette : identifiants saisis, refusés (message sous le mot de passe)
@@ -40,7 +40,7 @@ const SCREENS = {
     },
   },
   'INS-01': {
-    maquette: 'inscription.html',
+    maquette: 'reference/inscription.html',
     route: '/#/signup',
     signedOut: true,
     // État de la maquette : mot de passe saisi (robustesse « bonne »), autres champs vides
@@ -50,7 +50,7 @@ const SCREENS = {
     },
   },
   'ONB-01': {
-    maquette: 'onboarding.html',
+    maquette: 'reference/onboarding.html',
     route: '/#/onboarding',
     // État de la maquette : étape 1, nom de l'espace saisi, « Site web » choisi
     async prepare(p) {
@@ -59,7 +59,7 @@ const SCREENS = {
     },
   },
   'ONB-02': {
-    maquette: 'onboarding.html',
+    maquette: 'reference/onboarding.html',
     maquettePrep: (p) => p.click('#p1 [data-next="2"]'),
     route: '/#/onboarding',
     async prepare(p) {
@@ -70,7 +70,7 @@ const SCREENS = {
     },
   },
   'ONB-03': {
-    maquette: 'onboarding.html',
+    maquette: 'reference/onboarding.html',
     maquettePrep: async (p) => {
       await p.click('#p1 [data-next="2"]');
       await p.click('#p2 [data-next="3"]');

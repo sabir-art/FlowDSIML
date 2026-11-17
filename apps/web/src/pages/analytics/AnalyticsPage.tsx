@@ -12,6 +12,7 @@ import { LeadsMkTable } from './LeadsMkTable';
 import { initials } from '../../lib/initials';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
+import '../../styles/maquette-peau.css';
 
 type Source = 'direct' | 'embed' | 'link';
 interface WsAnalytics {

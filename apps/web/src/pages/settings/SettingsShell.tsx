@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Code, CreditCard, Palette, Settings, UserRound, Users } from 'lucide-react';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
+import '../../styles/maquette-peau.css';
 
 /**
  * Cadre des paramètres (maquette parametres.html) : titre « Paramètres » et navigation interne

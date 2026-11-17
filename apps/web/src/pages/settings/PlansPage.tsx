@@ -11,6 +11,7 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
+import '../../styles/maquette-peau.css';
 
 type Limits = {
   published_demos: number | null;

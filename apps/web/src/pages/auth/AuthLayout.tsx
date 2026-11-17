@@ -7,6 +7,7 @@ import { BrandMark } from '../../components/BrandMark';
 import { setLocale } from '../../i18n';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
+import '../../styles/maquette-peau.css';
 import type { FieldErrors } from '../../lib/validation';
 
 /** Message d'erreur de champ au format de la maquette (`.error-msg`). */

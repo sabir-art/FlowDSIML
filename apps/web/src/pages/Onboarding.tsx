@@ -23,6 +23,7 @@ import { BrandMark } from '../components/BrandMark';
 import { MkFieldError } from './auth/AuthLayout';
 import '../styles/maquette.css';
 import '../styles/maquette-ajouts.css';
+import '../styles/maquette-peau.css';
 
 type Step = 1 | 2 | 3;
 const USES = [

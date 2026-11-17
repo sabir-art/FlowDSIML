@@ -86,3 +86,55 @@ root = (
 )
 (ROOT / 'apps/web/src/styles/maquette.css').write_text(header + root + css)
 print(len(css.splitlines()), 'lignes')
+
+# ---- Peau DSI (référence de la Lead UX, docs/ux/maquettes/reference/assets/reference.css) ----
+# Jetons --ref-* globaux (:root, thème sombre) ; règles d'effets préfixées .mk comme le reste.
+ref_path = ROOT / 'docs/ux/maquettes/reference/assets/reference.css'
+if ref_path.exists():
+    ref = re.sub(r'/\*.*?\*/', '', ref_path.read_text(), flags=re.S)
+
+    def prefix_ref(sel: str):
+        out = []
+        for s in split_selectors(sel):
+            if s.startswith(':root'):
+                # :root:not(...) [descendant] -> :root:not(...) .mk descendant
+                head, _, rest = s.partition(' ')
+                out.append(f'{head} .mk {rest}'.strip() if rest else head)
+            elif s.startswith('[data-theme'):
+                head, _, rest = s.partition(' ')
+                out.append(f':root{head} .mk {rest}'.strip() if rest else f':root{head}')
+            elif s.startswith(('html', 'body')):
+                continue
+            else:
+                out.append(f'.mk {s}')
+        return ', '.join(out) if out else None
+
+    def process_ref(block: str) -> str:
+        res, i = [], 0
+        while i < len(block):
+            j = block.find('{', i)
+            if j < 0:
+                break
+            head = block[i:j].strip()
+            depth, k = 1, j + 1
+            while depth and k < len(block):
+                depth += {'{': 1, '}': -1}.get(block[k], 0)
+                k += 1
+            body = block[j + 1 : k - 1]
+            if head.startswith('@media'):
+                inner = process_ref(body)
+                if inner.strip():
+                    res.append(f'{head} {{\n{inner}}}\n')
+            elif head:
+                p = prefix_ref(head)
+                if p:
+                    res.append(f'{p} {{{body.strip()}}}\n')
+            i = k
+        return ''.join(res)
+
+    peau = process_ref(ref)
+    (ROOT / 'apps/web/src/styles/maquette-peau.css').write_text(
+        '/* Généré par scripts/maquette-css.py depuis docs/ux/maquettes/reference/assets/reference.css\n'
+        '   (peau DSI : effets des maquettes d\'origine transposés). Ne pas modifier à la main. */\n' + peau
+    )
+    print(len(peau.splitlines()), 'lignes de peau')
