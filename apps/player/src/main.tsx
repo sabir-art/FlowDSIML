@@ -8,6 +8,7 @@ import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
 import { Player } from './Player';
 import { Ban, Link2Off, SearchX } from 'lucide-preact';
+import '@flowdsiml/player-core/player-core.css';
 import './player.css';
 
 type State =
@@ -100,7 +101,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const tracker = useMemo(
     () =>

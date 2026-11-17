@@ -5,10 +5,13 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { richTextToHtml } from '@flowdsiml/core';
+import { applyVariables, richTextToHtml } from '@flowdsiml/core';
+import { themeSchema } from '@flowdsiml/manifest';
+import { beaconCenter, themeVars, tipClass } from '@flowdsiml/player-core';
+import { ChevronRight } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
-import { asRects, asZoom, type Selection, type StepRow } from './types';
+import { asAction, asCta, asRects, asSettings, asZoom, type Selection, type StepRow } from './types';
 
 export type Tool = 'select' | 'hotspot' | 'blur';
 
@@ -160,12 +163,19 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
   }
 
   const url = editor.imageUrls[step.image_path];
+  // Aperçu WYSIWYG (ED2) : mêmes classes et même thème que le player.
+  const theme = themeSchema.parse(asSettings(editor.demo?.settings).theme ?? {});
+  const defaults = Object.fromEntries(editor.variables.map((v) => [v.key, v.default_value]));
+  const sub = (txt: string) => applyVariables(txt, {}, defaults);
+  const tipHotspot =
+    (selection.kind === 'hotspot' ? hotspots.find((h) => h.id === selection.id) : undefined) ?? hotspots[0];
+  const stepIndex = editor.steps.findIndex((x) => x.id === step.id);
   const ratio = `${step.image_width ?? 16} / ${step.image_height ?? 10}`;
   return (
     <div
       ref={frame}
-      className={`canvas-frame tool-${tool}`}
-      style={{ aspectRatio: ratio }}
+      className={`canvas-frame fd-player-scope tool-${tool}`}
+      style={{ aspectRatio: ratio, ...themeVars(theme) }}
       onPointerDown={onFrameDown}
       onPointerMove={onMove}
       onPointerUp={onUp}
@@ -231,6 +241,49 @@ export function Canvas({ editor, step, tool, setTool, selection, setSelection, r
       <span className="sr-only" aria-live="polite">
         {announce}
       </span>
+      {hotspots.map((h) => (
+        <span
+          key={`b-${h.id}`}
+          className={`p-beacon canvas-beacon ${h.pulse ? 'p-pulse' : ''}`}
+          style={beaconCenter(h)}
+          aria-hidden="true"
+        >
+          <span className="p-beacon-dot" />
+        </span>
+      ))}
+      {tipHotspot &&
+        tool === 'select' &&
+        !drag &&
+        (tipHotspot.title || tipHotspot.body || asCta(tipHotspot.cta)) && (
+          <div
+            className={`${tipClass(tipHotspot, tipHotspot.placement)} canvas-tip`}
+            style={beaconCenter(tipHotspot)}
+            aria-hidden="true"
+          >
+            {tipHotspot.title && <div className="p-tip-title">{sub(tipHotspot.title)}</div>}
+            {tipHotspot.body && (
+              <div
+                className="p-rich"
+                dangerouslySetInnerHTML={{ __html: richTextToHtml(sub(tipHotspot.body)) }}
+              />
+            )}
+            <div className="p-actions">
+              <span className="p-tip-count">
+                {stepIndex + 1}/{editor.steps.length}
+              </span>
+              {asCta(tipHotspot.cta) ? (
+                <span className="p-btn p-btn-primary p-btn-sm">{sub(asCta(tipHotspot.cta)!.label)}</span>
+              ) : (
+                asAction(tipHotspot.action).type !== 'none' && (
+                  <span className="p-btn p-btn-primary p-btn-sm">
+                    {t('editor.previewNext')}
+                    <ChevronRight size={14} aria-hidden="true" />
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+        )}
       {hotspots.map((h, i) => {
         const selected = selection.kind === 'hotspot' && selection.id === h.id;
         return (

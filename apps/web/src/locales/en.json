@@ -282,7 +282,8 @@
     "narrowTitle": "The editor needs a wider screen",
     "narrowBody": "Open this demo on a computer (1024 px minimum) to edit it. You can still share it from this phone.",
     "colorHotspot": "Hotspot beacon",
-    "chars": "{{n}} / {{max}} characters"
+    "chars": "{{n}} / {{max}} characters",
+    "previewNext": "Next"
   },
   "status": {
     "draft": "Draft",

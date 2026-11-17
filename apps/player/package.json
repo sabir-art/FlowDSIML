@@ -15,7 +15,8 @@
     "@flowdsiml/core": "workspace:*",
     "@flowdsiml/manifest": "workspace:*",
     "lucide-preact": "^0.577.0",
-    "preact": "^10.29.8"
+    "preact": "^10.29.8",
+    "@flowdsiml/player-core": "workspace:*"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",

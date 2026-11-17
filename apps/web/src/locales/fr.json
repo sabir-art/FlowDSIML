@@ -282,7 +282,8 @@
     "narrowTitle": "L'éditeur nécessite un écran plus large",
     "narrowBody": "Ouvrez cette démo sur un ordinateur (1024 px minimum) pour la modifier. Vous pouvez la partager depuis ce téléphone.",
     "colorHotspot": "Pastille du hotspot",
-    "chars": "{{n}} / {{max}} caractères"
+    "chars": "{{n}} / {{max}} caractères",
+    "previewNext": "Suivant"
   },
   "status": {
     "draft": "Brouillon",

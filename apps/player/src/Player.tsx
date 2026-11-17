@@ -10,7 +10,8 @@ import {
   Minimize2,
   RotateCcw,
 } from 'lucide-preact';
-import { nextIndex, resolvePlacement } from './logic';
+import { nextIndex } from './logic';
+import { beaconCenter, themeVars, tipClass } from '@flowdsiml/player-core';
 import { strings, type Dict } from './i18n';
 import type { Tracker } from './api';
 import { LeadForm } from './LeadForm';
@@ -129,15 +130,7 @@ export function Player({ manifest: m, values, tracker, preview, onLead }: Props)
     return () => removeEventListener('keydown', onKey);
   });
 
-  const style = {
-    '--p-primary': theme.primary,
-    '--p-hotspot': theme.hotspot,
-    '--p-bg': theme.background,
-    '--p-surface': theme.surface,
-    '--p-text': theme.text,
-    '--p-radius': `${theme.radius}px`,
-    fontFamily: theme.fontFamily,
-  } as Record<string, string>;
+  const style = themeVars(theme);
 
   const chapterOf = (s: Step) => m.chapters.find((c) => c.id === s.chapterId);
   const progress = ((index + 1) / m.steps.length) * 100;
@@ -389,7 +382,7 @@ function Beacon({ h, label, onClick }: { h: Hotspot; label: string; onClick: () 
   return (
     <button
       class={`p-beacon ${h.pulse ? 'p-pulse' : ''}`}
-      style={{ left: `${(h.x + h.w / 2) * 100}%`, top: `${(h.y + h.h / 2) * 100}%` }}
+      style={beaconCenter(h)}
       aria-label={label}
       onClick={onClick}
     >
@@ -411,21 +404,10 @@ function Tooltip({
   t,
   sheet,
 }: TipProps & { sheet?: boolean }) {
-  const place = resolvePlacement(h.placement, h);
-  const cx = (h.x + h.w / 2) * 100;
-  const cy = (h.y + h.h / 2) * 100;
-  const pos: Record<string, string> = sheet ? {} : { left: `${cx}%`, top: `${cy}%` };
-  const shift =
-    !sheet && (place === 'top' || place === 'bottom')
-      ? cx < 22
-        ? 'p-tip-shift-r'
-        : cx > 78
-          ? 'p-tip-shift-l'
-          : ''
-      : '';
+  const pos: Record<string, string> = sheet ? {} : beaconCenter(h);
   return (
     <div
-      class={sheet ? 'p-sheet' : `p-tip p-tip-${place} ${shift}`}
+      class={sheet ? 'p-sheet' : tipClass(h, h.placement)}
       style={pos}
       role="dialog"
       aria-label={sub(h.title)}

@@ -364,3 +364,23 @@
   color: var(--fd-color-text-muted);
   min-width: 0;
 }
+/* Aperçu WYSIWYG : la zone cliquable reste éditable, la pastille et la bulle sont celles du player */
+.canvas-hotspot {
+  border: 1.5px dashed color-mix(in srgb, var(--p-hotspot, var(--fd-color-hotspot)) 70%, transparent);
+  background: color-mix(in srgb, var(--p-hotspot, var(--fd-color-hotspot)) 8%, transparent);
+}
+.canvas-hotspot.selected {
+  border-style: solid;
+  outline: none;
+  box-shadow: var(--fd-shadow-focus);
+}
+.canvas-hotspot-n {
+  display: none;
+}
+.canvas-beacon,
+.canvas-tip {
+  pointer-events: none;
+}
+.canvas-tip {
+  z-index: 4;
+}

@@ -21,6 +21,7 @@ import { ChaptersPanel } from './panels/ChaptersPanel';
 import { buildDraftManifest } from './draftManifest';
 import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
+import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
 
 /** Vrai si la fenêtre est plus étroite que `px` (ED11 : l'éditeur exige un écran large). */

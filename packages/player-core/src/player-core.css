@@ -1,0 +1,187 @@
+/* Styles partagés player ↔ aperçu WYSIWYG de l'éditeur (pastille, bulle, boutons).
+   Variables attendues : --p-primary, --p-hotspot, --p-surface, --p-text, --p-radius (voir themeVars()). */
+.p-tip,
+.p-beacon {
+  --p-shadow: 0 4px 8px rgb(31 29 26 / 6%), 0 18px 40px rgb(31 29 26 / 16%);
+}
+/* Hotspot : pastille 20 px, cible 44 px */
+.p-beacon {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 5;
+}
+.p-beacon-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--p-hotspot);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+}
+.p-pulse .p-beacon-dot {
+  animation: p-pulse 1.8s infinite;
+}
+@keyframes p-pulse {
+  0% {
+    box-shadow:
+      0 2px 6px rgb(0 0 0 / 30%),
+      0 0 0 0 color-mix(in srgb, var(--p-hotspot) 55%, transparent);
+  }
+  70% {
+    box-shadow:
+      0 2px 6px rgb(0 0 0 / 30%),
+      0 0 0 14px transparent;
+  }
+  100% {
+    box-shadow:
+      0 2px 6px rgb(0 0 0 / 30%),
+      0 0 0 0 transparent;
+  }
+}
+/* Bulle avec flèche, ancrée au centre de la pastille */
+.p-tip {
+  position: absolute;
+  z-index: 10;
+  width: min(300px, 70%);
+  background: var(--p-surface);
+  color: var(--p-text);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: var(--p-shadow);
+  font-size: 14px;
+  line-height: 1.5;
+  --gap: 22px;
+}
+.p-tip::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--p-surface);
+  transform: rotate(45deg);
+}
+.p-tip-bottom {
+  transform: translate(-50%, var(--gap));
+}
+.p-tip-bottom::after {
+  top: -6px;
+  left: calc(50% - 6px);
+}
+.p-tip-top {
+  transform: translate(-50%, calc(-100% - var(--gap)));
+}
+.p-tip-top::after {
+  bottom: -6px;
+  left: calc(50% - 6px);
+}
+.p-tip-right {
+  transform: translate(var(--gap), -50%);
+}
+.p-tip-right::after {
+  left: -6px;
+  top: calc(50% - 6px);
+}
+.p-tip-left {
+  transform: translate(calc(-100% - var(--gap)), -50%);
+}
+.p-tip-left::after {
+  right: -6px;
+  top: calc(50% - 6px);
+}
+.p-tip-bottom.p-tip-shift-r {
+  transform: translate(-24px, var(--gap));
+}
+.p-tip-top.p-tip-shift-r {
+  transform: translate(-24px, calc(-100% - var(--gap)));
+}
+.p-tip-shift-r::after {
+  left: 18px;
+}
+.p-tip-bottom.p-tip-shift-l {
+  transform: translate(calc(-100% + 24px), var(--gap));
+}
+.p-tip-top.p-tip-shift-l {
+  transform: translate(calc(-100% + 24px), calc(-100% - var(--gap)));
+}
+.p-tip-shift-l::after {
+  left: auto;
+  right: 18px;
+}
+.p-tip-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.p-tip-count {
+  font-size: 12px;
+  opacity: 0.65;
+  margin-right: auto;
+  font-variant-numeric: tabular-nums;
+}
+.p-rich a {
+  color: var(--p-primary);
+}
+.p-rich p {
+  margin: 0;
+}
+.is-compact .p-btn {
+  min-height: 44px;
+}
+.p-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.p-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1.2;
+}
+.p-btn-sm {
+  padding: 7px 12px;
+  font-size: 13px;
+}
+.p-btn-primary {
+  background: var(--p-primary);
+  color: #fff;
+}
+.p-btn-primary:hover {
+  filter: brightness(0.94);
+}
+.p-btn-ghost {
+  background: transparent;
+  color: inherit;
+  border-color: color-mix(in srgb, currentColor 22%, transparent);
+}
+.p-btn:disabled {
+  opacity: 0.6;
+}
+.p-text-step .p-actions {
+  justify-content: center;
+  margin-top: 24px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p-pulse .p-beacon-dot {
+    animation: none;
+  }
+}
