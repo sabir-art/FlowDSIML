@@ -599,3 +599,60 @@ Captures : `docs/ux/recette/debordements/`.
 - **PL2b** : l'explication du dev est **juste**, et ma recommandation était erronée. Avec un `transform-origin` dans [0 ; 1] et une échelle ≥ 1, l'image agrandie couvre toujours le cadre. La bande blanche venait du manifeste de test (image de 1 100 × 750 annoncée en 1 280 × 800). Corrigé dans `6ac3b65`, avec un contrôle e2e de couverture.
 
 À revérifier lors de la recette « Refonte » sur le build intégré.
+
+## Recette visuelle « Refonte DSI » (`main` @ `e22d750`)
+
+Tests :
+- **build intégré** avec le faux Supabase : dashboard, analytics d'une démo et éditeur, en 1 440, 1 024 et 390 px, thèmes clair et sombre (18 captures et mesures DOM), comparés aux maquettes `maquettes/refonte/` ;
+- **site réel** : écran de connexion et player Nordline.
+
+Captures : `docs/ux/recette/refonte/`.
+
+**Conforme aux maquettes**
+
+| Contrôle | Résultat |
+|---|---|
+| Police | ✅ Plus Jakarta Sans partout, y compris dans le player en ligne |
+| Fond / cartes | ✅ `#EEF2F6` en clair, `#0B0D10` en sombre. Cartes de 24 px sans bordure avec ombre douce en clair, bordure de 1 px en sombre |
+| Navigation | ✅ Pilule active noire avec texte blanc (claire avec texte noir en sombre), éléments de 44 px. Logo DSI avec « DSI des Missions Locales » |
+| Titres | ✅ `h1` de 32 px en 800 |
+| KPI | ✅ Carte héro verte avec texte noir, valeurs de 40 px, puces d'icône, badges de tendance pilules (hausse en vert, baisse en framboise, « — » neutre) |
+| Boutons | ✅ Pilules ; segmentés pour les périodes et les statuts ; bouton prune « Nouvelle démo » |
+| Dashboard | ✅ Filtres en segmenté, dossiers en pilules, carte « Nouvelle démo » en pointillés, vignettes claires en sombre, cloche absente |
+| Graphiques | ✅ Barres orange arrondies sur piste pâle, valeurs écrites au-dessus, pic en noir (en clair en sombre). Donut SVG sur 3 sources réelles (52 / 28 / 20 %). Entonnoir en barres horizontales |
+| Éditeur | ✅ Barre sur une ligne à 1 024 et 1 440 px (DB3 ✅), outils en segmenté noir (en icônes à 1 024 px), rail en cartes avec étape courante prune, canevas et vignettes clairs en sombre (DB2 ✅), panneau avec onglets pilules et interrupteurs |
+| Motifs proscrits | ✅ 0 dégradé, 0 emoji, aucun défilement horizontal de la page, dans les 18 configurations |
+| Player en ligne | ✅ Thème DSI par défaut : bouton « Réserver une démo » et « Suivant » en prune, pastille framboise, progression orange, Plus Jakarta Sans |
+
+**Écarts**
+
+| # | Gravité | Écran | Écart | Correction attendue |
+|---|---|---|---|---|
+| RF1 | ⚠️ | Dashboard et analytics, 390 px | Les 4 ou 5 KPI s'empilent sur **une colonne** (environ 160 px chacun) : il faut presque 2 écrans avant d'atteindre les démos. C'est ma spec (« 1 colonne sous 480 px ») qui était trop prudente | Sous 480 px : **grille de 2 colonnes**, la carte héro en pleine largeur (`grid-column: 1 / -1`), valeur en 28 px, pied réduit au seul badge de tendance (« vs 30 jours précédents » en texte `sr-only`). Je mets `refonte.md` §2 à jour |
+| RF2 | ⚠️ | Analytics, 1 024–1 279 px | 5 KPI sur 2 colonnes : la carte « Leads » reste seule sur sa ligne | Entre 1 024 et 1 279 px : **3 colonnes** (3 + 2). Au-delà de 1 280 px : 5 colonnes, comme aujourd'hui |
+| RF3 | ⚠️ | Analytics, 1 440 px | Avec 5 KPI, « Visiteurs uniques » et « Taux de complétion » passent sur 2 lignes, et le pied de la carte héro passe sous le badge. Les rangées sont irrégulières | `white-space: nowrap` + ellipse sur `.fd-kpi__label` (libellé complet dans `title`), pied sur une ligne (« vs 30 j préc. » si la largeur est inférieure à 220 px) |
+| RF4 | ⚠️ | Analytics, 390 px | Les titres de carte passent sur 2 ou 3 lignes à côté de leur action (« Vues par jour » + segmenté, « Parcours étape par étape » + Exporter). Les barres de l'entonnoir sont très courtes | Sous 480 px : `.fd-card__head { flex-wrap: wrap }`, action sur sa propre ligne. Entonnoir sur 2 lignes par étape (libellé au-dessus, puis barre, nombre et perte) |
+| RF5 | ℹ️ | Analytics, 390 px | Le tableau des leads défile horizontalement (`overflow-x: auto`, 576 px dans 308 px), mais rien ne l'indique | Ombre de bord droite quand il reste du contenu (`mask-image` ou ombre interne), ou affichage en liste sous 480 px (e-mail en titre, puis entreprise · date) |
+| RF6 | ⚠️ | Analytics d'une démo | **Aucune entrée de navigation n'est active** (`aria-current` absent). On ne sait plus où l'on est | Mettre en actif « Démos » sur toutes les routes `/demos/:id/*` (analytics, partage, éditeur), puisque ces écrans sont atteints depuis une démo. Le retour ← reste en place |
+| RF7 | ℹ️ | Donut | La légende affiche les % mais pas le nombre de vues (`text-subtle`) prévu par la spec | Ajouter le nombre de vues à droite du pourcentage, comme dans la maquette |
+| RF8 | — | Connexion (site réel) | Pas encore refondue : panneau gauche gris, pas de logo DSI blanc sur prune | Prévu au §7 (« Authentification »), en cours chez le dev. À revoir à la prochaine passe |
+
+**Bilan** : la refonte est **fidèle aux maquettes** sur les trois écrans, dans les deux thèmes, et DB2 et DB3 sont confirmés corrigés. 7 écarts, aucun bloquant : 5 d'ajustement responsive (RF1 à RF5, surtout en mobile), 1 de navigation (RF6) et 1 de détail (RF7). La connexion (RF8) reste à refondre au §7.
+
+### Refonte §7 (`claude/dev-mvp` @ `16f9d34`, inclus dans `main`) : captures du dev en clair et en sombre + site réel
+
+| Écran | Statut |
+|---|---|
+| Connexion / inscription | ✅ Panneau prune (identique en sombre) avec le logo DSI blanc officiel nettoyé, titre et arguments en blanc, champs pilules de 48 px, bouton prune pleine largeur. **En ligne sur le site réel** : RF8 est résolu |
+| Partage | ✅ Cartes avec puces d'icône (`Globe`, `Code`, `Link`, `History`), URL en pilule `readonly` avec « Copier » accolé, aperçu P12 dans une carte, « Dépublier » en `ghost` danger |
+| Paramètres | ✅ Formulaire en carte. Carte « Plan » avec jauges prune. **Zone de danger** : puce `TriangleAlert` sur `danger-soft` et bouton danger plein, conforme en sombre |
+| Plans | ✅ Plan actuel en carte **héro** verte avec texte noir et badge « Plan actuel » en pilule noire, les autres en blanc. Alerte info « Paiement en ligne bientôt disponible… » |
+| Leads, membres, profil | ✅ Même grammaire : tableaux en carte, actions en pilules |
+| Thème sombre | ✅ 22 captures `sombre/` cohérentes avec les maquettes |
+
+Points ouverts : RF6 (pas d'entrée de navigation active sur `/demos/:id/*`, visible aussi sur le partage) et RF1 à RF5, RF7.
+
+**Décision « Plans » (question du dev)** : pas de bouton « Choisir » tant que le changement de plan est manuel (D6). À la place, un **bouton secondaire « Nous contacter »** (`Mail`) dans l'alerte info et sous chaque plan non actuel :
+- `mailto:` vers l'adresse de support **configurable** (`VITE_SUPPORT_EMAIL`, jamais en dur dans le code, puisque le dépôt est public) ;
+- objet pré-rempli : « Changement de plan : {{workspace}} → {{plan}} » / « Plan change: {{workspace}} → {{plan}} » ;
+- si la variable n'est pas définie, le bouton est masqué et le texte actuel reste affiché.

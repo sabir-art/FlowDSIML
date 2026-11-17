@@ -54,7 +54,11 @@ Règles :
 - **Une seule carte héro par rangée**, toujours la première, sur la mesure principale (Vues). Fond vert DSI, **tout le texte en noir**, badge de tendance inversé (pilule noire, texte vert). Ces styles sont déjà fournis par `.fd-card--hero`.
 - Icônes Lucide par KPI : Vues `Eye`, Visiteurs `Users`, Complétion `Route`, Clics CTA `MousePointerClick`, Leads `Mail`.
 - `stat-delta--up` devient `.fd-trend--up` (`TrendingUp`), `--down` devient `.fd-trend--down` (`TrendingDown`). Sans période de référence : `.fd-trend` neutre avec « — », plus le texte pour lecteur d'écran déjà en place.
-- La rangée `.stat-row` passe en grille de 4 colonnes avec un gap de 20 px (2 colonnes sous 1 100 px, 1 sous 480 px). Pour 5 KPI : 5 colonnes au-dessus de 1 280 px.
+- La rangée `.stat-row` passe en grille avec un gap de 20 px :
+  - **4 KPI** : 4 colonnes, puis 2 sous 1 100 px ;
+  - **5 KPI** : 5 colonnes au-dessus de 1 280 px, 3 colonnes (3 + 2) entre 1 024 et 1 279 px, puis 2 en dessous ;
+  - **sous 480 px** : toujours **2 colonnes**, la carte héro en pleine largeur (`grid-column: 1 / -1`), valeur en 28 px, pied réduit au badge de tendance (texte « vs … » en `sr-only`). C'est une révision après la recette RF1 : 1 colonne repoussait le contenu de 2 écrans.
+- `.fd-kpi__label` reste sur une ligne (`nowrap` + ellipse, libellé complet dans `title`).
 - Valeur en `.fd-kpi__value` : 40 px, 800, chiffres tabulaires.
 
 ## 3. Graphiques (`components/charts.tsx` → `DailyBars`, entonnoir)
