@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { install } = require('./fake-supabase.cjs');
 const { seedMaquette } = require('./maquette-data.cjs');
-const { learnersFixture } = require('./learners-data.cjs');
+const { learnersFixture, resumeFixture } = require('./learners-data.cjs');
 
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const MAQ = path.resolve(__dirname, '../../../docs/ux/maquettes');
@@ -510,6 +510,15 @@ const SCREENS = {
       await p.waitForTimeout(400);
     },
   },
+  'L13-06': {
+    maquette: 'refonte/f3-suivi.html?view=resume',
+    player: true,
+    playerPath: '/l/jeton-exemple',
+    rpc: (m) => ({
+      resolve_share_link: { demoId: m.demoId, linkId: 'link-1', variables: { first_name: 'Alex' } },
+      learner_resume: resumeFixture(m.demoId),
+    }),
+  },
   // L11 : partage sécurisé (onglet Accès, écrans visiteur)
   'L11-01': {
     maquette: 'reference/partage-securise.html?etat=mdp',
@@ -821,14 +830,18 @@ async function shotPlayer(b, s, theme) {
   await p.route('**/assets/a.webp', (r) =>
     r.fulfill({ contentType: 'image/png', body: fs.readFileSync(path.join(__dirname, 'fixture.png')) }),
   );
-  await p.route('**/rest/v1/rpc/**', (r) =>
-    r.fulfill({
+  await p.route('**/rest/v1/rpc/**', (r) => {
+    const fn = new URL(r.request().url()).pathname.split('/').pop();
+    const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' };
+    if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+    // L13-06 : réponses propres à l'état (lien personnalisé, reprise) ; PLY-06 : un lien expiré ne se résout pas
+    const rpc = s.rpc?.(manifest)?.[fn];
+    return r.fulfill({
       contentType: 'application/json',
-      // PLY-06 : un lien expiré ne se résout pas
-      body: s.playerPath ? 'null' : '"ok"',
-      headers: { 'access-control-allow-origin': '*' },
-    }),
-  );
+      body: rpc !== undefined ? JSON.stringify(rpc) : s.playerPath ? 'null' : '"ok"',
+      headers: cors,
+    });
+  });
   await p.goto(`${PLAYER}/#${s.playerPath ?? `/d/${manifest.demoId}`}`);
   await p.waitForSelector(s.playerPath || s.gate ? '.p-sys-card' : '.p-stage');
   await p.waitForTimeout(900);

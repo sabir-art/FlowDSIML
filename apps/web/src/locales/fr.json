@@ -1749,7 +1749,8 @@
       "typeEmail": "Saisissez",
       "typeName": "Saisissez le nom",
       "confirm": "Supprimer définitivement",
-      "done": "Les données de l'apprenant ont été supprimées."
+      "done": "Les données de l'apprenant ont été supprimées.",
+      "toConfirm": "pour confirmer"
     },
     "export": {
       "title": "Exporter en CSV",

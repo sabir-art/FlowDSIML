@@ -932,7 +932,8 @@ body {
 /* Titres qui reçoivent le focus par script (annonce) : pas d'anneau de focus */
 .p-root .p-quiz-status h3:focus-visible,
 .p-root .p-quiz-result h2:focus-visible,
-.p-root .p-quiz-fieldset legend:focus-visible {
+.p-root .p-quiz-fieldset legend:focus-visible,
+.p-root .p-resume h1:focus-visible {
   box-shadow: none;
 }
 

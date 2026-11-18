@@ -76,7 +76,7 @@ export function ResumeCard({
                     {done
                       ? r.validated
                       : x.current
-                        ? `${m.seen} / ${m.total}`
+                        ? `${next} / ${m.total}`
                         : locked
                           ? fmt(r, 'after', { n: i })
                           : x.seen

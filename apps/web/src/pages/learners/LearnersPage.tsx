@@ -1427,7 +1427,8 @@ function EraseDialog({
             {error && <Alert kind="error">{error}</Alert>}
             <label className="fd-field">
               <span className="fd-label">
-                {t(row.raw.email ? 'learners.erase.typeEmail' : 'learners.erase.typeName')} <b>{expected}</b>
+                {t(row.raw.email ? 'learners.erase.typeEmail' : 'learners.erase.typeName')} <b>{expected}</b>{' '}
+                {t('learners.erase.toConfirm')}
               </span>
               <input
                 className="fd-input"

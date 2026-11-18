@@ -132,4 +132,21 @@ function learnersFixture(now = Date.now()) {
   return { progress: { paths, structures, learners }, detail };
 }
 
-module.exports = { learnersFixture };
+/** L13-06 : réponse fictive de learner_resume pour la démo de player-maquette.cjs (6 étapes). */
+function resumeFixture(demoId) {
+  return {
+    firstName: 'Alex',
+    module: { demoId, seen: 3, total: 6, status: 'in_progress' },
+    path: {
+      title: 'Logiciel métier',
+      ordered: true,
+      modules: [
+        { title: 'Prise en main', status: 'validated', seen: 8, total: 8, current: false },
+        { title: 'Fiches usagers', status: 'in_progress', seen: 3, total: 6, current: true },
+        { title: 'Agenda', status: null, seen: null, total: null, current: false },
+      ],
+    },
+  };
+}
+
+module.exports = { learnersFixture, resumeFixture };

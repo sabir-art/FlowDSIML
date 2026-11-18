@@ -1749,7 +1749,8 @@
       "typeEmail": "Type",
       "typeName": "Type the name",
       "confirm": "Delete permanently",
-      "done": "The learner's data has been deleted."
+      "done": "The learner's data has been deleted.",
+      "toConfirm": "to confirm"
     },
     "export": {
       "title": "Export as CSV",
