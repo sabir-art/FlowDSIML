@@ -25,6 +25,20 @@ export function StepPanel({
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
   const zoom = asZoom(step.zoom);
+  const zoomExtra = (step.zoom ?? {}) as { transition?: 'smooth' | 'instant'; keep?: boolean };
+  const setZoom = (p: Record<string, unknown>) =>
+    editor.updateStep(step.id, {
+      zoom: { ...(step.zoom as Record<string, unknown>), ...p } as StepRow['zoom'],
+    });
+  /** Centre borné : le cadre de zoom reste dans l'image. */
+  const center = (x: number, y: number, scale: number) => {
+    const half = 0.5 / scale;
+    const c = (v: number) => Math.round(Math.min(1 - half, Math.max(half, v)) * 10000) / 10000;
+    return { x: c(x), y: c(y) };
+  };
+  const firstHotspot = editor.hotspots
+    .filter((h) => h.step_id === step.id)
+    .sort((a, b) => a.position - b.position)[0];
   const blurs = asRects(step.blurs);
   const varKeys = editor.variables.map((v) => v.key);
   const plan = usePlan();
@@ -165,7 +179,9 @@ export function StepPanel({
                 disabled={readOnly}
                 onChange={(e) =>
                   editor.updateStep(step.id, {
-                    zoom: e.target.checked ? { x: 0.5, y: 0.5, scale: 1.5 } : null,
+                    zoom: e.target.checked
+                      ? { x: 0.5, y: 0.5, scale: 2, transition: 'smooth', keep: false }
+                      : null,
                   })
                 }
               />
@@ -174,38 +190,102 @@ export function StepPanel({
           </div>
           {zoom && (
             <>
-              {(['x', 'y'] as const).map((k) => (
-                <div key={k} className="field">
-                  <label htmlFor={`zoom-${k}`}>{t(`editor.zoom_${k}`)}</label>
-                  <input
-                    id={`zoom-${k}`}
-                    type="range"
-                    min={0}
-                    max={1}
-                    step={0.01}
+              {/* L12-02 : niveau, position en %, centrage sur le hotspot, mouvement */}
+              <span className="label" id="zl">
+                {t('editor.zoomLevel')}
+              </span>
+              <div className="segmented zoom-levels" role="radiogroup" aria-labelledby="zl">
+                {[1.5, 2, 3].map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    role="radio"
+                    aria-checked={Math.abs(zoom.scale - v) < 0.05}
                     disabled={readOnly}
-                    value={zoom[k]}
-                    onChange={(e) =>
-                      editor.updateStep(step.id, { zoom: { ...zoom, [k]: Number(e.target.value) } })
-                    }
-                  />
-                </div>
-              ))}
-              <div className="field">
-                <label htmlFor="zoom-s">{t('editor.zoomScale', { v: zoom.scale.toFixed(1) })}</label>
-                <input
-                  id="zoom-s"
-                  type="range"
-                  min={1}
-                  max={4}
-                  step={0.1}
-                  disabled={readOnly}
-                  value={zoom.scale}
-                  onChange={(e) =>
-                    editor.updateStep(step.id, { zoom: { ...zoom, scale: Number(e.target.value) } })
-                  }
-                />
+                    onClick={() => setZoom({ scale: v, ...center(zoom.x, zoom.y, v) })}
+                  >
+                    {Math.round(v * 100)}&nbsp;%
+                  </button>
+                ))}
               </div>
+              <p className="help zoom-help">{t('editor.zoomHelp')}</p>
+              <div className="zoom-pos">
+                {(['x', 'y'] as const).map((k) => (
+                  <div key={k} className="field">
+                    <label htmlFor={`zoom-${k}`}>{t(`editor.zoom_${k}`)}</label>
+                    <div className="input-affix-r">
+                      <input
+                        id={`zoom-${k}`}
+                        className="input input-sm"
+                        type="number"
+                        min={0}
+                        max={100}
+                        disabled={readOnly}
+                        value={Math.round(zoom[k] * 100)}
+                        onChange={(e) => {
+                          const v = Number(e.target.value) / 100;
+                          const p = { x: zoom.x, y: zoom.y, [k]: v };
+                          setZoom(center(p.x, p.y, zoom.scale));
+                        }}
+                      />
+                      <span aria-hidden="true">%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {firstHotspot && (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm zoom-center"
+                  disabled={readOnly}
+                  onClick={() =>
+                    setZoom(
+                      center(
+                        firstHotspot.x + firstHotspot.w / 2,
+                        firstHotspot.y + firstHotspot.h / 2,
+                        zoom.scale,
+                      ),
+                    )
+                  }
+                >
+                  <Target aria-hidden="true" />
+                  {t('editor.zoomCenter')}
+                </button>
+              )}
+              <div className="sec-sub">{t('editor.zoomMotion')}</div>
+              <span className="label" id="zt">
+                {t('editor.zoomTransition')}
+              </span>
+              <div className="segmented zoom-levels" role="radiogroup" aria-labelledby="zt">
+                {(['smooth', 'instant'] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    role="radio"
+                    aria-checked={(zoomExtra.transition ?? 'smooth') === v}
+                    disabled={readOnly}
+                    onClick={() => setZoom({ transition: v })}
+                  >
+                    {t(`editor.zoomTr.${v}`)}
+                  </button>
+                ))}
+              </div>
+              <div className="setting">
+                <span className="t-label" id="zoom-keep">
+                  {t('editor.zoomKeep')}
+                </span>
+                <span className="switch">
+                  <input
+                    type="checkbox"
+                    aria-labelledby="zoom-keep"
+                    checked={!!zoomExtra.keep}
+                    disabled={readOnly}
+                    onChange={(e) => setZoom({ keep: e.target.checked })}
+                  />
+                  <span />
+                </span>
+              </div>
+              <p className="help zoom-help">{t('editor.zoomMotionHelp')}</p>
             </>
           )}
         </div>

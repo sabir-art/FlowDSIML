@@ -1,8 +1,18 @@
-import { ChevronLeft, Crop, MessageSquare, Target, Trash2 } from 'lucide-react';
+import { ChevronLeft, Crop, Layers, MessageSquare, Target, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { ApplyStyleDialog } from '../ApplyStyleDialog';
 import { useTranslation } from 'react-i18next';
-import type { HotspotAction } from '@flowdsiml/manifest';
+import type { HotspotAction, StepOptions } from '@flowdsiml/manifest';
 import type { DemoEditor } from '../useDemoEditor';
-import { asAction, asCta, asSettings, type HotspotRow, type Selection } from '../types';
+import {
+  asAction,
+  asCta,
+  asSettings,
+  asStepOptions,
+  type HotspotRow,
+  type Selection,
+  type StepRow,
+} from '../types';
 import { RichTextField } from '../RichTextField';
 import { VariablePreview } from '../VariablePreview';
 import { CtaFields } from './CtaFields';
@@ -30,6 +40,7 @@ export function HotspotPanel({
   setSelection: (s: Selection) => void;
 }) {
   const { t } = useTranslation();
+  const [applying, setApplying] = useState(false);
   const action = asAction(hotspot.action);
   const varKeys = editor.variables.map((v) => v.key);
   const set = (patch: Partial<HotspotRow>) => editor.updateHotspot(hotspot.id, patch);
@@ -37,6 +48,11 @@ export function HotspotPanel({
   const style = demoSpotlight ? 'spotlight' : hotspot.style === 'spotlight' ? 'spotlight' : 'beacon';
   const auto = hotspot.placement === 'auto';
   const advances = action.type !== 'none';
+  const step = editor.steps.find((st) => st.id === hotspot.step_id);
+  const opts = asStepOptions(step?.options);
+  const isLast = !!step && editor.steps[editor.steps.length - 1]?.id === step.id;
+  const setOpts = (patch: Partial<StepOptions>) =>
+    step && editor.updateStep(step.id, { options: { ...opts, ...patch } as unknown as StepRow['options'] });
 
   function setActionType(type: HotspotAction['type']) {
     const next: HotspotAction =
@@ -201,19 +217,56 @@ export function HotspotPanel({
       </div>
 
       <div className="sec">
-        <div className="sec-title">
-          {t('editor.hs.buttons')}
-          <span className="badge badge-xs">{t('shell.soon')}</span>
-        </div>
+        {/* L12-05 : libellés de la bulle (vides = ceux du thème) et bouton « Précédent » facultatif */}
+        <div className="sec-title">{t('editor.hs.buttons')}</div>
         <div className="hs-btns">
           <div className="field">
             <label htmlFor="hs-prev">{t('editor.hs.prev')}</label>
-            <input id="hs-prev" className="input input-sm" disabled value={t('editor.hs.prev')} readOnly />
+            <input
+              id="hs-prev"
+              className="input input-sm"
+              maxLength={24}
+              disabled={readOnly}
+              value={opts.prevLabel}
+              placeholder={t('editor.hs.prev')}
+              aria-describedby="hs-prev-c"
+              onChange={(e) => setOpts({ prevLabel: e.target.value })}
+            />
+            <span className="help" id="hs-prev-c">
+              {opts.prevLabel.length} / 24
+            </span>
           </div>
           <div className="field">
             <label htmlFor="hs-next">{t('editor.hs.next')}</label>
-            <input id="hs-next" className="input input-sm" disabled value={t('editor.hs.next')} readOnly />
+            <input
+              id="hs-next"
+              className="input input-sm"
+              maxLength={24}
+              disabled={readOnly}
+              value={opts.buttonLabel}
+              placeholder={isLast ? t('editor.hs.finish') : t('editor.hs.next')}
+              aria-describedby="hs-next-c"
+              onChange={(e) => setOpts({ buttonLabel: e.target.value })}
+            />
+            <span className="help" id="hs-next-c">
+              {opts.buttonLabel.length} / 24
+            </span>
           </div>
+        </div>
+        <div className="setting">
+          <span className="t-label" id="hs-showprev">
+            {t('editor.hs.showPrev')}
+          </span>
+          <span className="switch">
+            <input
+              type="checkbox"
+              aria-labelledby="hs-showprev"
+              checked={opts.showPrev}
+              disabled={readOnly}
+              onChange={(e) => setOpts({ showPrev: e.target.checked })}
+            />
+            <span />
+          </span>
         </div>
         <div className="setting">
           <span className="t-label" id="hs-adv">
@@ -230,7 +283,33 @@ export function HotspotPanel({
             <span />
           </span>
         </div>
+        <p className="help hs-btns-help">{t('editor.hs.labelsHelp')}</p>
       </div>
+
+      {/* L12-03 : copier le style de cette étape sur toutes les étapes à bulle */}
+      {!readOnly && step && (
+        <div className="sec">
+          <div className="sec-title">{t('editor.applyStyle.section')}</div>
+          <p className="help hs-style-help">{t('editor.applyStyle.sectionHelp')}</p>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm btn-block"
+            onClick={() => setApplying(true)}
+          >
+            <Layers aria-hidden="true" />
+            {t('editor.applyStyle.open')}
+          </button>
+          {applying && (
+            <ApplyStyleDialog
+              editor={editor}
+              step={step}
+              index={editor.steps.indexOf(step)}
+              hotspot={hotspot}
+              onClose={() => setApplying(false)}
+            />
+          )}
+        </div>
+      )}
 
       <div className="sec">
         <div className="sec-title">{t('editor.action')}</div>

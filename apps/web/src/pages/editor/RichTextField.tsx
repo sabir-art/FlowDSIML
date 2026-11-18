@@ -1,3 +1,4 @@
+import type React from 'react';
 import { Bold, Braces, Italic, Link2 } from 'lucide-react';
 import { useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -78,6 +79,16 @@ export function RichTextField({
   const ref = useRef<HTMLTextAreaElement>(null);
   const hl = useRef<HTMLDivElement>(null);
 
+  /** L12-06 : Ctrl B (gras) et Ctrl I (italique), ⌘ sur Mac. */
+  function onFormatKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+    const k = e.key.toLowerCase();
+    if (k === 'b' || k === 'i') {
+      e.preventDefault();
+      wrap(k === 'b' ? '**' : '*');
+    }
+  }
+
   function wrap(before: string, after = before, placeholder = '') {
     const el = ref.current;
     if (!el) return;
@@ -133,6 +144,7 @@ export function RichTextField({
               disabled={disabled}
               maxLength={4000}
               onChange={(e) => onChange(e.target.value)}
+              onKeyDown={onFormatKey}
               onScroll={(e) => {
                 if (hl.current) hl.current.scrollTop = e.currentTarget.scrollTop;
               }}
@@ -205,6 +217,7 @@ export function RichTextField({
         disabled={disabled}
         maxLength={4000}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onFormatKey}
       />
       <div className="rt-meta">
         <span className="fd-muted">{t('editor.chars', { n: value.length, max: 4000 })}</span>

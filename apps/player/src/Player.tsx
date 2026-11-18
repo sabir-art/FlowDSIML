@@ -293,6 +293,10 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
     total: m.steps.length,
     finish: last && !m.quiz,
     onNext: () => onHotspot(primary),
+    // L12-05 : libellés de la bulle propres à l'étape (vides = ceux du thème)
+    nextLabel: step.options.buttonLabel ? sub(step.options.buttonLabel) : '',
+    prevLabel: step.options.prevLabel ? sub(step.options.prevLabel) : '',
+    onPrev: step.options.showPrev && index > 0 ? () => go(index - 1) : undefined,
     t,
   };
 
@@ -458,6 +462,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
             onHotspot={onHotspot}
             onCta={onCta}
             tip={!compact && !gateForm && !ended ? tipProps : undefined}
+            carry={index > 0 && m.steps[index - 1]?.zoom?.keep ? m.steps[index - 1]!.zoom : null}
           />
         ) : (
           <>
@@ -708,6 +713,10 @@ type TipProps = {
   /** PY-6 : dernière étape sans quiz, le bouton devient « Terminer ». */
   finish: boolean;
   onNext: () => void;
+  nextLabel: string;
+  prevLabel: string;
+  /** Présent si « Afficher « Précédent » » est activé et qu'une étape précède. */
+  onPrev?: () => void;
   t: Dict;
 };
 
@@ -718,8 +727,11 @@ function ImageStep({
   onCta,
   tip,
   dimmed = false,
+  carry = null,
 }: {
   step: Step;
+  /** L12-02 : zoom de l'étape précédente marqué « garder », repris si cette étape n'a pas le sien. */
+  carry?: Step['zoom'];
   sub: (s: string) => string;
   onHotspot: (h: Hotspot) => void;
   onCta: (url: string, label: string) => void;
@@ -728,8 +740,9 @@ function ImageStep({
   dimmed?: boolean;
 }) {
   const img = step.image!;
-  const zoom = step.zoom;
-  const [zoomed, setZoomed] = useState(false);
+  const zoom = step.zoom ?? carry;
+  // Zoom repris de l'étape précédente, ou transition « Directe » : pas d'animation d'entrée
+  const [zoomed, setZoomed] = useState(!step.zoom && !!carry);
   useEffect(() => {
     if (!zoom) return;
     const id = requestAnimationFrame(() => setZoomed(true));
@@ -749,19 +762,25 @@ function ImageStep({
       class={`p-stage${dimmed ? ' is-backdrop' : ''}`}
       style={{ '--ratio': String(img.width / img.height) }}
     >
-      <div class="p-zoom" style={{ transform, transformOrigin: origin }}>
+      <div
+        class={`p-zoom${zoom?.transition === 'instant' ? ' is-instant' : ''}`}
+        style={{ transform, transformOrigin: origin }}
+      >
         <img class="p-img" src={img.url} alt={sub(step.title)} draggable={false} />
         {step.blurs.map((b, i) => (
           <div
             key={i}
-            class="p-blur"
+            class={`p-blur${b.style === 'solid' ? ' p-blur--solid' : b.style === 'pixels' ? ' p-blur--pixels' : ''}`}
             style={{
               left: `${b.x * 100}%`,
               top: `${b.y * 100}%`,
               width: `${b.w * 100}%`,
               height: `${b.h * 100}%`,
+              ...(b.style === 'solid' ? { background: b.color } : {}),
             }}
-          />
+          >
+            {b.style === 'solid' && b.text ? <span>{b.text}</span> : null}
+          </div>
         ))}
       </div>
       {!dimmed && step.hotspots.some((h) => h.style === 'spotlight') && (
@@ -835,6 +854,9 @@ function Tooltip({
   total,
   finish,
   onNext,
+  nextLabel,
+  prevLabel,
+  onPrev,
   t,
   sheet,
 }: TipProps & { sheet?: boolean }) {
@@ -859,9 +881,14 @@ function Tooltip({
             <ExternalLink {...ICON} size={14} />
           </button>
         )}
+        {onPrev && (
+          <button class="p-btn p-btn-ghost p-btn-sm p-tip-prev" onClick={onPrev}>
+            {prevLabel || t.prev}
+          </button>
+        )}
         {h.action.type !== 'none' && !h.cta && (
           <button class="p-btn p-btn-primary p-btn-sm" onClick={onNext}>
-            {finish && h.action.type === 'next' ? t.finish : t.next}
+            {nextLabel || (finish && h.action.type === 'next' ? t.finish : t.next)}
             <ChevronRight {...ICON} size={14} />
           </button>
         )}

@@ -48,6 +48,14 @@ export type FormField = {
 
 /** Accès typés aux colonnes JSON. */
 export const asRects = (v: unknown): Rect[] => (Array.isArray(v) ? (v as Rect[]) : []);
+/** L12-01 : zones masquées (flou, pixels, aplat) telles qu'enregistrées dans steps.blurs. */
+export type MaskRect = Rect & {
+  style?: 'blur' | 'pixels' | 'solid';
+  color?: string;
+  text?: string;
+  group?: string;
+};
+export const asMasks = (v: unknown): MaskRect[] => (Array.isArray(v) ? (v as MaskRect[]) : []);
 export const asZoom = (v: unknown): Zoom | null => (v && typeof v === 'object' ? (v as Zoom) : null);
 export const asCta = (v: unknown): Cta | null =>
   v && typeof v === 'object' && 'url' in (v as object) ? (v as Cta) : null;

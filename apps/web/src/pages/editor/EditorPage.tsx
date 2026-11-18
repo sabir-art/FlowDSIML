@@ -11,6 +11,7 @@ import {
   GraduationCap,
   Image as ImageIcon,
   Keyboard,
+  Search,
   Palette,
   PenLine,
   Redo2,
@@ -42,6 +43,8 @@ import { buildDraftManifest } from './draftManifest';
 import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
 import { PreviewDialog } from './PreviewDialog';
+import { FindBar } from './FindBar';
+import { ShortcutsDialog, isMac } from './ShortcutsDialog';
 import type { Manifest } from '@flowdsiml/manifest';
 import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
@@ -83,6 +86,10 @@ export function EditorPage() {
   const readOnly = !can('demo.edit');
   const narrow = useNarrow(1024);
   const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);
+  // L12 : rechercher-remplacer (pastilles du rail) et modale des raccourcis
+  const [findOpen, setFindOpen] = useState(false);
+  const [findHits, setFindHits] = useState<Record<number, number>>({});
+  const [keysOpen, setKeysOpen] = useState(false);
   const [zoom, setZoom] = useState<Zoom>('fit');
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -114,8 +121,47 @@ export function EditorPage() {
   // Raccourcis clavier : flèches pour naviguer, Suppr pour le hotspot sélectionné.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      const mod = e.ctrlKey || e.metaKey;
+      const key = e.key.toLowerCase();
+      // L12 : raccourcis globaux, actifs même pendant la saisie
+      if (mod && key === 'f' && !e.altKey) {
+        e.preventDefault();
+        setFindOpen(true);
+        return;
+      }
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if ((e.target as HTMLElement)?.isContentEditable) return;
+      // Ctrl Entrée : aperçu (hors saisie, où il sert à envoyer un commentaire)
+      if (mod && e.key === 'Enter') {
+        e.preventDefault();
+        setPreviewManifest(buildDraftManifest(editor, ws?.name ?? ''));
+        return;
+      }
+      // Annuler / rétablir (le champ en cours de saisie garde son propre Ctrl Z)
+      if (mod && key === 'z' && !readOnly) {
+        e.preventDefault();
+        if (e.shiftKey) editor.redo();
+        else editor.undo();
+        return;
+      }
+      if (mod && key === 'y' && !readOnly) {
+        e.preventDefault();
+        editor.redo();
+        return;
+      }
+      if (mod || e.altKey) return;
+      // Raccourcis à une lettre : jamais pendant la saisie (vérifié plus haut)
+      if (e.key === '?') {
+        e.preventDefault();
+        setKeysOpen(true);
+        return;
+      }
+      if (!readOnly && (key === 'h' || key === 'b')) {
+        const k = key === 'h' ? 'hotspot' : 'blur';
+        setTool((cur) => (cur === k ? 'select' : k));
+        return;
+      }
       if ((e.target as HTMLElement)?.closest?.('[data-canvas-item], .cm, #fd-portal')) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight')
         setIndex((i) => Math.min(i + 1, editor.steps.length - 1));
@@ -131,7 +177,7 @@ export function EditorPage() {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [editor, selection, readOnly]);
+  }, [editor, selection, readOnly, ws]);
 
   if (narrow) {
     // Écran étroit : l'éditeur reste indisponible, mais on lit et on répond aux commentaires (commentaires.md §5)
@@ -252,22 +298,24 @@ export function EditorPage() {
           {t(`editor.save_${editor.saveState === 'idle' ? 'saved' : editor.saveState}`)}
         </span>
         <span className="grow" />
-        {/* Annuler / rétablir : pas encore disponibles */}
+        {/* L12 : annuler / rétablir (Ctrl Z, Ctrl Maj Z) */}
         <button
           type="button"
           className="btn btn-ghost btn-sm btn-icon"
-          aria-label={`${t('editor.undo')} · ${t('shell.soon')}`}
-          title={t('shell.soon')}
-          aria-disabled="true"
+          aria-label={t('editor.undo')}
+          title={`${t('editor.undo')} (${isMac ? '⌘' : 'Ctrl'} Z)`}
+          disabled={readOnly || !editor.canUndo}
+          onClick={() => editor.undo()}
         >
           <Undo2 aria-hidden="true" />
         </button>
         <button
           type="button"
           className="btn btn-ghost btn-sm btn-icon"
-          aria-label={`${t('editor.redo')} · ${t('shell.soon')}`}
-          title={t('shell.soon')}
-          aria-disabled="true"
+          aria-label={t('editor.redo')}
+          title={`${t('editor.redo')} (${isMac ? '⌘' : 'Ctrl'} ${t('editor.keys.shift')} Z)`}
+          disabled={readOnly || !editor.canRedo}
+          onClick={() => editor.redo()}
         >
           <Redo2 aria-hidden="true" />
         </button>
@@ -315,16 +363,16 @@ export function EditorPage() {
               onSelect: () => undefined,
             },
             {
+              label: t('editor.find.label'),
+              icon: <Search />,
+              end: <kbd className="menu-kbd">{isMac ? '⌘' : 'Ctrl'} F</kbd>,
+              onSelect: () => setFindOpen(true),
+            },
+            {
               label: t('editor.shortcuts'),
               icon: <Keyboard />,
-              disabled: true,
-              end: (
-                <>
-                  <kbd className="menu-kbd">?</kbd>
-                  <span className="fd-badge menu-soon">{t('shell.soon')}</span>
-                </>
-              ),
-              onSelect: () => undefined,
+              end: <kbd className="menu-kbd">?</kbd>,
+              onSelect: () => setKeysOpen(true),
             },
             'separator',
             ...(can('demo.edit')
@@ -378,6 +426,7 @@ export function EditorPage() {
               setSelection({ kind: 'step' });
             }}
             readOnly={readOnly}
+            findHits={findOpen ? findHits : undefined}
             openComments={comments.openByStep}
             selectedFormId={selectedForm?.id ?? null}
             onSelectForm={(i, id) => {
@@ -408,6 +457,20 @@ export function EditorPage() {
               <option value="100">100 %</option>
             </select>
           </div>
+          {findOpen && (
+            <FindBar
+              editor={editor}
+              readOnly={readOnly}
+              onHits={setFindHits}
+              onClose={() => setFindOpen(false)}
+              onGoto={(i, hotspotId) => {
+                setIndex(i);
+                setSelection(hotspotId ? { kind: 'hotspot', id: hotspotId } : { kind: 'step' });
+                setTab('step');
+              }}
+            />
+          )}
+          {keysOpen && <ShortcutsDialog onClose={() => setKeysOpen(false)} />}
           <div className="stage-main">
             <div className="stage-inner">
               {step ? (

@@ -29,6 +29,7 @@ export function StepList({
   onSelect,
   readOnly,
   openComments = {},
+  findHits,
   selectedFormId = null,
   onSelectForm,
 }: {
@@ -41,6 +42,8 @@ export function StepList({
   readOnly: boolean;
   /** Nombre de commentaires ouverts par étape (badge du rail). */
   openComments?: Record<string, number>;
+  /** L12-04 : nombre de résultats de recherche par index d'étape (pastille orange). */
+  findHits?: Record<number, number>;
 }) {
   const { t } = useTranslation();
   const { current: ws } = useWorkspace();
@@ -281,6 +284,12 @@ export function StepList({
                       <span className="th-card fd-player-scope">{s.title || t('editor.untitled')}</span>
                     ) : (
                       <ImageOff aria-hidden="true" className="th-missing" />
+                    )}
+                    {!!findHits?.[i] && (
+                      <span className="rail-hits">
+                        <span aria-hidden="true">{findHits[i]}</span>
+                        <span className="sr-only">{t('editor.find.railHits', { count: findHits[i] })}</span>
+                      </span>
                     )}
                   </span>
                   <span className="meta">

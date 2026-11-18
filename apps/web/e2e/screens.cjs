@@ -62,6 +62,12 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await p.waitForSelector('#hs-title');
   await shot(p, '08-editeur-hotspot');
   await p.getByRole('button', { name: 'Publier' }).click();
+  // F1 : confirmation RGPD avant la publication publique
+  const gdpr = p.locator('dialog.gdpr-dialog[open]');
+  await gdpr.waitFor();
+  await gdpr.getByLabel(/J’ai relu|J'ai relu/).check();
+  await gdpr.getByLabel(/fictives ou floutées/).check();
+  await gdpr.getByRole('button', { name: 'Publier en public' }).click();
   await p.waitForURL(/share/);
   await p.waitForTimeout(500);
   await shot(p, '09-partage', true);

@@ -7,6 +7,11 @@ import type { ChapterRow, DemoRow, FormRow, HotspotRow, QuestionRow, StepRow, Va
 
 type Table = 'demos' | 'steps' | 'hotspots' | 'chapters' | 'forms' | 'variables' | 'quiz_questions';
 type Patch = Record<string, unknown>;
+/** L12 : modification annulable (valeurs avant / après des seuls champs modifiés). */
+type Change = { table: 'demos' | 'steps' | 'hotspots'; id: string; before: Patch; after: Patch };
+type HistoryEntry = { changes: Change[]; key: string | null; at: number };
+/** Saisies successives d'un même champ fusionnées en une seule étape d'annulation. */
+const COALESCE_MS = 1500;
 
 export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -27,6 +32,12 @@ export function useDemoEditor(demoId: string) {
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [lastError, setLastError] = useState<unknown>(null);
+  // L12 : historique d'annulation (Ctrl Z / Ctrl Maj Z) des modifications de démo, étapes et hotspots
+  const undoStack = useRef<HistoryEntry[]>([]);
+  const redoStack = useRef<HistoryEntry[]>([]);
+  const batchRef = useRef<Change[] | null>(null);
+  const [history, setHistory] = useState({ undo: 0, redo: 0 });
+  const syncHistory = () => setHistory({ undo: undoStack.current.length, redo: redoStack.current.length });
 
   const pending = useRef(new Map<string, { table: Table; id: string; patch: Patch }>());
   const timer = useRef<number | undefined>(undefined);
@@ -125,20 +136,80 @@ export function useDemoEditor(demoId: string) {
     }
   }, []);
 
-  const api = useMemo(
-    () => ({
+  const api = useMemo(() => {
+    const apply = (table: Change['table'], id: string, patch: Patch) => {
+      if (table === 'demos') setDemo((d) => (d ? { ...d, ...patch } : d));
+      if (table === 'steps') setSteps((list) => list.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+      if (table === 'hotspots')
+        setHotspots((list) => list.map((h) => (h.id === id ? { ...h, ...patch } : h)));
+      queue(table, id, patch);
+    };
+    const record = (table: Change['table'], id: string, row: Patch | undefined, patch: Patch) => {
+      if (!row) return;
+      // Champ absent = null (undefined disparaîtrait de la requête et ne serait pas rétabli)
+      const before = Object.fromEntries(Object.keys(patch).map((k) => [k, row[k] ?? null]));
+      const change: Change = { table, id, before, after: { ...patch } };
+      if (batchRef.current) return void batchRef.current.push(change);
+      const key = `${table}:${id}:${Object.keys(patch).sort().join(',')}`;
+      const top = undoStack.current[undoStack.current.length - 1];
+      if (top && top.key === key && Date.now() - top.at < COALESCE_MS) {
+        Object.assign(top.changes[0]!.after, patch);
+        top.at = Date.now();
+      } else {
+        undoStack.current.push({ changes: [change], key, at: Date.now() });
+        if (undoStack.current.length > 100) undoStack.current.shift();
+      }
+      redoStack.current = [];
+      syncHistory();
+    };
+    const edit = (table: Change['table'], id: string, row: Patch | undefined, patch: Patch) => {
+      record(table, id, row, patch);
+      apply(table, id, patch);
+    };
+    return {
       updateDemo(patch: Partial<DemoRow>) {
-        setDemo((d) => (d ? { ...d, ...patch } : d));
-        queue('demos', demoId, patch);
+        edit('demos', demoId, demo as Patch | undefined, patch as Patch);
       },
       updateStep(id: string, patch: Partial<StepRow>) {
-        setSteps((list) => list.map((s) => (s.id === id ? { ...s, ...patch } : s)));
-        queue('steps', id, patch);
+        edit('steps', id, steps.find((s) => s.id === id) as Patch | undefined, patch as Patch);
       },
       updateHotspot(id: string, patch: Partial<HotspotRow>) {
-        setHotspots((list) => list.map((h) => (h.id === id ? { ...h, ...patch } : h)));
-        queue('hotspots', id, patch);
+        edit('hotspots', id, hotspots.find((h) => h.id === id) as Patch | undefined, patch as Patch);
       },
+      /** Regroupe plusieurs modifications en une seule étape d'annulation (actions de masse). */
+      batch(fn: () => void) {
+        batchRef.current = [];
+        try {
+          fn();
+        } finally {
+          const changes = batchRef.current;
+          batchRef.current = null;
+          if (changes.length) {
+            undoStack.current.push({ changes, key: null, at: Date.now() });
+            redoStack.current = [];
+            syncHistory();
+          }
+        }
+      },
+      undo() {
+        const e = undoStack.current.pop();
+        if (!e) return false;
+        for (const c of [...e.changes].reverse()) apply(c.table, c.id, c.before);
+        redoStack.current.push(e);
+        syncHistory();
+        return true;
+      },
+      redo() {
+        const e = redoStack.current.pop();
+        if (!e) return false;
+        for (const c of e.changes) apply(c.table, c.id, c.after);
+        e.key = null;
+        undoStack.current.push(e);
+        syncHistory();
+        return true;
+      },
+      canUndo: history.undo > 0,
+      canRedo: history.redo > 0,
       updateChapter(id: string, patch: Partial<ChapterRow>) {
         setChapters((list) => list.map((c) => (c.id === id ? { ...c, ...patch } : c)));
         queue('chapters', id, patch);
@@ -364,10 +435,9 @@ export function useDemoEditor(demoId: string) {
 
       flush,
       reload: load,
-    }),
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [demoId, demo, steps, hotspots, chapters, questions, queue, run, flush, load, signImages],
-  );
+  }, [demoId, demo, steps, hotspots, chapters, questions, queue, run, flush, load, signImages, history]);
 
   async function persistOrder(next: StepRow[]) {
     const ordered = next.map((s, i) => ({ ...s, position: i }));

@@ -1455,3 +1455,28 @@ body {
   height: 44px;
   border-radius: 12px;
 }
+/* L12-01 : aperçu des masques (dans la démo publiée, ils sont incrustés dans l'image) */
+.p-blur--pixels {
+  backdrop-filter: blur(6px) contrast(1.2);
+  -webkit-backdrop-filter: blur(6px) contrast(1.2);
+}
+.p-blur--solid {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.p-blur--solid span {
+  font:
+    600 12px/1.2 system-ui,
+    sans-serif;
+  color: #fff;
+  mix-blend-mode: difference;
+  text-align: center;
+  padding: 0 4px;
+}
+/* L12-02 : transition « Directe » du zoom */
+.p-zoom.is-instant {
+  transition: none;
+}

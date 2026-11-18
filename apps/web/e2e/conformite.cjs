@@ -343,6 +343,77 @@ const SCREENS = {
     player: true,
     playerPath: '/l/lien-expire',
   },
+  // L12 : gains rapides de l'éditeur
+  'L12-01': {
+    maquette: 'reference/editeur-gains.html?etat=masque',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async prepare(p) {
+      await p.locator('.stage-head').click();
+      await p.keyboard.press('b');
+      const box = await p.locator('.canvas-frame').boundingBox();
+      await p.mouse.move(box.x + box.width * 0.62, box.y + box.height * 0.3);
+      await p.mouse.down();
+      await p.mouse.move(box.x + box.width * 0.9, box.y + box.height * 0.4, { steps: 5 });
+      await p.mouse.up();
+      await p.waitForSelector('.blur-panel');
+      await p.getByRole('radio', { name: 'Aplat' }).click();
+      await p.waitForTimeout(400);
+    },
+  },
+  'L12-02': {
+    maquette: 'reference/editeur-gains.html?etat=zoom',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async prepare(p) {
+      await p.locator('#zoom-on').check();
+      await p.waitForSelector('.canvas-zoom');
+      await p
+        .locator('.zoom-center')
+        .click()
+        .catch(() => {});
+      await p.locator('#zoom-on').scrollIntoViewIfNeeded();
+      await p.waitForTimeout(400);
+    },
+  },
+  'L12-03': {
+    maquette: 'reference/editeur-gains.html?etat=style',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async prepare(p) {
+      await p.locator('.canvas-frame [data-canvas-item]').first().click();
+      await p.getByRole('button', { name: 'Appliquer à toutes les étapes…' }).click();
+      await p.waitForSelector('.modal');
+      await p.waitForTimeout(300);
+    },
+  },
+  'L12-04': {
+    maquette: 'reference/editeur-gains.html?etat=recherche',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async prepare(p) {
+      await p.locator('.stage-head').click();
+      await p.keyboard.press('Control+f');
+      await p.fill('#find-q', 'Cliquez');
+      await p.waitForTimeout(400);
+    },
+  },
+  'L12-05': {
+    maquette: 'reference/editeur-gains.html?etat=boutons',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async prepare(p) {
+      await p.locator('.canvas-frame [data-canvas-item]').first().click();
+      await p.fill('#hs-prev', 'Retour');
+      await p.fill('#hs-next', 'J’ai compris');
+      await p.locator('#hs-next').scrollIntoViewIfNeeded();
+      await p.waitForTimeout(400);
+    },
+  },
+  'L12-06': {
+    maquette: 'reference/editeur-gains.html?etat=raccourcis',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async prepare(p) {
+      await p.locator('.stage-head').click();
+      await p.keyboard.press('?');
+      await p.waitForSelector('.kb-modal');
+    },
+  },
   // L11 : partage sécurisé (onglet Accès, écrans visiteur)
   'L11-01': {
     maquette: 'reference/partage-securise.html?etat=mdp',

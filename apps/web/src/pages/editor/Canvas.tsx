@@ -15,14 +15,15 @@ import {
   themeVars,
   tipClass,
 } from '@flowdsiml/player-core';
-import { ChevronRight, ClipboardList, ExternalLink, Info, RotateCcw } from 'lucide-react';
+import { ChevronRight, ClipboardList, ExternalLink, Info, Move, RotateCcw } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
 import { withVariablePills } from './RichTextField';
+import { textOn } from '../../lib/publish';
 import {
   asAction,
   asCta,
-  asRects,
+  asMasks,
   asSettings,
   asStepOptions,
   asZoom,
@@ -54,7 +55,10 @@ type Drag =
   | { kind: 'draw'; x0: number; y0: number; rect: Rect }
   | { kind: 'blur-move'; index: number; dx: number; dy: number }
   /** EDT-07 : redimensionnement d'une zone de flou par l'un de ses 4 coins (coin opposé fixe). */
-  | { kind: 'blur-resize'; index: number; ax: number; ay: number };
+  | { kind: 'blur-resize'; index: number; ax: number; ay: number }
+  /** L12-02 : déplacement du cadre de zoom (décalage du pointeur au centre) ou redimensionnement. */
+  | { kind: 'zoom-move'; dx: number; dy: number }
+  | { kind: 'zoom-resize'; ax: number; ay: number };
 
 export function Canvas({
   editor,
@@ -71,8 +75,10 @@ export function Canvas({
   const frame = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
   const hotspots = editor.hotspots.filter((h) => h.step_id === step.id);
-  const blurs = asRects(step.blurs);
+  const blurs = asMasks(step.blurs);
   const zoom = asZoom(step.zoom);
+  // Champs du zoom au-delà de x, y, scale (transition, garder) conservés à chaque modification
+  const zoomRaw = (step.zoom ?? {}) as Record<string, unknown>;
 
   function rel(e: { clientX: number; clientY: number }) {
     const b = frame.current!.getBoundingClientRect();
@@ -133,13 +139,50 @@ export function Canvas({
       const x = Math.min(drag.ax, p.x);
       const y = Math.min(drag.ay, p.y);
       next[drag.index] = {
+        ...next[drag.index]!,
         x: r4(x),
         y: r4(y),
         w: r4(Math.max(0.01, Math.abs(p.x - drag.ax))),
         h: r4(Math.max(0.01, Math.abs(p.y - drag.ay))),
       };
       editor.updateStep(step.id, { blurs: next });
+    } else if (drag.kind === 'zoom-move' && zoom) {
+      editor.updateStep(step.id, {
+        zoom: { ...zoomRaw, ...zoomCenter(p.x - drag.dx, p.y - drag.dy, zoom.scale) },
+      });
+    } else if (drag.kind === 'zoom-resize' && zoom) {
+      const size = Math.max(Math.abs(p.x - drag.ax), Math.abs(p.y - drag.ay));
+      const scale = Math.round(clamp(1 / Math.max(size, 0.01), 1.2, 4) * 10) / 10;
+      const half = 0.5 / scale;
+      const cx = drag.ax + (p.x >= drag.ax ? half : -half);
+      const cy = drag.ay + (p.y >= drag.ay ? half : -half);
+      editor.updateStep(step.id, { zoom: { ...zoomRaw, scale, ...zoomCenter(cx, cy, scale) } });
     }
+  }
+
+  /** Centre du zoom borné pour que le cadre reste dans l'image. */
+  function zoomCenter(x: number, y: number, scale: number) {
+    const half = 0.5 / scale;
+    return { x: r4(clamp(x, half, 1 - half)), y: r4(clamp(y, half, 1 - half)) };
+  }
+
+  /** L12-02 : flèches pour déplacer le cadre (1 %, Maj : 10 %). */
+  function onZoomKey(e: ReactKeyboardEvent) {
+    if (!zoom || readOnly) return;
+    const d = e.shiftKey ? 0.1 : 0.01;
+    const mv: Record<string, [number, number]> = {
+      ArrowLeft: [-d, 0],
+      ArrowRight: [d, 0],
+      ArrowUp: [0, -d],
+      ArrowDown: [0, d],
+    };
+    const m = mv[e.key];
+    if (!m) return;
+    e.preventDefault();
+    e.stopPropagation();
+    editor.updateStep(step.id, {
+      zoom: { ...zoomRaw, ...zoomCenter(zoom.x + m[0], zoom.y + m[1], zoom.scale) },
+    });
   }
 
   function onUp() {
@@ -182,7 +225,7 @@ export function Canvas({
       if (isHot) editor.updateHotspot(id, { x, y });
       else {
         const next = blurs.slice();
-        next[index] = { ...rect, x, y };
+        next[index] = { ...blurs[index]!, x, y };
         editor.updateStep(step.id, { blurs: next });
       }
       setAnnounce(t('editor.a11yMoved', { x: pct(x), y: pct(y) }));
@@ -333,7 +376,7 @@ export function Canvas({
       {blurs.map((b, i) => (
         <div
           key={`b${i}`}
-          className={`canvas-blur ${selection.kind === 'blur' && selection.index === i ? 'selected' : ''}`}
+          className={`canvas-blur${b.style === 'solid' ? ' canvas-blur--solid' : b.style === 'pixels' ? ' canvas-blur--pixels' : ''} ${selection.kind === 'blur' && selection.index === i ? 'selected' : ''}`}
           role="button"
           tabIndex={0}
           data-canvas-item=""
@@ -345,6 +388,9 @@ export function Canvas({
             top: `${b.y * 100}%`,
             width: `${b.w * 100}%`,
             height: `${b.h * 100}%`,
+            ...(b.style === 'solid'
+              ? { background: b.color ?? '#2A2F3A', color: textOn(b.color ?? '#2A2F3A') }
+              : {}),
           }}
           onPointerDown={(e) => {
             if (readOnly || tool !== 'select') return;
@@ -355,9 +401,12 @@ export function Canvas({
             setDrag({ kind: 'blur-move', index: i, dx: p.x - b.x, dy: p.y - b.y });
           }}
         >
+          {b.style === 'solid' && b.text ? <span className="canvas-mask-text">{b.text}</span> : null}
           {selection.kind === 'blur' && selection.index === i && (
             <>
-              <span className="canvas-blur-tag">{t('editor.blurTag')}</span>
+              <span className="canvas-blur-tag">
+                {b.style === 'solid' ? t('editor.maskTag') : t('editor.blurTag')}
+              </span>
               {!readOnly &&
                 (
                   [
@@ -401,15 +450,68 @@ export function Canvas({
 
       {zoom && (
         <div
-          className="canvas-zoom"
-          title={t('editor.zoomArea')}
+          className={`canvas-zoom${tool === 'select' && !readOnly ? ' is-live' : ''}`}
+          role="slider"
+          tabIndex={0}
+          aria-label={t('editor.zoomArea')}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(zoom.x * 100)}
+          aria-valuetext={t('editor.zoomPos', {
+            pct: Math.round(zoom.scale * 100),
+            x: Math.round(zoom.x * 100),
+            y: Math.round(zoom.y * 100),
+          })}
+          onKeyDown={onZoomKey}
           style={{
             left: `${clamp(zoom.x - 0.5 / zoom.scale) * 100}%`,
             top: `${clamp(zoom.y - 0.5 / zoom.scale) * 100}%`,
             width: `${(100 / zoom.scale).toFixed(2)}%`,
             height: `${(100 / zoom.scale).toFixed(2)}%`,
           }}
-        />
+          onPointerDown={(e) => {
+            if (readOnly || tool !== 'select' || e.button !== 0) return;
+            e.stopPropagation();
+            (e.target as Element).setPointerCapture(e.pointerId);
+            const p = rel(e);
+            setDrag({ kind: 'zoom-move', dx: p.x - zoom.x, dy: p.y - zoom.y });
+          }}
+        >
+          <span className="canvas-zoom-tag">
+            {t('editor.zoomTag', { pct: Math.round(zoom.scale * 100) })}
+          </span>
+          {tool === 'select' && !readOnly && (
+            <>
+              <span className="canvas-zoom-move" aria-hidden="true">
+                <Move size={16} />
+              </span>
+              {(
+                [
+                  [0, 0],
+                  [1, 0],
+                  [0, 1],
+                  [1, 1],
+                ] as const
+              ).map(([cx, cy]) => (
+                <span
+                  key={`${cx}${cy}`}
+                  className={`canvas-blur-handle h${cx}${cy}`}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    (e.target as Element).setPointerCapture(e.pointerId);
+                    const half = 0.5 / zoom.scale;
+                    // Coin opposé fixe
+                    setDrag({
+                      kind: 'zoom-resize',
+                      ax: cx ? zoom.x - half : zoom.x + half,
+                      ay: cy ? zoom.y - half : zoom.y + half,
+                    });
+                  }}
+                />
+              ))}
+            </>
+          )}
+        </div>
       )}
 
       <span className="sr-only" aria-live="polite">
@@ -467,12 +569,21 @@ export function Canvas({
             )}
             <div className="p-actions">
               <span />
+              {/* L12-05 : libellés saisis montrés tout de suite dans la bulle */}
+              {asStepOptions(step.options).showPrev && stepIndex > 0 && (
+                <span className="p-btn p-btn-ghost p-btn-sm">
+                  {asStepOptions(step.options).prevLabel || t('editor.hs.prev')}
+                </span>
+              )}
               {asCta(tipHotspot.cta) ? (
                 <span className="p-btn p-btn-primary p-btn-sm">{sub(asCta(tipHotspot.cta)!.label)}</span>
               ) : (
                 asAction(tipHotspot.action).type !== 'none' && (
                   <span className="p-btn p-btn-primary p-btn-sm">
-                    {t('editor.previewNext')}
+                    {asStepOptions(step.options).buttonLabel ||
+                      (stepIndex === editor.steps.length - 1
+                        ? t('editor.hs.finish')
+                        : t('editor.previewNext'))}
                     <ChevronRight size={14} aria-hidden="true" />
                   </span>
                 )

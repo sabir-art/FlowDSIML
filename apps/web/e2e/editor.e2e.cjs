@@ -91,7 +91,7 @@ const SHOTS = process.env.SHOTS_DIR;
   ok((await page.locator('.canvas-hotspot').count()) === 2, 'nouveau hotspot ajouté');
 
   // Flou
-  await page.getByRole('button', { name: 'Flou', exact: true }).click();
+  await page.getByRole('button', { name: 'Flou ou masque', exact: true }).click();
   await page.mouse.move(frame.x + 50, frame.y + 50);
   await page.mouse.down();
   await page.mouse.move(frame.x + 250, frame.y + 100, { steps: 4 });

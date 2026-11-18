@@ -17,6 +17,20 @@ export const rectSchema = z.object({
 });
 export type Rect = z.infer<typeof rectSchema>;
 
+/** L12-01 : zone masquée d'une capture (flou, pixels ou aplat de couleur, texte facultatif). */
+export const maskSchema = rectSchema.extend({
+  style: z.enum(['blur', 'pixels', 'solid']).default('blur').catch('blur'),
+  color: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .default('#2A2F3A')
+    .catch('#2A2F3A'),
+  text: z.string().max(60).default('').catch(''),
+  /** Zones copiées sur toutes les étapes (même position) : même identifiant de groupe. */
+  group: z.string().max(40).optional().catch(undefined),
+});
+export type Mask = z.infer<typeof maskSchema>;
+
 export const placementSchema = z.enum(['auto', 'top', 'bottom', 'left', 'right']);
 
 export const hotspotActionSchema = z.discriminatedUnion('type', [
@@ -51,6 +65,10 @@ export const zoomSchema = z.object({
   x: z.number().min(0).max(1),
   y: z.number().min(0).max(1),
   scale: z.number().min(1).max(4),
+  /** L12-02 : « smooth » glisse depuis l'état précédent, « instant » saute directement. */
+  transition: z.enum(['smooth', 'instant']).default('smooth').catch('smooth'),
+  /** L12-02 : l'étape suivante (sans zoom propre) garde ce zoom. */
+  keep: z.boolean().default(false).catch(false),
 });
 export type Zoom = z.infer<typeof zoomSchema>;
 
@@ -89,6 +107,9 @@ export const stepOptionsSchema = z
     showIcon: z.boolean().default(true).catch(true),
     /** Libellé du bouton principal (vide = « Suivant »). */
     buttonLabel: z.string().max(40).default('').catch(''),
+    /** L12-05 : libellé de « Précédent » dans la bulle (vide = thème) et affichage du bouton. */
+    prevLabel: z.string().max(24).default('').catch(''),
+    showPrev: z.boolean().default(false).catch(false),
     /** Choix invalides ignorés un par un (un lien mal formé n'invalide pas la démo). */
     choices: z
       .array(z.unknown())
@@ -109,6 +130,8 @@ export const stepOptionsSchema = z
     bgColor: '#080808',
     showIcon: true,
     buttonLabel: '',
+    prevLabel: '',
+    showPrev: false,
     choices: [],
   });
 export type StepOptions = z.infer<typeof stepOptionsSchema>;
@@ -125,7 +148,7 @@ export const stepSchema = z.object({
   title: z.string().max(200).default(''),
   body: z.string().max(4000).default(''),
   hotspots: z.array(hotspotSchema).default([]),
-  blurs: z.array(rectSchema).default([]),
+  blurs: z.array(maskSchema).default([]),
   zoom: zoomSchema.nullable().default(null),
   /** Formulaire de lead affiché avant cette étape. */
   gateFormId: z.string().nullable().default(null),
