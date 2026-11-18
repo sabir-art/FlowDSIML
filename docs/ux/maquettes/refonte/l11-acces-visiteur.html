@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partage sécurisé : accès visiteur — TutoClick (lot L11)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* Lot L11 : écrans d'accès dans le cadre du lecteur (en-tête, capture vide voilée, carte, « Créé avec TutoClick »).
+     Même carte que la fin de démo (.pl-modal), pastille d'icône colorée selon le cas. */
+  .l11-chip { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--fd-color-primary-soft); color: var(--fd-color-primary); }
+  .l11-chip svg { width: 24px; height: 24px; }
+  .l11-chip--warn { background: var(--fd-color-warning-soft); color: var(--fd-color-warning-text, var(--fd-color-warning)); }
+  .l11-chip--ok { background: var(--fd-color-success-soft); color: var(--fd-color-success); }
+  .l11-card { align-items: center; text-align: center; }
+  .l11-card .fd-field { width: 100%; text-align: left; }
+  .l11-card .fd-btn--primary { width: 100%; justify-content: center; }
+  .l11-foot { margin: 0; font-size: var(--fd-text-caption-size); color: var(--fd-color-text-subtle); }
+  .l11-pw { display: flex; gap: 8px; } .l11-pw .fd-input { flex: 1; }
+  .pl-top--locked .pl-top__acts { display: none; }
+  .pl-root[data-view='mdp'] > [data-pane='mdp'], .pl-root[data-view='mdp-err'] > [data-pane='mdp-err'], .pl-root[data-view='mdp-bloque'] > [data-pane='mdp-bloque'],
+  .pl-root[data-view='invitation'] > [data-pane='invitation'], .pl-root[data-view='envoye'] > [data-pane='envoye'], .pl-root[data-view='domaine'] > [data-pane='domaine'],
+  .pl-root[data-view='expire'] > [data-pane='expire'], .pl-root[data-view='lien-perime'] > [data-pane='lien-perime'] { display: grid; }
+</style>
+</head>
+<body class="pl-body">
+<div class="pl-root" data-view="mdp">
+
+  <!-- 1. Mot de passe -->
+  <section data-pane="mdp" class="pl">
+    <header class="pl-top pl-top--locked"><div class="pl-id"><span class="pl-ws" aria-hidden="true">DSI</span><div><b>Créer une fiche usager</b><small>DSI Missions Locales · 6 étapes</small></div></div></header>
+    <main class="pl-stage" aria-label="Accès protégé">
+      <div class="shot pl-shot fd-player-scope"><div class="shot__bar"></div><div class="shot__side"></div><div class="pl-scrim" aria-hidden="true"></div>
+        <form class="fd-card pl-modal l11-card" onsubmit="return false" aria-labelledby="t1">
+          <span class="l11-chip"><i data-icon="key"></i></span>
+          <h2 id="t1">Cette démo est protégée</h2>
+          <p class="sub">Saisissez le mot de passe communiqué par DSI Missions Locales pour ouvrir « Créer une fiche usager ».</p>
+          <div class="fd-field" style="margin:0"><label class="fd-label" for="p1">Mot de passe</label>
+            <div class="l11-pw"><input class="fd-input" id="p1" type="password" autocomplete="current-password"><button class="fd-btn fd-btn--icon" type="button" aria-label="Afficher le mot de passe" aria-pressed="false"><i data-icon="eye2"></i></button></div></div>
+          <button class="fd-btn fd-btn--primary" type="submit">Accéder à la démo<i data-icon="arrowRight"></i></button>
+        </form>
+      </div>
+    </main>
+    <a class="pl-made" href="#">Créé avec <b>TutoClick</b></a>
+  </section>
+
+  <!-- 2. Mot de passe : erreur -->
+  <section data-pane="mdp-err" class="pl">
+    <header class="pl-top pl-top--locked"><div class="pl-id"><span class="pl-ws" aria-hidden="true">DSI</span><div><b>Créer une fiche usager</b><small>DSI Missions Locales · 6 étapes</small></div></div></header>
+    <main class="pl-stage" aria-label="Accès protégé">
+      <div class="shot pl-shot fd-player-scope"><div class="shot__bar"></div><div class="shot__side"></div><div class="pl-scrim" aria-hidden="true"></div>
+        <form class="fd-card pl-modal l11-card" onsubmit="return false" aria-labelledby="t2">
+          <span class="l11-chip"><i data-icon="key"></i></span>
+          <h2 id="t2">Cette démo est protégée</h2>
+          <p class="sub">Saisissez le mot de passe communiqué par DSI Missions Locales pour ouvrir « Créer une fiche usager ».</p>
+          <div class="fd-field" style="margin:0"><label class="fd-label" for="p2">Mot de passe</label>
+            <div class="l11-pw"><input class="fd-input" id="p2" type="password" value="xxxxxxxx" aria-invalid="true" aria-describedby="p2e"><button class="fd-btn fd-btn--icon" type="button" aria-label="Afficher le mot de passe" aria-pressed="false"><i data-icon="eye2"></i></button></div>
+            <span class="fd-error" id="p2e" role="alert">Mot de passe incorrect. Vérifiez-le ou demandez-le à la personne qui vous a partagé la démo.</span></div>
+          <button class="fd-btn fd-btn--primary" type="submit">Accéder à la démo<i data-icon="arrowRight"></i></button>
+          <p class="l11-foot">Il vous reste 3 essais.</p>
+        </form>
+      </div>
+    </main>
+    <a class="pl-made" href="#">Créé avec <b>TutoClick</b></a>
+  </section>
+
+  <!-- 3. Mot de passe : trop d'essais -->
+  <section data-pane="mdp-bloque" class="pl">
+    <header class="pl-top pl-top--locked"><div class="pl-id"><span class="pl-ws" aria-hidden="true">DSI</span><div><b>Créer une fiche usager</b><small>DSI Missions Locales · 6 étapes</small></div></div></header>
+    <main class="pl-stage" aria-label="Accès protégé">
+      <div class="shot pl-shot fd-player-scope"><div class="shot__bar"></div><div class="shot__side"></div><div class="pl-scrim" aria-hidden="true"></div>
+        <form class="fd-card pl-modal l11-card" onsubmit="return false" aria-labelledby="t3">
+          <span class="l11-chip l11-chip--warn"><i data-icon="clock"></i></span>
+          <h2 id="t3">Trop d'essais</h2>
+          <p class="sub" role="status">Par sécurité, patientez 1 minute avant de réessayer.</p>
+          <div class="fd-field" style="margin:0"><label class="fd-label" for="p3">Mot de passe</label><input class="fd-input" id="p3" type="password" disabled></div>
+          <button class="fd-btn fd-btn--primary" type="submit" disabled>Réessayer dans 0:48</button>
+        </form>
+      </div>
+    </main>
+    <a class="pl-made" href="#">Créé avec <b>TutoClick</b></a>
+  </section>
+
+  <!-- 4. Sur invitation -->
+  <section data-pane="invitation" class="pl">
+    <header class="pl-top pl-top--locked"><div class="pl-id"><span class="pl-ws" aria-hidden="true">DSI</span><div><b>Créer une fiche usager</b><small>DSI Missions Locales · 6 étapes</small></div></div></header>
+    <main class="pl-stage" aria-label="Accès sur invitation">
+      <div class="shot pl-shot fd-player-scope"><div class="shot__bar"></div><div class="shot__side"></div><div class="pl-scrim" aria-hidden="true"></div>
+        <form class="fd-card pl-modal l11-card" onsubmit="return false" aria-labelledby="t4">
+          <span class="l11-chip"><i data-icon="mail"></i></span>
+          <h2 id="t4">Accès sur invitation</h2>
+          <p class="sub">Cette démo est réservée aux personnes invitées. Saisissez votre adresse : si elle est sur la liste, vous recevrez un lien d'accès personnel.</p>
+          <div class="fd-field" style="margin:0"><label class="fd-label" for="e4">Adresse e-mail</label><input class="fd-input" id="e4" type="email" autocomplete="email" placeholder="prenom.nom@exemple.example"></div>
+          <button class="fd-btn fd-btn--primary" type="submit">Recevoir mon lien d'accès<i data-icon="send"></i></button>
+          <p class="l11-foot">Votre adresse sert uniquement à vérifier l'accès.</p>
+        </form>
+      </div>
+    </main>
+    <a class="pl-made" href="#">Créé avec <b>TutoClick</b></a>
+  </section>
+
+  <!-- 5. Lien d'accès envoyé (invitation ou domaine) -->
+  <section data-pane="envoye" class="pl">
+    <header class="pl-top pl-top--locked"><div class="pl-id"><span class="pl-ws" aria-hidden="true">DSI</span><div><b>Créer une fiche usager</b><small>DSI Missions Locales · 6 étapes</small></div></div></header>
+    <main class="pl-stage" aria-label="Lien d'accès envoyé">
+      <div class="shot pl-shot fd-player-scope"><div class="shot__bar"></div><div class="shot__side"></div><div class="pl-scrim" aria-hidden="true"></div>
+        <div class="fd-card pl-modal l11-card" role="status" aria-labelledby="t5">
+          <span class="l11-chip l11-chip--ok"><i data-icon="checkCircle"></i></span>
+          <h2 id="t5">Vérifiez votre boîte mail</h2>
+          <p class="sub">Si l'adresse <b>lea.martin@mission-locale.example</b> est autorisée, un lien d'accès vient de lui être envoyé. Il est valable 30 minutes.</p>
+          <div class="pl-modal__acts pl-modal__acts--col"><button class="fd-btn fd-btn--ghost" type="button" disabled><i data-icon="refresh"></i>Renvoyer le lien dans 0:42</button><button class="fd-btn fd-btn--ghost" type="button"><i data-icon="arrowLeft"></i>Changer d'adresse</button></div>
+          <p class="l11-foot">Rien reçu ? Pensez aux courriers indésirables.</p>
+        </div>
+      </div>
+    </main>
+    <a class="pl-made" href="#">Créé avec <b>TutoClick</b></a>
+  </section>
+
+  <!-- 6. Par domaine e-mail : adresse refusée -->
+  <section data-pane="domaine" class="pl">
+    <header class="pl-top pl-top--locked"><div class="pl-id"><span class="pl-ws" aria-hidden="true">DSI</span><div><b>Créer une fiche usager</b><small>DSI Missions Locales · 6 étapes</small></div></div></header>
+    <main class="pl-stage" aria-label="Accès par domaine e-mail">
+      <div class="shot pl-shot fd-player-scope"><div class="shot__bar"></div><div class="shot__side"></div><div class="pl-scrim" aria-hidden="true"></div>
+        <form class="fd-card pl-modal l11-card" onsubmit="return false" aria-labelledby="t6">
+          <span class="l11-chip"><i data-icon="building"></i></span>
+          <h2 id="t6">Réservé au réseau</h2>
+          <p class="sub">Utilisez votre adresse professionnelle (<b>@mission-locale.example</b> ou <b>@dsi-ml.example</b>). Nous vous enverrons un lien pour la confirmer.</p>
+          <div class="fd-field" style="margin:0"><label class="fd-label" for="d6">Adresse e-mail professionnelle</label><input class="fd-input" id="d6" type="email" value="lea@messagerie.example" aria-invalid="true" aria-describedby="d6e"><span class="fd-error" id="d6e" role="alert">Cette adresse n'appartient pas à un domaine autorisé.</span></div>
+          <button class="fd-btn fd-btn--primary" type="submit">Recevoir mon lien d'accès<i data-icon="send"></i></button>
+        </form>
+      </div>
+    </main>
+    <a class="pl-made" href="#">Créé avec <b>TutoClick</b></a>
+  </section>
+
+  <!-- 7. Lien de la démo expiré (complète PLY-06 quand la date et le workspace sont connus) -->
+  <section data-pane="expire" class="pl">
+    <header class="pl-top pl-top--locked"><div class="pl-id"><span class="pl-ws" aria-hidden="true">DSI</span><div><b>Créer une fiche usager</b><small>DSI Missions Locales</small></div></div></header>
+    <main class="pl-stage" aria-label="Démo indisponible">
+      <div class="shot pl-shot fd-player-scope"><div class="shot__bar"></div><div class="shot__side"></div><div class="pl-scrim" aria-hidden="true"></div>
+        <div class="fd-card pl-modal l11-card" role="alert" aria-labelledby="t7">
+          <span class="l11-chip"><i data-icon="clock"></i></span>
+          <h2 id="t7">Cette démo n'est plus disponible</h2>
+          <p class="sub">Le lien a expiré le 30 novembre 2026. Contactez DSI Missions Locales pour en recevoir un nouveau.</p>
+          <div class="pl-modal__acts pl-modal__acts--col"><a class="fd-btn" href="#"><i data-icon="external"></i>Visiter www.dsi-ml.example</a></div>
+        </div>
+      </div>
+    </main>
+    <a class="pl-made" href="#">Créé avec <b>TutoClick</b></a>
+  </section>
+
+  <!-- 8. Lien d'accès personnel expiré (invitation ou domaine, après 30 minutes) -->
+  <section data-pane="lien-perime" class="pl">
+    <header class="pl-top pl-top--locked"><div class="pl-id"><span class="pl-ws" aria-hidden="true">DSI</span><div><b>Créer une fiche usager</b><small>DSI Missions Locales · 6 étapes</small></div></div></header>
+    <main class="pl-stage" aria-label="Lien d'accès expiré">
+      <div class="shot pl-shot fd-player-scope"><div class="shot__bar"></div><div class="shot__side"></div><div class="pl-scrim" aria-hidden="true"></div>
+        <div class="fd-card pl-modal l11-card" role="alert" aria-labelledby="t8">
+          <span class="l11-chip l11-chip--warn"><i data-icon="mail"></i></span>
+          <h2 id="t8">Ce lien d'accès a expiré</h2>
+          <p class="sub">Les liens d'accès personnels sont valables 30 minutes et ne servent qu'une fois. Demandez-en un nouveau avec la même adresse.</p>
+          <button class="fd-btn fd-btn--primary" type="button">Recevoir un nouveau lien<i data-icon="send"></i></button>
+        </div>
+      </div>
+    </main>
+    <a class="pl-made" href="#">Créé avec <b>TutoClick</b></a>
+  </section>
+</div>
+
+<div class="mock-state mock-state--top fd-segmented" role="group" aria-label="Écran d'accès (maquette)">
+  <button type="button" data-view-set="mdp" aria-pressed="true">Mot de passe</button>
+  <button type="button" data-view-set="mdp-err" aria-pressed="false">Erreur</button>
+  <button type="button" data-view-set="mdp-bloque" aria-pressed="false">Trop d'essais</button>
+  <button type="button" data-view-set="invitation" aria-pressed="false">Invitation</button>
+  <button type="button" data-view-set="envoye" aria-pressed="false">Lien envoyé</button>
+  <button type="button" data-view-set="domaine" aria-pressed="false">Domaine</button>
+  <button type="button" data-view-set="expire" aria-pressed="false">Lien expiré</button>
+  <button type="button" data-view-set="lien-perime" aria-pressed="false">Accès périmé</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

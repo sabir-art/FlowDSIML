@@ -172,6 +172,78 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(beacon.width >= 44 && beacon.height >= 44, 'cible tactile du hotspot ≥ 44 px');
   if (SHOTS) await m.screenshot({ path: `${SHOTS}/player-mobile.png` });
 
+  // L11 : protection par mot de passe (onglet Accès), vérifiée par open-demo
+  await app.getByRole('tab', { name: 'Accès' }).click();
+  await app.getByRole('radio', { name: /Avec un mot de passe/ }).check();
+  await app.fill('#acc-pw', 'court');
+  ok(
+    await app.getByRole('button', { name: 'Enregistrer le mot de passe' }).isDisabled(),
+    'L11 : 8 caractères minimum',
+  );
+  await app.fill('#acc-pw', 'parcours-2026');
+  await app.getByRole('button', { name: 'Enregistrer le mot de passe' }).click();
+  await app.waitForSelector('.toast');
+  ok(state.tables.demo_access[0]?.mode === 'password', 'L11 : démo protégée par mot de passe');
+  ok(
+    (await app.locator('.l11-opt.is-soon input:disabled').count()) === 2,
+    'L11 : invitation et domaine e-mail en Bientôt',
+  );
+  ok(/Avec un mot de passe/.test(await app.textContent('.l11-sum')), 'L11 : carte « Accès à la démo »');
+
+  const g = await ctx.newPage();
+  await install(g, state);
+  await g.goto(publicUrl);
+  await g.waitForSelector('.p-gate');
+  ok((await g.locator('.p-stage').count()) === 0, 'L11-06 : rien de la démo avant le mot de passe');
+  await g.fill('#p-gate-pw', 'mauvais');
+  await g.click('.p-gate-submit');
+  await g.waitForSelector('#p-gate-err');
+  ok(
+    (await g.getAttribute('#p-gate-pw', 'aria-invalid')) === 'true' &&
+      /4 (essais|attempts)/.test(await g.textContent('.p-gate')),
+    'L11-07 : erreur liée au champ, essais restants',
+  );
+  for (let i = 0; i < 4; i++) {
+    await g.fill('#p-gate-pw', `faux-${i}`);
+    await g.click('.p-gate-submit');
+    await g.waitForTimeout(150);
+  }
+  await g.waitForSelector('#p-gate-pw:disabled');
+  ok(
+    /Réessayer dans|Try again in/.test(await g.textContent('.p-gate-submit')),
+    'L11-08 : trop d’essais, compte à rebours',
+  );
+  const g2 = await ctx.newPage();
+  await install(g2, state);
+  state.tables.demo_access[0].lockedUntil = 0;
+  await g2.goto(publicUrl);
+  await g2.fill('#p-gate-pw', 'parcours-2026');
+  await g2.click('.p-gate-submit');
+  await g2.waitForSelector('.p-stage');
+  ok(true, 'L11 : bon mot de passe, la démo s’ouvre');
+
+  // L11-05 / L11-12 : expiration passée → écran « plus disponible » avec date et site du workspace
+  await app.bringToFront();
+  await app.getByRole('radio', { name: /Toute personne avec le lien/ }).check();
+  await app.waitForTimeout(300);
+  state.tables.workspaces[0].settings = {
+    ...(state.tables.workspaces[0].settings || {}),
+    websiteUrl: 'https://acme.example',
+  };
+  await app.getByLabel('Date d’expiration').check();
+  await app.fill('#acc-exp-d', '2025-01-15');
+  await app.waitForTimeout(400);
+  ok(!!state.tables.demo_access[0].expires_at, 'L11-05 : date d’expiration enregistrée');
+  const g3 = await ctx.newPage();
+  await install(g3, state);
+  await g3.goto(publicUrl);
+  await g3.waitForSelector('.p-sys-card');
+  ok(
+    /15 (janvier|January) 2025/.test(await g3.textContent('.p-sys-card')) &&
+      (await g3.locator('.p-sys-card a[href="https://acme.example"]').count()) === 1,
+    'L11-12 : date d’expiration et lien vers le site du workspace',
+  );
+
   ok(errors.length === 0, `aucune erreur (${errors.join(' | ')})`);
   await b.close();
 })().catch((e) => {

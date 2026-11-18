@@ -1,5 +1,5 @@
 import { parseManifest, type EventType, type Manifest } from '@flowdsiml/manifest';
-import { publishedBase, SUPABASE_ANON_KEY, SUPABASE_URL, TRACK_URL } from './config';
+import { OPEN_URL, publishedBase, SUPABASE_ANON_KEY, SUPABASE_URL, TRACK_URL } from './config';
 import { resolveAssets, randomId } from './logic';
 
 const rpcHeaders = () => ({
@@ -20,11 +20,64 @@ async function rpc<T>(fn: string, args: Record<string, unknown>, keepalive = fal
   return (text ? JSON.parse(text) : null) as T;
 }
 
-export async function loadManifest(demoId: string): Promise<Manifest> {
-  const base = publishedBase(demoId);
-  const res = await fetch(`${base}latest.json`, { cache: 'no-cache' });
-  if (!res.ok) throw new Error('NOT_FOUND');
-  return resolveAssets(parseManifest(await res.json()), base);
+/** Réponse de l'Edge Function open-demo (L11). */
+export type GateInfo = {
+  status:
+    | 'ok'
+    | 'not_found'
+    | 'unavailable'
+    | 'expired'
+    | 'password_required'
+    | 'password_wrong'
+    | 'locked'
+    | 'error';
+  title?: string;
+  workspace?: string;
+  website?: string | null;
+  expiredAt?: string;
+  remaining?: number;
+  retryIn?: number;
+  grant?: string;
+  manifest?: Manifest;
+};
+
+const grantKey = (demoId: string) => `fd.grant.${demoId}`;
+
+/**
+ * Ouvre une démo publiée via open-demo : le serveur applique l'accès (expiration, mot de passe) et
+ * renvoie le manifeste avec des URL d'images signées. Le jeton d'accès reste pour la session.
+ */
+export async function openDemo(demoId: string, password?: string): Promise<GateInfo> {
+  let grant: string | null = null;
+  try {
+    grant = sessionStorage.getItem(grantKey(demoId));
+  } catch {
+    /* stockage indisponible */
+  }
+  const res = await fetch(OPEN_URL, {
+    method: 'POST',
+    headers: rpcHeaders(),
+    body: JSON.stringify({ demoId, password: password || undefined, grant: grant || undefined }),
+  }).catch(() => null);
+  if (!res || (!res.ok && res.status !== 429)) return { status: 'error' };
+  const body = (await res.json().catch(() => null)) as (GateInfo & { manifest?: unknown }) | null;
+  if (!body) return { status: 'error' };
+  if (res.status === 429) return { status: 'locked', retryIn: 60 };
+  if (body.status === 'ok') {
+    if (body.grant) {
+      try {
+        sessionStorage.setItem(grantKey(demoId), body.grant);
+      } catch {
+        /* stockage indisponible */
+      }
+    }
+    try {
+      return { ...body, manifest: resolveAssets(parseManifest(body.manifest), publishedBase(demoId)) };
+    } catch {
+      return { status: 'not_found' };
+    }
+  }
+  return body as GateInfo;
 }
 
 export function resolveLink(token: string) {

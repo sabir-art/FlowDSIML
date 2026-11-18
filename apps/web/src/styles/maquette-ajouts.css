@@ -2359,3 +2359,164 @@
   padding: 20px 24px;
   margin: 0;
 }
+/* L11 : onglet Accès (cartes radio, configuration en retrait, expiration) et carte « Accès à la démo » */
+.mk .l11-modes {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mk .l11-legend {
+  margin-bottom: 12px;
+  padding: 0;
+}
+.mk .opt-card.l11-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface);
+  cursor: pointer;
+}
+.mk .l11-opt input {
+  accent-color: var(--fd-color-primary);
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: none;
+}
+.mk .l11-opt .grow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mk .l11-opt.is-soon {
+  cursor: default;
+  opacity: 0.75;
+}
+.mk .l11-opt:has(input:checked) {
+  border-color: var(--fd-color-primary);
+  background: var(--fd-color-primary-soft);
+}
+.mk .l11-opt:has(input:focus-visible) {
+  box-shadow: var(--fd-shadow-focus);
+}
+.mk .l11-ic {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.mk .l11-opt:has(input:checked) .l11-ic {
+  background: var(--fd-color-surface);
+  color: var(--fd-color-primary);
+}
+.mk .l11-ic svg {
+  width: 18px;
+  height: 18px;
+}
+.mk .l11-cfg {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0 0 30px;
+  padding: 16px;
+  border-left: 3px solid var(--fd-color-primary);
+  background: var(--fd-color-surface-sunken);
+  border-radius: 0 var(--fd-radius-md) var(--fd-radius-md) 0;
+}
+.mk .l11-field {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mk .l11-pw {
+  display: flex;
+  gap: 8px;
+}
+.mk .l11-pw .input {
+  flex: 1;
+  min-width: 0;
+}
+.mk .l11-cfg .setting {
+  padding: 0;
+  border: 0;
+}
+.mk .l11-err {
+  margin-top: 8px;
+}
+.mk .l11-hr {
+  margin: 20px 0 4px;
+}
+.mk .l11-exp {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0 12px;
+}
+.mk .l11-exp-grid {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 12px;
+}
+.mk .l11-exp-grid .field {
+  margin: 0;
+}
+.mk .l11-short {
+  gap: 8px;
+}
+.mk .l11-help {
+  margin: 0;
+}
+.mk .l11-info {
+  margin-top: 12px;
+}
+.mk .l11-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+.mk .l11-sum__line {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.mk .l11-sum__line > span:last-child {
+  display: flex;
+  flex-direction: column;
+}
+.mk .l11-sum .l11-ic {
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary);
+}
+@media (max-width: 640px) {
+  .mk .l11-cfg {
+    margin-left: 0;
+  }
+  .mk .l11-exp-grid {
+    grid-template-columns: 1fr;
+  }
+  .mk .l11-pw {
+    flex-wrap: wrap;
+  }
+}
+/* PRM-07 : pastille à gauche du champ hexadécimal, sur la même ligne */
+.mk .st-color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mk .st-color-row .input {
+  flex: 1;
+  min-width: 0;
+}

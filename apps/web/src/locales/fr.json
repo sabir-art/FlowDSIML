@@ -1371,5 +1371,51 @@
     "keyTaken": "Cette variable existe déjà.",
     "create": "Créer la variable",
     "created": "Variable {{key}} créée"
+  },
+  "access": {
+    "who": "Qui peut voir la démo ?",
+    "mode": {
+      "link": "Toute personne avec le lien",
+      "password": "Avec un mot de passe",
+      "invite": "Sur invitation",
+      "domain": "Par domaine e-mail"
+    },
+    "modeHelp": {
+      "link": "Accès libre, sans identification.",
+      "password": "Le visiteur saisit un mot de passe que vous lui communiquez.",
+      "invite": "Seules les adresses invitées reçoivent un lien d’accès personnel.",
+      "domain": "Toute adresse d’un domaine autorisé, confirmée par un lien envoyé par e-mail."
+    },
+    "password": "Mot de passe",
+    "showPw": "Afficher le mot de passe",
+    "generate": "Générer",
+    "pwHelp": "8 caractères minimum. Le changer oblige les visiteurs à saisir le nouveau.",
+    "pwChanged": "Défini {{when}}.",
+    "pwChangedCap": "Mot de passe changé {{when}}",
+    "pwKeep": "Défini : saisissez-en un nouveau pour le changer",
+    "pwSave": "Enregistrer le mot de passe",
+    "pwUpdate": "Changer le mot de passe",
+    "pwSaved": "Mot de passe enregistré : la démo est protégée",
+    "pwTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+    "pwRequired": "Enregistrez d’abord un mot de passe.",
+    "askEmail": "Demander aussi l’e-mail du visiteur",
+    "savedLink": "Accès libre : toute personne avec le lien peut voir la démo",
+    "savedPassword": "La démo est protégée par mot de passe",
+    "expiration": "Date d’expiration",
+    "expirationHelp": "Après cette date, le lien affiche « Cette démo n’est plus disponible ».",
+    "expDate": "Le lien expire le",
+    "expTime": "À",
+    "in7": "Dans 7 jours",
+    "in30": "Dans 30 jours",
+    "endOfMonth": "Fin du mois",
+    "expHelp": "Heure de Paris. Vous pouvez prolonger ou retirer l’expiration à tout moment : le lien redevient actif aussitôt.",
+    "expSaved": "Date d’expiration enregistrée",
+    "expRemoved": "Expiration retirée : le lien est actif",
+    "rulesInfo": "Ces règles s’appliquent au lien, à l’intégration et aux liens personnalisés. Elles prennent effet tout de suite, sans republier la démo.",
+    "summary": "Accès à la démo",
+    "expiresOn": "Expire le {{date}}",
+    "expiredOn": "A expiré le {{date}}",
+    "parisTime": "Heure de Paris",
+    "seeScreen": "Voir l’écran d’accès"
   }
 }

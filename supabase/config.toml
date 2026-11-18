@@ -419,3 +419,8 @@ enabled = true
 [functions.track]
 enabled = true
 verify_jwt = false
+
+# L11 : ouverture d'une démo publiée (bucket privé, règles d'accès côté serveur), visiteurs anonymes.
+[functions.open-demo]
+enabled = true
+verify_jwt = false

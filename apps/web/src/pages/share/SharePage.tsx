@@ -17,6 +17,7 @@ import { useDemoEditor } from '../editor/useDemoEditor';
 import { PublishButton } from '../editor/PublishButton';
 import { usePlan } from '../../lib/plan';
 import { PlanFormsWarning } from '../../components/PlanFormsWarning';
+import { AccessPanel, AccessSummary, useDemoAccess } from './AccessPanel';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
@@ -52,6 +53,7 @@ export function SharePage() {
   const [params] = useSearchParams();
   const { can, current } = useWorkspace();
   const editor = useDemoEditor(demoId);
+  const access = useDemoAccess(demoId);
   const [demo, setDemo] = useState<Tables<'demos'> | null>(null);
   const [links, setLinks] = useState<Tables<'share_links'>[]>([]);
   const [linkStats, setLinkStats] = useState<LinkStats>({});
@@ -515,54 +517,13 @@ export function SharePage() {
               </section>
             )}
 
-            {tab === 'access' && (
-              <section role="tabpanel" id="sh-panel-access" aria-labelledby="sh-tab-access">
-                {/* Accès restreint (mot de passe, expiration, domaines) : lot L11, pas encore disponible */}
-                <div className="setting sh-first">
-                  <div>
-                    <b>{t('share.password')}</b> <span className="badge">{t('shell.soon')}</span>
-                    <p className="t-caption muted">{t('share.passwordHelp')}</p>
-                  </div>
-                  <span className="switch">
-                    <input type="checkbox" disabled aria-label={t('share.password')} />
-                    <span />
-                  </span>
-                </div>
-                <div className="setting">
-                  <div>
-                    <b>{t('share.expiration')}</b> <span className="badge">{t('shell.soon')}</span>
-                    <p className="t-caption muted">{t('share.expirationHelp')}</p>
-                  </div>
-                  <span className="switch">
-                    <input type="checkbox" disabled aria-label={t('share.expiration')} />
-                    <span />
-                  </span>
-                </div>
-                <div className="setting">
-                  <div>
-                    <b>{t('share.domains')}</b> <span className="badge">V2</span>
-                    <p className="t-caption muted">{t('share.domainsHelp')}</p>
-                  </div>
-                  <span className="switch">
-                    <input type="checkbox" disabled aria-label={t('share.domains')} />
-                    <span />
-                  </span>
-                </div>
-                <div className="setting">
-                  <div>
-                    <b>{t('share.formFirst')}</b>
-                    <p className="t-caption muted">{t('share.formFirstHelp')}</p>
-                  </div>
-                  <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/edit`}>
-                    {t('share.configure')}
-                  </Link>
-                </div>
-              </section>
-            )}
+            {tab === 'access' && <AccessPanel demoId={demo.id} state={access} editable={can('demo.edit')} />}
           </div>
         </div>
 
         <aside className="col sh-aside" aria-label={t('share.preview')}>
+          {/* L11 : carte « Accès à la démo » en tête de la colonne */}
+          <AccessSummary state={access} url={url} />
           <MiniPreview demoId={demo.id} previewUrl={`${url}?preview=1`} />
           <div className="card card-pad">
             <h3 className="t-label">{t('share.socialPreview')}</h3>

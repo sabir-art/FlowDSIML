@@ -54,7 +54,7 @@ export function BrandSettings() {
           <div>
             <div className="field">
               <label htmlFor="br-p">{t('brand.primary')}</label>
-              <div className="row">
+              <div className="st-color-row">
                 {swatch(DEFAULT_PRIMARY)}
                 <input id="br-p" className="input t-mono" value={DEFAULT_PRIMARY} disabled readOnly />
               </div>
@@ -67,7 +67,7 @@ export function BrandSettings() {
             </div>
             <div className="field">
               <label htmlFor="br-h">{t('brand.hotspot')}</label>
-              <div className="row">
+              <div className="st-color-row">
                 {swatch(DEFAULT_HOTSPOT)}
                 <input id="br-h" className="input t-mono" value={DEFAULT_HOTSPOT} disabled readOnly />
               </div>

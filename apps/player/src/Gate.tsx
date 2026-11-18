@@ -1,0 +1,223 @@
+import type { ComponentChildren } from 'preact';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { ArrowRight, Ban, Clock, ExternalLink, Eye, EyeOff, Key, SearchX } from 'lucide-preact';
+import { openDemo, type GateInfo } from './api';
+import { fmt, strings, type Dict } from './i18n';
+import { initials } from './Player';
+
+/**
+ * Cadre des écrans système et d'accès (PLY-06, L11) : en-tête du workspace sans actions, capture vide
+ * voilée, carte centrée (feuille du bas sur mobile), « Créé avec TutoClick ».
+ */
+export function SysFrame({
+  t,
+  info,
+  label,
+  children,
+}: {
+  t: Dict;
+  info?: Pick<GateInfo, 'title' | 'workspace'>;
+  label: string;
+  children: ComponentChildren;
+}) {
+  return (
+    <div class="p-root p-sys">
+      <header class="p-top">
+        {info?.title ? (
+          <div class="p-id">
+            {info.workspace ? (
+              <span class="p-ws" aria-hidden="true">
+                {initials(info.workspace)}
+              </span>
+            ) : null}
+            <div class="p-id-text">
+              <b class="p-title">{info.title}</b>
+              {info.workspace ? <small class="p-meta">{info.workspace}</small> : null}
+            </div>
+          </div>
+        ) : null}
+      </header>
+      <main class="p-stage-wrap" aria-label={label}>
+        <div class="p-sys-shot" aria-hidden="true" />
+        {children}
+      </main>
+      <p class="p-branding">{t.madeWith}</p>
+    </div>
+  );
+}
+
+type SysKind = 'notFound' | 'expired' | 'blocked';
+
+/** Écran système : démo introuvable, lien expiré (L11-12 : date, workspace, site), intégration refusée. */
+export function SysScreen({ kind, locale, info }: { kind: SysKind; locale: string; info?: GateInfo }) {
+  const t = strings(locale.startsWith('en') ? 'en' : 'fr');
+  const g = t.gate as unknown as Record<string, string>;
+  const date = info?.expiredAt
+    ? new Intl.DateTimeFormat(locale.startsWith('en') ? 'en-GB' : 'fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'Europe/Paris',
+      }).format(new Date(info.expiredAt))
+    : null;
+  const view = {
+    notFound: { Icon: SearchX, title: t.notFoundTitle, text: t.notFound },
+    expired: {
+      Icon: Clock,
+      title: t.expiredTitle,
+      text: date
+        ? fmt(g, info?.workspace ? 'expiredOn' : 'expiredOnNoWs', { date, ws: info?.workspace ?? '' })
+        : t.expired,
+    },
+    blocked: { Icon: Ban, title: t.blockedTitle, text: t.embedBlocked },
+  }[kind];
+  const site = kind === 'expired' && info?.website ? info.website : null;
+  return (
+    <SysFrame t={t} info={info} label={view.title}>
+      <div class="p-card p-sys-card" role="alert">
+        <span class="p-sys-chip" aria-hidden="true">
+          <view.Icon size={22} />
+        </span>
+        <h1>{view.title}</h1>
+        <p class="p-sub">{view.text}</p>
+        {site && (
+          <a class="p-btn p-btn-secondary p-sys-act" href={site} target="_blank" rel="noopener noreferrer">
+            <ExternalLink size={16} aria-hidden="true" />
+            {fmt(g, 'visit', { site: new URL(site).host })}
+          </a>
+        )}
+      </div>
+    </SysFrame>
+  );
+}
+
+const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+/**
+ * L11-06 à 08 : mot de passe. Erreur sous le champ avec les essais restants ; après 5 essais, champ
+ * désactivé et compte à rebours sur le bouton (annoncé une seule fois).
+ */
+export function PasswordGate({
+  demoId,
+  locale,
+  info,
+  onOpen,
+}: {
+  demoId: string;
+  locale: string;
+  info: GateInfo;
+  onOpen: (r: GateInfo) => void;
+}) {
+  const t = strings(locale.startsWith('en') ? 'en' : 'fr');
+  const g = t.gate as unknown as Record<string, string>;
+  const [value, setValue] = useState('');
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [state, setState] = useState<GateInfo>(info);
+  const [wait, setWait] = useState(info.status === 'locked' ? (info.retryIn ?? 60) : 0);
+  const input = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (wait <= 0) return;
+    const id = setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => clearTimeout(id);
+  }, [wait]);
+  useEffect(() => {
+    if (wait !== 0) return;
+    setState((s) => (s.status === 'locked' ? { ...s, status: 'password_required' } : s));
+    input.current?.focus();
+  }, [wait]);
+
+  const locked = wait > 0;
+  const wrong = state.status === 'password_wrong' || state.status === 'error';
+  const submit = async (e: Event) => {
+    e.preventDefault();
+    if (!value || busy || locked) return;
+    setBusy(true);
+    const r = await openDemo(demoId, value);
+    setBusy(false);
+    if (r.status === 'ok') return onOpen(r);
+    setState({ ...state, ...r });
+    if (r.status === 'locked') setWait(r.retryIn ?? 60);
+    else {
+      setValue('');
+      input.current?.focus();
+    }
+  };
+
+  const title = (locked ? g.lockedTitle : g.protectedTitle) ?? '';
+  return (
+    <SysFrame t={t} info={info} label={title}>
+      <form class="p-card p-sys-card p-gate" onSubmit={submit} aria-labelledby="p-gate-t" novalidate>
+        <span class={`p-sys-chip${locked ? ' p-sys-chip--warn' : ''}`} aria-hidden="true">
+          {locked ? <Clock size={22} /> : <Key size={22} />}
+        </span>
+        <h1 id="p-gate-t">{title}</h1>
+        {locked ? (
+          <p class="p-sub" role="status">
+            {g.lockedText}
+          </p>
+        ) : (
+          <p class="p-sub">
+            {fmt(g, info.workspace ? 'protectedText' : 'protectedTextNoWs', {
+              ws: info.workspace ?? '',
+              title: info.title ?? '',
+            })}
+          </p>
+        )}
+        <div class="p-field p-gate-field">
+          <label for="p-gate-pw">{g.password}</label>
+          <div class="p-gate-pw">
+            <input
+              ref={input}
+              id="p-gate-pw"
+              class="p-input"
+              type={show ? 'text' : 'password'}
+              autocomplete="current-password"
+              autoFocus
+              required
+              disabled={locked}
+              value={value}
+              aria-invalid={wrong && !locked ? true : undefined}
+              aria-describedby={wrong && !locked ? 'p-gate-err' : undefined}
+              onInput={(e) => setValue((e.target as HTMLInputElement).value)}
+            />
+            <button
+              type="button"
+              class="p-icon-btn p-gate-eye"
+              aria-label={g.show}
+              aria-pressed={show}
+              disabled={locked}
+              onClick={() => setShow((v) => !v)}
+            >
+              {show ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+          {wrong && !locked && (
+            <span class="p-gate-err" id="p-gate-err" role="alert">
+              {state.status === 'error' ? g.error : g.wrong}
+            </span>
+          )}
+        </div>
+        <button
+          type="submit"
+          class="p-btn p-btn-primary p-gate-submit"
+          disabled={busy || locked}
+          aria-label={locked ? g.lockedText : undefined}
+        >
+          {locked ? (
+            <span aria-hidden="true">{fmt(g, 'retryIn', { time: clock(wait) })}</span>
+          ) : (
+            <>
+              {g.access}
+              <ArrowRight size={16} aria-hidden="true" />
+            </>
+          )}
+        </button>
+        {state.status === 'password_wrong' && typeof state.remaining === 'number' && !locked && (
+          <p class="p-gate-foot">{fmt(g, 'remaining', { count: state.remaining })}</p>
+        )}
+      </form>
+    </SysFrame>
+  );
+}

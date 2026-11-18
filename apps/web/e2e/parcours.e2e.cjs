@@ -87,11 +87,11 @@ const manifest = {
   const page = await b.newPage({ viewport: { width: 1280, height: 800 } });
   page.on('pageerror', (e) => errors.push(e.message));
   const tracked = [];
-  await page.route('**/latest.json', (r) =>
+  await page.route('**/functions/v1/open-demo', (r) =>
     r.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify(manifest),
-      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify({ status: 'ok', manifest: manifest }),
+      headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
     }),
   );
   await page.route('**/assets/a.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));
@@ -193,11 +193,11 @@ const manifest = {
 
   // Grand écran : carte à côté de la capture, sans la recouvrir
   const wide = await b.newPage({ viewport: { width: 1920, height: 900 } });
-  await wide.route('**/latest.json', (r) =>
+  await wide.route('**/functions/v1/open-demo', (r) =>
     r.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify(manifest),
-      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify({ status: 'ok', manifest: manifest }),
+      headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
     }),
   );
   await wide.route('**/assets/a.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));

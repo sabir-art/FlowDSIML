@@ -13,11 +13,11 @@ const manifest = require('./player-maquette.cjs');
   };
   async function open(viewport, m = manifest) {
     const p = await b.newPage({ viewport });
-    await p.route('**/latest.json', (r) =>
+    await p.route('**/functions/v1/open-demo', (r) =>
       r.fulfill({
         contentType: 'application/json',
-        body: JSON.stringify(m),
-        headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ status: 'ok', manifest: m }),
+        headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
       }),
     );
     await p.route('**/assets/a.webp', (r) =>
@@ -30,7 +30,7 @@ const manifest = require('./player-maquette.cjs');
         headers: { 'access-control-allow-origin': '*' },
       }),
     );
-    await p.route('**/functions/v1/**', (r) => r.fulfill({ status: 200, body: '{}' }));
+    await p.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, body: '{}' }));
     await p.goto(`${PLAYER}/#/d/${m.demoId}`);
     await p.waitForSelector('.p-stage');
     await p.waitForTimeout(600);

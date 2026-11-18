@@ -29,7 +29,7 @@ export function Profile() {
     setFullName(profile.full_name);
     setLoc(profile.locale === 'en' ? 'en' : 'fr');
   };
-   
+
   useEffect(reset, [profile]);
 
   async function saveProfile(e: FormEvent) {

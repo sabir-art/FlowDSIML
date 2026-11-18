@@ -19,11 +19,11 @@ const DEMO = manifest.demoId;
   async function open(viewport) {
     const page = await b.newPage({ viewport });
     page.on('pageerror', (e) => errors.push(e.message));
-    await page.route('**/latest.json', (r) =>
+    await page.route('**/functions/v1/open-demo', (r) =>
       r.fulfill({
         contentType: 'application/json',
-        body: JSON.stringify(manifest),
-        headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ status: 'ok', manifest: manifest }),
+        headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
       }),
     );
     await page.route('**/assets/a.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));

@@ -91,11 +91,11 @@ const manifest = {
   const submits = [];
   const events = [];
   let used = 0;
-  await page.route('**/latest.json', (r) =>
+  await page.route('**/functions/v1/open-demo', (r) =>
     r.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify(manifest),
-      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify({ status: 'ok', manifest: manifest }),
+      headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
     }),
   );
   await page.route('**/assets/a.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));

@@ -46,7 +46,7 @@ export function WorkspaceSettings() {
     setPrivacyUrl(savedPrivacy);
     setUrlError(null);
   };
-   
+
   useEffect(reset, [ws.name, ws.slug, savedPrivacy, savedWebsite]);
 
   // PRM-06 / PRM-11 : conséquences chiffrées de la suppression

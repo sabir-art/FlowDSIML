@@ -140,6 +140,7 @@ function seed() {
       folders: [],
       themes: [],
       share_links: [],
+      demo_access: [],
       leads: [
         {
           id: 'l1',
@@ -294,6 +295,45 @@ async function install(page, state = seed()) {
         : null;
     state.calls.push({ method, path: p, query: url.search, body });
 
+    // L11 : Edge Function open-demo (accès décidé côté serveur, manifeste servi par la fonction)
+    if (p.startsWith('/functions/v1/open-demo')) {
+      const req0 = JSON.parse(req.postData() || '{}');
+      const id = req0.demoId;
+      const f = state.storage[`published/${id}/latest.json`];
+      const demo = state.tables.demos.find((d) => d.id === id);
+      if (!f || !demo) return json(route, 200, { status: 'not_found' });
+      const ws = state.tables.workspaces.find((w) => w.id === demo.workspace_id);
+      const info = {
+        title: demo.title,
+        workspace: ws?.name ?? '',
+        website: ws?.settings?.websiteUrl ?? null,
+      };
+      const acc = (state.tables.demo_access || []).find((a) => a.demo_id === id);
+      if (acc?.expires_at && new Date(acc.expires_at) <= new Date())
+        return json(route, 200, { ...info, status: 'expired', expiredAt: acc.expires_at });
+      const ok = (extra = {}) =>
+        json(route, 200, { ...info, ...extra, status: 'ok', manifest: JSON.parse(f.data.toString()) });
+      if (!acc || acc.mode === 'link') return ok();
+      state.grants = state.grants || {};
+      if (req0.grant && state.grants[req0.grant] === id) return ok();
+      if (!req0.password) return json(route, 200, { ...info, status: 'password_required' });
+      acc.failures = acc.failures || 0;
+      if (acc.lockedUntil && acc.lockedUntil > Date.now())
+        return json(route, 200, { ...info, status: 'locked', retryIn: 60 });
+      if (req0.password === acc.password) {
+        acc.failures = 0;
+        const grant = `grant-${Object.keys(state.grants).length + 1}`;
+        state.grants[grant] = id;
+        return ok({ grant });
+      }
+      acc.failures++;
+      if (acc.failures >= 5) {
+        acc.failures = 0;
+        acc.lockedUntil = Date.now() + 60_000;
+        return json(route, 200, { ...info, status: 'locked', retryIn: 60 });
+      }
+      return json(route, 200, { ...info, status: 'password_wrong', remaining: 5 - acc.failures });
+    }
     if (p.startsWith('/functions/v1/track')) {
       const batch = JSON.parse(req.postData() || '{}');
       state.events.push(...(batch.events || []));
@@ -600,6 +640,41 @@ async function install(page, state = seed()) {
             created_at: new Date().toISOString(),
           });
           return json(route, 200, 'lead-id');
+        case 'set_demo_password':
+        case 'set_demo_access': {
+          if (!t.demo_access) t.demo_access = [];
+          let row = t.demo_access.find((x) => x.demo_id === a.p_demo);
+          if (fn === 'set_demo_access' && a.p_mode === 'password' && !row?.password)
+            return json(route, 400, { code: 'P0001', message: 'PASSWORD_REQUIRED' });
+          if (fn === 'set_demo_password' && (a.p_password || '').length < 8)
+            return json(route, 400, { code: 'P0001', message: 'PASSWORD_LENGTH' });
+          const demo = t.demos.find((d) => d.id === a.p_demo);
+          if (!row) {
+            row = {
+              demo_id: a.p_demo,
+              workspace_id: demo?.workspace_id,
+              mode: 'link',
+              ask_email: false,
+              expires_at: null,
+            };
+            t.demo_access.push(row);
+          }
+          if (fn === 'set_demo_password') {
+            Object.assign(row, {
+              mode: 'password',
+              password: a.p_password,
+              password_changed_at: new Date().toISOString(),
+            });
+            state.grants = {};
+          } else
+            Object.assign(row, {
+              mode: a.p_mode,
+              ask_email: !!a.p_ask_email,
+              expires_at: a.p_expires_at ?? null,
+            });
+          row.updated_at = new Date().toISOString();
+          return json(route, 200, null);
+        }
         case 'resolve_share_link': {
           const l = t.share_links.find((x) => x.token === a.p_token && x.is_active);
           return json(route, 200, l ? { demoId: l.demo_id, linkId: l.id, variables: l.variables } : null);

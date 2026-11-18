@@ -871,7 +871,7 @@ function Tooltip({
 }
 
 /** Initiales du workspace pour la pastille de l'en-tête (PY-1). */
-function initials(name: string): string {
+export function initials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
   // Sigle en tête (« DSI Missions Locales » → DSI), sinon initiales des deux premiers mots
   const first = words[0] ?? '';

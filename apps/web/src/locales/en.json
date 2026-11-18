@@ -1371,5 +1371,51 @@
     "keyTaken": "This variable already exists.",
     "create": "Create variable",
     "created": "Variable {{key}} created"
+  },
+  "access": {
+    "who": "Who can see the demo?",
+    "mode": {
+      "link": "Anyone with the link",
+      "password": "With a password",
+      "invite": "By invitation",
+      "domain": "By email domain"
+    },
+    "modeHelp": {
+      "link": "Open access, no identification.",
+      "password": "Visitors enter a password you give them.",
+      "invite": "Only invited addresses receive a personal access link.",
+      "domain": "Any address from an allowed domain, confirmed by an emailed link."
+    },
+    "password": "Password",
+    "showPw": "Show password",
+    "generate": "Generate",
+    "pwHelp": "8 characters minimum. Changing it requires visitors to enter the new one.",
+    "pwChanged": "Set {{when}}.",
+    "pwChangedCap": "Password changed {{when}}",
+    "pwKeep": "Set: type a new one to change it",
+    "pwSave": "Save password",
+    "pwUpdate": "Change password",
+    "pwSaved": "Password saved: the demo is protected",
+    "pwTooShort": "The password must be at least 8 characters.",
+    "pwRequired": "Save a password first.",
+    "askEmail": "Also ask for the visitor’s email",
+    "savedLink": "Open access: anyone with the link can see the demo",
+    "savedPassword": "The demo is password protected",
+    "expiration": "Expiry date",
+    "expirationHelp": "After this date, the link shows “This demo is no longer available”.",
+    "expDate": "Link expires on",
+    "expTime": "At",
+    "in7": "In 7 days",
+    "in30": "In 30 days",
+    "endOfMonth": "End of month",
+    "expHelp": "Paris time. You can extend or remove the expiry at any time: the link becomes active again immediately.",
+    "expSaved": "Expiry date saved",
+    "expRemoved": "Expiry removed: the link is active",
+    "rulesInfo": "These rules apply to the link, the embed and personalised links. They take effect immediately, without republishing.",
+    "summary": "Demo access",
+    "expiresOn": "Expires on {{date}}",
+    "expiredOn": "Expired on {{date}}",
+    "parisTime": "Paris time",
+    "seeScreen": "See the access screen"
   }
 }

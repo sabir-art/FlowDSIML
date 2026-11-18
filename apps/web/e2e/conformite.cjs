@@ -343,6 +343,82 @@ const SCREENS = {
     player: true,
     playerPath: '/l/lien-expire',
   },
+  // L11 : partage sécurisé (onglet Accès, écrans visiteur)
+  'L11-01': {
+    maquette: 'reference/partage-securise.html?etat=mdp',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share?tab=access',
+    seed(d) {
+      d.tables.demo_access = [
+        {
+          demo_id: '0b5c1f0e-0000-4000-8000-000000000001',
+          mode: 'password',
+          password: 'parcours-2026',
+          ask_email: false,
+          expires_at: null,
+          password_changed_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ];
+    },
+    async prepare(p) {
+      await p.waitForSelector('#acc-pw');
+    },
+  },
+  'L11-05': {
+    maquette: 'reference/partage-securise.html?etat=expiration',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share?tab=access',
+    seed(d) {
+      d.tables.demo_access = [
+        {
+          demo_id: '0b5c1f0e-0000-4000-8000-000000000001',
+          mode: 'link',
+          ask_email: false,
+          expires_at: '2026-11-30T17:00:00.000Z',
+          password_changed_at: null,
+          updated_at: new Date().toISOString(),
+        },
+      ];
+    },
+    async prepare(p) {
+      await p.waitForSelector('#acc-exp-d');
+    },
+  },
+  'L11-06': {
+    maquette: 'refonte/l11-acces-visiteur.html?view=mdp',
+    player: true,
+    gate: { status: 'password_required', title: 'Créer une fiche usager', workspace: 'DSI Missions Locales' },
+  },
+  'L11-07': {
+    maquette: 'refonte/l11-acces-visiteur.html?view=mdp-err',
+    player: true,
+    gate: {
+      status: 'password_wrong',
+      remaining: 3,
+      title: 'Créer une fiche usager',
+      workspace: 'DSI Missions Locales',
+    },
+  },
+  'L11-08': {
+    maquette: 'refonte/l11-acces-visiteur.html?view=mdp-bloque',
+    player: true,
+    gate: {
+      status: 'locked',
+      retryIn: 48,
+      title: 'Créer une fiche usager',
+      workspace: 'DSI Missions Locales',
+    },
+  },
+  'L11-12': {
+    maquette: 'refonte/l11-acces-visiteur.html?view=expire',
+    player: true,
+    gate: {
+      status: 'expired',
+      expiredAt: '2026-11-30T17:00:00.000Z',
+      title: 'Créer une fiche usager',
+      workspace: 'DSI Missions Locales',
+      website: 'https://www.dsi-ml.example',
+    },
+  },
   // Lot 2 Lead UX : Plans, Analytics (leads), Paramètres
   'PLN-04': { maquette: 'reference/plans.html', route: '/#/settings/plans' },
   'PLN-05': {
@@ -564,11 +640,15 @@ const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 async function shotPlayer(b, s, theme) {
   const manifest = require('./player-maquette.cjs');
   const p = await b.newPage({ viewport: s.view || VIEW, colorScheme: theme, locale: 'fr-FR' });
-  await p.route('**/latest.json', (r) =>
+  await p.route('**/functions/v1/**', (r) =>
+    r.fulfill({ status: 200, body: '{}', headers: { 'access-control-allow-origin': '*' } }),
+  );
+  // L11 : réponse d'open-demo propre à l'état (mot de passe, lien expiré…), sinon la démo s'ouvre
+  await p.route('**/functions/v1/open-demo', (r) =>
     r.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify(manifest),
-      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify(s.gate ?? { status: 'ok', manifest }),
+      headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
     }),
   );
   await p.route('**/assets/a.webp', (r) =>
@@ -582,11 +662,8 @@ async function shotPlayer(b, s, theme) {
       headers: { 'access-control-allow-origin': '*' },
     }),
   );
-  await p.route('**/functions/v1/**', (r) =>
-    r.fulfill({ status: 200, body: '{}', headers: { 'access-control-allow-origin': '*' } }),
-  );
   await p.goto(`${PLAYER}/#${s.playerPath ?? `/d/${manifest.demoId}`}`);
-  await p.waitForSelector(s.playerPath ? '.p-sys-card' : '.p-stage');
+  await p.waitForSelector(s.playerPath || s.gate ? '.p-sys-card' : '.p-stage');
   await p.waitForTimeout(900);
   if (s.prepare) await s.prepare(p);
   await p.mouse.move(0, 0);

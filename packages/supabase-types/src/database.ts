@@ -31,6 +31,18 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"demo_access": {
+                  Row: {
+                    "ask_email": boolean,"demo_id": string,"expires_at": string | null,"mode": string,"password_changed_at": string | null,"updated_at": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ask_email"?: boolean,"demo_id": string,"expires_at"?: string | null,"mode"?: string,"password_changed_at"?: string | null,"updated_at"?: string,"workspace_id": string
+                  }
+                  Update: {
+                    "ask_email"?: boolean,"demo_id"?: string,"expires_at"?: string | null,"mode"?: string,"password_changed_at"?: string | null,"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Relationships: []
                 },"demo_versions": {
                   Row: {
                     "demo_id": string,"id": string,"manifest": NonNullable<Json>,"number": number,"public_ack": Json | null,"published_at": string,"published_by": string | null,"workspace_id": string
@@ -695,6 +707,12 @@ isOneToOne: false
                            },
 "resolve_share_link":
 { Args: { "p_token": string }; Returns: Json
+                           },
+"set_demo_access":
+{ Args: { "p_ask_email": boolean,"p_demo": string,"p_expires_at": string | null,"p_mode": string }; Returns: undefined
+                           },
+"set_demo_password":
+{ Args: { "p_demo": string,"p_password": string }; Returns: undefined
                            },
 "submit_lead":
 { Args: { "p_consent"?: boolean,"p_demo": string,"p_email": string,"p_fields"?: Json,"p_link_token"?: string,"p_version": string,"p_visitor"?: string }; Returns: string
