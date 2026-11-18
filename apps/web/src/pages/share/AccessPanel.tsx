@@ -423,7 +423,7 @@ export function AccessSummary({ state, url }: { state: AccessState; url: string 
   const expired = access.expires_at ? Date.parse(access.expires_at) <= Date.now() : false;
   return (
     <div className="card card-pad l11-sum">
-      <h3 className="t-label">{t('access.summary')}</h3>
+      <h2 className="t-label">{t('access.summary')}</h2>
       <div className="l11-sum__line">
         <span className="l11-ic">
           {access.mode === 'password' ? <Key aria-hidden="true" /> : <Globe aria-hidden="true" />}

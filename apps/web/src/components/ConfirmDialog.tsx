@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
 
@@ -30,6 +30,7 @@ export function ConfirmDialog({
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -44,7 +45,7 @@ export function ConfirmDialog({
 
   const blocked = requireText !== undefined && text !== requireText;
   return (
-    <dialog ref={ref} className="dialog dialog-confirm" onClose={onClose} aria-labelledby="dlg-title">
+    <dialog ref={ref} className="dialog dialog-confirm" onClose={onClose} aria-labelledby={titleId}>
       <form
         method="dialog"
         onSubmit={async (e) => {
@@ -61,7 +62,7 @@ export function ConfirmDialog({
       >
         {/* PRM-05 / PRM-06 : en-tête, corps et pied séparés, comme les modales de la maquette */}
         <div className="dialog-head">
-          <h2 id="dlg-title">{title}</h2>
+          <h2 id={titleId}>{title}</h2>
         </div>
         {(body || requireText !== undefined) && (
           <div className="dialog-body">

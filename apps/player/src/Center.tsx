@@ -637,7 +637,11 @@ function PathPage({
           )}
         </section>
       )}
-      <ol class="fp-list" aria-label={c.fpModules}>
+      {/* A11Y-07 : niveau de titre intermédiaire avant les modules (h3) */}
+      <h2 class="sr-only" id="fp-modules-t">
+        {c.fpModules}
+      </h2>
+      <ol class="fp-list" aria-labelledby="fp-modules-t">
         {p.modules.map((m, i) => {
           const st = v.modules[i]!;
           const cls =

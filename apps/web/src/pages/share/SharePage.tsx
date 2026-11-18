@@ -224,7 +224,7 @@ export function SharePage() {
                   role="tab"
                   id={`sh-tab-${id}`}
                   aria-selected={tab === id}
-                  aria-controls={`sh-panel-${id}`}
+                  aria-controls={tab === id ? `sh-panel-${id}` : undefined}
                   tabIndex={tab === id ? 0 : -1}
                   onClick={() => setTab(id)}
                   onKeyDown={(e) => {
@@ -309,9 +309,9 @@ export function SharePage() {
                   <span className="help">{t('share.customAddressHelp')}</span>
                 </div>
                 <hr className="divider sh-hr" />
-                <h3 className="t-label sh-h3" id="sh-params-h">
+                <h2 className="t-label sh-h3" id="sh-params-h">
                   {t('share.urlParams')}
-                </h3>
+                </h2>
                 {/* Zone défilante atteignable au clavier (RGAA 7.3) */}
                 <div className="code" tabIndex={0} role="region" aria-labelledby="sh-params-h">
                   {url}
@@ -334,7 +334,7 @@ export function SharePage() {
                 </div>
                 <p className="help sh-help">{t('share.urlParamsHelp')}</p>
                 <hr className="divider sh-hr" />
-                <h3 className="t-label sh-h3">{t('share.elsewhere')}</h3>
+                <h2 className="t-label sh-h3">{t('share.elsewhere')}</h2>
                 <div className="row wrap">
                   <a
                     className="btn btn-secondary btn-sm"
@@ -536,7 +536,7 @@ export function SharePage() {
           <AccessSummary state={access} url={url} />
           <MiniPreview demoId={demo.id} previewUrl={`${url}?preview=1`} />
           <div className="card card-pad">
-            <h3 className="t-label">{t('share.socialPreview')}</h3>
+            <h2 className="t-label">{t('share.socialPreview')}</h2>
             <div className="sh-og">
               <div className="sh-og-img fd-player-scope">
                 <b>{demo.title}</b>
@@ -554,7 +554,7 @@ export function SharePage() {
           </div>
           <div className="card card-pad">
             <div className="row between">
-              <h3 className="t-label">{t('share.thisWeek')}</h3>
+              <h2 className="t-label">{t('share.thisWeek')}</h2>
               <Link to={`/demos/${demoId}/analytics`} className="t-caption">
                 {t('share.seeAnalytics')}
               </Link>

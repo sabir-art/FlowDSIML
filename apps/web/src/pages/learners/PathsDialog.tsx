@@ -214,7 +214,7 @@ export function PathsDialog({
                 type="button"
                 id={`gm-tab-${id}`}
                 aria-selected={tab === id}
-                aria-controls={`gm-panel-${id}`}
+                aria-controls={tab === id ? `gm-panel-${id}` : undefined}
                 tabIndex={tab === id ? 0 : -1}
                 onClick={() => setTab(id)}
                 onKeyDown={(e) => {

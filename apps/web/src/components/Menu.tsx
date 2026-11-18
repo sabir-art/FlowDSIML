@@ -160,7 +160,7 @@ export function Menu({
         aria-label={trigger || custom ? undefined : label}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-controls={id}
+        aria-controls={open ? id : undefined}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();

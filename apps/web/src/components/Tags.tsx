@@ -301,7 +301,7 @@ export function TagFilter({
         type="button"
         className={`fd-btn tg-filter${selected.length ? ' is-active' : ''}`}
         aria-expanded={open}
-        aria-controls="tg-pop"
+        aria-controls={open ? 'tg-pop' : undefined}
         onClick={() => setOpen((v) => !v)}
       >
         <TagIcon aria-hidden="true" />

@@ -253,7 +253,7 @@ export function LearnersPage() {
             type="button"
             id={`l13-tab-${id}`}
             aria-selected={tab === id}
-            aria-controls={`l13-panel-${id}`}
+            aria-controls={tab === id ? `l13-panel-${id}` : undefined}
             tabIndex={tab === id ? 0 : -1}
             onClick={() => setParam({ tab: id === 'liste' ? null : id })}
             onKeyDown={(e) => {

@@ -1109,6 +1109,11 @@
 .chart-col:hover .fd-bar__fill {
   background: var(--fd-color-nav-active);
 }
+/* A11Y-14 : 90 jours, valeurs non écrites sur chaque barre → liseré foncé (> 3:1) pour que la
+   barre orange reste perceptible ; les valeurs restent dans la table pour lecteur d'écran */
+.chart-bars--dense .fd-bar__fill {
+  box-shadow: inset 0 0 0 1px var(--fd-color-text-muted);
+}
 /* 90 jours : valeur au survol seulement (la table sr-only et l'info-bulle restent) */
 .chart-bars--dense .chart-col__v {
   visibility: hidden;

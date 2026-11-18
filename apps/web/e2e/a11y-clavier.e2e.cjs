@@ -163,6 +163,38 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     await e.ctx.close();
   }
 
+  // 1 ter. Références ARIA et identifiants (A11Y-08, A11Y-09)
+  for (const [name, route, seed] of [
+    ['Démos', '/#/'],
+    ['Éditeur', `/#/demos/${DEMO}/edit`],
+    ['Partager', `/#/demos/${DEMO}/share`],
+    ['Analytics', '/#/analytics'],
+    [
+      'Apprenants',
+      '/#/learners',
+      (d) => {
+        seedPathTables(d.tables, d.tables.workspaces[0].id);
+        d.learners = learnersFixture().progress;
+      },
+    ],
+    ['Centre (réglages)', '/#/center', (d) => seedCenterTables(d)],
+  ]) {
+    const { p, ctx } = await app(route, { seed });
+    const r = await p.evaluate(() => {
+      const ids = [...document.querySelectorAll('[id]')].map((e) => e.id);
+      const dup = [...new Set(ids.filter((x, i) => ids.indexOf(x) !== i))];
+      const broken = [];
+      for (const attr of ['aria-controls', 'aria-labelledby', 'aria-describedby', 'aria-owns', 'aria-activedescendant'])
+        for (const el of document.querySelectorAll(`[${attr}]`))
+          for (const ref of el.getAttribute(attr).split(/\s+/).filter(Boolean))
+            if (!document.getElementById(ref)) broken.push(`${attr}→${ref}`);
+      return { dup, broken: [...new Set(broken)] };
+    });
+    ok(r.dup.length === 0, `A11Y-08 : identifiants uniques : ${name}${r.dup.length ? ` → ${r.dup.join(', ')}` : ''}`);
+    ok(r.broken.length === 0, `A11Y-09 : références ARIA valides : ${name}${r.broken.length ? ` → ${r.broken.join(', ')}` : ''}`);
+    await ctx.close();
+  }
+
   // 2. Focus visible sur les pages principales
   for (const [name, route, seed] of [
     ['Démos', '/#/'],

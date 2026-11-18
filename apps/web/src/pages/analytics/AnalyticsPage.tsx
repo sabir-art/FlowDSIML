@@ -217,7 +217,7 @@ export function AnalyticsPage() {
             role="tab"
             id={`an-tab-${k}`}
             aria-selected={tab === k}
-            aria-controls={`an-panel-${k}`}
+            aria-controls={tab === k ? `an-panel-${k}` : undefined}
             tabIndex={tab === k ? 0 : -1}
             onClick={() => selectTab(k)}
             onKeyDown={(e) => {

@@ -337,7 +337,6 @@ export function CommentsPanel({
           type="button"
           className="cm-collapsed-bar"
           aria-expanded="false"
-          aria-controls="cm-panel"
           onClick={() => toggle(false)}
         >
           <span className="fd-icon-chip" aria-hidden="true">
