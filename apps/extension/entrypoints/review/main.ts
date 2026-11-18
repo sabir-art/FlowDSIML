@@ -11,6 +11,8 @@ import {
   Lock,
   Mail,
   Phone,
+  ScanSearch,
+  Send,
   SquareDashed,
   User,
   createElement as lucideEl,
@@ -81,13 +83,16 @@ async function boot() {
   $('rail-title').textContent = tr('captures');
   $('privacy').textContent = tr('privacy');
   $('cancel').textContent = tr('cancel');
-  $('blur-all').textContent = tr('blurAll');
+  $('blur-all-text').textContent = tr('blurAll');
   $('add-hint').textContent = tr('addZone');
   $('confirm-text').textContent = tr('cancelConfirm');
   $('confirm-no').textContent = tr('back');
   $('confirm-yes').textContent = tr('cancelYes');
-  $('state').textContent = tr('analyzing');
-  createIcons({ icons: { Lock }, attrs: { width: 16, height: 16, 'aria-hidden': 'true' } });
+  $('state-text').textContent = tr('analyzing');
+  createIcons({
+    icons: { Lock, Check, Send, Scan: ScanSearch },
+    attrs: { width: 16, height: 16, 'aria-hidden': 'true' },
+  });
 
   target = ((await browser.storage.local.get('fd.review'))['fd.review'] as typeof target) ?? null;
   const all = await pending.all();
@@ -97,7 +102,7 @@ async function boot() {
   );
   for (const c of captures) urls.set(c.id, URL.createObjectURL(c.image));
   $('main').setAttribute('aria-busy', 'false');
-  $('state').textContent = tr('done');
+  $('state-text').textContent = tr('done');
   $('state').classList.add('is-done');
   $('subtitle').textContent = tr('subtitle', { demo: target?.title ?? '', count: captures.length });
   if (!captures.length || !target) {
@@ -134,7 +139,7 @@ function render() {
   renderStage();
   renderPanel();
   const n = captures.length;
-  $('send').textContent = tr('send', { count: n });
+  $('send-text').textContent = tr('send', { count: n });
 }
 
 function renderRail() {
@@ -154,16 +159,27 @@ function renderRail() {
             'data-i': String(i),
           },
           h('img', { src: urls.get(c.id) ?? '', alt: '' }),
-          h('span', { class: 'rv-thumb__title' }, tr('captureN', { n: c.order + 1 })),
+          // FL-3 : « n · titre » puis la pastille du nombre de détections, à droite du libellé
           h(
             'span',
-            { class: `rv-pill ${n ? 'rv-pill--danger' : 'rv-pill--ok'}`, 'aria-label': count },
-            n ? String(n) : icon(Check, 12),
+            { class: 'rv-thumb__label' },
+            h('span', { class: 'rv-thumb__title' }, thumbTitle(c)),
+            h(
+              'span',
+              { class: `rv-pill ${n ? 'rv-pill--danger' : 'rv-pill--ok'}`, 'aria-label': count },
+              n ? String(n) : '0',
+            ),
           ),
         ),
       );
     }),
   );
+}
+
+/** « n · titre » : titre de la page capturée (texte tiers, inséré en textContent). */
+function thumbTitle(c: PendingCapture) {
+  const t = (c.title || c.label || '').trim();
+  return t ? `${c.order + 1} · ${t}` : tr('captureN', { n: c.order + 1 });
 }
 
 function zoneLabel(z: PendingZone) {
@@ -230,8 +246,13 @@ function renderPanel() {
     ),
   );
   const off = [...new Set(c.zones.filter((z) => !z.blur).map((z) => typeLabel(z.type)))];
+  // FL-5 : phrase qui nomme les détections non floutées (« ne seront pas floutées », « pas » en gras)
   $('warning').hidden = off.length === 0;
-  $('warning').textContent = off.length ? tr('notBlurredWarning', { types: off.join(', ') }) : '';
+  const list = new Intl.ListFormat(document.documentElement.lang, { type: 'conjunction' }).format(off);
+  const [before, after] = (off.length ? tr('notBlurredWarning', { types: list, not: '{{not}}' }) : '').split(
+    '{{not}}',
+  );
+  $('warning').replaceChildren(before ?? '', ...(after !== undefined ? [h('b', {}, tr('not')), after] : []));
   ($('blur-all') as HTMLButtonElement).disabled = c.zones.every((z) => z.blur);
 }
 
@@ -358,7 +379,7 @@ $('send').addEventListener('click', async () => {
   const ordered = [...captures].sort((a, b) => a.order - b.order);
   try {
     const demoId = await sendCaptures(ordered, target, (done) => {
-      send.textContent = tr('sending', { done, total: ordered.length });
+      $('send-text').textContent = tr('sending', { done, total: ordered.length });
     });
     await pending.clear();
     await browser.storage.local.remove('fd.review');
@@ -368,7 +389,7 @@ $('send').addEventListener('click', async () => {
     $('error').textContent = (err as Error).message ?? String(err);
     send.disabled = false;
     $('cancel').removeAttribute('disabled');
-    send.textContent = tr('send', { count: ordered.length });
+    $('send-text').textContent = tr('send', { count: ordered.length });
   }
 });
 

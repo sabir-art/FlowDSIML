@@ -590,7 +590,7 @@
       "commentsNote": "Internal comments: never published",
       "checkReviewed": "I have reviewed every step, including bubble and form text.",
       "checkFictional": "Visible data is fictional or blurred.",
-      "restrict": "Need to restrict access?",
+      "restrict": "Need to restrict access? Choose <a>Invitation</a>, <b>Email domain</b> or <c>Password</c>.",
       "restrictLink": "Choose Invitation, Email domain or Password",
       "review": "Review step {{n}}",
       "cancel": "Cancel",

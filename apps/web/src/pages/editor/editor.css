@@ -1571,3 +1571,27 @@
 .canvas-end-acts .p-btn-ghost {
   border-color: transparent;
 }
+/* RP-1 : résumé en lignes simples, sans fond ; RP-2 / RP-3 */
+.gdpr-summary {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+.gdpr-restrict {
+  margin: 0;
+  font-size: var(--fd-text-body-size, 14px);
+}
+.mk-link-inline {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: var(--fd-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.gdpr-why {
+  margin: 8px 0 0;
+  text-align: right;
+}

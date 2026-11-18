@@ -8,12 +8,14 @@
   <body>
     <div class="rv">
       <header class="rv-head">
-        <img class="rv-logo" src="/logo-tutoclick-compact.svg" width="114" height="36" alt="TutoClick" />
+        <img class="rv-logo" src="/symbole-tutoclick.svg" width="32" height="32" alt="TutoClick" />
         <div class="rv-head__text">
           <h1 id="title"></h1>
           <p id="subtitle" class="muted"></p>
         </div>
-        <span id="state" class="rv-badge" role="status"></span>
+        <span id="state" class="rv-badge" role="status"
+          ><i data-lucide="scan"></i><span id="state-text"></span
+        ></span>
       </header>
       <div id="summary" class="rv-alert" role="alert" hidden></div>
       <div id="error" class="rv-alert rv-alert--error" role="alert" hidden></div>
@@ -31,13 +33,17 @@
           <h2 id="panel-title"></h2>
           <ul id="zones" class="rv-zones"></ul>
           <p id="warning" class="rv-help rv-help--warn" hidden></p>
-          <button id="blur-all" class="btn" type="button"></button>
+          <button id="blur-all" class="btn btn-sm" type="button">
+            <i data-lucide="check"></i><span id="blur-all-text"></span>
+          </button>
         </aside>
       </main>
       <footer class="rv-foot">
         <p class="rv-privacy"><i data-lucide="lock"></i><span id="privacy"></span></p>
-        <button id="cancel" class="btn btn-ghost-danger" type="button"></button>
-        <button id="send" class="btn btn-primary" type="button"></button>
+        <button id="cancel" class="btn" type="button"></button>
+        <button id="send" class="btn btn-primary" type="button">
+          <i data-lucide="send"></i><span id="send-text"></span>
+        </button>
       </footer>
     </div>
     <dialog id="confirm" aria-labelledby="confirm-text">

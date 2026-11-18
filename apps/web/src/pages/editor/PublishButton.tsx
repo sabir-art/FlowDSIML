@@ -99,6 +99,7 @@ export function PublishButton({
           onReviewStep?.(i);
         }}
         onSettings={() => navigate('/settings/workspace')}
+        onRestrict={() => navigate(`/demos/${demo.id}/share?tab=access`)}
         onClose={() => setGdprOpen(false)}
       />
       {error && (

@@ -37,6 +37,7 @@ export function GdprDialog({
   onConfirm,
   onReview,
   onSettings,
+  onRestrict,
   onClose,
 }: {
   open: boolean;
@@ -45,6 +46,8 @@ export function GdprDialog({
   onConfirm: (ack: GdprAck) => void;
   onReview: (stepIndex: number) => void;
   onSettings: () => void;
+  /** RP-2 : ouvre l'onglet Accès du partage. */
+  onRestrict: () => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -120,6 +123,16 @@ export function GdprDialog({
                 {t('editor.gdpr.commentsNote')}
               </li>
             </ul>
+            <p className="gdpr-restrict">
+              <Trans
+                i18nKey="editor.gdpr.restrict"
+                components={{
+                  a: <button type="button" className="mk-link-inline" onClick={onRestrict} />,
+                  b: <button type="button" className="mk-link-inline" onClick={onRestrict} />,
+                  c: <button type="button" className="mk-link-inline" onClick={onRestrict} />,
+                }}
+              />
+            </p>
             <label className="gdpr-check">
               <input type="checkbox" checked={reviewed} onChange={(e) => setReviewed(e.target.checked)} />
               <span>{t('editor.gdpr.checkReviewed')}</span>
@@ -128,11 +141,6 @@ export function GdprDialog({
               <input type="checkbox" checked={fictional} onChange={(e) => setFictional(e.target.checked)} />
               <span>{t('editor.gdpr.checkFictional')}</span>
             </label>
-            {!ready && (
-              <p id={`${id}-why`} className="fd-help">
-                {t('editor.gdpr.why')}
-              </p>
-            )}
           </div>
           <div className="dialog-actions">
             {sum.pendingSteps.length > 0 && (
@@ -152,6 +160,12 @@ export function GdprDialog({
               {t('editor.gdpr.publish')}
             </Button>
           </div>
+          {/* RP-3 : aide sous les boutons, alignée à droite */}
+          {!ready && (
+            <p id={`${id}-why`} className="fd-help gdpr-why">
+              {t('editor.gdpr.why')}
+            </p>
+          )}
         </form>
       )}
     </dialog>

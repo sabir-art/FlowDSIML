@@ -590,7 +590,7 @@
       "commentsNote": "Commentaires internes : jamais publiés",
       "checkReviewed": "J'ai relu chaque étape, y compris les textes des bulles et du formulaire.",
       "checkFictional": "Les données visibles sont fictives ou floutées.",
-      "restrict": "Besoin de restreindre l'accès ?",
+      "restrict": "Besoin de restreindre l’accès ? Choisir <a>Invitation</a>, <b>Domaine e-mail</b> ou <c>Mot de passe</c>.",
       "restrictLink": "Choisir Invitation, Domaine e-mail ou Mot de passe",
       "review": "Revoir l'étape {{n}}",
       "cancel": "Annuler",

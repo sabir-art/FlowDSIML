@@ -381,3 +381,90 @@ dialog::backdrop {
   gap: 8px;
   justify-content: flex-end;
 }
+
+/* ---- F1-01 : écarts FL-1 à FL-6 (refonte/f1-formation.html, vue Flous) ---- */
+.rv-logo {
+  width: 32px;
+  height: 32px;
+}
+.rv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+/* FL-2 : aperçu réel du flou ; cadre framboise plein = floutée, pointillé = non floutée, bleu = sélection */
+.rv-zone.is-blur {
+  border: 0;
+  outline: 2px solid var(--fd-color-primary);
+  background: color-mix(in srgb, var(--fd-color-surface-sunken, #f1f4f8) 35%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.rv-zone.is-off {
+  border: 0;
+  outline: 2px dashed var(--fd-color-danger, #d60b52);
+}
+.rv-zone.is-selected,
+.rv-zone:focus-visible {
+  outline: 3px solid #2897d5;
+  outline-offset: 0;
+}
+.rv-sw--blur {
+  border: 0;
+  outline: 2px solid var(--fd-color-primary);
+  background: var(--fd-color-surface-sunken, #f1f4f8);
+}
+.rv-sw--off {
+  border: 0;
+  outline: 2px dashed var(--fd-color-danger, #d60b52);
+}
+.rv-sw--sel {
+  outline: 3px solid #2897d5;
+}
+/* FL-3 : libellé « n · titre » et pastille à droite, sous la vignette */
+.rv-thumb__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.rv-thumb__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rv-thumb .rv-pill {
+  position: static;
+  flex: none;
+}
+/* FL-4 : chaque détection est une carte bordée ; la carte sélectionnée a une bordure bleue */
+.rv-row {
+  border: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface);
+  padding: 10px;
+}
+.rv-row.is-selected {
+  background: var(--fd-color-surface);
+  border-color: #2897d5;
+  box-shadow: 0 0 0 1px #2897d5;
+}
+.rv-row .rv-chip {
+  background: var(--fd-color-primary-soft, #fbe8f0);
+  color: var(--fd-color-primary-soft-text, #8a1450);
+}
+/* FL-5 / FL-6 : boutons avec icône */
+#blur-all,
+#send {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+#blur-all {
+  align-self: flex-start;
+}

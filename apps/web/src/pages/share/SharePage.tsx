@@ -58,7 +58,11 @@ export function SharePage() {
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [variables, setVariables] = useState<Tables<'variables'>[]>([]);
   const [origins, setOrigins] = useState('');
-  const [tab, setTab] = useState<Tab>('link');
+  // RP-2 : la modale RGPD ouvre directement l'onglet Accès (?tab=access)
+  const [tab, setTab] = useState<Tab>(() => {
+    const q = params.get('tab');
+    return q === 'embed' || q === 'perso' || q === 'access' ? q : 'link';
+  });
   const [creating, setCreating] = useState(false);
   const [week, setWeek] = useState<{ views: number; leads: number } | null>(null);
   const [gatedSteps, setGatedSteps] = useState(0);

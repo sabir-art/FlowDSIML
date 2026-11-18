@@ -44,6 +44,17 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await dlg.waitFor();
   const pub = dlg.getByRole('button', { name: 'Publier en public' });
   ok(await pub.isDisabled(), 'RGPD : « Publier en public » bloqué tant que les cases ne sont pas cochées');
+  ok(
+    (await dlg.locator('.gdpr-restrict button').count()) === 3,
+    'RP-2 : liens Invitation, Domaine e-mail, Mot de passe',
+  );
+  ok(
+    await dlg
+      .locator('.gdpr-why')
+      .evaluate((el) => !!el.previousElementSibling?.classList.contains('dialog-actions')),
+    'RP-3 : aide sous les boutons',
+  );
+  if (process.env.F1_SHOT) await dlg.screenshot({ path: process.env.F1_SHOT });
   ok((await dlg.textContent()).includes('zone floutée'), 'RGPD : bilan des zones floutées');
   if (process.env.SHOTS_DIR) await app.screenshot({ path: `${process.env.SHOTS_DIR}/f1-rgpd.png` });
   await dlg.getByLabel(/J’ai relu|J'ai relu/).check();
