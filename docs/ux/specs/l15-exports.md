@@ -100,9 +100,9 @@
   - en-tête : logo et nom du workspace, « Centre de formation », filet noir de 2 px ;
   - pastille bordée « ATTESTATION DE SUIVI · NON CERTIFIANTE » ;
   - titre « Attestation de suivi » ;
-  - phrase : « {{workspace}} atteste que **{{prénom}}** a suivi en ligne la formation **« {{formation}} »** et validé l'ensemble de ses modules : » ;
+  - phrase : « {{workspace}} atteste que **{{prénom}}** a suivi en ligne la formation **« {{formation}} »** et validé l'ensemble de ses modules. Formation validée le **{{date}}**. » La date est celle où le dernier module obligatoire a été validé (événement `demo_complete` ou quiz réussi, horodaté côté serveur), renvoyée par la RPC d'attestation. Si elle manque, la phrase s'arrête après « modules » ;
   - tableau Module, Statut, Quiz (meilleur score, sinon « — ») ;
-  - zone « Pour {{workspace}} » avec une ligne de signature vide, et « Document généré le {{date du jour}} ». C'est la seule date du document : la base ne garde pas les dates de validation ;
+  - zone « Pour {{workspace}} » avec une ligne de signature vide, et « Document généré le {{date du jour}} » ;
   - encadré final : « Attestation de suivi, non certifiante. Elle indique que les modules ont été suivis et validés en ligne ; elle ne vaut ni diplôme, ni certification, ni habilitation. »
 - **Prénom seul** : c'est ce que le centre connaît de l'apprenant (L14). Le nom complet ne s'affiche que si le lien personnel le fournit.
 - Elle est disponible seulement si **tous** les modules obligatoires sont validés. Sinon, le bouton n'apparaît pas.
@@ -111,6 +111,6 @@
 ## 6. Règles
 
 - Données fictives uniquement (`*.example`, « Mission Locale Exemple »). Icônes Lucide, aucun caractère utilisé comme icône.
-- Aucune valeur inventée : pas de poids ni de durée estimés avant la création du fichier, pas de date de validation.
+- Aucune valeur inventée : pas de poids ni de durée estimés avant la création du fichier. La seule date de validation affichée est celle de la formation, horodatée côté serveur.
 - Les formats non disponibles restent visibles avec « Bientôt ». On ne les supprime pas.
 - Contrastes : texte ≥ 4,5:1. Le framboise des repères (5,21:1 sur blanc) ne sert jamais au texte courant.
