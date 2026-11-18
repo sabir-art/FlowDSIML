@@ -424,3 +424,8 @@ verify_jwt = false
 [functions.open-demo]
 enabled = true
 verify_jwt = false
+
+# L14 : centre de formation public (visiteurs anonymes, accès décidé par center_open)
+[functions.open-center]
+enabled = true
+verify_jwt = false

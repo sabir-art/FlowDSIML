@@ -404,7 +404,19 @@ isOneToOne: false
                   }
                   Relationships: []
                 },
-"learners": {
+"training_centers": {
+                  Row: {
+                    "access_mode": string,"draft": Json,"password_changed_at": string | null,"published": Json | null,"published_at": string | null,"slug": string,"updated_at": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "access_mode"?: string,"draft"?: Json,"password_changed_at"?: string | null,"published"?: Json | null,"published_at"?: string | null,"slug"?: string,"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Update: {
+                    "access_mode"?: string,"draft"?: Json,"password_changed_at"?: string | null,"published"?: Json | null,"published_at"?: string | null,"slug"?: string,"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Relationships: []
+                },"learners": {
                   Row: {
                     "created_at": string,"email": string | null,"full_name": string,"id": string,"last_seen_at": string,"share_link_id": string | null,"source": string,"structure_id": string | null,"workspace_id": string
                   }
@@ -432,14 +444,14 @@ isOneToOne: false
                 },
 "paths": {
                   Row: {
-                    "created_at": string,"goal": number,"id": string,"ordered": boolean,"title": string,"updated_at": string,"workspace_id": string
+                    "created_at": string,"description": string,"goal": number,"id": string,"ordered": boolean,"title": string,"updated_at": string,"workspace_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"goal"?: number,"id"?: string,"ordered"?: boolean,"title"?: string,"updated_at"?: string,"workspace_id": string
+                    "created_at"?: string,"description"?: string,"goal"?: number,"id"?: string,"ordered"?: boolean,"title"?: string,"updated_at"?: string,"workspace_id": string
                   }
                   Update: {
-                    "created_at"?: string,"goal"?: number,"id"?: string,"ordered"?: boolean,"title"?: string,"updated_at"?: string,"workspace_id"?: string
+                    "created_at"?: string,"description"?: string,"goal"?: number,"id"?: string,"ordered"?: boolean,"title"?: string,"updated_at"?: string,"workspace_id"?: string
                   }
                   Relationships: []
                 },
@@ -739,6 +751,24 @@ isOneToOne: false
                            },
 "learner_resume":
 { Args: { "p_demo": string,"p_link_token": string }; Returns: Json
+                           },
+"center_slug_available":
+{ Args: { "p_slug": string,"p_ws": string }; Returns: boolean
+                           },
+"save_center_draft":
+{ Args: { "p_draft": Json,"p_slug": string,"p_ws": string }; Returns: undefined
+                           },
+"publish_center":
+{ Args: { "p_ws": string }; Returns: string
+                           },
+"unpublish_center":
+{ Args: { "p_ws": string }; Returns: undefined
+                           },
+"set_center_access":
+{ Args: { "p_mode": string,"p_ws": string }; Returns: undefined
+                           },
+"set_center_password":
+{ Args: { "p_password": string,"p_ws": string }; Returns: undefined
                            },
 "submit_quiz_attempt":
 { Args: { "p_batch": Json }; Returns: Json
