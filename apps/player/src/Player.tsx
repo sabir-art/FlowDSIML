@@ -6,7 +6,7 @@ import {
   type Manifest,
   type Step,
 } from '@flowdsiml/manifest';
-import { applyVariables, richTextToHtml, type VariableValues } from '@flowdsiml/core';
+import { applyVariables, richTextToHtml, richTextToPlain, type VariableValues } from '@flowdsiml/core';
 import {
   ArrowLeft,
   ArrowRight,
@@ -302,8 +302,24 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
     t,
   };
 
+  // L24 : annonce de l'étape aux lecteurs d'écran (zone toujours présente, texte mis à jour)
+  const h0 = step.hotspots[0];
+  const announce =
+    view === 'quiz' || gateForm
+      ? ''
+      : [
+          `${t.stepWord} ${index + 1} ${t.of} ${m.steps.length}`,
+          richTextToPlain(sub(h0?.title || step.title || '')),
+          richTextToPlain(sub(h0?.body || step.body || '')),
+        ]
+          .filter(Boolean)
+          .join('. ');
+
   return (
     <div class={`p-root ${compact ? 'is-compact' : ''}${dark ? ' is-dark' : ''}`} style={style} ref={rootRef}>
+      <p class="sr-only" aria-live="polite" aria-atomic="true">
+        {announce}
+      </p>
       {preview && <div class="p-preview">{t.preview}</div>}
       <header class="p-top" inert={!!gateForm}>
         {/* PY-1 : pastille du workspace (logo, sinon initiales), titre, méta */}

@@ -1441,6 +1441,9 @@
 }
 /* RF5 : tableau qui défile horizontalement — ombre interne du côté où il reste du contenu (sans dégradé) */
 .table-scroll {
+  /* L24 : bloc conteneur des éléments positionnés du tableau (textes masqués des en-têtes), sinon
+     ils débordent la page au zoom 200 % */
+  position: relative;
   overflow-x: auto;
   transition: box-shadow var(--fd-motion-duration-fast, 120ms);
 }

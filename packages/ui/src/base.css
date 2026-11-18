@@ -661,3 +661,16 @@ input[type='radio'] {
 .fd-bar--h .fd-bar__fill {
   inset: 0 auto 0 0;
 }
+
+/* L24 · RGAA 13.8 : les visiteurs qui réduisent les animations n'en voient plus (boucles, fondus,
+   transitions). Les changements d'état restent visibles, seule leur animation disparaît. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
