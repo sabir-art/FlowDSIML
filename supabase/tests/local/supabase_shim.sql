@@ -51,3 +51,18 @@ do $$ begin
     create publication supabase_realtime;
   end if;
 end $$;
+
+-- Realtime Authorization (fourni par Supabase) : table des messages et sujet du canal courant.
+create schema if not exists realtime;
+create table if not exists realtime.messages (
+  id bigint generated always as identity primary key,
+  topic text not null, extension text not null, payload jsonb, event text,
+  private boolean default true, inserted_at timestamptz default now()
+);
+alter table realtime.messages enable row level security;
+create or replace function realtime.topic() returns text language sql stable as $$
+  select nullif(current_setting('realtime.topic', true), '')
+$$;
+grant usage on schema realtime to anon, authenticated, service_role;
+grant select, insert on realtime.messages to anon, authenticated;
+grant execute on function realtime.topic() to anon, authenticated;
