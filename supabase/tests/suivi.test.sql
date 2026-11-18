@@ -2,7 +2,7 @@
 -- tentatives accordées, droits, agrégats masqués, reprise, effacement RGPD, purge selon le plan).
 begin;
 set search_path = public, extensions;
-select plan(30);
+select plan(31);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000001a1', 'admin-suivi@example.com'),
@@ -87,6 +87,19 @@ update public.share_links set expires_at = now() - interval '1 day' where token 
 set local role anon;
 select is(public.learner_resume('tok-marc', '00000000-0000-0000-0000-0000000001d2'), '{}'::jsonb, 'reprise : lien expiré');
 reset role;
+-- Modules brouillon et supprimé dans le parcours : leurs titres ne sortent pas vers un détenteur de lien
+insert into public.demos (id, workspace_id, title, created_by, status, deleted_at) values
+  ('00000000-0000-0000-0000-0000000001d3', (select ws from ctx), 'Brouillon secret', '00000000-0000-0000-0000-0000000001a1', 'draft', null),
+  ('00000000-0000-0000-0000-0000000001d4', (select ws from ctx), 'Démo supprimée', '00000000-0000-0000-0000-0000000001a1', 'published', now());
+insert into public.path_modules (path_id, demo_id, position) values
+  ('00000000-0000-0000-0000-0000000001f1', '00000000-0000-0000-0000-0000000001d3', 2),
+  ('00000000-0000-0000-0000-0000000001f1', '00000000-0000-0000-0000-0000000001d4', 3);
+set local role anon;
+select ok((select r::text !~ '(Brouillon secret|Démo supprimée)' and jsonb_array_length(r -> 'path' -> 'modules') = 2
+           from (select public.learner_resume('tok-paul', '00000000-0000-0000-0000-0000000001d2') as r) x),
+  'reprise : ni brouillon ni démo supprimée dans les modules du parcours');
+reset role;
+delete from public.path_modules where demo_id in ('00000000-0000-0000-0000-0000000001d3', '00000000-0000-0000-0000-0000000001d4');
 
 -- ===== Identification =====
 select is((select source || ' ' || full_name || ' ' || coalesce((select name from public.structures s where s.id = structure_id), '-')
