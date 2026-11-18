@@ -29,6 +29,23 @@ jobs:
           npx -y deno@2.5.6 check --no-lock webhooks-dispatch/index.ts
           npx -y deno@2.5.6 test --no-lock webhooks-dispatch/
 
+  secrets:
+    name: Secrets (gitleaks, tout l'historique)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks 8.21.2 (binaire officiel, somme de contrôle vérifiée)
+        run: |
+          V=8.21.2
+          F=gitleaks_${V}_linux_x64.tar.gz
+          curl -sSfL -o "$F" "https://github.com/gitleaks/gitleaks/releases/download/v${V}/${F}"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_checksums.txt" | grep " ${F}$" | sha256sum -c -
+          tar xzf "$F" gitleaks
+      - name: Recherche de secrets (sorties masquées)
+        run: ./gitleaks git --config .gitleaks.toml --redact --no-banner --verbose .
+
   database:
     name: Migrations SQL + pgTAP
     runs-on: ubuntu-24.04
