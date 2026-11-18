@@ -41,6 +41,7 @@ import {
   canRemind,
   csvTable,
   kpis,
+  learnerCounts,
   pathStats,
   sortRows,
   splitPercents,
@@ -277,9 +278,13 @@ export function LearnersPage() {
           </span>
           <p className="empty-state__title">{t('learners.empty.noPath')}</p>
           <p className="fd-muted">{t('learners.empty.noPathHint')}</p>
-          <Button variant="primary" size="sm" icon={<Plus />} onClick={() => setOverlay({ kind: 'paths' })}>
-            {t('learners.paths.create')}
-          </Button>
+          {can('members.manage') ? (
+            <Button variant="primary" size="sm" icon={<Plus />} onClick={() => setOverlay({ kind: 'paths' })}>
+              {t('learners.paths.create')}
+            </Button>
+          ) : (
+            <p className="fd-help">{t('learners.empty.askAdmin')}</p>
+          )}
         </div>
       ) : tab === 'liste' ? (
         <ListView
@@ -357,6 +362,7 @@ export function LearnersPage() {
       {overlay?.kind === 'paths' && current && (
         <PathsDialog
           wsId={current.id}
+          counts={learnerCounts(rows)}
           onClose={() => {
             setOverlay(null);
             void load();
@@ -392,7 +398,7 @@ export function LearnersPage() {
         </div>
         {d && (
           <div className="page-head__actions">
-            {can('demo.edit') && (
+            {can('members.manage') && (
               <Button icon={<Settings2 />} onClick={onPaths}>
                 {t('learners.paths.manage')}
               </Button>

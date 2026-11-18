@@ -333,3 +333,32 @@ export function csvTable(
   });
   return { headers, data };
 }
+
+// ---------------------------------------------------------------------------
+// Structures : domaines e-mail
+// ---------------------------------------------------------------------------
+/** Messageries grand public : refusées comme domaine de structure (comme en L11). */
+export const PUBLIC_MAIL_DOMAINS = new Set([
+  'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.fr', 'hotmail.com', 'hotmail.fr', 'outlook.com', 'outlook.fr',
+  'live.com', 'live.fr', 'msn.com', 'icloud.com', 'me.com', 'aol.com', 'orange.fr', 'wanadoo.fr', 'free.fr',
+  'sfr.fr', 'neuf.fr', 'laposte.net', 'bbox.fr', 'gmx.fr', 'gmx.com', 'protonmail.com', 'proton.me', 'yandex.com',
+]); // prettier-ignore
+
+/** Nettoie une saisie de domaine (« @Exemple.org » → « exemple.org »), refuse l'invalide et le grand public. */
+export function cleanDomain(raw: string): { domain: string } | { error: 'invalid' | 'public' } {
+  const d = raw.trim().toLowerCase().replace(/^@/, '');
+  if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(d)) return { error: 'invalid' };
+  if (PUBLIC_MAIL_DOMAINS.has(d)) return { error: 'public' };
+  return { domain: d };
+}
+
+/** Apprenants par formation suivie et par structure (compteurs de la gestion des formations). */
+export function learnerCounts(rows: LearnerRow[]) {
+  const paths: Record<string, number> = {};
+  const structures: Record<string, number> = {};
+  for (const r of rows) {
+    for (const s of r.paths) paths[s.path.id] = (paths[s.path.id] ?? 0) + 1;
+    if (r.raw.structureId) structures[r.raw.structureId] = (structures[r.raw.structureId] ?? 0) + 1;
+  }
+  return { paths, structures };
+}

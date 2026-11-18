@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { install } = require('./fake-supabase.cjs');
 const { seedMaquette } = require('./maquette-data.cjs');
-const { learnersFixture, resumeFixture } = require('./learners-data.cjs');
+const { learnersFixture, resumeFixture, seedPathTables } = require('./learners-data.cjs');
 
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const MAQ = path.resolve(__dirname, '../../../docs/ux/maquettes');
@@ -518,6 +518,33 @@ const SCREENS = {
       resolve_share_link: { demoId: m.demoId, linkId: 'link-1', variables: { first_name: 'Alex' } },
       learner_resume: resumeFixture(m.demoId),
     }),
+  },
+  'L13-07': {
+    maquette: 'refonte/l13-suivi.html?view=gerer',
+    route: '/#/learners?statut=stale',
+    seed(d) {
+      seedLearners(d);
+      seedPathTables(d.tables, d.tables.workspaces[0].id);
+    },
+    async prepare(p) {
+      await p.getByRole('button', { name: 'Gérer les formations' }).click();
+      await p.waitForSelector('.gm-mods li');
+      await p.waitForTimeout(300);
+    },
+  },
+  'L13-07-structures': {
+    maquette: 'refonte/l13-suivi.html?view=gerer-structures',
+    route: '/#/learners?statut=stale',
+    seed(d) {
+      seedLearners(d);
+      seedPathTables(d.tables, d.tables.workspaces[0].id);
+    },
+    async prepare(p) {
+      await p.getByRole('button', { name: 'Gérer les formations' }).click();
+      await p.getByRole('tab', { name: 'Structures' }).click();
+      await p.waitForSelector('.gm-st');
+      await p.waitForTimeout(300);
+    },
   },
   // L11 : partage sécurisé (onglet Accès, écrans visiteur)
   'L11-01': {

@@ -3,6 +3,8 @@ import {
   applyFilters,
   buildRows,
   canRemind,
+  cleanDomain,
+  learnerCounts,
   csvTable,
   kpis,
   pathStats,
@@ -200,5 +202,15 @@ describe('suivi des apprenants', () => {
       'in_progress (20 %)',
       'validated (100 %)',
     ]);
+  });
+
+  it('domaines de structure : nettoyés, messageries grand public refusées', () => {
+    expect(cleanDomain(' @Mission-Locale.Example ')).toEqual({ domain: 'mission-locale.example' });
+    expect(cleanDomain('gmail.com')).toEqual({ error: 'public' });
+    expect(cleanDomain('pas un domaine')).toEqual({ error: 'invalid' });
+  });
+
+  it('compte les apprenants par formation et structure', () => {
+    expect(learnerCounts(rows)).toEqual({ paths: { p1: 3, p2: 1 }, structures: { s1: 2 } });
   });
 });
