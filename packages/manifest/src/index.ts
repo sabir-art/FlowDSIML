@@ -78,8 +78,12 @@ export const imageRefSchema = z.object({
   height: z.number().int().positive(),
 });
 
-/** F1 : destination d'un choix de parcours (étape, chapitre, fin de la démo ou lien). */
+/**
+ * F1 : destination d'un choix de parcours (étape, chapitre, fin de la démo ou lien).
+ * L22-09 : « next » = étape suivante dans l'ordre courant (suit les réordonnancements).
+ */
 export const choiceActionSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('next') }),
   z.object({ type: z.literal('goto'), stepId: z.string() }),
   z.object({ type: z.literal('chapter'), chapterId: z.string() }),
   z.object({ type: z.literal('end') }),
@@ -104,6 +108,17 @@ export const ruleSchema = z.object({
   goto: choiceActionSchema,
 });
 export type Rule = z.infer<typeof ruleSchema>;
+
+/**
+ * L22-09 : règles de suite d'un menu de choix, telles que saisies dans l'éditeur. `rules` liste, dans
+ * l'ordre, les réponses qui ont leur propre règle : leur destination est celle du choix (que la copie
+ * d'une démo remappe déjà). Les autres réponses suivent `else`. Le lecteur lit seulement les choix.
+ */
+export const branchSchema = z.object({
+  rules: z.array(z.number().int().min(0).max(5)).max(6).catch([]),
+  else: choiceActionSchema.catch({ type: 'next' }),
+});
+export type Branch = z.infer<typeof branchSchema>;
 
 /** F1 : options d'affichage d'une étape (pop-up, variante, menu de choix). */
 export const stepOptionsSchema = z
@@ -136,6 +151,8 @@ export const stepOptionsSchema = z
           return r.success ? [r.data] : [];
         }),
       ),
+    /** L22-09 : règles de suite du menu de choix (absentes sur les menus créés avant L22). */
+    branch: branchSchema.optional().catch(undefined),
     /** L22 : règles de branchement automatique (une règle invalide est ignorée seule). */
     rules: z
       .array(z.unknown())

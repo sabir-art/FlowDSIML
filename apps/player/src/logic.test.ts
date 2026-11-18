@@ -98,6 +98,9 @@ describe('player logic', () => {
     expect(choiceTarget(m, { type: 'goto', stepId: 'c' })).toEqual({ kind: 'step', index: 2 });
     expect(choiceTarget(m, { type: 'goto', stepId: 'zz' })).toBe(null);
     expect(choiceTarget(m, { type: 'end' })).toEqual({ kind: 'end' });
+    // L22-09 : « étape suivante » suit l'ordre courant ; après la dernière, fin
+    expect(choiceTarget(m, { type: 'next' }, 0)).toEqual({ kind: 'step', index: 1 });
+    expect(choiceTarget(m, { type: 'next' }, m.steps.length - 1)).toEqual({ kind: 'end' });
     expect(canAutoAdvance(m, 0, false)).toBe(true);
     expect(canAutoAdvance(m, 0, true)).toBe(false);
     expect(canAutoAdvance(m, 2, false)).toBe(false);

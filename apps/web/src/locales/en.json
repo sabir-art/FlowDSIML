@@ -970,6 +970,30 @@
       "private": "Private",
       "label": "Presenter notes for this step",
       "help": "Only visible in presenter mode, on your screen. Never published, never exported. 1,000 characters max."
+    },
+    "branch": {
+      "title": "Choice question",
+      "answers": "Answers (one per line, 6 max)",
+      "rules": "Next-step rules",
+      "if": "If the answer is",
+      "then": "Then go to",
+      "else": "Otherwise, go to",
+      "ruleAnswer": "Answer for rule {{n}}",
+      "ruleDest": "Destination for rule {{n}}",
+      "elseDest": "Default destination",
+      "removeRule": "Delete rule {{n}}",
+      "add": "Add a rule",
+      "help": "Rules are read in order; the first match applies. An answer without a rule follows “Otherwise”.",
+      "next": "Next step ({{n}})",
+      "nextEnd": "Next step (end of demo)",
+      "deleted": "Deleted step",
+      "url": "Link address, {{label}}",
+      "loop": "Loop with no exit: from this step, no path leads to the end of the demo. Add a way out (next step, end or link).",
+      "railRules_one": "{{count}} rule",
+      "railRules_other": "{{count}} rules",
+      "publishWarn": "Branching to check:",
+      "publishDead": "Step {{n}} has a rule pointing to a deleted step.",
+      "publishLoop": "Step {{n}} leads to a loop with no exit."
     }
   },
   "status": {

@@ -1920,3 +1920,47 @@
     transition: none;
   }
 }
+
+/* L22-09 : règles de suite (maquette editeur-collab.html ?etat=regles) */
+.br-sub {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fd-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.br-rule {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+}
+.br-else {
+  background: transparent;
+  border: 1px dashed var(--fd-color-border-strong);
+}
+.br-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  align-items: center;
+  font-size: 13px;
+}
+.br-row > b {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.br-dest {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.br-dest .is-invalid {
+  border-color: var(--fd-color-danger);
+  color: var(--fd-color-danger);
+}

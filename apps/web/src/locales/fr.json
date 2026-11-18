@@ -970,6 +970,30 @@
       "private": "Privées",
       "label": "Notes du présentateur pour cette étape",
       "help": "Visibles seulement en mode présentateur, sur votre écran. Jamais publiées, jamais exportées. 1 000 caractères au plus."
+    },
+    "branch": {
+      "title": "Question à choix",
+      "answers": "Réponses (une par ligne, 6 au plus)",
+      "rules": "Règles de suite",
+      "if": "Si la réponse est",
+      "then": "Alors aller à",
+      "else": "Sinon, aller à",
+      "ruleAnswer": "Réponse de la règle {{n}}",
+      "ruleDest": "Destination de la règle {{n}}",
+      "elseDest": "Destination par défaut",
+      "removeRule": "Supprimer la règle {{n}}",
+      "add": "Ajouter une règle",
+      "help": "Les règles sont lues dans l’ordre ; la première qui correspond s’applique. Une réponse sans règle suit « Sinon ».",
+      "next": "Étape suivante ({{n}})",
+      "nextEnd": "Étape suivante (fin de la démo)",
+      "deleted": "Étape supprimée",
+      "url": "Adresse du lien, {{label}}",
+      "loop": "Boucle sans sortie : depuis cette étape, aucun chemin ne mène à la fin de la démo. Ajoutez une issue (étape suivante, fin ou lien).",
+      "railRules_one": "{{count}} règle",
+      "railRules_other": "{{count}} règles",
+      "publishWarn": "Branchements à vérifier :",
+      "publishDead": "L’étape {{n}} a une règle vers une étape supprimée.",
+      "publishLoop": "L’étape {{n}} mène à une boucle sans sortie."
     }
   },
   "status": {

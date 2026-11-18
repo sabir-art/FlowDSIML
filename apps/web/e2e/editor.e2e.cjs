@@ -208,8 +208,11 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('menuitem', { name: 'Menu de choix' }).click();
   await page.waitForSelector('.canvas-popup');
   ok((await page.locator('.canvas-choices li').count()) === 2, 'F1 : étape menu de choix (2 choix) créée');
-  await page.getByLabel('Destination du choix 1').selectOption({ index: 0 });
-  await page.fill('#gc-label-0', 'Je suis conseiller');
+  // L22-09 : réponses une par ligne, règles de suite (index 0 = « Étape suivante », 1 = première étape)
+  await page.getByLabel('Destination de la règle 1').selectOption({ index: 1 });
+  const answers = page.getByLabel('Réponses (une par ligne, 6 au plus)');
+  const lines = (await answers.inputValue()).split('\n');
+  await answers.fill(['Je suis conseiller', ...lines.slice(1)].join('\n'));
   await page.waitForTimeout(900);
   ok(
     state.calls.some(
@@ -222,8 +225,8 @@ const SHOTS = process.env.SHOTS_DIR;
     'F1 : choix et destination enregistrés',
   );
   ok(
-    (await page.locator('.rail-list .icons [aria-label="2 choix"]').count()) === 1,
-    'F1 : badge « 2 choix » dans le rail',
+    (await page.locator('.rail-list .icons [aria-label="2 règles"]').count()) === 1,
+    'L22-09 : badge « 2 règles » dans le rail',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-editor-choix.png` });
 

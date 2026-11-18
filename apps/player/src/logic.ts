@@ -118,8 +118,12 @@ export function checklistItems(
 export function choiceTarget(
   m: Manifest,
   action: ChoiceAction,
+  from = -1,
 ): { kind: 'step'; index: number } | { kind: 'end' } | { kind: 'url'; url: string } | null {
   if (action.type === 'end') return { kind: 'end' };
+  // L22-09 : étape suivante dans l'ordre courant ; après la dernière, fin de la démo
+  if (action.type === 'next')
+    return from < 0 ? null : from + 1 < m.steps.length ? { kind: 'step', index: from + 1 } : { kind: 'end' };
   if (action.type === 'url') return { kind: 'url', url: action.url };
   const i =
     action.type === 'goto'

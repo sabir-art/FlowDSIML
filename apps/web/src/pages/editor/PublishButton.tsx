@@ -1,5 +1,7 @@
 import { AlertTriangle, Loader2, Rocket } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { branchIssues } from './branch';
+import { asAction, asStepOptions } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
@@ -26,6 +28,23 @@ export function PublishButton({
   onReviewStep?: (index: number) => void;
 }) {
   const { t } = useTranslation();
+  // L22-09 : avertissements de branchement rappelés dans la modale de publication (non bloquants)
+  const branchWarnings = useMemo(() => {
+    const issues = branchIssues(
+      editor.steps.map((s) => ({
+        id: s.id,
+        chapterId: s.chapter_id,
+        options: asStepOptions(s.options),
+        hotspotActions: editor.hotspots.filter((h) => h.step_id === s.id).map((h) => asAction(h.action)),
+      })),
+      new Set(editor.chapters.map((c) => c.id)),
+    );
+    return [
+      ...issues.unreachable.map((i) => t('editor.advanced.choice.unreachable', { n: i + 1 })),
+      ...issues.dead.map((i) => t('editor.branch.publishDead', { n: i + 1 })),
+      ...issues.loops.map((i) => t('editor.branch.publishLoop', { n: i + 1 })),
+    ];
+  }, [editor.steps, editor.hotspots, editor.chapters, t]);
   const navigate = useNavigate();
   const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +111,7 @@ export function PublishButton({
       <GdprDialog
         open={gdprOpen}
         steps={editor.steps}
+        branchWarnings={branchWarnings}
         publicEnabled={ws?.public_links_enabled !== false}
         onConfirm={(ack) => void doPublish(ack)}
         onReview={(i) => {

@@ -1,13 +1,12 @@
-import { AppWindow, ArrowRight, GitBranch, Plus, Trash2, TriangleAlert } from 'lucide-react';
-import { useMemo } from 'react';
+import { AppWindow, GitBranch, Plus, Trash2, TriangleAlert } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ChoiceAction, StepOptions } from '@flowdsiml/manifest';
 import { Button, Field, Select, Switch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asAction, asStepOptions, type StepRow } from '../types';
-import { unreachableSteps } from '../reachability';
-
-const MAX_CHOICES = 6;
+import { loopsWithoutExit, unreachableSteps } from '../reachability';
+import { answersFromText, branchOf, branchPatch, isDead, remapRules, type BranchView } from '../branch';
 
 /** Valeur du select de destination : « step:<id> », « chapter:<id> », « end » ou « url ». */
 const destValue = (a: ChoiceAction) =>
@@ -32,8 +31,6 @@ export function GuidedStepFields({
   const opts = asStepOptions(step.options);
   const set = (patch: Partial<StepOptions>) =>
     editor.updateStep(step.id, { options: { ...opts, ...patch } as unknown as StepRow['options'] });
-  const setChoice = (i: number, patch: Partial<StepOptions['choices'][number]>) =>
-    set({ choices: opts.choices.map((c, j) => (j === i ? { ...c, ...patch } : c)) });
 
   const unreachable = useMemo(
     () =>
@@ -48,15 +45,117 @@ export function GuidedStepFields({
     [editor.steps, editor.hotspots],
   );
 
-  function setDestination(i: number, value: string) {
-    const action: ChoiceAction = value.startsWith('step:')
-      ? { type: 'goto', stepId: value.slice(5) }
-      : value.startsWith('chapter:')
-        ? { type: 'chapter', chapterId: value.slice(8) }
-        : value === 'url'
-          ? { type: 'url', url: 'https://' }
-          : { type: 'end' };
-    setChoice(i, { action });
+  // L22-09 : règles de suite (seule source) ; destinations des choix recalculées
+  const branch = branchOf(opts);
+  const labels = opts.choices.map((c) => c.label);
+  const stepIds = new Set(editor.steps.map((s) => s.id));
+  const chapterIds = new Set(editor.chapters.map((c) => c.id));
+  const [answersDraft, setAnswersDraft] = useState(() => labels.join('\n'));
+  useEffect(() => {
+    setAnswersDraft(
+      asStepOptions(step.options)
+        .choices.map((c) => c.label)
+        .join('\n'),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step.id]);
+  const saveBranch = (b: BranchView, nextLabels = labels) =>
+    set({
+      ...branchPatch(nextLabels, b),
+      // Premier choix ajouté : la carte passe en pop-up (comportement F1)
+      display: !labels.length && nextLabels.length ? 'popup' : opts.display,
+    });
+  const setRule = (k: number, patch: Partial<BranchView['rules'][number]>) =>
+    saveBranch({ ...branch, rules: branch.rules.map((r, j) => (j === k ? { ...r, ...patch } : r)) });
+  const setAnswers = (text: string) => {
+    setAnswersDraft(text);
+    const next = answersFromText(text);
+    if (next.join('\n') !== labels.join('\n')) saveBranch(remapRules(labels, next, branch), next);
+  };
+  const loops = useMemo(
+    () =>
+      loopsWithoutExit(
+        editor.steps.map((s) => ({
+          id: s.id,
+          chapterId: s.chapter_id,
+          options: asStepOptions(s.options),
+          hotspotActions: editor.hotspots.filter((h) => h.step_id === s.id).map((h) => asAction(h.action)),
+        })),
+      ),
+    [editor.steps, editor.hotspots],
+  );
+
+  /** Liste des destinations : étape suivante, étapes, chapitres, fin, lien. */
+  function destination({
+    label,
+    action,
+    dead,
+    onChange,
+  }: {
+    label: string;
+    action: ChoiceAction;
+    dead: boolean;
+    onChange: (a: ChoiceAction) => void;
+  }) {
+    const nextStep = editor.steps[index + 1];
+    return (
+      <span className="br-dest">
+        <Select
+          aria-label={label}
+          aria-invalid={dead || undefined}
+          className={dead ? 'is-invalid' : undefined}
+          disabled={readOnly}
+          value={dead ? 'dead' : destValue(action)}
+          onChange={(e) => {
+            const v = e.target.value;
+            onChange(
+              v === 'next'
+                ? { type: 'next' }
+                : v.startsWith('step:')
+                  ? { type: 'goto', stepId: v.slice(5) }
+                  : v.startsWith('chapter:')
+                    ? { type: 'chapter', chapterId: v.slice(8) }
+                    : v === 'url'
+                      ? { type: 'url', url: 'https://' }
+                      : { type: 'end' },
+            );
+          }}
+        >
+          {dead && (
+            <option value="dead" disabled>
+              {t('editor.branch.deleted')}
+            </option>
+          )}
+          <option value="next">
+            {nextStep ? t('editor.branch.next', { n: index + 2 }) : t('editor.branch.nextEnd')}
+          </option>
+          {editor.steps.map((s, j) =>
+            j === index ? null : (
+              <option key={s.id} value={`step:${s.id}`}>
+                {t('editor.advanced.choice.toStep', { n: j + 1, title: s.title || t('editor.untitled') })}
+              </option>
+            ),
+          )}
+          {editor.chapters.map((ch) => (
+            <option key={ch.id} value={`chapter:${ch.id}`}>
+              {t('editor.advanced.choice.toChapter', { title: ch.title || t('editor.untitled') })}
+            </option>
+          ))}
+          <option value="end">{t('editor.advanced.choice.toEnd')}</option>
+          <option value="url">{t('editor.advanced.choice.toUrl')}</option>
+        </Select>
+        {action.type === 'url' && (
+          <input
+            className="fd-input"
+            type="url"
+            aria-label={t('editor.branch.url', { label })}
+            disabled={readOnly}
+            value={action.url}
+            onChange={(e) => onChange({ type: 'url', url: e.target.value })}
+          />
+        )}
+      </span>
+    );
   }
 
   return (
@@ -165,98 +264,111 @@ export function GuidedStepFields({
               <GitBranch />
             </span>
             <h2 className="fd-card__title" id={`gc-${step.id}`}>
-              {t('editor.advanced.choice.title')}
+              {t('editor.branch.title')}
             </h2>
           </div>
-          <p className="fd-help">{t('editor.advanced.choice.help')}</p>
-          {opts.choices.map((c, i) => (
-            <div key={i} className="choice-block">
-              <label className="sr-only" htmlFor={`gc-label-${i}`}>
-                {t('editor.advanced.choice.option', { n: i + 1 })}
-              </label>
-              <input
-                id={`gc-label-${i}`}
-                className="fd-input"
-                maxLength={80}
-                disabled={readOnly}
-                value={c.label}
-                placeholder={t('editor.advanced.choice.placeholder')}
-                onChange={(e) => setChoice(i, { label: e.target.value })}
-              />
-              <div className="choice-block__dest">
-                <ArrowRight aria-hidden="true" size={16} />
-                <Select
-                  aria-label={t('editor.advanced.choice.destination', { n: i + 1 })}
-                  disabled={readOnly}
-                  value={destValue(c.action)}
-                  onChange={(e) => setDestination(i, e.target.value)}
-                >
-                  {editor.steps.map((s, j) =>
-                    j === index ? null : (
-                      <option key={s.id} value={`step:${s.id}`}>
-                        {t('editor.advanced.choice.toStep', {
-                          n: j + 1,
-                          title: s.title || t('editor.untitled'),
-                        })}
-                      </option>
-                    ),
-                  )}
-                  {editor.chapters.map((ch) => (
-                    <option key={ch.id} value={`chapter:${ch.id}`}>
-                      {t('editor.advanced.choice.toChapter', { title: ch.title || t('editor.untitled') })}
-                    </option>
-                  ))}
-                  <option value="end">{t('editor.advanced.choice.toEnd')}</option>
-                  <option value="url">{t('editor.advanced.choice.toUrl')}</option>
-                </Select>
-                {!readOnly && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    icon={<Trash2 />}
-                    aria-label={t('editor.advanced.choice.remove', { n: i + 1 })}
-                    title={t('editor.advanced.choice.remove', { n: i + 1 })}
-                    onClick={() => set({ choices: opts.choices.filter((_, j) => j !== i) })}
-                  />
-                )}
+          <Field label={t('editor.branch.answers')} htmlFor={`gc-answers-${step.id}`}>
+            <textarea
+              id={`gc-answers-${step.id}`}
+              className="fd-textarea"
+              rows={3}
+              disabled={readOnly}
+              value={answersDraft}
+              placeholder={t('editor.advanced.choice.placeholder')}
+              onChange={(e) => setAnswers(e.target.value)}
+            />
+          </Field>
+          {labels.length > 0 && (
+            <>
+              <h3 className="br-sub">{t('editor.branch.rules')}</h3>
+              {branch.rules.map((r, k) => {
+                const dead = isDead(r.goto, stepIds, chapterIds);
+                return (
+                  <div key={k} className="br-rule">
+                    <div className="br-row">
+                      <b id={`br-if-${step.id}-${k}`}>{t('editor.branch.if')}</b>
+                      <Select
+                        aria-label={t('editor.branch.ruleAnswer', { n: k + 1 })}
+                        disabled={readOnly}
+                        value={String(r.answer)}
+                        onChange={(e) => setRule(k, { answer: Number(e.target.value) })}
+                      >
+                        {labels.map((l, i) => (
+                          // Une règle par réponse : celles déjà prises par une autre règle sont grisées
+                          <option
+                            key={i}
+                            value={i}
+                            disabled={branch.rules.some((o, j) => j !== k && o.answer === i)}
+                          >
+                            {l}
+                          </option>
+                        ))}
+                      </Select>
+                      {!readOnly && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          icon={<Trash2 />}
+                          aria-label={t('editor.branch.removeRule', { n: k + 1 })}
+                          title={t('editor.branch.removeRule', { n: k + 1 })}
+                          onClick={() =>
+                            saveBranch({ ...branch, rules: branch.rules.filter((_, j) => j !== k) })
+                          }
+                        />
+                      )}
+                    </div>
+                    <div className="br-row">
+                      <b>{t('editor.branch.then')}</b>
+                      {destination({
+                        label: t('editor.branch.ruleDest', { n: k + 1 }),
+                        action: r.goto,
+                        dead: dead,
+                        onChange: (goto) => setRule(k, { goto }),
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="br-rule br-else">
+                <div className="br-row">
+                  <b>{t('editor.branch.else')}</b>
+                  {destination({
+                    label: t('editor.branch.elseDest'),
+                    action: branch.else,
+                    dead: isDead(branch.else, stepIds, chapterIds),
+                    onChange: (a) => saveBranch({ ...branch, else: a }),
+                  })}
+                </div>
               </div>
-              {c.action.type === 'url' && (
-                <>
-                  <label className="sr-only" htmlFor={`gc-url-${i}`}>
-                    {t('editor.advanced.choice.url', { n: i + 1 })}
-                  </label>
-                  <input
-                    id={`gc-url-${i}`}
-                    className="fd-input"
-                    type="url"
-                    disabled={readOnly}
-                    value={c.action.url}
-                    onChange={(e) => setChoice(i, { action: { type: 'url', url: e.target.value } })}
-                  />
-                </>
+              {!readOnly && branch.rules.length < labels.length && (
+                <Button
+                  size="sm"
+                  variant="default"
+                  icon={<Plus />}
+                  onClick={() =>
+                    saveBranch({
+                      ...branch,
+                      rules: [
+                        ...branch.rules,
+                        {
+                          answer: labels.findIndex((_, i) => !branch.rules.some((r) => r.answer === i)),
+                          goto: { type: 'end' },
+                        },
+                      ],
+                    })
+                  }
+                >
+                  {t('editor.branch.add')}
+                </Button>
               )}
+              <p className="fd-help">{t('editor.branch.help')}</p>
+            </>
+          )}
+          {loops.includes(index) && (
+            <div className="fd-alert fd-alert--warning" role="status">
+              <TriangleAlert aria-hidden="true" size={16} />
+              <div>{t('editor.branch.loop')}</div>
             </div>
-          ))}
-          {!readOnly && opts.choices.length < MAX_CHOICES && (
-            <Button
-              size="sm"
-              variant="default"
-              icon={<Plus />}
-              onClick={() =>
-                set({
-                  display: opts.choices.length ? opts.display : 'popup',
-                  choices: [
-                    ...opts.choices,
-                    {
-                      label: t('editor.advanced.choice.option', { n: opts.choices.length + 1 }),
-                      action: { type: 'end' },
-                    },
-                  ],
-                })
-              }
-            >
-              {t('editor.advanced.choice.add')}
-            </Button>
           )}
         </section>
       )}

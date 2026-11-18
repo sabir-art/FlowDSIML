@@ -147,7 +147,7 @@ export function Player({
   const primary = step.kind === 'image' ? step.hotspots[0] : undefined;
   const last = index === m.steps.length - 1;
   /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
-  const choices = step.options.choices.filter((c) => choiceTarget(m, c.action));
+  const choices = step.options.choices.filter((c) => choiceTarget(m, c.action, index));
   /** Écran de fin (dernière étape de texte, sans quiz) : carte sur la capture précédente (PY-6, EDT-09). */
   const endText =
     step.kind !== 'image' && last && step.options.display !== 'popup' && !m.quiz && !choices.length;
@@ -277,7 +277,7 @@ export function Player({
   function next() {
     const rule = ruleTarget(m, index, memory.current);
     // Cible inconnue (étape d'une autre démo, supprimée…) : la règle est ignorée
-    if (rule && ruleJumps.current < MAX_RULE_JUMPS && choiceTarget(m, rule)) {
+    if (rule && ruleJumps.current < MAX_RULE_JUMPS && choiceTarget(m, rule, index)) {
       ruleJumps.current += 1;
       return follow(rule);
     }
@@ -295,7 +295,7 @@ export function Player({
   }
 
   function follow(action: (typeof choices)[number]['action']) {
-    const target = choiceTarget(m, action);
+    const target = choiceTarget(m, action, index);
     if (!target) return;
     if (target.kind === 'url') window.open(target.url, '_blank', 'noopener');
     else if (target.kind === 'end') {

@@ -26,6 +26,7 @@ export function unreachableSteps(steps: StepLike[]): number[] {
     const next: number[] = [i - 1];
     if (s.options.choices.length) {
       for (const c of s.options.choices) {
+        if (c.action.type === 'next') next.push(i + 1);
         if (c.action.type === 'goto') next.push(index.get(c.action.stepId) ?? -1);
         if (c.action.type === 'chapter') next.push(chapterStart.get(c.action.chapterId) ?? -1);
       }
@@ -37,4 +38,50 @@ export function unreachableSteps(steps: StepLike[]): number[] {
     queue.push(...next);
   }
   return steps.flatMap((_, i) => (seen.has(i) ? [] : [i]));
+}
+
+/**
+ * L22-09 : menus de choix d'où aucun chemin ne mène à une fin (fin de la démo, lien, ou bouton
+ * Suivant de la dernière étape) : boucle sans sortie. « Précédent » n'est pas une sortie.
+ * Avertissement non bloquant.
+ */
+export function loopsWithoutExit(steps: StepLike[]): number[] {
+  const index = new Map(steps.map((s, i) => [s.id, i]));
+  const chapterStart = new Map<string, number>();
+  steps.forEach((s, i) => s.chapterId && !chapterStart.has(s.chapterId) && chapterStart.set(s.chapterId, i));
+  /** Successeurs d'une étape ; null = cette étape a une sortie. */
+  const succ = (i: number): number[] | null => {
+    const s = steps[i]!;
+    const out: number[] = [];
+    let exit = false;
+    const add = (j: number) => (j >= steps.length ? (exit = true) : j >= 0 && out.push(j));
+    if (s.options.choices.length) {
+      for (const c of s.options.choices) {
+        if (c.action.type === 'end' || c.action.type === 'url') exit = true;
+        if (c.action.type === 'next') add(i + 1);
+        if (c.action.type === 'goto') add(index.get(c.action.stepId) ?? -1);
+        if (c.action.type === 'chapter') add(chapterStart.get(c.action.chapterId) ?? -1);
+      }
+    } else add(i + 1);
+    for (const a of s.hotspotActions) {
+      if (a.type === 'next') add(i + 1);
+      if (a.type === 'goto') add(index.get(a.stepId) ?? -1);
+      if (a.type === 'url') exit = true;
+    }
+    return exit ? null : out;
+  };
+  const canExit = (start: number) => {
+    const seen = new Set<number>();
+    const queue = [start];
+    while (queue.length) {
+      const i = queue.pop()!;
+      if (seen.has(i)) continue;
+      seen.add(i);
+      const n = succ(i);
+      if (n === null) return true;
+      queue.push(...n);
+    }
+    return false;
+  };
+  return steps.flatMap((s, i) => (s.options.choices.length && !canExit(i) ? [i] : []));
 }

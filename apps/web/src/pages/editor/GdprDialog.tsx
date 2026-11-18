@@ -39,6 +39,7 @@ export function GdprDialog({
   onSettings,
   onRestrict,
   onClose,
+  branchWarnings = [],
 }: {
   open: boolean;
   steps: Pick<StepRow, 'blurs' | 'element_meta'>[];
@@ -49,6 +50,8 @@ export function GdprDialog({
   /** RP-2 : ouvre l'onglet Accès du partage. */
   onRestrict: () => void;
   onClose: () => void;
+  /** L22-09 : avertissements de branchement (non bloquants), rappelés avant publication. */
+  branchWarnings?: string[];
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
@@ -118,6 +121,14 @@ export function GdprDialog({
                   t('editor.gdpr.none')
                 )}
               </li>
+              {branchWarnings.length > 0 && (
+                <li className="is-warning">
+                  <TriangleAlert aria-hidden="true" />
+                  <span>
+                    {t('editor.branch.publishWarn')} {branchWarnings.join(' ')}
+                  </span>
+                </li>
+              )}
               <li>
                 <MessageSquareLock aria-hidden="true" />
                 {t('editor.gdpr.commentsNote')}

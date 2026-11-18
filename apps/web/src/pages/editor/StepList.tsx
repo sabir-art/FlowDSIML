@@ -1,4 +1,5 @@
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
+import { branchOf } from './branch';
 import type { PresencePayload } from './presence/presence';
 import { RailWho } from './presence/PresenceUI';
 import {
@@ -379,7 +380,8 @@ function StepBadges({ step, hotspots, isLast }: { step: StepRow; hotspots: numbe
   const items = [
     opts.choices.length > 0 && {
       icon: <GitBranch />,
-      label: t('editor.advanced.choice.railBadge', { count: opts.choices.length }),
+      // L22-09 : « n règles » (règles de suite du menu de choix)
+      label: t('editor.branch.railRules', { count: branchOf(opts).rules.length }),
     },
     !opts.choices.length &&
       step.kind === 'text' &&
