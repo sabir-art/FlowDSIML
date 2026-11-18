@@ -34,7 +34,6 @@ const DemoAnalyticsPage = lazy(() =>
 const AnalyticsPage = lazy(() =>
   import('./pages/analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
 );
-const LeadsPage = lazy(() => import('./pages/analytics/LeadsPage').then((m) => ({ default: m.LeadsPage })));
 const SharePage = lazy(() => import('./pages/share/SharePage').then((m) => ({ default: m.SharePage })));
 
 /**
@@ -127,7 +126,7 @@ export function App() {
                   <Route path="/demos/:demoId/share" element={<SharePage />} />
                   <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
                   <Route path="/analytics" element={<AnalyticsPage />} />
-                  <Route path="/leads" element={<LeadsPage />} />
+                  <Route path="/leads" element={<Navigate to="/analytics?tab=leads" replace />} />
                   <Route path="/settings/profile" element={<Profile />} />
                   <Route path="/settings/members" element={<Members />} />
                   <Route path="/settings/workspace" element={<WorkspaceSettings />} />

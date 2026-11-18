@@ -2,7 +2,7 @@ import { formatDate } from '../../lib/format';
 import { initials } from '../../lib/initials';
 export { initials };
 import { useConfirm } from '../../components/ConfirmDialog';
-import { Check, Copy, Info, LogOut, Plus, Search, Star, Trash2, UserMinus, X } from 'lucide-react';
+import { Check, Copy, Info, LogOut, Mail, Plus, Search, Star, Trash2, X } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { assignableRoles, can as roleCan, ROLES, type Action, type Role } from '@flowdsiml/core';
@@ -82,6 +82,7 @@ export function Members() {
   }, [load]);
 
   const roles = assignableRoles(myRole);
+  const soon = <span className="fd-badge menu-soon">{t('shell.soon')}</span>;
   const needle = q.trim().toLowerCase();
   const match = (name: string, email: string, role: WorkspaceRole) =>
     (!needle || name.toLowerCase().includes(needle) || email.toLowerCase().includes(needle)) &&
@@ -90,12 +91,27 @@ export function Members() {
 
   async function remove(m: MemberRow) {
     const self = m.user_id === user?.id;
+    const label = m.full_name || m.email;
+    // PRM-05 : nombre de démos créées par ce membre (elles restent dans le workspace)
+    const demos = self
+      ? null
+      : (
+          await supabase
+            .from('demos')
+            .select('id', { count: 'exact', head: true })
+            .eq('workspace_id', ws.id)
+            .eq('created_by', m.user_id)
+            .is('deleted_at', null)
+        ).count;
+    const first = (m.full_name || '').trim().split(/\s+/)[0] || m.email;
     if (
       !(await ask({
-        title: self
-          ? t('members.confirmLeave')
-          : t('members.confirmRemove', { email: m.full_name || m.email }),
-        body: self ? undefined : t('members.removeBody', { name: m.full_name || m.email }),
+        title: self ? t('members.confirmLeave') : t('members.confirmRemove', { email: label }),
+        body: self
+          ? undefined
+          : `${t('members.removeLoses', { name: first })} ${
+              demos ? t('members.removeDemos', { count: demos }) : t('members.removeNoDemos')
+            }`,
         confirmLabel: self ? t('members.leave') : t('members.removeMember'),
         danger: true,
       }))
@@ -188,16 +204,17 @@ export function Members() {
                     const editable = canManage && !me && (m.role !== 'owner' || myRole === 'owner');
                     const items: Array<MenuItem | 'separator'> = [
                       {
-                        // Transfert de propriété : pas encore disponible
-                        label: `${t('members.transfer')} · ${t('shell.soon')}`,
+                        // PRM-03 : transfert de propriété pas encore disponible (badge Bientôt)
+                        label: t('members.transfer'),
                         icon: <Star />,
                         disabled: true,
+                        end: soon,
                         onSelect: () => undefined,
                       },
                       'separator',
                       {
                         label: t('members.removeFromWs'),
-                        icon: <UserMinus />,
+                        icon: <Trash2 />,
                         danger: true,
                         onSelect: () => void remove(m),
                       },
@@ -308,6 +325,14 @@ export function Members() {
                                   void navigator.clipboard
                                     .writeText(inviteUrl(i.token))
                                     .then(() => run(async () => undefined, t('members.linkCopied'))),
+                              },
+                              {
+                                // PRM-03 : l'envoi d'e-mails d'invitation n'existe pas encore (lien à copier)
+                                label: t('members.resend'),
+                                icon: <Mail />,
+                                disabled: true,
+                                end: soon,
+                                onSelect: () => undefined,
                               },
                               'separator',
                               {

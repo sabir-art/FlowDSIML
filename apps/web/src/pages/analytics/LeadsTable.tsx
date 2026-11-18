@@ -45,6 +45,8 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
 
   const known: Record<string, string> = {
     full_name: t('editor.fieldName'),
+    name: t('editor.fieldName'),
+    first_name: t('editor.fieldName'),
     company: t('editor.fieldCompany'),
     job_title: t('editor.fieldJob'),
     phone: t('editor.fieldPhone'),

@@ -21,7 +21,7 @@ import {
   Monitor,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Alert, Select } from '@flowdsiml/ui';
 import { PLAN_DEFAULTS, type PlanCode } from '@flowdsiml/core';
@@ -77,7 +77,9 @@ export function EditorPage() {
   const [index, setIndex] = useState(0);
   const [tool, setTool] = useState<Tool>('select');
   const [selection, setSelection] = useState<Selection>({ kind: 'step' });
-  const [tab, setTab] = useState<Tab>('step');
+  const [params] = useSearchParams();
+  // ANA-09 : « Ajouter un formulaire » ouvre directement l'onglet Réglages
+  const [tab, setTab] = useState<Tab>(params.get('tab') === 'settings' ? 'settings' : 'step');
   const readOnly = !can('demo.edit');
   const narrow = useNarrow(1024);
   const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);

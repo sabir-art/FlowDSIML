@@ -49,13 +49,59 @@ const SHOTS = process.env.SHOTS_DIR;
     'transfert : Bientôt',
   );
   await page.getByRole('menuitem', { name: 'Retirer du workspace' }).click();
+  await page.waitForSelector('dialog[open] .dialog-head');
+  ok(
+    /^Retirer Nina Roux \?$/.test((await page.textContent('dialog[open] h2')).replace(/\u202f/g, ' ')) &&
+      /Nina perdra l’accès/.test(await page.textContent('dialog[open] .dialog-body')),
+    'PRM-05 : titre et texte de la maquette, en-tête / corps / pied',
+  );
   await page.locator('dialog[open]').getByRole('button', { name: 'Retirer le membre' }).click();
   await page.waitForTimeout(400);
   ok(!state.tables.members.some((m) => m.user_id === 'u-5'), 'membre retiré');
 
   await page.getByRole('link', { name: 'Marque' }).click();
-  await page.waitForSelector('.st-soon');
-  ok(true, 'onglet Marque : Bientôt');
+  await page.waitForSelector('.st-brand-note');
+  ok(
+    (await page.locator('.st-brand input:disabled').count()) >= 4,
+    'PRM-07 : onglet Marque désactivé (Bientôt)',
+  );
+
+  await page.getByRole('link', { name: 'Variables' }).click();
+  await page.getByRole('button', { name: 'Nouvelle variable' }).click();
+  await page.fill('#var-key', 'first_name');
+  await page.getByRole('button', { name: 'Créer la variable' }).click();
+  ok(/existe déjà/.test(await page.textContent('.modal')), 'PRM-08 : nom de variable déjà pris refusé');
+  await page.fill('#var-key', 'job_title');
+  await page.fill('#var-def', 'votre poste');
+  await page.getByRole('button', { name: 'Créer la variable' }).click();
+  await page.waitForSelector('.st-vars td >> text={{job_title}}');
+  await page.waitForSelector('.modal-backdrop', { state: 'detached' });
+  ok(
+    state.tables.variables.some((v) => v.key === 'job_title' && v.default_value === 'votre poste'),
+    'PRM-08 : variable créée dans le workspace',
+  );
+
+  await page.getByRole('link', { name: 'Mon profil' }).click();
+  await page.waitForSelector('#fn');
+  ok(
+    (await page.locator('.st-pf .form-sec .intro h2').allTextContents()).join('|') === 'Profil|Préférences',
+    'PRM-09 : sections Profil et Préférences',
+  );
+
+  await page.getByRole('link', { name: 'Général' }).click();
+  await page.waitForSelector('#ws-name');
+  await page.getByRole('button', { name: 'Supprimer le workspace' }).click();
+  await page.waitForSelector('dialog[open] .dialog-require');
+  ok(
+    (await page.locator('dialog[open] .dialog-require b').count()) === 1 &&
+      (await page
+        .locator('dialog[open]')
+        .getByRole('button', { name: 'Supprimer définitivement' })
+        .isDisabled()),
+    'PRM-06 : saisie du nom en gras, « Supprimer définitivement » bloqué',
+  );
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/PRM-06.png` });
+  await page.keyboard.press('Escape');
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })().catch((e) => {

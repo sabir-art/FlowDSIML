@@ -11,6 +11,7 @@ export function ConfirmDialog({
   danger,
   requireText,
   secondary,
+  requireLabel,
   onConfirm,
   onClose,
 }: {
@@ -22,6 +23,8 @@ export function ConfirmDialog({
   requireText?: string;
   /** Action secondaire à la place de « Annuler » (ex. « Voir les plans ») ; Échap annule toujours. */
   secondary?: { label: string; onSelect: () => void };
+  /** Libellé du champ de saisie (sinon « Saisissez … pour confirmer »). */
+  requireLabel?: ReactNode;
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
 }) {
@@ -41,7 +44,7 @@ export function ConfirmDialog({
 
   const blocked = requireText !== undefined && text !== requireText;
   return (
-    <dialog ref={ref} className="dialog" onClose={onClose} aria-labelledby="dlg-title">
+    <dialog ref={ref} className="dialog dialog-confirm" onClose={onClose} aria-labelledby="dlg-title">
       <form
         method="dialog"
         onSubmit={async (e) => {
@@ -56,13 +59,27 @@ export function ConfirmDialog({
           }
         }}
       >
-        <h2 id="dlg-title">{title}</h2>
-        {body && <div className="dialog-body">{body}</div>}
-        {requireText !== undefined && (
-          <label className="fd-field">
-            <span className="fd-label">{t('common.typeToConfirm', { text: requireText })}</span>
-            <input className="fd-input" value={text} onChange={(e) => setText(e.target.value)} autoFocus />
-          </label>
+        {/* PRM-05 / PRM-06 : en-tête, corps et pied séparés, comme les modales de la maquette */}
+        <div className="dialog-head">
+          <h2 id="dlg-title">{title}</h2>
+        </div>
+        {(body || requireText !== undefined) && (
+          <div className="dialog-body">
+            {body}
+            {requireText !== undefined && (
+              <label className="fd-field dialog-require">
+                <span className="fd-label">
+                  {requireLabel ?? t('common.typeToConfirm', { text: requireText })}
+                </span>
+                <input
+                  className="fd-input"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  autoFocus
+                />
+              </label>
+            )}
+          </div>
         )}
         <div className="dialog-actions">
           {secondary ? (
@@ -92,6 +109,7 @@ interface AskOptions {
   confirmLabel: string;
   danger?: boolean;
   requireText?: string;
+  requireLabel?: ReactNode;
   secondary?: { label: string; onSelect: () => void };
 }
 
@@ -110,6 +128,7 @@ export function useConfirm(): [ReactNode, (o: AskOptions) => Promise<boolean>] {
       confirmLabel={state?.confirmLabel ?? ''}
       danger={state?.danger}
       requireText={state?.requireText}
+      requireLabel={state?.requireLabel}
       secondary={state?.secondary}
       onConfirm={() => {
         state?.resolve(true);

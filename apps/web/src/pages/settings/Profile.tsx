@@ -1,30 +1,36 @@
 import { SettingsShell } from './SettingsShell';
-import { CardHead } from '../../components/CardHead';
-import { Check, KeyRound } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Card, Field, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { useAuth } from '../../auth/AuthProvider';
 import { setLocale } from '../../i18n';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
+import { useToast } from '../../components/Toast';
 
+/**
+ * Paramètres › Mon profil (PRM-09), mise en page de la maquette : une carte à sections en deux colonnes
+ * (Profil, Préférences), puis le mot de passe. Les notifications par e-mail sont annoncées Bientôt
+ * (aucun envoi d'e-mail n'existe encore).
+ */
 export function Profile() {
   const { t } = useTranslation();
+  const toast = useToast();
   const { user, profile, refreshProfile } = useAuth();
   const [fullName, setFullName] = useState('');
   const [locale, setLoc] = useState<'fr' | 'en'>('fr');
   const [password, setPassword] = useState('');
   const info = useAction();
   const pwd = useAction();
+  const soon = <span className="badge">{t('shell.soon')}</span>;
 
-  useEffect(() => {
-    if (profile) {
-      setFullName(profile.full_name);
-      setLoc(profile.locale === 'en' ? 'en' : 'fr');
-    }
-  }, [profile]);
+  const reset = () => {
+    if (!profile) return;
+    setFullName(profile.full_name);
+    setLoc(profile.locale === 'en' ? 'en' : 'fr');
+  };
+   
+  useEffect(reset, [profile]);
 
   async function saveProfile(e: FormEvent) {
     e.preventDefault();
@@ -32,7 +38,8 @@ export function Profile() {
       check(await supabase.from('profiles').update({ full_name: fullName, locale }).eq('id', user!.id));
       setLocale(locale);
       await refreshProfile();
-    }, t('common.saved'));
+      toast(t('workspace.saved'));
+    });
   }
 
   async function savePassword(e: FormEvent) {
@@ -40,63 +47,116 @@ export function Profile() {
     await pwd.run(async () => {
       check(await supabase.auth.updateUser({ password }));
       setPassword('');
-    }, t('profile.passwordUpdated'));
+      toast(t('profile.passwordUpdated'));
+    });
   }
 
   return (
     <SettingsShell>
-      <div className="stack st-legacy" style={{ maxWidth: 560 }}>
-        <Card>
-          <form onSubmit={saveProfile}>
-            {info.error && <Alert kind="error">{info.error}</Alert>}
-            {info.success && <Alert kind="success">{info.success}</Alert>}
-            <Field label={t('auth.email')} htmlFor="pf-email">
+      <form className="card st-gen st-pf" onSubmit={saveProfile}>
+        {info.error && (
+          <div className="alert alert-danger st-gen-alert" role="alert">
+            {info.error}
+          </div>
+        )}
+        <div className="form-sec">
+          <div className="intro">
+            <h2 className="t-h3">{t('profile.section')}</h2>
+          </div>
+          <div>
+            <div className="field">
+              <label htmlFor="fn">{t('profile.name')}</label>
+              <input
+                id="fn"
+                className="input"
+                maxLength={120}
+                autoComplete="name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="pf-email">{t('profile.email')}</label>
               <input
                 id="pf-email"
-                className="fd-input"
+                className="input"
                 value={user?.email ?? ''}
                 readOnly
                 aria-describedby="pf-email-hint"
               />
-              <p id="pf-email-hint" className="fd-help">
+              <span id="pf-email-hint" className="help">
                 {t('profile.emailHint')}
-              </p>
-            </Field>
-            <Field label={t('auth.fullName')} htmlFor="fn">
-              <input
-                id="fn"
-                className="fd-input"
-                maxLength={120}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </Field>
-            <div className="fd-field">
-              <span className="fd-label" id="theme-label">
-                {t('theme.label')}
               </span>
-              <ThemeSwitcher withLabels />
             </div>
-            <Field label={t('common.language')} htmlFor="loc">
-              <Select id="loc" value={locale} onChange={(e) => setLoc(e.target.value === 'en' ? 'en' : 'fr')}>
+          </div>
+        </div>
+        <div className="form-sec">
+          <div className="intro">
+            <h2 className="t-h3">{t('profile.prefs')}</h2>
+          </div>
+          <div>
+            <div className="field">
+              <label htmlFor="loc">{t('profile.uiLanguage')}</label>
+              <select
+                id="loc"
+                className="select"
+                value={locale}
+                onChange={(e) => setLoc(e.target.value === 'en' ? 'en' : 'fr')}
+              >
                 <option value="fr">Français</option>
                 <option value="en">English</option>
-              </Select>
-            </Field>
-            <Button icon={<Check />} type="submit" variant="primary" disabled={info.busy}>
-              {t('common.save')}
-            </Button>
-          </form>
-        </Card>
-        <Card>
-          <CardHead icon={<KeyRound />} title={t('profile.changePassword')} />
-          <form onSubmit={savePassword}>
-            {pwd.error && <Alert kind="error">{pwd.error}</Alert>}
-            {pwd.success && <Alert kind="success">{pwd.success}</Alert>}
-            <Field label={t('auth.passwordNew')} htmlFor="np">
+              </select>
+            </div>
+            <fieldset className="field st-pf-fs">
+              <legend className="label">{t('profile.appearance')}</legend>
+              <ThemeSwitcher withLabels />
+            </fieldset>
+            <div className="setting st-pf-notif">
+              <div>
+                <b id="pf-n1">{t('profile.notifLead')}</b> {soon}
+              </div>
+              <span className="switch">
+                <input type="checkbox" disabled aria-labelledby="pf-n1" />
+                <span />
+              </span>
+            </div>
+            <div className="setting">
+              <div>
+                <b id="pf-n2">{t('profile.notifWeekly')}</b> {soon}
+              </div>
+              <span className="switch">
+                <input type="checkbox" disabled aria-labelledby="pf-n2" />
+                <span />
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="form-sec st-gen-foot">
+          <button type="button" className="btn btn-secondary" onClick={reset} disabled={info.busy}>
+            {t('common.cancel')}
+          </button>
+          <button type="submit" className="btn btn-primary" disabled={info.busy}>
+            {t('common.save')}
+          </button>
+        </div>
+      </form>
+
+      <form className="card st-gen st-pf-pwd" onSubmit={savePassword}>
+        {pwd.error && (
+          <div className="alert alert-danger st-gen-alert" role="alert">
+            {pwd.error}
+          </div>
+        )}
+        <div className="form-sec">
+          <div className="intro">
+            <h2 className="t-h3">{t('profile.changePassword')}</h2>
+          </div>
+          <div>
+            <div className="field">
+              <label htmlFor="np">{t('auth.passwordNew')}</label>
               <input
                 id="np"
-                className="fd-input"
+                className="input"
                 type="password"
                 autoComplete="new-password"
                 minLength={8}
@@ -104,13 +164,15 @@ export function Profile() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-            </Field>
-            <Button icon={<KeyRound />} type="submit" disabled={pwd.busy}>
-              {t('auth.updatePassword')}
-            </Button>
-          </form>
-        </Card>
-      </div>
+            </div>
+            <div className="st-pf-pwd-act">
+              <button type="submit" className="btn btn-secondary" disabled={pwd.busy}>
+                {t('auth.updatePassword')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
     </SettingsShell>
   );
 }

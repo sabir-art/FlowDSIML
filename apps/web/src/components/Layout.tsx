@@ -89,7 +89,7 @@ export function Layout() {
   const nav = [
     { to: '/', end: true, icon: <LayoutGrid {...ICON} />, label: t('nav.demos') },
     { to: '/analytics', icon: <BarChart3 {...ICON} />, label: t('nav.analytics') },
-    { to: '/leads', icon: <Contact {...ICON} />, label: t('nav.leads') },
+    { to: '/analytics?tab=leads', icon: <Contact {...ICON} />, label: t('nav.leads') },
   ];
   const admin = [
     { to: '/settings/members', icon: <Users {...ICON} />, label: t('nav.members') },
@@ -156,11 +156,21 @@ export function Layout() {
                 </Link>
               );
             }
+            // ANA-10 : « Leads » ouvre Analytics sur l'onglet Leads ; une seule des deux entrées est active
+            const onLeads =
+              location.pathname === '/analytics' &&
+              new URLSearchParams(location.search).get('tab') === 'leads';
+            const active = location.pathname === '/analytics' && (n.to === '/analytics' ? !onLeads : onLeads);
             return (
-              <NavLink key={n.to} to={n.to} end={n.end} className="fd-nav__item">
+              <Link
+                key={n.to}
+                to={n.to}
+                className={`fd-nav__item${active ? ' active' : ''}`}
+                aria-current={active ? 'page' : undefined}
+              >
                 {n.icon}
                 {n.label}
-              </NavLink>
+              </Link>
             );
           })}
           <div className="fd-nav__section">{t('nav.workspace')}</div>

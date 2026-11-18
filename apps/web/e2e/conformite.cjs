@@ -343,6 +343,126 @@ const SCREENS = {
     player: true,
     playerPath: '/l/lien-expire',
   },
+  // Lot 2 Lead UX : Plans, Analytics (leads), Paramètres
+  'PLN-04': { maquette: 'reference/plans.html', route: '/#/settings/plans' },
+  'PLN-05': {
+    maquette: 'reference/plans.html',
+    route: '/#/settings/plans',
+    async maquettePrep(p) {
+      await p.evaluate(() =>
+        [...document.querySelectorAll('h2')]
+          .find((h) => /Factures/.test(h.textContent))
+          .scrollIntoView({ block: 'center' }),
+      );
+    },
+    async prepare(p) {
+      await p.locator('.pl-invoices').scrollIntoViewIfNeeded();
+      await p.evaluate(() => document.querySelector('.pl-invoices').scrollIntoView({ block: 'center' }));
+    },
+  },
+  'PLN-08': {
+    maquette: 'reference/plans.html',
+    route: '/#/settings/plans',
+    async maquettePrep(p) {
+      await p.evaluate(() => document.getElementById('m-up').removeAttribute('hidden'));
+    },
+    async prepare(p) {
+      await p.getByRole('link', { name: 'Parlons Enterprise' }).click();
+      await p.waitForSelector('.modal');
+    },
+  },
+  'ANA-09': {
+    maquette: 'reference/analytics.html',
+    route: '/#/analytics?tab=leads',
+    seed(d) {
+      d.tables.leads = [];
+    },
+    async maquettePrep(p) {
+      await p.locator('#vt3').click();
+      await p.evaluate(() =>
+        [...document.querySelectorAll('#v-leads .empty')].pop().scrollIntoView({ block: 'center' }),
+      );
+    },
+    async prepare(p) {
+      await p.waitForSelector('#an-panel-leads .empty');
+    },
+  },
+  'ANA-10': {
+    maquette: 'reference/analytics.html',
+    route: '/#/leads',
+    async maquettePrep(p) {
+      await p.locator('#vt3').click();
+    },
+    async prepare(p) {
+      await p.waitForSelector('#an-panel-leads table');
+    },
+  },
+  'PRM-03': {
+    maquette: 'reference/parametres.html',
+    route: '/#/settings/members',
+    async maquettePrep(p) {
+      await p.locator('[data-menu="mem-menu"]').first().click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.locator('.table [aria-label^="Actions pour"]').first().click();
+      await p.waitForTimeout(300);
+    },
+  },
+  'PRM-05': {
+    maquette: 'reference/parametres.html',
+    route: '/#/settings/members',
+    async maquettePrep(p) {
+      await p.evaluate(() => document.getElementById('m-remove').removeAttribute('hidden'));
+    },
+    async prepare(p) {
+      await p.locator('.table [aria-label^="Actions pour"]').first().click();
+      await p.getByRole('menuitem', { name: 'Retirer du workspace' }).click();
+      await p.waitForSelector('dialog[open] .dialog-body');
+      await p.waitForTimeout(200);
+    },
+  },
+  'PRM-06': {
+    maquette: 'reference/parametres.html',
+    route: '/#/settings/workspace',
+    async maquettePrep(p) {
+      await p.locator('#st-gen').click();
+      await p.evaluate(() => document.getElementById('m-delws').removeAttribute('hidden'));
+    },
+    async prepare(p) {
+      await p.getByRole('button', { name: 'Supprimer le workspace' }).click();
+      await p.waitForSelector('dialog[open] .dialog-require');
+      await p.waitForTimeout(200);
+    },
+  },
+  'PRM-07': {
+    maquette: 'reference/parametres.html',
+    route: '/#/settings/brand',
+    async maquettePrep(p) {
+      await p.locator('#st-brand').click();
+    },
+  },
+  'PRM-08': {
+    maquette: 'reference/parametres.html',
+    route: '/#/settings/variables',
+    async maquettePrep(p) {
+      await p.locator('#st-var').click();
+    },
+  },
+  'PRM-09': {
+    maquette: 'reference/parametres.html',
+    route: '/#/settings/profile',
+    async maquettePrep(p) {
+      await p.locator('#st-me').click();
+    },
+  },
+  'PRM-11': {
+    maquette: 'reference/parametres.html',
+    route: '/#/settings/workspace',
+    async maquettePrep(p) {
+      await p.locator('#st-gen').click();
+    },
+  },
   'PRT-01': {
     maquette: 'reference/partage.html',
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',

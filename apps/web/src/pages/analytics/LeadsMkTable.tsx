@@ -1,4 +1,5 @@
-import { Trash2, Users } from 'lucide-react';
+import { Plus, Trash2, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
@@ -31,6 +32,7 @@ export function LeadsMkTable({
   demo,
   title,
   onChange,
+  formDemo,
 }: {
   wsId: string;
   days: number;
@@ -38,6 +40,8 @@ export function LeadsMkTable({
   title: (id: string) => string;
   /** Prévient la page quand le nombre total de leads change (suppression). */
   onChange?: (total: number) => void;
+  /** ANA-09 : démo ouverte par « Ajouter un formulaire » (filtre courant, sinon la première). */
+  formDemo?: string;
 }) {
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
@@ -93,6 +97,10 @@ export function LeadsMkTable({
           <Users aria-hidden="true" className="an-empty-ic" />
           <h3>{t('leads.emptyTitle')}</h3>
           <p className="muted">{t('leads.emptyBody')}</p>
+          <Link className="btn btn-primary" to={formDemo ? `/demos/${formDemo}/edit?tab=settings` : '/'}>
+            <Plus aria-hidden="true" />
+            {t('leads.addForm')}
+          </Link>
         </div>
       </div>
     );

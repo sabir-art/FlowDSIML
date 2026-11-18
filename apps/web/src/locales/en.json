@@ -172,7 +172,15 @@
     "title": "My profile",
     "changePassword": "Change password",
     "passwordUpdated": "Password updated.",
-    "emailHint": "Contact support to change your email."
+    "emailHint": "Contact support to change your email.",
+    "section": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "prefs": "Preferences",
+    "uiLanguage": "Interface language",
+    "appearance": "Appearance",
+    "notifLead": "Email when a lead is collected",
+    "notifWeekly": "Weekly views summary"
   },
   "members": {
     "title": "Members",
@@ -186,7 +194,7 @@
     "revoke": "Revoke",
     "remove": "Remove",
     "leave": "Leave",
-    "confirmRemove": "Remove {{email}} from the workspace?",
+    "confirmRemove": "Remove {{email}}?",
     "confirmLeave": "Leave this workspace?",
     "emails": "Email addresses",
     "emailsPlaceholder": "mary@acme.example, paul@acme.example",
@@ -211,7 +219,6 @@
     "transfer": "Transfer ownership",
     "removeFromWs": "Remove from workspace",
     "removeMember": "Remove member",
-    "removeBody": "{{name}} will lose access to the workspace. Their demos stay in the workspace.",
     "invitedOn": "Invitation sent on {{date}}",
     "pendingBadge": "Pending",
     "linkCopied": "Invitation link copied.",
@@ -236,7 +243,12 @@
     "seatsUsed_other": "{{count}} seats will be used. {{left}} of the {{limit}} in your plan will remain.",
     "seatsUsedUnlimited_one": "{{count}} seat will be used (unlimited members in your plan).",
     "seatsUsedUnlimited_other": "{{count}} seats will be used (unlimited members in your plan).",
-    "sendInvites": "Create the invitations"
+    "sendInvites": "Create the invitations",
+    "resend": "Resend invitation",
+    "removeLoses": "{{name}} will lose access to the workspace and its demos.",
+    "removeDemos_one": "Their demo stays in the workspace.",
+    "removeDemos_other": "Their {{count}} demos stay in the workspace.",
+    "removeNoDemos": "The workspace demos are not changed."
   },
   "workspace": {
     "title": "Workspace settings",
@@ -251,7 +263,30 @@
     "privacyUrlHelp": "Shown below the lead forms of your demos, from the next publication.",
     "publicLinks": "Allow public links",
     "publicLinksHelp": "Anyone with the link can view published demos without signing in. When off, no demo can be published or shared by link. Restricted access (invitation, email domain, password) is coming soon.",
-    "publicLinksAdmin": "Only an administrator can change this setting."
+    "publicLinksAdmin": "Only an administrator can change this setting.",
+    "wsName": "Workspace name",
+    "identity": "Identity",
+    "identityHelp": "Visible to members and in invitation emails.",
+    "changeLogo": "Change logo",
+    "logoHelp": "Square PNG or SVG, 512 px minimum",
+    "website": "Website",
+    "sharing": "Privacy and sharing",
+    "sharingHelp": "What visitors of your published demos see.",
+    "region": "Language and region",
+    "defaultLang": "Default language for new demos",
+    "timezone": "Analytics time zone",
+    "saved": "Settings saved",
+    "dangerHelp": "Irreversible actions.",
+    "deleteHintCounts": "Deletes {{demos}}, their analytics and their leads. Members lose access.",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteBodyCounts": "This cannot be undone: {{demos}}, their analytics and {{leads}} will be deleted.",
+    "deleteForever": "Delete permanently",
+    "typeName1": "Type",
+    "typeName2": "to confirm",
+    "nDemos_one": "the demo",
+    "nDemos_other": "the {{n}} demos",
+    "nLeads_one": "{{n}} lead",
+    "nLeads_other": "{{n}} leads"
   },
   "plan": {
     "title": "Plan",
@@ -1052,7 +1087,7 @@
     "deleteTitle_other": "Permanently delete these {{count}} leads?",
     "deleteBody": "Right to erasure (GDPR): the data is deleted and cannot be recovered.",
     "emptyTitle": "No leads yet",
-    "emptyBody": "Add a form to a demo to collect emails, or share personalised links to identify your visitors."
+    "emptyBody": "Add a form to a demo to collect emails, or share personalised links to identify your prospects."
   },
   "demos": {
     "title": "Demos",
@@ -1212,7 +1247,14 @@
       "business": "For teams",
       "enterprise": "To scale up"
     },
-    "activation": "We will get back to you by email."
+    "activation": "We will get back to you by email.",
+    "invDate": "Date",
+    "invPlan": "Plan",
+    "invAmount": "Amount",
+    "invStatus": "Status",
+    "invDownload": "Download",
+    "upCopy": "Copy the request",
+    "upCopied": "Request copied: send it to your support contact."
   },
   "theme": {
     "label": "Theme",
@@ -1288,5 +1330,46 @@
     "demoDeleted": "Demo deleted",
     "moved": "Demo moved to “{{folder}}”",
     "linkCopied": "Link copied"
+  },
+  "brand": {
+    "soonNote": "Workspace theme is coming soon. The values below are the defaults; each demo is styled in the editor.",
+    "themeTitle": "Demo theme",
+    "themeHelp": "Applied by default to every new demo. Each demo can change it.",
+    "primary": "Primary colour",
+    "contrast": "Contrast with white text: {{ratio}}:1, {{level}}",
+    "aa": "AA compliant",
+    "notAa": "not enough for AA",
+    "hotspot": "Hotspot colour",
+    "font": "Font",
+    "fontDefault": "Plus Jakarta Sans (default)",
+    "pageTitle": "Public page",
+    "pageHelp": "The header shown around demos shared by link.",
+    "cta1": "Primary button",
+    "cta1Url": "Primary button URL",
+    "cta2": "Secondary button",
+    "cta2Url": "Secondary button URL",
+    "ctaLabel": "Label",
+    "hideBranding": "Hide “Made with {{app}}”",
+    "fromPlan": "Available from the {{plan}} plan."
+  },
+  "vars": {
+    "help1": "Personalise texts with",
+    "help2": ". Filled from the URL, a personalised link or a form.",
+    "new": "New variable",
+    "variable": "Variable",
+    "type": "Type",
+    "default": "Default value",
+    "usedIn": "Used in",
+    "text": "Text",
+    "demos_one": "{{n}} demo",
+    "demos_other": "{{n}} demos",
+    "unused": "No demo",
+    "empty": "No variables yet. Create one to personalise your demos.",
+    "key": "Variable name",
+    "keyHelp": "Lowercase letters, digits and _; starts with a letter (e.g. first_name).",
+    "keyInvalid": "Use lowercase letters, digits and _, starting with a letter.",
+    "keyTaken": "This variable already exists.",
+    "create": "Create variable",
+    "created": "Variable {{key}} created"
   }
 }

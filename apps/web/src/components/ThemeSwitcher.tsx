@@ -4,9 +4,10 @@ import { supabase } from '../lib/supabase';
 import { setTheme, useTheme, type ThemePref } from '../lib/theme';
 
 export const THEME_OPTIONS: Array<{ value: ThemePref; icon: typeof Sun }> = [
+  // PRM-09 : ordre de la maquette (Système, Clair, Sombre)
+  { value: 'system', icon: Monitor },
   { value: 'light', icon: Sun },
   { value: 'dark', icon: Moon },
-  { value: 'system', icon: Monitor },
 ];
 
 /** Applique le thème et le mémorise sur le compte si une session existe (sans bloquer l'interface). */
@@ -18,7 +19,7 @@ export async function chooseTheme(pref: ThemePref) {
   }
 }
 
-/** Contrôle segmenté Clair / Sombre / Système (icônes Lucide, libellés optionnels). */
+/** Contrôle segmenté Système / Clair / Sombre (icônes Lucide, libellés optionnels). */
 export function ThemeSwitcher({
   withLabels = false,
   className = '',

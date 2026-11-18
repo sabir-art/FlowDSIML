@@ -172,7 +172,15 @@
     "title": "Mon profil",
     "changePassword": "Changer de mot de passe",
     "passwordUpdated": "Mot de passe mis à jour.",
-    "emailHint": "Contactez le support pour changer d'email."
+    "emailHint": "Contactez le support pour changer d'email.",
+    "section": "Profil",
+    "name": "Nom",
+    "email": "E-mail",
+    "prefs": "Préférences",
+    "uiLanguage": "Langue de l’interface",
+    "appearance": "Apparence",
+    "notifLead": "E-mail quand un lead est collecté",
+    "notifWeekly": "Résumé hebdomadaire des vues"
   },
   "members": {
     "title": "Membres",
@@ -186,7 +194,7 @@
     "revoke": "Révoquer",
     "remove": "Retirer",
     "leave": "Quitter",
-    "confirmRemove": "Retirer {{email}} du workspace ?",
+    "confirmRemove": "Retirer {{email}} ?",
     "confirmLeave": "Quitter ce workspace ?",
     "emails": "Adresses email",
     "emailsPlaceholder": "marie@acme.example, paul@acme.example",
@@ -211,7 +219,6 @@
     "transfer": "Transférer la propriété",
     "removeFromWs": "Retirer du workspace",
     "removeMember": "Retirer le membre",
-    "removeBody": "{{name}} perdra l’accès au workspace. Ses démos restent dans le workspace.",
     "invitedOn": "Invitation envoyée le {{date}}",
     "pendingBadge": "En attente",
     "linkCopied": "Lien d’invitation copié.",
@@ -236,7 +243,12 @@
     "seatsUsed_other": "{{count}} sièges seront utilisés. Il en restera {{left}} sur les {{limit}} de votre plan.",
     "seatsUsedUnlimited_one": "{{count}} siège sera utilisé (membres illimités dans votre plan).",
     "seatsUsedUnlimited_other": "{{count}} sièges seront utilisés (membres illimités dans votre plan).",
-    "sendInvites": "Créer les invitations"
+    "sendInvites": "Créer les invitations",
+    "resend": "Renvoyer l’invitation",
+    "removeLoses": "{{name}} perdra l’accès au workspace et à ses démos.",
+    "removeDemos_one": "Sa démo reste dans le workspace.",
+    "removeDemos_other": "Ses {{count}} démos restent dans le workspace.",
+    "removeNoDemos": "Les démos du workspace ne sont pas modifiées."
   },
   "workspace": {
     "title": "Paramètres du workspace",
@@ -251,7 +263,30 @@
     "privacyUrlHelp": "Lien affiché sous les formulaires de lead de vos démos, à la prochaine publication.",
     "publicLinks": "Autoriser les liens publics",
     "publicLinksHelp": "Toute personne disposant du lien pourra voir les démos publiées, sans connexion. Désactivé, aucune démo ne peut être publiée ni partagée par lien. Les accès restreints (invitation, domaine e-mail, mot de passe) arrivent prochainement.",
-    "publicLinksAdmin": "Seul un administrateur peut modifier ce réglage."
+    "publicLinksAdmin": "Seul un administrateur peut modifier ce réglage.",
+    "wsName": "Nom du workspace",
+    "identity": "Identité",
+    "identityHelp": "Visible par les membres et dans les emails d’invitation.",
+    "changeLogo": "Changer le logo",
+    "logoHelp": "PNG ou SVG carré, 512 px minimum",
+    "website": "Site web",
+    "sharing": "Confidentialité et partage",
+    "sharingHelp": "Ce que voient les visiteurs de vos démos publiées.",
+    "region": "Langue et région",
+    "defaultLang": "Langue par défaut des nouvelles démos",
+    "timezone": "Fuseau horaire des analytics",
+    "saved": "Paramètres enregistrés",
+    "dangerHelp": "Actions irréversibles.",
+    "deleteHintCounts": "Supprime {{demos}}, leurs statistiques et leurs leads. Les membres perdent l’accès.",
+    "deleteTitle": "Supprimer « {{name}} » ?",
+    "deleteBodyCounts": "Cette action est définitive : {{demos}}, leurs statistiques et {{leads}} seront supprimés.",
+    "deleteForever": "Supprimer définitivement",
+    "typeName1": "Saisissez",
+    "typeName2": "pour confirmer",
+    "nDemos_one": "la démo",
+    "nDemos_other": "les {{n}} démos",
+    "nLeads_one": "{{n}} lead",
+    "nLeads_other": "{{n}} leads"
   },
   "plan": {
     "title": "Plan",
@@ -1052,7 +1087,7 @@
     "deleteTitle_other": "Supprimer définitivement ces {{count}} leads ?",
     "deleteBody": "Droit à l’effacement (RGPD) : les données sont supprimées et ne peuvent pas être récupérées.",
     "emptyTitle": "Aucun lead pour l’instant",
-    "emptyBody": "Ajoutez un formulaire à une démo pour collecter des emails, ou partagez des liens personnalisés pour identifier vos visiteurs."
+    "emptyBody": "Ajoutez un formulaire à une démo pour collecter des emails, ou partagez des liens personnalisés pour identifier vos prospects."
   },
   "demos": {
     "title": "Démos",
@@ -1212,7 +1247,14 @@
       "business": "Pour les équipes",
       "enterprise": "Pour passer à l’échelle"
     },
-    "activation": "Nous revenons vers vous par email."
+    "activation": "Nous revenons vers vous par email.",
+    "invDate": "Date",
+    "invPlan": "Plan",
+    "invAmount": "Montant",
+    "invStatus": "Statut",
+    "invDownload": "Télécharger",
+    "upCopy": "Copier la demande",
+    "upCopied": "Demande copiée : transmettez-la à votre interlocuteur support."
   },
   "theme": {
     "label": "Thème",
@@ -1288,5 +1330,46 @@
     "demoDeleted": "Démo supprimée",
     "moved": "Démo déplacée vers « {{folder}} »",
     "linkCopied": "Lien copié"
+  },
+  "brand": {
+    "soonNote": "Le thème du workspace arrive bientôt. Les valeurs ci-dessous sont celles appliquées par défaut ; chaque démo se règle dans l’éditeur.",
+    "themeTitle": "Thème des démos",
+    "themeHelp": "Appliqué par défaut à toutes les nouvelles démos. Chaque démo peut le modifier.",
+    "primary": "Couleur principale",
+    "contrast": "Contraste avec le texte blanc : {{ratio}}:1, {{level}}",
+    "aa": "conforme AA",
+    "notAa": "insuffisant pour AA",
+    "hotspot": "Couleur du hotspot",
+    "font": "Police",
+    "fontDefault": "Plus Jakarta Sans (par défaut)",
+    "pageTitle": "Page publique",
+    "pageHelp": "L’en-tête affiché autour de vos démos partagées par lien.",
+    "cta1": "Bouton principal",
+    "cta1Url": "URL du bouton principal",
+    "cta2": "Bouton secondaire",
+    "cta2Url": "URL du bouton secondaire",
+    "ctaLabel": "Libellé",
+    "hideBranding": "Masquer « Fait avec {{app}} »",
+    "fromPlan": "Disponible à partir du plan {{plan}}."
+  },
+  "vars": {
+    "help1": "Personnalisez les textes avec",
+    "help2": ". Remplies par l’URL, un lien personnalisé ou un formulaire.",
+    "new": "Nouvelle variable",
+    "variable": "Variable",
+    "type": "Type",
+    "default": "Valeur par défaut",
+    "usedIn": "Utilisée dans",
+    "text": "Texte",
+    "demos_one": "{{n}} démo",
+    "demos_other": "{{n}} démos",
+    "unused": "Aucune démo",
+    "empty": "Aucune variable pour l’instant. Créez-en une pour personnaliser vos démos.",
+    "key": "Nom de la variable",
+    "keyHelp": "Lettres minuscules, chiffres et _ ; commence par une lettre (ex. first_name).",
+    "keyInvalid": "Utilisez des lettres minuscules, des chiffres et _, en commençant par une lettre.",
+    "keyTaken": "Cette variable existe déjà.",
+    "create": "Créer la variable",
+    "created": "Variable {{key}} créée"
   }
 }

@@ -2228,3 +2228,134 @@
   bottom: -5px;
   cursor: nwse-resize;
 }
+/* PLN-05 : tableau des factures en aperçu (lignes squelettes, badge Bientôt collé au titre) */
+.mk .pl-inv-head {
+  justify-content: flex-start;
+  gap: 8px;
+}
+.mk .pl-inv-skel:hover {
+  background: none;
+}
+.mk .pl-inv-skel td {
+  opacity: 0.7;
+}
+.mk .pl-sk {
+  display: inline-block;
+  height: 10px;
+  vertical-align: middle;
+}
+.mk .pl-sk--badge {
+  width: 56px;
+  height: 20px;
+  border-radius: 6px;
+}
+.mk .pl-inv-table .btn[aria-disabled='true'] {
+  color: var(--fd-color-text-muted);
+  cursor: default;
+}
+/* PRM-11 : Général en une carte à sections (logo, pied Annuler / Enregistrer, zone de danger) */
+.mk .st-gen .logo-up {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.mk .st-gen .logo-up .ws-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  font-size: 26px;
+}
+.mk .st-gen .logo-up .col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mk .st-logo-btn {
+  gap: 8px;
+}
+.mk .st-gen .field + .field,
+.mk .st-gen .field + .setting {
+  margin-top: 16px;
+}
+.mk .st-gen-first {
+  margin-top: 20px;
+}
+.mk .st-gen-alert {
+  margin: 16px 24px 0;
+}
+.mk .form-sec.st-gen-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+}
+.mk .form-sec.st-danger {
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .st-danger .intro h2 {
+  color: var(--fd-color-danger);
+}
+.mk .st-danger-row {
+  gap: 12px;
+}
+.mk .st-danger-row p {
+  margin-top: 4px;
+}
+.mk .btn.st-danger-btn {
+  color: var(--fd-color-danger);
+}
+.mk .st-gen label .badge,
+.mk .st-pf label .badge {
+  margin-left: 6px;
+  vertical-align: 1px;
+}
+/* PRM-09 : Mon profil */
+.mk .st-pf-fs {
+  border: 0;
+  padding: 0;
+  margin: 16px 0 0;
+}
+.mk .st-pf-fs legend {
+  margin-bottom: 6px;
+}
+.mk .st-pf-notif {
+  margin-top: 12px;
+}
+.mk .st-pf .setting .badge {
+  margin-left: 6px;
+}
+.mk .st-pf-pwd {
+  margin-top: 16px;
+}
+.mk .st-pf-pwd-act {
+  margin-top: 16px;
+}
+/* PRM-07 / PRM-08 : Marque (aperçu désactivé) et Variables */
+.mk .st-brand-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mk .st-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex: none;
+}
+.mk .st-pair {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+}
+.mk .st-vars .card-head {
+  align-items: flex-start;
+}
+.mk .st-vars .card-head p {
+  margin-top: 4px;
+}
+.mk .st-vars-empty {
+  padding: 20px 24px;
+  margin: 0;
+}

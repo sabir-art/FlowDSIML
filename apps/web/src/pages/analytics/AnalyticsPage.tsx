@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, Calendar, Download, TriangleAlert } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { completionRate, computeFunnel, toCsv } from '@flowdsiml/core';
 import { supabase } from '../../lib/supabase';
@@ -52,7 +52,24 @@ export function AnalyticsPage() {
   const [days, setDays] = useState<number>(30);
   const [demo, setDemo] = useState<string>('');
   const [source, setSource] = useState<Source | ''>('');
-  const [tab, setTab] = useState<Tab>('overview');
+  const [params, setParams] = useSearchParams();
+  // ANA-10 : l'entrée « Leads » de la navigation ouvre cet écran sur l'onglet Leads
+  const [tab, setTab] = useState<Tab>(
+    params.get('tab') === 'leads' && canLeads
+      ? 'leads'
+      : params.get('tab') === 'sessions'
+        ? 'sessions'
+        : 'overview',
+  );
+  useEffect(() => {
+    const p = params.get('tab');
+    if (p === 'leads' && canLeads) setTab('leads');
+    else if (p === null) setTab('overview');
+  }, [params, canLeads]);
+  const selectTab = (k: Tab) => {
+    setTab(k);
+    setParams(k === 'overview' ? {} : { tab: k }, { replace: true });
+  };
   const [demos, setDemos] = useState<Array<{ id: string; title: string }>>([]);
   const [data, setData] = useState<WsAnalytics | null>(null);
   const [prev, setPrev] = useState<WsAnalytics | null>(null);
@@ -202,12 +219,12 @@ export function AnalyticsPage() {
             aria-selected={tab === k}
             aria-controls={`an-panel-${k}`}
             tabIndex={tab === k ? 0 : -1}
-            onClick={() => setTab(k)}
+            onClick={() => selectTab(k)}
             onKeyDown={(e) => {
               const i = tabs.indexOf(k);
               if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                 const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]!;
-                setTab(n);
+                selectTab(n);
                 document.getElementById(`an-tab-${n}`)?.focus();
               }
             }}
@@ -240,7 +257,14 @@ export function AnalyticsPage() {
       )}
       {tab === 'leads' && canLeads && (
         <section role="tabpanel" id="an-panel-leads" aria-labelledby="an-tab-leads">
-          <LeadsMkTable wsId={ws.id} days={days} demo={demo} title={title} onChange={setLeadCount} />
+          <LeadsMkTable
+            wsId={ws.id}
+            days={days}
+            demo={demo}
+            title={title}
+            onChange={setLeadCount}
+            formDemo={demo || demos[0]?.id}
+          />
         </section>
       )}
     </div>

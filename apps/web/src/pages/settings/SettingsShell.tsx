@@ -40,23 +40,3 @@ export function SettingsShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-/** Section des paramètres pas encore disponible au niveau du workspace (Marque, Variables). */
-export function SettingsSoon({ title, body }: { title: string; body: string }) {
-  const { t } = useTranslation();
-  return (
-    <SettingsShell>
-      <section className="card">
-        <div className="form-sec">
-          <div className="intro">
-            <h2 className="t-h3">{title}</h2>
-          </div>
-          <div className="st-soon">
-            <span className="badge">{t('shell.soon')}</span>
-            <p className="muted">{body}</p>
-          </div>
-        </div>
-      </section>
-    </SettingsShell>
-  );
-}

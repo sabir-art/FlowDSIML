@@ -90,11 +90,17 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
     await v.close();
   }
 
+  // ANA-10 : l'ancienne adresse #/leads ouvre Analytics sur l'onglet Leads
   await page.goto(`${APP}/#/leads`);
-  await page.waitForSelector('text=prospect@globex.example');
+  await page.waitForURL(/analytics\?tab=leads/);
+  await page.waitForSelector('#an-panel-leads >> text=prospect@globex.example');
+  ok(
+    (await page.locator('.fd-nav__item.active').textContent()).trim() === 'Leads',
+    'ANA-10 : entrée « Leads » active, onglet Leads d’Analytics',
+  );
   const [dl2] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByRole('button', { name: 'Exporter en CSV' }).click(),
+    page.getByRole('button', { name: 'Exporter' }).click(),
   ]);
   const csv = require('fs').readFileSync(await dl2.path(), 'utf8');
   ok(csv.includes('prospect@globex.example') && csv.includes('Globex'), 'export CSV des leads');
@@ -102,6 +108,14 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await page.locator('dialog[open]').getByRole('button', { name: 'Supprimer' }).click();
   await page.waitForTimeout(500);
   ok(state.tables.leads.length === 0, 'suppression d’un lead (RGPD)');
+  await page.waitForSelector('#an-panel-leads .empty');
+  ok(
+    /prospects/.test(await page.textContent('#an-panel-leads .empty')) &&
+      (await page
+        .locator('#an-panel-leads .empty a.btn-primary', { hasText: 'Ajouter un formulaire' })
+        .count()) === 1,
+    'ANA-09 : état vide avec « Ajouter un formulaire »',
+  );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/leads.png` });
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();

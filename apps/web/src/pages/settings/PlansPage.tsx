@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Check, Info, X } from 'lucide-react';
+import { Check, Download, Info, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { APP_NAME } from '@flowdsiml/core';
 import { SUPPORT_EMAIL } from '../../lib/env';
@@ -9,6 +9,7 @@ import { supabase } from '../../lib/supabase';
 import { formatNumber } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
+import { useToast } from '../../components/Toast';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
@@ -34,6 +35,7 @@ export function PlansPage() {
   const { current } = useWorkspace();
   const [plans, setPlans] = useState<Tables<'plans'>[] | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
+  // Demande de changement de plan : plan visé (ou Enterprise pour « Parlons Enterprise »)
   const [upgrade, setUpgrade] = useState<Tables<'plans'> | null>(null);
 
   useEffect(() => {
@@ -227,13 +229,10 @@ export function PlansPage() {
                   {t('plans.upgradeTo', { plan: name(p.code) })}
                 </button>
               ) : (
-                <a
-                  className="btn btn-secondary btn-block"
-                  href={mailto(changeSubject(p))}
-                  aria-disabled={SUPPORT_EMAIL ? undefined : 'true'}
-                >
+                // PLN-04 : toujours actif ; la modale prépare l'email ou copie la demande
+                <button type="button" className="btn btn-secondary btn-block" onClick={() => setUpgrade(p)}>
                   {lower ? t('plans.downgrade') : t('plans.chooseX', { plan: name(p.code) })}
-                </a>
+                </button>
               )}
             </article>
           );
@@ -241,24 +240,71 @@ export function PlansPage() {
       </div>
       <p className="t-caption muted pl-foot">
         {t('plans.enterpriseQ')}{' '}
-        {SUPPORT_EMAIL ? (
-          <a href={mailto(t('plans.enterpriseSubject', { workspace: current?.name ?? '' }))}>
-            {t('plans.enterpriseLink')}
-          </a>
-        ) : (
-          t('plans.enterpriseLink')
-        )}
+        {/* PLN-08 : toujours un lien, qui ouvre la demande pour le plan Enterprise */}
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            const ent = plans.find((p) => p.code === 'enterprise');
+            if (ent) setUpgrade(ent);
+          }}
+        >
+          {t('plans.enterpriseLink')}
+        </a>
         .
       </p>
 
+      {/* PLN-05 : structure du tableau de la maquette, lignes squelettes tant que la facturation
+          en ligne n'existe pas (aucune donnée inventée) */}
       <section className="card pl-invoices" aria-labelledby="pl-inv">
-        <div className="card-head">
+        <div className="card-head pl-inv-head">
           <h2 className="t-h3" id="pl-inv">
             {t('plans.invoices')}
           </h2>
           <span className="badge">{t('shell.soon')}</span>
         </div>
-        <p className="muted pl-empty">{t('plans.noInvoices')}</p>
+        <div className="table-wrap">
+          <table className="table pl-inv-table">
+            <caption className="sr-only">{t('plans.noInvoices')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t('plans.invDate')}</th>
+                <th scope="col">{t('plans.invPlan')}</th>
+                <th scope="col" className="r">
+                  {t('plans.invAmount')}
+                </th>
+                <th scope="col">{t('plans.invStatus')}</th>
+                <th scope="col">
+                  <span className="sr-only">{t('plans.invDownload')}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody aria-hidden="true">
+              {[0, 1].map((i) => (
+                <tr key={i} className="pl-inv-skel">
+                  <td>
+                    <span className="skeleton pl-sk" style={{ width: 88 }} />
+                  </td>
+                  <td>
+                    <span className="skeleton pl-sk" style={{ width: 120 }} />
+                  </td>
+                  <td className="r">
+                    <span className="skeleton pl-sk" style={{ width: 72 }} />
+                  </td>
+                  <td>
+                    <span className="skeleton pl-sk pl-sk--badge" />
+                  </td>
+                  <td className="r">
+                    <button type="button" className="btn btn-ghost btn-sm" aria-disabled="true" tabIndex={-1}>
+                      <Download aria-hidden="true" />
+                      PDF
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {atLimit && usage && limits && (
@@ -287,6 +333,7 @@ export function PlansPage() {
         <UpgradeDialog
           planName={name(upgrade.code)}
           minMembers={(upgrade.limits as unknown as Limits).members ?? usage?.members ?? null}
+          subject={changeSubject(upgrade)}
           mailto={(body) => mailto(changeSubject(upgrade), body)}
           onClose={() => setUpgrade(null)}
         />
@@ -299,15 +346,18 @@ export function PlansPage() {
 function UpgradeDialog({
   planName,
   minMembers,
+  subject,
   mailto,
   onClose,
 }: {
   planName: string;
   minMembers: number | null;
+  subject: string;
   mailto: (body: string) => string | undefined;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [members, setMembers] = useState(String(minMembers ?? ''));
   const [message, setMessage] = useState('');
   const body = `${t('plans.upMembers')} : ${members}\n\n${message}`.trim();
@@ -362,14 +412,26 @@ function UpgradeDialog({
           <button type="button" className="btn btn-secondary" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <a
-            className="btn btn-primary"
-            href={href}
-            aria-disabled={href ? undefined : 'true'}
-            onClick={() => href && onClose()}
-          >
-            {t('plans.upSend')}
-          </a>
+          {href ? (
+            <a className="btn btn-primary" href={href} onClick={onClose}>
+              {t('plans.upSend')}
+            </a>
+          ) : (
+            // Sans adresse de support configurée : la demande est copiée pour être transmise
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                void navigator.clipboard?.writeText(`${subject}\n\n${body}`).then(
+                  () => toast(t('plans.upCopied')),
+                  () => undefined,
+                );
+                onClose();
+              }}
+            >
+              {t('plans.upCopy')}
+            </button>
+          )}
         </div>
       </div>
     </div>
