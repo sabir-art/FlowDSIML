@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { install } = require('./fake-supabase.cjs');
 const { seedMaquette } = require('./maquette-data.cjs');
+const { learnersFixture } = require('./learners-data.cjs');
 
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const MAQ = path.resolve(__dirname, '../../../docs/ux/maquettes');
@@ -38,6 +39,13 @@ function seedTags(d) {
   d.tables.demo_tags = demos
     .slice(0, 3)
     .flatMap((x, i) => pick[i].map((k) => ({ demo_id: x.id, tag_id: `tg-${k}`, workspace_id: ws })));
+}
+
+/** L13 : apprenants fictifs (domaines *.example). */
+function seedLearners(d) {
+  const f = learnersFixture();
+  d.learners = f.progress;
+  d.learnerDetail = f.detail;
 }
 
 const SCREENS = {
@@ -459,6 +467,47 @@ const SCREENS = {
     seed: seedTags,
     async prepare(p) {
       await p.waitForSelector('.tg-field');
+    },
+  },
+  // L13 : suivi des apprenants
+  'L13-01': {
+    maquette: 'refonte/l13-suivi.html?view=liste',
+    route: '/#/learners?statut=stale',
+    seed: seedLearners,
+  },
+  'L13-02': {
+    maquette: 'refonte/l13-suivi.html?view=fiche',
+    route: '/#/learners?statut=stale',
+    seed: seedLearners,
+    async prepare(p) {
+      await p.getByRole('button', { name: 'Léa Exemple', exact: true }).click();
+      await p.waitForTimeout(500);
+    },
+  },
+  'L13-03': {
+    maquette: 'refonte/l13-suivi.html?view=formation',
+    route: '/#/learners?tab=formation',
+    seed: seedLearners,
+  },
+  'L13-04': {
+    maquette: 'refonte/l13-suivi.html?view=export',
+    route: '/#/learners?statut=stale',
+    seed: seedLearners,
+    async prepare(p) {
+      await p.getByRole('checkbox', { name: 'Sélectionner Léa Exemple' }).check();
+      await p.getByRole('checkbox', { name: 'Sélectionner Hugo Test' }).check();
+      await p.getByRole('button', { name: 'Exporter CSV' }).click();
+      await p.waitForTimeout(400);
+    },
+  },
+  'L13-05': {
+    maquette: 'refonte/l13-suivi.html?view=rgpd',
+    route: '/#/learners?statut=stale',
+    seed: seedLearners,
+    async prepare(p) {
+      await p.getByRole('button', { name: 'Léa Exemple', exact: true }).click();
+      await p.getByRole('button', { name: 'Supprimer ses données' }).click();
+      await p.waitForTimeout(400);
     },
   },
   // L11 : partage sécurisé (onglet Accès, écrans visiteur)

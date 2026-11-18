@@ -2,7 +2,16 @@ import { render } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { manifestSchema, type Manifest } from '@flowdsiml/manifest';
 import { variablesFromSearch, type VariableValues } from '@flowdsiml/core';
-import { openDemo, resolveLink, submitLead, Tracker, type GateInfo } from './api';
+import {
+  learnerResume,
+  openDemo,
+  resolveLink,
+  submitLead,
+  Tracker,
+  type GateInfo,
+  type ResumeInfo,
+} from './api';
+import { ResumeCard, resumable } from './Resume';
 import { embedAllowed, parseRoute } from './logic';
 import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
@@ -22,6 +31,9 @@ type State =
       linkToken: string | null;
       preview: boolean;
       startQuiz?: boolean;
+      /** L13 : reprise proposée (« Bon retour ») tant que l'apprenant n'a pas choisi. */
+      resume?: ResumeInfo;
+      startStep?: number;
     };
 
 const inIframe = window.parent !== window;
@@ -90,9 +102,11 @@ function App() {
       } else {
         return fail('notFound');
       }
+      // L13 : reprise d'un apprenant identifié par son lien personnalisé (en parallèle de l'ouverture)
+      const resumeP = linkToken ? learnerResume(linkToken, demoId).catch(() => null) : Promise.resolve(null);
       // L11 : l'accès est décidé côté serveur (open-demo), qui sert le manifeste et des images signées
       const gate = await openDemo(demoId);
-      const start = (r: GateInfo) => {
+      const start = async (r: GateInfo) => {
         const manifest = r.manifest;
         if (!manifest) return fail('notFound');
         if (!embedAllowed(manifest.allowedEmbedOrigins, inIframe, parentOrigin))
@@ -108,9 +122,18 @@ function App() {
         };
         // P12 : « Ouvrir l'aperçu » depuis l'app (?preview=1) n'enregistre pas de statistiques
         const preview = [search, location.search].some((q) => new URLSearchParams(q).get('preview') === '1');
-        if (!cancelled) setState({ status: 'ready', manifest, values, linkToken, preview });
+        const resume = preview ? null : await resumeP;
+        if (!cancelled)
+          setState({
+            status: 'ready',
+            manifest,
+            values,
+            linkToken,
+            preview,
+            resume: resumable(resume) ? resume : undefined,
+          });
       };
-      if (gate.status === 'ok') return start(gate);
+      if (gate.status === 'ok') return void start(gate);
       if (gate.status === 'expired' || gate.status === 'unavailable')
         return fail('expired', navigator.language, gate);
       if (
@@ -119,7 +142,7 @@ function App() {
         gate.status === 'locked'
       ) {
         if (gate.title) document.title = gate.title;
-        if (!cancelled) setState({ status: 'gate', demoId, info: gate, open: start });
+        if (!cancelled) setState({ status: 'gate', demoId, info: gate, open: (r) => void start(r) });
         return;
       }
       return fail('notFound');
@@ -157,7 +180,8 @@ function App() {
       state.status === 'ready'
         ? new Tracker(state.manifest.demoId, state.manifest.versionId, state.linkToken, !state.preview)
         : null,
-    [state],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [state.status === 'ready' ? state.manifest : null],
   );
 
   if (state.status === 'loading') return <div class="p-center">{t.loading}</div>;
@@ -168,6 +192,19 @@ function App() {
       <PasswordGate demoId={state.demoId} locale={navigator.language} info={state.info} onOpen={state.open} />
     );
   const m = state.manifest;
+  if (state.resume) {
+    const resume = state.resume;
+    return (
+      <ResumeCard
+        t={t}
+        info={resume}
+        title={m.title}
+        workspace={m.workspaceName}
+        onResume={() => setState({ ...state, resume: undefined, startStep: resume.module!.seen })}
+        onRestart={() => setState({ ...state, resume: undefined, startStep: 0 })}
+      />
+    );
+  }
   return (
     <Player
       manifest={m}
@@ -175,6 +212,7 @@ function App() {
       tracker={tracker!}
       preview={state.preview}
       startQuiz={state.startQuiz}
+      startStep={state.startStep}
       onLead={async (_form, data) => {
         if (state.preview) return;
         await submitLead({

@@ -6,6 +6,7 @@ export function csvCell(value: unknown): string {
   return /[",\n\r;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-export function toCsv(headers: string[], rows: unknown[][]): string {
-  return [headers, ...rows].map((r) => r.map(csvCell).join(',')).join('\r\n');
+/** `sep` : ',' par défaut ; ';' pour Excel en français. */
+export function toCsv(headers: string[], rows: unknown[][], sep: ',' | ';' = ','): string {
+  return [headers, ...rows].map((r) => r.map(csvCell).join(sep)).join('\r\n');
 }

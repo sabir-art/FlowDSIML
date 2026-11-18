@@ -18,6 +18,8 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/DEMO_EMPTY/, 'errors.demoEmpty'],
     [/PUBLIC_DISABLED/, 'errors.publicDisabled'],
     [/GDPR_ACK_REQUIRED/, 'errors.gdprAck'],
+    [/CONFIRMATION_MISMATCH/, 'errors.confirmMismatch'],
+    [/DEMO_NOT_FOUND/, 'errors.demoNotFound'],
     [/Invalid login credentials/i, 'errors.badCredentials'],
     [/Email not confirmed/i, 'errors.emailNotConfirmed'],
     [/User already registered/i, 'errors.alreadyRegistered'],

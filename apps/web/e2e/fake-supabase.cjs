@@ -686,6 +686,39 @@ async function install(page, state = seed()) {
           row.updated_at = new Date().toISOString();
           return json(route, 200, null);
         }
+        // L13 : suivi des apprenants. state.learners = réponse de learners_progress (paths, structures, learners)
+        case 'learners_progress':
+          return json(route, 200, state.learners || { paths: [], structures: [], learners: [] });
+        case 'learner_detail':
+          return json(route, 200, (state.learnerDetail || {})[a.p_learner] || { events: [], attempts: [], reminders: [] });
+        case 'record_reminders': {
+          const now = new Date().toISOString();
+          const kept = (state.learners?.learners || []).filter(
+            (l) => a.p_learners.includes(l.id) && l.email && (!l.lastReminder || Date.now() - Date.parse(l.lastReminder) >= 72 * 3600e3),
+          );
+          for (const l of kept) l.lastReminder = now;
+          return json(route, 200, kept.map((l) => l.id));
+        }
+        case 'grant_quiz_attempt': {
+          const m = state.learners?.learners.find((l) => l.id === a.p_learner)?.modules.find((x) => x.demoId === a.p_demo);
+          if (m && m.max !== null) {
+            m.max += 1;
+            if (m.status === 'failed') m.status = 'in_progress';
+          }
+          return json(route, 200, 1);
+        }
+        case 'log_learners_export':
+          (state.audit ||= []).push({ action: 'learners.export', rows: a.p_rows, columns: a.p_columns });
+          return json(route, 200, null);
+        case 'erase_learner': {
+          const list = state.learners?.learners || [];
+          const l = list.find((x) => x.id === a.p_learner);
+          if (!l || String(a.p_confirm).trim().toLowerCase() !== (l.email || l.name).toLowerCase())
+            return json(route, 400, { code: 'P0001', message: 'CONFIRMATION_MISMATCH' });
+          state.learners.learners = list.filter((x) => x.id !== a.p_learner);
+          (state.audit ||= []).push({ action: 'learner.erase' });
+          return json(route, 200, null);
+        }
         case 'resolve_share_link': {
           const l = t.share_links.find((x) => x.token === a.p_token && x.is_active);
           return json(route, 200, l ? { demoId: l.demo_id, linkId: l.id, variables: l.variables } : null);

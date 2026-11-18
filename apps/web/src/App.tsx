@@ -1,3 +1,4 @@
+import { LearnersPage } from './pages/learners/LearnersPage';
 import { lazy, Suspense, useEffect } from 'react';
 import { ToastProvider } from './components/Toast';
 import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
@@ -126,6 +127,7 @@ export function App() {
                   <Route path="/demos/:demoId/share" element={<SharePage />} />
                   <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
                   <Route path="/analytics" element={<AnalyticsPage />} />
+                  <Route path="/learners" element={<LearnersPage />} />
                   <Route path="/leads" element={<Navigate to="/analytics?tab=leads" replace />} />
                   <Route path="/settings/profile" element={<Profile />} />
                   <Route path="/settings/members" element={<Members />} />

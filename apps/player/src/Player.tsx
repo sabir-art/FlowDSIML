@@ -49,6 +49,8 @@ interface Props {
   preview?: boolean;
   /** F2 : aperçu « Tester le quiz » ouvert directement sur le quiz. */
   startQuiz?: boolean;
+  /** L13 : reprise à une étape (« Bon retour »). */
+  startStep?: number;
   onLead: (
     form: LeadFormT,
     data: { email: string; fields: Record<string, string>; consent: boolean },
@@ -76,14 +78,14 @@ const DEFAULT_THEME = themeSchema.parse({});
 // Seul le cadre passe en sombre ; bulle, formulaire et cartes gardent la surface claire du thème (maquette)
 const DARK = { '--p-bg': '#0B0D10', '--p-chrome': '#15191F', '--p-chrome-text': '#F3F5F8' };
 
-export function Player({ manifest: m, values, tracker, preview, startQuiz, onLead }: Props) {
+export function Player({ manifest: m, values, tracker, preview, startQuiz, startStep, onLead }: Props) {
   // PY-3 : langue de l'interface du lecteur (le contenu de la démo reste dans sa langue)
   const [locale, setLocale] = useState<'fr' | 'en'>(m.locale === 'en' ? 'en' : 'fr');
   const t = strings(locale);
   const compact = useCompact();
   const prefersDark = useMedia('(prefers-color-scheme: dark)');
   const rootRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() => Math.max(0, Math.min(startStep ?? 0, m.steps.length - 1)));
   const [fullscreen, setFullscreen] = useState(false);
   const [gateDone, setGateDone] = useState<Set<string>>(() => {
     try {

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suivi des apprenants (lot L13) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* Lot L13 : suivi des apprenants. Cadre validé (CAD), peau DSI, composants F3 (st-badge, lp, fchip, kpis). */
+  .l13 [data-pane] { display: none; }
+  .l13[data-view='liste'] [data-pane~='liste'], .l13[data-view='fiche'] [data-pane~='liste'], .l13[data-view='export'] [data-pane~='liste'], .l13[data-view='rgpd'] [data-pane~='liste'],
+  .l13[data-view='formation'] [data-pane~='formation'] { display: flex; flex-direction: column; gap: var(--fd-space-5); }
+  .l13[data-view='fiche'] .l13-drawer, .l13[data-view='rgpd'] .l13-drawer { display: flex; }
+  .l13[data-view='export'] .l13-modal--export, .l13[data-view='rgpd'] .l13-modal--rgpd { display: flex; }
+  .l13[data-view='fiche'] .l13-scrim, .l13[data-view='export'] .l13-scrim, .l13[data-view='rgpd'] .l13-scrim { display: block; }
+  .st-badge.relance { background: var(--fd-color-warning-soft); color: var(--fd-color-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fd-orange-500) 45%, transparent); }
+  .st-badge.relance svg { color: var(--fd-orange-600, var(--fd-orange-500)); }
+  .fm-list { display: flex; flex-wrap: wrap; gap: 4px; }
+  .fm { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .fm--more { background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+  .l13-table td { vertical-align: middle; }
+  .l13-table td:nth-child(2) { min-width: 250px; white-space: nowrap; }
+  .l13-table th button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .l13-table th button svg { width: 12px; height: 12px; }
+  .l13-sel { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--fd-radius-md); background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-weight: 600; }
+  .l13-sel .grow { flex: 1; }
+  .l13-pager { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--fd-color-text-muted); font-size: var(--fd-text-caption-size); }
+  /* Tiroir fiche apprenant */
+  .l13-scrim { display: none; position: fixed; inset: 0; z-index: 50; background: color-mix(in srgb, #0C0F14 45%, transparent); }
+  .l13-drawer { display: none; position: fixed; z-index: 60; top: 0; right: 0; bottom: 0; width: min(520px, 100%); flex-direction: column; background: var(--fd-color-surface); box-shadow: var(--fd-shadow-lg); border-radius: 24px 0 0 24px; overflow: auto; }
+  .l13-drawer header { display: flex; gap: 14px; align-items: flex-start; padding: 24px 24px 16px; border-bottom: 1px solid var(--fd-color-border); }
+  .l13-drawer header .avatar { width: 48px; height: 48px; font-size: 16px; }
+  .l13-drawer header h2 { margin: 0; font-size: 1.25rem; }
+  .l13-drawer header p { margin: 2px 0 0; color: var(--fd-color-text-muted); font-size: var(--fd-text-caption-size); }
+  .l13-drawer .body { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+  .l13-drawer h3 { margin: 0 0 10px; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+  .l13-mods { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .l13-mods li { display: grid; grid-template-columns: minmax(0, 1fr) 120px 112px; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--fd-color-surface-sunken); font-size: 14px; }
+  .l13-mods li small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .l13-timeline { list-style: none; margin: 0; padding: 0 0 0 18px; border-left: 2px solid var(--fd-color-border); display: grid; gap: 12px; font-size: 14px; }
+  .l13-timeline li { position: relative; }
+  .l13-timeline li::before { content: ""; position: absolute; left: -24px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--fd-color-primary); box-shadow: 0 0 0 3px var(--fd-color-surface); }
+  .l13-timeline small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .l13-drawer footer { margin-top: auto; display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--fd-color-border); }
+  .l13-drawer footer .push { margin-left: auto; }
+  .l13-name { color: var(--fd-color-text); text-decoration: none; } .l13-name:hover b { text-decoration: underline; }
+  .l13-mods .st-badge { justify-self: end; }
+  .l13[data-view='rgpd'] .l13-scrim { z-index: 65; }
+  .fd-btn--danger-ghost { color: var(--fd-color-danger); }
+  /* Modales */
+  .l13-modal { display: none; position: fixed; z-index: 70; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(480px, calc(100% - 32px)); flex-direction: column; background: var(--fd-color-surface); border-radius: 20px; box-shadow: var(--fd-shadow-lg); }
+  .l13-modal > header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 12px; }
+  .l13-modal > header h2 { margin: 0; font-size: 1.25rem; }
+  .l13-modal .body { padding: 4px 24px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .l13-modal .body p { margin: 0; color: var(--fd-color-text-muted); }
+  .l13-modal > footer { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px 20px; border-top: 1px solid var(--fd-color-border); }
+  .l13-checks { display: grid; gap: 8px; } .l13-checks label { display: flex; gap: 10px; align-items: center; font-size: 14px; }
+  .l13-checks input, .l13-radio input { accent-color: var(--fd-color-primary); width: 16px; height: 16px; margin: 0; }
+  .l13-radio { display: grid; gap: 8px; } .l13-radio label { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--fd-color-border); border-radius: 12px; font-size: 14px; }
+  .l13-radio label:has(input:checked) { border-color: var(--fd-color-primary); background: var(--fd-color-primary-soft); }
+  .l13-radio small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .l13-danger-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; color: var(--fd-color-text); }
+  /* Vue par formation */
+  .fo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--fd-space-4); }
+  .fo-card { display: flex; flex-direction: column; gap: 10px; cursor: pointer; }
+  .fo-card[aria-current='true'] { box-shadow: inset 0 0 0 2px var(--fd-color-primary); }
+  .fo-card h3 { margin: 0; font-size: 1rem; }
+  .fo-card .fo-meta { color: var(--fd-color-text-muted); font-size: 12px; }
+  .fo-split { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--fd-color-surface-sunken); }
+  .fo-split span:nth-child(1) { background: var(--fd-color-hero); }
+  .fo-split span:nth-child(2) { background: var(--fd-bleu-500); }
+  .fo-split span:nth-child(3) { background: var(--fd-orange-500); }
+  .fo-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--fd-color-text-muted); }
+  .fo-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .funnel { display: grid; gap: 10px; }
+  .funnel .row { display: grid; grid-template-columns: 200px minmax(0, 1fr) 160px; gap: 12px; align-items: center; font-size: 14px; }
+  .funnel .bar { height: 26px; border-radius: 8px; background: var(--fd-color-surface-sunken); overflow: hidden; }
+  .funnel .bar span { display: block; height: 100%; border-radius: 8px; background: var(--fd-color-primary); }
+  .funnel .row:nth-child(2) .bar span { background: var(--fd-bleu-500); }
+  .funnel .row:nth-child(3) .bar span { background: var(--fd-vert-600); }
+  .funnel .row:nth-child(4) .bar span { background: var(--fd-orange-500); }
+  .funnel .num { font-variant-numeric: tabular-nums; color: var(--fd-color-text-muted); font-size: 13px; }
+  .funnel .num b { color: var(--fd-color-text); }
+  @media (max-width: 1100px) { .fo-grid { grid-template-columns: minmax(0, 1fr); } .funnel .row { grid-template-columns: 1fr; } }
+  .mock-state { z-index: 90; }
+</style>
+</head>
+<body>
+<div class="l13" data-view="liste">
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Formation</span>
+      <a class="fd-nav__item" href="#" aria-current="page"><i data-icon="graduation"></i>Apprenants</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Éditrice</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div><h1>Apprenants</h1><p class="sub">214 apprenants · 3 formations · données des 12 derniers mois</p></div>
+      <div class="topbar__actions"><button class="fd-btn" type="button" data-view-set="export"><i data-icon="download"></i>Exporter CSV</button><button class="fd-btn fd-btn--primary" type="button"><i data-icon="mail"></i>Inviter des apprenants</button></div>
+    </header>
+    <div class="fd-tabs" role="tablist" aria-label="Vues du suivi" style="max-width:520px;margin-bottom:20px">
+      <button role="tab" type="button" aria-selected="true" data-view-set="liste">Tous les apprenants</button>
+      <button role="tab" type="button" aria-selected="false" data-view-set="formation">Par formation</button>
+    </div>
+
+    <!-- L13-01 : liste des apprenants -->
+    <section data-pane="liste">
+      <div class="filterbar" aria-label="Filtres" style="margin:0">
+        <span class="fchip">Formation : <b>Toutes</b><button type="button" aria-label="Changer le filtre Formation"><i data-icon="chevronDown"></i></button></span>
+        <span class="fchip">Statut : <b>À relancer</b><button type="button" aria-label="Retirer le filtre Statut"><i data-icon="x"></i></button></span>
+        <span class="fchip">Structure : <b>Toutes</b><button type="button" aria-label="Changer le filtre Structure"><i data-icon="chevronDown"></i></button></span>
+        <label class="fd-field" style="margin:0 0 0 auto;min-width:260px"><span class="cm-sr">Rechercher un apprenant par nom ou e-mail</span><input class="fd-input" type="search" placeholder="Nom ou e-mail" style="border-radius:999px"></label>
+      </div>
+      <div class="kpis" style="margin:0">
+        <article class="fd-card fd-card--hero fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="award"></i></span><span class="fd-kpi__label">Terminé</span></div><span class="fd-kpi__value">133</span><span class="fd-kpi__foot">62 % des apprenants</span></article>
+        <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="clock"></i></span><span class="fd-kpi__label">En cours</span></div><span class="fd-kpi__value">60</span><span class="fd-kpi__foot">actifs ces 7 derniers jours</span></article>
+        <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="bellRing"></i></span><span class="fd-kpi__label">À relancer</span></div><span class="fd-kpi__value">21</span><span class="fd-kpi__foot">inactifs depuis 7 jours ou plus</span></article>
+        <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="help"></i></span><span class="fd-kpi__label">Score moyen au quiz</span></div><span class="fd-kpi__value">78 %</span><span class="fd-kpi__foot">seuil de réussite 70 %</span></article>
+      </div>
+      <article class="fd-card">
+        <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="graduation"></i></span><h2 class="fd-card__title">21 apprenants à relancer</h2><button class="fd-btn fd-btn--sm" type="button"><i data-icon="bellRing"></i>Relancer les 21</button></div>
+        <div class="l13-sel" role="status"><span class="grow">2 apprenants sélectionnés</span><button class="fd-btn fd-btn--sm" type="button"><i data-icon="bellRing"></i>Relancer</button><button class="fd-btn fd-btn--sm" type="button" data-view-set="export"><i data-icon="download"></i>Exporter</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Désélectionner</button></div>
+        <div style="overflow-x:auto;margin-top:12px"><table class="fd-table l13-table">
+          <caption class="cm-sr">Apprenants filtrés sur le statut « À relancer », triés par dernière activité</caption>
+          <thead><tr>
+            <th scope="col"><input type="checkbox" aria-label="Tout sélectionner"></th>
+            <th scope="col"><button type="button">Apprenant</button></th>
+            <th scope="col">Formations suivies</th>
+            <th scope="col"><button type="button">Progression</button></th>
+            <th scope="col"><button type="button">Score au quiz</button></th>
+            <th scope="col" aria-sort="ascending"><button type="button">Dernière activité<i data-icon="arrowUp"></i></button></th>
+            <th scope="col">Statut</th>
+            <th scope="col"><span class="cm-sr">Actions</span></th>
+          </tr></thead>
+          <tbody>
+            <tr aria-selected="true"><td><input type="checkbox" checked aria-label="Sélectionner Léa Exemple"></td><td><a class="l13-name" href="#" data-view-set="fiche"><b>Léa Exemple</b></a><br><span class="fd-help">lea.exemple@mission-locale.example</span></td><td><span class="fm-list"><span class="fm">Logiciel métier</span><span class="fm">Agenda</span></span></td><td><span class="lp"><span class="fd-bar fd-bar--h" role="img" aria-label="45 % parcouru"><span class="fd-bar__fill" style="width:45%"></span></span><span>45 %</span></span></td><td>—</td><td>il y a 12 j</td><td><span class="st-badge relance"><i data-icon="bellRing"></i>À relancer</span></td><td><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Actions pour Léa Exemple"><i data-icon="more"></i></button></td></tr>
+            <tr aria-selected="true"><td><input type="checkbox" checked aria-label="Sélectionner Hugo Test"></td><td><b>Hugo Test</b><br><span class="fd-help">hugo.test@dsi-ml.example</span></td><td><span class="fm-list"><span class="fm">Logiciel métier</span></span></td><td><span class="lp"><span class="fd-bar fd-bar--h" role="img" aria-label="20 % parcouru"><span class="fd-bar__fill" style="width:20%"></span></span><span>20 %</span></span></td><td>—</td><td>il y a 9 j</td><td><span class="st-badge relance"><i data-icon="bellRing"></i>À relancer</span></td><td><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Actions pour Hugo Test"><i data-icon="more"></i></button></td></tr>
+            <tr><td><input type="checkbox" aria-label="Sélectionner Nina Demo"></td><td><b>Nina Demo</b><br><span class="fd-help">nina.demo@mission-locale.example</span></td><td><span class="fm-list"><span class="fm">Agenda</span><span class="fm">Statistiques</span><span class="fm fm--more">+1</span></span></td><td><span class="lp"><span class="fd-bar fd-bar--h" role="img" aria-label="60 % parcouru"><span class="fd-bar__fill" style="width:60%"></span></span><span>60 %</span></span></td><td>55 %</td><td>il y a 8 j</td><td><span class="st-badge relance"><i data-icon="bellRing"></i>À relancer</span></td><td><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Actions pour Nina Demo"><i data-icon="more"></i></button></td></tr>
+            <tr><td><input type="checkbox" aria-label="Sélectionner Camille Exemple"></td><td><b>Camille Exemple</b><br><span class="fd-help">camille@mission-locale.example</span></td><td><span class="fm-list"><span class="fm">Logiciel métier</span></span></td><td><span class="lp"><span class="fd-bar fd-bar--h" role="img" aria-label="100 % parcouru"><span class="fd-bar__fill" style="width:100%"></span></span><span>100 %</span></span></td><td>90 %</td><td>aujourd'hui, 10:12</td><td><span class="st-badge done"><i data-icon="award"></i>Terminé</span></td><td><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Actions pour Camille Exemple"><i data-icon="more"></i></button></td></tr>
+            <tr><td><input type="checkbox" aria-label="Sélectionner Sam Essai"></td><td><b>Sam Essai</b><br><span class="fd-help">sam.essai@dsi-ml.example</span></td><td><span class="fm-list"><span class="fm">Agenda</span></span></td><td><span class="lp"><span class="fd-bar fd-bar--h" role="img" aria-label="70 % parcouru"><span class="fd-bar__fill" style="width:70%"></span></span><span>70 %</span></span></td><td>—</td><td>hier, 16:40</td><td><span class="st-badge prog"><i data-icon="clock"></i>En cours</span></td><td><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Actions pour Sam Essai"><i data-icon="more"></i></button></td></tr>
+          </tbody></table></div>
+        <div class="l13-pager"><span>1 à 5 sur 21</span><span><button class="fd-btn fd-btn--sm" type="button" disabled>Précédent</button> <button class="fd-btn fd-btn--sm" type="button">Suivant</button></span></div>
+        <p class="fd-help">Statuts : <b>Terminé</b> = toutes les formations suivies sont validées ; <b>En cours</b> = activité depuis moins de 7 jours ; <b>À relancer</b> = aucune activité depuis 7 jours ou plus, formation non terminée. Menu ⋯ : voir la fiche, relancer par e-mail, accorder une tentative, retirer l'accès.</p>
+      </article>
+    </section>
+
+    <!-- L13-03 : vue par formation -->
+    <section data-pane="formation">
+      <div class="fo-grid" role="list" aria-label="Formations">
+        <article class="fd-card fo-card" role="listitem" aria-current="true" tabindex="0">
+          <h3>Logiciel métier</h3><span class="fo-meta">4 modules · quiz final · 142 apprenants</span>
+          <div class="fo-split" role="img" aria-label="68 % terminé, 22 % en cours, 10 % à relancer"><span style="width:68%"></span><span style="width:22%"></span><span style="width:10%"></span></div>
+          <div class="fo-legend"><span><i style="background:var(--fd-color-hero)"></i>Terminé 68 %</span><span><i style="background:var(--fd-bleu-500)"></i>En cours 22 %</span><span><i style="background:var(--fd-orange-500)"></i>À relancer 10 %</span></div>
+        </article>
+        <article class="fd-card fo-card" role="listitem" tabindex="0">
+          <h3>Agenda partagé</h3><span class="fo-meta">2 modules · sans quiz · 96 apprenants</span>
+          <div class="fo-split" role="img" aria-label="54 % terminé, 31 % en cours, 15 % à relancer"><span style="width:54%"></span><span style="width:31%"></span><span style="width:15%"></span></div>
+          <div class="fo-legend"><span><i style="background:var(--fd-color-hero)"></i>Terminé 54 %</span><span><i style="background:var(--fd-bleu-500)"></i>En cours 31 %</span><span><i style="background:var(--fd-orange-500)"></i>À relancer 15 %</span></div>
+        </article>
+        <article class="fd-card fo-card" role="listitem" tabindex="0">
+          <h3>Statistiques d'activité</h3><span class="fo-meta">3 modules · quiz par module · 41 apprenants</span>
+          <div class="fo-split" role="img" aria-label="35 % terminé, 40 % en cours, 25 % à relancer"><span style="width:35%"></span><span style="width:40%"></span><span style="width:25%"></span></div>
+          <div class="fo-legend"><span><i style="background:var(--fd-color-hero)"></i>Terminé 35 %</span><span><i style="background:var(--fd-bleu-500)"></i>En cours 40 %</span><span><i style="background:var(--fd-orange-500)"></i>À relancer 25 %</span></div>
+        </article>
+      </div>
+      <div class="kpis" style="margin:0">
+        <article class="fd-card fd-card--hero fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="award"></i></span><span class="fd-kpi__label">Terminé · Logiciel métier</span></div><span class="fd-kpi__value">68 %</span><span class="fd-kpi__foot">97 apprenants sur 142</span></article>
+        <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="timer"></i></span><span class="fd-kpi__label">Durée médiane</span></div><span class="fd-kpi__value">38 min</span><span class="fd-kpi__foot">pour terminer la formation</span></article>
+        <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="help"></i></span><span class="fd-kpi__label">Réussite au quiz</span></div><span class="fd-kpi__value">84 %</span><span class="fd-kpi__foot">au 1er essai : 71 %</span></article>
+        <article class="fd-card fd-kpi"><div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="bellRing"></i></span><span class="fd-kpi__label">À relancer</span></div><span class="fd-kpi__value">14</span><span class="fd-kpi__foot"><a href="#" data-view-set="liste">Voir la liste filtrée</a></span></article>
+      </div>
+      <article class="fd-card">
+        <div class="fd-card__head"><span class="fd-icon-chip"><i data-icon="layers"></i></span><h2 class="fd-card__title">Avancement par module · Logiciel métier</h2><button class="fd-btn fd-btn--sm" type="button" data-view-set="export"><i data-icon="download"></i>Exporter cette formation</button></div>
+        <div class="funnel" role="list" aria-label="Part des apprenants ayant validé chaque module">
+          <div class="row" role="listitem"><span>1 · Prise en main</span><span class="bar"><span style="width:94%"></span></span><span class="num"><b>94 %</b> · 133 sur 142</span></div>
+          <div class="row" role="listitem"><span>2 · Fiches usagers</span><span class="bar"><span style="width:85%"></span></span><span class="num"><b>85 %</b> · 121 sur 142</span></div>
+          <div class="row" role="listitem"><span>3 · Agenda</span><span class="bar"><span style="width:76%"></span></span><span class="num"><b>76 %</b> · 108 sur 142</span></div>
+          <div class="row" role="listitem"><span>4 · Quiz final</span><span class="bar"><span style="width:68%"></span></span><span class="num"><b>68 %</b> · 97 sur 142</span></div>
+        </div>
+        <p class="fd-help" style="margin-top:12px">Le plus gros décrochage est entre les modules 2 et 3 (−9 points). Un clic sur un module ouvre la liste des apprenants filtrée sur ce module.</p>
+      </article>
+    </section>
+  </main>
+</div>
+
+<div class="l13-scrim" aria-hidden="true"></div>
+
+<!-- L13-02 : fiche d'un apprenant -->
+<aside class="l13-drawer" role="dialog" aria-modal="true" aria-labelledby="dr-t">
+  <header>
+    <span class="avatar" aria-hidden="true">LE</span>
+    <div style="flex:1"><h2 id="dr-t">Léa Exemple</h2><p>lea.exemple@mission-locale.example · Antenne Nord · invitée le 2 oct. 2026</p><span class="st-badge relance" style="margin-top:8px"><i data-icon="bellRing"></i>À relancer · inactive depuis 12 jours</span></div>
+    <button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Fermer la fiche" data-view-set="liste"><i data-icon="x"></i></button>
+  </header>
+  <div class="body">
+    <section><h3>Formations suivies</h3>
+      <ul class="l13-mods">
+        <li><span><b>Logiciel métier</b><small>Module 2 sur 4 · Fiches usagers</small></span><span class="lp"><span class="fd-bar fd-bar--h" role="img" aria-label="45 % parcouru"><span class="fd-bar__fill" style="width:45%"></span></span><span>45 %</span></span><span class="st-badge relance"><i data-icon="bellRing"></i>À relancer</span></li>
+        <li><span><b>Agenda partagé</b><small>2 modules · terminé le 14 oct.</small></span><span class="lp"><span class="fd-bar fd-bar--h" role="img" aria-label="100 % parcouru"><span class="fd-bar__fill" style="width:100%"></span></span><span>100 %</span></span><span class="st-badge done"><i data-icon="award"></i>Terminé</span></li>
+      </ul>
+    </section>
+    <section><h3>Quiz</h3>
+      <p style="margin:0;font-size:14px">Logiciel métier · quiz final : <b>pas encore tenté</b> (3 tentatives disponibles).</p>
+    </section>
+    <section><h3>Activité</h3>
+      <ol class="l13-timeline">
+        <li>Étape 4 du module « Fiches usagers » vue<small>6 nov. 2026, 15:02</small></li>
+        <li>Relance envoyée par Alice Martin<small>5 nov. 2026, 09:00</small></li>
+        <li>Formation « Agenda partagé » terminée<small>14 oct. 2026, 11:20</small></li>
+        <li>Invitation acceptée<small>2 oct. 2026, 10:41</small></li>
+      </ol>
+    </section>
+    <p class="fd-help" style="margin:0">L'apprenante voit seulement sa propre progression. Données conservées 12 mois, puis anonymisées.</p>
+  </div>
+  <footer>
+    <button class="fd-btn fd-btn--primary fd-btn--sm" type="button"><i data-icon="bellRing"></i>Relancer par e-mail</button>
+    <button class="fd-btn fd-btn--sm" type="button"><i data-icon="refresh"></i>Accorder une tentative</button>
+    <button class="fd-btn fd-btn--sm" type="button" data-view-set="export"><i data-icon="download"></i>Exporter ses données</button>
+    <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--danger-ghost push" type="button" data-view-set="rgpd"><i data-icon="trash"></i>Supprimer ses données</button>
+  </footer>
+</aside>
+
+<!-- L13-04 : export CSV -->
+<div class="l13-modal l13-modal--export" role="dialog" aria-modal="true" aria-labelledby="ex-t">
+  <header><h2 id="ex-t">Exporter en CSV</h2><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Fermer" data-view-set="liste"><i data-icon="x"></i></button></header>
+  <div class="body">
+    <div class="l13-radio" role="radiogroup" aria-label="Lignes à exporter">
+      <label><input type="radio" name="ex" checked><span><b>Apprenants filtrés</b><small>21 lignes · filtre « À relancer »</small></span></label>
+      <label><input type="radio" name="ex"><span><b>Sélection</b><small>2 apprenants</small></span></label>
+      <label><input type="radio" name="ex"><span><b>Tous les apprenants</b><small>214 lignes</small></span></label>
+    </div>
+    <fieldset class="l13-checks" style="border:0;margin:0;padding:0"><legend class="fd-label" style="margin-bottom:8px">Colonnes</legend>
+      <label><input type="checkbox" checked>Nom et e-mail</label>
+      <label><input type="checkbox" checked>Formations, progression et statut</label>
+      <label><input type="checkbox" checked>Score au quiz et tentatives</label>
+      <label><input type="checkbox">Détail par module (une colonne par module)</label>
+    </fieldset>
+    <p class="fd-help">Fichier UTF-8, séparateur point-virgule (Excel). Ce fichier contient des données personnelles : stockez-le dans un espace protégé et supprimez-le après usage.</p>
+  </div>
+  <footer><button class="fd-btn" type="button" data-view-set="liste">Annuler</button><button class="fd-btn fd-btn--primary" type="button"><i data-icon="download"></i>Exporter 21 lignes</button></footer>
+</div>
+
+<!-- L13-05 : suppression RGPD -->
+<div class="l13-modal l13-modal--rgpd" role="alertdialog" aria-modal="true" aria-labelledby="rg-t" aria-describedby="rg-d">
+  <header><h2 id="rg-t">Supprimer les données de Léa Exemple ?</h2></header>
+  <div class="body">
+    <p id="rg-d">Demande d'effacement (RGPD, article 17). Cette action est définitive et sera tracée dans le journal du workspace.</p>
+    <ul class="l13-danger-list"><li>Progression et historique des 2 formations</li><li>Réponses et scores aux quiz</li><li>Accès personnel et invitations en attente</li></ul>
+    <p>Les statistiques agrégées (taux de réussite, pilotage par structure) sont conservées sans données nominatives.</p>
+    <label class="fd-field" style="margin:0"><span class="fd-label">Saisissez <b>lea.exemple@mission-locale.example</b> pour confirmer</span><input class="fd-input" type="text" autocomplete="off"></label>
+  </div>
+  <footer><button class="fd-btn" type="button" data-view-set="fiche">Annuler</button><button class="fd-btn fd-btn--danger" type="button" disabled>Supprimer définitivement</button></footer>
+</div>
+</div>
+
+<div class="mock-state fd-segmented" role="group" aria-label="Écran (maquette)" style="left:50%;transform:translateX(-50%)">
+  <button type="button" data-view-set="liste" aria-pressed="true">Liste</button>
+  <button type="button" data-view-set="fiche" aria-pressed="false">Fiche</button>
+  <button type="button" data-view-set="formation" aria-pressed="false">Par formation</button>
+  <button type="button" data-view-set="export" aria-pressed="false">Export CSV</button>
+  <button type="button" data-view-set="rgpd" aria-pressed="false">Suppression RGPD</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

@@ -87,6 +87,27 @@ export function resolveLink(token: string) {
   );
 }
 
+/** L13 : reprise « Bon retour » (lien personnalisé valide sur une démo publiée) ; {} sinon. */
+export interface ResumeInfo {
+  firstName?: string;
+  module?: { demoId: string; seen: number; total: number; status: string } | null;
+  path?: {
+    title: string;
+    ordered: boolean;
+    modules: Array<{
+      title: string;
+      status: string | null;
+      seen: number | null;
+      total: number | null;
+      current: boolean;
+    }>;
+  } | null;
+}
+
+export function learnerResume(token: string, demoId: string) {
+  return rpc<ResumeInfo>('learner_resume', { p_link_token: token, p_demo: demoId });
+}
+
 export function submitLead(args: {
   demoId: string;
   versionId: string;

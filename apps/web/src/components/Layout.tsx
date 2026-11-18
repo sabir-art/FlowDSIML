@@ -8,6 +8,7 @@ import {
   BarChart3,
   CreditCard,
   Contact,
+  GraduationCap,
   Languages,
   LayoutGrid,
   LogOut,
@@ -173,6 +174,12 @@ export function Layout() {
               </Link>
             );
           })}
+          {/* L13 : section Formation › Apprenants */}
+          <div className="fd-nav__section">{t('nav.training')}</div>
+          <NavLink to="/learners" className="fd-nav__item">
+            <GraduationCap {...ICON} />
+            {t('nav.learners')}
+          </NavLink>
           <div className="fd-nav__section">{t('nav.workspace')}</div>
           {admin.map((n) => (
             <NavLink key={n.to} to={n.to} className="fd-nav__item">

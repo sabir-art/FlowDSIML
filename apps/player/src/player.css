@@ -1500,3 +1500,93 @@ body {
     min-width: 0;
   }
 }
+
+/* L13 : reprise « Bon retour » (maquette refonte/f3-suivi.html, état Reprise) */
+.p-sys-card.p-resume {
+  align-items: stretch;
+  text-align: left;
+  gap: 16px;
+  width: min(520px, 100%);
+}
+.p-resume h1 {
+  font-size: 24px;
+}
+.p-resume h1:focus,
+.p-resume h1:focus-visible {
+  outline: none;
+}
+.p-resume-badge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e6f2fa;
+  color: #12161b;
+  font-size: 13px;
+  font-weight: 700;
+}
+.p-resume-steps {
+  display: flex;
+  gap: 4px;
+}
+.p-resume-steps span {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: #e3e8ee;
+}
+.p-resume-steps span.on {
+  background: var(--p-primary);
+}
+.p-resume-mods {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.p-resume-mods li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f3f5f8;
+  font-size: 15px;
+}
+.p-resume-mods li.cur {
+  background: #fbeff4;
+  font-weight: 700;
+}
+.p-resume-ic {
+  display: inline-flex;
+  color: #6b7682;
+}
+.p-resume-ic.ok,
+.p-resume-st.ok {
+  color: #2f6a06;
+}
+.p-resume-ic.cur {
+  color: var(--p-primary);
+}
+.p-resume-st {
+  font-size: 13px;
+  color: #4a5562;
+}
+.p-resume-st.ok {
+  font-weight: 700;
+}
+.p-resume-acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+@media (max-width: 480px) {
+  .p-resume-acts .p-btn {
+    flex: 1 1 100%;
+  }
+}
