@@ -275,14 +275,17 @@ export function EventBadges({ events, max = 2 }: { events: string[]; max?: numbe
   );
 }
 
-export function StateBadge({ h }: { h: Webhook }) {
+/** `inline` : badge seul (en-tête du détail, où le bandeau donne déjà le nombre d'échecs). */
+export function StateBadge({ h, inline = false }: { h: Webhook; inline?: boolean }) {
   const { t } = useTranslation();
   if (h.state === 'active') return <span className="badge badge-success">{t('integrations.active')}</span>;
   if (h.state === 'paused_auto')
     return (
       <>
         <span className="badge badge-warning">{t('integrations.pausedAuto')}</span>
-        <div className="t-caption subtle">{t('integrations.failures', { count: h.failures })}</div>
+        {!inline && (
+          <div className="t-caption subtle">{t('integrations.failures', { count: h.failures })}</div>
+        )}
       </>
     );
   return <span className="badge">{t('integrations.disabled')}</span>;

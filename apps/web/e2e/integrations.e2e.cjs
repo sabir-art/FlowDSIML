@@ -36,7 +36,16 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
     console.log(`${cond ? 'ok' : 'NOT OK'} - ${label}`);
     if (!cond) process.exitCode = 1;
   };
-  const shot = async (name) => SHOTS && page.screenshot({ path: `${SHOTS}/l23-${name}${sfx}.png` });
+  /** Capture après la fin des animations (modales, toasts). */
+  const shot = async (name) => {
+    if (!SHOTS) return;
+    await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running'));
+    await page.screenshot({ path: `${SHOTS}/l23-${name}${sfx}.png` });
+  };
+  const closeToasts = async () => {
+    for (const b of await page.locator('.toast button').all()) await b.click().catch(() => {});
+    await page.waitForFunction(() => !document.querySelector('.toast'));
+  };
   const state = seed();
   state.tables.webhooks = [];
   state.tables.webhook_deliveries = [];
@@ -101,6 +110,19 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   );
   await page.keyboard.press('Escape');
   ok((await sec.count()) === 1, 'L23-04 : Échap ne ferme pas');
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running'));
+  ok(
+    await page.evaluate(() => {
+      const modal = document.querySelector('[role="alertdialog"]');
+      const r = modal.getBoundingClientRect();
+      // Points répartis sur la modale : l'élément au premier plan doit toujours lui appartenir.
+      const pts = [0.1, 0.3, 0.5, 0.7, 0.9].flatMap((x) =>
+        [0.2, 0.5, 0.8].map((y) => [r.left + r.width * x, r.top + r.height * y]),
+      );
+      return pts.every(([x, y]) => modal.contains(document.elementFromPoint(x, y)));
+    }),
+    'L23-04 : la modale est au premier plan (aucune carte au-dessus)',
+  );
   await shot('04-secret');
   await sec.getByRole('checkbox', { name: /J’ai copié le secret/ }).check();
   await sec.getByRole('button', { name: 'Terminé' }).click();
@@ -183,17 +205,6 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   );
   ok((await rows.filter({ hasText: 'essai dans' }).count()) === 1, 'L23-05 : « essai dans n min »');
   await shot('05-detail');
-  await panel.getByRole('button', { name: 'Rejouer maintenant' }).click();
-  await page.waitForSelector('.toast');
-  ok(
-    /Envoi rejoué · HTTP 200 en 180 ms/.test(await page.textContent('.toast')),
-    'L23-05 : rejeu immédiat avec résultat',
-  );
-  ok(
-    t.webhook_deliveries.some((d) => d.replay_of && d.status === 'success'),
-    'L23-05 : rejeu enregistré (même event_id)',
-  );
-
   // L23-06 : test en échec
   state.dispatchResult = { status: 404, duration_ms: 210, error: 'HTTP 404' };
   await page.getByRole('button', { name: 'Envoyer un test' }).click();
@@ -212,6 +223,20 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   ok(t.webhooks[0].failures === 0, 'L23-06 : le test ne compte pas dans les échecs');
   await shot('06-test');
   state.dispatchResult = null;
+
+  // L23-05 (suite) : rejeu immédiat, après la capture du test
+  await panel.getByRole('button', { name: 'Rejouer maintenant' }).click();
+  await page.waitForSelector('.toast');
+  ok(
+    /Envoi rejoué · HTTP 200 en 180 ms/.test(await page.textContent('.toast')),
+    'L23-05 : rejeu immédiat avec résultat',
+  );
+  ok(
+    t.webhook_deliveries.some((d) => d.replay_of && d.status === 'success'),
+    'L23-05 : rejeu enregistré (même event_id)',
+  );
+
+  await closeToasts();
 
   // Renouvellement : confirmation, nouveau secret une fois
   const hint = t.webhooks[0].secret_hint;
@@ -239,6 +264,17 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
       (await page.getByRole('button', { name: 'Désactiver' }).count()) === 0,
     'L23-07 : test et désactiver masqués',
   );
+  ok(
+    !/échec/.test(await page.locator('.l23-head p.muted').textContent()),
+    'L23-07 : en-tête sur une ligne (badge · créé le…), sans le nombre d’échecs',
+  );
+  await page.locator('.l23-log tbody tr').first().click();
+  const attempt = page.locator('.l23 aside .l23-attempt');
+  ok(
+    /^essai 6 sur 6$/.test((await attempt.textContent()).trim()),
+    'L23-07 : « Essai 6 sur 6 » sur sa ligne, sans « · »',
+  );
+  ok((await page.locator('.toast').count()) === 0, 'L23-07 : aucun toast');
   await shot('07-pause');
   await page.getByRole('button', { name: 'Réactiver' }).click();
   await page.waitForFunction(() => !document.querySelector('.l23 .alert-warning'));

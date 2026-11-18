@@ -134,7 +134,7 @@ export function WebhookDetail() {
               {hook.url}
             </h2>
             <p className="muted">
-              <StateBadge h={hook} /> ·{' '}
+              <StateBadge h={hook} inline /> ·{' '}
               {author
                 ? t('integrations.createdBy', { date: formatDateTime(hook.created_at), name: author })
                 : t('integrations.created', { date: formatDateTime(hook.created_at) })}
@@ -331,8 +331,8 @@ export function WebhookDetail() {
               <div className="row l23-sel-head">
                 <span className={`st ${statusKind(sel)}`}>{statusText(sel)}</span>
                 <b className="t-mono">{sel.event_type}</b>
-                <span className="t-caption muted">· {t('integrations.attempt', { n: sel.attempt })}</span>
               </div>
+              <p className="t-caption muted l23-attempt">{t('integrations.attempt', { n: sel.attempt })}</p>
               <p className="t-caption muted">{t('integrations.schedule')}</p>
               <h4 className="t-label">{t('integrations.body')}</h4>
               <pre className="pre">{JSON.stringify(sel.payload, null, 2)}</pre>

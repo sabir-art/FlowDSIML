@@ -199,6 +199,13 @@
 }
 .l23-sel-head {
   gap: 8px;
+  flex-wrap: wrap;
+}
+.l23 aside .l23-attempt {
+  margin: 4px 0 0;
+}
+.l23-attempt::first-letter {
+  text-transform: uppercase;
 }
 .l23 aside .t-caption {
   margin: 8px 0 12px;
