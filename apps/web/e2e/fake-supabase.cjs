@@ -783,6 +783,10 @@ async function install(page, state = seed()) {
       const embed = (r) => {
         if (table === 'members' && select.includes('workspaces'))
           return { ...r, workspaces: t.workspaces.find((w) => w.id === r.workspace_id) || null };
+        if (select.includes('paths(') && r.path_id) {
+          const x = (t.paths || []).find((y) => y.id === r.path_id);
+          return { ...r, paths: x ? { title: x.title } : null };
+        }
         if (select.includes('demos(') && r.demo_id) {
           const d = t.demos.find((x) => x.id === r.demo_id);
           return { ...r, demos: d ? { title: d.title } : null };

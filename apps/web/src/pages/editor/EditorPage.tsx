@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clock,
   Copy,
+  Download,
   Crop,
   Droplet,
   GraduationCap,
@@ -43,6 +44,7 @@ import { buildDraftManifest } from './draftManifest';
 import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
 import { PreviewDialog } from './PreviewDialog';
+import { ExportDialog } from '../export/ExportDialog';
 import { FindBar } from './FindBar';
 import { ShortcutsDialog, isMac } from './ShortcutsDialog';
 import type { Manifest } from '@flowdsiml/manifest';
@@ -92,6 +94,7 @@ export function EditorPage() {
   const [keysOpen, setKeysOpen] = useState(false);
   const [zoom, setZoom] = useState<Zoom>('fit');
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
   const navigate = useNavigate();
   const versionId = editor.demo?.current_version_id;
   useEffect(() => {
@@ -271,6 +274,7 @@ export function EditorPage() {
 
   return (
     <main className="mk ed" id="main">
+      {exporting && demoId && <ExportDialog demoId={demoId} onClose={() => setExporting(false)} />}
       <h1 className="sr-only">
         {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
       </h1>
@@ -350,6 +354,7 @@ export function EditorPage() {
               onSelect: () => undefined,
             },
             { label: t('editor.themeOfDemo'), icon: <Palette />, onSelect: () => setTab('design') },
+            { label: t('export.menu'), icon: <Download />, onSelect: () => setExporting(true) },
             {
               label: t('editor.quiz.open') + (editor.questions.length ? ` (${editor.questions.length})` : ''),
               icon: <GraduationCap />,

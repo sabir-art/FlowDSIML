@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "@flowdsiml/core": "workspace:*",
+    "@flowdsiml/exports": "workspace:*",
     "@flowdsiml/manifest": "workspace:*",
+    "@flowdsiml/player-core": "workspace:*",
     "@flowdsiml/supabase-types": "workspace:*",
     "@flowdsiml/ui": "workspace:*",
     "@supabase/supabase-js": "^2.119.0",
@@ -23,8 +25,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^15.7.4",
-    "react-router-dom": "^7.18.5",
-    "@flowdsiml/player-core": "workspace:*"
+    "react-router-dom": "^7.18.5"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.3",

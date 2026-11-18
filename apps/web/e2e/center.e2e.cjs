@@ -168,22 +168,66 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     await p.close();
   }
 
-  // L14-06 : formation terminée, attestation « Bientôt »
+  // L14-06 / L15-07 : formation terminée, attestation délivrée par le serveur
   {
-    const { p } = await center(`/f/${F('f2')}`);
+    const { p } = await center(`/f/${F('f2')}?l=jeton-alex-0001`);
     ok(
       (await p.locator('.fp-done h2').textContent()) === 'Formation terminée, bravo Alex',
       'L14-06 : bandeau de fin',
     );
     const btn = p.locator('.fp-done button');
     ok(
-      (await btn.isDisabled()) && (await btn.textContent()).includes('Bientôt'),
-      'L14-06 : attestation désactivée avec « Bientôt »',
+      !(await btn.isDisabled()) && !(await btn.textContent()).includes('Bientôt'),
+      'L15-07 : bouton d’attestation actif, sans « Bientôt »',
     );
     ok(
       (await p.locator('.fp-list li .cta').allTextContents()).every((x) => x.startsWith('Revoir')),
       'L14-06 : « Revoir » partout',
     );
+    const sent = [];
+    let reply = {};
+    await p.route('**/rest/v1/rpc/issue_certificate', (r) => {
+      if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+      sent.push(JSON.parse(r.request().postData() || '{}'));
+      return r.fulfill({ contentType: 'application/json', body: JSON.stringify(reply), headers: cors });
+    });
+    // Refus du serveur (lien désactivé, module non validé) : message, aucun fichier
+    await btn.click();
+    await p.waitForSelector('.fp-cert-s.err');
+    ok(
+      sent[0]?.p_link_token === 'jeton-alex-0001' && sent[0]?.p_path === F('f2'),
+      'L15-07 : jeton du lien et formation envoyés à issue_certificate',
+    );
+    ok(/n’a pas pu être délivrée/.test(await p.locator('.fp-cert-s').textContent()), 'L15-07 : refus expliqué');
+    reply = { error: 'name_missing' };
+    await btn.click();
+    await p.waitForFunction(() => /nom n’est pas renseigné/.test(document.querySelector('.fp-cert-s')?.textContent || ''));
+    ok(true, 'L15-07 : nom manquant expliqué');
+    reply = {
+      certificateId: '000042',
+      issuedAt: '2026-11-12T10:00:00Z',
+      learner: 'Alex Martin',
+      path: 'Agenda partagé',
+      workspace: 'Mission Locale Exemple',
+      validatedAt: '2026-11-04T11:00:00Z',
+      modules: [
+        { title: 'Partager un agenda', best: null },
+        { title: 'Planifier un rendez-vous', best: null },
+      ],
+    };
+    p.on('console', (m) => m.type() === 'error' && console.log('console:', m.text()));
+    const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 15000 }).catch(async (e) => { console.log('status:', await p.locator('.fp-cert-s').textContent(), errors); throw e; }), btn.click()]);
+    const pdf = require('fs').readFileSync(await dl.path()).toString('latin1');
+    ok(dl.suggestedFilename() === 'attestation-agenda-partage.pdf', 'L15-07 : nom du fichier');
+    ok(pdf.startsWith('%PDF-') && /\/Count 1/.test(pdf) && pdf.includes('/Lang (fr-FR)'), 'L15-07 : PDF d’une page, en français');
+    ok((await p.locator('.fp-cert-s').textContent()) === '', 'L15-07 : plus de message après la création');
+    await p.close();
+  }
+
+  // Sans lien personnel : pas de bouton d'attestation
+  {
+    const { p } = await center(`/f/${F('f2')}`);
+    ok((await p.locator('.fp-done button').count()) === 0, 'L15-07 : sans lien personnel, aucun bouton');
     await p.close();
   }
 

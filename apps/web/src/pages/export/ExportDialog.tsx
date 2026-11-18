@@ -1,0 +1,922 @@
+/**
+ * L15-01 à L15-05 : modale d'export d'une démo (PDF ou GIF animé), créés dans le navigateur à partir
+ * de la version publiée. Vidéo MP4 et hors-ligne : visibles avec « Bientôt », non sélectionnables.
+ */
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Archive,
+  CircleAlert,
+  CircleCheck,
+  Download,
+  FileText,
+  Film,
+  Image as ImageIcon,
+  Info,
+  Lock,
+  Pause,
+  Play,
+  RefreshCw,
+  X,
+} from 'lucide-react';
+import { fileName, formatSize, gifDuration, type ExportDemo } from '@flowdsiml/exports/model';
+import {
+  DEFAULT_PDF,
+  pageSize,
+  planDemoPdf,
+  type Measure,
+  type Page,
+  type PdfOptions,
+} from '@flowdsiml/exports/layout';
+import {
+  DEFAULT_GIF,
+  GIF_SPEEDS,
+  GIF_WIDTHS,
+  GifWriter,
+  drawGifFrame,
+  gifHeight,
+  planGif,
+  type GifOptions,
+} from '@flowdsiml/exports/gif';
+import type { FontFiles } from '@flowdsiml/exports/pdf';
+import { usePlan } from '../../lib/plan';
+import { download, fetchBitmap, loadExportSource, toPdfImage, type ExportSource } from './exportData';
+import { PdfPagePreview } from './PdfPagePreview';
+import './export.css';
+
+type Fmt = 'pdf' | 'gif';
+type Phase =
+  | { kind: 'options' }
+  | { kind: 'running'; fmt: Fmt; stage: 0 | 1 | 2; pct: number; n: number; total: number }
+  | { kind: 'done'; fmt: Fmt; name: string; meta: string }
+  | { kind: 'error'; fmt: Fmt; message: string; detail: string; fallback: boolean };
+
+class StepImageError extends Error {
+  constructor(readonly step: number) {
+    super('STEP_IMAGE');
+  }
+}
+
+const tick = () => new Promise((r) => setTimeout(r, 0));
+const isAbort = (e: unknown) => e instanceof DOMException && e.name === 'AbortError';
+
+export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () => void }) {
+  const { t, i18n } = useTranslation();
+  const plan = usePlan();
+  const id = useId();
+  const ref = useRef<HTMLDialogElement>(null);
+  const [src, setSrc] = useState<ExportSource | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [fonts, setFonts] = useState<FontFiles | null>(null);
+  const [measure, setMeasure] = useState<Measure | null>(null);
+  const [fmt, setFmt] = useState<Fmt>('pdf');
+  const [pdf, setPdf] = useState<PdfOptions>(DEFAULT_PDF);
+  const [gif, setGif] = useState<
+    Omit<GifOptions, 'from' | 'to'> & { range: 'all' | 'range'; from: number; to: number }
+  >({
+    ...DEFAULT_GIF,
+    range: 'all',
+    from: 0,
+    to: 0,
+  });
+  const [page, setPage] = useState(0);
+  const [phase, setPhase] = useState<Phase>({ kind: 'options' });
+  const abort = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const d = ref.current;
+    if (d && !d.open) d.showModal();
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    loadExportSource(demoId, plan.removeBranding)
+      .then((s) => {
+        if (!alive) return;
+        setSrc(s);
+        if (s.kind === 'ok') setGif((g) => ({ ...g, to: Math.max(0, s.demo.steps.length - 1) }));
+      })
+      .catch(() => alive && setFailed(true));
+    // Polices et mesure jsPDF : le même moteur sert à l'aperçu et au fichier
+    void import('@flowdsiml/exports/pdf')
+      .then(async (m) => {
+        const f = await m.loadFonts();
+        if (!alive) return;
+        setFonts(f);
+        setMeasure(m.jsMeasure(m.createDoc(f)));
+      })
+      .catch(() => alive && setFailed(true));
+    return () => {
+      alive = false;
+      abort.current?.abort();
+    };
+  }, [demoId, plan.removeBranding]);
+
+  const demo = src?.kind === 'ok' ? src.demo : null;
+  const pages = useMemo<Page[]>(
+    () => (demo && measure ? planDemoPdf(demo, pdf, measure) : []),
+    [demo, measure, pdf],
+  );
+  useEffect(() => setPage((p) => Math.min(p, Math.max(0, pages.length - 1))), [pages.length]);
+
+  const gifOpts = (d: ExportDemo): GifOptions => ({
+    seconds: gif.seconds,
+    width: gif.width,
+    bubble: gif.bubble,
+    cursor: gif.cursor,
+    loop: gif.loop,
+    from: gif.range === 'all' ? 0 : gif.from,
+    to: gif.range === 'all' ? d.steps.length - 1 : gif.to,
+  });
+
+  const close = () => {
+    abort.current?.abort();
+    ref.current?.close();
+  };
+
+  // ---------------------------------------------------------------------------------------------
+  // Exports
+  // ---------------------------------------------------------------------------------------------
+  async function runPdf(opts: PdfOptions) {
+    if (!demo || !fonts || !measure) return;
+    const ac = new AbortController();
+    abort.current = ac;
+    const layout = planDemoPdf(demo, opts, measure);
+    const used = opts.images ? demo.steps.map((s, i) => (s.imageUrl ? i : -1)).filter((i) => i >= 0) : [];
+    setPhase({ kind: 'running', fmt: 'pdf', stage: 0, pct: 0, n: 0, total: layout.length });
+    try {
+      const { renderPdf } = await import('@flowdsiml/exports/pdf');
+      const imgs = new Map<number, Awaited<ReturnType<typeof toPdfImage>>>();
+      for (const [k, i] of used.entries()) {
+        try {
+          imgs.set(i, await toPdfImage(await fetchBitmap(demo.steps[i]!.imageUrl!, ac.signal), 1600, 'JPEG'));
+        } catch (e) {
+          if (isAbort(e)) throw e;
+          throw new StepImageError(i);
+        }
+        setPhase({
+          kind: 'running',
+          fmt: 'pdf',
+          stage: 0,
+          pct: Math.round(((k + 1) / used.length) * 40),
+          n: 0,
+          total: layout.length,
+        });
+      }
+      let logo = null;
+      if (src?.kind === 'ok' && src.logoUrl)
+        logo = await fetchBitmap(src.logoUrl, ac.signal)
+          .then((b) => toPdfImage(b, 256, 'PNG'))
+          .catch(() => null);
+      const buf = await renderPdf(layout, {
+        fonts,
+        orientation: opts.orientation,
+        title: demo.title,
+        lang: i18n.language.startsWith('en') ? 'en-GB' : 'fr-FR',
+        author: demo.workspace,
+        image: async (i) => imgs.get(i) ?? null,
+        logo,
+        signal: ac.signal,
+        onProgress: (n, total) =>
+          setPhase({
+            kind: 'running',
+            fmt: 'pdf',
+            stage: 1,
+            pct: 40 + Math.round((n / total) * 55),
+            n,
+            total,
+          }),
+      });
+      setPhase({ kind: 'running', fmt: 'pdf', stage: 2, pct: 100, n: layout.length, total: layout.length });
+      await tick();
+      const name = fileName(demo.title, 'pdf');
+      download(buf, name, 'application/pdf');
+      setPhase({
+        kind: 'done',
+        fmt: 'pdf',
+        name,
+        meta: [
+          t('export.pages', { count: layout.length }),
+          formatSize(buf.byteLength, i18n.language),
+          t(opts.orientation === 'portrait' ? 'export.a4portrait' : 'export.a4landscape'),
+        ].join(' · '),
+      });
+    } catch (e) {
+      if (isAbort(e)) return setPhase({ kind: 'options' });
+      failWith('pdf', e);
+    }
+  }
+
+  async function runGif() {
+    if (!demo) return;
+    const o = gifOpts(demo);
+    const frames = planGif(demo.steps, o);
+    const first = demo.steps[o.from]!;
+    const w = o.width;
+    const h = gifHeight(first, w);
+    const total = o.to - o.from + 1;
+    const ac = new AbortController();
+    abort.current = ac;
+    setPhase({ kind: 'running', fmt: 'gif', stage: 0, pct: 0, n: 0, total });
+    try {
+      const bmps = new Map<number, ImageBitmap | null>();
+      for (let i = o.from; i <= o.to; i++) {
+        const url = demo.steps[i]!.imageUrl;
+        try {
+          bmps.set(i, url ? await fetchBitmap(url, ac.signal) : null);
+        } catch (e) {
+          if (isAbort(e)) throw e;
+          throw new StepImageError(i);
+        }
+        setPhase({
+          kind: 'running',
+          fmt: 'gif',
+          stage: 0,
+          pct: Math.round(((i - o.from + 1) / total) * 30),
+          n: 0,
+          total,
+        });
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+      await document.fonts?.load(`700 15px "Plus Jakarta Sans"`).catch(() => undefined);
+      const writer = new GifWriter(w, h, o.loop);
+      for (const [k, f] of frames.entries()) {
+        if (ac.signal.aborted) throw new DOMException('Export annulé', 'AbortError');
+        drawGifFrame(ctx, bmps.get(f.step) ?? null, demo.steps, f, w, h);
+        writer.add(ctx.getImageData(0, 0, w, h).data, f.delay);
+        const n = f.step - o.from + 1;
+        setPhase({
+          kind: 'running',
+          fmt: 'gif',
+          stage: 1,
+          pct: 30 + Math.round(((k + 1) / frames.length) * 65),
+          n,
+          total,
+        });
+        await tick();
+      }
+      setPhase({ kind: 'running', fmt: 'gif', stage: 2, pct: 100, n: total, total });
+      await tick();
+      const bytes = writer.finish();
+      const name = fileName(demo.title, 'gif');
+      download(bytes, name, 'image/gif');
+      setPhase({
+        kind: 'done',
+        fmt: 'gif',
+        name,
+        meta: [
+          t('export.seconds', { n: gifDuration(total, o.seconds).toLocaleString(i18n.language) }),
+          formatSize(bytes.byteLength, i18n.language),
+          `${w} × ${h} px`,
+        ].join(' · '),
+      });
+    } catch (e) {
+      if (isAbort(e)) return setPhase({ kind: 'options' });
+      failWith('gif', e);
+    }
+  }
+
+  function failWith(f: Fmt, e: unknown) {
+    if (e instanceof StepImageError && demo) {
+      const s = demo.steps[e.step]!;
+      setPhase({
+        kind: 'error',
+        fmt: f,
+        message: t(f === 'pdf' ? 'export.errImage' : 'export.errImageGif', { n: e.step + 1 }),
+        detail: t('export.errImageDetail', { n: e.step + 1, title: s.title }),
+        fallback: f === 'pdf',
+      });
+    } else
+      setPhase({
+        kind: 'error',
+        fmt: f,
+        message: t('export.errGeneric'),
+        detail: t(f === 'pdf' ? 'export.errStagePdf' : 'export.errStageGif'),
+        fallback: false,
+      });
+  }
+
+  const start = () => (fmt === 'pdf' ? void runPdf(pdf) : void runGif());
+
+  // ---------------------------------------------------------------------------------------------
+  // Rendu
+  // ---------------------------------------------------------------------------------------------
+  const small = phase.kind !== 'options' || src?.kind === 'unpublished' || failed;
+  let body: ReactNode;
+  if (failed)
+    body = (
+      <>
+        <div className="x15-head">
+          <span className="fd-icon-chip x15-chip--danger">
+            <CircleAlert aria-hidden="true" />
+          </span>
+          <h2 id={`${id}-t`}>{t('export.errTitle')}</h2>
+        </div>
+        <p className="x15-p">{t('export.errLoad')}</p>
+        <div className="x15-foot">
+          <button type="button" className="fd-btn" onClick={close}>
+            {t('common.close')}
+          </button>
+        </div>
+      </>
+    );
+  else if (src?.kind === 'unpublished')
+    body = (
+      <>
+        <div className="x15-head">
+          <span className="fd-icon-chip">
+            <Info aria-hidden="true" />
+          </span>
+          <h2 id={`${id}-t`}>{t('export.title', { title: src.title })}</h2>
+        </div>
+        <p className="x15-p">{t('export.unpublished')}</p>
+        <div className="x15-foot">
+          <button type="button" className="fd-btn fd-btn--primary" onClick={close}>
+            {t('common.close')}
+          </button>
+        </div>
+      </>
+    );
+  else if (phase.kind === 'running') {
+    const labels =
+      phase.fmt === 'pdf'
+        ? [t('export.stagePrepare'), t('export.stageLayout'), t('export.stagePdf')]
+        : [t('export.stagePrepare'), t('export.stageFrames'), t('export.stageGif')];
+    body = (
+      <>
+        <div className="x15-head">
+          <span className="fd-icon-chip">
+            {phase.fmt === 'pdf' ? <FileText aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}
+          </span>
+          <h2 id={`${id}-t`}>{t(phase.fmt === 'pdf' ? 'export.runningPdf' : 'export.runningGif')}</h2>
+        </div>
+        <div className="exp-progress">
+          <div
+            className="exp-bar"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={phase.pct}
+            aria-label={t('export.progress')}
+          >
+            <span style={{ width: `${phase.pct}%` }} />
+          </div>
+          <p className="fd-label x15-live" aria-live="polite">
+            {phase.stage === 0
+              ? `${phase.pct}\u202f%`
+              : t(phase.fmt === 'pdf' ? 'export.livePdf' : 'export.liveGif', {
+                  pct: phase.pct,
+                  n: phase.n,
+                  total: phase.total,
+                })}
+          </p>
+          <ol className="exp-steps">
+            {labels.map((l, i) => (
+              <li key={l} className={i < phase.stage ? 'done' : i === phase.stage ? 'cur' : ''}>
+                {i < phase.stage ? (
+                  <CircleCheck aria-hidden="true" />
+                ) : i === phase.stage ? (
+                  <span className="spin" aria-hidden="true" />
+                ) : (
+                  <span className="todo" aria-hidden="true" />
+                )}
+                {i === 1 && phase.stage === 1 && phase.fmt === 'pdf'
+                  ? `${l} (${phase.n} / ${phase.total})`
+                  : l}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <p className="fd-help x15-p">{t('export.keepTab')}</p>
+        <div className="x15-foot">
+          <button type="button" className="fd-btn" onClick={() => abort.current?.abort()}>
+            {t('export.cancelRun')}
+          </button>
+        </div>
+      </>
+    );
+  } else if (phase.kind === 'done')
+    body = (
+      <>
+        <div className="x15-head">
+          <span className="fd-icon-chip x15-chip--success">
+            <CircleCheck aria-hidden="true" />
+          </span>
+          <h2 id={`${id}-t`}>{t(phase.fmt === 'pdf' ? 'export.donePdf' : 'export.doneGif')}</h2>
+          <button
+            type="button"
+            className="fd-btn fd-btn--ghost fd-btn--icon"
+            aria-label={t('common.close')}
+            onClick={close}
+          >
+            <X aria-hidden="true" />
+          </button>
+        </div>
+        <div className="exp-file">
+          <span className="fd-icon-chip">
+            {phase.fmt === 'pdf' ? <FileText aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}
+          </span>
+          <span>
+            <b>{phase.name}</b>
+            <small>{phase.meta}</small>
+          </span>
+          <button type="button" className="fd-btn fd-btn--primary" onClick={start}>
+            <Download aria-hidden="true" />
+            {t('export.download')}
+          </button>
+        </div>
+        <p className="fd-help x15-p">{t('export.notKept')}</p>
+        <div className="x15-foot">
+          <button type="button" className="fd-btn" onClick={() => setPhase({ kind: 'options' })}>
+            {t('export.other')}
+          </button>
+        </div>
+      </>
+    );
+  else if (phase.kind === 'error')
+    body = (
+      <>
+        <div className="x15-head">
+          <span className="fd-icon-chip x15-chip--danger">
+            <CircleAlert aria-hidden="true" />
+          </span>
+          <h2 id={`${id}-t`}>{t('export.errTitle')}</h2>
+        </div>
+        <p className="x15-p" id={`${id}-d`}>
+          {phase.message}
+        </p>
+        <div className="err-box">
+          <b>{t('export.detail')}</b> {phase.detail}
+        </div>
+        <div className="x15-foot">
+          <button type="button" className="fd-btn" onClick={close}>
+            {t('common.close')}
+          </button>
+          {phase.fallback && (
+            <button
+              type="button"
+              className="fd-btn"
+              onClick={() => {
+                const o = { ...pdf, images: false, text: true };
+                setPdf(o);
+                void runPdf(o);
+              }}
+            >
+              {t('export.withoutImages')}
+            </button>
+          )}
+          <button type="button" className="fd-btn fd-btn--primary" onClick={start}>
+            <RefreshCw aria-hidden="true" />
+            {t('export.retry')}
+          </button>
+        </div>
+      </>
+    );
+  else
+    body = (
+      <Options
+        id={id}
+        demo={demo}
+        title={demo?.title ?? ''}
+        fmt={fmt}
+        setFmt={setFmt}
+        pdf={pdf}
+        setPdf={setPdf}
+        gif={gif}
+        setGif={setGif}
+        pages={pages}
+        page={page}
+        setPage={setPage}
+        ready={!!demo && !!measure}
+        onClose={close}
+        onStart={start}
+        gifOpts={demo ? gifOpts(demo) : null}
+      />
+    );
+
+  return (
+    <dialog
+      ref={ref}
+      className={small ? 'x15-dialog x15-small' : 'x15-dialog x15-dlg'}
+      role={phase.kind === 'error' ? 'alertdialog' : undefined}
+      aria-labelledby={`${id}-t`}
+      aria-describedby={phase.kind === 'error' ? `${id}-d` : undefined}
+      onCancel={(e) => {
+        if (phase.kind === 'running') {
+          e.preventDefault();
+          abort.current?.abort();
+        }
+      }}
+      onClose={onClose}
+    >
+      {body}
+    </dialog>
+  );
+}
+
+// -------------------------------------------------------------------------------------------------
+// L15-01 / L15-02 : options et aperçu
+// -------------------------------------------------------------------------------------------------
+type GifState = Omit<GifOptions, 'from' | 'to'> & { range: 'all' | 'range'; from: number; to: number };
+
+function Options(p: {
+  id: string;
+  demo: ExportDemo | null;
+  title: string;
+  fmt: Fmt;
+  setFmt: (f: Fmt) => void;
+  pdf: PdfOptions;
+  setPdf: (o: PdfOptions) => void;
+  gif: GifState;
+  setGif: (g: GifState) => void;
+  pages: Page[];
+  page: number;
+  setPage: (n: number) => void;
+  ready: boolean;
+  onClose: () => void;
+  onStart: () => void;
+  gifOpts: GifOptions | null;
+}) {
+  const { t, i18n } = useTranslation();
+  const { pdf, setPdf, gif, setGif, demo } = p;
+  const n = demo?.steps.length ?? 0;
+  const formats: Array<{ key: string; icon: ReactNode; soon?: boolean }> = [
+    { key: 'pdf', icon: <FileText aria-hidden="true" /> },
+    { key: 'gif', icon: <ImageIcon aria-hidden="true" /> },
+    { key: 'mp4', icon: <Film aria-hidden="true" />, soon: true },
+    { key: 'zip', icon: <Archive aria-hidden="true" />, soon: true },
+  ];
+  const sw = (
+    label: string,
+    help: string | null,
+    checked: boolean,
+    on: (v: boolean) => void,
+    disabled = false,
+  ) => (
+    <label className="fd-switch">
+      <span>
+        {label}
+        {help && <small>{help}</small>}
+      </span>
+      <input
+        type="checkbox"
+        role="switch"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => on(e.target.checked)}
+      />
+      <span className="fd-switch__track" aria-hidden="true" />
+    </label>
+  );
+  const seg = <T extends string | number>(
+    label: string,
+    value: T,
+    opts: Array<{ v: T; label: string }>,
+    on: (v: T) => void,
+  ) => (
+    <div className="fd-segmented" role="radiogroup" aria-label={label}>
+      {opts.map((o) => (
+        <button
+          key={String(o.v)}
+          type="button"
+          role="radio"
+          aria-checked={o.v === value}
+          aria-pressed={o.v === value}
+          onClick={() => on(o.v)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+  const range = p.gifOpts ? p.gifOpts.to - p.gifOpts.from + 1 : 0;
+  return (
+    <>
+      <div className="x15-main">
+        <div className="x15-head">
+          <span className="fd-icon-chip">
+            <Download aria-hidden="true" />
+          </span>
+          <h2 id={`${p.id}-t`}>{t('export.title', { title: p.title })}</h2>
+          <button
+            type="button"
+            className="fd-btn fd-btn--ghost fd-btn--icon"
+            aria-label={t('common.close')}
+            onClick={p.onClose}
+          >
+            <X aria-hidden="true" />
+          </button>
+        </div>
+        <div className="exp-formats" role="radiogroup" aria-label={t('export.format')}>
+          {formats.map((f) => {
+            const on = f.key === p.fmt;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                className="exp-format"
+                role="radio"
+                aria-checked={on}
+                aria-pressed={on}
+                aria-disabled={f.soon || undefined}
+                aria-describedby={f.soon ? `${p.id}-soon-${f.key}` : undefined}
+                onClick={() => !f.soon && p.setFmt(f.key as Fmt)}
+              >
+                {f.soon && (
+                  <span className="soon" id={`${p.id}-soon-${f.key}`}>
+                    {t('shell.soon')}
+                  </span>
+                )}
+                <span className="fd-icon-chip">{f.icon}</span>
+                <b>{t(`export.fmt_${f.key}`)}</b>
+                <small>{t(`export.fmt_${f.key}_help`)}</small>
+              </button>
+            );
+          })}
+        </div>
+
+        {p.fmt === 'pdf' ? (
+          <>
+            <fieldset>
+              <legend className="fd-label">{t('export.layout')}</legend>
+              {seg(
+                t('export.layout'),
+                pdf.layout,
+                [
+                  { v: 'one', label: t('export.layoutOne') },
+                  { v: 'two', label: t('export.layoutTwo') },
+                ],
+                (v) => setPdf({ ...pdf, layout: v }),
+              )}
+            </fieldset>
+            <fieldset>
+              <legend className="fd-label">{t('export.content')}</legend>
+              <div className="opts">
+                {sw(t('export.images'), t('export.imagesHelp'), pdf.images, (v) =>
+                  setPdf({ ...pdf, images: v, text: v ? pdf.text : true }),
+                )}
+                {sw(
+                  t('export.text'),
+                  pdf.images ? t('export.textHelp') : t('export.textLocked'),
+                  pdf.text,
+                  (v) => setPdf({ ...pdf, text: v }),
+                  !pdf.images,
+                )}
+                {sw(t('export.numbering'), t('export.numberingHelp'), pdf.numbering, (v) =>
+                  setPdf({ ...pdf, numbering: v }),
+                )}
+                {sw(t('export.cover'), t('export.coverHelp'), pdf.cover, (v) => setPdf({ ...pdf, cover: v }))}
+              </div>
+            </fieldset>
+            <div className="row-2">
+              <div className="fd-field">
+                <label className="fd-label" htmlFor={`${p.id}-fmt`}>
+                  {t('export.paper')}
+                </label>
+                <select
+                  className="fd-select"
+                  id={`${p.id}-fmt`}
+                  value={pdf.orientation}
+                  onChange={(e) =>
+                    setPdf({ ...pdf, orientation: e.target.value as PdfOptions['orientation'] })
+                  }
+                >
+                  <option value="portrait">{t('export.a4portrait')}</option>
+                  <option value="landscape">{t('export.a4landscape')}</option>
+                </select>
+              </div>
+              <div className="fd-field">
+                <label className="fd-label" htmlFor={`${p.id}-lng`}>
+                  {t('export.lang')}
+                </label>
+                <select className="fd-select" id={`${p.id}-lng`} defaultValue="demo">
+                  <option value="demo">
+                    {t(i18n.language.startsWith('en') ? 'export.langEn' : 'export.langFr')}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <fieldset>
+              <legend className="fd-label">{t('export.speed')}</legend>
+              {seg(
+                t('export.speed'),
+                gif.seconds,
+                GIF_SPEEDS.map((s) => ({ v: s.seconds as number, label: t(`export.speed_${s.key}`) })),
+                (v) => setGif({ ...gif, seconds: v }),
+              )}
+            </fieldset>
+            <div className="row-2">
+              <div className="fd-field">
+                <label className="fd-label" htmlFor={`${p.id}-gsz`}>
+                  {t('export.size')}
+                </label>
+                <select
+                  className="fd-select"
+                  id={`${p.id}-gsz`}
+                  value={gif.width}
+                  onChange={(e) => setGif({ ...gif, width: Number(e.target.value) as GifOptions['width'] })}
+                >
+                  {GIF_WIDTHS.map((w) => (
+                    <option key={w} value={w}>
+                      {t(`export.size_${w}`)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="fd-field">
+                <label className="fd-label" htmlFor={`${p.id}-grg`}>
+                  {t('export.steps')}
+                </label>
+                <select
+                  className="fd-select"
+                  id={`${p.id}-grg`}
+                  value={gif.range}
+                  onChange={(e) => setGif({ ...gif, range: e.target.value as 'all' | 'range' })}
+                >
+                  <option value="all">{t('export.allSteps', { count: n })}</option>
+                  <option value="range">{t('export.someSteps')}</option>
+                </select>
+              </div>
+            </div>
+            {gif.range === 'range' && (
+              <div className="row-2">
+                {(['from', 'to'] as const).map((k) => (
+                  <div className="fd-field" key={k}>
+                    <label className="fd-label" htmlFor={`${p.id}-${k}`}>
+                      {t(`export.range_${k}`)}
+                    </label>
+                    <select
+                      className="fd-select"
+                      id={`${p.id}-${k}`}
+                      value={gif[k]}
+                      onChange={(e) => {
+                        const v = Number(e.target.value);
+                        setGif(
+                          k === 'from'
+                            ? { ...gif, from: v, to: Math.max(v, gif.to) }
+                            : { ...gif, to: v, from: Math.min(v, gif.from) },
+                        );
+                      }}
+                    >
+                      {demo?.steps.map((s, i) => (
+                        <option key={i} value={i}>
+                          {`${i + 1}. ${s.title || t('export.stepN', { n: i + 1 })}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            )}
+            <fieldset>
+              <legend className="fd-label">{t('export.content')}</legend>
+              <div className="opts">
+                {sw(t('export.bubble'), null, gif.bubble, (v) => setGif({ ...gif, bubble: v }))}
+                {sw(t('export.cursor'), null, gif.cursor, (v) => setGif({ ...gif, cursor: v }))}
+                {sw(t('export.loop'), null, gif.loop, (v) => setGif({ ...gif, loop: v }))}
+              </div>
+            </fieldset>
+          </>
+        )}
+
+        <div className="fd-alert x15-alert">
+          <Lock aria-hidden="true" />
+          <div>{t('export.privacy')}</div>
+        </div>
+        <div className="x15-foot">
+          <p className="fd-help">
+            {!p.ready
+              ? t('export.preparing')
+              : p.fmt === 'pdf'
+                ? t('export.helpPdf', { count: p.pages.length })
+                : `${t(gif.loop ? 'export.helpGifLoop' : 'export.helpGifOnce', {
+                    n: gifDuration(range, gif.seconds).toLocaleString(i18n.language),
+                  })} ${t('export.helpGifLong')}`}
+          </p>
+          <button type="button" className="fd-btn" onClick={p.onClose}>
+            {t('common.cancel')}
+          </button>
+          <button type="button" className="fd-btn fd-btn--primary" disabled={!p.ready} onClick={p.onStart}>
+            <Download aria-hidden="true" />
+            {t(p.fmt === 'pdf' ? 'export.goPdf' : 'export.goGif')}
+          </button>
+        </div>
+      </div>
+      {p.fmt === 'pdf' ? (
+        <aside className="x15-side" aria-label={t('export.preview')}>
+          <div className="cap">
+            <span>{t('export.preview')}</span>
+            <span>{t('export.previewLive')}</span>
+          </div>
+          <div className="x15-page" aria-hidden="true">
+            {p.pages[p.page] && demo ? (
+              <PdfPagePreview page={p.pages[p.page]!} size={pageSize(pdf)} demo={demo} />
+            ) : (
+              <div
+                className="x15-page-wait"
+                style={{ aspectRatio: pdf.orientation === 'portrait' ? '210 / 297' : '297 / 210' }}
+              />
+            )}
+          </div>
+          <div className="pager">
+            <button
+              type="button"
+              aria-label={t('export.prevPage')}
+              disabled={p.page === 0}
+              onClick={() => p.setPage(p.page - 1)}
+            >
+              <ArrowLeft aria-hidden="true" />
+            </button>
+            <span>{t('export.pageOf', { n: p.pages.length ? p.page + 1 : 0, total: p.pages.length })}</span>
+            <button
+              type="button"
+              aria-label={t('export.nextPage')}
+              disabled={p.page >= p.pages.length - 1}
+              onClick={() => p.setPage(p.page + 1)}
+            >
+              <ArrowRight aria-hidden="true" />
+            </button>
+          </div>
+        </aside>
+      ) : (
+        <GifPreview demo={demo} opts={p.gifOpts} />
+      )}
+    </>
+  );
+}
+
+/** L15-02 : aperçu du GIF dessiné par le même moteur que le fichier. */
+function GifPreview({ demo, opts }: { demo: ExportDemo | null; opts: GifOptions | null }) {
+  const { t } = useTranslation();
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [paused, setPaused] = useState(reduced);
+  const [frame, setFrame] = useState(0);
+  const [bmps, setBmps] = useState<Map<number, ImageBitmap | null>>(new Map());
+  const frames = useMemo(() => (demo && opts ? planGif(demo.steps, opts) : []), [demo, opts]);
+  const W = 640;
+  const H = demo && opts ? gifHeight(demo.steps[opts.from]!, W) : 400;
+
+  useEffect(() => setFrame(0), [frames]);
+  useEffect(() => {
+    if (!demo || !opts) return;
+    let alive = true;
+    for (let i = opts.from; i <= opts.to; i++) {
+      const url = demo.steps[i]!.imageUrl;
+      if (bmps.has(i)) continue;
+      void (url ? fetchBitmap(url) : Promise.resolve(null))
+        .catch(() => null)
+        .then((b) => alive && setBmps((m) => new Map(m).set(i, b)));
+    }
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo, opts?.from, opts?.to]);
+  useEffect(() => {
+    const f = frames[frame];
+    const ctx = canvas.current?.getContext('2d');
+    if (!f || !ctx || !demo) return;
+    drawGifFrame(ctx, bmps.get(f.step) ?? null, demo.steps, f, W, H);
+    if (paused) return;
+    const id = setTimeout(() => setFrame((frame + 1) % frames.length), f.delay);
+    return () => clearTimeout(id);
+  }, [frame, frames, paused, bmps, demo, H]);
+
+  const cur = frames[frame];
+  const total = opts ? opts.to - opts.from + 1 : 0;
+  const n = cur && opts ? cur.step - opts.from + 1 : 0;
+  return (
+    <aside className="x15-side" aria-label={t('export.previewGif')}>
+      <div className="cap">
+        <span>{t('export.preview')}</span>
+        <span>
+          {opts ? `${opts.width} × ${demo ? gifHeight(demo.steps[opts.from]!, opts.width) : 0} px` : ''}
+        </span>
+      </div>
+      <div className="gif-frame" aria-hidden="true">
+        <canvas ref={canvas} width={W} height={H} />
+      </div>
+      <div className="gif-dots" aria-hidden="true">
+        {Array.from({ length: Math.min(total, 40) }, (_, i) => (
+          <span key={i} className={i < n ? 'on' : ''} />
+        ))}
+      </div>
+      <div className="gif-meta">
+        <span>{t('export.stepOf', { n, total })}</span>
+        <button type="button" className="fd-btn fd-btn--sm" onClick={() => setPaused(!paused)}>
+          {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+          {t(paused ? 'export.play' : 'export.pause')}
+        </button>
+      </div>
+    </aside>
+  );
+}

@@ -16,7 +16,7 @@ import {
   User,
   X,
 } from 'lucide-preact';
-import { centerLinkToken, openCenter, type CenterGateInfo } from './api';
+import { centerLinkToken, issueCertificate, openCenter, type CenterGateInfo } from './api';
 import {
   currentPath,
   filterPaths,
@@ -153,10 +153,20 @@ export function CenterApp({ route }: { route: Route }) {
     );
   if (state.status !== 'ok' || !state.center || !state.paths)
     return <SysScreen kind="notFound" locale={navigator.language} />;
-  return <Center t={t} data={state as CenterData} route={r} />;
+  return <Center t={t} data={state as CenterData} route={r} token={token} />;
 }
 
-function Center({ t, data, route }: { t: Dict; data: CenterData; route: Route }) {
+function Center({
+  t,
+  data,
+  route,
+  token,
+}: {
+  t: Dict;
+  data: CenterData;
+  route: Route;
+  token: string | null;
+}) {
   const c = t.center as unknown as C;
   const info = data.center;
   const identified = !!data.visitor;
@@ -202,7 +212,7 @@ function Center({ t, data, route }: { t: Dict; data: CenterData; route: Route })
         )}
       </header>
       {route.pathId ? (
-        <PathPage t={t} data={data} views={views} route={route} />
+        <PathPage t={t} data={data} views={views} route={route} token={token} />
       ) : data.paths.length === 0 ? (
         <main class="ctr-in" id="ctr-main">
           <div class="ctr-hero ctr-hero--one">
@@ -535,7 +545,19 @@ function PathCard({ c, v, q, href }: { c: C; v: PathView; q: string; href: strin
 // ---------------------------------------------------------------------------
 // Page d'une formation (L14-05, L14-06)
 // ---------------------------------------------------------------------------
-function PathPage({ t, data, views, route }: { t: Dict; data: CenterData; views: PathView[]; route: Route }) {
+function PathPage({
+  t,
+  data,
+  views,
+  route,
+  token,
+}: {
+  t: Dict;
+  data: CenterData;
+  views: PathView[];
+  route: Route;
+  token: string | null;
+}) {
   const c = t.center as unknown as C;
   const v = views.find((x) => x.path.id === route.pathId);
   const h1 = useRef<HTMLHeadingElement>(null);
@@ -602,14 +624,7 @@ function PathPage({ t, data, views, route }: { t: Dict; data: CenterData; views:
             </h2>
             <p>{c.fpDoneText}</p>
           </div>
-          {/* Attestation : génération prévue avec le lot Exports (L15) */}
-          <button class="cta cta--soon" type="button" disabled aria-describedby="fp-soon">
-            <Download aria-hidden="true" />
-            {c.certificate}
-            <span class="soon" id="fp-soon">
-              {c.soon}
-            </span>
-          </button>
+          {token && <CertificateButton c={c} token={token} pathId={p.id} logoPath={data.center.logoPath} />}
         </section>
       )}
       <ol class="fp-list" aria-label={c.fpModules}>
@@ -690,5 +705,76 @@ function PathPage({ t, data, views, route }: { t: Dict; data: CenterData; views:
         )
       )}
     </main>
+  );
+}
+
+/** L15-07 : attestation délivrée par le serveur (formation validée), puis créée dans le navigateur. */
+function CertificateButton({
+  c,
+  token,
+  pathId,
+  logoPath,
+}: {
+  c: C;
+  token: string;
+  pathId: string;
+  logoPath: string | null;
+}) {
+  const [state, setState] = useState<'idle' | 'busy' | 'refused' | 'noName' | 'error'>('idle');
+  const run = async () => {
+    setState('busy');
+    try {
+      const info = await issueCertificate(token, pathId);
+      if (info?.error === 'name_missing') return setState('noName');
+      if (
+        !info?.certificateId ||
+        !info.learner ||
+        !info.path ||
+        !info.workspace ||
+        !info.modules ||
+        !info.issuedAt
+      )
+        return setState('refused');
+      const { downloadCertificate } = await import('./certificate');
+      await downloadCertificate(
+        { ...info, validatedAt: info.validatedAt ?? null } as Parameters<typeof downloadCertificate>[0],
+        navigator.language.startsWith('en') ? 'en-GB' : 'fr-FR',
+        logoPath ? brandingUrl(logoPath) : null,
+      );
+      setState('idle');
+    } catch {
+      setState('error');
+    }
+  };
+  const msg =
+    state === 'refused'
+      ? c.certRefused
+      : state === 'noName'
+        ? c.certNoName
+        : state === 'error'
+          ? c.certError
+          : state === 'busy'
+            ? c.certBusy
+            : '';
+  return (
+    <div class="fp-cert">
+      <button
+        class="cta"
+        type="button"
+        onClick={() => void run()}
+        disabled={state === 'busy'}
+        aria-describedby="fp-cert-s"
+      >
+        <Download aria-hidden="true" />
+        {c.certificate}
+      </button>
+      <p
+        class={`fp-cert-s${state === 'busy' || state === 'idle' ? '' : ' err'}`}
+        id="fp-cert-s"
+        role="status"
+      >
+        {msg}
+      </p>
+    </div>
   );
 }

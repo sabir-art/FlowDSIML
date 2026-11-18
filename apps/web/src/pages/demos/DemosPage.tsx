@@ -15,6 +15,7 @@ import {
   Route,
   Users,
   Copy,
+  Download,
   Folder,
   FolderInput,
   FolderOpen,
@@ -41,6 +42,7 @@ import { Menu, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
 import { NewDemoDialog } from './NewDemoDialog';
+import { ExportDialog } from '../export/ExportDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
@@ -97,6 +99,7 @@ export function DemosPage() {
   const [newFolder, setNewFolder] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const [toDelete, setToDelete] = useState<Demo | null>(null);
+  const [exporting, setExporting] = useState<string | null>(null);
   const [folderToDelete, setFolderToDelete] = useState<FolderRow | null>(null);
   const [moving, setMoving] = useState<Demo | null>(null);
   // L12-07 : étiquettes des démos (filtre, pastilles, menu de la carte)
@@ -287,6 +290,7 @@ export function DemosPage() {
     { label: t('demos.openEditor'), icon: <Pencil />, onSelect: () => navigate(`/demos/${d.id}/edit`) },
     { label: t('editor.share'), icon: <Share2 />, onSelect: () => navigate(`/demos/${d.id}/share`) },
     { label: t('nav.analytics'), icon: <BarChart3 />, onSelect: () => navigate(`/demos/${d.id}/analytics`) },
+    { label: t('export.menu'), icon: <Download />, onSelect: () => setExporting(d.id) },
     {
       label: t('demos.copyLink'),
       icon: <Link2 />,
@@ -340,6 +344,7 @@ export function DemosPage() {
   };
   return (
     <div className="stack page-wide">
+      {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
       <header className="page-head page-head--refonte">
         <div className="page-head__titles">
           <h1>{t('demos.title')}</h1>

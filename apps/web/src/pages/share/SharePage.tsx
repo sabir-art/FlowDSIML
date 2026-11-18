@@ -18,6 +18,7 @@ import { PublishButton } from '../editor/PublishButton';
 import { usePlan } from '../../lib/plan';
 import { PlanFormsWarning } from '../../components/PlanFormsWarning';
 import { AccessPanel, AccessSummary, useDemoAccess } from './AccessPanel';
+import { ExportDialog } from '../export/ExportDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
@@ -66,6 +67,7 @@ export function SharePage() {
     return q === 'embed' || q === 'perso' || q === 'access' ? q : 'link';
   });
   const [creating, setCreating] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [week, setWeek] = useState<{ views: number; leads: number } | null>(null);
   const [gatedSteps, setGatedSteps] = useState(0);
   const { error, success, run } = useAction();
@@ -158,6 +160,7 @@ export function SharePage() {
   return (
     <div className="mk sh">
       {dialog}
+      {exporting && <ExportDialog demoId={demoId} onClose={() => setExporting(false)} />}
       <div className="page-head">
         <div>
           <h1>{t('share.pageTitle')}</h1>
@@ -182,6 +185,10 @@ export function SharePage() {
             <Eye aria-hidden="true" />
             {t('share.preview')}
           </a>
+          <button type="button" className="btn btn-secondary" onClick={() => setExporting(true)}>
+            <Download aria-hidden="true" />
+            {t('export.menu')}
+          </button>
           {editable && editor.demo && (!published || pending) && (
             <span className="sh-publish tc-cta-grad">
               <PublishButton editor={editor} republishLabel={t('share.publishChanges')} />

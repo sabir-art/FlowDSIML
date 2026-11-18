@@ -1016,3 +1016,21 @@
 .fp-list .mini--none::before {
   display: none;
 }
+/* L15-07 : bouton d'attestation actif et son statut */
+.fp-cert {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.fp-cert-s {
+  margin: 0;
+  font-size: 13px;
+  max-width: 340px;
+}
+.fp-cert-s:empty {
+  display: none;
+}
+.fp-cert-s.err {
+  color: var(--ctr-danger, #b3261e);
+}

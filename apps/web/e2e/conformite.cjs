@@ -586,7 +586,7 @@ const SCREENS = {
   'L14-06': {
     maquette: 'refonte/l14-centre.html?view=terminee',
     player: true,
-    playerPath: '/c/ml-exemple/f/00000000-0000-4000-8000-0000000000f2',
+    playerPath: '/c/ml-exemple/f/00000000-0000-4000-8000-0000000000f2?l=jeton-alex-0001',
     waitFor: '.ctr',
     center: () => centerFixture(),
   },

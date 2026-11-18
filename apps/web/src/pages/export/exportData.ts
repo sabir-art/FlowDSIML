@@ -1,0 +1,114 @@
+/**
+ * L15 : données d'export d'une démo, tirées de la version PUBLIÉE (flous incrustés, variables par
+ * défaut). Une démo jamais publiée n'est pas exportable.
+ */
+import { parseManifest } from '@flowdsiml/manifest';
+import { stepsFromManifest, type ExportDemo } from '@flowdsiml/exports/model';
+import { supabase } from '../../lib/supabase';
+import { publicDemoUrl } from '../../lib/embed';
+
+export type ExportSource =
+  { kind: 'ok'; demo: ExportDemo; logoUrl: string | null } | { kind: 'unpublished'; title: string };
+
+export async function loadExportSource(demoId: string, removeBranding: boolean): Promise<ExportSource> {
+  const { data: d, error } = await supabase
+    .from('demos')
+    .select('id, title, status, current_version_id, workspace_id')
+    .eq('id', demoId)
+    .single();
+  if (error || !d) throw error ?? new Error('NOT_FOUND');
+  if (d.status !== 'published' || !d.current_version_id) return { kind: 'unpublished', title: d.title };
+  const [v, ws, ctx] = await Promise.all([
+    supabase.from('demo_versions').select('manifest, number').eq('id', d.current_version_id).single(),
+    supabase.from('workspaces').select('name').eq('id', d.workspace_id).single(),
+    supabase.from('path_modules').select('path_id, paths(title)').eq('demo_id', demoId).limit(1),
+  ]);
+  if (v.error || !v.data) throw v.error ?? new Error('NO_VERSION');
+  const m = parseManifest(v.data.manifest);
+  const steps = stepsFromManifest(m);
+  // Captures publiées (bucket privé « published ») : URL signées le temps de l'export
+  const rel = [
+    ...new Set(
+      steps.map((s) => s.imageUrl).filter((u): u is string => !!u && !/^(https?:|data:|blob:)/.test(u)),
+    ),
+  ];
+  const signed = new Map<string, string>();
+  if (rel.length) {
+    const { data } = await supabase.storage.from('published').createSignedUrls(
+      rel.map((p) => `${demoId}/${p}`),
+      3600,
+    );
+    for (const s of data ?? [])
+      if (s.path && s.signedUrl) signed.set(s.path.slice(demoId.length + 1), s.signedUrl);
+  }
+  const path = (ctx.data?.[0] as { paths?: { title?: string } | null } | undefined)?.paths?.title;
+  return {
+    kind: 'ok',
+    logoUrl: m.theme.logoUrl,
+    demo: {
+      title: m.title || d.title,
+      workspace: m.workspaceName || ws.data?.name || '',
+      brand: /^#[0-9a-fA-F]{6}$/.test(m.theme.primary) ? m.theme.primary : '#A3195B',
+      logo: null,
+      version: v.data.number ?? 1,
+      url: publicDemoUrl(demoId),
+      context: path ? `Formation « ${path} »` : '',
+      showBranding: !removeBranding,
+      steps: steps.map((s) => ({
+        ...s,
+        imageUrl: s.imageUrl
+          ? (signed.get(s.imageUrl) ?? (/^https?:/.test(s.imageUrl) ? s.imageUrl : null))
+          : null,
+      })),
+    },
+  };
+}
+
+/** Image chargée et décodée (capture ou logo). */
+export async function fetchBitmap(url: string, signal?: AbortSignal): Promise<ImageBitmap> {
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const blob = await res.blob();
+  if (blob.type === 'image/svg+xml') {
+    const img = new Image();
+    const u = URL.createObjectURL(blob);
+    try {
+      img.src = u;
+      await img.decode();
+      return await createImageBitmap(img, { resizeWidth: 256, resizeHeight: 256 });
+    } finally {
+      URL.revokeObjectURL(u);
+    }
+  }
+  return createImageBitmap(blob);
+}
+
+/** Bitmap → JPEG (ou PNG pour un logo) limité en largeur, pour le PDF. */
+export async function toPdfImage(bmp: ImageBitmap, maxW: number, format: 'JPEG' | 'PNG') {
+  const scale = Math.min(1, maxW / bmp.width);
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * scale);
+  c.height = Math.round(bmp.height * scale);
+  const ctx = c.getContext('2d')!;
+  if (format === 'JPEG') {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, c.width, c.height);
+  }
+  ctx.drawImage(bmp, 0, 0, c.width, c.height);
+  const blob = await new Promise<Blob | null>((r) =>
+    c.toBlob(r, format === 'JPEG' ? 'image/jpeg' : 'image/png', 0.86),
+  );
+  if (!blob) throw new Error('ENCODE');
+  return { data: new Uint8Array(await blob.arrayBuffer()), format };
+}
+
+export function download(bytes: ArrayBuffer | Uint8Array, name: string, type: string) {
+  const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}

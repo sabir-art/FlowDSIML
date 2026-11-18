@@ -13,10 +13,11 @@
   },
   "dependencies": {
     "@flowdsiml/core": "workspace:*",
+    "@flowdsiml/exports": "workspace:*",
     "@flowdsiml/manifest": "workspace:*",
+    "@flowdsiml/player-core": "workspace:*",
     "lucide-preact": "^0.577.0",
-    "preact": "^10.29.8",
-    "@flowdsiml/player-core": "workspace:*"
+    "preact": "^10.29.8"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",

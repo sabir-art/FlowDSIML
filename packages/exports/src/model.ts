@@ -1,0 +1,84 @@
+import type { Manifest } from '@flowdsiml/manifest';
+import { applyVariables, richTextToPlain } from '@flowdsiml/core';
+
+/** Une étape exportée : titre et texte de la bulle, capture (déjà floutée à la publication). */
+export interface ExportStep {
+  title: string;
+  text: string;
+  /** URL lisible de la capture publiée (signée), ou null pour une étape sans image. */
+  imageUrl: string | null;
+  width: number;
+  height: number;
+  /** Zone de la bulle sur la capture (0 à 1), pour le cadre et la pastille numérotée. */
+  target: { x: number; y: number; w: number; h: number } | null;
+}
+
+export interface ExportDemo {
+  title: string;
+  workspace: string;
+  /** Couleur principale du workspace (#RRGGBB). */
+  brand: string;
+  /** Logo en data URL (PNG ou JPEG), sinon initiales. */
+  logo: string | null;
+  version: number;
+  /** Adresse du tutoriel en ligne, seulement si la démo est publiée. */
+  url: string | null;
+  /** Formation ou module (couverture), facultatif. */
+  context: string;
+  /** « Créé avec TutoClick » (plan Free seulement). */
+  showBranding: boolean;
+  steps: ExportStep[];
+}
+
+/**
+ * Étapes à exporter depuis le manifeste PUBLIÉ (flous incrustés) : texte de la première bulle
+ * (sinon titre et corps de l'étape), variables remplacées par leur valeur par défaut — jamais par
+ * les données d'un apprenant. Les formulaires et commentaires ne sont pas dans le manifeste.
+ */
+export function stepsFromManifest(m: Manifest): ExportStep[] {
+  const defaults = Object.fromEntries(m.variables.map((v) => [v.key, v.default ?? '']));
+  const txt = (s: string) => applyVariables(richTextToPlain(s), {}, defaults).trim();
+  return m.steps.map((s) => {
+    const h = s.hotspots[0];
+    return {
+      title: txt(h?.title || s.title || ''),
+      text: txt(h?.body || s.body || ''),
+      imageUrl: s.kind === 'image' && s.image ? s.image.url : null,
+      width: s.image?.width ?? 1280,
+      height: s.image?.height ?? 800,
+      target: h ? { x: h.x, y: h.y, w: h.w, h: h.h } : null,
+    };
+  });
+}
+
+/** Nom de fichier tiré du titre : minuscules, sans accents, tirets. */
+export function fileName(title: string, ext: 'pdf' | 'gif'): string {
+  const base = title
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/, '');
+  return `${base || 'tutoriel'}.${ext}`;
+}
+
+/** Durée du GIF en secondes : nombre d'étapes × vitesse. */
+export const gifDuration = (steps: number, secondsPerStep: number) =>
+  Math.round(steps * secondsPerStep * 10) / 10;
+
+/** Poids lisible (« 1,2 Mo »). */
+export function formatSize(bytes: number, locale = 'fr'): string {
+  const units = locale.startsWith('en') ? ['B', 'KB', 'MB'] : ['o', 'Ko', 'Mo'];
+  let v = bytes;
+  let i = 0;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i++;
+  }
+  const n = new Intl.NumberFormat(locale.startsWith('en') ? 'en-GB' : 'fr-FR', {
+    maximumFractionDigits: i === 0 ? 0 : 1,
+  }).format(v);
+  return `${n}\u202f${units[i]}`;
+}

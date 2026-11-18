@@ -1,0 +1,30 @@
+{
+  "name": "@flowdsiml/exports",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./model": "./src/model.ts",
+    "./layout": "./src/layout.ts",
+    "./gif": "./src/gif.ts",
+    "./pdf": "./src/pdf.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "dependencies": {
+    "@flowdsiml/core": "workspace:*",
+    "@flowdsiml/manifest": "workspace:*",
+    "gifenc": "1.0.3",
+    "jspdf": "4.2.1"
+  }
+}

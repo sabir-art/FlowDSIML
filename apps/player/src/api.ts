@@ -294,3 +294,18 @@ export async function openCenter(
   if (body.status === 'ok' && body.grant) sessionSet(centerGrantKey(slug), body.grant);
   return body;
 }
+
+/** L15-07 : attestation de suivi, délivrée par le serveur si la formation est validée ('{}' sinon). */
+export interface CertificateInfo {
+  certificateId?: string;
+  issuedAt?: string;
+  learner?: string;
+  path?: string;
+  workspace?: string;
+  validatedAt?: string | null;
+  modules?: Array<{ title: string; best: number | null }>;
+  error?: 'name_missing';
+}
+export function issueCertificate(token: string, pathId: string) {
+  return rpc<CertificateInfo>('issue_certificate', { p_link_token: token, p_path: pathId });
+}

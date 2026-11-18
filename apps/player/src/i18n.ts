@@ -138,7 +138,12 @@ const dict = {
       fpFootProtected:
         'Un module protégé demande son mot de passe à l’ouverture (même écran que les démos protégées). Votre progression reste enregistrée.',
       fpFootDone:
-        'Bientôt : l’attestation reprendra votre nom, la formation, les modules validés et le nom de la structure. Ce ne sera pas une certification.',
+        'L’attestation reprend votre nom, la formation, les modules validés et le nom de la structure. Ce n’est pas une certification.',
+      certBusy: 'Création de l’attestation…',
+      certRefused:
+        'L’attestation n’a pas pu être délivrée : votre lien n’est plus actif ou un module n’est pas validé. Contactez le service formation.',
+      certNoName: 'Votre nom n’est pas renseigné : contactez le service formation pour obtenir votre attestation.',
+      certError: 'L’attestation n’a pas pu être créée. Vérifiez votre connexion et réessayez.',
       notFound: 'Cette formation n’est pas disponible.',
       backHome: 'Retour au centre',
       emptyTitle: 'Aucune formation pour le moment',
@@ -377,7 +382,12 @@ const dict = {
       fpFootProtected:
         'A protected module asks for its password when opened (same screen as protected demos). Your progress is still saved.',
       fpFootDone:
-        'Soon: the certificate will show your name, the course, the validated modules and the organisation name. It will not be a certification.',
+        'The certificate shows your name, the course, the validated modules and the organisation name. It is not a certification.',
+      certBusy: 'Creating the certificate…',
+      certRefused:
+        'The certificate could not be issued: your link is no longer active or a module is not validated. Contact the training team.',
+      certNoName: 'Your name is missing: contact the training team to get your certificate.',
+      certError: 'The certificate could not be created. Check your connection and try again.',
       notFound: 'This course is not available.',
       backHome: 'Back to the center',
       emptyTitle: 'No course yet',
