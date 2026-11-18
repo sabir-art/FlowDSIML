@@ -442,18 +442,22 @@ function PathCard({ c, v, q, href }: { c: C; v: PathView; q: string; href: strin
   ]
     .filter(Boolean)
     .join(' · ');
+  // Une seule mention en pied de carte (retour L14-01) : les modules au-delà des 3 premiers y sont
+  // annoncés comme expirés, facultatifs ou simplement « + n module(s) ».
+  const hiddenMore = Math.max(0, p.modules.length - 3 - v.expiredHidden);
   const note = v.done
     ? c.allValidated
     : v.expiredHidden
       ? fmt(c, 'expiredMore', { count: v.expiredHidden })
       : v.optional
         ? fmt(c, 'optional', { count: v.optional })
-        : v.identified && !v.started
-          ? c.notStarted
-          : v.quizzes
-            ? fmt(c, 'quiz', { count: v.quizzes })
-            : c.noQuiz;
-  const hiddenMore = p.modules.length - 3 - v.expiredHidden;
+        : hiddenMore
+          ? fmt(c, 'more', { count: hiddenMore })
+          : v.identified && !v.started
+            ? c.notStarted
+            : v.quizzes
+              ? fmt(c, 'quiz', { count: v.quizzes })
+              : c.noQuiz;
   const curIdx = v.modules.findIndex((m) => m.kind === 'cur');
   return (
     <a class="fc" href={href}>
@@ -516,7 +520,6 @@ function PathCard({ c, v, q, href }: { c: C; v: PathView; q: string; href: strin
             );
           })}
         </ol>
-        {hiddenMore > 0 && <span class="more">{fmt(c, 'more', { count: hiddenMore })}</span>}
         <span class="ft">
           <span class="note">{note}</span>
           <span class={`cta${v.cta === 'review' ? ' cta--sec' : ''}`}>
