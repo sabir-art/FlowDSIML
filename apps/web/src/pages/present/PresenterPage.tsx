@@ -222,11 +222,12 @@ export function PresenterPage() {
               <button
                 type="button"
                 className="pr-ghost"
+                aria-label={t(notesOn ? 'present.hideNotes' : 'present.showNotes')}
                 aria-keyshortcuts="N"
                 onClick={() => setNotesOn(!notesOn)}
               >
                 {notesOn ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-                {t(notesOn ? 'present.hideNotes' : 'present.showNotes')}
+                {t(notesOn ? 'present.hideShort' : 'present.showShort')}
               </button>
             </h2>
             {notesOn &&
@@ -259,9 +260,9 @@ export function PresenterPage() {
             <h2 id="kb-t">{t('present.shortcuts')}</h2>
             <div className="kbd">
               <kbd>→</kbd>
-              <span>{t('present.next')}</span>
+              <span>{t('present.kbNext')}</span>
               <kbd>←</kbd>
-              <span>{t('present.prev')}</span>
+              <span>{t('present.kbPrev')}</span>
               <kbd>N</kbd>
               <span>{t('present.hideNotes')}</span>
               <kbd>B</kbd>

@@ -64,7 +64,7 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
     window.__open = window.open;
     window.open = () => null;
   });
-  await dlg.getByRole('button', { name: 'Commencer' }).click();
+  await dlg.getByRole('button', { name: 'Lancer la présentation' }).click();
   ok(
     /Autorisez les fenêtres pop-up/.test(await dlg.getByRole('alert').textContent()),
     'L22-02 : pop-up bloquée signalée',
