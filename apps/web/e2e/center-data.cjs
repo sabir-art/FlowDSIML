@@ -10,6 +10,7 @@ function centerFixture({
   empty = false,
   cover = null,
   statsStarted = false,
+  hasName = true,
 } = {}) {
   const st = (status, seen, total) =>
     identified ? { status, seen, total } : { status: null, seen: null, total: null };
@@ -114,7 +115,7 @@ function centerFixture({
       indexable: false,
       workspace: 'Mission Locale Exemple',
     },
-    visitor: identified ? { firstName: 'Alex' } : null,
+    visitor: identified ? { firstName: 'Alex', hasName } : null,
     paths: empty ? [] : paths,
   };
 }

@@ -248,6 +248,20 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     await p.close();
   }
 
+  // Nom inconnu dès l'ouverture (visitor.hasName = false) : l'aide remplace le bouton d'emblée
+  {
+    const { p } = await center(`/f/${F('f2')}?l=jeton-alex-0001`, { hasName: false });
+    ok(
+      (await p.locator('.fp-done button').count()) === 0 &&
+        /Pour recevoir votre attestation, contactez Mission Locale Exemple/.test(
+          await p.locator('.fp-cert-help').textContent(),
+        ) &&
+        !(await p.evaluate(() => document.activeElement?.classList.contains('fp-cert-s'))),
+      'L15-07 : nom inconnu dès le chargement, aide affichée sans bouton et sans voler le focus',
+    );
+    await p.close();
+  }
+
   // Sans lien personnel : pas de bouton d'attestation
   {
     const { p } = await center(`/f/${F('f2')}`);

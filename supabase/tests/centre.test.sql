@@ -2,7 +2,7 @@
 -- modules protégés ou expirés, visiteur identifié, mot de passe du centre, réponses identiques).
 begin;
 set search_path = public, extensions;
-select plan(33);
+select plan(34);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000002a1', 'admin-centre@example.com'),
@@ -143,9 +143,17 @@ select ok((select (j -> 'paths' -> 0 ->> 'isNew')::boolean and j -> 'visitor' = 
   'formation nouvelle ; sans jeton, aucun visiteur');
 select is(public.center_open('ml-exemple', p_link_token => 'jeton-expire-01') -> 'visitor', 'null'::jsonb,
   'lien personnel expiré : aucun visiteur');
-select ok((select v = '{"firstName":"Alex"}'::jsonb
+select ok((select v = '{"firstName":"Alex","hasName":true}'::jsonb
            from (select public.center_open('ml-exemple', p_link_token => 'jeton-alex-0001', p_visitor => 'visitor-alex-01') -> 'visitor' as v) x),
-  'lien personnel valide : prénom seul');
+  'lien personnel valide : prénom seul et indicateur « nom connu », sans le nom');
+-- Apprenant sans nom ni variables de nom : hasName faux (l'aide remplace le bouton d'attestation)
+insert into public.share_links (id, demo_id, workspace_id, token, name, variables) values
+  ('00000000-0000-0000-0000-0000000002c3', '00000000-0000-0000-0000-0000000002d1', (select ws from ctx), 'jeton-sansnom-01', '',
+   '{}');
+insert into public.learners (workspace_id, email, full_name, source, share_link_id) values
+  ((select ws from ctx), null, '', 'link', '00000000-0000-0000-0000-0000000002c3');
+select is(public.center_open('ml-exemple', p_link_token => 'jeton-sansnom-01') -> 'visitor',
+  '{"firstName":"","hasName":false}'::jsonb, 'aucun nom ni variable de nom : hasName faux (même règle que l''attestation)');
 select is((select count(*)::int from public.learner_visitors where visitor_id = 'visitor-alex-01'), 1,
   'visiteur du centre rattaché à l''apprenant');
 

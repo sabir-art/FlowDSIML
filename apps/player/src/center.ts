@@ -50,7 +50,8 @@ export interface CenterInfo {
 
 export interface CenterData {
   center: CenterInfo;
-  visitor: { firstName: string } | null;
+  /** hasName : nom connu pour l'attestation (booléen seul ; absent avant la migration 140000). */
+  visitor: { firstName: string; hasName?: boolean } | null;
   paths: CenterPath[];
 }
 

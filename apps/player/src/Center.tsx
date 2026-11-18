@@ -632,6 +632,7 @@ function PathPage({
               logoPath={data.center.logoPath}
               workspace={data.center.workspace}
               help={data.center.help}
+              hasName={data.visitor?.hasName !== false}
             />
           )}
         </section>
@@ -725,6 +726,7 @@ function CertificateButton({
   logoPath,
   workspace,
   help,
+  hasName,
 }: {
   c: C;
   token: string;
@@ -732,13 +734,20 @@ function CertificateButton({
   logoPath: string | null;
   workspace: string;
   help: string;
+  hasName: boolean;
 }) {
-  const [state, setState] = useState<'idle' | 'busy' | 'refused' | 'noName' | 'error'>('idle');
+  // Nom inconnu dès le chargement (open-center) : l'aide s'affiche d'emblée, sans bouton qui échoue
+  const [state, setState] = useState<'idle' | 'busy' | 'refused' | 'noName' | 'error'>(
+    hasName ? 'idle' : 'noName',
+  );
   const status = useRef<HTMLParagraphElement>(null);
+  const clicked = useRef(false);
   useEffect(() => {
-    if (state === 'noName') status.current?.focus();
+    // Le focus ne bouge que si le bouton vient de disparaître sous les doigts du visiteur
+    if (state === 'noName' && clicked.current) status.current?.focus();
   }, [state]);
   const run = async () => {
+    clicked.current = true;
     setState('busy');
     try {
       const info = await issueCertificate(token, pathId);
