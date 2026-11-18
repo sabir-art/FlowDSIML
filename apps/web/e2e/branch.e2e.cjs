@@ -1,13 +1,14 @@
 /** L22-09 : règles de suite du menu de choix (une seule source, destinations recalculées, contrôles). */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
 (async () => {
   const b = await chromium.launch();
-  const page = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  const page = await (await themedContext(b, { viewport: { width: 1440, height: 900 } })).newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const ok = (cond, label) => {
@@ -79,7 +80,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       if (sec && el) el.scrollTop += sec.getBoundingClientRect().top - el.getBoundingClientRect().top - 8;
       window.scrollTo(0, 0);
     });
-    await page.screenshot({ path: `${SHOTS}/l22-09-regles.png` });
+    await page.screenshot({ path: `${SHOTS}/l22-09-regles${sfx}.png` });
   }
 
   // Une 3e réponse sans règle suit « Sinon » ; les règles suivent leur réponse

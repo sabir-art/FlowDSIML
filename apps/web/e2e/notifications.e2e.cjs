@@ -1,6 +1,7 @@
 /** L22-05/06 : cloche, centre de notifications, lien vers le fil, préférences, état vide. */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -69,7 +70,7 @@ function withNotifications() {
 
 (async () => {
   const b = await chromium.launch();
-  const page = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  const page = await (await themedContext(b, { viewport: { width: 1440, height: 900 } })).newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const ok = (cond, label) => {
@@ -119,7 +120,7 @@ function withNotifications() {
       (await dlg.getByRole('tab', { name: 'Non lues · 2' }).count()) === 1,
     'L22-05 : filtres avec compteurs',
   );
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-05-notifications.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-05-notifications${sfx}.png` });
 
   await dlg.getByRole('tab', { name: 'Toutes' }).focus();
   await page.keyboard.press('ArrowRight');
@@ -152,7 +153,7 @@ function withNotifications() {
       false,
     'L22-05 : préférence enregistrée (table propre à l’utilisateur)',
   );
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-05-preferences.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-05-preferences${sfx}.png` });
   await prefs.getByRole('button', { name: 'Retour aux notifications' }).click();
 
   // Ouvrir une notification : éditeur sur l'étape, fil ouvert, notification lue
@@ -162,7 +163,7 @@ function withNotifications() {
   ok(true, 'L22-05 : éditeur ouvert sur le fil, commentaire mis en évidence');
   ok(/Étape 2/.test(await page.textContent('.stage-head')), 'L22-05 : étape de la notification sélectionnée');
   ok(!!state.tables.notifications.find((x) => x.id === 'n1').read_at, 'L22-05 : ouvrir la marque comme lue');
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-05-fil.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-05-fil${sfx}.png` });
 
   await page.goto(`${BASE}/#/analytics`);
   await page.waitForFunction(() =>
@@ -178,7 +179,7 @@ function withNotifications() {
   );
 
   // L22-06 : état vide
-  const p2 = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  const p2 = await (await themedContext(b, { viewport: { width: 1440, height: 900 } })).newPage();
   p2.on('pageerror', (e) => errors.push(e.message));
   await install(p2, seed());
   await p2.goto(`${BASE}/#/`);
@@ -192,7 +193,7 @@ function withNotifications() {
   await p2.waitForSelector('.nb-empty');
   ok(/Rien de nouveau/.test(await p2.textContent('.nb-empty')), 'L22-06 : « Rien de nouveau »');
   ok((await p2.getAttribute('.nb-empty', 'role')) === 'status', 'L22-06 : role=status');
-  if (SHOTS) await p2.screenshot({ path: `${SHOTS}/l22-06-vide.png` });
+  if (SHOTS) await p2.screenshot({ path: `${SHOTS}/l22-06-vide${sfx}.png` });
 
   ok(errors.length === 0, `aucune erreur JavaScript${errors.length ? ` (${errors.join(' | ')})` : ''}`);
   await b.close();

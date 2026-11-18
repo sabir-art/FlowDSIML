@@ -4,6 +4,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -11,7 +12,7 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
 
 (async () => {
   const b = await chromium.launch();
-  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
   // Tout ce que reçoit le lecteur (aperçu et présentation) est consigné pour vérifier l'absence des notes
   await ctx.addInitScript(() => {
     window.__fdMsgs = [];
@@ -46,7 +47,7 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
   await page.fill('#st-notes', `${NOTE}\nQuestion fréquente : pièces à fournir`);
   await page.waitForTimeout(900);
   ok(st('s1').presenter_notes?.startsWith(NOTE), 'L22-01 : notes enregistrées sur l’étape');
-  if (SHOTS) await page.locator('.notes-sec').screenshot({ path: `${SHOTS}/l22-01-notes.png` });
+  if (SHOTS) await page.locator('.notes-sec').screenshot({ path: `${SHOTS}/l22-01-notes${sfx}.png` });
 
   // L22-02 : lancement depuis la barre de l'éditeur
   await page.getByRole('button', { name: 'Présenter', exact: true }).click();
@@ -57,7 +58,7 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
     'L22-02 : Deux fenêtres par défaut',
   );
   ok((await dlg.getByLabel('Durée cible en minutes').inputValue()) === '15', 'L22-02 : minuteur à 15 min');
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-02-lancer.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-02-lancer${sfx}.png` });
 
   // Fenêtre bloquée : message et Réessayer
   await page.evaluate(() => {
@@ -107,9 +108,9 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
   const pubFrame = pub.frames().find((f) => f.url().includes('/#/preview'));
   await pubFrame.waitForSelector('.p-tip-title', { timeout: 10000 });
   if (SHOTS) {
-    await page.screenshot({ path: `${SHOTS}/l22-03-presentateur.png` });
+    await page.screenshot({ path: `${SHOTS}/l22-03-presentateur${sfx}.png` });
     await pub.setViewportSize({ width: 1440, height: 900 });
-    await pub.screenshot({ path: `${SHOTS}/l22-04-public.png` });
+    await pub.screenshot({ path: `${SHOTS}/l22-04-public${sfx}.png` });
   }
 
   await page.keyboard.press('ArrowRight');
@@ -130,7 +131,7 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
     /Présentation en pause/.test(await pubFrame.textContent('.p-black')),
     'L22-04 : « Présentation en pause » à l’écran public',
   );
-  if (SHOTS) await pub.screenshot({ path: `${SHOTS}/l22-04-noir.png` });
+  if (SHOTS) await pub.screenshot({ path: `${SHOTS}/l22-04-noir${sfx}.png` });
   await page.keyboard.press('b');
 
   await page.keyboard.press('n');

@@ -4,6 +4,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -12,7 +13,7 @@ const SACHA = '0b5c1f0e-0000-4000-8000-0000000000b2';
 
 (async () => {
   const b = await chromium.launch();
-  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
   await ctx.addInitScript(() => {
     window.__fdPresence = {
       join(topic, me, onSync) {
@@ -97,7 +98,7 @@ const SACHA = '0b5c1f0e-0000-4000-8000-0000000000b2';
     (await cursor.count()) === 1 && (await cursor.textContent()) === 'Marie',
     'L22-08 : curseur distant au prénom',
   );
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-08-presence.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-08-presence${sfx}.png` });
 
   await stackBtn.click();
   const pop = page.getByRole('dialog', { name: 'Sur cette démo' });
@@ -112,7 +113,7 @@ const SACHA = '0b5c1f0e-0000-4000-8000-0000000000b2';
     rows.some((r) => /Sacha Durand.*Étape 2 · inactif depuis 3 min/.test(r)),
     'L22-08 : « inactif depuis 3 min »',
   );
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-08-panneau.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-08-panneau${sfx}.png` });
   await pop.getByRole('button', { name: /Sacha Durand/ }).click();
   await page.waitForFunction(() => /Étape 2/.test(document.querySelector('.stage-head')?.textContent ?? ''));
   ok(true, 'L22-08 : un clic sur une personne affiche son étape');

@@ -1,6 +1,7 @@
 /** L22-07 : mention @ dans un commentaire (liste de membres, pastille, retour arrière, format stocké). */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -9,7 +10,7 @@ const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
 
 (async () => {
   const b = await chromium.launch();
-  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
   // Panneau Commentaires déplié (replié par défaut)
   await ctx.addInitScript(() => {
     if (localStorage.getItem('fd.editor.comments.collapsed') === null)
@@ -51,7 +52,7 @@ const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
     /Éditeur|Éditrice/.test(await list.getByRole('option').first().textContent()),
     'L22-07 : rôle sous le nom',
   );
-  if (SHOTS) await page.locator('.cm').screenshot({ path: `${SHOTS}/l22-07-mention.png` });
+  if (SHOTS) await page.locator('.cm').screenshot({ path: `${SHOTS}/l22-07-mention${sfx}.png` });
 
   await input.press('ArrowDown');
   ok(
