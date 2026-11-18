@@ -30,7 +30,8 @@ returns boolean language sql immutable set search_path = '' as $$
   select jsonb_typeof(d) = 'object'
     and not exists (
       select 1 from jsonb_object_keys(d) k
-      where k not in ('title', 'intro', 'brand', 'accent', 'style', 'logoPath', 'help', 'indexable', 'a11y', 'paths'))
+      where k not in ('title', 'intro', 'brand', 'accent', 'style', 'logoPath', 'help', 'indexable', 'a11y', 'a11yUrl',
+                    'privacyUrl', 'paths'))
     and (d -> 'title' is null or (jsonb_typeof(d -> 'title') = 'string' and char_length(d ->> 'title') <= 120))
     and (d -> 'intro' is null or (jsonb_typeof(d -> 'intro') = 'string' and char_length(d ->> 'intro') <= 600))
     and (d -> 'brand' is null or (d ->> 'brand') ~ '^#[0-9a-fA-F]{6}$')
@@ -40,6 +41,10 @@ returns boolean language sql immutable set search_path = '' as $$
          or (d ->> 'logoPath') ~ '^[0-9a-f-]{36}/center-logo-[0-9a-z]{4,24}\.(png|svg|webp)$')
     and (d -> 'help' is null or (jsonb_typeof(d -> 'help') = 'string' and char_length(d ->> 'help') <= 200
          and ((d ->> 'help') = '' or (d ->> 'help') ~ '^https://\S+$' or (d ->> 'help') ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$')))
+    and (d -> 'a11yUrl' is null or (jsonb_typeof(d -> 'a11yUrl') = 'string' and char_length(d ->> 'a11yUrl') <= 300
+         and ((d ->> 'a11yUrl') = '' or (d ->> 'a11yUrl') ~ '^https://\S+$')))
+    and (d -> 'privacyUrl' is null or (jsonb_typeof(d -> 'privacyUrl') = 'string' and char_length(d ->> 'privacyUrl') <= 300
+         and ((d ->> 'privacyUrl') = '' or (d ->> 'privacyUrl') ~ '^https://\S+$')))
     and (d -> 'indexable' is null or jsonb_typeof(d -> 'indexable') = 'boolean')
     and (d -> 'a11y' is null or (d ->> 'a11y') in ('non_evalue', 'partiel', 'total'))
     and (d -> 'paths' is null or (
@@ -285,6 +290,8 @@ begin
       'logoPath', c.published ->> 'logoPath',
       'help', coalesce(c.published ->> 'help', ''),
       'a11y', coalesce(c.published ->> 'a11y', 'non_evalue'),
+      'a11yUrl', coalesce(c.published ->> 'a11yUrl', ''),
+      'privacyUrl', coalesce(c.published ->> 'privacyUrl', ''),
       'indexable', coalesce((c.published ->> 'indexable')::boolean, false),
       'workspace', (select name from public.workspaces where id = p_ws)),
     'visitor', case when v_learner is not null then jsonb_build_object('firstName', left(coalesce(v_first, ''), 60)) end,
@@ -307,6 +314,9 @@ begin
             'cover', case when (a.demo_id is null or (a.mode = 'link' and (a.expires_at is null or a.expires_at > now())))
                                and (v.manifest -> 'steps' -> 0 -> 'image' ->> 'url') ~ '^assets/[\w.-]+$'
                           then v.manifest -> 'steps' -> 0 -> 'image' ->> 'url' end,
+            -- Date d'expiration L11 (« plus disponible depuis le … ») et meilleur score de l'apprenant
+            'expiredAt', case when a.expires_at is not null and a.expires_at <= now() then a.expires_at end,
+            'best', case when lm.has_quiz then lm.best_score end,
             'status', lm.status, 'seen', lm.steps_seen, 'total', lm.total_steps
           ) order by m.position), '[]'::jsonb)
           from public.path_modules m

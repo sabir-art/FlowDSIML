@@ -13,6 +13,8 @@ export interface CenterDraft {
   help?: string;
   indexable?: boolean;
   a11y?: 'non_evalue' | 'partiel' | 'total';
+  a11yUrl?: string;
+  privacyUrl?: string;
   paths?: Array<{ id: string; visible: boolean }>;
 }
 
@@ -24,6 +26,7 @@ export interface PathSummary {
   /** Modules publiés et non supprimés (seuls visibles sur la page). */
   published: number;
   protectedCount: number;
+  expiredCount: number;
   tags: string[];
 }
 

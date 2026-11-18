@@ -2,7 +2,7 @@
 -- modules protégés ou expirés, visiteur identifié, mot de passe du centre, réponses identiques).
 begin;
 set search_path = public, extensions;
-select plan(31);
+select plan(33);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000002a1', 'admin-centre@example.com'),
@@ -129,6 +129,12 @@ select ok((select j::text !~ '(Brouillon secret|Démo supprimée|Formation en pr
   'aucun titre de brouillon, de démo supprimée ni de formation masquée');
 select is((select jsonb_agg(m ->> 'access' order by m ->> 'title') from r, jsonb_array_elements(j -> 'paths' -> 0 -> 'modules') m),
   '["expired", "password", "open"]'::jsonb, 'modules : expiré et mot de passe signalés');
+select ok((select (m ->> 'expiredAt') is not null from r, jsonb_array_elements(j -> 'paths' -> 0 -> 'modules') m
+           where m ->> 'access' = 'expired'), 'module expiré : date d''expiration renvoyée');
+select pg_temp.login('00000000-0000-0000-0000-0000000002a1');
+select throws_ok($$ select public.save_center_draft((select ws from ctx), 'ml-exemple', '{"privacyUrl":"javascript:alert(1)"}') $$,
+  'P0001', 'CENTER_INVALID', 'liens du pied de page en https uniquement');
+reset role;
 select is((select jsonb_agg(m -> 'cover') from r, jsonb_array_elements(j -> 'paths' -> 0 -> 'modules') m),
   '["assets/s1-abc.webp", null, null]'::jsonb, 'aucune couverture pour un module protégé ou expiré');
 select is((select j -> 'paths' -> 0 -> 'tags' from r), '[{"name": "Logiciel", "color": "blue"}]'::jsonb,

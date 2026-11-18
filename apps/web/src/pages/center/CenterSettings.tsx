@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   CircleCheck,
+  FileText,
   CircleAlert,
   Copy,
   ExternalLink,
@@ -109,6 +110,10 @@ export function CenterSettings() {
         modules: mods.length,
         published: live.length,
         protectedCount: live.filter((y) => access.get(y.demo_id)?.mode === 'password').length,
+        expiredCount: live.filter((y) => {
+          const e = access.get(y.demo_id)?.expires_at;
+          return !!e && Date.parse(e) <= Date.now();
+        }).length,
         tags: [
           ...new Set(
             (dt.data ?? [])
@@ -532,44 +537,6 @@ export function CenterSettings() {
               })}
             </div>
             <p className="fd-help cfg-help">{t('center.colorsHelp')}</p>
-            <div className="two">
-              <div className="fd-field">
-                <label className="fd-label" htmlFor="c-help">
-                  {t('center.help')}
-                </label>
-                <input
-                  id="c-help"
-                  className="fd-input"
-                  maxLength={200}
-                  placeholder={t('center.helpPlaceholder')}
-                  defaultValue={draft.help ?? ''}
-                  key={`help-${loaded}`}
-                  onBlur={(e) => {
-                    const v = e.target.value.trim();
-                    if (v === '' || /^https:\/\/\S+$/.test(v) || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))
-                      update({ help: v });
-                    else toast(t('center.helpInvalid'));
-                  }}
-                />
-              </div>
-              <div className="fd-field">
-                <label className="fd-label" htmlFor="c-a11y">
-                  {t('center.a11y')}
-                </label>
-                <select
-                  id="c-a11y"
-                  className="fd-input"
-                  value={draft.a11y ?? 'non_evalue'}
-                  onChange={(e) => update({ a11y: e.target.value as CenterDraft['a11y'] })}
-                >
-                  {(['non_evalue', 'partiel', 'total'] as const).map((a) => (
-                    <option key={a} value={a}>
-                      {t(`center.a11y_${a}`)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
           </section>
 
           <section className="fd-card" aria-labelledby="c-style">
@@ -636,6 +603,7 @@ export function CenterSettings() {
                       t('learners.fo.modules', { count: p.published }),
                       p.ordered ? t('center.ordered') : null,
                       p.protectedCount ? t('center.protected', { count: p.protectedCount }) : null,
+                      p.expiredCount ? t('center.expired', { count: p.expiredCount }) : null,
                       p.published === 0 ? t('center.noPublished') : null,
                       !x.visible ? t('center.hidden') : null,
                       p.tags.length ? p.tags.join(', ') : null,
@@ -695,6 +663,83 @@ export function CenterSettings() {
                 <p className="fd-help cfg-help">{t('center.visibleHelp')}</p>
               </>
             )}
+          </section>
+
+          <section className="fd-card" aria-labelledby="c-foot">
+            <div className="fd-card__head">
+              <span className="fd-icon-chip">
+                <FileText {...ICON} />
+              </span>
+              <h2 className="fd-card__title" id="c-foot">
+                {t('center.footer')}
+              </h2>
+            </div>
+            <div className="two">
+              <div className="fd-field">
+                <label className="fd-label" htmlFor="c-a11y">
+                  {t('center.a11y')}
+                </label>
+                <select
+                  id="c-a11y"
+                  className="fd-input"
+                  aria-describedby="c-a11y-h"
+                  value={draft.a11y ?? 'non_evalue'}
+                  onChange={(e) => update({ a11y: e.target.value as CenterDraft['a11y'] })}
+                >
+                  {(['non_evalue', 'partiel', 'total'] as const).map((a) => (
+                    <option key={a} value={a}>
+                      {t(`center.a11y_${a}`)}
+                    </option>
+                  ))}
+                </select>
+                <span className="fd-help" id="c-a11y-h">
+                  {t('center.a11yHelp')}
+                </span>
+              </div>
+              <UrlField
+                id="c-a11y-url"
+                label={t('center.a11yUrl')}
+                optional={t('center.optional')}
+                placeholder="https://"
+                value={draft.a11yUrl ?? ''}
+                onSave={(v) => update({ a11yUrl: v })}
+                invalid={t('center.urlInvalid')}
+              />
+            </div>
+            <div className="two">
+              <div className="fd-field">
+                <label className="fd-label" htmlFor="c-help">
+                  {t('center.help')}
+                </label>
+                <input
+                  id="c-help"
+                  className="fd-input"
+                  maxLength={200}
+                  placeholder={t('center.helpPlaceholder')}
+                  defaultValue={draft.help ?? ''}
+                  key={`help-${loaded}`}
+                  aria-describedby="c-help-h"
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (v === '' || /^https:\/\/\S+$/.test(v) || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))
+                      update({ help: v });
+                    else toast(t('center.helpInvalid'));
+                  }}
+                />
+                <span className="fd-help" id="c-help-h">
+                  {t('center.helpHint')}
+                </span>
+              </div>
+              <UrlField
+                id="c-privacy"
+                label={t('center.privacyUrl')}
+                optional={t('center.optional')}
+                placeholder="https://"
+                value={draft.privacyUrl ?? ''}
+                onSave={(v) => update({ privacyUrl: v })}
+                invalid={t('center.urlInvalid')}
+              />
+            </div>
           </section>
 
           <section className="fd-card" aria-labelledby="c-acc">
@@ -867,6 +912,47 @@ export function CenterSettings() {
             void load();
           }}
         />
+      )}
+    </div>
+  );
+}
+
+/** Lien https facultatif, enregistré en quittant le champ (vide accepté). */
+function UrlField(props: {
+  id: string;
+  label: string;
+  optional: string;
+  placeholder: string;
+  value: string;
+  invalid: string;
+  onSave: (v: string) => void;
+}) {
+  const [err, setErr] = useState(false);
+  return (
+    <div className="fd-field">
+      <label className="fd-label" htmlFor={props.id}>
+        {props.label} <span className="fd-help">{props.optional}</span>
+      </label>
+      <input
+        id={props.id}
+        className="fd-input"
+        type="url"
+        maxLength={300}
+        placeholder={props.placeholder}
+        defaultValue={props.value}
+        aria-invalid={err || undefined}
+        aria-describedby={err ? `${props.id}-e` : undefined}
+        onBlur={(e) => {
+          const v = e.target.value.trim();
+          const ok = v === '' || /^https:\/\/\S+$/.test(v);
+          setErr(!ok);
+          if (ok && v !== props.value) props.onSave(v);
+        }}
+      />
+      {err && (
+        <span className="err-line" id={`${props.id}-e`} role="alert">
+          {props.invalid}
+        </span>
       )}
     </div>
   );

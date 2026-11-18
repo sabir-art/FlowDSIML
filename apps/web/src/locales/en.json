@@ -1880,7 +1880,7 @@
     "intro": "Welcome text",
     "logo": "Logo",
     "logoNone": "No logo (workspace initials)",
-    "logoHelp": "PNG, SVG or WebP, square, at least 512 px, 512 KB max. Shown at 40 px in the header.",
+    "logoHelp": "PNG, SVG or WebP, 512 KB max, square. SVG is cleaned on upload. Shown at 40 px in the header.",
     "logoAdd": "Add",
     "logoReplace": "Replace",
     "logoRemove": "Remove",
@@ -1901,7 +1901,7 @@
     "help": "“Need help?” contact",
     "helpPlaceholder": "help@example.org or https://…",
     "helpInvalid": "Contact refused: enter an email or an https address.",
-    "a11y": "Accessibility (footer)",
+    "a11y": "Accessibility status (RGAA)",
     "a11y_non_evalue": "Not assessed",
     "a11y_partiel": "Partially compliant",
     "a11y_total": "Fully compliant",
@@ -1941,6 +1941,15 @@
     "accessHelp": "Page access does not replace demo access: a protected module keeps its own password.",
     "preview": "Preview",
     "previewLive": "updates live",
-    "emptyPreview": "No course yet"
+    "emptyPreview": "No course yet",
+    "footer": "Footer",
+    "a11yHelp": "Shows “Accessibility: not assessed” until an audit is done.",
+    "a11yUrl": "Link to the statement",
+    "optional": "(optional)",
+    "privacyUrl": "“Personal data” link",
+    "urlInvalid": "Address refused: an https address is expected.",
+    "helpHint": "Email address or link. Empty: the entry is hidden.",
+    "expired_one": "{{count}} expired",
+    "expired_other": "{{count}} expired"
   }
 }

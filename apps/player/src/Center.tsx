@@ -30,7 +30,7 @@ import {
   type ModuleView,
   type PathView,
 } from './center';
-import { brandingUrl, APP_ORIGIN } from './config';
+import { brandingUrl } from './config';
 import { fmt, strings, type Dict } from './i18n';
 import { PasswordGate, SysScreen } from './Gate';
 import { initials, useMedia } from './Player';
@@ -47,6 +47,14 @@ const TAG_CLASS: Record<string, string> = {
   plum: 'p',
 };
 const tagCls = (color: string) => TAG_CLASS[color] ?? 'b';
+
+const frDate = (iso: string) =>
+  new Intl.DateTimeFormat(navigator.language.startsWith('en') ? 'en-GB' : 'fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Europe/Paris',
+  }).format(new Date(iso));
 
 /** Lien interne au centre (le jeton du lien personnel reste en session, jamais dans l'adresse). */
 const centerHref = (slug: string, pathId?: string, params?: Record<string, string>) => {
@@ -224,8 +232,8 @@ function Center({ t, data, route }: { t: Dict; data: CenterData; route: Route })
       )}
       <footer class="ctr-foot">
         <span>{info.workspace}</span>
-        <span>{a11y}</span>
-        <a href={`${APP_ORIGIN}/#/legal/privacy`}>{c.privacy}</a>
+        {info.a11yUrl ? <a href={info.a11yUrl}>{a11y}</a> : <span>{a11y}</span>}
+        {info.privacyUrl && <a href={info.privacyUrl}>{c.privacy}</a>}
         {help && <a href={help}>{c.help}</a>}
         <span>{t.madeWith}</span>
       </footer>
@@ -415,7 +423,7 @@ function ModuleState({ c, m, identified }: { c: C; m: ModuleView; identified: bo
     );
   if (m.kind === 'expired')
     return (
-      <span class="hb">
+      <span class="hb exp">
         <Clock aria-hidden="true" />
         {c.expired}
       </span>
@@ -430,19 +438,22 @@ function PathCard({ c, v, q, href }: { c: C; v: PathView; q: string; href: strin
   const cover = p.modules[0]?.cover ?? null;
   const meta = [
     fmt(c, p.ordered ? 'metaOrdered' : 'metaFree', { count: p.modules.length }),
-    v.quizzes ? fmt(c, 'quiz', { count: v.quizzes }) : null,
+    v.quizzes ? fmt(c, 'quiz', { count: v.quizzes }) : c.noQuizLower,
   ]
     .filter(Boolean)
     .join(' · ');
   const note = v.done
-    ? c.done
-    : v.optional
-      ? fmt(c, 'optional', { count: v.optional })
-      : v.identified && !v.started
-        ? c.notStarted
-        : v.quizzes
-          ? fmt(c, 'quiz', { count: v.quizzes })
-          : c.noQuiz;
+    ? c.allValidated
+    : v.expiredHidden
+      ? fmt(c, 'expiredMore', { count: v.expiredHidden })
+      : v.optional
+        ? fmt(c, 'optional', { count: v.optional })
+        : v.identified && !v.started
+          ? c.notStarted
+          : v.quizzes
+            ? fmt(c, 'quiz', { count: v.quizzes })
+            : c.noQuiz;
+  const hiddenMore = p.modules.length - 3 - v.expiredHidden;
   const curIdx = v.modules.findIndex((m) => m.kind === 'cur');
   return (
     <a class="fc" href={href}>
@@ -505,7 +516,7 @@ function PathCard({ c, v, q, href }: { c: C; v: PathView; q: string; href: strin
             );
           })}
         </ol>
-        {p.modules.length > 3 && <span class="more">{fmt(c, 'more', { count: p.modules.length - 3 })}</span>}
+        {hiddenMore > 0 && <span class="more">{fmt(c, 'more', { count: hiddenMore })}</span>}
         <span class="ft">
           <span class="note">{note}</span>
           <span class={`cta${v.cta === 'review' ? ' cta--sec' : ''}`}>
@@ -542,11 +553,12 @@ function PathPage({ t, data, views, route }: { t: Dict; data: CenterData; views:
   const p: CenterPath = v.path;
   const meta = [
     fmt(c, p.ordered ? 'metaOrdered' : 'metaFree', { count: p.modules.length }),
-    v.quizzes ? fmt(c, 'quiz', { count: v.quizzes }) : null,
+    v.quizzes ? fmt(c, 'quiz', { count: v.quizzes }) : c.noQuizLower,
   ]
     .filter(Boolean)
     .join(' · ');
   const protectedMod = p.modules.some((m) => m.access === 'password');
+  const expiredMod = p.modules.some((m) => m.access === 'expired');
   return (
     <main class="ctr-in" id="ctr-main">
       <nav class="crumb" aria-label={c.crumb}>
@@ -610,13 +622,17 @@ function PathPage({ t, data, views, route }: { t: Dict; data: CenterData; views:
                   : '';
           const line =
             st.kind === 'ok'
-              ? c.fpOk
+              ? st.best !== null
+                ? fmt(c, 'fpOkScore', { score: st.best })
+                : c.fpOk
               : st.kind === 'cur'
                 ? fmt(c, 'fpCur', { n: st.step, total: st.total })
                 : st.kind === 'lock'
                   ? fmt(c, 'fpLock', { n: st.after })
                   : st.kind === 'expired'
-                    ? c.fpExpired
+                    ? st.since
+                      ? fmt(c, 'fpExpiredSince', { date: frDate(st.since) })
+                      : c.fpExpired
                     : st.kind === 'password'
                       ? c.fpPassword
                       : c.fpTodo;
@@ -625,8 +641,8 @@ function PathPage({ t, data, views, route }: { t: Dict; data: CenterData; views:
               <span class="n" aria-hidden="true">
                 {i + 1}
               </span>
-              <span class="mini" aria-hidden="true">
-                {m.cover && <img src={m.cover} alt="" loading="lazy" />}
+              <span class={`mini${st.kind === 'expired' ? ' mini--none' : ''}`} aria-hidden="true">
+                {m.cover && st.kind !== 'expired' && <img src={m.cover} alt="" loading="lazy" />}
               </span>
               <div>
                 <h3>
@@ -638,7 +654,7 @@ function PathPage({ t, data, views, route }: { t: Dict; data: CenterData; views:
                     </span>
                   )}
                   {m.access === 'expired' && (
-                    <span class="hb">
+                    <span class="hb exp">
                       <Clock aria-hidden="true" />
                       {c.expired}
                     </span>
@@ -662,7 +678,13 @@ function PathPage({ t, data, views, route }: { t: Dict; data: CenterData; views:
       {v.done ? (
         <p class="fp-foot">{c.fpFootDone}</p>
       ) : (
-        protectedMod && <p class="fp-foot">{c.fpFootProtected}</p>
+        (protectedMod || expiredMod) && (
+          <p class="fp-foot">
+            {[protectedMod ? c.fpFootProtected : null, expiredMod ? c.fpFootExpired : null]
+              .filter(Boolean)
+              .join(' ')}
+          </p>
+        )
       )}
     </main>
   );

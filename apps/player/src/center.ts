@@ -17,6 +17,10 @@ export interface CenterModule {
   status?: ModuleStatus | null;
   seen?: number | null;
   total?: number | null;
+  /** Date d'expiration L11 dépassée (module expiré). */
+  expiredAt?: string | null;
+  /** Meilleur score au quiz de l'apprenant identifié. */
+  best?: number | null;
 }
 
 export interface CenterPath {
@@ -38,6 +42,8 @@ export interface CenterInfo {
   logoPath: string | null;
   help: string;
   a11y: 'non_evalue' | 'partiel' | 'total';
+  a11yUrl?: string;
+  privacyUrl?: string;
   indexable: boolean;
   workspace: string;
 }
@@ -50,12 +56,12 @@ export interface CenterData {
 
 /** État d'un module tel qu'affiché (carte et page de la formation). */
 export type ModuleView =
-  | { kind: 'ok' }
+  | { kind: 'ok'; best: number | null }
   | { kind: 'cur'; step: number; total: number }
   | { kind: 'lock'; after: number }
   | { kind: 'todo' }
   | { kind: 'password' }
-  | { kind: 'expired' };
+  | { kind: 'expired'; since: string | null };
 
 export interface PathView {
   path: CenterPath;
@@ -71,19 +77,23 @@ export interface PathView {
   next: CenterModule | null;
   optional: number;
   quizzes: number;
+  /** Modules expirés au-delà des 3 premiers (note « + n module(s) expiré(s) »). */
+  expiredHidden: number;
 }
 
 export function pathView(p: CenterPath, identified: boolean): PathView {
   const mods = p.modules;
-  const valid = (m: CenterModule) => identified && m.status === 'validated';
-  const validated = mods.filter(valid).length;
-  const mustDo = mods.some((m) => m.required) ? mods.filter((m) => m.required) : mods;
+  // Un module expiré reste listé mais ne compte pas dans la progression
+  const live = mods.filter((m) => m.access !== 'expired');
+  const valid = (m: CenterModule) => identified && m.access !== 'expired' && m.status === 'validated';
+  const validated = live.filter(valid).length;
+  const mustDo = live.some((m) => m.required) ? live.filter((m) => m.required) : live;
   const done = identified && mustDo.length > 0 && mustDo.every(valid);
-  const started = identified && mods.some((m) => m.status && m.status !== 'not_started');
-  const firstOpen = mods.findIndex((m) => !valid(m));
+  const started = identified && live.some((m) => m.status && m.status !== 'not_started');
+  const firstOpen = mods.findIndex((m) => m.access !== 'expired' && !valid(m));
   const views: ModuleView[] = mods.map((m, i) => {
-    if (m.access === 'expired') return { kind: 'expired' };
-    if (valid(m)) return { kind: 'ok' };
+    if (m.access === 'expired') return { kind: 'expired', since: m.expiredAt ?? null };
+    if (valid(m)) return { kind: 'ok', best: m.hasQuiz ? (m.best ?? null) : null };
     if (m.access === 'password') return { kind: 'password' };
     if (identified && p.ordered && firstOpen >= 0 && i > firstOpen) return { kind: 'lock', after: i };
     if (identified && (m.status === 'in_progress' || m.status === 'failed') && (m.total ?? 0) > 0)
@@ -95,15 +105,16 @@ export function pathView(p: CenterPath, identified: boolean): PathView {
     path: p,
     identified,
     validated,
-    total: mods.length,
+    total: live.length,
     started,
     done,
     badge: done ? 'done' : started ? 'current' : p.isNew ? 'new' : null,
     cta: done ? 'review' : started ? 'resume' : 'start',
     modules: views,
     next,
-    optional: mods.filter((m) => !m.required).length,
-    quizzes: mods.filter((m) => m.hasQuiz).length,
+    optional: live.filter((m) => !m.required).length,
+    quizzes: live.filter((m) => m.hasQuiz).length,
+    expiredHidden: mods.slice(3).filter((m) => m.access === 'expired').length,
   };
 }
 

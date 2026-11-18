@@ -49,7 +49,7 @@ describe('centre de formation', () => {
   it('états des modules pour un visiteur identifié (ordre imposé)', () => {
     const v = pathView(p, true);
     expect(v.modules).toEqual([
-      { kind: 'ok' },
+      { kind: 'ok', best: null },
       { kind: 'cur', step: 4, total: 6 },
       { kind: 'lock', after: 2 },
       { kind: 'password' },
@@ -77,9 +77,21 @@ describe('centre de formation', () => {
     const done = path({ modules: [mod('a', { status: 'validated' }), mod('b', { required: false })] });
     expect(pathView(done, true)).toMatchObject({ done: true, badge: 'done', cta: 'review' });
     expect(pathView(path({ isNew: true, modules: [mod('a')] }), true).badge).toBe('new');
-    expect(pathView(path({ modules: [mod('x', { access: 'expired' })] }), true).modules[0]).toEqual({
-      kind: 'expired',
-    });
+    const exp = pathView(
+      path({
+        modules: [
+          mod('x', { access: 'expired', expiredAt: '2026-09-30T00:00:00Z' }),
+          mod('y', { status: 'validated', hasQuiz: true, best: 85 }),
+        ],
+      }),
+      true,
+    );
+    expect(exp.modules).toEqual([
+      { kind: 'expired', since: '2026-09-30T00:00:00Z' },
+      { kind: 'ok', best: 85 },
+    ]);
+    // L'expiré ne compte pas dans la progression
+    expect([exp.validated, exp.total, exp.done]).toEqual([1, 1, true]);
   });
 
   it('formation en cours : la première commencée et non terminée', () => {

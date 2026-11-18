@@ -10,8 +10,26 @@ describe('réglages du centre', () => {
 
   it('publication : au moins une formation visible avec un module publié', () => {
     const paths = [
-      { id: 'a', title: 'A', ordered: false, modules: 2, published: 0, protectedCount: 0, tags: [] },
-      { id: 'b', title: 'B', ordered: false, modules: 1, published: 1, protectedCount: 0, tags: [] },
+      {
+        id: 'a',
+        title: 'A',
+        ordered: false,
+        modules: 2,
+        published: 0,
+        protectedCount: 0,
+        expiredCount: 0,
+        tags: [],
+      },
+      {
+        id: 'b',
+        title: 'B',
+        ordered: false,
+        modules: 1,
+        published: 1,
+        protectedCount: 0,
+        expiredCount: 0,
+        tags: [],
+      },
     ];
     expect(
       publishable(

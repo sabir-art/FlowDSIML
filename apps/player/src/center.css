@@ -1003,3 +1003,16 @@
   background: #3a1424;
   color: #f4a6c1;
 }
+/* Mise à jour de la maquette (3f8cd20) : module expiré */
+.hb.exp {
+  background: var(--c-sunken);
+  color: var(--c-muted);
+  box-shadow: inset 0 0 0 1px var(--c-border);
+}
+.fp-list .mini--none {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--c-border);
+}
+.fp-list .mini--none::before {
+  display: none;
+}

@@ -68,13 +68,18 @@ function centerFixture({
         m('c1', 'Lire le tableau de bord', {
           hasQuiz: true,
           cover,
-          ...(statsStarted ? st('validated', 6, 6) : {}),
+          ...(statsStarted ? { ...st('validated', 6, 6), best: 85 } : {}),
         }),
         m('c2', 'Exporter un indicateur', {
           hasQuiz: true,
           ...(statsStarted ? st('in_progress', 2, 8) : {}),
         }),
         m('c3', 'Rapport aux financeurs', { hasQuiz: true, access: 'password' }),
+        m('c4', 'Indicateurs de l’an dernier', {
+          hasQuiz: true,
+          access: 'expired',
+          expiredAt: '2026-09-30T10:00:00Z',
+        }),
       ],
     },
     {
@@ -87,7 +92,7 @@ function centerFixture({
       modules: [
         m('d1', 'Mes premiers jours', { cover }),
         m('d2', 'Messagerie et agenda'),
-        m('d3', 'Où trouver les documents', { access: 'expired' }),
+        m('d3', 'Où trouver les documents', { access: 'expired', expiredAt: '2026-10-15T10:00:00Z' }),
       ],
     },
   ];
@@ -104,6 +109,8 @@ function centerFixture({
       logoPath: null,
       help: 'aide@mission-locale.example',
       a11y: 'non_evalue',
+      a11yUrl: '',
+      privacyUrl: 'https://mission-locale.example/donnees-personnelles',
       indexable: false,
       workspace: 'Mission Locale Exemple',
     },

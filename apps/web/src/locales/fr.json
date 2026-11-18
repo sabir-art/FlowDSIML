@@ -1880,7 +1880,7 @@
     "intro": "Texte d'accueil",
     "logo": "Logo",
     "logoNone": "Aucun logo (initiales du workspace)",
-    "logoHelp": "PNG, SVG ou WebP, carré, 512 px au moins, 512 Ko au plus. Il s'affiche en 40 px dans l'en-tête.",
+    "logoHelp": "PNG, SVG ou WebP, 512 Ko au plus, carré. Le SVG est nettoyé à l'envoi. Il s'affiche en 40 px dans l'en-tête.",
     "logoAdd": "Ajouter",
     "logoReplace": "Remplacer",
     "logoRemove": "Retirer",
@@ -1901,7 +1901,7 @@
     "help": "Contact « Besoin d'aide ? »",
     "helpPlaceholder": "aide@exemple.org ou https://…",
     "helpInvalid": "Contact refusé : saisissez un e-mail ou une adresse https.",
-    "a11y": "Accessibilité (pied de page)",
+    "a11y": "Statut d'accessibilité (RGAA)",
     "a11y_non_evalue": "Non évaluée",
     "a11y_partiel": "Partiellement conforme",
     "a11y_total": "Totalement conforme",
@@ -1941,6 +1941,15 @@
     "accessHelp": "L'accès à la page ne remplace pas celui des démos : un module protégé garde son propre mot de passe.",
     "preview": "Aperçu",
     "previewLive": "se met à jour en direct",
-    "emptyPreview": "Aucune formation pour le moment"
+    "emptyPreview": "Aucune formation pour le moment",
+    "footer": "Pied de page",
+    "a11yHelp": "Affiché « Accessibilité : non évaluée » tant qu'aucun audit n'a été fait.",
+    "a11yUrl": "Lien vers la déclaration",
+    "optional": "(facultatif)",
+    "privacyUrl": "Lien « Données personnelles »",
+    "urlInvalid": "Adresse refusée : une adresse https est attendue.",
+    "helpHint": "Adresse e-mail ou lien. Vide : l'entrée est masquée.",
+    "expired_one": "{{count}} expiré",
+    "expired_other": "{{count}} expirés"
   }
 }

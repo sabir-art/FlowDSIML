@@ -130,6 +130,44 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     await p.close();
   }
 
+  // L14-05 (maquette 3f8cd20) : module expiré daté, score d'un module validé, expiré hors progression
+  {
+    const { centerFixture: cf } = require('./center-data.cjs');
+    const { p } = await center(`/f/${F('f3')}`, {}, cf({ statsStarted: true }));
+    const exp = p.locator('.fp-list li', { hasText: 'Indicateurs' });
+    ok(
+      (await exp.textContent()).includes('plus disponible depuis le 30 sept. 2026') &&
+        (await exp.locator('a').count()) === 0,
+      'L14-05 : module expiré daté, sans action',
+    );
+    ok(
+      (await p.locator('.fp-list li', { hasText: 'Lire le tableau' }).textContent()).includes(
+        'Validé · score 85',
+      ),
+      'L14-05 : score du module validé',
+    );
+    ok(
+      (await p.locator('.fp-head .hb').textContent()).includes('1 sur 3 validé'),
+      'L14-05 : l’expiré ne compte pas dans la progression',
+    );
+    await p.goto(`${PLAYER}/#/c/ml-exemple`);
+    await p.waitForSelector('.fc');
+    ok(
+      (await p.locator('.fc', { hasText: 'Statistiques' }).locator('.note').textContent()) ===
+        '+ 1 module expiré',
+      'L14-01 : note « + 1 module expiré »',
+    );
+    const foot = p.locator('.ctr-foot');
+    ok(
+      (await foot.textContent()).match(/Accessibilité.: non évaluée/) !== null &&
+        (await foot.getByRole('link', { name: 'Données personnelles' }).getAttribute('href')).startsWith(
+          'https://',
+        ),
+      'L14 : pied de page (statut et lien réglés)',
+    );
+    await p.close();
+  }
+
   // L14-06 : formation terminée, attestation « Bientôt »
   {
     const { p } = await center(`/f/${F('f2')}`);
