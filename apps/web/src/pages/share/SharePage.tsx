@@ -309,8 +309,11 @@ export function SharePage() {
                   <span className="help">{t('share.customAddressHelp')}</span>
                 </div>
                 <hr className="divider sh-hr" />
-                <h3 className="t-label sh-h3">{t('share.urlParams')}</h3>
-                <div className="code">
+                <h3 className="t-label sh-h3" id="sh-params-h">
+                  {t('share.urlParams')}
+                </h3>
+                {/* Zone défilante atteignable au clavier (RGAA 7.3) */}
+                <div className="code" tabIndex={0} role="region" aria-labelledby="sh-params-h">
                   {url}
                   {paramExample.length ? (
                     paramExample.map(([sep, k, v]) => (

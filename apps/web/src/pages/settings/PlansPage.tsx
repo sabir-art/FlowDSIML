@@ -241,16 +241,16 @@ export function PlansPage() {
       <p className="t-caption muted pl-foot">
         {t('plans.enterpriseQ')}{' '}
         {/* PLN-08 : toujours un lien, qui ouvre la demande pour le plan Enterprise */}
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
+        <button
+          type="button"
+          className="link-button"
+          onClick={() => {
             const ent = plans.find((p) => p.code === 'enterprise');
             if (ent) setUpgrade(ent);
           }}
         >
           {t('plans.enterpriseLink')}
-        </a>
+        </button>
         .
       </p>
 

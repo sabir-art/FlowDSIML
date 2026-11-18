@@ -91,7 +91,7 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: var(--fd-color-success-text, #2f6a06);
+  color: var(--fd-color-success);
 }
 .ok-line svg {
   width: 15px;

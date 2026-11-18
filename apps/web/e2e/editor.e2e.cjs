@@ -145,7 +145,7 @@ const SHOTS = process.env.SHOTS_DIR;
     'EDT-08 : aperçu du formulaire sur le canevas',
   );
   ok(
-    (await page.locator('.rail-list .step--form[aria-selected="true"]').count()) === 1,
+    (await page.locator('.rail-list .step--form[aria-current="step"]').count()) === 1,
     'EDT-08 : formulaire sélectionné dans le rail',
   );
   await page.locator('.rail-li--form').hover();

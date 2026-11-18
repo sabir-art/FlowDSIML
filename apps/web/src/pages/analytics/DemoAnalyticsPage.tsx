@@ -315,14 +315,10 @@ export function PeriodPicker({ days, setDays }: { days: number; setDays: (d: num
   return (
     <div className="fd-segmented" role="group" aria-label={t('analytics.period')}>
       {PERIODS.map((p) => (
-        <button
-          key={p}
-          type="button"
-          aria-pressed={days === p}
-          aria-label={t('analytics.lastDays', { count: p })}
-          onClick={() => setDays(p)}
-        >
-          {t('analytics.daysShort', { count: p })}
+        <button key={p} type="button" aria-pressed={days === p} onClick={() => setDays(p)}>
+          {/* Texte court affiché, libellé complet pour les lecteurs d'écran (RGAA 11.2) */}
+          <span aria-hidden="true">{t('analytics.daysShort', { count: p })}</span>
+          <span className="sr-only">{t('analytics.lastDays', { count: p })}</span>
         </button>
       ))}
     </div>

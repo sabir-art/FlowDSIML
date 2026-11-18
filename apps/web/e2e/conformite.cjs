@@ -775,7 +775,7 @@ const SCREENS = {
       await p.evaluate(() => document.getElementById('m-up').removeAttribute('hidden'));
     },
     async prepare(p) {
-      await p.getByRole('link', { name: 'Parlons Enterprise' }).click();
+      await p.getByRole('button', { name: 'Parlons Enterprise' }).click();
       await p.waitForSelector('.modal');
     },
   },

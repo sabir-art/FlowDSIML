@@ -43,9 +43,16 @@ export function computePosition(
   let side = side0;
   if (side === 'bottom' && size.height > below && above > below) side = 'top';
   else if (side === 'top' && size.height > above && below > above) side = 'bottom';
-  const available = side === 'bottom' ? below : above;
-  const height = Math.min(size.height, available);
-  const top = side === 'bottom' ? anchor.bottom + GAP : anchor.top - GAP - height;
+  let available = side === 'bottom' ? below : above;
+  let height = Math.min(size.height, available);
+  let top = side === 'bottom' ? anchor.bottom + GAP : anchor.top - GAP - height;
+  // Aucun côté ne suffit mais le menu tient dans la fenêtre : on le décale pour le montrer en entier
+  // (pas de défilement caché, utile aussi au zoom 200 %), quitte à recouvrir le bouton.
+  if (size.height > available && size.height <= vh - 2 * margin) {
+    available = vh - 2 * margin;
+    height = size.height;
+    top = Math.min(Math.max(top, margin), vh - margin - height);
+  }
   // Alignement horizontal puis décalage pour rester dans le viewport
   let left = align === 'start' ? anchor.left : anchor.right - size.width;
   left = Math.min(left, vw - margin - size.width);

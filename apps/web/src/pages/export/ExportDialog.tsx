@@ -586,7 +586,6 @@ function Options(p: {
           type="button"
           role="radio"
           aria-checked={o.v === value}
-          aria-pressed={o.v === value}
           onClick={() => on(o.v)}
         >
           {o.label}
@@ -622,7 +621,6 @@ function Options(p: {
                 className="exp-format"
                 role="radio"
                 aria-checked={on}
-                aria-pressed={on}
                 aria-disabled={f.soon || undefined}
                 aria-describedby={f.soon ? `${p.id}-soon-${f.key}` : undefined}
                 onClick={() => !f.soon && p.setFmt(f.key as Fmt)}

@@ -1948,3 +1948,9 @@
   width: 12px;
   height: 12px;
 }
+
+/* L24 · RGAA 10.6 : un lien placé dans du texte se distingue autrement que par la couleur */
+:where(p, li, small, .sh-sub, .fd-help) a:not([class]) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

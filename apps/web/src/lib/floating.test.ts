@@ -28,6 +28,13 @@ describe('computePosition', () => {
     const r = computePosition(rect(2, 100), { width: 240, height: 100 }, 'bottom-end', 1280, 800);
     expect(r.left).toBe(8);
   });
+  it('décale le menu pour le montrer en entier quand aucun côté ne suffit', () => {
+    // Bouton au milieu d'une fenêtre de 768 px : 360 px au-dessus et au-dessous, menu de 460 px
+    const p = computePosition(rect(500, 370, 32, 32), { width: 220, height: 460 }, 'bottom-end', 1024, 768);
+    expect(p.top).toBeGreaterThanOrEqual(8);
+    expect(p.top + 460).toBeLessThanOrEqual(768 - 8);
+    expect(p.maxHeight).toBeGreaterThanOrEqual(460);
+  });
   it('limite la hauteur à l’espace disponible', () => {
     const p = computePosition(rect(10, 300, 32, 32), { width: 200, height: 2000 }, 'bottom-start', 1280, 800);
     expect(p.maxHeight).toBe(800 - 332 - 4 - 8);

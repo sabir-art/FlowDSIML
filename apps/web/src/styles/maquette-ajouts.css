@@ -638,7 +638,8 @@
   display: block;
 }
 .mk .funnel-bar > span + b {
-  color: #fff;
+  /* L24 : encre sur l'orange des graphiques (le blanc ne fait que 2,2:1) */
+  color: #080808;
 }
 :root[data-theme='dark'] .mk .funnel-bar > span + b {
   color: var(--fd-lagoon-950);
@@ -1273,7 +1274,7 @@
 .mk .step:hover {
   background: var(--fd-color-surface-hover);
 }
-.mk .step[aria-selected='true'] {
+.mk .step[aria-current='step'] {
   background: var(--fd-color-surface-selected);
   border-color: var(--fd-color-border-selected);
 }
@@ -1306,7 +1307,13 @@
   padding: 4px;
   text-align: center;
   overflow: hidden;
-  color: var(--fd-stone-700);
+  /* Aperçu du player toujours en clair : fond clair, texte lisible dans les deux thèmes */
+  align-self: stretch;
+  justify-self: stretch;
+  display: grid;
+  place-items: center;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text-muted);
 }
 .mk .step .th-missing {
   width: 16px;

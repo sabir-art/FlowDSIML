@@ -100,9 +100,7 @@
 }
 .mk .plans .plan.current .tag {
   background: var(--ref-current);
-  color: #ffffff;
-}
-:root[data-theme='dark'] .mk .plans .plan.current .tag {
+  /* L24 : encre foncée sur le bleu (le blanc ne fait que 3,2:1) */
   color: var(--fd-bleu-950);
 }
 .mk .badge-success {

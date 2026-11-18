@@ -164,12 +164,14 @@
   color: var(--fd-color-text);
 }
 .fd-segmented > button[aria-pressed='true'],
+.fd-segmented > button[aria-checked='true'],
 .fd-segmented > button[aria-selected='true'] {
   background: var(--fd-color-surface);
   color: var(--fd-color-text);
   box-shadow: var(--fd-shadow-xs);
 }
 .fd-segmented--strong > button[aria-pressed='true'],
+.fd-segmented--strong > button[aria-checked='true'],
 .fd-segmented--strong > button[aria-selected='true'] {
   background: var(--fd-color-nav-active);
   color: var(--fd-color-on-nav-active);

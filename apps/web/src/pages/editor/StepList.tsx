@@ -186,7 +186,7 @@ export function StepList({
                   <button
                     type="button"
                     className="step step--form"
-                    aria-selected={formSelected}
+                    aria-current={formSelected ? 'step' : undefined}
                     onClick={() => onSelectForm?.(i, form.id)}
                   >
                     <span className="n" aria-hidden="true" />
@@ -254,7 +254,6 @@ export function StepList({
                   type="button"
                   className={`step${grabbed === i ? ' is-grabbed' : ''}`}
                   aria-current={i === current && !selectedFormId ? 'step' : undefined}
-                  aria-selected={i === current && !selectedFormId}
                   data-step-index={i}
                   onClick={() => onSelect(i)}
                   onKeyDown={(e) => onRailKey(e, i)}

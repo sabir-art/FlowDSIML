@@ -81,7 +81,7 @@ export const colors = {
     'border-selected': prune[600],
     'text': noir[900],
     'text-muted': ardoise[600],
-    'text-subtle': ardoise[500],
+    'text-subtle': '#5C6774',
     'text-inverse': ardoise[0],
     'text-disabled': ardoise[400],
     'primary': prune[600],

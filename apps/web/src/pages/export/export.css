@@ -79,7 +79,7 @@
   text-align: left;
   cursor: pointer;
 }
-.x15-dialog .exp-format[aria-pressed='true'] {
+.x15-dialog .exp-format[aria-checked='true'] {
   border: 2px solid var(--fd-color-primary);
   padding: calc(var(--fd-space-4) - 1px);
   background: var(--fd-color-primary-soft);

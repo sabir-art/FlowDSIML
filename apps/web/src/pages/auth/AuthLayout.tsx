@@ -158,15 +158,13 @@ export function AuthLayout({
           {children}
           {footer && (
             <div className="row auth-footer">
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                aria-label={t('auth.changeLanguage')}
-                lang={other}
-                onClick={() => setLocale(other)}
-              >
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setLocale(other)}>
                 <Globe aria-hidden="true" />
-                {i18n.language === 'en' ? 'English' : 'Français'}
+                {/* Nom accessible = texte visible précédé de l'action (RGAA 11.2) */}
+                <span className="sr-only">{t('auth.changeLanguage')} : </span>
+                <span lang={i18n.language === 'en' ? 'en' : 'fr'}>
+                  {i18n.language === 'en' ? 'English' : 'Français'}
+                </span>
               </button>
               {/* Pages légales pas encore rédigées : liens vers une page « Bientôt » */}
               <span className="row auth-legal">

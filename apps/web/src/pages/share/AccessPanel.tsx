@@ -334,7 +334,7 @@ export function AccessPanel({
           <input
             type="checkbox"
             aria-labelledby="acc-exp-l"
-            aria-controls="acc-exp"
+            aria-controls={expOn ? 'acc-exp' : undefined}
             checked={expOn}
             disabled={!editable}
             onChange={(e) => {
