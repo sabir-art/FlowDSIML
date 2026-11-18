@@ -12,6 +12,7 @@ import {
   type ResumeInfo,
 } from './api';
 import { ResumeCard, resumable } from './Resume';
+import { CenterApp } from './Center';
 import { embedAllowed, parseRoute } from './logic';
 import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
@@ -229,4 +230,12 @@ function App() {
   );
 }
 
-render(<App />, document.getElementById('root')!);
+// L14 : le centre de formation a sa propre page ; passer du centre à un module (ou l'inverse) recharge
+// le lecteur, qui ne démarre qu'une fois par chargement. La navigation interne au centre ne recharge pas.
+const first = parseRoute(location.hash);
+addEventListener('hashchange', () => {
+  const next = parseRoute(location.hash);
+  const sameCenter = first.kind === 'center' && next.kind === 'center' && next.slug === first.slug;
+  if (!sameCenter) location.reload();
+});
+render(first.kind === 'center' ? <CenterApp route={first} /> : <App />, document.getElementById('root')!);

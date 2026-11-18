@@ -11,3 +11,7 @@ export const APP_ORIGIN: string = env.VITE_APP_ORIGIN || 'http://localhost:5173'
 export const OPEN_URL: string = env.VITE_OPEN_URL || `${SUPABASE_URL}/functions/v1/open-demo`;
 export const publishedBase = (demoId: string) =>
   `${SUPABASE_URL}/storage/v1/object/public/published/${demoId}/`;
+/** L14 : Edge Function du centre de formation public. */
+export const CENTER_URL: string = env.VITE_CENTER_URL || `${SUPABASE_URL}/functions/v1/open-center`;
+/** Logos du centre : bucket public « branding » (L14). */
+export const brandingUrl = (path: string) => `${SUPABASE_URL}/storage/v1/object/public/branding/${path}`;

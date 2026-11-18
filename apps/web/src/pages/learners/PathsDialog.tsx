@@ -306,6 +306,33 @@ export function PathsDialog({
                       }}
                     />
                   </div>
+                  <div className="fd-field">
+                    <label className="fd-label" htmlFor="gm-desc">
+                      {t('learners.paths.description')}
+                    </label>
+                    <textarea
+                      id="gm-desc"
+                      className="fd-input"
+                      rows={2}
+                      maxLength={600}
+                      defaultValue={path.description ?? ''}
+                      aria-describedby="gm-desc-h"
+                      onBlur={(e) => {
+                        const v = e.target.value.trim();
+                        if (v !== (path.description ?? ''))
+                          act(
+                            async () =>
+                              check(
+                                await supabase.from('paths').update({ description: v }).eq('id', path.id),
+                              ),
+                            saved,
+                          );
+                      }}
+                    />
+                    <span className="fd-help" id="gm-desc-h">
+                      {t('learners.paths.descriptionHelp')}
+                    </span>
+                  </div>
                   <label className="fd-switch gm-row">
                     <span>
                       {t('learners.paths.ordered')}

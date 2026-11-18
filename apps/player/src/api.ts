@@ -1,5 +1,5 @@
 import { parseManifest, type EventType, type Manifest } from '@flowdsiml/manifest';
-import { OPEN_URL, publishedBase, SUPABASE_ANON_KEY, SUPABASE_URL, TRACK_URL } from './config';
+import { CENTER_URL, OPEN_URL, publishedBase, SUPABASE_ANON_KEY, SUPABASE_URL, TRACK_URL } from './config';
 import { resolveAssets, randomId } from './logic';
 
 const rpcHeaders = () => ({
@@ -236,4 +236,61 @@ export function submitQuizAttempt(batch: {
   answers: Array<{ questionId: string; answerIds: string[] }>;
 }) {
   return rpc<QuizResult>('submit_quiz_attempt', { p_batch: batch });
+}
+
+// ---------------------------------------------------------------------------
+// L14 : centre de formation
+// ---------------------------------------------------------------------------
+const centerGrantKey = (slug: string) => `fd.cgrant.${slug}`;
+const centerLinkKey = (slug: string) => `fd.clink.${slug}`;
+
+function sessionGet(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function sessionSet(key: string, value: string) {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    /* stockage indisponible */
+  }
+}
+
+/** Jeton du lien personnel : pris dans l'adresse (?l=) puis gardé pour la session. */
+export function centerLinkToken(slug: string, fromUrl: string | null): string | null {
+  if (fromUrl && /^[A-Za-z0-9_-]{8,128}$/.test(fromUrl)) {
+    sessionSet(centerLinkKey(slug), fromUrl);
+    return fromUrl;
+  }
+  return sessionGet(centerLinkKey(slug));
+}
+
+export type CenterGateInfo = Omit<GateInfo, 'manifest'> & Partial<import('./center').CenterData>;
+
+/** Ouvre le centre via open-center (accès décidé côté serveur, couvertures signées). */
+export async function openCenter(
+  slug: string,
+  linkToken: string | null,
+  password?: string,
+): Promise<CenterGateInfo> {
+  const res = await fetch(CENTER_URL, {
+    method: 'POST',
+    headers: rpcHeaders(),
+    body: JSON.stringify({
+      slug,
+      password: password || undefined,
+      grant: sessionGet(centerGrantKey(slug)) || undefined,
+      linkToken: linkToken || undefined,
+      visitorId: storageGet(globalThis.localStorage, 'fd.vid'),
+    }),
+  }).catch(() => null);
+  if (!res || (!res.ok && res.status !== 429)) return { status: 'error' };
+  if (res.status === 429) return { status: 'locked', retryIn: 60 };
+  const body = (await res.json().catch(() => null)) as CenterGateInfo | null;
+  if (!body) return { status: 'error' };
+  if (body.status === 'ok' && body.grant) sessionSet(centerGrantKey(slug), body.grant);
+  return body;
 }

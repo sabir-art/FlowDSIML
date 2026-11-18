@@ -686,6 +686,42 @@ async function install(page, state = seed()) {
           row.updated_at = new Date().toISOString();
           return json(route, 200, null);
         }
+        // L14 : centre de formation (réglages)
+        case 'center_slug_available': {
+          const taken = (state.takenSlugs || []).includes(a.p_slug) ||
+            (t.training_centers || []).some((c) => c.slug === a.p_slug && c.workspace_id !== a.p_ws);
+          return json(route, 200, /^[a-z0-9][a-z0-9-]{1,46}[a-z0-9]$/.test(a.p_slug) && !taken);
+        }
+        case 'save_center_draft': {
+          if ((state.takenSlugs || []).includes(a.p_slug))
+            return json(route, 400, { code: 'P0001', message: 'SLUG_TAKEN' });
+          const list = (t.training_centers ||= []);
+          let c = list.find((x) => x.workspace_id === a.p_ws);
+          if (!c) {
+            c = { workspace_id: a.p_ws, published: null, published_at: null, access_mode: 'link', password_changed_at: null };
+            list.push(c);
+          }
+          Object.assign(c, { slug: a.p_slug, draft: a.p_draft, updated_at: new Date().toISOString() });
+          return json(route, 200, null);
+        }
+        case 'publish_center': {
+          const c = (t.training_centers || []).find((x) => x.workspace_id === a.p_ws);
+          if (!c) return json(route, 400, { code: 'P0001', message: 'NO_VISIBLE_PATH' });
+          c.published = JSON.parse(JSON.stringify(c.draft));
+          c.published_at = new Date().toISOString();
+          return json(route, 200, c.published_at);
+        }
+        case 'set_center_access': {
+          const c = (t.training_centers || []).find((x) => x.workspace_id === a.p_ws);
+          if (c) c.access_mode = a.p_mode;
+          return json(route, 200, null);
+        }
+        case 'set_center_password': {
+          const c = (t.training_centers || []).find((x) => x.workspace_id === a.p_ws);
+          if (c) Object.assign(c, { access_mode: 'password', password_changed_at: new Date().toISOString() });
+          (state.centerPasswords ||= []).push(a.p_password.length);
+          return json(route, 200, null);
+        }
         // L13 : suivi des apprenants. state.learners = réponse de learners_progress (paths, structures, learners)
         case 'learners_progress':
           return json(route, 200, state.learners || { paths: [], structures: [], learners: [] });

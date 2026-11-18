@@ -1,0 +1,204 @@
+/**
+ * L14 : logique du centre de formation public (sans rendu) : états des formations et des modules,
+ * recherche et étiquettes, couleurs de la marque. Les données viennent d'open-center (center_open).
+ */
+
+export type ModuleAccess = 'open' | 'password' | 'expired';
+export type ModuleStatus = 'validated' | 'failed' | 'in_progress' | 'not_started';
+
+export interface CenterModule {
+  demoId: string;
+  title: string;
+  required: boolean;
+  steps: number;
+  hasQuiz: boolean;
+  access: ModuleAccess;
+  cover: string | null;
+  status?: ModuleStatus | null;
+  seen?: number | null;
+  total?: number | null;
+}
+
+export interface CenterPath {
+  id: string;
+  title: string;
+  description: string;
+  ordered: boolean;
+  isNew: boolean;
+  tags: Array<{ name: string; color: string }>;
+  modules: CenterModule[];
+}
+
+export interface CenterInfo {
+  title: string;
+  intro: string;
+  brand: string | null;
+  accent: string | null;
+  style: 'workspace' | 'sober' | 'dark' | 'contrast';
+  logoPath: string | null;
+  help: string;
+  a11y: 'non_evalue' | 'partiel' | 'total';
+  indexable: boolean;
+  workspace: string;
+}
+
+export interface CenterData {
+  center: CenterInfo;
+  visitor: { firstName: string } | null;
+  paths: CenterPath[];
+}
+
+/** État d'un module tel qu'affiché (carte et page de la formation). */
+export type ModuleView =
+  | { kind: 'ok' }
+  | { kind: 'cur'; step: number; total: number }
+  | { kind: 'lock'; after: number }
+  | { kind: 'todo' }
+  | { kind: 'password' }
+  | { kind: 'expired' };
+
+export interface PathView {
+  path: CenterPath;
+  identified: boolean;
+  validated: number;
+  total: number;
+  started: boolean;
+  done: boolean;
+  badge: 'done' | 'current' | 'new' | null;
+  cta: 'resume' | 'start' | 'review';
+  modules: ModuleView[];
+  /** Premier module à faire (reprise), s'il est ouvert. */
+  next: CenterModule | null;
+  optional: number;
+  quizzes: number;
+}
+
+export function pathView(p: CenterPath, identified: boolean): PathView {
+  const mods = p.modules;
+  const valid = (m: CenterModule) => identified && m.status === 'validated';
+  const validated = mods.filter(valid).length;
+  const mustDo = mods.some((m) => m.required) ? mods.filter((m) => m.required) : mods;
+  const done = identified && mustDo.length > 0 && mustDo.every(valid);
+  const started = identified && mods.some((m) => m.status && m.status !== 'not_started');
+  const firstOpen = mods.findIndex((m) => !valid(m));
+  const views: ModuleView[] = mods.map((m, i) => {
+    if (m.access === 'expired') return { kind: 'expired' };
+    if (valid(m)) return { kind: 'ok' };
+    if (m.access === 'password') return { kind: 'password' };
+    if (identified && p.ordered && firstOpen >= 0 && i > firstOpen) return { kind: 'lock', after: i };
+    if (identified && (m.status === 'in_progress' || m.status === 'failed') && (m.total ?? 0) > 0)
+      return { kind: 'cur', step: Math.min((m.seen ?? 0) + 1, m.total!), total: m.total! };
+    return { kind: 'todo' };
+  });
+  const next = mods.find((m, i) => !valid(m) && m.access !== 'expired' && views[i]!.kind !== 'lock') ?? null;
+  return {
+    path: p,
+    identified,
+    validated,
+    total: mods.length,
+    started,
+    done,
+    badge: done ? 'done' : started ? 'current' : p.isNew ? 'new' : null,
+    cta: done ? 'review' : started ? 'resume' : 'start',
+    modules: views,
+    next,
+    optional: mods.filter((m) => !m.required).length,
+    quizzes: mods.filter((m) => m.hasQuiz).length,
+  };
+}
+
+/** « Ma formation en cours » : la première formation commencée et non terminée, dans l'ordre de la page. */
+export function currentPath(views: PathView[]): PathView | null {
+  return views.find((v) => v.started && !v.done) ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Recherche et étiquettes
+// ---------------------------------------------------------------------------
+export const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+
+/** La recherche porte sur les titres des formations et des modules, leurs descriptions et les étiquettes. */
+export function matches(p: CenterPath, q: string): boolean {
+  const n = fold(q.trim());
+  if (!n) return true;
+  return [p.title, p.description, ...p.modules.map((m) => m.title), ...p.tags.map((t) => t.name)].some((s) =>
+    fold(s).includes(n),
+  );
+}
+
+export function filterPaths(paths: CenterPath[], q: string, tag: string): CenterPath[] {
+  return paths.filter((p) => (!tag || p.tags.some((t) => t.name === tag)) && matches(p, q));
+}
+
+/** Étiquettes utilisées par au moins une formation visible, avec leur nombre de formations. */
+export function tagCounts(paths: CenterPath[]): Array<{ name: string; color: string; count: number }> {
+  const m = new Map<string, { name: string; color: string; count: number }>();
+  for (const p of paths)
+    for (const t of p.tags) {
+      const x = m.get(t.name) ?? { ...t, count: 0 };
+      x.count++;
+      m.set(t.name, x);
+    }
+  return [...m.values()].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+}
+
+/** Découpe un texte pour surligner le terme cherché (sans tenir compte des accents ni de la casse). */
+export function highlight(text: string, q: string): Array<{ text: string; hit: boolean }> {
+  const n = fold(q.trim());
+  if (!n) return [{ text, hit: false }];
+  const f = fold(text);
+  // fold() garde la longueur des caractères de base : les positions se correspondent après NFD
+  const base = text.normalize('NFD').replace(/\p{M}/gu, '');
+  if (base.length !== text.length) {
+    const i = f.indexOf(n);
+    return i < 0 ? [{ text, hit: false }] : [{ text, hit: true }];
+  }
+  const out: Array<{ text: string; hit: boolean }> = [];
+  let from = 0;
+  for (let i = f.indexOf(n); i >= 0; i = f.indexOf(n, i + n.length)) {
+    if (i > from) out.push({ text: text.slice(from, i), hit: false });
+    out.push({ text: text.slice(i, i + n.length), hit: true });
+    from = i + n.length;
+  }
+  if (from < text.length) out.push({ text: text.slice(from), hit: false });
+  return out.length ? out : [{ text, hit: false }];
+}
+
+// ---------------------------------------------------------------------------
+// Couleurs
+// ---------------------------------------------------------------------------
+function lum(hex: string): number {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const [r, g, b] = c.map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)) as [
+    number,
+    number,
+    number,
+  ];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+export function contrast(a: string, b: string): number {
+  const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m) as [number, number];
+  return (x + 0.05) / (y + 0.05);
+}
+const HEX = /^#[0-9a-f]{6}$/i;
+export const DEFAULT_BRAND = '#A3195B';
+export const DEFAULT_ACCENT = '#95C11F';
+
+/** Variables CSS de la page selon le style prédéfini et les couleurs du workspace. */
+export function themeVars(c: Pick<CenterInfo, 'brand' | 'accent' | 'style'>): Record<string, string> {
+  const brand =
+    c.style === 'sober' || c.style === 'contrast'
+      ? '#12161B'
+      : c.brand && HEX.test(c.brand)
+        ? c.brand
+        : DEFAULT_BRAND;
+  const accent = c.accent && HEX.test(c.accent) ? c.accent : DEFAULT_ACCENT;
+  if (c.style === 'dark') return { '--accent': accent };
+  const on = contrast(brand, '#FFFFFF') >= 4.5 ? '#FFFFFF' : '#12161B';
+  return {
+    '--brand': brand,
+    '--brand-on': on,
+    '--brand-soft': `color-mix(in srgb, ${brand} 10%, #FFFFFF)`,
+    '--accent': accent,
+  };
+}

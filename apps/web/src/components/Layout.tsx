@@ -9,6 +9,7 @@ import {
   CreditCard,
   Contact,
   GraduationCap,
+  LayoutTemplate,
   Languages,
   LayoutGrid,
   LogOut,
@@ -36,7 +37,7 @@ export function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut, user, profile } = useAuth();
-  const { current } = useWorkspace();
+  const { current, can } = useWorkspace();
   const [open, setOpen] = useState(false);
 
   const menuBtn = useRef<HTMLButtonElement>(null);
@@ -180,6 +181,13 @@ export function Layout() {
             <GraduationCap {...ICON} />
             {t('nav.learners')}
           </NavLink>
+          {/* L14 : réglages du centre de formation (propriétaires et admins) */}
+          {can('members.manage') && (
+            <NavLink to="/center" className="fd-nav__item">
+              <LayoutTemplate {...ICON} />
+              {t('nav.center')}
+            </NavLink>
+          )}
           <div className="fd-nav__section">{t('nav.workspace')}</div>
           {admin.map((n) => (
             <NavLink key={n.to} to={n.to} className="fd-nav__item">

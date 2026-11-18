@@ -10,6 +10,7 @@ const path = require('path');
 const { install } = require('./fake-supabase.cjs');
 const { seedMaquette } = require('./maquette-data.cjs');
 const { learnersFixture, resumeFixture, seedPathTables } = require('./learners-data.cjs');
+const { centerFixture, seedCenterTables } = require('./center-data.cjs');
 
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const MAQ = path.resolve(__dirname, '../../../docs/ux/maquettes');
@@ -546,6 +547,66 @@ const SCREENS = {
       await p.waitForTimeout(300);
     },
   },
+  // L14 : centre de formation (page publique dans le lecteur, réglages dans l'app)
+  'L14-01': {
+    maquette: 'refonte/l14-centre.html?view=accueil',
+    player: true,
+    playerPath: '/c/ml-exemple',
+    waitFor: '.ctr',
+    center: () => centerFixture(),
+  },
+  'L14-02': {
+    maquette: 'refonte/l14-centre.html?view=anonyme',
+    player: true,
+    playerPath: '/c/ml-exemple',
+    waitFor: '.ctr',
+    center: () => centerFixture({ identified: false }),
+  },
+  'L14-03': {
+    maquette: 'refonte/l14-centre.html?view=filtre',
+    player: true,
+    playerPath: '/c/ml-exemple?q=agenda&tag=Bureautique',
+    waitFor: '.ctr',
+    center: () => centerFixture(),
+  },
+  'L14-04': {
+    maquette: 'refonte/l14-centre.html?view=sans-resultat',
+    player: true,
+    playerPath: "/c/ml-exemple?q=badge%20d'acc%C3%A8s",
+    waitFor: '.ctr',
+    center: () => centerFixture(),
+  },
+  'L14-05': {
+    maquette: 'refonte/l14-centre.html?view=formation',
+    player: true,
+    playerPath: '/c/ml-exemple/f/00000000-0000-4000-8000-0000000000f3',
+    waitFor: '.ctr',
+    center: () => centerFixture({ statsStarted: true }),
+  },
+  'L14-06': {
+    maquette: 'refonte/l14-centre.html?view=terminee',
+    player: true,
+    playerPath: '/c/ml-exemple/f/00000000-0000-4000-8000-0000000000f2',
+    waitFor: '.ctr',
+    center: () => centerFixture(),
+  },
+  'L14-07': {
+    maquette: 'refonte/l14-centre.html?view=vide',
+    player: true,
+    playerPath: '/c/ml-exemple',
+    waitFor: '.ctr',
+    center: () => centerFixture({ empty: true }),
+  },
+  'L14-08': {
+    maquette: 'refonte/l14-centre.html?view=reglages',
+    route: '/#/center',
+    seed: (d) => seedCenterTables(d),
+  },
+  'L14-09': {
+    maquette: 'refonte/l14-centre.html?view=reglages-vide',
+    route: '/#/center',
+    seed: (d) => seedCenterTables(d, { empty: true }),
+  },
   // L11 : partage sécurisé (onglet Accès, écrans visiteur)
   'L11-01': {
     maquette: 'reference/partage-securise.html?etat=mdp',
@@ -869,8 +930,22 @@ async function shotPlayer(b, s, theme) {
       headers: cors,
     });
   });
+  // L14 : centre de formation (réponse d'open-center propre à l'état)
+  if (s.center)
+    await p.route('**/functions/v1/open-center', (r) =>
+      r.request().method() === 'OPTIONS'
+        ? r.fulfill({
+            status: 204,
+            headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
+          })
+        : r.fulfill({
+            contentType: 'application/json',
+            body: JSON.stringify(s.center()),
+            headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
+          }),
+    );
   await p.goto(`${PLAYER}/#${s.playerPath ?? `/d/${manifest.demoId}`}`);
-  await p.waitForSelector(s.playerPath || s.gate ? '.p-sys-card' : '.p-stage');
+  await p.waitForSelector(s.waitFor ?? (s.playerPath || s.gate ? '.p-sys-card' : '.p-stage'));
   await p.waitForTimeout(900);
   if (s.prepare) await s.prepare(p);
   await p.mouse.move(0, 0);

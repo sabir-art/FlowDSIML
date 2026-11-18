@@ -102,11 +102,14 @@ export function PasswordGate({
   locale,
   info,
   onOpen,
+  submitPassword,
 }: {
   demoId: string;
   locale: string;
   info: GateInfo;
   onOpen: (r: GateInfo) => void;
+  /** L14 : vérification propre (centre de formation) ; par défaut, open-demo. */
+  submitPassword?: (password: string) => Promise<GateInfo>;
 }) {
   const t = strings(locale.startsWith('en') ? 'en' : 'fr');
   const g = t.gate as unknown as Record<string, string>;
@@ -134,7 +137,7 @@ export function PasswordGate({
     e.preventDefault();
     if (!value || busy || locked) return;
     setBusy(true);
-    const r = await openDemo(demoId, value);
+    const r = await (submitPassword ? submitPassword(value) : openDemo(demoId, value));
     setBusy(false);
     if (r.status === 'ok') return onOpen(r);
     setState({ ...state, ...r });

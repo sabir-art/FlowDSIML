@@ -61,7 +61,7 @@ const GATE_KEY = (demoId: string) => `fd.gate.${demoId}`;
 const ICON = { size: 18, strokeWidth: 2, 'aria-hidden': true } as const;
 
 /** Vrai sous 640 px : la bulle devient une feuille ancrée en bas (P3). */
-function useMedia(q: string) {
+export function useMedia(q: string) {
   const [match, setMatch] = useState(() => matchMedia(q).matches);
   useEffect(() => {
     const mq = matchMedia(q);
