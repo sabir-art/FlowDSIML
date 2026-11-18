@@ -688,7 +688,8 @@ async function install(page, state = seed()) {
         }
         // L14 : centre de formation (réglages)
         case 'center_slug_available': {
-          const taken = (state.takenSlugs || []).includes(a.p_slug) ||
+          const taken =
+            (state.takenSlugs || []).includes(a.p_slug) ||
             (t.training_centers || []).some((c) => c.slug === a.p_slug && c.workspace_id !== a.p_ws);
           return json(route, 200, /^[a-z0-9][a-z0-9-]{1,46}[a-z0-9]$/.test(a.p_slug) && !taken);
         }
@@ -698,7 +699,13 @@ async function install(page, state = seed()) {
           const list = (t.training_centers ||= []);
           let c = list.find((x) => x.workspace_id === a.p_ws);
           if (!c) {
-            c = { workspace_id: a.p_ws, published: null, published_at: null, access_mode: 'link', password_changed_at: null };
+            c = {
+              workspace_id: a.p_ws,
+              published: null,
+              published_at: null,
+              access_mode: 'link',
+              password_changed_at: null,
+            };
             list.push(c);
           }
           Object.assign(c, { slug: a.p_slug, draft: a.p_draft, updated_at: new Date().toISOString() });
@@ -726,17 +733,30 @@ async function install(page, state = seed()) {
         case 'learners_progress':
           return json(route, 200, state.learners || { paths: [], structures: [], learners: [] });
         case 'learner_detail':
-          return json(route, 200, (state.learnerDetail || {})[a.p_learner] || { events: [], attempts: [], reminders: [] });
+          return json(
+            route,
+            200,
+            (state.learnerDetail || {})[a.p_learner] || { events: [], attempts: [], reminders: [] },
+          );
         case 'record_reminders': {
           const now = new Date().toISOString();
           const kept = (state.learners?.learners || []).filter(
-            (l) => a.p_learners.includes(l.id) && l.email && (!l.lastReminder || Date.now() - Date.parse(l.lastReminder) >= 72 * 3600e3),
+            (l) =>
+              a.p_learners.includes(l.id) &&
+              l.email &&
+              (!l.lastReminder || Date.now() - Date.parse(l.lastReminder) >= 72 * 3600e3),
           );
           for (const l of kept) l.lastReminder = now;
-          return json(route, 200, kept.map((l) => l.id));
+          return json(
+            route,
+            200,
+            kept.map((l) => l.id),
+          );
         }
         case 'grant_quiz_attempt': {
-          const m = state.learners?.learners.find((l) => l.id === a.p_learner)?.modules.find((x) => x.demoId === a.p_demo);
+          const m = state.learners?.learners
+            .find((l) => l.id === a.p_learner)
+            ?.modules.find((x) => x.demoId === a.p_demo);
           if (m && m.max !== null) {
             m.max += 1;
             if (m.status === 'failed') m.status = 'in_progress';
