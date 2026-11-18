@@ -83,6 +83,8 @@ const { chromium } = require('playwright');
   await first.click();
   const unticked = await first.getAttribute('aria-checked');
   const warn = await review.textContent('#warning');
+  if (process.env.SHOTS_DIR)
+    await review.screenshot({ path: `${process.env.SHOTS_DIR}/f1-verification-decoche.png` });
   const logBeforeSend = await (await fetch('http://localhost:54400/__log')).json();
   await review.click('#send');
   await review.waitForURL(/22222222-2222-2222-2222-222222222222/, { timeout: 15000 }).catch(() => {});
@@ -140,7 +142,7 @@ const { chromium } = require('playwright');
   );
   ok(!/06 12|camille\.martin|DURAND|123 456/.test(excerpts), 'extraits masqués, jamais en clair');
   ok(
-    unticked === 'false' && /ne seront pas floutés|will not be blurred/.test(warn),
+    unticked === 'false' && /ne sera pas floutée|ne seront pas floutées|will not be blurred/.test(warn),
     'faux positif décoché avec avertissement',
   );
   ok(

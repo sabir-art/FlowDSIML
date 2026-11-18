@@ -9,8 +9,10 @@ import {
   KeyRound,
   Landmark,
   Lock,
+  EyeOff,
   Mail,
   Phone,
+  TriangleAlert,
   ScanSearch,
   Send,
   SquareDashed,
@@ -90,7 +92,7 @@ async function boot() {
   $('confirm-yes').textContent = tr('cancelYes');
   $('state-text').textContent = tr('analyzing');
   createIcons({
-    icons: { Lock, Check, Send, Scan: ScanSearch },
+    icons: { Lock, Check, Send, Scan: ScanSearch, EyeOff },
     attrs: { width: 16, height: 16, 'aria-hidden': 'true' },
   });
 
@@ -117,6 +119,7 @@ async function boot() {
   sum.hidden = false;
   sum.className = `rv-alert ${total ? 'rv-alert--warning' : 'rv-alert--info'}`;
   sum.replaceChildren(
+    ...(total ? [icon(TriangleAlert, 18)] : []),
     total
       ? h(
           'p',
@@ -249,9 +252,11 @@ function renderPanel() {
   // FL-5 : phrase qui nomme les détections non floutées (« ne seront pas floutées », « pas » en gras)
   $('warning').hidden = off.length === 0;
   const list = new Intl.ListFormat(document.documentElement.lang, { type: 'conjunction' }).format(off);
-  const [before, after] = (off.length ? tr('notBlurredWarning', { types: list, not: '{{not}}' }) : '').split(
-    '{{not}}',
-  );
+  const [before, after] = (
+    off.length
+      ? tr('notBlurredWarning', { types: list, not: '{{not}}', count: c.zones.filter((z) => !z.blur).length })
+      : ''
+  ).split('{{not}}');
   $('warning').replaceChildren(before ?? '', ...(after !== undefined ? [h('b', {}, tr('not')), after] : []));
   ($('blur-all') as HTMLButtonElement).disabled = c.zones.every((z) => z.blur);
 }

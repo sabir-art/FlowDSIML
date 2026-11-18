@@ -25,7 +25,10 @@ const fr = {
   legendSelected: 'Sélectionnée',
   zoneBlurred: '{{type}}, floutée',
   zoneNotBlurred: '{{type}}, non floutée',
-  notBlurredWarning: '{{types}} ne seront {{not}} floutés. Vérifiez qu’il s’agit bien de données fictives.',
+  notBlurredWarning_one:
+    'Cette détection ne sera {{not}} floutée : {{types}}. Vérifiez qu’il s’agit bien d’une donnée fictive.',
+  notBlurredWarning_other:
+    'Ces détections ne seront {{not}} floutées : {{types}}. Vérifiez qu’il s’agit bien de données fictives.',
   not: 'pas',
   privacy: 'Détection faite dans votre navigateur : aucune image n’est envoyée avant votre validation.',
   cancel: 'Annuler la capture',
@@ -75,7 +78,9 @@ const en: typeof fr = {
   legendSelected: 'Selected',
   zoneBlurred: '{{type}}, blurred',
   zoneNotBlurred: '{{type}}, not blurred',
-  notBlurredWarning: '{{types}} will {{not}} be blurred. Make sure this is fictional data.',
+  notBlurredWarning_one: 'This detection will {{not}} be blurred: {{types}}. Make sure it is fictional data.',
+  notBlurredWarning_other:
+    'These detections will {{not}} be blurred: {{types}}. Make sure this is fictional data.',
   not: 'not',
   privacy: 'Detection runs in your browser: no image is sent before you confirm.',
   cancel: 'Discard capture',

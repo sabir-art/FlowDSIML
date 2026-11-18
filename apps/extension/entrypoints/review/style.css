@@ -468,3 +468,38 @@ dialog::backdrop {
 #blur-all {
   align-self: flex-start;
 }
+/* F1-01 (retours) : bandeau d'alerte avec icône et bordure orange, pastille œil barré du panneau */
+.rv-alert--warning {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px solid color-mix(in srgb, var(--fd-color-warning, #c27a00) 45%, transparent);
+}
+.rv-alert--warning > svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--fd-color-warning, #c27a00);
+}
+.rv-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.rv-panel__head h2 {
+  margin: 0;
+}
+.rv-panel__chip {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--fd-color-primary-soft, #fbe8f0);
+  color: var(--fd-color-primary-soft-text, #8a1450);
+}
+.rv-panel__chip svg {
+  width: 16px;
+  height: 16px;
+}
