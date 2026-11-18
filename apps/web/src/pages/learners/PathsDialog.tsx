@@ -308,7 +308,8 @@ export function PathsDialog({
                   </div>
                   <div className="fd-field">
                     <label className="fd-label" htmlFor="gm-desc">
-                      {t('learners.paths.description')}
+                      {t('learners.paths.description')}{' '}
+                      <span className="fd-help">{t('learners.paths.optional')}</span>
                     </label>
                     <textarea
                       id="gm-desc"

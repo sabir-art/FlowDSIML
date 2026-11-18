@@ -1848,7 +1848,8 @@
       "structureDeleted": "Structure « {{name}} » supprimée.",
       "publicHelp": "Les messageries grand public ne sont pas acceptées comme domaine. Un apprenant sans domaine connu reste « Sans structure » jusqu'à ce qu'on le rattache depuis sa fiche.",
       "description": "Description",
-      "descriptionHelp": "Affichée sous le titre de la formation dans le centre ; la recherche du centre en tient compte."
+      "descriptionHelp": "Affichée en intro de la page de la formation (centre de formation) et prise en compte par la recherche. 600 caractères au plus.",
+      "optional": "(facultatif)"
     },
     "daysAgo_one": "il y a {{count}} j",
     "daysAgo_other": "il y a {{count}} j"

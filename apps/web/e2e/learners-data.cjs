@@ -248,6 +248,10 @@ function seedPathTables(tables, ws, now = Date.now()) {
     id: p.id,
     workspace_id: ws,
     title: p.title,
+    description: {
+      'p-logiciel': 'Prendre en main le logiciel métier, de la fiche usager à l’agenda.',
+      'p-stats': 'Lire et exporter les indicateurs d’activité de la structure.',
+    }[p.id] ?? '',
     ordered: p.ordered,
     goal: p.goal,
     created_at: new Date(Date.parse(at) + i * 1000).toISOString(),

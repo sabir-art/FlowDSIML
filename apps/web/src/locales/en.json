@@ -1848,7 +1848,8 @@
       "structureDeleted": "Structure “{{name}}” deleted.",
       "publicHelp": "Public mail providers are not accepted as a domain. A learner with no known domain stays “No structure” until attached from their profile.",
       "description": "Description",
-      "descriptionHelp": "Shown under the course title in the center; the center search uses it."
+      "descriptionHelp": "Shown as the intro of the course page (training center) and used by search. 600 characters max.",
+      "optional": "(optional)"
     },
     "daysAgo_one": "{{count}}d ago",
     "daysAgo_other": "{{count}}d ago"
