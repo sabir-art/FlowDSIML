@@ -354,9 +354,10 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
           {m.cta && (
             <button
               class="p-btn p-btn-primary p-btn-sm p-top-cta"
+              title={sub(m.cta.label)}
               onClick={() => onCta(m.cta!.url, m.cta!.label)}
             >
-              {sub(m.cta.label)}
+              <span class="p-top-cta-label">{sub(m.cta.label)}</span>
               <span class="p-top-cta-icon">
                 <ExternalLink {...ICON} size={16} />
               </span>

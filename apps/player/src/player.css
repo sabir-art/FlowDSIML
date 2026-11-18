@@ -1480,3 +1480,23 @@ body {
 .p-zoom.is-instant {
   transition: none;
 }
+/* CTA de l'en-tête toujours sur une ligne sur mobile (retour Lead UX) : libellé tronqué avec « … »,
+   libellé complet en infobulle ; l'icône reste visible (PY-7) */
+@media (max-width: 720px) {
+  .p-top-acts {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 52%;
+  }
+  .p-top-cta {
+    max-width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
+  .p-top-cta-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+}
