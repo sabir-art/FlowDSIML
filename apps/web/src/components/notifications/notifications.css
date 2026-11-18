@@ -1,0 +1,229 @@
+/* L22-05/06 : cloche et panneau de notifications (maquette l22-collab.html ?view=notifs). */
+.nb {
+  position: relative;
+  display: inline-flex;
+}
+.nb-bell {
+  position: relative;
+}
+.nb-cnt {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--fd-color-danger);
+  color: #ffffff;
+  font: 700 11px/18px var(--fd-font-sans);
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--fd-color-bg);
+}
+.nb-pop {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 40;
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 110px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--fd-radius-2xl);
+  border: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: var(--fd-shadow-lg);
+  text-align: left;
+}
+.nb-pop:focus {
+  outline: none;
+}
+.nb-pop:focus-visible {
+  box-shadow: var(--fd-shadow-focus), var(--fd-shadow-lg);
+}
+.nb-pop header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nb-pop header h2 {
+  flex: 1;
+  margin: 0;
+  font-size: var(--fd-text-h3-size);
+}
+.nb-pop .fd-segmented {
+  align-self: flex-start;
+}
+.nb-body {
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+.nb-group {
+  margin: 6px 0 2px;
+  font-size: var(--fd-text-caption-size);
+  font-weight: 700;
+  color: var(--fd-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.nb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.nb-list li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 10px;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--fd-radius-lg);
+  font-size: var(--fd-text-body-size);
+}
+.nb-list li:hover {
+  background: var(--fd-color-surface-hover);
+}
+.nb-list li.unread {
+  background: var(--fd-color-primary-soft);
+}
+.nb-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--fd-color-primary);
+}
+.nb-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font: 700 0.6875rem var(--fd-font-sans);
+}
+.nb-avatar--1 {
+  background: var(--fd-color-chart-1);
+  color: #080808;
+}
+.nb-avatar--2 {
+  background: var(--fd-color-chart-2);
+  color: #ffffff;
+}
+.nb-avatar--3 {
+  background: var(--fd-color-chart-3);
+  color: #080808;
+}
+.nb-avatar--4 {
+  background: var(--fd-color-chart-4);
+  color: #080808;
+}
+.nb-avatar--5 {
+  background: var(--fd-color-chart-5);
+  color: #ffffff;
+}
+.nb-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.nb-text small {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  color: var(--fd-color-text-muted);
+  font-size: var(--fd-text-caption-size);
+}
+.nb-text small svg {
+  width: 13px;
+  height: 13px;
+}
+.nb-q {
+  display: block;
+  margin-top: 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--fd-color-surface);
+  border-left: 3px solid var(--fd-color-primary);
+  font-size: var(--fd-text-label-size);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nb-mtag {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  font-weight: 700;
+}
+.nb-cover {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.nb-cover:focus-visible {
+  outline: none;
+  box-shadow: var(--fd-shadow-focus);
+}
+.nb-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.nb-foot .fd-help {
+  margin: 0;
+}
+.nb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 28px 16px;
+}
+.nb-empty .fd-icon-chip {
+  width: 48px;
+  height: 48px;
+}
+.nb-empty p {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+  font-size: 14px;
+}
+.nb-prefs-help {
+  margin: 0;
+}
+.nb-prefs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.nb-prefs .fd-switch {
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0;
+}
+.nb-prefs .is-soon {
+  color: var(--fd-color-text-muted);
+}
+@media (max-width: 600px) {
+  .nb-pop {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    top: 72px;
+    width: auto;
+  }
+}

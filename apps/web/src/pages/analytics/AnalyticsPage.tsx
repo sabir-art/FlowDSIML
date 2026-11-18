@@ -13,6 +13,7 @@ import { initials } from '../../lib/initials';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
+import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 type Source = 'direct' | 'embed' | 'link';
 interface WsAnalytics {
@@ -159,6 +160,7 @@ export function AnalyticsPage() {
           <p className="muted an-sub">{t('analytics.updated', { when: formatRelativeShort(loadedAt) })}</p>
         </div>
         <div className="row wrap">
+          <NotificationBell />
           <select
             className="select input-sm an-select"
             aria-label={t('analytics.demoFilter')}

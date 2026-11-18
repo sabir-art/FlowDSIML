@@ -5,6 +5,7 @@ import { Code, CreditCard, Palette, Settings, UserRound, Users } from 'lucide-re
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
+import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 /**
  * Cadre des paramètres (maquette parametres.html) : titre « Paramètres » et navigation interne
@@ -23,6 +24,9 @@ export function SettingsShell({ children }: { children: ReactNode }) {
     <div className="mk st">
       <div className="page-head">
         <h1>{t('settings.title')}</h1>
+        <div className="page-head__actions">
+          <NotificationBell />
+        </div>
       </div>
       <div className="settings">
         <nav className="snav" aria-label={t('settings.sections')}>

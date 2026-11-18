@@ -22,6 +22,7 @@ import { ExportDialog } from '../export/ExportDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
+import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 type Tab = 'link' | 'embed' | 'perso' | 'access';
 type LinkStats = Record<string, { views: number; last: string | null }>;
@@ -194,6 +195,9 @@ export function SharePage() {
               <PublishButton editor={editor} republishLabel={t('share.publishChanges')} />
             </span>
           )}
+        </div>
+        <div className="page-head__actions">
+          <NotificationBell />
         </div>
       </div>
       {params.get('published') && (

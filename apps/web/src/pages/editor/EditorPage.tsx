@@ -98,6 +98,16 @@ export function EditorPage() {
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   // L22-02 : « Présenter » (aussi ouvert depuis le menu d'une démo par ?present=1)
+  // L22-05 : lien d'une notification (?step=…&comment=…) → étape choisie une fois chargée
+  const focusStep = params.get('step');
+  const focusComment = params.get('comment');
+  const [stepApplied, setStepApplied] = useState(false);
+  useEffect(() => {
+    if (stepApplied || !focusStep || !editor.steps.length) return;
+    const i = editor.steps.findIndex((st) => st.id === focusStep);
+    if (i >= 0) setIndex(i);
+    setStepApplied(true);
+  }, [stepApplied, focusStep, editor.steps]);
   const [presenting, setPresenting] = useState(() => params.get('present') === '1');
   const navigate = useNavigate();
   const versionId = editor.demo?.current_version_id;
@@ -213,6 +223,7 @@ export function EditorPage() {
         {step && (
           <CommentsPanel
             variant="mobile"
+            focusComment={focusComment}
             stepId={step.id}
             stepIndex={Math.min(index, editor.steps.length - 1)}
             api={comments}
@@ -576,7 +587,12 @@ export function EditorPage() {
           </div>
           {/* Commentaires d'équipe (lot A6) : gardés sous le canevas, repliables */}
           <div className="stage-comments">
-            <CommentsPanel stepId={step?.id ?? null} stepIndex={safeIndex} api={comments} />
+            <CommentsPanel
+              stepId={step?.id ?? null}
+              stepIndex={safeIndex}
+              api={comments}
+              focusComment={focusComment}
+            />
           </div>
         </section>
         <aside className="panel" aria-label={t('editor.properties')}>

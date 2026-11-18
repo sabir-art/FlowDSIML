@@ -40,6 +40,7 @@ import {
   type PathSummary,
 } from './centerDraft';
 import './center.css';
+import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 const ICON = { size: 16, strokeWidth: 1.75, 'aria-hidden': true } as const;
 const BLACK = '#080808';
@@ -301,6 +302,7 @@ export function CenterSettings() {
           </p>
         </div>
         <div className="page-head__actions">
+          <NotificationBell />
           <a
             className={`fd-btn${row?.published ? '' : ' is-disabled'}`}
             href={row?.published ? url : undefined}

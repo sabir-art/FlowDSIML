@@ -1,3 +1,4 @@
+import { avatarTone } from '../../../lib/avatarTone';
 import {
   Fragment,
   useEffect,
@@ -66,13 +67,6 @@ function store(key: string, value: string) {
   }
 }
 
-/** Couleur d'avatar stable par membre, prise dans chart-1…chart-5. */
-function avatarTone(id: string) {
-  let h = 0;
-  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return (h % 5) + 1;
-}
-
 /** Texte brut avec liens cliquables (pas de Markdown, jamais de HTML injecté). */
 function Linkified({ text }: { text: string }) {
   const parts = text.split(/(https?:\/\/[^\s<>"']*[^\s<>"'.,;:!?)\]])/g);
@@ -111,6 +105,7 @@ export function CommentsPanel({
   canComment = true,
   variant = 'panel',
   header,
+  focusComment,
 }: {
   stepId: string | null;
   stepIndex: number;
@@ -120,6 +115,8 @@ export function CommentsPanel({
   variant?: 'panel' | 'mobile';
   /** Contenu inséré sous l'en-tête (sélecteur d'étape en mobile). */
   header?: ReactNode;
+  /** L22-05 : commentaire à montrer (lien d'une notification) : panneau déplié, fil visible. */
+  focusComment?: string | null;
 }) {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -166,6 +163,23 @@ export function CommentsPanel({
     const a = api.authors[id];
     return a?.full_name || a?.email || '—';
   };
+  // L22-05 : arrivée depuis une notification → panneau déplié, commentaire montré et mis en évidence
+  const [highlight, setHighlight] = useState<string | null>(null);
+  const scrolled = useRef<string | null>(null);
+  const target = focusComment ? forStep.find((c) => c.id === focusComment) : undefined;
+  useEffect(() => {
+    if (!target || highlight === target.id) return;
+    setHighlight(target.id);
+    setCollapsed(false);
+    if (target.resolved_at) setShowResolved(true);
+  }, [target, highlight]);
+  useEffect(() => {
+    if (!highlight || scrolled.current === highlight) return;
+    const el = listRef.current?.querySelector<HTMLElement>(`[data-comment="${highlight}"]`);
+    if (!el) return;
+    scrolled.current = highlight;
+    el.scrollIntoView({ block: 'center' });
+  });
   const unfresh = (id: string) =>
     setFresh((f) => {
       if (!f[id]) return f;
@@ -507,7 +521,7 @@ export function CommentsPanel({
                   <li
                     key={c.id}
                     data-comment={c.id}
-                    className={`cm-item${c.resolved_at ? ' cm-item--resolved' : ''}${isFresh ? ' cm-item--new' : ''}`}
+                    className={`cm-item${c.resolved_at ? ' cm-item--resolved' : ''}${isFresh ? ' cm-item--new' : ''}${c.id === highlight ? ' cm-item--focus' : ''}`}
                     onMouseEnter={() => isFresh && unfresh(c.id)}
                   >
                     <Avatar id={c.author_id} label={authorName} />

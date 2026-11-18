@@ -47,6 +47,7 @@ import { ExportDialog } from '../export/ExportDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
+import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 type Demo = Tables<'demos'>;
 type FolderRow = Tables<'folders'>;
@@ -358,6 +359,7 @@ export function DemosPage() {
           <p className="page-head__sub">{t('demos.subtitle')}</p>
         </div>
         <div className="page-head__actions">
+          <NotificationBell />
           <label className="search-pill">
             <Search aria-hidden="true" />
             <input

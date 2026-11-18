@@ -19,6 +19,8 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.goto(`${APP}/#/`);
   await page.waitForSelector('.demo-card');
   ok((await page.locator('.demo-card').count()) === 2, 'deux démos affichées');
+  // Les vignettes arrivent après les URL signées : on les attend avant de compter
+  await page.waitForSelector('.demo-cover img', { timeout: 5000 }).catch(() => undefined);
   ok((await page.locator('.demo-cover img').count()) >= 1, 'vignette de la première étape');
   ok(
     !(await page.textContent('main')).includes('1 / 25'),

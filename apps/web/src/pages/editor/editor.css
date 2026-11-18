@@ -886,6 +886,11 @@
 .cm-item--new {
   background: var(--fd-color-info-soft);
 }
+/* L22-05 : commentaire ouvert depuis une notification */
+.cm-item--focus {
+  background: var(--fd-color-primary-soft);
+  box-shadow: inset 3px 0 0 var(--fd-color-primary);
+}
 .cm-avatar {
   display: grid;
   place-items: center;

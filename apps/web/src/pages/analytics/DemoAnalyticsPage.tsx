@@ -25,6 +25,7 @@ import { formatNumber } from '../../lib/format';
 import { Loading } from '../../components/guards';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { LeadsTable } from './LeadsTable';
+import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 interface Analytics {
   views: number;
@@ -148,6 +149,7 @@ export function DemoAnalyticsPage() {
           </p>
         </div>
         <div className="page-head__actions">
+          <NotificationBell />
           <PeriodPicker days={days} setDays={setDays} />
           <Link className="fd-btn" to={`/demos/${demoId}/edit`}>
             <Pencil size={16} aria-hidden="true" />

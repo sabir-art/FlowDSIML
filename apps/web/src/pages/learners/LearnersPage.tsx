@@ -53,6 +53,7 @@ import {
   type SortKey,
 } from './progress';
 import './learners.css';
+import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 const ICON = { size: 16, strokeWidth: 1.75, 'aria-hidden': true } as const;
 const PAGE = 50;
@@ -398,6 +399,7 @@ export function LearnersPage() {
         </div>
         {d && (
           <div className="page-head__actions">
+            <NotificationBell />
             {can('members.manage') && (
               <Button icon={<Settings2 />} onClick={onPaths}>
                 {t('learners.paths.manage')}

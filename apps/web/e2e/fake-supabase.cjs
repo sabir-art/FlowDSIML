@@ -775,6 +775,16 @@ async function install(page, state = seed()) {
           (state.audit ||= []).push({ action: 'learner.erase' });
           return json(route, 200, null);
         }
+        case 'mark_notifications_read': {
+          // L22-05 : comme la RPC, seulement les notifications de l'utilisateur
+          let n = 0;
+          for (const x of t.notifications || [])
+            if (x.user_id === state.user.id && !x.read_at && (!a.p_ids || a.p_ids.includes(x.id))) {
+              x.read_at = new Date().toISOString();
+              n++;
+            }
+          return json(route, 200, n);
+        }
         case 'resolve_share_link': {
           const l = t.share_links.find((x) => x.token === a.p_token && x.is_active);
           return json(route, 200, l ? { demoId: l.demo_id, linkId: l.id, variables: l.variables } : null);

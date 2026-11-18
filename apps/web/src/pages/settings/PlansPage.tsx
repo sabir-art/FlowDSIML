@@ -13,6 +13,7 @@ import { useToast } from '../../components/Toast';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
+import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 type Limits = {
   published_demos: number | null;
@@ -128,6 +129,9 @@ export function PlansPage() {
         <div>
           <h1>{t('plans.pageTitle')}</h1>
           <p className="muted pl-sub">{t('plans.sub', { workspace: current?.name ?? '' })}</p>
+        </div>
+        <div className="page-head__actions">
+          <NotificationBell />
         </div>
       </div>
 
