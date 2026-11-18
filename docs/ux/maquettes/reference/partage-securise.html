@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partage sécurisé · TutoClick (lot L11)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .share-layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; }
+  @media (max-width: 1100px) { .share-layout { grid-template-columns: 1fr; } }
+  .preview-box { border-radius: var(--fd-radius-xl); overflow: hidden; background: var(--fd-player-backdrop); border: 1px solid var(--fd-color-border); padding: 28px; }
+  .mini-player { border-radius: 12px; overflow: hidden; box-shadow: var(--fd-shadow-lg); background: #fff; }
+  .mini-player .bar { height: 26px; background: var(--fd-stone-100); display: flex; gap: 5px; align-items: center; padding: 0 10px; }
+  .mini-player .bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--fd-stone-300); }
+  .code { background: var(--fd-color-surface-sunken); border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-md); padding: 12px 14px; font: 12.5px/1.6 var(--fd-font-mono); white-space: pre; overflow-x: auto; color: var(--fd-color-text); position: relative; }
+  .code .k { color: var(--fd-color-primary); } .code .s { color: var(--fd-color-accent); }
+  .opt-card { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-md); }
+  .opt-card + .opt-card { margin-top: 8px; }
+  /* Lot L11 : partage sécurisé */
+  .l11-modes { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .l11-opt { cursor: pointer; } .l11-opt input { accent-color: var(--fd-color-primary); width: 18px; height: 18px; margin: 0; }
+  .l11-opt .grow { display: flex; flex-direction: column; gap: 2px; }
+  .l11-opt:has(input:checked) { border-color: var(--fd-color-primary); background: var(--fd-color-primary-soft); }
+  .l11-opt:has(input:focus-visible) { box-shadow: var(--fd-shadow-focus); }
+  .l11-ic { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 10px; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+  .l11-opt:has(input:checked) .l11-ic { background: var(--fd-color-surface); color: var(--fd-color-primary); }
+  .l11-ic svg { width: 18px; height: 18px; }
+  .l11-cfg { display: none; flex-direction: column; gap: 12px; margin: 8px 0 0 30px; padding: 16px; border-left: 3px solid var(--fd-color-primary); background: var(--fd-color-surface-sunken); border-radius: 0 var(--fd-radius-md) var(--fd-radius-md) 0; }
+  [data-mode="mdp"] .l11-cfg--mdp, [data-mode="invitation"] .l11-cfg--invitation, [data-mode="domaine"] .l11-cfg--domaine { display: flex; }
+  .l11-cfg + .opt-card, .l11-cfg + .l11-opt { margin-top: 8px; }
+  .l11-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 44px; padding: 6px 8px; border: 1px solid var(--fd-color-border-strong); border-radius: var(--fd-radius-md); background: var(--fd-color-surface); }
+  .l11-chips:has([aria-invalid="true"]) { border-color: var(--fd-color-danger); }
+  .l11-chips input { flex: 1; min-width: 140px; border: 0; background: transparent; font: inherit; color: var(--fd-color-text); outline: none; }
+  .l11-chip { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 4px 0 10px; border-radius: var(--fd-radius-full); background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font: 500 13px var(--fd-font-mono); }
+  .l11-chip button { display: grid; place-items: center; width: 22px; height: 22px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+  .l11-chip button svg { width: 14px; height: 14px; }
+  .l11-exp { display: none; flex-direction: column; gap: 12px; padding: 4px 0 12px; }
+  #t-sec:has(#exp-sw:checked) .l11-exp { display: flex; }
+  .l11-sum { display: flex; flex-direction: column; gap: 12px; }
+  .l11-sum__line { display: flex; gap: 12px; align-items: center; } .l11-sum__line > span:last-child { display: flex; flex-direction: column; }
+  .l11-sum__exp { display: none; } body:has(#exp-sw:checked) .l11-sum__exp { display: flex; }
+  .l11-sum .l11-ic { background: var(--fd-color-primary-soft); color: var(--fd-color-primary); }
+</style>
+</head>
+<body data-shell="app" data-page="demos" data-crumbs='<a href="dashboard.html">Démos</a><span>/</span><a href="editeur.html">Créer un rapport en 2 minutes</a><span>/</span><span aria-current="page">Partager</span>'>
+<main>
+  <div class="content">
+    <div class="page-head">
+      <div><h1>Partager la démo</h1><p class="muted" style="margin-top:4px">Version publiée le 17 nov. à 14:32 · <a href="editeur.html">2 modifications non publiées</a></p></div>
+      <div class="row"><a class="btn btn-secondary" href="player.html"><i data-icon="eye"></i>Aperçu</a><button class="btn btn-accent" data-toast="Démo publiée">Publier les modifications</button></div>
+    </div>
+
+    <div class="share-layout">
+      <div class="card">
+        <div style="padding:0 24px">
+          <div class="tabs" role="tablist" aria-label="Mode de partage">
+            <button role="tab" aria-selected="false" aria-controls="t-link" id="tab-link" tabindex="-1"><i data-icon="link"></i>Lien</button>
+            <button role="tab" aria-selected="false" aria-controls="t-embed" id="tab-embed" tabindex="-1"><i data-icon="code"></i>Intégrer</button>
+            <button role="tab" aria-selected="false" aria-controls="t-perso" id="tab-perso" tabindex="-1"><i data-icon="users"></i>Liens personnalisés</button>
+            <button role="tab" aria-selected="true" aria-controls="t-sec" id="tab-sec"><i data-icon="lock"></i>Accès</button>
+          </div>
+        </div>
+        <div class="card-pad">
+          <!-- Lien -->
+          <section role="tabpanel" id="t-link" aria-labelledby="tab-link" hidden>
+            <div class="setting" style="padding-top:0"><div><b>Accès public</b><p class="t-caption muted">Toute personne disposant du lien peut voir la démo, sans compte.</p></div><span class="switch"><input type="checkbox" checked aria-label="Accès public"><span></span></span></div>
+            <div class="field" style="margin-top:16px"><label for="pub">Lien public</label>
+              <div class="input-group"><input id="pub" class="input t-mono" readonly value="https://demos.tutoclick.example/d/rapport-2-min"><button class="btn btn-secondary" data-copy="Lien copié"><i data-icon="copy"></i><span>Copier</span></button></div>
+            </div>
+            <div class="field"><label for="slug">Adresse personnalisée</label>
+              <div class="input-group"><span class="input t-mono muted" style="width:auto;border-radius:var(--fd-radius-md) 0 0 var(--fd-radius-md);display:flex;align-items:center;background:var(--fd-color-surface-sunken);border-right:0">demos.tutoclick.example/d/</span><input id="slug" class="input t-mono" value="rapport-2-min" style="border-radius:0 var(--fd-radius-md) var(--fd-radius-md) 0"></div>
+              <span class="help">Lettres minuscules, chiffres et tirets. Changer l'adresse casse les anciens liens.</span>
+            </div>
+            <hr class="divider" style="margin:24px 0">
+            <h3 class="t-label" style="margin-bottom:12px">Personnaliser par paramètres d'URL</h3>
+            <div class="code">https://demos.tutoclick.example/d/rapport-2-min<span class="k">?first_name=</span><span class="s">Léa</span><span class="k">&amp;company=</span><span class="s">Globex</span></div>
+            <p class="help" style="margin-top:8px">Dans vos emails, utilisez les champs de fusion de votre outil, par exemple <span class="t-mono">?first_name={{contact.firstname}}</span>.</p>
+            <hr class="divider" style="margin:24px 0">
+            <h3 class="t-label" style="margin-bottom:12px">Partager ailleurs</h3>
+            <div class="row wrap">
+              <button class="btn btn-secondary btn-sm"><i data-icon="mail"></i>Email</button>
+              <button class="btn btn-secondary btn-sm">LinkedIn</button>
+              <button class="btn btn-secondary btn-sm">X</button>
+              <button class="btn btn-secondary btn-sm" aria-disabled="true" title="Disponible en V2"><i data-icon="download"></i>GIF / vidéo<span class="badge" style="height:16px">V2</span></button>
+            </div>
+          </section>
+          <!-- Embed -->
+          <section role="tabpanel" id="t-embed" aria-labelledby="tab-embed" hidden>
+            <div class="segmented" role="radiogroup" data-seg aria-label="Format d'intégration"><button role="radio" aria-checked="true">Responsive</button><button role="radio" aria-checked="false">Taille fixe</button><button role="radio" aria-checked="false">Bouton + pop-up</button></div>
+            <div class="code" style="margin-top:16px">&lt;<span class="k">div</span> style="position:relative;padding-bottom:62.5%;height:0"&gt;
+  &lt;<span class="k">iframe</span> src="<span class="s">https://demos.tutoclick.example/e/rapport-2-min</span>"
+    title="Démo : Créer un rapport en 2 minutes"
+    loading="lazy" allow="fullscreen"
+    style="position:absolute;inset:0;width:100%;height:100%;border:0"&gt;&lt;/<span class="k">iframe</span>&gt;
+&lt;/<span class="k">div</span>&gt;</div>
+            <div class="row" style="margin-top:12px"><button class="btn btn-primary" data-copy="Code d'intégration copié"><i data-icon="copy"></i><span>Copier le code</span></button><a href="#" class="t-label">Guides : Webflow, WordPress, HubSpot, Framer…</a></div>
+            <hr class="divider" style="margin:24px 0">
+            <div class="setting"><span class="t-label">Masquer le filigrane</span><span class="badge badge-accent">Plan Solo</span></div>
+            <div class="setting"><span class="t-label">Démarrer au clic (couverture + bouton « Lancer la démo »)</span><span class="switch"><input type="checkbox" checked aria-label="Démarrer au clic"><span></span></span></div>
+            <div class="alert" style="margin-top:12px"><i data-icon="info"></i><span class="t-caption">Le site d'accueil doit autoriser les iframes provenant de <span class="t-mono">demos.tutoclick.example</span> (en-tête CSP <span class="t-mono">frame-src</span>).</span></div>
+          </section>
+          <!-- Liens personnalisés -->
+          <section role="tabpanel" id="t-perso" aria-labelledby="tab-perso" hidden>
+            <div class="row between" style="margin-bottom:12px"><p class="muted">Un lien par prospect, avec ses variables pré-remplies et ses propres statistiques.</p><button class="btn btn-primary btn-sm" data-open="m-link"><i data-icon="plus"></i>Nouveau lien</button></div>
+            <div class="table-wrap"><table class="table"><caption class="sr-only">Liens personnalisés</caption>
+              <thead><tr><th>Nom</th><th>Variables</th><th class="r">Vues</th><th>Dernière vue</th><th><span class="sr-only">Actions</span></th></tr></thead>
+              <tbody>
+                <tr><th scope="row" style="text-align:left">Globex — Léa Dupont</th><td><span class="badge">Léa</span> <span class="badge">Globex</span></td><td class="r">7</td><td class="muted">il y a 2 h</td><td class="r"><button class="btn btn-ghost btn-sm btn-icon" data-copy="Lien copié" aria-label="Copier le lien Globex"><i data-icon="copy"></i></button></td></tr>
+                <tr><th scope="row" style="text-align:left">Initech — Marc Petit</th><td><span class="badge">Marc</span> <span class="badge">Initech</span></td><td class="r">0</td><td class="muted">—</td><td class="r"><button class="btn btn-ghost btn-sm btn-icon" data-copy="Lien copié" aria-label="Copier le lien Initech"><i data-icon="copy"></i></button></td></tr>
+                <tr><th scope="row" style="text-align:left">Salon VivaTech</th><td><span class="badge badge-warning">Expire le 30 nov.</span></td><td class="r">143</td><td class="muted">hier</td><td class="r"><button class="btn btn-ghost btn-sm btn-icon" data-copy="Lien copié" aria-label="Copier le lien Salon"><i data-icon="copy"></i></button></td></tr>
+              </tbody></table></div>
+          </section>
+          <!-- Accès (lot L11 : partage sécurisé) -->
+          <section role="tabpanel" id="t-sec" aria-labelledby="tab-sec" data-mode="mdp">
+            <fieldset class="l11-modes">
+              <legend class="t-label" style="margin-bottom:12px">Qui peut voir la démo ?</legend>
+              <label class="opt-card l11-opt"><input type="radio" name="acc" value="libre"><span class="l11-ic"><i data-icon="globe"></i></span><span class="grow"><b>Toute personne avec le lien</b><span class="t-caption muted">Accès libre, sans identification.</span></span></label>
+              <label class="opt-card l11-opt"><input type="radio" name="acc" value="mdp" checked><span class="l11-ic"><i data-icon="key"></i></span><span class="grow"><b>Avec un mot de passe</b><span class="t-caption muted">Le visiteur saisit un mot de passe que vous lui communiquez.</span></span></label>
+              <div class="l11-cfg l11-cfg--mdp">
+                <div class="field" style="margin:0"><label for="pw">Mot de passe</label>
+                  <div class="input-group"><input id="pw" class="input" type="password" value="parcours-2026" autocomplete="new-password" aria-describedby="pw-h"><button class="btn btn-secondary btn-icon" type="button" aria-label="Afficher le mot de passe" aria-pressed="false"><i data-icon="eye"></i></button><button class="btn btn-secondary" type="button" data-toast="Nouveau mot de passe généré"><i data-icon="refresh"></i>Générer</button></div>
+                  <span class="help" id="pw-h">8 caractères minimum. Le changer oblige les visiteurs à saisir le nouveau.</span></div>
+                <div class="setting"><span class="t-label">Demander aussi l'e-mail du visiteur</span><span class="switch"><input type="checkbox" aria-label="Demander aussi l'e-mail du visiteur"><span></span></span></div>
+              </div>
+              <label class="opt-card l11-opt"><input type="radio" name="acc" value="invitation"><span class="l11-ic"><i data-icon="mail"></i></span><span class="grow"><b>Sur invitation</b><span class="t-caption muted">Seules les adresses invitées reçoivent un lien d'accès personnel.</span></span></label>
+              <div class="l11-cfg l11-cfg--invitation">
+                <div class="row between"><span class="t-label">3 personnes invitées</span><button class="btn btn-primary btn-sm" type="button" data-open="m-inv"><i data-icon="plus"></i>Inviter des personnes</button></div>
+                <div class="table-wrap"><table class="table"><caption class="sr-only">Personnes invitées</caption>
+                  <thead><tr><th>Adresse</th><th>Statut</th><th>Dernière visite</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row" style="text-align:left">lea.martin@mission-locale.example</th><td><span class="badge badge-success">A ouvert la démo</span></td><td class="muted">il y a 2 h</td><td class="r"><button class="btn btn-ghost btn-sm btn-icon" data-menu="inv-menu" aria-label="Actions pour lea.martin@mission-locale.example"><i data-icon="more"></i></button></td></tr>
+                    <tr><th scope="row" style="text-align:left">paul.robert@mission-locale.example</th><td><span class="badge">Invité</span></td><td class="muted">—</td><td class="r"><button class="btn btn-ghost btn-sm btn-icon" data-menu="inv-menu" aria-label="Actions pour paul.robert@mission-locale.example"><i data-icon="more"></i></button></td></tr>
+                    <tr><th scope="row" style="text-align:left">sarah.petit@dsi-ml.example</th><td><span class="badge badge-warning">Lien d'accès expiré</span></td><td class="muted">hier</td><td class="r"><button class="btn btn-ghost btn-sm btn-icon" data-menu="inv-menu" aria-label="Actions pour sarah.petit@dsi-ml.example"><i data-icon="more"></i></button></td></tr>
+                  </tbody></table></div>
+                <p class="help" style="margin:0">Chaque personne reçoit un lien personnel valable 30 minutes. Elle peut en redemander un depuis la page d'accès avec la même adresse.</p>
+              </div>
+              <label class="opt-card l11-opt"><input type="radio" name="acc" value="domaine"><span class="l11-ic"><i data-icon="building"></i></span><span class="grow"><b>Par domaine e-mail</b><span class="t-caption muted">Toute adresse d'un domaine autorisé, confirmée par un lien envoyé par e-mail.</span></span></label>
+              <div class="l11-cfg l11-cfg--domaine">
+                <div class="field" style="margin:0"><label for="dom-in">Domaines autorisés</label>
+                  <div class="l11-chips" role="group" aria-label="Domaines autorisés"><span class="l11-chip">@mission-locale.example<button type="button" aria-label="Retirer mission-locale.example"><i data-icon="x"></i></button></span><span class="l11-chip">@dsi-ml.example<button type="button" aria-label="Retirer dsi-ml.example"><i data-icon="x"></i></button></span><input id="dom-in" value="messagerie" aria-invalid="true" aria-describedby="dom-e dom-h" placeholder="Ajouter un domaine…"></div>
+                  <span class="error-msg" id="dom-e"><i data-icon="alert"></i>Saisissez un domaine complet, par exemple mission-locale.example.</span>
+                  <span class="help" id="dom-h">Appuyez sur Entrée pour ajouter. Les messageries grand public sont refusées : elles ouvriraient l'accès à tout le monde.</span></div>
+              </div>
+            </fieldset>
+
+            <hr class="divider" style="margin:20px 0 4px">
+            <div class="setting"><div><b>Date d'expiration</b><p class="t-caption muted">Après cette date, le lien affiche « Cette démo n'est plus disponible ».</p></div><span class="switch"><input type="checkbox" id="exp-sw" aria-label="Date d'expiration" aria-controls="exp-cfg"><span></span></span></div>
+            <div class="l11-exp" id="exp-cfg">
+              <div class="grid" style="grid-template-columns:1fr 160px;gap:12px">
+                <div class="field" style="margin:0"><label for="exp-d">Le lien expire le</label><input id="exp-d" class="input" type="date" value="2026-11-30"></div>
+                <div class="field" style="margin:0"><label for="exp-h">À</label><input id="exp-h" class="input" type="time" value="18:00"></div>
+              </div>
+              <div class="row wrap" style="gap:8px"><button class="btn btn-secondary btn-sm" type="button">Dans 7 jours</button><button class="btn btn-secondary btn-sm" type="button">Dans 30 jours</button><button class="btn btn-secondary btn-sm" type="button">Fin du mois</button></div>
+              <p class="help" style="margin:0">Heure de Paris. Vous pouvez prolonger ou retirer l'expiration à tout moment : le lien redevient actif aussitôt. <a href="../refonte/l11-acces-visiteur.html?view=expire">Voir l'écran affiché</a></p>
+            </div>
+            <div class="setting"><div><b>Formulaire avant la démo</b><p class="t-caption muted">Demander l'email avant la première étape. À configurer dans l'éditeur.</p></div><a class="btn btn-secondary btn-sm" href="editeur.html">Configurer</a></div>
+            <div class="alert" style="margin-top:12px"><i data-icon="info"></i><span class="t-caption">Ces règles s'appliquent au lien, à l'intégration et aux liens personnalisés. Elles prennent effet tout de suite, sans republier la démo.</span></div>
+          </section>
+        </div>
+      </div>
+
+      <aside class="col" style="gap:16px" aria-label="Aperçu">
+        <div class="card card-pad l11-sum">
+          <h3 class="t-label">Accès à la démo</h3>
+          <div class="l11-sum__line"><span class="l11-ic"><i data-icon="lock"></i></span><span><b class="l11-sum__mode">Avec un mot de passe</b><span class="t-caption muted l11-sum__detail">Changé il y a 2 jours</span></span></div>
+          <div class="l11-sum__line l11-sum__exp"><span class="l11-ic"><i data-icon="clock"></i></span><span><b>Expire le 30 nov. 2026 à 18:00</b><span class="t-caption muted">Dans 12 jours</span></span></div>
+          <a class="btn btn-secondary btn-sm" href="../refonte/l11-acces-visiteur.html" id="l11-prev"><i data-icon="eye"></i>Voir l'écran d'accès</a>
+        </div>
+        <div class="preview-box fd-player-scope">
+          <div class="mini-player"><div class="bar"><i></i><i></i><i></i></div><div style="position:relative;aspect-ratio:16/10"><div data-fake="dashboard" style="position:absolute;inset:0"></div>
+            <div style="position:absolute;inset:0;background:rgba(20,19,17,.35);display:grid;place-items:center"><span class="btn btn-primary" style="background:var(--fd-player-primary)"><i data-icon="play"></i>Lancer la démo</span></div></div></div>
+        </div>
+        <div class="card card-pad">
+          <h3 class="t-label">Aperçu sur les réseaux</h3>
+          <div style="margin-top:12px;border:1px solid var(--fd-color-border);border-radius:var(--fd-radius-md);overflow:hidden">
+            <div style="aspect-ratio:1.91/1;background:var(--fd-player-backdrop);display:grid;place-items:center" class="fd-player-scope"><b style="font:700 20px var(--fd-font-display);color:var(--fd-stone-900);text-align:center;padding:0 24px">Créer un rapport en 2 minutes</b></div>
+            <div style="padding:10px 12px"><span class="t-caption subtle">demos.tutoclick.example</span><p class="t-label">Créer un rapport en 2 minutes · Démo interactive</p></div>
+          </div>
+          <p class="help" style="margin-top:8px">Image générée automatiquement à la publication.</p>
+        </div>
+        <div class="card card-pad">
+          <div class="row between"><h3 class="t-label">Cette semaine</h3><a href="analytics.html" class="t-caption">Voir les analytics</a></div>
+          <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:12px">
+            <div><span class="t-caption muted">Vues</span><div style="font:700 24px var(--fd-font-display)" class="num">312</div></div>
+            <div><span class="t-caption muted">Leads</span><div style="font:700 24px var(--fd-font-display)" class="num">18</div></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<div class="modal-backdrop" id="m-link" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-link-t">
+    <div class="modal-head"><h2 id="m-link-t">Nouveau lien personnalisé</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label for="ln">Nom du lien</label><input id="ln" class="input" placeholder="Ex. : Globex — Léa Dupont"><span class="help">Visible uniquement par votre équipe.</span></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:20px">
+        <div class="field"><label for="v1"><span class="t-mono">{{first_name}}</span></label><input id="v1" class="input" value="Léa"></div>
+        <div class="field" style="margin:0"><label for="v2"><span class="t-mono">{{company}}</span></label><input id="v2" class="input" value="Globex"></div>
+      </div>
+      <div class="field"><label for="v3"><span class="t-mono">{{email}}</span> <span class="opt">(facultatif)</span></label><input id="v3" class="input" type="email" placeholder="lea@globex.example" aria-invalid="true" value="lea@globex" aria-describedby="v3e"><span class="error-msg" id="v3e"><i data-icon="alert"></i>Saisissez une adresse email valide, par exemple lea@globex.example.</span></div>
+      <div class="setting" style="margin-top:12px"><span class="t-label">Expiration</span><span class="switch"><input type="checkbox" aria-label="Expiration"><span></span></span></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close data-toast="Lien créé et copié">Créer et copier le lien</button></div>
+  </div>
+</div>
+
+<div class="menu" id="inv-menu" role="menu" hidden>
+  <button role="menuitem" data-toast="Invitation renvoyée"><i data-icon="send"></i>Renvoyer l'invitation</button>
+  <button role="menuitem" data-copy="Lien d'accès copié"><i data-icon="copy"></i>Copier un lien d'accès</button>
+  <hr><button role="menuitem" class="danger" data-toast="Accès retiré"><i data-icon="userX"></i>Retirer l'accès</button>
+</div>
+<div class="modal-backdrop" id="m-inv" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-inv-t">
+    <div class="modal-head"><h2 id="m-inv-t">Inviter des personnes</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="field" style="margin-top:0"><label for="inv-e">Adresses e-mail</label><textarea id="inv-e" class="textarea" placeholder="prenom.nom@mission-locale.example" aria-describedby="inv-h">jean.durand@mission-locale.example, nina.roux@dsi-ml.example</textarea><span class="help" id="inv-h">Séparez les adresses par une virgule ou un retour à la ligne. 50 adresses maximum par envoi.</span></div>
+      <div class="field"><label for="inv-m">Message <span class="opt">(facultatif)</span></label><textarea id="inv-m" class="textarea" placeholder="Bonjour, voici le tutoriel dont nous avons parlé."></textarea></div>
+      <div class="setting" style="margin-top:4px"><span class="t-label">Envoyer l'invitation par e-mail</span><span class="switch"><input type="checkbox" checked aria-label="Envoyer l'invitation par e-mail"><span></span></span></div>
+      <p class="help" style="margin:0">Désactivé, les adresses sont seulement autorisées : les personnes demandent leur lien d'accès depuis la page de la démo.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close data-toast="2 invitations envoyées"><i data-icon="send"></i>Inviter 2 personnes</button></div>
+  </div>
+</div>
+<div class="mock-l11" role="group" aria-label="État de la maquette L11">
+  <button type="button" data-l11="mdp" aria-pressed="true">Mot de passe</button>
+  <button type="button" data-l11="invitation" aria-pressed="false">Invitation</button>
+  <button type="button" data-l11="modale" aria-pressed="false">Modale</button>
+  <button type="button" data-l11="domaine" aria-pressed="false">Domaine</button>
+  <button type="button" data-l11="expiration" aria-pressed="false">Expiration</button>
+</div>
+<style>
+  .mock-l11 { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; gap: 4px; padding: 4px; border-radius: var(--fd-radius-full); background: var(--fd-stone-900); box-shadow: var(--fd-shadow-lg); }
+  .mock-l11 button { border: 0; background: transparent; color: #fff; font: 500 13px var(--fd-font-sans); padding: 6px 12px; border-radius: var(--fd-radius-full); cursor: pointer; }
+  .mock-l11 button[aria-pressed="true"] { background: #fff; color: var(--fd-stone-900); }
+</style>
+<script>
+(() => {
+  const sec = () => document.getElementById('t-sec');
+  const labels = { libre: ['Toute personne avec le lien', 'Accès libre'], mdp: ['Avec un mot de passe', 'Changé il y a 2 jours'], invitation: ['Sur invitation', '3 personnes invitées'], domaine: ['Par domaine e-mail', '2 domaines autorisés'] };
+  const setMode = (m) => {
+    sec().dataset.mode = m; const r = document.querySelector(`input[name="acc"][value="${m}"]`); if (r) r.checked = true;
+    document.querySelector('.l11-sum__mode').textContent = labels[m][0]; document.querySelector('.l11-sum__detail').textContent = labels[m][1];
+    const v = { mdp: 'mdp', invitation: 'invitation', domaine: 'domaine', libre: '' }[m]; document.getElementById('l11-prev').href = '../refonte/l11-acces-visiteur.html' + (v ? '?view=' + v : '');
+  };
+  document.addEventListener('change', (e) => { if (e.target.name === 'acc') setMode(e.target.value); });
+  const go = (k) => {
+    document.querySelectorAll('[data-l11]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.l11 === k)));
+    document.getElementById('m-inv').hidden = k !== 'modale';
+    document.getElementById('exp-sw').checked = k === 'expiration';
+    setMode(k === 'modale' ? 'invitation' : k === 'expiration' ? 'mdp' : k);
+  };
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-l11]'); if (b) go(b.dataset.l11); });
+  window.addEventListener('DOMContentLoaded', () => { const k = new URLSearchParams(location.search).get('etat'); go(k || 'mdp'); });
+})();
+</script>
+</body>
+</html>
