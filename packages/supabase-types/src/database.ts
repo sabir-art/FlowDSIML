@@ -932,6 +932,53 @@ export type Database = {
         };
         Relationships: [];
       };
+      webhooks: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          events: string[];
+          failures: number;
+          id: string;
+          name: string;
+          secret_hint: string;
+          state: string;
+          updated_at: string;
+          url: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: never;
+        Update: {
+          events?: string[];
+          name?: string;
+          url?: string;
+        };
+        Relationships: [];
+      };
+      webhook_deliveries: {
+        Row: {
+          attempt: number;
+          created_at: string;
+          duration_ms: number | null;
+          error: string | null;
+          event_id: string;
+          event_type: string;
+          finished_at: string | null;
+          id: string;
+          next_attempt_at: string;
+          payload: NonNullable<Json>;
+          replay_of: string | null;
+          response_body: string | null;
+          response_status: number | null;
+          status: string;
+          webhook_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       notification_settings: {
         Row: {
           prefs: NonNullable<Json>;
@@ -1698,9 +1745,9 @@ export type Database = {
       learners_progress: { Args: { p_workspace: string }; Returns: Json };
       learner_detail: { Args: { p_learner: string }; Returns: Json };
       mark_notifications_read: { Args: { p_ids?: string[] | null }; Returns: number };
-      webhook_create: { Args: { p_ws: string; p_url: string; p_events: string[] }; Returns: Json };
+      webhook_create: { Args: { p_ws: string; p_url: string; p_events: string[]; p_name?: string }; Returns: Json };
       webhook_rotate_secret: { Args: { p_id: string }; Returns: string };
-      webhook_send_test: { Args: { p_id: string }; Returns: number };
+      webhook_send_test: { Args: { p_id: string }; Returns: string };
       webhook_replay: { Args: { p_delivery: string }; Returns: string };
       webhook_set_state: { Args: { p_id: string; p_state: string }; Returns: undefined };
       webhook_url_ok: { Args: { p_url: string }; Returns: boolean };

@@ -9,7 +9,11 @@
 --    essais à 1 min, 5 min, 30 min, 2 h, 6 h ; au 6e échec, envoi « dead » et webhook en pause auto.
 --  * Événements créés côté serveur uniquement (déclencheurs) : lead.created (seul à porter l'e-mail et
 --    les champs, et seulement vers les webhooks abonnés à lead.created), demo.completed, demo.published,
---    quiz.passed ; « ping » pour le test.
+--    learner.quiz_passed, learner.quiz_failed, learner.module_validated (une fois par apprenant identifié
+--    et par module ; identifiants pseudonymes seulement) ; « ping » pour le test (jamais compté en échec,
+--    jamais réessayé). alert.triggered : « Bientôt », non abonnable.
+--  * Test et rejeu immédiats : la fonction de dispatch, appelée avec le JWT d'un admin, réserve une seule
+--    livraison en attente (webhook_claim_one), 10 envois immédiats par minute et par utilisateur au plus.
 --  * Envoi par l'Edge Function webhooks-dispatch, appelée chaque minute par pg_cron + pg_net. L'URL de la
 --    fonction et le secret partagé sont lus dans Vault (webhooks_dispatch_url, webhooks_dispatch_secret) :
 --    absents, le job ne fait rien (notice). Rien de tout cela n'est dans le dépôt.
@@ -47,7 +51,8 @@ alter table public.audit_log add constraint audit_log_action_check check (action
 -- ===== Règles =====
 create or replace function public.webhook_event_types()
 returns text[] language sql immutable set search_path = '' as $$
-  select array['lead.created', 'demo.completed', 'demo.published', 'quiz.passed'];
+  select array['lead.created', 'demo.completed', 'demo.published', 'learner.quiz_passed', 'learner.quiz_failed',
+               'learner.module_validated'];
 $$;
 
 /**
@@ -99,8 +104,11 @@ create table if not exists public.webhooks (
   id uuid primary key default gen_random_uuid(),
   workspace_id uuid not null references public.workspaces (id) on delete cascade,
   url text not null constraint webhooks_url_ok check (public.webhook_url_ok(url)),
+  name text not null default '' check (char_length(name) <= 60),
+  -- 4 derniers caractères du secret, pour l'affichage masqué (« tcsec_••••…3f9a ») ; jamais le secret
+  secret_hint text not null default '' check (char_length(secret_hint) <= 4),
   events text[] not null constraint webhooks_events_ok
-    check (cardinality(events) between 1 and 4 and events <@ public.webhook_event_types()),
+    check (cardinality(events) between 1 and 6 and events <@ public.webhook_event_types()),
   state text not null default 'active' check (state in ('active', 'paused', 'paused_auto')),
   failures int not null default 0 check (failures >= 0),
   created_by uuid references auth.users (id) on delete set null,
@@ -145,7 +153,7 @@ alter table public.webhook_deliveries enable row level security;
 revoke all on public.webhooks, public.webhook_deliveries from anon, authenticated;
 -- Création par RPC (secret, limite du plan) ; un admin modifie l'URL et les événements, ou supprime.
 grant select, delete on public.webhooks to authenticated;
-grant update (url, events) on public.webhooks to authenticated;
+grant update (url, events, name) on public.webhooks to authenticated;
 grant select on public.webhook_deliveries to authenticated;
 drop policy if exists webhooks_admin_select on public.webhooks;
 create policy webhooks_admin_select on public.webhooks for select to authenticated
@@ -209,17 +217,58 @@ end $$;
 drop trigger if exists webhooks_on_lead on public.leads;
 create trigger webhooks_on_lead after insert on public.leads for each row execute function public.webhooks_on_lead();
 
+/** Apprenant identifié derrière un visiteur (L13), ou null. */
+create or replace function private.webhook_learner(p_ws uuid, p_visitor text)
+returns uuid language sql stable security definer set search_path = '' as $$
+  select learner_id from public.learner_visitors where workspace_id = p_ws and visitor_id = p_visitor;
+$$;
+
+-- Première validation d'un module par un apprenant identifié : une seule fois par (apprenant, démo, parcours)
+create table if not exists private.webhook_module_seen (
+  learner_id uuid not null references public.learners (id) on delete cascade,
+  demo_id uuid not null references public.demos (id) on delete cascade,
+  path_key uuid not null,
+  primary key (learner_id, demo_id, path_key)
+);
+revoke all on private.webhook_module_seen from public;
+
+create or replace function private.webhook_module_validated(p_ws uuid, p_demo uuid, p_visitor text, p_at timestamptz)
+returns void language plpgsql security definer set search_path = '' as $$
+declare
+  v_learner uuid := private.webhook_learner(p_ws, p_visitor);
+  v_path uuid;
+  v_none constant uuid := '00000000-0000-0000-0000-000000000000';
+begin
+  if v_learner is null then return; end if; -- visiteur anonyme : pas d'événement apprenant
+  for v_path in
+    select m.path_id from public.path_modules m where m.workspace_id = p_ws and m.demo_id = p_demo
+    union all select null where not exists (select 1 from public.path_modules m where m.workspace_id = p_ws and m.demo_id = p_demo)
+  loop
+    insert into private.webhook_module_seen (learner_id, demo_id, path_key)
+      values (v_learner, p_demo, coalesce(v_path, v_none)) on conflict do nothing;
+    if found then
+      perform public.enqueue_webhook_event(p_ws, 'learner.module_validated', jsonb_build_object(
+        'learner_id', v_learner, 'demo_id', p_demo, 'path_id', v_path, 'validated_at', p_at));
+    end if;
+  end loop;
+end $$;
+
 create or replace function public.webhooks_on_quiz()
 returns trigger language plpgsql security definer set search_path = '' as $$
 begin
-  perform public.enqueue_webhook_event(new.workspace_id, 'quiz.passed', jsonb_build_object(
+  -- Identifiants pseudonymes seulement (jamais de nom ni d'e-mail)
+  perform public.enqueue_webhook_event(new.workspace_id,
+    case when new.passed then 'learner.quiz_passed' else 'learner.quiz_failed' end, jsonb_build_object(
     'attempt_id', new.id, 'demo_id', new.demo_id, 'version_id', new.version_id, 'link_id', new.link_id,
-    'visitor_id', new.visitor_id, 'score', new.score, 'correct', new.correct, 'total', new.total,
-    'created_at', new.created_at));
+    'visitor_id', new.visitor_id, 'learner_id', private.webhook_learner(new.workspace_id, new.visitor_id),
+    'score', new.score, 'correct', new.correct, 'total', new.total, 'created_at', new.created_at));
+  if new.passed then
+    perform private.webhook_module_validated(new.workspace_id, new.demo_id, new.visitor_id, new.created_at);
+  end if;
   return null;
 end $$;
 drop trigger if exists webhooks_on_quiz on public.quiz_attempts;
-create trigger webhooks_on_quiz after insert on public.quiz_attempts for each row when (new.passed)
+create trigger webhooks_on_quiz after insert on public.quiz_attempts for each row
   execute function public.webhooks_on_quiz();
 
 create or replace function public.webhooks_on_complete()
@@ -228,6 +277,10 @@ begin
   perform public.enqueue_webhook_event(new.workspace_id, 'demo.completed', jsonb_build_object(
     'demo_id', new.demo_id, 'version_id', new.version_id, 'link_id', new.link_id,
     'visitor_id', new.visitor_id, 'session_id', new.session_id, 'occurred_at', new.occurred_at));
+  -- Démo sans quiz : la terminer valide le module (avec quiz : c'est la réussite du quiz qui valide)
+  if not exists (select 1 from public.quiz_questions q where q.demo_id = new.demo_id) then
+    perform private.webhook_module_validated(new.workspace_id, new.demo_id, new.visitor_id, new.occurred_at);
+  end if;
   return null;
 end $$;
 drop trigger if exists webhooks_on_complete on public.events;
@@ -249,7 +302,7 @@ create trigger webhooks_on_publish after update of current_version_id on public.
   execute function public.webhooks_on_publish();
 
 -- ===== RPC admin =====
-create or replace function public.webhook_create(p_ws uuid, p_url text, p_events text[])
+create or replace function public.webhook_create(p_ws uuid, p_url text, p_events text[], p_name text default '')
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare
   v_lim jsonb;
@@ -267,10 +320,11 @@ begin
       and (select count(*) from public.webhooks where workspace_id = p_ws) >= (v_lim #>> '{}')::int) then
     raise exception 'PLAN_LIMIT' using errcode = 'P0001';
   end if;
-  insert into public.webhooks (workspace_id, url, events, created_by)
-    values (p_ws, p_url, (select array_agg(distinct e order by e) from unnest(p_events) e), auth.uid())
-    returning id into v_id;
   v_secret := private.new_webhook_secret();
+  insert into public.webhooks (workspace_id, url, events, name, secret_hint, created_by)
+    values (p_ws, p_url, (select array_agg(distinct e order by e) from unnest(p_events) e),
+            left(btrim(coalesce(p_name, '')), 60), right(v_secret, 4), auth.uid())
+    returning id into v_id;
   insert into private.webhook_secrets (webhook_id, secret) values (v_id, v_secret);
   return jsonb_build_object('id', v_id, 'secret', v_secret);
 end $$;
@@ -293,16 +347,25 @@ begin
   update private.webhook_secrets
      set previous_secret = secret, previous_until = now() + interval '24 hours', secret = v_secret
    where webhook_id = p_id;
+  update public.webhooks set secret_hint = right(v_secret, 4) where id = p_id;
   insert into public.audit_log (workspace_id, actor_id, action, target_ref)
     values (v_ws, auth.uid(), 'webhook.secret_rotated', p_id::text);
   return v_secret;
 end $$;
 
+/** Test : un événement ping ({ data: {} }) vers ce webhook, quel que soit son état ; renvoie la livraison. */
 create or replace function public.webhook_send_test(p_id uuid)
-returns int language plpgsql security definer set search_path = '' as $$
-declare v_ws uuid := private.webhook_admin(p_id);
+returns uuid language plpgsql security definer set search_path = '' as $$
+declare
+  v_ws uuid := private.webhook_admin(p_id);
+  v_event uuid := gen_random_uuid();
+  v_id uuid;
 begin
-  return public.enqueue_webhook_event(v_ws, 'ping', jsonb_build_object('webhook_id', p_id), p_id);
+  insert into public.webhook_deliveries (workspace_id, webhook_id, event_id, event_type, payload)
+    values (v_ws, p_id, v_event, 'ping',
+            jsonb_build_object('id', v_event, 'type', 'ping', 'created_at', now(), 'data', '{}'::jsonb))
+    returning id into v_id;
+  return v_id;
 end $$;
 
 create or replace function public.webhook_replay(p_delivery uuid)
@@ -356,6 +419,45 @@ begin
     join private.webhook_secrets s on s.webhook_id = c.webhook_id;
 end $$;
 
+-- Envois immédiats (test, rejeu) : journal pour la limite de 10 par minute et par utilisateur
+create table if not exists private.webhook_immediate_log (
+  user_id uuid not null,
+  at timestamptz not null default now()
+);
+create index if not exists webhook_immediate_log_idx on private.webhook_immediate_log (user_id, at);
+revoke all on private.webhook_immediate_log from public;
+
+/**
+ * Envoi immédiat demandé par un utilisateur (JWT vérifié par la fonction) : une seule livraison
+ * « pending », d'un webhook dont il est admin. Sinon, aucune ligne (même réponse qu'une livraison
+ * inexistante). Au-delà de 10 envois immédiats par minute : RATE_LIMIT.
+ */
+create or replace function public.webhook_claim_one(p_delivery uuid, p_user uuid)
+returns table (id uuid, url text, event_id uuid, event_type text, attempt int, body text, secrets text[])
+language plpgsql security definer set search_path = '' as $$
+begin
+  delete from private.webhook_immediate_log where at < now() - interval '10 minutes';
+  if (select count(*) from private.webhook_immediate_log l where l.user_id = p_user and l.at > now() - interval '1 minute') >= 10 then
+    raise exception 'RATE_LIMIT' using errcode = 'P0001';
+  end if;
+  insert into private.webhook_immediate_log (user_id) values (p_user);
+  return query
+  with one as (
+    update public.webhook_deliveries d
+       set status = 'sending', next_attempt_at = now() + interval '2 minutes'
+     where d.id = p_delivery and d.status = 'pending'
+       and exists (select 1 from public.members m
+                    where m.workspace_id = d.workspace_id and m.user_id = p_user
+                      and m.role in ('admin', 'owner'))
+    returning d.*
+  )
+  select o.id, w.url, o.event_id, o.event_type, o.attempt, o.payload::text,
+         array_remove(array[s.secret, case when s.previous_until > now() then s.previous_secret end], null)
+    from one o
+    join public.webhooks w on w.id = o.webhook_id
+    join private.webhook_secrets s on s.webhook_id = o.webhook_id;
+end $$;
+
 /** Résultat d'un envoi : succès, nouvel essai (1 min, 5 min, 30 min, 2 h, 6 h) ou abandon et pause auto. */
 create or replace function public.webhook_record_result(p_id uuid, p_status int, p_body text, p_duration int, p_error text)
 returns text language plpgsql security definer set search_path = '' as $$
@@ -367,6 +469,15 @@ declare
 begin
   select * into d from public.webhook_deliveries where id = p_id for update;
   if d.id is null then return null; end if;
+  -- Test (ping) : résultat définitif, jamais réessayé ni compté dans les échecs du webhook
+  if d.event_type = 'ping' then
+    v_out := case when p_status between 200 and 299 then 'success' else 'failed' end;
+    update public.webhook_deliveries
+       set status = v_out, response_status = p_status, response_body = left(p_body, 2048),
+           duration_ms = p_duration, error = left(p_error, 500), finished_at = now()
+     where id = p_id;
+    return v_out;
+  end if;
   if p_status between 200 and 299 then
     v_out := 'success';
     update public.webhook_deliveries
@@ -431,6 +542,8 @@ begin
 end $$;
 
 revoke all on function public.webhook_claim_due(int), public.webhook_record_result(uuid, int, text, int, text),
+  public.webhook_claim_one(uuid, uuid), private.webhook_learner(uuid, text),
+  private.webhook_module_validated(uuid, uuid, text, timestamptz),
   public.purge_webhook_deliveries(), public.webhooks_dispatch_tick(),
   public.webhooks_on_lead(), public.webhooks_on_quiz(), public.webhooks_on_complete(), public.webhooks_on_publish(),
   private.new_webhook_secret(), private.webhook_admin(uuid)
@@ -439,13 +552,14 @@ do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'service_role') then
     execute 'grant usage on schema private to service_role';
-    execute 'grant execute on function public.webhook_claim_due(int), public.webhook_record_result(uuid, int, text, int, text) to service_role';
+    execute 'grant execute on function public.webhook_claim_due(int), public.webhook_claim_one(uuid, uuid),
+      public.webhook_record_result(uuid, int, text, int, text) to service_role';
   end if;
 end $$;
-revoke all on function public.webhook_create(uuid, text, text[]),
+revoke all on function public.webhook_create(uuid, text, text[], text),
   public.webhook_rotate_secret(uuid), public.webhook_send_test(uuid), public.webhook_replay(uuid),
   public.webhook_set_state(uuid, text) from public, anon;
-grant execute on function public.webhook_create(uuid, text, text[]),
+grant execute on function public.webhook_create(uuid, text, text[], text),
   public.webhook_rotate_secret(uuid), public.webhook_send_test(uuid), public.webhook_replay(uuid),
   public.webhook_set_state(uuid, text), public.webhook_url_ok(text), public.webhook_event_types() to authenticated;
 
