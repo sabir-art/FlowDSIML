@@ -39,7 +39,7 @@
 - Modale « Présenter « {{démo}} » » :
   - **Affichage**, cartes radio :
     - **Deux fenêtres** (par défaut) : la vue présentateur, plus un écran public ouvert dans une nouvelle fenêtre ;
-    - **Un seul écran** : plein écran, notes affichées ou masquées avec N.
+    - **Un seul écran** : plein écran, notes affichées ou masquées avec N. L'alerte devient alors : « La démo passe en plein écran ; vos notes restent à droite et se masquent avec la touche N. Une présentation n'est pas comptée comme une vue. »
   - **Commencer à** : liste des étapes.
   - **Minuteur** : interrupteur et durée cible en minutes (1 à 180, 15 par défaut). Coupé, il affiche seulement le temps écoulé.
   - **Masquer les points chauds à l'écran public** : interrupteur, désactivé par défaut.
@@ -76,7 +76,7 @@
 
 ## 3. Centre de notifications (L22-05, L22-06)
 
-- **Cloche** (`Bell`) dans la barre du haut de l'app, à gauche des actions.
+- **Cloche** (`Bell`) dans la barre du haut de toutes les pages de l'app, en première action. Elle n'est pas dans l'éditeur : les mentions y arrivent par les commentaires.
   - Pastille framboise avec le nombre de non lues ; « 9+ » au-delà de 9.
   - `aria-label` « Notifications, n non lues ».
   - Le bouton a `aria-haspopup="dialog"` et `aria-expanded`.
@@ -105,7 +105,7 @@
 - Dans le champ de réponse d'un fil de commentaire, « @ » ouvre une liste de membres :
   - le champ est en `aria-autocomplete="list"`, la liste en `role="listbox"`, l'option active en `aria-activedescendant` ;
   - la liste est filtrée à chaque lettre et limitée aux membres qui ont accès à la démo ;
-  - chaque option affiche l'avatar, le nom, puis le rôle et « sur cette démo » si la personne y est ;
+  - chaque option affiche l'avatar, le nom, puis le rôle, suivi de « sur cette démo » si la personne y est (L22-08) ;
   - flèches pour choisir, Entrée ou Tab pour insérer, Échap pour fermer.
 - La mention insérée est une pastille prune « @Prénom Nom », supprimée d'un seul retour arrière.
 - Envoyer le commentaire notifie chaque personne mentionnée (L22-05). On ne peut pas mentionner une personne hors du workspace.
@@ -120,14 +120,17 @@
 - **Rail** : avatar de 20 px en haut à droite de la vignette de l'étape où se trouve chaque personne (`title` et texte masqué).
 - **Même étape** : un bandeau d'information au-dessus du canevas, « **Marie Durand** modifie aussi cette étape (texte de la bulle). Vos changements sont fusionnés champ par champ. » (`role="status"`, une seule annonce).
 - **Curseur distant** : flèche et étiquette au prénom, de la couleur de l'avatar, masquables dans les Réglages (« Afficher les curseurs »).
-- **Conflit sur un même champ** : la dernière modification enregistrée l'emporte. L'autre personne voit un toast « Marie Durand a modifié ce champ · Voir la version précédente », qui ouvre l'historique.
+- **Même étape, sans champ en cours** : « **Marie Durand** est aussi sur cette étape. Vos changements sont fusionnés champ par champ. »
+- **Conflit sur un même champ** : la dernière modification enregistrée l'emporte. L'autre personne voit un toast « Marie Durand a modifié ce champ », sans action tant qu'il n'existe pas d'historique des versions.
+- **Afficher les curseurs** : section « Collaboration » en tête de l'onglet Réglages. C'est une préférence propre au navigateur.
 
 ## 6. Branchement conditionnel (L22-09)
 
-- Il s'applique aux étapes **Question à choix** (menu de choix A2 §5) et **Sondage à choix** (unique ou multiple).
+- Il s'applique à l'étape **Menu de choix** (F1, A2 §5). Pas de nouveau type « Sondage à choix » dans ce lot.
+- **Une seule source** (option A retenue avec le dev) : la section « Menu de choix » existante devient cet écran. Chaque réponse garde sa destination côté lecteur, recalculée depuis les règles à chaque modification. Une nouvelle destination « Étape suivante » suit l'ordre des étapes, même après un réordonnancement.
 - **Panneau Étape** :
   - **Question à choix** : la question et les réponses, une par ligne, 6 au plus ;
-  - **Règles de suite** : une carte par règle, avec « Si la réponse est » (liste des réponses ; pour un choix multiple, « contient »), « Alors aller à » (étape « n · titre », chapitre, Fin de la démo ou Ouvrir un lien) et une corbeille ;
+  - **Règles de suite** : une carte par règle, avec « Si la réponse est » (liste des réponses), « Alors aller à » (étape « n · titre », chapitre, Fin de la démo ou Ouvrir un lien) et une corbeille ;
   - une carte « Sinon, aller à », en pointillés et toujours présente, réglée par défaut sur « Étape suivante » ;
   - « Ajouter une règle ». Aide : les règles sont lues dans l'ordre et la première qui correspond s'applique.
 - **Contrôles** (alerte d'avertissement, `role="status"`) :
@@ -146,4 +149,5 @@
   - aucun piège hors des modales ;
   - les raccourcis à une lettre sont inactifs pendant une saisie.
 - Les avatars ne portent jamais seuls l'information : nom en `title` et texte masqué.
+- Accords : le profil n'a pas de genre. On écrit « vous a mentionné·e », « prévenu·e ». Les rôles restent au masculin générique (« Éditeur »).
 - L'envoi d'e-mails (notifications, mentions) reste en « Bientôt » tant qu'il n'est pas branché.
