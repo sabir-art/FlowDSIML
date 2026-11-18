@@ -74,6 +74,8 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
     window.open = window.__open;
   });
 
+  // Le faux Supabase est installé par page : on l'installe aussi sur la fenêtre de l'écran public
+  ctx.on('page', (p) => void install(p, state));
   const [pub] = await Promise.all([
     ctx.waitForEvent('page'),
     dlg.getByRole('button', { name: 'Réessayer' }).click(),
