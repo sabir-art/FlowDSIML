@@ -5,7 +5,9 @@
 --    Modes « invite » et « domain » : réservés, refusés tant que l'envoi d'e-mails n'existe pas.
 --  * demo_access_attempts : essais de mot de passe par démo et par client : 5 échecs, puis 1 minute
 --    d'attente. client_key = HMAC-SHA256 salé (IP + démo) calculé par open-demo : l'IP n'est jamais
---    stockée ni transmise en clair. Purge après 24 h (pg_cron).
+--    stockée ni transmise en clair. Purge après 24 h (pg_cron). Plafond global par démo, indépendant
+--    du client (ligne client_key = 'global:demo-limit') : au-delà de 50 échecs en 1 h, la démo refuse
+--    tout essai pendant 15 minutes.
 --  * demo_access_grants : jetons d'accès de 12 h remis après un bon mot de passe. Seul le SHA-256 du
 --    jeton est stocké. Changer le mot de passe les révoque. Purge des jetons expirés (pg_cron).
 --  * Réponse identique (« not_found ») pour une démo inexistante, dépubliée ou dont le workspace
@@ -41,6 +43,7 @@ create table if not exists public.demo_access_attempts (
   client_key text not null check (char_length(client_key) between 16 and 128),
   failures int not null default 0,
   locked_until timestamptz,
+  window_start timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key (demo_id, client_key)
 );
@@ -118,6 +121,8 @@ declare
   d record;
   a public.demo_access;
   att public.demo_access_attempts;
+  glob public.demo_access_attempts;
+  global_key constant text := 'global:demo-limit';
   info jsonb;
   tok text;
 begin
@@ -163,6 +168,13 @@ begin
     raise exception 'CLIENT_REQUIRED' using errcode = 'P0001';
   end if;
 
+  -- Plafond global de la démo (essais répartis sur des clients différents)
+  select * into glob from public.demo_access_attempts where demo_id = p_demo and client_key = global_key;
+  if found and glob.locked_until is not null and glob.locked_until > now() then
+    return info || jsonb_build_object('status', 'locked',
+      'retryIn', ceil(extract(epoch from glob.locked_until - now()))::int);
+  end if;
+
   select * into att from public.demo_access_attempts where demo_id = p_demo and client_key = p_client;
   if found and att.locked_until is not null and att.locked_until > now() then
     return info || jsonb_build_object('status', 'locked',
@@ -176,6 +188,22 @@ begin
     insert into public.demo_access_grants (token_hash, demo_id)
       values (encode(extensions.digest(tok, 'sha256'), 'hex'), p_demo);
     return info || jsonb_build_object('status', 'ok', 'grant', tok, 'askEmail', a.ask_email);
+  end if;
+
+  insert into public.demo_access_attempts as t (demo_id, client_key, failures, locked_until, window_start)
+  values (p_demo, global_key, 1, null, now())
+  on conflict (demo_id, client_key) do update
+    set failures = case when t.window_start < now() - interval '1 hour' or t.locked_until is not null
+                        then 1 else t.failures + 1 end,
+        window_start = case when t.window_start < now() - interval '1 hour' or t.locked_until is not null
+                            then now() else t.window_start end,
+        locked_until = null, updated_at = now()
+  returning * into glob;
+  if glob.failures >= 50 then
+    update public.demo_access_attempts
+       set failures = 0, locked_until = now() + interval '15 minutes', window_start = now(), updated_at = now()
+     where demo_id = p_demo and client_key = global_key;
+    return info || jsonb_build_object('status', 'locked', 'retryIn', 900);
   end if;
 
   insert into public.demo_access_attempts as t (demo_id, client_key, failures, locked_until)

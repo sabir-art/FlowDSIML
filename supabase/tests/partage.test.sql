@@ -1,7 +1,7 @@
 -- Tests pgTAP : L11 partage sécurisé (mot de passe, essais limités, jetons, expiration, bucket privé).
 begin;
 set search_path = public, extensions;
-select plan(24);
+select plan(28);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000f1', 'auteur@example.com'),
@@ -77,6 +77,25 @@ select is((select count(*)::int from (
 select is(public.demo_gate('00000000-0000-0000-0000-0000000000f9', 'parcours-2026', null, 'client-0000000002') ->> 'status',
   'locked', 'bloqué même avec le bon mot de passe pendant l''attente');
 reset role;
+
+-- Plafond global : 50 échecs en 1 h, chacun d'un client différent (IP falsifiées) → démo bloquée 15 min
+reset role;
+delete from public.demo_access_attempts where client_key = 'global:demo-limit';
+set local role service_role;
+select is((select count(*)::int from (
+  select public.demo_gate('00000000-0000-0000-0000-0000000000f9', 'x', null, 'client-glob-' || lpad(i::text, 6, '0')) ->> 'status' as s
+  from generate_series(1, 49) i) q where s = 'password_wrong'), 49, 'plafond global : essais de clients différents comptés');
+select is(public.demo_gate('00000000-0000-0000-0000-0000000000f9', 'x', null, 'client-autre-0000001') ->> 'status',
+  'locked', '50e échec : plafond global atteint');
+select is(public.demo_gate('00000000-0000-0000-0000-0000000000f9', 'parcours-2026', null, 'client-autre-0000002') ->> 'status',
+  'locked', 'plafond global atteint : bloqué pour tout le monde, même avec le bon mot de passe');
+select ok((public.demo_gate('00000000-0000-0000-0000-0000000000f9', null, null, null) ->> 'status') = 'password_required'
+  and (select locked_until > now() + interval '14 minutes' from public.demo_access_attempts
+       where demo_id = '00000000-0000-0000-0000-0000000000f9' and client_key = 'global:demo-limit'),
+  'plafond global : attente de 15 minutes');
+reset role;
+update public.demo_access_attempts set locked_until = null where client_key = 'global:demo-limit';
+set local role service_role;
 
 -- Changer le mot de passe révoque les jetons
 select pg_temp.login('00000000-0000-0000-0000-0000000000f1');

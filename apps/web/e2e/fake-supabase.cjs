@@ -311,8 +311,19 @@ async function install(page, state = seed()) {
       const acc = (state.tables.demo_access || []).find((a) => a.demo_id === id);
       if (acc?.expires_at && new Date(acc.expires_at) <= new Date())
         return json(route, 200, { ...info, status: 'expired', expiredAt: acc.expires_at });
+      // Comme la fonction : toute ressource relative « assets/… » devient une URL signée
+      const sign = (v) =>
+        typeof v === 'string'
+          ? /^assets\/[\w.-]+$/.test(v)
+            ? `${HOST}/storage/v1/object/sign/published/${id}/${v}?token=t`
+            : v
+          : Array.isArray(v)
+            ? v.map(sign)
+            : v && typeof v === 'object'
+              ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, sign(x)]))
+              : v;
       const ok = (extra = {}) =>
-        json(route, 200, { ...info, ...extra, status: 'ok', manifest: JSON.parse(f.data.toString()) });
+        json(route, 200, { ...info, ...extra, status: 'ok', manifest: sign(JSON.parse(f.data.toString())) });
       if (!acc || acc.mode === 'link') return ok();
       state.grants = state.grants || {};
       if (req0.grant && state.grants[req0.grant] === id) return ok();
@@ -782,6 +793,9 @@ async function install(page, state = seed()) {
     }
     if (p.startsWith('/storage/v1/object/public/')) {
       const key = decodeURIComponent(p.slice('/storage/v1/object/public/'.length));
+      // L11 : bucket « published » privé, aucune lecture publique
+      if (key.startsWith('published/'))
+        return json(route, 400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
       const f = state.storage[key];
       if (!f) return json(route, 400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
       return route.fulfill({

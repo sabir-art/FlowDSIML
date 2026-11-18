@@ -54,18 +54,48 @@ async function clientKey(ip: string, demoId: string): Promise<string> {
   const sig = await crypto.subtle.sign('HMAC', await key(), new TextEncoder().encode(`${ip}|${demoId}`));
   return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
+/**
+ * IP posée par la plateforme, jamais celle déclarée par le client : cf-connecting-ip (Cloudflare,
+ * réécrit à l'entrée), sinon x-real-ip, sinon la DERNIÈRE valeur de x-forwarded-for (ajoutée par le
+ * dernier proxy ; les premières peuvent venir du client). Le plafond global par démo (demo_gate)
+ * protège de toute façon si une IP pouvait être falsifiée.
+ */
+function clientIp(req: Request): string {
+  const cf = req.headers.get('cf-connecting-ip')?.trim();
+  if (cf) return cf;
+  const real = req.headers.get('x-real-ip')?.trim();
+  if (real) return real;
+  const xff = (req.headers.get('x-forwarded-for') ?? '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
+  return xff[xff.length - 1] ?? 'unknown';
+}
+
 const pause = (since: number) =>
   new Promise((r) => setTimeout(r, Math.max(0, MIN_DELAY_MS - (Date.now() - since))));
 
-type Step = { image?: { url: string } | null };
-const isRelative = (u: string) => !/^(https?:|blob:|data:)/.test(u);
+const ASSET = /^assets\/[\w.-]+$/;
+function collect(v: unknown, out: Set<string>) {
+  if (typeof v === 'string') {
+    if (ASSET.test(v)) out.add(v);
+  } else if (Array.isArray(v)) v.forEach((x) => collect(x, out));
+  else if (v && typeof v === 'object') Object.values(v).forEach((x) => collect(x, out));
+}
+function replaceAssets(v: unknown, signed: Map<string, string>): unknown {
+  if (typeof v === 'string') return ASSET.test(v) ? (signed.get(v) ?? '') : v;
+  if (Array.isArray(v)) return v.map((x) => replaceAssets(x, signed));
+  if (v && typeof v === 'object')
+    return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, replaceAssets(x, signed)]));
+  return v;
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
   if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
 
   const started = Date.now();
-  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0]!.trim() || 'unknown';
+  const ip = clientIp(req);
   if (rateLimited(ip)) return json(429, { status: 'rate_limited' });
 
   const text = await req.text();
@@ -101,32 +131,27 @@ Deno.serve(async (req) => {
     await pause(started);
     return json(200, { status: 'not_found' });
   }
-  let manifest: { steps?: Step[] } & Record<string, unknown>;
+  let manifest: Record<string, unknown>;
   try {
     manifest = JSON.parse(await dl.data.text());
   } catch {
     return json(200, { status: 'not_found' });
   }
 
-  // Images : chemins relatifs du manifeste → URL signées à durée limitée
-  const steps = Array.isArray(manifest.steps) ? manifest.steps : [];
-  const paths = [
-    ...new Set(
-      steps
-        .map((s) => s.image?.url)
-        .filter((u): u is string => typeof u === 'string' && isRelative(u) && !u.includes('..'))
-        .map((u) => `${demoId}/${u}`),
-    ),
-  ];
+  // Toutes les ressources relatives du manifeste (« assets/… » : images des étapes, et toute image
+  // publiée ajoutée plus tard) → URL signées. Les URL absolues (logo du bucket public « branding »,
+  // liens externes) sont laissées telles quelles.
+  const paths = new Set<string>();
+  collect(manifest, paths);
   const signed = new Map<string, string>();
-  if (paths.length) {
-    const { data: urls } = await supabase.storage.from('published').createSignedUrls(paths, SIGN_TTL);
-    for (const u of urls ?? []) if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl);
+  if (paths.size) {
+    const { data: urls } = await supabase.storage.from('published').createSignedUrls(
+      [...paths].map((p) => `${demoId}/${p}`),
+      SIGN_TTL,
+    );
+    for (const u of urls ?? [])
+      if (u.path && u.signedUrl) signed.set(u.path.slice(demoId.length + 1), u.signedUrl);
   }
-  manifest.steps = steps.map((s) =>
-    s.image && isRelative(s.image.url)
-      ? { ...s, image: { ...s.image, url: signed.get(`${demoId}/${s.image.url}`) ?? '' } }
-      : s,
-  );
+  manifest = replaceAssets(manifest, signed) as typeof manifest;
   return json(200, { ...gate, manifest });
 });

@@ -172,6 +172,33 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(beacon.width >= 44 && beacon.height >= 44, 'cible tactile du hotspot ≥ 44 px');
   if (SHOTS) await m.screenshot({ path: `${SHOTS}/player-mobile.png` });
 
+  // L11 : bucket privé → images signées par open-demo ; logo absolu (bucket public « branding ») conservé
+  const key = `published/${DEMO}/latest.json`;
+  const withLogo = JSON.parse(state.storage[key].data.toString());
+  withLogo.theme = {
+    ...withLogo.theme,
+    logoUrl: 'https://ffzlhlxfratcbitkuvli.supabase.co/storage/v1/object/public/branding/logo.png',
+  };
+  state.storage['branding/logo.png'] = {
+    data: require('fs').readFileSync(`${__dirname}/fixture.png`),
+    type: 'image/png',
+  };
+  state.storage[key] = { ...state.storage[key], data: Buffer.from(JSON.stringify(withLogo)) };
+  const lg = await ctx.newPage();
+  await install(lg, state);
+  await lg.goto(publicUrl);
+  await lg.waitForSelector('.p-ws img');
+  await lg.waitForTimeout(500);
+  ok(
+    await lg.evaluate(() => {
+      const logo = document.querySelector('.p-ws img');
+      const shot = document.querySelector('.p-stage img');
+      return !!logo?.naturalWidth && !!shot?.naturalWidth && shot.src.includes('/object/sign/published/');
+    }),
+    'L11 : logo du workspace affiché et capture servie par URL signée',
+  );
+  await lg.close();
+
   // L11 : protection par mot de passe (onglet Accès), vérifiée par open-demo
   await app.getByRole('tab', { name: 'Accès' }).click();
   await app.getByRole('radio', { name: /Avec un mot de passe/ }).check();
