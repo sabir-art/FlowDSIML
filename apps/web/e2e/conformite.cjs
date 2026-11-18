@@ -89,6 +89,36 @@ const SCREENS = {
       await p.waitForTimeout(400);
     },
   },
+  'PLY-01': {
+    maquette: 'refonte/player.html?view=etape',
+    player: true,
+  },
+  'PLY-01-formulaire': {
+    maquette: 'refonte/player.html?view=formulaire',
+    player: true,
+    async prepare(p) {
+      for (let i = 0; i < 2; i++) {
+        await p.locator('.p-tip .p-btn-primary').click();
+        await p.waitForTimeout(500);
+      }
+    },
+  },
+  'PLY-01-fin': {
+    maquette: 'refonte/player.html?view=fin',
+    player: true,
+    async prepare(p) {
+      for (let i = 0; i < 6; i++) {
+        await p.locator('.p-tip .p-btn-primary').click();
+        await p.waitForTimeout(400);
+        if (await p.locator('.p-form').count()) {
+          await p.locator('.p-form input[type=email]').fill('lea@example.com');
+          await p.locator('.p-form input[type=checkbox]').check();
+          await p.locator('.p-form button[type=submit]').click();
+          await p.waitForTimeout(500);
+        }
+      }
+    },
+  },
   'PRT-01': {
     maquette: 'reference/partage.html',
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',
@@ -184,7 +214,44 @@ async function shotMaquette(b, file, theme, prep) {
   return buf;
 }
 
+const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
+
+/** Lecteur (PLY-01) : manifeste de la maquette servi à la place du stockage. */
+async function shotPlayer(b, s, theme) {
+  const manifest = require('./player-maquette.cjs');
+  const p = await b.newPage({ viewport: VIEW, colorScheme: theme });
+  await p.route('**/latest.json', (r) =>
+    r.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(manifest),
+      headers: { 'access-control-allow-origin': '*' },
+    }),
+  );
+  await p.route('**/assets/a.webp', (r) =>
+    r.fulfill({ contentType: 'image/png', body: fs.readFileSync(path.join(__dirname, 'fixture.png')) }),
+  );
+  await p.route('**/rest/v1/rpc/**', (r) =>
+    r.fulfill({
+      contentType: 'application/json',
+      body: '"ok"',
+      headers: { 'access-control-allow-origin': '*' },
+    }),
+  );
+  await p.route('**/functions/v1/**', (r) =>
+    r.fulfill({ status: 200, body: '{}', headers: { 'access-control-allow-origin': '*' } }),
+  );
+  await p.goto(`${PLAYER}/#/d/${manifest.demoId}`);
+  await p.waitForSelector('.p-stage');
+  await p.waitForTimeout(900);
+  if (s.prepare) await s.prepare(p);
+  await p.mouse.move(0, 0);
+  const buf = await p.screenshot();
+  await p.close();
+  return buf;
+}
+
 async function shotApp(b, s, theme) {
+  if (s.player) return shotPlayer(b, s, theme);
   const p = await b.newPage({ viewport: VIEW });
   await p.addInitScript((th) => {
     try {

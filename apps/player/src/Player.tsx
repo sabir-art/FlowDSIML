@@ -2,12 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Hotspot, LeadForm as LeadFormT, Manifest, Step } from '@flowdsiml/manifest';
 import { applyVariables, richTextToHtml, type VariableValues } from '@flowdsiml/core';
 import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
   ExternalLink,
+  Globe,
   Info,
-  List,
+  ListChecks,
   Pause,
   Play,
   Maximize2,
@@ -28,7 +32,7 @@ import {
   zoomBox,
   zoomOrigin,
 } from '@flowdsiml/player-core';
-import { strings, type Dict } from './i18n';
+import { fmt, strings, type Dict } from './i18n';
 import type { Tracker } from './api';
 import { LeadForm } from './LeadForm';
 
@@ -62,7 +66,9 @@ function useCompact() {
 }
 
 export function Player({ manifest: m, values, tracker, preview, startQuiz, onLead }: Props) {
-  const t = strings(m.locale);
+  // PY-3 : langue de l'interface du lecteur (le contenu de la démo reste dans sa langue)
+  const [locale, setLocale] = useState<'fr' | 'en'>(m.locale === 'en' ? 'en' : 'fr');
+  const t = strings(locale);
   const compact = useCompact();
   const rootRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -211,7 +217,15 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
       return;
     }
     const n = nextIndex(m, index, h.action);
-    go(n === null && h.action.type === 'next' && last && m.quiz ? m.steps.length : n);
+    if (n === null && h.action.type === 'next' && last) return m.quiz ? go(m.steps.length) : finish();
+    go(n);
+  }
+
+  /** PY-6 : « Terminer » sur la dernière étape ouvre la carte de fin. */
+  function finish() {
+    markSeen(index);
+    setEnded(true);
+    setMenu(false);
   }
 
   function onCta(url: string, label: string) {
@@ -251,7 +265,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
     onCta,
     index,
     total: m.steps.length,
-    onPrev: () => go(index - 1),
+    finish: last && !m.quiz,
     onNext: () => onHotspot(primary),
     t,
   };
@@ -260,40 +274,65 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
     <div class={`p-root ${compact ? 'is-compact' : ''}`} style={style} ref={rootRef}>
       {preview && <div class="p-preview">{t.preview}</div>}
       <header class="p-top" inert={!!gateForm}>
-        {theme.logoUrl ? <img class="p-logo" src={theme.logoUrl} alt="" /> : null}
-        <span class="p-title">{sub(m.title)}</span>
-        {m.cta && (
-          <button
-            class="p-btn p-btn-primary p-btn-sm p-top-cta"
-            onClick={() => onCta(m.cta!.url, m.cta!.label)}
-          >
-            {sub(m.cta.label)}
-            <span class="p-top-cta-icon">
-              <ExternalLink {...ICON} size={14} />
+        {/* PY-1 : pastille du workspace (logo, sinon initiales), titre, méta */}
+        <div class="p-id">
+          {theme.logoUrl ? (
+            <span class="p-ws">
+              <img src={theme.logoUrl} alt="" />
             </span>
-          </button>
-        )}
-        {m.checklist && items.length > 0 && !compact && checklistDocked && (
-          <Checklist
-            title={m.checklist.title}
-            position="collapsed"
-            items={items}
-            t={t}
-            sub={sub}
-            onGo={go}
-            docked
-          />
-        )}
-        {m.chapters.length > 0 && (
-          <button
-            class="p-icon-btn"
-            aria-expanded={menu}
-            aria-label={t.chapters}
-            onClick={() => setMenu(!menu)}
-          >
-            <List {...ICON} />
-          </button>
-        )}
+          ) : m.workspaceName ? (
+            <span class="p-ws" aria-hidden="true">
+              {initials(m.workspaceName)}
+            </span>
+          ) : null}
+          <div class="p-id-text">
+            <b class="p-title">{sub(m.title)}</b>
+            <small class="p-meta">
+              {m.workspaceName
+                ? fmt(t as unknown as Record<string, string>, 'meta', {
+                    ws: m.workspaceName,
+                    count: m.steps.length,
+                  })
+                : fmt(t as unknown as Record<string, string>, 'metaSteps', { count: m.steps.length })}
+            </small>
+          </div>
+        </div>
+        <div class="p-top-acts">
+          {m.checklist && items.length > 0 && !compact && checklistDocked && (
+            <Checklist
+              title={m.checklist.title}
+              position="collapsed"
+              items={items}
+              t={t}
+              sub={sub}
+              onGo={go}
+              docked
+            />
+          )}
+          {/* PY-2 : « Chapitres » (si la démo a des chapitres), puis le CTA de la page */}
+          {m.chapters.length > 0 && (
+            <button
+              class="p-btn p-btn-ghost p-btn-sm p-chapters-btn"
+              aria-expanded={menu}
+              aria-haspopup="menu"
+              onClick={() => setMenu(!menu)}
+            >
+              <ListChecks {...ICON} size={16} />
+              {t.chapters}
+            </button>
+          )}
+          {m.cta && (
+            <button
+              class="p-btn p-btn-primary p-btn-sm p-top-cta"
+              onClick={() => onCta(m.cta!.url, m.cta!.label)}
+            >
+              {sub(m.cta.label)}
+              <span class="p-top-cta-icon">
+                <ExternalLink {...ICON} size={16} />
+              </span>
+            </button>
+          )}
+        </div>
       </header>
       {menu && !gateForm && (
         <nav class="p-menu" aria-label={t.chapters}>
@@ -485,12 +524,31 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
             </div>
           </>
         )}
-        {ended && <div class="p-popup-bg" aria-hidden="true" />}
+        {ended && <div class="p-scrim" aria-hidden="true" />}
         {ended && (
-          <div class="p-text-step p-popup p-end" role="dialog" aria-labelledby="p-end-title">
-            <h1 id="p-end-title">{t.end}</h1>
-            <div class="p-actions">
-              <button class="p-btn p-btn-primary" onClick={() => go(0)} autoFocus>
+          <div class="p-card p-end" role="dialog" aria-modal="true" aria-labelledby="p-end-title">
+            <span class="p-end-chip" aria-hidden="true">
+              <CheckCircle2 {...ICON} size={24} />
+            </span>
+            <h2 id="p-end-title">{t.endTitle}</h2>
+            <p class="p-sub">
+              {fmt(t as unknown as Record<string, string>, 'endBody', {
+                count: m.steps.length,
+                title: sub(m.title),
+              })}
+            </p>
+            <div class="p-card-acts p-card-acts--col">
+              {m.cta && (
+                <button class="p-btn p-btn-primary" onClick={() => onCta(m.cta!.url, m.cta!.label)} autoFocus>
+                  {sub(m.cta.label)}
+                  <ExternalLink {...ICON} size={16} />
+                </button>
+              )}
+              <button
+                class={`p-btn ${m.cta ? 'p-btn-ghost' : 'p-btn-secondary'}`}
+                onClick={() => go(0)}
+                autoFocus={!m.cta}
+              >
                 <RotateCcw {...ICON} size={16} />
                 {t.restart}
               </button>
@@ -511,6 +569,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
           <LeadForm
             form={gateForm}
             privacyUrl={m.privacyUrl}
+            workspaceName={m.workspaceName}
             t={t}
             sub={sub}
             onSkip={() => markGate(gateForm.id)}
@@ -530,14 +589,20 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
         <Checklist title={m.checklist.title} position="collapsed" items={items} t={t} sub={sub} onGo={go} />
       )}
 
-      <footer class="p-controls" inert={!!gateForm} aria-hidden={gateForm ? true : undefined}>
+      {/* PY-3 : une pilule centrée : ←, progression, « n / N », →, séparateur, langue, plein écran */}
+      <nav
+        class="p-controls"
+        aria-label={t.nav}
+        inert={!!gateForm || ended}
+        aria-hidden={gateForm ? true : undefined}
+      >
         <button
           class="p-icon-btn"
           onClick={() => go(index - 1)}
           disabled={index === 0 || view === 'quiz'}
-          aria-label={t.prev}
+          aria-label={t.prevStep}
         >
-          <ChevronLeft {...ICON} />
+          <ArrowLeft {...ICON} />
         </button>
         {autoplay && (
           <button
@@ -560,26 +625,35 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
           <div style={{ width: `${view === 'quiz' ? 100 : progress}%` }} />
         </div>
         <span class="p-count" aria-hidden="true">
-          {view === 'quiz' ? t.quiz.label : `${index + 1}/${m.steps.length}`}
+          {view === 'quiz' ? t.quiz.label : `${index + 1} / ${m.steps.length}`}
         </span>
         <button
           class="p-icon-btn"
-          onClick={() => go(index + 1)}
-          disabled={(last && !m.quiz) || view === 'quiz'}
-          aria-label={t.next}
+          onClick={() => (last && !m.quiz ? finish() : go(index + 1))}
+          disabled={(last && !m.quiz && ended) || view === 'quiz'}
+          aria-label={t.nextStep}
         >
-          <ChevronRight {...ICON} />
+          <ArrowRight {...ICON} />
+        </button>
+        <span class="p-sep" aria-hidden="true" />
+        <button
+          class="p-icon-btn p-icon-btn--ghost p-lang"
+          onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
+          aria-label={t.language}
+          title={t.language}
+        >
+          <Globe {...ICON} />
         </button>
         {document.fullscreenEnabled && (
           <button
-            class="p-icon-btn"
+            class="p-icon-btn p-icon-btn--ghost p-fs"
             onClick={toggleFullscreen}
             aria-label={fullscreen ? t.exitFullscreen : t.fullscreen}
           >
             {fullscreen ? <Minimize2 {...ICON} /> : <Maximize2 {...ICON} />}
           </button>
         )}
-      </footer>
+      </nav>
       {theme.showBranding && <p class="p-branding">{t.madeWith}</p>}
     </div>
   );
@@ -602,7 +676,8 @@ type TipProps = {
   onCta: (url: string, label: string) => void;
   index: number;
   total: number;
-  onPrev: () => void;
+  /** PY-6 : dernière étape sans quiz, le bouton devient « Terminer ». */
+  finish: boolean;
   onNext: () => void;
   t: Dict;
 };
@@ -729,7 +804,7 @@ function Tooltip({
   onCta,
   index,
   total,
-  onPrev,
+  finish,
   onNext,
   t,
   sheet,
@@ -744,15 +819,11 @@ function Tooltip({
     >
       {h.title && <div class="p-tip-title">{sub(h.title)}</div>}
       {h.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(h.body) }} />}
+      {/* PY-4 : pied « n / N » + bouton ; « Précédent » est dans la barre */}
       <div class="p-actions">
         <span class="p-tip-count">
-          {index + 1}/{total}
+          {index + 1} / {total}
         </span>
-        {index > 0 && (
-          <button class="p-btn p-btn-ghost p-btn-sm" onClick={onPrev}>
-            {t.prev}
-          </button>
-        )}
         {h.cta && (
           <button class="p-btn p-btn-primary p-btn-sm" onClick={() => onCta(h.cta!.url, h.cta!.label)}>
             {sub(h.cta.label)}
@@ -761,11 +832,21 @@ function Tooltip({
         )}
         {h.action.type !== 'none' && !h.cta && (
           <button class="p-btn p-btn-primary p-btn-sm" onClick={onNext}>
-            {t.next}
+            {finish && h.action.type === 'next' ? t.finish : t.next}
             <ChevronRight {...ICON} size={14} />
           </button>
         )}
       </div>
     </div>
   );
+}
+
+/** Initiales du workspace pour la pastille de l'en-tête (PY-1). */
+function initials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  // Sigle en tête (« DSI Missions Locales » → DSI), sinon initiales des deux premiers mots
+  const first = words[0] ?? '';
+  if (/^[A-ZÀ-Ý0-9]{2,4}$/.test(first)) return first;
+  const out = words.length > 1 ? words.slice(0, 2).map((w) => w[0]) : [...first].slice(0, 2);
+  return out.join('').toUpperCase();
 }

@@ -1,10 +1,12 @@
 import { useState } from 'preact/hooks';
 import type { LeadForm as LeadFormT } from '@flowdsiml/manifest';
-import type { Dict } from './i18n';
+import { ArrowRight } from 'lucide-preact';
+import { fmt, type Dict } from './i18n';
 
 export function LeadForm({
   form,
   privacyUrl,
+  workspaceName,
   t,
   sub,
   onSubmit,
@@ -12,6 +14,8 @@ export function LeadForm({
 }: {
   form: LeadFormT;
   privacyUrl?: string | null;
+  /** PY-5 : « Données traitées par … » (toujours affiché). */
+  workspaceName?: string;
   t: Dict;
   sub: (s: string) => string;
   onSubmit: (d: { email: string; fields: Record<string, string>; consent: boolean }) => Promise<void>;
@@ -23,7 +27,7 @@ export function LeadForm({
   const [error, setError] = useState(false);
   const fields = form.fields.some((f) => f.type === 'email')
     ? form.fields
-    : [{ key: 'email', label: 'Email', type: 'email' as const, required: true }, ...form.fields];
+    : [{ key: 'email', label: t.emailPro, type: 'email' as const, required: true }, ...form.fields];
 
   async function submit(e: Event) {
     e.preventDefault();
@@ -48,8 +52,8 @@ export function LeadForm({
         {fields.map((f) => (
           <label key={f.key} class="p-field">
             <span>
-              {sub(f.label)}
-              {f.required ? ' *' : ''}
+              {f.type === 'email' && /^e-?mail$/i.test(f.label.trim()) ? t.emailPro : sub(f.label)}
+              {(f.required || f.type === 'email') && <span aria-hidden="true"> *</span>}
             </span>
             <input
               type={f.type}
@@ -82,13 +86,19 @@ export function LeadForm({
             <span>{sub(form.consentText)}</span>
           </label>
         )}
-        {privacyUrl && (
-          <p class="p-privacy">
-            <a href={privacyUrl} target="_blank" rel="noopener noreferrer">
-              {t.privacy}
-            </a>
-          </p>
-        )}
+        <p class="p-privacy">
+          {workspaceName
+            ? fmt(t as unknown as Record<string, string>, 'processedBy', { ws: workspaceName })
+            : t.processedByUnknown}
+          {privacyUrl && (
+            <>
+              {' '}
+              <a href={privacyUrl} target="_blank" rel="noopener noreferrer">
+                {t.privacy}
+              </a>
+            </>
+          )}
+        </p>
         {error && <p class="p-error">{t.formError}</p>}
         <div class="p-actions">
           {form.skippable && (
@@ -98,6 +108,7 @@ export function LeadForm({
           )}
           <button type="submit" class="p-btn p-btn-primary" disabled={busy}>
             {busy ? t.sending : sub(form.submitLabel)}
+            {!busy && <ArrowRight size={16} aria-hidden="true" />}
           </button>
         </div>
       </form>

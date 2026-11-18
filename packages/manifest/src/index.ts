@@ -211,6 +211,8 @@ export const manifestSchema = z.object({
   demoId: z.string(),
   versionId: z.string(),
   workspaceId: z.string(),
+  /** PLY-01 : nom du workspace (en-tête du lecteur, « Données traitées par … »). Absent avant la migration 131500. */
+  workspaceName: z.string().max(120).default('').catch(''),
   title: z.string(),
   locale: z.string().default('fr'),
   publishedAt: z.string(),

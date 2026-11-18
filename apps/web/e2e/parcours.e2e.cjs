@@ -168,7 +168,7 @@ const manifest = {
   await page.getByRole('button', { name: 'Je suis gestionnaire' }).click();
   await page.waitForSelector('text=Vue gestionnaire');
   ok(
-    (await page.locator('.p-count').textContent()).trim() === '4/5',
+    (await page.locator('.p-count').textContent()).trim() === '4 / 5',
     'choix : saut vers le chapitre gestionnaire',
   );
   await page.locator('.p-checklist-pill').click();
@@ -185,10 +185,10 @@ const manifest = {
   // Choix « Fin de la démo »
   await page.locator('.p-checklist-item', { hasText: 'Découverte' }).click();
   await page.waitForTimeout(300);
-  await page.locator('.p-controls [aria-label="Suivant"]').click();
+  await page.locator('.p-controls [aria-label="Étape suivante"]').click();
   await page.waitForSelector('.p-choice');
   await page.getByRole('button', { name: 'Plus tard' }).click();
-  ok((await page.locator('#p-end-title').textContent()) === 'Fin de la démo', 'choix : fin de la démo');
+  ok((await page.locator('#p-end-title').textContent()) === 'Tutoriel terminé', 'choix : fin de la démo');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-fin.png` });
 
   // Grand écran : carte à côté de la capture, sans la recouvrir

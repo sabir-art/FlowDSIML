@@ -133,7 +133,7 @@ const manifest = {
   });
   await page.goto(`${PLAYER}/#/d/${DEMO}`);
   await page.waitForSelector('.p-stage');
-  await page.locator('.p-controls [aria-label="Suivant"]').click();
+  await page.locator('.p-controls [aria-label="Étape suivante"]').click();
   await page.getByRole('button', { name: 'Passer au quiz' }).click();
   await page.waitForSelector('.p-quiz-card');
   ok(

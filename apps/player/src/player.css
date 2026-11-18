@@ -954,3 +954,260 @@ body {
 .is-compact .p-quiz-card {
   box-shadow: 0 1px 3px rgb(8 8 8 / 0.12);
 }
+
+/* ---------- PLY-01 : refonte du lecteur (maquette refonte/player.html, PY-1 à PY-7) ---------- */
+.p-top {
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px 4px;
+}
+.p-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.p-ws {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 10px;
+  background: var(--p-surface);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--p-text) 14%, transparent);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--p-primary);
+  overflow: hidden;
+}
+.p-ws img {
+  max-width: 28px;
+  max-height: 28px;
+  object-fit: contain;
+}
+.p-id-text {
+  min-width: 0;
+}
+.p-id .p-title {
+  display: block;
+  flex: none;
+  font-size: 16px;
+  font-weight: 700;
+}
+.p-meta {
+  display: block;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--p-text) 68%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.p-top-acts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.p-chapters-btn {
+  border-color: transparent;
+}
+.p-chapters-btn:hover {
+  background: color-mix(in srgb, var(--p-text) 7%, transparent);
+}
+/* Le formulaire ne voile plus l'en-tête : il reste lisible (PY-5) */
+.p-top[inert] > :not(.p-title):not(.p-logo) {
+  opacity: 1;
+}
+
+/* Barre de navigation : une pilule centrée (PY-3) ; la progression suit la couleur principale */
+.p-controls {
+  align-self: center;
+  gap: 8px;
+  padding: 6px;
+  margin: 4px 0 8px;
+  border-radius: 999px;
+  background: var(--p-surface);
+  box-shadow: 0 1px 3px rgb(8 8 8 / 0.08);
+}
+.p-controls .p-icon-btn {
+  width: 40px;
+  height: 40px;
+  box-shadow: none;
+  background: color-mix(in srgb, var(--p-text) 5%, transparent);
+}
+.p-controls .p-icon-btn--ghost {
+  background: transparent;
+}
+.p-controls .p-icon-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--p-text) 10%, transparent);
+}
+.p-controls .p-progress {
+  flex: none;
+  width: 240px;
+  height: 6px;
+  background: color-mix(in srgb, var(--p-text) 10%, transparent);
+}
+.p-controls .p-progress > div {
+  background: var(--p-primary);
+}
+.p-controls .p-count {
+  min-width: 44px;
+  font-size: 13px;
+}
+.p-sep {
+  width: 1px;
+  height: 24px;
+  background: color-mix(in srgb, var(--p-text) 14%, transparent);
+}
+.p-controls[inert] {
+  opacity: 0.5;
+}
+
+/* Voile sur la capture seulement (formulaire et fin) */
+.p-overlay,
+.p-scrim {
+  inset: 4px 16px 12px;
+  border-radius: var(--p-radius);
+  background: rgb(8 8 8 / 0.48);
+}
+.p-scrim {
+  position: absolute;
+  z-index: 39;
+}
+.p-form h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
+}
+.p-form .p-actions .p-btn-primary {
+  min-width: 120px;
+}
+
+/* Carte de fin (PY-6) */
+.p-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  width: min(420px, calc(100% - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--p-surface);
+  color: var(--p-text);
+  box-shadow: var(--p-shadow);
+}
+.p-card h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+.p-card .p-sub {
+  margin: -8px 0 0;
+  color: color-mix(in srgb, var(--p-text) 72%, transparent);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.p-end {
+  align-items: center;
+  text-align: center;
+}
+.p-end-chip {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e8f5ec;
+  color: #1e7b34;
+}
+.p-card-acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.p-card-acts--col {
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+.p-card-acts--col .p-btn-ghost {
+  border-color: transparent;
+}
+.p-btn-secondary {
+  background: var(--p-surface);
+  color: var(--p-text);
+  border-color: color-mix(in srgb, var(--p-text) 22%, transparent);
+}
+
+/* Mobile (PY-7) : bulle, formulaire et fin en feuille du bas ; méta, chapitres, langue et plein écran masqués */
+@media (max-width: 720px) {
+  .p-top {
+    padding: 12px 12px 4px;
+    align-items: flex-start;
+  }
+  .p-meta,
+  .p-chapters-btn,
+  .p-sep,
+  .p-lang,
+  .p-fs {
+    display: none;
+  }
+  .p-id .p-title {
+    font-size: 15px;
+  }
+  .p-controls .p-progress {
+    width: 96px;
+  }
+  .p-overlay {
+    position: fixed;
+    inset: 0;
+    border-radius: 0;
+    place-items: end stretch;
+    padding: 0;
+  }
+  .p-overlay .p-form {
+    width: auto;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px 24px;
+  }
+  .p-scrim {
+    position: fixed;
+    inset: 0;
+    border-radius: 0;
+  }
+  .p-card {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    transform: none;
+    width: auto;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px 24px;
+  }
+}
+/* Le voile assombrit la capture elle-même, pas toute la zone (PY-5) */
+.p-overlay,
+.p-scrim {
+  background: transparent;
+}
+.p-stage-wrap:has(> .p-overlay) > .p-stage,
+.p-stage-wrap:has(> .p-scrim) > .p-stage {
+  filter: brightness(0.52);
+}
+@media (max-width: 720px) {
+  .p-overlay,
+  .p-scrim {
+    background: rgb(8 8 8 / 0.48);
+  }
+  .p-stage-wrap:has(> .p-overlay) > .p-stage,
+  .p-stage-wrap:has(> .p-scrim) > .p-stage {
+    filter: none;
+  }
+}

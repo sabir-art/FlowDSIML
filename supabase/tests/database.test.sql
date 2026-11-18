@@ -2,7 +2,7 @@
 -- Exécution : `supabase test db` (Docker) ou supabase/tests/local/run.sh (Postgres nu).
 begin;
 set search_path = public, extensions;
-select plan(41);
+select plan(42);
 
 -- Utilisateurs de test
 insert into auth.users (id, email) values
@@ -108,6 +108,7 @@ select is((select jsonb_array_length(r -> 'copies') from pub), 2, '2 images à c
 select is((select r -> 'manifest' -> 'steps' -> 0 -> 'hotspots' -> 0 ->> 'title' from pub), 'Cliquez ici', 'hotspot dans le manifeste');
 select is((select r -> 'manifest' -> 'cta' ->> 'label' from pub), 'Réserver', 'CTA client dans le manifeste (P6)');
 select is((select r -> 'manifest' ->> 'privacyUrl' from pub), 'https://example.com/confidentialite', 'lien de confidentialité du workspace dans le manifeste (P13)');
+select is((select r -> 'manifest' ->> 'workspaceName' from pub), (select name from public.workspaces where id = (select workspace_id from public.demos where id = '00000000-0000-0000-0000-0000000000d1')), 'nom du workspace dans le manifeste (PLY-01)');
 select is((select status from public.demos where id = '00000000-0000-0000-0000-0000000000d1'), 'draft'::public.demo_status, 'pas en ligne avant finalisation');
 select lives_ok($$ select public.finalize_publication((select (r ->> 'versionId')::uuid from pub)) $$, 'finalisation');
 select is((select status from public.demos where id = '00000000-0000-0000-0000-0000000000d1'), 'published'::public.demo_status, 'démo publiée');
