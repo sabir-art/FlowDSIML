@@ -42,7 +42,52 @@ export type Block =
       size?: number;
     }
   | { t: 'line'; x1: number; y1: number; x2: number; y2: number; color: string; lw: number }
-  | { t: 'logo'; x: number; y: number; size: number; initials: string; color: string };
+  | { t: 'logo'; x: number; y: number; size: number; initials: string; color: string }
+  /** Paragraphe à graisses mêlées : chaque ligne est une suite de segments (x relatif en mm). */
+  | {
+      t: 'rich';
+      x: number;
+      y: number;
+      lines: Array<Array<{ text: string; weight: Weight; dx: number }>>;
+      size: number;
+      color: string;
+      lh: number;
+      role?: 'p';
+    };
+
+/** Coupe un paragraphe à graisses mêlées en lignes de largeur maximale `maxWidth`. */
+export function wrapRich(
+  parts: Array<{ text: string; weight: Weight }>,
+  size: number,
+  maxWidth: number,
+  m: Measure,
+): Array<Array<{ text: string; weight: Weight; dx: number }>> {
+  const words = parts.flatMap((p) =>
+    p.text
+      .split(/(?<= )/)
+      .filter(Boolean)
+      .map((w) => ({ text: w, weight: p.weight })),
+  );
+  const lines: Array<Array<{ text: string; weight: Weight; dx: number }>> = [];
+  let cur: Array<{ text: string; weight: Weight; dx: number }> = [];
+  let x = 0;
+  for (const w of words) {
+    const ww = m.width(w.text.trimEnd(), size, w.weight);
+    if (x > 0 && x + ww > maxWidth) {
+      lines.push(cur);
+      cur = [];
+      x = 0;
+    }
+    const last = cur[cur.length - 1];
+    if (last && last.weight === w.weight) last.text += w.text;
+    else cur.push({ text: w.text, weight: w.weight, dx: x });
+    x += m.width(w.text, size, w.weight);
+  }
+  if (cur.length) lines.push(cur);
+  return lines.map((l) =>
+    l.map((seg, i) => (i === l.length - 1 ? { ...seg, text: seg.text.trimEnd() } : seg)),
+  );
+}
 
 export interface Page {
   kind: 'cover' | 'steps' | 'list' | 'certificate';
@@ -587,11 +632,24 @@ export function planCertificate(c: CertificateData, m: Measure): Page {
     lh: 1.15,
     role: 'h1',
   });
-  const sentence =
-    `${c.workspace} atteste que ${c.learner} a suivi en ligne la formation « ${c.path} » et validé l’ensemble de ses modules.` +
-    (c.validatedAt ? ` Formation validée le ${frDate(c.validatedAt)}.` : '');
-  const sl = m.split(sentence, 11, 'regular', w);
-  b.push({ t: 'text', x, y: 70, lines: sl, size: 11, weight: 'regular', color: INK, lh: 1.6, role: 'p' });
+  const R = 'regular' as const;
+  const B = 'bold' as const;
+  const parts = [
+    { text: `${c.workspace} atteste que `, weight: R },
+    { text: c.learner, weight: B },
+    { text: ' a suivi en ligne la formation ', weight: R },
+    { text: `«\u00a0${c.path}\u00a0»`, weight: B },
+    { text: ' et validé l’ensemble de ses modules.', weight: R },
+    ...(c.validatedAt
+      ? [
+          { text: ' Formation validée le ', weight: R },
+          { text: frDate(c.validatedAt), weight: B },
+          { text: '.', weight: R },
+        ]
+      : []),
+  ];
+  const sl = wrapRich(parts, 11, w, m);
+  b.push({ t: 'rich', x, y: 70, lines: sl, size: 11, color: INK, lh: 1.6, role: 'p' });
   let y = 70 + sl.length * 11 * PT * 1.6 + 8;
   b.push({ t: 'text', x, y, lines: ['Module'], size: 8.5, weight: 'bold', color: MUTED, lh: LH });
   b.push({

@@ -149,6 +149,18 @@ function draw(doc: jsPDF, b: Block, img: Map<number, PdfImage | null>, logo: Pdf
       }
       break;
     }
+    case 'rich': {
+      doc.setFontSize(b.size);
+      doc.setTextColor(...rgb(b.color));
+      const step = b.size * PT * b.lh;
+      b.lines.forEach((line, i) => {
+        for (const seg of line) {
+          doc.setFont(FAMILY[seg.weight][0], FAMILY[seg.weight][1]);
+          doc.text(pdfText(seg.text), b.x + seg.dx, b.y + i * step, { baseline: 'top' });
+        }
+      });
+      break;
+    }
     case 'text': {
       doc.setFont(FAMILY[b.weight][0], FAMILY[b.weight][1]);
       doc.setFontSize(b.size);

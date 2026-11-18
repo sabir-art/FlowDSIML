@@ -51,7 +51,12 @@ const demo = (n: number, o: Partial<ExportDemo> = {}): ExportDemo => ({
   })),
   ...o,
 });
-const texts = (p: Page) => p.blocks.flatMap((b) => (b.t === 'text' ? b.lines : [])).join('\n');
+const texts = (p: Page) =>
+  p.blocks
+    .flatMap((b) =>
+      b.t === 'text' ? b.lines : b.t === 'rich' ? b.lines.map((l) => l.map((s) => s.text).join('')) : [],
+    )
+    .join('\n');
 
 describe('stepsFromManifest', () => {
   it('prend la première bulle, retire la mise en forme et applique les valeurs par défaut', () => {
@@ -171,7 +176,16 @@ describe('attestation', () => {
   };
   it('phrase, date de validation, tableau, mention non certifiante', () => {
     const t = texts(planCertificate(cert, measure)).replace(/\n/g, ' ');
-    expect(t).toContain('Alex Martin');
+    expect(t).toMatch(/Alex Martin a suivi en ligne la formation «\u00a0Logiciel\s?métier\u00a0»/);
+    const rich = planCertificate(cert, measure).blocks.find((b) => b.t === 'rich');
+    const bold =
+      rich && rich.t === 'rich'
+        ? rich.lines
+            .flat()
+            .filter((s) => s.weight === 'bold')
+            .map((s) => s.text.trim())
+        : [];
+    expect(bold.join(' ')).toBe('Alex Martin «\u00a0Logiciel métier\u00a0» 04/11/2026');
     expect(t).toContain('Formation validée le 04/11/2026.');
     expect(t).toContain('Document généré le 18/11/2026');
     expect(t).toContain('100 %');

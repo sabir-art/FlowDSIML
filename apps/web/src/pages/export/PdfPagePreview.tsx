@@ -91,6 +91,23 @@ export function PdfPagePreview({
               <rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} fill="#F1F3F6" />
             );
           }
+          case 'rich':
+            return (
+              <text key={i} fontSize={b.size * PT} fill={b.color} dominantBaseline="text-before-edge">
+                {b.lines.flatMap((l, k) =>
+                  l.map((seg, j) => (
+                    <tspan
+                      key={`${k}-${j}`}
+                      x={b.x + seg.dx}
+                      y={b.y + k * b.size * PT * b.lh}
+                      fontWeight={W8[seg.weight]}
+                    >
+                      {seg.text}
+                    </tspan>
+                  )),
+                )}
+              </text>
+            );
           case 'text':
             return (
               <text
