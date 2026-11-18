@@ -1,11 +1,12 @@
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import { asSettings, type DemoSettings } from '../types';
 import { ClipboardList } from 'lucide-react';
 import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
+import { DEMO_TAG_LIMIT, TAG_COLORS, TAG_LIMIT, useWorkspaceTags } from '../../../components/Tags';
 
 /** Interrupteur de la maquette (.setting + .switch). */
 function SettingSwitch({
@@ -78,6 +79,8 @@ export function SettingsTab({
 
   return (
     <div className="st-panel">
+      {/* L12-07 : étiquettes de la démo (organiser et filtrer le tableau de bord) */}
+      <TagsField demoId={editor.demo!.id} wsId={editor.demo!.workspace_id} readOnly={readOnly} />
       <div className="sec">
         <div className="sec-title">{t('editor.settings.reading')}</div>
         <SettingSwitch
@@ -302,6 +305,76 @@ export function SettingsTab({
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Champ à pastilles : retrait par pastille, ajout (ou création) par saisie puis Entrée. */
+function TagsField({ demoId, wsId, readOnly }: { demoId: string; wsId: string; readOnly: boolean }) {
+  const { t } = useTranslation();
+  const store = useWorkspaceTags(wsId);
+  const [q, setQ] = useState('');
+  const mine = store.tagsOf(demoId);
+  const add = async () => {
+    const name = q.trim();
+    if (!name) return;
+    let tag = store.tags.find((x) => x.name.trim().toLowerCase() === name.toLowerCase());
+    if (!tag) {
+      // Nouvelle étiquette : couleur suivante de la palette
+      const color = TAG_COLORS[store.tags.length % TAG_COLORS.length]!;
+      tag = (await store.create(name, color)) ?? undefined;
+    }
+    if (tag && !mine.some((x) => x.id === tag!.id)) await store.toggle(demoId, tag.id, true);
+    setQ('');
+  };
+  return (
+    <div className="sec">
+      <div className="sec-title">{t('tags.title')}</div>
+      <div className="tg-field" role="group" aria-label={t('tags.title')}>
+        {mine.map((x) => (
+          <span key={x.id} className={`tg tg--${x.color} tg--removable`}>
+            {x.name}
+            {!readOnly && (
+              <button
+                type="button"
+                aria-label={t('tags.remove', { name: x.name })}
+                onClick={() => void store.toggle(demoId, x.id, false)}
+              >
+                <X aria-hidden="true" />
+              </button>
+            )}
+          </span>
+        ))}
+        {!readOnly && mine.length < DEMO_TAG_LIMIT && (
+          <input
+            list="tg-suggest"
+            value={q}
+            maxLength={32}
+            aria-label={t('tags.add')}
+            placeholder={t('tags.addPlaceholder')}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                void add();
+              }
+            }}
+          />
+        )}
+        <datalist id="tg-suggest">
+          {store.tags
+            .filter((x) => !mine.some((m) => m.id === x.id))
+            .map((x) => (
+              <option key={x.id} value={x.name} />
+            ))}
+        </datalist>
+      </div>
+      {store.error && (
+        <p className="error-msg" role="alert">
+          {store.error}
+        </p>
+      )}
+      <p className="help">{t('tags.fieldHelp', { ws: TAG_LIMIT, demo: DEMO_TAG_LIMIT })}</p>
     </div>
   );
 }

@@ -24,6 +24,7 @@ import {
   Plus,
   Search,
   Share2,
+  Tag,
   Trash2,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
@@ -41,6 +42,7 @@ import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
 import { NewDemoDialog } from './NewDemoDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
 
 type Demo = Tables<'demos'>;
@@ -97,6 +99,12 @@ export function DemosPage() {
   const [toDelete, setToDelete] = useState<Demo | null>(null);
   const [folderToDelete, setFolderToDelete] = useState<FolderRow | null>(null);
   const [moving, setMoving] = useState<Demo | null>(null);
+  // L12-07 : étiquettes des démos (filtre, pastilles, menu de la carte)
+  const tagStore = useWorkspaceTags(ws.id);
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const [tagMode, setTagMode] = useState<'any' | 'all'>('any');
+  const [tagging, setTagging] = useState<Demo | null>(null);
+  const [managingTags, setManagingTags] = useState(false);
   const { error, run } = useAction();
   const editable = can('demo.edit');
   const [kpis, setKpis] = useState<{ cur: Kpis; prev: Kpis | null } | null>(null);
@@ -196,19 +204,24 @@ export function DemosPage() {
   }, [load]);
 
   const visible = useMemo(() => {
+    const matchTags = (demoId: string) => {
+      const own = new Set(tagStore.links.filter((l) => l.demo_id === demoId).map((l) => l.tag_id));
+      return tagMode === 'all' ? tagFilter.every((x) => own.has(x)) : tagFilter.some((x) => own.has(x));
+    };
     const needle = q.trim().toLowerCase();
     const list = (demos ?? []).filter(
       (d) =>
         (folder === 'all' || (folder === 'none' ? !d.folder_id : d.folder_id === folder)) &&
         (status === 'all' || d.status === status) &&
-        (!needle || d.title.toLowerCase().includes(needle)),
+        (!needle || d.title.toLowerCase().includes(needle)) &&
+        (tagFilter.length === 0 || matchTags(d.id)),
     );
     if (sort === 'title') return [...list].sort((a, b) => a.title.localeCompare(b.title, i18n.language));
     if (sort === 'created') return [...list].sort((a, b) => b.created_at.localeCompare(a.created_at));
     if (sort === 'views')
       return [...list].sort((a, b) => (stats[b.id]?.views ?? 0) - (stats[a.id]?.views ?? 0));
     return list;
-  }, [demos, folder, status, q, sort, stats, i18n.language]);
+  }, [demos, folder, status, q, sort, stats, i18n.language, tagFilter, tagMode, tagStore.links]);
 
   const [newOpen, setNewOpen] = useState(false);
   const openNew = () => setNewOpen(true);
@@ -289,6 +302,7 @@ export function DemosPage() {
             end: <kbd className="menu-kbd">{mod}+D</kbd>,
             onSelect: () => duplicate(d),
           },
+          { label: t('tags.title'), icon: <Tag />, onSelect: () => setTagging(d) },
           { label: t('demos.moveTo'), icon: <FolderInput />, onSelect: () => setMoving(d) },
           {
             label: t('demos.archive'),
@@ -537,6 +551,14 @@ export function DemosPage() {
                   : []),
               ]}
             />
+            <TagFilter
+              store={tagStore}
+              selected={tagFilter}
+              setSelected={setTagFilter}
+              mode={tagMode}
+              setMode={setTagMode}
+              onManage={editable ? () => setManagingTags(true) : undefined}
+            />
             <div className="fd-segmented view-seg" role="radiogroup" aria-label={t('demos.view')}>
               <button
                 type="button"
@@ -647,6 +669,13 @@ export function DemosPage() {
                           </span>
                           <Link to={`/demos/${d.id}/edit`}>{d.title}</Link>
                         </span>
+                        {tagStore.tagsOf(d.id).length > 0 && (
+                          <span className="tg-row tg-row--list" aria-label={t('tags.title')}>
+                            {tagStore.tagsOf(d.id).map((x) => (
+                              <TagChip key={x.id} tag={x} />
+                            ))}
+                          </span>
+                        )}
                       </td>
                       <td>
                         <span className={`fd-badge status-${statusOf(d)}`}>{t(`status.${statusOf(d)}`)}</span>
@@ -728,6 +757,13 @@ export function DemosPage() {
                         </time>
                       </span>
                     </div>
+                    {tagStore.tagsOf(d.id).length > 0 && (
+                      <div className="tg-row" aria-label={t('tags.title')}>
+                        {tagStore.tagsOf(d.id).map((x) => (
+                          <TagChip key={x.id} tag={x} />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </li>
               );
@@ -747,6 +783,8 @@ export function DemosPage() {
         )}
       </section>
 
+      {tagging && <TagsDialog demo={tagging} store={tagStore} onClose={() => setTagging(null)} />}
+      {managingTags && <ManageTagsDialog store={tagStore} onClose={() => setManagingTags(false)} />}
       <NewDemoDialog
         open={newOpen}
         folders={folders}

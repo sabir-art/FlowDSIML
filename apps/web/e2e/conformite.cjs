@@ -18,6 +18,28 @@ const VIEW = { width: 1440, height: 900 };
 /** Écrans : maquette (fichier + préparation) et route de l'app. */
 // Choix du client par écran (outil de suivi « Conformité TutoClick ») : maquette d'origine
 // (docs/ux/maquettes/*.html) ou refonte (docs/ux/maquettes/refonte/*.html).
+/** L12-07 : étiquettes fictives posées sur les premières démos du jeu de données. */
+function seedTags(d) {
+  const ws = d.tables.workspaces[0].id;
+  const names = [
+    ['Logiciel métier', 'blue'],
+    ['Conseillers', 'green'],
+    ['Agenda', 'orange'],
+    ['Jeunes', 'raspberry'],
+    ['Module 1', 'plum'],
+  ];
+  d.tables.tags = names.map(([name, color], i) => ({ id: `tg-${i}`, workspace_id: ws, name, color }));
+  const demos = d.tables.demos.filter((x) => x.workspace_id === ws);
+  const pick = [
+    [0, 1],
+    [2, 3],
+    [0, 4],
+  ];
+  d.tables.demo_tags = demos
+    .slice(0, 3)
+    .flatMap((x, i) => pick[i].map((k) => ({ demo_id: x.id, tag_id: `tg-${k}`, workspace_id: ws })));
+}
+
 const SCREENS = {
   'CAD-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
   'DSH-01': { maquette: 'refonte/dashboard.html', route: '/#/' },
@@ -412,6 +434,29 @@ const SCREENS = {
       await p.locator('.stage-head').click();
       await p.keyboard.press('?');
       await p.waitForSelector('.kb-modal');
+    },
+  },
+  'L12-07': {
+    maquette: 'refonte/l12-etiquettes.html?etat=cartes',
+    route: '/#/',
+    seed: seedTags,
+  },
+  'L12-07-filtre': {
+    maquette: 'refonte/l12-etiquettes.html?etat=filtre',
+    route: '/#/',
+    seed: seedTags,
+    async prepare(p) {
+      await p.getByRole('button', { name: /^Étiquettes/ }).click();
+      await p.locator('.tg-pop').getByRole('checkbox').first().check();
+      await p.waitForTimeout(300);
+    },
+  },
+  'L12-07-reglages': {
+    maquette: 'reference/editeur-gains.html?etat=etiquettes',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit?tab=settings',
+    seed: seedTags,
+    async prepare(p) {
+      await p.waitForSelector('.tg-field');
     },
   },
   // L11 : partage sécurisé (onglet Accès, écrans visiteur)

@@ -1524,5 +1524,42 @@
     "expiredOn": "Expired on {{date}}",
     "parisTime": "Paris time",
     "seeScreen": "See the access screen"
+  },
+  "tags": {
+    "title": "Tags",
+    "search": "Search tags",
+    "searchOrCreate": "Search or create a tag",
+    "create": "Create “{{name}}”",
+    "color": "Colour",
+    "colors": {
+      "blue": "Blue",
+      "green": "Green",
+      "orange": "Orange",
+      "raspberry": "Raspberry",
+      "plum": "Plum"
+    },
+    "limits": "Up to {{ws}} tags per workspace, {{demo}} per demo.",
+    "of": "Tags of {{title}}",
+    "filterBy": "Filter by tags",
+    "activeCount_one": "{{count}} tag selected",
+    "activeCount_other": "{{count}} tags selected",
+    "none": "No tags yet. Add some from a demo’s “…” menu.",
+    "combine": "Combination",
+    "any": "At least one",
+    "all": "All",
+    "clear": "Clear",
+    "manage": "Manage tags",
+    "rename": "Rename {{name}}",
+    "delete": "Delete {{name}}",
+    "deleted": "Tag deleted",
+    "demos_one": "{{count}} demo",
+    "demos_other": "{{count}} demos",
+    "demoLimit": "Up to {{n}} tags per demo.",
+    "wsLimit": "Up to {{n}} tags per workspace.",
+    "duplicate": "This tag already exists.",
+    "remove": "Remove {{name}}",
+    "add": "Add a tag",
+    "addPlaceholder": "Add…",
+    "fieldHelp": "To organise and filter your demos (tool, audience, module). Up to {{demo}} tags per demo, {{ws}} per workspace."
   }
 }

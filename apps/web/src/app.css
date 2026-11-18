@@ -1651,3 +1651,300 @@
 .dialog-confirm .dialog-actions .fd-btn:not(.fd-btn--primary):not(.fd-btn--danger) {
   border-color: var(--fd-color-border-strong, #8793a3);
 }
+/* L12-07 : étiquettes des démos (palette DSI, une couleur par catégorie ; le nom est toujours écrit) */
+.tg-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.tg-row--list {
+  margin: 4px 0 0 44px;
+}
+.tg {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font: 600 11.5px var(--fd-font-sans);
+  white-space: nowrap;
+}
+.tg::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.tg--blue {
+  background: var(--fd-bleu-50);
+  color: var(--fd-bleu-700);
+}
+.tg--green {
+  background: var(--fd-vert-50);
+  color: var(--fd-vert-700);
+}
+.tg--orange {
+  background: var(--fd-orange-50);
+  color: var(--fd-orange-700);
+}
+.tg--raspberry {
+  background: var(--fd-framboise-50);
+  color: var(--fd-framboise-700);
+}
+.tg--plum {
+  background: var(--fd-prune-50);
+  color: var(--fd-prune-700);
+}
+:root[data-theme='dark'] .tg--blue {
+  background: color-mix(in srgb, var(--fd-bleu-400) 18%, transparent);
+  color: var(--fd-bleu-200);
+}
+:root[data-theme='dark'] .tg--green {
+  background: color-mix(in srgb, var(--fd-vert-400) 18%, transparent);
+  color: var(--fd-vert-200);
+}
+:root[data-theme='dark'] .tg--orange {
+  background: color-mix(in srgb, var(--fd-orange-400) 18%, transparent);
+  color: var(--fd-orange-200);
+}
+:root[data-theme='dark'] .tg--raspberry {
+  background: color-mix(in srgb, var(--fd-framboise-400) 18%, transparent);
+  color: var(--fd-framboise-200);
+}
+:root[data-theme='dark'] .tg--plum {
+  background: color-mix(in srgb, var(--fd-prune-400) 22%, transparent);
+  color: var(--fd-prune-200);
+}
+.tg-anchor {
+  position: relative;
+  display: inline-flex;
+}
+.tg-filter.is-active {
+  border-color: var(--fd-color-primary);
+}
+.tg-filter svg {
+  width: 16px;
+  height: 16px;
+}
+.tg-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary, #fff);
+  font: 700 11px var(--fd-font-sans);
+}
+.tg-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 40;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  box-shadow: var(--fd-shadow-lg);
+}
+.tg-pop fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 260px;
+  overflow: auto;
+}
+.tg-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.tg-search svg {
+  position: absolute;
+  left: 10px;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.tg-search input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding-left: 32px;
+}
+.tg-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 0 6px;
+  border-radius: var(--fd-radius-sm);
+  cursor: pointer;
+}
+.tg-opt:hover {
+  background: var(--fd-color-surface-hover);
+}
+.tg-opt input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--fd-color-primary);
+  margin: 0;
+}
+.tg-opt small {
+  margin-left: auto;
+  color: var(--fd-color-text-subtle);
+}
+.tg-mode {
+  display: flex;
+  gap: 14px;
+  padding: 6px;
+  border-top: 1px solid var(--fd-color-border);
+  font-size: 13px;
+}
+.tg-mode label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tg-mode input {
+  accent-color: var(--fd-color-primary);
+}
+.tg-foot {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--fd-color-border);
+  padding-top: 6px;
+}
+.tg-empty {
+  margin: 4px 6px;
+}
+.tg-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tg-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 240px;
+  overflow: auto;
+}
+.tg-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--fd-color-border);
+  padding-top: 6px;
+  flex-wrap: wrap;
+}
+.tg-create__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  font: 600 13px var(--fd-font-sans);
+  color: var(--fd-color-primary);
+  cursor: pointer;
+}
+.tg-create__btn svg {
+  width: 16px;
+  height: 16px;
+}
+.tg-colors {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.tg-colors .sw {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--fd-color-surface);
+  box-shadow: 0 0 0 1px var(--fd-color-border-strong);
+  cursor: pointer;
+  padding: 0;
+}
+.tg-colors .sw[aria-checked='true'] {
+  box-shadow: 0 0 0 2px var(--fd-color-primary);
+}
+.sw--blue {
+  background: var(--fd-bleu-400);
+}
+.sw--green {
+  background: var(--fd-vert-400);
+}
+.sw--orange {
+  background: var(--fd-orange-400);
+}
+.sw--raspberry {
+  background: var(--fd-framboise-400);
+}
+.sw--plum {
+  background: var(--fd-prune-400);
+}
+.tg-help,
+.tg-err {
+  margin: 0;
+}
+.tg-manage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tg-manage-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 10px;
+  align-items: center;
+}
+.tg-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 1px solid var(--fd-color-border-strong);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface);
+}
+.tg-field input {
+  flex: 1;
+  min-width: 100px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--fd-color-text);
+  outline: none;
+}
+.tg--removable {
+  padding-right: 2px;
+}
+.tg--removable button {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.tg--removable button svg {
+  width: 12px;
+  height: 12px;
+}

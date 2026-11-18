@@ -43,6 +43,30 @@ isOneToOne: false
                     "ask_email"?: boolean,"demo_id"?: string,"expires_at"?: string | null,"mode"?: string,"password_changed_at"?: string | null,"updated_at"?: string,"workspace_id"?: string
                   }
                   Relationships: []
+                },"tags": {
+                  Row: {
+                    "color": string,"created_at": string,"id": string,"name": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "color"?: string,"created_at"?: string,"id"?: string,"name": string,"workspace_id": string
+                  }
+                  Update: {
+                    "color"?: string,"created_at"?: string,"id"?: string,"name"?: string,"workspace_id"?: string
+                  }
+                  Relationships: []
+                },"demo_tags": {
+                  Row: {
+                    "created_at": string,"demo_id": string,"tag_id": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"demo_id": string,"tag_id": string,"workspace_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"demo_id"?: string,"tag_id"?: string,"workspace_id"?: string
+                  }
+                  Relationships: []
                 },"demo_versions": {
                   Row: {
                     "demo_id": string,"id": string,"manifest": NonNullable<Json>,"number": number,"public_ack": Json | null,"published_at": string,"published_by": string | null,"workspace_id": string

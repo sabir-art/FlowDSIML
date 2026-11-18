@@ -1524,5 +1524,42 @@
     "expiredOn": "A expiré le {{date}}",
     "parisTime": "Heure de Paris",
     "seeScreen": "Voir l’écran d’accès"
+  },
+  "tags": {
+    "title": "Étiquettes",
+    "search": "Chercher une étiquette",
+    "searchOrCreate": "Chercher ou créer une étiquette",
+    "create": "Créer « {{name}} »",
+    "color": "Couleur",
+    "colors": {
+      "blue": "Bleu",
+      "green": "Vert",
+      "orange": "Orange",
+      "raspberry": "Framboise",
+      "plum": "Prune"
+    },
+    "limits": "{{ws}} étiquettes au plus par workspace, {{demo}} par démo.",
+    "of": "Étiquettes de {{title}}",
+    "filterBy": "Filtrer par étiquettes",
+    "activeCount_one": "{{count}} étiquette sélectionnée",
+    "activeCount_other": "{{count}} étiquettes sélectionnées",
+    "none": "Aucune étiquette pour l’instant. Ajoutez-en depuis le menu « … » d’une démo.",
+    "combine": "Combinaison",
+    "any": "Au moins une",
+    "all": "Toutes",
+    "clear": "Effacer",
+    "manage": "Gérer les étiquettes",
+    "rename": "Renommer {{name}}",
+    "delete": "Supprimer {{name}}",
+    "deleted": "Étiquette supprimée",
+    "demos_one": "{{count}} démo",
+    "demos_other": "{{count}} démos",
+    "demoLimit": "{{n}} étiquettes au plus par démo.",
+    "wsLimit": "{{n}} étiquettes au plus par workspace.",
+    "duplicate": "Cette étiquette existe déjà.",
+    "remove": "Retirer {{name}}",
+    "add": "Ajouter une étiquette",
+    "addPlaceholder": "Ajouter…",
+    "fieldHelp": "Pour organiser et filtrer vos démos (outil, public, module). {{demo}} étiquettes au plus par démo, {{ws}} par workspace."
   }
 }
