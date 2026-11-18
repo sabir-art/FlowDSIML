@@ -1,3 +1,4 @@
+import { RouteFocus } from './lib/routeFocus';
 import { CenterSettings } from './pages/center/CenterSettings';
 import { LearnersPage } from './pages/learners/LearnersPage';
 import { lazy, Suspense, useEffect } from 'react';
@@ -78,6 +79,7 @@ export function App() {
         <WorkspaceProvider>
           <ToastProvider>
             <EmailRedirectHandler />
+            <RouteFocus />
             <ConfigWarning />
             <Suspense fallback={<Loading />}>
               <Routes>

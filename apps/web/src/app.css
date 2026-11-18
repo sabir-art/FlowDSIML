@@ -1957,3 +1957,9 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* A11Y-02 : titre d'écran qui reçoit le focus au changement de route (lu, sans anneau) */
+[data-route-focus]:focus {
+  outline: none;
+  box-shadow: none;
+}

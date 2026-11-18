@@ -131,6 +131,38 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     await ctx.close();
   }
 
+  // 1 bis. Titre de page et focus au changement d'écran (A11Y-01, A11Y-02)
+  {
+    const { p, ctx } = await app('/#/');
+    ok(
+      (await p.title()) === 'Démos · TutoClick',
+      `A11Y-01 : titre « Démos · TutoClick » (${await p.title()})`,
+    );
+    await p.getByRole('link', { name: 'Analytics' }).first().click();
+    await p.waitForTimeout(800);
+    const r = await p.evaluate(() => ({
+      title: document.title,
+      tag: document.activeElement?.tagName,
+      text: document.activeElement?.textContent,
+    }));
+    ok(
+      / · TutoClick$/.test(r.title) && r.title !== 'Démos · TutoClick',
+      `A11Y-01 : titre mis à jour (${r.title})`,
+    );
+    ok(
+      r.tag === 'H1',
+      `A11Y-02 : focus sur le h1 du nouvel écran (${r.tag} « ${(r.text || '').trim().slice(0, 30)} »)`,
+    );
+    await ctx.close();
+    const e = await app(`/#/demos/${DEMO}/edit`);
+    await e.p.waitForTimeout(600);
+    ok(
+      /Créer|Démo|démo/.test(await e.p.title()) && / · TutoClick$/.test(await e.p.title()),
+      `A11Y-01 : titre de l’éditeur avec la démo (${await e.p.title()})`,
+    );
+    await e.ctx.close();
+  }
+
   // 2. Focus visible sur les pages principales
   for (const [name, route, seed] of [
     ['Démos', '/#/'],
