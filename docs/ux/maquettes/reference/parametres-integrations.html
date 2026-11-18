@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paramètres, intégrations (lot L23) · TutoClick (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .settings { display: grid; grid-template-columns: 200px 1fr; gap: 32px; align-items: start; }
+  .snav { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 80px; }
+  .snav [role="tab"] { all: unset; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: var(--fd-radius-md); color: var(--fd-color-text-muted); font-weight: 500; cursor: pointer; }
+  .snav [role="tab"]:hover { background: var(--fd-color-surface-hover); }
+  .snav [role="tab"][aria-selected="true"] { background: var(--fd-color-surface-selected); color: var(--fd-color-primary-soft-text); font-weight: 600; }
+  .snav [role="tab"]:focus-visible { box-shadow: var(--fd-shadow-focus); }
+  .snav svg { width: 18px; height: 18px; }
+  .snav .grp { font: 600 11px var(--fd-font-sans); text-transform: uppercase; letter-spacing: .04em; color: var(--fd-color-text-subtle); padding: 14px 10px 4px; }
+  .form-sec { display: grid; grid-template-columns: 240px 1fr; gap: 24px; padding: 24px; }
+  .form-sec + .form-sec { border-top: 1px solid var(--fd-color-border); }
+  .form-sec .intro p { margin-top: 4px; }
+  .logo-up { display: flex; align-items: center; gap: 16px; }
+  .logo-up .ws-logo { width: 56px; height: 56px; border-radius: 14px; font-size: 22px; }
+  .role-select { height: 32px; width: auto; }
+  @media (max-width: 900px) { .settings { grid-template-columns: 1fr; } .snav { position: static; flex-direction: row; overflow-x: auto; } .snav .grp { display: none; } .form-sec { grid-template-columns: 1fr; } }
+  .ok-ic { display: inline-block; width: 16px; height: 16px; background: currentColor; color: var(--fd-color-success); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5L20 7'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5L20 7'/%3E%3C/svg%3E") center/contain no-repeat; vertical-align: -3px; }
+  /* ===== L23 : intégrations (webhooks) ===== */
+  .l23 [data-st] { display: none; }
+  body[data-l23="liste"] .l23 [data-st~="liste"], body[data-l23="vide"] .l23 [data-st~="vide"], body[data-l23="creer"] .l23 [data-st~="liste"],
+  body[data-l23="secret"] .l23 [data-st~="liste"], body[data-l23="detail"] .l23 [data-st~="detail"], body[data-l23="test"] .l23 [data-st~="detail"],
+  body[data-l23="pause"] .l23 [data-st~="detail"] { display: block; }
+  body:not([data-l23="test"]) .l23 [data-only="test"], body:not([data-l23="pause"]) .l23 [data-only="pause"], body[data-l23="pause"] .l23 [data-not="pause"] { display: none !important; }
+  .wh-url { font: 500 13px var(--fd-font-mono); color: var(--fd-color-text); overflow-wrap: anywhere; }
+  td .wh-url { display: block; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .l23 .table td { white-space: nowrap; }
+  .wh-ev { display: flex; flex-wrap: wrap; gap: 4px; }
+  .wh-ev .badge { font-family: var(--fd-font-mono); font-weight: 500; }
+  .st { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 22px; padding: 0 6px; border-radius: 6px; font: 600 12px var(--fd-font-mono); }
+  .st.ok { background: var(--fd-color-success-soft); color: var(--fd-color-success); }
+  .st.ko { background: var(--fd-color-danger-soft); color: var(--fd-color-danger); }
+  .st.wait { background: var(--fd-color-warning-soft); color: var(--fd-color-warning); }
+  .int-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .int-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: var(--fd-radius-lg); border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); }
+  .int-card .hd { display: flex; align-items: center; gap: 10px; }
+  .int-card .lg { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); font: 700 12px var(--fd-font-sans); flex: none; }
+  .int-card .lg svg { width: 18px; height: 18px; }
+  .int-card b { font-size: 14px; } .int-card .badge { margin-left: auto; }
+  .int-card p { margin: 0; font-size: 13px; color: var(--fd-color-text-muted); }
+  .wh-detail { display: grid; grid-template-columns: minmax(0, 1fr) 320px; margin-top: 16px; gap: 16px; align-items: start; }
+  .secret { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; border-radius: var(--fd-radius-md); background: var(--fd-color-surface-sunken); border: 1px solid var(--fd-color-border); }
+  .secret code { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 500 13px var(--fd-font-mono); color: var(--fd-color-text); word-break: break-all; }
+  .pre { margin: 0; padding: 12px; border-radius: var(--fd-radius-md); background: #0B0D10; color: #E6EAEE; font: 12px/1.55 var(--fd-font-mono); white-space: pre-wrap; word-break: break-word; }
+  .tr-sel { background: var(--fd-color-surface-selected); }
+  .ev-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+  .ev-list label { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+  .ev-list small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .ev-list code { font: 500 12px var(--fd-font-mono); color: var(--fd-color-text-muted); }
+  @media (max-width: 1100px) { .wh-detail, .int-grid, .ev-list { grid-template-columns: 1fr; } }
+  .mock-l23 { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--fd-stone-900); box-shadow: var(--fd-shadow-lg); }
+  .mock-l23 button { border: 0; background: transparent; color: #fff; font: 500 13px var(--fd-font-sans); padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+  .mock-l23 button[aria-pressed="true"] { background: #fff; color: var(--fd-stone-900); }
+</style>
+</head>
+<body data-shell="app" data-page="settings" data-crumbs='<span>Paramètres</span><span>/</span><span aria-current="page" id="crumb">Intégrations</span>'>
+<main>
+  <div class="content">
+    <div class="page-head"><h1>Paramètres</h1></div>
+    <div class="settings">
+      <div class="snav" role="tablist" aria-label="Sections des paramètres" aria-orientation="vertical">
+        <span class="grp">Workspace</span>
+        <button role="tab" aria-selected="false" aria-controls="s-gen" id="st-gen" tabindex="-1"><i data-icon="settings"></i>Général</button>
+        <button role="tab" aria-selected="false" aria-controls="s-mem" id="st-mem" tabindex="-1"><i data-icon="users"></i>Membres</button>
+        <button role="tab" aria-selected="false" aria-controls="s-brand" id="st-brand" tabindex="-1"><i data-icon="palette"></i>Marque</button>
+        <button role="tab" aria-selected="false" aria-controls="s-var" id="st-var" tabindex="-1"><i data-icon="code"></i>Variables</button>
+        <button role="tab" aria-selected="true" aria-controls="s-int" id="st-int"><i data-icon="plug"></i>Intégrations</button>
+        <span class="grp">Compte</span>
+        <button role="tab" aria-selected="false" aria-controls="s-me" id="st-me" tabindex="-1"><i data-icon="users"></i>Mon profil</button>
+        <a class="row" href="plans.html" style="height:36px;padding:0 10px;color:var(--fd-color-text-muted);font-weight:500;gap:10px"><i data-icon="card"></i>Plans et facturation</a>
+      </div>
+
+      <div>
+        <!-- Général -->
+        <section role="tabpanel" id="s-gen" aria-labelledby="st-gen" hidden class="card">
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Identité</h2><p class="t-caption muted">Visible par les membres et dans les emails d'invitation.</p></div>
+            <div><div class="logo-up"><span class="ws-logo">A</span><div class="col"><button class="btn btn-secondary btn-sm">Changer le logo</button><span class="help">PNG ou SVG carré, 512 px minimum</span></div></div>
+              <div class="field" style="margin-top:20px"><label for="wn">Nom du workspace</label><input id="wn" class="input" value="Acme Analytics"></div>
+              <div class="field"><label for="wu">Site web</label><input id="wu" class="input" value="https://acme-analytics.example"></div></div></div>
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Langue et région</h2></div>
+            <div><div class="field"><label for="wl">Langue par défaut des nouvelles démos</label><select id="wl" class="select"><option>Français</option><option>English</option></select></div>
+            <div class="field"><label for="wt">Fuseau horaire des analytics</label><select id="wt" class="select"><option>Europe/Paris (UTC+1)</option></select></div></div></div>
+          <div class="form-sec" style="justify-content:end;display:flex;gap:8px"><button class="btn btn-secondary">Annuler</button><button class="btn btn-primary" data-toast="Paramètres enregistrés">Enregistrer</button></div>
+          <div class="form-sec" style="border-top:1px solid var(--fd-color-border)"><div class="intro"><h2 class="t-h3" style="color:var(--fd-color-danger)">Zone de danger</h2><p class="t-caption muted">Actions irréversibles.</p></div>
+            <div class="row between wrap" style="gap:12px"><div><b>Supprimer le workspace</b><p class="t-caption muted">Supprime les 24 démos, leurs statistiques et leurs leads. Les membres perdent l'accès.</p></div><button class="btn btn-secondary" style="color:var(--fd-color-danger)" data-open="m-delws">Supprimer le workspace</button></div></div>
+        </section>
+
+        <!-- L23 : Intégrations -->
+        <section role="tabpanel" id="s-int" aria-labelledby="st-int" class="l23">
+          <!-- L23-01 liste / L23-02 vide -->
+          <div data-st="liste vide">
+            <div class="row between wrap" style="margin-bottom:16px;gap:12px">
+              <div><h2 class="t-h2">Intégrations</h2><p class="muted" style="margin-top:4px">Envoyez les événements de vos démos vers vos outils. Réservé aux propriétaires et admins.</p></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div><h3 class="t-h3">Webhooks</h3><p class="t-caption muted">Un appel HTTPS signé à chaque événement choisi.</p></div><button class="btn btn-primary btn-sm" data-open="m-create"><i data-icon="plus"></i>Ajouter un webhook</button></div>
+              <div data-st="liste">
+              <div class="table-wrap"><table class="table">
+                <caption class="sr-only">Webhooks du workspace</caption>
+                <thead><tr><th>Adresse</th><th>Événements</th><th>État</th><th>Dernier envoi</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                <tbody>
+                  <tr><td><a href="?etat=detail" class="wh-url" title="https://hooks.acme.example/tutoclick">https://hooks.acme.example/tutoclick</a><div class="t-caption subtle">CRM interne</div></td><td><div class="wh-ev"><span class="badge">lead.created</span><span class="badge">demo.completed</span><span class="badge">+1</span></div></td><td><span class="badge badge-success">Actif</span></td><td><span class="st ok">200</span> <span class="t-caption muted">il y a 12 min</span></td><td class="r"><button class="btn btn-ghost btn-sm btn-icon" aria-label="Actions pour hooks.acme.example"><i data-icon="more"></i></button></td></tr>
+                  <tr><td><a href="?etat=pause" class="wh-url" title="https://automate.acme.example/hook/42">https://automate.acme.example/hook/42</a><div class="t-caption subtle">Tableur des inscriptions</div></td><td><div class="wh-ev"><span class="badge">learner.module_validated</span></div></td><td><span class="badge badge-warning">En pause</span><div class="t-caption subtle">6 échecs</div></td><td><span class="st ko">503</span> <span class="t-caption muted">hier</span></td><td class="r"><button class="btn btn-ghost btn-sm btn-icon" aria-label="Actions pour automate.acme.example"><i data-icon="more"></i></button></td></tr>
+                  <tr><td><a href="#" class="wh-url">https://test.acme.example/ping</a><div class="t-caption subtle">Essais</div></td><td><div class="wh-ev"><span class="badge">demo.published</span></div></td><td><span class="badge">Désactivé</span></td><td><span class="t-caption muted">Jamais</span></td><td class="r"><button class="btn btn-ghost btn-sm btn-icon" aria-label="Actions pour test.acme.example"><i data-icon="more"></i></button></td></tr>
+                </tbody>
+              </table></div>
+              </div>
+              <div data-st="vide"><div class="empty" role="status"><span class="int-card" style="border:0;padding:0;align-items:center"><span class="lg" style="width:48px;height:48px"><i data-icon="webhook"></i></span></span><h3 class="t-h3">Aucun webhook</h3><p class="muted">Ajoutez l'adresse HTTPS de votre outil (CRM, tableur, automate) pour y recevoir les leads, les démos terminées ou les modules validés.</p><button class="btn btn-primary btn-sm" data-open="m-create"><i data-icon="plus"></i>Ajouter un webhook</button></div></div>
+            </div>
+            <div class="card card-pad" style="margin-top:16px">
+              <h3 class="t-h3">Autres intégrations</h3>
+              <p class="t-caption muted" style="margin:4px 0 12px">Ces connexions arrivent. En attendant, un webhook peut alimenter la plupart de ces outils.</p>
+              <div class="int-grid">
+                <div class="int-card" aria-disabled="true"><div class="hd"><span class="lg"><i data-icon="hash"></i></span><b>Slack</b><span class="badge">Bientôt</span></div><p>Recevoir les nouveaux leads et les commentaires dans un canal.</p></div>
+                <div class="int-card" aria-disabled="true"><div class="hd"><span class="lg"><i data-icon="zap"></i></span><b>Zapier</b><span class="badge">Bientôt</span></div><p>Relier TutoClick à vos autres applications, sans code.</p></div>
+                <div class="int-card" aria-disabled="true"><div class="hd"><span class="lg"><i data-icon="chart"></i></span><b>Google Analytics</b><span class="badge">Bientôt</span></div><p>Envoyer les événements du lecteur à votre propriété GA4.</p></div>
+                <div class="int-card" aria-disabled="true"><div class="hd"><span class="lg"><i data-icon="chart"></i></span><b>Matomo</b><span class="badge">Bientôt</span></div><p>Mesure d'audience hébergée par votre organisation.</p></div>
+                <div class="int-card" aria-disabled="true"><div class="hd"><span class="lg"><i data-icon="message"></i></span><b>Microsoft Teams</b><span class="badge">Bientôt</span></div><p>Notifications de leads et de commentaires dans une équipe.</p></div>
+                <div class="int-card" aria-disabled="true"><div class="hd"><span class="lg"><i data-icon="building"></i></span><b>CRM</b><span class="badge">Bientôt</span></div><p>Synchroniser les leads avec votre outil de relation usagers.</p></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- L23-05 détail / L23-06 test / L23-07 pause -->
+          <div data-st="detail">
+            <a href="?etat=liste" class="btn btn-ghost btn-sm" style="margin:-4px 0 8px -8px"><i data-icon="arrowLeft"></i>Intégrations</a>
+            <div class="row between wrap" style="margin-bottom:12px;gap:12px">
+              <div><h2 class="t-h2 wh-url" style="font-size:18px" data-not="pause">https://hooks.acme.example/tutoclick</h2><h2 class="t-h2 wh-url" style="font-size:18px" data-only="pause">https://automate.acme.example/hook/42</h2>
+                <p class="muted" style="margin-top:4px"><span class="badge badge-success" data-not="pause">Actif</span><span class="badge badge-warning" data-only="pause">En pause</span> · créé le 3 nov. 2026 par Camille Martin</p></div>
+              <div class="row" style="gap:8px"><button class="btn btn-secondary btn-sm" data-not="pause"><i data-icon="send"></i>Envoyer un test</button><button class="btn btn-secondary btn-sm" data-not="pause"><i data-icon="pause"></i>Désactiver</button><button class="btn btn-primary btn-sm" data-only="pause"><i data-icon="refresh"></i>Réactiver</button><button class="btn btn-ghost btn-sm btn-icon" aria-label="Plus d'actions : modifier, supprimer"><i data-icon="more"></i></button></div>
+            </div>
+            <div class="alert alert-danger" role="alert" data-only="test" style="margin-bottom:12px"><i data-icon="alert"></i><span><b>Le test a échoué : HTTP 404 en 210 ms.</b> L'adresse ne répond pas. Vérifiez qu'elle est correcte et accessible depuis Internet, puis relancez le test.</span></div>
+            <div class="alert alert-warning" role="status" data-only="pause" style="margin-bottom:12px"><i data-icon="pause"></i><span><b>Mis en pause automatiquement le 17 nov. à 21 h 40, après 6 échecs consécutifs.</b> Les événements suivants n'ont pas été envoyés. Corrigez l'adresse ou votre outil, puis réactivez : vous pourrez rejouer les envois en échec.</span></div>
+            <div class="card">
+                <div class="form-sec" style="grid-template-columns:160px 1fr"><div class="intro"><h3 class="t-h3">Événements</h3></div><div class="wh-ev"><span class="badge">lead.created</span><span class="badge">demo.completed</span><span class="badge">learner.module_validated</span></div></div>
+                <div class="form-sec" style="grid-template-columns:160px 1fr"><div class="intro"><h3 class="t-h3">Secret de signature</h3></div><div><div class="secret"><code>tcsec_••••••••••••••••3f9a</code><button class="btn btn-ghost btn-sm" data-open="m-rotate"><i data-icon="refresh"></i>Renouveler</button></div><p class="help" style="margin-top:6px">Affiché une seule fois à la création. Chaque envoi porte l'en-tête <span class="t-mono">TutoClick-Signature</span> (HMAC-SHA256). <a href="#">Vérifier la signature</a></p></div></div>
+            </div>
+            <div class="wh-detail">
+              <div class="card" style="padding:0 0 8px">
+                  <div class="row between" style="padding:16px 24px 8px"><h3 class="t-h3">Journal des envois · 7 jours</h3><select class="select input-sm" style="width:auto" aria-label="Filtrer le journal"><option>Tous les statuts</option><option>Échecs</option></select></div>
+                  <div class="table-wrap"><table class="table">
+                    <caption class="sr-only">Journal des envois du webhook</caption>
+                    <thead><tr><th>Statut</th><th>Événement</th><th>Date</th><th>Durée</th></tr></thead>
+                    <tbody>
+                      <tr data-only="test"><td><span class="st ko">404</span></td><td class="t-mono">ping <span class="badge">Test</span></td><td>à l'instant</td><td>210 ms</td></tr>
+                      <tr class="tr-sel" aria-selected="true"><td><span class="st ko">503</span></td><td class="t-mono">lead.created</td><td>17 nov., 21:40</td><td>essai 6 sur 6</td></tr>
+                      <tr><td><span class="st ok">200</span></td><td class="t-mono">demo.completed</td><td>17 nov., 15:30</td><td>180 ms</td></tr>
+                      <tr data-not="pause"><td><span class="st wait">…</span></td><td class="t-mono">learner.module_validated</td><td>17 nov., 15:29</td><td>essai dans 4 min</td></tr>
+                      <tr><td><span class="st ok">200</span></td><td class="t-mono">lead.created</td><td>17 nov., 14:02</td><td>210 ms</td></tr>
+                    </tbody>
+                  </table></div>
+              </div>
+              <aside class="card card-pad" aria-label="Envoi sélectionné">
+                <div class="row" style="gap:8px"><span class="st ko">503</span><b class="t-mono">lead.created</b><span class="t-caption muted">· essai 6 sur 6</span></div>
+                <p class="t-caption muted" style="margin:8px 0 12px">Nouveaux essais automatiques : 1 min, 5 min, 30 min, 2 h, 6 h. Après 6 échecs, le webhook est mis en pause.</p>
+                <h4 class="t-label" style="margin:0 0 6px">Corps envoyé</h4>
+<pre class="pre">{
+  "id": "evt_01JD8X…",
+  "type": "lead.created",
+  "created_at": "2026-11-17T21:40:10Z",
+  "data": {
+    "demo": { "id": "…", "title": "Créer un rapport" },
+    "lead": { "email": "lea@acme.example" }
+  }
+}</pre>
+                <h4 class="t-label" style="margin:12px 0 6px">Réponse</h4>
+                <pre class="pre">HTTP 503 · Service Unavailable</pre>
+                <button class="btn btn-primary btn-sm" style="margin-top:12px" data-toast="Envoi rejoué · HTTP 200 en 190 ms"><i data-icon="refresh"></i>Rejouer maintenant</button>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <!-- Membres -->
+        <section role="tabpanel" id="s-mem" aria-labelledby="st-mem" hidden>
+          <div class="row between wrap" style="margin-bottom:16px;gap:12px">
+            <div><h2 class="t-h2">Membres</h2><p class="muted" style="margin-top:4px">6 membres sur 10 inclus dans le plan Team.</p></div>
+            <button class="btn btn-primary" data-open="m-invite"><i data-icon="plus"></i>Inviter des membres</button>
+          </div>
+          <div class="card">
+            <div class="row" style="padding:12px 16px;border-bottom:1px solid var(--fd-color-border);gap:12px">
+              <div class="input-affix grow" style="max-width:320px"><i data-icon="search"></i><input class="input input-sm" type="search" placeholder="Rechercher un membre" aria-label="Rechercher un membre"></div>
+              <select class="select input-sm" style="width:auto" aria-label="Filtrer par rôle"><option>Tous les rôles</option><option>Propriétaire</option><option>Admin</option><option>Éditeur</option><option>Lecteur</option></select>
+            </div>
+            <div class="table-wrap"><table class="table">
+              <caption class="sr-only">Membres du workspace</caption>
+              <thead><tr><th>Membre</th><th>Rôle</th><th>Dernière activité</th><th><span class="sr-only">Actions</span></th></tr></thead>
+              <tbody id="members"></tbody>
+            </table></div>
+          </div>
+          <div class="card card-pad" style="margin-top:16px">
+            <h3 class="t-h3">Ce que chaque rôle peut faire</h3>
+            <div class="table-wrap" style="margin-top:12px"><table class="table">
+              <thead><tr><th>Permission</th><th class="r">Propriétaire</th><th class="r">Admin</th><th class="r">Éditeur</th><th class="r">Lecteur</th></tr></thead>
+              <tbody>
+                <tr><td>Voir les démos et les analytics</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td></tr>
+                <tr><td>Créer, modifier, publier des démos</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td></tr>
+                <tr><td>Voir et exporter les leads</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td></tr>
+                <tr><td>Inviter et gérer les membres, marque, intégrations</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td></tr>
+                <tr><td>Facturation, suppression du workspace, transfert</td><td class="r"><span class="ok-ic" role="img" aria-label="Oui"></span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td><td class="r subtle"><span class="sr-only">Non</span><span aria-hidden="true">—</span></td></tr>
+              </tbody></table></div>
+            <p class="help" style="margin-top:8px">« — » : action non autorisée. Les rôles suivent la décision D8 (owner, admin, editor, viewer).</p>
+          </div>
+        </section>
+
+        <!-- Marque -->
+        <section role="tabpanel" id="s-brand" aria-labelledby="st-brand" hidden class="card">
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Thème des démos</h2><p class="t-caption muted">Appliqué par défaut à toutes les nouvelles démos. Chaque démo peut le modifier.</p></div>
+            <div><div class="field"><label for="bp">Couleur principale</label><div class="row"><span style="width:32px;height:32px;border-radius:8px;background:#0E7C71;flex:none"></span><input id="bp" class="input t-mono" value="#0E7C71"></div><span class="help">Contraste avec le texte blanc : 5,1:1, conforme AA</span></div>
+              <div class="field"><label for="bh">Couleur du hotspot</label><div class="row"><span style="width:32px;height:32px;border-radius:8px;background:#E8541F;flex:none"></span><input id="bh" class="input t-mono" value="#E8541F"></div></div>
+              <div class="field"><label for="bf">Police</label><select id="bf" class="select"><option>Instrument Sans (par défaut)</option><option>Inter</option><option>Police personnalisée…</option></select></div></div></div>
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Page publique</h2><p class="t-caption muted">L'en-tête affiché autour de vos démos partagées par lien.</p></div>
+            <div><div class="field"><label for="pl1">Bouton principal</label><div class="grid" style="grid-template-columns:1fr 1.4fr;gap:8px"><input id="pl1" class="input" value="Essai gratuit"><input class="input t-mono" aria-label="URL du bouton principal" value="https://acme-analytics.example/signup"></div></div>
+              <div class="field"><label for="pl2">Bouton secondaire <span class="opt">(facultatif)</span></label><div class="grid" style="grid-template-columns:1fr 1.4fr;gap:8px"><input id="pl2" class="input" value="Voir les tarifs"><input class="input t-mono" aria-label="URL du bouton secondaire" value="https://acme-analytics.example/pricing"></div></div>
+              <div class="setting" style="margin-top:12px"><div><b>Masquer « Fait avec TutoClick »</b><p class="t-caption muted">Disponible à partir du plan Solo.</p></div><span class="switch"><input type="checkbox" checked aria-label="Masquer le filigrane"><span></span></span></div></div></div>
+        </section>
+
+        <!-- Variables -->
+        <section role="tabpanel" id="s-var" aria-labelledby="st-var" hidden class="card">
+          <div class="card-head"><div><h2 class="t-h3">Variables</h2><p class="t-caption muted">Personnalisez les textes avec <span class="t-mono">{{nom}}</span>. Remplies par l'URL, un lien personnalisé ou un formulaire.</p></div><button class="btn btn-primary btn-sm"><i data-icon="plus"></i>Nouvelle variable</button></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Variable</th><th>Type</th><th>Valeur par défaut</th><th class="r">Utilisée dans</th></tr></thead>
+            <tbody>
+              <tr><td><span class="t-mono badge badge-primary">{{first_name}}</span></td><td>Texte</td><td class="muted">vous</td><td class="r">12 démos</td></tr>
+              <tr><td><span class="t-mono badge badge-primary">{{company}}</span></td><td>Texte</td><td class="muted">votre équipe</td><td class="r">9 démos</td></tr>
+              <tr><td><span class="t-mono badge badge-primary">{{logo_url}}</span></td><td>Image</td><td class="muted">Logo Acme</td><td class="r">2 démos</td></tr>
+            </tbody></table></div>
+        </section>
+
+        <!-- Profil -->
+        <section role="tabpanel" id="s-me" aria-labelledby="st-me" hidden class="card">
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Profil</h2></div>
+            <div><div class="field"><label for="pn">Nom</label><input id="pn" class="input" value="Camille Martin"></div><div class="field"><label for="pe">Email</label><input id="pe" class="input" value="camille@acme.example"></div></div></div>
+          <div class="form-sec"><div class="intro"><h2 class="t-h3">Préférences</h2></div>
+            <div><div class="field"><label for="pl">Langue de l'interface</label><select id="pl" class="select"><option>Français</option><option>English</option></select></div>
+              <fieldset class="field" style="border:0;padding:0"><legend class="label" style="margin-bottom:6px">Apparence</legend><div class="segmented" role="radiogroup" data-seg><button role="radio" aria-checked="true"><i data-icon="monitor"></i>Système</button><button role="radio" aria-checked="false"><i data-icon="sun"></i>Clair</button><button role="radio" aria-checked="false"><i data-icon="moon"></i>Sombre</button></div></fieldset>
+              <div class="setting" style="margin-top:12px"><div><b>Email quand un lead est collecté</b></div><span class="switch"><input type="checkbox" checked aria-label="Email quand un lead est collecté"><span></span></span></div>
+              <div class="setting"><div><b>Résumé hebdomadaire des vues</b></div><span class="switch"><input type="checkbox" checked aria-label="Résumé hebdomadaire"><span></span></span></div></div></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="menu" id="mem-menu" role="menu" hidden>
+  <button role="menuitem"><i data-icon="mail"></i>Renvoyer l'invitation</button>
+  <button role="menuitem"><i data-icon="star"></i>Transférer la propriété</button>
+  <hr><button role="menuitem" class="danger" data-open="m-remove"><i data-icon="trash"></i>Retirer du workspace</button>
+</div>
+
+<div class="modal-backdrop" id="m-invite" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-invite-t">
+    <div class="modal-head"><h2 id="m-invite-t">Inviter des membres</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label for="ie">Adresses email</label><textarea id="ie" class="textarea" placeholder="nom@acme.example, autre@acme.example">paul@acme.example, sarah@acme.example</textarea><span class="help">Séparez les adresses par une virgule ou un retour à la ligne.</span></div>
+      <div class="field"><label for="ir">Rôle</label><select id="ir" class="select"><option>Éditeur : crée et publie des démos</option><option>Lecteur : consulte les démos et les analytics</option><option>Admin : gère aussi les membres et la marque</option></select></div>
+      <div class="alert" style="margin-top:20px"><i data-icon="info"></i><span>2 sièges seront utilisés. Il en restera 2 sur les 10 de votre plan.</span></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close data-toast="2 invitations envoyées">Envoyer les invitations</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-remove" hidden>
+  <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="m-remove-t">
+    <div class="modal-head"><h2 id="m-remove-t">Retirer Thomas Bernard ?</h2></div>
+    <div class="modal-body"><p class="muted">Thomas perdra l'accès au workspace. Ses 4 démos restent dans le workspace, et vous en devenez propriétaire.</p></div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-danger" data-close data-toast="Thomas Bernard a été retiré">Retirer le membre</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-delws" hidden>
+  <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="m-delws-t">
+    <div class="modal-head"><h2 id="m-delws-t">Supprimer « Acme Analytics » ?</h2></div>
+    <div class="modal-body"><p class="muted">Cette action est définitive : 24 démos, leurs statistiques et 128 leads seront supprimés.</p><div class="field" style="margin-top:16px"><label for="cfm">Saisissez <b>Acme Analytics</b> pour confirmer</label><input id="cfm" class="input"></div></div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-danger" aria-disabled="true">Supprimer définitivement</button></div>
+  </div>
+</div>
+<!-- L23-03 : créer un webhook -->
+<div class="modal-backdrop" id="m-create" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-create-t" style="max-width:640px">
+    <div class="modal-head"><h2 id="m-create-t">Ajouter un webhook</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label for="wu">Adresse de réception</label><input id="wu" class="input t-mono" value="http://hooks.acme.example/tutoclick" aria-invalid="true" aria-describedby="wu-e"><span class="help" id="wu-e" style="color:var(--fd-color-danger)">L'adresse doit commencer par https://. Les adresses internes (localhost, réseau privé) sont refusées.</span></div>
+      <div class="field" style="margin-top:12px"><label for="wn">Nom <span class="opt">(facultatif)</span></label><input id="wn" class="input" value="CRM interne"></div>
+      <fieldset style="border:0;margin:16px 0 0;padding:0"><legend class="t-label" style="margin-bottom:8px">Événements à envoyer</legend>
+        <div class="ev-list">
+          <label><input type="checkbox" checked><span>Nouveau lead<small><code>lead.created</code> · e-mail et champs du formulaire</small></span></label>
+          <label><input type="checkbox" checked><span>Démo terminée<small><code>demo.completed</code></small></span></label>
+          <label><input type="checkbox"><span>Démo publiée<small><code>demo.published</code></small></span></label>
+          <label><input type="checkbox" checked><span>Module validé<small><code>learner.module_validated</code></small></span></label>
+          <label><input type="checkbox"><span>Quiz échoué<small><code>learner.quiz_failed</code></small></span></label>
+          <label><input type="checkbox"><span>Alerte déclenchée<small><code>alert.triggered</code> · règle d'alerte du suivi</small></span></label>
+        </div>
+      </fieldset>
+      <p class="help" style="margin-top:12px">Format : <span class="t-mono">{ id, type, created_at, data }</span>, délai de 10 s par envoi. Les données personnelles ne sont envoyées qu'avec les événements qui les concernent.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" aria-disabled="true">Créer le webhook</button></div>
+  </div>
+</div>
+<!-- L23-04 : secret affiché une seule fois -->
+<div class="modal-backdrop" id="m-secret" hidden>
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="m-secret-t" aria-describedby="m-secret-d" style="max-width:560px">
+    <div class="modal-head"><h2 id="m-secret-t">Webhook créé : copiez son secret</h2></div>
+    <div class="modal-body">
+      <p class="muted" id="m-secret-d">Votre outil s'en sert pour vérifier que les envois viennent bien de TutoClick. <b>Il ne sera plus jamais affiché.</b> Si vous le perdez, renouvelez-le.</p>
+      <div class="secret" style="margin-top:12px"><code>tcsec_EXEMPLE-fictif-0000-0000-3f9a</code><button class="btn btn-secondary btn-sm" data-toast="Secret copié"><i data-icon="copy"></i>Copier</button></div>
+      <label class="check" style="margin-top:16px"><input type="checkbox">J'ai copié le secret dans un endroit sûr</label>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-toast="Test envoyé · HTTP 200 en 180 ms"><i data-icon="send"></i>Envoyer un test</button><button class="btn btn-primary" aria-disabled="true">Terminé</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-rotate" hidden>
+  <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="m-rotate-t">
+    <div class="modal-head"><h2 id="m-rotate-t">Renouveler le secret ?</h2></div>
+    <div class="modal-body"><p class="muted">Un nouveau secret sera affiché une seule fois. L'ancien reste valable 24 h, le temps de mettre à jour votre outil.</p></div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close>Renouveler</button></div>
+  </div>
+</div>
+<div class="mock-l23" role="group" aria-label="État de la maquette L23">
+  <button type="button" data-l23-go="liste" aria-pressed="true">Liste</button>
+  <button type="button" data-l23-go="vide" aria-pressed="false">Vide</button>
+  <button type="button" data-l23-go="creer" aria-pressed="false">Créer</button>
+  <button type="button" data-l23-go="secret" aria-pressed="false">Secret</button>
+  <button type="button" data-l23-go="detail" aria-pressed="false">Détail et journal</button>
+  <button type="button" data-l23-go="test" aria-pressed="false">Test en échec</button>
+  <button type="button" data-l23-go="pause" aria-pressed="false">En pause</button>
+</div>
+<script>
+document.addEventListener('fd:ready', () => {
+  const go = (k) => {
+    document.body.dataset.l23 = k;
+    document.querySelectorAll('.mock-l23 [data-l23-go]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.l23Go === k)));
+    document.getElementById('m-create').hidden = k !== 'creer';
+    document.getElementById('m-secret').hidden = k !== 'secret';
+    document.getElementById('st-int').click();
+    window.scrollTo(0, 0);
+  };
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-l23-go]'); if (b) go(b.dataset.l23Go); });
+  go(new URLSearchParams(location.search).get('etat') || 'liste');
+});
+</script>
+<script>
+const M = [['Camille Martin','camille@acme.example','Propriétaire','Active maintenant','CM',true],['Thomas Bernard','thomas@acme.example','Admin','il y a 2 h','TB'],['Inès Haddad','ines@acme.example','Éditeur','hier','IH'],['Hugo Lefèvre','hugo@acme.example','Éditeur','il y a 4 j','HL'],['Nina Roux','nina@acme.example','Lecteur','il y a 2 sem.','NR'],['paul@acme.example','Invitation envoyée le 15 nov.','Éditeur',null,'P']];
+document.addEventListener('fd:ready', () => {
+  const tb = document.getElementById('members');
+  M.forEach(([n,e,r,a,i,me]) => tb.insertAdjacentHTML('beforeend', `<tr><td><div class="row"><span class="avatar" ${a===null?'style="background:var(--fd-stone-100);color:var(--fd-stone-600)"':''}>${i}</span><div><b>${n}</b>${me?' <span class="badge">Vous</span>':''}<div class="t-caption subtle">${e}</div></div></div></td>
+    <td>${me?'<span class="badge badge-primary">Propriétaire</span>':`<select class="select role-select input-sm" aria-label="Rôle de ${n}"><option ${r==='Admin'?'selected':''}>Admin</option><option ${r==='Éditeur'?'selected':''}>Éditeur</option><option ${r==='Lecteur'?'selected':''}>Lecteur</option></select>`}</td>
+    <td class="muted">${a===null?'<span class="badge badge-warning">En attente</span>':a}</td>
+    <td class="r">${me?'':`<button class="btn btn-ghost btn-sm btn-icon" data-menu="mem-menu" aria-label="Actions pour ${n}">${fdIcon('more')}</button>`}</td></tr>`));
+  document.addEventListener('click', e => { const b = e.target.closest('[data-menu="mem-menu"]'); if (b) { const m = document.getElementById('mem-menu'), rc = b.getBoundingClientRect(); m.style.position='fixed'; m.style.top=(rc.bottom+4)+'px'; m.style.left=(rc.right-220)+'px'; } }, true);
+  document.querySelectorAll('.snav [role=tab]').forEach(t => t.addEventListener('click', () => document.getElementById('crumb').textContent = t.textContent.trim()));
+  const h = location.hash.slice(1); if (h) { const t = document.getElementById('st-' + h); t && t.click(); }
+});
+</script>
+</body>
+</html>
