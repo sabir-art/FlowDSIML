@@ -42,22 +42,8 @@ export function grouped<T extends { created_at: string }>(rows: T[], now: number
 /** « 9+ » au-delà de 9 ; rien à 0. */
 export const badge = (n: number) => (n <= 0 ? '' : n > 9 ? '9+' : String(n));
 
-export type BodyPart = { text: string } | { mention: string; userId: string };
-
-/** Mention stockée « @[Prénom Nom](uuid) » (L22-07) → pastille ; le reste reste du texte brut. */
-const MENTION = /@\[([^\]]{1,80})\]\(([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\)/g;
-
-export function bodyParts(body: string): BodyPart[] {
-  const parts: BodyPart[] = [];
-  let last = 0;
-  for (const m of body.matchAll(MENTION)) {
-    if (m.index > last) parts.push({ text: body.slice(last, m.index) });
-    parts.push({ mention: m[1] ?? '', userId: m[2] ?? '' });
-    last = m.index + m[0].length;
-  }
-  if (last < body.length) parts.push({ text: body.slice(last) });
-  return parts;
-}
+export { bodyParts, type BodyPart } from '../../lib/mentions';
+import { bodyParts } from '../../lib/mentions';
 
 /** Texte lisible d'un message (mentions réduites à « @Nom »), pour un extrait ou un libellé. */
 export const plainBody = (body: string) =>

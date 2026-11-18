@@ -8,6 +8,7 @@ export interface CommentAuthor {
   user_id: string;
   email: string;
   full_name: string;
+  role?: string;
 }
 /** Événement reçu d'un autre membre (annonce aria-live, mise en évidence « Nouveau »). */
 export interface RemoteEvent {

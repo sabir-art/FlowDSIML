@@ -1,4 +1,6 @@
 import { avatarTone } from '../../../lib/avatarTone';
+import { bodyParts, serialize, toDraft, type Mention } from '../../../lib/mentions';
+import { MentionInput } from './MentionInput';
 import {
   Fragment,
   useEffect,
@@ -65,6 +67,25 @@ function store(key: string, value: string) {
   } catch {
     /* stockage indisponible : la préférence vaut pour la session */
   }
+}
+
+const mapDraft = (d: { text: string; mentions: Mention[] }) => ({ body: d.text, mentions: d.mentions });
+
+/** L22-07 : message avec mentions en pastilles ; le reste en texte brut avec liens. */
+function CommentBody({ body }: { body: string }) {
+  return (
+    <>
+      {bodyParts(body).map((p, i) =>
+        'text' in p ? (
+          <Linkified key={i} text={p.text} />
+        ) : (
+          <span key={i} className="cm-mtag">
+            @{p.mention}
+          </span>
+        ),
+      )}
+    </>
+  );
 }
 
 /** Texte brut avec liens cliquables (pas de Markdown, jamais de HTML injecté). */
@@ -134,10 +155,11 @@ export function CommentsPanel({
   const [collapsed, setCollapsed] = useState(() => !mobile && read(COLLAPSED_KEY) !== '0');
   const [showResolved, setShowResolved] = useState(false);
   const [draft, setDraft] = useState('');
+  const [draftMentions, setDraftMentions] = useState<Mention[]>([]);
   const [composeFocus, setComposeFocus] = useState(false);
   const [sendError, setSendError] = useState(false);
   const [sending, setSending] = useState(false);
-  const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
+  const [editing, setEditing] = useState<{ id: string; body: string; mentions: Mention[] } | null>(null);
   const [fresh, setFresh] = useState<Record<string, true>>({});
   const [pending, setPending] = useState(0);
   /** Commentaires lus plus haut que le premier non lu (pilule « n plus anciens ↑ »). */
@@ -180,6 +202,8 @@ export function CommentsPanel({
     scrolled.current = highlight;
     el.scrollIntoView({ block: 'center' });
   });
+  // L22-07 : membres du workspace qu'on peut mentionner (jamais soi-même)
+  const mentionable = Object.values(api.authors).filter((a) => a.user_id !== user?.id);
   const unfresh = (id: string) =>
     setFresh((f) => {
       if (!f[id]) return f;
@@ -297,13 +321,15 @@ export function CommentsPanel({
   }
 
   async function send() {
-    const body = draft.trim();
-    if (!body || !stepId || body.length > MAX_LEN || sending) return;
+    const text = draft.trim();
+    if (!text || !stepId || text.length > MAX_LEN || sending) return;
+    const body = serialize(text, draftMentions);
     setSending(true);
     setSendError(false);
     try {
       await api.add(stepId, body);
       setDraft('');
+      setDraftMentions([]);
       setPending(0);
     } catch {
       setSendError(true); // le texte reste dans le champ
@@ -313,8 +339,9 @@ export function CommentsPanel({
   }
   async function saveEdit() {
     if (!editing) return;
-    const body = editing.body.trim();
-    if (!body || body.length > MAX_LEN) return;
+    const text = editing.body.trim();
+    if (!text || text.length > MAX_LEN) return;
+    const body = serialize(text, editing.mentions);
     try {
       await api.update(editing.id, body);
       setEditing(null);
@@ -508,7 +535,7 @@ export function CommentsPanel({
                   menuItems.push({
                     label: t('editor.comments.edit'),
                     icon: <Pencil />,
-                    onSelect: () => setEditing({ id: c.id, body: c.body }),
+                    onSelect: () => setEditing({ id: c.id, ...mapDraft(toDraft(c.body)) }),
                   });
                 if (mineC || isAdmin)
                   menuItems.push({
@@ -537,14 +564,16 @@ export function CommentsPanel({
                       </div>
                       {editing?.id === c.id ? (
                         <div className="cm-edit">
-                          <textarea
+                          <MentionInput
                             className="fd-textarea"
                             aria-label={t('editor.comments.editLabel')}
                             autoFocus
                             rows={2}
                             maxLength={MAX_LEN}
                             value={editing.body}
-                            onChange={(e) => setEditing({ id: c.id, body: e.target.value })}
+                            mentions={editing.mentions}
+                            members={mentionable}
+                            onValueChange={(body, mentions) => setEditing({ id: c.id, body, mentions })}
                             onKeyDown={(e) => {
                               if (e.key === 'Escape') {
                                 e.stopPropagation();
@@ -567,7 +596,7 @@ export function CommentsPanel({
                         </div>
                       ) : (
                         <p className="cm-body">
-                          <Linkified text={c.body} />
+                          <CommentBody body={c.body} />
                         </p>
                       )}
                       {c.resolved_at && (
@@ -642,8 +671,9 @@ export function CommentsPanel({
               }}
             >
               {user && <Avatar id={user.id} label={name(user.id) || user.email || '?'} />}
-              <textarea
+              <MentionInput
                 ref={draftRef}
+                wrapClassName="cm-compose__field"
                 className="fd-textarea cm-compose__input"
                 rows={1}
                 maxLength={MAX_LEN}
@@ -653,11 +683,14 @@ export function CommentsPanel({
                 aria-label={t('editor.comments.placeholderShort')}
                 aria-describedby="cm-compose-hint"
                 value={draft}
+                mentions={draftMentions}
+                members={mentionable}
                 disabled={!stepId}
                 onFocus={() => setComposeFocus(true)}
                 onBlur={() => setComposeFocus(false)}
-                onChange={(e) => {
-                  setDraft(e.target.value);
+                onValueChange={(text, mentions) => {
+                  setDraft(text);
+                  setDraftMentions(mentions);
                   setSendError(false);
                 }}
                 onKeyDown={(e) => {

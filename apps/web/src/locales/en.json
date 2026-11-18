@@ -500,7 +500,7 @@
       "placeholder": "Add a comment for your team…",
       "placeholderShort": "Add a comment…",
       "send": "Send comment",
-      "composeHint": "Enter to send · Shift + Enter for a new line",
+      "composeHint": "@ to mention · Enter to send · Shift + Enter for a new line",
       "resolve": "Resolve",
       "reopen": "Reopen",
       "resolvedBy": "Resolved by {{name}}",
@@ -540,7 +540,9 @@
       "newBelow_other": "{{count}} new comments",
       "olderAbove_one": "{{count}} older comment",
       "olderAbove_other": "{{count}} older comments",
-      "viewDemo": "View demo"
+      "viewDemo": "View demo",
+      "mentionList": "Members to mention",
+      "onDemo": "on this demo"
     },
     "autoplay": "Autoplay",
     "autoplayHelp": "Advances on its own; stops on a form, a choice menu or the last step.",

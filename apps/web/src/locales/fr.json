@@ -500,7 +500,7 @@
       "placeholder": "Ajouter un commentaire pour l'équipe…",
       "placeholderShort": "Ajouter un commentaire…",
       "send": "Envoyer le commentaire",
-      "composeHint": "Entrée pour envoyer · Maj + Entrée pour aller à la ligne",
+      "composeHint": "@ pour mentionner · Entrée pour envoyer · Maj + Entrée pour aller à la ligne",
       "resolve": "Résoudre",
       "reopen": "Rouvrir",
       "resolvedBy": "Résolu par {{name}}",
@@ -540,7 +540,9 @@
       "newBelow_other": "{{count}} nouveaux commentaires",
       "olderAbove_one": "{{count}} commentaire plus ancien",
       "olderAbove_other": "{{count}} commentaires plus anciens",
-      "viewDemo": "Voir la démo"
+      "viewDemo": "Voir la démo",
+      "mentionList": "Membres à mentionner",
+      "onDemo": "sur cette démo"
     },
     "autoplay": "Lecture automatique",
     "autoplayHelp": "Avance seule ; s’arrête sur un formulaire, un menu de choix ou la dernière étape.",

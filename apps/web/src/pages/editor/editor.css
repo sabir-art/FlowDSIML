@@ -1648,3 +1648,90 @@
   width: 12px;
   height: 12px;
 }
+
+/* L22-07 : champ avec mentions. Le calque (.mi-mirror) a exactement la boîte du champ ;
+   la pastille ne change que les couleurs (jamais la largeur), sinon le curseur se décale. */
+.mi {
+  position: relative;
+  min-width: 0;
+}
+.cm-compose__field {
+  flex: 1;
+}
+.mi-input {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  color: transparent;
+  caret-color: var(--fd-color-text);
+  background: transparent;
+}
+.mi-input::placeholder {
+  color: var(--fd-color-text-subtle);
+}
+.mi-input::selection {
+  color: transparent;
+  background: color-mix(in srgb, var(--fd-color-primary) 30%, transparent);
+}
+.mi-mirror {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  color: var(--fd-color-text);
+  border-color: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+.mi-tag,
+.cm-mtag {
+  border-radius: 4px;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  box-shadow: 0 0 0 2px var(--fd-color-primary-soft);
+}
+.cm-mtag {
+  font-weight: 700;
+}
+.mi-ac {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 20;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+  border: 1px solid var(--fd-color-border);
+  box-shadow: var(--fd-shadow-lg);
+}
+.mi-ac li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.mi-ac li[aria-selected='true'] {
+  background: var(--fd-color-primary-soft);
+}
+.mi-ac small {
+  display: block;
+  color: var(--fd-color-text-muted);
+  font-size: 11px;
+}
+.cm-avatar.mi-avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 9px;
+}
