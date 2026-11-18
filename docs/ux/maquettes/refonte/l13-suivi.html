@@ -10,11 +10,15 @@
 <style>
   /* Lot L13 : suivi des apprenants. Cadre validé (CAD), peau DSI, composants F3 (st-badge, lp, fchip, kpis). */
   .l13 [data-pane] { display: none; }
-  .l13[data-view='liste'] [data-pane~='liste'], .l13[data-view='fiche'] [data-pane~='liste'], .l13[data-view='export'] [data-pane~='liste'], .l13[data-view='rgpd'] [data-pane~='liste'],
+  .l13[data-view='liste'] [data-pane~='liste'], .l13[data-view='fiche'] [data-pane~='liste'], .l13[data-view='export'] [data-pane~='liste'], .l13[data-view='rgpd'] [data-pane~='liste'], .l13[data-view='gerer'] [data-pane~='liste'], .l13[data-view='gerer-structures'] [data-pane~='liste'],
   .l13[data-view='formation'] [data-pane~='formation'] { display: flex; flex-direction: column; gap: var(--fd-space-5); }
   .l13[data-view='fiche'] .l13-drawer, .l13[data-view='rgpd'] .l13-drawer { display: flex; }
-  .l13[data-view='export'] .l13-modal--export, .l13[data-view='rgpd'] .l13-modal--rgpd { display: flex; }
-  .l13[data-view='fiche'] .l13-scrim, .l13[data-view='export'] .l13-scrim, .l13[data-view='rgpd'] .l13-scrim { display: block; }
+  .l13[data-view='export'] .l13-modal--export, .l13[data-view='rgpd'] .l13-modal--rgpd, .l13[data-view='gerer'] .l13-modal--gerer, .l13[data-view='gerer-structures'] .l13-modal--gerer { display: flex; }
+  .l13[data-view='gerer-structures'] .gm-pane--fo, .l13[data-view='gerer'] .gm-pane--st { display: none; }
+  .l13[data-view='gerer-structures'] .gm-del { visibility: hidden; }
+  .l13[data-view='gerer-structures'] .gm-tabs button:first-child { background: transparent; color: var(--fd-color-text-muted); box-shadow: none; }
+  .l13[data-view='gerer-structures'] .gm-tabs button:last-child { background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: var(--fd-shadow-xs); }
+  .l13[data-view='fiche'] .l13-scrim, .l13[data-view='export'] .l13-scrim, .l13[data-view='rgpd'] .l13-scrim, .l13[data-view='gerer'] .l13-scrim, .l13[data-view='gerer-structures'] .l13-scrim { display: block; }
   .st-badge.relance { background: var(--fd-color-warning-soft); color: var(--fd-color-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fd-orange-500) 45%, transparent); }
   .st-badge.relance svg { color: var(--fd-orange-600, var(--fd-orange-500)); }
   .fm-list { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -84,6 +88,39 @@
   .funnel .num { font-variant-numeric: tabular-nums; color: var(--fd-color-text-muted); font-size: 13px; }
   .funnel .num b { color: var(--fd-color-text); }
   @media (max-width: 1100px) { .fo-grid { grid-template-columns: minmax(0, 1fr); } .funnel .row { grid-template-columns: 1fr; } }
+  /* L13-07 : gérer les formations */
+  .l13-modal--gerer { width: min(880px, calc(100% - 32px)); max-height: calc(100vh - 48px); }
+  .l13-modal--gerer .gm-tabs { padding: 0 24px; }
+  .l13-modal--gerer .body { overflow: auto; padding-top: 16px; }
+  .gm-pane--fo { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; }
+  .gm-list { display: flex; flex-direction: column; gap: 6px; }
+  .gm-list button.gm-item { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 10px 12px; border: 1px solid var(--fd-color-border); border-radius: 12px; background: var(--fd-color-surface); color: var(--fd-color-text); font: inherit; font-size: 14px; cursor: pointer; }
+  .gm-list button.gm-item small { color: var(--fd-color-text-muted); font-size: 12px; }
+  .gm-list button.gm-item[aria-current='true'] { border-color: var(--fd-color-primary); background: var(--fd-color-primary-soft); }
+  .gm-list .gm-new { display: flex; gap: 6px; margin-top: 6px; }
+  .gm-list .gm-new .fd-input { flex: 1; min-width: 0; }
+  .gm-edit { display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 16px; background: var(--fd-color-surface-sunken); }
+  .gm-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; }
+  .gm-mods { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .gm-mods li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 8px 8px 12px; border-radius: 12px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); font-size: 14px; }
+  .gm-mods .gm-n { width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: var(--fd-color-primary-soft); color: var(--fd-color-primary); font-size: 12px; font-weight: 700; }
+  .gm-mods .gm-meta { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .gm-mods .gm-req { display: flex; gap: 6px; align-items: center; font-size: 13px; white-space: nowrap; }
+  .gm-mods .gm-req input, .gm-st input[type=checkbox] { accent-color: var(--fd-color-primary); width: 16px; height: 16px; margin: 0; }
+  .gm-mods .gm-acts { display: flex; gap: 2px; }
+  .gm-add { display: flex; gap: 8px; }
+  .gm-add select { flex: 1; min-width: 0; }
+  .gm-pane--st { display: flex; flex-direction: column; gap: 10px; }
+  .gm-st { display: grid; grid-template-columns: 200px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px; border: 1px solid var(--fd-color-border); border-radius: 12px; }
+  .gm-st b { font-size: 14px; } .gm-st small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .gm-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 40px; padding: 6px 8px; border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); border-radius: 10px; background: var(--fd-color-surface); }
+  .gm-chips .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 8px; border-radius: 999px; background: var(--fd-color-primary-soft); color: var(--fd-color-text); font-family: var(--fd-font-mono, ui-monospace, monospace); font-size: 12px; }
+  .gm-chips .chip button { border: 0; background: none; color: inherit; padding: 2px; border-radius: 999px; cursor: pointer; display: grid; place-items: center; }
+  .gm-chips .chip svg { width: 12px; height: 12px; }
+  .gm-chips input { border: 0; outline: 0; background: none; color: var(--fd-color-text); font: inherit; font-size: 13px; flex: 1; min-width: 140px; }
+  .gm-st--new { border-style: dashed; grid-template-columns: minmax(0, 1fr) auto; }
+  .l13-modal--gerer > footer { justify-content: space-between; align-items: center; }
+  @media (max-width: 760px) { .gm-pane--fo, .gm-st { grid-template-columns: minmax(0, 1fr); } }
   .mock-state { z-index: 90; }
 </style>
 </head>
@@ -115,7 +152,7 @@
   <main class="main">
     <header class="topbar">
       <div><h1>Apprenants</h1><p class="sub">214 apprenants · 3 formations · données des 12 derniers mois</p></div>
-      <div class="topbar__actions"><button class="fd-btn" type="button" data-view-set="export"><i data-icon="download"></i>Exporter CSV</button><button class="fd-btn fd-btn--primary" type="button"><i data-icon="mail"></i>Inviter des apprenants</button></div>
+      <div class="topbar__actions"><button class="fd-btn" type="button" data-view-set="gerer"><i data-icon="settings"></i>Gérer les formations</button><button class="fd-btn" type="button" data-view-set="export"><i data-icon="download"></i>Exporter CSV</button><button class="fd-btn fd-btn--primary" type="button"><i data-icon="mail"></i>Inviter des apprenants</button></div>
     </header>
     <div class="fd-tabs" role="tablist" aria-label="Vues du suivi" style="max-width:520px;margin-bottom:20px">
       <button role="tab" type="button" aria-selected="true" data-view-set="liste">Tous les apprenants</button>
@@ -259,6 +296,46 @@
   <footer><button class="fd-btn" type="button" data-view-set="liste">Annuler</button><button class="fd-btn fd-btn--primary" type="button"><i data-icon="download"></i>Exporter 21 lignes</button></footer>
 </div>
 
+<!-- L13-07 : gérer les formations et les structures -->
+<div class="l13-modal l13-modal--gerer" role="dialog" aria-modal="true" aria-labelledby="gm-t">
+  <header><h2 id="gm-t">Formations et structures</h2><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Fermer" data-view-set="liste"><i data-icon="x"></i></button></header>
+  <div class="gm-tabs"><div class="fd-segmented" role="tablist" aria-label="Formations et structures">
+    <button role="tab" type="button" data-view-set="gerer" aria-selected="true"><i data-icon="graduation"></i>Formations</button>
+    <button role="tab" type="button" data-view-set="gerer-structures" aria-selected="false"><i data-icon="building"></i>Structures</button>
+  </div></div>
+  <div class="body">
+    <div class="gm-pane--fo" role="tabpanel" aria-label="Formations">
+      <div class="gm-list" aria-label="Formations du workspace">
+        <button class="gm-item" type="button" aria-current="true"><b>Logiciel métier</b><small>4 modules · 1 quiz · 142 apprenants</small></button>
+        <button class="gm-item" type="button"><b>Agenda partagé</b><small>2 modules · sans quiz · 96 apprenants</small></button>
+        <button class="gm-item" type="button"><b>Statistiques d'activité</b><small>3 modules · 3 quiz · 41 apprenants</small></button>
+        <div class="gm-new"><input class="fd-input" type="text" placeholder="Nom de la nouvelle formation" aria-label="Nom de la nouvelle formation"><button class="fd-btn fd-btn--icon" type="button" aria-label="Créer une formation"><i data-icon="plus"></i></button></div>
+      </div>
+      <div class="gm-edit">
+        <div class="fd-field"><label class="fd-label" for="gm-name">Nom</label><input class="fd-input" id="gm-name" type="text" value="Logiciel métier"></div>
+        <label class="fd-switch gm-row"><span>Modules à suivre dans l'ordre<span class="fd-help" style="display:block">Un module s'ouvre quand le précédent est validé.</span></span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+        <ol class="gm-mods" aria-label="Modules de la formation">
+        <li><span class="gm-n">1</span><span><b>Prise en main</b><span class="gm-meta">Démo · 8 étapes · sans quiz</span></span><label class="gm-req"><input type="checkbox" checked>Obligatoire</label><span class="gm-acts"><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Monter le module Prise en main" disabled><i data-icon="chevronUp"></i></button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Descendre le module Prise en main"><i data-icon="chevronDown"></i></button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Retirer le module Prise en main"><i data-icon="x"></i></button></span></li>
+        <li><span class="gm-n">2</span><span><b>Fiches usagers</b><span class="gm-meta">Démo · 12 étapes · sans quiz</span></span><label class="gm-req"><input type="checkbox" checked>Obligatoire</label><span class="gm-acts"><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Monter le module Fiches usagers"><i data-icon="chevronUp"></i></button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Descendre le module Fiches usagers"><i data-icon="chevronDown"></i></button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Retirer le module Fiches usagers"><i data-icon="x"></i></button></span></li>
+        <li><span class="gm-n">3</span><span><b>Agenda</b><span class="gm-meta">Démo · 9 étapes · sans quiz</span></span><label class="gm-req"><input type="checkbox">Obligatoire</label><span class="gm-acts"><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Monter le module Agenda"><i data-icon="chevronUp"></i></button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Descendre le module Agenda"><i data-icon="chevronDown"></i></button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Retirer le module Agenda"><i data-icon="x"></i></button></span></li>
+        <li><span class="gm-n">4</span><span><b>Quiz final</b><span class="gm-meta">Démo · 6 étapes · quiz, seuil 70 %</span></span><label class="gm-req"><input type="checkbox" checked>Obligatoire</label><span class="gm-acts"><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Monter le module Quiz final"><i data-icon="chevronUp"></i></button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Descendre le module Quiz final" disabled><i data-icon="chevronDown"></i></button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Retirer le module Quiz final"><i data-icon="x"></i></button></span></li>
+        </ol>
+        <div class="gm-add"><select class="fd-input" aria-label="Ajouter un module"><option>Choisir une démo…</option><option>Saisir un rendez-vous</option><option>Exporter une liste</option></select><button class="fd-btn" type="button"><i data-icon="plus"></i>Ajouter un module</button></div>
+        <p class="fd-help" style="margin:0">Une formation est une suite de démos (modules). Un module sans quiz est validé à la dernière étape, un module avec quiz quand le quiz est réussi.</p>
+      </div>
+    </div>
+    <div class="gm-pane--st" role="tabpanel" aria-label="Structures">
+      <p class="fd-help" style="margin:0">Les structures regroupent les apprenants (antenne, service…). Un apprenant est rattaché automatiquement selon le domaine de son e-mail.</p>
+      <div class="gm-st"><span><b>Antenne Nord</b><small>58 apprenants</small></span><div class="gm-chips" aria-label="Domaines e-mail de Antenne Nord"><span class="chip">@mission-locale.example<button type="button" aria-label="Retirer le domaine mission-locale.example"><i data-icon="x"></i></button></span><input type="text" placeholder="Ajouter un domaine" aria-label="Ajouter un domaine e-mail à Antenne Nord"></div><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm fd-btn--danger-ghost" type="button" aria-label="Supprimer la structure Antenne Nord"><i data-icon="trash"></i></button></div>
+      <div class="gm-st"><span><b>Antenne Sud</b><small>44 apprenants</small></span><div class="gm-chips" aria-label="Domaines e-mail de Antenne Sud"><span class="chip">@sud.mission-locale.example<button type="button" aria-label="Retirer le domaine sud.mission-locale.example"><i data-icon="x"></i></button></span><input type="text" placeholder="Ajouter un domaine" aria-label="Ajouter un domaine e-mail à Antenne Sud"></div><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm fd-btn--danger-ghost" type="button" aria-label="Supprimer la structure Antenne Sud"><i data-icon="trash"></i></button></div>
+      <div class="gm-st"><span><b>Siège DSI</b><small>12 apprenants</small></span><div class="gm-chips" aria-label="Domaines e-mail de Siège DSI"><span class="chip">@dsi-ml.example<button type="button" aria-label="Retirer le domaine dsi-ml.example"><i data-icon="x"></i></button></span><span class="chip">@acme.example<button type="button" aria-label="Retirer le domaine acme.example"><i data-icon="x"></i></button></span><input type="text" placeholder="Ajouter un domaine" aria-label="Ajouter un domaine e-mail à Siège DSI"></div><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm fd-btn--danger-ghost" type="button" aria-label="Supprimer la structure Siège DSI"><i data-icon="trash"></i></button></div>
+      <div class="gm-st gm-st--new"><input class="fd-input" type="text" placeholder="Nom de la nouvelle structure" aria-label="Nom de la nouvelle structure"><button class="fd-btn" type="button"><i data-icon="plus"></i>Ajouter</button></div>
+      <p class="fd-help" style="margin:0">Les messageries grand public ne sont pas acceptées comme domaine. Un apprenant sans domaine connu reste « Sans structure » jusqu'à ce qu'on le rattache depuis sa fiche.</p>
+    </div>
+  </div>
+  <footer><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--danger-ghost gm-del" type="button"><i data-icon="trash"></i>Supprimer la formation</button><button class="fd-btn fd-btn--primary" type="button" data-view-set="liste">Terminé</button></footer>
+</div>
+
 <!-- L13-05 : suppression RGPD -->
 <div class="l13-modal l13-modal--rgpd" role="alertdialog" aria-modal="true" aria-labelledby="rg-t" aria-describedby="rg-d">
   <header><h2 id="rg-t">Supprimer les données de Léa Exemple ?</h2></header>
@@ -278,6 +355,7 @@
   <button type="button" data-view-set="formation" aria-pressed="false">Par formation</button>
   <button type="button" data-view-set="export" aria-pressed="false">Export CSV</button>
   <button type="button" data-view-set="rgpd" aria-pressed="false">Suppression RGPD</button>
+  <button type="button" data-view-set="gerer" aria-pressed="false">Gérer les formations</button>
 </div>
 <div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
   <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
