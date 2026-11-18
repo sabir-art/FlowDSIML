@@ -1029,8 +1029,19 @@
   max-width: 340px;
 }
 .fp-cert-s:empty {
-  display: none;
+  /* Zone d'état vide : invisible mais présente pour les lecteurs d'écran (annonces fiables) */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.fp-cert-s:focus {
+  outline: none;
 }
 .fp-cert-s.err {
   color: var(--ctr-danger, #b3261e);
+}
+.fp-cert {
+  position: relative;
 }

@@ -203,6 +203,10 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       'L15-07 : refus expliqué',
     );
     reply = { error: 'name_missing' };
+    ok(
+      (await p.locator('.fp-cert [role="status"]').count()) === 1,
+      'L15-07 : zone d’état présente avant le clic',
+    );
     await btn.click();
     await p.waitForSelector('.fp-cert-help');
     ok(
@@ -212,6 +216,10 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
         ) &&
         (await p.locator('.fp-cert-help a').getAttribute('href')) === 'mailto:aide@mission-locale.example',
       'L15-07 : sans nom, l’aide remplace le bouton (avec « Besoin d’aide ? »)',
+    );
+    ok(
+      await p.evaluate(() => document.activeElement?.getAttribute('role') === 'status'),
+      'L15-07 : le focus passe sur l’aide quand le bouton disparaît',
     );
     await p.reload();
     await p.waitForSelector('.fp-done button');

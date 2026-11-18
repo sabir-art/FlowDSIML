@@ -734,6 +734,10 @@ function CertificateButton({
   help: string;
 }) {
   const [state, setState] = useState<'idle' | 'busy' | 'refused' | 'noName' | 'error'>('idle');
+  const status = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (state === 'noName') status.current?.focus();
+  }, [state]);
   const run = async () => {
     setState('busy');
     try {
@@ -763,39 +767,44 @@ function CertificateButton({
     state === 'refused'
       ? c.certRefused
       : state === 'noName'
-        ? c.certNoName
+        ? fmt(c, 'certNoName', { workspace })
         : state === 'error'
           ? c.certError
           : state === 'busy'
             ? c.certBusy
             : '';
-  // Aucun nom connu : pas d'attestation, l'aide remplace le bouton (spec L15 §5)
-  if (state === 'noName') {
-    const href = help ? (help.includes('@') ? `mailto:${help}` : help) : null;
-    return (
-      <p class="fp-cert-s fp-cert-help" role="status">
-        {fmt(c, 'certNoName', { workspace })} {href && <a href={href}>{c.help}</a>}
-      </p>
-    );
-  }
+  // Aucun nom connu : pas d'attestation, l'aide remplace le bouton (spec L15 §5). La zone d'état
+  // existe dès l'affichage (annonce fiable) et reçoit le focus quand le bouton disparaît.
+  const noName = state === 'noName';
+  const href = help ? (help.includes('@') ? `mailto:${help}` : help) : null;
   return (
     <div class="fp-cert">
-      <button
-        class="cta"
-        type="button"
-        onClick={() => void run()}
-        disabled={state === 'busy'}
-        aria-describedby="fp-cert-s"
-      >
-        <Download aria-hidden="true" />
-        {c.certificate}
-      </button>
+      {!noName && (
+        <button
+          class="cta"
+          type="button"
+          onClick={() => void run()}
+          disabled={state === 'busy'}
+          aria-describedby="fp-cert-s"
+        >
+          <Download aria-hidden="true" />
+          {c.certificate}
+        </button>
+      )}
       <p
-        class={`fp-cert-s${state === 'busy' || state === 'idle' ? '' : ' err'}`}
+        ref={status}
+        tabIndex={-1}
+        class={`fp-cert-s${noName ? ' fp-cert-help' : state === 'busy' || state === 'idle' ? '' : ' err'}`}
         id="fp-cert-s"
         role="status"
       >
         {msg}
+        {noName && href && (
+          <>
+            {' '}
+            <a href={href}>{c.help}</a>
+          </>
+        )}
       </p>
     </div>
   );
