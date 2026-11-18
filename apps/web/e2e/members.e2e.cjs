@@ -18,7 +18,7 @@ const SHOTS = process.env.SHOTS_DIR;
   };
   await page.goto(`${APP}/#/settings/members`);
   await page.waitForSelector('.snav');
-  ok((await page.locator('.snav .snav-item').count()) === 6, 'navigation interne : 6 sections');
+  ok((await page.locator('.snav .snav-item').count()) === 7, 'navigation interne : 7 sections (dont Intégrations)');
   await page.waitForSelector('text=Thomas Bernard');
   ok((await page.locator('tbody tr').count()) >= 6, 'membres et invitation en attente');
   ok((await page.locator('text=En attente').count()) === 1, 'badge « En attente »');

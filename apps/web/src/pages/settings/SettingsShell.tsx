@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Code, CreditCard, Palette, Settings, UserRound, Users } from 'lucide-react';
+import { Code, CreditCard, Palette, Plug, Settings, UserRound, Users } from 'lucide-react';
+import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
@@ -14,6 +15,7 @@ import { NotificationBell } from '../../components/notifications/NotificationBel
  */
 export function SettingsShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
+  const { can } = useWorkspace();
   const item = (to: string, icon: ReactNode, label: string) => (
     <NavLink to={to} className={({ isActive }) => `snav-item${isActive ? ' is-active' : ''}`}>
       {icon}
@@ -35,6 +37,9 @@ export function SettingsShell({ children }: { children: ReactNode }) {
           {item('/settings/members', <Users aria-hidden="true" />, t('settings.members'))}
           {item('/settings/brand', <Palette aria-hidden="true" />, t('settings.brand'))}
           {item('/settings/variables', <Code aria-hidden="true" />, t('settings.variables'))}
+          {/* L23 : intégrations, propriétaires et admins seulement */}
+          {can('integrations.manage') &&
+            item('/settings/integrations', <Plug aria-hidden="true" />, t('settings.integrations'))}
           <span className="grp">{t('settings.account')}</span>
           {item('/settings/profile', <UserRound aria-hidden="true" />, t('settings.profile'))}
           {item('/settings/plans', <CreditCard aria-hidden="true" />, t('settings.plans'))}

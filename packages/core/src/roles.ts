@@ -11,6 +11,7 @@ export type Action =
   | 'members.invite'
   | 'members.manage'
   | 'workspace.settings'
+  | 'integrations.manage'
   | 'workspace.delete'
   | 'billing.manage';
 
@@ -25,6 +26,8 @@ const MIN_ROLE: Record<Action, Role> = {
   'members.invite': 'admin',
   'members.manage': 'admin',
   'workspace.settings': 'admin',
+  // L23 : webhooks (adresses et secrets) réservés aux propriétaires et admins
+  'integrations.manage': 'admin',
   'billing.manage': 'owner',
   'workspace.delete': 'owner',
 };

@@ -345,6 +345,24 @@ async function install(page, state = seed()) {
       }
       return json(route, 200, { ...info, status: 'password_wrong', remaining: 5 - acc.failures });
     }
+    // L23 : envoi immédiat (test, rejeu) ; résultat réglable par state.dispatchResult
+    if (p.startsWith('/functions/v1/webhooks-dispatch')) {
+      const d = (t.webhook_deliveries || []).find(
+        (x) => x.id === body?.delivery_id && x.status === 'pending',
+      );
+      if (!d) return json(route, 404, { error: 'not_found' });
+      const r = { status: 200, duration_ms: 180, error: null, ...(state.dispatchResult || {}) };
+      const ok = r.status >= 200 && r.status < 300;
+      Object.assign(d, {
+        status: ok ? 'success' : d.event_type === 'ping' ? 'failed' : 'pending',
+        response_status: r.status,
+        response_body: ok ? 'ok' : 'Not Found',
+        duration_ms: r.duration_ms,
+        error: r.error,
+        finished_at: new Date().toISOString(),
+      });
+      return json(route, 200, { ...r, outcome: d.status });
+    }
     if (p.startsWith('/functions/v1/track')) {
       const batch = JSON.parse(req.postData() || '{}');
       state.events.push(...(batch.events || []));
@@ -784,6 +802,70 @@ async function install(page, state = seed()) {
               n++;
             }
           return json(route, 200, n);
+        }
+        // ===== L23 : webhooks =====
+        case 'webhook_create': {
+          const n = (t.webhooks || []).filter((w) => w.workspace_id === a.p_ws).length;
+          if (n >= (state.webhookLimit ?? 3))
+            return json(route, 400, { message: 'PLAN_LIMIT', code: 'P0001' });
+          const secret = 'tcsec_EXEMPLE-fictif-' + crypto.randomBytes(12).toString('hex');
+          const w = {
+            id: crypto.randomUUID(),
+            workspace_id: a.p_ws,
+            url: a.p_url,
+            name: a.p_name || '',
+            events: a.p_events,
+            state: 'active',
+            failures: 0,
+            secret_hint: secret.slice(-4),
+            created_by: state.user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          (t.webhooks ||= []).push(w);
+          return json(route, 200, { id: w.id, secret });
+        }
+        case 'webhook_rotate_secret': {
+          const w = t.webhooks.find((x) => x.id === a.p_id);
+          const secret = 'tcsec_EXEMPLE-fictif-' + crypto.randomBytes(12).toString('hex');
+          w.secret_hint = secret.slice(-4);
+          (state.audit ||= []).push({ action: 'webhook.secret_rotated' });
+          return json(route, 200, secret);
+        }
+        case 'webhook_set_state': {
+          const w = t.webhooks.find((x) => x.id === a.p_id);
+          w.state = a.p_state;
+          if (a.p_state === 'active') w.failures = 0;
+          return json(route, 200, null);
+        }
+        case 'webhook_send_test':
+        case 'webhook_replay': {
+          const src =
+            fn === 'webhook_replay' ? t.webhook_deliveries.find((x) => x.id === a.p_delivery) : null;
+          const hook = t.webhooks.find((x) => x.id === (src ? src.webhook_id : a.p_id));
+          const ev = src ? src.event_id : crypto.randomUUID();
+          const d = {
+            id: crypto.randomUUID(),
+            workspace_id: hook.workspace_id,
+            webhook_id: hook.id,
+            event_id: ev,
+            event_type: src ? src.event_type : 'ping',
+            payload: src
+              ? src.payload
+              : { id: ev, type: 'ping', created_at: new Date().toISOString(), data: {} },
+            status: 'pending',
+            attempt: 1,
+            next_attempt_at: new Date().toISOString(),
+            response_status: null,
+            response_body: null,
+            duration_ms: null,
+            error: null,
+            replay_of: src ? src.id : null,
+            created_at: new Date().toISOString(),
+            finished_at: null,
+          };
+          (t.webhook_deliveries ||= []).push(d);
+          return json(route, 200, d.id);
         }
         case 'resolve_share_link': {
           const l = t.share_links.find((x) => x.token === a.p_token && x.is_active);

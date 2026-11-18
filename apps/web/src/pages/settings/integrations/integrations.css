@@ -1,0 +1,266 @@
+/* L23 : Paramètres > Intégrations (maquette reference/parametres-integrations.html). */
+.l23-head {
+  margin-bottom: 16px;
+  gap: 12px;
+}
+.l23-head p {
+  margin: 4px 0 0;
+}
+.l23-back {
+  margin: -4px 0 8px -8px;
+}
+.l23-actions {
+  gap: 8px;
+}
+.l23-gap {
+  margin-top: 12px;
+}
+.l23-banner {
+  margin-bottom: 12px;
+}
+.l23 .wh-url {
+  font: 500 13px var(--fd-font-mono);
+  color: var(--fd-color-text);
+  overflow-wrap: anywhere;
+}
+.l23 td .wh-url {
+  display: block;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.l23 .wh-url--title {
+  font-size: 18px;
+  margin: 0;
+}
+.l23 .table td {
+  white-space: nowrap;
+}
+.wh-ev {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.wh-ev .badge {
+  font-family: var(--fd-font-mono);
+  font-weight: 500;
+}
+.l23 .st {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  font: 600 12px var(--fd-font-mono);
+}
+.l23 .st.ok {
+  background: var(--fd-color-success-soft);
+  color: var(--fd-color-success);
+}
+.l23 .st.ko {
+  background: var(--fd-color-danger-soft);
+  color: var(--fd-color-danger);
+}
+.l23 .st.wait {
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-warning);
+}
+.l23-soon {
+  margin-top: 16px;
+}
+.l23-soon > p {
+  margin: 4px 0 12px;
+}
+.int-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.int-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--fd-radius-lg);
+  border: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface);
+}
+.int-card .hd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.int-lg {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+  flex: none;
+}
+.int-lg svg {
+  width: 18px;
+  height: 18px;
+}
+.int-lg--big {
+  width: 48px;
+  height: 48px;
+}
+.int-card b {
+  font-size: 14px;
+}
+.int-card .badge {
+  margin-left: auto;
+}
+.int-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.l23-sec {
+  grid-template-columns: 160px 1fr;
+}
+.l23 .secret {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface-sunken);
+  border: 1px solid var(--fd-color-border);
+}
+.l23 .secret code,
+.l23-modal-sm .secret code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 13px var(--fd-font-mono);
+  color: var(--fd-color-text);
+}
+.l23-modal-sm .secret {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface-sunken);
+  border: 1px solid var(--fd-color-border);
+}
+.l23-modal-sm .secret code {
+  white-space: normal;
+  word-break: break-all;
+}
+.l23 .help {
+  margin-top: 6px;
+}
+.wh-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  margin-top: 16px;
+  gap: 16px;
+  align-items: start;
+}
+.l23-log {
+  padding: 0 0 8px;
+}
+.l23-log-head {
+  padding: 16px 24px 8px;
+}
+.l23-log-head .select {
+  width: auto;
+}
+.l23-log-empty {
+  padding: 8px 24px 16px;
+  margin: 0;
+}
+.l23 tbody tr[tabindex] {
+  cursor: pointer;
+}
+.l23 tbody tr[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: inset var(--fd-shadow-focus);
+}
+.l23 .tr-sel {
+  background: var(--fd-color-surface-selected);
+}
+.l23-test {
+  margin-left: 6px;
+  font-family: var(--fd-font-sans);
+}
+.l23-sel-head {
+  gap: 8px;
+}
+.l23 aside .t-caption {
+  margin: 8px 0 12px;
+}
+.l23 aside .t-label {
+  margin: 12px 0 6px;
+}
+.l23 .pre {
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--fd-radius-md);
+  background: #0b0d10;
+  color: #e6eaee;
+  font: 12px/1.55 var(--fd-font-mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.l23-modal {
+  max-width: 640px;
+}
+.l23-modal-sm {
+  max-width: 560px;
+}
+.l23-fs {
+  border: 0;
+  margin: 16px 0 0;
+  padding: 0;
+}
+.l23-fs legend {
+  margin-bottom: 8px;
+}
+.ev-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+.ev-list label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+}
+.ev-list small {
+  display: block;
+  color: var(--fd-color-text-muted);
+  font-size: 12px;
+}
+.ev-list code {
+  font: 500 12px var(--fd-font-mono);
+  color: var(--fd-color-text-muted);
+}
+.ev-list .is-soon {
+  color: var(--fd-color-text-muted);
+}
+.l23-modal .help.is-error,
+.l23-fs .help.is-error {
+  color: var(--fd-color-danger);
+}
+@media (max-width: 1100px) {
+  .wh-detail,
+  .int-grid,
+  .ev-list {
+    grid-template-columns: 1fr;
+  }
+}

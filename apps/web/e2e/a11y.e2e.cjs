@@ -21,6 +21,45 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 const BLOCKING = new Set(['serious', 'critical']);
 const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' };
 
+/** L23 : un webhook actif et deux envois (données fictives). */
+function seedWebhooks(d) {
+  const ws = d.tables.workspaces[0].id;
+  const at = new Date(Date.now() - 3600_000).toISOString();
+  d.tables.webhooks = [
+    {
+      id: 'wh-a11y',
+      workspace_id: ws,
+      url: 'https://hooks.acme.example/tutoclick',
+      name: 'CRM interne',
+      events: ['lead.created'],
+      state: 'active',
+      failures: 0,
+      secret_hint: 'b58b',
+      created_by: null,
+      created_at: at,
+      updated_at: at,
+    },
+  ];
+  d.tables.webhook_deliveries = ['success', 'dead'].map((status, i) => ({
+    id: `d-a11y-${i}`,
+    workspace_id: ws,
+    webhook_id: 'wh-a11y',
+    event_id: `e-${i}`,
+    event_type: 'lead.created',
+    payload: { id: `e-${i}`, type: 'lead.created', data: {} },
+    status,
+    attempt: status === 'dead' ? 6 : 1,
+    next_attempt_at: at,
+    response_status: status === 'dead' ? 503 : 200,
+    response_body: 'ok',
+    duration_ms: 120,
+    error: status === 'dead' ? 'HTTP 503' : null,
+    replay_of: null,
+    created_at: at,
+    finished_at: at,
+  }));
+}
+
 /** Pages de l'app (faux Supabase). `open` amène la page dans l'état audité (modale ouverte…). */
 const APP_PAGES = [
   { name: 'Connexion', route: '/#/login', signedOut: true },
@@ -72,6 +111,19 @@ const APP_PAGES = [
   { name: 'Plans', route: '/#/settings/plans' },
   { name: 'Marque', route: '/#/settings/brand' },
   { name: 'Variables', route: '/#/settings/variables' },
+  { name: 'Intégrations', route: '/#/settings/integrations', seed: seedWebhooks },
+  {
+    name: 'Intégrations · ajout',
+    route: '/#/settings/integrations',
+    seed: seedWebhooks,
+    open: (p) => p.getByRole('button', { name: 'Ajouter un webhook' }).first().click(),
+  },
+  {
+    name: 'Intégrations · détail',
+    route: '/#/settings/integrations/wh-a11y',
+    seed: seedWebhooks,
+    open: (p) => p.locator('.l23-log tbody tr').first().click(),
+  },
 ];
 
 /** Pages du lecteur et du centre (réponses des fonctions simulées). */
