@@ -379,14 +379,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "avatar_url": string | null,"created_at": string,"full_name": string,"id": string,"locale": string,"updated_at": string
+                    "avatar_url": string | null,"created_at": string,"full_name": string,"id": string,"locale": string,"notification_prefs": NonNullable<Json>,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "avatar_url"?: string | null,"created_at"?: string,"full_name"?: string,"id": string,"locale"?: string,"updated_at"?: string
+                    "avatar_url"?: string | null,"created_at"?: string,"full_name"?: string,"id": string,"locale"?: string,"notification_prefs"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Update: {
-                    "avatar_url"?: string | null,"created_at"?: string,"full_name"?: string,"id"?: string,"locale"?: string,"updated_at"?: string
+                    "avatar_url"?: string | null,"created_at"?: string,"full_name"?: string,"id"?: string,"locale"?: string,"notification_prefs"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Relationships: [
                     

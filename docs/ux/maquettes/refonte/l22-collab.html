@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Présentateur et notifications (lot L22) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* Lot L22 : mode présentateur (vue présentateur, écran public), centre de notifications. Cadre validé (CAD), peau DSI. */
+  .l22 [data-pane] { display: none; }
+  .l22[data-view='notifs'] [data-pane~='app'], .l22[data-view='notifs-vide'] [data-pane~='app'] { display: block; }
+  .l22[data-view='lancer'] [data-pane~='lancer'] { display: block; }
+  .l22[data-view='presentateur'] [data-pane~='presentateur'] { display: grid; }
+  .l22[data-view='public'] [data-pane~='public'], .l22[data-view='noir'] [data-pane~='public'] { display: grid; }
+  .l22[data-view='notifs'] [data-only]:not([data-only~='notifs']), .l22[data-view='notifs-vide'] [data-only]:not([data-only~='notifs-vide']),
+  .l22[data-view='public'] [data-only]:not([data-only~='public']), .l22[data-view='noir'] [data-only]:not([data-only~='noir']) { display: none !important; }
+
+  /* Cloche dans la barre du haut */
+  .bell { position: relative; }
+  .bell .cnt { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--fd-color-danger); color: #FFFFFF; font: 700 11px/18px var(--fd-font-sans); text-align: center; box-shadow: 0 0 0 2px var(--fd-color-bg); }
+  .l22 .notif-pop { position: fixed; right: 32px; top: 84px; width: 440px; max-height: calc(100vh - 110px); z-index: 30; border: 1px solid var(--fd-color-border); }
+  .l22 .nlist li a.cover { position: absolute; inset: 0; border-radius: inherit; }
+  .l22 .nlist li a.cover:focus-visible { box-shadow: var(--fd-shadow-focus); }
+  .l22 .nlist .kind { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 12px; color: var(--fd-color-text-muted); }
+  .l22 .nlist .kind svg { width: 13px; height: 13px; }
+  .np-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid var(--fd-color-border); }
+  .np-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 28px 16px; }
+  .np-empty .fd-icon-chip { width: 48px; height: 48px; }
+  .np-empty p { margin: 0; color: var(--fd-color-text-muted); font-size: 14px; }
+  .dim { position: fixed; inset: 0; z-index: 20; }
+
+  /* Lancement */
+  .lx-bg { position: fixed; inset: 0; background: var(--fd-color-bg); }
+  .lx-ov { position: fixed; inset: 0; background: var(--fd-color-overlay); display: grid; place-items: center; padding: 24px; z-index: 5; }
+  .lx { width: min(600px, 100%); padding: 24px; border-radius: var(--fd-radius-2xl); background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: var(--fd-shadow-lg); display: flex; flex-direction: column; gap: 16px; }
+  .lx header { display: flex; align-items: center; gap: 12px; }
+  .lx h2 { margin: 0; font-size: var(--fd-text-h2-size); }
+  .lx header .fd-btn { margin-left: auto; }
+  .lx-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lx-modes label { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--fd-color-border); cursor: pointer; font-size: 14px; }
+  .lx-modes label:has(input:checked) { border: 2px solid var(--fd-color-primary); padding: 11px; background: var(--fd-color-primary-soft); }
+  .lx-modes input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .lx-modes label:has(input:focus-visible) { box-shadow: var(--fd-shadow-focus); }
+  .lx-modes small { color: var(--fd-color-text-muted); font-size: 12px; }
+  .lx-modes .ill { display: flex; gap: 6px; height: 54px; }
+  .lx-modes .ill i { flex: 1; border-radius: 6px; background: var(--fd-color-surface-sunken); box-shadow: inset 0 0 0 1px var(--fd-color-border); position: relative; }
+  .lx-modes .ill i.n::after { content: ''; position: absolute; right: 6px; top: 6px; bottom: 6px; width: 30%; border-radius: 4px; background: var(--fd-color-border-strong); opacity: .5; }
+  .lx-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .lx-time { display: flex; align-items: center; gap: 8px; }
+  .lx-time .fd-input { width: 90px; }
+  .lx footer { display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* Vue présentateur (complète refonte.css .presenter) */
+  .l22 .presenter { grid-template-columns: minmax(0, 1fr) 400px; }
+  .l22 .presenter .bar .t small { font-size: 13px; font-weight: 600; color: #B7C0CA; margin-left: 4px; }
+  .l22 .presenter .bar .t.over { color: #F8BB61; }
+  .l22 .presenter .bar button:focus-visible { outline: none; box-shadow: 0 0 0 2px #0B0D10, 0 0 0 4px #51ABDD; }
+  .l22 .presenter .tbar { display: flex; align-items: center; gap: 8px; height: 6px; }
+  .l22 .presenter .tbar span { flex: 1; height: 6px; border-radius: 3px; background: #262C35; overflow: hidden; }
+  .l22 .presenter .tbar span i { display: block; height: 100%; width: 45%; background: #AED054; border-radius: 3px; }
+  .l22 .presenter .live { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #1C2409; color: #AED054; font: 700 12px var(--fd-font-sans); }
+  .l22 .presenter .live i { width: 8px; height: 8px; border-radius: 50%; background: #AED054; }
+  .l22 .presenter .notes { padding-left: 20px; }
+  .l22 .presenter .pcard h2 { display: flex; align-items: center; gap: 8px; }
+  .l22 .presenter .pcard h2 .fd-btn { margin-left: auto; }
+  .l22 .presenter .tip-copy { margin: 8px 0 0; padding: 10px 12px; border-radius: 10px; background: #262C35; font-size: 14px; color: #E6EAEE; }
+
+  /* Écran public */
+  .pub { position: relative; min-height: 100vh; grid-template-rows: 1fr auto; background: #0B0D10; padding: 24px; gap: 12px; }
+  .pub .stage { position: relative; align-self: center; justify-self: center; width: min(1280px, 100%); aspect-ratio: 16 / 10; border-radius: 16px; overflow: hidden; background: #FFFFFF; }
+  .pub .stage .fakeapp { position: absolute; inset: 0; border-radius: 0; aspect-ratio: auto; }
+  .pub .ptip { position: absolute; left: calc(72% - 300px); top: 30%; width: 300px; padding: 16px; border-radius: 18px; background: #FFFFFF; color: #080808; box-shadow: 0 12px 32px rgba(0,0,0,.25); font-family: var(--fd-font-sans); }
+  .pub .ptip b { display: block; font-size: 15px; } .pub .ptip p { margin: 4px 0 0; font-size: 14px; color: #4F5966; }
+  .pub .foot { display: flex; justify-content: space-between; color: #8A95A3; font: 600 13px var(--fd-font-sans); }
+  .pub .black { position: absolute; inset: 0; background: #000000; display: grid; place-items: center; color: #6B7787; font: 600 14px var(--fd-font-sans); }
+  @media (max-width: 1100px) { .l22 .presenter { grid-template-columns: 1fr; } .lx-modes, .lx-row { grid-template-columns: 1fr; } }
+  .mock-state { z-index: 90; }
+</style>
+</head>
+<body>
+<div class="l22" data-view="notifs">
+
+<!-- L22-05, L22-06 : centre de notifications dans l'app -->
+<div data-pane="app">
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html" aria-current="page"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Formation</span>
+      <a class="fd-nav__item" href="l13-suivi.html"><i data-icon="graduation"></i>Apprenants</a>
+      <a class="fd-nav__item" href="l14-centre.html?view=reglages"><i data-icon="layout"></i>Centre de formation</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Éditrice</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div><h1>Démos</h1><p class="sub">Vos parcours interactifs, prêts à partager.</p></div>
+      <div class="topbar__actions">
+        <button class="icon-btn bell" type="button" aria-haspopup="dialog" aria-expanded="true" aria-controls="np" data-only="notifs" aria-label="Notifications, 2 non lues"><i data-icon="bell"></i><span class="cnt" aria-hidden="true">2</span></button>
+        <button class="icon-btn bell" type="button" aria-haspopup="dialog" aria-expanded="true" aria-controls="np" data-only="notifs-vide" aria-label="Notifications, aucune non lue"><i data-icon="bell"></i></button>
+        <button class="fd-btn fd-btn--primary" type="button"><i data-icon="plus"></i>Nouvelle démo</button>
+      </div>
+    </header>
+    <div class="fd-card" style="height:520px;opacity:.55" aria-hidden="true"></div>
+  </main>
+</div>
+<div class="notif-pop" id="np" role="dialog" aria-labelledby="np-t">
+  <header><h2 id="np-t">Notifications</h2><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button" data-only="notifs"><i data-icon="checkAll"></i>Tout marquer comme lu</button><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Fermer"><i data-icon="x"></i></button></header>
+  <div class="fd-segmented" role="tablist" aria-label="Filtrer les notifications"><button type="button" role="tab" aria-selected="true">Toutes</button><button type="button" role="tab" aria-selected="false">Mentions<span data-only="notifs"> · 1</span></button><button type="button" role="tab" aria-selected="false">Non lues<span data-only="notifs"> · 2</span></button></div>
+  <div data-only="notifs">
+    <p class="ngroup">Aujourd'hui</p>
+    <ul class="nlist">
+      <li class="unread"><span class="avatar" style="background:#E9F3CF;color:#2F4A06" aria-hidden="true">MD</span><span><b>Marie Durand</b> vous a mentionnée dans « Créer un rapport en 2 minutes » · étape 3<span class="q"><span class="mtag">@Alice</span> peux-tu vérifier le libellé du bouton ?</span><small>il y a 5 min</small></span><span class="dot"><span class="cm-sr">Non lue</span></span><a class="cover" href="../reference/editeur-collab.html?etat=mention" aria-label="Ouvrir la mention de Marie Durand, étape 3"></a></li>
+      <li class="unread"><span class="avatar" style="background:#DCEEF9;color:#12547A" aria-hidden="true">SD</span><span><b>Sacha Durand</b> a répondu à votre commentaire · « Agenda partagé » · étape 2<span class="q">C'est corrigé, j'ai remplacé la capture.</span><small>il y a 40 min</small></span><span class="dot"><span class="cm-sr">Non lue</span></span><a class="cover" href="#" aria-label="Ouvrir la réponse de Sacha Durand, étape 2"></a></li>
+    </ul>
+    <p class="ngroup">Cette semaine</p>
+    <ul class="nlist">
+      <li><span class="avatar" style="background:#E9F3CF;color:#2F4A06" aria-hidden="true">MD</span><span><b>Marie Durand</b> a commenté « Créer une fiche usager » · étape 5<small>mardi</small></span><span></span><a class="cover" href="#" aria-label="Ouvrir le commentaire de Marie Durand, étape 5"></a></li>
+      <li><span class="avatar" style="background:#DCEEF9;color:#12547A" aria-hidden="true">SD</span><span><b>Sacha Durand</b> a résolu votre commentaire · « Agenda partagé » · étape 1<small>lundi</small></span><span></span><a class="cover" href="#" aria-label="Ouvrir le commentaire résolu, étape 1"></a></li>
+    </ul>
+  </div>
+  <div class="np-empty" data-only="notifs-vide" role="status">
+    <span class="fd-icon-chip"><i data-icon="bell"></i></span>
+    <b>Rien de nouveau</b>
+    <p>Vous serez prévenue ici quand on vous mentionne ou qu'on répond à vos commentaires.</p>
+  </div>
+  <div class="np-foot"><span class="fd-help" style="margin:0">Notifications des 30 derniers jours</span><a class="fd-btn fd-btn--ghost fd-btn--sm" href="#"><i data-icon="settings"></i>Préférences</a></div>
+</div>
+</div>
+
+<!-- L22-02 : lancement du mode présentateur -->
+<div data-pane="lancer">
+  <div class="lx-bg"></div>
+  <div class="lx-ov">
+    <section class="lx" role="dialog" aria-modal="true" aria-labelledby="lx-t">
+      <header><span class="fd-icon-chip"><i data-icon="presentation"></i></span><h2 id="lx-t">Présenter « Créer un rapport en 2 minutes »</h2><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Fermer"><i data-icon="x"></i></button></header>
+      <fieldset style="border:0;margin:0;padding:0"><legend class="fd-label" style="margin-bottom:8px">Affichage</legend>
+        <div class="lx-modes">
+          <label><input type="radio" name="lx" checked><span class="ill" aria-hidden="true"><i class="n"></i><i></i></span><b>Deux fenêtres</b><small>Vue présentateur avec vos notes, et un écran public à placer sur le vidéoprojecteur.</small></label>
+          <label><input type="radio" name="lx"><span class="ill" aria-hidden="true"><i class="n"></i></span><b>Un seul écran</b><small>Plein écran ; vos notes s'affichent ou se masquent avec la touche N.</small></label>
+        </div>
+      </fieldset>
+      <div class="lx-row">
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="lx-s">Commencer à</label><select class="fd-select" id="lx-s"><option>Étape 1 · Page d'accueil des rapports</option><option>Étape 3 · Ouvrir le menu « Nouveau rapport »</option></select></div>
+        <div class="fd-field" style="margin:0"><span class="fd-label" id="lx-tl">Minuteur</span>
+          <div class="lx-time" role="group" aria-labelledby="lx-tl"><label class="fd-switch" style="gap:8px"><input type="checkbox" role="switch" checked aria-label="Durée cible"><span class="fd-switch__track"></span></label><input class="fd-input" type="number" value="15" min="1" max="180" aria-label="Durée cible en minutes"><span class="fd-help" style="margin:0">min</span></div>
+        </div>
+      </div>
+      <label class="fd-switch"><span>Masquer les points chauds à l'écran public<span class="fd-help" style="display:block">Utile pour une démonstration commentée : vous montrez, sans guider.</span></span><input type="checkbox" role="switch"><span class="fd-switch__track"></span></label>
+      <div class="fd-alert" style="background:var(--fd-color-info-soft)"><i data-icon="presentation"></i><div>L'écran public s'ouvre dans une nouvelle fenêtre : déplacez-la sur le vidéoprojecteur, puis passez-la en plein écran (F11). Vos notes n'y apparaissent jamais.</div></div>
+      <footer><button class="fd-btn" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button" data-view-set="presentateur"><i data-icon="play"></i>Lancer la présentation</button></footer>
+    </section>
+  </div>
+</div>
+
+<!-- L22-03 : vue présentateur -->
+<section data-pane="presentateur" class="presenter" aria-label="Vue présentateur">
+  <div class="main-s">
+    <div style="display:flex;align-items:center;gap:10px"><span class="live"><i></i>Écran public ouvert</span><span style="color:#B7C0CA;font:600 13px var(--fd-font-sans)">Créer un rapport en 2 minutes</span></div>
+    <div class="stage"><div class="fakeapp"><div class="nav"><b>Logiciel métier</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><dl><dt>Structure</dt><dd>Antenne Nord</dd><dt>Statut</dt><dd>Actif</dd></dl><span class="btnx">+ Ajouter</span></div></div><span class="marker" style="left:72%;top:22%">3</span><div class="ptip" style="position:absolute;left:calc(72% - 300px);top:30%;width:280px;padding:14px;border-radius:16px;background:#FFFFFF;color:#080808;box-shadow:0 12px 32px rgba(0,0,0,.25)"><b style="display:block;font-size:14px">Nouveau rapport</b><span style="font-size:13px;color:#4F5966">Bonjour, cliquez ici pour créer votre premier rapport.</span></div></div>
+    <div class="tbar" aria-hidden="true"><span><i></i></span></div>
+    <div class="bar" role="toolbar" aria-label="Commandes de la présentation">
+      <span class="t" role="timer" aria-label="Temps écoulé 6 minutes 42 sur 15 minutes">06:42<small>/ 15:00</small></span>
+      <span style="color:#B7C0CA">Étape 3 sur 8</span>
+      <span style="margin-left:auto;display:flex;gap:8px">
+        <button type="button" aria-keyshortcuts="ArrowLeft"><i data-icon="arrowLeft"></i>Précédente</button>
+        <button type="button" class="pri" aria-keyshortcuts="ArrowRight">Suivante<i data-icon="arrowRight"></i></button>
+        <button type="button" aria-keyshortcuts="B" aria-pressed="false"><i data-icon="eyeOff"></i>Écran noir</button>
+        <button type="button" aria-keyshortcuts="Escape">Terminer</button>
+      </span>
+    </div>
+  </div>
+  <aside>
+    <section class="pcard" aria-labelledby="pn-t"><h2 id="pn-t">Notes · étape 3<button class="fd-btn fd-btn--ghost fd-btn--sm" type="button" style="color:#B7C0CA" aria-keyshortcuts="N">Masquer</button></h2>
+      <ul class="notes"><li>Insister : le bouton a changé de place.</li><li>Question fréquente : « Et les doublons ? » → montrer l'étape 6.</li></ul>
+          </section>
+    <section class="pcard" aria-labelledby="nx-t"><h2 id="nx-t">Étape suivante · 4</h2><div class="next" aria-hidden="true"><div class="fakeapp"><div class="nav"><b>Logiciel métier</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><dl><dt>Structure</dt><dd>Antenne Nord</dd><dt>Statut</dt><dd>Actif</dd></dl><span class="btnx">+ Ajouter</span></div></div></div><p style="margin:8px 0 0;font-size:14px">Choisir un modèle</p></section>
+    <section class="pcard" aria-labelledby="kb-t"><h2 id="kb-t">Raccourcis</h2><div class="kbd"><kbd>→</kbd><span>Étape suivante</span><kbd>←</kbd><span>Étape précédente</span><kbd>N</kbd><span>Masquer les notes</span><kbd>B</kbd><span>Écran noir</span><kbd>T</kbd><span>Remettre le minuteur à zéro</span><kbd>Échap</kbd><span>Terminer</span></div></section>
+  </aside>
+</section>
+
+<!-- L22-04 : écran public (et écran noir) -->
+<section data-pane="public" class="pub" aria-label="Écran public">
+  <div class="stage">
+    <div class="fakeapp"><div class="nav"><b>Logiciel métier</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><dl><dt>Structure</dt><dd>Antenne Nord</dd><dt>Statut</dt><dd>Actif</dd></dl><span class="btnx">+ Ajouter</span></div></div>
+    <span class="marker" style="left:72%;top:22%" data-only="public">3</span>
+    <div class="ptip" data-only="public"><b>Nouveau rapport</b><p>Bonjour, cliquez ici pour créer votre premier rapport.</p></div>
+    <div class="black" data-only="noir" role="status">Présentation en pause</div>
+  </div>
+  <div class="foot" data-only="public"><span>Créer un rapport en 2 minutes</span><span>3 / 8</span></div>
+</section>
+
+</div>
+<div class="mock-state fd-segmented" role="group" aria-label="Écran (maquette)" style="left:50%;transform:translateX(-50%)">
+  <button type="button" data-view-set="notifs" aria-pressed="true">Notifications</button>
+  <button type="button" data-view-set="notifs-vide" aria-pressed="false">Aucune notification</button>
+  <button type="button" data-view-set="lancer" aria-pressed="false">Lancer</button>
+  <button type="button" data-view-set="presentateur" aria-pressed="false">Vue présentateur</button>
+  <button type="button" data-view-set="public" aria-pressed="false">Écran public</button>
+  <button type="button" data-view-set="noir" aria-pressed="false">Écran noir</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

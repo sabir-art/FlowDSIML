@@ -1,7 +1,7 @@
 -- Tests pgTAP : L22 collaboration (notes du présentateur, notifications, présence Realtime).
 begin;
 set search_path = public, extensions;
-select plan(17);
+select plan(21);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000004a1', 'olga-collab@example.com'),
@@ -37,8 +37,8 @@ insert into public.members (workspace_id, user_id, role) values
   ((select ws from ctx), '00000000-0000-0000-0000-0000000004a3', 'viewer');
 
 -- ===== Notes du présentateur =====
-select throws_ok($$ update public.steps set presenter_notes = repeat('x', 4001) where id = '00000000-0000-0000-0000-0000000004e1' $$,
-  '23514', null, 'notes limitées à 4 000 caractères');
+select throws_ok($$ update public.steps set presenter_notes = repeat('x', 1001) where id = '00000000-0000-0000-0000-0000000004e1' $$,
+  '23514', null, 'notes limitées à 1 000 caractères');
 select pg_temp.login('00000000-0000-0000-0000-0000000004a2');
 select ok(position('Note secrète' in public.publish_demo('00000000-0000-0000-0000-0000000004d1',
   '{"reviewed": true, "fictional": true}')::text) = 0, 'les notes du présentateur ne sont jamais publiées');
@@ -70,6 +70,23 @@ select pg_temp.logout();
 select is((select count(*)::int from public.notifications
            where user_id = '00000000-0000-0000-0000-0000000004a2' and kind = 'resolved'), 1,
   'résolution : l''auteur du commentaire est notifié');
+-- Mentions : Eddie mentionne Vera (membre) et Xavier (hors workspace) ; Olga a coupé « comment »
+update public.profiles set notification_prefs = '{"comment": false}' where id = '00000000-0000-0000-0000-0000000004a1';
+select pg_temp.login('00000000-0000-0000-0000-0000000004a2');
+insert into public.step_comments (id, step_id, body) values ('00000000-0000-0000-0000-0000000004c3', '00000000-0000-0000-0000-0000000004e1',
+  'Tu peux relire @[Vera Exemple](00000000-0000-0000-0000-0000000004a3) et @[Xavier](00000000-0000-0000-0000-0000000004a4) ?');
+select pg_temp.logout();
+select is((select kind from public.notifications where comment_id = '00000000-0000-0000-0000-0000000004c3'
+           and user_id = '00000000-0000-0000-0000-0000000004a3'), 'mention',
+  'mention : la personne mentionnée est notifiée en « mention » (prioritaire sur la réponse)');
+select is((select count(*)::int from public.notifications where comment_id = '00000000-0000-0000-0000-0000000004c3'
+           and user_id = '00000000-0000-0000-0000-0000000004a4'), 0, 'mention d''une personne hors du workspace ignorée');
+select is((select count(*)::int from public.notifications where comment_id = '00000000-0000-0000-0000-0000000004c3'
+           and user_id = '00000000-0000-0000-0000-0000000004a1'), 0, 'préférence : un type désactivé n''est plus notifié');
+select throws_ok($$ update public.profiles set notification_prefs = '{"email": true}' where id = '00000000-0000-0000-0000-0000000004a1' $$,
+  '23514', null, 'préférences : seuls les types connus, en booléen');
+update public.profiles set notification_prefs = '{}' where id = '00000000-0000-0000-0000-0000000004a1';
+
 -- Un non-membre n'est jamais notifié, même s'il a créé la démo
 update public.demos set created_by = '00000000-0000-0000-0000-0000000004a4' where id = '00000000-0000-0000-0000-0000000004d1';
 select pg_temp.login('00000000-0000-0000-0000-0000000004a2');
