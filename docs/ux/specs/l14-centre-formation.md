@@ -75,7 +75,7 @@
   - liste ordonnée des modules (pastille de numéro, mini-vignette, titre `h3`, ligne d'état, action).
 - **Module protégé** (L14-05) : à côté du titre, le badge orange `Key` « Protégé par mot de passe ».
   - La ligne d'état précise : « le mot de passe vous est donné par votre responsable ».
-- **Module expiré** (date d'expiration L11 dépassée) : il reste listé, jamais sans badge. Badge neutre `Clock` « Expiré », ligne « Ce module n'est plus disponible depuis le … » (date d'expiration L11), aucune action, opacité 0,72, et pas de vignette (cadre vide bordé). Il ne compte pas dans la progression.
+- **Module expiré** (date d'expiration L11 dépassée) : il reste listé, jamais sans badge. Badge neutre `Clock` « Expiré », ligne « Ce module n'est plus disponible depuis le … » (date d'expiration L11), aucune action, opacité 0,72, et pas de vignette (cadre vide bordé). Il ne compte pas dans la progression : « n sur N validé » ne compte que les modules disponibles (ex. 1 sur 3 avec un module expiré sur 4).
   - « Commencer » ouvre l'écran mot de passe du lecteur (L11-06 à L11-08), puis le module. La progression est enregistrée comme pour les autres modules.
 - **Formation terminée** (L14-06) :
   - bandeau couleur d'accent, avec l'icône `Award` et « Formation terminée, bravo {{prénom}} », **sans date** (la base ne garde pas la date de validation) ;

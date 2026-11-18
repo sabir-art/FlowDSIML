@@ -404,6 +404,19 @@ isOneToOne: false
                   }
                   Relationships: []
                 },
+"learner_certificates": {
+                  Row: {
+                    "id": number,"issued_at": string,"learner_id": string,"path_id": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: never,"issued_at"?: string,"learner_id": string,"path_id": string,"workspace_id": string
+                  }
+                  Update: {
+                    "id"?: never,"issued_at"?: string,"learner_id"?: string,"path_id"?: string,"workspace_id"?: string
+                  }
+                  Relationships: []
+                },
 "training_centers": {
                   Row: {
                     "access_mode": string,"draft": Json,"password_changed_at": string | null,"published": Json | null,"published_at": string | null,"slug": string,"updated_at": string,"workspace_id": string
@@ -733,6 +746,9 @@ isOneToOne: false
                            },
 "learner_detail":
 { Args: { "p_learner": string }; Returns: Json
+                           },
+"issue_certificate":
+{ Args: { "p_link_token": string,"p_path": string }; Returns: Json
                            },
 "structure_overview":
 { Args: { "p_path": string }; Returns: Json
