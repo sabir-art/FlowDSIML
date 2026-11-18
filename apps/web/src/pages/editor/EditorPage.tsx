@@ -1,4 +1,6 @@
 import { SettingsTab } from './panels/SettingsTab';
+import { FormPanel } from './panels/FormPanel';
+import { FormPreview } from './FormPreview';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -95,7 +97,16 @@ export function EditorPage() {
   const step = editor.steps[Math.min(index, editor.steps.length - 1)];
 
   // Changement d'étape → sélection de l'étape.
-  useEffect(() => setSelection({ kind: 'step' }), [index]);
+  // (sauf le formulaire de lead, qui se sélectionne en même temps que l'étape qu'il précède)
+  useEffect(
+    () =>
+      setSelection((s) =>
+        s.kind === 'form' && editor.steps[index]?.gate_form_id === s.id ? s : { kind: 'step' },
+      ),
+    [index], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const selectedForm =
+    selection.kind === 'form' ? editor.forms.find((f) => f.id === selection.id) : undefined;
 
   // Raccourcis clavier : flèches pour naviguer, Suppr pour le hotspot sélectionné.
   useEffect(() => {
@@ -337,17 +348,28 @@ export function EditorPage() {
           <StepList
             editor={editor}
             current={index}
-            onSelect={setIndex}
+            onSelect={(i) => {
+              setIndex(i);
+              setSelection({ kind: 'step' });
+            }}
             readOnly={readOnly}
             openComments={comments.openByStep}
+            selectedFormId={selectedForm?.id ?? null}
+            onSelectForm={(i, id) => {
+              setSelection({ kind: 'form', id });
+              setIndex(i);
+              setTab('step');
+            }}
           />
         </nav>
         <section className="stage" aria-label={t('editor.canvas')} id="canvas">
           <div className="row stage-head">
             <span className="t-caption muted">
-              {step
-                ? `${t('editor.stepN', { n: safeIndex + 1 })} · ${step.title || t('editor.untitled')}`
-                : ''}
+              {selectedForm
+                ? `${t('editor.leadForm')} · ${t('editor.form.beforeStepShort', { n: safeIndex + 1 })}`
+                : step
+                  ? `${t('editor.stepN', { n: safeIndex + 1 })} · ${step.title || t('editor.untitled')}`
+                  : ''}
             </span>
             <span className="grow" />
             <select
@@ -382,8 +404,12 @@ export function EditorPage() {
                       selection={selection}
                       setSelection={setSelection}
                       readOnly={readOnly}
-                      onEditForm={() => setTab('settings')}
+                      onEditForm={() =>
+                        step.gate_form_id && setSelection({ kind: 'form', id: step.gate_form_id })
+                      }
+                      hideFormChip={!!selectedForm}
                     />
+                    {selectedForm && <FormPreview form={selectedForm} editor={editor} />}
                   </div>
                 </div>
               ) : (
@@ -450,6 +476,19 @@ export function EditorPage() {
             ))}
           </div>
           <div className="panel-body" role="tabpanel" aria-labelledby={`ed-tab-${tab}`}>
+            {tab === 'step' && selectedForm && (
+              <FormPanel
+                editor={editor}
+                readOnly={readOnly}
+                leadFormsAllowed={plan.leadForms}
+                form={selectedForm}
+                onBack={() => setSelection({ kind: 'step' })}
+                onMove={(i) => {
+                  setSelection({ kind: 'form', id: selectedForm.id });
+                  setIndex(i);
+                }}
+              />
+            )}
             {tab === 'step' && step && selection.kind === 'step' && (
               <StepPanel
                 editor={editor}
@@ -478,7 +517,16 @@ export function EditorPage() {
             )}
             {tab === 'design' && <ThemePanel editor={editor} readOnly={readOnly} />}
             {tab === 'settings' && (
-              <SettingsTab editor={editor} readOnly={readOnly} leadFormsAllowed={plan.leadForms} />
+              <SettingsTab
+                editor={editor}
+                readOnly={readOnly}
+                leadFormsAllowed={plan.leadForms}
+                onOpenForm={(i, id) => {
+                  setSelection({ kind: 'form', id });
+                  setIndex(i);
+                  setTab('step');
+                }}
+              />
             )}
           </div>
         </aside>

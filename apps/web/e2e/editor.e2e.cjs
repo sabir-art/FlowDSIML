@@ -139,6 +139,23 @@ const SHOTS = process.env.SHOTS_DIR;
     state.calls.some((c) => c.method === 'PATCH' && c.path.endsWith('/forms') && c.body?.skippable === true),
     'EDT-08 : « Formulaire obligatoire » désactivé = formulaire passable',
   );
+  // EDT-08 : panneau du formulaire dans l'onglet Étape, aperçu en carte sur le canevas
+  ok(
+    (await page.locator('.canvas-form-preview .cfp-card').count()) === 1,
+    'EDT-08 : aperçu du formulaire sur le canevas',
+  );
+  ok(
+    (await page.locator('.rail-list .step--form[aria-selected="true"]').count()) === 1,
+    'EDT-08 : formulaire sélectionné dans le rail',
+  );
+  await page.locator('.rail-li--form').hover();
+  await page.getByRole('button', { name: 'Placer avant l’étape suivante' }).click();
+  await page.waitForTimeout(900);
+  ok(
+    (await page.locator('#f-gate').inputValue()) === '2',
+    'EDT-08 : déplacer le formulaire dans le rail change l’étape déclencheuse',
+  );
+  await page.getByRole('tab', { name: 'Réglages' }).click();
   ok((await page.locator('text={{company}}').count()) > 0, 'variables du workspace listées');
   await page.getByRole('tab', { name: 'Étape' }).click();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/editor-after.png` });

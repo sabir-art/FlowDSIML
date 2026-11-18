@@ -41,16 +41,16 @@ const SCREENS = {
       await p.locator('#rail .step[data-i="5"]').click();
       await p.waitForTimeout(200);
     },
-    // Le formulaire de lead est réglé au niveau de la démo (onglet Réglages)
+    // EDT-08 : le formulaire se place dans le rail (avant l'étape 2) et s'édite dans l'onglet Étape
     async prepare(p) {
       await p.getByRole('tab', { name: 'Réglages' }).click();
       await p.getByRole('button', { name: 'Créer le formulaire' }).click();
       await p.waitForSelector('#f-title');
-      await p.locator('.panel-body').evaluate((el) => {
-        const t = el.querySelector('#f-title').closest('.sec');
-        el.scrollTop = t.offsetTop - el.offsetTop - 8;
-      });
-      await p.waitForTimeout(300);
+      await p
+        .locator('#f-desc')
+        .fill('Laissez vos coordonnées, nous vous envoyons l’accès au parcours avancé.');
+      await p.waitForTimeout(500);
+      await p.mouse.move(0, 0);
     },
   },
   'EDT-09': {

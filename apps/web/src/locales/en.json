@@ -752,7 +752,21 @@
       "sendTo": "Send leads to",
       "webhook": "Webhook",
       "leadsTab": "Leads are always visible in the Leads tab.",
-      "email": "Email"
+      "email": "Email",
+      "beforeStep": "Form · before step {{n}}",
+      "moveUp": "Place before the previous step",
+      "moveDown": "Place before the next step",
+      "feedsVars": "Answers feed the variables",
+      "position": "Position in the tour",
+      "beforeStepLabel": "Before step",
+      "positionHelp": "The form shows just before this step. You can also move it with the rail arrows.",
+      "emailPro": "Work email",
+      "skip": "Skip",
+      "continue": "Continue",
+      "inRail": "The form is in the rail, before step {{n}}.",
+      "notPlaced": "The form is not placed before any step.",
+      "open": "Open the form",
+      "beforeStepShort": "before step {{n}}"
     },
     "ctaNewTabHelp": "The link opens in a new tab.",
     "end": {

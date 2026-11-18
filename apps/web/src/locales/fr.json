@@ -752,7 +752,21 @@
       "sendTo": "Envoyer les leads vers",
       "webhook": "Webhook",
       "leadsTab": "Les leads sont toujours visibles dans l’onglet Leads.",
-      "email": "Email"
+      "email": "Email",
+      "beforeStep": "Formulaire · avant l’étape {{n}}",
+      "moveUp": "Placer avant l’étape précédente",
+      "moveDown": "Placer avant l’étape suivante",
+      "feedsVars": "Les réponses alimentent les variables",
+      "position": "Position dans le parcours",
+      "beforeStepLabel": "Avant l’étape",
+      "positionHelp": "Le formulaire s’affiche juste avant cette étape. Vous pouvez aussi le déplacer avec les flèches du rail.",
+      "emailPro": "E-mail professionnel",
+      "skip": "Passer",
+      "continue": "Continuer",
+      "inRail": "Le formulaire est placé dans le rail, avant l’étape {{n}}.",
+      "notPlaced": "Le formulaire n’est placé avant aucune étape.",
+      "open": "Ouvrir le formulaire",
+      "beforeStepShort": "avant l’étape {{n}}"
     },
     "ctaNewTabHelp": "Le lien s’ouvre dans un nouvel onglet.",
     "end": {

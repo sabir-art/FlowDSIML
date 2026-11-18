@@ -41,6 +41,8 @@ interface Props {
   setSelection: (s: Selection) => void;
   readOnly: boolean;
   onEditForm?: () => void;
+  /** EDT-08 : pastille masquée quand l'aperçu du formulaire est affiché. */
+  hideFormChip?: boolean;
 }
 
 const clamp = (v: number, min = 0, max = 1) => Math.min(max, Math.max(min, v));
@@ -61,6 +63,7 @@ export function Canvas({
   setSelection,
   readOnly,
   onEditForm,
+  hideFormChip,
 }: Props) {
   const { t } = useTranslation();
   const frame = useRef<HTMLDivElement>(null);
@@ -182,7 +185,7 @@ export function Canvas({
 
   // ED8 : formulaire de lead visible sur le canevas
   const gateForm = step.gate_form_id ? editor.forms.find((f) => f.id === step.gate_form_id) : undefined;
-  const formChip = gateForm && (
+  const formChip = gateForm && !hideFormChip && (
     <div className="canvas-form-chip">
       <ClipboardList size={16} aria-hidden="true" />
       <span>{t('editor.formOnStep', { title: gateForm.title })}</span>

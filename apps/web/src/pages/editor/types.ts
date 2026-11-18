@@ -57,7 +57,12 @@ export const asSettings = (v: unknown): DemoSettings =>
   v && typeof v === 'object' ? (v as DemoSettings) : {};
 export const asFields = (v: unknown): FormField[] => (Array.isArray(v) ? (v as FormField[]) : []);
 
-export type Selection = { kind: 'step' } | { kind: 'hotspot'; id: string } | { kind: 'blur'; index: number };
+export type Selection =
+  | { kind: 'step' }
+  | { kind: 'hotspot'; id: string }
+  | { kind: 'blur'; index: number }
+  /** EDT-08 : formulaire de lead sélectionné dans le rail (avant l'étape qu'il précède). */
+  | { kind: 'form'; id: string };
 export const asStepOptions = (v: unknown): StepOptions => stepOptionsSchema.parse(v ?? {});
 
 /** F2 : réponse d'une question (jsonb answers). */

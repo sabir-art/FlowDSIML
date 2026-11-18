@@ -1,9 +1,10 @@
 /* Généré par scripts/maquette-css.py depuis docs/ux/maquettes/reference/assets/reference.css
    (peau DSI : effets des maquettes d'origine transposés). Ne pas modifier à la main. */
-:root {--ref-reco-from: var(--fd-orange-100);
+:root {
+  --ref-reco-from: var(--fd-orange-100);
   --ref-reco-mid: var(--fd-framboise-50);
   --ref-reco-border: var(--fd-orange-300);
-  --ref-hot: var(--fd-framboise-600);          
+  --ref-hot: var(--fd-framboise-600);
   --ref-hot-hover: var(--fd-framboise-700);
   --ref-current: var(--fd-bleu-500);
   --ref-current-soft: var(--fd-bleu-50);
@@ -12,8 +13,10 @@
   --ref-gauge-2: var(--fd-orange-500);
   --ref-gauge-3: var(--fd-vert-600);
   --ref-good-soft: var(--fd-vert-50);
-  --ref-good-text: var(--fd-vert-700);}
-:root[data-theme="dark"] {--ref-reco-from: color-mix(in srgb, var(--fd-orange-500) 26%, transparent);
+  --ref-good-text: var(--fd-vert-700);
+}
+:root[data-theme='dark'] {
+  --ref-reco-from: color-mix(in srgb, var(--fd-orange-500) 26%, transparent);
   --ref-reco-mid: color-mix(in srgb, var(--fd-framboise-600) 14%, transparent);
   --ref-reco-border: color-mix(in srgb, var(--fd-orange-400) 55%, transparent);
   --ref-hot: var(--fd-framboise-600);
@@ -25,9 +28,11 @@
   --ref-gauge-2: var(--fd-orange-400);
   --ref-gauge-3: var(--fd-vert-400);
   --ref-good-soft: color-mix(in srgb, var(--fd-vert-400) 16%, transparent);
-  --ref-good-text: var(--fd-vert-300);}
+  --ref-good-text: var(--fd-vert-300);
+}
 @media (prefers-color-scheme: dark) {
-:root:not([data-theme="light"]):not([data-theme="dark"]) {--ref-reco-from: color-mix(in srgb, var(--fd-orange-500) 26%, transparent);
+  :root:not([data-theme='light']):not([data-theme='dark']) {
+    --ref-reco-from: color-mix(in srgb, var(--fd-orange-500) 26%, transparent);
     --ref-reco-mid: color-mix(in srgb, var(--fd-framboise-600) 14%, transparent);
     --ref-reco-border: color-mix(in srgb, var(--fd-orange-400) 55%, transparent);
     --ref-hot-hover: var(--fd-framboise-500);
@@ -38,35 +43,112 @@
     --ref-gauge-2: var(--fd-orange-400);
     --ref-gauge-3: var(--fd-vert-400);
     --ref-good-soft: color-mix(in srgb, var(--fd-vert-400) 16%, transparent);
-    --ref-good-text: var(--fd-vert-300);}
+    --ref-good-text: var(--fd-vert-300);
+  }
 }
-.mk .tc-logo {display: block; width: auto;}
-.mk .tc-logo--d {display: none;}
-:root[data-theme="dark"] .mk .tc-logo--l {display: none;}
-:root[data-theme="dark"] .mk .tc-logo--d {display: block;}
+.mk .tc-logo {
+  display: block;
+  width: auto;
+}
+.mk .tc-logo--d {
+  display: none;
+}
+:root[data-theme='dark'] .mk .tc-logo--l {
+  display: none;
+}
+:root[data-theme='dark'] .mk .tc-logo--d {
+  display: block;
+}
 @media (prefers-color-scheme: dark) {
-:root:not([data-theme="light"]):not([data-theme="dark"]) .mk .tc-logo--l {display: none;}
-:root:not([data-theme="light"]):not([data-theme="dark"]) .mk .tc-logo--d {display: block;}
+  :root:not([data-theme='light']):not([data-theme='dark']) .mk .tc-logo--l {
+    display: none;
+  }
+  :root:not([data-theme='light']):not([data-theme='dark']) .mk .tc-logo--d {
+    display: block;
+  }
 }
-.mk .btn-accent {background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 24px);
+.mk .btn-accent {
+  background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 24px);
   box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--fd-orange-500) 75%, transparent);
-  color: #FFFFFF;}
-.mk .btn-accent.btn-block {background: linear-gradient(90deg, var(--fd-orange-500) 0%, var(--ref-hot) 22%);}
-.mk .btn-accent:hover {background: var(--ref-hot-hover);}
-.mk .badge-accent {background: linear-gradient(90deg, var(--ref-reco-from), var(--ref-reco-mid)); color: var(--fd-color-accent-soft-text);}
-.mk .plans .plan.reco {border-color: var(--ref-reco-border);
-  background: linear-gradient(180deg, var(--ref-reco-from) 0%, var(--ref-reco-mid) 24%, var(--fd-color-surface) 52%);}
-.mk .plans .plan.reco .tag {background: var(--ref-hot); color: #FFFFFF;}
-.mk .plans .plan.current {border-color: var(--ref-current);}
-.mk .plans .plan.current .tag {background: var(--ref-current); color: #FFFFFF;}
-:root[data-theme="dark"] .mk .plans .plan.current .tag {color: var(--fd-bleu-950);}
-.mk .badge-success {background: var(--ref-good-soft); color: var(--ref-good-text);}
-.mk .usage-grid > div:nth-child(1) .progress > span {background: var(--ref-gauge-1);}
-.mk .usage-grid > div:nth-child(2) .progress > span, .mk .progress.warn > span {background: var(--ref-gauge-2);}
-.mk .sidebar-foot .usage .progress > span {background: var(--ref-gauge-2);}
-.mk .nav a {position: relative;}
-.mk .nav a[aria-current="page"]::before {content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--fd-color-primary);}
-.mk .toast {border-left: 3px solid var(--fd-color-success);}
-.mk .screen .ic {width: 36px; height: 36px; border-radius: 10px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); display: grid; place-items: center; margin-bottom: 6px;}
-.mk .screen .ic svg {width: 18px; height: 18px;}
-.mk .btn-accent.btn-sm {background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 16px);}
+  color: #ffffff;
+}
+.mk .btn-accent.btn-block {
+  background: linear-gradient(90deg, var(--fd-orange-500) 0%, var(--ref-hot) 22%);
+}
+.mk .btn-accent:hover {
+  background: var(--ref-hot-hover);
+}
+.mk .badge-accent {
+  background: linear-gradient(90deg, var(--ref-reco-from), var(--ref-reco-mid));
+  color: var(--fd-color-accent-soft-text);
+}
+.mk .plans .plan.reco {
+  border-color: var(--ref-reco-border);
+  background: linear-gradient(
+    180deg,
+    var(--ref-reco-from) 0%,
+    var(--ref-reco-mid) 24%,
+    var(--fd-color-surface) 52%
+  );
+}
+.mk .plans .plan.reco .tag {
+  background: var(--ref-hot);
+  color: #ffffff;
+}
+.mk .plans .plan.current {
+  border-color: var(--ref-current);
+}
+.mk .plans .plan.current .tag {
+  background: var(--ref-current);
+  color: #ffffff;
+}
+:root[data-theme='dark'] .mk .plans .plan.current .tag {
+  color: var(--fd-bleu-950);
+}
+.mk .badge-success {
+  background: var(--ref-good-soft);
+  color: var(--ref-good-text);
+}
+.mk .usage-grid > div:nth-child(1) .progress > span {
+  background: var(--ref-gauge-1);
+}
+.mk .usage-grid > div:nth-child(2) .progress > span,
+.mk .progress.warn > span {
+  background: var(--ref-gauge-2);
+}
+.mk .sidebar-foot .usage .progress > span {
+  background: var(--ref-gauge-2);
+}
+.mk .nav a {
+  position: relative;
+}
+.mk .nav a[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--fd-color-primary);
+}
+.mk .toast {
+  border-left: 3px solid var(--fd-color-success);
+}
+.mk .screen .ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  display: grid;
+  place-items: center;
+  margin-bottom: 6px;
+}
+.mk .screen .ic svg {
+  width: 18px;
+  height: 18px;
+}
+.mk .btn-accent.btn-sm {
+  background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 16px);
+}

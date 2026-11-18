@@ -3,7 +3,8 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import { asSettings, type DemoSettings } from '../types';
-import { FormPanel } from './FormPanel';
+import { ClipboardList } from 'lucide-react';
+import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
 
 /** Interrupteur de la maquette (.setting + .switch). */
 function SettingSwitch({
@@ -46,10 +47,13 @@ export function SettingsTab({
   editor,
   readOnly,
   leadFormsAllowed,
+  onOpenForm,
 }: {
   editor: DemoEditor;
   readOnly: boolean;
   leadFormsAllowed: boolean;
+  /** EDT-08 : ouvre le formulaire dans le rail (onglet Étape). */
+  onOpenForm: (stepIndex: number, formId: string) => void;
 }) {
   const { t } = useTranslation();
   const settings = asSettings(editor.demo!.settings);
@@ -58,6 +62,8 @@ export function SettingsTab({
   const autoplay = { enabled: false, delayMs: 4000, ...settings.autoplay };
   const checklist = { enabled: false, title: '', position: 'right' as const, ...settings.checklist };
   const soon = <span className="badge badge-xs">{t('shell.soon')}</span>;
+  const form = editor.forms[0];
+  const gateIndex = form ? editor.steps.findIndex((s) => s.gate_form_id === form.id) : -1;
   const [key, setKey] = useState('');
   const valid = /^[a-z][a-z0-9_]{0,39}$/.test(key);
 
@@ -170,7 +176,41 @@ export function SettingsTab({
         )}
       </div>
 
-      <FormPanel editor={editor} readOnly={readOnly} leadFormsAllowed={leadFormsAllowed} />
+      <div className="sec">
+        <div className="sec-title">{t('editor.leadForm')}</div>
+        {!leadFormsAllowed && <PlanFormsWarning />}
+        <p className="help sec-help">
+          {form && gateIndex >= 0
+            ? t('editor.form.inRail', { n: gateIndex + 1 })
+            : form
+              ? t('editor.form.notPlaced')
+              : t('editor.leadFormHint')}
+        </p>
+        {!readOnly && (
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() =>
+              void (async () => {
+                const f = form ?? (await editor.createForm());
+                if (!f) return;
+                // Nouveau formulaire : avant la 2e étape (ou la seule étape)
+                let i = editor.steps.findIndex((s) => s.gate_form_id === f.id);
+                if (i < 0) {
+                  i = Math.min(1, editor.steps.length - 1);
+                  const target = editor.steps[i];
+                  if (!target) return;
+                  editor.updateStep(target.id, { gate_form_id: f.id });
+                }
+                onOpenForm(i, f.id);
+              })()
+            }
+          >
+            <ClipboardList aria-hidden="true" />
+            {form ? t('editor.form.open') : t('editor.createForm')}
+          </button>
+        )}
+      </div>
 
       <div className="sec">
         <div className="sec-title">

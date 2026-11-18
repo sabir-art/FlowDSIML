@@ -1,9 +1,10 @@
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { Menu } from '../../../components/Menu';
-import { ClipboardList, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronLeft, GripVertical, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
-import { asFields, type FormField } from '../types';
+import { asFields, type FormField, type FormRow } from '../types';
 import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
 
 const OPTIONAL: Array<Omit<FormField, 'label'> & { labelKey: string }> = [
@@ -13,34 +14,39 @@ const OPTIONAL: Array<Omit<FormField, 'label'> & { labelKey: string }> = [
   { key: 'phone', type: 'tel', required: false, labelKey: 'editor.fieldPhone' },
 ];
 
-/** Formulaire de lead (maquette editeur.html, contexte « form », EDT-08), dans l'onglet Réglages. */
+/**
+ * Formulaire de lead (maquette editeur.html, contexte « form », EDT-08) : sélectionné dans le rail,
+ * avant l'étape qu'il précède, et édité dans l'onglet Étape.
+ */
 export function FormPanel({
   editor,
   readOnly,
   leadFormsAllowed,
+  form,
+  onBack,
+  onMove,
 }: {
   editor: DemoEditor;
   readOnly: boolean;
   leadFormsAllowed: boolean;
+  form: FormRow;
+  onBack: () => void;
+  /** Après un changement d'étape déclencheuse : nouvel index de cette étape. */
+  onMove: (stepIndex: number) => void;
 }) {
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
-  const form = editor.forms[0];
+  const [dragKey, setDragKey] = useState<string | null>(null);
+  const gateIndex = editor.steps.findIndex((s) => s.gate_form_id === form.id);
 
-  if (!form)
-    return (
-      <div className="sec">
-        <div className="sec-title">{t('editor.leadForm')}</div>
-        <p className="help sec-help">{t('editor.leadFormHint')}</p>
-        {!leadFormsAllowed && <PlanFormsWarning />}
-        {!readOnly && (
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => void editor.createForm()}>
-            <ClipboardList aria-hidden="true" />
-            {t('editor.createForm')}
-          </button>
-        )}
-      </div>
-    );
+  function moveTo(i: number) {
+    const target = editor.steps[i];
+    if (!target) return;
+    for (const s of editor.steps)
+      if (s.gate_form_id === form.id && s.id !== target.id) editor.updateStep(s.id, { gate_form_id: null });
+    editor.updateStep(target.id, { gate_form_id: form.id });
+    onMove(i);
+  }
 
   const fields = asFields(form.fields);
   const set = (patch: Parameters<DemoEditor['updateForm']>[1]) => editor.updateForm(form.id, patch);
@@ -50,18 +56,56 @@ export function FormPanel({
   const setRequired = (key: string, required: boolean) =>
     set({ fields: fields.map((x) => (x.key === key ? { ...x, required } : x)) });
   const missing = OPTIONAL.filter((o) => !fields.some((f) => f.key === o.key));
+  const optional = fields.filter((f) => OPTIONAL.some((o) => o.key === f.key));
+  const reorder = (key: string, to: number) => {
+    const from = optional.findIndex((f) => f.key === key);
+    if (from < 0 || to < 0 || to >= optional.length || from === to) return;
+    const next = [...optional];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    set({ fields: [...fields.filter((f) => !OPTIONAL.some((o) => o.key === f.key)), ...next] });
+  };
+  const labelOf = (key: string) => t(OPTIONAL.find((o) => o.key === key)!.labelKey);
   const consent = form.consent_text.trim().length > 0;
 
   return (
     <>
       {dialog}
+      <div className="hs-head">
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onBack}>
+          <ChevronLeft aria-hidden="true" />
+          {t('editor.backToStep')}
+        </button>
+        <span className="t-label">{t('editor.leadForm')}</span>
+        {!readOnly && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-icon"
+            aria-label={t('editor.deleteForm')}
+            title={t('editor.deleteForm')}
+            onClick={() =>
+              void ask({
+                title: t('editor.confirmDeleteForm'),
+                confirmLabel: t('common.delete'),
+                danger: true,
+              }).then((yes) => {
+                if (yes) {
+                  void editor.deleteForm(form.id);
+                  onBack();
+                }
+              })
+            }
+          >
+            <Trash2 aria-hidden="true" />
+          </button>
+        )}
+      </div>
       <div className="sec">
         <div className="sec-title">
           {t('editor.leadForm')}
           {!leadFormsAllowed && <span className="badge badge-warning">{t('planForms.badge')}</span>}
         </div>
         {!leadFormsAllowed && <PlanFormsWarning />}
-        <p className="help sec-help">{t('editor.leadFormGateHint')}</p>
         <div className="field">
           <label htmlFor="f-title">{t('editor.formTitle')}</label>
           <input
@@ -98,15 +142,32 @@ export function FormPanel({
           )}
         </div>
         <div className="field-row">
+          <span className="fr-grip is-fixed" aria-hidden="true">
+            <GripVertical />
+          </span>
           <span className="grow">{t('editor.form.email')}</span>
           <span className="badge">{t('editor.form.required')}</span>
           <span className="fr-spacer" aria-hidden="true" />
         </div>
-        {OPTIONAL.filter((o) => fields.some((f) => f.key === o.key)).map((o) => {
-          const f = fields.find((x) => x.key === o.key)!;
-          const label = t(o.labelKey);
+        {optional.map((f, i) => {
+          const label = labelOf(f.key);
           return (
-            <div key={o.key} className="field-row">
+            <div
+              key={f.key}
+              className={`field-row${dragKey === f.key ? ' is-dragging' : ''}`}
+              draggable={!readOnly}
+              onDragStart={() => setDragKey(f.key)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (dragKey) reorder(dragKey, i);
+                setDragKey(null);
+              }}
+              onDragEnd={() => setDragKey(null)}
+            >
+              <span className="fr-grip" aria-hidden="true">
+                <GripVertical />
+              </span>
               <span className="grow">{label}</span>
               <span className="badge">
                 {f.required ? t('editor.form.required') : t('editor.form.optional')}
@@ -117,13 +178,26 @@ export function FormPanel({
                   items={[
                     {
                       label: f.required ? t('editor.form.makeOptional') : t('editor.form.makeRequired'),
-                      onSelect: () => setRequired(o.key, !f.required),
+                      onSelect: () => setRequired(f.key, !f.required),
                     },
+                    {
+                      label: t('editor.moveUp'),
+                      icon: <ArrowUp />,
+                      disabled: i === 0,
+                      onSelect: () => reorder(f.key, i - 1),
+                    },
+                    {
+                      label: t('editor.moveDown'),
+                      icon: <ArrowDown />,
+                      disabled: i === optional.length - 1,
+                      onSelect: () => reorder(f.key, i + 1),
+                    },
+                    'separator',
                     {
                       label: t('editor.form.removeField'),
                       icon: <Trash2 />,
                       danger: true,
-                      onSelect: () => remove(o.key),
+                      onSelect: () => remove(f.key),
                     },
                   ]}
                 />
@@ -133,6 +207,34 @@ export function FormPanel({
             </div>
           );
         })}
+        <p className="help">
+          {t('editor.form.feedsVars')}{' '}
+          {['email', ...optional.map((f) => f.key)].map((k) => (
+            <span key={k} className="chip-var">{`{{${k}}}`}</span>
+          ))}{' '}
+          <span className="badge badge-xs">{t('shell.soon')}</span>
+        </p>
+      </div>
+
+      <div className="sec">
+        <div className="sec-title">{t('editor.form.position')}</div>
+        <div className="field">
+          <label htmlFor="f-gate">{t('editor.form.beforeStepLabel')}</label>
+          <select
+            id="f-gate"
+            className="select input-sm"
+            disabled={readOnly}
+            value={gateIndex}
+            onChange={(e) => moveTo(Number(e.target.value))}
+          >
+            {editor.steps.map((s, i) => (
+              <option key={s.id} value={i}>
+                {i + 1}. {s.title || t('editor.untitled')}
+              </option>
+            ))}
+          </select>
+          <span className="help">{t('editor.form.positionHelp')}</span>
+        </div>
       </div>
 
       <div className="sec">
@@ -207,22 +309,6 @@ export function FormPanel({
           />
         </div>
         <p className="help">{t('editor.form.leadsTab')}</p>
-        {!readOnly && (
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm btn-danger-ghost f-delete"
-            onClick={() =>
-              void ask({
-                title: t('editor.confirmDeleteForm'),
-                confirmLabel: t('common.delete'),
-                danger: true,
-              }).then((yes) => yes && void editor.deleteForm(form.id))
-            }
-          >
-            <Trash2 aria-hidden="true" />
-            {t('editor.deleteForm')}
-          </button>
-        )}
       </div>
     </>
   );

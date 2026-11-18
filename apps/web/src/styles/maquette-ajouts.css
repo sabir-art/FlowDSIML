@@ -1995,3 +1995,106 @@
   border-top: 0;
   padding-top: 4px;
 }
+/* ---- EDT-08 : formulaire de lead dans le rail, lignes de champ, aperçu sur le canevas ---- */
+.mk .step--form .th--form {
+  aspect-ratio: auto;
+  height: 40px;
+  color: var(--fd-color-primary);
+  background: var(--fd-color-primary-soft);
+  border-color: transparent;
+}
+.mk .step--form .th--form svg {
+  width: 18px;
+  height: 18px;
+}
+.mk .step--form .meta .icons {
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+}
+.mk .field-row .fr-grip {
+  display: inline-grid;
+  color: var(--fd-color-text-subtle);
+  cursor: grab;
+}
+.mk .field-row .fr-grip.is-fixed {
+  visibility: hidden;
+}
+.mk .field-row.is-dragging {
+  opacity: 0.5;
+}
+.mk .field-row .menu-trigger {
+  width: 28px;
+  height: 28px;
+}
+.mk .sec .help .chip-var {
+  margin: 0 2px;
+}
+.mk .shot {
+  position: relative;
+}
+.mk .canvas-form-preview {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(8 8 8 / 0.48);
+  border-radius: inherit;
+}
+.mk .cfp-card {
+  width: min(380px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
+  border-radius: 16px;
+  background: var(--p-surface, #fff);
+  color: var(--p-text, #080808);
+  box-shadow: 0 24px 48px rgb(8 8 8 / 0.28);
+  font-family: var(--fd-player-font);
+}
+.mk .cfp-card h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+.mk .cfp-sub {
+  margin: -6px 0 0;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--p-text, #080808) 70%, transparent);
+}
+.mk .cfp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.mk .cfp-input {
+  height: 32px;
+  border: 1px solid #8793a3;
+  border-radius: 8px;
+  background: var(--p-surface, #fff);
+}
+.mk .cfp-consent {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+}
+.mk .cfp-box {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  border: 1.5px solid #8793a3;
+  border-radius: 4px;
+}
+.mk .cfp-acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
