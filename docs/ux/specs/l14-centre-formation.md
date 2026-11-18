@@ -25,7 +25,7 @@
 - Barre blanche (sombre en style Sombre). Elle contient :
   - le logo du workspace (40 px, coins 12 px ; à défaut, ses initiales sur la couleur principale) ;
   - le nom du workspace, avec « Centre de formation » en dessous ;
-  - à droite, « Glossaire » (seulement si le glossaire contient un terme), puis le prénom et l'avatar du visiteur identifié. Sans identification, il n'y a ni prénom ni avatar.
+  - à droite, « Glossaire » (seulement si le glossaire contient un terme ; la fonction n'existe pas encore, l'entrée reste donc masquée), puis le prénom et l'avatar du visiteur identifié. Sans identification, il n'y a ni prénom ni avatar.
 - La **couleur principale** du workspace (`--brand`) colore :
   - les boutons et les barres de progression ;
   - le module en cours ;
@@ -49,7 +49,8 @@
 - **Carte de formation** (grille de 2 ; 1 colonne sous 900 px). Toute la carte est **un seul lien** vers la page de la formation, sans aucun bouton à l'intérieur. Elle contient :
   - une couverture : la capture de l'étape 1 du premier module ;
   - un badge d'état en haut à droite : « En cours » (couleur principale), « Terminée » (accent, texte noir), « Nouveau » (blanc bordé, publiée depuis moins de 30 jours) ;
-  - le titre `h3` (19 px, 800), les pastilles d'étiquettes (L12-07), puis la méta : « n modules à suivre dans l'ordre » ou « en ordre libre », la durée, les quiz ;
+  - le titre `h3` (19 px, 800), les pastilles d'étiquettes, puis la méta : « n modules à suivre dans l'ordre » ou « en ordre libre », et les quiz. **Aucune durée** n'est affichée : elle n'est pas mesurée ;
+  - **étiquettes d'une formation** : l'union des étiquettes de ses modules (L12-07), sans saisie dédiée ;
   - pour un visiteur identifié qui a commencé : une barre et « n sur N validé(s) » ;
   - la liste des **3 premiers modules** avec leur état :
 
@@ -58,24 +59,26 @@
     | Validé | `CircleCheck`, vert | « Validé » |
     | En cours (fond de la couleur principale, pâle) | `Play` | « Étape n sur N » |
     | Verrouillé | `Lock` | « Après le module n » |
-    | Pas commencé | `CircleDot` | « Pas commencé » (sans identification : la durée) |
+    | Pas commencé | `CircleDot` | « Pas commencé » (sans identification : rien) |
     | Protégé par mot de passe | — | badge orange `Key` « Mot de passe » |
+    | Expiré (date L11 dépassée) | — | badge neutre `Clock` « Expiré », sans action |
 
-    Au-delà de 3 modules : « + n module(s) » en pied ;
-  - en pied : une note (« Attestation disponible », « Non commencée », « + 1 module facultatif ») et un faux bouton (texte stylé, pas un `button`) : Reprendre, Commencer ou Revoir.
+    Au-delà de 3 modules : « + n module(s) » en pied (« + 1 module expiré » si c'est le cas) ;
+  - en pied : une note (« Terminée le … », « Non commencée », « + 1 module facultatif ») et un faux bouton (texte stylé, pas un `button`) : Reprendre, Commencer ou Revoir.
 - **Sans résultat** (L14-04) : un bloc centré avec l'icône de recherche, le titre « Aucune formation pour « q » », une aide, et le bouton « Effacer la recherche ». Les filtres restent visibles.
 
 ## 4. Page d'une formation (L14-05, L14-06)
 
 - Elle reprend F4 §2 :
-  - fil d'Ariane, `h1` de 32 px, intro, étiquettes, badge « n sur N validé » ;
+  - fil d'Ariane, `h1` de 32 px, description de la formation (`paths.description`, champ ajouté dans L13-07), puis la méta (modules, ordre, quiz), étiquettes, badge « n sur N validé » ;
   - liste ordonnée des modules (pastille de numéro, mini-vignette, titre `h3`, ligne d'état, action).
 - **Module protégé** (L14-05) : à côté du titre, le badge orange `Key` « Protégé par mot de passe ».
   - La ligne d'état précise : « le mot de passe vous est donné par votre responsable ».
+- **Module expiré** (date d'expiration L11 dépassée) : il reste listé, jamais sans badge. Badge neutre `Clock` « Expiré », ligne « Ce module n'est plus disponible depuis le … », aucune action, opacité 0,72. Il ne compte pas dans la progression.
   - « Commencer » ouvre l'écran mot de passe du lecteur (L11-06 à L11-08), puis le module. La progression est enregistrée comme pour les autres modules.
 - **Formation terminée** (L14-06) :
   - bandeau couleur d'accent, avec l'icône `Award`, « Formation terminée, bravo {{prénom}} » et la date ;
-  - bouton noir « Télécharger mon attestation (PDF) », seulement si l'option est active ;
+  - bouton noir « Télécharger mon attestation (PDF) ». La génération n'existe pas encore : le bouton est **désactivé avec le badge « Bientôt »** (`aria-describedby`), jamais supprimé ;
   - tous les modules affichent « Validé le … » et l'action « Revoir » ;
   - une ligne rappelle ce que contient l'attestation, et que ce n'est pas une certification.
 
@@ -111,6 +114,9 @@
   - l'ordre des lignes est celui de la page ;
   - le bouton « Gérer les formations » ouvre L13-07 ;
   - aide : une formation masquée reste accessible par son lien personnel, et les démos en brouillon ne sont jamais montrées.
+- **Pied de page** :
+  - « Statut d'accessibilité (RGAA) » : Non évaluée (par défaut), Partiellement conforme, Totalement conforme, avec un lien facultatif vers la déclaration. Le pied affiche « Accessibilité : non évaluée » tant que rien n'est choisi : on n'affiche jamais un statut faux ;
+  - contact « Besoin d'aide ? » (e-mail ou lien ; vide, l'entrée est masquée) et lien « Données personnelles ».
 - **Accès à la page** : mêmes modes que L11.
   - Toute personne avec le lien, et Avec un mot de passe ;
   - Par domaine e-mail et Sur invitation restent visibles, avec le badge « Bientôt », tant que l'envoi d'e-mails n'est pas branché ;

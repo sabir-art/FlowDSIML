@@ -121,6 +121,10 @@
   .hb.cur { background: var(--brand); color: var(--brand-on); box-shadow: none; }
   .hb.key { background: #FDF0E0; color: #6B3A00; box-shadow: inset 0 0 0 1px #F2C58A; }
   [data-theme='dark'] .hb.key { background: #33220C; color: #F6C27F; box-shadow: inset 0 0 0 1px #6B4A1A; }
+  .hb.exp { background: var(--c-sunken); color: var(--c-muted); box-shadow: inset 0 0 0 1px var(--c-border); }
+  .cta--off { border: 0; font-family: inherit; cursor: not-allowed; opacity: .85; }
+  .fp-done .cta--off { background: rgba(8, 8, 8, .55); }
+  .soon-b { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: #FFFFFF; color: #12161B; font-size: 11px; font-weight: 700; margin-left: 4px; }
   /* États vides et sans résultat */
   .ctr-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 56px 24px; border-radius: 24px; background: var(--c-surface); box-shadow: inset 0 0 0 1px var(--c-border); }
   .ctr-empty .ic { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); }
@@ -288,7 +292,7 @@
         <span class="bd">
           <h3>Nouvel outil de gestion</h3>
           <span class="tgs"><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span><span class="tg tg--v"><span class="dot dot--v"></span>Nouveaux agents</span></span>
-          <span class="meta">4 modules à suivre dans l'ordre · 32 min · quiz</span>
+          <span class="meta">4 modules à suivre dans l'ordre · quiz</span>
           <span class="fc-pg"><span class="bar" role="img" aria-label="1 module validé sur 4"><span style="width:25%"></span></span><span>1 sur 4 validé</span></span>
           <ol aria-label="Modules">
             <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>1 · Prise en main</span><span class="s ok">Validé</span></li>
@@ -303,13 +307,13 @@
         <span class="bd">
           <h3>Agenda partagé</h3>
           <span class="tgs"><span class="tg tg--o"><span class="dot dot--o"></span>Bureautique</span></span>
-          <span class="meta">2 modules · 14 min</span>
+          <span class="meta">2 modules · sans quiz</span>
           <span class="fc-pg done"><span class="bar" role="img" aria-label="2 modules validés sur 2"><span style="width:100%"></span></span><span>2 sur 2 validés</span></span>
           <ol aria-label="Modules">
             <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>1 · Partager un agenda</span><span class="s ok">Validé</span></li>
             <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>2 · Planifier un rendez-vous</span><span class="s ok">Validé</span></li>
           </ol>
-          <span class="ft"><span class="note"><i data-icon="download"></i>Attestation disponible</span><span class="cta cta--sec">Revoir</span></span>
+          <span class="ft"><span class="note">Terminée le 24 oct. 2026</span><span class="cta cta--sec">Revoir</span></span>
         </span>
       </a>
       <a class="fc" href="#">
@@ -317,13 +321,13 @@
         <span class="bd">
           <h3>Statistiques d'activité</h3>
           <span class="tgs"><span class="tg tg--p"><span class="dot dot--p"></span>Pilotage</span><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span></span>
-          <span class="meta">3 modules en ordre libre · 25 min · 3 quiz</span>
+          <span class="meta">4 modules en ordre libre · 3 quiz</span>
           <ol aria-label="Modules">
             <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Lire le tableau de bord</span><span class="s">Pas commencé</span></li>
             <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Exporter un indicateur</span><span class="s">Pas commencé</span></li>
             <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Rapport aux financeurs</span><span class="hb key"><i data-icon="key"></i>Mot de passe</span></li>
           </ol>
-          <span class="ft"><span class="note">Non commencée</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
+          <span class="ft"><span class="note">+ 1 module expiré</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
         </span>
       </a>
       <a class="fc" href="#">
@@ -331,11 +335,11 @@
         <span class="bd">
           <h3>Accueil d'un nouvel agent</h3>
           <span class="tgs"><span class="tg tg--v"><span class="dot dot--v"></span>Nouveaux agents</span></span>
-          <span class="meta">3 modules en ordre libre · 16 min</span>
+          <span class="meta">3 modules en ordre libre · sans quiz</span>
           <ol aria-label="Modules">
             <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Mes premiers jours</span><span class="s">Pas commencé</span></li>
             <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Messagerie et agenda</span><span class="s">Pas commencé</span></li>
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Où trouver les documents</span><span class="s">Pas commencé</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Où trouver les documents</span><span class="hb exp"><i data-icon="clock"></i>Expiré</span></li>
           </ol>
           <span class="ft"><span class="note">Non commencée</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
         </span>
@@ -349,11 +353,11 @@
         <span class="bd">
           <h3>Nouvel outil de gestion</h3>
           <span class="tgs"><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span><span class="tg tg--v"><span class="dot dot--v"></span>Nouveaux agents</span></span>
-          <span class="meta">4 modules à suivre dans l'ordre · 32 min · quiz</span>
+          <span class="meta">4 modules à suivre dans l'ordre · quiz</span>
           <ol aria-label="Modules">
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Prise en main</span><span class="s">5 min</span></li>
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Fiches usagers</span><span class="s">8 min</span></li>
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Agenda</span><span class="s">9 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Prise en main</span><span class="s"></span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Fiches usagers</span><span class="s"></span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Agenda</span><span class="s"></span></li>
           </ol>
           <span class="ft"><span class="note">+ 1 module facultatif</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
         </span>
@@ -363,10 +367,10 @@
         <span class="bd">
           <h3>Agenda partagé</h3>
           <span class="tgs"><span class="tg tg--o"><span class="dot dot--o"></span>Bureautique</span></span>
-          <span class="meta">2 modules · 14 min</span>
+          <span class="meta">2 modules · sans quiz</span>
           <ol aria-label="Modules">
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Partager un agenda</span><span class="s">6 min</span></li>
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Planifier un rendez-vous</span><span class="s">8 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Partager un agenda</span><span class="s"></span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Planifier un rendez-vous</span><span class="s"></span></li>
           </ol>
           <span class="ft"><span class="note">Sans quiz</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
         </span>
@@ -376,13 +380,13 @@
         <span class="bd">
           <h3>Statistiques d'activité</h3>
           <span class="tgs"><span class="tg tg--p"><span class="dot dot--p"></span>Pilotage</span><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span></span>
-          <span class="meta">3 modules en ordre libre · 25 min · 3 quiz</span>
+          <span class="meta">4 modules en ordre libre · 3 quiz</span>
           <ol aria-label="Modules">
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Lire le tableau de bord</span><span class="s">7 min</span></li>
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Exporter un indicateur</span><span class="s">8 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Lire le tableau de bord</span><span class="s"></span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Exporter un indicateur</span><span class="s"></span></li>
             <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Rapport aux financeurs</span><span class="hb key"><i data-icon="key"></i>Mot de passe</span></li>
           </ol>
-          <span class="ft"><span class="note">3 quiz</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
+          <span class="ft"><span class="note">+ 1 module expiré</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
         </span>
       </a>
       <a class="fc" href="#">
@@ -390,11 +394,11 @@
         <span class="bd">
           <h3>Accueil d'un nouvel agent</h3>
           <span class="tgs"><span class="tg tg--v"><span class="dot dot--v"></span>Nouveaux agents</span></span>
-          <span class="meta">3 modules en ordre libre · 16 min</span>
+          <span class="meta">3 modules en ordre libre · sans quiz</span>
           <ol aria-label="Modules">
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Mes premiers jours</span><span class="s">4 min</span></li>
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Messagerie et agenda</span><span class="s">7 min</span></li>
-            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Où trouver les documents</span><span class="s">5 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Mes premiers jours</span><span class="s"></span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Messagerie et agenda</span><span class="s"></span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Où trouver les documents</span><span class="hb exp"><i data-icon="clock"></i>Expiré</span></li>
           </ol>
           <span class="ft"><span class="note">Sans quiz</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
         </span>
@@ -408,13 +412,13 @@
         <span class="bd">
           <h3>Agenda partagé</h3>
           <span class="tgs"><span class="tg tg--o"><span class="dot dot--o"></span>Bureautique</span></span>
-          <span class="meta">2 modules · 14 min</span>
+          <span class="meta">2 modules · sans quiz</span>
           <span class="fc-pg done"><span class="bar" role="img" aria-label="2 modules validés sur 2"><span style="width:100%"></span></span><span>2 sur 2 validés</span></span>
           <ol aria-label="Modules">
             <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>1 · Partager un <mark>agenda</mark></span><span class="s ok">Validé</span></li>
             <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>2 · Planifier un rendez-vous</span><span class="s ok">Validé</span></li>
           </ol>
-          <span class="ft"><span class="note"><i data-icon="download"></i>Attestation disponible</span><span class="cta cta--sec">Revoir</span></span>
+          <span class="ft"><span class="note">Terminée le 24 oct. 2026</span><span class="cta cta--sec">Revoir</span></span>
         </span>
       </a>
     </div>
@@ -435,36 +439,37 @@
     <div class="fp-head" data-only="formation">
       <div>
         <h1>Statistiques d'activité</h1>
-        <p>3 modules en ordre libre · 25 min au total · un quiz valide chaque module.</p>
+        <p>Lire, exporter et transmettre les indicateurs d'activité de la structure.</p><p style="font-size:14px;margin-top:6px">4 modules en ordre libre · un quiz valide chaque module.</p>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px" data-only="formation"><span class="tg tg--p"><span class="dot dot--p"></span>Pilotage</span><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span></div>
       </div>
-      <span class="hb" style="font-size:14px;padding:6px 14px"><i data-icon="award"></i>1 sur 3 validé</span>
+      <span class="hb" style="font-size:14px;padding:6px 14px"><i data-icon="award"></i>1 sur 4 validé</span>
     </div>
     <ol class="fp-list" aria-label="Modules de la formation" data-only="formation">
       <li class="ok"><span class="n" aria-hidden="true">1</span><span class="mini"></span><div><h3>Lire le tableau de bord</h3><p>Validé le 12 nov. 2026 · score 85 %</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Lire le tableau de bord</span></a></li>
       <li class="cur"><span class="n" aria-hidden="true">2</span><span class="mini"></span><div><h3>Exporter un indicateur</h3><p>En cours · étape 3 sur 8</p></div><a class="cta" href="#">Reprendre<i data-icon="arrowRight"></i></a></li>
-      <li><span class="n" aria-hidden="true">3</span><span class="mini"></span><div><h3>Rapport aux financeurs <span class="hb key"><i data-icon="key"></i>Protégé par mot de passe</span></h3><p>À faire · 10 min · le mot de passe vous est donné par votre responsable</p></div><a class="cta cta--sec" href="#">Commencer<span class="cm-sr"> Rapport aux financeurs</span></a></li>
+      <li><span class="n" aria-hidden="true">3</span><span class="mini"></span><div><h3>Rapport aux financeurs <span class="hb key"><i data-icon="key"></i>Protégé par mot de passe</span></h3><p>À faire · le mot de passe vous est donné par votre responsable</p></div><a class="cta cta--sec" href="#">Commencer<span class="cm-sr"> Rapport aux financeurs</span></a></li>
+      <li class="lock"><span class="n" aria-hidden="true">4</span><span class="mini"></span><div><h3>Indicateurs de l'an dernier <span class="hb exp"><i data-icon="clock"></i>Expiré</span></h3><p>Ce module n'est plus disponible depuis le 30 sept. 2026</p></div><span></span></li>
     </ol>
 
     <!-- L14-06 : formation terminée -->
     <div class="fp-head" data-only="terminee">
       <div>
         <h1>Agenda partagé</h1>
-        <p>2 modules · 14 min au total.</p>
+        <p>2 modules · sans quiz.</p>
       </div>
       <span class="hb ok" style="font-size:14px;padding:6px 14px"><i data-icon="award"></i>2 sur 2 validés</span>
     </div>
     <section class="fp-done" aria-labelledby="done-t" data-only="terminee">
       <span class="ic" aria-hidden="true"><i data-icon="award"></i></span>
       <div><h2 id="done-t">Formation terminée, bravo Alex</h2><p>Terminée le 24 oct. 2026. Vous pouvez revoir chaque module quand vous le souhaitez.</p></div>
-      <a class="cta" href="#"><i data-icon="download"></i>Télécharger mon attestation (PDF)</a>
+      <button class="cta cta--off" type="button" disabled aria-describedby="att-soon"><i data-icon="download"></i>Télécharger mon attestation (PDF)<span class="soon-b" id="att-soon">Bientôt</span></button>
     </section>
     <ol class="fp-list" aria-label="Modules de la formation" data-only="terminee">
       <li class="ok"><span class="n" aria-hidden="true">1</span><span class="mini"></span><div><h3>Partager un agenda</h3><p>Validé le 22 oct. 2026</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Partager un agenda</span></a></li>
       <li class="ok"><span class="n" aria-hidden="true">2</span><span class="mini"></span><div><h3>Planifier un rendez-vous</h3><p>Validé le 24 oct. 2026</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Planifier un rendez-vous</span></a></li>
     </ol>
-    <p class="fp-foot" data-only="terminee">L'attestation reprend votre nom, la formation, les dates de validation et le nom de la structure. Ce n'est pas une certification.</p>
-    <p class="fp-foot" data-only="formation">Un module protégé demande son mot de passe à l'ouverture (même écran que les démos protégées). Votre progression reste enregistrée.</p>
+    <p class="fp-foot" data-only="terminee">Bientôt : l'attestation reprendra votre nom, la formation, les dates de validation et le nom de la structure. Ce ne sera pas une certification.</p>
+    <p class="fp-foot" data-only="formation">Un module protégé demande son mot de passe à l'ouverture (même écran que les démos protégées). Un module expiré reste listé, sans action ; il ne compte pas dans la progression.</p>
   </main>
 
   <!-- L14-07 : centre vide (public) -->
@@ -480,7 +485,7 @@
     </div>
   </main>
 
-  <footer class="ctr-foot"><span>Mission Locale Exemple</span><a href="#">Accessibilité : partiellement conforme</a><a href="#">Données personnelles</a><a href="#">Besoin d'aide ?</a><span>Créé avec TutoClick</span></footer>
+  <footer class="ctr-foot"><span>Mission Locale Exemple</span><a href="#">Accessibilité : non évaluée</a><a href="#">Données personnelles</a><a href="#">Besoin d'aide ?</a><span>Créé avec TutoClick</span></footer>
 </div>
 </div>
 
@@ -566,7 +571,7 @@
           <ul class="vis" aria-label="Formations, dans l'ordre d'affichage" data-only="reglages">
             <li><span class="grip" title="Glisser, ou Alt + flèches"><i data-icon="grip"></i></span><input type="checkbox" checked aria-label="Afficher Nouvel outil de gestion"><span><b>Nouvel outil de gestion</b><small>4 modules · ordre imposé · Logiciel métier, Nouveaux agents</small></span><span class="fd-help">142 apprenants</span></li>
             <li><span class="grip"><i data-icon="grip"></i></span><input type="checkbox" checked aria-label="Afficher Agenda partagé"><span><b>Agenda partagé</b><small>2 modules · Bureautique</small></span><span class="fd-help">96 apprenants</span></li>
-            <li><span class="grip"><i data-icon="grip"></i></span><input type="checkbox" checked aria-label="Afficher Statistiques d'activité"><span><b>Statistiques d'activité</b><small>3 modules · 1 protégé par mot de passe · Pilotage</small></span><span class="fd-help">41 apprenants</span></li>
+            <li><span class="grip"><i data-icon="grip"></i></span><input type="checkbox" checked aria-label="Afficher Statistiques d'activité"><span><b>Statistiques d'activité</b><small>4 modules · 1 protégé par mot de passe · 1 expiré · Pilotage</small></span><span class="fd-help">41 apprenants</span></li>
             <li><span class="grip"><i data-icon="grip"></i></span><input type="checkbox" checked aria-label="Afficher Accueil d'un nouvel agent"><span><b>Accueil d'un nouvel agent</b><small>3 modules · Nouveaux agents</small></span><span class="fd-help">12 apprenants</span></li>
             <li class="off"><span class="grip"><i data-icon="grip"></i></span><input type="checkbox" aria-label="Afficher Procédure interne RH"><span><b>Procédure interne RH</b><small>2 modules · masquée</small></span><span class="fd-help">8 apprenants</span></li>
           </ul>
@@ -576,6 +581,18 @@
             <b>Aucune formation à afficher</b>
             <p>Une formation regroupe des démos publiées en modules. Créez-en une pour la proposer dans le centre.</p>
             <a class="fd-btn fd-btn--primary" href="l13-suivi.html?view=gerer"><i data-icon="plus"></i>Créer une formation</a>
+          </div>
+        </section>
+
+        <section class="fd-card" aria-labelledby="c-foot">
+          <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="fileText"></i></span><h2 class="fd-card__title" id="c-foot">Pied de page</h2></div>
+          <div class="two">
+            <div class="fd-field"><label class="fd-label" for="a11y">Statut d'accessibilité (RGAA)</label><select class="fd-input" id="a11y" aria-describedby="a11y-h"><option selected>Non évaluée</option><option>Partiellement conforme</option><option>Totalement conforme</option></select><span class="fd-help" id="a11y-h">Affiché « Accessibilité : non évaluée » tant qu'aucun audit n'a été fait.</span></div>
+            <div class="fd-field"><label class="fd-label" for="a11y-url">Lien vers la déclaration <span class="fd-help">(facultatif)</span></label><input class="fd-input" id="a11y-url" type="url" placeholder="https://mission-locale.example/accessibilite"></div>
+          </div>
+          <div class="two">
+            <div class="fd-field"><label class="fd-label" for="help14">Contact « Besoin d'aide ? »</label><input class="fd-input" id="help14" type="text" value="support@mission-locale.example"><span class="fd-help">Adresse e-mail ou lien. Vide : l'entrée est masquée.</span></div>
+            <div class="fd-field"><label class="fd-label" for="priv14">Lien « Données personnelles »</label><input class="fd-input" id="priv14" type="url" value="https://mission-locale.example/donnees-personnelles"></div>
           </div>
         </section>
 
