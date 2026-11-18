@@ -107,7 +107,7 @@ Modale large (880 px) ouverte par « Gérer les formations ». Titre « Formatio
 - **À gauche**, la liste des formations en cartes (nom ; modules, quiz et apprenants). La carte choisie a un contour prune et le fond prune pâle. En dessous, un champ « Nom de la nouvelle formation » et le bouton « Créer une formation » (icône plus).
 - **À droite**, dans un bloc `surface-sunken` :
   - champ « Nom » ;
-  - champ « Description » (facultatif, 240 caractères) : intro de la page de la formation dans le centre (L14-05) et prise en compte par la recherche ;
+  - champ « Description » (facultatif, 600 caractères) : intro de la page de la formation dans le centre (L14-05) et prise en compte par la recherche ;
   - interrupteur « Modules à suivre dans l'ordre », avec l'aide « Un module s'ouvre quand le précédent est validé » ;
   - liste ordonnée des modules : numéro en pastille prune, titre de la démo et méta (étapes, quiz et seuil), case « Obligatoire », puis Monter, Descendre et Retirer. Monter est désactivé sur le premier module, Descendre sur le dernier. Chaque bouton a un nom accessible qui cite le module ;
   - « Choisir une démo… » et « Ajouter un module » ;

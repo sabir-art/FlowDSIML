@@ -63,8 +63,9 @@
     | Protégé par mot de passe | — | badge orange `Key` « Mot de passe » |
     | Expiré (date L11 dépassée) | — | badge neutre `Clock` « Expiré », sans action |
 
+    Un module validé n'affiche jamais de date de validation : la base ne la garde pas.
     Au-delà de 3 modules : « + n module(s) » en pied (« + 1 module expiré » si c'est le cas) ;
-  - en pied : une note (« Terminée le … », « Non commencée », « + 1 module facultatif ») et un faux bouton (texte stylé, pas un `button`) : Reprendre, Commencer ou Revoir.
+  - en pied : une note (« Tous les modules validés », « Non commencée », « + 1 module facultatif ») et un faux bouton (texte stylé, pas un `button`) : Reprendre, Commencer ou Revoir.
 - **Sans résultat** (L14-04) : un bloc centré avec l'icône de recherche, le titre « Aucune formation pour « q » », une aide, et le bouton « Effacer la recherche ». Les filtres restent visibles.
 
 ## 4. Page d'une formation (L14-05, L14-06)
@@ -74,12 +75,12 @@
   - liste ordonnée des modules (pastille de numéro, mini-vignette, titre `h3`, ligne d'état, action).
 - **Module protégé** (L14-05) : à côté du titre, le badge orange `Key` « Protégé par mot de passe ».
   - La ligne d'état précise : « le mot de passe vous est donné par votre responsable ».
-- **Module expiré** (date d'expiration L11 dépassée) : il reste listé, jamais sans badge. Badge neutre `Clock` « Expiré », ligne « Ce module n'est plus disponible depuis le … », aucune action, opacité 0,72. Il ne compte pas dans la progression.
+- **Module expiré** (date d'expiration L11 dépassée) : il reste listé, jamais sans badge. Badge neutre `Clock` « Expiré », ligne « Ce module n'est plus disponible depuis le … » (date d'expiration L11), aucune action, opacité 0,72, et pas de vignette (cadre vide bordé). Il ne compte pas dans la progression.
   - « Commencer » ouvre l'écran mot de passe du lecteur (L11-06 à L11-08), puis le module. La progression est enregistrée comme pour les autres modules.
 - **Formation terminée** (L14-06) :
-  - bandeau couleur d'accent, avec l'icône `Award`, « Formation terminée, bravo {{prénom}} » et la date ;
-  - bouton noir « Télécharger mon attestation (PDF) ». La génération n'existe pas encore : le bouton est **désactivé avec le badge « Bientôt »** (`aria-describedby`), jamais supprimé ;
-  - tous les modules affichent « Validé le … » et l'action « Revoir » ;
+  - bandeau couleur d'accent, avec l'icône `Award` et « Formation terminée, bravo {{prénom}} », **sans date** (la base ne garde pas la date de validation) ;
+  - bouton noir « Télécharger mon attestation (PDF) ». La génération n'existe pas encore : le bouton est **désactivé avec le badge « Bientôt »** (`aria-describedby`), jamais supprimé. La génération arrivera avec le lot L15 (Exports) ;
+  - tous les modules affichent « Validé » (et le score s'il y a un quiz), sans date, avec l'action « Revoir » ;
   - une ligne rappelle ce que contient l'attestation, et que ce n'est pas une certification.
 
 ## 5. Centre vide (L14-07)
@@ -102,7 +103,7 @@
   - interrupteur « Visible dans les moteurs de recherche », désactivé par défaut (`noindex`).
 - **Identité** :
   - Titre et Texte d'accueil ;
-  - **Logo** : SVG ou PNG carré, 512 px au moins, avec les actions Remplacer et Retirer ;
+  - **Logo** : PNG, SVG (nettoyé à l'envoi) ou WebP, 512 Ko au plus, carré, avec les actions Remplacer et Retirer. Il est stocké dans l'espace « branding » ;
   - **Couleur principale** et **couleur d'accent** : pastille et champ hexadécimal. Le contraste du texte posé dessus est calculé en direct (blanc sur la principale, noir sur l'accent). Sous 4,5:1, la couleur est refusée et le message donne la valeur.
 - **Style prédéfini** (`radiogroup` de 4 cartes avec une vignette) :
   - Couleurs du workspace (par défaut) ;

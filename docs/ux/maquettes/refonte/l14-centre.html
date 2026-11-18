@@ -153,6 +153,8 @@
   .fp-list h3 { margin: 0 0 4px; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .fp-list p { margin: 0; font-size: 14px; color: var(--c-muted); }
   .fp-list li.lock { opacity: .72; }
+  .fp-list .mini--none { background: transparent; box-shadow: inset 0 0 0 1px var(--c-border); }
+  .fp-list .mini--none::before { display: none; }
   .fp-foot { font-size: 14px; color: var(--c-muted); margin: 0; }
   .ctr-foot { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: center; padding: 20px 24px 32px; font-size: 13px; color: var(--c-muted); }
   .ctr-foot a { color: var(--c-muted); }
@@ -313,7 +315,7 @@
             <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>1 · Partager un agenda</span><span class="s ok">Validé</span></li>
             <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>2 · Planifier un rendez-vous</span><span class="s ok">Validé</span></li>
           </ol>
-          <span class="ft"><span class="note">Terminée le 24 oct. 2026</span><span class="cta cta--sec">Revoir</span></span>
+          <span class="ft"><span class="note">Tous les modules validés</span><span class="cta cta--sec">Revoir</span></span>
         </span>
       </a>
       <a class="fc" href="#">
@@ -418,7 +420,7 @@
             <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>1 · Partager un <mark>agenda</mark></span><span class="s ok">Validé</span></li>
             <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>2 · Planifier un rendez-vous</span><span class="s ok">Validé</span></li>
           </ol>
-          <span class="ft"><span class="note">Terminée le 24 oct. 2026</span><span class="cta cta--sec">Revoir</span></span>
+          <span class="ft"><span class="note">Tous les modules validés</span><span class="cta cta--sec">Revoir</span></span>
         </span>
       </a>
     </div>
@@ -445,10 +447,10 @@
       <span class="hb" style="font-size:14px;padding:6px 14px"><i data-icon="award"></i>1 sur 4 validé</span>
     </div>
     <ol class="fp-list" aria-label="Modules de la formation" data-only="formation">
-      <li class="ok"><span class="n" aria-hidden="true">1</span><span class="mini"></span><div><h3>Lire le tableau de bord</h3><p>Validé le 12 nov. 2026 · score 85 %</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Lire le tableau de bord</span></a></li>
+      <li class="ok"><span class="n" aria-hidden="true">1</span><span class="mini"></span><div><h3>Lire le tableau de bord</h3><p>Validé · score 85 %</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Lire le tableau de bord</span></a></li>
       <li class="cur"><span class="n" aria-hidden="true">2</span><span class="mini"></span><div><h3>Exporter un indicateur</h3><p>En cours · étape 3 sur 8</p></div><a class="cta" href="#">Reprendre<i data-icon="arrowRight"></i></a></li>
       <li><span class="n" aria-hidden="true">3</span><span class="mini"></span><div><h3>Rapport aux financeurs <span class="hb key"><i data-icon="key"></i>Protégé par mot de passe</span></h3><p>À faire · le mot de passe vous est donné par votre responsable</p></div><a class="cta cta--sec" href="#">Commencer<span class="cm-sr"> Rapport aux financeurs</span></a></li>
-      <li class="lock"><span class="n" aria-hidden="true">4</span><span class="mini"></span><div><h3>Indicateurs de l'an dernier <span class="hb exp"><i data-icon="clock"></i>Expiré</span></h3><p>Ce module n'est plus disponible depuis le 30 sept. 2026</p></div><span></span></li>
+      <li class="lock"><span class="n" aria-hidden="true">4</span><span class="mini mini--none"></span><div><h3>Indicateurs de l'an dernier <span class="hb exp"><i data-icon="clock"></i>Expiré</span></h3><p>Ce module n'est plus disponible depuis le 30 sept. 2026</p></div><span></span></li>
     </ol>
 
     <!-- L14-06 : formation terminée -->
@@ -461,14 +463,14 @@
     </div>
     <section class="fp-done" aria-labelledby="done-t" data-only="terminee">
       <span class="ic" aria-hidden="true"><i data-icon="award"></i></span>
-      <div><h2 id="done-t">Formation terminée, bravo Alex</h2><p>Terminée le 24 oct. 2026. Vous pouvez revoir chaque module quand vous le souhaitez.</p></div>
+      <div><h2 id="done-t">Formation terminée, bravo Alex</h2><p>Vous avez validé tous les modules. Vous pouvez revoir chacun d'eux quand vous le souhaitez.</p></div>
       <button class="cta cta--off" type="button" disabled aria-describedby="att-soon"><i data-icon="download"></i>Télécharger mon attestation (PDF)<span class="soon-b" id="att-soon">Bientôt</span></button>
     </section>
     <ol class="fp-list" aria-label="Modules de la formation" data-only="terminee">
-      <li class="ok"><span class="n" aria-hidden="true">1</span><span class="mini"></span><div><h3>Partager un agenda</h3><p>Validé le 22 oct. 2026</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Partager un agenda</span></a></li>
-      <li class="ok"><span class="n" aria-hidden="true">2</span><span class="mini"></span><div><h3>Planifier un rendez-vous</h3><p>Validé le 24 oct. 2026</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Planifier un rendez-vous</span></a></li>
+      <li class="ok"><span class="n" aria-hidden="true">1</span><span class="mini"></span><div><h3>Partager un agenda</h3><p>Validé</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Partager un agenda</span></a></li>
+      <li class="ok"><span class="n" aria-hidden="true">2</span><span class="mini"></span><div><h3>Planifier un rendez-vous</h3><p>Validé</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Planifier un rendez-vous</span></a></li>
     </ol>
-    <p class="fp-foot" data-only="terminee">Bientôt : l'attestation reprendra votre nom, la formation, les dates de validation et le nom de la structure. Ce ne sera pas une certification.</p>
+    <p class="fp-foot" data-only="terminee">Bientôt : l'attestation reprendra votre nom, la formation, les modules validés et le nom de la structure. Ce ne sera pas une certification.</p>
     <p class="fp-foot" data-only="formation">Un module protégé demande son mot de passe à l'ouverture (même écran que les démos protégées). Un module expiré reste listé, sans action ; il ne compte pas dans la progression.</p>
   </main>
 
@@ -546,7 +548,7 @@
           <div class="fd-field"><label class="fd-label" for="t14">Titre</label><input class="fd-input" id="t14" type="text" value="Se former aux outils de la Mission Locale"></div>
           <div class="fd-field"><label class="fd-label" for="w14">Texte d'accueil</label><textarea class="fd-input" id="w14" rows="2">Des tutoriels interactifs pour prendre en main vos outils, à votre rythme. Chaque module dure moins de 10 minutes.</textarea></div>
           <div class="fd-field"><span class="fd-label">Logo</span>
-            <div class="logo-f"><span class="ctr-logo" aria-hidden="true">ML</span><span class="tx"><b>logo-mission-locale.svg</b>SVG ou PNG, carré, 512 px au moins. Il s'affiche en 40 px dans l'en-tête.</span><button class="fd-btn fd-btn--sm" type="button"><i data-icon="upload"></i>Remplacer</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Retirer</button></div>
+            <div class="logo-f"><span class="ctr-logo" aria-hidden="true">ML</span><span class="tx"><b>logo-mission-locale.svg</b>PNG, SVG ou WebP, 512 Ko au plus, carré. Le SVG est nettoyé à l'envoi. Il s'affiche en 40 px dans l'en-tête.</span><button class="fd-btn fd-btn--sm" type="button"><i data-icon="upload"></i>Remplacer</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Retirer</button></div>
           </div>
           <div class="two">
             <div class="fd-field"><label class="fd-label" for="col1">Couleur principale</label><div class="col-f"><span class="sw" style="background:#A3195B"></span><input id="col1" type="text" value="#A3195B" aria-describedby="col1-h"></div><span class="ok-line" id="col1-h"><i data-icon="checkCircle"></i>Texte blanc : contraste 7,9:1, conforme</span></div>
