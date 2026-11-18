@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import {
   BarChart3,
   CreditCard,
-  Building2,
   Contact,
   Languages,
   LayoutGrid,
@@ -19,12 +18,12 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { Select } from '@flowdsiml/ui';
 import { useAuth } from '../auth/AuthProvider';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { setLocale } from '../i18n';
 import { supabase } from '../lib/supabase';
 import { Menu } from './Menu';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { THEME_OPTIONS, chooseTheme } from './ThemeSwitcher';
 import { useTheme, type ThemePref } from '../lib/theme';
 
@@ -36,7 +35,7 @@ export function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut, user, profile } = useAuth();
-  const { workspaces, current, select } = useWorkspace();
+  const { current } = useWorkspace();
   const [open, setOpen] = useState(false);
 
   const menuBtn = useRef<HTMLButtonElement>(null);
@@ -138,23 +137,8 @@ export function Layout() {
         <div className="brand">
           <BrandMark size={44} subtitle={t('app.org')} />
         </div>
-        {/* D-2 : sélecteur de workspace seulement à partir de 2 workspaces */}
-        {workspaces.length > 1 && (
-          <div className="ws-switch">
-            <Building2 {...ICON} />
-            <Select
-              aria-label={t('nav.workspace')}
-              value={current?.id ?? ''}
-              onChange={(e) => select(e.target.value)}
-            >
-              {workspaces.map((w) => (
-                <option key={w.id} value={w.id}>
-                  {w.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-        )}
+        {/* CAD-02 : sélecteur de workspace toujours visible (maquette) */}
+        <WorkspaceSwitcher />
         <nav aria-label={t('nav.main')} className="fd-nav">
           {nav.map((n) => {
             // RF6 : « Démos » reste actif dans les sous-pages d'une démo (analytics, partage…)

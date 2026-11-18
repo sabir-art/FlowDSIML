@@ -32,7 +32,10 @@
     "newWorkspace": "Nouveau workspace",
     "openMenu": "Ouvrir le menu",
     "account": "Mon compte",
-    "plans": "Plans"
+    "plans": "Plans",
+    "wsPlan": "Plan {{plan}}",
+    "wsMembers_one": "{{count}} membre",
+    "wsMembers_other": "{{count}} membres"
   },
   "roles": {
     "owner": "Propriétaire",
@@ -1210,5 +1213,14 @@
     "plans": "Plans et facturation",
     "brandSoon": "Le thème par défaut du workspace (couleurs, police, page publique) arrive bientôt. En attendant, le thème se règle dans chaque démo, depuis l’éditeur.",
     "variablesSoon": "Les variables partagées du workspace arrivent bientôt. En attendant, les variables se définissent dans chaque démo, depuis l’éditeur."
+  },
+  "toast": {
+    "duplicated": "Démo dupliquée",
+    "folderCreated": "Dossier « {{name}} » créé",
+    "folderRenamed": "Dossier renommé",
+    "folderDeleted": "Dossier supprimé",
+    "demoDeleted": "Démo supprimée",
+    "moved": "Démo déplacée vers « {{folder}} »",
+    "linkCopied": "Lien copié"
   }
 }

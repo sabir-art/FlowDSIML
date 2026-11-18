@@ -212,6 +212,12 @@
 /* Bouton rond ↗ du KPI héros, en haut à droite */
 .kpi-action {
   margin-left: auto;
+  /* CAD-07 : reste un petit rond (pas étiré par les règles mobiles des boutons) */
+  flex: none;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
 }
 
 @media (max-width: 640px) {

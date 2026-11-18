@@ -141,6 +141,37 @@ const SCREENS = {
     view: { width: 390, height: 844 },
     prepare: (p) => SCREENS['PLY-01-fin'].prepare(p),
   },
+  'CAD-02': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    async maquettePrep(p) {
+      await p.locator('.ws-switch').click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.locator('.ws-switch').click();
+      await p.waitForTimeout(300);
+    },
+  },
+  'CAD-07': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    view: { width: 390, height: 844 },
+  },
+  'CAD-08': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    async maquettePrep(p) {
+      await p.evaluate(() => document.querySelector('[data-toast="Lien copié"]').click());
+      await p.waitForTimeout(400);
+    },
+    async prepare(p) {
+      await p.locator('.demo-card .menu-trigger, [aria-label^="Actions"]').first().click();
+      await p.getByRole('menuitem', { name: 'Dupliquer' }).click();
+      await p.waitForSelector('.toast');
+      await p.waitForTimeout(300);
+    },
+  },
   'PRT-01': {
     maquette: 'reference/partage.html',
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',
@@ -274,7 +305,7 @@ async function shotPlayer(b, s, theme) {
 
 async function shotApp(b, s, theme) {
   if (s.player) return shotPlayer(b, s, theme);
-  const p = await b.newPage({ viewport: VIEW });
+  const p = await b.newPage({ viewport: s.view || VIEW });
   await p.addInitScript((th) => {
     try {
       localStorage.setItem('fd.theme', th);

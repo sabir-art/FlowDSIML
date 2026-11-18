@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
+import { ToastProvider } from './components/Toast';
 import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Alert } from '@flowdsiml/ui';
@@ -74,68 +75,70 @@ export function App() {
     <HashRouter>
       <AuthProvider>
         <WorkspaceProvider>
-          <EmailRedirectHandler />
-          <ConfigWarning />
-          <Suspense fallback={<Loading />}>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/legal/:doc" element={<LegalSoon />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/invite/:token" element={<AcceptInvite />} />
-              <Route
-                path="/onboarding"
-                element={
-                  <RequireAuth>
-                    <Onboarding />
-                  </RequireAuth>
-                }
-              />
-              <Route
-                path="/demos/:demoId/quiz"
-                element={
-                  <RequireAuth>
-                    <RequireWorkspace>
-                      <QuizEditorPage />
-                    </RequireWorkspace>
-                  </RequireAuth>
-                }
-              />
-              <Route
-                path="/demos/:demoId/edit"
-                element={
-                  <RequireAuth>
-                    <RequireWorkspace>
-                      <EditorPage />
-                    </RequireWorkspace>
-                  </RequireAuth>
-                }
-              />
-              <Route
-                element={
-                  <RequireAuth>
-                    <RequireWorkspace>
-                      <Layout />
-                    </RequireWorkspace>
-                  </RequireAuth>
-                }
-              >
-                <Route index element={<DemosPage />} />
-                <Route path="/demos/:demoId/share" element={<SharePage />} />
-                <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
-                <Route path="/analytics" element={<AnalyticsPage />} />
-                <Route path="/leads" element={<LeadsPage />} />
-                <Route path="/settings/profile" element={<Profile />} />
-                <Route path="/settings/members" element={<Members />} />
-                <Route path="/settings/workspace" element={<WorkspaceSettings />} />
-                <Route path="/settings/plans" element={<PlansPage />} />
-                <Route path="/settings/brand" element={<BrandSettings />} />
-                <Route path="/settings/variables" element={<VariablesSettings />} />
-              </Route>
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
+          <ToastProvider>
+            <EmailRedirectHandler />
+            <ConfigWarning />
+            <Suspense fallback={<Loading />}>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/legal/:doc" element={<LegalSoon />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/invite/:token" element={<AcceptInvite />} />
+                <Route
+                  path="/onboarding"
+                  element={
+                    <RequireAuth>
+                      <Onboarding />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/demos/:demoId/quiz"
+                  element={
+                    <RequireAuth>
+                      <RequireWorkspace>
+                        <QuizEditorPage />
+                      </RequireWorkspace>
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/demos/:demoId/edit"
+                  element={
+                    <RequireAuth>
+                      <RequireWorkspace>
+                        <EditorPage />
+                      </RequireWorkspace>
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  element={
+                    <RequireAuth>
+                      <RequireWorkspace>
+                        <Layout />
+                      </RequireWorkspace>
+                    </RequireAuth>
+                  }
+                >
+                  <Route index element={<DemosPage />} />
+                  <Route path="/demos/:demoId/share" element={<SharePage />} />
+                  <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
+                  <Route path="/analytics" element={<AnalyticsPage />} />
+                  <Route path="/leads" element={<LeadsPage />} />
+                  <Route path="/settings/profile" element={<Profile />} />
+                  <Route path="/settings/members" element={<Members />} />
+                  <Route path="/settings/workspace" element={<WorkspaceSettings />} />
+                  <Route path="/settings/plans" element={<PlansPage />} />
+                  <Route path="/settings/brand" element={<BrandSettings />} />
+                  <Route path="/settings/variables" element={<VariablesSettings />} />
+                </Route>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </ToastProvider>
         </WorkspaceProvider>
       </AuthProvider>
     </HashRouter>

@@ -19,6 +19,10 @@ export interface MenuItem {
   onSelect: () => void;
   danger?: boolean;
   disabled?: boolean;
+  /** Contenu aligné à droite (coche de l'élément actif, badge « Bientôt »…). */
+  end?: ReactNode;
+  /** Élément actif (aria-current), ex. workspace courant. */
+  current?: boolean;
 }
 
 /** Au-delà de ce nombre d'éléments, le menu s'affiche en feuille du bas sous 480 px (§15.7). */
@@ -36,6 +40,7 @@ export function Menu({
   placement,
   trigger,
   icon,
+  custom,
 }: {
   label: string;
   items: Array<MenuItem | MenuRadioGroup | 'separator'>;
@@ -51,6 +56,8 @@ export function Menu({
   };
   /** Icône du bouton seul (par défaut « ⋯ »), ex. « + » du rail des étapes. */
   icon?: ReactNode;
+  /** Déclencheur entièrement personnalisé (contenu et classe), ex. sélecteur de workspace. */
+  custom?: { content: ReactNode; className: string };
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -144,11 +151,13 @@ export function Menu({
         ref={btn}
         type="button"
         className={
-          trigger
-            ? `fd-btn fd-btn--sm menu-trigger${trigger.block ? ' fd-btn--block' : ''}`
-            : 'fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon menu-trigger'
+          custom
+            ? `${custom.className} menu-trigger`
+            : trigger
+              ? `fd-btn fd-btn--sm menu-trigger${trigger.block ? ' fd-btn--block' : ''}`
+              : 'fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon menu-trigger'
         }
-        aria-label={trigger ? undefined : label}
+        aria-label={trigger || custom ? undefined : label}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={id}
@@ -158,7 +167,9 @@ export function Menu({
           setOpen(!open);
         }}
       >
-        {trigger ? (
+        {custom ? (
+          custom.content
+        ) : trigger ? (
           <>
             {trigger.icon && (
               <span className="fd-btn__icon" aria-hidden="true">
@@ -216,6 +227,7 @@ export function Menu({
                   role="menuitem"
                   className={`menu-item${it.danger ? ' menu-item--danger' : ''}`}
                   disabled={it.disabled}
+                  aria-current={it.current ? 'true' : undefined}
                   onClick={(e) => {
                     e.stopPropagation();
                     close(true);
@@ -228,6 +240,7 @@ export function Menu({
                     </span>
                   )}
                   {it.label}
+                  {it.end && <span className="menu-item__end">{it.end}</span>}
                 </button>
               ),
             )}

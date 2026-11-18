@@ -32,6 +32,7 @@ import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { Menu, type MenuItem } from '../../components/Menu';
+import { useToast } from '../../components/Toast';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import './demos.css';
 
@@ -44,6 +45,7 @@ type Sort = 'updated' | 'title' | 'views';
 
 export function DemosPage() {
   const { t, i18n } = useTranslation();
+  const toast = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { current, can } = useWorkspace();
@@ -185,6 +187,7 @@ export function DemosPage() {
     await run(async () => {
       if (renaming) check(await supabase.from('folders').update({ name }).eq('id', renaming.id));
       else check(await supabase.from('folders').insert({ workspace_id: ws.id, name }));
+      toast(renaming ? t('toast.folderRenamed') : t('toast.folderCreated', { name }));
       setRenaming(null);
       setNewFolder(null);
       await load();
@@ -207,6 +210,7 @@ export function DemosPage() {
               void run(async () => {
                 check(await supabase.rpc('duplicate_demo', { p_demo: d.id }));
                 await load();
+                toast(t('toast.duplicated'));
               }),
           },
           { label: t('demos.moveTo'), icon: <FolderInput />, onSelect: () => setMoving(d) },
@@ -515,6 +519,7 @@ export function DemosPage() {
             );
             await supabase.storage.from('published').remove([`${d.id}/latest.json`]);
             await load();
+            toast(t('toast.demoDeleted'));
           }).then(() => undefined)
         }
       />
@@ -530,6 +535,7 @@ export function DemosPage() {
             check(await supabase.from('folders').delete().eq('id', folderToDelete!.id));
             if (folder === folderToDelete!.id) setFolder('all');
             await load();
+            toast(t('toast.folderDeleted'));
           }).then(() => undefined)
         }
       />
@@ -550,6 +556,11 @@ export function DemosPage() {
                       .eq('id', moving.id),
                   );
                   await load();
+                  toast(
+                    t('toast.moved', {
+                      folder: folders.find((f) => f.id === e.target.value)?.name ?? t('demos.noFolder'),
+                    }),
+                  );
                 })
               }
             >
