@@ -37,6 +37,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       .click();
     await p.getByRole('menuitem', { name: 'Exporter (PDF, GIF)' }).click();
     await p.waitForSelector('dialog.x15-dialog[open]');
+    await p.waitForFunction(() =>
+      /Créer une fiche usager/.test(document.querySelector('dialog.x15-dialog h2')?.textContent || ''),
+    );
   };
   const help = (p) => p.locator('.x15-foot .fd-help').textContent();
 

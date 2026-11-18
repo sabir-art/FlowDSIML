@@ -198,10 +198,15 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       sent[0]?.p_link_token === 'jeton-alex-0001' && sent[0]?.p_path === F('f2'),
       'L15-07 : jeton du lien et formation envoyés à issue_certificate',
     );
-    ok(/n’a pas pu être délivrée/.test(await p.locator('.fp-cert-s').textContent()), 'L15-07 : refus expliqué');
+    ok(
+      /n’a pas pu être délivrée/.test(await p.locator('.fp-cert-s').textContent()),
+      'L15-07 : refus expliqué',
+    );
     reply = { error: 'name_missing' };
     await btn.click();
-    await p.waitForFunction(() => /nom n’est pas renseigné/.test(document.querySelector('.fp-cert-s')?.textContent || ''));
+    await p.waitForFunction(() =>
+      /nom n’est pas renseigné/.test(document.querySelector('.fp-cert-s')?.textContent || ''),
+    );
     ok(true, 'L15-07 : nom manquant expliqué');
     reply = {
       certificateId: '000042',
@@ -216,10 +221,21 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       ],
     };
     p.on('console', (m) => m.type() === 'error' && console.log('console:', m.text()));
-    const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 15000 }).catch(async (e) => { console.log('status:', await p.locator('.fp-cert-s').textContent(), errors); throw e; }), btn.click()]);
-    const pdf = require('fs').readFileSync(await dl.path()).toString('latin1');
+    const [dl] = await Promise.all([
+      p.waitForEvent('download', { timeout: 15000 }).catch(async (e) => {
+        console.log('status:', await p.locator('.fp-cert-s').textContent(), errors);
+        throw e;
+      }),
+      btn.click(),
+    ]);
+    const pdf = require('fs')
+      .readFileSync(await dl.path())
+      .toString('latin1');
     ok(dl.suggestedFilename() === 'attestation-agenda-partage.pdf', 'L15-07 : nom du fichier');
-    ok(pdf.startsWith('%PDF-') && /\/Count 1/.test(pdf) && pdf.includes('/Lang (fr-FR)'), 'L15-07 : PDF d’une page, en français');
+    ok(
+      pdf.startsWith('%PDF-') && /\/Count 1/.test(pdf) && pdf.includes('/Lang (fr-FR)'),
+      'L15-07 : PDF d’une page, en français',
+    );
     ok((await p.locator('.fp-cert-s').textContent()) === '', 'L15-07 : plus de message après la création');
     await p.close();
   }

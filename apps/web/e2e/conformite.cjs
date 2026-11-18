@@ -11,6 +11,9 @@ const { install } = require('./fake-supabase.cjs');
 const { seedMaquette } = require('./maquette-data.cjs');
 const { learnersFixture, resumeFixture, seedPathTables } = require('./learners-data.cjs');
 const { centerFixture, seedCenterTables } = require('./center-data.cjs');
+const { seedExport } = require('./export-data.cjs');
+const { execFileSync } = require('child_process');
+const os = require('os');
 
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const MAQ = path.resolve(__dirname, '../../../docs/ux/maquettes');
@@ -607,6 +610,71 @@ const SCREENS = {
     route: '/#/center',
     seed: (d) => seedCenterTables(d, { empty: true }),
   },
+  // L15 : exports (modale depuis le menu « … » de la démo, version publiée)
+  'L15-01': {
+    maquette: 'refonte/l15-exports.html?view=pdf',
+    route: '/#/',
+    seed: (d) => seedExport(d),
+    prepare: (p) => openExport(p, 1),
+  },
+  'L15-02': {
+    maquette: 'refonte/l15-exports.html?view=gif',
+    route: '/#/',
+    seed: (d) => seedExport(d),
+    async prepare(p) {
+      await openExport(p, 0);
+      await p.getByRole('radio', { name: /GIF animé/ }).click();
+      await p.waitForTimeout(1500);
+      await p.getByRole('button', { name: 'Pause' }).click();
+    },
+  },
+  'L15-03': {
+    maquette: 'refonte/l15-exports.html?view=en-cours',
+    route: '/#/',
+    seed: (d) => seedExport(d),
+    async prepare(p) {
+      await openExport(p, 0);
+      // La capture de l'étape 5 tarde : l'export reste sur « Préparation des captures »
+      await p.route('**/storage/v1/object/sign/**/st-5.webp*', () => undefined);
+      await p.getByRole('button', { name: 'Exporter en PDF' }).click();
+      await p.waitForTimeout(1200);
+    },
+  },
+  'L15-04': {
+    maquette: 'refonte/l15-exports.html?view=termine',
+    route: '/#/',
+    seed: (d) => seedExport(d),
+    async prepare(p) {
+      await openExport(p, 0);
+      await Promise.all([
+        p.waitForEvent('download'),
+        p.getByRole('button', { name: 'Exporter en PDF' }).click(),
+      ]);
+      await p.waitForTimeout(400);
+    },
+  },
+  'L15-05': {
+    maquette: 'refonte/l15-exports.html?view=erreur',
+    route: '/#/',
+    seed: (d) => seedExport(d),
+    async prepare(p) {
+      await openExport(p, 0);
+      await p.route('**/storage/v1/object/sign/**/st-5.webp*', (r) => r.fulfill({ status: 404, body: 'x' }));
+      await p.getByRole('button', { name: 'Exporter en PDF' }).click();
+      await p.waitForSelector('dialog[role="alertdialog"]');
+    },
+  },
+  'L15-06': {
+    maquette: 'refonte/l15-exports.html?view=gabarit',
+    route: '/#/',
+    seed: (d) => seedExport(d),
+    render: (b) => pdfDesk(b, 'demo'),
+  },
+  'L15-07': {
+    maquette: 'refonte/l15-exports.html?view=attestation',
+    route: '/#/',
+    render: (b) => pdfDesk(b, 'certificate'),
+  },
   // L11 : partage sécurisé (onglet Accès, écrans visiteur)
   'L11-01': {
     maquette: 'reference/partage-securise.html?etat=mdp',
@@ -954,7 +1022,131 @@ async function shotPlayer(b, s, theme) {
   return buf;
 }
 
+/** L15 : ouvre la modale d'export de la première démo, puis va à la page `page` de l'aperçu. */
+async function openExport(p, page) {
+  await p
+    .getByRole('button', { name: /Actions.*Créer une fiche usager/ })
+    .first()
+    .click();
+  await p.getByRole('menuitem', { name: 'Exporter (PDF, GIF)' }).click();
+  await p.waitForFunction(() =>
+    /\d+ pages/.test(document.querySelector('.x15-foot .fd-help')?.textContent || ''),
+  );
+  for (let i = 0; i < page; i++) await p.getByRole('button', { name: 'Page suivante' }).click();
+  await p.waitForTimeout(500);
+}
+
+/** PDF téléchargé → pages PNG (pdftoppm), posées sur un fond ardoise comme la maquette. */
+function pdfPages(buf, pages, dpi = 60) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'l15-'));
+  fs.writeFileSync(path.join(dir, 'f.pdf'), buf);
+  return pages.map((n) => {
+    execFileSync('pdftoppm', [
+      '-r',
+      String(dpi),
+      '-png',
+      '-f',
+      String(n),
+      '-l',
+      String(n),
+      '-singlefile',
+      path.join(dir, 'f.pdf'),
+      path.join(dir, `p${n}`),
+    ]);
+    return fs.readFileSync(path.join(dir, `p${n}.png`));
+  });
+}
+
+async function pdfDesk(b, kind) {
+  const shots = [];
+  if (kind === 'demo') {
+    const p = await b.newPage({ viewport: VIEW, acceptDownloads: true, locale: 'fr-FR' });
+    const data = seedMaquette();
+    seedExport(data);
+    await install(p, data);
+    await p.goto(`${APP}/#/`);
+    await p.waitForTimeout(1500);
+    await openExport(p, 0);
+    const grab = async () => {
+      const [dl] = await Promise.all([
+        p.waitForEvent('download'),
+        p.getByRole('button', { name: 'Exporter en PDF' }).click(),
+      ]);
+      const buf = fs.readFileSync(await dl.path());
+      await p.getByRole('button', { name: 'Exporter dans un autre format' }).click();
+      return buf;
+    };
+    const one = await grab();
+    shots.push(
+      ...pdfPages(one, [1, 4]).map((img, i) => [img, i ? 'Une étape par page' : 'Couverture et sommaire']),
+    );
+    await p.getByRole('radio', { name: 'Deux étapes par page' }).click();
+    shots.push([pdfPages(await grab(), [2])[0], 'Deux étapes par page']);
+    await p.getByRole('radio', { name: 'Une étape par page' }).click();
+    await p.getByRole('switch', { name: /Captures d'écran/ }).click();
+    shots.push([pdfPages(await grab(), [2])[0], 'Sans captures']);
+    await p.close();
+  } else {
+    const p = await b.newPage({ viewport: VIEW, acceptDownloads: true, locale: 'fr-FR' });
+    const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' };
+    await p.route('**/functions/v1/open-center', (r) =>
+      r.request().method() === 'OPTIONS'
+        ? r.fulfill({ status: 204, headers: cors })
+        : r.fulfill({
+            contentType: 'application/json',
+            body: JSON.stringify(centerFixture()),
+            headers: cors,
+          }),
+    );
+    await p.route('**/rest/v1/rpc/issue_certificate', (r) =>
+      r.request().method() === 'OPTIONS'
+        ? r.fulfill({ status: 204, headers: cors })
+        : r.fulfill({
+            contentType: 'application/json',
+            headers: cors,
+            body: JSON.stringify({
+              certificateId: '000042',
+              issuedAt: '2026-11-12T10:00:00Z',
+              learner: 'Alex Martin',
+              path: 'Agenda partagé',
+              workspace: 'Mission Locale Exemple',
+              validatedAt: '2026-11-04T11:00:00Z',
+              modules: [
+                { title: 'Partager un agenda', best: null },
+                { title: 'Planifier un rendez-vous', best: 85 },
+              ],
+            }),
+          }),
+    );
+    const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
+    await p.goto(`${PLAYER}/#/c/ml-exemple/f/00000000-0000-4000-8000-0000000000f2?l=jeton-alex-0001`);
+    await p.waitForSelector('.fp-done button');
+    const [dl] = await Promise.all([p.waitForEvent('download'), p.locator('.fp-done button').click()]);
+    shots.push([
+      pdfPages(fs.readFileSync(await dl.path()), [1], 90)[0],
+      'Attestation de suivi (A4, une page)',
+    ]);
+    await p.close();
+  }
+  const p = await b.newPage({ viewport: VIEW });
+  const img = (buf) => `data:image/png;base64,${buf.toString('base64')}`;
+  await p.setContent(`<!doctype html><html><body style="margin:0;background:#5B6670;font:600 13px system-ui;color:#fff">
+    <div style="display:flex;gap:20px;justify-content:center;align-items:flex-start;padding:72px 16px 16px">
+    ${shots
+      .map(
+        ([buf, label]) =>
+          `<figure style="margin:0;text-align:center"><img src="${img(buf)}" style="height:${kind === 'demo' ? 440 : 760}px;box-shadow:0 8px 24px rgba(0,0,0,.3);display:block"><figcaption style="margin-top:10px">${label}</figcaption></figure>`,
+      )
+      .join('')}
+    </div></body></html>`);
+  await p.waitForTimeout(300);
+  const buf = await p.screenshot();
+  await p.close();
+  return buf;
+}
+
 async function shotApp(b, s, theme) {
+  if (s.render) return s.render(b, theme);
   if (s.player) return shotPlayer(b, s, theme);
   const p = await b.newPage({ viewport: s.view || VIEW });
   await p.addInitScript((th) => {
