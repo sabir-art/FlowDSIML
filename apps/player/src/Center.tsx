@@ -130,7 +130,10 @@ export function CenterApp({ route }: { route: Route }) {
 
   useEffect(() => {
     if (state?.status !== 'ok' || !state.center) return;
-    document.title = state.center.title || state.center.workspace;
+    // A11Y-15 : page d'une formation → « {{formation}} · {{titre du centre}} »
+    const site = state.center.title || state.center.workspace;
+    const path = r.pathId ? state.paths?.find((x) => x.id === r.pathId) : undefined;
+    document.title = path ? `${path.title} · ${site}` : site;
     let meta = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
     if (!meta) {
       meta = document.createElement('meta');
@@ -138,7 +141,7 @@ export function CenterApp({ route }: { route: Route }) {
       document.head.appendChild(meta);
     }
     meta.content = state.center.indexable ? 'index, follow' : 'noindex, nofollow';
-  }, [state]);
+  }, [state, r.pathId]);
 
   if (!state) return <div class="p-center">{c.loading}</div>;
   if (state.status === 'password_required' || state.status === 'password_wrong' || state.status === 'locked')

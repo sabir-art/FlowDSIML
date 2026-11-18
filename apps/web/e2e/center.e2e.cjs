@@ -175,6 +175,10 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       (await p.locator('.fp-done h2').textContent()) === 'Formation terminée, bravo Alex',
       'L14-06 : bandeau de fin',
     );
+    ok(
+      (await p.title()) === 'Agenda partagé · Se former aux outils de la Mission Locale',
+      `A11Y-15 : titre « formation · centre » (${await p.title()})`,
+    );
     const btn = p.locator('.fp-done button');
     ok(
       !(await btn.isDisabled()) && !(await btn.textContent()).includes('Bientôt'),
