@@ -2,9 +2,9 @@
 -- Schéma approuvé par le chef d'équipe (secrets en schéma private, secret de dispatch en Vault).
 --  * webhooks : URL https (adresses privées, internes et IP réservées refusées), événements abonnés,
 --    état actif / en pause / en pause automatique. Lecture et écriture : admin du workspace seulement.
---  * private.webhook_secrets : secret de signature (« whsec_… »), ancien secret valable 24 h après un
---    renouvellement. Aucun droit pour anon ni authenticated ; lu par la fonction de dispatch via RPC
---    réservée au rôle service, ou montré à un admin par webhook_reveal_secret (tracé dans audit_log).
+--  * private.webhook_secrets : secret de signature (« tcsec_… »), ancien secret valable 24 h après un
+--    renouvellement. Aucun droit pour anon ni authenticated ; montré une seule fois (création ou
+--    renouvellement), jamais relisible ensuite ; lu par la fonction de dispatch via RPC (rôle service).
 --  * webhook_deliveries : journal des envois (7 jours), un identifiant d'événement stable (idempotence),
 --    essais à 1 min, 5 min, 30 min, 2 h, 6 h ; au 6e échec, envoi « dead » et webhook en pause auto.
 --  * Événements créés côté serveur uniquement (déclencheurs) : lead.created (seul à porter l'e-mail et
@@ -172,7 +172,7 @@ create trigger webhooks_touch before update on public.webhooks for each row exec
 -- ===== Émission =====
 create or replace function private.new_webhook_secret()
 returns text language sql volatile set search_path = '' as $$
-  select 'whsec_' || rtrim(translate(encode(extensions.gen_random_bytes(32), 'base64'), '+/', '-_'), '=');
+  select 'tcsec_' || rtrim(translate(encode(extensions.gen_random_bytes(32), 'base64'), '+/', '-_'), '=');
 $$;
 
 /**
@@ -282,15 +282,6 @@ begin
   select workspace_id into v_ws from public.webhooks where id = p_id;
   if v_ws is null or not public.has_role(v_ws, 'admin') then raise exception 'Accès refusé' using errcode = '42501'; end if;
   return v_ws;
-end $$;
-
-create or replace function public.webhook_reveal_secret(p_id uuid)
-returns text language plpgsql security definer set search_path = '' as $$
-declare v_ws uuid := private.webhook_admin(p_id);
-begin
-  insert into public.audit_log (workspace_id, actor_id, action, target_ref)
-    values (v_ws, auth.uid(), 'webhook.secret_revealed', p_id::text);
-  return (select secret from private.webhook_secrets where webhook_id = p_id);
 end $$;
 
 create or replace function public.webhook_rotate_secret(p_id uuid)
@@ -451,10 +442,10 @@ begin
     execute 'grant execute on function public.webhook_claim_due(int), public.webhook_record_result(uuid, int, text, int, text) to service_role';
   end if;
 end $$;
-revoke all on function public.webhook_create(uuid, text, text[]), public.webhook_reveal_secret(uuid),
+revoke all on function public.webhook_create(uuid, text, text[]),
   public.webhook_rotate_secret(uuid), public.webhook_send_test(uuid), public.webhook_replay(uuid),
   public.webhook_set_state(uuid, text) from public, anon;
-grant execute on function public.webhook_create(uuid, text, text[]), public.webhook_reveal_secret(uuid),
+grant execute on function public.webhook_create(uuid, text, text[]),
   public.webhook_rotate_secret(uuid), public.webhook_send_test(uuid), public.webhook_replay(uuid),
   public.webhook_set_state(uuid, text), public.webhook_url_ok(text), public.webhook_event_types() to authenticated;
 

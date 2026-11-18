@@ -1,7 +1,7 @@
 -- Tests pgTAP : L23 webhooks sortants (URL, droits, secrets, émission, essais, rejeu, limite du plan).
 begin;
 set search_path = public, extensions;
-select plan(35);
+select plan(36);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000005a1', 'olga-hooks@example.com'),
@@ -61,15 +61,16 @@ create temp table h as
 create temp table h2 as
   select (public.webhook_create((select ws from ctx), 'https://hooks.example.com/fin', array['demo.completed', 'quiz.passed'])) as r;
 grant all on h, h2 to authenticated;
-select ok((select r ->> 'secret' from h) ~ '^whsec_[A-Za-z0-9_-]{43}$', 'secret « whsec_ » renvoyé une fois à la création');
+select ok((select r ->> 'secret' from h) ~ '^tcsec_[A-Za-z0-9_-]{43}$', 'secret « tcsec_ » renvoyé une fois à la création');
+select hasnt_function('public', 'webhook_reveal_secret', 'aucun moyen de relire un secret après coup');
 select throws_ok($$ select public.webhook_create((select ws from ctx), 'https://10.1.2.3/x', array['lead.created']) $$,
   '22023', 'INVALID_URL', 'création : URL privée refusée');
 select pg_temp.logout();
 
 select pg_temp.login('00000000-0000-0000-0000-0000000005a2');
 select is((select count(*)::int from public.webhooks), 0, 'un éditeur ne voit pas les webhooks');
-select throws_ok($$ select public.webhook_reveal_secret(((select r from h) ->> 'id')::uuid) $$, '42501', null,
-  'un éditeur ne peut pas afficher le secret');
+select throws_ok($$ select public.webhook_rotate_secret(((select r from h) ->> 'id')::uuid) $$, '42501', null,
+  'un éditeur ne peut pas renouveler le secret');
 select pg_temp.logout();
 select pg_temp.login('00000000-0000-0000-0000-0000000005a3');
 select is((select count(*)::int from public.webhooks), 0, 'l''admin d''un autre workspace ne voit rien');
@@ -77,12 +78,12 @@ select throws_ok($$ select count(*) from private.webhook_secrets $$, '42501', nu
 select pg_temp.logout();
 
 select pg_temp.login('00000000-0000-0000-0000-0000000005a1');
-select is(public.webhook_reveal_secret(((select r from h) ->> 'id')::uuid), (select r ->> 'secret' from h),
-  'un admin affiche le secret');
+create temp table rot as select public.webhook_rotate_secret(((select r from h) ->> 'id')::uuid) as s;
 select pg_temp.logout();
+select ok((select s ~ '^tcsec_' and s <> (select r ->> 'secret' from h) from rot), 'renouvellement : nouveau secret montré une fois');
 select ok((select count(*) = 1 and bool_and(target_ref = (select r ->> 'id' from h) and meta = '{}'::jsonb)
-             from public.audit_log where action = 'webhook.secret_revealed'),
-  'affichage tracé dans audit_log, sans le secret');
+             from public.audit_log where action = 'webhook.secret_rotated'),
+  'renouvellement tracé dans audit_log, sans le secret');
 
 -- ===== Émission =====
 insert into public.demos (id, workspace_id, title, created_by)
@@ -124,7 +125,12 @@ select is((select count(*)::int from public.webhook_deliveries where event_type 
 -- ===== Envoi : réservation, essais, pause automatique =====
 create temp table claimed as select * from public.webhook_claim_due(10);
 grant all on claimed to authenticated;
-select ok((select count(*) >= 3 and bool_and(cardinality(secrets) = 1) from claimed), 'réservation avec le secret de signature');
+select ok((select count(*) >= 3 from claimed)
+          and (select bool_and(cardinality(secrets) = 2) from claimed c join public.webhook_deliveries d on d.id = c.id
+                where d.webhook_id = ((select r from h) ->> 'id')::uuid)
+          and (select bool_and(cardinality(secrets) = 1) from claimed c join public.webhook_deliveries d on d.id = c.id
+                where d.webhook_id = ((select r from h2) ->> 'id')::uuid),
+  'réservation : deux secrets pendant les 24 h qui suivent un renouvellement, un seul sinon');
 select is(public.webhook_record_result((select id from claimed where event_type = 'lead.created'), 500, 'erreur', 120, null),
   'pending', 'échec : nouvel essai programmé');
 select ok((select attempt = 2 and next_attempt_at between now() + interval '50 seconds' and now() + interval '70 seconds'

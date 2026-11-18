@@ -9,15 +9,15 @@ const d: Delivery = {
   event_type: 'lead.created',
   attempt: 1,
   body: '{"id":"e1","type":"lead.created"}',
-  secrets: ['whsec_test'],
+  secrets: ['tcsec_test'],
 };
 const publicDns = () => Promise.resolve(['93.184.215.14']);
 
 Deno.test('signature HMAC-SHA256 de « t.corps » (vecteur de référence)', async () => {
-  // Vecteur calculé indépendamment : printf '1700000000.{}' | openssl dgst -sha256 -hmac whsec_test
+  // Vecteur calculé indépendamment : printf '1700000000.{}' | openssl dgst -sha256 -hmac tcsec_test
   assertEquals(
-    await sign('whsec_test', 1700000000, '{}'),
-    '35495024f4ef3f94e5a93e22221544c4b75e9a42300cd965ab81cb85cd994e91',
+    await sign('tcsec_test', 1700000000, '{}'),
+    '94c635e1fc75d7c9dc771237cd60b227b0413e255235bf507b05e45249b53cbf',
   );
   const h = await signatureHeader(['a', 'b'], 1700000000, '{}');
   assertMatch(h, /^t=1700000000, v1=[0-9a-f]{64}, v1=[0-9a-f]{64}$/);
@@ -104,7 +104,7 @@ Deno.test('en-têtes signés, corps envoyé tel quel, réponse tronquée à 2 Ko
   assertEquals(headers['tutoclick-event-id'], 'e1');
   assertEquals(
     headers['tutoclick-signature'],
-    `t=1700000000, v1=${await sign('whsec_test', 1700000000, d.body)}`,
+    `t=1700000000, v1=${await sign('tcsec_test', 1700000000, d.body)}`,
   );
   assertEquals(r.status, 200);
   assertEquals(r.body.length, 2048);

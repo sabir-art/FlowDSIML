@@ -1699,7 +1699,6 @@ export type Database = {
       learner_detail: { Args: { p_learner: string }; Returns: Json };
       mark_notifications_read: { Args: { p_ids?: string[] | null }; Returns: number };
       webhook_create: { Args: { p_ws: string; p_url: string; p_events: string[] }; Returns: Json };
-      webhook_reveal_secret: { Args: { p_id: string }; Returns: string };
       webhook_rotate_secret: { Args: { p_id: string }; Returns: string };
       webhook_send_test: { Args: { p_id: string }; Returns: number };
       webhook_replay: { Args: { p_delivery: string }; Returns: string };
