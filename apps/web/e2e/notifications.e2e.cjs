@@ -148,8 +148,9 @@ function withNotifications() {
   await prefs.getByRole('switch', { name: /répond à un fil/ }).uncheck();
   await page.waitForTimeout(400);
   ok(
-    state.tables.profiles[0].notification_prefs?.reply === false,
-    'L22-05 : préférence enregistrée sur le profil',
+    (state.tables.notification_settings || []).find((x) => x.user_id === state.user.id)?.prefs?.reply ===
+      false,
+    'L22-05 : préférence enregistrée (table propre à l’utilisateur)',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-05-preferences.png` });
   await prefs.getByRole('button', { name: 'Retour aux notifications' }).click();

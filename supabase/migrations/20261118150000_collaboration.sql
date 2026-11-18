@@ -5,7 +5,9 @@
 --    le texte du commentaire est relu via step_comments, soumis à sa propre RLS. Créées par trigger
 --    (nouveau commentaire : personnes mentionnées « @[Nom](uuid) », fil de l'étape, créateur de la
 --    démo ; résolution : auteur), jamais par le client. Préférences par type dans
---    profiles.notification_prefs (un type à false n'est plus notifié). Chacun ne lit que les siennes, et seulement s'il est encore membre du workspace.
+--    notification_settings (un type à false n'est plus notifié) : table à part, lisible et modifiable par
+--    son seul propriétaire (profiles est lisible par les co-membres). Chaque notification n'est lue que par
+--    son destinataire, et seulement s'il est encore membre du workspace.
 --  * Présence (Realtime) : canal privé « demo:<uuid> » réservé aux membres (viewer+), extension
 --    presence seulement, sujet validé par expression régulière avant tout cast.
 
@@ -31,21 +33,25 @@ create table if not exists public.notifications (
   created_at timestamptz not null default now(),
   read_at timestamptz
 );
--- Préférences de notification dans l'app : {"mention": bool, "reply": bool, "comment": bool, "resolved": bool}
-alter table public.profiles add column if not exists notification_prefs jsonb not null default '{}'::jsonb;
+-- Préférences de notification dans l'app : {"mention": bool, "reply": bool, "comment": bool, "resolved": bool}.
+-- Table à part : la policy de profiles laisse les co-membres lire le profil, pas les préférences.
 create or replace function public.notification_prefs_valid(p jsonb)
 returns boolean language sql immutable set search_path = '' as $$
   select jsonb_typeof(p) = 'object'
     and not exists (select 1 from jsonb_each(p) e
                     where e.key not in ('mention', 'reply', 'comment', 'resolved') or jsonb_typeof(e.value) <> 'boolean');
 $$;
-do $$
-begin
-  if not exists (select 1 from pg_constraint where conname = 'profiles_notification_prefs_valid') then
-    alter table public.profiles add constraint profiles_notification_prefs_valid
-      check (public.notification_prefs_valid(notification_prefs));
-  end if;
-end $$;
+create table if not exists public.notification_settings (
+  user_id uuid primary key default auth.uid() references auth.users (id) on delete cascade,
+  prefs jsonb not null default '{}'::jsonb check (public.notification_prefs_valid(prefs)),
+  updated_at timestamptz not null default now()
+);
+alter table public.notification_settings enable row level security;
+revoke all on public.notification_settings from anon;
+grant select, insert, update on public.notification_settings to authenticated;
+drop policy if exists notification_settings_own on public.notification_settings;
+create policy notification_settings_own on public.notification_settings for all to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 
 create index if not exists notifications_user_idx on public.notifications (user_id, created_at desc);
 create index if not exists notifications_unread_idx on public.notifications (user_id) where read_at is null;
@@ -61,7 +67,7 @@ create policy notifications_select on public.notifications for select to authent
 /** Le type est-il activé pour cet utilisateur ? (absent = activé) */
 create or replace function public.notification_wanted(p_user uuid, p_kind text)
 returns boolean language sql stable security definer set search_path = '' as $$
-  select coalesce((select (p.notification_prefs ->> p_kind)::boolean from public.profiles p where p.id = p_user), true);
+  select coalesce((select (n.prefs ->> p_kind)::boolean from public.notification_settings n where n.user_id = p_user), true);
 $$;
 revoke all on function public.notification_wanted(uuid, text) from public, anon, authenticated;
 

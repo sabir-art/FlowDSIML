@@ -99,14 +99,19 @@ export function useNotifications() {
     };
   }, [ws, me, reload]);
 
+  // Préférences : table à part, lisible par son seul propriétaire (RLS)
+  const hasRow = useRef(false);
   useEffect(() => {
     if (!me) return;
     void supabase
-      .from('profiles')
-      .select('notification_prefs')
-      .eq('id', me)
+      .from('notification_settings')
+      .select('prefs')
+      .eq('user_id', me)
       .maybeSingle()
-      .then(({ data }) => setPrefsState(readPrefs(data?.notification_prefs)));
+      .then(({ data }) => {
+        hasRow.current = !!data;
+        setPrefsState(readPrefs(data?.prefs));
+      });
   }, [me]);
 
   const markRead = useCallback(async (ids?: string[]) => {
@@ -122,7 +127,10 @@ export function useNotifications() {
       if (!me) return;
       const next = { ...prefs, [kind]: on };
       setPrefsState(next);
-      const { error } = await supabase.from('profiles').update({ notification_prefs: next }).eq('id', me);
+      const { error } = hasRow.current
+        ? await supabase.from('notification_settings').update({ prefs: next }).eq('user_id', me)
+        : await supabase.from('notification_settings').insert({ user_id: me, prefs: next });
+      if (!error) hasRow.current = true;
       if (error) setPrefsState(prefs);
       return !error;
     },

@@ -1,7 +1,7 @@
 -- Tests pgTAP : L22 collaboration (notes du présentateur, notifications, présence Realtime).
 begin;
 set search_path = public, extensions;
-select plan(21);
+select plan(24);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000004a1', 'olga-collab@example.com'),
@@ -71,10 +71,19 @@ select is((select count(*)::int from public.notifications
            where user_id = '00000000-0000-0000-0000-0000000004a2' and kind = 'resolved'), 1,
   'résolution : l''auteur du commentaire est notifié');
 -- Mentions : Eddie mentionne Vera (membre) et Xavier (hors workspace) ; Olga a coupé « comment »
-update public.profiles set notification_prefs = '{"comment": false}' where id = '00000000-0000-0000-0000-0000000004a1';
+select pg_temp.login('00000000-0000-0000-0000-0000000004a1');
+insert into public.notification_settings (prefs) values ('{"comment": false}');
+select pg_temp.logout();
+-- Les préférences ne sont lisibles ni modifiables par un co-membre
+select pg_temp.login('00000000-0000-0000-0000-0000000004a2');
+select is((select count(*)::int from public.notification_settings where user_id = '00000000-0000-0000-0000-0000000004a1'), 0,
+  'préférences : un co-membre ne lit pas celles des autres');
+select throws_ok($$ insert into public.notification_settings (user_id, prefs) values ('00000000-0000-0000-0000-0000000004a1', '{}') $$,
+  '42501', null, 'préférences : personne n''écrit celles d''un autre');
+select pg_temp.logout();
 select pg_temp.login('00000000-0000-0000-0000-0000000004a2');
 insert into public.step_comments (id, step_id, body) values ('00000000-0000-0000-0000-0000000004c3', '00000000-0000-0000-0000-0000000004e1',
-  'Tu peux relire @[Vera Exemple](00000000-0000-0000-0000-0000000004a3) et @[Xavier](00000000-0000-0000-0000-0000000004a4) ?');
+  'Tu peux relire @[Vera Exemple](00000000-0000-0000-0000-0000000004a3) et @[Xavier](00000000-0000-0000-0000-0000000004a4) ? Je m''ajoute : @[Eddie](00000000-0000-0000-0000-0000000004a2)');
 select pg_temp.logout();
 select is((select kind from public.notifications where comment_id = '00000000-0000-0000-0000-0000000004c3'
            and user_id = '00000000-0000-0000-0000-0000000004a3'), 'mention',
@@ -82,10 +91,12 @@ select is((select kind from public.notifications where comment_id = '00000000-00
 select is((select count(*)::int from public.notifications where comment_id = '00000000-0000-0000-0000-0000000004c3'
            and user_id = '00000000-0000-0000-0000-0000000004a4'), 0, 'mention d''une personne hors du workspace ignorée');
 select is((select count(*)::int from public.notifications where comment_id = '00000000-0000-0000-0000-0000000004c3'
+           and user_id = '00000000-0000-0000-0000-0000000004a2'), 0, 'mention de soi-même ignorée');
+select is((select count(*)::int from public.notifications where comment_id = '00000000-0000-0000-0000-0000000004c3'
            and user_id = '00000000-0000-0000-0000-0000000004a1'), 0, 'préférence : un type désactivé n''est plus notifié');
-select throws_ok($$ update public.profiles set notification_prefs = '{"email": true}' where id = '00000000-0000-0000-0000-0000000004a1' $$,
+select throws_ok($$ update public.notification_settings set prefs = '{"email": true}' where user_id = '00000000-0000-0000-0000-0000000004a1' $$,
   '23514', null, 'préférences : seuls les types connus, en booléen');
-update public.profiles set notification_prefs = '{}' where id = '00000000-0000-0000-0000-0000000004a1';
+update public.notification_settings set prefs = '{}' where user_id = '00000000-0000-0000-0000-0000000004a1';
 
 -- Un non-membre n'est jamais notifié, même s'il a créé la démo
 update public.demos set created_by = '00000000-0000-0000-0000-0000000004a4' where id = '00000000-0000-0000-0000-0000000004d1';
