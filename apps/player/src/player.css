@@ -211,7 +211,7 @@ body {
   text-align: center;
   box-shadow: var(--p-shadow);
 }
-.p-text-step h1 {
+.p-text-step .p-step-h {
   margin: 0 0 12px;
   font-size: clamp(22px, 4vw, 32px);
   line-height: 1.2;
@@ -1608,4 +1608,17 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* A11Y-05 : le titre de la démo est le h1 de la page, sans changer son style */
+h1.p-title {
+  margin: 0;
+  line-height: inherit;
+}
+/* A11Y-03 : titres qui reçoivent le focus après un changement d'étape (pas d'anneau, le texte est lu) */
+.p-root .p-tip-title:focus,
+.p-root .p-step-h:focus,
+.p-root #p-main:focus {
+  outline: none;
+  box-shadow: none;
 }

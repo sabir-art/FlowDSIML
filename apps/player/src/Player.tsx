@@ -181,6 +181,27 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
     return () => clearTimeout(id);
   }, [autoplay, playing, index, gateForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // A11Y-03 : après un changement d'étape (bouton, flèches, Échap), le focus ne se perd pas sur la
+  // page : s'il était dans l'ancienne bulle (démontée), il passe au titre de la nouvelle étape.
+  // S'il est sur un bouton toujours présent (barre du bas), il y reste ; la zone live annonce l'étape.
+  const firstStep = useRef(true);
+  useEffect(() => {
+    if (firstStep.current) {
+      firstStep.current = false;
+      return;
+    }
+    const id = requestAnimationFrame(() => {
+      const root = rootRef.current;
+      const a = document.activeElement;
+      if (!root || (a && a !== document.body && a.isConnected && root.contains(a))) return;
+      const target =
+        root.querySelector<HTMLElement>('.p-tip-title, .p-step-h') ??
+        root.querySelector<HTMLElement>('#p-main');
+      target?.focus();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [index, view]);
+
   function go(i: number | null) {
     if (i === m.steps.length && m.quiz) return openQuiz();
     if (i === null || i < 0 || i >= m.steps.length) return;
@@ -302,6 +323,10 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
     t,
   };
 
+  // A11Y-06 : alternative de la capture, qui situe l'écran (le texte de la bulle porte l'action)
+  const shotTitle = richTextToPlain(sub(step.title || step.hotspots[0]?.title || '')).trim();
+  const shotAlt = `${t.shotAlt} ${index + 1} ${t.of} ${m.steps.length}${shotTitle ? ` : ${shotTitle}` : ''}`;
+
   // L24 : annonce de l'étape aux lecteurs d'écran (zone toujours présente, texte mis à jour)
   const h0 = step.hotspots[0];
   const announce =
@@ -334,7 +359,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
             </span>
           ) : null}
           <div class="p-id-text">
-            <b class="p-title">{sub(m.title)}</b>
+            <h1 class="p-title">{sub(m.title)}</h1>
             <small class="p-meta">
               {m.workspaceName
                 ? fmt(t as unknown as Record<string, string>, 'meta', {
@@ -402,7 +427,9 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
         </nav>
       )}
 
-      <div
+      <main
+        id="p-main"
+        tabIndex={-1}
         class="p-stage-wrap"
         onTouchStart={(e) => (touchX.current = e.touches[0]?.clientX ?? null)}
         onTouchEnd={(e) => {
@@ -482,6 +509,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
             onCta={onCta}
             tip={!compact && !gateForm && !ended ? tipProps : undefined}
             carry={index > 0 && m.steps[index - 1]?.zoom?.keep ? m.steps[index - 1]!.zoom : null}
+            alt={shotAlt}
           />
         ) : (
           <>
@@ -518,7 +546,9 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
                   {step.options.variant === 'instruction' ? t.instruction : t.info}
                 </span>
               )}
-              <h1 id={`p-step-title-${step.id}`}>{sub(step.title)}</h1>
+              <h2 id={`p-step-title-${step.id}`} class="p-step-h" tabIndex={-1}>
+                {sub(step.title)}
+              </h2>
               {step.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(step.body) }} />}
               {choices.length > 0 && (
                 <div class="p-choices" role="group" aria-label={t.choose}>
@@ -633,7 +663,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
             }}
           />
         )}
-      </div>
+      </main>
 
       {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
           navigation sont retirées (rien ne permet de le contourner). */}
@@ -747,8 +777,11 @@ function ImageStep({
   tip,
   dimmed = false,
   carry = null,
+  alt = '',
 }: {
   step: Step;
+  /** A11Y-06 : alternative de la capture (vide pour un fond décoratif). */
+  alt?: string;
   /** L12-02 : zoom de l'étape précédente marqué « garder », repris si cette étape n'a pas le sien. */
   carry?: Step['zoom'];
   sub: (s: string) => string;
@@ -785,7 +818,7 @@ function ImageStep({
         class={`p-zoom${zoom?.transition === 'instant' ? ' is-instant' : ''}`}
         style={{ transform, transformOrigin: origin }}
       >
-        <img class="p-img" src={img.url} alt={sub(step.title)} draggable={false} />
+        <img class="p-img" src={img.url} alt={alt} draggable={false} />
         {step.blurs.map((b, i) => (
           <div
             key={i}
@@ -887,7 +920,11 @@ function Tooltip({
       role="dialog"
       aria-label={sub(h.title)}
     >
-      {h.title && <div class="p-tip-title">{sub(h.title)}</div>}
+      {h.title && (
+        <div class="p-tip-title" tabIndex={-1}>
+          {sub(h.title)}
+        </div>
+      )}
       {h.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(h.body) }} />}
       {/* PY-4 : pied « n / N » + bouton ; « Précédent » est dans la barre */}
       <div class="p-actions">

@@ -116,7 +116,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
   await player.keyboard.press('ArrowRight');
   await player.waitForSelector('.p-text-step');
-  ok((await player.textContent('.p-text-step h1')) === 'Merci !', 'écran texte final');
+  ok((await player.textContent('.p-text-step .p-step-h')) === 'Merci !', 'écran texte final');
   if (SHOTS) await player.screenshot({ path: `${SHOTS}/player-end.png` });
   await player.evaluate(() => dispatchEvent(new Event('pagehide')));
   await player.waitForTimeout(2500);

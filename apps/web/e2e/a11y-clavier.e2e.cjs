@@ -306,6 +306,36 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     await ctx.close();
   }
 
+  // 8. Lecteur (audit A11Y-03, 05, 06) : focus après « Suivant » de la bulle, h1 et main, alternative
+  {
+    const { p, ctx } = await player(`/d/${DEMO}`);
+    ok(
+      (await p.locator('h1.p-title').count()) === 1 && (await p.locator('main#p-main').count()) === 1,
+      'A11Y-05 : h1 (titre de la démo) et main',
+    );
+    ok(
+      /^Capture de l’écran, étape 1 sur \d+/.test(
+        (await p.locator('img.p-img').first().getAttribute('alt')) || '',
+      ),
+      'A11Y-06 : alternative « Capture de l’écran, étape n sur N : titre »',
+    );
+    const next = p.locator('.p-tip .p-actions button').last();
+    if (await next.count()) {
+      await next.focus();
+      await p.keyboard.press('Enter');
+      await p.waitForTimeout(500);
+      const r = await p.evaluate(() => ({
+        body: document.activeElement === document.body,
+        cls: document.activeElement?.className || '',
+      }));
+      ok(
+        !r.body && /p-tip-title|p-step-h/.test(r.cls),
+        `A11Y-03 : après « Suivant » de la bulle, focus sur le titre de l’étape (${r.cls || 'body'})`,
+      );
+    } else ok(false, 'A11Y-03 : bulle avec bouton « Suivant » introuvable');
+    await ctx.close();
+  }
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' | ')}` : ''}`);
   await b.close();
 })();
