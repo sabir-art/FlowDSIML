@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Centre de formation (lot L14) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* Lot L14 : centre de formation (F4). Page publique aux couleurs du workspace + réglages dans le cadre validé (CAD). */
+  .l14 [data-pane] { display: none; }
+  .l14 main.ctr-in[data-pane] { flex-direction: column; }
+  .l14[data-view='accueil'] [data-pane~='accueil'], .l14[data-view='anonyme'] [data-pane~='accueil'],
+  .l14[data-view='filtre'] [data-pane~='accueil'], .l14[data-view='sans-resultat'] [data-pane~='accueil'],
+  .l14[data-view='formation'] [data-pane~='formation'], .l14[data-view='terminee'] [data-pane~='formation'],
+  .l14[data-view='vide'] [data-pane~='vide'],
+  .l14[data-view='reglages'] [data-pane~='reglages'], .l14[data-view='reglages-vide'] [data-pane~='reglages'] { display: block; }
+  .l14[data-view='accueil'] main[data-pane~='accueil'],
+  .l14[data-view='anonyme'] main[data-pane~='accueil'],
+  .l14[data-view='filtre'] main[data-pane~='accueil'],
+  .l14[data-view='sans-resultat'] main[data-pane~='accueil'],
+  .l14[data-view='formation'] main[data-pane~='formation'],
+  .l14[data-view='terminee'] main[data-pane~='formation'],
+  .l14[data-view='vide'] main[data-pane~='vide'] { display: flex; }
+  /* Variantes d'état dans un même écran : on masque ce qui n'est pas pour la vue courante */
+  .l14[data-view='accueil'] [data-only]:not([data-only~='accueil']),
+  .l14[data-view='anonyme'] [data-only]:not([data-only~='anonyme']),
+  .l14[data-view='filtre'] [data-only]:not([data-only~='filtre']),
+  .l14[data-view='sans-resultat'] [data-only]:not([data-only~='sans-resultat']),
+  .l14[data-view='formation'] [data-only]:not([data-only~='formation']),
+  .l14[data-view='terminee'] [data-only]:not([data-only~='terminee']),
+  .l14[data-view='vide'] [data-only]:not([data-only~='vide']),
+  .l14[data-view='reglages'] [data-only]:not([data-only~='reglages']),
+  .l14[data-view='reglages-vide'] [data-only]:not([data-only~='reglages-vide']) { display: none !important; }
+
+  /* ===== Page publique : jetons propres, pilotés par la couleur du workspace (--brand) ===== */
+  .ctr { --brand: #A3195B; --brand-on: #FFFFFF; --brand-soft: #FBEFF4; --c-bg: #F6F7F9; --c-surface: #FFFFFF; --c-sunken: #EEF1F5; --c-text: #12161B; --c-muted: #4A5562; --c-border: #DCE2E8; --c-strong: #C9D1DA; --c-ok: #95C11F; --c-ok-text: #2F6A06; --c-focus: #2897D5;
+    min-height: 100vh; background: var(--c-bg); color: var(--c-text); font-family: var(--fd-font-sans); }
+  [data-theme='dark'] .ctr { --brand: #E07BAA; --brand-on: #12161B; --brand-soft: #3A1A2A; --c-bg: #0F1217; --c-surface: #181C23; --c-sunken: #222731; --c-text: #F2F4F7; --c-muted: #A9B3BF; --c-border: #2C323C; --c-strong: #3A414D; --c-ok-text: #B5DB4C; }
+  .ctr a { color: inherit; }
+  .ctr-top { display: flex; align-items: center; gap: 12px; padding: 14px 32px; background: var(--c-surface); box-shadow: 0 1px 0 var(--c-border); }
+  .ctr-logo { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--brand); color: var(--brand-on); font-weight: 800; font-size: 15px; letter-spacing: .02em; flex: none; }
+  .ctr-top .nm b { display: block; font-size: 16px; } .ctr-top .nm small { display: block; font-size: 13px; color: var(--c-muted); }
+  .ctr-top .sp { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--c-muted); }
+  .ctr-top .sp a { color: var(--c-text); font-weight: 600; text-decoration: none; }
+  .ctr-av { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #2897D5; color: #080808; font-weight: 700; font-size: 13px; }
+  .ctr-in { max-width: 1120px; margin: 0 auto; padding: 32px 24px 48px; display: flex; flex-direction: column; gap: 26px; }
+  .ctr-hero { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: stretch; }
+  .ctr-hero h1 { margin: 0 0 8px; font-size: 36px; font-weight: 800; line-height: 1.15; }
+  .ctr-hero p { margin: 0; font-size: 17px; color: var(--c-muted); }
+  .ctr-search { margin-top: 20px; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 8px 0 20px; border-radius: 999px; background: var(--c-surface); border: 1px solid var(--c-strong); font-size: 16px; color: var(--c-muted); }
+  .ctr-search svg { width: 18px; height: 18px; flex: none; }
+  .ctr-search .q { flex: 1; color: var(--c-text); }
+  .ctr-search .clr { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--c-sunken); color: var(--c-text); cursor: pointer; }
+  .ctr-me { padding: 20px; border-radius: 24px; background: #95C11F; color: #080808; display: flex; flex-direction: column; gap: 10px; }
+  .ctr-me .lbl { font-size: 14px; font-weight: 700; }
+  .ctr-me b.big { font-size: 40px; font-weight: 800; line-height: 1; }
+  .ctr-me .track { height: 10px; border-radius: 5px; background: rgba(8, 8, 8, .15); overflow: hidden; }
+  .ctr-me .track span { display: block; height: 100%; background: #080808; border-radius: 5px; }
+  .ctr-me a { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 999px; background: #080808; color: #FFFFFF; font-weight: 700; text-decoration: none; font-size: 14px; }
+  .ctr-me a svg { width: 16px; height: 16px; }
+  .ctr-anon { padding: 20px; border-radius: 24px; background: var(--c-surface); box-shadow: inset 0 0 0 1px var(--c-border); display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--c-muted); }
+  .ctr-anon .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); }
+  .ctr-anon .ic svg { width: 20px; height: 20px; }
+  .ctr-anon b { color: var(--c-text); font-size: 16px; }
+  /* Filtres par étiquettes (L12-07) */
+  .ctr-tags { margin-top: -4px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .ctr-tags button { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--c-strong); background: var(--c-surface); font: 600 14px var(--fd-font-sans); color: var(--c-text); cursor: pointer; }
+  .ctr-tags button .n { font-weight: 500; color: var(--c-muted); font-variant-numeric: tabular-nums; }
+  .ctr-tags button[aria-pressed='true'] { background: var(--c-text); border-color: var(--c-text); color: var(--c-bg); }
+  .ctr-tags button[aria-pressed='true'] .n { color: inherit; opacity: .75; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot--b { background: #2897D5; } .dot--v { background: #6E9A0F; } .dot--o { background: #E8840C; } .dot--f { background: #D6336C; } .dot--p { background: #A3195B; }
+  .tg { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .tg--b { background: #E6F2FA; color: #0E5A85; } .tg--v { background: #EEF6DC; color: #3D5A06; } .tg--o { background: #FDF0E0; color: #8A4B00; } .tg--p { background: #FBEFF4; color: #8A1450; }
+  [data-theme='dark'] .tg--b { background: #10293A; color: #9DD2F2; } [data-theme='dark'] .tg--v { background: #1E2A0B; color: #C2E07A; } [data-theme='dark'] .tg--o { background: #33220C; color: #F6C27F; } [data-theme='dark'] .tg--p { background: #3A1A2A; color: #F3A9CB; }
+  .ctr mark { background: #FDE3C2; color: inherit; border-radius: 3px; padding: 0 2px; }
+  [data-theme='dark'] .ctr mark { background: #5A3A10; }
+  .ctr-h2 { display: flex; align-items: baseline; gap: 10px; margin: 0; font-size: 22px; font-weight: 800; }
+  .ctr-h2 small { font-size: 14px; font-weight: 500; color: var(--c-muted); }
+  .ctr-res { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 15px; color: var(--c-muted); }
+  .ctr-res b { color: var(--c-text); }
+  .ctr-link { border: 0; background: none; padding: 0; font: 600 14px var(--fd-font-sans); color: var(--brand); text-decoration: underline; cursor: pointer; }
+  /* Cartes de formation : un seul lien par carte */
+  .ctr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .fc { display: flex; flex-direction: column; border-radius: 22px; background: var(--c-surface); box-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08); overflow: hidden; color: inherit; text-decoration: none; }
+  [data-theme='dark'] .fc { box-shadow: inset 0 0 0 1px var(--c-border); }
+  .fc:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--c-surface), 0 0 0 4px var(--c-focus); }
+  .fc .cov, .fc .bd, .fc h3, .fc .tgs, .fc .meta, .fc .fc-pg, .fc .ft { display: block; }
+  .fc .cov { position: relative; height: 112px; background: var(--c-sunken); }
+  .fc .cov .fc-shot { position: absolute; inset: 14px 20px 0 20px; border-radius: 10px 10px 0 0; background: var(--c-surface); box-shadow: 0 0 0 1px var(--c-border); overflow: hidden; }
+  .fc .cov .fc-shot::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 22%; background: #1F2933; }
+  .fc .cov .fc-shot::after { content: ''; position: absolute; left: 28%; right: 8%; top: 18px; height: 10px; border-radius: 5px; background: var(--c-sunken); box-shadow: 0 22px 0 var(--c-sunken), 0 44px 0 var(--c-sunken); }
+  .fc .cov .st { position: absolute; top: 12px; right: 12px; }
+  .fc .bd { padding: 16px 20px 20px; display: flex !important; flex-direction: column; gap: 10px; flex: 1; }
+  .fc h3 { margin: 0; font-size: 19px; font-weight: 800; line-height: 1.25; }
+  .fc .meta { font-size: 13px; color: var(--c-muted); }
+  .fc .tgs { display: flex !important; flex-wrap: wrap; gap: 6px; }
+  .fc .fc-pg { display: grid !important; grid-template-columns: 1fr auto; gap: 10px; align-items: center; font-size: 13px; font-weight: 700; }
+  .fc .fc-pg .bar { height: 8px; border-radius: 4px; background: var(--c-sunken); overflow: hidden; }
+  .fc .fc-pg .bar span { display: block; height: 100%; background: var(--brand); border-radius: 4px; }
+  .fc .fc-pg.done .bar span { background: var(--c-ok); }
+  .fc ol { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 4px; }
+  .fc ol li { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 10px; border-radius: 10px; background: var(--c-sunken); font-size: 14px; }
+  .fc ol li.cur { background: var(--brand-soft); font-weight: 700; }
+  .fc ol li .ic { display: inline-flex; color: var(--c-muted); } .fc ol li .ic svg { width: 16px; height: 16px; }
+  .fc ol li .ic.ok { color: var(--c-ok-text); } .fc ol li .ic.cur { color: var(--brand); }
+  .fc ol li .s { font-size: 12px; color: var(--c-muted); font-weight: 600; white-space: nowrap; }
+  .fc ol li .s.ok { color: var(--c-ok-text); }
+  .fc ol li.lock { color: var(--c-muted); }
+  .fc .ft { display: flex !important; justify-content: space-between; align-items: center; gap: 12px; margin-top: auto; padding-top: 6px; }
+  .fc .ft .note { font-size: 13px; color: var(--c-muted); display: inline-flex; align-items: center; gap: 6px; } .fc .ft .note svg { width: 15px; height: 15px; }
+  .ctr .cta { text-decoration: none; }
+  .cta { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; background: var(--brand); color: var(--brand-on); font-weight: 700; font-size: 14px; white-space: nowrap; }
+  .cta svg { width: 16px; height: 16px; }
+  .cta--sec { background: transparent; color: var(--c-text); box-shadow: inset 0 0 0 1px var(--c-strong); }
+  .hb { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--c-surface); color: var(--c-text); box-shadow: 0 0 0 1px var(--c-border); white-space: nowrap; }
+  .hb svg { width: 13px; height: 13px; }
+  .hb.ok { background: #95C11F; color: #080808; box-shadow: none; }
+  .hb.cur { background: var(--brand); color: var(--brand-on); box-shadow: none; }
+  .hb.key { background: #FDF0E0; color: #6B3A00; box-shadow: inset 0 0 0 1px #F2C58A; }
+  [data-theme='dark'] .hb.key { background: #33220C; color: #F6C27F; box-shadow: inset 0 0 0 1px #6B4A1A; }
+  /* États vides et sans résultat */
+  .ctr-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 56px 24px; border-radius: 24px; background: var(--c-surface); box-shadow: inset 0 0 0 1px var(--c-border); }
+  .ctr-empty .ic { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); }
+  .ctr-empty .ic svg { width: 26px; height: 26px; }
+  .ctr-empty h2 { margin: 0; font-size: 22px; font-weight: 800; }
+  .ctr-empty p { margin: 0; max-width: 520px; color: var(--c-muted); font-size: 16px; }
+  .ctr-empty .acts { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+  .ctr-empty button.cta { border: 0; cursor: pointer; font-family: inherit; }
+  /* Page d'une formation */
+  .crumb { font-size: 14px; color: var(--c-muted); } .crumb a { color: var(--brand); }
+  .fp-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+  .fp-head h1 { margin: 0 0 8px; font-size: 32px; font-weight: 800; }
+  .fp-head p { margin: 0; color: var(--c-muted); font-size: 17px; }
+  .fp-done { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 20px 22px; border-radius: 22px; background: #95C11F; color: #080808; }
+  .fp-done .ic { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: rgba(8, 8, 8, .12); }
+  .fp-done .ic svg { width: 28px; height: 28px; }
+  .fp-done h2 { margin: 0 0 4px; font-size: 20px; font-weight: 800; } .fp-done p { margin: 0; font-size: 15px; }
+  .fp-done .cta { background: #080808; color: #FFFFFF; height: 44px; }
+  .fp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .fp-list li { display: grid; grid-template-columns: 44px 120px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 12px 16px 12px 12px; border-radius: 20px; background: var(--c-surface); box-shadow: 0 1px 2px rgba(16, 24, 40, .06); }
+  [data-theme='dark'] .fp-list li { box-shadow: inset 0 0 0 1px var(--c-border); }
+  .fp-list .n { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--c-sunken); }
+  .fp-list li.ok .n { background: #95C11F; color: #080808; } .fp-list li.cur .n { background: var(--brand); color: var(--brand-on); }
+  .fp-list .mini { height: 68px; border-radius: 12px; background: var(--c-sunken); position: relative; overflow: hidden; }
+  .fp-list .mini::before { content: ''; position: absolute; inset: 8px auto 0 10px; width: 24px; border-radius: 6px 6px 0 0; background: #1F2933; }
+  .fp-list h3 { margin: 0 0 4px; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .fp-list p { margin: 0; font-size: 14px; color: var(--c-muted); }
+  .fp-list li.lock { opacity: .72; }
+  .fp-foot { font-size: 14px; color: var(--c-muted); margin: 0; }
+  .ctr-foot { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: center; padding: 20px 24px 32px; font-size: 13px; color: var(--c-muted); }
+  .ctr-foot a { color: var(--c-muted); }
+  @media (max-width: 900px) { .ctr-hero, .ctr-grid { grid-template-columns: minmax(0, 1fr); } .ctr-top { padding: 12px 16px; } .ctr-top .who { display: none; } .fp-list li { grid-template-columns: 44px minmax(0, 1fr); } .fp-list .mini { display: none; } .fp-list li > :last-child { grid-column: 2; justify-self: start; } .fp-done { grid-template-columns: 1fr; } }
+
+  /* ===== Réglages (admin) ===== */
+  .cfg14 { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--fd-space-5); align-items: start; }
+  .cfg14 .col { display: flex; flex-direction: column; gap: var(--fd-space-5); }
+  .cfg14 .fd-card { display: flex; flex-direction: column; gap: 14px; }
+  .cfg14 .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+  .url-f { display: flex; align-items: stretch; border: 1px solid var(--fd-color-border-strong); border-radius: 12px; overflow: hidden; background: var(--fd-color-surface); }
+  .url-f span { display: flex; align-items: center; padding: 0 12px; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); font-family: var(--fd-font-mono, ui-monospace, monospace); font-size: 13px; white-space: nowrap; }
+  .url-f input { flex: 1; min-width: 0; border: 0; padding: 10px 12px; background: none; color: var(--fd-color-text); font-family: var(--fd-font-mono, ui-monospace, monospace); font-size: 13px; }
+  .url-row { display: flex; gap: 8px; align-items: center; }
+  .url-row .url-f { flex: 1; }
+  .ok-line { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fd-color-success-text, #2F6A06); }
+  .ok-line svg { width: 15px; height: 15px; }
+  .logo-f { display: flex; align-items: center; gap: 14px; padding: 12px; border: 1px dashed var(--fd-color-border-strong); border-radius: 14px; }
+  .logo-f .ctr-logo { width: 52px; height: 52px; border-radius: 14px; background: #A3195B; color: #FFFFFF; font-size: 18px; }
+  .logo-f .tx { flex: 1; font-size: 13px; color: var(--fd-color-text-muted); } .logo-f .tx b { display: block; color: var(--fd-color-text); font-size: 14px; }
+  .col-f { display: flex; align-items: center; gap: 10px; border: 1px solid var(--fd-color-border-strong); border-radius: 12px; padding: 6px 10px 6px 6px; background: var(--fd-color-surface); }
+  .col-f .sw { width: 28px; height: 28px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .1); flex: none; }
+  .col-f input { border: 0; background: none; color: var(--fd-color-text); font-family: var(--fd-font-mono, ui-monospace, monospace); font-size: 13px; width: 100%; }
+  .cfg14 .presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .presets label { display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 14px; border: 1px solid var(--fd-color-border); cursor: pointer; font-size: 13px; font-weight: 600; }
+  .presets label:has(input:checked) { border: 2px solid var(--fd-color-primary); padding: 7px; }
+  .presets input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .presets label:has(input:focus-visible) { outline: 2px solid var(--fd-color-focus, #2897D5); outline-offset: 2px; }
+  .pv { height: 64px; border-radius: 10px; position: relative; overflow: hidden; }
+  .pv i { position: absolute; left: 10px; top: 10px; width: 46%; height: 8px; border-radius: 4px; }
+  .pv b { position: absolute; left: 10px; bottom: 10px; width: 40%; height: 18px; border-radius: 9px; }
+  .pv u { position: absolute; right: 10px; top: 10px; width: 28%; height: 44px; border-radius: 8px; }
+  .pv--dsi { background: #F6F7F9; box-shadow: inset 0 0 0 1px #DCE2E8; } .pv--dsi i { background: #12161B; } .pv--dsi b { background: #A3195B; } .pv--dsi u { background: #95C11F; }
+  .pv--sobre { background: #FFFFFF; box-shadow: inset 0 0 0 1px #DCE2E8; } .pv--sobre i { background: #12161B; } .pv--sobre b { background: #12161B; } .pv--sobre u { background: #EEF1F5; }
+  .pv--sombre { background: #0F1217; } .pv--sombre i { background: #F2F4F7; } .pv--sombre b { background: #E07BAA; } .pv--sombre u { background: #222731; }
+  .pv--contraste { background: #FFFFFF; box-shadow: inset 0 0 0 2px #080808; } .pv--contraste i { background: #080808; } .pv--contraste b { background: #080808; } .pv--contraste u { background: #FFFFFF; box-shadow: inset 0 0 0 2px #080808; }
+  .vis { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .vis li { display: grid; grid-template-columns: 24px 20px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--fd-color-surface-sunken); font-size: 14px; }
+  .vis li small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .vis li .grip { color: var(--fd-color-text-muted); display: inline-flex; } .vis li .grip svg { width: 16px; height: 16px; }
+  .vis input { accent-color: var(--fd-color-primary); width: 16px; height: 16px; margin: 0; }
+  .vis li.off { opacity: .75; }
+  .acc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .acc label { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--fd-color-border); border-radius: 12px; font-size: 14px; }
+  .acc label:has(input:checked) { border-color: var(--fd-color-primary); background: var(--fd-color-primary-soft); }
+  .acc input { accent-color: var(--fd-color-primary); width: 16px; height: 16px; margin: 2px 0 0; }
+  .acc small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .acc label[aria-disabled='true'] { opacity: .7; }
+  .soon { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); font-size: 11px; font-weight: 700; margin-left: 6px; vertical-align: 1px; }
+  .cfg-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 28px 16px; border-radius: 14px; border: 1px dashed var(--fd-color-border-strong); }
+  .cfg-empty .fd-icon-chip { width: 44px; height: 44px; }
+  .cfg-empty p { margin: 0; color: var(--fd-color-text-muted); font-size: 14px; max-width: 360px; }
+  .warn14 { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--fd-color-warning-soft); font-size: 14px; color: var(--fd-color-text); }
+  .warn14 svg { width: 18px; height: 18px; color: var(--fd-orange-600, #B5650A); flex: none; margin-top: 1px; }
+  /* Aperçu réduit, collant */
+  .pvw { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 10px; }
+  .pvw .cap { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--fd-color-text-muted); }
+  .pvw .frame { border-radius: 18px; overflow: hidden; box-shadow: var(--fd-shadow-md); background: #F6F7F9; color: #12161B; }
+  .pvw .m-top { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #FFFFFF; box-shadow: 0 1px 0 #E3E8EE; font-size: 11px; }
+  .pvw .m-top .ctr-logo { background: #A3195B; color: #FFFFFF; width: 22px; height: 22px; border-radius: 7px; font-size: 9px; }
+  .pvw .m-in { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .pvw .m-h { font-size: 15px; font-weight: 800; line-height: 1.2; }
+  .pvw .m-p { font-size: 10px; color: #4A5562; }
+  .pvw .m-s { height: 22px; border-radius: 11px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #C9D1DA; }
+  .pvw .m-chips { display: flex; gap: 4px; } .pvw .m-chips span { height: 14px; width: 42px; border-radius: 7px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #C9D1DA; } .pvw .m-chips span:first-child { background: #12161B; box-shadow: none; width: 28px; }
+  .pvw .m-g { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pvw .m-c { border-radius: 10px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(16, 24, 40, .08); overflow: hidden; }
+  .pvw .m-c .cv { height: 34px; background: #EEF1F5; }
+  .pvw .m-c .tt { padding: 6px 8px 2px; font-size: 9px; font-weight: 800; }
+  .pvw .m-c .ln { margin: 4px 8px; height: 6px; border-radius: 3px; background: #EEF1F5; }
+  .pvw .m-c .bt { margin: 6px 8px 8px; width: 46px; height: 12px; border-radius: 6px; background: #A3195B; }
+  .pvw .m-empty { padding: 26px 10px; text-align: center; font-size: 10px; color: #4A5562; border-radius: 10px; background: #FFFFFF; }
+  @media (max-width: 1180px) { .cfg14 { grid-template-columns: minmax(0, 1fr); } .pvw { position: static; } .presets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .mock-state { z-index: 90; flex-wrap: wrap; max-width: calc(100% - 200px); }
+</style>
+</head>
+<body>
+<div class="l14" data-view="accueil">
+
+<!-- ===================== PAGE PUBLIQUE ===================== -->
+<div data-pane="accueil formation vide">
+<div class="ctr">
+  <header class="ctr-top">
+    <span class="ctr-logo" aria-hidden="true">ML</span>
+    <span class="nm"><b>Mission Locale Exemple</b><small>Centre de formation</small></span>
+    <span class="sp">
+      <a href="#" data-only="accueil filtre sans-resultat formation terminee">Glossaire</a>
+      <span class="who" data-only="accueil filtre sans-resultat formation terminee">Alex Martin</span><span class="ctr-av" aria-hidden="true" data-only="accueil filtre sans-resultat formation terminee">AM</span>
+    </span>
+  </header>
+
+  <!-- L14-01 à L14-04 : accueil -->
+  <main class="ctr-in" data-pane="accueil">
+    <div class="ctr-hero">
+      <div>
+        <h1>Se former aux outils de la Mission Locale</h1>
+        <p>Des tutoriels interactifs pour prendre en main vos outils, à votre rythme. Chaque module dure moins de 10 minutes.</p>
+        <div class="ctr-search" role="search">
+          <i data-icon="search"></i>
+          <span class="q" data-only="accueil anonyme">Rechercher une formation, un module, un outil…</span>
+          <span class="q" data-only="filtre">agenda</span>
+          <span class="q" data-only="sans-resultat">badge d'accès</span>
+          <button class="clr" type="button" aria-label="Effacer la recherche" data-only="filtre sans-resultat"><i data-icon="x"></i></button>
+        </div>
+      </div>
+      <aside class="ctr-me" aria-label="Ma progression" data-only="accueil filtre sans-resultat">
+        <span class="lbl">Ma formation en cours : Nouvel outil de gestion</span>
+        <b class="big">1 / 4</b><span>module validé</span>
+        <span class="track" role="img" aria-label="25 % de la formation validés"><span style="width:25%"></span></span>
+        <a href="#">Reprendre « Fiches usagers »<i data-icon="arrowRight"></i></a>
+      </aside>
+      <aside class="ctr-anon" aria-label="Suivre sa progression" data-only="anonyme">
+        <span class="ic"><i data-icon="user"></i></span>
+        <b>Retrouvez votre progression</b>
+        <span>Ouvrez le centre depuis le lien personnel reçu de votre structure : vos modules validés et votre reprise s'afficheront ici.</span>
+        <span>Sans ce lien, vous pouvez suivre toutes les formations, mais rien n'est enregistré.</span>
+      </aside>
+    </div>
+
+    <div class="ctr-tags" role="group" aria-label="Filtrer par étiquette">
+      <button type="button" aria-pressed="true" data-only="accueil anonyme sans-resultat">Toutes <span class="n">4</span></button>
+      <button type="button" aria-pressed="false" data-only="filtre">Toutes <span class="n">4</span></button>
+      <button type="button" aria-pressed="false"><span class="dot dot--b"></span>Logiciel métier <span class="n">2</span></button>
+      <button type="button" aria-pressed="false"><span class="dot dot--v"></span>Nouveaux agents <span class="n">2</span></button>
+      <button type="button" aria-pressed="false" data-only="accueil anonyme sans-resultat"><span class="dot dot--o"></span>Bureautique <span class="n">1</span></button>
+      <button type="button" aria-pressed="true" data-only="filtre"><span class="dot dot--o"></span>Bureautique <span class="n">1</span></button>
+      <button type="button" aria-pressed="false"><span class="dot dot--p"></span>Pilotage <span class="n">1</span></button>
+    </div>
+
+    <h2 class="ctr-h2" data-only="accueil anonyme">Formations <small>4 formations · 13 modules</small></h2>
+    <div class="ctr-res" role="status" data-only="filtre"><span><b>1 formation</b> pour « agenda » avec l'étiquette Bureautique</span><button class="ctr-link" type="button">Effacer les filtres</button></div>
+
+    <!-- L14-01 : visiteur identifié -->
+    <div class="ctr-grid" data-only="accueil">
+      <a class="fc" href="#" data-view-set="formation">
+        <span class="cov"><span class="fc-shot"></span><span class="hb cur st"><i data-icon="play"></i>En cours</span></span>
+        <span class="bd">
+          <h3>Nouvel outil de gestion</h3>
+          <span class="tgs"><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span><span class="tg tg--v"><span class="dot dot--v"></span>Nouveaux agents</span></span>
+          <span class="meta">4 modules à suivre dans l'ordre · 32 min · quiz</span>
+          <span class="fc-pg"><span class="bar" role="img" aria-label="1 module validé sur 4"><span style="width:25%"></span></span><span>1 sur 4 validé</span></span>
+          <ol aria-label="Modules">
+            <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>1 · Prise en main</span><span class="s ok">Validé</span></li>
+            <li class="cur"><span class="ic cur"><i data-icon="play"></i></span><span>2 · Fiches usagers</span><span class="s">Étape 4 sur 7</span></li>
+            <li class="lock"><span class="ic"><i data-icon="lock"></i></span><span>3 · Agenda</span><span class="s">Après le module 2</span></li>
+          </ol>
+          <span class="ft"><span class="note">+ 1 module facultatif</span><span class="cta">Reprendre<i data-icon="arrowRight"></i></span></span>
+        </span>
+      </a>
+      <a class="fc" href="#" data-view-set="terminee">
+        <span class="cov"><span class="fc-shot"></span><span class="hb ok st"><i data-icon="award"></i>Terminée</span></span>
+        <span class="bd">
+          <h3>Agenda partagé</h3>
+          <span class="tgs"><span class="tg tg--o"><span class="dot dot--o"></span>Bureautique</span></span>
+          <span class="meta">2 modules · 14 min</span>
+          <span class="fc-pg done"><span class="bar" role="img" aria-label="2 modules validés sur 2"><span style="width:100%"></span></span><span>2 sur 2 validés</span></span>
+          <ol aria-label="Modules">
+            <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>1 · Partager un agenda</span><span class="s ok">Validé</span></li>
+            <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>2 · Planifier un rendez-vous</span><span class="s ok">Validé</span></li>
+          </ol>
+          <span class="ft"><span class="note"><i data-icon="download"></i>Attestation disponible</span><span class="cta cta--sec">Revoir</span></span>
+        </span>
+      </a>
+      <a class="fc" href="#">
+        <span class="cov"><span class="fc-shot"></span></span>
+        <span class="bd">
+          <h3>Statistiques d'activité</h3>
+          <span class="tgs"><span class="tg tg--p"><span class="dot dot--p"></span>Pilotage</span><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span></span>
+          <span class="meta">3 modules en ordre libre · 25 min · 3 quiz</span>
+          <ol aria-label="Modules">
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Lire le tableau de bord</span><span class="s">Pas commencé</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Exporter un indicateur</span><span class="s">Pas commencé</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Rapport aux financeurs</span><span class="hb key"><i data-icon="key"></i>Mot de passe</span></li>
+          </ol>
+          <span class="ft"><span class="note">Non commencée</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
+        </span>
+      </a>
+      <a class="fc" href="#">
+        <span class="cov"><span class="fc-shot"></span><span class="hb st">Nouveau</span></span>
+        <span class="bd">
+          <h3>Accueil d'un nouvel agent</h3>
+          <span class="tgs"><span class="tg tg--v"><span class="dot dot--v"></span>Nouveaux agents</span></span>
+          <span class="meta">3 modules en ordre libre · 16 min</span>
+          <ol aria-label="Modules">
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Mes premiers jours</span><span class="s">Pas commencé</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Messagerie et agenda</span><span class="s">Pas commencé</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Où trouver les documents</span><span class="s">Pas commencé</span></li>
+          </ol>
+          <span class="ft"><span class="note">Non commencée</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
+        </span>
+      </a>
+    </div>
+
+    <!-- L14-02 : visiteur non identifié (aucune progression) -->
+    <div class="ctr-grid" data-only="anonyme">
+      <a class="fc" href="#">
+        <span class="cov"><span class="fc-shot"></span></span>
+        <span class="bd">
+          <h3>Nouvel outil de gestion</h3>
+          <span class="tgs"><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span><span class="tg tg--v"><span class="dot dot--v"></span>Nouveaux agents</span></span>
+          <span class="meta">4 modules à suivre dans l'ordre · 32 min · quiz</span>
+          <ol aria-label="Modules">
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Prise en main</span><span class="s">5 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Fiches usagers</span><span class="s">8 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Agenda</span><span class="s">9 min</span></li>
+          </ol>
+          <span class="ft"><span class="note">+ 1 module facultatif</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
+        </span>
+      </a>
+      <a class="fc" href="#">
+        <span class="cov"><span class="fc-shot"></span></span>
+        <span class="bd">
+          <h3>Agenda partagé</h3>
+          <span class="tgs"><span class="tg tg--o"><span class="dot dot--o"></span>Bureautique</span></span>
+          <span class="meta">2 modules · 14 min</span>
+          <ol aria-label="Modules">
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Partager un agenda</span><span class="s">6 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Planifier un rendez-vous</span><span class="s">8 min</span></li>
+          </ol>
+          <span class="ft"><span class="note">Sans quiz</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
+        </span>
+      </a>
+      <a class="fc" href="#">
+        <span class="cov"><span class="fc-shot"></span></span>
+        <span class="bd">
+          <h3>Statistiques d'activité</h3>
+          <span class="tgs"><span class="tg tg--p"><span class="dot dot--p"></span>Pilotage</span><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span></span>
+          <span class="meta">3 modules en ordre libre · 25 min · 3 quiz</span>
+          <ol aria-label="Modules">
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Lire le tableau de bord</span><span class="s">7 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Exporter un indicateur</span><span class="s">8 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Rapport aux financeurs</span><span class="hb key"><i data-icon="key"></i>Mot de passe</span></li>
+          </ol>
+          <span class="ft"><span class="note">3 quiz</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
+        </span>
+      </a>
+      <a class="fc" href="#">
+        <span class="cov"><span class="fc-shot"></span><span class="hb st">Nouveau</span></span>
+        <span class="bd">
+          <h3>Accueil d'un nouvel agent</h3>
+          <span class="tgs"><span class="tg tg--v"><span class="dot dot--v"></span>Nouveaux agents</span></span>
+          <span class="meta">3 modules en ordre libre · 16 min</span>
+          <ol aria-label="Modules">
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>1 · Mes premiers jours</span><span class="s">4 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>2 · Messagerie et agenda</span><span class="s">7 min</span></li>
+            <li><span class="ic"><i data-icon="circleDot"></i></span><span>3 · Où trouver les documents</span><span class="s">5 min</span></li>
+          </ol>
+          <span class="ft"><span class="note">Sans quiz</span><span class="cta">Commencer<i data-icon="arrowRight"></i></span></span>
+        </span>
+      </a>
+    </div>
+
+    <!-- L14-03 : recherche et étiquette actives -->
+    <div class="ctr-grid" data-only="filtre">
+      <a class="fc" href="#" data-view-set="terminee">
+        <span class="cov"><span class="fc-shot"></span><span class="hb ok st"><i data-icon="award"></i>Terminée</span></span>
+        <span class="bd">
+          <h3>Agenda partagé</h3>
+          <span class="tgs"><span class="tg tg--o"><span class="dot dot--o"></span>Bureautique</span></span>
+          <span class="meta">2 modules · 14 min</span>
+          <span class="fc-pg done"><span class="bar" role="img" aria-label="2 modules validés sur 2"><span style="width:100%"></span></span><span>2 sur 2 validés</span></span>
+          <ol aria-label="Modules">
+            <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>1 · Partager un <mark>agenda</mark></span><span class="s ok">Validé</span></li>
+            <li><span class="ic ok"><i data-icon="checkCircle"></i></span><span>2 · Planifier un rendez-vous</span><span class="s ok">Validé</span></li>
+          </ol>
+          <span class="ft"><span class="note"><i data-icon="download"></i>Attestation disponible</span><span class="cta cta--sec">Revoir</span></span>
+        </span>
+      </a>
+    </div>
+
+    <!-- L14-04 : aucun résultat -->
+    <div class="ctr-empty" role="status" data-only="sans-resultat">
+      <span class="ic"><i data-icon="search"></i></span>
+      <h2>Aucune formation pour « badge d'accès »</h2>
+      <p>Vérifiez l'orthographe ou essayez un mot plus court, comme le nom de l'outil. La recherche porte sur les titres des formations et des modules, leurs descriptions et les étiquettes.</p>
+      <div class="acts"><button class="cta" type="button">Effacer la recherche</button></div>
+    </div>
+  </main>
+
+  <!-- L14-05 et L14-06 : page d'une formation -->
+  <main class="ctr-in" data-pane="formation">
+    <nav class="crumb" aria-label="Fil d'Ariane"><a href="#" data-view-set="accueil">Centre de formation</a> › <span data-only="formation">Statistiques d'activité</span><span data-only="terminee">Agenda partagé</span></nav>
+
+    <div class="fp-head" data-only="formation">
+      <div>
+        <h1>Statistiques d'activité</h1>
+        <p>3 modules en ordre libre · 25 min au total · un quiz valide chaque module.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px" data-only="formation"><span class="tg tg--p"><span class="dot dot--p"></span>Pilotage</span><span class="tg tg--b"><span class="dot dot--b"></span>Logiciel métier</span></div>
+      </div>
+      <span class="hb" style="font-size:14px;padding:6px 14px"><i data-icon="award"></i>1 sur 3 validé</span>
+    </div>
+    <ol class="fp-list" aria-label="Modules de la formation" data-only="formation">
+      <li class="ok"><span class="n" aria-hidden="true">1</span><span class="mini"></span><div><h3>Lire le tableau de bord</h3><p>Validé le 12 nov. 2026 · score 85 %</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Lire le tableau de bord</span></a></li>
+      <li class="cur"><span class="n" aria-hidden="true">2</span><span class="mini"></span><div><h3>Exporter un indicateur</h3><p>En cours · étape 3 sur 8</p></div><a class="cta" href="#">Reprendre<i data-icon="arrowRight"></i></a></li>
+      <li><span class="n" aria-hidden="true">3</span><span class="mini"></span><div><h3>Rapport aux financeurs <span class="hb key"><i data-icon="key"></i>Protégé par mot de passe</span></h3><p>À faire · 10 min · le mot de passe vous est donné par votre responsable</p></div><a class="cta cta--sec" href="#">Commencer<span class="cm-sr"> Rapport aux financeurs</span></a></li>
+    </ol>
+
+    <!-- L14-06 : formation terminée -->
+    <div class="fp-head" data-only="terminee">
+      <div>
+        <h1>Agenda partagé</h1>
+        <p>2 modules · 14 min au total.</p>
+      </div>
+      <span class="hb ok" style="font-size:14px;padding:6px 14px"><i data-icon="award"></i>2 sur 2 validés</span>
+    </div>
+    <section class="fp-done" aria-labelledby="done-t" data-only="terminee">
+      <span class="ic" aria-hidden="true"><i data-icon="award"></i></span>
+      <div><h2 id="done-t">Formation terminée, bravo Alex</h2><p>Terminée le 24 oct. 2026. Vous pouvez revoir chaque module quand vous le souhaitez.</p></div>
+      <a class="cta" href="#"><i data-icon="download"></i>Télécharger mon attestation (PDF)</a>
+    </section>
+    <ol class="fp-list" aria-label="Modules de la formation" data-only="terminee">
+      <li class="ok"><span class="n" aria-hidden="true">1</span><span class="mini"></span><div><h3>Partager un agenda</h3><p>Validé le 22 oct. 2026</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Partager un agenda</span></a></li>
+      <li class="ok"><span class="n" aria-hidden="true">2</span><span class="mini"></span><div><h3>Planifier un rendez-vous</h3><p>Validé le 24 oct. 2026</p></div><a class="cta cta--sec" href="#">Revoir<span class="cm-sr"> Planifier un rendez-vous</span></a></li>
+    </ol>
+    <p class="fp-foot" data-only="terminee">L'attestation reprend votre nom, la formation, les dates de validation et le nom de la structure. Ce n'est pas une certification.</p>
+    <p class="fp-foot" data-only="formation">Un module protégé demande son mot de passe à l'ouverture (même écran que les démos protégées). Votre progression reste enregistrée.</p>
+  </main>
+
+  <!-- L14-07 : centre vide (public) -->
+  <main class="ctr-in" data-pane="vide">
+    <div class="ctr-hero" style="grid-template-columns:minmax(0,1fr)">
+      <div><h1>Se former aux outils de la Mission Locale</h1><p>Des tutoriels interactifs pour prendre en main vos outils, à votre rythme.</p></div>
+    </div>
+    <div class="ctr-empty" role="status">
+      <span class="ic"><i data-icon="book"></i></span>
+      <h2>Aucune formation pour le moment</h2>
+      <p>Les formations de Mission Locale Exemple apparaîtront ici dès leur publication. Revenez bientôt, ou contactez votre structure si vous attendiez une formation.</p>
+      <div class="acts"><a class="cta cta--sec" href="#"><i data-icon="mail"></i>Besoin d'aide ?</a></div>
+    </div>
+  </main>
+
+  <footer class="ctr-foot"><span>Mission Locale Exemple</span><a href="#">Accessibilité : partiellement conforme</a><a href="#">Données personnelles</a><a href="#">Besoin d'aide ?</a><span>Créé avec TutoClick</span></footer>
+</div>
+</div>
+
+<!-- ===================== RÉGLAGES (ADMIN) ===================== -->
+<div data-pane="reglages">
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Formation</span>
+      <a class="fd-nav__item" href="l13-suivi.html"><i data-icon="graduation"></i>Apprenants</a>
+      <a class="fd-nav__item" href="#" aria-current="page"><i data-icon="layout"></i>Centre de formation</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Propriétaire</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div><h1>Centre de formation</h1>
+        <p class="sub" data-only="reglages">Publié · <a href="#">formation.tutoclick.example/mission-locale-exemple</a> · 2 modifications non publiées</p>
+        <p class="sub" data-only="reglages-vide">Brouillon · jamais publié</p>
+      </div>
+      <div class="topbar__actions">
+        <button class="fd-btn" type="button" data-view-set="accueil"><i data-icon="external"></i>Ouvrir</button>
+        <button class="fd-btn fd-btn--primary" type="button" data-only="reglages">Publier les modifications</button>
+        <button class="fd-btn fd-btn--primary" type="button" disabled aria-describedby="pub-why" data-only="reglages-vide">Publier le centre</button>
+      </div>
+    </header>
+
+    <div class="cfg14">
+      <div class="col">
+        <div class="warn14" id="pub-why" data-only="reglages-vide"><i data-icon="alert"></i><span>Ajoutez au moins une formation visible pour publier le centre.</span></div>
+
+        <section class="fd-card" aria-labelledby="c-url">
+          <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="globe"></i></span><h2 class="fd-card__title" id="c-url">Adresse</h2></div>
+          <div class="fd-field"><label class="fd-label" for="slug">Adresse de la page</label>
+            <div class="url-row"><div class="url-f"><span>formation.tutoclick.example/</span><input id="slug" type="text" value="mission-locale-exemple" aria-describedby="slug-h"></div><button class="fd-btn fd-btn--icon" type="button" aria-label="Copier l'adresse"><i data-icon="copy"></i></button></div>
+            <span class="ok-line" id="slug-h" role="status"><i data-icon="checkCircle"></i>Adresse disponible. Lettres minuscules, chiffres et tirets.</span>
+          </div>
+          <label class="fd-switch"><span>Visible dans les moteurs de recherche<span class="fd-help" style="display:block">Désactivé par défaut : la page n'est trouvée que par son lien.</span></span><input type="checkbox" role="switch"><span class="fd-switch__track"></span></label>
+        </section>
+
+        <section class="fd-card" aria-labelledby="c-id">
+          <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="palette"></i></span><h2 class="fd-card__title" id="c-id">Identité</h2></div>
+          <div class="fd-field"><label class="fd-label" for="t14">Titre</label><input class="fd-input" id="t14" type="text" value="Se former aux outils de la Mission Locale"></div>
+          <div class="fd-field"><label class="fd-label" for="w14">Texte d'accueil</label><textarea class="fd-input" id="w14" rows="2">Des tutoriels interactifs pour prendre en main vos outils, à votre rythme. Chaque module dure moins de 10 minutes.</textarea></div>
+          <div class="fd-field"><span class="fd-label">Logo</span>
+            <div class="logo-f"><span class="ctr-logo" aria-hidden="true">ML</span><span class="tx"><b>logo-mission-locale.svg</b>SVG ou PNG, carré, 512 px au moins. Il s'affiche en 40 px dans l'en-tête.</span><button class="fd-btn fd-btn--sm" type="button"><i data-icon="upload"></i>Remplacer</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Retirer</button></div>
+          </div>
+          <div class="two">
+            <div class="fd-field"><label class="fd-label" for="col1">Couleur principale</label><div class="col-f"><span class="sw" style="background:#A3195B"></span><input id="col1" type="text" value="#A3195B" aria-describedby="col1-h"></div><span class="ok-line" id="col1-h"><i data-icon="checkCircle"></i>Texte blanc : contraste 7,9:1, conforme</span></div>
+            <div class="fd-field"><label class="fd-label" for="col2">Couleur d'accent</label><div class="col-f"><span class="sw" style="background:#95C11F"></span><input id="col2" type="text" value="#95C11F" aria-describedby="col2-h"></div><span class="ok-line" id="col2-h"><i data-icon="checkCircle"></i>Texte noir : contraste 10,4:1, conforme</span></div>
+          </div>
+          <p class="fd-help" style="margin:0">La couleur principale sert aux boutons, aux barres et au module en cours ; l'accent à la carte « Ma formation en cours » et aux badges « Terminée ». Une couleur trop claire pour le texte est refusée avec la valeur du contraste.</p>
+        </section>
+
+        <section class="fd-card" aria-labelledby="c-style">
+          <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="layout"></i></span><h2 class="fd-card__title" id="c-style">Style prédéfini</h2></div>
+          <div class="presets" role="radiogroup" aria-labelledby="c-style">
+            <label><input type="radio" name="pst" checked><span class="pv pv--dsi"><i></i><b></b><u></u></span>Couleurs du workspace</label>
+            <label><input type="radio" name="pst"><span class="pv pv--sobre"><i></i><b></b><u></u></span>Sobre</label>
+            <label><input type="radio" name="pst"><span class="pv pv--sombre"><i></i><b></b><u></u></span>Sombre</label>
+            <label><input type="radio" name="pst"><span class="pv pv--contraste"><i></i><b></b><u></u></span>Contraste renforcé</label>
+          </div>
+          <p class="fd-help" style="margin:0">Le style s'applique à toute la page publique. « Contraste renforcé » vise les personnes malvoyantes : bordures épaisses, texte noir sur blanc.</p>
+        </section>
+
+        <section class="fd-card" aria-labelledby="c-vis">
+          <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="graduation"></i></span><h2 class="fd-card__title" id="c-vis">Formations visibles</h2><a class="fd-btn fd-btn--sm" href="l13-suivi.html?view=gerer"><i data-icon="settings"></i>Gérer les formations</a></div>
+          <ul class="vis" aria-label="Formations, dans l'ordre d'affichage" data-only="reglages">
+            <li><span class="grip" title="Glisser, ou Alt + flèches"><i data-icon="grip"></i></span><input type="checkbox" checked aria-label="Afficher Nouvel outil de gestion"><span><b>Nouvel outil de gestion</b><small>4 modules · ordre imposé · Logiciel métier, Nouveaux agents</small></span><span class="fd-help">142 apprenants</span></li>
+            <li><span class="grip"><i data-icon="grip"></i></span><input type="checkbox" checked aria-label="Afficher Agenda partagé"><span><b>Agenda partagé</b><small>2 modules · Bureautique</small></span><span class="fd-help">96 apprenants</span></li>
+            <li><span class="grip"><i data-icon="grip"></i></span><input type="checkbox" checked aria-label="Afficher Statistiques d'activité"><span><b>Statistiques d'activité</b><small>3 modules · 1 protégé par mot de passe · Pilotage</small></span><span class="fd-help">41 apprenants</span></li>
+            <li><span class="grip"><i data-icon="grip"></i></span><input type="checkbox" checked aria-label="Afficher Accueil d'un nouvel agent"><span><b>Accueil d'un nouvel agent</b><small>3 modules · Nouveaux agents</small></span><span class="fd-help">12 apprenants</span></li>
+            <li class="off"><span class="grip"><i data-icon="grip"></i></span><input type="checkbox" aria-label="Afficher Procédure interne RH"><span><b>Procédure interne RH</b><small>2 modules · masquée</small></span><span class="fd-help">8 apprenants</span></li>
+          </ul>
+          <p class="fd-help" style="margin:0" data-only="reglages">Une formation masquée n'apparaît pas sur la page, mais reste accessible à ceux qui ont son lien personnel. Les démos en brouillon ne sont jamais montrées.</p>
+          <div class="cfg-empty" data-only="reglages-vide">
+            <span class="fd-icon-chip"><i data-icon="graduation"></i></span>
+            <b>Aucune formation à afficher</b>
+            <p>Une formation regroupe des démos publiées en modules. Créez-en une pour la proposer dans le centre.</p>
+            <a class="fd-btn fd-btn--primary" href="l13-suivi.html?view=gerer"><i data-icon="plus"></i>Créer une formation</a>
+          </div>
+        </section>
+
+        <section class="fd-card" aria-labelledby="c-acc">
+          <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="shield"></i></span><h2 class="fd-card__title" id="c-acc">Accès à la page</h2></div>
+          <div class="acc" role="radiogroup" aria-labelledby="c-acc">
+            <label><input type="radio" name="acc" checked><span><b>Toute personne avec le lien</b><small>Sans identification</small></span></label>
+            <label><input type="radio" name="acc"><span><b>Avec un mot de passe</b><small>Le même pour tous (L11)</small></span></label>
+            <label aria-disabled="true"><input type="radio" name="acc" disabled><span><b>Par domaine e-mail</b><span class="soon">Bientôt</span><small>Demande l'envoi d'e-mails</small></span></label>
+            <label aria-disabled="true"><input type="radio" name="acc" disabled><span><b>Sur invitation</b><span class="soon">Bientôt</span><small>Demande l'envoi d'e-mails</small></span></label>
+          </div>
+          <p class="fd-help" style="margin:0">L'accès à la page ne remplace pas celui des démos : un module protégé garde son propre mot de passe.</p>
+        </section>
+      </div>
+
+      <aside class="pvw" aria-hidden="true">
+        <div class="cap"><span>Aperçu</span><span>se met à jour en direct</span></div>
+        <div class="frame">
+          <div class="m-top"><span class="ctr-logo">ML</span><b>Mission Locale Exemple</b></div>
+          <div class="m-in">
+            <div class="m-h">Se former aux outils de la Mission Locale</div>
+            <div class="m-p">Des tutoriels interactifs pour prendre en main vos outils, à votre rythme.</div>
+            <div class="m-s"></div>
+            <div class="m-chips" data-only="reglages"><span></span><span></span><span></span><span></span></div>
+            <div class="m-g" data-only="reglages">
+              <div class="m-c"><div class="cv"></div><div class="tt">Nouvel outil de gestion</div><div class="ln"></div><div class="ln"></div><div class="bt"></div></div>
+              <div class="m-c"><div class="cv"></div><div class="tt">Agenda partagé</div><div class="ln"></div><div class="ln"></div><div class="bt"></div></div>
+              <div class="m-c"><div class="cv"></div><div class="tt">Statistiques d'activité</div><div class="ln"></div><div class="ln"></div><div class="bt"></div></div>
+              <div class="m-c"><div class="cv"></div><div class="tt">Accueil d'un nouvel agent</div><div class="ln"></div><div class="ln"></div><div class="bt"></div></div>
+            </div>
+            <div class="m-empty" data-only="reglages-vide">Aucune formation pour le moment</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+</div>
+
+</div>
+<div class="mock-state fd-segmented" role="group" aria-label="Écran (maquette)" style="left:50%;transform:translateX(-50%)">
+  <button type="button" data-view-set="accueil" aria-pressed="true">Accueil</button>
+  <button type="button" data-view-set="anonyme" aria-pressed="false">Non identifié</button>
+  <button type="button" data-view-set="filtre" aria-pressed="false">Filtre</button>
+  <button type="button" data-view-set="sans-resultat" aria-pressed="false">Sans résultat</button>
+  <button type="button" data-view-set="formation" aria-pressed="false">Formation</button>
+  <button type="button" data-view-set="terminee" aria-pressed="false">Terminée</button>
+  <button type="button" data-view-set="vide" aria-pressed="false">Vide</button>
+  <button type="button" data-view-set="reglages" aria-pressed="false">Réglages</button>
+  <button type="button" data-view-set="reglages-vide" aria-pressed="false">Réglages vides</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>
