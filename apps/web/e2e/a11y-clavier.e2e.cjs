@@ -184,14 +184,26 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       const ids = [...document.querySelectorAll('[id]')].map((e) => e.id);
       const dup = [...new Set(ids.filter((x, i) => ids.indexOf(x) !== i))];
       const broken = [];
-      for (const attr of ['aria-controls', 'aria-labelledby', 'aria-describedby', 'aria-owns', 'aria-activedescendant'])
+      for (const attr of [
+        'aria-controls',
+        'aria-labelledby',
+        'aria-describedby',
+        'aria-owns',
+        'aria-activedescendant',
+      ])
         for (const el of document.querySelectorAll(`[${attr}]`))
           for (const ref of el.getAttribute(attr).split(/\s+/).filter(Boolean))
             if (!document.getElementById(ref)) broken.push(`${attr}→${ref}`);
       return { dup, broken: [...new Set(broken)] };
     });
-    ok(r.dup.length === 0, `A11Y-08 : identifiants uniques : ${name}${r.dup.length ? ` → ${r.dup.join(', ')}` : ''}`);
-    ok(r.broken.length === 0, `A11Y-09 : références ARIA valides : ${name}${r.broken.length ? ` → ${r.broken.join(', ')}` : ''}`);
+    ok(
+      r.dup.length === 0,
+      `A11Y-08 : identifiants uniques : ${name}${r.dup.length ? ` → ${r.dup.join(', ')}` : ''}`,
+    );
+    ok(
+      r.broken.length === 0,
+      `A11Y-09 : références ARIA valides : ${name}${r.broken.length ? ` → ${r.broken.join(', ')}` : ''}`,
+    );
     await ctx.close();
   }
 
