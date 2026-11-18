@@ -14,6 +14,7 @@
 | L12-04 | Rechercher et remplacer | `?etat=recherche` |
 | L12-05 | Étiquettes des boutons de la bulle | `?etat=boutons` |
 | L12-06 | Modale « Raccourcis clavier » | `?etat=raccourcis` |
+| L12-07 | Étiquettes des démos (tableau de bord et réglages) | `refonte/l12-etiquettes.html?etat=cartes|filtre|carte`, `editeur-gains.html?etat=etiquettes` |
 
 ## 2. Masquage opaque (L12-01)
 
@@ -75,7 +76,34 @@
 - Quatre groupes en deux colonnes : Général, Étapes, Canevas, Texte. Chaque touche est une `kbd` bordée.
 - Les raccourcis à une lettre (H, B, Z) sont inactifs pendant la saisie de texte. Sur Mac, Ctrl devient ⌘.
 
-## 8. Règles
+## 8. Étiquettes des démos (L12-07)
+
+Elles servent à organiser et filtrer les formations par outil, par public ou par module, comme la ligne « Tags » du tableau de parité.
+
+**Tableau de bord** (structure de la refonte validée) :
+- **Cartes** : les pastilles d'étiquettes s'affichent sous la ligne de méta. Chacune a un point et un texte de sa couleur, sur fond clair de la même teinte. Il y a une couleur par catégorie, prise dans la palette DSI (bleu, vert, orange, framboise, prune), pour respecter la règle D13.
+- **Filtre** : le bouton « Étiquettes » se place entre « Dossiers » et le tri. Il porte un compteur prune quand un filtre est actif.
+  - Le panneau contient une recherche, puis la liste à cocher avec le nombre de démos par étiquette.
+  - Combinaison : « Au moins une » ou « Toutes ».
+  - En pied : « Effacer » et « Gérer les étiquettes » (renommer, recolorer, supprimer).
+- **Menu « … » de la carte** : nouvelle entrée « Étiquettes », qui ouvre un sous-panneau à droite.
+  - Recherche ou création, liste à cocher.
+  - « Créer « … » » avec le choix parmi les 5 couleurs.
+  - Limites : 20 étiquettes par workspace, 5 par démo.
+
+**Éditeur** (`editeur-gains.html?etat=etiquettes`) : section « Étiquettes » en tête de l'onglet Réglages.
+- Champ à pastilles, avec retrait par pastille et ajout par saisie et Entrée.
+- Une aide rappelle l'usage et la limite.
+
+**Accessibilité** :
+- le filtre est un bouton `aria-expanded` relié à son panneau (`aria-controls`) ;
+- le sous-panneau est un `dialog` étiqueté ;
+- les pastilles de couleur ont un nom accessible ;
+- la couleur n'est jamais le seul repère, car le nom de l'étiquette est toujours écrit.
+
+Les libellés des boutons de la bulle (L12-05) restent dans le lot.
+
+## 9. Règles
 
 - Données fictives uniquement. Icônes Lucide, aucun caractère utilisé comme icône. Les flèches et ⌘ sont des libellés de touches, pas des icônes.
 - Couleurs du surlignage de recherche : `orange-100` et `orange-300` en clair, sur un texte inchangé. Le contraste du texte reste celui du corps.

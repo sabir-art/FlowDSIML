@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Étiquettes des démos (lot L12) — Démos — TutoClick (refonte DSI)</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* Lot L12-07 : étiquettes des démos (une couleur par catégorie, règle D13) */
+  .tg-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .tg { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: var(--fd-radius-full); font: 600 11.5px var(--fd-font-sans); white-space: nowrap; }
+  .tg::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .tg--b { background: var(--fd-bleu-50); color: var(--fd-bleu-700); }
+  .tg--v { background: var(--fd-vert-50); color: var(--fd-vert-700); }
+  .tg--o { background: var(--fd-orange-50); color: var(--fd-orange-700); }
+  .tg--f { background: var(--fd-framboise-50); color: var(--fd-framboise-700); }
+  .tg--p { background: var(--fd-prune-50); color: var(--fd-prune-700); }
+  [data-theme="dark"] .tg--b { background: color-mix(in srgb, var(--fd-bleu-400) 18%, transparent); color: var(--fd-bleu-200); }
+  [data-theme="dark"] .tg--v { background: color-mix(in srgb, var(--fd-vert-400) 18%, transparent); color: var(--fd-vert-200); }
+  [data-theme="dark"] .tg--o { background: color-mix(in srgb, var(--fd-orange-400) 18%, transparent); color: var(--fd-orange-200); }
+  [data-theme="dark"] .tg--f { background: color-mix(in srgb, var(--fd-framboise-400) 18%, transparent); color: var(--fd-framboise-200); }
+  [data-theme="dark"] .tg--p { background: color-mix(in srgb, var(--fd-prune-400) 22%, transparent); color: var(--fd-prune-200); }
+  .tg-anchor { position: relative; display: inline-flex; }
+  .tg-count { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--fd-color-primary); color: var(--fd-color-on-primary); font: 700 11px var(--fd-font-sans); }
+  .tg-pop, .tg-menu, .tg-sub { position: absolute; z-index: 40; display: none; flex-direction: column; gap: 6px; padding: 10px; box-shadow: var(--fd-shadow-lg); }
+  .tg-pop { top: calc(100% + 6px); right: 0; width: 280px; }
+  body[data-l12="filtre"] .tg-pop { display: flex; }
+  body[data-l12="filtre"] .tg-filter { border-color: var(--fd-color-primary); }
+  .tg-menu { top: calc(100% + 4px); right: 0; width: 230px; gap: 0; padding: 6px; }
+  body[data-l12="carte"] .tg-menu, body[data-l12="carte"] .tg-sub { display: flex; }
+  .tg-menu > button { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border: 0; background: none; border-radius: var(--fd-radius-sm); font: 500 13.5px var(--fd-font-sans); color: var(--fd-color-text); cursor: pointer; text-align: left; }
+  .tg-menu > button:hover, .tg-menu > button.is-open { background: var(--fd-color-surface-hover); }
+  .tg-menu > button svg { width: 16px; height: 16px; color: var(--fd-color-text-muted); }
+  .tg-menu > button .push { margin-left: auto; }
+  .tg-menu > .danger, .tg-menu > .danger svg { color: var(--fd-color-danger); }
+  .tg-menu hr { border: 0; border-top: 1px solid var(--fd-color-border); margin: 4px 0; }
+  .tg-sub { top: 20px; left: calc(100% + 6px); width: 260px; }
+  .tg-pop legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .tg-search { height: 36px; width: 100%; box-sizing: border-box; } .tg-search input { width: 100%; min-width: 0; height: 36px; }
+  .tg-opt { display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 6px; border-radius: var(--fd-radius-sm); cursor: pointer; }
+  .tg-opt:hover { background: var(--fd-color-surface-hover); }
+  .tg-opt input { width: 16px; height: 16px; accent-color: var(--fd-color-primary); margin: 0; }
+  .tg-opt small { margin-left: auto; color: var(--fd-color-text-subtle); }
+  .tg-pop fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .tg-mode { display: flex; gap: 14px; padding: 6px; border-top: 1px solid var(--fd-color-border); font-size: var(--fd-text-label-size); }
+  .tg-mode label { display: flex; align-items: center; gap: 6px; } .tg-mode input { accent-color: var(--fd-color-primary); }
+  .tg-foot { display: flex; justify-content: space-between; border-top: 1px solid var(--fd-color-border); padding-top: 6px; }
+  .tg-create { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 6px; border: 0; border-top: 1px solid var(--fd-color-border); background: none; font: 600 13px var(--fd-font-sans); color: var(--fd-color-primary); cursor: pointer; }
+  .tg-create svg { width: 16px; height: 16px; }
+  .tg-colors { display: inline-flex; gap: 4px; margin-left: auto; }
+  .sw { width: 14px; height: 14px; border-radius: 50%; } .sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--fd-color-surface), 0 0 0 4px var(--fd-color-primary); }
+  .sw--b { background: var(--fd-bleu-500); } .sw--v { background: var(--fd-vert-600); } .sw--o { background: var(--fd-orange-500); } .sw--f { background: var(--fd-framboise-600); } .sw--p { background: var(--fd-prune-600); }
+  .demo { overflow: visible; }
+  .mock-l12 { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 80; display: flex; gap: 4px; padding: 4px; border-radius: var(--fd-radius-full); background: var(--fd-stone-900); box-shadow: var(--fd-shadow-lg); }
+  .mock-l12 button { border: 0; background: transparent; color: #fff; font: 500 13px var(--fd-font-sans); padding: 6px 12px; border-radius: var(--fd-radius-full); cursor: pointer; }
+  .mock-l12 button[aria-pressed="true"] { background: #fff; color: var(--fd-stone-900); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Navigation principale">
+    <a class="brand" href="dashboard.html">
+      <img class="brand__logo wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="brand__logo wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick">
+      <span class="brand__sub">DSI des Missions Locales</span>
+    </a>
+    <nav class="fd-nav">
+      <a class="fd-nav__item" href="dashboard.html" aria-current="page"><i data-icon="grid"></i>Démos</a>
+      <a class="fd-nav__item" href="analytics.html"><i data-icon="chart"></i>Analytics</a>
+      <a class="fd-nav__item" href="#"><i data-icon="contact"></i>Leads</a>
+      <span class="fd-nav__section">Workspace</span>
+      <a class="fd-nav__item" href="#"><i data-icon="users"></i>Membres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="settings"></i>Paramètres</a>
+      <a class="fd-nav__item" href="#"><i data-icon="card"></i>Plans</a>
+    </nav>
+    <div class="side__foot">
+      <span class="avatar" aria-hidden="true">AM</span>
+      <span><b>Alice Martin</b><small>Éditrice</small></span>
+      <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Menu du compte"><i data-icon="more"></i></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1>Démos</h1>
+        <p class="sub">Vos parcours interactifs, prêts à partager.</p>
+      </div>
+      <div class="topbar__actions">
+        <label class="search"><i data-icon="search"></i><span class="sr-only" hidden>Rechercher</span><input class="fd-input" type="search" placeholder="Rechercher une démo"></label>
+        <button class="fd-btn fd-btn--primary fd-btn--lg" type="button"><i data-icon="plus"></i>Nouvelle démo</button>
+      </div>
+    </header>
+
+    <section class="kpis" aria-label="Indicateurs des 30 derniers jours">
+      <article class="fd-card fd-card--hero fd-kpi">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="eye"></i></span><span class="fd-kpi__label">Vues (30 jours)</span><button class="fd-btn--round fd-btn fd-btn--inverse fd-btn--sm" type="button" aria-label="Voir les analytics"><i data-icon="arrowUpRight"></i></button></div>
+        <span class="fd-kpi__value">2 486</span>
+        <span class="fd-kpi__foot"><span class="fd-trend"><i data-icon="trendUp"></i>+18 %</span>vs 30 jours précédents</span>
+      </article>
+      <article class="fd-card fd-kpi">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="users"></i></span><span class="fd-kpi__label">Visiteurs uniques</span></div>
+        <span class="fd-kpi__value">1 312</span>
+        <span class="fd-kpi__foot"><span class="fd-trend fd-trend--up"><i data-icon="trendUp"></i>+9 %</span>vs 30 jours précédents</span>
+      </article>
+      <article class="fd-card fd-kpi">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="route"></i></span><span class="fd-kpi__label">Taux de complétion</span></div>
+        <span class="fd-kpi__value">46 %</span>
+        <span class="fd-kpi__foot"><span class="fd-trend fd-trend--down"><i data-icon="trendDown"></i>−4 pts</span>vs 30 jours précédents</span>
+      </article>
+      <article class="fd-card fd-kpi">
+        <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="mail"></i></span><span class="fd-kpi__label">Leads</span></div>
+        <span class="fd-kpi__value">87</span>
+        <span class="fd-kpi__foot"><span class="fd-trend fd-trend--up"><i data-icon="trendUp"></i>+12</span>vs 30 jours précédents</span>
+      </article>
+    </section>
+
+    <div class="section-head">
+      <h2>Toutes les démos</h2>
+      <div class="fd-segmented" role="group" aria-label="Filtrer par statut">
+        <button type="button" aria-pressed="true">Toutes · 6</button>
+        <button type="button" aria-pressed="false">Publiées · 4</button>
+        <button type="button" aria-pressed="false">Brouillons · 2</button>
+      </div>
+      <div class="topbar__actions">
+        <button class="fd-btn" type="button"><i data-icon="folder"></i>Dossiers<i data-icon="chevronDown"></i></button>
+        <div class="tg-anchor"><button class="fd-btn tg-filter" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tg-pop"><i data-icon="tag"></i>Étiquettes<span class="tg-count">2</span><i data-icon="chevronDown"></i></button>
+          <div class="tg-pop fd-card" id="tg-pop" role="dialog" aria-label="Filtrer par étiquettes">
+            <label class="search tg-search"><i data-icon="search"></i><input class="fd-input" type="search" aria-label="Chercher une étiquette" placeholder="Chercher une étiquette"></label>
+            <fieldset><legend class="sr-only">Étiquettes</legend>
+              <label class="tg-opt"><input type="checkbox" checked><span class="tg tg--b">Logiciel métier</span><small>2</small></label>
+              <label class="tg-opt"><input type="checkbox" checked><span class="tg tg--f">Jeunes</span><small>2</small></label>
+              <label class="tg-opt"><input type="checkbox"><span class="tg tg--v">Conseillers</span><small>1</small></label>
+              <label class="tg-opt"><input type="checkbox"><span class="tg tg--o">Agenda</span><small>1</small></label>
+              <label class="tg-opt"><input type="checkbox"><span class="tg tg--p">Module 1</span><small>1</small></label>
+              <label class="tg-opt"><input type="checkbox"><span class="tg tg--p">Module 2</span><small>1</small></label>
+            </fieldset>
+            <div class="tg-mode" role="radiogroup" aria-label="Combinaison"><label><input type="radio" name="tgm" checked>Au moins une</label><label><input type="radio" name="tgm">Toutes</label></div>
+            <div class="tg-foot"><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Effacer</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"><i data-icon="settings"></i>Gérer les étiquettes</button></div>
+          </div></div>
+        <button class="fd-btn" type="button">Modifiées récemment<i data-icon="chevronDown"></i></button>
+      </div>
+    </div>
+
+    <section class="demos" aria-label="Démos">
+      <article class="fd-card demo">
+        <div class="demo__thumb"><span class="fake fd-player-scope"></span><span class="dot" style="left:38%;top:46%"></span></div>
+        <div class="demo__body">
+          <div><h3>Créer une fiche usager</h3>
+            <div class="demo__meta"><span class="fd-badge fd-badge--live">Publiée</span>1 204 vues · 41 leads · il y a 2 h</div><div class="tg-row" aria-label="Étiquettes"><span class="tg tg--b">Logiciel métier</span><span class="tg tg--v">Conseillers</span></div></div>
+          <div class="tg-anchor"><button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions pour Créer une fiche usager"><i data-icon="more"></i></button>
+            <div class="tg-menu fd-card" role="menu" aria-label="Actions pour Créer une fiche usager">
+              <button role="menuitem" type="button"><i data-icon="pencil"></i>Ouvrir dans l'éditeur</button>
+              <button role="menuitem" type="button"><i data-icon="share"></i>Partager</button>
+              <button role="menuitem" type="button" aria-haspopup="true" aria-expanded="true" class="is-open"><i data-icon="tag"></i>Étiquettes<i data-icon="chevronRight" class="push"></i></button>
+              <button role="menuitem" type="button"><i data-icon="copy"></i>Dupliquer</button>
+              <button role="menuitem" type="button"><i data-icon="folder"></i>Déplacer vers…</button>
+              <hr><button role="menuitem" type="button" class="danger"><i data-icon="trash"></i>Supprimer</button>
+              <div class="tg-sub fd-card" role="dialog" aria-label="Étiquettes de Créer une fiche usager">
+                <label class="search tg-search"><i data-icon="search"></i><input class="fd-input" type="search" aria-label="Chercher ou créer une étiquette" value="Accu"></label>
+                <label class="tg-opt"><input type="checkbox" checked><span class="tg tg--b">Logiciel métier</span></label>
+                <label class="tg-opt"><input type="checkbox" checked><span class="tg tg--v">Conseillers</span></label>
+                <label class="tg-opt"><input type="checkbox"><span class="tg tg--o">Agenda</span></label>
+                <button class="tg-create" type="button"><i data-icon="plus"></i>Créer « Accu »<span class="tg-colors" aria-label="Couleur"><span class="sw sw--b" aria-pressed="true"></span><span class="sw sw--v"></span><span class="sw sw--o"></span><span class="sw sw--f"></span><span class="sw sw--p"></span></span></button>
+                <p class="fd-help" style="margin:0">20 étiquettes au plus par workspace, 5 par démo.</p>
+              </div>
+            </div></div>
+        </div>
+      </article>
+      <article class="fd-card demo">
+        <div class="demo__thumb"><span class="fake fd-player-scope"></span><span class="dot" style="left:64%;top:30%"></span></div>
+        <div class="demo__body">
+          <div><h3>Prise de rendez-vous conseiller</h3>
+            <div class="demo__meta"><span class="fd-badge fd-badge--live">Publiée</span>682 vues · 23 leads · hier</div><div class="tg-row" aria-label="Étiquettes"><span class="tg tg--o">Agenda</span><span class="tg tg--f">Jeunes</span></div></div>
+          <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions pour Prise de rendez-vous conseiller"><i data-icon="more"></i></button>
+        </div>
+      </article>
+      <article class="fd-card demo">
+        <div class="demo__thumb"><span class="fake fd-player-scope"></span><span class="dot" style="left:22%;top:62%"></span></div>
+        <div class="demo__body">
+          <div><h3>Prise en main du logiciel métier</h3>
+            <div class="demo__meta"><span class="fd-badge fd-badge--draft">Brouillon</span>6 étapes · il y a 3 j</div><div class="tg-row" aria-label="Étiquettes"><span class="tg tg--b">Logiciel métier</span><span class="tg tg--p">Module 1</span></div></div>
+          <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions pour Prise en main du logiciel métier"><i data-icon="more"></i></button>
+        </div>
+      </article>
+      <article class="fd-card demo">
+        <div class="demo__thumb"><span class="fake fd-player-scope"></span><span class="dot" style="left:52%;top:52%"></span></div>
+        <div class="demo__body">
+          <div><h3>Dépôt de pièces justificatives</h3>
+            <div class="demo__meta"><span class="fd-badge fd-badge--live">Publiée</span>600 vues · 23 leads · 12 nov.</div><div class="tg-row" aria-label="Étiquettes"><span class="tg tg--f">Jeunes</span><span class="tg tg--p">Module 2</span></div></div>
+          <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" aria-label="Actions pour Dépôt de pièces justificatives"><i data-icon="more"></i></button>
+        </div>
+      </article>
+      <button class="fd-card demo demo--new" type="button">
+        <span><span class="fd-btn fd-btn--round" aria-hidden="true"><i data-icon="plus"></i></span></span>
+        <span><b style="display:block;color:var(--fd-color-text)">Nouvelle démo</b>Capturer un parcours avec l'extension</span>
+      </button>
+    </section>
+  </main>
+</div>
+
+<div class="mock-l12" role="group" aria-label="État de la maquette L12-07">
+  <button type="button" data-l12="cartes" aria-pressed="true">Cartes</button>
+  <button type="button" data-l12="filtre" aria-pressed="false">Filtre</button>
+  <button type="button" data-l12="carte" aria-pressed="false">Menu de la carte</button>
+  <a href="../reference/editeur-gains.html?etat=etiquettes" style="color:#fff;font:500 13px var(--fd-font-sans);padding:6px 12px;text-decoration:none">Réglages de la démo</a>
+</div>
+<script>
+(() => { const go = (k) => { document.body.dataset.l12 = k; document.querySelectorAll('[data-l12]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.l12 === k))); const f = document.querySelector('.tg-filter'); if (f) f.setAttribute('aria-expanded', String(k === 'filtre')); };
+  document.addEventListener('click', (e) => { const b = e.target.closest('button[data-l12]'); if (b) go(b.dataset.l12); });
+  go(new URLSearchParams(location.search).get('etat') || 'cartes'); })();
+</script>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

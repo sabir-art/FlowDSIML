@@ -130,6 +130,14 @@
   .kb-grid dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; font-size: 13px; }
   .kb-grid dd { margin: 0; display: flex; gap: 4px; }
   .kb-grid kbd, .kbd { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--fd-color-border-strong); border-bottom-width: 2px; background: var(--fd-color-surface); font: 600 11px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+  .tg { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 4px 0 8px; border-radius: var(--fd-radius-full); font: 600 12px var(--fd-font-sans); }
+  .tg::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .tg button { display: grid; place-items: center; width: 18px; height: 18px; border: 0; border-radius: 50%; background: none; color: inherit; cursor: pointer; padding: 0; } .tg button svg { width: 12px; height: 12px; }
+  .tg--b { background: var(--fd-bleu-50); color: var(--fd-bleu-700); } .tg--v { background: var(--fd-vert-50); color: var(--fd-vert-700); }
+  [data-theme="dark"] .tg--b { background: color-mix(in srgb, var(--fd-bleu-400) 18%, transparent); color: var(--fd-bleu-200); }
+  [data-theme="dark"] .tg--v { background: color-mix(in srgb, var(--fd-vert-400) 18%, transparent); color: var(--fd-vert-200); }
+  .tg-edit { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 40px; padding: 6px 8px; border: 1px solid var(--fd-color-border-strong); border-radius: var(--fd-radius-md); background: var(--fd-color-surface); }
+  .tg-edit input { flex: 1; min-width: 80px; border: 0; background: none; font: inherit; color: var(--fd-color-text); outline: none; }
   .mock-l12 { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 80; display: flex; gap: 4px; padding: 4px; border-radius: var(--fd-radius-full); background: var(--fd-stone-900); box-shadow: var(--fd-shadow-lg); }
   .mock-l12 button { border: 0; background: transparent; color: #fff; font: 500 13px var(--fd-font-sans); padding: 6px 12px; border-radius: var(--fd-radius-full); cursor: pointer; }
   .mock-l12 button[aria-pressed="true"] { background: #fff; color: var(--fd-stone-900); }
@@ -443,6 +451,11 @@
         </div>
         <div role="tabpanel" id="tp-settings" aria-labelledby="tb-settings" hidden>
           <div class="sec">
+            <div class="sec-title">Étiquettes</div>
+            <div class="tg-edit" role="group" aria-label="Étiquettes de la démo"><span class="tg tg--b">Logiciel métier<button aria-label="Retirer Logiciel métier"><i data-icon="x"></i></button></span><span class="tg tg--v">Conseillers<button aria-label="Retirer Conseillers"><i data-icon="x"></i></button></span><input aria-label="Ajouter une étiquette" placeholder="Ajouter…"></div>
+            <p class="help" style="margin:6px 0 0">Pour organiser et filtrer les formations dans le tableau de bord (outil, public, module). 5 par démo.</p>
+          </div>
+          <div class="sec">
             <div class="sec-title">Lecture</div>
             <div class="setting"><span class="t-label">Lecture automatique</span><span class="switch"><input type="checkbox" aria-label="Lecture automatique"><span></span></span></div>
             <div class="setting"><span class="t-label">Barre de progression</span><span class="switch"><input type="checkbox" checked aria-label="Barre de progression"><span></span></span></div>
@@ -551,7 +564,8 @@ document.addEventListener('fd:ready', () => {
   <button type="button" data-l12-go="zoom" aria-pressed="false">Zoom</button>
   <button type="button" data-l12-go="style" aria-pressed="false">Style à toutes</button>
   <button type="button" data-l12-go="recherche" aria-pressed="false">Rechercher</button>
-  <button type="button" data-l12-go="boutons" aria-pressed="false">Étiquettes</button>
+  <button type="button" data-l12-go="boutons" aria-pressed="false">Libellés</button>
+  <button type="button" data-l12-go="etiquettes" aria-pressed="false">Étiquettes</button>
   <button type="button" data-l12-go="raccourcis" aria-pressed="false">Raccourcis</button>
 </div>
 <script>
@@ -563,6 +577,7 @@ document.addEventListener('fd:ready', () => {
     document.getElementById('m-apply').hidden = k !== 'style';
     document.getElementById('m-keys').hidden = k !== 'raccourcis';
     setCtx({ masque: 'mask', zoom: 'zoom' }[k] || 'hotspot');
+    document.getElementById(k === 'etiquettes' ? 'tb-settings' : 'tb-step').click();
     const pb = document.querySelector('.panel-body'); if (k === 'boutons') { const t = [...pb.querySelectorAll('.sec-title')].find((x) => x.textContent.trim() === 'Boutons'); if (t) pb.scrollTop = t.closest('.sec').offsetTop - 16; } else pb.scrollTop = 0;
     const t = document.querySelector('.floatbar'); t.querySelectorAll('button').forEach((b, i) => b.setAttribute('aria-pressed', String(i === ({ masque: 1, zoom: 2 }[k] ?? 0))));
   };
