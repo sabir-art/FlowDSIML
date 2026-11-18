@@ -14,6 +14,7 @@ import {
   parseRoute,
   resolveAssets,
   resolvePlacement,
+  ruleTarget,
 } from './logic';
 
 const m = parseManifest({
@@ -165,5 +166,51 @@ describe('player logic', () => {
     // seuil atteint à la valeur exacte
     expect(scoreQuiz(quiz, { q1: ['b'], q2: ['a', 'b'] })).toMatchObject({ score: 75, passed: true });
     expect(shuffled([1, 2, 3], () => 0)).toEqual([2, 3, 1]);
+  });
+});
+
+describe('L22 : branchement conditionnel', () => {
+  const mb = parseManifest({
+    schemaVersion: 1,
+    demoId: 'd',
+    versionId: 'v',
+    workspaceId: 'w',
+    title: 'T',
+    publishedAt: 'x',
+    theme: {},
+    steps: [
+      {
+        id: 'menu',
+        kind: 'text',
+        options: {
+          choices: [
+            { label: 'Conseiller', action: { type: 'goto', stepId: 'a' } },
+            { label: 'Accueil', action: { type: 'goto', stepId: 'b' } },
+          ],
+        },
+      },
+      {
+        id: 'a',
+        kind: 'text',
+        options: {
+          rules: [
+            { when: { choice: { stepId: 'menu', index: 1 } }, goto: { type: 'goto', stepId: 'c' } },
+            { when: { quiz: { questionId: 'q1', answerId: 'x' } }, goto: { type: 'end' } },
+            { when: { nope: true }, goto: { type: 'end' } },
+          ],
+        },
+      },
+      { id: 'b', kind: 'text' },
+      { id: 'c', kind: 'text' },
+    ],
+  });
+  it('ignore une règle invalide et garde les autres', () => {
+    expect(mb.steps[1]!.options.rules).toHaveLength(2);
+  });
+  it('première règle vraie, sinon null', () => {
+    expect(ruleTarget(mb, 1, { choices: {}, answers: {} })).toBeNull();
+    expect(ruleTarget(mb, 1, { choices: { menu: 1 }, answers: {} })).toEqual({ type: 'goto', stepId: 'c' });
+    expect(ruleTarget(mb, 1, { choices: { menu: 0 }, answers: { q1: ['x'] } })).toEqual({ type: 'end' });
+    expect(ruleTarget(mb, 0, { choices: { menu: 1 }, answers: {} })).toBeNull();
   });
 });

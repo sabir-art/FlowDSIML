@@ -181,3 +181,24 @@ export function shuffled<T>(list: readonly T[], rnd: () => number = Math.random)
   }
   return out;
 }
+
+/** L22 : mémoire de la session utilisée par les règles (choix faits, réponses au quiz). */
+export interface BranchMemory {
+  /** Index du choix fait à chaque étape à menu (par identifiant d'étape). */
+  choices: Record<string, number>;
+  /** Réponses cochées par question du quiz. */
+  answers: Record<string, string[]>;
+}
+
+/** L22 : destination imposée par la première règle vraie de l'étape `i`, sinon null. */
+export function ruleTarget(m: Manifest, i: number, mem: BranchMemory): ChoiceAction | null {
+  const rules = m.steps[i]?.options.rules ?? [];
+  for (const r of rules) {
+    const ok =
+      'choice' in r.when
+        ? mem.choices[r.when.choice.stepId] === r.when.choice.index
+        : (mem.answers[r.when.quiz.questionId] ?? []).includes(r.when.quiz.answerId);
+    if (ok) return r.goto;
+  }
+  return null;
+}

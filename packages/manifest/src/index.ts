@@ -91,6 +91,20 @@ export type ChoiceAction = z.infer<typeof choiceActionSchema>;
 export const choiceSchema = z.object({ label: z.string().max(80), action: choiceActionSchema });
 export type Choice = z.infer<typeof choiceSchema>;
 
+/**
+ * L22 : règle de branchement automatique. En quittant l'étape (« Suivant »), la première règle dont
+ * la condition est vraie choisit la destination ; sinon, étape suivante. Les conditions portent sur
+ * les choix faits plus tôt dans la session (menu de choix) ou sur les réponses au quiz.
+ */
+export const ruleSchema = z.object({
+  when: z.union([
+    z.object({ choice: z.object({ stepId: z.string(), index: z.number().int().min(0).max(5) }) }),
+    z.object({ quiz: z.object({ questionId: z.string(), answerId: z.string() }) }),
+  ]),
+  goto: choiceActionSchema,
+});
+export type Rule = z.infer<typeof ruleSchema>;
+
 /** F1 : options d'affichage d'une étape (pop-up, variante, menu de choix). */
 export const stepOptionsSchema = z
   .object({
@@ -122,6 +136,18 @@ export const stepOptionsSchema = z
           return r.success ? [r.data] : [];
         }),
       ),
+    /** L22 : règles de branchement automatique (une règle invalide est ignorée seule). */
+    rules: z
+      .array(z.unknown())
+      .max(10)
+      .default([])
+      .catch([])
+      .transform((list) =>
+        list.flatMap((r) => {
+          const p = ruleSchema.safeParse(r);
+          return p.success ? [p.data] : [];
+        }),
+      ),
   })
   .default({
     display: 'screen',
@@ -133,6 +159,7 @@ export const stepOptionsSchema = z
     prevLabel: '',
     showPrev: false,
     choices: [],
+    rules: [],
   });
 export type StepOptions = z.infer<typeof stepOptionsSchema>;
 

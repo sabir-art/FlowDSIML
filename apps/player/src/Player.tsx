@@ -24,7 +24,15 @@ import {
   Minimize2,
   RotateCcw,
 } from 'lucide-preact';
-import { backdropIndex, canAutoAdvance, checklistItems, choiceTarget, nextIndex } from './logic';
+import {
+  backdropIndex,
+  canAutoAdvance,
+  checklistItems,
+  choiceTarget,
+  nextIndex,
+  ruleTarget,
+  type BranchMemory,
+} from './logic';
 import { Checklist } from './Checklist';
 import { Quiz } from './Quiz';
 import { submitQuizAttempt } from './api';
@@ -177,7 +185,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
   const autoplay = m.autoplay?.enabled ? m.autoplay : null;
   useEffect(() => {
     if (!autoplay || !playing || !canAutoAdvance(m, index, !!gateForm)) return;
-    const id = setTimeout(() => go(index + 1), autoplay.delayMs);
+    const id = setTimeout(() => next(), autoplay.delayMs);
     return () => clearTimeout(id);
   }, [autoplay, playing, index, gateForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -229,13 +237,28 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
     }
   }
 
+  // L22 : mémoire de la session pour les règles de branchement (choix faits, réponses au quiz)
+  const memory = useRef<BranchMemory>({ choices: {}, answers: {} });
+
+  /** L22 : « Suivant » applique la première règle vraie de l'étape, sinon l'étape suivante. */
+  function next() {
+    const rule = ruleTarget(m, index, memory.current);
+    if (rule) return follow(rule);
+    go(index + 1);
+  }
+
   function onChoice(c: (typeof choices)[number]) {
     tracker.track('hotspot_click', {
       stepId: step.id,
       stepIndex: index,
       props: { choice: c.label.slice(0, 80) },
     });
-    const target = choiceTarget(m, c.action);
+    memory.current.choices[step.id] = choices.indexOf(c);
+    follow(c.action);
+  }
+
+  function follow(action: (typeof choices)[number]['action']) {
+    const target = choiceTarget(m, action);
     if (!target) return;
     if (target.kind === 'url') window.open(target.url, '_blank', 'noopener');
     else if (target.kind === 'end') {
@@ -254,6 +277,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
       window.open(h.action.url, h.action.newTab ? '_blank' : '_top', 'noopener');
       return;
     }
+    if (h.action.type === 'next' && ruleTarget(m, index, memory.current)) return next();
     const n = nextIndex(m, index, h.action);
     if (n === null && h.action.type === 'next' && last) return m.quiz ? go(m.steps.length) : finish();
     go(n);
@@ -281,10 +305,10 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
       if (e.key === 'Escape') {
         if (menu) return setMenu(false);
         // Spec a2 §2 : Échap vaut « Suivant » sur une pop-up sans choix
-        if (popup && !choices.length && !last && !gateForm) return go(index + 1);
+        if (popup && !choices.length && !last && !gateForm) return next();
       }
       if ((e.target as HTMLElement)?.closest?.('form') || gateForm || view === 'quiz') return;
-      if (e.key === 'ArrowRight') go(index + 1);
+      if (e.key === 'ArrowRight') next();
       if (e.key === 'ArrowLeft') go(index - 1);
     }
     addEventListener('keydown', onKey);
@@ -462,6 +486,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
               }}
               attemptsUsed={quizAttemptsUsed()}
               onSubmit={async (answers) => {
+                memory.current.answers = { ...memory.current.answers, ...answers };
                 if (preview) return null; // « Tester le quiz » : tentative non comptée
                 const res = await submitQuizAttempt({
                   demoId: m.demoId,
@@ -579,7 +604,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
                 {choices.length > 0 ? null : !last ? (
                   <button
                     class={`p-btn ${step.cta ? 'p-btn-ghost' : 'p-btn-primary'}`}
-                    onClick={() => go(index + 1)}
+                    onClick={() => next()}
                     autoFocus
                   >
                     {step.options.buttonLabel
@@ -712,7 +737,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
         </span>
         <button
           class="p-icon-btn"
-          onClick={() => (last && !m.quiz ? finish() : go(index + 1))}
+          onClick={() => (last && !m.quiz ? finish() : next())}
           disabled={(last && !m.quiz && (ended || endText)) || view === 'quiz'}
           aria-label={t.nextStep}
         >
