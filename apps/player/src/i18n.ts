@@ -142,7 +142,7 @@ const dict = {
       certBusy: 'Création de l’attestation…',
       certRefused:
         'L’attestation n’a pas pu être délivrée : votre lien n’est plus actif ou un module n’est pas validé. Contactez le service formation.',
-      certNoName: 'Votre nom n’est pas renseigné : contactez le service formation pour obtenir votre attestation.',
+      certNoName: 'Pour recevoir votre attestation, contactez {{workspace}} : votre nom n’est pas renseigné.',
       certError: 'L’attestation n’a pas pu être créée. Vérifiez votre connexion et réessayez.',
       notFound: 'Cette formation n’est pas disponible.',
       backHome: 'Retour au centre',
@@ -386,7 +386,7 @@ const dict = {
       certBusy: 'Creating the certificate…',
       certRefused:
         'The certificate could not be issued: your link is no longer active or a module is not validated. Contact the training team.',
-      certNoName: 'Your name is missing: contact the training team to get your certificate.',
+      certNoName: 'To receive your certificate, contact {{workspace}}: your name is missing.',
       certError: 'The certificate could not be created. Check your connection and try again.',
       notFound: 'This course is not available.',
       backHome: 'Back to the center',

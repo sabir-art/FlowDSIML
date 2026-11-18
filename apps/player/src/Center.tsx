@@ -624,7 +624,16 @@ function PathPage({
             </h2>
             <p>{c.fpDoneText}</p>
           </div>
-          {token && <CertificateButton c={c} token={token} pathId={p.id} logoPath={data.center.logoPath} />}
+          {token && (
+            <CertificateButton
+              c={c}
+              token={token}
+              pathId={p.id}
+              logoPath={data.center.logoPath}
+              workspace={data.center.workspace}
+              help={data.center.help}
+            />
+          )}
         </section>
       )}
       <ol class="fp-list" aria-label={c.fpModules}>
@@ -714,11 +723,15 @@ function CertificateButton({
   token,
   pathId,
   logoPath,
+  workspace,
+  help,
 }: {
   c: C;
   token: string;
   pathId: string;
   logoPath: string | null;
+  workspace: string;
+  help: string;
 }) {
   const [state, setState] = useState<'idle' | 'busy' | 'refused' | 'noName' | 'error'>('idle');
   const run = async () => {
@@ -756,6 +769,15 @@ function CertificateButton({
           : state === 'busy'
             ? c.certBusy
             : '';
+  // Aucun nom connu : pas d'attestation, l'aide remplace le bouton (spec L15 §5)
+  if (state === 'noName') {
+    const href = help ? (help.includes('@') ? `mailto:${help}` : help) : null;
+    return (
+      <p class="fp-cert-s fp-cert-help" role="status">
+        {fmt(c, 'certNoName', { workspace })} {href && <a href={href}>{c.help}</a>}
+      </p>
+    );
+  }
   return (
     <div class="fp-cert">
       <button

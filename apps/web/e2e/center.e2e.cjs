@@ -204,10 +204,17 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     );
     reply = { error: 'name_missing' };
     await btn.click();
-    await p.waitForFunction(() =>
-      /nom n’est pas renseigné/.test(document.querySelector('.fp-cert-s')?.textContent || ''),
+    await p.waitForSelector('.fp-cert-help');
+    ok(
+      (await p.locator('.fp-done button').count()) === 0 &&
+        /Pour recevoir votre attestation, contactez Mission Locale Exemple.*nom n’est pas renseigné/.test(
+          await p.locator('.fp-cert-help').textContent(),
+        ) &&
+        (await p.locator('.fp-cert-help a').getAttribute('href')) === 'mailto:aide@mission-locale.example',
+      'L15-07 : sans nom, l’aide remplace le bouton (avec « Besoin d’aide ? »)',
     );
-    ok(true, 'L15-07 : nom manquant expliqué');
+    await p.reload();
+    await p.waitForSelector('.fp-done button');
     reply = {
       certificateId: '000042',
       issuedAt: '2026-11-12T10:00:00Z',
@@ -220,14 +227,7 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
         { title: 'Planifier un rendez-vous', best: null },
       ],
     };
-    p.on('console', (m) => m.type() === 'error' && console.log('console:', m.text()));
-    const [dl] = await Promise.all([
-      p.waitForEvent('download', { timeout: 15000 }).catch(async (e) => {
-        console.log('status:', await p.locator('.fp-cert-s').textContent(), errors);
-        throw e;
-      }),
-      btn.click(),
-    ]);
+    const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), btn.click()]);
     const pdf = require('fs')
       .readFileSync(await dl.path())
       .toString('latin1');

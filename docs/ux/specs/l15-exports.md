@@ -100,11 +100,12 @@
   - en-tête : logo et nom du workspace, « Centre de formation », filet noir de 2 px ;
   - pastille bordée « ATTESTATION DE SUIVI · NON CERTIFIANTE » ;
   - titre « Attestation de suivi » ;
-  - phrase : « {{workspace}} atteste que **{{prénom}}** a suivi en ligne la formation **« {{formation}} »** et validé l'ensemble de ses modules. Formation validée le **{{date}}**. » La date est celle où le dernier module obligatoire a été validé (événement `demo_complete` ou quiz réussi, horodaté côté serveur), renvoyée par la RPC d'attestation. Si elle manque, la phrase s'arrête après « modules » ;
+  - phrase : « {{workspace}} atteste que **{{prénom}} {{nom}}** a suivi en ligne la formation **« {{formation}} »** et validé l'ensemble de ses modules. Formation validée le **{{date}}**. » La date est celle où le dernier module obligatoire a été validé (événement `demo_complete` ou quiz réussi, horodaté côté serveur), renvoyée par la RPC d'attestation. Si elle manque, la phrase s'arrête après « modules » ;
   - tableau Module, Statut, Quiz (meilleur score, sinon « — ») ;
   - zone « Pour {{workspace}} » avec une ligne de signature vide, et « Document généré le {{date du jour}} » ;
   - encadré final : « Attestation de suivi, non certifiante. Elle indique que les modules ont été suivis et validés en ligne ; elle ne vaut ni diplôme, ni certification, ni habilitation. »
-- **Prénom seul** : c'est ce que le centre connaît de l'apprenant (L14). Le nom complet ne s'affiche que si le lien personnel le fournit.
+- **Prénom et nom** : l'attestation sert à un salarié, elle porte donc son nom complet. Il vient du nom complet de l'apprenant, sinon du prénom et du nom fournis par le lien personnel ; jamais de l'e-mail.
+- **Aucun nom connu** : aucune attestation n'est délivrée. Sur la page de la formation terminée (L14-06), le bouton est remplacé par une aide : « Pour recevoir votre attestation, contactez {{workspace}} : votre nom n'est pas renseigné. », avec le lien « Besoin d'aide ? » s'il existe.
 - Elle est disponible seulement si **tous** les modules obligatoires sont validés. Sinon, le bouton n'apparaît pas.
 - Le PDF est balisé comme au §4, avec le titre « Attestation de suivi · {{formation}} ».
 
