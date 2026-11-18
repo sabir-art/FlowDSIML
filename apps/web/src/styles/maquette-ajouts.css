@@ -1977,3 +1977,21 @@
 .mk .cta-fields .help {
   display: block;
 }
+/* Calque du champ Texte : gras simulé (même chasse), italique synthétisé, marqueurs atténués */
+.mk .rte-b {
+  text-shadow:
+    0.35px 0 0 currentColor,
+    -0.35px 0 0 currentColor;
+}
+.mk .rte-i {
+  font-style: italic;
+  font-synthesis: style;
+}
+.mk .rte-mk {
+  color: var(--fd-color-text-subtle);
+  text-shadow: none;
+}
+.mk .sp-panel > :first-child:not(.sec) + .sec {
+  border-top: 0;
+  padding-top: 4px;
+}

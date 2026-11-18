@@ -97,11 +97,14 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
       : undefined;
   const primary = step.kind === 'image' ? step.hotspots[0] : undefined;
   const last = index === m.steps.length - 1;
-  const popup = step.kind !== 'image' && step.options.display === 'popup';
-  const bgBlur = popup && step.options.background === 'blur';
-  const backdrop = bgBlur ? backdropIndex(m, index) : null;
   /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
   const choices = step.options.choices.filter((c) => choiceTarget(m, c.action));
+  /** Écran de fin (dernière étape de texte, sans quiz) : carte sur la capture précédente (PY-6, EDT-09). */
+  const endText =
+    step.kind !== 'image' && last && step.options.display !== 'popup' && !m.quiz && !choices.length;
+  const popup = step.kind !== 'image' && (step.options.display === 'popup' || endText);
+  const bgBlur = popup && (endText || step.options.background === 'blur');
+  const backdrop = bgBlur ? backdropIndex(m, index) : null;
   const [visited, setVisited] = useState<Set<number>>(() => new Set());
   const prevIndex = useRef<number | null>(null);
   const markSeen = (i: number) => setVisited((v) => (v.has(i) ? v : new Set(v).add(i)));
@@ -453,11 +456,11 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
               />
             )}
             <div
-              class={`p-text-step${popup ? ' p-popup' : ''}`}
+              class={`p-text-step${popup ? ' p-popup' : ''}${endText ? ' p-end-text' : ''}`}
               role={popup ? 'dialog' : undefined}
               aria-labelledby={`p-step-title-${step.id}`}
             >
-              {popup && (
+              {popup && !endText && (
                 <span class={`p-variant p-variant--${step.options.variant}`}>
                   {step.options.showIcon &&
                     (step.options.variant === 'instruction' ? (
@@ -484,8 +487,8 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
                   ))}
                 </div>
               )}
-              <div class="p-actions">
-                {index > 0 && (
+              <div class={`p-actions${endText ? ' p-card-acts--col' : ''}`}>
+                {index > 0 && !endText && (
                   <button class="p-btn p-btn-ghost" onClick={() => go(index - 1)}>
                     {t.prev}
                   </button>
@@ -515,7 +518,10 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
                     <ChevronRight {...ICON} size={16} />
                   </button>
                 ) : (
-                  <button class="p-btn p-btn-ghost" onClick={() => go(0)}>
+                  <button
+                    class={`p-btn ${step.cta || !endText ? 'p-btn-ghost' : 'p-btn-secondary'}`}
+                    onClick={() => go(0)}
+                  >
                     <RotateCcw {...ICON} size={16} />
                     {t.restart}
                   </button>
@@ -630,7 +636,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
         <button
           class="p-icon-btn"
           onClick={() => (last && !m.quiz ? finish() : go(index + 1))}
-          disabled={(last && !m.quiz && ended) || view === 'quiz'}
+          disabled={(last && !m.quiz && (ended || endText)) || view === 'quiz'}
           aria-label={t.nextStep}
         >
           <ArrowRight {...ICON} />

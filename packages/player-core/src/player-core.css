@@ -172,6 +172,12 @@
   color: inherit;
   border-color: color-mix(in srgb, currentColor 22%, transparent);
 }
+/* Bouton secondaire (carte de fin sans CTA, PY-6) */
+.p-btn-secondary {
+  background: var(--p-surface);
+  color: var(--p-text);
+  border-color: color-mix(in srgb, var(--p-text) 22%, transparent);
+}
 .p-btn:disabled {
   opacity: 0.6;
 }

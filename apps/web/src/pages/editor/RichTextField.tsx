@@ -13,26 +13,44 @@ export function withVariablePills(html: string): string {
   );
 }
 
-const VAR_RE = /\{\{\s*[a-z][a-z0-9_]{0,39}\s*(?:\|[^}]*)?\}\}/g;
+/** Calque sous le champ : même texte, variables en pastilles, **gras** et *italique* rendus
+ * (gras simulé et italique synthétisé : même chasse que le texte, le curseur reste aligné). */
+const TOKEN_RE = /(\*\*)([^*\n]+)(\*\*)|(\*)([^*\n]+)(\*)|(\{\{\s*[a-z][a-z0-9_]{0,39}\s*(?:\|[^}]*)?\}\})/g;
 
-/** Calque sous le champ : même texte, variables en pastilles (le champ reste un textarea natif). */
 function highlightVariables(text: string): ReactNode[] {
   const out: ReactNode[] = [];
   let last = 0;
-  for (const m of text.matchAll(VAR_RE)) {
+  for (const m of text.matchAll(TOKEN_RE)) {
     out.push(text.slice(last, m.index));
-    out.push(
-      <span key={m.index} className="rte-var">
-        {m[0]}
-      </span>,
-    );
-    last = m.index! + m[0].length;
+    const k = m.index!;
+    if (m[2] !== undefined)
+      out.push(
+        <span key={k} className="rte-b">
+          <span className="rte-mk">{m[1]}</span>
+          {m[2]}
+          <span className="rte-mk">{m[3]}</span>
+        </span>,
+      );
+    else if (m[5] !== undefined)
+      out.push(
+        <span key={k} className="rte-i">
+          <span className="rte-mk">{m[4]}</span>
+          {m[5]}
+          <span className="rte-mk">{m[6]}</span>
+        </span>,
+      );
+    else
+      out.push(
+        <span key={k} className="rte-var">
+          {m[7]}
+        </span>,
+      );
+    last = k + m[0].length;
   }
   out.push(text.slice(last) + '\n');
   return out;
 }
 
-/** Texte riche restreint : **gras**, *italique*, [lien](url), {{variable}}. Rendu sûr (échappé). */
 export function RichTextField({
   id,
   label,

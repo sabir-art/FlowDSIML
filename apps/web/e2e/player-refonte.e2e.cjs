@@ -127,6 +127,29 @@ const manifest = require('./player-maquette.cjs');
     'PY-6 : sans CTA, « Recommencer » en secondaire',
   );
 
+  // Écran de fin en texte (EDT-09) : carte sur la capture précédente assombrie, CTA + Recommencer
+  const endStep = {
+    id: 'end',
+    kind: 'text',
+    title: 'Merci !',
+    body: 'Réservez une **démo**',
+    hotspots: [],
+    cta: { label: 'Réserver une démo', url: 'https://example.com' },
+  };
+  const p3 = await open(
+    { width: 1440, height: 900 },
+    { ...manifest, forms: [], steps: [{ ...manifest.steps[0], gateFormId: null }, endStep] },
+  );
+  await next(p3);
+  await p3.waitForSelector('.p-end-text');
+  ok((await p3.locator('.p-stage.is-backdrop').count()) === 1, 'EDT-09 : fin sur la capture précédente');
+  ok(
+    (await p3.locator('.p-end-text .p-btn-primary').textContent()).includes('Réserver une démo') &&
+      (await p3.locator('.p-end-text').getByText('Recommencer').count()) === 1 &&
+      (await p3.locator('.p-end-text').getByText('Précédent').count()) === 0,
+    'EDT-09 : bouton principal + Recommencer, sans Précédent',
+  );
+
   // Mobile : feuille du bas, méta et langue masquées
   const m = await open({ width: 390, height: 844 });
   ok(

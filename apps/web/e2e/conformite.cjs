@@ -63,6 +63,11 @@ const SCREENS = {
     async prepare(p) {
       await p.locator('.rail-list .step').nth(2).click();
       await p.waitForTimeout(400);
+      // Bouton principal activé, pour valider la section « Bouton principal (CTA) »
+      await p.locator('#st-cta-on').check();
+      await p.locator('#st-cta-l').fill('Réserver une démo');
+      await p.locator('#st-cta-u').fill('https://agenda.example.com/demo');
+      await p.waitForTimeout(400);
     },
   },
   'EDT-10': {

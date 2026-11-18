@@ -15,7 +15,7 @@ import {
   themeVars,
   tipClass,
 } from '@flowdsiml/player-core';
-import { ChevronRight, ClipboardList, Info } from 'lucide-react';
+import { ChevronRight, ClipboardList, ExternalLink, Info, RotateCcw } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
 import { withVariablePills } from './RichTextField';
@@ -196,10 +196,20 @@ export function Canvas({
 
   if (step.kind === 'text' || !step.image_path) {
     const opts = asStepOptions(step.options);
-    const popup = step.kind === 'text' && opts.display === 'popup';
+    const here = editor.steps.findIndex((x) => x.id === step.id);
+    // Écran de fin, comme le lecteur (PY-6, EDT-09) : dernière étape de texte, sans quiz ni choix,
+    // en carte sur la capture précédente assombrie, avec bouton principal et « Recommencer »
+    const endText =
+      step.kind === 'text' &&
+      here === editor.steps.length - 1 &&
+      opts.display !== 'popup' &&
+      !editor.questions.length &&
+      !opts.choices.length;
+    const popup = step.kind === 'text' && (opts.display === 'popup' || endText);
+    const stepCta = asCta(step.cta);
     const card = (
       <>
-        {popup && (
+        {popup && !endText && (
           <span className={`canvas-variant canvas-variant--${opts.variant}`}>
             {opts.showIcon &&
               (opts.variant === 'instruction' ? (
@@ -215,7 +225,21 @@ export function Canvas({
           </span>
         )}
         <h2>{step.title || t('editor.untitled')}</h2>
-        <div dangerouslySetInnerHTML={{ __html: richTextToHtml(step.body) }} />
+        <div dangerouslySetInnerHTML={{ __html: withVariablePills(richTextToHtml(step.body)) }} />
+        {endText && (
+          <div className="canvas-end-acts">
+            {stepCta && (
+              <span className="p-btn p-btn-primary">
+                {stepCta.label}
+                <ExternalLink size={16} aria-hidden="true" />
+              </span>
+            )}
+            <span className={`p-btn ${stepCta ? 'p-btn-ghost' : 'p-btn-secondary'}`}>
+              <RotateCcw size={16} aria-hidden="true" />
+              {t('editor.end.restart')}
+            </span>
+          </div>
+        )}
         {opts.choices.length > 0 && (
           <ul className="canvas-choices" aria-label={t('editor.advanced.choice.title')}>
             {opts.choices.map((c, i) => (
@@ -229,22 +253,27 @@ export function Canvas({
       </>
     );
     // F1-2 : fond « Capture floutée » = dernière étape image précédente, floutée comme dans le player
-    const here = editor.steps.findIndex((x) => x.id === step.id);
     const prevImage = [...editor.steps.slice(0, Math.max(0, here))]
       .reverse()
       .find((x) => x.kind === 'image' && x.image_path);
     const bgUrl =
-      popup && opts.background === 'blur' && prevImage ? editor.imageUrls[prevImage.image_path!] : undefined;
+      popup && (endText || opts.background === 'blur') && prevImage
+        ? editor.imageUrls[prevImage.image_path!]
+        : undefined;
     return (
       // F1-1 : le canevas suit le thème de la démo (clair), pas le thème sombre de l'app
       <div
-        className={`canvas-text fd-player-scope${popup ? ' canvas-text--popup' : ''}`}
-        style={popup && opts.background === 'color' ? { background: opts.bgColor } : undefined}
+        className={`canvas-text fd-player-scope${popup ? ' canvas-text--popup' : ''}${endText ? ' canvas-text--end' : ''}`}
+        style={{
+          // Variables du lecteur (--p-primary…) pour les boutons de la carte, comme sur les étapes image
+          ...themeVars(themeSchema.parse(asSettings(editor.demo?.settings).theme ?? {})),
+          ...(popup && opts.background === 'color' && !endText ? { background: opts.bgColor } : {}),
+        }}
         onPointerDown={() => setSelection({ kind: 'step' })}
       >
         {bgUrl && <img className="canvas-popup-bg" src={bgUrl} alt="" aria-hidden="true" />}
         {formChip}
-        {popup ? <div className="canvas-popup">{card}</div> : card}
+        {popup ? <div className={`canvas-popup${endText ? ' canvas-end' : ''}`}>{card}</div> : card}
       </div>
     );
   }

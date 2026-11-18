@@ -1546,3 +1546,28 @@
   width: 14px;
   height: 14px;
 }
+/* EDT-09 : écran de fin en carte sur la capture précédente assombrie (comme le lecteur) */
+.canvas-text--end .canvas-popup-bg {
+  filter: brightness(0.52);
+  transform: none;
+}
+.canvas-end {
+  width: min(420px, 100%);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+}
+.canvas-end h2 {
+  font-size: 20px;
+  font-weight: 800;
+}
+.canvas-end-acts {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 18px;
+}
+.canvas-end-acts .p-btn-ghost {
+  border-color: transparent;
+}
