@@ -59,10 +59,19 @@ interface Props {
   startQuiz?: boolean;
   /** L13 : reprise à une étape (« Bon retour »). */
   startStep?: number;
+  /** L22 : mode présentation, piloté par l'app (vue présentateur, écran public). */
+  present?: PresentState;
   onLead: (
     form: LeadFormT,
     data: { email: string; fields: Record<string, string>; consent: boolean },
   ) => Promise<void>;
+}
+
+/** L22 : état imposé par la vue présentateur. */
+export interface PresentState {
+  index: number;
+  black: boolean;
+  hideHotspots: boolean;
 }
 
 const GATE_KEY = (demoId: string) => `fd.gate.${demoId}`;
@@ -89,7 +98,16 @@ const DARK = { '--p-bg': '#0B0D10', '--p-chrome': '#15191F', '--p-chrome-text': 
 /** L22 : nombre maximal de sauts par règle dans une session (protection contre les boucles). */
 const MAX_RULE_JUMPS = 50;
 
-export function Player({ manifest: m, values, tracker, preview, startQuiz, startStep, onLead }: Props) {
+export function Player({
+  manifest: m,
+  values,
+  tracker,
+  preview,
+  startQuiz,
+  startStep,
+  onLead,
+  present,
+}: Props) {
   // PY-3 : langue de l'interface du lecteur (le contenu de la démo reste dans sa langue)
   const [locale, setLocale] = useState<'fr' | 'en'>(m.locale === 'en' ? 'en' : 'fr');
   const t = strings(locale);
@@ -97,6 +115,12 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
   const prefersDark = useMedia('(prefers-color-scheme: dark)');
   const rootRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(() => Math.max(0, Math.min(startStep ?? 0, m.steps.length - 1)));
+  // L22 : en présentation, l'étape est imposée par la vue présentateur
+  useEffect(() => {
+    if (present && present.index !== index && present.index >= 0 && present.index < m.steps.length)
+      setIndex(present.index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [present?.index]);
   const [fullscreen, setFullscreen] = useState(false);
   const [gateDone, setGateDone] = useState<Set<string>>(() => {
     try {
@@ -196,11 +220,15 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
   // page : s'il était dans l'ancienne bulle (démontée), il passe au titre de la nouvelle étape.
   // S'il est sur un bouton toujours présent (barre du bas), il y reste ; la zone live annonce l'étape.
   const firstStep = useRef(true);
+  const presenting = Boolean(present);
   useEffect(() => {
     if (firstStep.current) {
       firstStep.current = false;
       return;
     }
+    // L22 : en présentation, le lecteur est piloté de l'extérieur ; il ne prend jamais le focus
+    // (sinon les raccourcis de la vue présentateur partiraient dans l'iframe).
+    if (presenting) return;
     const id = requestAnimationFrame(() => {
       const root = rootRef.current;
       const a = document.activeElement;
@@ -211,7 +239,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
       target?.focus();
     });
     return () => cancelAnimationFrame(id);
-  }, [index, view]);
+  }, [index, view, presenting]);
 
   function go(i: number | null) {
     if (i === m.steps.length && m.quiz) return openQuiz();
@@ -374,11 +402,20 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
           .join('. ');
 
   return (
-    <div class={`p-root ${compact ? 'is-compact' : ''}${dark ? ' is-dark' : ''}`} style={style} ref={rootRef}>
+    <div
+      class={`p-root ${compact ? 'is-compact' : ''}${dark ? ' is-dark' : ''}${present ? ' is-present' : ''}${present?.hideHotspots ? ' is-present-nohs' : ''}`}
+      style={style}
+      ref={rootRef}
+    >
+      {present?.black && (
+        <div class="p-black" role="status">
+          {t.paused}
+        </div>
+      )}
       <p class="sr-only" aria-live="polite" aria-atomic="true">
         {announce}
       </p>
-      {preview && <div class="p-preview">{t.preview}</div>}
+      {preview && !present && <div class="p-preview">{t.preview}</div>}
       <header class="p-top" inert={!!gateForm}>
         {/* PY-1 : pastille du workspace (logo, sinon initiales), titre, méta */}
         <div class="p-id">

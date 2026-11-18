@@ -1,5 +1,5 @@
 import { useConfirm } from '../../../components/ConfirmDialog';
-import { EyeOff, Target, Trash2, TriangleAlert } from 'lucide-react';
+import { EyeOff, Lock, Presentation, Target, Trash2, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import { asCta, asRects, asZoom, type Selection, type StepRow } from '../types';
@@ -337,6 +337,35 @@ export function StepPanel({
 
       <div className="sec">
         <GuidedStepFields editor={editor} step={step} index={index} readOnly={readOnly} />
+      </div>
+
+      {/* L22-01 : notes du présentateur, jamais publiées ni exportées */}
+      <div className="sec notes-sec">
+        <div className="sec-title">
+          <Presentation aria-hidden="true" />
+          {t('editor.notes.title')}
+          <span className="lock">
+            <Lock aria-hidden="true" />
+            {t('editor.notes.private')}
+          </span>
+        </div>
+        <div className="field">
+          <label className="sr-only" htmlFor="st-notes">
+            {t('editor.notes.label')}
+          </label>
+          <textarea
+            id="st-notes"
+            className="textarea"
+            maxLength={1000}
+            aria-describedby="st-notes-h"
+            readOnly={readOnly}
+            value={step.presenter_notes ?? ''}
+            onChange={(e) => editor.updateStep(step.id, { presenter_notes: e.target.value.slice(0, 1000) })}
+          />
+        </div>
+        <p className="help" id="st-notes-h">
+          {t('editor.notes.help')}
+        </p>
       </div>
     </div>
   );

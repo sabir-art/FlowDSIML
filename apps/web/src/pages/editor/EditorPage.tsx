@@ -21,6 +21,7 @@ import {
   Undo2,
   ZoomIn,
   Monitor,
+  Presentation,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -45,6 +46,7 @@ import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
 import { PreviewDialog } from './PreviewDialog';
 import { ExportDialog } from '../export/ExportDialog';
+import { PresentDialog } from '../present/PresentDialog';
 import { FindBar } from './FindBar';
 import { ShortcutsDialog, isMac } from './ShortcutsDialog';
 import type { Manifest } from '@flowdsiml/manifest';
@@ -95,6 +97,8 @@ export function EditorPage() {
   const [zoom, setZoom] = useState<Zoom>('fit');
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  // L22-02 : « Présenter » (aussi ouvert depuis le menu d'une démo par ?present=1)
+  const [presenting, setPresenting] = useState(() => params.get('present') === '1');
   const navigate = useNavigate();
   const versionId = editor.demo?.current_version_id;
   useEffect(() => {
@@ -275,6 +279,14 @@ export function EditorPage() {
   return (
     <main className="mk ed" id="main">
       {exporting && demoId && <ExportDialog demoId={demoId} onClose={() => setExporting(false)} />}
+      {presenting && demoId && editor.steps.length > 0 && (
+        <PresentDialog
+          demoId={demoId}
+          title={editor.demo.title || t('demos.untitled')}
+          steps={editor.steps.map((st) => st.title ?? '')}
+          onClose={() => setPresenting(false)}
+        />
+      )}
       <h1 className="sr-only">
         {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
       </h1>
@@ -396,6 +408,15 @@ export function EditorPage() {
               : []),
           ]}
         />
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          disabled={!editor.steps.length}
+          onClick={() => setPresenting(true)}
+        >
+          <Presentation aria-hidden="true" />
+          {t('present.button')}
+        </button>
         <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/share`}>
           <Share2 aria-hidden="true" />
           {t('editor.share')}

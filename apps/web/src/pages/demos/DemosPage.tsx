@@ -16,6 +16,7 @@ import {
   Users,
   Copy,
   Download,
+  Presentation,
   Folder,
   FolderInput,
   FolderOpen,
@@ -288,6 +289,12 @@ export function DemosPage() {
 
   const menuFor = (d: Demo): Array<MenuItem | 'separator'> => [
     { label: t('demos.openEditor'), icon: <Pencil />, onSelect: () => navigate(`/demos/${d.id}/edit`) },
+    {
+      label: t('present.button'),
+      icon: <Presentation />,
+      disabled: !stepCounts[d.id],
+      onSelect: () => navigate(`/demos/${d.id}/edit?present=1`),
+    },
     { label: t('editor.share'), icon: <Share2 />, onSelect: () => navigate(`/demos/${d.id}/share`) },
     { label: t('nav.analytics'), icon: <BarChart3 />, onSelect: () => navigate(`/demos/${d.id}/analytics`) },
     { label: t('export.menu'), icon: <Download />, onSelect: () => setExporting(d.id) },

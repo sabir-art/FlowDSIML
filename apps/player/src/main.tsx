@@ -16,7 +16,7 @@ import { CenterApp } from './Center';
 import { embedAllowed, parseRoute } from './logic';
 import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
-import { Player } from './Player';
+import { Player, type PresentState } from './Player';
 import { PasswordGate, SysScreen } from './Gate';
 import '@flowdsiml/player-core/player-core.css';
 import './player.css';
@@ -35,6 +35,8 @@ type State =
       /** L13 : reprise proposée (« Bon retour ») tant que l'apprenant n'a pas choisi. */
       resume?: ResumeInfo;
       startStep?: number;
+      /** L22 : présentation pilotée par l'app (vue présentateur, écran public). */
+      present?: PresentState;
     };
 
 const inIframe = window.parent !== window;
@@ -62,7 +64,19 @@ function App() {
       if (route.kind === 'preview') {
         // Aperçu : le manifeste vient de l'éditeur (origine vérifiée), rien n'est enregistré.
         const onMsg = (e: MessageEvent) => {
-          if (e.origin !== APP_ORIGIN || (e.data as { type?: string })?.type !== 'fd:preview') return;
+          if (e.origin !== APP_ORIGIN) return;
+          // L22 : la vue présentateur impose l'étape, l'écran noir et le masquage des points chauds
+          if ((e.data as { type?: string })?.type === 'fd:present') {
+            const p = e.data as { index?: unknown; black?: unknown; hideHotspots?: unknown };
+            const present: PresentState = {
+              index: typeof p.index === 'number' ? p.index : 0,
+              black: p.black === true,
+              hideHotspots: p.hideHotspots === true,
+            };
+            setState((st) => (st.status === 'ready' ? { ...st, present } : st));
+            return;
+          }
+          if ((e.data as { type?: string })?.type !== 'fd:preview') return;
           const parsed = manifestSchema.safeParse((e.data as { manifest: unknown }).manifest);
           if (parsed.success)
             setState({
@@ -214,6 +228,7 @@ function App() {
       preview={state.preview}
       startQuiz={state.startQuiz}
       startStep={state.startStep}
+      present={state.present}
       onLead={async (_form, data) => {
         if (state.preview) return;
         await submitLead({

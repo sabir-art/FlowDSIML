@@ -27,6 +27,12 @@ import { BrandSettings, VariablesSettings } from './pages/settings/SoonSections'
 import { DemosPage } from './pages/demos/DemosPage';
 
 // Pages lourdes chargées à la demande (éditeur, analytics, partage).
+const PresenterPage = lazy(() =>
+  import('./pages/present/PresenterPage').then((m) => ({ default: m.PresenterPage })),
+);
+const PublicScreen = lazy(() =>
+  import('./pages/present/PublicScreen').then((m) => ({ default: m.PublicScreen })),
+);
 const EditorPage = lazy(() => import('./pages/editor/EditorPage').then((m) => ({ default: m.EditorPage })));
 const QuizEditorPage = lazy(() =>
   import('./pages/editor/quiz/QuizEditorPage').then((m) => ({ default: m.QuizEditorPage })),
@@ -104,6 +110,24 @@ export function App() {
                       <RequireWorkspace>
                         <QuizEditorPage />
                       </RequireWorkspace>
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/demos/:demoId/present"
+                  element={
+                    <RequireAuth>
+                      <RequireWorkspace>
+                        <PresenterPage />
+                      </RequireWorkspace>
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/present/:demoId/screen"
+                  element={
+                    <RequireAuth>
+                      <PublicScreen />
                     </RequireAuth>
                   }
                 />

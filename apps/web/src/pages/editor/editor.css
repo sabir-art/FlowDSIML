@@ -1616,3 +1616,30 @@
   justify-content: center;
   gap: var(--fd-space-2);
 }
+
+/* L22-01 : notes du présentateur (bas de l'onglet Étape) */
+.mk .notes-sec .textarea {
+  min-height: 110px;
+}
+.mk .notes-sec .sec-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mk .notes-sec .sec-title svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+.mk .notes-sec .lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font: 500 11px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.mk .notes-sec .lock svg {
+  width: 12px;
+  height: 12px;
+}

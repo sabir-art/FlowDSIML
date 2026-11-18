@@ -1622,3 +1622,33 @@ h1.p-title {
   outline: none;
   box-shadow: none;
 }
+
+/* L22 : mode présentation (vue présentateur et écran public) — scène seule, pilotée par l'app */
+.p-root.is-present .p-top,
+.p-root.is-present .p-controls,
+.p-root.is-present .p-checklist,
+.p-root.is-present .p-menu,
+.p-root.is-present .p-branding,
+.p-root.is-present .p-preview {
+  display: none !important;
+}
+.p-root.is-present .p-stage-wrap {
+  pointer-events: none;
+}
+.p-root.is-present-nohs .p-beacon,
+.p-root.is-present-nohs .p-spotlight,
+.p-root.is-present-nohs .p-veil,
+.p-root.is-present-nohs .p-tip,
+.p-root.is-present-nohs .p-sheet {
+  display: none !important;
+}
+.p-black {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: #000000;
+  color: #6b7787;
+  font: 600 14px var(--fd-font-sans, system-ui, sans-serif);
+}
