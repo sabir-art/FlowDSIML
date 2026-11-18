@@ -1042,6 +1042,12 @@ body {
 .p-controls .p-icon-btn--ghost {
   background: transparent;
 }
+/* L24 : la règle « box-shadow: none » des contrôles ne doit pas effacer l'indicateur de focus */
+.p-controls .p-icon-btn:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--p-surface),
+    0 0 0 4px var(--p-primary);
+}
 .p-controls .p-icon-btn:hover:not(:disabled) {
   background: color-mix(in srgb, var(--p-text) 10%, transparent);
 }
@@ -1589,5 +1595,17 @@ body {
 @media (max-width: 480px) {
   .p-resume-acts .p-btn {
     flex: 1 1 100%;
+  }
+}
+
+/* L24 · RGAA 13.8 : animations réduites pour tout le lecteur et le centre de formation */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

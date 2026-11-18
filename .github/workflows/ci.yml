@@ -68,6 +68,8 @@ jobs:
           cat /tmp/web.log /tmp/player.log; exit 1
       - name: Audit axe-core (0 violation serious ou critical)
         run: cd apps/web && node e2e/a11y.e2e.cjs --report /tmp/a11y-report.json
+      - name: Clavier, focus, animations réduites, zoom 200 %, lecteur annoncé
+        run: cd apps/web && node e2e/a11y-clavier.e2e.cjs
       - name: Rapport
         if: always()
         uses: actions/upload-artifact@v4
