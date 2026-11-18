@@ -1,3 +1,4 @@
+import i18n from '../../i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { moveItem } from '@flowdsiml/core';
 import type { Json, TablesUpdate } from '@flowdsiml/supabase-types';
@@ -268,11 +269,20 @@ export function useDemoEditor(demoId: string) {
           setSteps((l) => l.map((s) => (s.chapter_id === id ? { ...s, chapter_id: null } : s)));
         }),
 
-      createForm: () =>
+      /** PLY-03 : valeurs par défaut lisibles telles quelles dans le lecteur (libellé, description, consentement). */
+      createForm: (workspaceName = '') =>
         run(async () => {
           const { data, error } = await supabase
             .from('forms')
-            .insert({ workspace_id: demo!.workspace_id, demo_id: demoId })
+            .insert({
+              workspace_id: demo!.workspace_id,
+              demo_id: demoId,
+              description: i18n.t('editor.form.defaultDescription'),
+              fields: [
+                { key: 'email', label: i18n.t('editor.form.emailPro'), type: 'email', required: true },
+              ],
+              consent_text: workspaceName ? i18n.t('editor.form.defaultConsent', { ws: workspaceName }) : '',
+            })
             .select()
             .single();
           if (error) throw error;

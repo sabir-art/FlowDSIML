@@ -7,7 +7,7 @@ import { embedAllowed, parseRoute } from './logic';
 import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
 import { Player } from './Player';
-import { Ban, Link2Off, SearchX } from 'lucide-preact';
+import { Ban, Clock, SearchX } from 'lucide-preact';
 import '@flowdsiml/player-core/player-core.css';
 import './player.css';
 
@@ -125,17 +125,25 @@ function App() {
     const e = strings(state.locale.startsWith('en') ? 'en' : 'fr');
     const view = {
       notFound: { Icon: SearchX, title: e.notFoundTitle, text: e.notFound },
-      expired: { Icon: Link2Off, title: e.expiredTitle, text: e.expired },
+      expired: { Icon: Clock, title: e.expiredTitle, text: e.expired },
       blocked: { Icon: Ban, title: e.blockedTitle, text: e.embedBlocked },
     }[state.kind];
+    // PLY-06 : cadre du lecteur conservé (en-tête, capture vide, pied), message dans une carte centrée
     return (
-      <main class="p-center" role="alert">
-        <div>
-          <view.Icon size={40} strokeWidth={1.5} aria-hidden="true" />
-          <h1>{view.title}</h1>
-          <p>{view.text}</p>
-        </div>
-      </main>
+      <div class="p-root p-sys">
+        <header class="p-top" aria-hidden="true" />
+        <main class="p-stage-wrap">
+          <div class="p-sys-shot" aria-hidden="true" />
+          <div class="p-card p-sys-card" role="alert">
+            <span class="p-sys-chip" aria-hidden="true">
+              <view.Icon size={22} />
+            </span>
+            <h1>{view.title}</h1>
+            <p class="p-sub">{view.text}</p>
+          </div>
+        </main>
+        <p class="p-branding">{e.madeWith}</p>
+      </div>
     );
   }
   const m = state.manifest;

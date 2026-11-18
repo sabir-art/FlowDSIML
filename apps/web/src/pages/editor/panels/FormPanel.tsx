@@ -2,6 +2,7 @@ import { useConfirm } from '../../../components/ConfirmDialog';
 import { Menu } from '../../../components/Menu';
 import { ArrowDown, ArrowUp, ChevronLeft, GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import { asFields, type FormField, type FormRow } from '../types';
@@ -35,6 +36,7 @@ export function FormPanel({
   onMove: (stepIndex: number) => void;
 }) {
   const { t } = useTranslation();
+  const { current: ws } = useWorkspace();
   const [dialog, ask] = useConfirm();
   const [dragKey, setDragKey] = useState<string | null>(null);
   const gateIndex = editor.steps.findIndex((s) => s.gate_form_id === form.id);
@@ -264,7 +266,15 @@ export function FormPanel({
               type="checkbox"
               checked={consent}
               disabled={readOnly}
-              onChange={(e) => set({ consent_text: e.target.checked ? t('editor.consentPlaceholder') : '' })}
+              onChange={(e) =>
+                set({
+                  consent_text: e.target.checked
+                    ? ws?.name
+                      ? t('editor.form.defaultConsent', { ws: ws.name })
+                      : t('editor.consentPlaceholder')
+                    : '',
+                })
+              }
             />
             <span />
           </span>

@@ -1306,3 +1306,82 @@ body {
 .is-dark .p-controls .p-progress > div {
   background: var(--p-chrome-primary, var(--p-primary));
 }
+
+/* PLY-06 : écrans système (lien expiré, démo introuvable, intégration refusée) dans le cadre du lecteur */
+.p-sys {
+  --p-bg: #eef2f6;
+  --p-surface: #ffffff;
+  --p-text: #080808;
+}
+.p-sys .p-top {
+  min-height: 56px;
+}
+.p-sys-shot {
+  width: min(100%, 1120px);
+  aspect-ratio: 16 / 10;
+  max-height: 100%;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--p-text) 6%, var(--p-bg));
+}
+.p-sys-card {
+  align-items: center;
+  text-align: center;
+}
+.p-sys-card h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+.p-sys-chip {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fbe8f0;
+  color: #a3195b;
+}
+@media (prefers-color-scheme: dark) {
+  .p-sys {
+    --p-bg: #0b0d10;
+    color: #f3f5f8;
+  }
+  .p-sys .p-branding {
+    color: #a9b3bf;
+  }
+}
+/* PLY-03 : 14 px entre les blocs du formulaire, description ou non */
+.p-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.p-form h2,
+.p-form > p,
+.p-form .p-field,
+.p-form .p-consent,
+.p-form .p-privacy,
+.p-form .p-actions {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+/* PLY-07 : boutons ← et → de 44 px ; la dernière étape texte en feuille du bas */
+@media (max-width: 720px) {
+  .p-controls .p-icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .p-end-text {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    transform: none;
+    width: auto;
+    max-height: 80vh;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px 24px;
+    z-index: 41;
+  }
+}

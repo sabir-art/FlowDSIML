@@ -338,6 +338,11 @@ const SCREENS = {
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
     view: { width: 390, height: 844 },
   },
+  'PLY-06': {
+    maquette: 'refonte/player.html#expired',
+    player: true,
+    playerPath: '/l/lien-expire',
+  },
   'PRT-01': {
     maquette: 'reference/partage.html',
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',
@@ -438,7 +443,7 @@ const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 /** Lecteur (PLY-01) : manifeste de la maquette servi à la place du stockage. */
 async function shotPlayer(b, s, theme) {
   const manifest = require('./player-maquette.cjs');
-  const p = await b.newPage({ viewport: s.view || VIEW, colorScheme: theme });
+  const p = await b.newPage({ viewport: s.view || VIEW, colorScheme: theme, locale: 'fr-FR' });
   await p.route('**/latest.json', (r) =>
     r.fulfill({
       contentType: 'application/json',
@@ -452,15 +457,16 @@ async function shotPlayer(b, s, theme) {
   await p.route('**/rest/v1/rpc/**', (r) =>
     r.fulfill({
       contentType: 'application/json',
-      body: '"ok"',
+      // PLY-06 : un lien expiré ne se résout pas
+      body: s.playerPath ? 'null' : '"ok"',
       headers: { 'access-control-allow-origin': '*' },
     }),
   );
   await p.route('**/functions/v1/**', (r) =>
     r.fulfill({ status: 200, body: '{}', headers: { 'access-control-allow-origin': '*' } }),
   );
-  await p.goto(`${PLAYER}/#/d/${manifest.demoId}`);
-  await p.waitForSelector('.p-stage');
+  await p.goto(`${PLAYER}/#${s.playerPath ?? `/d/${manifest.demoId}`}`);
+  await p.waitForSelector(s.playerPath ? '.p-sys-card' : '.p-stage');
   await p.waitForTimeout(900);
   if (s.prepare) await s.prepare(p);
   await p.mouse.move(0, 0);

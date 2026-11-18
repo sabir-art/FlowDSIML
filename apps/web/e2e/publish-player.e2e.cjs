@@ -105,6 +105,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(true, 'formulaire de lead affiché avant l’étape 2');
   if (SHOTS) await player.screenshot({ path: `${SHOTS}/player-form.png` });
   await player.fill('.p-form input[type=email]', 'marie@globex.example');
+  // PLY-03 : le formulaire par défaut a une case de consentement (au nom du workspace)
+  if (await player.locator('.p-form input[type=checkbox]').count())
+    await player.check('.p-form input[type=checkbox]');
   await player.click('.p-form button[type=submit]');
   await player.waitForSelector('.p-form', { state: 'detached' });
   ok(
@@ -139,16 +142,19 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const p4 = await ctx.newPage();
   await install(p4, state);
   await p4.goto(`${PLAYER}/#/l/inconnu123`);
-  await p4.waitForSelector('.p-center h1');
-  ok(/expiré|expired/i.test(await p4.textContent('.p-center h1')), 'écran dédié pour un lien expiré');
+  await p4.waitForSelector('.p-sys-card h1');
+  ok(
+    /plus disponible|no longer available/i.test(await p4.textContent('.p-sys-card h1')),
+    'PLY-06 : écran dédié pour un lien expiré (carte dans le cadre du lecteur)',
+  );
   if (SHOTS) await p4.screenshot({ path: `${SHOTS}/player-expired.png` });
 
   const p3 = await ctx.newPage();
   await install(p3, state);
   await p3.goto(`${PLAYER}/#/d/0b5c1f0e-0000-4000-8000-0000000000ff`);
-  await p3.waitForSelector('.p-center');
+  await p3.waitForSelector('.p-sys-card');
   ok(
-    /n'existe pas|does not exist/.test(await p3.textContent('.p-center')),
+    /n'existe pas|does not exist/.test(await p3.textContent('.p-sys-card')),
     'message pour une démo introuvable',
   );
 

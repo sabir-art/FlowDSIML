@@ -1,3 +1,4 @@
+import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import {
   ArrowDown,
   ArrowUp,
@@ -42,6 +43,7 @@ export function StepList({
   openComments?: Record<string, number>;
 }) {
   const { t } = useTranslation();
+  const { current: ws } = useWorkspace();
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [over, setOver] = useState<number | null>(null);
   const file = useRef<HTMLInputElement>(null);
@@ -94,7 +96,7 @@ export function StepList({
         void (async () => {
           const target = editor.steps[current];
           if (!target) return;
-          const form = editor.forms[0] ?? (await editor.createForm());
+          const form = editor.forms[0] ?? (await editor.createForm(ws?.name ?? ''));
           if (!form) return;
           await placeForm(form.id, current);
           onSelectForm?.(current, form.id);

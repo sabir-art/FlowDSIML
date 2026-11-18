@@ -770,7 +770,9 @@
       "inRail": "Le formulaire est placé dans le rail, avant l’étape {{n}}.",
       "notPlaced": "Le formulaire n’est placé avant aucune étape.",
       "open": "Ouvrir le formulaire",
-      "beforeStepShort": "avant l’étape {{n}}"
+      "beforeStepShort": "avant l’étape {{n}}",
+      "defaultDescription": "Laissez votre e-mail pour continuer le tutoriel.",
+      "defaultConsent": "J’accepte d’être recontacté·e par {{ws}} au sujet de ce tutoriel."
     },
     "ctaNewTabHelp": "Le lien s’ouvre dans un nouvel onglet.",
     "end": {

@@ -1,3 +1,4 @@
+import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -56,6 +57,7 @@ export function SettingsTab({
   onOpenForm: (stepIndex: number, formId: string) => void;
 }) {
   const { t } = useTranslation();
+  const { current: ws } = useWorkspace();
   const settings = asSettings(editor.demo!.settings);
   const set = (patch: Partial<DemoSettings>) =>
     editor.updateDemo({ settings: { ...settings, ...patch } as DemoSettings as never });
@@ -192,7 +194,7 @@ export function SettingsTab({
             className="btn btn-secondary btn-sm"
             onClick={() =>
               void (async () => {
-                const f = form ?? (await editor.createForm());
+                const f = form ?? (await editor.createForm(ws?.name ?? ''));
                 if (!f) return;
                 // Nouveau formulaire : avant la 2e étape (ou la seule étape)
                 let i = editor.steps.findIndex((s) => s.gate_form_id === f.id);

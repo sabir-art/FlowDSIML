@@ -93,7 +93,7 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   const ex = await newPage({ viewport: { width: 390, height: 780 } });
   await install(ex, state);
   await ex.goto(`${PLAYER}/#/l/inconnu123`);
-  await ex.waitForSelector('.p-center h1');
+  await ex.waitForSelector('.p-sys-card h1');
   await shot(ex, '18-player-lien-expire');
   const mm = await newPage({ viewport: { width: 390, height: 780 } });
   await install(mm, state);

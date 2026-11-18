@@ -36,8 +36,9 @@ const dict = {
     preview: 'Aperçu — les statistiques ne sont pas enregistrées',
     fullscreen: 'Plein écran',
     exitFullscreen: 'Quitter le plein écran',
-    expiredTitle: 'Lien expiré',
-    expired: 'Ce lien a expiré ou a été désactivé. Demandez un nouveau lien à votre interlocuteur.',
+    expiredTitle: 'Cette démo n’est plus disponible',
+    expired:
+      'Ce lien a expiré ou a été désactivé. Contactez l’organisation qui vous l’a transmis pour en recevoir un nouveau.',
     notFoundTitle: 'Démo introuvable',
     blockedTitle: 'Intégration non autorisée',
     menu: 'Menu',
@@ -144,8 +145,9 @@ const dict = {
     preview: 'Preview — analytics are not recorded',
     fullscreen: 'Full screen',
     exitFullscreen: 'Exit full screen',
-    expiredTitle: 'Link expired',
-    expired: 'This link has expired or was disabled. Ask your contact for a new link.',
+    expiredTitle: 'This demo is no longer available',
+    expired:
+      'This link has expired or was disabled. Contact the organization that sent it to you for a new one.',
     notFoundTitle: 'Demo not found',
     blockedTitle: 'Embedding not allowed',
     menu: 'Menu',

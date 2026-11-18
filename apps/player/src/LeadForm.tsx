@@ -52,7 +52,9 @@ export function LeadForm({
         {fields.map((f) => (
           <label key={f.key} class="p-field">
             <span>
-              {f.type === 'email' && /^e-?mail$/i.test(f.label.trim()) ? t.emailPro : sub(f.label)}
+              {f.type === 'email' && /^e-?mail( professionnel)?$/i.test(f.label.trim())
+                ? t.emailPro
+                : sub(f.label)}
               {(f.required || f.type === 'email') && <span aria-hidden="true"> *</span>}
             </span>
             <input

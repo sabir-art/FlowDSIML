@@ -770,7 +770,9 @@
       "inRail": "The form is in the rail, before step {{n}}.",
       "notPlaced": "The form is not placed before any step.",
       "open": "Open the form",
-      "beforeStepShort": "before step {{n}}"
+      "beforeStepShort": "before step {{n}}",
+      "defaultDescription": "Leave your email to continue the tutorial.",
+      "defaultConsent": "I agree to be contacted by {{ws}} about this tutorial."
     },
     "ctaNewTabHelp": "The link opens in a new tab.",
     "end": {

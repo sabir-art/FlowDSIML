@@ -457,7 +457,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
             sub={sub}
             onHotspot={onHotspot}
             onCta={onCta}
-            tip={!compact && !gateForm ? tipProps : undefined}
+            tip={!compact && !gateForm && !ended ? tipProps : undefined}
           />
         ) : (
           <>
@@ -613,7 +613,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
 
       {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
           navigation sont retirées (rien ne permet de le contourner). */}
-      {compact && tipProps && !gateForm && view === 'steps' && <Tooltip {...tipProps} sheet />}
+      {compact && tipProps && !gateForm && !ended && view === 'steps' && <Tooltip {...tipProps} sheet />}
       {compact && m.checklist && items.length > 0 && !gateForm && (
         <Checklist title={m.checklist.title} position="collapsed" items={items} t={t} sub={sub} onGo={go} />
       )}
