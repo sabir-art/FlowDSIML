@@ -1,7 +1,7 @@
 -- Tests pgTAP : L23 webhooks sortants (URL, droits, secrets, émission, essais, rejeu, limite du plan).
 begin;
 set search_path = public, extensions;
-select plan(49);
+select plan(52);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000005a1', 'olga-hooks@example.com'),
@@ -215,6 +215,24 @@ select ok((select r.event_id = o.event_id and r.attempt = 1 and r.status = 'pend
              from public.webhook_deliveries r, public.webhook_deliveries o
             where r.id = (select id from rep) and o.id = (select id from claimed where event_type = 'lead.created')),
   'rejeu : nouvel envoi avec le même event_id');
+
+-- ===== Purge : statuts finaux après 7 jours, envois jamais partis après 30 jours =====
+insert into public.webhook_deliveries (workspace_id, webhook_id, event_id, event_type, payload, status, created_at)
+select (select ws from ctx), ((select r from h2) ->> 'id')::uuid, gen_random_uuid(), 'purge.' || v.tag, '{}'::jsonb, v.status,
+       now() - v.age
+  from (values ('success8', 'success', interval '8 days'), ('dead8', 'dead', interval '8 days'),
+               ('failed8', 'failed', interval '8 days'), ('success6', 'success', interval '6 days'),
+               ('pending8', 'pending', interval '8 days'), ('sending8', 'sending', interval '8 days'),
+               ('pending31', 'pending', interval '31 days'), ('sending31', 'sending', interval '31 days')) v(tag, status, age);
+select is(public.purge_webhook_deliveries(), 5, 'purge : 3 finaux de plus de 7 jours et 2 envois en attente de plus de 30 jours');
+select is((select array_agg(event_type order by event_type) from public.webhook_deliveries where event_type like 'purge.%'),
+  array['purge.pending8', 'purge.sending8', 'purge.success6'],
+  'purge : un envoi en attente depuis 8 jours et un succès récent sont conservés');
+insert into public.webhook_deliveries (workspace_id, webhook_id, event_id, event_type, payload, status, created_at)
+select (select ws from ctx), ((select r from h2) ->> 'id')::uuid, gen_random_uuid(), 'purge.lot', '{}'::jsonb, 'success',
+       now() - interval '8 days'
+  from generate_series(1, 12000);
+select is(public.purge_webhook_deliveries(), 12000, 'purge par lots de 5 000 : tout le volume au-delà d''un lot');
 
 select * from finish();
 rollback;
