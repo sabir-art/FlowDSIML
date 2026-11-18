@@ -18,11 +18,15 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     ok(await menu.evaluate((el) => el.parentElement?.id === 'fd-portal'), `${name} : rendu dans #fd-portal`);
     const vp = page.viewportSize();
     const box = await menu.boundingBox();
+    // §15.7 : au-delà de 7 éléments, sous 480 px, le menu devient une feuille du bas
+    const sheet = await menu.evaluate((el) => el.classList.contains('menu-list--sheet'));
     ok(
-      box.x >= 8 &&
-        box.y >= 8 &&
-        box.x + box.width <= vp.width - 8 + 0.5 &&
-        box.y + box.height <= vp.height - 8 + 0.5,
+      sheet
+        ? Math.abs(box.y + box.height - vp.height) < 1 && box.width >= vp.width - 1
+        : box.x >= 8 &&
+            box.y >= 8 &&
+            box.x + box.width <= vp.width - 8 + 0.5 &&
+            box.y + box.height <= vp.height - 8 + 0.5,
       `${name} : menu à 8 px au moins des bords (${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)})`,
     );
     const items = page.locator('[role=menu] [role^=menuitem]');
@@ -111,7 +115,8 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     // Menu ⋯ de la dernière carte (la plus à droite)
     await page.locator('.demo-card .menu-trigger').last().click();
     await checkMenu(page, `${w}px menu ⋯ d'une carte`);
-    await page.mouse.click(5, h - 5);
+    const sheetOpen = await page.locator('.menu-list--sheet').count();
+    await page.mouse.click(sheetOpen ? w / 2 : 5, sheetOpen ? 80 : h - 5);
     ok((await page.locator('[role=menu]').count()) === 0, `${w}px : clic extérieur ferme le menu`);
     await page.close();
   }

@@ -172,6 +172,99 @@ const SCREENS = {
       await p.waitForTimeout(300);
     },
   },
+  'DSH-02': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    async maquettePrep(p) {
+      await p.locator('#viewseg [data-value="list"]').click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.getByRole('radio', { name: 'Liste' }).click();
+      await p.locator('.demos-section').scrollIntoViewIfNeeded();
+      await p.waitForTimeout(300);
+    },
+  },
+  'DSH-03': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    // Bandeau visible tant qu'une étape manque : ici, aucune capture par l'extension
+    seed(d) {
+      for (const st of d.tables?.steps ?? []) st.page_url = null;
+    },
+  },
+  'DSH-04': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    async prepare(p) {
+      await p.getByRole('button', { name: 'Modifiées récemment' }).click();
+      await p.waitForTimeout(300);
+    },
+  },
+  'DSH-05': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    async maquettePrep(p) {
+      await p.locator('[data-menu="card-menu"]').first().click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.locator('.demo-card .menu-trigger').first().click();
+      await p.waitForTimeout(300);
+    },
+  },
+  'DSH-06': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    async maquettePrep(p) {
+      await p.evaluate(() => (document.getElementById('m-new').hidden = false));
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+      await p.waitForTimeout(400);
+    },
+  },
+  'DSH-08': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    async maquettePrep(p) {
+      await p.evaluate(() => (document.getElementById('m-del').hidden = false));
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.locator('.demo-card .menu-trigger').first().click();
+      await p.getByRole('menuitem', { name: 'Supprimer' }).click();
+      await p.waitForTimeout(400);
+    },
+  },
+  'DSH-09': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    async maquettePrep(p) {
+      await p.locator('.empty').scrollIntoViewIfNeeded();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.getByRole('button', { name: /Dossiers/ }).click();
+      await p.getByRole('menuitem', { name: 'Nouveau dossier' }).click();
+      await p.locator('dialog[open] input').fill('Archives 2025');
+      await p.locator('dialog[open] button[type=submit]').click();
+      await p.waitForTimeout(500);
+      await p.getByRole('button', { name: /Dossiers/ }).click();
+      await p.getByRole('menuitem', { name: /Archives 2025/ }).click();
+      await p.waitForTimeout(400);
+      await p.locator('.empty-folder').scrollIntoViewIfNeeded();
+    },
+  },
+  'DSH-10': {
+    maquette: 'reference/dashboard.html',
+    route: '/#/',
+    async prepare(p) {
+      await p.locator('.demo-grid').scrollIntoViewIfNeeded();
+      await p.waitForTimeout(300);
+    },
+  },
   'PRT-01': {
     maquette: 'reference/partage.html',
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',
@@ -311,7 +404,9 @@ async function shotApp(b, s, theme) {
       localStorage.setItem('fd.theme', th);
     } catch {}
   }, theme);
-  await install(p, { ...seedMaquette(), signedOut: Boolean(s.signedOut) });
+  const data = seedMaquette();
+  if (s.seed) s.seed(data);
+  await install(p, { ...data, signedOut: Boolean(s.signedOut) });
   await p.goto(`${APP}${s.route}`);
   await p.waitForTimeout(1800);
   if (s.prepare) await s.prepare(p);

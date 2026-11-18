@@ -1596,3 +1596,21 @@
     color: var(--fd-vert-200);
   }
 }
+/* DSH-05 : raccourci et badge « Bientôt » alignés à droite dans les menus */
+.menu-kbd {
+  font: 500 11px var(--fd-font-mono, ui-monospace, monospace);
+  color: var(--fd-color-text-subtle);
+  padding: 1px 5px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 4px;
+}
+.menu-soon {
+  font-size: 10px;
+  padding: 0 6px;
+}
+/* DSH-08 : pied des modales séparé du corps par un filet, avec plus d'air */
+.dialog .dialog-actions {
+  margin: var(--fd-space-5) calc(-1 * var(--fd-space-5)) calc(-1 * var(--fd-space-5));
+  padding: var(--fd-space-4) var(--fd-space-5);
+  border-top: 1px solid var(--fd-color-border);
+}

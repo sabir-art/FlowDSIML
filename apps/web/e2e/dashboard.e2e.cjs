@@ -52,7 +52,7 @@ const SHOTS = process.env.SHOTS_DIR;
   // Menu ⋯ d'une carte → Déplacer
   await page.getByRole('button', { name: 'Actions pour Démo CRM' }).click();
   ok((await page.locator('[role=menuitem]').count()) >= 5, 'menu d’actions de la carte');
-  await page.getByRole('menuitem', { name: 'Déplacer vers un dossier' }).click();
+  await page.getByRole('menuitem', { name: 'Déplacer vers…' }).click();
   await page.locator('dialog[open] select').selectOption({ label: 'Ventes' });
   await page.waitForTimeout(300);
   await page.locator('dialog[open]').getByRole('button', { name: 'Fermer' }).click();
@@ -98,6 +98,27 @@ const SHOTS = process.env.SHOTS_DIR;
     'mobile : menu ouvert au tap',
   );
   if (SHOTS) await m.screenshot({ path: `${SHOTS}/dashboard-mobile-menu.png` });
+
+  // DSH-02 / DSH-04 / DSH-06 : vue liste, tri « Créées récemment », modale « Nouvelle démo »
+  const d2 = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  await install(d2, state);
+  await d2.goto(`${APP}/#/`);
+  await d2.waitForSelector('.demo-card');
+  await d2.getByRole('radio', { name: 'Liste' }).click();
+  ok((await d2.locator('.demo-table tbody tr').count()) > 0, 'DSH-02 : vue liste en tableau');
+  await d2.getByRole('radio', { name: 'Grille' }).click();
+  await d2.getByRole('button', { name: 'Modifiées récemment' }).click();
+  ok(
+    (await d2.getByRole('menuitem', { name: 'Créées récemment' }).count()) === 1,
+    'DSH-04 : tri « Créées récemment »',
+  );
+  await d2.keyboard.press('Escape');
+  await d2.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+  await d2.waitForSelector('dialog.new-demo-dialog[open]');
+  ok((await d2.locator('.nd-choice.is-soon').count()) === 1, 'DSH-06 / DSH-07 : import d’images en Bientôt');
+  await d2.getByRole('button', { name: 'Partir d’une démo vide' }).click();
+  await d2.waitForURL(/\/edit$/);
+  ok(true, 'DSH-06 : « Partir d’une démo vide » ouvre l’éditeur');
 
   ok(errors.length === 0, `aucune erreur (${errors.join(' | ')})`);
   await b.close();

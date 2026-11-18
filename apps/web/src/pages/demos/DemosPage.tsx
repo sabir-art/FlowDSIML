@@ -2,6 +2,11 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
+  X,
+  Archive,
+  LayoutGrid,
+  List,
+  Link2,
   ArrowUpRight,
   BarChart3,
   Check,
@@ -33,6 +38,8 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
+import { publicDemoUrl } from '../../lib/embed';
+import { NewDemoDialog } from './NewDemoDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import './demos.css';
 
@@ -41,7 +48,7 @@ type FolderRow = Tables<'folders'>;
 type Stats = { views: number; completions: number; visitors: number; leads: number };
 type Kpis = Stats;
 type StatusFilter = 'all' | 'draft' | 'published';
-type Sort = 'updated' | 'title' | 'views';
+type Sort = 'updated' | 'created' | 'title' | 'views';
 
 export function DemosPage() {
   const { t, i18n } = useTranslation();
@@ -55,10 +62,36 @@ export function DemosPage() {
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [covers, setCovers] = useState<Record<string, string>>({});
   const [stepCounts, setStepCounts] = useState<Record<string, number>>({});
+  const [captured, setCaptured] = useState(false);
+  const [gsHidden, setGsHidden] = useState(() => {
+    try {
+      return localStorage.getItem(`fd.gettingStarted.${ws.id}`) === 'hidden';
+    } catch {
+      return false;
+    }
+  });
+  /** DSH-10 : date de la dernière publication, pour le badge « Modifiée ». */
+  const [publishedAt, setPublishedAt] = useState<Record<string, string>>({});
   const [folder, setFolder] = useState<string | 'all' | 'none'>('all');
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<Sort>('updated');
+  // DSH-02 : affichage grille / liste, mémorisé dans ce navigateur
+  const [view, setView] = useState<'grid' | 'list'>(() => {
+    try {
+      return localStorage.getItem('fd.demos.view') === 'list' ? 'list' : 'grid';
+    } catch {
+      return 'grid';
+    }
+  });
+  const chooseView = (v: 'grid' | 'list') => {
+    setView(v);
+    try {
+      localStorage.setItem('fd.demos.view', v);
+    } catch {
+      /* stockage indisponible */
+    }
+  };
   const [newFolder, setNewFolder] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const [toDelete, setToDelete] = useState<Demo | null>(null);
@@ -115,7 +148,7 @@ export function DemosPage() {
     if (list.length) {
       const all = await supabase
         .from('steps')
-        .select('demo_id')
+        .select('demo_id, page_url')
         .in(
           'demo_id',
           list.map((x) => x.id),
@@ -123,6 +156,20 @@ export function DemosPage() {
       const n: Record<string, number> = {};
       for (const r of all.data ?? []) n[r.demo_id] = (n[r.demo_id] ?? 0) + 1;
       setStepCounts(n);
+      // DSH-03 : une étape avec l'URL de la page vient d'une capture par l'extension
+      setCaptured((all.data ?? []).some((r) => !!r.page_url));
+      // Date de publication de la version en ligne (même règle que la barre de l'éditeur)
+      const versions = list
+        .filter((x) => x.status === 'published' && x.current_version_id)
+        .map((x) => x.current_version_id!);
+      if (versions.length) {
+        const v = await supabase.from('demo_versions').select('demo_id, published_at').in('id', versions);
+        setPublishedAt(
+          Object.fromEntries(
+            (v.data ?? []).filter((r) => r.published_at).map((r) => [r.demo_id, r.published_at!]),
+          ),
+        );
+      }
       const s = await supabase
         .from('steps')
         .select('demo_id, image_path, position')
@@ -157,12 +204,16 @@ export function DemosPage() {
         (!needle || d.title.toLowerCase().includes(needle)),
     );
     if (sort === 'title') return [...list].sort((a, b) => a.title.localeCompare(b.title, i18n.language));
+    if (sort === 'created') return [...list].sort((a, b) => b.created_at.localeCompare(a.created_at));
     if (sort === 'views')
       return [...list].sort((a, b) => (stats[b.id]?.views ?? 0) - (stats[a.id]?.views ?? 0));
     return list;
   }, [demos, folder, status, q, sort, stats, i18n.language]);
 
-  async function createDemo() {
+  const [newOpen, setNewOpen] = useState(false);
+  const openNew = () => setNewOpen(true);
+
+  async function createDemo(folderId: string | null = folder !== 'all' && folder !== 'none' ? folder : null) {
     const d = await run(async () =>
       check(
         await supabase
@@ -171,7 +222,7 @@ export function DemosPage() {
             workspace_id: ws.id,
             title: t('demos.untitled'),
             created_by: user!.id,
-            folder_id: folder !== 'all' && folder !== 'none' ? folder : null,
+            folder_id: folderId,
           })
           .select()
           .single(),
@@ -196,34 +247,70 @@ export function DemosPage() {
 
   if (!demos) return <Loading />;
 
+  /** DSH-10 : publiée puis modifiée (changements non publiés). */
+  const isModified = (d: Demo) =>
+    d.status === 'published' &&
+    !!publishedAt[d.id] &&
+    new Date(d.updated_at).getTime() - new Date(publishedAt[d.id]!).getTime() > 2000;
+  const statusOf = (d: Demo) => (isModified(d) ? 'modified' : d.status);
+
+  async function copyLink(d: Demo) {
+    try {
+      await navigator.clipboard.writeText(publicDemoUrl(d.id));
+      toast(t('toast.linkCopied'));
+    } catch {
+      /* presse-papiers indisponible : rien à annoncer */
+    }
+  }
+  const duplicate = (d: Demo) =>
+    void run(async () => {
+      check(await supabase.rpc('duplicate_demo', { p_demo: d.id }));
+      await load();
+      toast(t('toast.duplicated'));
+    });
+  const mod = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
+
   const menuFor = (d: Demo): Array<MenuItem | 'separator'> => [
-    { label: t('demos.edit'), icon: <Pencil />, onSelect: () => navigate(`/demos/${d.id}/edit`) },
+    { label: t('demos.openEditor'), icon: <Pencil />, onSelect: () => navigate(`/demos/${d.id}/edit`) },
     { label: t('editor.share'), icon: <Share2 />, onSelect: () => navigate(`/demos/${d.id}/share`) },
     { label: t('nav.analytics'), icon: <BarChart3 />, onSelect: () => navigate(`/demos/${d.id}/analytics`) },
+    {
+      label: t('demos.copyLink'),
+      icon: <Link2 />,
+      disabled: d.status !== 'published',
+      onSelect: () => void copyLink(d),
+    },
     ...(editable
       ? ([
           'separator',
           {
             label: t('demos.duplicate'),
             icon: <Copy />,
-            onSelect: () =>
-              void run(async () => {
-                check(await supabase.rpc('duplicate_demo', { p_demo: d.id }));
-                await load();
-                toast(t('toast.duplicated'));
-              }),
+            end: <kbd className="menu-kbd">{mod}+D</kbd>,
+            onSelect: () => duplicate(d),
           },
           { label: t('demos.moveTo'), icon: <FolderInput />, onSelect: () => setMoving(d) },
+          {
+            label: t('demos.archive'),
+            icon: <Archive />,
+            disabled: true,
+            end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
+            onSelect: () => {},
+          },
           'separator',
           { label: t('common.delete'), icon: <Trash2 />, danger: true, onSelect: () => setToDelete(d) },
         ] as Array<MenuItem | 'separator'>)
       : []),
   ];
 
+  // DSH-09 : les compteurs suivent le dossier affiché
+  const inView = demos.filter(
+    (d) => folder === 'all' || (folder === 'none' ? !d.folder_id : d.folder_id === folder),
+  );
   const counts = {
-    all: demos.length,
-    published: demos.filter((d) => d.status === 'published').length,
-    draft: demos.filter((d) => d.status === 'draft').length,
+    all: inView.length,
+    published: inView.filter((d) => d.status === 'published').length,
+    draft: inView.filter((d) => d.status === 'draft').length,
   };
   const inFolder = (id: string | 'none') =>
     demos.filter((d) => (id === 'none' ? !d.folder_id : d.folder_id === id)).length;
@@ -233,6 +320,7 @@ export function DemosPage() {
   };
   const sortLabels: Record<Sort, string> = {
     updated: t('demos.sortUpdated'),
+    created: t('demos.sortCreated'),
     title: t('demos.sortTitle'),
     views: t('demos.sortViews'),
   };
@@ -256,13 +344,74 @@ export function DemosPage() {
             />
           </label>
           {editable && (
-            <Button variant="primary" size="lg" icon={<Plus />} onClick={() => void createDemo()}>
+            <Button variant="primary" size="lg" icon={<Plus />} onClick={openNew}>
               {t('demos.new')}
             </Button>
           )}
         </div>
       </header>
       {error && <Alert kind="error">{error}</Alert>}
+
+      {(() => {
+        // DSH-03 : « Premiers pas · n sur 5 », calculé sur des étapes réelles
+        const published = demos.filter((d) => d.status === 'published');
+        const viewed = published.some((d) => (stats[d.id]?.views ?? 0) > 0);
+        const steps = [true, captured, demos.length > 0, published.length > 0, viewed];
+        const done = steps.filter(Boolean).length;
+        if (gsHidden || done === steps.length || !editable) return null;
+        const latest = demos[0];
+        const next = !captured
+          ? { text: t('demos.gs.capture'), label: t('demos.new'), go: openNew }
+          : !demos.length
+            ? { text: t('demos.gs.demo'), label: t('demos.new'), go: openNew }
+            : !published.length
+              ? {
+                  text: t('demos.gs.publish', { title: latest!.title }),
+                  label: t('demos.gs.open'),
+                  go: () => navigate(`/demos/${latest!.id}/edit`),
+                }
+              : {
+                  text: t('demos.gs.share', { title: published[0]!.title }),
+                  label: t('editor.share'),
+                  go: () => navigate(`/demos/${published[0]!.id}/share`),
+                };
+        return (
+          <section className="gs-banner" aria-labelledby="gs-title">
+            <div className="gs-text">
+              <b id="gs-title">{t('demos.gs.title', { done, total: steps.length })}</b>
+              <span>{next.text}</span>
+            </div>
+            <div
+              className="gs-bar"
+              role="progressbar"
+              aria-label={t('demos.gs.progress')}
+              aria-valuemin={0}
+              aria-valuemax={steps.length}
+              aria-valuenow={done}
+            >
+              <span style={{ width: `${(done / steps.length) * 100}%` }} />
+            </div>
+            <Button size="sm" onClick={next.go}>
+              {next.label}
+            </Button>
+            <button
+              type="button"
+              className="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon"
+              aria-label={t('demos.gs.hide')}
+              onClick={() => {
+                setGsHidden(true);
+                try {
+                  localStorage.setItem(`fd.gettingStarted.${ws.id}`, 'hidden');
+                } catch {
+                  /* stockage indisponible */
+                }
+              }}
+            >
+              <X aria-hidden="true" />
+            </button>
+          </section>
+        );
+      })()}
 
       {kpis && (
         <section className="stat-row" aria-label={t('analytics.kpis', { count: 30 })}>
@@ -388,6 +537,28 @@ export function DemosPage() {
                   : []),
               ]}
             />
+            <div className="fd-segmented view-seg" role="radiogroup" aria-label={t('demos.view')}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={view === 'grid'}
+                aria-label={t('demos.viewGrid')}
+                title={t('demos.viewGrid')}
+                onClick={() => chooseView('grid')}
+              >
+                <LayoutGrid aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={view === 'list'}
+                aria-label={t('demos.viewList')}
+                title={t('demos.viewList')}
+                onClick={() => chooseView('list')}
+              >
+                <List aria-hidden="true" />
+              </button>
+            </div>
             <Menu
               label={t('demos.sort')}
               trigger={{ text: sortLabels[sort], chevron: true }}
@@ -409,19 +580,117 @@ export function DemosPage() {
               <li>{t('demos.emptyStep3')}</li>
             </ol>
             {editable && (
-              <Button icon={<Plus />} onClick={() => void createDemo()}>
+              <Button icon={<Plus />} onClick={openNew}>
                 {t('demos.emptyCta')}
               </Button>
             )}
           </Card>
+        ) : visible.length === 0 && inView.length === 0 && folder !== 'all' ? (
+          // DSH-09 : dossier vide (carte de la maquette)
+          <div className="fd-card empty-folder">
+            <svg className="illu" viewBox="0 0 140 100" aria-hidden="true">
+              <rect x="10" y="14" width="120" height="76" rx="10" className="illu-bg" />
+              <path
+                d="M28 70c14 0 18-22 34-22s20-18 36-18"
+                fill="none"
+                className="illu-path"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeDasharray="2 7"
+              />
+              <circle cx="28" cy="70" r="6" className="illu-dot" />
+              <circle cx="62" cy="48" r="6" className="illu-dot" />
+              <circle cx="98" cy="30" r="9" className="illu-hot" />
+              <circle cx="98" cy="30" r="3.5" fill="#fff" />
+            </svg>
+            <h3>{t('demos.emptyFolderTitle')}</h3>
+            <p className="fd-muted">{t('demos.emptyFolderBody')}</p>
+            {editable && (
+              <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                {t('demos.new')}
+              </Button>
+            )}
+          </div>
         ) : visible.length === 0 ? (
           <p className="fd-muted">{t('demos.noMatch')}</p>
+        ) : view === 'list' ? (
+          <div className="fd-card demo-table-wrap">
+            <table className="demo-table">
+              <caption className="sr-only">{t('demos.listCaption')}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t('demos.colName')}</th>
+                  <th scope="col">{t('demos.colStatus')}</th>
+                  <th scope="col">{t('demos.colFolder')}</th>
+                  <th scope="col" className="r">
+                    {t('demos.colViews')}
+                  </th>
+                  <th scope="col" className="r">
+                    {t('demos.colCompletion')}
+                  </th>
+                  <th scope="col">{t('demos.colUpdated')}</th>
+                  <th scope="col">
+                    <span className="sr-only">{t('demos.colActions')}</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((d) => {
+                  const s = stats[d.id];
+                  const rate = s ? Math.round(completionRate(s.visitors, s.completions) * 100) : 0;
+                  return (
+                    <tr key={d.id}>
+                      <td>
+                        <span className="dt-name">
+                          <span className="dt-thumb" aria-hidden="true">
+                            {covers[d.id] ? <img src={covers[d.id]} alt="" loading="lazy" /> : null}
+                          </span>
+                          <Link to={`/demos/${d.id}/edit`}>{d.title}</Link>
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`fd-badge status-${statusOf(d)}`}>{t(`status.${statusOf(d)}`)}</span>
+                      </td>
+                      <td className="fd-muted">{folders.find((f) => f.id === d.folder_id)?.name ?? '—'}</td>
+                      <td className="r num">{formatNumber(s?.views ?? 0)}</td>
+                      <td className="r">
+                        <span className="dt-rate">
+                          <span className="dt-bar" aria-hidden="true">
+                            <span style={{ width: `${rate}%` }} />
+                          </span>
+                          <span className="num">{rate} %</span>
+                        </span>
+                      </td>
+                      <td className="fd-muted">
+                        <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
+                          {formatRelativeShort(d.updated_at)}
+                        </time>
+                      </td>
+                      <td className="r">
+                        <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <ul className="demo-grid">
             {visible.map((d) => {
               const s = stats[d.id];
               return (
-                <li key={d.id} className="fd-card demo-card">
+                <li
+                  key={d.id}
+                  className="fd-card demo-card"
+                  onKeyDown={(e) => {
+                    // DSH-05 : ⌘D / Ctrl+D duplique la démo dont la carte a le focus
+                    if (editable && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
+                      e.preventDefault();
+                      duplicate(d);
+                    }
+                  }}
+                >
                   <div className={`demo-cover${covers[d.id] ? ' fd-player-scope' : ''}`} aria-hidden="true">
                     {covers[d.id] ? (
                       <img src={covers[d.id]} alt="" loading="lazy" />
@@ -443,7 +712,7 @@ export function DemosPage() {
                       <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
                     </div>
                     <div className="demo-meta">
-                      <span className={`fd-badge status-${d.status}`}>{t(`status.${d.status}`)}</span>
+                      <span className={`fd-badge status-${statusOf(d)}`}>{t(`status.${statusOf(d)}`)}</span>
                       <span>
                         {d.status === 'published' ? (
                           <>
@@ -465,7 +734,7 @@ export function DemosPage() {
             })}
             {editable && (
               <li className="demo-new">
-                <button type="button" className="demo-new__btn" onClick={() => void createDemo()}>
+                <button type="button" className="demo-new__btn" onClick={openNew}>
                   <span className="fd-btn fd-btn--round" aria-hidden="true">
                     <Plus />
                   </span>
@@ -478,6 +747,16 @@ export function DemosPage() {
         )}
       </section>
 
+      <NewDemoDialog
+        open={newOpen}
+        folders={folders}
+        defaultFolder={folder !== 'all' && folder !== 'none' ? folder : null}
+        onClose={() => setNewOpen(false)}
+        onEmpty={async (f) => {
+          setNewOpen(false);
+          await createDemo(f);
+        }}
+      />
       <ConfirmDialog
         open={newFolder !== null || renaming !== null}
         title={renaming ? t('demos.renameFolder', { name: '' }).trim() : t('demos.newFolder')}
@@ -507,7 +786,7 @@ export function DemosPage() {
         open={!!toDelete}
         title={t('demos.deleteTitle', { title: toDelete?.title ?? '' })}
         body={t('demos.confirmDelete', { title: toDelete?.title ?? '' })}
-        confirmLabel={t('common.delete')}
+        confirmLabel={t('demos.deleteDemo')}
         danger
         onClose={() => setToDelete(null)}
         onConfirm={() =>
