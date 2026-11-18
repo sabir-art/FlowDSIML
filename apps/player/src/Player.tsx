@@ -86,6 +86,9 @@ const DEFAULT_THEME = themeSchema.parse({});
 // Seul le cadre passe en sombre ; bulle, formulaire et cartes gardent la surface claire du thème (maquette)
 const DARK = { '--p-bg': '#0B0D10', '--p-chrome': '#15191F', '--p-chrome-text': '#F3F5F8' };
 
+/** L22 : nombre maximal de sauts par règle dans une session (protection contre les boucles). */
+const MAX_RULE_JUMPS = 50;
+
 export function Player({ manifest: m, values, tracker, preview, startQuiz, startStep, onLead }: Props) {
   // PY-3 : langue de l'interface du lecteur (le contenu de la démo reste dans sa langue)
   const [locale, setLocale] = useState<'fr' | 'en'>(m.locale === 'en' ? 'en' : 'fr');
@@ -241,9 +244,15 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, start
   const memory = useRef<BranchMemory>({ choices: {}, answers: {} });
 
   /** L22 : « Suivant » applique la première règle vraie de l'étape, sinon l'étape suivante. */
+  // Garde-fou : plafond de sauts par règle dans la session (une règle mal conçue ne boucle pas sans fin)
+  const ruleJumps = useRef(0);
   function next() {
     const rule = ruleTarget(m, index, memory.current);
-    if (rule) return follow(rule);
+    // Cible inconnue (étape d'une autre démo, supprimée…) : la règle est ignorée
+    if (rule && ruleJumps.current < MAX_RULE_JUMPS && choiceTarget(m, rule)) {
+      ruleJumps.current += 1;
+      return follow(rule);
+    }
     go(index + 1);
   }
 
