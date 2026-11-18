@@ -226,7 +226,8 @@
   width: var(--h);
   padding: 0;
 }
-.mk .btn[aria-disabled='true'] {
+.mk .btn[aria-disabled='true'],
+.mk .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

@@ -434,6 +434,8 @@ const SCREENS = {
       await p.locator('.stage-head').click();
       await p.keyboard.press('?');
       await p.waitForSelector('.kb-modal');
+      // Capture une fois l'animation d'ouverture terminée
+      await p.waitForTimeout(800);
     },
   },
   'L12-07': {

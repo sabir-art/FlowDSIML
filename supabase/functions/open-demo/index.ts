@@ -60,7 +60,22 @@ async function clientKey(ip: string, demoId: string): Promise<string> {
  * dernier proxy ; les premières peuvent venir du client). Le plafond global par démo (demo_gate)
  * protège de toute façon si une IP pouvait être falsifiée.
  */
+let headersLogged = false;
 function clientIp(req: Request): string {
+  // Diagnostic (une fois par instance) : en-têtes d'IP PRÉSENTS, jamais leurs valeurs
+  if (!headersLogged) {
+    headersLogged = true;
+    console.log(
+      JSON.stringify({
+        openDemoIpHeaders: {
+          cfConnectingIp: req.headers.has('cf-connecting-ip'),
+          xRealIp: req.headers.has('x-real-ip'),
+          xForwardedForCount: (req.headers.get('x-forwarded-for') ?? '').split(',').filter((v) => v.trim())
+            .length,
+        },
+      }),
+    );
+  }
   const cf = req.headers.get('cf-connecting-ip')?.trim();
   if (cf) return cf;
   const real = req.headers.get('x-real-ip')?.trim();

@@ -884,7 +884,9 @@
       "done_other": "Style applied to {{count}} steps · Ctrl Z to undo",
       "section": "Step style",
       "sectionHelp": "Bubble position, button labels, guidance type and advance on click.",
-      "open": "Apply to all steps…"
+      "open": "Apply to all steps…",
+      "noTarget": "No other step with a bubble to change.",
+      "applyNone": "Apply"
     },
     "find": {
       "label": "Find and replace",

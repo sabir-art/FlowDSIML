@@ -884,7 +884,9 @@
       "done_other": "Style appliqué à {{count}} étapes · Ctrl Z pour annuler",
       "section": "Style de l’étape",
       "sectionHelp": "Position de la bulle, libellés des boutons, type de guidage et avance au clic.",
-      "open": "Appliquer à toutes les étapes…"
+      "open": "Appliquer à toutes les étapes…",
+      "noTarget": "Aucune autre étape avec bulle à modifier.",
+      "applyNone": "Appliquer"
     },
     "find": {
       "label": "Rechercher et remplacer",

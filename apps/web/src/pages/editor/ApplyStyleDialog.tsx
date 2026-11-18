@@ -127,7 +127,11 @@ export function ApplyStyleDialog({
             </fieldset>
             <div className="alert as-info">
               <Info aria-hidden="true" />
-              <span className="t-caption">{t('editor.applyStyle.info', { count: targets.length })}</span>
+              <span className="t-caption">
+                {targets.length
+                  ? t('editor.applyStyle.info', { count: targets.length })
+                  : t('editor.applyStyle.noTarget')}
+              </span>
             </div>
           </div>
           <div className="modal-foot">
@@ -138,9 +142,12 @@ export function ApplyStyleDialog({
               type="button"
               className="btn btn-primary"
               disabled={none || targets.length === 0}
+              aria-disabled={none || targets.length === 0 ? 'true' : undefined}
               onClick={apply}
             >
-              {t('editor.applyStyle.apply', { count: targets.length })}
+              {targets.length
+                ? t('editor.applyStyle.apply', { count: targets.length })
+                : t('editor.applyStyle.applyNone')}
             </button>
           </div>
         </div>
