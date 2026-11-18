@@ -1698,6 +1698,14 @@ export type Database = {
       learners_progress: { Args: { p_workspace: string }; Returns: Json };
       learner_detail: { Args: { p_learner: string }; Returns: Json };
       mark_notifications_read: { Args: { p_ids?: string[] | null }; Returns: number };
+      webhook_create: { Args: { p_ws: string; p_url: string; p_events: string[] }; Returns: Json };
+      webhook_reveal_secret: { Args: { p_id: string }; Returns: string };
+      webhook_rotate_secret: { Args: { p_id: string }; Returns: string };
+      webhook_send_test: { Args: { p_id: string }; Returns: number };
+      webhook_replay: { Args: { p_delivery: string }; Returns: string };
+      webhook_set_state: { Args: { p_id: string; p_state: string }; Returns: undefined };
+      webhook_url_ok: { Args: { p_url: string }; Returns: boolean };
+      webhook_event_types: { Args: Record<string, never>; Returns: string[] };
       issue_certificate: { Args: { p_link_token: string; p_path: string }; Returns: Json };
       structure_overview: { Args: { p_path: string }; Returns: Json };
       grant_quiz_attempt: { Args: { p_demo: string; p_learner: string }; Returns: number };

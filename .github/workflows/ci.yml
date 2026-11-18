@@ -23,6 +23,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm turbo run lint typecheck test build
+      - name: Edge Functions (deno check + tests du dispatch des webhooks)
+        working-directory: supabase/functions
+        run: |
+          npx -y deno@2.5.6 check --no-lock webhooks-dispatch/index.ts
+          npx -y deno@2.5.6 test --no-lock webhooks-dispatch/
 
   database:
     name: Migrations SQL + pgTAP

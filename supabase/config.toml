@@ -429,3 +429,9 @@ verify_jwt = false
 [functions.open-center]
 enabled = true
 verify_jwt = false
+
+# L23 : envoi des webhooks, appelé par pg_cron (pg_net) ; accès par secret partagé
+# (WEBHOOKS_DISPATCH_SECRET, comparé en temps constant), pas par JWT.
+[functions.webhooks-dispatch]
+enabled = true
+verify_jwt = false
