@@ -1,4 +1,6 @@
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
+import type { PresencePayload } from './presence/presence';
+import { RailWho } from './presence/PresenceUI';
 import {
   ArrowDown,
   ArrowUp,
@@ -32,6 +34,8 @@ export function StepList({
   findHits,
   selectedFormId = null,
   onSelectForm,
+  presence = {},
+  presenceNames = {},
 }: {
   editor: DemoEditor;
   current: number;
@@ -44,6 +48,9 @@ export function StepList({
   openComments?: Record<string, number>;
   /** L12-04 : nombre de résultats de recherche par index d'étape (pastille orange). */
   findHits?: Record<number, number>;
+  /** L22-08 : personnes présentes par étape (avatars sur la vignette). */
+  presence?: Record<string, PresencePayload[]>;
+  presenceNames?: Record<string, string>;
 }) {
   const { t } = useTranslation();
   const { current: ws } = useWorkspace();
@@ -284,6 +291,7 @@ export function StepList({
                     ) : (
                       <ImageOff aria-hidden="true" className="th-missing" />
                     )}
+                    <RailWho people={presence[s.id] ?? []} names={presenceNames} />
                     {!!findHits?.[i] && (
                       <span className="rail-hits">
                         <span aria-hidden="true">{findHits[i]}</span>

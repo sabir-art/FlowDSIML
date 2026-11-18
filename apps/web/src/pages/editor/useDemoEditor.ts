@@ -435,6 +435,16 @@ export function useDemoEditor(demoId: string) {
 
       flush,
       reload: load,
+      /**
+       * L22-08 : ligne relue après l'enregistrement d'une autre personne. Fusion champ par champ,
+       * sans historique ni file d'enregistrement ; les champs de `keep` (modifiés ici à l'instant) restent.
+       */
+      mergeRemote(table: 'steps' | 'hotspots', row: Patch & { id: string }, keep: string[] = []) {
+        const patch = Object.fromEntries(Object.entries(row).filter(([k]) => !keep.includes(k)));
+        if (table === 'steps')
+          setSteps((list) => list.map((s) => (s.id === row.id ? { ...s, ...patch } : s)));
+        else setHotspots((list) => list.map((h) => (h.id === row.id ? { ...h, ...patch } : h)));
+      },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demoId, demo, steps, hotspots, chapters, questions, queue, run, flush, load, signImages, history]);

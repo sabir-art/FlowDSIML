@@ -23,7 +23,12 @@ import {
   Monitor,
   Presentation,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useToast } from '../../components/Toast';
+import { activityOf, type EditTable, type PresencePayload } from './presence/presence';
+import { usePresenceCalm, usePresenceChannel } from './presence/usePresence';
+import { CoBanner, PresenceStack, RemoteCursors } from './presence/PresenceUI';
+import { useShowCursors } from './presence/showCursors';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Alert, Select } from '@flowdsiml/ui';
@@ -78,9 +83,69 @@ export function EditorPage() {
   const { t } = useTranslation();
   const { demoId = '' } = useParams();
   const { can, current: ws } = useWorkspace();
-  const editor = useDemoEditor(demoId);
+  const rawEditor = useDemoEditor(demoId);
   const { user } = useAuth();
+  const toast = useToast();
   const comments = useStepComments(demoId, ws?.id, user?.id);
+
+  // L22-08 : présence (canal privé demo:<id>), modifications des autres fusionnées champ par champ
+  const presence = usePresenceChannel(demoId, user?.id);
+  const others = usePresenceCalm(presence.store);
+  const [showCursors, setShowCursors] = useShowCursors();
+  const names: Record<string, string> = Object.fromEntries(
+    Object.values(comments.authors).map((a) => [a.user_id, a.full_name || a.email]),
+  );
+  /** Mes dernières modifications par ligne et champ (pour signaler un écrasement). */
+  const myEdits = useRef(new Map<string, number>());
+  const noteEdit = (tb: EditTable, id: string, fields: string[]) => {
+    const at = Date.now();
+    for (const f of fields) myEdits.current.set(`${tb}:${id}:${f}`, at);
+    if (fields[0]) presence.update({ e: { tb, id, f: fields[0], at }, t: at });
+  };
+  const editor = useMemo(
+    () => ({
+      ...rawEditor,
+      updateStep: (id: string, patch: Parameters<typeof rawEditor.updateStep>[1]) => {
+        noteEdit('steps', id, Object.keys(patch));
+        rawEditor.updateStep(id, patch);
+      },
+      updateHotspot: (id: string, patch: Parameters<typeof rawEditor.updateHotspot>[1]) => {
+        noteEdit('hotspots', id, Object.keys(patch));
+        rawEditor.updateHotspot(id, patch);
+      },
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rawEditor],
+  );
+  const seenEdits = useRef(new Map<string, number>());
+  useEffect(() => {
+    for (const p of others) {
+      const e = p.e;
+      if (!e || (seenEdits.current.get(p.u) ?? 0) >= e.at) continue;
+      const first = !seenEdits.current.has(p.u);
+      seenEdits.current.set(p.u, e.at);
+      if (first && Date.now() - e.at > 5000) continue; // modification ancienne, déjà dans le chargement
+      const key = `${e.tb}:${e.id}:${e.f}`;
+      const mine = myEdits.current.get(key);
+      // Mes champs modifiés il y a moins de 3 s restent (enregistrement en cours)
+      const keep = [...myEdits.current]
+        .filter(([k, at]) => k.startsWith(`${e.tb}:${e.id}:`) && Date.now() - at < 3000)
+        .map(([k]) => k.split(':')[2]!);
+      void supabase
+        .from(e.tb)
+        .select('*')
+        .eq('id', e.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) rawEditor.mergeRemote(e.tb, data as Record<string, unknown> & { id: string }, keep);
+        });
+      if (mine && e.at > mine && Date.now() - mine < 10 * 60_000) {
+        myEdits.current.delete(key);
+        toast(t('presence.conflict', { name: names[p.u] || t('presence.someone') }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [others]);
   const [index, setIndex] = useState(0);
   const [tool, setTool] = useState<Tool>('select');
   const [selection, setSelection] = useState<Selection>({ kind: 'step' });
@@ -122,6 +187,56 @@ export function EditorPage() {
   }, [versionId]);
 
   const step = editor.steps[Math.min(index, editor.steps.length - 1)];
+  useEffect(() => {
+    presence.update({ s: step?.id ?? null, t: Date.now() });
+  }, [step?.id, presence]);
+  useEffect(() => {
+    let lastActive = Date.now();
+    const active = () => {
+      if (Date.now() - lastActive > 20_000) {
+        lastActive = Date.now();
+        presence.update({ t: lastActive });
+      }
+    };
+    const onFocus = (e: FocusEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (!el?.closest?.('.panel')) return;
+      lastActive = Date.now();
+      presence.update({ a: activityOf(el.id), t: lastActive });
+    };
+    const onBlur = (e: FocusEvent) => {
+      if ((e.target as HTMLElement | null)?.closest?.('.panel')) presence.update({ a: null });
+    };
+    const onMove = (e: PointerEvent) => {
+      active();
+      const frame = document.querySelector<HTMLElement>('.canvas-frame');
+      const r = frame?.getBoundingClientRect();
+      const inside =
+        r && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      presence.update({
+        c: inside
+          ? [+((e.clientX - r.left) / r.width).toFixed(3), +((e.clientY - r.top) / r.height).toFixed(3)]
+          : null,
+      });
+    };
+    document.addEventListener('focusin', onFocus);
+    document.addEventListener('focusout', onBlur);
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('keydown', active);
+    return () => {
+      document.removeEventListener('focusin', onFocus);
+      document.removeEventListener('focusout', onBlur);
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('keydown', active);
+    };
+  }, [presence]);
+  const [frameEl, setFrameEl] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setFrameEl(document.querySelector<HTMLElement>('.canvas-frame'));
+  }, [step?.id, rawEditor.loading, narrow]);
+  const byStep: Record<string, PresencePayload[]> = {};
+  for (const p of others) if (p.s) (byStep[p.s] ||= []).push(p);
+  const stepIndexOf = (id: string | null) => editor.steps.findIndex((st) => st.id === id);
 
   // Changement d'étape → sélection de l'étape.
   // (sauf le formulaire de lead, qui se sélectionne en même temps que l'étape qu'il précède)
@@ -325,6 +440,19 @@ export function EditorPage() {
           {t(`editor.save_${editor.saveState === 'idle' ? 'saved' : editor.saveState}`)}
         </span>
         <span className="grow" />
+        {user && (
+          <PresenceStack
+            others={others}
+            names={names}
+            stepIndexOf={stepIndexOf}
+            me={{ id: user.id, name: names[user.id] || user.email || '?' }}
+            myStep={safeIndex}
+            onGo={(i) => {
+              setIndex(i);
+              setSelection({ kind: 'step' });
+            }}
+          />
+        )}
         {/* L12 : annuler / rétablir (Ctrl Z, Ctrl Maj Z) */}
         <button
           type="button"
@@ -465,6 +593,8 @@ export function EditorPage() {
             readOnly={readOnly}
             findHits={findOpen ? findHits : undefined}
             openComments={comments.openByStep}
+            presence={byStep}
+            presenceNames={names}
             selectedFormId={selectedForm?.id ?? null}
             onSelectForm={(i, id) => {
               setSelection({ kind: 'form', id });
@@ -508,6 +638,10 @@ export function EditorPage() {
             />
           )}
           {keysOpen && <ShortcutsDialog onClose={() => setKeysOpen(false)} />}
+          <CoBanner others={others} stepId={step?.id ?? null} names={names} />
+          {showCursors && (
+            <RemoteCursors store={presence.store} stepId={step?.id ?? null} names={names} frame={frameEl} />
+          )}
           <div className="stage-main">
             <div className="stage-inner">
               {step ? (
@@ -656,6 +790,8 @@ export function EditorPage() {
               <SettingsTab
                 editor={editor}
                 readOnly={readOnly}
+                showCursors={showCursors}
+                onShowCursors={setShowCursors}
                 leadFormsAllowed={plan.leadForms}
                 onOpenForm={(i, id) => {
                   setSelection({ kind: 'form', id });

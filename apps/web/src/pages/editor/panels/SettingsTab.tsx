@@ -50,10 +50,15 @@ export function SettingsTab({
   readOnly,
   leadFormsAllowed,
   onOpenForm,
+  showCursors = true,
+  onShowCursors,
 }: {
   editor: DemoEditor;
   readOnly: boolean;
   leadFormsAllowed: boolean;
+  /** L22-08 : curseurs des autres personnes (préférence de ce navigateur). */
+  showCursors?: boolean;
+  onShowCursors?: (on: boolean) => void;
   /** EDT-08 : ouvre le formulaire dans le rail (onglet Étape). */
   onOpenForm: (stepIndex: number, formId: string) => void;
 }) {
@@ -81,6 +86,17 @@ export function SettingsTab({
     <div className="st-panel">
       {/* L12-07 : étiquettes de la démo (organiser et filtrer le tableau de bord) */}
       <TagsField demoId={editor.demo!.id} wsId={editor.demo!.workspace_id} readOnly={readOnly} />
+      {onShowCursors && (
+        <div className="sec">
+          <div className="sec-title">{t('presence.collab')}</div>
+          <SettingSwitch
+            id="show-cursors"
+            label={t('presence.showCursors')}
+            checked={showCursors}
+            onChange={onShowCursors}
+          />
+        </div>
+      )}
       <div className="sec">
         <div className="sec-title">{t('editor.settings.reading')}</div>
         <SettingSwitch
