@@ -1,13 +1,14 @@
 import {
   ArrowDown,
-  AppWindow,
   ArrowUp,
   ClipboardList,
-  EyeOff,
+  Droplet,
+  Flag,
   GitBranch,
   ImageOff,
   ImagePlus,
   GripVertical,
+  MessageCircle,
   MessageSquare,
   MousePointerClick,
   Plus,
@@ -15,7 +16,7 @@ import {
   Type,
   ZoomIn,
 } from 'lucide-react';
-import { Menu } from '../../components/Menu';
+import { Menu, type MenuItem } from '../../components/Menu';
 import { asStepOptions, type StepRow } from './types';
 import { Fragment, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,7 +47,16 @@ export function StepList({
   const file = useRef<HTMLInputElement>(null);
   const chapterTitle = (id: string | null) => editor.chapters.find((c) => c.id === id)?.title;
 
-  const addItems = [
+  const addItems: Array<MenuItem | 'separator'> = [
+    // EDT-03 : ordre et libellés de la maquette
+    {
+      label: t('editor.add.capture'),
+      icon: <MousePointerClick />,
+      disabled: true,
+      end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
+      onSelect: () => {},
+    },
+    { label: t('editor.add.image'), icon: <ImagePlus />, onSelect: () => file.current?.click() },
     {
       label: t('editor.addTextStep'),
       icon: <Type />,
@@ -54,8 +64,8 @@ export function StepList({
         void editor.addTextStep(current, t('editor.newTextStep')).then(() => onSelect(current + 1)),
     },
     {
-      label: t('editor.advanced.stepTypes.popup'),
-      icon: <AppWindow />,
+      label: t('editor.add.popup'),
+      icon: <MessageCircle />,
       onSelect: () =>
         void editor
           .addTextStep(current, t('editor.advanced.stepTypes.popup'), { display: 'popup' })
@@ -75,10 +85,10 @@ export function StepList({
           })
           .then(() => onSelect(current + 1)),
     },
-    { label: t('editor.addImageStep'), icon: <ImagePlus />, onSelect: () => file.current?.click() },
+    'separator',
     // EDT-08 : le formulaire de lead se place avant l'étape courante (un seul formulaire par démo)
     {
-      label: t('editor.leadForm'),
+      label: t('editor.add.form'),
       icon: <ClipboardList />,
       onSelect: () =>
         void (async () => {
@@ -91,6 +101,51 @@ export function StepList({
         })(),
     },
   ];
+
+  // EDT-04 : au clavier, le focus suit les flèches ; Espace « saisit » l'étape, les flèches la
+  // déplacent, Espace la pose, Échap la repose.
+  const [grabbed, setGrabbed] = useState<number | null>(null);
+  const [announce, setAnnounce] = useState('');
+  const listRef = useRef<HTMLOListElement>(null);
+  const focusStep = (i: number) =>
+    requestAnimationFrame(() =>
+      listRef.current?.querySelector<HTMLButtonElement>(`[data-step-index="${i}"]`)?.focus(),
+    );
+  function onRailKey(e: React.KeyboardEvent, i: number) {
+    const n = editor.steps.length;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      e.stopPropagation();
+      const to = Math.min(n - 1, Math.max(0, i + (e.key === 'ArrowDown' ? 1 : -1)));
+      if (to === i) return;
+      if (grabbed !== null && !readOnly) {
+        void editor.moveStep(i, to).then(() => {
+          setGrabbed(to);
+          onSelect(to);
+          focusStep(to);
+          setAnnounce(t('editor.rail.moved', { n: to + 1, total: n }));
+        });
+      } else {
+        onSelect(to);
+        focusStep(to);
+      }
+    } else if (e.key === ' ' && !readOnly) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (grabbed === null) {
+        setGrabbed(i);
+        setAnnounce(t('editor.rail.grabbed', { n: i + 1 }));
+      } else {
+        setGrabbed(null);
+        setAnnounce(t('editor.rail.dropped', { n: i + 1 }));
+      }
+    } else if (e.key === 'Escape' && grabbed !== null) {
+      e.preventDefault();
+      e.stopPropagation();
+      setGrabbed(null);
+      setAnnounce(t('editor.rail.dropped', { n: i + 1 }));
+    }
+  }
 
   /** Déplacer le formulaire dans le rail = changer l'étape qu'il précède. */
   async function placeForm(formId: string, to: number) {
@@ -107,9 +162,12 @@ export function StepList({
         <b className="t-label">
           {t('editor.steps')} <span className="subtle">· {editor.steps.length}</span>
         </b>
-        {!readOnly && <Menu label={t('editor.addStep')} align="end" icon={<Plus />} items={addItems} />}
+        {!readOnly && <Menu label={t('editor.addStep')} align="start" icon={<Plus />} items={addItems} />}
       </div>
-      <ol className="rail-list" aria-label={t('editor.steps')}>
+      <span className="sr-only" aria-live="assertive">
+        {announce}
+      </span>
+      <ol className="rail-list" aria-label={t('editor.railLabel')} ref={listRef}>
         {editor.steps.map((s, i) => {
           const url = s.image_path ? editor.imageUrls[s.image_path] : undefined;
           const chapter = chapterTitle(s.chapter_id);
@@ -189,10 +247,12 @@ export function StepList({
                 )}
                 <button
                   type="button"
-                  className="step"
+                  className={`step${grabbed === i ? ' is-grabbed' : ''}`}
                   aria-current={i === current && !selectedFormId ? 'step' : undefined}
                   aria-selected={i === current && !selectedFormId}
+                  data-step-index={i}
                   onClick={() => onSelect(i)}
+                  onKeyDown={(e) => onRailKey(e, i)}
                 >
                   {!readOnly && (
                     <span className="grip" aria-hidden="true">
@@ -202,7 +262,19 @@ export function StepList({
                   <span className="n">{i + 1}</span>
                   <span className="th">
                     {url ? (
-                      <img src={url} alt="" />
+                      <>
+                        <img src={url} alt="" />
+                        {(() => {
+                          // EDT-04 : point du premier hotspot sur la vignette
+                          const h = editor.hotspots.find((x) => x.step_id === s.id);
+                          return h ? (
+                            <span
+                              className="th-dot"
+                              style={{ left: `${(h.x + h.w / 2) * 100}%`, top: `${(h.y + h.h / 2) * 100}%` }}
+                            />
+                          ) : null;
+                        })()}
+                      </>
                     ) : s.kind === 'text' ? (
                       <span className="th-card fd-player-scope">{s.title || t('editor.untitled')}</span>
                     ) : (
@@ -215,6 +287,7 @@ export function StepList({
                       <StepBadges
                         step={s}
                         hotspots={editor.hotspots.filter((h) => h.step_id === s.id).length}
+                        isLast={i === editor.steps.length - 1}
                       />
                       {(openComments[s.id] ?? 0) > 0 && (
                         <span className="rail-comments">
@@ -281,7 +354,7 @@ export function StepList({
 }
 
 /** Icônes d'état d'une étape dans le rail (ED10). */
-function StepBadges({ step, hotspots }: { step: StepRow; hotspots: number }) {
+function StepBadges({ step, hotspots, isLast }: { step: StepRow; hotspots: number; isLast: boolean }) {
   const { t } = useTranslation();
   const blurs = Array.isArray(step.blurs) ? step.blurs.length : 0;
   const opts = asStepOptions(step.options);
@@ -292,12 +365,19 @@ function StepBadges({ step, hotspots }: { step: StepRow; hotspots: number }) {
     },
     !opts.choices.length &&
       step.kind === 'text' &&
-      opts.display === 'popup' && { icon: <AppWindow />, label: t('editor.advanced.stepTypes.popup') },
+      opts.display === 'popup' && { icon: <MessageCircle />, label: t('editor.advanced.stepTypes.popup') },
+    // EDT-04 : icône de type pour l'étape de texte ou de fin
+    !opts.choices.length &&
+      step.kind === 'text' &&
+      opts.display !== 'popup' &&
+      (isLast
+        ? { icon: <Flag />, label: t('editor.end.title') }
+        : { icon: <Type />, label: t('editor.end.textTitle') }),
     hotspots > 0 && { icon: <Target />, label: t('editor.badgeHotspots', { count: hotspots }) },
     step.gate_form_id && { icon: <ClipboardList />, label: t('editor.badgeForm') },
     step.cta && { icon: <MousePointerClick />, label: t('editor.badgeCta') },
     step.zoom && { icon: <ZoomIn />, label: t('editor.badgeZoom') },
-    blurs > 0 && { icon: <EyeOff />, label: t('editor.badgeBlurs', { count: blurs }) },
+    blurs > 0 && { icon: <Droplet />, label: t('editor.badgeBlurs', { count: blurs }) },
   ].filter(Boolean) as Array<{ icon: React.ReactNode; label: string }>;
   if (!items.length) return null;
   return (

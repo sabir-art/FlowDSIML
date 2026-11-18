@@ -52,8 +52,10 @@ body {
   overflow: hidden;
 }
 .p-preview {
-  background: #c27a00;
-  color: #fff;
+  /* EDT-12 : bandeau d'aperçu sur le bleu DSI (jetons --fd-bleu-100 / --fd-bleu-800) */
+  background: var(--p-info-bg, #d3eaf7);
+  color: var(--p-info-text, #195475);
+  font-weight: 600;
   font-size: 12px;
   text-align: center;
   padding: 4px;

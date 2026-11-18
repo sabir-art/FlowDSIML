@@ -265,6 +265,79 @@ const SCREENS = {
       await p.waitForTimeout(300);
     },
   },
+  'EDT-02': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async maquettePrep(p) {
+      await p.locator('[data-menu="more-menu"]').click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.locator('.ed-bar').getByRole('button', { name: 'Plus d’options' }).click();
+      await p.waitForTimeout(300);
+    },
+  },
+  'EDT-03': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async maquettePrep(p) {
+      await p.locator('.rail-head [data-menu="add-menu"]').click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.locator('.rail-head').getByRole('button', { name: 'Ajouter une étape' }).click();
+      await p.waitForTimeout(300);
+    },
+  },
+  'EDT-04': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async prepare(p) {
+      await p.locator('.rail-li').nth(1).hover();
+      await p.waitForTimeout(200);
+    },
+  },
+  'EDT-05': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async prepare(p) {
+      await p
+        .locator('.floatbar')
+        .getByRole('button', { name: /Flou|Zone de flou/ })
+        .first()
+        .click();
+      await p.waitForTimeout(200);
+      await p.mouse.move(0, 0);
+    },
+  },
+  'EDT-07': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async maquettePrep(p) {
+      await p.locator('.blurbox').first().click();
+      await p.waitForTimeout(200);
+    },
+    async prepare(p) {
+      await p.locator('.rail-list .step').nth(1).click();
+      await p.waitForTimeout(400);
+      await p.locator('.canvas-blur').first().click();
+      await p.waitForTimeout(300);
+      await p.mouse.move(0, 0);
+    },
+  },
+  'EDT-12': {
+    maquette: 'refonte/player.html?view=etape',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    async prepare(p) {
+      await p.getByRole('radio', { name: 'Aperçu' }).click();
+      await p.waitForTimeout(1200);
+    },
+  },
+  'EDT-13': {
+    maquette: 'reference/editeur.html',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
+    view: { width: 390, height: 844 },
+  },
   'PRT-01': {
     maquette: 'reference/partage.html',
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share',

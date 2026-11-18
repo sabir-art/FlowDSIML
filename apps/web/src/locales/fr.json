@@ -493,13 +493,14 @@
       "retry": "Réessayer",
       "offline": "Hors ligne : les nouveaux commentaires s'afficheront au retour de la connexion.",
       "tooLong": "{{count}} / 2000 caractères",
-      "mobileNoticeTitle": "L'éditeur nécessite un écran plus large",
-      "mobileNoticeBody": "Ouvrez cette démo sur un ordinateur pour la modifier. Vous pouvez lire et répondre aux commentaires ici.",
+      "mobileNoticeTitle": "L’éditeur s’utilise sur ordinateur",
+      "mobileNoticeBody": "Ouvrez TutoClick sur un écran d’au moins 1 024 px de large pour modifier cette démo. Vous pouvez la prévisualiser, la partager et répondre aux commentaires depuis ce téléphone.",
       "step": "Étape",
       "newBelow_one": "{{count}} nouveau commentaire",
       "newBelow_other": "{{count}} nouveaux commentaires",
       "olderAbove_one": "{{count}} commentaire plus ancien",
-      "olderAbove_other": "{{count}} commentaires plus anciens"
+      "olderAbove_other": "{{count}} commentaires plus anciens",
+      "viewDemo": "Voir la démo"
     },
     "autoplay": "Lecture automatique",
     "autoplayHelp": "Avance seule ; s’arrête sur un formulaire, un menu de choix ou la dernière étape.",
@@ -783,7 +784,34 @@
       "elements": "Hotspots et zones de flou",
       "zoomOn": "Zoom sur une zone",
       "organisation": "Organisation"
-    }
+    },
+    "add": {
+      "capture": "Capturer de nouvelles étapes",
+      "image": "Importer une image",
+      "popup": "Ajouter une pop-up",
+      "form": "Ajouter un formulaire"
+    },
+    "duplicateDemo": "Dupliquer la démo",
+    "rail": {
+      "moved": "Étape déplacée en position {{n}} sur {{total}}.",
+      "grabbed": "Étape {{n}} saisie. Flèches pour la déplacer, Espace pour la poser.",
+      "dropped": "Étape posée en position {{n}}."
+    },
+    "railLabel": "Étapes, réordonnables avec Espace puis les flèches",
+    "blur": {
+      "title": "Zone de flou",
+      "style": "Style de masquage",
+      "blur": "Flou",
+      "pixels": "Pixels",
+      "solid": "Aplat",
+      "intensity": "Intensité",
+      "intensityValue": "Intensité, valeur",
+      "applyTo": "Appliquer à",
+      "thisStep": "Cette étape",
+      "allSteps": "Toutes les étapes",
+      "info": "Le lecteur applique ce flou par-dessus la capture d’origine. Pour une donnée sensible, floutez-la dès la capture : l’extension l’incruste dans l’image avant l’envoi."
+    },
+    "blurTag": "Flou"
   },
   "status": {
     "draft": "Brouillon",

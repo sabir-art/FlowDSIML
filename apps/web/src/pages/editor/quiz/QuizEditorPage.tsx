@@ -36,7 +36,7 @@ export function QuizEditorPage() {
   const { t } = useTranslation();
   const { demoId = '' } = useParams();
   const editor = useDemoEditor(demoId);
-  const { can } = useWorkspace();
+  const { can, current: ws } = useWorkspace();
   const readOnly = !can('demo.edit');
   const [current, setCurrent] = useState(0);
   const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);
@@ -91,7 +91,7 @@ export function QuizEditorPage() {
             disabled={!qs.length}
             onClick={async () => {
               await editor.flush();
-              setPreviewManifest(buildDraftManifest(editor));
+              setPreviewManifest(buildDraftManifest(editor, ws?.name ?? ''));
             }}
           >
             {t('editor.quiz.test')}

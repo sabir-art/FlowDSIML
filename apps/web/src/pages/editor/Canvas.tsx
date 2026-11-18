@@ -52,7 +52,9 @@ type Drag =
   | { kind: 'move'; id: string; dx: number; dy: number }
   | { kind: 'resize'; id: string }
   | { kind: 'draw'; x0: number; y0: number; rect: Rect }
-  | { kind: 'blur-move'; index: number; dx: number; dy: number };
+  | { kind: 'blur-move'; index: number; dx: number; dy: number }
+  /** EDT-07 : redimensionnement d'une zone de flou par l'un de ses 4 coins (coin opposé fixe). */
+  | { kind: 'blur-resize'; index: number; ax: number; ay: number };
 
 export function Canvas({
   editor,
@@ -124,6 +126,17 @@ export function Canvas({
         ...b,
         x: r4(clamp(p.x - drag.dx, 0, 1 - b.w)),
         y: r4(clamp(p.y - drag.dy, 0, 1 - b.h)),
+      };
+      editor.updateStep(step.id, { blurs: next });
+    } else if (drag.kind === 'blur-resize') {
+      const next = blurs.slice();
+      const x = Math.min(drag.ax, p.x);
+      const y = Math.min(drag.ay, p.y);
+      next[drag.index] = {
+        x: r4(x),
+        y: r4(y),
+        w: r4(Math.max(0.01, Math.abs(p.x - drag.ax))),
+        h: r4(Math.max(0.01, Math.abs(p.y - drag.ay))),
       };
       editor.updateStep(step.id, { blurs: next });
     }
@@ -341,7 +354,38 @@ export function Canvas({
             setSelection({ kind: 'blur', index: i });
             setDrag({ kind: 'blur-move', index: i, dx: p.x - b.x, dy: p.y - b.y });
           }}
-        />
+        >
+          {selection.kind === 'blur' && selection.index === i && (
+            <>
+              <span className="canvas-blur-tag">{t('editor.blurTag')}</span>
+              {!readOnly &&
+                (
+                  [
+                    [0, 0],
+                    [1, 0],
+                    [0, 1],
+                    [1, 1],
+                  ] as const
+                ).map(([cx, cy]) => (
+                  <span
+                    key={`${cx}${cy}`}
+                    className={`canvas-blur-handle h${cx}${cy}`}
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      (e.target as Element).setPointerCapture(e.pointerId);
+                      // Coin opposé fixe
+                      setDrag({
+                        kind: 'blur-resize',
+                        index: i,
+                        ax: cx ? b.x : b.x + b.w,
+                        ay: cy ? b.y : b.y + b.h,
+                      });
+                    }}
+                  />
+                ))}
+            </>
+          )}
+        </div>
       ))}
       {drag?.kind === 'draw' && (
         <div

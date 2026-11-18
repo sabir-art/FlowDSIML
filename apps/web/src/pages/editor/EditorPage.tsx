@@ -18,6 +18,7 @@ import {
   Target,
   Undo2,
   ZoomIn,
+  Monitor,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -135,14 +136,21 @@ export function EditorPage() {
     if (editor.loading) return <Loading />;
     return (
       <main className="editor-narrow" id="main">
-        <div className="fd-card editor-narrow__notice">
+        {/* EDT-13 : avis centré, sans carte (maquette) */}
+        <div className="editor-narrow__notice">
+          <Monitor className="editor-narrow__icon" aria-hidden="true" />
           <h1>{t('editor.comments.mobileNoticeTitle')}</h1>
           <p className="fd-muted">{t('editor.comments.mobileNoticeBody')}</p>
-          <div className="row">
-            <Link className="fd-btn fd-btn--sm" to="/">
-              {t('common.back')}
-            </Link>
-            <Link className="fd-btn fd-btn--sm" to={`/demos/${demoId}/share`}>
+          <div className="row editor-narrow__acts">
+            <button
+              type="button"
+              className="fd-btn fd-btn--primary"
+              disabled={!editor.steps.length}
+              onClick={() => setPreviewManifest(buildDraftManifest(editor, ws?.name ?? ''))}
+            >
+              {t('editor.comments.viewDemo')}
+            </button>
+            <Link className="fd-btn" to={`/demos/${demoId}/share`}>
               {t('editor.share')}
             </Link>
           </div>
@@ -172,6 +180,7 @@ export function EditorPage() {
             }
           />
         )}
+        <PreviewDialog manifest={previewManifest} onClose={() => setPreviewManifest(null)} />
       </main>
     );
   }
@@ -189,7 +198,7 @@ export function EditorPage() {
     selection.kind === 'hotspot' ? editor.hotspots.find((h) => h.id === selection.id) : undefined;
 
   function preview() {
-    setPreviewManifest(buildDraftManifest(editor));
+    setPreviewManifest(buildDraftManifest(editor, ws?.name ?? ''));
   }
 
   const safeIndex = Math.min(index, editor.steps.length - 1);
@@ -261,12 +270,18 @@ export function EditorPage() {
           <Redo2 aria-hidden="true" />
         </button>
         <div className="segmented" role="radiogroup" aria-label={t('editor.mode')}>
-          <button type="button" aria-checked="true" role="radio">
+          {/* EDT-12 : le segmenté passe sur « Aperçu » pendant l'aperçu */}
+          <button
+            type="button"
+            aria-checked={!previewManifest}
+            role="radio"
+            onClick={() => setPreviewManifest(null)}
+          >
             {t('editor.modeEdit')}
           </button>
           <button
             type="button"
-            aria-checked="false"
+            aria-checked={!!previewManifest}
             role="radio"
             onClick={preview}
             disabled={!editor.steps.length}
@@ -278,9 +293,10 @@ export function EditorPage() {
           label={t('editor.more')}
           items={[
             {
-              label: `${t('editor.versions')} · ${t('shell.soon')}`,
+              label: t('editor.versions'),
               icon: <Clock />,
               disabled: true,
+              end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
               onSelect: () => undefined,
             },
             { label: t('editor.themeOfDemo'), icon: <Palette />, onSelect: () => setTab('design') },
@@ -290,22 +306,29 @@ export function EditorPage() {
               onSelect: () => navigate(`/demos/${demoId}/quiz`),
             },
             {
-              label: `${t('editor.aiWriter')} · V2`,
+              label: t('editor.aiWriter'),
               icon: <PenLine />,
               disabled: true,
+              end: <span className="fd-badge menu-soon">V2</span>,
               onSelect: () => undefined,
             },
             {
-              label: `${t('editor.shortcuts')} · ${t('shell.soon')}`,
+              label: t('editor.shortcuts'),
               icon: <Keyboard />,
               disabled: true,
+              end: (
+                <>
+                  <kbd className="menu-kbd">?</kbd>
+                  <span className="fd-badge menu-soon">{t('shell.soon')}</span>
+                </>
+              ),
               onSelect: () => undefined,
             },
             'separator',
             ...(can('demo.edit')
               ? [
                   {
-                    label: t('demos.duplicate'),
+                    label: t('editor.duplicateDemo'),
                     icon: <Copy />,
                     onSelect: () =>
                       void supabase.rpc('duplicate_demo', { p_demo: demoId }).then(({ data }) => {
@@ -441,6 +464,9 @@ export function EditorPage() {
                 title={t('shell.soon')}
               >
                 <Crop aria-hidden="true" />
+                <span className="fb-soon" aria-hidden="true">
+                  {t('shell.soon')}
+                </span>
               </button>
               <span className="sep" />
               <button
@@ -451,6 +477,9 @@ export function EditorPage() {
                 title={t('shell.soon')}
               >
                 <ImageIcon aria-hidden="true" />
+                <span className="fb-soon" aria-hidden="true">
+                  {t('shell.soon')}
+                </span>
               </button>
             </div>
           </div>

@@ -1595,3 +1595,24 @@
   margin: 8px 0 0;
   text-align: right;
 }
+
+/* EDT-13 : avis mobile de l'éditeur, centré sans carte */
+.editor-narrow__notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 360px;
+  margin: var(--fd-space-6) auto;
+  padding: 0 var(--fd-space-4);
+}
+.editor-narrow__icon {
+  width: 32px;
+  height: 32px;
+  color: var(--fd-color-primary);
+  margin-bottom: var(--fd-space-3);
+}
+.editor-narrow__acts {
+  justify-content: center;
+  gap: var(--fd-space-2);
+}

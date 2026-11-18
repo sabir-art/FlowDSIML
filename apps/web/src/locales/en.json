@@ -493,13 +493,14 @@
       "retry": "Retry",
       "offline": "Offline: new comments will appear when you're back online.",
       "tooLong": "{{count}} / 2000 characters",
-      "mobileNoticeTitle": "The editor needs a larger screen",
-      "mobileNoticeBody": "Open this demo on a computer to edit it. You can read and reply to comments here.",
+      "mobileNoticeTitle": "The editor works on a computer",
+      "mobileNoticeBody": "Open TutoClick on a screen at least 1,024 px wide to edit this demo. You can preview it, share it and reply to comments from this phone.",
       "step": "Step",
       "newBelow_one": "{{count}} new comment",
       "newBelow_other": "{{count}} new comments",
       "olderAbove_one": "{{count}} older comment",
-      "olderAbove_other": "{{count}} older comments"
+      "olderAbove_other": "{{count}} older comments",
+      "viewDemo": "View demo"
     },
     "autoplay": "Autoplay",
     "autoplayHelp": "Advances on its own; stops on a form, a choice menu or the last step.",
@@ -783,7 +784,34 @@
       "elements": "Hotspots and blur areas",
       "zoomOn": "Zoom on an area",
       "organisation": "Organization"
-    }
+    },
+    "add": {
+      "capture": "Capture new steps",
+      "image": "Import an image",
+      "popup": "Add a pop-up",
+      "form": "Add a form"
+    },
+    "duplicateDemo": "Duplicate demo",
+    "rail": {
+      "moved": "Step moved to position {{n}} of {{total}}.",
+      "grabbed": "Step {{n}} grabbed. Arrows to move it, Space to drop.",
+      "dropped": "Step dropped at position {{n}}."
+    },
+    "railLabel": "Steps, reorder with Space then the arrows",
+    "blur": {
+      "title": "Blur area",
+      "style": "Masking style",
+      "blur": "Blur",
+      "pixels": "Pixels",
+      "solid": "Solid",
+      "intensity": "Intensity",
+      "intensityValue": "Intensity, value",
+      "applyTo": "Apply to",
+      "thisStep": "This step",
+      "allSteps": "All steps",
+      "info": "The player applies this blur over the original capture. For sensitive data, blur it at capture time: the extension burns it into the image before upload."
+    },
+    "blurTag": "Blur"
   },
   "status": {
     "draft": "Draft",

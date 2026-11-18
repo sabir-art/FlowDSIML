@@ -7,7 +7,7 @@ import { questionErrors } from './quizValidation';
  * Manifeste de prévisualisation construit côté client (miroir de publish_demo en SQL),
  * avec les URLs signées des captures privées. Jamais publié tel quel.
  */
-export function buildDraftManifest(ed: DemoEditor): Manifest {
+export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest {
   const demo = ed.demo!;
   const settings = asSettings(demo.settings);
   return manifestSchema.parse({
@@ -15,6 +15,8 @@ export function buildDraftManifest(ed: DemoEditor): Manifest {
     demoId: demo.id,
     versionId: 'preview',
     workspaceId: demo.workspace_id,
+    // EDT-12 : nom du workspace, comme dans le manifeste publié (migration 131500)
+    workspaceName,
     title: demo.title,
     locale: settings.locale ?? 'fr',
     publishedAt: new Date().toISOString(),
