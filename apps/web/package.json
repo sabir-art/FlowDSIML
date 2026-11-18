@@ -10,7 +10,8 @@
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
-    "e2e": "node e2e/editor.e2e.cjs && node e2e/publish-player.e2e.cjs && node e2e/analytics.e2e.cjs && node e2e/dashboard.e2e.cjs && node e2e/theme.e2e.cjs && node e2e/menus.e2e.cjs && node e2e/player-ux.e2e.cjs && node e2e/comments.e2e.cjs"
+    "e2e": "node e2e/editor.e2e.cjs && node e2e/publish-player.e2e.cjs && node e2e/analytics.e2e.cjs && node e2e/dashboard.e2e.cjs && node e2e/theme.e2e.cjs && node e2e/menus.e2e.cjs && node e2e/player-ux.e2e.cjs && node e2e/comments.e2e.cjs",
+    "a11y": "node e2e/a11y.e2e.cjs"
   },
   "dependencies": {
     "@flowdsiml/core": "workspace:*",
@@ -28,11 +29,13 @@
     "react-router-dom": "^7.18.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@testing-library/react": "^16.3.3",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
     "jsdom": "^26.1.0",
+    "playwright": "1.63.0",
     "typescript": "~5.9.3",
     "vite": "^7.3.8",
     "vitest": "^3.2.7"

@@ -28,3 +28,14 @@ Installées avec jsPDF. Seules `fflate`, `fast-png` et `@babel/runtime` servent 
 | stackblur-canvas, svg-pathdata, raf, performance-now         | —       | MIT                                                  |
 | core-js, regenerator-runtime                                 | —       | MIT                                                  |
 | DOMPurify                                                    | 3.4     | MPL-2.0 ou Apache-2.0, au choix (Apache-2.0 retenue) |
+
+## Outils de test (L24, non livrés)
+
+Ces dépendances de développement servent seulement aux tests automatisés (CI). Elles ne sont ni modifiées ni incluses dans les applications livrées.
+
+| Composant                                                                        | Version | Licence    | Usage                                         |
+| -------------------------------------------------------------------------------- | ------- | ---------- | --------------------------------------------- |
+| [Playwright](https://github.com/microsoft/playwright)                            | 1.63.0  | Apache-2.0 | Pilotage du navigateur dans les tests e2e     |
+| [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm), axe-core 4.14 | 4.14.0  | MPL-2.0    | Audit d'accessibilité automatisé (RGAA, WCAG) |
+
+MPL-2.0 est une licence à copyleft faible, limité aux fichiers de la bibliothèque. Elle ne s'étend pas au code de TutoClick, et l'outil n'est utilisé qu'en test, sans modification.

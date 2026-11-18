@@ -39,3 +39,39 @@ jobs:
         run: |
           mkdir -p /tmp/fdrepo && cp -r supabase /tmp/fdrepo/ && chmod -R a+rX /tmp/fdrepo
           sudo -u postgres env PGHOST=/var/run/postgresql PGUSER=postgres bash /tmp/fdrepo/supabase/tests/local/run.sh
+
+  a11y:
+    name: Accessibilité (axe-core, RGAA)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Navigateur Chromium (Playwright)
+        run: pnpm --filter @flowdsiml/web exec playwright install --with-deps chromium
+      - name: App web et lecteur (serveurs de dev, faux Supabase dans les tests)
+        env:
+          VITE_SUPABASE_ANON_KEY: test
+          VITE_PLAYER_URL: http://localhost:5174
+          VITE_APP_ORIGIN: http://localhost:5173
+        run: |
+          (cd apps/web && nohup pnpm exec vite --port 5173 --strictPort > /tmp/web.log 2>&1 &)
+          (cd apps/player && nohup pnpm exec vite --port 5174 --strictPort > /tmp/player.log 2>&1 &)
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:5173/ >/dev/null && curl -sf http://localhost:5174/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/web.log /tmp/player.log; exit 1
+      - name: Audit axe-core (0 violation serious ou critical)
+        run: cd apps/web && node e2e/a11y.e2e.cjs --report /tmp/a11y-report.json
+      - name: Rapport
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report
+          path: /tmp/a11y-report.json
+          if-no-files-found: ignore
