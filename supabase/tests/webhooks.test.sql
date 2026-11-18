@@ -1,7 +1,7 @@
 -- Tests pgTAP : L23 webhooks sortants (URL, droits, secrets, émission, essais, rejeu, limite du plan).
 begin;
 set search_path = public, extensions;
-select plan(47);
+select plan(49);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000005a1', 'olga-hooks@example.com'),
@@ -196,6 +196,16 @@ select pg_temp.login('00000000-0000-0000-0000-0000000005a1');
 select throws_ok($$ select public.webhook_claim_one(gen_random_uuid(), '00000000-0000-0000-0000-0000000005a1') $$,
   '42501', null, 'webhook_claim_one réservé au rôle service');
 select pg_temp.logout();
+
+-- ===== Reprise après plantage : une livraison restée en 'sending' est reprise à l'expiration du bail =====
+select ok(not exists (select 1 from public.webhook_claim_due(100) c where c.id = (select id from ping2)),
+  'livraison en cours (bail de 2 min actif) : pas reprise');
+update public.webhook_deliveries set next_attempt_at = now() - interval '1 second' where id = (select id from ping2);
+create temp table reclaimed as select * from public.webhook_claim_due(100);
+select ok(exists (select 1 from reclaimed c where c.id = (select id from ping2))
+          and (select status = 'sending' and next_attempt_at > now() + interval '110 seconds'
+                 from public.webhook_deliveries where id = (select id from ping2)),
+  'livraison restée en sending après expiration du bail : reprise avec un nouveau bail');
 
 -- ===== Rejeu (admin, même event_id) =====
 select pg_temp.login('00000000-0000-0000-0000-0000000005a1');
