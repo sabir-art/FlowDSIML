@@ -20,7 +20,8 @@
   height: 44px;
   padding-left: 44px;
   border-radius: var(--fd-radius-full);
-  border-color: transparent;
+  /* A11Y-12 : contour du champ visible sur le fond (3,46:1) */
+  border-color: var(--fd-color-border-strong);
   box-shadow: var(--fd-shadow-xs);
 }
 

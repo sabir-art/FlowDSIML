@@ -34,6 +34,7 @@
   --c-muted: #a9b3bf;
   --c-border: #2c323c;
   --c-strong: #3a414d;
+  --c-field: #6b7787;
   --c-ok-text: #b5db4c;
 }
 .ctr a {
@@ -127,7 +128,8 @@
   padding: 0 8px 0 20px;
   border-radius: 999px;
   background: var(--c-surface);
-  border: 1px solid var(--c-strong);
+  /* A11Y-12 : contour du champ de recherche à 3:1 au moins sur le fond */
+  border: 1px solid var(--c-field, #768294);
   font-size: 16px;
   color: var(--c-muted);
 }
@@ -982,6 +984,7 @@
 .ctr--contrast {
   --c-border: #080808;
   --c-strong: #080808;
+  --c-field: #080808;
   --c-muted: #12161b;
   --c-bg: #ffffff;
 }
