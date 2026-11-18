@@ -1,0 +1,8 @@
+# Dettes techniques
+
+Points connus, acceptés pour l'instant, avec leur remède prévu.
+
+| Date | Sujet | Constat | Impact | Remède prévu |
+|---|---|---|---|---|
+| 2026-11-18 | L11 : cache CDN des anciennes URL publiques | Depuis le passage du bucket « published » en privé (migration 20261118090000), le lecteur passe par l'Edge Function open-demo et des URL signées. Le Smart CDN de Supabase peut encore servir, depuis son cache, les objets demandés publiquement **avant** ce passage (par exemple `latest.json` de la démo fictive Nordline). | Faible : seules les démos publiées avant L11 et déjà consultées par leur URL publique sont concernées, et uniquement tant que le cache n'est pas renouvelé. Une démo passée ensuite en mot de passe ou avec expiration pourrait rester lisible par son ancienne URL publique en cache. | Si une démo réelle est concernée : réécrire ses fichiers publiés (upsert à l'identique, avec le service role), ce qui devrait invalider le cache du Smart CDN, ou les republier sous un nouveau préfixe. Aucun script tant que seule Nordline (fictive, en mode lien) est concernée. |
+| 2026-11-18 | L11 : en-tête IP fiable pour open-demo | L'Edge Function prend `cf-connecting-ip`, sinon `x-real-ip`, sinon la dernière valeur de `x-forwarded-for`. L'en-tête réellement fourni par l'Edge Runtime n'est pas encore confirmé. Une trace par instance (`openDemoIpHeaders`, présence des en-têtes seulement, jamais de valeur) est en place pour le vérifier dans les logs. | Faible : le plafond global par démo (50 échecs en 1 h, puis 15 minutes de blocage) limite les essais même si l'IP pouvait être falsifiée. | Lire la trace depuis le tableau de bord Supabase, garder l'en-tête confirmé, puis retirer la trace. |
