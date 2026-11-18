@@ -102,7 +102,7 @@ body {
   outline: none;
   box-shadow:
     0 0 0 2px var(--p-surface),
-    0 0 0 4px var(--p-primary);
+    0 0 0 4px var(--fd-color-focus, #1f7fb6);
 }
 .p-menu {
   position: absolute;
@@ -1046,7 +1046,7 @@ body {
 .p-controls .p-icon-btn:focus-visible {
   box-shadow:
     0 0 0 2px var(--p-surface),
-    0 0 0 4px var(--p-primary);
+    0 0 0 4px var(--fd-color-focus, #1f7fb6);
 }
 .p-controls .p-icon-btn:hover:not(:disabled) {
   background: color-mix(in srgb, var(--p-text) 10%, transparent);

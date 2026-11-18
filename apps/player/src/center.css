@@ -17,7 +17,7 @@
   --c-strong: #c9d1da;
   --c-ok: #95c11f;
   --c-ok-text: #2f6a06;
-  --c-focus: #2897d5;
+  --c-focus: #1f7fb6;
   min-height: 100vh;
   background: var(--c-bg);
   color: var(--c-text);
