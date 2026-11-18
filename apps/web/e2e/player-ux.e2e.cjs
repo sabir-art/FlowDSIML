@@ -81,8 +81,9 @@ const DEMO = manifest.demoId;
     'PL4 : titre renvoyé à la ligne (2 lignes au plus)',
   );
   ok(
-    (await m.locator('.p-top-cta-icon').evaluate((el) => getComputedStyle(el).display)) === 'none',
-    'PL4 : CTA sans icône sous 480 px',
+    (await m.locator('.p-top-cta').evaluate((el) => el.scrollWidth <= el.clientWidth + 1)) &&
+      (await m.locator('.p-top-cta-icon').evaluate((el) => getComputedStyle(el).display)) !== 'none',
+    'PY-7 (remplace PL4) : CTA avec son icône, sans débordement',
   );
   if (SHOTS) await m.screenshot({ path: `${SHOTS}/23-player-mobile-zoom.png` });
   await m.getByRole('button', { name: 'Suivant' }).last().click();

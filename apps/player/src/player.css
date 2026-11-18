@@ -1232,3 +1232,75 @@ body {
 .p-end-text .p-actions .p-btn-ghost {
   border-color: transparent;
 }
+
+/* PLY-01 : thème sombre (prefers-color-scheme, couleurs par défaut de la démo) */
+.p-root.is-dark {
+  color-scheme: dark;
+}
+.is-dark .p-controls {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+}
+.is-dark .p-top,
+.is-dark .p-branding {
+  color: var(--p-chrome-text);
+}
+.is-dark .p-meta {
+  color: #a9b3bf;
+}
+.is-dark .p-ws,
+.is-dark .p-controls {
+  background: var(--p-chrome);
+  color: var(--p-chrome-text);
+}
+.is-dark .p-ws {
+  box-shadow: inset 0 0 0 1px #272e37;
+}
+.is-dark .p-controls .p-icon-btn {
+  color: var(--p-chrome-text);
+  background: rgb(255 255 255 / 0.06);
+}
+.is-dark .p-controls .p-icon-btn--ghost {
+  background: transparent;
+}
+.is-dark .p-controls .p-progress {
+  background: rgb(255 255 255 / 0.12);
+}
+.is-dark .p-chapters-btn {
+  color: var(--p-chrome-text);
+}
+/* Fin : bouton principal à sa largeur naturelle, centré (maquette) */
+.p-card-acts--col {
+  align-items: center;
+}
+
+/* Mobile : CTA de l'en-tête sur une ligne, le titre se replie (maquette) */
+@media (max-width: 720px) {
+  .p-top-cta {
+    max-width: 72%;
+    white-space: normal;
+    font-size: 13px;
+    padding-inline: 12px;
+  }
+  .p-id {
+    flex: 1;
+  }
+}
+.is-dark .p-controls .p-count {
+  color: #a9b3bf;
+}
+@media (max-width: 720px) {
+  .p-top-cta .p-top-cta-icon {
+    display: inline-flex;
+  }
+}
+
+/* Cadre sombre : prune clair et texte foncé pour l'appel de l'en-tête et la progression (refonte) */
+.is-dark .p-top-cta {
+  background: var(--p-chrome-primary, var(--p-primary));
+}
+.is-dark[style*='--p-chrome-primary'] .p-top-cta {
+  color: #080808;
+}
+.is-dark .p-controls .p-progress > div {
+  background: var(--p-chrome-primary, var(--p-primary));
+}

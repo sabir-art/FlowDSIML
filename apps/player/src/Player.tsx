@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import type { Hotspot, LeadForm as LeadFormT, Manifest, Step } from '@flowdsiml/manifest';
+import {
+  themeSchema,
+  type Hotspot,
+  type LeadForm as LeadFormT,
+  type Manifest,
+  type Step,
+} from '@flowdsiml/manifest';
 import { applyVariables, richTextToHtml, type VariableValues } from '@flowdsiml/core';
 import {
   ArrowLeft,
@@ -53,23 +59,29 @@ const GATE_KEY = (demoId: string) => `fd.gate.${demoId}`;
 const ICON = { size: 18, strokeWidth: 2, 'aria-hidden': true } as const;
 
 /** Vrai sous 640 px : la bulle devient une feuille ancrée en bas (P3). */
-function useCompact() {
-  const q = '(max-width: 639px)';
-  const [compact, setCompact] = useState(() => matchMedia(q).matches);
+function useMedia(q: string) {
+  const [match, setMatch] = useState(() => matchMedia(q).matches);
   useEffect(() => {
     const mq = matchMedia(q);
-    const on = () => setCompact(mq.matches);
+    const on = () => setMatch(mq.matches);
     mq.addEventListener('change', on);
     return () => mq.removeEventListener('change', on);
-  }, []);
-  return compact;
+  }, [q]);
+  return match;
 }
+const useCompact = () => useMedia('(max-width: 639px)');
+
+/** Couleurs du thème par défaut : seules celles-ci passent en sombre (une démo à la charte du client garde ses couleurs). */
+const DEFAULT_THEME = themeSchema.parse({});
+// Seul le cadre passe en sombre ; bulle, formulaire et cartes gardent la surface claire du thème (maquette)
+const DARK = { '--p-bg': '#0B0D10', '--p-chrome': '#15191F', '--p-chrome-text': '#F3F5F8' };
 
 export function Player({ manifest: m, values, tracker, preview, startQuiz, onLead }: Props) {
   // PY-3 : langue de l'interface du lecteur (le contenu de la démo reste dans sa langue)
   const [locale, setLocale] = useState<'fr' | 'en'>(m.locale === 'en' ? 'en' : 'fr');
   const t = strings(locale);
   const compact = useCompact();
+  const prefersDark = useMedia('(prefers-color-scheme: dark)');
   const rootRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
@@ -256,7 +268,18 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
     return () => removeEventListener('keydown', onKey);
   });
 
-  const style = themeVars(theme);
+  // PLY-01 : thème sombre du système (refonte), quand la démo garde les couleurs par défaut
+  const dark =
+    prefersDark &&
+    theme.background === DEFAULT_THEME.background &&
+    theme.surface === DEFAULT_THEME.surface &&
+    theme.text === DEFAULT_THEME.text;
+  const style = {
+    ...themeVars({ ...theme, ...(dark ? { background: DARK['--p-bg'] } : {}) }),
+    ...(dark ? DARK : {}),
+    // Cadre sombre : appel de l'en-tête et progression en prune clair, si la couleur principale est celle par défaut
+    ...(dark && theme.primary === DEFAULT_THEME.primary ? { '--p-chrome-primary': '#CF86A9' } : {}),
+  };
 
   const chapterOf = (s: Step) => m.chapters.find((c) => c.id === s.chapterId);
   const progress = ((index + 1) / m.steps.length) * 100;
@@ -274,7 +297,7 @@ export function Player({ manifest: m, values, tracker, preview, startQuiz, onLea
   };
 
   return (
-    <div class={`p-root ${compact ? 'is-compact' : ''}`} style={style} ref={rootRef}>
+    <div class={`p-root ${compact ? 'is-compact' : ''}${dark ? ' is-dark' : ''}`} style={style} ref={rootRef}>
       {preview && <div class="p-preview">{t.preview}</div>}
       <header class="p-top" inert={!!gateForm}>
         {/* PY-1 : pastille du workspace (logo, sinon initiales), titre, méta */}

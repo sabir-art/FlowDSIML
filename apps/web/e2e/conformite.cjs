@@ -103,7 +103,7 @@ const SCREENS = {
     player: true,
     async prepare(p) {
       for (let i = 0; i < 2; i++) {
-        await p.locator('.p-tip .p-btn-primary').click();
+        await p.locator('.p-tip .p-btn-primary, .p-sheet .p-btn-primary').click();
         await p.waitForTimeout(500);
       }
     },
@@ -113,7 +113,7 @@ const SCREENS = {
     player: true,
     async prepare(p) {
       for (let i = 0; i < 6; i++) {
-        await p.locator('.p-tip .p-btn-primary').click();
+        await p.locator('.p-tip .p-btn-primary, .p-sheet .p-btn-primary').click();
         await p.waitForTimeout(400);
         if (await p.locator('.p-form').count()) {
           await p.locator('.p-form input[type=email]').fill('lea@example.com');
@@ -123,6 +123,23 @@ const SCREENS = {
         }
       }
     },
+  },
+  'PLY-01-mobile': {
+    maquette: 'refonte/player.html?view=etape',
+    player: true,
+    view: { width: 390, height: 844 },
+  },
+  'PLY-01-mobile-formulaire': {
+    maquette: 'refonte/player.html?view=formulaire',
+    player: true,
+    view: { width: 390, height: 844 },
+    prepare: (p) => SCREENS['PLY-01-formulaire'].prepare(p),
+  },
+  'PLY-01-mobile-fin': {
+    maquette: 'refonte/player.html?view=fin',
+    player: true,
+    view: { width: 390, height: 844 },
+    prepare: (p) => SCREENS['PLY-01-fin'].prepare(p),
   },
   'PRT-01': {
     maquette: 'reference/partage.html',
@@ -203,8 +220,8 @@ const SCREENS = {
   },
 };
 
-async function shotMaquette(b, file, theme, prep) {
-  const p = await b.newPage({ viewport: VIEW });
+async function shotMaquette(b, file, theme, prep, view = VIEW) {
+  const p = await b.newPage({ viewport: view });
   await p.goto(`file://${MAQ}/${file}${file.includes('?') ? '&' : '?'}theme=${theme}`);
   await p.evaluate((th) => {
     document.documentElement.dataset.theme = th;
@@ -224,7 +241,7 @@ const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 /** Lecteur (PLY-01) : manifeste de la maquette servi à la place du stockage. */
 async function shotPlayer(b, s, theme) {
   const manifest = require('./player-maquette.cjs');
-  const p = await b.newPage({ viewport: VIEW, colorScheme: theme });
+  const p = await b.newPage({ viewport: s.view || VIEW, colorScheme: theme });
   await p.route('**/latest.json', (r) =>
     r.fulfill({
       contentType: 'application/json',
@@ -272,8 +289,8 @@ async function shotApp(b, s, theme) {
   return buf;
 }
 
-async function sideBySide(b, left, right, label) {
-  const p = await b.newPage({ viewport: { width: VIEW.width * 2 + 48, height: VIEW.height + 64 } });
+async function sideBySide(b, left, right, label, view = VIEW) {
+  const p = await b.newPage({ viewport: { width: view.width * 2 + 48, height: view.height + 64 } });
   const img = (buf) => `data:image/png;base64,${buf.toString('base64')}`;
   await p.setContent(`<!doctype html><html><body style="margin:0;font:600 18px system-ui;background:#888">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px">
@@ -292,13 +309,13 @@ async function sideBySide(b, left, right, label) {
   for (const [name, s] of Object.entries(SCREENS)) {
     if (only.length && !only.includes(name)) continue;
     for (const theme of ['light', 'dark']) {
-      const left = await shotMaquette(b, s.maquette, theme, s.maquettePrep);
+      const left = await shotMaquette(b, s.maquette, theme, s.maquettePrep, s.view);
       const right = await shotApp(b, s, theme);
       // Capture de l'app seule (téléversée dans l'outil de suivi « Conformité TutoClick »)
       fs.writeFileSync(path.join(OUT, `${name}-app-${theme === 'light' ? 'clair' : 'sombre'}.png`), right);
       fs.writeFileSync(
         path.join(OUT, `${name}-${theme === 'light' ? 'clair' : 'sombre'}.png`),
-        await sideBySide(b, left, right, `${name} (${theme === 'light' ? 'clair' : 'sombre'})`),
+        await sideBySide(b, left, right, `${name} (${theme === 'light' ? 'clair' : 'sombre'})`, s.view),
       );
       console.log(`ok - ${name} (${theme})`);
     }
