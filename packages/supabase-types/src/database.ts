@@ -1548,6 +1548,14 @@ export type Database = {
           token: string;
           variables: NonNullable<Json>;
           workspace_id: string;
+          page_enabled: boolean;
+          page_title: string;
+          page_message: string;
+          signed_by: string | null;
+          dataset_row: number | null;
+          cta_label: string | null;
+          cta_url: string | null;
+          page_code: string | null;
         };
         ComputedFields: never;
         Insert: {
@@ -1561,6 +1569,13 @@ export type Database = {
           token?: string;
           variables?: NonNullable<Json>;
           workspace_id: string;
+          page_enabled?: boolean;
+          page_title?: string;
+          page_message?: string;
+          signed_by?: string | null;
+          dataset_row?: number | null;
+          cta_label?: string | null;
+          cta_url?: string | null;
         };
         Update: {
           created_at?: string;
@@ -1573,6 +1588,13 @@ export type Database = {
           token?: string;
           variables?: NonNullable<Json>;
           workspace_id?: string;
+          page_enabled?: boolean;
+          page_title?: string;
+          page_message?: string;
+          signed_by?: string | null;
+          dataset_row?: number | null;
+          cta_label?: string | null;
+          cta_url?: string | null;
         };
         Relationships: [
           {
@@ -2133,6 +2155,7 @@ export type Database = {
         Returns: Json;
       };
       public_page: { Args: { p_demo: string }; Returns: Json };
+      personal_page: { Args: { p_demo: string; p_code: string }; Returns: Json };
       live_demo: { Args: { p_demo: string }; Returns: Json };
       survey_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
       survey_texts: { Args: { p_demo: string; p_question?: string | null; p_limit?: number }; Returns: Json };
