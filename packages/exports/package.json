@@ -10,7 +10,8 @@
     "./model": "./src/model.ts",
     "./layout": "./src/layout.ts",
     "./gif": "./src/gif.ts",
-    "./pdf": "./src/pdf.ts"
+    "./pdf": "./src/pdf.ts",
+    "./mp4": "./src/mp4.ts"
   },
   "scripts": {
     "lint": "eslint src",
@@ -25,6 +26,7 @@
     "@flowdsiml/core": "workspace:*",
     "@flowdsiml/manifest": "workspace:*",
     "gifenc": "1.0.3",
-    "jspdf": "4.2.1"
+    "jspdf": "4.2.1",
+    "mp4-muxer": "5.2.2"
   }
 }

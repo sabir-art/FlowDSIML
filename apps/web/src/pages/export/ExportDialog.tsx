@@ -1,6 +1,6 @@
 /**
  * L15-01 à L15-05 : modale d'export d'une démo (PDF ou GIF animé), créés dans le navigateur à partir
- * de la version publiée. Vidéo MP4 et hors-ligne : visibles avec « Bientôt », non sélectionnables.
+ * de la version publiée. L25-11/12 : vidéo MP4 (WebCodecs). Hors-ligne : visible avec « Bientôt ».
  */
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,16 +41,40 @@ import {
   type GifOptions,
 } from '@flowdsiml/exports/gif';
 import type { FontFiles } from '@flowdsiml/exports/pdf';
+import {
+  MP4_FORMATS,
+  MP4_MAX_SECONDS,
+  buildVtt,
+  canEncodeVideo,
+  defaultMp4,
+  drawVideoFrame,
+  encodeMp4,
+  mp4Duration,
+  mp4Format,
+  planVideo,
+  type Mp4Format,
+  type Mp4Options,
+  type StepImages,
+  type Subtitles,
+} from '@flowdsiml/exports/mp4';
 import { usePlan } from '../../lib/plan';
 import { download, fetchBitmap, loadExportSource, toPdfImage, type ExportSource } from './exportData';
 import { PdfPagePreview } from './PdfPagePreview';
 import './export.css';
 
-type Fmt = 'pdf' | 'gif';
+type Fmt = 'pdf' | 'gif' | 'mp4';
+/** L25-12 : fichiers prêts (vidéo et sous-titres). */
+interface ReadyFile {
+  name: string;
+  meta: string;
+  kind: 'video' | 'text';
+  bytes: ArrayBuffer | Uint8Array;
+  type: string;
+}
 type Phase =
   | { kind: 'options' }
-  | { kind: 'running'; fmt: Fmt; stage: 0 | 1 | 2; pct: number; n: number; total: number }
-  | { kind: 'done'; fmt: Fmt; name: string; meta: string }
+  | { kind: 'running'; fmt: Fmt; stage: 0 | 1 | 2 | 3; pct: number; n: number; total: number }
+  | { kind: 'done'; fmt: Fmt; name: string; meta: string; files?: ReadyFile[] }
   | { kind: 'error'; fmt: Fmt; message: string; detail: string; fallback: boolean };
 
 class StepImageError extends Error {
@@ -81,6 +105,16 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
     from: 0,
     to: 0,
   });
+  // L25-11 : options propres à la vidéo (vitesse, étapes, bulle et curseur : celles du GIF)
+  const [mp4x, setMp4x] = useState<{
+    format: Mp4Format;
+    zoom: boolean;
+    title: boolean;
+    subtitles: Subtitles;
+  }>(() => {
+    const d = defaultMp4();
+    return { format: d.format, zoom: d.zoom, title: d.title, subtitles: d.subtitles };
+  });
   const [page, setPage] = useState(0);
   const [phase, setPhase] = useState<Phase>({ kind: 'options' });
   const abort = useRef<AbortController | null>(null);
@@ -96,7 +130,11 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
       .then((s) => {
         if (!alive) return;
         setSrc(s);
-        if (s.kind === 'ok') setGif((g) => ({ ...g, to: Math.max(0, s.demo.steps.length - 1) }));
+        if (s.kind === 'ok') {
+          setGif((g) => ({ ...g, to: Math.max(0, s.demo.steps.length - 1) }));
+          // Démo mobile : 9:16 proposé par défaut
+          setMp4x((x) => ({ ...x, format: defaultMp4(s.demo.device).format }));
+        }
       })
       .catch(() => alive && setFailed(true));
     // Polices et mesure jsPDF : le même moteur sert à l'aperçu et au fichier
@@ -129,6 +167,14 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
     loop: gif.loop,
     from: gif.range === 'all' ? 0 : gif.from,
     to: gif.range === 'all' ? d.steps.length - 1 : gif.to,
+  });
+
+  const mp4Opts = (d: ExportDemo): Mp4Options => ({
+    ...gifOpts(d),
+    format: mp4x.format,
+    zoom: mp4x.zoom,
+    title: mp4x.title,
+    subtitles: mp4x.subtitles,
   });
 
   const close = () => {
@@ -288,13 +334,110 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
     }
   }
 
+  /** L25-11 / L25-12 : vidéo MP4 (et sous-titres .vtt), créée dans le navigateur. */
+  async function runMp4() {
+    if (!demo) return;
+    const o = mp4Opts(demo);
+    const total = o.to - o.from + 1;
+    if (mp4Duration(o) > MP4_MAX_SECONDS) {
+      setPhase({
+        kind: 'error',
+        fmt: 'mp4',
+        message: t('export.errTooLong', { max: MP4_MAX_SECONDS / 60 }),
+        detail: t('export.errTooLongDetail', { n: mp4Duration(o).toLocaleString(i18n.language) }),
+        fallback: false,
+      });
+      return;
+    }
+    const ac = new AbortController();
+    abort.current = ac;
+    const run = (stage: 0 | 1 | 2 | 3, pct: number, n = 0) =>
+      setPhase({ kind: 'running', fmt: 'mp4', stage, pct, n, total });
+    run(0, 0);
+    try {
+      const images = new Map<number, StepImages>();
+      for (let i = o.from; i <= o.to; i++) {
+        const st = demo.steps[i]!;
+        try {
+          images.set(i, {
+            img: st.imageUrl ? await fetchBitmap(st.imageUrl, ac.signal, st.crop) : null,
+            full: st.fullPage ? await fetchBitmap(st.fullPage.url, ac.signal).catch(() => null) : null,
+          });
+        } catch (e) {
+          if (isAbort(e)) throw e;
+          throw new StepImageError(i);
+        }
+        run(0, Math.round(((i - o.from + 1) / total) * 15));
+      }
+      const logo =
+        src?.kind === 'ok' && src.logoUrl && o.title
+          ? await fetchBitmap(src.logoUrl, ac.signal).catch(() => null)
+          : null;
+      await document.fonts?.load(`700 15px "Plus Jakarta Sans"`).catch(() => undefined);
+      const fmtx = mp4Format(o.format);
+      const canvas = document.createElement('canvas');
+      canvas.width = fmtx.w;
+      canvas.height = fmtx.h;
+      const ctx = canvas.getContext('2d')!;
+      const stageCanvas = new OffscreenCanvas(1, 1);
+      const stage = { canvas: stageCanvas, ctx: stageCanvas.getContext('2d')! };
+      const frames = planVideo(demo.steps, o);
+      const bytes = await encodeMp4({
+        canvas,
+        frames,
+        signal: ac.signal,
+        draw: (k) => drawVideoFrame(ctx, demo, images, frames[k]!, fmtx.w, fmtx.h, o, logo, stage),
+        progress: (k) => {
+          if (k % 10 === 0 || k === frames.length - 1)
+            run(1, 15 + Math.round(((k + 1) / frames.length) * 75), frames[k]!.step - o.from + 1);
+        },
+      });
+      run(2, 92, total);
+      await tick();
+      const name = fileName(demo.title, 'mp4');
+      const files: ReadyFile[] = [
+        {
+          name,
+          kind: 'video',
+          type: 'video/mp4',
+          bytes,
+          meta: [
+            t('export.seconds', { n: mp4Duration(o).toLocaleString(i18n.language) }),
+            `${fmtx.w.toLocaleString(i18n.language)} × ${fmtx.h.toLocaleString(i18n.language)}`,
+            formatSize(bytes.byteLength, i18n.language),
+          ].join(' · '),
+        },
+      ];
+      if (o.subtitles === 'vtt') {
+        run(3, 96, total);
+        await tick();
+        const vtt = buildVtt(demo.steps, o);
+        files.push({
+          name: fileName(demo.title, i18n.language.startsWith('en') ? 'en.vtt' : 'fr.vtt'),
+          kind: 'text',
+          type: 'text/vtt',
+          bytes: new TextEncoder().encode(vtt.text),
+          meta: t('export.cues', { count: vtt.cues }),
+        });
+      }
+      for (const f of files) download(f.bytes, f.name, f.type);
+      setPhase({ kind: 'done', fmt: 'mp4', name, meta: files[0]!.meta, files });
+    } catch (e) {
+      if (isAbort(e)) return setPhase({ kind: 'options' });
+      failWith('mp4', e);
+    }
+  }
+
   function failWith(f: Fmt, e: unknown) {
     if (e instanceof StepImageError && demo) {
       const s = demo.steps[e.step]!;
       setPhase({
         kind: 'error',
         fmt: f,
-        message: t(f === 'pdf' ? 'export.errImage' : 'export.errImageGif', { n: e.step + 1 }),
+        message: t(
+          f === 'pdf' ? 'export.errImage' : f === 'mp4' ? 'export.errImageMp4' : 'export.errImageGif',
+          { n: e.step + 1 },
+        ),
         detail: t('export.errImageDetail', { n: e.step + 1, title: s.title }),
         fallback: f === 'pdf',
       });
@@ -303,12 +446,14 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
         kind: 'error',
         fmt: f,
         message: t('export.errGeneric'),
-        detail: t(f === 'pdf' ? 'export.errStagePdf' : 'export.errStageGif'),
+        detail: t(
+          f === 'pdf' ? 'export.errStagePdf' : f === 'mp4' ? 'export.errStageMp4' : 'export.errStageGif',
+        ),
         fallback: false,
       });
   }
 
-  const start = () => (fmt === 'pdf' ? void runPdf(pdf) : void runGif());
+  const start = () => (fmt === 'pdf' ? void runPdf(pdf) : fmt === 'mp4' ? void runMp4() : void runGif());
 
   // ---------------------------------------------------------------------------------------------
   // Rendu
@@ -353,14 +498,33 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
     const labels =
       phase.fmt === 'pdf'
         ? [t('export.stagePrepare'), t('export.stageLayout'), t('export.stagePdf')]
-        : [t('export.stagePrepare'), t('export.stageFrames'), t('export.stageGif')];
+        : phase.fmt === 'mp4'
+          ? [
+              t('export.stagePrepare'),
+              t('export.stageRender', { n: phase.n, total: phase.total }),
+              t('export.stageEncode'),
+              ...(mp4x.subtitles === 'vtt' ? [t('export.stageVtt')] : []),
+            ]
+          : [t('export.stagePrepare'), t('export.stageFrames'), t('export.stageGif')];
+    const runTitle =
+      phase.fmt === 'pdf'
+        ? 'export.runningPdf'
+        : phase.fmt === 'mp4'
+          ? 'export.runningMp4'
+          : 'export.runningGif';
     body = (
       <>
         <div className="x15-head">
           <span className="fd-icon-chip">
-            {phase.fmt === 'pdf' ? <FileText aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}
+            {phase.fmt === 'pdf' ? (
+              <FileText aria-hidden="true" />
+            ) : phase.fmt === 'mp4' ? (
+              <Film aria-hidden="true" />
+            ) : (
+              <ImageIcon aria-hidden="true" />
+            )}
           </span>
-          <h2 id={`${id}-t`}>{t(phase.fmt === 'pdf' ? 'export.runningPdf' : 'export.runningGif')}</h2>
+          <h2 id={`${id}-t`}>{t(runTitle)}</h2>
         </div>
         <div className="exp-progress">
           <div
@@ -374,7 +538,7 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
             <span style={{ width: `${phase.pct}%` }} />
           </div>
           <p className="fd-label x15-live" aria-live="polite">
-            {phase.stage === 0
+            {phase.stage === 0 || phase.fmt === 'mp4'
               ? `${phase.pct}\u202f%`
               : t(phase.fmt === 'pdf' ? 'export.livePdf' : 'export.liveGif', {
                   pct: phase.pct,
@@ -414,7 +578,15 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
           <span className="fd-icon-chip x15-chip--success">
             <CircleCheck aria-hidden="true" />
           </span>
-          <h2 id={`${id}-t`}>{t(phase.fmt === 'pdf' ? 'export.donePdf' : 'export.doneGif')}</h2>
+          <h2 id={`${id}-t`}>
+            {t(
+              phase.fmt === 'pdf'
+                ? 'export.donePdf'
+                : phase.fmt === 'mp4'
+                  ? 'export.doneMp4'
+                  : 'export.doneGif',
+            )}
+          </h2>
           <button
             type="button"
             className="fd-btn fd-btn--ghost fd-btn--icon"
@@ -424,20 +596,47 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
             <X aria-hidden="true" />
           </button>
         </div>
-        <div className="exp-file">
-          <span className="fd-icon-chip">
-            {phase.fmt === 'pdf' ? <FileText aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}
-          </span>
-          <span>
-            <b>{phase.name}</b>
-            <small>{phase.meta}</small>
-          </span>
-          <button type="button" className="fd-btn fd-btn--primary" onClick={start}>
-            <Download aria-hidden="true" />
-            {t('export.download')}
-          </button>
-        </div>
-        <p className="fd-help x15-p">{t('export.notKept')}</p>
+        {phase.files ? (
+          // L25-12 : vidéo et sous-titres, chacun avec son bouton
+          phase.files.map((f) => (
+            <div className="exp-file" key={f.name}>
+              <span className="fd-icon-chip">
+                {f.kind === 'video' ? <Film aria-hidden="true" /> : <FileText aria-hidden="true" />}
+              </span>
+              <span>
+                <b>{f.name}</b>
+                <small>{f.meta}</small>
+              </span>
+              <button
+                type="button"
+                className="fd-btn fd-btn--primary"
+                aria-label={t('export.downloadFile', { name: f.name })}
+                onClick={() => download(f.bytes, f.name, f.type)}
+              >
+                <Download aria-hidden="true" />
+                {t('export.download')}
+              </button>
+            </div>
+          ))
+        ) : (
+          <div className="exp-file">
+            <span className="fd-icon-chip">
+              {phase.fmt === 'pdf' ? <FileText aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}
+            </span>
+            <span>
+              <b>{phase.name}</b>
+              <small>{phase.meta}</small>
+            </span>
+            <button type="button" className="fd-btn fd-btn--primary" onClick={start}>
+              <Download aria-hidden="true" />
+              {t('export.download')}
+            </button>
+          </div>
+        )}
+        {phase.files?.some((f) => f.kind === 'text') && (
+          <p className="fd-help x15-p">{t('export.vttHelp')}</p>
+        )}
+        {!phase.files && <p className="fd-help x15-p">{t('export.notKept')}</p>}
         <div className="x15-foot">
           <button type="button" className="fd-btn" onClick={() => setPhase({ kind: 'options' })}>
             {t('export.other')}
@@ -503,6 +702,9 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
         onClose={close}
         onStart={start}
         gifOpts={demo ? gifOpts(demo) : null}
+        mp4x={mp4x}
+        setMp4x={setMp4x}
+        mp4Opts={demo ? mp4Opts(demo) : null}
       />
     );
 
@@ -548,16 +750,22 @@ function Options(p: {
   onClose: () => void;
   onStart: () => void;
   gifOpts: GifOptions | null;
+  mp4x: { format: Mp4Format; zoom: boolean; title: boolean; subtitles: Subtitles };
+  setMp4x: (x: { format: Mp4Format; zoom: boolean; title: boolean; subtitles: Subtitles }) => void;
+  mp4Opts: Mp4Options | null;
 }) {
   const { t, i18n } = useTranslation();
   const { pdf, setPdf, gif, setGif, demo } = p;
   const n = demo?.steps.length ?? 0;
-  const formats: Array<{ key: string; icon: ReactNode; soon?: boolean }> = [
+  // L25-11 : MP4 actif si le navigateur sait encoder (WebCodecs), sinon visible et désactivé
+  const videoOk = canEncodeVideo();
+  const formats: Array<{ key: string; icon: ReactNode; soon?: boolean; off?: boolean }> = [
     { key: 'pdf', icon: <FileText aria-hidden="true" /> },
     { key: 'gif', icon: <ImageIcon aria-hidden="true" /> },
-    { key: 'mp4', icon: <Film aria-hidden="true" />, soon: true },
+    { key: 'mp4', icon: <Film aria-hidden="true" />, off: !videoOk },
     { key: 'zip', icon: <Archive aria-hidden="true" />, soon: true },
   ];
+  const { mp4x, setMp4x } = p;
   const sw = (
     label: string,
     help: string | null,
@@ -628,9 +836,9 @@ function Options(p: {
                 className="exp-format"
                 role="radio"
                 aria-checked={on}
-                aria-disabled={f.soon || undefined}
-                aria-describedby={f.soon ? `${p.id}-soon-${f.key}` : undefined}
-                onClick={() => !f.soon && p.setFmt(f.key as Fmt)}
+                aria-disabled={f.soon || f.off || undefined}
+                aria-describedby={f.soon || f.off ? `${p.id}-soon-${f.key}` : undefined}
+                onClick={() => !f.soon && !f.off && p.setFmt(f.key as Fmt)}
               >
                 {f.soon && (
                   <span className="soon" id={`${p.id}-soon-${f.key}`}>
@@ -639,7 +847,9 @@ function Options(p: {
                 )}
                 <span className="fd-icon-chip">{f.icon}</span>
                 <b>{t(`export.fmt_${f.key}`)}</b>
-                <small>{t(`export.fmt_${f.key}_help`)}</small>
+                <small id={f.off ? `${p.id}-soon-${f.key}` : undefined}>
+                  {f.off ? t('export.mp4Unsupported') : t(`export.fmt_${f.key}_help`)}
+                </small>
               </button>
             );
           })}
@@ -719,23 +929,43 @@ function Options(p: {
               )}
             </fieldset>
             <div className="row-2">
-              <div className="fd-field">
-                <label className="fd-label" htmlFor={`${p.id}-gsz`}>
-                  {t('export.size')}
-                </label>
-                <select
-                  className="fd-select"
-                  id={`${p.id}-gsz`}
-                  value={gif.width}
-                  onChange={(e) => setGif({ ...gif, width: Number(e.target.value) as GifOptions['width'] })}
-                >
-                  {GIF_WIDTHS.map((w) => (
-                    <option key={w} value={w}>
-                      {t(`export.size_${w}`)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {p.fmt === 'mp4' ? (
+                <div className="fd-field">
+                  <label className="fd-label" htmlFor={`${p.id}-vfmt`}>
+                    {t('export.frameFormat')}
+                  </label>
+                  <select
+                    className="fd-select"
+                    id={`${p.id}-vfmt`}
+                    value={mp4x.format}
+                    onChange={(e) => setMp4x({ ...mp4x, format: e.target.value as Mp4Format })}
+                  >
+                    {MP4_FORMATS.map((f) => (
+                      <option key={f.key} value={f.key}>
+                        {t(`export.vfmt_${f.key}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="fd-field">
+                  <label className="fd-label" htmlFor={`${p.id}-gsz`}>
+                    {t('export.size')}
+                  </label>
+                  <select
+                    className="fd-select"
+                    id={`${p.id}-gsz`}
+                    value={gif.width}
+                    onChange={(e) => setGif({ ...gif, width: Number(e.target.value) as GifOptions['width'] })}
+                  >
+                    {GIF_WIDTHS.map((w) => (
+                      <option key={w} value={w}>
+                        {t(`export.size_${w}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="fd-field">
                 <label className="fd-label" htmlFor={`${p.id}-grg`}>
                   {t('export.steps')}
@@ -786,9 +1016,34 @@ function Options(p: {
               <div className="opts">
                 {sw(t('export.bubble'), null, gif.bubble, (v) => setGif({ ...gif, bubble: v }))}
                 {sw(t('export.cursor'), null, gif.cursor, (v) => setGif({ ...gif, cursor: v }))}
-                {sw(t('export.loop'), null, gif.loop, (v) => setGif({ ...gif, loop: v }))}
+                {p.fmt === 'mp4' ? (
+                  <>
+                    {sw(t('export.zooms'), null, mp4x.zoom, (v) => setMp4x({ ...mp4x, zoom: v }))}
+                    {sw(t('export.titleScreen'), t('export.titleScreenHelp'), mp4x.title, (v) =>
+                      setMp4x({ ...mp4x, title: v }),
+                    )}
+                  </>
+                ) : (
+                  sw(t('export.loop'), null, gif.loop, (v) => setGif({ ...gif, loop: v }))
+                )}
               </div>
             </fieldset>
+            {p.fmt === 'mp4' && (
+              <fieldset>
+                <legend className="fd-label">{t('export.subtitles')}</legend>
+                {seg(
+                  t('export.subtitles'),
+                  mp4x.subtitles,
+                  [
+                    { v: 'vtt' as Subtitles, label: t('export.sub_vtt') },
+                    { v: 'burn' as Subtitles, label: t('export.sub_burn') },
+                    { v: 'none' as Subtitles, label: t('export.sub_none') },
+                  ],
+                  (v) => setMp4x({ ...mp4x, subtitles: v }),
+                )}
+                <p className="fd-help">{t('export.subtitlesHelp')}</p>
+              </fieldset>
+            )}
           </>
         )}
 
@@ -802,16 +1057,18 @@ function Options(p: {
               ? t('export.preparing')
               : p.fmt === 'pdf'
                 ? t('export.helpPdf', { count: p.pages.length })
-                : `${t(gif.loop ? 'export.helpGifLoop' : 'export.helpGifOnce', {
-                    n: gifDuration(range, gif.seconds).toLocaleString(i18n.language),
-                  })} ${t('export.helpGifLong')}`}
+                : p.fmt === 'mp4' && p.mp4Opts
+                  ? t('export.helpMp4', { n: mp4Duration(p.mp4Opts).toLocaleString(i18n.language) })
+                  : `${t(gif.loop ? 'export.helpGifLoop' : 'export.helpGifOnce', {
+                      n: gifDuration(range, gif.seconds).toLocaleString(i18n.language),
+                    })} ${t('export.helpGifLong')}`}
           </p>
           <button type="button" className="fd-btn" onClick={p.onClose}>
             {t('common.cancel')}
           </button>
           <button type="button" className="fd-btn fd-btn--primary" disabled={!p.ready} onClick={p.onStart}>
             <Download aria-hidden="true" />
-            {t(p.fmt === 'pdf' ? 'export.goPdf' : 'export.goGif')}
+            {t(p.fmt === 'pdf' ? 'export.goPdf' : p.fmt === 'mp4' ? 'export.goMp4' : 'export.goGif')}
           </button>
         </div>
       </div>
@@ -852,14 +1109,31 @@ function Options(p: {
           </div>
         </aside>
       ) : (
-        <GifPreview demo={demo} opts={p.gifOpts} />
+        <GifPreview
+          demo={demo}
+          opts={p.gifOpts}
+          caption={
+            p.fmt === 'mp4'
+              ? `${mp4Format(mp4x.format).w.toLocaleString(i18n.language)} × ${mp4Format(mp4x.format).h.toLocaleString(i18n.language)}`
+              : undefined
+          }
+        />
       )}
     </>
   );
 }
 
 /** L15-02 : aperçu du GIF dessiné par le même moteur que le fichier. */
-function GifPreview({ demo, opts }: { demo: ExportDemo | null; opts: GifOptions | null }) {
+function GifPreview({
+  demo,
+  opts,
+  caption,
+}: {
+  demo: ExportDemo | null;
+  opts: GifOptions | null;
+  /** L25-11 : taille de la vidéo à la place de celle du GIF. */
+  caption?: string;
+}) {
   const { t } = useTranslation();
   const canvas = useRef<HTMLCanvasElement>(null);
   const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -904,7 +1178,8 @@ function GifPreview({ demo, opts }: { demo: ExportDemo | null; opts: GifOptions 
       <div className="cap">
         <span>{t('export.preview')}</span>
         <span>
-          {opts ? `${opts.width} × ${demo ? gifHeight(demo.steps[opts.from]!, opts.width) : 0} px` : ''}
+          {caption ??
+            (opts ? `${opts.width} × ${demo ? gifHeight(demo.steps[opts.from]!, opts.width) : 0} px` : '')}
         </span>
       </div>
       <div className="gif-frame" aria-hidden="true">

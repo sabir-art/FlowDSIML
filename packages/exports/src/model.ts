@@ -16,6 +16,15 @@ export interface ExportStep {
    * sont déjà ceux de la capture recadrée ; l'image chargée doit être découpée à cette zone.
    */
   crop?: { x: number; y: number; w: number; h: number } | null;
+  /** L25-11 : zoom de l'éditeur (centre relatif, échelle). */
+  zoom?: { x: number; y: number; scale: number } | null;
+  /** L25-11 : animation de saisie ou de défilement (L25-04/05), jouée dans la vidéo. */
+  animation?:
+    | { type: 'typing'; text: string; field: { x: number; y: number; w: number; h: number } | null }
+    | { type: 'scroll'; direction: 'down' | 'up'; distance: number; duration: number }
+    | null;
+  /** L25-05 : capture pleine page (URL lisible), position de départ et hauteur de la fenêtre (px). */
+  fullPage?: { url: string; width: number; height: number; top: number; viewportHeight: number } | null;
 }
 
 export interface ExportDemo {
@@ -33,6 +42,8 @@ export interface ExportDemo {
   /** « Créé avec TutoClick » (plan Free seulement). */
   showBranding: boolean;
   steps: ExportStep[];
+  /** L25-11 : démo capturée au format mobile (9:16 proposé par défaut). */
+  device?: 'desktop' | 'mobile';
 }
 
 /**
@@ -46,7 +57,26 @@ export function stepsFromManifest(m: Manifest): ExportStep[] {
   return m.steps.map((s) => {
     const h = s.hotspots[0];
     const c = s.kind === 'image' ? (s.options?.crop ?? null) : null;
+    const a = s.kind === 'image' ? s.options?.animation : undefined;
+    const fp = s.kind === 'image' ? s.options?.fullPage : undefined;
     return {
+      zoom: s.zoom ? { x: s.zoom.x, y: s.zoom.y, scale: s.zoom.scale } : null,
+      animation:
+        a?.type === 'typing'
+          ? { type: 'typing', text: applyVariables(a.text, {}, defaults), field: a.field }
+          : a?.type === 'scroll'
+            ? { type: 'scroll', direction: a.direction, distance: a.distance, duration: a.duration }
+            : null,
+      fullPage:
+        fp?.url && !c
+          ? {
+              url: fp.url,
+              width: fp.width,
+              height: fp.height,
+              top: fp.top,
+              viewportHeight: fp.viewportHeight,
+            }
+          : null,
       title: txt(h?.title || s.title || ''),
       text: txt(h?.body || s.body || ''),
       imageUrl: s.kind === 'image' && s.image ? s.image.url : null,
@@ -59,7 +89,7 @@ export function stepsFromManifest(m: Manifest): ExportStep[] {
 }
 
 /** Nom de fichier tiré du titre : minuscules, sans accents, tirets. */
-export function fileName(title: string, ext: 'pdf' | 'gif'): string {
+export function fileName(title: string, ext: 'pdf' | 'gif' | 'mp4' | 'fr.vtt' | 'en.vtt'): string {
   const base = title
     .normalize('NFD')
     .replace(/\p{M}/gu, '')

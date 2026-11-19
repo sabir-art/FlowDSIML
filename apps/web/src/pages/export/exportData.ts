@@ -29,7 +29,9 @@ export async function loadExportSource(demoId: string, removeBranding: boolean):
   // Captures publiées (bucket privé « published ») : URL signées le temps de l'export
   const rel = [
     ...new Set(
-      steps.map((s) => s.imageUrl).filter((u): u is string => !!u && !/^(https?:|data:|blob:)/.test(u)),
+      steps
+        .flatMap((s) => [s.imageUrl, s.fullPage?.url ?? null])
+        .filter((u): u is string => !!u && !/^(https?:|data:|blob:)/.test(u)),
     ),
   ];
   const signed = new Map<string, string>();
@@ -54,12 +56,16 @@ export async function loadExportSource(demoId: string, removeBranding: boolean):
       url: publicDemoUrl(demoId),
       context: path ? `Formation « ${path} »` : '',
       showBranding: !removeBranding,
-      steps: steps.map((s) => ({
-        ...s,
-        imageUrl: s.imageUrl
-          ? (signed.get(s.imageUrl) ?? (/^https?:/.test(s.imageUrl) ? s.imageUrl : null))
-          : null,
-      })),
+      device: m.device === 'mobile' ? 'mobile' : 'desktop',
+      steps: steps.map((s) => {
+        const sign = (u: string) => signed.get(u) ?? (/^https?:/.test(u) ? u : null);
+        const full = s.fullPage ? sign(s.fullPage.url) : null;
+        return {
+          ...s,
+          imageUrl: s.imageUrl ? sign(s.imageUrl) : null,
+          fullPage: s.fullPage && full ? { ...s.fullPage, url: full } : null,
+        };
+      }),
     },
   };
 }
