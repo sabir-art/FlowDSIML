@@ -186,7 +186,7 @@ function draftQuiz(ed: DemoEditor, settings: ReturnType<typeof asSettings>) {
 type PageMeta = { url?: string; links?: Array<{ sel: string; href: string }> };
 const norm = (u: string) => u.replace(/#.*$/, '').replace(/\/$/, '');
 /** Liens d'une page vers une autre page de la démo (même adresse) : même règle que publish_demo. */
-function resolveLinks(s: StepRow, steps: StepRow[]) {
+export function resolveLinks(s: StepRow, steps: StepRow[]) {
   const links = ((s.html_meta as PageMeta | null)?.links ?? []).slice(0, 300);
   const out: Array<{ sel: string; step: string }> = [];
   for (const l of links) {
@@ -200,7 +200,7 @@ function resolveLinks(s: StepRow, steps: StepRow[]) {
   }
   return out;
 }
-function sandboxOf(v: unknown, steps: StepRow[]) {
+export function sandboxOf(v: unknown, steps: StepRow[]) {
   const o = (v && typeof v === 'object' ? v : {}) as Record<string, unknown>;
   const ids = new Set(steps.map((s) => s.id));
   const start = typeof o.start === 'string' && ids.has(o.start) ? o.start : (steps[0]?.id ?? null);

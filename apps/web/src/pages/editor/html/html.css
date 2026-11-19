@@ -143,3 +143,134 @@
 .mod.nf > svg {
   color: var(--fd-color-warning, #b54708);
 }
+
+/* A8 (L20-02) : plan du Sandbox */
+.sb-plan {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  width: 100%;
+  align-items: start;
+  text-align: left;
+}
+.sb-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.sb-title {
+  margin: 0;
+  font-size: 22px;
+}
+.sb-sub {
+  margin: 0;
+}
+.sb-scroll {
+  overflow: auto;
+  border-radius: 20px;
+  background: var(--fd-color-surface);
+  box-shadow: var(--fd-shadow-sm);
+}
+.sbmap {
+  position: relative;
+}
+.sbmap svg.links {
+  position: absolute;
+  inset: 0;
+}
+.sbnode {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--fd-color-surface);
+  box-shadow: inset 0 0 0 1px var(--fd-color-border-strong);
+  font-size: 13px;
+}
+.sbnode.start {
+  box-shadow: inset 0 0 0 2px var(--fd-color-success, #027a48);
+}
+.sbnode.warn {
+  box-shadow: inset 0 0 0 2px var(--fd-color-warning, #b54708);
+}
+.sbnode .badge {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  background: var(--fd-color-surface);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.sbnode .mini {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--fd-color-surface-hover);
+  color: var(--fd-color-text-muted);
+}
+.sbnode small {
+  color: var(--fd-color-text-muted);
+}
+.sb-alert {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.link-btn {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--fd-color-link, var(--fd-color-primary));
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--fd-shadow-focus);
+  border-radius: 2px;
+}
+.sb-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px 24px;
+  padding: 16px;
+  align-items: start;
+}
+.sb-settings > .sb-head {
+  grid-column: 1 / -1;
+}
+.sb-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sb-head h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.sb-keys {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.sb-keys legend {
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 4px;
+}
+.sb-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+.stage-view {
+  display: inline-flex;
+}

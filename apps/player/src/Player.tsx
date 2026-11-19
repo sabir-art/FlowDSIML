@@ -348,13 +348,22 @@ export function Player({
 
   // ===== A8 : Sandbox (navigation libre entre pages HTML reliées) =====
   const sandbox = m.kind === 'sandbox' ? m.sandbox : null;
-  /** Pages clés : choisies dans l'éditeur, sinon toutes les pages HTML. */
+  /** Pages clés : choisies dans l'éditeur, sinon toutes les pages reliées. */
   const keyPages = useMemo(
     () =>
       sandbox
         ? sandbox.keyPages.length
           ? sandbox.keyPages.filter((id) => m.steps.some((s) => s.id === id))
-          : m.steps.filter((s) => s.kind === 'html').map((s) => s.id)
+          : (() => {
+              // Par défaut : toutes les pages reliées (départ compris), comme le plan de l'éditeur
+              const pages = m.steps.filter((s) => s.kind === 'html');
+              const linked = new Set<string>(sandbox.start ? [sandbox.start] : []);
+              for (const s of pages) {
+                for (const o of s.html?.ops ?? []) if (o.op === 'link' && o.value) linked.add(o.value);
+                if (sandbox.autoLink) for (const l of s.html?.links ?? []) linked.add(l.step);
+              }
+              return pages.filter((s) => linked.has(s.id)).map((s) => s.id);
+            })()
         : [],
     [sandbox, m.steps],
   );

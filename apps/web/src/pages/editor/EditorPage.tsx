@@ -39,6 +39,7 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { useDemoEditor } from './useDemoEditor';
 import { Canvas, type Tool } from './Canvas';
+import { SandboxPlan } from './html/SandboxPlan';
 import { StepList } from './StepList';
 import { CommentsPanel } from './comments/CommentsPanel';
 import { useStepComments } from './comments/useStepComments';
@@ -172,6 +173,9 @@ export function EditorPage() {
   const [findHits, setFindHits] = useState<Record<number, number>>({});
   const [keysOpen, setKeysOpen] = useState(false);
   const [zoom, setZoom] = useState<Zoom>('fit');
+  // A8 (L20-02) : plan du Sandbox (démo de pages HTML reliées)
+  const sandbox = editor.demo?.kind === 'sandbox';
+  const [planView, setPlanView] = useState(false);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   // L16 : « Diffuser » (menu « … », aussi ouvert par #/demos/:id/distribute → ?distribute=1)
@@ -639,6 +643,25 @@ export function EditorPage() {
                   : ''}
             </span>
             <span className="grow" />
+            {sandbox && (
+              <div
+                className="segmented stage-view"
+                role="radiogroup"
+                aria-label={t('editor.sandbox.viewLabel')}
+              >
+                {(['page', 'plan'] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    role="radio"
+                    aria-checked={(v === 'plan') === planView}
+                    onClick={() => setPlanView(v === 'plan')}
+                  >
+                    {v === 'plan' ? t('editor.sandbox.viewPlan') : t('editor.sandbox.viewPage')}
+                  </button>
+                ))}
+              </div>
+            )}
             <select
               className="select input-sm stage-zoom"
               aria-label={t('editor.zoom')}
@@ -671,7 +694,17 @@ export function EditorPage() {
           <div className="stage-main">
             <div className="stage-inner">
               {step && ab.test?.step_id === step.id && <AbCanvasSwitch ab={ab} />}
-              {step ? (
+              {sandbox && planView ? (
+                <SandboxPlan
+                  editor={editor}
+                  readOnly={readOnly}
+                  onOpen={(i) => {
+                    if (i >= 0) setIndex(i);
+                    setSelection({ kind: 'step' });
+                    setPlanView(false);
+                  }}
+                />
+              ) : step ? (
                 <div className={`frame fd-player-scope frame--${zoom}`}>
                   {/* L18 : police de la médiathèque appliquée au canevas, comme dans le lecteur */}
                   {fontCss && <style>{fontCss}</style>}
