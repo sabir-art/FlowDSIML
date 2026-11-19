@@ -77,6 +77,7 @@ export const imageRefSchema = z.object({
   width: z.number().int().positive(),
   height: z.number().int().positive(),
 });
+export type ImageRef = z.infer<typeof imageRefSchema>;
 
 /**
  * F1 : destination d'un choix de parcours (étape, chapitre, fin de la démo ou lien).
@@ -180,10 +181,47 @@ export const stepOptionsSchema = z
   });
 export type StepOptions = z.infer<typeof stepOptionsSchema>;
 
+/**
+ * L17 : étape Avant / Après. L'image principale de l'étape est « Maintenant » ; `before` est la
+ * capture « Avant » (ses zones floutées dans `beforeBlurs`). Disposition : côte à côte, curseur ou
+ * bascule (imposée sous 640 px par le lecteur).
+ */
+export const beforeAfterSchema = z.object({
+  layout: z.enum(['side', 'slider', 'toggle']).default('side').catch('side'),
+  labels: z
+    .object({
+      before: z.string().max(20).default('').catch(''),
+      after: z.string().max(20).default('').catch(''),
+    })
+    .default({ before: '', after: '' })
+    .catch({ before: '', after: '' }),
+  notes: z
+    .object({
+      before: z.string().max(140).default('').catch(''),
+      after: z.string().max(140).default('').catch(''),
+    })
+    .default({ before: '', after: '' })
+    .catch({ before: '', after: '' }),
+  before: imageRefSchema,
+  beforeBlurs: z.array(maskSchema).default([]).catch([]),
+});
+export type BeforeAfter = z.infer<typeof beforeAfterSchema>;
+
+/** L17 : terme du glossaire du workspace (nouveau terme, ancien terme barré, autres formes). */
+export const glossaryTermSchema = z.object({
+  term: z.string().min(1).max(60),
+  oldTerm: z.string().max(60).nullable().default(null).catch(null),
+  definition: z.string().min(1).max(140),
+  forms: z.array(z.string().min(1).max(60)).max(10).default([]).catch([]),
+});
+export type GlossaryTerm = z.infer<typeof glossaryTermSchema>;
+
 export const stepSchema = z.object({
   id: z.string(),
   chapterId: z.string().nullable().default(null),
-  kind: z.enum(['image', 'text', 'html']),
+  kind: z.enum(['image', 'text', 'html', 'before_after']),
+  /** L17 : pour kind = before_after (null si la capture « Avant » manque). */
+  beforeAfter: beforeAfterSchema.nullable().default(null).catch(null),
   /** Pour kind = image (MVP). */
   image: imageRefSchema.nullable().default(null),
   /** Pour kind = html (V2) : URL du snapshot assaini. */
@@ -314,6 +352,24 @@ export const manifestSchema = z.object({
   cta: ctaSchema.nullable().default(null),
   /** P13 : politique de confidentialité du workspace (https), affichée sous les formulaires de lead. */
   privacyUrl: z.string().url().startsWith('https://').nullable().default(null).catch(null),
+  /**
+   * L17 : termes du glossaire présents dans la démo (préfiltre serveur), null si le soulignement est
+   * désactivé pour le workspace ou la démo. Un terme invalide est ignoré seul.
+   */
+  glossary: z
+    .array(z.unknown())
+    .max(500)
+    .nullable()
+    .default(null)
+    .catch(null)
+    .transform((list) =>
+      list === null
+        ? null
+        : list.flatMap((t) => {
+            const r = glossaryTermSchema.safeParse(t);
+            return r.success ? [r.data] : [];
+          }),
+    ),
   /** URL de l'endpoint d'ingestion analytics. */
   trackUrl: z.string().nullable().default(null),
 });

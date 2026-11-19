@@ -6,7 +6,18 @@ import {
   type Manifest,
   type Step,
 } from '@flowdsiml/manifest';
-import { applyVariables, richTextToHtml, richTextToPlain, type VariableValues } from '@flowdsiml/core';
+import {
+  applyVariables,
+  buildNeedles,
+  escapeHtml,
+  markTermsInHtml,
+  richTextToHtml,
+  richTextToPlain,
+  termsPresent,
+  VAR_CLOSE,
+  VAR_OPEN,
+  type VariableValues,
+} from '@flowdsiml/core';
 import {
   ArrowLeft,
   ArrowRight,
@@ -22,6 +33,7 @@ import {
   Play,
   Maximize2,
   Minimize2,
+  Notebook,
   RotateCcw,
 } from 'lucide-preact';
 import {
@@ -34,6 +46,8 @@ import {
   type BranchMemory,
 } from './logic';
 import { Checklist } from './Checklist';
+import { BeforeAfterStep } from './BeforeAfter';
+import { GlossaryDrawer, GlossaryTip } from './Glossary';
 import { Quiz } from './Quiz';
 import { submitQuizAttempt } from './api';
 import {
@@ -144,20 +158,68 @@ export function Player({
     [m.variables],
   );
   const sub = (s: string) => applyVariables(s, values, defaults);
-  const html = (s: string) => richTextToHtml(sub(s));
+  // L17 : glossaire. Termes repérés hors valeurs de variables et hors liens, jamais dans les titres ;
+  // première occurrence de chaque terme dans l'étape (corps, bulles, notes Avant / Après, dans cet ordre).
+  const glossary = useMemo(() => m.glossary ?? [], [m.glossary]);
+  const needles = useMemo(() => buildNeedles(glossary, escapeHtml), [glossary]);
+  const marked = (s: string) => richTextToHtml(applyVariables(s, values, defaults, [VAR_OPEN, VAR_CLOSE]));
+  const stepTerms = useMemo(() => {
+    const byText = new Map<string, Set<number>>();
+    if (!needles.length) return byText;
+    const s = m.steps[index]!;
+    const used = new Set<number>();
+    const fields = [
+      s.body,
+      ...s.hotspots.map((h) => h.body),
+      s.beforeAfter?.notes.before,
+      s.beforeAfter?.notes.after,
+    ];
+    for (const f of fields) {
+      if (!f || byText.has(f)) continue;
+      const before = new Set(used);
+      markTermsInHtml(marked(f), needles, used);
+      byText.set(f, new Set([...used].filter((i) => !before.has(i))));
+    }
+    return byText;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needles, index, values, defaults]);
+  const html = (s: string) => {
+    const own = stepTerms.get(s);
+    if (!own || !own.size) return richTextToHtml(sub(s));
+    const skip = new Set(glossary.map((_, i) => i).filter((i) => !own.has(i)));
+    return markTermsInHtml(marked(s), needles, skip);
+  };
+  const presentTerms = useMemo(() => {
+    if (!needles.length) return [];
+    const texts = m.steps.flatMap((s) => [
+      s.title,
+      s.body,
+      ...s.hotspots.flatMap((h) => [h.title, h.body]),
+      s.beforeAfter?.notes.before ?? '',
+      s.beforeAfter?.notes.after ?? '',
+    ]);
+    const found = termsPresent(
+      texts.map((x) => escapeHtml(applyVariables(x, values, defaults, [VAR_OPEN, VAR_CLOSE]))),
+      needles,
+    );
+    return glossary.filter((_, i) => found.has(i));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needles, values, defaults]);
+  const [glossOpen, setGlossOpen] = useState(false);
   const theme = m.theme;
   const gateForm =
     step.gateFormId && !gateDone.has(step.gateFormId)
       ? m.forms.find((f) => f.id === step.gateFormId)
       : undefined;
+  /** L17 : une étape Avant / Après se comporte comme une capture (ni pop-up, ni écran de fin). */
+  const visual = step.kind === 'image' || step.kind === 'before_after';
   const primary = step.kind === 'image' ? step.hotspots[0] : undefined;
   const last = index === m.steps.length - 1;
   /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
   const choices = step.options.choices.filter((c) => choiceTarget(m, c.action, index));
   /** Écran de fin (dernière étape de texte, sans quiz) : carte sur la capture précédente (PY-6, EDT-09). */
-  const endText =
-    step.kind !== 'image' && last && step.options.display !== 'popup' && !m.quiz && !choices.length;
-  const popup = step.kind !== 'image' && (step.options.display === 'popup' || endText);
+  const endText = !visual && last && step.options.display !== 'popup' && !m.quiz && !choices.length;
+  const popup = !visual && (step.options.display === 'popup' || endText);
   const bgBlur = popup && (endText || step.options.background === 'blur');
   const backdrop = bgBlur ? backdropIndex(m, index) : null;
   const [visited, setVisited] = useState<Set<number>>(() => new Set());
@@ -357,7 +419,9 @@ export function Player({
           return next();
         }
       }
-      if ((e.target as HTMLElement)?.closest?.('form') || gateForm || view === 'quiz') return;
+      // L17 : les flèches d'un champ (curseur Avant / Après, recherche du glossaire) lui appartiennent
+      const tgt = e.target as HTMLElement | null;
+      if (tgt?.closest?.('form, input, textarea, select, dialog') || gateForm || view === 'quiz') return;
       if (e.key === 'ArrowRight') next();
       if (e.key === 'ArrowLeft') go(index - 1);
     }
@@ -477,6 +541,17 @@ export function Player({
               {t.chapters}
             </button>
           )}
+          {presentTerms.length > 0 && (
+            <button
+              class="p-btn p-btn-ghost p-btn-sm p-gloss-btn"
+              aria-haspopup="dialog"
+              onClick={() => setGlossOpen(true)}
+            >
+              <Notebook {...ICON} size={16} />
+              {/* Spec §6 : sur mobile, bouton icône seul nommé « Glossaire » */}
+              <span class={compact ? 'sr-only' : undefined}>{t.glossary}</span>
+            </button>
+          )}
           {m.cta && (
             <button
               class="p-btn p-btn-primary p-btn-sm p-top-cta"
@@ -586,7 +661,27 @@ export function Player({
             />
           </div>
         )}
-        {view === 'quiz' ? null : step.kind === 'image' && step.image ? (
+        {view === 'quiz' ? null : step.kind === 'before_after' && step.image && step.beforeAfter ? (
+          <BeforeAfterStep
+            key={step.id}
+            step={step}
+            narrow={compact}
+            t={t}
+            sub={sub}
+            html={html}
+            stepLabel={`${index + 1} ${t.of} ${m.steps.length}`}
+            nextLabel={
+              step.options.buttonLabel
+                ? sub(step.options.buttonLabel)
+                : last
+                  ? m.quiz
+                    ? t.quiz.start
+                    : t.finish
+                  : t.next
+            }
+            onNext={last ? (m.quiz ? openQuiz : finish) : next}
+          />
+        ) : step.kind === 'image' && step.image ? (
           <ImageStep
             key={step.id}
             step={step}
@@ -750,6 +845,9 @@ export function Player({
           />
         )}
       </main>
+
+      {needles.length > 0 && <GlossaryTip root={rootRef} terms={glossary} t={t} />}
+      {glossOpen && <GlossaryDrawer terms={presentTerms} t={t} onClose={() => setGlossOpen(false)} />}
 
       {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
           navigation sont retirées (rien ne permet de le contourner). */}

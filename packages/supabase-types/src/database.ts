@@ -1427,6 +1427,10 @@ export type Database = {
       };
       steps: {
         Row: {
+          before_blurs: NonNullable<Json>;
+          before_image_height: number | null;
+          before_image_path: string | null;
+          before_image_width: number | null;
           blurs: NonNullable<Json>;
           body: string;
           chapter_id: string | null;
@@ -1453,6 +1457,10 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          before_blurs?: NonNullable<Json>;
+          before_image_height?: number | null;
+          before_image_path?: string | null;
+          before_image_width?: number | null;
           blurs?: NonNullable<Json>;
           body?: string;
           chapter_id?: string | null;
@@ -1478,6 +1486,10 @@ export type Database = {
           presenter_notes?: string;
         };
         Update: {
+          before_blurs?: NonNullable<Json>;
+          before_image_height?: number | null;
+          before_image_path?: string | null;
+          before_image_width?: number | null;
           blurs?: NonNullable<Json>;
           body?: string;
           chapter_id?: string | null;
@@ -1611,6 +1623,51 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'themes_workspace_id_fkey';
+            columns: ['workspace_id'];
+            isOneToOne: false;
+            referencedRelation: 'workspaces';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      glossary_terms: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          definition: string;
+          forms: string[];
+          id: string;
+          old_term: string | null;
+          term: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          definition: string;
+          forms?: string[];
+          id?: string;
+          old_term?: string | null;
+          term: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          definition?: string;
+          forms?: string[];
+          id?: string;
+          old_term?: string | null;
+          term?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'glossary_terms_workspace_id_fkey';
             columns: ['workspace_id'];
             isOneToOne: false;
             referencedRelation: 'workspaces';
@@ -1769,6 +1826,9 @@ export type Database = {
         Returns: string;
       };
       demo_embed_views: { Args: { p_demo: string }; Returns: Json };
+      glossary_import: { Args: { p_ws: string; p_rows: Json; p_replace?: boolean }; Returns: Json };
+      glossary_set_underline: { Args: { p_ws: string; p_on: boolean }; Returns: undefined };
+      glossary_usage: { Args: { p_ws: string }; Returns: Json };
       webhook_create: { Args: { p_ws: string; p_url: string; p_events: string[]; p_name?: string }; Returns: Json };
       webhook_rotate_secret: { Args: { p_id: string }; Returns: string };
       webhook_send_test: { Args: { p_id: string }; Returns: string };
@@ -1863,7 +1923,7 @@ export type Database = {
     };
     Enums: {
       demo_status: 'draft' | 'published' | 'archived';
-      step_kind: 'image' | 'text' | 'html';
+      step_kind: 'image' | 'text' | 'html' | 'before_after';
       workspace_role: 'viewer' | 'editor' | 'admin' | 'owner';
     };
     CompositeTypes: {
@@ -1976,7 +2036,7 @@ export const Constants = {
   public: {
     Enums: {
       demo_status: ['draft', 'published', 'archived'],
-      step_kind: ['image', 'text', 'html'],
+      step_kind: ['image', 'text', 'html', 'before_after'],
       workspace_role: ['viewer', 'editor', 'admin', 'owner'],
     },
   },

@@ -10,14 +10,16 @@ const VAR_WITH_SPACE_RE = new RegExp(`([ \\u00a0\\u202f]?)${VAR_RE.source}`, 'g'
  * Remplace les variables. Une variable sans valeur (ni valeur, ni défaut) disparaît avec l'espace
  * qui la précède : « Bienvenue {{first_name}} ! » → « Bienvenue ! », jamais « Bienvenue  ! » (PL3).
  */
-export function applyVariables(text: string, values: VariableValues, defaults: VariableValues = {}): string {
+export function applyVariables(
+  text: string,
+  values: VariableValues,
+  defaults: VariableValues = {},
+  /** L17 : bornes placées autour de chaque valeur insérée (glossaire : jamais souligné dedans). */
+  wrap: [string, string] = ['', ''],
+): string {
   return text.replace(VAR_WITH_SPACE_RE, (_m, space: string, key: string, inlineDefault?: string) => {
-    const v = values[key]?.trim();
-    if (v) return space + v;
-    const d = defaults[key]?.trim();
-    if (d) return space + d;
-    const inline = (inlineDefault ?? '').trim();
-    return inline ? space + inline : '';
+    const v = values[key]?.trim() || defaults[key]?.trim() || (inlineDefault ?? '').trim();
+    return v ? space + wrap[0] + v + wrap[1] : '';
   });
 }
 
