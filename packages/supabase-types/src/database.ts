@@ -1549,6 +1549,18 @@ export type Database = {
         };
         Relationships: [];
       };
+      demo_addresses: {
+        Row: {
+          address: string;
+          created_at: string;
+          demo_id: string;
+          retired_at: string | null;
+          workspace_id: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       demo_pages: {
         Row: {
           cta_label: string | null;
@@ -2393,7 +2405,9 @@ export type Database = {
       survey_texts: { Args: { p_demo: string; p_question?: string | null; p_limit?: number }; Returns: Json };
       choice_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
       purge_old_events: { Args: Record<PropertyKey, never>; Returns: number };
+      resolve_demo_address: { Args: { p_address: string }; Returns: string | null };
       resolve_share_link: { Args: { p_token: string }; Returns: Json };
+      set_demo_address: { Args: { p_demo: string; p_label: string }; Returns: string };
       set_demo_access: {
         Args: { p_ask_email: boolean; p_demo: string; p_expires_at: string | null; p_mode: string };
         Returns: undefined;

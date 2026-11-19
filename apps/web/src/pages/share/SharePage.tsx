@@ -7,7 +7,7 @@ import type { Tables } from '@flowdsiml/supabase-types';
 import { extractVariableKeys } from '@flowdsiml/core';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
-import { embedSnippet, personalPageUrl, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
+import { addressUrl, embedSnippet, personalPageUrl, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
 import { unpublishDemo } from '../../lib/publish';
 import { formatDate, formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -29,6 +29,7 @@ import {
   type PersonalPageDraft,
 } from './PersonalPageFields';
 import { ExportDialog } from '../export/ExportDialog';
+import { AddressField } from './AddressField';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
@@ -56,6 +57,8 @@ export function SharePage() {
   const [variables, setVariables] = useState<Tables<'variables'>[]>([]);
   /** REV-10 : variables réellement présentes dans les textes de la démo, dans l'ordre d'apparition. */
   const [usedKeys, setUsedKeys] = useState<string[]>([]);
+  /** L28-01 : adresse personnalisée courante (null : aucune, le lien utilise l'identifiant). */
+  const [address, setAddress] = useState<string | null>(null);
   // L25-13 : page publique (activée, bouton), membres (signature), lignes du jeu de données
   const [pubPage, setPubPage] = useState<{ enabled: boolean; cta: { label: string; url: string } | null }>({
     enabled: false,
@@ -124,6 +127,13 @@ export function SharePage() {
     ]);
     const texts = [...(st.data ?? []), ...(hs.data ?? [])].flatMap((x) => [x.title ?? '', x.body ?? '']);
     setUsedKeys([...new Set(texts.flatMap((x) => extractVariableKeys(x)))]);
+    const ad = await supabase
+      .from('demo_addresses')
+      .select('address')
+      .eq('demo_id', demoId)
+      .is('retired_at', null)
+      .maybeSingle();
+    setAddress(ad.data?.address ?? null);
     const [pg, mem, ds] = await Promise.all([
       supabase.from('demo_pages').select('enabled, cta_label, cta_url').eq('demo_id', demoId).maybeSingle(),
       supabase.rpc('list_members', { p_workspace: d.data.workspace_id }),
@@ -180,6 +190,9 @@ export function SharePage() {
   if (!demo) return <Loading />;
   const published = demo.status === 'published';
   const url = publicDemoUrl(demo.id);
+  // L28-01 : le lien public et ses partages prennent l'adresse personnalisée ; intégrations, liens
+  // personnalisés et paquets gardent l'identifiant
+  const publicUrl = address ? addressUrl(address) : url;
   const publicLinksOff = current?.public_links_enabled === false;
   // Modifications non publiées : démo modifiée après la publication de la version en ligne
   const pending =
@@ -351,34 +364,25 @@ export function SharePage() {
                 <div className="field sh-field">
                   <label htmlFor="sh-pub">{t('share.publicLink')}</label>
                   <div className="input-group">
-                    <input id="sh-pub" className="input t-mono" readOnly value={url} disabled={!published} />
-                    <CopyButton value={url} />
-                  </div>
-                </div>
-                <div className="field">
-                  <label htmlFor="sh-slug">
-                    {t('share.customAddress')} <span className="badge">{t('shell.soon')}</span>
-                  </label>
-                  {/* REV-10 : « Bientôt » : lisible et atteignable, mais non modifiable */}
-                  <div className="input-group">
-                    <span className="input t-mono muted sh-prefix">{url.replace(/[^/]+$/, '')}</span>
                     <input
-                      id="sh-slug"
-                      className="input t-mono sh-slug"
+                      id="sh-pub"
+                      className="input t-mono"
                       readOnly
-                      aria-disabled="true"
-                      value={demo.id.slice(0, 8)}
+                      value={publicUrl}
+                      disabled={!published}
                     />
+                    <CopyButton value={publicUrl} />
                   </div>
-                  <span className="help">{t('share.customAddressHelp')}</span>
                 </div>
+                {/* L28-01 : adresse personnalisée (#/l/<partie lisible>-<suffixe>) */}
+                <AddressField demoId={demo.id} editable={editable} address={address} onSaved={setAddress} />
                 <hr className="divider sh-hr" />
                 <h2 className="t-label sh-h3" id="sh-params-h">
                   {t('share.urlParams')}
                 </h2>
                 {/* Zone défilante atteignable au clavier (RGAA 7.3) */}
                 <div className="code" tabIndex={0} role="region" aria-labelledby="sh-params-h">
-                  {url}
+                  {publicUrl}
                   {paramExample.map(([sep, k, v]) => (
                     <span key={k}>
                       <span className="k">
@@ -397,7 +401,7 @@ export function SharePage() {
                 <div className="row wrap">
                   <a
                     className="btn btn-secondary btn-sm"
-                    href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(url)}`}
+                    href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(publicUrl)}`}
                     aria-disabled={published ? undefined : 'true'}
                   >
                     <Mail aria-hidden="true" />
@@ -405,7 +409,7 @@ export function SharePage() {
                   </a>
                   <a
                     className="btn btn-secondary btn-sm"
-                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`}
+                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`}
                     target="_blank"
                     rel="noreferrer noopener"
                     aria-disabled={published ? undefined : 'true'}
@@ -414,7 +418,7 @@ export function SharePage() {
                   </a>
                   <a
                     className="btn btn-secondary btn-sm"
-                    href={`https://x.com/intent/post?url=${encodeURIComponent(url)}&text=${encodeURIComponent(demo.title)}`}
+                    href={`https://x.com/intent/post?url=${encodeURIComponent(publicUrl)}&text=${encodeURIComponent(demo.title)}`}
                     target="_blank"
                     rel="noreferrer noopener"
                     aria-disabled={published ? undefined : 'true'}

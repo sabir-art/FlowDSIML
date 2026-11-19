@@ -1034,6 +1034,46 @@
 .mk .sh-slug {
   border-radius: 0 var(--fd-radius-md) var(--fd-radius-md) 0;
 }
+/* L28-01 : adresse personnalisée (préfixe, partie lisible, suffixe tiré par le serveur) */
+.mk .sh-addr .sh-slug {
+  border-radius: 0;
+  min-width: 0;
+}
+.mk .sh-suffix {
+  width: auto;
+  display: flex;
+  align-items: center;
+  border-left: 0;
+  border-radius: 0 var(--fd-radius-md) var(--fd-radius-md) 0;
+  background: var(--fd-color-surface-sunken);
+  white-space: nowrap;
+}
+.mk.sh .ok-line,
+.mk.sh .err-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--fd-color-success);
+}
+.mk.sh .err-line {
+  color: var(--fd-color-danger);
+}
+.mk.sh .ok-line svg,
+.mk.sh .err-line svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+.mk .sh-addr-actions {
+  margin-top: 8px;
+}
+.mk .sh-addr-ro {
+  margin: 4px 0 0;
+  word-break: break-all;
+}
 .mk .sh-hr {
   margin: 24px 0;
 }

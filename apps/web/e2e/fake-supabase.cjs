@@ -211,6 +211,7 @@ function seed() {
       demo_access: [],
       share_rules: [],
       folder_members: [],
+      demo_addresses: [],
       leads: [
         {
           id: 'l1',
@@ -679,6 +680,33 @@ async function install(page, state = seed()) {
             completions: (previous ? 30 : 40) * pub,
             leads: (previous ? 0 : 1) * pub,
           });
+        }
+        case 'set_demo_address': {
+          // L28 082 : partie lisible validée, suffixe base62 de 6 caractères, ancienne adresse retirée
+          const label = String(a.p_label || '').toLowerCase();
+          if (!/^[a-z0-9][a-z0-9-]{1,46}[a-z0-9]$/.test(label))
+            return json(route, 400, { message: 'ADDRESS_FORMAT', code: 'P0001' });
+          if (['admin', 'api', 'demo', 'l', 'd', 'c'].includes(label))
+            return json(route, 400, { message: 'ADDRESS_RESERVED', code: 'P0001' });
+          const d = t.demos.find((x) => x.id === a.p_demo);
+          const now = new Date().toISOString();
+          for (const x of t.demo_addresses) if (x.demo_id === a.p_demo && !x.retired_at) x.retired_at = now;
+          const al = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+          const sfx = Array.from({ length: 6 }, () => al[Math.floor(Math.random() * 62)]).join('');
+          const address = `${label}-${sfx}`;
+          t.demo_addresses.push({
+            address,
+            demo_id: a.p_demo,
+            workspace_id: d.workspace_id,
+            created_at: now,
+            retired_at: null,
+          });
+          return json(route, 200, address);
+        }
+        case 'resolve_demo_address': {
+          const x = t.demo_addresses.find((r) => r.address === a.p_address);
+          const d = x && t.demos.find((r) => r.id === x.demo_id && r.status === 'published');
+          return json(route, 200, d ? d.id : null);
         }
         case 'set_folder_access': {
           // L27-09 : dossier restreint à des membres choisis (administrateurs toujours inclus)

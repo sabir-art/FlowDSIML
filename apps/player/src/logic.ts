@@ -118,12 +118,16 @@ export function randomId(): string {
   return Array.from(a, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** Parse le hash : #/d/<demoId>?company=x | #/l/<token> | #/preview | #/c/<slug>[/f/<formation>] */
+/**
+ * Parse le hash : #/d/<demoId>?company=x | #/l/<token> | #/l/<adresse> | #/preview | #/c/<slug>[/f/<formation>]
+ * L28 082 : une adresse personnalisée finit toujours par « -<6 base62> » ; un jeton n'a jamais de tiret.
+ */
 export function parseRoute(
   hash: string,
 ):
   | { kind: 'demo'; id: string; search: string }
   | { kind: 'link'; token: string; search: string }
+  | { kind: 'address'; address: string; search: string }
   | { kind: 'preview' }
   | { kind: 'center'; slug: string; pathId: string | null; params: URLSearchParams }
   | { kind: 'page'; id: string; code?: string }
@@ -133,6 +137,8 @@ export function parseRoute(
   const parts = path.split('/').filter(Boolean);
   if (parts[0] === 'd' && parts[1] && /^[0-9a-f-]{36}$/i.test(parts[1]))
     return { kind: 'demo', id: parts[1], search: `?${search}` };
+  if (parts[0] === 'l' && parts[1] && /^[a-z0-9][a-z0-9-]{1,46}[a-z0-9]-[A-Za-z0-9]{6}$/.test(parts[1]))
+    return { kind: 'address', address: parts[1], search: `?${search}` };
   if (parts[0] === 'l' && parts[1] && /^[A-Za-z0-9_-]{6,64}$/.test(parts[1]))
     return { kind: 'link', token: parts[1], search: `?${search}` };
   if (parts[0] === 'preview') return { kind: 'preview' };

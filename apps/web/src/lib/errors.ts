@@ -22,6 +22,10 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/HTML_MISSING|HTML_OBJECT_MISSING|HTML_PATH/, 'errors.htmlMissingAny'],
     [/NO_VISIBLE_DEMO/, 'errors.noVisibleDemo'],
     [/PUBLIC_DISABLED/, 'errors.publicDisabled'],
+    // L28 082 : adresse personnalisée
+    [/ADDRESS_FORMAT/, 'share.address.invalid'],
+    [/ADDRESS_RESERVED/, 'share.address.reserved'],
+    [/ADDRESS_RETRY/, 'share.address.retry'],
     // L27 : règles de partage de l'espace
     [/RULE_MODE\b/, 'rules.errMode'],
     [/RULE_PUBLISH/, 'rules.errPublish'],

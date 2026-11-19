@@ -1,5 +1,5 @@
 /**
- * REV-10 : onglet Lien de Partager. « Adresse personnalisée » (Bientôt) en aria-disabled, « GIF / vidéo »
+ * REV-10 : onglet Lien de Partager. « GIF / vidéo » (l'adresse personnalisée est testée par adresse-demo)
  * ouvre l'export sur le GIF, exemple d'URL avec les variables présentes dans la démo, texte d'aide.
  * Données fictives. Usage : SHOTS_DIR=… [THEME=dark] node e2e/partager-rev10.e2e.cjs
  */
@@ -35,15 +35,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   d.current_version_id = d.current_version_id || 'v-1';
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/share`);
-  const slug = page.locator('#sh-slug');
-  await slug.waitFor();
-  ok(
-    (await slug.getAttribute('aria-disabled')) === 'true' &&
-      (await slug.getAttribute('readonly')) !== null &&
-      (await slug.evaluate((e) => e.disabled)) === false,
-    `adresse personnalisée : aria-disabled, lisible, non modifiable (${await slug.getAttribute('aria-disabled')} ${await slug.getAttribute('readonly')} ${await slug.evaluate((e) => e.disabled)})`,
-  );
+  await page.locator('#sh-slug').waitFor();
   const code = page.getByRole('region', { name: /Personnaliser par paramètres/ });
+  await code.getByText(/\?company=/).waitFor();
   ok(/\?company=/.test(await code.innerText()), 'exemple : variable présente dans la démo (company)');
   const help = sp(await page.locator('#sh-panel-link .sh-help').innerText());
   ok(

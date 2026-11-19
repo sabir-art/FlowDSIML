@@ -83,6 +83,11 @@ export async function openDemo(demoId: string, password?: string): Promise<GateI
   return body as GateInfo;
 }
 
+/** L28 082 : adresse personnalisée → identifiant de la démo publiée (null si inconnue ou expirée). */
+export function resolveAddress(address: string) {
+  return rpc<string | null>('resolve_demo_address', { p_address: address });
+}
+
 export function resolveLink(token: string) {
   return rpc<{
     demoId: string;

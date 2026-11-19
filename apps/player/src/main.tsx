@@ -5,6 +5,7 @@ import { variablesFromSearch, type VariableValues } from '@flowdsiml/core';
 import {
   learnerResume,
   openDemo,
+  resolveAddress,
   resolveLink,
   submitLead,
   Tracker,
@@ -127,6 +128,11 @@ function App() {
       let search = '';
       if (route.kind === 'demo') {
         demoId = route.id;
+        search = route.search;
+      } else if (route.kind === 'address') {
+        const id = await resolveAddress(route.address).catch(() => null);
+        if (!id) return fail('notFound');
+        demoId = id;
         search = route.search;
       } else if (route.kind === 'link') {
         const link = await resolveLink(route.token).catch(() => null);

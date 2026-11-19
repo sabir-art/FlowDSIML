@@ -68,6 +68,14 @@ describe('player logic', () => {
       search: '?company=Acme',
     });
     expect(parseRoute('#/l/abcdef123456')).toEqual({ kind: 'link', token: 'abcdef123456', search: '?' });
+    // L28 082 : adresse personnalisée (partie lisible + suffixe de 6 caractères base62)
+    expect(parseRoute('#/l/accueil-rh-aB3dE9?x=1')).toEqual({
+      kind: 'address',
+      address: 'accueil-rh-aB3dE9',
+      search: '?x=1',
+    });
+    expect(parseRoute('#/l/0123456789abcdef01234567').kind).toBe('link');
+    expect(parseRoute('#/l/-accueil-aB3dE9').kind).toBe('link');
     expect(parseRoute('#/d/not-a-uuid')).toEqual({ kind: 'none' });
     expect(parseRoute('#/preview')).toEqual({ kind: 'preview' });
     // L25-14 : page personnalisée (code de 12 caractères alphanumériques)

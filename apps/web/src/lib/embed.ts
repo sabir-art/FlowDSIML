@@ -1,6 +1,10 @@
 import { PLAYER_URL } from './env';
 
 export const publicDemoUrl = (demoId: string) => `${PLAYER_URL}/#/d/${demoId}`;
+/** L28 082 : adresse personnalisée (partie lisible + suffixe tiré par le serveur). */
+export const addressUrl = (address: string) => `${PLAYER_URL}/#/l/${address}`;
+/** Préfixe affiché devant le champ de l'adresse personnalisée. */
+export const addressPrefix = () => `${PLAYER_URL}/#/l/`;
 export const shareLinkUrl = (token: string) => `${PLAYER_URL}/#/l/${token}`;
 
 /** Snippet d'intégration responsive (ratio 16:10 + barre du player). */

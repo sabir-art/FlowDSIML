@@ -1742,7 +1742,17 @@
     "notPublishedNote": "The demo is not published: publish it to enable the public link.",
     "publicLinksOff": "Public links are disabled for this workspace (Settings › General). Use personalised links.",
     "customAddress": "Custom address",
-    "customAddressHelp": "Lowercase letters, digits and hyphens. Changing the address breaks old links.",
+    "address": {
+      "valid": "Valid address.",
+      "invalid": "3 to 48 characters: lowercase letters, digits and hyphens, no hyphen at the start or end.",
+      "reserved": "This word is reserved. Choose another one.",
+      "retry": "The address could not be created. Try again.",
+      "suffixHelp": "A 6-character suffix is added when you save.",
+      "redirectHelp": "The old address redirects to the demo for 90 days.",
+      "save": "Save address",
+      "saved": "Address saved.",
+      "none": "No custom address: the link uses the demo ID."
+    },
     "urlParams": "Personalise with URL parameters",
     "urlParamsHelp": "Replace the value with the recipient’s, or use a personalised link.",
     "urlParamsNone": "This demo uses no variables: add some to the editor texts (for example {{first_name}}).",

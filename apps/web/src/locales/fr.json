@@ -1742,7 +1742,17 @@
     "notPublishedNote": "La démo n’est pas publiée : publiez-la pour activer le lien public.",
     "publicLinksOff": "Les liens publics sont désactivés pour ce workspace (Paramètres › Général). Utilisez des liens personnalisés.",
     "customAddress": "Adresse personnalisée",
-    "customAddressHelp": "Lettres minuscules, chiffres et tirets. Changer l’adresse casse les anciens liens.",
+    "address": {
+      "valid": "Adresse valide.",
+      "invalid": "De 3 à 48 caractères : lettres minuscules, chiffres et tirets, sans tiret au début ni à la fin.",
+      "reserved": "Ce mot est réservé. Choisissez-en un autre.",
+      "retry": "L’adresse n’a pas pu être créée. Réessayez.",
+      "suffixHelp": "Un suffixe de 6 caractères est ajouté à l’enregistrement.",
+      "redirectHelp": "L’ancienne adresse redirige vers la démo pendant 90 jours.",
+      "save": "Enregistrer l’adresse",
+      "saved": "Adresse enregistrée.",
+      "none": "Aucune adresse personnalisée : le lien utilise l’identifiant de la démo."
+    },
     "urlParams": "Personnaliser par paramètres d’URL",
     "urlParamsHelp": "Remplacez la valeur par celle du destinataire, ou utilisez un lien personnalisé.",
     "urlParamsNone": "Cette démo n’utilise pas de variable : ajoutez-en dans les textes de l’éditeur (par exemple {{first_name}}).",
