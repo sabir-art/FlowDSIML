@@ -7,6 +7,7 @@ import { RichTextField } from '../RichTextField';
 import { VariablePreview } from '../VariablePreview';
 import { CtaFields } from './CtaFields';
 import { GuidedStepFields } from './GuidedStepFields';
+import { BeforeAfterFields } from '../BeforeAfterEditor';
 import { usePlan } from '../../../lib/plan';
 
 export function StepPanel({
@@ -107,18 +108,22 @@ export function StepPanel({
         )}
       </div>
 
-      <div className="sec">
-        <div className="sec-title">
-          {step.kind === 'text' ? t('editor.end.primary') : t('editor.end.stepCta')}
+      {step.kind === 'before_after' && <BeforeAfterFields editor={editor} step={step} readOnly={readOnly} />}
+
+      {step.kind !== 'before_after' && (
+        <div className="sec">
+          <div className="sec-title">
+            {step.kind === 'text' ? t('editor.end.primary') : t('editor.end.stepCta')}
+          </div>
+          <CtaFields
+            idPrefix="st"
+            label={t('editor.end.showButton')}
+            value={asCta(step.cta)}
+            disabled={readOnly}
+            onChange={(v) => editor.updateStep(step.id, { cta: v })}
+          />
         </div>
-        <CtaFields
-          idPrefix="st"
-          label={t('editor.end.showButton')}
-          value={asCta(step.cta)}
-          disabled={readOnly}
-          onChange={(v) => editor.updateStep(step.id, { cta: v })}
-        />
-      </div>
+      )}
 
       {step.kind === 'text' && last && (
         <div className="sec">

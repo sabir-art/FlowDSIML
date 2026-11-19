@@ -46,6 +46,24 @@ function seedDiffusion(d) {
 }
 
 /** L23 : un webhook actif et deux envois (données fictives). */
+function seedGlossary(d) {
+  const ws = d.tables.workspaces[0].id;
+  d.tables.glossary_terms = [
+    ['Dossier usager', 'fiche bénéficiaire', 'Toutes les informations d’une personne accompagnée.'],
+    ['Tableau de bord', 'synthèse mensuelle', 'Page d’accueil qui regroupe vos indicateurs.'],
+  ].map(([term, old_term, definition], i) => ({
+    id: `gl-${i}`,
+    workspace_id: ws,
+    term,
+    old_term,
+    definition,
+    forms: [],
+    created_by: null,
+    created_at: '2026-11-19T08:00:00Z',
+    updated_at: '2026-11-19T08:00:00Z',
+  }));
+}
+
 function seedWebhooks(d) {
   const ws = d.tables.workspaces[0].id;
   const at = new Date(Date.now() - 3600_000).toISOString();
@@ -135,6 +153,8 @@ const APP_PAGES = [
   { name: 'Plans', route: '/#/settings/plans' },
   { name: 'Marque', route: '/#/settings/brand' },
   { name: 'Variables', route: '/#/settings/variables' },
+  { name: 'Glossaire (vide)', route: '/#/settings/glossary' },
+  { name: 'Glossaire', route: '/#/settings/glossary', seed: seedGlossary },
   { name: 'Intégrations', route: '/#/settings/integrations', seed: seedWebhooks },
   // L16 : modale « Diffuser » (onglets SCORM, Intranet, E-mail, Où elle est diffusée)
   ...['SCORM', 'Intranet', 'E-mail', 'Où elle est diffusée'].map((c) => ({

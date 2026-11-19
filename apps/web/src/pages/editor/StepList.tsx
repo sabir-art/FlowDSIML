@@ -19,6 +19,7 @@ import {
   Target,
   Type,
   ZoomIn,
+  Layers,
 } from 'lucide-react';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { asStepOptions, type StepRow } from './types';
@@ -97,6 +98,13 @@ export function StepList({
             })),
           })
           .then(() => onSelect(current + 1)),
+    },
+    // L17-02 : étape Avant / Après (captures choisies ensuite dans le panneau)
+    {
+      label: t('editor.add.beforeAfter'),
+      icon: <Layers />,
+      onSelect: () =>
+        void editor.addBeforeAfterStep(current, t('editor.ba.newTitle')).then(() => onSelect(current + 1)),
     },
     'separator',
     // EDT-08 : le formulaire de lead se place avant l'étape courante (un seul formulaire par démo)
@@ -393,6 +401,7 @@ function StepBadges({ step, hotspots, isLast }: { step: StepRow; hotspots: numbe
       (isLast
         ? { icon: <Flag />, label: t('editor.end.title') }
         : { icon: <Type />, label: t('editor.end.textTitle') }),
+    step.kind === 'before_after' && { icon: <Layers />, label: t('editor.add.beforeAfter') },
     hotspots > 0 && { icon: <Target />, label: t('editor.badgeHotspots', { count: hotspots }) },
     step.gate_form_id && { icon: <ClipboardList />, label: t('editor.badgeForm') },
     step.cta && { icon: <MousePointerClick />, label: t('editor.badgeCta') },

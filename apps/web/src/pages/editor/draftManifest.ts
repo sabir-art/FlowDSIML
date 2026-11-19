@@ -1,6 +1,17 @@
 import { MANIFEST_SCHEMA_VERSION, manifestSchema, type Manifest } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
-import { asAction, asAnswers, asCta, asFields, asRects, asSettings, asStepOptions, asZoom } from './types';
+import {
+  asAction,
+  asAnswers,
+  asBeforeAfter,
+  asCta,
+  asFields,
+  asMasks,
+  asRects,
+  asSettings,
+  asStepOptions,
+  asZoom,
+} from './types';
 import { questionErrors } from './quizValidation';
 
 /**
@@ -34,6 +45,24 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
             height: s.image_height ?? 800,
           }
         : null,
+      // L17 : Avant / Après (null tant que la capture « Avant » manque, comme publish_demo)
+      beforeAfter:
+        s.kind === 'before_after' && s.before_image_path
+          ? (() => {
+              const ba = asBeforeAfter(s.options);
+              return {
+                layout: ba.layout,
+                labels: ba.labels,
+                notes: ba.notes,
+                before: {
+                  url: ed.imageUrls[s.before_image_path] ?? '',
+                  width: s.before_image_width ?? 1280,
+                  height: s.before_image_height ?? 800,
+                },
+                beforeBlurs: asMasks(s.before_blurs),
+              };
+            })()
+          : null,
       title: s.title,
       body: s.body,
       blurs: asRects(s.blurs),

@@ -1,0 +1,111 @@
+/* L17 : Paramètres › Glossaire */
+.gl-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.gl-head > div:first-child {
+  flex: 1 1 360px;
+}
+.gl-head .muted {
+  margin-top: 4px;
+  max-width: 560px;
+}
+.gl-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+.gl-search {
+  width: 280px;
+  max-width: 100%;
+}
+.st .gl-table tbody th[scope='row'] {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fd-color-text);
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+.gl-old {
+  white-space: nowrap;
+}
+.gl-old {
+  color: var(--fd-color-text-muted);
+}
+.gl-def {
+  min-width: 240px;
+}
+.gl-nomatch {
+  padding: 16px 20px;
+}
+.gl-setting {
+  margin-top: 16px;
+  padding: 16px 20px;
+}
+.gl-setting .setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0;
+  cursor: pointer;
+}
+.gl-setting .help {
+  display: block;
+}
+.gl-modal {
+  max-width: 520px;
+}
+.gl-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gl-counter {
+  text-align: right;
+}
+.gl-preview {
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.gl-counts {
+  margin: 0;
+  padding-left: 18px;
+  font-weight: 600;
+}
+.gl-skipped {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--fd-color-text-muted);
+  max-height: 160px;
+  overflow: auto;
+}
+.st .gl-page .empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 40px 20px;
+}
+.st .gl-page .empty .muted {
+  max-width: 480px;
+}
+.gl-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.gl-file span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

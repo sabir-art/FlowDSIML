@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Code, CreditCard, Palette, Plug, Settings, UserRound, Users } from 'lucide-react';
+import { Code, CreditCard, Notebook, Palette, Plug, Settings, UserRound, Users } from 'lucide-react';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
@@ -37,6 +37,9 @@ export function SettingsShell({ children }: { children: ReactNode }) {
           {item('/settings/members', <Users aria-hidden="true" />, t('settings.members'))}
           {item('/settings/brand', <Palette aria-hidden="true" />, t('settings.brand'))}
           {item('/settings/variables', <Code aria-hidden="true" />, t('settings.variables'))}
+          {/* L17 : glossaire, propriétaires, admins et éditeurs (les lecteurs ne voient pas l'onglet) */}
+          {can('demo.edit') &&
+            item('/settings/glossary', <Notebook aria-hidden="true" />, t('settings.glossary'))}
           {/* L23 : intégrations, propriétaires et admins seulement */}
           {can('integrations.manage') &&
             item('/settings/integrations', <Plug aria-hidden="true" />, t('settings.integrations'))}

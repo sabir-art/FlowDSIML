@@ -85,7 +85,9 @@ export function useDemoEditor(demoId: string) {
   }, [flush]);
 
   const signImages = useCallback(async (rows: StepRow[]) => {
-    const paths = [...new Set(rows.map((s) => s.image_path).filter((p): p is string => !!p))];
+    const paths = [
+      ...new Set(rows.flatMap((s) => [s.image_path, s.before_image_path]).filter((p): p is string => !!p)),
+    ];
     if (!paths.length) return;
     const { data } = await supabase.storage.from('captures').createSignedUrls(paths, 3600);
     setImageUrls((prev) => {
@@ -247,6 +249,103 @@ export function useDemoEditor(demoId: string) {
           const next = [...steps];
           next.splice(position, 0, data);
           await persistOrder(next);
+          return data;
+        }),
+
+      /** L17 : étape Avant / Après vide (captures choisies ensuite dans le panneau). */
+      addBeforeAfterStep: (afterIndex: number, title: string) =>
+        run(async () => {
+          await flush();
+          const position = afterIndex + 1;
+          const { data, error } = await supabase
+            .from('steps')
+            .insert({
+              demo_id: demoId,
+              workspace_id: demo!.workspace_id,
+              kind: 'before_after',
+              title,
+              position,
+              options: {
+                beforeAfter: {
+                  layout: 'side',
+                  labels: { before: '', after: '' },
+                  notes: { before: '', after: '' },
+                  sources: {},
+                },
+              },
+            })
+            .select()
+            .single();
+          if (error) throw error;
+          const next = [...steps];
+          next.splice(position, 0, data);
+          await persistOrder(next);
+          return data;
+        }),
+
+      /**
+       * L17 : capture « Avant » ou « Maintenant » d'une étape Avant / Après. Une étape source est
+       * copiée (fichier et flous) : la modifier ensuite ne change pas l'Avant / Après.
+       */
+      setBeforeAfterImage: (
+        stepId: string,
+        side: 'before' | 'after',
+        from: { stepId: string } | { file: File },
+      ) =>
+        run(async () => {
+          await flush();
+          const target = steps.find((s) => s.id === stepId)!;
+          let path: string;
+          let width: number;
+          let height: number;
+          let blurs: NonNullable<Json> = [];
+          let source: NonNullable<Json>;
+          if ('stepId' in from) {
+            const src = steps.find((s) => s.id === from.stepId);
+            if (!src?.image_path) throw new Error('NO_IMAGE');
+            const ext = src.image_path.split('.').pop() || 'webp';
+            path = `${demo!.workspace_id}/${demoId}/${stepId}-${side}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+            const cp = await supabase.storage.from('captures').copy(src.image_path, path);
+            if (cp.error) throw cp.error;
+            width = src.image_width ?? 1280;
+            height = src.image_height ?? 800;
+            blurs = src.blurs;
+            source = { kind: 'step', stepId: src.id };
+          } else {
+            const file = from.file;
+            const bmp = await createImageBitmap(file);
+            const ext = file.type === 'image/png' ? 'png' : file.type === 'image/jpeg' ? 'jpg' : 'webp';
+            path = `${demo!.workspace_id}/${demoId}/${stepId}-${side}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+            const up = await supabase.storage.from('captures').upload(path, file, { contentType: file.type });
+            if (up.error) throw up.error;
+            width = bmp.width;
+            height = bmp.height;
+            source = { kind: 'upload', name: file.name.slice(0, 120) };
+          }
+          const opts = (target.options ?? {}) as Record<string, unknown>;
+          const ba = (opts.beforeAfter ?? {}) as Record<string, unknown>;
+          const patch =
+            side === 'after'
+              ? { image_path: path, image_width: width, image_height: height, blurs }
+              : {
+                  before_image_path: path,
+                  before_image_width: width,
+                  before_image_height: height,
+                  before_blurs: blurs,
+                };
+          const options = {
+            ...opts,
+            beforeAfter: { ...ba, sources: { ...((ba.sources as object) ?? {}), [side]: source } },
+          } as NonNullable<Json>;
+          const { data, error } = await supabase
+            .from('steps')
+            .update({ ...patch, options })
+            .eq('id', stepId)
+            .select()
+            .single();
+          if (error) throw error;
+          await signImages([data]);
+          setSteps((list) => list.map((s) => (s.id === stepId ? data : s)));
           return data;
         }),
 

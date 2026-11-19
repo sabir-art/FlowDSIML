@@ -70,6 +70,8 @@ export function SettingsTab({
   const autoplay = { enabled: false, delayMs: 4000, ...settings.autoplay };
   const checklist = { enabled: false, title: '', position: 'right' as const, ...settings.checklist };
   const soon = <span className="badge badge-xs">{t('shell.soon')}</span>;
+  const wsGlossary =
+    (ws?.settings as { glossary?: { underline?: boolean } } | null)?.glossary?.underline !== false;
   const form = editor.forms[0];
   const gateIndex = form ? editor.steps.findIndex((s) => s.gate_form_id === form.id) : -1;
   const [key, setKey] = useState('');
@@ -129,6 +131,17 @@ export function SettingsTab({
             <span className="help">{t('editor.autoplayHelp')}</span>
           </div>
         )}
+        {/* L17 : soulignement des termes du glossaire (désactivable par démo) */}
+        <SettingSwitch
+          id="gl-on"
+          label={t('editor.settings.glossary')}
+          checked={wsGlossary && settings.glossary !== false}
+          disabled={readOnly || !wsGlossary}
+          onChange={(v) => set({ glossary: v })}
+        />
+        <p className="help">
+          {t(wsGlossary ? 'editor.settings.glossaryHelp' : 'editor.settings.glossaryOff')}
+        </p>
         <SettingSwitch id="pg-on" label={t('editor.settings.progress')} checked disabled badge={soon} />
         <p className="help">{t('editor.settings.progressHelp')}</p>
       </div>

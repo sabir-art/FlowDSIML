@@ -803,6 +803,45 @@ async function install(page, state = seed()) {
             }
           return json(route, 200, n);
         }
+        // ===== L17 : glossaire =====
+        case 'glossary_usage':
+          return json(
+            route,
+            200,
+            (t.glossary_terms || [])
+              .filter((g) => g.workspace_id === a.p_ws)
+              .map((g) => ({ id: g.id, modules: (state.glossaryUsage || {})[g.term] ?? 0 })),
+          );
+        case 'glossary_set_underline': {
+          const w = t.workspaces.find((x) => x.id === a.p_ws);
+          w.settings = { ...(w.settings || {}), glossary: { underline: !!a.p_on } };
+          return json(route, 200, null);
+        }
+        case 'glossary_import': {
+          (state.glossaryImports ||= []).push(a);
+          const list = (t.glossary_terms ||= []);
+          const key = (x) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
+          let added = 0;
+          let updated = 0;
+          for (const r of a.p_rows) {
+            const cur = list.find((g) => g.workspace_id === a.p_ws && key(g.term) === key(r.term));
+            if (cur) {
+              Object.assign(cur, r, { updated_at: new Date().toISOString() });
+              updated++;
+            } else {
+              list.push({
+                id: crypto.randomUUID(),
+                workspace_id: a.p_ws,
+                created_by: state.user.id,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                ...r,
+              });
+              added++;
+            }
+          }
+          return json(route, 200, { added, updated, skipped: 0, errors: [] });
+        }
         // ===== L16 : diffusions =====
         case 'record_diffusion': {
           (state.diffusionCalls ||= []).push(a);
@@ -976,6 +1015,21 @@ async function install(page, state = seed()) {
               resolved_by: null,
             });
           }
+        // L17 : terme unique par workspace (casse et accents ignorés), comme l'index de la base
+        if (table === 'glossary_terms') {
+          const key = (x) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
+          if (
+            items.some((it) =>
+              rows.some((r) => r.workspace_id === it.workspace_id && key(r.term) === key(it.term)),
+            )
+          )
+            return json(route, 409, {
+              code: '23505',
+              message: 'duplicate key value',
+              details: '',
+              hint: null,
+            });
+        }
         rows.push(...items);
         return respond(items);
       }
@@ -1036,7 +1090,10 @@ async function install(page, state = seed()) {
         paths.map((x) => ({ path: x, signedURL: `/object/sign/${bucket}/${x}?token=t`, error: null })),
       );
     }
-    if (p.startsWith('/storage/v1/object/copy')) return json(route, 200, { Key: body.destinationKey });
+    if (p.startsWith('/storage/v1/object/copy')) {
+      (state.copies ||= []).push({ from: body.sourceKey, to: body.destinationKey });
+      return json(route, 200, { Key: body.destinationKey });
+    }
     if (p.startsWith('/storage/v1/object/') && (method === 'POST' || method === 'PUT')) {
       const key = decodeURIComponent(p.slice('/storage/v1/object/'.length));
       state.storage[key] = parseUpload(
@@ -1047,7 +1104,8 @@ async function install(page, state = seed()) {
     }
     // L16 : fichier déposé dans le faux Storage (ex. manifeste publié vN.json), sinon image fixture
     const stored = /^\/storage\/v1\/object\/(?:sign\/|public\/)?(.+)$/.exec(p);
-    if (stored && state.storage[decodeURIComponent(stored[1])]) {
+    // Corps binaire non transmis par Playwright (fichier image) : fixture servie à la place
+    if (stored && state.storage[decodeURIComponent(stored[1])]?.data?.length) {
       const f = state.storage[decodeURIComponent(stored[1])];
       return route.fulfill({
         status: 200,
@@ -1103,6 +1161,11 @@ function defaults(table, r) {
       body: '',
       title: '',
       element_meta: {},
+      options: {},
+      before_image_path: null,
+      before_image_width: null,
+      before_image_height: null,
+      before_blurs: [],
     };
   if (table === 'forms')
     return {

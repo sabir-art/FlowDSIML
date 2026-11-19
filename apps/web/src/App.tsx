@@ -24,6 +24,7 @@ import { Members } from './pages/settings/Members';
 import { WorkspaceSettings } from './pages/settings/WorkspaceSettings';
 import { PlansPage } from './pages/settings/PlansPage';
 import { BrandSettings, VariablesSettings } from './pages/settings/SoonSections';
+import { GlossarySettings } from './pages/settings/GlossarySettings';
 import { DemosPage } from './pages/demos/DemosPage';
 import { IntegrationsPage } from './pages/settings/integrations/IntegrationsPage';
 import { WebhookDetail } from './pages/settings/integrations/WebhookDetail';
@@ -171,6 +172,7 @@ export function App() {
                   <Route path="/settings/plans" element={<PlansPage />} />
                   <Route path="/settings/brand" element={<BrandSettings />} />
                   <Route path="/settings/variables" element={<VariablesSettings />} />
+                  <Route path="/settings/glossary" element={<GlossarySettings />} />
                   <Route path="/settings/integrations" element={<IntegrationsPage />} />
                   <Route path="/settings/integrations/:id" element={<WebhookDetail />} />
                 </Route>

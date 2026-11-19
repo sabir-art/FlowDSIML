@@ -1,7 +1,7 @@
 import { AlertTriangle, Loader2, Rocket } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { branchIssues } from './branch';
-import { asAction, asStepOptions } from './types';
+import { asAction, asStepOptions, beforeAfterComplete } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
@@ -86,6 +86,12 @@ export function PublishButton({
     );
     if (bad) {
       setError(t('errors.quizInvalid', { n: bad }));
+      return;
+    }
+    // L17 : une étape Avant / Après doit avoir ses deux captures
+    const incomplete = editor.steps.findIndex((s) => !beforeAfterComplete(s));
+    if (incomplete >= 0) {
+      setError(t('editor.ba.incomplete', { n: incomplete + 1 }));
       return;
     }
     // F1 : avertissement RGPD à chaque publication publique (toute publication l'est jusqu'à F3)

@@ -293,7 +293,8 @@ export function EditorPage() {
         setKeysOpen(true);
         return;
       }
-      if (!readOnly && (key === 'h' || key === 'b')) {
+      // L17 : pas d'outil hotspot ni flou sur une étape Avant / Après
+      if (!readOnly && (key === 'h' || key === 'b') && step?.kind !== 'before_after') {
         const k = key === 'h' ? 'hotspot' : 'blur';
         setTool((cur) => (cur === k ? 'select' : k));
         return;
@@ -313,7 +314,7 @@ export function EditorPage() {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [editor, selection, readOnly, ws]);
+  }, [editor, selection, readOnly, ws, step?.kind]);
 
   if (narrow) {
     // Écran étroit : l'éditeur reste indisponible, mais on lit et on répond aux commentaires (commentaires.md §5)
@@ -686,48 +687,50 @@ export function EditorPage() {
               )}
               {tool !== 'select' && <p className="muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
             </div>
-            <div className="floatbar" role="toolbar" aria-label={t('editor.tools')}>
-              {toolBtn('hotspot', Target, t('editor.toolHotspot'))}
-              {toolBtn('blur', Droplet, t('editor.toolBlur'))}
-              <button
-                type="button"
-                className="btn btn-ghost btn-icon"
-                aria-label={t('editor.toolZoom')}
-                title={t('editor.toolZoom')}
-                disabled={readOnly || step?.kind !== 'image'}
-                onClick={() => {
-                  setSelection({ kind: 'step' });
-                  setTab('step');
-                }}
-              >
-                <ZoomIn aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost btn-icon"
-                aria-disabled="true"
-                aria-label={`${t('editor.toolCrop')} · ${t('shell.soon')}`}
-                title={t('shell.soon')}
-              >
-                <Crop aria-hidden="true" />
-                <span className="fb-soon" aria-hidden="true">
-                  {t('shell.soon')}
-                </span>
-              </button>
-              <span className="sep" />
-              <button
-                type="button"
-                className="btn btn-ghost btn-icon"
-                aria-disabled="true"
-                aria-label={`${t('editor.toolReplace')} · ${t('shell.soon')}`}
-                title={t('shell.soon')}
-              >
-                <ImageIcon aria-hidden="true" />
-                <span className="fb-soon" aria-hidden="true">
-                  {t('shell.soon')}
-                </span>
-              </button>
-            </div>
+            {step?.kind !== 'before_after' && (
+              <div className="floatbar" role="toolbar" aria-label={t('editor.tools')}>
+                {toolBtn('hotspot', Target, t('editor.toolHotspot'))}
+                {toolBtn('blur', Droplet, t('editor.toolBlur'))}
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-icon"
+                  aria-label={t('editor.toolZoom')}
+                  title={t('editor.toolZoom')}
+                  disabled={readOnly || step?.kind !== 'image'}
+                  onClick={() => {
+                    setSelection({ kind: 'step' });
+                    setTab('step');
+                  }}
+                >
+                  <ZoomIn aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-icon"
+                  aria-disabled="true"
+                  aria-label={`${t('editor.toolCrop')} · ${t('shell.soon')}`}
+                  title={t('shell.soon')}
+                >
+                  <Crop aria-hidden="true" />
+                  <span className="fb-soon" aria-hidden="true">
+                    {t('shell.soon')}
+                  </span>
+                </button>
+                <span className="sep" />
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-icon"
+                  aria-disabled="true"
+                  aria-label={`${t('editor.toolReplace')} · ${t('shell.soon')}`}
+                  title={t('shell.soon')}
+                >
+                  <ImageIcon aria-hidden="true" />
+                  <span className="fb-soon" aria-hidden="true">
+                    {t('shell.soon')}
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
           {/* Commentaires d'équipe (lot A6) : gardés sous le canevas, repliables */}
           <div className="stage-comments">
