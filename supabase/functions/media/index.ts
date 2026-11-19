@@ -4,7 +4,7 @@
 //    <ws>/<uuid>.<ext>, puis ligne media_files (taille réelle et quota de 500 Mo vérifiés en base) ;
 //    en cas de refus, l'objet déposé est retiré.
 //  * DELETE ({ id }) : même contrôle de rôle ; l'objet et la ligne sont supprimés ensemble.
-// Déployée sans vérification JWT par la plateforme : l'utilisateur est vérifié ici (auth.getUser).
+// JWT vérifié par la plateforme (config.toml : verify_jwt = true), puis ici l'utilisateur et son rôle (auth.getUser).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { EXT, MAX_BYTES, MediaError, allowed, pngSize, sanitizeSvg, sniff, type Kind } from './lib.ts';
