@@ -156,6 +156,35 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     'meta description',
   );
   ok((await p1.getByRole('heading', { level: 1 }).count()) === 1, 'un seul h1');
+  ok(
+    (await p1.locator('.pp-top img').count()) === 0 && (await p1.textContent('.pp-lg')) === 'A',
+    'sans logo : initiale',
+  );
+  {
+    // F7 : logo du workspace (bucket public branding)
+    answer = { ...info, logoPath: '0b5c1f0e-0000-4000-8000-0000000000ff/logo.png' };
+    const pl = await pp({ width: 1440, height: 900 });
+    await pl.route('**/storage/v1/object/public/branding/**', (r) =>
+      r.fulfill({
+        contentType: 'image/png',
+        body: Buffer.from(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+          'base64',
+        ),
+      }),
+    );
+    await pl.goto(`${PLAYER}/#/p/${DEMO}`);
+    await pl.getByRole('heading', { level: 1, name: info.title }).waitFor();
+    const src = await pl.locator('.pp-top img.pp-logo').getAttribute('src');
+    ok(
+      /\/storage\/v1\/object\/public\/branding\/0b5c1f0e-0000-4000-8000-0000000000ff\/logo\.png$/.test(
+        src ?? '',
+      ),
+      'logo du workspace affiché depuis le bucket public',
+    );
+    await pl.context().close();
+    answer = info;
+  }
   ok((await p1.getByText('6 étapes').count()) === 1, 'badge du nombre d’étapes');
   ok((await p1.getByText(/Environ/).count()) === 0, 'pas de durée estimée');
   ok(

@@ -31,6 +31,11 @@ html[data-page-theme='dark'] body {
   place-items: center;
   font: 700 14px var(--fd-font-display, var(--fd-player-font, system-ui, sans-serif));
 }
+.pp-logo {
+  display: block;
+  object-fit: contain;
+  background: #fff;
+}
 .pp-top b {
   font: 700 16px var(--fd-font-display, var(--fd-player-font, system-ui, sans-serif));
 }

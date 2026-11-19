@@ -89,6 +89,9 @@ export default defineContentScript({
     const bar = $<HTMLDivElement>('.bar');
     const timeEl = $<HTMLSpanElement>('.t');
     const pauseBtn = $<HTMLButtonElement>('.pause');
+    timeEl.textContent = `${timer(0)} / ${timer(MAX_MS)}`;
+    timeEl.setAttribute('aria-label', s.timerLabel.replace('{{t}}', timer(0)));
+    pauseBtn.textContent = s.pause;
     const toast = $<HTMLDivElement>('.toast');
     const alertEl = $<HTMLDivElement>('.alert');
     let warned = false;

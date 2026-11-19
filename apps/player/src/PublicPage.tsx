@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { ArrowRight, EyeOff, Play } from 'lucide-preact';
-import { publicPage, type PublicPageInfo } from './api';
+import { brandingUrl, publicPage, type PublicPageInfo } from './api';
 import { fmt, strings } from './i18n';
 import './public-page.css';
 
@@ -96,9 +96,13 @@ export function PublicPage({ id }: { id: string }) {
   return (
     <div class={`pp${info.style === 'dark' ? ' pp-dark' : ''}`}>
       <header class="pp-top">
-        <span class="pp-lg" aria-hidden="true">
-          {info.workspace.trim().charAt(0).toUpperCase()}
-        </span>
+        {info.logoPath ? (
+          <img class="pp-lg pp-logo" src={brandingUrl(info.logoPath)} alt="" width={32} height={32} />
+        ) : (
+          <span class="pp-lg" aria-hidden="true">
+            {info.workspace.trim().charAt(0).toUpperCase()}
+          </span>
+        )}
         <b>{info.workspace}</b>
         {info.cta && (
           <a class="pill pill-p pp-cta" href={info.cta.url} target="_blank" rel="noopener noreferrer">

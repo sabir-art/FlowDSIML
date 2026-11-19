@@ -11,6 +11,9 @@ const os = require('os');
 const WS = '11111111-1111-1111-1111-111111111111';
 (async () => {
   const ext = path.resolve(__dirname, '../.output/chrome-mv3');
+  // Le faux Supabase peut avoir servi un autre test : seules les requêtes de ce test comptent
+  const start = (await (await fetch('http://localhost:54400/__log')).json()).length;
+  const getLog = async () => (await (await fetch('http://localhost:54400/__log')).json()).slice(start);
   const ctx = await chromium.launchPersistentContext(fs.mkdtempSync(path.join(os.tmpdir(), 'fd-ext-')), {
     headless: true,
     locale: 'fr-FR',
@@ -19,8 +22,8 @@ const WS = '11111111-1111-1111-1111-111111111111';
     args: [`--disable-extensions-except=${ext}`, `--load-extension=${ext}`],
   });
   const sfx = process.env.THEME === 'dark' ? '-sombre' : '';
-  const shot = (p, name) =>
-    process.env.SHOTS_DIR && p.screenshot({ path: `${process.env.SHOTS_DIR}/${name}${sfx}.png` });
+  const shot = (p, name, fullPage = false) =>
+    process.env.SHOTS_DIR && p.screenshot({ path: `${process.env.SHOTS_DIR}/${name}${sfx}.png`, fullPage });
   const results = [];
   const ok = (cond, label) => results.push([!!cond, label]);
   let [sw] = ctx.serviceWorkers();
@@ -98,7 +101,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await review.waitForSelector('#state.is-done');
   await review.click('#send');
   await review.waitForURL(/22222222/, { timeout: 15000 }).catch(() => {});
-  let log = await (await fetch('http://localhost:54400/__log')).json();
+  let log = await getLog();
   const demoPost = log.find((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/demos'));
   const demoBody = demoPost && JSON.parse(demoPost.body);
   ok(demoBody?.device === 'mobile' && demoBody.viewport?.w === 390, 'démo créée en mobile avec sa taille');
@@ -200,7 +203,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
     'au-delà de 50 Mo : message clair',
   );
   ok(await vr.isDisabled('#send'), 'au-delà de 50 Mo : envoi impossible');
-  await shot(vr, 'l21-03-trop-lourd');
+  await shot(vr, 'l21-03-trop-lourd', true);
   await seed(false);
   await vr.reload();
   await vr.waitForSelector('#frames li');
@@ -213,11 +216,11 @@ const WS = '11111111-1111-1111-1111-111111111111';
   );
   ok(!(await vr.$('#frames input, #frames [contenteditable]')), 'aucune retouche possible');
   await vr.waitForFunction(() => document.querySelector('video').readyState >= 1);
-  await shot(vr, 'l21-03-verification');
+  await shot(vr, 'l21-03-verification', true);
   await vr.click('#send');
   await vr.waitForURL(/22222222-2222-2222-2222-222222222222(\/|%2F)edit/, { timeout: 15000 }).catch(() => {});
   ok(/22222222/.test(vr.url()), 'après envoi : ouverture de l’éditeur');
-  log = await (await fetch('http://localhost:54400/__log')).json();
+  log = await getLog();
   const tus = log.filter((l) => l.u.startsWith('/storage/v1/upload/resumable') && l.tus);
   const tmeta = tus[0]?.tus.meta ?? {};
   ok(
@@ -264,7 +267,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
   const closed = vr.waitForEvent('close').catch(() => null);
   await vr.click('#delete');
   await closed;
-  const log2 = await (await fetch('http://localhost:54400/__log')).json();
+  const log2 = await getLog();
   ok(
     !log2.slice(before).some((l) => l.u.startsWith('/storage/') || l.u.startsWith('/rest/v1/demos')),
     'supprimer n’envoie rien',

@@ -59,9 +59,10 @@ export function VideoCanvas({
   const caption = captionAt(ed.t, v.captions);
 
   useEffect(() => {
-    videoEl.current = ref.current;
+    const el = ref.current;
+    videoEl.current = el;
     return () => {
-      if (videoEl.current === ref.current) videoEl.current = null;
+      if (videoEl.current === el) videoEl.current = null;
     };
   }, [url]);
 

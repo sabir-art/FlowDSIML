@@ -394,10 +394,17 @@ export interface PublicPageInfo {
   steps: number;
   updatedAt: string;
   workspace: string;
+  /** F7 : logo du workspace (bucket public branding), absent sinon. */
+  logoPath?: string | null;
   privacyUrl: string | null;
   a11y: 'non_evalue' | 'partiel' | 'total';
   a11yUrl: string | null;
   related: Array<{ demoId: string; title: string; description: string }>;
+}
+
+/** URL publique d'un logo du bucket branding (chemin validé côté base). */
+export function brandingUrl(path: string): string {
+  return `${SUPABASE_URL}/storage/v1/object/public/branding/${path.split('/').map(encodeURIComponent).join('/')}`;
 }
 
 /** Page publique (null : indisponible, quelle qu'en soit la raison). */
