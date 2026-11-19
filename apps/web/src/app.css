@@ -1525,9 +1525,9 @@
 }
 .ws-text small {
   display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Plan et nombre de membres : renvoi à la ligne plutôt que tronqués (« Plan Enterprise · 3 membres ») */
+  white-space: normal;
+  overflow-wrap: anywhere;
   font-size: var(--fd-text-caption-size);
   color: var(--fd-color-text-subtle);
 }

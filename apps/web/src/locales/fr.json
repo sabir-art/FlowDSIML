@@ -1509,7 +1509,8 @@
       "button": "Importer une image",
       "order": "Étape à capturer {{n}} sur {{total}}",
       "help": "Avec l’extension : ouvrez votre logiciel, lancez la capture et choisissez « Compléter : {{title}} ». Chaque clic remplit l’étape suivante. Vous pouvez aussi importer une image."
-    }
+    },
+    "importWarn": "Image importée : aucune détection automatique des données personnelles. Vérifiez-la et floutez si besoin."
   },
   "status": {
     "draft": "Brouillon",

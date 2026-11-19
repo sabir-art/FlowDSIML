@@ -18,6 +18,8 @@ export function gdprSummary(
       const src = asBeforeAfter(s.options).sources;
       imported += [src.before, src.after].filter((x) => x?.kind === 'upload').length;
     }
+    // REV-07 : image importée (« Importer une image », image ajoutée au rail)
+    else if ((s.element_meta as { imported?: boolean } | null)?.imported) imported += 1;
     if (Array.isArray(s.blurs)) blurred += s.blurs.length;
     const pii = (s.element_meta as { pii?: Array<{ blurred?: boolean }> } | null)?.pii;
     if (!Array.isArray(pii)) return;

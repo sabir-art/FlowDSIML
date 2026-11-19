@@ -429,7 +429,17 @@ export function useDemoEditor(demoId: string) {
           if (up.error) throw up.error;
           const { data, error } = await supabase
             .from('steps')
-            .update({ image_path: path, image_width: bmp.width, image_height: bmp.height, to_capture: false })
+            // REV-07 : image importée (aucune détection automatique des données personnelles), comptée au bilan RGPD
+            .update({
+              image_path: path,
+              image_width: bmp.width,
+              image_height: bmp.height,
+              to_capture: false,
+              element_meta: {
+                ...((steps.find((s) => s.id === stepId)?.element_meta as object) ?? {}),
+                imported: true,
+              },
+            })
             .eq('id', stepId)
             .select()
             .single();
@@ -459,6 +469,7 @@ export function useDemoEditor(demoId: string) {
               image_width: bmp.width,
               image_height: bmp.height,
               position: afterIndex + 1,
+              element_meta: { imported: true },
             })
             .select()
             .single();

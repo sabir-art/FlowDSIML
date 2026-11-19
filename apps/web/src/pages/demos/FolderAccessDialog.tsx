@@ -104,10 +104,10 @@ export function FolderAccessDialog({
         {restricted && (
           <fieldset className="fa-members">
             <legend className="sr-only">{t('folderAccess.members')}</legend>
-            <label className="fa-search">
+            <label className="search-pill fa-search">
               <Search aria-hidden="true" />
               <input
-                className="input input-sm"
+                className="fd-input"
                 type="search"
                 aria-label={t('folderAccess.search')}
                 placeholder={t('folderAccess.search')}

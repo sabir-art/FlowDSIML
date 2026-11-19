@@ -1509,7 +1509,8 @@
       "button": "Import an image",
       "order": "Step to capture {{n}} of {{total}}",
       "help": "With the extension: open your software, start capturing and choose “Complete: {{title}}”. Each click fills the next step. You can also import an image."
-    }
+    },
+    "importWarn": "Image imported: no automatic detection of personal data. Check it and blur if needed."
   },
   "status": {
     "draft": "Draft",

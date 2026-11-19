@@ -28,4 +28,12 @@ describe('gdprSummary', () => {
     ]);
     expect(s.imported).toBe(1);
   });
+  it('REV-07 : images importées dans les étapes', () => {
+    const s = gdprSummary([
+      { kind: 'image', blurs: [], element_meta: { imported: true } },
+      { kind: 'image', blurs: [], element_meta: { imported: true, pii: [] } },
+      { kind: 'image', blurs: [], element_meta: {} },
+    ]);
+    expect(s.imported).toBe(2);
+  });
 });

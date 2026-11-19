@@ -5,6 +5,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '../../components/Toast';
 import { applyVariables, escapeHtml, richTextToHtml } from '@flowdsiml/core';
 import { themeSchema } from '@flowdsiml/manifest';
 import {
@@ -709,6 +710,7 @@ function ToCaptureCanvas({
   readOnly?: boolean;
 }) {
   const { t } = useTranslation();
+  const toast = useToast();
   const file = useRef<HTMLInputElement>(null);
   const todo = editor.steps.filter((s) => s.to_capture && !s.image_path);
   const n = todo.findIndex((s) => s.id === step.id) + 1;
@@ -734,7 +736,8 @@ function ToCaptureCanvas({
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 e.target.value = '';
-                if (f) void editor.captureStep(step.id, f);
+                // REV-07 : avertissement à l'import (aucune détection automatique)
+                if (f) void editor.captureStep(step.id, f).then((r) => r && toast(t('editor.importWarn')));
               }}
             />
             <p className="canvas-tocapture-help">

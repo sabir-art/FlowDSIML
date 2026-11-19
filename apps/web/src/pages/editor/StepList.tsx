@@ -36,6 +36,7 @@ import { Menu, type MenuItem } from '../../components/Menu';
 import { asStepOptions, type StepRow } from './types';
 import { Fragment, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '../../components/Toast';
 import type { DemoEditor } from './useDemoEditor';
 
 export function StepList({
@@ -65,6 +66,7 @@ export function StepList({
   presence?: Record<string, PresencePayload[]>;
   presenceNames?: Record<string, string>;
 }) {
+  const toast = useToast();
   const { t } = useTranslation();
   /** L25-10 : destination d'une règle de suite dans le rail. */
   const railDest = (a: ChoiceAction, from: number) => {
@@ -415,7 +417,12 @@ export function StepList({
             accept="image/png,image/jpeg,image/webp"
             onChange={(e) => {
               const f = e.target.files?.[0];
-              if (f) void editor.addImageStep(current, f).then(() => onSelect(current + 1));
+              // REV-07 : avertissement à l'import (aucune détection automatique)
+              if (f)
+                void editor.addImageStep(current, f).then((r) => {
+                  onSelect(current + 1);
+                  if (r) toast(t('editor.importWarn'));
+                });
               e.target.value = '';
             }}
           />
