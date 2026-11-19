@@ -1,0 +1,145 @@
+/* A8 (L20-01) : étape HTML dans l'éditeur */
+.html-canvas {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+.html-crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-height: 28px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--fd-color-border);
+  font: 12px/1.4 var(--fd-font-mono, ui-monospace, monospace);
+}
+.html-crumbs .badge {
+  margin-right: 6px;
+  font-family: var(--fd-font-sans, system-ui, sans-serif);
+}
+.crumb-btn {
+  border: 0;
+  background: none;
+  padding: 2px 3px;
+  border-radius: 4px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.crumb-btn:hover {
+  background: var(--fd-color-surface-hover);
+}
+.crumb-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--fd-shadow-focus);
+}
+.html-stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #fff;
+}
+.html-stage iframe {
+  position: absolute;
+  inset: 0 auto auto 0;
+  border: 0;
+  transform-origin: 0 0;
+  background: #fff;
+}
+.html-state,
+.html-empty {
+  margin: 0;
+  padding: 24px;
+}
+.html-keys {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+/* Barre d'actions : pilule noire, sous l'élément (au-dessus s'il n'y a pas la place) */
+.eltb {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #141311;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+.eltb > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font: 500 13px var(--fd-font-sans, system-ui, sans-serif);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.eltb > button:hover,
+.eltb > button[aria-pressed='true'] {
+  background: #3a3734;
+}
+.eltb > button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.eltb > button:focus-visible {
+  outline: 3px solid #2897d5;
+  outline-offset: 1px;
+}
+.eltb-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 240px;
+  max-height: 280px;
+  overflow: auto;
+}
+.mods {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.mod {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--fd-color-surface-subtle, var(--fd-color-surface-hover));
+  font-size: 13px;
+}
+.mod > svg {
+  flex: none;
+  margin-top: 2px;
+}
+.mod > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mod code {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+.mod .badge {
+  margin-left: 6px;
+}
+.mod.nf {
+  box-shadow: inset 0 0 0 1px var(--fd-color-warning, #b54708);
+}
+.mod.nf > svg {
+  color: var(--fd-color-warning, #b54708);
+}

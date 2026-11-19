@@ -19,6 +19,8 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/BEFORE_AFTER_INCOMPLETE/, 'errors.beforeAfterIncomplete'],
     [/VIDEO_MISSING/, 'errors.videoMissingAny'],
     [/VIDEO_OBJECT_MISSING|VIDEO_PATH/, 'errors.videoMissingAny'],
+    [/HTML_MISSING|HTML_OBJECT_MISSING|HTML_PATH/, 'errors.htmlMissingAny'],
+    [/NO_VISIBLE_DEMO/, 'errors.noVisibleDemo'],
     [/PUBLIC_DISABLED/, 'errors.publicDisabled'],
     [/GDPR_ACK_REQUIRED/, 'errors.gdprAck'],
     [/CONFIRMATION_MISMATCH/, 'errors.confirmMismatch'],

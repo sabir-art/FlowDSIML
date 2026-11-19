@@ -95,14 +95,17 @@ export function useDemoEditor(demoId: string) {
     ];
     // F7 : vidéos (bucket videos), signées dans la même table d'adresses
     const videos = [...new Set(rows.map((s) => s.video_path).filter((p): p is string => !!p))];
-    if (!paths.length && !videos.length) return;
-    const [img, vid] = await Promise.all([
+    // A8 : pages HTML (bucket html)
+    const pages = [...new Set(rows.map((s) => s.html_path).filter((p): p is string => !!p))];
+    if (!paths.length && !videos.length && !pages.length) return;
+    const [img, vid, htm] = await Promise.all([
       paths.length ? supabase.storage.from('captures').createSignedUrls(paths, 3600) : { data: [] },
       videos.length ? supabase.storage.from('videos').createSignedUrls(videos, 3600) : { data: [] },
+      pages.length ? supabase.storage.from('html').createSignedUrls(pages, 3600) : { data: [] },
     ]);
     setImageUrls((prev) => {
       const next = { ...prev };
-      for (const d of [...(img.data ?? []), ...(vid.data ?? [])])
+      for (const d of [...(img.data ?? []), ...(vid.data ?? []), ...(htm.data ?? [])])
         if (d.path && d.signedUrl) next[d.path] = d.signedUrl;
       return next;
     });

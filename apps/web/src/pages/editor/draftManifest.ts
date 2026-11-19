@@ -1,3 +1,5 @@
+import { asOps } from './html/htmlModel';
+import type { StepRow } from './types';
 import { MANIFEST_SCHEMA_VERSION, manifestSchema, type Manifest } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
 import {
@@ -32,6 +34,9 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
     title: demo.title,
     device: demo.device === 'mobile' ? ('mobile' as const) : ('desktop' as const),
     viewport: null,
+    // A8 : démo guidée ou Sandbox
+    kind: demo.kind === 'sandbox' ? ('sandbox' as const) : ('guided' as const),
+    sandbox: demo.kind === 'sandbox' ? sandboxOf(demo.sandbox, ed.steps) : null,
     locale: settings.locale ?? 'fr',
     publishedAt: new Date().toISOString(),
     theme: settings.theme ?? {},
@@ -65,6 +70,17 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
                 beforeBlurs: asMasks(s.before_blurs),
               };
             })()
+          : null,
+      // A8 : page HTML (URL signée du bucket html) ; liens résolus comme à la publication
+      html:
+        s.kind === 'html' && s.html_path
+          ? {
+              url: ed.imageUrls[s.html_path] ?? '',
+              ops: asOps(s.html_ops).filter((o) => o.op !== 'link' || ed.steps.some((x) => x.id === o.value)),
+              title: String((s.html_meta as { title?: string } | null)?.title ?? ''),
+              viewport: (s.html_meta as { viewport?: { w: number; h: number } } | null)?.viewport ?? null,
+              links: resolveLinks(s, ed.steps),
+            }
           : null,
       // F7 : vidéo (URL signée du bucket videos) pour l'aperçu
       video:
@@ -164,5 +180,37 @@ function draftQuiz(ed: DemoEditor, settings: ReturnType<typeof asSettings>) {
     shuffle: q.shuffle ?? true,
     required: q.required ?? true,
     questions,
+  };
+}
+
+type PageMeta = { url?: string; links?: Array<{ sel: string; href: string }> };
+const norm = (u: string) => u.replace(/#.*$/, '').replace(/\/$/, '');
+/** Liens d'une page vers une autre page de la démo (même adresse) : même règle que publish_demo. */
+function resolveLinks(s: StepRow, steps: StepRow[]) {
+  const links = ((s.html_meta as PageMeta | null)?.links ?? []).slice(0, 300);
+  const out: Array<{ sel: string; step: string }> = [];
+  for (const l of links) {
+    const target = steps.find(
+      (t) =>
+        t.kind === 'html' &&
+        t.id !== s.id &&
+        norm((t.html_meta as PageMeta | null)?.url ?? '') === norm(l.href),
+    );
+    if (target) out.push({ sel: l.sel, step: target.id });
+  }
+  return out;
+}
+function sandboxOf(v: unknown, steps: StepRow[]) {
+  const o = (v && typeof v === 'object' ? v : {}) as Record<string, unknown>;
+  const ids = new Set(steps.map((s) => s.id));
+  const start = typeof o.start === 'string' && ids.has(o.start) ? o.start : (steps[0]?.id ?? null);
+  return {
+    start,
+    autoLink: o.autoLink !== false,
+    unlinked: o.unlinked === 'none' || o.unlinked === 'highlight' ? o.unlinked : ('toast' as const),
+    guide: o.guide === true,
+    keyPages: Array.isArray(o.keyPages)
+      ? o.keyPages.filter((k): k is string => typeof k === 'string' && ids.has(k))
+      : [],
   };
 }

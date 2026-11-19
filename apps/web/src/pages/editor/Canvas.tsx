@@ -22,6 +22,7 @@ import { withVariablePills } from './RichTextField';
 import { textOn } from '../../lib/publish';
 import { BeforeAfterCanvas } from './BeforeAfterEditor';
 import { VideoCanvas } from './video/VideoCanvas';
+import { HtmlCanvas } from './html/HtmlCanvas';
 import {
   asAction,
   asCta,
@@ -264,6 +265,9 @@ export function Canvas({
 
   // F7 (L21-03) : étape vidéo (canevas et montage, sans outils de capture)
   if (step.kind === 'video') return <VideoCanvas editor={editor} step={step} readOnly={readOnly} />;
+
+  // A8 (L20-01) : étape HTML (éditeur d'éléments, sans outils de capture)
+  if (step.kind === 'html') return <HtmlCanvas editor={editor} step={step} readOnly={readOnly} />;
 
   if (step.kind === 'text' || !step.image_path) {
     const opts = asStepOptions(step.options);

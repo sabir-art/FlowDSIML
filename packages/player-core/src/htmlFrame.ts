@@ -28,7 +28,9 @@ export type ToFrame =
       unlinked?: 'toast' | 'none' | 'highlight';
     }
   | { fd: 1; t: 'ops'; ops: FrameOp[] }
-  | { fd: 1; t: 'select'; sel: string | null };
+  | { fd: 1; t: 'select'; sel: string | null }
+  /** Éditeur : sélectionne le n-ième parent de l'élément sélectionné (fil du sélecteur). */
+  | { fd: 1; t: 'up'; n: number };
 
 export interface Selected {
   sel: string;
@@ -305,7 +307,7 @@ export const FRAME_RUNTIME = `(function () {
         post({ t: 'key', key: 'hide' });
       }
     }, true);
-    addEventListener('scroll', function () { place(selBox, current()); post({ t: 'scroll' }); }, { passive: true });
+    addEventListener('scroll', function () { var c = current(); if (c) select(c, false); else post({ t: 'scroll' }); }, { passive: true });
   }
   document.addEventListener('click', function (e) {
     var t = e.target;
@@ -344,6 +346,10 @@ export const FRAME_RUNTIME = `(function () {
       apply();
     } else if (m.t === 'select' && mode === 'editor') {
       select(typeof m.sel === 'string' ? q(m.sel) : null);
+    } else if (m.t === 'up' && mode === 'editor' && typeof m.n === 'number') {
+      var c = current();
+      for (var k = 0; c && k < m.n && c.parentElement && c.parentElement !== document.documentElement; k++) c = c.parentElement;
+      if (c) select(c);
     }
   });
   post({ t: 'ready', h: height() });

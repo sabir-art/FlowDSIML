@@ -715,7 +715,7 @@ export function EditorPage() {
               )}
               {tool !== 'select' && <p className="muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
             </div>
-            {step?.kind !== 'before_after' && step?.kind !== 'video' && (
+            {step?.kind !== 'before_after' && step?.kind !== 'video' && step?.kind !== 'html' && (
               <div className="floatbar" role="toolbar" aria-label={t('editor.tools')}>
                 {toolBtn('hotspot', Target, t('editor.toolHotspot'))}
                 {toolBtn('blur', Droplet, t('editor.toolBlur'))}

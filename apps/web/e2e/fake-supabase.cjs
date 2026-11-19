@@ -1315,6 +1315,17 @@ async function install(page, state = seed()) {
         headers: { 'access-control-allow-origin': '*' },
       });
     }
+    // A8 : pages HTML (bucket html, URL signées) : contenu tenu dans state.htmlPages (chemin → HTML)
+    if (/^\/storage\/v1\/object\/sign\/html\//.test(p)) {
+      const key = decodeURIComponent(p.slice('/storage/v1/object/sign/html/'.length));
+      const html = (state.htmlPages || {})[key];
+      return route.fulfill({
+        status: html ? 200 : 404,
+        contentType: 'text/html',
+        headers: { 'access-control-allow-origin': '*' },
+        body: html || 'introuvable',
+      });
+    }
     // F7 : vidéos (bucket videos, URL signées) : WebM fictif, requêtes partielles comme le stockage
     if (/^\/storage\/v1\/object\/sign\/videos\//.test(p)) {
       const webm = require('fs').readFileSync(require('path').join(__dirname, 'fixture-video.webm'));
@@ -1364,7 +1375,17 @@ function parseUpload(buf, contentType) {
 
 function defaults(table, r) {
   if (table === 'demos')
-    return { status: 'draft', settings: {}, folder_id: null, deleted_at: null, current_version_id: null };
+    return {
+      status: 'draft',
+      settings: {},
+      folder_id: null,
+      deleted_at: null,
+      current_version_id: null,
+      device: 'desktop',
+      viewport: null,
+      kind: 'guided',
+      sandbox: null,
+    };
   if (table === 'hotspots')
     return { body: '', placement: 'auto', action: { type: 'next' }, cta: null, pulse: true };
   if (table === 'steps')
@@ -1385,6 +1406,9 @@ function defaults(table, r) {
       video_path: null,
       video_duration_ms: null,
       video: {},
+      html_path: null,
+      html_ops: [],
+      html_meta: {},
     };
   if (table === 'alerts')
     return {

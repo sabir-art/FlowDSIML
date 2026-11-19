@@ -13,8 +13,8 @@ interface PublishResult {
       beforeAfter?: { before: { url: string }; beforeBlurs: Mask[] } | null;
     }>;
   };
-  /** F7 : bucket source (captures par défaut ; videos pour une vidéo, copiée sans retouche). */
-  copies: Array<{ from: string; to: string; bucket?: 'videos' }>;
+  /** F7 / A8 : bucket source (captures par défaut ; videos ou html, copiés sans retouche). */
+  copies: Array<{ from: string; to: string; bucket?: 'videos' | 'html' }>;
 }
 
 /**
@@ -127,7 +127,13 @@ export async function publishDemo(
       const blob = blurs.length ? await burnBlurs(dl.data, blurs) : dl.data;
       const up = await supabase.storage.from('published').upload(c.to, blob, {
         contentType:
-          c.bucket === 'videos' ? 'video/webm' : blurs.length ? 'image/webp' : dl.data.type || 'image/webp',
+          c.bucket === 'videos'
+            ? 'video/webm'
+            : c.bucket === 'html'
+              ? 'text/html'
+              : blurs.length
+                ? 'image/webp'
+                : dl.data.type || 'image/webp',
         cacheControl: '31536000',
         upsert: true,
       });

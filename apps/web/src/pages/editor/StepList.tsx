@@ -7,21 +7,22 @@ import {
   ArrowDown,
   ArrowUp,
   ClipboardList,
+  Code,
   Droplet,
   Flag,
   GitBranch,
+  GripVertical,
   ImageOff,
   ImagePlus,
-  GripVertical,
+  Layers,
   MessageCircle,
   MessageSquare,
   MousePointerClick,
+  Play,
   Plus,
   Target,
   Type,
   ZoomIn,
-  Layers,
-  Play,
 } from 'lucide-react';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { asStepOptions, type StepRow } from './types';
@@ -302,6 +303,8 @@ export function StepList({
                       </>
                     ) : s.kind === 'video' ? (
                       <Play aria-hidden="true" className="th-missing" />
+                    ) : s.kind === 'html' ? (
+                      <Code aria-hidden="true" className="th-missing" />
                     ) : s.kind === 'text' ? (
                       <span className="th-card fd-player-scope">{s.title || t('editor.untitled')}</span>
                     ) : (
@@ -410,6 +413,7 @@ function StepBadges({ step, hotspots, isLast }: { step: StepRow; hotspots: numbe
         : { icon: <Type />, label: t('editor.end.textTitle') }),
     step.kind === 'before_after' && { icon: <Layers />, label: t('editor.add.beforeAfter') },
     step.kind === 'video' && { icon: <Play />, label: t('editor.video.kind') },
+    step.kind === 'html' && { icon: <Code />, label: t('editor.html.kind') },
     hotspots > 0 && { icon: <Target />, label: t('editor.badgeHotspots', { count: hotspots }) },
     step.gate_form_id && { icon: <ClipboardList />, label: t('editor.badgeForm') },
     step.cta && { icon: <MousePointerClick />, label: t('editor.badgeCta') },

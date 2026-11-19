@@ -102,6 +102,12 @@ export function PublishButton({
       setError(t('errors.videoMissing', { n: noVideo + 1 }));
       return;
     }
+    // A8 : une étape HTML doit avoir sa page
+    const noHtml = editor.steps.findIndex((s) => s.kind === 'html' && !s.html_path);
+    if (noHtml >= 0) {
+      setError(t('errors.htmlMissing', { n: noHtml + 1 }));
+      return;
+    }
     // F1 : avertissement RGPD à chaque publication publique (toute publication l'est jusqu'à F3)
     setGdprOpen(true);
   }
