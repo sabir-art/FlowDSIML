@@ -3125,6 +3125,73 @@
     "errTooLongDetail": "Durée calculée : {{n}} s. Réduisez les étapes ou choisissez une vitesse plus rapide.",
     "helpMp4NoTitle": "{{n}} secondes · son des étapes vidéo seulement."
   },
+  "onb": {
+    "title": "Prise en main de votre espace",
+    "sub_one": "{{count}} étape sur {{total}}. Elles se cochent seules quand vous les faites.",
+    "sub_other": "{{count}} étapes sur {{total}}. Elles se cochent seules quand vous les faites.",
+    "valuetext_one": "{{count}} étape sur {{total}}",
+    "valuetext_other": "{{count}} étapes sur {{total}}",
+    "collapse": "Réduire la prise en main",
+    "expand": "Afficher la prise en main",
+    "s": {
+      "brand": "Personnaliser l’espace",
+      "extension": "Installer l’extension",
+      "capture": "Capturer une première démo",
+      "pii": "Flouter les données sensibles",
+      "publish": "Publier et partager une démo",
+      "invite": "Inviter un membre de l’équipe",
+      "distribute": "Diffuser dans l’intranet ou la plateforme de formation"
+    },
+    "h": {
+      "brand": "Logo, couleurs et style par défaut",
+      "extension": "Pour capturer depuis le navigateur",
+      "capture": "Une étape par clic, avec l’extension",
+      "pii": "Vérifier le floutage automatique d’une capture",
+      "publish": "Lien, mot de passe, expiration",
+      "invite": "Éditeur ou lecteur",
+      "distribute": "Lien personnalisé, intégration, page publique ou paquet SCORM"
+    },
+    "a": {
+      "brand": "Personnaliser",
+      "extension": "Installer",
+      "capture": "Capturer",
+      "pii": "Voir comment",
+      "publish": "Partager",
+      "invite": "Inviter",
+      "distribute": "Diffuser"
+    },
+    "nextHint": "Prochaine étape conseillée",
+    "done": "Fait",
+    "footAdmin": "Visible par les propriétaires et administrateurs de l’espace. Les éditeurs voient les étapes de création.",
+    "footEditor": "Les étapes de création de démos. Les autres sont suivies par les administrateurs de l’espace.",
+    "hide": "Masquer la prise en main",
+    "hideShort": "Masquer",
+    "ready": "Votre espace est prêt",
+    "readyBody": "Les 7 étapes sont faites. Retrouvez l’aide à tout moment avec F1.",
+    "resume": "Reprendre la prise en main",
+    "resumeHint": "Les étapes de votre espace, sur la page Démos"
+  },
+  "learn": {
+    "title": "Apprendre TutoClick",
+    "count": "{{n}} sur {{total}}",
+    "progress": "Parcours Apprendre TutoClick",
+    "valuetext_one": "{{count}} module sur {{total}}",
+    "valuetext_other": "{{count}} modules sur {{total}}",
+    "m": {
+      "capturer": "Capturer une démo",
+      "modifier": "Modifier une étape",
+      "flouter": "Flouter les données",
+      "publier": "Publier et partager",
+      "diffuser": "Diffuser (intranet, SCORM)",
+      "statistiques": "Lire les statistiques"
+    },
+    "again": "Revoir",
+    "start": "Commencer",
+    "done": "fait",
+    "steps_one": "{{count}} étape",
+    "steps_other": "{{count}} étapes",
+    "soon": "Bientôt disponible"
+  },
   "help": {
     "open": "Aide (F1)",
     "title": "Aide",

@@ -124,6 +124,8 @@ function send<T>(req: PopupRequest): Promise<T> {
 
 async function loadWorkspaces() {
   const { data: u } = await supabase.auth.getUser();
+  // L26-01 : « Installer l'extension » se coche quand l'extension a répondu au moins une fois
+  void supabase.rpc('extension_seen').then(() => undefined);
   const { data, error: err } = await supabase
     .from('members')
     .select('role, workspaces(id, name)')

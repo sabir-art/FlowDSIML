@@ -910,6 +910,7 @@ export type Database = {
         Row: {
           avatar_url: string | null;
           created_at: string;
+          extension_seen_at: string | null;
           full_name: string;
           id: string;
           locale: string;
@@ -1073,6 +1074,20 @@ export type Database = {
         ComputedFields: never;
         Insert: { demo_id: string; key: string; steps?: number; title?: string; updated_at?: string };
         Update: { demo_id?: string; key?: string; steps?: number; title?: string; updated_at?: string };
+        Relationships: [];
+      };
+      learn_progress: {
+        Row: { done_at: string; module: string; user_id: string };
+        ComputedFields: never;
+        Insert: { done_at?: string; module: string; user_id?: string };
+        Update: { done_at?: string; module?: string; user_id?: string };
+        Relationships: [];
+      };
+      onboarding_prefs: {
+        Row: { hidden_at: string | null; user_id: string; workspace_id: string };
+        ComputedFields: never;
+        Insert: { hidden_at?: string | null; user_id?: string; workspace_id: string };
+        Update: { hidden_at?: string | null; user_id?: string; workspace_id?: string };
         Relationships: [];
       };
       present_reports: {
@@ -2260,6 +2275,8 @@ export type Database = {
       present_remote_new_code: { Args: { p_id: string }; Returns: Json };
       present_remote_status: { Args: { p_id: string }; Returns: Json };
       present_remote_end: { Args: { p_id: string }; Returns: undefined };
+      extension_seen: { Args: Record<PropertyKey, never>; Returns: undefined };
+      workspace_onboarding: { Args: { p_ws: string }; Returns: Json };
       help_feedback: { Args: { p_article: string; p_helpful: boolean }; Returns: undefined };
       save_demo_as_template: {
         Args: {

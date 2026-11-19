@@ -167,6 +167,8 @@ function seed() {
       quiz_questions: [],
       demo_templates: builtinTemplates(),
       help_tours: [],
+      onboarding_prefs: [],
+      learn_progress: [],
       variables: [
         {
           id: 'var-1',
@@ -645,6 +647,25 @@ async function install(page, state = seed()) {
             visitors: (previous ? 80 : 90) * pub,
             completions: (previous ? 30 : 40) * pub,
             leads: (previous ? 0 : 1) * pub,
+          });
+        }
+        case 'workspace_onboarding': {
+          // L26-01 : étapes fixées par le test (state.onboarding), sinon déduites des données
+          const ws = a.p_ws;
+          const st = state.onboarding || {
+            brand: false,
+            extension: false,
+            capture: t.steps.some((x) => x.workspace_id === ws && x.image_path),
+            pii: false,
+            publish: t.demos.some((d) => d.workspace_id === ws && d.status === 'published'),
+            invite: t.members.filter((m) => m.workspace_id === ws).length >= 2,
+            distribute: false,
+          };
+          const pref = t.onboarding_prefs.find((p) => p.workspace_id === ws);
+          return json(route, 200, {
+            steps: st,
+            doneAt: state.onboardingDoneAt ?? null,
+            hiddenAt: pref?.hidden_at ?? null,
           });
         }
         case 'help_feedback': {
@@ -1602,6 +1623,14 @@ async function install(page, state = seed()) {
               hint: null,
             });
         }
+        // L26 : upsert sur la clé (personne, espace / module)
+        if (table === 'onboarding_prefs' || table === 'learn_progress')
+          for (const it of items) {
+            it.user_id = it.user_id ?? state.user.id;
+            const k = table === 'onboarding_prefs' ? 'workspace_id' : 'module';
+            const i = rows.findIndex((r) => r.user_id === it.user_id && r[k] === it[k]);
+            if (i >= 0) rows.splice(i, 1);
+          }
         rows.push(...items);
         return respond(items);
       }

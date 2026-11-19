@@ -3125,6 +3125,73 @@
     "errTooLongDetail": "Calculated duration: {{n}} s. Reduce the steps or choose a faster speed.",
     "helpMp4NoTitle": "{{n}} seconds · sound from video steps only."
   },
+  "onb": {
+    "title": "Getting started with your workspace",
+    "sub_one": "{{count}} of {{total}} steps. They check themselves as you do them.",
+    "sub_other": "{{count}} of {{total}} steps. They check themselves as you do them.",
+    "valuetext_one": "{{count}} of {{total}} steps",
+    "valuetext_other": "{{count}} of {{total}} steps",
+    "collapse": "Collapse getting started",
+    "expand": "Expand getting started",
+    "s": {
+      "brand": "Customize the workspace",
+      "extension": "Install the extension",
+      "capture": "Capture a first demo",
+      "pii": "Blur sensitive data",
+      "publish": "Publish and share a demo",
+      "invite": "Invite a team member",
+      "distribute": "Distribute on the intranet or training platform"
+    },
+    "h": {
+      "brand": "Logo, colors and default style",
+      "extension": "To capture from the browser",
+      "capture": "One step per click, with the extension",
+      "pii": "Check the automatic blurring of a capture",
+      "publish": "Link, password, expiry",
+      "invite": "Editor or viewer",
+      "distribute": "Personalized link, embed, public page or SCORM package"
+    },
+    "a": {
+      "brand": "Customize",
+      "extension": "Install",
+      "capture": "Capture",
+      "pii": "See how",
+      "publish": "Share",
+      "invite": "Invite",
+      "distribute": "Distribute"
+    },
+    "nextHint": "Recommended next step",
+    "done": "Done",
+    "footAdmin": "Visible to workspace owners and admins. Editors see the creation steps.",
+    "footEditor": "Demo creation steps. The others are followed by workspace admins.",
+    "hide": "Hide getting started",
+    "hideShort": "Hide",
+    "ready": "Your workspace is ready",
+    "readyBody": "All 7 steps are done. Find help anytime with F1.",
+    "resume": "Resume getting started",
+    "resumeHint": "Your workspace steps, on the Demos page"
+  },
+  "learn": {
+    "title": "Learn TutoClick",
+    "count": "{{n}} of {{total}}",
+    "progress": "Learn TutoClick path",
+    "valuetext_one": "{{count}} of {{total}} modules",
+    "valuetext_other": "{{count}} of {{total}} modules",
+    "m": {
+      "capturer": "Capture a demo",
+      "modifier": "Edit a step",
+      "flouter": "Blur data",
+      "publier": "Publish and share",
+      "diffuser": "Distribute (intranet, SCORM)",
+      "statistiques": "Read the statistics"
+    },
+    "again": "Watch again",
+    "start": "Start",
+    "done": "done",
+    "steps_one": "{{count}} step",
+    "steps_other": "{{count}} steps",
+    "soon": "Coming soon"
+  },
   "help": {
     "open": "Help (F1)",
     "title": "Help",

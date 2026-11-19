@@ -27,6 +27,8 @@ interface HelpState {
   /** L'éditeur annonce son onglet (articles « Sur cette page »). */
   setEditorTab: (tab: string | null) => void;
   editorTab: string | null;
+  /** Ouvre le tiroir sur un article (ex. « Voir comment » sans visite guidée). */
+  openArticle: (slug: string, opener?: HTMLElement | null) => void;
 }
 const Ctx = createContext<HelpState | null>(null);
 export const useHelp = () => useContext(Ctx);
@@ -36,6 +38,7 @@ export function HelpProvider({ children }: { children: ReactNode }) {
   const { current } = useWorkspace();
   const [open, setOpen] = useState(false);
   const [editorTab, setEditorTab] = useState<string | null>(null);
+  const [article, setArticle] = useState<string | null>(null);
   const opener = useRef<HTMLElement | null>(null);
   const available = !!user && !!current;
 
@@ -50,10 +53,16 @@ export function HelpProvider({ children }: { children: ReactNode }) {
     (el?: HTMLElement | null) => {
       if (open) return close();
       opener.current = el ?? (document.activeElement as HTMLElement | null);
+      setArticle(null);
       setOpen(true);
     },
     [open, close],
   );
+  const openArticle = useCallback((slug: string, el?: HTMLElement | null) => {
+    opener.current = el ?? (document.activeElement as HTMLElement | null);
+    setArticle(slug);
+    setOpen(true);
+  }, []);
 
   // F1 : ouvre ou ferme l'aide (le navigateur ouvrirait sa propre aide)
   useEffect(() => {
@@ -69,15 +78,15 @@ export function HelpProvider({ children }: { children: ReactNode }) {
   }, [available, toggle]);
 
   const value = useMemo(
-    () => ({ open: open && available, toggle, close, setEditorTab, editorTab }),
-    [open, available, toggle, close, editorTab],
+    () => ({ open: open && available, toggle, close, setEditorTab, editorTab, openArticle }),
+    [open, available, toggle, close, editorTab, openArticle],
   );
   return (
     <Ctx.Provider value={value}>
       {children}
       {open && available && (
         <Suspense fallback={null}>
-          <HelpDrawer onClose={close} editorTab={editorTab} />
+          <HelpDrawer key={article ?? ''} onClose={close} editorTab={editorTab} initialArticle={article} />
         </Suspense>
       )}
     </Ctx.Provider>

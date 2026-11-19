@@ -28,7 +28,6 @@ import {
   Tag,
   Trash2,
   Users,
-  X,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Card, Select } from '@flowdsiml/ui';
@@ -45,6 +44,7 @@ import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
 import { NewDemoDialog } from './NewDemoDialog';
 import { TemplatesDialog } from './TemplatesDialog';
+import { OnboardingCard } from './OnboardingCard';
 import { ExportDialog } from '../export/ExportDialog';
 import { DistributeDialog } from '../share/DistributeDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -71,14 +71,6 @@ export function DemosPage() {
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [covers, setCovers] = useState<Record<string, string>>({});
   const [stepCounts, setStepCounts] = useState<Record<string, number>>({});
-  const [captured, setCaptured] = useState(false);
-  const [gsHidden, setGsHidden] = useState(() => {
-    try {
-      return localStorage.getItem(`fd.gettingStarted.${ws.id}`) === 'hidden';
-    } catch {
-      return false;
-    }
-  });
   /** DSH-10 : date de la dernière publication, pour le badge « Modifiée ». */
   const [publishedAt, setPublishedAt] = useState<Record<string, string>>({});
   const [folder, setFolder] = useState<string | 'all' | 'none'>('all');
@@ -173,8 +165,6 @@ export function DemosPage() {
       const n: Record<string, number> = {};
       for (const r of all.data ?? []) n[r.demo_id] = (n[r.demo_id] ?? 0) + 1;
       setStepCounts(n);
-      // DSH-03 : une étape avec l'URL de la page vient d'une capture par l'extension
-      setCaptured((all.data ?? []).some((r) => !!r.page_url));
       // Date de publication de la version en ligne (même règle que la barre de l'éditeur)
       const versions = list
         .filter((x) => x.status === 'published' && x.current_version_id)
@@ -390,66 +380,12 @@ export function DemosPage() {
       </header>
       {error && <Alert kind="error">{error}</Alert>}
 
-      {(() => {
-        // DSH-03 : « Premiers pas · n sur 5 », calculé sur des étapes réelles
-        const published = demos.filter((d) => d.status === 'published');
-        const viewed = published.some((d) => (stats[d.id]?.views ?? 0) > 0);
-        const steps = [true, captured, demos.length > 0, published.length > 0, viewed];
-        const done = steps.filter(Boolean).length;
-        if (gsHidden || done === steps.length || !editable) return null;
-        const latest = demos[0];
-        const next = !captured
-          ? { text: t('demos.gs.capture'), label: t('demos.new'), go: openNew }
-          : !demos.length
-            ? { text: t('demos.gs.demo'), label: t('demos.new'), go: openNew }
-            : !published.length
-              ? {
-                  text: t('demos.gs.publish', { title: latest!.title }),
-                  label: t('demos.gs.open'),
-                  go: () => navigate(`/demos/${latest!.id}/edit`),
-                }
-              : {
-                  text: t('demos.gs.share', { title: published[0]!.title }),
-                  label: t('editor.share'),
-                  go: () => navigate(`/demos/${published[0]!.id}/share`),
-                };
-        return (
-          <section className="gs-banner" aria-labelledby="gs-title">
-            <div className="gs-text">
-              <b id="gs-title">{t('demos.gs.title', { done, total: steps.length })}</b>
-              <span>{next.text}</span>
-            </div>
-            <div
-              className="gs-bar"
-              role="progressbar"
-              aria-label={t('demos.gs.progress')}
-              aria-valuemin={0}
-              aria-valuemax={steps.length}
-              aria-valuenow={done}
-            >
-              <span style={{ width: `${(done / steps.length) * 100}%` }} />
-            </div>
-            <Button size="sm" onClick={next.go}>
-              {next.label}
-            </Button>
-            <button
-              type="button"
-              className="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon"
-              aria-label={t('demos.gs.hide')}
-              onClick={() => {
-                setGsHidden(true);
-                try {
-                  localStorage.setItem(`fd.gettingStarted.${ws.id}`, 'hidden');
-                } catch {
-                  /* stockage indisponible */
-                }
-              }}
-            >
-              <X aria-hidden="true" />
-            </button>
-          </section>
-        );
-      })()}
+      {/* L26-01 : « Prise en main de votre espace » (remplace « Premiers pas ») */}
+      <OnboardingCard
+        onCapture={openNew}
+        latestDemoId={demos[0]?.id ?? null}
+        publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
+      />
 
       {kpis && (
         <section className="stat-row" aria-label={t('analytics.kpis', { count: 30 })}>

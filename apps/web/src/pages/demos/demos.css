@@ -722,3 +722,105 @@
     grid-template-columns: 1fr;
   }
 }
+/* L26-01 : « Prise en main de votre espace » */
+.onb-card {
+  margin-bottom: var(--fd-space-6);
+  padding: 0;
+}
+.onb-card svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.onb-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px 14px;
+}
+.onb-titles {
+  flex: 1;
+  min-width: 0;
+}
+.onb-titles h2 {
+  margin: 0;
+  font-size: var(--fd-text-h3-size, 18px);
+}
+.onb-titles p {
+  margin: 2px 0 0;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+}
+.onb-bar {
+  width: 200px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken, var(--fd-color-border));
+  overflow: hidden;
+}
+.onb-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fd-color-primary);
+}
+.onb-list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0 8px 8px;
+  list-style: none;
+}
+.onb-list li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--fd-radius-md);
+}
+.onb-list li > svg {
+  width: 20px;
+  height: 20px;
+  color: var(--fd-color-text-subtle);
+}
+.onb-list li.done > svg {
+  color: var(--fd-color-success);
+}
+.onb-list li.done b {
+  font-weight: 500;
+  color: var(--fd-color-text-muted);
+  text-decoration: line-through;
+}
+.onb-list li.next {
+  background: var(--fd-color-surface-selected);
+}
+.onb-list small {
+  display: block;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.onb-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px 14px;
+  border-top: 1px solid var(--fd-color-border);
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.onb-grow {
+  flex: 1;
+}
+@media (max-width: 900px) {
+  .onb-list {
+    grid-auto-flow: row;
+    grid-template-columns: 1fr;
+    grid-template-rows: none !important;
+  }
+  .onb-bar {
+    width: 120px;
+  }
+}

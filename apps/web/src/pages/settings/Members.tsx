@@ -48,7 +48,10 @@ export function Members() {
   const [planName, setPlanName] = useState('');
   const [q, setQ] = useState('');
   const [roleFilter, setRoleFilter] = useState<WorkspaceRole | ''>('');
-  const [inviting, setInviting] = useState(false);
+  // L26-01 : « Inviter » de la prise en main ouvre directement la création d'invitation
+  const [inviting, setInviting] = useState(
+    () => new URLSearchParams(location.hash.split('?')[1] ?? '').get('invite') === '1',
+  );
   const { error, success, run } = useAction();
   const ws = current!;
   const myRole = ws.role as Role;

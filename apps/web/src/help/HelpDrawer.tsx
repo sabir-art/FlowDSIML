@@ -4,14 +4,15 @@
  * La recherche remplace les sections (résultats annoncés en aria-live). Un article s'ouvre dans le tiroir.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, BookOpen, CircleHelp, Keyboard, Play, Search, X } from 'lucide-react';
+import { ArrowLeft, BookOpen, CircleHelp, Keyboard, Play, Search, Sparkles, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { PLAYER_URL } from '../lib/env';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { ShortcutsDialog } from '../pages/editor/ShortcutsDialog';
 import { Markdown } from './Markdown';
+import { TourDialog } from './TourDialog';
+import { Academy } from './Academy';
 import {
   PAGE_ARTICLES,
   articleBySlug,
@@ -36,14 +37,43 @@ function Marked({ text, terms }: { text: string; terms: string[] }) {
   );
 }
 
-export function HelpDrawer({ onClose, editorTab }: { onClose: () => void; editorTab: string | null }) {
+export function HelpDrawer({
+  onClose,
+  editorTab,
+  initialArticle = null,
+}: {
+  onClose: () => void;
+  editorTab: string | null;
+  initialArticle?: string | null;
+}) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
-  const { current } = useWorkspace();
+  const { current, can } = useWorkspace();
   const ws = current!;
+  const navigate = useNavigate();
+  // L26-01 : « Reprendre la prise en main » quand la personne l'a masquée
+  const [resume, setResume] = useState(false);
+  useEffect(() => {
+    if (!can('demo.edit')) return;
+    void supabase
+      .from('onboarding_prefs')
+      .select('hidden_at')
+      .eq('workspace_id', ws.id)
+      .maybeSingle()
+      .then(({ data }) => setResume(!!data?.hidden_at));
+  }, [ws.id, can]);
+  const reopenOnboarding = async () => {
+    await supabase.from('onboarding_prefs').delete().eq('workspace_id', ws.id);
+    setResume(false);
+    window.dispatchEvent(new Event('fd:onboarding'));
+    onClose();
+    navigate('/');
+  };
   const page = pageFor(pathname, editorTab);
   const [q, setQ] = useState('');
-  const [article, setArticle] = useState<Article | null>(null);
+  const [article, setArticle] = useState<Article | null>(() =>
+    initialArticle ? articleBySlug(initialArticle) : null,
+  );
   const [tour, setTour] = useState<{ demo_id: string; title: string } | null>(null);
   const [touring, setTouring] = useState(false);
   const [keys, setKeys] = useState(false);
@@ -52,8 +82,9 @@ export function HelpDrawer({ onClose, editorTab }: { onClose: () => void; editor
   const back = useRef<HTMLButtonElement>(null);
   const lastLink = useRef<string | null>(null);
 
-  // Focus dans la recherche à l'ouverture ; Échap ferme (sauf fenêtre ouverte par-dessus)
-  useEffect(() => search.current?.focus(), []);
+  // Focus dans la recherche à l'ouverture (sur « Retour » quand un article est ouvert d'emblée) ;
+  // Échap ferme (sauf fenêtre ouverte par-dessus)
+  useEffect(() => (initialArticle ? back.current : search.current)?.focus(), [initialArticle]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return;
@@ -208,6 +239,16 @@ export function HelpDrawer({ onClose, editorTab }: { onClose: () => void; editor
                     )}
                   </section>
                 )}
+                <Academy />
+                {resume && (
+                  <button type="button" className="help-link" onClick={reopenOnboarding}>
+                    <Sparkles aria-hidden="true" />
+                    <span>
+                      {t('onb.resume')}
+                      <small>{t('onb.resumeHint')}</small>
+                    </span>
+                  </button>
+                )}
                 <section className="help-sec" aria-labelledby="help-keys">
                   <h3 id="help-keys">{t('help.keys')}</h3>
                   <button type="button" className="help-link" onClick={() => setKeys(true)}>
@@ -289,36 +330,5 @@ function Feedback({ slug }: { slug: string }) {
         </>
       )}
     </div>
-  );
-}
-
-/** L26-02 : visite guidée = démo TutoClick dans le lecteur, en modale (aperçu : aucune statistique). */
-function TourDialog({ demoId, title, onClose }: { demoId: string; title: string; onClose: () => void }) {
-  const { t } = useTranslation();
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const d = ref.current;
-    if (d && !d.open) d.showModal();
-  }, []);
-  return (
-    <dialog ref={ref} className="dialog help-tour-dialog" aria-labelledby="help-tour-t" onClose={onClose}>
-      <div className="nd-head">
-        <h2 id="help-tour-t">{title || t('help.tour')}</h2>
-        <button
-          type="button"
-          className="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon"
-          aria-label={t('common.close')}
-          onClick={() => ref.current?.close()}
-        >
-          <X aria-hidden="true" />
-        </button>
-      </div>
-      <iframe
-        title={title || t('help.tour')}
-        src={`${PLAYER_URL}/#/d/${demoId}?preview=1`}
-        sandbox="allow-scripts allow-same-origin allow-popups"
-        allow="fullscreen"
-      />
-    </dialog>
   );
 }

@@ -13,7 +13,7 @@ export function HelpButton({ className = 'fd-btn fd-btn--ghost fd-btn--icon' }: 
       className={`${className} help-btn`}
       aria-label={t('help.open')}
       aria-expanded={help.open}
-      aria-controls="help-drawer"
+      aria-controls={help.open ? 'help-drawer' : undefined}
       aria-keyshortcuts="F1"
       onClick={(e) => help.toggle(e.currentTarget)}
     >
