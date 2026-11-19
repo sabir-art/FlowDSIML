@@ -79,11 +79,16 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const first = grid.getByRole('radio', { name: /Prise en main d’un logiciel|Prise en main d'un logiciel/ });
   ok((await first.getAttribute('aria-checked')) === 'true', 'premier modèle choisi');
   ok(
-    /3 chapitres · 9 étapes · quiz/.test(sp(await first.innerText())),
-    'carte : « 3 chapitres · 9 étapes · quiz »',
+    /3 chapitres · 8 étapes · quiz de 3 questions/.test(sp(await first.innerText())),
+    'carte (REV-08) : « 3 chapitres · 8 étapes · quiz de 3 questions »',
   );
   const prev = dlg.getByRole('complementary', { name: 'Aperçu du modèle' });
   ok(/Remplir le formulaire · saisie animée/.test(sp(await prev.innerText())), 'aperçu : type des étapes');
+  ok(
+    (await prev.locator('li').count()) === 8 &&
+      /Puis un quiz de 3 questions, dans l’onglet Quiz de l’éditeur\./.test(sp(await prev.innerText())),
+    'aperçu (REV-08) : 8 étapes numérotées, puis le quiz de 3 questions',
+  );
   ok(
     /Les 6 étapes à capturer sont marquées « À capturer »/.test(sp(await prev.innerText())),
     'aperçu : alerte',
@@ -95,6 +100,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await page.screenshot({ path: `${SHOTS}/l26-04-modeles${sfx}.png` });
+    await dlg.screenshot({ path: `${SHOTS}/rev-08-modele${sfx}.png` });
   }
   // Clavier : flèches dans la grille
   await first.focus();
@@ -134,6 +140,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(
     steps().length === 8 && steps().filter((s) => s.to_capture).length === 6,
     'brouillon : 8 étapes, 6 à capturer',
+  );
+  ok(
+    state.tables.quiz_questions.filter((q) => q.demo_id === id).length === 3,
+    'brouillon (REV-08) : quiz de 3 questions',
   );
 
   // ===== Étape « À capturer » =====

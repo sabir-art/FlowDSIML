@@ -3288,6 +3288,8 @@
   "templates": {
     "title": "Start from a template",
     "cardBody": "Structure and texts ready: you only need to capture or import the screens.",
+    "quizLine_one": "Then a {{count}}-question quiz, in the editor’s Quiz tab.",
+    "quizLine_other": "Then a {{count}}-question quiz, in the editor’s Quiz tab.",
     "cats": "Template categories",
     "cat": {
       "all": "All",
@@ -3306,6 +3308,8 @@
     "steps_one": "{{count}} step",
     "steps_other": "{{count}} steps",
     "f": {
+      "quizN_one": "{{count}}-question quiz",
+      "quizN_other": "{{count}}-question quiz",
       "quiz": "quiz",
       "avant_apres": "Before / After",
       "seuil": "{{n}}% pass mark",

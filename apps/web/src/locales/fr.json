@@ -3288,6 +3288,8 @@
   "templates": {
     "title": "Partir d’un modèle",
     "cardBody": "Structure et textes prêts : il ne reste qu’à capturer ou importer les écrans.",
+    "quizLine_one": "Puis un quiz de {{count}} question, dans l’onglet Quiz de l’éditeur.",
+    "quizLine_other": "Puis un quiz de {{count}} questions, dans l’onglet Quiz de l’éditeur.",
     "cats": "Catégories de modèles",
     "cat": {
       "all": "Tous",
@@ -3306,6 +3308,8 @@
     "steps_one": "{{count}} étape",
     "steps_other": "{{count}} étapes",
     "f": {
+      "quizN_one": "quiz de {{count}} question",
+      "quizN_other": "quiz de {{count}} questions",
       "quiz": "quiz",
       "avant_apres": "Avant / Après",
       "seuil": "seuil {{n}} %",

@@ -141,7 +141,11 @@ export function TemplatesDialog({
       t('templates.chapters', { count: s.chapters }),
       t('templates.steps', { count: s.steps }),
       ...s.features.map((f) =>
-        f === 'seuil' ? t('templates.f.seuil', { n: s.threshold }) : t(`templates.f.${f}`),
+        f === 'seuil'
+          ? t('templates.f.seuil', { n: s.threshold })
+          : f === 'quiz' && s.questions
+            ? t('templates.f.quizN', { count: s.questions })
+            : t(`templates.f.${f}`),
       ),
     ];
     return parts.join(' · ');
@@ -353,17 +357,22 @@ export function TemplatesDialog({
                     </div>
                   )}
                   <ol start={n + 1}>
-                    {c.steps.map((st, si) => {
-                      n += 1;
-                      return (
-                        <li key={si}>
-                          {st.title} <span>· {t(`templates.type.${st.type}`)}</span>
-                        </li>
-                      );
-                    })}
+                    {c.steps
+                      .filter((st) => st.type !== 'quiz')
+                      .map((st, si) => {
+                        n += 1;
+                        return (
+                          <li key={si}>
+                            {st.title} <span>· {t(`templates.type.${st.type}`)}</span>
+                          </li>
+                        );
+                      })}
                   </ol>
                 </div>
               ))}
+              {s.questions > 0 && (
+                <p className="tpl-quiz">{t('templates.quizLine', { count: s.questions })}</p>
+              )}
               {s.toCapture > 0 && (
                 <p className="tpl-alert">
                   <Info aria-hidden="true" />

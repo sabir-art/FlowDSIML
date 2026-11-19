@@ -44,7 +44,8 @@ const isCapture = (s: TemplateStep) => s.type === 'bulle' || s.type === 'saisie'
 export function summary(t: Template) {
   const st = structureOf(t);
   const chapters = chaptersOf(t);
-  const steps = chapters.flatMap((c) => c.steps);
+  // REV-08 : le repère « quiz » n'est pas une étape (la démo reçoit les questions dans l'onglet Quiz)
+  const steps = chapters.flatMap((c) => c.steps).filter((x) => x.type !== 'quiz');
   // Un modèle d'espace sans chapitre a un chapitre sans titre : il ne compte pas
   const nChapters = chapters.filter((c) => c.title).length || (steps.length ? 1 : 0);
   const features: Array<'quiz' | 'avant_apres' | 'seuil' | 'checklist' | 'cta'> = [];
@@ -63,6 +64,7 @@ export function summary(t: Template) {
     toCapture: steps.filter((s) => isCapture(s) && !(t.with_captures && s.image)).length,
     features,
     threshold: st.settings?.quiz?.threshold ?? 70,
+    questions: (st.quiz ?? []).length,
   };
 }
 

@@ -905,3 +905,9 @@
 .stats-later {
   margin: 0 0 8px;
 }
+/* REV-08 : le quiz du modèle, après les étapes */
+.tpl-quiz {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
