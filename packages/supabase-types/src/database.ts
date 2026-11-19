@@ -955,6 +955,25 @@ export type Database = {
         };
         Relationships: [];
       };
+      diffusions: {
+        Row: {
+          created_by: string | null;
+          demo_id: string;
+          first_at: string;
+          id: string;
+          kind: string;
+          label: string;
+          last_at: string;
+          settings: Json;
+          uses: number;
+          version_id: string | null;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       webhook_deliveries: {
         Row: {
           attempt: number;
@@ -1745,6 +1764,11 @@ export type Database = {
       learners_progress: { Args: { p_workspace: string }; Returns: Json };
       learner_detail: { Args: { p_learner: string }; Returns: Json };
       mark_notifications_read: { Args: { p_ids?: string[] | null }; Returns: number };
+      record_diffusion: {
+        Args: { p_demo: string; p_kind: string; p_label: string; p_settings?: Json };
+        Returns: string;
+      };
+      demo_embed_views: { Args: { p_demo: string }; Returns: Json };
       webhook_create: { Args: { p_ws: string; p_url: string; p_events: string[]; p_name?: string }; Returns: Json };
       webhook_rotate_secret: { Args: { p_id: string }; Returns: string };
       webhook_send_test: { Args: { p_id: string }; Returns: string };
