@@ -1426,7 +1426,8 @@
       "addRow": "Ajouter une ligne",
       "fromDataset": "Depuis un jeu de données",
       "chartReset": "Rétablir le graphique d'origine",
-      "chartHelp": "Graphiques reconnus : barres, courbes et anneaux en HTML ou SVG simple. Les valeurs sont toujours écrites sur le graphique."
+      "chartHelp": "Graphiques reconnus : barres, courbes et anneaux en HTML ou SVG simple. Les valeurs sont toujours écrites sur le graphique.",
+      "unchangedM": "Inchangé"
     },
     "rules": {
       "title": "Suite de l'étape",
@@ -3040,8 +3041,8 @@
     "sub_burn": "Incrustés dans l'image",
     "sub_none": "Aucun",
     "subtitlesHelp": "Une vidéo sans son ni sous-titres n'est pas accessible : gardez le fichier .vtt ou incrustez les sous-titres.",
-    "helpMp4": "Durée : {{n}} s (étapes × vitesse, écran de titre compris). Son des étapes vidéo seulement.",
-    "goMp4": "Créer la vidéo",
+    "helpMp4": "{{n}} secondes (écran de titre compris) · son des étapes vidéo seulement.",
+    "goMp4": "Exporter en MP4",
     "runningMp4": "Création de la vidéo",
     "stageRender": "Rendu des images (étape {{n}} / {{total}})",
     "stageEncode": "Encodage de la vidéo",
@@ -3054,7 +3055,8 @@
     "errImageMp4": "La capture de l'étape {{n}} n'a pas pu être chargée : la vidéo n'a pas été créée.",
     "errStageMp4": "Étape : encodage de la vidéo.",
     "errTooLong": "La vidéo dépasse {{max}} minutes.",
-    "errTooLongDetail": "Durée calculée : {{n}} s. Réduisez les étapes ou choisissez une vitesse plus rapide."
+    "errTooLongDetail": "Durée calculée : {{n}} s. Réduisez les étapes ou choisissez une vitesse plus rapide.",
+    "helpMp4NoTitle": "{{n}} secondes · son des étapes vidéo seulement."
   },
   "present": {
     "button": "Présenter",

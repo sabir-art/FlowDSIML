@@ -2819,3 +2819,7 @@
   align-items: center;
   gap: 8px;
 }
+
+.ds-dialog .gdpr-head .ds-close {
+  margin-left: auto;
+}

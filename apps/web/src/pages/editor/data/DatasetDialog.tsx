@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Database, Info, TriangleAlert, Upload } from 'lucide-react';
+import { Database, Info, TriangleAlert, Upload, X } from 'lucide-react';
 import { readDataset, type CsvEncoding, type CsvSeparator, type DatasetError } from '@flowdsiml/core';
 import type { DatasetBinding } from '@flowdsiml/manifest';
 import { Button } from '@flowdsiml/ui';
@@ -203,6 +203,14 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
           <Database />
         </span>
         <h2 id={`${id}-t`}>{t('editor.dataset.title')}</h2>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm btn-icon ds-close"
+          aria-label={t('common.close')}
+          onClick={() => setOpen(false)}
+        >
+          <X {...ICON} />
+        </button>
       </div>
       <div className="dialog-body stack">
         <input

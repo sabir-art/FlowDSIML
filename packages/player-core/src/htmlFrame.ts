@@ -580,6 +580,10 @@ export const FRAME_RUNTIME = `(function () {
     }, true);
     addEventListener('scroll', function () { var c = current(); if (c) select(c, false); else post({ t: 'scroll' }); }, { passive: true });
   }
+  // L25-07 : Maj + clic ne sélectionne pas de texte dans la page (sélection multiple seulement)
+  document.addEventListener('mousedown', function (e) {
+    if (mode === 'editor' && e.shiftKey) e.preventDefault();
+  }, true);
   document.addEventListener('click', function (e) {
     var t = e.target;
     if (!t || !t.closest) return;

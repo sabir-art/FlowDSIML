@@ -1088,7 +1088,7 @@ function Options(p: {
               : p.fmt === 'pdf'
                 ? t('export.helpPdf', { count: p.pages.length })
                 : p.fmt === 'mp4' && p.mp4Opts
-                  ? t('export.helpMp4', {
+                  ? t(p.mp4x.title ? 'export.helpMp4' : 'export.helpMp4NoTitle', {
                       n: mp4Duration(p.mp4Opts, demo?.steps).toLocaleString(i18n.language),
                     })
                   : `${t(gif.loop ? 'export.helpGifLoop' : 'export.helpGifOnce', {
@@ -1144,6 +1144,14 @@ function Options(p: {
         <GifPreview
           demo={demo}
           opts={p.gifOpts}
+          timing={
+            p.fmt === 'mp4' && p.mp4Opts
+              ? {
+                  offset: p.mp4Opts.title ? 3000 : 0,
+                  total: mp4Duration(p.mp4Opts, demo?.steps) * 1000,
+                }
+              : undefined
+          }
           caption={
             p.fmt === 'mp4'
               ? `${mp4Format(mp4x.format).w.toLocaleString(i18n.language)} × ${mp4Format(mp4x.format).h.toLocaleString(i18n.language)}`
@@ -1160,11 +1168,14 @@ function GifPreview({
   demo,
   opts,
   caption,
+  timing,
 }: {
   demo: ExportDemo | null;
   opts: GifOptions | null;
   /** L25-11 : taille de la vidéo à la place de celle du GIF. */
   caption?: string;
+  /** L25-11 : minutage de la vidéo (écran de titre avant les étapes, durée totale), en ms. */
+  timing?: { offset: number; total: number };
 }) {
   const { t } = useTranslation();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -1223,7 +1234,16 @@ function GifPreview({
         ))}
       </div>
       <div className="gif-meta">
-        <span>{t('export.stepOf', { n, total })}</span>
+        <span>
+          {t('export.stepOf', { n, total })}
+          {timing && (
+            <span className="gif-time">
+              {' · '}
+              {clock(timing.offset + frames.slice(0, frame).reduce((a, f) => a + f.delay, 0))} /{' '}
+              {clock(timing.total)}
+            </span>
+          )}
+        </span>
         <button type="button" className="fd-btn fd-btn--sm" onClick={() => setPaused(!paused)}>
           {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
           {t(paused ? 'export.play' : 'export.pause')}
@@ -1272,3 +1292,9 @@ async function decodeSound(url: string, signal: AbortSignal): Promise<Float32Arr
     return [];
   }
 }
+
+/** 00:04 (minutage de l'aperçu vidéo). */
+const clock = (ms: number) => {
+  const s = Math.floor(ms / 1000);
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+};

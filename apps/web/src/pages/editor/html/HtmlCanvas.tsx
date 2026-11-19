@@ -143,7 +143,9 @@ export function HtmlCanvas({
     const top = sel.rect.y * scale;
     const bottom = (sel.rect.y + sel.rect.h) * scale;
     const below = bottom + 8;
-    const y = below + bh <= box.height ? below : Math.max(0, top - bh - 8);
+    const above = top - bh - 8;
+    // L25-08 : au-dessus d'un graphique (son panneau est à droite), pour ne rien masquer dessous
+    const y = sel.chart && above >= 0 ? above : below + bh <= box.height ? below : Math.max(0, above);
     const x = Math.min(Math.max(0, sel.rect.x * scale), Math.max(0, box.width - bw));
     setBarPos({ left: x, top: y });
   }, [ed.selected, scale]);

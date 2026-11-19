@@ -72,11 +72,11 @@ const SHOTS = process.env.SHOTS_DIR;
       `formats proposés (${formats.join(' | ')})`,
     );
     ok(
-      /^Durée : 20,5 s/.test(await help(p)) && /Son des étapes vidéo seulement/.test(await help(p)),
+      /^20,5 secondes \(écran de titre compris\) · son des étapes vidéo seulement\.$/.test(await help(p)),
       `durée calculée : 7 × 2,5 + 3 (${await help(p)})`,
     );
     await p.getByRole('switch', { name: 'Écran de titre' }).click();
-    ok(/^Durée : 17,5 s/.test(await help(p)), 'sans écran de titre : 17,5 s');
+    ok(/^17,5 secondes · son/.test(await help(p)), 'sans écran de titre : 17,5 s');
     await p.getByRole('switch', { name: 'Écran de titre' }).click();
     ok(
       (await p
@@ -96,7 +96,7 @@ const SHOTS = process.env.SHOTS_DIR;
     // ===== L25-12 : en cours puis prêt =====
     const downloads = [];
     p.on('download', (d) => downloads.push(d));
-    await p.getByRole('button', { name: 'Créer la vidéo' }).click();
+    await p.getByRole('button', { name: 'Exporter en MP4' }).click();
     await p.waitForSelector('.exp-progress [role="progressbar"]');
     const steps = await p.locator('.exp-steps li').allTextContents();
     ok(
@@ -152,11 +152,11 @@ const SHOTS = process.env.SHOTS_DIR;
     await p.getByRole('radio', { name: /Vidéo MP4/ }).click();
     await p.getByRole('switch', { name: 'Écran de titre' }).click();
     // 1 étape × 2,5 s + vidéo gardée (12,008 − 8 s)
-    ok(/^Durée : 6,5 s/.test(await help(p)), `durée : étape vidéo coupée (${await help(p)})`);
+    ok(/^6,5 secondes/.test(await help(p)), `durée : étape vidéo coupée (${await help(p)})`);
     await p.getByLabel("Format de l'image").selectOption('1280x720');
     const [d] = await Promise.all([
       p.waitForEvent('download', { timeout: 120000 }),
-      p.getByRole('button', { name: 'Créer la vidéo' }).click(),
+      p.getByRole('button', { name: 'Exporter en MP4' }).click(),
     ]);
     await p.waitForSelector('text=Vidéo prête', { timeout: 120000 });
     const out = process.env.KEEP_MP4_VIDEO || require('path').join(require('os').tmpdir(), 'fd-video.mp4');
@@ -182,6 +182,7 @@ const SHOTS = process.env.SHOTS_DIR;
         /Votre navigateur ne permet pas de créer une vidéo/.test(await card.textContent()),
       'sans WebCodecs : carte désactivée avec l’aide',
     );
+    await shot(p, 'l25-12-sans-webcodecs');
     await p.context().close();
   }
 

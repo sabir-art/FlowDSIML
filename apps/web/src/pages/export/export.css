@@ -377,3 +377,13 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* L25-11 : pied fixe (durée calculée, Annuler, Exporter) ; le corps défile au-dessus */
+.x15-dlg .x15-main > .x15-foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: auto -24px -24px;
+  padding: 12px 24px;
+  background: var(--fd-color-surface);
+  border-top: 1px solid var(--fd-color-border);
+}

@@ -89,7 +89,7 @@ export function StyleFields({
           id={`st-${k}`}
           className="input input-sm"
           value={f[k]}
-          placeholder={t('editor.data.unchanged')}
+          placeholder={k === 'background' ? t('editor.data.unchangedM') : t('editor.data.unchanged')}
           maxLength={7}
           disabled={readOnly}
           aria-invalid={f[k] !== '' && !HEX.test(f[k])}

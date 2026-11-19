@@ -1426,7 +1426,8 @@
       "addRow": "Add a row",
       "fromDataset": "From a dataset",
       "chartReset": "Restore the original chart",
-      "chartHelp": "Recognised charts: bars, lines and donuts in HTML or simple SVG. Values are always written on the chart."
+      "chartHelp": "Recognised charts: bars, lines and donuts in HTML or simple SVG. Values are always written on the chart.",
+      "unchangedM": "Unchanged"
     },
     "rules": {
       "title": "What comes next",
@@ -3040,8 +3041,8 @@
     "sub_burn": "Burned into the picture",
     "sub_none": "None",
     "subtitlesHelp": "A video without sound or subtitles is not accessible: keep the .vtt file or burn the subtitles in.",
-    "helpMp4": "Duration: {{n}} s (steps × speed, title screen included). Sound from video steps only.",
-    "goMp4": "Create the video",
+    "helpMp4": "{{n}} seconds (title screen included) · sound from video steps only.",
+    "goMp4": "Export as MP4",
     "runningMp4": "Creating the video",
     "stageRender": "Rendering frames (step {{n}} / {{total}})",
     "stageEncode": "Encoding the video",
@@ -3054,7 +3055,8 @@
     "errImageMp4": "The capture of step {{n}} could not be loaded: the video was not created.",
     "errStageMp4": "Stage: video encoding.",
     "errTooLong": "The video exceeds {{max}} minutes.",
-    "errTooLongDetail": "Calculated duration: {{n}} s. Reduce the steps or choose a faster speed."
+    "errTooLongDetail": "Calculated duration: {{n}} s. Reduce the steps or choose a faster speed.",
+    "helpMp4NoTitle": "{{n}} seconds · sound from video steps only."
   },
   "present": {
     "button": "Present",

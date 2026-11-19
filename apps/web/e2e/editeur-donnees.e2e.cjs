@@ -236,6 +236,8 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
         'La colonne « contact » contient des données personnelles : retirez-la du fichier.',
       'colonne personnelle refusée à l’import',
     );
+    ok((await dlg.getByRole('button', { name: 'Fermer' }).count()) === 1, 'bouton × dans l’en-tête');
+    await shot('l25-09-refus');
     await input.setInputFiles({
       name: 'equipes-acme.csv',
       mimeType: 'text/csv',
@@ -442,6 +444,11 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
         1,
       'rail : flèche secondaire vers chaque destination',
     );
+    // Panneau défilé : « Sinon » en entier, « Ajouter une règle » et l'aide de lecture visibles
+    await sec
+      .locator('p.fd-help')
+      .last()
+      .evaluate((el) => el.scrollIntoView({ block: 'end' }));
     await shot('l25-10-conditions');
     // Boucle sans sortie : 3 → 4 → 3
     await r1.getByRole('combobox', { name: 'Destination, règle 1' }).selectOption({ label: '4 · Écran 2' });
