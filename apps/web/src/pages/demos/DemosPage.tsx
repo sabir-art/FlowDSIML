@@ -14,6 +14,7 @@ import {
   FolderOpen,
   FolderPlus,
   Layers,
+  Lock,
   LayoutGrid,
   Link2,
   List,
@@ -45,6 +46,7 @@ import { publicDemoUrl } from '../../lib/embed';
 import { NewDemoDialog } from './NewDemoDialog';
 import { TemplatesDialog } from './TemplatesDialog';
 import { OnboardingCard, useOnboarding } from './OnboardingCard';
+import { FolderAccessDialog } from './FolderAccessDialog';
 import { useShareRules } from '../../lib/shareRules';
 import { ExportDialog } from '../export/ExportDialog';
 import { DistributeDialog } from '../share/DistributeDialog';
@@ -69,6 +71,17 @@ export function DemosPage() {
   const ws = current!;
   const [demos, setDemos] = useState<Demo[] | null>(null);
   const onb = useOnboarding();
+  useEffect(() => {
+    void supabase
+      .from('plans')
+      .select('limits')
+      .eq('code', ws.plan_code)
+      .maybeSingle()
+      .then(({ data }) => setEnterprise(!!(data?.limits as { share_rules?: boolean } | null)?.share_rules));
+    void supabase
+      .rpc('list_members', { p_workspace: ws.id })
+      .then(({ data }) => setMemberCount((data ?? []).length));
+  }, [ws.id, ws.plan_code]);
   const rules = useShareRules(ws.id);
   // L27-07 : démos bloquées par les règles (mot de passe exigé, aucun défini) : « Accès à régler »
   const [lockedIds, setLockedIds] = useState<Set<string>>(new Set());
@@ -104,6 +117,14 @@ export function DemosPage() {
   const [exporting, setExporting] = useState<string | null>(null);
   const [distributing, setDistributing] = useState<string | null>(null);
   const [folderToDelete, setFolderToDelete] = useState<FolderRow | null>(null);
+  // L27-09 : accès par dossier (administrateurs, plan Enterprise)
+  const [folderAccess, setFolderAccess] = useState<FolderRow | null>(null);
+  const [enterprise, setEnterprise] = useState(false);
+  const [hidden, setHidden] = useState<Record<string, number>>({});
+  const [memberCount, setMemberCount] = useState(0);
+  const [pendingMove, setPendingMove] = useState<{ demoId: string; folderId: string; n: number } | null>(
+    null,
+  );
   const [moving, setMoving] = useState<Demo | null>(null);
   // L12-07 : étiquettes des démos (filtre, pastilles, menu de la carte)
   const tagStore = useWorkspaceTags(ws.id);
@@ -147,6 +168,14 @@ export function DemosPage() {
     ]);
     // Liste et indicateurs affichés ensemble (aucun saut de mise en page au chargement)
     setFolders(f.data ?? []);
+    // Dossiers restreints : membres qui ne les voient pas (infobulle, confirmation de déplacement)
+    const restrictedIds = (f.data ?? []).filter((x) => x.restricted).map((x) => x.id);
+    const counts = await Promise.all(
+      restrictedIds.map((id) =>
+        supabase.rpc('folder_hidden_count', { p_folder: id }).then((r) => [id, r.data ?? 0] as const),
+      ),
+    );
+    setHidden(Object.fromEntries(counts));
     setStats(
       Object.fromEntries(((o.data ?? []) as Array<Stats & { demo_id: string }>).map((r) => [r.demo_id, r])),
     );
@@ -238,6 +267,19 @@ export function DemosPage() {
   // L26-04 : bibliothèque de modèles (dossier choisi dans « Nouvelle démo »)
   const [tplFolder, setTplFolder] = useState<string | null | undefined>(undefined);
   const openNew = () => setNewOpen(true);
+
+  async function moveDemo(demoId: string, target: string) {
+    await run(async () => {
+      check(
+        await supabase
+          .from('demos')
+          .update({ folder_id: target || null })
+          .eq('id', demoId),
+      );
+      await load();
+      toast(t('toast.moved', { folder: folders.find((f) => f.id === target)?.name ?? t('demos.noFolder') }));
+    });
+  }
 
   async function createDemo(folderId: string | null = folder !== 'all' && folder !== 'none' ? folder : null) {
     const d = await run(async () =>
@@ -501,6 +543,16 @@ export function DemosPage() {
                 ...folders.map((f) => ({
                   label: `${f.name} · ${inFolder(f.id)}`,
                   icon: folder === f.id ? <Check /> : <Folder />,
+                  // L27-09 : dossier restreint (cadenas, nombre de membres qui le voient)
+                  end: f.restricted ? (
+                    <span
+                      role="img"
+                      aria-label={t('folderAccess.restricted')}
+                      title={t('folderAccess.visibleBy', { count: memberCount - (hidden[f.id] ?? 0) })}
+                    >
+                      <Lock size={14} aria-hidden="true" />
+                    </span>
+                  ) : undefined,
                   onSelect: () => setFolder(f.id),
                 })),
                 ...(editable
@@ -519,6 +571,21 @@ export function DemosPage() {
                                 if (f) setRenaming({ id: f.id, name: f.name });
                               },
                             },
+                            ...(can('workspace.settings')
+                              ? [
+                                  {
+                                    label: t('folderAccess.menu'),
+                                    icon: <Lock />,
+                                    disabled: !enterprise,
+                                    hint: enterprise ? undefined : t('rules.errPlan'),
+                                    end: enterprise ? undefined : (
+                                      <span className="fd-badge menu-soon">Enterprise</span>
+                                    ),
+                                    onSelect: () =>
+                                      setFolderAccess(folders.find((x) => x.id === folder) ?? null),
+                                  },
+                                ]
+                              : []),
                             {
                               label: t('demos.deleteFolderShort'),
                               icon: <Trash2 />,
@@ -862,6 +929,28 @@ export function DemosPage() {
           }).then(() => undefined)
         }
       />
+      {folderAccess && (
+        <FolderAccessDialog
+          folder={folderAccess}
+          onClose={() => setFolderAccess(null)}
+          onSaved={() => {
+            toast(t('folderAccess.saved'));
+            void load();
+          }}
+        />
+      )}
+      <ConfirmDialog
+        open={!!pendingMove}
+        title={t('demos.moveTo')}
+        body={pendingMove ? t('folderAccess.moveWarn', { count: pendingMove.n }) : ''}
+        confirmLabel={t('folderAccess.moveConfirm')}
+        onClose={() => setPendingMove(null)}
+        onConfirm={async () => {
+          const m = pendingMove!;
+          setPendingMove(null);
+          await moveDemo(m.demoId, m.folderId);
+        }}
+      />
       <ConfirmDialog
         open={!!moving}
         title={t('demos.moveTo')}
@@ -870,22 +959,16 @@ export function DemosPage() {
             <Select
               aria-label={t('demos.moveTo')}
               defaultValue={moving.folder_id ?? ''}
-              onChange={(e) =>
-                void run(async () => {
-                  check(
-                    await supabase
-                      .from('demos')
-                      .update({ folder_id: e.target.value || null })
-                      .eq('id', moving.id),
-                  );
-                  await load();
-                  toast(
-                    t('toast.moved', {
-                      folder: folders.find((f) => f.id === e.target.value)?.name ?? t('demos.noFolder'),
-                    }),
-                  );
-                })
-              }
+              onChange={(e) => {
+                const target = e.target.value;
+                // L27-09 : confirmation avant de déplacer une démo vers un dossier restreint
+                if (target && (hidden[target] ?? 0) > 0) {
+                  setPendingMove({ demoId: moving.id, folderId: target, n: hidden[target]! });
+                  setMoving(null);
+                  return;
+                }
+                void moveDemo(moving.id, target);
+              }}
             >
               <option value="">{t('demos.noFolder')}</option>
               {folders.map((f) => (

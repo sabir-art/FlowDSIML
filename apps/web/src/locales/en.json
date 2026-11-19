@@ -3923,5 +3923,23 @@
     "accessToFix": "Access to fix",
     "accessToFixHelp": "Demo not accessible: the workspace rules require a password.",
     "keptMode": "Kept for this link. This mode is no longer offered: disabled by the workspace rules."
+  },
+  "folderAccess": {
+    "menu": "Access",
+    "title": "Access to the “{{name}}” folder",
+    "who": "Who sees this folder?",
+    "all": "The whole workspace",
+    "chosen": "Chosen members",
+    "members": "Members",
+    "search": "Search a member",
+    "adminsAlways": "Admins always have access.",
+    "linksStay": "Links already shared stay valid. To cut them off, change each demo’s access in Share.",
+    "saved": "Folder access saved.",
+    "restricted": "Restricted folder",
+    "visibleBy_one": "Visible to {{count}} member.",
+    "visibleBy_other": "Visible to {{count}} members.",
+    "moveWarn_one": "This demo will no longer be visible to {{count}} member.",
+    "moveWarn_other": "This demo will no longer be visible to {{count}} members.",
+    "moveConfirm": "Move"
   }
 }

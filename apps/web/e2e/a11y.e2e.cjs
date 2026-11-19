@@ -460,6 +460,31 @@ const APP_PAGES = [
       ];
     },
   },
+  {
+    name: 'Démos · accès au dossier',
+    route: '/#/',
+    seed: (d) => {
+      d.tables.workspaces[0].plan_code = 'enterprise';
+      d.tables.folders.push({
+        id: 'f-rh',
+        workspace_id: d.tables.workspaces[0].id,
+        name: 'RH',
+        parent_id: null,
+        restricted: false,
+      });
+    },
+    open: async (p) => {
+      await p
+        .getByRole('button', { name: /Dossiers/ })
+        .first()
+        .click();
+      await p.getByRole('menuitem', { name: /^RH/ }).click();
+      await p.getByRole('button', { name: /RH/ }).first().click();
+      await p.getByRole('menuitem', { name: /Accès/ }).click();
+      await p.getByRole('radio', { name: 'Membres choisis' }).check();
+      await p.waitForSelector('dialog[open] .fa-list');
+    },
+  },
   { name: 'Variables', route: '/#/settings/variables' },
   { name: 'Glossaire (vide)', route: '/#/settings/glossary' },
   { name: 'Glossaire', route: '/#/settings/glossary', seed: seedGlossary },

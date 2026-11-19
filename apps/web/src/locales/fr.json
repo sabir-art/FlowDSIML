@@ -3923,5 +3923,23 @@
     "accessToFix": "Accès à régler",
     "accessToFixHelp": "Démo inaccessible : les règles de l’espace exigent un mot de passe.",
     "keptMode": "Conservé pour ce lien. Ce mode n’est plus proposé : désactivé par les règles de l’espace."
+  },
+  "folderAccess": {
+    "menu": "Accès",
+    "title": "Accès au dossier « {{name}} »",
+    "who": "Qui voit ce dossier ?",
+    "all": "Tout l’espace",
+    "chosen": "Membres choisis",
+    "members": "Membres",
+    "search": "Rechercher un membre",
+    "adminsAlways": "Accès toujours ouvert aux administrateurs.",
+    "linksStay": "Les liens déjà partagés restent valables. Pour les couper, changez l’accès de chaque démo dans Partager.",
+    "saved": "Accès au dossier enregistré.",
+    "restricted": "Dossier restreint",
+    "visibleBy_one": "Visible par {{count}} membre.",
+    "visibleBy_other": "Visible par {{count}} membres.",
+    "moveWarn_one": "Cette démo ne sera plus visible pour {{count}} membre.",
+    "moveWarn_other": "Cette démo ne sera plus visible pour {{count}} membres.",
+    "moveConfirm": "Déplacer"
   }
 }

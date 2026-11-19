@@ -210,6 +210,7 @@ function seed() {
       share_links: [],
       demo_access: [],
       share_rules: [],
+      folder_members: [],
       leads: [
         {
           id: 'l1',
@@ -678,6 +679,30 @@ async function install(page, state = seed()) {
             completions: (previous ? 30 : 40) * pub,
             leads: (previous ? 0 : 1) * pub,
           });
+        }
+        case 'set_folder_access': {
+          // L27-09 : dossier restreint à des membres choisis (administrateurs toujours inclus)
+          const f = t.folders.find((x) => x.id === a.p_folder);
+          if (!f) return json(route, 400, { code: '42501', message: 'FORBIDDEN' });
+          f.restricted = !!a.p_restricted;
+          t.folder_members = t.folder_members.filter((m) => m.folder_id !== f.id);
+          if (f.restricted)
+            for (const u of a.p_users || [])
+              t.folder_members.push({ folder_id: f.id, user_id: u, workspace_id: f.workspace_id });
+          state.folderAccessCalls = [...(state.folderAccessCalls || []), a];
+          return json(route, 200, null);
+        }
+        case 'folder_hidden_count': {
+          const f = t.folders.find((x) => x.id === a.p_folder);
+          if (!f?.restricted) return json(route, 200, 0);
+          const others = (t.members || []).filter((m) => m.role !== 'admin' && m.role !== 'owner');
+          return json(
+            route,
+            200,
+            others.filter(
+              (m) => !t.folder_members.some((x) => x.folder_id === f.id && x.user_id === m.user_id),
+            ).length,
+          );
         }
         case 'share_rules_preview': {
           // L27-07 : démos publiées dont le mode est interdit ou sans expiration sous la limite

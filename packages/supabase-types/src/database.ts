@@ -565,6 +565,7 @@ export type Database = {
           id: string;
           name: string;
           parent_id: string | null;
+          restricted: boolean;
           workspace_id: string;
         };
         ComputedFields: never;
@@ -573,6 +574,7 @@ export type Database = {
           id?: string;
           name: string;
           parent_id?: string | null;
+          restricted?: boolean;
           workspace_id: string;
         };
         Update: {
@@ -580,6 +582,7 @@ export type Database = {
           id?: string;
           name?: string;
           parent_id?: string | null;
+          restricted?: boolean;
           workspace_id?: string;
         };
         Relationships: [
@@ -1070,6 +1073,13 @@ export type Database = {
           description?: string;
           name?: string;
         };
+        Relationships: [];
+      };
+      folder_members: {
+        Row: { created_at: string; folder_id: string; user_id: string; workspace_id: string };
+        ComputedFields: never;
+        Insert: { created_at?: string; folder_id: string; user_id: string; workspace_id: string };
+        Update: { created_at?: string; folder_id?: string; user_id?: string; workspace_id?: string };
         Relationships: [];
       };
       share_rules: {
@@ -2328,6 +2338,11 @@ export type Database = {
         Returns: undefined;
       };
       default_style_impact: { Args: { p_ws: string }; Returns: number };
+      set_folder_access: {
+        Args: { p_folder: string; p_restricted: boolean; p_users?: string[] };
+        Returns: undefined;
+      };
+      folder_hidden_count: { Args: { p_folder: string }; Returns: number };
       share_rules_preview: {
         Args: { p_ws: string; p_modes: string[]; p_max_days: number | null };
         Returns: Json;
