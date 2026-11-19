@@ -98,7 +98,45 @@ const pages = [
   ok((await p.locator('.sbnode').count()) === 5, 'une carte par page');
   ok((await p.locator('.sbnode.start').innerText()).includes('Départ'), 'badge « Départ »');
   ok((await p.locator('.sbnode.warn').innerText()).includes('À relier'), 'badge « À relier »');
-  ok((await p.locator('.sbmap svg path').count()) >= 6, 'liens tracés');
+  ok((await p.locator('.sbmap svg g path').count()) === 3, 'un seul tracé par paire de pages (3 paires)');
+  ok(
+    (await p.locator('.sbmap svg g path[marker-start]').count()) === 3,
+    'liens dans les deux sens : flèche à chaque bout',
+  );
+  // Aucun tracé ne passe sous une carte (échantillonnage des segments)
+  ok(
+    await p.evaluate(() => {
+      const cards = [...document.querySelectorAll('.sbnode')].map((c) => c.getBoundingClientRect());
+      return [...document.querySelectorAll('.sbmap svg g path')].every((path) => {
+        const len = path.getTotalLength();
+        const m = path.getScreenCTM();
+        for (let i = 3; i < len - 3; i += 4) {
+          const pt = path.getPointAtLength(i).matrixTransform(m);
+          if (
+            cards.some(
+              (r) => pt.x > r.left + 1 && pt.x < r.right - 1 && pt.y > r.top + 1 && pt.y < r.bottom - 1,
+            )
+          )
+            return false;
+        }
+        return true;
+      });
+    }),
+    'aucun tracé sous une carte',
+  );
+  ok(
+    await p.evaluate(() => {
+      const box = document.querySelector('.sb-scroll').getBoundingClientRect();
+      return [...document.querySelectorAll('.sbnode')].every(
+        (c) => c.getBoundingClientRect().right <= box.right - 4,
+      );
+    }),
+    'aucune carte ne touche le bord du plan',
+  );
+  ok(
+    (await p.locator('#sb-guide').getAttribute('aria-disabled')) === 'true',
+    'guide optionnel : aria-disabled',
+  );
   ok(
     (await p.getByRole('alert').filter({ hasText: 'n’est reliée à aucune page' }).innerText()).includes(
       'Paramètres',
@@ -113,6 +151,16 @@ const pages = [
   );
   ok((await p.getByText('Complétion : a vu les 4 pages clés').count()) === 1, 'complétion : 4 pages clés');
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/l20-02-sandbox${sfx}.png`, fullPage: true });
+  // Seconde capture : réglages, pages clés et liste équivalente du plan
+  if (SHOTS) {
+    await p.locator('#sb-list-h').evaluate((el) => {
+      let q = el.parentElement;
+      while (q && q.scrollHeight <= q.clientHeight) q = q.parentElement;
+      if (q) q.scrollTop += el.getBoundingClientRect().top - q.getBoundingClientRect().top - 420;
+    });
+    await p.waitForTimeout(300);
+    await p.screenshot({ path: `${SHOTS}/l20-02-reglages${sfx}.png` });
+  }
 
   // Réglages enregistrés
   await p.getByLabel('Clic sur un élément non relié').selectOption('highlight');

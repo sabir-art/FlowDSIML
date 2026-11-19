@@ -706,45 +706,48 @@ export function EditorPage() {
                   }}
                 />
               ) : step ? (
-                <div className={`frame fd-player-scope frame--${zoom}`}>
-                  {step.kind !== 'html' && <ChecklistPreview editor={editor} index={safeIndex} />}
-                  {/* L18 : police de la médiathèque appliquée au canevas, comme dans le lecteur */}
-                  {fontCss && <style>{fontCss}</style>}
-                  <div className="browser" aria-hidden="true">
-                    <i />
-                    <i />
-                    <i />
-                    {step.page_url && (
-                      <span className="url">{step.page_url.replace(/^https?:\/\//, '')}</span>
-                    )}
+                <>
+                  {step.kind === 'html' && <div id="html-crumbs-slot" className="html-crumbs-slot" />}
+                  <div className={`frame fd-player-scope frame--${zoom}`}>
+                    {step.kind !== 'html' && <ChecklistPreview editor={editor} index={safeIndex} />}
+                    {/* L18 : police de la médiathèque appliquée au canevas, comme dans le lecteur */}
+                    {fontCss && <style>{fontCss}</style>}
+                    <div className="browser" aria-hidden="true">
+                      <i />
+                      <i />
+                      <i />
+                      {step.page_url && (
+                        <span className="url">{step.page_url.replace(/^https?:\/\//, '')}</span>
+                      )}
+                    </div>
+                    <div className="shot">
+                      <Canvas
+                        editor={editor}
+                        step={step}
+                        tool={tool}
+                        setTool={setTool}
+                        selection={selection}
+                        setSelection={setSelection}
+                        readOnly={readOnly}
+                        onEditForm={() =>
+                          step.gate_form_id && setSelection({ kind: 'form', id: step.gate_form_id })
+                        }
+                        hideFormChip={!!selectedForm}
+                        abPreview={
+                          ab.test && ab.view === 'B' && ab.test.step_id === step.id && ab.test.hotspot_id
+                            ? {
+                                hotspotId: ab.test.hotspot_id,
+                                title: asVariantB(ab.test.variant_b).title ?? '',
+                                body: asVariantB(ab.test.variant_b).body ?? '',
+                                cta: asVariantB(ab.test.variant_b).cta ?? null,
+                              }
+                            : null
+                        }
+                      />
+                      {selectedForm && <FormPreview form={selectedForm} editor={editor} />}
+                    </div>
                   </div>
-                  <div className="shot">
-                    <Canvas
-                      editor={editor}
-                      step={step}
-                      tool={tool}
-                      setTool={setTool}
-                      selection={selection}
-                      setSelection={setSelection}
-                      readOnly={readOnly}
-                      onEditForm={() =>
-                        step.gate_form_id && setSelection({ kind: 'form', id: step.gate_form_id })
-                      }
-                      hideFormChip={!!selectedForm}
-                      abPreview={
-                        ab.test && ab.view === 'B' && ab.test.step_id === step.id && ab.test.hotspot_id
-                          ? {
-                              hotspotId: ab.test.hotspot_id,
-                              title: asVariantB(ab.test.variant_b).title ?? '',
-                              body: asVariantB(ab.test.variant_b).body ?? '',
-                              cta: asVariantB(ab.test.variant_b).cta ?? null,
-                            }
-                          : null
-                      }
-                    />
-                    {selectedForm && <FormPreview form={selectedForm} editor={editor} />}
-                  </div>
-                </div>
+                </>
               ) : (
                 <div className="muted">{t('editor.empty')}</div>
               )}

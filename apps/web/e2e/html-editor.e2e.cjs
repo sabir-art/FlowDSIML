@@ -204,15 +204,31 @@ const page = (h1) => `<!doctype html><html><head><meta charset="utf-8"><title>${
     'Remplacer l’image : « Bientôt »',
   );
   await p.keyboard.press('Escape');
-  if (SHOTS) {
-    await frame.locator('div.kpi').first().locator('b.value').click();
-    await p.waitForTimeout(300);
-    await p.screenshot({ path: `${SHOTS}/l20-01-modifications${sfx}.png` });
-  }
   // Introuvable : suppression
   await p.getByRole('button', { name: 'Supprimer la modification de a.export-disparu' }).click();
   await p.waitForTimeout(1300);
   ok(!ops(0).some((o) => o.id === 'nf1'), 'modification introuvable supprimée');
+  // L20-01 : capture avec de vraies modifications (texte avant → après, élément masqué, flou, lien)
+  await frame.locator('div.kpi').first().locator('b.value').click();
+  await p.getByLabel('Texte', { exact: true }).fill('1 248');
+  await p.keyboard.press('Enter');
+  await p.waitForTimeout(1300);
+  ok(
+    (await p.getByRole('button', { name: /Annuler la modification du texte/ }).count()) >= 1,
+    'modification de texte annulable (bouton nommé)',
+  );
+  if (SHOTS) {
+    await p
+      .locator('.panel')
+      .getByText(/Modifications de l’étape/)
+      .evaluate((el) => {
+        let q = el.parentElement;
+        while (q && q.scrollHeight <= q.clientHeight) q = q.parentElement;
+        if (q) q.scrollTop += el.getBoundingClientRect().top - q.getBoundingClientRect().top - 120;
+      });
+    await p.waitForTimeout(300);
+    await p.screenshot({ path: `${SHOTS}/l20-01-modifications${sfx}.png` });
+  }
   ok(errors.length === 0, `aucune erreur (${errors.join(' | ')})`);
   await b.close();
 })().catch((e) => {

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Copy, Droplet, EyeOff, Image, Link2, MoreHorizontal, PenLine, Trash2 } from 'lucide-react';
 import {
@@ -32,6 +33,8 @@ export function HtmlCanvas({
 }) {
   const { t } = useTranslation();
   const ed = useHtmlEdit(step.id);
+  const [crumbSlot, setCrumbSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => setCrumbSlot(document.getElementById('html-crumbs-slot')), [step.id]);
   const frame = useRef<HTMLIFrameElement>(null);
   const wrap = useRef<HTMLDivElement>(null);
   const bar = useRef<HTMLDivElement>(null);
@@ -158,33 +161,37 @@ export function HtmlCanvas({
   const linked = sel ? opOn(step, sel.sel, 'link') : undefined;
   const others = editor.steps.map((s, i) => ({ s, n: i + 1 })).filter(({ s }) => s.id !== step.id);
   if (!step.html_path) return <div className="muted html-empty">{t('editor.html.missing')}</div>;
+  const crumbsEl = (
+    <div className="html-crumbs" role="group" aria-label={t('editor.html.trail')}>
+      <span className="badge">{t('editor.html.kind')}</span>
+      {sel ? (
+        sel.trail.map((label, i) => {
+          const isLast = i === sel.trail.length - 1;
+          return (
+            <span key={`${i}-${label}`} className="html-crumb">
+              {i > 0 && <span aria-hidden="true"> › </span>}
+              <button
+                type="button"
+                className="crumb-btn"
+                aria-current={isLast ? 'true' : undefined}
+                aria-label={t('editor.html.trailBtn', { el: label })}
+                onClick={() => frameSend.current?.({ t: 'up', n: sel.trail.length - 1 - i })}
+              >
+                {isLast ? <b>{label}</b> : label}
+              </button>
+            </span>
+          );
+        })
+      ) : (
+        <span className="muted">{t('editor.html.noSelection')}</span>
+      )}
+    </div>
+  );
 
   return (
     <div className="html-canvas">
-      <div className="html-crumbs" role="group" aria-label={t('editor.html.trail')}>
-        <span className="badge">{t('editor.html.kind')}</span>
-        {sel ? (
-          sel.trail.map((label, i) => {
-            const isLast = i === sel.trail.length - 1;
-            return (
-              <span key={`${i}-${label}`} className="html-crumb">
-                {i > 0 && <span aria-hidden="true"> › </span>}
-                <button
-                  type="button"
-                  className="crumb-btn"
-                  aria-current={isLast ? 'true' : undefined}
-                  aria-label={t('editor.html.trailBtn', { el: label })}
-                  onClick={() => frameSend.current?.({ t: 'up', n: sel.trail.length - 1 - i })}
-                >
-                  {isLast ? <b>{label}</b> : label}
-                </button>
-              </span>
-            );
-          })
-        ) : (
-          <span className="muted">{t('editor.html.noSelection')}</span>
-        )}
-      </div>
+      {/* L20-01 : fil du sélecteur en tête du canevas, au-dessus du cadre navigateur */}
+      {crumbSlot ? createPortal(crumbsEl, crumbSlot) : crumbsEl}
       <div className="html-stage" ref={wrap} style={{ height: `${Math.round(vh * scale)}px` }}>
         {doc ? (
           <iframe
@@ -209,6 +216,10 @@ export function HtmlCanvas({
             aria-label={t('editor.html.toolbar')}
             style={barPos ? { left: barPos.left, top: barPos.top } : { visibility: 'hidden' }}
           >
+            {/* L20-01 : étiquette du sélecteur, dans la barre (elle ne masque aucun texte de la page) */}
+            <span className="eltb-tag" aria-hidden="true">
+              {sel.short}
+            </span>
             <button
               type="button"
               disabled={sel.canvas || sel.img}

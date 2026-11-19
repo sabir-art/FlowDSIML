@@ -247,9 +247,9 @@ export const FRAME_RUNTIME = `(function () {
     if (el) {
       var r = el.getBoundingClientRect();
       selTag.textContent = shortSel(el);
-      selTag.style.display = 'block';
-      selTag.style.left = (r.left + scrollX - 2) + 'px';
-      selTag.style.top = Math.max(0, r.top + scrollY - 24) + 'px';
+      // L20-01 : l'étiquette du sélecteur est affichée dans la barre d'actions de l'éditeur (hors de la
+      // page) : elle ne masque plus de texte de la capture
+      selTag.style.display = 'none';
       if (focus !== false && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
       post({ t: 'select', el: {
         sel: selected, short: shortSel(el), trail: trail(el),

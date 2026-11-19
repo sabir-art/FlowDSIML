@@ -55,8 +55,20 @@
 }
 .html-keys {
   margin: 0;
-  padding: 8px 10px;
+  /* L20-01 : marge intérieure (le texte ne touche plus le bord du cadre) */
+  padding: 10px 16px 12px;
   font-size: 12px;
+}
+/* L20-01 : fil du sélecteur en tête du canevas, hors du cadre navigateur */
+.html-crumbs-slot {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 8px;
+}
+.html-crumbs-slot .html-crumbs {
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
 }
 /* Barre d'actions : pilule noire, sous l'élément (au-dessus s'il n'y a pas la place) */
 .eltb {
@@ -168,6 +180,8 @@
 }
 .sb-scroll {
   overflow: auto;
+  /* L20-02 : marge intérieure, aucune carte ne touche le bord */
+  padding: 8px;
   border-radius: 20px;
   background: var(--fd-color-surface);
   box-shadow: var(--fd-shadow-sm);
@@ -235,7 +249,8 @@
 }
 .sb-settings {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  /* L20-02 : colonnes assez larges pour que les selects ne coupent pas leur texte */
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 12px 24px;
   padding: 16px;
   align-items: start;
@@ -273,4 +288,29 @@
 }
 .stage-view {
   display: inline-flex;
+}
+
+.eltb-tag {
+  padding: 2px 8px;
+  margin-right: 2px;
+  border-radius: 999px;
+  background: #217bac;
+  color: #fff;
+  font: 600 11px/1.6 var(--fd-font-mono, ui-monospace, monospace);
+  white-space: nowrap;
+}
+
+/* L20-02 : réglage « Bientôt » estompé (interrupteur inactif) */
+.sb-settings .setting.is-soon {
+  opacity: 0.6;
+}
+.sb-settings .setting.is-soon .switch {
+  cursor: not-allowed;
+}
+.sb-settings select {
+  width: 100%;
+  text-overflow: ellipsis;
+}
+.sbmap {
+  margin: 0 auto;
 }

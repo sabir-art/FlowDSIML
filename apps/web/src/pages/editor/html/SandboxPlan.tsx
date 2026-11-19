@@ -7,9 +7,28 @@ import { sandboxOf } from '../draftManifest';
 import { sandboxGraph, type SbNode } from './sandboxGraph';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
+
+/** Inverse un tracé orthogonal « M x y H … V … H … » (pour orienter la flèche). */
+function reversePath(d: string): string {
+  const pts: Array<[number, number]> = [];
+  let x = 0;
+  let y = 0;
+  for (const m of d.matchAll(/([MHV])\s*(-?[\d.]+)(?:\s+(-?[\d.]+))?/g)) {
+    if (m[1] === 'M') {
+      x = Number(m[2]);
+      y = Number(m[3]);
+    } else if (m[1] === 'H') x = Number(m[2]);
+    else y = Number(m[2]);
+    pts.push([x, y]);
+  }
+  return pts
+    .reverse()
+    .map(([px, py], i) => `${i ? 'L' : 'M'}${px} ${py}`)
+    .join(' ');
+}
 const W = 150;
 const H = 116;
-const GX = 56;
+const GX = 44;
 const GY = 36;
 
 /**
@@ -44,6 +63,39 @@ export function SandboxPlan({
   const height = rows * (H + GY) - GY + 48;
   const pos = (n: SbNode) => ({ x: 24 + n.col * (W + GX), y: 24 + n.row * (H + GY) });
 
+  // Paires de pages (sans doublon) : a → b, et both si b → a existe aussi
+  const edges = (() => {
+    const seen = new Set<string>();
+    const out: Array<{ key: string; d: string; both: boolean }> = [];
+    for (const n of nodes)
+      for (const to of n.to) {
+        const m = byId.get(to);
+        if (!m) continue;
+        const key = [n.id, to].sort().join('|');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const both = m.to.includes(n.id);
+        // Sens de tracé : de la colonne de gauche vers la droite (même colonne : de haut en bas)
+        const [u, v] = n.col < m.col || (n.col === m.col && n.row <= m.row) ? [n, m] : [m, n];
+        const a = pos(u);
+        const b = pos(v);
+        let d: string;
+        if (u.col === v.col) {
+          // Même colonne : par le couloir de droite
+          const gx = a.x + W + GX / 2;
+          d = `M${a.x + W} ${a.y + H / 2} H${gx} V${b.y + H / 2} H${b.x + W}`;
+        } else {
+          // Colonnes différentes : sortie à droite, descente dans le couloir, entrée à gauche
+          const gx = b.x - GX / 2;
+          d = `M${a.x + W} ${a.y + H / 2} H${gx} V${b.y + H / 2} H${b.x}`;
+        }
+        // Flèche vers la page liée : si seul v → u existe, on inverse le tracé
+        const forward = u.id === n.id || both;
+        out.push({ key, d: forward ? d : reversePath(d), both });
+      }
+    return out;
+  })();
+
   const desc = [
     ...nodes
       .filter((n) => n.to.length)
@@ -74,24 +126,30 @@ export function SandboxPlan({
             style={{ width, height }}
           >
             <svg className="links" width={width} height={height} aria-hidden="true">
+              <defs>
+                <marker
+                  id="sb-arrow"
+                  viewBox="0 0 10 10"
+                  refX="9"
+                  refY="5"
+                  markerWidth="7"
+                  markerHeight="7"
+                  orient="auto-start-reverse"
+                >
+                  <path d="M0 0 L10 5 L0 10 z" fill="var(--fd-color-primary)" />
+                </marker>
+              </defs>
+              {/* L20-02 : un seul tracé par paire de pages (flèche à chaque bout si le lien va dans les deux
+                  sens), routé dans les couloirs entre les cartes : jamais sous une carte */}
               <g stroke="var(--fd-color-primary)" strokeWidth="2" fill="none">
-                {nodes.flatMap((n) =>
-                  n.to.map((to) => {
-                    const target = byId.get(to);
-                    if (!target) return null;
-                    const a = pos(n);
-                    const b = pos(target);
-                    const forward = target.col > n.col;
-                    const x1 = forward ? a.x + W : a.x + W / 2;
-                    const y1 = forward ? a.y + H / 2 : a.y + H;
-                    const x2 = forward ? b.x : b.x + W / 2;
-                    const y2 = forward ? b.y + H / 2 : b.y + H;
-                    const d = forward
-                      ? `M${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 40} ${y2}, ${x2} ${y2}`
-                      : `M${x1} ${y1} C ${x1} ${y1 + 30}, ${x2} ${y2 + 30}, ${x2} ${y2}`;
-                    return <path key={`${n.id}-${to}`} d={d} />;
-                  }),
-                )}
+                {edges.map((e) => (
+                  <path
+                    key={e.key}
+                    d={e.d}
+                    markerEnd="url(#sb-arrow)"
+                    markerStart={e.both ? 'url(#sb-arrow)' : undefined}
+                  />
+                ))}
               </g>
             </svg>
             {nodes.map((n) => {
@@ -187,12 +245,12 @@ export function SandboxPlan({
             <option value="highlight">{t('editor.sandbox.unlinkedHighlight')}</option>
           </select>
         </div>
-        <div className="setting">
+        <div className="setting is-soon">
           <label className="t-label" htmlFor="sb-guide">
             {t('editor.sandbox.guide')} <span className="badge">{t('editor.sandbox.soon')}</span>
           </label>
           <span className="switch">
-            <input id="sb-guide" type="checkbox" checked={false} disabled readOnly />
+            <input id="sb-guide" type="checkbox" checked={false} disabled aria-disabled="true" readOnly />
             <span />
           </span>
         </div>
