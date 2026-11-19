@@ -1,4 +1,4 @@
-import { Copy, Download, Eye, Info, Mail, Play, Plus, Power, Trash2, X } from 'lucide-react';
+import { Copy, Download, Eye, Info, Mail, Play, Plus, Power, ShieldCheck, Trash2, X } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -42,6 +42,8 @@ export function SharePage() {
   const [links, setLinks] = useState<Tables<'share_links'>[]>([]);
   const [linkStats, setLinkStats] = useState<LinkStats>({});
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  /** L17-01 : confirmation RGPD enregistrée avec la version en ligne (auteur et date). */
+  const [ack, setAck] = useState<{ name: string; at: string } | null>(null);
   const [variables, setVariables] = useState<Tables<'variables'>[]>([]);
   const [origins, setOrigins] = useState('');
   // RP-2 : la modale RGPD ouvre directement l'onglet Accès (?tab=access)
@@ -71,7 +73,7 @@ export function SharePage() {
       d.data.current_version_id
         ? supabase
             .from('demo_versions')
-            .select('published_at')
+            .select('published_at, public_ack')
             .eq('id', d.data.current_version_id)
             .maybeSingle()
         : Promise.resolve({ data: null }),
@@ -89,7 +91,14 @@ export function SharePage() {
     ]);
     const list = l.data ?? [];
     setLinks(list);
-    setPublishedAt((v.data as { published_at: string } | null)?.published_at ?? null);
+    const ver = v.data as { published_at: string; public_ack: { by?: string; at?: string } | null } | null;
+    setPublishedAt(ver?.published_at ?? null);
+    const pa = ver?.public_ack;
+    if (pa?.by && pa.at) {
+      const m = await supabase.rpc('list_members', { p_workspace: d.data.workspace_id });
+      const who = (m.data ?? []).find((x) => x.user_id === pa.by);
+      setAck({ name: who?.full_name || who?.email || t('share.ackUnknown'), at: pa.at });
+    } else setAck(null);
     setVariables(vars.data ?? []);
     setGatedSteps(gated.count ?? 0);
     const w = a.data as unknown as { views: number; leads: number } | null;
@@ -118,7 +127,7 @@ export function SharePage() {
       }),
     );
     setLinkStats(stats);
-  }, [demoId]);
+  }, [demoId, t]);
 
   useEffect(() => {
     void load();
@@ -168,6 +177,12 @@ export function SharePage() {
               t('share.neverPublished', { title: demo.title })
             )}
           </p>
+          {published && ack && (
+            <p className="muted sh-sub sh-ack">
+              <ShieldCheck size={14} aria-hidden="true" />
+              {t('share.ackLine', { name: ack.name, date: formatDateTime(ack.at) })}
+            </p>
+          )}
         </div>
         <div className="row">
           <a className="btn btn-secondary" href={`${url}?preview=1`} target="_blank" rel="noreferrer">

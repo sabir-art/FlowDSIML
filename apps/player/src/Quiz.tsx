@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'preact/hooks';
 import type { Quiz as QuizT, QuizQuestion } from '@flowdsiml/manifest';
-import { Award, CircleCheck, CircleX, RefreshCw, RotateCcw } from 'lucide-preact';
+import { Award, BookOpen, CircleCheck, CircleX, RefreshCw, RotateCcw } from 'lucide-preact';
 import { fmt, type Dict } from './i18n';
 import { isCorrect, isOpenQuestion, isPartial, scoreQuiz, shuffled } from './logic';
 import type { QuizResult } from './api';
@@ -211,6 +211,7 @@ export function Quiz({
             ) : (
               <>
                 <button type="button" class="p-btn p-btn-ghost" onClick={onRestartModule}>
+                  <BookOpen {...ICON} size={16} />
                   {q.reviewModule}
                 </button>
                 {canRetry && (
@@ -295,9 +296,10 @@ export function Quiz({
           aria-label={q.progressLabel}
           aria-valuemin={0}
           aria-valuemax={order.length}
-          aria-valuenow={answered}
+          aria-valuenow={Math.max(answered, qi + 1)}
         >
-          <div style={{ width: `${(answered / order.length) * 100}%` }} />
+          {/* F2-03 : la question en cours compte (1 sur 3 : environ 33 %) */}
+          <div style={{ width: `${(Math.max(answered, qi + 1) / order.length) * 100}%` }} />
         </div>
         <fieldset class="p-quiz-fieldset" aria-describedby={`${id}-hint`}>
           <legend tabIndex={-1} ref={legendRef}>

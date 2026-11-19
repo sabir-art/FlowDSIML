@@ -844,7 +844,8 @@ body {
   stroke: color-mix(in srgb, var(--p-text) 10%, transparent);
 }
 .p-ring__arc {
-  stroke: #8793a3;
+  /* F2-06 : ardoise plus soutenue (contraste 3:1 sur le fond) */
+  stroke: #5b6675;
   stroke-linecap: round;
   transition: stroke-dasharray 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
 }

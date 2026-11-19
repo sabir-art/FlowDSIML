@@ -10,7 +10,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react';
-import { useEffect, useId, useState } from 'react';
+import { useId, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Manifest } from '@flowdsiml/manifest';
@@ -24,6 +24,7 @@ import { PreviewDialog } from '../PreviewDialog';
 import { asAnswers, asSettings, type DemoSettings, type QuestionRow, type QuizAnswer } from '../types';
 import { convertAnswers, isOpenType, newAnswerId, questionErrors } from '../quizValidation';
 import { QuizStats } from './QuizStats';
+import { useToast } from '../../../components/Toast';
 import '../editor.css';
 import './quiz.css';
 
@@ -142,7 +143,10 @@ export function QuizEditorPage() {
         </section>
         <aside className="quiz-side">
           <QuizSettings editor={editor} readOnly={readOnly} />
-          <QuizStats demoId={demoId} questions={qs} />
+          {/* A2-04 : pas de réussite par question en mode Sondage */}
+          {asSettings(editor.demo!.settings).quiz?.mode !== 'survey' && (
+            <QuizStats demoId={demoId} questions={qs} />
+          )}
         </aside>
       </div>
       <PreviewDialog manifest={previewManifest} startQuiz onClose={() => setPreviewManifest(null)} />
@@ -281,22 +285,17 @@ function QuestionForm({
   const mode = asSettings(editor.demo!.settings).quiz?.mode === 'survey' ? 'survey' : 'quiz';
   const errs = questionErrors({ prompt: q.prompt, answers, type: q.type }, mode);
   const open = isOpenType(type);
-  const [notice, setNotice] = useState('');
+  const toast = useToast();
   const set = (patch: Partial<QuestionRow>) => editor.updateQuestion(q.id, patch);
   const setAnswers = (next: QuizAnswer[]) => set({ answers: next as unknown as QuestionRow['answers'] });
   const fixed = type === 'truefalse';
-
-  useEffect(() => {
-    if (!notice) return;
-    const timer = setTimeout(() => setNotice(''), 6000);
-    return () => clearTimeout(timer);
-  }, [notice]);
 
   function setType(to: QType) {
     if (to === type) return;
     const r = convertAnswers(answers, to, { true: t('editor.quiz.true'), false: t('editor.quiz.false') });
     set({ type: to, answers: r.answers as unknown as QuestionRow['answers'] });
-    if (r.trimmed) setNotice(t('editor.quiz.typeTrimmed'));
+    // F2-01 : simple toast au passage de Choix multiples à Choix unique, pas de bandeau
+    if (r.trimmed) toast(t('editor.quiz.typeTrimmed'));
   }
 
   function markCorrect(i: number, on: boolean) {
@@ -323,14 +322,18 @@ function QuestionForm({
               {t(`editor.quiz.${TYPE_KEY[k]}`)}
             </button>
           ))}
+          {/* A2-04 : étoiles de 1 à 5, pas encore disponibles (gardées avec « Bientôt ») */}
+          {(mode === 'survey' || isOpenType(type)) && (
+            <button type="button" aria-pressed={false} disabled aria-disabled="true">
+              {t('editor.quiz.typeStars')} <span className="badge badge-xs">{t('shell.soon')}</span>
+            </button>
+          )}
         </div>
       </div>
-      {/* Alert info = role=status : le message est annoncé */}
-      {notice && <Alert kind="info">{notice}</Alert>}
       <Field label={t('editor.quiz.questionLabel')} htmlFor="qz-prompt">
         <textarea
           id="qz-prompt"
-          className="fd-input"
+          className="fd-input quiz-prompt"
           rows={2}
           maxLength={200}
           disabled={readOnly}
@@ -422,49 +425,54 @@ function QuestionForm({
         )}
       </fieldset>
 
-      <Field label={t('editor.quiz.explanation')} htmlFor="qz-expl">
-        <textarea
-          id="qz-expl"
-          className="fd-input"
-          rows={3}
-          maxLength={1000}
-          disabled={readOnly}
-          value={q.explanation}
-          onChange={(e) => set({ explanation: e.target.value })}
-        />
-      </Field>
-      <div className="quiz-question__row">
-        <Field label={t('editor.quiz.linkedStep')} htmlFor="qz-step">
-          <Select
-            id="qz-step"
-            disabled={readOnly}
-            value={q.step_id ?? ''}
-            onChange={(e) => set({ step_id: e.target.value || null })}
-          >
-            <option value="">{t('editor.quiz.linkedStepNone')}</option>
-            {editor.steps.map((s, i) => (
-              <option key={s.id} value={s.id}>
-                {i + 1}. {s.title || t('editor.untitled')}
-              </option>
-            ))}
-          </Select>
-        </Field>
-        <Field label={t('editor.quiz.points')} htmlFor="qz-points">
-          <input
-            id="qz-points"
-            className="fd-input"
-            type="number"
-            min={1}
-            max={100}
-            disabled={readOnly}
-            value={q.points}
-            onChange={(e) => {
-              const v = Math.round(Number(e.target.value));
-              if (v >= 1 && v <= 100) set({ points: v });
-            }}
-          />
-        </Field>
-      </div>
+      {/* A2-04 : en mode Sondage, ni explication, ni étape à revoir, ni points */}
+      {mode === 'quiz' && (
+        <>
+          <Field label={t('editor.quiz.explanation')} htmlFor="qz-expl">
+            <textarea
+              id="qz-expl"
+              className="fd-input"
+              rows={3}
+              maxLength={1000}
+              disabled={readOnly}
+              value={q.explanation}
+              onChange={(e) => set({ explanation: e.target.value })}
+            />
+          </Field>
+          <div className="quiz-question__row">
+            <Field label={t('editor.quiz.linkedStep')} htmlFor="qz-step">
+              <Select
+                id="qz-step"
+                disabled={readOnly}
+                value={q.step_id ?? ''}
+                onChange={(e) => set({ step_id: e.target.value || null })}
+              >
+                <option value="">{t('editor.quiz.linkedStepNone')}</option>
+                {editor.steps.map((s, i) => (
+                  <option key={s.id} value={s.id}>
+                    {i + 1}. {s.title || t('editor.untitled')}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label={t('editor.quiz.points')} htmlFor="qz-points">
+              <input
+                id="qz-points"
+                className="fd-input"
+                type="number"
+                min={1}
+                max={100}
+                disabled={readOnly}
+                value={q.points}
+                onChange={(e) => {
+                  const v = Math.round(Number(e.target.value));
+                  if (v >= 1 && v <= 100) set({ points: v });
+                }}
+              />
+            </Field>
+          </div>
+        </>
+      )}
       {!readOnly && (
         <Button
           variant="ghost"
@@ -525,6 +533,7 @@ function QuizSettings({ editor, readOnly }: { editor: DemoEditor; readOnly: bool
         <Field label={t('editor.quiz.thresholdLabel', { value: quiz.threshold })} htmlFor="qz-th">
           <input
             id="qz-th"
+            className="quiz-threshold"
             type="range"
             min={0}
             max={100}
@@ -536,35 +545,39 @@ function QuizSettings({ editor, readOnly }: { editor: DemoEditor; readOnly: bool
           />
         </Field>
       )}
-      <Field label={t('editor.quiz.attempts')} htmlFor="qz-att">
-        <Select
-          id="qz-att"
-          disabled={readOnly}
-          value={String(quiz.attempts)}
-          onChange={(e) => set({ attempts: Number(e.target.value) })}
-        >
-          {ATTEMPTS.map((n) => (
-            <option key={n} value={n}>
-              {n === 0 ? t('editor.quiz.attemptsUnlimited') : t('editor.quiz.attemptsN', { count: n })}
-            </option>
-          ))}
-        </Select>
-      </Field>
-      <Field label={t('editor.quiz.showCorrection')}>
-        <div className="fd-segmented" role="group" aria-label={t('editor.quiz.showCorrection')}>
-          {(['each', 'end'] as const).map((f) => (
-            <button
-              key={f}
-              type="button"
-              aria-pressed={quiz.feedback === f}
+      {quiz.mode !== 'survey' && (
+        <>
+          <Field label={t('editor.quiz.attempts')} htmlFor="qz-att">
+            <Select
+              id="qz-att"
               disabled={readOnly}
-              onClick={() => set({ feedback: f })}
+              value={String(quiz.attempts)}
+              onChange={(e) => set({ attempts: Number(e.target.value) })}
             >
-              {t(f === 'each' ? 'editor.quiz.afterEach' : 'editor.quiz.atEnd')}
-            </button>
-          ))}
-        </div>
-      </Field>
+              {ATTEMPTS.map((n) => (
+                <option key={n} value={n}>
+                  {n === 0 ? t('editor.quiz.attemptsUnlimited') : t('editor.quiz.attemptsN', { count: n })}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label={t('editor.quiz.showCorrection')}>
+            <div className="fd-segmented" role="group" aria-label={t('editor.quiz.showCorrection')}>
+              {(['each', 'end'] as const).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  aria-pressed={quiz.feedback === f}
+                  disabled={readOnly}
+                  onClick={() => set({ feedback: f })}
+                >
+                  {t(f === 'each' ? 'editor.quiz.afterEach' : 'editor.quiz.atEnd')}
+                </button>
+              ))}
+            </div>
+          </Field>
+        </>
+      )}
       <Switch
         label={t('editor.quiz.shuffle')}
         checked={quiz.shuffle}
@@ -572,7 +585,7 @@ function QuizSettings({ editor, readOnly }: { editor: DemoEditor; readOnly: bool
         onChange={(e) => set({ shuffle: e.target.checked })}
       />
       <Switch
-        label={t('editor.quiz.required')}
+        label={t(quiz.mode === 'survey' ? 'editor.quiz.requiredSurvey' : 'editor.quiz.required')}
         checked={quiz.required}
         disabled={readOnly}
         onChange={(e) => set({ required: e.target.checked })}

@@ -301,6 +301,14 @@ export function Canvas({
         )}
         <h2>{step.title || t('editor.untitled')}</h2>
         <div dangerouslySetInnerHTML={{ __html: withVariablePills(richTextToHtml(step.body)) }} />
+        {/* A2-02 : bouton de la pop-up, comme dans le lecteur (vide = « Suivant ») */}
+        {popup && !endText && opts.choices.length === 0 && (
+          <div className="canvas-popup-acts">
+            <span className="p-btn p-btn-primary">
+              {opts.buttonLabel || t('editor.advanced.popup.buttonPlaceholder')}
+            </span>
+          </div>
+        )}
         {endText && (
           <div className="canvas-end-acts">
             {stepCta && (

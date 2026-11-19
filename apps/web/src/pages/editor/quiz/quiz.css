@@ -71,10 +71,23 @@
   gap: 2px;
 }
 .quiz-list__prompt {
+  /* F2-01 : l'intitulé passe sur deux lignes avant d'être coupé */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   font-weight: 600;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+/* F2-01 : marge intérieure du champ question, espace sous le curseur du seuil */
+.quiz-prompt {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: 1.45;
+  resize: vertical;
+}
+.quiz-threshold {
+  width: 100%;
+  margin-bottom: 8px;
 }
 .quiz-list__caption {
   font-size: 12px;
@@ -99,6 +112,11 @@
 .quiz-list li:focus-within .quiz-list__move {
   display: inline-flex;
 }
+/* F2-01 : les flèches de déplacement ne recouvrent pas l'intitulé */
+.quiz-list li:hover .quiz-list__text,
+.quiz-list li:focus-within .quiz-list__text {
+  padding-right: 48px;
+}
 .quiz-list__move button {
   display: inline-grid;
   place-items: center;
@@ -116,6 +134,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+/* A2-04 : six types (dont « Étoiles », Bientôt) : les boutons passent à la ligne sans déborder */
+.quiz-question__head .fd-segmented {
+  flex-wrap: wrap;
+  max-width: 100%;
+  height: auto;
 }
 .quiz-question__row {
   display: grid;

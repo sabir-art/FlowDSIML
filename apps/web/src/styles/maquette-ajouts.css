@@ -981,6 +981,13 @@
 .mk .code .s {
   color: var(--fd-color-accent);
 }
+/* L17-01 : auteur et date de la confirmation RGPD de la version en ligne */
+.mk .sh-ack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
 .mk .sh-sub {
   margin-top: 4px;
 }

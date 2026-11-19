@@ -1282,3 +1282,8 @@
     display: none;
   }
 }
+
+/* A2-02 : interrupteurs du composant partagé à la couleur principale, comme ceux de l'éditeur */
+.mk .fd-switch input:checked + .fd-switch__track {
+  background: var(--fd-color-primary);
+}

@@ -146,13 +146,41 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
 
       <div className="sec">
         <div className="sec-title">{t('editor.design.frame')}</div>
-        <div className="setting">
-          <span className="t-label">
-            {t('editor.design.browserBar')} <span className="badge badge-xs">{t('shell.soon')}</span>
+        {/* A2-01 : cadre du canevas. Navigateur (actuel) ; Aucun, Mobile et adresse affichée : L25-03 */}
+        <div className="field">
+          <span className="t-label" id="th-frame-l">
+            {t('editor.advanced.mode.frame')}
           </span>
-          <span className="switch">
-            <input type="checkbox" checked disabled aria-label={t('editor.design.browserBar')} readOnly />
-            <span />
+          <div className="segmented frame-seg" role="radiogroup" aria-labelledby="th-frame-l">
+            {(['frameNone', 'frameBrowser', 'frameMobile'] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                role="radio"
+                aria-checked={k === 'frameBrowser'}
+                aria-disabled={k !== 'frameBrowser' || undefined}
+                disabled={k !== 'frameBrowser'}
+                tabIndex={k === 'frameBrowser' ? 0 : -1}
+              >
+                {t(`editor.advanced.mode.${k}`)}
+                {k !== 'frameBrowser' && <span className="badge badge-xs">{t('shell.soon')}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field">
+          <label className="t-label" htmlFor="th-frame-url">
+            {t('editor.advanced.mode.frameUrl')} <span className="badge badge-xs">{t('shell.soon')}</span>
+          </label>
+          <input
+            id="th-frame-url"
+            className="input input-sm"
+            disabled
+            placeholder="app.example.com"
+            aria-describedby="th-frame-url-h"
+          />
+          <span className="help" id="th-frame-url-h">
+            {t('editor.advanced.mode.frameUrlHelp')}
           </span>
         </div>
         {color('background', t('editor.design.background'))}

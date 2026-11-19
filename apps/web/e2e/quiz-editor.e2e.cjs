@@ -96,7 +96,7 @@ const { sfx, themedContext } = require('./_theme.cjs');
     (await pf.locator('legend').textContent()) === 'Où créer un rendez-vous ?',
     'aperçu : le quiz s’ouvre directement',
   );
-  await page.getByRole('button', { name: 'Fermer' }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Fermer' }).click();
 
   // Seconde question incomplète → publication bloquée avec le numéro
   await page.getByRole('button', { name: 'Ajouter une question' }).first().click();

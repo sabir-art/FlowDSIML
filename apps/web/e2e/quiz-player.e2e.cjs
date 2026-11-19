@@ -40,7 +40,7 @@ const manifest = {
   ],
   quiz: {
     threshold: 70,
-    attempts: 2,
+    attempts: 3,
     feedback: 'each',
     shuffle: false,
     questions: [
@@ -127,7 +127,7 @@ const manifest = {
         correct,
         total: 3,
         passed: score >= 70,
-        attemptsLeft: 2 - used,
+        attemptsLeft: 3 - used,
         questions: qs,
       }),
     });
@@ -137,7 +137,15 @@ const manifest = {
   await page.locator('.p-controls [aria-label="Étape suivante"]').click();
   await page.getByRole('button', { name: 'Passer au quiz' }).click();
   await page.waitForSelector('.p-quiz-card');
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-question${sfx}.png` });
+  // F2-03 : la question en cours compte dans la barre (1 sur 3 : environ 33 %)
+  ok(
+    Math.abs(
+      (await page.locator('.p-quiz-progress > div').evaluate((el) => el.getBoundingClientRect().width)) /
+        (await page.locator('.p-quiz-progress').evaluate((el) => el.getBoundingClientRect().width)) -
+        1 / 3,
+    ) < 0.02,
+    'barre de progression : environ 33 % sur la question 1',
+  );
   ok(
     (await page.locator('legend').textContent()) === 'Où créer un rendez-vous ?',
     'énoncé = legend du fieldset',
@@ -161,6 +169,11 @@ const manifest = {
     'focus sur la première option',
   );
 
+  // F2-02 : réponse cochée au clavier, focus visible
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(200);
+  ok(await page.getByLabel('Dans les paramètres').isChecked(), 'réponse cochée au clavier');
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-question${sfx}.png` });
   // Mauvaise réponse : correction par texte et icône, explication, revoir l'étape
   await page.getByLabel('Dans les paramètres').check();
   await page.keyboard.press('Enter');
@@ -215,7 +228,7 @@ const manifest = {
     'focus sur le titre du résultat',
   );
   ok(
-    (await page.getByRole('status').first().textContent()).includes('il vous reste 1 tentative'),
+    (await page.getByRole('status').first().textContent()).includes('il vous reste 2 tentatives'),
     'phrase de score avec tentatives restantes',
   );
   ok(
@@ -244,6 +257,11 @@ const manifest = {
   await page.waitForSelector('.p-quiz-badge.is-pass');
   ok((await page.locator('.p-quiz-badge').textContent()) === 'Module validé', 'réussite : « Module validé »');
   ok((await page.locator('.p-quiz-result h2').textContent()).includes('Bravo'), 'titre de réussite');
+  // F2-05 : tentatives restantes après réussite : « Repasser le quiz »
+  ok(
+    (await page.getByRole('button', { name: 'Repasser le quiz' }).count()) === 1,
+    'réussite : « Repasser le quiz » (tentative restante)',
+  );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-resultat-reussite${sfx}.png` });
   await page.waitForTimeout(2600);
   ok(

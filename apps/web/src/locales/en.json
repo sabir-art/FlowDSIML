@@ -652,7 +652,8 @@
       "disabledBody": "This workspace does not allow public links: the demo cannot be published with public access. An administrator can allow them in Settings.",
       "openSettings": "Open settings",
       "close": "Close",
-      "none": "No unblurred detection"
+      "none": "No unblurred detection",
+      "checksLegend": "Confirmations before publishing"
     },
     "quiz": {
       "title": "Module quiz",
@@ -724,7 +725,9 @@
       "typeText": "Written answer",
       "npsHelp": "The visitor picks a rating from 0 to 10. The recommendation score shows in Analytics from 20 responses.",
       "textHelp": "Free answer, 500 characters at most, optional. Readable by editors only, erased with the demo and the learner.",
-      "errSurveyOnly": "This question type only exists in Survey mode."
+      "errSurveyOnly": "This question type only exists in Survey mode.",
+      "typeStars": "Stars from 1 to 5",
+      "requiredSurvey": "Answer required to finish the module"
     },
     "backToDemos": "Back to demos",
     "unpublishedChanges": "Unpublished changes",
@@ -1579,7 +1582,9 @@
       "ogSoon": "Rich preview when shared (server-side image and Open Graph tags): coming soon.",
       "open": "View the public page",
       "newTab": "Opens in a new tab."
-    }
+    },
+    "ackLine": "GDPR confirmation: {{name}}, {{date}}",
+    "ackUnknown": "former member"
   },
   "analytics": {
     "title": "Analytics",

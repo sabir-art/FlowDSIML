@@ -1596,9 +1596,24 @@
   text-underline-offset: 2px;
   cursor: pointer;
 }
-.gdpr-why {
-  margin: 8px 0 0;
+.gdpr-dialog .gdpr-why {
+  /* F1-02 : les actions mangent la marge basse de la boîte (marge négative) : on la rend */
+  margin: 20px 0 0;
   text-align: right;
+}
+/* F1-02 : bloc gris des deux confirmations ; bouton inactif pâle */
+.gdpr-checks {
+  display: grid;
+  gap: 12px;
+  margin: 4px 0 0;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+}
+.gdpr-dialog .dialog-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* EDT-13 : avis mobile de l'éditeur, centré sans carte */
@@ -2083,7 +2098,7 @@
   display: grid;
   place-items: center;
   color: var(--fd-color-text-muted);
-  background: var(--fd-color-surface-2, #f5f5f4);
+  background: var(--fd-color-surface-sunken);
   box-shadow: 0 0 0 1px var(--fd-color-border);
 }
 .ba-thumb img {
@@ -2170,4 +2185,113 @@
 }
 .ba-pick-list small {
   color: var(--fd-color-text-muted);
+}
+
+/* A2-01 : choix du cadre (options à venir désactivées, badge « Bientôt ») */
+.frame-seg {
+  display: flex;
+  width: 100%;
+}
+.frame-seg button {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: auto;
+  padding-block: 6px;
+  line-height: 1.2;
+}
+.frame-seg button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* A2-03 : aperçu de la checklist sur le canevas (carte de 260 px) */
+.ck-prev {
+  position: absolute;
+  bottom: 16px;
+  z-index: 4;
+  width: 260px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--fd-player-surface, #fff);
+  color: var(--fd-player-text, #080808);
+  box-shadow: 0 10px 30px rgba(8, 8, 8, 0.18);
+  font-size: 13px;
+  text-align: left;
+}
+.ck-prev--right {
+  right: 16px;
+}
+.ck-prev--left {
+  left: 16px;
+}
+.ck-prev:has(.ck-pill) {
+  width: auto;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+.ck-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--fd-player-surface, #fff);
+  box-shadow: 0 6px 18px rgba(8, 8, 8, 0.18);
+  font-weight: 600;
+}
+.ck-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 14px;
+}
+.ck-progress {
+  margin: 2px 0 8px;
+  opacity: 0.75;
+}
+.ck-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(8, 8, 8, 0.1);
+  overflow: hidden;
+}
+.ck-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--fd-player-primary, #a3195b);
+}
+.ck-prev ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.ck-prev li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ck-prev li.cur {
+  font-weight: 700;
+}
+.ck-prev .ok {
+  color: var(--fd-player-primary, #a3195b);
+}
+.mk .frame:has(> .ck-prev) {
+  position: relative;
+}
+
+/* A2-02 : bouton de la pop-up sur le canevas */
+.canvas-popup-acts {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }

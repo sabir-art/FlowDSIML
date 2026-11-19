@@ -40,6 +40,7 @@ import { Loading } from '../../components/guards';
 import { useDemoEditor } from './useDemoEditor';
 import { Canvas, type Tool } from './Canvas';
 import { SandboxPlan } from './html/SandboxPlan';
+import { ChecklistPreview } from './ChecklistPreview';
 import { StepList } from './StepList';
 import { CommentsPanel } from './comments/CommentsPanel';
 import { useStepComments } from './comments/useStepComments';
@@ -706,6 +707,7 @@ export function EditorPage() {
                 />
               ) : step ? (
                 <div className={`frame fd-player-scope frame--${zoom}`}>
+                  {step.kind !== 'html' && <ChecklistPreview editor={editor} index={safeIndex} />}
                   {/* L18 : police de la médiathèque appliquée au canevas, comme dans le lecteur */}
                   {fontCss && <style>{fontCss}</style>}
                   <div className="browser" aria-hidden="true">

@@ -652,7 +652,8 @@
       "disabledBody": "Ce workspace n’autorise pas les liens publics : la démo ne peut pas être publiée en accès public. Un administrateur peut les autoriser dans Paramètres.",
       "openSettings": "Ouvrir les paramètres",
       "close": "Fermer",
-      "none": "Aucune détection non floutée"
+      "none": "Aucune détection non floutée",
+      "checksLegend": "Confirmations avant publication"
     },
     "quiz": {
       "title": "Quiz du module",
@@ -724,7 +725,9 @@
       "typeText": "Réponse écrite",
       "npsHelp": "Le visiteur choisit une note de 0 à 10. Le score de recommandation s’affiche dans Analytics à partir de 20 réponses.",
       "textHelp": "Réponse libre, 500 caractères au plus, facultative. Lisible par les éditeurs seulement, effacée avec la démo et l’apprenant.",
-      "errSurveyOnly": "Ce type de question n’existe qu’en mode Sondage."
+      "errSurveyOnly": "Ce type de question n’existe qu’en mode Sondage.",
+      "typeStars": "Étoiles de 1 à 5",
+      "requiredSurvey": "Réponse obligatoire pour terminer le module"
     },
     "backToDemos": "Retour aux démos",
     "unpublishedChanges": "Modifications non publiées",
@@ -1579,7 +1582,9 @@
       "ogSoon": "Aperçu enrichi lors d’un partage (image et balises Open Graph côté serveur) : bientôt.",
       "open": "Voir la page publique",
       "newTab": "S’ouvre dans un nouvel onglet."
-    }
+    },
+    "ackLine": "Confirmation RGPD : {{name}}, le {{date}}",
+    "ackUnknown": "membre retiré"
   },
   "analytics": {
     "title": "Analytics",

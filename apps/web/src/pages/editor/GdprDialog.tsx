@@ -144,14 +144,18 @@ export function GdprDialog({
                 }}
               />
             </p>
-            <label className="gdpr-check">
-              <input type="checkbox" checked={reviewed} onChange={(e) => setReviewed(e.target.checked)} />
-              <span>{t('editor.gdpr.checkReviewed')}</span>
-            </label>
-            <label className="gdpr-check">
-              <input type="checkbox" checked={fictional} onChange={(e) => setFictional(e.target.checked)} />
-              <span>{t('editor.gdpr.checkFictional')}</span>
-            </label>
+            {/* F1-02 : les deux confirmations regroupées dans un bloc */}
+            <fieldset className="gdpr-checks">
+              <legend className="sr-only">{t('editor.gdpr.checksLegend')}</legend>
+              <label className="gdpr-check">
+                <input type="checkbox" checked={reviewed} onChange={(e) => setReviewed(e.target.checked)} />
+                <span>{t('editor.gdpr.checkReviewed')}</span>
+              </label>
+              <label className="gdpr-check">
+                <input type="checkbox" checked={fictional} onChange={(e) => setFictional(e.target.checked)} />
+                <span>{t('editor.gdpr.checkFictional')}</span>
+              </label>
+            </fieldset>
           </div>
           <div className="dialog-actions">
             {sum.pendingSteps.length > 0 && (

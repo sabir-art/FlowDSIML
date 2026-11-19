@@ -707,7 +707,10 @@ async function install(page, state = seed()) {
             demo_id: d.id,
             number,
             manifest,
+            published_by: state.user.id,
             published_at: new Date().toISOString(),
+            // F1 : confirmation RGPD (auteur, date) quand la publication est publique
+            public_ack: a.p_ack ? { by: state.user.id, at: new Date().toISOString(), reviewed: true } : null,
           });
           return json(route, 200, {
             versionId,
