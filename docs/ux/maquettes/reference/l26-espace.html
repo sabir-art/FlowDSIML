@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prise en main, aide et modèles (lot L26) · TutoClick (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+  .thumb .hs { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--fd-ember-500); box-shadow: 0 0 0 4px rgba(232,84,31,.25); }
+  .view-list[hidden], .demo-grid[hidden] { display: none; }
+  .banner-ob { display: flex; gap: 20px; align-items: center; padding: 16px 20px; border-radius: var(--fd-radius-lg); background: var(--fd-color-primary-soft); margin-bottom: 24px; }
+  .banner-ob .progress { width: 160px; }
+</style>
+<style>
+  /* ===== L26 ===== */
+  body:not([data-l26="checklist"]) .onb-card { display: none; }
+  body[data-l26="checklist"] .banner-ob { display: none; }
+  .onb-card { margin-bottom: 24px; }
+  .onb-head { display: flex; align-items: center; gap: 16px; padding: 18px 20px 14px; }
+  .onb-head .progress { width: 200px; }
+  .onb-list { list-style: none; margin: 0; padding: 0 8px 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+  .onb-list li { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: var(--fd-radius-md); }
+  .onb-list li.done b { color: var(--fd-color-text-muted); font-weight: 500; text-decoration: line-through; }
+  .onb-list li.next { background: var(--fd-color-surface-selected); }
+  .onb-list svg { width: 20px; height: 20px; } .onb-list li.done > svg { color: var(--fd-color-success); } .onb-list li:not(.done) > svg { color: var(--fd-color-text-subtle); }
+  .onb-list small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .onb-foot { display: flex; align-items: center; gap: 12px; padding: 10px 20px 14px; border-top: 1px solid var(--fd-color-border); font-size: 13px; color: var(--fd-color-text-muted); }
+  @media (max-width: 900px) { .onb-list { grid-template-columns: 1fr; } }
+  /* Tiroir d'aide */
+  .help-drawer { position: fixed; top: 56px; right: 0; bottom: 0; width: 400px; max-width: 100%; z-index: 60; background: var(--fd-color-surface); border-left: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-lg); display: flex; flex-direction: column; }
+  body:not([data-l26^="aide"]) .help-drawer { display: none; }
+  .help-drawer header { display: flex; align-items: center; gap: 8px; padding: 16px 16px 12px; }
+  .help-drawer header h2 { margin: 0; font-size: 18px; } .help-drawer header .grow { flex: 1; }
+  .help-body { flex: 1; overflow: auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 18px; }
+  .help-sec h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--fd-color-text-muted); }
+  .help-link { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border-radius: var(--fd-radius-md); color: var(--fd-color-text); text-decoration: none; }
+  .help-link:hover { background: var(--fd-color-surface-sunken); } .help-link svg { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--fd-color-text-muted); }
+  .help-link small { display: block; color: var(--fd-color-text-muted); font-size: 12px; margin-top: 2px; }
+  .help-link mark { background: var(--fd-color-warning-soft, #FFF3C4); color: inherit; padding: 0 1px; border-radius: 2px; }
+  .academy { border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-lg); padding: 12px; }
+  .academy ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 2px; }
+  .academy li { display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; font-size: 14px; padding: 6px 4px; }
+  .academy li svg { width: 18px; height: 18px; } .academy li.done svg { color: var(--fd-color-success); } .academy li:not(.done) svg { color: var(--fd-color-text-subtle); }
+  .help-foot { border-top: 1px solid var(--fd-color-border); padding: 12px 16px; font-size: 13px; }
+  body:not([data-l26="aide-recherche"]) .help-results { display: none; } body[data-l26="aide-recherche"] .help-ctx { display: none !important; }
+  /* Modèles */
+  .tpl-modal { width: min(1040px, 100%); }
+  .tpl-wrap { display: grid; grid-template-columns: 180px minmax(0,1fr) 300px; gap: 20px; }
+  .tpl-cats { display: grid; gap: 2px; align-content: start; }
+  .tpl-cats button { text-align: left; border: 0; background: transparent; padding: 8px 10px; border-radius: var(--fd-radius-md); font: inherit; color: var(--fd-color-text); cursor: pointer; display: flex; justify-content: space-between; }
+  .tpl-cats button[aria-pressed="true"] { background: var(--fd-color-surface-selected); font-weight: 600; }
+  .tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
+  .tpl-card { text-align: left; border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-lg); background: var(--fd-color-surface); padding: 12px; cursor: pointer; display: grid; gap: 6px; font: inherit; color: var(--fd-color-text); }
+  .tpl-card[aria-checked="true"] { border: 2px solid var(--fd-color-primary); padding: 11px; background: var(--fd-color-surface-selected); }
+  .tpl-card svg { width: 20px; height: 20px; } .tpl-card b { font-size: 15px; } .tpl-card small { color: var(--fd-color-text-muted); font-size: 12px; }
+  .tpl-prev { border-left: 1px solid var(--fd-color-border); padding-left: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .tpl-prev ol { margin: 0; padding-left: 18px; font-size: 13px; display: grid; gap: 4px; } .tpl-prev ol li span { color: var(--fd-color-text-muted); }
+  .tpl-prev .chap { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--fd-color-text-muted); margin-top: 6px; }
+  @media (max-width: 1000px) { .tpl-wrap { grid-template-columns: 1fr; } .tpl-prev { border-left: 0; padding-left: 0; } }
+  .onb-card svg, .help-drawer svg, .tpl-modal svg { width: 18px; height: 18px; flex: none; }
+  .onb-head .fd-icon-chip, .onb-head > span:first-child { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--fd-color-surface-selected); color: var(--fd-color-primary); }
+  .mock-l26 { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #141311; }
+  .mock-l26 button { border: 0; background: transparent; color: #fff; font: 500 13px var(--fd-font-sans); padding: 6px 12px; border-radius: 999px; cursor: pointer; } .mock-l26 button[aria-pressed="true"] { background: #fff; color: #141311; }
+</style>
+</head>
+<body data-shell="app" data-page="demos" data-crumbs='<span aria-current="page">Démos</span>'>
+<main>
+  <div class="content">
+    <div class="banner-ob" role="region" aria-label="Premiers pas">
+      <div class="grow"><b>Premiers pas · 3 sur 5</b><p class="t-caption muted" style="margin-top:2px">Prochaine étape : partagez votre démo « Créer un rapport » pour recevoir vos premières vues.</p></div>
+      <div class="progress hide-sm"><span style="width:60%"></span></div>
+      <a class="btn btn-secondary btn-sm" href="partage.html">Partager</a>
+      <button class="btn btn-ghost btn-sm btn-icon" aria-label="Masquer les premiers pas"><i data-icon="x"></i></button>
+    </div>
+
+    <section class="card onb-card" aria-labelledby="onb-t">
+      <div class="onb-head"><span class="fd-icon-chip" aria-hidden="true"><i data-icon="sparkles"></i></span><div class="grow"><h2 id="onb-t" class="t-h3" style="margin:0">Prise en main de votre espace</h2><p class="t-caption muted" style="margin:2px 0 0">3 étapes sur 7. Elles se cochent seules quand vous les faites.</p></div>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="7" aria-valuenow="3" aria-valuetext="3 étapes sur 7" aria-label="Prise en main"><span style="width:43%"></span></div>
+        <button class="btn btn-ghost btn-sm btn-icon" aria-label="Réduire la prise en main" aria-expanded="true"><i data-icon="chevronUp"></i></button></div>
+      <ol class="onb-list">
+        <li class="done"><i data-icon="checkCircle"></i><span><b>Personnaliser l'espace</b><small>Logo, couleurs et style par défaut</small></span><span class="sr-only">Fait</span></li>
+        <li><i data-icon="circle"></i><span><b>Flouter les données sensibles</b><small>Vérifier le floutage automatique d'une capture</small></span><button class="btn btn-ghost btn-sm"><i data-icon="play"></i>Voir comment</button></li>
+        <li class="done"><i data-icon="checkCircle"></i><span><b>Installer l'extension</b><small>Pour capturer depuis le navigateur</small></span><span class="sr-only">Fait</span></li>
+        <li class="next"><i data-icon="circle"></i><span><b>Publier et partager une démo</b><small>Prochaine étape conseillée</small></span><a class="btn btn-primary btn-sm" href="partage.html">Partager</a></li>
+        <li class="done"><i data-icon="checkCircle"></i><span><b>Capturer une première démo</b><small>« Créer un rapport en 2 minutes »</small></span><span class="sr-only">Fait</span></li>
+        <li><i data-icon="circle"></i><span><b>Inviter un membre de l'équipe</b><small>Éditeur ou lecteur</small></span><button class="btn btn-ghost btn-sm">Inviter</button></li>
+        <li><i data-icon="circle"></i><span><b>Diffuser dans l'intranet ou la plateforme de formation</b><small>Lien, intégration ou paquet SCORM</small></span><button class="btn btn-ghost btn-sm">Diffuser</button></li>
+      </ol>
+      <div class="onb-foot"><i data-icon="info"></i><span class="grow">Visible par les propriétaires et administrateurs de l'espace. Chaque « Voir comment » lance une visite guidée dans l'app.</span><button class="btn btn-ghost btn-sm">Masquer la prise en main</button></div>
+    </section>
+
+    <div class="page-head">
+      <div><h1>Démos</h1><p class="muted" style="margin-top:4px">24 démos · 18 publiées</p></div>
+      <div class="row">
+        <button class="btn btn-secondary" data-open="m-import"><i data-icon="upload"></i>Importer</button>
+        <button class="btn btn-primary" data-open="m-new"><i data-icon="plus"></i>Nouvelle démo</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="input-affix" style="width:280px;max-width:100%"><i data-icon="search"></i><input class="input input-sm" type="search" placeholder="Rechercher une démo" aria-label="Rechercher une démo"></div>
+      <select class="select input-sm" style="width:auto" aria-label="Statut"><option>Tous les statuts</option><option>Publiées</option><option>Brouillons</option><option>Modifiées</option></select>
+      <select class="select input-sm" style="width:auto" aria-label="Créateur"><option>Tous les créateurs</option><option>Moi</option></select>
+      <select class="select input-sm" style="width:auto" aria-label="Trier"><option>Modifiées récemment</option><option>Créées récemment</option><option>Nom (A-Z)</option><option>Plus vues</option></select>
+      <span class="grow"></span>
+      <div class="segmented" role="radiogroup" aria-label="Affichage" data-seg id="viewseg"><button role="radio" aria-checked="true" data-value="grid" aria-label="Grille"><i data-icon="layers"></i></button><button role="radio" aria-checked="false" data-value="list" aria-label="Liste"><i data-icon="form"></i></button></div>
+    </div>
+
+    <div class="demo-grid" id="grid"></div>
+
+    <div class="card view-list" id="list" hidden>
+      <div class="table-wrap"><table class="table">
+        <caption class="sr-only">Liste des démos</caption>
+        <thead><tr><th scope="col"><button>Nom <i data-icon="chevronDown"></i></button></th><th>Statut</th><th>Dossier</th><th class="r">Vues (30 j)</th><th class="r">Complétion</th><th>Modifiée</th><th><span class="sr-only">Actions</span></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+    </div>
+
+    <h2 class="t-h3" style="margin:40px 0 12px">Exemple d'état vide (dossier sans démo)</h2>
+    <div class="card"><div class="empty">
+      <svg class="illu" viewBox="0 0 140 100" aria-hidden="true"><rect x="10" y="14" width="120" height="76" rx="10" fill="var(--fd-lagoon-50)" stroke="var(--fd-lagoon-200)"/><path d="M28 70c14 0 18-22 34-22s20-18 36-18" fill="none" stroke="var(--fd-lagoon-300)" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 7"/><circle cx="28" cy="70" r="6" fill="var(--fd-lagoon-300)"/><circle cx="62" cy="48" r="6" fill="var(--fd-lagoon-300)"/><circle cx="98" cy="30" r="9" fill="var(--fd-ember-400)"/><circle cx="98" cy="30" r="3.5" fill="#fff"/></svg>
+      <h3>Ce dossier est vide</h3><p class="muted">Glissez des démos ici depuis la liste, ou créez-en une nouvelle directement dans ce dossier.</p>
+      <button class="btn btn-primary" data-open="m-new"><i data-icon="plus"></i>Nouvelle démo</button>
+    </div></div>
+  </div>
+</main>
+
+<div class="menu" id="card-menu" role="menu" hidden>
+  <a role="menuitem" href="editeur.html"><i data-icon="edit"></i>Ouvrir dans l'éditeur</a>
+  <a role="menuitem" href="partage.html"><i data-icon="share"></i>Partager</a>
+  <button role="menuitem" data-toast="Lien copié"><i data-icon="link"></i>Copier le lien</button>
+  <button role="menuitem"><i data-icon="duplicate"></i>Dupliquer<span class="kbd">⌘D</span></button>
+  <button role="menuitem"><i data-icon="folder"></i>Déplacer vers…</button>
+  <hr>
+  <button role="menuitem" data-toast="Démo archivée · Annuler"><i data-icon="archive"></i>Archiver</button>
+  <button role="menuitem" class="danger" data-open="m-del"><i data-icon="trash"></i>Supprimer</button>
+</div>
+
+<div class="modal-backdrop" id="m-new" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-new-t">
+    <div class="modal-head"><h2 id="m-new-t">Nouvelle démo</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+        <button class="card card-pad col" style="text-align:left;cursor:pointer;border:2px solid var(--fd-color-primary);background:var(--fd-color-surface-selected)" data-toast="Ouverture de l'extension…"><i data-icon="chrome"></i><b>Capturer avec l'extension</b><span class="t-caption muted">Recommandé. Une étape par clic, avec la position du clic.</span></button>
+        <button class="card card-pad col" style="text-align:left;cursor:pointer" data-open="m-import"><i data-icon="image"></i><b>Importer des images</b><span class="t-caption muted">Partez de captures d'écran ou de maquettes existantes.</span></button>
+        <button class="card card-pad col" style="text-align:left;cursor:pointer" data-open="m-tpl"><i data-icon="template"></i><b>Partir d'un modèle</b><span class="t-caption muted">Une structure de formation prête, à compléter avec vos captures.</span></button>
+      </div>
+      <div class="field" style="margin-top:20px"><label for="nd-folder">Dossier</label><select id="nd-folder" class="select"><option>Site web</option><option>Sales — Outbound</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-import" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-import-t">
+    <div class="modal-head"><h2 id="m-import-t">Importer des captures</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body col" style="gap:12px">
+      <p class="muted">Téléversement de 12 images sur 18…</p>
+      <div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="Téléversement"><span style="width:66%"></span></div>
+      <div class="alert alert-warning"><i data-icon="alert"></i><span><b>2 fichiers ignorés</b> : « video.mov » n'est pas une image, « scan.tiff » n'est pas un format pris en charge.</span></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" aria-disabled="true"><span class="spinner"></span>Import en cours…</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-del" hidden>
+  <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="m-del-t" aria-describedby="m-del-d">
+    <div class="modal-head"><h2 id="m-del-t">Supprimer « Créer un rapport » ?</h2></div>
+    <div class="modal-body"><p id="m-del-d" class="muted">La démo, ses liens et ses statistiques seront supprimés définitivement. Les leads déjà collectés sont conservés. Pour la mettre de côté, archivez-la plutôt.</p></div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-danger" data-close data-toast="Démo supprimée">Supprimer la démo</button></div>
+  </div>
+</div>
+
+<script>
+const demos = [
+  ['Créer un rapport en 2 minutes','Publiée','success','Site web',1284,'72 %','il y a 2 h','dashboard'],
+  ['Onboarding — import de données','Modifiée','warning','Onboarding',402,'64 %','hier','list'],
+  ['Démo Acme × Globex (perso)','Publiée','success','Sales — Outbound',37,'91 %','il y a 3 j','modal'],
+  ['Tableau de bord temps réel','Brouillon','','Site web',0,'—','il y a 5 j','dashboard'],
+  ['Intégration HubSpot','Publiée','success','Site web',856,'58 %','12 nov.','list'],
+  ['Nouveautés de novembre','Publiée','success','Onboarding',219,'80 %','10 nov.','modal'],
+];
+document.addEventListener('fd:ready', () => {
+  const g = document.getElementById('grid'), r = document.getElementById('rows');
+  demos.forEach(([t,s,c,f,v,cp,m,fk],i) => {
+    g.insertAdjacentHTML('beforeend', `<article class="demo-card">
+      <div class="thumb"><div data-fake="${fk}" style="position:absolute;inset:0"></div><span class="hs" style="left:${40+i*7}%;top:${30+i*5}%"></span></div>
+      <span class="status badge ${c?'badge-'+c:''}"><span class="dot"></span>${s}</span>
+      <div class="body"><a class="title stretch" href="editeur.html">${t}</a><span class="t-caption subtle">${8+i} étapes · ${f} · ${m}</span>
+      <span class="t-caption muted row" style="gap:4px">${fdIcon('eye','width="14" height="14"')}<span class="num">${v.toLocaleString('fr-FR')}</span> vues</span></div>
+      <button class="btn btn-ghost btn-sm btn-icon more" data-menu="card-menu" aria-haspopup="menu" aria-label="Actions pour ${t}">${fdIcon('more')}</button></article>`);
+    r.insertAdjacentHTML('beforeend', `<tr><th scope="row" style="font-weight:600;text-align:left"><a href="editeur.html" style="color:var(--fd-color-text)">${t}</a></th>
+      <td><span class="badge ${c?'badge-'+c:''}">${s}</span></td><td class="muted">${f}</td><td class="r">${v.toLocaleString('fr-FR')}</td><td class="r">${cp}</td><td class="muted">${m}</td>
+      <td class="r"><button class="btn btn-ghost btn-sm btn-icon" data-menu="card-menu" aria-label="Actions pour ${t}">${fdIcon('more')}</button></td></tr>`);
+  });
+  // re-render fakes for injected cards
+  document.querySelectorAll('#grid [data-fake]').forEach(el => { el.innerHTML = document.querySelector('.fake') ? '' : ''; });
+  const s = document.createElement('script'); s.textContent='';
+  document.getElementById('viewseg').addEventListener('seg', e => { document.getElementById('grid').hidden = e.detail==='list'; document.getElementById('list').hidden = e.detail!=='list'; });
+  // menu positioning
+  document.addEventListener('click', e => { const b = e.target.closest('[data-menu="card-menu"]'); if (!b) return; const m = document.getElementById('card-menu'); const rc = b.getBoundingClientRect(); m.style.position='fixed'; m.style.top = Math.min(rc.bottom+4, innerHeight-330)+'px'; m.style.left = Math.max(8, rc.right-220)+'px'; }, true);
+  window.fdRenderFakes && fdRenderFakes();
+});
+</script>
+<aside class="help-drawer" aria-labelledby="help-t">
+  <header><i data-icon="help"></i><h2 id="help-t">Aide</h2><span class="grow"></span><button class="btn btn-ghost btn-sm btn-icon" aria-label="Fermer l'aide"><i data-icon="x"></i></button></header>
+  <div style="padding:0 16px 12px"><div class="input-affix"><i data-icon="search"></i><input class="input input-sm" type="search" aria-label="Rechercher dans l'aide" placeholder="Rechercher dans l'aide" id="help-q"></div></div>
+  <div class="help-body">
+    <div class="help-ctx" style="display:flex;flex-direction:column;gap:18px">
+      <section class="help-sec"><h3>Sur cette page · Démos</h3>
+        <a class="help-link" href="#"><i data-icon="bookOpen"></i><span>Créer une démo avec l'extension<small>Capturer, flouter, envoyer</small></span></a>
+        <a class="help-link" href="#"><i data-icon="bookOpen"></i><span>Ranger les démos : dossiers et étiquettes</span></a>
+        <a class="help-link" href="#"><i data-icon="bookOpen"></i><span>Partir d'un modèle de formation</span></a>
+        <button class="btn btn-secondary btn-sm" style="margin-top:6px"><i data-icon="play"></i>Visite guidée de cette page</button>
+      </section>
+      <section class="help-sec academy" aria-labelledby="ac-t"><div class="row" style="gap:8px"><i data-icon="graduation"></i><b id="ac-t" class="grow">Apprendre TutoClick</b><span class="t-caption muted">2 sur 6</span></div>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="2" aria-valuetext="2 modules sur 6" aria-label="Parcours Apprendre TutoClick" style="margin-top:8px"><span style="width:33%"></span></div>
+        <ol>
+          <li class="done"><i data-icon="checkCircle"></i><span>Capturer une démo</span><span class="t-caption muted">Revoir</span></li>
+          <li class="done"><i data-icon="checkCircle"></i><span>Modifier une étape</span><span class="t-caption muted">Revoir</span></li>
+          <li><i data-icon="circle"></i><span>Flouter les données</span><a href="#" class="t-caption">Commencer</a></li>
+          <li><i data-icon="circle"></i><span>Publier et partager</span><span class="t-caption muted">6 étapes</span></li>
+          <li><i data-icon="circle"></i><span>Diffuser (intranet, SCORM)</span><span class="t-caption muted">8 étapes</span></li>
+          <li><i data-icon="circle"></i><span>Lire les statistiques</span><span class="t-caption muted">5 étapes</span></li>
+        </ol>
+      </section>
+      <section class="help-sec"><h3>Raccourcis</h3><a class="help-link" href="#"><i data-icon="keyboard"></i><span>Tous les raccourcis clavier<small>Touche ? n'importe où dans l'app</small></span></a></section>
+    </div>
+    <section class="help-sec help-results" aria-live="polite"><h3>3 résultats pour « scorm »</h3>
+      <a class="help-link" href="#"><i data-icon="bookOpen"></i><span>Exporter un paquet <mark>SCORM</mark> pour une plateforme de formation<small>Diffusion · version 1.2 ou 2004, critère de réussite</small></span></a>
+      <a class="help-link" href="#"><i data-icon="bookOpen"></i><span>Mettre à jour un paquet <mark>SCORM</mark> déjà diffusé<small>Diffusion · générer la nouvelle version</small></span></a>
+      <a class="help-link" href="#"><i data-icon="graduation"></i><span>Module « Diffuser (intranet, <mark>SCORM</mark>) »<small>Apprendre TutoClick · 8 étapes</small></span></a>
+      <p class="t-caption muted" style="margin:6px 10px 0">Pas la bonne réponse ? Écrivez au support de votre DSI, en bas de ce panneau.</p>
+    </section>
+  </div>
+  <div class="help-foot"><b>Besoin d'aide ?</b> <a href="#">Contacter le support de la DSI</a><span class="t-caption muted" style="display:block;margin-top:2px">support@acme.example · réglé dans Paramètres &gt; Général</span></div>
+</aside>
+<div class="modal-backdrop" id="m-tpl" hidden>
+  <div class="modal tpl-modal" role="dialog" aria-modal="true" aria-labelledby="m-tpl-t">
+    <div class="modal-head"><h2 id="m-tpl-t">Partir d'un modèle</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="tpl-wrap">
+        <nav class="tpl-cats" aria-label="Catégories de modèles">
+          <button aria-pressed="true">Tous <span class="muted">7</span></button><button aria-pressed="false">Logiciel <span class="muted">2</span></button><button aria-pressed="false">Procédure <span class="muted">2</span></button><button aria-pressed="false">Réglementaire <span class="muted">1</span></button><button aria-pressed="false">Accueil <span class="muted">1</span></button>
+          <hr style="border:0;border-top:1px solid var(--fd-color-border);margin:6px 0"><button aria-pressed="false">Modèles de l'espace <span class="muted">1</span></button>
+        </nav>
+        <div class="tpl-grid" role="radiogroup" aria-label="Modèles">
+          <button class="tpl-card" role="radio" aria-checked="true"><i data-icon="monitor"></i><b>Prise en main d'un logiciel</b><small>3 chapitres · 9 étapes · quiz</small></button>
+          <button class="tpl-card" role="radio" aria-checked="false"><i data-icon="form"></i><b>Nouvelle procédure</b><small>2 chapitres · 6 étapes</small></button>
+          <button class="tpl-card" role="radio" aria-checked="false"><i data-icon="refresh"></i><b>Changement de version</b><small>1 chapitre · 5 étapes · Avant / Après</small></button>
+          <button class="tpl-card" role="radio" aria-checked="false"><i data-icon="shield"></i><b>Formation avec quiz noté</b><small>3 chapitres · 10 étapes · seuil 70 %</small></button>
+          <button class="tpl-card" role="radio" aria-checked="false"><i data-icon="users"></i><b>Accueil d'un nouvel agent</b><small>4 chapitres · 12 étapes · checklist</small></button>
+          <button class="tpl-card" role="radio" aria-checked="false"><i data-icon="target"></i><b>Démo d'une fonctionnalité</b><small>1 chapitre · 5 étapes · bouton d'action</small></button>
+          <button class="tpl-card" role="radio" aria-checked="false"><i data-icon="template"></i><b>Procédure DSI</b><small>Modèle de l'espace · 2 chapitres · 7 étapes</small></button>
+        </div>
+        <aside class="tpl-prev" aria-label="Aperçu du modèle">
+          <b style="font-size:16px">Prise en main d'un logiciel</b>
+          <p class="t-caption muted" style="margin:0">Pour présenter un outil à ses futurs utilisateurs : connexion, navigation, première tâche, puis un quiz court.</p>
+          <div class="chap">1 · Découvrir</div><ol><li>Se connecter <span>· bulle</span></li><li>Repérer le menu <span>· bulle</span></li><li>Ouvrir le tableau de bord <span>· bulle</span></li></ol>
+          <div class="chap">2 · Première tâche</div><ol start="4"><li>Créer un élément <span>· bulle</span></li><li>Remplir le formulaire <span>· saisie animée</span></li><li>Enregistrer <span>· bulle</span></li></ol>
+          <div class="chap">3 · Vérifier</div><ol start="7"><li>Quiz de 3 questions <span>· quiz</span></li><li>Récapitulatif <span>· pop-up</span></li><li>Écran de fin <span>· fin</span></li></ol>
+          <div class="alert" style="margin-top:4px"><i data-icon="info"></i><span class="t-caption">Le modèle apporte la structure et les textes. Les 7 étapes à capturer sont marquées « À capturer » : l'extension les propose dans l'ordre.</span></div>
+        </aside>
+      </div>
+    </div>
+    <div class="modal-foot"><span class="t-caption muted grow">Les textes utilisent vos variables ({{first_name}}) et votre style par défaut.</span><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close data-toast="Démo créée depuis le modèle"><i data-icon="template"></i>Utiliser ce modèle</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-save-tpl" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-save-tpl-t">
+    <div class="modal-head"><h2 id="m-save-tpl-t">Enregistrer comme modèle</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label for="st-n">Nom du modèle</label><input id="st-n" class="input" value="Procédure DSI" maxlength="60"></div>
+      <div class="field"><label for="st-d">Description <span class="opt">(facultatif)</span></label><textarea id="st-d" class="input" rows="2" maxlength="200">Structure commune des procédures publiées par la DSI.</textarea></div>
+      <div class="field"><label for="st-c">Catégorie</label><select id="st-c" class="select"><option>Procédure</option><option>Logiciel</option><option>Réglementaire</option><option>Accueil</option></select></div>
+      <fieldset class="field" style="border:0;padding:0;margin:0"><legend class="t-label" style="margin-bottom:8px">Captures</legend>
+        <label class="check" style="display:flex;gap:8px;align-items:flex-start"><input type="radio" name="st-k" checked><span><b>Sans les captures</b> (recommandé)<span class="help" style="display:block">Chaque étape devient « À capturer ». Aucune donnée de la démo d'origine n'est copiée.</span></span></label>
+        <label class="check" style="display:flex;gap:8px;align-items:flex-start;margin-top:8px"><input type="radio" name="st-k"><span><b>Avec les captures, comme exemple</b><span class="help" style="display:block">Les zones floutées restent floutées. À éviter si les captures montrent des données réelles.</span></span></label>
+      </fieldset>
+      <p class="help" style="margin-top:12px">Gardés : chapitres, textes des bulles, quiz, réglages et style. Visible par tous les membres de l'espace.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close data-toast="Modèle enregistré">Enregistrer le modèle</button></div>
+  </div>
+</div>
+<div class="mock-l26" role="group" aria-label="État de la maquette L26"><button type="button" data-g="checklist">Prise en main</button><button type="button" data-g="aide">Aide</button><button type="button" data-g="aide-recherche">Recherche</button><button type="button" data-g="modeles">Modèles</button><button type="button" data-g="modele-enregistrer">Enregistrer un modèle</button></div>
+<script>
+document.addEventListener('fd:ready', () => {
+  const go = (k) => {
+    document.body.dataset.l26 = k;
+    document.querySelectorAll('.mock-l26 button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.g === k)));
+    document.getElementById('m-tpl').hidden = k !== 'modeles';
+    document.getElementById('m-save-tpl').hidden = k !== 'modele-enregistrer';
+    const q = document.getElementById('help-q'); if (q) q.value = k === 'aide-recherche' ? 'scorm' : '';
+  };
+  document.addEventListener('click', (e) => { const b = e.target.closest('.mock-l26 [data-g]'); if (b) go(b.dataset.g); });
+  go(new URLSearchParams(location.search).get('etat') || 'checklist');
+});
+</script>
+</body>
+</html>
