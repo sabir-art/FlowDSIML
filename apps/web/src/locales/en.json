@@ -1705,17 +1705,19 @@
         "count_other": "{{count}} visitors",
         "place": "Country and device",
         "since": "Since",
-        "anon": "Visitor",
+        "anon": "Anonymous visitor",
         "unknownPlace": "Unknown country",
         "stepsSeen": "{{n}} of {{total}} steps seen",
         "stepN": "Step {{n}}",
-        "more_one": "1 more visitor.",
-        "more_other": "{{count}} more visitors.",
+        "more_one": "1 other anonymous visitor.",
+        "more_other": "{{count}} other anonymous visitors.",
         "privacy": "IP addresses are never stored; only the country is inferred at visit time.",
         "emptyTitle": "Nobody on the demo right now",
         "emptyBody": "Visitors show up here as soon as they open the demo, with the step they are on.",
         "noDemo": "No demo to follow yet.",
-        "announce": "{{live}} visitors right now, {{views}} views in 30 minutes"
+        "announce": "{{live}} visitors right now, {{views}} views in 30 minutes",
+        "learner": "Identified learner",
+        "learnerSub": "Learner"
       },
       "dev": {
         "desktop": "desktop",
@@ -1831,7 +1833,10 @@
         "v_os_linux": "Linux",
         "v_os_chromeos": "ChromeOS",
         "v_os_other": "Other",
-        "nameTaken": "A segment already has this name."
+        "nameTaken": "A segment already has this name.",
+        "soon_returning": "New or returning",
+        "soon_utm": "Campaign (UTM)",
+        "soon_city": "City"
       },
       "al": {
         "title": "Alerts",
@@ -1858,7 +1863,7 @@
         "w_structure_below_goal": "A structure is below the training goal",
         "segmentScope": "Segment “{{name}}”",
         "ch_app": "in the app",
-        "ch_webhook": "Webhook",
+        "ch_webhook": "webhook",
         "chJoin": " and ",
         "fq_immediate": "immediate",
         "fq_daily": "daily digest at 9 am",
@@ -1895,8 +1900,10 @@
         "updated": "Alert updated.",
         "create": "Create alert",
         "deleteTitle": "Delete this alert?",
-        "deleteBody": "You will no longer be notified for this trigger."
-      }
+        "deleteBody": "You will no longer be notified for this trigger.",
+        "chWebhookLabel": "Webhook"
+      },
+      "filtersNotApplied": "Filters do not apply to this tab yet."
     }
   },
   "leads": {

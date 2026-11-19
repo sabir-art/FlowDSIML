@@ -25,7 +25,9 @@ const live = (n) => ({
           device: 'desktop',
           country: 'FR',
           lastType: 'step_view',
-          identity: 'lea@acme.example',
+          identity: 'Léa Martin',
+          learner: true,
+          structure: 'Équipe Nord',
         },
         {
           key: 'k2',
@@ -65,6 +67,9 @@ const live = (n) => ({
   };
   const shot = async (name) => {
     if (!SHOTS) return;
+    // Captures sans toast
+    for (const x of await page.locator('.toast .toast-close').all()) await x.click().catch(() => {});
+    await page.waitForFunction(() => !document.querySelector('.toast')).catch(() => {});
     await page.waitForTimeout(250);
     await page.screenshot({ path: `${SHOTS}/${name}${sfx}.png` });
   };
@@ -150,13 +155,27 @@ const live = (n) => ({
   );
   ok((await page.locator('.kpis .kpi').count()) === 4, '4 KPI');
   ok((await page.locator('.l19-hero .value').textContent()) === '7', 'visiteurs en ce moment');
-  ok((await page.getByText('lea@acme.example').count()) === 1, 'identité renvoyée par la base (éditeur)');
+  ok((await page.getByText('Léa Martin').count()) === 1, 'identité renvoyée par la base (éditeur)');
   ok(
-    (await page.locator('tbody b').getByText('Visiteur', { exact: true }).count()) === 2,
-    'anonymes : « Visiteur »',
+    (await page.getByText('Apprenant · Équipe Nord').count()) === 1,
+    'apprenant : sous-ligne avec la structure',
+  );
+  ok(
+    (await page.locator('.avatar').getByText('LM', { exact: true }).count()) === 1,
+    'apprenant : deux initiales',
+  );
+  ok(
+    (await page.locator('tbody b').getByText('Visiteur anonyme', { exact: true }).count()) === 2,
+    'anonymes : « Visiteur anonyme »',
+  );
+  ok(
+    /^Démo CRM · actualisé toutes les 10 s$/.test(
+      (await page.locator('.l19-livehead p').textContent()).replace(/\s+/g, ' ').trim(),
+    ),
+    'en-tête : démo nommée, sans « · » orphelin',
   );
   ok((await page.getByRole('img', { name: '4 étapes vues sur 6' }).count()) === 1, 'mini-progression nommée');
-  ok((await page.getByText(/4 autres visiteurs/).count()) === 1, 'visiteurs restants');
+  ok((await page.getByText(/4 autres visiteurs anonymes/).count()) === 1, 'visiteurs restants');
   ok((await page.locator('table[aria-live="off"]').count()) === 1, 'tableau en aria-live off');
   const pause = page.getByRole('button', { name: 'Mettre en pause' });
   await pause.click();
@@ -169,7 +188,6 @@ const live = (n) => ({
     state.calls.some((c) => c.path.endsWith('/live_demo') && c.body.p_demo),
     'live_demo interrogée',
   );
-  await shot('l19-01-temps-reel');
 
   // ===== L19-02 : temps réel vide =====
   state.live = live(0);
@@ -180,7 +198,6 @@ const live = (n) => ({
     (await page.locator('.kpis .kpi .value').nth(2).textContent()) === '2',
     'vide : clics du jour conservés',
   );
-  await shot('l19-02-temps-reel-vide');
 
   // ===== L19-03 : sondages et tests =====
   await page.getByRole('tab', { name: 'Sondages et tests' }).click();
@@ -198,7 +215,6 @@ const live = (n) => ({
     (await page.getByText(`Complétion après le choix${N}: Conseiller`).count()) === 1,
     'menu de choix : complétion après le choix',
   );
-  await shot('l19-03-sondages-tests');
   await page.getByRole('button', { name: 'Voir les 31 réponses écrites' }).click();
   const drawer = page.getByRole('dialog', { name: 'Réponses écrites' });
   await drawer.waitFor();
@@ -221,6 +237,12 @@ const live = (n) => ({
   await page.getByLabel('Nom du segment').fill('Conseillers sur mobile');
   await page.getByRole('button', { name: 'Ajouter une condition' }).click();
   ok((await page.locator('fieldset.cond').count()) === 2, 'constructeur prérempli + une condition');
+  ok(
+    (await page.getByLabel('Critère de la condition 2').locator('option[disabled]').allTextContents()).some(
+      (x) => /Ville · Bientôt/.test(x),
+    ),
+    'critères à venir : affichés désactivés avec « Bientôt »',
+  );
   await page.getByLabel('Critère de la condition 2').selectOption('completed');
   await page.getByLabel('Valeur de la condition 2').selectOption('false');
   await page.getByText('111 visiteurs correspondent').waitFor({ timeout: 3000 });
@@ -228,7 +250,6 @@ const live = (n) => ({
   await page.getByRole('radio', { name: 'Au moins une (OU)' }).click();
   await page.getByText('800 visiteurs correspondent').waitFor({ timeout: 3000 });
   ok((await page.locator('.cond .cn').nth(1).textContent()) === 'ou', 'connecteur « ou »');
-  await shot('l19-04-segments');
   await page.getByRole('button', { name: 'Enregistrer le segment' }).click();
   await page.getByRole('button', { name: 'Conseillers sur mobile' }).first().waitFor();
   ok(state.tables.segments.length === 1 && state.tables.segments[0].match === 'any', 'segment enregistré');
@@ -293,7 +314,6 @@ const live = (n) => ({
   await dlg.getByLabel('Démo').selectOption(DEMO);
   await dlg.getByRole('checkbox', { name: /Webhook/ }).check();
   await dlg.getByRole('radio', { name: 'Résumé quotidien (9 h)' }).click();
-  await shot('l19-06-nouvelle-alerte');
   await dlg.getByLabel('Seuil (%)').fill('0');
   await dlg.getByRole('button', { name: 'Créer l’alerte' }).click();
   ok((await dlg.getByText('Indiquez un seuil entre 1 et 100.').count()) === 1, 'seuil hors bornes refusé');
@@ -315,7 +335,6 @@ const live = (n) => ({
     (await page.getByRole('tab', { name: /Alertes/ }).textContent()).includes('1'),
     'compteur des alertes actives',
   );
-  await shot('l19-05-alertes');
   // Modifier
   await page.getByRole('button', { name: 'Nouveau lead' }).click();
   await page.getByRole('dialog', { name: 'Modifier l’alerte' }).getByLabel('Quand').selectOption('cta');
@@ -326,14 +345,83 @@ const live = (n) => ({
   await page.getByText('Clic sur le bouton d’action', { exact: true }).waitFor();
   ok(state.tables.alerts[1].trigger === 'cta', 'alerte modifiée');
 
+  // ===== Captures du lot, même état de données (1 alerte active, segments enregistrés), sans toast =====
+  if (SHOTS) {
+    state.tables.segments.push(
+      {
+        ...state.tables.segments[0],
+        id: 'seg-desk',
+        name: 'Visiteurs sur ordinateur',
+        conditions: [{ field: 'device', op: 'is', value: 'desktop' }],
+        match: 'all',
+      },
+      {
+        ...state.tables.segments[0],
+        id: 'seg-leads',
+        name: 'Leads de la semaine',
+        conditions: [{ field: 'lead', op: 'is', value: true }],
+        match: 'all',
+      },
+    );
+    state.live = live(1);
+    await page.goto(`${APP}/#/analytics?tab=live`);
+    await page.getByRole('heading', { name: 'Visiteurs actifs' }).waitFor();
+    await shot('l19-01-temps-reel');
+    state.live = live(0);
+    await page.reload();
+    await page.getByRole('heading', { name: 'Personne sur la démo en ce moment' }).waitFor();
+    await shot('l19-02-temps-reel-vide');
+    await page.getByRole('tab', { name: 'Sondages et tests' }).click();
+    await page.getByLabel('Démo analysée').selectOption(DEMO);
+    await page.getByRole('heading', { name: 'Test A/B · étape 3' }).waitFor();
+    ok(
+      (await page.getByText('Les filtres ne s’appliquent pas encore à cet onglet.').count()) === 1,
+      'L19-03 : mention des filtres',
+    );
+    await shot('l19-03-sondages-tests');
+    await page.getByRole('tab', { name: 'Segments' }).click();
+    await page.getByRole('heading', { name: 'Nouveau segment' }).waitFor();
+    await page.getByRole('button', { name: 'Ajouter une condition' }).click();
+    await page.getByLabel('Critère de la condition 1').selectOption('device');
+    await page.getByLabel('Valeur de la condition 1').selectOption('mobile');
+    await page.waitForTimeout(600);
+    ok((await page.locator('.l19-saved li, .l19-saved tr').count()) >= 3, 'L19-04 : 3 segments enregistrés');
+    await shot('l19-04-segments');
+    await page.getByRole('tab', { name: /Alertes/ }).click();
+    await page.getByText('Clic sur le bouton d’action', { exact: true }).waitFor();
+    ok(
+      /dans l’app et webhook/.test(await page.locator('main').textContent()),
+      'L19-05 : « dans l’app et webhook » en minuscule',
+    );
+    await shot('l19-05-alertes');
+    await page.getByRole('button', { name: 'Nouvelle alerte' }).click();
+    const nd = page.getByRole('dialog', { name: 'Nouvelle alerte' });
+    await nd.getByLabel('Quand').selectOption('completion_below');
+    await nd.getByLabel('Démo').selectOption(DEMO);
+    await nd.getByRole('checkbox', { name: /Webhook/ }).check();
+    await nd.getByRole('radio', { name: 'Résumé quotidien (9 h)' }).click();
+    await shot('l19-06-nouvelle-alerte');
+    await nd.getByRole('button', { name: 'Annuler' }).click();
+  }
+
   // Lecteur : lecture seule
   const vs = seed();
   vs.tables.members[0].role = 'viewer';
   vs.role = 'viewer';
   vs.tables.alerts = state.tables.alerts;
   vs.surveys = state.surveys;
+  // L19-01 : sans droit au suivi nominatif, la base renvoie learner sans identité ni structure
+  vs.live = live(1);
+  vs.live.visitors[0] = { ...vs.live.visitors[0], identity: null, structure: null };
   const p2 = await ctx.newPage();
   await install(p2, vs);
+  await p2.goto(`${APP}/#/analytics?tab=live`);
+  await p2.getByRole('heading', { name: 'Visiteurs actifs' }).waitFor();
+  ok(
+    (await p2.locator('tbody b').getByText('Apprenant identifié', { exact: true }).count()) === 1 &&
+      (await p2.getByText('Léa Martin').count()) === 0,
+    'lecteur : « Apprenant identifié », sans nom',
+  );
   await p2.goto(`${APP}/#/analytics?tab=alerts`);
   await p2.getByText(`Taux de complétion sous 50${N}%`).waitFor();
   ok((await p2.getByRole('button', { name: 'Nouvelle alerte' }).count()) === 0, 'lecteur : pas de création');

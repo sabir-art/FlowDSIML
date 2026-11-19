@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Calendar, Download, TriangleAlert } from 'lucide-react';
+import { ArrowDown, ArrowUp, Calendar, Download, Info, TriangleAlert } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -312,6 +312,13 @@ export function AnalyticsPage() {
             selectTab('segments');
           }}
         />
+      )}
+      {/* L19-03 / L19-04 : ces onglets n'appliquent pas encore les filtres du haut : on le dit */}
+      {(tab === 'tests' || tab === 'segments') && (
+        <p className="help an-filter-note" role="note">
+          <Info size={14} aria-hidden="true" />
+          {t('analytics.adv.filtersNotApplied')}
+        </p>
       )}
       {tab === 'overview' && (
         <section role="tabpanel" id="an-panel-overview" aria-labelledby="an-tab-overview">

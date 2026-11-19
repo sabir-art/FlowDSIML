@@ -16,6 +16,10 @@ interface LiveVisitor {
   country: string | null;
   lastType: string;
   identity: string | null;
+  /** L19-01 : visiteur rattaché à un apprenant (même sans droit au suivi nominatif). */
+  learner?: boolean;
+  /** L19-01 : structure de l'apprenant (rôles avec suivi nominatif). */
+  structure?: string | null;
 }
 interface Live {
   kpis: { live: number; views30: number; ctaToday: number; leadsToday: number };
@@ -108,10 +112,9 @@ export function LiveTab({
   return (
     <div className="l19">
       <div className="row between wrap l19-livehead">
-        <p className="muted">
-          {demo ? (
-            <b>{title}</b>
-          ) : (
+        {/* L19-01 / 02 : la démo est toujours nommée en tête de ligne (« Démo CRM · actualisé… ») */}
+        <div className="l19-livehead-l">
+          {!demo && (
             <select
               className="select input-sm"
               aria-label={t('analytics.adv.live.demo')}
@@ -125,8 +128,10 @@ export function LiveTab({
               ))}
             </select>
           )}
-          <span>· {t('analytics.adv.live.refresh')}</span>
-        </p>
+          <p className="muted">
+            <b>{title}</b> · {t('analytics.adv.live.refresh')}
+          </p>
+        </div>
         <button
           type="button"
           className="btn btn-secondary btn-sm"
@@ -187,19 +192,28 @@ export function LiveTab({
               <tbody>
                 {data.visitors.map((v) => {
                   const seen = v.stepIndex === null ? 0 : v.stepIndex + 1;
-                  const label = v.identity ?? t('analytics.adv.live.anon');
-                  const avatar = v.identity ? initials(v.identity) : `V${++anon}`;
+                  // L19-01 : apprenant identifié (nom si droit au suivi nominatif), sinon visiteur anonyme
+                  const label =
+                    v.identity ??
+                    (v.learner ? t('analytics.adv.live.learner') : t('analytics.adv.live.anon'));
+                  const avatar = v.identity ? initials(v.identity) : v.learner ? 'AI' : `V${++anon}`;
+                  const sub = v.learner
+                    ? [t('analytics.adv.live.learnerSub'), v.structure].filter(Boolean).join(' · ')
+                    : null;
                   return (
                     <tr key={v.key}>
                       <td>
                         <div className="row">
                           <span
-                            className={`avatar avatar-sm${v.identity ? '' : ' an-anon'}`}
+                            className={`avatar avatar-sm${v.identity || v.learner ? '' : ' an-anon'}`}
                             aria-hidden="true"
                           >
                             {avatar}
                           </span>
-                          <b>{label}</b>
+                          <span className="l19-who">
+                            <b>{label}</b>
+                            {sub && <span className="t-caption muted">{sub}</span>}
+                          </span>
                         </div>
                       </td>
                       <td>

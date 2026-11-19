@@ -1705,17 +1705,19 @@
         "count_other": "{{count}} visiteurs",
         "place": "Pays et appareil",
         "since": "Depuis",
-        "anon": "Visiteur",
+        "anon": "Visiteur anonyme",
         "unknownPlace": "Pays inconnu",
         "stepsSeen": "{{n}} étapes vues sur {{total}}",
         "stepN": "Étape {{n}}",
-        "more_one": "1 autre visiteur.",
-        "more_other": "{{count}} autres visiteurs.",
+        "more_one": "1 autre visiteur anonyme.",
+        "more_other": "{{count}} autres visiteurs anonymes.",
         "privacy": "L’adresse IP n’est jamais conservée ; seul le pays est déduit au moment de la visite.",
         "emptyTitle": "Personne sur la démo en ce moment",
         "emptyBody": "Les visiteurs apparaissent ici dès qu’ils ouvrent la démo, avec l’étape où ils en sont.",
         "noDemo": "Aucune démo à suivre pour l’instant.",
-        "announce": "{{live}} visiteurs en ce moment, {{views}} vues en 30 minutes"
+        "announce": "{{live}} visiteurs en ce moment, {{views}} vues en 30 minutes",
+        "learner": "Apprenant identifié",
+        "learnerSub": "Apprenant"
       },
       "dev": {
         "desktop": "ordinateur",
@@ -1831,7 +1833,10 @@
         "v_os_linux": "Linux",
         "v_os_chromeos": "ChromeOS",
         "v_os_other": "Autre",
-        "nameTaken": "Un segment porte déjà ce nom."
+        "nameTaken": "Un segment porte déjà ce nom.",
+        "soon_returning": "Nouveau ou récurrent",
+        "soon_utm": "Campagne (UTM)",
+        "soon_city": "Ville"
       },
       "al": {
         "title": "Alertes",
@@ -1858,7 +1863,7 @@
         "w_structure_below_goal": "Une structure est sous l’objectif de formation",
         "segmentScope": "Segment « {{name}} »",
         "ch_app": "dans l’app",
-        "ch_webhook": "Webhook",
+        "ch_webhook": "webhook",
         "chJoin": " et ",
         "fq_immediate": "immédiat",
         "fq_daily": "résumé quotidien à 9 h",
@@ -1895,8 +1900,10 @@
         "updated": "Alerte modifiée.",
         "create": "Créer l’alerte",
         "deleteTitle": "Supprimer l’alerte ?",
-        "deleteBody": "Vous ne serez plus prévenu pour ce déclencheur."
-      }
+        "deleteBody": "Vous ne serez plus prévenu pour ce déclencheur.",
+        "chWebhookLabel": "Webhook"
+      },
+      "filtersNotApplied": "Les filtres ne s’appliquent pas encore à cet onglet."
     }
   },
   "leads": {

@@ -26,6 +26,21 @@
 .mk .l19-livehead {
   margin-bottom: 12px;
   gap: 8px;
+  /* L19-01 : « Mettre en pause » aligné sur la ligne de la démo */
+  align-items: center;
+}
+.mk .l19-livehead-l select {
+  width: auto;
+}
+.mk .l19-livehead-l {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.mk .l19-who {
+  display: grid;
+  line-height: 1.3;
 }
 .mk .l19-livehead p {
   margin: 0;
@@ -466,4 +481,16 @@ dialog.l19-drawer {
   .mk .l19-2col {
     grid-template-columns: 1fr;
   }
+}
+
+/* L19-04 : compteur « n visiteurs correspondent » lisible en sombre (4,5:1 au moins) */
+:root[data-theme='dark'] .mk .badge.badge-primary.seg-count {
+  background: var(--fd-color-surface-selected);
+  color: var(--fd-color-text);
+}
+.mk .an-filter-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
 }

@@ -189,7 +189,7 @@ export function SegmentsTab({
             <Plus aria-hidden="true" />
             {t('analytics.adv.seg.addCondition')}
           </button>
-          <span className="badge badge-primary" aria-live="polite">
+          <span className="badge badge-primary seg-count" aria-live="polite">
             {count === undefined
               ? '…'
               : count === null

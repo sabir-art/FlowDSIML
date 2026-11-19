@@ -417,7 +417,7 @@ function AlertDialog({
                   checked={channels.includes('webhook') && !webhookOff}
                   onChange={(e) => toggleCh('webhook', e.target.checked)}
                 />
-                {t('analytics.adv.al.ch_webhook')}
+                {t('analytics.adv.al.chWebhookLabel')}
                 {hook && <span className="t-caption muted"> · {hook}</span>}
               </label>
               {webhookOff ? (

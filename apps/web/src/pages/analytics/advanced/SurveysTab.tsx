@@ -134,7 +134,8 @@ export function SurveysTab({
           q.type === 'nps' ? (
             <NpsCard key={q.id} q={q} />
           ) : q.type === 'text' ? (
-            <div key={q.id} className="card chart-card">
+            // L19-03 : réponse écrite en pleine largeur (pas de vide à droite)
+            <div key={q.id} className="card chart-card l19-wide">
               <h2 className="t-h3">{q.prompt || t('analytics.adv.tests.textQuestion')}</h2>
               <p className="t-caption muted">{t('analytics.adv.tests.textCount', { count: q.responses })}</p>
               {canEdit && q.responses > 0 ? (

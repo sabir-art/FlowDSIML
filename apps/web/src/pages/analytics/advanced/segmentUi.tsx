@@ -75,11 +75,23 @@ function FieldSelect({
               {t(`analytics.adv.seg.f_${f}`)}
             </option>
           ))}
+          {/* L19-04 : critères à venir, visibles mais désactivés (jamais retirés) */}
+          {(SOON[g] ?? []).map((k) => (
+            <option key={k} value="" disabled>
+              {t(`analytics.adv.seg.soon_${k}`)} · {t('shell.soon')}
+            </option>
+          ))}
         </optgroup>
       ))}
     </select>
   );
 }
+
+/** Critères annoncés par la spec, pas encore calculés : affichés désactivés avec « Bientôt ». */
+const SOON: Partial<Record<string, string[]>> = {
+  visit: ['returning', 'utm'],
+  device: ['city'],
+};
 
 function ValueInput({
   c,
