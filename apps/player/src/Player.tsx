@@ -60,6 +60,7 @@ import { Checklist } from './Checklist';
 import { BeforeAfterStep } from './BeforeAfter';
 import { VideoStep } from './VideoStep';
 import { HtmlStep } from './HtmlStep';
+import { InfoDialog } from './InfoDialog';
 import { GlossaryDrawer, GlossaryTip } from './Glossary';
 import { Quiz } from './Quiz';
 import { submitQuizAttempt } from './api';
@@ -101,6 +102,8 @@ interface Props {
   scoreQuiz?: (answers: Record<string, string[]>, attemptsUsed: number) => Promise<QuizResult>;
   /** L16 : langue de l'interface imposée (?lang=fr|en, widget, paquet). */
   uiLocale?: 'fr' | 'en';
+  /** L26-08 : bouton « Informations » (mesure des visites, refus) quand la mesure est active. */
+  measureInfo?: boolean;
   onLead: (
     form: LeadFormT,
     data: { email: string; fields: Record<string, string>; consent: boolean },
@@ -150,6 +153,7 @@ export function Player({
   present,
   scoreQuiz,
   uiLocale,
+  measureInfo = false,
 }: Props) {
   // L18 : test A/B. Variante tirée une fois par visiteur (jamais en aperçu : variante A), bulle
   // testée remplacée pour B, et chaque événement marqué de la variante.
@@ -264,6 +268,7 @@ export function Player({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needles, values, defaults]);
   const [glossOpen, setGlossOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const theme = m.theme;
   const gateForm =
     step.gateFormId && !gateDone.has(step.gateFormId)
@@ -662,6 +667,17 @@ export function Player({
               <span class={compact ? 'sr-only' : undefined}>{t.glossary}</span>
             </button>
           )}
+          {measureInfo && (
+            <button
+              class="p-btn p-btn-ghost p-btn-sm p-info-btn"
+              aria-haspopup="dialog"
+              aria-label={t.infoBtn}
+              title={t.infoBtn}
+              onClick={() => setInfoOpen(true)}
+            >
+              <Info {...ICON} size={16} />
+            </button>
+          )}
           {m.cta && (
             <button
               class="p-btn p-btn-primary p-btn-sm p-top-cta"
@@ -1005,6 +1021,7 @@ export function Player({
 
       {needles.length > 0 && <GlossaryTip root={rootRef} terms={glossary} t={t} />}
       {glossOpen && <GlossaryDrawer terms={presentTerms} t={t} onClose={() => setGlossOpen(false)} />}
+      {infoOpen && <InfoDialog t={t} privacyUrl={m.privacyUrl} onClose={() => setInfoOpen(false)} />}
 
       {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
           navigation sont retirées (rien ne permet de le contourner). */}

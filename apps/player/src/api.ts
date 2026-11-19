@@ -1,6 +1,7 @@
 import { parseManifest, type EventType, type Manifest } from '@flowdsiml/manifest';
 import { CENTER_URL, OPEN_URL, publishedBase, SUPABASE_ANON_KEY, SUPABASE_URL, TRACK_URL } from './config';
 import { resolveAssets, randomId } from './logic';
+import { visitorIdFor } from './visitor';
 
 const rpcHeaders = () => ({
   'content-type': 'application/json',
@@ -39,6 +40,8 @@ export type GateInfo = {
   retryIn?: number;
   grant?: string;
   manifest?: Manifest;
+  /** L26-08 : mesure des visites de l'espace (false : aucun identifiant créé). */
+  visitMeasure?: boolean;
 };
 
 const grantKey = (demoId: string) => `fd.grant.${demoId}`;
@@ -209,7 +212,8 @@ export class Tracker {
   private baseProps: Record<string, string> = {};
   /** L19b : canal de diffusion (page publique) ; la base n'accepte que 'page'. */
   channel: 'page' | null = null;
-  readonly visitorId = storageGet(globalThis.localStorage, 'fd.vid');
+  /** L26 : identifiant propre à l'espace, 13 mois au plus ; de session si la mesure est refusée. */
+  readonly visitorId: string;
   readonly sessionId = storageGet(globalThis.sessionStorage, 'fd.sid');
 
   constructor(
@@ -217,7 +221,9 @@ export class Tracker {
     private readonly versionId: string,
     readonly linkToken: string | null,
     private readonly enabled: boolean,
+    visit: { workspaceId: string; measure: boolean } = { workspaceId: '', measure: true },
   ) {
+    this.visitorId = visitorIdFor(visit.workspaceId, visit.measure);
     addEventListener('pagehide', () => this.flush(true));
     addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && this.flush(true));
   }
@@ -356,7 +362,8 @@ export async function openCenter(
       password: password || undefined,
       grant: sessionGet(centerGrantKey(slug)) || undefined,
       linkToken: linkToken || undefined,
-      visitorId: storageGet(globalThis.localStorage, 'fd.vid'),
+      // L26 : centre d'un seul espace ; identifiant propre au centre (de session si refus)
+      visitorId: visitorIdFor(`c.${slug}`),
     }),
   }).catch(() => null);
   if (!res || (!res.ok && res.status !== 429)) return { status: 'error' };

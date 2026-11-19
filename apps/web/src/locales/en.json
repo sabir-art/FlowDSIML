@@ -2080,7 +2080,8 @@
         "nameTaken": "A segment already has this name.",
         "soon_returning": "New or returning",
         "soon_utm": "Campaign (UTM)",
-        "soon_city": "City"
+        "soon_city": "City",
+        "f_returning": "Returning visitor"
       },
       "al": {
         "title": "Alerts",
@@ -2148,6 +2149,38 @@
         "chWebhookLabel": "Webhook"
       },
       "filtersNotApplied": "Filters do not apply to this tab yet."
+    },
+    "ret": {
+      "kpi": "Returning visitors",
+      "kpiSub": "{{n}} of {{total}} · came back at least once",
+      "off": "Measurement off",
+      "offBody": "Visit measurement is off: no identifier is created and existing identifiers are ignored.",
+      "title": "New and returning",
+      "how": "How it is measured",
+      "definition": "Returning: same browser back after more than {{gap}}, or an identified learner who came before.",
+      "gap30": "30 minutes",
+      "gap24h": "24 hours",
+      "gap30Default": "30 minutes (default)",
+      "new": "New",
+      "ret": "Returning",
+      "summary": "New: {{fresh}}, {{pNew}}%. Returning: {{ret}}, {{pRet}}%.",
+      "sentence": "A returning visitor comes back {{avg}} times on average over the period.",
+      "sentenceTop": "Most revisited demos: {{list}}.",
+      "topItem": "“{{title}}” ({{pct}}% returning)",
+      "badgeNew": "New",
+      "badgeRet": "Returning · visit no. {{n}}",
+      "measure": "Visit measurement",
+      "measureTitle": "Visit measurement",
+      "switch": "Recognise returning visitors",
+      "switchHelp": "A random identifier, specific to your workspace, is kept in the visitor's browser for 13 months at most. It contains no personal data and is never shared with another site.",
+      "gapLabel": "Time between two visits",
+      "gapHelp": "Below this, it is the same visit.",
+      "cnil": "Audience measurement only, without third-party cookies or cross-referencing: designed for the CNIL consent exemption. To be validated by your DPO.",
+      "playerNote": "The player shows “Do not measure my visits” in its information and respects this choice, like the browser's Global Privacy Control signal. When embedded on another site, the browser partitions storage: the same visitor is counted once per site.",
+      "offNote": "Off: no identifier is created any more, existing identifiers are ignored, and “Returning visitors” shows “Measurement off”.",
+      "adminOnly": "Reserved for workspace owners and admins.",
+      "saved": "Visit measurement saved.",
+      "saveError": "Saving failed. Try again."
     }
   },
   "leads": {
@@ -3529,12 +3562,18 @@
         "Mandatory SSO sign-in"
       ],
       "field": "Identity provider metadata URL",
-      "why": "Requires a SAML-compatible hosting plan. Meanwhile: email invitations and allowed domains."
+      "why": "Requires a SAML-compatible hosting plan. Meanwhile: invitation links and allowed domains."
     },
     "useWebhooks": "Use webhooks",
     "inviteMembers": "Invite members",
     "aiEntry": "AI assistance",
     "security": "Security",
     "securitySub": "Sign-in and access to the workspace."
+  },
+  "privacy": {
+    "title": "Privacy",
+    "sub": "What the workspace measures about your demo visitors.",
+    "measureOn": "On: returning visitors are recognised, new visit after {{gap}}.",
+    "edit": "Edit"
   }
 }

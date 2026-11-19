@@ -40,6 +40,8 @@ function seed() {
     plan_code: 'pro',
     logo_path: null,
     settings: {},
+    visit_measure: true,
+    visit_gap_minutes: 30,
     created_by: user.id,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
@@ -977,6 +979,36 @@ async function install(page, state = seed()) {
           });
           return json(route, 200, null);
         }
+        // ===== L26-06 à 08 : visiteurs récurrents =====
+        case 'workspace_returning': {
+          const w = t.workspaces.find((x) => x.id === a.p_workspace) || t.workspaces[0];
+          if (w.visit_measure === false)
+            return json(route, 200, { enabled: false, gapMinutes: w.visit_gap_minutes ?? 30 });
+          return json(
+            route,
+            200,
+            state.returning || {
+              enabled: true,
+              gapMinutes: w.visit_gap_minutes ?? 30,
+              total: 0,
+              visitors: 0,
+              avgVisits: null,
+              topDemos: [],
+            },
+          );
+        }
+        case 'session_visits': {
+          const w = t.workspaces.find((x) => x.id === a.p_workspace) || t.workspaces[0];
+          if (w.visit_measure === false) return json(route, 200, {});
+          // Sessions fictives : une sur deux est une visite répétée (n° 2 à 4)
+          return json(
+            route,
+            200,
+            Object.fromEntries((a.p_sessions || []).map((s, i) => [s, i % 2 ? 2 + (i % 3) : 1])),
+          );
+        }
+        case 'live_visits':
+          return json(route, 200, state.liveVisits || {});
         // ===== L19 : analytics avancées =====
         case 'live_demo':
           return json(

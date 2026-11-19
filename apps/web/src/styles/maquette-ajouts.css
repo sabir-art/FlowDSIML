@@ -3008,6 +3008,13 @@
 .mk .soon-tabs {
   max-width: 640px;
   margin-bottom: var(--fd-space-5);
+  /* Retour Lead UX VB-02 : le contour de focus n'est plus coupé par le défilement de la barre */
+  padding: 4px 4px 0;
+}
+.mk .soon-tabs [role='tab']:focus-visible {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: -2px;
+  border-radius: 6px;
 }
 .mk .soon-alert {
   margin-bottom: var(--fd-space-4);
@@ -3091,6 +3098,17 @@
 .mk .soon-field {
   margin: 0;
 }
+/* VB-03 : champ désactivé visible comme tel */
+.mk .soon-field .input:disabled {
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-subtle);
+  border-style: dashed;
+  cursor: not-allowed;
+  opacity: 1;
+}
+.mk .soon-field label {
+  color: var(--fd-color-text-muted);
+}
 .mk .soon-why {
   margin: 0;
   padding: 12px 14px;
@@ -3104,4 +3122,64 @@
 }
 .mk .l23-soon-more {
   margin: 12px 0 0;
+}
+
+/* L26-06 à 08 : visiteurs récurrents */
+.mk .an-ret {
+  display: block;
+  margin-top: var(--fd-space-4);
+}
+.mk .an-ret .an-sources {
+  align-items: stretch;
+  max-width: 640px;
+}
+.mk .an-ret .an-sources > div {
+  width: 100%;
+}
+/* L26-06 : six indicateurs sur une ligne en grand écran */
+.mk.an .kpis {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.mk .an-ret-def {
+  margin: 4px 0 12px;
+}
+.mk .an-ret-sentence {
+  margin: 12px 0 0;
+}
+.mk .an-progress-ret > span {
+  background: var(--fd-color-accent, var(--fd-color-primary));
+}
+.mk .an-visit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  width: fit-content;
+}
+.mk .an-visit svg {
+  width: 12px;
+  height: 12px;
+}
+.mk .an-measure {
+  max-width: 560px;
+}
+.mk .an-measure .modal-body {
+  display: grid;
+  gap: 14px;
+}
+.mk .an-measure-gap {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.mk .an-measure-gap .radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mk .l19-who {
+  display: flex;
+  flex-direction: column;
 }

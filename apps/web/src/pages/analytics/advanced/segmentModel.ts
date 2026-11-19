@@ -13,6 +13,7 @@ export type Field =
   | 'completed'
   | 'lead'
   | 'cta'
+  | 'returning'
   | 'steps'
   | 'referrer';
 export type Op = 'is' | 'is_not' | 'gte' | 'lte' | 'contains' | 'not_contains';
@@ -38,6 +39,8 @@ export const FIELDS: Record<
 > = {
   source: { group: 'visit', kind: 'list', values: ['direct', 'embed', 'link'] },
   referrer: { group: 'visit', kind: 'text' },
+  // L26-07 : nouveau ou récurrent (« Oui » : visiteur revenu au moins une fois)
+  returning: { group: 'visit', kind: 'bool' },
   device: { group: 'device', kind: 'list', values: ['desktop', 'mobile', 'tablet'] },
   browser: {
     group: 'device',

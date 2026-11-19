@@ -74,6 +74,16 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.keyboard.press('ArrowRight');
   await page.waitForSelector('#soon-tab-crm[aria-selected="true"]', { timeout: 3000 }).catch(() => {});
   ok(
+    await page.evaluate(() => {
+      const el = document.getElementById('soon-tab-crm');
+      const bar = el.parentElement.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      return el.matches(':focus-visible') && r.top - bar.top >= 2 && r.left - bar.left >= 2;
+    }),
+    'onglet actif : contour de focus entier (non coupé)',
+  );
+  if (SHOTS) await page.locator('.soon-tabs').screenshot({ path: `${SHOTS}/vb-02-focus${sfx}.png` });
+  ok(
     (await page.getByRole('tab', { name: 'CRM et e-mailing' }).getAttribute('aria-selected')) === 'true',
     'onglets au clavier (→)',
   );
@@ -116,8 +126,17 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'champ des métadonnées désactivé',
   );
   ok(
-    /invitation par e-mail et domaines autorisés/.test(await page.locator('.soon-why').innerText()),
-    'encadré « En attendant : invitation par e-mail et domaines autorisés »',
+    await page
+      .getByLabel('URL des métadonnées du fournisseur')
+      .evaluate(
+        (el) =>
+          getComputedStyle(el).borderStyle === 'dashed' && getComputedStyle(el).cursor === 'not-allowed',
+      ),
+    'champ des métadonnées : aspect désactivé',
+  );
+  ok(
+    /lien d’invitation et domaines autorisés/.test(await page.locator('.soon-why').innerText()),
+    'encadré « En attendant : lien d’invitation et domaines autorisés »',
   );
   ok(
     (await page.locator('.soon-why').getByRole('link', { name: 'Inviter des membres' }).count()) === 1,
@@ -161,6 +180,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     !/\bV2\b/.test(await page.locator('.sp-panel, .hs-panel, aside').last().innerText()),
     'panneau : jamais « V2 »',
   );
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/vb-01-bulle${sfx}.png` });
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   ok(

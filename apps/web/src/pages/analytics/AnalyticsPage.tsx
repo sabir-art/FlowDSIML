@@ -1,8 +1,9 @@
-import { ArrowDown, ArrowUp, Calendar, Download, Info, TriangleAlert } from 'lucide-react';
+import { ArrowDown, ArrowUp, Calendar, Download, Info, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { completionRate, computeFunnel, toCsv } from '@flowdsiml/core';
+import { MeasureDialog, ReturningCard, ReturningKpi, VisitBadge, type Returning } from './returning';
 import { supabase } from '../../lib/supabase';
 import { downloadText } from '../../lib/download';
 import { formatDate, formatNumber, formatRelativeShort } from '../../lib/format';
@@ -124,6 +125,10 @@ export function AnalyticsPage() {
   const [prev, setPrev] = useState<WsAnalytics | null>(null);
   const [loadedAt, setLoadedAt] = useState<string>('');
   const [leadCount, setLeadCount] = useState<number | null>(null);
+  // L26-06 : visiteurs récurrents ; L26-08 : modale « Mesure des visites »
+  const [ret, setRet] = useState<Returning | null>(null);
+  const [measureOpen, setMeasureOpen] = useState(false);
+  const [measureTick, setMeasureTick] = useState(0);
 
   useEffect(() => {
     void supabase
@@ -150,6 +155,10 @@ export function AnalyticsPage() {
       p_source: source || null,
       p_segment: pSegment as never,
     };
+    setRet(null);
+    void supabase
+      .rpc('workspace_returning', { ...args, p_from: iso(days), p_to: new Date(now).toISOString() })
+      .then(({ data: r }) => setRet((r as unknown as Returning) ?? null));
     void Promise.all([
       supabase.rpc('workspace_analytics', { ...args, p_from: iso(days), p_to: new Date(now).toISOString() }),
       supabase.rpc('workspace_analytics', { ...args, p_from: iso(2 * days), p_to: iso(days) }),
@@ -159,7 +168,7 @@ export function AnalyticsPage() {
       setLoadedAt(new Date().toISOString());
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ws.id, days, demo, source, segKey]);
+  }, [ws.id, days, demo, source, segKey, measureTick]);
 
   if (!data) return <Loading />;
   const title = (id: string) => demos.find((d) => d.id === id)?.title ?? '—';
@@ -260,6 +269,10 @@ export function AnalyticsPage() {
               <span className="badge an-soon">{t('shell.soon')}</span>
             </button>
           </div>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setMeasureOpen(true)}>
+            <ShieldCheck aria-hidden="true" />
+            {t('analytics.ret.measure')}
+          </button>
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => void exportCsv()}>
             <Download aria-hidden="true" />
             {t('analytics.export')}
@@ -330,8 +343,13 @@ export function AnalyticsPage() {
             demo={demo}
             demos={demos}
             title={title}
+            ret={ret}
+            onHow={() => setMeasureOpen(true)}
           />
         </section>
+      )}
+      {measureOpen && (
+        <MeasureDialog onClose={() => setMeasureOpen(false)} onSaved={() => setMeasureTick((n) => n + 1)} />
       )}
       {tab === 'sessions' && (
         <section role="tabpanel" id="an-panel-sessions" aria-labelledby="an-tab-sessions">
@@ -433,7 +451,11 @@ function Overview({
   demo,
   demos,
   title,
+  ret,
+  onHow,
 }: {
+  ret: Returning | null;
+  onHow: () => void;
   wsId: string;
   data: WsAnalytics;
   prev: WsAnalytics | null;
@@ -526,6 +548,7 @@ function Overview({
             <Delta value={pctChange(data.visitors, prev?.visitors)} unit={pctUnit} label={vs} />
           </span>
         </div>
+        <ReturningKpi ret={ret} />
         <div className="card kpi">
           <span className="t-caption muted">{t('analytics.completion')}</span>
           <div className="value">{Math.round(rate * 100)}&nbsp;%</div>
@@ -607,6 +630,8 @@ function Overview({
           </div>
         </div>
       </div>
+
+      <ReturningCard ret={ret} onHow={onHow} />
 
       <div className="card chart-card an-funnel-card">
         <div className="row between">
@@ -766,6 +791,7 @@ function Sessions({
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [res, setRes] = useState<{ total: number; rows: Session[]; tooSmall?: boolean } | null>(null);
+  const [visits, setVisits] = useState<Record<string, number>>({});
   const segKey = JSON.stringify(segment);
   useEffect(() => setPage(0), [days, demo, source, segKey]);
   useEffect(() => {
@@ -781,9 +807,16 @@ function Sessions({
         p_offset: page * PAGE,
         p_segment: segment as never,
       })
-      .then(({ data }) =>
-        setRes((data as unknown as { total: number; rows: Session[] }) ?? { total: 0, rows: [] }),
-      );
+      .then(async ({ data }) => {
+        const r = (data as unknown as { total: number; rows: Session[] }) ?? { total: 0, rows: [] };
+        // L26-07 : numéro de visite des sessions affichées (vide si la mesure est désactivée)
+        const ids = r.rows.map((x) => x.session_id);
+        const v = ids.length
+          ? await supabase.rpc('session_visits', { p_workspace: wsId, p_sessions: ids })
+          : { data: {} };
+        setVisits((v.data as Record<string, number> | null) ?? {});
+        setRes(r);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wsId, days, demo, source, page, segKey]);
   if (!res) return <Loading />;
@@ -842,6 +875,7 @@ function Sessions({
                       <div>
                         <b>{main}</b>
                         {sub && <div className="t-caption subtle">{sub}</div>}
+                        <VisitBadge no={visits[s.session_id]} />
                       </div>
                     </div>
                   </td>

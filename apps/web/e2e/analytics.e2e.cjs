@@ -38,10 +38,10 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   ]);
   ok(dl.suggestedFilename().endsWith('.csv'), 'export CSV de l’entonnoir');
 
-  // Analytics du workspace (ANA-01) : 5 KPI, période, filtre par démo, onglets
+  // Analytics du workspace (ANA-01) : 6 KPI (L26-06 : visiteurs récurrents), période, filtre par démo, onglets
   await page.goto(`${APP}/#/analytics`);
   await page.waitForSelector('.mk .kpis .kpi');
-  ok((await page.locator('.kpis .kpi').count()) === 5, 'analytics du workspace : 5 KPI');
+  ok((await page.locator('.kpis .kpi').count()) === 6, 'analytics du workspace : 6 KPI');
   ok((await page.locator('svg.chart').count()) === 1, 'courbe vues et complétions');
   ok((await page.locator('.funnel-row[role=row]').count()) >= 2, 'parcours étape par étape');
   await page.getByRole('radio', { name: '7 j' }).click();

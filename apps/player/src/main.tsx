@@ -33,6 +33,8 @@ type State =
       linkToken: string | null;
       /** L25-13 : ligne du jeu de données choisie pour le lien personnalisé. */
       datasetRow?: number | null;
+      /** L26-08 : mesure des visites de l'espace. */
+      visitMeasure?: boolean;
       preview: boolean;
       startQuiz?: boolean;
       /** L13 : reprise proposée (« Bon retour ») tant que l'apprenant n'a pas choisi. */
@@ -172,6 +174,7 @@ function App() {
             values,
             linkToken,
             datasetRow: linkRow,
+            visitMeasure: r.visitMeasure !== false,
             preview,
             resume: resumable(resume) ? resume : undefined,
             clickToStart: q('start') === 'click' && !preview,
@@ -224,7 +227,10 @@ function App() {
     () =>
       state.status === 'ready'
         ? Object.assign(
-            new Tracker(state.manifest.demoId, state.manifest.versionId, state.linkToken, !state.preview),
+            new Tracker(state.manifest.demoId, state.manifest.versionId, state.linkToken, !state.preview, {
+              workspaceId: state.manifest.workspaceId,
+              measure: state.visitMeasure !== false && !state.preview,
+            }),
             { channel: state.channel ?? null },
           )
         : null,
@@ -273,6 +279,7 @@ function App() {
       startStep={state.startStep}
       present={state.present}
       uiLocale={state.uiLocale}
+      measureInfo={!state.preview && !state.present && state.visitMeasure !== false}
       onLead={async (_form, data) => {
         if (state.preview) return;
         await submitLead({

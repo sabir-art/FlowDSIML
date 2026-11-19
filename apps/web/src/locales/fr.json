@@ -2080,7 +2080,8 @@
         "nameTaken": "Un segment porte déjà ce nom.",
         "soon_returning": "Nouveau ou récurrent",
         "soon_utm": "Campagne (UTM)",
-        "soon_city": "Ville"
+        "soon_city": "Ville",
+        "f_returning": "Visiteur récurrent"
       },
       "al": {
         "title": "Alertes",
@@ -2148,6 +2149,38 @@
         "chWebhookLabel": "Webhook"
       },
       "filtersNotApplied": "Les filtres ne s’appliquent pas encore à cet onglet."
+    },
+    "ret": {
+      "kpi": "Visiteurs récurrents",
+      "kpiSub": "{{n}} sur {{total}} · revenus au moins une fois",
+      "off": "Mesure désactivée",
+      "offBody": "La mesure des visites est désactivée : aucun identifiant n'est créé et les identifiants existants sont ignorés.",
+      "title": "Nouveaux et récurrents",
+      "how": "Comment c'est mesuré",
+      "definition": "Récurrent : même navigateur revenu après plus de {{gap}}, ou apprenant identifié déjà venu.",
+      "gap30": "30 minutes",
+      "gap24h": "24 heures",
+      "gap30Default": "30 minutes (par défaut)",
+      "new": "Nouveaux",
+      "ret": "Récurrents",
+      "summary": "Nouveaux : {{fresh}}, {{pNew}} %. Récurrents : {{ret}}, {{pRet}} %.",
+      "sentence": "Un visiteur récurrent revient en moyenne {{avg}} fois sur la période.",
+      "sentenceTop": "Les démos les plus revues : {{list}}.",
+      "topItem": "« {{title}} » ({{pct}} % de récurrents)",
+      "badgeNew": "Nouveau",
+      "badgeRet": "Récurrent · visite n° {{n}}",
+      "measure": "Mesure des visites",
+      "measureTitle": "Mesure des visites",
+      "switch": "Reconnaître les visiteurs qui reviennent",
+      "switchHelp": "Un identifiant aléatoire, propre à votre espace, est gardé dans le navigateur du visiteur pour 13 mois au plus. Il ne contient aucune donnée personnelle et n'est jamais partagé avec un autre site.",
+      "gapLabel": "Durée entre deux visites",
+      "gapHelp": "En dessous, c'est la même visite.",
+      "cnil": "Mesure d'audience seule, sans cookie tiers ni recoupement : pensée pour l'exemption de consentement de la CNIL. À faire valider par votre DPO.",
+      "playerNote": "Le lecteur affiche « Ne pas mesurer mes visites » dans ses informations, et respecte ce choix comme le signal Global Privacy Control du navigateur. Dans une intégration sur un autre site, le navigateur cloisonne le stockage : un même visiteur est compté une fois par site.",
+      "offNote": "Désactivée : plus aucun identifiant n'est créé, les identifiants existants sont ignorés, et « Visiteurs récurrents » affiche « Mesure désactivée ».",
+      "adminOnly": "Réservé aux propriétaires et administrateurs de l'espace.",
+      "saved": "Mesure des visites enregistrée.",
+      "saveError": "L'enregistrement a échoué. Réessayez."
     }
   },
   "leads": {
@@ -3461,7 +3494,7 @@
     "tabIa": "Assistance IA",
     "tabCrm": "CRM et e-mailing",
     "tabSso": "Connexion unique",
-    "iaBannerTitle": "Fonctions d'assistance par IA : en préparation.",
+    "iaBannerTitle": "Fonctions d'assistance par IA : en préparation.",
     "iaBanner": "Elles ne sont pas actives. Aucune donnée n'est envoyée à un service d'IA, et leur activation demandera l'accord d'un admin du workspace.",
     "why": "Pourquoi et en attendant",
     "gen": {
@@ -3473,28 +3506,28 @@
         "Toujours relu avant publication"
       ],
       "action": "Générer",
-      "why": "Nécessite un fournisseur d'IA et une validation RGPD (données des captures). En attendant : rédaction manuelle."
+      "why": "Nécessite un fournisseur d'IA et une validation RGPD (données des captures). En attendant : rédaction manuelle."
     },
     "translate": {
       "title": "Traduire la démo",
       "body": "Traduire bulles, boutons, quiz et sous-titres dans une autre langue.",
       "items": ["Une version par langue", "Glossaire respecté", "Relecture humaine conseillée"],
       "action": "Traduire",
-      "why": "Nécessite un fournisseur d'IA. En attendant : traduction manuelle."
+      "why": "Nécessite un fournisseur d'IA. En attendant : traduction manuelle."
     },
     "voice": {
       "title": "Sous-titres et voix off",
       "body": "Transcrire la voix d'une étape vidéo et générer une voix off à partir du texte.",
       "items": ["Transcription automatique", "Voix off synthétique", "Sous-titres modifiables"],
       "action": "Transcrire",
-      "why": "Nécessite des services de transcription et de synthèse vocale. En attendant : import de sous-titres .vtt."
+      "why": "Nécessite des services de transcription et de synthèse vocale. En attendant : import de sous-titres .vtt."
     },
     "writer": {
       "title": "Assistant de rédaction",
       "body": "Reformuler une bulle, simplifier un texte (FALC), suggérer des questions de quiz.",
       "items": ["Reformulation", "Facile à lire et à comprendre", "Suggestions de quiz"],
       "action": "Ouvrir l’assistant",
-      "why": "Nécessite un fournisseur d'IA. En attendant : rédaction manuelle."
+      "why": "Nécessite un fournisseur d'IA. En attendant : rédaction manuelle."
     },
     "crm": {
       "title": "CRM",
@@ -3504,21 +3537,21 @@
         "Création ou mise à jour du contact",
         "Activité de démo sur la fiche"
       ],
-      "why": "Nécessite des applications OAuth et des comptes développeur. En attendant : webhooks signés vers votre outil."
+      "why": "Nécessite des applications OAuth et des comptes développeur. En attendant : webhooks signés vers votre outil."
     },
     "emailing": {
       "title": "Outils d'e-mailing",
       "body": "Ajouter les leads à une liste ou déclencher un scénario d'e-mails.",
       "items": ["Listes et scénarios", "Respect du consentement du formulaire"],
       "action": "Connecter",
-      "why": "Nécessite des comptes et des clés des éditeurs. En attendant : webhooks."
+      "why": "Nécessite des comptes et des clés des éditeurs. En attendant : webhooks."
     },
     "enrich": {
       "title": "Enrichissement des visiteurs",
       "body": "Identifier l'organisation d'un visiteur anonyme.",
       "items": ["Entreprise à partir du réseau", "Taille, secteur"],
       "action": "Activer",
-      "why": "Non prévu sans analyse juridique : traitement de données personnelles par un tiers (RGPD)."
+      "why": "Non prévu sans analyse juridique : traitement de données personnelles par un tiers (RGPD)."
     },
     "sso": {
       "title": "Connexion unique (SSO / SAML)",
@@ -3529,12 +3562,18 @@
         "Connexion obligatoire par SSO"
       ],
       "field": "URL des métadonnées du fournisseur",
-      "why": "Nécessite une offre d'hébergement compatible SAML. En attendant : invitation par e-mail et domaines autorisés."
+      "why": "Nécessite une offre d'hébergement compatible SAML. En attendant : lien d’invitation et domaines autorisés."
     },
     "useWebhooks": "Utiliser les webhooks",
     "inviteMembers": "Inviter des membres",
     "aiEntry": "Assistance IA",
     "security": "Sécurité",
     "securitySub": "Connexion et accès au workspace."
+  },
+  "privacy": {
+    "title": "Confidentialité",
+    "sub": "Ce que l’espace mesure chez les visiteurs de vos démos.",
+    "measureOn": "Activée : reconnaissance des visiteurs qui reviennent, nouvelle visite après {{gap}}.",
+    "edit": "Modifier"
   }
 }

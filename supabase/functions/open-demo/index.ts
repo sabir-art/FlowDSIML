@@ -168,5 +168,12 @@ Deno.serve(async (req) => {
       if (u.path && u.signedUrl) signed.set(u.path.slice(demoId.length + 1), u.signedUrl);
   }
   manifest = replaceAssets(manifest, signed) as typeof manifest;
-  return json(200, { ...gate, manifest });
+  // L26-08 : mesure des visites de l'espace (désactivée : le lecteur ne crée aucun identifiant)
+  const ws =
+    typeof manifest.workspaceId === 'string' && UUID.test(manifest.workspaceId) ? manifest.workspaceId : null;
+  const measure = ws
+    ? await supabase.from('workspaces').select('visit_measure').eq('id', ws).maybeSingle()
+    : null;
+  const visitMeasure = measure?.data ? measure.data.visit_measure !== false : true;
+  return json(200, { ...gate, manifest, visitMeasure });
 });

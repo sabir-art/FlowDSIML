@@ -33,6 +33,19 @@ const dict = {
     /** L17 : glossaire du workspace. */
     glossary: 'Glossaire',
     glossaryClose: 'Fermer le glossaire',
+    // L26-08 : informations du lecteur, mesure des visites
+    infoBtn: 'Informations',
+    infoTitle: 'Informations',
+    infoClose: 'Fermer les informations',
+    measureTitle: 'Mesure des visites',
+    measureOn:
+      'Pour compter les visites qui reviennent, un identifiant aléatoire est gardé dans ce navigateur pour 13 mois au plus. Il ne contient aucune donnée personnelle et n’est jamais partagé avec un autre site.',
+    measureOff: 'Vos visites ne sont pas mesurées. Aucun identifiant n’est gardé dans ce navigateur.',
+    measureGpc:
+      'Votre navigateur demande de ne pas être suivi (Global Privacy Control) : vos visites ne sont pas mesurées.',
+    measureRefuse: 'Ne pas mesurer mes visites',
+    measureAccept: 'Mesurer à nouveau mes visites',
+    measureSaved: 'Votre choix est enregistré dans ce navigateur.',
     glossarySearch: 'Rechercher un terme',
     glossaryOld: 'Ancien terme :',
     glossaryCount_one: '{{count}} terme',
@@ -376,6 +389,17 @@ const dict = {
     chapters: 'Chapters',
     glossary: 'Glossary',
     glossaryClose: 'Close the glossary',
+    infoBtn: 'Information',
+    infoTitle: 'Information',
+    infoClose: 'Close the information',
+    measureTitle: 'Visit measurement',
+    measureOn:
+      'To count returning visits, a random identifier is kept in this browser for 13 months at most. It contains no personal data and is never shared with another site.',
+    measureOff: 'Your visits are not measured. No identifier is kept in this browser.',
+    measureGpc: 'Your browser asks not to be tracked (Global Privacy Control): your visits are not measured.',
+    measureRefuse: 'Do not measure my visits',
+    measureAccept: 'Measure my visits again',
+    measureSaved: 'Your choice is saved in this browser.',
     glossarySearch: 'Search a term',
     glossaryOld: 'Former term:',
     glossaryCount_one: '{{count}} term',

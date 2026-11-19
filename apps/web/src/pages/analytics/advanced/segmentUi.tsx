@@ -89,7 +89,7 @@ function FieldSelect({
 
 /** Critères annoncés par la spec, pas encore calculés : affichés désactivés avec « Bientôt ». */
 const SOON: Partial<Record<string, string[]>> = {
-  visit: ['returning', 'utm'],
+  visit: ['utm'],
   device: ['city'],
 };
 

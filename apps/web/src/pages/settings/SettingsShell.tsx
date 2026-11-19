@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Clock,
   Code,
+  EyeOff,
   CreditCard,
   Notebook,
   Palette,
@@ -56,6 +57,8 @@ export function SettingsShell({ children }: { children: ReactNode }) {
             item('/settings/integrations', <Plug aria-hidden="true" />, t('settings.integrations'))}
           {/* VB-03 : Sécurité (connexion unique « Bientôt ») ; VB-01 à 03 : fonctions à venir */}
           {item('/settings/security', <Shield aria-hidden="true" />, t('soon.security'))}
+          {/* L26-08 : Confidentialité (mesure des visites) */}
+          {item('/settings/privacy', <EyeOff aria-hidden="true" />, t('privacy.title'))}
           {item('/settings/soon', <Clock aria-hidden="true" />, t('soon.nav'))}
           <span className="grp">{t('settings.account')}</span>
           {item('/settings/profile', <UserRound aria-hidden="true" />, t('settings.profile'))}

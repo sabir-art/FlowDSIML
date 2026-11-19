@@ -2005,6 +2005,8 @@ export type Database = {
           name: string;
           plan_code: string;
           public_links_enabled: boolean;
+          visit_measure: boolean;
+          visit_gap_minutes: number;
           settings: NonNullable<Json>;
           slug: string;
           updated_at: string;
@@ -2018,6 +2020,8 @@ export type Database = {
           name: string;
           plan_code?: string;
           public_links_enabled?: boolean;
+          visit_measure?: boolean;
+          visit_gap_minutes?: number;
           settings?: NonNullable<Json>;
           slug: string;
           updated_at?: string;
@@ -2030,6 +2034,8 @@ export type Database = {
           name?: string;
           plan_code?: string;
           public_links_enabled?: boolean;
+          visit_measure?: boolean;
+          visit_gap_minutes?: number;
           settings?: NonNullable<Json>;
           slug?: string;
           updated_at?: string;
@@ -2060,6 +2066,8 @@ export type Database = {
           name: string;
           plan_code: string;
           public_links_enabled: boolean;
+          visit_measure: boolean;
+          visit_gap_minutes: number;
           settings: NonNullable<Json>;
           slug: string;
           updated_at: string;
@@ -2157,6 +2165,19 @@ export type Database = {
       public_page: { Args: { p_demo: string }; Returns: Json };
       personal_page: { Args: { p_demo: string; p_code: string }; Returns: Json };
       live_demo: { Args: { p_demo: string }; Returns: Json };
+      live_visits: { Args: { p_demo: string }; Returns: Json };
+      session_visits: { Args: { p_workspace: string; p_sessions: string[] }; Returns: Json };
+      workspace_returning: {
+        Args: {
+          p_workspace: string;
+          p_from: string;
+          p_to?: string;
+          p_demo?: string | null;
+          p_source?: string | null;
+          p_segment?: Json | null;
+        };
+        Returns: Json;
+      };
       survey_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
       survey_texts: { Args: { p_demo: string; p_question?: string | null; p_limit?: number }; Returns: Json };
       choice_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };

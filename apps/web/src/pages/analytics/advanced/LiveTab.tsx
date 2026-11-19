@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pause, Play } from 'lucide-react';
+import { VisitBadge } from '../returning';
 import { supabase } from '../../../lib/supabase';
 import { formatNumber, formatRelativeShort } from '../../../lib/format';
 import { initials } from '../../../lib/initials';
@@ -61,6 +62,7 @@ export function LiveTab({
 }) {
   const { t } = useTranslation();
   const [target, setTarget] = useState<string | null>(demo || null);
+  const [visits, setVisits] = useState<Record<string, number>>({});
   const [data, setData] = useState<Live | null>(null);
   const [paused, setPaused] = useState(false);
   const [announce, setAnnounce] = useState('');
@@ -79,9 +81,14 @@ export function LiveTab({
     if (!target || paused) return;
     let off = false;
     const load = () =>
-      supabase.rpc('live_demo', { p_demo: target }).then(({ data: d }) => {
+      Promise.all([
+        supabase.rpc('live_demo', { p_demo: target }),
+        // L26-07 : nouveau ou récurrent (vide si la mesure est désactivée)
+        supabase.rpc('live_visits', { p_demo: target }),
+      ]).then(([{ data: d }, { data: lv }]) => {
         if (off || !d) return;
         const live = d as unknown as Live;
+        setVisits((lv as Record<string, number> | null) ?? {});
         setData(live);
         // KPI annoncés au plus une fois par minute, et seulement s'ils changent
         const text = t('analytics.adv.live.announce', {
@@ -213,6 +220,7 @@ export function LiveTab({
                           <span className="l19-who">
                             <b>{label}</b>
                             {sub && <span className="t-caption muted">{sub}</span>}
+                            <VisitBadge no={visits[v.key]} />
                           </span>
                         </div>
                       </td>

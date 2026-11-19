@@ -2712,3 +2712,25 @@ h1.p-title {
 .is-mobile .p-beacon.is-wide.p-pulse::after {
   border-radius: 14px;
 }
+
+/* L26-08 : informations du lecteur (mesure des visites) */
+.p-info-sec {
+  padding: 4px 20px 20px;
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.p-info-sec h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+}
+.p-info-sec p {
+  margin: 0;
+  line-height: 1.5;
+}
+.p-info-saved:empty {
+  display: none;
+}
