@@ -241,7 +241,8 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-.presenter button {
+/* Les modales (télécommande, bilan) gardent les boutons du système de design. */
+.presenter button:not(dialog button) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -254,19 +255,19 @@
   font: 700 13px var(--fd-font-sans);
   cursor: pointer;
 }
-.presenter button:disabled {
+.presenter button:not(dialog button):disabled {
   opacity: 0.45;
   cursor: default;
 }
-.presenter button.pri {
+.presenter button:not(dialog button).pri {
   background: #e86a9b;
   color: #080808;
 }
-.presenter button[aria-pressed='true'] {
+.presenter button:not(dialog button)[aria-pressed='true'] {
   background: #ffffff;
   color: #080808;
 }
-.presenter button:focus-visible {
+.presenter button:not(dialog button):focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px #0b0d10,

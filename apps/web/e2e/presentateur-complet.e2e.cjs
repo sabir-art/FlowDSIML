@@ -143,6 +143,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await phone.locator('.rmp-notes', { hasText: 'Montrer l’étape 6' }).waitFor({ timeout: 5000 });
   ok(true, 'téléphone : notes modifiées reçues');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l26-09-notes${sfx}.png` });
+  await area.focus();
   await page.keyboard.press('Escape');
   await area.waitFor({ state: 'detached', timeout: 3000 }).catch(() => undefined);
   ok(
@@ -182,6 +183,12 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(
     !(state.calls || []).some((c) => /track_events|functions\/v1\/track/.test(c.path)),
     'aucune vue comptée',
+  );
+  const bg = (n) =>
+    rep.getByRole('button', { name: n, exact: true }).evaluate((e) => getComputedStyle(e).backgroundColor);
+  ok(
+    (await bg('Retour à l’éditeur')) !== (await bg('Fermer')),
+    'bilan : « Retour à l’éditeur » en bouton principal',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l26-12-bilan${sfx}.png` });
   await rep.getByRole('button', { name: 'Retour à l’éditeur' }).click();

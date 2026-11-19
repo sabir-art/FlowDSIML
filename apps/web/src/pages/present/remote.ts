@@ -7,6 +7,7 @@
  */
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
+import { REMOTE_ORIGIN } from '../../lib/env';
 
 export type RemoteCmd = 'next' | 'prev' | 'black' | 'end' | 'hello';
 export type RemoteMessage =
@@ -81,10 +82,9 @@ export function openRemote(
 }
 
 /** Adresse courte affichée (sans protocole) et adresse complète du QR code. */
-export const remoteShortUrl = () =>
-  `${location.host}${location.pathname.replace(/\/$/, '')}/t`.replace(/^\/+/, '');
+export const remoteShortUrl = () => `${REMOTE_ORIGIN.replace(/^https?:\/\//, '')}/t`;
 export const remoteUrl = (id: string, code: string) =>
-  `${location.origin}${location.pathname}#/t?r=${encodeURIComponent(id)}&c=${encodeURIComponent(code)}`;
+  `${REMOTE_ORIGIN}/#/t?r=${encodeURIComponent(id)}&c=${encodeURIComponent(code)}`;
 
 /** « 4829 1307 » (lecture, 8 chiffres) ; chiffre par chiffre pour les lecteurs d'écran. */
 export const codeDisplay = (code: string) => `${code.slice(0, 4)}\u00a0${code.slice(4)}`;
