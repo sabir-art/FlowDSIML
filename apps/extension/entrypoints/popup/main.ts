@@ -8,6 +8,7 @@ import type { CaptureMode, PopupRequest, RecordingStatus } from '@/lib/messages'
 import { lang, stepsCaptured, strings } from '@/lib/i18n';
 import {
   Check,
+  Code,
   Film,
   LogIn,
   LogOut,
@@ -27,7 +28,7 @@ for (const el of document.querySelectorAll<HTMLElement>('[data-app-name]')) el.t
 for (const el of document.querySelectorAll<HTMLElement>('[data-i18n]'))
   el.textContent = strings[el.dataset.i18n as keyof typeof strings];
 (document.getElementById('title') as HTMLInputElement).placeholder = strings.demoTitlePlaceholder;
-const ICONS = { Check, Film, LogIn, LogOut, MousePointerClick, Pause, Play, Smartphone, Video, X };
+const ICONS = { Check, Code, Film, LogIn, LogOut, MousePointerClick, Pause, Play, Smartphone, Video, X };
 createIcons({ icons: ICONS, attrs: { width: 16, height: 16, 'stroke-width': 2, 'aria-hidden': 'true' } });
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -40,9 +41,16 @@ function syncMode() {
   const m = mode();
   show('opt-video', m === 'video');
   show('opt-mobile', m === 'mobile');
+  show('opt-html', m === 'html');
   show('hint', m === 'clicks');
   $('start-label').textContent =
-    m === 'video' ? strings.startVideo : m === 'mobile' ? strings.startMobile : strings.start;
+    m === 'video'
+      ? strings.startVideo
+      : m === 'mobile'
+        ? strings.startMobile
+        : m === 'html'
+          ? strings.startHtml
+          : strings.start;
 }
 for (const r of document.querySelectorAll<HTMLInputElement>('input[name="mode"]'))
   r.addEventListener('change', () => {

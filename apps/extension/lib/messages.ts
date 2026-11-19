@@ -1,5 +1,6 @@
 import type { PxRect, Viewport } from './geometry';
 import type { Detection } from './scan';
+import type { HtmlCapture } from './htmlCapture';
 
 /** Clic capturé par le content script et envoyé au service worker. */
 export interface ClickPayload {
@@ -21,7 +22,7 @@ export interface ClickPayload {
 }
 
 /** F7 : type de capture choisi dans la popup. */
-export type CaptureMode = 'clicks' | 'video' | 'mobile';
+export type CaptureMode = 'clicks' | 'video' | 'mobile' | 'html';
 
 export type PopupRequest =
   | {
@@ -49,6 +50,14 @@ export type VideoBarRequest =
   | { type: 'fd:video-stop' }
   | { type: 'fd:video-blurs'; count: number };
 
+/** A8 : barre de la capture HTML (content script) vers le service worker. */
+export type HtmlBarRequest =
+  | { type: 'fd:html-ready' }
+  | { type: 'fd:html-page'; capture: HtmlCapture }
+  | { type: 'fd:html-click'; sel: string; label: string }
+  | { type: 'fd:html-stop' }
+  | { type: 'fd:fetch-asset'; url: string; kind: 'image' | 'font' | 'css' };
+
 export interface RecordingStatus {
   recording: boolean;
   paused: boolean;
@@ -70,4 +79,6 @@ export interface RecordingStatus {
   pausedMs?: number;
   micDenied?: boolean;
   blurredZones?: number;
+  /** A8 : capture HTML à faire au prochain chargement de page (après un clic qui navigue). */
+  htmlAwait?: boolean;
 }

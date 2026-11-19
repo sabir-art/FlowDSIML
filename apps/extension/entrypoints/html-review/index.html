@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vérification de la capture HTML</title>
+  </head>
+  <body>
+    <main id="main" tabindex="-1">
+      <header class="vr-head">
+        <img class="logo" src="/symbole-tutoclick.svg" width="36" height="36" alt="TutoClick" />
+        <div>
+          <h1 data-i18n="hrTitle"></h1>
+          <p class="muted" data-i18n="hrHelp"></p>
+        </div>
+      </header>
+      <div id="alert" class="alert" role="alert" hidden></div>
+      <fieldset class="kinds">
+        <legend data-i18n="hrType"></legend>
+        <label class="kind"
+          ><input type="radio" name="kind" value="guided" checked /><span
+            ><b data-i18n="hrGuided"></b><small data-i18n="hrGuidedHelp"></small></span
+        ></label>
+        <label class="kind"
+          ><input type="radio" name="kind" value="sandbox" /><span
+            ><b data-i18n="hrSandbox"></b><small data-i18n="hrSandboxHelp"></small></span
+        ></label>
+      </fieldset>
+      <section aria-labelledby="pages-h">
+        <h2 id="pages-h" data-i18n="hrPages"></h2>
+        <ol id="pages" class="pages"></ol>
+      </section>
+      <div class="vr-actions">
+        <button id="delete" class="btn btn-ghost-danger" data-i18n="hrDelete"></button>
+        <span class="grow"></span>
+        <span id="progress" class="muted" role="status"></span>
+        <button id="send" class="btn btn-primary" data-i18n="hrSend"></button>
+      </div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

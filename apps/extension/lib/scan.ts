@@ -79,20 +79,20 @@ function rangeRects(node: Text, start: number, end: number): DOMRect[] {
   return Array.from(r.getClientRects()).filter(visible);
 }
 
-/**
- * Analyse le viewport visible. Les valeurs ne sont lues que pour être comparées aux motifs, dans
- * la page ; seul un extrait masqué en sort, vers l'écran de vérification local.
- */
-export function scanPage(root: ParentNode = document.body): Detection[] {
-  const out: Detection[] = [];
-  const push = (type: PiiType, rect: DOMRect, value: string) =>
-    out.push({ type, rect: px(rect), excerpt: type === 'zone' ? '' : maskExcerpt(type, value) });
+/** Repérage brut : élément (champ, zone imposée) ou nœud texte avec la plage concernée. */
+type Hit =
+  | { type: PiiType; el: HTMLElement; value: string }
+  | { type: PiiType; node: Text; start: number; end: number; value: string };
 
+/**
+ * Parcours commun : zones imposées, champs remplis, texte affiché. visibleOnly limite au viewport
+ * (captures en image) ; sans lui, tout le document est parcouru (capture HTML, A8).
+ */
+function walk(root: ParentNode, visibleOnly: boolean, emit: (h: Hit) => void): void {
+  const shown = (el: Element) => !visibleOnly || visible(el.getBoundingClientRect());
   // 1) Zones imposées et champs de formulaire
-  for (const el of Array.from(root.querySelectorAll<HTMLElement>('[data-fd-blur]'))) {
-    const r = el.getBoundingClientRect();
-    if (visible(r)) push('zone', r, '');
-  }
+  for (const el of Array.from(root.querySelectorAll<HTMLElement>('[data-fd-blur]')))
+    if (shown(el)) emit({ type: 'zone', el, value: '' });
   for (const el of Array.from(root.querySelectorAll<HTMLElement>('input,textarea,select'))) {
     if (el.closest(SKIP)) continue;
     const input = el as HTMLInputElement;
@@ -112,30 +112,30 @@ export function scanPage(root: ParentNode = document.body): Detection[] {
       ].includes(kind)
     )
       continue;
-    const r = el.getBoundingClientRect();
-    if (!visible(r)) continue;
+    if (!shown(el)) continue;
     if (kind === 'password') {
-      push('zone', r, '');
+      emit({ type: 'zone', el, value: '' });
       continue;
     }
     const value =
       el instanceof HTMLSelectElement ? clean(el.selectedOptions[0]?.textContent) : clean(input.value);
     const byAc = autocompleteType(el.getAttribute('autocomplete'));
     if (byAc === 'zone') {
-      push('zone', r, '');
+      emit({ type: 'zone', el, value: '' });
       continue;
     }
     if (!value) continue; // champ vide : rien à cacher
     const type = byAc ?? labelType(fieldLabel(el)) ?? matchText(value)[0]?.type ?? null;
-    if (type) push(type, r, value);
+    if (type) emit({ type, el, value });
   }
 
   // 2) Texte affiché
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   let n = 0;
+  const max = visibleOnly ? MAX_NODES : MAX_NODES * 10;
   for (
     let node = walker.nextNode() as Text | null;
-    node && n < MAX_NODES;
+    node && n < max;
     node = walker.nextNode() as Text | null
   ) {
     const text = node.data;
@@ -153,15 +153,49 @@ export function scanPage(root: ParentNode = document.body): Detection[] {
     const trimmed = text.trim();
     if (ctxType && trimmed.length <= 120 && !labelType(trimmed)) {
       const start = text.indexOf(trimmed);
-      for (const rect of rangeRects(node, start, start + trimmed.length)) push(ctxType, rect, trimmed);
+      emit({ type: ctxType, node, start, end: start + trimmed.length, value: trimmed });
       continue;
     }
     const inline = inlineLabelValue(text);
     const matches = inline ? [inline] : matchText(text, ctx);
     for (const m of matches)
-      for (const rect of rangeRects(node, m.start, m.end)) push(m.type, rect, text.slice(m.start, m.end));
+      emit({ type: m.type, node, start: m.start, end: m.end, value: text.slice(m.start, m.end) });
   }
+}
+
+/**
+ * Analyse le viewport visible. Les valeurs ne sont lues que pour être comparées aux motifs, dans
+ * la page ; seul un extrait masqué en sort, vers l'écran de vérification local.
+ */
+export function scanPage(root: ParentNode = document.body): Detection[] {
+  const out: Detection[] = [];
+  const push = (type: PiiType, rect: DOMRect, value: string) =>
+    out.push({ type, rect: px(rect), excerpt: type === 'zone' ? '' : maskExcerpt(type, value) });
+  walk(root, true, (h) => {
+    if ('el' in h) push(h.type, h.el.getBoundingClientRect(), h.value);
+    else for (const rect of rangeRects(h.node, h.start, h.end)) push(h.type, rect, h.value);
+  });
   return dedupe(out);
+}
+
+/** A8 : repérage sur tout le document (capture HTML) ; renvoie les nœuds, jamais les valeurs. */
+export interface NodeDetection {
+  type: PiiType;
+  /** Élément (champ, zone imposée) ou parent du texte repéré. */
+  el: Element;
+  /** Nœud texte concerné et plage (absent pour un champ ou une zone). */
+  node?: Text;
+  start?: number;
+  end?: number;
+}
+export function scanNodes(root: ParentNode = document.body): NodeDetection[] {
+  const out: NodeDetection[] = [];
+  walk(root, false, (h) => {
+    if ('el' in h) out.push({ type: h.type, el: h.el });
+    else if (h.node.parentElement)
+      out.push({ type: h.type, el: h.node.parentElement, node: h.node, start: h.start, end: h.end });
+  });
+  return out;
 }
 
 /** Retire les boîtes contenues dans une autre boîte déjà détectée. */

@@ -8,3 +8,5 @@ export * from './strings';
 export * from './brand';
 export * from './glossary';
 export * from './videoTimeline';
+export * from './htmlOps';
+export * from './htmlSanitize';

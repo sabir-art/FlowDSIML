@@ -91,6 +91,39 @@ http
         return send(200, { Key: req.url, Id: 'x' });
       }
       if (req.url.startsWith('/rest/v1/')) return send(201, null);
+      // A8 : seconde page (script, gestionnaire, mot de passe rempli, données fictives) et ingestion
+      if (req.url.startsWith('/page2')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end(
+          '<html><head><meta charset="utf-8"><title>Agenda</title><link rel="stylesheet" href="/style.css"><script>window.__x=1</script></head>' +
+            '<body><nav id="menu"><a href="/page">Accueil</a><a href="/page2">Agenda</a></nav><h1 class="titre">Agenda</h1>' +
+            '<button onclick="alert(1)">Valider</button><p>Conseillère : Camille MARTIN</p><p>Tél. 06 12 34 56 78</p>' +
+            '<input type="password" value="secret"><input name="q" value="recherche"><img src="/img.png" alt="Logo Acme"></body></html>',
+        );
+      }
+      if (req.url.startsWith('/style.css')) {
+        res.writeHead(200, { 'content-type': 'text/css' });
+        return res.end('.titre{color:rgb(163, 25, 91)} body{background:url(/img.png) no-repeat -999px 0}');
+      }
+      if (req.url.startsWith('/img.png')) {
+        res.writeHead(200, { 'content-type': 'image/png' });
+        return res.end(
+          Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+            'base64',
+          ),
+        );
+      }
+      if (req.url.startsWith('/functions/v1/html-ingest')) {
+        const b = JSON.parse(buf.toString() || '{}');
+        log[log.length - 1].body = JSON.stringify({
+          workspaceId: b.workspaceId,
+          demoId: b.demoId,
+          size: (b.html || '').length,
+        });
+        log[log.length - 1].html = b.html;
+        return send(200, { path: `${b.workspaceId}/${b.demoId}/${require('crypto').randomUUID()}.html` });
+      }
       if (req.url.startsWith('/page')) {
         res.writeHead(200, { 'content-type': 'text/html' });
         return res.end(
