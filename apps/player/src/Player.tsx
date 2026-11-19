@@ -87,6 +87,8 @@ import { LeadForm } from './LeadForm';
 interface Props {
   manifest: Manifest;
   values: VariableValues;
+  /** L25-13 : ligne du jeu de données imposée par le lien personnalisé. */
+  datasetRowIndex?: number | null;
   tracker: TrackerLike;
   preview?: boolean;
   /** F2 : aperçu « Tester le quiz » ouvert directement sur le quiz. */
@@ -139,6 +141,7 @@ const MAX_RULE_JUMPS = 50;
 export function Player({
   manifest: raw,
   values: rawValues,
+  datasetRowIndex = null,
   tracker,
   preview,
   startQuiz,
@@ -162,7 +165,15 @@ export function Player({
   }, [raw.ab, preview]);
   const m = useMemo(() => applyAb(raw, variant), [raw, variant]);
   // L25-09 : ligne du jeu de données (lien personnalisé ou ligne 1) ; ses variables passent après l'URL
-  const dsRow = useMemo(() => (m.dataset ? datasetRow(m.dataset, rawValues) : null), [m.dataset, rawValues]);
+  const dsRow = useMemo(
+    () =>
+      m.dataset
+        ? datasetRowIndex !== null && m.dataset.rows[datasetRowIndex]
+          ? m.dataset.rows[datasetRowIndex]!
+          : datasetRow(m.dataset, rawValues)
+        : null,
+    [m.dataset, rawValues, datasetRowIndex],
+  );
   const values = useMemo(
     () => ({ ...(m.dataset ? datasetVars(m.dataset, dsRow) : {}), ...rawValues }),
     [m.dataset, dsRow, rawValues],

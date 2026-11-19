@@ -81,10 +81,13 @@ export async function openDemo(demoId: string, password?: string): Promise<GateI
 }
 
 export function resolveLink(token: string) {
-  return rpc<{ demoId: string; linkId: string; variables: Record<string, string> } | null>(
-    'resolve_share_link',
-    { p_token: token },
-  );
+  return rpc<{
+    demoId: string;
+    linkId: string;
+    variables: Record<string, string>;
+    /** L25-13 : ligne du jeu de données choisie pour ce lien. */
+    datasetRow?: number | null;
+  } | null>('resolve_share_link', { p_token: token });
 }
 
 /** L13 : reprise « Bon retour » (lien personnalisé valide sur une démo publiée) ; {} sinon. */
@@ -405,6 +408,28 @@ export interface PublicPageInfo {
 /** URL publique d'un logo du bucket branding (chemin validé côté base). */
 export function brandingUrl(path: string): string {
   return `${SUPABASE_URL}/storage/v1/object/public/branding/${path.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+/** L25-14 / 15 : page personnalisée d'un lien. Jamais d'e-mail ni d'id du signataire. */
+export type PersonalPageInfo =
+  | { status: 'not_found' }
+  | { status: 'inactive'; publicPage: boolean; demoId: string }
+  | {
+      status: 'ok';
+      page: PublicPageInfo;
+      personal: {
+        title: string;
+        message: string;
+        signer: { name: string; initials: string } | null;
+        cta: { label: string; url: string } | null;
+        variables: Record<string, string>;
+        datasetRow: number | null;
+        /** Absent si la démo est protégée : le lecteur passe par l'écran habituel. */
+        token: string | null;
+      };
+    };
+export function personalPage(demoId: string, code: string) {
+  return rpc<PersonalPageInfo>('personal_page', { p_demo: demoId, p_code: code });
 }
 
 /** Page publique (null : indisponible, quelle qu'en soit la raison). */

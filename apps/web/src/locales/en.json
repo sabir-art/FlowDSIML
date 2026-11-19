@@ -1809,7 +1809,30 @@
       "ogSoonText": "Rich preview when shared (image and Open Graph tags served by the server)"
     },
     "ackLine": "GDPR confirmation: {{name}}, {{date}}",
-    "ackUnknown": "former member"
+    "ackUnknown": "former member",
+    "pp": {
+      "title": "Personalised page",
+      "help": "A page like the public page, with your message, for this recipient. Not indexed.",
+      "off": "The demo's public page is turned off.",
+      "enablePublic": "Turn on the public page",
+      "pageTitle": "Title",
+      "titlePlaceholder": "Your demo, {{company}}",
+      "preview": "Preview: {{title}}",
+      "message": "Message",
+      "count": "{{n}} / 400 characters",
+      "signedBy": "Signed by",
+      "noSignature": "No signature",
+      "datasetRow": "Dataset row",
+      "rowAuto": "From the dataset",
+      "rowN": "Row {{n}} · {{label}}",
+      "ctaLabel": "Button text",
+      "ctaUrl": "Button link",
+      "httpsRequired": "Enter an address starting with https://",
+      "emailHelp": "Used to link views and the lead to this contact. Never shown on the page or in the demo.",
+      "column": "Page",
+      "badgeOn": "Personalised",
+      "badgeOff": "Demo only"
+    }
   },
   "analytics": {
     "title": "Analytics",

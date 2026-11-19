@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
-import { embedSnippet, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
+import { embedSnippet, personalPageUrl, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
 import { unpublishDemo } from '../../lib/publish';
 import { formatDate, formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -20,6 +20,12 @@ import { PlanFormsWarning } from '../../components/PlanFormsWarning';
 import { AccessPanel, AccessSummary, useDemoAccess } from './AccessPanel';
 import { CopyButton, highlightHtml } from './codeBlock';
 import { PublicPagePanel } from './PublicPagePanel';
+import {
+  PersonalPageFields,
+  emptyPersonalPage,
+  personalPageErrors,
+  type PersonalPageDraft,
+} from './PersonalPageFields';
 import { ExportDialog } from '../export/ExportDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
@@ -45,6 +51,13 @@ export function SharePage() {
   /** L17-01 : confirmation RGPD enregistrée avec la version en ligne (auteur et date). */
   const [ack, setAck] = useState<{ name: string; at: string } | null>(null);
   const [variables, setVariables] = useState<Tables<'variables'>[]>([]);
+  // L25-13 : page publique (activée, bouton), membres (signature), lignes du jeu de données
+  const [pubPage, setPubPage] = useState<{ enabled: boolean; cta: { label: string; url: string } | null }>({
+    enabled: false,
+    cta: null,
+  });
+  const [signers, setSigners] = useState<Array<{ id: string; name: string }>>([]);
+  const [dsRows, setDsRows] = useState<string[] | null>(null);
   const [origins, setOrigins] = useState('');
   // RP-2 : la modale RGPD ouvre directement l'onglet Accès (?tab=access)
   const [tab, setTab] = useState<Tab>(() => {
@@ -100,6 +113,26 @@ export function SharePage() {
       setAck({ name: who?.full_name || who?.email || t('share.ackUnknown'), at: pa.at });
     } else setAck(null);
     setVariables(vars.data ?? []);
+    const [pg, mem, ds] = await Promise.all([
+      supabase.from('demo_pages').select('enabled, cta_label, cta_url').eq('demo_id', demoId).maybeSingle(),
+      supabase.rpc('list_members', { p_workspace: d.data.workspace_id }),
+      supabase.from('demo_datasets').select('columns, rows, link_column').eq('demo_id', demoId).maybeSingle(),
+    ]);
+    setPubPage({
+      enabled: !!pg.data?.enabled,
+      cta: pg.data?.cta_url ? { label: pg.data.cta_label ?? '', url: pg.data.cta_url } : null,
+    });
+    // Signature : nom seulement (jamais l'e-mail)
+    setSigners(
+      (mem.data ?? [])
+        .filter((m) => (m.full_name ?? '').trim())
+        .map((m) => ({ id: m.user_id, name: (m.full_name ?? '').trim() })),
+    );
+    const dsd = ds.data as { columns: string[]; rows: string[][]; link_column: string | null } | null;
+    if (dsd) {
+      const c = Math.max(0, dsd.link_column ? dsd.columns.indexOf(dsd.link_column) : 0);
+      setDsRows(dsd.rows.map((r) => r[c] ?? ''));
+    } else setDsRows(null);
     setGatedSteps(gated.count ?? 0);
     const w = a.data as unknown as { views: number; leads: number } | null;
     setWeek(w ? { views: Number(w.views), leads: Number(w.leads) } : null);
@@ -434,6 +467,7 @@ export function SharePage() {
                         <tr>
                           <th>{t('share.linkNameShort')}</th>
                           <th>{t('editor.variables')}</th>
+                          <th>{t('share.pp.column')}</th>
                           <th className="r">{t('analytics.views')}</th>
                           <th>{t('share.lastView')}</th>
                           <th>
@@ -472,6 +506,13 @@ export function SharePage() {
                                   </span>
                                 )}
                                 {!vars.length && !l.expires_at && <span className="muted">—</span>}
+                              </td>
+                              <td>
+                                {l.page_enabled && l.page_code ? (
+                                  <span className="badge badge-success">{t('share.pp.badgeOn')}</span>
+                                ) : (
+                                  <span className="badge">{t('share.pp.badgeOff')}</span>
+                                )}
                               </td>
                               <td className="r">{formatNumber(st?.views ?? 0)}</td>
                               <td className="muted">{st?.last ? formatRelativeShort(st.last) : '—'}</td>
@@ -595,8 +636,16 @@ export function SharePage() {
       {creating && (
         <NewLinkDialog
           variables={variables}
+          publicPage={pubPage}
+          members={signers}
+          datasetRows={dsRows}
+          demoTitle={demo.title}
+          onEnablePublicPage={() => {
+            setCreating(false);
+            setTab('page');
+          }}
           onClose={() => setCreating(false)}
-          onCreate={async (name, vars, days) => {
+          onCreate={async (name, vars, days, pp) => {
             await run(async () => {
               const created = check(
                 await supabase
@@ -607,12 +656,30 @@ export function SharePage() {
                     name,
                     variables: vars,
                     expires_at: days ? new Date(Date.now() + days * 86400_000).toISOString() : null,
+                    // L25-13 : page personnalisée (le code est tiré par la base)
+                    ...(pp.enabled && pubPage.enabled
+                      ? {
+                          page_enabled: true,
+                          page_title: pp.title.trim().slice(0, 90),
+                          page_message: pp.message.trim().slice(0, 400),
+                          signed_by: pp.signedBy || null,
+                          dataset_row: pp.datasetRow === '' ? null : Number(pp.datasetRow),
+                          cta_label: pp.ctaLabel.trim() || null,
+                          cta_url: pp.ctaUrl.trim() || null,
+                        }
+                      : {}),
                   })
-                  .select('token')
+                  .select('token, page_code')
                   .single(),
               );
-              // P10 : le lien créé est copié automatiquement
-              await navigator.clipboard?.writeText(shareLinkUrl(created.token)).catch(() => undefined);
+              // P10 : le lien créé est copié automatiquement (l'adresse de la page s'il y en a une)
+              await navigator.clipboard
+                ?.writeText(
+                  created.page_code
+                    ? personalPageUrl(demoId, created.page_code)
+                    : shareLinkUrl(created.token),
+                )
+                .catch(() => undefined);
               setCreating(false);
               await load();
             }, t('share.linkCreatedCopied'));
@@ -783,12 +850,27 @@ function MiniPreview({ demoId, previewUrl }: { demoId: string; previewUrl: strin
 /** Modale « Nouveau lien personnalisé » (PRT-05). */
 function NewLinkDialog({
   variables,
+  publicPage,
+  members,
+  datasetRows,
+  demoTitle,
+  onEnablePublicPage,
   onClose,
   onCreate,
 }: {
   variables: Tables<'variables'>[];
+  publicPage: { enabled: boolean; cta: { label: string; url: string } | null };
+  members: Array<{ id: string; name: string }>;
+  datasetRows: string[] | null;
+  demoTitle: string;
+  onEnablePublicPage: () => void;
   onClose: () => void;
-  onCreate: (name: string, vars: Record<string, string>, days: number | null) => Promise<void>;
+  onCreate: (
+    name: string,
+    vars: Record<string, string>,
+    days: number | null,
+    pp: PersonalPageDraft,
+  ) => Promise<void>;
 }) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
@@ -796,6 +878,9 @@ function NewLinkDialog({
   const [expires, setExpires] = useState(false);
   const [days, setDays] = useState(30);
   const [err, setErr] = useState<Record<string, string>>({});
+  // L25-13 : activée par défaut si la page publique l'est
+  const [pp, setPp] = useState<PersonalPageDraft>(() => emptyPersonalPage(publicPage.enabled));
+  const ppErr = personalPageErrors(pp);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', onKey);
@@ -811,14 +896,14 @@ function NewLinkDialog({
         errs[v.key] = t('share.invalidEmail');
     }
     setErr(errs);
-    if (Object.keys(errs).length) return;
+    if (Object.keys(errs).length || Object.keys(ppErr).length) return;
     const vars = Object.fromEntries(Object.entries(values).filter(([, v]) => v.trim()));
-    await onCreate(name.trim(), vars, expires ? days : null);
+    await onCreate(name.trim(), vars, expires ? days : null, pp);
   }
   return (
     <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <form
-        className="modal"
+        className="modal modal-lg"
         role="dialog"
         aria-modal="true"
         aria-labelledby="sh-link-t"
@@ -877,10 +962,22 @@ function NewLinkDialog({
                     aria-invalid={err[v.key] ? true : undefined}
                   />
                   {err[v.key] && <span className="error-msg">{err[v.key]}</span>}
+                  {v.key === 'email' && <span className="help">{t('share.pp.emailHelp')}</span>}
                 </div>
               ))}
             </div>
           )}
+          <PersonalPageFields
+            draft={pp}
+            onChange={setPp}
+            publicPage={publicPage}
+            members={members}
+            datasetRows={datasetRows}
+            values={values}
+            demoTitle={demoTitle}
+            onEnablePublicPage={onEnablePublicPage}
+            errors={ppErr}
+          />
           <div className="setting sh-exp">
             <span className="t-label">{t('share.expiration')}</span>
             <span className="switch">

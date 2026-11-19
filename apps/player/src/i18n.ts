@@ -89,6 +89,14 @@ const dict = {
       a11y_non_evalue: 'non conforme',
       a11y_partiel: 'partiellement conforme',
       a11y_total: 'totalement conforme',
+      // L25-14 / 15 : page personnalisée par lien
+      preparedFor: 'Préparée pour {{company}}',
+      signedBy: '{{name}} · {{workspace}}',
+      personalNotice: 'Page préparée pour vous, non référencée. Votre visite est visible par {{workspace}}.',
+      inactiveTitle: 'Ce lien n’est plus actif',
+      inactiveBody:
+        'Il a expiré ou a été désactivé. Demandez une nouvelle adresse à la personne qui vous l’a envoyé.',
+      seePublic: 'Voir la démo publique',
     },
     center: {
       // A8 : Demo Center
@@ -424,6 +432,12 @@ const dict = {
       a11y_non_evalue: 'not compliant',
       a11y_partiel: 'partially compliant',
       a11y_total: 'fully compliant',
+      preparedFor: 'Prepared for {{company}}',
+      signedBy: '{{name}} · {{workspace}}',
+      personalNotice: 'Page prepared for you, not indexed. Your visit is visible to {{workspace}}.',
+      inactiveTitle: 'This link is no longer active',
+      inactiveBody: 'It has expired or was turned off. Ask the person who sent it to you for a new address.',
+      seePublic: 'See the public demo',
     },
     center: {
       demoSub: 'Demos',

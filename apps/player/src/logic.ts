@@ -126,7 +126,7 @@ export function parseRoute(
   | { kind: 'link'; token: string; search: string }
   | { kind: 'preview' }
   | { kind: 'center'; slug: string; pathId: string | null; params: URLSearchParams }
-  | { kind: 'page'; id: string }
+  | { kind: 'page'; id: string; code?: string }
   | { kind: 'none' } {
   const h = hash.replace(/^#/, '');
   const [path = '', search = ''] = h.split('?');
@@ -137,8 +137,14 @@ export function parseRoute(
     return { kind: 'link', token: parts[1], search: `?${search}` };
   if (parts[0] === 'preview') return { kind: 'preview' };
   // L19b : page publique d'une démo (#/p/<id>)
-  if (parts[0] === 'p' && parts[1] && /^[0-9a-f-]{36}$/i.test(parts[1]))
+  if (parts[0] === 'p' && parts[1] && /^[0-9a-f-]{36}$/i.test(parts[1])) {
+    // L25-14 : page personnalisée d'un lien (#/p/<id>/<code de 12 caractères>)
+    if (parts[2] !== undefined)
+      return /^[0-9A-Za-z]{12}$/.test(parts[2])
+        ? { kind: 'page', id: parts[1], code: parts[2] }
+        : { kind: 'none' };
     return { kind: 'page', id: parts[1] };
+  }
   // L14 : centre de formation (#/c/<slug>, #/c/<slug>/f/<formation>)
   if (parts[0] === 'c' && parts[1] && /^[a-z0-9][a-z0-9-]{1,46}[a-z0-9]$/.test(parts[1])) {
     const pathId = parts[2] === 'f' && parts[3] && /^[0-9a-f-]{36}$/i.test(parts[3]) ? parts[3] : null;

@@ -1809,7 +1809,30 @@
       "ogSoonText": "Aperçu enrichi lors d’un partage (image et balises Open Graph côté serveur)"
     },
     "ackLine": "Confirmation RGPD : {{name}}, le {{date}}",
-    "ackUnknown": "membre retiré"
+    "ackUnknown": "membre retiré",
+    "pp": {
+      "title": "Page personnalisée",
+      "help": "Une page à l'image de la page publique, avec votre message, pour ce destinataire. Non référencée.",
+      "off": "La page publique de la démo est désactivée.",
+      "enablePublic": "Activer la page publique",
+      "pageTitle": "Titre",
+      "titlePlaceholder": "Votre démo, {{company}}",
+      "preview": "Aperçu : {{title}}",
+      "message": "Message",
+      "count": "{{n}} / 400 caractères",
+      "signedBy": "Signé par",
+      "noSignature": "Sans signature",
+      "datasetRow": "Ligne du jeu de données",
+      "rowAuto": "Selon le jeu de données",
+      "rowN": "Ligne {{n}} · {{label}}",
+      "ctaLabel": "Texte du bouton",
+      "ctaUrl": "Lien du bouton",
+      "httpsRequired": "Saisissez une adresse qui commence par https://",
+      "emailHelp": "Sert à relier les vues et le lead à ce contact. Jamais affichée sur la page ni dans la démo.",
+      "column": "Page",
+      "badgeOn": "Personnalisée",
+      "badgeOff": "Démo seule"
+    }
   },
   "analytics": {
     "title": "Analytics",

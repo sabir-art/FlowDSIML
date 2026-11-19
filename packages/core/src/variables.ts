@@ -39,3 +39,22 @@ export function variablesFromSearch(search: string, allowedKeys: string[]): Vari
   }
   return out;
 }
+
+/**
+ * L25-13 : titre d'une page personnalisée. Variables remplacées ; une variable vide est retirée avec
+ * ses mots de liaison (« pour », « de », « chez », virgule…) ; titre vide : celui de la démo.
+ */
+export function personalTitle(tpl: string, values: VariableValues, fallback: string): string {
+  const out = tpl
+    .replace(
+      /(\s*(?:,|·|-|—|:)?\s*(?:(?<!\p{L})(?:pour|de|d’|d'|du|chez|à|avec|for|at|with)(?!\p{L}))?\s*)\{\{\s*([a-z][a-z0-9_]{0,39})\s*\}\}/giu,
+      (m, lead: string, key: string) => {
+        const v = (values[key.toLowerCase()] ?? '').trim();
+        return v ? `${lead}${v}` : '';
+      },
+    )
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^[\s,·:—-]+|[\s,·:—-]+$/g, '')
+    .trim();
+  return out || fallback;
+}

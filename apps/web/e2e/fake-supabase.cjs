@@ -1242,6 +1242,14 @@ async function install(page, state = seed()) {
           ...defaults(table, r),
           ...r,
         }));
+        // L25-13 : code de page tiré par la base (jamais celui du client)
+        if (table === 'share_links')
+          for (const it of items) {
+            const abc = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            it.page_code = it.page_enabled
+              ? Array.from(crypto.randomBytes(12), (x) => abc[x % 62]).join('')
+              : null;
+          }
         // step_comments : contexte et auteur posés comme le trigger SQL
         if (table === 'step_comments')
           for (const it of items) {

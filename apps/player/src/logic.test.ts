@@ -70,6 +70,12 @@ describe('player logic', () => {
     expect(parseRoute('#/l/abcdef123456')).toEqual({ kind: 'link', token: 'abcdef123456', search: '?' });
     expect(parseRoute('#/d/not-a-uuid')).toEqual({ kind: 'none' });
     expect(parseRoute('#/preview')).toEqual({ kind: 'preview' });
+    // L25-14 : page personnalisée (code de 12 caractères alphanumériques)
+    const id = '0193a5c0-0000-7000-8000-000000000001';
+    expect(parseRoute(`#/p/${id}`)).toEqual({ kind: 'page', id });
+    expect(parseRoute(`#/p/${id}/Ab3dE5fG7hJ9`)).toEqual({ kind: 'page', id, code: 'Ab3dE5fG7hJ9' });
+    expect(parseRoute(`#/p/${id}/abc`)).toEqual({ kind: 'none' });
+    expect(parseRoute(`#/p/${id}/Ab3dE5fG7hJ!`)).toEqual({ kind: 'none' });
   });
   it('F1 : fond des pop-up, checklist, choix, autoplay', () => {
     expect(backdropIndex(m, 1)).toBe(0);

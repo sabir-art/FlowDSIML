@@ -14,3 +14,6 @@ export function embedSnippet(url: string, title: string): string {
 
 /** L19b : page publique d'une démo. */
 export const publicPageUrl = (demoId: string) => `${PLAYER_URL}/#/p/${demoId}`;
+
+/** L25-14 : page personnalisée d'un lien (code de 12 caractères tiré par la base). */
+export const personalPageUrl = (demoId: string, code: string) => `${PLAYER_URL}/#/p/${demoId}/${code}`;

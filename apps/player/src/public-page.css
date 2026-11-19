@@ -247,3 +247,74 @@ html[data-page-theme='dark'] body {
     display: none;
   }
 }
+
+/* L25-14 : page personnalisée par lien */
+.pp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: var(--pp-surface-2, #f1f0ee);
+  font-size: 14px;
+  font-weight: 600;
+}
+.pp-msg {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  max-width: 720px;
+  margin: 0 0 24px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--pp-surface, #fff);
+  box-shadow: inset 0 0 0 1px var(--pp-border, #e7e5e4);
+}
+.pp-msg p {
+  margin: 0 0 6px;
+  white-space: pre-line;
+}
+/* Initiales en blanc sur #2F5DB8 (6,2:1) */
+.pp-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #2f5db8;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+}
+.pp-sign {
+  font-size: 14px;
+  color: var(--pp-muted, #57534e);
+}
+.pp-notice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-basis: 100%;
+  margin: 4px 0 0;
+}
+.pp-na .pill {
+  margin-top: 8px;
+}
+@media (max-width: 600px) {
+  .pp-perso .pp-hero h1 {
+    font-size: 30px;
+  }
+}
+.pp-dark .pp-badge {
+  background: #292524;
+}
+.pp-dark .pp-msg {
+  background: #1c1917;
+  box-shadow: inset 0 0 0 1px #44403c;
+}
+.pp-dark .pp-sign,
+.pp-dark .pp-notice {
+  color: #d6d3d1;
+}

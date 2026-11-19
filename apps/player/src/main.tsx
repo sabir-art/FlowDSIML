@@ -31,6 +31,8 @@ type State =
       manifest: Manifest;
       values: VariableValues;
       linkToken: string | null;
+      /** L25-13 : ligne du jeu de données choisie pour le lien personnalisé. */
+      datasetRow?: number | null;
       preview: boolean;
       startQuiz?: boolean;
       /** L13 : reprise proposée (« Bon retour ») tant que l'apprenant n'a pas choisi. */
@@ -119,6 +121,7 @@ function App() {
       let demoId: string;
       let linkVars: VariableValues = {};
       let linkToken: string | null = null;
+      let linkRow: number | null = null;
       let search = '';
       if (route.kind === 'demo') {
         demoId = route.id;
@@ -128,6 +131,7 @@ function App() {
         if (!link) return fail('expired');
         demoId = link.demoId;
         linkVars = link.variables ?? {};
+        linkRow = typeof link.datasetRow === 'number' ? link.datasetRow : null;
         linkToken = route.token;
         search = route.search;
       } else {
@@ -167,6 +171,7 @@ function App() {
             manifest,
             values,
             linkToken,
+            datasetRow: linkRow,
             preview,
             resume: resumable(resume) ? resume : undefined,
             clickToStart: q('start') === 'click' && !preview,
@@ -261,6 +266,7 @@ function App() {
     <Player
       manifest={m}
       values={state.values}
+      datasetRowIndex={state.datasetRow ?? null}
       tracker={tracker!}
       preview={state.preview}
       startQuiz={state.startQuiz}
@@ -295,7 +301,7 @@ render(
   first.kind === 'center' ? (
     <CenterApp route={first} />
   ) : first.kind === 'page' ? (
-    <PublicPage id={first.id} />
+    <PublicPage id={first.id} code={first.code} />
   ) : (
     <App />
   ),
