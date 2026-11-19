@@ -121,7 +121,27 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     .getByRole('button', { name: 'Précédente' })
     .click()
     .catch(() => {});
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l21-03-editeur-video${sfx}.png` });
+  ok(
+    (await page.getByRole('button', { name: /Retirer la coupe de/ }).innerText()).includes(
+      'Supprimer la coupe',
+    ),
+    'coupe : bouton nommé « Supprimer la coupe »',
+  );
+  ok(
+    (await page.locator('#video-tl-slot .vd-tl').count()) === 1 &&
+      (await page.locator('.frame .vd-tl').count()) === 0,
+    'carte Montage sous le canevas, hors du cadre',
+  );
+  if (SHOTS) {
+    for (const x of await page.locator('.toast .toast-close').all()) await x.click().catch(() => {});
+    await page.waitForFunction(() => !document.querySelector('.toast')).catch(() => {});
+    // Panneau en haut : section « Pause-étape 1 · 00:03 » et « Texte de la bulle »
+    await page.evaluate(() =>
+      document.querySelectorAll('.panel, .panel-body, aside').forEach((el) => (el.scrollTop = 0)),
+    );
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${SHOTS}/l21-03-editeur-video${sfx}.png` });
+  }
 
   // Conversion en captures
   const n0 = state.tables.steps.filter((s) => s.demo_id === DEMO).length;

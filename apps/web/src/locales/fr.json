@@ -1190,7 +1190,9 @@
       "capText": "Texte du sous-titre {{n}}",
       "capDelete": "Supprimer le sous-titre {{n}}",
       "addCaption": "Ajouter un sous-titre",
-      "captionInvalid": "Sous-titre {{n}} : temps ou texte invalide (format 1:02.5)."
+      "captionInvalid": "Sous-titre {{n}} : temps ou texte invalide (format 1:02.5).",
+      "pauseInCut": "Dans une coupe : ignorée à la lecture.",
+      "deleteCutShort": "Supprimer la coupe"
     },
     "html": {
       "kind": "Étape HTML",

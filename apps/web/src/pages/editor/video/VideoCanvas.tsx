@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Pause, Play, Scissors, Target } from 'lucide-react';
 import { captionAt, editedDuration, normalizeCuts } from '@flowdsiml/core';
@@ -53,6 +54,8 @@ export function VideoCanvas({
   const [notice, setNotice] = useState('');
   const url = step.video_path ? editor.imageUrls[step.video_path] : undefined;
   const cuts = useMemo(() => normalizeCuts(v.cuts, dur || 1), [v.cuts, dur]);
+  const [tlSlot, setTlSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => setTlSlot(document.getElementById('video-tl-slot')), [step.id]);
   const after = editedDuration(cuts, dur || 1);
   const pauseIdx = v.pauses.findIndex((p) => p.id === ed.pause);
   const pause = pauseIdx >= 0 ? v.pauses[pauseIdx] : null;
@@ -159,6 +162,133 @@ export function VideoCanvas({
   if (at < dur) segs.push({ from: at, to: dur });
   const ticks = Array.from({ length: 5 }, (_, i) => (dur * i) / 4);
 
+  const timeline = (
+    <div className="vd-tl card" aria-label={t('editor.video.montage')}>
+      <div className="vd-bar">
+        <button type="button" className="btn btn-secondary btn-sm" onClick={togglePlay} disabled={!url}>
+          {ed.playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+          {ed.playing ? t('editor.video.pause') : t('editor.video.play')}
+        </button>
+        <span className="vd-time">
+          {t('editor.video.time', { now: mmss(ed.t), total: mmss(dur), after: mmss(after) })}
+        </span>
+        <span className="grow" />
+        {!readOnly && (
+          <>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={cut}
+              aria-pressed={ed.cutStart !== null}
+            >
+              <Scissors aria-hidden="true" />
+              {ed.cutStart !== null ? t('editor.video.cutEnd') : t('editor.video.cut')}{' '}
+              <span className="kbd">C</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => void addPause()}
+              disabled={v.pauses.length >= MAX_PAUSES}
+            >
+              <Target aria-hidden="true" />
+              {t('editor.video.addPause')} <span className="kbd">P</span>
+            </button>
+          </>
+        )}
+      </div>
+      <div
+        className="vd-tracks"
+        tabIndex={0}
+        role="group"
+        aria-label={t('editor.video.tracksLabel')}
+        aria-describedby="vd-keys"
+        onKeyDown={onKey}
+      >
+        <div
+          className="vd-track"
+          role="img"
+          aria-label={t('editor.video.trackSummary', {
+            total: mmss(dur),
+            segs: segs.length,
+            cuts: cuts.length
+              ? cuts.map((c) => `${mmss(c.from)}–${mmss(c.to)}`).join(', ')
+              : t('editor.video.none'),
+            pauses: v.pauses.length ? v.pauses.map((p) => mmss(p.t)).join(', ') : t('editor.video.none'),
+          })}
+          onClick={(e) => {
+            const r = e.currentTarget.getBoundingClientRect();
+            seek(((e.clientX - r.left) / r.width) * dur);
+          }}
+        >
+          {segs.map((s, i) => {
+            const inSeg = v.pauses.find((p) => p.t >= s.from && p.t < s.to);
+            return (
+              <span
+                key={i}
+                className="vd-seg"
+                style={{ left: pct(s.from), width: `calc(${pct(s.to)} - ${pct(s.from)})` }}
+              >
+                {inSeg?.title}
+              </span>
+            );
+          })}
+          {cuts.map((c, i) => (
+            <span
+              key={`c${i}`}
+              className="vd-cut"
+              style={{ left: pct(c.from), width: `calc(${pct(c.to)} - ${pct(c.from)})` }}
+            />
+          ))}
+          {ed.cutStart !== null && <span className="vd-cutmark" style={{ left: pct(ed.cutStart) }} />}
+          {v.pauses.map((p, i) => (
+            <button
+              key={p.id}
+              type="button"
+              tabIndex={-1}
+              className={`vd-pin${p.id === ed.pause ? ' sel' : ''}`}
+              style={{ left: pct(p.t) }}
+              aria-hidden="true"
+              onClick={(e) => {
+                e.stopPropagation();
+                setVideoEdit({ pause: p.id });
+                seek(p.t);
+              }}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <span className="vd-head" style={{ left: pct(ed.t) }} />
+        </div>
+        <div
+          className="vd-subtrack"
+          role="img"
+          aria-label={t('editor.video.subSummary', { count: v.captions.length })}
+        >
+          {v.captions.map((c, i) => (
+            <span
+              key={i}
+              className="vd-subblock"
+              style={{ left: pct(c.from), width: `calc(${pct(c.to)} - ${pct(c.from)})` }}
+            >
+              {c.text}
+            </span>
+          ))}
+        </div>
+        <div className="vd-scale" aria-hidden="true">
+          {ticks.map((x, i) => (
+            <span key={i}>{mmss(x)}</span>
+          ))}
+        </div>
+      </div>
+      <p className="help" id="vd-keys">
+        {t('editor.video.keys')}
+      </p>
+      <span className="sr-only" role="status">
+        {notice}
+      </span>
+    </div>
+  );
   return (
     <div className="vd">
       <div className="vd-stage">
@@ -198,131 +328,8 @@ export function VideoCanvas({
         {caption && <span className="vd-sub">{caption}</span>}
       </div>
 
-      <div className="vd-tl card" aria-label={t('editor.video.montage')}>
-        <div className="vd-bar">
-          <button type="button" className="btn btn-secondary btn-sm" onClick={togglePlay} disabled={!url}>
-            {ed.playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
-            {ed.playing ? t('editor.video.pause') : t('editor.video.play')}
-          </button>
-          <span className="vd-time">
-            {t('editor.video.time', { now: mmss(ed.t), total: mmss(dur), after: mmss(after) })}
-          </span>
-          <span className="grow" />
-          {!readOnly && (
-            <>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={cut}
-                aria-pressed={ed.cutStart !== null}
-              >
-                <Scissors aria-hidden="true" />
-                {ed.cutStart !== null ? t('editor.video.cutEnd') : t('editor.video.cut')}{' '}
-                <span className="kbd">C</span>
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => void addPause()}
-                disabled={v.pauses.length >= MAX_PAUSES}
-              >
-                <Target aria-hidden="true" />
-                {t('editor.video.addPause')} <span className="kbd">P</span>
-              </button>
-            </>
-          )}
-        </div>
-        <div
-          className="vd-tracks"
-          tabIndex={0}
-          role="group"
-          aria-label={t('editor.video.tracksLabel')}
-          aria-describedby="vd-keys"
-          onKeyDown={onKey}
-        >
-          <div
-            className="vd-track"
-            role="img"
-            aria-label={t('editor.video.trackSummary', {
-              total: mmss(dur),
-              segs: segs.length,
-              cuts: cuts.length
-                ? cuts.map((c) => `${mmss(c.from)}–${mmss(c.to)}`).join(', ')
-                : t('editor.video.none'),
-              pauses: v.pauses.length ? v.pauses.map((p) => mmss(p.t)).join(', ') : t('editor.video.none'),
-            })}
-            onClick={(e) => {
-              const r = e.currentTarget.getBoundingClientRect();
-              seek(((e.clientX - r.left) / r.width) * dur);
-            }}
-          >
-            {segs.map((s, i) => {
-              const inSeg = v.pauses.find((p) => p.t >= s.from && p.t < s.to);
-              return (
-                <span
-                  key={i}
-                  className="vd-seg"
-                  style={{ left: pct(s.from), width: `calc(${pct(s.to)} - ${pct(s.from)})` }}
-                >
-                  {inSeg?.title}
-                </span>
-              );
-            })}
-            {cuts.map((c, i) => (
-              <span
-                key={`c${i}`}
-                className="vd-cut"
-                style={{ left: pct(c.from), width: `calc(${pct(c.to)} - ${pct(c.from)})` }}
-              />
-            ))}
-            {ed.cutStart !== null && <span className="vd-cutmark" style={{ left: pct(ed.cutStart) }} />}
-            {v.pauses.map((p, i) => (
-              <button
-                key={p.id}
-                type="button"
-                tabIndex={-1}
-                className={`vd-pin${p.id === ed.pause ? ' sel' : ''}`}
-                style={{ left: pct(p.t) }}
-                aria-hidden="true"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setVideoEdit({ pause: p.id });
-                  seek(p.t);
-                }}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <span className="vd-head" style={{ left: pct(ed.t) }} />
-          </div>
-          <div
-            className="vd-subtrack"
-            role="img"
-            aria-label={t('editor.video.subSummary', { count: v.captions.length })}
-          >
-            {v.captions.map((c, i) => (
-              <span
-                key={i}
-                className="vd-subblock"
-                style={{ left: pct(c.from), width: `calc(${pct(c.to)} - ${pct(c.from)})` }}
-              >
-                {c.text}
-              </span>
-            ))}
-          </div>
-          <div className="vd-scale" aria-hidden="true">
-            {ticks.map((x, i) => (
-              <span key={i}>{mmss(x)}</span>
-            ))}
-          </div>
-        </div>
-        <p className="help" id="vd-keys">
-          {t('editor.video.keys')}
-        </p>
-        <span className="sr-only" role="status">
-          {notice}
-        </span>
-      </div>
+      {/* L21-03 : carte Montage sous le canevas, hors du cadre navigateur (thème de l'app) */}
+      {tlSlot ? createPortal(timeline, tlSlot) : timeline}
     </div>
   );
 }

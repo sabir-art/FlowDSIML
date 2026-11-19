@@ -7,7 +7,11 @@
   <body>
     <main>
       <header>
-        <img class="logo" src="/logo-tutoclick-compact.svg" width="98" height="31" alt="TutoClick" />
+        <!-- L21-01 : logo clair ou sombre selon le thème du navigateur -->
+        <picture class="logo">
+          <source srcset="/logo-tutoclick-compact-sombre.svg" media="(prefers-color-scheme: dark)" />
+          <img src="/logo-tutoclick-compact.svg" width="98" height="31" alt="TutoClick" />
+        </picture>
         <span class="muted" data-i18n="subtitle"></span>
       </header>
       <div id="error" class="alert" role="alert" hidden></div>
@@ -91,7 +95,12 @@
           <p class="muted small" data-i18n="mobileHelp"></p>
         </div>
         <button id="start" class="btn btn-accent">
-          <i data-lucide="video"></i><span id="start-label" data-i18n="start"></span>
+          <!-- L21-01 : icône selon le type de capture (smartphone pour le format mobile) -->
+          <span class="start-ico" data-for="clicks"><i data-lucide="video"></i></span
+          ><span class="start-ico" data-for="video" hidden><i data-lucide="video"></i></span
+          ><span class="start-ico" data-for="mobile" hidden><i data-lucide="smartphone"></i></span
+          ><span class="start-ico" data-for="html" hidden><i data-lucide="code"></i></span
+          ><span id="start-label" data-i18n="start"></span>
         </button>
         <p class="muted small" id="hint" data-i18n="hint"></p>
         <p class="small">

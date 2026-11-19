@@ -246,3 +246,16 @@ dialog.vd-dialog .modal-body {
   gap: 6px;
   align-items: center;
 }
+
+/* L21-03 : pause placée dans une coupe (ignorée à la lecture) */
+.vd-pin.in-cut {
+  background: var(--fd-color-surface);
+  color: var(--fd-color-warning-text, #93370d);
+  box-shadow: 0 0 0 2px var(--fd-color-warning, #b54708);
+}
+/* L21-03 : carte Montage sous le canevas, au thème de l'app */
+.video-tl-slot {
+  width: 100%;
+  max-width: 1100px;
+  margin: 12px auto 0;
+}

@@ -193,6 +193,25 @@ legend {
 .type-card:has(input:checked) {
   border-color: var(--fd-color-primary, #a3195b);
   box-shadow: inset 0 0 0 1px var(--fd-color-primary, #a3195b);
+  /* L21-01 : fond pâle de la couleur principale sur la carte choisie */
+  background: color-mix(in srgb, var(--fd-color-primary, #a3195b) 8%, var(--fd-color-surface));
+}
+/* L21-01 : indicateur radio sur chaque carte */
+.type-card::after {
+  content: '';
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0 auto;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px solid var(--fd-color-border-strong);
+  background: var(--fd-color-surface);
+}
+.type-card:has(input:checked)::after {
+  border-color: var(--fd-color-primary, #a3195b);
+  box-shadow: inset 0 0 0 3px var(--fd-color-surface);
+  background: var(--fd-color-primary, #a3195b);
 }
 .type-card:has(input:focus-visible) {
   box-shadow: var(--fd-shadow-focus);
@@ -229,4 +248,24 @@ fieldset.inline legend {
 }
 #custom-size[hidden] {
   display: none;
+}
+
+.logo {
+  display: inline-flex;
+  flex: none;
+}
+.start-ico[hidden] {
+  display: none;
+}
+.start-ico {
+  display: inline-flex;
+}
+/* L21-01 : contrôles natifs (radios « Portrait / Paysage ») lisibles en sombre (contour 3:1) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+.check input {
+  accent-color: var(--fd-color-primary, #a3195b);
 }

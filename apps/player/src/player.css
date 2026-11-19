@@ -2307,8 +2307,24 @@ h1.p-title {
   min-width: 44px;
   min-height: 44px;
 }
+/* L21-05 / 06 : hotspot tactile visible de 44 px, anneau #D60B52 de 3 px */
 .is-mobile .p-beacon .p-beacon-dot {
+  width: 44px;
+  height: 44px;
+  background: rgb(214 11 82 / 0.18);
   box-shadow: 0 0 0 3px #d60b52;
+}
+/* L21-06 : feuille du haut sous l'en-tête du lecteur (le sous-titre reste visible) */
+.p-root.is-framed .p-sheet--top {
+  top: 88px;
+}
+/* L21-05 : la capture mobile remplit l'écran du téléphone (sans marges latérales ni coins) */
+.p-root.is-mobile .p-stage-wrap {
+  padding: 0;
+}
+.p-root.is-mobile .p-stage {
+  border-radius: 0;
+  box-shadow: none;
 }
 /* Cadre de téléphone : place pour l'encoche, barre de navigation contenue dans la largeur */
 .p-root.is-framed .p-top {

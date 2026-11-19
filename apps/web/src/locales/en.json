@@ -1190,7 +1190,9 @@
       "capText": "Text of caption {{n}}",
       "capDelete": "Delete caption {{n}}",
       "addCaption": "Add a caption",
-      "captionInvalid": "Caption {{n}}: invalid time or text (format 1:02.5)."
+      "captionInvalid": "Caption {{n}}: invalid time or text (format 1:02.5).",
+      "pauseInCut": "Inside a cut: skipped during playback.",
+      "deleteCutShort": "Delete the cut"
     },
     "html": {
       "kind": "HTML step",

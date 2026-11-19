@@ -11,6 +11,26 @@ const SHOTS = process.env.SHOTS_DIR;
 const { sfx, themedContext } = require('./_theme.cjs');
 const webm = fs.readFileSync(path.join(__dirname, 'fixture-video.webm'));
 const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
+/** L21-05 / 06 : vraie capture mobile fictive (390 × 844), générée par le test (domaines .example). */
+const MOBILE_PAGE = `<!doctype html><html><head><meta charset="utf-8"><style>
+  *{box-sizing:border-box}body{margin:0;width:390px;height:844px;font:15px/1.4 system-ui,sans-serif;color:#1c1917;background:#f5f5f4}
+  header{height:72px;display:flex;align-items:center;gap:12px;padding:0 16px;background:#1f2a44;color:#fff}
+  #menu{width:44px;height:44px;border-radius:10px;border:0;background:#2e3b5c;display:grid;place-items:center}
+  #menu i{display:block;width:20px;height:2px;background:#fff;box-shadow:0 6px #fff,0 -6px #fff}
+  header b{font-size:17px}header span{margin-left:auto;font-size:12px;opacity:.85}
+  main{padding:18px 16px}h1{font-size:22px;margin:0 0 14px}
+  .f{display:block;margin-bottom:12px}.f small{display:block;color:#57534e;margin-bottom:4px}
+  .f div{height:44px;border:1px solid #d6d3d1;border-radius:10px;background:#fff;padding:11px 12px}
+  #ok{position:absolute;left:16px;right:16px;top:760px;height:52px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font:600 16px system-ui}
+</style></head><body><header><button id="menu" aria-label="Menu"><i></i></button><b>ExampleCRM</b><span>alice@acme.example</span></header>
+<main><h1>Nouvelle fiche</h1>
+<label class="f"><small>Nom</small><div>Martin</div></label>
+<label class="f"><small>Prénom</small><div>Camille</div></label>
+<label class="f"><small>Courriel</small><div>camille.martin@acme.example</div></label>
+<label class="f"><small>Téléphone</small><div>01 23 45 67 89</div></label>
+<label class="f"><small>Structure</small><div>Équipe Nord</div></label>
+</main><button id="ok">Enregistrer la fiche</button></body></html>`;
+let mobilePng = png;
 const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' };
 const N = ' ';
 const base = (id, extra) => ({
@@ -59,10 +79,10 @@ const manifests = {
         hotspots: [
           {
             id: 'h1',
-            x: 0.3,
-            y: 0.2,
-            w: 0.3,
-            h: 0.06,
+            x: 16 / 390,
+            y: 14 / 844,
+            w: 44 / 390,
+            h: 44 / 844,
             title: 'Ouvrez le menu',
             placement: 'auto',
             action: { type: 'next' },
@@ -76,10 +96,10 @@ const manifests = {
         hotspots: [
           {
             id: 'h2',
-            x: 0.3,
-            y: 0.86,
-            w: 0.4,
-            h: 0.06,
+            x: 16 / 390,
+            y: 760 / 844,
+            w: 358 / 390,
+            h: 52 / 844,
             title: 'Validez',
             placement: 'auto',
             action: { type: 'next' },
@@ -92,6 +112,12 @@ const manifests = {
 
 (async () => {
   const b = await chromium.launch();
+  {
+    const mp = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+    await mp.setContent(MOBILE_PAGE);
+    mobilePng = await mp.screenshot();
+    await mp.context().close();
+  }
   const ok = (c, l) => {
     console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
     if (!c) process.exitCode = 1;
@@ -124,7 +150,7 @@ const manifests = {
         body: webm.subarray(start, end + 1),
       });
     });
-    await p.route('**/assets/m.png', (r) => r.fulfill({ contentType: 'image/png', body: png }));
+    await p.route('**/assets/m.png', (r) => r.fulfill({ contentType: 'image/png', body: mobilePng }));
     await p.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, headers: cors, body: '{}' }));
     await p.goto(`${PLAYER}/#/d/${id}`);
     return p;

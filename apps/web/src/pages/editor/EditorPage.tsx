@@ -747,6 +747,7 @@ export function EditorPage() {
                       {selectedForm && <FormPreview form={selectedForm} editor={editor} />}
                     </div>
                   </div>
+                  {step.kind === 'video' && <div id="video-tl-slot" className="video-tl-slot" />}
                 </>
               ) : (
                 <div className="muted">{t('editor.empty')}</div>

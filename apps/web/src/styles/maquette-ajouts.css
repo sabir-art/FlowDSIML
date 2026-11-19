@@ -1577,6 +1577,15 @@
 .mk .stage-inner > .frame {
   margin: auto 0;
 }
+/* L20-01 / L21-03 : fil HTML au-dessus et carte Montage sous le cadre ; rangées à la hauteur de
+   leur contenu (le cadre, en overflow hidden, ne doit pas être compressé sous la carte) */
+.mk .stage-inner:has(> .html-crumbs-slot, > .video-tl-slot) {
+  grid-auto-rows: max-content;
+  align-content: safe center;
+}
+.mk .stage-inner:has(> .html-crumbs-slot, > .video-tl-slot) > .frame {
+  margin: 0;
+}
 .mk .stage-main .floatbar {
   bottom: 24px;
 }

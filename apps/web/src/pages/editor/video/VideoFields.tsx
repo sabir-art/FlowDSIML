@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Layers, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
+import { Layers, Pencil, Plus, Trash2, TriangleAlert, Upload, X } from 'lucide-react';
 import { parseVtt } from '@flowdsiml/core';
 import { useToast } from '../../../components/Toast';
 import type { DemoEditor } from '../useDemoEditor';
@@ -109,6 +109,13 @@ export function VideoFields({
               />
             </div>
             <p className="help">{t('editor.video.pauseHelp')}</p>
+            {/* L21-03 : une pause placée dans une coupe est ignorée à la lecture */}
+            {v.cuts.some((c) => pause.t >= c.from && pause.t < c.to) && (
+              <p className="help help-warning">
+                <TriangleAlert size={16} aria-hidden="true" />
+                {t('editor.video.pauseInCut')}
+              </p>
+            )}
             <div className="row vd-pnav">
               <button
                 type="button"
@@ -169,19 +176,21 @@ export function VideoFields({
           <div className="sec-title">{t('editor.video.cutsTitle', { count: v.cuts.length })}</div>
           <ul className="vd-plist">
             {v.cuts.map((c, i) => (
-              <li key={i} className="row">
+              <li key={i} className="row vd-pnav">
                 <span>
                   {mmss(c.from)} – {mmss(c.to)}
                 </span>
                 <span className="grow" />
+                {/* L21-03 : action nommée, alignée sur « Précédente / Suivante » */}
                 {!readOnly && (
                   <button
                     type="button"
-                    className="btn btn-ghost btn-sm btn-icon"
+                    className="btn btn-ghost btn-sm"
                     aria-label={t('editor.video.deleteCut', { from: mmss(c.from), to: mmss(c.to) })}
                     onClick={() => save({ cuts: v.cuts.filter((_, j) => j !== i) })}
                   >
                     <X aria-hidden="true" />
+                    {t('editor.video.deleteCutShort')}
                   </button>
                 )}
               </li>

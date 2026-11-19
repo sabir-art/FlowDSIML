@@ -43,6 +43,7 @@ function syncMode() {
   show('opt-mobile', m === 'mobile');
   show('opt-html', m === 'html');
   show('hint', m === 'clicks');
+  for (const el of document.querySelectorAll<HTMLElement>('.start-ico')) el.hidden = el.dataset.for !== m;
   $('start-label').textContent =
     m === 'video'
       ? strings.startVideo
