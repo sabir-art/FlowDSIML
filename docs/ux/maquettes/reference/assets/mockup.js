@@ -113,7 +113,7 @@
         </div>
         <nav class="nav" aria-label="Sections">
           <a href="dashboard.html"${cur('demos')}>${svg('play')}Démos<span class="count">24</span></a>
-          <a href="#"${cur('centers')}>${svg('layers')}Démo centers<span class="badge" style="margin-left:auto">V2</span></a>
+          <a href="#"${cur('centers')}>${svg('layers')}Démo centers</a>
           <a href="analytics.html"${cur('analytics')}>${svg('chart')}Analytics</a>
           <a href="analytics.html#leads"${cur('leads')}>${svg('users')}Leads<span class="count">128</span></a>
           <div class="nav-title">Dossiers</div>

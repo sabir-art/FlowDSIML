@@ -38,7 +38,7 @@
 - **Canevas** :
   - au-dessus du canevas, un sélecteur « Test A/B · Variante A / Variante B » (`radiogroup`) ;
   - le canevas montre la variante choisie ;
-  - les pastilles A et B utilisent `#2381B5` et `#A3195B`, avec la lettre écrite dans la pastille (jamais la couleur seule).
+  - les pastilles A et B utilisent `#217BAC` (lettre blanche 4,67:1, comme le style Bleu institutionnel) et `#A3195B`, avec la lettre écrite dans la pastille (jamais la couleur seule). En sombre, la bordure de la variante B qui mène prend une teinte plus claire pour atteindre 3:1 sur la carte.
 - **Panneau** :
   - titre de section et badge « En cours · jour n » (`badge-success`) ;
   - **deux cartes de variante** : pastille, libellé (« Original », puis le libellé donné à B), valeur de l'objectif en grand, dénominateur réel (« de complétion · n visiteurs »). La variante qui mène a une bordure de 2 px de la couleur B ou A. Il n'y a pas de meneur sous 50 visiteurs par variante ;
