@@ -150,6 +150,48 @@ export interface TrackerLike {
   setBaseProps?(props: Record<string, string>): void;
 }
 
+/**
+ * L19 : description grossière de l'appareil, envoyée avec chaque lot. Familles en liste fermée, sans
+ * version ni empreinte (pas de résolution exacte, pas de polices, pas de canvas) ; l'IP n'est jamais
+ * conservée.
+ */
+export function deviceInfo(
+  ua: string = navigator.userAgent,
+  width: number = Math.min(screen.width || innerWidth, innerWidth || screen.width),
+  language: string = navigator.language || '',
+): { type: 'mobile' | 'tablet' | 'desktop'; browser: string; os: string; lang: string | null } {
+  const tablet = /iPad|Tablet|PlayBook|Silk/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua));
+  const mobile = !tablet && (/Mobi|iPhone|iPod|Android.*Mobile|Windows Phone/i.test(ua) || width < 640);
+  const browser = /Edg\//.test(ua)
+    ? 'edge'
+    : /OPR\/|Opera/.test(ua)
+      ? 'opera'
+      : /Firefox\//.test(ua)
+        ? 'firefox'
+        : /SamsungBrowser\//.test(ua)
+          ? 'samsung'
+          : /Chrome\/|CriOS\//.test(ua)
+            ? 'chrome'
+            : /Safari\//.test(ua)
+              ? 'safari'
+              : 'other';
+  const os = /Windows/.test(ua)
+    ? 'windows'
+    : /iPhone|iPad|iPod/.test(ua)
+      ? 'ios'
+      : /Mac OS X|Macintosh/.test(ua)
+        ? 'macos'
+        : /Android/.test(ua)
+          ? 'android'
+          : /CrOS/.test(ua)
+            ? 'chromeos'
+            : /Linux/.test(ua)
+              ? 'linux'
+              : 'other';
+  const lang = /^[a-z]{2}/i.exec(language)?.[0]?.toLowerCase() ?? null;
+  return { type: tablet ? 'tablet' : mobile ? 'mobile' : 'desktop', browser, os, lang };
+}
+
 /** File d'événements : envoi groupé toutes les 2 s et à la fermeture de la page. */
 export class Tracker {
   private queue: Array<{
@@ -215,6 +257,7 @@ export class Tracker {
       sessionId: this.sessionId,
       referrer: document.referrer || null,
       embedOrigin: parent !== window ? (location.ancestorOrigins?.[0] ?? null) : null,
+      device: deviceInfo(),
       events,
     };
     const body = JSON.stringify(batch);
