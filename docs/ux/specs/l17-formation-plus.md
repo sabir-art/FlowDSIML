@@ -45,7 +45,7 @@ Il ne manque que les captures de l'app, en clair et en sombre. À vérifier sur 
 - **Panneau Étape** :
   - **Capture « Avant »** et **Capture « Maintenant »** : vignette, source (« Étape n », ou « Image importée » avec son nom) et bouton « Changer ». Le menu de « Changer » propose : choisir une étape de la démo, importer une image (PNG, JPEG, WebP, 10 Mo au plus).
     - La capture d'une étape est **copiée** au moment du choix, flous compris. Modifier ensuite l'étape source ne change pas l'Avant / Après.
-    - Une image importée passe par la détection des données personnelles (F1 §1), comme une capture.
+    - Une image importée n'a pas de détection automatique des données personnelles (arbitrage du chef d'équipe). L'import affiche l'avertissement « Cette image n'est pas vérifiée automatiquement : floutez les données personnelles avant de publier. ». Le bilan RGPD de la publication (F1-02) ajoute la ligne « n images importées non vérifiées ».
   - **Disposition** (`radiogroup`) : Côte à côte (par défaut), Curseur, Bascule. Aide : « Sur mobile, la bascule est toujours utilisée. »
   - **Libellés** : « Avant » et « Maintenant » par défaut, 20 caractères au plus.
   - **Note sous les captures** : une ligne pour l'Avant, une pour le Maintenant, 140 caractères chacune. C'est du texte réel, lu par les lecteurs d'écran. Si les deux lignes sont vides, la note n'est pas affichée.

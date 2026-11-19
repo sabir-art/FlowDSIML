@@ -71,8 +71,9 @@
 - **Vide (L18-04)** : une seule grande case « Importer votre premier fichier » avec l'usage, « 0 Mo sur 500 Mo », et « Utiliser ce fichier » en `aria-disabled`.
 - **Règles** :
   - un SVG importé est nettoyé côté serveur : scripts, `foreignObject` et liens externes sont retirés ;
-  - une image passe par la détection des données personnelles (F1 §1). Si elle contient des données repérées, l'import demande de flouter ou de confirmer ;
-  - supprimer un fichier utilisé demande confirmation : « Ce fichier est utilisé dans n démos. Il sera remplacé par l'image par défaut. » ;
+  - une image importée n'a pas de détection automatique des données personnelles (arbitrage du chef d'équipe). L'import affiche l'avertissement « Cette image n'est pas vérifiée automatiquement : floutez les données personnelles avant de publier. », et le bilan RGPD de la publication ajoute la ligne « n images importées non vérifiées » ;
+  - supprimer un fichier utilisé demande confirmation : « Ce fichier est utilisé dans n démos. Ces emplacements resteront vides. » (aucune image par défaut ne le remplace) ;
+  - le pied affiche le vrai total utilisé (« 1,8 Mo sur 500 Mo », en Ko sous 1 Mo), jamais une valeur arrondie à zéro ;
   - quota de 500 Mo par workspace. Au-delà, erreur à l'import : « Médiathèque pleine : supprimez des fichiers inutilisés ».
 
 ## 4. Styles prédéfinis (L18-05)
