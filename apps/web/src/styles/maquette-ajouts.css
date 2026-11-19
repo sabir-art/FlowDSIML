@@ -1144,13 +1144,14 @@
 /* ---- Peau DSI : effets des maquettes d'origine regroupés en jetons réutilisables ----
    La palette finale sera appliquée d'un coup en ne modifiant que ces jetons. */
 :root {
-  /* Appel fort (référence DSI corrigée, b806cb4) : orange dans l'angle et le halo, texte blanc sur framboise (≥ 5:1) */
-  --tc-grad-cta: linear-gradient(135deg, var(--fd-orange-500) 0, var(--fd-framboise-600) 24px);
-  --tc-grad-cta-sm: linear-gradient(135deg, var(--fd-orange-500) 0, var(--fd-framboise-600) 16px);
-  --tc-grad-cta-block: linear-gradient(90deg, var(--fd-orange-500) 0%, var(--fd-framboise-600) 22%);
-  --tc-grad-cta-halo: 0 6px 16px -6px color-mix(in srgb, var(--fd-orange-500) 75%, transparent);
-  --tc-grad-cta-hover: var(--fd-framboise-700);
-  --tc-on-grad: #fff;
+  /* Appel fort : retour Lead UX (AA), fond uni de l'accent (fd-btn--accent), jamais de dégradé
+     derrière du texte. #D60B52 et texte blanc en clair, #E35889 en sombre (jetons du thème). */
+  --tc-grad-cta: var(--fd-color-accent);
+  --tc-grad-cta-sm: var(--fd-color-accent);
+  --tc-grad-cta-block: var(--fd-color-accent);
+  --tc-grad-cta-halo: none;
+  --tc-grad-cta-hover: var(--fd-color-accent-hover);
+  --tc-on-grad: var(--fd-color-on-accent);
 }
 /* Bouton d'appel fort (Publier, Passer à …, Démarrer la capture) */
 .tc-cta-grad .fd-btn--primary,
@@ -1170,6 +1171,10 @@
 .tc-cta-grad .fd-btn--primary:hover,
 .mk .btn.tc-cta-grad:hover {
   background: var(--tc-grad-cta-hover);
+}
+.tc-cta-grad .fd-btn--primary:focus-visible,
+.mk .btn.tc-cta-grad:focus-visible {
+  box-shadow: var(--fd-shadow-focus);
 }
 .mk .sh-perso-head {
   flex-wrap: nowrap;

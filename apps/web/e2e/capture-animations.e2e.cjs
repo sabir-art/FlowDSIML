@@ -48,6 +48,8 @@ ${Array.from({ length: 9 }, (_, i) => `<div class="row">Rapport ${i + 1} · Équ
   const okBtn = await box('#ok');
   await gen.context().close();
   const rel = (r) => ({ x: r.left / W, y: r.top / VH, w: r.width / W, h: r.height / VH });
+  // Hotspot juste à droite du bouton : la pastille ne masque pas « Créer le rapport »
+  const beside = (r) => ({ x: (r.left + r.width + 4) / W, y: r.top / VH, w: 28 / W, h: r.height / VH });
 
   const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
@@ -80,7 +82,7 @@ ${Array.from({ length: 9 }, (_, i) => `<div class="row">Rapport ${i + 1} · Équ
   });
   state.tables.hotspots[0] = {
     ...state.tables.hotspots[0],
-    ...rel(okBtn),
+    ...beside(okBtn),
     title: 'Créez le rapport',
     body: 'Cliquez sur « Créer le rapport ».',
   };
@@ -154,13 +156,22 @@ ${Array.from({ length: 9 }, (_, i) => `<div class="row">Rapport ${i + 1} · Équ
     `défilement par défaut : vers le bas, ${TOP} px, 1,2 s`,
   );
   ok(
-    (await page.locator('.cap-scroll-mark .cap-chip').textContent()) === `Défilement · ${TOP}${N}px`,
+    (await page.locator('.cap-scroll-mark .cap-chip').textContent()) === `Défilement · ${TOP}\u00a0px`,
     'canevas : flèche et distance',
   );
   ok(
     (await sec.getByLabel('Distance (px)').inputValue()) === String(TOP),
     'distance calculée depuis la page entière',
   );
+  {
+    // Repère d'arrivée : à la place de la capture dans la page entière
+    const bar = await page.locator('.cap-scrollbar').boundingBox();
+    const to = await page.locator('.cap-scrollbar-to').boundingBox();
+    ok(
+      Math.abs((to.y - bar.y) / bar.height - TOP / fullH) < 0.02,
+      'repère d’arrivée placé selon la distance',
+    );
+  }
   await sec.getByRole('radio', { name: '2 s', exact: true }).click();
   await page.waitForTimeout(500);
   await sec.getByRole('button', { name: 'Prévisualiser l’animation' }).click();
@@ -204,7 +215,7 @@ ${Array.from({ length: 9 }, (_, i) => `<div class="row">Rapport ${i + 1} · Équ
         hotspots: [
           {
             id: 'h1',
-            ...rel(okBtn),
+            ...beside(okBtn),
             title: 'Créez le rapport',
             body: 'Cliquez sur « Créer le rapport ».',
             placement: 'auto',

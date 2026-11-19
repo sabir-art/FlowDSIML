@@ -1328,7 +1328,8 @@
       "pii_birthdate": "a date of birth",
       "pii_iban": "an IBAN",
       "pii_identifier": "an identifier",
-      "pii_zone": "data to hide"
+      "pii_zone": "data to hide",
+      "arrival": "Arrival"
     },
     "hint_field": "Click the field where the text is typed.",
     "crop": {
@@ -1357,6 +1358,25 @@
       "handle_s": "Bottom handle",
       "handle_sw": "Bottom left handle",
       "handle_w": "Left handle"
+    },
+    "frame": {
+      "title": "Browser frame",
+      "style": "Style",
+      "style_light": "Light",
+      "style_dark": "Dark",
+      "style_minimal": "Minimal",
+      "style_none": "None",
+      "addressBar": "Address bar",
+      "address": "Displayed address",
+      "addressHelp": "By default, the capture address, shown in the editor only. Only an address typed here is published. Display only, never a link.",
+      "tabs": "Tabs",
+      "tabTitle": "Tab title",
+      "tabTitleHelp": "By default, the one from the capture.",
+      "windowButtons": "Window buttons",
+      "background": "Background around the frame",
+      "phone": "Phone frame",
+      "show": "Show",
+      "hide": "Hide"
     }
   },
   "status": {

@@ -104,7 +104,11 @@ export function MediaLibrary({
     const fd = new FormData();
     fd.append('file', file);
     fd.append('ws', wsId);
-    fd.append('kind', font ? 'font' : kind === 'logo' || filter === 'logo' ? 'logo' : 'image');
+    // L18-03 : le filtre actif décide du type (« Images » : image, même ouverte pour un logo)
+    fd.append(
+      'kind',
+      font ? 'font' : filter === 'logo' || (filter !== 'image' && kind === 'logo') ? 'logo' : 'image',
+    );
     fd.append('name', file.name.slice(0, 120));
     setBusy(true);
     const { data, error } = await supabase.functions.invoke('media', { body: fd });

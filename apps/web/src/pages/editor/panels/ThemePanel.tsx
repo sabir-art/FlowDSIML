@@ -1,6 +1,7 @@
 import { Image as ImageIcon, ImageUp, Images, TriangleAlert, X } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { FrameFields } from '../capture/FrameFields';
 import { themeSchema, type Theme } from '@flowdsiml/manifest';
 import { Alert } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
@@ -145,46 +146,10 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
       </div>
 
       <div className="sec">
-        <div className="sec-title">{t('editor.design.frame')}</div>
-        {/* A2-01 : cadre du canevas. Navigateur (actuel) ; Aucun, Mobile et adresse affichée : L25-03 */}
-        <div className="field">
-          <span className="t-label" id="th-frame-l">
-            {t('editor.advanced.mode.frame')}
-          </span>
-          <div className="segmented frame-seg" role="radiogroup" aria-labelledby="th-frame-l">
-            {(['frameNone', 'frameBrowser', 'frameMobile'] as const).map((k) => (
-              <button
-                key={k}
-                type="button"
-                role="radio"
-                aria-checked={k === 'frameBrowser'}
-                aria-disabled={k !== 'frameBrowser' || undefined}
-                disabled={k !== 'frameBrowser'}
-                tabIndex={k === 'frameBrowser' ? 0 : -1}
-              >
-                {t(`editor.advanced.mode.${k}`)}
-                {k !== 'frameBrowser' && <span className="badge badge-xs">{t('shell.soon')}</span>}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="field">
-          <label className="t-label" htmlFor="th-frame-url">
-            {t('editor.advanced.mode.frameUrl')} <span className="badge badge-xs">{t('shell.soon')}</span>
-          </label>
-          <input
-            id="th-frame-url"
-            className="input input-sm is-soon"
-            disabled
-            aria-disabled="true"
-            placeholder="app.example.com"
-            aria-describedby="th-frame-url-h"
-          />
-          <span className="help" id="th-frame-url-h">
-            {t('editor.advanced.mode.frameUrlHelp')}
-          </span>
-        </div>
-        {color('background', t('editor.design.background'))}
+        {/* L25-03 : cadre du navigateur (toute la démo), remplace la bascule d'A2-01 */}
+        <div className="sec-title">{t('editor.frame.title')}</div>
+        <FrameFields editor={editor} readOnly={readOnly} />
+        {color('background', t('editor.frame.background'))}
         <div className="setting">
           <span className="t-label" id="th-grad-l">
             {t('editor.design.gradient')}

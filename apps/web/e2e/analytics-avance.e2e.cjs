@@ -245,10 +245,10 @@ const live = (n) => ({
   );
   await page.getByLabel('Critère de la condition 2').selectOption('completed');
   await page.getByLabel('Valeur de la condition 2').selectOption('false');
-  await page.getByText('111 visiteurs correspondent').waitFor({ timeout: 3000 });
+  await page.getByText('200 visiteurs correspondent').waitFor({ timeout: 3000 });
   ok(true, 'compteur en direct (ET)');
   await page.getByRole('radio', { name: 'Au moins une (OU)' }).click();
-  await page.getByText('800 visiteurs correspondent').waitFor({ timeout: 3000 });
+  await page.getByText('766 visiteurs correspondent').waitFor({ timeout: 3000 });
   ok((await page.locator('.cond .cn').nth(1).textContent()) === 'ou', 'connecteur « ou »');
   await page.getByRole('button', { name: 'Enregistrer le segment' }).click();
   await page.getByRole('button', { name: 'Conseillers sur mobile' }).first().waitFor();
@@ -387,6 +387,25 @@ const live = (n) => ({
     await page.waitForTimeout(600);
     ok((await page.locator('.l19-saved li, .l19-saved tr').count()) >= 3, 'L19-04 : 3 segments enregistrés');
     await shot('l19-04-segments');
+    // L19-04 (reprise UX) : sélecteur de critère ouvert, critères à venir désactivés avec « Bientôt ».
+    // Une liste déroulante native ne se capture pas ouverte : on l'affiche en liste (mêmes options).
+    await page.getByRole('button', { name: 'Ajouter un filtre' }).click();
+    const fdc = page.getByRole('dialog', { name: 'Ajouter un filtre' });
+    const crit = fdc.getByLabel('Critère de la condition 1');
+    await crit.evaluate((el) => {
+      el.size = Math.min(14, el.options.length);
+      el.style.height = 'auto';
+    });
+    ok(
+      (await crit.locator('option[disabled]').count()) > 0 &&
+        (await crit.locator('option[disabled]').allTextContents()).every((x) => /Bientôt/.test(x)),
+      'L19-04 : critères indisponibles désactivés, badge « Bientôt »',
+    );
+    await shot('l19-04-criteres');
+    await fdc
+      .getByRole('button', { name: /Annuler|Fermer/ })
+      .first()
+      .click();
     await page.getByRole('tab', { name: /Alertes/ }).click();
     await page.getByText('Clic sur le bouton d’action', { exact: true }).waitFor();
     ok(

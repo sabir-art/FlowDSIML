@@ -73,10 +73,11 @@ export function AnimationMarks({ step, urls }: { step: StepRow; urls: Record<str
           {t('editor.capture.canvasTyping')}
           {anim.text && <span className="cap-chip-t">{anim.text}</span>}
         </span>
-        {chars !== null && (
+        {/* Texte saisi visible dans le champ (à la lecture : caractère par caractère) */}
+        {anim.text && (
           <span className="cap-typed">
             {shown}
-            <i className="cap-caret" />
+            {chars !== null && <i className="cap-caret" />}
           </span>
         )}
       </div>
@@ -101,6 +102,25 @@ export function AnimationMarks({ step, urls }: { step: StepRow; urls: Record<str
           />
         </div>
       )}
+      {/* Indicateur de défilement à droite : page entière, départ et position d'arrivée */}
+      <span className="cap-scrollbar" aria-hidden="true">
+        <span
+          className="cap-scrollbar-from"
+          style={{
+            top: `${(plan.from / fp.height) * 100}%`,
+            height: `${(fp.viewportHeight / fp.height) * 100}%`,
+          }}
+        />
+        <span
+          className="cap-scrollbar-to"
+          style={{
+            top: `${(plan.to / fp.height) * 100}%`,
+            height: `${(fp.viewportHeight / fp.height) * 100}%`,
+          }}
+        >
+          <span className="cap-scrollbar-label">{t('editor.capture.arrival')}</span>
+        </span>
+      </span>
       <span className={`cap-scroll-mark is-${anim.direction}`} aria-hidden="true">
         <span className="cap-chip">
           <Arrow />

@@ -1315,11 +1315,11 @@
       "dir_down": "Vers le bas",
       "dir_up": "Vers le haut",
       "distance": "Distance (px)",
-      "distanceHelp": "Calculée depuis la capture pleine page. Modifiable, {{max}} px au plus.",
+      "distanceHelp": "Calculée depuis la capture pleine page. Modifiable, {{max}} px au plus.",
       "duration": "Durée",
       "preview": "Prévisualiser l’animation",
       "canvasTyping": "Saisie animée",
-      "canvasScroll": "Défilement · {{n}} px",
+      "canvasScroll": "Défilement · {{n}} px",
       "pii_name": "un nom",
       "pii_nir": "un numéro de sécurité sociale",
       "pii_phone": "un numéro de téléphone",
@@ -1328,7 +1328,8 @@
       "pii_birthdate": "une date de naissance",
       "pii_iban": "un IBAN",
       "pii_identifier": "un identifiant",
-      "pii_zone": "une donnée à masquer"
+      "pii_zone": "une donnée à masquer",
+      "arrival": "Arrivée"
     },
     "hint_field": "Cliquez sur le champ où le texte est saisi.",
     "crop": {
@@ -1357,6 +1358,25 @@
       "handle_s": "Poignée bas",
       "handle_sw": "Poignée bas gauche",
       "handle_w": "Poignée gauche"
+    },
+    "frame": {
+      "title": "Cadre du navigateur",
+      "style": "Style",
+      "style_light": "Clair",
+      "style_dark": "Sombre",
+      "style_minimal": "Minimal",
+      "style_none": "Aucun",
+      "addressBar": "Barre d’adresse",
+      "address": "Adresse affichée",
+      "addressHelp": "Par défaut, l’adresse de la capture, montrée seulement dans l’éditeur. Seule une adresse saisie ici est publiée. Ne sert qu’à l’affichage, jamais un lien.",
+      "tabs": "Onglets",
+      "tabTitle": "Titre de l’onglet",
+      "tabTitleHelp": "Par défaut, celui de la capture.",
+      "windowButtons": "Boutons de fenêtre",
+      "background": "Fond autour du cadre",
+      "phone": "Cadre du téléphone",
+      "show": "Afficher",
+      "hide": "Masquer"
     }
   },
   "status": {

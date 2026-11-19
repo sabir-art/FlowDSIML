@@ -1,3 +1,4 @@
+import { DEFAULT_FRAME } from '@flowdsiml/manifest';
 import { asOps } from './html/htmlModel';
 import type { StepRow } from './types';
 import { MANIFEST_SCHEMA_VERSION, manifestSchema, type Manifest } from '@flowdsiml/manifest';
@@ -39,7 +40,8 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
     sandbox: demo.kind === 'sandbox' ? sandboxOf(demo.sandbox, ed.steps) : null,
     locale: settings.locale ?? 'fr',
     publishedAt: new Date().toISOString(),
-    theme: settings.theme ?? {},
+    // L25-03 : cadre par défaut tant qu'il n'a pas été réglé (comme à la publication)
+    theme: { frame: DEFAULT_FRAME, ...(settings.theme ?? {}) },
     variables: ed.variables.map((v) => ({ key: v.key, label: v.label, default: v.default_value })),
     chapters: ed.chapters.map((c) => ({ id: c.id, title: c.title })),
     steps: ed.steps.map((s) => ({

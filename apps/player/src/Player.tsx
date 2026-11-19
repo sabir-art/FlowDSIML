@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
+  DEFAULT_FRAME,
   themeSchema,
+  type Frame,
   type Hotspot,
   type LeadForm as LeadFormT,
   type Manifest,
@@ -165,7 +167,8 @@ export function Player({
   const narrow = useCompact();
   /** F7 : démo mobile : feuille du bas partout ; sur grand écran, dans un cadre de téléphone. */
   const mobile = m.device === 'mobile';
-  const framed = mobile && !narrow;
+  // L25-03 : cadre du téléphone masquable dans l'éditeur
+  const framed = mobile && !narrow && m.theme.frame?.phone !== false;
   const compact = narrow || mobile;
   const prefersDark = useMedia('(prefers-color-scheme: dark)');
   const rootRef = useRef<HTMLDivElement>(null);
@@ -801,6 +804,8 @@ export function Player({
           <TabWindow
             tabs={tabs}
             changed={newTab}
+            frame={mobile ? { ...DEFAULT_FRAME, style: 'none' } : theme.frame}
+            title={m.title}
             ratio={(() => {
               const c = croppedSize(step.image, asCrop(step.options.crop));
               return c.width / c.height;
@@ -1281,36 +1286,66 @@ function ImageStep({
 }
 
 /**
- * L25-06 : fenêtre avec la barre d'onglets au-dessus de la capture (onglets déjà ouverts, celui de
- * l'étape actif). Au passage à un autre onglet, l'onglet s'active puis la capture apparaît
- * (animations retirées si le visiteur en demande moins). Sans onglets : la capture seule.
+ * L25-03 : cadre du navigateur autour de la capture (style, barre d'adresse, onglets, boutons de
+ * fenêtre), réglé pour la démo. L25-06 : onglets de la capture, celui de l'étape actif ; au passage à
+ * un autre onglet, l'onglet s'active puis la capture apparaît (sans animation si le visiteur en
+ * demande moins). Manifeste sans cadre (avant L25) : barre seulement s'il y a des onglets.
  */
 function TabWindow({
   tabs,
   changed,
   ratio,
+  frame,
+  title,
   children,
 }: {
   tabs: { tabs: { n: number; title: string }[]; active: number };
   changed: boolean;
   ratio: number;
+  frame?: Frame;
+  title: string;
   children: ComponentChildren;
 }) {
-  if (!tabs.tabs.length) return <>{children}</>;
+  const f = frame ?? (tabs.tabs.length ? { ...DEFAULT_FRAME, addressBar: false } : null);
+  if (!f || f.style === 'none') return <>{children}</>;
+  const minimal = f.style === 'minimal';
+  const list = tabs.tabs.length ? tabs.tabs : f.tabs ? [{ n: 1, title: f.tabTitle || title }] : [];
+  const active = tabs.tabs.length ? tabs.active : 1;
+  const withTabs = !minimal && list.length > 0;
+  const dots = f.windowButtons && !minimal && (
+    <span class="p-tabs-dots">
+      <i />
+      <i />
+      <i />
+    </span>
+  );
+  const address = f.addressBar && <span class="p-addr">{f.address}</span>;
+  const bar = minimal ? 26 : (withTabs ? 36 : 0) + (f.addressBar || !withTabs ? (withTabs ? 30 : 36) : 0);
   return (
-    <div class={`p-win${changed ? ' is-switch' : ''}`} style={{ '--ratio': String(ratio) }}>
-      <div class="p-tabs" aria-hidden="true">
-        <span class="p-tabs-dots">
-          <i />
-          <i />
-          <i />
-        </span>
-        {tabs.tabs.map((x) => (
-          <span key={x.n} class={`p-tab${x.n === tabs.active ? ' is-active' : ''}`}>
-            <span class="p-tab-fav" />
-            <span class="p-tab-t">{x.title || `#${x.n}`}</span>
-          </span>
-        ))}
+    <div
+      class={`p-win p-win--${f.style}${changed ? ' is-switch' : ''}`}
+      style={{ '--ratio': String(ratio), '--bar': `${bar}px` }}
+    >
+      <div class="p-chrome" aria-hidden="true">
+        {withTabs ? (
+          <>
+            <div class="p-tabs">
+              {dots}
+              {list.map((x) => (
+                <span key={x.n} class={`p-tab${x.n === active ? ' is-active' : ''}`}>
+                  <span class="p-tab-fav" />
+                  <span class="p-tab-t">{x.title || `#${x.n}`}</span>
+                </span>
+              ))}
+            </div>
+            {f.addressBar && <div class="p-addr-row">{address}</div>}
+          </>
+        ) : (
+          <div class="p-tabs p-tabs--addr">
+            {dots}
+            {address}
+          </div>
+        )}
       </div>
       {children}
     </div>

@@ -996,12 +996,44 @@ async function install(page, state = seed()) {
         case 'survey_texts':
           return json(route, 200, state.surveyTexts || []);
         case 'segment_count': {
-          // Effectif synthétique : 1 000 visiteurs, divisé par 3 à chaque condition « toutes »
+          // Effectif calculé (retour Lead UX) : population fictive de 1 000 visiteurs aux attributs
+          // fixés, chaque condition est réellement évaluée. Les leads sont ceux de la table leads.
           state.segmentCalls = (state.segmentCalls || 0) + 1;
           const seg = a.p_segment || {};
           const def = seg.id ? (t.segments || []).find((x) => x.id === seg.id) : seg;
-          const n = (def?.conditions || []).length;
-          const visitors = def?.match === 'any' ? 600 + 100 * n : Math.round(1000 / 3 ** n);
+          const nLeads = (t.leads || []).length;
+          const pop = Array.from({ length: 1000 }, (_, i) => ({
+            source: ['direct', 'embed', 'link'][i % 3],
+            device: i % 10 < 6 ? 'desktop' : i % 10 < 9 ? 'mobile' : 'tablet',
+            browser: ['chrome', 'edge', 'firefox', 'safari'][i % 4],
+            os: ['windows', 'macos', 'android', 'ios'][i % 4],
+            lang: i % 7 === 0 ? 'en' : 'fr',
+            country: i % 9 === 0 ? 'BE' : 'FR',
+            steps: i % 6,
+            completed: i % 3 === 0,
+            cta: i % 8 === 0,
+            lead: i < nLeads,
+            referrer: i % 2 ? 'intranet.acme.example' : '',
+            demo: null,
+          }));
+          const test = (v, c) => {
+            const x = v[c.field];
+            if (c.op === 'is') return x === c.value;
+            if (c.op === 'is_not' || c.op === 'not') return x !== c.value;
+            if (c.op === 'gte' || c.op === 'at_least') return Number(x) >= Number(c.value);
+            if (c.op === 'lte' || c.op === 'at_most') return Number(x) <= Number(c.value);
+            if (c.op === 'contains') return String(x ?? '').includes(String(c.value));
+            if (c.op === 'not_contains') return !String(x ?? '').includes(String(c.value));
+            return true;
+          };
+          const conds = def?.conditions || [];
+          const visitors = pop.filter((v) =>
+            !conds.length
+              ? true
+              : def?.match === 'any'
+                ? conds.some((c) => test(v, c))
+                : conds.every((c) => test(v, c)),
+          ).length;
           return json(route, 200, { visitors, total: 1000 });
         }
         case 'ab_results': {

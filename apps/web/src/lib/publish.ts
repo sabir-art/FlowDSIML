@@ -1,4 +1,5 @@
-import type { Mask } from '@flowdsiml/manifest';
+import { DEFAULT_FRAME, type Mask } from '@flowdsiml/manifest';
+import type { Json } from '@flowdsiml/supabase-types';
 import { supabase } from './supabase';
 
 interface PublishResult {
@@ -93,6 +94,25 @@ async function exists(bucket: string, path: string): Promise<boolean> {
 }
 
 /**
+ * L25-03 : une démo dont le cadre n'a jamais été réglé est publiée avec le cadre par défaut (celui
+ * que montre l'éditeur). Les manifestes publiés avant L25 n'ont pas de cadre.
+ */
+async function ensureFrame(demoId: string) {
+  const d = await supabase.from('demos').select('settings').eq('id', demoId).maybeSingle();
+  const settings = (d.data?.settings ?? {}) as { theme?: Record<string, unknown> };
+  if (d.error || !d.data || settings.theme?.frame) return;
+  await supabase
+    .from('demos')
+    .update({
+      settings: {
+        ...settings,
+        theme: { ...(settings.theme ?? {}), frame: DEFAULT_FRAME },
+      } as NonNullable<Json>,
+    })
+    .eq('id', demoId);
+}
+
+/**
  * Publication en 3 temps :
  * 1. publish_demo (SQL) construit le manifeste immuable et crée la version (pas encore en ligne) ;
  * 2. le client copie les images vers le bucket public (en floutant si besoin) et téléverse le manifeste ;
@@ -105,6 +125,7 @@ export async function publishDemo(
   ack: { reviewed: true; fictional: true },
   onProgress?: (done: number, total: number) => void,
 ): Promise<PublishResult> {
+  await ensureFrame(demoId);
   const { data, error } = await supabase.rpc('publish_demo', { p_demo: demoId, p_ack: ack });
   if (error) throw error;
   const res = data as unknown as PublishResult;

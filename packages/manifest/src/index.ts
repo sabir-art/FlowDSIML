@@ -419,6 +419,20 @@ export type Quiz = z.infer<typeof quizSchema>;
 export const chapterSchema = z.object({ id: z.string(), title: z.string().max(120) });
 export type Chapter = z.infer<typeof chapterSchema>;
 
+/** L25-03 : cadre du navigateur (style, barre d'adresse, onglets, boutons de fenêtre, téléphone). */
+export const frameSchema = z.object({
+  style: z.enum(['light', 'dark', 'minimal', 'none']).default('light').catch('light'),
+  addressBar: z.boolean().default(true).catch(true),
+  address: z.string().max(120).default('').catch(''),
+  tabs: z.boolean().default(false).catch(false),
+  tabTitle: z.string().max(80).default('').catch(''),
+  windowButtons: z.boolean().default(true).catch(true),
+  /** Démo mobile (L21) : cadre du téléphone affiché. */
+  phone: z.boolean().default(true).catch(true),
+});
+export type Frame = z.infer<typeof frameSchema>;
+export const DEFAULT_FRAME: Frame = frameSchema.parse({});
+
 export const themeSchema = z.object({
   // Valeurs par défaut = tokens --fd-player-* (packages/ui/src/tokens.ts)
   // Charte DSI des Missions Locales (refonte) : prune, framboise, fond ardoise 100
@@ -439,6 +453,12 @@ export const themeSchema = z.object({
   showBranding: z.boolean().default(true),
   /** Fond dégradé du lecteur (maquette editeur.html, onglet Design › Cadre). */
   backgroundGradient: z.boolean().default(false),
+  /**
+   * L25-03 : cadre du navigateur autour des captures (toute la démo). Absent dans les manifestes
+   * publiés avant L25 : pas de cadre. L'adresse affichée n'est jamais celle de la capture d'office :
+   * seule une adresse saisie dans l'éditeur est publiée.
+   */
+  frame: frameSchema.optional().catch(undefined),
 });
 export type Theme = z.infer<typeof themeSchema>;
 

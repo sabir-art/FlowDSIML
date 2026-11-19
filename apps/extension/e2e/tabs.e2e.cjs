@@ -76,8 +76,11 @@ const log = async () => (await fetch(`${MOCK}/__log`)).json();
   for (const theme of ['light', 'dark']) {
     await popup.emulateMedia({ colorScheme: theme });
     const sfx = theme === 'dark' ? '-sombre' : '';
+    await popup.check('#follow');
     await popup.selectOption('#tabsize', 'current');
     if (SHOTS) await popup.screenshot({ path: `${SHOTS}/l25-01-suivi${sfx}.png`, fullPage: true });
+    // Vue « Taille personnalisée » : suivi des onglets à sa valeur par défaut (désactivé)
+    await popup.uncheck('#follow');
     await popup.selectOption('#tabsize', 'custom');
     await popup.fill('#dw', '1600');
     await popup.fill('#dh', '900');

@@ -246,7 +246,8 @@ export function VideoCanvas({
               key={p.id}
               type="button"
               tabIndex={-1}
-              className={`vd-pin${p.id === ed.pause ? ' sel' : ''}`}
+              // L21-03 : une pause placée dans une coupe est ignorée à la lecture (contour warning)
+              className={`vd-pin${p.id === ed.pause ? ' sel' : ''}${(v.cuts ?? []).some((c) => p.t >= c.from && p.t < c.to) ? ' in-cut' : ''}`}
               style={{ left: pct(p.t) }}
               aria-hidden="true"
               onClick={(e) => {

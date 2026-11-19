@@ -42,6 +42,7 @@ import { Canvas, type Tool } from './Canvas';
 import { SandboxPlan } from './html/SandboxPlan';
 import { ChecklistPreview } from './ChecklistPreview';
 import { BrowserBar } from './capture/BrowserBar';
+import { demoFrame } from './capture/FrameFields';
 import { CropCanvas, CropPanel, cropDraftFor, type CropDraft } from './capture/Crop';
 import { StepList } from './StepList';
 import { CommentsPanel } from './comments/CommentsPanel';
@@ -726,7 +727,12 @@ export function EditorPage() {
                     {step.kind !== 'html' && <ChecklistPreview editor={editor} index={safeIndex} />}
                     {/* L18 : police de la médiathèque appliquée au canevas, comme dans le lecteur */}
                     {fontCss && <style>{fontCss}</style>}
-                    <BrowserBar steps={editor.steps} index={safeIndex} />
+                    <BrowserBar
+                      steps={editor.steps}
+                      index={safeIndex}
+                      frame={demoFrame(editor)}
+                      demoTitle={editor.demo?.title ?? ''}
+                    />
                     <div className="shot">
                       {selection.kind === 'crop' && cropDraft && step.kind === 'image' ? (
                         <CropCanvas

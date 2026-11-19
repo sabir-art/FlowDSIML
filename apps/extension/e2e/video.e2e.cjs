@@ -67,9 +67,9 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await popup.selectOption('#device', 'custom');
   ok(await popup.isVisible('#custom-size'), 'taille personnalisée');
   await popup.selectOption('#device', 'phone');
-  await shot(popup, 'l21-01-popup-mobile');
+  await shot(popup, 'l21-01-popup-mobile', true);
   await popup.click('.type-card:has(input[value=video])');
-  await shot(popup, 'l21-01-popup-video');
+  await shot(popup, 'l21-01-popup-video', true);
   await popup.click('.type-card:has(input[value=clicks])');
 
   // Format mobile : l'onglet est émulé (390 px, tactile), la démo est créée en mobile

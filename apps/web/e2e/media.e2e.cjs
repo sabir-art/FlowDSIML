@@ -92,8 +92,15 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
     (await dlg.getByRole('button', { name: 'logo-acme.png' }).getAttribute('aria-pressed')) === 'true',
     'fichier importé sélectionné',
   );
+  // L18-03 : une image de fond s'importe sous le filtre « Images » (classée image, pas logo)
+  await dlg.getByRole('radio', { name: 'Images' }).click();
   await importVia(fond, /^Importer/);
   await dlg.getByRole('button', { name: 'fond-accueil.png' }).waitFor();
+  ok(
+    state.tables.media_files.find((x) => x.name === 'fond-accueil.png')?.kind === 'image' &&
+      (await dlg.locator('.md-tile').count()) === 1,
+    'L18-03 : l’image importée est classée « Images »',
+  );
   ok(
     /n’est pas vérifiée automatiquement/.test(await dlg.locator('.md-foot .md-sel-warn').textContent()) &&
       (await dlg.getByRole('button', { name: 'fond-accueil.png' }).locator('.md-tile-warn').count()) === 1,

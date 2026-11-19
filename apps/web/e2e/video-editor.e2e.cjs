@@ -143,6 +143,38 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await page.screenshot({ path: `${SHOTS}/l21-03-editeur-video${sfx}.png` });
   }
 
+  // L21-03 (reprise UX) : une pause placée dans la coupe, contour warning et aide
+  {
+    const vid = state.tables.steps.find((s) => s.id === 'vid-1');
+    const keep = vid.video;
+    vid.video = {
+      ...keep,
+      pauses: [
+        ...keep.pauses,
+        { id: 'p-cut', t: 11000, title: 'Vérifiez la fiche', body: 'Relisez avant d’enregistrer.' },
+      ],
+      frames: { ...keep.frames, 'p-cut': keep.frames.p1 },
+    };
+    await page.reload();
+    await page.locator('.vd-stage video').waitFor();
+    const pc = page.getByRole('button', { name: /Pause-étape 3 · 00:11/ });
+    ok((await page.locator('.vd-pin.in-cut').count()) === 1, 'pause dans une coupe : contour warning');
+    await pc.click();
+    await page.getByText(/Dans une coupe.: ignorée à la lecture/).waitFor();
+    ok(true, 'pause dans une coupe : aide « ignorée à la lecture »');
+    if (SHOTS) {
+      for (const x of await page.locator('.toast .toast-close').all()) await x.click().catch(() => {});
+      await page.evaluate(() =>
+        document.querySelectorAll('.panel, .panel-body, aside').forEach((el) => (el.scrollTop = 0)),
+      );
+      await page.waitForTimeout(300);
+      await page.screenshot({ path: `${SHOTS}/l21-03-pause-coupe${sfx}.png` });
+    }
+    vid.video = keep;
+    await page.reload();
+    await page.locator('.vd-stage video').waitFor();
+  }
+
   // Conversion en captures
   const n0 = state.tables.steps.filter((s) => s.demo_id === DEMO).length;
   await page.getByRole('button', { name: 'Créer 2 étapes captures' }).click();

@@ -370,3 +370,54 @@ fieldset.inline legend {
 #desk-size label {
   margin-top: 0;
 }
+
+/* L21-01 (reprise UX) : cases et radios natives dessinées, contour à 3:1 en clair et en sombre */
+.check input[type='checkbox'],
+.check input[type='radio'] {
+  appearance: none;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid #6b7280;
+  border-radius: 4px;
+  background: var(--fd-color-surface);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.check input[type='radio'] {
+  border-radius: 50%;
+}
+.check input:checked {
+  border-color: var(--fd-color-primary, #a3195b);
+  background: var(--fd-color-primary, #a3195b);
+}
+.check input[type='radio']:checked {
+  background: var(--fd-color-primary, #a3195b);
+  box-shadow: inset 0 0 0 3px var(--fd-color-surface);
+}
+.check input[type='checkbox']:checked::after {
+  content: '';
+  width: 4px;
+  height: 8px;
+  margin-top: -2px;
+  border: solid var(--fd-color-on-primary, #fff);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.check input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.check input:focus-visible {
+  outline: none;
+  box-shadow: var(--fd-shadow-focus);
+}
+@media (prefers-color-scheme: dark) {
+  .check input[type='checkbox'],
+  .check input[type='radio'] {
+    border-color: #9aa3ad;
+  }
+}

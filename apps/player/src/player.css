@@ -2372,11 +2372,40 @@ h1.p-title {
   min-height: 44px;
 }
 /* L21-05 / 06 : hotspot tactile visible de 44 px, anneau #D60B52 de 3 px */
+/* Retour Lead UX : anneau #D60B52 opaque de 3 px en permanence (liseré blanc autour),
+   intérieur transparent (le libellé dessous reste lisible). La pulsation n'anime qu'un halo à part. */
 .is-mobile .p-beacon .p-beacon-dot {
   width: 44px;
   height: 44px;
-  background: rgb(214 11 82 / 0.18);
-  box-shadow: 0 0 0 3px #d60b52;
+  box-sizing: border-box;
+  background: transparent;
+  border: 3px solid #d60b52;
+  box-shadow: 0 0 0 2px #fff;
+  animation: none;
+}
+.is-mobile .p-beacon.p-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: p-halo 1.8s infinite;
+}
+@keyframes p-halo {
+  0% {
+    box-shadow: 0 0 0 0 rgb(214 11 82 / 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgb(214 11 82 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(214 11 82 / 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-mobile .p-beacon.p-pulse::after {
+    animation: none;
+  }
 }
 /* L21-06 : feuille du haut sous l'en-tête du lecteur (le sous-titre reste visible) */
 .p-root.is-framed .p-sheet--top {
@@ -2473,15 +2502,87 @@ h1.p-title {
   border-radius: 0;
   box-shadow: none;
 }
+.p-chrome {
+  flex: none;
+  height: var(--bar);
+  display: flex;
+  flex-direction: column;
+  background: #e7e5e4;
+}
 .p-tabs {
   flex: none;
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  height: var(--bar);
+  height: 36px;
   padding: 0 12px;
-  background: #e7e5e4;
   min-width: 0;
+}
+.p-tabs--addr {
+  align-items: center;
+}
+/* L25-03 : barre d'adresse (texte d'affichage, jamais un lien) */
+.p-addr-row {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: #fff;
+  border-bottom: 1px solid #e7e5e4;
+}
+.p-addr {
+  flex: 1;
+  max-width: 420px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: #fff;
+  color: #57534e;
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.p-addr-row .p-addr {
+  max-width: none;
+  background: #f5f5f4;
+}
+.p-win--dark,
+.p-win--dark .p-chrome {
+  background: #2b2a29;
+}
+.p-win--dark .p-tabs-dots i {
+  background: #57534e;
+}
+.p-win--dark .p-tab {
+  color: #a8a29e;
+}
+.p-win--dark .p-tab.is-active,
+.p-win--dark .p-addr-row,
+.p-win--dark .p-addr {
+  background: #3d3b39;
+  color: #e7e5e4;
+  border-color: #1c1b1a;
+}
+.p-win--dark .p-addr-row .p-addr {
+  background: #2b2a29;
+}
+.p-win--minimal .p-chrome {
+  background: #f5f5f4;
+}
+.p-win--minimal .p-tabs {
+  height: 26px;
+  justify-content: center;
+}
+.p-win--minimal .p-addr {
+  flex: none;
+  max-width: 60%;
+  height: 18px;
+  justify-content: center;
+  background: transparent;
+  font-size: 11px;
 }
 .p-tabs-dots {
   display: inline-flex;

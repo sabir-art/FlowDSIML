@@ -67,16 +67,17 @@
     display: block;
   }
 }
-.mk .btn-accent {
-  background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 24px);
-  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--fd-orange-500) 75%, transparent);
-  color: #ffffff;
-}
-.mk .btn-accent.btn-block {
-  background: linear-gradient(90deg, var(--fd-orange-500) 0%, var(--ref-hot) 22%);
+/* Retour Lead UX (AA) : bouton accent en fond uni, jamais de dégradé derrière du texte
+   (fd-btn--accent : #D60B52 et texte blanc en clair, #E35889 en sombre) */
+.mk .btn-accent,
+.mk .btn-accent.btn-block,
+.mk .btn-accent.btn-sm {
+  background: var(--fd-color-accent);
+  box-shadow: none;
+  color: var(--fd-color-on-accent);
 }
 .mk .btn-accent:hover {
-  background: var(--ref-hot-hover);
+  background: var(--fd-color-accent-hover);
 }
 .mk .badge-accent {
   background: linear-gradient(90deg, var(--ref-reco-from), var(--ref-reco-mid));
@@ -146,7 +147,4 @@
 .mk .screen .ic svg {
   width: 18px;
   height: 18px;
-}
-.mk .btn-accent.btn-sm {
-  background: linear-gradient(135deg, var(--fd-orange-500) 0, var(--ref-hot) 16px);
 }

@@ -1,22 +1,51 @@
+import type { Frame } from '@flowdsiml/manifest';
 import type { StepRow } from '../types';
 import { showTabs, tabsAt } from './tabs';
 
 /**
- * Barre du navigateur du canevas (A2-01). L25-06 : quand l'étape a été capturée avec le suivi des
- * onglets, les onglets ouverts jusqu'ici s'affichent, celui de l'étape actif. Décorative (aria-hidden) :
- * l'onglet est indiqué dans le panneau Étape.
+ * Barre du navigateur du canevas. L25-03 : style du cadre (clair, sombre, minimal, aucun), barre
+ * d'adresse, onglets et boutons de fenêtre réglés pour la démo. L25-06 : onglets de la capture
+ * (celui de l'étape actif). Sans adresse saisie, l'éditeur montre l'adresse de la capture en gris :
+ * elle n'est pas publiée. Décorative (aria-hidden).
  */
-export function BrowserBar({ steps, index }: { steps: StepRow[]; index: number }) {
+export function BrowserBar({
+  steps,
+  index,
+  frame,
+  demoTitle = '',
+}: {
+  steps: StepRow[];
+  index: number;
+  frame: Frame;
+  demoTitle?: string;
+}) {
   const step = steps[index];
-  const { tabs, active } = tabsAt(steps, index);
-  const url = step?.page_url?.replace(/^https?:\/\//, '');
-  const withTabs = tabs.length > 0 && showTabs(step);
+  if (frame.style === 'none') return null;
+  const captured = tabsAt(steps, index);
+  const stepTabs = captured.tabs.length > 0 && showTabs(step);
+  const tabs = stepTabs
+    ? captured.tabs
+    : frame.tabs
+      ? [{ n: 1, title: frame.tabTitle || step?.page_title || demoTitle }]
+      : [];
+  const active = stepTabs ? captured.active : 1;
+  const captureUrl = step?.page_url?.replace(/^https?:\/\//, '') ?? '';
+  const url = frame.address || captureUrl;
+  const dots = frame.windowButtons && frame.style !== 'minimal' && (
+    <>
+      <i />
+      <i />
+      <i />
+    </>
+  );
+  const address = frame.addressBar && (
+    <span className={`url${frame.address ? '' : ' is-capture'}`}>{url}</span>
+  );
+  const withTabs = tabs.length > 0 && frame.style !== 'minimal';
   return (
-    <div className={`browser${withTabs ? ' has-tabs' : ''}`} aria-hidden="true">
+    <div className={`browser browser--${frame.style}${withTabs ? ' has-tabs' : ''}`} aria-hidden="true">
       <span className="browser-row">
-        <i />
-        <i />
-        <i />
+        {dots}
         {withTabs ? (
           <span className="browser-tabs">
             {tabs.map((t) => (
@@ -27,14 +56,10 @@ export function BrowserBar({ steps, index }: { steps: StepRow[]; index: number }
             ))}
           </span>
         ) : (
-          url && <span className="url">{url}</span>
+          address
         )}
       </span>
-      {withTabs && url && (
-        <span className="browser-row browser-row--url">
-          <span className="url">{url}</span>
-        </span>
-      )}
+      {withTabs && frame.addressBar && <span className="browser-row browser-row--url">{address}</span>}
     </div>
   );
 }

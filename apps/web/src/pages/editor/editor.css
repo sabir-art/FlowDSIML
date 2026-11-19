@@ -2666,3 +2666,87 @@
 .crop-size .field + .field {
   margin-top: 0;
 }
+
+/* ===== L25-03 : styles du cadre du navigateur ===== */
+.mk .browser .url.is-capture {
+  color: var(--fd-stone-400, #a8a29e);
+  font-style: italic;
+}
+.mk .browser--dark {
+  background: #2b2a29;
+  border-bottom-color: #1c1b1a;
+}
+.mk .browser--dark i {
+  background: #57534e;
+}
+.mk .browser--dark .url,
+.mk .browser--dark .browser-row--url .url {
+  background: #3d3b39;
+  color: #e7e5e4;
+}
+.mk .browser--dark .browser-row--url {
+  background: #3d3b39;
+  border-top-color: #1c1b1a;
+}
+.mk .browser--dark .browser-tab {
+  color: #a8a29e;
+}
+.mk .browser--dark .browser-tab.is-active {
+  background: #3d3b39;
+  color: #fafaf9;
+}
+.mk .browser--minimal {
+  height: 26px;
+  justify-content: center;
+  background: var(--fd-stone-100);
+}
+.mk .browser--minimal .url {
+  margin: 0;
+  max-width: 280px;
+  height: 18px;
+  justify-content: center;
+  background: transparent;
+}
+/* L25-05 : indicateur de défilement à droite de la capture (page entière, arrivée) */
+.cap-scrollbar {
+  position: absolute;
+  z-index: 3;
+  top: 8px;
+  bottom: 8px;
+  right: 6px;
+  width: 8px;
+  border-radius: 99px;
+  background: rgb(20 19 17 / 18%);
+  pointer-events: none;
+}
+.cap-scrollbar-from,
+.cap-scrollbar-to {
+  position: absolute;
+  left: 0;
+  right: 0;
+  min-height: 10px;
+  border-radius: 99px;
+}
+.cap-scrollbar-from {
+  border: 1px dashed #141311;
+  background: rgb(255 255 255 / 70%);
+}
+.cap-scrollbar-to {
+  background: #2897d5;
+  box-shadow: 0 0 0 2px #fff;
+}
+.cap-scrollbar-label {
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #141311;
+  color: #fff;
+  font: 600 11px/1.5 var(--fd-font-sans);
+  white-space: nowrap;
+}
+.cap-field-mark:not(.is-playing) .cap-typed {
+  background: rgb(255 255 255 / 85%);
+}

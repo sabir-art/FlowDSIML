@@ -250,8 +250,19 @@ dialog.vd-dialog .modal-body {
 /* L21-03 : pause placée dans une coupe (ignorée à la lecture) */
 .vd-pin.in-cut {
   background: var(--fd-color-surface);
-  color: var(--fd-color-warning-text, #93370d);
-  box-shadow: 0 0 0 2px var(--fd-color-warning, #b54708);
+  color: var(--fd-color-warning);
+  box-shadow: 0 0 0 2px var(--fd-color-warning);
+}
+/* Les pastilles passent devant la tête de lecture (leur chiffre reste lisible) */
+.vd-pin {
+  z-index: 2;
+}
+.vd-head {
+  z-index: 1;
+}
+/* En sombre, liseré clair autour des pastilles noires (lisibles sur la piste bordeaux) */
+:root[data-theme='dark'] .vd-pin:not(.in-cut) {
+  border-color: #fff;
 }
 /* L21-03 : carte Montage sous le canevas, au thème de l'app */
 .video-tl-slot {
