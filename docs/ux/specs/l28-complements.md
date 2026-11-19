@@ -153,13 +153,12 @@ Fonctions 171 et 172.
 ### 7.1 Exporter mes données (L28-07)
 - **Contenu du texte** : « Un fichier .zip avec vos données personnelles : profil, espaces et rôles, commentaires, notifications, préférences et confirmations de publication. Les démos appartiennent à l'espace : elles ne sont pas incluses. »
   - Le texte liste exactement ce que contient le fichier, rien de plus.
-- **Préparation** :
-  - bouton « Préparer l'export » ;
-  - pendant la préparation : « Préparation en cours… », avec une barre indéterminée ;
-  - la page reste utilisable.
-- **Prêt** :
-  - carte fichier avec le nom `mes-donnees-{{date}}.zip`, le poids et « Télécharger » ;
-  - aide : « Disponible 7 jours, ici seulement. » ;
+- **Export** (arbitrage du chef d'équipe : aucune copie conservée sur le serveur) :
+  - bouton « Télécharger mes données (.zip) » (icône `download`) ;
+  - pendant la génération : le bouton passe en « Préparation du fichier… », désactivé, avec une barre indéterminée ;
+  - le fichier `mes-donnees-{{date}}.zip` est ensuite téléchargé directement dans le navigateur ;
+  - message en `role="status"` : « Fichier téléchargé. Il n'est pas conservé sur nos serveurs. » ;
+  - en cas d'échec : « Le fichier n'a pas pu être préparé. Réessayez. », en `role="alert"` ;
   - aucun e-mail n'est envoyé.
 - **Format** : un fichier ZIP qui contient un fichier JSON par catégorie (`profil.json`, `espaces.json`, `commentaires.json`, `notifications.json`, `preferences.json`, `confirmations.json`), plus un `LISEZMOI.txt` qui décrit chaque fichier en français.
 
@@ -173,8 +172,13 @@ Fonctions 171 et 172.
 - **Confirmation** :
   - **Titre** : « Supprimer votre compte ? »
   - **Texte** : « Votre profil et vos préférences sont supprimés. Vos commentaires restent dans les démos, signés « Ancien membre ». Les démos que vous avez créées restent dans leur espace. Cette action est définitive. »
-  - **Champs** : mot de passe actuel, plus une case « Je comprends que cette action est définitive. »
-  - **Bouton** : « Supprimer mon compte » (`fd-btn--danger`), actif quand les deux sont remplis.
+  - **Connexion récente** : la suppression exige une connexion de moins de 5 minutes. Sinon, la modale affiche « Pour votre sécurité, reconnectez-vous avant de supprimer votre compte. » et le bouton « Me reconnecter ». Après la reconnexion, l'utilisateur revient sur cette modale.
+  - **Champs** :
+    - « Saisissez votre adresse e-mail pour confirmer », avec l'aide « {{email}} » affichée en clair. La valeur doit être identique, sans tenir compte de la casse ;
+    - « Mot de passe actuel », seulement si le compte en a un. Les comptes par lien magique n'ont pas ce champ ;
+    - la case « Je comprends que cette action est définitive. ».
+  - **Bouton** : « Supprimer mon compte » (`fd-btn--danger`), actif quand tous les champs affichés sont remplis et la case cochée.
+  - **Erreurs** : « L'adresse ne correspond pas à votre compte. » ; « Mot de passe incorrect. »
 - **Après** : déconnexion, puis la page de connexion avec le message « Votre compte a été supprimé. ».
 - Si la suppression est différée côté serveur (purge après un délai), le texte doit le dire avec le délai réel. Il ne doit jamais affirmer une suppression immédiate qui n'a pas lieu.
 
