@@ -1,5 +1,5 @@
 import { browser } from 'wxt/browser';
-import { AUDIO_BPS, VIDEO_BPS, pickMime, type Mark } from '@/lib/video';
+import { AUDIO_BPS, VIDEO_BPS, pickMime, type Mark, type Zone } from '@/lib/video';
 import { videoStore, type PendingVideo } from '@/lib/videoStore';
 
 /**
@@ -21,7 +21,7 @@ type Msg =
   | Start
   | { type: 'fd:rec-pause' }
   | { type: 'fd:rec-resume' }
-  | { type: 'fd:rec-mark'; t: number; label: string; manual: boolean }
+  | { type: 'fd:rec-mark'; t: number; label: string; manual: boolean; zones?: Zone[] }
   | { type: 'fd:rec-stop'; durationMs: number; blurredZones: number }
   | { type: 'fd:rec-cancel' };
 
@@ -148,7 +148,7 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
   if (m.type === 'fd:rec-resume') return void recorder?.resume();
   if (m.type === 'fd:rec-mark')
     return frame().then((b) => {
-      marks.push({ t: m.t, label: m.label, manual: m.manual });
+      marks.push({ t: m.t, label: m.label, manual: m.manual, zones: m.zones ?? [] });
       frames.push(b);
       return true;
     });

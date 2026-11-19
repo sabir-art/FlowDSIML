@@ -22,15 +22,25 @@
         <h2 id="kf-h" data-i18n="vrFrames"></h2>
         <p class="muted" data-i18n="vrFramesHelp"></p>
         <p class="note" id="blurred"></p>
+        <p class="muted small" id="zone-help" data-i18n="vrZoneHelp"></p>
         <ul id="frames" class="vr-frames"></ul>
       </section>
       <div class="vr-actions">
-        <button id="delete" class="btn btn-ghost-danger" data-i18n="vrDelete"></button>
+        <button type="button" id="delete" class="btn btn-danger-outline" data-i18n="vrDelete"></button>
         <span class="grow"></span>
         <span id="progress" class="muted" role="status"></span>
-        <button id="send" class="btn btn-primary" data-i18n="vrSend"></button>
+        <span id="reason" class="reason" hidden></span>
+        <button type="button" id="send" class="btn btn-primary" data-i18n="vrSend"></button>
       </div>
     </main>
+    <dialog id="confirm" class="vr-confirm" aria-labelledby="confirm-t" aria-describedby="confirm-d">
+      <h2 id="confirm-t" data-i18n="vrConfirmTitle"></h2>
+      <p id="confirm-d" data-i18n="vrConfirmBody"></p>
+      <div class="vr-confirm-actions">
+        <button type="button" id="confirm-no" class="btn btn-secondary" data-i18n="vrCancel"></button>
+        <button type="button" id="confirm-yes" class="btn btn-danger" data-i18n="vrDelete"></button>
+      </div>
+    </dialog>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

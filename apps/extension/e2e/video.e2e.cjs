@@ -70,6 +70,10 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await shot(popup, 'l21-01-popup-mobile', true);
   await popup.click('.type-card:has(input[value=video])');
   await shot(popup, 'l21-01-popup-video', true);
+  // L21-01 : carte « Capture HTML » choisie
+  await popup.click('.type-card:has(input[value=html])');
+  ok(await popup.isChecked('input[value=html]'), 'carte « Capture HTML » sélectionnable');
+  await shot(popup, 'l21-01-popup-html', true);
   await popup.click('.type-card:has(input[value=clicks])');
 
   // Format mobile : l'onglet est émulé (390 px, tactile), la démo est créée en mobile
@@ -172,10 +176,18 @@ const WS = '11111111-1111-1111-1111-111111111111';
           mime: 'video/webm',
           durationMs: 8000,
           marks: [
-            { t: 1200, label: 'Créer un projet', manual: false },
-            { t: 1800, label: 'Créer un projet', manual: false },
-            { t: 4200, label: 'Étape marquée', manual: true },
-            { t: 6500, label: 'Enregistrer', manual: false },
+            {
+              t: 1200,
+              label: 'Créer un projet',
+              manual: false,
+              zones: [
+                { x: 0.1, y: 0.2, w: 0.25, h: 0.08 },
+                { x: 0.55, y: 0.6, w: 0.2, h: 0.08 },
+              ],
+            },
+            { t: 1800, label: 'Créer un projet', manual: false, zones: [] },
+            { t: 4200, label: 'Étape marquée', manual: true, zones: [{ x: 0.3, y: 0.3, w: 0.3, h: 0.1 }] },
+            { t: 6500, label: 'Enregistrer', manual: false, zones: [] },
           ],
           frames: [await frame(200), await frame(210), await frame(120), await frame(30)],
           hasVoice: false,
@@ -207,18 +219,45 @@ const WS = '11111111-1111-1111-1111-111111111111';
     'au-delà de 50 Mo : message clair',
   );
   ok(await vr.isDisabled('#send'), 'au-delà de 50 Mo : envoi impossible');
+  ok(
+    /Envoi impossible : la vidéo pèse [\d,]+\s?Mo, 50\sMo au plus/.test(
+      (await vr.textContent('#reason')).replace(/\u00a0/g, ' '),
+    ) && (await vr.getAttribute('#send', 'aria-describedby')) === 'reason',
+    'au-delà de 50 Mo : raison liée au bouton désactivé',
+  );
   await shot(vr, 'l21-03-trop-lourd', true);
   await seed(false);
   await vr.reload();
   await vr.waitForSelector('#frames li');
   ok(await vr.isHidden('#alert'), 'sous 50 Mo : pas d’alerte');
   ok((await vr.$$('#frames li')).length === 3, 'clics rapprochés fusionnés (3 images clés)');
-  ok(/7 zones/.test(await vr.textContent('#blurred')), 'nombre de zones floutées indiqué');
   ok(
-    await vr.$$eval('#frames img', (i) => i.every((x) => x.alt && x.naturalWidth > 0)),
-    'images clés avec texte alternatif',
+    /^3 zones floutées repérées/.test(await vr.textContent('#blurred')),
+    'nombre de zones issu de la détection',
   );
-  ok(!(await vr.$('#frames input, #frames [contenteditable]')), 'aucune retouche possible');
+  ok(
+    (await vr.textContent('#meta')).includes('00:12') && !(await vr.textContent('#meta')).includes('00:08'),
+    'une seule durée : celle de la vidéo',
+  );
+  ok(
+    await vr.$$eval('#frames img', (i) =>
+      i.every((x) => x.alt && x.naturalWidth > 0 && x.src.startsWith('data:image')),
+    ),
+    'images clés tirées de la vidéo, avec texte alternatif',
+  );
+  ok((await vr.$$('#frames .zone')).length === 3, 'zones floutées visibles sur les images clés');
+  // Ajuster : clavier (déplacer, redimensionner), ajouter, retirer
+  const z0 = vr.locator('[data-zone="0-0"]');
+  const before0 = await z0.boundingBox();
+  await z0.focus();
+  await vr.keyboard.press('ArrowRight');
+  await vr.keyboard.press('Shift+ArrowDown');
+  const after0 = await z0.boundingBox();
+  ok(after0.x > before0.x && after0.height > before0.height, 'zone déplacée et redimensionnée au clavier');
+  await vr.getByRole('button', { name: /Ajouter une zone · Pause 2/ }).click();
+  ok((await vr.$$('#frames .zone')).length === 4, 'zone ajoutée');
+  await vr.getByRole('button', { name: 'Retirer la zone 2 de l’image 1' }).click();
+  ok((await vr.$$('#frames .zone')).length === 3, 'zone retirée');
   await vr.waitForFunction(() => document.querySelector('video').readyState >= 1);
   await shot(vr, 'l21-03-verification', true);
   await vr.click('#send');
@@ -241,14 +280,16 @@ const WS = '11111111-1111-1111-1111-111111111111';
   const stepPost = log.filter((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/steps')).pop();
   const step = stepPost && JSON.parse(stepPost.body);
   ok(
-    step?.kind === 'video' && step.video_path === tmeta.objectName && step.video_duration_ms === 8000,
+    step?.kind === 'video' &&
+      step.video_path === tmeta.objectName &&
+      Math.abs(step.video_duration_ms - 12008) < 100,
     'étape vidéo créée',
   );
   ok(
     step?.video.pauses.length === 3 && step.video.pauses[0].title === 'Créer un projet',
     'pauses-étapes proposées',
   );
-  ok(Object.keys(step?.video.frames ?? {}).length === 3, 'images des pauses téléversées');
+  ok(Object.keys(step?.video.frames ?? {}).length === 3, 'images des pauses téléversées (zones incrustées)');
   ok(step?.video.autoplayMuted === true && step.video.hasVoice === false, 'lecture muette, sans voix');
   const after = await popup.evaluate(
     () =>
@@ -267,9 +308,16 @@ const WS = '11111111-1111-1111-1111-111111111111';
   const before = log.length;
   await vr.goto(`chrome-extension://${extId}/video-review.html`);
   await vr.waitForSelector('#frames li');
-  vr.once('dialog', (d) => d.accept());
-  const closed = vr.waitForEvent('close').catch(() => null);
+  // Vrai bouton, confirmation dans la page : « Annuler » rend le focus au bouton
+  await vr.focus('#delete');
+  await vr.keyboard.press('Enter');
+  ok(await vr.isVisible('#confirm'), 'supprimer : confirmation demandée');
+  await shot(vr, 'l21-01-supprimer', true);
+  await vr.click('#confirm-no');
+  ok(await vr.evaluate(() => document.activeElement?.id === 'delete'), 'annuler : focus rendu au bouton');
   await vr.click('#delete');
+  const closed = vr.waitForEvent('close').catch(() => null);
+  await vr.click('#confirm-yes');
   await closed;
   const log2 = await getLog();
   ok(

@@ -83,6 +83,16 @@ const fr = {
   vrSending: 'Envoi… {{p}}\u202f%',
   vrSent: 'Envoyé. Ouverture de l’éditeur…',
   vrError: 'L’envoi a échoué. Réessayez.',
+  vrZones:
+    '{{n}} zones floutées repérées sur les images clés. Déplacez ou redimensionnez une zone, ou ajoutez-en une : elles sont incrustées dans les images envoyées.',
+  vrZone: 'Zone floutée {{z}} de l’image {{n}}',
+  vrZoneHelp: 'Flèches : déplacer. Maj + flèches : redimensionner. Suppr : retirer.',
+  vrAddZone: 'Ajouter une zone',
+  vrRemoveZone: 'Retirer la zone {{z}} de l’image {{n}}',
+  vrTooBigReason: 'Envoi impossible : la vidéo pèse {{mb}} Mo, 50 Mo au plus.',
+  vrConfirmTitle: 'Supprimer l’enregistrement ?',
+  vrConfirmBody: 'Il sera effacé de ce navigateur. Rien n’a été envoyé.',
+  vrCancel: 'Annuler',
   // L25-01 : multi-onglets, taille de l'onglet, page entière
   followTabs: 'Suivre les nouveaux onglets',
   followTabsHelp:
@@ -231,6 +241,16 @@ const en: typeof fr = {
   vrSending: 'Sending… {{p}}%',
   vrSent: 'Sent. Opening the editor…',
   vrError: 'Sending failed. Try again.',
+  vrZones:
+    '{{n}} blurred areas found on the key frames. Move or resize an area, or add one: they are burned into the images sent.',
+  vrZone: 'Blurred area {{z}} of frame {{n}}',
+  vrZoneHelp: 'Arrows: move. Shift + arrows: resize. Delete: remove.',
+  vrAddZone: 'Add an area',
+  vrRemoveZone: 'Remove area {{z}} of frame {{n}}',
+  vrTooBigReason: 'Cannot send: the video weighs {{mb}} MB, 50 MB at most.',
+  vrConfirmTitle: 'Delete the recording?',
+  vrConfirmBody: 'It will be erased from this browser. Nothing has been sent.',
+  vrCancel: 'Cancel',
   typeHtml: 'HTML capture',
   typeHtmlHelp: 'Page reproduced and editable',
   htmlHelp:

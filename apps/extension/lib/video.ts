@@ -41,6 +41,21 @@ export interface Mark {
   /** Clic détecté (libellé de l'élément) ou marque manuelle. */
   label: string;
   manual: boolean;
+  /** L21-01 : zones floutées à l'écran au moment du repère (relatives à la fenêtre, 0 à 1). */
+  zones?: Zone[];
+}
+export interface Zone {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/** Zone gardée dans l'image (0 à 1), taille minimale 2 %. */
+export function clampZone(z: Zone): Zone {
+  const w = Math.min(1, Math.max(0.02, z.w));
+  const h = Math.min(1, Math.max(0.02, z.h));
+  return { x: Math.min(1 - w, Math.max(0, z.x)), y: Math.min(1 - h, Math.max(0, z.y)), w, h };
 }
 
 /**

@@ -29,8 +29,21 @@ export default defineContentScript({
     veil.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483646';
     document.documentElement.appendChild(veil);
     let maxZones = 0;
+    // L21-01 : zones floutées à l'écran (relatives à la fenêtre), jointes à chaque repère
+    let shown: Array<{ x: number; y: number; w: number; h: number }> = [];
     function blurNow() {
       const zones = scanPage();
+      const W = innerWidth || 1;
+      const H = innerHeight || 1;
+      shown = zones
+        .map((d) => ({
+          x: Math.max(0, (d.rect.left - 2) / W),
+          y: Math.max(0, (d.rect.top - 2) / H),
+          w: Math.min(1, (d.rect.width + 4) / W),
+          h: Math.min(1, (d.rect.height + 4) / H),
+        }))
+        .filter((z) => z.x < 1 && z.y < 1 && z.w > 0 && z.h > 0)
+        .slice(0, 40);
       veil.replaceChildren(
         ...zones.map((d) => {
           const b = document.createElement('div');
@@ -100,7 +113,7 @@ export default defineContentScript({
 
     pauseBtn.onclick = () => void send({ type: 'fd:video-pause' }).then(tick);
     $<HTMLButtonElement>('.mark').onclick = () => {
-      void send({ type: 'fd:video-mark', label: '', manual: true });
+      void send({ type: 'fd:video-mark', label: '', manual: true, zones: shown });
       flash(s.marked);
     };
     $<HTMLButtonElement>('.stop').onclick = () => finish();
@@ -180,7 +193,7 @@ export default defineContentScript({
             alt: el.getAttribute('alt'),
           })
         : '';
-      void send({ type: 'fd:video-mark', label, manual: false });
+      void send({ type: 'fd:video-mark', label, manual: false, zones: shown });
     }
     document.addEventListener('pointerdown', onPointerDown, true);
 

@@ -63,7 +63,12 @@ export interface TrackedTab {
 /** F7 : messages de la barre d'enregistrement (content script) vers le service worker. */
 export type VideoBarRequest =
   | { type: 'fd:video-pause' }
-  | { type: 'fd:video-mark'; label: string; manual: boolean }
+  | {
+      type: 'fd:video-mark';
+      label: string;
+      manual: boolean;
+      zones?: Array<{ x: number; y: number; w: number; h: number }>;
+    }
   | { type: 'fd:video-stop' }
   | { type: 'fd:video-blurs'; count: number };
 

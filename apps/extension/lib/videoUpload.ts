@@ -35,7 +35,12 @@ function tusUpload(
  * videos, 50 Mo au plus), les images des repères (bucket captures), puis l'étape vidéo avec ses
  * pauses-étapes proposées (clics et marques). Renvoie l'id de la démo.
  */
-export async function sendVideo(v: PendingVideo, onProgress: (ratio: number) => void): Promise<string> {
+export async function sendVideo(
+  v: PendingVideo,
+  onProgress: (ratio: number) => void,
+  /** L21-01 : durée réelle lue dans la vidéo ; images clés avec les zones floutées incrustées. */
+  opts: { durationMs?: number; keptFrames?: Array<Blob | null> } = {},
+): Promise<string> {
   if (v.blob.size > MAX_BYTES) throw new Error('TOO_BIG');
   const { data: s } = await supabase.auth.getSession();
   const user = s.session?.user;
@@ -58,13 +63,13 @@ export async function sendVideo(v: PendingVideo, onProgress: (ratio: number) => 
   await tusUpload(v.blob, 'videos', videoPath, s.session.access_token, (a, b) => onProgress((0.9 * a) / b));
 
   // Repères retenus (fusion à moins de 1,5 s) et leurs images
-  const kept = proposePauses(v.marks, v.durationMs);
+  const kept = proposePauses(v.marks, opts.durationMs ?? v.durationMs);
   const pauses: Array<{ id: string; t: number; title: string; body: string }> = [];
   const frames: Record<string, string> = {};
   for (const [i, m] of kept.entries()) {
     const id = `p-${i + 1}`;
     pauses.push({ id, t: Math.round(m.t), title: m.label.slice(0, 200), body: '' });
-    const blob = v.frames[v.marks.indexOf(m)];
+    const blob = opts.keptFrames?.[i] ?? v.frames[v.marks.indexOf(m)];
     if (blob && blob.size) {
       const path = `${v.workspaceId}/${demoId}/${crypto.randomUUID()}.webp`;
       const up = await supabase.storage.from('captures').upload(path, blob, { contentType: 'image/webp' });
@@ -81,7 +86,7 @@ export async function sendVideo(v: PendingVideo, onProgress: (ratio: number) => 
     title: (v.title || 'Vidéo').slice(0, 200),
     page_url: v.url.slice(0, 2000),
     video_path: videoPath,
-    video_duration_ms: Math.max(1, Math.min(600000, Math.round(v.durationMs))),
+    video_duration_ms: Math.max(1, Math.min(600000, Math.round(opts.durationMs ?? v.durationMs))),
     video: {
       pauses,
       frames,

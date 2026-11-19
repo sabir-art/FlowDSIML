@@ -384,7 +384,13 @@ async function onVideoBar(m: VideoBarRequest): Promise<unknown> {
       Date.now(),
     );
     await browser.runtime
-      .sendMessage({ type: 'fd:rec-mark', t, label: m.label.slice(0, 200), manual: m.manual })
+      .sendMessage({
+        type: 'fd:rec-mark',
+        t,
+        label: m.label.slice(0, 200),
+        manual: m.manual,
+        zones: (m.zones ?? []).slice(0, 40),
+      })
       .catch(() => undefined);
     return setState({ steps: s.steps + 1 });
   }
