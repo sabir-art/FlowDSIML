@@ -897,19 +897,20 @@ export function DemosPage() {
         open={newFolder !== null || renaming !== null}
         title={renaming ? t('demos.renameFolder', { name: '' }).trim() : t('demos.newFolder')}
         body={
-          <form onSubmit={saveFolder}>
+          // REV-11 : pas de formulaire imbriqué : Entrée soumet le formulaire de la modale (onConfirm)
+          <label className="fd-field">
+            <span className="sr-only">{t('demos.folderName')}</span>
             <input
               className="fd-input"
               autoFocus
               maxLength={80}
-              aria-label={t('demos.folderName')}
               placeholder={t('demos.folderName')}
               value={renaming ? renaming.name : (newFolder ?? '')}
               onChange={(e) =>
                 renaming ? setRenaming({ ...renaming, name: e.target.value }) : setNewFolder(e.target.value)
               }
             />
-          </form>
+          </label>
         }
         confirmLabel={t('common.save')}
         onClose={() => {

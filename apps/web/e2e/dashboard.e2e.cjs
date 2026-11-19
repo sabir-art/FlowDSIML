@@ -46,10 +46,16 @@ const SHOTS = process.env.SHOTS_DIR;
   ok((await page.locator('.folder-pills').count()) === 0, 'pas de rangée de dossiers');
   await page.getByRole('button', { name: 'Dossiers' }).click();
   await page.getByRole('menuitem', { name: 'Nouveau dossier' }).click();
+  ok((await page.locator('dialog[open] form form').count()) === 0, 'REV-11 : pas de formulaire imbriqué');
+  ok(
+    (await page.locator('dialog[open]').getByRole('textbox', { name: 'Nom du dossier' }).count()) === 1,
+    'REV-11 : champ nommé',
+  );
   await page.fill('dialog[open] input', 'Ventes');
-  await page.locator('dialog[open]').getByRole('button', { name: 'Enregistrer' }).click();
+  await page.keyboard.press('Enter');
   await page.waitForTimeout(400);
-  ok(state.tables.folders.length === 1, 'dossier créé (modale, sans prompt natif)');
+  ok(state.tables.folders.length === 1, 'dossier créé avec Entrée (modale, sans prompt natif)');
+  ok((await page.locator('dialog[open]').count()) === 0, 'REV-11 : la modale se ferme');
 
   // Menu ⋯ d'une carte → Déplacer
   await page.getByRole('button', { name: 'Actions pour Démo CRM' }).click();
