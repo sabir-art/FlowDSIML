@@ -60,6 +60,8 @@ export function PlayerFrame({
   }, [state.index, state.black, state.hideHotspots]);
 
   return (
-    <iframe ref={frame} className={className} src={`${PLAYER_URL}/#/preview`} title={title} tabIndex={-1} />
+    // L27 : aperçu piloté par la vue présentateur, non interactif (inert : hors du clavier et de l'arbre
+    // d'accessibilité, sans contenu focalisable caché derrière tabindex=-1)
+    <iframe ref={frame} className={className} src={`${PLAYER_URL}/#/preview`} title={title} inert />
   );
 }

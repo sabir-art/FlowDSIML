@@ -265,6 +265,42 @@ const APP_PAGES = [
     },
   },
   { name: 'Éditeur', route: `/#/demos/${DEMO}/edit` },
+  // L27 : écrans ajoutés depuis L24
+  {
+    name: 'Éditeur · onglet Design (styles)',
+    route: `/#/demos/${DEMO}/edit`,
+    open: async (p) => {
+      await p.getByRole('tab', { name: 'Design' }).click();
+      await p.waitForTimeout(400);
+    },
+  },
+  {
+    name: 'Éditeur · test A/B',
+    route: `/#/demos/${DEMO}/edit`,
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Créer une variante B' }).click();
+      await p.waitForTimeout(400);
+    },
+  },
+  {
+    name: 'Éditeur · zone de flou',
+    route: `/#/demos/${DEMO}/edit`,
+    open: async (p) => {
+      await p.getByRole('button', { name: /^2 Écran 2/ }).click();
+      await p.locator('.canvas-blur').first().click({ force: true });
+      await p.getByRole('radiogroup', { name: 'Style de masquage' }).waitFor();
+    },
+  },
+  { name: 'Diffuser', route: `/#/demos/${DEMO}/distribute` },
+  { name: 'Présentateur', route: `/#/demos/${DEMO}/present` },
+  {
+    name: 'Présenter · lancement',
+    route: `/#/demos/${DEMO}/edit`,
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Présenter', exact: true }).click();
+      await p.waitForSelector('dialog[open]');
+    },
+  },
   { name: 'Quiz (éditeur)', route: `/#/demos/${DEMO}/quiz` },
   { name: 'Partager', route: `/#/demos/${DEMO}/share` },
   {
@@ -291,6 +327,15 @@ const APP_PAGES = [
   { name: 'Partager · accès', route: `/#/demos/${DEMO}/share?tab=access` },
   { name: 'Analytics d’une démo', route: `/#/demos/${DEMO}/analytics` },
   { name: 'Analytics', route: '/#/analytics' },
+  { name: 'Analytics · sessions', route: '/#/analytics?tab=sessions' },
+  {
+    name: 'Analytics · mesure des visites',
+    route: '/#/analytics',
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Mesure des visites' }).click();
+      await p.getByRole('dialog', { name: 'Mesure des visites' }).waitFor();
+    },
+  },
   { name: 'Leads', route: '/#/analytics?tab=leads' },
   {
     name: 'Analytics · temps réel',
@@ -339,6 +384,17 @@ const APP_PAGES = [
   { name: 'Workspace', route: '/#/settings/workspace' },
   { name: 'Plans', route: '/#/settings/plans' },
   { name: 'Marque', route: '/#/settings/brand' },
+  {
+    name: 'Médiathèque',
+    route: '/#/settings/brand',
+    open: async (p) => {
+      await p
+        .getByRole('button', { name: /Médiathèque/ })
+        .first()
+        .click();
+      await p.waitForSelector('dialog[open]');
+    },
+  },
   { name: 'Variables', route: '/#/settings/variables' },
   { name: 'Glossaire (vide)', route: '/#/settings/glossary' },
   { name: 'Glossaire', route: '/#/settings/glossary', seed: seedGlossary },
@@ -381,6 +437,28 @@ const APP_PAGES = [
 /** Pages du lecteur et du centre (réponses des fonctions simulées). */
 const PLAYER_PAGES = [
   { name: 'Lecteur · démo', path: '/d/0b5c1f0e-0000-4000-8000-000000000001' },
+  // L27 : page publique d'une démo (L19b)
+  {
+    name: 'Lecteur · page publique',
+    path: '/p/0b5c1f0e-0000-4000-8000-000000000001',
+    publicPage: {
+      demoId: '0b5c1f0e-0000-4000-8000-000000000001',
+      title: 'Créer un rapport en 2 minutes',
+      description: 'Suivez pas à pas la création d’un rapport, à votre rythme, sans compte.',
+      cta: { label: 'Réserver un accompagnement', url: 'https://www.acme.example/rdv' },
+      endTitle: 'Besoin d’aide\u202f?',
+      endBody: 'Un membre de l’équipe vous accompagne.',
+      style: 'light',
+      indexable: false,
+      steps: 6,
+      updatedAt: '2026-11-14T10:00:00Z',
+      workspace: 'Acme',
+      privacyUrl: 'https://www.acme.example/confidentialite',
+      a11y: 'non_evalue',
+      a11yUrl: 'https://www.acme.example/accessibilite',
+      related: [],
+    },
+  },
   {
     name: 'Lecteur · mot de passe',
     path: '/d/0b5c1f0e-0000-4000-8000-000000000001',
@@ -460,7 +538,9 @@ async function playerPage(b, s, theme) {
   await p.route('**/functions/v1/**', (r) => json(r, {}));
   await p.route('**/functions/v1/open-demo', (r) => json(r, s.gate ?? { status: 'ok', manifest }));
   await p.route('**/functions/v1/open-center', (r) => json(r, s.center ? s.center() : {}));
-  await p.route('**/rest/v1/rpc/**', (r) => json(r, null));
+  await p.route('**/rest/v1/rpc/**', (r) =>
+    json(r, s.publicPage && r.request().url().includes('/rpc/public_page') ? s.publicPage : null),
+  );
   await p.route('**/assets/**', (r) =>
     r.fulfill({ contentType: 'image/png', body: fs.readFileSync(`${__dirname}/fixture.png`), headers: cors }),
   );

@@ -86,3 +86,21 @@ Autre amélioration demandée par le chef : sur l'attestation (L15-07), le centr
 - **PDF balisé (exports L15)** : jsPDF ne produit ni la structure de titres ni les textes alternatifs des captures. C'est une dette connue, à reprendre si l'on change de moteur PDF.
 - **Ce que l'automatisation ne couvre pas** : il manque un audit RGAA complet par une personne qualifiée, avec lecteurs d'écran réels (NVDA, VoiceOver) et grille officielle. Ce rapport ne vaut pas déclaration de conformité. Le statut affiché dans le pied du centre reste celui que choisit l'administrateur (« non évalué » par défaut).
 - **Contenus créés par les clients** : les contrastes et les textes des démos (couleurs de marque, bulles) dépendent de leurs auteurs. L'éditeur contrôle déjà le contraste de la couleur de marque (4,5:1).
+
+## 6. Passe L27 (écrans ajoutés depuis L24)
+
+- **Audit axe** (`apps/web/e2e/a11y.e2e.cjs`), étendu aux écrans des lots L18 à L26 :
+  - onglet Design (styles prédéfinis), test A/B, zone de flou et ses réglages, médiathèque ;
+  - vue présentateur et modale de lancement, télécommande sur téléphone ;
+  - Analytics : sessions, « Mesure des visites » ;
+  - aide (tiroir, recherche, article), « Partir d'un modèle », « Enregistrer comme modèle » ;
+  - lecteur : page publique d'une démo.
+
+  Résultat : **0 violation sérieuse ou critique** sur l'ensemble des écrans, en clair et en sombre.
+- **Correction** : l'aperçu de la vue présentateur (iframe du lecteur, piloté par la vue) était en `tabindex="-1"` avec un contenu focalisable (`frame-focusable-content`). Il est maintenant `inert` : hors du clavier et de l'arbre d'accessibilité, puisque les commandes sont celles de la vue présentateur.
+- **Clavier**, vérifié par les e2e de chaque lot :
+  - tiroir d'aide : F1, focus dans la recherche, Échap, retour du focus ;
+  - « Partir d'un modèle » : flèches dans la grille, Entrée pour utiliser ;
+  - télécommande : code lu chiffre par chiffre, cibles de 64 px ;
+  - « Prise en main » : Réduire avec `aria-expanded` ;
+  - suite `a11y-clavier.e2e.cjs` sans échec.
