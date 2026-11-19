@@ -391,6 +391,21 @@
 }
 .mk .ob-actions {
   margin-top: 32px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+/* REV-02 : le titre reçoit le focus par programme (annonce de l'étape) : pas d'anneau visible */
+.mk .ob-card h1[tabindex='-1']:focus,
+.mk .ob-card h1[tabindex='-1']:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.mk .ob-end {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.mk .ob-more {
+  margin-top: 12px;
 }
 .mk .ob-ext-steps {
   gap: 14px;

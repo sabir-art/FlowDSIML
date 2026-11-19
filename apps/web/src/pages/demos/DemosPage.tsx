@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Archive,
@@ -43,6 +43,7 @@ import { Loading } from '../../components/guards';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
+import { createDemoFromImages } from './importImages';
 import { NewDemoDialog } from './NewDemoDialog';
 import { TemplatesDialog } from './TemplatesDialog';
 import { OnboardingCard, useOnboarding } from './OnboardingCard';
@@ -264,6 +265,13 @@ export function DemosPage() {
   }, [demos, folder, status, q, sort, stats, i18n.language, tagFilter, tagMode, tagStore.links]);
 
   const [newOpen, setNewOpen] = useState(false);
+  // REV-04 : « Démarrer » de l'onboarding arrive ici avec ?new=1 et ouvre « Nouvelle démo »
+  const [params, setParams] = useSearchParams();
+  useEffect(() => {
+    if (params.get('new') !== '1') return;
+    setNewOpen(true);
+    setParams({}, { replace: true });
+  }, [params, setParams]);
   // L26-04 : bibliothèque de modèles (dossier choisi dans « Nouvelle démo »)
   const [tplFolder, setTplFolder] = useState<string | null | undefined>(undefined);
   const openNew = () => setNewOpen(true);
@@ -850,6 +858,21 @@ export function DemosPage() {
         onEmpty={async (f) => {
           setNewOpen(false);
           await createDemo(f);
+        }}
+        onImport={async (files, f) => {
+          const id = await run(async () =>
+            createDemoFromImages({
+              workspaceId: ws.id,
+              userId: user!.id,
+              folderId: f,
+              title: t('demos.untitled'),
+              files,
+            }),
+          );
+          if (!id) return;
+          setNewOpen(false);
+          toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
+          navigate(`/demos/${id}/edit`);
         }}
         onTemplate={(f) => {
           setNewOpen(false);

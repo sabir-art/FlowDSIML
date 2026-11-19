@@ -206,6 +206,28 @@ const APP_PAGES = [
   { name: 'Inscription', route: '/#/signup', signedOut: true },
   { name: 'Mot de passe oublié', route: '/#/forgot-password', signedOut: true },
   { name: 'Démos', route: '/#/' },
+  // REV-02 à 04 : les trois étapes de l'onboarding
+  { name: 'Onboarding · espace', route: '/#/onboarding' },
+  {
+    name: 'Onboarding · extension',
+    route: '/#/onboarding',
+    open: async (p) => {
+      await p.fill('#ws-name', 'Service RH Acme');
+      await p.keyboard.press('Enter');
+      await p.waitForSelector('#ob-h2');
+    },
+  },
+  {
+    name: 'Onboarding · premiers pas',
+    route: '/#/onboarding',
+    open: async (p) => {
+      await p.fill('#ws-name', 'Service RH Acme');
+      await p.keyboard.press('Enter');
+      await p.waitForSelector('#ob-h2');
+      await p.getByRole('button', { name: /Continuer sans/ }).click();
+      await p.waitForSelector('#ob-h3');
+    },
+  },
   {
     name: 'Démos · nouvelle démo',
     route: '/#/',

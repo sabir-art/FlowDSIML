@@ -122,18 +122,18 @@
     "skip": "Skip",
     "hello": "Welcome, {{name}}",
     "title": "Let’s set up your space",
-    "subtitle": "Two questions to suggest the right templates. You can change everything later.",
+    "subtitle": "You can change everything later.",
     "name": "Workspace name",
-    "nameHelp": "Usually the name of your company or team.",
+    "nameHelp": "Usually the name of your organisation or department.",
     "defaultName": "{{name}}’s space",
     "useQuestion": "What will your demos be used for?",
     "use": {
-      "website": "Website",
-      "websiteHelp": "Product tours on your landing pages",
-      "outreach": "Outreach",
-      "outreachHelp": "Personalised demos by email",
-      "presales": "Pre-sales",
-      "presalesHelp": "Demos during and after calls"
+      "train": "Train teams",
+      "trainHelp": "Software onboarding and new employee templates",
+      "document": "Document a procedure",
+      "documentHelp": "One demo per procedure, always up to date",
+      "announce": "Announce a new version",
+      "announceHelp": "Show what changes, screen by screen"
     },
     "continue": "Continue",
     "extTitle": "Install the capture extension",
@@ -148,9 +148,8 @@
     "popStart": "Start capture",
     "browsers": "Using another browser? The extension works on Chrome, Edge, Brave and Arc.",
     "back": "Back",
-    "extDone": "I installed the extension",
     "firstTitle": "Your first demo awaits",
-    "firstSubtitle": "Follow these steps.",
+    "firstSubtitle": "The first steps to get your workspace started.",
     "done": {
       "account": "Create your account",
       "extension": "Install the extension",
@@ -158,12 +157,14 @@
       "share": "Share the link",
       "view": "Get your first view"
     },
-    "captureHelp": "5 to 10 clicks are enough for a good demo.",
+    "captureHelp": "One step per click.",
     "start": "Start",
     "exploreSample": "Explore the sample demo",
     "doneSr": "(done)",
     "todoSr": "(to do)",
-    "goDashboard": "Go to my demos"
+    "goDashboard": "Go to my demos",
+    "extSkip": "Continue without the extension",
+    "moreSteps": "The other steps are waiting at the top of the Demos page."
   },
   "invite": {
     "title": "Invitation",
@@ -1510,7 +1511,9 @@
       "order": "Step to capture {{n}} of {{total}}",
       "help": "With the extension: open your software, start capturing and choose “Complete: {{title}}”. Each click fills the next step. You can also import an image."
     },
-    "importWarn": "Image imported: no automatic detection of personal data. Check it and blur if needed."
+    "importWarn": "Image imported: no automatic detection of personal data. Check it and blur if needed.",
+    "importWarnMany_one": "Imported image: no automatic detection of personal data. Check it and blur if needed.",
+    "importWarnMany_other": "{{count}} imported images: no automatic detection of personal data. Check them and blur if needed."
   },
   "status": {
     "draft": "Draft",
@@ -2297,7 +2300,7 @@
     "newExtension": "Capture with the extension",
     "newExtensionBody": "Recommended. One step per click, with the click position.",
     "newImport": "Import images",
-    "newImportBody": "Start from existing screenshots or mockups.",
+    "newImportBody": "One step per image, in file name order. PNG, JPEG or WebP.",
     "newExtensionHelp": "Open your software’s page, then click the TutoClick icon in the browser toolbar to start capturing. The demo is created in this workspace.",
     "newEmpty": "Start from an empty demo",
     "gs": {
@@ -3285,7 +3288,7 @@
   },
   "templates": {
     "title": "Start from a template",
-    "cardBody": "Structure and texts ready: you only need to capture the screens.",
+    "cardBody": "Structure and texts ready: you only need to capture or import the screens.",
     "cats": "Template categories",
     "cat": {
       "all": "All",

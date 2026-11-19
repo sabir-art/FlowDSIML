@@ -122,18 +122,18 @@
     "skip": "Passer",
     "hello": "Bienvenue, {{name}}",
     "title": "Configurons votre espace",
-    "subtitle": "Deux questions pour vous proposer les bons modèles. Vous pourrez tout modifier plus tard.",
-    "name": "Nom du workspace",
-    "nameHelp": "En général, le nom de votre entreprise ou de votre équipe.",
+    "subtitle": "Vous pourrez tout modifier plus tard.",
+    "name": "Nom de l’espace",
+    "nameHelp": "En général, le nom de votre structure ou de votre service.",
     "defaultName": "Espace de {{name}}",
     "useQuestion": "À quoi serviront vos démos ?",
     "use": {
-      "website": "Site web",
-      "websiteHelp": "Tours produit sur vos landing pages",
-      "outreach": "Prospection",
-      "outreachHelp": "Démos personnalisées par email",
-      "presales": "Avant-vente",
-      "presalesHelp": "Démos pendant et après les appels"
+      "train": "Former les équipes",
+      "trainHelp": "Modèles Prise en main, Accueil d’un nouvel agent",
+      "document": "Documenter une procédure",
+      "documentHelp": "Une démo par procédure, toujours à jour",
+      "announce": "Annoncer un changement de version",
+      "announceHelp": "Montrer ce qui change, écran par écran"
     },
     "continue": "Continuer",
     "extTitle": "Installez l’extension de capture",
@@ -148,9 +148,8 @@
     "popStart": "Démarrer la capture",
     "browsers": "Vous utilisez un autre navigateur ? L’extension fonctionne sur Chrome, Edge, Brave et Arc.",
     "back": "Retour",
-    "extDone": "J’ai installé l’extension",
     "firstTitle": "Votre première démo vous attend",
-    "firstSubtitle": "Suivez ces étapes.",
+    "firstSubtitle": "Les premières étapes de la prise en main de votre espace.",
     "done": {
       "account": "Créer votre compte",
       "extension": "Installer l’extension",
@@ -158,12 +157,14 @@
       "share": "Partager le lien",
       "view": "Recevoir votre première vue"
     },
-    "captureHelp": "5 à 10 clics suffisent pour une bonne démo.",
+    "captureHelp": "Une étape par clic.",
     "start": "Démarrer",
     "exploreSample": "Explorer la démo d’exemple",
     "doneSr": "(fait)",
     "todoSr": "(à faire)",
-    "goDashboard": "Accéder à mes démos"
+    "goDashboard": "Aller à mes démos",
+    "extSkip": "Continuer sans l’extension",
+    "moreSteps": "Les autres étapes vous attendent en tête de la page Démos."
   },
   "invite": {
     "title": "Invitation",
@@ -1510,7 +1511,9 @@
       "order": "Étape à capturer {{n}} sur {{total}}",
       "help": "Avec l’extension : ouvrez votre logiciel, lancez la capture et choisissez « Compléter : {{title}} ». Chaque clic remplit l’étape suivante. Vous pouvez aussi importer une image."
     },
-    "importWarn": "Image importée : aucune détection automatique des données personnelles. Vérifiez-la et floutez si besoin."
+    "importWarn": "Image importée : aucune détection automatique des données personnelles. Vérifiez-la et floutez si besoin.",
+    "importWarnMany_one": "Image importée : aucune détection automatique des données personnelles. Vérifiez-la et floutez si besoin.",
+    "importWarnMany_other": "{{count}} images importées : aucune détection automatique des données personnelles. Vérifiez-les et floutez si besoin."
   },
   "status": {
     "draft": "Brouillon",
@@ -2297,7 +2300,7 @@
     "newExtension": "Capturer avec l’extension",
     "newExtensionBody": "Recommandé. Une étape par clic, avec la position du clic.",
     "newImport": "Importer des images",
-    "newImportBody": "Partez de captures d’écran ou de maquettes existantes.",
+    "newImportBody": "Une étape par image, dans l’ordre des noms de fichiers. PNG, JPEG ou WebP.",
     "newExtensionHelp": "Ouvrez la page de votre logiciel, puis cliquez sur l’icône TutoClick de la barre d’outils du navigateur pour lancer la capture. La démo est créée dans ce workspace.",
     "newEmpty": "Partir d’une démo vide",
     "gs": {
@@ -3285,7 +3288,7 @@
   },
   "templates": {
     "title": "Partir d’un modèle",
-    "cardBody": "Structure et textes prêts : il ne reste qu’à capturer les écrans.",
+    "cardBody": "Structure et textes prêts : il ne reste qu’à capturer ou importer les écrans.",
     "cats": "Catégories de modèles",
     "cat": {
       "all": "Tous",

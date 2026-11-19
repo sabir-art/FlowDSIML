@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ImagePlus, Info, LayoutTemplate, Puzzle, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
+import { IMAGE_ACCEPT } from './importImages';
 
 /**
- * DSH-06 : modale « Nouvelle démo » de la maquette. L26-04 : troisième carte « Partir d'un modèle ». Deux choix : capturer avec l'extension (recommandé)
- * et importer des images (Bientôt, DSH-07). Le dossier préremplit celui qui est filtré ; il s'applique
- * à la démo vide, seul parcours de création directe aujourd'hui (lien secondaire).
+ * DSH-06 : modale « Nouvelle démo » de la maquette. L26-04 : troisième carte « Partir d'un modèle ».
+ * Capturer avec l'extension (recommandé) ; REV-06 : importer des images (plusieurs fichiers, une étape par
+ * image). Le dossier préremplit celui qui est filtré ; il s'applique à l'import, au modèle et à la démo vide.
  */
 export function NewDemoDialog({
   open,
@@ -14,6 +15,7 @@ export function NewDemoDialog({
   defaultFolder,
   onEmpty,
   onTemplate,
+  onImport,
   onClose,
 }: {
   open: boolean;
@@ -22,10 +24,13 @@ export function NewDemoDialog({
   onEmpty: (folderId: string | null) => Promise<void> | void;
   /** L26-04 : troisième carte, « Partir d'un modèle ». */
   onTemplate: (folderId: string | null) => void;
+  /** REV-06 : images choisies (au moins une). */
+  onImport: (files: File[], folderId: string | null) => Promise<void> | void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
+  const picker = useRef<HTMLInputElement>(null);
   const [folder, setFolder] = useState<string>(defaultFolder ?? '');
   const [busy, setBusy] = useState(false);
 
@@ -57,13 +62,35 @@ export function NewDemoDialog({
           <b>{t('demos.newExtension')}</b>
           <span className="fd-muted">{t('demos.newExtensionBody')}</span>
         </div>
-        <div className="nd-choice is-soon" aria-disabled="true">
+        <button
+          type="button"
+          className="nd-choice nd-choice--btn"
+          disabled={busy}
+          onClick={() => picker.current?.click()}
+        >
           <ImagePlus aria-hidden="true" />
-          <b>
-            {t('demos.newImport')} <span className="fd-badge nd-soon">{t('shell.soon')}</span>
-          </b>
+          <b>{t('demos.newImport')}</b>
           <span className="fd-muted">{t('demos.newImportBody')}</span>
-        </div>
+        </button>
+        <input
+          ref={picker}
+          type="file"
+          accept={IMAGE_ACCEPT}
+          multiple
+          hidden
+          aria-label={t('demos.newImport')}
+          onChange={async (e) => {
+            const files = [...(e.target.files ?? [])];
+            e.target.value = '';
+            if (!files.length) return;
+            setBusy(true);
+            try {
+              await onImport(files, folder || null);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        />
         <button type="button" className="nd-choice nd-choice--btn" onClick={() => onTemplate(folder || null)}>
           <LayoutTemplate aria-hidden="true" />
           <b>{t('templates.title')}</b>

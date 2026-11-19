@@ -114,6 +114,7 @@ export function EditorPage() {
   const names: Record<string, string> = Object.fromEntries(
     Object.values(comments.authors).map((a) => [a.user_id, a.full_name || a.email]),
   );
+  const replacePicker = useRef<HTMLInputElement>(null);
   /** Mes dernières modifications par ligne et champ (pour signaler un écrasement). */
   const myEdits = useRef(new Map<string, number>());
   const noteEdit = (tb: EditTable, id: string, fields: string[]) => {
@@ -860,18 +861,32 @@ export function EditorPage() {
                   <Crop aria-hidden="true" />
                 </button>
                 <span className="sep" />
+                {/* REV-06 : remplacer l'image de l'étape (image importée, signalée et comptée au bilan RGPD) */}
                 <button
                   type="button"
                   className="btn btn-ghost btn-icon"
-                  aria-disabled="true"
-                  aria-label={`${t('editor.toolReplace')} · ${t('shell.soon')}`}
-                  title={t('shell.soon')}
+                  aria-label={t('editor.toolReplace')}
+                  title={t('editor.toolReplace')}
+                  disabled={readOnly || step?.kind !== 'image'}
+                  onClick={() => replacePicker.current?.click()}
                 >
                   <ImageIcon aria-hidden="true" />
-                  <span className="fb-soon" aria-hidden="true">
-                    {t('shell.soon')}
-                  </span>
                 </button>
+                <input
+                  ref={replacePicker}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden
+                  aria-label={t('editor.toolReplace')}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = '';
+                    if (!f || !step) return;
+                    void editor.captureStep(step.id, f).then((r) => {
+                      if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
+                    });
+                  }}
+                />
               </div>
             )}
           </div>

@@ -117,7 +117,11 @@ const SHOTS = process.env.SHOTS_DIR;
   await d2.keyboard.press('Escape');
   await d2.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
   await d2.waitForSelector('dialog.new-demo-dialog[open]');
-  ok((await d2.locator('.nd-choice.is-soon').count()) === 1, 'DSH-06 / DSH-07 : import d’images en Bientôt');
+  ok(
+    (await d2.locator('.nd-choice.is-soon').count()) === 0 &&
+      (await d2.getByRole('button', { name: /Importer des images/ }).count()) === 1,
+    'DSH-06 / DSH-07 (REV-06) : import d’images actif',
+  );
   await d2.getByRole('button', { name: 'Partir d’une démo vide' }).click();
   await d2.waitForURL(/\/edit$/);
   ok(true, 'DSH-06 : « Partir d’une démo vide » ouvre l’éditeur');

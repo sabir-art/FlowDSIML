@@ -7,10 +7,10 @@ import {
   Check,
   Chrome,
   CircleAlert,
-  Globe,
+  FileText,
+  GraduationCap,
   Info,
-  Mail,
-  Monitor,
+  Megaphone,
   Settings,
   Upload,
 } from 'lucide-react';
@@ -21,31 +21,38 @@ import { useAuth } from '../auth/AuthProvider';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { BrandMark } from '../components/BrandMark';
 import { MkFieldError } from './auth/AuthLayout';
+import { useHelp } from '../help/HelpProvider';
+import { useToast } from '../components/Toast';
+import { createDemoFromImages, IMAGE_ACCEPT } from './demos/importImages';
 import '../styles/maquette.css';
 import '../styles/maquette-ajouts.css';
 import '../styles/maquette-peau.css';
 
 type Step = 1 | 2 | 3;
+// REV-02 : usages d'un outil de formation et de documentation des procédures
 const USES = [
-  { id: 'website', icon: Globe },
-  { id: 'outreach', icon: Mail },
-  { id: 'presales', icon: Monitor },
+  { id: 'train', icon: GraduationCap },
+  { id: 'document', icon: FileText },
+  { id: 'announce', icon: Megaphone },
 ] as const;
 
-/** Avancement réel de la checklist de l'étape 3 (données du workspace créé). */
-type Progress = { captured: boolean; shared: boolean; viewed: boolean };
+/** REV-04 : les premières étapes de la prise en main L26-01 (une seule source, cochées par la base). */
+const FIRST = ['brand', 'extension', 'capture'] as const;
+type Progress = Record<(typeof FIRST)[number], boolean>;
 
 /** Onboarding (ONB-01 à 03), à l'identique de la maquette onboarding.html : espace, extension, premiers pas. */
 export function Onboarding() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { reload, select, workspaces } = useWorkspace();
+  const help = useHelp();
+  const toast = useToast();
+  const picker = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<Step>(1);
   const [name, setName] = useState('');
-  const [use, setUse] = useState<(typeof USES)[number]['id']>('website');
+  const [use, setUse] = useState<(typeof USES)[number]['id']>('train');
   const [wsId, setWsId] = useState<string | null>(null);
-  const [extAck, setExtAck] = useState(false);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   const { busy, error, run } = useAction();
@@ -62,23 +69,31 @@ export function Onboarding() {
     heading.current?.focus();
   }, [step]);
 
-  // Étape 3 : coches calculées à partir des données réelles du workspace
+  // Étape 3 : coches de la prise en main de l'espace (workspace_onboarding, comme la carte L26-01)
   useEffect(() => {
     if (step !== 3 || !wsId) return;
-    void (async () => {
-      const [d, o] = await Promise.all([
-        supabase.from('demos').select('id,status').eq('workspace_id', wsId).is('deleted_at', null),
-        supabase.rpc('workspace_overview', { p_workspace: wsId, p_days: 3650 }),
-      ]);
-      const demos = (d.data ?? []) as Array<{ status: string }>;
-      const rows = (o.data ?? []) as Array<{ views: number }>;
-      setProgress({
-        captured: demos.length > 0,
-        shared: demos.some((x) => x.status === 'published'),
-        viewed: rows.some((r) => Number(r.views) > 0),
-      });
-    })();
+    void supabase.rpc('workspace_onboarding', { p_ws: wsId }).then(({ data }) => {
+      const st = ((data as { steps?: Partial<Progress> } | null)?.steps ?? {}) as Partial<Progress>;
+      setProgress({ brand: !!st.brand, extension: !!st.extension, capture: !!st.capture });
+    });
   }, [step, wsId]);
+
+  // REV-03 : « Importer des captures à la place » crée une démo, une étape par image, et ouvre l'éditeur
+  async function importImages(files: File[]) {
+    if (!wsId || !user || !files.length) return;
+    const id = await run(async () =>
+      createDemoFromImages({
+        workspaceId: wsId,
+        userId: user.id,
+        folderId: null,
+        title: t('demos.untitled'),
+        files,
+      }),
+    );
+    if (!id) return;
+    toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
+    navigate(`/demos/${id}/edit`, { replace: true });
+  }
 
   async function createWorkspace(wsName: string) {
     const ws = await run(async () => check(await supabase.rpc('create_workspace', { p_name: wsName })));
@@ -86,7 +101,7 @@ export function Onboarding() {
     await reload();
     select(ws.id);
     setWsId(ws.id);
-    // Usage déclaré : mémorisé sur le compte (servira à proposer des modèles, V2)
+    // Usage déclaré : mémorisé sur le compte
     void supabase.auth.updateUser({ data: { use_case: use } });
     return ws.id as string;
   }
@@ -110,8 +125,6 @@ export function Onboarding() {
     }
     navigate('/', { replace: true });
   }
-
-  const steps = [t('onboarding.done.account'), t('onboarding.done.extension')];
 
   return (
     <div className="mk">
@@ -208,17 +221,37 @@ export function Onboarding() {
                       </div>
                     ))}
                     <div className="row ob-ext-actions">
-                      {/* Extension pas encore publiée sur le Chrome Web Store ; import d'images pas encore disponible */}
-                      <button type="button" className="btn btn-primary" aria-disabled="true">
+                      {/* REV-03 : l'article d'aide explique l'installation ; l'import crée une démo à partir d'images */}
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={(e) => help?.openArticle('creer-demo-extension', e.currentTarget)}
+                      >
                         <Chrome aria-hidden="true" />
                         {t('onboarding.addToChrome')}
-                        <span className="badge">{t('shell.soon')}</span>
                       </button>
-                      <button type="button" className="btn btn-ghost" aria-disabled="true">
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        disabled={busy}
+                        onClick={() => picker.current?.click()}
+                      >
                         <Upload aria-hidden="true" />
                         {t('onboarding.importInstead')}
-                        <span className="badge">{t('shell.soon')}</span>
                       </button>
+                      <input
+                        ref={picker}
+                        type="file"
+                        accept={IMAGE_ACCEPT}
+                        multiple
+                        hidden
+                        aria-label={t('onboarding.importInstead')}
+                        onChange={(e) => {
+                          const files = [...(e.target.files ?? [])];
+                          e.target.value = '';
+                          void importImages(files);
+                        }}
+                      />
                     </div>
                   </div>
                   <div className="ext-pop" aria-hidden="true">
@@ -256,15 +289,9 @@ export function Onboarding() {
                     <ArrowLeft aria-hidden="true" />
                     {t('onboarding.back')}
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-lg"
-                    onClick={() => {
-                      setExtAck(true);
-                      setStep(3);
-                    }}
-                  >
-                    {t('onboarding.extDone')}
+                  <button type="button" className="btn btn-secondary btn-lg" onClick={() => setStep(3)}>
+                    {t('onboarding.extSkip')}
+                    <ArrowRight aria-hidden="true" />
                   </button>
                 </div>
               </section>
@@ -277,40 +304,50 @@ export function Onboarding() {
                 </h1>
                 <p className="muted t-lg ob-sub">{t('onboarding.firstSubtitle')}</p>
                 <ol className="checklist ob-checklist">
-                  {steps.map((label, i) => (
-                    <Item key={label} done={i === 0 || extAck || Boolean(progress?.captured)} label={label} />
-                  ))}
-                  <li>
-                    {progress?.captured ? <Done /> : <span className="todo" aria-hidden="true" />}
-                    <span className="grow">
-                      {progress?.captured ? (
-                        <s className="muted">{t('onboarding.done.capture')}</s>
-                      ) : (
-                        <>
-                          <b>{t('onboarding.done.capture')}</b>
+                  <Item done label={t('onboarding.done.account')} />
+                  {FIRST.map((k) =>
+                    k === 'capture' && progress && !progress.capture ? (
+                      <li key={k}>
+                        <span className="todo" aria-hidden="true" />
+                        <span className="grow">
+                          <b>{t(`onb.s.${k}`)}</b>
                           <br />
                           <span className="t-caption muted">{t('onboarding.captureHelp')}</span>
-                        </>
-                      )}
-                    </span>
-                    {!progress?.captured && (
-                      <button type="button" className="btn btn-primary btn-sm" onClick={() => setStep(2)}>
-                        {t('onboarding.start')}
-                      </button>
-                    )}
-                  </li>
-                  <Item done={Boolean(progress?.shared)} label={t('onboarding.done.share')} />
-                  <Item done={Boolean(progress?.viewed)} label={t('onboarding.done.view')} />
+                        </span>
+                        <span className="sr-only">{t('onboarding.todoSr')}</span>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={() => navigate('/?new=1', { replace: true })}
+                        >
+                          {t('onboarding.start')}
+                        </button>
+                      </li>
+                    ) : (
+                      <Item key={k} done={Boolean(progress?.[k])} label={t(`onb.s.${k}`)} />
+                    ),
+                  )}
                 </ol>
+                <p className="t-caption muted ob-more">{t('onboarding.moreSteps')}</p>
                 <div className="row between ob-actions">
                   <button type="button" className="btn btn-ghost" onClick={() => setStep(2)}>
                     <ArrowLeft aria-hidden="true" />
                     {t('onboarding.back')}
                   </button>
-                  {/* Pas encore de démo d'exemple fournie avec un nouvel espace */}
-                  <span className="btn btn-secondary btn-lg" aria-disabled="true">
-                    {t('onboarding.exploreSample')}
-                    <span className="badge">{t('shell.soon')}</span>
+                  <span className="row ob-end">
+                    {/* Pas encore de démo d'exemple fournie avec un nouvel espace */}
+                    <span className="btn btn-secondary" aria-disabled="true">
+                      {t('onboarding.exploreSample')}
+                      <span className="badge">{t('shell.soon')}</span>
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-lg"
+                      onClick={() => navigate('/', { replace: true })}
+                    >
+                      {t('onboarding.goDashboard')}
+                      <ArrowRight aria-hidden="true" />
+                    </button>
                   </span>
                 </div>
               </section>

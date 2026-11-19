@@ -1100,6 +1100,12 @@ async function install(page, state = seed()) {
           // Nouvel espace vide (comme en vrai) : aucune démo, aucune vue
           const ws = { ...t.workspaces[0], id: crypto.randomUUID(), name: a.p_name, slug: null };
           t.workspaces.push(ws);
+          t.members.push({
+            workspace_id: ws.id,
+            user_id: t.members[0].user_id,
+            role: 'owner',
+            created_at: '2026-01-01',
+          });
           return json(route, 200, ws);
         }
         case 'track_events':
