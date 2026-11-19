@@ -204,6 +204,8 @@ export class Tracker {
   }> = [];
   private timer: number | undefined;
   private baseProps: Record<string, string> = {};
+  /** L19b : canal de diffusion (page publique) ; la base n'accepte que 'page'. */
+  channel: 'page' | null = null;
   readonly visitorId = storageGet(globalThis.localStorage, 'fd.vid');
   readonly sessionId = storageGet(globalThis.sessionStorage, 'fd.sid');
 
@@ -258,6 +260,7 @@ export class Tracker {
       referrer: document.referrer || null,
       embedOrigin: parent !== window ? (location.ancestorOrigins?.[0] ?? null) : null,
       device: deviceInfo(),
+      ...(this.channel ? { channel: this.channel } : {}),
       events,
     };
     const body = JSON.stringify(batch);
@@ -374,4 +377,30 @@ export interface CertificateInfo {
 }
 export function issueCertificate(token: string, pathId: string) {
   return rpc<CertificateInfo>('issue_certificate', { p_link_token: token, p_path: pathId });
+}
+
+// ---------------------------------------------------------------------------
+// L19b : page publique d'une démo
+// ---------------------------------------------------------------------------
+export interface PublicPageInfo {
+  demoId: string;
+  title: string;
+  description: string;
+  cta: { label: string; url: string } | null;
+  endTitle: string;
+  endBody: string;
+  style: 'demo' | 'light' | 'dark';
+  indexable: boolean;
+  steps: number;
+  updatedAt: string;
+  workspace: string;
+  privacyUrl: string | null;
+  a11y: 'non_evalue' | 'partiel' | 'total';
+  a11yUrl: string | null;
+  related: Array<{ demoId: string; title: string; description: string }>;
+}
+
+/** Page publique (null : indisponible, quelle qu'en soit la raison). */
+export function publicPage(demoId: string) {
+  return rpc<PublicPageInfo | null>('public_page', { p_demo: demoId });
 }

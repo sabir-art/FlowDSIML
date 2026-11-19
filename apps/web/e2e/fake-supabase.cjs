@@ -1384,6 +1384,18 @@ function defaults(table, r) {
       created_by: 'u-alice',
     };
   if (table === 'segments') return { match: 'all', created_by: 'u-alice' };
+  if (table === 'demo_pages')
+    return {
+      workspace_id: 'ws-1',
+      enabled: false,
+      title: '',
+      description: '',
+      cta_label: null,
+      cta_url: null,
+      style: 'demo',
+      related: false,
+      indexable: false,
+    };
   if (table === 'forms')
     return {
       title: 'Accédez à la démo',

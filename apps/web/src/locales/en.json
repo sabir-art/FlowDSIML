@@ -1331,7 +1331,8 @@
       "link": "Link",
       "embed": "Embed",
       "perso": "Personalised links",
-      "access": "Access"
+      "access": "Access",
+      "page": "Public page"
     },
     "publicAccess": "Public access",
     "publicAccessHelp": "Anyone with the link can view the demo, without an account.",
@@ -1385,7 +1386,40 @@
     "expiresAfter": "Expires",
     "createAndCopy": "Create and copy the link",
     "publishChanges": "Publish changes",
-    "guides": "Guides: Webflow, WordPress, HubSpot, Framer…"
+    "guides": "Guides: Webflow, WordPress, HubSpot, Framer…",
+    "page": {
+      "toggle": "Public page",
+      "toggleHelp": "A simple page presenting the demo, to share or link from your website.",
+      "offInfo": "The public page is turned off. Its address shows “This page is not available”. The demo link and embeds do not change.",
+      "notPublished": "Demo not published: the page stays unavailable until it is published.",
+      "enabled": "Public page turned on.",
+      "disabled": "Public page turned off.",
+      "saved": "Public page saved.",
+      "error": "The page could not be saved.",
+      "address": "Page address",
+      "title": "Page title",
+      "titleHelp": "Defaults to the demo title. Also used as the browser tab title.",
+      "description": "Description",
+      "count": "{{n}} / {{max}} characters",
+      "ctaLabel": "Action button text",
+      "ctaUrl": "Button link",
+      "ctaHelp": "Optional together: without them, the action card is hidden.",
+      "ctaLabelRequired": "Enter the button text.",
+      "ctaUrlRequired": "Enter the button link.",
+      "ctaUrlHttps": "The link must start with https://.",
+      "style": "Page style",
+      "style_demo": "Demo style",
+      "style_light": "Light",
+      "style_dark": "Dark",
+      "related": "Suggest other workspace demos",
+      "relatedHelp": "Up to 3 demos that also have a public page, below the player.",
+      "indexable": "Search engine indexing",
+      "indexableHelp": "When off, the page carries noindex.",
+      "indexableProtected": "Protected demo (password, invitation or domain): the page is never indexed.",
+      "ogSoon": "Rich preview when shared (server-side image and Open Graph tags): coming soon.",
+      "open": "View the public page",
+      "newTab": "Opens in a new tab."
+    }
   },
   "analytics": {
     "title": "Analytics",
@@ -1435,12 +1469,14 @@
     "src": {
       "direct": "Public link",
       "embed": "Embed",
-      "link": "Personalised links"
+      "link": "Personalised links",
+      "page": "Public page"
     },
     "srcLong": {
       "direct": "Public link",
       "embed": "Embedded on a site",
-      "link": "Personalised links"
+      "link": "Personalised links",
+      "page": "Public page"
     },
     "dates": "Dates",
     "views_label": "Views",

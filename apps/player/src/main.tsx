@@ -18,6 +18,7 @@ import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
 import { Player, type PresentState } from './Player';
 import { PasswordGate, StartScreen, SysScreen } from './Gate';
+import { PublicPage } from './PublicPage';
 import '@flowdsiml/player-core/player-core.css';
 import './player.css';
 
@@ -40,6 +41,8 @@ type State =
       /** L16 : intégration avec démarrage au clic (?start=click), langue imposée (?lang=fr|en). */
       clickToStart?: boolean;
       uiLocale?: 'fr' | 'en';
+      /** L19b : lecteur affiché dans la page publique (statistiques « Page publique »). */
+      channel?: 'page' | null;
     };
 
 const inIframe = window.parent !== window;
@@ -137,7 +140,12 @@ function App() {
       const start = async (r: GateInfo) => {
         const manifest = r.manifest;
         if (!manifest) return fail('notFound');
-        if (!embedAllowed(manifest.allowedEmbedOrigins, inIframe, parentOrigin))
+        // L16 : réglages d'intégration (code iframe, widget)
+        const q = (k: string) =>
+          new URLSearchParams(search).get(k) ?? new URLSearchParams(location.search).get(k);
+        // L19b : le lecteur intégré dans la page publique (même origine) n'est pas une intégration tierce
+        const onPage = q('ch') === 'page' && parentOrigin === location.origin;
+        if (!onPage && !embedAllowed(manifest.allowedEmbedOrigins, inIframe, parentOrigin))
           return fail('blocked', manifest.locale);
         document.title = manifest.title;
         document.documentElement.lang = manifest.locale;
@@ -151,13 +159,11 @@ function App() {
         // P12 : « Ouvrir l'aperçu » depuis l'app (?preview=1) n'enregistre pas de statistiques
         const preview = [search, location.search].some((q) => new URLSearchParams(q).get('preview') === '1');
         const resume = preview ? null : await resumeP;
-        // L16 : réglages d'intégration (code iframe, widget)
-        const q = (k: string) =>
-          new URLSearchParams(search).get(k) ?? new URLSearchParams(location.search).get(k);
         const lang = q('lang');
         if (!cancelled)
           setState({
             status: 'ready',
+            channel: onPage ? 'page' : null,
             manifest,
             values,
             linkToken,
@@ -212,7 +218,10 @@ function App() {
   const tracker = useMemo(
     () =>
       state.status === 'ready'
-        ? new Tracker(state.manifest.demoId, state.manifest.versionId, state.linkToken, !state.preview)
+        ? Object.assign(
+            new Tracker(state.manifest.demoId, state.manifest.versionId, state.linkToken, !state.preview),
+            { channel: state.channel ?? null },
+          )
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [state.status === 'ready' ? state.manifest : null],
@@ -282,4 +291,13 @@ addEventListener('hashchange', () => {
   const sameCenter = first.kind === 'center' && next.kind === 'center' && next.slug === first.slug;
   if (!sameCenter) location.reload();
 });
-render(first.kind === 'center' ? <CenterApp route={first} /> : <App />, document.getElementById('root')!);
+render(
+  first.kind === 'center' ? (
+    <CenterApp route={first} />
+  ) : first.kind === 'page' ? (
+    <PublicPage id={first.id} />
+  ) : (
+    <App />
+  ),
+  document.getElementById('root')!,
+);

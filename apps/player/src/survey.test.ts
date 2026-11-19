@@ -37,3 +37,14 @@ describe('sondage (L19) : note de 0 à 10 et réponse écrite', () => {
     expect(r.questions.map((q) => q.questionId)).toEqual(['c']);
   });
 });
+
+import { parseRoute } from './logic';
+describe('page publique (L19b) : route', () => {
+  it('#/p/<id> ; autre chose ignoré', () => {
+    expect(parseRoute('#/p/0b5c1f0e-0000-4000-8000-000000000002')).toEqual({
+      kind: 'page',
+      id: '0b5c1f0e-0000-4000-8000-000000000002',
+    });
+    expect(parseRoute('#/p/pas-un-id').kind).toBe('none');
+  });
+});

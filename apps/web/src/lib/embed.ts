@@ -11,3 +11,6 @@ export function embedSnippet(url: string, title: string): string {
     style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px"></iframe>
 </div>`;
 }
+
+/** L19b : page publique d'une démo. */
+export const publicPageUrl = (demoId: string) => `${PLAYER_URL}/#/p/${demoId}`;

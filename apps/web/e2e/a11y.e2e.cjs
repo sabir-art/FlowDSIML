@@ -232,6 +232,27 @@ const APP_PAGES = [
   { name: 'Éditeur', route: `/#/demos/${DEMO}/edit` },
   { name: 'Quiz (éditeur)', route: `/#/demos/${DEMO}/quiz` },
   { name: 'Partager', route: `/#/demos/${DEMO}/share` },
+  {
+    name: 'Partager · page publique',
+    route: `/#/demos/${DEMO}/share?tab=page`,
+    seed: (d) => {
+      d.tables.demo_pages = [
+        {
+          demo_id: DEMO,
+          workspace_id: d.tables.workspaces[0].id,
+          enabled: true,
+          title: '',
+          description: 'Démo fictive.',
+          cta_label: null,
+          cta_url: null,
+          style: 'demo',
+          related: false,
+          indexable: false,
+        },
+      ];
+    },
+    open: (p) => p.waitForSelector('.sh-page-form'),
+  },
   { name: 'Partager · accès', route: `/#/demos/${DEMO}/share?tab=access` },
   { name: 'Analytics d’une démo', route: `/#/demos/${DEMO}/analytics` },
   { name: 'Analytics', route: '/#/analytics' },

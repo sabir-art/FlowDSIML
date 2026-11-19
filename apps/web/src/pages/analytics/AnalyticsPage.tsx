@@ -22,7 +22,8 @@ import { FilterBar } from './advanced/FilterBar';
 import { decodeDef, encodeDef, type SegmentDef } from './advanced/segmentModel';
 import './advanced/advanced.css';
 
-type Source = 'direct' | 'embed' | 'link';
+/** L19b : « page » = lecteur affiché dans la page publique. */
+type Source = 'direct' | 'embed' | 'link' | 'page';
 interface WsAnalytics {
   views: number;
   visitors: number;
@@ -30,7 +31,7 @@ interface WsAnalytics {
   ctaClicks: number;
   leads: number;
   daily: Array<{ day: string; views: number; completions: number }>;
-  sources: Record<Source, number>;
+  sources: Record<Exclude<Source, 'page'>, number> & { page?: number };
   /** L19 : visiteurs du segment appliqué (null sans segment). */
   segmentVisitors?: number | null;
 }
@@ -238,6 +239,7 @@ export function AnalyticsPage() {
             <option value="direct">{t('analytics.src.direct')}</option>
             <option value="embed">{t('analytics.src.embed')}</option>
             <option value="link">{t('analytics.src.link')}</option>
+            <option value="page">{t('analytics.src.page')}</option>
           </select>
           <div className="segmented" role="radiogroup" aria-label={t('analytics.period')}>
             {PERIODS.map((p) => (
@@ -497,7 +499,8 @@ function Overview({
   const worst = rows
     .slice(1)
     .reduce<(typeof rows)[number] | null>((w, r) => (!w || r.dropOff > w.dropOff ? r : w), null);
-  const totalSources = data.sources.direct + data.sources.embed + data.sources.link;
+  const totalSources =
+    data.sources.direct + data.sources.embed + data.sources.link + (data.sources.page ?? 0);
 
   return (
     <>
@@ -571,8 +574,8 @@ function Overview({
         <div className="card chart-card">
           <h2 className="t-h3">{t('analytics.sources')}</h2>
           <div className="col an-sources">
-            {(['embed', 'link', 'direct'] as Source[]).map((k) => {
-              const n = data.sources[k];
+            {(['embed', 'link', 'direct', 'page'] as Source[]).map((k) => {
+              const n = data.sources[k] ?? 0;
               const p = totalSources ? Math.round((n / totalSources) * 100) : 0;
               return (
                 <div key={k}>

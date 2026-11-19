@@ -19,13 +19,14 @@ import { usePlan } from '../../lib/plan';
 import { PlanFormsWarning } from '../../components/PlanFormsWarning';
 import { AccessPanel, AccessSummary, useDemoAccess } from './AccessPanel';
 import { CopyButton, highlightHtml } from './codeBlock';
+import { PublicPagePanel } from './PublicPagePanel';
 import { ExportDialog } from '../export/ExportDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
 
-type Tab = 'link' | 'embed' | 'perso' | 'access';
+type Tab = 'link' | 'embed' | 'perso' | 'access' | 'page';
 type LinkStats = Record<string, { views: number; last: string | null }>;
 
 /** Partager une démo (PRT-01), à l'identique de la maquette partage.html, sur les données réelles. */
@@ -46,7 +47,7 @@ export function SharePage() {
   // RP-2 : la modale RGPD ouvre directement l'onglet Accès (?tab=access)
   const [tab, setTab] = useState<Tab>(() => {
     const q = params.get('tab');
-    return q === 'embed' || q === 'perso' || q === 'access' ? q : 'link';
+    return q === 'embed' || q === 'perso' || q === 'access' || q === 'page' ? q : 'link';
   });
   const [creating, setCreating] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -137,7 +138,13 @@ export function SharePage() {
     .map((v, i) => [i ? '&' : '?', `${v!.key}=`, v!.default_value || v!.key] as const);
 
   // Onglets texte seul, comme le rendu de la maquette
-  const tabs: Array<{ id: Tab }> = [{ id: 'link' }, { id: 'embed' }, { id: 'perso' }, { id: 'access' }];
+  const tabs: Array<{ id: Tab }> = [
+    { id: 'link' },
+    { id: 'embed' },
+    { id: 'perso' },
+    { id: 'access' },
+    { id: 'page' },
+  ];
 
   return (
     <div className="mk sh">
@@ -513,6 +520,17 @@ export function SharePage() {
             )}
 
             {tab === 'access' && <AccessPanel demoId={demo.id} state={access} editable={can('demo.edit')} />}
+            {tab === 'page' && (
+              <section role="tabpanel" id="sh-panel-page" aria-labelledby="sh-tab-page">
+                <PublicPagePanel
+                  demoId={demo.id}
+                  demoTitle={demo.title}
+                  published={published}
+                  protectedAccess={access.access.mode !== 'link'}
+                  editable={editable}
+                />
+              </section>
+            )}
           </div>
         </div>
 

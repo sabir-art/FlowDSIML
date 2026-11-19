@@ -2879,3 +2879,37 @@
   color: var(--fd-color-text-muted);
   margin: 16px 0 8px;
 }
+
+/* L19b : onglet « Page publique » de Partager */
+.mk .sh-page-form {
+  gap: 0;
+}
+.mk .sh-page-fs {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+.mk .sh-page-fs .field {
+  margin: 0;
+}
+.mk .sh-page-2col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 12px;
+}
+.mk .sh-page-actions {
+  margin-top: 16px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.mk .sh-page-actions .btn-primary {
+  margin-left: auto;
+}
+@media (max-width: 640px) {
+  .mk .sh-page-2col {
+    grid-template-columns: 1fr;
+  }
+}
