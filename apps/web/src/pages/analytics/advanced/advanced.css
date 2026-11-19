@@ -299,7 +299,7 @@
 }
 .mk .cond {
   display: grid;
-  grid-template-columns: 44px 1fr 1fr 1fr 32px;
+  grid-template-columns: 44px minmax(260px, 1.6fr) minmax(0, 1fr) minmax(0, 1fr) 32px;
   gap: 8px;
   align-items: center;
   padding: 10px;
@@ -493,4 +493,8 @@ dialog.l19-drawer {
   align-items: center;
   gap: 6px;
   margin: 0 0 12px;
+}
+/* L19-04 : modale « Ajouter un filtre » assez large pour les libellés entiers */
+.mk dialog.l19-filter {
+  width: min(820px, calc(100vw - 32px));
 }

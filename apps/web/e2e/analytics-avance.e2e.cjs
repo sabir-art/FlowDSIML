@@ -395,6 +395,9 @@ const live = (n) => ({
     await crit.evaluate((el) => {
       el.size = Math.min(14, el.options.length);
       el.style.height = 'auto';
+      // Liste ouverte : chaque libellé et son « Bientôt » entiers (comme la liste native)
+      el.style.width = 'max-content';
+      el.style.minWidth = '100%';
     });
     ok(
       (await crit.locator('option[disabled]').count()) > 0 &&

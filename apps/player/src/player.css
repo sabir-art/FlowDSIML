@@ -2697,3 +2697,18 @@ h1.p-title {
     opacity: 0;
   }
 }
+/* L21-06 : cible plus large que 44 px : l'anneau entoure toute la cible en rectangle arrondi
+   (rayon de la zone + 4 px), liseré blanc, halo à l'extérieur ; le libellé reste entier dessous */
+.is-mobile .p-beacon.is-wide {
+  width: var(--ring-w);
+  height: var(--ring-h);
+  margin: calc(var(--ring-h) / -2) 0 0 calc(var(--ring-w) / -2);
+}
+.is-mobile .p-beacon.is-wide .p-beacon-dot {
+  width: var(--ring-w);
+  height: var(--ring-h);
+  border-radius: 12px;
+}
+.is-mobile .p-beacon.is-wide.p-pulse::after {
+  border-radius: 14px;
+}

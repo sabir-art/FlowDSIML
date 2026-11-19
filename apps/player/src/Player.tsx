@@ -1368,10 +1368,30 @@ function TabWindow({
 
 /** Pastille pulsée de 20 px au centre de la zone ; cible cliquable de 44 px minimum (P2). */
 function Beacon({ h, label, onClick }: { h: Hotspot; label: string; onClick: () => void }) {
+  // L21-06 : sur mobile, une cible plus large que 44 px est entourée en entier (rectangle arrondi)
+  const ref = useRef<HTMLButtonElement>(null);
+  const [ring, setRing] = useState<{ w: number; h: number } | null>(null);
+  useEffect(() => {
+    const stage = ref.current?.parentElement;
+    if (!stage || typeof ResizeObserver === 'undefined') return;
+    const measure = () => {
+      const w = h.w * stage.clientWidth;
+      const hh = h.h * stage.clientHeight;
+      setRing(w > 44 || hh > 44 ? { w: Math.max(44, w + 8), h: Math.max(44, hh + 8) } : null);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(stage);
+    return () => ro.disconnect();
+  }, [h.w, h.h]);
   return (
     <button
-      class={`p-beacon ${h.pulse ? 'p-pulse' : ''}`}
-      style={beaconCenter(h)}
+      ref={ref}
+      class={`p-beacon ${h.pulse ? 'p-pulse' : ''}${ring ? ' is-wide' : ''}`}
+      style={{
+        ...beaconCenter(h),
+        ...(ring ? { '--ring-w': `${Math.round(ring.w)}px`, '--ring-h': `${Math.round(ring.h)}px` } : {}),
+      }}
       aria-label={label}
       onClick={onClick}
     >
