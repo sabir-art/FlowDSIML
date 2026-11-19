@@ -787,12 +787,12 @@
       "steps": [
         {
           "surface": "app",
-          "route": "share",
+          "route": "editor",
           "target": {
-            "role": "tab",
-            "name": "Diffusion"
+            "role": "button",
+            "name": "Plus d’actions"
           },
-          "text": "Ouvrez Diffusion depuis Partager.",
+          "text": "Ouvrez Diffuser depuis le menu ⋯ de l’éditeur.",
           "placement": "auto",
           "setup": {
             "demo": "Créer un rapport en 2 minutes"

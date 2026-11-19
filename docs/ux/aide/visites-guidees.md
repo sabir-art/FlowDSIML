@@ -73,7 +73,7 @@
 ### V-ANALYTICS · Analytics · clé `page:analytics`
 | # | Écran | Cible | Bulle |
 |---|---|---|---|
-| 1 | Analytics | KPI | **Les chiffres clés** · Vues, visiteurs, récurrents, complétion et leads sur la période choisie. |
+| 1 | Analytics | Rangée d'indicateurs | **Les chiffres clés** · Vues, visiteurs, récurrents, complétion et leads sur la période choisie. |
 | 2 | Analytics | Filtres du haut | Filtrez par démo, par source et par période. |
 | 3 | Analytics | « Parcours étape par étape » | Repérez l'étape où les visiteurs abandonnent. |
 | 4 | Analytics | Onglet « Sessions » | Chaque session indique la source, la durée et la progression du visiteur. |
@@ -91,7 +91,7 @@
 ### V-CENTRE · Centre de formation · clé `page:center`
 | # | Écran | Cible | Bulle |
 |---|---|---|---|
-| 1 | Centre | Aperçu | **Le centre** · Une page qui rassemble les formations publiées de l'espace. |
+| 1 | Centre | Section « Type de centre » | **Le centre** · Une page qui rassemble les formations publiées de l'espace. |
 | 2 | Centre | Réglages, adresse | Choisissez l'adresse, le logo et les couleurs du centre. |
 | 3 | Centre | Formations visibles | Choisissez les formations affichées et leur ordre. |
 | 4 | Fin | — | C'est à vous. |
@@ -144,7 +144,7 @@ Le nombre d'étapes affiché dans l'aide est lu dans le manifeste (écran de fin
 6. Fin.
 
 ### M5 · Diffuser (intranet, SCORM) · clé `learn:distribute` · 8 étapes
-1. « Partager » > « Diffusion » : « Ouvrez Diffusion depuis Partager. »
+1. Menu ⋯ de l'éditeur : « Ouvrez Diffuser depuis le menu ⋯ de l'éditeur. »
 2. Onglet « Plateforme de formation » : « Choisissez « Plateforme de formation » pour un paquet SCORM. »
 3. Version et seuil : « Choisissez la version SCORM et le seuil de réussite. »
 4. « Générer le paquet » : « Générez, puis téléchargez le fichier .zip. »
@@ -154,7 +154,7 @@ Le nombre d'étapes affiché dans l'aide est lu dans le manifeste (écran de fin
 8. Fin.
 
 ### M6 · Lire les statistiques · clé `learn:analytics` · 5 étapes
-1. Analytics, KPI : « Les chiffres clés de la période. »
+1. Analytics, rangée d'indicateurs : « Les chiffres clés de la période. »
 2. « Parcours étape par étape » : « L'étape en orange fait perdre le plus de visiteurs : relisez sa consigne. »
 3. Onglet Sessions : « Ouvrez une session pour voir le parcours d'un visiteur. »
 4. Onglet Leads : « Les leads arrivent ici, et dans vos webhooks. »
