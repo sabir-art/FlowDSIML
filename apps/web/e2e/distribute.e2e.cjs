@@ -59,8 +59,8 @@ function seedDistribute(s, { published = true } = {}) {
   s.embedViews = [
     {
       origin: 'https://intranet.acme.example',
-      views: 312,
-      last_at: new Date(Date.now() - 86400000).toISOString(),
+      views: 57,
+      last_at: new Date(Date.now() - 3 * 3600000).toISOString(),
     },
   ];
   return s;
@@ -584,7 +584,7 @@ function seedDistribute(s, { published = true } = {}) {
   });
   // Vues réelles du lien direct (événements demo_view hors intégration)
   t.events = t.events || [];
-  for (let i = 0; i < 48; i++)
+  for (let i = 0; i < 23; i++)
     t.events.push({
       id: `ev-direct-${i}`,
       demo_id: DEMO,
@@ -604,14 +604,14 @@ function seedDistribute(s, { published = true } = {}) {
     /Lien direct/.test(where) && /Formation « Nouvel outil de gestion »/.test(where),
     'Où : lien direct et centre de formation',
   );
-  ok(/48 vues/.test(where), 'Où : vues réelles du lien direct');
+  ok(/23 vues/.test(where) && /57 vues/.test(where), 'Où : vues réelles du lien direct');
   ok(
     /version 4, publiée le/.test(nb(await dlg.locator('.dif-sub').textContent())) &&
       !/10 nov/.test(await dlg.locator('.dif-sub').textContent()),
     'En-tête : date de la version courante',
   );
   ok(
-    /intranet\.acme\.example · 312 vues · vue pour la dernière fois/.test(where),
+    /intranet\.acme\.example · 57 vues · vue pour la dernière fois/.test(where),
     'Où : intranet, vues réelles',
   );
   const lmsRow = dlg.locator('.dif-list li', { hasText: 'LMS · SCORM 1.2' });

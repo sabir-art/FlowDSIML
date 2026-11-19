@@ -5,6 +5,7 @@
  * Données fictives (faux Supabase). Usage : SHOTS_DIR=… [THEME=dark] node e2e/formation-editor.e2e.cjs
  */
 const { chromium } = require('playwright');
+const fs = require('fs');
 const path = require('path');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
@@ -99,13 +100,20 @@ const N = ' ';
     page.waitForEvent('filechooser'),
     page.getByRole('menuitem', { name: 'Importer une image' }).click(),
   ]);
-  await chooser.setFiles(path.join(__dirname, 'fixture.png'));
+  await chooser.setFiles({
+    name: 'nouvel-outil.png',
+    mimeType: 'image/png',
+    buffer: fs.readFileSync(path.join(__dirname, 'fixture.png')),
+  });
   await page.waitForFunction(() => document.querySelectorAll('.ba-missing').length === 0);
   ok(
     ba.image_path && ba.options.beforeAfter.sources.after.kind === 'upload',
     'Image importée pour « Maintenant »',
   );
-  ok((await after.locator('.ba-slot-text small').textContent()) === 'fixture.png', 'Nom de l’image importée');
+  ok(
+    (await after.locator('.ba-slot-text small').textContent()) === 'nouvel-outil.png',
+    'Nom de l’image importée',
+  );
   ok(
     /n’est pas vérifiée automatiquement/.test(await page.locator('.ba-warn').textContent()),
     'Avertissement à l’import d’une image',

@@ -99,7 +99,7 @@
   gap: 8px;
   margin: 12px 0 6px;
 }
-.ab-stop {
+.ab-sec .btn.ab-stop {
   color: var(--fd-color-danger);
 }
 

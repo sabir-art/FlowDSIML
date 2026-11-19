@@ -17,8 +17,13 @@ const ACCEPT = '.png,.jpg,.jpeg,.svg,.woff2,image/png,image/jpeg,image/svg+xml,f
 /** URL publique d'un fichier de la médiathèque (logo, image, police). */
 export const mediaUrl = (path: string) => supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
 
-const mb = (n: number, locale: string) =>
-  (n / 1024 / 1024).toLocaleString(locale, { maximumFractionDigits: n < 10 * 1024 * 1024 ? 1 : 0 });
+/** L18-03 : taille réelle lisible, en Ko sous 1 Mo, sinon en Mo à une décimale. */
+export const sizeLabel = (n: number, locale: string) => {
+  const fr = locale.startsWith('fr');
+  return n < 1024 * 1024
+    ? `${Math.max(n > 0 ? 1 : 0, Math.round(n / 1024)).toLocaleString(locale)}${fr ? '\u202fKo' : ' KB'}`
+    : `${(n / 1024 / 1024).toLocaleString(locale, { maximumFractionDigits: 1 })}${fr ? '\u202fMo' : ' MB'}`;
+};
 
 /**
  * L18-03 / 04 : médiathèque du workspace (modale de 720 px). Recherche, filtre Tout / Logos / Images /
@@ -48,7 +53,8 @@ export function MediaLibrary({
   const [used, setUsed] = useState(0);
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>(kind ?? 'all');
-  const [warn, setWarn] = useState(false);
+  // L18-03 : fichier importé non vérifié (l'avertissement lui est rattaché, pas en bandeau)
+  const [warnId, setWarnId] = useState<string | null>(null);
   const [sel, setSel] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -120,7 +126,7 @@ export function MediaLibrary({
     await load();
     setSel(data.id as string);
     // L18-03 : une image importée n'est pas vérifiée automatiquement (données personnelles)
-    setWarn(!font);
+    setWarnId(font ? null : (data.id as string));
   }
 
   async function remove(f: MediaFile) {
@@ -144,7 +150,7 @@ export function MediaLibrary({
     if (e.dataTransfer.files.length) void upload(e.dataTransfer.files);
   };
   const empty = files !== null && files.length === 0;
-  const quota = t('media.quota', { used: mb(used, i18n.language), total: '500' });
+  const quota = t('media.quota', { used: sizeLabel(used, i18n.language), total: '500' });
 
   return (
     <dialog ref={ref} className="mk md-dialog" aria-labelledby="md-title" onClose={onClose}>
@@ -174,12 +180,6 @@ export function MediaLibrary({
         {err && (
           <div className="alert alert-danger" role="alert">
             {err}
-          </div>
-        )}
-        {warn && (
-          <div className="alert alert-warning md-warn" role="status">
-            <TriangleAlert aria-hidden="true" />
-            <span>{t('editor.importUnverified')}</span>
           </div>
         )}
         {/* L18-04 : recherche et filtre toujours présents (inactifs quand la médiathèque est vide) */}
@@ -274,6 +274,11 @@ export function MediaLibrary({
                       )}
                     </span>
                     <span className="md-name">{f.name}</span>
+                    {warnId === f.id && (
+                      <span className="md-tile-warn" title={t('editor.importUnverified')}>
+                        <TriangleAlert aria-hidden="true" />
+                      </span>
+                    )}
                   </button>
                 </li>
               ))}
@@ -287,8 +292,15 @@ export function MediaLibrary({
             <>
               <b className="md-sel-name">{selected.name}</b>
               <span className="help">
-                {t('media.usedIn', { count: usage[selected.id] ?? 0 })} · {quota}
+                {t('media.usedIn', { count: usage[selected.id] ?? 0 })} ·{' '}
+                {sizeLabel(selected.size_bytes ?? 0, i18n.language)} · {quota}
               </span>
+              {warnId === selected.id && (
+                <span className="md-sel-warn" role="status">
+                  <TriangleAlert aria-hidden="true" />
+                  {t('editor.importUnverified')}
+                </span>
+              )}
             </>
           ) : (
             <span className="help">{quota}</span>

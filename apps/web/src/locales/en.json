@@ -1413,7 +1413,8 @@
       "copied": "Code copied",
       "iframeTitle": "Demo: {{title}}",
       "help": "SharePoint: “Embed” web part. Wiki or CMS: HTML block. If the intranet blocks scripts, use the iframe format.",
-      "previewStep": "Click “New record”"
+      "previewStep": "Click “New record”",
+      "previewNext": "Next"
     },
     "mail": {
       "intro": "Opens your email app with a ready-to-send message. TutoClick sends no email.",
@@ -3164,7 +3165,7 @@
     "types": "PNG, JPG, SVG or WOFF2, 5 MB at most",
     "importFirst": "Import your first file",
     "importHelp": "Logos, background images and fonts, reusable in every demo of the workspace. PNG, JPG, SVG or WOFF2, 5 MB at most.",
-    "quota": "{{used}} MB of {{total}} MB",
+    "quota": "{{used}} of {{total}} MB",
     "usedIn_one": "Used in {{count}} demo",
     "usedIn_other": "Used in {{count}} demos",
     "use": "Use this file",

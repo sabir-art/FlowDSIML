@@ -993,7 +993,7 @@ function IntranetPanel({
                   <span className="pop-hs" />
                   <span className="pop-tip">
                     {t('distribute.intranet.previewStep')}
-                    <i />
+                    <i>{t('distribute.intranet.previewNext')}</i>
                   </span>
                 </div>
               </div>

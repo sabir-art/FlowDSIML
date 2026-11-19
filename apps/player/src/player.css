@@ -1738,9 +1738,16 @@ h1.p-title {
 .p-ba-frame.is-old .p-ba-shot {
   opacity: 0.85;
 }
+.p-ba-col {
+  /* L17-04 : colonne comparaison + curseur, à la largeur de la capture (36 px réservés au curseur) */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(100cqw, (100cqh - 36px) * var(--ratio, 1.6));
+}
 .p-ba-cmp {
   position: relative;
-  width: min(100cqw, 100cqh * var(--ratio, 1.6));
+  width: 100%;
   aspect-ratio: var(--ratio, 1.6);
   border-radius: 10px;
   /* Les étiquettes débordent au-dessus : la découpe arrondie est portée par les calques */
@@ -1806,8 +1813,50 @@ h1.p-title {
   align-self: auto;
 }
 .p-ba-range {
+  /* L17-04 : piste et poignée aux couleurs du thème (lisibles en clair et en sombre) */
   width: 100%;
-  accent-color: var(--p-primary);
+  height: 24px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+.p-ba-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--p-text) 22%, transparent);
+}
+.p-ba-range::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--p-text) 22%, transparent);
+}
+.p-ba-range::-moz-range-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--p-primary);
+}
+.p-ba-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--p-primary);
+  box-shadow: 0 0 0 3px var(--p-surface);
+}
+.p-ba-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--p-primary);
+  box-shadow: 0 0 0 3px var(--p-surface);
+}
+.p-ba-range:focus-visible {
+  outline: 3px solid var(--p-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 .p-ba-seg {
   align-self: flex-start;
@@ -2004,6 +2053,21 @@ h1.p-title {
 }
 .is-dark .p-ba-seg button:not([aria-pressed='true']) {
   color: var(--p-chrome-text);
+}
+/* L17-04 : en sombre, piste claire sur le chrome du lecteur */
+.is-dark .p-ba-range::-webkit-slider-runnable-track {
+  background: color-mix(in srgb, var(--p-chrome-text) 28%, transparent);
+}
+.is-dark .p-ba-range::-moz-range-track {
+  background: color-mix(in srgb, var(--p-chrome-text) 28%, transparent);
+}
+.is-dark .p-ba-range::-webkit-slider-thumb {
+  background: var(--p-chrome-primary, var(--p-primary));
+  box-shadow: 0 0 0 3px var(--p-chrome);
+}
+.is-dark .p-ba-range::-moz-range-thumb {
+  background: var(--p-chrome-primary, var(--p-primary));
+  box-shadow: 0 0 0 3px var(--p-chrome);
 }
 /* L17-10 : en sombre, le tiroir suit le chrome du lecteur */
 .is-dark .p-gloss-drawer {

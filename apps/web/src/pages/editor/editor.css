@@ -1519,6 +1519,8 @@
 }
 .canvas-popup {
   position: relative;
+  /* A2-02 : la pop-up reste au premier plan (au-dessus de l'aperçu de la checklist) */
+  z-index: 6;
 }
 /* F1-6 : l'état vide des commentaires défile au lieu de passer sous le champ de saisie */
 .cm-scroll {
@@ -2306,4 +2308,10 @@
 /* L18-01 : une section sans contenu ne laisse pas de double séparateur */
 .mk .sec:empty {
   display: none;
+}
+
+/* A2-01 : champ « Bientôt » estompé */
+.input.is-soon {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

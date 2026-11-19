@@ -13,6 +13,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const N = ' ';
+const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ');
 
 (async () => {
   const b = await chromium.launch();
@@ -73,7 +74,7 @@ const N = ' ';
       (await dlg.getByRole('radio', { name: 'Logos' }).isDisabled()),
     'L18-04 : recherche et filtre présents, inactifs',
   );
-  ok(/0\s?Mo sur 500/.test(await dlg.textContent()), 'L18-04 : quota réel (0 Mo)');
+  ok(/0\s?Ko sur 500/.test(await dlg.textContent()), 'L18-04 : quota réel (0 Ko)');
   await shot('l18-04-media-vide');
 
   // Imports
@@ -94,9 +95,19 @@ const N = ' ';
   await importVia(fond, /^Importer/);
   await dlg.getByRole('button', { name: 'fond-accueil.png' }).waitFor();
   ok(
-    /n’est pas vérifiée automatiquement/.test(await dlg.locator('.md-warn').textContent()),
-    'L18-03 : avertissement à l’import d’une image',
+    /n’est pas vérifiée automatiquement/.test(await dlg.locator('.md-foot .md-sel-warn').textContent()) &&
+      (await dlg.getByRole('button', { name: 'fond-accueil.png' }).locator('.md-tile-warn').count()) === 1,
+    'L18-03 : avertissement rattaché à l’image importée (vignette et pied)',
   );
+  {
+    // Taille réelle du fichier et total réel (Ko sous 1 Mo)
+    const foot = nb(await dlg.locator('.md-foot').textContent());
+    const kb = (n) => `${Math.max(1, Math.round(n / 1024))} Ko`;
+    const total = state.tables.media_files.reduce((n, x) => n + (x.size_bytes || 0), 0);
+    const own = state.tables.media_files.find((x) => x.name === 'fond-accueil.png').size_bytes;
+    ok(foot.includes(`${kb(own)} · ${kb(total)} sur 500 Mo`), `L18-03 : taille et total réels (${foot})`);
+  }
+  await shot('l18-03-media');
 
   // Filtre et recherche
   await dlg.getByRole('radio', { name: 'Tout' }).click();
@@ -106,7 +117,7 @@ const N = ' ';
   await dlg.getByRole('searchbox').fill('');
   await dlg.getByRole('button', { name: 'logo-acme.png' }).click();
   ok((await dlg.locator('.md-foot').textContent()).includes(`sur 500${N}Mo`), 'pied : quota sur 500 Mo');
-  await shot('l18-03-media');
+  ok((await dlg.locator('.md-sel-warn').count()) === 0, 'logo : pas d’avertissement (autre fichier)');
   state.mediaReject = 'SVG_REJECTED';
   await importVia(svg, /^Importer/);
   await dlg.getByRole('alert').waitFor();
@@ -122,12 +133,21 @@ const N = ' ';
     'logo de la démo pris dans la médiathèque',
   );
 
-  // Suppression d'un fichier utilisé (depuis Paramètres › Marque)
+  // Suppression d'un fichier utilisé (depuis Paramètres › Marque) : le logo sert aussi à une 2e démo
+  {
+    const d1 = state.tables.demos.find((d) => d.id === DEMO);
+    state.tables.demos.push({
+      ...d1,
+      id: '0b5c1f0e-0000-4000-8000-0000000000c2',
+      title: 'Prendre un rendez-vous',
+      settings: JSON.parse(JSON.stringify(d1.settings)),
+    });
+  }
   await page.goto(`${APP}/#/settings/brand`);
   await page.getByRole('button', { name: 'Médiathèque' }).click();
   const lib = page.getByRole('dialog', { name: 'Médiathèque' });
   await lib.getByRole('button', { name: 'logo-acme.png' }).click();
-  ok((await lib.locator('.md-foot').textContent()).includes('Utilisé dans 1 démo'), 'usage : 1 démo');
+  ok((await lib.locator('.md-foot').textContent()).includes('Utilisé dans 2 démos'), 'usage : 2 démos');
   ok(
     (await lib.getByRole('button', { name: 'Utiliser ce fichier' }).count()) === 0,
     'consultation : pas de « Utiliser »',
@@ -136,9 +156,12 @@ const N = ' ';
   const conf = page.getByRole('dialog', { name: `Supprimer «${N}logo-acme.png${N}»${N}?` });
   await conf.waitFor();
   ok(
-    (await conf.textContent()).includes('Ce fichier est utilisé dans 1 démo. Cet emplacement restera vide.'),
+    (await conf.textContent()).includes(
+      'Ce fichier est utilisé dans 2 démos. Ces emplacements resteront vides.',
+    ),
     'suppression : avertissement d’usage',
   );
+  await shot('l18-03-suppression');
   await conf.getByRole('button', { name: 'Supprimer' }).click();
   await page.waitForTimeout(500);
   ok(

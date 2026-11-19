@@ -369,10 +369,11 @@ export function SharePage() {
                   >
                     X
                   </a>
-                  <span className="btn btn-secondary btn-sm" aria-disabled="true" title={t('share.v2')}>
+                  <span className="btn btn-secondary btn-sm" aria-disabled="true">
                     <Download aria-hidden="true" />
                     {t('share.gif')}
-                    <span className="badge sh-badge-xs">V2</span>
+                    {/* Vague B : « Bientôt », jamais « V2 » */}
+                    <span className="badge sh-badge-xs">{t('shell.soon')}</span>
                   </span>
                 </div>
               </section>

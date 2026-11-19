@@ -100,40 +100,42 @@ export function BeforeAfterStep({
       {layout === 'slider' && (
         <div class="p-ba-slider">
           <div class="p-ba-frame">
-            <div
-              class="p-ba-cmp"
-              role="img"
-              aria-label={t.baCompare.replace('{{before}}', lb).replace('{{after}}', la)}
-              style={{ '--ratio': String(after.width / after.height) }}
-            >
-              <div class="p-ba-layer">
-                <Shot img={after} blurs={step.blurs} alt="" />
+            {/* L17-04 : le curseur a exactement la largeur de la comparaison */}
+            <div class="p-ba-col" style={{ '--ratio': String(after.width / after.height) }}>
+              <div
+                class="p-ba-cmp"
+                role="img"
+                aria-label={t.baCompare.replace('{{before}}', lb).replace('{{after}}', la)}
+              >
+                <div class="p-ba-layer">
+                  <Shot img={after} blurs={step.blurs} alt="" />
+                </div>
+                <div class="p-ba-layer is-old" style={{ clipPath: `inset(0 ${100 - value}% 0 0)` }}>
+                  <Shot img={ba.before} blurs={ba.beforeBlurs} alt="" />
+                </div>
+                <span class="p-ba-bar" style={{ left: `${value}%` }} aria-hidden="true" />
+                <span class="p-ba-knob" style={{ left: `${value}%` }} aria-hidden="true">
+                  <MoveHorizontal {...ICON} />
+                </span>
+                {/* L17-04 : étiquettes au-dessus des captures (elles ne masquent rien) */}
+                <div class="p-ba-tags" aria-hidden="true">
+                  <span class="p-ba-pill p-ba-pill--before">{lb}</span>
+                  <span class="p-ba-pill p-ba-pill--after">{la}</span>
+                </div>
               </div>
-              <div class="p-ba-layer is-old" style={{ clipPath: `inset(0 ${100 - value}% 0 0)` }}>
-                <Shot img={ba.before} blurs={ba.beforeBlurs} alt="" />
-              </div>
-              <span class="p-ba-bar" style={{ left: `${value}%` }} aria-hidden="true" />
-              <span class="p-ba-knob" style={{ left: `${value}%` }} aria-hidden="true">
-                <MoveHorizontal {...ICON} />
-              </span>
-              {/* L17-04 : étiquettes au-dessus des captures (elles ne masquent rien) */}
-              <div class="p-ba-tags" aria-hidden="true">
-                <span class="p-ba-pill p-ba-pill--before">{lb}</span>
-                <span class="p-ba-pill p-ba-pill--after">{la}</span>
-              </div>
+              <input
+                class="p-ba-range"
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={value}
+                aria-label={t.baSlider}
+                aria-valuetext={t.baSliderValue.replace('{{n}}', String(value))}
+                onInput={(e) => setValue(Number((e.target as HTMLInputElement).value))}
+              />
             </div>
           </div>
-          <input
-            class="p-ba-range"
-            type="range"
-            min={0}
-            max={100}
-            step={5}
-            value={value}
-            aria-label={t.baSlider}
-            aria-valuetext={t.baSliderValue.replace('{{n}}', String(value))}
-            onInput={(e) => setValue(Number((e.target as HTMLInputElement).value))}
-          />
         </div>
       )}
       {layout === 'toggle' && (

@@ -174,8 +174,9 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
           </label>
           <input
             id="th-frame-url"
-            className="input input-sm"
+            className="input input-sm is-soon"
             disabled
+            aria-disabled="true"
             placeholder="app.example.com"
             aria-describedby="th-frame-url-h"
           />

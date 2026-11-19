@@ -1413,7 +1413,8 @@
       "copied": "Code copié",
       "iframeTitle": "Démo : {{title}}",
       "help": "SharePoint : composant « Incorporer ». Wiki ou CMS : bloc HTML. Si l’intranet refuse les scripts, utilisez le format iframe.",
-      "previewStep": "Cliquez sur « Nouvelle fiche »"
+      "previewStep": "Cliquez sur « Nouvelle fiche »",
+      "previewNext": "Suivant"
     },
     "mail": {
       "intro": "Ouvre votre messagerie avec un message prêt à envoyer. TutoClick n’envoie aucun e-mail.",
@@ -3164,7 +3165,7 @@
     "types": "PNG, JPG, SVG ou WOFF2, 5 Mo au plus",
     "importFirst": "Importer votre premier fichier",
     "importHelp": "Logos, images de fond et polices, réutilisables dans toutes les démos du workspace. PNG, JPG, SVG ou WOFF2, 5 Mo au plus.",
-    "quota": "{{used}} Mo sur {{total}} Mo",
+    "quota": "{{used}} sur {{total}} Mo",
     "usedIn_one": "Utilisé dans {{count}} démo",
     "usedIn_other": "Utilisé dans {{count}} démos",
     "use": "Utiliser ce fichier",

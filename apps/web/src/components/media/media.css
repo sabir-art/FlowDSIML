@@ -118,3 +118,38 @@
 .md-del {
   color: var(--fd-color-danger);
 }
+
+/* L18-03 : avertissement rattaché au fichier importé (vignette et pied de la sélection) */
+.md-tile {
+  position: relative;
+}
+.md-tile-warn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-warning);
+  box-shadow: 0 0 0 2px var(--fd-color-surface);
+}
+.md-tile-warn svg {
+  width: 14px;
+  height: 14px;
+}
+.md-sel-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--fd-color-warning);
+}
+.md-sel-warn svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
