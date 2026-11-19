@@ -480,19 +480,40 @@ function QuizSettings({ editor, readOnly }: { editor: DemoEditor; readOnly: bool
           {t('editor.quiz.validation')}
         </h2>
       </div>
-      <Field label={t('editor.quiz.thresholdLabel', { value: quiz.threshold })} htmlFor="qz-th">
-        <input
-          id="qz-th"
-          type="range"
-          min={0}
-          max={100}
-          step={5}
-          disabled={readOnly}
-          value={quiz.threshold}
-          aria-valuetext={t('editor.quiz.thresholdValue', { value: quiz.threshold })}
-          onChange={(e) => set({ threshold: Number(e.target.value) })}
-        />
+      {/* A2-04 : sondage = même moteur que le quiz, sans bonne réponse ni seuil */}
+      <Field label={t('editor.quiz.modeLabel')}>
+        <div className="fd-segmented" role="group" aria-label={t('editor.quiz.modeLabel')}>
+          {(['quiz', 'survey'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              aria-pressed={(quiz.mode ?? 'quiz') === m}
+              disabled={readOnly}
+              onClick={() => set({ mode: m })}
+            >
+              {t(m === 'quiz' ? 'editor.quiz.modeQuiz' : 'editor.quiz.modeSurvey')}
+            </button>
+          ))}
+        </div>
+        <span className="fd-help">
+          {t(quiz.mode === 'survey' ? 'editor.quiz.modeSurveyHelp' : 'editor.quiz.modeQuizHelp')}
+        </span>
       </Field>
+      {quiz.mode !== 'survey' && (
+        <Field label={t('editor.quiz.thresholdLabel', { value: quiz.threshold })} htmlFor="qz-th">
+          <input
+            id="qz-th"
+            type="range"
+            min={0}
+            max={100}
+            step={5}
+            disabled={readOnly}
+            value={quiz.threshold}
+            aria-valuetext={t('editor.quiz.thresholdValue', { value: quiz.threshold })}
+            onChange={(e) => set({ threshold: Number(e.target.value) })}
+          />
+        </Field>
+      )}
       <Field label={t('editor.quiz.attempts')} htmlFor="qz-att">
         <Select
           id="qz-att"

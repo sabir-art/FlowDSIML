@@ -4,10 +4,11 @@ const { install, seed } = require('./fake-supabase.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const SHOTS = process.env.SHOTS_DIR;
+const { sfx, themedContext } = require('./_theme.cjs');
 
 (async () => {
   const b = await chromium.launch();
-  const page = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  const page = await (await themedContext(b, { viewport: { width: 1440, height: 900 } })).newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const ok = (c, l) => {
@@ -85,7 +86,7 @@ const SHOTS = process.env.SHOTS_DIR;
     (await page.locator('.quiz-list__caption').first().textContent()).includes('lié à l’étape 1'),
     'liste : « lié à l’étape 1 »',
   );
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-editeur.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-editeur${sfx}.png` });
 
   // « Tester le quiz » : aperçu ouvert directement sur le quiz
   await page.getByRole('button', { name: 'Tester le quiz' }).click();

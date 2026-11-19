@@ -708,7 +708,12 @@
       "false": "Faux",
       "thresholdLabel": "Seuil de réussite : {{value}} %",
       "subtitle_one": "« {{module}} » · {{count}} question",
-      "subtitle_other": "« {{module}} » · {{count}} questions"
+      "subtitle_other": "« {{module}} » · {{count}} questions",
+      "modeLabel": "Type",
+      "modeQuiz": "Quiz noté",
+      "modeSurvey": "Sondage",
+      "modeQuizHelp": "Bonnes réponses et seuil de réussite : le quiz valide le module.",
+      "modeSurveyHelp": "Recueille des avis : pas de bonne réponse ni de seuil, le module est validé une fois répondu."
     },
     "backToDemos": "Retour aux démos",
     "unpublishedChanges": "Modifications non publiées",

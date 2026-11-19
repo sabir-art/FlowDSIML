@@ -708,7 +708,12 @@
       "false": "False",
       "thresholdLabel": "Pass mark: {{value}} %",
       "subtitle_one": "\"{{module}}\" · {{count}} question",
-      "subtitle_other": "\"{{module}}\" · {{count}} questions"
+      "subtitle_other": "\"{{module}}\" · {{count}} questions",
+      "modeLabel": "Type",
+      "modeQuiz": "Graded quiz",
+      "modeSurvey": "Survey",
+      "modeQuizHelp": "Correct answers and a pass mark: the quiz validates the module.",
+      "modeSurveyHelp": "Collects opinions: no correct answer or pass mark, the module is validated once answered."
     },
     "backToDemos": "Back to demos",
     "unpublishedChanges": "Unpublished changes",

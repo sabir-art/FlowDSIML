@@ -1246,6 +1246,10 @@ body {
 .p-root.is-dark {
   color-scheme: dark;
 }
+/* Surfaces de la démo restées claires : contrôles natifs (cases, boutons radio) en clair */
+.is-dark :is(.p-quiz-card, .p-form, .p-checklist-card, .p-text-step) {
+  color-scheme: light;
+}
 .is-dark .p-controls {
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
 }

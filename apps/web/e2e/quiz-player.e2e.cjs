@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const SHOTS = process.env.SHOTS_DIR;
+const { sfx, themedContext } = require('./_theme.cjs');
 const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
 const DEMO = '0b5c1f0e-0000-4000-8000-0000000000f2';
 const img = { url: 'assets/a.webp', width: 1100, height: 750 };
@@ -86,7 +87,7 @@ const manifest = {
     if (!c) process.exitCode = 1;
   };
   const errors = [];
-  const page = await b.newPage({ viewport: { width: 1280, height: 860 } });
+  const page = await (await themedContext(b, { viewport: { width: 1280, height: 860 } })).newPage();
   page.on('pageerror', (e) => errors.push(e.message));
   const submits = [];
   const events = [];
@@ -136,6 +137,7 @@ const manifest = {
   await page.locator('.p-controls [aria-label="Étape suivante"]').click();
   await page.getByRole('button', { name: 'Passer au quiz' }).click();
   await page.waitForSelector('.p-quiz-card');
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-question${sfx}.png` });
   ok(
     (await page.locator('legend').textContent()) === 'Où créer un rendez-vous ?',
     'énoncé = legend du fieldset',
@@ -158,7 +160,6 @@ const manifest = {
       .evaluate((el) => el === document.activeElement),
     'focus sur la première option',
   );
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-question.png` });
 
   // Mauvaise réponse : correction par texte et icône, explication, revoir l'étape
   await page.getByLabel('Dans les paramètres').check();
@@ -177,7 +178,7 @@ const manifest = {
     'marque « Bonne réponse »',
   );
   ok(await page.locator('.p-quiz-option input').first().isDisabled(), 'options désactivées après correction');
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-correction.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-correction${sfx}.png` });
   await page.getByRole('button', { name: "Revoir l'étape 1 du module" }).click();
   await page.waitForSelector('.p-review-bar');
   ok(
@@ -221,7 +222,7 @@ const manifest = {
     submits.length === 1 && submits[0].answers.length === 3 && !!submits[0].visitorId,
     'tentative envoyée au serveur',
   );
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-resultat-echec.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-resultat-echec${sfx}.png` });
 
   // Seconde tentative réussie
   await page.getByRole('button', { name: 'Réessayer le quiz' }).click();
@@ -233,12 +234,17 @@ const manifest = {
     await page.getByLabel(label).check();
     if (n === 2) await page.getByLabel('Le motif').check();
     await page.getByRole('button', { name: 'Valider ma réponse' }).click();
+    // F2-03 : bonne réponse (correction affichée)
+    if (n === 1 && SHOTS) {
+      await page.waitForSelector('.p-quiz-status');
+      await page.screenshot({ path: `${SHOTS}/f2-bonne-reponse${sfx}.png` });
+    }
     await page.getByRole('button', { name: n === 3 ? 'Voir mon résultat' : 'Question suivante' }).click();
   }
   await page.waitForSelector('.p-quiz-badge.is-pass');
   ok((await page.locator('.p-quiz-badge').textContent()) === 'Module validé', 'réussite : « Module validé »');
   ok((await page.locator('.p-quiz-result h2').textContent()).includes('Bravo'), 'titre de réussite');
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-resultat-reussite.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-resultat-reussite${sfx}.png` });
   await page.waitForTimeout(2600);
   ok(
     events.filter((e) => e.type === 'demo_complete').length === 1,
