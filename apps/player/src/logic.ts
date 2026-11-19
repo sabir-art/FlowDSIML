@@ -44,6 +44,8 @@ export function resolveAssets(m: Manifest, base: string): Manifest {
       options: s.options.fullPage?.url
         ? { ...s.options, fullPage: { ...s.options.fullPage, url: abs(s.options.fullPage.url) } }
         : s.options,
+      // L28 035 : voix off
+      voice: s.voice ? { ...s.voice, src: abs(s.voice.src) } : s.voice,
       // F7 : vidéo et images des pauses
       video: s.video
         ? {

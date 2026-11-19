@@ -37,6 +37,8 @@ import {
   Minimize2,
   Notebook,
   RotateCcw,
+  Captions,
+  Volume2,
 } from 'lucide-preact';
 import {
   abVariant,
@@ -215,6 +217,16 @@ export function Player({
   const completed = useRef(false);
   const touchX = useRef<number | null>(null);
   const step = m.steps[index]!;
+  // L28-03 : voix off. Son coupé au départ (règle des navigateurs) ; « Activer le son » vaut pour la session
+  const [soundOn, setSoundOn] = useState(() => {
+    try {
+      return sessionStorage.getItem('fd.voice.sound') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const [voiceCc, setVoiceCc] = useState(true);
+  const voiceRef = useRef<HTMLAudioElement>(null);
   const defaults = useMemo(
     () => Object.fromEntries(m.variables.map((v) => [v.key, v.default])),
     [m.variables],
@@ -291,6 +303,8 @@ export function Player({
   const markSeen = (i: number) => setVisited((v) => (v.has(i) ? v : new Set(v).add(i)));
   /** F2 : quiz du module (après la dernière étape) ; gardé monté pendant « Revoir l'étape ». */
   const [view, setView] = useState<'steps' | 'quiz'>(() => (startQuiz && m.quiz ? 'quiz' : 'steps'));
+  // L28-03 : voix off de l'étape affichée (ni pendant un formulaire, ni sur le quiz)
+  const voice = view === 'steps' && !gateForm ? step.voice : null;
   const [quizOpened, setQuizOpened] = useState(() => !!(startQuiz && m.quiz));
   const [reviewing, setReviewing] = useState(false);
   const quizGate = !!m.quiz && m.quiz.required && m.quiz.mode === 'quiz';
@@ -512,6 +526,31 @@ export function Player({
     else void rootRef.current?.requestFullscreen?.();
   }
 
+  // Changement d'étape : la voix s'arrête ; elle repart à l'arrivée si le son est actif et la voix automatique
+  useEffect(() => {
+    const a = voiceRef.current;
+    if (!a) return;
+    a.pause();
+    a.currentTime = 0;
+    if (voice && soundOn && voice.autoplay) void a.play().catch(() => undefined);
+  }, [step.id, voice, soundOn]);
+  function enableSound() {
+    setSoundOn(true);
+    try {
+      sessionStorage.setItem('fd.voice.sound', '1');
+    } catch {
+      /* stockage indisponible */
+    }
+    // Lecture lancée dans le geste de l'utilisateur (autorisée par le navigateur)
+    if (voice?.autoplay) void voiceRef.current?.play().catch(() => undefined);
+  }
+  function toggleVoice() {
+    const a = voiceRef.current;
+    if (!a) return;
+    if (a.paused) void a.play().catch(() => undefined);
+    else a.pause();
+  }
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -529,6 +568,9 @@ export function Player({
       // L17 : les flèches d'un champ (curseur Avant / Après, recherche du glossaire) lui appartiennent
       const tgt = e.target as HTMLElement | null;
       if (tgt?.closest?.('form, input, textarea, select, dialog') || gateForm || view === 'quiz') return;
+      // L28-03 : C masque ou affiche les sous-titres de la voix off
+      if ((e.key === 'c' || e.key === 'C') && voice && !e.ctrlKey && !e.metaKey && !e.altKey)
+        setVoiceCc((v) => !v);
       if (e.key === 'ArrowRight') next();
       if (e.key === 'ArrowLeft') go(index - 1);
     }
@@ -1037,6 +1079,16 @@ export function Player({
         <Checklist title={m.checklist.title} position="collapsed" items={items} t={t} sub={sub} onGo={go} />
       )}
 
+      {voice && (
+        <>
+          <audio ref={voiceRef} src={voice.src} preload="auto" aria-label={t.voice.label} />
+          {voiceCc && voice.transcript && (
+            <p class="p-voice-cc" lang={locale}>
+              {sub(voice.transcript)}
+            </p>
+          )}
+        </>
+      )}
       {/* PY-3 : une pilule centrée : ←, progression, « n / N », →, séparateur, langue, plein écran */}
       <nav
         class="p-controls"
@@ -1083,6 +1135,28 @@ export function Player({
         >
           <ArrowRight {...ICON} />
         </button>
+        {voice && !soundOn && (
+          <button class="p-sound-btn" onClick={enableSound}>
+            <Volume2 {...ICON} />
+            {t.voice.enableSound}
+          </button>
+        )}
+        {voice && soundOn && !voice.autoplay && (
+          <button class="p-icon-btn p-icon-btn--ghost" onClick={toggleVoice} aria-label={t.voice.listen}>
+            <Volume2 {...ICON} />
+          </button>
+        )}
+        {voice && (
+          <button
+            class="p-icon-btn p-icon-btn--ghost p-cc"
+            onClick={() => setVoiceCc(!voiceCc)}
+            aria-pressed={voiceCc}
+            aria-label={t.voice.captions}
+            title={`${t.voice.captions} (C)`}
+          >
+            <Captions {...ICON} />
+          </button>
+        )}
         <span class="p-sep" aria-hidden="true" />
         <button
           class="p-icon-btn p-icon-btn--ghost p-lang"

@@ -15,7 +15,7 @@ interface PublishResult {
     }>;
   };
   /** F7 / A8 : bucket source (captures par défaut ; videos ou html, copiés sans retouche). */
-  copies: Array<{ from: string; to: string; bucket?: 'videos' | 'html' }>;
+  copies: Array<{ from: string; to: string; bucket?: 'videos' | 'html' | 'voices' }>;
 }
 
 /**
@@ -129,6 +129,22 @@ export async function publishDemo(
   const { data, error } = await supabase.rpc('publish_demo', { p_demo: demoId, p_ack: ack });
   if (error) throw error;
   const res = data as unknown as PublishResult;
+  // L28 035 : le manifeste enregistré porte les voix off (ajoutées par la base) ; pistes copiées en plus
+  const ver = await supabase.from('demo_versions').select('manifest').eq('id', res.versionId).single();
+  if (ver.error) throw ver.error;
+  res.manifest = ver.data.manifest as unknown as PublishResult['manifest'];
+  const voiced = await supabase
+    .from('steps')
+    .select('voice_path')
+    .eq('demo_id', demoId)
+    .not('voice_path', 'is', null);
+  if (voiced.error) throw voiced.error;
+  for (const v of voiced.data)
+    res.copies.push({
+      from: v.voice_path!,
+      to: `${demoId}/assets/voice-${v.voice_path!.split('/')[2]}`,
+      bucket: 'voices',
+    });
   // Flous par chemin publié (<demo>/assets/…), pour les appliquer dans les pixels.
   const blurByPath = new Map(
     res.manifest.steps.filter((s) => s.image).map((s) => [`${demoId}/${s.image!.url}`, s.blurs ?? []]),
@@ -150,11 +166,13 @@ export async function publishDemo(
         contentType:
           c.bucket === 'videos'
             ? 'video/webm'
-            : c.bucket === 'html'
-              ? 'text/html'
-              : blurs.length
-                ? 'image/webp'
-                : dl.data.type || 'image/webp',
+            : c.bucket === 'voices'
+              ? dl.data.type || 'audio/webm'
+              : c.bucket === 'html'
+                ? 'text/html'
+                : blurs.length
+                  ? 'image/webp'
+                  : dl.data.type || 'image/webp',
         cacheControl: '31536000',
         upsert: true,
       });

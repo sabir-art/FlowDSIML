@@ -1813,6 +1813,10 @@ export type Database = {
       };
       steps: {
         Row: {
+          voice_autoplay: boolean;
+          voice_duration_ms: number | null;
+          voice_path: string | null;
+          voice_transcript: string | null;
           video: Json;
           video_duration_ms: number | null;
           video_path: string | null;
@@ -1850,6 +1854,10 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          voice_autoplay?: boolean;
+          voice_duration_ms?: number | null;
+          voice_path?: string | null;
+          voice_transcript?: string | null;
           video?: Json;
           video_duration_ms?: number | null;
           video_path?: string | null;
@@ -1886,6 +1894,10 @@ export type Database = {
           presenter_notes?: string;
         };
         Update: {
+          voice_autoplay?: boolean;
+          voice_duration_ms?: number | null;
+          voice_path?: string | null;
+          voice_transcript?: string | null;
           video?: Json;
           video_duration_ms?: number | null;
           video_path?: string | null;

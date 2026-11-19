@@ -2937,3 +2937,53 @@
 .svt-ack input {
   margin-top: 2px;
 }
+
+/* L28-02 : section « Voix off » de l'onglet Étape */
+.voice-sec .voice-actions {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.voice-rec {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.voice-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--fd-color-danger);
+  animation: voice-blink 1.2s ease-in-out infinite;
+}
+.voice-dot.is-paused {
+  animation: none;
+  opacity: 0.5;
+}
+@keyframes voice-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .voice-dot {
+    animation: none;
+  }
+}
+.voice-clock {
+  font-size: var(--fd-font-sm);
+}
+.voice-player {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin-bottom: 8px;
+}
+.voice-player.is-loading {
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface-sunken);
+}
+.voice-auto {
+  margin: 4px 0 10px;
+}

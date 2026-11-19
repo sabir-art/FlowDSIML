@@ -220,6 +220,33 @@ export async function buildScormPackage(
     }
   }
 
+  // L28 035 : pistes de voix off embarquées (le poids du paquet en tient compte)
+  const voices = [
+    ...new Set(
+      manifest.steps
+        .map((s) => s.voice?.src)
+        .filter((u): u is string => !!u && !/^(https?:|data:|blob:)/.test(u) && !u.includes('..')),
+    ),
+  ];
+  if (voices.length) {
+    const { data } = await supabase.storage.from('published').createSignedUrls(
+      voices.map((p) => `${demoId}/${p}`),
+      600,
+    );
+    const urls = new Map((data ?? []).map((s) => [s.path?.slice(demoId.length + 1), s.signedUrl]));
+    for (const p of voices) {
+      stop();
+      const u = urls.get(p);
+      const r = u ? await fetch(u, { signal }).catch(() => null) : null;
+      stop();
+      if (!r || !r.ok) throw new ScormBuildError('SERVER');
+      const bytes = new Uint8Array(await r.arrayBuffer());
+      total += bytes.length;
+      if (total > MAX_PACKAGE_BYTES) throw new ScormBuildError('TOO_BIG');
+      files[p] = [bytes, { level: 0 }];
+    }
+  }
+
   const { js, css } = await import('virtual:tutoclick-offline');
   stop();
   const mastery = opts.pass.kind === 'quiz' ? opts.pass.min : null;

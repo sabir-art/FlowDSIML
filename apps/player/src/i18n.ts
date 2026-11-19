@@ -292,6 +292,12 @@ const dict = {
       continue: 'Continuer',
       noSound: 'Pas de son',
     },
+    voice: {
+      label: 'Voix off',
+      enableSound: 'Activer le son',
+      captions: 'Sous-titres',
+      listen: 'Écouter la voix off',
+    },
     mobile: {
       tap: 'Touchez',
       tapHere: 'Touchez ici',
@@ -638,6 +644,12 @@ const dict = {
       pauseOf: 'Pause {{n}} of {{total}}',
       continue: 'Continue',
       noSound: 'No sound',
+    },
+    voice: {
+      label: 'Voice-over',
+      enableSound: 'Turn on sound',
+      captions: 'Captions',
+      listen: 'Play the voice-over',
     },
     mobile: {
       tap: 'Tap',

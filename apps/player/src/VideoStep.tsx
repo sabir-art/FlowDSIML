@@ -129,7 +129,8 @@ export function VideoStep({
         <video
           ref={ref}
           src={v.url}
-          muted={muted}
+          // L28 035 : une voix off remplace la piste son de la vidéo
+          muted={muted || !!step.voice}
           autoPlay={v.autoplayMuted}
           playsInline
           preload="metadata"

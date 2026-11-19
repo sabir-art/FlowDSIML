@@ -11,6 +11,7 @@ import {
   TriangleAlert,
   PanelsTopLeft,
   ArrowDown,
+  AudioLines,
   ArrowUp,
   ClipboardList,
   Code,
@@ -490,6 +491,8 @@ function StepBadges({
     step.kind === 'before_after' && { icon: <Layers />, label: t('editor.add.beforeAfter') },
     step.kind === 'video' && { icon: <Play />, label: t('editor.video.kind') },
     step.kind === 'html' && { icon: <Code />, label: t('editor.html.kind') },
+    // L28-02 : étape avec voix off
+    step.voice_path && { icon: <AudioLines />, label: t('editor.voice.railIcon') },
     hotspots > 0 && { icon: <Target />, label: t('editor.badgeHotspots', { count: hotspots }) },
     step.gate_form_id && { icon: <ClipboardList />, label: t('editor.badgeForm') },
     step.cta && { icon: <MousePointerClick />, label: t('editor.badgeCta') },

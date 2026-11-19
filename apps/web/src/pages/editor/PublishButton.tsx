@@ -114,6 +114,12 @@ export function PublishButton({
       );
       return;
     }
+    // L28 035 : une voix off doit avoir sa transcription (sous-titres)
+    const noTranscript = editor.steps.findIndex((s) => s.voice_path && !s.voice_transcript?.trim());
+    if (noTranscript >= 0) {
+      setError(t('editor.voice.publishMissing', { n: noTranscript + 1 }), noTranscript);
+      return;
+    }
     // F7 : une étape vidéo doit avoir son fichier
     const noVideo = editor.steps.findIndex(
       (s) => s.kind === 'video' && (!s.video_path || !s.video_duration_ms),

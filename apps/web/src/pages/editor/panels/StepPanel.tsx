@@ -1,3 +1,4 @@
+import { VoiceFields } from '../voice/VoiceFields';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { EyeOff, Lock, Presentation, Target, Trash2, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -309,6 +310,8 @@ export function StepPanel({
 
       {step.kind === 'image' && <AnimationFields editor={editor} step={step} readOnly={readOnly} />}
       {step.kind === 'image' && <CaptureTabFields editor={editor} step={step} readOnly={readOnly} />}
+      {/* L28-02 : voix off ajoutée après coup (toutes les étapes ; vidéo : remplace la piste son) */}
+      <VoiceFields editor={editor} step={step} readOnly={readOnly} />
 
       <div className="sec">
         <div className="sec-title">{t('editor.end.organisation')}</div>

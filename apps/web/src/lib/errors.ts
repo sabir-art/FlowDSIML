@@ -22,6 +22,9 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/HTML_MISSING|HTML_OBJECT_MISSING|HTML_PATH/, 'errors.htmlMissingAny'],
     [/NO_VISIBLE_DEMO/, 'errors.noVisibleDemo'],
     [/PUBLIC_DISABLED/, 'errors.publicDisabled'],
+    // L28 035 : voix off
+    [/VOICE_TRANSCRIPT/, 'editor.voice.publishMissingAny'],
+    [/VOICE_OBJECT_MISSING|VOICE_PATH/, 'editor.voice.uploadError'],
     // L28 082 : adresse personnalisée
     [/ADDRESS_FORMAT/, 'share.address.invalid'],
     [/ADDRESS_RESERVED/, 'share.address.reserved'],
