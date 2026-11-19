@@ -1284,7 +1284,16 @@
       "viewPlan": "Map"
     },
     "importUnverified": "This image is not checked automatically: blur personal data before publishing.",
-    "noFormShort": "No form"
+    "noFormShort": "No form",
+    "capture": {
+      "tabSection": "Capture tab",
+      "tab": "Tab",
+      "tabOption": "Tab {{n}} · {{title}}",
+      "tabHelp2": "Captured in a second tab: the browser bar shows the switch from one tab to the other.",
+      "tabHelpN": "Captured in tab {{n}}: the browser bar shows the switch from one tab to the other.",
+      "showTabs": "Show tabs in the frame",
+      "railTab": "Tab {{n}}"
+    }
   },
   "status": {
     "draft": "Draft",

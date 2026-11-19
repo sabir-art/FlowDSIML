@@ -2315,3 +2315,94 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* ===== L25-06 : onglets de la capture ===== */
+.mk .browser.has-tabs {
+  height: auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+}
+.mk .browser-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.mk .browser.has-tabs .browser-row {
+  height: 34px;
+  padding: 0 12px;
+}
+.mk .browser.has-tabs .browser-row:first-child {
+  align-items: flex-end;
+}
+.mk .browser.has-tabs .browser-row:first-child > i {
+  align-self: center;
+}
+.mk .browser-row--url {
+  border-top: 1px solid var(--fd-stone-200);
+  background: #fff;
+}
+.mk .browser-row--url .url {
+  margin-left: 0;
+  max-width: none;
+  background: var(--fd-stone-100);
+}
+.mk .browser-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin-left: 14px;
+  min-width: 0;
+  height: 100%;
+}
+.mk .browser-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 200px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 8px 8px 0 0;
+  color: var(--fd-stone-500);
+  font: 500 11px var(--fd-font-sans);
+}
+.mk .browser-tab.is-active {
+  background: #fff;
+  color: var(--fd-stone-800, #292524);
+}
+.mk .browser-tab-t {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .browser-fav {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--fd-stone-300);
+}
+.mk .browser-tab.is-active .browser-fav {
+  background: #217bac;
+}
+/* Puce « Onglet 2 » sous le titre de l'étape (liste des étapes) */
+.rail-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: max-content;
+  margin-top: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--fd-color-info-soft, #e8f3fa);
+  color: var(--fd-color-info, #155e8a);
+  font-size: 11px;
+  font-weight: 600;
+}
+.rail-tab svg {
+  width: 12px;
+  height: 12px;
+}

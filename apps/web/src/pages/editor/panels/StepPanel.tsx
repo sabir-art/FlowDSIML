@@ -12,6 +12,7 @@ import { AbSection, type AbState } from '../ab/AbTest';
 import { usePlan } from '../../../lib/plan';
 import { VideoFields } from '../video/VideoFields';
 import { HtmlFields } from '../html/HtmlFields';
+import { CaptureTabFields } from '../capture/CaptureFields';
 
 export function StepPanel({
   editor,
@@ -303,6 +304,8 @@ export function StepPanel({
           )}
         </div>
       )}
+
+      {step.kind === 'image' && <CaptureTabFields editor={editor} step={step} readOnly={readOnly} />}
 
       <div className="sec">
         <div className="sec-title">{t('editor.end.organisation')}</div>

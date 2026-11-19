@@ -45,9 +45,12 @@ import {
   choiceTarget,
   nextIndex,
   ruleTarget,
+  tabChanged,
+  tabsAt,
   type BranchMemory,
   quizAnswerPayload,
 } from './logic';
+import type { ComponentChildren } from 'preact';
 import { Checklist } from './Checklist';
 import { BeforeAfterStep } from './BeforeAfter';
 import { VideoStep } from './VideoStep';
@@ -532,12 +535,18 @@ export function Player({
   const shotTitle = richTextToPlain(sub(step.title || step.hotspots[0]?.title || '')).trim();
   const shotAlt = `${t.shotAlt} ${index + 1} ${t.of} ${m.steps.length}${shotTitle ? ` : ${shotTitle}` : ''}`;
 
+  // L25-06 : onglets de la capture (barre du navigateur) et passage à un autre onglet
+  const tabs = step.kind === 'image' ? tabsAt(m, index) : { tabs: [], active: 0 };
+  const newTab = tabs.tabs.length > 0 && tabChanged(m, index);
+  const activeTitle = tabs.tabs.find((x) => x.n === tabs.active)?.title ?? '';
+
   // L24 : annonce de l'étape aux lecteurs d'écran (zone toujours présente, texte mis à jour)
   const h0 = step.hotspots[0];
   const announce =
     view === 'quiz' || gateForm
       ? ''
       : [
+          newTab ? t.newTab.replace('{{title}}', activeTitle) : '',
           `${t.stepWord} ${index + 1} ${t.of} ${m.steps.length}`,
           richTextToPlain(sub(h0?.title || step.title || '')),
           richTextToPlain(sub(h0?.body || step.body || '')),
@@ -783,18 +792,20 @@ export function Player({
             />
           </>
         ) : step.kind === 'image' && step.image ? (
-          <ImageStep
-            key={step.id}
-            step={step}
-            sub={sub}
-            onHotspot={onHotspot}
-            onCta={onCta}
-            tip={!compact && !gateForm && !ended ? tipProps : undefined}
-            carry={index > 0 && m.steps[index - 1]?.zoom?.keep ? m.steps[index - 1]!.zoom : null}
-            alt={shotAlt}
-            tap={mobile ? t.mobile.tap : undefined}
-            tapHere={t.mobile.tapHere}
-          />
+          <TabWindow tabs={tabs} changed={newTab} ratio={step.image.width / step.image.height}>
+            <ImageStep
+              key={step.id}
+              step={step}
+              sub={sub}
+              onHotspot={onHotspot}
+              onCta={onCta}
+              tip={!compact && !gateForm && !ended ? tipProps : undefined}
+              carry={index > 0 && m.steps[index - 1]?.zoom?.keep ? m.steps[index - 1]!.zoom : null}
+              alt={shotAlt}
+              tap={mobile ? t.mobile.tap : undefined}
+              tapHere={t.mobile.tapHere}
+            />
+          </TabWindow>
         ) : (
           <>
             {popup && backdrop !== null && (
@@ -1183,6 +1194,43 @@ function ImageStep({
           <ExternalLink {...ICON} size={16} />
         </button>
       )}
+    </div>
+  );
+}
+
+/**
+ * L25-06 : fenêtre avec la barre d'onglets au-dessus de la capture (onglets déjà ouverts, celui de
+ * l'étape actif). Au passage à un autre onglet, l'onglet s'active puis la capture apparaît
+ * (animations retirées si le visiteur en demande moins). Sans onglets : la capture seule.
+ */
+function TabWindow({
+  tabs,
+  changed,
+  ratio,
+  children,
+}: {
+  tabs: { tabs: { n: number; title: string }[]; active: number };
+  changed: boolean;
+  ratio: number;
+  children: ComponentChildren;
+}) {
+  if (!tabs.tabs.length) return <>{children}</>;
+  return (
+    <div class={`p-win${changed ? ' is-switch' : ''}`} style={{ '--ratio': String(ratio) }}>
+      <div class="p-tabs" aria-hidden="true">
+        <span class="p-tabs-dots">
+          <i />
+          <i />
+          <i />
+        </span>
+        {tabs.tabs.map((x) => (
+          <span key={x.n} class={`p-tab${x.n === tabs.active ? ' is-active' : ''}`}>
+            <span class="p-tab-fav" />
+            <span class="p-tab-t">{x.title || `#${x.n}`}</span>
+          </span>
+        ))}
+      </div>
+      {children}
     </div>
   );
 }

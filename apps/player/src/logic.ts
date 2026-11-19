@@ -31,6 +31,10 @@ export function resolveAssets(m: Manifest, base: string): Manifest {
       beforeAfter: s.beforeAfter
         ? { ...s.beforeAfter, before: { ...s.beforeAfter.before, url: abs(s.beforeAfter.before.url) } }
         : s.beforeAfter,
+      // L25-01 : page entière (animation de défilement)
+      options: s.options.fullPage?.url
+        ? { ...s.options, fullPage: { ...s.options.fullPage, url: abs(s.options.fullPage.url) } }
+        : s.options,
       // F7 : vidéo et images des pauses
       video: s.video
         ? {
@@ -276,4 +280,30 @@ export function ruleTarget(m: Manifest, i: number, mem: BranchMemory): ChoiceAct
     if (ok) return r.goto;
   }
   return null;
+}
+
+/**
+ * L25-06 : onglets visibles à l'étape i (déjà ouverts, dernier titre connu) et onglet actif. Vide si
+ * l'étape n'a pas d'onglet ou si l'éditeur les a masqués.
+ */
+export function tabsAt(m: Manifest, i: number): { tabs: { n: number; title: string }[]; active: number } {
+  const cur = m.steps[i]?.options.tab;
+  if (!cur || m.steps[i]!.options.showTabs === false) return { tabs: [], active: 0 };
+  const seen = new Map<number, { n: number; title: string }>();
+  for (let k = 0; k <= i; k++) {
+    const t = m.steps[k]!.options.tab;
+    if (t) seen.set(t.n, t);
+  }
+  return { tabs: [...seen.values()].sort((a, b) => a.n - b.n), active: cur.n };
+}
+
+/** L25-06 : l'étape i change d'onglet (par rapport à la dernière étape qui en a un). */
+export function tabChanged(m: Manifest, i: number): boolean {
+  const cur = m.steps[i]?.options.tab;
+  if (!cur) return false;
+  for (let k = i - 1; k >= 0; k--) {
+    const t = m.steps[k]!.options.tab;
+    if (t) return t.n !== cur.n;
+  }
+  return cur.n > 1;
 }

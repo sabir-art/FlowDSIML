@@ -1,9 +1,11 @@
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { branchOf } from './branch';
+import { stepTab, tabChanged } from './capture/tabs';
 import { asVideo } from './video/videoModel';
 import type { PresencePayload } from './presence/presence';
 import { RailWho } from './presence/PresenceUI';
 import {
+  PanelsTopLeft,
   ArrowDown,
   ArrowUp,
   ClipboardList,
@@ -320,6 +322,13 @@ export function StepList({
                   </span>
                   <span className="meta">
                     <b>{s.title || t('editor.untitled')}</b>
+                    {/* L25-06 : l'étape change d'onglet */}
+                    {tabChanged(editor.steps, i) && (
+                      <span className="rail-tab">
+                        <PanelsTopLeft aria-hidden="true" />
+                        {t('editor.capture.railTab', { n: stepTab(s)!.n })}
+                      </span>
+                    )}
                     <span className="icons">
                       <StepBadges
                         step={s}

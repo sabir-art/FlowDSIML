@@ -154,6 +154,33 @@ export const stepOptionsSchema = z
       ),
     /** L22-09 : règles de suite du menu de choix (absentes sur les menus créés avant L22). */
     branch: branchSchema.optional().catch(undefined),
+    /** L25-06 : onglet de la capture (numéro d'ordre et titre), écrit par l'extension. */
+    tab: z
+      .object({ n: z.number().int().min(1).max(50), title: z.string().max(120) })
+      .optional()
+      .catch(undefined),
+    /** L25-06 : onglet d'origine de la capture, gardé quand l'éditeur rattache l'étape à un autre onglet. */
+    tabCaptured: z
+      .object({ n: z.number().int().min(1).max(50), title: z.string().max(120) })
+      .optional()
+      .catch(undefined),
+    /** L25-06 : onglets affichés dans la barre du navigateur (absent : affichés). */
+    showTabs: z.boolean().optional().catch(undefined),
+    /**
+     * L25-01 : capture de la page entière (animation de défilement). `path` dans l'éditeur (stockage),
+     * `url` dans le manifeste publié ; `top` et `viewportHeight` en pixels de l'image.
+     */
+    fullPage: z
+      .object({
+        path: z.string().optional(),
+        url: z.string().optional(),
+        width: z.number().positive(),
+        height: z.number().positive(),
+        top: z.number().min(0),
+        viewportHeight: z.number().positive(),
+      })
+      .optional()
+      .catch(undefined),
     /** L22 : règles de branchement automatique (une règle invalide est ignorée seule). */
     rules: z
       .array(z.unknown())

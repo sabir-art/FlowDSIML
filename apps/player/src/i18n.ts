@@ -27,6 +27,8 @@ const dict = {
     stepWord: 'Étape',
     paused: 'Présentation en pause',
     shotAlt: 'Capture de l’écran, étape',
+    /** L25-06 : annonce du changement d'onglet. */
+    newTab: 'Nouvel onglet\u202f: {{title}}',
     chapters: 'Chapitres',
     /** L17 : glossaire du workspace. */
     glossary: 'Glossaire',
@@ -362,6 +364,7 @@ const dict = {
     stepWord: 'Step',
     paused: 'Presentation paused',
     shotAlt: 'Screenshot, step',
+    newTab: 'New tab: {{title}}',
     chapters: 'Chapters',
     glossary: 'Glossary',
     glossaryClose: 'Close the glossary',

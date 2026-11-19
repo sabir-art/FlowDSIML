@@ -2456,3 +2456,97 @@ h1.p-title {
   color: var(--p-muted, #57534e);
   font-size: 14px;
 }
+
+/* ===== L25-06 : barre d'onglets au-dessus de la capture ===== */
+.p-win {
+  --bar: 36px;
+  display: flex;
+  flex-direction: column;
+  width: min(100cqw, (100cqh - var(--bar)) * var(--ratio, 1.6));
+  border-radius: var(--p-radius);
+  box-shadow: var(--p-shadow);
+  overflow: hidden;
+  background: #e7e5e4;
+}
+.p-win > .p-stage {
+  width: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+.p-tabs {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: var(--bar);
+  padding: 0 12px;
+  background: #e7e5e4;
+  min-width: 0;
+}
+.p-tabs-dots {
+  display: inline-flex;
+  gap: 6px;
+  align-self: center;
+  margin-right: 12px;
+}
+.p-tabs-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #c4c0bc;
+}
+.p-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 220px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 8px 8px 0 0;
+  color: #57534e;
+  font-size: 12px;
+  font-weight: 500;
+}
+.p-tab.is-active {
+  background: #fff;
+  color: #1c1917;
+}
+.p-tab-t {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.p-tab-fav {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: #a8a29e;
+}
+.p-tab.is-active .p-tab-fav {
+  background: #217bac;
+}
+/* Passage à un autre onglet : l'onglet s'active, puis la capture apparaît */
+.p-win.is-switch .p-tab.is-active {
+  animation: p-tab-on 0.3s ease-out both;
+}
+.p-win.is-switch > .p-stage {
+  animation: p-shot-in 0.35s 0.2s ease-out both;
+}
+@keyframes p-tab-on {
+  from {
+    background: transparent;
+  }
+}
+@keyframes p-shot-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-win.is-switch .p-tab.is-active,
+  .p-win.is-switch > .p-stage {
+    animation: none;
+  }
+}

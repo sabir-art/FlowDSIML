@@ -1284,7 +1284,16 @@
       "viewPlan": "Plan"
     },
     "importUnverified": "Cette image n’est pas vérifiée automatiquement : floutez les données personnelles avant de publier.",
-    "noFormShort": "Aucun formulaire"
+    "noFormShort": "Aucun formulaire",
+    "capture": {
+      "tabSection": "Onglet de la capture",
+      "tab": "Onglet",
+      "tabOption": "Onglet {{n}} · {{title}}",
+      "tabHelp2": "Capturée dans un deuxième onglet : la barre du navigateur montre le passage d’un onglet à l’autre.",
+      "tabHelpN": "Capturée dans l’onglet {{n}} : la barre du navigateur montre le passage d’un onglet à l’autre.",
+      "showTabs": "Afficher les onglets dans le cadre",
+      "railTab": "Onglet {{n}}"
+    }
   },
   "status": {
     "draft": "Brouillon",
