@@ -6,6 +6,7 @@ const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
+const { PUBLIC_PLAYER } = require('./fake-supabase.cjs');
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -74,7 +75,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'le manifeste ne renvoie plus les zones à flouter',
   );
   const publicUrl = await app.inputValue('#sh-pub');
-  ok(publicUrl === `${PLAYER}/#/d/${DEMO}`, 'lien public affiché');
+  ok(publicUrl === `${PUBLIC_PLAYER}/#/d/${DEMO}`, 'lien public affiché (adresse publique du lecteur)');
   await app.getByRole('tab', { name: 'Intégrer' }).click();
   ok((await app.textContent('.sh-code')).includes('<iframe'), 'snippet d’intégration affiché');
   if (SHOTS) await app.screenshot({ path: `${SHOTS}/share.png`, fullPage: true });
