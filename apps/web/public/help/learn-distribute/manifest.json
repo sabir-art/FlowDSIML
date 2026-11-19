@@ -33,12 +33,12 @@
       "hotspots": [
         {
           "id": "learn-distribute-1-h",
-          "x": 0.17777777777777778,
-          "y": 0.022222222222222223,
-          "w": 0.6444444444444445,
-          "h": 0.9555555555555556,
+          "x": 0.7339409722222222,
+          "y": 0.006111111111111111,
+          "w": 0.027777777777777776,
+          "h": 0.044444444444444446,
           "title": "",
-          "body": "Ouvrez Diffusion depuis Partager.",
+          "body": "Ouvrez Diffuser depuis le menu ⋯ de l’éditeur.",
           "placement": "auto",
           "action": {
             "type": "next"

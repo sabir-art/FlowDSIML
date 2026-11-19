@@ -34,11 +34,7 @@ module.exports = {
   'learn:blur#4': { role: 'radio', name: 'Toutes les étapes, même position' },
   'learn:blur#5': { before: [{ role: 'button', name: 'Publier' }] },
   'learn:share#2': { role: 'link', name: 'Partager' },
-  'learn:distribute#1': {
-    role: 'dialog',
-    name: 'Diffuser « Créer un rapport en 2 minutes »',
-    route: 'share/distribution',
-  },
+  'learn:distribute#1': { name: 'Plus d’options' },
   'learn:distribute#2': { name: 'SCORM' },
   'learn:distribute#7': { exact: false },
   'learn:distribute#6': { name: 'Copier le code d’intégration', before: [{ role: 'tab', name: 'Intranet' }] },
