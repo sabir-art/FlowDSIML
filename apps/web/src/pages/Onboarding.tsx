@@ -231,7 +231,7 @@ export function Onboarding() {
                         {t('onboarding.popCaptures')}
                       </button>
                       <button type="button" tabIndex={-1} aria-checked="false" role="radio">
-                        HTML <span className="badge ob-badge-xs">V2</span>
+                        HTML
                       </button>
                     </div>
                     <span className="setting ob-setting">

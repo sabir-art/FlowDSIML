@@ -308,6 +308,11 @@ const APP_PAGES = [
   { name: 'Glossaire (vide)', route: '/#/settings/glossary' },
   { name: 'Glossaire', route: '/#/settings/glossary', seed: seedGlossary },
   { name: 'Intégrations', route: '/#/settings/integrations', seed: seedWebhooks },
+  // VB-01 à 03 : fonctions à venir et Sécurité (cartes « Bientôt »)
+  { name: 'Fonctions à venir (IA)', route: '/#/settings/soon?tab=ia' },
+  { name: 'Fonctions à venir (CRM)', route: '/#/settings/soon?tab=crm' },
+  { name: 'Fonctions à venir (SSO)', route: '/#/settings/soon?tab=sso' },
+  { name: 'Sécurité', route: '/#/settings/security' },
   // L16 : modale « Diffuser » (onglets SCORM, Intranet, E-mail, Où elle est diffusée)
   ...['SCORM', 'Intranet', 'E-mail', 'Où elle est diffusée'].map((c) => ({
     name: `Diffuser · ${c}`,

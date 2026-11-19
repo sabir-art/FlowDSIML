@@ -1741,9 +1741,15 @@
   outline: none;
 }
 .mk .hs-ai {
-  color: var(--fd-color-text-subtle);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--fd-color-text-muted);
   text-decoration: underline dotted;
-  cursor: not-allowed;
+}
+.mk .hs-ai svg {
+  width: 13px;
+  height: 13px;
 }
 .mk .pos-grid {
   display: grid;
@@ -2962,4 +2968,109 @@
 .mk .link-btn:focus-visible {
   outline: 2px solid var(--fd-color-focus, #1f7fb6);
   outline-offset: 2px;
+}
+
+/* VB-01 à 03 : cartes « à venir » (vague B) : bordure pointillée, badge neutre, jamais d'accent */
+.mk .soon-page > .muted {
+  margin: 4px 0 var(--fd-space-4);
+}
+.mk .soon-tabs {
+  max-width: 640px;
+  margin-bottom: var(--fd-space-5);
+}
+.mk .soon-alert {
+  margin-bottom: var(--fd-space-4);
+}
+.mk .soon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: var(--fd-space-4);
+}
+.mk .soon-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: var(--fd-space-5);
+  border-radius: var(--fd-radius-2xl);
+  background: var(--fd-color-surface);
+  border: 1px dashed var(--fd-color-border-strong);
+  max-width: 980px;
+}
+.mk .soon-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mk .soon-chip {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.mk .soon-chip svg {
+  width: 18px;
+  height: 18px;
+}
+.mk .soon-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font: 700 16px/1.3 var(--fd-font-display);
+  color: var(--fd-color-text);
+}
+.mk .soon-badge {
+  flex: none;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+  box-shadow: inset 0 0 0 1px var(--fd-color-border);
+  font: 700 var(--fd-text-caption-size) var(--fd-font-sans);
+  white-space: nowrap;
+}
+.mk .soon-badge svg {
+  width: 12px;
+  height: 12px;
+}
+.mk .soon-body {
+  margin: 0;
+}
+.mk .soon-list {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+  color: var(--fd-color-text-muted);
+  font-size: var(--fd-text-body-size);
+}
+.mk .soon-ctl {
+  align-self: flex-start;
+}
+.mk .soon-card [disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.mk .soon-field {
+  margin: 0;
+}
+.mk .soon-why {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--fd-radius-lg);
+  background: var(--fd-color-surface-sunken);
+  font-size: var(--fd-text-label-size, 13px);
+  color: var(--fd-color-text-muted);
+}
+.mk .int-card .soon-why {
+  margin-top: 8px;
+}
+.mk .l23-soon-more {
+  margin: 12px 0 0;
 }

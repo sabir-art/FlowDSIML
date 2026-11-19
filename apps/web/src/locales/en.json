@@ -3451,5 +3451,89 @@
     "error": "The import failed. Try again.",
     "open": "Media library",
     "choose": "Choose from the media library"
+  },
+  "soon": {
+    "badge": "Coming soon",
+    "title": "Upcoming features",
+    "nav": "Upcoming features",
+    "sub": "These features are not active. They depend on a third-party service or a hosting plan.",
+    "tabIa": "AI assistance",
+    "tabCrm": "CRM and emailing",
+    "tabSso": "Single sign-on",
+    "iaBannerTitle": "AI assistance features: in preparation.",
+    "iaBanner": "They are not active. No data is sent to an AI service, and enabling them will require approval from a workspace admin.",
+    "why": "Why, and what to use meanwhile",
+    "gen": {
+      "title": "Generate a demo",
+      "body": "Suggest a first draft of steps (titles, bubble texts) from the captures.",
+      "items": [
+        "Suggested bubble texts and titles",
+        "Split into chapters",
+        "Always reviewed before publishing"
+      ],
+      "action": "Generate",
+      "why": "Requires an AI provider and a GDPR review (capture data). Meanwhile: write manually."
+    },
+    "translate": {
+      "title": "Translate the demo",
+      "body": "Translate bubbles, buttons, quizzes and subtitles into another language.",
+      "items": ["One version per language", "Glossary respected", "Human review recommended"],
+      "action": "Translate",
+      "why": "Requires an AI provider. Meanwhile: manual translation."
+    },
+    "voice": {
+      "title": "Subtitles and voice-over",
+      "body": "Transcribe the voice of a video step and generate a voice-over from text.",
+      "items": ["Automatic transcription", "Synthetic voice-over", "Editable subtitles"],
+      "action": "Transcribe",
+      "why": "Requires transcription and speech synthesis services. Meanwhile: import .vtt subtitles."
+    },
+    "writer": {
+      "title": "Writing assistant",
+      "body": "Rephrase a bubble, simplify a text (easy-to-read), suggest quiz questions.",
+      "items": ["Rephrasing", "Easy to read and understand", "Quiz suggestions"],
+      "action": "Open the assistant",
+      "why": "Requires an AI provider. Meanwhile: write manually."
+    },
+    "crm": {
+      "title": "CRM",
+      "body": "Automatically send leads and demo activity to your CRM.",
+      "items": [
+        "HubSpot, Salesforce, Pipedrive, Zoho",
+        "Create or update the contact",
+        "Demo activity on the record"
+      ],
+      "why": "Requires OAuth apps and developer accounts. Meanwhile: signed webhooks to your tool."
+    },
+    "emailing": {
+      "title": "Emailing tools",
+      "body": "Add leads to a list or trigger an email sequence.",
+      "items": ["Lists and sequences", "Form consent respected"],
+      "action": "Connect",
+      "why": "Requires vendor accounts and keys. Meanwhile: webhooks."
+    },
+    "enrich": {
+      "title": "Visitor enrichment",
+      "body": "Identify the organisation of an anonymous visitor.",
+      "items": ["Company from the network", "Size, industry"],
+      "action": "Enable",
+      "why": "Not planned without a legal review: personal data processed by a third party (GDPR)."
+    },
+    "sso": {
+      "title": "Single sign-on (SSO / SAML)",
+      "body": "Sign in with your organisation account and manage access from your directory.",
+      "items": [
+        "SAML 2.0 (Microsoft Entra ID, Okta…)",
+        "Account provisioning (SCIM)",
+        "Mandatory SSO sign-in"
+      ],
+      "field": "Identity provider metadata URL",
+      "why": "Requires a SAML-compatible hosting plan. Meanwhile: email invitations and allowed domains."
+    },
+    "useWebhooks": "Use webhooks",
+    "inviteMembers": "Invite members",
+    "aiEntry": "AI assistance",
+    "security": "Security",
+    "securitySub": "Sign-in and access to the workspace."
   }
 }

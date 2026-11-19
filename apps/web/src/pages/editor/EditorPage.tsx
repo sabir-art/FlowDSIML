@@ -15,6 +15,7 @@ import {
   Monitor,
   Palette,
   PenLine,
+  WandSparkles,
   Presentation,
   Redo2,
   Search,
@@ -560,12 +561,18 @@ export function EditorPage() {
               icon: <GraduationCap />,
               onSelect: () => navigate(`/demos/${demoId}/quiz`),
             },
+            // VB-01 : vague B, « Bientôt » (jamais « V2 ») ; ouvre « Fonctions à venir » dans un onglet
+            {
+              label: t('soon.aiEntry'),
+              icon: <WandSparkles />,
+              end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
+              onSelect: () => openSoon('ia'),
+            },
             {
               label: t('editor.aiWriter'),
               icon: <PenLine />,
-              disabled: true,
-              end: <span className="fd-badge menu-soon">V2</span>,
-              onSelect: () => undefined,
+              end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
+              onSelect: () => openSoon('ia'),
             },
             {
               label: t('editor.find.label'),
@@ -926,4 +933,9 @@ export function EditorPage() {
       <PreviewDialog manifest={previewManifest} onClose={() => setPreviewManifest(null)} />
     </main>
   );
+}
+
+/** VB-01 : page « Fonctions à venir », dans un nouvel onglet (l'éditeur reste ouvert). */
+function openSoon(tab: 'ia' | 'crm' | 'sso') {
+  window.open(`${location.pathname}#/settings/soon?tab=${tab}`, '_blank', 'noopener');
 }

@@ -3451,5 +3451,89 @@
     "error": "L’import n’a pas abouti. Réessayez.",
     "open": "Médiathèque",
     "choose": "Choisir dans la médiathèque"
+  },
+  "soon": {
+    "badge": "Bientôt disponible",
+    "title": "Fonctions à venir",
+    "nav": "Fonctions à venir",
+    "sub": "Ces fonctions ne sont pas actives. Elles dépendent d'un service tiers ou d'une offre d'hébergement.",
+    "tabIa": "Assistance IA",
+    "tabCrm": "CRM et e-mailing",
+    "tabSso": "Connexion unique",
+    "iaBannerTitle": "Fonctions d'assistance par IA : en préparation.",
+    "iaBanner": "Elles ne sont pas actives. Aucune donnée n'est envoyée à un service d'IA, et leur activation demandera l'accord d'un admin du workspace.",
+    "why": "Pourquoi et en attendant",
+    "gen": {
+      "title": "Générer une démo",
+      "body": "Proposer un premier jet d'étapes (titres, textes de bulles) à partir des captures.",
+      "items": [
+        "Textes de bulles et titres suggérés",
+        "Découpage en chapitres",
+        "Toujours relu avant publication"
+      ],
+      "action": "Générer",
+      "why": "Nécessite un fournisseur d'IA et une validation RGPD (données des captures). En attendant : rédaction manuelle."
+    },
+    "translate": {
+      "title": "Traduire la démo",
+      "body": "Traduire bulles, boutons, quiz et sous-titres dans une autre langue.",
+      "items": ["Une version par langue", "Glossaire respecté", "Relecture humaine conseillée"],
+      "action": "Traduire",
+      "why": "Nécessite un fournisseur d'IA. En attendant : traduction manuelle."
+    },
+    "voice": {
+      "title": "Sous-titres et voix off",
+      "body": "Transcrire la voix d'une étape vidéo et générer une voix off à partir du texte.",
+      "items": ["Transcription automatique", "Voix off synthétique", "Sous-titres modifiables"],
+      "action": "Transcrire",
+      "why": "Nécessite des services de transcription et de synthèse vocale. En attendant : import de sous-titres .vtt."
+    },
+    "writer": {
+      "title": "Assistant de rédaction",
+      "body": "Reformuler une bulle, simplifier un texte (FALC), suggérer des questions de quiz.",
+      "items": ["Reformulation", "Facile à lire et à comprendre", "Suggestions de quiz"],
+      "action": "Ouvrir l’assistant",
+      "why": "Nécessite un fournisseur d'IA. En attendant : rédaction manuelle."
+    },
+    "crm": {
+      "title": "CRM",
+      "body": "Envoyer automatiquement les leads et l'activité des démos vers votre CRM.",
+      "items": [
+        "HubSpot, Salesforce, Pipedrive, Zoho",
+        "Création ou mise à jour du contact",
+        "Activité de démo sur la fiche"
+      ],
+      "why": "Nécessite des applications OAuth et des comptes développeur. En attendant : webhooks signés vers votre outil."
+    },
+    "emailing": {
+      "title": "Outils d'e-mailing",
+      "body": "Ajouter les leads à une liste ou déclencher un scénario d'e-mails.",
+      "items": ["Listes et scénarios", "Respect du consentement du formulaire"],
+      "action": "Connecter",
+      "why": "Nécessite des comptes et des clés des éditeurs. En attendant : webhooks."
+    },
+    "enrich": {
+      "title": "Enrichissement des visiteurs",
+      "body": "Identifier l'organisation d'un visiteur anonyme.",
+      "items": ["Entreprise à partir du réseau", "Taille, secteur"],
+      "action": "Activer",
+      "why": "Non prévu sans analyse juridique : traitement de données personnelles par un tiers (RGPD)."
+    },
+    "sso": {
+      "title": "Connexion unique (SSO / SAML)",
+      "body": "Se connecter avec le compte de votre organisation et gérer les accès depuis votre annuaire.",
+      "items": [
+        "SAML 2.0 (Microsoft Entra ID, Okta…)",
+        "Provisionnement des comptes (SCIM)",
+        "Connexion obligatoire par SSO"
+      ],
+      "field": "URL des métadonnées du fournisseur",
+      "why": "Nécessite une offre d'hébergement compatible SAML. En attendant : invitation par e-mail et domaines autorisés."
+    },
+    "useWebhooks": "Utiliser les webhooks",
+    "inviteMembers": "Inviter des membres",
+    "aiEntry": "Assistance IA",
+    "security": "Sécurité",
+    "securitySub": "Connexion et accès au workspace."
   }
 }

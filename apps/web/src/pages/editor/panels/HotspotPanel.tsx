@@ -1,4 +1,4 @@
-import { ChevronLeft, Crop, Layers, MessageSquare, Target, Trash2 } from 'lucide-react';
+import { ChevronLeft, Crop, Layers, MessageSquare, Target, Trash2, WandSparkles } from 'lucide-react';
 import { useState } from 'react';
 import { ApplyStyleDialog } from '../ApplyStyleDialog';
 import { useTranslation } from 'react-i18next';
@@ -163,10 +163,17 @@ export function HotspotPanel({
           extra={
             <>
               {' · '}
-              <span className="hs-ai" aria-disabled="true">
-                {t('editor.hs.improveAi')}
-              </span>{' '}
-              <span className="badge badge-xs">{t('editor.v2')}</span>
+              {/* VB-01 : Assistance IA « Bientôt » (ouvre « Fonctions à venir ») */}
+              <a
+                className="hs-ai"
+                href={`${location.pathname}#/settings/soon?tab=ia`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <WandSparkles aria-hidden="true" />
+                {t('soon.aiEntry')}
+              </a>{' '}
+              <span className="badge badge-xs">{t('shell.soon')}</span>
             </>
           }
         />

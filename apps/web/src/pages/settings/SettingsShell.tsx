@@ -1,7 +1,18 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Code, CreditCard, Notebook, Palette, Plug, Settings, UserRound, Users } from 'lucide-react';
+import {
+  Clock,
+  Code,
+  CreditCard,
+  Notebook,
+  Palette,
+  Plug,
+  Settings,
+  Shield,
+  UserRound,
+  Users,
+} from 'lucide-react';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
@@ -43,6 +54,9 @@ export function SettingsShell({ children }: { children: ReactNode }) {
           {/* L23 : intégrations, propriétaires et admins seulement */}
           {can('integrations.manage') &&
             item('/settings/integrations', <Plug aria-hidden="true" />, t('settings.integrations'))}
+          {/* VB-03 : Sécurité (connexion unique « Bientôt ») ; VB-01 à 03 : fonctions à venir */}
+          {item('/settings/security', <Shield aria-hidden="true" />, t('soon.security'))}
+          {item('/settings/soon', <Clock aria-hidden="true" />, t('soon.nav'))}
           <span className="grp">{t('settings.account')}</span>
           {item('/settings/profile', <UserRound aria-hidden="true" />, t('settings.profile'))}
           {item('/settings/plans', <CreditCard aria-hidden="true" />, t('settings.plans'))}

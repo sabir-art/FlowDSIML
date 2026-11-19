@@ -11,6 +11,7 @@ import {
   ChartColumn,
   Copy,
   Hash,
+  Mail,
   MessageSquare,
   Plus,
   Send,
@@ -58,6 +59,15 @@ export function IntegrationsPage() {
   const allowed = can('integrations.manage');
   const location = useLocation();
   const editId = (location.state as { edit?: string } | null)?.edit;
+  // VB-02 : arrivée depuis « Utiliser les webhooks » (Fonctions à venir)
+  const toWebhooks = (location.state as { focus?: string } | null)?.focus === 'webhooks';
+  const loaded = hooks !== null;
+  useEffect(() => {
+    // Après le chargement de la liste (et l'annonce de changement de page)
+    if (!toWebhooks || !loaded) return;
+    const id = window.setTimeout(focusWebhooks, 50);
+    return () => window.clearTimeout(id);
+  }, [toWebhooks, loaded]);
 
   const load = useCallback(async () => {
     if (!ws) return;
@@ -109,7 +119,7 @@ export function IntegrationsPage() {
             <p className="muted">{t('integrations.sub')}</p>
           </div>
         </div>
-        <div className="card">
+        <div className="card" id="webhooks" tabIndex={-1}>
           <div className="card-head">
             <div>
               <h3 className="t-h3">{t('integrations.webhooks')}</h3>
@@ -291,6 +301,13 @@ export function StateBadge({ h, inline = false }: { h: Webhook; inline?: boolean
   return <span className="badge">{t('integrations.disabled')}</span>;
 }
 
+/** Ancre « Webhooks » : défilement et focus sur la carte. */
+function focusWebhooks() {
+  const el = document.getElementById('webhooks');
+  el?.scrollIntoView({ block: 'start' });
+  el?.focus({ preventScroll: true });
+}
+
 function SoonCards() {
   const { t } = useTranslation();
   const cards = [
@@ -318,7 +335,28 @@ function SoonCards() {
             <p>{t(`integrations.soon_${c.k}_body`)}</p>
           </li>
         ))}
+        {/* VB-02 : outils d'e-mailing, avec l'alternative active (webhooks) : pas d'aria-disabled
+            sur la carte, qui rendrait le lien inactif ; le badge dit que la fonction est à venir */}
+        <li className="int-card int-card-soon">
+          <div className="hd">
+            <span className="int-lg" aria-hidden="true">
+              <Mail />
+            </span>
+            <b>{t('soon.emailing.title')}</b>
+            <span className="badge">{t('shell.soon')}</span>
+          </div>
+          <p>{t('soon.emailing.body')}</p>
+          <p className="soon-why">
+            {t('soon.emailing.why')}{' '}
+            <button type="button" className="link-btn" onClick={focusWebhooks}>
+              {t('soon.useWebhooks')}
+            </button>
+          </p>
+        </li>
       </ul>
+      <p className="t-caption muted l23-soon-more">
+        <Link to="/settings/soon?tab=crm">{t('soon.title')}</Link>
+      </p>
     </div>
   );
 }
