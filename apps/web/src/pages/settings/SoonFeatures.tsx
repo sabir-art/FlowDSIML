@@ -11,6 +11,7 @@ import {
   Users,
   WandSparkles,
 } from 'lucide-react';
+import { ShareRulesCard } from './security/ShareRulesCard';
 import { SettingsShell } from './SettingsShell';
 import { SoonButton, SoonCard } from '../../components/soon/SoonCard';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -156,6 +157,8 @@ export function SecuritySettings() {
           {t('soon.security')}
         </h2>
         <p className="muted">{t('soon.securitySub')}</p>
+        {/* L27-06 : règles de partage, au-dessus de la connexion unique (« Bientôt », VB-03) */}
+        <ShareRulesCard />
         <SsoCard headingLevel={3} />
       </section>
     </SettingsShell>

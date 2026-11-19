@@ -25,7 +25,7 @@ describe('styles prédéfinis', () => {
 describe('styles livrés en base', () => {
   it('builtin_styles (migration) = PRESETS', () => {
     const sql = readFileSync(
-      resolve(__dirname, '../../../../../../supabase/migrations/20261122090000_marque.sql'),
+      resolve(__dirname, '../../../../../../supabase/migrations/20261122090000_marque_regles.sql'),
       'utf8',
     );
     for (const p of PRESETS) {

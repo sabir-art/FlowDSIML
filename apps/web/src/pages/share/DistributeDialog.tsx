@@ -46,6 +46,7 @@ import { useDemoEditor } from '../editor/useDemoEditor';
 import { PublishButton } from '../editor/PublishButton';
 import { download } from '../export/exportData';
 import { useDemoAccess } from './AccessPanel';
+import { canPublishWith, useShareRules } from '../../lib/shareRules';
 import { highlightHtml } from './codeBlock';
 import {
   embedUrl,
@@ -151,6 +152,9 @@ export function DistributeDialog({
   const { can, current } = useWorkspace();
   const id = useId();
   const ref = useRef<HTMLDialogElement>(null);
+  // L27-08 : règles de partage (diffusion réservée aux administrateurs, exports hors de l'app)
+  const rules = useShareRules(current?.id);
+  const pubBlocked = !canPublishWith(rules, current?.role);
   const editor = useDemoEditor(demoId);
   const access = useDemoAccess(demoId).access;
   const [info, setInfo] = useState<Info | null>(null);
@@ -326,7 +330,14 @@ export function DistributeDialog({
         }}
       />
     );
-    foot = <ScormFoot demoId={demoId} close={close} generate={generate} />;
+    foot = (
+      <ScormFoot
+        demoId={demoId}
+        close={close}
+        generate={generate}
+        blocked={pubBlocked || !rules.exports_allowed ? `${id}-rule` : null}
+      />
+    );
   } else if (info && tab === 'intranet') {
     body = (
       <IntranetPanel
@@ -334,6 +345,7 @@ export function DistributeDialog({
         editable={can('demo.edit')}
         onAllowed={() => void load()}
         record={(label, settings) => record('intranet', label, settings)}
+        ruled={pubBlocked ? `${id}-rule` : null}
       />
     );
   } else if (info && tab === 'mail' && mail) {
@@ -432,6 +444,12 @@ export function DistributeDialog({
                 {t('distribute.modifiedNote', { n: info?.version?.number })}{' '}
                 {publishBtn(t('distribute.publish'))}
               </span>
+            </div>
+          )}
+          {(pubBlocked || (tab === 'scorm' && !rules.exports_allowed)) && tab !== 'where' && (
+            <div className="alert alert-info dif-modified" role="note" id={`${id}-rule`}>
+              <Info aria-hidden="true" />
+              <span>{pubBlocked ? t('rules.errPublish') : t('rules.errExports')}</span>
             </div>
           )}
           {info ? body : <p className="muted">{t('common.loading')}</p>}
@@ -709,7 +727,18 @@ function ScormPanel({
   );
 }
 
-function ScormFoot({ demoId, close, generate }: { demoId: string; close: () => void; generate: () => void }) {
+function ScormFoot({
+  demoId,
+  close,
+  generate,
+  blocked,
+}: {
+  demoId: string;
+  close: () => void;
+  generate: () => void;
+  /** L27 : id de l'explication quand les règles de l'espace bloquent la génération */
+  blocked: string | null;
+}) {
   const { t } = useTranslation();
   const st = useScormJob(demoId)?.state.status;
   if (st === 'running')
@@ -752,7 +781,13 @@ function ScormFoot({ demoId, close, generate }: { demoId: string; close: () => v
       <button type="button" className="btn btn-secondary" onClick={close}>
         {t('common.cancel')}
       </button>
-      <button type="button" className="btn btn-primary" onClick={generate}>
+      <button
+        type="button"
+        className="btn btn-primary"
+        aria-disabled={blocked ? true : undefined}
+        aria-describedby={blocked ?? undefined}
+        onClick={() => !blocked && generate()}
+      >
         <Package aria-hidden="true" />
         {t('distribute.scorm.generate')}
       </button>
@@ -767,11 +802,14 @@ function IntranetPanel({
   editable,
   onAllowed,
   record,
+  ruled,
 }: {
   info: Info;
   editable: boolean;
   onAllowed: () => void;
   record: (label: string, settings: Record<string, unknown>) => void;
+  /** L27 : id de l'explication quand les règles de l'espace bloquent la diffusion */
+  ruled: string | null;
 }) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -1042,7 +1080,9 @@ function IntranetPanel({
           type="button"
           className="btn btn-secondary btn-sm"
           aria-label={t('distribute.intranet.copyLabel')}
-          onClick={() => void copy()}
+          aria-disabled={ruled ? true : undefined}
+          aria-describedby={ruled ?? undefined}
+          onClick={() => !ruled && void copy()}
         >
           <Copy aria-hidden="true" />
           <span>{t('common.copy')}</span>

@@ -424,6 +424,42 @@ const APP_PAGES = [
       await p.waitForSelector('dialog[open]');
     },
   },
+  { name: 'Sécurité · règles de partage (plan)', route: '/#/settings/security' },
+  {
+    name: 'Sécurité · règles de partage (Enterprise)',
+    route: '/#/settings/security',
+    seed: (d) => {
+      d.tables.workspaces[0].plan_code = 'enterprise';
+    },
+  },
+  {
+    name: 'Sécurité · liens non conformes',
+    route: '/#/settings/security',
+    seed: (d) => {
+      d.tables.workspaces[0].plan_code = 'enterprise';
+      for (const x of d.tables.demos.slice(0, 2)) x.status = 'published';
+    },
+    open: async (p) => {
+      await p.getByRole('checkbox', { name: 'Lien public' }).uncheck();
+      await p.getByRole('button', { name: 'Enregistrer les règles' }).click();
+      await p.waitForSelector('dialog[open]');
+    },
+  },
+  {
+    name: 'Partager · règles de l’espace',
+    route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/share?tab=access',
+    seed: (d) => {
+      d.tables.share_rules = [
+        {
+          workspace_id: d.tables.workspaces[0].id,
+          modes: ['password'],
+          max_link_days: 30,
+          publish_role: 'admin',
+          exports_allowed: false,
+        },
+      ];
+    },
+  },
   { name: 'Variables', route: '/#/settings/variables' },
   { name: 'Glossaire (vide)', route: '/#/settings/glossary' },
   { name: 'Glossaire', route: '/#/settings/glossary', seed: seedGlossary },

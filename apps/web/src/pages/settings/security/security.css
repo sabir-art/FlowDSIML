@@ -1,0 +1,107 @@
+/* L27-06 : carte « Règles de partage » */
+.sr-card {
+  display: grid;
+  gap: 4px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.sr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.sr-head .badge {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.sr-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--fd-color-border);
+}
+.sr-row p {
+  margin: 2px 0 0;
+}
+.sr-fieldset {
+  margin: 0;
+  min-width: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+.sr-legend {
+  float: left;
+  display: grid;
+  gap: 2px;
+  padding: 0;
+}
+.sr-checks {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+.sr-checks .check.is-soon {
+  color: var(--fd-color-text-muted);
+}
+.sr-ctl [aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.sr-foot {
+  margin: 8px 0;
+}
+.sr-dialog {
+  width: min(560px, calc(100vw - 32px));
+  border: 0;
+  padding: 0;
+  border-radius: var(--fd-radius-lg, 16px);
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: var(--fd-shadow-lg);
+}
+.sr-dialog::backdrop {
+  background: rgb(12 10 9 / 0.45);
+}
+.sr-c-body {
+  display: grid;
+  gap: 10px;
+}
+.sr-c-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+.sr-c-choices {
+  border: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.sr-c-opt {
+  align-items: flex-start;
+}
+.sr-c-opt > span {
+  display: grid;
+  gap: 2px;
+}
+.sr-c-warn {
+  color: var(--fd-color-warning-text, var(--fd-color-text));
+  font-weight: 600;
+}
+@media (max-width: 640px) {
+  .sr-row {
+    grid-template-columns: 1fr;
+  }
+}
+.sr-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}

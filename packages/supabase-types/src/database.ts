@@ -48,6 +48,7 @@ export type Database = {
           ask_email: boolean;
           demo_id: string;
           expires_at: string | null;
+          locked_by_rules: boolean;
           mode: string;
           password_changed_at: string | null;
           updated_at: string;
@@ -58,6 +59,7 @@ export type Database = {
           ask_email?: boolean;
           demo_id: string;
           expires_at?: string | null;
+          locked_by_rules?: boolean;
           mode?: string;
           password_changed_at?: string | null;
           updated_at?: string;
@@ -67,6 +69,7 @@ export type Database = {
           ask_email?: boolean;
           demo_id?: string;
           expires_at?: string | null;
+          locked_by_rules?: boolean;
           mode?: string;
           password_changed_at?: string | null;
           updated_at?: string;
@@ -1066,6 +1069,37 @@ export type Database = {
           category?: string;
           description?: string;
           name?: string;
+        };
+        Relationships: [];
+      };
+      share_rules: {
+        Row: {
+          exports_allowed: boolean;
+          max_link_days: number | null;
+          modes: string[];
+          publish_role: string;
+          updated_at: string;
+          updated_by: string | null;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          exports_allowed?: boolean;
+          max_link_days?: number | null;
+          modes?: string[];
+          publish_role?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          workspace_id: string;
+        };
+        Update: {
+          exports_allowed?: boolean;
+          max_link_days?: number | null;
+          modes?: string[];
+          publish_role?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          workspace_id?: string;
         };
         Relationships: [];
       };
@@ -2294,6 +2328,21 @@ export type Database = {
         Returns: undefined;
       };
       default_style_impact: { Args: { p_ws: string }; Returns: number };
+      share_rules_preview: {
+        Args: { p_ws: string; p_modes: string[]; p_max_days: number | null };
+        Returns: Json;
+      };
+      set_share_rules: {
+        Args: {
+          p_ws: string;
+          p_modes: string[];
+          p_max_days: number | null;
+          p_publish_role: string;
+          p_exports: boolean;
+          p_fix?: boolean;
+        };
+        Returns: Json;
+      };
       template_set_images: { Args: { p_template: string; p_map: Json }; Returns: undefined };
       help_feedback: { Args: { p_article: string; p_helpful: boolean }; Returns: undefined };
       save_demo_as_template: {

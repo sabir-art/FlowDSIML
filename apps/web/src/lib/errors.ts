@@ -22,6 +22,12 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/HTML_MISSING|HTML_OBJECT_MISSING|HTML_PATH/, 'errors.htmlMissingAny'],
     [/NO_VISIBLE_DEMO/, 'errors.noVisibleDemo'],
     [/PUBLIC_DISABLED/, 'errors.publicDisabled'],
+    // L27 : règles de partage de l'espace
+    [/RULE_MODE\b/, 'rules.errMode'],
+    [/RULE_PUBLISH/, 'rules.errPublish'],
+    [/RULE_EXPORTS/, 'rules.errExports'],
+    [/RULE_MODES_EMPTY/, 'rules.modesEmpty'],
+    [/PLAN_REQUIRED:share_rules/, 'rules.errPlan'],
     [/GDPR_ACK_REQUIRED/, 'errors.gdprAck'],
     [/CONFIRMATION_MISMATCH/, 'errors.confirmMismatch'],
     [/DEMO_NOT_FOUND/, 'errors.demoNotFound'],
@@ -40,6 +46,8 @@ export function errorMessage(t: TFunction, err: unknown): string {
   const cap = /TO_CAPTURE:(\d+)/.exec(msg);
   if (cap) return t('templates.toCaptureLeft', { count: Number(cap[1]) });
   if (/TEMPLATE_NOT_FOUND/.test(msg)) return t('templates.notFound');
+  const exp = /RULE_EXPIRY:(\d+)/.exec(msg);
+  if (exp) return t('rules.errExpiry', { n: Number(exp[1]) });
   for (const [re, key] of known) if (re.test(msg)) return t(key);
   return t('errors.generic', { message: msg });
 }

@@ -1,0 +1,212 @@
+/**
+ * L27-06 à L27-08 et L27-10 : règles de partage (Paramètres > Sécurité), liens non conformes,
+ * effet dans Partager (mode interdit visible et expliqué, durée maximale, publication réservée),
+ * exports désactivés, plan inférieur à Enterprise. Données fictives (« Acme », .example).
+ * Usage : SHOTS_DIR=… [THEME=dark] node e2e/regles-partage.e2e.cjs
+ */
+const { chromium } = require('playwright');
+const { install, seed } = require('./fake-supabase.cjs');
+const { sfx, themedContext } = require('./_theme.cjs');
+const APP = process.env.APP_URL || 'http://localhost:5173';
+const SHOTS = process.env.SHOTS_DIR;
+const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
+const sp = (s) => (s || '').replace(/[  ]/g, ' ');
+
+(async () => {
+  const b = await chromium.launch();
+  const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const ok = (c, l) => {
+    console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
+    if (!c) process.exitCode = 1;
+  };
+  const state = seed();
+  const t = state.tables;
+  t.profiles[0].full_name = 'Alice Exemple';
+  // Deux démos publiées : l'une en lien public sans mot de passe, l'autre avec un mot de passe
+  t.demos[0].status = 'published';
+  if (t.demos[1]) t.demos[1].status = 'published';
+  t.demo_access.push({
+    demo_id: t.demos[1]?.id ?? DEMO,
+    workspace_id: 'ws-1',
+    mode: 'link',
+    ask_email: false,
+    expires_at: null,
+    password: 'motdepasse-fictif',
+    password_changed_at: '2026-11-10T10:00:00Z',
+  });
+  await install(page, state);
+  const shot = async (name) => {
+    if (!SHOTS) return;
+    for (const x of await page.locator('.toast-close').all()) await x.click().catch(() => {});
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(200);
+    await page.screenshot({ path: `${SHOTS}/${name}${sfx}.png` });
+  };
+
+  // ===== L27-10 : plan inférieur à Enterprise =====
+  await page.goto(`${APP}/#/settings/security`);
+  const card = page.getByRole('region', { name: /Règles de partage/ });
+  await card.waitFor();
+  await card.getByText('Enterprise', { exact: true }).waitFor();
+  ok(
+    (await card.getByRole('link', { name: 'Voir les plans' }).count()) === 1,
+    'Enterprise : badge et « Voir les plans »',
+  );
+  ok(
+    !/Bientôt/.test((await card.locator('.sr-head').innerText()) || ''),
+    'pas de badge « Bientôt » sur la carte',
+  );
+  const linkBox = card.getByRole('checkbox', { name: 'Lien public' });
+  ok(
+    (await linkBox.getAttribute('aria-disabled')) === 'true' && (await linkBox.isChecked()),
+    'contrôles : valeurs actuelles, désactivés (aria-disabled)',
+  );
+  await linkBox.click({ force: true });
+  ok(await linkBox.isChecked(), 'contrôle désactivé : aucun changement');
+  ok(
+    (await card.getByRole('button', { name: 'Enregistrer les règles' }).count()) === 0,
+    'pas d’enregistrement',
+  );
+  const ssoTop = await page.getByRole('heading', { name: /Connexion unique/ }).boundingBox();
+  const rulesTop = await card.boundingBox();
+  ok(rulesTop.y < ssoTop.y, 'carte au-dessus de « Connexion unique »');
+  await shot('l27-10-regles-plan');
+
+  // ===== L27-06 : Enterprise, administrateur =====
+  t.workspaces[0].plan_code = 'enterprise';
+  await page.reload();
+  await card.waitFor();
+  await card.getByRole('button', { name: 'Enregistrer les règles' }).waitFor();
+  const save = card.getByRole('button', { name: 'Enregistrer les règles' });
+  ok(await save.isDisabled(), 'Enregistrer inactif sans changement');
+  ok(
+    (await card.getByRole('checkbox', { name: /Invitation/ }).getAttribute('aria-disabled')) === 'true' &&
+      /Bientôt/.test(await card.locator('.check.is-soon').first().innerText()),
+    'Invitation et Domaine e-mail : « Bientôt »',
+  );
+  ok((await card.locator('fieldset legend').count()) >= 2, 'groupes en fieldset / legend');
+  await card.getByRole('checkbox', { name: 'Lien public' }).uncheck();
+  await card.getByRole('checkbox', { name: 'Mot de passe' }).uncheck();
+  ok(
+    (await card.getByRole('alert').innerText()) === 'Gardez au moins un mode d’accès.' &&
+      (await save.isDisabled()),
+    'au moins un mode',
+  );
+  await card.getByRole('checkbox', { name: 'Mot de passe' }).check();
+  await card.getByRole('combobox', { name: 'Durée maximale des liens' }).selectOption('30');
+  await card.getByRole('radio', { name: 'Administrateurs et propriétaires seulement' }).check();
+  await card
+    .getByRole('switch', { name: /Autoriser les exports/ })
+    .or(card.getByRole('checkbox', { name: /Autoriser les exports/ }))
+    .first()
+    .uncheck();
+  ok(!(await save.isDisabled()), 'Enregistrer actif dès qu’une valeur change');
+  await shot('l27-06-regles-partage');
+
+  // ===== L27-07 : liens existants non conformes =====
+  await save.click();
+  const dlg = page.getByRole('dialog', { name: /liens? ne respecte/ });
+  await dlg.waitFor();
+  const title = sp(await dlg.getByRole('heading').innerText());
+  ok(/^\d+ liens? ne respectent? pas ces règles$/.test(title), `titre (${title})`);
+  ok((await dlg.getByRole('listitem').count()) >= 1, 'liste des liens (5 au plus)');
+  ok(/Lien public/.test(await dlg.innerText()), 'type de lien affiché');
+  ok(
+    /Ces démos ne seront plus accessibles tant qu’un mot de passe n’est pas défini\./.test(
+      await dlg.innerText(),
+    ),
+    'démos bloquées annoncées',
+  );
+  ok(
+    await dlg.getByRole('radio', { name: /mettre en conformité/ }).isChecked(),
+    'choix par défaut : conformité',
+  );
+  await shot('l27-07-liens-non-conformes');
+  await dlg.getByRole('button', { name: 'Enregistrer les règles' }).click();
+  await dlg.waitFor({ state: 'detached' });
+  await page.getByText('Règles de partage enregistrées.').waitFor();
+  const call = state.shareRulesCalls.at(-1);
+  ok(
+    call.p_fix === true &&
+      call.p_max_days === 30 &&
+      call.p_publish_role === 'admin' &&
+      call.p_exports === false &&
+      call.p_modes.join() === 'password',
+    'règles envoyées (conformité, 30 jours, admins, sans exports)',
+  );
+  ok(
+    t.demo_access.some((x) => x.locked_by_rules),
+    'démo sans mot de passe bloquée',
+  );
+
+  // Démos : badge « Accès à régler »
+  await page.goto(`${APP}/#/`);
+  await page.locator('text=Accès à régler >> visible=true').first().waitFor();
+  ok(true, 'liste des démos : « Accès à régler »');
+
+  // ===== L27-08 : Partager, administrateur (lien vers les règles) =====
+  await page.goto(`${APP}/#/demos/${DEMO}/share?tab=access`);
+  const linkOpt = page.getByRole('radio', { name: /Toute personne avec le lien/ });
+  await linkOpt.waitFor();
+  ok(
+    (await page.getByRole('link', { name: 'Voir les règles' }).count()) === 1,
+    'admin : « Voir les règles »',
+  );
+
+  // ===== L27-08 : éditeur =====
+  t.members[0].role = 'editor';
+  await page.reload();
+  await page.waitForSelector('#acc-link[aria-disabled="true"]');
+  ok(
+    (await linkOpt.getAttribute('aria-disabled')) === 'true' &&
+      (await page.locator(`#${await linkOpt.getAttribute('aria-describedby')}`).innerText()) ===
+        'Désactivé par les règles de l’espace.',
+    'mode interdit visible, désactivé et expliqué',
+  );
+  ok(
+    (await page.getByRole('link', { name: 'Voir les règles' }).count()) === 0,
+    'éditeur : pas de lien vers les règles',
+  );
+  const expSwitch = page
+    .getByRole('checkbox', { name: 'Expiration' })
+    .or(page.getByRole('switch', { name: 'Expiration' }))
+    .first();
+  ok(
+    (await expSwitch.isChecked()) && (await expSwitch.getAttribute('aria-disabled')) === 'true',
+    '« Jamais » désactivé (expiration obligatoire)',
+  );
+  ok(
+    /Durée maximale fixée par l’espace : 30 jours\./.test(sp(await page.locator('#acc-exp-max').innerText())),
+    'durée maximale annoncée',
+  );
+  await shot('l27-08-partager-regles');
+
+  // Exports désactivés (menu de l'éditeur) et diffusion réservée
+  await page.goto(`${APP}/#/demos/${DEMO}/edit`);
+  const pub = page.getByRole('button', { name: /Publier/ }).first();
+  await pub.waitFor();
+  ok(
+    (await pub.getAttribute('aria-disabled')) === 'true' &&
+      (await pub.getAttribute('title')) ===
+        'Seuls les administrateurs et propriétaires publient dans cet espace.',
+    'éditeur : « Publier » désactivé avec infobulle',
+  );
+  ok((await page.getByText('Demander la publication').count()) === 0, 'rien à la place de « Publier »');
+  await page.getByRole('button', { name: 'Plus d’options' }).click();
+  const exp = page.getByRole('menuitem', { name: 'Exporter' });
+  ok(
+    (await exp.getAttribute('aria-disabled')) === 'true' &&
+      (await exp.getAttribute('title')) === 'Les exports sont désactivés par les règles de l’espace.',
+    'menu « Exporter » désactivé et expliqué',
+  );
+  await page.keyboard.press('Escape');
+
+  ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
+  await b.close();
+})().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

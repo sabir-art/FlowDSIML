@@ -45,6 +45,7 @@ import { publicDemoUrl } from '../../lib/embed';
 import { NewDemoDialog } from './NewDemoDialog';
 import { TemplatesDialog } from './TemplatesDialog';
 import { OnboardingCard, useOnboarding } from './OnboardingCard';
+import { useShareRules } from '../../lib/shareRules';
 import { ExportDialog } from '../export/ExportDialog';
 import { DistributeDialog } from '../share/DistributeDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -68,6 +69,9 @@ export function DemosPage() {
   const ws = current!;
   const [demos, setDemos] = useState<Demo[] | null>(null);
   const onb = useOnboarding();
+  const rules = useShareRules(ws.id);
+  // L27-07 : démos bloquées par les règles (mot de passe exigé, aucun défini) : « Accès à régler »
+  const [lockedIds, setLockedIds] = useState<Set<string>>(new Set());
   const [folders, setFolders] = useState<FolderRow[]>([]);
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [covers, setCovers] = useState<Record<string, string>>({});
@@ -123,6 +127,12 @@ export function DemosPage() {
       supabase.rpc('workspace_overview', { p_workspace: ws.id, p_days: 30 }),
     ]);
     const list = d.data ?? [];
+    const lk = await supabase
+      .from('demo_access')
+      .select('demo_id')
+      .eq('workspace_id', ws.id)
+      .eq('locked_by_rules', true);
+    setLockedIds(new Set((lk.data ?? []).map((x) => x.demo_id)));
     // KPI du workspace sur 30 jours (et les 30 précédents pour les variations). Repli sur la somme
     // de workspace_overview si la RPC workspace_kpis (migration 130800) n'est pas encore en place.
     const now = Date.now();
@@ -299,7 +309,14 @@ export function DemosPage() {
       ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(d.id) }]
       : []),
     { label: t('nav.analytics'), icon: <BarChart3 />, onSelect: () => navigate(`/demos/${d.id}/analytics`) },
-    { label: t('export.menu'), icon: <Download />, onSelect: () => setExporting(d.id) },
+    {
+      label: t('export.menu'),
+      icon: <Download />,
+      // L27 : exports hors de l'app interdits par les règles de l'espace
+      disabled: !rules.exports_allowed,
+      hint: rules.exports_allowed ? undefined : t('rules.errExports'),
+      onSelect: () => setExporting(d.id),
+    },
     {
       label: t('demos.copyLink'),
       icon: <Link2 />,
@@ -642,6 +659,11 @@ export function DemosPage() {
                       </td>
                       <td>
                         <span className={`fd-badge status-${statusOf(d)}`}>{t(`status.${statusOf(d)}`)}</span>
+                        {lockedIds.has(d.id) && (
+                          <span className="fd-badge fd-badge--warning" title={t('rules.accessToFixHelp')}>
+                            {t('rules.accessToFix')}
+                          </span>
+                        )}
                       </td>
                       <td className="fd-muted">{folders.find((f) => f.id === d.folder_id)?.name ?? '—'}</td>
                       <td className="r num">{formatNumber(s?.views ?? 0)}</td>
@@ -705,6 +727,11 @@ export function DemosPage() {
                     </div>
                     <div className="demo-meta">
                       <span className={`fd-badge status-${statusOf(d)}`}>{t(`status.${statusOf(d)}`)}</span>
+                      {lockedIds.has(d.id) && (
+                        <span className="fd-badge fd-badge--warning" title={t('rules.accessToFixHelp')}>
+                          {t('rules.accessToFix')}
+                        </span>
+                      )}
                       <span>
                         {d.status === 'published' ? (
                           <>

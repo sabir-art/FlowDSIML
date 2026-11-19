@@ -61,6 +61,7 @@ import { ThemePanel } from './panels/ThemePanel';
 import { buildDraftManifest } from './draftManifest';
 import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
+import { useShareRules } from '../../lib/shareRules';
 import { PreviewDialog } from './PreviewDialog';
 import { ExportDialog } from '../export/ExportDialog';
 import { DistributeDialog } from '../share/DistributeDialog';
@@ -100,6 +101,7 @@ export function EditorPage() {
   const { t } = useTranslation();
   const { demoId = '' } = useParams();
   const { can, current: ws } = useWorkspace();
+  const rules = useShareRules(ws?.id);
   const rawEditor = useDemoEditor(demoId);
   const { user } = useAuth();
   const toast = useToast();
@@ -577,7 +579,14 @@ export function EditorPage() {
               onSelect: () => undefined,
             },
             { label: t('editor.themeOfDemo'), icon: <Palette />, onSelect: () => setTab('design') },
-            { label: t('export.menu'), icon: <Download />, onSelect: () => setExporting(true) },
+            {
+              label: t('export.menu'),
+              icon: <Download />,
+              // L27 : exports hors de l'app interdits par les règles de l'espace
+              disabled: !rules.exports_allowed,
+              hint: rules.exports_allowed ? undefined : t('rules.errExports'),
+              onSelect: () => setExporting(true),
+            },
             ...(can('demo.edit')
               ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(true) }]
               : []),

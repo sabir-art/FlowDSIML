@@ -18,6 +18,7 @@ import { PublishButton } from '../editor/PublishButton';
 import { usePlan } from '../../lib/plan';
 import { PlanFormsWarning } from '../../components/PlanFormsWarning';
 import { AccessPanel, AccessSummary, useDemoAccess } from './AccessPanel';
+import { useShareRules } from '../../lib/shareRules';
 import { CopyButton, highlightHtml } from './codeBlock';
 import { PublicPagePanel } from './PublicPagePanel';
 import {
@@ -42,6 +43,7 @@ export function SharePage() {
   const { demoId = '' } = useParams();
   const [params] = useSearchParams();
   const { can, current } = useWorkspace();
+  const rules = useShareRules(current?.id);
   const editor = useDemoEditor(demoId);
   const access = useDemoAccess(demoId);
   const [demo, setDemo] = useState<Tables<'demos'> | null>(null);
@@ -222,7 +224,14 @@ export function SharePage() {
             <Eye aria-hidden="true" />
             {t('share.preview')}
           </a>
-          <button type="button" className="btn btn-secondary" onClick={() => setExporting(true)}>
+          {/* L27 : exports hors de l'app interdits par les règles de l'espace */}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            aria-disabled={rules.exports_allowed ? undefined : true}
+            title={rules.exports_allowed ? undefined : t('rules.errExports')}
+            onClick={() => rules.exports_allowed && setExporting(true)}
+          >
             <Download aria-hidden="true" />
             {t('export.menu')}
           </button>

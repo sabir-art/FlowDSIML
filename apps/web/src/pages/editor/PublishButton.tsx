@@ -6,6 +6,7 @@ import { publishedColumns, useDataset } from './data/datasetStore';
 import { asAction, asStepOptions, beforeAfterComplete } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { canPublishWith, useShareRules } from '../../lib/shareRules';
 import { Trans } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
 import { useConfirm } from '../../components/ConfirmDialog';
@@ -58,6 +59,8 @@ export function PublishButton({
   // Le message d'une tentative précédente disparaît dès que les étapes changent (corrigées)
   useEffect(() => setError(null), [editor.steps]);
   const demo = editor.demo!;
+  const { current } = useWorkspace();
+  const restricted = !canPublishWith(useShareRules(demo.workspace_id), current?.role);
   const plan = usePlan();
   const [dialog, ask] = useConfirm();
   const [gdprOpen, setGdprOpen] = useState(false);
@@ -173,11 +176,20 @@ export function PublishButton({
           {error}
         </span>
       )}
+      {/* L27-08 : publication réservée aux administrateurs par les règles de l'espace */}
+      {restricted && (
+        <span id="publish-restricted" className="sr-only">
+          {t('rules.errPublish')}
+        </span>
+      )}
       <Button
         variant="primary"
         icon={progress ? <Loader2 className="spin" /> : <Rocket />}
-        onClick={() => void publish()}
+        onClick={() => !restricted && void publish()}
         disabled={progress !== null || !editor.steps.length}
+        aria-disabled={restricted || undefined}
+        aria-describedby={restricted ? 'publish-restricted' : undefined}
+        title={restricted ? t('rules.errPublish') : undefined}
       >
         {progress
           ? `${t('publish.publishing')} ${progress}`

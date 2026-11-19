@@ -824,3 +824,9 @@
     width: 120px;
   }
 }
+/* L27-07 : démo bloquée par les règles de partage (« Accès à régler ») */
+.fd-badge--warning {
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fd-color-warning) 45%, transparent);
+}

@@ -7,6 +7,8 @@ import { supabase } from '../../lib/supabase';
 import { check } from '../../lib/useAction';
 import { formatRelativeShort } from '../../lib/format';
 import { useToast } from '../../components/Toast';
+import { useShareRules } from '../../lib/shareRules';
+import { useWorkspace } from '../../workspace/WorkspaceProvider';
 
 type Access = Pick<
   Tables<'demo_access'>,
@@ -155,6 +157,12 @@ export function AccessPanel({
 }) {
   const { t } = useTranslation();
   const { access, error, setRule, setPassword } = state;
+  // L27-08 : règles de partage de l'espace (mode interdit visible mais désactivé, durée maximale)
+  const { current, can } = useWorkspace();
+  const rules = useShareRules(current?.id);
+  const forbidden = (m: Mode) => (m === 'link' || m === 'password') && !rules.modes.includes(m);
+  const maxDays = rules.max_link_days;
+  const maxDate = maxDays ? new Date(Date.now() + maxDays * 86_400_000) : null;
   const [choice, setChoice] = useState<Mode>(access.mode as Mode);
   const [pw, setPw] = useState('');
   const [show, setShow] = useState(false);
@@ -182,7 +190,7 @@ export function AccessPanel({
   ];
 
   const pick = (m: Mode) => {
-    if (!editable) return;
+    if (!editable || forbidden(m)) return;
     setChoice(m);
     if (m === 'link' && access.mode !== 'link') void setRule({ mode: 'link' }, t('access.savedLink'));
     // Mot de passe déjà défini : le mode s'applique tout de suite ; sinon, à l'enregistrement du mot de passe
@@ -199,7 +207,7 @@ export function AccessPanel({
           : 0;
     if (!dir) return;
     e.preventDefault();
-    const avail = modes.filter((m) => m.available).map((m) => m.id);
+    const avail = modes.filter((m) => m.available && !forbidden(m.id)).map((m) => m.id);
     const next = avail[(avail.indexOf(choice) + dir + avail.length) % avail.length]!;
     pick(next);
     requestAnimationFrame(() => document.getElementById(`acc-${next}`)?.focus());
@@ -230,7 +238,9 @@ export function AccessPanel({
         <legend className="t-label l11-legend">{t('access.who')}</legend>
         {modes.map((m) => (
           <div key={m.id}>
-            <label className={`opt-card l11-opt${m.available ? '' : ' is-soon'}`}>
+            <label
+              className={`opt-card l11-opt${m.available ? '' : ' is-soon'}${forbidden(m.id) ? ' is-ruled' : ''}`}
+            >
               <input
                 id={`acc-${m.id}`}
                 type="radio"
@@ -238,7 +248,9 @@ export function AccessPanel({
                 value={m.id}
                 checked={choice === m.id}
                 disabled={!m.available}
-                tabIndex={choice === m.id ? 0 : -1}
+                aria-disabled={forbidden(m.id) || undefined}
+                aria-describedby={forbidden(m.id) ? `acc-${m.id}-rule` : undefined}
+                tabIndex={choice === m.id || (forbidden(m.id) && forbidden(choice)) ? 0 : -1}
                 onChange={() => pick(m.id)}
               />
               <span className="l11-ic">{m.icon}</span>
@@ -247,8 +259,18 @@ export function AccessPanel({
                   {t(`access.mode.${m.id}`)} {!m.available && soon}
                 </b>
                 <span className="t-caption muted">{t(`access.modeHelp.${m.id}`)}</span>
+                {forbidden(m.id) && (
+                  <span className="t-caption l11-rule" id={`acc-${m.id}-rule`}>
+                    {t('rules.disabledByRules')}
+                  </span>
+                )}
               </span>
             </label>
+            {forbidden(m.id) && can('workspace.settings') && (
+              <Link className="mk-link l11-rule-link" to="/settings/security">
+                {t('rules.seeRules')}
+              </Link>
+            )}
             {m.id === 'password' && choice === 'password' && (
               <div className="l11-cfg">
                 <form
@@ -329,15 +351,24 @@ export function AccessPanel({
         <div>
           <b id="acc-exp-l">{t('access.expiration')}</b>
           <p className="t-caption muted">{t('access.expirationHelp')}</p>
+          {maxDays && (
+            <p className="t-caption l11-rule" id="acc-exp-max">
+              {t('rules.maxFixed', { n: maxDays })}
+            </p>
+          )}
         </div>
         <span className="switch">
           <input
             type="checkbox"
             aria-labelledby="acc-exp-l"
-            aria-controls={expOn ? 'acc-exp' : undefined}
-            checked={expOn}
+            aria-controls={expOn || maxDays ? 'acc-exp' : undefined}
+            checked={expOn || !!maxDays}
             disabled={!editable}
+            aria-disabled={maxDays ? true : undefined}
+            aria-describedby={maxDays ? 'acc-exp-max' : undefined}
             onChange={(e) => {
+              // Durée maximale fixée par l'espace : « Jamais » n'est pas proposé
+              if (maxDays) return;
               setExpOn(e.target.checked);
               if (!e.target.checked) saveExpiration(false);
             }}
@@ -345,7 +376,7 @@ export function AccessPanel({
           <span />
         </span>
       </div>
-      {expOn && (
+      {(expOn || !!maxDays) && (
         <div className="l11-exp" id="acc-exp">
           <div className="l11-exp-grid">
             <div className="field">
@@ -354,7 +385,8 @@ export function AccessPanel({
                 id="acc-exp-d"
                 className="input"
                 type="date"
-                value={date}
+                value={date || (maxDate ? isoToParis(maxDate.toISOString()).date : '')}
+                max={maxDate ? isoToParis(maxDate.toISOString()).date : undefined}
                 disabled={!editable}
                 onChange={(e) => {
                   setDate(e.target.value);
@@ -382,10 +414,20 @@ export function AccessPanel({
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => shortcut('7')}>
                 {t('access.in7')}
               </button>
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => shortcut('30')}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                disabled={!!maxDays && maxDays < 30}
+                onClick={() => shortcut('30')}
+              >
                 {t('access.in30')}
               </button>
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => shortcut('month')}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                disabled={!!maxDays && maxDays < 31}
+                onClick={() => shortcut('month')}
+              >
                 {t('access.endOfMonth')}
               </button>
             </div>

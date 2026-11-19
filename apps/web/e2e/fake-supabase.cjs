@@ -27,7 +27,7 @@ function fakeJwt(user) {
 /** L27 : styles livrés, lus dans la migration (identiques à presets.ts). */
 function builtinStyles() {
   const sql = fs.readFileSync(
-    path.join(__dirname, '../../../supabase/migrations/20261122090000_marque.sql'),
+    path.join(__dirname, '../../../supabase/migrations/20261122090000_marque_regles.sql'),
     'utf8',
   );
   const out = {};
@@ -209,6 +209,7 @@ function seed() {
       ],
       share_links: [],
       demo_access: [],
+      share_rules: [],
       leads: [
         {
           id: 'l1',
@@ -269,6 +270,7 @@ function seed() {
           name: 'Enterprise',
           sort: 3,
           limits: {
+            share_rules: true,
             published_demos: null,
             members: null,
             steps_per_demo: null,
@@ -676,6 +678,57 @@ async function install(page, state = seed()) {
             completions: (previous ? 30 : 40) * pub,
             leads: (previous ? 0 : 1) * pub,
           });
+        }
+        case 'share_rules_preview': {
+          // L27-07 : démos publiées dont le mode est interdit ou sans expiration sous la limite
+          const items = [];
+          let locked = 0;
+          for (const d of t.demos.filter(
+            (x) => x.workspace_id === a.p_ws && x.status === 'published' && !x.deleted_at,
+          )) {
+            const acc = (t.demo_access || []).find((x) => x.demo_id === d.id);
+            if (acc?.locked_by_rules) continue;
+            const mode = acc?.mode || 'link';
+            if (!a.p_modes.includes(mode)) {
+              items.push({ title: d.title, kind: 'mode', mode });
+              if (!a.p_modes.includes('link') && !(a.p_modes.includes('password') && acc?.password)) locked++;
+            } else if (
+              a.p_max_days &&
+              (!acc?.expires_at || Date.parse(acc.expires_at) > Date.now() + a.p_max_days * 864e5)
+            )
+              items.push({ title: d.title, kind: 'expiry', mode });
+          }
+          return json(route, 200, { count: items.length, locked, items: items.slice(0, 5) });
+        }
+        case 'set_share_rules': {
+          const ws = t.workspaces.find((w) => w.id === a.p_ws);
+          if (ws?.plan_code !== 'enterprise')
+            return json(route, 400, { code: 'P0001', message: 'PLAN_REQUIRED:share_rules' });
+          state.shareRulesCalls = [...(state.shareRulesCalls || []), a];
+          let fixed = 0;
+          let lockedN = 0;
+          if (a.p_fix)
+            for (const d of t.demos.filter((x) => x.workspace_id === a.p_ws && x.status === 'published')) {
+              if (!t.demo_access) t.demo_access = [];
+              let acc = t.demo_access.find((x) => x.demo_id === d.id);
+              const mode = acc?.mode || 'link';
+              if (a.p_modes.includes(mode)) continue;
+              if (!acc)
+                t.demo_access.push(
+                  (acc = { demo_id: d.id, workspace_id: a.p_ws, mode: 'link', ask_email: false }),
+                );
+              if (a.p_modes.includes('password') && acc.password) ((acc.mode = 'password'), fixed++);
+              else ((acc.locked_by_rules = true), lockedN++);
+            }
+          t.share_rules = t.share_rules.filter((r) => r.workspace_id !== a.p_ws);
+          t.share_rules.push({
+            workspace_id: a.p_ws,
+            modes: a.p_modes,
+            max_link_days: a.p_max_days,
+            publish_role: a.p_publish_role,
+            exports_allowed: a.p_exports,
+          });
+          return json(route, 200, { fixed, locked: lockedN });
         }
         case 'set_default_style': {
           // L27-03 : style livré (ligne masquée) ou style de l'espace
