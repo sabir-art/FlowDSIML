@@ -57,6 +57,16 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     /1 image importée non vérifiée/.test(sp(await gdpr.innerText())),
     'bilan RGPD : « 1 image importée non vérifiée »',
   );
+  ok(
+    /pourra voir cette démo/.test(sp(await gdpr.innerText())) && !/ce module/.test(await gdpr.innerText()),
+    'REV-09 : « cette démo » dans la modale RGPD',
+  );
+  if (process.env.SHOTS_DIR) {
+    await page.mouse.move(0, 0);
+    await gdpr.screenshot({
+      path: `${process.env.SHOTS_DIR}/rev-09-rgpd${process.env.THEME === 'dark' ? '-sombre' : ''}.png`,
+    });
+  }
   if (process.env.SHOTS_DIR)
     await page.screenshot({
       path: `${process.env.SHOTS_DIR}/rev-07-bilan-import${process.env.THEME === 'dark' ? '-sombre' : ''}.png`,

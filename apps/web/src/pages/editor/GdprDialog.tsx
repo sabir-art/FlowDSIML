@@ -164,8 +164,6 @@ export function GdprDialog({
                 i18nKey="editor.gdpr.restrict"
                 components={{
                   a: <button type="button" className="mk-link-inline" onClick={onRestrict} />,
-                  b: <button type="button" className="mk-link-inline" onClick={onRestrict} />,
-                  c: <button type="button" className="mk-link-inline" onClick={onRestrict} />,
                 }}
               />
             </p>

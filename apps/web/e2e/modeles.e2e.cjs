@@ -171,6 +171,28 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     /6 étapes restent à capturer/.test(sp(await alert.innerText())),
     'publication : « 6 étapes restent à capturer »',
   );
+  const box = await alert.boundingBox();
+  const vw = page.viewportSize().width;
+  const btnBox = await page.locator('.publish-wrap > button').first().boundingBox();
+  ok(
+    box.x >= 0 && box.x + box.width <= vw && box.y >= btnBox.y + btnBox.height,
+    'REV-09 : message sous le bouton Publier, entier dans la fenêtre',
+  );
+  const goBtn = alert.getByRole('button', { name: 'Aller à l’étape 1' });
+  ok((await goBtn.count()) === 1, 'REV-09 : « Aller à l’étape 1 »');
+  if (SHOTS) {
+    await page.mouse.move(0, 0);
+    await page.screenshot({
+      path: `${SHOTS}/rev-09-publier-bloque${sfx}.png`,
+      clip: {
+        x: Math.max(0, box.x - 360),
+        y: 0,
+        width: Math.min(vw, box.width + 380),
+        height: box.y + box.height + 24,
+      },
+    });
+  }
+
   // Capture importée
   const png = await page.screenshot({ clip: { x: 0, y: 0, width: 320, height: 200 } });
   await frame

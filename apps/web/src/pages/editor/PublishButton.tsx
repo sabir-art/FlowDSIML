@@ -55,9 +55,11 @@ export function PublishButton({
   // L25-09 : le bilan RGPD compte le jeu de données publié
   const { dataset } = useDataset(editor.demo?.id);
   const [progress, setProgress] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // REV-09 : le message bloquant s'affiche en infobulle sous le bouton, avec « Aller à l'étape n »
+  const [error, setErrorState] = useState<{ text: string; step?: number } | null>(null);
+  const setError = (text: string | null, step?: number) => setErrorState(text ? { text, step } : null);
   // Le message d'une tentative précédente disparaît dès que les étapes changent (corrigées)
-  useEffect(() => setError(null), [editor.steps]);
+  useEffect(() => setErrorState(null), [editor.steps]);
   const demo = editor.demo!;
   const { current } = useWorkspace();
   const restricted = !canPublishWith(useShareRules(demo.workspace_id), current?.role);
@@ -100,13 +102,16 @@ export function PublishButton({
     // L17 : une étape Avant / Après doit avoir ses deux captures
     const incomplete = editor.steps.findIndex((s) => !beforeAfterComplete(s));
     if (incomplete >= 0) {
-      setError(t('editor.ba.incomplete', { n: incomplete + 1 }));
+      setError(t('editor.ba.incomplete', { n: incomplete + 1 }), incomplete);
       return;
     }
     // L26-04 : étapes « À capturer » d'un modèle
     const toCapture = editor.steps.filter((s) => s.to_capture && !s.image_path).length;
     if (toCapture > 0) {
-      setError(t('templates.toCaptureLeft', { count: toCapture }));
+      setError(
+        t('templates.toCaptureLeft', { count: toCapture }),
+        editor.steps.findIndex((s) => s.to_capture && !s.image_path),
+      );
       return;
     }
     // F7 : une étape vidéo doit avoir son fichier
@@ -114,19 +119,19 @@ export function PublishButton({
       (s) => s.kind === 'video' && (!s.video_path || !s.video_duration_ms),
     );
     if (noVideo >= 0) {
-      setError(t('errors.videoMissing', { n: noVideo + 1 }));
+      setError(t('errors.videoMissing', { n: noVideo + 1 }), noVideo);
       return;
     }
     // A8 : une étape HTML doit avoir sa page
     const noHtml = editor.steps.findIndex((s) => s.kind === 'html' && !s.html_path);
     if (noHtml >= 0) {
-      setError(t('errors.htmlMissing', { n: noHtml + 1 }));
+      setError(t('errors.htmlMissing', { n: noHtml + 1 }), noHtml);
       return;
     }
     // L25-10 : une règle de suite sans destination bloque la publication
     const noDest = firstMissingRule(editor.steps.map((s) => asStepOptions(s.options)));
     if (noDest >= 0) {
-      setError(t('editor.rules.publishMissing', { n: noDest + 1 }));
+      setError(t('editor.rules.publishMissing', { n: noDest + 1 }), noDest);
       return;
     }
     // F1 : avertissement RGPD à chaque publication publique (toute publication l'est jusqu'à F3)
@@ -170,33 +175,48 @@ export function PublishButton({
         onRestrict={() => navigate(`/demos/${demo.id}/share?tab=access`)}
         onClose={() => setGdprOpen(false)}
       />
-      {error && (
-        <span role="alert" className="publish-error">
-          <AlertTriangle size={16} aria-hidden="true" />
-          {error}
-        </span>
-      )}
       {/* L27-08 : publication réservée aux administrateurs par les règles de l'espace */}
       {restricted && (
         <span id="publish-restricted" className="sr-only">
           {t('rules.errPublish')}
         </span>
       )}
-      <Button
-        variant="primary"
-        icon={progress ? <Loader2 className="spin" /> : <Rocket />}
-        onClick={() => !restricted && void publish()}
-        disabled={progress !== null || !editor.steps.length}
-        aria-disabled={restricted || undefined}
-        aria-describedby={restricted ? 'publish-restricted' : undefined}
-        title={restricted ? t('rules.errPublish') : undefined}
-      >
-        {progress
-          ? `${t('publish.publishing')} ${progress}`
-          : demo.status === 'published'
-            ? (republishLabel ?? t('publish.republish'))
-            : t('publish.publish')}
-      </Button>
+      <span className="publish-wrap">
+        <Button
+          variant="primary"
+          icon={progress ? <Loader2 className="spin" /> : <Rocket />}
+          onClick={() => !restricted && void publish()}
+          disabled={progress !== null || !editor.steps.length}
+          aria-disabled={restricted || undefined}
+          aria-describedby={restricted ? 'publish-restricted' : undefined}
+          title={restricted ? t('rules.errPublish') : undefined}
+        >
+          {progress
+            ? `${t('publish.publishing')} ${progress}`
+            : demo.status === 'published'
+              ? (republishLabel ?? t('publish.republish'))
+              : t('publish.publish')}
+        </Button>
+        {error && (
+          <span role="alert" className="publish-error">
+            <AlertTriangle size={16} aria-hidden="true" />
+            <span className="publish-error__text">{error.text}</span>
+            {error.step !== undefined && error.step >= 0 && onReviewStep && (
+              <button
+                type="button"
+                className="mk-link-inline publish-error__go"
+                onClick={() => {
+                  const i = error.step!;
+                  setErrorState(null);
+                  onReviewStep(i);
+                }}
+              >
+                {t('publish.goStep', { n: error.step + 1 })}
+              </button>
+            )}
+          </span>
+        )}
+      </span>
     </>
   );
 }

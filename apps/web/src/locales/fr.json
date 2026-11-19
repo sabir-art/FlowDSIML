@@ -635,7 +635,7 @@
     "checklistNoChapter": "Sans chapitre, la checklist liste les étapes.",
     "gdpr": {
       "title": "Publier en accès public ?",
-      "body": "Toute personne disposant du lien pourra voir ce module, sans connexion. Avant de publier, vérifiez qu'il ne contient aucune donnée personnelle réelle (usagers, collègues, partenaires).",
+      "body": "Toute personne disposant du lien pourra voir cette démo, sans connexion. Avant de publier, vérifiez qu'elle ne contient aucune donnée personnelle réelle (usagers, collègues, partenaires).",
       "blurred_one": "{{count}} zone floutée",
       "blurred_other": "{{count}} zones floutées",
       "pending_one": "{{count}} détection non floutée (<strong>{{steps}}</strong>)",
@@ -643,8 +643,8 @@
       "commentsNote": "Commentaires internes : jamais publiés",
       "checkReviewed": "J'ai relu chaque étape, y compris les textes des bulles et du formulaire.",
       "checkFictional": "Les données visibles sont fictives ou floutées.",
-      "restrict": "Besoin de restreindre l’accès ? Choisir <a>Invitation</a>, <b>Domaine e-mail</b> ou <c>Mot de passe</c>.",
-      "restrictLink": "Choisir Invitation, Domaine e-mail ou Mot de passe",
+      "restrict": "Besoin de restreindre l’accès ? Protégez la démo par un <a>mot de passe</a>.",
+      "restrictLink": "Protéger par un mot de passe",
       "review": "Revoir l'étape {{n}}",
       "cancel": "Annuler",
       "publish": "Publier en public",
@@ -1522,6 +1522,7 @@
     "modified": "Modifiée"
   },
   "publish": {
+    "goStep": "Aller à l’étape {{n}}",
     "publish": "Publier",
     "republish": "Republier",
     "publishing": "Publication…"

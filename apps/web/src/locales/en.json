@@ -635,7 +635,7 @@
     "checklistNoChapter": "Without chapters, the checklist lists the steps.",
     "gdpr": {
       "title": "Publish with public access?",
-      "body": "Anyone with the link will be able to view this module without signing in. Before publishing, make sure it contains no real personal data (users, colleagues, partners).",
+      "body": "Anyone with the link will be able to view this demo without signing in. Before publishing, make sure it contains no real personal data (users, colleagues, partners).",
       "blurred_one": "{{count}} blurred area",
       "blurred_other": "{{count}} blurred areas",
       "pending_one": "{{count}} detection not blurred (<strong>{{steps}}</strong>)",
@@ -643,8 +643,8 @@
       "commentsNote": "Internal comments: never published",
       "checkReviewed": "I have reviewed every step, including bubble and form text.",
       "checkFictional": "Visible data is fictional or blurred.",
-      "restrict": "Need to restrict access? Choose <a>Invitation</a>, <b>Email domain</b> or <c>Password</c>.",
-      "restrictLink": "Choose Invitation, Email domain or Password",
+      "restrict": "Need to restrict access? Protect the demo with a <a>password</a>.",
+      "restrictLink": "Protect with a password",
       "review": "Review step {{n}}",
       "cancel": "Cancel",
       "publish": "Publish publicly",
@@ -1522,6 +1522,7 @@
     "modified": "Modified"
   },
   "publish": {
+    "goStep": "Go to step {{n}}",
     "publish": "Publish",
     "republish": "Republish",
     "publishing": "Publishing…"

@@ -46,8 +46,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const pub = dlg.getByRole('button', { name: 'Publier en public' });
   ok(await pub.isDisabled(), 'RGPD : « Publier en public » bloqué tant que les cases ne sont pas cochées');
   ok(
-    (await dlg.locator('.gdpr-restrict button').count()) === 3,
-    'RP-2 : liens Invitation, Domaine e-mail, Mot de passe',
+    (await dlg.locator('.gdpr-restrict button').count()) === 1 &&
+      /Protégez la démo par un mot de passe/.test(await dlg.locator('.gdpr-restrict').innerText()),
+    'RP-2 (REV-09) : seul le mot de passe est proposé',
   );
   ok(
     await dlg
