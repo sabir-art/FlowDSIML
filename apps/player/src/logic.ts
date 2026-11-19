@@ -21,13 +21,59 @@ export function embedAllowed(allowed: string[], inIframe: boolean, parentOrigin:
 
 /** Résout les URL d'images relatives (assets/…) par rapport au dossier publié. */
 export function resolveAssets(m: Manifest, base: string): Manifest {
+  const abs = (u: string) => (/^(https?:|blob:|data:)/.test(u) ? u : base + u);
   return {
     ...m,
-    steps: m.steps.map((s): Step =>
-      s.image && !/^(https?:|blob:|data:)/.test(s.image.url)
-        ? { ...s, image: { ...s.image, url: base + s.image.url } }
-        : s,
-    ),
+    steps: m.steps.map((s): Step => ({
+      ...s,
+      image: s.image ? { ...s.image, url: abs(s.image.url) } : s.image,
+      // L17 : capture « Avant » publiée à côté des autres
+      beforeAfter: s.beforeAfter
+        ? { ...s.beforeAfter, before: { ...s.beforeAfter.before, url: abs(s.beforeAfter.before.url) } }
+        : s.beforeAfter,
+    })),
+  };
+}
+
+/**
+ * L18 : variante A/B du visiteur, tirée une fois (répartition splitB % pour B) et gardée dans le
+ * stockage local (tc_ab_<testId>, valeur A ou B, aucune donnée personnelle). Sans stockage : tirage
+ * à chaque chargement.
+ */
+export function abVariant(
+  testId: string,
+  splitB: number,
+  store: Pick<Storage, 'getItem' | 'setItem'> | null,
+  rnd: () => number = Math.random,
+): 'A' | 'B' {
+  const key = `tc_ab_${testId}`;
+  try {
+    const v = store?.getItem(key);
+    if (v === 'A' || v === 'B') return v;
+  } catch {
+    /* stockage indisponible */
+  }
+  const v = rnd() * 100 < splitB ? 'B' : 'A';
+  try {
+    store?.setItem(key, v);
+  } catch {
+    /* stockage indisponible */
+  }
+  return v;
+}
+
+/** L18 : manifeste vu par le visiteur (la bulle testée prend le texte de B pour la variante B). */
+export function applyAb(m: Manifest, variant: 'A' | 'B'): Manifest {
+  const ab = m.ab;
+  if (!ab || variant === 'A') return m;
+  return {
+    ...m,
+    steps: m.steps.map((s) => ({
+      ...s,
+      hotspots: s.hotspots.map((h) =>
+        h.id === ab.hotspotId ? { ...h, title: ab.b.title, body: ab.b.body, cta: ab.b.cta } : h,
+      ),
+    })),
   };
 }
 

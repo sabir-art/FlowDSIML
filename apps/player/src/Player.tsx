@@ -37,6 +37,8 @@ import {
   RotateCcw,
 } from 'lucide-preact';
 import {
+  abVariant,
+  applyAb,
   backdropIndex,
   canAutoAdvance,
   checklistItems,
@@ -117,7 +119,7 @@ const DARK = { '--p-bg': '#0B0D10', '--p-chrome': '#15191F', '--p-chrome-text': 
 const MAX_RULE_JUMPS = 50;
 
 export function Player({
-  manifest: m,
+  manifest: raw,
   values,
   tracker,
   preview,
@@ -128,6 +130,22 @@ export function Player({
   scoreQuiz,
   uiLocale,
 }: Props) {
+  // L18 : test A/B. Variante tirée une fois par visiteur (jamais en aperçu : variante A), bulle
+  // testée remplacée pour B, et chaque événement marqué de la variante.
+  const variant = useMemo(() => {
+    if (!raw.ab || preview) return 'A' as const;
+    let store: Storage | null = null;
+    try {
+      store = localStorage;
+    } catch {
+      /* stockage indisponible */
+    }
+    return abVariant(raw.ab.testId, raw.ab.splitB, store);
+  }, [raw.ab, preview]);
+  const m = useMemo(() => applyAb(raw, variant), [raw, variant]);
+  useEffect(() => {
+    if (raw.ab && !preview) tracker.setBaseProps?.({ abt: raw.ab.testId, abv: variant });
+  }, [raw.ab, preview, tracker, variant]);
   // PY-3 : langue de l'interface du lecteur (le contenu de la démo reste dans sa langue)
   const [locale, setLocale] = useState<'fr' | 'en'>(uiLocale ?? (m.locale === 'en' ? 'en' : 'fr'));
   const t = strings(locale);

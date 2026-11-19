@@ -374,6 +374,24 @@ export const manifestSchema = z.object({
             return r.success ? [r.data] : [];
           }),
     ),
+  /**
+   * L18 : test A/B en cours (une seule bulle par démo). Le lecteur tire la variante une fois par
+   * visiteur (A ou B, mémorisée localement) et marque ses événements (props.abt, props.abv).
+   */
+  ab: z
+    .object({
+      testId: z.string(),
+      hotspotId: z.string(),
+      splitB: z.number().int().min(10).max(90),
+      b: z.object({
+        title: z.string().max(200).default(''),
+        body: z.string().max(4000).default(''),
+        cta: ctaSchema.nullable().default(null),
+      }),
+    })
+    .nullable()
+    .default(null)
+    .catch(null),
   /** URL de l'endpoint d'ingestion analytics. */
   trackUrl: z.string().nullable().default(null),
 });

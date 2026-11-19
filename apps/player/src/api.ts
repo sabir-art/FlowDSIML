@@ -146,6 +146,8 @@ export interface TrackerLike {
   readonly sessionId: string;
   readonly linkToken: string | null;
   track(type: EventType, data?: Parameters<Tracker['track']>[1]): void;
+  /** L18 : propriétés ajoutées à chaque événement (variante A/B). */
+  setBaseProps?(props: Record<string, string>): void;
 }
 
 /** File d'événements : envoi groupé toutes les 2 s et à la fermeture de la page. */
@@ -159,6 +161,7 @@ export class Tracker {
     at: string;
   }> = [];
   private timer: number | undefined;
+  private baseProps: Record<string, string> = {};
   readonly visitorId = storageGet(globalThis.localStorage, 'fd.vid');
   readonly sessionId = storageGet(globalThis.sessionStorage, 'fd.sid');
 
@@ -185,9 +188,20 @@ export class Tracker {
     if (parent !== window)
       parent.postMessage({ type: 'flowdsiml:event', event: type, demoId: this.demoId, ...data }, '*');
     if (!this.enabled) return;
-    this.queue.push({ type, ...data, at: new Date().toISOString() });
+    const props = { ...this.baseProps, ...data.props };
+    this.queue.push({
+      type,
+      ...data,
+      ...(Object.keys(props).length ? { props } : {}),
+      at: new Date().toISOString(),
+    });
     clearTimeout(this.timer);
     this.timer = window.setTimeout(() => this.flush(false), 2000);
+  }
+
+  /** L18 : variante A/B portée par chaque événement (props.abt, props.abv). */
+  setBaseProps(props: Record<string, string>) {
+    this.baseProps = props;
   }
 
   flush(unloading: boolean) {
