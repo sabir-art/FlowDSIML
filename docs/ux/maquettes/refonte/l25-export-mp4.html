@@ -60,6 +60,9 @@
   .gif-dots span.on { background: #FFFFFF; }
 
   /* Petites modales : en cours, terminé, erreur (gabarit A3) */
+  /* L25 : corps défilant, pied toujours visible */
+  .l15[data-view='mp4'] .x15-main { max-height: calc(100vh - 88px); overflow: auto; padding-bottom: 0; }
+  .l15[data-view='mp4'] .x15-foot { position: sticky; bottom: 0; z-index: 1; background: var(--fd-color-surface); padding: 12px 0 20px; border-top: 1px solid var(--fd-color-border); margin-top: 0; }
   .x15-small { width: min(540px, 100%); padding: 24px; border-radius: var(--fd-radius-2xl); background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: var(--fd-shadow-lg); display: flex; flex-direction: column; gap: 16px; }
   .x15-small .x15-foot { justify-content: flex-end; }
   .x15-small .exp-bar span { width: 48%; }
