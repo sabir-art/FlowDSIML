@@ -1300,6 +1300,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      segments: {
+        Row: {
+          conditions: Json;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          match: string;
+          name: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          conditions: Json;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          match?: string;
+          name: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          conditions?: Json;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          match?: string;
+          name?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
       survey_text_answers: {
         Row: {
           attempt_id: string;
@@ -1935,6 +1968,11 @@ export type Database = {
       set_center_access: { Args: { p_mode: string; p_ws: string }; Returns: undefined };
       set_center_password: { Args: { p_password: string; p_ws: string }; Returns: undefined };
       submit_quiz_attempt: { Args: { p_batch: Json }; Returns: Json };
+      segment_count: {
+        Args: { p_workspace: string; p_segment: Json; p_from: string; p_to?: string };
+        Returns: Json;
+      };
+      live_demo: { Args: { p_demo: string }; Returns: Json };
       survey_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
       survey_texts: { Args: { p_demo: string; p_question?: string | null; p_limit?: number }; Returns: Json };
       choice_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
@@ -1975,6 +2013,7 @@ export type Database = {
           p_demo?: string | null;
           p_from: string;
           p_source?: string | null;
+          p_segment?: Json | null;
           p_to?: string;
           p_workspace: string;
         };
@@ -1987,6 +2026,7 @@ export type Database = {
           p_from: string;
           p_limit?: number;
           p_offset?: number;
+          p_segment?: Json | null;
           p_to?: string;
           p_workspace: string;
         };
@@ -1999,6 +2039,7 @@ export type Database = {
           p_limit?: number;
           p_offset?: number;
           p_source?: string | null;
+          p_segment?: Json | null;
           p_to?: string;
           p_workspace: string;
         };
