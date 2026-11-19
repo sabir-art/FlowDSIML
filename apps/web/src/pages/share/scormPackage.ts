@@ -179,9 +179,10 @@ export async function buildScormPackage(
   // Première étape qui utilise chaque capture (cause affichée si elle est illisible)
   const firstStep = new Map<string, { n: number; id: string }>();
   manifest.steps.forEach((s, i) => {
-    const u = s.image?.url;
-    if (u && !/^(https?:|data:|blob:)/.test(u) && !u.includes('..') && !firstStep.has(u))
-      firstStep.set(u, { n: i + 1, id: s.id });
+    // L17 : la capture « Avant » d'une étape Avant / Après est embarquée comme les autres
+    for (const u of [s.image?.url, s.beforeAfter?.before.url])
+      if (u && !/^(https?:|data:|blob:)/.test(u) && !u.includes('..') && !firstStep.has(u))
+        firstStep.set(u, { n: i + 1, id: s.id });
   });
   const images = [...firstStep.keys()];
   const files: Zippable = {};

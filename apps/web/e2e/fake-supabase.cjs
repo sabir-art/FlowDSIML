@@ -566,6 +566,11 @@ async function install(page, state = seed()) {
           if (!a.p_ack?.reviewed || !a.p_ack?.fictional)
             return json(route, 400, { message: 'GDPR_ACK_REQUIRED', code: 'P0001' });
           state.lastAck = a.p_ack;
+          const baBad = steps.findIndex(
+            (s) => s.kind === 'before_after' && (!s.image_path || !s.before_image_path),
+          );
+          if (baBad >= 0)
+            return json(route, 400, { message: `BEFORE_AFTER_INCOMPLETE:${baBad + 1}`, code: 'P0001' });
           const versionId = crypto.randomUUID();
           const number = t.demo_versions.filter((v) => v.demo_id === d.id).length + 1;
           const manifest = {
@@ -600,6 +605,19 @@ async function install(page, state = seed()) {
                 ? { url: `assets/${s.id}.webp`, width: s.image_width, height: s.image_height }
                 : null,
               snapshotUrl: null,
+              // L17 : comme publish_demo (capture « Avant », sans les sources)
+              beforeAfter:
+                s.kind === 'before_after' && s.before_image_path
+                  ? {
+                      ...(({ sources, ...rest }) => rest)(s.options?.beforeAfter || {}),
+                      before: {
+                        url: `assets/${s.id}-b.webp`,
+                        width: s.before_image_width,
+                        height: s.before_image_height,
+                      },
+                      beforeBlurs: s.before_blurs || [],
+                    }
+                  : null,
               title: s.title,
               body: s.body,
               blurs: s.blurs,
@@ -634,9 +652,14 @@ async function install(page, state = seed()) {
             versionId,
             number,
             manifest,
-            copies: steps
-              .filter((s) => s.image_path)
-              .map((s) => ({ from: s.image_path, to: `${d.id}/assets/${s.id}.webp` })),
+            copies: [
+              ...steps
+                .filter((s) => s.image_path)
+                .map((s) => ({ from: s.image_path, to: `${d.id}/assets/${s.id}.webp` })),
+              ...steps
+                .filter((s) => s.kind === 'before_after' && s.before_image_path)
+                .map((s) => ({ from: s.before_image_path, to: `${d.id}/assets/${s.id}-b.webp` })),
+            ],
           });
         }
         case 'finalize_publication': {

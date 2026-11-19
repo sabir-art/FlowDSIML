@@ -5,7 +5,13 @@ interface PublishResult {
   versionId: string;
   number: number;
   manifest: Record<string, unknown> & {
-    steps: Array<{ id: string; blurs: Mask[]; image: { url: string } | null }>;
+    steps: Array<{
+      id: string;
+      blurs: Mask[];
+      image: { url: string } | null;
+      /** L17 : capture « Avant » d'une étape Avant / Après (flous incrustés comme blurs). */
+      beforeAfter?: { before: { url: string }; beforeBlurs: Mask[] } | null;
+    }>;
   };
   copies: Array<{ from: string; to: string }>;
 }
@@ -105,6 +111,10 @@ export async function publishDemo(
   const blurByPath = new Map(
     res.manifest.steps.filter((s) => s.image).map((s) => [`${demoId}/${s.image!.url}`, s.blurs ?? []]),
   );
+  // L17 : flous de la capture « Avant » incrustés de la même façon
+  for (const s of res.manifest.steps)
+    if (s.beforeAfter)
+      blurByPath.set(`${demoId}/${s.beforeAfter.before.url}`, s.beforeAfter.beforeBlurs ?? []);
   const total = res.copies.length + 1;
   let done = 0;
 
@@ -125,7 +135,14 @@ export async function publishDemo(
   }
 
   // Les flous sont déjà appliqués dans les pixels : inutile de les rejouer dans le player.
-  const manifest = { ...res.manifest, steps: res.manifest.steps.map((s) => ({ ...s, blurs: [] })) };
+  const manifest = {
+    ...res.manifest,
+    steps: res.manifest.steps.map((s) => ({
+      ...s,
+      blurs: [],
+      ...(s.beforeAfter ? { beforeAfter: { ...s.beforeAfter, beforeBlurs: [] } } : {}),
+    })),
+  };
   const body = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
   for (const [path, cache] of [
     [`${demoId}/v${res.number}.json`, '31536000'],

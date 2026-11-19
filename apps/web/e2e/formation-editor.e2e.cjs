@@ -122,6 +122,41 @@ const N = ' ';
   await page.waitForTimeout(600);
   await shot('l17-02-editeur');
 
+  // Publication : capture « Avant » copiée et ses flous incrustés, manifeste sans flous ni sources
+  state.tables.workspaces[0].public_links_enabled = true;
+  await page
+    .locator('.ed-bar')
+    .getByRole('button', { name: /^Publier/ })
+    .first()
+    .click();
+  const gdpr = page.locator('dialog.gdpr-dialog[open]');
+  await gdpr.waitFor();
+  for (const c of await gdpr.getByRole('checkbox').all()) await c.check();
+  await gdpr
+    .getByRole('button', { name: /Publier/ })
+    .last()
+    .click();
+  await page.waitForFunction(
+    () => location.hash.includes('/share') || !!document.querySelector('.publish-error'),
+  );
+  const v = state.tables.demo_versions.at(-1);
+  const pubBa = v?.manifest.steps.find((s) => s.kind === 'before_after')?.beforeAfter;
+  ok(
+    !!pubBa && pubBa.layout === 'side' && !('sources' in pubBa),
+    'Publication : beforeAfter publié, sans les sources',
+  );
+  ok(
+    !!state.storage[`published/${DEMO}/assets/${ba.id}-b.webp`],
+    'Publication : capture « Avant » déposée dans les fichiers publiés',
+  );
+  const latest = JSON.parse(state.storage[`published/${DEMO}/latest.json`].data.toString());
+  ok(
+    latest.steps.find((s) => s.kind === 'before_after').beforeAfter.beforeBlurs.length === 0,
+    'Publication : flous « Avant » incrustés (absents du manifeste publié)',
+  );
+  await page.goto(`${APP}/#/demos/${DEMO}/edit`);
+  await page.waitForSelector('.ed-bar');
+
   // Réglage « Glossaire » de la démo (Réglages > Lecture)
   await page.getByRole('tab', { name: 'Réglages' }).click();
   const gl = page.getByLabel('Glossaire', { exact: true });
