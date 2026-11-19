@@ -86,11 +86,11 @@ Le parcours d'accueil ONB-01 à 04 (configuration, extension, première démo) n
 - **Contenu minimal au lancement** : un article par page principale (Démos, Éditeur, Partager, Diffusion, Analytics, Apprenants, Centre de formation, Paramètres), plus « Données personnelles et floutage » et « Accessibilité des démos ».
 
 ### 3.3 Visites guidées
-- Une visite guidée est une **démo TutoClick**, faite avec TutoClick, sur des données fictives. Elle s'ouvre dans le lecteur, en modale (`dialog`, 960 px). Ce n'est pas une surcouche sur l'app réelle.
-- Les visites sont hébergées dans un espace système en lecture seule. Elles ne comptent pas dans les statistiques de l'espace.
+- Une visite guidée est une **démo statique embarquée dans l'app** (manifeste JSON et captures dans `apps/web/public/help/`), générée avec Playwright sur des données fictives. Elle s'ouvre dans le lecteur existant, en modale (`dialog`, 960 px). Ce n'est pas une surcouche sur l'app réelle.
+- Les visites ne comptent pas dans les statistiques de l'espace.
 - Elles reprennent l'accessibilité du lecteur.
-- **Stockage** : table `help_tours` (clé de page ou de module → démo publiée de l'espace système, nombre d'étapes). Les visites s'ouvrent avec `?preview=1`, sans statistique.
-- **Sans visite enregistrée** : « Visite guidée de cette page » reste visible, désactivé (`aria-disabled`), avec le badge « Bientôt ». Un module « Apprendre » sans démo affiche « Bientôt » au lieu de « n étapes ». La progression ne compte que les modules disponibles.
+- **Scénarios au format du manifeste** : `docs/ux/aide/help-tours.json` (clés `page:*` et `learn:*`, cibles par rôle et nom accessible).
+- **Sans visite disponible** : « Visite guidée de cette page » reste visible, désactivé (`aria-disabled`), avec le badge « Bientôt ». Un module « Apprendre » sans démo affiche « Bientôt » au lieu de « n étapes ». La progression ne compte que les modules disponibles.
 - **Scénarios** (étapes et textes des bulles) : `docs/ux/aide/visites-guidees.md`.
 
 ### 3.4 « Apprendre TutoClick »

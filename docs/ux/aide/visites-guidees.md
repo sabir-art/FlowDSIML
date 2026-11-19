@@ -1,12 +1,13 @@
 # Visites guidées et parcours « Apprendre TutoClick » : scénarios
 
-> **Pour qui** : la personne qui enregistre les démos de l'espace système avec l'extension.
+> **Source de vérité** : `docs/ux/aide/help-tours.json` (même contenu, au format du manifeste). Ce document en est la lecture humaine.
+> **Production** (arbitrage du chef d'équipe) : démos statiques embarquées dans l'app (`apps/web/public/help/`), captures générées par le développeur avec Playwright sur l'app et des données fictives.
 > **Spec** : `specs/l26-aide-modeles.md`, §3.3 (visites guidées) et §3.4 (parcours).
-> **Table** `help_tours` : une ligne par visite, avec sa clé (colonne « Clé ») → la démo publiée de l'espace système et son nombre d'étapes.
+
 
 ## 0. Règles d'enregistrement
 
-- **Espace système** : « TutoClick · Aide », en lecture seule, exclu des statistiques. Les visites s'ouvrent avec `?preview=1`.
+- **Lecture** : le lecteur existant ouvre le manifeste embarqué, en modale, sans statistique.
 - **Données fictives uniquement**, dans un espace de démonstration préparé avant l'enregistrement :
   - workspace « Acme » ;
   - démos « Créer un rapport en 2 minutes » et « Démo CRM » ;
@@ -106,7 +107,7 @@
 
 ## 2. Parcours « Apprendre TutoClick » (6 modules)
 
-Le nombre d'étapes affiché dans l'aide est celui de la démo enregistrée, lu dans `help_tours`. Les nombres ci-dessous sont les cibles des scénarios.
+Le nombre d'étapes affiché dans l'aide est lu dans le manifeste (écran de fin non compté). Les nombres ci-dessous sont les cibles des scénarios.
 
 ### M1 · Capturer une démo · clé `learn:capture` · 7 étapes
 1. Barre du navigateur, icône de l'extension : « Cliquez sur l'icône TutoClick pour ouvrir l'extension. »
