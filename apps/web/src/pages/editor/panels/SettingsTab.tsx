@@ -4,7 +4,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import { asSettings, type DemoSettings } from '../types';
-import { ClipboardList, Database } from 'lucide-react';
+import { ClipboardList, Database, Lock, Presentation } from 'lucide-react';
 import { DATASET_OPEN } from '../html/ChartFields';
 import { publishedColumns, useDataset } from '../data/datasetStore';
 import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
@@ -90,6 +90,35 @@ export function SettingsTab({
     <div className="st-panel">
       {/* L12-07 : étiquettes de la démo (organiser et filtrer le tableau de bord) */}
       <TagsField demoId={editor.demo!.id} wsId={editor.demo!.workspace_id} readOnly={readOnly} />
+      {/* L26-09 : notes du présentateur pour toute la démo (jamais publiées ni exportées) */}
+      <div className="sec">
+        <div className="sec-title">
+          <Presentation aria-hidden="true" />
+          {t('editor.notes.demoTitle')}
+          <span className="lock">
+            <Lock aria-hidden="true" />
+            {t('editor.notes.private')}
+          </span>
+        </div>
+        <div className="field">
+          <label className="sr-only" htmlFor="demo-notes">
+            {t('editor.notes.demoLabel')}
+          </label>
+          <textarea
+            id="demo-notes"
+            className="textarea"
+            maxLength={2000}
+            rows={4}
+            aria-describedby="demo-notes-h"
+            readOnly={readOnly}
+            value={editor.demo?.presenter_notes ?? ''}
+            onChange={(e) => editor.updateDemo({ presenter_notes: e.target.value.slice(0, 2000) })}
+          />
+        </div>
+        <p className="help" id="demo-notes-h">
+          {t('editor.notes.demoHelp')}
+        </p>
+      </div>
       {onShowCursors && (
         <div className="sec">
           <div className="sec-title">{t('presence.collab')}</div>

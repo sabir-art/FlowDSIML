@@ -979,6 +979,80 @@ async function install(page, state = seed()) {
           });
           return json(route, 200, null);
         }
+        // ===== L26-10 / 11 : télécommande du mode présentateur =====
+        case 'present_remote_start': {
+          state.remotes = state.remotes || [];
+          state.remotes.forEach((r) => r.demo_id === a.p_demo && (r.ended = true));
+          const r = {
+            id: crypto.randomUUID(),
+            demo_id: a.p_demo,
+            code: state.remoteCode || String(crypto.randomInt(0, 1e8)).padStart(8, '0'),
+            codeExpiresAt: new Date(Date.now() + 300000).toISOString(),
+            channel: crypto.randomBytes(16).toString('hex'),
+            token: null,
+            failures: 0,
+            ended: false,
+          };
+          state.remotes.push(r);
+          return json(route, 200, {
+            id: r.id,
+            code: r.code,
+            codeExpiresAt: r.codeExpiresAt,
+            channel: r.channel,
+          });
+        }
+        case 'present_remote_new_code': {
+          const r = (state.remotes || []).find((x) => x.id === a.p_id);
+          r.code = String(crypto.randomInt(0, 1e8)).padStart(8, '0');
+          r.failures = 0;
+          r.codeExpiresAt = new Date(Date.now() + 300000).toISOString();
+          return json(route, 200, { code: r.code, codeExpiresAt: r.codeExpiresAt });
+        }
+        case 'present_remote_status': {
+          const r = (state.remotes || []).find((x) => x.id === a.p_id);
+          return json(
+            route,
+            200,
+            r ? { paired: !!r.token, channel: r.channel, active: !r.ended, failures: r.failures } : null,
+          );
+        }
+        case 'present_remote_end': {
+          const r = (state.remotes || []).find((x) => x.id === a.p_id);
+          if (r) r.ended = true;
+          return json(route, 200, null);
+        }
+        case 'present_remote_pair':
+        case 'present_remote_state': {
+          const list = state.remotes || [];
+          const r =
+            fn === 'present_remote_state'
+              ? list.find((x) => x.token && x.token === a.p_token)
+              : list.find((x) => !x.ended && x.code && x.code === a.p_code && (!a.p_id || x.id === a.p_id));
+          if (!r || r.ended) {
+            const bad = a.p_id && list.find((x) => x.id === a.p_id);
+            if (bad) bad.failures += 1;
+            return json(route, 200, { status: fn === 'present_remote_state' ? 'ended' : 'invalid' });
+          }
+          if (fn === 'present_remote_pair') {
+            r.code = null;
+            r.token = crypto.randomBytes(32).toString('hex');
+            r.channel = crypto.randomBytes(16).toString('hex');
+          }
+          const d = t.demos.find((x) => x.id === r.demo_id);
+          const steps = t.steps
+            .filter((s) => s.demo_id === r.demo_id)
+            .sort((x, y) => x.position - y.position)
+            .map((s) => ({ title: s.title, notes: s.presenter_notes || '' }));
+          return json(route, 200, {
+            status: 'ok',
+            id: r.id,
+            token: r.token,
+            channel: r.channel,
+            title: d.title,
+            notes: d.presenter_notes || '',
+            steps,
+          });
+        }
         // ===== L26-06 à 08 : visiteurs récurrents =====
         case 'workspace_returning': {
           const w = t.workspaces.find((x) => x.id === a.p_workspace) || t.workspaces[0];

@@ -146,6 +146,20 @@ export function PresentDialog({
         />
         <span className="fd-switch__track" aria-hidden="true" />
       </label>
+      {/* L26-10 : télécommande sur téléphone (appairage à l'ouverture de la vue présentateur) */}
+      <label className="fd-switch">
+        <span>
+          {t('present.remoteOption')}
+          <span className="fd-help lx-help">{t('present.remoteOptionHelp')}</span>
+        </span>
+        <input
+          type="checkbox"
+          role="switch"
+          checked={o.remote}
+          onChange={(e) => setO({ ...o, remote: e.target.checked })}
+        />
+        <span className="fd-switch__track" aria-hidden="true" />
+      </label>
       {blocked ? (
         <div className="fd-alert fd-alert--error" role="alert">
           <CircleAlert aria-hidden="true" />

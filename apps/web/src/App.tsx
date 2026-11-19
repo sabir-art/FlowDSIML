@@ -35,6 +35,9 @@ import { WebhookDetail } from './pages/settings/integrations/WebhookDetail';
 const PresenterPage = lazy(() =>
   import('./pages/present/PresenterPage').then((m) => ({ default: m.PresenterPage })),
 );
+const RemotePhone = lazy(() =>
+  import('./pages/present/RemotePhone').then((m) => ({ default: m.RemotePhone })),
+);
 const PublicScreen = lazy(() =>
   import('./pages/present/PublicScreen').then((m) => ({ default: m.PublicScreen })),
 );
@@ -105,6 +108,8 @@ export function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/invite/:token" element={<AcceptInvite />} />
+                {/* L26-11 : télécommande du mode présentateur, sans compte */}
+                <Route path="/t" element={<RemotePhone />} />
                 <Route
                   path="/onboarding"
                   element={

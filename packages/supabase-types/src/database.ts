@@ -186,6 +186,7 @@ export type Database = {
           settings: NonNullable<Json>;
           status: Database['public']['Enums']['demo_status'];
           theme_id: string | null;
+          presenter_notes: string;
           title: string;
           updated_at: string;
           workspace_id: string;
@@ -206,6 +207,7 @@ export type Database = {
           settings?: NonNullable<Json>;
           status?: Database['public']['Enums']['demo_status'];
           theme_id?: string | null;
+          presenter_notes?: string;
           title?: string;
           updated_at?: string;
           workspace_id: string;
@@ -225,6 +227,7 @@ export type Database = {
           settings?: NonNullable<Json>;
           status?: Database['public']['Enums']['demo_status'];
           theme_id?: string | null;
+          presenter_notes?: string;
           title?: string;
           updated_at?: string;
           workspace_id?: string;
@@ -1026,6 +1029,46 @@ export type Database = {
         ComputedFields: never;
         Insert: never;
         Update: never;
+        Relationships: [];
+      };
+      present_reports: {
+        Row: {
+          created_at: string;
+          demo_id: string;
+          duration_s: number;
+          id: string;
+          notes_changed: number;
+          owner: string;
+          started_at: string;
+          steps: Json;
+          target_min: number | null;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          demo_id: string;
+          duration_s: number;
+          id?: string;
+          notes_changed?: number;
+          owner?: string;
+          started_at: string;
+          steps?: Json;
+          target_min?: number | null;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          demo_id?: string;
+          duration_s?: number;
+          id?: string;
+          notes_changed?: number;
+          owner?: string;
+          started_at?: string;
+          steps?: Json;
+          target_min?: number | null;
+          workspace_id?: string;
+        };
         Relationships: [];
       };
       notification_settings: {
@@ -2166,6 +2209,12 @@ export type Database = {
       personal_page: { Args: { p_demo: string; p_code: string }; Returns: Json };
       live_demo: { Args: { p_demo: string }; Returns: Json };
       live_visits: { Args: { p_demo: string }; Returns: Json };
+      present_remote_start: { Args: { p_demo: string }; Returns: Json };
+      present_remote_new_code: { Args: { p_id: string }; Returns: Json };
+      present_remote_status: { Args: { p_id: string }; Returns: Json };
+      present_remote_end: { Args: { p_id: string }; Returns: undefined };
+      present_remote_pair: { Args: { p_id: string | null; p_code: string }; Returns: Json };
+      present_remote_state: { Args: { p_token: string }; Returns: Json };
       session_visits: { Args: { p_workspace: string; p_sessions: string[] }; Returns: Json };
       workspace_returning: {
         Args: {

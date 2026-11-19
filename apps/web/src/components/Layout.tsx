@@ -85,7 +85,13 @@ export function Layout() {
   const switchLang = () => {
     const lng = i18n.language === 'en' ? 'fr' : 'en';
     setLocale(lng);
-    if (user) void supabase.from('profiles').update({ locale: lng }).eq('id', user.id);
+    // Requête paresseuse : .then() la déclenche (sans lui, la langue n'était jamais enregistrée)
+    if (user)
+      void supabase
+        .from('profiles')
+        .update({ locale: lng })
+        .eq('id', user.id)
+        .then(() => undefined);
   };
 
   const nav = [

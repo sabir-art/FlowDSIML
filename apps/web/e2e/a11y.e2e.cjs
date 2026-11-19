@@ -314,6 +314,8 @@ const APP_PAGES = [
   { name: 'Fonctions à venir (SSO)', route: '/#/settings/soon?tab=sso' },
   { name: 'Sécurité', route: '/#/settings/security' },
   { name: 'Confidentialité', route: '/#/settings/privacy' },
+  // L26-11 : télécommande (saisie du code, sans compte)
+  { name: 'Télécommande', route: '/#/t' },
   // L16 : modale « Diffuser » (onglets SCORM, Intranet, E-mail, Où elle est diffusée)
   ...['SCORM', 'Intranet', 'E-mail', 'Où elle est diffusée'].map((c) => ({
     name: `Diffuser · ${c}`,

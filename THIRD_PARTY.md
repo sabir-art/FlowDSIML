@@ -10,6 +10,7 @@ Ce fichier recense les bibliothèques et les ressources tierces ajoutées pour l
 | [gifenc](https://github.com/mattdesl/gifenc)                                                    | 1.0.3   | MIT                                                          | Encodage des GIF animés dans le navigateur                                 |
 | [fflate](https://github.com/101arrowz/fflate)                                                   | 0.8.3   | MIT                                                          | Paquets SCORM (zip) assemblés dans le navigateur (L16)                     |
 | [mp4-muxer](https://github.com/Vanilagy/mp4-muxer)                                              | 5.2.2   | MIT                                                          | Vidéos MP4 (H.264, son AAC ou Opus) assemblées dans le navigateur (L25-11) |
+| [uqr](https://github.com/unjs/uqr)                                                              | 0.1.2   | MIT                                                          | QR code de la télécommande du mode présentateur, rendu en SVG (L26-10)     |
 | [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) (TTF Regular, Bold, ExtraBold) | 2.071   | SIL Open Font License 1.1 (`packages/exports/fonts/OFL.txt`) | Police embarquée dans les PDF                                              |
 
 ### Dépendances de jsPDF

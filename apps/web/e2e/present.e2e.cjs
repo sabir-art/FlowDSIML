@@ -88,6 +88,10 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
   // L22-03 : vue présentateur
   await page.waitForSelector('.presenter .live:not(.live--off)', { timeout: 10000 });
   ok(true, 'L22-03 : « Écran public ouvert »');
+  // L26-09 : à l'étape 1, l'onglet « Démo » s'ouvre de lui-même ; les notes de l'étape sont sous « Étape 1 »
+  await page.getByRole('tab', { name: 'Étape 1' }).click();
+  // Les flèches sur les onglets changent d'onglet (motif tablist) : on quitte le focus
+  await page.evaluate(() => document.activeElement?.blur?.());
   ok(
     (await page.locator('.notes li').first().textContent()) === NOTE,
     'L22-03 : notes en puces côté présentateur',
@@ -153,13 +157,13 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
   const pubMsgs = await pub.evaluate(() => window.__fdMsgs.join('\n'));
   ok(!pubMsgs.includes('Note interne'), 'Notes absentes du canal vers l’écran public');
 
-  // Terminer : retour à l'éditeur avec la durée, l'écran public se ferme
+  // Terminer : bilan de fin (L26-12) avec la durée, puis retour à l'éditeur ; l'écran public se ferme
   await page.keyboard.press('Escape');
+  const rep = page.getByRole('dialog', { name: /Présentation terminée · 0 min \d\d/ });
+  await rep.waitFor();
+  ok(true, 'L22-03 / L26-12 : bilan de fin avec durée');
+  await rep.getByRole('button', { name: 'Retour à l’éditeur' }).click();
   await page.waitForFunction(() => location.hash.endsWith('/edit'));
-  ok(
-    /Présentation terminée · 0 min \d\d/.test(await page.locator('.toast').textContent()),
-    'L22-03 : toast de fin avec durée',
-  );
   await pub.waitForEvent('close', { timeout: 5000 }).catch(() => undefined);
   ok(
     pub.isClosed() || /Présentation terminée/.test(await pub.textContent('body')),

@@ -13,6 +13,8 @@ export interface PresentOptions {
   /** Durée cible en minutes (1 à 180). */
   minutes: number;
   hideHotspots: boolean;
+  /** L26-10 : ouvrir l'appairage du téléphone au lancement. */
+  remote: boolean;
 }
 
 export const DEFAULT_PRESENT: PresentOptions = {
@@ -21,6 +23,7 @@ export const DEFAULT_PRESENT: PresentOptions = {
   timer: true,
   minutes: 15,
   hideHotspots: false,
+  remote: false,
 };
 
 export type PresentMessage =
@@ -44,6 +47,7 @@ export function toSearch(o: PresentOptions): string {
     timer: o.timer ? '1' : '0',
     min: String(o.minutes),
     hide: o.hideHotspots ? '1' : '0',
+    remote: o.remote ? '1' : '0',
   });
   return `?${p.toString()}`;
 }
@@ -60,6 +64,7 @@ export function fromSearch(search: string, steps: number): PresentOptions {
     timer: p.get('timer') !== '0',
     minutes: int(p.get('min'), 15, 1, 180),
     hideHotspots: p.get('hide') === '1',
+    remote: p.get('remote') === '1',
   };
 }
 
@@ -88,3 +93,43 @@ export const noteLines = (notes: string | null | undefined) =>
 /** URL de l'écran public (même origine que l'app). */
 export const screenUrl = (demoId: string) =>
   `${location.origin}${location.pathname}#/present/${demoId}/screen`;
+
+/**
+ * L26-12 : temps par étape pour le bilan. Plus de 6 étapes : les 4 premières, puis la plus longue si
+ * elle est plus loin, puis les autres regroupées.
+ */
+export interface ReportRow {
+  label: string;
+  first: number;
+  last: number;
+  seconds: number;
+  longest: boolean;
+  count: number;
+}
+export function reportRows(spent: number[], titles: string[]): ReportRow[] {
+  const max = Math.max(0, ...spent);
+  const longestIdx = max > 0 ? spent.indexOf(max) : -1;
+  const row = (i: number): ReportRow => ({
+    label: titles[i] ?? '',
+    first: i,
+    last: i,
+    seconds: spent[i] ?? 0,
+    longest: i === longestIdx,
+    count: 1,
+  });
+  if (spent.length <= 6) return spent.map((_, i) => row(i));
+  const head = [0, 1, 2, 3].map(row);
+  const rest = spent.map((_, i) => i).filter((i) => i > 3 && i !== longestIdx);
+  const out = [...head];
+  if (longestIdx > 3) out.push(row(longestIdx));
+  if (rest.length)
+    out.push({
+      label: '',
+      first: rest[0]!,
+      last: rest[rest.length - 1]!,
+      seconds: rest.reduce((a, i) => a + (spent[i] ?? 0), 0),
+      longest: false,
+      count: rest.length,
+    });
+  return out;
+}

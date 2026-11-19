@@ -410,3 +410,363 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== L26-09 : onglets et modification des notes ===== */
+.presenter .pr-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #0b0d10;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.presenter .pr-tabs [role='tab'] {
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: none;
+  color: #b7c0ca;
+  font: 600 12px var(--fd-font-sans);
+  cursor: pointer;
+}
+.presenter .pr-tabs [role='tab'][aria-selected='true'] {
+  background: #2a313b;
+  color: #ffffff;
+}
+.presenter .pcard h2 .pr-ghost + .pr-ghost {
+  margin-left: 0;
+}
+.presenter .pr-notes-edit {
+  width: 100%;
+  min-height: 140px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #3a434f;
+  background: #0b0d10;
+  color: #f3f5f8;
+  font: 16px/1.5 var(--fd-font-sans);
+  resize: vertical;
+}
+.presenter .pr-saved {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #b7c0ca;
+}
+/* Puce « Téléphone connecté » : #8CC8EC sur #10202C (9,2:1) */
+.presenter .live--phone {
+  background: #10202c;
+  color: #8cc8ec;
+}
+.presenter .live--phone svg {
+  width: 14px;
+  height: 14px;
+}
+.presenter .pr-phone-btn {
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.presenter .pr-phone-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ===== L26-10 : appairage ===== */
+.rm .rm-body {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.rm .rm-qr {
+  flex: none;
+  border-radius: 8px;
+  border: 1px solid var(--fd-color-border);
+}
+.rm .rm-text p {
+  margin: 0 0 10px;
+}
+.rm .rm-code {
+  font: 800 34px/1.1 var(--fd-font-mono, ui-monospace, monospace);
+  letter-spacing: 0.08em;
+  color: var(--fd-color-text);
+}
+.rm .rm-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0;
+  font-weight: 600;
+  color: var(--fd-color-text-muted);
+}
+.rm .rm-status.is-on {
+  color: var(--fd-color-success);
+}
+.rm .rm-status svg {
+  width: 18px;
+  height: 18px;
+}
+.rm .rm-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: rm-pulse 1.4s ease-in-out infinite;
+}
+@keyframes rm-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rm .rm-dot {
+    animation: none;
+  }
+}
+@media (max-width: 560px) {
+  .rm .rm-body {
+    flex-direction: column;
+  }
+}
+
+/* ===== L26-12 : bilan ===== */
+.rp .rp-intro {
+  margin: 0 0 12px;
+}
+.rp .rp-table {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.rp .rp-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 40%);
+  gap: 12px;
+  align-items: center;
+}
+.rp .rp-name {
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+.rp .rp-n {
+  flex: none;
+  min-width: 28px;
+  color: var(--fd-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.rp .rp-dur {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rp .rp-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--fd-color-surface-sunken);
+  overflow: hidden;
+}
+.rp .rp-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--fd-color-primary);
+}
+.rp .rp-row.is-long {
+  font-weight: 700;
+}
+/* Étape la plus longue : #B85B00 (4,6:1 sur blanc) */
+.rp .rp-row.is-long .rp-bar i {
+  background: #b85b00;
+}
+.rp .rp-time {
+  min-width: 44px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== L26-11 : téléphone (#0B0D10) ===== */
+html[data-remote] body {
+  background: #0b0d10;
+}
+.rmp {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px max(16px, env(safe-area-inset-bottom));
+  background: #0b0d10;
+  color: #f3f5f8;
+  font-family: var(--fd-font-sans);
+}
+.rmp-center {
+  justify-content: center;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.rmp h1 {
+  margin: 0;
+  font-size: 18px;
+}
+.rmp-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  color: #b7c0ca;
+}
+.rmp-head h1 {
+  color: #f3f5f8;
+}
+.rmp-timer {
+  margin: 0;
+  font: 700 40px/1 var(--fd-font-sans);
+  font-variant-numeric: tabular-nums;
+}
+.rmp-timer small {
+  font-size: 18px;
+  color: #b7c0ca;
+}
+.rmp-notes {
+  flex: 1;
+  padding: 16px;
+  border-radius: 16px;
+  background: #15191f;
+}
+.rmp-notes h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #b7c0ca;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.rmp-notes ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 19px;
+  line-height: 1.5;
+}
+.rmp-muted,
+.rmp-nextis {
+  color: #b7c0ca;
+}
+.rmp-nextis {
+  margin: 12px 0 0;
+  font-size: 15px;
+}
+.rmp-ctl {
+  display: grid;
+  gap: 10px;
+}
+.rmp-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.rmp button,
+.rmp input {
+  min-height: 48px;
+  border-radius: 14px;
+  font: 700 16px var(--fd-font-sans);
+}
+.rmp button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #3a434f;
+  background: #15191f;
+  color: #f3f5f8;
+  cursor: pointer;
+}
+.rmp button svg {
+  width: 20px;
+  height: 20px;
+}
+.rmp button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.rmp button:focus-visible,
+.rmp input:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px #2f5db8;
+}
+.rmp .rmp-prev,
+.rmp .rmp-next {
+  min-height: 64px;
+}
+/* « Suivante » : vert DSI #C5E86C, texte #12210A (12,1:1) */
+.rmp .rmp-next {
+  background: #c5e86c;
+  border-color: #c5e86c;
+  color: #12210a;
+}
+.rmp button[aria-pressed='true'] {
+  background: #f3f5f8;
+  color: #0b0d10;
+}
+.rmp .rmp-danger {
+  background: #b42318;
+  border-color: #b42318;
+}
+.rmp-confirm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.rmp-lost {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #2a1e0c;
+  color: #f8bb61;
+  font-weight: 600;
+}
+.rmp-lost svg {
+  width: 18px;
+  height: 18px;
+}
+.rmp-form {
+  display: grid;
+  gap: 10px;
+}
+.rmp-form label {
+  font-weight: 700;
+}
+.rmp-help {
+  margin: 0;
+  color: #b7c0ca;
+}
+.rmp input {
+  padding: 0 14px;
+  border: 1px solid #3a434f;
+  background: #15191f;
+  color: #f3f5f8;
+  font-size: 26px;
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+.rmp-err {
+  margin: 0;
+  color: #ff9b8f;
+}
+
+/* QR code : taille propre (les icônes de la modale sont à 18 px) */
+.rm svg.rm-qr {
+  width: 168px;
+  height: 168px;
+}
+.presenter .pcard h2 {
+  flex-wrap: wrap;
+}
+.presenter .pr-tabs [role='tab'],
+.presenter .pcard h2 .pr-ghost {
+  white-space: nowrap;
+}
