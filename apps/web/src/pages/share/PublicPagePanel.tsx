@@ -293,7 +293,10 @@ export function PublicPagePanel({
                 <span />
               </span>
             </div>
-            <p className="help">{t('share.page.ogSoon')}</p>
+            {/* L19b-01 : badge « Bientôt » standard */}
+            <p className="help">
+              {t('share.page.ogSoonText')} <span className="badge">{t('shell.soon')}</span>
+            </p>
           </fieldset>
           <div className="row sh-page-actions">
             <a className="btn btn-secondary" href={url} target="_blank" rel="noreferrer">

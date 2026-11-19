@@ -939,7 +939,8 @@
 .mk .preview-box {
   border-radius: var(--fd-radius-xl);
   overflow: hidden;
-  background: var(--fd-player-backdrop);
+  /* L19b : le cadre suit le thème de l'app ; seul le lecteur garde le thème de la démo */
+  background: var(--fd-color-surface-sunken);
   border: 1px solid var(--fd-color-border);
   padding: 28px;
 }
@@ -1099,13 +1100,13 @@
 }
 .mk .sh-og-img {
   aspect-ratio: 1.91/1;
-  background: var(--fd-player-backdrop);
+  background: var(--fd-color-surface-sunken);
   display: grid;
   place-items: center;
 }
 .mk .sh-og-img b {
   font: 700 20px var(--fd-font-display);
-  color: var(--fd-stone-900);
+  color: var(--fd-color-text);
   text-align: center;
   padding: 0 24px;
 }

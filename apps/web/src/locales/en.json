@@ -1586,7 +1586,8 @@
       "indexableProtected": "Protected demo (password, invitation or domain): the page is never indexed.",
       "ogSoon": "Rich preview when shared (server-side image and Open Graph tags): coming soon.",
       "open": "View the public page",
-      "newTab": "Opens in a new tab."
+      "newTab": "Opens in a new tab.",
+      "ogSoonText": "Rich preview when shared (image and Open Graph tags served by the server)"
     },
     "ackLine": "GDPR confirmation: {{name}}, {{date}}",
     "ackUnknown": "former member"

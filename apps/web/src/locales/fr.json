@@ -1586,7 +1586,8 @@
       "indexableProtected": "Démo protégée (mot de passe, invitation ou domaine) : la page n’est jamais indexée.",
       "ogSoon": "Aperçu enrichi lors d’un partage (image et balises Open Graph côté serveur) : bientôt.",
       "open": "Voir la page publique",
-      "newTab": "S’ouvre dans un nouvel onglet."
+      "newTab": "S’ouvre dans un nouvel onglet.",
+      "ogSoonText": "Aperçu enrichi lors d’un partage (image et balises Open Graph côté serveur)"
     },
     "ackLine": "Confirmation RGPD : {{name}}, le {{date}}",
     "ackUnknown": "membre retiré"

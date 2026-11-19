@@ -556,7 +556,7 @@ export function SharePage() {
           <div className="card card-pad">
             <h2 className="t-label">{t('share.socialPreview')}</h2>
             <div className="sh-og">
-              <div className="sh-og-img fd-player-scope">
+              <div className="sh-og-img">
                 <b>{demo.title}</b>
               </div>
               <div className="sh-og-txt">
@@ -757,8 +757,9 @@ function MiniPreview({ demoId, previewUrl }: { demoId: string; previewUrl: strin
     };
   }, [demoId]);
   return (
-    <div className="preview-box fd-player-scope">
-      <div className="mini-player">
+    // L19b : seul le lecteur garde le thème de la démo ; le cadre suit le thème de l'app
+    <div className="preview-box">
+      <div className="mini-player fd-player-scope">
         <div className="bar">
           <i />
           <i />

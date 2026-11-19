@@ -26,10 +26,15 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
   const state = seed();
+  const demoRow = state.tables.demos.find((d) => d.id === DEMO);
+  // L19b-02 : démo non publiée (note PRT-01 dans l'onglet) ; L19b-01 : démo publiée (version 2)
+  demoRow.status = 'draft';
+  demoRow.current_version_id = null;
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/share?tab=page`);
   const sw = page.getByRole('switch', { name: 'Page publique' });
   await sw.waitFor();
+  ok((await page.getByText(/Démo non publiée/).count()) === 1, 'démo non publiée : note dans l’onglet');
   ok(
     (await page.getByRole('tab', { name: 'Page publique' }).getAttribute('aria-selected')) === 'true',
     'onglet ouvert depuis l’URL',
@@ -37,6 +42,19 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
   ok(!(await sw.isChecked()), 'page désactivée par défaut');
   ok((await page.getByText(/La page publique est désactivée/).count()) === 1, 'désactivée : alerte info');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l19b-02-onglet-off${sfx}.png` });
+  demoRow.status = 'published';
+  demoRow.current_version_id = 'v-2';
+  state.tables.demo_versions.push({
+    id: 'v-2',
+    demo_id: DEMO,
+    workspace_id: demoRow.workspace_id,
+    number: 2,
+    manifest: {},
+    published_at: '2026-11-14T10:00:00Z',
+  });
+  demoRow.updated_at = '2026-11-14T10:00:00Z';
+  await page.reload();
+  await sw.waitFor();
   await sw.check();
   await page.getByLabel('Titre de la page').waitFor();
   ok(state.tables.demo_pages?.[0]?.enabled === true, 'page activée');
@@ -72,7 +90,12 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       .first()
       .click()
       .catch(() => {});
-    await page.screenshot({ path: `${SHOTS}/l19b-01-onglet${sfx}.png`, fullPage: true });
+    await page.waitForFunction(() => !document.querySelector('.toast')).catch(() => {});
+    // Pleine hauteur sans capture « fullPage » (la barre latérale, en 100vh, reste ancrée en haut)
+    const h = await page.evaluate(() => document.documentElement.scrollHeight);
+    await page.setViewportSize({ width: 1440, height: h });
+    await page.screenshot({ path: `${SHOTS}/l19b-01-onglet${sfx}.png` });
+    await page.setViewportSize({ width: 1440, height: 900 });
   }
   // Démo protégée : indexation impossible
   state.tables.demo_access = [
