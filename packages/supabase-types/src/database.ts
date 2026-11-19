@@ -252,6 +252,7 @@ export type Database = {
         Row: {
           demo_id: string;
           browser: string | null;
+          channel: string | null;
           country: string | null;
           device: string | null;
           embed_origin: string | null;
@@ -275,6 +276,7 @@ export type Database = {
         Insert: {
           demo_id: string;
           browser?: string | null;
+          channel?: string | null;
           country?: string | null;
           device?: string | null;
           embed_origin?: string | null;
@@ -297,6 +299,7 @@ export type Database = {
         Update: {
           demo_id?: string;
           browser?: string | null;
+          channel?: string | null;
           country?: string | null;
           device?: string | null;
           embed_origin?: string | null;
@@ -1352,6 +1355,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      demo_pages: {
+        Row: {
+          cta_label: string | null;
+          cta_url: string | null;
+          demo_id: string;
+          description: string;
+          enabled: boolean;
+          indexable: boolean;
+          related: boolean;
+          style: string;
+          title: string;
+          updated_at: string;
+          updated_by: string | null;
+          workspace_id: string;
+        };
+        Insert: {
+          cta_label?: string | null;
+          cta_url?: string | null;
+          demo_id: string;
+          description?: string;
+          enabled?: boolean;
+          indexable?: boolean;
+          related?: boolean;
+          style?: string;
+          title?: string;
+          workspace_id?: string;
+        };
+        Update: {
+          cta_label?: string | null;
+          cta_url?: string | null;
+          description?: string;
+          enabled?: boolean;
+          indexable?: boolean;
+          related?: boolean;
+          style?: string;
+          title?: string;
+        };
+        Relationships: [];
+      };
       segments: {
         Row: {
           conditions: Json;
@@ -2024,6 +2066,7 @@ export type Database = {
         Args: { p_workspace: string; p_segment: Json; p_from: string; p_to?: string };
         Returns: Json;
       };
+      public_page: { Args: { p_demo: string }; Returns: Json };
       live_demo: { Args: { p_demo: string }; Returns: Json };
       survey_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
       survey_texts: { Args: { p_demo: string; p_question?: string | null; p_limit?: number }; Returns: Json };
