@@ -1831,7 +1831,8 @@
       "emailHelp": "Used to link views and the lead to this contact. Never shown on the page or in the demo.",
       "column": "Page",
       "badgeOn": "Personalised",
-      "badgeOff": "Demo only"
+      "badgeOff": "Demo only",
+      "copyPage": "Copy the page address {{name}}"
     }
   },
   "analytics": {

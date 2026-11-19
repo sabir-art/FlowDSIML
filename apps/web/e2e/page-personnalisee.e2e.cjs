@@ -127,6 +127,21 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     (await page.getByText('Personnalisée', { exact: true }).count()) === 1,
     'liste : badge « Personnalisée »',
   );
+  ok(
+    (await page.locator('.sh-pp-url .t-mono').innerText()).endsWith(`/${link.page_code}`) &&
+      (await page.locator('.sh-pp-url .t-mono').getAttribute('title')).endsWith(
+        `#/p/${DEMO}/${link.page_code}`,
+      ),
+    'liste : adresse de la page /p/<démo>/<code>',
+  );
+  ok(
+    (await page.getByRole('button', { name: 'Copier l’adresse de la page Globex — Marie' }).count()) === 1,
+    'liste : copier l’adresse de la page',
+  );
+  ok(
+    await page.locator('.table-wrap').evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    'liste : actions visibles sans défilement horizontal',
+  );
   if (SHOTS) {
     await page
       .locator('.toast button[aria-label]')

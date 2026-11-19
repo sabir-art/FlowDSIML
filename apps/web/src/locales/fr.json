@@ -1831,7 +1831,8 @@
       "emailHelp": "Sert à relier les vues et le lead à ce contact. Jamais affichée sur la page ni dans la démo.",
       "column": "Page",
       "badgeOn": "Personnalisée",
-      "badgeOff": "Démo seule"
+      "badgeOff": "Démo seule",
+      "copyPage": "Copier l’adresse de la page {{name}}"
     }
   },
   "analytics": {

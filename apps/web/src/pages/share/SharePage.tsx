@@ -461,15 +461,15 @@ export function SharePage() {
                   <p className="muted sh-empty">{t('share.noLinks')}</p>
                 ) : (
                   <div className="table-wrap">
-                    <table className="table">
+                    <table className="table sh-links">
                       <caption className="sr-only">{t('share.tab.perso')}</caption>
                       <thead>
                         <tr>
                           <th>{t('share.linkNameShort')}</th>
                           <th>{t('editor.variables')}</th>
                           <th>{t('share.pp.column')}</th>
+                          {/* L25-13 : vues et dernière vue dans une colonne (table plus étroite) */}
                           <th className="r">{t('analytics.views')}</th>
-                          <th>{t('share.lastView')}</th>
                           <th>
                             <span className="sr-only">{t('members.actions')}</span>
                           </th>
@@ -492,7 +492,7 @@ export function SharePage() {
                               </th>
                               <td>
                                 {vars.map((v) => (
-                                  <span key={v} className="badge sh-var">
+                                  <span key={v} className="badge sh-var" title={v}>
                                     {v}
                                   </span>
                                 ))}
@@ -509,13 +509,41 @@ export function SharePage() {
                               </td>
                               <td>
                                 {l.page_enabled && l.page_code ? (
-                                  <span className="badge badge-success">{t('share.pp.badgeOn')}</span>
+                                  <div className="sh-pp-cell">
+                                    <span className="badge badge-success">{t('share.pp.badgeOn')}</span>
+                                    {/* L25-13 : adresse de la page (/p/<démo>/<code>), copiable */}
+                                    <span className="sh-pp-url">
+                                      <span className="t-mono" title={personalPageUrl(demoId, l.page_code)}>
+                                        {`…/${l.page_code}`}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        className="btn btn-ghost btn-sm btn-icon"
+                                        aria-label={t('share.pp.copyPage', { name: l.name || '—' })}
+                                        title={t('share.pp.copyPage', { name: l.name || '—' })}
+                                        onClick={() =>
+                                          void navigator.clipboard
+                                            ?.writeText(personalPageUrl(demoId, l.page_code!))
+                                            .then(() => run(async () => undefined, t('members.linkCopied')))
+                                        }
+                                      >
+                                        <Copy aria-hidden="true" />
+                                      </button>
+                                    </span>
+                                  </div>
                                 ) : (
                                   <span className="badge">{t('share.pp.badgeOff')}</span>
                                 )}
                               </td>
-                              <td className="r">{formatNumber(st?.views ?? 0)}</td>
-                              <td className="muted">{st?.last ? formatRelativeShort(st.last) : '—'}</td>
+                              <td className="r sh-views">
+                                {formatNumber(st?.views ?? 0)}
+                                {st?.last && (
+                                  <span className="t-caption muted">
+                                    <span className="sr-only">{t('share.lastView')} : </span>
+                                    {formatRelativeShort(st.last)}
+                                  </span>
+                                )}
+                              </td>
                               <td className="r">
                                 <div className="row sh-actions">
                                   <button
