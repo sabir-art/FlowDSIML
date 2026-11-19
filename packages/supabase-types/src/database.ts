@@ -172,6 +172,8 @@ export type Database = {
       };
       demos: {
         Row: {
+          device: string;
+          viewport: Json | null;
           cover_path: string | null;
           created_at: string;
           created_by: string | null;
@@ -188,6 +190,8 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          device?: string;
+          viewport?: Json | null;
           cover_path?: string | null;
           created_at?: string;
           created_by?: string | null;
@@ -203,6 +207,8 @@ export type Database = {
           workspace_id: string;
         };
         Update: {
+          device?: string;
+          viewport?: Json | null;
           cover_path?: string | null;
           created_at?: string;
           created_by?: string | null;
@@ -1585,6 +1591,9 @@ export type Database = {
       };
       steps: {
         Row: {
+          video: Json;
+          video_duration_ms: number | null;
+          video_path: string | null;
           before_blurs: NonNullable<Json>;
           before_image_height: number | null;
           before_image_path: string | null;
@@ -1615,6 +1624,9 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          video?: Json;
+          video_duration_ms?: number | null;
+          video_path?: string | null;
           before_blurs?: NonNullable<Json>;
           before_image_height?: number | null;
           before_image_path?: string | null;
@@ -1644,6 +1656,9 @@ export type Database = {
           presenter_notes?: string;
         };
         Update: {
+          video?: Json;
+          video_duration_ms?: number | null;
+          video_path?: string | null;
           before_blurs?: NonNullable<Json>;
           before_image_height?: number | null;
           before_image_path?: string | null;
@@ -2144,7 +2159,7 @@ export type Database = {
     };
     Enums: {
       demo_status: 'draft' | 'published' | 'archived';
-      step_kind: 'image' | 'text' | 'html' | 'before_after';
+      step_kind: 'image' | 'text' | 'html' | 'before_after' | 'video';
       workspace_role: 'viewer' | 'editor' | 'admin' | 'owner';
     };
     CompositeTypes: {
