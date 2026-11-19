@@ -3131,6 +3131,8 @@
 }
 .mk .an-ret .an-sources {
   align-items: stretch;
+  align-self: stretch;
+  width: 100%;
   max-width: 640px;
 }
 .mk .an-ret .an-sources > div {

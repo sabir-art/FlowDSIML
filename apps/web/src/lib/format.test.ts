@@ -7,6 +7,8 @@ describe('format', () => {
     await i18n.changeLanguage('fr');
     expect(formatDate('2026-11-17T10:00:00Z')).toBe('17 nov. 2026');
     expect(formatNumber(12345)).toMatch(/12\s345/);
+    // L26-06 : séparateur des milliers visible (espace insécable, pas d'espace fine)
+    if (formatNumber(1000).length > 4) expect(formatNumber(3127)).not.toContain('\u202f');
     expect(formatPercent(0.44)).toMatch(/44\s%/);
     await i18n.changeLanguage('en');
     expect(formatDate('2026-11-17T10:00:00Z')).toBe('17 Nov 2026');

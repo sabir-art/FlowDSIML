@@ -19,8 +19,8 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.goto(`${APP}/#/settings/members`);
   await page.waitForSelector('.snav');
   ok(
-    (await page.locator('.snav .snav-item').count()) === 8,
-    'navigation interne : 8 sections (dont Intégrations et Glossaire)',
+    (await page.locator('.snav .snav-item').count()) === 11,
+    'navigation interne : 11 sections (dont Intégrations, Glossaire, Sécurité, Confidentialité, Fonctions à venir)',
   );
   await page.waitForSelector('text=Thomas Bernard');
   ok((await page.locator('tbody tr').count()) >= 6, 'membres et invitation en attente');

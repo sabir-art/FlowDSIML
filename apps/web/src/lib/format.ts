@@ -22,8 +22,12 @@ export function formatDateTime(iso: string | null | undefined): string {
   });
 }
 
+/**
+ * Nombre localisé. Séparateur des milliers en espace insécable (U+00A0) plutôt qu'en espace fine
+ * (U+202F, rendue presque nulle par la police de l'app) : « 3 127 » reste lisible (retour Lead UX L26-06).
+ */
 export function formatNumber(n: number): string {
-  return new Intl.NumberFormat(locale()).format(n);
+  return new Intl.NumberFormat(locale()).format(n).replace(/\u202f/g, '\u00a0');
 }
 
 export function formatPercent(ratio: number): string {

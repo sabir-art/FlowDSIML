@@ -984,18 +984,30 @@ async function install(page, state = seed()) {
           const w = t.workspaces.find((x) => x.id === a.p_workspace) || t.workspaces[0];
           if (w.visit_measure === false)
             return json(route, 200, { enabled: false, gapMinutes: w.visit_gap_minutes ?? 30 });
-          return json(
-            route,
-            200,
-            state.returning || {
-              enabled: true,
-              gapMinutes: w.visit_gap_minutes ?? 30,
-              total: 0,
-              visitors: 0,
-              avgVisits: null,
-              topDemos: [],
-            },
+          // Même population que workspace_analytics (visiteurs = 65 % des vues), part de récurrents
+          // réglable (state.returningShare, 34 % par défaut) : chiffres cohérents avec la vue d'ensemble
+          const pubs = t.demos.filter(
+            (d) => d.status === 'published' && !d.deleted_at && (!a.p_demo || d.id === a.p_demo),
           );
+          const total = Math.round(267 * pubs.length * 0.65);
+          const share = state.returningShare ?? 0.34;
+          const visitors = Math.round(total * share);
+          return json(route, 200, {
+            enabled: true,
+            gapMinutes: w.visit_gap_minutes ?? 30,
+            total,
+            visitors,
+            avgVisits: visitors ? 2.4 : null,
+            topDemos: pubs.slice(0, 2).map((d, i) => {
+              const v = Math.round(total / Math.max(pubs.length, 1));
+              return {
+                demoId: d.id,
+                title: d.title,
+                visitors: v,
+                returning: Math.round(v * (share + 0.07 - i * 0.04)),
+              };
+            }),
+          });
         }
         case 'session_visits': {
           const w = t.workspaces.find((x) => x.id === a.p_workspace) || t.workspaces[0];

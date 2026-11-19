@@ -27,17 +27,6 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
   const state = seed();
-  state.returning = {
-    enabled: true,
-    gapMinutes: 30,
-    total: 3127,
-    visitors: 1063,
-    avgVisits: 2.8,
-    topDemos: [
-      { demoId: DEMO, title: 'Créer un rapport en 2 minutes', visitors: 900, returning: 369 },
-      { demoId: 'x', title: 'Onboarding — import de données', visitors: 400, returning: 148 },
-    ],
-  };
   // Sessions fictives (le faux Supabase en tire une par lead)
   for (const [i, who] of ['lea', 'marc', 'nora', 'paul'].entries())
     state.tables.leads.push({
@@ -67,27 +56,39 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       .includes('Visiteurs uniques|Visiteurs récurrents'),
     'KPI « Visiteurs récurrents » après « Visiteurs uniques »',
   );
-  ok(sp(await kpi.locator('.value').innerText()) === '34 %', 'KPI : pourcentage');
-  ok(sp(await kpi.innerText()).includes('1 063 sur 3 127 · revenus au moins une fois'), 'KPI : n sur N');
+  // Chiffres cohérents avec la vue d'ensemble : même population que « Visiteurs uniques »
+  const num = (x) => Number(sp(x).replace(/\D/g, ''));
+  const uniq = num(
+    await page.locator('.kpi', { hasText: 'Visiteurs uniques' }).locator('.value').innerText(),
+  );
+  const n = Math.round(uniq * 0.34);
+  const pRet = Math.round((n / uniq) * 100);
+  const fmt = (x) => x.toLocaleString('fr-FR').replace(/[\u00a0\u202f]/g, ' ');
+  ok(sp(await kpi.locator('.value').innerText()) === `${pRet} %`, `KPI : pourcentage réel (${pRet} %)`);
+  ok(
+    sp(await kpi.innerText()).includes(`${fmt(n)} sur ${fmt(uniq)} · revenus au moins une fois`),
+    `KPI : ${n} sur ${uniq} (visiteurs uniques)`,
+  );
   const card = page.locator('.an-ret');
   ok(sp(await card.innerText()).includes('revenu après plus de 30 minutes'), 'définition (30 min)');
   ok(
     sp(await card.locator('[role="img"]').getAttribute('aria-label')) ===
-      'Nouveaux : 2 064, 66 %. Récurrents : 1 063, 34 %.',
-    'barres résumées (role="img")',
+      `Nouveaux : ${fmt(uniq - n)}, ${100 - pRet} %. Récurrents : ${fmt(n)}, ${pRet} %.`,
+    'barres sur les vraies données (role="img")',
   );
   ok(
-    sp(await card.innerText()).includes('revient en moyenne 2,8 fois') &&
-      sp(await card.innerText()).includes('« Créer un rapport en 2 minutes » (41 % de récurrents)'),
+    sp(await card.innerText()).includes('revient en moyenne 2,4 fois') &&
+      /« [^»]+ » \(\d+ % de récurrents\)/.test(sp(await card.innerText())),
     'phrase : visites moyennes et démos les plus revues',
   );
   await shot('l26-06-vue');
 
   // Moins de 20 récurrents : phrase omise
-  state.returning = { ...state.returning, total: 40, visitors: 12 };
+  state.returningShare = 0.1;
   await page.reload();
   await card.waitFor();
   ok(!sp(await card.innerText()).includes('en moyenne'), 'moins de 20 récurrents : phrase omise');
+  state.returningShare = 0.34;
 
   // ===== L26-08 : modale « Mesure des visites » =====
   await page
