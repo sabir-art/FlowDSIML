@@ -2754,3 +2754,8 @@
 .cap-field-mark:not(.is-playing) .cap-typed {
   background: rgb(255 255 255 / 85%);
 }
+
+/* L25-10 : « Suite de l'étape » (opérateur et valeur côte à côte) */
+.br-row.nr-cond {
+  grid-template-columns: minmax(120px, 42%) minmax(0, 1fr);
+}

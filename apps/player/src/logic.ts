@@ -1,5 +1,5 @@
 /** Logique pure du player (testée). */
-import type { ChoiceAction, Manifest, Quiz, QuizQuestion, Step } from '@flowdsiml/manifest';
+import type { ChoiceAction, Manifest, Quiz, QuizQuestion, RuleCond, RuleOp, Step } from '@flowdsiml/manifest';
 
 export { resolvePlacement, type Placement } from '@flowdsiml/player-core';
 
@@ -267,18 +267,77 @@ export interface BranchMemory {
   choices: Record<string, number>;
   /** Réponses cochées par question du quiz. */
   answers: Record<string, string[]>;
+  /** L25-10 : valeurs des variables (lien personnalisé, formulaire), score du quiz (%), variante A/B. */
+  vars?: Record<string, string | undefined>;
+  score?: number | null;
+  variant?: 'A' | 'B';
 }
 
-/** L22 : destination imposée par la première règle vraie de l'étape `i`, sinon null. */
+const norm = (s: string) => s.trim().toLocaleLowerCase();
+/** Nombre saisi (« 1 248 », « 12,5 ») ; null sinon. */
+export function ruleNumber(s: string): number | null {
+  const t = s.replace(/[\s\u00a0\u202f]/g, '').replace(',', '.');
+  return /^-?\d+(\.\d+)?$/.test(t) ? Number(t) : null;
+}
+
+/**
+ * L25-10 : comparaison d'une condition, opérateurs en liste fermée. Aucune évaluation d'expression :
+ * égalité et inclusion de chaînes (sans casse), comparaison de nombres. Valeur absente = vide.
+ */
+export function compareCond(left: string, op: RuleOp, right: string): boolean {
+  switch (op) {
+    case 'is':
+      return norm(left) === norm(right);
+    case 'isNot':
+      return norm(left) !== norm(right);
+    case 'contains':
+      return norm(right) !== '' && norm(left).includes(norm(right));
+    case 'lt':
+    case 'gt': {
+      const a = ruleNumber(left);
+      const b = ruleNumber(right);
+      if (a === null || b === null) return false;
+      return op === 'lt' ? a < b : a > b;
+    }
+    default:
+      return false;
+  }
+}
+
+/** Valeur lue par une condition (variable, réponse d'une étape, score, variante). */
+function condLeft(m: Manifest, c: RuleCond, mem: BranchMemory): string {
+  switch (c.source) {
+    case 'var':
+      return (c.key && mem.vars?.[c.key]) || '';
+    case 'answer': {
+      const k = c.stepId ? mem.choices[c.stepId] : undefined;
+      const st = m.steps.find((s) => s.id === c.stepId);
+      return k === undefined ? '' : (st?.options.choices[k]?.label ?? '');
+    }
+    case 'score':
+      return mem.score === null || mem.score === undefined ? '' : String(mem.score);
+    case 'ab':
+      return mem.variant ?? 'A';
+  }
+}
+
+/**
+ * L22 : destination imposée par la première règle vraie de l'étape `i`. L25-10 : sinon, « Sinon,
+ * aller à » s'il est réglé ; null = étape suivante.
+ */
 export function ruleTarget(m: Manifest, i: number, mem: BranchMemory): ChoiceAction | null {
-  const rules = m.steps[i]?.options.rules ?? [];
+  const opts = m.steps[i]?.options;
+  const rules = opts?.rules ?? [];
   for (const r of rules) {
     const ok =
       'choice' in r.when
         ? mem.choices[r.when.choice.stepId] === r.when.choice.index
-        : (mem.answers[r.when.quiz.questionId] ?? []).includes(r.when.quiz.answerId);
+        : 'quiz' in r.when
+          ? (mem.answers[r.when.quiz.questionId] ?? []).includes(r.when.quiz.answerId)
+          : compareCond(condLeft(m, r.when.cond, mem), r.when.cond.op, r.when.cond.value);
     if (ok) return r.goto;
   }
+  if (rules.length && opts?.rulesElse && opts.rulesElse.type !== 'next') return opts.rulesElse;
   return null;
 }
 

@@ -6,11 +6,8 @@ import { Button, Field, Select, Switch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asAction, asStepOptions, type StepRow } from '../types';
 import { loopsWithoutExit, unreachableSteps } from '../reachability';
+import { DestinationSelect } from './DestinationSelect';
 import { answersFromText, branchOf, branchPatch, isDead, remapRules, type BranchView } from '../branch';
-
-/** Valeur du select de destination : « step:<id> », « chapter:<id> », « end » ou « url ». */
-const destValue = (a: ChoiceAction) =>
-  a.type === 'goto' ? `step:${a.stepId}` : a.type === 'chapter' ? `chapter:${a.chapterId}` : a.type;
 
 /**
  * F1 : réglages « parcours guidé » d'une étape texte (spec a2 §2 et §5) : affichage plein écran ou
@@ -86,77 +83,12 @@ export function GuidedStepFields({
   );
 
   /** Liste des destinations : étape suivante, étapes, chapitres, fin, lien. */
-  function destination({
-    label,
-    action,
-    dead,
-    onChange,
-  }: {
+  const destination = (p: {
     label: string;
     action: ChoiceAction;
     dead: boolean;
     onChange: (a: ChoiceAction) => void;
-  }) {
-    const nextStep = editor.steps[index + 1];
-    return (
-      <span className="br-dest">
-        <Select
-          aria-label={label}
-          aria-invalid={dead || undefined}
-          className={dead ? 'is-invalid' : undefined}
-          disabled={readOnly}
-          value={dead ? 'dead' : destValue(action)}
-          onChange={(e) => {
-            const v = e.target.value;
-            onChange(
-              v === 'next'
-                ? { type: 'next' }
-                : v.startsWith('step:')
-                  ? { type: 'goto', stepId: v.slice(5) }
-                  : v.startsWith('chapter:')
-                    ? { type: 'chapter', chapterId: v.slice(8) }
-                    : v === 'url'
-                      ? { type: 'url', url: 'https://' }
-                      : { type: 'end' },
-            );
-          }}
-        >
-          {dead && (
-            <option value="dead" disabled>
-              {t('editor.branch.deleted')}
-            </option>
-          )}
-          <option value="next">
-            {nextStep ? t('editor.branch.next', { n: index + 2 }) : t('editor.branch.nextEnd')}
-          </option>
-          {editor.steps.map((s, j) =>
-            j === index ? null : (
-              <option key={s.id} value={`step:${s.id}`}>
-                {t('editor.advanced.choice.toStep', { n: j + 1, title: s.title || t('editor.untitled') })}
-              </option>
-            ),
-          )}
-          {editor.chapters.map((ch) => (
-            <option key={ch.id} value={`chapter:${ch.id}`}>
-              {t('editor.advanced.choice.toChapter', { title: ch.title || t('editor.untitled') })}
-            </option>
-          ))}
-          <option value="end">{t('editor.advanced.choice.toEnd')}</option>
-          <option value="url">{t('editor.advanced.choice.toUrl')}</option>
-        </Select>
-        {action.type === 'url' && (
-          <input
-            className="fd-input"
-            type="url"
-            aria-label={t('editor.branch.url', { label })}
-            disabled={readOnly}
-            value={action.url}
-            onChange={(e) => onChange({ type: 'url', url: e.target.value })}
-          />
-        )}
-      </span>
-    );
-  }
+  }) => <DestinationSelect editor={editor} index={index} readOnly={readOnly} {...p} />;
 
   return (
     <>

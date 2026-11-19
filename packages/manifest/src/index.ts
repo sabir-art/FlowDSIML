@@ -101,10 +101,31 @@ export type Choice = z.infer<typeof choiceSchema>;
  * la condition est vraie choisit la destination ; sinon, étape suivante. Les conditions portent sur
  * les choix faits plus tôt dans la session (menu de choix) ou sur les réponses au quiz.
  */
+/**
+ * L25-10 : condition déclarative d'une règle de suite. Opérateurs en liste fermée ; aucune
+ * expression n'est jamais évaluée (ni eval ni Function) : le lecteur compare des chaînes ou des nombres.
+ * Sources : variable {{clé}}, réponse au menu de choix d'une étape, score du quiz (%), variante A/B.
+ */
+export const RULE_OPS = ['is', 'isNot', 'contains', 'lt', 'gt'] as const;
+export type RuleOp = (typeof RULE_OPS)[number];
+export const condSchema = z
+  .object({
+    source: z.enum(['var', 'answer', 'score', 'ab']),
+    key: z
+      .string()
+      .regex(/^[a-z][a-z0-9_]{0,39}$/)
+      .optional(),
+    stepId: z.string().max(40).optional(),
+    op: z.enum(RULE_OPS),
+    value: z.string().max(200),
+  })
+  .strict();
+export type RuleCond = z.infer<typeof condSchema>;
 export const ruleSchema = z.object({
   when: z.union([
     z.object({ choice: z.object({ stepId: z.string(), index: z.number().int().min(0).max(5) }) }),
     z.object({ quiz: z.object({ questionId: z.string(), answerId: z.string() }) }),
+    z.object({ cond: condSchema }),
   ]),
   goto: choiceActionSchema,
 });
@@ -223,6 +244,8 @@ export const stepOptionsSchema = z
       })
       .optional()
       .catch(undefined),
+    /** L25-10 : « Sinon, aller à » des règles de suite (absent : étape suivante). */
+    rulesElse: choiceActionSchema.optional().catch(undefined),
     /** L22 : règles de branchement automatique (une règle invalide est ignorée seule). */
     rules: z
       .array(z.unknown())

@@ -214,6 +214,162 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     await shot('l25-08-graphique');
   }
 
+  // ===== L25-10 : embranchement conditionnel =====
+  if (ONLY.includes('conditions')) {
+    const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
+    const st = (i) =>
+      state.tables.steps.find(
+        (s) =>
+          s.demo_id === DEMO &&
+          s.position ===
+            state.tables.steps.filter((x) => x.demo_id === DEMO).sort((a, b) => a.position - b.position)[i]
+              .position,
+      );
+    await p.locator('[data-step-index="2"]').click();
+    const sec = p.locator('.rules-sec');
+    await sec.scrollIntoViewIfNeeded();
+    ok(
+      (await sec.getByRole('heading').textContent()) === 'Suite de l’étape' ||
+        (await sec.getByRole('heading').textContent()) === "Suite de l'étape",
+      'section « Suite de l’étape »',
+    );
+    const elseSel = sec.getByRole('combobox', { name: 'Destination par défaut' });
+    ok(
+      (await elseSel.locator('option:checked').textContent()) === 'Étape suivante (4)',
+      '« Sinon » : étape suivante par défaut',
+    );
+    await sec.getByRole('button', { name: 'Ajouter une règle' }).click();
+    await p.waitForTimeout(300);
+    const r1 = sec.getByRole('group', { name: 'Règle 1' });
+    ok(
+      (await r1.getByRole('combobox', { name: 'Destination, règle 1' }).getAttribute('aria-invalid')) ===
+        'true' && (await r1.getByText('Choisissez une destination pour cette règle.').count()) === 1,
+      'règle sans destination signalée en erreur',
+    );
+    await p.getByRole('button', { name: 'Publier', exact: true }).click();
+    await p.waitForTimeout(300);
+    ok(
+      (await p.getByText('L’étape 3 a une règle sans destination').count()) +
+        (await p.getByText("L'étape 3 a une règle sans destination").count()) >=
+        1,
+      'publication bloquée',
+    );
+    const ops = await r1
+      .getByRole('combobox', { name: 'Opérateur, règle 1' })
+      .locator('option')
+      .allTextContents();
+    ok(
+      ops.join('|') === "est|n'est pas|contient|moins de|plus de",
+      `opérateurs en liste fermée (${ops.join('|')})`,
+    );
+    await r1
+      .getByRole('combobox', { name: 'Critère, règle 1' })
+      .selectOption({ label: 'Variable {{company}}' });
+    await r1.getByRole('textbox', { name: 'Valeur, règle 1' }).fill('Acme');
+    await r1.getByRole('combobox', { name: 'Destination, règle 1' }).selectOption({ label: '5 · Merci !' });
+    await sec.getByRole('button', { name: 'Ajouter une règle' }).click();
+    const r2 = sec.getByRole('group', { name: 'Règle 2' });
+    await r2.getByRole('combobox', { name: 'Critère, règle 2' }).selectOption({ label: 'Score du quiz (%)' });
+    await r2.getByRole('combobox', { name: 'Opérateur, règle 2' }).selectOption({ label: 'moins de' });
+    await r2.getByRole('textbox', { name: 'Valeur, règle 2' }).fill('50');
+    await r2
+      .getByRole('combobox', { name: 'Destination, règle 2' })
+      .selectOption({ label: 'Fin de la démo' });
+    await p.waitForTimeout(1500);
+    const rules = st(2).options.rules;
+    ok(
+      rules.length === 2 &&
+        JSON.stringify(rules[0].when.cond) ===
+          JSON.stringify({ source: 'var', key: 'company', op: 'is', value: 'Acme' }) &&
+        rules[1].goto.type === 'end',
+      `règles déclaratives enregistrées (${JSON.stringify(rules.map((r) => r.when))})`,
+    );
+    ok(
+      (await p
+        .locator('[data-step-index="2"]')
+        .getByLabel(/Règles vers 5, fin/)
+        .count()) +
+        (await p.locator('[data-step-index="2"] [title="Règles vers 5, fin"]').count()) >=
+        1,
+      'rail : flèche secondaire vers chaque destination',
+    );
+    await shot('l25-10-conditions');
+    // Boucle sans sortie : 3 → 4 → 3
+    await r1.getByRole('combobox', { name: 'Destination, règle 1' }).selectOption({ label: '4 · Écran 2' });
+    await r2.getByRole('combobox', { name: 'Destination, règle 2' }).selectOption({ label: '4 · Écran 2' });
+    await p.locator('[data-step-index="3"]').click();
+    const sec4 = p.locator('.rules-sec');
+    await sec4.getByRole('button', { name: 'Ajouter une règle' }).click();
+    await sec4
+      .getByRole('group', { name: 'Règle 1' })
+      .getByRole('combobox', { name: 'Destination, règle 1' })
+      .selectOption({ label: '3 · Écran 1' });
+    await sec4
+      .getByRole('combobox', { name: 'Destination par défaut' })
+      .selectOption({ label: '3 · Écran 1' });
+    await p.waitForTimeout(400);
+    ok(
+      (await sec4.getByText('Ce parcours peut tourner en rond').count()) === 1,
+      'boucle sans sortie : alerte (non bloquante)',
+    );
+    await sec4.getByRole('button', { name: 'Supprimer la règle 1' }).click();
+    await sec4.getByRole('combobox', { name: 'Destination par défaut' }).selectOption({ index: 0 });
+
+    // Lecteur : la première règle vraie s'applique ; sinon « Sinon »
+    const manifest = {
+      schemaVersion: 1,
+      demoId: DEMO,
+      versionId: '0b5c1f0e-0000-4000-8000-0000000025e1',
+      workspaceId: 'w',
+      workspaceName: 'Acme',
+      title: 'Parcours',
+      locale: 'fr',
+      publishedAt: '2026-11-19T10:00:00Z',
+      theme: {},
+      variables: [{ key: 'company', label: 'Entreprise', default: '' }],
+      steps: [
+        {
+          id: 's1',
+          kind: 'text',
+          title: 'Bienvenue',
+          body: 'Départ',
+          options: {
+            rules: [
+              {
+                when: { cond: { source: 'var', key: 'company', op: 'is', value: 'Acme' } },
+                goto: { type: 'goto', stepId: 's3' },
+              },
+            ],
+            rulesElse: { type: 'goto', stepId: 's2' },
+          },
+        },
+        { id: 's2', kind: 'text', title: 'Parcours général', body: '' },
+        { id: 's3', kind: 'text', title: 'Parcours Acme', body: '' },
+      ],
+    };
+    for (const [q, want] of [
+      ['?company=acme', 'Parcours Acme'],
+      ['', 'Parcours général'],
+    ]) {
+      const pp = await (await themedContext(b, { viewport: { width: 1280, height: 800 } })).newPage();
+      pp.on('pageerror', (e) => errors.push(e.message));
+      await pp.route('**/functions/v1/open-demo', (r) =>
+        r.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({ status: 'ok', manifest }),
+          headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
+        }),
+      );
+      await pp.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, body: '{}' }));
+      await pp.goto(`${PLAYER}/${q}#/d/${DEMO}`);
+      await pp.getByText('Bienvenue').first().waitFor();
+      await pp.getByRole('button', { name: 'Commencer' }).click();
+      await pp.waitForTimeout(500);
+      ok((await pp.getByText(want).count()) >= 1, `lecteur ${q || '(sans variable)'} → « ${want} »`);
+      await pp.context().close();
+    }
+  }
+
   ok(errors.length === 0, `aucune erreur JavaScript${errors.length ? ` (${errors.join(' | ')})` : ''}`);
   await b.close();
 })().catch((e) => {

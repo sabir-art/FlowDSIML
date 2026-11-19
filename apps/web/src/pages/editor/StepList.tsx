@@ -1,5 +1,7 @@
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { branchOf } from './branch';
+import { condRules, missingDest } from './rules';
+import type { ChoiceAction } from '@flowdsiml/manifest';
 import { stepTab, tabChanged } from './capture/tabs';
 import { asCrop, cropImageStyle, outOfFrame } from '@flowdsiml/player-core';
 import { asVideo } from './video/videoModel';
@@ -14,6 +16,7 @@ import {
   Code,
   Droplet,
   Flag,
+  CornerDownRight,
   GitBranch,
   GripVertical,
   ImageOff,
@@ -62,6 +65,14 @@ export function StepList({
   presenceNames?: Record<string, string>;
 }) {
   const { t } = useTranslation();
+  /** L25-10 : destination d'une règle de suite dans le rail. */
+  const railDest = (a: ChoiceAction, from: number) => {
+    if (missingDest(a)) return '?';
+    if (a.type === 'next') return String(from + 2);
+    if (a.type === 'goto') return String(editor.steps.findIndex((x) => x.id === a.stepId) + 1 || '?');
+    if (a.type === 'chapter') return editor.chapters.find((c) => c.id === a.chapterId)?.title || '?';
+    return a.type === 'end' ? t('editor.rules.railEnd') : t('editor.rules.railUrl');
+  };
   const { current: ws } = useWorkspace();
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [over, setOver] = useState<number | null>(null);
@@ -342,6 +353,7 @@ export function StepList({
                         hotspots={editor.hotspots.filter((h) => h.step_id === s.id).length}
                         isLast={i === editor.steps.length - 1}
                         outside={editor.hotspots.some((h) => h.step_id === s.id && outOfFrame(h))}
+                        railDest={(a) => railDest(a, i)}
                       />
                       {(openComments[s.id] ?? 0) > 0 && (
                         <span className="rail-comments">
@@ -413,10 +425,13 @@ function StepBadges({
   hotspots,
   isLast,
   outside = false,
+  railDest,
 }: {
   step: StepRow;
   hotspots: number;
   isLast: boolean;
+  /** L25-10 : destination d'une règle de suite, en clair (« 7 », « Les bases », « Fin »). */
+  railDest: (a: ChoiceAction) => string;
   /** L25-02 : un hotspot sort du cadre après un recadrage (alerte, publication non bloquée). */
   outside?: boolean;
 }) {
@@ -430,6 +445,16 @@ function StepBadges({
       // L22-09 : « n règles » (règles de suite du menu de choix)
       label: t('editor.branch.railRules', { count: branchOf(opts).rules.length }),
     },
+    // L25-10 : flèche secondaire vers chaque destination des règles de suite
+    !opts.choices.length &&
+      condRules(opts).length > 0 && {
+        icon: <CornerDownRight />,
+        label: t('editor.rules.rail', {
+          dests: condRules(opts)
+            .map((r) => railDest(r.goto))
+            .join(', '),
+        }),
+      },
     !opts.choices.length &&
       step.kind === 'text' &&
       opts.display === 'popup' && { icon: <MessageCircle />, label: t('editor.advanced.stepTypes.popup') },

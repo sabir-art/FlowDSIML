@@ -2,11 +2,12 @@ import { useConfirm } from '../../../components/ConfirmDialog';
 import { EyeOff, Lock, Presentation, Target, Trash2, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
-import { asCta, asRects, asZoom, type Selection, type StepRow } from '../types';
+import { asCta, asRects, asStepOptions, asZoom, type Selection, type StepRow } from '../types';
 import { RichTextField } from '../RichTextField';
 import { VariablePreview } from '../VariablePreview';
 import { CtaFields } from './CtaFields';
 import { GuidedStepFields } from './GuidedStepFields';
+import { NextRulesFields } from './NextRulesFields';
 import { BeforeAfterFields } from '../BeforeAfterEditor';
 import { AbSection, type AbState } from '../ab/AbTest';
 import { usePlan } from '../../../lib/plan';
@@ -358,6 +359,13 @@ export function StepPanel({
       <div className="sec">
         <GuidedStepFields editor={editor} step={step} index={index} readOnly={readOnly} />
       </div>
+
+      {/* L25-10 : « Suite de l'étape » (un menu de choix a ses propres règles, L22-09) */}
+      {!asStepOptions(step.options).choices.length && (
+        <div className="sec">
+          <NextRulesFields editor={editor} step={step} index={index} readOnly={readOnly} />
+        </div>
+      )}
 
       {ab && <AbSection editor={editor} step={step} index={index} readOnly={readOnly} ab={ab} />}
 

@@ -1,6 +1,7 @@
 import { AlertTriangle, Loader2, Rocket } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { branchIssues } from './branch';
+import { firstMissingRule } from './rules';
 import { asAction, asStepOptions, beforeAfterComplete } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -106,6 +107,12 @@ export function PublishButton({
     const noHtml = editor.steps.findIndex((s) => s.kind === 'html' && !s.html_path);
     if (noHtml >= 0) {
       setError(t('errors.htmlMissing', { n: noHtml + 1 }));
+      return;
+    }
+    // L25-10 : une règle de suite sans destination bloque la publication
+    const noDest = firstMissingRule(editor.steps.map((s) => asStepOptions(s.options)));
+    if (noDest >= 0) {
+      setError(t('editor.rules.publishMissing', { n: noDest + 1 }));
       return;
     }
     // F1 : avertissement RGPD à chaque publication publique (toute publication l'est jusqu'à F3)

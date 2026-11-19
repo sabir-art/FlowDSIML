@@ -14,6 +14,7 @@ import {
   parseRoute,
   resolveAssets,
   resolvePlacement,
+  compareCond,
   ruleTarget,
 } from './logic';
 
@@ -215,5 +216,70 @@ describe('L22 : branchement conditionnel', () => {
     expect(ruleTarget(mb, 1, { choices: { menu: 1 }, answers: {} })).toEqual({ type: 'goto', stepId: 'c' });
     expect(ruleTarget(mb, 1, { choices: { menu: 0 }, answers: { q1: ['x'] } })).toEqual({ type: 'end' });
     expect(ruleTarget(mb, 0, { choices: { menu: 1 }, answers: {} })).toBeNull();
+  });
+});
+
+describe('L25-10 : embranchement conditionnel (opérateurs en liste fermée)', () => {
+  const cond = (c: Record<string, unknown>, goto: Record<string, unknown>) => ({ when: { cond: c }, goto });
+  const mc = parseManifest({
+    schemaVersion: 1,
+    demoId: 'd',
+    versionId: 'v',
+    workspaceId: 'w',
+    title: 'T',
+    publishedAt: 'x',
+    theme: {},
+    steps: [
+      {
+        id: 'menu',
+        kind: 'text',
+        options: {
+          choices: [
+            { label: 'Conseiller', action: { type: 'next' } },
+            { label: 'Accueil', action: { type: 'next' } },
+          ],
+        },
+      },
+      {
+        id: 'r',
+        kind: 'text',
+        options: {
+          rules: [
+            cond(
+              { source: 'var', key: 'role', op: 'is', value: 'Conseiller' },
+              { type: 'goto', stepId: 'a' },
+            ),
+            cond({ source: 'score', op: 'lt', value: '50' }, { type: 'chapter', chapterId: 'ch1' }),
+            cond({ source: 'answer', stepId: 'menu', op: 'contains', value: 'accu' }, { type: 'end' }),
+            cond({ source: 'ab', op: 'is', value: 'B' }, { type: 'goto', stepId: 'b' }),
+            cond({ source: 'var', key: 'role', op: 'eval', value: '1' }, { type: 'end' }),
+            cond({ source: 'var', key: 'Role;alert(1)', op: 'is', value: '' }, { type: 'end' }),
+          ],
+          rulesElse: { type: 'goto', stepId: 'b' },
+        },
+      },
+      { id: 'a', kind: 'text' },
+      { id: 'b', kind: 'text' },
+    ],
+  });
+  const mem = (x: Record<string, unknown> = {}) => ({ choices: {}, answers: {}, ...x });
+  it('règle hors liste fermée ignorée (opérateur ou clé invalides)', () => {
+    expect(mc.steps[1]!.options.rules).toHaveLength(4);
+  });
+  it('lues dans l’ordre, la première qui correspond s’applique ; sinon « Sinon »', () => {
+    expect(ruleTarget(mc, 1, mem({ vars: { role: ' conseiller ' } }))).toEqual({ type: 'goto', stepId: 'a' });
+    expect(ruleTarget(mc, 1, mem({ score: 40 }))).toEqual({ type: 'chapter', chapterId: 'ch1' });
+    expect(ruleTarget(mc, 1, mem({ choices: { menu: 1 } }))).toEqual({ type: 'end' });
+    expect(ruleTarget(mc, 1, mem({ variant: 'B' }))).toEqual({ type: 'goto', stepId: 'b' });
+    // variable absente = vide ; aucune règle vraie → « Sinon »
+    expect(ruleTarget(mc, 1, mem())).toEqual({ type: 'goto', stepId: 'b' });
+  });
+  it('comparaisons : chaînes sans casse, nombres, jamais d’évaluation', () => {
+    expect(compareCond('Nord', 'isNot', 'Sud')).toBe(true);
+    expect(compareCond('', 'contains', '')).toBe(false);
+    expect(compareCond('1 248', 'gt', '1000')).toBe(true);
+    expect(compareCond('12,5', 'lt', '13')).toBe(true);
+    expect(compareCond('abc', 'lt', '5')).toBe(false);
+    expect(compareCond('1+1', 'is', '2')).toBe(false);
   });
 });

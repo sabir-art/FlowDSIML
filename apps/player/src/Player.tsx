@@ -423,7 +423,8 @@ export function Player({
   // Garde-fou : plafond de sauts par règle dans la session (une règle mal conçue ne boucle pas sans fin)
   const ruleJumps = useRef(0);
   function next() {
-    const rule = ruleTarget(m, index, memory.current);
+    // L25-10 : variables (lien personnalisé, formulaire) et variante A/B lues par les règles
+    const rule = ruleTarget(m, index, { ...memory.current, vars: values, variant });
     // Cible inconnue (étape d'une autre démo, supprimée…) : la règle est ignorée
     if (rule && ruleJumps.current < MAX_RULE_JUMPS && choiceTarget(m, rule, index)) {
       ruleJumps.current += 1;
@@ -462,7 +463,8 @@ export function Player({
       window.open(h.action.url, h.action.newTab ? '_blank' : '_top', 'noopener');
       return;
     }
-    if (h.action.type === 'next' && ruleTarget(m, index, memory.current)) return next();
+    if (h.action.type === 'next' && ruleTarget(m, index, { ...memory.current, vars: values, variant }))
+      return next();
     const n = nextIndex(m, index, h.action);
     if (n === null && h.action.type === 'next' && last) return m.quiz ? go(m.steps.length) : finish();
     go(n);
@@ -727,6 +729,8 @@ export function Player({
                 } catch {
                   /* stockage indisponible */
                 }
+                // L25-10 : score lu par les règles « Score du quiz »
+                memory.current.score = res.score;
                 if (res.passed && !completed.current) {
                   completed.current = true;
                   tracker.track('demo_complete', { stepIndex: m.steps.length - 1 });

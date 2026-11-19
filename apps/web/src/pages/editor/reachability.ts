@@ -1,10 +1,19 @@
-import type { HotspotAction, StepOptions } from '@flowdsiml/manifest';
+import type { ChoiceAction, HotspotAction, StepOptions } from '@flowdsiml/manifest';
 
 interface StepLike {
   id: string;
   chapterId: string | null;
   options: StepOptions;
   hotspotActions: HotspotAction[];
+}
+
+/**
+ * L25-10 : destinations des règles de suite d'une étape (« Sinon » compris) ; null si l'étape n'a
+ * pas de règle. « Suivant » passe toujours par les règles.
+ */
+export function ruleDests(o: StepOptions): ChoiceAction[] | null {
+  if (!o.rules.length) return null;
+  return [...o.rules.map((r) => r.goto), o.rulesElse ?? { type: 'next' }];
 }
 
 /**
@@ -29,6 +38,12 @@ export function unreachableSteps(steps: StepLike[]): number[] {
         if (c.action.type === 'next') next.push(i + 1);
         if (c.action.type === 'goto') next.push(index.get(c.action.stepId) ?? -1);
         if (c.action.type === 'chapter') next.push(chapterStart.get(c.action.chapterId) ?? -1);
+      }
+    } else if (ruleDests(s.options)) {
+      for (const a of ruleDests(s.options)!) {
+        if (a.type === 'next') next.push(i + 1);
+        if (a.type === 'goto') next.push(index.get(a.stepId) ?? -1);
+        if (a.type === 'chapter') next.push(chapterStart.get(a.chapterId) ?? -1);
       }
     } else next.push(i + 1);
     for (const a of s.hotspotActions) {
@@ -62,6 +77,13 @@ export function loopsWithoutExit(steps: StepLike[]): number[] {
         if (c.action.type === 'goto') add(index.get(c.action.stepId) ?? -1);
         if (c.action.type === 'chapter') add(chapterStart.get(c.action.chapterId) ?? -1);
       }
+    } else if (ruleDests(s.options)) {
+      for (const a of ruleDests(s.options)!) {
+        if (a.type === 'end' || a.type === 'url') exit = true;
+        if (a.type === 'next') add(i + 1);
+        if (a.type === 'goto') add(index.get(a.stepId) ?? -1);
+        if (a.type === 'chapter') add(chapterStart.get(a.chapterId) ?? -1);
+      }
     } else add(i + 1);
     for (const a of s.hotspotActions) {
       if (a.type === 'next') add(i + 1);
@@ -83,5 +105,7 @@ export function loopsWithoutExit(steps: StepLike[]): number[] {
     }
     return false;
   };
-  return steps.flatMap((s, i) => (s.options.choices.length && !canExit(i) ? [i] : []));
+  return steps.flatMap((s, i) =>
+    (s.options.choices.length || s.options.rules.length) && !canExit(i) ? [i] : [],
+  );
 }
