@@ -3030,6 +3030,7 @@
     "stageFrames": "Rendering frames",
     "stageGif": "Encoding the GIF",
     "keepTab": "The file is created in your browser: keep this tab open. You can work in another tab.",
+    "keepTabVideo": "The video is created in your browser: keep this tab open. You can work in another tab.",
     "cancelRun": "Cancel export",
     "donePdf": "PDF ready",
     "doneGif": "GIF ready",

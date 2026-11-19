@@ -593,7 +593,7 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
             ))}
           </ol>
         </div>
-        <p className="fd-help x15-p">{t('export.keepTab')}</p>
+        <p className="fd-help x15-p">{t(phase.fmt === 'mp4' ? 'export.keepTabVideo' : 'export.keepTab')}</p>
         <div className="x15-foot">
           <button type="button" className="fd-btn" onClick={() => abort.current?.abort()}>
             {t('export.cancelRun')}

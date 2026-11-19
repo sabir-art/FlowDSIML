@@ -111,6 +111,10 @@ const SHOTS = process.env.SHOTS_DIR;
         1,
       '« Annuler l’export »',
     );
+    ok(
+      (await p.getByText(/^La vidéo se crée dans votre navigateur/).count()) === 1,
+      '« La vidéo se crée dans votre navigateur »',
+    );
     await shot(p, 'l25-12-mp4-en-cours');
     await p.waitForSelector('text=Vidéo prête', { timeout: 120000 });
     await p.waitForTimeout(500);

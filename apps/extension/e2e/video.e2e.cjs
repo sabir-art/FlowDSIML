@@ -315,6 +315,30 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await shot(vr, 'l21-01-supprimer', true);
   await vr.click('#confirm-no');
   ok(await vr.evaluate(() => document.activeElement?.id === 'delete'), 'annuler : focus rendu au bouton');
+  // L21-01 : focus visible sur « Envoyer » et « Supprimer » (navigation au clavier)
+  for (const id of ['send', 'delete']) {
+    await vr.focus(`#${id}`);
+    await vr.keyboard.press('Shift');
+    ok(
+      await vr.$eval(
+        `#${id}`,
+        (el) => el.matches(':focus-visible') && getComputedStyle(el).outlineStyle !== 'none',
+      ),
+      `focus visible sur #${id}`,
+    );
+    if (process.env.SHOTS_DIR) {
+      const r = await vr.locator(`#${id}`).boundingBox();
+      await vr.screenshot({
+        path: `${process.env.SHOTS_DIR}/l21-01-focus-${id}${sfx}.png`,
+        clip: {
+          x: Math.max(0, r.x - 120),
+          y: Math.max(0, r.y - 40),
+          width: r.width + 240,
+          height: r.height + 80,
+        },
+      });
+    }
+  }
   await vr.click('#delete');
   const closed = vr.waitForEvent('close').catch(() => null);
   await vr.click('#confirm-yes');

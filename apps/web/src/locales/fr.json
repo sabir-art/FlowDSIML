@@ -3030,6 +3030,7 @@
     "stageFrames": "Rendu des images",
     "stageGif": "Encodage du GIF",
     "keepTab": "Le document se crée dans votre navigateur : gardez cet onglet ouvert. Vous pouvez travailler dans un autre onglet.",
+    "keepTabVideo": "La vidéo se crée dans votre navigateur : gardez cet onglet ouvert. Vous pouvez travailler dans un autre onglet.",
     "cancelRun": "Annuler l'export",
     "donePdf": "PDF prêt",
     "doneGif": "GIF prêt",
