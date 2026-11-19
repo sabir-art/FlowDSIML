@@ -22,29 +22,29 @@
 
 ## 2. Adresse personnalisée d'un lien (L28-01)
 
-Fonction 082. Elle active le champ « Adresse personnalisée » de Partager > Lien, aujourd'hui en « Bientôt », à la même place. Elle reprend A1 §2.
+Fonction 082. Elle active le champ « Adresse personnalisée » de Partager > Lien, aujourd'hui en « Bientôt », à la même place. Le format a été arrêté par le chef d'équipe et remplace A1 §2.
 
-- **Forme** : `https://demos.<domaine>/#/d/<espace>/<adresse>`.
-  - `<espace>` est `workspaces.slug`, déjà unique sur la plateforme.
-  - `<adresse>` est unique **dans l'espace**.
-  - Le préfixe, jusqu'à `<espace>/` compris, est affiché en mono et n'est pas modifiable. Seule l'adresse est saisie.
-- **Anciens liens `#/d/<id>`** : ils restent valables, sans redirection, puisque les deux adresses mènent à la même démo. Les liens personnalisés, les intégrations et les paquets SCORM gardent l'identifiant.
-- **Espace sans slug** : le champ reste désactivé, avec le texte « Choisissez d'abord l'adresse de l'espace dans Paramètres > Général. » et un lien vers cette page.
+- **Forme** : `https://demos.<domaine>/#/l/<partie-lisible>-<suffixe>`.
+  - L'utilisateur choisit la partie lisible.
+  - Le serveur tire le suffixe : 6 caractères aléatoires en base62.
+  - L'adresse est unique sur toute la plateforme et ne contient aucun nom d'espace.
+- **Champ** :
+  - le préfixe `https://demos.<domaine>/#/l/` est affiché en mono, non modifiable ;
+  - la partie lisible est saisie à droite ;
+  - elle est suivie de `-xxxxxx` en mono grisé, ou du suffixe réel une fois l'adresse enregistrée.
+  - Aide permanente : « Un suffixe de 6 caractères est ajouté à l'enregistrement, pour que l'adresse reste unique. »
 - **Valeur proposée** : le titre de la démo converti en adresse, par exemple « Prise en main d'un logiciel » devient `prise-en-main-d-un-logiciel`, tronqué à 48 caractères. Elle n'est enregistrée qu'à la validation.
-- **Règles** : de 3 à 48 caractères, lettres minuscules, chiffres et tirets, sans tiret au début ni à la fin.
-- **Messages** (sous le champ ; état en `role="status"`, erreur en `role="alert"`). La vérification se lance à la frappe, après 400 ms de pause.
-  - Pendant la vérification : « Vérification de l'adresse… »
-  - Adresse libre : « Adresse disponible. »
-  - Adresse déjà prise dans l'espace : « Une autre démo de l'espace utilise déjà cette adresse. »
-  - Caractère refusé : « Utilisez seulement des lettres minuscules sans accent, des chiffres et des tirets. »
-  - Longueur : « De 3 à 48 caractères. »
-  - Tiret au début ou à la fin : « L'adresse ne peut pas commencer ni finir par un tiret. »
+- **Validation** : à la frappe, sans appel au serveur, avec les règles et les textes de L14.
+  - De 3 à 48 caractères : lettres minuscules, chiffres et tirets, sans tiret au début ni à la fin.
+  - Les mots réservés sont refusés.
+  - Pas de contrôle de disponibilité, et aucun message « déjà prise » : un slug pris ne révèle rien, puisque le suffixe rend l'adresse unique.
+  - Les erreurs sont en `role="alert"`.
 - **Enregistrer** :
-  - bouton « Enregistrer l'adresse », actif seulement si l'adresse est valide et disponible ;
+  - bouton « Enregistrer l'adresse », actif dès que le format est valide ;
   - toast : « Adresse enregistrée. » ;
-  - « Lien public » et « Copier » prennent la nouvelle adresse.
-- **Changer une adresse enregistrée** : l'ancienne adresse redirige vers la démo pendant 90 jours. L'aide permanente devient « L'ancienne adresse redirige vers la démo pendant 90 jours. ».
-  - Si la redirection n'est pas faite, l'aide reste « Changer l'adresse casse les anciens liens. ».
+  - « Lien public » et « Copier » prennent l'adresse complète.
+- **Changer l'adresse** : un nouveau suffixe est tiré. L'ancienne adresse redirige vers la démo pendant 90 jours. L'aide affiche « L'ancienne adresse redirige vers la démo pendant 90 jours. ».
+- **Liens `#/d/<id>`** : ils restent toujours valables. Les liens personnalisés, les intégrations et les paquets SCORM gardent l'identifiant.
 - **Droits** : éditeur et plus. Un lecteur voit l'adresse, sans champ.
 
 ## 3. Voix off après coup (L28-02, L28-03)
