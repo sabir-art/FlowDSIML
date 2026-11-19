@@ -162,8 +162,8 @@ Le nombre d'étapes affiché dans l'aide est lu dans le manifeste (écran de fin
 
 ## 3. Articles de l'aide (§3.2)
 
-Un article par clé de page, plus deux articles transverses :
-- `donnees-et-floutage` : « Données personnelles et floutage » ;
-- `accessibilite-des-demos` : « Accessibilité des démos ».
+Les articles sont livrés avec l'app, dans `apps/web/src/aide/*.md` (20 articles). Chaque article a un front matter avec `title`, `section` et `summary`, puis des sections `##`.
 
-Le format (front matter, clés) est à fixer avec le développeur. Les textes seront rédigés par la Lead UX selon les mêmes règles : phrases courtes, vocabulaire de l'app, aucune donnée réelle, aucune durée.
+Les deux articles transverses sont `flouter-donnees.md` et `accessibilite-demos.md`.
+
+Les textes sont relus par la Lead UX selon les mêmes règles que les bulles : phrases courtes, vocabulaire de l'app, aucune donnée réelle, aucune durée. Une relecture du 19/11 n'a relevé ni durée, ni adresse, ni hôte local, ni vocabulaire interdit.
