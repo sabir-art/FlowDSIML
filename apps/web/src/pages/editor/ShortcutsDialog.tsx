@@ -35,6 +35,8 @@ export function ShortcutsDialog({ onClose }: { onClose: () => void }) {
       title: t('editor.keys.general'),
       rows: [
         [t('editor.keys.show'), k('?')],
+        // L26-02 : aide intégrée
+        [t('help.title'), k('F1')],
         [t('editor.keys.undo'), k(ctrl, 'Z')],
         [t('editor.keys.redo'), k(ctrl, t('editor.keys.shift'), 'Z')],
         [t('editor.keys.find'), k(ctrl, 'F')],

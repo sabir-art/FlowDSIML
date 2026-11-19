@@ -1,0 +1,205 @@
+/* L26-02 / L26-03 : tiroir d'aide (non modal, 400 px, plein écran sous 640 px) */
+.help-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  max-width: 100%;
+  border-left: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface);
+  box-shadow: -12px 0 32px rgb(0 0 0 / 0.12);
+  color: var(--fd-color-text);
+}
+@media (max-width: 640px) {
+  .help-drawer {
+    width: 100%;
+    border-left: 0;
+  }
+}
+.help-drawer svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.help-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 12px;
+}
+.help-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.help-grow {
+  flex: 1;
+}
+.help-search {
+  position: relative;
+  padding: 0 16px 12px;
+}
+.help-search > svg {
+  position: absolute;
+  left: 28px;
+  top: 11px;
+  color: var(--fd-color-text-muted);
+  pointer-events: none;
+}
+.help-search .fd-input {
+  width: 100%;
+  padding-left: 36px;
+}
+.help-body {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0 16px 16px;
+}
+.help-sec,
+.help-results {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.help-sec h3,
+.help-results h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fd-color-text-muted);
+}
+.help-link {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--fd-radius-md);
+  background: transparent;
+  font: inherit;
+  color: var(--fd-color-text);
+  text-align: left;
+  cursor: pointer;
+}
+.help-link:hover {
+  background: var(--fd-color-surface-sunken, var(--fd-color-surface-selected));
+}
+.help-link:focus-visible {
+  outline: 2px solid var(--fd-color-focus);
+  outline-offset: 1px;
+}
+.help-link svg {
+  margin-top: 2px;
+  color: var(--fd-color-text-muted);
+}
+.help-link small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.help-link mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--fd-color-warning, #d4a106) 28%, transparent);
+  color: inherit;
+}
+.help-tour {
+  align-self: flex-start;
+  margin-top: 6px;
+}
+.help-muted {
+  margin: 6px 10px 0;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+}
+.help-block {
+  display: block;
+  margin: 2px 0 0;
+}
+.help-foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--fd-color-border);
+  font-size: 13px;
+}
+.help-foot a {
+  color: var(--fd-color-link, var(--fd-color-primary));
+}
+/* Article */
+.help-article {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.help-back {
+  align-self: flex-start;
+}
+.help-section {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fd-color-text-muted);
+}
+.help-article h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.help-article h3 {
+  margin: 8px 0 4px;
+  font-size: 15px;
+}
+.help-article p,
+.help-article ul,
+.help-article ol {
+  margin: 0;
+}
+.help-article ul,
+.help-article ol {
+  display: grid;
+  gap: 4px;
+  padding-left: 20px;
+}
+.help-article code {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--fd-color-surface-sunken, var(--fd-color-surface-selected));
+  font-size: 13px;
+}
+.help-fb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.help-fb p {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+}
+/* Visite guidée : lecteur en modale (960 px) */
+.help-tour-dialog {
+  width: min(960px, calc(100vw - 32px));
+}
+.help-tour-dialog iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border: 0;
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface-sunken, #f4f5f7);
+}

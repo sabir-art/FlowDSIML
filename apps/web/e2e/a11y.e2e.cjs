@@ -215,6 +215,23 @@ const APP_PAGES = [
     },
   },
   {
+    name: 'Démos · aide',
+    route: '/#/',
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Aide (F1)' }).first().click();
+      await p.getByRole('complementary', { name: 'Aide' }).waitFor();
+    },
+  },
+  {
+    name: 'Démos · aide, recherche et article',
+    route: '/#/',
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Aide (F1)' }).first().click();
+      await p.getByRole('searchbox', { name: 'Rechercher dans l’aide' }).fill('scorm');
+      await p.locator('.help-results .help-link').first().waitFor();
+    },
+  },
+  {
     name: 'Démos · partir d’un modèle',
     route: '/#/',
     open: async (p) => {

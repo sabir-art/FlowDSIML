@@ -5,6 +5,7 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { HelpButton } from '../../help/HelpButton';
 import {
   ArrowLeft,
   AtSign,
@@ -79,184 +80,188 @@ export function NotificationBell() {
   };
 
   return (
-    <span className="nb">
-      <button
-        ref={btn}
-        type="button"
-        className="fd-btn fd-btn--ghost fd-btn--icon nb-bell"
-        aria-label={label}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-controls={open ? `${id}-pop` : undefined}
-        onClick={() => (open ? close() : setOpen(true))}
-      >
-        <Bell aria-hidden="true" />
-        {n.unread > 0 && (
-          <span className="nb-cnt" aria-hidden="true">
-            {badge(n.unread)}
-          </span>
-        )}
-      </button>
-      {open && (
-        <div
-          ref={pop}
-          id={`${id}-pop`}
-          className="nb-pop"
-          role="dialog"
-          aria-labelledby={`${id}-t`}
-          tabIndex={-1}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              e.stopPropagation();
-              close();
-            }
-          }}
+    <>
+      {/* L26-02 : bouton « Aide » à côté de la cloche, dans toutes les barres du haut */}
+      <HelpButton />
+      <span className="nb">
+        <button
+          ref={btn}
+          type="button"
+          className="fd-btn fd-btn--ghost fd-btn--icon nb-bell"
+          aria-label={label}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls={open ? `${id}-pop` : undefined}
+          onClick={() => (open ? close() : setOpen(true))}
         >
-          {view === 'list' ? (
-            <>
-              <header>
-                <h2 id={`${id}-t`}>{t('notifications.title')}</h2>
-                {n.unread > 0 && (
+          <Bell aria-hidden="true" />
+          {n.unread > 0 && (
+            <span className="nb-cnt" aria-hidden="true">
+              {badge(n.unread)}
+            </span>
+          )}
+        </button>
+        {open && (
+          <div
+            ref={pop}
+            id={`${id}-pop`}
+            className="nb-pop"
+            role="dialog"
+            aria-labelledby={`${id}-t`}
+            tabIndex={-1}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                e.stopPropagation();
+                close();
+              }
+            }}
+          >
+            {view === 'list' ? (
+              <>
+                <header>
+                  <h2 id={`${id}-t`}>{t('notifications.title')}</h2>
+                  {n.unread > 0 && (
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--ghost fd-btn--sm"
+                      onClick={() => void n.markRead()}
+                    >
+                      <CheckCheck aria-hidden="true" />
+                      {t('notifications.markAll')}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+                    aria-label={t('common.close')}
+                    onClick={() => close()}
+                  >
+                    <X aria-hidden="true" />
+                  </button>
+                </header>
+                <div className="fd-segmented" role="tablist" aria-label={t('notifications.filter')}>
+                  {FILTERS.map((f, i) => (
+                    <button
+                      key={f}
+                      ref={(el) => {
+                        tabs.current[i] = el;
+                      }}
+                      type="button"
+                      role="tab"
+                      id={`${id}-tab-${f}`}
+                      aria-selected={filter === f}
+                      aria-controls={`${id}-panel`}
+                      tabIndex={filter === f ? 0 : -1}
+                      onClick={() => setFilter(f)}
+                      onKeyDown={(e) => onTabKey(e, i)}
+                    >
+                      {t(`notifications.f_${f}`)}
+                      {f === 'mention' && mentions > 0 && ` · ${mentions}`}
+                      {f === 'unread' && n.unread > 0 && ` · ${n.unread}`}
+                    </button>
+                  ))}
+                </div>
+                <div
+                  className="nb-body"
+                  id={`${id}-panel`}
+                  role="tabpanel"
+                  aria-labelledby={`${id}-tab-${filter}`}
+                >
+                  {n.loading ? null : shown.length === 0 ? (
+                    <div className="nb-empty" role="status">
+                      <span className="fd-icon-chip">
+                        <Bell aria-hidden="true" />
+                      </span>
+                      <b>{t('notifications.emptyTitle')}</b>
+                      <p>{t(filter === 'all' ? 'notifications.emptyBody' : 'notifications.emptyFilter')}</p>
+                    </div>
+                  ) : (
+                    grouped(shown).map((g) => (
+                      <section key={g.group} aria-labelledby={`${id}-g-${g.group}`}>
+                        <h3 className="nb-group" id={`${id}-g-${g.group}`}>
+                          {t(`notifications.g_${g.group}`)}
+                        </h3>
+                        <ul className="nb-list">
+                          {g.rows.map((x) => (
+                            <Row
+                              key={x.id}
+                              item={x}
+                              onOpen={() => {
+                                if (!x.read_at) void n.markRead([x.id]);
+                                close(false);
+                              }}
+                            />
+                          ))}
+                        </ul>
+                      </section>
+                    ))
+                  )}
+                </div>
+                <footer className="nb-foot">
+                  <span className="fd-help">{t('notifications.window')}</span>
                   <button
                     type="button"
                     className="fd-btn fd-btn--ghost fd-btn--sm"
-                    onClick={() => void n.markRead()}
+                    onClick={() => setView('prefs')}
                   >
-                    <CheckCheck aria-hidden="true" />
-                    {t('notifications.markAll')}
+                    <Settings aria-hidden="true" />
+                    {t('notifications.prefs')}
                   </button>
-                )}
-                <button
-                  type="button"
-                  className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-                  aria-label={t('common.close')}
-                  onClick={() => close()}
-                >
-                  <X aria-hidden="true" />
-                </button>
-              </header>
-              <div className="fd-segmented" role="tablist" aria-label={t('notifications.filter')}>
-                {FILTERS.map((f, i) => (
+                </footer>
+              </>
+            ) : (
+              <>
+                <header>
                   <button
-                    key={f}
-                    ref={(el) => {
-                      tabs.current[i] = el;
-                    }}
                     type="button"
-                    role="tab"
-                    id={`${id}-tab-${f}`}
-                    aria-selected={filter === f}
-                    aria-controls={`${id}-panel`}
-                    tabIndex={filter === f ? 0 : -1}
-                    onClick={() => setFilter(f)}
-                    onKeyDown={(e) => onTabKey(e, i)}
+                    className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+                    aria-label={t('notifications.back')}
+                    onClick={() => setView('list')}
                   >
-                    {t(`notifications.f_${f}`)}
-                    {f === 'mention' && mentions > 0 && ` · ${mentions}`}
-                    {f === 'unread' && n.unread > 0 && ` · ${n.unread}`}
+                    <ArrowLeft aria-hidden="true" />
                   </button>
-                ))}
-              </div>
-              <div
-                className="nb-body"
-                id={`${id}-panel`}
-                role="tabpanel"
-                aria-labelledby={`${id}-tab-${filter}`}
-              >
-                {n.loading ? null : shown.length === 0 ? (
-                  <div className="nb-empty" role="status">
-                    <span className="fd-icon-chip">
-                      <Bell aria-hidden="true" />
-                    </span>
-                    <b>{t('notifications.emptyTitle')}</b>
-                    <p>{t(filter === 'all' ? 'notifications.emptyBody' : 'notifications.emptyFilter')}</p>
-                  </div>
-                ) : (
-                  grouped(shown).map((g) => (
-                    <section key={g.group} aria-labelledby={`${id}-g-${g.group}`}>
-                      <h3 className="nb-group" id={`${id}-g-${g.group}`}>
-                        {t(`notifications.g_${g.group}`)}
-                      </h3>
-                      <ul className="nb-list">
-                        {g.rows.map((x) => (
-                          <Row
-                            key={x.id}
-                            item={x}
-                            onOpen={() => {
-                              if (!x.read_at) void n.markRead([x.id]);
-                              close(false);
-                            }}
-                          />
-                        ))}
-                      </ul>
-                    </section>
-                  ))
-                )}
-              </div>
-              <footer className="nb-foot">
-                <span className="fd-help">{t('notifications.window')}</span>
-                <button
-                  type="button"
-                  className="fd-btn fd-btn--ghost fd-btn--sm"
-                  onClick={() => setView('prefs')}
-                >
-                  <Settings aria-hidden="true" />
-                  {t('notifications.prefs')}
-                </button>
-              </footer>
-            </>
-          ) : (
-            <>
-              <header>
-                <button
-                  type="button"
-                  className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-                  aria-label={t('notifications.back')}
-                  onClick={() => setView('list')}
-                >
-                  <ArrowLeft aria-hidden="true" />
-                </button>
-                <h2 id={`${id}-t`}>{t('notifications.prefsTitle')}</h2>
-                <button
-                  type="button"
-                  className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-                  aria-label={t('common.close')}
-                  onClick={() => close()}
-                >
-                  <X aria-hidden="true" />
-                </button>
-              </header>
-              <p className="fd-help nb-prefs-help">{t('notifications.prefsHelp')}</p>
-              <ul className="nb-prefs">
-                {NOTIFICATION_KINDS.map((k) => (
-                  <li key={k}>
-                    <label className="fd-switch">
-                      <span>{t(`notifications.p_${k}`)}</span>
-                      <input
-                        type="checkbox"
-                        role="switch"
-                        checked={n.prefs[k]}
-                        onChange={(e) => void n.setPref(k, e.target.checked)}
-                      />
+                  <h2 id={`${id}-t`}>{t('notifications.prefsTitle')}</h2>
+                  <button
+                    type="button"
+                    className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+                    aria-label={t('common.close')}
+                    onClick={() => close()}
+                  >
+                    <X aria-hidden="true" />
+                  </button>
+                </header>
+                <p className="fd-help nb-prefs-help">{t('notifications.prefsHelp')}</p>
+                <ul className="nb-prefs">
+                  {NOTIFICATION_KINDS.map((k) => (
+                    <li key={k}>
+                      <label className="fd-switch">
+                        <span>{t(`notifications.p_${k}`)}</span>
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          checked={n.prefs[k]}
+                          onChange={(e) => void n.setPref(k, e.target.checked)}
+                        />
+                        <span className="fd-switch__track" aria-hidden="true" />
+                      </label>
+                    </li>
+                  ))}
+                  <li>
+                    <label className="fd-switch is-soon">
+                      <span>
+                        {t('notifications.p_email')} <span className="fd-badge">{t('shell.soon')}</span>
+                      </span>
+                      <input type="checkbox" role="switch" checked={false} disabled />
                       <span className="fd-switch__track" aria-hidden="true" />
                     </label>
                   </li>
-                ))}
-                <li>
-                  <label className="fd-switch is-soon">
-                    <span>
-                      {t('notifications.p_email')} <span className="fd-badge">{t('shell.soon')}</span>
-                    </span>
-                    <input type="checkbox" role="switch" checked={false} disabled />
-                    <span className="fd-switch__track" aria-hidden="true" />
-                  </label>
-                </li>
-              </ul>
-            </>
-          )}
-        </div>
-      )}
-    </span>
+                </ul>
+              </>
+            )}
+          </div>
+        )}
+      </span>
+    </>
   );
 }
 

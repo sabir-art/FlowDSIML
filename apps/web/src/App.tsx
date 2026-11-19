@@ -3,6 +3,7 @@ import { CenterSettings } from './pages/center/CenterSettings';
 import { LearnersPage } from './pages/learners/LearnersPage';
 import { lazy, Suspense, useEffect } from 'react';
 import { ToastProvider } from './components/Toast';
+import { HelpProvider } from './help/HelpProvider';
 import { HashRouter, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Alert } from '@flowdsiml/ui';
@@ -97,98 +98,100 @@ export function App() {
       <AuthProvider>
         <WorkspaceProvider>
           <ToastProvider>
-            <EmailRedirectHandler />
-            <RouteFocus />
-            <ConfigWarning />
-            <Suspense fallback={<Loading />}>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/legal/:doc" element={<LegalSoon />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/invite/:token" element={<AcceptInvite />} />
-                {/* L26-11 : télécommande du mode présentateur, sans compte */}
-                <Route path="/t" element={<RemotePhone />} />
-                <Route
-                  path="/onboarding"
-                  element={
-                    <RequireAuth>
-                      <Onboarding />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/demos/:demoId/quiz"
-                  element={
-                    <RequireAuth>
-                      <RequireWorkspace>
-                        <QuizEditorPage />
-                      </RequireWorkspace>
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/demos/:demoId/present"
-                  element={
-                    <RequireAuth>
-                      <RequireWorkspace>
-                        <PresenterPage />
-                      </RequireWorkspace>
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/present/:demoId/screen"
-                  element={
-                    <RequireAuth>
-                      <PublicScreen />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/demos/:demoId/edit"
-                  element={
-                    <RequireAuth>
-                      <RequireWorkspace>
-                        <EditorPage />
-                      </RequireWorkspace>
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  element={
-                    <RequireAuth>
-                      <RequireWorkspace>
-                        <Layout />
-                      </RequireWorkspace>
-                    </RequireAuth>
-                  }
-                >
-                  <Route index element={<DemosPage />} />
-                  <Route path="/demos/:demoId/share" element={<SharePage />} />
-                  <Route path="/demos/:demoId/distribute" element={<DistributeRoute />} />
-                  <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
-                  <Route path="/analytics" element={<AnalyticsPage />} />
-                  <Route path="/learners" element={<LearnersPage />} />
-                  <Route path="/center" element={<CenterSettings />} />
-                  <Route path="/leads" element={<Navigate to="/analytics?tab=leads" replace />} />
-                  <Route path="/settings/profile" element={<Profile />} />
-                  <Route path="/settings/members" element={<Members />} />
-                  <Route path="/settings/workspace" element={<WorkspaceSettings />} />
-                  <Route path="/settings/plans" element={<PlansPage />} />
-                  <Route path="/settings/brand" element={<BrandSettings />} />
-                  <Route path="/settings/variables" element={<VariablesSettings />} />
-                  <Route path="/settings/glossary" element={<GlossarySettings />} />
-                  <Route path="/settings/security" element={<SecuritySettings />} />
-                  <Route path="/settings/privacy" element={<PrivacySettings />} />
-                  <Route path="/settings/soon" element={<SoonFeatures />} />
-                  <Route path="/settings/integrations" element={<IntegrationsPage />} />
-                  <Route path="/settings/integrations/:id" element={<WebhookDetail />} />
-                </Route>
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
+            <HelpProvider>
+              <EmailRedirectHandler />
+              <RouteFocus />
+              <ConfigWarning />
+              <Suspense fallback={<Loading />}>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/legal/:doc" element={<LegalSoon />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/invite/:token" element={<AcceptInvite />} />
+                  {/* L26-11 : télécommande du mode présentateur, sans compte */}
+                  <Route path="/t" element={<RemotePhone />} />
+                  <Route
+                    path="/onboarding"
+                    element={
+                      <RequireAuth>
+                        <Onboarding />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/demos/:demoId/quiz"
+                    element={
+                      <RequireAuth>
+                        <RequireWorkspace>
+                          <QuizEditorPage />
+                        </RequireWorkspace>
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/demos/:demoId/present"
+                    element={
+                      <RequireAuth>
+                        <RequireWorkspace>
+                          <PresenterPage />
+                        </RequireWorkspace>
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/present/:demoId/screen"
+                    element={
+                      <RequireAuth>
+                        <PublicScreen />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/demos/:demoId/edit"
+                    element={
+                      <RequireAuth>
+                        <RequireWorkspace>
+                          <EditorPage />
+                        </RequireWorkspace>
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    element={
+                      <RequireAuth>
+                        <RequireWorkspace>
+                          <Layout />
+                        </RequireWorkspace>
+                      </RequireAuth>
+                    }
+                  >
+                    <Route index element={<DemosPage />} />
+                    <Route path="/demos/:demoId/share" element={<SharePage />} />
+                    <Route path="/demos/:demoId/distribute" element={<DistributeRoute />} />
+                    <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
+                    <Route path="/analytics" element={<AnalyticsPage />} />
+                    <Route path="/learners" element={<LearnersPage />} />
+                    <Route path="/center" element={<CenterSettings />} />
+                    <Route path="/leads" element={<Navigate to="/analytics?tab=leads" replace />} />
+                    <Route path="/settings/profile" element={<Profile />} />
+                    <Route path="/settings/members" element={<Members />} />
+                    <Route path="/settings/workspace" element={<WorkspaceSettings />} />
+                    <Route path="/settings/plans" element={<PlansPage />} />
+                    <Route path="/settings/brand" element={<BrandSettings />} />
+                    <Route path="/settings/variables" element={<VariablesSettings />} />
+                    <Route path="/settings/glossary" element={<GlossarySettings />} />
+                    <Route path="/settings/security" element={<SecuritySettings />} />
+                    <Route path="/settings/privacy" element={<PrivacySettings />} />
+                    <Route path="/settings/soon" element={<SoonFeatures />} />
+                    <Route path="/settings/integrations" element={<IntegrationsPage />} />
+                    <Route path="/settings/integrations/:id" element={<WebhookDetail />} />
+                  </Route>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
+            </HelpProvider>
           </ToastProvider>
         </WorkspaceProvider>
       </AuthProvider>

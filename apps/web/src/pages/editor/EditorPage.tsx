@@ -72,6 +72,8 @@ import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
 import { Menu } from '../../components/Menu';
 import { SaveTemplateDialog } from './SaveTemplateDialog';
+import { HelpButton } from '../../help/HelpButton';
+import { useHelp } from '../../help/HelpProvider';
 import { supabase } from '../../lib/supabase';
 import { DatasetDialog } from './data/DatasetDialog';
 import '../../styles/maquette.css';
@@ -181,6 +183,13 @@ export function EditorPage() {
   const [params] = useSearchParams();
   // ANA-09 : « Ajouter un formulaire » ouvre directement l'onglet Réglages
   const [tab, setTab] = useState<Tab>(params.get('tab') === 'settings' ? 'settings' : 'step');
+  // L26-02 : les articles « Sur cette page » de l'aide suivent l'onglet du panneau
+  const help = useHelp();
+  const setHelpTab = help?.setEditorTab;
+  useEffect(() => {
+    setHelpTab?.(tab);
+    return () => setHelpTab?.(null);
+  }, [tab, setHelpTab]);
   const readOnly = !can('demo.edit');
   const narrow = useNarrow(1024);
   const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);
@@ -556,6 +565,7 @@ export function EditorPage() {
             {t('editor.preview')}
           </button>
         </div>
+        <HelpButton className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" />
         <Menu
           label={t('editor.more')}
           items={[

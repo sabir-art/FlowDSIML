@@ -29,6 +29,9 @@ export function WorkspaceSettings() {
   const str = (k: string) => (typeof wsSettings[k] === 'string' ? (wsSettings[k] as string) : '');
   const savedPrivacy = str('privacyUrl');
   const savedWebsite = str('websiteUrl');
+  // L26-02 : contact d'aide (e-mail ou lien https) proposé en bas du panneau d'aide
+  const savedHelp = str('helpContact');
+  const [helpContact, setHelpContact] = useState(savedHelp);
   const [name, setName] = useState(ws.name);
   const [slug, setSlug] = useState(ws.slug);
   const [website, setWebsite] = useState(savedWebsite);
@@ -44,10 +47,11 @@ export function WorkspaceSettings() {
     setSlug(ws.slug);
     setWebsite(savedWebsite);
     setPrivacyUrl(savedPrivacy);
+    setHelpContact(savedHelp);
     setUrlError(null);
   };
 
-  useEffect(reset, [ws.name, ws.slug, savedPrivacy, savedWebsite]);
+  useEffect(reset, [ws.name, ws.slug, savedPrivacy, savedWebsite, savedHelp]);
 
   // PRM-06 / PRM-11 : conséquences chiffrées de la suppression
   useEffect(() => {
@@ -74,9 +78,16 @@ export function WorkspaceSettings() {
         return;
       }
     }
+    const hc = helpContact.trim();
+    if (hc && !HTTPS.test(hc) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(hc)) {
+      setUrlError({ id: 'ws-help', text: t('help.contactInvalid') });
+      document.getElementById('ws-help')?.focus();
+      return;
+    }
     setUrlError(null);
     const settings = {
       ...wsSettings,
+      helpContact: hc || null,
       privacyUrl: privacyUrl.trim() || null,
       websiteUrl: website.trim() || null,
     };
@@ -228,6 +239,28 @@ export function WorkspaceSettings() {
               {errFor('ws-privacy')}
               <span id="ws-privacy-help" className="help">
                 {t('workspace.privacyUrlHelp')}
+              </span>
+            </div>
+            <div className="field">
+              <label htmlFor="ws-help">{t('help.contactLabel')}</label>
+              <input
+                id="ws-help"
+                className="input"
+                inputMode="email"
+                placeholder="support@exemple.example"
+                maxLength={500}
+                disabled={!editable}
+                value={helpContact}
+                aria-invalid={urlError?.id === 'ws-help' ? true : undefined}
+                aria-describedby={described('ws-help', 'ws-help-help')}
+                onChange={(e) => {
+                  setHelpContact(e.target.value);
+                  setUrlError(null);
+                }}
+              />
+              {errFor('ws-help')}
+              <span id="ws-help-help" className="help">
+                {t('help.contactHelp')}
               </span>
             </div>
             <div className="setting">

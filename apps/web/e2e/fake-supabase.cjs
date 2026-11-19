@@ -166,6 +166,7 @@ function seed() {
       forms: [],
       quiz_questions: [],
       demo_templates: builtinTemplates(),
+      help_tours: [],
       variables: [
         {
           id: 'var-1',
@@ -645,6 +646,10 @@ async function install(page, state = seed()) {
             completions: (previous ? 30 : 40) * pub,
             leads: (previous ? 0 : 1) * pub,
           });
+        }
+        case 'help_feedback': {
+          state.helpFeedback = [...(state.helpFeedback || []), a];
+          return json(route, 200, null);
         }
         case 'create_demo_from_template': {
           const tpl = t.demo_templates.find(

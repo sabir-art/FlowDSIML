@@ -1068,6 +1068,13 @@ export type Database = {
         };
         Relationships: [];
       };
+      help_tours: {
+        Row: { demo_id: string; key: string; steps: number; title: string; updated_at: string };
+        ComputedFields: never;
+        Insert: { demo_id: string; key: string; steps?: number; title?: string; updated_at?: string };
+        Update: { demo_id?: string; key?: string; steps?: number; title?: string; updated_at?: string };
+        Relationships: [];
+      };
       present_reports: {
         Row: {
           created_at: string;
@@ -2253,6 +2260,7 @@ export type Database = {
       present_remote_new_code: { Args: { p_id: string }; Returns: Json };
       present_remote_status: { Args: { p_id: string }; Returns: Json };
       present_remote_end: { Args: { p_id: string }; Returns: undefined };
+      help_feedback: { Args: { p_article: string; p_helpful: boolean }; Returns: undefined };
       save_demo_as_template: {
         Args: {
           p_demo: string;
