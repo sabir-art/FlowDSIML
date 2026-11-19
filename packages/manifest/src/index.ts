@@ -160,6 +160,19 @@ export const stepOptionsSchema = z
       .optional()
       .catch(undefined),
     /**
+     * L25-02 : recadrage non destructif (zone gardée, relative à l'image d'origine). Hotspots,
+     * flous, zoom et champ de la saisie sont relatifs au cadre recadré.
+     */
+    crop: z
+      .object({
+        x: z.number().min(0).max(1),
+        y: z.number().min(0).max(1),
+        w: z.number().min(0.02).max(1),
+        h: z.number().min(0.02).max(1),
+      })
+      .optional()
+      .catch(undefined),
+    /**
      * L25-04/05 : animation jouée à l'arrivée sur l'étape, avant la bulle. Une seule par étape.
      * Saisie : texte (variables possibles) écrit dans le champ repéré ; défilement : la capture pleine
      * page défile jusqu'à la position d'arrivée (distance en pixels de l'image).

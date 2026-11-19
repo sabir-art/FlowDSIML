@@ -85,7 +85,21 @@ export function PdfPagePreview({
             );
           case 'image': {
             const url = demo.steps[b.step]?.imageUrl;
-            return url ? (
+            const c = demo.steps[b.step]?.crop;
+            return url && c ? (
+              // L25-02 : capture recadrée (l'image entière est placée dans un cadre qui la découpe)
+              <svg
+                key={i}
+                x={b.x}
+                y={b.y}
+                width={b.w}
+                height={b.h}
+                viewBox={`${c.x} ${c.y} ${c.w} ${c.h}`}
+                preserveAspectRatio="none"
+              >
+                <image href={url} x={0} y={0} width={1} height={1} preserveAspectRatio="none" />
+              </svg>
+            ) : url ? (
               <image key={i} href={url} x={b.x} y={b.y} width={b.w} height={b.h} preserveAspectRatio="none" />
             ) : (
               <rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} fill="#F1F3F6" />

@@ -65,7 +65,12 @@ export async function loadExportSource(demoId: string, removeBranding: boolean):
 }
 
 /** Image chargée et décodée (capture ou logo). */
-export async function fetchBitmap(url: string, signal?: AbortSignal): Promise<ImageBitmap> {
+export async function fetchBitmap(
+  url: string,
+  signal?: AbortSignal,
+  /** L25-02 : capture recadrée (zone relative à l'image d'origine). */
+  crop?: { x: number; y: number; w: number; h: number } | null,
+): Promise<ImageBitmap> {
   const res = await fetch(url, { signal });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const blob = await res.blob();
@@ -80,7 +85,19 @@ export async function fetchBitmap(url: string, signal?: AbortSignal): Promise<Im
       URL.revokeObjectURL(u);
     }
   }
-  return createImageBitmap(blob);
+  if (!crop) return createImageBitmap(blob);
+  const full = await createImageBitmap(blob);
+  try {
+    return await createImageBitmap(
+      full,
+      Math.round(full.width * crop.x),
+      Math.round(full.height * crop.y),
+      Math.max(1, Math.round(full.width * crop.w)),
+      Math.max(1, Math.round(full.height * crop.h)),
+    );
+  } finally {
+    full.close();
+  }
 }
 
 /** Bitmap → JPEG (ou PNG pour un logo) limité en largeur, pour le PDF. */

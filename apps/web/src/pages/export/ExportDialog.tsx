@@ -151,7 +151,14 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
       const imgs = new Map<number, Awaited<ReturnType<typeof toPdfImage>>>();
       for (const [k, i] of used.entries()) {
         try {
-          imgs.set(i, await toPdfImage(await fetchBitmap(demo.steps[i]!.imageUrl!, ac.signal), 1600, 'JPEG'));
+          imgs.set(
+            i,
+            await toPdfImage(
+              await fetchBitmap(demo.steps[i]!.imageUrl!, ac.signal, demo.steps[i]!.crop),
+              1600,
+              'JPEG',
+            ),
+          );
         } catch (e) {
           if (isAbort(e)) throw e;
           throw new StepImageError(i);
@@ -225,7 +232,7 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
       for (let i = o.from; i <= o.to; i++) {
         const url = demo.steps[i]!.imageUrl;
         try {
-          bmps.set(i, url ? await fetchBitmap(url, ac.signal) : null);
+          bmps.set(i, url ? await fetchBitmap(url, ac.signal, demo.steps[i]!.crop) : null);
         } catch (e) {
           if (isAbort(e)) throw e;
           throw new StepImageError(i);
@@ -870,7 +877,7 @@ function GifPreview({ demo, opts }: { demo: ExportDemo | null; opts: GifOptions 
     for (let i = opts.from; i <= opts.to; i++) {
       const url = demo.steps[i]!.imageUrl;
       if (bmps.has(i)) continue;
-      void (url ? fetchBitmap(url) : Promise.resolve(null))
+      void (url ? fetchBitmap(url, undefined, demo.steps[i]!.crop) : Promise.resolve(null))
         .catch(() => null)
         .then((b) => alive && setBmps((m) => new Map(m).set(i, b)));
     }

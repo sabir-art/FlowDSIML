@@ -2538,3 +2538,131 @@
 .cap-anim > .field + .field {
   margin-top: 12px;
 }
+
+/* ===== L25-02 : recadrage ===== */
+.crop-frame {
+  cursor: default;
+}
+.crop-veil {
+  position: absolute;
+  background: rgb(10 14 20 / 62%);
+  pointer-events: none;
+}
+.crop-box {
+  position: absolute;
+  box-shadow:
+    0 0 0 1px #fff,
+    0 0 0 2px rgb(0 0 0 / 35%);
+  cursor: move;
+  touch-action: none;
+}
+.crop-dims {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #141311;
+  color: #fff;
+  font: 600 12px/1.5 var(--fd-font-sans);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.crop-box:has(> .crop-h--n:focus-visible) .crop-dims,
+.crop-box[style*='top: 0%'] .crop-dims {
+  bottom: auto;
+  top: 8px;
+}
+.crop-h {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  background: #217bac;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 40%);
+}
+.crop-h::after {
+  /* Cible de 24 px au moins pour le pointeur */
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+.crop-h:focus-visible {
+  outline: 3px solid #2897d5;
+  outline-offset: 2px;
+}
+.crop-h--nw {
+  left: 0;
+  top: 0;
+  cursor: nwse-resize;
+}
+.crop-h--n {
+  left: 50%;
+  top: 0;
+  cursor: ns-resize;
+}
+.crop-h--ne {
+  left: 100%;
+  top: 0;
+  cursor: nesw-resize;
+}
+.crop-h--e {
+  left: 100%;
+  top: 50%;
+  cursor: ew-resize;
+}
+.crop-h--se {
+  left: 100%;
+  top: 100%;
+  cursor: nwse-resize;
+}
+.crop-h--s {
+  left: 50%;
+  top: 100%;
+  cursor: ns-resize;
+}
+.crop-h--sw {
+  left: 0;
+  top: 100%;
+  cursor: nesw-resize;
+}
+.crop-h--w {
+  left: 0;
+  top: 50%;
+  cursor: ew-resize;
+}
+.crop-panel .segmented {
+  margin-bottom: 4px;
+}
+.crop-panel > .sec > .t-label {
+  display: block;
+  margin: 12px 0 6px;
+}
+.crop-size {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+.crop-size .field {
+  margin: 0;
+}
+.crop-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.crop-actions .sp {
+  flex: 1;
+}
+.rail-warn {
+  color: var(--fd-color-warning);
+}
+.crop-size .field + .field {
+  margin-top: 0;
+}

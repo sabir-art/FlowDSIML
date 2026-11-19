@@ -11,6 +11,11 @@ export interface ExportStep {
   height: number;
   /** Zone de la bulle sur la capture (0 à 1), pour le cadre et la pastille numérotée. */
   target: { x: number; y: number; w: number; h: number } | null;
+  /**
+   * L25-02 : zone gardée de la capture (relative à l'image d'origine), ou null. width et height
+   * sont déjà ceux de la capture recadrée ; l'image chargée doit être découpée à cette zone.
+   */
+  crop?: { x: number; y: number; w: number; h: number } | null;
 }
 
 export interface ExportDemo {
@@ -40,12 +45,14 @@ export function stepsFromManifest(m: Manifest): ExportStep[] {
   const txt = (s: string) => applyVariables(richTextToPlain(s), {}, defaults).trim();
   return m.steps.map((s) => {
     const h = s.hotspots[0];
+    const c = s.kind === 'image' ? (s.options?.crop ?? null) : null;
     return {
       title: txt(h?.title || s.title || ''),
       text: txt(h?.body || s.body || ''),
       imageUrl: s.kind === 'image' && s.image ? s.image.url : null,
-      width: s.image?.width ?? 1280,
-      height: s.image?.height ?? 800,
+      width: Math.round((s.image?.width ?? 1280) * (c?.w ?? 1)),
+      height: Math.round((s.image?.height ?? 800) * (c?.h ?? 1)),
+      crop: c,
       target: h ? { x: h.x, y: h.y, w: h.w, h: h.h } : null,
     };
   });

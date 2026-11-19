@@ -42,6 +42,7 @@ import { Canvas, type Tool } from './Canvas';
 import { SandboxPlan } from './html/SandboxPlan';
 import { ChecklistPreview } from './ChecklistPreview';
 import { BrowserBar } from './capture/BrowserBar';
+import { CropCanvas, CropPanel, cropDraftFor, type CropDraft } from './capture/Crop';
 import { StepList } from './StepList';
 import { CommentsPanel } from './comments/CommentsPanel';
 import { useStepComments } from './comments/useStepComments';
@@ -157,6 +158,8 @@ export function EditorPage() {
   }, [others]);
   const [index, setIndex] = useState(0);
   const [tool, setTool] = useState<Tool>('select');
+  // L25-02 : brouillon du recadrage (cadre et panneau)
+  const [cropDraft, setCropDraft] = useState<CropDraft | null>(null);
   // L25-04 : « Choisir un champ » du panneau Animation (clic suivant sur le canevas)
   useEffect(() => {
     const on = () => setTool('field');
@@ -213,6 +216,10 @@ export function EditorPage() {
   }, [versionId]);
 
   const step = editor.steps[Math.min(index, editor.steps.length - 1)];
+  // L25-02 : changer d'étape quitte le recadrage (le brouillon appartient à l'étape)
+  useEffect(() => {
+    setSelection((cur) => (cur.kind === 'crop' ? { kind: 'step' } : cur));
+  }, [step?.id]);
   useEffect(() => {
     presence.update({ s: step?.id ?? null, t: Date.now() });
   }, [step?.id, presence]);
@@ -721,29 +728,38 @@ export function EditorPage() {
                     {fontCss && <style>{fontCss}</style>}
                     <BrowserBar steps={editor.steps} index={safeIndex} />
                     <div className="shot">
-                      <Canvas
-                        editor={editor}
-                        step={step}
-                        tool={tool}
-                        setTool={setTool}
-                        selection={selection}
-                        setSelection={setSelection}
-                        readOnly={readOnly}
-                        onEditForm={() =>
-                          step.gate_form_id && setSelection({ kind: 'form', id: step.gate_form_id })
-                        }
-                        hideFormChip={!!selectedForm}
-                        abPreview={
-                          ab.test && ab.view === 'B' && ab.test.step_id === step.id && ab.test.hotspot_id
-                            ? {
-                                hotspotId: ab.test.hotspot_id,
-                                title: asVariantB(ab.test.variant_b).title ?? '',
-                                body: asVariantB(ab.test.variant_b).body ?? '',
-                                cta: asVariantB(ab.test.variant_b).cta ?? null,
-                              }
-                            : null
-                        }
-                      />
+                      {selection.kind === 'crop' && cropDraft && step.kind === 'image' ? (
+                        <CropCanvas
+                          step={step}
+                          url={step.image_path ? editor.imageUrls[step.image_path] : undefined}
+                          draft={cropDraft}
+                          setDraft={setCropDraft}
+                        />
+                      ) : (
+                        <Canvas
+                          editor={editor}
+                          step={step}
+                          tool={tool}
+                          setTool={setTool}
+                          selection={selection}
+                          setSelection={setSelection}
+                          readOnly={readOnly}
+                          onEditForm={() =>
+                            step.gate_form_id && setSelection({ kind: 'form', id: step.gate_form_id })
+                          }
+                          hideFormChip={!!selectedForm}
+                          abPreview={
+                            ab.test && ab.view === 'B' && ab.test.step_id === step.id && ab.test.hotspot_id
+                              ? {
+                                  hotspotId: ab.test.hotspot_id,
+                                  title: asVariantB(ab.test.variant_b).title ?? '',
+                                  body: asVariantB(ab.test.variant_b).body ?? '',
+                                  cta: asVariantB(ab.test.variant_b).cta ?? null,
+                                }
+                              : null
+                          }
+                        />
+                      )}
                       {selectedForm && <FormPreview form={selectedForm} editor={editor} />}
                     </div>
                   </div>
@@ -771,17 +787,22 @@ export function EditorPage() {
                 >
                   <ZoomIn aria-hidden="true" />
                 </button>
+                {/* L25-02 : recadrer la capture (outil actif) */}
                 <button
                   type="button"
                   className="btn btn-ghost btn-icon"
-                  aria-disabled="true"
-                  aria-label={`${t('editor.toolCrop')} · ${t('shell.soon')}`}
-                  title={t('shell.soon')}
+                  aria-label={t('editor.toolCrop')}
+                  title={t('editor.toolCrop')}
+                  aria-pressed={selection.kind === 'crop'}
+                  disabled={readOnly || step?.kind !== 'image' || !step?.image_path}
+                  onClick={() => {
+                    if (!step) return;
+                    setCropDraft(cropDraftFor(step));
+                    setSelection({ kind: 'crop' });
+                    setTab('step');
+                  }}
                 >
                   <Crop aria-hidden="true" />
-                  <span className="fb-soon" aria-hidden="true">
-                    {t('shell.soon')}
-                  </span>
                 </button>
                 <span className="sep" />
                 <button
@@ -855,6 +876,15 @@ export function EditorPage() {
                 hotspot={hotspot}
                 readOnly={readOnly}
                 setSelection={setSelection}
+              />
+            )}
+            {tab === 'step' && step && selection.kind === 'crop' && cropDraft && (
+              <CropPanel
+                editor={editor}
+                step={step}
+                draft={cropDraft}
+                setDraft={setCropDraft}
+                onClose={() => setSelection({ kind: 'step' })}
               />
             )}
             {tab === 'step' && step && selection.kind === 'blur' && (

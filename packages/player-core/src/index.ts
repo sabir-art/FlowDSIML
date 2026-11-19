@@ -149,3 +149,4 @@ export function spotlightVeilPath(boxes: Box[]): string {
 }
 export * from './htmlFrame';
 export * from './animation';
+export * from './crop';

@@ -1330,7 +1330,34 @@
       "pii_identifier": "an identifier",
       "pii_zone": "data to hide"
     },
-    "hint_field": "Click the field where the text is typed."
+    "hint_field": "Click the field where the text is typed.",
+    "crop": {
+      "title": "Crop the capture",
+      "format": "Format",
+      "free": "Free",
+      "width": "Width (px)",
+      "height": "Height (px)",
+      "help": "Drag the handles, or use the arrow keys (Shift: 10 px). The hotspot, blurs and zoom follow the crop.",
+      "dims": "Kept area: {{w}} × {{h}} pixels",
+      "applyTo": "Apply to",
+      "thisStep": "This step",
+      "all": "All ({{n}})",
+      "allHelp_one": "{{count}} capture of another size will not change.",
+      "allHelp_other": "{{count}} captures of another size will not change.",
+      "othersUnchanged_one": "{{count}} capture of another size was not cropped.",
+      "othersUnchanged_other": "{{count}} captures of another size were not cropped.",
+      "reset": "Reset",
+      "apply": "Crop",
+      "outside": "Hotspot outside the frame",
+      "handle_nw": "Top left handle",
+      "handle_n": "Top handle",
+      "handle_ne": "Top right handle",
+      "handle_e": "Right handle",
+      "handle_se": "Bottom right handle",
+      "handle_s": "Bottom handle",
+      "handle_sw": "Bottom left handle",
+      "handle_w": "Left handle"
+    }
   },
   "status": {
     "draft": "Draft",

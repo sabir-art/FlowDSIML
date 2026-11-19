@@ -14,6 +14,9 @@ import {
   spotlightVeilPath,
   themeVars,
   tipClass,
+  asCrop,
+  cropImageStyle,
+  croppedSize,
 } from '@flowdsiml/player-core';
 import { ChevronRight, ClipboardList, ExternalLink, Info, Move, RotateCcw } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
@@ -398,7 +401,10 @@ export function Canvas({
           return { ...a.box, placement: a.placement };
         })()
       : tipHotspot;
-  const ratio = `${step.image_width ?? 16} / ${step.image_height ?? 10}`;
+  // L25-02 : capture recadrée (l'image entière est placée dans le cadre affiché)
+  const crop = asCrop(asStepOptions(step.options).crop);
+  const shown = croppedSize({ width: step.image_width ?? 1600, height: step.image_height ?? 1000 }, crop);
+  const ratio = `${shown.width} / ${shown.height}`;
   return (
     <div
       ref={frame}
@@ -411,7 +417,12 @@ export function Canvas({
     >
       {formChip}
       {url ? (
-        <img src={url} alt={step.title || t('editor.untitled')} draggable={false} />
+        <img
+          src={url}
+          alt={step.title || t('editor.untitled')}
+          draggable={false}
+          style={cropImageStyle(crop)}
+        />
       ) : (
         <div className="canvas-missing">{t('common.loading')}</div>
       )}

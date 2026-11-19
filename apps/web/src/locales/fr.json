@@ -1330,7 +1330,34 @@
       "pii_identifier": "un identifiant",
       "pii_zone": "une donnée à masquer"
     },
-    "hint_field": "Cliquez sur le champ où le texte est saisi."
+    "hint_field": "Cliquez sur le champ où le texte est saisi.",
+    "crop": {
+      "title": "Recadrer la capture",
+      "format": "Format",
+      "free": "Libre",
+      "width": "Largeur (px)",
+      "height": "Hauteur (px)",
+      "help": "Glissez les poignées, ou utilisez les flèches (Maj : 10 px). Le hotspot, les flous et le zoom suivent le recadrage.",
+      "dims": "Zone gardée : {{w}} × {{h}} pixels",
+      "applyTo": "Appliquer à",
+      "thisStep": "Cette étape",
+      "all": "Toutes ({{n}})",
+      "allHelp_one": "{{count}} capture d’une autre taille ne changera pas.",
+      "allHelp_other": "{{count}} captures d’une autre taille ne changeront pas.",
+      "othersUnchanged_one": "{{count}} capture d’une autre taille n’a pas été recadrée.",
+      "othersUnchanged_other": "{{count}} captures d’une autre taille n’ont pas été recadrées.",
+      "reset": "Réinitialiser",
+      "apply": "Recadrer",
+      "outside": "Hotspot hors du cadre",
+      "handle_nw": "Poignée haut gauche",
+      "handle_n": "Poignée haut",
+      "handle_ne": "Poignée haut droite",
+      "handle_e": "Poignée droite",
+      "handle_se": "Poignée bas droite",
+      "handle_s": "Poignée bas",
+      "handle_sw": "Poignée bas gauche",
+      "handle_w": "Poignée gauche"
+    }
   },
   "status": {
     "draft": "Brouillon",

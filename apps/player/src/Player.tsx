@@ -69,6 +69,9 @@ import {
   zoomOrigin,
   fontFaceCss,
   TYPING_MS,
+  asCrop,
+  cropImageStyle,
+  croppedSize,
   scrollOffset,
   scrollPlan,
 } from '@flowdsiml/player-core';
@@ -795,7 +798,14 @@ export function Player({
             />
           </>
         ) : step.kind === 'image' && step.image ? (
-          <TabWindow tabs={tabs} changed={newTab} ratio={step.image.width / step.image.height}>
+          <TabWindow
+            tabs={tabs}
+            changed={newTab}
+            ratio={(() => {
+              const c = croppedSize(step.image, asCrop(step.options.crop));
+              return c.width / c.height;
+            })()}
+          >
             <ImageStep
               key={step.id}
               step={step}
@@ -1127,7 +1137,10 @@ function ImageStep({
   const fp = step.options.fullPage;
   const reduced = useMedia('(prefers-reduced-motion: reduce)');
   const typed = anim?.type === 'typing' && anim.field ? sub(anim.text) : null;
-  const scroll = anim?.type === 'scroll' && fp?.url ? scrollPlan(fp, anim) : null;
+  // L25-02 : capture recadrée (la page entière ne l'est pas : pas de défilement sur une capture recadrée)
+  const crop = asCrop(step.options.crop);
+  const shown = croppedSize(img, crop);
+  const scroll = anim?.type === 'scroll' && fp?.url && !crop ? scrollPlan(fp, anim) : null;
   const animated = !reduced && (typed !== null || (scroll !== null && scroll.distance > 0));
   const [phase, setPhase] = useState<'run' | 'go' | 'done'>(animated ? 'run' : 'done');
   const [chars, setChars] = useState(animated ? 0 : Number.MAX_SAFE_INTEGER);
@@ -1164,13 +1177,13 @@ function ImageStep({
   return (
     <div
       class={`p-stage${dimmed ? ' is-backdrop' : ''}`}
-      style={{ '--ratio': String(img.width / img.height) }}
+      style={{ '--ratio': String(shown.width / shown.height) }}
     >
       <div
         class={`p-zoom${zoom?.transition === 'instant' ? ' is-instant' : ''}`}
         style={{ transform, transformOrigin: origin }}
       >
-        <img class="p-img" src={img.url} alt={alt} draggable={false} />
+        <img class="p-img" src={img.url} alt={alt} draggable={false} style={cropImageStyle(crop)} />
         {scroll && fp && playing && (
           <div class="p-scroll" aria-hidden="true">
             <img

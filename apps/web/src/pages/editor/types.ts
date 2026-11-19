@@ -72,7 +72,9 @@ export type Selection =
   | { kind: 'hotspot'; id: string }
   | { kind: 'blur'; index: number }
   /** EDT-08 : formulaire de lead sélectionné dans le rail (avant l'étape qu'il précède). */
-  | { kind: 'form'; id: string };
+  | { kind: 'form'; id: string }
+  /** L25-02 : recadrage de la capture de l'étape. */
+  | { kind: 'crop' };
 export const asStepOptions = (v: unknown): StepOptions => stepOptionsSchema.parse(v ?? {});
 
 /** F2 : réponse d'une question (jsonb answers). */

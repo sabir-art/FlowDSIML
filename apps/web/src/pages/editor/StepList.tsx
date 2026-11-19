@@ -1,10 +1,12 @@
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { branchOf } from './branch';
 import { stepTab, tabChanged } from './capture/tabs';
+import { asCrop, cropImageStyle, outOfFrame } from '@flowdsiml/player-core';
 import { asVideo } from './video/videoModel';
 import type { PresencePayload } from './presence/presence';
 import { RailWho } from './presence/PresenceUI';
 import {
+  TriangleAlert,
   PanelsTopLeft,
   ArrowDown,
   ArrowUp,
@@ -291,7 +293,12 @@ export function StepList({
                   <span className="th">
                     {url ? (
                       <>
-                        <img src={url} alt="" />
+                        {/* L25-02 : vignette recadrée comme la capture */}
+                        <img
+                          src={url}
+                          alt=""
+                          style={cropImageStyle(asCrop((s.options as { crop?: unknown } | null)?.crop))}
+                        />
                         {(() => {
                           // EDT-04 : point du premier hotspot sur la vignette
                           const h = editor.hotspots.find((x) => x.step_id === s.id);
@@ -334,6 +341,7 @@ export function StepList({
                         step={s}
                         hotspots={editor.hotspots.filter((h) => h.step_id === s.id).length}
                         isLast={i === editor.steps.length - 1}
+                        outside={editor.hotspots.some((h) => h.step_id === s.id && outOfFrame(h))}
                       />
                       {(openComments[s.id] ?? 0) > 0 && (
                         <span className="rail-comments">
@@ -400,11 +408,23 @@ export function StepList({
 }
 
 /** Icônes d'état d'une étape dans le rail (ED10). */
-function StepBadges({ step, hotspots, isLast }: { step: StepRow; hotspots: number; isLast: boolean }) {
+function StepBadges({
+  step,
+  hotspots,
+  isLast,
+  outside = false,
+}: {
+  step: StepRow;
+  hotspots: number;
+  isLast: boolean;
+  /** L25-02 : un hotspot sort du cadre après un recadrage (alerte, publication non bloquée). */
+  outside?: boolean;
+}) {
   const { t } = useTranslation();
   const blurs = Array.isArray(step.blurs) ? step.blurs.length : 0;
   const opts = asStepOptions(step.options);
   const items = [
+    outside && { icon: <TriangleAlert className="rail-warn" />, label: t('editor.crop.outside') },
     opts.choices.length > 0 && {
       icon: <GitBranch />,
       // L22-09 : « n règles » (règles de suite du menu de choix)
