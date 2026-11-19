@@ -2066,7 +2066,8 @@
   gap: 2px;
 }
 .mk .ba-intro {
-  margin: 0 0 12px;
+  /* L17-02 : espace entre l'aide et « Capture Avant » */
+  margin: 0 0 16px;
 }
 .ba-slot {
   display: flex;
@@ -2108,11 +2109,10 @@
   font-size: 13px;
 }
 .ba-slot-text small {
+  /* L17-02 : la source passe à la ligne au lieu d'être coupée */
   color: var(--fd-color-text-muted);
   font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .ba-seg {
   width: 100%;
@@ -2284,4 +2284,21 @@
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+}
+
+/* L17-02 : avertissement sous une image importée */
+.ba-warn {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--fd-color-warning-text, var(--fd-color-text-muted));
+}
+.ba-warn svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  color: var(--fd-color-warning, currentColor);
 }

@@ -1,15 +1,23 @@
-import { EyeOff, MessageSquareLock, Shield, TriangleAlert } from 'lucide-react';
+import { EyeOff, ImageUp, MessageSquareLock, Shield, TriangleAlert } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
-import type { StepRow } from './types';
+import { asBeforeAfter, type StepRow } from './types';
 
 /** Bilan RGPD d'une démo (même calcul que publish_demo côté serveur). Pur, testé. */
-export function gdprSummary(steps: Pick<StepRow, 'blurs' | 'element_meta'>[]) {
+export function gdprSummary(
+  steps: (Pick<StepRow, 'blurs' | 'element_meta'> & Partial<Pick<StepRow, 'kind' | 'options'>>)[],
+) {
   let blurred = 0;
   let pending = 0;
+  /** L17-02 / L18-03 : images importées, sans détection automatique des données personnelles. */
+  let imported = 0;
   const pendingSteps: number[] = [];
   steps.forEach((s, i) => {
+    if (s.kind === 'before_after') {
+      const src = asBeforeAfter(s.options).sources;
+      imported += [src.before, src.after].filter((x) => x?.kind === 'upload').length;
+    }
     if (Array.isArray(s.blurs)) blurred += s.blurs.length;
     const pii = (s.element_meta as { pii?: Array<{ blurred?: boolean }> } | null)?.pii;
     if (!Array.isArray(pii)) return;
@@ -20,7 +28,7 @@ export function gdprSummary(steps: Pick<StepRow, 'blurs' | 'element_meta'>[]) {
       pendingSteps.push(i + 1);
     }
   });
-  return { blurred, pending, pendingSteps };
+  return { blurred, pending, pendingSteps, imported };
 }
 
 export type GdprAck = { reviewed: true; fictional: true };
@@ -121,6 +129,12 @@ export function GdprDialog({
                   t('editor.gdpr.none')
                 )}
               </li>
+              {sum.imported > 0 && (
+                <li className="is-warning">
+                  <ImageUp aria-hidden="true" />
+                  {t('editor.gdpr.imported', { count: sum.imported })}
+                </li>
+              )}
               {branchWarnings.length > 0 && (
                 <li className="is-warning">
                   <TriangleAlert aria-hidden="true" />

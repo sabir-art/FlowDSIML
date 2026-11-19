@@ -653,7 +653,9 @@
       "openSettings": "Ouvrir les paramètres",
       "close": "Fermer",
       "none": "Aucune détection non floutée",
-      "checksLegend": "Confirmations avant publication"
+      "checksLegend": "Confirmations avant publication",
+      "imported_one": "{{count}} image importée non vérifiée",
+      "imported_other": "{{count}} images importées non vérifiées"
     },
     "quiz": {
       "title": "Quiz du module",
@@ -1278,7 +1280,8 @@
       "viewLabel": "Affichage du canevas",
       "viewPage": "Page",
       "viewPlan": "Plan"
-    }
+    },
+    "importUnverified": "Cette image n’est pas vérifiée automatiquement : floutez les données personnelles avant de publier."
   },
   "status": {
     "draft": "Brouillon",

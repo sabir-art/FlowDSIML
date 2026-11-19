@@ -330,7 +330,8 @@ export function useDemoEditor(demoId: string) {
               options: {
                 beforeAfter: {
                   layout: 'side',
-                  labels: { before: '', after: '' },
+                  // L17-02 : libellés préremplis (modifiables)
+                  labels: { before: i18n.t('editor.ba.before'), after: i18n.t('editor.ba.after') },
                   notes: { before: '', after: '' },
                   sources: {},
                 },

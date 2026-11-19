@@ -22,7 +22,8 @@ const ba = (layout) => ({
   labels: { before: '', after: '' },
   notes,
   before,
-  beforeBlurs: [{ x: 0.1, y: 0.1, w: 0.2, h: 0.08, style: 'blur' }],
+  // Flou sur l'adresse e-mail : le titre de la capture reste lisible
+  beforeBlurs: [{ x: 0.8, y: 0.0, w: 0.19, h: 0.07, style: 'blur' }],
 });
 const manifest = {
   schemaVersion: 1,
@@ -50,11 +51,12 @@ const manifest = {
           w: 0.12,
           h: 0.06,
           title: 'Créer un rapport',
-          body: 'Cliquez sur « Nouveau rapport ». Le tableau de bord se met à jour ; le tableau de bord suit. Votre {{outil}} aussi.',
+          body: 'Cliquez sur « Nouveau rapport ». Le rapport apparaît aussitôt dans le tableau de bord de l’équipe, à côté de votre {{outil}}.',
           placement: 'auto',
           action: { type: 'next' },
         },
       ],
+      options: { showPrev: true },
     },
     { id: 's4', kind: 'text', title: 'Fin', body: 'Le dossier usager est à jour.' },
   ],
@@ -159,6 +161,15 @@ const manifest = {
     'L17-09 : info-bulle avec ancien terme',
   );
   ok((await terms.first().getAttribute('aria-describedby')) === 'p-gloss-tip', 'L17-09 : aria-describedby');
+  {
+    const tb = await tip.boundingBox();
+    const bb = await page.locator('.p-tip').first().boundingBox();
+    ok(
+      !!tb && !!bb && (tb.y >= bb.y + bb.height || tb.y + tb.height <= bb.y),
+      'L17-09 : info-bulle hors de la bulle',
+    );
+  }
+  ok((await page.locator('.p-tip-prev').count()) === 1, 'L17-09 : « Précédent » dans la bulle');
   await shot(page, 'l17-09-terme');
   await page.keyboard.press('Escape');
   ok((await page.getByRole('tooltip').count()) === 0, 'L17-09 : Échap ferme l’info-bulle');
@@ -181,13 +192,21 @@ const manifest = {
   const mob = await open({ width: 390, height: 780 });
   ok((await mob.locator('.p-ba--toggle').count()) === 1, 'L17-05 : bascule imposée sous 640 px');
   const seg = mob.getByRole('group', { name: 'Afficher' });
+  ok(
+    (await seg.getByRole('button', { name: 'Maintenant' }).getAttribute('aria-pressed')) === 'true',
+    'L17-05 : « Maintenant » affiché par défaut',
+  );
+  ok(
+    (await mob.getByRole('button', { name: 'Glossaire' }).count()) === 1,
+    'L17-05 : bouton nommé « Glossaire »',
+  );
+  await shot(mob, 'l17-05-bascule');
   await seg.getByRole('button', { name: 'Avant' }).click();
   ok(
     (await seg.getByRole('button', { name: 'Avant' }).getAttribute('aria-pressed')) === 'true' &&
       (await mob.locator('.p-ba-frame.is-old').count()) === 1,
     'L17-05 : « Avant » affiché',
   );
-  await shot(mob, 'l17-05-bascule');
 
   ok(errors.length === 0, `aucune erreur JavaScript${errors.length ? ` (${errors.join(' | ')})` : ''}`);
   await b.close();

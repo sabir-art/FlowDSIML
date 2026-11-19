@@ -1743,7 +1743,8 @@ h1.p-title {
   width: min(100cqw, 100cqh * var(--ratio, 1.6));
   aspect-ratio: var(--ratio, 1.6);
   border-radius: 10px;
-  overflow: hidden;
+  /* Les étiquettes débordent au-dessus : la découpe arrondie est portée par les calques */
+  overflow: visible;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 .p-ba-cmp .p-ba-shot {
@@ -1756,6 +1757,8 @@ h1.p-title {
 .p-ba-layer {
   position: absolute;
   inset: 0;
+  border-radius: 10px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1785,16 +1788,22 @@ h1.p-title {
   place-items: center;
   pointer-events: none;
 }
-.p-ba-tag-l,
-.p-ba-tag-r {
+.p-ba-tags {
+  /* L17-04 : au-dessus de la capture, alignées sur ses bords */
   position: absolute;
-  top: 10px;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.p-ba-tag-l {
-  left: 10px;
+.p-ba-slider {
+  padding-top: 30px;
 }
-.p-ba-tag-r {
-  right: 10px;
+.p-ba-tags .p-ba-pill {
+  align-self: auto;
 }
 .p-ba-range {
   width: 100%;
@@ -1820,7 +1829,9 @@ h1.p-title {
   cursor: pointer;
 }
 .p-ba-seg button[aria-pressed='true'] {
-  background: var(--p-surface);
+  /* L17-05 : lisible en clair et en sombre (texte blanc sur la couleur principale) */
+  background: var(--p-primary);
+  color: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 .p-ba-card {
@@ -1986,6 +1997,43 @@ h1.p-title {
 .p-gloss-empty {
   margin: 18px;
   color: #57534e;
+}
+/* L17-05 : bascule Avant / Maintenant lisible en sombre */
+.is-dark .p-ba-seg {
+  background: rgb(255 255 255 / 0.08);
+}
+.is-dark .p-ba-seg button:not([aria-pressed='true']) {
+  color: var(--p-chrome-text);
+}
+/* L17-10 : en sombre, le tiroir suit le chrome du lecteur */
+.is-dark .p-gloss-drawer {
+  background: var(--p-chrome);
+  color: var(--p-chrome-text);
+  color-scheme: dark;
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.5);
+}
+.is-dark .p-gloss-drawer header {
+  border-bottom-color: #272e37;
+}
+.is-dark .p-gloss-drawer .p-icon-btn {
+  background: rgb(255 255 255 / 0.06);
+  color: var(--p-chrome-text);
+  border-color: #3a4350;
+}
+.is-dark .p-gloss-search input {
+  background: #0f1216;
+  color: var(--p-chrome-text);
+  border-color: #4a5562;
+}
+.is-dark .p-gloss-search svg,
+.is-dark .p-gloss-count,
+.is-dark .p-gloss-empty,
+.is-dark .p-gloss-drawer dt .p-gloss-old {
+  color: #a9b3bf;
+}
+.is-dark .p-gloss-drawer dd {
+  color: #d5dbe2;
+  border-bottom-color: #272e37;
 }
 
 /* L19 : note de 0 à 10 et réponse écrite (sondage) */

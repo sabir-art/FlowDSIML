@@ -11,6 +11,21 @@ describe('gdprSummary', () => {
       { blurs: [], element_meta: { pii: [{ blurred: false }, { blurred: true }] } },
       { blurs: [], element_meta: {} },
     ]);
-    expect(s).toEqual({ blurred: 4, pending: 1, pendingSteps: [2] });
+    expect(s).toEqual({ blurred: 4, pending: 1, pendingSteps: [2], imported: 0 });
+  });
+  it('compte les images importées des étapes Avant / Après (non vérifiées)', () => {
+    const s = gdprSummary([
+      {
+        kind: 'before_after',
+        blurs: [],
+        element_meta: {},
+        options: {
+          beforeAfter: {
+            sources: { before: { kind: 'upload', name: 'ancien.png' }, after: { kind: 'step', stepId: 'x' } },
+          },
+        },
+      },
+    ]);
+    expect(s.imported).toBe(1);
   });
 });

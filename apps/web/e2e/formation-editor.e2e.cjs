@@ -34,7 +34,8 @@ const N = ' ';
   };
   const state = seed();
   // Une zone floutée sur l'écran 1 : elle doit suivre la copie
-  state.tables.steps[0].blurs = [{ x: 0.1, y: 0.1, w: 0.2, h: 0.1, style: 'blur' }];
+  // Flou sur l'adresse e-mail (en haut à droite) : le titre de la capture reste lisible
+  state.tables.steps[0].blurs = [{ x: 0.8, y: 0.0, w: 0.19, h: 0.07, style: 'blur' }];
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
@@ -105,6 +106,11 @@ const N = ' ';
     'Image importée pour « Maintenant »',
   );
   ok((await after.locator('.ba-slot-text small').textContent()) === 'fixture.png', 'Nom de l’image importée');
+  ok(
+    /n’est pas vérifiée automatiquement/.test(await page.locator('.ba-warn').textContent()),
+    'Avertissement à l’import d’une image',
+  );
+  ok((await page.locator('#ba-l-before').inputValue()) === 'Avant', 'Libellé « Avant » prérempli');
 
   // Disposition, libellés, notes
   await page.getByRole('radio', { name: 'Curseur' }).click();
@@ -120,6 +126,10 @@ const N = ' ';
   );
   await page.getByRole('radio', { name: 'Côte à côte' }).click();
   await page.waitForTimeout(600);
+  // Panneau en haut (titre « ÉTAPE n » visible)
+  await page.evaluate(() =>
+    document.querySelectorAll('.ed-panel, .panel-body, aside').forEach((el) => (el.scrollTop = 0)),
+  );
   await shot('l17-02-editeur');
 
   // Publication : capture « Avant » copiée et ses flous incrustés, manifeste sans flous ni sources
@@ -131,6 +141,11 @@ const N = ' ';
     .click();
   const gdpr = page.locator('dialog.gdpr-dialog[open]');
   await gdpr.waitFor();
+  ok(
+    /1 image importée non vérifiée/.test(await gdpr.locator('.gdpr-summary').textContent()),
+    'Bilan RGPD : « 1 image importée non vérifiée »',
+  );
+  await shot('l17-02-rgpd');
   for (const c of await gdpr.getByRole('checkbox').all()) await c.check();
   await gdpr
     .getByRole('button', { name: /Publier/ })

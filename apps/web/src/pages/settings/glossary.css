@@ -109,3 +109,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* L17-06 : pas de bordure sous la dernière ligne (elle dépassait sous les coins arrondis) */
+.gl-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.gl-table-wrap,
+.card:has(> .gl-table),
+.card:has(> div > .gl-table) {
+  overflow: hidden;
+}

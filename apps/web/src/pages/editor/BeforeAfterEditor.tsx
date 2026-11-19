@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImagePlus, ListOrdered, X } from 'lucide-react';
+import { ImagePlus, ListOrdered, TriangleAlert, X } from 'lucide-react';
 import { Menu } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import type { DemoEditor } from './useDemoEditor';
@@ -192,6 +192,13 @@ export function BeforeAfterFields({
             />
           )}
         </div>
+        {/* L17-02 : une image importée n'est pas vérifiée automatiquement */}
+        {ba.sources[side]?.kind === 'upload' && (
+          <p className="ba-warn" role="note">
+            <TriangleAlert aria-hidden="true" />
+            {t('editor.importUnverified')}
+          </p>
+        )}
       </div>
     );
   };

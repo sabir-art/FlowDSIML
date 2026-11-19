@@ -23,20 +23,27 @@ export function GlossaryTip({
   const anchor = useRef<HTMLElement | null>(null);
   const box = useRef<HTMLDivElement>(null);
 
-  // Placement après mesure : au-dessus du terme si la place le permet, sinon en dessous, et jamais
-  // sur les boutons de la bulle (spec §6) : sous la rangée de boutons si elle serait couverte.
+  // Placement après mesure : sous la bulle qui contient le terme ; hors bulle, au-dessus du terme si
+  // la place le permet, sinon en dessous, et jamais sur les boutons (spec §6).
   useLayoutEffect(() => {
     if (!tip || tip.y !== null || !anchor.current || !box.current) return;
     const r = anchor.current.getBoundingClientRect();
     const h = box.current.offsetHeight;
-    let y = r.top - 8 - h;
-    if (y < 8) {
-      y = r.bottom + 8;
-      const acts = anchor.current
-        .closest('.p-tip, .p-sheet, .p-text-step, .p-ba-card')
-        ?.querySelector('.p-actions, .p-btn');
-      const a = acts?.getBoundingClientRect();
-      if (a && y < a.bottom && y + h > a.top) y = a.bottom + 8;
+    // L17-09 : dans une bulle, l'infobulle se place sous la bulle (hors de la bulle : titre, texte et
+    // hotspot restent visibles), au-dessus seulement si la place manque en bas
+    const bubble = anchor.current.closest('.p-tip, .p-sheet')?.getBoundingClientRect();
+    let y: number;
+    if (bubble) {
+      y = bubble.bottom + 8;
+      if (y + h > window.innerHeight - 8) y = Math.max(8, bubble.top - 8 - h);
+    } else {
+      y = r.top - 8 - h;
+      if (y < 8) {
+        y = r.bottom + 8;
+        const acts = anchor.current.closest('.p-text-step, .p-ba-card')?.querySelector('.p-actions, .p-btn');
+        const a = acts?.getBoundingClientRect();
+        if (a && y < a.bottom && y + h > a.top) y = a.bottom + 8;
+      }
     }
     setTip({ ...tip, y });
   }, [tip]);

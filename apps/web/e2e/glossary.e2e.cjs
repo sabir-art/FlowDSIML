@@ -129,7 +129,6 @@ const SHOTS = process.env.SHOTS_DIR;
     (await page.locator('.gl-table tbody tr').nth(3).locator('td.num').textContent()) === '4',
     'L17-06 : nombre de modules',
   );
-  await shot('l17-06-glossaire');
   await page.getByRole('searchbox', { name: 'Rechercher un terme' }).fill('tableur');
   ok(
     (await rows.count()) === 1 && (await page.getByText('1 terme', { exact: true }).count()) === 1,
@@ -146,6 +145,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await ed.getByLabel('Nouveau terme').fill('Rendez-vous');
   await ed.getByRole('button', { name: 'Enregistrer' }).click();
   await ed.waitFor({ state: 'detached' });
+  // L17-06 : capture avec la donnée alignée (« Rendez-vous »)
+  await page.getByRole('rowheader', { name: 'Rendez-vous', exact: true }).waitFor();
+  await closeToasts();
+  await shot('l17-06-glossaire');
 
   // Suppression confirmée
   await page.getByRole('button', { name: 'Actions pour Nouveau rapport' }).click();

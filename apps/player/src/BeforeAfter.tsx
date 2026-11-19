@@ -116,12 +116,11 @@ export function BeforeAfterStep({
               <span class="p-ba-knob" style={{ left: `${value}%` }} aria-hidden="true">
                 <MoveHorizontal {...ICON} />
               </span>
-              <span class="p-ba-pill p-ba-pill--before p-ba-tag-l" aria-hidden="true">
-                {lb}
-              </span>
-              <span class="p-ba-pill p-ba-pill--after p-ba-tag-r" aria-hidden="true">
-                {la}
-              </span>
+              {/* L17-04 : étiquettes au-dessus des captures (elles ne masquent rien) */}
+              <div class="p-ba-tags" aria-hidden="true">
+                <span class="p-ba-pill p-ba-pill--before">{lb}</span>
+                <span class="p-ba-pill p-ba-pill--after">{la}</span>
+              </div>
             </div>
           </div>
           <input
