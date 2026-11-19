@@ -453,22 +453,13 @@ function seedDistribute(s, { published = true } = {}) {
     'Taille fixe : largeur et hauteur',
   );
   await dlg.getByLabel('Taille', { exact: true }).selectOption('fluid');
+  ok(
+    (await dlg.locator('.dif-prev .emb').evaluate((el) => el.getBoundingClientRect().width)) >
+      0.9 * (await dlg.locator('.dif-prev .pg').evaluate((el) => el.clientWidth - 28)),
+    'Aperçu : « S’adapte à la largeur » remplit la largeur',
+  );
+  await dlg.getByLabel(/Adresse de l’intranet/).blur();
   await shot('05-intranet');
-  await warn.getByRole('button', { name: 'L’ajouter' }).click();
-  await page.locator('.toast', { hasText: 'ajouté aux sites autorisés' }).waitFor();
-  ok(
-    t.demos[0].settings.allowedEmbedOrigins.includes('intranet.acme.example'),
-    '« L’ajouter » : site autorisé ajouté',
-  );
-  await page.waitForFunction(() => !document.querySelector('dialog.dif-dialog .alert-warning'));
-  ok(true, 'Alerte retirée après l’ajout');
-  await dlg.getByRole('button', { name: 'Copier le code d’intégration' }).click();
-  await page.locator('.toast', { hasText: 'Code copié' }).waitFor();
-  ok(
-    t.diffusions.some((d) => d.kind === 'intranet' && d.label === 'intranet.acme.example'),
-    'Copie : intranet déclaré',
-  );
-
   // ===== L16-06 : bouton + pop-up =====
   await dlg.getByRole('radio', { name: 'Bouton + pop-up' }).click();
   ok(
@@ -485,7 +476,23 @@ function seedDistribute(s, { published = true } = {}) {
       /data-tutoclick-lang="en"/.test(popup),
     'Code pop-up : bouton data-tutoclick, flottant, popup.js',
   );
+  ok((await dlg.locator('.alert-warning').count()) === 1, 'Pop-up : même alerte de site non autorisé');
+  ok(!/\S="[^"\n]*\n/.test(popup), 'Code pop-up : coupé entre les attributs');
   await shot('06-intranet-popup');
+  await warn.getByRole('button', { name: 'L’ajouter' }).click();
+  await page.locator('.toast', { hasText: 'ajouté aux sites autorisés' }).waitFor();
+  ok(
+    t.demos[0].settings.allowedEmbedOrigins.includes('intranet.acme.example'),
+    '« L’ajouter » : site autorisé ajouté',
+  );
+  await page.waitForFunction(() => !document.querySelector('dialog.dif-dialog .alert-warning'));
+  ok(true, 'Alerte retirée après l’ajout');
+  await dlg.getByRole('button', { name: 'Copier le code d’intégration' }).click();
+  await page.locator('.toast', { hasText: 'Code copié' }).waitFor();
+  ok(
+    t.diffusions.some((d) => d.kind === 'intranet' && d.label === 'intranet.acme.example'),
+    'Copie : intranet déclaré',
+  );
 
   // popup.js réel sur une page d'intranet fictive : bouton, fenêtre modale, Échap depuis le lecteur
   const host = await ctx.newPage();
@@ -568,8 +575,25 @@ function seedDistribute(s, { published = true } = {}) {
 
   // ===== L16-08 : où elle est diffusée (nouvelle version publiée) =====
   t.demos[0].current_version_id = 'v-nouvelle';
-  t.demo_versions.push({ ...t.demo_versions[0], id: 'v-nouvelle', number: 4 });
-  t.demos[0].updated_at = t.demo_versions[0].published_at;
+  // L16-08 : la version 4 a sa propre date (l'en-tête affiche celle de la version courante)
+  t.demo_versions.push({
+    ...t.demo_versions[0],
+    id: 'v-nouvelle',
+    number: 4,
+    published_at: new Date(Date.now() - 2 * 3600000).toISOString(),
+  });
+  // Vues réelles du lien direct (événements demo_view hors intégration)
+  t.events = t.events || [];
+  for (let i = 0; i < 48; i++)
+    t.events.push({
+      id: `ev-direct-${i}`,
+      demo_id: DEMO,
+      workspace_id: t.workspaces[0].id,
+      type: 'demo_view',
+      embed_origin: null,
+      occurred_at: new Date(Date.now() - i * 3600000).toISOString(),
+    });
+  t.demos[0].updated_at = t.demo_versions.find((x) => x.id === 'v-nouvelle').published_at;
   await page.goto(`${APP}/#/`);
   await page.goto(`${APP}/#/demos/${DEMO}/distribute`);
   await dlg.waitFor();
@@ -579,6 +603,12 @@ function seedDistribute(s, { published = true } = {}) {
   ok(
     /Lien direct/.test(where) && /Formation « Nouvel outil de gestion »/.test(where),
     'Où : lien direct et centre de formation',
+  );
+  ok(/48 vues/.test(where), 'Où : vues réelles du lien direct');
+  ok(
+    /version 4, publiée le/.test(nb(await dlg.locator('.dif-sub').textContent())) &&
+      !/10 nov/.test(await dlg.locator('.dif-sub').textContent()),
+    'En-tête : date de la version courante',
   );
   ok(
     /intranet\.acme\.example · 312 vues · vue pour la dernière fois/.test(where),

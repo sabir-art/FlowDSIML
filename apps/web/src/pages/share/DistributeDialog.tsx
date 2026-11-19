@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   CircleCheck,
   Copy,
+  Download,
   Globe,
   Info,
   Layers,
@@ -561,6 +562,7 @@ function ScormPanel({
               className="btn btn-primary"
               onClick={() => download(state.build.bytes, state.build.name, 'application/zip')}
             >
+              <Download aria-hidden="true" />
               {t('distribute.scorm.download')}
             </button>
           </div>
@@ -582,11 +584,13 @@ function ScormPanel({
                 {t('distribute.scorm.retry')}
               </button>
               {state.error.code === 'IMAGE' && state.error.step && (
+                // L16-04 : action d'aspect lien (couleur, soulignement, crayon)
                 <button
                   type="button"
-                  className="btn btn-ghost btn-sm"
+                  className="mk-link-inline dif-link-btn"
                   onClick={() => onOpenStep(state.error.step!.id)}
                 >
+                  <Pencil aria-hidden="true" />
                   {t('distribute.scorm.openStep', { n: state.error.step.n })}
                 </button>
               )}
@@ -980,8 +984,18 @@ function IntranetPanel({
               )}
             </div>
             {format === 'popup' && (
+              // L16-06 : étape d'exemple (capture, hotspot, bulle) et bouton de fermeture
               <div className="pop">
-                <div />
+                <div className="pop-card">
+                  <span className="pop-x">
+                    <X size={10} aria-hidden="true" />
+                  </span>
+                  <span className="pop-hs" />
+                  <span className="pop-tip">
+                    {t('distribute.intranet.previewStep')}
+                    <i />
+                  </span>
+                </div>
               </div>
             )}
           </div>

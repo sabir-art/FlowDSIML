@@ -1355,7 +1355,7 @@
       "running": "Génération du paquet SCORM en cours",
       "progress": "Captures {{done}} sur {{total}}",
       "progressLabel": "Génération du paquet SCORM",
-      "canClose": "Vous pouvez fermer cette fenêtre : le paquet restera disponible ici.",
+      "canClose": "Vous pouvez fermer cette fenêtre : le paquet reste disponible jusqu’à la fermeture de cette page.",
       "cancel": "Annuler la génération",
       "readyTitle": "Paquet prêt.",
       "readyText": "Déposez-le dans votre LMS comme une nouvelle activité SCORM.",
@@ -1406,7 +1406,8 @@
       "codeLabel": "Code d’intégration",
       "copied": "Code copié",
       "iframeTitle": "Démo : {{title}}",
-      "help": "SharePoint : composant « Incorporer ». Wiki ou CMS : bloc HTML. Si l’intranet refuse les scripts, utilisez le format iframe."
+      "help": "SharePoint : composant « Incorporer ». Wiki ou CMS : bloc HTML. Si l’intranet refuse les scripts, utilisez le format iframe.",
+      "previewStep": "Cliquez sur « Nouvelle fiche »"
     },
     "mail": {
       "intro": "Ouvre votre messagerie avec un message prêt à envoyer. TutoClick n’envoie aucun e-mail.",

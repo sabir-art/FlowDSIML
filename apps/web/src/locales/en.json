@@ -1355,7 +1355,7 @@
       "running": "SCORM package generation in progress",
       "progress": "Screenshots {{done}} of {{total}}",
       "progressLabel": "SCORM package generation",
-      "canClose": "You can close this window: the package will stay available here.",
+      "canClose": "You can close this window: the package stays available until you close this page.",
       "cancel": "Cancel generation",
       "readyTitle": "Package ready.",
       "readyText": "Upload it to your LMS as a new SCORM activity.",
@@ -1406,7 +1406,8 @@
       "codeLabel": "Embed code",
       "copied": "Code copied",
       "iframeTitle": "Demo: {{title}}",
-      "help": "SharePoint: “Embed” web part. Wiki or CMS: HTML block. If the intranet blocks scripts, use the iframe format."
+      "help": "SharePoint: “Embed” web part. Wiki or CMS: HTML block. If the intranet blocks scripts, use the iframe format.",
+      "previewStep": "Click “New record”"
     },
     "mail": {
       "intro": "Opens your email app with a ready-to-send message. TutoClick sends no email.",

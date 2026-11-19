@@ -1968,3 +1968,15 @@
   outline: none;
   box-shadow: none;
 }
+
+/* Bouton à l'aspect d'un lien (RGPD, Diffuser) */
+.mk-link-inline {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: var(--fd-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}

@@ -1586,16 +1586,6 @@
   margin: 0;
   font-size: var(--fd-text-body-size, 14px);
 }
-.mk-link-inline {
-  border: 0;
-  padding: 0;
-  background: none;
-  font: inherit;
-  color: var(--fd-color-primary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
 .gdpr-dialog .gdpr-why {
   /* F1-02 : les actions mangent la marge basse de la boîte (marge négative) : on la rend */
   margin: 20px 0 0;

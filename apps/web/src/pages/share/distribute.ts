@@ -48,7 +48,8 @@ export function popupCode(
     o.clickToStart ? 'data-tutoclick-start="click"' : '',
     o.lang ? `data-tutoclick-lang="${o.lang}"` : '',
   ].filter(Boolean);
-  return `<button ${attrs.join(' ')}>${clean(o.label).slice(0, 40)}</button>\n<script src="${playerBase.replace(/\/$/, '')}/popup.js" defer></script>`;
+  // L16-06 : un attribut par ligne (le code se coupe entre les attributs, jamais au milieu)
+  return `<button\n  ${attrs.join('\n  ')}>${clean(o.label).slice(0, 40)}</button>\n<script src="${playerBase.replace(/\/$/, '')}/popup.js" defer></script>`;
 }
 
 /** Domaine saisi (« intranet.exemple.fr », « https://intranet.exemple.fr/page ») ; null s'il est invalide. */

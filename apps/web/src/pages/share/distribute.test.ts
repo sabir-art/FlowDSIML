@@ -30,7 +30,7 @@ describe('codes pour l’intranet', () => {
       lang: null,
     });
     expect(c).toContain(
-      '<button type="button" data-tutoclick="id-1" data-tutoclick-float data-tutoclick-start="click">',
+      '<button\n  type="button"\n  data-tutoclick="id-1"\n  data-tutoclick-float\n  data-tutoclick-start="click">',
     );
     expect(c).toContain('>Lancer le tutoriel</button>');
     expect(c).toContain('<script src="https://l.example/popup.js" defer></script>');
