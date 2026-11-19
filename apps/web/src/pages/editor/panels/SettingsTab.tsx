@@ -4,7 +4,9 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import { asSettings, type DemoSettings } from '../types';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, Database } from 'lucide-react';
+import { DATASET_OPEN } from '../html/ChartFields';
+import { publishedColumns, useDataset } from '../data/datasetStore';
 import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
 import { DEMO_TAG_LIMIT, TAG_COLORS, TAG_LIMIT, useWorkspaceTags } from '../../../components/Tags';
 
@@ -210,6 +212,9 @@ export function SettingsTab({
         )}
       </div>
 
+      {/* L25-09 : jeu de données CSV (données fictives ou agrégées) */}
+      <DatasetSection editor={editor} readOnly={readOnly} />
+
       <div className="sec">
         <div className="sec-title">{t('editor.leadForm')}</div>
         {!leadFormsAllowed && <PlanFormsWarning />}
@@ -404,6 +409,40 @@ function TagsField({ demoId, wsId, readOnly }: { demoId: string; wsId: string; r
         </p>
       )}
       <p className="help">{t('tags.fieldHelp', { ws: TAG_LIMIT, demo: DEMO_TAG_LIMIT })}</p>
+    </div>
+  );
+}
+
+function DatasetSection({ editor, readOnly }: { editor: DemoEditor; readOnly: boolean }) {
+  const { t } = useTranslation();
+  const { dataset } = useDataset(editor.demo?.id);
+  return (
+    <div className="sec">
+      <div className="sec-title">{t('editor.dataset.title')}</div>
+      {dataset ? (
+        <p className="help" style={{ marginTop: 0 }}>
+          <b>{dataset.name}</b>
+          {' · '}
+          {t('editor.dataset.summary', {
+            rows: dataset.rows.length,
+            cols: dataset.columns.length,
+            bound: publishedColumns(dataset).length,
+          })}
+        </p>
+      ) : (
+        <p className="help" style={{ marginTop: 0 }}>
+          {t('editor.dataset.none')}
+        </p>
+      )}
+      <button
+        type="button"
+        className="btn btn-secondary btn-sm"
+        disabled={readOnly}
+        onClick={() => window.dispatchEvent(new CustomEvent(DATASET_OPEN))}
+      >
+        <Database aria-hidden="true" />
+        {dataset ? t('editor.dataset.edit') : t('editor.dataset.import')}
+      </button>
     </div>
   );
 }

@@ -15,6 +15,10 @@ import {
   resolveAssets,
   resolvePlacement,
   compareCond,
+  datasetChartRows,
+  datasetRow,
+  datasetVars,
+  withDataset,
   ruleTarget,
 } from './logic';
 
@@ -281,5 +285,67 @@ describe('L25-10 : embranchement conditionnel (opérateurs en liste fermée)', (
     expect(compareCond('12,5', 'lt', '13')).toBe(true);
     expect(compareCond('abc', 'lt', '5')).toBe(false);
     expect(compareCond('1+1', 'is', '2')).toBe(false);
+  });
+});
+
+describe('L25-09 : jeu de données', () => {
+  const ds = {
+    columns: ['equipe', 'rapports'],
+    rows: [
+      ['Antenne Nord', '1 248'],
+      ['Antenne Sud', '932'],
+    ],
+    bindings: [
+      { column: 'equipe', kind: 'variable' as const, key: 'team' },
+      { column: 'rapports', kind: 'element' as const, stepId: 'h', sel: 'b.value' },
+      { column: 'rapports', kind: 'chart' as const, stepId: 'h', opId: 'c1' },
+    ],
+    rowMode: 'link' as const,
+    linkColumn: 'equipe',
+  };
+  it('ligne selon le lien personnalisé, sinon valeurs de la capture', () => {
+    expect(datasetRow(ds, { team: 'antenne sud' })).toEqual(['Antenne Sud', '932']);
+    expect(datasetRow(ds, { team: 'Ouest' })).toBeNull();
+    expect(datasetRow(ds, {})).toBeNull();
+    expect(datasetRow({ ...ds, rowMode: 'first' }, {})).toEqual(['Antenne Nord', '1 248']);
+    expect(datasetVars({ ...ds, rowMode: 'first' }, ds.rows[0]!)).toEqual({ team: 'Antenne Nord' });
+    expect(datasetVars(ds, ds.rows[0]!)).toEqual({});
+  });
+  it('élément et graphique reliés', () => {
+    expect(datasetChartRows(ds, 'rapports')).toEqual([
+      { label: 'Antenne Nord', value: 1248 },
+      { label: 'Antenne Sud', value: 932 },
+    ]);
+    const step = parseManifest({
+      schemaVersion: 1,
+      demoId: 'd',
+      versionId: 'v',
+      workspaceId: 'w',
+      title: 'T',
+      publishedAt: 'x',
+      theme: {},
+      steps: [
+        {
+          id: 'h',
+          kind: 'html',
+          html: {
+            url: 'assets/h.html',
+            ops: [
+              {
+                id: 'c1',
+                sel: 'div.chart',
+                op: 'chart',
+                value: { type: 'bar', rows: [{ label: 'a', value: 1 }] },
+                scope: 'step',
+              },
+            ],
+          },
+        },
+      ],
+    }).steps[0]!;
+    const out = withDataset(step, ds, ds.rows[1]!).html!.ops;
+    expect(out[0]!.value).toMatchObject({ rows: [{ value: 1248 }, { value: 932 }] });
+    expect(out[1]).toMatchObject({ sel: 'b.value', op: 'text', value: '932' });
+    expect(withDataset(step, ds, null).html!.ops).toHaveLength(1);
   });
 });

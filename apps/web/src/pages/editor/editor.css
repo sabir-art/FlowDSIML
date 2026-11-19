@@ -2759,3 +2759,63 @@
 .br-row.nr-cond {
   grid-template-columns: minmax(120px, 42%) minmax(0, 1fr);
 }
+
+/* L25-09 : modale « Jeu de données » */
+.ds-dialog {
+  width: min(760px, calc(100vw - 32px));
+}
+.ds-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+}
+.ds-file > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.ds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.ds-table caption {
+  text-align: left;
+  font-weight: 600;
+  padding: 0 0 6px;
+}
+.ds-table th,
+.ds-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.ds-table thead th {
+  color: var(--fd-color-text-muted);
+  font-weight: 600;
+}
+.ds-binds tbody th {
+  font-family: ui-monospace, monospace;
+  font-weight: 500;
+  width: 30%;
+}
+.ds-mode {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.ds-mode legend {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.ds-mode label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

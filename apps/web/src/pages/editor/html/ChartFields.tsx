@@ -184,11 +184,13 @@ export function ChartFields({
           type="button"
           className="btn btn-ghost btn-sm"
           disabled={readOnly}
-          onClick={() =>
+          onClick={() => {
+            // Le graphique devient une modification (cible proposée en tête de « Relier les colonnes »)
+            if (!op) commit();
             window.dispatchEvent(
-              new CustomEvent(DATASET_OPEN, { detail: { stepId: step.id, opId: op?.id ?? null } }),
-            )
-          }
+              new CustomEvent(DATASET_OPEN, { detail: { stepId: step.id, sel: chart.sel } }),
+            );
+          }}
         >
           <Database {...ICON} />
           {t('editor.data.fromDataset')}

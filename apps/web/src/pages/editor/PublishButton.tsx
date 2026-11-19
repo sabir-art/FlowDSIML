@@ -1,7 +1,8 @@
 import { AlertTriangle, Loader2, Rocket } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { branchIssues } from './branch';
 import { firstMissingRule } from './rules';
+import { publishedColumns, useDataset } from './data/datasetStore';
 import { asAction, asStepOptions, beforeAfterComplete } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -50,8 +51,12 @@ export function PublishButton({
     ];
   }, [editor.steps, editor.hotspots, editor.chapters, t]);
   const navigate = useNavigate();
+  // L25-09 : le bilan RGPD compte le jeu de données publié
+  const { dataset } = useDataset(editor.demo?.id);
   const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Le message d'une tentative précédente disparaît dès que les étapes changent (corrigées)
+  useEffect(() => setError(null), [editor.steps]);
   const demo = editor.demo!;
   const plan = usePlan();
   const [dialog, ask] = useConfirm();
@@ -145,6 +150,7 @@ export function PublishButton({
         open={gdprOpen}
         steps={editor.steps}
         branchWarnings={branchWarnings}
+        dataset={dataset ? { rows: dataset.rows.length, columns: publishedColumns(dataset).length } : null}
         publicEnabled={ws?.public_links_enabled !== false}
         onConfirm={(ack) => void doPublish(ack)}
         onReview={(i) => {

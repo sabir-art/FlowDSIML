@@ -1,4 +1,4 @@
-import { EyeOff, ImageUp, MessageSquareLock, Shield, TriangleAlert } from 'lucide-react';
+import { Database, EyeOff, ImageUp, MessageSquareLock, Shield, TriangleAlert } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
@@ -48,6 +48,7 @@ export function GdprDialog({
   onRestrict,
   onClose,
   branchWarnings = [],
+  dataset = null,
 }: {
   open: boolean;
   steps: Pick<StepRow, 'blurs' | 'element_meta'>[];
@@ -60,6 +61,8 @@ export function GdprDialog({
   onClose: () => void;
   /** L22-09 : avertissements de branchement (non bloquants), rappelés avant publication. */
   branchWarnings?: string[];
+  /** L25-09 : jeu de données publié (lignes, colonnes reliées). */
+  dataset?: { rows: number; columns: number } | null;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
@@ -141,6 +144,12 @@ export function GdprDialog({
                   <span>
                     {t('editor.branch.publishWarn')} {branchWarnings.join(' ')}
                   </span>
+                </li>
+              )}
+              {dataset && (
+                <li className="is-warning">
+                  <Database aria-hidden="true" />
+                  {t('editor.gdpr.dataset', { rows: dataset.rows, columns: dataset.columns })}
                 </li>
               )}
               <li>

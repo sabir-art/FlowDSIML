@@ -70,6 +70,7 @@ import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
 import { Menu } from '../../components/Menu';
 import { supabase } from '../../lib/supabase';
+import { DatasetDialog } from './data/DatasetDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
@@ -444,6 +445,8 @@ export function EditorPage() {
 
   return (
     <main className="mk ed" id="main">
+      {/* L25-09 : modale « Jeu de données » (Réglages ou graphique) */}
+      <DatasetDialog editor={editor} readOnly={readOnly} />
       {exporting && demoId && <ExportDialog demoId={demoId} onClose={() => setExporting(false)} />}
       {distributing && demoId && can('demo.edit') && (
         <DistributeDialog demoId={demoId} onClose={() => setDistributing(false)} />

@@ -214,6 +214,155 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     await shot('l25-08-graphique');
   }
 
+  // ===== L25-09 : jeu de données CSV =====
+  if (ONLY.includes('donnees')) {
+    const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
+    await p.locator('[data-step-index="0"]').click();
+    await frame.locator('b.value').first().click();
+    await p.waitForTimeout(300);
+    await p.getByRole('tab', { name: 'Réglages' }).click();
+    await p.getByRole('button', { name: 'Importer un fichier CSV' }).click();
+    const dlg = p.locator('.ds-dialog');
+    await dlg.waitFor();
+    const input = dlg.locator('input[type="file"]');
+    await input.setInputFiles({
+      name: 'contacts.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from('equipe;contact\nAntenne Nord;nord@acme.example\n'),
+    });
+    await p.waitForTimeout(300);
+    ok(
+      (await dlg.getByRole('alert').textContent()) ===
+        'La colonne « contact » contient des données personnelles : retirez-la du fichier.',
+      'colonne personnelle refusée à l’import',
+    );
+    await input.setInputFiles({
+      name: 'equipes-acme.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from(
+        '\uFEFFequipe;rapports;vues;responsable\nAntenne Nord;1 248;86;Équipe Nord\nAntenne Sud;932;64;Équipe Sud\nAntenne Est;611;40;Équipe Est\nAntenne Ouest;402;31;Équipe Ouest\n',
+      ),
+    });
+    await p.waitForTimeout(300);
+    ok(
+      (await dlg.locator('.ds-file').textContent()).includes(
+        '4 lignes · 4 colonnes · séparateur point-virgule, UTF-8',
+      ),
+      'fichier : lignes, colonnes, séparateur et encodage détectés',
+    );
+    ok(
+      (await dlg.locator('.ds-table').first().locator('tbody tr').count()) === 3,
+      'aperçu des 3 premières lignes',
+    );
+    await dlg.getByRole('combobox', { name: 'Relier la colonne « rapports »' }).selectOption({ index: 1 });
+    const chosen = await dlg
+      .getByRole('combobox', { name: 'Relier la colonne « rapports »' })
+      .locator('option:checked')
+      .textContent();
+    ok(chosen.startsWith('Élément b.value'), `colonne reliée à un élément (${chosen})`);
+    await dlg
+      .getByRole('combobox', { name: 'Relier la colonne « equipe »' })
+      .selectOption({ label: 'Variable {{company}}' });
+    const link = dlg.getByRole('radio', {
+      name: 'Selon le lien personnalisé (colonne equipe = {{company}})',
+    });
+    await link.check();
+    await shot('l25-09-donnees');
+    await dlg.getByRole('button', { name: 'Relier' }).click();
+    await p.waitForTimeout(800);
+    const row = (state.tables.demo_datasets || [])[0];
+    ok(
+      !!row && row.row_mode === 'link' && row.link_column === 'equipe' && row.bindings.length === 2,
+      `jeu enregistré (${JSON.stringify(row && { mode: row.row_mode, link: row.link_column, b: row.bindings.length })})`,
+    );
+    ok(
+      (await p.locator('.sec').filter({ hasText: 'equipes-acme.csv' }).textContent()).includes('2 publiées'),
+      'Réglages : 2 colonnes publiées sur 4',
+    );
+    await p.getByRole('button', { name: 'Publier', exact: true }).click();
+    const gd = p.locator('.gdpr-dialog');
+    await gd.waitFor();
+    ok(
+      (await gd.textContent()).includes('Jeu de données publié : 4 lignes, 2 colonnes reliées'),
+      'bilan RGPD : jeu de données compté',
+    );
+    await gd.getByRole('button', { name: 'Annuler' }).click();
+    await p.getByRole('tab', { name: 'Étape' }).click();
+
+    // Lecteur : la ligne du lien personnalisé remplace les valeurs de la capture
+    const sel = row.bindings.find((b) => b.kind === 'element').sel;
+    const manifest = {
+      schemaVersion: 1,
+      demoId: DEMO,
+      versionId: '0b5c1f0e-0000-4000-8000-0000000025e2',
+      workspaceId: 'w',
+      workspaceName: 'Acme',
+      title: 'Tableau de bord',
+      locale: 'fr',
+      publishedAt: '2026-11-19T10:00:00Z',
+      theme: {},
+      variables: [{ key: 'company', label: 'Entreprise', default: '' }],
+      dataset: {
+        columns: ['equipe', 'rapports'],
+        rows: [
+          ['Antenne Nord', '1 248'],
+          ['Antenne Sud', '932'],
+        ],
+        bindings: [
+          { column: 'equipe', kind: 'variable', key: 'company' },
+          { column: 'rapports', kind: 'element', stepId: 'h1', sel },
+        ],
+        rowMode: 'link',
+        linkColumn: 'equipe',
+      },
+      steps: [
+        {
+          id: 'h1',
+          kind: 'html',
+          title: 'Tableau de bord',
+          html: {
+            url: 'assets/h1.html',
+            title: 'Tableau de bord',
+            viewport: { w: 1280, h: 720 },
+            ops: [],
+            links: [],
+          },
+        },
+      ],
+    };
+    for (const [q, want] of [
+      ['?company=Antenne%20Sud', '932'],
+      ['?company=Ouest', '1 248'],
+    ]) {
+      const pp = await (await themedContext(b, { viewport: { width: 1280, height: 860 } })).newPage();
+      pp.on('pageerror', (e) => {
+        if (!/lacks the 'allow-same-origin' flag/.test(e.message)) errors.push(e.message);
+      });
+      await pp.route('**/functions/v1/open-demo', (r) =>
+        r.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({ status: 'ok', manifest }),
+          headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
+        }),
+      );
+      await pp.route('**/assets/*.html', (r) =>
+        r.fulfill({
+          contentType: 'text/html',
+          body: page('Tableau de bord'),
+          headers: { 'access-control-allow-origin': '*' },
+        }),
+      );
+      await pp.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, body: '{}' }));
+      await pp.goto(`${PLAYER}/${q}#/d/${DEMO}`);
+      const f = pp.frameLocator('iframe');
+      await f.locator('h1').waitFor();
+      await pp.waitForTimeout(500);
+      const v = await f.locator('b.value').first().textContent();
+      ok(v === want, `lecteur ${q} → « ${v} »`);
+      await pp.context().close();
+    }
+  }
+
   // ===== L25-10 : embranchement conditionnel =====
   if (ONLY.includes('conditions')) {
     const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';

@@ -1367,6 +1367,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      demo_datasets: {
+        Row: {
+          bindings: Json;
+          columns: Json;
+          created_at: string;
+          created_by: string | null;
+          demo_id: string;
+          id: string;
+          link_column: string | null;
+          name: string;
+          row_mode: string;
+          rows: Json;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          bindings?: Json;
+          columns: Json;
+          demo_id: string;
+          id?: string;
+          link_column?: string | null;
+          name: string;
+          row_mode?: string;
+          rows?: Json;
+          workspace_id: string;
+        };
+        Update: {
+          bindings?: Json;
+          columns?: Json;
+          link_column?: string | null;
+          name?: string;
+          row_mode?: string;
+          rows?: Json;
+        };
+        Relationships: [];
+      };
       demo_pages: {
         Row: {
           cta_label: string | null;

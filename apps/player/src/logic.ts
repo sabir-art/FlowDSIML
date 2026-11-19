@@ -1,5 +1,14 @@
 /** Logique pure du player (testée). */
-import type { ChoiceAction, Manifest, Quiz, QuizQuestion, RuleCond, RuleOp, Step } from '@flowdsiml/manifest';
+import type {
+  ChoiceAction,
+  Dataset,
+  Manifest,
+  Quiz,
+  QuizQuestion,
+  RuleCond,
+  RuleOp,
+  Step,
+} from '@flowdsiml/manifest';
 
 export { resolvePlacement, type Placement } from '@flowdsiml/player-core';
 
@@ -365,4 +374,74 @@ export function tabChanged(m: Manifest, i: number): boolean {
     if (t) return t.n !== cur.n;
   }
   return cur.n > 1;
+}
+
+/**
+ * L25-09 : ligne du jeu de données utilisée. « Selon le lien personnalisé » : la ligne dont la colonne
+ * de correspondance vaut la variable reliée à cette colonne ; sinon la ligne 1. Sans correspondance :
+ * null (les valeurs de la capture restent).
+ */
+export function datasetRow(ds: Dataset, vars: Record<string, string | undefined>): string[] | null {
+  if (!ds.rows.length) return null;
+  if (ds.rowMode === 'first' || !ds.linkColumn) return ds.rows[0]!;
+  const col = ds.columns.indexOf(ds.linkColumn);
+  const key = ds.bindings.find((b) => b.kind === 'variable' && b.column === ds.linkColumn)?.key;
+  const v = key ? vars[key] : undefined;
+  if (col < 0 || !v) return null;
+  return ds.rows.find((r) => norm(r[col] ?? '') === norm(v)) ?? null;
+}
+
+/** L25-09 : variables remplies par la ligne (hors variable de correspondance). */
+export function datasetVars(ds: Dataset, row: string[] | null): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!row) return out;
+  for (const b of ds.bindings) {
+    if (b.kind !== 'variable' || !b.key) continue;
+    if (ds.rowMode === 'link' && b.column === ds.linkColumn) continue;
+    const i = ds.columns.indexOf(b.column);
+    if (i >= 0 && row[i] !== undefined) out[b.key] = row[i]!;
+  }
+  return out;
+}
+
+/** L25-09 : lignes d'un graphique relié (libellé : colonne de correspondance ou autre colonne publiée). */
+export function datasetChartRows(ds: Dataset, column: string): Array<{ label: string; value: number }> {
+  const v = ds.columns.indexOf(column);
+  const labelCol =
+    ds.linkColumn && ds.linkColumn !== column ? ds.linkColumn : ds.columns.find((c) => c !== column);
+  const l = labelCol ? ds.columns.indexOf(labelCol) : -1;
+  if (v < 0) return [];
+  return ds.rows
+    .flatMap((r, i) => {
+      const n = ruleNumber(r[v] ?? '');
+      return n === null ? [] : [{ label: (l >= 0 ? (r[l] ?? '') : String(i + 1)).slice(0, 40), value: n }];
+    })
+    .slice(0, 12);
+}
+
+/** L25-09 : étape HTML avec les valeurs du jeu de données (éléments reliés, graphiques reliés). */
+export function withDataset(step: Step, ds: Dataset | null, row: string[] | null): Step {
+  if (!ds || step.kind !== 'html' || !step.html) return step;
+  const binds = ds.bindings.filter((b) => b.stepId === step.id);
+  if (!binds.length) return step;
+  const charts = new Map(
+    binds.flatMap((b) =>
+      b.kind === 'chart' && b.opId ? [[b.opId, datasetChartRows(ds, b.column)] as const] : [],
+    ),
+  );
+  const ops = step.html.ops.map((o) => {
+    const rows = charts.get(o.id);
+    if (o.op !== 'chart' || !rows?.length || !o.value || typeof o.value !== 'object' || !('rows' in o.value))
+      return o;
+    return { ...o, value: { ...o.value, rows } };
+  });
+  const texts = row
+    ? binds.flatMap((b, i) => {
+        const c = ds.columns.indexOf(b.column);
+        return b.kind === 'element' && b.sel && c >= 0
+          ? [{ id: `ds-${i}`, sel: b.sel, op: 'text' as const, value: row[c] ?? '', scope: 'step' as const }]
+          : [];
+      })
+    : [];
+  return { ...step, html: { ...step.html, ops: [...ops, ...texts] } };
 }

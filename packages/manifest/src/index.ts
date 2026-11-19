@@ -537,6 +537,30 @@ export const formSchema = z.object({
 });
 export type LeadForm = z.infer<typeof formSchema>;
 
+/** L25-09 : liaison d'une colonne (élément d'une étape HTML, graphique, variable). */
+export const datasetBindingSchema = z.object({
+  column: z.string().max(60),
+  kind: z.enum(['element', 'chart', 'variable']),
+  stepId: z.string().max(40).optional(),
+  sel: z.string().max(500).optional(),
+  opId: z.string().max(40).optional(),
+  key: z.string().max(40).optional(),
+  label: z.string().max(120).optional(),
+});
+export type DatasetBinding = z.infer<typeof datasetBindingSchema>;
+export const datasetSchema = z.object({
+  columns: z.array(z.string().max(60)).max(20),
+  rows: z.array(z.array(z.string().max(200)).max(20)).max(1000),
+  bindings: z
+    .array(datasetBindingSchema.catch(null as never))
+    .max(40)
+    .default([])
+    .transform((a) => a.filter(Boolean)),
+  rowMode: z.enum(['link', 'first']).default('first').catch('first'),
+  linkColumn: z.string().max(60).nullable().default(null),
+});
+export type Dataset = z.infer<typeof datasetSchema>;
+
 export const manifestSchema = z.object({
   schemaVersion: z.literal(MANIFEST_SCHEMA_VERSION),
   demoId: z.string(),
@@ -620,6 +644,11 @@ export const manifestSchema = z.object({
     .nullable()
     .default(null)
     .catch(null),
+  /**
+   * L25-09 : jeu de données publié, réduit aux colonnes liées (et à la colonne de correspondance).
+   * Ligne choisie selon le lien personnalisé (colonne = variable) ou toujours la première.
+   */
+  dataset: datasetSchema.nullable().default(null).catch(null),
   /** URL de l'endpoint d'ingestion analytics. */
   trackUrl: z.string().nullable().default(null),
 });

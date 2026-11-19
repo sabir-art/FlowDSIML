@@ -54,6 +54,9 @@ export function useHtmlEdit(stepId: string): HtmlEditState {
   }
   return s;
 }
+/** L25-09 : élément sélectionné dans le canevas HTML (cible proposée par « Relier les colonnes »). */
+export const htmlSelection = () => ({ stepId: state.stepId, selected: state.selected });
+
 /** Envoi vers la page de l'éditeur (canevas monté). */
 export const frameSend: {
   current:

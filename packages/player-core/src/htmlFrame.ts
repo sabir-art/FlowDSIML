@@ -306,7 +306,9 @@ export const FRAME_RUNTIME = `(function () {
   }
   function readChart(c) {
     if (c.querySelector && c.querySelector('canvas')) return null;
-    var svg = c.tagName.toLowerCase() === 'svg' ? c : (c.querySelectorAll('svg').length === 1 ? c.querySelector('svg') : null);
+    // SVG : l'élément lui-même ou son unique enfant direct (jamais un SVG plus profond de la page)
+    var direct = [].slice.call(c.children).filter(function (x) { return x.tagName.toLowerCase() === 'svg'; });
+    var svg = c.tagName.toLowerCase() === 'svg' ? c : (direct.length === 1 ? direct[0] : null);
     var rows = [], type = null, target = c;
     if (svg) {
       var texts = [].slice.call(svg.querySelectorAll('text')).map(function (t) { return (t.textContent || '').trim(); }).filter(Boolean);

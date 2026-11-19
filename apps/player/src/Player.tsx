@@ -47,6 +47,9 @@ import {
   choiceTarget,
   nextIndex,
   ruleTarget,
+  datasetRow,
+  datasetVars,
+  withDataset,
   tabChanged,
   tabsAt,
   type BranchMemory,
@@ -135,7 +138,7 @@ const MAX_RULE_JUMPS = 50;
 
 export function Player({
   manifest: raw,
-  values,
+  values: rawValues,
   tracker,
   preview,
   startQuiz,
@@ -158,6 +161,12 @@ export function Player({
     return abVariant(raw.ab.testId, raw.ab.splitB, store);
   }, [raw.ab, preview]);
   const m = useMemo(() => applyAb(raw, variant), [raw, variant]);
+  // L25-09 : ligne du jeu de données (lien personnalisé ou ligne 1) ; ses variables passent après l'URL
+  const dsRow = useMemo(() => (m.dataset ? datasetRow(m.dataset, rawValues) : null), [m.dataset, rawValues]);
+  const values = useMemo(
+    () => ({ ...(m.dataset ? datasetVars(m.dataset, dsRow) : {}), ...rawValues }),
+    [m.dataset, dsRow, rawValues],
+  );
   useEffect(() => {
     if (raw.ab && !preview) tracker.setBaseProps?.({ abt: raw.ab.testId, abv: variant });
   }, [raw.ab, preview, tracker, variant]);
@@ -788,7 +797,7 @@ export function Player({
           <>
             <HtmlStep
               key={step.id}
-              step={step}
+              step={withDataset(step, m.dataset, dsRow)}
               t={t}
               sub={sub}
               sandbox={sandbox}
