@@ -137,10 +137,10 @@
     },
     "continue": "Continue",
     "extTitle": "Install the capture extension",
-    "extSubtitle": "It records a capture at every click in your product. Nothing is sent until you click “Finish”.",
+    "extSubtitle": "It records a capture at every click in your software. Nothing is sent until you click “Finish”.",
     "ext1": "Add the extension to Chrome",
     "ext2": "Pin it to the toolbar",
-    "ext3": "Open your product and click “Start”",
+    "ext3": "Open your software and click “Start”",
     "addToChrome": "Add to Chrome",
     "importInstead": "Import captures instead",
     "popCaptures": "Captures",
@@ -1512,6 +1512,8 @@
       "help": "With the extension: open your software, start capturing and choose “Complete: {{title}}”. Each click fills the next step. You can also import an image."
     },
     "importWarn": "Image imported: no automatic detection of personal data. Check it and blur if needed.",
+    "railQuiz_one": "Quiz · {{count}} question",
+    "railQuiz_other": "Quiz · {{count}} questions",
     "importWarnMany_one": "Imported image: no automatic detection of personal data. Check it and blur if needed.",
     "importWarnMany_other": "{{count}} imported images: no automatic detection of personal data. Check them and blur if needed."
   },

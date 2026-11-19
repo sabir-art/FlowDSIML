@@ -145,6 +145,20 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     state.tables.quiz_questions.filter((q) => q.demo_id === id).length === 3,
     'brouillon (REV-08) : quiz de 3 questions',
   );
+  const railQuiz = page.getByRole('link', { name: 'Quiz · 3 questions' });
+  await railQuiz.waitFor();
+  ok(
+    (await railQuiz.getAttribute('href')).endsWith(`/demos/${id}/quiz`),
+    'REV-08 : « Quiz · 3 questions » dans le rail, vers la page Quiz',
+  );
+  if (SHOTS) {
+    await page.mouse.move(0, 0);
+    const rail = await page.locator('.rail-quiz').boundingBox();
+    await page.screenshot({
+      path: `${SHOTS}/rev-08-rail-quiz${sfx}.png`,
+      clip: { x: 0, y: Math.max(0, rail.y - 420), width: 420, height: 500 },
+    });
+  }
 
   // ===== Étape « À capturer » =====
   const frame = page.locator('.canvas-tocapture');

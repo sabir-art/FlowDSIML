@@ -19,6 +19,7 @@ import {
   Flag,
   CornerDownRight,
   GitBranch,
+  GraduationCap,
   GripVertical,
   ImageOff,
   ImagePlus,
@@ -35,6 +36,7 @@ import {
 import { Menu, type MenuItem } from '../../components/Menu';
 import { asStepOptions, type StepRow } from './types';
 import { Fragment, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
 import type { DemoEditor } from './useDemoEditor';
@@ -402,6 +404,13 @@ export function StepList({
           );
         })}
       </ol>
+      {/* REV-08 : le quiz (après la dernière étape) est visible dans le rail et s'ouvre en un clic */}
+      {editor.questions.length > 0 && editor.demo && (
+        <Link className="rail-quiz" to={`/demos/${editor.demo.id}/quiz`}>
+          <GraduationCap aria-hidden="true" />
+          <span>{t('editor.railQuiz', { count: editor.questions.length })}</span>
+        </Link>
+      )}
       {!readOnly && (
         <div className="rail-foot">
           <Menu
