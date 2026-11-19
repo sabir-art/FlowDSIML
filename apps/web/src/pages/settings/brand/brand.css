@@ -68,6 +68,8 @@
 }
 .br-sub {
   margin: 4px 0 0;
+  text-transform: none;
+  letter-spacing: normal;
   font-size: 13px;
   font-weight: 600;
 }

@@ -26,11 +26,40 @@ interface State {
   hiddenAt: string | null;
 }
 
+/**
+ * État de la prise en main, chargé par la page Démos avant son premier affichage (la carte arrive en
+ * même temps que la liste : aucun saut de mise en page).
+ */
+export function useOnboarding() {
+  const { current, can } = useWorkspace();
+  const wsId = current?.id;
+  const editor = can('demo.edit');
+  const [state, setState] = useState<State | null>(null);
+  const [ready, setReady] = useState(!editor);
+  const load = useCallback(() => {
+    if (!editor || !wsId) return setReady(true);
+    void supabase
+      .rpc('workspace_onboarding', { p_ws: wsId })
+      .then(({ data }) => setState(data as State | null))
+      .then(() => setReady(true));
+  }, [wsId, editor]);
+  useEffect(load, [load]);
+  // « Reprendre la prise en main » depuis l'aide
+  useEffect(() => {
+    addEventListener('fd:onboarding', load);
+    return () => removeEventListener('fd:onboarding', load);
+  }, [load]);
+  return { state, setState, ready };
+}
+export type Onboarding = ReturnType<typeof useOnboarding>;
+
 export function OnboardingCard({
+  onb,
   onCapture,
   latestDemoId,
   publishedDemoId,
 }: {
+  onb: Onboarding;
   onCapture: () => void;
   latestDemoId: string | null;
   publishedDemoId: string | null;
@@ -41,7 +70,7 @@ export function OnboardingCard({
   const { current, can } = useWorkspace();
   const ws = current!;
   const admin = ws.role === 'owner' || ws.role === 'admin';
-  const [state, setState] = useState<State | null>(null);
+  const { state, setState } = onb;
   const [open, setOpen] = useState(() => {
     try {
       return localStorage.getItem(`fd.onb.collapsed.${ws.id}`) !== '1';
@@ -50,19 +79,6 @@ export function OnboardingCard({
     }
   });
   const [tour, setTour] = useState<{ id: string; title: string } | null>(null);
-
-  const load = useCallback(() => {
-    if (!can('demo.edit')) return;
-    void supabase
-      .rpc('workspace_onboarding', { p_ws: ws.id })
-      .then(({ data }) => setState(data as State | null));
-  }, [ws.id, can]);
-  useEffect(load, [load]);
-  // « Reprendre la prise en main » depuis l'aide
-  useEffect(() => {
-    addEventListener('fd:onboarding', load);
-    return () => removeEventListener('fd:onboarding', load);
-  }, [load]);
 
   if (!state || !can('demo.edit') || state.hiddenAt) return null;
   const visible = admin ? [...STEPS] : EDITOR_STEPS;

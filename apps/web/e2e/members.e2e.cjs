@@ -63,10 +63,12 @@ const SHOTS = process.env.SHOTS_DIR;
   ok(!state.tables.members.some((m) => m.user_id === 'u-5'), 'membre retiré');
 
   await page.getByRole('link', { name: 'Marque' }).click();
-  await page.waitForSelector('.st-brand-note');
+  // L27 : la Marque est active ; seule la carte « Page publique » reste « Bientôt »
+  const pp = page.getByRole('region', { name: /Page publique/ });
+  await pp.waitFor();
   ok(
-    (await page.locator('.st-brand input:disabled').count()) >= 4,
-    'PRM-07 : onglet Marque désactivé (Bientôt)',
+    (await pp.locator('input:disabled').count()) >= 4 && /Bientôt/.test(await pp.innerText()),
+    'PRM-07 : page publique toujours « Bientôt »',
   );
 
   await page.getByRole('link', { name: 'Variables' }).click();

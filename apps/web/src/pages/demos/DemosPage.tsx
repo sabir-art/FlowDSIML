@@ -44,7 +44,7 @@ import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
 import { NewDemoDialog } from './NewDemoDialog';
 import { TemplatesDialog } from './TemplatesDialog';
-import { OnboardingCard } from './OnboardingCard';
+import { OnboardingCard, useOnboarding } from './OnboardingCard';
 import { ExportDialog } from '../export/ExportDialog';
 import { DistributeDialog } from '../share/DistributeDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -67,6 +67,7 @@ export function DemosPage() {
   const { current, can } = useWorkspace();
   const ws = current!;
   const [demos, setDemos] = useState<Demo[] | null>(null);
+  const onb = useOnboarding();
   const [folders, setFolders] = useState<FolderRow[]>([]);
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [covers, setCovers] = useState<Record<string, string>>({});
@@ -122,11 +123,6 @@ export function DemosPage() {
       supabase.rpc('workspace_overview', { p_workspace: ws.id, p_days: 30 }),
     ]);
     const list = d.data ?? [];
-    setDemos(list);
-    setFolders(f.data ?? []);
-    setStats(
-      Object.fromEntries(((o.data ?? []) as Array<Stats & { demo_id: string }>).map((r) => [r.demo_id, r])),
-    );
     // KPI du workspace sur 30 jours (et les 30 précédents pour les variations). Repli sur la somme
     // de workspace_overview si la RPC workspace_kpis (migration 130800) n'est pas encore en place.
     const now = Date.now();
@@ -139,6 +135,12 @@ export function DemosPage() {
       }),
       supabase.rpc('workspace_kpis', { p_workspace: ws.id, p_from: iso(60), p_to: iso(30) }),
     ]);
+    // Liste et indicateurs affichés ensemble (aucun saut de mise en page au chargement)
+    setFolders(f.data ?? []);
+    setStats(
+      Object.fromEntries(((o.data ?? []) as Array<Stats & { demo_id: string }>).map((r) => [r.demo_id, r])),
+    );
+    setDemos(list);
     if (!cur.error && cur.data)
       setKpis({ cur: cur.data as unknown as Kpis, prev: (prev.data as unknown as Kpis) ?? null });
     else {
@@ -259,7 +261,7 @@ export function DemosPage() {
     });
   }
 
-  if (!demos) return <Loading />;
+  if (!demos || !onb.ready) return <Loading />;
 
   /** DSH-10 : publiée puis modifiée (changements non publiés). */
   const isModified = (d: Demo) =>
@@ -382,6 +384,7 @@ export function DemosPage() {
 
       {/* L26-01 : « Prise en main de votre espace » (remplace « Premiers pas ») */}
       <OnboardingCard
+        onb={onb}
         onCapture={openNew}
         latestDemoId={demos[0]?.id ?? null}
         publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}

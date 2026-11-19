@@ -58,26 +58,25 @@ export function Members() {
   const canManage = can('members.manage');
 
   const load = useCallback(async () => {
-    const [m, u] = await Promise.all([
+    // Tout est chargé avant l'affichage : membres et invitations arrivent ensemble (pas de saut)
+    const [m, u, i] = await Promise.all([
       supabase.rpc('list_members', { p_workspace: ws.id }),
       supabase.rpc('workspace_usage', { p_workspace: ws.id }),
+      canManage
+        ? supabase
+            .from('invitations')
+            .select('*')
+            .eq('workspace_id', ws.id)
+            .is('accepted_at', null)
+            .order('created_at', { ascending: false })
+        : Promise.resolve({ data: [] as Tables<'invitations'>[] }),
     ]);
-    setMembers((m.data ?? []) as MemberRow[]);
     const us = u.data as unknown as { plan: string; limits: { members: number | null } } | null;
+    const p = us ? await supabase.from('plans').select('name').eq('code', us.plan).maybeSingle() : null;
+    setMembers((m.data ?? []) as MemberRow[]);
+    setInvites(i.data ?? []);
     setUsage(us);
-    if (us) {
-      const p = await supabase.from('plans').select('name').eq('code', us.plan).maybeSingle();
-      setPlanName(p.data?.name ?? us.plan);
-    }
-    if (canManage) {
-      const i = await supabase
-        .from('invitations')
-        .select('*')
-        .eq('workspace_id', ws.id)
-        .is('accepted_at', null)
-        .order('created_at', { ascending: false });
-      setInvites(i.data ?? []);
-    }
+    if (us) setPlanName(p?.data?.name ?? us.plan);
   }, [ws.id, canManage]);
 
   useEffect(() => {
