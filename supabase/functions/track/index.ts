@@ -50,7 +50,10 @@ Deno.serve(async (req) => {
   if (!batch || typeof batch !== 'object' || !Array.isArray(batch.events))
     return json(400, { error: 'bad_batch' });
 
-  // L'IP n'est jamais stockée (minimisation RGPD).
+  // L'IP n'est jamais stockée (minimisation RGPD). Pays (L19) : seul le code à 2 lettres de l'en-tête
+  // cf-ipcountry est gardé, et il remplace toujours une valeur envoyée par le client ; null sinon.
+  const cc = (req.headers.get('cf-ipcountry') ?? '').trim().toUpperCase();
+  batch.country = /^[A-Z]{2}$/.test(cc) ? cc : null;
   const { data, error } = await supabase.rpc('track_events', { p_batch: batch });
   if (error) return json(400, { error: 'rejected' });
   return json(200, { inserted: data });

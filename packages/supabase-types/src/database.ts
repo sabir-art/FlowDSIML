@@ -251,11 +251,16 @@ export type Database = {
       events: {
         Row: {
           demo_id: string;
+          browser: string | null;
+          country: string | null;
+          device: string | null;
           embed_origin: string | null;
           hotspot_id: string | null;
           id: number;
+          lang: string | null;
           link_id: string | null;
           occurred_at: string;
+          os: string | null;
           props: NonNullable<Json>;
           referrer_host: string | null;
           session_id: string;
@@ -269,10 +274,15 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           demo_id: string;
+          browser?: string | null;
+          country?: string | null;
+          device?: string | null;
           embed_origin?: string | null;
           hotspot_id?: string | null;
           id?: never;
+          lang?: string | null;
           link_id?: string | null;
+          os?: string | null;
           occurred_at?: string;
           props?: NonNullable<Json>;
           referrer_host?: string | null;
@@ -286,10 +296,15 @@ export type Database = {
         };
         Update: {
           demo_id?: string;
+          browser?: string | null;
+          country?: string | null;
+          device?: string | null;
           embed_origin?: string | null;
           hotspot_id?: string | null;
           id?: never;
+          lang?: string | null;
           link_id?: string | null;
+          os?: string | null;
           occurred_at?: string;
           props?: NonNullable<Json>;
           referrer_host?: string | null;
@@ -1285,6 +1300,22 @@ export type Database = {
         };
         Relationships: [];
       };
+      survey_text_answers: {
+        Row: {
+          attempt_id: string;
+          body: string;
+          created_at: string;
+          demo_id: string;
+          id: string;
+          question_id: string;
+          visitor_id: string;
+          workspace_id: string;
+        };
+        /** Écrites seulement par submit_quiz_attempt (aucune écriture directe). */
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       quiz_questions: {
         Row: {
           answers: NonNullable<Json>;
@@ -1904,6 +1935,9 @@ export type Database = {
       set_center_access: { Args: { p_mode: string; p_ws: string }; Returns: undefined };
       set_center_password: { Args: { p_password: string; p_ws: string }; Returns: undefined };
       submit_quiz_attempt: { Args: { p_batch: Json }; Returns: Json };
+      survey_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
+      survey_texts: { Args: { p_demo: string; p_question?: string | null; p_limit?: number }; Returns: Json };
+      choice_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
       purge_old_events: { Args: Record<PropertyKey, never>; Returns: number };
       resolve_share_link: { Args: { p_token: string }; Returns: Json };
       set_demo_access: {
