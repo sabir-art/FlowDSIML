@@ -177,7 +177,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const withLogo = JSON.parse(state.storage[key].data.toString());
   withLogo.theme = {
     ...withLogo.theme,
-    logoUrl: 'https://ffzlhlxfratcbitkuvli.supabase.co/storage/v1/object/public/branding/logo.png',
+    logoUrl: 'https://api.tutoclick.example/storage/v1/object/public/branding/logo.png',
   };
   state.storage['branding/logo.png'] = {
     data: require('fs').readFileSync(`${__dirname}/fixture.png`),

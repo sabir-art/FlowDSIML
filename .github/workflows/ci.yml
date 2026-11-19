@@ -79,7 +79,9 @@ jobs:
       - name: App web et lecteur (serveurs de dev, faux Supabase dans les tests)
         env:
           VITE_SUPABASE_ANON_KEY: test
-          VITE_PLAYER_URL: http://localhost:5174
+          # Hôtes fictifs : le faux Supabase et l'adresse publique du lecteur sont servis par les tests
+          VITE_SUPABASE_URL: https://api.tutoclick.example
+          VITE_PLAYER_URL: https://demos.tutoclick.example
           VITE_APP_ORIGIN: http://localhost:5173
         run: |
           (cd apps/web && nohup pnpm exec vite --port 5173 --strictPort > /tmp/web.log 2>&1 &)

@@ -8,8 +8,12 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const HOST = 'https://ffzlhlxfratcbitkuvli.supabase.co';
-const STORAGE_KEY = 'sb-ffzlhlxfratcbitkuvli-auth-token';
+// Hôtes fictifs (captures) : l'app et le lecteur sont lancés avec VITE_SUPABASE_URL=HOST et
+// VITE_PLAYER_URL=PUBLIC_PLAYER ; PUBLIC_PLAYER est servi par le lecteur local (LOCAL_PLAYER).
+const HOST = process.env.FAKE_SUPABASE_HOST || 'https://api.tutoclick.example';
+const PUBLIC_PLAYER = process.env.PUBLIC_PLAYER_URL || 'https://demos.tutoclick.example';
+const LOCAL_PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
+const STORAGE_KEY = `sb-${new URL(HOST).hostname.split('.')[0]}-auth-token`;
 
 function b64url(o) {
   return Buffer.from(JSON.stringify(o)).toString('base64url');
@@ -274,6 +278,17 @@ async function install(page, state = seed()) {
         },
       ],
     );
+
+  // Adresse publique fictive du lecteur (codes d'intégration, liens, aperçus) servie par le lecteur local
+  await page.route(`${PUBLIC_PLAYER}/**`, async (route) => {
+    const u = new URL(route.request().url());
+    try {
+      const res = await route.fetch({ url: `${LOCAL_PLAYER}${u.pathname}${u.search}` });
+      return route.fulfill({ response: res });
+    } catch {
+      return route.abort();
+    }
+  });
 
   await page.route(`${HOST}/**`, async (route) => {
     const req = route.request();
@@ -1459,4 +1474,4 @@ function defaults(table, r) {
   return {};
 }
 
-module.exports = { install, seed, HOST };
+module.exports = { install, seed, HOST, PUBLIC_PLAYER };

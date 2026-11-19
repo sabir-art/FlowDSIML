@@ -11,7 +11,7 @@ const { install, seed } = require('./fake-supabase.cjs');
 const { seedExport } = require('./export-data.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
-const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
+const { PUBLIC_PLAYER } = require('./fake-supabase.cjs');
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const LMS = 'http://lms.exemple.test';
@@ -509,7 +509,7 @@ function seedDistribute(s, { published = true } = {}) {
   await pdlg.waitFor();
   const src = await pdlg.locator('iframe').getAttribute('src');
   ok(
-    src.startsWith(`${PLAYER}/#/d/${DEMO}?`) && /start=click/.test(src) && /lang=en/.test(src),
+    src.startsWith(`${PUBLIC_PLAYER}/#/d/${DEMO}?`) && /start=click/.test(src) && /lang=en/.test(src),
     'popup.js : lecteur avec réglages',
   );
   const frame = host.frameLocator('dialog.tcp-dlg iframe');
