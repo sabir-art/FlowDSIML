@@ -36,7 +36,7 @@ export function Profile() {
     e.preventDefault();
     await info.run(async () => {
       check(await supabase.from('profiles').update({ full_name: fullName, locale }).eq('id', user!.id));
-      setLocale(locale);
+      void setLocale(locale);
       await refreshProfile();
       toast(t('workspace.saved'));
     });

@@ -1,6 +1,4 @@
 import { RouteFocus } from './lib/routeFocus';
-import { CenterSettings } from './pages/center/CenterSettings';
-import { LearnersPage } from './pages/learners/LearnersPage';
 import { lazy, Suspense, useEffect } from 'react';
 import { ToastProvider } from './components/Toast';
 import { HelpProvider } from './help/HelpProvider';
@@ -18,21 +16,48 @@ import { Signup } from './pages/auth/Signup';
 import { LegalSoon } from './pages/auth/LegalSoon';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
 import { ResetPassword } from './pages/auth/ResetPassword';
-import { Onboarding } from './pages/Onboarding';
-import { AcceptInvite } from './pages/AcceptInvite';
-import { Profile } from './pages/settings/Profile';
-import { Members } from './pages/settings/Members';
-import { WorkspaceSettings } from './pages/settings/WorkspaceSettings';
-import { PlansPage } from './pages/settings/PlansPage';
-import { BrandSettings, VariablesSettings } from './pages/settings/SoonSections';
-import { GlossarySettings } from './pages/settings/GlossarySettings';
-import { SecuritySettings, SoonFeatures } from './pages/settings/SoonFeatures';
-import { PrivacySettings } from './pages/settings/PrivacySettings';
-import { DemosPage } from './pages/demos/DemosPage';
-import { IntegrationsPage } from './pages/settings/integrations/IntegrationsPage';
-import { WebhookDetail } from './pages/settings/integrations/WebhookDetail';
 
 // Pages lourdes chargées à la demande (éditeur, analytics, partage).
+// L27 : chaque page est un morceau chargé à la demande (bundle initial réduit)
+const CenterSettings = lazy(() =>
+  import('./pages/center/CenterSettings').then((m) => ({ default: m.CenterSettings })),
+);
+const LearnersPage = lazy(() =>
+  import('./pages/learners/LearnersPage').then((m) => ({ default: m.LearnersPage })),
+);
+const Onboarding = lazy(() => import('./pages/Onboarding').then((m) => ({ default: m.Onboarding })));
+const AcceptInvite = lazy(() => import('./pages/AcceptInvite').then((m) => ({ default: m.AcceptInvite })));
+const Profile = lazy(() => import('./pages/settings/Profile').then((m) => ({ default: m.Profile })));
+const Members = lazy(() => import('./pages/settings/Members').then((m) => ({ default: m.Members })));
+const WorkspaceSettings = lazy(() =>
+  import('./pages/settings/WorkspaceSettings').then((m) => ({ default: m.WorkspaceSettings })),
+);
+const PlansPage = lazy(() => import('./pages/settings/PlansPage').then((m) => ({ default: m.PlansPage })));
+const GlossarySettings = lazy(() =>
+  import('./pages/settings/GlossarySettings').then((m) => ({ default: m.GlossarySettings })),
+);
+const PrivacySettings = lazy(() =>
+  import('./pages/settings/PrivacySettings').then((m) => ({ default: m.PrivacySettings })),
+);
+const DemosPage = lazy(() => import('./pages/demos/DemosPage').then((m) => ({ default: m.DemosPage })));
+const IntegrationsPage = lazy(() =>
+  import('./pages/settings/integrations/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage })),
+);
+const WebhookDetail = lazy(() =>
+  import('./pages/settings/integrations/WebhookDetail').then((m) => ({ default: m.WebhookDetail })),
+);
+const BrandSettings = lazy(() =>
+  import('./pages/settings/SoonSections').then((m) => ({ default: m.BrandSettings })),
+);
+const VariablesSettings = lazy(() =>
+  import('./pages/settings/SoonSections').then((m) => ({ default: m.VariablesSettings })),
+);
+const SecuritySettings = lazy(() =>
+  import('./pages/settings/SoonFeatures').then((m) => ({ default: m.SecuritySettings })),
+);
+const SoonFeatures = lazy(() =>
+  import('./pages/settings/SoonFeatures').then((m) => ({ default: m.SoonFeatures })),
+);
 const PresenterPage = lazy(() =>
   import('./pages/present/PresenterPage').then((m) => ({ default: m.PresenterPage })),
 );

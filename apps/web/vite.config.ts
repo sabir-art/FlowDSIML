@@ -14,5 +14,21 @@ export default defineConfig({
     { name: 'app-name', transformIndexHtml: (html: string) => html.replaceAll('%APP_NAME%', APP_NAME) },
   ],
   server: { port: 5173 },
+  // L27 : bibliothèques de base dans des morceaux à part (cache gardé d'un déploiement à l'autre) ;
+  // les pages, l'éditeur, les analytics et les exports PDF / MP4 sont chargés à la demande.
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return undefined;
+          if (/[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'vendor-react';
+          if (/[\\/]react-router/.test(id)) return 'vendor-router';
+          if (/[\\/]@supabase[\\/]/.test(id)) return 'vendor-supabase';
+          if (/[\\/](i18next|react-i18next)[\\/]/.test(id)) return 'vendor-i18n';
+          return undefined;
+        },
+      },
+    },
+  },
   test: { environment: 'jsdom' },
 });

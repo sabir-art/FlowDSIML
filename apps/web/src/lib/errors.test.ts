@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import i18n from '../i18n';
+import i18n, { setLocale } from '../i18n';
 import { errorMessage } from './errors';
 
 describe('errorMessage', () => {
@@ -11,7 +11,7 @@ describe('errorMessage', () => {
     );
   });
   it('a une traduction anglaise', async () => {
-    await i18n.changeLanguage('en');
+    await setLocale('en');
     expect(errorMessage(i18n.t, { message: 'INVITATION_EXPIRED' })).toBe('This invitation has expired.');
   });
   it('les deux langues ont les mêmes clés', async () => {

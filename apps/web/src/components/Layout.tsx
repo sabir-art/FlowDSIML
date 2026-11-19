@@ -84,7 +84,7 @@ export function Layout() {
 
   const switchLang = () => {
     const lng = i18n.language === 'en' ? 'fr' : 'en';
-    setLocale(lng);
+    void setLocale(lng);
     // Requête paresseuse : .then() la déclenche (sans lui, la langue n'était jamais enregistrée)
     if (user)
       void supabase
