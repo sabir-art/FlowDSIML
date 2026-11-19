@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "demoId": "00000000-0000-4000-8000-000000000001",
+  "versionId": "00000000-0000-4000-8000-000000000101",
+  "workspaceId": "00000000-0000-4000-8000-000000000000",
+  "title": "Visite de la page Démos",
+  "locale": "fr",
+  "publishedAt": "2026-11-20T00:00:00.000Z",
+  "theme": {},
+  "variables": [],
+  "chapters": [],
+  "forms": [],
+  "allowedEmbedOrigins": [],
+  "trackUrl": null,
+  "steps": [
+    {
+      "id": "page-demos-1",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "1.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "Vos démos",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-demos-1-h",
+          "x": 0.19722222222222222,
+          "y": 0.022222222222222223,
+          "w": 0.1944552951388889,
+          "h": 0.04977430555555556,
+          "title": "Vos démos",
+          "body": "Toutes les démos de l'espace sont ici, triées par dernière modification.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-demos-2",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "2.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-demos-2-h",
+          "x": 0.8401150173611112,
+          "y": 0.029878472222222223,
+          "w": 0.14044053819444444,
+          "h": 0.06222222222222222,
+          "title": "",
+          "body": "Cliquez sur « Nouvelle démo » pour capturer, importer des images ou partir d'un modèle.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-demos-3",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "3.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-demos-3-h",
+          "x": 0.6401150173611111,
+          "y": 0.032100694444444446,
+          "w": 0.2,
+          "h": 0.057777777777777775,
+          "title": "",
+          "body": "Cherchez une démo par son titre ou une étiquette.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-demos-4",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "4.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-demos-4-h",
+          "x": 0.31832682291666664,
+          "y": 0.37310763888888887,
+          "w": 0.2228515625,
+          "h": 0.05555555555555555,
+          "title": "",
+          "body": "Filtrez les brouillons, les démos publiées ou celles qui ont des modifications non publiées.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-demos-5",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "5.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-demos-5-h",
+          "x": 0.5423611111111111,
+          "y": 0.6357465277777777,
+          "w": 0.027777777777777776,
+          "h": 0.044444444444444446,
+          "title": "",
+          "body": "Le menu ⋯ permet de dupliquer, déplacer, présenter ou archiver une démo.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-demos-fin",
+      "chapterId": null,
+      "kind": "text",
+      "image": null,
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "C'est à vous",
+      "body": "Retrouvez cette visite dans l'aide (touche F1).",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": []
+    }
+  ]
+}

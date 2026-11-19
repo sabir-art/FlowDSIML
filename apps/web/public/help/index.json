@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "tours": [
+    {
+      "key": "page:demos",
+      "id": "page-demos",
+      "kind": "page",
+      "order": null,
+      "title": "Visite de la page Démos",
+      "steps": 5
+    },
+    {
+      "key": "page:editor",
+      "id": "page-editor",
+      "kind": "page",
+      "order": null,
+      "title": "Visite de l'éditeur",
+      "steps": 7
+    },
+    {
+      "key": "page:share",
+      "id": "page-share",
+      "kind": "page",
+      "order": null,
+      "title": "Visite de Partager",
+      "steps": 4
+    },
+    {
+      "key": "page:distribution",
+      "id": "page-distribution",
+      "kind": "page",
+      "order": null,
+      "title": "Visite de la diffusion",
+      "steps": 4
+    },
+    {
+      "key": "page:analytics",
+      "id": "page-analytics",
+      "kind": "page",
+      "order": null,
+      "title": "Visite d'Analytics",
+      "steps": 5
+    },
+    {
+      "key": "page:learners",
+      "id": "page-learners",
+      "kind": "page",
+      "order": null,
+      "title": "Visite du suivi des apprenants",
+      "steps": 3
+    },
+    {
+      "key": "page:center",
+      "id": "page-center",
+      "kind": "page",
+      "order": null,
+      "title": "Visite du centre de formation",
+      "steps": 3
+    },
+    {
+      "key": "page:settings",
+      "id": "page-settings",
+      "kind": "page",
+      "order": null,
+      "title": "Visite des paramètres",
+      "steps": 4
+    },
+    {
+      "key": "learn:edit",
+      "id": "learn-edit",
+      "kind": "module",
+      "order": 2,
+      "title": "Modifier une étape",
+      "steps": 6
+    },
+    {
+      "key": "learn:blur",
+      "id": "learn-blur",
+      "kind": "module",
+      "order": 3,
+      "title": "Flouter les données",
+      "steps": 5
+    },
+    {
+      "key": "learn:share",
+      "id": "learn-share",
+      "kind": "module",
+      "order": 4,
+      "title": "Publier et partager",
+      "steps": 5
+    },
+    {
+      "key": "learn:distribute",
+      "id": "learn-distribute",
+      "kind": "module",
+      "order": 5,
+      "title": "Diffuser (intranet, SCORM)",
+      "steps": 7
+    },
+    {
+      "key": "learn:analytics",
+      "id": "learn-analytics",
+      "kind": "module",
+      "order": 6,
+      "title": "Lire les statistiques",
+      "steps": 4
+    }
+  ]
+}

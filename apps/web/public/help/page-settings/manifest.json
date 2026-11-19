@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "demoId": "00000000-0000-4000-8000-000000000008",
+  "versionId": "00000000-0000-4000-8000-000000000108",
+  "workspaceId": "00000000-0000-4000-8000-000000000000",
+  "title": "Visite des paramètres",
+  "locale": "fr",
+  "publishedAt": "2026-11-20T00:00:00.000Z",
+  "theme": {},
+  "variables": [],
+  "chapters": [],
+  "forms": [],
+  "allowedEmbedOrigins": [],
+  "trackUrl": null,
+  "steps": [
+    {
+      "id": "page-settings-1",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "1.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "Votre marque",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-settings-1-h",
+          "x": 0.19722222222222222,
+          "y": 0.21444444444444444,
+          "w": 0.14444444444444443,
+          "h": 0.04888888888888889,
+          "title": "Votre marque",
+          "body": "Logo, couleurs et style par défaut des démos.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-settings-2",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "2.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-settings-2-h",
+          "x": 0.008333333333333333,
+          "y": 0.5457638888888889,
+          "w": 0.16111111111111112,
+          "h": 0.057777777777777775,
+          "title": "",
+          "body": "Ajoutez des membres avec un lien d'invitation et choisissez leur rôle.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-settings-3",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "3.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-settings-3-h",
+          "x": 0.5590277777777778,
+          "y": 0.6805034722222222,
+          "w": 0.4041666666666667,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Indiquez le contact du support affiché dans l'aide.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-settings-4",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "4.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-settings-4-h",
+          "x": 0.19722222222222222,
+          "y": 0.4255555555555556,
+          "w": 0.14444444444444443,
+          "h": 0.04888888888888889,
+          "title": "",
+          "body": "Réglez la mesure des visites et la conservation des données.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-settings-fin",
+      "chapterId": null,
+      "kind": "text",
+      "image": null,
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "C'est à vous",
+      "body": "Retrouvez cette visite dans l'aide (touche F1).",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": []
+    }
+  ]
+}

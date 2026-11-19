@@ -9,10 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { CircleCheck, Circle, GraduationCap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { TourDialog } from './TourDialog';
+import { MODULE_TOUR, loadTours, type TourEntry } from './tours';
 
 export const MODULES = ['capturer', 'modifier', 'flouter', 'publier', 'diffuser', 'statistiques'] as const;
 export type Module = (typeof MODULES)[number];
-type Tour = { key: string; demo_id: string; title: string; steps: number };
+type Tour = TourEntry;
 
 export function Academy() {
   const { t } = useTranslation();
@@ -21,18 +22,16 @@ export function Academy() {
   const [playing, setPlaying] = useState<Module | null>(null);
 
   useEffect(() => {
-    void Promise.all([
-      supabase.from('learn_progress').select('module'),
-      supabase
-        .from('help_tours')
-        .select('key, demo_id, title, steps')
-        .in(
-          'key',
-          MODULES.map((m) => `learn-${m}`),
-        ),
-    ]).then(([p, h]) => {
+    void Promise.all([supabase.from('learn_progress').select('module'), loadTours()]).then(([p, list]) => {
       setDone(new Set((p.data ?? []).map((r) => r.module)));
-      setTours(Object.fromEntries((h.data ?? []).map((r) => [r.key.replace(/^learn-/, ''), r])));
+      setTours(
+        Object.fromEntries(
+          MODULES.flatMap((m) => {
+            const e = list.find((x) => x.key === MODULE_TOUR[m]);
+            return e ? [[m, e]] : [];
+          }),
+        ),
+      );
     });
   }, []);
 
@@ -45,7 +44,10 @@ export function Academy() {
       .then(() => undefined);
   };
 
-  const n = MODULES.filter((m) => done.has(m)).length;
+  // La progression ne compte que les modules disponibles (« 0 sur 2 » s'il n'y en a que 2)
+  const available = MODULES.filter((m) => tours[m]);
+  const n = available.filter((m) => done.has(m)).length;
+  const total = available.length;
   const next = MODULES.find((m) => !done.has(m) && tours[m]);
   const tour = playing ? tours[playing] : null;
   return (
@@ -53,18 +55,18 @@ export function Academy() {
       <div className="academy-head">
         <GraduationCap aria-hidden="true" />
         <b id="ac-t">{t('learn.title')}</b>
-        <span className="help-muted academy-count">{t('learn.count', { n, total: MODULES.length })}</span>
+        {total > 0 && <span className="help-muted academy-count">{t('learn.count', { n, total })}</span>}
       </div>
       <div
         className="academy-bar"
         role="progressbar"
         aria-label={t('learn.progress')}
         aria-valuemin={0}
-        aria-valuemax={MODULES.length}
+        aria-valuemax={total || 1}
         aria-valuenow={n}
-        aria-valuetext={t('learn.valuetext', { count: n, total: MODULES.length })}
+        aria-valuetext={t('learn.valuetext', { count: n, total })}
       >
-        <span style={{ width: `${(n / MODULES.length) * 100}%` }} />
+        <span style={{ width: `${total ? (n / total) * 100 : 0}%` }} />
       </div>
       <ol>
         {MODULES.map((m) => {
@@ -97,7 +99,7 @@ export function Academy() {
       </ol>
       {tour && playing && (
         <TourDialog
-          demoId={tour.demo_id}
+          tourId={tour.id}
           title={tour.title || t(`learn.m.${playing}`)}
           onComplete={() => finish(playing)}
           onClose={() => setPlaying(null)}

@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "demoId": "00000000-0000-4000-8000-000000000003",
+  "versionId": "00000000-0000-4000-8000-000000000103",
+  "workspaceId": "00000000-0000-4000-8000-000000000000",
+  "title": "Visite de Partager",
+  "locale": "fr",
+  "publishedAt": "2026-11-20T00:00:00.000Z",
+  "theme": {},
+  "variables": [],
+  "chapters": [],
+  "forms": [],
+  "allowedEmbedOrigins": [],
+  "trackUrl": null,
+  "steps": [
+    {
+      "id": "page-share-1",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "1.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "Le lien",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-share-1-h",
+          "x": 0.21458333333333332,
+          "y": 0.11866319444444444,
+          "w": 0.02345920138888889,
+          "h": 0.05333333333333334,
+          "title": "Le lien",
+          "body": "Copiez le lien public de la démo.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-share-2",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "2.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-share-2-h",
+          "x": 0.4008029513888889,
+          "y": 0.11866319444444444,
+          "w": 0.032486979166666666,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Protégez la démo par mot de passe, par expiration ou par domaine e-mail.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-share-3",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "3.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-share-3-h",
+          "x": 0.3002387152777778,
+          "y": 0.11866319444444444,
+          "w": 0.089453125,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Créez un lien par destinataire, avec ses variables et sa page personnalisée.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-share-4",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "4.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-share-4-h",
+          "x": 0.44440104166666666,
+          "y": 0.11866319444444444,
+          "w": 0.06770833333333333,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Activez une page publique pour présenter la démo avec un titre et un bouton d'action.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-share-fin",
+      "chapterId": null,
+      "kind": "text",
+      "image": null,
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "C'est à vous",
+      "body": "Retrouvez cette visite dans l'aide (touche F1).",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": []
+    }
+  ]
+}

@@ -1,0 +1,922 @@
+{
+  "$comment": "Scénarios des visites guidées et du parcours « Apprendre TutoClick » (spec L26 §3.3-3.4). Les champs suivent le manifeste prévu dans apps/web/public/help/ ; la Lead UX tient les textes, le développeur les routes, les cibles réelles et les captures (Playwright).",
+  "version": 1,
+  "lang": "fr",
+  "capture": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "theme": "light",
+    "deviceScaleFactor": 1,
+    "workspace": "Acme",
+    "data": "fictive uniquement : démos « Créer un rapport en 2 minutes » et « Démo CRM », membres « Camille Fictive » et « Alice Exemple », apprenant « Léa Exemple », domaines .example ; aucune donnée réelle, aucun localhost dans l'image",
+    "hideToasts": true
+  },
+  "fields": {
+    "surface": "app (défaut) | extension (popup ou vérification) | extension-bar (barre de capture) | demo-app (app de démo ExampleCRM)",
+    "route": "clé logique de route, à traduire par le développeur (ex. demos → #/demos)",
+    "target": "élément visé, par rôle et nom accessible (Playwright getByRole) ; le hotspot se place sur sa boîte, et entoure toute la cible si elle dépasse 44 px",
+    "title": "titre de bulle facultatif",
+    "text": "texte exact de la bulle, 25 mots au plus, sans durée",
+    "placement": "auto | top | bottom | left | right",
+    "setup": "état à préparer avant la capture"
+  },
+  "tours": [
+    {
+      "key": "page:demos",
+      "kind": "page",
+      "title": "Visite de la page Démos",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "demos",
+          "target": {
+            "role": "heading",
+            "name": "Démos"
+          },
+          "title": "Vos démos",
+          "text": "Toutes les démos de l'espace sont ici, triées par dernière modification.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "demos",
+          "target": {
+            "role": "button",
+            "name": "Nouvelle démo"
+          },
+          "text": "Cliquez sur « Nouvelle démo » pour capturer, importer des images ou partir d'un modèle.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "demos",
+          "target": {
+            "role": "searchbox",
+            "name": "Rechercher une démo"
+          },
+          "text": "Cherchez une démo par son titre ou une étiquette.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "demos",
+          "target": {
+            "role": "combobox",
+            "name": "Statut"
+          },
+          "text": "Filtrez les brouillons, les démos publiées ou celles qui ont des modifications non publiées.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "demos",
+          "target": {
+            "role": "button",
+            "name": "Actions pour Créer un rapport en 2 minutes"
+          },
+          "text": "Le menu ⋯ permet de dupliquer, déplacer, présenter ou archiver une démo.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "page:editor",
+      "kind": "page",
+      "title": "Visite de l'éditeur",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "list",
+            "name": "Étapes"
+          },
+          "title": "Les étapes",
+          "text": "Glissez une étape pour la déplacer. Les chapitres regroupent les étapes.",
+          "placement": "auto",
+          "setup": {
+            "demo": "Démo CRM",
+            "step": 1
+          }
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "button",
+            "name": "Hotspot"
+          },
+          "text": "Cliquez sur le canevas pour placer le point que le visiteur devra cliquer.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "textbox",
+            "name": "Texte"
+          },
+          "text": "Saisissez le texte de la bulle. {{first_name}} se remplace par le prénom du visiteur.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "button",
+            "name": "Flou"
+          },
+          "text": "L'outil Flou masque une zone sensible, sur cette étape ou sur toutes.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "tab",
+            "name": "Design"
+          },
+          "text": "L'onglet Design règle le style, le cadre du navigateur et le mode de lecture.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "radio",
+            "name": "Aperçu"
+          },
+          "text": "Aperçu montre la démo comme un visiteur la verra.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "button",
+            "name": "Publier"
+          },
+          "text": "Publiez pour rendre vos modifications visibles. Le brouillon reste modifiable.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "page:share",
+      "kind": "page",
+      "title": "Visite de Partager",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "share",
+          "target": {
+            "role": "tab",
+            "name": "Lien"
+          },
+          "title": "Le lien",
+          "text": "Copiez le lien public de la démo.",
+          "placement": "auto",
+          "setup": {
+            "demo": "Créer un rapport en 2 minutes"
+          }
+        },
+        {
+          "surface": "app",
+          "route": "share",
+          "target": {
+            "role": "tab",
+            "name": "Accès"
+          },
+          "text": "Protégez la démo par mot de passe, par expiration ou par domaine e-mail.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share",
+          "target": {
+            "role": "tab",
+            "name": "Liens personnalisés"
+          },
+          "text": "Créez un lien par destinataire, avec ses variables et sa page personnalisée.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share",
+          "target": {
+            "role": "tab",
+            "name": "Page publique"
+          },
+          "text": "Activez une page publique pour présenter la démo avec un titre et un bouton d'action.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "page:distribution",
+      "kind": "page",
+      "title": "Visite de la diffusion",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "tab",
+            "name": "Plateforme de formation"
+          },
+          "title": "SCORM",
+          "text": "Générez un paquet SCORM pour votre plateforme de formation.",
+          "placement": "auto",
+          "setup": {
+            "demo": "Créer un rapport en 2 minutes"
+          }
+        },
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "radiogroup",
+            "name": "Version SCORM"
+          },
+          "text": "Choisissez SCORM 1.2 ou 2004, selon votre plateforme.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "tab",
+            "name": "Intranet"
+          },
+          "text": "Intégrez la démo dans une page de l'intranet, en cadre ou en pop-up.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "tab",
+            "name": "Où elle est diffusée"
+          },
+          "text": "Retrouvez chaque diffusion et sa version. Régénérez celles qui sont anciennes.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "page:analytics",
+      "kind": "page",
+      "title": "Visite d'Analytics",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "analytics",
+          "target": {
+            "role": "region",
+            "name": "Indicateurs"
+          },
+          "title": "Les chiffres clés",
+          "text": "Vues, visiteurs, récurrents, complétion et leads sur la période choisie.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "analytics",
+          "target": {
+            "role": "combobox",
+            "name": "Démo"
+          },
+          "text": "Filtrez par démo, par source et par période.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "analytics",
+          "target": {
+            "role": "heading",
+            "name": "Parcours étape par étape"
+          },
+          "text": "Repérez l'étape où les visiteurs abandonnent.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "analytics",
+          "target": {
+            "role": "tab",
+            "name": "Sessions"
+          },
+          "text": "Chaque session indique la source, la durée et la progression du visiteur.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "analytics",
+          "target": {
+            "role": "button",
+            "name": "Mesure des visites"
+          },
+          "text": "Réglez ici la reconnaissance des visiteurs qui reviennent.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "page:learners",
+      "kind": "page",
+      "title": "Visite du suivi des apprenants",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "learners",
+          "target": {
+            "role": "table",
+            "name": "Apprenants"
+          },
+          "title": "Le suivi",
+          "text": "Les apprenants identifiés et leur progression par formation.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "learners",
+          "target": {
+            "role": "link",
+            "name": "Léa Exemple"
+          },
+          "text": "Ouvrez une fiche pour voir les modules suivis et les scores aux quiz.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "learners",
+          "target": {
+            "role": "button",
+            "name": "Exporter"
+          },
+          "text": "Exportez le suivi en CSV.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "page:center",
+      "kind": "page",
+      "title": "Visite du centre de formation",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "center",
+          "target": {
+            "role": "region",
+            "name": "Aperçu du centre"
+          },
+          "title": "Le centre",
+          "text": "Une page qui rassemble les formations publiées de l'espace.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "center",
+          "target": {
+            "role": "textbox",
+            "name": "Adresse du centre"
+          },
+          "text": "Choisissez l'adresse, le logo et les couleurs du centre.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "center",
+          "target": {
+            "role": "group",
+            "name": "Formations visibles"
+          },
+          "text": "Choisissez les formations affichées et leur ordre.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "page:settings",
+      "kind": "page",
+      "title": "Visite des paramètres",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "settings/brand",
+          "target": {
+            "role": "link",
+            "name": "Marque"
+          },
+          "title": "Votre marque",
+          "text": "Logo, couleurs et style par défaut des démos.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "settings/members",
+          "target": {
+            "role": "link",
+            "name": "Membres"
+          },
+          "text": "Ajoutez des membres avec un lien d'invitation et choisissez leur rôle.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "settings/general",
+          "target": {
+            "role": "textbox",
+            "name": "Contact d'aide"
+          },
+          "text": "Indiquez le contact du support affiché dans l'aide.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "settings/privacy",
+          "target": {
+            "role": "link",
+            "name": "Confidentialité"
+          },
+          "text": "Réglez la mesure des visites et la conservation des données.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "learn:capture",
+      "kind": "module",
+      "order": 1,
+      "title": "Capturer une démo",
+      "steps": [
+        {
+          "surface": "extension",
+          "route": "popup",
+          "target": {
+            "role": "radio",
+            "name": "Captures à chaque clic"
+          },
+          "text": "Choisissez « Captures à chaque clic » pour un tutoriel étape par étape.",
+          "placement": "auto"
+        },
+        {
+          "surface": "extension",
+          "route": "popup",
+          "target": {
+            "role": "button",
+            "name": "Démarrer la capture"
+          },
+          "text": "Démarrez. Chaque clic dans la page devient une étape.",
+          "placement": "auto"
+        },
+        {
+          "surface": "demo-app",
+          "route": "demo-app",
+          "target": {
+            "role": "button",
+            "name": "+ Nouvelle opportunité"
+          },
+          "text": "Faites le geste à montrer, comme d'habitude.",
+          "placement": "auto"
+        },
+        {
+          "surface": "extension-bar",
+          "route": "demo-app",
+          "target": {
+            "role": "button",
+            "name": "Terminer"
+          },
+          "text": "Cliquez sur « Terminer » quand le geste est fini.",
+          "placement": "auto"
+        },
+        {
+          "surface": "extension",
+          "route": "review",
+          "target": {
+            "role": "region",
+            "name": "Images clés"
+          },
+          "text": "Vérifiez les zones floutées avant l'envoi. Ajoutez-en si besoin.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "list",
+            "name": "Étapes"
+          },
+          "text": "Votre démo s'ouvre dans l'éditeur.",
+          "placement": "auto",
+          "setup": {
+            "demo": "Démo CRM"
+          }
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "learn:edit",
+      "kind": "module",
+      "order": 2,
+      "title": "Modifier une étape",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "list",
+            "name": "Étapes"
+          },
+          "text": "Choisissez une étape dans la liste.",
+          "placement": "auto",
+          "setup": {
+            "demo": "Démo CRM",
+            "step": 1
+          }
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "button",
+            "name": "Hotspot"
+          },
+          "text": "Déplacez le point pour qu'il tombe sur l'élément à cliquer.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "textbox",
+            "name": "Texte"
+          },
+          "text": "Réécrivez la bulle. Une phrase, le verbe en tête.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "button",
+            "name": "Variable"
+          },
+          "text": "Insérez {{first_name}} pour saluer le visiteur par son prénom.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "group",
+            "name": "Position de la bulle"
+          },
+          "text": "La bulle se place seule. Vous pouvez la fixer d'un côté.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "button",
+            "name": "Ajouter une étape"
+          },
+          "text": "Ajoutez une pop-up, un quiz ou un écran de fin entre deux captures.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "learn:blur",
+      "kind": "module",
+      "order": 3,
+      "title": "Flouter les données",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "button",
+            "name": "Flou"
+          },
+          "text": "Choisissez l'outil Flou dans la barre du canevas.",
+          "placement": "auto",
+          "setup": {
+            "demo": "Démo CRM",
+            "step": 1
+          }
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "region",
+            "name": "Canevas"
+          },
+          "text": "Tracez un rectangle sur la donnée à masquer.",
+          "placement": "auto",
+          "setup": {
+            "blurZone": "e-mail en haut à droite"
+          }
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "radiogroup",
+            "name": "Type de masque"
+          },
+          "text": "Choisissez flou, pixels ou aplat. L'aplat ne laisse rien deviner.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "radio",
+            "name": "Toutes les étapes"
+          },
+          "text": "Appliquez le masque à toutes les étapes où la zone apparaît.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "dialog",
+            "name": "Publier en accès public ?"
+          },
+          "text": "Avant de publier, cochez les deux confirmations du bilan.",
+          "placement": "auto",
+          "setup": {
+            "open": "publish-dialog"
+          }
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "learn:share",
+      "kind": "module",
+      "order": 4,
+      "title": "Publier et partager",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "button",
+            "name": "Publier"
+          },
+          "text": "Publiez la démo. Les visiteurs voient la version publiée.",
+          "placement": "auto",
+          "setup": {
+            "demo": "Créer un rapport en 2 minutes"
+          }
+        },
+        {
+          "surface": "app",
+          "route": "editor",
+          "target": {
+            "role": "button",
+            "name": "Partager"
+          },
+          "text": "Ouvrez Partager.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share",
+          "target": {
+            "role": "button",
+            "name": "Copier"
+          },
+          "text": "Copiez le lien et envoyez-le.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share",
+          "target": {
+            "role": "tab",
+            "name": "Accès"
+          },
+          "text": "Ajoutez un mot de passe si la démo est interne.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share",
+          "target": {
+            "role": "tab",
+            "name": "Liens personnalisés"
+          },
+          "text": "Créez un lien par destinataire pour suivre ses visites.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "learn:distribute",
+      "kind": "module",
+      "order": 5,
+      "title": "Diffuser (intranet, SCORM)",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "share",
+          "target": {
+            "role": "tab",
+            "name": "Diffusion"
+          },
+          "text": "Ouvrez Diffusion depuis Partager.",
+          "placement": "auto",
+          "setup": {
+            "demo": "Créer un rapport en 2 minutes"
+          }
+        },
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "tab",
+            "name": "Plateforme de formation"
+          },
+          "text": "Choisissez « Plateforme de formation » pour un paquet SCORM.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "radiogroup",
+            "name": "Version SCORM"
+          },
+          "text": "Choisissez la version SCORM et le seuil de réussite.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "button",
+            "name": "Générer le paquet"
+          },
+          "text": "Générez, puis téléchargez le fichier .zip.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "tab",
+            "name": "Intranet"
+          },
+          "text": "Pour l'intranet, choisissez cadre ou pop-up.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "button",
+            "name": "Copier le code"
+          },
+          "text": "Copiez le code et collez-le dans la page de l'intranet.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "share/distribution",
+          "target": {
+            "role": "tab",
+            "name": "Où elle est diffusée"
+          },
+          "text": "Suivez chaque diffusion et régénérez les versions anciennes.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    },
+    {
+      "key": "learn:analytics",
+      "kind": "module",
+      "order": 6,
+      "title": "Lire les statistiques",
+      "steps": [
+        {
+          "surface": "app",
+          "route": "analytics",
+          "target": {
+            "role": "region",
+            "name": "Indicateurs"
+          },
+          "text": "Les chiffres clés de la période.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "analytics",
+          "target": {
+            "role": "heading",
+            "name": "Parcours étape par étape"
+          },
+          "text": "L'étape en orange fait perdre le plus de visiteurs : relisez sa consigne.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "analytics",
+          "target": {
+            "role": "tab",
+            "name": "Sessions"
+          },
+          "text": "Ouvrez une session pour voir le parcours d'un visiteur.",
+          "placement": "auto"
+        },
+        {
+          "surface": "app",
+          "route": "analytics",
+          "target": {
+            "role": "tab",
+            "name": "Leads"
+          },
+          "text": "Les leads arrivent ici, et dans vos webhooks.",
+          "placement": "auto"
+        }
+      ],
+      "end": {
+        "title": "C'est à vous",
+        "text": "Retrouvez cette visite dans l'aide (touche F1).",
+        "button": "Fermer"
+      }
+    }
+  ]
+}

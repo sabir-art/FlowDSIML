@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "demoId": "00000000-0000-4000-8000-000000000010",
+  "versionId": "00000000-0000-4000-8000-000000000110",
+  "workspaceId": "00000000-0000-4000-8000-000000000000",
+  "title": "Flouter les données",
+  "locale": "fr",
+  "publishedAt": "2026-11-20T00:00:00.000Z",
+  "theme": {},
+  "variables": [],
+  "chapters": [],
+  "forms": [],
+  "allowedEmbedOrigins": [],
+  "trackUrl": null,
+  "steps": [
+    {
+      "id": "learn-blur-1",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "1.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-blur-1-h",
+          "x": 0.4253472222222222,
+          "y": 0.8577777777777778,
+          "w": 0.03333333333333333,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Choisissez l'outil Flou dans la barre du canevas.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-blur-2",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "2.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-blur-2-h",
+          "x": 0.16944444444444445,
+          "y": 0.05333333333333334,
+          "w": 0.6111111111111112,
+          "h": 0.9466666666666667,
+          "title": "",
+          "body": "Tracez un rectangle sur la donnée à masquer.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-blur-3",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "3.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-blur-3-h",
+          "x": 0.7868055555555555,
+          "y": 0.22666666666666666,
+          "w": 0.2048611111111111,
+          "h": 0.04888888888888889,
+          "title": "",
+          "body": "Choisissez flou, pixels ou aplat. L'aplat ne laisse rien deviner.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-blur-4",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "4.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-blur-4-h",
+          "x": 0.7868055555555555,
+          "y": 0.4166666666666667,
+          "w": 0.016666666666666666,
+          "h": 0.02666666666666667,
+          "title": "",
+          "body": "Appliquez le masque à toutes les étapes où la zone apparaît.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-blur-5",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "5.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-blur-5-h",
+          "x": 0.30277777777777776,
+          "y": 0.2127777777777778,
+          "w": 0.39444444444444443,
+          "h": 0.5744444444444444,
+          "title": "",
+          "body": "Avant de publier, cochez les deux confirmations du bilan.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-blur-fin",
+      "chapterId": null,
+      "kind": "text",
+      "image": null,
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "C'est à vous",
+      "body": "Retrouvez cette visite dans l'aide (touche F1).",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": []
+    }
+  ]
+}

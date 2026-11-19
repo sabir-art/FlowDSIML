@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "demoId": "00000000-0000-4000-8000-000000000009",
+  "versionId": "00000000-0000-4000-8000-000000000109",
+  "workspaceId": "00000000-0000-4000-8000-000000000000",
+  "title": "Modifier une étape",
+  "locale": "fr",
+  "publishedAt": "2026-11-20T00:00:00.000Z",
+  "theme": {},
+  "variables": [],
+  "chapters": [],
+  "forms": [],
+  "allowedEmbedOrigins": [],
+  "trackUrl": null,
+  "steps": [
+    {
+      "id": "learn-edit-1",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "1.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-edit-1-h",
+          "x": 0,
+          "y": 0.1111111111111111,
+          "w": 0.17708333333333334,
+          "h": 0.83,
+          "title": "",
+          "body": "Choisissez une étape dans la liste.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-edit-2",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "2.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-edit-2-h",
+          "x": 0.39618055555555554,
+          "y": 0.8577777777777778,
+          "w": 0.03333333333333333,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Déplacez le point pour qu'il tombe sur l'élément à cliquer.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-edit-3",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "3.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-edit-3-h",
+          "x": 0.7875,
+          "y": 0.5419791666666667,
+          "w": 0.20347222222222222,
+          "h": 0.12444444444444444,
+          "title": "",
+          "body": "Réécrivez la bulle. Une phrase, le verbe en tête.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-edit-4",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "4.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-edit-4-h",
+          "x": 0.9220811631944444,
+          "y": 0.5053125,
+          "w": 0.06611328125,
+          "h": 0.04,
+          "title": "",
+          "body": "Insérez {{first_name}} pour saluer le visiteur par son prénom.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-edit-5",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "5.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-edit-5-h",
+          "x": 0.7868055555555555,
+          "y": 0.7947569444444444,
+          "w": 0.06944444444444445,
+          "h": 0.1111111111111111,
+          "title": "",
+          "body": "La bulle se place seule. Vous pouvez la fixer d'un côté.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-edit-6",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "6.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-edit-6-h",
+          "x": 0.13819444444444445,
+          "y": 0.06666666666666667,
+          "w": 0.027777777777777776,
+          "h": 0.044444444444444446,
+          "title": "",
+          "body": "Ajoutez une pop-up, un quiz ou un écran de fin entre deux captures.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-edit-fin",
+      "chapterId": null,
+      "kind": "text",
+      "image": null,
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "C'est à vous",
+      "body": "Retrouvez cette visite dans l'aide (touche F1).",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": []
+    }
+  ]
+}

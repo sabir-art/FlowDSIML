@@ -2277,6 +2277,7 @@ export type Database = {
       present_remote_end: { Args: { p_id: string }; Returns: undefined };
       extension_seen: { Args: Record<PropertyKey, never>; Returns: undefined };
       workspace_onboarding: { Args: { p_ws: string }; Returns: Json };
+      template_set_images: { Args: { p_template: string; p_map: Json }; Returns: undefined };
       help_feedback: { Args: { p_article: string; p_helpful: boolean }; Returns: undefined };
       save_demo_as_template: {
         Args: {
@@ -2285,6 +2286,7 @@ export type Database = {
           p_description: string;
           p_category: string;
           p_with_captures: boolean;
+          p_ack?: boolean | null;
         };
         Returns: string;
       };

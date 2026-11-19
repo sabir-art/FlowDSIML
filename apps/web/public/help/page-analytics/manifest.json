@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "demoId": "00000000-0000-4000-8000-000000000005",
+  "versionId": "00000000-0000-4000-8000-000000000105",
+  "workspaceId": "00000000-0000-4000-8000-000000000000",
+  "title": "Visite d'Analytics",
+  "locale": "fr",
+  "publishedAt": "2026-11-20T00:00:00.000Z",
+  "theme": {},
+  "variables": [],
+  "chapters": [],
+  "forms": [],
+  "allowedEmbedOrigins": [],
+  "trackUrl": null,
+  "steps": [
+    {
+      "id": "page-analytics-1",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "1.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "Les chiffres clés",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-analytics-1-h",
+          "x": 0.19722222222222222,
+          "y": 0.30421875,
+          "w": 0.7833333333333333,
+          "h": 0.1757638888888889,
+          "title": "Les chiffres clés",
+          "body": "Vues, visiteurs, récurrents, complétion et leads sur la période choisie.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-analytics-2",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "2.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-analytics-2-h",
+          "x": 0.2638888888888889,
+          "y": 0.11310763888888889,
+          "w": 0.17291666666666666,
+          "h": 0.044444444444444446,
+          "title": "",
+          "body": "Filtrez par démo, par source et par période.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-analytics-3",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "3.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-analytics-3-h",
+          "x": 0.21458333333333332,
+          "y": 0.6636979166666667,
+          "w": 0.2864583333333333,
+          "h": 0.03288194444444444,
+          "title": "",
+          "body": "Repérez l'étape où les visiteurs abandonnent.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-analytics-4",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "4.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-analytics-4-h",
+          "x": 0.28426649305555557,
+          "y": 0.17977430555555557,
+          "w": 0.04405381944444445,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Chaque session indique la source, la durée et la progression du visiteur.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-analytics-5",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "5.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-analytics-5-h",
+          "x": 0.7702365451388888,
+          "y": 0.11310763888888889,
+          "w": 0.11952039930555555,
+          "h": 0.044444444444444446,
+          "title": "",
+          "body": "Réglez ici la reconnaissance des visiteurs qui reviennent.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-analytics-fin",
+      "chapterId": null,
+      "kind": "text",
+      "image": null,
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "C'est à vous",
+      "body": "Retrouvez cette visite dans l'aide (touche F1).",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": []
+    }
+  ]
+}

@@ -18,7 +18,7 @@ import {
   cropImageStyle,
   croppedSize,
 } from '@flowdsiml/player-core';
-import { Camera, ChevronRight, ClipboardList, ExternalLink, Info, Move, RotateCcw } from 'lucide-react';
+import { ChevronRight, ImagePlus, ClipboardList, ExternalLink, Info, Move, RotateCcw } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
 import { withVariablePills } from './RichTextField';
@@ -721,7 +721,7 @@ function ToCaptureCanvas({
         {!readOnly && (
           <>
             <button type="button" className="fd-btn fd-btn--primary" onClick={() => file.current?.click()}>
-              <Camera aria-hidden="true" />
+              <ImagePlus aria-hidden="true" />
               {t('editor.toCapture.button')}
             </button>
             <input

@@ -21,7 +21,14 @@ import {
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { Alert } from '@flowdsiml/ui';
-import { CATEGORIES, chaptersOf, summary, type Template, type TemplateCategory } from './templates';
+import {
+  CATEGORIES,
+  chaptersOf,
+  copyTemplateImages,
+  summary,
+  type Template,
+  type TemplateCategory,
+} from './templates';
 
 const ICONS: Record<string, LucideIcon> = {
   monitor: Monitor,
@@ -94,15 +101,18 @@ export function TemplatesDialog({
 
   const applyTemplate = async (tp: Template | null) => {
     if (!tp) return;
-    const id = await run(async () =>
-      check(
+    const id = await run(async () => {
+      const demoId = check(
         await supabase.rpc('create_demo_from_template', {
           p_template: tp.id,
           p_ws: workspaceId,
           p_folder: folderId,
         }),
-      ),
-    );
+      );
+      // Modèle avec captures : copie des images dans le dossier de la nouvelle démo
+      if (tp.with_captures) await copyTemplateImages(workspaceId, demoId);
+      return demoId;
+    });
     if (id) onCreated(id);
   };
 

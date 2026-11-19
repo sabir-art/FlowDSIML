@@ -1,7 +1,7 @@
 -- Tests pgTAP : L26-04 / L26-05 (bibliothèque de modèles, étapes « À capturer »).
 begin;
 set search_path = public, extensions;
-select plan(22);
+select plan(27);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000040a1', 'editrice-modeles@example.com'),
@@ -72,12 +72,27 @@ create temp table d2 as select public.create_demo_from_template((select id from 
 grant all on d2 to authenticated;
 select is((select count(*)::int from public.steps where demo_id = (select id from d2) and to_capture), 6,
   'depuis le modèle de l’espace : toutes les captures à refaire');
--- Avec les captures, comme exemple
-create temp table t2 as select public.save_demo_as_template((select id from d1), 'Exemple', '', 'logiciel', true) as id;
+-- Avec les captures, comme exemple : bilan RGPD obligatoire, aucun chemin partagé
+select throws_like($$ select public.save_demo_as_template((select id from d1), 'Exemple', '', 'logiciel', true) $$,
+  'GDPR_ACK_REQUIRED', 'avec les captures : bilan RGPD obligatoire');
+create temp table t2 as select public.save_demo_as_template((select id from d1), 'Exemple', '', 'logiciel', true, true) as id;
 grant all on t2 to authenticated;
-create temp table d3 as select public.create_demo_from_template((select id from t2), (select ws from ctx)) as id;
-grant all on d3 to authenticated;
-select is((select count(*)::int from public.steps where demo_id = (select id from d3) and to_capture), 5, 'avec les captures : image d’exemple gardée');
+create temp table r3 as select public.create_demo_from_template((select id from t2), (select ws from ctx)) as r;
+grant all on r3 to authenticated;
+select is((select count(*)::int from public.steps where demo_id = (select r from r3) and image_path is not null), 0,
+  'avec les captures : aucun chemin d’image partagé');
+select is((select count(*)::int from public.steps where demo_id = (select r from r3) and options ? 'templateImage'), 1,
+  'avec les captures : une image à copier');
+-- Images du modèle rangées dans son dossier
+select throws_like($$ select public.template_set_images((select id from t2),
+  jsonb_build_object((select ws from ctx)::text || '/' || (select id from d1)::text || '/s.webp', 'ailleurs/x.webp')) $$,
+  'MAP_INVALID', 'images du modèle : dossier contrôlé');
+select lives_ok($$ select public.template_set_images((select id from t2),
+  jsonb_build_object((select ws from ctx)::text || '/' || (select id from d1)::text || '/s.webp',
+                     (select ws from ctx)::text || '/templates/' || (select id from t2)::text || '/1.webp')) $$,
+  'images du modèle : chemin remplacé');
+select ok((select structure::text from public.demo_templates where id = (select id from t2)) ~ '/templates/',
+  'images du modèle : dans son dossier');
 
 -- Lecteur : voit le modèle de l'espace, ne le supprime pas
 select pg_temp.login('00000000-0000-0000-0000-0000000040a2');

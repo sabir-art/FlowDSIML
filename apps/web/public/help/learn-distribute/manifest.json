@@ -1,0 +1,277 @@
+{
+  "schemaVersion": 1,
+  "demoId": "00000000-0000-4000-8000-000000000012",
+  "versionId": "00000000-0000-4000-8000-000000000112",
+  "workspaceId": "00000000-0000-4000-8000-000000000000",
+  "title": "Diffuser (intranet, SCORM)",
+  "locale": "fr",
+  "publishedAt": "2026-11-20T00:00:00.000Z",
+  "theme": {},
+  "variables": [],
+  "chapters": [],
+  "forms": [],
+  "allowedEmbedOrigins": [],
+  "trackUrl": null,
+  "steps": [
+    {
+      "id": "learn-distribute-1",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "1.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-distribute-1-h",
+          "x": 0.17777777777777778,
+          "y": 0.022222222222222223,
+          "w": 0.6444444444444445,
+          "h": 0.9555555555555556,
+          "title": "",
+          "body": "Ouvrez Diffusion depuis Partager.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-distribute-2",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "2.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-distribute-2-h",
+          "x": 0.19444444444444445,
+          "y": 0.10932291666666667,
+          "w": 0.05541449652777778,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Choisissez « Plateforme de formation » pour un paquet SCORM.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-distribute-3",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "3.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-distribute-3-h",
+          "x": 0.19444444444444445,
+          "y": 0.36475694444444445,
+          "w": 0.15284288194444445,
+          "h": 0.04888888888888889,
+          "title": "",
+          "body": "Choisissez la version SCORM et le seuil de réussite.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-distribute-4",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "4.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-distribute-4-h",
+          "x": 0.6798611111111111,
+          "y": 0.9066666666666666,
+          "w": 0.12569444444444444,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Générez, puis téléchargez le fichier .zip.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-distribute-5",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "5.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-distribute-5-h",
+          "x": 0.26097005208333335,
+          "y": 0.10932291666666667,
+          "w": 0.054741753472222224,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Pour l'intranet, choisissez cadre ou pop-up.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-distribute-6",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "6.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-distribute-6-h",
+          "x": 0.7353949652777778,
+          "y": 0.7080902777777778,
+          "w": 0.07016059027777778,
+          "h": 0.044444444444444446,
+          "title": "",
+          "body": "Copiez le code et collez-le dans la page de l'intranet.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-distribute-7",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "7.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "learn-distribute-7-h",
+          "x": 0.38701171875,
+          "y": 0.10932291666666667,
+          "w": 0.12064887152777778,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Suivez chaque diffusion et régénérez les versions anciennes.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "learn-distribute-fin",
+      "chapterId": null,
+      "kind": "text",
+      "image": null,
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "C'est à vous",
+      "body": "Retrouvez cette visite dans l'aide (touche F1).",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": []
+    }
+  ]
+}

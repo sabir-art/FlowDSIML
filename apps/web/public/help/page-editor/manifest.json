@@ -1,0 +1,277 @@
+{
+  "schemaVersion": 1,
+  "demoId": "00000000-0000-4000-8000-000000000002",
+  "versionId": "00000000-0000-4000-8000-000000000102",
+  "workspaceId": "00000000-0000-4000-8000-000000000000",
+  "title": "Visite de l'éditeur",
+  "locale": "fr",
+  "publishedAt": "2026-11-20T00:00:00.000Z",
+  "theme": {},
+  "variables": [],
+  "chapters": [],
+  "forms": [],
+  "allowedEmbedOrigins": [],
+  "trackUrl": null,
+  "steps": [
+    {
+      "id": "page-editor-1",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "1.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "Les étapes",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-editor-1-h",
+          "x": 0,
+          "y": 0.1111111111111111,
+          "w": 0.17708333333333334,
+          "h": 0.83,
+          "title": "Les étapes",
+          "body": "Glissez une étape pour la déplacer. Les chapitres regroupent les étapes.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-editor-2",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "2.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-editor-2-h",
+          "x": 0.39618055555555554,
+          "y": 0.8577777777777778,
+          "w": 0.03333333333333333,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "Cliquez sur le canevas pour placer le point que le visiteur devra cliquer.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-editor-3",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "3.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-editor-3-h",
+          "x": 0.7875,
+          "y": 0.5419791666666667,
+          "w": 0.20347222222222222,
+          "h": 0.12444444444444444,
+          "title": "",
+          "body": "Saisissez le texte de la bulle. {{first_name}} se remplace par le prénom du visiteur.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-editor-4",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "4.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-editor-4-h",
+          "x": 0.4253472222222222,
+          "y": 0.8577777777777778,
+          "w": 0.03333333333333333,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "L'outil Flou masque une zone sensible, sur cette étape ou sur toutes.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-editor-5",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "5.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-editor-5-h",
+          "x": 0.8265407986111111,
+          "y": 0.05333333333333334,
+          "w": 0.035731336805555555,
+          "h": 0.05333333333333334,
+          "title": "",
+          "body": "L'onglet Design règle le style, le cadre du navigateur et le mode de lecture.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-editor-6",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "6.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-editor-6-h",
+          "x": 0.6503580729166667,
+          "y": 0.007222222222222222,
+          "w": 0.053721788194444446,
+          "h": 0.042222222222222223,
+          "title": "",
+          "body": "Aperçu montre la démo comme un visiteur la verra.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-editor-7",
+      "chapterId": null,
+      "kind": "image",
+      "image": {
+        "url": "7.webp",
+        "width": 1440,
+        "height": 900
+      },
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "",
+      "body": "",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": [
+        {
+          "id": "page-editor-7-h",
+          "x": 0.9223741319444444,
+          "y": 0.006111111111111111,
+          "w": 0.0720703125,
+          "h": 0.044444444444444446,
+          "title": "",
+          "body": "Publiez pour rendre vos modifications visibles. Le brouillon reste modifiable.",
+          "placement": "auto",
+          "action": {
+            "type": "next"
+          },
+          "cta": null,
+          "pulse": true
+        }
+      ]
+    },
+    {
+      "id": "page-editor-fin",
+      "chapterId": null,
+      "kind": "text",
+      "image": null,
+      "snapshotUrl": null,
+      "beforeAfter": null,
+      "title": "C'est à vous",
+      "body": "Retrouvez cette visite dans l'aide (touche F1).",
+      "blurs": [],
+      "zoom": null,
+      "cta": null,
+      "gateFormId": null,
+      "hotspots": []
+    }
+  ]
+}

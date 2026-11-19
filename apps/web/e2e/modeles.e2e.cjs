@@ -142,8 +142,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(/Se connecter/.test(await frame.innerText()), 'cadre : titre de l’étape');
   ok(/Étape à capturer 1 sur 6/.test(sp(await frame.innerText())), 'cadre : 1 sur 6');
   ok(
-    (await frame.getByRole('button', { name: 'Capturer cette étape' }).count()) === 1,
-    'bouton « Capturer cette étape »',
+    (await frame.getByRole('button', { name: 'Importer une image' }).count()) === 1,
+    'bouton « Importer une image »',
   );
   ok((await page.locator('.th-tocapture').count()) === 6, 'rail : 6 vignettes « À capturer »');
   if (SHOTS) {
@@ -183,8 +183,22 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await sv.getByLabel('Nom du modèle').fill('Prise en main maison');
   await sv.getByLabel(/Description/).fill('Notre façon de présenter un outil.');
   await sv.getByLabel('Catégorie').selectOption('logiciel');
+  // Bilan RGPD : avec les captures, confirmation obligatoire
+  await sv.getByRole('radio', { name: /Avec les captures/ }).check();
+  ok(
+    await sv.getByRole('button', { name: 'Enregistrer le modèle' }).isDisabled(),
+    'avec les captures : bilan RGPD obligatoire',
+  );
+  await sv.getByRole('radio', { name: /Sans les captures/ }).check();
   if (SHOTS) {
     await page.mouse.move(0, 0);
+    // Capture sans le toast « Démo créée depuis le modèle »
+    await page
+      .locator('.toast')
+      .first()
+      .waitFor({ state: 'detached', timeout: 8000 })
+      .catch(() => undefined);
+    await page.evaluate(() => document.querySelectorAll('.toast').forEach((e) => e.remove()));
     await page.screenshot({ path: `${SHOTS}/l26-05-enregistrer${sfx}.png` });
   }
   await sv.getByRole('button', { name: 'Enregistrer le modèle' }).click();

@@ -1506,7 +1506,7 @@
     },
     "toCapture": {
       "badge": "To capture",
-      "button": "Capture this step",
+      "button": "Import an image",
       "order": "Step to capture {{n}} of {{total}}",
       "help": "With the extension: open your software, start capturing and choose “Complete: {{title}}”. Each click fills the next step. You can also import an image."
     }
@@ -3190,7 +3190,7 @@
     "done": "done",
     "steps_one": "{{count}} step",
     "steps_other": "{{count}} steps",
-    "soon": "Coming soon"
+    "soon": "Soon"
   },
   "help": {
     "open": "Help (F1)",
@@ -3291,7 +3291,8 @@
       "withHelp": "Blurred areas stay blurred. Avoid if captures show real data.",
       "kept": "Kept: chapters, tooltip texts, quiz, settings and style. Visible to all workspace members.",
       "submit": "Save template",
-      "done": "Template saved"
+      "done": "Template saved",
+      "ack": "I checked that the captures only show fictitious or blurred data."
     }
   },
   "present": {

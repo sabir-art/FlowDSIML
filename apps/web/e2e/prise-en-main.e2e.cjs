@@ -31,13 +31,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     invite: false,
     distribute: false,
   };
-  state.tables.help_tours.push(
-    { key: 'learn-capturer', demo_id: DEMO, title: 'Capturer une démo', steps: 6 },
-    { key: 'learn-modifier', demo_id: DEMO, title: 'Modifier une étape', steps: 4 },
-  );
   state.tables.learn_progress.push({
     user_id: 'u-alice',
-    module: 'capturer',
+    module: 'modifier',
     done_at: '2026-11-18T10:00:00Z',
   });
   await install(page, state);
@@ -73,52 +69,56 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   ok((await card.locator('li').count()) === 0, 'réduite : liste masquée');
   await card.getByRole('button', { name: 'Afficher la prise en main' }).click();
-  // « Voir comment » sans visite : article d'aide
+  // Lecteur simulé : reçoit le manifeste puis signale la dernière étape vue
+  await page.route('https://demos.tutoclick.example/**', (r) =>
+    r.fulfill({
+      contentType: 'text/html',
+      body: `<script>addEventListener('message', (e) => { if (e.data && e.data.type === 'fd:preview')
+        parent.postMessage({ type: 'flowdsiml:event', event: 'demo_complete' }, '*'); });
+        parent.postMessage({ type: 'fd:preview-ready' }, '*');</script>`,
+    }),
+  );
+  // « Voir comment » : visite guidée du floutage
   await next.getByRole('button', { name: 'Voir comment' }).click();
-  const drawer = page.getByRole('complementary', { name: 'Aide' });
-  await drawer.getByRole('heading', { name: 'Données personnelles et floutage' }).waitFor();
-  ok(true, '« Voir comment » : article sur le floutage');
+  const how = page.getByRole('dialog', { name: 'Flouter les données' });
+  await how.waitFor();
+  ok(true, '« Voir comment » : visite guidée du floutage');
+  await page.keyboard.press('Escape');
+  await how.waitFor({ state: 'detached' }).catch(() => undefined);
 
-  // ===== « Apprendre TutoClick » =====
-  await drawer.getByRole('button', { name: 'Retour' }).click();
+  // ===== « Apprendre TutoClick » (modules disponibles seulement) =====
+  await page.getByRole('button', { name: 'Aide (F1)' }).first().click();
+  const drawer = page.getByRole('complementary', { name: 'Aide' });
   const ac = drawer.getByRole('region', { name: 'Apprendre TutoClick' });
   await ac.waitFor();
   await ac.locator('li.done').first().waitFor();
   ok(
-    sp(await ac.getByRole('progressbar').getAttribute('aria-valuetext')) === '1 module sur 6',
-    'parcours : 1 sur 6',
+    sp(await ac.getByRole('progressbar').getAttribute('aria-valuetext')) === '1 module sur 5',
+    'parcours : 1 sur 5 (modules disponibles)',
   );
-  ok(/Revoir/.test(await ac.locator('li').nth(0).innerText()), 'module fait : « Revoir »');
-  ok(/Commencer/.test(await ac.locator('li').nth(1).innerText()), 'prochain : « Commencer »');
-  ok(
-    /Bientôt disponible/.test(await ac.locator('li').nth(2).innerText()),
-    'sans visite : « Bientôt disponible »',
-  );
+  ok(/Bientôt/.test(await ac.locator('li').nth(0).innerText()), 'sans démo : « Bientôt »');
+  ok(/Revoir/.test(await ac.locator('li').nth(1).innerText()), 'module fait : « Revoir »');
+  ok(/Commencer/.test(await ac.locator('li').nth(2).innerText()), 'prochain : « Commencer »');
+  ok(/\d+ étapes/.test(await ac.locator('li').nth(3).innerText()), 'les autres : « n étapes »');
   ok(!/min/.test(await ac.innerText()), 'pas de durée affichée');
   if (SHOTS) {
     await drawer.getByRole('searchbox').focus();
     await page.screenshot({ path: `${SHOTS}/l26-02-aide-parcours${sfx}.png` });
   }
   // Visite terminée (dernière étape vue, relayée par le lecteur)
-  await page.route('https://demos.tutoclick.example/**', (r) =>
-    r.fulfill({
-      contentType: 'text/html',
-      body: "<p>Visite</p><script>parent.postMessage({type:'flowdsiml:event',event:'demo_complete'},'*')</script>",
-    }),
-  );
-  await ac.getByRole('button', { name: /Commencer : Modifier une étape/ }).click();
-  const tour = page.getByRole('dialog', { name: 'Modifier une étape' });
+  await ac.getByRole('button', { name: /Commencer : Flouter les données/ }).click();
+  const tour = page.getByRole('dialog', { name: 'Flouter les données' });
   await tour.waitFor();
   await ac.locator('li.done').nth(1).waitFor({ timeout: 5000 });
   ok(
-    state.tables.learn_progress.some((r) => r.module === 'modifier'),
+    state.tables.learn_progress.some((r) => r.module === 'flouter'),
     'dernière étape vue : module terminé et enregistré',
   );
   await page.keyboard.press('Escape');
   await tour.waitFor({ state: 'detached' }).catch(() => undefined);
   ok(
-    sp(await ac.getByRole('progressbar').getAttribute('aria-valuetext')) === '2 modules sur 6',
-    'parcours : 2 sur 6',
+    sp(await ac.getByRole('progressbar').getAttribute('aria-valuetext')) === '2 modules sur 5',
+    'parcours : 2 sur 5',
   );
   await page.keyboard.press('Escape');
 

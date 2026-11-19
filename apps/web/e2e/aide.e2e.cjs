@@ -77,16 +77,37 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await drawer.waitFor();
   ok(true, 'F1 ouvre l’aide');
 
-  // ===== Visite guidée : lecteur en aperçu =====
+  // ===== Visite guidée : démo statique embarquée, lecteur en aperçu =====
   await onPage.getByRole('button', { name: 'Visite guidée de cette page' }).click();
-  const tour = page.getByRole('dialog', { name: 'Visite : la liste des démos' });
+  const tour = page.getByRole('dialog', { name: 'Visite de la page Démos' });
   await tour.waitFor();
   const src = await tour.locator('iframe').getAttribute('src');
-  ok(src.endsWith(`/#/d/${DEMO}?preview=1`), 'visite : lecteur en aperçu (aucune statistique)');
+  ok(src.endsWith('/#/preview'), 'visite : lecteur en aperçu (aucune statistique)');
+  // Le vrai lecteur (local) reçoit le manifeste statique et affiche la première bulle
+  const player = tour.frameLocator('iframe');
+  await player
+    .getByText(/Toutes les démos de l.espace sont ici/)
+    .first()
+    .waitFor({ timeout: 10000 });
+  ok(true, 'visite : le lecteur joue la démo statique (première bulle)');
   ok(/allow-scripts/.test(await tour.locator('iframe').getAttribute('sandbox')), 'visite : iframe sandbox');
   await page.keyboard.press('Escape');
   await tour.waitFor({ state: 'detached' }).catch(() => undefined);
   ok(await drawer.isVisible(), 'Échap dans la visite : le tiroir reste ouvert');
+
+  // Sans visite pour la page : entrée gardée, désactivée, « Bientôt »
+  await page.route('**/help/index.json', (r) =>
+    r.fulfill({ contentType: 'application/json', body: JSON.stringify({ version: 1, tours: [] }) }),
+  );
+  await page.reload();
+  await page.getByRole('button', { name: 'Aide (F1)' }).first().click();
+  const soonTour = drawer.getByRole('button', { name: /Visite guidée de cette page/ });
+  await soonTour.waitFor();
+  ok(
+    (await soonTour.getAttribute('aria-disabled')) === 'true' && /Bientôt/.test(await soonTour.innerText()),
+    'sans visite : entrée désactivée avec « Bientôt »',
+  );
+  await page.unroute('**/help/index.json');
 
   // ===== L26-03 : recherche =====
   await drawer.getByRole('searchbox').fill('scorm');

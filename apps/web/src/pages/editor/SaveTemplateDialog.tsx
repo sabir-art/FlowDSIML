@@ -9,7 +9,8 @@ import { X } from 'lucide-react';
 import { Alert } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
-import { CATEGORIES, type TemplateCategory } from '../demos/templates';
+import { CATEGORIES, copyImagesIntoTemplate, type TemplateCategory } from '../demos/templates';
+import { useWorkspace } from '../../workspace/WorkspaceProvider';
 
 export function SaveTemplateDialog({
   demoId,
@@ -28,6 +29,9 @@ export function SaveTemplateDialog({
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<TemplateCategory>('procedure');
   const [captures, setCaptures] = useState<'without' | 'with'>('without');
+  // Bilan RGPD : avec les captures, même confirmation qu'avant une publication
+  const [ack, setAck] = useState(false);
+  const { current } = useWorkspace();
   const { busy, error, run } = useAction();
 
   useEffect(() => {
@@ -38,17 +42,21 @@ export function SaveTemplateDialog({
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    const id = await run(async () =>
-      check(
+    const id = await run(async () => {
+      const tplId = check(
         await supabase.rpc('save_demo_as_template', {
           p_demo: demoId,
           p_name: name.trim(),
           p_description: description.trim(),
           p_category: category,
           p_with_captures: captures === 'with',
+          p_ack: captures === 'with' ? ack : null,
         }),
-      ),
-    );
+      );
+      // Les images d'exemple sont copiées dans le dossier du modèle (indépendant de la démo d'origine)
+      if (captures === 'with' && current) await copyImagesIntoTemplate(current.id, tplId);
+      return tplId;
+    });
     if (id) onSaved();
   };
 
@@ -127,13 +135,23 @@ export function SaveTemplateDialog({
               </label>
             ))}
           </fieldset>
+          {captures === 'with' && (
+            <label className="svt-ack">
+              <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} />
+              <span>{t('templates.save.ack')}</span>
+            </label>
+          )}
           <p className="fd-help">{t('templates.save.kept')}</p>
         </div>
         <div className="dialog-actions">
           <button type="button" className="fd-btn" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button type="submit" className="fd-btn fd-btn--primary" disabled={busy || !name.trim()}>
+          <button
+            type="submit"
+            className="fd-btn fd-btn--primary"
+            disabled={busy || !name.trim() || (captures === 'with' && !ack)}
+          >
             {t('templates.save.submit')}
           </button>
         </div>

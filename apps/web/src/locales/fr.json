@@ -1506,7 +1506,7 @@
     },
     "toCapture": {
       "badge": "À capturer",
-      "button": "Capturer cette étape",
+      "button": "Importer une image",
       "order": "Étape à capturer {{n}} sur {{total}}",
       "help": "Avec l’extension : ouvrez votre logiciel, lancez la capture et choisissez « Compléter : {{title}} ». Chaque clic remplit l’étape suivante. Vous pouvez aussi importer une image."
     }
@@ -3190,7 +3190,7 @@
     "done": "fait",
     "steps_one": "{{count}} étape",
     "steps_other": "{{count}} étapes",
-    "soon": "Bientôt disponible"
+    "soon": "Bientôt"
   },
   "help": {
     "open": "Aide (F1)",
@@ -3291,7 +3291,8 @@
       "withHelp": "Les zones floutées restent floutées. À éviter si les captures montrent des données réelles.",
       "kept": "Gardés : chapitres, textes des bulles, quiz, réglages et style. Visible par tous les membres de l’espace.",
       "submit": "Enregistrer le modèle",
-      "done": "Modèle enregistré"
+      "done": "Modèle enregistré",
+      "ack": "J’ai vérifié que les captures ne montrent que des données fictives ou floutées."
     }
   },
   "present": {

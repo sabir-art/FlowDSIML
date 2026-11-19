@@ -13,6 +13,7 @@ import { supabase } from '../../lib/supabase';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useHelp } from '../../help/HelpProvider';
 import { TourDialog } from '../../help/TourDialog';
+import { MODULE_TOUR, loadTours } from '../../help/tours';
 
 const STEPS = ['brand', 'extension', 'capture', 'pii', 'publish', 'invite', 'distribute'] as const;
 type Step = (typeof STEPS)[number];
@@ -48,7 +49,7 @@ export function OnboardingCard({
       return true;
     }
   });
-  const [tour, setTour] = useState<{ demo_id: string; title: string } | null>(null);
+  const [tour, setTour] = useState<{ id: string; title: string } | null>(null);
 
   const load = useCallback(() => {
     if (!can('demo.edit')) return;
@@ -93,12 +94,8 @@ export function OnboardingCard({
   };
   const howTo = async (el: HTMLElement) => {
     // « Voir comment » : visite guidée de l'étape (§3.3), sinon l'article d'aide
-    const { data } = await supabase
-      .from('help_tours')
-      .select('demo_id, title')
-      .eq('key', 'learn-flouter')
-      .maybeSingle();
-    if (data) setTour(data);
+    const data = (await loadTours()).find((x) => x.key === MODULE_TOUR.flouter);
+    if (data) setTour({ id: data.id, title: data.title });
     else help?.openArticle('flouter-donnees', el);
   };
   const action = (s: Step): { label: string; go: (el: HTMLElement) => void; play?: boolean } => {
@@ -221,7 +218,7 @@ export function OnboardingCard({
           </div>
         </>
       )}
-      {tour && <TourDialog demoId={tour.demo_id} title={tour.title} onClose={() => setTour(null)} />}
+      {tour && <TourDialog tourId={tour.id} title={tour.title} onClose={() => setTour(null)} />}
     </section>
   );
 }

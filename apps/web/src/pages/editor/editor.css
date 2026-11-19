@@ -2903,3 +2903,12 @@
 .svt-radio .fd-help {
   display: block;
 }
+.svt-ack {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: var(--fd-text-caption-size);
+}
+.svt-ack input {
+  margin-top: 2px;
+}

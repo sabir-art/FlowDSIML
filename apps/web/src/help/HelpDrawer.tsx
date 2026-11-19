@@ -12,6 +12,7 @@ import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { ShortcutsDialog } from '../pages/editor/ShortcutsDialog';
 import { Markdown } from './Markdown';
 import { TourDialog } from './TourDialog';
+import { PAGE_TOUR, loadTours } from './tours';
 import { Academy } from './Academy';
 import {
   PAGE_ARTICLES,
@@ -74,7 +75,7 @@ export function HelpDrawer({
   const [article, setArticle] = useState<Article | null>(() =>
     initialArticle ? articleBySlug(initialArticle) : null,
   );
-  const [tour, setTour] = useState<{ demo_id: string; title: string } | null>(null);
+  const [tour, setTour] = useState<{ id: string; title: string } | null>(null);
   const [touring, setTouring] = useState(false);
   const [keys, setKeys] = useState(false);
   const [admins, setAdmins] = useState<string[] | null>(null);
@@ -95,17 +96,14 @@ export function HelpDrawer({
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // Visite guidée de la page (démo publiée de l'espace système), si elle existe
+  // Visite guidée de la page (démo statique embarquée), « Bientôt » si elle n'existe pas encore
   useEffect(() => {
     setTour(null);
     if (!page) return;
-    const key = page.startsWith('editor') ? 'editor' : page;
-    void supabase
-      .from('help_tours')
-      .select('demo_id, title')
-      .eq('key', key)
-      .maybeSingle()
-      .then(({ data }) => setTour(data ?? null));
+    void loadTours().then((list) => {
+      const e = list.find((x) => x.key === PAGE_TOUR[page]);
+      setTour(e ? { id: e.id, title: e.title } : null);
+    });
   }, [page]);
 
   // Contact d'aide de l'espace, sinon les administrateurs
@@ -227,16 +225,17 @@ export function HelpDrawer({
                   <section className="help-sec" aria-labelledby="help-page">
                     <h3 id="help-page">{t('help.onPage', { page: t(`help.page.${page}`) })}</h3>
                     {onPage.map((a) => link(a))}
-                    {tour && (
-                      <button
-                        type="button"
-                        className="fd-btn fd-btn--sm help-tour"
-                        onClick={() => setTouring(true)}
-                      >
-                        <Play aria-hidden="true" />
-                        {t('help.tour')}
-                      </button>
-                    )}
+                    {/* Sans visite : l'entrée reste, désactivée, avec « Bientôt » */}
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--sm help-tour"
+                      aria-disabled={tour ? undefined : true}
+                      onClick={() => tour && setTouring(true)}
+                    >
+                      <Play aria-hidden="true" />
+                      {t('help.tour')}
+                      {!tour && <span className="fd-badge help-soon">{t('shell.soon')}</span>}
+                    </button>
                   </section>
                 )}
                 <Academy />
@@ -287,7 +286,7 @@ export function HelpDrawer({
         )}
       </footer>
       {touring && tour && (
-        <TourDialog demoId={tour.demo_id} title={tour.title} onClose={() => setTouring(false)} />
+        <TourDialog tourId={tour.id} title={tour.title} onClose={() => setTouring(false)} />
       )}
       {keys && <ShortcutsDialog onClose={() => setKeys(false)} />}
     </aside>

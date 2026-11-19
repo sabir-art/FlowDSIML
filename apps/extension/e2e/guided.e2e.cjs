@@ -21,8 +21,10 @@ const { chromium } = require('playwright');
   let [sw] = ctx.serviceWorkers();
   if (!sw) sw = await ctx.waitForEvent('serviceworker');
   const extId = sw.url().split('/')[2];
+  // Journal du faux serveur partagé avec les autres suites : seules les requêtes de ce test comptent
+  const from = (await (await fetch('http://localhost:54400/__log')).json()).length;
   const page = await ctx.newPage();
-  await page.goto('http://localhost:54400/page');
+  await page.goto('http://localhost:54400/crm');
   const popup = await ctx.newPage();
   await popup.goto(`chrome-extension://${extId}/popup.html`);
   await popup.fill('#email', 'a@b.c');
@@ -72,7 +74,7 @@ const { chromium } = require('playwright');
   await review.click('#send');
   await review.waitForURL(/33333333-3333-3333-3333-333333333333/, { timeout: 15000 }).catch(() => {});
   const finalUrl = review.url();
-  const log = await (await fetch('http://localhost:54400/__log')).json();
+  const log = (await (await fetch('http://localhost:54400/__log')).json()).slice(from);
   await ctx.close();
   const ok = (cond, label) => {
     console.log(`${cond ? 'ok' : 'NOT OK'} - ${label}`);
