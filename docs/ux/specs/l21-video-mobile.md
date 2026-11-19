@@ -80,7 +80,8 @@ Tout est conforme à F7 §1 et §2. Points à vérifier sur les captures :
 - **Démo mobile (L21-05)** :
   - sur grand écran, elle s'affiche dans le cadre d'un téléphone : 9:19.5, rayon de 44 px, encoche décorative. Sur un vrai téléphone, elle passe en plein écran, sans cadre ;
   - la bulle devient une **feuille du bas** avec un bouton de 44 px de haut ;
-  - le hotspot tactile mesure au moins 44 px, avec un anneau #D60B52 de 3 px ;
+  - le hotspot tactile mesure au moins 44 px, avec un anneau #D60B52 **opaque** de 3 px, visible en permanence (liseré blanc possible ; une pulsation n'anime qu'un halo à l'extérieur) ;
+  - **cible plus large que 44 px** (bouton, champ) : l'anneau entoure la cible entière, en rectangle arrondi au rayon de la cible + 4 px. L'intérieur reste transparent et ni l'anneau ni le halo ne passent sur le libellé. Cette règle vaut aussi sur ordinateur ;
   - la microcopie dit « Touchez » au lieu de « Cliquez » pour une démo `device: mobile`.
 - **Hotspot bas (L21-06)** : si le hotspot est dans le tiers bas de l'écran, la feuille passe **en haut**. Elle ne cache jamais le hotspot.
 

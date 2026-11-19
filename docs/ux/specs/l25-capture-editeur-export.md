@@ -83,7 +83,7 @@ Ces options s'ajoutent à la popup de L21-01, sous le type de capture. Elles val
 - **Style** (`radiogroup`) : Clair, Sombre, Minimal, Aucun.
 - **Barre d'adresse** :
   - interrupteur ;
-  - « Adresse affichée » : par défaut, l'adresse de la capture. Le texte sert seulement à l'affichage et n'est jamais un lien.
+  - « Adresse affichée » : le texte sert seulement à l'affichage et n'est jamais un lien. L'adresse réelle de la capture n'est visible que dans l'éditeur (indication grisée) ; **seule une adresse saisie est publiée**. Sans saisie, la barre publiée affiche le domaine seul, ou rien si le style est Minimal.
 - **Onglets** : interrupteur, « Titre de l'onglet » (par défaut, celui de la capture), interrupteur « Boutons de fenêtre ».
 - **Fond autour du cadre** : couleur, avec la règle de contraste existante.
 - **Mobile** : une démo `device: mobile` (L21) a le cadre téléphone. Cette section est alors remplacée par « Cadre du téléphone : Afficher / Masquer ».
