@@ -61,6 +61,20 @@ async function scheduled() {
   return json(200, { sent });
 }
 
+/** L25 : vidéos de plus de 24 h citées par aucune étape, retirées par l'API Storage (lots de 100). */
+async function purgeVideos() {
+  const { data, error } = await supabase.rpc('orphan_videos', { p_limit: 500 });
+  if (error) return json(500, { error: 'orphans' });
+  const names = ((data ?? []) as Array<{ name: string }>).map((r) => r.name);
+  let removed = 0;
+  for (let i = 0; i < names.length; i += 100) {
+    const { data: gone } = await supabase.storage.from('videos').remove(names.slice(i, i + 100));
+    removed += gone?.length ?? 0;
+  }
+  console.log(`purge_videos : ${removed} vidéo(s) retirée(s)`);
+  return json(200, { removed });
+}
+
 async function immediate(req: Request, token: string) {
   const { data: u } = await supabase.auth.getUser(token);
   if (!u.user) return json(401, { error: 'auth' });
@@ -83,7 +97,12 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'method' });
   const auth = req.headers.get('authorization') ?? '';
   const secret = Deno.env.get('WEBHOOKS_DISPATCH_SECRET') ?? '';
-  if (secret && safeEqual(auth, `Bearer ${secret}`)) return scheduled();
+  if (secret && safeEqual(auth, `Bearer ${secret}`)) {
+    // L25 : purge planifiée des vidéos orphelines (même secret, appel distinct de pg_cron)
+    const body = (await req.json().catch(() => null)) as { task?: unknown } | null;
+    if (body?.task === 'purge_videos') return purgeVideos();
+    return scheduled();
+  }
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
   if (!token) return json(401, { error: 'auth' });
   return immediate(req, token);
