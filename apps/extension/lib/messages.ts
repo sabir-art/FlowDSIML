@@ -1,6 +1,8 @@
 import type { PxRect, Viewport } from './geometry';
 import type { Detection } from './scan';
 import type { HtmlCapture } from './htmlCapture';
+import type { PageBox } from './fullpage';
+import type { PiiType } from './pii';
 
 /** Clic capturé par le content script et envoyé au service worker. */
 export interface ClickPayload {
@@ -19,6 +21,10 @@ export interface ClickPayload {
    * dans la page. Restent dans le navigateur jusqu'à l'écran de vérification.
    */
   detections: Detection[];
+  /** L25-01 : taille du document et défilement au moment du clic (capture pleine page). */
+  page?: PageBox;
+  /** L25-01 : repérages sur tout le document (pixels CSS du document), pour la capture pleine page. */
+  pageDetections?: { type: PiiType; rect: PxRect }[];
 }
 
 /** F7 : type de capture choisi dans la popup. */
@@ -37,11 +43,22 @@ export type PopupRequest =
       webcam?: boolean;
       /** Format mobile : taille émulée. */
       viewport?: { w: number; h: number };
+      /** L25-01 : taille de l'onglet le temps de la capture (null : taille actuelle). */
+      size?: { w: number; h: number } | null;
+      /** L25-01 : suivre les onglets ouverts depuis l'onglet capturé. */
+      followTabs?: boolean;
     }
   | { type: 'fd:stop' }
   | { type: 'fd:pause' }
   | { type: 'fd:cancel' }
   | { type: 'fd:status' };
+
+/** L25-01 : onglet suivi pendant la capture (numéro d'ordre et titre). */
+export interface TrackedTab {
+  id: number;
+  n: number;
+  title: string;
+}
 
 /** F7 : messages de la barre d'enregistrement (content script) vers le service worker. */
 export type VideoBarRequest =
@@ -81,4 +98,11 @@ export interface RecordingStatus {
   blurredZones?: number;
   /** A8 : capture HTML à faire au prochain chargement de page (après un clic qui navigue). */
   htmlAwait?: boolean;
+  /** L25-01 : taille de l'onglet imposée pendant la capture (null : taille actuelle). */
+  size?: { w: number; h: number } | null;
+  followTabs?: boolean;
+  /** L25-01 : onglets suivis (le premier est l'onglet de départ). */
+  tabs?: TrackedTab[];
+  /** L25-01 : onglets où le protocole DevTools est attaché (taille, capture pleine page). */
+  debugged?: number[];
 }

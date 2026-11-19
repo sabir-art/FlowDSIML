@@ -269,3 +269,104 @@ fieldset.inline legend {
 .check input {
   accent-color: var(--fd-color-primary, #a3195b);
 }
+
+/* L25-01 : options des captures (multi-onglets, taille de l'onglet, vérification) */
+.sub {
+  display: grid;
+  gap: 10px;
+}
+.sub[hidden] {
+  display: none;
+}
+.switch-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.switch-row > svg {
+  flex: none;
+  margin-top: 2px;
+}
+.switch-row > span:nth-of-type(1) {
+  flex: 1;
+}
+.switch-row small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
+}
+.switch {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 20px;
+}
+.switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.switch > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--fd-color-border-strong);
+  pointer-events: none;
+}
+.switch > span::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+.switch input:checked + span {
+  background: var(--fd-color-primary, #a3195b);
+}
+.switch input:checked + span::after {
+  transform: translateX(14px);
+}
+.switch input:disabled + span {
+  opacity: 0.55;
+}
+.switch input:disabled {
+  cursor: not-allowed;
+}
+.switch input:focus-visible + span {
+  box-shadow: var(--fd-shadow-focus);
+}
+@media (prefers-reduced-motion: reduce) {
+  .switch > span::after {
+    transition: none;
+  }
+}
+#size-field label {
+  margin-top: 0;
+}
+.help {
+  margin: 4px 0 0;
+}
+.help[hidden],
+#desk-size[hidden] {
+  display: none;
+}
+#desk-size {
+  margin-top: 8px;
+}
+#desk-size label {
+  margin-top: 0;
+}

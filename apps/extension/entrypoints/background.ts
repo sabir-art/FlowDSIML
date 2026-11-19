@@ -8,8 +8,10 @@ import type {
   HtmlBarRequest,
   PopupRequest,
   RecordingStatus,
+  TrackedTab,
   VideoBarRequest,
 } from '@/lib/messages';
+import { fullHeight } from '@/lib/fullpage';
 import { htmlStore } from '@/lib/htmlStore';
 import { elapsed } from '@/lib/video';
 import { videoStore } from '@/lib/videoStore';
@@ -91,6 +93,89 @@ async function captureMobile(tabId: number): Promise<string> {
   return `data:image/png;base64,${r.data}`;
 }
 
+// ===== L25-01 : taille de l'onglet, capture pleine page, onglets suivis =====
+/** Attache le protocole DevTools à un onglet (une fois) ; false si impossible (DevTools ouvert…). */
+async function attach(tabId: number): Promise<boolean> {
+  const s = await getState();
+  if (s.debugged?.includes(tabId)) return true;
+  try {
+    await dbg().attach({ tabId }, '1.3');
+  } catch {
+    return false;
+  }
+  await setState({ debugged: [...((await getState()).debugged ?? []), tabId] });
+  return true;
+}
+/** Prépare un onglet suivi : taille imposée ou émulation mobile, protocole pour la page entière. */
+async function prepareTab(tabId: number, s: RecordingStatus) {
+  if (s.mode === 'mobile' && s.viewport) {
+    if (await attach(tabId)) {
+      await dbg().sendCommand({ tabId }, 'Emulation.setDeviceMetricsOverride', {
+        width: s.viewport.w,
+        height: s.viewport.h,
+        deviceScaleFactor: 2,
+        mobile: true,
+      });
+      await dbg().sendCommand({ tabId }, 'Emulation.setTouchEmulationEnabled', {
+        enabled: true,
+        maxTouchPoints: 5,
+      });
+    }
+    return;
+  }
+  // Capture à chaque clic : le protocole sert aussi à la capture pleine page
+  const need = !!s.size || s.mode === 'clicks';
+  if (!need || !(await attach(tabId))) return;
+  if (s.size)
+    await dbg()
+      .sendCommand({ tabId }, 'Emulation.setDeviceMetricsOverride', {
+        width: s.size.w,
+        height: s.size.h,
+        deviceScaleFactor: 0,
+        mobile: false,
+      })
+      .catch(() => undefined);
+}
+/** Remet chaque onglet à sa taille et détache le protocole. */
+async function releaseTabs(s: RecordingStatus) {
+  for (const tabId of s.debugged ?? []) await stopEmulation(tabId);
+  await setState({ debugged: [] });
+}
+/** Capture du viewport (et de la page entière si le protocole est attaché). */
+async function shoot(
+  tabId: number,
+  windowId: number,
+  s: RecordingStatus,
+  msg: ClickPayload,
+): Promise<{ view: string; full: string | null }> {
+  if (!s.debugged?.includes(tabId))
+    return { view: await browser.tabs.captureVisibleTab(windowId, { format: 'png' }), full: null };
+  const view = await captureMobile(tabId);
+  let full: string | null = null;
+  if (msg.page && msg.page.height > msg.viewport.height + 1) {
+    try {
+      const r = (await dbg().sendCommand({ tabId }, 'Page.captureScreenshot', {
+        format: 'png',
+        captureBeyondViewport: true,
+        // Image en pixels CSS : la page entière reste sous la limite des canevas
+        clip: {
+          x: 0,
+          y: 0,
+          width: msg.page.width,
+          height: fullHeight(msg.page),
+          scale: 1 / Math.max(1, msg.dpr),
+        },
+      })) as { data: string };
+      full = `data:image/png;base64,${r.data}`;
+    } catch {
+      full = null;
+    }
+  }
+  return { view, full };
+}
+const tracked = (s: RecordingStatus, tabId: number | undefined): TrackedTab | null =>
+  tabId === undefined ? null : ((s.tabs ?? []).find((t) => t.id === tabId) ?? null);
+
 // ===== F7 : vidéo de l'onglet (document hors écran) =====
 async function ensureOffscreen() {
   const c = browser;
@@ -119,19 +204,20 @@ function enqueue<T>(fn: () => Promise<T>): Promise<T> {
   return p;
 }
 
-async function handleClick(msg: ClickPayload, windowId: number) {
+async function handleClick(msg: ClickPayload, windowId: number, tabId: number | undefined) {
   const state = await getState();
   if (!state.recording || state.paused || !state.workspaceId) return;
+  // L25-01 : seuls l'onglet de départ et les onglets qu'il a ouverts sont capturés
+  const tab = tracked(state, tabId) ?? (tabId === state.tabId ? { id: tabId!, n: 1, title: '' } : null);
+  if (!tab) return;
   try {
-    const dataUrl = await enqueue(() =>
-      state.mode === 'mobile' && state.tabId !== null
-        ? captureMobile(state.tabId)
-        : browser.tabs.captureVisibleTab(windowId, { format: 'png' }),
-    );
-    const image = await (await fetch(dataUrl)).blob();
+    const shot = await enqueue(() => shoot(tab.id, windowId, state, msg));
+    const image = await (await fetch(shot.view)).blob();
     const bitmap = await createImageBitmap(image);
     const { width, height } = bitmap;
     bitmap.close();
+    let full: Awaited<ReturnType<typeof fullCapture>> = undefined;
+    if (shot.full && msg.page) full = await fullCapture(shot.full, msg);
     const order = (await getState()).steps;
     await pending.put({
       id: crypto.randomUUID(),
@@ -152,6 +238,9 @@ async function handleClick(msg: ClickPayload, windowId: number) {
         const rect = toRelRect(d.rect, msg.viewport);
         return rect ? [{ id: crypto.randomUUID(), type: d.type, rect, excerpt: d.excerpt, blur: true }] : [];
       }),
+      // L25-06 : onglet de la capture quand le suivi des onglets est activé
+      tab: state.followTabs ? { n: tab.n, title: msg.title.slice(0, 120) } : undefined,
+      full,
     });
     await setState({ steps: order + 1, lastError: null });
   } catch (e) {
@@ -161,12 +250,42 @@ async function handleClick(msg: ClickPayload, windowId: number) {
   }
 }
 
+/** L25-01 : capture pleine page et ses zones (relatives à la page entière). */
+async function fullCapture(dataUrl: string, msg: ClickPayload) {
+  if (!msg.page) return undefined;
+  const image = await (await fetch(dataUrl)).blob();
+  const bmp = await createImageBitmap(image);
+  const { width, height } = bmp;
+  bmp.close();
+  const box = { width: msg.page.width, height: fullHeight(msg.page) };
+  return {
+    image,
+    width,
+    height,
+    page: msg.page,
+    zones: (msg.pageDetections ?? []).flatMap((d) => {
+      const rect = toRelRect(d.rect, box);
+      return rect ? [{ type: d.type, rect }] : [];
+    }),
+  };
+}
+
 async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<RecordingStatus> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) throw new Error('Non connecté');
   await pending.clear();
   const mode = req.mode ?? 'clicks';
-  if (mode === 'mobile' && req.viewport) await emulate(req.tabId, req.viewport);
+  const first = await browser.tabs.get(req.tabId);
+  await setState({
+    debugged: [],
+    tabs: [{ id: req.tabId, n: 1, title: (first.title ?? '').slice(0, 120) }],
+    followTabs: mode !== 'video' && !!req.followTabs,
+    size: mode === 'clicks' || mode === 'html' ? (req.size ?? null) : null,
+  });
+  if (mode === 'mobile' && req.viewport) {
+    await emulate(req.tabId, req.viewport);
+    await setState({ debugged: [req.tabId] });
+  }
   if (mode === 'video') {
     if (!req.streamId) throw new Error("Flux de l'onglet indisponible.");
     await videoStore.clear();
@@ -206,6 +325,7 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
     return state;
   }
   if (mode === 'html') await htmlStore.clear();
+  if (mode === 'clicks' || mode === 'html') await prepareTab(req.tabId, { ...(await getState()), mode });
   const state = await setState({
     recording: true,
     mode,
@@ -331,8 +451,10 @@ async function stop(): Promise<RecordingStatus> {
   const state = await getState();
   if (state.mode === 'video') return stopVideo();
   if (state.mode === 'html') {
-    if (state.tabId !== null)
-      await browser.tabs.sendMessage(state.tabId, { type: 'fd:recorder-stop' }).catch(() => undefined);
+    await releaseTabs(state);
+    for (const t of state.tabs ?? [{ id: state.tabId ?? -1 }])
+      if (t.id >= 0)
+        await browser.tabs.sendMessage(t.id, { type: 'fd:recorder-stop' }).catch(() => undefined);
     if (state.workspaceId && (await htmlStore.count()) > 0) {
       await browser.storage.local.set({
         'fd.htmlReview': { workspaceId: state.workspaceId, title: state.title || 'Nouvelle démo' },
@@ -341,10 +463,9 @@ async function stop(): Promise<RecordingStatus> {
     }
     return setState({ ...EMPTY });
   }
-  if (state.mode === 'mobile' && state.tabId !== null) await stopEmulation(state.tabId);
-  if (state.tabId !== null) {
-    await browser.tabs.sendMessage(state.tabId, { type: 'fd:recorder-stop' }).catch(() => undefined);
-  }
+  await releaseTabs(state);
+  for (const t of state.tabs ?? [{ id: state.tabId ?? -1 }])
+    if (t.id >= 0) await browser.tabs.sendMessage(t.id, { type: 'fd:recorder-stop' }).catch(() => undefined);
   if (state.workspaceId && (await pending.count()) > 0) {
     await browser.storage.local.set({
       'fd.review': {
@@ -363,9 +484,9 @@ async function stop(): Promise<RecordingStatus> {
 /** Annule : arrête la capture et efface les captures gardées dans le navigateur. */
 async function cancel(): Promise<RecordingStatus> {
   const state = await getState();
-  if (state.tabId !== null)
-    await browser.tabs.sendMessage(state.tabId, { type: 'fd:recorder-stop' }).catch(() => undefined);
-  if (state.mode === 'mobile' && state.tabId !== null) await stopEmulation(state.tabId);
+  for (const t of state.tabs ?? [{ id: state.tabId ?? -1 }])
+    if (t.id >= 0) await browser.tabs.sendMessage(t.id, { type: 'fd:recorder-stop' }).catch(() => undefined);
+  await releaseTabs(state);
   if (state.mode === 'html') await htmlStore.clear();
   if (state.mode === 'video') {
     await browser.runtime.sendMessage({ type: 'fd:rec-cancel' }).catch(() => undefined);
@@ -400,9 +521,15 @@ export default defineBackground(() => {
     if (m.type === 'fd:click') {
       // On répond après la capture : le badge REC reste masqué jusque-là (il n'apparaît pas à l'image)
       if (sender.tab?.windowId !== undefined)
-        return handleClick(m as ClickPayload, sender.tab.windowId).then(() => true);
+        return handleClick(m as ClickPayload, sender.tab.windowId, sender.tab.id).then(() => true);
       return undefined;
     }
+    if (m.type === 'fd:tab-info')
+      // L25-01 : numéro de l'onglet suivi, pour la puce « Onglet 2 · Aide » de la barre
+      return getState().then((s) => {
+        const t = tracked(s, sender.tab?.id);
+        return t ? { n: t.n, title: sender.tab?.title ?? t.title } : null;
+      });
     const p = m as PopupRequest;
     if (p.type === 'fd:status') return getState();
     if (p.type === 'fd:start')
@@ -416,16 +543,45 @@ export default defineBackground(() => {
     return undefined;
   });
 
-  // Réinjection après navigation dans l'onglet enregistré.
-  browser.tabs.onUpdated.addListener((tabId, info) => {
+  // L25-01 : un onglet ouvert PAR un onglet suivi est suivi à son tour (jamais un onglet ouvert à la main)
+  browser.tabs.onCreated.addListener((tab) => {
+    void getState().then(async (s) => {
+      if (!s.recording || !s.followTabs || tab.id === undefined || s.mode === 'video') return;
+      if (!tracked(s, tab.openerTabId)) return;
+      // Un nouvel onglet du navigateur (Ctrl + T : chrome://newtab) a été ouvert à la main : jamais suivi
+      if (/^(chrome|edge|brave|about:newtab)/.test(tab.pendingUrl ?? tab.url ?? '')) return;
+      const tabs = s.tabs ?? [];
+      const n = Math.max(0, ...tabs.map((t) => t.n)) + 1;
+      await setState({ tabs: [...tabs, { id: tab.id, n, title: (tab.title ?? '').slice(0, 120) }] });
+    });
+  });
+  // Réinjection après navigation dans un onglet suivi.
+  browser.tabs.onUpdated.addListener((tabId, info, tab) => {
     if (info.status !== 'complete') return;
-    void getState().then((s) => {
-      if (s.recording && s.tabId === tabId) void inject(tabId, s.mode);
+    void getState().then(async (s) => {
+      if (!s.recording) return;
+      const t = tracked(s, tabId) ?? (s.tabId === tabId ? { id: tabId, n: 1, title: '' } : null);
+      if (!t) return;
+      if (t.n > 1) {
+        await setState({
+          tabs: (s.tabs ?? []).map((x) =>
+            x.id === tabId ? { ...x, title: (tab.title ?? '').slice(0, 120) } : x,
+          ),
+        });
+        if (!s.debugged?.includes(tabId)) await prepareTab(tabId, s);
+      }
+      void inject(tabId, s.mode);
     });
   });
   browser.tabs.onRemoved.addListener((tabId) => {
     void getState().then((s) => {
-      if (s.recording && s.tabId === tabId) void stop();
+      if (!s.recording) return;
+      if (s.tabId === tabId) return void stop();
+      if (tracked(s, tabId))
+        void setState({
+          tabs: (s.tabs ?? []).filter((t) => t.id !== tabId),
+          debugged: (s.debugged ?? []).filter((x) => x !== tabId),
+        });
     });
   });
 });

@@ -124,6 +124,25 @@ http
         log[log.length - 1].html = b.html;
         return send(200, { path: `${b.workspaceId}/${b.demoId}/${require('crypto').randomUUID()}.html` });
       }
+      // L25-01 : page haute (capture pleine page) qui ouvre l'aide dans un nouvel onglet
+      if (req.url.startsWith('/tabs')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end(
+          '<html><head><meta charset="utf-8"><title>Rapports</title></head><body style="margin:0;font-family:sans-serif">' +
+            '<header style="height:64px;background:#1f2a44;color:#fff;padding:16px">ExampleCRM</header>' +
+            '<main style="padding:24px"><h1>Rapports</h1><button id="new" style="font-size:18px;padding:10px">Nouveau rapport</button> ' +
+            '<a id="help" href="/aide" target="_blank">Aide</a><div style="height:1800px"></div>' +
+            // Donnée fictive tout en bas de la page (hors du viewport au clic)
+            '<p id="bas">Contact : lea.martin@acme.example</p></main></body></html>',
+        );
+      }
+      if (req.url.startsWith('/aide')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end(
+          '<html><head><meta charset="utf-8"><title>Aide</title></head><body style="font-family:sans-serif">' +
+            '<h1>Centre d’aide</h1><button id="ok" style="font-size:18px;padding:10px">Lire l’article</button></body></html>',
+        );
+      }
       if (req.url.startsWith('/page')) {
         res.writeHead(200, { 'content-type': 'text/html' });
         return res.end(

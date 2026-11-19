@@ -1,5 +1,6 @@
 import type { RelRect, Viewport, PxRect } from './geometry';
 import type { PiiType } from './pii';
+import type { PageBox } from './fullpage';
 
 /** Zone à vérifier sur une capture (coordonnées relatives 0–1). */
 export interface PendingZone {
@@ -31,6 +32,19 @@ export interface PendingCapture {
   element: PxRect | null;
   click: { x: number; y: number };
   zones: PendingZone[];
+  /** L25-01 : onglet de la capture (numéro d'ordre et titre), quand plusieurs onglets sont suivis. */
+  tab?: { n: number; title: string };
+  /**
+   * L25-01 : capture de la page entière (animation de défilement). Ses zones sont repérées sur tout
+   * le document et floutées à l'envoi, sauf celles décochées sur la capture du viewport.
+   */
+  full?: {
+    image: Blob;
+    width: number;
+    height: number;
+    page: PageBox;
+    zones: { type: PiiType; rect: RelRect }[];
+  };
 }
 
 const DB = 'fd-pending';

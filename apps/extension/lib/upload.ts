@@ -3,6 +3,7 @@ import { supabase } from './supabase';
 import { burnBlurs } from './burn';
 import { defaultHotspotTitle, hotspotRect } from './geometry';
 import type { PendingCapture } from './pending';
+import { fullHeight, fullPageBlurs } from './fullpage';
 
 /**
  * Envoi après vérification (spec f1-formation §1) : crée la démo, puis pour chaque capture floute
@@ -47,6 +48,28 @@ export async function sendCaptures(
       .from('captures')
       .upload(path, blob, { contentType: 'image/webp', upsert: false });
     if (up.error) throw up.error;
+    // L25-01 : page entière (animation de défilement), floutée par défaut sur tout le document
+    let fullPage: Record<string, unknown> | null = null;
+    if (c.full) {
+      const f = await burnBlurs(c.full.image, fullPageBlurs(c.full.zones, c.zones, c.viewport, c.full.page));
+      const fpath = `${target.workspaceId}/${demoId}/${stepId}-page.webp`;
+      const fu = await supabase.storage
+        .from('captures')
+        .upload(fpath, f.blob, { contentType: 'image/webp', upsert: false });
+      if (fu.error) throw fu.error;
+      const scale = f.height / fullHeight(c.full.page);
+      fullPage = {
+        path: fpath,
+        width: f.width,
+        height: f.height,
+        // Position du viewport capturé dans l'image de la page (pixels de l'image)
+        top: Math.round(c.full.page.scrollY * scale),
+        viewportHeight: Math.round(c.viewport.height * scale),
+      };
+    }
+    const options: Record<string, unknown> = {};
+    if (c.tab) options.tab = c.tab;
+    if (fullPage) options.fullPage = fullPage;
     const ins = await supabase.from('steps').insert({
       id: stepId,
       demo_id: demoId,
@@ -61,6 +84,7 @@ export async function sendCaptures(
       page_title: c.title.slice(0, 300),
       // Flous incrustés dans l'image : pas de calque à rejouer dans le player
       blurs: [] as unknown as NonNullable<Json>,
+      ...(Object.keys(options).length ? { options: options as NonNullable<Json> } : {}),
       element_meta: JSON.parse(
         JSON.stringify({
           selector: c.selector,

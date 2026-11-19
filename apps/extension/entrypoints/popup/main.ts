@@ -9,7 +9,9 @@ import { lang, stepsCaptured, strings } from '@/lib/i18n';
 import {
   Check,
   Code,
+  EyeOff,
   Film,
+  Layers,
   LogIn,
   LogOut,
   MousePointerClick,
@@ -21,6 +23,7 @@ import {
   createIcons,
 } from 'lucide';
 import { viewportFor, type DeviceKey } from '@/lib/video';
+import { tabSize, type TabSizeKey } from '@/lib/fullpage';
 
 document.documentElement.lang = lang;
 document.title = APP_NAME;
@@ -28,7 +31,21 @@ for (const el of document.querySelectorAll<HTMLElement>('[data-app-name]')) el.t
 for (const el of document.querySelectorAll<HTMLElement>('[data-i18n]'))
   el.textContent = strings[el.dataset.i18n as keyof typeof strings];
 (document.getElementById('title') as HTMLInputElement).placeholder = strings.demoTitlePlaceholder;
-const ICONS = { Check, Code, Film, LogIn, LogOut, MousePointerClick, Pause, Play, Smartphone, Video, X };
+const ICONS = {
+  Check,
+  Code,
+  EyeOff,
+  Film,
+  Layers,
+  LogIn,
+  LogOut,
+  MousePointerClick,
+  Pause,
+  Play,
+  Smartphone,
+  Video,
+  X,
+};
 createIcons({ icons: ICONS, attrs: { width: 16, height: 16, 'stroke-width': 2, 'aria-hidden': 'true' } });
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -42,7 +59,12 @@ function syncMode() {
   show('opt-video', m === 'video');
   show('opt-mobile', m === 'mobile');
   show('opt-html', m === 'html');
-  show('hint', m === 'clicks');
+  // L25-01 : multi-onglets et taille pour les captures d'écran et HTML ; taille masquée en mobile
+  show('opt-desk', m !== 'video');
+  show('size-field', m === 'clicks' || m === 'html');
+  show('opt-full', m === 'clicks' || m === 'mobile');
+  // L25-01 : l'aide de la vérification est portée par l'interrupteur « Vérifier les données »
+  show('hint', false);
   for (const el of document.querySelectorAll<HTMLElement>('.start-ico')) el.hidden = el.dataset.for !== m;
   $('start-label').textContent =
     m === 'video'
@@ -58,6 +80,18 @@ for (const r of document.querySelectorAll<HTMLInputElement>('input[name="mode"]'
     syncMode();
     void browser.storage.local.set({ 'fd.lastMode': mode() });
   });
+$<HTMLSelectElement>('tabsize').addEventListener('change', () => {
+  const custom = $<HTMLSelectElement>('tabsize').value === 'custom';
+  show('desk-size', custom);
+  show('desk-range', custom);
+});
+// « Taille actuelle · 1 512 × 862 » : taille de l'onglet courant
+void browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+  if (tab?.width && tab.height)
+    $('tabsize-current').textContent = strings.tabSizeCurrentWH
+      .replace('{{w}}', tab.width.toLocaleString(lang))
+      .replace('{{h}}', tab.height.toLocaleString(lang));
+});
 $<HTMLSelectElement>('device').addEventListener('change', () =>
   show('custom-size', $<HTMLSelectElement>('device').value === 'custom'),
 );
@@ -210,6 +244,14 @@ $('start').addEventListener('click', async () => {
       mic: m === 'video' && $<HTMLInputElement>('mic').checked,
       webcam: m === 'video' && $<HTMLInputElement>('webcam').checked,
       viewport: m === 'mobile' ? viewport() : undefined,
+      followTabs: m !== 'video' && $<HTMLInputElement>('follow').checked,
+      size:
+        m === 'clicks' || m === 'html'
+          ? tabSize($<HTMLSelectElement>('tabsize').value as TabSizeKey, {
+              w: +$<HTMLInputElement>('dw').value,
+              h: +$<HTMLInputElement>('dh').value,
+            })
+          : null,
     });
     await render();
   } catch (err) {

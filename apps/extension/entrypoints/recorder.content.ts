@@ -3,7 +3,8 @@ import { browser } from 'wxt/browser';
 import { elementLabel } from '@/lib/geometry';
 import { cssSelector } from '@/lib/selector';
 import type { ClickPayload } from '@/lib/messages';
-import { scanPage } from '@/lib/scan';
+import { scanFullPage, scanPage } from '@/lib/scan';
+import { tabChip } from '@/lib/i18n';
 
 /**
  * Injecté à la demande (registration: runtime) dans l'onglet enregistré.
@@ -27,6 +28,23 @@ export default defineContentScript({
       'position:fixed;z-index:2147483647;bottom:12px;right:12px;padding:4px 10px;border-radius:999px;' +
       'background:#d93f4c;color:#fff;font:600 12px system-ui,sans-serif;pointer-events:none;opacity:.9';
     document.documentElement.appendChild(badge);
+    // L25-01 : onglet suivi (« Onglet 2 · Aide ») et annonce pour les lecteurs d'écran
+    const live = document.createElement('div');
+    live.setAttribute('data-fd-ui', '');
+    live.setAttribute('role', 'status');
+    live.style.cssText =
+      'position:fixed;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap';
+    document.documentElement.appendChild(live);
+    void browser.runtime
+      .sendMessage({ type: 'fd:tab-info' })
+      .then((r: unknown) => {
+        const info = r as { n: number; title: string } | null;
+        if (!info || info.n < 2) return;
+        const chip = tabChip(info.n, info.title || document.title);
+        badge.textContent = `● REC · ${chip.label}`;
+        live.textContent = chip.announce;
+      })
+      .catch(() => undefined);
 
     const rect = (el: Element) => {
       const r = el.getBoundingClientRect();
@@ -63,6 +81,14 @@ export default defineContentScript({
         url: location.href,
         title: document.title,
         detections: scanPage(),
+        // L25-01 : page entière (animation de défilement dans l'éditeur)
+        page: {
+          width: document.documentElement.scrollWidth,
+          height: document.documentElement.scrollHeight,
+          scrollX,
+          scrollY,
+        },
+        pageDetections: scanFullPage(),
       };
       badge.style.visibility = 'hidden';
       // Deux images d'affichage : le badge masqué est bien peint avant la capture
@@ -80,6 +106,7 @@ export default defineContentScript({
       if ((msg as { type?: string })?.type === 'fd:recorder-stop') {
         document.removeEventListener('pointerdown', onPointerDown, true);
         badge.remove();
+        live.remove();
         w.__fdRecorder = false;
       }
     });

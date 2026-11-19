@@ -42,8 +42,12 @@ const WS = '11111111-1111-1111-1111-111111111111';
   // L21-01 : trois cartes de type, options propres à chacun
   const cards = await popup.$$eval('.type-card b', (b) => b.map((x) => x.textContent));
   ok(
-    cards.length === 4 && /clic/.test(cards[0]) && /Vidéo/.test(cards[1]) && /mobile/.test(cards[2]),
-    'types de capture (clics, vidéo, mobile, HTML)',
+    cards.length === 4 &&
+      /clic/.test(cards[0]) &&
+      /HTML/.test(cards[1]) &&
+      /Vidéo/.test(cards[2]) &&
+      /mobile/.test(cards[3]),
+    'types de capture (clics, HTML, vidéo, mobile)',
   );
   ok(
     (await popup.$('#opt-video[hidden]')) && (await popup.$('#opt-mobile[hidden]')),

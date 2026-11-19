@@ -30,11 +30,11 @@ const fr = {
   // F7 : capture vidéo et mobile
   captureType: 'Type de capture',
   typeClicks: 'Captures à chaque clic',
-  typeClicksHelp: 'Une étape par clic, comme aujourd’hui',
+  typeClicksHelp: 'Tutoriel interactif, étape par étape',
   typeVideo: 'Vidéo de l’onglet',
-  typeVideoHelp: 'Pour un geste continu (saisie, glisser-déposer)',
+  typeVideoHelp: 'Geste continu\u202f: saisie, glisser, défilement',
   typeMobile: 'Format mobile',
-  typeMobileHelp: 'Taille téléphone ou tablette',
+  typeMobileHelp: 'Captures en taille téléphone ou tablette',
   optMic: 'Enregistrer ma voix',
   optWebcam: 'Webcam dans un coin',
   optCheck: 'Vérifier les données avant l’envoi (toujours actif)',
@@ -83,6 +83,23 @@ const fr = {
   vrSending: 'Envoi… {{p}}\u202f%',
   vrSent: 'Envoyé. Ouverture de l’éditeur…',
   vrError: 'L’envoi a échoué. Réessayez.',
+  // L25-01 : multi-onglets, taille de l'onglet, page entière
+  followTabs: 'Suivre les nouveaux onglets',
+  followTabsHelp:
+    'Les onglets ouverts depuis la page capturée sont capturés aussi. Les autres onglets ne le sont jamais.',
+  tabSize: 'Taille de l’onglet',
+  tabSizeCurrent: 'Taille actuelle',
+  tabSizeCurrentWH: 'Taille actuelle · {{w}} × {{h}}',
+  tabSizeCustom: 'Taille personnalisée…',
+  tabSizeHelp: 'L’onglet est redimensionné le temps de la capture, puis remis à sa taille.',
+  widthPx: 'Largeur (px)',
+  heightPx: 'Hauteur (px)',
+  sizeRange: 'De 800 à 2\u202f560 px.',
+  checkData: 'Vérifier les données avant l’envoi',
+  checkDataHelp: 'Toujours active\u202f: chaque capture, dans chaque onglet.',
+  fullPageHelp: 'Chaque capture garde la page entière, pour animer le défilement dans l’éditeur.',
+  tabChip: 'Onglet {{n}} · {{title}}',
+  tabAnnounce: 'Capture dans l’onglet {{n}}\u202f: {{title}}',
   // A8 : capture HTML
   typeHtml: 'Capture HTML',
   typeHtmlHelp: 'Page reproduite et modifiable',
@@ -147,11 +164,11 @@ const en: typeof fr = {
   noWorkspace: 'No workspace where you are an editor. Create one in the app.',
   captureType: 'Capture type',
   typeClicks: 'Screenshot on each click',
-  typeClicksHelp: 'One step per click, as today',
+  typeClicksHelp: 'Interactive tutorial, step by step',
   typeVideo: 'Tab video',
-  typeVideoHelp: 'For a continuous gesture (typing, drag and drop)',
+  typeVideoHelp: 'Continuous gesture: typing, dragging, scrolling',
   typeMobile: 'Mobile format',
-  typeMobileHelp: 'Phone or tablet size',
+  typeMobileHelp: 'Captures at phone or tablet size',
   optMic: 'Record my voice',
   optWebcam: 'Webcam in a corner',
   optCheck: 'Check data before sending (always on)',
@@ -192,6 +209,21 @@ const en: typeof fr = {
   vrNoFrames: 'No click or marked step: you will add pauses in the editor.',
   vrTooBig: 'The video is over 50 MB. Shorten or split the recording.',
   vrEmpty: 'The recording is empty or too long.',
+  followTabs: 'Follow new tabs',
+  followTabsHelp: 'Tabs opened from the captured page are captured too. Other tabs never are.',
+  tabSize: 'Tab size',
+  tabSizeCurrent: 'Current size',
+  tabSizeCurrentWH: 'Current size · {{w}} × {{h}}',
+  tabSizeCustom: 'Custom size…',
+  tabSizeHelp: 'The tab is resized during the capture, then restored.',
+  widthPx: 'Width (px)',
+  heightPx: 'Height (px)',
+  sizeRange: 'From 800 to 2,560 px.',
+  checkData: 'Check data before sending',
+  checkDataHelp: 'Always on: every capture, in every tab.',
+  fullPageHelp: 'Each capture keeps the whole page, to animate scrolling in the editor.',
+  tabChip: 'Tab {{n}} · {{title}}',
+  tabAnnounce: 'Capturing in tab {{n}}: {{title}}',
   vrNone: 'No recording to check.',
   vrDelete: 'Delete the recording',
   vrConfirmDelete: 'Delete the recording? It will be erased from this browser.',
@@ -243,4 +275,11 @@ export const lang = strings === en ? 'en' : 'fr';
 
 export function stepsCaptured(n: number): string {
   return (n === 1 ? strings.stepsCaptured_one : strings.stepsCaptured_other).replace('{{count}}', String(n));
+}
+
+/** L25-01 : puce de l'onglet suivi dans la barre d'enregistrement, et son annonce. */
+export function tabChip(n: number, title: string): { label: string; announce: string } {
+  const t = title.slice(0, 40);
+  const fill = (x: string) => x.replace('{{n}}', String(n)).replace('{{title}}', t);
+  return { label: fill(strings.tabChip), announce: fill(strings.tabAnnounce) };
 }

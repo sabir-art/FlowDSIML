@@ -178,6 +178,31 @@ export function scanPage(root: ParentNode = document.body): Detection[] {
   return dedupe(out);
 }
 
+/**
+ * L25-01 : repérage sur tout le document, pour la capture pleine page. Boîtes en pixels CSS du
+ * document (défilement ajouté) ; seuls le type et la boîte en sortent, jamais la valeur.
+ */
+export function scanFullPage(root: ParentNode = document.body): { type: PiiType; rect: PxRect }[] {
+  const out: { type: PiiType; rect: PxRect }[] = [];
+  const push = (type: PiiType, r: DOMRect) => {
+    if (r.width > 1 && r.height > 1)
+      out.push({
+        type,
+        rect: { left: r.left + scrollX, top: r.top + scrollY, width: r.width, height: r.height },
+      });
+  };
+  walk(root, false, (h) => {
+    if ('el' in h) push(h.type, h.el.getBoundingClientRect());
+    else {
+      const r = document.createRange();
+      r.setStart(h.node, h.start);
+      r.setEnd(h.node, h.end);
+      for (const rect of Array.from(r.getClientRects())) push(h.type, rect);
+    }
+  });
+  return out;
+}
+
 /** A8 : repérage sur tout le document (capture HTML) ; renvoie les nœuds, jamais les valeurs. */
 export interface NodeDetection {
   type: PiiType;
