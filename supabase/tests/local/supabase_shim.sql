@@ -32,8 +32,10 @@ create table if not exists storage.buckets (
 create table if not exists storage.objects (
   id uuid primary key default gen_random_uuid(),
   bucket_id text references storage.buckets (id), name text, owner uuid,
+  metadata jsonb,
   created_at timestamptz default now()
 );
+alter table storage.objects add column if not exists metadata jsonb;
 alter table storage.objects enable row level security;
 
 grant usage on schema public, auth, storage, extensions to anon, authenticated, service_role;

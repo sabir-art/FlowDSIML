@@ -1630,6 +1630,48 @@ export type Database = {
           },
         ];
       };
+      ab_tests: {
+        Row: {
+          created_by: string | null;
+          demo_id: string;
+          ended_at: string | null;
+          goal: string;
+          history: NonNullable<Json>;
+          hotspot_id: string | null;
+          id: string;
+          kept: string | null;
+          label_b: string;
+          split_b: number;
+          started_at: string;
+          status: string;
+          step_id: string;
+          variant_b: NonNullable<Json>;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      media_files: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          height: number | null;
+          id: string;
+          kind: string;
+          mime: string;
+          name: string;
+          path: string;
+          size_bytes: number;
+          width: number | null;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       glossary_terms: {
         Row: {
           created_at: string;
@@ -1829,6 +1871,15 @@ export type Database = {
       glossary_import: { Args: { p_ws: string; p_rows: Json; p_replace?: boolean }; Returns: Json };
       glossary_set_underline: { Args: { p_ws: string; p_on: boolean }; Returns: undefined };
       glossary_usage: { Args: { p_ws: string }; Returns: Json };
+      ab_start: { Args: { p_hotspot: string; p_label?: string }; Returns: string };
+      ab_update: {
+        Args: { p_test: string; p_label?: string; p_b?: Json; p_split?: number; p_goal?: string };
+        Returns: undefined;
+      };
+      ab_end: { Args: { p_test: string; p_keep?: string }; Returns: undefined };
+      ab_results: { Args: { p_test: string; p_goal?: string }; Returns: Json };
+      media_used: { Args: { p_ws: string }; Returns: number };
+      media_usage: { Args: { p_ws: string }; Returns: Json };
       webhook_create: { Args: { p_ws: string; p_url: string; p_events: string[]; p_name?: string }; Returns: Json };
       webhook_rotate_secret: { Args: { p_id: string }; Returns: string };
       webhook_send_test: { Args: { p_id: string }; Returns: string };

@@ -435,3 +435,8 @@ verify_jwt = false
 [functions.webhooks-dispatch]
 enabled = true
 verify_jwt = false
+
+# L18 : médiathèque (dépôt et suppression), JWT de l'utilisateur vérifié par la plateforme et par la fonction.
+[functions.media]
+enabled = true
+verify_jwt = true
