@@ -278,8 +278,12 @@ export const themeSchema = z.object({
   background: z.string().default('#EEF2F6'),
   surface: z.string().default('#FFFFFF'),
   text: z.string().default('#080808'),
+  /** L18 : texte des boutons sur la couleur principale (noir sur le Vert DSI, par exemple). */
+  onPrimary: z.string().default('#FFFFFF').catch('#FFFFFF'),
   fontFamily: z.string().default("'Plus Jakarta Sans', system-ui, sans-serif"),
   radius: z.number().min(0).max(32).default(20),
+  /** L18 : arrondi des boutons (999 = pilule). */
+  buttonRadius: z.number().min(0).max(999).default(999).catch(999),
   logoUrl: z.string().nullable().default(null),
   showBranding: z.boolean().default(true),
   /** Fond dégradé du lecteur (maquette editeur.html, onglet Design › Cadre). */

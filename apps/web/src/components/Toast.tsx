@@ -6,7 +6,12 @@ import '../styles/maquette-ajouts.css';
 import '../styles/maquette-peau.css';
 
 /** L16 : action facultative (ex. « Télécharger ») ; un toast avec action reste jusqu'à sa fermeture. */
-export type ToastAction = { label: string; onClick: () => void };
+export type ToastAction = {
+  label: string;
+  onClick: () => void;
+  /** L18 : action limitée dans le temps (ex. « Annuler » pendant 8 s) : le toast se ferme seul. */
+  durationMs?: number;
+};
 type Toast = { id: number; text: string; action?: ToastAction };
 const Ctx = createContext<(text: string, action?: ToastAction) => void>(() => {});
 
@@ -26,7 +31,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (text: string, action?: ToastAction) => {
       const id = ++seq.current;
       setToasts((l) => [...l.slice(-2), { id, text, action }]);
-      if (!action) window.setTimeout(() => close(id), DURATION);
+      if (!action || action.durationMs) window.setTimeout(() => close(id), action?.durationMs ?? DURATION);
     },
     [close],
   );

@@ -10,6 +10,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import { CtaFields } from './CtaFields';
 import { ReadingModePanel } from './GuidedDemoPanels';
 import { asSettings } from '../types';
+import { StylesSection } from '../styles/StylesSection';
 
 const FONTS = [
   "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -81,28 +82,21 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
     </div>
   );
 
-  // Texte blanc des boutons sur la couleur principale (AA : 4,5:1)
-  const ratio = contrastRatio(theme.primary, '#FFFFFF');
-  const fix = ratio < 4.5 ? darkenToContrast(theme.primary) : null;
+  // Texte des boutons sur la couleur principale (AA : 4,5:1) ; correction proposée pour un texte blanc
+  const ratio = contrastRatio(theme.primary, theme.onPrimary);
+  const fix =
+    ratio < 4.5 && theme.onPrimary.toUpperCase() === '#FFFFFF' ? darkenToContrast(theme.primary) : null;
   const ratioText = ratio.toFixed(1).replace('.', ',');
 
   return (
     <div className="th-panel">
-      <div className="sec">
-        <div className="sec-title">{t('editor.design.theme')}</div>
-        <select
-          className="select input-sm"
-          aria-label={t('editor.design.theme')}
-          value="demo"
-          disabled={readOnly}
-          onChange={() => {}}
-        >
-          <option value="demo">{t('editor.design.themeDemo')}</option>
-          <option value="workspace" disabled>
-            {t('editor.design.themeWorkspace')} ({t('shell.soon')})
-          </option>
-        </select>
-      </div>
+      {/* L18-05 : styles prédéfinis (remplacent le select « Thème ») */}
+      <StylesSection
+        wsId={demo.workspace_id}
+        theme={theme}
+        readOnly={readOnly}
+        onApply={(tokens) => set(tokens)}
+      />
 
       <div className="sec">
         <div className="sec-title">{t('editor.design.colors')}</div>

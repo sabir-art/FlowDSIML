@@ -52,6 +52,8 @@ export function themeVars(theme: Theme): Record<string, string> {
     '--p-surface': theme.surface,
     '--p-text': theme.text,
     '--p-radius': `${theme.radius}px`,
+    '--p-on-primary': theme.onPrimary,
+    '--p-btn-radius': `${theme.buttonRadius}px`,
     // Fond dégradé : teinte principale en haut à gauche, teinte hotspot en bas à droite
     '--p-bg-image': theme.backgroundGradient
       ? `linear-gradient(160deg, color-mix(in srgb, ${theme.primary} 14%, ${theme.background}) 0%, ${theme.background} 55%, color-mix(in srgb, ${theme.hotspot} 10%, ${theme.background}) 100%)`
