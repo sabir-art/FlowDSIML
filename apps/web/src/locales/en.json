@@ -1747,7 +1747,7 @@
       "invalid": "3 to 48 characters: lowercase letters, digits and hyphens, no hyphen at the start or end.",
       "reserved": "This word is reserved. Choose another one.",
       "retry": "The address could not be created. Try again.",
-      "suffixHelp": "A 6-character suffix is added when you save.",
+      "suffixHelp": "A 6-character suffix is added when you save, so that the address stays unique.",
       "redirectHelp": "The old address redirects to the demo for 90 days.",
       "save": "Save address",
       "saved": "Address saved.",

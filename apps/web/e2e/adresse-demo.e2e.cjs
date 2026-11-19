@@ -48,7 +48,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(!/Bientôt/.test(await page.locator('label[for=sh-slug]').innerText()), 'plus de « Bientôt »');
   ok(await save.isDisabled(), 'enregistrer : désactivé sans saisie');
   ok(
-    /Un suffixe de 6 caractères est ajouté à l’enregistrement\. L’ancienne adresse redirige vers la démo pendant 90 jours\./.test(
+    /Un suffixe de 6 caractères est ajouté à l’enregistrement, pour que l’adresse reste unique\. L’ancienne adresse redirige vers la démo pendant 90 jours\./.test(
       sp(await page.locator('#sh-slug-help').innerText()),
     ),
     'aide : suffixe et redirection 90 jours',

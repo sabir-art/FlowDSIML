@@ -1747,7 +1747,7 @@
       "invalid": "De 3 à 48 caractères : lettres minuscules, chiffres et tirets, sans tiret au début ni à la fin.",
       "reserved": "Ce mot est réservé. Choisissez-en un autre.",
       "retry": "L’adresse n’a pas pu être créée. Réessayez.",
-      "suffixHelp": "Un suffixe de 6 caractères est ajouté à l’enregistrement.",
+      "suffixHelp": "Un suffixe de 6 caractères est ajouté à l’enregistrement, pour que l’adresse reste unique.",
       "redirectHelp": "L’ancienne adresse redirige vers la démo pendant 90 jours.",
       "save": "Enregistrer l’adresse",
       "saved": "Adresse enregistrée.",
