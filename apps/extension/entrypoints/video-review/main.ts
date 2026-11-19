@@ -109,7 +109,7 @@ async function main() {
   const lang = document.documentElement.lang;
   const mb = (v.blob.size / 1024 / 1024).toLocaleString(lang, { maximumFractionDigits: 1 });
   $('meta').textContent =
-    `${v.title || s.vrUntitled} · ${timer(durationMs)} · ${mb} Mo${v.hasVoice ? '' : ` · ${s.vrNoSound}`}`;
+    `${v.title || s.vrUntitled} · ${timer(durationMs)} · ${mb}\u00a0Mo${v.hasVoice ? '' : ` · ${s.vrNoSound}`}`;
 
   // Images clés tirées de la vidéo (lecteur caché, pour ne pas déplacer celui de la page)
   const kept = proposePauses(v.marks, durationMs);
