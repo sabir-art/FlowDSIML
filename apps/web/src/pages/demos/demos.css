@@ -892,3 +892,16 @@
   display: block;
   width: 100%;
 }
+
+/* REV-05 : état vide réduit, ligne des statistiques à venir */
+.demos-empty {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+.demos-empty p {
+  margin: 0;
+}
+.stats-later {
+  margin: 0 0 8px;
+}

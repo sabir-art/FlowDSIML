@@ -275,6 +275,7 @@ export function DemosPage() {
   // L26-04 : bibliothèque de modèles (dossier choisi dans « Nouvelle démo »)
   const [tplFolder, setTplFolder] = useState<string | null | undefined>(undefined);
   const openNew = () => setNewOpen(true);
+  const anyPublished = (demos ?? []).some((d) => d.status === 'published');
 
   async function moveDemo(demoId: string, target: string) {
     await run(async () => {
@@ -457,7 +458,11 @@ export function DemosPage() {
         publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
       />
 
-      {kpis && (
+      {/* REV-05 : pas d'indicateurs à zéro tant qu'aucune démo n'est publiée */}
+      {kpis && !anyPublished && demos.length > 0 && (
+        <p className="fd-muted stats-later">{t('demos.statsLater')}</p>
+      )}
+      {kpis && anyPublished && (
         <section className="stat-row" aria-label={t('analytics.kpis', { count: 30 })}>
           <StatTile
             hero
@@ -649,16 +654,13 @@ export function DemosPage() {
         </div>
 
         {demos.length === 0 ? (
-          <Card>
+          // REV-05 : une phrase et « Nouvelle démo » ; les étapes sont dans la prise en main (L26-01)
+          <Card className="demos-empty">
             <h2 className="card-title">{t('demos.emptyTitle')}</h2>
-            <ol className="onboarding-steps">
-              <li>{t('demos.emptyStep1')}</li>
-              <li>{t('demos.emptyStep2')}</li>
-              <li>{t('demos.emptyStep3')}</li>
-            </ol>
+            <p className="fd-muted">{editable ? t('demos.emptyBody') : t('demos.emptyBodyViewer')}</p>
             {editable && (
-              <Button icon={<Plus />} onClick={openNew}>
-                {t('demos.emptyCta')}
+              <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                {t('demos.new')}
               </Button>
             )}
           </Card>
