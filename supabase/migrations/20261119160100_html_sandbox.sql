@@ -327,8 +327,15 @@ begin
                            select 1 from public.steps t where t.demo_id = p_demo and t.id::text = e.op ->> 'value')), '[]'::jsonb),
         'title', left(coalesce(s.html_meta ->> 'title', ''), 200),
         'viewport', s.html_meta -> 'viewport',
-        'links', coalesce((select jsonb_agg(jsonb_build_object('sel', l ->> 'sel', 'href', l ->> 'href'))
-                           from jsonb_array_elements(coalesce(s.html_meta -> 'links', '[]'::jsonb)) l), '[]'::jsonb)) end,
+        -- Liens de la page résolus vers une autre page de la démo (même adresse, sans fragment ni
+        -- barre finale) : liaison automatique du Sandbox. Aucune adresse n'est publiée.
+        'links', coalesce((select jsonb_agg(jsonb_build_object('sel', l ->> 'sel', 'step', t.id::text))
+                           from jsonb_array_elements(coalesce(s.html_meta -> 'links', '[]'::jsonb)) l
+                           join lateral (select t.id from public.steps t
+                                         where t.demo_id = p_demo and t.kind::text = 'html' and t.id <> s.id
+                                           and regexp_replace(regexp_replace(t.html_meta ->> 'url', '#.*$', ''), '/$', '')
+                                             = regexp_replace(regexp_replace(l ->> 'href', '#.*$', ''), '/$', '')
+                                         order by t.position, t.created_at limit 1) t on true), '[]'::jsonb)) end,
       'zoom', s.zoom,
       'cta', s.cta,
       'options', s.options - 'beforeAfter',

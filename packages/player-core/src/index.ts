@@ -147,3 +147,4 @@ export function spotlightVeilPath(boxes: Box[]): string {
     ...boxes.map((b) => `M${r(b.x)} ${r(b.y)}V${r(b.y + b.h)}H${r(b.x + b.w)}V${r(b.y)}Z`),
   ].join('');
 }
+export * from './htmlFrame';

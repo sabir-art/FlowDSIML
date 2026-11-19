@@ -249,12 +249,53 @@ export const videoSchema = z.object({
 });
 export type VideoStep = z.infer<typeof videoSchema>;
 
+/** A8 : page HTML capturée (servie en iframe srcdoc sandbox) et ses opérations. */
+export const htmlOpSchema = z.object({
+  id: z.string().max(40),
+  sel: z.string().min(1).max(500),
+  op: z.enum(['text', 'hide', 'blur', 'link', 'image', 'remove']),
+  value: z.string().max(5000).optional(),
+  before: z.string().max(5000).optional(),
+  scope: z.enum(['step', 'all']).default('step'),
+  group: z.string().max(40).optional(),
+});
+export type HtmlOp = z.infer<typeof htmlOpSchema>;
+export const htmlStepSchema = z.object({
+  url: z.string(),
+  ops: z
+    .array(htmlOpSchema.catch(null as never))
+    .max(500)
+    .default([])
+    .transform((a) => a.filter(Boolean)),
+  title: z.string().max(200).default(''),
+  viewport: z.object({ w: z.number(), h: z.number() }).nullable().default(null).catch(null),
+  /** Liens de la page déjà résolus vers une autre page de la démo (liaison automatique). */
+  links: z
+    .array(z.object({ sel: z.string().max(500), step: z.string().max(40) }))
+    .max(300)
+    .default([])
+    .catch([]),
+});
+export type HtmlStep = z.infer<typeof htmlStepSchema>;
+
+/** A8 : réglages d'une démo Sandbox (navigation libre). */
+export const sandboxSchema = z.object({
+  start: z.string().nullable().default(null),
+  autoLink: z.boolean().default(true),
+  unlinked: z.enum(['toast', 'none', 'highlight']).default('toast').catch('toast'),
+  guide: z.boolean().default(false),
+  keyPages: z.array(z.string()).max(200).default([]),
+});
+export type SandboxSettings = z.infer<typeof sandboxSchema>;
+
 export const stepSchema = z.object({
   id: z.string(),
   chapterId: z.string().nullable().default(null),
   kind: z.enum(['image', 'text', 'html', 'before_after', 'video']),
   /** F7 : pour kind = video (null si le fichier manque). */
   video: videoSchema.nullable().default(null).catch(null),
+  /** A8 : pour kind = html (null si la page manque). */
+  html: htmlStepSchema.nullable().default(null).catch(null),
   /** L17 : pour kind = before_after (null si la capture « Avant » manque). */
   beforeAfter: beforeAfterSchema.nullable().default(null).catch(null),
   /** Pour kind = image (MVP). */
@@ -365,6 +406,9 @@ export const manifestSchema = z.object({
   /** F7 : démo capturée au format mobile (cadre téléphone, feuille du bas, « Touchez »). */
   device: z.enum(['desktop', 'mobile']).default('desktop').catch('desktop'),
   viewport: z.object({ w: z.number(), h: z.number() }).nullable().default(null).catch(null),
+  /** A8 : démo guidée ou Sandbox (navigation libre entre pages HTML reliées). */
+  kind: z.enum(['guided', 'sandbox']).default('guided').catch('guided'),
+  sandbox: sandboxSchema.nullable().default(null).catch(null),
   title: z.string(),
   locale: z.string().default('fr'),
   publishedAt: z.string(),

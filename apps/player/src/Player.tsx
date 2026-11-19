@@ -51,6 +51,7 @@ import {
 import { Checklist } from './Checklist';
 import { BeforeAfterStep } from './BeforeAfter';
 import { VideoStep } from './VideoStep';
+import { HtmlStep } from './HtmlStep';
 import { GlossaryDrawer, GlossaryTip } from './Glossary';
 import { Quiz } from './Quiz';
 import { submitQuizAttempt } from './api';
@@ -237,7 +238,8 @@ export function Player({
       ? m.forms.find((f) => f.id === step.gateFormId)
       : undefined;
   /** L17 : une étape Avant / Après se comporte comme une capture (ni pop-up, ni écran de fin). */
-  const visual = step.kind === 'image' || step.kind === 'before_after' || step.kind === 'video';
+  const visual =
+    step.kind === 'image' || step.kind === 'before_after' || step.kind === 'video' || step.kind === 'html';
   const primary = step.kind === 'image' ? step.hotspots[0] : undefined;
   const last = index === m.steps.length - 1;
   /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
@@ -342,6 +344,37 @@ export function Player({
     setIndex(i);
     setMenu(false);
     setEnded(false);
+  }
+
+  // ===== A8 : Sandbox (navigation libre entre pages HTML reliées) =====
+  const sandbox = m.kind === 'sandbox' ? m.sandbox : null;
+  /** Pages clés : choisies dans l'éditeur, sinon toutes les pages HTML. */
+  const keyPages = useMemo(
+    () =>
+      sandbox
+        ? sandbox.keyPages.length
+          ? sandbox.keyPages.filter((id) => m.steps.some((s) => s.id === id))
+          : m.steps.filter((s) => s.kind === 'html').map((s) => s.id)
+        : [],
+    [sandbox, m.steps],
+  );
+  const [seenPages, setSeenPages] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    if (!sandbox || step.kind !== 'html') return;
+    setSeenPages((v) => (v.has(step.id) ? v : new Set(v).add(step.id)));
+  }, [sandbox, step]);
+  useEffect(() => {
+    // Complétion : « a vu les n pages clés »
+    if (sandbox && keyPages.length && keyPages.every((id) => seenPages.has(id)) && !completed.current) {
+      completed.current = true;
+      tracker.track('demo_complete', { stepIndex: index });
+    }
+  }, [seenPages]); // eslint-disable-line react-hooks/exhaustive-deps
+  function goStep(id: string) {
+    const i = m.steps.findIndex((s) => s.id === id);
+    if (i < 0) return;
+    tracker.track('hotspot_click', { stepId: step.id, stepIndex: index, props: { link: i + 1 } });
+    go(i);
   }
 
   function openQuiz() {
@@ -719,6 +752,27 @@ export function Player({
               tracker.track('step_view', { stepId: step.id, stepIndex: index, props: { pause: n } })
             }
           />
+        ) : step.kind === 'html' && step.html ? (
+          <>
+            <HtmlStep
+              key={step.id}
+              step={step}
+              t={t}
+              sub={sub}
+              sandbox={sandbox}
+              nextLabel={last ? (m.quiz ? t.quiz.start : t.finish) : t.next}
+              onNext={last ? (m.quiz ? openQuiz : finish) : next}
+              onGo={goStep}
+            />
+            {sandbox && keyPages.length > 0 && (
+              <p class="p-html-key" aria-live="polite">
+                {fmt(t.html as unknown as Record<string, string>, 'keyPages', {
+                  seen: keyPages.filter((id) => seenPages.has(id)).length,
+                  total: keyPages.length,
+                })}
+              </p>
+            )}
+          </>
         ) : step.kind === 'image' && step.image ? (
           <ImageStep
             key={step.id}

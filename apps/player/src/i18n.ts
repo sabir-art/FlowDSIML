@@ -226,6 +226,15 @@ const dict = {
         'Le lien a expiré le {{date}}. Contactez l’organisation qui vous l’a transmis pour en recevoir un nouveau.',
       visit: 'Visiter {{site}}',
     },
+    html: {
+      frame: 'Page de la démo\u202f: {{title}}',
+      unavailable: 'Cette partie n’est pas disponible dans la démo',
+      loading: 'Chargement de la page…',
+      error: 'La page n’a pas pu être chargée.',
+      pageOf: 'Page {{n}} sur {{total}}',
+      keyPages: '{{seen}} pages clés vues sur {{total}}',
+      restart: 'Revenir au départ',
+    },
     video: {
       label: 'Vidéo de la démo',
       play: 'Lire',
@@ -526,6 +535,15 @@ const dict = {
       expiredOn: 'The link expired on {{date}}. Contact {{ws}} to get a new one.',
       expiredOnNoWs: 'The link expired on {{date}}. Contact the organisation that sent it to get a new one.',
       visit: 'Visit {{site}}',
+    },
+    html: {
+      frame: 'Demo page: {{title}}',
+      unavailable: 'This part is not available in the demo',
+      loading: 'Loading the page…',
+      error: 'The page could not be loaded.',
+      pageOf: 'Page {{n}} of {{total}}',
+      keyPages: '{{seen}} key pages seen out of {{total}}',
+      restart: 'Back to start',
     },
     video: {
       label: 'Demo video',

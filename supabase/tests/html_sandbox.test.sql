@@ -76,7 +76,8 @@ select lives_ok($$ update public.steps set html_path = (select p1 from p),
   html_meta = '{"title":"Accueil","url":"https://app.acme.example/","bytes":120000,"viewport":{"w":1280,"h":800},
                 "links":[{"sel":"#menu > a:nth-of-type(2)","href":"https://app.acme.example/agenda","label":"Agenda"}],"blurred":3,"canvases":0}'
   where id = '00000000-0000-0000-0000-0000000008e1' $$, 'éditrice : page, opérations et meta');
-select lives_ok($$ update public.steps set html_path = (select p2 from p) where id = '00000000-0000-0000-0000-0000000008e2' $$,
+select lives_ok($$ update public.steps set html_path = (select p2 from p),
+  html_meta = '{"title":"Agenda","url":"https://app.acme.example/agenda/#jour"}' where id = '00000000-0000-0000-0000-0000000008e2' $$,
   'éditrice : seconde page');
 select pg_temp.login('00000000-0000-0000-0000-0000000008a2');
 select is((select count(*)::int from storage.objects where bucket_id = 'html'), 2, 'lecteur : lit les pages du workspace');
@@ -90,8 +91,9 @@ select is((select r -> 'manifest' -> 'sandbox' ->> 'start' from pub), '00000000-
 select ok((select r -> 'manifest' -> 'steps' -> 0 -> 'html' ->> 'url' like 'assets/%.html' from pub), 'manifeste : page publiée');
 select is((select jsonb_array_length(r -> 'manifest' -> 'steps' -> 0 -> 'html' -> 'ops') from pub), 2,
   'lien vers une étape absente retiré');
-select is((select r -> 'manifest' -> 'steps' -> 0 -> 'html' -> 'links' -> 0 ->> 'label' from pub), null,
-  'liens publiés sans libellé');
+select is((select r -> 'manifest' -> 'steps' -> 0 -> 'html' -> 'links' from pub),
+  '[{"sel":"#menu > a:nth-of-type(2)","step":"00000000-0000-0000-0000-0000000008e2"}]'::jsonb,
+  'liens résolus vers la page de même adresse, sans adresse publiée');
 select is((select count(*)::int from pub, jsonb_array_elements(r -> 'copies') c where c ->> 'bucket' = 'html'), 2,
   'copie des pages depuis le bucket html');
 

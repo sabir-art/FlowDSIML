@@ -2272,3 +2272,58 @@ h1.p-title {
 .p-root.is-framed .p-controls .p-progress {
   display: none;
 }
+
+/* ===== A8 : étape HTML (page capturée en iframe sandbox) ===== */
+.p-html-step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.p-html-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--p-radius, 12px);
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--p-border, rgba(0, 0, 0, 0.08));
+}
+.p-html-frame iframe {
+  position: absolute;
+  inset: 0 auto auto 0;
+  border: 0;
+  transform-origin: 0 0;
+  background: #fff;
+}
+.p-html-state {
+  margin: 0;
+  padding: 24px;
+  color: var(--p-muted, #57534e);
+}
+.p-html-toast:not(:empty) {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #141311;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.p-html-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.p-html-title {
+  flex: 1;
+  font-weight: 600;
+}
+.p-html-key {
+  margin: 8px 0 0;
+  color: var(--p-muted, #57534e);
+  font-size: 14px;
+}
