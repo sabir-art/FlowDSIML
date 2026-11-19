@@ -3,7 +3,7 @@
  * manifeste est envoyé par l'app, aucune statistique). Modale de 960 px. La fin de la démo (événement
  * « demo_complete » relayé par le lecteur) termine le module.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { PLAYER_URL } from '../lib/env';
@@ -30,7 +30,8 @@ export function TourDialog({
     if (d && !d.open) d.showModal();
   }, []);
   // Le lecteur annonce qu'il est prêt : on lui envoie le manifeste. Messages du lecteur seulement.
-  useEffect(() => {
+  // Écoute posée dès le montage (useLayoutEffect) : l'annonce peut arriver avant un useEffect.
+  useLayoutEffect(() => {
     const origin = new URL(PLAYER_URL).origin;
     const manifest = loadTourManifest(tourId);
     const onMsg = (e: MessageEvent) => {
