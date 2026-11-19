@@ -1503,6 +1503,12 @@
       "err_tooManyRows": "The file exceeds 1,000 rows.",
       "err_tooManyColumns": "The file exceeds 20 columns.",
       "err_header": "Every column needs a header of 60 characters at most."
+    },
+    "toCapture": {
+      "badge": "To capture",
+      "button": "Capture this step",
+      "order": "Step to capture {{n}} of {{total}}",
+      "help": "With the extension: open your software, start capturing and choose “Complete: {{title}}”. Each click fills the next step. You can also import an image."
     }
   },
   "status": {
@@ -3118,6 +3124,72 @@
     "errTooLong": "The video exceeds {{max}} minutes.",
     "errTooLongDetail": "Calculated duration: {{n}} s. Reduce the steps or choose a faster speed.",
     "helpMp4NoTitle": "{{n}} seconds · sound from video steps only."
+  },
+  "templates": {
+    "title": "Start from a template",
+    "cardBody": "Structure and texts ready: you only need to capture the screens.",
+    "cats": "Template categories",
+    "cat": {
+      "all": "All",
+      "logiciel": "Software",
+      "procedure": "Procedure",
+      "reglementaire": "Compliance",
+      "accueil": "Onboarding",
+      "space": "Workspace templates"
+    },
+    "grid": "Templates",
+    "preview": "Template preview",
+    "empty": "No template in this category.",
+    "spaceOne": "Workspace template",
+    "chapters_one": "{{count}} chapter",
+    "chapters_other": "{{count}} chapters",
+    "steps_one": "{{count}} step",
+    "steps_other": "{{count}} steps",
+    "f": {
+      "quiz": "quiz",
+      "avant_apres": "Before / After",
+      "seuil": "{{n}}% pass mark",
+      "checklist": "checklist",
+      "cta": "action button"
+    },
+    "type": {
+      "bulle": "tooltip",
+      "saisie": "typing",
+      "quiz": "quiz",
+      "popup": "pop-up",
+      "fin": "end",
+      "texte": "text"
+    },
+    "toCaptureInfo_one": "The template brings the structure and texts. The step to capture is marked “To capture”: the extension offers it.",
+    "toCaptureInfo_other": "The template brings the structure and texts. The {{count}} steps to capture are marked “To capture”: the extension offers them in order.",
+    "hint": "Texts use your variables ({{first_name}}) and your default style.",
+    "use": "Use this template",
+    "created": "Demo created from the template",
+    "more": "Actions for template {{name}}",
+    "rename": "Rename",
+    "delete": "Delete",
+    "name": "Template name",
+    "deleteTitle": "Delete the template",
+    "deleteBody": "Delete this template? Demos already created from it are kept.",
+    "notFound": "This template no longer exists.",
+    "toCaptureLeft_one": "{{count}} step left to capture.",
+    "toCaptureLeft_other": "{{count}} steps left to capture.",
+    "save": {
+      "menu": "Save as template",
+      "title": "Save as template",
+      "description": "Description",
+      "optional": "(optional)",
+      "category": "Category",
+      "captures": "Captures",
+      "without": "Without captures",
+      "recommended": "(recommended)",
+      "withoutHelp": "Each step becomes “To capture”. No data from the original demo is copied.",
+      "with": "With captures, as an example",
+      "withHelp": "Blurred areas stay blurred. Avoid if captures show real data.",
+      "kept": "Kept: chapters, tooltip texts, quiz, settings and style. Visible to all workspace members.",
+      "submit": "Save template",
+      "done": "Template saved"
+    }
   },
   "present": {
     "button": "Present",

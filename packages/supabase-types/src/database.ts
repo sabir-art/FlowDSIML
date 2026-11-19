@@ -1031,6 +1031,43 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      demo_templates: {
+        Row: {
+          builtin_key: string | null;
+          category: string;
+          created_at: string;
+          created_by: string | null;
+          description: string;
+          icon: string;
+          id: string;
+          name: string;
+          structure: Json;
+          updated_at: string;
+          with_captures: boolean;
+          workspace_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          builtin_key?: string | null;
+          category: string;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string;
+          icon?: string;
+          id?: string;
+          name: string;
+          structure: Json;
+          updated_at?: string;
+          with_captures?: boolean;
+          workspace_id?: string | null;
+        };
+        Update: {
+          category?: string;
+          description?: string;
+          name?: string;
+        };
+        Relationships: [];
+      };
       present_reports: {
         Row: {
           created_at: string;
@@ -1726,6 +1763,7 @@ export type Database = {
           position: number;
           snapshot_path: string | null;
           title: string;
+          to_capture: boolean;
           updated_at: string;
           workspace_id: string;
           zoom: Json | null;
@@ -1762,6 +1800,7 @@ export type Database = {
           position?: number;
           snapshot_path?: string | null;
           title?: string;
+          to_capture?: boolean;
           updated_at?: string;
           workspace_id: string;
           zoom?: Json | null;
@@ -1797,6 +1836,7 @@ export type Database = {
           position?: number;
           snapshot_path?: string | null;
           title?: string;
+          to_capture?: boolean;
           updated_at?: string;
           workspace_id?: string;
           zoom?: Json | null;
@@ -2213,6 +2253,20 @@ export type Database = {
       present_remote_new_code: { Args: { p_id: string }; Returns: Json };
       present_remote_status: { Args: { p_id: string }; Returns: Json };
       present_remote_end: { Args: { p_id: string }; Returns: undefined };
+      save_demo_as_template: {
+        Args: {
+          p_demo: string;
+          p_name: string;
+          p_description: string;
+          p_category: string;
+          p_with_captures: boolean;
+        };
+        Returns: string;
+      };
+      create_demo_from_template: {
+        Args: { p_template: string; p_ws: string; p_folder?: string | null };
+        Returns: string;
+      };
       present_remote_pair: { Args: { p_id: string | null; p_code: string }; Returns: Json };
       present_remote_state: { Args: { p_token: string }; Returns: Json };
       session_visits: { Args: { p_workspace: string; p_sessions: string[] }; Returns: Json };

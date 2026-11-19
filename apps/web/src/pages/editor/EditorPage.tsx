@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clock,
   Copy,
+  LayoutTemplate,
   Crop,
   Download,
   Droplet,
@@ -70,6 +71,7 @@ import type { Manifest } from '@flowdsiml/manifest';
 import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
 import { Menu } from '../../components/Menu';
+import { SaveTemplateDialog } from './SaveTemplateDialog';
 import { supabase } from '../../lib/supabase';
 import { DatasetDialog } from './data/DatasetDialog';
 import '../../styles/maquette.css';
@@ -192,6 +194,8 @@ export function EditorPage() {
   const [planView, setPlanView] = useState(false);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  // L26-05 : enregistrer comme modèle
+  const [savingTpl, setSavingTpl] = useState(false);
   // L16 : « Diffuser » (menu « … », aussi ouvert par #/demos/:id/distribute → ?distribute=1)
   const [distributing, setDistributing] = useState(() => params.get('distribute') === '1');
   // L22-02 : « Présenter » (aussi ouvert depuis le menu d'une démo par ?present=1)
@@ -449,6 +453,17 @@ export function EditorPage() {
       {/* L25-09 : modale « Jeu de données » (Réglages ou graphique) */}
       <DatasetDialog editor={editor} readOnly={readOnly} />
       {exporting && demoId && <ExportDialog demoId={demoId} onClose={() => setExporting(false)} />}
+      {savingTpl && demoId && (
+        <SaveTemplateDialog
+          demoId={demoId}
+          demoTitle={editor.demo?.title ?? ''}
+          onClose={() => setSavingTpl(false)}
+          onSaved={() => {
+            setSavingTpl(false);
+            toast(t('templates.save.done'));
+          }}
+        />
+      )}
       {distributing && demoId && can('demo.edit') && (
         <DistributeDialog demoId={demoId} onClose={() => setDistributing(false)} />
       )}
@@ -598,6 +613,11 @@ export function EditorPage() {
                           typeof data === 'string' ? data : (data as unknown as { id?: string } | null)?.id;
                         navigate(id ? `/demos/${id}/edit` : '/');
                       }),
+                  },
+                  {
+                    label: t('templates.save.menu'),
+                    icon: <LayoutTemplate />,
+                    onSelect: () => setSavingTpl(true),
                   },
                 ]
               : []),

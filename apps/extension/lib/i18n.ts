@@ -110,6 +110,12 @@ const fr = {
   fullPageHelp: 'Chaque capture garde la page entière, pour animer le défilement dans l’éditeur.',
   tabChip: 'Onglet {{n}} · {{title}}',
   tabAnnounce: 'Capture dans l’onglet {{n}}\u202f: {{title}}',
+  // L26-04 : capture guidée d'une démo créée depuis un modèle
+  fillLabel: 'Démo',
+  fillNew: 'Nouvelle démo',
+  fillOption: 'Compléter\u202f: {{title}} ({{count}} à capturer)',
+  fillHelp: 'Chaque clic remplit l’étape «\u00a0À capturer\u00a0» suivante, dans l’ordre.',
+  guideChip: 'Étape à capturer\u202f: {{title}} ({{n}} / {{total}})',
   // A8 : capture HTML
   typeHtml: 'Capture HTML',
   typeHtmlHelp: 'Page reproduite et modifiable',
@@ -234,6 +240,11 @@ const en: typeof fr = {
   fullPageHelp: 'Each capture keeps the whole page, to animate scrolling in the editor.',
   tabChip: 'Tab {{n}} · {{title}}',
   tabAnnounce: 'Capturing in tab {{n}}: {{title}}',
+  fillLabel: 'Demo',
+  fillNew: 'New demo',
+  fillOption: 'Complete: {{title}} ({{count}} to capture)',
+  fillHelp: 'Each click fills the next “To capture” step, in order.',
+  guideChip: 'Step to capture: {{title}} ({{n}} / {{total}})',
   vrNone: 'No recording to check.',
   vrDelete: 'Delete the recording',
   vrConfirmDelete: 'Delete the recording? It will be erased from this browser.',
@@ -302,4 +313,12 @@ export function tabChip(n: number, title: string): { label: string; announce: st
   const t = title.slice(0, 40);
   const fill = (x: string) => x.replace('{{n}}', String(n)).replace('{{title}}', t);
   return { label: fill(strings.tabChip), announce: fill(strings.tabAnnounce) };
+}
+
+/** L26-04 : prochaine étape à capturer, dans la barre d'enregistrement. */
+export function guideChip(g: { title: string; n: number; total: number }): string {
+  return strings.guideChip
+    .replace('{{title}}', g.title.slice(0, 60))
+    .replace('{{n}}', String(g.n))
+    .replace('{{total}}', String(g.total));
 }

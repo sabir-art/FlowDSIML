@@ -33,8 +33,15 @@
       <section id="setup" hidden>
         <label for="workspace" data-i18n="workspace"></label>
         <select id="workspace"></select>
-        <label for="title" data-i18n="demoTitle"></label>
-        <input id="title" maxlength="160" />
+        <div id="fill-field" hidden>
+          <label for="fill" data-i18n="fillLabel"></label>
+          <select id="fill" aria-describedby="fill-h"></select>
+          <p class="muted small help" id="fill-h" data-i18n="fillHelp"></p>
+        </div>
+        <div id="title-field">
+          <label for="title" data-i18n="demoTitle"></label>
+          <input id="title" maxlength="160" />
+        </div>
         <fieldset class="types">
           <legend data-i18n="captureType"></legend>
           <label class="type-card"

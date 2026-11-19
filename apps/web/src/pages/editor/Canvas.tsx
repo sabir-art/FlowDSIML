@@ -18,7 +18,7 @@ import {
   cropImageStyle,
   croppedSize,
 } from '@flowdsiml/player-core';
-import { ChevronRight, ClipboardList, ExternalLink, Info, Move, RotateCcw } from 'lucide-react';
+import { Camera, ChevronRight, ClipboardList, ExternalLink, Info, Move, RotateCcw } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
 import { withVariablePills } from './RichTextField';
@@ -286,6 +286,10 @@ export function Canvas({
 
   // A8 (L20-01) : étape HTML (éditeur d'éléments, sans outils de capture)
   if (step.kind === 'html') return <HtmlCanvas editor={editor} step={step} readOnly={readOnly} />;
+
+  // L26-04 : étape « À capturer » (modèle) : cadre pointillé, titre et « Capturer cette étape »
+  if (step.kind === 'image' && !step.image_path && step.to_capture)
+    return <ToCaptureCanvas editor={editor} step={step} readOnly={readOnly} />;
 
   if (step.kind === 'text' || !step.image_path) {
     const opts = asStepOptions(step.options);
@@ -690,6 +694,55 @@ export function Canvas({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** L26-04 : étape « À capturer ». La capture vient de l'extension (capture guidée) ou d'une image. */
+function ToCaptureCanvas({
+  editor,
+  step,
+  readOnly,
+}: {
+  editor: DemoEditor;
+  step: DemoEditor['steps'][number];
+  readOnly?: boolean;
+}) {
+  const { t } = useTranslation();
+  const file = useRef<HTMLInputElement>(null);
+  const todo = editor.steps.filter((s) => s.to_capture && !s.image_path);
+  const n = todo.findIndex((s) => s.id === step.id) + 1;
+  return (
+    <div className="canvas-tocapture">
+      <div className="canvas-tocapture-frame">
+        <span className="fd-badge canvas-tocapture-badge">{t('editor.toCapture.badge')}</span>
+        <h2>{step.title || t('editor.untitled')}</h2>
+        <p className="fd-muted">{t('editor.toCapture.order', { n, total: todo.length })}</p>
+        {!readOnly && (
+          <>
+            <button type="button" className="fd-btn fd-btn--primary" onClick={() => file.current?.click()}>
+              <Camera aria-hidden="true" />
+              {t('editor.toCapture.button')}
+            </button>
+            <input
+              ref={file}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              hidden
+              aria-hidden="true"
+              tabIndex={-1}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = '';
+                if (f) void editor.captureStep(step.id, f);
+              }}
+            />
+            <p className="canvas-tocapture-help">
+              {t('editor.toCapture.help', { title: editor.demo?.title ?? '' })}
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 }

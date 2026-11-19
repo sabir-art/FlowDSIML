@@ -26,6 +26,7 @@ import { APP_NAME } from '@flowdsiml/core';
 import { pending, type PendingCapture, type PendingZone } from '@/lib/pending';
 import type { PiiType } from '@/lib/pii';
 import { sendCaptures } from '@/lib/upload';
+import type { FillTarget } from '@/lib/messages';
 import { rs, tr } from '@/lib/reviewStrings';
 
 /**
@@ -77,6 +78,8 @@ let target: {
   title: string;
   device?: 'desktop' | 'mobile';
   viewport?: { w: number; h: number } | null;
+  /** L26-04 : capture guidée d'une démo créée depuis un modèle. */
+  fill?: FillTarget | null;
 } | null = null;
 const urls = new Map<string, string>();
 

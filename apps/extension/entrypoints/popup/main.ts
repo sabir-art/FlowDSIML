@@ -4,7 +4,7 @@ import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
 import { APP_URL } from '@/lib/config';
 import { APP_NAME } from '@flowdsiml/core';
-import type { CaptureMode, PopupRequest, RecordingStatus } from '@/lib/messages';
+import type { CaptureMode, FillTarget, PopupRequest, RecordingStatus } from '@/lib/messages';
 import { lang, stepsCaptured, strings } from '@/lib/i18n';
 import {
   Check,
@@ -78,6 +78,7 @@ function syncMode() {
 for (const r of document.querySelectorAll<HTMLInputElement>('input[name="mode"]'))
   r.addEventListener('change', () => {
     syncMode();
+    syncFill();
     void browser.storage.local.set({ 'fd.lastMode': mode() });
   });
 $<HTMLSelectElement>('tabsize').addEventListener('change', () => {
@@ -145,6 +146,57 @@ async function loadWorkspaces() {
   if (saved && [...select.options].some((o) => o.value === saved)) select.value = saved;
 }
 
+// L26-04 : démos de l'espace qui ont des étapes « À capturer » (capture guidée)
+let fills: FillTarget[] = [];
+async function loadFills() {
+  const ws = $<HTMLSelectElement>('workspace').value;
+  const select = $<HTMLSelectElement>('fill');
+  fills = [];
+  if (ws) {
+    const { data } = await supabase
+      .from('steps')
+      .select('id, title, position, demo_id, demos!inner(title, deleted_at)')
+      .eq('workspace_id', ws)
+      .eq('to_capture', true)
+      .is('image_path', null)
+      .is('demos.deleted_at', null)
+      .order('position');
+    const byDemo = new Map<string, FillTarget>();
+    for (const r of (data ?? []) as unknown as Array<{
+      id: string;
+      title: string;
+      demo_id: string;
+      demos: { title: string } | null;
+    }>) {
+      const f = byDemo.get(r.demo_id) ?? { demoId: r.demo_id, title: r.demos?.title ?? '', steps: [] };
+      f.steps.push({ id: r.id, title: r.title });
+      byDemo.set(r.demo_id, f);
+    }
+    fills = [...byDemo.values()];
+  }
+  select.innerHTML = '';
+  const none = document.createElement('option');
+  none.value = '';
+  none.textContent = strings.fillNew;
+  select.appendChild(none);
+  for (const f of fills) {
+    const o = document.createElement('option');
+    o.value = f.demoId;
+    o.textContent = strings.fillOption
+      .replace('{{title}}', f.title)
+      .replace('{{count}}', String(f.steps.length));
+    select.appendChild(o);
+  }
+  show('fill-field', fills.length > 0);
+  syncFill();
+}
+function syncFill() {
+  const filling = !!$<HTMLSelectElement>('fill').value && mode() === 'clicks';
+  show('title-field', !filling);
+}
+$<HTMLSelectElement>('workspace').addEventListener('change', () => void loadFills());
+$<HTMLSelectElement>('fill').addEventListener('change', syncFill);
+
 async function render() {
   const status = await send<RecordingStatus>({ type: 'fd:status' });
   error(status.lastError);
@@ -184,6 +236,7 @@ async function render() {
   show('login', false);
   show('setup', true);
   await loadWorkspaces();
+  await loadFills();
 }
 
 $<HTMLAnchorElement>('signup-link').href = `${APP_URL.replace(/\/$/, '')}/#/signup`;
@@ -245,6 +298,8 @@ $('start').addEventListener('click', async () => {
       webcam: m === 'video' && $<HTMLInputElement>('webcam').checked,
       viewport: m === 'mobile' ? viewport() : undefined,
       followTabs: m !== 'video' && $<HTMLInputElement>('follow').checked,
+      fill:
+        m === 'clicks' ? (fills.find((f) => f.demoId === $<HTMLSelectElement>('fill').value) ?? null) : null,
       size:
         m === 'clicks' || m === 'html'
           ? tabSize($<HTMLSelectElement>('tabsize').value as TabSizeKey, {

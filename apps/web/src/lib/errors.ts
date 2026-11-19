@@ -36,6 +36,10 @@ export function errorMessage(t: TFunction, err: unknown): string {
   ];
   const quiz = /QUIZ_INVALID:(\d+)/.exec(msg);
   if (quiz) return t('errors.quizInvalid', { n: quiz[1] });
+  // L26-04 : étapes « À capturer » restantes
+  const cap = /TO_CAPTURE:(\d+)/.exec(msg);
+  if (cap) return t('templates.toCaptureLeft', { count: Number(cap[1]) });
+  if (/TEMPLATE_NOT_FOUND/.test(msg)) return t('templates.notFound');
   for (const [re, key] of known) if (re.test(msg)) return t(key);
   return t('errors.generic', { message: msg });
 }

@@ -4,7 +4,7 @@ import { elementLabel } from '@/lib/geometry';
 import { cssSelector } from '@/lib/selector';
 import type { ClickPayload } from '@/lib/messages';
 import { scanFullPage, scanPage } from '@/lib/scan';
-import { tabChip } from '@/lib/i18n';
+import { guideChip, tabChip } from '@/lib/i18n';
 
 /**
  * Injecté à la demande (registration: runtime) dans l'onglet enregistré.
@@ -35,16 +35,33 @@ export default defineContentScript({
     live.style.cssText =
       'position:fixed;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap';
     document.documentElement.appendChild(live);
-    void browser.runtime
-      .sendMessage({ type: 'fd:tab-info' })
-      .then((r: unknown) => {
-        const info = r as { n: number; title: string } | null;
-        if (!info || info.n < 2) return;
-        const chip = tabChip(info.n, info.title || document.title);
-        badge.textContent = `● REC · ${chip.label}`;
-        live.textContent = chip.announce;
-      })
-      .catch(() => undefined);
+    // L25-01 : onglet suivi ; L26-04 : prochaine étape à capturer (relu après chaque clic)
+    const refresh = () =>
+      browser.runtime
+        .sendMessage({ type: 'fd:tab-info' })
+        .then((r: unknown) => {
+          const info = r as {
+            n: number;
+            title: string;
+            guide?: { title: string; n: number; total: number } | null;
+          } | null;
+          const parts = ['● REC'];
+          const said: string[] = [];
+          if (info && info.n >= 2) {
+            const chip = tabChip(info.n, info.title || document.title);
+            parts.push(chip.label);
+            said.push(chip.announce);
+          }
+          if (info?.guide) {
+            const g = guideChip(info.guide);
+            parts.push(g);
+            said.push(g);
+          }
+          badge.textContent = parts.join(' · ');
+          if (said.length) live.textContent = said.join('. ');
+        })
+        .catch(() => undefined);
+    void refresh();
 
     const rect = (el: Element) => {
       const r = el.getBoundingClientRect();
@@ -98,6 +115,8 @@ export default defineContentScript({
         .catch(() => undefined)
         .finally(() => {
           badge.style.visibility = 'visible';
+          // La capture est gardée de façon asynchrone : relecture un peu après
+          setTimeout(() => void refresh(), 600);
         });
     }
 

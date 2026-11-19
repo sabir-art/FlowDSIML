@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImagePlus, Info, Puzzle, X } from 'lucide-react';
+import { ImagePlus, Info, LayoutTemplate, Puzzle, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 
 /**
- * DSH-06 : modale « Nouvelle démo » de la maquette. Deux choix : capturer avec l'extension (recommandé)
+ * DSH-06 : modale « Nouvelle démo » de la maquette. L26-04 : troisième carte « Partir d'un modèle ». Deux choix : capturer avec l'extension (recommandé)
  * et importer des images (Bientôt, DSH-07). Le dossier préremplit celui qui est filtré ; il s'applique
  * à la démo vide, seul parcours de création directe aujourd'hui (lien secondaire).
  */
@@ -13,12 +13,15 @@ export function NewDemoDialog({
   folders,
   defaultFolder,
   onEmpty,
+  onTemplate,
   onClose,
 }: {
   open: boolean;
   folders: Tables<'folders'>[];
   defaultFolder: string | null;
   onEmpty: (folderId: string | null) => Promise<void> | void;
+  /** L26-04 : troisième carte, « Partir d'un modèle ». */
+  onTemplate: (folderId: string | null) => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -61,6 +64,11 @@ export function NewDemoDialog({
           </b>
           <span className="fd-muted">{t('demos.newImportBody')}</span>
         </div>
+        <button type="button" className="nd-choice nd-choice--btn" onClick={() => onTemplate(folder || null)}>
+          <LayoutTemplate aria-hidden="true" />
+          <b>{t('templates.title')}</b>
+          <span className="fd-muted">{t('templates.cardBody')}</span>
+        </button>
       </div>
       <p className="nd-help">
         <Info aria-hidden="true" />

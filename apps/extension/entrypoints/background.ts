@@ -335,6 +335,8 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
     tabId: req.tabId,
     steps: 0,
     lastError: null,
+    // L26-04 : capture guidée (captures à chaque clic seulement)
+    fill: mode === 'clicks' ? (req.fill ?? null) : null,
     viewport: mode === 'mobile' ? (req.viewport ?? null) : null,
     // A8 : la page de départ est capturée dès l'injection de la barre
     htmlAwait: mode === 'html',
@@ -480,6 +482,7 @@ async function stop(): Promise<RecordingStatus> {
         // F7 : démo mobile (cadre téléphone dans le lecteur)
         device: state.mode === 'mobile' ? 'mobile' : 'desktop',
         viewport: state.mode === 'mobile' ? (state.viewport ?? null) : null,
+        fill: state.fill ?? null,
       },
     });
     await browser.tabs.create({ url: browser.runtime.getURL('/review.html') });
@@ -534,7 +537,12 @@ export default defineBackground(() => {
       // L25-01 : numéro de l'onglet suivi, pour la puce « Onglet 2 · Aide » de la barre
       return getState().then((s) => {
         const t = tracked(s, sender.tab?.id);
-        return t ? { n: t.n, title: sender.tab?.title ?? t.title } : null;
+        // L26-04 : prochaine étape à capturer (n / N), affichée dans la barre
+        const next = s.fill?.steps[s.steps];
+        const guide =
+          s.fill && next ? { title: next.title, n: s.steps + 1, total: s.fill.steps.length } : null;
+        if (t) return { n: t.n, title: sender.tab?.title ?? t.title, guide };
+        return guide ? { n: 1, title: '', guide } : null;
       });
     const p = m as PopupRequest;
     if (p.type === 'fd:status') return getState();

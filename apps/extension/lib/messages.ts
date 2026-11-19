@@ -47,11 +47,23 @@ export type PopupRequest =
       size?: { w: number; h: number } | null;
       /** L25-01 : suivre les onglets ouverts depuis l'onglet capturé. */
       followTabs?: boolean;
+      /** L26-04 : capture guidée d'une démo créée depuis un modèle (étapes « À capturer »). */
+      fill?: FillTarget | null;
     }
   | { type: 'fd:stop' }
   | { type: 'fd:pause' }
   | { type: 'fd:cancel' }
   | { type: 'fd:status' };
+
+/**
+ * L26-04 : capture guidée. Chaque clic remplit l'étape « À capturer » suivante de la démo (dans l'ordre) ;
+ * au-delà, les captures s'ajoutent à la fin.
+ */
+export interface FillTarget {
+  demoId: string;
+  title: string;
+  steps: Array<{ id: string; title: string }>;
+}
 
 /** L25-01 : onglet suivi pendant la capture (numéro d'ordre et titre). */
 export interface TrackedTab {
@@ -110,4 +122,6 @@ export interface RecordingStatus {
   tabs?: TrackedTab[];
   /** L25-01 : onglets où le protocole DevTools est attaché (taille, capture pleine page). */
   debugged?: number[];
+  /** L26-04 : capture guidée (démo à compléter). */
+  fill?: FillTarget | null;
 }

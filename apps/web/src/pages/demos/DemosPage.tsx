@@ -44,6 +44,7 @@ import { Menu, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
 import { NewDemoDialog } from './NewDemoDialog';
+import { TemplatesDialog } from './TemplatesDialog';
 import { ExportDialog } from '../export/ExportDialog';
 import { DistributeDialog } from '../share/DistributeDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -232,6 +233,8 @@ export function DemosPage() {
   }, [demos, folder, status, q, sort, stats, i18n.language, tagFilter, tagMode, tagStore.links]);
 
   const [newOpen, setNewOpen] = useState(false);
+  // L26-04 : bibliothèque de modèles (dossier choisi dans « Nouvelle démo »)
+  const [tplFolder, setTplFolder] = useState<string | null | undefined>(undefined);
   const openNew = () => setNewOpen(true);
 
   async function createDemo(folderId: string | null = folder !== 'all' && folder !== 'none' ? folder : null) {
@@ -814,6 +817,22 @@ export function DemosPage() {
         onEmpty={async (f) => {
           setNewOpen(false);
           await createDemo(f);
+        }}
+        onTemplate={(f) => {
+          setNewOpen(false);
+          setTplFolder(f);
+        }}
+      />
+      <TemplatesDialog
+        open={tplFolder !== undefined}
+        workspaceId={ws.id}
+        folderId={tplFolder ?? null}
+        canManage={can('demo.edit')}
+        onClose={() => setTplFolder(undefined)}
+        onCreated={(id) => {
+          setTplFolder(undefined);
+          toast(t('templates.created'));
+          navigate(`/demos/${id}/edit`);
         }}
       />
       <ConfirmDialog

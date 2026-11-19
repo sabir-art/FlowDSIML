@@ -418,6 +418,27 @@ export function useDemoEditor(demoId: string) {
           return data;
         }),
 
+      /** L26-04 : capture d'une étape « À capturer » (image importée ; l'extension fait de même). */
+      captureStep: (stepId: string, file: File) =>
+        run(async () => {
+          await flush();
+          const bmp = await createImageBitmap(file);
+          const ext = file.type === 'image/png' ? 'png' : file.type === 'image/jpeg' ? 'jpg' : 'webp';
+          const path = `${demo!.workspace_id}/${demoId}/${stepId}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+          const up = await supabase.storage.from('captures').upload(path, file, { contentType: file.type });
+          if (up.error) throw up.error;
+          const { data, error } = await supabase
+            .from('steps')
+            .update({ image_path: path, image_width: bmp.width, image_height: bmp.height, to_capture: false })
+            .eq('id', stepId)
+            .select()
+            .single();
+          if (error) throw error;
+          await signImages([data]);
+          setSteps((list) => list.map((s) => (s.id === stepId ? data : s)));
+          return data;
+        }),
+
       addImageStep: (afterIndex: number, file: File) =>
         run(async () => {
           await flush();

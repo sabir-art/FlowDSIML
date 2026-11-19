@@ -23,6 +23,36 @@ function fakeJwt(user) {
   return `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ sub: user.id, email: user.email, role: 'authenticated', aud: 'authenticated', exp: now + 3600, iat: now })}.sig`;
 }
 
+/** L26-04 : modèles livrés, lus dans la migration (une seule source). */
+function builtinTemplates() {
+  const sql = fs.readFileSync(
+    path.join(__dirname, '../../../supabase/migrations/20261121090000_modeles.sql'),
+    'utf8',
+  );
+  const re =
+    /\('([a-z-]+)', '((?:[^']|'')*)',\s*'((?:[^']|'')*)',\s*'([a-z]+)', '([a-z-]+)', \$j\$([\s\S]*?)\$j\$::jsonb\)/g;
+  const out = [];
+  let m;
+  let i = 0;
+  while ((m = re.exec(sql))) {
+    out.push({
+      id: `tpl-${m[1]}`,
+      workspace_id: null,
+      builtin_key: m[1],
+      name: m[2].replace(/''/g, "'"),
+      description: m[3].replace(/''/g, "'"),
+      category: m[4],
+      icon: m[5],
+      structure: JSON.parse(m[6]),
+      with_captures: false,
+      created_by: null,
+      created_at: new Date(Date.UTC(2026, 0, 1, 0, 0, i)).toISOString(),
+      updated_at: new Date(Date.UTC(2026, 0, 1, 0, 0, i++)).toISOString(),
+    });
+  }
+  return out;
+}
+
 function seed() {
   const user = {
     id: 'u-alice',
@@ -135,6 +165,7 @@ function seed() {
       chapters: [],
       forms: [],
       quiz_questions: [],
+      demo_templates: builtinTemplates(),
       variables: [
         {
           id: 'var-1',
@@ -615,6 +646,163 @@ async function install(page, state = seed()) {
             leads: (previous ? 0 : 1) * pub,
           });
         }
+        case 'create_demo_from_template': {
+          const tpl = t.demo_templates.find(
+            (x) => x.id === a.p_template && (x.workspace_id === null || x.workspace_id === a.p_ws),
+          );
+          if (!tpl) return json(route, 400, { message: 'TEMPLATE_NOT_FOUND', code: 'P0001' });
+          const base = t.demos[0];
+          const id = `demo-${crypto.randomUUID().slice(0, 6)}`;
+          t.demos.push({
+            ...base,
+            id,
+            workspace_id: a.p_ws,
+            folder_id: a.p_folder ?? null,
+            title: tpl.name,
+            status: 'draft',
+            current_version_id: null,
+            settings: { ...(tpl.structure.settings || {}) },
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+          let pos = 0;
+          const ids = [];
+          (tpl.structure.chapters || []).forEach((c, ci) => {
+            let chap = null;
+            if (c.title) {
+              chap = crypto.randomUUID();
+              t.chapters.push({ id: chap, demo_id: id, workspace_id: a.p_ws, title: c.title, position: ci });
+            }
+            for (const st of c.steps || []) {
+              if (st.type === 'quiz') continue;
+              const sid = crypto.randomUUID();
+              ids.push(sid);
+              const text = ['popup', 'fin', 'texte'].includes(st.type);
+              const options = { ...(st.options || {}) };
+              if (st.type === 'popup') options.display = 'popup';
+              if (st.type === 'saisie' && st.typing)
+                options.animation = {
+                  type: 'typing',
+                  text: st.typing,
+                  field: null,
+                  fieldLabel: '',
+                  speed: 'normal',
+                };
+              const img = tpl.workspace_id === a.p_ws && st.image ? st.image : null;
+              t.steps.push({
+                ...t.steps[0],
+                id: sid,
+                demo_id: id,
+                workspace_id: a.p_ws,
+                position: pos++,
+                chapter_id: chap,
+                kind: text ? 'text' : 'image',
+                title: st.title || '',
+                body: st.body || '',
+                options,
+                cta: st.cta || null,
+                image_path: img ? img.path : null,
+                image_width: img ? img.width : null,
+                image_height: img ? img.height : null,
+                blurs: img ? img.blurs || [] : [],
+                page_url: null,
+                page_title: null,
+                element_meta: {},
+                presenter_notes: '',
+                to_capture: !text && !img,
+              });
+              if (!text) {
+                const hs =
+                  st.hotspots && st.hotspots.length
+                    ? st.hotspots
+                    : [{ x: 0.45, y: 0.45, w: 0.1, h: 0.06, title: st.bubble || '', body: '' }];
+                hs.forEach((h, hi) =>
+                  t.hotspots.push({
+                    ...t.hotspots[0],
+                    id: crypto.randomUUID(),
+                    step_id: sid,
+                    demo_id: id,
+                    workspace_id: a.p_ws,
+                    x: h.x,
+                    y: h.y,
+                    w: h.w,
+                    h: h.h,
+                    title: h.title || '',
+                    body: h.body || '',
+                    action: { type: 'next' },
+                    position: hi,
+                  }),
+                );
+              }
+            }
+          });
+          (tpl.structure.quiz || []).forEach((q, qi) =>
+            t.quiz_questions.push({
+              id: crypto.randomUUID(),
+              demo_id: id,
+              workspace_id: a.p_ws,
+              position: qi,
+              type: q.type,
+              prompt: q.prompt,
+              answers: q.answers,
+              explanation: q.explanation || '',
+              step_id: null,
+              points: q.points || 1,
+            }),
+          );
+          state.lastTemplateDemo = id;
+          return json(route, 200, id);
+        }
+        case 'save_demo_as_template': {
+          const d = t.demos.find((x) => x.id === a.p_demo);
+          const steps = t.steps.filter((x) => x.demo_id === d.id).sort((x, y) => x.position - y.position);
+          const toJson = (x) => ({
+            type:
+              x.kind === 'text'
+                ? x.options?.display === 'popup'
+                  ? 'popup'
+                  : 'texte'
+                : x.options?.animation?.type === 'typing'
+                  ? 'saisie'
+                  : 'bulle',
+            title: x.title,
+            body: x.body,
+            ...(a.p_with_captures && x.image_path
+              ? {
+                  image: { path: x.image_path, width: x.image_width, height: x.image_height, blurs: x.blurs },
+                }
+              : {}),
+            hotspots: t.hotspots
+              .filter((h) => h.step_id === x.id)
+              .map((h) => ({ x: h.x, y: h.y, w: h.w, h: h.h, title: h.title, body: h.body })),
+          });
+          const chapters = t.chapters
+            .filter((c) => c.demo_id === d.id)
+            .sort((x, y) => x.position - y.position)
+            .map((c) => ({ title: c.title, steps: steps.filter((x) => x.chapter_id === c.id).map(toJson) }));
+          const loose = steps.filter((x) => !x.chapter_id).map(toJson);
+          const row = {
+            id: `tpl-${crypto.randomUUID().slice(0, 6)}`,
+            workspace_id: d.workspace_id,
+            builtin_key: null,
+            name: a.p_name,
+            description: a.p_description || '',
+            category: a.p_category,
+            icon: 'layout-template',
+            structure: {
+              settings: d.settings || {},
+              chapters: [...(loose.length ? [{ title: '', steps: loose }] : []), ...chapters],
+              quiz: t.quiz_questions.filter((q) => q.demo_id === d.id),
+            },
+            with_captures: !!a.p_with_captures,
+            created_by: state.user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          t.demo_templates.push(row);
+          state.lastTemplateArgs = a;
+          return json(route, 200, row.id);
+        }
         case 'duplicate_demo': {
           const src = t.demos.find((d) => d.id === a.p_demo);
           const id = `demo-${crypto.randomUUID().slice(0, 6)}`;
@@ -631,6 +819,8 @@ async function install(page, state = seed()) {
           const d = t.demos.find((x) => x.id === a.p_demo);
           const steps = t.steps.filter((s) => s.demo_id === d.id).sort((x, y) => x.position - y.position);
           if (!steps.length) return json(route, 400, { message: 'DEMO_EMPTY', code: 'P0001' });
+          const toCapture = steps.filter((s) => s.to_capture && !s.image_path).length;
+          if (toCapture) return json(route, 400, { message: `TO_CAPTURE:${toCapture}`, code: 'P0001' });
           const ws = t.workspaces?.find((w) => w.id === d.workspace_id);
           if (ws && ws.public_links_enabled === false)
             return json(route, 400, { message: 'PUBLIC_DISABLED', code: 'P0001' });

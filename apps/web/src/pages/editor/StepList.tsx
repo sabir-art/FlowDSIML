@@ -15,6 +15,7 @@ import {
   ClipboardList,
   Code,
   Droplet,
+  Camera,
   Flag,
   CornerDownRight,
   GitBranch,
@@ -327,6 +328,11 @@ export function StepList({
                       <Code aria-hidden="true" className="th-missing" />
                     ) : s.kind === 'text' ? (
                       <span className="th-card fd-player-scope">{s.title || t('editor.untitled')}</span>
+                    ) : s.to_capture ? (
+                      <span className="th-tocapture">
+                        <Camera aria-hidden="true" />
+                        {t('editor.toCapture.badge')}
+                      </span>
                     ) : (
                       <ImageOff aria-hidden="true" className="th-missing" />
                     )}

@@ -1503,6 +1503,12 @@
       "err_tooManyRows": "Le fichier dépasse 1 000 lignes.",
       "err_tooManyColumns": "Le fichier dépasse 20 colonnes.",
       "err_header": "Chaque colonne doit avoir un en-tête de 60 caractères au plus."
+    },
+    "toCapture": {
+      "badge": "À capturer",
+      "button": "Capturer cette étape",
+      "order": "Étape à capturer {{n}} sur {{total}}",
+      "help": "Avec l’extension : ouvrez votre logiciel, lancez la capture et choisissez « Compléter : {{title}} ». Chaque clic remplit l’étape suivante. Vous pouvez aussi importer une image."
     }
   },
   "status": {
@@ -3118,6 +3124,72 @@
     "errTooLong": "La vidéo dépasse {{max}} minutes.",
     "errTooLongDetail": "Durée calculée : {{n}} s. Réduisez les étapes ou choisissez une vitesse plus rapide.",
     "helpMp4NoTitle": "{{n}} secondes · son des étapes vidéo seulement."
+  },
+  "templates": {
+    "title": "Partir d’un modèle",
+    "cardBody": "Structure et textes prêts : il ne reste qu’à capturer les écrans.",
+    "cats": "Catégories de modèles",
+    "cat": {
+      "all": "Tous",
+      "logiciel": "Logiciel",
+      "procedure": "Procédure",
+      "reglementaire": "Réglementaire",
+      "accueil": "Accueil",
+      "space": "Modèles de l’espace"
+    },
+    "grid": "Modèles",
+    "preview": "Aperçu du modèle",
+    "empty": "Aucun modèle dans cette catégorie.",
+    "spaceOne": "Modèle de l’espace",
+    "chapters_one": "{{count}} chapitre",
+    "chapters_other": "{{count}} chapitres",
+    "steps_one": "{{count}} étape",
+    "steps_other": "{{count}} étapes",
+    "f": {
+      "quiz": "quiz",
+      "avant_apres": "Avant / Après",
+      "seuil": "seuil {{n}} %",
+      "checklist": "checklist",
+      "cta": "bouton d’action"
+    },
+    "type": {
+      "bulle": "bulle",
+      "saisie": "saisie animée",
+      "quiz": "quiz",
+      "popup": "pop-up",
+      "fin": "fin",
+      "texte": "texte"
+    },
+    "toCaptureInfo_one": "Le modèle apporte la structure et les textes. L’étape à capturer est marquée « À capturer » : l’extension la propose.",
+    "toCaptureInfo_other": "Le modèle apporte la structure et les textes. Les {{count}} étapes à capturer sont marquées « À capturer » : l’extension les propose dans l’ordre.",
+    "hint": "Les textes utilisent vos variables ({{first_name}}) et votre style par défaut.",
+    "use": "Utiliser ce modèle",
+    "created": "Démo créée depuis le modèle",
+    "more": "Actions du modèle {{name}}",
+    "rename": "Renommer",
+    "delete": "Supprimer",
+    "name": "Nom du modèle",
+    "deleteTitle": "Supprimer le modèle",
+    "deleteBody": "Supprimer ce modèle ? Les démos déjà créées avec lui sont gardées.",
+    "notFound": "Ce modèle n’existe plus.",
+    "toCaptureLeft_one": "{{count}} étape reste à capturer.",
+    "toCaptureLeft_other": "{{count}} étapes restent à capturer.",
+    "save": {
+      "menu": "Enregistrer comme modèle",
+      "title": "Enregistrer comme modèle",
+      "description": "Description",
+      "optional": "(facultatif)",
+      "category": "Catégorie",
+      "captures": "Captures",
+      "without": "Sans les captures",
+      "recommended": "(recommandé)",
+      "withoutHelp": "Chaque étape devient « À capturer ». Aucune donnée de la démo d’origine n’est copiée.",
+      "with": "Avec les captures, comme exemple",
+      "withHelp": "Les zones floutées restent floutées. À éviter si les captures montrent des données réelles.",
+      "kept": "Gardés : chapitres, textes des bulles, quiz, réglages et style. Visible par tous les membres de l’espace.",
+      "submit": "Enregistrer le modèle",
+      "done": "Modèle enregistré"
+    }
   },
   "present": {
     "button": "Présenter",

@@ -44,6 +44,33 @@ http
         return send(200, [
           { role: 'owner', workspaces: { id: '11111111-1111-1111-1111-111111111111', name: 'Acme' } },
         ]);
+      // L26-04 : étapes « À capturer » d'une démo créée depuis un modèle (capture guidée)
+      if (req.url.startsWith('/rest/v1/steps') && req.method === 'GET') {
+        if (req.url.includes('to_capture=eq.true') && req.url.includes('demos'))
+          return send(200, [
+            {
+              id: 's-a',
+              title: 'Se connecter',
+              position: 0,
+              demo_id: '33333333-3333-3333-3333-333333333333',
+              demos: { title: 'Prise en main' },
+            },
+            {
+              id: 's-b',
+              title: 'Repérer le menu',
+              position: 1,
+              demo_id: '33333333-3333-3333-3333-333333333333',
+              demos: { title: 'Prise en main' },
+            },
+          ]);
+        if (req.url.includes('to_capture=eq.true'))
+          return send(200, [
+            { id: 's-a', options: {} },
+            { id: 's-b', options: { animation: { type: 'typing', text: 'x' } } },
+          ]);
+        return send(200, [{ position: 7 }]);
+      }
+      if (req.url.startsWith('/rest/v1/hotspots') && req.method === 'GET') return send(200, [{ id: 'h-1' }]);
       if (req.url.startsWith('/rest/v1/demos'))
         return send(201, { id: '22222222-2222-2222-2222-222222222222' });
       // F7 : envoi par reprise (protocole TUS) de la vidéo

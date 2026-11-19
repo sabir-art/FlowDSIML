@@ -100,6 +100,12 @@ export function PublishButton({
       setError(t('editor.ba.incomplete', { n: incomplete + 1 }));
       return;
     }
+    // L26-04 : étapes « À capturer » d'un modèle
+    const toCapture = editor.steps.filter((s) => s.to_capture && !s.image_path).length;
+    if (toCapture > 0) {
+      setError(t('templates.toCaptureLeft', { count: toCapture }));
+      return;
+    }
     // F7 : une étape vidéo doit avoir son fichier
     const noVideo = editor.steps.findIndex(
       (s) => s.kind === 'video' && (!s.video_path || !s.video_duration_ms),

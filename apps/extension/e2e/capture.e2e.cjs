@@ -126,7 +126,7 @@ const { chromium } = require('playwright');
     !logDuring.some(
       (l) =>
         l.u.startsWith('/storage/') ||
-        l.u.startsWith('/rest/v1/steps') ||
+        (l.m !== 'GET' && l.u.startsWith('/rest/v1/steps')) ||
         (l.m === 'POST' && l.u.startsWith('/rest/v1/demos')),
     ),
     'rien n’est envoyé pendant la capture',
@@ -157,7 +157,7 @@ const { chromium } = require('playwright');
     log.some((l) => l.u.startsWith('/storage/v1/object/captures/') && l.len > 1000),
     'la capture floutée (WebP) est téléversée',
   );
-  const step = log.find((l) => l.u.startsWith('/rest/v1/steps'));
+  const step = log.find((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/steps'));
   const meta = step && JSON.parse(step.body).element_meta;
   ok(
     meta &&

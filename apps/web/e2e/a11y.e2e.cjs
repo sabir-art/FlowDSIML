@@ -215,6 +215,24 @@ const APP_PAGES = [
     },
   },
   {
+    name: 'Démos · partir d’un modèle',
+    route: '/#/',
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
+      await p.getByRole('button', { name: /Partir d’un modèle/ }).click();
+      await p.getByRole('radio').first().waitFor();
+    },
+  },
+  {
+    name: 'Éditeur · enregistrer comme modèle',
+    route: `/#/demos/${DEMO}/edit`,
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Plus d’options' }).click();
+      await p.getByRole('menuitem', { name: 'Enregistrer comme modèle' }).click();
+      await p.waitForSelector('dialog[open]');
+    },
+  },
+  {
     name: 'Démos · export PDF',
     route: '/#/',
     seed: (d) => seedExport(d),
