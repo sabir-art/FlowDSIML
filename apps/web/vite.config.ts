@@ -1,12 +1,15 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { APP_NAME } from '../../packages/core/src/brand';
+import { offlineRuntime } from './vite.offline';
 
 // GitHub Pages sert le site sous /<dépôt>/ : la base est injectée par la CI (BASE_PATH).
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   plugins: [
     react(),
+    // L16 : lecteur hors ligne des paquets SCORM (module virtuel)
+    offlineRuntime(),
     // Nom du produit dans index.html (constante unique)
     { name: 'app-name', transformIndexHtml: (html: string) => html.replaceAll('%APP_NAME%', APP_NAME) },
   ],

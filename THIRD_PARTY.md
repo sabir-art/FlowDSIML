@@ -8,6 +8,7 @@ Ce fichier recense les bibliothèques et les ressources tierces ajoutées pour l
 | ----------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------ | ------------------------------------------------------- |
 | [jsPDF](https://github.com/parallax/jsPDF)                                                      | 4.2.1   | MIT                                                          | Création des PDF (démo, attestation) dans le navigateur |
 | [gifenc](https://github.com/mattdesl/gifenc)                                                    | 1.0.3   | MIT                                                          | Encodage des GIF animés dans le navigateur              |
+| [fflate](https://github.com/101arrowz/fflate)                                                   | 0.8.3   | MIT                                                          | Paquets SCORM (zip) assemblés dans le navigateur (L16)  |
 | [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) (TTF Regular, Bold, ExtraBold) | 2.071   | SIL Open Font License 1.1 (`packages/exports/fonts/OFL.txt`) | Police embarquée dans les PDF                           |
 
 ### Dépendances de jsPDF

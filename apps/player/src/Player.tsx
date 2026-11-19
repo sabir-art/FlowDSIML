@@ -47,13 +47,13 @@ import {
   zoomOrigin,
 } from '@flowdsiml/player-core';
 import { fmt, strings, type Dict } from './i18n';
-import type { Tracker } from './api';
+import type { QuizResult, TrackerLike } from './api';
 import { LeadForm } from './LeadForm';
 
 interface Props {
   manifest: Manifest;
   values: VariableValues;
-  tracker: Tracker;
+  tracker: TrackerLike;
   preview?: boolean;
   /** F2 : aperçu « Tester le quiz » ouvert directement sur le quiz. */
   startQuiz?: boolean;
@@ -61,6 +61,10 @@ interface Props {
   startStep?: number;
   /** L22 : mode présentation, piloté par l'app (vue présentateur, écran public). */
   present?: PresentState;
+  /** L16 : correction du quiz hors ligne (paquet SCORM) à la place de submit_quiz_attempt. */
+  scoreQuiz?: (answers: Record<string, string[]>, attemptsUsed: number) => Promise<QuizResult>;
+  /** L16 : langue de l'interface imposée (?lang=fr|en, widget, paquet). */
+  uiLocale?: 'fr' | 'en';
   onLead: (
     form: LeadFormT,
     data: { email: string; fields: Record<string, string>; consent: boolean },
@@ -107,9 +111,11 @@ export function Player({
   startStep,
   onLead,
   present,
+  scoreQuiz,
+  uiLocale,
 }: Props) {
   // PY-3 : langue de l'interface du lecteur (le contenu de la démo reste dans sa langue)
-  const [locale, setLocale] = useState<'fr' | 'en'>(m.locale === 'en' ? 'en' : 'fr');
+  const [locale, setLocale] = useState<'fr' | 'en'>(uiLocale ?? (m.locale === 'en' ? 'en' : 'fr'));
   const t = strings(locale);
   const compact = useCompact();
   const prefersDark = useMedia('(prefers-color-scheme: dark)');
@@ -340,9 +346,16 @@ export function Player({
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        if (menu) return setMenu(false);
+        // L16 : Échap traité ici n'est pas relayé à la page hôte (widget)
+        if (menu) {
+          e.preventDefault();
+          return setMenu(false);
+        }
         // Spec a2 §2 : Échap vaut « Suivant » sur une pop-up sans choix
-        if (popup && !choices.length && !last && !gateForm) return next();
+        if (popup && !choices.length && !last && !gateForm) {
+          e.preventDefault();
+          return next();
+        }
       }
       if ((e.target as HTMLElement)?.closest?.('form') || gateForm || view === 'quiz') return;
       if (e.key === 'ArrowRight') next();
@@ -534,17 +547,19 @@ export function Player({
               onSubmit={async (answers) => {
                 memory.current.answers = { ...memory.current.answers, ...answers };
                 if (preview) return null; // « Tester le quiz » : tentative non comptée
-                const res = await submitQuizAttempt({
-                  demoId: m.demoId,
-                  versionId: m.versionId,
-                  visitorId: tracker.visitorId,
-                  sessionId: tracker.sessionId,
-                  linkToken: tracker.linkToken,
-                  answers: Object.entries(answers).map(([questionId, answerIds]) => ({
-                    questionId,
-                    answerIds,
-                  })),
-                });
+                const res = scoreQuiz
+                  ? await scoreQuiz(answers, quizAttemptsUsed())
+                  : await submitQuizAttempt({
+                      demoId: m.demoId,
+                      versionId: m.versionId,
+                      visitorId: tracker.visitorId,
+                      sessionId: tracker.sessionId,
+                      linkToken: tracker.linkToken,
+                      answers: Object.entries(answers).map(([questionId, answerIds]) => ({
+                        questionId,
+                        answerIds,
+                      })),
+                    });
                 try {
                   localStorage.setItem(QUIZ_KEY, String(quizAttemptsUsed() + 1));
                 } catch {

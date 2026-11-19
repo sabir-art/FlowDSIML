@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { ArrowRight, Ban, Clock, ExternalLink, Eye, EyeOff, Key, SearchX } from 'lucide-preact';
+import { ArrowRight, Ban, Clock, ExternalLink, Eye, EyeOff, Key, Play, SearchX } from 'lucide-preact';
 import { openDemo, type GateInfo } from './api';
 import { fmt, strings, type Dict } from './i18n';
 import { initials } from './Player';
@@ -221,6 +221,34 @@ export function PasswordGate({
           <p class="p-gate-foot">{fmt(g, 'remaining', { count: state.remaining })}</p>
         )}
       </form>
+    </SysFrame>
+  );
+}
+
+/** L16 : écran de démarrage (intégration avec « Démarrage au clic », ?start=click). */
+export function StartScreen({
+  t,
+  title,
+  workspace,
+  onStart,
+}: {
+  t: Dict;
+  title: string;
+  workspace: string;
+  onStart: () => void;
+}) {
+  return (
+    <SysFrame t={t} info={{ title, workspace }} label={title}>
+      <div class="p-card p-sys-card">
+        <span class="p-sys-chip" aria-hidden="true">
+          <Play size={22} />
+        </span>
+        <h1>{title}</h1>
+        <button type="button" class="p-btn p-btn-primary" onClick={onStart} autoFocus>
+          {t.start}
+          <ArrowRight size={16} aria-hidden="true" />
+        </button>
+      </div>
     </SysFrame>
   );
 }

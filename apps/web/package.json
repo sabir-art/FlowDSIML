@@ -21,6 +21,7 @@
     "@flowdsiml/supabase-types": "workspace:*",
     "@flowdsiml/ui": "workspace:*",
     "@supabase/supabase-js": "^2.119.0",
+    "fflate": "^0.8.3",
     "i18next": "^25.10.10",
     "lucide-react": "^0.577.0",
     "react": "^19.2.0",

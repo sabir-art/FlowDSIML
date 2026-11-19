@@ -17,7 +17,7 @@ import { embedAllowed, parseRoute } from './logic';
 import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
 import { Player, type PresentState } from './Player';
-import { PasswordGate, SysScreen } from './Gate';
+import { PasswordGate, StartScreen, SysScreen } from './Gate';
 import '@flowdsiml/player-core/player-core.css';
 import './player.css';
 
@@ -37,9 +37,22 @@ type State =
       startStep?: number;
       /** L22 : présentation pilotée par l'app (vue présentateur, écran public). */
       present?: PresentState;
+      /** L16 : intégration avec démarrage au clic (?start=click), langue imposée (?lang=fr|en). */
+      clickToStart?: boolean;
+      uiLocale?: 'fr' | 'en';
     };
 
 const inIframe = window.parent !== window;
+// L16 : intégré (widget bouton + pop-up), Échap non traité par le lecteur ferme la fenêtre hôte :
+// le focus est dans l'iframe, la page hôte ne reçoit pas la touche autrement.
+if (inIframe)
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    // Après les gestionnaires du lecteur (menu, pop-up), qui marquent la touche comme traitée
+    setTimeout(() => {
+      if (!e.defaultPrevented) parent.postMessage({ type: 'tutoclick:escape' }, '*');
+    });
+  });
 const parentOrigin = (() => {
   const a = location.ancestorOrigins?.[0];
   if (a) return a;
@@ -138,6 +151,10 @@ function App() {
         // P12 : « Ouvrir l'aperçu » depuis l'app (?preview=1) n'enregistre pas de statistiques
         const preview = [search, location.search].some((q) => new URLSearchParams(q).get('preview') === '1');
         const resume = preview ? null : await resumeP;
+        // L16 : réglages d'intégration (code iframe, widget)
+        const q = (k: string) =>
+          new URLSearchParams(search).get(k) ?? new URLSearchParams(location.search).get(k);
+        const lang = q('lang');
         if (!cancelled)
           setState({
             status: 'ready',
@@ -146,6 +163,8 @@ function App() {
             linkToken,
             preview,
             resume: resumable(resume) ? resume : undefined,
+            clickToStart: q('start') === 'click' && !preview,
+            uiLocale: lang === 'fr' || lang === 'en' ? lang : undefined,
           });
       };
       if (gate.status === 'ok') return void start(gate);
@@ -207,6 +226,15 @@ function App() {
       <PasswordGate demoId={state.demoId} locale={navigator.language} info={state.info} onOpen={state.open} />
     );
   const m = state.manifest;
+  if (state.clickToStart)
+    return (
+      <StartScreen
+        t={strings(state.uiLocale ?? (m.locale === 'en' ? 'en' : 'fr'))}
+        title={m.title}
+        workspace={m.workspaceName}
+        onStart={() => setState({ ...state, clickToStart: false })}
+      />
+    );
   if (state.resume) {
     const resume = state.resume;
     return (
@@ -229,6 +257,7 @@ function App() {
       startQuiz={state.startQuiz}
       startStep={state.startStep}
       present={state.present}
+      uiLocale={state.uiLocale}
       onLead={async (_form, data) => {
         if (state.preview) return;
         await submitLead({

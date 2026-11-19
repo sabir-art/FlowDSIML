@@ -140,6 +140,14 @@ function storageGet(store: Storage | undefined, key: string): string {
   }
 }
 
+/** L16 : ce que le lecteur attend d'un traceur (en ligne : Tracker ; paquet SCORM : traceur hors ligne). */
+export interface TrackerLike {
+  readonly visitorId: string;
+  readonly sessionId: string;
+  readonly linkToken: string | null;
+  track(type: EventType, data?: Parameters<Tracker['track']>[1]): void;
+}
+
 /** File d'événements : envoi groupé toutes les 2 s et à la fermeture de la page. */
 export class Tracker {
   private queue: Array<{
