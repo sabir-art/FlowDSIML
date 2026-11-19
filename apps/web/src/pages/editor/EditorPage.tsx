@@ -304,7 +304,12 @@ export function EditorPage() {
         return;
       }
       // L17 : pas d'outil hotspot ni flou sur une étape Avant / Après
-      if (!readOnly && (key === 'h' || key === 'b') && step?.kind !== 'before_after') {
+      if (
+        !readOnly &&
+        (key === 'h' || key === 'b') &&
+        step?.kind !== 'before_after' &&
+        step?.kind !== 'video'
+      ) {
         const k = key === 'h' ? 'hotspot' : 'blur';
         setTool((cur) => (cur === k ? 'select' : k));
         return;
@@ -710,7 +715,7 @@ export function EditorPage() {
               )}
               {tool !== 'select' && <p className="muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
             </div>
-            {step?.kind !== 'before_after' && (
+            {step?.kind !== 'before_after' && step?.kind !== 'video' && (
               <div className="floatbar" role="toolbar" aria-label={t('editor.tools')}>
                 {toolBtn('hotspot', Target, t('editor.toolHotspot'))}
                 {toolBtn('blur', Droplet, t('editor.toolBlur'))}

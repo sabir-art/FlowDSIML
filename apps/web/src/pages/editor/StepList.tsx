@@ -1,5 +1,6 @@
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { branchOf } from './branch';
+import { asVideo } from './video/videoModel';
 import type { PresencePayload } from './presence/presence';
 import { RailWho } from './presence/PresenceUI';
 import {
@@ -20,6 +21,7 @@ import {
   Type,
   ZoomIn,
   Layers,
+  Play,
 } from 'lucide-react';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { asStepOptions, type StepRow } from './types';
@@ -190,7 +192,10 @@ export function StepList({
       </span>
       <ol className="rail-list" aria-label={t('editor.railLabel')} ref={listRef}>
         {editor.steps.map((s, i) => {
-          const url = s.image_path ? editor.imageUrls[s.image_path] : undefined;
+          // F7 : vignette d'une étape vidéo = image de sa première pause, sinon icône de lecture
+          const firstFrame = s.kind === 'video' ? Object.values(asVideo(s.video).frames)[0] : undefined;
+          const thumbPath = s.image_path ?? firstFrame;
+          const url = thumbPath ? editor.imageUrls[thumbPath] : undefined;
           const chapter = chapterTitle(s.chapter_id);
           const showChapter = chapter && chapterTitle(editor.steps[i - 1]?.chapter_id ?? null) !== chapter;
           const form = s.gate_form_id ? editor.forms.find((f) => f.id === s.gate_form_id) : undefined;
@@ -295,6 +300,8 @@ export function StepList({
                           ) : null;
                         })()}
                       </>
+                    ) : s.kind === 'video' ? (
+                      <Play aria-hidden="true" className="th-missing" />
                     ) : s.kind === 'text' ? (
                       <span className="th-card fd-player-scope">{s.title || t('editor.untitled')}</span>
                     ) : (
@@ -402,6 +409,7 @@ function StepBadges({ step, hotspots, isLast }: { step: StepRow; hotspots: numbe
         ? { icon: <Flag />, label: t('editor.end.title') }
         : { icon: <Type />, label: t('editor.end.textTitle') }),
     step.kind === 'before_after' && { icon: <Layers />, label: t('editor.add.beforeAfter') },
+    step.kind === 'video' && { icon: <Play />, label: t('editor.video.kind') },
     hotspots > 0 && { icon: <Target />, label: t('editor.badgeHotspots', { count: hotspots }) },
     step.gate_form_id && { icon: <ClipboardList />, label: t('editor.badgeForm') },
     step.cta && { icon: <MousePointerClick />, label: t('editor.badgeCta') },

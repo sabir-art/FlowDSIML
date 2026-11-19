@@ -10,6 +10,7 @@ import { GuidedStepFields } from './GuidedStepFields';
 import { BeforeAfterFields } from '../BeforeAfterEditor';
 import { AbSection, type AbState } from '../ab/AbTest';
 import { usePlan } from '../../../lib/plan';
+import { VideoFields } from '../video/VideoFields';
 
 export function StepPanel({
   editor,
@@ -113,8 +114,9 @@ export function StepPanel({
       </div>
 
       {step.kind === 'before_after' && <BeforeAfterFields editor={editor} step={step} readOnly={readOnly} />}
+      {step.kind === 'video' && <VideoFields editor={editor} step={step} readOnly={readOnly} />}
 
-      {step.kind !== 'before_after' && (
+      {step.kind !== 'before_after' && step.kind !== 'video' && (
         <div className="sec">
           <div className="sec-title">
             {step.kind === 'text' ? t('editor.end.primary') : t('editor.end.stepCta')}

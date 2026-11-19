@@ -12,6 +12,7 @@ import {
   asStepOptions,
   asZoom,
 } from './types';
+import { asVideo } from './video/videoModel';
 import { questionErrors } from './quizValidation';
 
 /**
@@ -29,6 +30,8 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
     // EDT-12 : nom du workspace, comme dans le manifeste publié (migration 131500)
     workspaceName,
     title: demo.title,
+    device: demo.device === 'mobile' ? ('mobile' as const) : ('desktop' as const),
+    viewport: null,
     locale: settings.locale ?? 'fr',
     publishedAt: new Date().toISOString(),
     theme: settings.theme ?? {},
@@ -60,6 +63,26 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
                   height: s.before_image_height ?? 800,
                 },
                 beforeBlurs: asMasks(s.before_blurs),
+              };
+            })()
+          : null,
+      // F7 : vidéo (URL signée du bucket videos) pour l'aperçu
+      video:
+        s.kind === 'video' && s.video_path && s.video_duration_ms
+          ? (() => {
+              const v = asVideo(s.video);
+              return {
+                url: ed.imageUrls[s.video_path] ?? '',
+                durationMs: s.video_duration_ms,
+                cuts: v.cuts,
+                pauses: v.pauses,
+                captions: v.captions,
+                captionsDefault: v.captionsDefault || v.hasVoice,
+                autoplayMuted: v.autoplayMuted,
+                hasVoice: v.hasVoice,
+                frames: Object.fromEntries(
+                  Object.entries(v.frames).map(([k, path]) => [k, ed.imageUrls[path] ?? '']),
+                ),
               };
             })()
           : null,

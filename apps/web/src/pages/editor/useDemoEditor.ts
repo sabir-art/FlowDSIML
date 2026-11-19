@@ -4,6 +4,7 @@ import { moveItem } from '@flowdsiml/core';
 import type { Json, TablesUpdate } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
 import type { ChapterRow, DemoRow, FormRow, HotspotRow, QuestionRow, StepRow, VariableRow } from './types';
+import { asVideo } from './video/videoModel';
 
 type Table = 'demos' | 'steps' | 'hotspots' | 'chapters' | 'forms' | 'variables' | 'quiz_questions';
 type Patch = Record<string, unknown>;
@@ -86,13 +87,23 @@ export function useDemoEditor(demoId: string) {
 
   const signImages = useCallback(async (rows: StepRow[]) => {
     const paths = [
-      ...new Set(rows.flatMap((s) => [s.image_path, s.before_image_path]).filter((p): p is string => !!p)),
+      ...new Set(
+        rows
+          .flatMap((s) => [s.image_path, s.before_image_path, ...Object.values(asVideo(s.video).frames)])
+          .filter((p): p is string => !!p),
+      ),
     ];
-    if (!paths.length) return;
-    const { data } = await supabase.storage.from('captures').createSignedUrls(paths, 3600);
+    // F7 : vidéos (bucket videos), signées dans la même table d'adresses
+    const videos = [...new Set(rows.map((s) => s.video_path).filter((p): p is string => !!p))];
+    if (!paths.length && !videos.length) return;
+    const [img, vid] = await Promise.all([
+      paths.length ? supabase.storage.from('captures').createSignedUrls(paths, 3600) : { data: [] },
+      videos.length ? supabase.storage.from('videos').createSignedUrls(videos, 3600) : { data: [] },
+    ]);
     setImageUrls((prev) => {
       const next = { ...prev };
-      for (const d of data ?? []) if (d.path && d.signedUrl) next[d.path] = d.signedUrl;
+      for (const d of [...(img.data ?? []), ...(vid.data ?? [])])
+        if (d.path && d.signedUrl) next[d.path] = d.signedUrl;
       return next;
     });
   }, []);
@@ -254,6 +265,50 @@ export function useDemoEditor(demoId: string) {
           next.splice(position, 0, data);
           await persistOrder(next);
           return data;
+        }),
+
+      /**
+       * F7 : « Créer n étapes captures » : une capture par pause-étape (image de la pause copiée,
+       * texte de la bulle), juste après l'étape vidéo. La vidéo reste en place.
+       */
+      convertVideo: (stepId: string) =>
+        run(async () => {
+          await flush();
+          const src = steps.find((x) => x.id === stepId);
+          if (!src) return 0;
+          const v = asVideo(src.video);
+          const pauses = [...v.pauses].sort((a, b) => a.t - b.t);
+          const at = steps.indexOf(src);
+          const created: StepRow[] = [];
+          for (const [i, pz] of pauses.entries()) {
+            const frame = v.frames[pz.id];
+            let image: string | null = null;
+            if (frame) {
+              image = `${demo!.workspace_id}/${demoId}/${crypto.randomUUID()}.webp`;
+              const cp = await supabase.storage.from('captures').copy(frame, image);
+              if (cp.error) image = null;
+            }
+            const { data, error } = await supabase
+              .from('steps')
+              .insert({
+                demo_id: demoId,
+                workspace_id: demo!.workspace_id,
+                kind: image ? 'image' : 'text',
+                title: pz.title,
+                body: pz.body,
+                position: at + 1 + i,
+                image_path: image,
+              })
+              .select()
+              .single();
+            if (error) throw error;
+            created.push(data);
+          }
+          const next = [...steps];
+          next.splice(at + 1, 0, ...created);
+          await persistOrder(next);
+          await signImages(created);
+          return created.length;
         }),
 
       /** L17 : étape Avant / Après vide (captures choisies ensuite dans le panneau). */

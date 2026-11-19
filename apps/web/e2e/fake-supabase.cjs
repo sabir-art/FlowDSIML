@@ -1315,6 +1315,21 @@ async function install(page, state = seed()) {
         headers: { 'access-control-allow-origin': '*' },
       });
     }
+    // F7 : vidéos (bucket videos, URL signées) : WebM fictif, requêtes partielles comme le stockage
+    if (/^\/storage\/v1\/object\/sign\/videos\//.test(p)) {
+      const webm = require('fs').readFileSync(require('path').join(__dirname, 'fixture-video.webm'));
+      const m = /bytes=(\d+)-(\d*)/.exec(req.headers()['range'] || '');
+      const cors = { 'access-control-allow-origin': '*', 'accept-ranges': 'bytes' };
+      if (!m) return route.fulfill({ status: 200, contentType: 'video/webm', headers: cors, body: webm });
+      const a = Number(m[1]);
+      const b = m[2] ? Number(m[2]) : webm.length - 1;
+      return route.fulfill({
+        status: 206,
+        contentType: 'video/webm',
+        headers: { ...cors, 'content-range': `bytes ${a}-${b}/${webm.length}` },
+        body: webm.subarray(a, b + 1),
+      });
+    }
     if (p.startsWith('/storage/v1/object/'))
       return route.fulfill({
         status: 200,
@@ -1367,6 +1382,9 @@ function defaults(table, r) {
       before_image_width: null,
       before_image_height: null,
       before_blurs: [],
+      video_path: null,
+      video_duration_ms: null,
+      video: {},
     };
   if (table === 'alerts')
     return {

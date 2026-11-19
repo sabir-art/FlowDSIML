@@ -10,7 +10,7 @@ import {
   skipCut,
   toEdited,
   toSource,
-} from './videoTimeline';
+} from '@flowdsiml/core';
 
 const ICON = { size: 18, strokeWidth: 2, 'aria-hidden': true } as const;
 

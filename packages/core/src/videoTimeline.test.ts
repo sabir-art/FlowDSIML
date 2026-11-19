@@ -39,3 +39,19 @@ describe('vidéo (F7) : temps après coupe', () => {
     expect(clock(65999)).toBe('1:05');
   });
 });
+
+import { parseVtt, toVtt } from './videoTimeline';
+describe('sous-titres WebVTT (F7)', () => {
+  it('lecture : temps, balises retirées, blocs invalides ignorés', () => {
+    const src = `WEBVTT\n\nNOTE commentaire\n\n1\n00:00:01.000 --> 00:00:03.500 align:start\n<v Léa>Ouvrez la fiche</v>\n\n00:04.000 --> 00:02.000\nInversé\n\n00:00:05.000 --> 00:00:06.000\nValidez &amp; enregistrez\n`;
+    expect(parseVtt(src)).toEqual([
+      { from: 1000, to: 3500, text: 'Ouvrez la fiche' },
+      { from: 5000, to: 6000, text: 'Validez & enregistrez' },
+    ]);
+    expect(parseVtt('pas un vtt')).toBeNull();
+  });
+  it('aller-retour', () => {
+    const cues = [{ from: 61000, to: 62500, text: 'Bonjour' }];
+    expect(parseVtt(toVtt(cues))).toEqual(cues);
+  });
+});

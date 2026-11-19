@@ -94,6 +94,14 @@ export function PublishButton({
       setError(t('editor.ba.incomplete', { n: incomplete + 1 }));
       return;
     }
+    // F7 : une étape vidéo doit avoir son fichier
+    const noVideo = editor.steps.findIndex(
+      (s) => s.kind === 'video' && (!s.video_path || !s.video_duration_ms),
+    );
+    if (noVideo >= 0) {
+      setError(t('errors.videoMissing', { n: noVideo + 1 }));
+      return;
+    }
     // F1 : avertissement RGPD à chaque publication publique (toute publication l'est jusqu'à F3)
     setGdprOpen(true);
   }

@@ -13,7 +13,8 @@ interface PublishResult {
       beforeAfter?: { before: { url: string }; beforeBlurs: Mask[] } | null;
     }>;
   };
-  copies: Array<{ from: string; to: string }>;
+  /** F7 : bucket source (captures par défaut ; videos pour une vidéo, copiée sans retouche). */
+  copies: Array<{ from: string; to: string; bucket?: 'videos' }>;
 }
 
 /**
@@ -120,12 +121,13 @@ export async function publishDemo(
 
   for (const c of res.copies) {
     if (!(await exists('published', c.to))) {
-      const blurs = blurByPath.get(c.to) ?? [];
-      const dl = await supabase.storage.from('captures').download(c.from);
+      const blurs = c.bucket ? [] : (blurByPath.get(c.to) ?? []);
+      const dl = await supabase.storage.from(c.bucket ?? 'captures').download(c.from);
       if (dl.error) throw dl.error;
       const blob = blurs.length ? await burnBlurs(dl.data, blurs) : dl.data;
       const up = await supabase.storage.from('published').upload(c.to, blob, {
-        contentType: blurs.length ? 'image/webp' : dl.data.type || 'image/webp',
+        contentType:
+          c.bucket === 'videos' ? 'video/webm' : blurs.length ? 'image/webp' : dl.data.type || 'image/webp',
         cacheControl: '31536000',
         upsert: true,
       });

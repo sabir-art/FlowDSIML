@@ -7,3 +7,4 @@ export * from './csv';
 export * from './strings';
 export * from './brand';
 export * from './glossary';
+export * from './videoTimeline';
