@@ -5,8 +5,10 @@ import '../styles/maquette.css';
 import '../styles/maquette-ajouts.css';
 import '../styles/maquette-peau.css';
 
-type Toast = { id: number; text: string };
-const Ctx = createContext<(text: string) => void>(() => {});
+/** L16 : action facultative (ex. « Télécharger ») ; un toast avec action reste jusqu'à sa fermeture. */
+export type ToastAction = { label: string; onClick: () => void };
+type Toast = { id: number; text: string; action?: ToastAction };
+const Ctx = createContext<(text: string, action?: ToastAction) => void>(() => {});
 
 /** Durée d'affichage d'un toast (maquette : 5 s). */
 const DURATION = 5000;
@@ -21,10 +23,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const seq = useRef(0);
   const close = useCallback((id: number) => setToasts((l) => l.filter((x) => x.id !== id)), []);
   const show = useCallback(
-    (text: string) => {
+    (text: string, action?: ToastAction) => {
       const id = ++seq.current;
-      setToasts((l) => [...l.slice(-2), { id, text }]);
-      window.setTimeout(() => close(id), DURATION);
+      setToasts((l) => [...l.slice(-2), { id, text, action }]);
+      if (!action) window.setTimeout(() => close(id), DURATION);
     },
     [close],
   );
@@ -39,6 +41,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <div className="grow">
                 <div className="t-label toast-text">{x.text}</div>
               </div>
+              {x.action && (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    x.action!.onClick();
+                    close(x.id);
+                  }}
+                >
+                  {x.action.label}
+                </button>
+              )}
               <button
                 type="button"
                 className="btn btn-ghost btn-sm btn-icon toast-close"

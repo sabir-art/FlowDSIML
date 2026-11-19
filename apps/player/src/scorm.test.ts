@@ -79,18 +79,40 @@ describe('ScormSession 1.2', () => {
     expect(calls.filter((c) => c === 'finish')).toHaveLength(1);
   });
 
-  it('quiz : failed puis passed, meilleur score, jamais rétrogradé', () => {
+  it('critère quiz : failed puis passed, meilleur score, jamais rétrogradé', () => {
     const { api, data } = fakeApi('1.2');
-    const s = new ScormSession('1.2', api as never);
+    const s = new ScormSession('1.2', api as never, { kind: 'quiz', min: 70 });
     s.init();
-    s.quiz(40, false);
+    s.step(2, 3);
+    expect(data['cmi.core.lesson_status']).toBe('incomplete');
+    s.quiz(40);
     expect(data['cmi.core.lesson_status']).toBe('failed');
     expect(data['cmi.core.score.raw']).toBe('40');
-    s.quiz(80, true);
-    s.quiz(60, false);
+    s.quiz(80);
+    s.quiz(60);
     expect(data['cmi.core.lesson_status']).toBe('passed');
     expect(data['cmi.core.score.raw']).toBe('80');
     expect(data['cmi.core.score.max']).toBe('100');
+  });
+
+  it('critère quiz : seuil choisi à l’export (pas celui du quiz)', () => {
+    const { api, data } = fakeApi('1.2');
+    const s = new ScormSession('1.2', api as never, { kind: 'quiz', min: 90 });
+    s.init();
+    s.quiz(80);
+    expect(data['cmi.core.lesson_status']).toBe('failed');
+    s.finish();
+    expect(data['cmi.core.exit']).toBe('suspend');
+  });
+
+  it('critère étapes : le quiz n’est pas transmis', () => {
+    const { api, data, calls } = fakeApi('1.2');
+    const s = new ScormSession('1.2', api as never);
+    s.init();
+    s.step(2, 3);
+    s.quiz(20);
+    expect(data['cmi.core.lesson_status']).toBe('completed');
+    expect(calls.some((c) => c.includes('score'))).toBe(false);
   });
 
   it('reprise : entry=resume et lesson_location', () => {
@@ -111,13 +133,13 @@ describe('ScormSession 1.2', () => {
 describe('ScormSession 2004', () => {
   it('completion_status, success_status, score.scaled, session_time ISO', () => {
     const { api, data } = fakeApi('2004', { 'cmi.completion_status': 'unknown', 'cmi.learner_id': 'L1' });
-    const s = new ScormSession('2004', api as never);
+    const s = new ScormSession('2004', api as never, { kind: 'quiz', min: 70 });
     expect(s.init().learnerId).toBe('L1');
     expect(data['cmi.completion_status']).toBe('incomplete');
     s.step(2, 3);
     expect(data['cmi.completion_status']).toBe('completed');
     expect(data['cmi.location']).toBe('2');
-    s.quiz(75, true);
+    s.quiz(75);
     expect(data['cmi.success_status']).toBe('passed');
     expect(data['cmi.score.scaled']).toBe('0.75');
     expect(data['cmi.score.raw']).toBe('75');
@@ -133,7 +155,7 @@ describe('sans LMS', () => {
     expect(s.active).toBe(false);
     expect(s.init()).toEqual({ learnerId: '', resumeStep: null });
     s.step(0, 1);
-    s.quiz(10, false);
+    s.quiz(10);
     s.finish();
   });
 });

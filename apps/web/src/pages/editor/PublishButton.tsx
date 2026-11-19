@@ -20,8 +20,11 @@ export function PublishButton({
   editor,
   onReviewStep,
   republishLabel,
+  onPublished,
 }: {
   editor: DemoEditor;
+  /** L16 : publication depuis « Diffuser » : rester dans la modale au lieu d'ouvrir Partager. */
+  onPublished?: (version: number) => void;
   /** Libellé quand la démo est déjà publiée (page Partager : « Publier les modifications »). */
   republishLabel?: string;
   /** « Revoir l'étape n » depuis l'avertissement RGPD. */
@@ -95,9 +98,12 @@ export function PublishButton({
     setError(null);
     try {
       await editor.flush();
-      await publishDemo(demo.id, ack, (d, total) => setProgress(`${Math.round((d / total) * 100)} %`));
+      const res = await publishDemo(demo.id, ack, (d, total) =>
+        setProgress(`${Math.round((d / total) * 100)} %`),
+      );
       await editor.reload();
-      navigate(`/demos/${demo.id}/share?published=1`);
+      if (onPublished) onPublished(res.number);
+      else navigate(`/demos/${demo.id}/share?published=1`);
     } catch (e) {
       setError(errorMessage(t, e));
     } finally {

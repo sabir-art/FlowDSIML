@@ -1,6 +1,6 @@
 import { Copy, Download, Eye, Info, Mail, Play, Plus, Power, Trash2, X } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
@@ -18,6 +18,7 @@ import { PublishButton } from '../editor/PublishButton';
 import { usePlan } from '../../lib/plan';
 import { PlanFormsWarning } from '../../components/PlanFormsWarning';
 import { AccessPanel, AccessSummary, useDemoAccess } from './AccessPanel';
+import { CopyButton, highlightHtml } from './codeBlock';
 import { ExportDialog } from '../export/ExportDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
@@ -26,26 +27,6 @@ import { NotificationBell } from '../../components/notifications/NotificationBel
 
 type Tab = 'link' | 'embed' | 'perso' | 'access';
 type LinkStats = Record<string, { views: number; last: string | null }>;
-
-/** Bouton de copie avec retour « Copié ». */
-function CopyButton({ value, label, primary }: { value: string; label?: string; primary?: boolean }) {
-  const { t } = useTranslation();
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      type="button"
-      className={`btn ${primary ? 'btn-primary' : 'btn-secondary'}`}
-      onClick={() => {
-        void navigator.clipboard?.writeText(value);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      }}
-    >
-      <Copy aria-hidden="true" />
-      <span aria-live="polite">{copied ? t('common.copied') : (label ?? t('common.copy'))}</span>
-    </button>
-  );
-}
 
 /** Partager une démo (PRT-01), à l'identique de la maquette partage.html, sur les données réelles. */
 export function SharePage() {
@@ -606,36 +587,6 @@ export function SharePage() {
       )}
     </div>
   );
-}
-
-/** Coloration du code d'intégration comme la maquette : noms de balise (.k) et URL src (.s). */
-function highlightHtml(code: string): ReactNode[] {
-  const out: ReactNode[] = [];
-  const re = /(<\/?)([a-z]+)|(src=")([^"]*)(")/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(code))) {
-    out.push(code.slice(last, m.index));
-    if (m[2]) {
-      out.push(
-        m[1],
-        <span key={m.index} className="k">
-          {m[2]}
-        </span>,
-      );
-    } else {
-      out.push(
-        m[3],
-        <span key={m.index} className="s">
-          {m[4]}
-        </span>,
-        m[5],
-      );
-    }
-    last = re.lastIndex;
-  }
-  out.push(code.slice(last));
-  return out;
 }
 
 function EmbedPanel({

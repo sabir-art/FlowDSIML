@@ -803,6 +803,34 @@ async function install(page, state = seed()) {
             }
           return json(route, 200, n);
         }
+        // ===== L16 : diffusions =====
+        case 'record_diffusion': {
+          (state.diffusionCalls ||= []).push(a);
+          const demo = t.demos.find((x) => x.id === a.p_demo);
+          const list = (t.diffusions ||= []);
+          const now = new Date().toISOString();
+          let row = list.find((x) => x.demo_id === a.p_demo && x.kind === a.p_kind && x.label === a.p_label);
+          if (row) Object.assign(row, { settings: a.p_settings || {}, last_at: now, uses: row.uses + 1 });
+          else {
+            row = {
+              id: crypto.randomUUID(),
+              workspace_id: demo.workspace_id,
+              demo_id: a.p_demo,
+              kind: a.p_kind,
+              label: a.p_label,
+              settings: a.p_settings || {},
+              created_by: state.user.id,
+              first_at: now,
+              last_at: now,
+              uses: 1,
+            };
+            list.push(row);
+          }
+          row.version_id = demo.current_version_id;
+          return json(route, 200, row.id);
+        }
+        case 'demo_embed_views':
+          return json(route, 200, state.embedViews || []);
         // ===== L23 : webhooks =====
         case 'webhook_create': {
           const n = (t.webhooks || []).filter((w) => w.workspace_id === a.p_ws).length;
@@ -1001,10 +1029,11 @@ async function install(page, state = seed()) {
     }
     if (p.startsWith('/storage/v1/object/sign/') && method === 'POST') {
       const paths = body.paths || [];
+      const bucket = p.slice('/storage/v1/object/sign/'.length).split('/')[0] || 'captures';
       return json(
         route,
         200,
-        paths.map((x) => ({ path: x, signedURL: `/object/sign/captures/${x}?token=t`, error: null })),
+        paths.map((x) => ({ path: x, signedURL: `/object/sign/${bucket}/${x}?token=t`, error: null })),
       );
     }
     if (p.startsWith('/storage/v1/object/copy')) return json(route, 200, { Key: body.destinationKey });
@@ -1015,6 +1044,17 @@ async function install(page, state = seed()) {
         req.headers()['content-type'] || '',
       );
       return json(route, 200, { Key: key, Id: 'x' });
+    }
+    // L16 : fichier déposé dans le faux Storage (ex. manifeste publié vN.json), sinon image fixture
+    const stored = /^\/storage\/v1\/object\/(?:sign\/|public\/)?(.+)$/.exec(p);
+    if (stored && state.storage[decodeURIComponent(stored[1])]) {
+      const f = state.storage[decodeURIComponent(stored[1])];
+      return route.fulfill({
+        status: 200,
+        contentType: f.type,
+        body: f.data,
+        headers: { 'access-control-allow-origin': '*' },
+      });
     }
     if (p.startsWith('/storage/v1/object/'))
       return route.fulfill({

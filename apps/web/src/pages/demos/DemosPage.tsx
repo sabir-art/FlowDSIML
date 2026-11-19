@@ -2,32 +2,33 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  X,
   Archive,
-  LayoutGrid,
-  List,
-  Link2,
   ArrowUpRight,
   BarChart3,
   Check,
-  Eye,
-  Mail,
-  Route,
-  Users,
   Copy,
   Download,
-  Presentation,
+  Eye,
   Folder,
   FolderInput,
   FolderOpen,
   FolderPlus,
   Layers,
+  LayoutGrid,
+  Link2,
+  List,
+  Mail,
   Pencil,
   Plus,
+  Presentation,
+  Route,
   Search,
+  Send,
   Share2,
   Tag,
   Trash2,
+  Users,
+  X,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Card, Select } from '@flowdsiml/ui';
@@ -44,6 +45,7 @@ import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
 import { NewDemoDialog } from './NewDemoDialog';
 import { ExportDialog } from '../export/ExportDialog';
+import { DistributeDialog } from '../share/DistributeDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
@@ -102,6 +104,7 @@ export function DemosPage() {
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const [toDelete, setToDelete] = useState<Demo | null>(null);
   const [exporting, setExporting] = useState<string | null>(null);
+  const [distributing, setDistributing] = useState<string | null>(null);
   const [folderToDelete, setFolderToDelete] = useState<FolderRow | null>(null);
   const [moving, setMoving] = useState<Demo | null>(null);
   // L12-07 : étiquettes des démos (filtre, pastilles, menu de la carte)
@@ -297,6 +300,9 @@ export function DemosPage() {
       onSelect: () => navigate(`/demos/${d.id}/edit?present=1`),
     },
     { label: t('editor.share'), icon: <Share2 />, onSelect: () => navigate(`/demos/${d.id}/share`) },
+    ...(can('demo.edit') && d.status !== 'archived'
+      ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(d.id) }]
+      : []),
     { label: t('nav.analytics'), icon: <BarChart3 />, onSelect: () => navigate(`/demos/${d.id}/analytics`) },
     { label: t('export.menu'), icon: <Download />, onSelect: () => setExporting(d.id) },
     {
@@ -353,6 +359,7 @@ export function DemosPage() {
   return (
     <div className="stack page-wide">
       {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
+      {distributing && <DistributeDialog demoId={distributing} onClose={() => setDistributing(null)} />}
       <header className="page-head page-head--refonte">
         <div className="page-head__titles">
           <h1>{t('demos.title')}</h1>

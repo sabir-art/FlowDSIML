@@ -245,7 +245,7 @@ export function StartScreen({
         </span>
         <h1>{title}</h1>
         <button type="button" class="p-btn p-btn-primary" onClick={onStart} autoFocus>
-          {t.start}
+          {t.launch}
           <ArrowRight size={16} aria-hidden="true" />
         </button>
       </div>

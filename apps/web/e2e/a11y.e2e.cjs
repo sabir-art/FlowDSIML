@@ -21,6 +21,30 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 const BLOCKING = new Set(['serious', 'critical']);
 const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' };
 
+/** L16 : démo publiée et une diffusion SCORM d'une version ancienne (données fictives). */
+function seedDiffusion(d) {
+  seedExport(d, { steps: 3 });
+  const v = d.tables.demo_versions.find((x) => x.id === d.tables.demos[0].current_version_id);
+  d.tables.demos[0].updated_at = v.published_at;
+  d.tables.training_centers = [];
+  d.tables.diffusions = [
+    {
+      id: 'df-1',
+      workspace_id: d.tables.workspaces[0].id,
+      demo_id: DEMO,
+      kind: 'scorm',
+      label: 'SCORM 1.2 · v2',
+      settings: { version: '1.2', pass: { kind: 'steps' }, stats: false, number: 2 },
+      version_id: 'v-ancienne',
+      created_by: null,
+      first_at: v.published_at,
+      last_at: v.published_at,
+      uses: 1,
+    },
+  ];
+  d.embedViews = [{ origin: 'https://intranet.acme.example', views: 312, last_at: v.published_at }];
+}
+
 /** L23 : un webhook actif et deux envois (données fictives). */
 function seedWebhooks(d) {
   const ws = d.tables.workspaces[0].id;
@@ -112,6 +136,19 @@ const APP_PAGES = [
   { name: 'Marque', route: '/#/settings/brand' },
   { name: 'Variables', route: '/#/settings/variables' },
   { name: 'Intégrations', route: '/#/settings/integrations', seed: seedWebhooks },
+  // L16 : modale « Diffuser » (onglets SCORM, Intranet, E-mail, Où elle est diffusée)
+  ...['SCORM', 'Intranet', 'E-mail', 'Où elle est diffusée'].map((c) => ({
+    name: `Diffuser · ${c}`,
+    route: `/#/demos/${DEMO}/distribute`,
+    seed: seedDiffusion,
+    open: async (p) => {
+      await p.waitForSelector('dialog.dif-dialog[open] .dif-sub');
+      await p
+        .locator('dialog.dif-dialog[open]')
+        .getByRole('tab', { name: new RegExp(`^${c}`) })
+        .click();
+    },
+  })),
   {
     name: 'Intégrations · ajout',
     route: '/#/settings/integrations',

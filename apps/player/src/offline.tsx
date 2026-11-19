@@ -10,13 +10,15 @@ import type { TrackerLike } from './api';
 import { randomId, resolveAssets } from './logic';
 import { scoreQuiz } from './quizScore';
 import { sha256Hex } from './sha256';
-import { findApi, ScormSession, type ScormVersion } from './scorm';
+import { findApi, ScormSession, type PassCriterion, type ScormVersion } from './scorm';
 import '@flowdsiml/player-core/player-core.css';
 import './player.css';
 
 export interface PackageConfig {
   manifest: unknown;
   scorm: ScormVersion;
+  /** Critère de réussite (« toutes les étapes vues » par défaut). */
+  pass?: PassCriterion;
   /** Option de l'export : suivi TutoClick en plus du LMS (désactivé par défaut). */
   stats: { trackUrl: string } | null;
   locale?: 'fr' | 'en';
@@ -83,7 +85,7 @@ async function boot() {
   const manifest = resolveAssets(parseManifest(cfg.manifest), '');
   document.title = manifest.title;
   document.documentElement.lang = cfg.locale ?? manifest.locale;
-  const lms = new ScormSession(cfg.scorm, findApi(cfg.scorm));
+  const lms = new ScormSession(cfg.scorm, findApi(cfg.scorm), cfg.pass ?? { kind: 'steps' });
   const state = lms.init();
   // Apprenant LMS : identifiant haché, calculé seulement si les statistiques sont envoyées (jamais en
   // clair vers TutoClick) ; sinon identifiant aléatoire
@@ -103,7 +105,7 @@ async function boot() {
       startStep={state.resumeStep ?? undefined}
       scoreQuiz={async (answers, attemptsUsed) => {
         const res = scoreQuiz(manifest.quiz!, answers, attemptsUsed);
-        lms.quiz(res.score, res.passed);
+        lms.quiz(res.score);
         return res;
       }}
       onLead={async () => undefined}

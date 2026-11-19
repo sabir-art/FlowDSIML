@@ -6,22 +6,23 @@ import {
   CheckCircle2,
   Clock,
   Copy,
-  Download,
   Crop,
+  Download,
   Droplet,
   GraduationCap,
   Image as ImageIcon,
   Keyboard,
-  Search,
+  Monitor,
   Palette,
   PenLine,
+  Presentation,
   Redo2,
+  Search,
+  Send,
   Share2,
   Target,
   Undo2,
   ZoomIn,
-  Monitor,
-  Presentation,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '../../components/Toast';
@@ -51,6 +52,7 @@ import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
 import { PreviewDialog } from './PreviewDialog';
 import { ExportDialog } from '../export/ExportDialog';
+import { DistributeDialog } from '../share/DistributeDialog';
 import { PresentDialog } from '../present/PresentDialog';
 import { FindBar } from './FindBar';
 import { ShortcutsDialog, isMac } from './ShortcutsDialog';
@@ -162,6 +164,8 @@ export function EditorPage() {
   const [zoom, setZoom] = useState<Zoom>('fit');
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  // L16 : « Diffuser » (menu « … », aussi ouvert par #/demos/:id/distribute → ?distribute=1)
+  const [distributing, setDistributing] = useState(() => params.get('distribute') === '1');
   // L22-02 : « Présenter » (aussi ouvert depuis le menu d'une démo par ?present=1)
   // L22-05 : lien d'une notification (?step=…&comment=…) → étape choisie une fois chargée
   const focusStep = params.get('step');
@@ -405,6 +409,9 @@ export function EditorPage() {
   return (
     <main className="mk ed" id="main">
       {exporting && demoId && <ExportDialog demoId={demoId} onClose={() => setExporting(false)} />}
+      {distributing && demoId && can('demo.edit') && (
+        <DistributeDialog demoId={demoId} onClose={() => setDistributing(false)} />
+      )}
       {presenting && demoId && editor.steps.length > 0 && (
         <PresentDialog
           demoId={demoId}
@@ -506,6 +513,9 @@ export function EditorPage() {
             },
             { label: t('editor.themeOfDemo'), icon: <Palette />, onSelect: () => setTab('design') },
             { label: t('export.menu'), icon: <Download />, onSelect: () => setExporting(true) },
+            ...(can('demo.edit')
+              ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(true) }]
+              : []),
             {
               label: t('editor.quiz.open') + (editor.questions.length ? ` (${editor.questions.length})` : ''),
               icon: <GraduationCap />,

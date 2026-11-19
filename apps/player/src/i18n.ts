@@ -20,6 +20,8 @@ const dict = {
     next: 'Suivant',
     prev: 'Précédent',
     start: 'Commencer',
+    /** L16 : couverture « Démarrer au clic » d'une intégration. */
+    launch: 'Lancer la démo',
     restart: 'Recommencer',
     of: 'sur',
     stepWord: 'Étape',
@@ -268,6 +270,7 @@ const dict = {
     next: 'Next',
     prev: 'Back',
     start: 'Start',
+    launch: 'Launch the demo',
     restart: 'Restart',
     of: 'of',
     stepWord: 'Step',

@@ -3,7 +3,7 @@ import { CenterSettings } from './pages/center/CenterSettings';
 import { LearnersPage } from './pages/learners/LearnersPage';
 import { lazy, Suspense, useEffect } from 'react';
 import { ToastProvider } from './components/Toast';
-import { HashRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { HashRouter, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Alert } from '@flowdsiml/ui';
 import './app.css';
@@ -46,6 +46,11 @@ const AnalyticsPage = lazy(() =>
   import('./pages/analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
 );
 const SharePage = lazy(() => import('./pages/share/SharePage').then((m) => ({ default: m.SharePage })));
+/** L16 : #/demos/:id/distribute ouvre la modale « Diffuser » au-dessus de l'éditeur. */
+function DistributeRoute() {
+  const { demoId = '' } = useParams();
+  return <Navigate replace to={`/demos/${demoId}/edit?distribute=1`} />;
+}
 
 /**
  * Après un lien email (PKCE), Supabase renvoie vers /?code=…&next=/route.
@@ -154,6 +159,7 @@ export function App() {
                 >
                   <Route index element={<DemosPage />} />
                   <Route path="/demos/:demoId/share" element={<SharePage />} />
+                  <Route path="/demos/:demoId/distribute" element={<DistributeRoute />} />
                   <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
                   <Route path="/analytics" element={<AnalyticsPage />} />
                   <Route path="/learners" element={<LearnersPage />} />

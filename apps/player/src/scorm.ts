@@ -1,13 +1,17 @@
 /**
  * L16 : adaptateur SCORM 1.2 et 2004 (4e édition) du lecteur hors ligne.
- * - Statut : « completed » quand la dernière étape est vue ; « passed » ou « failed » selon le quiz
- *   (1.2 : cmi.core.lesson_status ; 2004 : cmi.completion_status + cmi.success_status). Une réussite
- *   n'est jamais rétrogradée et le score envoyé est le meilleur de la session.
+ * - Critère de réussite choisi à l'export :
+ *   - « toutes les étapes vues » : « completed » à la dernière étape ; le quiz n'est pas transmis ;
+ *   - « quiz réussi » avec un score minimum : « passed » ou « failed » et le score (1.2 :
+ *     cmi.core.lesson_status ; 2004 : cmi.success_status, et cmi.completion_status à la dernière étape).
+ *   Une réussite n'est jamais rétrogradée et le score envoyé est le meilleur de la session.
  * - Reprise : étape courante dans cmi.core.lesson_location / cmi.location et cmi.suspend_data.
  * - Temps passé : cmi.core.session_time (HHHH:MM:SS.SS) ou cmi.session_time (durée ISO 8601).
  * Sans LMS (paquet ouvert hors d'une plateforme), l'adaptateur ne fait rien.
  */
 export type ScormVersion = '1.2' | '2004';
+/** Critère de réussite du paquet. */
+export type PassCriterion = { kind: 'steps' } | { kind: 'quiz'; min: number };
 
 interface Api12 {
   LMSInitialize(a: ''): string;
@@ -82,6 +86,7 @@ export class ScormSession {
   constructor(
     readonly version: ScormVersion,
     private readonly api: Api12 | Api2004 | null,
+    private readonly pass: PassCriterion = { kind: 'steps' },
   ) {
     this.active = !!api;
   }
@@ -148,14 +153,17 @@ export class ScormSession {
   complete() {
     if (!this.completed) {
       this.completed = true;
-      if (!this.passed) this.set('cmi.core.lesson_status', null, 'completed');
+      // 1.2 : un seul statut ; avec le critère « quiz », il ne vaut que « passed » ou « failed »
+      if (!this.passed && this.pass.kind === 'steps') this.set('cmi.core.lesson_status', null, 'completed');
       this.set(null, 'cmi.completion_status', 'completed');
     }
     this.commit();
   }
 
-  /** Résultat d'une tentative de quiz (score de 0 à 100). */
-  quiz(score: number, passed: boolean) {
+  /** Résultat d'une tentative de quiz (score de 0 à 100) : transmis seulement avec le critère « quiz ». */
+  quiz(score: number) {
+    if (this.pass.kind !== 'quiz') return;
+    const passed = score >= this.pass.min;
     this.best = Math.max(this.best ?? 0, Math.round(score));
     this.set('cmi.core.score.min', 'cmi.score.min', '0');
     this.set('cmi.core.score.max', 'cmi.score.max', '100');
@@ -175,7 +183,7 @@ export class ScormSession {
     const ms = Date.now() - this.started;
     this.set('cmi.core.session_time', null, time12(ms));
     this.set(null, 'cmi.session_time', time2004(ms));
-    const done = this.passed || (this.completed && this.best === null);
+    const done = this.pass.kind === 'quiz' ? this.passed : this.completed;
     this.set('cmi.core.exit', 'cmi.exit', done ? '' : 'suspend');
     this.commit();
     try {

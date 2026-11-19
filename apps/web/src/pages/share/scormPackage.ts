@@ -10,11 +10,28 @@ import { supabase } from '../../lib/supabase';
 import { SUPABASE_URL } from '../../lib/env';
 
 export type ScormVersion = '1.2' | '2004';
+/** Critère de réussite : toutes les étapes vues (par défaut) ou quiz réussi avec un score minimum. */
+export type PassCriterion = { kind: 'steps' } | { kind: 'quiz'; min: number };
 
 export interface ScormOptions {
   version: ScormVersion;
+  pass: PassCriterion;
   /** Envoyer aussi les statistiques à TutoClick (désactivé par défaut). */
   stats: boolean;
+}
+
+/** Plafond du paquet (spec L16 §4). */
+export const MAX_PACKAGE_BYTES = 500 * 1024 * 1024;
+
+/** Échec de génération, avec la cause affichée (capture illisible : numéro d'étape). */
+export class ScormBuildError extends Error {
+  constructor(
+    readonly code: 'UNPUBLISHED' | 'IMAGE' | 'TOO_BIG' | 'SERVER',
+    /** Capture illisible : numéro de l'étape (à partir de 1) et identifiant (lien vers l'éditeur). */
+    readonly step: { n: number; id: string } | null = null,
+  ) {
+    super(code);
+  }
 }
 
 const xml = (s: string) =>
@@ -112,7 +129,7 @@ export function indexHtml(title: string, lang: string): string {
 
 /** Configuration lue par le lecteur hors ligne (window.TUTOCLICK_PACKAGE). */
 export function packageJs(manifest: Manifest, opts: ScormOptions, trackUrl: string): string {
-  const cfg = { manifest, scorm: opts.version, stats: opts.stats ? { trackUrl } : null };
+  const cfg = { manifest, scorm: opts.version, pass: opts.pass, stats: opts.stats ? { trackUrl } : null };
   return `window.TUTOCLICK_PACKAGE = ${JSON.stringify(cfg)};\n`;
 }
 
@@ -123,39 +140,53 @@ export interface ScormBuild {
   versionNumber: number;
 }
 
-/** Assemble le paquet de la version publiée. `onProgress` : images téléchargées / total. */
+/**
+ * Assemble le paquet de la version publiée. `onProgress` : captures traitées / total (avancement réel).
+ * `signal` : « Annuler la génération ».
+ */
 export async function buildScormPackage(
   demoId: string,
   opts: ScormOptions,
   onProgress?: (done: number, total: number) => void,
+  signal?: AbortSignal,
 ): Promise<ScormBuild> {
+  const stop = () => {
+    if (signal?.aborted) throw new DOMException('Annulé', 'AbortError');
+  };
   const { data: d, error } = await supabase
     .from('demos')
     .select('id, title, status, current_version_id')
     .eq('id', demoId)
     .single();
-  if (error || !d) throw error ?? new Error('NOT_FOUND');
-  if (d.status !== 'published' || !d.current_version_id) throw new Error('UNPUBLISHED');
+  if (error || !d) throw new ScormBuildError('SERVER');
+  if (d.status !== 'published' || !d.current_version_id) throw new ScormBuildError('UNPUBLISHED');
   const v = await supabase.from('demo_versions').select('number').eq('id', d.current_version_id).single();
-  if (v.error || !v.data) throw v.error ?? new Error('NO_VERSION');
+  if (v.error || !v.data) throw new ScormBuildError('SERVER');
   const number = v.data.number ?? 1;
+  stop();
 
-  // Manifeste tel que publié (flous déjà incrustés dans les captures) et captures signées
+  // Manifeste tel que publié (flous déjà incrustés dans les captures, variables par défaut)
   const jsonPath = `${demoId}/v${number}.json`;
   const sig = await supabase.storage.from('published').createSignedUrls([jsonPath], 600);
   const jsonUrl = sig.data?.[0]?.signedUrl;
-  if (!jsonUrl) throw new Error('NO_MANIFEST');
-  const res = await fetch(jsonUrl);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!jsonUrl) throw new ScormBuildError('SERVER');
+  const res = await fetch(jsonUrl, { signal }).catch((e: unknown) => {
+    stop();
+    throw e instanceof ScormBuildError ? e : new ScormBuildError('SERVER');
+  });
+  if (!res.ok) throw new ScormBuildError('SERVER');
   const manifest = parseManifest(await res.json());
-  const images = [
-    ...new Set(
-      manifest.steps
-        .map((s) => s.image?.url)
-        .filter((u): u is string => !!u && !/^(https?:|data:|blob:)/.test(u) && !u.includes('..')),
-    ),
-  ];
+  // Première étape qui utilise chaque capture (cause affichée si elle est illisible)
+  const firstStep = new Map<string, { n: number; id: string }>();
+  manifest.steps.forEach((s, i) => {
+    const u = s.image?.url;
+    if (u && !/^(https?:|data:|blob:)/.test(u) && !u.includes('..') && !firstStep.has(u))
+      firstStep.set(u, { n: i + 1, id: s.id });
+  });
+  const images = [...firstStep.keys()];
   const files: Zippable = {};
+  let total = 0;
+  onProgress?.(0, images.length);
   if (images.length) {
     const { data } = await supabase.storage.from('published').createSignedUrls(
       images.map((p) => `${demoId}/${p}`),
@@ -164,18 +195,33 @@ export async function buildScormPackage(
     const urls = new Map((data ?? []).map((s) => [s.path?.slice(demoId.length + 1), s.signedUrl]));
     let done = 0;
     for (const p of images) {
+      stop();
       const u = urls.get(p);
-      if (!u) throw new Error('NO_IMAGE');
-      const r = await fetch(u);
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      if (!u) throw new ScormBuildError('IMAGE', firstStep.get(p));
+      const r = await fetch(u, { signal }).catch(() => null);
+      stop();
+      if (!r || !r.ok) throw new ScormBuildError(r && r.status >= 500 ? 'SERVER' : 'IMAGE', firstStep.get(p));
+      const blob = await r.blob();
+      // Capture illisible : vide, autre chose qu'une image, ou impossible à décoder
+      const readable =
+        blob.size > 0 &&
+        (await createImageBitmap(blob).then(
+          (b) => (b.close(), true),
+          () => false,
+        ));
+      if (!readable) throw new ScormBuildError('IMAGE', firstStep.get(p));
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      total += bytes.length;
+      if (total > MAX_PACKAGE_BYTES) throw new ScormBuildError('TOO_BIG');
       // Images déjà compressées : stockées telles quelles
-      files[p] = [new Uint8Array(await r.arrayBuffer()), { level: 0 }];
+      files[p] = [bytes, { level: 0 }];
       onProgress?.(++done, images.length);
     }
   }
 
   const { js, css } = await import('virtual:tutoclick-offline');
-  const mastery = manifest.quiz && manifest.quiz.mode === 'quiz' ? manifest.quiz.threshold : null;
+  stop();
+  const mastery = opts.pass.kind === 'quiz' ? opts.pass.min : null;
   files['index.html'] = strToU8(indexHtml(manifest.title || d.title, manifest.locale));
   files['package.js'] = strToU8(
     packageJs(manifest, opts, `${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/track`),
@@ -190,8 +236,10 @@ export async function buildScormPackage(
       mastery,
     }),
   );
+  const bytes = zipSync(files, { level: 6 });
+  if (bytes.length > MAX_PACKAGE_BYTES) throw new ScormBuildError('TOO_BIG');
   return {
-    bytes: zipSync(files, { level: 6 }),
+    bytes,
     name: scormFileName(manifest.title || d.title, opts.version),
     versionId: d.current_version_id,
     versionNumber: number,

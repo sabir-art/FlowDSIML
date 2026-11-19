@@ -46,11 +46,15 @@ describe('paquet SCORM', () => {
 
   it('package.js : statistiques désactivées par défaut', () => {
     const m = { demoId: 'd' } as never;
-    expect(packageJs(m, { version: '1.2', stats: false }, 'https://x.example/track')).toContain(
-      '"stats":null',
-    );
-    expect(packageJs(m, { version: '2004', stats: true }, 'https://x.example/track')).toContain(
-      '"stats":{"trackUrl":"https://x.example/track"}',
-    );
+    expect(
+      packageJs(m, { version: '1.2', pass: { kind: 'steps' }, stats: false }, 'https://x.example/track'),
+    ).toContain('"pass":{"kind":"steps"},"stats":null');
+    expect(
+      packageJs(
+        m,
+        { version: '2004', pass: { kind: 'quiz', min: 80 }, stats: true },
+        'https://x.example/track',
+      ),
+    ).toContain('"pass":{"kind":"quiz","min":80},"stats":{"trackUrl":"https://x.example/track"}');
   });
 });
