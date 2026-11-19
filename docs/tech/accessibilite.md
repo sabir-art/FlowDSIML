@@ -104,3 +104,7 @@ Autre amélioration demandée par le chef : sur l'attestation (L15-07), le centr
   - télécommande : code lu chiffre par chiffre, cibles de 64 px ;
   - « Prise en main » : Réduire avec `aria-expanded` ;
   - suite `a11y-clavier.e2e.cjs` sans échec.
+- **Paramètres > Marque (L27-01 à 05)**, ajoutés à l'audit : page (administrateur et éditeur), modale « Modifier le style », confirmation du style par défaut. 0 violation sérieuse ou critique.
+  - L'aperçu de la modale de style (`aria-hidden`) montre volontairement les couleurs choisies, même sous le seuil : il est exclu de la règle de contraste pour cet état seulement. Le contraste est annoncé en texte sous chaque champ (« Bulle : contraste 1,6:1, insuffisant. ») avec la couleur proposée.
+  - Une action indisponible d'un menu (« Supprimer » sur le style par défaut) reste focalisable en `aria-disabled`, avec son explication reliée par `aria-describedby`.
+  - Les deux contrôles d'une couleur ont des noms distincts : « Couleur principale » (saisie) et « Nuancier : Couleur principale ».

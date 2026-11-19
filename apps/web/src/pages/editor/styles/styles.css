@@ -115,3 +115,14 @@
 .sty-dialog::backdrop {
   background: rgb(12 10 9 / 0.45);
 }
+/* L27 §3.3 : grille de Paramètres > Marque (cartes non cliquables, style par défaut, auteur) */
+.sty-static {
+  cursor: default;
+}
+.sty-card.is-default .sty-btn {
+  border: 2px solid var(--fd-color-primary);
+  padding: 5px;
+}
+.sty-by {
+  font-size: 11px;
+}

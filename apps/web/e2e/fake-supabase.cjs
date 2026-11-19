@@ -24,6 +24,19 @@ function fakeJwt(user) {
 }
 
 /** L26-04 : modèles livrés, lus dans la migration (une seule source). */
+/** L27 : styles livrés, lus dans la migration (identiques à presets.ts). */
+function builtinStyles() {
+  const sql = fs.readFileSync(
+    path.join(__dirname, '../../../supabase/migrations/20261122090000_marque.sql'),
+    'utf8',
+  );
+  const out = {};
+  for (const m of sql.matchAll(/\('([a-z]+)', \d+, '(\{.*?\})'\)/g))
+    out[m[1]] = JSON.parse(m[2].replace(/''/g, "'"));
+  return out;
+}
+let currentUserId = null;
+
 function builtinTemplates() {
   const sql = fs.readFileSync(
     path.join(__dirname, '../../../supabase/migrations/20261121090000_modeles.sql'),
@@ -69,6 +82,8 @@ function seed() {
     slug: 'acme',
     plan_code: 'pro',
     logo_path: null,
+    brand_primary: null,
+    brand_accent: null,
     settings: {},
     visit_measure: true,
     visit_gap_minutes: 30,
@@ -166,7 +181,6 @@ function seed() {
       forms: [],
       quiz_questions: [],
       demo_templates: builtinTemplates(),
-      help_tours: [],
       onboarding_prefs: [],
       learn_progress: [],
       variables: [
@@ -179,7 +193,20 @@ function seed() {
         },
       ],
       folders: [],
-      themes: [],
+      // L27 : ligne du style livré par défaut (« dsi »), comme la création d'un espace
+      themes: [
+        {
+          id: 'th-default',
+          workspace_id: ws.id,
+          name: 'Par défaut',
+          tokens: builtinStyles().dsi,
+          is_default: true,
+          builtin_key: 'dsi',
+          created_by: null,
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+      ],
       share_links: [],
       demo_access: [],
       leads: [
@@ -291,6 +318,7 @@ function matches(row, key, op, val) {
 async function install(page, state = seed()) {
   const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
   const t = state.tables;
+  currentUserId = state.user?.id ?? null;
   const json = (route, status, body, headers = {}) =>
     route.fulfill({
       status,
@@ -649,6 +677,33 @@ async function install(page, state = seed()) {
             leads: (previous ? 0 : 1) * pub,
           });
         }
+        case 'set_default_style': {
+          // L27-03 : style livré (ligne masquée) ou style de l'espace
+          const rows = t.themes.filter((x) => x.workspace_id === a.p_ws);
+          for (const r of rows) r.is_default = false;
+          if (a.p_theme) {
+            t.themes = t.themes.filter((x) => !(x.workspace_id === a.p_ws && x.builtin_key));
+            const r = t.themes.find((x) => x.id === a.p_theme);
+            if (r) r.is_default = true;
+          } else {
+            const tokens = builtinStyles()[a.p_builtin];
+            if (!tokens) return json(route, 400, { code: 'P0001', message: 'NOT_FOUND' });
+            let r = rows.find((x) => x.builtin_key);
+            if (!r)
+              t.themes.push(
+                (r = { id: crypto.randomUUID(), workspace_id: a.p_ws, name: 'Par défaut', created_by: null }),
+              );
+            Object.assign(r, { builtin_key: a.p_builtin, tokens, is_default: true });
+          }
+          return json(route, 200, null);
+        }
+        case 'default_style_impact':
+          return json(
+            route,
+            200,
+            t.demos.filter((d) => d.workspace_id === a.p_ws && !d.deleted_at && !d.settings?.theme?.primary)
+              .length,
+          );
         case 'workspace_onboarding': {
           // L26-01 : étapes fixées par le test (state.onboarding), sinon déduites des données
           const ws = a.p_ws;
@@ -1674,10 +1729,12 @@ async function install(page, state = seed()) {
           headers: { 'access-control-allow-origin': '*' },
         });
       if (!f) return json(route, 400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
+      // Corps multipart non transmis par Playwright : image fixture à la place (logo de la marque…)
+      const empty = !f.data?.length && /^image\//.test(f.type || '');
       return route.fulfill({
         status: 200,
-        contentType: f.type,
-        body: f.data,
+        contentType: empty ? 'image/png' : f.type,
+        body: empty ? png : f.data,
         headers: { 'access-control-allow-origin': '*' },
       });
     }
@@ -1785,6 +1842,8 @@ function parseUpload(buf, contentType) {
 }
 
 function defaults(table, r) {
+  if (table === 'themes')
+    return { is_default: false, builtin_key: null, created_by: currentUserId, tokens: {} };
   if (table === 'demos')
     return {
       status: 'draft',

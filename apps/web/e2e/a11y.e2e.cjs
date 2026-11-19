@@ -385,6 +385,35 @@ const APP_PAGES = [
   { name: 'Plans', route: '/#/settings/plans' },
   { name: 'Marque', route: '/#/settings/brand' },
   {
+    name: 'Marque · modifier le style',
+    route: '/#/settings/brand',
+    // L27 §3.4 : l'aperçu (aria-hidden) montre volontairement les couleurs choisies, même sous le seuil ;
+    // le contraste est annoncé en texte à côté du champ (alerte et couleur proposée).
+    exclude: '.br-sd-preview',
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Nouveau style' }).click();
+      await p.getByRole('textbox', { name: 'Texte de la bulle', exact: true }).fill('#C8CCD2');
+      await p.keyboard.press('Tab');
+      await p.waitForSelector('dialog[open] .alert');
+    },
+  },
+  {
+    name: 'Marque · style par défaut',
+    route: '/#/settings/brand',
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Actions pour Nuit' }).click();
+      await p.getByRole('menuitem', { name: 'Définir par défaut' }).click();
+      await p.waitForSelector('dialog[open]');
+    },
+  },
+  {
+    name: 'Marque · éditeur',
+    route: '/#/settings/brand',
+    seed: (d) => {
+      d.tables.members[0].role = 'editor';
+    },
+  },
+  {
     name: 'Médiathèque',
     route: '/#/settings/brand',
     open: async (p) => {
@@ -483,8 +512,10 @@ const PLAYER_PAGES = [
   { name: 'Centre · mot de passe', path: '/c/ml-exemple', center: () => ({ status: 'password_required' }) },
 ];
 
-async function audit(page) {
-  const r = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+async function audit(page, exclude) {
+  let builder = new AxeBuilder({ page }).withTags(TAGS);
+  if (exclude) builder = builder.exclude(exclude);
+  const r = await builder.analyze();
   return r.violations.map((v) => ({
     id: v.id,
     impact: v.impact,
@@ -518,7 +549,7 @@ async function appPage(b, s, theme) {
   await p.waitForTimeout(1500);
   if (s.open) await s.open(p);
   await p.waitForTimeout(300);
-  const v = await audit(p);
+  const v = await audit(p, s.exclude);
   await ctx.close();
   return v;
 }

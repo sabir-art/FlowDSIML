@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { contrastRatio } from '../../../lib/contrast';
 import { PRESETS, asStyleTokens, sameTokens } from './presets';
@@ -17,5 +19,19 @@ describe('styles prédéfinis', () => {
       primary: '#123456',
       radius: 20,
     });
+  });
+});
+
+describe('styles livrés en base', () => {
+  it('builtin_styles (migration) = PRESETS', () => {
+    const sql = readFileSync(
+      resolve(__dirname, '../../../../../../supabase/migrations/20261122090000_marque.sql'),
+      'utf8',
+    );
+    for (const p of PRESETS) {
+      const m = new RegExp(`\\('${p.id}', \\d+, '(\\{.*?\\})'\\)`).exec(sql);
+      expect(m, p.id).not.toBeNull();
+      expect(JSON.parse(m![1]!.replace(/''/g, "'"))).toEqual(p.tokens);
+    }
   });
 });

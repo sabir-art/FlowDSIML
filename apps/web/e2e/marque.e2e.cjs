@@ -1,0 +1,302 @@
+/**
+ * L27-01 à L27-05 : Paramètres > Marque. Logo (formats, deux fonds), couleurs de la marque (contraste,
+ * couleur proposée), styles livrés et styles de l'espace (création, contraste, défaut, suppression avec
+ * Annuler, renommage en place), droits de l'éditeur. Données fictives (« Acme », .example).
+ * Usage : SHOTS_DIR=… [THEME=dark] node e2e/marque.e2e.cjs
+ */
+const path = require('path');
+const { chromium } = require('playwright');
+const { install, seed } = require('./fake-supabase.cjs');
+const { sfx, themedContext } = require('./_theme.cjs');
+const APP = process.env.APP_URL || 'http://localhost:5173';
+const SHOTS = process.env.SHOTS_DIR;
+const CAMILLE = '00000000-0000-4000-8000-0000000000c1';
+const sp = (s) => (s || '').replace(/[  ]/g, ' ');
+
+(async () => {
+  const b = await chromium.launch();
+  const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const ok = (c, l) => {
+    console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
+    if (!c) process.exitCode = 1;
+  };
+  const state = seed();
+  const t = state.tables;
+  t.profiles[0].full_name = 'Alice Exemple';
+  t.members.push({ workspace_id: 'ws-1', user_id: CAMILLE, role: 'editor', created_at: '2026-01-02' });
+  state.memberDirectory = { [CAMILLE]: { full_name: 'Camille Fictive', email: 'camille@acme.example' } };
+  t.themes.push({
+    id: 'th-acme',
+    workspace_id: 'ws-1',
+    name: 'Acme bleu',
+    tokens: {
+      primary: '#1D4ED8',
+      onPrimary: '#FFFFFF',
+      hotspot: '#2563EB',
+      background: '#F1F5F9',
+      surface: '#FFFFFF',
+      text: '#0F172A',
+      radius: 10,
+      buttonRadius: 8,
+      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+    },
+    is_default: false,
+    builtin_key: null,
+    created_by: CAMILLE,
+    created_at: '2026-01-03T00:00:00Z',
+    updated_at: '2026-01-03T00:00:00Z',
+  });
+  await install(page, state);
+  const shot = async (name) => {
+    if (!SHOTS) return;
+    // Captures sans toast
+    for (const x of await page.locator('.toast-close').all()) await x.click().catch(() => {});
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(200);
+    const modal = (await page.locator('dialog[open]').count()) > 0;
+    if (modal) return page.screenshot({ path: `${SHOTS}/${name}${sfx}.png` });
+    // Page entière : fenêtre agrandie à la hauteur du contenu (barre latérale collante à sa place)
+    await page.evaluate(() => document.activeElement?.blur?.());
+    const vp = page.viewportSize();
+    const h = await page.evaluate(() => document.documentElement.scrollHeight);
+    await page.setViewportSize({ width: vp.width, height: Math.max(vp.height, h) });
+    await page.waitForTimeout(150);
+    await page.screenshot({ path: `${SHOTS}/${name}${sfx}.png` });
+    await page.setViewportSize(vp);
+  };
+
+  // ===== L27-01 : propriétaire =====
+  await page.goto(`${APP}/#/settings/brand`);
+  const logo = page.getByRole('region', { name: 'Logo' });
+  await logo.waitFor();
+  ok(
+    (await page.locator('.br-card h3').allTextContents()).slice(0, 3).join('|') ===
+      'Logo|Couleurs de la marque|Styles des démos',
+    'trois cartes dans l’ordre',
+  );
+  ok(
+    /Aucun logo\. Le nom de l’espace est affiché à la place\./.test(await logo.innerText()),
+    'logo : état vide',
+  );
+  const file = logo.locator('input[type=file]');
+  await file.setInputFiles({ name: 'logo.gif', mimeType: 'image/gif', buffer: Buffer.from('GIF89a') });
+  ok(
+    (await logo.getByRole('alert').innerText()) ===
+      'Ce format n’est pas accepté. Choisissez un fichier PNG, JPEG, WebP ou SVG.',
+    'logo : format refusé',
+  );
+  await file.setInputFiles({
+    name: 'gros.png',
+    mimeType: 'image/png',
+    buffer: Buffer.alloc(2 * 1024 * 1024 + 1),
+  });
+  ok(sp(await logo.getByRole('alert').innerText()) === 'Le fichier dépasse 2 Mo.', 'logo : 2 Mo au plus');
+  await file.setInputFiles(path.join(__dirname, 'fixture.png'));
+  await logo.getByRole('img', { name: /sur fond sombre/ }).waitFor();
+  ok((await logo.getByRole('img').count()) === 2, 'logo : aperçu sur fond clair et sombre');
+  ok(/^ws-1\/logo-.+\.png$/.test(t.workspaces[0].logo_path || ''), 'logo enregistré dans branding/<espace>/');
+  ok((await logo.getByRole('button', { name: 'Remplacer' }).count()) === 1, 'Remplacer');
+  ok((await logo.getByRole('button', { name: 'Retirer' }).count()) === 1, 'Retirer');
+
+  // Couleurs de la marque
+  const colors = page.getByRole('region', { name: 'Couleurs de la marque' });
+  const primary = colors.getByRole('textbox', { name: 'Couleur principale', exact: true });
+  await primary.fill('#9AD1C8');
+  await primary.blur();
+  const warn = colors.getByRole('status').first();
+  ok(
+    /Contraste avec le blanc : 1,\d:1, insuffisant/.test(sp(await warn.innerText())),
+    'contraste insuffisant annoncé',
+  );
+  await warn.getByRole('button', { name: 'Utiliser cette couleur' }).click();
+  ok(/conforme/.test(sp(await colors.locator('.field').first().innerText())), 'couleur proposée appliquée');
+  await colors.getByRole('button', { name: 'Enregistrer' }).click();
+  await page.waitForTimeout(300);
+  ok(
+    /^#[0-9A-F]{6}$/.test(t.workspaces[0].brand_primary || '') && t.workspaces[0].brand_primary !== '#9AD1C8',
+    'couleurs enregistrées',
+  );
+
+  // Styles
+  const styles = page.getByRole('region', { name: 'Styles des démos' });
+  const builtin = styles.getByRole('list', { name: 'Styles livrés' });
+  const mine = styles.getByRole('list', { name: 'Styles de l’espace' });
+  ok((await builtin.getByRole('listitem').count()) === 6, '6 styles livrés');
+  const current = styles.locator('[aria-current="true"]');
+  ok(
+    (await current.count()) === 1 && /DSI Prune\s*Par défaut/.test(await current.innerText()),
+    'style par défaut : badge et aria-current',
+  );
+  ok(/Créé par Camille Fictive/.test(await mine.innerText()), 'auteur du style');
+  await shot('l27-01-marque');
+
+  // ===== L27-02 : nouveau style =====
+  await styles.getByRole('button', { name: 'Nouveau style' }).click();
+  const dlg = page.getByRole('dialog', { name: 'Nouveau style' });
+  await dlg.waitFor();
+  await dlg.getByLabel('Nom', { exact: true }).fill('acme BLEU');
+  await dlg.getByRole('textbox', { name: 'Texte de la bulle', exact: true }).fill('#C8CCD2');
+  await dlg.getByRole('textbox', { name: 'Texte de la bulle', exact: true }).blur();
+  const bubble = dlg.getByRole('status').filter({ hasText: 'Bulle' });
+  ok(
+    /Bulle : contraste 1,\d:1, insuffisant/.test(sp(await bubble.innerText())),
+    'bulle : contraste insuffisant',
+  );
+  ok(
+    (await dlg.locator('.br-sd-preview').getAttribute('aria-hidden')) === 'true',
+    'aperçu masqué aux lecteurs d’écran',
+  );
+  await shot('l27-02-modifier-style');
+  await dlg.getByRole('button', { name: 'Enregistrer' }).click();
+  ok((await dlg.getByRole('alert').innerText()) === 'Un style porte déjà ce nom.', 'nom déjà pris');
+  await dlg.getByLabel('Nom', { exact: true }).fill('Acme pâle');
+  await dlg.getByRole('button', { name: 'Enregistrer' }).click();
+  await dlg.waitFor({ state: 'detached' });
+  await page.getByText('Style « Acme pâle » enregistré.').waitFor();
+  ok(true, 'toast « Style « Acme pâle » enregistré. »');
+  const pale = mine.getByRole('listitem').filter({ hasText: 'Acme pâle' });
+  ok(/Contraste insuffisant/.test(await pale.innerText()), 'grille : badge « Contraste insuffisant »');
+  ok(t.themes.find((x) => x.name === 'Acme pâle')?.created_by === state.user.id, 'auteur = membre connecté');
+
+  // Dupliquer un style livré
+  await builtin.getByRole('button', { name: 'Actions pour Nuit' }).click();
+  await page.getByRole('menuitem', { name: 'Dupliquer' }).click();
+  const dup = page.getByRole('dialog', { name: 'Dupliquer « Nuit »' });
+  await dup.waitFor();
+  ok(
+    (await dup.getByLabel('Nom', { exact: true }).inputValue()) === 'Nuit (copie)',
+    'duplication : nom proposé',
+  );
+  await page.keyboard.press('Escape');
+  await dup.waitFor({ state: 'detached' });
+
+  // ===== L27-03 : style par défaut =====
+  t.demos[0].settings = { ...(t.demos[0].settings || {}), theme: undefined };
+  await mine.getByRole('button', { name: 'Actions pour Acme bleu' }).click();
+  await page.getByRole('menuitem', { name: 'Définir par défaut' }).click();
+  const conf = page.getByRole('dialog', { name: 'Utiliser « Acme bleu » par défaut ?' });
+  await conf.waitFor();
+  await conf.getByText(/démos? (est|sont) concernées?\./).waitFor();
+  ok(
+    /prochaine publication/.test(await conf.innerText()),
+    'texte : les démos publiées changent à leur prochaine publication (comportement réel)',
+  );
+  await shot('l27-03-style-par-defaut');
+  await conf.getByRole('button', { name: 'Utiliser par défaut' }).click();
+  await page.getByText('« Acme bleu » est le style par défaut.').waitFor();
+  ok(
+    /Acme bleu/.test(await styles.locator('[aria-current="true"]').innerText()) &&
+      t.themes.find((x) => x.id === 'th-acme').is_default,
+    'nouveau style par défaut',
+  );
+
+  // ===== L27-04 : suppression =====
+  await mine.getByRole('button', { name: 'Actions pour Acme bleu' }).click();
+  const delDefault = page.getByRole('menuitem', { name: 'Supprimer' });
+  ok(
+    (await delDefault.getAttribute('aria-disabled')) === 'true' &&
+      (await delDefault.getAttribute('title')) === 'Choisissez d’abord un autre style par défaut.',
+    'style par défaut : « Supprimer » désactivé et expliqué',
+  );
+  await page.keyboard.press('Escape');
+  await pale.getByRole('button', { name: 'Actions pour Acme pâle' }).click();
+  await page.getByRole('menuitem', { name: 'Supprimer' }).click();
+  const del = page.getByRole('dialog', { name: 'Supprimer « Acme pâle » ?' });
+  await del.waitFor();
+  await shot('l27-04-supprimer-style');
+  await del.getByRole('button', { name: 'Supprimer' }).click();
+  await page.getByText('Style supprimé.').waitFor();
+  ok(!t.themes.some((x) => x.name === 'Acme pâle'), 'style supprimé');
+  await page.getByRole('button', { name: 'Annuler' }).click();
+  await mine.getByText('Acme pâle').waitFor();
+  ok(
+    t.themes.some((x) => x.name === 'Acme pâle'),
+    'Annuler : style rétabli',
+  );
+
+  // Renommer en place : Entrée valide, Échap annule
+  await pale.getByRole('button', { name: 'Actions pour Acme pâle' }).click();
+  await page.getByRole('menuitem', { name: 'Renommer' }).click();
+  const rn = page.getByRole('textbox', { name: 'Nouveau nom de « Acme pâle »' });
+  await rn.fill('Acme bleu');
+  await rn.press('Enter');
+  ok((await mine.getByRole('alert').innerText()) === 'Un style porte déjà ce nom.', 'renommer : nom pris');
+  await rn.press('Escape');
+  ok((await rn.count()) === 0 && (await mine.getByText('Acme pâle').count()) === 1, 'Échap annule');
+  await pale.getByRole('button', { name: 'Actions pour Acme pâle' }).click();
+  await page.getByRole('menuitem', { name: 'Renommer' }).click();
+  await page.getByRole('textbox', { name: 'Nouveau nom de « Acme pâle »' }).fill('Acme clair');
+  await page.keyboard.press('Enter');
+  await mine.getByText('Acme clair').waitFor();
+  ok(
+    t.themes.some((x) => x.name === 'Acme clair'),
+    'Entrée valide le nouveau nom',
+  );
+
+  // ===== L27-05 : éditeur =====
+  t.members[0].role = 'editor';
+  await page.reload();
+  await styles.waitFor();
+  ok(
+    (await page.getByRole('note').innerText()) ===
+      'Seuls les propriétaires et administrateurs modifient la marque et le style par défaut.',
+    'éditeur : bandeau d’information',
+  );
+  ok(
+    (await logo.getByRole('button', { name: /Remplacer|Retirer/ }).count()) === 0,
+    'éditeur : logo en lecture',
+  );
+  ok(
+    (await colors.getByRole('button', { name: 'Enregistrer' }).count()) === 0 &&
+      (await colors
+        .getByRole('textbox', { name: 'Couleur principale', exact: true })
+        .getAttribute('readonly')) !== null,
+    'éditeur : couleurs en lecture seule',
+  );
+  ok(
+    (await styles.getByRole('button', { name: 'Nouveau style' }).count()) === 1,
+    'éditeur : « Nouveau style »',
+  );
+  await mine.getByRole('button', { name: 'Actions pour Acme bleu' }).click();
+  ok(
+    (await page.getByRole('menuitem').allTextContents()).join('|') === 'Dupliquer',
+    'style d’un autre membre : « Dupliquer » seulement',
+  );
+  await page.keyboard.press('Escape');
+  await mine.getByRole('button', { name: 'Actions pour Acme clair' }).click();
+  ok(
+    (await page.getByRole('menuitem').allTextContents()).join('|') === 'Modifier|Renommer|Dupliquer',
+    'son propre style : Modifier, Renommer, Dupliquer (ni défaut ni suppression)',
+  );
+  await page.keyboard.press('Escape');
+  await builtin.getByRole('button', { name: 'Actions pour Vert DSI' }).click();
+  ok(
+    (await page.getByRole('menuitem').allTextContents()).join('|') === 'Dupliquer',
+    'style livré : Dupliquer',
+  );
+  await page.keyboard.press('Escape');
+  await shot('l27-05-marque-editeur');
+
+  // 390 px : une colonne
+  await page.setViewportSize({ width: 390, height: 844 });
+  const cols = await page
+    .locator('.br-grid')
+    .first()
+    .evaluate((g) => getComputedStyle(g).gridTemplateColumns.split(' ').length);
+  ok(cols === 1, `390 px : une colonne (${cols})`);
+  await page.setViewportSize({ width: 1024, height: 800 });
+  const cols2 = await page
+    .locator('.br-grid')
+    .first()
+    .evaluate((g) => getComputedStyle(g).gridTemplateColumns.split(' ').length);
+  ok(cols2 === 2, `1 024 px : deux colonnes (${cols2})`);
+
+  ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
+  await b.close();
+})().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

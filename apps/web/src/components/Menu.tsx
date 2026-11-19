@@ -23,6 +23,11 @@ export interface MenuItem {
   end?: ReactNode;
   /** Élément actif (aria-current), ex. workspace courant. */
   current?: boolean;
+  /**
+   * L27 : explication d'un élément indisponible. Avec `disabled`, l'élément reste focalisable
+   * (aria-disabled) et l'explication est reliée par aria-describedby et affichée en infobulle.
+   */
+  hint?: string;
 }
 
 /** Au-delà de ce nombre d'éléments, le menu s'affiche en feuille du bas sous 480 px (§15.7). */
@@ -226,10 +231,14 @@ export function Menu({
                   type="button"
                   role="menuitem"
                   className={`menu-item${it.danger ? ' menu-item--danger' : ''}`}
-                  disabled={it.disabled}
+                  disabled={it.disabled && !it.hint}
+                  aria-disabled={it.disabled && it.hint ? 'true' : undefined}
+                  aria-describedby={it.disabled && it.hint ? `${id}-h${i}` : undefined}
+                  title={it.disabled && it.hint ? it.hint : undefined}
                   aria-current={it.current ? 'true' : undefined}
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (it.disabled) return;
                     close(true);
                     it.onSelect();
                   }}
@@ -241,6 +250,11 @@ export function Menu({
                   )}
                   {it.label}
                   {it.end && <span className="menu-item__end">{it.end}</span>}
+                  {it.disabled && it.hint && (
+                    <span id={`${id}-h${i}`} className="sr-only">
+                      {it.hint}
+                    </span>
+                  )}
                 </button>
               ),
             )}

@@ -1069,11 +1069,11 @@ export type Database = {
         };
         Relationships: [];
       };
-      help_tours: {
-        Row: { demo_id: string; key: string; steps: number; title: string; updated_at: string };
+      builtin_styles: {
+        Row: { key: string; sort: number; tokens: NonNullable<Json> };
         ComputedFields: never;
-        Insert: { demo_id: string; key: string; steps?: number; title?: string; updated_at?: string };
-        Update: { demo_id?: string; key?: string; steps?: number; title?: string; updated_at?: string };
+        Insert: { key: string; sort: number; tokens: NonNullable<Json> };
+        Update: { key?: string; sort?: number; tokens?: NonNullable<Json> };
         Relationships: [];
       };
       learn_progress: {
@@ -1944,7 +1944,9 @@ export type Database = {
       };
       themes: {
         Row: {
+          builtin_key: string | null;
           created_at: string;
+          created_by: string | null;
           id: string;
           is_default: boolean;
           name: string;
@@ -1954,7 +1956,9 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          builtin_key?: string | null;
           created_at?: string;
+          created_by?: string | null;
           id?: string;
           is_default?: boolean;
           name?: string;
@@ -1963,7 +1967,9 @@ export type Database = {
           workspace_id: string;
         };
         Update: {
+          builtin_key?: string | null;
           created_at?: string;
+          created_by?: string | null;
           id?: string;
           is_default?: boolean;
           name?: string;
@@ -2107,6 +2113,8 @@ export type Database = {
           created_by: string | null;
           id: string;
           logo_path: string | null;
+          brand_primary: string | null;
+          brand_accent: string | null;
           name: string;
           plan_code: string;
           public_links_enabled: boolean;
@@ -2122,6 +2130,8 @@ export type Database = {
           created_by?: string | null;
           id?: string;
           logo_path?: string | null;
+          brand_primary?: string | null;
+          brand_accent?: string | null;
           name: string;
           plan_code?: string;
           public_links_enabled?: boolean;
@@ -2136,6 +2146,8 @@ export type Database = {
           created_by?: string | null;
           id?: string;
           logo_path?: string | null;
+          brand_primary?: string | null;
+          brand_accent?: string | null;
           name?: string;
           plan_code?: string;
           public_links_enabled?: boolean;
@@ -2277,6 +2289,11 @@ export type Database = {
       present_remote_end: { Args: { p_id: string }; Returns: undefined };
       extension_seen: { Args: Record<PropertyKey, never>; Returns: undefined };
       workspace_onboarding: { Args: { p_ws: string }; Returns: Json };
+      set_default_style: {
+        Args: { p_ws: string; p_builtin?: string | null; p_theme?: string | null };
+        Returns: undefined;
+      };
+      default_style_impact: { Args: { p_ws: string }; Returns: number };
       template_set_images: { Args: { p_template: string; p_map: Json }; Returns: undefined };
       help_feedback: { Args: { p_article: string; p_helpful: boolean }; Returns: undefined };
       save_demo_as_template: {

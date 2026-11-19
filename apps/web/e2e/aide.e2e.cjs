@@ -26,12 +26,6 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     ...(state.tables.workspaces[0].settings || {}),
     helpContact: 'support@acme.example',
   };
-  state.tables.help_tours.push({
-    key: 'demos',
-    demo_id: DEMO,
-    title: 'Visite : la liste des démos',
-    steps: 5,
-  });
   await install(page, state);
 
   // ===== L26-02 : ouverture par le bouton =====

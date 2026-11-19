@@ -142,3 +142,21 @@ export function asStyleTokens(v: unknown): StyleTokens {
   }
   return out as StyleTokens;
 }
+
+/** Polices proposées par l'onglet Design (et la modale de style, L27 §3.4). */
+export const FONTS = [
+  "'Plus Jakarta Sans', system-ui, sans-serif",
+  "'Instrument Sans', system-ui, sans-serif",
+  'Inter, system-ui, sans-serif',
+  'system-ui, sans-serif',
+  "Georgia, 'Times New Roman', serif",
+  "'Helvetica Neue', Arial, sans-serif",
+  "'Courier New', monospace",
+];
+
+/** Forme des bulles et boutons (maquette : Carré / Doux / Rond) → rayon du thème. */
+export const SHAPES = [
+  { key: 'square', radius: 0 },
+  { key: 'soft', radius: 10 },
+  { key: 'round', radius: 20 },
+] as const;

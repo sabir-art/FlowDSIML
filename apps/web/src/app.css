@@ -352,7 +352,8 @@
   background: var(--fd-color-surface-hover);
   outline: none;
 }
-.menu-item:disabled {
+.menu-item:disabled,
+.menu-item[aria-disabled='true'] {
   color: var(--fd-color-text-disabled);
   cursor: default;
 }

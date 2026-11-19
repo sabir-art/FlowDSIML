@@ -41,3 +41,32 @@ export function darkenToContrast(hex: string, target = 4.5): string | null {
   }
   return null;
 }
+
+/**
+ * L27 : couleur la plus proche de `fg` (assombrie ou éclaircie par pas de 5 %) qui atteint `target`
+ * contre `bg` ; null si `fg` l'atteint déjà ou si c'est impossible.
+ */
+export function adjustToContrast(fg: string, bg: string, target = 4.5): string | null {
+  const c = channels(fg);
+  if (!c || contrastRatio(fg, bg) >= target) return null;
+  const hex = (v: number[]) =>
+    '#' +
+    v
+      .map((x) =>
+        Math.round(Math.min(255, Math.max(0, x)))
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('')
+      .toUpperCase();
+  for (let k = 0.05; k <= 1.0001; k += 0.05) {
+    const darker = hex(c.map((v) => v * (1 - k)));
+    if (contrastRatio(darker, bg) >= target) return darker;
+    const lighter = hex(c.map((v) => v + (255 - v) * k));
+    if (contrastRatio(lighter, bg) >= target) return lighter;
+  }
+  return null;
+}
+
+/** Rapport de contraste écrit à la française (« 5,2 »). */
+export const ratioText = (r: number) => (Math.floor(r * 10) / 10).toFixed(1).replace('.', ',');

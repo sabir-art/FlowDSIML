@@ -47,7 +47,7 @@ const WebhookDetail = lazy(() =>
   import('./pages/settings/integrations/WebhookDetail').then((m) => ({ default: m.WebhookDetail })),
 );
 const BrandSettings = lazy(() =>
-  import('./pages/settings/SoonSections').then((m) => ({ default: m.BrandSettings })),
+  import('./pages/settings/brand/BrandSettings').then((m) => ({ default: m.BrandSettings })),
 );
 const VariablesSettings = lazy(() =>
   import('./pages/settings/SoonSections').then((m) => ({ default: m.VariablesSettings })),

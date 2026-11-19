@@ -16,29 +16,43 @@ import { check } from '../../../lib/useAction';
 import { Menu } from '../../../components/Menu';
 import { useToast } from '../../../components/Toast';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
+import { useWorkspace } from '../../../workspace/WorkspaceProvider';
+import { useAuth } from '../../../auth/AuthProvider';
 import { PRESETS, asStyleTokens, pickTokens, sameTokens, type StyleTokens } from './presets';
 import './styles.css';
 
 const NAME_MAX = 40;
 type WsStyle = Tables<'themes'>;
 
-function Card({
+/**
+ * Carte d'un style (L18 §4), réutilisée par Paramètres > Marque (L27 §3.3). Sans `onApply`, la carte
+ * n'est pas un bouton (la grille de la marque n'applique rien).
+ */
+export function StyleCard({
   name,
   tokens,
   active,
-  badge,
+  current,
+  badges = [],
+  byline,
   disabled,
   onApply,
   menu,
+  nameSlot,
   sample,
 }: {
   name: string;
   tokens: StyleTokens;
-  active: boolean;
-  badge?: string;
-  disabled: boolean;
-  onApply: () => void;
+  active?: boolean;
+  /** Style par défaut de l'espace (aria-current, bordure). */
+  current?: boolean;
+  badges?: Array<{ text: string; tone?: 'warning' }>;
+  byline?: string;
+  disabled?: boolean;
+  onApply?: () => void;
   menu?: ReactNode;
+  /** Remplace le nom (renommage en place). */
+  nameSlot?: ReactNode;
   sample: { title: string; next: string };
 }) {
   const vars = {
@@ -52,26 +66,51 @@ function Card({
     '--st-br': `${Math.min(tokens.buttonRadius, 99)}px`,
     '--st-font': tokens.fontFamily,
   } as CSSProperties;
-  return (
-    <div className={`sty-card${active ? ' is-active' : ''}`}>
-      <button type="button" className="sty-btn" aria-pressed={active} disabled={disabled} onClick={onApply}>
-        <span className="sty-view" style={vars} aria-hidden="true">
-          <span className="sty-bubble">
-            {sample.title}
-            <span className="sty-cta">{sample.next}</span>
-          </span>
-          <span className="sty-dot" />
+  const body = (
+    <>
+      <span className="sty-view" style={vars} aria-hidden="true">
+        <span className="sty-bubble">
+          {sample.title}
+          <span className="sty-cta">{sample.next}</span>
         </span>
+        <span className="sty-dot" />
+      </span>
+      {nameSlot ?? (
         <span className="sty-name">
           {name}
-          {badge && <span className="badge badge-xs">{badge}</span>}
-        </span>
-        <span className="sty-swatches" aria-hidden="true">
-          {[tokens.primary, tokens.hotspot, tokens.background].map((c, i) => (
-            <span key={i} style={{ background: c }} />
+          {badges.map((b) => (
+            <span key={b.text} className={`badge badge-xs${b.tone ? ` badge-${b.tone}` : ''}`}>
+              {b.text}
+            </span>
           ))}
         </span>
-      </button>
+      )}
+      {byline && <span className="sty-by t-caption muted">{byline}</span>}
+      <span className="sty-swatches" aria-hidden="true">
+        {[tokens.primary, tokens.hotspot, tokens.background].map((c, i) => (
+          <span key={i} style={{ background: c }} />
+        ))}
+      </span>
+    </>
+  );
+  return (
+    <div
+      className={`sty-card${active ? ' is-active' : ''}${current ? ' is-default' : ''}`}
+      aria-current={current ? 'true' : undefined}
+    >
+      {onApply ? (
+        <button
+          type="button"
+          className="sty-btn"
+          aria-pressed={!!active}
+          disabled={disabled}
+          onClick={onApply}
+        >
+          {body}
+        </button>
+      ) : (
+        <div className="sty-btn sty-static">{body}</div>
+      )}
       {menu}
     </div>
   );
@@ -81,6 +120,7 @@ function Card({
  * L18-05 : « Choisir un style » en tête de l'onglet Design. Un clic applique le style à toute la
  * démo (couleurs, forme, police) ; les réglages fins restent modifiables (« Style personnalisé »).
  * Styles du workspace (table themes) : « Enregistrer le style actuel », Renommer, Supprimer.
+ * L27 §2 : renommer = admin ou auteur ; supprimer = admin, sauf le style par défaut.
  */
 export function StylesSection({
   wsId,
@@ -96,14 +136,21 @@ export function StylesSection({
 }) {
   const { t } = useTranslation();
   const toast = useToast();
-  const [mine, setMine] = useState<WsStyle[]>([]);
+  const { can } = useWorkspace();
+  const uid = useAuth().user?.id;
+  const isAdmin = can('workspace.settings');
+  const [all, setAll] = useState<WsStyle[]>([]);
+  // L27 : la ligne du style livré par défaut (builtin_key) n'est pas un style de l'espace
+  const mine = all.filter((m) => !m.builtin_key);
+  const defaultRow = all.find((m) => m.is_default);
+  const defaultKey = defaultRow ? defaultRow.builtin_key : 'dsi';
   const [naming, setNaming] = useState<WsStyle | 'new' | null>(null);
   const [deleting, setDeleting] = useState<WsStyle | null>(null);
   const current = pickTokens(theme);
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('themes').select('*').eq('workspace_id', wsId).order('created_at');
-    setMine(data ?? []);
+    setAll(data ?? []);
   }, [wsId]);
   useEffect(() => {
     void load();
@@ -133,47 +180,55 @@ export function StylesSection({
         {!active && <span className="badge badge-xs sty-custom">{t('editor.styles.custom')}</span>}
       </div>
       <div className="sty-grid" role="group" aria-labelledby="sty-title">
-        {PRESETS.map((p, i) => (
-          <Card
+        {PRESETS.map((p) => (
+          <StyleCard
             key={p.id}
             name={presetName(p.id)}
             tokens={p.tokens}
             active={active === p.id}
-            badge={i === 0 ? t('editor.styles.default') : undefined}
+            badges={defaultKey === p.id ? [{ text: t('editor.styles.default') }] : []}
             disabled={readOnly}
             sample={sample}
             onApply={() => apply(presetName(p.id), p.tokens)}
           />
         ))}
-        {mine.map((m) => (
-          <Card
-            key={m.id}
-            name={m.name}
-            tokens={asStyleTokens(m.tokens)}
-            active={active === m.id}
-            disabled={readOnly}
-            sample={sample}
-            onApply={() => apply(m.name, asStyleTokens(m.tokens))}
-            menu={
-              !readOnly && (
-                <span className="sty-menu">
-                  <Menu
-                    label={t('editor.styles.actionsFor', { name: m.name })}
-                    items={[
-                      { label: t('editor.styles.rename'), icon: <Pencil />, onSelect: () => setNaming(m) },
-                      {
-                        label: t('editor.styles.delete'),
-                        icon: <Trash2 />,
-                        danger: true,
-                        onSelect: () => setDeleting(m),
-                      },
-                    ]}
-                  />
-                </span>
-              )
-            }
-          />
-        ))}
+        {mine.map((m) => {
+          const items = [
+            ...(isAdmin || m.created_by === uid
+              ? [{ label: t('editor.styles.rename'), icon: <Pencil />, onSelect: () => setNaming(m) }]
+              : []),
+            ...(isAdmin && !m.is_default
+              ? [
+                  {
+                    label: t('editor.styles.delete'),
+                    icon: <Trash2 />,
+                    danger: true,
+                    onSelect: () => setDeleting(m),
+                  },
+                ]
+              : []),
+          ];
+          return (
+            <StyleCard
+              key={m.id}
+              name={m.name}
+              tokens={asStyleTokens(m.tokens)}
+              active={active === m.id}
+              badges={m.is_default ? [{ text: t('editor.styles.default') }] : []}
+              disabled={readOnly}
+              sample={sample}
+              onApply={() => apply(m.name, asStyleTokens(m.tokens))}
+              menu={
+                !readOnly &&
+                items.length > 0 && (
+                  <span className="sty-menu">
+                    <Menu label={t('editor.styles.actionsFor', { name: m.name })} items={items} />
+                  </span>
+                )
+              }
+            />
+          );
+        })}
       </div>
       {!readOnly && (
         <button type="button" className="btn btn-secondary btn-sm sty-save" onClick={() => setNaming('new')}>
