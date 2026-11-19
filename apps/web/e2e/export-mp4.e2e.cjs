@@ -146,6 +146,31 @@ const SHOTS = process.env.SHOTS_DIR;
     await p.context().close();
   }
 
+  // ===== Étape vidéo : son et coupes gardés =====
+  {
+    const p = await open({ steps: 1, video: { cuts: [{ from: 2000, to: 10000 }] } });
+    await p.getByRole('radio', { name: /Vidéo MP4/ }).click();
+    await p.getByRole('switch', { name: 'Écran de titre' }).click();
+    // 1 étape × 2,5 s + vidéo gardée (12,008 − 8 s)
+    ok(/^Durée : 6,5 s/.test(await help(p)), `durée : étape vidéo coupée (${await help(p)})`);
+    await p.getByLabel("Format de l'image").selectOption('1280x720');
+    const [d] = await Promise.all([
+      p.waitForEvent('download', { timeout: 120000 }),
+      p.getByRole('button', { name: 'Créer la vidéo' }).click(),
+    ]);
+    await p.waitForSelector('text=Vidéo prête', { timeout: 120000 });
+    const out = process.env.KEEP_MP4_VIDEO || require('path').join(require('os').tmpdir(), 'fd-video.mp4');
+    fs.copyFileSync(await d.path(), out);
+    const buf = fs.readFileSync(out);
+    ok(
+      buf.includes(Buffer.from('soun')) &&
+        (buf.includes(Buffer.from('Opus')) || buf.includes(Buffer.from('mp4a'))),
+      'piste son (AAC, ou Opus si le navigateur n’a pas AAC)',
+    );
+    if (!process.env.KEEP_MP4_VIDEO) fs.unlinkSync(out);
+    await p.context().close();
+  }
+
   // ===== Sans WebCodecs : carte visible, désactivée =====
   {
     const p = await open({}, () => {

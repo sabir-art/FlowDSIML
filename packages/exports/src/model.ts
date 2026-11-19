@@ -23,6 +23,8 @@ export interface ExportStep {
     | { type: 'typing'; text: string; field: { x: number; y: number; w: number; h: number } | null }
     | { type: 'scroll'; direction: 'down' | 'up'; distance: number; duration: number }
     | null;
+  /** L25-11 : étape vidéo (L21) : fichier, durée, passages coupés au montage (ms). */
+  video?: { url: string; durationMs: number; cuts: Array<{ from: number; to: number }> } | null;
   /** L25-05 : capture pleine page (URL lisible), position de départ et hauteur de la fenêtre (px). */
   fullPage?: { url: string; width: number; height: number; top: number; viewportHeight: number } | null;
 }
@@ -60,6 +62,10 @@ export function stepsFromManifest(m: Manifest): ExportStep[] {
     const a = s.kind === 'image' ? s.options?.animation : undefined;
     const fp = s.kind === 'image' ? s.options?.fullPage : undefined;
     return {
+      video:
+        s.kind === 'video' && s.video
+          ? { url: s.video.url, durationMs: s.video.durationMs, cuts: s.video.cuts }
+          : null,
       zoom: s.zoom ? { x: s.zoom.x, y: s.zoom.y, scale: s.zoom.scale } : null,
       animation:
         a?.type === 'typing'

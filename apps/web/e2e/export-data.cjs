@@ -20,7 +20,7 @@ const STEPS = [
   ['Enregistrer la fiche', 'La fiche apparaît dans la liste des usagers.', [0.72, 0.85, 0.2, 0.07]],
 ];
 
-function seedExport(d, { published = true, steps = STEPS.length } = {}) {
+function seedExport(d, { published = true, steps = STEPS.length, video = null } = {}) {
   const t = d.tables;
   const demo = t.demos[0];
   const ws = t.workspaces[0];
@@ -51,6 +51,15 @@ function seedExport(d, { published = true, steps = STEPS.length } = {}) {
       hotspots: [{ id: `h-${i + 1}`, x, y, w, h, title, body }],
     })),
   };
+  // L25-11 : étape vidéo (L21) ajoutée à la fin, servie par le faux Storage (fixture-video.webm)
+  if (video)
+    manifest.steps.push({
+      id: 'st-video',
+      kind: 'video',
+      title: 'Démonstration filmée',
+      video: { url: 'assets/st-video.webm', durationMs: 12008, cuts: video.cuts || [] },
+      hotspots: [],
+    });
   t.demo_versions = (t.demo_versions || []).filter((v) => v.id !== demo.current_version_id);
   t.demo_versions.push({
     id: demo.current_version_id,

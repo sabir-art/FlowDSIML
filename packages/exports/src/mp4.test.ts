@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { MP4_MAX_SECONDS, buildVtt, mp4Duration, planVideo, vttTime, type Mp4Options } from './mp4';
+import {
+  AUDIO_RATE,
+  MP4_MAX_SECONDS,
+  audioTimeline,
+  buildVtt,
+  keptSegments,
+  mp4Duration,
+  planVideo,
+  vttTime,
+  type Mp4Options,
+} from './mp4';
 import type { ExportStep } from './model';
 
 const step = (x: Partial<ExportStep> = {}): ExportStep => ({
@@ -52,5 +62,33 @@ describe('L25-11 : vidéo MP4', () => {
     expect(v.text).toContain('00:00:03.000 --> 00:00:05.500');
     expect(v.text).not.toContain('a --> b');
     expect(vttTime(3723456)).toBe('01:02:03.456');
+  });
+  it('étape vidéo : passages coupés retirés, durée gardée, son à sa place', () => {
+    expect(
+      keptSegments(10000, [
+        { from: 2000, to: 3000 },
+        { from: 8000, to: 12000 },
+        { from: 2500, to: 4000 },
+      ]),
+    ).toEqual([
+      { from: 0, to: 2000 },
+      { from: 4000, to: 8000 },
+    ]);
+    const video = { url: 'v.webm', durationMs: 4000, cuts: [{ from: 1000, to: 2000 }] };
+    const steps = [step(), step({ video, target: null, imageUrl: null })];
+    const oo = o({ to: 1 });
+    expect(mp4Duration(oo, steps)).toBe(8.5);
+    const frames = planVideo(steps, oo);
+    expect(Math.round(frames.reduce((a, f) => a + f.ms, 0))).toBe(8500);
+    const vf = frames.filter((f) => f.src !== undefined);
+    expect(vf[0]!.src).toBe(0);
+    expect(vf.some((f) => f.src! >= 1000 && f.src! < 2000)).toBe(false);
+    // Son : 1 s de silence (titre 3 s + étape 2,5 s), puis le son gardé de la vidéo
+    const ch = new Float32Array(4 * AUDIO_RATE).fill(0.5);
+    const a = audioTimeline(steps, oo, new Map([[1, [ch]]]))!;
+    expect(a[0]!.length).toBe(8.5 * AUDIO_RATE);
+    expect(a[0]![Math.round(5.4 * AUDIO_RATE)]).toBe(0);
+    expect(a[1]![Math.round(5.6 * AUDIO_RATE)]).toBe(0.5);
+    expect(audioTimeline(steps, oo, new Map())).toBeNull();
   });
 });

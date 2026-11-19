@@ -1385,7 +1385,10 @@ async function install(page, state = seed()) {
       });
     }
     // F7 : vidéos (bucket videos, URL signées) : WebM fictif, requêtes partielles comme le stockage
-    if (/^\/storage\/v1\/object\/sign\/videos\//.test(p)) {
+    if (
+      /^\/storage\/v1\/object\/sign\/videos\//.test(p) ||
+      /^\/storage\/v1\/object\/sign\/published\/.+\.webm$/.test(p)
+    ) {
       const webm = require('fs').readFileSync(require('path').join(__dirname, 'fixture-video.webm'));
       const m = /bytes=(\d+)-(\d*)/.exec(req.headers()['range'] || '');
       const cors = { 'access-control-allow-origin': '*', 'accept-ranges': 'bytes' };

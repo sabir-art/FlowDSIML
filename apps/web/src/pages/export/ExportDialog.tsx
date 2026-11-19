@@ -44,6 +44,8 @@ import type { FontFiles } from '@flowdsiml/exports/pdf';
 import {
   MP4_FORMATS,
   MP4_MAX_SECONDS,
+  audioTimeline,
+  AUDIO_RATE,
   buildVtt,
   canEncodeVideo,
   defaultMp4,
@@ -339,12 +341,12 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
     if (!demo) return;
     const o = mp4Opts(demo);
     const total = o.to - o.from + 1;
-    if (mp4Duration(o) > MP4_MAX_SECONDS) {
+    if (mp4Duration(o, demo.steps) > MP4_MAX_SECONDS) {
       setPhase({
         kind: 'error',
         fmt: 'mp4',
         message: t('export.errTooLong', { max: MP4_MAX_SECONDS / 60 }),
-        detail: t('export.errTooLongDetail', { n: mp4Duration(o).toLocaleString(i18n.language) }),
+        detail: t('export.errTooLongDetail', { n: mp4Duration(o, demo.steps).toLocaleString(i18n.language) }),
         fallback: false,
       });
       return;
@@ -356,8 +358,26 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
     run(0, 0);
     try {
       const images = new Map<number, StepImages>();
+      // L25-11 : étapes vidéo (L21) : lecture image par image et son décodé (48 kHz)
+      const steps = demo.steps.slice();
+      const videos = new Map<number, HTMLVideoElement>();
+      const sound = new Map<number, Float32Array[]>();
+      for (let i = o.from; i <= o.to; i++) {
+        const st = steps[i]!;
+        if (!st.video) continue;
+        try {
+          const v = await loadVideo(st.video.url, ac.signal);
+          videos.set(i, v);
+          steps[i] = { ...st, width: v.videoWidth || 1280, height: v.videoHeight || 720 };
+          sound.set(i, await decodeSound(st.video.url, ac.signal));
+        } catch (e) {
+          if (isAbort(e)) throw e;
+          throw new StepImageError(i);
+        }
+      }
       for (let i = o.from; i <= o.to; i++) {
         const st = demo.steps[i]!;
+        if (st.video) continue;
         try {
           images.set(i, {
             img: st.imageUrl ? await fetchBitmap(st.imageUrl, ac.signal, st.crop) : null,
@@ -381,12 +401,22 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
       const ctx = canvas.getContext('2d')!;
       const stageCanvas = new OffscreenCanvas(1, 1);
       const stage = { canvas: stageCanvas, ctx: stageCanvas.getContext('2d')! };
-      const frames = planVideo(demo.steps, o);
+      const vdemo = { ...demo, steps };
+      const frames = planVideo(steps, o);
       const bytes = await encodeMp4({
         canvas,
         frames,
         signal: ac.signal,
-        draw: (k) => drawVideoFrame(ctx, demo, images, frames[k]!, fmtx.w, fmtx.h, o, logo, stage),
+        audio: audioTimeline(steps, o, sound),
+        draw: async (k) => {
+          const f = frames[k]!;
+          const v = f.src !== undefined ? videos.get(f.step) : undefined;
+          if (v) {
+            await seekVideo(v, f.src! / 1000);
+            images.set(f.step, { img: v });
+          }
+          drawVideoFrame(ctx, vdemo, images, f, fmtx.w, fmtx.h, o, logo, stage);
+        },
         progress: (k) => {
           if (k % 10 === 0 || k === frames.length - 1)
             run(1, 15 + Math.round(((k + 1) / frames.length) * 75), frames[k]!.step - o.from + 1);
@@ -402,7 +432,7 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
           type: 'video/mp4',
           bytes,
           meta: [
-            t('export.seconds', { n: mp4Duration(o).toLocaleString(i18n.language) }),
+            t('export.seconds', { n: mp4Duration(o, steps).toLocaleString(i18n.language) }),
             `${fmtx.w.toLocaleString(i18n.language)} × ${fmtx.h.toLocaleString(i18n.language)}`,
             formatSize(bytes.byteLength, i18n.language),
           ].join(' · '),
@@ -411,7 +441,7 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
       if (o.subtitles === 'vtt') {
         run(3, 96, total);
         await tick();
-        const vtt = buildVtt(demo.steps, o);
+        const vtt = buildVtt(steps, o);
         files.push({
           name: fileName(demo.title, i18n.language.startsWith('en') ? 'en.vtt' : 'fr.vtt'),
           kind: 'text',
@@ -1058,7 +1088,9 @@ function Options(p: {
               : p.fmt === 'pdf'
                 ? t('export.helpPdf', { count: p.pages.length })
                 : p.fmt === 'mp4' && p.mp4Opts
-                  ? t('export.helpMp4', { n: mp4Duration(p.mp4Opts).toLocaleString(i18n.language) })
+                  ? t('export.helpMp4', {
+                      n: mp4Duration(p.mp4Opts, demo?.steps).toLocaleString(i18n.language),
+                    })
                   : `${t(gif.loop ? 'export.helpGifLoop' : 'export.helpGifOnce', {
                       n: gifDuration(range, gif.seconds).toLocaleString(i18n.language),
                     })} ${t('export.helpGifLong')}`}
@@ -1199,4 +1231,44 @@ function GifPreview({
       </div>
     </aside>
   );
+}
+
+/** L25-11 : vidéo d'une étape, prête à être lue image par image. */
+function loadVideo(url: string, signal: AbortSignal): Promise<HTMLVideoElement> {
+  return new Promise((resolve, reject) => {
+    const v = document.createElement('video');
+    v.crossOrigin = 'anonymous';
+    v.muted = true;
+    v.preload = 'auto';
+    v.playsInline = true;
+    const done = () => resolve(v);
+    v.addEventListener('loadeddata', done, { once: true });
+    v.addEventListener('error', () => reject(new Error('VIDEO_LOAD')), { once: true });
+    signal.addEventListener('abort', () => reject(new DOMException('Export annulé', 'AbortError')), {
+      once: true,
+    });
+    v.src = url;
+  });
+}
+
+/** Position exacte dans la vidéo (attend l'image). */
+function seekVideo(v: HTMLVideoElement, s: number): Promise<void> {
+  const target = Math.min(Math.max(0, s), Math.max(0, (v.duration || s) - 0.001));
+  if (Math.abs(v.currentTime - target) < 0.0005 && v.readyState >= 2) return Promise.resolve();
+  return new Promise((resolve) => {
+    v.addEventListener('seeked', () => resolve(), { once: true });
+    v.currentTime = target;
+  });
+}
+
+/** Son de la vidéo décodé (48 kHz) ; vide si le fichier n'a pas de son. */
+async function decodeSound(url: string, signal: AbortSignal): Promise<Float32Array[]> {
+  const buf = await (await fetch(url, { signal })).arrayBuffer();
+  const ctx = new OfflineAudioContext(2, 1, AUDIO_RATE);
+  try {
+    const a = await ctx.decodeAudioData(buf);
+    return Array.from({ length: a.numberOfChannels }, (_, c) => a.getChannelData(c));
+  } catch {
+    return [];
+  }
 }

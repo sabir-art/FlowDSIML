@@ -50,10 +50,42 @@ export const defaultMp4 = (device?: 'desktop' | 'mobile'): Omit<Mp4Options, 'fro
 
 export const mp4Format = (f: Mp4Format) => MP4_FORMATS.find((x) => x.key === f)!;
 
-/** Durée calculée (jamais estimée) : étapes × vitesse, plus l'écran de titre. */
-export function mp4Duration(o: Pick<Mp4Options, 'from' | 'to' | 'seconds' | 'title'>): number {
-  const n = Math.max(0, o.to - o.from + 1);
-  return Math.round((n * o.seconds + (o.title ? TITLE_SECONDS : 0)) * 10) / 10;
+/** L21 : passages gardés d'une vidéo (coupes retirées), dans l'ordre (ms). */
+export function keptSegments(durationMs: number, cuts: Array<{ from: number; to: number }>) {
+  const sorted = cuts
+    .map((c) => ({
+      from: Math.max(0, Math.min(c.from, c.to)),
+      to: Math.min(durationMs, Math.max(c.from, c.to)),
+    }))
+    .filter((c) => c.to > c.from)
+    .sort((a, b) => a.from - b.from);
+  const out: Array<{ from: number; to: number }> = [];
+  let at = 0;
+  for (const c of sorted) {
+    if (c.from > at) out.push({ from: at, to: c.from });
+    at = Math.max(at, c.to);
+  }
+  if (at < durationMs) out.push({ from: at, to: durationMs });
+  return out;
+}
+
+/** Durée d'une étape dans la vidéo (ms) : la vitesse, ou la durée gardée d'une étape vidéo. */
+export function stepMs(s: ExportStep | undefined, seconds: number): number {
+  if (s?.video) return keptSegments(s.video.durationMs, s.video.cuts).reduce((a, k) => a + k.to - k.from, 0);
+  return seconds * 1000;
+}
+
+/**
+ * Durée calculée (jamais estimée) : étapes × vitesse (durée gardée pour une étape vidéo), plus
+ * l'écran de titre.
+ */
+export function mp4Duration(
+  o: Pick<Mp4Options, 'from' | 'to' | 'seconds' | 'title'>,
+  steps: ExportStep[] = [],
+): number {
+  let ms = o.title ? TITLE_SECONDS * 1000 : 0;
+  for (let i = o.from; i <= o.to; i++) ms += stepMs(steps[i], o.seconds);
+  return Math.round(ms / 100) / 10;
 }
 
 /** Une image de la vidéo : écran de titre ou étape, avec la phase de l'étape (0 à 1). */
@@ -65,6 +97,8 @@ export interface VideoFrame {
   /** Début et durée (ms). */
   at: number;
   ms: number;
+  /** L25-11 : étape vidéo, position dans le fichier source (ms). */
+  src?: number;
 }
 
 /**
@@ -81,6 +115,13 @@ export function planVideo(steps: ExportStep[], o: Mp4Options): VideoFrame[] {
   if (o.title) push({ kind: 'title', step: o.from, t: 1, ms: TITLE_SECONDS * 1000 });
   for (let i = Math.max(0, o.from); i <= Math.min(o.to, steps.length - 1); i++) {
     const s = steps[i]!;
+    if (s.video) {
+      // Étape vidéo : image par image, passages coupés au montage retirés
+      for (const k of keptSegments(s.video.durationMs, s.video.cuts))
+        for (let t = k.from; t < k.to; t += FRAME_MS)
+          push({ kind: 'step', step: i, t: 1, ms: Math.min(FRAME_MS, k.to - t), src: t });
+      continue;
+    }
     const total = o.seconds * 1000;
     const moving = (o.cursor && !!s.target) || (o.zoom && !!s.zoom) || !!s.animation;
     if (!moving) {
@@ -112,7 +153,7 @@ export function buildVtt(steps: ExportStep[], o: Mp4Options): { text: string; cu
   for (let i = Math.max(0, o.from); i <= Math.min(o.to, steps.length - 1); i++) {
     const s = steps[i]!;
     const text = [s.title, s.text].filter(Boolean).join('\n').replace(/-->/g, '→').trim();
-    const end = at + o.seconds * 1000;
+    const end = at + stepMs(s, o.seconds);
     if (text) {
       cues++;
       lines.push(String(cues), `${vttTime(at)} --> ${vttTime(end)}`, text, '');
@@ -268,6 +309,64 @@ function wrapText(ctx: Ctx, text: string, max: number): string[] {
   return out;
 }
 
+export const AUDIO_RATE = 48000;
+
+/**
+ * L25-11 : piste son de la vidéo (stéréo, 48 kHz) : le son des étapes vidéo à leur place (passages
+ * coupés retirés), silence ailleurs. `decoded` : canaux décodés de chaque étape vidéo.
+ */
+export function audioTimeline(
+  steps: ExportStep[],
+  o: Mp4Options,
+  decoded: Map<number, Float32Array[]>,
+  rate = AUDIO_RATE,
+): Float32Array[] | null {
+  if (![...decoded.values()].some((c) => c.length && c[0]!.length)) return null;
+  const total = Math.round(mp4Duration(o, steps) * rate);
+  const out = [new Float32Array(total), new Float32Array(total)];
+  let at = o.title ? TITLE_SECONDS * 1000 : 0;
+  for (let i = o.from; i <= o.to; i++) {
+    const s = steps[i];
+    const ch = decoded.get(i);
+    if (s?.video && ch?.length) {
+      for (const k of keptSegments(s.video.durationMs, s.video.cuts)) {
+        const a = Math.round((k.from / 1000) * rate);
+        const b = Math.round((k.to / 1000) * rate);
+        const dst = Math.round((at / 1000) * rate);
+        for (let c = 0; c < 2; c++) {
+          const src = ch[Math.min(c, ch.length - 1)]!;
+          const part = src.subarray(Math.min(a, src.length), Math.min(b, src.length));
+          out[c]!.set(part.subarray(0, Math.max(0, total - dst)), dst);
+        }
+        at += k.to - k.from;
+      }
+    } else at += stepMs(s, o.seconds);
+  }
+  return out;
+}
+
+/** AAC si le navigateur sait l'encoder, sinon Opus (accepté dans un MP4). */
+async function pickAudio(): Promise<{ codec: string; mux: 'aac' | 'opus' } | null> {
+  if (typeof globalThis.AudioEncoder !== 'function') return null;
+  for (const [codec, mux] of [
+    ['mp4a.40.2', 'aac'],
+    ['opus', 'opus'],
+  ] as const) {
+    try {
+      const r = await AudioEncoder.isConfigSupported({
+        codec,
+        sampleRate: AUDIO_RATE,
+        numberOfChannels: 2,
+        bitrate: 128000,
+      });
+      if (r.supported) return { codec, mux };
+    } catch {
+      /* codec suivant */
+    }
+  }
+  return null;
+}
+
 /** WebCodecs disponible (VideoEncoder) ; sinon la carte MP4 reste visible, désactivée. */
 export const canEncodeVideo = () => typeof globalThis.VideoEncoder === 'function';
 
@@ -294,12 +393,20 @@ export async function encodeMp4(p: {
   draw: (i: number) => void | Promise<void>;
   progress: (i: number) => void;
   signal: AbortSignal;
+  /** Piste son (stéréo, 48 kHz), ou null : pas de piste son. */
+  audio?: Float32Array[] | null;
 }): Promise<ArrayBuffer> {
   const { width: w, height: h } = p.canvas;
   const codec = await pickCodec(w, h);
   if (!codec) throw new Error('NO_CODEC');
+  const audioCodec = p.audio ? await pickAudio() : null;
   const target = new ArrayBufferTarget();
-  const muxer = new Muxer({ target, video: { codec: 'avc', width: w, height: h }, fastStart: 'in-memory' });
+  const muxer = new Muxer({
+    target,
+    video: { codec: 'avc', width: w, height: h },
+    ...(audioCodec ? { audio: { codec: audioCodec.mux, numberOfChannels: 2, sampleRate: AUDIO_RATE } } : {}),
+    fastStart: 'in-memory',
+  });
   let failure: unknown = null;
   const enc = new VideoEncoder({
     output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
@@ -326,6 +433,38 @@ export async function encodeMp4(p: {
     frame.close();
     while (enc.encodeQueueSize > 4) await new Promise((r) => setTimeout(r, 0));
     p.progress(i);
+  }
+  // Piste son : par blocs de 1 024 échantillons (planaires, 32 bits)
+  if (audioCodec && p.audio) {
+    let aFail: unknown = null;
+    const aenc = new AudioEncoder({
+      output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+      error: (e) => {
+        aFail = e;
+      },
+    });
+    aenc.configure({ codec: audioCodec.codec, sampleRate: AUDIO_RATE, numberOfChannels: 2, bitrate: 128000 });
+    const [l, r] = p.audio as [Float32Array, Float32Array];
+    const BLOCK = 1024;
+    for (let i = 0; i < l.length; i += BLOCK) {
+      const n = Math.min(BLOCK, l.length - i);
+      const data = new Float32Array(n * 2);
+      data.set(l.subarray(i, i + n), 0);
+      data.set(r.subarray(i, i + n), n);
+      const ad = new AudioData({
+        format: 'f32-planar',
+        sampleRate: AUDIO_RATE,
+        numberOfFrames: n,
+        numberOfChannels: 2,
+        timestamp: Math.round((i / AUDIO_RATE) * 1e6),
+        data,
+      });
+      aenc.encode(ad);
+      ad.close();
+      if (aFail) throw aFail;
+    }
+    await aenc.flush();
+    aenc.close();
   }
   // Le conteneur ne garde pas la durée de la dernière image : une image de clôture (même contenu)
   // termine la vidéo à la durée calculée

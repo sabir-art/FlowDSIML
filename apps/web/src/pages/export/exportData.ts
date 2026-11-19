@@ -30,7 +30,7 @@ export async function loadExportSource(demoId: string, removeBranding: boolean):
   const rel = [
     ...new Set(
       steps
-        .flatMap((s) => [s.imageUrl, s.fullPage?.url ?? null])
+        .flatMap((s) => [s.imageUrl, s.fullPage?.url ?? null, s.video?.url ?? null])
         .filter((u): u is string => !!u && !/^(https?:|data:|blob:)/.test(u)),
     ),
   ];
@@ -64,6 +64,7 @@ export async function loadExportSource(demoId: string, removeBranding: boolean):
           ...s,
           imageUrl: s.imageUrl ? sign(s.imageUrl) : null,
           fullPage: s.fullPage && full ? { ...s.fullPage, url: full } : null,
+          video: s.video && sign(s.video.url) ? { ...s.video, url: sign(s.video.url)! } : null,
         };
       }),
     },
