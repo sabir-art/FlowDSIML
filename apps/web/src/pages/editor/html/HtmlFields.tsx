@@ -1,11 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Droplet, EyeOff, Image, Link2, PenLine, Trash2, Undo2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  BarChart3,
+  Droplet,
+  EyeOff,
+  Image,
+  Link2,
+  Paintbrush,
+  PenLine,
+  Trash2,
+  Undo2,
+} from 'lucide-react';
 import type { HtmlOp } from '@flowdsiml/core';
 import type { DemoEditor } from '../useDemoEditor';
 import type { StepRow } from '../types';
+import { ChartFields } from './ChartFields';
+import { StyleFields } from './StyleFields';
 import {
   asOps,
+  frameSend,
   htmlSteps,
   opOn,
   removeOp,
@@ -23,6 +37,8 @@ const OP_ICON: Record<HtmlOp['op'], typeof PenLine> = {
   link: Link2,
   image: Image,
   remove: Trash2,
+  style: Paintbrush,
+  chart: BarChart3,
 };
 
 /**
@@ -41,7 +57,8 @@ export function HtmlFields({
 }) {
   const { t } = useTranslation();
   const ed = useHtmlEdit(step.id);
-  const sel = ed.selected;
+  const multi = ed.multi.length > 1;
+  const sel = multi ? null : ed.selected;
   const ops = asOps(step.html_ops);
   const textOp = sel ? opOn(step, sel.sel, 'text') : undefined;
   const [text, setText] = useState('');
@@ -49,7 +66,7 @@ export function HtmlFields({
   const n = htmlSteps(editor).length;
 
   useEffect(() => {
-    setText(textOp?.value ?? sel?.text.trim() ?? '');
+    setText(typeof textOp?.value === 'string' ? textOp.value : (sel?.text.trim() ?? ''));
   }, [sel?.sel, textOp?.value]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (ed.focusText) input.current?.focus();
@@ -58,7 +75,7 @@ export function HtmlFields({
   function commit() {
     if (!sel || readOnly) return;
     const original = textOp?.before ?? sel.text.trim();
-    if (text === (textOp?.value ?? original)) return;
+    if (text === (typeof textOp?.value === 'string' ? textOp.value : original)) return;
     if (text === original && textOp) return removeOp(editor, step, textOp.id);
     upsertOp(
       editor,
@@ -72,13 +89,23 @@ export function HtmlFields({
   function describe(o: HtmlOp): string {
     switch (o.op) {
       case 'text':
-        return t('editor.html.modText', { before: o.before ?? '', after: o.value ?? '' });
+        return t('editor.html.modText', {
+          before: o.before ?? '',
+          after: typeof o.value === 'string' ? o.value : '',
+        });
       case 'hide':
         return o.before ? t('editor.html.modHidden', { before: o.before }) : t('editor.html.modHiddenEmpty');
       case 'blur':
         return t('editor.html.modBlur');
       case 'link':
-        return t('editor.html.modLink', { n: stepNumber(o.value) });
+        return t('editor.html.modLink', { n: stepNumber(typeof o.value === 'string' ? o.value : '') });
+      case 'style':
+        return t('editor.data.modStyle', { count: o.sels?.length ?? 1 });
+      case 'chart':
+        return t('editor.data.modChart', {
+          title:
+            (o.value && typeof o.value === 'object' && 'rows' in o.value && o.value.title) || o.before || '',
+        });
       case 'remove':
         return t('editor.html.modRemove');
       default:
@@ -88,7 +115,9 @@ export function HtmlFields({
 
   return (
     <>
-      {sel && (
+      {multi && <StyleFields editor={editor} step={step} readOnly={readOnly} />}
+      {sel?.chart && <ChartFields editor={editor} step={step} chart={sel.chart} readOnly={readOnly} />}
+      {sel && !sel.chart && (
         <div className="sec">
           <div className="sec-title">{t('editor.html.element', { sel: sel.short })}</div>
           <div className="field">
@@ -148,6 +177,18 @@ export function HtmlFields({
             </div>
             <span className="help">{t('editor.html.applyHelp')}</span>
           </div>
+          {/* L25-07 : sélection multiple (Maj + clic ou les semblables) */}
+          {sel.similar > 1 && !readOnly && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              style={{ marginTop: 10 }}
+              onClick={() => frameSend.current?.({ t: 'similar' })}
+            >
+              {t('editor.data.similar', { count: sel.similar })}
+            </button>
+          )}
+          <p className="help">{t('editor.data.shiftHelp')}</p>
         </div>
       )}
       <div className="sec">
@@ -157,7 +198,7 @@ export function HtmlFields({
           {ops.map((o) => {
             const nf = ed.notFound.includes(o.id);
             const Icon = nf ? AlertTriangle : OP_ICON[o.op];
-            const short = shortTrail(o.sel);
+            const short = o.op === 'style' ? (o.before ?? shortTrail(o.sel)) : shortTrail(o.sel);
             return (
               <li key={o.id} className={`mod${nf ? ' nf' : ''}`}>
                 <Icon {...ICON} />

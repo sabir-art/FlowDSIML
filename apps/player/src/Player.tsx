@@ -371,7 +371,8 @@ export function Player({
               const pages = m.steps.filter((s) => s.kind === 'html');
               const linked = new Set<string>(sandbox.start ? [sandbox.start] : []);
               for (const s of pages) {
-                for (const o of s.html?.ops ?? []) if (o.op === 'link' && o.value) linked.add(o.value);
+                for (const o of s.html?.ops ?? [])
+                  if (o.op === 'link' && typeof o.value === 'string' && o.value) linked.add(o.value);
                 if (sandbox.autoLink) for (const l of s.html?.links ?? []) linked.add(l.step);
               }
               return pages.filter((s) => linked.has(s.id)).map((s) => s.id);

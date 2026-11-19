@@ -2669,8 +2669,12 @@
 
 /* ===== L25-03 : styles du cadre du navigateur ===== */
 .mk .browser .url.is-capture {
-  color: var(--fd-stone-400, #a8a29e);
+  /* Grisée mais lisible (AA) : l'adresse de la capture n'est pas publiée */
+  color: #5f6b7a;
   font-style: italic;
+}
+.mk .browser--dark .url.is-capture {
+  color: #a9b3bf;
 }
 .mk .browser--dark {
   background: #2b2a29;

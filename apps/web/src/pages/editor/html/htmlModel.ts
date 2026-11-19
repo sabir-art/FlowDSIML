@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
-import { validHtmlOps, type HtmlOp } from '@flowdsiml/core';
-import type { Selected } from '@flowdsiml/player-core';
+import { STYLE_SELS_MAX, validHtmlOps, type HtmlOp, type HtmlStyle } from '@flowdsiml/core';
+import type { MultiEl, Selected } from '@flowdsiml/player-core';
 import type { Json } from '@flowdsiml/supabase-types';
 import type { DemoEditor } from '../useDemoEditor';
 import type { StepRow } from '../types';
@@ -24,8 +24,17 @@ interface HtmlEditState {
   focusText: number;
   /** Portée choisie dans le panneau (« Cette étape » / « Toutes les étapes »). */
   scope: 'step' | 'all';
+  /** L25-07 : sélection multiple (Maj + clic, « Sélectionner les semblables »), 2 éléments au moins. */
+  multi: MultiEl[];
 }
-let state: HtmlEditState = { stepId: null, selected: null, notFound: [], focusText: 0, scope: 'step' };
+let state: HtmlEditState = {
+  stepId: null,
+  selected: null,
+  notFound: [],
+  focusText: 0,
+  scope: 'step',
+  multi: [],
+};
 const subs = new Set<() => void>();
 export function setHtmlEdit(patch: Partial<HtmlEditState>) {
   state = { ...state, ...patch };
@@ -40,14 +49,22 @@ export function useHtmlEdit(stepId: string): HtmlEditState {
     () => state,
   );
   if (s.stepId !== stepId) {
-    state = { stepId, selected: null, notFound: [], focusText: 0, scope: s.scope };
+    state = { stepId, selected: null, notFound: [], focusText: 0, scope: s.scope, multi: [] };
     return state;
   }
   return s;
 }
 /** Envoi vers la page de l'éditeur (canevas monté). */
 export const frameSend: {
-  current: ((m: { t: 'select'; sel: string | null } | { t: 'up'; n: number }) => void) | null;
+  current:
+    | ((
+        m:
+          | { t: 'select'; sel: string | null }
+          | { t: 'up'; n: number }
+          | { t: 'similar' }
+          | { t: 'multi-clear' },
+      ) => void)
+    | null;
 } = {
   current: null,
 };
@@ -76,6 +93,7 @@ export function upsertOp(
         id: same?.id ?? newOpId(),
         sel: op.sel,
         op: op.op,
+        ...(op.sels ? { sels: op.sels } : {}),
         ...(op.value !== undefined ? { value: op.value } : {}),
         ...(op.before !== undefined
           ? { before: op.before }
@@ -86,6 +104,37 @@ export function upsertOp(
         ...(group ? { group } : {}),
       };
       editor.updateStep(s.id, { html_ops: [...rest, next] as unknown as Json });
+    }
+  });
+}
+
+/**
+ * L25-07 : style posé en masse, une seule ligne de modification (nouvelle opération à chaque
+ * application). Portée « toutes » : même groupe sur chaque étape HTML.
+ */
+export function addStyleOp(
+  editor: DemoEditor,
+  step: StepRow,
+  sels: string[],
+  value: HtmlStyle,
+  before: string,
+  scope: 'step' | 'all',
+) {
+  const targets = scope === 'all' ? htmlSteps(editor) : [step];
+  const group = scope === 'all' ? `g-${crypto.randomUUID().slice(0, 8)}` : undefined;
+  editor.batch(() => {
+    for (const s of targets) {
+      const op: HtmlOp = {
+        id: newOpId(),
+        sel: sels[0]!,
+        sels: sels.slice(0, STYLE_SELS_MAX),
+        op: 'style',
+        value,
+        before: before.slice(0, 200),
+        scope,
+        ...(group ? { group } : {}),
+      };
+      editor.updateStep(s.id, { html_ops: [...asOps(s.html_ops), op] as unknown as Json });
     }
   });
 }

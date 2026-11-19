@@ -314,3 +314,94 @@
 .sbmap {
   margin: 0 auto;
 }
+
+/* L25-07 : styles en masse */
+.st-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+.st-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.st-color input[type='color'] {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 6px;
+  background: none;
+  flex: none;
+}
+.st-color .input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: ui-monospace, monospace;
+}
+.st-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.st-contrast {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 8px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.st-contrast.is-low {
+  color: var(--fd-color-warning);
+}
+.st-apply {
+  margin-top: 10px;
+}
+/* L25-08 : valeurs du graphique */
+.ch-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 4px;
+}
+.ch-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fd-color-text-muted);
+  padding: 0 4px 4px;
+}
+.ch-table td {
+  padding: 2px 4px;
+  vertical-align: top;
+}
+.ch-table td:last-child {
+  width: 36px;
+}
+.ch-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ch-table .field-error {
+  display: block;
+  font-size: 12px;
+  color: var(--fd-color-danger);
+}
+.dt-sub {
+  margin: 14px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.st-fields .field {
+  margin-bottom: 10px;
+}
+.st-row {
+  align-items: end;
+}
+.st-row .field {
+  margin-top: 0;
+}

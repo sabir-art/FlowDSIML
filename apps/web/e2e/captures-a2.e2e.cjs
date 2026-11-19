@@ -78,9 +78,13 @@ const QID = (n) => `0b5c1f0e-0000-4000-8000-0000000000b${n}`;
   await page.waitForTimeout(600);
   ok((await page.locator('.canvas-spotlight').count()) >= 1, 'A2-01 : mode Spotlight appliqué au canevas');
   await shot('a2-01-modes');
-  const frame = page.getByRole('radiogroup', { name: 'Cadre' });
+  // L25-03 : la section « Cadre du navigateur » remplace la bascule d'A2-01
+  const frame = page.getByRole('radiogroup', { name: 'Style' });
   await frame.scrollIntoViewIfNeeded();
-  ok((await frame.getByRole('radio').count()) === 3, 'A2-01 : cadre Aucun / Navigateur / Mobile');
+  ok(
+    (await frame.getByRole('radio').count()) === 4,
+    'A2-01 / L25-03 : cadre Clair / Sombre / Minimal / Aucun',
+  );
   await shot('a2-01-cadre');
 
   // A2-03 : checklist avec chapitres (onglet Réglages) et aperçu sur le canevas

@@ -56,7 +56,15 @@ export function HtmlCanvas({
   const frameOps = useMemo<FrameOp[]>(
     // Dans l'éditeur, les images remplacées gardent la page d'origine (aperçu dans le lecteur)
     () =>
-      ops.filter((o) => o.op !== 'image').map((o) => ({ id: o.id, sel: o.sel, op: o.op, value: o.value })),
+      ops
+        .filter((o) => o.op !== 'image')
+        .map((o) => ({
+          id: o.id,
+          sel: o.sel,
+          op: o.op,
+          value: o.value,
+          ...(o.sels ? { sels: o.sels } : {}),
+        })),
     [step.html_ops], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const ready = useRef(false);
@@ -105,7 +113,12 @@ export function HtmlCanvas({
       } else if (m.t === 'applied') setHtmlEdit({ notFound: m.notFound });
       else if (m.t === 'select') {
         setMenu(null);
-        setHtmlEdit({ selected: m.el });
+        setHtmlEdit({ selected: m.el, multi: [] });
+      } else if (m.t === 'multi') {
+        setMenu(null);
+        // L25-07 : nombre d'éléments annoncé
+        setHtmlEdit({ multi: m.els.length > 1 ? m.els : [] });
+        if (m.els.length > 1) setNotice(t('editor.data.multiAnnounce', { count: m.els.length }));
       } else if (m.t === 'key' && !readOnly && ed.selected) {
         if (m.key === 'edit') setHtmlEdit({ focusText: ed.focusText + 1 });
         else toggle('hide');
@@ -157,14 +170,19 @@ export function HtmlCanvas({
     setNotice(t('editor.html.copied'));
   }
 
-  const sel = ed.selected;
+  const multi = ed.multi.length > 1 ? ed.multi : null;
+  const sel = multi ? null : ed.selected;
   const linked = sel ? opOn(step, sel.sel, 'link') : undefined;
   const others = editor.steps.map((s, i) => ({ s, n: i + 1 })).filter(({ s }) => s.id !== step.id);
   if (!step.html_path) return <div className="muted html-empty">{t('editor.html.missing')}</div>;
   const crumbsEl = (
     <div className="html-crumbs" role="group" aria-label={t('editor.html.trail')}>
       <span className="badge">{t('editor.html.kind')}</span>
-      {sel ? (
+      {multi ? (
+        <span className="html-crumb">
+          <b>{t('editor.data.trailMulti', { count: multi.length, sel: commonShort(multi) })}</b>
+        </span>
+      ) : sel ? (
         sel.trail.map((label, i) => {
           const isLast = i === sel.trail.length - 1;
           return (
@@ -309,6 +327,12 @@ export function HtmlCanvas({
       </div>
     </div>
   );
+}
+
+/** Sélecteur court commun (« b.value »), sinon celui du premier élément. */
+export function commonShort(els: Array<{ short: string }>): string {
+  const first = els[0]?.short ?? '';
+  return els.every((e) => e.short === first) ? first : `${first}…`;
 }
 
 /** Opérations introuvables lors de la dernière application (liste du panneau). */

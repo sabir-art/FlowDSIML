@@ -13,8 +13,34 @@
 export interface FrameOp {
   id: string;
   sel: string;
-  op: 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove';
-  value?: string;
+  op: 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart';
+  /** L25-07 : style posé sur plusieurs éléments. */
+  sels?: string[];
+  /** Texte, id d'étape ou URL ; L25-07/08 : objet de style ou de graphique (revalidé dans la page). */
+  value?: string | FrameStyle | FrameChart;
+}
+export interface FrameStyle {
+  color?: string;
+  background?: string;
+  fontSize?: number;
+  fontWeight?: '400' | '600' | '700';
+}
+export interface FrameChart {
+  type: 'bar' | 'line' | 'donut';
+  rows: Array<{ label: string; value: number }>;
+  title?: string;
+}
+/** L25-08 : graphique reconnu dans la page (conteneur, type, valeurs lues, titre). */
+export interface DetectedChart extends FrameChart {
+  sel: string;
+  title: string;
+}
+/** L25-07 : élément d'une sélection multiple (fond effectif et couleur du texte, pour le contraste). */
+export interface MultiEl {
+  sel: string;
+  short: string;
+  bg: string;
+  color: string;
 }
 
 export type ToFrame =
@@ -29,6 +55,9 @@ export type ToFrame =
     }
   | { fd: 1; t: 'ops'; ops: FrameOp[] }
   | { fd: 1; t: 'select'; sel: string | null }
+  /** L25-07 : « Sélectionner les semblables » ; vider la sélection multiple. */
+  | { fd: 1; t: 'similar' }
+  | { fd: 1; t: 'multi-clear' }
   /** Éditeur : sélectionne le n-ième parent de l'élément sélectionné (fil du sélecteur). */
   | { fd: 1; t: 'up'; n: number };
 
@@ -41,6 +70,12 @@ export interface Selected {
   tag: string;
   canvas: boolean;
   img: boolean;
+  /** L25-07 : éléments du même sélecteur court sur la page ; fond effectif et couleur du texte. */
+  similar: number;
+  bg: string;
+  color: string;
+  /** L25-08 : graphique reconnu (l'élément ou un parent proche). */
+  chart: DetectedChart | null;
 }
 
 export type FromFrame =
@@ -49,12 +84,30 @@ export type FromFrame =
   | { fd: 1; t: 'go'; step: string }
   | { fd: 1; t: 'unlinked' }
   | { fd: 1; t: 'select'; el: Selected | null }
+  | { fd: 1; t: 'multi'; els: MultiEl[] }
   | { fd: 1; t: 'key'; key: 'edit' | 'hide' }
   | { fd: 1; t: 'scroll' };
 
 const STEP_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const num = (v: unknown) => typeof v === 'number' && Number.isFinite(v);
 const str = (v: unknown, max: number) => typeof v === 'string' && v.length <= max;
+const HEX = /^#[0-9A-Fa-f]{6}$/;
+const hex = (v: unknown) => typeof v === 'string' && HEX.test(v);
+
+function parseChart(v: unknown): DetectedChart | null {
+  if (!v || typeof v !== 'object') return null;
+  const c = v as Record<string, unknown>;
+  if (!str(c.sel, 500) || !str(c.title, 120) || !['bar', 'line', 'donut'].includes(c.type as string))
+    return null;
+  if (!Array.isArray(c.rows) || c.rows.length < 1 || c.rows.length > 12) return null;
+  const rows: DetectedChart['rows'] = [];
+  for (const r of c.rows as unknown[]) {
+    const o = r as Record<string, unknown> | null;
+    if (!o || !str(o.label, 40) || !num(o.value)) return null;
+    rows.push({ label: o.label as string, value: o.value as number });
+  }
+  return { sel: c.sel as string, type: c.type as DetectedChart['type'], rows, title: c.title as string };
+}
 
 /** Contrôle d'un message reçu de la page (format strict ; tout le reste est ignoré). */
 export function parseFromFrame(data: unknown): FromFrame | null {
@@ -76,6 +129,21 @@ export function parseFromFrame(data: unknown): FromFrame | null {
       return { fd: 1, t: 'scroll' };
     case 'key':
       return m.key === 'edit' || m.key === 'hide' ? { fd: 1, t: 'key', key: m.key } : null;
+    case 'multi': {
+      if (!Array.isArray(m.els) || m.els.length > 200) return null;
+      const els: MultiEl[] = [];
+      for (const x of m.els as unknown[]) {
+        const e = x as Record<string, unknown> | null;
+        if (!e || !str(e.sel, 500) || !str(e.short, 120) || !hex(e.bg) || !hex(e.color)) return null;
+        els.push({
+          sel: e.sel as string,
+          short: e.short as string,
+          bg: e.bg as string,
+          color: e.color as string,
+        });
+      }
+      return { fd: 1, t: 'multi', els };
+    }
     case 'select': {
       if (m.el === null) return { fd: 1, t: 'select', el: null };
       const e = m.el as Record<string, unknown> | undefined;
@@ -108,6 +176,10 @@ export function parseFromFrame(data: unknown): FromFrame | null {
           tag: e.tag as string,
           canvas: e.canvas === true,
           img: e.img === true,
+          similar: num(e.similar) ? Math.max(0, Math.min(200, e.similar as number)) : 1,
+          bg: hex(e.bg) ? (e.bg as string) : '#FFFFFF',
+          color: hex(e.color) ? (e.color as string) : '#000000',
+          chart: e.chart == null ? null : parseChart(e.chart),
         },
       };
     }
@@ -131,6 +203,9 @@ export const FRAME_RUNTIME = `(function () {
   var selected = null;
   var hoverBox = null, selBox = null, selTag = null;
   var BLUE = '#2897D5';
+  var multi = [], multiBoxes = [];
+  var HEXRE = /^#[0-9A-Fa-f]{6}$/;
+  var SVGNS = 'http://www.w3.org/2000/svg';
   function post(m) { m.fd = 1; parentWin.postMessage(m, '*'); }
   function height() { return Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0); }
   function neutral(s) { return s.replace(/\\p{Lu}/gu, 'X').replace(/\\p{Ll}/gu, 'x').replace(/\\p{N}/gu, '0'); }
@@ -187,6 +262,185 @@ export const FRAME_RUNTIME = `(function () {
     for (var cur = el; cur && cur.tagName !== 'HTML'; cur = cur.parentElement) out.unshift(label(cur));
     return out;
   }
+  function toHex(c) {
+    var m = /rgba?\\(([0-9.]+),\\s*([0-9.]+),\\s*([0-9.]+)(?:,\\s*([0-9.]+))?/.exec(c || '');
+    if (!m || (m[4] !== undefined && parseFloat(m[4]) === 0)) return null;
+    return '#' + [m[1], m[2], m[3]].map(function (x) { var h = Math.round(parseFloat(x)).toString(16); return h.length < 2 ? '0' + h : h; }).join('').toUpperCase();
+  }
+  function bgOf(el) {
+    for (var c = el; c && c.nodeType === 1; c = c.parentElement) { var h = toHex(getComputedStyle(c).backgroundColor); if (h) return h; }
+    return '#FFFFFF';
+  }
+  function colorOf(el) { return toHex(getComputedStyle(el).color) || '#000000'; }
+  // L25-07 : propriétés de la liste blanche seulement, revalidées ici (jamais de chaîne CSS libre)
+  function applyStyle(el, v) {
+    if (!v || typeof v !== 'object') return;
+    if (typeof v.color === 'string' && HEXRE.test(v.color)) el.style.setProperty('color', v.color);
+    if (typeof v.background === 'string' && HEXRE.test(v.background)) el.style.setProperty('background-color', v.background);
+    if (typeof v.fontSize === 'number' && v.fontSize >= 8 && v.fontSize <= 96) el.style.setProperty('font-size', Math.round(v.fontSize) + 'px');
+    if (v.fontWeight === '400' || v.fontWeight === '600' || v.fontWeight === '700') el.style.setProperty('font-weight', v.fontWeight);
+  }
+  // L25-08 : lecture d'un graphique simple (SVG rect/path/circle avec texte de valeur, ou barres HTML)
+  function numOf(s) {
+    var t = String(s || '').replace(/[\\s\\u00a0\\u202f]/g, '').replace(',', '.').replace(/%$/, '');
+    return /^-?[0-9]+(\\.[0-9]+)?$/.test(t) ? parseFloat(t) : null;
+  }
+  function leaves(c) {
+    var out = [], w = document.createTreeWalker(c, 4);
+    for (var n = w.nextNode(); n; n = w.nextNode()) { var v = (n.nodeValue || '').trim(); if (v) out.push(v); }
+    return out;
+  }
+  function chartTitle(c) {
+    var drawn = c.closest && c.closest('[data-fd-title]');
+    if (drawn) return (drawn.getAttribute('data-fd-title') || '').slice(0, 120);
+    var a = c.getAttribute('aria-label');
+    if (a) return a.slice(0, 120);
+    for (var p = c, k = 0; p && k < 3; p = p.parentElement, k++) {
+      for (var s = p.previousElementSibling; s; s = s.previousElementSibling) {
+        if (/^H[1-6]$/.test(s.tagName) || /title|titre/i.test(s.className || '')) return (s.textContent || '').trim().slice(0, 120);
+      }
+      var h = p.parentElement && p.parentElement.querySelector('h1,h2,h3,h4,h5,h6,figcaption');
+      if (h && !c.contains(h)) return (h.textContent || '').trim().slice(0, 120);
+    }
+    return '';
+  }
+  function readChart(c) {
+    if (c.querySelector && c.querySelector('canvas')) return null;
+    var svg = c.tagName.toLowerCase() === 'svg' ? c : (c.querySelectorAll('svg').length === 1 ? c.querySelector('svg') : null);
+    var rows = [], type = null, target = c;
+    if (svg) {
+      var texts = [].slice.call(svg.querySelectorAll('text')).map(function (t) { return (t.textContent || '').trim(); }).filter(Boolean);
+      var nums = texts.filter(function (t) { return numOf(t) !== null; }), labels = texts.filter(function (t) { return numOf(t) === null; });
+      if (nums.length < 2) return null;
+      var vb = svg.getBoundingClientRect();
+      var rects = [].slice.call(svg.querySelectorAll('rect')).filter(function (r) { var b = r.getBoundingClientRect(); return b.height > 0 && b.width < vb.width * 0.9; });
+      var arcs = [].slice.call(svg.querySelectorAll('path')).filter(function (p) { return /[Aa]/.test(p.getAttribute('d') || ''); });
+      if (svg.querySelector('circle[stroke-dasharray]') || arcs.length >= 2) type = 'donut';
+      else if (rects.length >= 2) type = 'bar';
+      else if (svg.querySelector('polyline,path')) type = 'line';
+      else return null;
+      for (var i = 0; i < nums.length && i < 12; i++) rows.push({ label: (labels[i] || '').slice(0, 40), value: numOf(nums[i]) });
+      target = svg;
+    } else {
+      var kids = [].slice.call(c.children);
+      if (kids.length < 2 || kids.length > 12) return null;
+      for (var j = 0; j < kids.length; j++) {
+        var k = kids[j], lv = leaves(k);
+        var n = lv.filter(function (t) { return numOf(t) !== null; }), l = lv.filter(function (t) { return numOf(t) === null; });
+        var bar = (k.getAttribute('style') || '').indexOf('height') >= 0 || k.querySelector('[style*="height"]');
+        if (n.length !== 1 || l.length !== 1 || !bar) return null;
+        rows.push({ label: l[0].slice(0, 40), value: numOf(n[0]) });
+      }
+      type = 'bar';
+    }
+    return { sel: selectorOf(target), type: type, rows: rows, title: chartTitle(target) };
+  }
+  function chartOf(el) {
+    // Graphique déjà redessiné : son conteneur reste la cible (même sélecteur que l'opération)
+    var drawn = el.closest && el.closest('[data-fd-chart]');
+    if (drawn) { var d = readChart(drawn); if (d) { d.sel = selectorOf(drawn); return d; } }
+    for (var c = el, k = 0; c && k < 4 && c !== document.body && c !== document.documentElement; c = c.parentElement, k++) {
+      var r = readChart(c);
+      if (r) return r;
+    }
+    return null;
+  }
+  function chartColors(el) {
+    var out = [];
+    var marks = el.querySelectorAll('rect,path,circle,polyline,[style*="background"]');
+    for (var i = 0; i < marks.length && out.length < 6; i++) {
+      var cs = getComputedStyle(marks[i]);
+      var c = marks[i] instanceof SVGElement ? (toHex(cs.fill) || toHex(cs.stroke)) : toHex(cs.backgroundColor);
+      if (c && c !== '#FFFFFF' && out.indexOf(c) < 0) out.push(c);
+    }
+    return out.concat(['#2897D5', '#0B6B62', '#D60B52', '#6B7280', '#B45309', '#7C3AED']);
+  }
+  function svgEl(tag, attrs, text) {
+    var e = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) e.setAttribute(k, String(attrs[k]));
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function fmt(v) { try { return new Intl.NumberFormat(document.documentElement.lang || 'fr-FR').format(v); } catch (e) { return String(v); } }
+  // L25-08 : graphique redessiné avec les couleurs de la capture ; valeurs toujours écrites ; role=img
+  function drawChart(el, v) {
+    if (!v || typeof v !== 'object' || ['bar', 'line', 'donut'].indexOf(v.type) < 0 || !Array.isArray(v.rows)) return;
+    var rows = v.rows.filter(function (r) { return r && typeof r.label === 'string' && typeof r.value === 'number' && isFinite(r.value); }).slice(0, 12);
+    if (!rows.length) return;
+    var colors = chartColors(el), ink = colorOf(el);
+    var b = el.getBoundingClientRect();
+    var W = Math.max(160, Math.round(b.width) || 320), H = Math.max(120, Math.round(b.height) || 180);
+    var title = typeof v.title === 'string' ? v.title.slice(0, 120) : '';
+    var svg = el.tagName.toLowerCase() === 'svg' ? el : null;
+    while (el.firstChild) el.removeChild(el.firstChild);
+    if (!svg) { svg = svgEl('svg', { width: '100%', height: H }); el.appendChild(svg); svg.setAttribute('aria-hidden', 'true'); }
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', (title ? title + ' : ' : '') + rows.map(function (r) { return r.label + ' ' + fmt(r.value); }).join(', '));
+    el.setAttribute('data-fd-chart', v.type);
+    el.setAttribute('data-fd-title', title);
+    var font = { 'font-size': 12, 'font-family': 'inherit', fill: ink, 'text-anchor': 'middle' };
+    function text(x, y, t, extra) { var a = {}; for (var k in font) a[k] = font[k]; for (var k2 in extra || {}) a[k2] = extra[k2]; a.x = x; a.y = y; svg.appendChild(svgEl('text', a, t)); }
+    var max = Math.max.apply(null, rows.map(function (r) { return Math.abs(r.value); }).concat([1]));
+    var top = 20, bottom = H - 20, step = W / rows.length;
+    if (v.type === 'bar') {
+      rows.forEach(function (r, i) {
+        var h = Math.max(1, (bottom - top) * Math.abs(r.value) / max), bw = step * 0.56, x = i * step + (step - bw) / 2;
+        svg.appendChild(svgEl('rect', { x: x, y: bottom - h, width: bw, height: h, rx: 3, fill: colors[0] }));
+        text(x + bw / 2, bottom - h - 5, fmt(r.value), { 'font-weight': 600 });
+        text(x + bw / 2, H - 5, r.label);
+      });
+    } else if (v.type === 'line') {
+      var pts = rows.map(function (r, i) { return [i * step + step / 2, bottom - (bottom - top - 6) * r.value / max]; });
+      svg.appendChild(svgEl('polyline', { points: pts.map(function (p) { return p.join(','); }).join(' '), fill: 'none', stroke: colors[0], 'stroke-width': 2 }));
+      pts.forEach(function (p, i) {
+        svg.appendChild(svgEl('circle', { cx: p[0], cy: p[1], r: 4, fill: colors[0], stroke: '#FFFFFF', 'stroke-width': 2 }));
+        text(p[0], p[1] - 8, fmt(rows[i].value), { 'font-weight': 600 });
+        text(p[0], H - 5, rows[i].label);
+      });
+    } else {
+      var total = rows.reduce(function (a, r) { return a + Math.max(0, r.value); }, 0) || 1;
+      var R = Math.min(H, W / 2) / 2 - 12, cx = R + 12, cy = H / 2, C = 2 * Math.PI * R, acc = 0;
+      rows.forEach(function (r, i) {
+        var len = C * Math.max(0, r.value) / total;
+        svg.appendChild(svgEl('circle', { cx: cx, cy: cy, r: R, fill: 'none', stroke: colors[i % colors.length], 'stroke-width': 16,
+          'stroke-dasharray': Math.max(0, len - 2) + ' ' + C, 'stroke-dashoffset': -acc, transform: 'rotate(-90 ' + cx + ' ' + cy + ')' }));
+        acc += len;
+        var ly = 16 + i * 18, lx = cx + R + 24;
+        svg.appendChild(svgEl('rect', { x: lx, y: ly - 9, width: 10, height: 10, rx: 2, fill: colors[i % colors.length] }));
+        text(lx + 16, ly, r.label, { 'text-anchor': 'start' });
+        text(W - 6, ly, fmt(r.value), { 'text-anchor': 'end', 'font-weight': 600 });
+      });
+    }
+  }
+  function sameShort(el) {
+    var s = shortSel(el);
+    return candidates().filter(function (e) { return shortSel(e) === s; });
+  }
+  function postMulti() {
+    multiBoxes.forEach(function (b) { b.remove(); });
+    multiBoxes = [];
+    var els = [];
+    for (var i = 0; i < multi.length; i++) {
+      var e = q(multi[i]);
+      if (!e) continue;
+      var b = box(BLUE, false); place(b, e); multiBoxes.push(b);
+      els.push({ sel: multi[i], short: shortSel(e), bg: bgOf(e), color: colorOf(e) });
+    }
+    if (multi.length) place(selBox, null);
+    post({ t: 'multi', els: els });
+  }
+  function toggleMulti(el, keyboard) {
+    if (!el) return;
+    // Souris : l'élément déjà sélectionné ouvre la sélection ; clavier : l'élément focalisé s'ajoute
+    if (keyboard && !multi.length) { multi = [selectorOf(el)]; postMulti(); return; }
+    if (!multi.length && selected) multi = [selected];
+    var s = selectorOf(el), i = multi.indexOf(s);
+    if (i >= 0) multi.splice(i, 1); else if (multi.length < 200) multi.push(s);
+    if (multi.length === 1) { var only = q(multi[0]); multi = []; postMulti(); select(only); return; }
+    postMulti();
+  }
   function safeImg(u) { return typeof u === 'string' && (/^https:\\/\\//.test(u) || /^data:image\\/(png|jpe?g|gif|webp|avif);/.test(u)); }
   function apply() {
     if (original) {
@@ -197,6 +451,12 @@ export const FRAME_RUNTIME = `(function () {
     var notFound = [];
     for (var i = 0; i < ops.length; i++) {
       var o = ops[i];
+      if (o.op === 'style') {
+        var sels = Array.isArray(o.sels) ? o.sels.slice(0, 200) : [o.sel], hit = false;
+        for (var si = 0; si < sels.length; si++) { var se = q(sels[si]); if (se) { applyStyle(se, o.value); hit = true; } }
+        if (!hit) notFound.push(o.id);
+        continue;
+      }
       var el = q(o.sel);
       if (!el) { notFound.push(o.id); continue; }
       if (o.op === 'text') el.textContent = String(o.value || '');
@@ -210,6 +470,7 @@ export const FRAME_RUNTIME = `(function () {
         else el.setAttribute(o.op === 'hide' ? 'data-fd-hidden' : 'data-fd-removed', '');
       } else if (o.op === 'link') el.setAttribute('data-fd-link', String(o.value || ''));
       else if (o.op === 'image' && el.tagName === 'IMG' && safeImg(o.value)) { el.setAttribute('src', o.value); el.removeAttribute('srcset'); }
+      else if (o.op === 'chart') drawChart(el, o.value);
     }
     if (mode === 'player') {
       for (var j = 0; j < autoLinks.length; j++) {
@@ -218,7 +479,8 @@ export const FRAME_RUNTIME = `(function () {
       }
       if (unlinked === 'highlight') document.documentElement.setAttribute('data-fd-highlight', '');
     }
-    if (mode === 'editor' && selected) {
+    if (mode === 'editor' && multi.length) postMulti();
+    else if (mode === 'editor' && selected) {
       var again = q(selected);
       if (again) select(again, false); else select(null, false);
     }
@@ -242,6 +504,9 @@ export const FRAME_RUNTIME = `(function () {
     b.style.height = r.height + 'px';
   }
   function select(el, focus) {
+    // L25-08 : un clic dans un graphique reconnu sélectionne le graphique entier
+    var chart = el ? chartOf(el) : null;
+    if (chart) { var tgt = q(chart.sel); if (tgt) el = tgt; }
     selected = el ? selectorOf(el) : null;
     place(selBox, el);
     if (el) {
@@ -255,7 +520,8 @@ export const FRAME_RUNTIME = `(function () {
         sel: selected, short: shortSel(el), trail: trail(el),
         rect: { x: r.left, y: r.top, w: r.width, h: r.height },
         text: (el.textContent || '').slice(0, 5000), tag: el.tagName.toLowerCase(),
-        canvas: el.hasAttribute('data-fd-canvas'), img: el.tagName === 'IMG'
+        canvas: el.hasAttribute('data-fd-canvas'), img: el.tagName === 'IMG',
+        similar: Math.min(200, sameShort(el).length), bg: bgOf(el), color: colorOf(el), chart: chart
       } });
     } else {
       selTag.style.display = 'none';
@@ -299,6 +565,9 @@ export const FRAME_RUNTIME = `(function () {
       } else if (e.key === 'Escape' && cur) {
         e.preventDefault();
         if (cur.parentElement && cur.parentElement !== document.documentElement) select(cur.parentElement);
+      } else if (e.key === 'Enter' && e.shiftKey && cur) {
+        e.preventDefault();
+        toggleMulti(cur, true);
       } else if (e.key === 'Enter' && cur) {
         e.preventDefault();
         post({ t: 'key', key: 'edit' });
@@ -315,7 +584,11 @@ export const FRAME_RUNTIME = `(function () {
     if (mode === 'editor') {
       e.preventDefault();
       e.stopPropagation();
-      if (!t.closest('[data-fd-ui]')) select(t === document.body ? null : t);
+      if (t.closest('[data-fd-ui]')) return;
+      // L25-07 : Maj + clic ajoute ou retire l'élément de la sélection multiple
+      if (e.shiftKey && t !== document.body) { toggleMulti(t); return; }
+      if (multi.length) { multi = []; postMulti(); }
+      select(t === document.body ? null : t);
       return;
     }
     var linked = t.closest('[data-fd-link]');
@@ -346,6 +619,12 @@ export const FRAME_RUNTIME = `(function () {
       apply();
     } else if (m.t === 'select' && mode === 'editor') {
       select(typeof m.sel === 'string' ? q(m.sel) : null);
+    } else if (m.t === 'similar' && mode === 'editor') {
+      var base = current() || (multi.length ? q(multi[0]) : null);
+      if (base) { multi = sameShort(base).slice(0, 200).map(selectorOf); if (multi.length < 2) { multi = []; select(base); } else postMulti(); }
+    } else if (m.t === 'multi-clear' && mode === 'editor') {
+      var keep = multi.length ? q(multi[0]) : null;
+      multi = []; postMulti(); select(keep);
     } else if (m.t === 'up' && mode === 'editor' && typeof m.n === 'number') {
       var c = current();
       for (var k = 0; c && k < m.n && c.parentElement && c.parentElement !== document.documentElement; k++) c = c.parentElement;

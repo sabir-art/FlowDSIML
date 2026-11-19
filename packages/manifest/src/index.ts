@@ -320,11 +320,39 @@ export const videoSchema = z.object({
 export type VideoStep = z.infer<typeof videoSchema>;
 
 /** A8 : page HTML capturée (servie en iframe srcdoc sandbox) et ses opérations. */
+/** L25-07 : style en liste blanche stricte (aucune chaîne CSS libre). */
+export const htmlStyleSchema = z
+  .object({
+    color: z
+      .string()
+      .regex(/^#[0-9A-Fa-f]{6}$/)
+      .optional(),
+    background: z
+      .string()
+      .regex(/^#[0-9A-Fa-f]{6}$/)
+      .optional(),
+    fontSize: z.number().min(8).max(96).optional(),
+    fontWeight: z.enum(['400', '600', '700']).optional(),
+  })
+  .strict();
+/** L25-08 : graphique redessiné par le lecteur (valeurs toujours écrites). */
+export const htmlChartSchema = z
+  .object({
+    type: z.enum(['bar', 'line', 'donut']),
+    rows: z
+      .array(z.object({ label: z.string().max(40), value: z.number().finite() }).strict())
+      .min(1)
+      .max(12),
+    title: z.string().max(120).optional(),
+  })
+  .strict();
+export type HtmlChartValue = z.infer<typeof htmlChartSchema>;
 export const htmlOpSchema = z.object({
   id: z.string().max(40),
   sel: z.string().min(1).max(500),
-  op: z.enum(['text', 'hide', 'blur', 'link', 'image', 'remove']),
-  value: z.string().max(5000).optional(),
+  op: z.enum(['text', 'hide', 'blur', 'link', 'image', 'remove', 'style', 'chart']),
+  sels: z.array(z.string().min(1).max(500)).min(1).max(200).optional(),
+  value: z.union([z.string().max(5000), htmlStyleSchema, htmlChartSchema]).optional(),
   before: z.string().max(5000).optional(),
   scope: z.enum(['step', 'all']).default('step'),
   group: z.string().max(40).optional(),

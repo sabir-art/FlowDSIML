@@ -26,9 +26,9 @@ export function sandboxGraph(steps: StepRow[], sandbox: unknown): { nodes: SbNod
   const ids = new Set(pages.map((p) => p.id));
   const out = new Map<string, string[]>();
   for (const p of pages) {
-    const explicit = asOps(p.html_ops)
-      .filter((o) => o.op === 'link' && o.value && ids.has(o.value))
-      .map((o) => o.value!);
+    const explicit = asOps(p.html_ops).flatMap((o) =>
+      o.op === 'link' && typeof o.value === 'string' && ids.has(o.value) ? [o.value] : [],
+    );
     const auto = sb.autoLink ? resolveLinks(p, pages).map((l) => l.step) : [];
     out.set(
       p.id,

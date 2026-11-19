@@ -52,4 +52,30 @@ describe('htmlFrame', () => {
     expect(parseFromFrame({ fd: 1, t: 'select', el: { sel: 'b' } })).toBeNull();
     expect(parseFromFrame({ fd: 1, t: 'key', key: 'exec' })).toBeNull();
   });
+  it('L25-07/08 : sélection multiple et graphique reconnu, format strict', () => {
+    const el = { sel: 'b.value', short: 'b.value', bg: '#FFFFFF', color: '#111827' };
+    expect(parseFromFrame({ fd: 1, t: 'multi', els: [el, el] })).toEqual({
+      fd: 1,
+      t: 'multi',
+      els: [el, el],
+    });
+    expect(parseFromFrame({ fd: 1, t: 'multi', els: [{ ...el, bg: 'red' }] })).toBeNull();
+    expect(parseFromFrame({ fd: 1, t: 'multi', els: Array(201).fill(el) })).toBeNull();
+    const base = {
+      sel: 'div.chart',
+      short: 'div.chart',
+      trail: ['body', 'div.chart'],
+      rect: { x: 0, y: 0, w: 10, h: 10 },
+      text: '18',
+      tag: 'div',
+      similar: 1,
+      bg: '#FFFFFF',
+      color: '#000000',
+    };
+    const chart = { sel: 'div.chart', type: 'bar', title: 'Rapports', rows: [{ label: 'juil.', value: 18 }] };
+    const ok = parseFromFrame({ fd: 1, t: 'select', el: { ...base, chart } });
+    expect(ok && ok.t === 'select' && ok.el?.chart).toEqual(chart);
+    const bad = parseFromFrame({ fd: 1, t: 'select', el: { ...base, chart: { ...chart, type: 'pie' } } });
+    expect(bad && bad.t === 'select' && bad.el?.chart).toBeNull();
+  });
 });

@@ -79,12 +79,16 @@ export function HtmlStep({
   const ops = useMemo<FrameOp[]>(
     () =>
       h.ops
-        .filter((o) => o.op !== 'image' || /^(https:|data:image\/)/.test(o.value ?? ''))
+        .filter(
+          (o) => o.op !== 'image' || (typeof o.value === 'string' && /^(https:|data:image\/)/.test(o.value)),
+        )
         .map((o) => ({
           id: o.id,
           sel: o.sel,
           op: o.op,
-          value: o.op === 'text' ? sub(o.value ?? '') : o.value,
+          ...(o.sels ? { sels: o.sels } : {}),
+          // Style et graphique : objets revalidés dans la page (liste blanche, valeurs numériques)
+          value: o.op === 'text' ? sub(typeof o.value === 'string' ? o.value : '') : o.value,
         })),
     [h.ops, sub],
   );

@@ -5,14 +5,42 @@ import { applyVariables, type VariableValues } from './variables';
  * valeur) et non comme un DOM réécrit. Elles survivent à une nouvelle capture : un sélecteur qui ne
  * trouve plus rien est mis de côté (notFound), sans bloquer la publication.
  */
-export type HtmlOpKind = 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove';
+export type HtmlOpKind = 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart';
+
+/**
+ * L25-07 : style posé en masse. Liste blanche stricte (aucune chaîne CSS libre) : couleurs en
+ * #RRGGBB, taille de 8 à 96 px, graisse 400, 600 ou 700.
+ */
+export interface HtmlStyle {
+  color?: string;
+  background?: string;
+  fontSize?: number;
+  fontWeight?: '400' | '600' | '700';
+}
+export const STYLE_KEYS = ['color', 'fontSize', 'fontWeight', 'background'] as const;
+export const FONT_WEIGHTS = ['400', '600', '700'] as const;
+export const STYLE_SELS_MAX = 200;
+
+/** L25-08 : graphique redessiné (12 lignes au plus, valeurs numériques). */
+export type ChartType = 'bar' | 'line' | 'donut';
+export interface HtmlChart {
+  type: ChartType;
+  rows: Array<{ label: string; value: number }>;
+  title?: string;
+}
+export const CHART_ROWS_MAX = 12;
 
 export interface HtmlOp {
   id: string;
   sel: string;
   op: HtmlOpKind;
-  /** text : nouveau texte (variables {{…}} permises) ; link : id de l'étape ; image : chemin. */
-  value?: string;
+  /** L25-07 : style seulement, tous les éléments touchés (sel = le premier). */
+  sels?: string[];
+  /**
+   * text : nouveau texte (variables {{…}} permises) ; link : id de l'étape ; image : chemin ;
+   * style : propriétés en liste blanche ; chart : type et valeurs.
+   */
+  value?: string | HtmlStyle | HtmlChart;
   /** Valeur avant modification (texte d'origine, affiché dans la liste « avant → après »). */
   before?: string;
   /** « Toutes les étapes » : même groupe sur chaque étape, une seule annulation. */
@@ -22,8 +50,44 @@ export interface HtmlOp {
 
 export const HTML_OPS_MAX = 500;
 export const HTML_MAX_BYTES = 10 * 1024 * 1024;
-const KINDS: readonly HtmlOpKind[] = ['text', 'hide', 'blur', 'link', 'image', 'remove'];
+const KINDS: readonly HtmlOpKind[] = ['text', 'hide', 'blur', 'link', 'image', 'remove', 'style', 'chart'];
 const ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
+const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
+const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
+
+/** L25-07 : même règle que html_style_ok (base). */
+export function validStyle(v: unknown): v is HtmlStyle {
+  if (!isObj(v)) return false;
+  if (Object.keys(v).some((k) => !(STYLE_KEYS as readonly string[]).includes(k))) return false;
+  for (const k of ['color', 'background'] as const)
+    if (v[k] !== undefined && (typeof v[k] !== 'string' || !HEX_RE.test(v[k] as string))) return false;
+  if (
+    v.fontSize !== undefined &&
+    (typeof v.fontSize !== 'number' || !Number.isFinite(v.fontSize) || v.fontSize < 8 || v.fontSize > 96)
+  )
+    return false;
+  if (v.fontWeight !== undefined && !(FONT_WEIGHTS as readonly unknown[]).includes(v.fontWeight))
+    return false;
+  return true;
+}
+
+/** L25-08 : même règle que html_chart_ok (base). */
+export function validChart(v: unknown): v is HtmlChart {
+  if (!isObj(v)) return false;
+  if (Object.keys(v).some((k) => !['type', 'rows', 'title'].includes(k))) return false;
+  if (!['bar', 'line', 'donut'].includes(v.type as string)) return false;
+  if (v.title !== undefined && (typeof v.title !== 'string' || v.title.length > 120)) return false;
+  if (!Array.isArray(v.rows) || v.rows.length < 1 || v.rows.length > CHART_ROWS_MAX) return false;
+  return v.rows.every(
+    (r) =>
+      isObj(r) &&
+      Object.keys(r).every((k) => k === 'label' || k === 'value') &&
+      typeof r.label === 'string' &&
+      r.label.length <= 40 &&
+      typeof r.value === 'number' &&
+      Number.isFinite(r.value),
+  );
+}
 
 /** Validation (même règle que la base) : forme stricte, sélecteur borné, aucune clé en trop. */
 export function validHtmlOps(ops: unknown): ops is HtmlOp[] {
@@ -31,15 +95,28 @@ export function validHtmlOps(ops: unknown): ops is HtmlOp[] {
   return ops.every((o) => {
     if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
     const r = o as Record<string, unknown>;
-    const allowed = ['id', 'sel', 'op', 'value', 'before', 'scope', 'group'];
+    const allowed = ['id', 'sel', 'sels', 'op', 'value', 'before', 'scope', 'group'];
     if (Object.keys(r).some((k) => !allowed.includes(k))) return false;
     if (typeof r.id !== 'string' || !ID_RE.test(r.id)) return false;
     if (typeof r.sel !== 'string' || r.sel.length < 1 || r.sel.length > 500) return false;
     if (!KINDS.includes(r.op as HtmlOpKind)) return false;
     if (r.scope !== 'step' && r.scope !== 'all') return false;
     if (r.group !== undefined && (typeof r.group !== 'string' || !ID_RE.test(r.group))) return false;
-    for (const k of ['value', 'before'] as const)
-      if (r[k] !== undefined && (typeof r[k] !== 'string' || (r[k] as string).length > 5000)) return false;
+    if (
+      r.sels !== undefined &&
+      (r.op !== 'style' ||
+        !Array.isArray(r.sels) ||
+        r.sels.length < 1 ||
+        r.sels.length > STYLE_SELS_MAX ||
+        !r.sels.every((x) => typeof x === 'string' && x.length >= 1 && x.length <= 500))
+    )
+      return false;
+    if (r.op === 'style') {
+      if (!validStyle(r.value)) return false;
+    } else if (r.op === 'chart') {
+      if (!validChart(r.value)) return false;
+    } else if (r.value !== undefined && (typeof r.value !== 'string' || r.value.length > 5000)) return false;
+    if (r.before !== undefined && (typeof r.before !== 'string' || r.before.length > 5000)) return false;
     if ((r.op === 'text' || r.op === 'link' || r.op === 'image') && typeof r.value !== 'string') return false;
     return true;
   });
@@ -175,8 +252,8 @@ export function applyHtmlOps(
       case 'text':
         h.textContent =
           opts.mode === 'player'
-            ? applyVariables(o.value ?? '', opts.variables ?? {}, opts.defaults)
-            : (o.value ?? '');
+            ? applyVariables(String(o.value ?? ''), opts.variables ?? {}, opts.defaults)
+            : String(o.value ?? '');
         break;
       case 'blur':
         neutralizeText(el);
@@ -192,18 +269,40 @@ export function applyHtmlOps(
           h.setAttribute(o.op === 'hide' ? 'data-fd-hidden' : 'data-fd-removed', '');
         }
         break;
-      case 'link':
-        h.setAttribute('data-fd-link', o.value ?? '');
-        links.push({ el, step: o.value ?? '' });
+      case 'link': {
+        const step = typeof o.value === 'string' ? o.value : '';
+        h.setAttribute('data-fd-link', step);
+        links.push({ el, step });
         break;
+      }
       case 'image':
-        if (el.tagName === 'IMG' && o.value)
+        if (el.tagName === 'IMG' && typeof o.value === 'string' && o.value)
           el.setAttribute('src', opts.imageUrl ? opts.imageUrl(o.value) : o.value);
         el.removeAttribute('srcset');
+        break;
+      case 'style':
+        for (const s of o.sels ?? [o.sel]) {
+          let t: Element | null = null;
+          try {
+            t = doc.querySelector(s);
+          } catch {
+            t = null;
+          }
+          if (t) applyStyle(t as HTMLElement, o.value);
+        }
         break;
     }
   }
   return { notFound, links };
+}
+
+/** L25-07 : pose les seules propriétés de la liste blanche, revalidées (jamais de CSS libre). */
+export function applyStyle(h: HTMLElement, v: unknown): void {
+  if (!validStyle(v)) return;
+  if (v.color) h.style.setProperty('color', v.color);
+  if (v.background) h.style.setProperty('background-color', v.background);
+  if (v.fontSize) h.style.setProperty('font-size', `${Math.round(v.fontSize)}px`);
+  if (v.fontWeight) h.style.setProperty('font-weight', v.fontWeight);
 }
 
 /** Annulation : retire l'opération, ou tout son groupe (« Toutes les étapes ») d'un coup. */

@@ -7,7 +7,9 @@ import {
   shortSelector,
   stableSelector,
   undoHtmlOp,
+  validChart,
   validHtmlOps,
+  validStyle,
   type HtmlOp,
 } from './htmlOps';
 
@@ -113,5 +115,50 @@ describe('htmlOps', () => {
     ];
     expect(undoHtmlOp(ops, 'a').map((o) => o.id)).toEqual(['c']);
     expect(undoHtmlOp(ops, 'c').map((o) => o.id)).toEqual(['a', 'b']);
+  });
+
+  it('L25-07 : style en liste blanche, plusieurs éléments, une seule opération', () => {
+    const d = page();
+    const op: HtmlOp = {
+      id: 's1',
+      sel: 'div.kpi:nth-of-type(1) > b.value',
+      sels: ['div.kpi:nth-of-type(1) > b.value', 'div.kpi:nth-of-type(2) > b.value'],
+      op: 'style',
+      value: { color: '#0B6B62', fontSize: 24, fontWeight: '700' },
+      scope: 'step',
+    };
+    expect(validHtmlOps([op])).toBe(true);
+    applyHtmlOps(d, [op], { mode: 'player' });
+    const bs = [...d.querySelectorAll<HTMLElement>('b.value')];
+    expect(bs.map((b) => b.style.fontSize)).toEqual(['24px', '24px']);
+    expect(bs[1]!.style.fontWeight).toBe('700');
+    expect(bs[0]!.style.color).toBe('rgb(11, 107, 98)');
+  });
+  it('L25-07 : aucune chaîne CSS libre', () => {
+    expect(validStyle({ color: 'red' })).toBe(false);
+    expect(validStyle({ color: '#000000; background:url(x)' })).toBe(false);
+    expect(validStyle({ fontSize: 200 })).toBe(false);
+    expect(validStyle({ fontWeight: 'bold' })).toBe(false);
+    expect(validStyle({ position: 'fixed' })).toBe(false);
+    expect(validStyle({ background: '#FFFFFF' })).toBe(true);
+    const base = { id: 'a', sel: 'b', scope: 'step' };
+    expect(validHtmlOps([{ ...base, op: 'style', value: 'color:red' }])).toBe(false);
+    expect(validHtmlOps([{ ...base, op: 'hide', sels: ['b'] }])).toBe(false);
+    expect(
+      validHtmlOps([{ ...base, op: 'style', sels: Array(201).fill('b'), value: { color: '#000000' } }]),
+    ).toBe(false);
+  });
+  it('L25-08 : graphique (type, 12 lignes au plus, valeurs numériques)', () => {
+    const rows = [
+      { label: 'juil.', value: 18 },
+      { label: 'août', value: 22 },
+    ];
+    expect(validChart({ type: 'bar', rows, title: 'Rapports par mois' })).toBe(true);
+    expect(validChart({ type: 'pie', rows })).toBe(false);
+    expect(validChart({ type: 'bar', rows: [] })).toBe(false);
+    expect(validChart({ type: 'bar', rows: Array(13).fill(rows[0]) })).toBe(false);
+    expect(validChart({ type: 'bar', rows: [{ label: 'a', value: '3' }] })).toBe(false);
+    expect(validChart({ type: 'line', rows: [{ label: 'a', value: NaN }] })).toBe(false);
+    expect(validChart({ type: 'donut', rows, color: '#000000' })).toBe(false);
   });
 });
