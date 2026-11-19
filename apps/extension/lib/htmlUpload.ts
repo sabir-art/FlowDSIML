@@ -45,13 +45,13 @@ export async function sendHtml(
       kind: target.kind,
       sandbox:
         target.kind === 'sandbox'
-          ? { start: stepIds[0], autoLink: true, unlinked: 'toast', guide: false, keyPages: [] }
+          ? ({ start: stepIds[0], autoLink: true, unlinked: 'toast', guide: false, keyPages: [] } as Json)
           : null,
-    } as never)
+    })
     .select('id')
     .single();
   if (demo.error) throw demo.error;
-  const demoId = (demo.data as { id: string }).id;
+  const demoId = demo.data.id;
   for (const [i, p] of ordered.entries()) {
     const path = await ingest(s.session.access_token, target.workspaceId, demoId, p.html);
     const ops: HtmlOp[] = [];
@@ -77,7 +77,7 @@ export async function sendHtml(
         blurred: p.blurred,
         canvases: p.canvases,
       } as unknown as Json,
-    } as never);
+    });
     if (ins.error) throw ins.error;
     onProgress(i + 1);
   }

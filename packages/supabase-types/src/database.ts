@@ -174,6 +174,8 @@ export type Database = {
         Row: {
           device: string;
           viewport: Json | null;
+          kind: string;
+          sandbox: Json | null;
           cover_path: string | null;
           created_at: string;
           created_by: string | null;
@@ -192,6 +194,8 @@ export type Database = {
         Insert: {
           device?: string;
           viewport?: Json | null;
+          kind?: string;
+          sandbox?: Json | null;
           cover_path?: string | null;
           created_at?: string;
           created_by?: string | null;
@@ -209,6 +213,8 @@ export type Database = {
         Update: {
           device?: string;
           viewport?: Json | null;
+          kind?: string;
+          sandbox?: Json | null;
           cover_path?: string | null;
           created_at?: string;
           created_by?: string | null;
@@ -1594,6 +1600,9 @@ export type Database = {
           video: Json;
           video_duration_ms: number | null;
           video_path: string | null;
+          html_path: string | null;
+          html_ops: Json;
+          html_meta: Json;
           before_blurs: NonNullable<Json>;
           before_image_height: number | null;
           before_image_path: string | null;
@@ -1627,6 +1636,9 @@ export type Database = {
           video?: Json;
           video_duration_ms?: number | null;
           video_path?: string | null;
+          html_path?: string | null;
+          html_ops?: Json;
+          html_meta?: Json;
           before_blurs?: NonNullable<Json>;
           before_image_height?: number | null;
           before_image_path?: string | null;
@@ -1659,6 +1671,9 @@ export type Database = {
           video?: Json;
           video_duration_ms?: number | null;
           video_path?: string | null;
+          html_path?: string | null;
+          html_ops?: Json;
+          html_meta?: Json;
           before_blurs?: NonNullable<Json>;
           before_image_height?: number | null;
           before_image_path?: string | null;

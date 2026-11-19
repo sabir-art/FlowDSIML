@@ -30,6 +30,14 @@ Installées avec jsPDF. Seules `fflate`, `fast-png` et `@babel/runtime` servent 
 | core-js, regenerator-runtime                                 | —       | MIT                                                  |
 | DOMPurify                                                    | 3.4     | MPL-2.0 ou Apache-2.0, au choix (Apache-2.0 retenue) |
 
+## Vidéo et capture HTML (F7, A8)
+
+| Composant                                                       | Version | Licence | Usage                                                                                      |
+| --------------------------------------------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------ |
+| [tus-js-client](https://github.com/tus/tus-js-client)           | 4.3.1   | MIT     | Envoi par reprise des vidéos depuis l'extension (F7)                                       |
+| [sanitize-html](https://github.com/apostrophecms/sanitize-html) | 2.18.1  | MIT     | Second assainissement des captures HTML côté serveur, fonction `html-ingest` (A8)          |
+| [jsdom](https://github.com/jsdom/jsdom)                         | 26.1.0  | MIT     | Tests unitaires du moteur d'opérations et de l'assainissement (`packages/core`, non livré) |
+
 ## Outils de test (L24, non livrés)
 
 Ces dépendances de développement servent seulement aux tests automatisés (CI). Elles ne sont ni modifiées ni incluses dans les applications livrées.

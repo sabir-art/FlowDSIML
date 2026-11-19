@@ -440,3 +440,8 @@ verify_jwt = false
 [functions.media]
 enabled = true
 verify_jwt = true
+
+# A8 : seule porte d'écriture du bucket html (second assainissement des captures), JWT vérifié.
+[functions.html-ingest]
+enabled = true
+verify_jwt = true
