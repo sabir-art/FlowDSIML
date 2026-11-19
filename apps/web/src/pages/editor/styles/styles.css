@@ -87,6 +87,10 @@
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
 }
+/* L18-05 : en sombre, contour visible (3:1 au moins) autour des pastilles noires */
+:root[data-theme='dark'] .sty-swatches span {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.55);
+}
 .sty-menu {
   position: absolute;
   right: 2px;

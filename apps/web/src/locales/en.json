@@ -1281,7 +1281,8 @@
       "viewPage": "Page",
       "viewPlan": "Map"
     },
-    "importUnverified": "This image is not checked automatically: blur personal data before publishing."
+    "importUnverified": "This image is not checked automatically: blur personal data before publishing.",
+    "noFormShort": "No form"
   },
   "status": {
     "draft": "Draft",
@@ -3160,8 +3161,8 @@
     "delete": "Delete",
     "deleteTitle": "Delete “{{name}}”?",
     "deleteBody": "The file will be removed from the media library.",
-    "inUse_one": "This file is used in {{count}} demo. It will be replaced by the default image.",
-    "inUse_other": "This file is used in {{count}} demos. It will be replaced by the default image.",
+    "inUse_one": "This file is used in {{count}} demo. That spot will be left empty.",
+    "inUse_other": "This file is used in {{count}} demos. Those spots will be left empty.",
     "tooBig": "File too large: 5 MB at most.",
     "full": "Media library full: delete unused files.",
     "badType": "Format not accepted: PNG, JPG, SVG or WOFF2.",

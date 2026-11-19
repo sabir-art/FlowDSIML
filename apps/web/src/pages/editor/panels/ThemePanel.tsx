@@ -1,4 +1,4 @@
-import { Image as ImageIcon, ImageUp, TriangleAlert, X } from 'lucide-react';
+import { Image as ImageIcon, ImageUp, Images, TriangleAlert, X } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { themeSchema, type Theme } from '@flowdsiml/manifest';
@@ -260,7 +260,9 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
                 <ImageUp aria-hidden="true" />
                 {theme.logoUrl ? t('editor.changeLogo') : t('editor.chooseLogo')}
               </button>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setLibrary('logo')}>
+              {/* L18-03 : action stylée et alignée avec « Choisir un logo » */}
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setLibrary('logo')}>
+                <Images aria-hidden="true" />
                 {t('media.choose')}
               </button>
               {theme.logoUrl && (

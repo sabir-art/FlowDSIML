@@ -54,7 +54,7 @@ const N = ' ';
   );
   ok(
     (await panel.getByRole('status').filter({ hasText: 'mène' }).textContent()).includes(
-      `Résultat fiable à partir d’environ 1${N}000 visiteurs.`,
+      'Résultat fiable à partir d’environ 1\u00a0000 visiteurs.',
     ),
     'phrase prudente et seuil de fiabilité',
   );
@@ -96,6 +96,31 @@ const N = ' ';
   await panel.getByText('Pas encore assez de visiteurs pour comparer.').waitFor();
   ok((await panel.locator('.ab-card--lead').count()) === 0, 'sous 50 visiteurs : aucun meneur');
   await panel.getByLabel('Objectif').selectOption('completion');
+  // L18-02 : capture avec la section entière (cartes, champs de B, actions), répartition 50/50
+  // cohérente avec 206 visiteurs de chaque côté
+  ok(
+    (await panel
+      .locator('.ab-badge, .ab-sec .badge')
+      .first()
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize))) >= 12,
+    'badge « En cours » à la taille standard',
+  );
+  await panel
+    .locator('.ab-sec .sec-title')
+    .first()
+    .evaluate((el) => {
+      let p = el.parentElement;
+      while (p && p.scrollHeight <= p.clientHeight) p = p.parentElement;
+      if (p) p.scrollTop += el.getBoundingClientRect().top - p.getBoundingClientRect().top - 8;
+    });
+  await page.waitForTimeout(300);
+  ok(
+    await panel
+      .getByRole('button', { name: 'Arrêter le test' })
+      .evaluate((el) => el.getBoundingClientRect().bottom <= innerHeight),
+    'capture : actions de la section visibles',
+  );
+  await shot('l18-02-ab');
   const split = panel.getByLabel('Répartition');
   await split.focus();
   await page.keyboard.press('ArrowLeft');
@@ -104,8 +129,6 @@ const N = ' ';
     test.split_b === 60 && (await split.getAttribute('aria-valuetext')) === `A 40${N}%, B 60${N}%`,
     'répartition par pas de 10',
   );
-  await panel.getByText('B mène de 11 points sur 412 visiteurs.').scrollIntoViewIfNeeded();
-  await shot('l18-02-ab');
 
   // Un seul test par démo
   await page.locator('[data-step-index="1"]').click();

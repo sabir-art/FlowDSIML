@@ -415,6 +415,13 @@ async function install(page, state = seed()) {
         created_by: state.user.id,
         created_at: new Date().toISOString(),
       };
+      // Contenu du fichier (Playwright ne transmet pas les octets d'un envoi multipart) : fourni par
+      // le test dans state.mediaFiles[nom], pour une vignette fidèle dans la médiathèque
+      const content = state.mediaFiles?.[fname];
+      if (content) {
+        state.storage[`media/${row.path}`] = { data: content, type: mime };
+        row.size_bytes = content.length;
+      }
       list.unshift(row);
       return json(route, 200, row);
     }

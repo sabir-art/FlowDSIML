@@ -2302,3 +2302,8 @@
   margin-top: 1px;
   color: var(--fd-color-warning, currentColor);
 }
+
+/* L18-01 : une section sans contenu ne laisse pas de double séparateur */
+.mk .sec:empty {
+  display: none;
+}

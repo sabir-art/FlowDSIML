@@ -58,12 +58,9 @@ const N = ' ';
       (await cta.evaluate((e) => getComputedStyle(e).color)) === 'rgb(8, 8, 8)',
       'canevas : bouton en texte noir',
     );
+  // L18-05 : capture avec le toast « Style … appliqué » et son action « Annuler » (exception
+  // demandée à la règle « captures sans toast »)
   if (SHOTS) {
-    await page
-      .locator('.toast button[aria-label]')
-      .first()
-      .click()
-      .catch(() => {});
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${SHOTS}/l18-05-styles${sfx}.png` });
   }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileType, Search, Trash2, Upload, X } from 'lucide-react';
+import { FileType, Search, Trash2, TriangleAlert, Upload, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { foldText } from '@flowdsiml/core';
 import { supabase } from '../../lib/supabase';
@@ -48,6 +48,7 @@ export function MediaLibrary({
   const [used, setUsed] = useState(0);
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>(kind ?? 'all');
+  const [warn, setWarn] = useState(false);
   const [sel, setSel] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -118,6 +119,8 @@ export function MediaLibrary({
     }
     await load();
     setSel(data.id as string);
+    // L18-03 : une image importée n'est pas vérifiée automatiquement (données personnelles)
+    setWarn(!font);
   }
 
   async function remove(f: MediaFile) {
@@ -173,6 +176,44 @@ export function MediaLibrary({
             {err}
           </div>
         )}
+        {warn && (
+          <div className="alert alert-warning md-warn" role="status">
+            <TriangleAlert aria-hidden="true" />
+            <span>{t('editor.importUnverified')}</span>
+          </div>
+        )}
+        {/* L18-04 : recherche et filtre toujours présents (inactifs quand la médiathèque est vide) */}
+        <div className="md-tools">
+          <div className="input-affix md-search">
+            <Search aria-hidden="true" />
+            <input
+              className="input input-sm"
+              type="search"
+              placeholder={t('media.search')}
+              aria-label={t('media.search')}
+              value={q}
+              disabled={empty}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <div className="segmented" role="radiogroup" aria-label={t('media.filter')}>
+            {(['all', 'logo', 'image', 'font'] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                role="radio"
+                aria-checked={filter === f}
+                disabled={empty}
+                onClick={() => setFilter(f)}
+              >
+                {t(`media.filter_${f}`)}
+              </button>
+            ))}
+          </div>
+          <span className="sr-only" role="status">
+            {files ? t('media.count', { count: shown.length }) : ''}
+          </span>
+        </div>
         {empty ? (
           <button
             type="button"
@@ -192,35 +233,6 @@ export function MediaLibrary({
           </button>
         ) : (
           <>
-            <div className="md-tools">
-              <div className="input-affix md-search">
-                <Search aria-hidden="true" />
-                <input
-                  className="input input-sm"
-                  type="search"
-                  placeholder={t('media.search')}
-                  aria-label={t('media.search')}
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                />
-              </div>
-              <div className="segmented" role="radiogroup" aria-label={t('media.filter')}>
-                {(['all', 'logo', 'image', 'font'] as const).map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    role="radio"
-                    aria-checked={filter === f}
-                    onClick={() => setFilter(f)}
-                  >
-                    {t(`media.filter_${f}`)}
-                  </button>
-                ))}
-              </div>
-              <span className="sr-only" role="status">
-                {files ? t('media.count', { count: shown.length }) : ''}
-              </span>
-            </div>
             <ul className="md-grid" aria-label={t('media.files')}>
               <li>
                 <button

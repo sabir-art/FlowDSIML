@@ -233,7 +233,7 @@ export function AbSection({
       {dialog}
       <div className="sec-title">
         {t('editor.ab.title')}
-        <span className="badge badge-success badge-xs">{t('editor.ab.running', { n: day })}</span>
+        <span className="badge badge-success">{t('editor.ab.running', { n: day })}</span>
       </div>
       <div className="ab-cards">
         {card('A')}

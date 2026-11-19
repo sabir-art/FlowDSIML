@@ -30,7 +30,16 @@ const N = ' ';
   };
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'media-'));
   const logo = path.join(dir, 'logo-acme.png');
-  fs.copyFileSync(path.join(__dirname, 'fixture.png'), logo);
+  // L18-03 : vrai logo fictif (et non une capture du CRM)
+  {
+    const lp = await (await b.newContext({ viewport: { width: 240, height: 240 } })).newPage();
+    await lp.setContent(
+      '<body style="margin:0;display:grid;place-items:center;width:240px;height:240px;background:#fff;font:800 44px system-ui">' +
+        '<div style="display:grid;place-items:center;gap:6px"><div style="width:96px;height:96px;border-radius:24px;background:#1f6f5c;display:grid;place-items:center;color:#fff;font-size:56px">A</div><span style="color:#1f6f5c">acme</span></div></body>',
+    );
+    await lp.screenshot({ path: logo });
+    await lp.context().close();
+  }
   const fond = path.join(dir, 'fond-accueil.png');
   fs.copyFileSync(path.join(__dirname, 'fixture.png'), fond);
   const svg = path.join(dir, 'pictogramme.svg');
@@ -38,7 +47,8 @@ const N = ' ';
 
   const state = seed();
   state.tables.media_files = [];
-  state.mediaBaseUsed = 12 * 1024 * 1024;
+  state.mediaBaseUsed = 0;
+  state.mediaFiles = { 'logo-acme.png': fs.readFileSync(logo), 'fond-accueil.png': fs.readFileSync(fond) };
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
@@ -58,6 +68,12 @@ const N = ' ';
     (await dlg.getByRole('button', { name: 'Utiliser ce fichier' }).getAttribute('aria-disabled')) === 'true',
     'L18-04 : « Utiliser ce fichier » inactif',
   );
+  ok(
+    (await dlg.getByRole('searchbox', { name: 'Rechercher un fichier' }).isDisabled()) &&
+      (await dlg.getByRole('radio', { name: 'Logos' }).isDisabled()),
+    'L18-04 : recherche et filtre présents, inactifs',
+  );
+  ok(/0\s?Mo sur 500/.test(await dlg.textContent()), 'L18-04 : quota réel (0 Mo)');
   await shot('l18-04-media-vide');
 
   // Imports
@@ -77,11 +93,10 @@ const N = ' ';
   );
   await importVia(fond, /^Importer/);
   await dlg.getByRole('button', { name: 'fond-accueil.png' }).waitFor();
-  state.mediaReject = 'SVG_REJECTED';
-  await importVia(svg, /^Importer/);
-  await dlg.getByRole('alert').waitFor();
-  ok((await dlg.getByRole('alert').textContent()).includes('éléments refusés'), 'SVG refusé : message');
-  state.mediaReject = null;
+  ok(
+    /n’est pas vérifiée automatiquement/.test(await dlg.locator('.md-warn').textContent()),
+    'L18-03 : avertissement à l’import d’une image',
+  );
 
   // Filtre et recherche
   await dlg.getByRole('radio', { name: 'Tout' }).click();
@@ -92,6 +107,11 @@ const N = ' ';
   await dlg.getByRole('button', { name: 'logo-acme.png' }).click();
   ok((await dlg.locator('.md-foot').textContent()).includes(`sur 500${N}Mo`), 'pied : quota sur 500 Mo');
   await shot('l18-03-media');
+  state.mediaReject = 'SVG_REJECTED';
+  await importVia(svg, /^Importer/);
+  await dlg.getByRole('alert').waitFor();
+  ok((await dlg.getByRole('alert').textContent()).includes('éléments refusés'), 'SVG refusé : message');
+  state.mediaReject = null;
 
   // Utiliser pour le logo
   await dlg.getByRole('button', { name: 'Utiliser ce fichier' }).click();
@@ -116,9 +136,7 @@ const N = ' ';
   const conf = page.getByRole('dialog', { name: `Supprimer «${N}logo-acme.png${N}»${N}?` });
   await conf.waitFor();
   ok(
-    (await conf.textContent()).includes(
-      'Ce fichier est utilisé dans 1 démo. Il sera remplacé par l’image par défaut.',
-    ),
+    (await conf.textContent()).includes('Ce fichier est utilisé dans 1 démo. Cet emplacement restera vide.'),
     'suppression : avertissement d’usage',
   );
   await conf.getByRole('button', { name: 'Supprimer' }).click();

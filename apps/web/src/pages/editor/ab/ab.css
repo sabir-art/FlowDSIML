@@ -11,7 +11,7 @@
   flex: none;
 }
 .ab-pill--A {
-  background: #2381b5;
+  background: #217bac;
 }
 .ab-pill--B {
   background: #a3195b;
@@ -48,7 +48,7 @@
   padding: 9px;
 }
 .ab-card--lead-A {
-  border: 2px solid #2381b5;
+  border: 2px solid #217bac;
 }
 .ab-card--lead-B {
   border: 2px solid #a3195b;
@@ -101,4 +101,12 @@
 }
 .ab-stop {
   color: var(--fd-color-danger);
+}
+
+/* L18-02 : en sombre, contour de B plus clair (3:1 au moins sur la carte) */
+:root[data-theme='dark'] .ab-card--lead-B {
+  border-color: #e0679f;
+}
+:root[data-theme='dark'] .ab-card--lead-A {
+  border-color: #5aaedb;
 }

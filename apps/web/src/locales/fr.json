@@ -1103,7 +1103,7 @@
       "tooFew": "Pas encore assez de visiteurs pour comparer.",
       "leads": "{{v}} mène de {{points}} points sur {{n}} visiteurs.",
       "tie": "A et B sont à égalité sur {{n}} visiteurs.",
-      "reliable": "Résultat fiable à partir d’environ 1 000 visiteurs.",
+      "reliable": "Résultat fiable à partir d’environ 1 000 visiteurs.",
       "goal": "Objectif",
       "goal_completion": "Taux de complétion",
       "goal_cta": "Clics sur le bouton d’action",
@@ -1281,7 +1281,8 @@
       "viewPage": "Page",
       "viewPlan": "Plan"
     },
-    "importUnverified": "Cette image n’est pas vérifiée automatiquement : floutez les données personnelles avant de publier."
+    "importUnverified": "Cette image n’est pas vérifiée automatiquement : floutez les données personnelles avant de publier.",
+    "noFormShort": "Aucun formulaire"
   },
   "status": {
     "draft": "Brouillon",
@@ -3160,8 +3161,8 @@
     "delete": "Supprimer",
     "deleteTitle": "Supprimer « {{name}} » ?",
     "deleteBody": "Le fichier sera retiré de la médiathèque.",
-    "inUse_one": "Ce fichier est utilisé dans {{count}} démo. Il sera remplacé par l’image par défaut.",
-    "inUse_other": "Ce fichier est utilisé dans {{count}} démos. Il sera remplacé par l’image par défaut.",
+    "inUse_one": "Ce fichier est utilisé dans {{count}} démo. Cet emplacement restera vide.",
+    "inUse_other": "Ce fichier est utilisé dans {{count}} démos. Ces emplacements resteront vides.",
     "tooBig": "Fichier trop lourd : 5 Mo au plus.",
     "full": "Médiathèque pleine : supprimez des fichiers inutilisés.",
     "badType": "Format non accepté : PNG, JPG, SVG ou WOFF2.",

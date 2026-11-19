@@ -332,13 +332,15 @@ export function StepPanel({
             value={step.gate_form_id ?? ''}
             onChange={(e) => editor.updateStep(step.id, { gate_form_id: e.target.value || null })}
           >
-            <option value="">{editor.forms.length ? t('common.none') : t('editor.noForm')}</option>
+            <option value="">{editor.forms.length ? t('common.none') : t('editor.noFormShort')}</option>
             {editor.forms.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.title}
               </option>
             ))}
           </select>
+          {/* L18-01 : libellé court dans le select, explication en aide */}
+          {!editor.forms.length && <p className="help">{t('editor.noForm')}</p>}
           {step.gate_form_id && !plan.leadForms && (
             <p className="help help-warning">
               <TriangleAlert size={16} aria-hidden="true" />
