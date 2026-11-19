@@ -80,7 +80,7 @@ export function Academy() {
                 {ok && <span className="sr-only"> · {t('learn.done')}</span>}
               </span>
               {!tr ? (
-                <span className="help-muted academy-act">{t('learn.soon')}</span>
+                <span className="fd-badge help-soon academy-act">{t('shell.soon')}</span>
               ) : ok || m === next ? (
                 <button
                   type="button"

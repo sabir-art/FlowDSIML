@@ -96,7 +96,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     sp(await ac.getByRole('progressbar').getAttribute('aria-valuetext')) === '1 module sur 5',
     'parcours : 1 sur 5 (modules disponibles)',
   );
-  ok(/Bientôt/.test(await ac.locator('li').nth(0).innerText()), 'sans démo : « Bientôt »');
+  ok(
+    (await ac.locator('li').nth(0).locator('.fd-badge', { hasText: 'Bientôt' }).count()) === 1,
+    'sans démo : badge « Bientôt »',
+  );
   ok(/Revoir/.test(await ac.locator('li').nth(1).innerText()), 'module fait : « Revoir »');
   ok(/Commencer/.test(await ac.locator('li').nth(2).innerText()), 'prochain : « Commencer »');
   ok(/\d+ étapes/.test(await ac.locator('li').nth(3).innerText()), 'les autres : « n étapes »');
