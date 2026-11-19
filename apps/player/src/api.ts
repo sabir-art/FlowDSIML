@@ -298,7 +298,8 @@ export function submitQuizAttempt(batch: {
   visitorId: string;
   sessionId: string;
   linkToken: string | null;
-  answers: Array<{ questionId: string; answerIds: string[] }>;
+  /** L19 : note de 0 à 10 (value) ou réponse écrite (text, 500 caractères) pour un sondage. */
+  answers: Array<{ questionId: string; answerIds?: string[]; value?: number; text?: string }>;
 }) {
   return rpc<QuizResult>('submit_quiz_attempt', { p_batch: batch });
 }

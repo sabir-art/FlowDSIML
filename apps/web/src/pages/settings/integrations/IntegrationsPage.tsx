@@ -458,15 +458,6 @@ function WebhookForm({
                   </span>
                 </label>
               ))}
-              <label className="is-soon">
-                <input type="checkbox" disabled />
-                <span>
-                  {t('integrations.ev_alert')} <span className="badge">{t('shell.soon')}</span>
-                  <small>
-                    <code>alert.triggered</code>
-                  </small>
-                </span>
-              </label>
             </div>
             {evErr && (
               <p className="help is-error" id={`${id}-ee`} role="alert">

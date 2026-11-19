@@ -39,13 +39,15 @@ export function useNotifications() {
     const since = new Date(Date.now() - DAYS * 86400_000).toISOString();
     const { data } = await supabase
       .from('notifications')
-      .select('id, kind, demo_id, step_id, comment_id, actor_id, created_at, read_at')
+      .select('id, kind, demo_id, step_id, comment_id, alert_id, data, actor_id, created_at, read_at')
       .eq('workspace_id', ws)
       .gte('created_at', since)
       .order('created_at', { ascending: false })
       .limit(100);
     const rows = (data ?? []) as NotificationRow[];
-    const uniq = (k: 'demo_id' | 'step_id' | 'comment_id') => [...new Set(rows.map((r) => r[k]))];
+    const uniq = (k: 'demo_id' | 'step_id' | 'comment_id') => [
+      ...new Set(rows.map((r) => r[k]).filter((v): v is string => !!v)),
+    ];
     const [comments, demos, steps, members] = rows.length
       ? await Promise.all([
           supabase.from('step_comments').select('id, body').in('id', uniq('comment_id')),
@@ -69,13 +71,14 @@ export function useNotifications() {
     setItems(
       rows
         // Le fil n'est plus lisible (supprimé ou accès perdu) : la notification disparaît
-        .filter((r) => cm.has(r.comment_id))
+        // (une alerte ne porte pas de fil : elle reste)
+        .filter((r) => r.kind === 'alert' || (r.comment_id && cm.has(r.comment_id)))
         .map((r) => ({
           ...r,
           actorName: (r.actor_id && names.get(r.actor_id)) || '',
-          demoTitle: dm.get(r.demo_id)?.title ?? '',
-          stepNumber: sm.has(r.step_id) ? sm.get(r.step_id)!.position + 1 : null,
-          body: cm.get(r.comment_id)?.body ?? null,
+          demoTitle: (r.demo_id && dm.get(r.demo_id)?.title) || '',
+          stepNumber: r.step_id && sm.has(r.step_id) ? sm.get(r.step_id)!.position + 1 : null,
+          body: (r.comment_id && cm.get(r.comment_id)?.body) || null,
         })),
     );
     setLoading(false);

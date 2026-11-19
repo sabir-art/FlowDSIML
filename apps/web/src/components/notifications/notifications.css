@@ -128,6 +128,14 @@
   background: var(--fd-color-chart-5);
   color: #ffffff;
 }
+.nb-avatar--alert {
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary);
+}
+.nb-avatar--alert svg {
+  width: 18px;
+  height: 18px;
+}
 .nb-text {
   min-width: 0;
   overflow-wrap: anywhere;

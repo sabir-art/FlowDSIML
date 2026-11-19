@@ -46,6 +46,7 @@ import {
   nextIndex,
   ruleTarget,
   type BranchMemory,
+  quizAnswerPayload,
 } from './logic';
 import { Checklist } from './Checklist';
 import { BeforeAfterStep } from './BeforeAfter';
@@ -651,10 +652,9 @@ export function Player({
                       visitorId: tracker.visitorId,
                       sessionId: tracker.sessionId,
                       linkToken: tracker.linkToken,
-                      answers: Object.entries(answers).map(([questionId, answerIds]) => ({
-                        questionId,
-                        answerIds,
-                      })),
+                      answers: Object.entries(answers).map(([questionId, answerIds]) =>
+                        quizAnswerPayload(m.quiz!, questionId, answerIds),
+                      ),
                     });
                 try {
                   localStorage.setItem(QUIZ_KEY, String(quizAttemptsUsed() + 1));

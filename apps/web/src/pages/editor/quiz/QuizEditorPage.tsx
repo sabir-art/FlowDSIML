@@ -22,13 +22,22 @@ import { useDemoEditor, type DemoEditor } from '../useDemoEditor';
 import { buildDraftManifest } from '../draftManifest';
 import { PreviewDialog } from '../PreviewDialog';
 import { asAnswers, asSettings, type DemoSettings, type QuestionRow, type QuizAnswer } from '../types';
-import { convertAnswers, newAnswerId, questionErrors } from '../quizValidation';
+import { convertAnswers, isOpenType, newAnswerId, questionErrors } from '../quizValidation';
 import { QuizStats } from './QuizStats';
 import '../editor.css';
 import './quiz.css';
 
-type QType = 'single' | 'multiple' | 'truefalse';
+type QType = 'single' | 'multiple' | 'truefalse' | 'nps' | 'text';
 const TYPES: QType[] = ['single', 'multiple', 'truefalse'];
+/** L19 : en mode Sondage, note de 0 à 10 et réponse écrite en plus. */
+const SURVEY_TYPES: QType[] = [...TYPES, 'nps', 'text'];
+const TYPE_KEY: Record<QType, string> = {
+  single: 'typeSingle',
+  multiple: 'typeMultiple',
+  truefalse: 'typeTrueFalse',
+  nps: 'typeNps',
+  text: 'typeText',
+};
 const ATTEMPTS = [1, 2, 3, 5, 0];
 
 /** Onglet « Quiz » du module (spec f2-quiz §2) : liste, question, validation du module. */
@@ -170,7 +179,9 @@ function QuestionList({
       <ol>
         {editor.questions.map((q, i) => {
           const invalid =
-            Object.keys(questionErrors({ prompt: q.prompt, answers: asAnswers(q.answers) }, mode)).length > 0;
+            Object.keys(
+              questionErrors({ prompt: q.prompt, answers: asAnswers(q.answers), type: q.type }, mode),
+            ).length > 0;
           const linked = stepNumber(q.step_id);
           return (
             <li
@@ -202,9 +213,7 @@ function QuestionList({
                 <span className="quiz-list__text">
                   <span className="quiz-list__prompt">{q.prompt || t('editor.untitled')}</span>
                   <span className="quiz-list__caption">
-                    {t(
-                      `editor.quiz.type${q.type === 'truefalse' ? 'TrueFalse' : q.type === 'multiple' ? 'Multiple' : 'Single'}`,
-                    )}
+                    {t(`editor.quiz.${TYPE_KEY[q.type as QType] ?? 'typeSingle'}`)}
                     {linked > 0 && ` · ${t('editor.quiz.linkedTo', { n: linked })}`}
                   </span>
                 </span>
@@ -270,7 +279,8 @@ function QuestionForm({
   const answers = asAnswers(q.answers);
   const type = q.type as QType;
   const mode = asSettings(editor.demo!.settings).quiz?.mode === 'survey' ? 'survey' : 'quiz';
-  const errs = questionErrors({ prompt: q.prompt, answers }, mode);
+  const errs = questionErrors({ prompt: q.prompt, answers, type: q.type }, mode);
+  const open = isOpenType(type);
   const [notice, setNotice] = useState('');
   const set = (patch: Partial<QuestionRow>) => editor.updateQuestion(q.id, patch);
   const setAnswers = (next: QuizAnswer[]) => set({ answers: next as unknown as QuestionRow['answers'] });
@@ -302,7 +312,7 @@ function QuestionForm({
       <div className="quiz-question__head">
         <h2 className="fd-card__title">{t('editor.quiz.question', { n })}</h2>
         <div className="fd-segmented" role="group" aria-label={t('editor.quiz.type')}>
-          {TYPES.map((k) => (
+          {(mode === 'survey' || isOpenType(type) ? SURVEY_TYPES : TYPES).map((k) => (
             <button
               key={k}
               type="button"
@@ -310,9 +320,7 @@ function QuestionForm({
               disabled={readOnly}
               onClick={() => setType(k)}
             >
-              {t(
-                `editor.quiz.type${k === 'truefalse' ? 'TrueFalse' : k === 'multiple' ? 'Multiple' : 'Single'}`,
-              )}
+              {t(`editor.quiz.${TYPE_KEY[k]}`)}
             </button>
           ))}
         </div>
@@ -338,7 +346,21 @@ function QuestionForm({
         )}
       </Field>
 
-      <fieldset className="quiz-answers" aria-describedby={errs.answers ? `${id}-aerr` : undefined}>
+      {open && (
+        <div className="quiz-open">
+          <p className="fd-help">{t(type === 'nps' ? 'editor.quiz.npsHelp' : 'editor.quiz.textHelp')}</p>
+          {errs.answers && (
+            <p className="field-error" role="alert">
+              {t(`editor.quiz.${errs.answers}`)}
+            </p>
+          )}
+        </div>
+      )}
+      <fieldset
+        className="quiz-answers"
+        hidden={open}
+        aria-describedby={errs.answers ? `${id}-aerr` : undefined}
+      >
         <legend className="fd-label">{t('editor.quiz.answers')}</legend>
         <ul>
           {answers.map((a, i) => (

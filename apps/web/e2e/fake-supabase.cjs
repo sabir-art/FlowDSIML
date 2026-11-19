@@ -520,7 +520,9 @@ async function install(page, state = seed()) {
             const v = Math.round((views / days) * (0.7 + 0.6 * Math.abs(Math.sin(i / 3))));
             return { day, views: v, completions: Math.round(v * 0.62) };
           });
+          state.lastSegment = a.p_segment ?? null;
           return json(route, 200, {
+            segmentVisitors: a.p_segment ? (state.segmentVisitors ?? 120) : null,
             views,
             visitors: Math.round(views * 0.65),
             completions: Math.round(views * 0.65 * 0.64),
@@ -566,6 +568,10 @@ async function install(page, state = seed()) {
             lead_fields: i % 3 === 1 || state.role === 'viewer' ? null : l.fields,
           }));
           const off = a.p_offset || 0;
+          state.lastSessionsSegment = a.p_segment ?? null;
+          // L19 : segment de moins de 5 visiteurs : aucune ligne
+          if (a.p_segment && state.segmentVisitors != null && state.segmentVisitors < 5)
+            return json(route, 200, { total: 0, rows: [], tooSmall: true });
           return json(route, 200, { total: rows.length, rows: rows.slice(off, off + (a.p_limit || 25)) });
         }
         case 'quiz_stats':
@@ -945,6 +951,33 @@ async function install(page, state = seed()) {
           });
           return json(route, 200, null);
         }
+        // ===== L19 : analytics avancées =====
+        case 'live_demo':
+          return json(
+            route,
+            200,
+            state.live || {
+              kpis: { live: 0, views30: 0, ctaToday: 0, leadsToday: 0 },
+              stepsTotal: 0,
+              more: 0,
+              visitors: [],
+            },
+          );
+        case 'survey_results':
+          return json(route, 200, (state.surveys || {})[a.p_demo] || []);
+        case 'choice_results':
+          return json(route, 200, (state.choices || {})[a.p_demo] || []);
+        case 'survey_texts':
+          return json(route, 200, state.surveyTexts || []);
+        case 'segment_count': {
+          // Effectif synthétique : 1 000 visiteurs, divisé par 3 à chaque condition « toutes »
+          state.segmentCalls = (state.segmentCalls || 0) + 1;
+          const seg = a.p_segment || {};
+          const def = seg.id ? (t.segments || []).find((x) => x.id === seg.id) : seg;
+          const n = (def?.conditions || []).length;
+          const visitors = def?.match === 'any' ? 600 + 100 * n : Math.round(1000 / 3 ** n);
+          return json(route, 200, { visitors, total: 1000 });
+        }
         case 'ab_results': {
           const r = state.abResults || { A: { visitors: 0, reached: 0 }, B: { visitors: 0, reached: 0 } };
           const x = (t.ab_tests || []).find((y) => y.id === a.p_test);
@@ -1099,7 +1132,8 @@ async function install(page, state = seed()) {
       for (const [k, v] of url.searchParams) {
         if (k === 'select') select = v;
         else if (k === 'order') order = v;
-        else if (k !== 'limit' && k !== 'offset' && k !== 'columns') {
+        // or=(…) : non interprété (aucun filtre), suffisant pour les écrans testés
+        else if (k !== 'limit' && k !== 'offset' && k !== 'columns' && k !== 'or') {
           const i = v.indexOf('.');
           filters.push([k, v.slice(0, i), v.slice(i + 1)]);
         }
@@ -1162,6 +1196,18 @@ async function install(page, state = seed()) {
               resolved_by: null,
             });
           }
+        // L19 : nom de segment unique par workspace (casse ignorée)
+        if (
+          table === 'segments' &&
+          items.some((it) =>
+            rows.some(
+              (r) =>
+                r.workspace_id === it.workspace_id &&
+                r.name.trim().toLowerCase() === it.name.trim().toLowerCase(),
+            ),
+          )
+        )
+          return json(route, 409, { code: '23505', message: 'duplicate key value', details: '', hint: null });
         // L17 : terme unique par workspace (casse et accents ignorés), comme l'index de la base
         if (table === 'glossary_terms') {
           const key = (x) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
@@ -1322,6 +1368,22 @@ function defaults(table, r) {
       before_image_height: null,
       before_blurs: [],
     };
+  if (table === 'alerts')
+    return {
+      threshold: null,
+      demo_id: null,
+      path_id: null,
+      segment_id: null,
+      channels: ['app'],
+      frequency: 'immediate',
+      active: true,
+      pending: 0,
+      last_state: false,
+      digest_at: null,
+      last_fired_at: null,
+      created_by: 'u-alice',
+    };
+  if (table === 'segments') return { match: 'all', created_by: 'u-alice' };
   if (table === 'forms')
     return {
       title: 'Accédez à la démo',

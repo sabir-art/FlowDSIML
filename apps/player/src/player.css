@@ -1986,3 +1986,69 @@ h1.p-title {
   margin: 18px;
   color: #57534e;
 }
+
+/* L19 : note de 0 à 10 et réponse écrite (sondage) */
+.p-quiz-nps {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+.p-quiz-nps__opt {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border: 1px solid color-mix(in srgb, var(--p-text) 18%, transparent);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--p-surface);
+}
+.p-quiz-nps__opt input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.p-quiz-nps__opt:focus-within {
+  outline: 2px solid var(--p-primary);
+  outline-offset: 2px;
+}
+.p-quiz-nps__opt.is-selected {
+  background: var(--p-primary);
+  border-color: var(--p-primary);
+  color: var(--p-on-primary, #fff);
+}
+.p-quiz-nps__ends {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  opacity: 0.8;
+}
+.p-quiz-text {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--p-text) 18%, transparent);
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+  background: var(--p-surface);
+  color: inherit;
+  box-sizing: border-box;
+}
+.p-quiz-count-chars {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  opacity: 0.8;
+  text-align: right;
+}
+@media (max-width: 480px) {
+  .p-quiz-nps {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}

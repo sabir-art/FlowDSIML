@@ -141,7 +141,7 @@ function withNotifications() {
   await dlg.getByRole('button', { name: 'Préférences' }).click();
   const prefs = page.getByRole('dialog', { name: 'Préférences de notification' });
   await prefs.waitFor();
-  ok((await prefs.getByRole('switch').count()) === 5, 'L22-05 : 4 types + e-mail');
+  ok((await prefs.getByRole('switch').count()) === 6, 'L22-05 : 4 types + alertes (L19) + e-mail');
   ok(
     await prefs.getByRole('switch', { name: /e-mail/ }).isDisabled(),
     'L22-05 : e-mail désactivé, « Bientôt »',

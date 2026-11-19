@@ -29,4 +29,16 @@ describe('validation du quiz', () => {
       ['false', 'Faux', false],
     ]);
   });
+  it('L19 : note de 0 à 10 et réponse écrite, en mode Sondage seulement', () => {
+    expect(questionErrors({ prompt: 'Recommanderiez-vous ?', answers: [], type: 'nps' }, 'survey')).toEqual(
+      {},
+    );
+    expect(questionErrors({ prompt: 'Un avis ?', answers: [], type: 'text' }, 'quiz')).toEqual({
+      answers: 'errSurveyOnly',
+    });
+    expect(convertAnswers([], 'single', { true: 'Vrai', false: 'Faux' }).answers).toHaveLength(2);
+    expect(
+      convertAnswers([{ id: 'a', label: 'A', correct: true }], 'nps', { true: 'V', false: 'F' }).answers,
+    ).toEqual([]);
+  });
 });

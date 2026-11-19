@@ -102,6 +102,104 @@ function seedWebhooks(d) {
   }));
 }
 
+/** L19 : temps réel, sondages, segments et alertes (données fictives). */
+function seedL19(d) {
+  const ws = d.tables.workspaces[0].id;
+  const demo = d.tables.demos.find((x) => x.status === 'published') || d.tables.demos[0];
+  const at = new Date().toISOString();
+  d.live = {
+    kpis: { live: 2, views30: 9, ctaToday: 3, leadsToday: 1 },
+    stepsTotal: 4,
+    more: 0,
+    visitors: [
+      {
+        key: 'a',
+        lastAt: at,
+        since: at,
+        stepIndex: 1,
+        stepTitle: 'Bienvenue',
+        device: 'mobile',
+        country: 'FR',
+        lastType: 'step_view',
+        identity: 'lea@acme.example',
+      },
+      {
+        key: 'b',
+        lastAt: at,
+        since: at,
+        stepIndex: 2,
+        stepTitle: null,
+        device: 'desktop',
+        country: null,
+        lastType: 'step_view',
+        identity: null,
+      },
+    ],
+  };
+  d.surveys = {
+    [demo.id]: [
+      {
+        id: 'q1',
+        type: 'nps',
+        prompt: 'Recommanderiez-vous ce tutoriel ?',
+        responses: 24,
+        nps: { histogram: [0, 0, 1, 0, 1, 2, 2, 3, 5, 6, 4], score: 25 },
+        choices: null,
+      },
+      {
+        id: 'q2',
+        type: 'single',
+        prompt: 'Votre rôle',
+        responses: 10,
+        nps: null,
+        choices: [
+          { id: 'a', label: 'Conseiller', n: 7 },
+          { id: 'b', label: 'Encadrant', n: 3 },
+        ],
+      },
+    ],
+  };
+  d.tables.segments = [
+    {
+      id: 'sg1',
+      workspace_id: ws,
+      name: 'Visiteurs sur mobile',
+      match: 'all',
+      conditions: [{ field: 'device', op: 'is', value: 'mobile' }],
+      created_at: at,
+      updated_at: at,
+    },
+  ];
+  d.tables.alerts = [
+    {
+      id: 'al1',
+      workspace_id: ws,
+      trigger: 'lead',
+      threshold: null,
+      demo_id: null,
+      path_id: null,
+      segment_id: null,
+      channels: ['app'],
+      frequency: 'immediate',
+      active: true,
+      created_at: at,
+    },
+    {
+      id: 'al2',
+      workspace_id: ws,
+      trigger: 'completion_below',
+      threshold: 40,
+      demo_id: demo.id,
+      path_id: null,
+      segment_id: null,
+      channels: ['app'],
+      frequency: 'daily',
+      active: false,
+      created_at: at,
+    },
+  ];
+}
+
 /** Pages de l'app (faux Supabase). `open` amène la page dans l'état audité (modale ouverte…). */
 const APP_PAGES = [
   { name: 'Connexion', route: '/#/login', signedOut: true },
@@ -138,6 +236,39 @@ const APP_PAGES = [
   { name: 'Analytics d’une démo', route: `/#/demos/${DEMO}/analytics` },
   { name: 'Analytics', route: '/#/analytics' },
   { name: 'Leads', route: '/#/analytics?tab=leads' },
+  {
+    name: 'Analytics · temps réel',
+    route: '/#/analytics?tab=live',
+    seed: seedL19,
+    open: (p) => p.waitForSelector('.l19-hero'),
+  },
+  {
+    name: 'Analytics · sondages et tests',
+    route: '/#/analytics?tab=tests',
+    seed: seedL19,
+    open: (p) => p.waitForSelector('.l19 .chart-card, .l19 .empty'),
+  },
+  {
+    name: 'Analytics · segments',
+    route: '/#/analytics?tab=segments',
+    seed: seedL19,
+    open: (p) => p.waitForSelector('fieldset.cond'),
+  },
+  {
+    name: 'Analytics · alertes',
+    route: '/#/analytics?tab=alerts',
+    seed: seedL19,
+    open: (p) => p.waitForSelector('.al-row'),
+  },
+  {
+    name: 'Analytics · nouvelle alerte',
+    route: '/#/analytics?tab=alerts',
+    seed: seedL19,
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Nouvelle alerte' }).click();
+      await p.waitForSelector('dialog.l19-alert[open]');
+    },
+  },
   {
     name: 'Apprenants',
     route: '/#/learners',

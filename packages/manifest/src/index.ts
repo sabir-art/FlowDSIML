@@ -239,15 +239,18 @@ export const stepSchema = z.object({
 });
 export type Step = z.infer<typeof stepSchema>;
 
-/** F2 : question de quiz (réponses : 2 à 6 ; vrai/faux : 2 réponses fixes). */
+/**
+ * F2 : question de quiz (réponses : 2 à 6 ; vrai/faux : 2 réponses fixes). L19 : en mode Sondage,
+ * note de 0 à 10 (nps) et réponse écrite (text, 500 caractères), sans réponses proposées.
+ */
 export const quizQuestionSchema = z.object({
   id: z.string(),
-  type: z.enum(['single', 'multiple', 'truefalse']),
+  type: z.enum(['single', 'multiple', 'truefalse', 'nps', 'text']),
   prompt: z.string().max(200),
   answers: z
     .array(z.object({ id: z.string(), label: z.string().max(200), correct: z.boolean().default(false) }))
-    .min(2)
-    .max(6),
+    .max(6)
+    .default([]),
   explanation: z.string().max(1000).default(''),
   stepId: z.string().nullable().default(null),
   points: z.number().int().min(1).max(100).default(1),

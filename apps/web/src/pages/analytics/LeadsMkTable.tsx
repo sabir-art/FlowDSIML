@@ -33,6 +33,7 @@ export function LeadsMkTable({
   title,
   onChange,
   formDemo,
+  segment,
 }: {
   wsId: string;
   days: number;
@@ -42,6 +43,8 @@ export function LeadsMkTable({
   onChange?: (total: number) => void;
   /** ANA-09 : démo ouverte par « Ajouter un formulaire » (filtre courant, sinon la première). */
   formDemo?: string;
+  /** L19-04 : segment appliqué (sous 5 visiteurs, aucune ligne). */
+  segment?: unknown;
 }) {
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
@@ -58,10 +61,12 @@ export function LeadsMkTable({
       p_demo: demo || null,
       p_limit: PAGE,
       p_offset: page * PAGE,
+      p_segment: (segment ?? null) as never,
     });
     setRes((data as unknown as { total: number; rows: LeadRow[] }) ?? { total: 0, rows: [] });
     setSelected(new Set());
-  }, [wsId, days, demo, page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wsId, days, demo, page, JSON.stringify(segment ?? null)]);
 
   useEffect(() => setPage(0), [days, demo]);
   useEffect(() => {

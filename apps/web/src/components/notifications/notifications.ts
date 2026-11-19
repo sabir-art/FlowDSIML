@@ -3,15 +3,27 @@
  * Les notifications ne portent que des références ; le texte vient de step_comments (RLS).
  */
 
-export type NotificationKind = 'mention' | 'comment' | 'reply' | 'resolved';
-export const NOTIFICATION_KINDS: NotificationKind[] = ['mention', 'reply', 'comment', 'resolved'];
+export type NotificationKind = 'mention' | 'comment' | 'reply' | 'resolved' | 'alert';
+export const NOTIFICATION_KINDS: NotificationKind[] = ['mention', 'reply', 'comment', 'resolved', 'alert'];
+
+/** L19 : contenu d'une alerte (aucune donnée personnelle). */
+export interface AlertData {
+  trigger?: string;
+  count?: number;
+  value?: number | null;
+  threshold?: number | null;
+  digest?: 'daily' | 'weekly';
+}
 
 export interface NotificationRow {
   id: string;
   kind: NotificationKind;
-  demo_id: string;
-  step_id: string;
-  comment_id: string;
+  /** Nuls pour une alerte (L19) ; renseignés pour un commentaire. */
+  demo_id: string | null;
+  step_id: string | null;
+  comment_id: string | null;
+  alert_id?: string | null;
+  data?: AlertData | null;
   actor_id: string | null;
   created_at: string;
   read_at: string | null;
@@ -68,6 +80,8 @@ export function readPrefs(raw: unknown): NotificationPrefs {
   return Object.fromEntries(NOTIFICATION_KINDS.map((k) => [k, o[k] !== false])) as NotificationPrefs;
 }
 
-/** Lien vers l'éditeur, sur l'étape, avec le fil ouvert. */
-export const notificationHref = (n: Pick<NotificationRow, 'demo_id' | 'step_id' | 'comment_id'>) =>
-  `/demos/${n.demo_id}/edit?step=${n.step_id}&comment=${n.comment_id}`;
+/** Lien vers l'éditeur, sur l'étape, avec le fil ouvert ; une alerte mène à l'onglet Alertes. */
+export const notificationHref = (n: Pick<NotificationRow, 'kind' | 'demo_id' | 'step_id' | 'comment_id'>) =>
+  n.kind === 'alert'
+    ? '/analytics?tab=alerts'
+    : `/demos/${n.demo_id}/edit?step=${n.step_id}&comment=${n.comment_id}`;

@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   AtSign,
   Bell,
+  BellRing,
   CheckCheck,
   CheckCircle2,
   CornerDownRight,
@@ -26,7 +27,13 @@ import './notifications.css';
 type Filter = 'all' | 'mention' | 'unread';
 const FILTERS: Filter[] = ['all', 'mention', 'unread'];
 const MARK = '\u0001';
-const KIND_ICON = { mention: AtSign, reply: CornerDownRight, comment: MessageSquare, resolved: CheckCircle2 };
+const KIND_ICON = {
+  mention: AtSign,
+  reply: CornerDownRight,
+  comment: MessageSquare,
+  resolved: CheckCircle2,
+  alert: BellRing,
+};
 
 export function NotificationBell() {
   const { t } = useTranslation();
@@ -256,6 +263,7 @@ export function NotificationBell() {
 function Row({ item: x, onOpen }: { item: NotificationItem; onOpen: () => void }) {
   const { t } = useTranslation();
   const Icon = KIND_ICON[x.kind];
+  if (x.kind === 'alert') return <AlertRow item={x} icon={Icon} onOpen={onOpen} />;
   const actor = x.actorName || t('notifications.someone');
   const step = x.stepNumber ?? '?';
   const quote = (x.kind === 'mention' || x.kind === 'reply') && x.body;
@@ -299,6 +307,51 @@ function Row({ item: x, onOpen }: { item: NotificationItem; onOpen: () => void }
         className="nb-cover"
         to={notificationHref(x)}
         aria-label={t(`notifications.open_${x.kind}`, { actor, step })}
+        onClick={onOpen}
+      />
+    </li>
+  );
+}
+
+/** L19 : alerte (« 3 nouveaux leads », « Vues au-dessus de 500 »…), vers l'onglet Alertes. */
+function AlertRow({
+  item: x,
+  icon: Icon,
+  onOpen,
+}: {
+  item: NotificationItem;
+  icon: typeof Bell;
+  onOpen: () => void;
+}) {
+  const { t } = useTranslation();
+  const d = x.data ?? {};
+  const text = t(`notifications.alert_${d.trigger ?? 'lead'}`, {
+    count: d.count ?? 0,
+    value: d.value ?? '?',
+    threshold: d.threshold ?? '?',
+    demo: x.demoTitle || t('notifications.allDemos'),
+  });
+  const digest = d.digest ? t(`notifications.digest_${d.digest}`) : null;
+  return (
+    <li className={x.read_at ? undefined : 'unread'}>
+      <span className="nb-avatar nb-avatar--alert" aria-hidden="true">
+        <Icon />
+      </span>
+      <span className="nb-text">
+        {text}
+        <small>
+          <Icon aria-hidden="true" />
+          {digest ? `${digest} · ` : ''}
+          {formatRelativeShort(x.created_at)}
+        </small>
+      </span>
+      <span className={x.read_at ? undefined : 'nb-dot'}>
+        {!x.read_at && <span className="sr-only">{t('notifications.unread')}</span>}
+      </span>
+      <Link
+        className="nb-cover"
+        to={notificationHref(x)}
+        aria-label={t('notifications.open_alert', { text })}
         onClick={onOpen}
       />
     </li>

@@ -199,19 +199,32 @@ export function isPartial(q: QuizQuestion, chosen: readonly string[]): boolean {
 }
 
 /** F2 : score local (aperçu ou repli hors ligne), même calcul que submit_quiz_attempt. */
+/** L19 : question de sondage non notée (note de 0 à 10, réponse écrite). */
+export const isOpenQuestion = (q: { type: string }) => q.type === 'nps' || q.type === 'text';
+
+/** Réponse envoyée à submit_quiz_attempt : note (nps), texte (text, 500 caractères) ou choix. */
+export function quizAnswerPayload(quiz: Quiz, questionId: string, values: string[]) {
+  const q = quiz.questions.find((x) => x.id === questionId);
+  if (q?.type === 'nps') return { questionId, value: Number(values[0]) };
+  if (q?.type === 'text') return { questionId, text: (values[0] ?? '').trim().slice(0, 500) };
+  return { questionId, answerIds: values };
+}
+
 export function scoreQuiz(quiz: Quiz, answers: Record<string, string[]>) {
   let points = 0;
   let total = 0;
   let correct = 0;
-  const questions = quiz.questions.map((q) => {
-    total += q.points;
-    const ok = isCorrect(q, answers[q.id] ?? []);
-    if (ok) {
-      correct++;
-      points += q.points;
-    }
-    return { questionId: q.id, correct: ok };
-  });
+  const questions = quiz.questions
+    .filter((q) => !isOpenQuestion(q))
+    .map((q) => {
+      total += q.points;
+      const ok = isCorrect(q, answers[q.id] ?? []);
+      if (ok) {
+        correct++;
+        points += q.points;
+      }
+      return { questionId: q.id, correct: ok };
+    });
   const score = total ? Math.round((100 * points) / total) : 0;
   return {
     score,

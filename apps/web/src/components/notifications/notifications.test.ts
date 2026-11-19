@@ -40,12 +40,18 @@ describe('L22-05 : centre de notifications', () => {
       reply: false,
       comment: true,
       resolved: true,
+      alert: true,
     });
     expect(readPrefs(null).mention).toBe(true);
   });
   it('lien vers l’étape avec le fil ouvert', () => {
-    expect(notificationHref({ demo_id: 'd', step_id: 's', comment_id: 'c' })).toBe(
+    expect(notificationHref({ kind: 'reply', demo_id: 'd', step_id: 's', comment_id: 'c' })).toBe(
       '/demos/d/edit?step=s&comment=c',
+    );
+  });
+  it('une alerte mène à l’onglet Alertes', () => {
+    expect(notificationHref({ kind: 'alert', demo_id: null, step_id: null, comment_id: null })).toBe(
+      '/analytics?tab=alerts',
     );
   });
 });

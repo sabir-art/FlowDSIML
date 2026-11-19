@@ -6,7 +6,7 @@
 import { supabase } from '../../../lib/supabase';
 import { check } from '../../../lib/useAction';
 
-/** Événements abonnables (arbitrage du chef d'équipe). alert.triggered : « Bientôt ». */
+/** Événements abonnables (arbitrage du chef d'équipe). alert.triggered : actif depuis L19 (alertes). */
 export const WEBHOOK_EVENTS = [
   'lead.created',
   'demo.completed',
@@ -14,6 +14,7 @@ export const WEBHOOK_EVENTS = [
   'learner.quiz_passed',
   'learner.quiz_failed',
   'learner.module_validated',
+  'alert.triggered',
 ] as const;
 export type WebhookEvent = (typeof WEBHOOK_EVENTS)[number];
 

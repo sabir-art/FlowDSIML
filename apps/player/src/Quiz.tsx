@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'preact/hooks';
 import type { Quiz as QuizT, QuizQuestion } from '@flowdsiml/manifest';
 import { Award, CircleCheck, CircleX, RefreshCw, RotateCcw } from 'lucide-preact';
 import { fmt, type Dict } from './i18n';
-import { isCorrect, isPartial, scoreQuiz, shuffled } from './logic';
+import { isCorrect, isOpenQuestion, isPartial, scoreQuiz, shuffled } from './logic';
 import type { QuizResult } from './api';
 
 const ICON = { size: 18, strokeWidth: 2, 'aria-hidden': true } as const;
@@ -231,11 +231,14 @@ export function Quiz({
   const cur: QuizQuestion = order[qi]!;
   const chosen = answers[cur.id] ?? [];
   const multiple = cur.type === 'multiple';
+  // L19 : note de 0 à 10 (obligatoire) et réponse écrite (facultative), en mode Sondage
+  const open = isOpenQuestion(cur);
+  const textValue = cur.type === 'text' ? (chosen[0] ?? '') : '';
   const checked = phase.checked;
   const ok = isCorrect(cur, chosen);
   const partial = !ok && isPartial(cur, chosen);
   const last = qi === order.length - 1;
-  const answered = Object.keys(answers).filter((k) => (answers[k] ?? []).length > 0).length;
+  const answered = Object.keys(answers).filter((k) => (answers[k] ?? []).some((v) => v !== '')).length;
   const linked = stepNumber(cur.stepId);
 
   function toggle(answerId: string) {
@@ -254,7 +257,7 @@ export function Quiz({
 
   function validate(e: Event) {
     e.preventDefault();
-    if (!chosen.length) {
+    if (!chosen.length && cur.type !== 'text') {
       setAlert(true);
       firstInput.current?.focus();
       return;
@@ -269,7 +272,16 @@ export function Quiz({
     setTimeout(() => legendRef.current?.focus(), 0);
   }
 
-  const hint = cur.type === 'truefalse' ? q.hintTrueFalse : multiple ? q.hintMultiple : q.hintSingle;
+  const hint =
+    cur.type === 'nps'
+      ? q.hintNps
+      : cur.type === 'text'
+        ? q.hintText
+        : cur.type === 'truefalse'
+          ? q.hintTrueFalse
+          : multiple
+            ? q.hintMultiple
+            : q.hintSingle;
   return (
     <section class="p-quiz fd-player-scope" aria-label={fmt(q, 'region', { module: sub(module) })}>
       <form class="p-quiz-card" onSubmit={validate} noValidate>
@@ -294,7 +306,54 @@ export function Quiz({
           <p id={`${id}-hint`} class="p-quiz-hint">
             {hint}
           </p>
-          <div class={`p-quiz-options${cur.type === 'truefalse' ? ' is-tf' : ''}`}>
+          {cur.type === 'nps' && (
+            <>
+              <div class="p-quiz-nps">
+                {Array.from({ length: 11 }, (_, n) => (
+                  <label key={n} class={`p-quiz-nps__opt${chosen[0] === String(n) ? ' is-selected' : ''}`}>
+                    <input
+                      ref={n === 0 ? firstInput : undefined}
+                      type="radio"
+                      name={`${id}-q${qi}`}
+                      value={String(n)}
+                      checked={chosen[0] === String(n)}
+                      onChange={() => {
+                        setAlert(false);
+                        setAnswers((a) => ({ ...a, [cur.id]: [String(n)] }));
+                      }}
+                    />
+                    <span>{n}</span>
+                  </label>
+                ))}
+              </div>
+              <p class="p-quiz-nps__ends" aria-hidden="true">
+                <span>{q.npsLow}</span>
+                <span>{q.npsHigh}</span>
+              </p>
+            </>
+          )}
+          {cur.type === 'text' && (
+            <>
+              <textarea
+                class="p-quiz-text"
+                rows={4}
+                maxLength={500}
+                aria-label={sub(cur.prompt)}
+                aria-describedby={`${id}-hint ${id}-count`}
+                value={textValue}
+                onInput={(e) =>
+                  setAnswers((a) => ({
+                    ...a,
+                    [cur.id]: [(e.target as HTMLTextAreaElement).value.slice(0, 500)],
+                  }))
+                }
+              />
+              <p id={`${id}-count`} class="p-quiz-count-chars">
+                {fmt(q, 'textCount', { n: textValue.length })}
+              </p>
+            </>
+          )}
+          <div class={`p-quiz-options${cur.type === 'truefalse' ? ' is-tf' : ''}`} hidden={open}>
             {cur.answers.map((a, ai) => {
               const sel = chosen.includes(a.id);
               const mark = !checked ? null : a.correct ? 'good' : sel ? 'bad' : null;

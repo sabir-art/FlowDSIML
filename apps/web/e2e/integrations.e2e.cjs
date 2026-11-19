@@ -86,8 +86,8 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
     'L23-03 : rappel RGPD avec lead.created',
   );
   ok(
-    await dlg.getByRole('checkbox', { name: /Alerte déclenchée/ }).isDisabled(),
-    'L23-03 : alert.triggered « Bientôt »',
+    !(await dlg.getByRole('checkbox', { name: /Alerte déclenchée/ }).isDisabled()),
+    'L23-03 : alert.triggered actif (L19)',
   );
   await shot('03-creer');
   await url.fill('https://10.0.0.1/hook');

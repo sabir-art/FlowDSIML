@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUp, Calendar, Download, TriangleAlert } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { completionRate, computeFunnel, toCsv } from '@flowdsiml/core';
@@ -14,6 +14,13 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
+import { LiveTab } from './advanced/LiveTab';
+import { SurveysTab } from './advanced/SurveysTab';
+import { SegmentsTab, type Segment } from './advanced/SegmentsTab';
+import { AlertsTab } from './advanced/AlertsTab';
+import { FilterBar } from './advanced/FilterBar';
+import { decodeDef, encodeDef, type SegmentDef } from './advanced/segmentModel';
+import './advanced/advanced.css';
 
 type Source = 'direct' | 'embed' | 'link';
 interface WsAnalytics {
@@ -24,6 +31,8 @@ interface WsAnalytics {
   leads: number;
   daily: Array<{ day: string; views: number; completions: number }>;
   sources: Record<Source, number>;
+  /** L19 : visiteurs du segment appliqué (null sans segment). */
+  segmentVisitors?: number | null;
 }
 interface Session {
   session_id: string;
@@ -38,7 +47,11 @@ interface Session {
   lead_email: string | null;
   lead_fields: Record<string, unknown> | null;
 }
-type Tab = 'overview' | 'sessions' | 'leads';
+type Tab = 'overview' | 'sessions' | 'leads' | 'live' | 'tests' | 'segments' | 'alerts';
+/** L19 : onglets d'analytics avancées (après Vue d'ensemble, Sessions et Leads). */
+const ADV: Tab[] = ['live', 'tests', 'segments', 'alerts'];
+/** Onglets où la barre de filtres (segment) s'applique. */
+const FILTERED: Tab[] = ['overview', 'sessions', 'leads', 'segments'];
 const PERIODS = [7, 30, 90] as const;
 const PAGE = 25;
 
@@ -49,28 +62,62 @@ export function AnalyticsPage() {
   const ws = current!;
   // Données personnelles des leads : rôles editor et plus (comme la RLS leads_select)
   const canLeads = can('leads.view');
-  const tabs: Tab[] = canLeads ? ['overview', 'sessions', 'leads'] : ['overview', 'sessions'];
+  const canEdit = can('demo.edit');
+  const tabs: Tab[] = [
+    ...(canLeads ? (['overview', 'sessions', 'leads'] as Tab[]) : (['overview', 'sessions'] as Tab[])),
+    ...ADV,
+  ];
   const [days, setDays] = useState<number>(30);
   const [demo, setDemo] = useState<string>('');
   const [source, setSource] = useState<Source | ''>('');
   const [params, setParams] = useSearchParams();
   // ANA-10 : l'entrée « Leads » de la navigation ouvre cet écran sur l'onglet Leads
-  const [tab, setTab] = useState<Tab>(
-    params.get('tab') === 'leads' && canLeads
-      ? 'leads'
-      : params.get('tab') === 'sessions'
-        ? 'sessions'
-        : 'overview',
-  );
+  const parseTab = (p: string | null): Tab => (p && tabs.includes(p as Tab) ? (p as Tab) : 'overview');
+  const [tab, setTab] = useState<Tab>(parseTab(params.get('tab')));
   useEffect(() => {
-    const p = params.get('tab');
-    if (p === 'leads' && canLeads) setTab('leads');
-    else if (p === null) setTab('overview');
+    setTab(parseTab(params.get('tab')));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params, canLeads]);
+  /** Met à jour l'URL (onglet, filtres ?f=, segment ?seg=) en gardant le reste. */
+  const patchParams = (patch: Record<string, string | null>) => {
+    const next = new URLSearchParams(params);
+    for (const [k, v] of Object.entries(patch)) {
+      if (v === null || (k === 'tab' && v === 'overview')) next.delete(k);
+      else next.set(k, v);
+    }
+    setParams(next, { replace: true });
+  };
   const selectTab = (k: Tab) => {
     setTab(k);
-    setParams(k === 'overview' ? {} : { tab: k }, { replace: true });
+    patchParams({ tab: k });
   };
+  // L19-04 : filtres de la barre (définition dans ?f=) ou segment enregistré (?seg=)
+  const filters = useMemo(() => decodeDef(params.get('f')), [params]);
+  const segId = params.get('seg');
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const reloadSegments = useCallback(async () => {
+    const { data: s } = await supabase.from('segments').select('*').eq('workspace_id', ws.id).order('name');
+    setSegments((s ?? []) as Segment[]);
+  }, [ws.id]);
+  useEffect(() => {
+    void reloadSegments();
+  }, [reloadSegments]);
+  const segment = segments.find((x) => x.id === segId) ?? null;
+  const pSegment = useMemo(
+    () => (segId ? { id: segId } : filters ? { match: filters.match, conditions: filters.conditions } : null),
+    [segId, filters],
+  );
+  const segKey = JSON.stringify(pSegment);
+  const [segInitial, setSegInitial] = useState<SegmentDef | null>(null);
+  const [alertCount, setAlertCount] = useState<number | null>(null);
+  useEffect(() => {
+    void supabase
+      .from('alerts')
+      .select('id', { count: 'exact', head: true })
+      .eq('workspace_id', ws.id)
+      .eq('active', true)
+      .then(({ count }) => setAlertCount(count ?? 0));
+  }, [ws.id]);
   const [demos, setDemos] = useState<Array<{ id: string; title: string }>>([]);
   const [data, setData] = useState<WsAnalytics | null>(null);
   const [prev, setPrev] = useState<WsAnalytics | null>(null);
@@ -96,7 +143,12 @@ export function AnalyticsPage() {
     setData(null);
     const now = Date.now();
     const iso = (d: number) => new Date(now - d * 86400_000).toISOString();
-    const args = { p_workspace: ws.id, p_demo: demo || null, p_source: source || null };
+    const args = {
+      p_workspace: ws.id,
+      p_demo: demo || null,
+      p_source: source || null,
+      p_segment: pSegment as never,
+    };
     void Promise.all([
       supabase.rpc('workspace_analytics', { ...args, p_from: iso(days), p_to: new Date(now).toISOString() }),
       supabase.rpc('workspace_analytics', { ...args, p_from: iso(2 * days), p_to: iso(days) }),
@@ -105,7 +157,8 @@ export function AnalyticsPage() {
       setPrev((p.data as unknown as WsAnalytics) ?? null);
       setLoadedAt(new Date().toISOString());
     });
-  }, [ws.id, days, demo, source]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ws.id, days, demo, source, segKey]);
 
   if (!data) return <Loading />;
   const title = (id: string) => demos.find((d) => d.id === id)?.title ?? '—';
@@ -119,6 +172,7 @@ export function AnalyticsPage() {
         p_to: new Date().toISOString(),
         p_demo: demo || null,
         p_limit: 200,
+        p_segment: pSegment as never,
       });
       const rows = ((r as unknown as { rows?: Array<Record<string, unknown>> })?.rows ?? []) as Array<{
         email: string;
@@ -231,14 +285,32 @@ export function AnalyticsPage() {
               }
             }}
           >
+            {k === 'live' && <span className="live-dot" aria-hidden="true" />}
             {t(`analytics.tab.${k}`)}
             {k === 'leads' && leadCount !== null && (
               <span className="badge badge-primary">{formatNumber(leadCount)}</span>
             )}
+            {k === 'alerts' && !!alertCount && <span className="badge">{formatNumber(alertCount)}</span>}
           </button>
         ))}
       </div>
 
+      {FILTERED.includes(tab) && (
+        <FilterBar
+          def={segId ? null : filters}
+          segment={segment}
+          segments={segments}
+          demos={demos}
+          canEdit={canEdit}
+          tooSmall={data.segmentVisitors != null && data.segmentVisitors < 5}
+          onChange={(d) => patchParams({ f: d ? encodeDef(d) : null, seg: null })}
+          onSegment={(x) => patchParams({ seg: x?.id ?? null, f: null })}
+          onSave={() => {
+            setSegInitial(filters);
+            selectTab('segments');
+          }}
+        />
+      )}
       {tab === 'overview' && (
         <section role="tabpanel" id="an-panel-overview" aria-labelledby="an-tab-overview">
           <Overview
@@ -254,7 +326,7 @@ export function AnalyticsPage() {
       )}
       {tab === 'sessions' && (
         <section role="tabpanel" id="an-panel-sessions" aria-labelledby="an-tab-sessions">
-          <Sessions wsId={ws.id} days={days} demo={demo} source={source} title={title} />
+          <Sessions wsId={ws.id} days={days} demo={demo} source={source} title={title} segment={pSegment} />
         </section>
       )}
       {tab === 'leads' && canLeads && (
@@ -266,6 +338,46 @@ export function AnalyticsPage() {
             title={title}
             onChange={setLeadCount}
             formDemo={demo || demos[0]?.id}
+            segment={pSegment}
+          />
+        </section>
+      )}
+      {tab === 'live' && (
+        <section role="tabpanel" id="an-panel-live" aria-labelledby="an-tab-live">
+          <LiveTab wsId={ws.id} demo={demo} demos={demos} />
+        </section>
+      )}
+      {tab === 'tests' && (
+        <section role="tabpanel" id="an-panel-tests" aria-labelledby="an-tab-tests">
+          <SurveysTab demo={demo} demos={demos} days={days} canEdit={canEdit} />
+        </section>
+      )}
+      {tab === 'segments' && (
+        <section role="tabpanel" id="an-panel-segments" aria-labelledby="an-tab-segments">
+          <SegmentsTab
+            wsId={ws.id}
+            days={days}
+            demos={demos}
+            canEdit={canEdit}
+            initial={segInitial}
+            segments={segments}
+            reload={reloadSegments}
+            onApply={(x) => {
+              setTab('overview');
+              patchParams({ tab: 'overview', seg: x.id, f: null });
+            }}
+          />
+        </section>
+      )}
+      {tab === 'alerts' && (
+        <section role="tabpanel" id="an-panel-alerts" aria-labelledby="an-tab-alerts">
+          <AlertsTab
+            wsId={ws.id}
+            demos={demos}
+            segments={segments}
+            canEdit={canEdit}
+            isAdmin={can('integrations.manage')}
+            onCount={setAlertCount}
           />
         </section>
       )}
@@ -632,17 +744,20 @@ function Sessions({
   demo,
   source,
   title,
+  segment,
 }: {
   wsId: string;
   days: number;
   demo: string;
   source: Source | '';
   title: (id: string) => string;
+  segment: unknown;
 }) {
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
-  const [res, setRes] = useState<{ total: number; rows: Session[] } | null>(null);
-  useEffect(() => setPage(0), [days, demo, source]);
+  const [res, setRes] = useState<{ total: number; rows: Session[]; tooSmall?: boolean } | null>(null);
+  const segKey = JSON.stringify(segment);
+  useEffect(() => setPage(0), [days, demo, source, segKey]);
   useEffect(() => {
     setRes(null);
     void supabase
@@ -654,11 +769,13 @@ function Sessions({
         p_source: source || null,
         p_limit: PAGE,
         p_offset: page * PAGE,
+        p_segment: segment as never,
       })
       .then(({ data }) =>
         setRes((data as unknown as { total: number; rows: Session[] }) ?? { total: 0, rows: [] }),
       );
-  }, [wsId, days, demo, source, page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wsId, days, demo, source, page, segKey]);
   if (!res) return <Loading />;
   const dur = (s: number) =>
     s >= 60
@@ -685,7 +802,7 @@ function Sessions({
             {res.rows.length === 0 && (
               <tr>
                 <td colSpan={6} className="muted">
-                  {t('analytics.noSessions')}
+                  {res.tooSmall ? t('analytics.adv.seg.tooSmall') : t('analytics.noSessions')}
                 </td>
               </tr>
             )}

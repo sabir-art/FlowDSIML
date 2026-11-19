@@ -81,7 +81,7 @@ export function PublishButton({
     // F2 : publication bloquée tant qu'une question du quiz est incomplète
     const mode = asSettings(demo.settings).quiz?.mode === 'survey' ? 'survey' : 'quiz';
     const bad = firstInvalid(
-      editor.questions.map((q) => ({ prompt: q.prompt, answers: asAnswers(q.answers) })),
+      editor.questions.map((q) => ({ prompt: q.prompt, answers: asAnswers(q.answers), type: q.type })),
       mode,
     );
     if (bad) {
