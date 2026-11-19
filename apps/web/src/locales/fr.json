@@ -2670,7 +2670,26 @@
     "urlInvalid": "Adresse refusée : une adresse https est attendue.",
     "helpHint": "Adresse e-mail ou lien. Vide : l'entrée est masquée.",
     "expired_one": "{{count}} expiré",
-    "expired_other": "{{count}} expirés"
+    "expired_other": "{{count}} expirés",
+    "demo": {
+      "kind": "Type de centre",
+      "kind_training": "Centre de formation",
+      "kind_demo": "Demo Center",
+      "kindHelp_training": "Apprenants, progression, formations et attestation.",
+      "kindHelp_demo": "Hub public des démos, sans compte ni progression.",
+      "heroTitle": "Titre du héros",
+      "heroTitleDefault": "Découvrez nos outils",
+      "heroSubtitle": "Sous-titre du héros",
+      "heroSubtitleDefault": "Des démos interactives, sans inscription.",
+      "cta": "Bouton « Nous contacter »",
+      "ctaDefault": "Nous contacter",
+      "ctaLabel": "Libellé",
+      "ctaUrl": "Lien",
+      "ctaHelp": "Lien https. Laissez vide pour ne pas afficher de bouton.",
+      "ctaInvalid": "Indiquez un lien https et un libellé de 40 caractères au plus.",
+      "ctaForm": "Formulaire de lead à la place du lien",
+      "soon": "Bientôt"
+    }
   },
   "export": {
     "menu": "Exporter (PDF, GIF)",

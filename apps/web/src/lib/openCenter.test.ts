@@ -84,4 +84,21 @@ describe('open-center', () => {
     expect((await openCenter('x'.repeat(5000), deps(OPEN))).status).toBe(413);
     expect((await openCenter('{', deps(OPEN))).status).toBe(400);
   });
+
+  it('Demo Center : couvertures des démos signées, hors « assets/ » ignorées', async () => {
+    const d = deps({
+      status: 'ok',
+      paths: [],
+      demos: [
+        { demoId: 'd7', cover: 'assets/c7.webp', kind: 'sandbox' },
+        { demoId: 'd8', cover: 'https://ailleurs.example/x.png' },
+      ],
+    });
+    const r = await openCenter('{"slug":"demos-acme"}', d);
+    expect(d.sign).toHaveBeenCalledWith(['d7/assets/c7.webp'], 3600);
+    expect((r.body as CenterGate).demos!.map((x) => x.cover)).toEqual([
+      'https://signe.example/d7/assets/c7.webp?token=t',
+      null,
+    ]);
+  });
 });

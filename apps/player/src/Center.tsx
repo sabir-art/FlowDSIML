@@ -7,6 +7,7 @@ import {
   CircleCheck,
   CircleDot,
   Clock,
+  Code,
   Download,
   Key,
   Lock,
@@ -19,6 +20,9 @@ import {
 import { centerLinkToken, issueCertificate, openCenter, type CenterGateInfo } from './api';
 import {
   currentPath,
+  demoSections,
+  demoTagCounts,
+  filterDemos,
   filterPaths,
   highlight,
   pathView,
@@ -26,6 +30,7 @@ import {
   themeVars,
   DEFAULT_BRAND,
   type CenterData,
+  type CenterDemo,
   type CenterPath,
   type ModuleView,
   type PathView,
@@ -182,8 +187,13 @@ function Center({
     info.style === 'workspace' && !!info.brand && info.brand.toUpperCase() !== DEFAULT_BRAND;
   const style = info.style;
   const vars = dark && !customBrand ? themeVars({ ...info, style: 'dark' }) : themeVars(info);
-  const a11y = c[`a11y_${info.a11y}`] ?? c.a11y_non_evalue;
+  const a11y =
+    info.kind === 'demo' && info.a11y === 'non_evalue'
+      ? c.demoA11yNone // A8 : « non conforme » par défaut, jamais « partiellement » sans audit
+      : (c[`a11y_${info.a11y}`] ?? c.a11y_non_evalue);
   const help = info.help ? (info.help.includes('@') ? `mailto:${info.help}` : info.help) : null;
+  // A8 : Demo Center (démos ouvertes, sans compte ni progression)
+  const demoCenter = info.kind === 'demo';
 
   return (
     <div class={`ctr ctr--${style}`} data-theme={dark ? 'dark' : undefined} style={vars}>
@@ -203,8 +213,15 @@ function Center({
         )}
         <a class="nm" href={centerHref(route.slug)}>
           <b>{info.workspace}</b>
-          <small>{c.sub}</small>
+          <small>{demoCenter ? c.demoSub : c.sub}</small>
         </a>
+        {demoCenter && info.cta?.url && (
+          <span class="sp">
+            <a class="ctr-contact" href={info.cta.url} target="_blank" rel="noopener noreferrer">
+              {info.cta.label || c.demoContact}
+            </a>
+          </span>
+        )}
         {data.visitor && (
           <span class="sp">
             <span class="who">{data.visitor.firstName}</span>
@@ -214,7 +231,9 @@ function Center({
           </span>
         )}
       </header>
-      {route.pathId ? (
+      {demoCenter ? (
+        <DemoHome t={t} data={data} route={route} />
+      ) : route.pathId ? (
         <PathPage t={t} data={data} views={views} route={route} token={token} />
       ) : data.paths.length === 0 ? (
         <main class="ctr-in" id="ctr-main">
@@ -412,6 +431,154 @@ function Home({ t, data, views, route }: { t: Dict; data: CenterData; views: Pat
         </div>
       )}
     </main>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// A8 (L20-03) : Demo Center
+// ---------------------------------------------------------------------------
+function DemoHome({ t, data, route }: { t: Dict; data: CenterData; route: Route }) {
+  const c = t.center as unknown as C;
+  const info = data.center;
+  const demos = data.demos ?? [];
+  const q = route.params.get('q') ?? '';
+  const tag = route.params.get('tag') ?? '';
+  const [input, setInput] = useState(q);
+  const timer = useRef<number>();
+  useEffect(() => setInput(q), [q]);
+  const go = (next: { q?: string; tag?: string }) => {
+    history.replaceState(
+      null,
+      '',
+      centerHref(route.slug, undefined, { q: next.q ?? q, tag: next.tag ?? tag }),
+    );
+    dispatchEvent(new HashChangeEvent('hashchange'));
+  };
+  const shown = filterDemos(demos, q, tag);
+  const tags = demoTagCounts(demos);
+  const sections = demoSections(shown);
+  return (
+    <main class="ctr-in" id="ctr-main">
+      <div class="ctr-hero ctr-hero--one">
+        <div>
+          <h1>{info.heroTitle || c.demoHero}</h1>
+          <p>{info.heroSubtitle || c.demoIntro}</p>
+          <div class="ctr-search" role="search">
+            <Search aria-hidden="true" />
+            <input
+              class="q"
+              type="search"
+              aria-label={c.demoSearchLabel}
+              placeholder={c.demoSearchPlaceholder}
+              value={input}
+              onInput={(e) => {
+                const v = (e.target as HTMLInputElement).value;
+                setInput(v);
+                clearTimeout(timer.current);
+                timer.current = window.setTimeout(() => go({ q: v.trim() }), 250);
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && (clearTimeout(timer.current), go({ q: input.trim() }))}
+            />
+            {input && (
+              <button
+                class="clr"
+                type="button"
+                aria-label={c.clearSearch}
+                onClick={() => (setInput(''), go({ q: '' }))}
+              >
+                <X aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      {tags.length > 0 && (
+        <div class="ctr-tags" role="group" aria-label={c.demoFilterLabel}>
+          <button type="button" aria-pressed={!tag} onClick={() => go({ tag: '' })}>
+            {c.all} <span class="n">{demos.length}</span>
+          </button>
+          {tags.map((x) => (
+            <button
+              key={x.name}
+              type="button"
+              aria-pressed={tag === x.name}
+              onClick={() => go({ tag: tag === x.name ? '' : x.name })}
+            >
+              <span class={`dot dot--${tagCls(x.color)}`} aria-hidden="true" />
+              {x.name} <span class="n">{x.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {(q || tag) && shown.length > 0 && (
+        <div class="ctr-res" role="status">
+          <span>
+            <b>{fmt(c, 'demoResult', { count: shown.length })}</b>
+            {q && ` ${fmt(c, 'forQuery', { q })}`}
+            {tag && ` ${fmt(c, 'withTag', { tag })}`}
+          </span>
+          <button class="ctr-link" type="button" onClick={() => (setInput(''), go({ q: '', tag: '' }))}>
+            {c.clearFilters}
+          </button>
+        </div>
+      )}
+      {shown.length === 0 ? (
+        <div class="ctr-empty" role="status">
+          <span class="ic" aria-hidden="true">
+            {demos.length ? <Search /> : <Code />}
+          </span>
+          <h2>
+            {!demos.length ? c.demoNone : q ? fmt(c, 'noResult', { q }) : fmt(c, 'noResultTag', { tag })}
+          </h2>
+          {demos.length > 0 && (
+            <div class="acts">
+              <button class="cta" type="button" onClick={() => (setInput(''), go({ q: '', tag: '' }))}>
+                {c.clearFilters}
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        sections.map((sec, i) => (
+          <section key={sec.name ?? '-'} class="ctr-dsec" aria-labelledby={`dsec-${i}`}>
+            <h2 class="ctr-h2" id={`dsec-${i}`}>
+              {sec.name ?? (sections.length > 1 ? c.demoOther : c.demoAll)}{' '}
+              <small>{fmt(c, 'demoCount', { count: sec.demos.length })}</small>
+            </h2>
+            <div class="ctr-grid">
+              {sec.demos.map((d) => (
+                <DemoCard key={d.demoId} c={c} d={d} q={q} />
+              ))}
+            </div>
+          </section>
+        ))
+      )}
+    </main>
+  );
+}
+
+function DemoCard({ c, d, q }: { c: C; d: CenterDemo; q: string }) {
+  return (
+    <a class="fc dc" href={moduleHref(d.demoId)}>
+      <span class="cov">
+        {d.cover ? <img class="fc-img" src={d.cover} alt="" loading="lazy" /> : <span class="fc-shot" />}
+      </span>
+      <span class="bd">
+        <h3>
+          <Hl text={d.title} q={q} />
+        </h3>
+        <span class="meta">
+          {fmt(c, d.kind === 'sandbox' ? 'demoSandbox' : 'demoGuided', { count: d.steps })}
+        </span>
+        {d.tags.length > 0 && (
+          <span class="tgs">
+            {d.tags.map((x) => (
+              <Tag key={x.name} name={x.name} color={x.color} q={q} />
+            ))}
+          </span>
+        )}
+      </span>
+    </a>
   );
 }
 

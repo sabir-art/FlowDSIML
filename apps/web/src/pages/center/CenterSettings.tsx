@@ -23,6 +23,7 @@ import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { contrastRatio } from '../../lib/contrast';
 import { PLAYER_URL } from '../../lib/env';
+import { DemoCenterCard } from './DemoCenterCard';
 import { initials } from '../../lib/initials';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
@@ -350,6 +351,8 @@ export function CenterSettings() {
             </div>
           )}
 
+          <DemoCenterCard draft={draft} update={update} />
+
           <section className="fd-card" aria-labelledby="c-url">
             <div className="fd-card__head">
               <span className="fd-icon-chip">
@@ -571,101 +574,103 @@ export function CenterSettings() {
             <p className="fd-help cfg-help">{t('center.styleHelp')}</p>
           </section>
 
-          <section className="fd-card" aria-labelledby="c-vis">
-            <div className="fd-card__head">
-              <span className="fd-icon-chip">
-                <GraduationCap {...ICON} />
-              </span>
-              <h2 className="fd-card__title" id="c-vis">
-                {t('center.visible')}
-              </h2>
-              {visible.length > 0 && (
-                <Button size="sm" icon={<Settings2 />} onClick={() => setManaging(true)}>
-                  {t('learners.paths.manage')}
-                </Button>
-              )}
-            </div>
-            {visible.length === 0 ? (
-              <div className="cfg-empty">
+          {draft.kind !== 'demo' && (
+            <section className="fd-card" aria-labelledby="c-vis">
+              <div className="fd-card__head">
                 <span className="fd-icon-chip">
                   <GraduationCap {...ICON} />
                 </span>
-                <b>{t('center.visibleEmpty')}</b>
-                <p>{t('center.visibleEmptyHelp')}</p>
-                <Button variant="primary" icon={<Plus />} onClick={() => setManaging(true)}>
-                  {t('learners.paths.create')}
-                </Button>
+                <h2 className="fd-card__title" id="c-vis">
+                  {t('center.visible')}
+                </h2>
+                {visible.length > 0 && (
+                  <Button size="sm" icon={<Settings2 />} onClick={() => setManaging(true)}>
+                    {t('learners.paths.manage')}
+                  </Button>
+                )}
               </div>
-            ) : (
-              <>
-                <ul className="vis" aria-label={t('center.visibleOrder')}>
-                  {visible.map((x, i) => {
-                    const p = x.info!;
-                    const parts = [
-                      t('learners.fo.modules', { count: p.published }),
-                      p.ordered ? t('center.ordered') : null,
-                      p.protectedCount ? t('center.protected', { count: p.protectedCount }) : null,
-                      p.expiredCount ? t('center.expired', { count: p.expiredCount }) : null,
-                      p.published === 0 ? t('center.noPublished') : null,
-                      !x.visible ? t('center.hidden') : null,
-                      p.tags.length ? p.tags.join(', ') : null,
-                    ].filter(Boolean);
-                    return (
-                      <li
-                        key={x.id}
-                        className={x.visible ? undefined : 'off'}
-                        draggable
-                        onDragStart={() => (dragFrom.current = i)}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={() => {
-                          const from = dragFrom.current;
-                          dragFrom.current = null;
-                          if (from === null || from === i) return;
-                          const list = [...(draft.paths ?? [])];
-                          const [it] = list.splice(from, 1);
-                          list.splice(i, 0, it!);
-                          update({ paths: list });
-                        }}
-                      >
-                        <span className="grip" title={t('center.dragHint')} aria-hidden="true">
-                          <GripVertical />
-                        </span>
-                        <input
-                          type="checkbox"
-                          checked={x.visible}
-                          aria-label={t('center.show', { title: p.title })}
-                          aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
-                          onChange={(e) =>
-                            update({
-                              paths: (draft.paths ?? []).map((y) =>
-                                y.id === x.id ? { ...y, visible: e.target.checked } : y,
-                              ),
-                            })
-                          }
-                          onKeyDown={(e) => {
-                            if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-                              e.preventDefault();
-                              move(i, e.key === 'ArrowUp' ? -1 : 1);
-                              const el = e.currentTarget;
-                              requestAnimationFrame(() => el.focus());
-                            }
+              {visible.length === 0 ? (
+                <div className="cfg-empty">
+                  <span className="fd-icon-chip">
+                    <GraduationCap {...ICON} />
+                  </span>
+                  <b>{t('center.visibleEmpty')}</b>
+                  <p>{t('center.visibleEmptyHelp')}</p>
+                  <Button variant="primary" icon={<Plus />} onClick={() => setManaging(true)}>
+                    {t('learners.paths.create')}
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <ul className="vis" aria-label={t('center.visibleOrder')}>
+                    {visible.map((x, i) => {
+                      const p = x.info!;
+                      const parts = [
+                        t('learners.fo.modules', { count: p.published }),
+                        p.ordered ? t('center.ordered') : null,
+                        p.protectedCount ? t('center.protected', { count: p.protectedCount }) : null,
+                        p.expiredCount ? t('center.expired', { count: p.expiredCount }) : null,
+                        p.published === 0 ? t('center.noPublished') : null,
+                        !x.visible ? t('center.hidden') : null,
+                        p.tags.length ? p.tags.join(', ') : null,
+                      ].filter(Boolean);
+                      return (
+                        <li
+                          key={x.id}
+                          className={x.visible ? undefined : 'off'}
+                          draggable
+                          onDragStart={() => (dragFrom.current = i)}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={() => {
+                            const from = dragFrom.current;
+                            dragFrom.current = null;
+                            if (from === null || from === i) return;
+                            const list = [...(draft.paths ?? [])];
+                            const [it] = list.splice(from, 1);
+                            list.splice(i, 0, it!);
+                            update({ paths: list });
                           }}
-                        />
-                        <span>
-                          <b>{p.title || t('learners.untitled')}</b>
-                          <small>{parts.join(' · ')}</small>
-                        </span>
-                        <span className="fd-help">
-                          {t('learners.count', { count: counts.paths[p.id] ?? 0 })}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <p className="fd-help cfg-help">{t('center.visibleHelp')}</p>
-              </>
-            )}
-          </section>
+                        >
+                          <span className="grip" title={t('center.dragHint')} aria-hidden="true">
+                            <GripVertical />
+                          </span>
+                          <input
+                            type="checkbox"
+                            checked={x.visible}
+                            aria-label={t('center.show', { title: p.title })}
+                            aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
+                            onChange={(e) =>
+                              update({
+                                paths: (draft.paths ?? []).map((y) =>
+                                  y.id === x.id ? { ...y, visible: e.target.checked } : y,
+                                ),
+                              })
+                            }
+                            onKeyDown={(e) => {
+                              if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                                e.preventDefault();
+                                move(i, e.key === 'ArrowUp' ? -1 : 1);
+                                const el = e.currentTarget;
+                                requestAnimationFrame(() => el.focus());
+                              }
+                            }}
+                          />
+                          <span>
+                            <b>{p.title || t('learners.untitled')}</b>
+                            <small>{parts.join(' · ')}</small>
+                          </span>
+                          <span className="fd-help">
+                            {t('learners.count', { count: counts.paths[p.id] ?? 0 })}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <p className="fd-help cfg-help">{t('center.visibleHelp')}</p>
+                </>
+              )}
+            </section>
+          )}
 
           <section className="fd-card" aria-labelledby="c-foot">
             <div className="fd-card__head">

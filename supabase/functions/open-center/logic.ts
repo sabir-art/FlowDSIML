@@ -18,6 +18,8 @@ export interface CenterModule {
 export interface CenterGate {
   status: string;
   paths?: Array<{ modules: CenterModule[]; [k: string]: unknown }>;
+  /** A8 : Demo Center (démos ouvertes seulement, choisies par center_demos). */
+  demos?: Array<{ demoId: string; cover?: string | null; [k: string]: unknown }> | null;
   [k: string]: unknown;
 }
 
@@ -79,7 +81,17 @@ export async function openCenter(text: string, deps: Deps): Promise<Reply> {
       cover: m.access === 'open' && typeof m.cover === 'string' && ASSET.test(m.cover) ? m.cover : null,
     })),
   }));
-  const wanted = paths.flatMap((p) => p.modules.filter((m) => m.cover).map((m) => `${m.demoId}/${m.cover}`));
+  // A8 : démos d'un Demo Center (toutes ouvertes : liens publics sans mot de passe ni expiration)
+  const demos = Array.isArray(gate.demos)
+    ? gate.demos.map((d) => ({
+        ...d,
+        cover: typeof d.cover === 'string' && ASSET.test(d.cover) ? d.cover : null,
+      }))
+    : null;
+  const wanted = [
+    ...paths.flatMap((p) => p.modules.filter((m) => m.cover).map((m) => `${m.demoId}/${m.cover}`)),
+    ...(demos ?? []).filter((d) => d.cover).map((d) => `${d.demoId}/${d.cover}`),
+  ];
   const signed = wanted.length ? await deps.sign([...new Set(wanted)], SIGN_TTL) : new Map<string, string>();
   return {
     status: 200,
@@ -92,6 +104,9 @@ export async function openCenter(text: string, deps: Deps): Promise<Reply> {
           cover: m.cover ? (signed.get(`${m.demoId}/${m.cover}`) ?? null) : null,
         })),
       })),
+      demos: demos
+        ? demos.map((d) => ({ ...d, cover: d.cover ? (signed.get(`${d.demoId}/${d.cover}`) ?? null) : null }))
+        : null,
     },
   };
 }

@@ -597,3 +597,49 @@
   border-radius: 7px;
   font-size: 9px;
 }
+
+/* A8 (L20-03) : type de centre */
+.seg14 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.kind14 {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px var(--fd-color-border-strong);
+  cursor: pointer;
+}
+.kind14:has(input:checked) {
+  box-shadow: inset 0 0 0 2px var(--fd-color-primary);
+}
+.kind14:has(input:focus-visible) {
+  box-shadow:
+    inset 0 0 0 2px var(--fd-color-primary),
+    var(--fd-shadow-focus);
+}
+.kind14 input {
+  margin-top: 3px;
+  accent-color: var(--fd-color-primary);
+}
+.kind14 b,
+.kind14 small {
+  display: block;
+}
+.kind14 small {
+  color: var(--fd-color-text-muted);
+}
+.cta14 {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.row14 {
+  display: grid;
+  gap: 4px;
+}

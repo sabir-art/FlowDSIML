@@ -46,6 +46,22 @@ export interface CenterInfo {
   privacyUrl?: string;
   indexable: boolean;
   workspace: string;
+  /** A8 : type de centre (absent avant la migration 160100 : centre de formation). */
+  kind?: 'training' | 'demo';
+  heroTitle?: string;
+  heroSubtitle?: string;
+  cta?: { label: string; url?: string; formId?: string } | null;
+}
+
+/** A8 : démo d'un Demo Center (ouverte, sans compte ni progression). */
+export interface CenterDemo {
+  demoId: string;
+  title: string;
+  kind: 'guided' | 'sandbox';
+  steps: number;
+  section: string | null;
+  tags: Array<{ name: string; color: string }>;
+  cover: string | null;
 }
 
 export interface CenterData {
@@ -53,6 +69,8 @@ export interface CenterData {
   /** hasName : nom connu pour l'attestation (booléen seul ; absent avant la migration 140000). */
   visitor: { firstName: string; hasName?: boolean } | null;
   paths: CenterPath[];
+  /** A8 : Demo Center (null pour un centre de formation). */
+  demos?: CenterDemo[] | null;
 }
 
 /** État d'un module tel qu'affiché (carte et page de la formation). */
@@ -213,4 +231,42 @@ export function themeVars(c: Pick<CenterInfo, 'brand' | 'accent' | 'style'>): Re
     '--brand-soft': `color-mix(in srgb, ${brand} 10%, #FFFFFF)`,
     '--accent': accent,
   };
+}
+
+const norm = (x: string) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+
+/** A8 : recherche (titre, étiquettes, section) et filtre par étiquette du Demo Center. */
+export function filterDemos(demos: CenterDemo[], q: string, tag: string): CenterDemo[] {
+  const needle = norm(q.trim());
+  return demos.filter(
+    (d) =>
+      (!tag || d.tags.some((x) => x.name === tag)) &&
+      (!needle ||
+        norm(d.title).includes(needle) ||
+        norm(d.section ?? '').includes(needle) ||
+        d.tags.some((x) => norm(x.name).includes(needle))),
+  );
+}
+
+/** A8 : sections du Demo Center (dossiers), dans l'ordre reçu ; sans dossier en dernier. */
+export function demoSections(demos: CenterDemo[]): Array<{ name: string | null; demos: CenterDemo[] }> {
+  const out: Array<{ name: string | null; demos: CenterDemo[] }> = [];
+  for (const d of demos) {
+    const s = out.find((x) => x.name === d.section);
+    if (s) s.demos.push(d);
+    else out.push({ name: d.section, demos: [d] });
+  }
+  return [...out.filter((s) => s.name !== null), ...out.filter((s) => s.name === null)];
+}
+
+/** A8 : étiquettes du Demo Center avec leur nombre de démos. */
+export function demoTagCounts(demos: CenterDemo[]): Array<{ name: string; color: string; count: number }> {
+  const m = new Map<string, { name: string; color: string; count: number }>();
+  for (const d of demos)
+    for (const t of d.tags) {
+      const cur = m.get(t.name) ?? { ...t, count: 0 };
+      cur.count++;
+      m.set(t.name, cur);
+    }
+  return [...m.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }

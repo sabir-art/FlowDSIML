@@ -24,6 +24,7 @@ export function HtmlStep({
   nextLabel,
   onNext,
   onGo,
+  status,
 }: {
   step: Step;
   t: Dict;
@@ -33,6 +34,8 @@ export function HtmlStep({
   nextLabel: string;
   onNext: () => void;
   onGo: (stepId: string) => void;
+  /** Sandbox : « n pages clés vues sur N ». */
+  status?: string;
 }) {
   const h = step.html!;
   const ht = t.html;
@@ -42,6 +45,7 @@ export function HtmlStep({
   const [failed, setFailed] = useState(false);
   const [toast, setToast] = useState(false);
   const [scale, setScale] = useState(1);
+  const [boxW, setBoxW] = useState(0);
   const vw = h.viewport?.w ?? 1280;
   const vh = h.viewport?.h ?? 800;
 
@@ -63,7 +67,10 @@ export function HtmlStep({
   useEffect(() => {
     const el = box.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setScale(Math.min(1, el.clientWidth / vw)));
+    const ro = new ResizeObserver(() => {
+      setScale(Math.min(1, el.clientWidth / vw));
+      setBoxW(el.clientWidth);
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, [vw]);
@@ -121,7 +128,12 @@ export function HtmlStep({
             sandbox={FRAME_SANDBOX}
             referrerpolicy="no-referrer"
             title={fmt(ht as unknown as Record<string, string>, 'frame', { title })}
-            style={{ width: `${vw}px`, height: `${vh}px`, transform: `scale(${scale})` }}
+            // Plus large que la capture : la page occupe toute la largeur (elle se réorganise)
+            style={{
+              width: `${Math.max(vw, boxW / scale)}px`,
+              height: `${vh}px`,
+              transform: `scale(${scale})`,
+            }}
           />
         ) : (
           <p class="p-html-state" role={failed ? 'alert' : 'status'}>
@@ -132,6 +144,11 @@ export function HtmlStep({
           {toast ? ht.unavailable : ''}
         </div>
       </div>
+      {status && (
+        <p class="p-html-key" aria-live="polite">
+          {status}
+        </p>
+      )}
       {!sandbox && (
         <div class="p-html-bar">
           <span class="p-html-title">{sub(step.title ?? '')}</span>

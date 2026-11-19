@@ -2670,7 +2670,26 @@
     "urlInvalid": "Address refused: an https address is expected.",
     "helpHint": "Email address or link. Empty: the entry is hidden.",
     "expired_one": "{{count}} expired",
-    "expired_other": "{{count}} expired"
+    "expired_other": "{{count}} expired",
+    "demo": {
+      "kind": "Center type",
+      "kind_training": "Training center",
+      "kind_demo": "Demo Center",
+      "kindHelp_training": "Learners, progress, courses and certificate.",
+      "kindHelp_demo": "Public hub of demos, without account or progress.",
+      "heroTitle": "Hero title",
+      "heroTitleDefault": "Discover our tools",
+      "heroSubtitle": "Hero subtitle",
+      "heroSubtitleDefault": "Interactive demos, no sign-up.",
+      "cta": "“Contact us” button",
+      "ctaDefault": "Contact us",
+      "ctaLabel": "Label",
+      "ctaUrl": "Link",
+      "ctaHelp": "https link. Leave empty to hide the button.",
+      "ctaInvalid": "Enter an https link and a label of 40 characters at most.",
+      "ctaForm": "Lead form instead of the link",
+      "soon": "Soon"
+    }
   },
   "export": {
     "menu": "Export (PDF, GIF)",

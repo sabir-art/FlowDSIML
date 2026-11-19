@@ -1048,3 +1048,32 @@
 .fp-cert {
   position: relative;
 }
+
+/* A8 (L20-03) : Demo Center */
+.ctr-top a.ctr-contact,
+.ctr-contact {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #080808;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+.ctr-contact:focus-visible {
+  outline: 3px solid var(--ctr-accent, #2897d5);
+  outline-offset: 2px;
+}
+[data-theme='dark'] .ctr-top a.ctr-contact,
+[data-theme='dark'] .ctr-contact {
+  background: #fff;
+  color: #080808;
+}
+.ctr-dsec + .ctr-dsec {
+  margin-top: 28px;
+}
+.fc.dc .bd {
+  gap: 6px;
+}

@@ -16,6 +16,11 @@ export interface CenterDraft {
   a11yUrl?: string;
   privacyUrl?: string;
   paths?: Array<{ id: string; visible: boolean }>;
+  /** A8 : type de centre (centre de formation ou Demo Center), héros et bouton « Nous contacter ». */
+  kind?: 'training' | 'demo';
+  heroTitle?: string;
+  heroSubtitle?: string;
+  cta?: { label: string; url?: string; formId?: string } | null;
 }
 
 export interface PathSummary {
@@ -46,8 +51,12 @@ export function defaultSlug(name: string): string {
   return s.length >= 3 ? s : `centre-${s || 'formation'}`.slice(0, 48);
 }
 
-/** Publication possible : au moins une formation visible avec un module publié. */
+/**
+ * Publication possible : au moins une formation visible avec un module publié. Demo Center : la
+ * base vérifie qu'au moins une démo est ouverte (NO_VISIBLE_DEMO).
+ */
 export function publishable(d: CenterDraft, paths: PathSummary[]): boolean {
+  if (d.kind === 'demo') return true;
   return (d.paths ?? []).some((x) => x.visible && (paths.find((p) => p.id === x.id)?.published ?? 0) > 0);
 }
 
@@ -83,4 +92,10 @@ export function sanitizeSvg(text: string): string | null {
   };
   walk(root);
   return new XMLSerializer().serializeToString(root);
+}
+
+/** A8 : bouton « Nous contacter » valide (libellé et lien https), comme center_draft_valid. */
+export function ctaValid(cta: CenterDraft['cta']): boolean {
+  if (!cta) return true;
+  return cta.label.trim().length >= 1 && cta.label.length <= 40 && /^https:\/\/\S+$/.test(cta.url ?? '');
 }

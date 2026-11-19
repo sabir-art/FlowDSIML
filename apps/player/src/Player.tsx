@@ -772,15 +772,15 @@ export function Player({
               nextLabel={last ? (m.quiz ? t.quiz.start : t.finish) : t.next}
               onNext={last ? (m.quiz ? openQuiz : finish) : next}
               onGo={goStep}
+              status={
+                sandbox && keyPages.length > 0
+                  ? fmt(t.html as unknown as Record<string, string>, 'keyPages', {
+                      seen: keyPages.filter((id) => seenPages.has(id)).length,
+                      total: keyPages.length,
+                    })
+                  : undefined
+              }
             />
-            {sandbox && keyPages.length > 0 && (
-              <p class="p-html-key" aria-live="polite">
-                {fmt(t.html as unknown as Record<string, string>, 'keyPages', {
-                  seen: keyPages.filter((id) => seenPages.has(id)).length,
-                  total: keyPages.length,
-                })}
-              </p>
-            )}
           </>
         ) : step.kind === 'image' && step.image ? (
           <ImageStep

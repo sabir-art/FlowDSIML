@@ -159,9 +159,7 @@ const manifests = {
     'la page ne lit pas le lecteur (origine opaque)',
   );
   ok(
-    /1 pages clés vues sur 2|1 page clé vue sur 2|1 pages clés vues sur 2/.test(
-      await p.locator('.p-html-key').innerText(),
-    ),
+    /Pages clés vues\u202f: 1 sur 2/.test(await p.locator('.p-html-key').innerText()),
     'pages clés : 1 sur 2',
   );
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/l20-04-sandbox${sfx}.png` });
@@ -183,7 +181,10 @@ const manifests = {
   await p.frameLocator('.p-html-frame iframe').locator('h1', { hasText: 'Agenda' }).waitFor();
   ok(/Mardi/.test(await frameText(p)), 'lien automatique vers la page Agenda (clavier)');
   await p.waitForTimeout(300);
-  ok(/2 pages clés vues sur 2/.test(await p.locator('.p-html-key').innerText()), 'pages clés : 2 sur 2');
+  ok(
+    /Pages clés vues\u202f: 2 sur 2/.test(await p.locator('.p-html-key').innerText()),
+    'pages clés : 2 sur 2',
+  );
   await p.waitForTimeout(2600); // envoi des événements par lots (2 s)
   ok(
     tracked.some((e) => e.type === 'demo_complete'),

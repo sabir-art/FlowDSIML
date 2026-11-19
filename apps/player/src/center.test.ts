@@ -141,3 +141,33 @@ describe('centre de formation', () => {
     expect(themeVars({ brand: '#A3195B', accent: null, style: 'sober' })['--brand']).toBe('#12161B');
   });
 });
+
+import { demoSections, demoTagCounts, filterDemos, type CenterDemo } from './center';
+describe('Demo Center (A8)', () => {
+  const d = (id: string, title: string, section: string | null, tags: string[]): CenterDemo => ({
+    demoId: id,
+    title,
+    kind: 'guided',
+    steps: 3,
+    section,
+    tags: tags.map((name) => ({ name, color: 'blue' })),
+    cover: null,
+  });
+  const demos = [
+    d('1', 'Créer une fiche usager', 'Logiciel métier', ['Usagers']),
+    d('2', 'Planifier un rendez-vous', 'Logiciel métier', ['Agenda']),
+    d('3', 'Explorer librement', null, ['Sandbox', 'Usagers']),
+  ];
+  it('recherche sans accents, filtre par étiquette', () => {
+    expect(filterDemos(demos, 'creer', '').map((x) => x.demoId)).toEqual(['1']);
+    expect(filterDemos(demos, 'logiciel', '').map((x) => x.demoId)).toEqual(['1', '2']);
+    expect(filterDemos(demos, '', 'Usagers').map((x) => x.demoId)).toEqual(['1', '3']);
+  });
+  it('sections (sans dossier en dernier) et étiquettes comptées', () => {
+    expect(demoSections(demos).map((s) => [s.name, s.demos.length])).toEqual([
+      ['Logiciel métier', 2],
+      [null, 1],
+    ]);
+    expect(demoTagCounts(demos)[0]).toEqual({ name: 'Usagers', color: 'blue', count: 2 });
+  });
+});
