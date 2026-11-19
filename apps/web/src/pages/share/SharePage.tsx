@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
+import { extractVariableKeys } from '@flowdsiml/core';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { embedSnippet, personalPageUrl, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
@@ -53,6 +54,8 @@ export function SharePage() {
   /** L17-01 : confirmation RGPD enregistrée avec la version en ligne (auteur et date). */
   const [ack, setAck] = useState<{ name: string; at: string } | null>(null);
   const [variables, setVariables] = useState<Tables<'variables'>[]>([]);
+  /** REV-10 : variables réellement présentes dans les textes de la démo, dans l'ordre d'apparition. */
+  const [usedKeys, setUsedKeys] = useState<string[]>([]);
   // L25-13 : page publique (activée, bouton), membres (signature), lignes du jeu de données
   const [pubPage, setPubPage] = useState<{ enabled: boolean; cta: { label: string; url: string } | null }>({
     enabled: false,
@@ -67,7 +70,7 @@ export function SharePage() {
     return q === 'embed' || q === 'perso' || q === 'access' || q === 'page' ? q : 'link';
   });
   const [creating, setCreating] = useState(false);
-  const [exporting, setExporting] = useState(false);
+  const [exporting, setExporting] = useState<boolean | 'gif'>(false);
   const [week, setWeek] = useState<{ views: number; leads: number } | null>(null);
   const [gatedSteps, setGatedSteps] = useState(0);
   const { error, success, run } = useAction();
@@ -115,6 +118,12 @@ export function SharePage() {
       setAck({ name: who?.full_name || who?.email || t('share.ackUnknown'), at: pa.at });
     } else setAck(null);
     setVariables(vars.data ?? []);
+    const [st, hs] = await Promise.all([
+      supabase.from('steps').select('title, body, position').eq('demo_id', demoId).order('position'),
+      supabase.from('hotspots').select('title, body').eq('demo_id', demoId),
+    ]);
+    const texts = [...(st.data ?? []), ...(hs.data ?? [])].flatMap((x) => [x.title ?? '', x.body ?? '']);
+    setUsedKeys([...new Set(texts.flatMap((x) => extractVariableKeys(x)))]);
     const [pg, mem, ds] = await Promise.all([
       supabase.from('demo_pages').select('enabled, cta_label, cta_url').eq('demo_id', demoId).maybeSingle(),
       supabase.rpc('list_members', { p_workspace: d.data.workspace_id }),
@@ -175,11 +184,9 @@ export function SharePage() {
   // Modifications non publiées : démo modifiée après la publication de la version en ligne
   const pending =
     published && publishedAt ? Date.parse(demo.updated_at) > Date.parse(publishedAt) + 2000 : false;
-  const firstVar = variables[0];
-  const secondVar = variables[1];
-  const paramExample = [firstVar, secondVar]
-    .filter(Boolean)
-    .map((v, i) => [i ? '&' : '?', `${v!.key}=`, v!.default_value || v!.key] as const);
+  const paramExample = usedKeys
+    .slice(0, 2)
+    .map((k, i) => [i ? '&' : '?', `${k}=`, variables.find((v) => v.key === k)?.default_value || k] as const);
 
   // Onglets texte seul, comme le rendu de la maquette
   const tabs: Array<{ id: Tab }> = [
@@ -193,7 +200,13 @@ export function SharePage() {
   return (
     <div className="mk sh">
       {dialog}
-      {exporting && <ExportDialog demoId={demoId} onClose={() => setExporting(false)} />}
+      {exporting && (
+        <ExportDialog
+          demoId={demoId}
+          initialFormat={exporting === 'gif' ? 'gif' : undefined}
+          onClose={() => setExporting(false)}
+        />
+      )}
       <div className="page-head">
         <div>
           <h1>{t('share.pageTitle')}</h1>
@@ -346,12 +359,14 @@ export function SharePage() {
                   <label htmlFor="sh-slug">
                     {t('share.customAddress')} <span className="badge">{t('shell.soon')}</span>
                   </label>
+                  {/* REV-10 : « Bientôt » : lisible et atteignable, mais non modifiable */}
                   <div className="input-group">
                     <span className="input t-mono muted sh-prefix">{url.replace(/[^/]+$/, '')}</span>
                     <input
                       id="sh-slug"
                       className="input t-mono sh-slug"
-                      disabled
+                      readOnly
+                      aria-disabled="true"
                       value={demo.id.slice(0, 8)}
                     />
                   </div>
@@ -364,24 +379,19 @@ export function SharePage() {
                 {/* Zone défilante atteignable au clavier (RGAA 7.3) */}
                 <div className="code" tabIndex={0} role="region" aria-labelledby="sh-params-h">
                   {url}
-                  {paramExample.length ? (
-                    paramExample.map(([sep, k, v]) => (
-                      <span key={k}>
-                        <span className="k">
-                          {sep}
-                          {k}
-                        </span>
-                        <span className="s">{encodeURIComponent(v)}</span>
+                  {paramExample.map(([sep, k, v]) => (
+                    <span key={k}>
+                      <span className="k">
+                        {sep}
+                        {k}
                       </span>
-                    ))
-                  ) : (
-                    <>
-                      <span className="k">?first_name=</span>
-                      <span className="s">Léa</span>
-                    </>
-                  )}
+                      <span className="s">{encodeURIComponent(v)}</span>
+                    </span>
+                  ))}
                 </div>
-                <p className="help sh-help">{t('share.urlParamsHelp')}</p>
+                <p className="help sh-help">
+                  {paramExample.length ? t('share.urlParamsHelp') : t('share.urlParamsNone')}
+                </p>
                 <hr className="divider sh-hr" />
                 <h2 className="t-label sh-h3">{t('share.elsewhere')}</h2>
                 <div className="row wrap">
@@ -411,12 +421,18 @@ export function SharePage() {
                   >
                     X
                   </a>
-                  <span className="btn btn-secondary btn-sm" aria-disabled="true">
+                  {/* REV-10 : l'export GIF et vidéo existe (L15, L25) : on l'ouvre sur le GIF */}
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    disabled={!published}
+                    aria-disabled={rules.exports_allowed ? undefined : true}
+                    title={rules.exports_allowed ? undefined : t('rules.errExports')}
+                    onClick={() => rules.exports_allowed && setExporting('gif')}
+                  >
                     <Download aria-hidden="true" />
                     {t('share.gif')}
-                    {/* Vague B : « Bientôt », jamais « V2 » */}
-                    <span className="badge sh-badge-xs">{t('shell.soon')}</span>
-                  </span>
+                  </button>
                 </div>
               </section>
             )}

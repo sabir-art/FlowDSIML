@@ -88,7 +88,16 @@ class StepImageError extends Error {
 const tick = () => new Promise((r) => setTimeout(r, 0));
 const isAbort = (e: unknown) => e instanceof DOMException && e.name === 'AbortError';
 
-export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () => void }) {
+export function ExportDialog({
+  demoId,
+  onClose,
+  initialFormat,
+}: {
+  demoId: string;
+  onClose: () => void;
+  /** REV-10 : « GIF / vidéo » de Partager ouvre l'export sur le GIF. */
+  initialFormat?: Fmt;
+}) {
   const { t, i18n } = useTranslation();
   const plan = usePlan();
   const id = useId();
@@ -97,7 +106,7 @@ export function ExportDialog({ demoId, onClose }: { demoId: string; onClose: () 
   const [failed, setFailed] = useState(false);
   const [fonts, setFonts] = useState<FontFiles | null>(null);
   const [measure, setMeasure] = useState<Measure | null>(null);
-  const [fmt, setFmt] = useState<Fmt>('pdf');
+  const [fmt, setFmt] = useState<Fmt>(initialFormat ?? 'pdf');
   const [pdf, setPdf] = useState<PdfOptions>(DEFAULT_PDF);
   const [gif, setGif] = useState<
     Omit<GifOptions, 'from' | 'to'> & { range: 'all' | 'range'; from: number; to: number }
