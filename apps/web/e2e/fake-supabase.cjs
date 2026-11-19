@@ -826,6 +826,73 @@ async function install(page, state = seed()) {
             }
           return json(route, 200, n);
         }
+        // ===== L18 : test A/B =====
+        case 'ab_start': {
+          const h = t.hotspots.find((x) => x.id === a.p_hotspot);
+          const st = t.steps.find((x) => x.id === h.step_id);
+          const list = (t.ab_tests ||= []);
+          const run = list.find((x) => x.demo_id === st.demo_id && x.status === 'running');
+          if (run) {
+            const n =
+              t.steps
+                .filter((x) => x.demo_id === st.demo_id)
+                .sort((x, y) => x.position - y.position)
+                .findIndex((x) => x.id === run.step_id) + 1;
+            return json(route, 400, { message: `AB_ALREADY_RUNNING:${n}`, code: 'P0001' });
+          }
+          const row = {
+            id: crypto.randomUUID(),
+            workspace_id: st.workspace_id,
+            demo_id: st.demo_id,
+            step_id: st.id,
+            hotspot_id: h.id,
+            status: 'running',
+            split_b: 50,
+            goal: 'completion',
+            label_b: a.p_label || 'Variante B',
+            variant_b: { title: h.title, body: h.body, cta: h.cta },
+            history: [],
+            kept: null,
+            started_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+            ended_at: null,
+            created_by: state.user.id,
+          };
+          list.push(row);
+          return json(route, 200, row.id);
+        }
+        case 'ab_update': {
+          const x = (t.ab_tests || []).find((y) => y.id === a.p_test);
+          if (a.p_b) {
+            x.variant_b = { ...x.variant_b, ...a.p_b };
+            x.history.push({ at: new Date().toISOString(), fields: Object.keys(a.p_b) });
+          }
+          if (a.p_split) x.split_b = a.p_split;
+          if (a.p_goal) x.goal = a.p_goal;
+          if (a.p_label) x.label_b = a.p_label;
+          return json(route, 200, null);
+        }
+        case 'ab_end': {
+          const x = (t.ab_tests || []).find((y) => y.id === a.p_test);
+          if (a.p_keep === 'B') {
+            const h = t.hotspots.find((y) => y.id === x.hotspot_id);
+            Object.assign(h, {
+              title: x.variant_b.title,
+              body: x.variant_b.body,
+              cta: x.variant_b.cta ?? null,
+            });
+          }
+          Object.assign(x, {
+            status: a.p_keep ? 'ended' : 'stopped',
+            kept: a.p_keep || null,
+            ended_at: new Date().toISOString(),
+          });
+          return json(route, 200, null);
+        }
+        case 'ab_results': {
+          const r = state.abResults || { A: { visitors: 0, reached: 0 }, B: { visitors: 0, reached: 0 } };
+          const x = (t.ab_tests || []).find((y) => y.id === a.p_test);
+          return json(route, 200, { goal: a.p_goal || x.goal, ...(r[a.p_goal || x.goal] || r) });
+        }
         // ===== L17 : glossaire =====
         case 'glossary_usage':
           return json(

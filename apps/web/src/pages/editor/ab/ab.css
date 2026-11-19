@@ -1,0 +1,104 @@
+/* L18-01 / 02 : test A/B */
+.ab-pill {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  flex: none;
+}
+.ab-pill--A {
+  background: #2381b5;
+}
+.ab-pill--B {
+  background: #a3195b;
+}
+.ab-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  justify-content: center;
+}
+.ab-switch-l {
+  font-size: 13px;
+  font-weight: 600;
+}
+.ab-switch .segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ab-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ab-card {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-md);
+}
+.ab-card--lead {
+  padding: 9px;
+}
+.ab-card--lead-A {
+  border: 2px solid #2381b5;
+}
+.ab-card--lead-B {
+  border: 2px solid #a3195b;
+}
+.ab-card-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.ab-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ab-card-value {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.mk .ab-result {
+  margin: 10px 0 12px;
+  font-size: 13px;
+}
+.ab-split-v {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.ab-sec input[type='range'] {
+  width: 100%;
+  accent-color: var(--fd-color-primary);
+}
+.ab-b {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.ab-b .sec-sub {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.ab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+.ab-stop {
+  color: var(--fd-color-danger);
+}

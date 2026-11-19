@@ -45,6 +45,8 @@ interface Props {
   onEditForm?: () => void;
   /** EDT-08 : pastille masquée quand l'aperçu du formulaire est affiché. */
   hideFormChip?: boolean;
+  /** L18-02 : variante B affichée sur le canevas (texte de la bulle testée remplacé). */
+  abPreview?: { hotspotId: string; title: string; body: string; cta: unknown } | null;
 }
 
 const clamp = (v: number, min = 0, max = 1) => Math.min(max, Math.max(min, v));
@@ -71,6 +73,7 @@ export function Canvas({
   readOnly,
   onEditForm,
   hideFormChip,
+  abPreview,
 }: Props) {
   const { t } = useTranslation();
   const frame = useRef<HTMLDivElement>(null);
@@ -349,8 +352,12 @@ export function Canvas({
   const theme = themeSchema.parse(asSettings(editor.demo?.settings).theme ?? {});
   const defaults = Object.fromEntries(editor.variables.map((v) => [v.key, v.default_value]));
   const sub = (txt: string) => applyVariables(txt, {}, defaults);
-  const tipHotspot =
+  const tipBase =
     (selection.kind === 'hotspot' ? hotspots.find((h) => h.id === selection.id) : undefined) ?? hotspots[0];
+  const tipHotspot =
+    tipBase && abPreview && abPreview.hotspotId === tipBase.id
+      ? { ...tipBase, title: abPreview.title, body: abPreview.body, cta: abPreview.cta as typeof tipBase.cta }
+      : tipBase;
   const stepIndex = editor.steps.findIndex((x) => x.id === step.id);
   // Spotlight : la bulle est ancrée au bord de la zone éclairée, comme dans le player
   const tipAnchor =

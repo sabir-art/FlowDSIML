@@ -8,6 +8,7 @@ import { VariablePreview } from '../VariablePreview';
 import { CtaFields } from './CtaFields';
 import { GuidedStepFields } from './GuidedStepFields';
 import { BeforeAfterFields } from '../BeforeAfterEditor';
+import { AbSection, type AbState } from '../ab/AbTest';
 import { usePlan } from '../../../lib/plan';
 
 export function StepPanel({
@@ -16,12 +17,15 @@ export function StepPanel({
   index,
   readOnly,
   setSelection,
+  ab,
 }: {
   editor: DemoEditor;
   step: StepRow;
   index: number;
   readOnly: boolean;
   setSelection: (s: Selection) => void;
+  /** L18 : test A/B de la démo (section « Test A/B » des étapes à bulle). */
+  ab?: AbState;
 }) {
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
@@ -343,6 +347,8 @@ export function StepPanel({
       <div className="sec">
         <GuidedStepFields editor={editor} step={step} index={index} readOnly={readOnly} />
       </div>
+
+      {ab && <AbSection editor={editor} step={step} index={index} readOnly={readOnly} ab={ab} />}
 
       {/* L22-01 : notes du présentateur, jamais publiées ni exportées */}
       <div className="sec notes-sec">

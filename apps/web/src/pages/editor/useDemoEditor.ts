@@ -212,6 +212,10 @@ export function useDemoEditor(demoId: string) {
       },
       canUndo: history.undo > 0,
       canRedo: history.redo > 0,
+      /** L18 : une modification faite côté serveur (test A/B) rend la démo « non publiée ». */
+      markDirty() {
+        setDemo((d) => (d ? { ...d, updated_at: new Date().toISOString() } : d));
+      },
       updateChapter(id: string, patch: Partial<ChapterRow>) {
         setChapters((list) => list.map((c) => (c.id === id ? { ...c, ...patch } : c)));
         queue('chapters', id, patch);

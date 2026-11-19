@@ -44,6 +44,7 @@ import { CommentsPanel } from './comments/CommentsPanel';
 import { useStepComments } from './comments/useStepComments';
 import { useAuth } from '../../auth/AuthProvider';
 import { StepPanel } from './panels/StepPanel';
+import { AbCanvasSwitch, asVariantB, useAbTest } from './ab/AbTest';
 import { HotspotPanel } from './panels/HotspotPanel';
 import { BlurPanel } from './panels/BlurPanel';
 import { ThemePanel } from './panels/ThemePanel';
@@ -150,6 +151,8 @@ export function EditorPage() {
   }, [others]);
   const [index, setIndex] = useState(0);
   const [tool, setTool] = useState<Tool>('select');
+  // L18 : test A/B en cours de la démo
+  const ab = useAbTest(demoId);
   const [selection, setSelection] = useState<Selection>({ kind: 'step' });
   const [params] = useSearchParams();
   // ANA-09 : « Ajouter un formulaire » ouvre directement l'onglet Réglages
@@ -655,6 +658,7 @@ export function EditorPage() {
           )}
           <div className="stage-main">
             <div className="stage-inner">
+              {step && ab.test?.step_id === step.id && <AbCanvasSwitch ab={ab} />}
               {step ? (
                 <div className={`frame fd-player-scope frame--${zoom}`}>
                   <div className="browser" aria-hidden="true">
@@ -678,6 +682,16 @@ export function EditorPage() {
                         step.gate_form_id && setSelection({ kind: 'form', id: step.gate_form_id })
                       }
                       hideFormChip={!!selectedForm}
+                      abPreview={
+                        ab.test && ab.view === 'B' && ab.test.step_id === step.id && ab.test.hotspot_id
+                          ? {
+                              hotspotId: ab.test.hotspot_id,
+                              title: asVariantB(ab.test.variant_b).title ?? '',
+                              body: asVariantB(ab.test.variant_b).body ?? '',
+                              cta: asVariantB(ab.test.variant_b).cta ?? null,
+                            }
+                          : null
+                      }
                     />
                     {selectedForm && <FormPreview form={selectedForm} editor={editor} />}
                   </div>
@@ -779,6 +793,7 @@ export function EditorPage() {
                 index={index}
                 readOnly={readOnly}
                 setSelection={setSelection}
+                ab={ab}
               />
             )}
             {tab === 'step' && step && hotspot && (
