@@ -13,6 +13,7 @@ import { usePlan } from '../../../lib/plan';
 import { VideoFields } from '../video/VideoFields';
 import { HtmlFields } from '../html/HtmlFields';
 import { CaptureTabFields } from '../capture/CaptureFields';
+import { AnimationFields } from '../capture/AnimationFields';
 
 export function StepPanel({
   editor,
@@ -305,6 +306,7 @@ export function StepPanel({
         </div>
       )}
 
+      {step.kind === 'image' && <AnimationFields editor={editor} step={step} readOnly={readOnly} />}
       {step.kind === 'image' && <CaptureTabFields editor={editor} step={step} readOnly={readOnly} />}
 
       <div className="sec">

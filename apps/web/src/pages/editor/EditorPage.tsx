@@ -157,6 +157,12 @@ export function EditorPage() {
   }, [others]);
   const [index, setIndex] = useState(0);
   const [tool, setTool] = useState<Tool>('select');
+  // L25-04 : « Choisir un champ » du panneau Animation (clic suivant sur le canevas)
+  useEffect(() => {
+    const on = () => setTool('field');
+    window.addEventListener('fd:pick-field', on);
+    return () => window.removeEventListener('fd:pick-field', on);
+  }, []);
   // L18 : police de la médiathèque (règle @font-face contrôlée)
   const fontCss = editor.demo
     ? fontFaceCss(themeSchema.parse(asSettings(editor.demo.settings).theme ?? {}))

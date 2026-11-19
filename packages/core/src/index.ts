@@ -10,3 +10,4 @@ export * from './glossary';
 export * from './videoTimeline';
 export * from './htmlOps';
 export * from './htmlSanitize';
+export * from './pii';

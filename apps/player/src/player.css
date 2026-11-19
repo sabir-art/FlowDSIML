@@ -2550,3 +2550,49 @@ h1.p-title {
     animation: none;
   }
 }
+
+/* ===== L25-04/05 : animations de l'étape ===== */
+.p-scroll {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #fff;
+  z-index: 1;
+}
+.p-scroll img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+}
+.p-type {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 0.6em;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: inset 0 0 0 2px #2897d5;
+  color: #1c1917;
+  font-size: clamp(10px, 1.4cqw, 16px);
+  white-space: pre;
+}
+.p-type:not(.is-typing) {
+  box-shadow: inset 0 0 0 1px #a8a29e;
+}
+.p-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 1px;
+  background: currentColor;
+  animation: p-caret 1s steps(1) infinite;
+}
+@keyframes p-caret {
+  50% {
+    opacity: 0;
+  }
+}

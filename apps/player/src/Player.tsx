@@ -68,6 +68,9 @@ import {
   zoomBox,
   zoomOrigin,
   fontFaceCss,
+  TYPING_MS,
+  scrollOffset,
+  scrollPlan,
 } from '@flowdsiml/player-core';
 import { fmt, strings, type Dict } from './i18n';
 import type { QuizResult, TrackerLike } from './api';
@@ -1119,6 +1122,45 @@ function ImageStep({
   const origin = `${o.x * 100}% ${o.y * 100}%`;
   const screen = <T extends Hotspot>(h: T): T => zoomBox(h, o, scale);
 
+  // L25-04/05 : animation de l'étape (saisie ou défilement), jouée avant la pastille et la bulle
+  const anim = dimmed ? undefined : step.options.animation;
+  const fp = step.options.fullPage;
+  const reduced = useMedia('(prefers-reduced-motion: reduce)');
+  const typed = anim?.type === 'typing' && anim.field ? sub(anim.text) : null;
+  const scroll = anim?.type === 'scroll' && fp?.url ? scrollPlan(fp, anim) : null;
+  const animated = !reduced && (typed !== null || (scroll !== null && scroll.distance > 0));
+  const [phase, setPhase] = useState<'run' | 'go' | 'done'>(animated ? 'run' : 'done');
+  const [chars, setChars] = useState(animated ? 0 : Number.MAX_SAFE_INTEGER);
+  useEffect(() => {
+    if (phase === 'done') return;
+    if (typed !== null && anim?.type === 'typing') {
+      const total = [...typed].length;
+      let n = 0;
+      const id = setInterval(() => {
+        n += 1;
+        setChars(n);
+        if (n >= total) {
+          clearInterval(id);
+          setPhase('done');
+        }
+      }, TYPING_MS[anim.speed]);
+      return () => clearInterval(id);
+    }
+    if (scroll && anim?.type === 'scroll') {
+      const raf = requestAnimationFrame(() => requestAnimationFrame(() => setPhase('go')));
+      const end = setTimeout(() => setPhase('done'), anim.duration * 1000 + 120);
+      return () => {
+        cancelAnimationFrame(raf);
+        clearTimeout(end);
+      };
+    }
+    setPhase('done');
+    return undefined;
+    // L'animation se joue une fois, à l'arrivée sur l'étape
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const playing = phase !== 'done';
+
   return (
     <div
       class={`p-stage${dimmed ? ' is-backdrop' : ''}`}
@@ -1129,6 +1171,32 @@ function ImageStep({
         style={{ transform, transformOrigin: origin }}
       >
         <img class="p-img" src={img.url} alt={alt} draggable={false} />
+        {scroll && fp && playing && (
+          <div class="p-scroll" aria-hidden="true">
+            <img
+              src={fp.url}
+              alt=""
+              draggable={false}
+              style={{
+                transform: `translateY(${scrollOffset(fp, phase === 'go' ? scroll.to : scroll.from)})`,
+                transitionDuration: `${anim?.type === 'scroll' ? anim.duration : 1.2}s`,
+              }}
+            />
+          </div>
+        )}
+        {typed !== null && anim?.type === 'typing' && anim.field && (
+          <>
+            <div
+              class={`p-type${playing ? ' is-typing' : ''}`}
+              style={boxStyle(anim.field)}
+              aria-hidden="true"
+            >
+              <span>{[...typed].slice(0, chars).join('')}</span>
+              {playing && <i class="p-caret" />}
+            </div>
+            <span class="sr-only">{typed}</span>
+          </>
+        )}
         {step.blurs.map((b, i) => (
           <div
             key={i}
@@ -1145,7 +1213,7 @@ function ImageStep({
           </div>
         ))}
       </div>
-      {!dimmed && step.hotspots.some((h) => h.style === 'spotlight') && (
+      {!dimmed && !playing && step.hotspots.some((h) => h.style === 'spotlight') && (
         <svg class="p-veil" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <path
             fill-rule="evenodd"
@@ -1154,6 +1222,7 @@ function ImageStep({
         </svg>
       )}
       {!dimmed &&
+        !playing &&
         step.hotspots.map((h) =>
           h.style === 'spotlight' ? (
             <button
@@ -1173,7 +1242,7 @@ function ImageStep({
             />
           ),
         )}
-      {!dimmed && tip && (tip.h.title || tip.h.body || tip.h.cta) && (
+      {!dimmed && !playing && tip && (tip.h.title || tip.h.body || tip.h.cta) && (
         <Tooltip
           {...tip}
           {...(tip.h.style === 'spotlight'

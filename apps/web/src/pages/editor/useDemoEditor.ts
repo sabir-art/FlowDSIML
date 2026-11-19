@@ -89,7 +89,13 @@ export function useDemoEditor(demoId: string) {
     const paths = [
       ...new Set(
         rows
-          .flatMap((s) => [s.image_path, s.before_image_path, ...Object.values(asVideo(s.video).frames)])
+          .flatMap((s) => [
+            s.image_path,
+            s.before_image_path,
+            ...Object.values(asVideo(s.video).frames),
+            // L25-01 : capture pleine page (aperçu du défilement)
+            (s.options as { fullPage?: { path?: string } } | null)?.fullPage?.path,
+          ])
           .filter((p): p is string => !!p),
       ),
     ];

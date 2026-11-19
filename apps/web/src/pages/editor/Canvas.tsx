@@ -23,6 +23,8 @@ import { textOn } from '../../lib/publish';
 import { BeforeAfterCanvas } from './BeforeAfterEditor';
 import { VideoCanvas } from './video/VideoCanvas';
 import { HtmlCanvas } from './html/HtmlCanvas';
+import { AnimationMarks } from './capture/AnimationMarks';
+import { fieldAt } from './capture/animation';
 import {
   asAction,
   asCta,
@@ -34,7 +36,8 @@ import {
   type StepRow,
 } from './types';
 
-export type Tool = 'select' | 'hotspot' | 'blur';
+/** L25-04 : « field » = choix du champ de la saisie animée (un clic sur le canevas). */
+export type Tool = 'select' | 'hotspot' | 'blur' | 'field';
 
 interface Props {
   editor: DemoEditor;
@@ -97,6 +100,18 @@ export function Canvas({
     if (tool === 'hotspot') {
       const h = await editor.addHotspot(step.id, p.x, p.y, t('editor.newHotspot'));
       if (h) setSelection({ kind: 'hotspot', id: h.id });
+      setTool('select');
+    } else if (tool === 'field') {
+      // L25-04 : champ de la saisie animée choisi sur le canevas
+      const opts = (step.options ?? {}) as Record<string, unknown>;
+      const anim = opts.animation as { type?: string } | undefined;
+      if (anim?.type === 'typing')
+        editor.updateStep(step.id, {
+          options: {
+            ...opts,
+            animation: { ...anim, field: fieldAt(p.x, p.y), fieldLabel: '' },
+          } as StepRow['options'],
+        });
       setTool('select');
     } else if (tool === 'blur') {
       (e.target as Element).setPointerCapture(e.pointerId);
@@ -400,6 +415,9 @@ export function Canvas({
       ) : (
         <div className="canvas-missing">{t('common.loading')}</div>
       )}
+
+      {/* L25-04/05 : repères et aperçu de l'animation de l'étape */}
+      <AnimationMarks step={step} urls={editor.imageUrls} />
 
       {blurs.map((b, i) => (
         <div

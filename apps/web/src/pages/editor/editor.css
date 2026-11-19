@@ -2406,3 +2406,135 @@
   width: 12px;
   height: 12px;
 }
+
+/* ===== L25-04/05 : animation de l'étape ===== */
+.cap-anim .segmented + .help,
+.cap-anim .help + .help {
+  margin-top: 6px;
+}
+.cap-anim > .t-label {
+  display: block;
+  margin: 12px 0 6px;
+}
+.cap-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.cap-pii {
+  margin-top: 8px;
+}
+.cap-preview {
+  margin-top: 14px;
+}
+.canvas-frame.tool-field {
+  cursor: crosshair;
+}
+.cap-field-mark {
+  position: absolute;
+  z-index: 3;
+  border: 2px dashed #2897d5;
+  border-radius: 6px;
+  pointer-events: none;
+}
+.cap-field-mark.is-playing {
+  border-style: solid;
+  background: #fff;
+}
+.cap-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 280px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #141311;
+  color: #fff;
+  font: 600 11px/1.5 var(--fd-font-sans);
+  white-space: nowrap;
+}
+.cap-field-mark > .cap-chip {
+  left: -2px;
+  bottom: calc(100% + 6px);
+}
+.cap-chip svg {
+  flex: none;
+  width: 13px;
+  height: 13px;
+}
+.cap-chip-t {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 400;
+  opacity: 0.85;
+}
+.cap-typed {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 0.6em;
+  color: #1c1917;
+  font-size: 13px;
+  white-space: pre;
+  overflow: hidden;
+}
+.cap-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: currentColor;
+  animation: cap-caret 1s steps(1) infinite;
+}
+@keyframes cap-caret {
+  50% {
+    opacity: 0;
+  }
+}
+.cap-scroll-mark {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.cap-scroll-mark.is-down {
+  top: 12px;
+}
+.cap-scroll-mark.is-up {
+  bottom: 12px;
+}
+.cap-scroll-mark .cap-chip {
+  position: static;
+}
+.cap-scroll {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  background: #fff;
+  pointer-events: none;
+}
+.canvas-frame .cap-scroll img {
+  position: static;
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: initial;
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cap-caret {
+    animation: none;
+  }
+  .canvas-frame .cap-scroll img {
+    transition: none !important;
+  }
+}
+.cap-anim > .field,
+.cap-anim > .field + .field {
+  margin-top: 12px;
+}

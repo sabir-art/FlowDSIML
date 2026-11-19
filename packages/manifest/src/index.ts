@@ -159,6 +159,35 @@ export const stepOptionsSchema = z
       .object({ n: z.number().int().min(1).max(50), title: z.string().max(120) })
       .optional()
       .catch(undefined),
+    /**
+     * L25-04/05 : animation jouée à l'arrivée sur l'étape, avant la bulle. Une seule par étape.
+     * Saisie : texte (variables possibles) écrit dans le champ repéré ; défilement : la capture pleine
+     * page défile jusqu'à la position d'arrivée (distance en pixels de l'image).
+     */
+    animation: z
+      .discriminatedUnion('type', [
+        z.object({
+          type: z.literal('typing'),
+          text: z.string().max(200),
+          field: z
+            .object({ x: z.number(), y: z.number(), w: z.number(), h: z.number() })
+            .nullable()
+            .default(null),
+          fieldLabel: z.string().max(80).default(''),
+          speed: z.enum(['slow', 'normal', 'fast']).default('normal').catch('normal'),
+        }),
+        z.object({
+          type: z.literal('scroll'),
+          direction: z.enum(['down', 'up']).default('down').catch('down'),
+          distance: z.number().min(0).max(30000),
+          duration: z
+            .union([z.literal(0.6), z.literal(1.2), z.literal(2)])
+            .default(1.2)
+            .catch(1.2),
+        }),
+      ])
+      .optional()
+      .catch(undefined),
     /** L25-06 : onglet d'origine de la capture, gardé quand l'éditeur rattache l'étape à un autre onglet. */
     tabCaptured: z
       .object({ n: z.number().int().min(1).max(50), title: z.string().max(120) })
@@ -207,6 +236,7 @@ export const stepOptionsSchema = z
     rules: [],
   });
 export type StepOptions = z.infer<typeof stepOptionsSchema>;
+export type StepAnimation = NonNullable<StepOptions['animation']>;
 
 /**
  * L17 : étape Avant / Après. L'image principale de l'étape est « Maintenant » ; `before` est la

@@ -108,7 +108,17 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
       zoom: asZoom(s.zoom),
       cta: asCta(s.cta),
       gateFormId: s.gate_form_id,
-      options: asStepOptions(s.options),
+      // L25-01 : page entière par son adresse signée (aperçu du défilement), jamais son chemin
+      options: (() => {
+        const o = asStepOptions(s.options);
+        const fp = o.fullPage;
+        return fp
+          ? {
+              ...o,
+              fullPage: { ...fp, path: undefined, url: fp.path ? (ed.imageUrls[fp.path] ?? '') : fp.url },
+            }
+          : o;
+      })(),
       hotspots: ed.hotspots
         .filter((h) => h.step_id === s.id)
         .map((h) => ({
