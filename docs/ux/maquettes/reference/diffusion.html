@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diffuser une démo (lot L16) · TutoClick (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+  .thumb .hs { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--fd-ember-500); box-shadow: 0 0 0 4px rgba(232,84,31,.25); }
+  .view-list[hidden], .demo-grid[hidden] { display: none; }
+  .banner-ob { display: flex; gap: 20px; align-items: center; padding: 16px 20px; border-radius: var(--fd-radius-lg); background: var(--fd-color-primary-soft); margin-bottom: 24px; }
+  .banner-ob .progress { width: 160px; }
+  /* ===== L16 : diffusion ===== */
+  .modal-dif { width: min(920px, 100%); max-height: calc(100vh - 48px); display: flex; flex-direction: column; }
+  .modal-dif .modal-body { overflow: auto; padding-top: 0; }
+  .modal-dif .tabs { position: sticky; top: 0; background: var(--fd-color-surface); z-index: 1; margin-bottom: 20px; }
+  .dif-sub { margin-top: 2px; font-size: 13px; color: var(--fd-color-text-muted); display: flex; gap: 6px; align-items: center; }
+  .modal-dif [role=tab][aria-disabled=true] { color: var(--fd-color-text-subtle); cursor: not-allowed; }
+  .tab-count { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 99px; background: var(--fd-color-surface-sunken); font: 600 11px var(--fd-font-sans); display: inline-grid; place-items: center; }
+  .l16 [data-p]:not(.on) { display: none !important; }
+  .fs { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 20px; }
+  .fs legend, .lbl { display: block; font: 600 var(--fd-text-label-size) var(--fd-font-sans); margin-bottom: 8px; padding: 0; }
+  .radios { display: grid; gap: 10px; }
+  .radios label { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+  .radios input { margin-top: 3px; accent-color: var(--fd-color-primary); }
+  .radios small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .input-xs { width: 64px; height: 28px; display: inline-block; margin: 0 4px; text-align: right; }
+  .map { font-size: 13px; } .map td, .map th { padding: 8px 12px; height: auto; } .map tbody th { font-weight: 600; text-align: left; color: var(--fd-color-text-muted); width: 160px; }
+  .file-row { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-md); background: var(--fd-color-surface); }
+  .file-row .ic { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--fd-color-primary-soft); color: var(--fd-color-primary); flex: none; }
+  .file-row b { display: block; font: 600 13px var(--fd-font-mono); overflow-wrap: anywhere; }
+  .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .code { background: var(--fd-color-surface-sunken); border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-md); padding: 12px 14px; font: 12px/1.6 var(--fd-font-mono); white-space: pre-wrap; word-break: break-all; color: var(--fd-color-text); margin: 0; }
+  .code .k { color: var(--fd-color-primary); } .code .s { color: var(--fd-color-accent); }
+  .prev { border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-md); overflow: hidden; background: #fff; color: #1E2731; position: relative; }
+  .prev .bar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: #EEF2F6; font: 11px var(--fd-font-mono); color: #4A5562; }
+  .prev .bar i { width: 8px; height: 8px; border-radius: 50%; background: #C9D1DA; }
+  .prev .pg { padding: 12px 14px; display: grid; gap: 8px; font-size: 12px; min-height: 220px; }
+  .prev .ln { height: 6px; border-radius: 3px; background: #E3E8EE; }
+  .prev .emb { aspect-ratio: 16/10; border-radius: 6px; background: linear-gradient(135deg, #F4F6F9, #E3E8EE); border: 1px solid #D6DDE5; display: grid; place-items: center; }
+  .prev .emb span { padding: 6px 12px; border-radius: 99px; background: #A31F5E; color: #fff; font: 600 11px var(--fd-font-sans); display: inline-flex; gap: 6px; align-items: center; }
+  .prev .cta { justify-self: start; padding: 6px 12px; border-radius: 8px; background: #A31F5E; color: #fff; font: 600 12px var(--fd-font-sans); }
+  .prev .pop { position: absolute; inset: 34px 0 0; background: rgba(10,14,20,.45); display: grid; place-items: center; }
+  .prev .pop div { width: 70%; background: linear-gradient(180deg, #DDE3EA 0 18%, #F4F6F9 18%) !important; aspect-ratio: 16/10; border-radius: 8px; background: #F4F6F9; box-shadow: 0 8px 24px rgba(0,0,0,.25); position: relative; }
+  .prev .pop div::after { content: ""; position: absolute; top: 6px; right: 6px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px #C9D1DA; }
+  .dif-list { list-style: none; margin: 0; padding: 0; display: grid; }
+  .dif-list li { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--fd-color-border); }
+  .dif-list li:first-child { border-top: 0; }
+  .dif-list .ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+  .dif-list .ic svg { width: 18px; height: 18px; }
+  .dif-list b { display: block; font-size: 14px; } .dif-list small { color: var(--fd-color-text-muted); font-size: 12px; }
+  .dif-list .act { display: flex; gap: 8px; align-items: center; }
+  .count { font-size: 12px; color: var(--fd-color-text-muted); text-align: right; }
+  @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+  .mock-l16 { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 9500; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; padding: 4px; border-radius: 18px; background: #141311; box-shadow: var(--fd-shadow-lg); max-width: calc(100vw - 24px); }
+  .mock-l16 button { border: 0; background: transparent; color: #fff; font: 500 12px var(--fd-font-sans); padding: 6px 10px; border-radius: 99px; cursor: pointer; }
+  .mock-l16 button[aria-pressed="true"] { background: #fff; color: #141311; }
+</style>
+</head>
+<body data-shell="app" data-page="demos" data-crumbs='<span aria-current="page">Démos</span>'>
+<main>
+  <div class="content">
+    <div class="banner-ob" role="region" aria-label="Premiers pas">
+      <div class="grow"><b>Premiers pas · 3 sur 5</b><p class="t-caption muted" style="margin-top:2px">Prochaine étape : partagez votre démo « Créer un rapport » pour recevoir vos premières vues.</p></div>
+      <div class="progress hide-sm"><span style="width:60%"></span></div>
+      <a class="btn btn-secondary btn-sm" href="partage.html">Partager</a>
+      <button class="btn btn-ghost btn-sm btn-icon" aria-label="Masquer les premiers pas"><i data-icon="x"></i></button>
+    </div>
+
+    <div class="page-head">
+      <div><h1>Démos</h1><p class="muted" style="margin-top:4px">24 démos · 18 publiées</p></div>
+      <div class="row">
+        <button class="btn btn-secondary" data-open="m-import"><i data-icon="upload"></i>Importer</button>
+        <button class="btn btn-primary" data-open="m-new"><i data-icon="plus"></i>Nouvelle démo</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="input-affix" style="width:280px;max-width:100%"><i data-icon="search"></i><input class="input input-sm" type="search" placeholder="Rechercher une démo" aria-label="Rechercher une démo"></div>
+      <select class="select input-sm" style="width:auto" aria-label="Statut"><option>Tous les statuts</option><option>Publiées</option><option>Brouillons</option><option>Modifiées</option></select>
+      <select class="select input-sm" style="width:auto" aria-label="Créateur"><option>Tous les créateurs</option><option>Moi</option></select>
+      <select class="select input-sm" style="width:auto" aria-label="Trier"><option>Modifiées récemment</option><option>Créées récemment</option><option>Nom (A-Z)</option><option>Plus vues</option></select>
+      <span class="grow"></span>
+      <div class="segmented" role="radiogroup" aria-label="Affichage" data-seg id="viewseg"><button role="radio" aria-checked="true" data-value="grid" aria-label="Grille"><i data-icon="layers"></i></button><button role="radio" aria-checked="false" data-value="list" aria-label="Liste"><i data-icon="form"></i></button></div>
+    </div>
+
+    <div class="demo-grid" id="grid"></div>
+
+    <div class="card view-list" id="list" hidden>
+      <div class="table-wrap"><table class="table">
+        <caption class="sr-only">Liste des démos</caption>
+        <thead><tr><th scope="col"><button>Nom <i data-icon="chevronDown"></i></button></th><th>Statut</th><th>Dossier</th><th class="r">Vues (30 j)</th><th class="r">Complétion</th><th>Modifiée</th><th><span class="sr-only">Actions</span></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+    </div>
+
+    <h2 class="t-h3" style="margin:40px 0 12px">Exemple d'état vide (dossier sans démo)</h2>
+    <div class="card"><div class="empty">
+      <svg class="illu" viewBox="0 0 140 100" aria-hidden="true"><rect x="10" y="14" width="120" height="76" rx="10" fill="var(--fd-lagoon-50)" stroke="var(--fd-lagoon-200)"/><path d="M28 70c14 0 18-22 34-22s20-18 36-18" fill="none" stroke="var(--fd-lagoon-300)" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 7"/><circle cx="28" cy="70" r="6" fill="var(--fd-lagoon-300)"/><circle cx="62" cy="48" r="6" fill="var(--fd-lagoon-300)"/><circle cx="98" cy="30" r="9" fill="var(--fd-ember-400)"/><circle cx="98" cy="30" r="3.5" fill="#fff"/></svg>
+      <h3>Ce dossier est vide</h3><p class="muted">Glissez des démos ici depuis la liste, ou créez-en une nouvelle directement dans ce dossier.</p>
+      <button class="btn btn-primary" data-open="m-new"><i data-icon="plus"></i>Nouvelle démo</button>
+    </div></div>
+  </div>
+</main>
+
+<div class="menu" id="card-menu" role="menu" hidden>
+  <a role="menuitem" href="editeur.html"><i data-icon="edit"></i>Ouvrir dans l'éditeur</a>
+  <a role="menuitem" href="partage.html"><i data-icon="share"></i>Partager</a>
+  <button role="menuitem" data-toast="Lien copié"><i data-icon="link"></i>Copier le lien</button>
+  <button role="menuitem"><i data-icon="duplicate"></i>Dupliquer<span class="kbd">⌘D</span></button>
+  <button role="menuitem"><i data-icon="folder"></i>Déplacer vers…</button>
+  <hr>
+  <button role="menuitem" data-toast="Démo archivée · Annuler"><i data-icon="archive"></i>Archiver</button>
+  <button role="menuitem" class="danger" data-open="m-del"><i data-icon="trash"></i>Supprimer</button>
+</div>
+
+<div class="modal-backdrop" id="m-new" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-new-t">
+    <div class="modal-head"><h2 id="m-new-t">Nouvelle démo</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <button class="card card-pad col" style="text-align:left;cursor:pointer;border:2px solid var(--fd-color-primary);background:var(--fd-color-surface-selected)" data-toast="Ouverture de l'extension…"><i data-icon="chrome"></i><b>Capturer avec l'extension</b><span class="t-caption muted">Recommandé. Une étape par clic, avec la position du clic.</span></button>
+        <button class="card card-pad col" style="text-align:left;cursor:pointer" data-open="m-import"><i data-icon="image"></i><b>Importer des images</b><span class="t-caption muted">Partez de captures d'écran ou de maquettes existantes.</span></button>
+      </div>
+      <div class="field" style="margin-top:20px"><label for="nd-folder">Dossier</label><select id="nd-folder" class="select"><option>Site web</option><option>Sales — Outbound</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-import" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-import-t">
+    <div class="modal-head"><h2 id="m-import-t">Importer des captures</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body col" style="gap:12px">
+      <p class="muted">Téléversement de 12 images sur 18…</p>
+      <div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="Téléversement"><span style="width:66%"></span></div>
+      <div class="alert alert-warning"><i data-icon="alert"></i><span><b>2 fichiers ignorés</b> : « video.mov » n'est pas une image, « scan.tiff » n'est pas un format pris en charge.</span></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" aria-disabled="true"><span class="spinner"></span>Import en cours…</button></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="m-del" hidden>
+  <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="m-del-t" aria-describedby="m-del-d">
+    <div class="modal-head"><h2 id="m-del-t">Supprimer « Créer un rapport » ?</h2></div>
+    <div class="modal-body"><p id="m-del-d" class="muted">La démo, ses liens et ses statistiques seront supprimés définitivement. Les leads déjà collectés sont conservés. Pour la mettre de côté, archivez-la plutôt.</p></div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-danger" data-close data-toast="Démo supprimée">Supprimer la démo</button></div>
+  </div>
+</div>
+
+<!-- ===== L16 : modale Diffuser ===== -->
+<div class="modal-backdrop l16" id="m-dif" hidden>
+  <div class="modal modal-dif" role="dialog" aria-modal="true" aria-labelledby="m-dif-t">
+    <div class="modal-head"><div><h2 id="m-dif-t">Diffuser « Créer un rapport en 2 minutes »</h2>
+      <p class="dif-sub" data-p="pub"><span class="badge badge-success"><span class="dot"></span>Publiée</span>version 3, publiée le 14 nov. 2026</p>
+      <p class="dif-sub" data-p="np"><span class="badge"><span class="dot"></span>Brouillon</span>jamais publiée</p></div>
+      <button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body">
+      <div class="tabs" role="tablist" aria-label="Canal de diffusion">
+        <button role="tab" id="tb-scorm" aria-controls="tp-scorm" aria-selected="true"><i data-icon="package"></i>SCORM</button>
+        <button role="tab" id="tb-intra" aria-controls="tp-intra" aria-selected="false" tabindex="-1"><i data-icon="globe"></i>Intranet</button>
+        <button role="tab" id="tb-mail" aria-controls="tp-mail" aria-selected="false" tabindex="-1"><i data-icon="mail"></i>E-mail</button>
+        <button role="tab" id="tb-where" aria-controls="tp-where" aria-selected="false" tabindex="-1"><i data-icon="share"></i>Où elle est diffusée<span class="tab-count" data-p="pub">4</span></button>
+      </div>
+
+      <!-- L16-09 : démo non publiée -->
+      <div data-p="np"><div class="empty" role="status" style="padding:32px 16px">
+        <span class="file-row" style="border:0;padding:0;background:none"><span class="ic"><i data-icon="send"></i></span></span>
+        <h3>Publiez la démo pour la diffuser</h3>
+        <p class="muted" style="max-width:460px">Le paquet SCORM, le code pour l'intranet et le lien de l'e-mail utilisent la version publiée. Cette démo n'a pas encore été publiée.</p>
+        <div class="row" style="gap:8px;justify-content:center"><a class="btn btn-secondary" href="editeur.html"><i data-icon="edit"></i>Ouvrir dans l'éditeur</a><button class="btn btn-primary" data-toast="Démo publiée · version 1"><i data-icon="send"></i>Publier la démo</button></div>
+      </div></div>
+
+      <!-- L16-01 à 04 : SCORM -->
+      <section role="tabpanel" id="tp-scorm" aria-labelledby="tb-scorm" data-p="pub">
+        <div data-p="cours" role="status" style="margin-bottom:20px"><div class="row between" style="margin-bottom:8px"><span class="row" style="gap:8px"><span class="spinner" style="color:var(--fd-color-primary)"></span><b>Génération du paquet…</b></span><span class="t-caption muted num">Captures 12 sur 18</span></div>
+          <div class="progress" role="progressbar" aria-label="Génération du paquet SCORM" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"><span style="width:66%"></span></div>
+          <p class="t-caption muted" style="margin-top:8px">Vous pouvez fermer cette fenêtre : le paquet restera disponible dans la liste des exports.</p></div>
+        <div data-p="pret" style="margin-bottom:20px">
+          <div class="alert alert-success" role="status" style="margin-bottom:12px"><i data-icon="checkCircle"></i><span><b>Paquet prêt.</b> Déposez-le dans votre LMS comme une nouvelle activité SCORM.</span></div>
+          <div class="file-row"><span class="ic"><i data-icon="package"></i></span><span class="grow"><b>creer-un-rapport-scorm12.zip</b><span class="t-caption muted">4,2 Mo · SCORM 1.2 · version 3 · réussite : toutes les étapes vues</span></span><a class="btn btn-primary" href="#" data-toast="Téléchargement lancé"><i data-icon="download"></i>Télécharger</a></div>
+        </div>
+        <div data-p="err" style="margin-bottom:20px">
+          <div class="alert alert-danger" role="alert"><i data-icon="alert"></i><span><b>Le paquet n'a pas pu être généré.</b> La capture de l'étape 4 est illisible. Remplacez-la dans l'éditeur, puis relancez la génération.<span class="row" style="gap:8px;margin-top:10px"><button class="btn btn-secondary btn-sm"><i data-icon="refresh"></i>Réessayer</button><a class="btn btn-ghost btn-sm" href="editeur.html"><i data-icon="edit"></i>Ouvrir l'étape 4</a></span></span></div>
+        </div>
+        <p class="muted" style="margin:0 0 20px">Un fichier .zip à importer dans votre plateforme de formation (LMS), par exemple Moodle ou Chamilo. Le paquet contient la version publiée et fonctionne sans connexion à TutoClick.</p>
+        <fieldset class="fs" id="fs-scorm">
+          <div class="two">
+            <div><span class="lbl" id="lb-ver">Version SCORM</span>
+              <div class="segmented" role="radiogroup" data-seg aria-labelledby="lb-ver"><button role="radio" aria-checked="true">SCORM 1.2</button><button role="radio" aria-checked="false">SCORM 2004</button></div>
+              <p class="help" style="margin-top:6px">1.2 est accepté par presque tous les LMS. Choisissez 2004 si votre LMS le demande.</p></div>
+            <fieldset class="fs" style="gap:0"><legend>Critère de réussite</legend>
+              <div class="radios">
+                <label><input type="radio" name="crit" checked><span>Toutes les étapes vues<small>Le LMS reçoit « terminé » à la dernière étape.</small></span></label>
+                <label><input type="radio" name="crit"><span>Quiz réussi, score d'au moins <input class="input input-sm input-xs num" value="70" aria-label="Score minimum en pourcentage" disabled> %<small>Le LMS reçoit « réussi » ou « échoué » et le score.</small></span></label>
+              </div></fieldset>
+          </div>
+          <div><span class="lbl">Ce que reçoit le LMS</span>
+            <div class="table-wrap"><table class="table map"><caption class="sr-only">Données envoyées au LMS</caption><thead><tr><th scope="col">Donnée</th><th scope="col">Valeur</th></tr></thead><tbody>
+              <tr><th scope="row">Statut</th><td>Terminé à la dernière étape vue</td></tr>
+              <tr><th scope="row">Reprise</th><td>Dernière étape vue : l'apprenant reprend où il en était</td></tr>
+              <tr><th scope="row">Temps passé</th><td>Durée de chaque session</td></tr>
+            </tbody></table></div></div>
+          <div class="setting" style="border-top:1px solid var(--fd-color-border);padding-top:16px"><span><span class="t-label">Envoyer aussi les statistiques à TutoClick</span><span class="help" style="display:block;margin-top:2px;max-width:600px">Désactivé par défaut. Activé, le paquet transmet la progression au suivi des apprenants. Le LMS doit alors pouvoir joindre demos.tutoclick.example, et chaque apprenant est identifié par un code chiffré tiré de son identifiant LMS.</span></span><span class="switch"><input type="checkbox" aria-label="Envoyer aussi les statistiques à TutoClick"><span></span></span></div>
+        </fieldset>
+      </section>
+
+      <!-- L16-05 / 06 : Intranet -->
+      <section role="tabpanel" id="tp-intra" aria-labelledby="tb-intra" data-p="pub" hidden>
+        <div class="two">
+          <div class="col" style="gap:16px">
+            <div><span class="lbl" id="lb-fmt">Format</span>
+              <div class="segmented" role="radiogroup" aria-labelledby="lb-fmt"><button role="radio" aria-checked="true" data-fmt="iframe">Dans la page (iframe)</button><button role="radio" aria-checked="false" data-fmt="popup">Bouton + pop-up</button></div></div>
+            <div class="field"><label for="in-dom">Adresse de l'intranet <span class="opt">(facultatif)</span></label><input id="in-dom" class="input t-mono" value="intranet.acme.example"><span class="help">Sert à vérifier que l'intranet est autorisé à afficher la démo.</span></div>
+            <div data-p="iframe"><div class="setting"><span class="t-label">Démarrer au clic<span class="help" style="display:block">Affiche une couverture et un bouton « Lancer la démo ».</span></span><span class="switch"><input type="checkbox" checked aria-label="Démarrer au clic"><span></span></span></div>
+              <div class="setting"><span class="t-label">Taille</span><select class="select input-sm" style="width:auto" aria-label="Taille de l'iframe"><option>S'adapte à la largeur</option><option>Taille fixe</option></select></div></div>
+            <div data-p="popup" class="col" style="gap:12px"><div class="field"><label for="in-btn">Texte du bouton</label><input id="in-btn" class="input" value="Lancer le tutoriel" maxlength="40"></div>
+              <div class="setting"><span class="t-label">Position</span><select class="select input-sm" style="width:auto" aria-label="Position du bouton"><option>Dans le texte de la page</option><option>Flottant, en bas à droite</option></select></div></div>
+          </div>
+          <div><span class="lbl">Aperçu</span>
+            <div class="prev" aria-label="Aperçu sur une page d'intranet fictive" role="img">
+              <div class="bar"><i></i><i></i><i></i><span style="margin-left:6px">intranet.acme.example/outils</span></div>
+              <div class="pg"><b style="font-size:13px">Outils de l'équipe</b><span class="ln" style="width:90%"></span><span class="ln" style="width:70%"></span>
+                <div data-p="iframe" class="emb"><span>Lancer la démo</span></div>
+                <span data-p="popup" class="cta">Lancer le tutoriel</span><span data-p="popup" class="ln" style="width:80%"></span><span data-p="popup" class="ln" style="width:60%"></span></div>
+              <div data-p="popup" class="pop"><div><span style="position:absolute;left:30%;top:52%;width:9px;height:9px;border-radius:50%;background:#A31F5E;box-shadow:0 0 0 4px rgba(163,31,94,.25)"></span><span style="position:absolute;left:12%;top:30%;width:44%;padding:6px 8px;border-radius:6px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15);font:600 10px var(--fd-font-sans);color:#1E2731">Cliquez sur « Nouveau rapport »</span></div></div>
+            </div></div>
+        </div>
+        <div class="alert alert-warning" style="margin-top:16px"><i data-icon="alert"></i><span><b class="t-mono">intranet.acme.example</b> n'est pas dans les sites autorisés : la démo ne s'y affichera pas. <button class="btn btn-secondary btn-sm" style="margin-left:6px" data-toast="intranet.acme.example ajouté aux sites autorisés">L'ajouter</button></span></div>
+        <div class="row between" style="margin:16px 0 8px"><span class="lbl" style="margin:0">Code à coller dans l'intranet</span><button class="btn btn-secondary btn-sm" data-copy="Code copié" aria-label="Copier le code d'intégration"><i data-icon="copy"></i><span>Copier</span></button></div>
+<pre class="code" data-p="iframe">&lt;<span class="k">iframe</span> src="<span class="s">https://demos.tutoclick.example/e/rapport-2-min</span>"
+  title="Démo : Créer un rapport en 2 minutes"
+  loading="lazy" allow="fullscreen"
+  style="width:100%;aspect-ratio:16/10;border:0"&gt;&lt;/<span class="k">iframe</span>&gt;</pre>
+<pre class="code" data-p="popup">&lt;<span class="k">button</span> type="button" data-tutoclick="<span class="s">rapport-2-min</span>"&gt;Lancer le tutoriel&lt;/<span class="k">button</span>&gt;
+&lt;<span class="k">script</span> src="<span class="s">https://demos.tutoclick.example/popup.js</span>" defer&gt;&lt;/<span class="k">script</span>&gt;</pre>
+        <p class="help" style="margin-top:8px">SharePoint : composant « Incorporer ». Wiki ou CMS : bloc HTML. Si l'intranet refuse les scripts, utilisez le format iframe.</p>
+      </section>
+
+      <!-- L16-07 : E-mail -->
+      <section role="tabpanel" id="tp-mail" aria-labelledby="tb-mail" data-p="pub" hidden>
+        <p class="muted" style="margin:0 0 16px">Ouvre votre messagerie avec un message prêt à envoyer. TutoClick n'envoie aucun e-mail.</p>
+        <div class="col" style="gap:12px">
+          <div class="field"><label for="ml-to">Destinataires <span class="opt">(facultatif)</span></label><input id="ml-to" class="input" placeholder="prenom.nom@acme.example, …" aria-describedby="ml-to-h"><span class="help" id="ml-to-h">Séparez les adresses par des virgules. Vous pouvez aussi les ajouter dans votre messagerie.</span></div>
+          <div class="field"><label for="ml-sub">Objet</label><input id="ml-sub" class="input" value="Tutoriel : Créer un rapport en 2 minutes"></div>
+          <div class="field"><label for="ml-body">Message</label><textarea id="ml-body" class="textarea" rows="7" aria-describedby="ml-n">Bonjour,
+
+Voici un tutoriel interactif pour apprendre à créer un rapport. Vous pouvez le suivre à votre rythme et reprendre où vous en étiez.
+
+Commencer le tutoriel : https://demos.tutoclick.example/d/rapport-2-min
+
+Bonne découverte !</textarea><span class="count num" id="ml-n">276 / 1 500 caractères</span></div>
+        </div>
+      </section>
+
+      <!-- L16-08 : Où elle est diffusée -->
+      <section role="tabpanel" id="tp-where" aria-labelledby="tb-where" data-p="pub" hidden>
+        <ul class="dif-list">
+          <li><span class="ic"><i data-icon="link"></i></span><span><b>Lien direct</b><small class="t-mono">demos.tutoclick.example/d/rapport-2-min</small><small> · 1 284 vues</small></span><span class="act"><span class="badge badge-success">Actif</span></span></li>
+          <li><span class="ic"><i data-icon="layers"></i></span><span><b>Centre de formation</b><small>Formation « Nouvel outil »</small></span><span class="act"><span class="badge badge-success">Actif</span></span></li>
+          <li><span class="ic"><i data-icon="globe"></i></span><span><b>Intranet</b><small class="t-mono">intranet.acme.example</small><small> · 312 vues · vue pour la dernière fois hier</small></span><span class="act"><span class="badge badge-success">Actif</span></span></li>
+          <li><span class="ic"><i data-icon="package"></i></span><span><b>LMS · SCORM 1.2</b><small>Généré le 12 nov. 2026 par Camille Martin · version 2</small></span><span class="act"><span class="badge badge-warning">Version ancienne</span><button class="btn btn-secondary btn-sm" data-l16-go="scorm">Générer la version 3</button></span></li>
+        </ul>
+        <div class="alert" style="margin-top:12px"><i data-icon="info"></i><span class="t-caption">Un paquet SCORM est une copie : après chaque publication, générez-le à nouveau et remplacez-le dans le LMS. Les envois par e-mail ne sont pas suivis ici : ils partent de votre messagerie.</span></div>
+      </section>
+    </div>
+    <div class="modal-foot">
+      <span data-p="scorm" class="row" style="gap:8px"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-l16-go="scorm-cours"><i data-icon="package"></i>Générer le paquet</button></span>
+      <span data-p="cours" class="row" style="gap:8px"><button class="btn btn-secondary" data-l16-go="scorm">Annuler la génération</button><button class="btn btn-primary" aria-disabled="true"><span class="spinner"></span>Génération…</button></span>
+      <span data-p="pret" class="row" style="gap:8px"><button class="btn btn-secondary" data-l16-go="scorm">Modifier les réglages</button><button class="btn btn-primary" data-close>Terminé</button></span>
+      <span data-p="err" class="row" style="gap:8px"><button class="btn btn-secondary" data-close>Fermer</button><button class="btn btn-primary"><i data-icon="refresh"></i>Réessayer</button></span>
+      <span data-p="intra" class="row" style="gap:8px"><button class="btn btn-secondary" data-close>Fermer</button></span>
+      <span data-p="mail" class="row" style="gap:8px"><button class="btn btn-secondary" data-copy="Texte copié"><i data-icon="copy"></i><span>Copier le texte</span></button><a class="btn btn-primary" href="mailto:?subject=Tutoriel" ><i data-icon="mail"></i>Ouvrir dans ma messagerie</a></span>
+      <span data-p="where np" class="row" style="gap:8px"><button class="btn btn-secondary" data-close>Fermer</button></span>
+    </div>
+  </div>
+</div>
+<div class="mock-l16" role="group" aria-label="État de la maquette L16">
+  <button type="button" data-l16-go="scorm">SCORM</button><button type="button" data-l16-go="scorm-cours">En cours</button><button type="button" data-l16-go="scorm-pret">Prêt</button><button type="button" data-l16-go="scorm-erreur">Erreur</button><button type="button" data-l16-go="intranet">Intranet</button><button type="button" data-l16-go="intranet-popup">Pop-up</button><button type="button" data-l16-go="mail">E-mail</button><button type="button" data-l16-go="diffusions">Où diffusée</button><button type="button" data-l16-go="non-publiee">Non publiée</button>
+</div>
+<script>
+document.addEventListener('fd:ready', () => {
+  const M = document.getElementById('m-dif');
+  const TABS = { scorm: 'tb-scorm', 'scorm-cours': 'tb-scorm', 'scorm-pret': 'tb-scorm', 'scorm-erreur': 'tb-scorm', intranet: 'tb-intra', 'intranet-popup': 'tb-intra', mail: 'tb-mail', diffusions: 'tb-where', 'non-publiee': 'tb-scorm' };
+  const go = (k) => {
+    if (!TABS[k]) k = 'scorm';
+    const np = k === 'non-publiee';
+    const flags = new Set([np ? 'np' : 'pub']);
+    if (!np) {
+      if (k === 'scorm') flags.add('scorm');
+      if (k === 'scorm-cours') flags.add('cours');
+      if (k === 'scorm-pret') flags.add('pret');
+      if (k === 'scorm-erreur') flags.add('err');
+      if (k.startsWith('intranet')) flags.add('intra');
+      if (k === 'mail') flags.add('mail');
+      if (k === 'diffusions') flags.add('where');
+      flags.add(k === 'intranet-popup' ? 'popup' : 'iframe');
+    }
+    M.querySelectorAll('[data-p]').forEach((el) => { el.classList.toggle('on', el.dataset.p.split(' ').some((f) => flags.has(f))); });
+    document.getElementById('fs-scorm').disabled = k === 'scorm-cours';
+    M.querySelectorAll('[data-fmt]').forEach((b) => b.setAttribute('aria-checked', String((b.dataset.fmt === 'popup') === (k === 'intranet-popup'))));
+    M.querySelectorAll('[role=tab]').forEach((t) => { const on = t.id === TABS[k]; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; t.setAttribute('aria-disabled', String(np && !on)); const p = document.getElementById(t.getAttribute('aria-controls')); if (p) p.hidden = !on; });
+    M.hidden = false;
+    document.querySelectorAll('[data-l16-go]').forEach((b) => b.closest('.mock-l16') && b.setAttribute('aria-pressed', String(b.dataset.l16Go === k)));
+  };
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-l16-go]'); if (b) go(b.dataset.l16Go); });
+  M.querySelectorAll('[data-fmt]').forEach((b) => b.addEventListener('click', () => go(b.dataset.fmt === 'popup' ? 'intranet-popup' : 'intranet')));
+  go(new URLSearchParams(location.search).get('etat') || 'scorm');
+});
+</script>
+<script>
+const demos = [
+  ['Créer un rapport en 2 minutes','Publiée','success','Site web',1284,'72 %','il y a 2 h','dashboard'],
+  ['Onboarding — import de données','Modifiée','warning','Onboarding',402,'64 %','hier','list'],
+  ['Démo Acme × Globex (perso)','Publiée','success','Sales — Outbound',37,'91 %','il y a 3 j','modal'],
+  ['Tableau de bord temps réel','Brouillon','','Site web',0,'—','il y a 5 j','dashboard'],
+  ['Intégration HubSpot','Publiée','success','Site web',856,'58 %','12 nov.','list'],
+  ['Nouveautés de novembre','Publiée','success','Onboarding',219,'80 %','10 nov.','modal'],
+];
+document.addEventListener('fd:ready', () => {
+  const g = document.getElementById('grid'), r = document.getElementById('rows');
+  demos.forEach(([t,s,c,f,v,cp,m,fk],i) => {
+    g.insertAdjacentHTML('beforeend', `<article class="demo-card">
+      <div class="thumb"><div data-fake="${fk}" style="position:absolute;inset:0"></div><span class="hs" style="left:${40+i*7}%;top:${30+i*5}%"></span></div>
+      <span class="status badge ${c?'badge-'+c:''}"><span class="dot"></span>${s}</span>
+      <div class="body"><a class="title stretch" href="editeur.html">${t}</a><span class="t-caption subtle">${8+i} étapes · ${f} · ${m}</span>
+      <span class="t-caption muted row" style="gap:4px">${fdIcon('eye','width="14" height="14"')}<span class="num">${v.toLocaleString('fr-FR')}</span> vues</span></div>
+      <button class="btn btn-ghost btn-sm btn-icon more" data-menu="card-menu" aria-haspopup="menu" aria-label="Actions pour ${t}">${fdIcon('more')}</button></article>`);
+    r.insertAdjacentHTML('beforeend', `<tr><th scope="row" style="font-weight:600;text-align:left"><a href="editeur.html" style="color:var(--fd-color-text)">${t}</a></th>
+      <td><span class="badge ${c?'badge-'+c:''}">${s}</span></td><td class="muted">${f}</td><td class="r">${v.toLocaleString('fr-FR')}</td><td class="r">${cp}</td><td class="muted">${m}</td>
+      <td class="r"><button class="btn btn-ghost btn-sm btn-icon" data-menu="card-menu" aria-label="Actions pour ${t}">${fdIcon('more')}</button></td></tr>`);
+  });
+  // re-render fakes for injected cards
+  document.querySelectorAll('#grid [data-fake]').forEach(el => { el.innerHTML = document.querySelector('.fake') ? '' : ''; });
+  const s = document.createElement('script'); s.textContent='';
+  document.getElementById('viewseg').addEventListener('seg', e => { document.getElementById('grid').hidden = e.detail==='list'; document.getElementById('list').hidden = e.detail!=='list'; });
+  // menu positioning
+  document.addEventListener('click', e => { const b = e.target.closest('[data-menu="card-menu"]'); if (!b) return; const m = document.getElementById('card-menu'); const rc = b.getBoundingClientRect(); m.style.position='fixed'; m.style.top = Math.min(rc.bottom+4, innerHeight-330)+'px'; m.style.left = Math.max(8, rc.right-220)+'px'; }, true);
+  window.fdRenderFakes && fdRenderFakes();
+});
+</script>
+</body>
+</html>
