@@ -148,3 +148,9 @@
   width: 18px;
   height: 18px;
 }
+.mk .toast.toast--warning {
+  border-left-color: var(--fd-color-warning);
+}
+.mk .toast.toast--warning > svg:first-child {
+  color: var(--fd-color-warning);
+}

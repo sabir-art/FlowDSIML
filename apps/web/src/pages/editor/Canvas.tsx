@@ -737,7 +737,10 @@ function ToCaptureCanvas({
                 const f = e.target.files?.[0];
                 e.target.value = '';
                 // REV-07 : avertissement à l'import (aucune détection automatique)
-                if (f) void editor.captureStep(step.id, f).then((r) => r && toast(t('editor.importWarn')));
+                if (f)
+                  void editor
+                    .captureStep(step.id, f)
+                    .then((r) => r && toast(t('editor.importWarn'), undefined, { tone: 'warning' }));
               }}
             />
             <p className="canvas-tocapture-help">

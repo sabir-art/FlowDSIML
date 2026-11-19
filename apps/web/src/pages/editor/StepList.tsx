@@ -421,7 +421,7 @@ export function StepList({
               if (f)
                 void editor.addImageStep(current, f).then((r) => {
                   onSelect(current + 1);
-                  if (r) toast(t('editor.importWarn'));
+                  if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
                 });
               e.target.value = '';
             }}

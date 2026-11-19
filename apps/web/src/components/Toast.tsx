@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
-import { CircleCheck, X } from 'lucide-react';
+import { CircleCheck, TriangleAlert, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import '../styles/maquette.css';
 import '../styles/maquette-ajouts.css';
@@ -12,8 +12,10 @@ export type ToastAction = {
   /** L18 : action limitée dans le temps (ex. « Annuler » pendant 8 s) : le toast se ferme seul. */
   durationMs?: number;
 };
-type Toast = { id: number; text: string; action?: ToastAction };
-const Ctx = createContext<(text: string, action?: ToastAction) => void>(() => {});
+/** REV-07 : variante « avertissement » (icône et couleur d'alerte, affichée plus longtemps). */
+export type ToastOptions = { tone?: 'warning' };
+type Toast = { id: number; text: string; action?: ToastAction; tone?: 'warning' };
+const Ctx = createContext<(text: string, action?: ToastAction, opts?: ToastOptions) => void>(() => {});
 
 /** Durée d'affichage d'un toast (maquette : 5 s). */
 const DURATION = 5000;
@@ -28,10 +30,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const seq = useRef(0);
   const close = useCallback((id: number) => setToasts((l) => l.filter((x) => x.id !== id)), []);
   const show = useCallback(
-    (text: string, action?: ToastAction) => {
+    (text: string, action?: ToastAction, opts?: ToastOptions) => {
       const id = ++seq.current;
-      setToasts((l) => [...l.slice(-2), { id, text, action }]);
-      if (!action || action.durationMs) window.setTimeout(() => close(id), action?.durationMs ?? DURATION);
+      setToasts((l) => [...l.slice(-2), { id, text, action, tone: opts?.tone }]);
+      if (!action || action.durationMs)
+        window.setTimeout(
+          () => close(id),
+          action?.durationMs ?? (opts?.tone === 'warning' ? 8000 : DURATION),
+        );
     },
     [close],
   );
@@ -41,8 +47,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div className="mk mk-toasts">
         <div className="toasts" role="status" aria-live="polite">
           {toasts.map((x) => (
-            <div key={x.id} className="toast">
-              <CircleCheck aria-hidden="true" />
+            <div key={x.id} className={`toast${x.tone === 'warning' ? ' toast--warning' : ''}`}>
+              {x.tone === 'warning' ? (
+                <TriangleAlert aria-hidden="true" />
+              ) : (
+                <CircleCheck aria-hidden="true" />
+              )}
               <div className="grow">
                 <div className="t-label toast-text">{x.text}</div>
               </div>
