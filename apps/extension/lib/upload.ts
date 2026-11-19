@@ -11,14 +11,26 @@ import type { PendingCapture } from './pending';
  */
 export async function sendCaptures(
   captures: PendingCapture[],
-  target: { workspaceId: string; title: string },
+  target: {
+    workspaceId: string;
+    title: string;
+    device?: 'desktop' | 'mobile';
+    viewport?: { w: number; h: number } | null;
+  },
   onProgress: (done: number) => void,
 ): Promise<string> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) throw new Error('Non connecté');
   const demo = await supabase
     .from('demos')
-    .insert({ workspace_id: target.workspaceId, title: target.title.slice(0, 160), created_by: auth.user.id })
+    .insert({
+      workspace_id: target.workspaceId,
+      title: target.title.slice(0, 160),
+      created_by: auth.user.id,
+      // F7 : démo mobile (cadre téléphone dans le lecteur)
+      device: target.device ?? 'desktop',
+      viewport: (target.viewport ?? null) as Json,
+    })
     .select('id')
     .single();
   if (demo.error) throw demo.error;

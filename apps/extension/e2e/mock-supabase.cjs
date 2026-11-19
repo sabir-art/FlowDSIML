@@ -1,6 +1,7 @@
 // Faux Supabase minimal : enregistre les requêtes et répond juste assez pour l'extension.
 const http = require('http');
 const log = [];
+let tusOffset = 0;
 const user = {
   id: '00000000-0000-0000-0000-0000000000aa',
   email: 'a@b.c',
@@ -45,6 +46,46 @@ http
         ]);
       if (req.url.startsWith('/rest/v1/demos'))
         return send(201, { id: '22222222-2222-2222-2222-222222222222' });
+      // F7 : envoi par reprise (protocole TUS) de la vidéo
+      if (req.url.startsWith('/storage/v1/upload/resumable')) {
+        const tus = {
+          ...cors,
+          'tus-resumable': '1.0.0',
+          'access-control-expose-headers': 'Location, Upload-Offset, Upload-Length, Tus-Resumable',
+        };
+        const meta = Object.fromEntries(
+          String(req.headers['upload-metadata'] ?? '')
+            .split(',')
+            .filter(Boolean)
+            .map((kv) => {
+              const [k, v] = kv.trim().split(' ');
+              return [k, v ? Buffer.from(v, 'base64').toString() : ''];
+            }),
+        );
+        log[log.length - 1].tus = {
+          meta,
+          length: req.headers['upload-length'],
+          auth: !!req.headers.authorization,
+        };
+        if (req.method === 'POST') {
+          tusOffset = buf.length;
+          return res
+            .writeHead(201, {
+              ...tus,
+              location: 'http://localhost:54400/storage/v1/upload/resumable/up1',
+              'upload-offset': String(tusOffset),
+            })
+            .end();
+        }
+        if (req.method === 'PATCH') {
+          tusOffset += buf.length;
+          return res.writeHead(204, { ...tus, 'upload-offset': String(tusOffset) }).end();
+        }
+        if (req.method === 'HEAD')
+          return res
+            .writeHead(200, { ...tus, 'upload-offset': String(tusOffset), 'cache-control': 'no-store' })
+            .end();
+      }
       if (req.url.startsWith('/storage/v1/object/')) {
         if (process.env.MOCK_DUMP) require('fs').writeFileSync(process.env.MOCK_DUMP, buf);
         return send(200, { Key: req.url, Id: 'x' });

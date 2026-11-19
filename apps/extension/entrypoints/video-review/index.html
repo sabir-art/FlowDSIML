@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vérification de la vidéo</title>
+  </head>
+  <body>
+    <main id="main" tabindex="-1">
+      <header class="vr-head">
+        <img class="logo" src="/logo-tutoclick-compact.svg" width="98" height="31" alt="TutoClick" />
+        <div>
+          <h1 data-i18n="vrTitle"></h1>
+          <p class="muted" id="meta"></p>
+        </div>
+      </header>
+      <div id="alert" class="alert" role="alert" hidden></div>
+      <section class="vr-video">
+        <video id="video" controls playsinline aria-label=""></video>
+      </section>
+      <section aria-labelledby="kf-h">
+        <h2 id="kf-h" data-i18n="vrFrames"></h2>
+        <p class="muted" data-i18n="vrFramesHelp"></p>
+        <p class="note" id="blurred"></p>
+        <ul id="frames" class="vr-frames"></ul>
+      </section>
+      <div class="vr-actions">
+        <button id="delete" class="btn btn-ghost-danger" data-i18n="vrDelete"></button>
+        <span class="grow"></span>
+        <span id="progress" class="muted" role="status"></span>
+        <button id="send" class="btn btn-primary" data-i18n="vrSend"></button>
+      </div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

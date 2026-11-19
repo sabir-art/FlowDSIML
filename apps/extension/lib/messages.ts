@@ -20,12 +20,34 @@ export interface ClickPayload {
   detections: Detection[];
 }
 
+/** F7 : type de capture choisi dans la popup. */
+export type CaptureMode = 'clicks' | 'video' | 'mobile';
+
 export type PopupRequest =
-  | { type: 'fd:start'; workspaceId: string; title: string; tabId: number }
+  | {
+      type: 'fd:start';
+      workspaceId: string;
+      title: string;
+      tabId: number;
+      mode?: CaptureMode;
+      /** Vidéo : identifiant du flux de l'onglet (tabCapture, obtenu dans la popup). */
+      streamId?: string;
+      mic?: boolean;
+      webcam?: boolean;
+      /** Format mobile : taille émulée. */
+      viewport?: { w: number; h: number };
+    }
   | { type: 'fd:stop' }
   | { type: 'fd:pause' }
   | { type: 'fd:cancel' }
   | { type: 'fd:status' };
+
+/** F7 : messages de la barre d'enregistrement (content script) vers le service worker. */
+export type VideoBarRequest =
+  | { type: 'fd:video-pause' }
+  | { type: 'fd:video-mark'; label: string; manual: boolean }
+  | { type: 'fd:video-stop' }
+  | { type: 'fd:video-blurs'; count: number };
 
 export interface RecordingStatus {
   recording: boolean;
@@ -38,4 +60,14 @@ export interface RecordingStatus {
   tabId: number | null;
   steps: number;
   lastError: string | null;
+  /** F7 : type de capture en cours (absent : captures à chaque clic). */
+  mode?: CaptureMode;
+  /** F7 : démo mobile (taille émulée), null sinon. */
+  viewport?: { w: number; h: number } | null;
+  /** F7 : chronomètre de la vidéo (pauses exclues). */
+  startedAt?: number;
+  pausedAt?: number | null;
+  pausedMs?: number;
+  micDenied?: boolean;
+  blurredZones?: number;
 }

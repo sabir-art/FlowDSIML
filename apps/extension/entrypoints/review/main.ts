@@ -72,7 +72,12 @@ const icon = (node: IconNode, size = 16) => {
 let captures: PendingCapture[] = [];
 let current = 0;
 let selected: string | null = null;
-let target: { workspaceId: string; title: string } | null = null;
+let target: {
+  workspaceId: string;
+  title: string;
+  device?: 'desktop' | 'mobile';
+  viewport?: { w: number; h: number } | null;
+} | null = null;
 const urls = new Map<string, string>();
 
 const detected = (c: PendingCapture) => c.zones.filter((z) => !z.manual);

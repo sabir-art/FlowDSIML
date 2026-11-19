@@ -4,9 +4,22 @@ import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
 import { APP_URL } from '@/lib/config';
 import { APP_NAME } from '@flowdsiml/core';
-import type { PopupRequest, RecordingStatus } from '@/lib/messages';
+import type { CaptureMode, PopupRequest, RecordingStatus } from '@/lib/messages';
 import { lang, stepsCaptured, strings } from '@/lib/i18n';
-import { Check, LogIn, LogOut, Pause, Play, Video, X, createIcons } from 'lucide';
+import {
+  Check,
+  Film,
+  LogIn,
+  LogOut,
+  MousePointerClick,
+  Pause,
+  Play,
+  Smartphone,
+  Video,
+  X,
+  createIcons,
+} from 'lucide';
+import { viewportFor, type DeviceKey } from '@/lib/video';
 
 document.documentElement.lang = lang;
 document.title = APP_NAME;
@@ -14,11 +27,46 @@ for (const el of document.querySelectorAll<HTMLElement>('[data-app-name]')) el.t
 for (const el of document.querySelectorAll<HTMLElement>('[data-i18n]'))
   el.textContent = strings[el.dataset.i18n as keyof typeof strings];
 (document.getElementById('title') as HTMLInputElement).placeholder = strings.demoTitlePlaceholder;
-const ICONS = { Check, LogIn, LogOut, Pause, Play, Video, X };
+const ICONS = { Check, Film, LogIn, LogOut, MousePointerClick, Pause, Play, Smartphone, Video, X };
 createIcons({ icons: ICONS, attrs: { width: 16, height: 16, 'stroke-width': 2, 'aria-hidden': 'true' } });
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const show = (id: string, visible: boolean) => ($(id).hidden = !visible);
+
+// F7 : type de capture (clics, vidéo de l'onglet, format mobile)
+const mode = (): CaptureMode =>
+  (document.querySelector<HTMLInputElement>('input[name="mode"]:checked')?.value as CaptureMode) ?? 'clicks';
+function syncMode() {
+  const m = mode();
+  show('opt-video', m === 'video');
+  show('opt-mobile', m === 'mobile');
+  show('hint', m === 'clicks');
+  $('start-label').textContent =
+    m === 'video' ? strings.startVideo : m === 'mobile' ? strings.startMobile : strings.start;
+}
+for (const r of document.querySelectorAll<HTMLInputElement>('input[name="mode"]'))
+  r.addEventListener('change', () => {
+    syncMode();
+    void browser.storage.local.set({ 'fd.lastMode': mode() });
+  });
+$<HTMLSelectElement>('device').addEventListener('change', () =>
+  show('custom-size', $<HTMLSelectElement>('device').value === 'custom'),
+);
+function viewport(): { w: number; h: number } {
+  const landscape =
+    document.querySelector<HTMLInputElement>('input[name="orient"]:checked')?.value === 'landscape';
+  return viewportFor($<HTMLSelectElement>('device').value as DeviceKey, landscape, {
+    w: +$<HTMLInputElement>('vw').value || 390,
+    h: +$<HTMLInputElement>('vh').value || 844,
+  });
+}
+void browser.storage.local.get('fd.lastMode').then((r) => {
+  const saved = r['fd.lastMode'] as string | undefined;
+  const input = document.querySelector<HTMLInputElement>(`input[name="mode"][value="${saved}"]`);
+  if (input) input.checked = true;
+  syncMode();
+});
+syncMode();
 
 function error(msg: string | null) {
   const el = $('error');
@@ -133,11 +181,26 @@ $('start').addEventListener('click', async () => {
       throw new Error('Ouvrez une page web (http/https) à enregistrer.');
     const workspaceId = $<HTMLSelectElement>('workspace').value;
     await browser.storage.local.set({ 'fd.lastWorkspace': workspaceId });
+    const m = mode();
+    let streamId: string | undefined;
+    if (m === 'video') {
+      // L'identifiant du flux s'obtient depuis un geste dans la popup (onglet courant uniquement)
+      streamId = await (
+        browser as unknown as {
+          tabCapture: { getMediaStreamId(o: { targetTabId: number }): Promise<string> };
+        }
+      ).tabCapture.getMediaStreamId({ targetTabId: tab.id });
+    }
     await send({
       type: 'fd:start',
       workspaceId,
       title: $<HTMLInputElement>('title').value.trim(),
       tabId: tab.id,
+      mode: m,
+      streamId,
+      mic: m === 'video' && $<HTMLInputElement>('mic').checked,
+      webcam: m === 'video' && $<HTMLInputElement>('webcam').checked,
+      viewport: m === 'mobile' ? viewport() : undefined,
     });
     await render();
   } catch (err) {

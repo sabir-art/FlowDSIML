@@ -9,7 +9,7 @@
     "zip": "wxt zip",
     "postinstall": "wxt prepare",
     "lint": "eslint entrypoints lib",
-    "e2e": "node e2e/capture.e2e.cjs",
+    "e2e": "node e2e/capture.e2e.cjs && node e2e/video.e2e.cjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
   },
@@ -18,7 +18,8 @@
     "@flowdsiml/supabase-types": "workspace:*",
     "@flowdsiml/ui": "workspace:*",
     "@supabase/supabase-js": "^2.119.0",
-    "lucide": "^0.577.0"
+    "lucide": "^0.577.0",
+    "tus-js-client": "4.3.1"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
