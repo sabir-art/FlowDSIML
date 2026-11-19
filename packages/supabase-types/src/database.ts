@@ -1035,38 +1035,44 @@ export type Database = {
       notifications: {
         Row: {
           actor_id: string | null;
-          comment_id: string;
+          alert_id: string | null;
+          comment_id: string | null;
           created_at: string;
-          demo_id: string;
+          data: Json;
+          demo_id: string | null;
           id: string;
           kind: string;
           read_at: string | null;
-          step_id: string;
+          step_id: string | null;
           user_id: string;
           workspace_id: string;
         };
         ComputedFields: never;
         Insert: {
           actor_id?: string | null;
-          comment_id: string;
+          alert_id?: string | null;
+          comment_id?: string | null;
           created_at?: string;
-          demo_id: string;
+          data?: Json;
+          demo_id?: string | null;
           id?: string;
           kind: string;
           read_at?: string | null;
-          step_id: string;
+          step_id?: string | null;
           user_id: string;
           workspace_id: string;
         };
         Update: {
           actor_id?: string | null;
-          comment_id?: string;
+          alert_id?: string | null;
+          comment_id?: string | null;
           created_at?: string;
-          demo_id?: string;
+          data?: Json;
+          demo_id?: string | null;
           id?: string;
           kind?: string;
           read_at?: string | null;
-          step_id?: string;
+          step_id?: string | null;
           user_id?: string;
           workspace_id?: string;
         };
@@ -1297,6 +1303,52 @@ export type Database = {
           version_id?: string;
           visitor_id?: string;
           workspace_id?: string;
+        };
+        Relationships: [];
+      };
+      alerts: {
+        Row: {
+          active: boolean;
+          channels: string[];
+          checked_at: string;
+          created_at: string;
+          created_by: string | null;
+          demo_id: string | null;
+          digest_at: string | null;
+          frequency: string;
+          id: string;
+          last_fired_at: string | null;
+          last_state: boolean;
+          path_id: string | null;
+          pending: number;
+          segment_id: string | null;
+          threshold: number | null;
+          trigger: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          active?: boolean;
+          channels?: string[];
+          demo_id?: string | null;
+          frequency?: string;
+          id?: string;
+          path_id?: string | null;
+          segment_id?: string | null;
+          threshold?: number | null;
+          trigger: string;
+          workspace_id: string;
+        };
+        /** État interne (pending, last_state…) réservé à alerts_tick. */
+        Update: {
+          active?: boolean;
+          channels?: string[];
+          demo_id?: string | null;
+          frequency?: string;
+          path_id?: string | null;
+          segment_id?: string | null;
+          threshold?: number | null;
+          trigger?: string;
         };
         Relationships: [];
       };
