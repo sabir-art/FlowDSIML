@@ -50,6 +50,7 @@ import {
 } from './logic';
 import { Checklist } from './Checklist';
 import { BeforeAfterStep } from './BeforeAfter';
+import { VideoStep } from './VideoStep';
 import { GlossaryDrawer, GlossaryTip } from './Glossary';
 import { Quiz } from './Quiz';
 import { submitQuizAttempt } from './api';
@@ -151,7 +152,11 @@ export function Player({
   // PY-3 : langue de l'interface du lecteur (le contenu de la démo reste dans sa langue)
   const [locale, setLocale] = useState<'fr' | 'en'>(uiLocale ?? (m.locale === 'en' ? 'en' : 'fr'));
   const t = strings(locale);
-  const compact = useCompact();
+  const narrow = useCompact();
+  /** F7 : démo mobile : feuille du bas partout ; sur grand écran, dans un cadre de téléphone. */
+  const mobile = m.device === 'mobile';
+  const framed = mobile && !narrow;
+  const compact = narrow || mobile;
   const prefersDark = useMedia('(prefers-color-scheme: dark)');
   const rootRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(() => Math.max(0, Math.min(startStep ?? 0, m.steps.length - 1)));
@@ -232,7 +237,7 @@ export function Player({
       ? m.forms.find((f) => f.id === step.gateFormId)
       : undefined;
   /** L17 : une étape Avant / Après se comporte comme une capture (ni pop-up, ni écran de fin). */
-  const visual = step.kind === 'image' || step.kind === 'before_after';
+  const visual = step.kind === 'image' || step.kind === 'before_after' || step.kind === 'video';
   const primary = step.kind === 'image' ? step.hotspots[0] : undefined;
   const last = index === m.steps.length - 1;
   /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
@@ -500,7 +505,7 @@ export function Player({
 
   return (
     <div
-      class={`p-root ${compact ? 'is-compact' : ''}${dark ? ' is-dark' : ''}${present ? ' is-present' : ''}${present?.hideHotspots ? ' is-present-nohs' : ''}`}
+      class={`p-root ${compact ? 'is-compact' : ''}${mobile ? ' is-mobile' : ''}${framed ? ' is-framed' : ''}${dark ? ' is-dark' : ''}${present ? ' is-present' : ''}${present?.hideHotspots ? ' is-present-nohs' : ''}`}
       style={style}
       ref={rootRef}
     >
@@ -702,6 +707,18 @@ export function Player({
             }
             onNext={last ? (m.quiz ? openQuiz : finish) : next}
           />
+        ) : step.kind === 'video' && step.video ? (
+          <VideoStep
+            key={step.id}
+            step={step}
+            t={t}
+            sub={sub}
+            nextLabel={last ? (m.quiz ? t.quiz.start : t.finish) : t.next}
+            onNext={last ? (m.quiz ? openQuiz : finish) : next}
+            onPause={(n) =>
+              tracker.track('step_view', { stepId: step.id, stepIndex: index, props: { pause: n } })
+            }
+          />
         ) : step.kind === 'image' && step.image ? (
           <ImageStep
             key={step.id}
@@ -712,6 +729,8 @@ export function Player({
             tip={!compact && !gateForm && !ended ? tipProps : undefined}
             carry={index > 0 && m.steps[index - 1]?.zoom?.keep ? m.steps[index - 1]!.zoom : null}
             alt={shotAlt}
+            tap={mobile ? t.mobile.tap : undefined}
+            tapHere={t.mobile.tapHere}
           />
         ) : (
           <>
@@ -872,7 +891,14 @@ export function Player({
 
       {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
           navigation sont retirées (rien ne permet de le contourner). */}
-      {compact && tipProps && !gateForm && !ended && view === 'steps' && <Tooltip {...tipProps} sheet />}
+      {compact && tipProps && !gateForm && !ended && view === 'steps' && (
+        <Tooltip
+          {...tipProps}
+          sheet
+          // F7 (L21-06) : hotspot dans le tiers bas de l'écran : la feuille passe en haut
+          top={mobile && tipProps.h.y + tipProps.h.h / 2 > 2 / 3}
+        />
+      )}
       {compact && m.checklist && items.length > 0 && !gateForm && (
         <Checklist title={m.checklist.title} position="collapsed" items={items} t={t} sub={sub} onGo={go} />
       )}
@@ -983,8 +1009,13 @@ function ImageStep({
   dimmed = false,
   carry = null,
   alt = '',
+  tap,
+  tapHere,
 }: {
   step: Step;
+  /** F7 : verbe « Touchez » des démos mobiles (sinon le titre seul). */
+  tap?: string;
+  tapHere?: string;
   /** A11Y-06 : alternative de la capture (vide pour un fond décoratif). */
   alt?: string;
   /** L12-02 : zoom de l'étape précédente marqué « garder », repris si cette étape n'a pas le sien. */
@@ -1059,7 +1090,13 @@ function ImageStep({
               onClick={() => onHotspot(h)}
             />
           ) : (
-            <Beacon key={h.id} h={screen(h)} label={sub(h.title)} onClick={() => onHotspot(h)} />
+            <Beacon
+              key={h.id}
+              h={screen(h)}
+              // F7 : « Touchez » pour une démo capturée au format mobile
+              label={tap ? (h.title ? `${tap}\u202f: ${sub(h.title)}` : tapHere!) : sub(h.title)}
+              onClick={() => onHotspot(h)}
+            />
           ),
         )}
       {!dimmed && tip && (tip.h.title || tip.h.body || tip.h.cta) && (
@@ -1116,11 +1153,12 @@ function Tooltip({
   onPrev,
   t,
   sheet,
-}: TipProps & { sheet?: boolean }) {
+  top,
+}: TipProps & { sheet?: boolean; top?: boolean }) {
   const pos: Record<string, string> = sheet ? {} : beaconCenter(h);
   return (
     <div
-      class={sheet ? 'p-sheet' : tipClass(h, h.placement)}
+      class={sheet ? `p-sheet${top ? ' p-sheet--top' : ''}` : tipClass(h, h.placement)}
       style={pos}
       role="dialog"
       aria-label={sub(h.title)}

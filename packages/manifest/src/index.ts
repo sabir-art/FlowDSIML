@@ -216,10 +216,45 @@ export const glossaryTermSchema = z.object({
 });
 export type GlossaryTerm = z.infer<typeof glossaryTermSchema>;
 
+/** F7 : vidéo de l'onglet (temps en millisecondes, dans la vidéo d'origine). */
+export const videoSchema = z.object({
+  url: z.string(),
+  durationMs: z.number().int().min(1).max(600000),
+  /** Passages retirés au montage. */
+  cuts: z
+    .array(z.object({ from: z.number(), to: z.number() }))
+    .max(50)
+    .default([]),
+  /** Pauses-étapes : la vidéo s'arrête et affiche une bulle. */
+  pauses: z
+    .array(
+      z.object({
+        id: z.string().max(40),
+        t: z.number().min(0),
+        title: z.string().max(200).default(''),
+        body: z.string().max(2000).default(''),
+      }),
+    )
+    .max(50)
+    .default([]),
+  captions: z
+    .array(z.object({ from: z.number(), to: z.number(), text: z.string().max(200) }))
+    .max(500)
+    .default([]),
+  captionsDefault: z.boolean().default(false),
+  autoplayMuted: z.boolean().default(true),
+  hasVoice: z.boolean().default(false),
+  /** Image de chaque pause (PDF, conversion en captures). */
+  frames: z.record(z.string(), z.string()).default({}),
+});
+export type VideoStep = z.infer<typeof videoSchema>;
+
 export const stepSchema = z.object({
   id: z.string(),
   chapterId: z.string().nullable().default(null),
-  kind: z.enum(['image', 'text', 'html', 'before_after']),
+  kind: z.enum(['image', 'text', 'html', 'before_after', 'video']),
+  /** F7 : pour kind = video (null si le fichier manque). */
+  video: videoSchema.nullable().default(null).catch(null),
   /** L17 : pour kind = before_after (null si la capture « Avant » manque). */
   beforeAfter: beforeAfterSchema.nullable().default(null).catch(null),
   /** Pour kind = image (MVP). */
@@ -327,6 +362,9 @@ export const manifestSchema = z.object({
   workspaceId: z.string(),
   /** PLY-01 : nom du workspace (en-tête du lecteur, « Données traitées par … »). Absent avant la migration 131500. */
   workspaceName: z.string().max(120).default('').catch(''),
+  /** F7 : démo capturée au format mobile (cadre téléphone, feuille du bas, « Touchez »). */
+  device: z.enum(['desktop', 'mobile']).default('desktop').catch('desktop'),
+  viewport: z.object({ w: z.number(), h: z.number() }).nullable().default(null).catch(null),
   title: z.string(),
   locale: z.string().default('fr'),
   publishedAt: z.string(),

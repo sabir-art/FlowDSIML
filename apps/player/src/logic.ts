@@ -31,6 +31,14 @@ export function resolveAssets(m: Manifest, base: string): Manifest {
       beforeAfter: s.beforeAfter
         ? { ...s.beforeAfter, before: { ...s.beforeAfter.before, url: abs(s.beforeAfter.before.url) } }
         : s.beforeAfter,
+      // F7 : vidéo et images des pauses
+      video: s.video
+        ? {
+            ...s.video,
+            url: abs(s.video.url),
+            frames: Object.fromEntries(Object.entries(s.video.frames).map(([k, u]) => [k, abs(u)])),
+          }
+        : s.video,
     })),
   };
 }
