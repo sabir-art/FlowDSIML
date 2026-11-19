@@ -13,8 +13,16 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
 (async () => {
-  const b = await chromium.launch();
-  const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
+  const b = await chromium.launch({
+    // Champs date et heure au format français (locale du processus)
+    args: ['--lang=fr-FR'],
+    env: { ...process.env, LANG: 'fr_FR.UTF-8', LANGUAGE: 'fr_FR:fr', LC_ALL: 'fr_FR.UTF-8' },
+  });
+  const ctx = await themedContext(b, {
+    viewport: { width: 1440, height: 900 },
+    locale: 'fr-FR',
+    timezoneId: 'Europe/Paris',
+  });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -59,7 +67,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     !/Bientôt/.test((await card.locator('.sr-head').innerText()) || ''),
     'pas de badge « Bientôt » sur la carte',
   );
-  const linkBox = card.getByRole('checkbox', { name: 'Lien public' });
+  const linkBox = card.getByRole('checkbox', { name: 'Toute personne avec le lien' });
   ok(
     (await linkBox.getAttribute('aria-disabled')) === 'true' && (await linkBox.isChecked()),
     'contrôles : valeurs actuelles, désactivés (aria-disabled)',
@@ -83,19 +91,19 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const save = card.getByRole('button', { name: 'Enregistrer les règles' });
   ok(await save.isDisabled(), 'Enregistrer inactif sans changement');
   ok(
-    (await card.getByRole('checkbox', { name: /Invitation/ }).getAttribute('aria-disabled')) === 'true' &&
+    (await card.getByRole('checkbox', { name: /Sur invitation/ }).getAttribute('aria-disabled')) === 'true' &&
       /Bientôt/.test(await card.locator('.check.is-soon').first().innerText()),
     'Invitation et Domaine e-mail : « Bientôt »',
   );
   ok((await card.locator('fieldset legend').count()) >= 2, 'groupes en fieldset / legend');
-  await card.getByRole('checkbox', { name: 'Lien public' }).uncheck();
-  await card.getByRole('checkbox', { name: 'Mot de passe' }).uncheck();
+  await card.getByRole('checkbox', { name: 'Toute personne avec le lien' }).uncheck();
+  await card.getByRole('checkbox', { name: 'Avec un mot de passe' }).uncheck();
   ok(
     (await card.getByRole('alert').innerText()) === 'Gardez au moins un mode d’accès.' &&
       (await save.isDisabled()),
     'au moins un mode',
   );
-  await card.getByRole('checkbox', { name: 'Mot de passe' }).check();
+  await card.getByRole('checkbox', { name: 'Avec un mot de passe' }).check();
   await card.getByRole('combobox', { name: 'Durée maximale des liens' }).selectOption('30');
   await card.getByRole('radio', { name: 'Administrateurs et propriétaires seulement' }).check();
   await card
@@ -113,7 +121,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const title = sp(await dlg.getByRole('heading').innerText());
   ok(/^\d+ liens? ne respectent? pas ces règles$/.test(title), `titre (${title})`);
   ok((await dlg.getByRole('listitem').count()) >= 1, 'liste des liens (5 au plus)');
-  ok(/Lien public/.test(await dlg.innerText()), 'type de lien affiché');
+  ok(/Toute personne avec le lien/.test(await dlg.innerText()), 'type de lien affiché');
   ok(
     /Ces démos ne seront plus accessibles tant qu’un mot de passe n’est pas défini\./.test(
       await dlg.innerText(),
@@ -162,8 +170,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.waitForSelector('#acc-link[aria-disabled="true"]');
   ok(
     (await linkOpt.getAttribute('aria-disabled')) === 'true' &&
-      (await page.locator(`#${await linkOpt.getAttribute('aria-describedby')}`).innerText()) ===
-        'Désactivé par les règles de l’espace.',
+      sp(await page.locator(`#${await linkOpt.getAttribute('aria-describedby')}`).innerText()) ===
+        'Conservé pour ce lien. Ce mode n’est plus proposé : désactivé par les règles de l’espace.',
     'mode interdit visible, désactivé et expliqué',
   );
   ok(

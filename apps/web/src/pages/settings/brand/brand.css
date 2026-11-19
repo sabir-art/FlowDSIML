@@ -212,3 +212,9 @@
 .br-confirm p + p {
   margin-top: 8px;
 }
+.br-color-ro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}

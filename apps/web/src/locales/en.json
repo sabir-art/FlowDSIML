@@ -3922,9 +3922,6 @@
     "maxFixed": "Maximum duration set by the workspace: {{n}} days.",
     "accessToFix": "Access to fix",
     "accessToFixHelp": "Demo not accessible: the workspace rules require a password.",
-    "mode_link": "Public link",
-    "mode_password": "Password",
-    "mode_invite": "Invitation",
-    "mode_domain": "Email domain"
+    "keptMode": "Kept for this link. This mode is no longer offered: disabled by the workspace rules."
   }
 }

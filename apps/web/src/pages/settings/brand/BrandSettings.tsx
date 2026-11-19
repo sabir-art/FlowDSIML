@@ -207,9 +207,9 @@ function ColorsCard({ ws, isAdmin }: { ws: Tables<'workspaces'>; isAdmin: boolea
     });
     return (
       <div className="field">
-        <label htmlFor={id}>{label}</label>
-        <div className="color-row">
-          {isAdmin ? (
+        {isAdmin ? <label htmlFor={id}>{label}</label> : <span className="t-label">{label}</span>}
+        {isAdmin ? (
+          <div className="color-row">
             <input
               className="swatch"
               type="color"
@@ -217,23 +217,26 @@ function ColorsCard({ ws, isAdmin }: { ws: Tables<'workspaces'>; isAdmin: boolea
               value={v}
               onChange={(e) => setVals({ ...vals, [key]: e.target.value.toUpperCase() })}
             />
-          ) : (
+            <input
+              id={id}
+              className="input input-sm t-mono"
+              maxLength={7}
+              defaultValue={v}
+              key={v}
+              onBlur={(e) => {
+                const x = e.target.value.trim().toUpperCase();
+                if (isHex(x)) setVals({ ...vals, [key]: x });
+                else e.target.value = v;
+              }}
+            />
+          </div>
+        ) : (
+          // Lecture seule (éditeur) : pastille et valeur, comme du texte
+          <p className="br-color-ro" id={id}>
             <span className="st-swatch" style={{ background: v }} aria-hidden="true" />
-          )}
-          <input
-            id={id}
-            className="input input-sm t-mono"
-            maxLength={7}
-            readOnly={!isAdmin}
-            defaultValue={v}
-            key={v}
-            onBlur={(e) => {
-              const x = e.target.value.trim().toUpperCase();
-              if (isHex(x)) setVals({ ...vals, [key]: x });
-              else e.target.value = v;
-            }}
-          />
-        </div>
+            <span className="t-mono">{v}</span>
+          </p>
+        )}
         {r >= 4.5 ? (
           <span className="help">{ratio}</span>
         ) : (

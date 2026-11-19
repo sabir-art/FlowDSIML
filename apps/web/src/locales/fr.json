@@ -3922,9 +3922,6 @@
     "maxFixed": "Durée maximale fixée par l’espace : {{n}} jours.",
     "accessToFix": "Accès à régler",
     "accessToFixHelp": "Démo inaccessible : les règles de l’espace exigent un mot de passe.",
-    "mode_link": "Lien public",
-    "mode_password": "Mot de passe",
-    "mode_invite": "Invitation",
-    "mode_domain": "Domaine e-mail"
+    "keptMode": "Conservé pour ce lien. Ce mode n’est plus proposé : désactivé par les règles de l’espace."
   }
 }

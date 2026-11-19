@@ -261,7 +261,7 @@ export function AccessPanel({
                 <span className="t-caption muted">{t(`access.modeHelp.${m.id}`)}</span>
                 {forbidden(m.id) && (
                   <span className="t-caption l11-rule" id={`acc-${m.id}-rule`}>
-                    {t('rules.disabledByRules')}
+                    {choice === m.id ? t('rules.keptMode') : t('rules.disabledByRules')}
                   </span>
                 )}
               </span>
@@ -425,7 +425,11 @@ export function AccessPanel({
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
-                disabled={!!maxDays && maxDays < 31}
+                disabled={
+                  !!maxDate &&
+                  new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59).getTime() >
+                    maxDate.getTime() + 60_000
+                }
                 onClick={() => shortcut('month')}
               >
                 {t('access.endOfMonth')}

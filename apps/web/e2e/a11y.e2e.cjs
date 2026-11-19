@@ -440,7 +440,7 @@ const APP_PAGES = [
       for (const x of d.tables.demos.slice(0, 2)) x.status = 'published';
     },
     open: async (p) => {
-      await p.getByRole('checkbox', { name: 'Lien public' }).uncheck();
+      await p.getByRole('checkbox', { name: 'Toute personne avec le lien' }).uncheck();
       await p.getByRole('button', { name: 'Enregistrer les règles' }).click();
       await p.waitForSelector('dialog[open]');
     },

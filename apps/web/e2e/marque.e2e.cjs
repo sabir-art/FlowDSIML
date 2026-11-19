@@ -14,8 +14,16 @@ const CAMILLE = '00000000-0000-4000-8000-0000000000c1';
 const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
 (async () => {
-  const b = await chromium.launch();
-  const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
+  const b = await chromium.launch({
+    // Champs date et heure au format français (locale du processus)
+    args: ['--lang=fr-FR'],
+    env: { ...process.env, LANG: 'fr_FR.UTF-8', LANGUAGE: 'fr_FR:fr', LC_ALL: 'fr_FR.UTF-8' },
+  });
+  const ctx = await themedContext(b, {
+    viewport: { width: 1440, height: 900 },
+    locale: 'fr-FR',
+    timezoneId: 'Europe/Paris',
+  });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -50,6 +58,11 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     updated_at: '2026-01-03T00:00:00Z',
   });
   await install(page, state);
+  // Logo fictif « Acme » (le faux Supabase ne garde pas le corps des envois multipart)
+  const acme = require('fs').readFileSync(path.join(__dirname, 'acme-logo.svg'));
+  await page.route('**/storage/v1/object/public/branding/**', (r) =>
+    r.fulfill({ contentType: 'image/svg+xml', body: acme, headers: { 'access-control-allow-origin': '*' } }),
+  );
   const shot = async (name) => {
     if (!SHOTS) return;
     // Captures sans toast
@@ -137,7 +150,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await styles.getByRole('button', { name: 'Nouveau style' }).click();
   const dlg = page.getByRole('dialog', { name: 'Nouveau style' });
   await dlg.waitFor();
-  await dlg.getByLabel('Nom', { exact: true }).fill('acme BLEU');
+  await dlg.getByLabel('Nom', { exact: true }).fill('Acme pâle');
   await dlg.getByRole('textbox', { name: 'Texte de la bulle', exact: true }).fill('#C8CCD2');
   await dlg.getByRole('textbox', { name: 'Texte de la bulle', exact: true }).blur();
   const bubble = dlg.getByRole('status').filter({ hasText: 'Bulle' });
@@ -150,6 +163,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     'aperçu masqué aux lecteurs d’écran',
   );
   await shot('l27-02-modifier-style');
+  await dlg.getByLabel('Nom', { exact: true }).fill('acme BLEU');
   await dlg.getByRole('button', { name: 'Enregistrer' }).click();
   ok((await dlg.getByRole('alert').innerText()) === 'Un style porte déjà ce nom.', 'nom déjà pris');
   await dlg.getByLabel('Nom', { exact: true }).fill('Acme pâle');
@@ -251,9 +265,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   ok(
     (await colors.getByRole('button', { name: 'Enregistrer' }).count()) === 0 &&
-      (await colors
-        .getByRole('textbox', { name: 'Couleur principale', exact: true })
-        .getAttribute('readonly')) !== null,
+      (await colors.getByRole('textbox').count()) === 0 &&
+      /#5C7D78/.test(await colors.innerText()),
     'éditeur : couleurs en lecture seule',
   );
   ok(

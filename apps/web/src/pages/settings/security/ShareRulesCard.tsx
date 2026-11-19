@@ -152,7 +152,7 @@ export function ShareRulesCard() {
                 onChange={(e) => !locked && setModes(m, e.target.checked)}
                 onClick={(e) => locked && e.preventDefault()}
               />
-              {t(`rules.mode_${m}`)}
+              {t(`access.mode.${m}`)}
             </label>
           ))}
           {(['invite', 'domain'] as const).map((m) => (
@@ -165,7 +165,7 @@ export function ShareRulesCard() {
                 readOnly
                 onClick={(e) => e.preventDefault()}
               />
-              {t(`rules.mode_${m}`)} <span className="badge">{t('shell.soon')}</span>
+              {t(`access.mode.${m}`)} <span className="badge">{t('shell.soon')}</span>
             </label>
           ))}
           <span id={`${id}-soon`} className="sr-only">
@@ -314,7 +314,7 @@ function ConflictsDialog({
             <li key={i}>
               <b>{x.title}</b>{' '}
               <span className="muted">
-                · {x.kind === 'mode' ? t(`rules.mode_${x.mode ?? 'link'}`) : t(`rules.kind_${x.kind}`)}
+                · {x.kind === 'mode' ? t(`access.mode.${x.mode ?? 'link'}`) : t(`rules.kind_${x.kind}`)}
               </span>
             </li>
           ))}
