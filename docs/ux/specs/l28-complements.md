@@ -1,4 +1,4 @@
-# L28 : compléments (adresse personnalisée, voix off, redimensionnement, image d'un élément HTML, notifications, compte)
+# L28 : compléments (adresse personnalisée, voix off, format après capture, remplacer une image dans une capture HTML, notifications, compte)
 
 > Version courte : écrans existants plus deltas, sans maquette. Composants du design system, icônes Lucide.
 > Données des captures : espace « Acme », membres « Camille Fictive » et « Alice Exemple », domaines `.example`.
@@ -14,39 +14,42 @@
 | L28-01 | Adresse personnalisée : saisie, disponibilité, erreur | Partager > Lien |
 | L28-02 | Voix off d'une étape : enregistrer, importer, transcription | Éditeur > Étape > « Voix off » |
 | L28-03 | Voix off dans le lecteur : activer le son, sous-titres | Lecteur |
-| L28-04 | Redimensionner les écrans après capture | Éditeur > Réglages > « Taille des écrans » |
-| L28-05 | Image d'un élément HTML | Éditeur, étape HTML, élément sélectionné |
+| L28-04 | Format de la démo après capture | Éditeur > Réglages > « Format des écrans » |
+| L28-05 | Remplacer une image dans une capture HTML | Éditeur, étape HTML, image sélectionnée |
 | L28-06 | Notifications : réponse et résolution, préférences | Cloche, panneau Préférences |
 | L28-07 | Exporter mes données | Paramètres > Mon profil > « Mes données » |
 | L28-08 | Supprimer mon compte : blocage, confirmation | Paramètres > Mon profil > « Mes données » |
 
 ## 2. Adresse personnalisée d'un lien (L28-01)
 
-Ce lot active le champ, aujourd'hui en « Bientôt ». Il reprend A1 §2, adapté aux adresses actuelles.
+Fonction 082. Elle active le champ « Adresse personnalisée » de Partager > Lien, aujourd'hui en « Bientôt », à la même place. Elle reprend A1 §2.
 
-- **Forme** : `https://demos.<domaine>/#/d/<adresse>`. Le préfixe est affiché en mono, non modifiable. L'adresse est saisie à droite.
-- **Valeur par défaut** : l'identifiant de la démo, qui reste valable dans tous les cas : `#/d/<id>` fonctionne toujours.
-- **Règles de saisie** : les mêmes que pour le centre de formation (L14), avec les mêmes textes.
-  - De 3 à 48 caractères : lettres minuscules, chiffres et tirets, sans tiret au début ni à la fin.
-  - L'adresse doit être unique sur tout le domaine.
-  - Les mots réservés sont refusés : `d`, `e`, `p`, `t`, `embed`, `api`, `admin`.
-- **Vérification** :
-  - elle se lance à la frappe, après 400 ms de pause ;
-  - pendant la vérification : « Vérification de l'adresse… » ;
-  - si elle réussit : « Adresse disponible. » ;
-  - sinon : « Cette adresse est déjà prise. » ou le message de format.
-  - Les messages sont annoncés en `role="status"`. Une erreur passe en `role="alert"`.
-- **Enregistrer** : bouton « Enregistrer l'adresse », actif seulement si l'adresse est valide et disponible.
-  - Toast : « Adresse enregistrée. ».
-  - Le champ « Lien public » et le bouton « Copier » prennent la nouvelle adresse.
-- **Changer une adresse déjà enregistrée** : l'ancienne redirige vers la démo pendant 90 jours. Le texte d'aide permanent devient « L'ancienne adresse redirige vers la démo pendant 90 jours. ». Il remplace « Changer l'adresse casse les anciens liens. ».
-  - Si la redirection n'est pas faite, garder l'ancien texte : la règle « pas de texte faux » s'applique.
+- **Forme** : `https://demos.<domaine>/#/d/<espace>/<adresse>`.
+  - `<espace>` est `workspaces.slug`, déjà unique sur la plateforme.
+  - `<adresse>` est unique **dans l'espace**.
+  - Le préfixe, jusqu'à `<espace>/` compris, est affiché en mono et n'est pas modifiable. Seule l'adresse est saisie.
+- **Anciens liens `#/d/<id>`** : ils restent valables, sans redirection, puisque les deux adresses mènent à la même démo. Les liens personnalisés, les intégrations et les paquets SCORM gardent l'identifiant.
+- **Espace sans slug** : le champ reste désactivé, avec le texte « Choisissez d'abord l'adresse de l'espace dans Paramètres > Général. » et un lien vers cette page.
+- **Valeur proposée** : le titre de la démo converti en adresse, par exemple « Prise en main d'un logiciel » devient `prise-en-main-d-un-logiciel`, tronqué à 48 caractères. Elle n'est enregistrée qu'à la validation.
+- **Règles** : de 3 à 48 caractères, lettres minuscules, chiffres et tirets, sans tiret au début ni à la fin.
+- **Messages** (sous le champ ; état en `role="status"`, erreur en `role="alert"`). La vérification se lance à la frappe, après 400 ms de pause.
+  - Pendant la vérification : « Vérification de l'adresse… »
+  - Adresse libre : « Adresse disponible. »
+  - Adresse déjà prise dans l'espace : « Une autre démo de l'espace utilise déjà cette adresse. »
+  - Caractère refusé : « Utilisez seulement des lettres minuscules sans accent, des chiffres et des tirets. »
+  - Longueur : « De 3 à 48 caractères. »
+  - Tiret au début ou à la fin : « L'adresse ne peut pas commencer ni finir par un tiret. »
+- **Enregistrer** :
+  - bouton « Enregistrer l'adresse », actif seulement si l'adresse est valide et disponible ;
+  - toast : « Adresse enregistrée. » ;
+  - « Lien public » et « Copier » prennent la nouvelle adresse.
+- **Changer une adresse enregistrée** : l'ancienne adresse redirige vers la démo pendant 90 jours. L'aide permanente devient « L'ancienne adresse redirige vers la démo pendant 90 jours. ».
+  - Si la redirection n'est pas faite, l'aide reste « Changer l'adresse casse les anciens liens. ».
 - **Droits** : éditeur et plus. Un lecteur voit l'adresse, sans champ.
-- **Liens existants** : les liens personnalisés, les intégrations et les paquets SCORM utilisent l'identifiant. Ils ne changent pas.
 
 ## 3. Voix off après coup (L28-02, L28-03)
 
-Il s'agit d'ajouter une voix enregistrée sur une étape déjà capturée : image ou HTML, pas seulement vidéo. La voix de synthèse et la transcription automatique restent en « Bientôt » (L21).
+Fonction 035. Il s'agit d'ajouter une voix enregistrée sur une étape déjà capturée : les étapes image, HTML et texte (pop-up). Les étapes vidéo gardent leur voix L21 ; pour elles, la section « Voix off » remplace la piste son de la vidéo. La voix de synthèse et la transcription automatique restent en « Bientôt » (L21).
 
 ### 3.1 Éditeur
 - **Emplacement** : onglet Étape, nouvelle section « Voix off », placée après « Animation de l'étape ».
@@ -75,46 +78,58 @@ Il s'agit d'ajouter une voix enregistrée sur une étape déjà capturée : imag
 - **Passage à l'étape suivante** : la voix s'arrête. Elle ne bloque jamais le bouton « Suivant ».
 - **Hors ligne (SCORM, HTML)** : les pistes sont incluses dans le paquet. Le poids affiché du paquet en tient compte.
 
-## 4. Redimensionner les écrans après capture (L28-04)
+## 4. Format de la démo après capture (L28-04)
 
-Le cas visé : des captures faites à des tailles différentes, ou trop grandes pour la diffusion.
+Fonction 021. Elle s'applique à toute la démo. Le recadrage d'une seule étape existe déjà (L25-02).
 
-- **Emplacement** : onglet Réglages, section « Taille des écrans ».
-- **État initial** :
-  - la section liste les tailles trouvées dans la démo, par exemple « 1 920 × 1 080 · 6 étapes » et « 1 440 × 900 · 2 étapes » ;
-  - si une seule taille est trouvée : « Toutes les étapes font 1 440 × 900. ».
-- **Réglage** :
-  - « Largeur cible », avec les choix « Garder la taille d'origine » (par défaut), « 1 280 px », « 1 440 px » et « 1 920 px » ;
-  - « Ajustement », avec deux boutons radio : « Adapter (bandes de la couleur de fond) » et « Remplir (recadrer au centre) ».
-- **Aperçu** : avant d'appliquer, deux vignettes côte à côte, avant et après, sur l'étape sélectionnée.
+- **Emplacement** : onglet Réglages, section « Format des écrans ».
+- **Constat** : la section liste les tailles trouvées, par exemple « 1 920 × 1 080 · 6 étapes » et « 1 440 × 900 · 2 étapes ».
+- **Format** (boutons radio) :
+  - « D'origine » (par défaut) ;
+  - « 16:9 » ;
+  - « 16:10 » ;
+  - « 4:3 » ;
+  - « Personnalisé », avec deux champs, largeur et hauteur en pixels, de 640 à 3 840.
+- **Ajustement** (boutons radio), si le format choisi n'est pas « D'origine » :
+  - « Adapter » : l'image entière est conservée, avec des bandes de la couleur de fond de la démo ;
+  - « Recadrer » : l'image remplit le cadre et est recadrée. Le recadrage est centré sur le repère de l'étape s'il y en a un, au centre sinon.
+- **Largeur de sortie** : « 1 280 », « 1 440 » ou « 1 920 px ». Par défaut, la plus fréquente parmi les captures.
+- **Aperçu** : avant d'appliquer, deux vignettes avant/après de l'étape sélectionnée, avec les flèches pour passer d'une étape à l'autre.
+- **Repères, bulles, flous, zooms** :
+  - ils sont recalculés pour rester sur le même pixel de l'image ;
+  - en « Adapter », ils ne sortent jamais du cadre ;
+  - en « Recadrer », un élément qui sort du cadre est listé avant d'appliquer : « Étape {{n}} : le repère sort du cadre. » ou « Étape {{n}} : une zone de flou est coupée. ».
+  - Une zone de flou coupée reste appliquée sur la partie visible. Elle n'est jamais supprimée sans le dire.
 - **Appliquer** :
-  - bouton « Appliquer à toutes les étapes » ;
-  - une modale de confirmation affiche « {{n}} étapes seront redimensionnées. Les points, bulles et zones de flou gardent leur place. Les images d'origine sont conservées. » ;
-  - toast : « {{n}} étapes redimensionnées. », avec « Annuler » ;
-  - puis le lien « Revenir aux tailles d'origine » reste disponible dans la section.
-- **Positions** : les hotspots, flous et zooms sont en coordonnées relatives. En mode « Remplir », un élément qui sort du cadre est signalé avant d'appliquer : « Étape {{n}} : le point sort du cadre. ».
-- **Étapes HTML** : elles sont rendues à la largeur cible (A8), sans recadrage.
-- **Hors périmètre** : le recadrage d'une seule étape existe déjà (outil Recadrer, L25).
+  - « Appliquer à toutes les étapes » ouvre une confirmation : « {{n}} étapes passent en {{format}}. Les repères et les flous suivent l'image. Les images d'origine sont conservées. » ;
+  - toast : « Format appliqué à {{n}} étapes. », avec « Annuler ».
+- **Retour** : le lien « Revenir aux images d'origine » reste disponible dans la section.
+- **Étapes HTML** : elles sont rendues dans le nouveau format, sans recadrage (A8).
+- **Étapes vidéo** : « Adapter » seulement. L'option « Recadrer » est désactivée pour elles, avec l'aide « Les vidéos ne sont pas recadrées. ».
 
-## 5. Image d'un élément HTML (L28-05)
+## 5. Remplacer une image dans une capture HTML (L28-05)
 
-Dans une étape HTML (A8), on peut produire une image d'un seul élément : un tableau, une carte ou un formulaire.
+Fonction 051, aujourd'hui en « Bientôt ». Dans une étape HTML (A8), on remplace une image de la page capturée, par exemple un logo réel, une photo ou un graphique, par une autre image.
 
-- **Déclencheur** : élément sélectionné sur le canevas (contour existant), puis menu contextuel ou bouton « Image de l'élément » (icône `image-down`) dans la barre d'outils. Le bouton est désactivé tant qu'aucun élément n'est sélectionné.
-- **Panneau** :
-  - aperçu de l'image ;
-  - « Marge autour » : 0, 8, 16 ou 24 px (par défaut 16) ;
-  - « Fond » : celui de la page ou transparent ;
-  - échelle « 1× » ou « 2× » (par défaut 2×).
-- **Actions** :
-  - « Créer une étape image » insère une étape image après l'étape courante, dans le même chapitre. Toast : « Étape image créée après l'étape {{n}}. » ;
-  - « Télécharger en PNG » produit le fichier `{{demo}}-etape-{{n}}-element.png`.
-- **Données personnelles** : l'image est produite à partir du DOM stocké. Les textes floutés y sont donc déjà remplacés (A8). L'étape créée compte comme capture vérifiée, pas comme image importée.
-- **Limite** : l'élément doit faire au moins 24 × 24 px. Sinon : « Élément trop petit pour une image. ».
+- **Éléments concernés** : `<img>`, `<picture>`, `<svg>` et tout élément qui a une image de fond (`background-image`).
+- **Déclencheur** : on sélectionne l'élément sur le canevas (contour existant). Le panneau de l'élément affiche alors « Remplacer l'image » (icône `image-up`).
+  - Sur un autre élément, l'action n'apparaît pas.
+- **Choix de la nouvelle image** : fenêtre en deux onglets.
+  - « Importer » : PNG, JPEG, WebP ou SVG, 5 Mo au plus.
+  - « Médiathèque » : la médiathèque existante (L18-03).
+- **Ajustement** : l'image prend la taille de l'élément d'origine. Choix « Ajuster » (par défaut, `object-fit: contain`) ou « Remplir » (`cover`).
+- **Résultat** :
+  - l'image est remplacée dans le DOM stocké de l'étape. L'image d'origine n'est plus publiée ;
+  - toast : « Image remplacée. », avec « Annuler » ;
+  - le panneau propose ensuite « Revenir à l'image d'origine ».
+- **Données personnelles** :
+  - l'image importée compte dans « n images importées non vérifiées » du bilan de publication (REV-07), et l'avertissement d'import s'affiche ;
+  - une image de la médiathèque compte de la même façon, sauf si elle y a déjà été vérifiée.
+- **Supprimer sans remplacer** : l'action secondaire « Masquer l'image » remplace l'image par un aplat de la couleur de fond, à la même taille.
 
 ## 6. Notifications de commentaires (L28-06)
 
-La cloche, les mentions et les préférences existent (A6). Ce lot ajoute ou fixe les points suivants :
+Fonction 122. La cloche, la table `notifications` (mention, comment, reply, resolved) et les préférences existent (A6, L22). Ce qui manque ou est à revoir :
 
 - **Types** : « Mention », « Réponse » (un fil où j'ai écrit), « Commentaire » (sur une démo que j'ai créée) et « Résolu » (mon commentaire est résolu), avec les textes `k_*` existants.
   - Un même événement ne crée qu'une notification par personne. Si je suis mentionné dans une réponse, je reçois seulement « Mention ».
@@ -131,6 +146,8 @@ La cloche, les mentions et les préférences existent (A6). Ce lot ajoute ou fix
 
 ## 7. Mes données (L28-07, L28-08)
 
+Fonctions 171 et 172.
+
 - **Emplacement** : Paramètres > Mon profil, nouvelle carte « Mes données », en bas de la page.
 
 ### 7.1 Exporter mes données (L28-07)
@@ -144,7 +161,7 @@ La cloche, les mentions et les préférences existent (A6). Ce lot ajoute ou fix
   - carte fichier avec le nom `mes-donnees-{{date}}.zip`, le poids et « Télécharger » ;
   - aide : « Disponible 7 jours, ici seulement. » ;
   - aucun e-mail n'est envoyé.
-- **Format** : un fichier JSON par catégorie, plus un `LISEZMOI.txt` qui décrit chaque fichier en français.
+- **Format** : un fichier ZIP qui contient un fichier JSON par catégorie (`profil.json`, `espaces.json`, `commentaires.json`, `notifications.json`, `preferences.json`, `confirmations.json`), plus un `LISEZMOI.txt` qui décrit chaque fichier en français.
 
 ### 7.2 Supprimer mon compte (L28-08)
 - **Bouton** : « Supprimer mon compte » (`fd-btn--danger`, secondaire), sous l'export.
@@ -171,4 +188,5 @@ La cloche, les mentions et les préférences existent (A6). Ce lot ajoute ou fix
 - Voix de synthèse, transcription automatique, musique (« Bientôt »).
 - Envoi d'e-mails (notifications, résumé, export).
 - Domaine personnalisé pour les adresses de démo.
-- Redimensionnement d'une seule étape à une taille différente des autres.
+- Format différent pour une seule étape.
+- Génération d'une image à partir d'un élément HTML.
