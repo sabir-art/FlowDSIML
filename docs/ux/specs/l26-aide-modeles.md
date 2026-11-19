@@ -89,6 +89,9 @@ Le parcours d'accueil ONB-01 à 04 (configuration, extension, première démo) n
 - Une visite guidée est une **démo TutoClick**, faite avec TutoClick, sur des données fictives. Elle s'ouvre dans le lecteur, en modale (`dialog`, 960 px). Ce n'est pas une surcouche sur l'app réelle.
 - Les visites sont hébergées dans un espace système en lecture seule. Elles ne comptent pas dans les statistiques de l'espace.
 - Elles reprennent l'accessibilité du lecteur.
+- **Stockage** : table `help_tours` (clé de page ou de module → démo publiée de l'espace système, nombre d'étapes). Les visites s'ouvrent avec `?preview=1`, sans statistique.
+- **Sans visite enregistrée** : « Visite guidée de cette page » reste visible, désactivé (`aria-disabled`), avec le badge « Bientôt ». Un module « Apprendre » sans démo affiche « Bientôt » au lieu de « n étapes ». La progression ne compte que les modules disponibles.
+- **Scénarios** (étapes et textes des bulles) : `docs/ux/aide/visites-guidees.md`.
 
 ### 3.4 « Apprendre TutoClick »
 - Un parcours de 6 modules, chacun étant une visite guidée :
