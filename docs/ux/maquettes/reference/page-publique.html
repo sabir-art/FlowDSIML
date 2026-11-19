@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Créer un rapport en 2 minutes · Acme</title>
+<meta name="description" content="Suivez pas à pas la création d'un rapport, du choix du modèle à l'export. À votre rythme, sans compte.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  html, body { background: var(--fd-player-backdrop); }
+  body { font-family: var(--fd-player-font); color: var(--fd-stone-900); min-height: 100vh; }
+  .pp { max-width: 1120px; margin: 0 auto; padding: 0 24px 40px; }
+  .pp-top { display: flex; align-items: center; gap: 10px; padding: 18px 0; }
+  .pp-top .lg { width: 32px; height: 32px; border-radius: 9px; background: #A3195B; color: #fff; display: grid; place-items: center; font: 700 14px var(--fd-font-display); }
+  .pp-top b { font: 700 16px var(--fd-font-display); }
+  .pp-top .cta { margin-left: auto; }
+  .pill { height: 42px; padding: 0 20px; border-radius: 999px; border: 0; font: 600 15px var(--fd-player-font); display: inline-flex; align-items: center; gap: 8px; text-decoration: none !important; cursor: pointer; }
+  .pill.p { background: #A3195B; color: #fff; } .pill.k { background: #080808; color: #fff; }
+  .pill:focus-visible { outline: 3px solid #1F7FB6; outline-offset: 2px; }
+  .hero { padding: 24px 0 20px; max-width: 760px; }
+  .hero h1 { font: 800 40px/1.1 var(--fd-font-display); letter-spacing: -.02em; margin: 0; }
+  .hero p { font-size: 18px; line-height: 1.5; color: var(--fd-stone-600); margin: 12px 0 14px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; } .meta span { padding: 4px 10px; border-radius: 99px; background: #fff; box-shadow: inset 0 0 0 1px var(--fd-stone-200); font-size: 13px; color: var(--fd-stone-700); }
+  .stage { border-radius: 20px; overflow: hidden; box-shadow: var(--fd-player-shadow); background: #fff; aspect-ratio: 16/9; position: relative; }
+  .stage .ov { position: absolute; inset: 0; background: rgba(10,14,20,.38); display: grid; place-items: center; }
+  .ctab { margin-top: 24px; border-radius: 20px; background: #C5E86C; color: #12210A; padding: 28px 32px; display: flex; align-items: center; gap: 24px; justify-content: space-between; }
+  .ctab h2 { font: 800 26px var(--fd-font-display); margin: 0; } .ctab p { margin: 6px 0 0; font-size: 16px; }
+  .foot { margin-top: 28px; font-size: 13px; color: var(--fd-stone-600); display: flex; gap: 8px; flex-wrap: wrap; }
+  .foot a { color: var(--fd-stone-800); }
+  .na { min-height: 70vh; display: grid; place-items: center; text-align: center; }
+  .na .box { max-width: 440px; } .na h1 { font: 800 28px var(--fd-font-display); margin: 12px 0 8px; } .na p { color: var(--fd-stone-600); }
+  .pill svg { width: 18px; height: 18px; flex: none; } .na svg { width: 40px; height: 40px; color: var(--fd-stone-500); }
+  [data-v]:not(.on) { display: none !important; }
+  @media (max-width: 900px) { .ctab { flex-direction: column; align-items: flex-start; } }
+  @media (max-width: 639px) { .pp { padding: 0 16px 32px; } .hero h1 { font-size: 30px; } .hero p { font-size: 16px; } .stage { aspect-ratio: 4/5; border-radius: 16px; } .pp-top .cta { display: none; } }
+  .mock-l19b { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 9000; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #141311; }
+  .mock-l19b button { border: 0; background: transparent; color: #fff; font: 500 12px var(--fd-font-sans); padding: 6px 10px; border-radius: 999px; cursor: pointer; } .mock-l19b button[aria-pressed="true"] { background: #fff; color: #141311; }
+</style>
+</head>
+<body class="fd-player-scope" data-nomocknav>
+<div class="pp" data-v="page">
+  <header class="pp-top"><span class="lg" aria-hidden="true">A</span><b>Acme</b><a class="pill p cta" href="#">Réserver un accompagnement</a></header>
+  <main>
+    <section class="hero"><h1>Créer un rapport en 2 minutes</h1><p>Suivez pas à pas la création d'un rapport, du choix du modèle à l'export. À votre rythme, sans compte.</p>
+      <div class="meta"><span>6 étapes</span><span>Mis à jour le 14 nov. 2026</span></div></section>
+    <section class="stage" aria-label="Démo interactive : Créer un rapport en 2 minutes"><div data-fake="dashboard" style="position:absolute;inset:0"></div><div class="ov"><button class="pill p" style="height:48px"><i data-icon="play"></i>Lancer la démo</button></div></section>
+    <section class="ctab"><div><h2>Besoin d'aide pour vos premiers rapports ?</h2><p>Un membre de l'équipe vous accompagne sur votre propre compte.</p></div><a class="pill k" href="#">Réserver un accompagnement<i data-icon="arrowRight"></i></a></section>
+  </main>
+  <footer class="foot"><span>Créé avec TutoClick</span><span aria-hidden="true">·</span><a href="#">Politique de confidentialité</a><span aria-hidden="true">·</span><a href="#">Accessibilité : non conforme</a></footer>
+</div>
+<div class="pp na" data-v="off"><div class="box"><i data-icon="eyeOff"></i><h1>Cette page n'est pas disponible</h1><p>Elle a été désactivée ou la démo a été retirée. Si quelqu'un vous a envoyé ce lien, demandez-lui une nouvelle adresse.</p></div></div>
+<div class="mock-l19b" role="group" aria-label="État de la maquette"><button data-g="page">Page</button><button data-g="off">Indisponible</button></div>
+<script>
+document.addEventListener('fd:ready', () => {
+  const go = (k) => { const v = k === 'off' ? 'off' : 'page'; document.querySelectorAll('[data-v]').forEach((e) => e.classList.toggle('on', e.dataset.v === v)); document.querySelectorAll('.mock-l19b button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.g === v))); document.title = v === 'off' ? 'Page indisponible · TutoClick' : 'Créer un rapport en 2 minutes · Acme'; };
+  document.addEventListener('click', (e) => { const b = e.target.closest('.mock-l19b [data-g]'); if (b) go(b.dataset.g); });
+  go(new URLSearchParams(location.search).get('etat') || 'page');
+});
+</script>
+</body>
+</html>
