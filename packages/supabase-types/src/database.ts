@@ -2272,7 +2272,7 @@ export const Constants = {
   public: {
     Enums: {
       demo_status: ['draft', 'published', 'archived'],
-      step_kind: ['image', 'text', 'html', 'before_after'],
+      step_kind: ['image', 'text', 'html', 'before_after', 'video'],
       workspace_role: ['viewer', 'editor', 'admin', 'owner'],
     },
   },
