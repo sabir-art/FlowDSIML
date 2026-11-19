@@ -72,7 +72,7 @@
   - `progressbar` avec `aria-valuenow` ;
   - les réglages sont verrouillés (`fieldset disabled`) ;
   - pied : « Annuler la génération » et un bouton principal « Génération… » en `aria-disabled` ;
-  - texte : « Vous pouvez fermer cette fenêtre : le paquet restera disponible dans la liste des exports. » À la fermeture, la génération continue et un toast annonce « Paquet SCORM prêt » avec le lien « Télécharger » ;
+  - texte : « Vous pouvez fermer cette fenêtre : la génération continue. Le paquet reste disponible jusqu'à la fermeture de cette page. » Le paquet est assemblé dans le navigateur et n'est pas conservé : il est perdu au rechargement (écart accepté, pas de liste des exports). À la fermeture de la fenêtre, la génération continue et un toast annonce « Paquet SCORM prêt » avec le lien « Télécharger » ;
   - pas de pourcentage ni de durée estimée inventés : seul le nombre de captures traitées s'affiche.
 - **Prêt (L16-03)** :
   - alerte de succès (`role="status"`) : « Paquet prêt. Déposez-le dans votre LMS comme une nouvelle activité SCORM. » ;
@@ -107,7 +107,7 @@
   - il montre l'iframe avec sa couverture, ou le bouton et la pop-up ouverte ;
   - il se met à jour en direct. C'est une image (`role="img"`, nom « Aperçu sur une page d'intranet fictive »), pas une démo jouable.
 - **Code à coller** : bloc `pre` avec retour à la ligne et coloration, et le bouton « Copier » (nom accessible « Copier le code d'intégration », toast « Code copié »).
-  - Iframe : `src` vers `/e/{{slug}}`, `title="Démo : {{titre}}"`, `loading="lazy"`, `allow="fullscreen"`, `aspect-ratio:16/10`.
+  - Iframe : `src` vers le lecteur (`/e/{{slug}}` à terme ; aujourd'hui `#/d/{{id}}`, écart accepté), `title="Démo : {{titre}}"`, `loading="lazy"`, `allow="fullscreen"`, `aspect-ratio:16/10`.
   - Pop-up : un `button` avec `data-tutoclick="{{slug}}"`, et le script `popup.js` en `defer`.
 - **Aide** sous le code : « SharePoint : composant « Incorporer ». Wiki ou CMS : bloc HTML. Si l'intranet refuse les scripts, utilisez le format iframe. »
 - **Pied** : « Fermer ».
@@ -119,7 +119,7 @@
 - **Champs** :
   - **Destinataires** (facultatif) : adresses séparées par des virgules. Aide : « Séparez les adresses par des virgules. Vous pouvez aussi les ajouter dans votre messagerie. » Une adresse mal formée est signalée à la sortie du champ, avec `aria-invalid` et le message « Adresse invalide : {{valeur}} » ;
   - **Objet** : prérempli « Tutoriel : {{titre}} » ;
-  - **Message** : prérempli, modifiable. Il contient le lien direct `/d/{{slug}}`, sans durée ni nombre de questions inventés. Sous le champ, un compteur « n / 1 500 caractères » (`aria-describedby`).
+  - **Message** : prérempli, modifiable. Il contient le lien direct (`/d/{{slug}}` à terme ; aujourd'hui `#/d/{{id}}`, écart accepté), sans durée ni nombre de questions inventés. Sous le champ, un compteur « n / 1 500 caractères » (`aria-describedby`).
 - **Limite** : au-delà de 1 500 caractères, le lien mailto risque d'être tronqué par certaines messageries.
   - Le compteur passe en erreur.
   - « Ouvrir dans ma messagerie » est désactivé, avec l'aide : « Message trop long pour un lien mailto. Copiez le texte. »
