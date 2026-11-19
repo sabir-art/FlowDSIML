@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capture multi-onglets et taille de l'onglet (lot L25) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+</head>
+<body>
+<div data-view="suivi">
+  <section data-pane="suivi" class="f7-stage xpop-wrap l25row" style="display:none">
+    <div class="xpop" role="dialog" aria-labelledby="xp-t1">
+      <header><img class="wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick"><span class="sp fd-help">Workspace DSI</span></header>
+      <h1 id="xp-t1" style="margin:0;font-size:var(--fd-text-h3-size)">Nouvelle capture</h1>
+      <fieldset class="xmode" style="border:0;margin:0;padding:0"><legend class="cm-sr">Type de capture</legend>
+        <label><span class="fd-icon-chip"><i data-icon="cursorClick"></i></span><span><b>Captures à chaque clic</b><small>Tutoriel interactif, étape par étape</small></span><input type="radio" name="m1" checked></label>
+        <label><span class="fd-icon-chip"><i data-icon="code"></i></span><span><b>Capture HTML</b><small>Page reproduite et modifiable</small></span><input type="radio" name="m1"></label>
+        <label><span class="fd-icon-chip"><i data-icon="video"></i></span><span><b>Vidéo de l'onglet</b><small>Geste continu : saisie, glisser, défilement</small></span><input type="radio" name="m1"></label>
+        <label><span class="fd-icon-chip"><i data-icon="smartphone"></i></span><span><b>Format mobile</b><small>Captures en taille téléphone ou tablette</small></span><input type="radio" name="m1"></label>
+      </fieldset>
+      <div class="xsub">
+        <label class="fd-check" style="justify-content:space-between;align-items:flex-start"><span style="display:inline-flex;gap:8px;align-items:flex-start"><i data-icon="layers"></i><span>Suivre les nouveaux onglets<small style="display:block;color:var(--fd-color-text-muted);font-size:12px;font-weight:400;margin-top:2px">Les onglets ouverts depuis la page capturée sont capturés aussi. Les autres onglets ne le sont jamais.</small></span></span><span class="fd-switch"><input type="checkbox" checked  aria-label="Suivre les nouveaux onglets"><span class="fd-switch__track"></span></span></label>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="sz1">Taille de l'onglet</label><select class="fd-select" id="sz1" aria-describedby="szh1"><option selected>Taille actuelle · 1 512 × 862</option><option>1 280 × 720</option><option>1 440 × 900</option><option>1 920 × 1 080</option><option>Taille personnalisée…</option></select><p class="fd-help" id="szh1" style="margin:4px 0 0">L'onglet est redimensionné le temps de la capture, puis remis à sa taille.</p></div>
+        
+        <label class="fd-check" style="justify-content:space-between;align-items:flex-start"><span style="display:inline-flex;gap:8px;align-items:flex-start"><i data-icon="eyeOff"></i><span>Vérifier les données avant l'envoi<small style="display:block;color:var(--fd-color-text-muted);font-size:12px;font-weight:400;margin-top:2px">Toujours active : chaque capture, dans chaque onglet.</small></span></span><span class="fd-switch"><input type="checkbox" checked disabled aria-label="Vérifier les données avant l'envoi"><span class="fd-switch__track"></span></span></label>
+      </div>
+      <p class="fd-help" style="margin:0">Chaque capture garde la page entière, pour animer le défilement dans l'éditeur.</p>
+      <button class="fd-btn fd-btn--primary" type="button" style="justify-content:center"><i data-icon="cursorClick"></i>Démarrer la capture</button>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div role="toolbar" aria-label="Capture en cours" style="display:inline-flex;align-items:center;gap:10px;padding:8px 10px 8px 14px;border-radius:999px;background:#141311;color:#fff;font-size:14px;box-shadow:var(--fd-shadow-lg)">
+        <span aria-hidden="true" style="width:10px;height:10px;border-radius:50%;background:#D60B52"></span><b style="white-space:nowrap">7 captures</b>
+        <span class="tabchip" style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:rgba(255,255,255,.14);white-space:nowrap"><i data-icon="layers"></i>Onglet 2 · Aide</span>
+        <button class="fd-btn fd-btn--sm" type="button" style="background:#fff;color:#141311;border:0">Terminer</button>
+      </div>
+      <p class="fd-help" style="margin:0;max-width:420px;text-align:center">La barre indique l'onglet en cours dès qu'un onglet suivi est actif. Annonce : « Capture dans l'onglet 2 : Aide ».</p>
+    </div>
+  </section>
+  <section data-pane="taille" class="f7-stage xpop-wrap l25row" style="display:none">
+    <div class="xpop" role="dialog" aria-labelledby="xp-t2">
+      <header><img class="wm-l" src="../../brand-tutoclic/production/logo-tutoclick-compact.svg" alt="TutoClick"><img class="wm-d" src="../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg" alt="TutoClick"><span class="sp fd-help">Workspace DSI</span></header>
+      <h1 id="xp-t2" style="margin:0;font-size:var(--fd-text-h3-size)">Nouvelle capture</h1>
+      <fieldset class="xmode" style="border:0;margin:0;padding:0"><legend class="cm-sr">Type de capture</legend>
+        <label><span class="fd-icon-chip"><i data-icon="cursorClick"></i></span><span><b>Captures à chaque clic</b><small>Tutoriel interactif, étape par étape</small></span><input type="radio" name="m2" checked></label>
+        <label><span class="fd-icon-chip"><i data-icon="code"></i></span><span><b>Capture HTML</b><small>Page reproduite et modifiable</small></span><input type="radio" name="m2"></label>
+        <label><span class="fd-icon-chip"><i data-icon="video"></i></span><span><b>Vidéo de l'onglet</b><small>Geste continu : saisie, glisser, défilement</small></span><input type="radio" name="m2"></label>
+        <label><span class="fd-icon-chip"><i data-icon="smartphone"></i></span><span><b>Format mobile</b><small>Captures en taille téléphone ou tablette</small></span><input type="radio" name="m2"></label>
+      </fieldset>
+      <div class="xsub">
+        <label class="fd-check" style="justify-content:space-between;align-items:flex-start"><span style="display:inline-flex;gap:8px;align-items:flex-start"><i data-icon="layers"></i><span>Suivre les nouveaux onglets<small style="display:block;color:var(--fd-color-text-muted);font-size:12px;font-weight:400;margin-top:2px">Les onglets ouverts depuis la page capturée sont capturés aussi. Les autres onglets ne le sont jamais.</small></span></span><span class="fd-switch"><input type="checkbox"   aria-label="Suivre les nouveaux onglets"><span class="fd-switch__track"></span></span></label>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="sz2">Taille de l'onglet</label><select class="fd-select" id="sz2" aria-describedby="szh2"><option>Taille actuelle · 1 512 × 862</option><option>1 280 × 720</option><option>1 440 × 900</option><option>1 920 × 1 080</option><option selected>Taille personnalisée…</option></select><p class="fd-help" id="szh2" style="margin:4px 0 0">L'onglet est redimensionné le temps de la capture, puis remis à sa taille.</p></div>
+        <div class="row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="fd-field" style="margin:0"><label class="fd-label" for="w2">Largeur (px)</label><input class="fd-input" id="w2" value="1 600" inputmode="numeric"></div><div class="fd-field" style="margin:0"><label class="fd-label" for="h2">Hauteur (px)</label><input class="fd-input" id="h2" value="900" inputmode="numeric"></div></div><p class="fd-help" style="margin:0">De 800 à 2 560 px.</p>
+        <label class="fd-check" style="justify-content:space-between;align-items:flex-start"><span style="display:inline-flex;gap:8px;align-items:flex-start"><i data-icon="eyeOff"></i><span>Vérifier les données avant l'envoi<small style="display:block;color:var(--fd-color-text-muted);font-size:12px;font-weight:400;margin-top:2px">Toujours active : chaque capture, dans chaque onglet.</small></span></span><span class="fd-switch"><input type="checkbox" checked disabled aria-label="Vérifier les données avant l'envoi"><span class="fd-switch__track"></span></span></label>
+      </div>
+      <p class="fd-help" style="margin:0">Chaque capture garde la page entière, pour animer le défilement dans l'éditeur.</p>
+      <button class="fd-btn fd-btn--primary" type="button" style="justify-content:center"><i data-icon="cursorClick"></i>Démarrer la capture</button>
+    </div>
+  </section>
+</div>
+<style>.tabchip svg{width:14px;height:14px;flex:none} [data-view="suivi"] [data-pane="suivi"], [data-view="taille"] [data-pane="taille"]{display:flex !important;flex-direction:row;flex-wrap:wrap;gap:40px;align-items:center;justify-content:center;min-height:100vh;padding:24px}</style>
+<div class="mock-state fd-segmented" role="group" aria-label="Écran (maquette)" style="left:50%;transform:translateX(-50%);top:16px;bottom:auto">
+  <button type="button" data-view-set="suivi" aria-pressed="true">Multi-onglets</button>
+  <button type="button" data-view-set="taille" aria-pressed="false">Taille personnalisée</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 # L25 : capture avancée, éditeur de données, export MP4, page personnalisée, vague B
 
 > **Maquettes** :
+> - `refonte/l25-capture.html` (`?view=suivi|taille`) : popup de l'extension, multi-onglets et taille de l'onglet, avec la 4e carte « Capture HTML » (L20 §2) ;
 > - `reference/editeur-capture.html` (`?etat=recadrer|cadre|saisie|defilement|onglets`) : capture avancée dans l'éditeur ;
 > - `reference/editeur-donnees.html` (`?etat=masse|graphique|donnees|conditions`) : styles en masse, graphiques, jeux de données, embranchements ;
 > - `refonte/l25-export-mp4.html` (`?view=mp4|mp4-en-cours|mp4-termine`) : export vidéo ;
@@ -22,7 +23,7 @@
 
 | Code | État | Maquette |
 |---|---|---|
-| L25-01 | Extension : capture multi-onglets et taille de l'onglet | `refonte/f7-capture.html?view=popup` + §2 |
+| L25-01 | Extension : capture multi-onglets et taille de l'onglet | `refonte/l25-capture.html?view=suivi|taille` |
 | L25-02 | Éditeur : recadrage d'une capture | `editeur-capture.html?etat=recadrer` |
 | L25-03 | Éditeur : cadre du navigateur (onglet Design) | `editeur-capture.html?etat=cadre` |
 | L25-04 | Éditeur : animation de saisie | `editeur-capture.html?etat=saisie` |
