@@ -11,6 +11,8 @@ import { CtaFields } from './CtaFields';
 import { ReadingModePanel } from './GuidedDemoPanels';
 import { asSettings } from '../types';
 import { StylesSection } from '../styles/StylesSection';
+import { MediaLibrary, mediaUrl } from '../../../components/media/MediaLibrary';
+import { CUSTOM_FONT } from '@flowdsiml/player-core';
 
 const FONTS = [
   "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -36,6 +38,8 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
   const { t } = useTranslation();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [logoName, setLogoName] = useState<string | null>(null);
+  // L18 : médiathèque ouverte pour le logo ou la police
+  const [library, setLibrary] = useState<'logo' | 'font' | null>(null);
   const logoInput = useRef<HTMLInputElement>(null);
   const demo = editor.demo!;
   const settings = asSettings(demo.settings);
@@ -181,14 +185,19 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
           className="select input-sm"
           aria-label={t('editor.font')}
           disabled={readOnly}
-          value={theme.fontFamily}
-          onChange={(e) => set({ fontFamily: e.target.value })}
+          value={theme.fontUrl ? 'media' : theme.fontFamily}
+          onChange={(e) =>
+            e.target.value === 'media'
+              ? setLibrary('font')
+              : set({ fontFamily: e.target.value, fontUrl: null })
+          }
         >
           {FONTS.map((f) => (
             <option key={f} value={f}>
               {f.split(',')[0]!.replace(/'/g, '')}
             </option>
           ))}
+          <option value="media">{theme.fontUrl ? t('editor.design.fontMedia') : t('media.choose')}</option>
         </select>
       </div>
 
@@ -223,6 +232,9 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
                 <ImageUp aria-hidden="true" />
                 {theme.logoUrl ? t('editor.changeLogo') : t('editor.chooseLogo')}
               </button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setLibrary('logo')}>
+                {t('media.choose')}
+              </button>
               {theme.logoUrl && (
                 <button
                   type="button"
@@ -249,6 +261,19 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
         </label>
         <p className="help">{t('editor.brandingHint')}</p>
       </div>
+
+      {library && (
+        <MediaLibrary
+          wsId={demo.workspace_id}
+          kind={library}
+          onClose={() => setLibrary(null)}
+          onPick={(f) => {
+            if (library === 'font' && f.kind === 'font')
+              set({ fontUrl: mediaUrl(f.path), fontFamily: `'${CUSTOM_FONT}', system-ui, sans-serif` });
+            else if (library === 'logo' && f.kind !== 'font') set({ logoUrl: mediaUrl(f.path) });
+          }}
+        />
+      )}
 
       <div className="sec">
         <div className="sec-title">{t('editor.pageCta')}</div>

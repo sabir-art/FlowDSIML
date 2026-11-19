@@ -61,6 +61,7 @@ import {
   tipClass,
   zoomBox,
   zoomOrigin,
+  fontFaceCss,
 } from '@flowdsiml/player-core';
 import { fmt, strings, type Dict } from './i18n';
 import type { QuizResult, TrackerLike } from './api';
@@ -502,6 +503,8 @@ export function Player({
       style={style}
       ref={rootRef}
     >
+      {/* L18 : police de la médiathèque (WOFF2 https, URL contrôlée) */}
+      {fontFaceCss(theme) && <style>{fontFaceCss(theme)}</style>}
       {present?.black && (
         <div class="p-black" role="status">
           {t.paused}

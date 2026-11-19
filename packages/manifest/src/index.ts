@@ -285,6 +285,8 @@ export const themeSchema = z.object({
   /** L18 : arrondi des boutons (999 = pilule). */
   buttonRadius: z.number().min(0).max(999).default(999).catch(999),
   logoUrl: z.string().nullable().default(null),
+  /** L18 : police importée dans la médiathèque (WOFF2, https), utilisée sous le nom CUSTOM_FONT. */
+  fontUrl: z.string().startsWith('https://').nullable().default(null).catch(null),
   showBranding: z.boolean().default(true),
   /** Fond dégradé du lecteur (maquette editeur.html, onglet Design › Cadre). */
   backgroundGradient: z.boolean().default(false),

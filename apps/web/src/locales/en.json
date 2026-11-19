@@ -781,7 +781,8 @@
       "background": "Background",
       "gradient": "Gradient background",
       "typography": "Typography",
-      "brand": "Logo and brand"
+      "brand": "Logo and brand",
+      "fontMedia": "Media library font"
     },
     "settings": {
       "reading": "Playback",
@@ -2678,5 +2679,38 @@
     "actions": "Actions",
     "chooseFile": "Choose a file",
     "noFile": "No file chosen"
+  },
+  "media": {
+    "title": "Media library",
+    "search": "Search a file",
+    "filter": "File type",
+    "filter_all": "All",
+    "filter_logo": "Logos",
+    "filter_image": "Images",
+    "filter_font": "Fonts",
+    "files": "Media library files",
+    "count_one": "{{count}} file",
+    "count_other": "{{count}} files",
+    "import": "Import",
+    "uploading": "Importing…",
+    "types": "PNG, JPG, SVG or WOFF2, 5 MB at most",
+    "importFirst": "Import your first file",
+    "importHelp": "Logos, background images and fonts, reusable in every demo of the workspace. PNG, JPG, SVG or WOFF2, 5 MB at most.",
+    "quota": "{{used}} MB of {{total}} MB",
+    "usedIn_one": "Used in {{count}} demo",
+    "usedIn_other": "Used in {{count}} demos",
+    "use": "Use this file",
+    "delete": "Delete",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteBody": "The file will be removed from the media library.",
+    "inUse_one": "This file is used in {{count}} demo. It will be replaced by the default image.",
+    "inUse_other": "This file is used in {{count}} demos. It will be replaced by the default image.",
+    "tooBig": "File too large: 5 MB at most.",
+    "full": "Media library full: delete unused files.",
+    "badType": "Format not accepted: PNG, JPG, SVG or WOFF2.",
+    "svgRejected": "This SVG contains rejected content (script, entity, external link).",
+    "error": "The import failed. Try again.",
+    "open": "Media library",
+    "choose": "Choose from the media library"
   }
 }

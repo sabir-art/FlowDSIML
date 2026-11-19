@@ -363,6 +363,46 @@ async function install(page, state = seed()) {
       });
       return json(route, 200, { ...r, outcome: d.status });
     }
+    // L18 : fonction media (dépôt multipart, suppression) ; type réel simulé d'après le nom du fichier
+    if (p.startsWith('/functions/v1/media')) {
+      const list = (t.media_files ||= []);
+      if (method === 'DELETE') {
+        const row = list.find((x) => x.id === body?.id);
+        if (!row) return json(route, 404, { error: 'NOT_FOUND' });
+        t.media_files = list.filter((x) => x !== row);
+        (state.mediaDeleted ||= []).push(row.id);
+        return json(route, 200, { deleted: row.id });
+      }
+      const raw = (req.postDataBuffer() || Buffer.alloc(0)).toString('latin1');
+      const field = (n) => new RegExp(`name="${n}"\\r\\n\\r\\n([^\\r]*)`).exec(raw)?.[1] ?? '';
+      const fname = /filename="([^"]*)"/.exec(raw)?.[1] ?? field('name');
+      const ext = (fname.split('.').pop() || '').toLowerCase();
+      const mime = {
+        png: 'image/png',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        svg: 'image/svg+xml',
+        woff2: 'font/woff2',
+      }[ext];
+      if (!mime) return json(route, 415, { error: 'BAD_TYPE' });
+      if (state.mediaReject) return json(route, 422, { error: state.mediaReject });
+      const ws = field('ws');
+      const row = {
+        id: crypto.randomUUID(),
+        workspace_id: ws,
+        kind: field('kind') || 'image',
+        name: field('name') || fname,
+        path: `${ws}/${crypto.randomUUID()}.${ext === 'jpeg' ? 'jpg' : ext}`,
+        mime,
+        size_bytes: 120000,
+        width: null,
+        height: null,
+        created_by: state.user.id,
+        created_at: new Date().toISOString(),
+      };
+      list.unshift(row);
+      return json(route, 200, row);
+    }
     if (p.startsWith('/functions/v1/track')) {
       const batch = JSON.parse(req.postData() || '{}');
       state.events.push(...(batch.events || []));
@@ -826,6 +866,23 @@ async function install(page, state = seed()) {
             }
           return json(route, 200, n);
         }
+        // ===== L18 : médiathèque =====
+        case 'media_used':
+          return json(
+            route,
+            200,
+            (state.mediaBaseUsed || 0) + (t.media_files || []).reduce((n, x) => n + (x.size_bytes || 0), 0),
+          );
+        case 'media_usage':
+          return json(
+            route,
+            200,
+            (t.media_files || []).map((m) => ({
+              id: m.id,
+              demos: t.demos.filter((d) => !d.deleted_at && JSON.stringify(d.settings || {}).includes(m.path))
+                .length,
+            })),
+          );
         // ===== L18 : test A/B =====
         case 'ab_start': {
           const h = t.hotspots.find((x) => x.id === a.p_hotspot);
@@ -1154,6 +1211,14 @@ async function install(page, state = seed()) {
       if (key.startsWith('published/'))
         return json(route, 400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
       const f = state.storage[key];
+      // L18 : fichiers de la médiathèque déposés par la fonction media (image fixture)
+      if (!f && key.startsWith('media/') && (t.media_files || []).some((m) => key === `media/${m.path}`))
+        return route.fulfill({
+          status: 200,
+          contentType: 'image/png',
+          body: png,
+          headers: { 'access-control-allow-origin': '*' },
+        });
       if (!f) return json(route, 400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
       return route.fulfill({
         status: 200,

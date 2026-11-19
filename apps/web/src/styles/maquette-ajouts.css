@@ -1895,6 +1895,7 @@
 }
 .mk .th-panel .logo-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }

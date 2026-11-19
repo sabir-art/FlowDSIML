@@ -43,6 +43,19 @@ export function tipClass(h: Box, requested: string): string {
   return `p-tip p-tip-${place}${shift}`;
 }
 
+/** L18 : nom de famille d'une police importée dans la médiathèque. */
+export const CUSTOM_FONT = 'TutoClick Media';
+
+/**
+ * Règle @font-face d'une police de la médiathèque (WOFF2 en https seulement, URL sans guillemet ni
+ * parenthèse : aucune injection CSS possible). Chaîne vide sinon.
+ */
+export function fontFaceCss(theme: Pick<Theme, 'fontUrl'>): string {
+  const u = theme.fontUrl;
+  if (!u || !/^https:\/\/[^\s"'()\\<>]+$/.test(u)) return '';
+  return `@font-face{font-family:'${CUSTOM_FONT}';src:url("${u}") format('woff2');font-display:swap}`;
+}
+
 /** Variables CSS du thème (consommées par player-core.css). */
 export function themeVars(theme: Theme): Record<string, string> {
   return {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, X } from 'lucide-react';
+import { Image as ImageIcon, Plus, X } from 'lucide-react';
+import { MediaLibrary } from '../../components/media/MediaLibrary';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { APP_NAME, extractVariableKeys } from '@flowdsiml/core';
 import { SettingsShell } from './SettingsShell';
@@ -22,6 +23,9 @@ const DEFAULT_HOTSPOT = '#D60B52';
  */
 export function BrandSettings() {
   const { t } = useTranslation();
+  const { current } = useWorkspace();
+  // L18-03 : médiathèque du workspace (consultation, import, suppression)
+  const [library, setLibrary] = useState(false);
   const ratio = contrastRatio(DEFAULT_PRIMARY, '#FFFFFF');
   const [brandingPlan, setBrandingPlan] = useState<string | null>(null);
   useEffect(() => {
@@ -45,7 +49,16 @@ export function BrandSettings() {
         <div className="st-brand-note">
           {soon}
           <span className="t-caption muted">{t('brand.soonNote')}</span>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm st-media-btn"
+            onClick={() => setLibrary(true)}
+          >
+            <ImageIcon aria-hidden="true" />
+            {t('media.open')}
+          </button>
         </div>
+        {library && current && <MediaLibrary wsId={current.id} onClose={() => setLibrary(false)} />}
         <div className="form-sec">
           <div className="intro">
             <h3 className="t-h3">{t('brand.themeTitle')}</h3>

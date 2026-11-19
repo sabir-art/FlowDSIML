@@ -781,7 +781,8 @@
       "background": "Fond",
       "gradient": "Fond dégradé",
       "typography": "Typographie",
-      "brand": "Logo et marque"
+      "brand": "Logo et marque",
+      "fontMedia": "Police de la médiathèque"
     },
     "settings": {
       "reading": "Lecture",
@@ -2678,5 +2679,38 @@
     "actions": "Actions",
     "chooseFile": "Choisir un fichier",
     "noFile": "Aucun fichier choisi"
+  },
+  "media": {
+    "title": "Médiathèque",
+    "search": "Rechercher un fichier",
+    "filter": "Type de fichier",
+    "filter_all": "Tout",
+    "filter_logo": "Logos",
+    "filter_image": "Images",
+    "filter_font": "Polices",
+    "files": "Fichiers de la médiathèque",
+    "count_one": "{{count}} fichier",
+    "count_other": "{{count}} fichiers",
+    "import": "Importer",
+    "uploading": "Import en cours…",
+    "types": "PNG, JPG, SVG ou WOFF2, 5 Mo au plus",
+    "importFirst": "Importer votre premier fichier",
+    "importHelp": "Logos, images de fond et polices, réutilisables dans toutes les démos du workspace. PNG, JPG, SVG ou WOFF2, 5 Mo au plus.",
+    "quota": "{{used}} Mo sur {{total}} Mo",
+    "usedIn_one": "Utilisé dans {{count}} démo",
+    "usedIn_other": "Utilisé dans {{count}} démos",
+    "use": "Utiliser ce fichier",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer « {{name}} » ?",
+    "deleteBody": "Le fichier sera retiré de la médiathèque.",
+    "inUse_one": "Ce fichier est utilisé dans {{count}} démo. Il sera remplacé par l’image par défaut.",
+    "inUse_other": "Ce fichier est utilisé dans {{count}} démos. Il sera remplacé par l’image par défaut.",
+    "tooBig": "Fichier trop lourd : 5 Mo au plus.",
+    "full": "Médiathèque pleine : supprimez des fichiers inutilisés.",
+    "badType": "Format non accepté : PNG, JPG, SVG ou WOFF2.",
+    "svgRejected": "Ce SVG contient des éléments refusés (script, entité, lien externe).",
+    "error": "L’import n’a pas abouti. Réessayez.",
+    "open": "Médiathèque",
+    "choose": "Choisir dans la médiathèque"
   }
 }

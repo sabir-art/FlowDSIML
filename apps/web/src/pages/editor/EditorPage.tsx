@@ -45,6 +45,9 @@ import { useStepComments } from './comments/useStepComments';
 import { useAuth } from '../../auth/AuthProvider';
 import { StepPanel } from './panels/StepPanel';
 import { AbCanvasSwitch, asVariantB, useAbTest } from './ab/AbTest';
+import { fontFaceCss } from '@flowdsiml/player-core';
+import { themeSchema } from '@flowdsiml/manifest';
+import { asSettings } from './types';
 import { HotspotPanel } from './panels/HotspotPanel';
 import { BlurPanel } from './panels/BlurPanel';
 import { ThemePanel } from './panels/ThemePanel';
@@ -151,6 +154,10 @@ export function EditorPage() {
   }, [others]);
   const [index, setIndex] = useState(0);
   const [tool, setTool] = useState<Tool>('select');
+  // L18 : police de la médiathèque (règle @font-face contrôlée)
+  const fontCss = editor.demo
+    ? fontFaceCss(themeSchema.parse(asSettings(editor.demo.settings).theme ?? {}))
+    : '';
   // L18 : test A/B en cours de la démo
   const ab = useAbTest(demoId);
   const [selection, setSelection] = useState<Selection>({ kind: 'step' });
@@ -661,6 +668,8 @@ export function EditorPage() {
               {step && ab.test?.step_id === step.id && <AbCanvasSwitch ab={ab} />}
               {step ? (
                 <div className={`frame fd-player-scope frame--${zoom}`}>
+                  {/* L18 : police de la médiathèque appliquée au canevas, comme dans le lecteur */}
+                  {fontCss && <style>{fontCss}</style>}
                   <div className="browser" aria-hidden="true">
                     <i />
                     <i />
