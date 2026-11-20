@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Infobulles (lot L44) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* L44 : infobulle unique (packages/ui) pour tout bouton à icône seule. Données fictives. Spec : docs/ux/specs/l44-infobulles.md */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  body { background: var(--fd-color-bg); }
+  .l44 { max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 32px; color: var(--fd-color-text); font-family: var(--fd-font-sans); }
+  .l44 h1 { margin: 0; font-size: 28px; } .l44 > p { margin: 0; max-width: 860px; color: var(--fd-color-text-muted); }
+  .sec { display: flex; flex-direction: column; gap: 16px; } .sec > h2 { margin: 0; font-size: 20px; }
+  .lab { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+  .notes { margin: 0; padding-left: 20px; color: var(--fd-color-text-muted); display: grid; gap: 6px; font-size: 14px; max-width: 900px; }
+
+  /* ===== Composant proposé : fd-tooltip (packages/ui) ===== */
+  .fd-tooltip { position: absolute; z-index: 1000; max-width: 240px; padding: 6px 10px; border-radius: 8px; background: #12161B; color: #FFFFFF; font: 500 13px/18px var(--fd-font-sans); display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; box-shadow: 0 4px 12px rgb(8 10 14 / .18); pointer-events: none; }
+  .fd-tooltip__kbd { display: inline-flex; gap: 2px; color: rgb(255 255 255 / .72); font-weight: 600; }
+  .fd-tooltip__kbd kbd { font: inherit; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 4px; background: rgb(255 255 255 / .14); display: inline-grid; place-items: center; }
+  .fd-tooltip__arrow { position: absolute; width: 10px; height: 10px; background: inherit; transform: rotate(45deg); border-radius: 2px; }
+  .fd-tooltip[data-side='top'] .fd-tooltip__arrow { bottom: -4px; }
+  .fd-tooltip[data-side='bottom'] .fd-tooltip__arrow { top: -4px; }
+  .fd-tooltip[data-side='left'] .fd-tooltip__arrow { right: -4px; }
+  .fd-tooltip[data-side='right'] .fd-tooltip__arrow { left: -4px; }
+  [data-theme='dark'] .fd-tooltip { background: #2A3039; color: #F3F5F8; box-shadow: 0 0 0 1px #3A424D, 0 4px 12px rgb(0 0 0 / .4); }
+  [data-theme='dark'] .fd-tooltip__arrow { box-shadow: 1px 1px 0 0 #3A424D; }
+  [data-theme='dark'] .fd-tooltip[data-side='bottom'] .fd-tooltip__arrow { box-shadow: -1px -1px 0 0 #3A424D; }
+
+  /* Cadres de démonstration (simulent un écran ou une zone) */
+  .frame { position: relative; overflow: hidden; height: 200px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); color: var(--fd-color-text); }
+  .frame--dark { background: #0B0D10; }
+  .ib { position: absolute; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); color: var(--fd-color-text); display: grid; place-items: center; box-shadow: var(--fd-shadow-focus); }
+  .ib svg { width: 20px; height: 20px; }
+  .bar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; border-radius: 999px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-md); }
+  .bar .ib { position: static; box-shadow: none; border-color: transparent; }
+  .bar .ib.is-focus { box-shadow: var(--fd-shadow-focus); }
+  .edge-note { position: absolute; left: 12px; top: 10px; font-size: 12px; color: var(--fd-color-text-muted); }
+  .player-bar { position: absolute; right: 12px; bottom: 14px; left: auto; transform: none; }
+  .popup360 { width: 360px; max-width: 100%; height: 220px; }
+  .before { display: block; max-width: 100%; border-radius: 12px; border: 1px solid var(--fd-color-border); }
+</style>
+</head>
+<body>
+<main class="l44">
+  <h1>L44 : infobulles des boutons à icône</h1>
+  <p>Un seul composant pour l'app, le lecteur et l'extension. Une bulle sombre, avec une flèche qui pointe vers l'icône. Elle apparaît après 300 ms au survol, ou tout de suite au focus clavier. Elle ne sort jamais de l'écran : elle change de côté, puis glisse le long du bord, tandis que la flèche reste sur l'icône. Données fictives.</p>
+
+  <section class="sec" aria-labelledby="s1"><h2 id="s1">Anatomie et placements</h2>
+    <div class="grid">
+      <div><span class="lab">Au-dessus (par défaut)</span><div class="frame" data-demo="top"></div></div>
+      <div><span class="lab">En dessous (barre du haut)</span><div class="frame" data-demo="bottom"></div></div>
+      <div><span class="lab">À droite (barre d'outils verticale)</span><div class="frame" data-demo="right"></div></div>
+      <div><span class="lab">Avec raccourci clavier</span><div class="frame" data-demo="kbd"></div></div>
+    </div>
+  </section>
+  <section class="sec" aria-labelledby="s2"><h2 id="s2">Bord de l'écran : jamais coupée</h2>
+    <div class="grid">
+      <div><span class="lab">Lecteur : langue, au bord droit</span><div class="frame" data-demo="edge-right"></div></div>
+      <div><span class="lab">Haut de l'écran : passe en dessous</span><div class="frame" data-demo="flip"></div></div>
+      <div><span class="lab">Extension (popup de 360 px)</span><div class="frame popup360" data-demo="ext"></div></div>
+    </div>
+  </section>
+  <section class="sec" aria-labelledby="s3"><h2 id="s3">En sombre</h2>
+    <div class="grid" data-theme="dark">
+      <div><span class="lab">Au-dessus</span><div class="frame frame--dark" data-demo="top"></div></div>
+      <div><span class="lab">Bord droit</span><div class="frame frame--dark" data-demo="edge-right-kbd"></div></div>
+    </div>
+  </section>
+  <section class="sec" aria-labelledby="s4"><h2 id="s4">Règles</h2>
+    <ul class="notes">
+      <li>Tout bouton sans texte visible a une infobulle. Son libellé est le nom du bouton (aria-label), en 1 à 4 mots, sans point final : « Langue », « Plein écran », « Fermer ».</li>
+      <li>Le raccourci est affiché s'il existe : « Annuler » <b>Ctrl Z</b> (sur Mac : ⌘ Z, dans une touche dessinée, jamais comme icône de bouton).</li>
+      <li>Délai de 300 ms au survol, 0 au focus clavier. Une fois une infobulle ouverte, les suivantes s'ouvrent sans délai pendant 500 ms (on parcourt une barre d'outils).</li>
+      <li>Fermeture : en quittant le survol ou le focus, avec Échap, au clic, ou au défilement. L'infobulle reste ouverte si le pointeur passe dessus (WCAG 1.4.13).</li>
+      <li>Placement : le côté préféré, sinon le côté opposé, sinon un décalage le long du bord, avec 8 px de marge à l'écran. La flèche reste centrée sur l'icône, à 10 px au moins des coins.</li>
+      <li>L'infobulle porte un id ; le bouton a aria-describedby vers elle seulement si son texte diffère du nom (raccourci par exemple). Sinon, le nom suffit et l'infobulle est aria-hidden.</li>
+    </ul>
+  </section>
+</main>
+<script>
+  const P = {
+    globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+    expand: '<path d="m15 3 6 6"/><path d="M21 3v6h-6"/><path d="m9 21-6-6"/><path d="M3 21v-6h6"/>',
+    undo: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>',
+    help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    bell: '<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>',
+    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    drop: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+    left: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+    right: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+    settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>'
+  };
+  const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${P[n]}</svg>`;
+  const kbd = (k) => `<span class="fd-tooltip__kbd">${k.split(' ').map((x) => `<kbd>${x}</kbd>`).join('')}</span>`;
+
+  /* Algorithme de placement (celui de la spec) : côté préféré, sinon opposé, puis décalage le long du bord ; flèche sur l'icône. */
+  function place(frame, btn, label, side, shortcut) {
+    const tip = document.createElement('div'); tip.className = 'fd-tooltip'; tip.setAttribute('role', 'tooltip');
+    tip.id = 'tt-' + Math.random().toString(36).slice(2, 8);
+    tip.innerHTML = `<span>${label}</span>${shortcut ? kbd(shortcut) : ''}<span class="fd-tooltip__arrow" aria-hidden="true"></span>`;
+    frame.appendChild(tip);
+    btn.setAttribute('aria-describedby', tip.id);
+    const F = frame.getBoundingClientRect(), B = btn.getBoundingClientRect(), T = tip.getBoundingClientRect();
+    const M = 8, GAP = 8, b = { x: B.left - F.left, y: B.top - F.top, w: B.width, h: B.height };
+    const fits = { top: b.y - GAP - T.height >= M, bottom: b.y + b.h + GAP + T.height <= F.height - M, left: b.x - GAP - T.width >= M, right: b.x + b.w + GAP + T.width <= F.width - M };
+    const opp = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
+    const s = fits[side] ? side : fits[opp[side]] ? opp[side] : side;
+    let x, y;
+    if (s === 'top' || s === 'bottom') {
+      x = b.x + b.w / 2 - T.width / 2; x = Math.max(M, Math.min(x, F.width - M - T.width));
+      y = s === 'top' ? b.y - GAP - T.height : b.y + b.h + GAP;
+    } else {
+      y = b.y + b.h / 2 - T.height / 2; y = Math.max(M, Math.min(y, F.height - M - T.height));
+      x = s === 'left' ? b.x - GAP - T.width : b.x + b.w + GAP;
+    }
+    tip.dataset.side = s; tip.style.left = x + 'px'; tip.style.top = y + 'px';
+    const a = tip.querySelector('.fd-tooltip__arrow');
+    if (s === 'top' || s === 'bottom') a.style.left = Math.max(10, Math.min(b.x + b.w / 2 - x - 5, T.width - 20)) + 'px';
+    else a.style.top = Math.max(8, Math.min(b.y + b.h / 2 - y - 5, T.height - 18)) + 'px';
+  }
+  const btn = (frame, icon, label, css) => { const el = document.createElement('button'); el.type = 'button'; el.className = 'ib'; el.setAttribute('aria-label', label); el.style.cssText = css; el.innerHTML = svg(icon); frame.appendChild(el); return el; };
+  const bar = (frame, icons, focusIdx, extra = '') => {
+    const d = document.createElement('div'); d.className = 'bar ' + extra; frame.appendChild(d);
+    return icons.map(([ic, lb], i) => { const el = document.createElement('button'); el.type = 'button'; el.className = 'ib' + (i === focusIdx ? ' is-focus' : ''); el.setAttribute('aria-label', lb); el.innerHTML = svg(ic); d.appendChild(el); return el; });
+  };
+  const demos = {
+    top: (f) => place(f, btn(f, 'help', 'Aide', 'left:calc(50% - 20px);top:110px'), 'Aide', 'top', 'F1'),
+    bottom: (f) => place(f, btn(f, 'bell', 'Notifications', 'left:calc(50% - 20px);top:24px'), 'Notifications', 'bottom'),
+    right: (f) => { const bs = [['target', 'Hotspot'], ['drop', 'Flou ou masque']].map(([ic, lb], i) => btn(f, ic, lb, `left:16px;top:${40 + i * 52}px;box-shadow:none`)); bs[1].style.boxShadow = 'var(--fd-shadow-focus)'; place(f, bs[1], 'Flou ou masque', 'right', 'B'); },
+    kbd: (f) => place(f, btn(f, 'undo', 'Annuler', 'left:calc(50% - 20px);top:110px'), 'Annuler', 'top', 'Ctrl Z'),
+    'edge-right': (f) => { f.insertAdjacentHTML('beforeend', '<span class="edge-note">Bord droit de l’écran du lecteur</span>'); const bs = bar(f, [['left', 'Étape précédente'], ['right', 'Étape suivante'], ['globe', 'Langue'], ['expand', 'Plein écran']], 2, 'player-bar'); place(f, bs[2], 'Langue', 'top'); },
+    'edge-right-kbd': (f) => { const bs = bar(f, [['left', 'Étape précédente'], ['right', 'Étape suivante'], ['globe', 'Langue'], ['expand', 'Plein écran']], 3, 'player-bar'); place(f, bs[3], 'Plein écran', 'top'); },
+    flip: (f) => { f.insertAdjacentHTML('beforeend', '<span class="edge-note" style="top:auto;bottom:10px">Pas de place au-dessus : la bulle passe en dessous</span>'); place(f, btn(f, 'settings', 'Paramètres', 'left:calc(50% - 20px);top:10px'), 'Paramètres de la démo', 'top'); },
+    ext: (f) => { const b = btn(f, 'camera', 'Capturer l’onglet', 'right:12px;top:12px'); place(f, b, 'Capturer l’onglet', 'top'); }
+  };
+  document.querySelectorAll('[data-demo]').forEach((f) => demos[f.dataset.demo](f));
+</script>
+</body>
+</html>
