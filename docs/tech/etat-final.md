@@ -66,13 +66,22 @@ Builds de production, audit mobile avec ralentissement simulé du réseau et du 
 
 | Page | Performance | Accessibilité |
 |---|---|---|
-| Connexion | 94 | 100 |
-| Tableau de bord | 74 | 100 |
+| Connexion | 95 | 100 |
+| Tableau de bord | 81 | 100 |
 | Éditeur | 75 | 100 |
 | Lecteur (démo publiée) | 97 | 100 |
 
-Corrigé : polices chargées sans chaîne d'imports, icônes regroupées en un seul fichier, aucun décalage de
-mise en page. Le tableau de bord et l'éditeur restent sous 90 : leur contenu principal s'affiche après
-plusieurs requêtes de données successives (session, espace, puis contenu de la page). Pour gagner encore,
-il faudrait regrouper ces lectures en une seule requête au démarrage. Ce chantier dépasse les corrections
-simples et reste à planifier.
+Corrections faites :
+
+- polices chargées sans chaîne d'imports ;
+- icônes regroupées en un seul fichier ;
+- aucun décalage de mise en page ;
+- tableau de bord et éditeur lus en une seule requête au démarrage (au lieu de 8 lectures successives) ;
+- boîtes Exporter et Diffuser chargées à l'ouverture ;
+- code de la page d'arrivée demandé dès le démarrage.
+
+Dans un navigateur réel, le contenu principal s'affiche en moins d'une seconde (0,7 s pour le tableau de
+bord, 0,9 s pour l'éditeur). Les scores mobiles restent sous 90 à cause du volume de code chargé avant le
+premier affichage, environ 250 Ko compressés, dont les textes de l'interface en français. Pour aller plus
+loin, il faudrait découper les textes par page et alléger la vue mobile de l'éditeur, qui n'affiche qu'un
+message et la liste des étapes. Ce chantier reste à planifier.
