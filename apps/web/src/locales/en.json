@@ -3534,7 +3534,10 @@
       "noChapter": "Other steps",
       "allSteps": "Steps",
       "generated": "Version {{version}} · made with TutoClick"
-    }
+    },
+    "bubbles": "Bubbles on screenshots",
+    "bubblesHelp": "Each step’s text in its bubble, as in the player",
+    "bubblesLocked": "No screenshots, no bubbles"
   },
   "onb": {
     "title": "Getting started with your workspace",

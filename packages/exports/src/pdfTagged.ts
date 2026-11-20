@@ -238,7 +238,7 @@ function drawBlock(
       };
       // Sans rôle : paragraphe, sauf l'en-tête courant et le pied de page (titre répété, numéro de page),
       // marqués comme décor de pagination
-      const running = !b.role && (b.y < 14 || b.y > pageH - 12);
+      const running = b.decor || (!b.role && (b.y < 14 || b.y > pageH - 12));
       if (running) artifact(doc, draw);
       else sect.add(doc.struct(ROLE[b.role ?? 'p']!, draw));
       break;

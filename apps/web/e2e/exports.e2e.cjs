@@ -79,6 +79,18 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       'L15-01 : page 2 = étape 1',
     );
     ok((await p.locator('.x15-svg image').count()) === 1, 'L15-01 : capture dans l’aperçu');
+    // Bulles sur les captures (activées par défaut) : l'aperçu montre la bulle, comme le fichier
+    const titleCount = async () =>
+      (await p.locator('.x15-svg text').allTextContents()).filter((x) => x.includes('Ouvrir le menu Usagers'))
+        .length;
+    const bubbles = p.getByRole('switch', { name: /Bulles sur les captures/ });
+    ok(
+      (await bubbles.isChecked()) && (await titleCount()) === 2,
+      'bulle de l’étape dessinée sur la capture (aperçu)',
+    );
+    await bubbles.click();
+    ok((await titleCount()) === 1, 'bulles coupées : capture sans bulle');
+    await bubbles.click();
     await p.getByRole('radio', { name: 'Deux étapes par page' }).click();
     ok(/^5 pages/.test(await help(p)), 'L15-01 : deux étapes par page = 5 pages');
     await p.getByRole('radio', { name: 'Une étape par page' }).click();

@@ -1052,6 +1052,13 @@ function Options(p: {
                     {sw(t('export.numbering'), t('export.numberingHelp'), pdf.numbering, (v) =>
                       setPdf({ ...pdf, numbering: v }),
                     )}
+                    {sw(
+                      t('export.bubbles'),
+                      pdf.images ? t('export.bubblesHelp') : t('export.bubblesLocked'),
+                      pdf.images && pdf.bubbles,
+                      (v) => setPdf({ ...pdf, bubbles: v }),
+                      !pdf.images,
+                    )}
                     {sw(t('export.cover'), t('export.coverHelp'), pdf.cover, (v) =>
                       setPdf({ ...pdf, cover: v }),
                     )}

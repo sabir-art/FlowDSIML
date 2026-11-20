@@ -3534,7 +3534,10 @@
       "noChapter": "Autres étapes",
       "allSteps": "Étapes",
       "generated": "Version {{version}} · créée avec TutoClick"
-    }
+    },
+    "bubbles": "Bulles sur les captures",
+    "bubblesHelp": "Texte de chaque étape dans sa bulle, comme dans le lecteur",
+    "bubblesLocked": "Sans captures, pas de bulles"
   },
   "onb": {
     "title": "Prise en main de votre espace",

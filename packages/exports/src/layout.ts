@@ -2,7 +2,7 @@
  * L15-06 : mise en page des PDF en blocs positionnés (millimètres). Le même plan sert au rendu
  * jsPDF et à l'aperçu de la modale : le nombre de pages affiché est donc exact.
  */
-import type { ExportDemo } from './model';
+import type { ExportDemo, ExportStep } from './model';
 
 export type Weight = 'regular' | 'bold' | 'extrabold';
 export type Block =
@@ -29,6 +29,8 @@ export type Block =
       lh: number;
       /** Rôle sémantique (titre du document et ordre de lecture). */
       role?: 'h1' | 'h2' | 'h3' | 'p';
+      /** Texte répété dans un décor (bulle sur la capture) : ignoré par les lecteurs d'écran. */
+      decor?: boolean;
     }
   | { t: 'image'; x: number; y: number; w: number; h: number; step: number; alt: string }
   | {
@@ -100,6 +102,8 @@ export interface PdfOptions {
   images: boolean;
   text: boolean;
   numbering: boolean;
+  /** Bulle de l'étape dessinée sur la capture, comme dans le lecteur, le GIF et la vidéo. */
+  bubbles: boolean;
   cover: boolean;
   orientation: 'portrait' | 'landscape';
 }
@@ -109,6 +113,7 @@ export const DEFAULT_PDF: PdfOptions = {
   images: true,
   text: true,
   numbering: true,
+  bubbles: true,
   cover: true,
   orientation: 'portrait',
 };
@@ -314,7 +319,60 @@ function stepBlock(
         size: 7.5,
       });
     }
+    if (o.bubbles && s.target && (s.title || s.text)) out.push(...bubble(s, ix, cy, iw, ih, m));
   }
+  return out;
+}
+
+/**
+ * Bulle de l'étape sur la capture, aux proportions du GIF et de la vidéo (capture de 960 px de large) :
+ * sous la zone si la place le permet, sinon au-dessus, toujours dans la capture. Vectorielle : le fichier
+ * et l'aperçu la dessinent à l'identique.
+ */
+function bubble(s: ExportStep, ix: number, iy: number, iw: number, ih: number, m: Measure): Block[] {
+  const t = s.target!;
+  const k = iw / 960;
+  const pad = 14 * k;
+  const bw = Math.min(360 * k, iw - 2 * pad);
+  const titleSize = Math.max(5, (15 * k) / PT);
+  const textSize = Math.max(4.5, (13 * k) / PT);
+  const tl = s.title ? m.split(s.title, titleSize, 'bold', bw - 2 * pad) : [];
+  const bl = s.text ? m.split(s.text, textSize, 'regular', bw - 2 * pad).slice(0, 5) : [];
+  const tLine = 20 * k;
+  const bLine = 18 * k;
+  const gap = tl.length && bl.length ? 4 * k : 0;
+  const bh = pad * 2 + tl.length * tLine + gap + bl.length * bLine;
+  let by = iy + (t.y + t.h) * ih + 12 * k;
+  if (by + bh > iy + ih - pad) by = Math.max(iy + pad, iy + t.y * ih - bh - 12 * k);
+  const tx = ix + (t.x + t.w / 2) * iw;
+  const bx = Math.min(Math.max(ix + pad, tx - bw / 2), ix + iw - bw - pad);
+  const out: Block[] = [
+    { t: 'rect', x: bx, y: by, w: bw, h: bh, fill: '#FFFFFF', stroke: RULE, lw: 0.25, r: 10 * k },
+  ];
+  if (tl.length)
+    out.push({
+      t: 'text',
+      x: bx + pad,
+      y: by + pad,
+      lines: tl,
+      size: titleSize,
+      weight: 'bold',
+      color: INK,
+      lh: tLine / (titleSize * PT),
+      decor: true,
+    });
+  if (bl.length)
+    out.push({
+      t: 'text',
+      x: bx + pad,
+      y: by + pad + tl.length * tLine + gap,
+      lines: bl,
+      size: textSize,
+      weight: 'regular',
+      color: MUTED,
+      lh: bLine / (textSize * PT),
+      decor: true,
+    });
   return out;
 }
 
