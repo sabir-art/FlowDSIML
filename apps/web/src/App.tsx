@@ -40,7 +40,14 @@ const AiSettings = lazy(() => import('./pages/settings/AiSettings').then((m) => 
 const PrivacySettings = lazy(() =>
   import('./pages/settings/PrivacySettings').then((m) => ({ default: m.PrivacySettings })),
 );
-const DemosPage = lazy(() => import('./pages/demos/DemosPage').then((m) => ({ default: m.DemosPage })));
+// L32 : la page d'arrivée est demandée dès le démarrage, en parallèle de la session et de l'espace
+// (sinon son code n'est chargé qu'une fois l'espace connu, un aller-retour de plus)
+const routeHash = typeof location !== 'undefined' ? location.hash.replace(/^#/, '') : '';
+const demosChunk = () => import('./pages/demos/DemosPage');
+const editorChunk = () => import('./pages/editor/EditorPage');
+if (routeHash === '' || routeHash === '/') void demosChunk();
+else if (/^\/demos\/[^/]+\/edit$/.test(routeHash)) void editorChunk();
+const DemosPage = lazy(() => demosChunk().then((m) => ({ default: m.DemosPage })));
 const IntegrationsPage = lazy(() =>
   import('./pages/settings/integrations/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage })),
 );
@@ -68,7 +75,7 @@ const RemotePhone = lazy(() =>
 const PublicScreen = lazy(() =>
   import('./pages/present/PublicScreen').then((m) => ({ default: m.PublicScreen })),
 );
-const EditorPage = lazy(() => import('./pages/editor/EditorPage').then((m) => ({ default: m.EditorPage })));
+const EditorPage = lazy(() => editorChunk().then((m) => ({ default: m.EditorPage })));
 const QuizEditorPage = lazy(() =>
   import('./pages/editor/quiz/QuizEditorPage').then((m) => ({ default: m.QuizEditorPage })),
 );
