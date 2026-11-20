@@ -23,11 +23,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm turbo run lint typecheck test build
-      - name: Edge Functions (deno check + tests du dispatch des webhooks, de la médiathèque et de html-ingest)
+      - name: Edge Functions (deno check + tests du dispatch des webhooks, de la médiathèque, de html-ingest et de l'Assistance IA)
         working-directory: supabase/functions
         run: |
-          npx -y deno@2.5.6 check --no-lock webhooks-dispatch/index.ts media/index.ts html-ingest/index.ts
-          npx -y deno@2.5.6 test --no-lock webhooks-dispatch/ media/
+          npx -y deno@2.5.6 check --no-lock webhooks-dispatch/index.ts media/index.ts html-ingest/index.ts ai/index.ts
+          npx -y deno@2.5.6 test --no-lock webhooks-dispatch/ media/ ai/
           npx -y deno@2.5.6 test --no-lock --allow-env html-ingest/
 
   secrets:
