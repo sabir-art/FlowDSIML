@@ -369,3 +369,30 @@
 .ai-ds-table th {
   font-size: 13px;
 }
+/* L30-07 : aperçu du graphique proposé */
+.ai-chart-bars {
+  display: grid;
+  gap: 4px;
+}
+.ai-chart-row {
+  display: grid;
+  grid-template-columns: minmax(60px, 35%) 1fr auto;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+}
+.ai-chart-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-chart-bar {
+  display: block;
+  min-width: 2px;
+  height: 10px;
+  border-radius: 0 4px 4px 0;
+  background: var(--fd-color-primary);
+}
+.ai-chart-val {
+  font-variant-numeric: tabular-nums;
+}

@@ -205,9 +205,17 @@ export function parseRequest(body: Record<string, unknown>): Request {
       payload = { rows, columns, context: r(str(input.context, 500, 'CONTEXT', false)) };
       break;
     }
-    case 'chart':
-      payload = { description: r(str(input.description, 1000, 'DESCRIPTION')) };
+    case 'chart': {
+      // Jeu de données relié : noms de colonnes et 5 lignes d'exemple au plus (données fictives ou agrégées)
+      if (!Array.isArray(input.columns) || input.columns.length === 0 || input.columns.length > 30)
+        throw new AiError('BAD_COLUMNS');
+      const columns = input.columns.map((c) => str(c, 60, 'COLUMN'));
+      const sample = (Array.isArray(input.sample) ? input.sample.slice(0, 5) : []).map((row) =>
+        (Array.isArray(row) ? row.slice(0, columns.length) : []).map((v) => r(String(v ?? '').slice(0, 80))),
+      );
+      payload = { description: r(str(input.description, 1000, 'DESCRIPTION')), columns, sample };
       break;
+    }
     case 'assistant': {
       const msgs = Array.isArray(input.messages) ? input.messages.slice(-20) : [];
       if (msgs.length === 0) throw new AiError('MISSING_MESSAGES');
@@ -376,19 +384,20 @@ export function buildPrompt(req: Request): Prompt {
       return {
         model: HAIKU,
         system:
-          `Tu proposes un graphique simple à partir d'une description, avec des valeurs fictives et plausibles si elles ne sont pas données. ` +
-          `type : bar, line ou pie. 2 à 12 libellés, 1 à 4 séries de même longueur que les libellés. ${inLang}`,
-        messages: user(p.description),
+          "Tu choisis comment représenter un jeu de données dans un graphique simple, d'après la demande. " +
+          "type : bar (barres), line (courbe) ou donut (anneau, parts d'un total). labelColumn : colonne des libellés. " +
+          'valueColumn : colonne numérique, ou chaîne vide si aggregate vaut count. aggregate : none (une ligne = un point), ' +
+          'sum ou avg (regroupé par libellé), count (nombre de lignes par libellé). Utilise seulement les colonnes fournies. ' +
+          `title : titre court du graphique. ${inLang}`,
+        messages: user({ demande: p.description, colonnes: p.columns, exemple: p.sample }),
         schema: obj({
-          type: { type: 'string', enum: ['bar', 'line', 'pie'] },
+          type: { type: 'string', enum: ['bar', 'line', 'donut'] },
           title: S,
-          labels: { type: 'array', items: S },
-          series: {
-            type: 'array',
-            items: obj({ name: S, values: { type: 'array', items: { type: 'number' } } }),
-          },
+          labelColumn: S,
+          valueColumn: S,
+          aggregate: { type: 'string', enum: ['none', 'sum', 'avg', 'count'] },
         }),
-        maxTokens: 3000,
+        maxTokens: 1500,
       };
     case 'assistant':
       return {
@@ -468,16 +477,18 @@ export function checkOutput(task: Task, out: any, payload: Record<string, any>):
       return { rows };
     }
     case 'chart': {
-      const labels = Array.isArray(out?.labels) ? out.labels.slice(0, 12) : [];
-      const series = Array.isArray(out?.series)
-        ? out.series
-            .slice(0, 4)
-            .filter(
-              (s: { values: unknown[] }) => Array.isArray(s.values) && s.values.length === labels.length,
-            )
-        : [];
-      if (labels.length < 2 || series.length === 0) throw new AiError('EMPTY', 502);
-      return { type: out.type, title: String(out.title ?? ''), labels, series };
+      const cols = payload.columns as string[];
+      if (!['bar', 'line', 'donut'].includes(out?.type) || !cols.includes(out?.labelColumn))
+        throw new AiError('EMPTY', 502);
+      const aggregate = ['none', 'sum', 'avg', 'count'].includes(out.aggregate) ? out.aggregate : 'none';
+      if (aggregate !== 'count' && !cols.includes(out.valueColumn)) throw new AiError('EMPTY', 502);
+      return {
+        type: out.type,
+        title: String(out.title ?? '').slice(0, 120),
+        labelColumn: out.labelColumn,
+        valueColumn: aggregate === 'count' ? '' : out.valueColumn,
+        aggregate,
+      };
     }
     case 'assistant':
       if (!isStr(out?.text) || !out.text.trim()) throw new AiError('EMPTY', 502);

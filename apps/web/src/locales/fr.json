@@ -4330,6 +4330,17 @@
       "use": "Utiliser ce jeu de données",
       "personal": "Un jeu de données ne doit contenir ni nom, ni e-mail, ni identifiant de personne.",
       "name": "Données fictives"
+    },
+    "chart": {
+      "open": "Décrire le graphique",
+      "label": "Que doit montrer le graphique ?",
+      "placeholder": "Évolution mensuelle des entrées en formation, par structure",
+      "go": "Proposer le graphique",
+      "busy": "Préparation du graphique…",
+      "noDataset": "Reliez d’abord un jeu de données, ou générez-en un.",
+      "openDataset": "Ouvrir le jeu de données",
+      "summary": "{{type}} · libellés : {{label}} · valeurs : {{value}}",
+      "count": "nombre de lignes"
     }
   }
 }

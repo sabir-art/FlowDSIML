@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Database, Plus, Trash2 } from 'lucide-react';
+import { Database, Plus, Trash2, WandSparkles } from 'lucide-react';
+import { AiChart } from '../../../components/ai/AiChart';
+import { useDataset } from '../data/datasetStore';
+import { asSettings } from '../types';
+import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { CHART_ROWS_MAX, validChart, type ChartType, type HtmlChart } from '@flowdsiml/core';
 import type { DetectedChart } from '@flowdsiml/player-core';
 import type { DemoEditor } from '../useDemoEditor';
@@ -61,6 +65,10 @@ export function ChartFields({
   const [type, setType] = useState<ChartType>(initial.type);
   const [rows, setRows] = useState(initial.rows.map((r) => ({ label: r.label, value: fmt(r.value) })));
   const title = saved?.title ?? chart.title;
+  // L30-07 : « Décrire le graphique » (Assistance IA), à partir du jeu de données relié
+  const [describing, setDescribing] = useState(false);
+  const { current: ws } = useWorkspace();
+  const { dataset } = useDataset(editor.demo?.id);
   useEffect(() => {
     setType(initial.type);
     setRows(initial.rows.map((r) => ({ label: r.label, value: fmt(r.value) })));
@@ -195,7 +203,43 @@ export function ChartFields({
           <Database {...ICON} />
           {t('editor.data.fromDataset')}
         </button>
+        {ws && !readOnly && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            aria-expanded={describing}
+            onClick={() => setDescribing((v) => !v)}
+          >
+            <WandSparkles {...ICON} />
+            {t('ai.chart.open')}
+          </button>
+        )}
       </div>
+      {describing && ws && (
+        <AiChart
+          ws={ws.id}
+          lang={asSettings(editor.demo!.settings).locale ?? 'fr'}
+          dataset={dataset && dataset.rows.length ? { columns: dataset.columns, rows: dataset.rows } : null}
+          onCancel={() => setDescribing(false)}
+          onOpenDataset={() => {
+            setDescribing(false);
+            window.dispatchEvent(
+              new CustomEvent(DATASET_OPEN, { detail: { stepId: step.id, sel: chart.sel } }),
+            );
+          }}
+          onApply={(c) => {
+            setDescribing(false);
+            setType(c.type);
+            setRows(c.rows.map((r) => ({ label: r.label, value: fmt(r.value) })));
+            upsertOp(
+              editor,
+              step,
+              { sel: chart.sel, op: 'chart', value: c, before: title || chart.sel },
+              'step',
+            );
+          }}
+        />
+      )}
       {op && (
         <button
           type="button"

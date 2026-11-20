@@ -139,3 +139,27 @@ Deno.test('generate : chapitres bornés, quiz à une bonne réponse', () => {
   assertEquals(out.chapters[0]!.steps.length, 30);
   assertEquals(out.quiz.length, 1);
 });
+
+Deno.test('chart : colonnes du jeu de données seulement, agrégation bornée', () => {
+  const payload = parseRequest({
+    task: 'chart',
+    input: {
+      description: 'Jeunes suivis par structure',
+      columns: ['structure', 'suivis'],
+      sample: [['Nord', '12']],
+    },
+  }).payload;
+  assertEquals(
+    checkOutput(
+      'chart',
+      { type: 'bar', title: 'Suivis', labelColumn: 'structure', valueColumn: 'suivis', aggregate: 'sum' },
+      payload,
+    ),
+    { type: 'bar', title: 'Suivis', labelColumn: 'structure', valueColumn: 'suivis', aggregate: 'sum' },
+  );
+  assertThrows(
+    () => checkOutput('chart', { type: 'bar', labelColumn: 'inconnue', valueColumn: 'suivis' }, payload),
+    AiError,
+  );
+  assertThrows(() => parseRequest({ task: 'chart', input: { description: 'x' } }), AiError, 'BAD_COLUMNS');
+});

@@ -4330,6 +4330,17 @@
       "use": "Use this dataset",
       "personal": "A dataset must not contain any name, email or person identifier.",
       "name": "Sample data"
+    },
+    "chart": {
+      "open": "Describe the chart",
+      "label": "What should the chart show?",
+      "placeholder": "Monthly training entries, by team",
+      "go": "Propose the chart",
+      "busy": "Preparing the chart…",
+      "noDataset": "Link a dataset first, or generate one.",
+      "openDataset": "Open the dataset",
+      "summary": "{{type}} · labels: {{label}} · values: {{value}}",
+      "count": "number of rows"
     }
   }
 }
