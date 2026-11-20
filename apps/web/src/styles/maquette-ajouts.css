@@ -1415,7 +1415,7 @@
   left: 16px;
   top: -8px;
   height: 12px;
-  border-left: 2px dotted var(--fd-color-border-strong);
+  border-left: 1px dotted var(--fd-color-border-strong);
 }
 .mk .step {
   position: relative;
@@ -2631,9 +2631,8 @@
   gap: 12px;
   margin: 8px 0 0 30px;
   padding: 16px;
-  border-left: 3px solid var(--fd-color-primary);
   background: var(--fd-color-surface-sunken);
-  border-radius: 0 var(--fd-radius-md) var(--fd-radius-md) 0;
+  border-radius: var(--fd-radius-md);
 }
 .mk .l11-field {
   margin: 0;

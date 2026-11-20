@@ -162,7 +162,6 @@
   padding: 6px 10px;
   border-radius: 8px;
   background: var(--fd-color-surface);
-  border-left: 3px solid var(--fd-color-primary);
   font-size: var(--fd-text-label-size);
   display: -webkit-box;
   -webkit-line-clamp: 3;

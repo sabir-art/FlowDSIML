@@ -118,22 +118,6 @@
 .mk .sidebar-foot .usage .progress > span {
   background: var(--ref-gauge-2);
 }
-.mk .nav a {
-  position: relative;
-}
-.mk .nav a[aria-current='page']::before {
-  content: '';
-  position: absolute;
-  left: -12px;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--fd-color-primary);
-}
-.mk .toast {
-  border-left: 3px solid var(--fd-color-success);
-}
 .mk .screen .ic {
   width: 36px;
   height: 36px;
@@ -147,9 +131,6 @@
 .mk .screen .ic svg {
   width: 18px;
   height: 18px;
-}
-.mk .toast.toast--warning {
-  border-left-color: var(--fd-color-warning);
 }
 .mk .toast.toast--warning > svg:first-child {
   color: var(--fd-color-warning);
