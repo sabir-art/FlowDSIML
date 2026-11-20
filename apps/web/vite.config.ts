@@ -2,6 +2,8 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { APP_NAME } from '../../packages/core/src/brand';
 import { offlineRuntime } from './vite.offline';
+import { localeSplit } from './vite.locales';
+import { routePreload } from './vite.preload';
 
 // GitHub Pages sert le site sous /<dépôt>/ : la base est injectée par la CI (BASE_PATH).
 export default defineConfig({
@@ -10,8 +12,12 @@ export default defineConfig({
     react(),
     // L16 : lecteur hors ligne des paquets SCORM (module virtuel)
     offlineRuntime(),
+    // L33 : textes français en deux morceaux (socle au démarrage, suite avec les autres pages)
+    localeSplit(),
     // Nom du produit dans index.html (constante unique)
     { name: 'app-name', transformIndexHtml: (html: string) => html.replaceAll('%APP_NAME%', APP_NAME) },
+    // L33 : code de la page d'arrivée préchargé dès le HTML (sinon découvert après l'exécution de l'entrée)
+    routePreload(),
   ],
   server: { port: 5173 },
   // L27 : bibliothèques de base dans des morceaux à part (cache gardé d'un déploiement à l'autre) ;

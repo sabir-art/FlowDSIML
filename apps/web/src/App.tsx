@@ -1,5 +1,7 @@
 import { RouteFocus } from './lib/routeFocus';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState, type ComponentType } from 'react';
+import { useNarrow } from './lib/useNarrow';
+import { loadRestLocale, withRestLocale } from './i18n';
 import { ToastProvider } from './components/Toast';
 import { HelpProvider } from './help/HelpProvider';
 import { HashRouter, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
@@ -17,75 +19,105 @@ import { LegalSoon } from './pages/auth/LegalSoon';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
 import { ResetPassword } from './pages/auth/ResetPassword';
 
+// L33 : une page chargée à la demande attend aussi la suite des textes (src/i18n.ts, vite.locales.ts)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- même signature que React.lazy
+function lazyRest<T extends ComponentType<any>>(load: () => Promise<{ default: T }>) {
+  return lazy(() => withRestLocale(load));
+}
+
 // Pages lourdes chargées à la demande (éditeur, analytics, partage).
 // L27 : chaque page est un morceau chargé à la demande (bundle initial réduit)
-const CenterSettings = lazy(() =>
+const CenterSettings = lazyRest(() =>
   import('./pages/center/CenterSettings').then((m) => ({ default: m.CenterSettings })),
 );
-const LearnersPage = lazy(() =>
+const LearnersPage = lazyRest(() =>
   import('./pages/learners/LearnersPage').then((m) => ({ default: m.LearnersPage })),
 );
-const Onboarding = lazy(() => import('./pages/Onboarding').then((m) => ({ default: m.Onboarding })));
-const AcceptInvite = lazy(() => import('./pages/AcceptInvite').then((m) => ({ default: m.AcceptInvite })));
-const Profile = lazy(() => import('./pages/settings/Profile').then((m) => ({ default: m.Profile })));
-const Members = lazy(() => import('./pages/settings/Members').then((m) => ({ default: m.Members })));
-const WorkspaceSettings = lazy(() =>
+const Onboarding = lazyRest(() => import('./pages/Onboarding').then((m) => ({ default: m.Onboarding })));
+const AcceptInvite = lazyRest(() =>
+  import('./pages/AcceptInvite').then((m) => ({ default: m.AcceptInvite })),
+);
+const Profile = lazyRest(() => import('./pages/settings/Profile').then((m) => ({ default: m.Profile })));
+const Members = lazyRest(() => import('./pages/settings/Members').then((m) => ({ default: m.Members })));
+const WorkspaceSettings = lazyRest(() =>
   import('./pages/settings/WorkspaceSettings').then((m) => ({ default: m.WorkspaceSettings })),
 );
-const PlansPage = lazy(() => import('./pages/settings/PlansPage').then((m) => ({ default: m.PlansPage })));
-const GlossarySettings = lazy(() =>
+const PlansPage = lazyRest(() =>
+  import('./pages/settings/PlansPage').then((m) => ({ default: m.PlansPage })),
+);
+const GlossarySettings = lazyRest(() =>
   import('./pages/settings/GlossarySettings').then((m) => ({ default: m.GlossarySettings })),
 );
-const AiSettings = lazy(() => import('./pages/settings/AiSettings').then((m) => ({ default: m.AiSettings })));
-const PrivacySettings = lazy(() =>
+const AiSettings = lazyRest(() =>
+  import('./pages/settings/AiSettings').then((m) => ({ default: m.AiSettings })),
+);
+const PrivacySettings = lazyRest(() =>
   import('./pages/settings/PrivacySettings').then((m) => ({ default: m.PrivacySettings })),
 );
 // L32 : la page d'arrivée est demandée dès le démarrage, en parallèle de la session et de l'espace
 // (sinon son code n'est chargé qu'une fois l'espace connu, un aller-retour de plus)
 const routeHash = typeof location !== 'undefined' ? location.hash.replace(/^#/, '') : '';
 const demosChunk = () => import('./pages/demos/DemosPage');
-const editorChunk = () => import('./pages/editor/EditorPage');
+const editorChunk = () => withRestLocale(() => import('./pages/editor/EditorPage'));
+// L33 : sur écran étroit, une page légère (avis + commentaires) remplace l'éditeur complet
+const narrowChunk = () => import('./pages/editor/EditorNarrow');
+const startsNarrow = typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches;
 if (routeHash === '' || routeHash === '/') void demosChunk();
-else if (/^\/demos\/[^/]+\/edit$/.test(routeHash)) void editorChunk();
+else if (/^\/demos\/[^/]+\/edit$/.test(routeHash)) void (startsNarrow ? narrowChunk() : editorChunk());
+// Suite des textes demandée une fois la page affichée (boîtes de dialogue et pages suivantes sans attente) ;
+// l'éditeur et les autres pages l'attendent de toute façon (lazyRest)
+if (typeof window !== 'undefined')
+  window.addEventListener('load', () => setTimeout(() => void loadRestLocale(), 1500), { once: true });
 const DemosPage = lazy(() => demosChunk().then((m) => ({ default: m.DemosPage })));
-const IntegrationsPage = lazy(() =>
+const IntegrationsPage = lazyRest(() =>
   import('./pages/settings/integrations/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage })),
 );
-const WebhookDetail = lazy(() =>
+const WebhookDetail = lazyRest(() =>
   import('./pages/settings/integrations/WebhookDetail').then((m) => ({ default: m.WebhookDetail })),
 );
-const BrandSettings = lazy(() =>
+const BrandSettings = lazyRest(() =>
   import('./pages/settings/brand/BrandSettings').then((m) => ({ default: m.BrandSettings })),
 );
-const VariablesSettings = lazy(() =>
+const VariablesSettings = lazyRest(() =>
   import('./pages/settings/SoonSections').then((m) => ({ default: m.VariablesSettings })),
 );
-const SecuritySettings = lazy(() =>
+const SecuritySettings = lazyRest(() =>
   import('./pages/settings/SoonFeatures').then((m) => ({ default: m.SecuritySettings })),
 );
-const SoonFeatures = lazy(() =>
+const SoonFeatures = lazyRest(() =>
   import('./pages/settings/SoonFeatures').then((m) => ({ default: m.SoonFeatures })),
 );
-const PresenterPage = lazy(() =>
+const PresenterPage = lazyRest(() =>
   import('./pages/present/PresenterPage').then((m) => ({ default: m.PresenterPage })),
 );
-const RemotePhone = lazy(() =>
+const RemotePhone = lazyRest(() =>
   import('./pages/present/RemotePhone').then((m) => ({ default: m.RemotePhone })),
 );
-const PublicScreen = lazy(() =>
+const PublicScreen = lazyRest(() =>
   import('./pages/present/PublicScreen').then((m) => ({ default: m.PublicScreen })),
 );
-const EditorPage = lazy(() => editorChunk().then((m) => ({ default: m.EditorPage })));
-const QuizEditorPage = lazy(() =>
+const EditorPage = lazyRest(() => editorChunk().then((m) => ({ default: m.EditorPage })));
+const EditorNarrowPage = lazy(() => narrowChunk().then((m) => ({ default: m.EditorNarrowPage })));
+
+/** Écran étroit à l'ouverture : page légère ; dès qu'il a été large, l'éditeur complet (qui gère l'étroit). */
+function EditorRoute() {
+  const narrow = useNarrow(1024);
+  const [everWide, setEverWide] = useState(!narrow);
+  useEffect(() => {
+    if (!narrow) setEverWide(true);
+  }, [narrow]);
+  return everWide ? <EditorPage /> : <EditorNarrowPage />;
+}
+const QuizEditorPage = lazyRest(() =>
   import('./pages/editor/quiz/QuizEditorPage').then((m) => ({ default: m.QuizEditorPage })),
 );
-const DemoAnalyticsPage = lazy(() =>
+const DemoAnalyticsPage = lazyRest(() =>
   import('./pages/analytics/DemoAnalyticsPage').then((m) => ({ default: m.DemoAnalyticsPage })),
 );
-const AnalyticsPage = lazy(() =>
+const AnalyticsPage = lazyRest(() =>
   import('./pages/analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
 );
-const SharePage = lazy(() => import('./pages/share/SharePage').then((m) => ({ default: m.SharePage })));
+const SharePage = lazyRest(() => import('./pages/share/SharePage').then((m) => ({ default: m.SharePage })));
 /** L16 : #/demos/:id/distribute ouvre la modale « Diffuser » au-dessus de l'éditeur. */
 function DistributeRoute() {
   const { demoId = '' } = useParams();
@@ -186,7 +218,7 @@ export function App() {
                     element={
                       <RequireAuth>
                         <RequireWorkspace>
-                          <EditorPage />
+                          <EditorRoute />
                         </RequireWorkspace>
                       </RequireAuth>
                     }

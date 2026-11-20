@@ -16,9 +16,13 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../auth/AuthProvider';
+import { withRestLocale } from '../i18n';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
 
-const HelpDrawer = lazy(() => import('./HelpDrawer').then((m) => ({ default: m.HelpDrawer })));
+// L33 : le panneau cite les raccourcis de l'éditeur (textes chargés à la demande)
+const HelpDrawer = lazy(() =>
+  withRestLocale(() => import('./HelpDrawer')).then((m) => ({ default: m.HelpDrawer })),
+);
 
 interface HelpState {
   open: boolean;

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { withRestLocale } from '../../i18n';
 import {
   Archive,
   ArrowUpRight,
@@ -45,22 +46,41 @@ import { Menu, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
 import { createDemoFromImages } from './importImages';
-import { NewDemoDialog } from './NewDemoDialog';
-import { TemplatesDialog } from './TemplatesDialog';
 import { OnboardingCard, useOnboarding } from './OnboardingCard';
 import { loadHome, type Stats } from './home';
-import { FolderAccessDialog } from './FolderAccessDialog';
 import { useShareRules } from '../../lib/shareRules';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
-import { GenerateDialog } from '../../components/ai/GenerateDialog';
-import { NotificationBell } from '../../components/notifications/NotificationBell';
+import { LazyNotificationBell } from '../../components/notifications/LazyNotificationBell';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
-const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
+// L33 : boîtes ouvertes au clic, hors du premier rendu ; leur code est demandé une fois la page affichée
+const newDemoChunk = () => import('./NewDemoDialog');
+const templatesChunk = () => import('./TemplatesDialog');
+const NewDemoDialog = lazy(() => newDemoChunk().then((m) => ({ default: m.NewDemoDialog })));
+const TemplatesDialog = lazy(() => templatesChunk().then((m) => ({ default: m.TemplatesDialog })));
+const FolderAccessDialog = lazy(() =>
+  import('./FolderAccessDialog').then((m) => ({ default: m.FolderAccessDialog })),
+);
+const GenerateDialog = lazy(() =>
+  import('../../components/ai/GenerateDialog').then((m) => ({ default: m.GenerateDialog })),
+);
+
+/** Vrai dès la première ouverture : la boîte reste ensuite montée (fermeture et retour du focus inchangés). */
+function useMountedOnce(open: boolean) {
+  const [mounted, setMounted] = useState(open);
+  useEffect(() => {
+    if (open) setMounted(true);
+  }, [open]);
+  return open || mounted;
+}
+
+const ExportDialog = lazy(() =>
+  withRestLocale(() => import('../export/ExportDialog')).then((m) => ({ default: m.ExportDialog })),
+);
 const DistributeDialog = lazy(() =>
-  import('../share/DistributeDialog').then((m) => ({ default: m.DistributeDialog })),
+  withRestLocale(() => import('../share/DistributeDialog')).then((m) => ({ default: m.DistributeDialog })),
 );
 
 type Demo = Tables<'demos'>;
@@ -243,6 +263,16 @@ export function DemosPage() {
   }, [params, setParams]);
   // L26-04 : bibliothèque de modèles (dossier choisi dans « Nouvelle démo »)
   const [tplFolder, setTplFolder] = useState<string | null | undefined>(undefined);
+  const newMounted = useMountedOnce(newOpen);
+  const tplMounted = useMountedOnce(tplFolder !== undefined);
+  // L33 : code des boîtes « Nouvelle démo » et « Modèles » demandé une fois la page affichée
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      void newDemoChunk();
+      void templatesChunk();
+    }, 2000);
+    return () => window.clearTimeout(id);
+  }, []);
   const openNew = () => setNewOpen(true);
   const anyPublished = (demos ?? []).some((d) => d.status === 'published');
 
@@ -300,7 +330,7 @@ export function DemosPage() {
           <p className="page-head__sub">{t('demos.subtitle')}</p>
         </div>
         <div className="page-head__actions">
-          <NotificationBell />
+          <LazyNotificationBell />
           <label className="search-pill">
             <Search aria-hidden="true" />
             <input
@@ -853,62 +883,68 @@ export function DemosPage() {
 
       {tagging && <TagsDialog demo={tagging} store={tagStore} onClose={() => setTagging(null)} />}
       {managingTags && <ManageTagsDialog store={tagStore} onClose={() => setManagingTags(false)} />}
-      {/* L30-05 : démo générée depuis un plan texte (langue de l'interface) */}
-      {generating && (
-        <GenerateDialog
-          ws={ws.id}
-          userId={user!.id}
-          folderId={generating.folder}
-          lang={i18n.language.startsWith('en') ? 'en' : 'fr'}
-          onClose={() => setGenerating(null)}
-        />
-      )}
-      <NewDemoDialog
-        open={newOpen}
-        folders={folders}
-        defaultFolder={folder !== 'all' && folder !== 'none' ? folder : null}
-        onClose={() => setNewOpen(false)}
-        onEmpty={async (f) => {
-          setNewOpen(false);
-          await createDemo(f);
-        }}
-        onImport={async (files, f) => {
-          const id = await run(async () =>
-            createDemoFromImages({
-              workspaceId: ws.id,
-              userId: user!.id,
-              folderId: f,
-              title: t('demos.untitled'),
-              files,
-            }),
-          );
-          if (!id) return;
-          setNewOpen(false);
-          toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
-          navigate(`/demos/${id}/edit`);
-        }}
-        ws={ws.id}
-        onGenerate={(f) => {
-          setNewOpen(false);
-          setGenerating({ folder: f });
-        }}
-        onTemplate={(f) => {
-          setNewOpen(false);
-          setTplFolder(f);
-        }}
-      />
-      <TemplatesDialog
-        open={tplFolder !== undefined}
-        workspaceId={ws.id}
-        folderId={tplFolder ?? null}
-        canManage={can('demo.edit')}
-        onClose={() => setTplFolder(undefined)}
-        onCreated={(id) => {
-          setTplFolder(undefined);
-          toast(t('templates.created'));
-          navigate(`/demos/${id}/edit`);
-        }}
-      />
+      <Suspense fallback={null}>
+        {/* L30-05 : démo générée depuis un plan texte (langue de l'interface) */}
+        {generating && (
+          <GenerateDialog
+            ws={ws.id}
+            userId={user!.id}
+            folderId={generating.folder}
+            lang={i18n.language.startsWith('en') ? 'en' : 'fr'}
+            onClose={() => setGenerating(null)}
+          />
+        )}
+        {newMounted && (
+          <NewDemoDialog
+            open={newOpen}
+            folders={folders}
+            defaultFolder={folder !== 'all' && folder !== 'none' ? folder : null}
+            onClose={() => setNewOpen(false)}
+            onEmpty={async (f) => {
+              setNewOpen(false);
+              await createDemo(f);
+            }}
+            onImport={async (files, f) => {
+              const id = await run(async () =>
+                createDemoFromImages({
+                  workspaceId: ws.id,
+                  userId: user!.id,
+                  folderId: f,
+                  title: t('demos.untitled'),
+                  files,
+                }),
+              );
+              if (!id) return;
+              setNewOpen(false);
+              toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
+              navigate(`/demos/${id}/edit`);
+            }}
+            ws={ws.id}
+            onGenerate={(f) => {
+              setNewOpen(false);
+              setGenerating({ folder: f });
+            }}
+            onTemplate={(f) => {
+              setNewOpen(false);
+              setTplFolder(f);
+            }}
+          />
+        )}
+        {tplMounted && (
+          <TemplatesDialog
+            open={tplFolder !== undefined}
+            workspaceId={ws.id}
+            folderId={tplFolder ?? null}
+            canManage={can('demo.edit')}
+            onClose={() => setTplFolder(undefined)}
+            onCreated={(id) => {
+              setTplFolder(undefined);
+              toast(t('templates.created'));
+              navigate(`/demos/${id}/edit`);
+            }}
+          />
+        )}
+      </Suspense>
       <ConfirmDialog
         open={newFolder !== null || renaming !== null}
         title={renaming ? t('demos.renameFolder', { name: '' }).trim() : t('demos.newFolder')}
@@ -972,14 +1008,16 @@ export function DemosPage() {
         }
       />
       {folderAccess && (
-        <FolderAccessDialog
-          folder={folderAccess}
-          onClose={() => setFolderAccess(null)}
-          onSaved={() => {
-            toast(t('folderAccess.saved'));
-            void load();
-          }}
-        />
+        <Suspense fallback={null}>
+          <FolderAccessDialog
+            folder={folderAccess}
+            onClose={() => setFolderAccess(null)}
+            onSaved={() => {
+              toast(t('folderAccess.saved'));
+              void load();
+            }}
+          />
+        </Suspense>
       )}
       <ConfirmDialog
         open={!!pendingMove}

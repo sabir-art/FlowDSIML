@@ -20,6 +20,8 @@
     "@flowdsiml/player-core": "workspace:*",
     "@flowdsiml/supabase-types": "workspace:*",
     "@flowdsiml/ui": "workspace:*",
+    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
     "@supabase/supabase-js": "^2.119.0",
     "fflate": "^0.8.3",
     "i18next": "^25.10.10",

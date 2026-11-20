@@ -13,7 +13,6 @@ import {
   GraduationCap,
   Image as ImageIcon,
   Keyboard,
-  Monitor,
   Palette,
   PenLine,
   WandSparkles,
@@ -40,11 +39,9 @@ import { CoBanner, PresenceStack, RemoteCursors } from './presence/PresenceUI';
 import { useShowCursors } from './presence/showCursors';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Select } from '@flowdsiml/ui';
 import { PLAN_DEFAULTS, type PlanCode } from '@flowdsiml/core';
 import { errorMessage } from '../../lib/errors';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
-import { Loading } from '../../components/guards';
 import { useDemoEditor } from './useDemoEditor';
 import { Canvas, type Tool } from './Canvas';
 import { SandboxPlan } from './html/SandboxPlan';
@@ -80,6 +77,8 @@ import { SaveTemplateDialog } from './SaveTemplateDialog';
 import { HelpButton } from '../../help/HelpButton';
 import { LoadError, LoadStatus, SlowLine, useSkeleton } from '../../components/Skeleton';
 import { EditorSkeleton, storeEditorGeometry } from './EditorSkeleton';
+import { EditorNarrowView } from './EditorNarrow';
+import { useNarrow } from '../../lib/useNarrow';
 import { useHelp } from '../../help/HelpProvider';
 import { supabase } from '../../lib/supabase';
 import { DatasetDialog } from './data/DatasetDialog';
@@ -92,19 +91,6 @@ const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ 
 const DistributeDialog = lazy(() =>
   import('../share/DistributeDialog').then((m) => ({ default: m.DistributeDialog })),
 );
-
-/** Vrai si la fenêtre est plus étroite que `px` (ED11 : l'éditeur exige un écran large). */
-function useNarrow(px: number) {
-  const query = `(max-width: ${px - 1}px)`;
-  const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches);
-  useEffect(() => {
-    const mq = window.matchMedia(query);
-    const on = () => setNarrow(mq.matches);
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
-  }, [query]);
-  return narrow;
-}
 
 type Tab = 'step' | 'design' | 'settings';
 type Zoom = 'fit' | '50' | '100';
@@ -394,60 +380,8 @@ export function EditorPage() {
     if (ready) storeEditorGeometry(demoId);
   }, [ready, demoId]);
 
-  if (narrow) {
-    // Écran étroit : l'éditeur reste indisponible, mais on lit et on répond aux commentaires (commentaires.md §5)
-    if (editor.loading) return <Loading />;
-    return (
-      <main className="editor-narrow" id="main">
-        {/* EDT-13 : avis centré, sans carte (maquette) */}
-        <div className="editor-narrow__notice">
-          <Monitor className="editor-narrow__icon" aria-hidden="true" />
-          <h1>{t('editor.comments.mobileNoticeTitle')}</h1>
-          <p className="fd-muted">{t('editor.comments.mobileNoticeBody')}</p>
-          <div className="row editor-narrow__acts">
-            <button
-              type="button"
-              className="fd-btn fd-btn--primary"
-              disabled={!editor.steps.length}
-              onClick={() => setPreviewManifest(buildDraftManifest(editor, ws?.name ?? ''))}
-            >
-              {t('editor.comments.viewDemo')}
-            </button>
-            <Link className="fd-btn" to={`/demos/${demoId}/share`}>
-              {t('editor.share')}
-            </Link>
-          </div>
-        </div>
-        {step && (
-          <CommentsPanel
-            variant="mobile"
-            focusComment={focusComment}
-            stepId={step.id}
-            stepIndex={Math.min(index, editor.steps.length - 1)}
-            api={comments}
-            header={
-              <Select
-                className="editor-narrow__steps"
-                aria-label={t('editor.comments.step')}
-                value={String(Math.min(index, editor.steps.length - 1))}
-                onChange={(e) => setIndex(Number(e.target.value))}
-              >
-                {editor.steps.map((s, i) => (
-                  <option key={s.id} value={i}>
-                    {`${t('editor.comments.step')} ${i + 1} · ${s.title || t('editor.untitled')}`}
-                    {comments.openByStep[s.id]
-                      ? ` — ${t('editor.comments.openCount', { count: comments.openByStep[s.id] })}`
-                      : ''}
-                  </option>
-                ))}
-              </Select>
-            }
-          />
-        )}
-        <PreviewDialog manifest={previewManifest} onClose={() => setPreviewManifest(null)} />
-      </main>
-    );
-  }
+  if (narrow)
+    return <EditorNarrowView editor={editor} comments={comments} index={index} setIndex={setIndex} />;
   const backToDemos = (primary = false) => (
     <Link to="/" className={`fd-btn${primary ? ' fd-btn--primary' : ''}`}>
       {t('loading.backToDemos')}
