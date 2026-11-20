@@ -1,7 +1,7 @@
 # TutoClick : identité visuelle
 
 > Version du 17 nov. 2026. Le produit s'appelle **TutoClick** (graphie exacte : T et C majuscules, avec un k). Il est porté par la **DSI des Missions Locales**.
-> Logo : fourni par le client, vectorisé dans `docs/ux/brand-tutoclic/production/`.
+> Logo : logo officiel fourni par le client le 20 novembre 2026 (`docs/ux/brand-tutoclic/logo-tutoclick-source.svg`), décliné dans `docs/ux/brand-tutoclic/production/`. Règles d'usage : §2 et `composants.md` §16.
 > Charte institutionnelle de l'interface : `docs/ux/brand-dsi/` (couleurs DSI).
 > Tokens : `packages/ui/src/tokens.ts`, générés en `tokens.css` avec `node packages/ui/src/tokens.build.mjs`.
 > Maquettes de référence : `docs/ux/maquettes/refonte/`. Spec de la refonte : `docs/ux/refonte.md`.
@@ -10,40 +10,71 @@
 ## 1. Intention
 
 TutoClick est l'outil de tutoriels et de démos interactives de la DSI des Missions Locales, d'abord pour **former** les équipes à leurs outils. On distingue deux niveaux :
-- **La marque**, c'est-à-dire le logo TutoClick. Elle est chaleureuse et reconnaissable : bulle bordeaux en dégradé, curseur blanc, éclat orange, « Tuto » en encre, « Click » en bleu, trait vert.
+- **La marque**, c'est-à-dire le logo TutoClick. Elle est nette et reconnaissable : un carré arrondi magenta avec un curseur blanc qui vise une cible, « Tuto » en magenta et « Click » en noir, un trait magenta souligné, et la signature « Porté par la DSIML » suivie de cinq points de couleur.
 - **L'interface**, qui suit la charte institutionnelle DSI (prune, framboise, bleu, vert, orange). Elle a l'allure d'un tableau de bord moderne : fond gris-bleuté, grandes cartes blanches très arrondies, navigation en pilules, beaucoup d'air. Elle reste sobre et accessible (WCAG 2.1 AA, RGAA) : les couleurs vives **signalent**, elles ne décorent pas.
 
 ## 2. Logo TutoClick
 
 ### 2.1 Fichiers (`docs/ux/brand-tutoclic/production/`)
 
+Source : `../logo-tutoclick-source.svg` (vectoriel, 803,5 × 260, texte vectorisé). Toutes les déclinaisons en sont tirées sans redessiner les formes.
+
 | Fichier | Usage |
 |---|---|
-| `logo-tutoclick.svg` | **Logo de référence du client**, texte vectorisé (Inter 750, interlettrage −5), sur fond clair. Dessin et cadrage inchangés (900 × 260) |
-| `logo-tutoclick-sombre.svg` | Même logo sur fond sombre : « Tuto » en blanc |
-| `logo-tutoclick-compact.svg` / `-compact-sombre.svg` | **Version horizontale compacte** : cadrage serré, sans ombre portée, pour la barre latérale (40 px de haut) et l'en-tête de l'extension |
-| `logo-tutoclick-mono-noir.svg` / `-mono-blanc.svg` | Une couleur. Le curseur et l'éclat sont **évidés** dans la bulle. Pour l'impression, le tampon et les fonds photo |
-| `symbole-tutoclick.svg` | Bulle, curseur et éclat seuls, sans ombre : avatar d'app, écran de chargement |
-| `symbole-tutoclick-mono-noir.svg` / `-mono-blanc.svg` | Symbole en une couleur |
-| `symbole-tutoclick-petit.svg` | **Adaptation optique pour 16 et 32 px** : curseur un peu plus grand, éclat réduit à un disque (les rayons disparaissent à cette taille) |
-| `favicon.svg`, `favicon.ico` (16, 32, 48) | Onglet du navigateur. Le `.ico` utilise la version petite pour 16 et 32 |
+| `logo-tutoclick.svg` | **Logo complet** : symbole, « TutoClick », trait, signature « Porté par la DSIML » et cinq points. Fond clair. Page de connexion, documents, supports imprimés. Au moins 480 px de large (sous cette taille, la signature n'est plus lisible) |
+| `logo-tutoclick-sombre.svg` | Logo complet sur fond sombre (§2.2) |
+| `logo-tutoclick-compact.svg` / `-compact-sombre.svg` | **Version compacte** : symbole, « TutoClick » et trait, **sans la signature ni les points**, cadrage serré (742 × 204). Barre latérale, en-tête de l'extension, e-mails, toute taille sous 480 px de large |
+| `logo-tutoclick-mono-noir.svg` / `-mono-blanc.svg` | Une couleur ; le curseur et les cercles de visée sont **évidés** dans le carré. Impression, tampon, fond photo ou couleur vive |
+| `symbole-tutoclick.svg` | **Icône seule** : carré magenta, curseur et cible. Avatar d'app, écran de chargement, à partir de 24 px |
+| `symbole-tutoclick-petit.svg` | **Icône pour 16 à 23 px** : carré et curseur, **sans les cercles de visée** (ils deviennent une tache à cette taille) |
+| `symbole-tutoclick-mono-noir.svg` / `-mono-blanc.svg` | Icône en une couleur |
+| `favicon.svg`, `favicon.ico` (16, 32, 48) | Onglet du navigateur (version petite pour 16 et 32 px) |
 | `icon-16/32/48/128.png` | Icônes de l'extension Chrome (`manifest.icons`) |
-| `icon-180.png`, `icon-192.png`, `icon-512.png` | Apple touch icon, manifeste web (PWA) |
-| `apercu.html` | Planche de contrôle de toutes les déclinaisons, sur fond clair et sombre |
+| `icon-180.png` | Apple touch icon, fond magenta plein (le système arrondit les coins) |
+| `icon-192.png`, `icon-512.png` | Manifeste web |
+| `apercu.html` | Planche de contrôle : toutes les déclinaisons, en clair et en sombre, avec la zone de protection |
+| `../../emails/logo-tutoclick-email.png` | Version compacte en PNG (352 × 124, fond blanc) pour les e-mails d'authentification |
 
-### 2.2 Règles
+### 2.2 Couleurs du logo
 
-- **Ne pas redessiner** le logo. Les seules adaptations admises sont celles listées ci-dessus : cadrage compact, mono, version petite.
-- **Dans l'interface**, on utilise le fichier SVG compact (`<img>` avec `alt="TutoClick"`), et non une recomposition en texte HTML : le texte est vectorisé et ne dépend pas de la police.
-- La mention « DSI des Missions Locales » peut accompagner le logo **à côté**, en texte HTML (11 px, 600, `text-subtle`). Elle ne doit jamais être intégrée au dessin.
-- **Zone de protection** : la moitié de la hauteur de la bulle, tout autour.
-- **Tailles minimales** : logo compact 28 px de haut ; symbole 16 px (avec la version petite).
-- **Fonds** : clair (`bg`, `surface`) → version claire ; sombre (`#0B0D10`, `#15191F`) → version sombre. Sur une photo ou une couleur vive → mono.
-- **Interdits** : recolorer les éléments ; poser la version couleur sur un fond bordeaux, prune ou framboise (la bulle disparaît) ; étirer ; ajouter un contour ; séparer « Tuto » et « Click » ; écrire le nom autrement que « TutoClick ».
+| Élément | Clair | Sombre |
+|---|---|---|
+| Carré de l'icône | `#A3195B` | `#A3195B` (inchangé) |
+| Curseur et cible | `#FFFFFF` | `#FFFFFF` |
+| « Tuto », point du i, trait souligné | `#A3195B` | `#CF86A9` (magenta éclairci, contraste 7,1:1 sur `#0B0D10` ; le magenta `#A3195B` n’y fait que 2,6:1) |
+| « Click » | `#1A1A1A` | `#F3F5F8` |
+| Signature « Porté par la DSIML » | `#123A49` | `#C9D1DA` |
+| Cinq points | `#D50D52`, `#D50D52`, `#2B95D2`, `#95C020`, `#F19103` | inchangés |
 
-### 2.3 Exception de marque : le dégradé
+La variante sombre ne change que ces couleurs. Elle est nécessaire : sur fond sombre, « Click » (`#1A1A1A`) et la signature disparaissent.
 
-Le **dégradé de la bulle** (`#A52B60` → `#7D204C`) et sa **légère ombre portée** font partie du dessin du client. Ils sont **acceptés dans le logo seulement**. C'est une exception de marque : l'interface reste **sans dégradé ni ombre colorée** (§10). Les versions compactes, mono et petites n'ont pas d'ombre, car elle salit le rendu aux petites tailles.
+### 2.3 Règles
+
+- **Ne pas redessiner** le logo. Seules les adaptations du §2.1 sont admises : couleurs sombres, cadrage compact, mono, icône seule ou petite.
+- **Dans l'interface** :
+  - on utilise le fichier SVG compact (`<img>` avec `alt="TutoClick"`), et non une recomposition en texte HTML ;
+  - le thème choisit le fichier (clair ou sombre), jamais un filtre CSS.
+- La mention « DSI des Missions Locales » peut accompagner le logo compact **à côté**, en texte HTML (11 px, 600, `text-subtle`). Le logo complet porte déjà sa signature : on ne l'ajoute pas en double.
+- **Zone de protection** :
+  - un quart de la hauteur du symbole, tout autour du cadrage (compact ou symbole) ; le logo complet inclut déjà une marge de 28 unités sur 260 ;
+  - exemple : logo compact de 40 px de haut, zone de 10 px.
+- **Tailles minimales** :
+  - logo complet : 480 px de large ;
+  - logo compact : 28 px de haut ;
+  - icône : 24 px ;
+  - icône petite : 16 px.
+- **Fonds** :
+  - clair (`bg`, `surface`) : version claire ;
+  - sombre (`#0B0D10`, `#15191F`) : version sombre ;
+  - photo, magenta, prune, framboise ou toute couleur vive : mono blanc (ou mono noir sur fond très clair).
+- **Interdits** :
+  - recolorer hors du §2.2 ;
+  - poser la version couleur sur un fond magenta, prune ou framboise (le carré disparaît) ;
+  - étirer ;
+  - ajouter un contour ou une ombre ;
+  - séparer « Tuto » et « Click » ;
+  - retirer le trait ;
+  - écrire le nom autrement que « TutoClick ».
 
 ### 2.4 Logos institutionnels DSI (inchangés)
 
@@ -56,7 +87,7 @@ Le **dégradé de la bulle** (`#A52B60` → `#7D204C`) et sa **légère ombre po
 
 | Palette | Où | Tokens |
 |---|---|---|
-| **Marque TutoClick** : bordeaux `#A52B60` → `#7D204C`, orange `#E49A32`, bleu `#4A9BCB`, vert `#91B83E`, encre `#25232A` | Logo, icônes d'app, favicon, supports de marque (page d'accueil publique, documents, e-mails) | `--fd-brand-bordeaux`, `-bordeaux-fonce`, `-orange`, `-bleu`, `-vert`, `-encre` |
+| **Marque TutoClick** (logo du 20 novembre) : magenta `#A3195B`, encre `#1A1A1A`, bleu nuit `#123A49`, points `#D50D52`, `#2B95D2`, `#95C020`, `#F19103` | Logo, icônes d'app, favicon, supports de marque (page d'accueil publique, documents, e-mails) | `--fd-brand-*`, à mettre à jour par le dev : `--fd-brand-magenta` `#A3195B`, `--fd-brand-encre` `#1A1A1A`, `--fd-brand-nuit` `#123A49` ; les anciennes valeurs (bordeaux en dégradé, bleu `#4A9BCB`) ne servent plus |
 | **Charte DSI** : prune, framboise, bleu, vert, orange, noir | **Toute l'interface** : boutons, liens, états, graphiques, player par défaut | `--fd-prune-*` … et rôles `--fd-color-*` |
 
 **Cohabitation :**

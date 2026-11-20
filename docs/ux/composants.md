@@ -490,3 +490,46 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
 - ouvrir chaque overlay près des quatre bords et dans les conteneurs défilants (barre latérale, panneau de l'éditeur, tableau) ;
 - vérifier que la boîte de chaque overlay est **entièrement dans le viewport**, à 8 px au moins des bords, et qu'aucun ancêtre en `overflow` autre que `#fd-portal` ne le contient ;
 - vérifier qu'aucun libellé n'est coupé.
+
+## 16. Logo TutoClick
+
+> Logo officiel du 20 novembre 2026. Charte complète, couleurs et fichiers : `identite-visuelle.md` §2. Planche de contrôle : `brand-tutoclic/production/apercu.html`.
+
+### 16.1 Versions
+
+| Version | Contenu | Où | Taille minimale |
+|---|---|---|---|
+| **Complète** (`logo-tutoclick.svg`, `-sombre.svg`) | Icône, « TutoClick », trait, signature « Porté par la DSIML », cinq points | Page de connexion et d'inscription (à partir de 480 px de large), documents, supports imprimés | 480 px de large |
+| **Compacte** (`logo-tutoclick-compact.svg`, `-compact-sombre.svg`) | Icône, « TutoClick », trait, sans la signature | Barre latérale (40 px de haut), en-tête de l'extension (32 px), e-mails, connexion sous 480 px | 28 px de haut |
+| **Icône seule** (`symbole-tutoclick.svg`) | Carré magenta, curseur et cible | Barre du haut de l'éditeur (32 px), avatar d'app, écran de chargement, tiroir mobile replié | 24 px |
+| **Icône petite** (`symbole-tutoclick-petit.svg`) | Carré et curseur, sans la cible | Favicon, icônes de 16 à 23 px | 16 px |
+| **Mono** (`-mono-noir.svg`, `-mono-blanc.svg`) | Une couleur, curseur et cible évidés | Fond photo ou couleur vive (panneau de marque de la connexion), impression | comme la version d'origine |
+
+### 16.2 Thème sombre
+
+- Le thème choisit le **fichier**, jamais un filtre CSS (`filter: invert` interdit) :
+  - `<picture>` avec `<source srcset="…-sombre.svg" media="(prefers-color-scheme: dark)">`,
+  - ou deux `<img>` alternées par `[data-theme]`, comme dans les maquettes (`wm-l` et `wm-d`).
+- En sombre, seules changent les couleurs du texte : « Tuto » et le trait passent en `#CF86A9`, « Click » en `#F3F5F8`, la signature en `#C9D1DA`. L'icône ne change pas.
+
+### 16.3 Zone de protection
+
+- **Valeur** : un quart de la hauteur de l'icône, tout autour du cadrage (compact ou icône seule).
+- **Exemples** :
+  - barre latérale, logo compact de 40 px : 10 px au moins jusqu'au sélecteur d'espace et aux bords ;
+  - icône de 32 px dans la barre de l'éditeur : 8 px.
+- Le logo complet inclut déjà sa marge dans son cadrage (28 unités sur 260) : on ne l'ajoute pas en plus.
+- Aucun texte, aucun bouton, aucun bord de carte dans la zone.
+
+### 16.4 Intégration
+
+- `<img src="…" alt="TutoClick">`, avec `height` fixé et `width: auto`. Le logo n'est jamais recomposé en texte HTML.
+- Si le logo est un lien vers l'accueil, l'`alt` reste « TutoClick » : le lien porte `aria-label="TutoClick, accueil"`.
+- « DSI des Missions Locales » reste possible **à côté** du logo compact, en texte HTML (11 px, 600, `text-subtle`), avec la zone de protection entre les deux. Jamais à côté du logo complet, qui a déjà sa signature.
+- **Interdits** :
+  - recolorer ;
+  - étirer ;
+  - ajouter une ombre ou un contour ;
+  - poser la version couleur sur du magenta, du prune ou du framboise ;
+  - utiliser l'icône petite au-dessus de 23 px ou l'icône complète en dessous de 24 px.
+- **Contrôle CI suggéré** : aucun fichier de l'ancien logo (dégradé `#A52B60`) dans `apps/*/public` et `packages/*` ; tous les `<img>` du logo ont `alt="TutoClick"`.
