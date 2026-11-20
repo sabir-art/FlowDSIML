@@ -534,7 +534,7 @@ export function EditorPage() {
       <h1 className="sr-only">
         {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
       </h1>
-      <header className="ed-bar">
+      <header className="ed-bar" data-tip-side="bottom">
         <Link to="/" className="btn btn-ghost btn-sm btn-icon" aria-label={t('editor.backToDemos')}>
           <ArrowLeft aria-hidden="true" />
         </Link>

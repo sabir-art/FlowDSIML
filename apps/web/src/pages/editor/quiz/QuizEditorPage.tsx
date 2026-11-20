@@ -77,7 +77,7 @@ export function QuizEditorPage() {
 
   return (
     <main className="quiz-page">
-      <header className="editor-bar">
+      <header className="editor-bar" data-tip-side="bottom">
         <Link
           to={`/demos/${demoId}/edit`}
           className="fd-btn fd-btn--round btn-surface"

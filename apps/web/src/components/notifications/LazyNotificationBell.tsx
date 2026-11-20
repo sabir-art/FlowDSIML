@@ -19,7 +19,7 @@ export function LazyNotificationBell() {
       fallback={
         <>
           <HelpButton />
-          <span className="nb">
+          <span className="nb" data-tip-side="bottom">
             <button
               type="button"
               className="fd-btn fd-btn--ghost fd-btn--icon nb-bell"

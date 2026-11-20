@@ -117,7 +117,7 @@ export function Layout() {
       >
         {t('a11y.skip')}
       </a>
-      <header className="topbar">
+      <header className="topbar" data-tip-side="bottom">
         <button
           ref={menuBtn}
           type="button"
@@ -134,6 +134,7 @@ export function Layout() {
         </span>
       </header>
       <aside
+        data-tip-side="right"
         className="sidebar"
         id="sidebar"
         ref={sidebar}

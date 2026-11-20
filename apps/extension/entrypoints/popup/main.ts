@@ -1,10 +1,12 @@
 import '@flowdsiml/ui/tokens.css';
 import '@flowdsiml/ui/select.css';
+import '@flowdsiml/ui/tooltip.css';
 import './style.css';
 import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
 import { APP_URL } from '@/lib/config';
 import { APP_NAME } from '@flowdsiml/core';
+import { installTooltips } from '@flowdsiml/ui/tooltip';
 import type { CaptureMode, FillTarget, PopupRequest, RecordingStatus } from '@/lib/messages';
 import { lang, stepsCaptured, strings } from '@/lib/i18n';
 import {
@@ -47,6 +49,7 @@ const ICONS = {
   Video,
   X,
 };
+installTooltips();
 createIcons({ icons: ICONS, attrs: { width: 16, height: 16, 'stroke-width': 2, 'aria-hidden': 'true' } });
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;

@@ -16,6 +16,7 @@
     "@flowdsiml/exports": "workspace:*",
     "@flowdsiml/manifest": "workspace:*",
     "@flowdsiml/player-core": "workspace:*",
+    "@flowdsiml/ui": "workspace:*",
     "lucide-preact": "^0.577.0",
     "preact": "^10.29.8"
   },
