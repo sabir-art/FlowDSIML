@@ -47,7 +47,7 @@ select throws_ok($$ insert into public.ai_usage (workspace_id, user_id, day, req
 select pg_temp.login('00000000-0000-0000-0000-0000000300a1');
 select throws_ok($$ select public.set_ai_settings((select ws from ctx), true, null, 100000) $$,
   '22023', 'AI_QUOTA_OUT_OF_PLAN', 'quota au-delà du plan refusé');
-select throws_ok($$ select public.set_ai_settings((select ws from ctx), true, '{"voice":true}') $$,
+select throws_ok($$ select public.set_ai_settings((select ws from ctx), true, '{"images":true}') $$,
   '22023', 'INVALID_FEATURES', 'fonction inconnue refusée');
 select is((public.set_ai_settings((select ws from ctx), true, '{"chart":false}', 3, 2)) ->> 'quota', '3', 'activé, quota 3');
 reset role;

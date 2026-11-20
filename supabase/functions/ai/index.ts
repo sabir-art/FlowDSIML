@@ -9,6 +9,19 @@ import Anthropic from 'npm:@anthropic-ai/sdk@1.11.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { AiError, FEATURE_OF, SONNET, buildPrompt, checkOutput, parseRequest } from './lib.ts';
+import {
+  STT_MODEL,
+  TTS_FORMAT,
+  TTS_MODEL,
+  VIDEO_MAX_S,
+  VOICES,
+  VOICE_MAX_BYTES,
+  VOICE_MAX_MS,
+  cuesFromWords,
+  mp3DurationMs,
+  parseCaptions,
+  parseVoice,
+} from './audio.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const RANK: Record<string, number> = { viewer: 1, editor: 2, admin: 3, owner: 4 };
@@ -33,6 +46,121 @@ const renewsOn = () => {
   const d = new Date();
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)).toISOString().slice(0, 10);
 };
+
+const ELEVEN = 'https://api.elevenlabs.io/v1';
+
+/** Client au nom de l'utilisateur (RLS : dossiers restreints compris), pour vérifier l'accès à l'étape. */
+const asUser = (req: Request) =>
+  createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+    auth: { persistSession: false },
+    global: { headers: { authorization: req.headers.get('authorization') ?? '' } },
+  });
+
+async function reserveOr(ws: string, uid: string, feature: string, audio = 0): Promise<Response | null> {
+  const reserve = await admin.rpc('ai_reserve', {
+    p_ws: ws,
+    p_user: uid,
+    p_feature: feature,
+    p_audio_seconds: audio,
+  });
+  if (!reserve.error) return null;
+  const code = ['AI_DISABLED', 'AI_QUOTA_WORKSPACE', 'AI_QUOTA_USER', 'FORBIDDEN'].find((c) =>
+    reserve.error!.message.includes(c),
+  );
+  if (code === 'AI_DISABLED' || code === 'FORBIDDEN') return json(403, { error: code });
+  if (code) return json(429, { error: code, renewsOn: renewsOn() });
+  console.error('ai: reserve', reserve.error.code);
+  return json(500, { error: 'SERVER' });
+}
+
+/**
+ * 065 Voix de synthèse (TTS) et 066 Sous-titres automatiques (STT), ElevenLabs. Seule cette fonction
+ * lit ELEVENLABS_API_KEY. Rien n'est conservé hors des fichiers produits (voix : bucket voices).
+ */
+async function audio(req: Request, body: Record<string, unknown>, ws: string, uid: string) {
+  const key = Deno.env.get('ELEVENLABS_API_KEY');
+  if (!key) return json(503, { error: 'PROVIDER' });
+  const input = (body.input ?? {}) as Record<string, unknown>;
+  let parsed;
+  try {
+    parsed = body.task === 'voice' ? parseVoice(input) : parseCaptions(input);
+  } catch (e) {
+    return e instanceof AiError ? json(e.status, { error: e.code }) : json(400, { error: 'BAD_REQUEST' });
+  }
+  // L'étape doit être visible par l'utilisateur (RLS) et appartenir à l'espace
+  const { data: step } = await asUser(req)
+    .from('steps')
+    .select('id, demo_id, workspace_id, kind, video_path, video_duration_ms')
+    .eq('id', parsed.stepId)
+    .maybeSingle();
+  if (!step || step.workspace_id !== ws) return json(404, { error: 'NOT_FOUND' });
+  const refund = () =>
+    admin.rpc('ai_commit', { p_ws: ws, p_user: uid, p_input: 0, p_output: 0, p_refund: true });
+
+  if (body.task === 'voice') {
+    const v = parsed as ReturnType<typeof parseVoice>;
+    const blocked = await reserveOr(ws, uid, 'voice', v.estimate);
+    if (blocked) return blocked;
+    const res = await fetch(`${ELEVEN}/text-to-speech/${VOICES[v.voice]}?output_format=${TTS_FORMAT}`, {
+      method: 'POST',
+      headers: { 'xi-api-key': key, 'content-type': 'application/json', accept: 'audio/mpeg' },
+      body: JSON.stringify({ text: v.text, model_id: TTS_MODEL }),
+    }).catch(() => null);
+    if (!res || !res.ok) {
+      await refund();
+      console.error('ai: tts', res?.status ?? 'network');
+      return json(res?.status === 429 ? 503 : 502, { error: 'PROVIDER' });
+    }
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    const durationMs = mp3DurationMs(bytes.byteLength);
+    await admin.rpc('ai_commit', {
+      p_ws: ws,
+      p_user: uid,
+      p_input: 0,
+      p_output: 0,
+      p_audio_seconds: Math.min(3600, Math.ceil(durationMs / 1000)),
+    });
+    if (bytes.byteLength > VOICE_MAX_BYTES || durationMs > VOICE_MAX_MS)
+      return json(422, { error: 'TOO_LONG' });
+    const path = `${ws}/${step.demo_id}/${crypto.randomUUID()}.mp3`;
+    const up = await admin.storage
+      .from('voices')
+      .upload(path, bytes, { contentType: 'audio/mpeg', upsert: false });
+    if (up.error) return json(400, { error: 'STORAGE' });
+    return json(200, { result: { path, durationMs } });
+  }
+
+  // Sous-titres : la piste audio de la vidéo de l'étape part chez le fournisseur (annoncé dans l'interface)
+  if (step.kind !== 'video' || !step.video_path) return json(400, { error: 'NO_VIDEO' });
+  const seconds = Math.min(VIDEO_MAX_S, Math.max(1, Math.ceil(Number(step.video_duration_ms ?? 0) / 1000)));
+  const blocked = await reserveOr(ws, uid, 'captions', seconds);
+  if (blocked) return blocked;
+  const file = await admin.storage.from('videos').download(step.video_path);
+  if (file.error || !file.data) {
+    await refund();
+    return json(404, { error: 'NOT_FOUND' });
+  }
+  const form = new FormData();
+  form.append('model_id', STT_MODEL);
+  form.append('file', file.data, 'video.webm');
+  const lang = typeof body.lang === 'string' ? body.lang.slice(0, 2).toLowerCase() : '';
+  if (/^[a-z]{2}$/.test(lang)) form.append('language_code', lang);
+  const res = await fetch(`${ELEVEN}/speech-to-text`, {
+    method: 'POST',
+    headers: { 'xi-api-key': key },
+    body: form,
+  }).catch(() => null);
+  if (!res || !res.ok) {
+    await refund();
+    console.error('ai: stt', res?.status ?? 'network');
+    return json(res?.status === 429 ? 503 : 502, { error: 'PROVIDER' });
+  }
+  const out = (await res.json().catch(() => ({}))) as {
+    words?: Array<{ text: string; start: number; end: number; type?: string }>;
+  };
+  await admin.rpc('ai_commit', { p_ws: ws, p_user: uid, p_input: 0, p_output: 0, p_audio_seconds: seconds });
+  return json(200, { result: { captions: cuesFromWords(Array.isArray(out.words) ? out.words : []) } });
+}
 
 async function editorOf(req: Request, ws: string): Promise<string | null> {
   const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
@@ -107,6 +235,8 @@ Deno.serve(async (req) => {
   const uid = await editorOf(req, ws);
   if (!uid) return json(403, { error: 'FORBIDDEN' });
 
+  if (body.task === 'voice' || body.task === 'captions') return audio(req, body, ws, uid);
+
   let parsed;
   try {
     parsed = parseRequest(body);
@@ -114,20 +244,8 @@ Deno.serve(async (req) => {
     return json(400, { error: e instanceof AiError ? e.code : 'BAD_REQUEST' });
   }
 
-  const reserve = await admin.rpc('ai_reserve', {
-    p_ws: ws,
-    p_user: uid,
-    p_feature: FEATURE_OF[parsed.task],
-  });
-  if (reserve.error) {
-    const code = ['AI_DISABLED', 'AI_QUOTA_WORKSPACE', 'AI_QUOTA_USER', 'FORBIDDEN'].find((c) =>
-      reserve.error!.message.includes(c),
-    );
-    if (code === 'AI_DISABLED' || code === 'FORBIDDEN') return json(403, { error: code });
-    if (code) return json(429, { error: code, renewsOn: renewsOn() });
-    console.error('ai: reserve', reserve.error.code);
-    return json(500, { error: 'SERVER' });
-  }
+  const blocked = await reserveOr(ws, uid, FEATURE_OF[parsed.task]);
+  if (blocked) return blocked;
 
   const prompt = buildPrompt(parsed);
   let result;
