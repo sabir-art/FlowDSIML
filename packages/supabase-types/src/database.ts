@@ -1832,6 +1832,7 @@ export type Database = {
           voice_duration_ms: number | null;
           voice_path: string | null;
           voice_transcript: string | null;
+          alt_text: string | null;
           video: Json;
           video_duration_ms: number | null;
           video_path: string | null;
@@ -1874,6 +1875,7 @@ export type Database = {
           voice_duration_ms?: number | null;
           voice_path?: string | null;
           voice_transcript?: string | null;
+          alt_text?: string | null;
           video?: Json;
           video_duration_ms?: number | null;
           video_path?: string | null;
@@ -1915,6 +1917,7 @@ export type Database = {
           voice_duration_ms?: number | null;
           voice_path?: string | null;
           voice_transcript?: string | null;
+          alt_text?: string | null;
           video?: Json;
           video_duration_ms?: number | null;
           video_path?: string | null;

@@ -1627,7 +1627,14 @@
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
     "importWarnMany_one": "Imported image: no automatic detection of personal data. Check it and blur if needed.",
-    "importWarnMany_other": "{{count}} imported images: no automatic detection of personal data. Check them and blur if needed."
+    "importWarnMany_other": "{{count}} imported images: no automatic detection of personal data. Check them and blur if needed.",
+    "alt": {
+      "section": "Accessibility",
+      "label": "Screenshot alternative text",
+      "default": "Screenshot: {{title}}.",
+      "help": "Describe what the screen shows, in one sentence. If left empty, the text is “Screenshot: {{title}}.”",
+      "count": "{{n}} / 250"
+    }
   },
   "status": {
     "draft": "Draft",

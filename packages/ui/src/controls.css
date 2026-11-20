@@ -108,10 +108,13 @@
 .fd-switch input:focus-visible + .fd-switch__track {
   box-shadow: var(--fd-shadow-focus);
 }
-.fd-switch input:disabled + .fd-switch__track {
+.fd-switch input:disabled + .fd-switch__track,
+.fd-switch input[aria-disabled='true'] + .fd-switch__track {
   opacity: 0.5;
 }
-.fd-switch:has(input:disabled) {
+/* aria-disabled : reste focalisable et lu (avec son aide), même apparence que disabled */
+.fd-switch:has(input:disabled),
+.fd-switch:has(input[aria-disabled='true']) {
   cursor: not-allowed;
 }
 @media (prefers-reduced-motion: reduce) {

@@ -1627,7 +1627,14 @@
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
     "importWarnMany_one": "Image importée : aucune détection automatique des données personnelles. Vérifiez-la et floutez si besoin.",
-    "importWarnMany_other": "{{count}} images importées : aucune détection automatique des données personnelles. Vérifiez-les et floutez si besoin."
+    "importWarnMany_other": "{{count}} images importées : aucune détection automatique des données personnelles. Vérifiez-les et floutez si besoin.",
+    "alt": {
+      "section": "Accessibilité",
+      "label": "Texte alternatif de la capture",
+      "default": "Capture d’écran : {{title}}.",
+      "help": "Décrivez ce que montre l’écran, en une phrase. Laissé vide, le texte est « Capture d’écran : {{title}}. ».",
+      "count": "{{n}} / 250"
+    }
   },
   "status": {
     "draft": "Brouillon",

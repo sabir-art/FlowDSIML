@@ -435,6 +435,8 @@ export const stepSchema = z.object({
   image: imageRefSchema.nullable().default(null),
   /** Pour kind = html (V2) : URL du snapshot assaini. */
   snapshotUrl: z.string().nullable().default(null),
+  /** L29 §3.5 : texte alternatif de la capture saisi dans l'éditeur (sinon texte construit). */
+  alt: z.string().max(250).optional().catch(undefined),
   /** Pour kind = text : écran de titre / transition. */
   title: z.string().max(200).default(''),
   body: z.string().max(4000).default(''),

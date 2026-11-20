@@ -181,6 +181,33 @@ export function StepPanel({
         </div>
       )}
 
+      {(step.kind === 'image' || step.kind === 'html') && (
+        // L29 §3.5 : texte alternatif de la capture (lecteur, version accessible), facultatif
+        <div className="sec">
+          <div className="sec-title">{t('editor.alt.section')}</div>
+          <div className="field">
+            <label htmlFor="st-alt">{t('editor.alt.label')}</label>
+            <textarea
+              id="st-alt"
+              className="textarea input-sm"
+              rows={2}
+              maxLength={250}
+              disabled={readOnly}
+              placeholder={t('editor.alt.default', { title: step.title || t('editor.untitled') })}
+              aria-describedby="st-alt-h st-alt-n"
+              value={step.alt_text ?? ''}
+              onChange={(e) => editor.updateStep(step.id, { alt_text: e.target.value || null })}
+            />
+            <span className="help" id="st-alt-h">
+              {t('editor.alt.help', { title: step.title || t('editor.untitled') })}
+            </span>
+            <span className="help sp-count" id="st-alt-n">
+              {t('editor.alt.count', { n: (step.alt_text ?? '').length })}
+            </span>
+          </div>
+        </div>
+      )}
+
       {step.kind === 'image' && (
         <div className="sec">
           <div className="sec-title">{t('editor.zoom')}</div>

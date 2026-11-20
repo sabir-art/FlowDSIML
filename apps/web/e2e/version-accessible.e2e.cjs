@@ -34,6 +34,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   };
   const s = seed();
   seedExport(s);
+  // L29 §3.5 : texte alternatif saisi sur l'étape 2 (prioritaire sur le texte construit)
+  for (const v of s.tables.demo_versions)
+    if (v.manifest?.steps?.[1]) v.manifest.steps[1].alt = 'Liste des usagers filtrée par structure.';
   await install(p, s);
   await p.goto(`${APP}/#/`);
   await p.waitForTimeout(900);
@@ -90,8 +93,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok((await v.locator('nav a').count()) === 7, 'sommaire : un lien par étape');
   const alts = await v.locator('img').evaluateAll((l) => l.map((i) => i.getAttribute('alt')));
   ok(
-    alts.length > 0 && alts.every((a) => /^Capture d’écran : .+\./.test(a || '')),
-    'textes alternatifs construits',
+    alts[1] === 'Liste des usagers filtrée par structure.',
+    `texte alternatif saisi prioritaire (${alts[1]})`,
+  );
+  ok(
+    alts.length > 0 && alts.filter((_, k) => k !== 1).every((a) => /^Capture d’écran : .+\./.test(a || '')),
+    'sinon textes alternatifs construits',
   );
   const loaded = await v.locator('img').evaluateAll((l) => l.every((i) => i.complete && i.naturalWidth > 0));
   ok(loaded, 'images visibles hors connexion');

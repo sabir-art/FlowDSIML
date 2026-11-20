@@ -37,10 +37,11 @@ const esc = (s: string) =>
 
 /** Texte alternatif : saisi sur l'étape s'il existe (pas encore dans le modèle), sinon construit. */
 export function altText(
-  step: { title: string; kind?: string; target: unknown },
+  step: { title: string; kind?: string; target: unknown; alt?: string },
   n: number,
   s: AccessibleStrings,
 ): string {
+  if (step.alt?.trim()) return step.alt.trim();
   const title = step.title || s.stepHeading(n, '').replace(/\s*·\s*$/, '');
   if (step.kind === 'video') return s.altVideo(title);
   return [s.altCapture(title), step.target ? s.altTarget : ''].filter(Boolean).join(' ');

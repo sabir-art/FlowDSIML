@@ -612,7 +612,10 @@ export function Player({
 
   // A11Y-06 : alternative de la capture, qui situe l'écran (le texte de la bulle porte l'action)
   const shotTitle = richTextToPlain(sub(step.title || step.hotspots[0]?.title || '')).trim();
-  const shotAlt = `${t.shotAlt} ${index + 1} ${t.of} ${m.steps.length}${shotTitle ? ` : ${shotTitle}` : ''}`;
+  // L29 §3.5 : texte alternatif saisi sur l'étape, sinon « Capture n sur N : titre »
+  const shotAlt =
+    step.alt?.trim() ||
+    `${t.shotAlt} ${index + 1} ${t.of} ${m.steps.length}${shotTitle ? ` : ${shotTitle}` : ''}`;
 
   // L25-06 : onglets de la capture (barre du navigateur) et passage à un autre onglet
   const tabs = step.kind === 'image' ? tabsAt(m, index) : { tabs: [], active: 0 };

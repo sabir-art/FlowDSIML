@@ -151,6 +151,10 @@ function withNotifications() {
     'L28-06 : mentions toujours activées (aria-disabled)',
   );
   ok(
+    Number(await mentionSw.evaluate((e) => getComputedStyle(e.nextElementSibling).opacity)) === 0.5,
+    'L28-06 : interrupteur « On me mentionne » estompé (état désactivé du design system)',
+  );
+  ok(
     /Les mentions sont toujours signalées\./.test(await prefs.innerText()) &&
       (await prefs.getByRole('switch', { name: /Résumé quotidien/ }).isDisabled()),
     'L28-06 : aide des mentions, résumé quotidien « Bientôt »',

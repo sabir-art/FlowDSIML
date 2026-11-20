@@ -31,6 +31,8 @@ export interface ExportStep {
   kind?: 'image' | 'text' | 'html' | 'before_after' | 'video';
   chapterId?: string | null;
   transcript?: string;
+  /** L29 §3.5 : texte alternatif saisi sur l'étape. */
+  alt?: string;
 }
 
 export interface ExportDemo {
@@ -84,6 +86,7 @@ export function stepsFromManifest(m: Manifest): ExportStep[] {
     return {
       kind: s.kind,
       chapterId: s.chapterId ?? null,
+      alt: s.alt?.trim() || undefined,
       transcript: applyVariables(transcript, {}, defaults).trim(),
       video:
         s.kind === 'video' && s.video

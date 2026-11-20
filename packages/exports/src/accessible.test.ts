@@ -102,6 +102,9 @@ describe('version accessible (L29-03/04)', () => {
   });
   it('alt, langue et nom de fichier', () => {
     expect(altText({ title: 'X', target: null }, 1, S)).toBe('Capture d’écran : X.');
+    expect(altText({ title: 'X', target: {}, alt: ' Menu Opportunités ouvert. ' }, 1, S)).toBe(
+      'Menu Opportunités ouvert.',
+    );
     expect(demoLang('en')).toBe('en-GB');
     expect(demoLang(undefined)).toBe('fr-FR');
     expect(fileName('Prise en main d’un logiciel', 'accessible.html')).toBe(
