@@ -116,7 +116,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     state.tables.leads.some((l) => l.email === 'marie@globex.example'),
     'lead enregistré',
   );
-  await player.keyboard.press('ArrowRight');
+  // Déterministe : l'étape 2 est affichée (formulaire fermé, écouteurs du lecteur à jour) avant
+  // d'avancer, par le bouton « Étape suivante » plutôt qu'une touche envoyée pendant le rendu
+  await player.waitForFunction(() => /^2 \//.test(document.querySelector('.p-count')?.textContent || ''));
+  await player.getByRole('button', { name: /^(Étape suivante|Next step)$/ }).click();
   await player.waitForSelector('.p-text-step');
   ok((await player.textContent('.p-text-step .p-step-h')) === 'Merci !', 'écran texte final');
   if (SHOTS) await player.screenshot({ path: `${SHOTS}/player-end.png` });
