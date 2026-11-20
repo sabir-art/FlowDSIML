@@ -8,8 +8,6 @@ export type AbCounts = {
 
 /** Pas de meneur sous 50 visiteurs par variante. */
 export const MIN_PER_VARIANT = 50;
-/** Seuil indicatif d'un résultat fiable (« environ 1 000 visiteurs »). */
-export const RELIABLE_TOTAL = 1000;
 
 export function abOutcome(c: AbCounts): {
   tooFew: boolean;

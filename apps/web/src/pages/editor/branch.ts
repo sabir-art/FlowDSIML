@@ -7,7 +7,6 @@ import type { ChoiceAction, StepOptions } from '@flowdsiml/manifest';
 import { loopsWithoutExit, unreachableSteps } from './reachability';
 
 export const MAX_ANSWERS = 6;
-export const MAX_RULES = MAX_ANSWERS;
 export const MAX_LABEL = 80;
 
 /** Vue de l'éditeur : règles (réponse → destination) et « Sinon ». */

@@ -368,8 +368,4 @@ export function commonShort(els: Array<{ short: string }>): string {
   return els.every((e) => e.short === first) ? first : `${first}…`;
 }
 
-/** Opérations introuvables lors de la dernière application (liste du panneau). */
-export function useNotFound(stepId: string) {
-  return useHtmlEdit(stepId).notFound;
-}
 export { removeOp };

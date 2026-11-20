@@ -61,4 +61,18 @@ Le détail est dans docs/tech/dettes.md. Les points encore ouverts :
 
 ## Performance et accessibilité (Lighthouse, mobile)
 
-À COMPLÉTER
+Builds de production, audit mobile avec ralentissement simulé du réseau et du processeur, données fictives
+(script : apps/web/e2e/lighthouse.cjs).
+
+| Page | Performance | Accessibilité |
+|---|---|---|
+| Connexion | 94 | 100 |
+| Tableau de bord | 74 | 100 |
+| Éditeur | 75 | 100 |
+| Lecteur (démo publiée) | 97 | 100 |
+
+Corrigé : polices chargées sans chaîne d'imports, icônes regroupées en un seul fichier, aucun décalage de
+mise en page. Le tableau de bord et l'éditeur restent sous 90 : leur contenu principal s'affiche après
+plusieurs requêtes de données successives (session, espace, puis contenu de la page). Pour gagner encore,
+il faudrait regrouper ces lectures en une seule requête au démarrage. Ce chantier dépasse les corrections
+simples et reste à planifier.

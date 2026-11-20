@@ -29,8 +29,6 @@ export interface SegmentDef {
 
 export const MAX_CONDITIONS = 8;
 export const NAME_MAX = 60;
-/** Sous ce nombre de visiteurs : chiffres agrégés seulement. */
-export const MIN_VISITORS = 5;
 
 type Kind = 'list' | 'bool' | 'number' | 'text' | 'code' | 'demo';
 export const FIELDS: Record<
