@@ -156,7 +156,7 @@ const SACHA = '0b5c1f0e-0000-4000-8000-0000000000b2';
     (l) => window.__setOthers(l),
     others({ t: later, e: { tb: 'steps', id: 's1', f: 'title', at: later } }),
   );
-  await page.waitForFunction(() => document.querySelector('#st-title')?.value === 'Titre de Marie');
+  await page.waitForFunction(() => document.querySelector('#st-title')?.textContent === 'Titre de Marie');
   ok(true, 'L22-08 : modification de l’autre personne fusionnée');
   await page.waitForSelector('.toast');
   ok(

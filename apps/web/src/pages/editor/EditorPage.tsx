@@ -43,6 +43,7 @@ import { errorMessage } from '../../lib/errors';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useDemoEditor } from './useDemoEditor';
 import { Canvas, type Tool } from './Canvas';
+import { PreviewSwitch } from './vars/varPreview';
 import { SandboxPlan } from './html/SandboxPlan';
 import { ChecklistPreview } from './ChecklistPreview';
 import { BrowserBar } from './capture/BrowserBar';
@@ -876,6 +877,12 @@ export function EditorPage() {
                     />
                   )}
                   {step.kind === 'html' && <div id="html-crumbs-slot" className="html-crumbs-slot" />}
+                  <PreviewSwitch
+                    visible={
+                      /\{\{/.test(step.title + step.body) ||
+                      editor.hotspots.some((h) => h.step_id === step.id && /\{\{/.test(h.title + h.body))
+                    }
+                  />
                   <div className={`frame fd-player-scope frame--${zoom}`}>
                     {step.kind !== 'html' && <ChecklistPreview editor={editor} index={safeIndex} />}
                     {/* L18 : police de la médiathèque appliquée au canevas, comme dans le lecteur */}

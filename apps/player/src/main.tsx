@@ -1,7 +1,7 @@
 import { render } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { manifestSchema, type Manifest } from '@flowdsiml/manifest';
-import { variablesFromSearch, type VariableValues } from '@flowdsiml/core';
+import { computedVariables, variablesFromSearch, type VariableValues } from '@flowdsiml/core';
 import {
   learnerResume,
   NetworkError,
@@ -133,10 +133,16 @@ function App() {
             setState({
               status: 'ready',
               manifest: parsed.data,
-              values: variablesFromSearch(
-                location.search,
-                parsed.data.variables.map((v) => v.key),
-              ),
+              values: {
+                ...computedVariables(
+                  { title: parsed.data.title, stepCount: parsed.data.steps.length },
+                  parsed.data.locale,
+                ),
+                ...variablesFromSearch(
+                  location.search,
+                  parsed.data.variables.map((v) => v.key),
+                ),
+              },
               linkToken: null,
               preview: true,
               // « Tester le quiz » (éditeur) : l'aperçu s'ouvre directement sur le quiz
@@ -199,6 +205,8 @@ function App() {
         const keys = manifest.variables.map((v) => v.key);
         // Priorité : URL (?company=…) > lien personnalisé > valeurs par défaut
         const values = {
+          // L46 : titre de la démo, nombre d'étapes et date du jour, toujours connus du lecteur
+          ...computedVariables({ title: manifest.title, stepCount: manifest.steps.length }, manifest.locale),
           ...linkVars,
           ...variablesFromSearch(search, keys),
           ...variablesFromSearch(location.search, keys),

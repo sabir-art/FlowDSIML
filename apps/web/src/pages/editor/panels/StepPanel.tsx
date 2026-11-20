@@ -4,8 +4,8 @@ import { EyeOff, Lock, Presentation, Target, Trash2, TriangleAlert } from 'lucid
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import { asCta, asRects, asStepOptions, asZoom, type Selection, type StepRow } from '../types';
-import { RichTextField } from '../RichTextField';
-import { VariablePreview } from '../VariablePreview';
+import { VarTextField } from '../vars/VarTextField';
+import { useVarCatalog } from '../../../lib/varCatalog';
 import { CtaFields } from './CtaFields';
 import { GuidedStepFields } from './GuidedStepFields';
 import { NextRulesFields } from './NextRulesFields';
@@ -51,7 +51,7 @@ export function StepPanel({
     .filter((h) => h.step_id === step.id)
     .sort((a, b) => a.position - b.position)[0];
   const blurs = asRects(step.blurs);
-  const varKeys = editor.variables.map((v) => v.key);
+  const catalog = useVarCatalog(editor.variables);
   const plan = usePlan();
   const hotspots = editor.hotspots.filter((h) => h.step_id === step.id);
 
@@ -83,32 +83,28 @@ export function StepPanel({
             </button>
           )}
         </div>
-        <div className="field">
-          <label htmlFor="st-title">
-            {step.kind === 'text' ? t('editor.hs.title') : t('editor.stepTitle')}
-          </label>
-          <input
-            id="st-title"
-            className="input input-sm"
-            maxLength={200}
-            disabled={readOnly}
-            value={step.title}
-            onChange={(e) => editor.updateStep(step.id, { title: e.target.value })}
-          />
-          <VariablePreview text={step.title} variables={editor.variables} />
-        </div>
+        <VarTextField
+          singleLine
+          id="st-title"
+          label={step.kind === 'text' ? t('editor.hs.title') : t('editor.stepTitle')}
+          maxLength={200}
+          catalog={catalog}
+          canManage={!readOnly}
+          disabled={readOnly}
+          value={step.title}
+          onChange={(v) => editor.updateStep(step.id, { title: v })}
+        />
         {step.kind === 'text' && (
           <>
-            <RichTextField
-              mk
+            <VarTextField
               id="st-body"
               label={t('editor.hs.text')}
               value={step.body}
-              variables={varKeys}
+              catalog={catalog}
+              canManage={!readOnly}
               disabled={readOnly}
               onChange={(v) => editor.updateStep(step.id, { body: v })}
             />
-            <VariablePreview text={step.body} variables={editor.variables} />
           </>
         )}
         {step.page_url && (

@@ -2215,24 +2215,33 @@ export type Database = {
       variables: {
         Row: {
           default_value: string;
+          description: string;
+          example: string;
           id: string;
           key: string;
           label: string;
+          value: string | null;
           workspace_id: string;
         };
         ComputedFields: never;
         Insert: {
           default_value?: string;
+          description?: string;
+          example?: string;
           id?: string;
           key: string;
           label?: string;
+          value?: string | null;
           workspace_id: string;
         };
         Update: {
           default_value?: string;
+          description?: string;
+          example?: string;
           id?: string;
           key?: string;
           label?: string;
+          value?: string | null;
           workspace_id?: string;
         };
         Relationships: [

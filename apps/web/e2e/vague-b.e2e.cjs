@@ -171,7 +171,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.locator('.canvas-hotspot').first().click();
   await page.waitForSelector('#hs-title');
   // L30-02 : l'entrée « Bientôt » est remplacée par l'Assistance IA (désactivée par défaut)
-  const entry = page.locator('.ai-entry');
+  const entry = page.locator('.ai-write .ai-entry, .panel .ai-entry').first();
   ok(
     (await entry.innerText()).includes('Assistance IA') &&
       (await entry.getAttribute('aria-disabled')) === 'true',
