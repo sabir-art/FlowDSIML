@@ -81,7 +81,9 @@ Corrections faites :
 - aucun décalage de mise en page ;
 - tableau de bord et éditeur lus en une seule requête au démarrage (au lieu de 8 lectures successives) ;
 - boîtes Exporter et Diffuser chargées à l'ouverture ;
-- code de la page d'arrivée demandé dès le démarrage.
+- code de la page d'arrivée demandé dès le démarrage ;
+- squelettes de chargement à la géométrie de la page finale (tableau de bord et éditeur), visibles
+  seulement au-delà de 200 ms ; message à 10 s, carte d'erreur avec « Réessayer » à 30 s.
 
 Dans un navigateur réel, le contenu principal s'affiche en moins d'une seconde (0,7 s pour le tableau de
 bord, 0,9 s pour l'éditeur). Les scores mobiles restent sous 90 à cause du volume de code chargé avant le
