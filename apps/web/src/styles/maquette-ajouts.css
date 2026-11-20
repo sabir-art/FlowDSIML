@@ -1119,6 +1119,30 @@
   height: 18px;
   margin-top: 1px;
 }
+.mk .sh-training h2 {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.mk .sh-training h2 svg,
+.mk .sh-training-scorm svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.mk .sh-training p {
+  margin: 8px 0 0;
+}
+.mk .sh-training-add {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mk .sh-training-scorm {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
 .mk .sh-perso-acts {
   gap: 8px;
   flex-wrap: wrap;

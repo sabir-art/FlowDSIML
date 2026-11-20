@@ -50,6 +50,7 @@ import { popupCode } from './distribute';
 import { PLAYER_URL } from '../../lib/env';
 import { centerLinkUrl, centerModuleOf, type CenterModule } from './centerModule';
 import { ImportLinksDialog } from './ImportLinksDialog';
+import { TrainingCard } from './TrainingCard';
 import { COHORT_MAX, cohorts, exportLinks, linkFromRow } from './linksCsv';
 import { downloadText } from '../../lib/download';
 import '../../styles/maquette.css';
@@ -94,6 +95,11 @@ export function SharePage() {
   /** L38-3 : groupes déjà utilisés dans l'espace (suggestions) ; L38-2 : import d'une liste. */
   const [cohortList, setCohortList] = useState<string[]>([]);
   const [importing, setImporting] = useState(false);
+  /** L38-7 : formations de l'espace et leurs modules (bloc « Formation »). */
+  const [training, setTraining] = useState<{
+    paths: Pick<Tables<'paths'>, 'id' | 'title'>[];
+    modules: Pick<Tables<'path_modules'>, 'path_id' | 'demo_id' | 'position'>[];
+  }>({ paths: [], modules: [] });
   // RP-2 : la modale RGPD ouvre directement l'onglet Accès (?tab=access)
   const [tab, setTab] = useState<Tab>(() => {
     const q = params.get('tab');
@@ -175,6 +181,7 @@ export function SharePage() {
       supabase.from('share_links').select('cohort').eq('workspace_id', d.data.workspace_id).neq('cohort', ''),
     ]);
     setCenterModule(centerModuleOf(center.data, paths.data ?? [], mods.data ?? [], demoId));
+    setTraining({ paths: paths.data ?? [], modules: mods.data ?? [] });
     setCohortList(cohorts((groups.data ?? []).map((g) => g.cohort)));
     const ver = v.data as { published_at: string; public_ack: { by?: string; at?: string } | null } | null;
     setPublishedAt(ver?.published_at ?? null);
@@ -773,6 +780,14 @@ export function SharePage() {
         <aside className="col sh-aside" aria-label={t('share.preview')}>
           {/* L11 : carte « Accès à la démo » en tête de la colonne */}
           <AccessSummary state={access} url={url} />
+          <TrainingCard
+            demoId={demoId}
+            workspaceId={demo.workspace_id}
+            editable={editable}
+            paths={training.paths}
+            modules={training.modules}
+            onChanged={load}
+          />
           <MiniPreview demoId={demo.id} previewUrl={`${url}?preview=1`} />
           <div className="card card-pad">
             <h2 className="t-label">{t('share.socialPreview')}</h2>

@@ -40,6 +40,7 @@ import {
   RotateCcw,
   RotateCw,
   ImageOff,
+  ZoomIn,
   Captions,
   Volume2,
 } from 'lucide-preact';
@@ -923,6 +924,7 @@ export function Player({
               tap={mobile ? t.mobile.tap : undefined}
               tapHere={t.mobile.tapHere}
               missing={{ text: t.imgMissing, retry: t.retry }}
+              autoZoom={narrow && !mobile ? { full: t.seeFullScreen, zoom: t.zoomOnSpot } : null}
             />
           </TabWindow>
         ) : (
@@ -1250,8 +1252,11 @@ function ImageStep({
   tap,
   tapHere,
   missing,
+  autoZoom,
 }: {
   step: Step;
+  /** L38-11 : cadrage automatique autour du hotspot (petit écran), libellés du bouton. */
+  autoZoom?: { full: string; zoom: string } | null;
   /** L36 : capture introuvable (démo supprimée, réseau coupé) : message et bouton Réessayer. */
   missing?: { text: string; retry: string };
   /** F7 : verbe « Touchez » des démos mobiles (sinon le titre seul). */
@@ -1282,9 +1287,28 @@ function ImageStep({
     addEventListener('online', again);
     return () => removeEventListener('online', again);
   }, [broken]);
-  const zoom = step.zoom ?? carry;
+  // L38-11 : sur petit écran, sans zoom réglé par l'auteur, la zone du premier hotspot est agrandie
+  // (×2) pour que les libellés du logiciel restent lisibles ; « Voir tout l'écran » revient à la capture
+  // entière. Sans animation si l'utilisateur réduit les animations.
+  const [full, setFull] = useState(false);
+  const reducedMotion = useMedia('(prefers-reduced-motion: reduce)');
+  const h0 = step.hotspots[0];
+  const auto = useMemo(
+    () =>
+      autoZoom && !step.zoom && !carry && h0 && !full
+        ? {
+            x: h0.x + h0.w / 2,
+            y: h0.y + h0.h / 2,
+            scale: 2,
+            transition: reducedMotion ? ('instant' as const) : ('smooth' as const),
+            keep: false,
+          }
+        : null,
+    [autoZoom, step.zoom, carry, h0, full, reducedMotion],
+  );
+  const zoom = step.zoom ?? carry ?? auto;
   // Zoom repris de l'étape précédente, ou transition « Directe » : pas d'animation d'entrée
-  const [zoomed, setZoomed] = useState(!step.zoom && !!carry);
+  const [zoomed, setZoomed] = useState((!step.zoom && !!carry) || (!!auto && reducedMotion));
   useEffect(() => {
     if (!zoom) return;
     const id = requestAnimationFrame(() => setZoomed(true));
@@ -1346,6 +1370,12 @@ function ImageStep({
       class={`p-stage${dimmed ? ' is-backdrop' : ''}`}
       style={{ '--ratio': String(shown.width / shown.height) }}
     >
+      {autoZoom && !step.zoom && !carry && h0 && (
+        <button type="button" class="p-autozoom" onClick={() => setFull((f) => !f)}>
+          {full ? <ZoomIn {...ICON} size={16} /> : <Maximize2 {...ICON} size={16} />}
+          {full ? autoZoom.zoom : autoZoom.full}
+        </button>
+      )}
       <div
         class={`p-zoom${zoom?.transition === 'instant' ? ' is-instant' : ''}`}
         style={{ transform, transformOrigin: origin }}

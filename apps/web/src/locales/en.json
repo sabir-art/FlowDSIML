@@ -1622,7 +1622,8 @@
       "tooLong": "Track too long: 2 minutes max.",
       "uploadError": "The voice-over could not be saved. Try again.",
       "railIcon": "Voice-over",
-      "railIconAi": "AI-generated voice-over"
+      "railIconAi": "AI-generated voice-over",
+      "nextStep": "Next step"
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
@@ -1664,7 +1665,10 @@
       "done": "Every step has a bubble. Review them, then publish.",
       "hide": "Hide help"
     },
-    "addHotspot": "Add a hotspot"
+    "addHotspot": "Add a hotspot",
+    "railQuizAdd": "Add a quiz",
+    "railQuizThreshold_one": "Quiz · {{count}} question · pass mark {{pct}}",
+    "railQuizThreshold_other": "Quiz · {{count}} questions · pass mark {{pct}}"
   },
   "status": {
     "draft": "Draft",
@@ -2058,6 +2062,20 @@
       "exportAll": "Export the links (CSV)",
       "exportFile": "learner-links.csv",
       "demoLink": "Demo link"
+    },
+    "training": {
+      "title": "Training",
+      "moduleOf": "Module {{n}} of “{{path}}”.",
+      "none": "This demo is not part of any course.",
+      "path": "Add to the course",
+      "position": "Position",
+      "last": "Module {{n}} (last)",
+      "at": "Module {{n}}",
+      "add": "Add to the course",
+      "added": "Demo added to “{{path}}”.",
+      "noPath": "No course in the workspace.",
+      "toLearners": "Create a course in Learners",
+      "scorm": "SCORM package for your learning platform"
     }
   },
   "analytics": {
@@ -2901,7 +2919,8 @@
     "status": {
       "done": "Completed",
       "active": "In progress",
-      "stale": "To remind"
+      "stale": "To remind",
+      "quiz": "Quiz not passed"
     },
     "moduleStatus": {
       "validated": "Validated",
@@ -2982,7 +3001,7 @@
       "quiz_one": "{{count}} quiz",
       "quiz_other": "{{count}} quizzes",
       "noQuiz": "no quiz",
-      "splitAria": "{{done}}% completed, {{active}}% in progress, {{stale}}% to remind",
+      "splitAria": "{{done}}% completed, {{active}}% in progress, {{stale}}% to remind, {{quiz}}% quiz not passed",
       "ofLearners": "{{n}} learners of {{total}}",
       "quizSuccess": "Quiz success",
       "firstTry": "first try: {{pct}}",
@@ -3150,7 +3169,12 @@
     "daysAgo_other": "{{count}}d ago",
     "noGroup": "No group",
     "groupPlaceholder": "E.g. 12 November session",
-    "groupSaved": "Group saved."
+    "groupSaved": "Group saved.",
+    "quiz": {
+      "exhausted": "No attempts left.",
+      "left_one": "{{count}} attempt left",
+      "left_other": "{{count}} attempts left"
+    }
   },
   "center": {
     "title": "Training center",

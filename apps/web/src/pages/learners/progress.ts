@@ -5,7 +5,14 @@
  */
 
 export type ModuleStatus = 'validated' | 'failed' | 'in_progress' | 'not_started';
-export type LearnerStatus = 'done' | 'active' | 'stale';
+/** L38-12 : « quiz » = quiz tenté et non validé (prime sur « en cours » et « à relancer »). */
+export type LearnerStatus = 'done' | 'active' | 'stale' | 'quiz';
+
+/** Quiz tenté, non validé : tentatives restantes (null : illimitées, 0 : épuisées). */
+export interface QuizIssue {
+  demoId: string;
+  left: number | null;
+}
 
 export interface RawModule {
   demoId: string;
@@ -62,6 +69,7 @@ export interface PathState {
   pct: number;
   done: boolean;
   status: LearnerStatus;
+  quiz: QuizIssue | null;
   /** Premier module non validé (null si tout est validé). */
   current: { index: number; title: string } | null;
   lastActivity: string;
@@ -77,6 +85,7 @@ export interface LearnerRow {
   best: number | null;
   attempts: number;
   status: LearnerStatus;
+  quiz: QuizIssue | null;
   lastActivity: string;
   inactiveDays: number;
 }
@@ -101,9 +110,20 @@ export function followsPath(l: RawLearner, p: PathInfo): boolean {
   });
 }
 
-function statusFor(done: boolean, last: string, now: number): LearnerStatus {
+function statusFor(done: boolean, last: string, now: number, quiz: QuizIssue | null = null): LearnerStatus {
   if (done) return 'done';
+  if (quiz) return 'quiz';
   return now - Date.parse(last) < STALE_DAYS * DAY ? 'active' : 'stale';
+}
+
+/** Premier quiz tenté et non validé parmi ces modules (ordre des formations). */
+export function quizIssue(l: RawLearner, demoIds: string[]): QuizIssue | null {
+  for (const id of demoIds) {
+    const m = l.modules.find((x) => x.demoId === id);
+    if (!m || !m.hasQuiz || m.status === 'validated' || m.used === 0) continue;
+    return { demoId: id, left: m.status === 'failed' ? 0 : m.max ? Math.max(0, m.max - m.used) : null };
+  }
+  return null;
 }
 
 export function pathState(l: RawLearner, p: PathInfo, now: number): PathState {
@@ -116,11 +136,18 @@ export function pathState(l: RawLearner, p: PathInfo, now: number): PathState {
     mustDo.every((pm) => l.modules.find((m) => m.demoId === pm.demoId)?.status === 'validated');
   const idx = mods.findIndex((m) => m?.status !== 'validated');
   const last = mods.reduce<string | null>((a, m) => maxIso(a, m?.lastActivity ?? null), null) ?? l.createdAt;
+  const quiz = done
+    ? null
+    : quizIssue(
+        l,
+        p.modules.map((pm) => pm.demoId),
+      );
   return {
     path: p,
     pct,
     done,
-    status: statusFor(done, last, now),
+    status: statusFor(done, last, now, quiz),
+    quiz,
     current: idx < 0 ? null : { index: idx, title: p.modules[idx]!.title },
     lastActivity: last,
     doneAt: done ? last : null,
@@ -135,6 +162,7 @@ export function learnerRow(l: RawLearner, paths: PathInfo[], now: number): Learn
   const scores = quizMods.map((m) => m.best).filter((x): x is number => x !== null);
   const last = l.modules.reduce<string | null>((a, m) => maxIso(a, m.lastActivity), null) ?? l.createdAt;
   const done = followed.length > 0 && followed.every((s) => s.done);
+  const quiz = done ? null : (followed.find((s) => s.quiz)?.quiz ?? null);
   return {
     raw: l,
     label: l.name.trim() || l.email || '',
@@ -142,7 +170,8 @@ export function learnerRow(l: RawLearner, paths: PathInfo[], now: number): Learn
     pct: followed.length ? followed.reduce((s, x) => s + x.pct, 0) / followed.length : 0,
     best: scores.length ? Math.max(...scores) : null,
     attempts: quizMods.reduce((s, m) => s + m.used, 0),
-    status: statusFor(done, last, now),
+    status: statusFor(done, last, now, quiz),
+    quiz,
     lastActivity: last,
     inactiveDays: Math.max(0, Math.floor((now - Date.parse(last)) / DAY)),
   };
@@ -221,6 +250,7 @@ export function kpis(rows: LearnerRow[], paths: PathInfo[]) {
     done: rows.filter((r) => r.status === 'done').length,
     active: rows.filter((r) => r.status === 'active').length,
     stale: rows.filter((r) => r.status === 'stale').length,
+    quiz: rows.filter((r) => r.status === 'quiz').length,
     avgScore: scored.length ? Math.round(scored.reduce((s, r) => s + r.best!, 0) / scored.length) : null,
     threshold: thresholds.length === 1 ? thresholds[0]! : null,
   };
@@ -257,6 +287,7 @@ export function pathStats(rows: LearnerRow[], p: PathInfo) {
     done: count('done'),
     active: count('active'),
     stale: count('stale'),
+    quiz: count('quiz'),
     hasQuiz: quizIds.length > 0,
     quizTried: tried.length,
     quizPassed: tried.filter((x) => quizOk(x, false)).length,

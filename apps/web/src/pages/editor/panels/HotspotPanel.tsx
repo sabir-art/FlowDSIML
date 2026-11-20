@@ -1,3 +1,4 @@
+import { VoiceFields } from '../voice/VoiceFields';
 import { ChevronLeft, Crop, Layers, MessageSquare, Target, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { ApplyStyleDialog } from '../ApplyStyleDialog';
@@ -233,6 +234,9 @@ export function HotspotPanel({
         )}
         <VariablePreview text={hotspot.body} variables={editor.variables} />
       </div>
+
+      {/* L38-10 : voix off juste sous la consigne qu'elle lit (même piste que l'onglet Étape) */}
+      {step && step.kind === 'image' && <VoiceFields editor={editor} step={step} readOnly={readOnly} chain />}
 
       <div className="sec">
         <div className="sec-title">{t('editor.placement')}</div>
