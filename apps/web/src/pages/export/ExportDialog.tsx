@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Archive,
+  Accessibility,
   CircleAlert,
   CircleCheck,
   Download,
@@ -60,11 +61,19 @@ import {
   type Subtitles,
 } from '@flowdsiml/exports/mp4';
 import { usePlan } from '../../lib/plan';
-import { download, fetchBitmap, loadExportSource, toPdfImage, type ExportSource } from './exportData';
+import {
+  bitmapToDataUrl,
+  download,
+  fetchBitmap,
+  loadExportSource,
+  toPdfImage,
+  videoPoster,
+  type ExportSource,
+} from './exportData';
 import { PdfPagePreview } from './PdfPagePreview';
 import './export.css';
 
-type Fmt = 'pdf' | 'gif' | 'mp4';
+type Fmt = 'pdf' | 'gif' | 'mp4' | 'html';
 /** L25-12 : fichiers prêts (vidéo et sous-titres). */
 interface ReadyFile {
   name: string;
@@ -238,7 +247,7 @@ export function ExportDialog({
         fonts,
         orientation: opts.orientation,
         title: demo.title,
-        lang: i18n.language.startsWith('en') ? 'en-GB' : 'fr-FR',
+        lang: demo.lang ?? (i18n.language.startsWith('en') ? 'en-GB' : 'fr-FR'),
         author: demo.workspace,
         image: async (i) => imgs.get(i) ?? null,
         logo,
@@ -270,6 +279,79 @@ export function ExportDialog({
     } catch (e) {
       if (isAbort(e)) return setPhase({ kind: 'options' });
       failWith('pdf', e);
+    }
+  }
+
+  /** L29-03 : version accessible (HTML autonome, images intégrées). */
+  async function runHtml(opts: PdfOptions) {
+    if (!demo) return;
+    const ac = new AbortController();
+    abort.current = ac;
+    const total = demo.steps.length;
+    setPhase({ kind: 'running', fmt: 'html', stage: 0, pct: 0, n: 0, total });
+    try {
+      const { renderAccessibleHtml } = await import('@flowdsiml/exports/accessible');
+      const imgs = new Map<number, string | null>();
+      if (opts.images)
+        for (const [i, st] of demo.steps.entries()) {
+          try {
+            const b = st.imageUrl
+              ? await fetchBitmap(st.imageUrl, ac.signal, st.crop)
+              : st.video
+                ? await videoPoster(st.video.url, ac.signal)
+                : null;
+            imgs.set(i, b ? bitmapToDataUrl(b) : null);
+          } catch (e) {
+            if (isAbort(e)) throw e;
+            if (st.imageUrl) throw new StepImageError(i);
+            imgs.set(i, null);
+          }
+          setPhase({
+            kind: 'running',
+            fmt: 'html',
+            stage: 0,
+            pct: Math.round(((i + 1) / total) * 80),
+            n: i + 1,
+            total,
+          });
+        }
+      setPhase({ kind: 'running', fmt: 'html', stage: 1, pct: 90, n: total, total });
+      await tick();
+      const lt = (k: string, o?: Record<string, unknown>) => t(k, { lng: demo.lang?.slice(0, 2), ...o });
+      const html = renderAccessibleHtml(
+        demo,
+        imgs,
+        { images: opts.images, text: opts.text },
+        {
+          skip: lt('export.a11y.skip'),
+          toc: lt('export.a11y.toc'),
+          stepHeading: (n, title) => lt('export.a11y.step', { n, title }),
+          altCapture: (title) => lt('export.a11y.altCapture', { title }),
+          altTarget: lt('export.a11y.altTarget'),
+          altVideo: (title) => lt('export.a11y.altVideo', { title }),
+          transcript: lt('export.a11y.transcript'),
+          quiz: lt('export.a11y.quiz'),
+          noChapter: lt('export.a11y.noChapter'),
+          allSteps: lt('export.a11y.allSteps'),
+          generated: lt('export.a11y.generated', { version: demo.version }),
+        },
+      );
+      const bytes = new TextEncoder().encode(html);
+      const name = fileName(demo.title, 'accessible.html');
+      setPhase({ kind: 'running', fmt: 'html', stage: 2, pct: 100, n: total, total });
+      await tick();
+      download(bytes, name, 'text/html;charset=utf-8');
+      setPhase({
+        kind: 'done',
+        fmt: 'html',
+        name,
+        meta: [t('export.stepsCount', { count: total }), formatSize(bytes.byteLength, i18n.language)].join(
+          ' · ',
+        ),
+      });
+    } catch (e) {
+      if (isAbort(e)) return setPhase({ kind: 'options' });
+      failWith('html', e);
     }
   }
 
@@ -474,7 +556,11 @@ export function ExportDialog({
         kind: 'error',
         fmt: f,
         message: t(
-          f === 'pdf' ? 'export.errImage' : f === 'mp4' ? 'export.errImageMp4' : 'export.errImageGif',
+          f === 'pdf' || f === 'html'
+            ? 'export.errImage'
+            : f === 'mp4'
+              ? 'export.errImageMp4'
+              : 'export.errImageGif',
           { n: e.step + 1 },
         ),
         detail: t('export.errImageDetail', { n: e.step + 1, title: s.title }),
@@ -486,13 +572,26 @@ export function ExportDialog({
         fmt: f,
         message: t('export.errGeneric'),
         detail: t(
-          f === 'pdf' ? 'export.errStagePdf' : f === 'mp4' ? 'export.errStageMp4' : 'export.errStageGif',
+          f === 'pdf'
+            ? 'export.errStagePdf'
+            : f === 'html'
+              ? 'export.errStageHtml'
+              : f === 'mp4'
+                ? 'export.errStageMp4'
+                : 'export.errStageGif',
         ),
         fallback: false,
       });
   }
 
-  const start = () => (fmt === 'pdf' ? void runPdf(pdf) : fmt === 'mp4' ? void runMp4() : void runGif());
+  const start = () =>
+    fmt === 'pdf'
+      ? void runPdf(pdf)
+      : fmt === 'html'
+        ? void runHtml(pdf)
+        : fmt === 'mp4'
+          ? void runMp4()
+          : void runGif();
 
   // ---------------------------------------------------------------------------------------------
   // Rendu
@@ -537,26 +636,32 @@ export function ExportDialog({
     const labels =
       phase.fmt === 'pdf'
         ? [t('export.stagePrepare'), t('export.stageLayout'), t('export.stagePdf')]
-        : phase.fmt === 'mp4'
-          ? [
-              t('export.stagePrepare'),
-              t('export.stageRender', { n: phase.n, total: phase.total }),
-              t('export.stageEncode'),
-              ...(mp4x.subtitles === 'vtt' ? [t('export.stageVtt')] : []),
-            ]
-          : [t('export.stagePrepare'), t('export.stageFrames'), t('export.stageGif')];
+        : phase.fmt === 'html'
+          ? [t('export.stageImages'), t('export.stageHtml'), t('export.stageDone')]
+          : phase.fmt === 'mp4'
+            ? [
+                t('export.stagePrepare'),
+                t('export.stageRender', { n: phase.n, total: phase.total }),
+                t('export.stageEncode'),
+                ...(mp4x.subtitles === 'vtt' ? [t('export.stageVtt')] : []),
+              ]
+            : [t('export.stagePrepare'), t('export.stageFrames'), t('export.stageGif')];
     const runTitle =
       phase.fmt === 'pdf'
         ? 'export.runningPdf'
-        : phase.fmt === 'mp4'
-          ? 'export.runningMp4'
-          : 'export.runningGif';
+        : phase.fmt === 'html'
+          ? 'export.runningHtml'
+          : phase.fmt === 'mp4'
+            ? 'export.runningMp4'
+            : 'export.runningGif';
     body = (
       <>
         <div className="x15-head">
           <span className="fd-icon-chip">
             {phase.fmt === 'pdf' ? (
               <FileText aria-hidden="true" />
+            ) : phase.fmt === 'html' ? (
+              <Accessibility aria-hidden="true" />
             ) : phase.fmt === 'mp4' ? (
               <Film aria-hidden="true" />
             ) : (
@@ -577,7 +682,7 @@ export function ExportDialog({
             <span style={{ width: `${phase.pct}%` }} />
           </div>
           <p className="fd-label x15-live" aria-live="polite">
-            {phase.stage === 0 || phase.fmt === 'mp4'
+            {phase.stage === 0 || phase.fmt === 'mp4' || phase.fmt === 'html'
               ? `${phase.pct}\u202f%`
               : t(phase.fmt === 'pdf' ? 'export.livePdf' : 'export.liveGif', {
                   pct: phase.pct,
@@ -621,9 +726,11 @@ export function ExportDialog({
             {t(
               phase.fmt === 'pdf'
                 ? 'export.donePdf'
-                : phase.fmt === 'mp4'
-                  ? 'export.doneMp4'
-                  : 'export.doneGif',
+                : phase.fmt === 'html'
+                  ? 'export.doneHtml'
+                  : phase.fmt === 'mp4'
+                    ? 'export.doneMp4'
+                    : 'export.doneGif',
             )}
           </h2>
           <button
@@ -660,7 +767,13 @@ export function ExportDialog({
         ) : (
           <div className="exp-file">
             <span className="fd-icon-chip">
-              {phase.fmt === 'pdf' ? <FileText aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}
+              {phase.fmt === 'pdf' ? (
+                <FileText aria-hidden="true" />
+              ) : phase.fmt === 'html' ? (
+                <Accessibility aria-hidden="true" />
+              ) : (
+                <ImageIcon aria-hidden="true" />
+              )}
             </span>
             <span>
               <b>{phase.name}</b>
@@ -676,6 +789,15 @@ export function ExportDialog({
           <p className="fd-help x15-p">{t('export.vttHelp')}</p>
         )}
         {!phase.files && <p className="fd-help x15-p">{t('export.notKept')}</p>}
+        {phase.fmt === 'pdf' && (
+          // L29-03 : la version accessible est proposée après chaque PDF
+          <p className="x15-p">
+            <button type="button" className="mk-link-inline" onClick={() => void runHtml(pdf)}>
+              <Accessibility aria-hidden="true" className="exp-inline-ico" />
+              {t('export.alsoHtml')}
+            </button>
+          </p>
+        )}
         <div className="x15-foot">
           <button type="button" className="fd-btn" onClick={() => setPhase({ kind: 'options' })}>
             {t('export.other')}
@@ -801,6 +923,7 @@ function Options(p: {
   const formats: Array<{ key: string; icon: ReactNode; soon?: boolean; off?: boolean }> = [
     { key: 'pdf', icon: <FileText aria-hidden="true" /> },
     { key: 'gif', icon: <ImageIcon aria-hidden="true" /> },
+    { key: 'html', icon: <Accessibility aria-hidden="true" /> },
     { key: 'mp4', icon: <Film aria-hidden="true" />, off: !videoOk },
     { key: 'zip', icon: <Archive aria-hidden="true" />, soon: true },
   ];
@@ -894,20 +1017,23 @@ function Options(p: {
           })}
         </div>
 
-        {p.fmt === 'pdf' ? (
+        {p.fmt === 'pdf' || p.fmt === 'html' ? (
           <>
-            <fieldset>
-              <legend className="fd-label">{t('export.layout')}</legend>
-              {seg(
-                t('export.layout'),
-                pdf.layout,
-                [
-                  { v: 'one', label: t('export.layoutOne') },
-                  { v: 'two', label: t('export.layoutTwo') },
-                ],
-                (v) => setPdf({ ...pdf, layout: v }),
-              )}
-            </fieldset>
+            {/* L29-03 : la version accessible garde les options de contenu, pas la mise en page */}
+            {p.fmt === 'pdf' && (
+              <fieldset>
+                <legend className="fd-label">{t('export.layout')}</legend>
+                {seg(
+                  t('export.layout'),
+                  pdf.layout,
+                  [
+                    { v: 'one', label: t('export.layoutOne') },
+                    { v: 'two', label: t('export.layoutTwo') },
+                  ],
+                  (v) => setPdf({ ...pdf, layout: v }),
+                )}
+              </fieldset>
+            )}
             <fieldset>
               <legend className="fd-label">{t('export.content')}</legend>
               <div className="opts">
@@ -921,40 +1047,48 @@ function Options(p: {
                   (v) => setPdf({ ...pdf, text: v }),
                   !pdf.images,
                 )}
-                {sw(t('export.numbering'), t('export.numberingHelp'), pdf.numbering, (v) =>
-                  setPdf({ ...pdf, numbering: v }),
+                {p.fmt === 'pdf' && (
+                  <>
+                    {sw(t('export.numbering'), t('export.numberingHelp'), pdf.numbering, (v) =>
+                      setPdf({ ...pdf, numbering: v }),
+                    )}
+                    {sw(t('export.cover'), t('export.coverHelp'), pdf.cover, (v) =>
+                      setPdf({ ...pdf, cover: v }),
+                    )}
+                  </>
                 )}
-                {sw(t('export.cover'), t('export.coverHelp'), pdf.cover, (v) => setPdf({ ...pdf, cover: v }))}
               </div>
             </fieldset>
-            <div className="row-2">
-              <div className="fd-field">
-                <label className="fd-label" htmlFor={`${p.id}-fmt`}>
-                  {t('export.paper')}
-                </label>
-                <select
-                  className="fd-select"
-                  id={`${p.id}-fmt`}
-                  value={pdf.orientation}
-                  onChange={(e) =>
-                    setPdf({ ...pdf, orientation: e.target.value as PdfOptions['orientation'] })
-                  }
-                >
-                  <option value="portrait">{t('export.a4portrait')}</option>
-                  <option value="landscape">{t('export.a4landscape')}</option>
-                </select>
+            {p.fmt === 'pdf' && (
+              <div className="row-2">
+                <div className="fd-field">
+                  <label className="fd-label" htmlFor={`${p.id}-fmt`}>
+                    {t('export.paper')}
+                  </label>
+                  <select
+                    className="fd-select"
+                    id={`${p.id}-fmt`}
+                    value={pdf.orientation}
+                    onChange={(e) =>
+                      setPdf({ ...pdf, orientation: e.target.value as PdfOptions['orientation'] })
+                    }
+                  >
+                    <option value="portrait">{t('export.a4portrait')}</option>
+                    <option value="landscape">{t('export.a4landscape')}</option>
+                  </select>
+                </div>
+                <div className="fd-field">
+                  <label className="fd-label" htmlFor={`${p.id}-lng`}>
+                    {t('export.lang')}
+                  </label>
+                  <select className="fd-select" id={`${p.id}-lng`} defaultValue="demo">
+                    <option value="demo">
+                      {t(i18n.language.startsWith('en') ? 'export.langEn' : 'export.langFr')}
+                    </option>
+                  </select>
+                </div>
               </div>
-              <div className="fd-field">
-                <label className="fd-label" htmlFor={`${p.id}-lng`}>
-                  {t('export.lang')}
-                </label>
-                <select className="fd-select" id={`${p.id}-lng`} defaultValue="demo">
-                  <option value="demo">
-                    {t(i18n.language.startsWith('en') ? 'export.langEn' : 'export.langFr')}
-                  </option>
-                </select>
-              </div>
-            </div>
+            )}
           </>
         ) : (
           <>
@@ -1096,24 +1230,49 @@ function Options(p: {
               ? t('export.preparing')
               : p.fmt === 'pdf'
                 ? t('export.helpPdf', { count: p.pages.length })
-                : p.fmt === 'mp4' && p.mp4Opts
-                  ? t(p.mp4x.title ? 'export.helpMp4' : 'export.helpMp4NoTitle', {
-                      n: mp4Duration(p.mp4Opts, demo?.steps).toLocaleString(i18n.language),
-                    })
-                  : `${t(gif.loop ? 'export.helpGifLoop' : 'export.helpGifOnce', {
-                      n: gifDuration(range, gif.seconds).toLocaleString(i18n.language),
-                    })} ${t('export.helpGifLong')}`}
+                : p.fmt === 'html'
+                  ? t('export.helpHtml', { count: n })
+                  : p.fmt === 'mp4' && p.mp4Opts
+                    ? t(p.mp4x.title ? 'export.helpMp4' : 'export.helpMp4NoTitle', {
+                        n: mp4Duration(p.mp4Opts, demo?.steps).toLocaleString(i18n.language),
+                      })
+                    : `${t(gif.loop ? 'export.helpGifLoop' : 'export.helpGifOnce', {
+                        n: gifDuration(range, gif.seconds).toLocaleString(i18n.language),
+                      })} ${t('export.helpGifLong')}`}
           </p>
           <button type="button" className="fd-btn" onClick={p.onClose}>
             {t('common.cancel')}
           </button>
           <button type="button" className="fd-btn fd-btn--primary" disabled={!p.ready} onClick={p.onStart}>
             <Download aria-hidden="true" />
-            {t(p.fmt === 'pdf' ? 'export.goPdf' : p.fmt === 'mp4' ? 'export.goMp4' : 'export.goGif')}
+            {t(
+              p.fmt === 'pdf'
+                ? 'export.goPdf'
+                : p.fmt === 'html'
+                  ? 'export.goHtml'
+                  : p.fmt === 'mp4'
+                    ? 'export.goMp4'
+                    : 'export.goGif',
+            )}
           </button>
         </div>
       </div>
-      {p.fmt === 'pdf' ? (
+      {p.fmt === 'html' ? (
+        // L29-03 : aperçu du plan de la page (titres dans l'ordre de lecture)
+        <aside className="x15-side" aria-label={t('export.preview')}>
+          <div className="cap">
+            <span>{t('export.preview')}</span>
+          </div>
+          <div className="exp-outline">
+            <b>{demo?.title}</b>
+            <ol>
+              {demo?.steps.map((s, i) => (
+                <li key={i}>{t('export.a11y.step', { n: i + 1, title: s.title })}</li>
+              ))}
+            </ol>
+          </div>
+        </aside>
+      ) : p.fmt === 'pdf' ? (
         <aside className="x15-side" aria-label={t('export.preview')}>
           <div className="cap">
             <span>{t('export.preview')}</span>

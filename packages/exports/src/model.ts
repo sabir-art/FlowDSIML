@@ -27,6 +27,10 @@ export interface ExportStep {
   video?: { url: string; durationMs: number; cuts: Array<{ from: number; to: number }> } | null;
   /** L25-05 : capture pleine page (URL lisible), position de départ et hauteur de la fenêtre (px). */
   fullPage?: { url: string; width: number; height: number; top: number; viewportHeight: number } | null;
+  /** L29-04 : type d'étape, chapitre et transcription (voix off, sinon sous-titres de la vidéo). */
+  kind?: 'image' | 'text' | 'html' | 'before_after' | 'video';
+  chapterId?: string | null;
+  transcript?: string;
 }
 
 export interface ExportDemo {
@@ -46,6 +50,19 @@ export interface ExportDemo {
   steps: ExportStep[];
   /** L25-11 : démo capturée au format mobile (9:16 proposé par défaut). */
   device?: 'desktop' | 'mobile';
+  /** L29 : langue de la démo (BCP 47, « fr-FR » par défaut). */
+  lang?: string;
+  /** L29-04 : chapitres (h2 de la version accessible). */
+  chapters?: Array<{ id: string; title: string }>;
+  /** L29-04 : questions du quiz ou du sondage (sans les réponses). */
+  questions?: string[];
+}
+
+/** Langue de la démo en BCP 47 (« fr » → « fr-FR », « en » → « en-GB »). */
+export function demoLang(locale: string | undefined): string {
+  const l = (locale || 'fr').toLowerCase();
+  if (/^[a-z]{2}-[a-z]{2}$/.test(l)) return `${l.slice(0, 2)}-${l.slice(3).toUpperCase()}`;
+  return l.startsWith('en') ? 'en-GB' : 'fr-FR';
 }
 
 /**
@@ -61,7 +78,13 @@ export function stepsFromManifest(m: Manifest): ExportStep[] {
     const c = s.kind === 'image' ? (s.options?.crop ?? null) : null;
     const a = s.kind === 'image' ? s.options?.animation : undefined;
     const fp = s.kind === 'image' ? s.options?.fullPage : undefined;
+    const transcript =
+      s.voice?.transcript ||
+      (s.kind === 'video' && s.video ? s.video.captions.map((c) => c.text).join(' ') : '');
     return {
+      kind: s.kind,
+      chapterId: s.chapterId ?? null,
+      transcript: applyVariables(transcript, {}, defaults).trim(),
       video:
         s.kind === 'video' && s.video
           ? { url: s.video.url, durationMs: s.video.durationMs, cuts: s.video.cuts }
@@ -95,7 +118,10 @@ export function stepsFromManifest(m: Manifest): ExportStep[] {
 }
 
 /** Nom de fichier tiré du titre : minuscules, sans accents, tirets. */
-export function fileName(title: string, ext: 'pdf' | 'gif' | 'mp4' | 'fr.vtt' | 'en.vtt'): string {
+export function fileName(
+  title: string,
+  ext: 'pdf' | 'gif' | 'mp4' | 'fr.vtt' | 'en.vtt' | 'accessible.html',
+): string {
   const base = title
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
@@ -104,7 +130,7 @@ export function fileName(title: string, ext: 'pdf' | 'gif' | 'mp4' | 'fr.vtt' | 
     .replace(/^-+|-+$/g, '')
     .slice(0, 60)
     .replace(/-+$/, '');
-  return `${base || 'tutoriel'}.${ext}`;
+  return `${base || 'tutoriel'}${ext === 'accessible.html' ? '-' : '.'}${ext}`;
 }
 
 /** Durée du GIF en secondes : nombre d'étapes × vitesse. */

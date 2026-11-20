@@ -11,7 +11,8 @@
     "./layout": "./src/layout.ts",
     "./gif": "./src/gif.ts",
     "./pdf": "./src/pdf.ts",
-    "./mp4": "./src/mp4.ts"
+    "./mp4": "./src/mp4.ts",
+    "./accessible": "./src/accessible.ts"
   },
   "scripts": {
     "lint": "eslint src",

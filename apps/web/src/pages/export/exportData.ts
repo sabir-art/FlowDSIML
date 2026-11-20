@@ -3,7 +3,7 @@
  * défaut). Une démo jamais publiée n'est pas exportable.
  */
 import { parseManifest } from '@flowdsiml/manifest';
-import { stepsFromManifest, type ExportDemo } from '@flowdsiml/exports/model';
+import { demoLang, stepsFromManifest, type ExportDemo } from '@flowdsiml/exports/model';
 import { supabase } from '../../lib/supabase';
 import { publicDemoUrl } from '../../lib/embed';
 
@@ -57,6 +57,10 @@ export async function loadExportSource(demoId: string, removeBranding: boolean):
       context: path ? `Formation « ${path} »` : '',
       showBranding: !removeBranding,
       device: m.device === 'mobile' ? 'mobile' : 'desktop',
+      // L29 : langue de la démo (métadonnées du PDF, version accessible), chapitres et quiz
+      lang: demoLang(m.locale),
+      chapters: m.chapters.map((c) => ({ id: c.id, title: c.title })),
+      questions: (m.quiz?.questions ?? []).map((q) => q.prompt).filter(Boolean),
       steps: steps.map((s) => {
         const sign = (u: string) => signed.get(u) ?? (/^https?:/.test(u) ? u : null);
         const full = s.fullPage ? sign(s.fullPage.url) : null;
@@ -135,4 +139,42 @@ export function download(bytes: ArrayBuffer | Uint8Array, name: string, type: st
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+/** L29-04 : image en data URL JPEG (version accessible : un seul fichier, hors connexion). */
+export function bitmapToDataUrl(b: ImageBitmap, maxWidth = 1600): string {
+  const scale = Math.min(1, maxWidth / b.width);
+  const c = document.createElement('canvas');
+  c.width = Math.round(b.width * scale);
+  c.height = Math.round(b.height * scale);
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#FFFFFF';
+  g.fillRect(0, 0, c.width, c.height);
+  g.drawImage(b, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', 0.85);
+}
+
+/** L29-04 : première image d'une vidéo (étape vidéo de la version accessible). */
+export async function videoPoster(url: string, signal?: AbortSignal): Promise<ImageBitmap> {
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const u = URL.createObjectURL(await res.blob());
+  try {
+    const v = document.createElement('video');
+    v.muted = true;
+    v.preload = 'auto';
+    v.src = u;
+    await new Promise<void>((ok, ko) => {
+      v.onloadeddata = () => ok();
+      v.onerror = () => ko(new Error('VIDEO'));
+    });
+    v.currentTime = 0.05;
+    await new Promise<void>((ok) => {
+      v.onseeked = () => ok();
+      setTimeout(ok, 1500);
+    });
+    return await createImageBitmap(v);
+  } finally {
+    URL.revokeObjectURL(u);
+  }
 }

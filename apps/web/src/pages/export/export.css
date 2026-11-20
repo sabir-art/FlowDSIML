@@ -61,7 +61,8 @@
 }
 .x15-dialog .exp-formats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* L29-03 : cinq formats (PDF, GIF, version accessible, vidéo, ZIP) */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--fd-space-3);
 }
 .x15-dialog .exp-format {
@@ -386,4 +387,23 @@
   padding: 12px 24px;
   background: var(--fd-color-surface);
   border-top: 1px solid var(--fd-color-border);
+}
+
+/* L29-03 : aperçu du plan de la version accessible, lien après le PDF */
+.x15-dialog .exp-outline {
+  padding: var(--fd-space-4);
+  border: 1px solid var(--fd-color-border, #d5dce4);
+  border-radius: 8px;
+  background: var(--fd-color-surface, #fff);
+  font-size: 0.875rem;
+}
+.x15-dialog .exp-outline ol {
+  margin: var(--fd-space-2) 0 0;
+  padding-left: 1.4em;
+}
+.x15-dialog .exp-inline-ico {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  margin-right: 4px;
 }
