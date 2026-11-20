@@ -15,12 +15,14 @@ import { StylesSection } from '../styles/StylesSection';
 import { FONTS, SHAPES } from '../styles/presets';
 import { MediaLibrary, mediaUrl } from '../../../components/media/MediaLibrary';
 import { CUSTOM_FONT } from '@flowdsiml/player-core';
+import { useVarCatalog } from '../../../lib/varCatalog';
 
 type ColorKey = 'primary' | 'hotspot' | 'background' | 'surface' | 'text';
 
 /** Onglet Design de l'éditeur (maquette editeur.html, EDT-10). */
 export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly: boolean }) {
   const { t } = useTranslation();
+  const catalog = useVarCatalog(editor.variables);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [logoName, setLogoName] = useState<string | null>(null);
   // L18 : médiathèque ouverte pour le logo ou la police
@@ -271,6 +273,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
         <p className="help th-help-top">{t('editor.pageCtaHint')}</p>
         <CtaFields
           idPrefix="page"
+          catalog={catalog}
           value={settings.cta ?? null}
           disabled={readOnly}
           onChange={(v) => editor.updateDemo({ settings: { ...settings, cta: v } })}

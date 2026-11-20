@@ -17,6 +17,8 @@ export interface CatalogItem {
   fallback: string;
   computed: boolean;
   emailOnly: boolean;
+  /** L46-bis : variable visible mais indisponible ici (raison affichée, « Bientôt »). */
+  disabledReason?: string;
 }
 
 export const GROUP_ORDER: VariableGroup[] = ['visitor', 'company', 'demo', 'date', 'workspace'];

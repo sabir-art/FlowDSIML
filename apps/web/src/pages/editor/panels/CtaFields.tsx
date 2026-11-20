@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { Cta } from '@flowdsiml/manifest';
+import { VarTextField } from '../vars/VarTextField';
+import type { CatalogItem } from '../../../lib/varCatalog';
 
 /** Bouton d'appel à l'action (libellé + URL), habillage maquette (.setting / .switch / .field). */
 export function CtaFields({
@@ -8,11 +10,14 @@ export function CtaFields({
   onChange,
   disabled,
   label,
+  catalog,
 }: {
   idPrefix: string;
   value: Cta | null;
   onChange: (v: Cta | null) => void;
   disabled?: boolean;
+  /** L46-bis : variables du libellé et de l'adresse (encodée dans le lien). */
+  catalog: CatalogItem[];
   /** Libellé de l'interrupteur (par défaut « Bouton d'action (CTA) »). */
   label?: string;
 }) {
@@ -38,29 +43,31 @@ export function CtaFields({
       </div>
       {value && (
         <>
-          <div className="field">
-            <label htmlFor={`${idPrefix}-cta-l`}>{t('editor.ctaLabel')}</label>
-            <input
-              id={`${idPrefix}-cta-l`}
-              className="input input-sm"
-              maxLength={80}
-              disabled={disabled}
-              value={value.label}
-              onChange={(e) => onChange({ ...value, label: e.target.value })}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor={`${idPrefix}-cta-u`}>{t('editor.ctaUrl')}</label>
-            <input
-              id={`${idPrefix}-cta-u`}
-              className="input input-sm t-mono"
-              type="url"
-              disabled={disabled}
-              value={value.url}
-              onChange={(e) => onChange({ ...value, url: e.target.value })}
-            />
-            <span className="help">{t('editor.ctaNewTabHelp')}</span>
-          </div>
+          <VarTextField
+            singleLine
+            id={`${idPrefix}-cta-l`}
+            label={t('editor.ctaLabel')}
+            maxLength={80}
+            catalog={catalog}
+            canManage={!disabled}
+            disabled={disabled}
+            value={value.label}
+            onChange={(v) => onChange({ ...value, label: v })}
+          />
+          <VarTextField
+            singleLine
+            id={`${idPrefix}-cta-u`}
+            label={t('editor.ctaUrl')}
+            maxLength={2000}
+            catalog={catalog}
+            groups={['visitor', 'company']}
+            chipHint={t('variables.urlHint')}
+            canManage={!disabled}
+            disabled={disabled}
+            value={value.url}
+            onChange={(v) => onChange({ ...value, url: v })}
+            extra={<span className="help">{t('editor.ctaNewTabHelp')}</span>}
+          />
         </>
       )}
     </div>

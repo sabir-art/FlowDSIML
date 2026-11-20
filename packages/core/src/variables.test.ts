@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { personalTitle, computedVariables, variablesFromSearch } from './variables';
+import {
+  applyUrlVariables,
+  computedVariables,
+  personalTitle,
+  variablesFromForm,
+  variablesFromSearch,
+} from './variables';
 
 describe('L25-13 : titre de la page personnalisée', () => {
   it('variables remplacées, variable vide retirée avec ses mots de liaison', () => {
@@ -29,5 +35,32 @@ describe('L46 : variables prédéfinies', () => {
       new Date('2026-11-20T10:00:00Z'),
     );
     expect(v).toEqual({ demo_title: 'Créer un rapport', step_count: '7', today: '20 novembre 2026' });
+  });
+});
+
+describe('L46-bis : adresse et formulaire', () => {
+  it('encode chaque valeur dans l’adresse', () => {
+    const url = 'https://intranet.example/inscription?prenom={{first_name}}';
+    expect(applyUrlVariables(url, { first_name: 'Camille' })).toBe(
+      'https://intranet.example/inscription?prenom=Camille',
+    );
+    expect(applyUrlVariables(url, { first_name: 'Jean Ö' })).toBe(
+      'https://intranet.example/inscription?prenom=Jean%20%C3%96',
+    );
+  });
+  it('sans valeur ni repli : paramètre vide, lien valide ; repli encodé', () => {
+    expect(applyUrlVariables('https://x.example/?p={{first_name}}', {})).toBe('https://x.example/?p=');
+    expect(applyUrlVariables('https://x.example/?c={{company|A & B}}', {})).toBe(
+      'https://x.example/?c=A%20%26%20B',
+    );
+  });
+  it('formulaire : clés et alias du visiteur et de l’entreprise seulement', () => {
+    expect(
+      variablesFromForm({ first_name: ' Camille ', entreprise: 'Acme', email: 'a@example.com', other: 'x' }),
+    ).toEqual({
+      first_name: 'Camille',
+      company: 'Acme',
+    });
+    expect(variablesFromForm({ prenom: '' })).toEqual({});
   });
 });

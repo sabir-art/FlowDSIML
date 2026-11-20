@@ -30,6 +30,8 @@ interface Ctx {
   catalog: CatalogItem[];
   aria: (label: string, fallback: string | null) => string;
   tip: (fallback: string) => string;
+  /** L46-bis : aide ajoutée à l'infobulle de chaque pastille (ex. « Ajoutée à l'adresse, encodée »). */
+  hint: string;
   deletedLabel: string;
   onOpen: (p: Pill) => void;
   renders: Set<() => void>;
@@ -90,7 +92,8 @@ const VariableNode = Node.create<{ ctx: { current: Ctx } }>({
         const label = item ? item.label : c.deletedLabel;
         // L46-01 : le nom seul ; le repli est dans l'infobulle et dans le réglage de la pastille
         dom.textContent = label;
-        if (item && fb) dom.dataset.tip = c.tip(fb);
+        const tip = [c.hint, item && fb ? c.tip(fb) : ''].filter(Boolean).join(' · ');
+        if (tip) dom.dataset.tip = tip;
         else delete dom.dataset.tip;
         dom.setAttribute('aria-label', c.aria(label, item && fb ? fb : null));
       };
@@ -165,11 +168,14 @@ export function VarTextField({
   catalog,
   disabled,
   singleLine = false,
+  plain = false,
   emailField = false,
   maxLength = 4000,
   canManage = false,
   rows = 4,
   placeholder,
+  groups,
+  chipHint = '',
   extra,
 }: {
   id: string;
@@ -179,17 +185,26 @@ export function VarTextField({
   catalog: CatalogItem[];
   disabled?: boolean;
   singleLine?: boolean;
+  /** L46-bis : texte simple sur plusieurs lignes (ex. message d'e-mail) : ni barre ni mise en forme. */
+  plain?: boolean;
   /** Champ d'e-mail ou de formulaire : l'e-mail du visiteur est proposé. */
   emailField?: boolean;
   maxLength?: number;
   canManage?: boolean;
   rows?: number;
   placeholder?: string;
+  /** L46-bis : groupes proposés (ex. adresse d'un lien : Visiteur et Entreprise seulement). */
+  groups?: CatalogItem['group'][];
+  /** L46-bis : aide affichée au survol des pastilles de ce champ. */
+  chipHint?: string;
   extra?: React.ReactNode;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const items = useMemo(() => catalog.filter((c) => emailField || !c.emailOnly), [catalog, emailField]);
+  const items = useMemo(
+    () => catalog.filter((c) => (emailField || !c.emailOnly) && (!groups || groups.includes(c.group))),
+    [catalog, emailField, groups],
+  );
   const [cat, setCat] = useState<{ rect: DOMRect; brace: number | null } | null>(null);
   const [pill, setPill] = useState<Pill | null>(null);
   const addBtn = useRef<HTMLButtonElement>(null);
@@ -198,6 +213,7 @@ export function VarTextField({
     aria: (l, f) =>
       f ? t('variables.pillAriaFallback', { label: l, fallback: f }) : t('variables.pillAria', { label: l }),
     tip: (f) => t('variables.pillTip', { fallback: f }),
+    hint: chipHint,
     deletedLabel: t('variables.deleted'),
     onOpen: (p) => setPill(p),
     renders: new Set(),
@@ -260,7 +276,7 @@ export function VarTextField({
         onChange(out);
       },
     },
-    [id, singleLine, label, placeholder],
+    [id, singleLine, plain, label, placeholder],
   );
   const editorRef = useRef<Editor | null>(null);
   editorRef.current = editor;
@@ -323,7 +339,7 @@ export function VarTextField({
         {label}
       </label>
       <div className={`var-rte${disabled ? ' is-disabled' : ''}${singleLine ? ' var-rte--single' : ''}`}>
-        {!singleLine && !disabled && editor && (
+        {!singleLine && !plain && !disabled && editor && (
           <div className="var-rte__bar">
             {toolBtn(
               <BoldIcon aria-hidden="true" />,

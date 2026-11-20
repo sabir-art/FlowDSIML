@@ -12,6 +12,7 @@ export function LeadForm({
   sub,
   onSubmit,
   onSkip,
+  rich,
 }: {
   form: LeadFormT;
   privacyUrl?: string | null;
@@ -21,6 +22,8 @@ export function LeadForm({
   sub: (s: string) => string;
   onSubmit: (d: { email: string; fields: Record<string, string>; consent: boolean }) => Promise<void>;
   onSkip: () => void;
+  /** Texte riche avec variables, en HTML sûr (richTextToHtml). */
+  rich: (s: string) => string;
 }) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [consent, setConsent] = useState(false);
@@ -50,7 +53,8 @@ export function LeadForm({
     <div ref={modal} class="p-overlay" role="dialog" aria-modal="true" aria-labelledby="p-form-title">
       <form class="p-form" onSubmit={submit}>
         <h2 id="p-form-title">{sub(form.title)}</h2>
-        {form.description && <p>{sub(form.description)}</p>}
+        {/* L46-bis : introduction en texte riche (variables remplacées, HTML sûr par construction) */}
+        {form.description && <p dangerouslySetInnerHTML={{ __html: rich(form.description) }} />}
         {fields.map((f) => (
           <label key={f.key} class="p-field">
             <span>

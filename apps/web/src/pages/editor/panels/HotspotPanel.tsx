@@ -430,6 +430,7 @@ export function HotspotPanel({
         <div className="sec-title">{t('editor.hs.cta')}</div>
         <CtaFields
           idPrefix="hs"
+          catalog={catalog}
           value={asCta(hotspot.cta)}
           disabled={readOnly}
           onChange={(v) => set({ cta: v })}

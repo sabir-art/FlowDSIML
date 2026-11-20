@@ -4,6 +4,8 @@ import { ArrowDown, ArrowUp, ChevronLeft, GripVertical, Plus, Trash2 } from 'luc
 import { useState } from 'react';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useTranslation } from 'react-i18next';
+import { VarTextField } from '../vars/VarTextField';
+import { useVarCatalog } from '../../../lib/varCatalog';
 import type { DemoEditor } from '../useDemoEditor';
 import { asFields, type FormField, type FormRow } from '../types';
 import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
@@ -36,6 +38,7 @@ export function FormPanel({
   onMove: (stepIndex: number) => void;
 }) {
   const { t } = useTranslation();
+  const catalog = useVarCatalog(editor.variables);
   const { current: ws } = useWorkspace();
   const [dialog, ask] = useConfirm();
   const [dragKey, setDragKey] = useState<string | null>(null);
@@ -108,28 +111,28 @@ export function FormPanel({
           {!leadFormsAllowed && <span className="badge badge-warning">{t('planForms.badge')}</span>}
         </div>
         {!leadFormsAllowed && <PlanFormsWarning />}
-        <div className="field">
-          <label htmlFor="f-title">{t('editor.formTitle')}</label>
-          <input
-            id="f-title"
-            className="input input-sm"
-            maxLength={120}
-            disabled={readOnly}
-            value={form.title}
-            onChange={(e) => set({ title: e.target.value })}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="f-desc">{t('editor.formDescription')}</label>
-          <textarea
-            id="f-desc"
-            className="textarea"
-            maxLength={500}
-            disabled={readOnly}
-            value={form.description}
-            onChange={(e) => set({ description: e.target.value })}
-          />
-        </div>
+        <VarTextField
+          singleLine
+          id="f-title"
+          label={t('editor.formTitle')}
+          maxLength={120}
+          catalog={catalog}
+          canManage={!readOnly}
+          disabled={readOnly}
+          value={form.title}
+          onChange={(v) => set({ title: v })}
+        />
+        <VarTextField
+          id="f-desc"
+          label={t('editor.formDescription')}
+          maxLength={500}
+          rows={3}
+          catalog={catalog}
+          canManage={!readOnly}
+          disabled={readOnly}
+          value={form.description}
+          onChange={(v) => set({ description: v })}
+        />
       </div>
 
       <div className="sec">

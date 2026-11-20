@@ -139,6 +139,23 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
     'axe : panneau sans violation',
   );
 
+  // L46-bis : adresse du bouton d'action : Visiteur et Entreprise seulement, valeurs encodées
+  await p.locator('#hs-cta-on').check();
+  const url = p.locator('.var-rte').filter({ has: p.locator('#hs-cta-u') });
+  await url.getByRole('button', { name: 'Insérer une variable' }).click();
+  ok(
+    (await cat.locator('.var-cat__group').allInnerTexts()).join('|') === 'Visiteur|Entreprise',
+    'adresse du lien : groupes Visiteur et Entreprise seulement',
+  );
+  await p.keyboard.press('Escape');
+  ok(
+    (await p
+      .locator('.var-rte')
+      .filter({ has: p.locator('#hs-cta-l') })
+      .count()) === 1,
+    'libellé du bouton : « + Variable »',
+  );
+
   // Paramètres > Variables : création
   await p.goto(`${APP}/#/settings/variables`);
   await p.getByRole('button', { name: 'Nouvelle variable' }).click();

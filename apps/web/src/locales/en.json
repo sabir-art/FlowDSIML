@@ -3268,7 +3268,22 @@
       "left_one": "{{count}} attempt left",
       "left_other": "{{count}} attempts left"
     },
-    "groupScope": "Group: {{group}}"
+    "groupScope": "Group: {{group}}",
+    "reminder": {
+      "title": "Prepare the reminder",
+      "intro_one": "One email goes to {{count}} learner, in blind copy.",
+      "intro_other": "One email goes to {{count}} learners, in blind copy.",
+      "subject": "Subject",
+      "message": "Message",
+      "keep": "Save as the workspace’s default message",
+      "open": "Open in my email app",
+      "perPerson": "One email goes to everyone, in blind copy: no value per person.",
+      "vars": {
+        "learner_first_name": "Learner first name",
+        "personal_link": "Personal link",
+        "workspace_name": "Workspace name"
+      }
+    }
   },
   "center": {
     "title": "Training center",
@@ -4772,7 +4787,8 @@
     "previewWith": "Preview with",
     "previewExamples": "Examples",
     "previewFallbacks": "Fallback values",
-    "pillTip": "If unknown: {{fallback}}"
+    "pillTip": "If unknown: {{fallback}}",
+    "urlHint": "Added to the address, encoded"
   },
   "kpi": {
     "tablist": "Displayed metric",

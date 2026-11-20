@@ -23,6 +23,35 @@ export function applyVariables(
   });
 }
 
+/**
+ * L46-bis : adresse d'un bouton d'action avec variables. Chaque valeur (ou repli) est encodée
+ * (encodeURIComponent) ; sans valeur ni repli, le paramètre reste vide (?prenom=), le lien reste valide.
+ */
+export function applyUrlVariables(
+  url: string,
+  values: VariableValues,
+  defaults: VariableValues = {},
+): string {
+  return url.replace(VAR_RE, (_m, key: string, inlineDefault?: string) =>
+    encodeURIComponent(values[key]?.trim() || defaults[key]?.trim() || (inlineDefault ?? '').trim()),
+  );
+}
+
+/**
+ * L46-bis : valeurs saisies dans un formulaire du lecteur qui correspondent à une variable du visiteur
+ * ou de l'entreprise (clé ou alias français). L'appelant ne les laisse jamais écraser l'adresse ni le
+ * lien personnalisé ; rien n'est gardé après la session.
+ */
+export function variablesFromForm(fields: Record<string, string>): VariableValues {
+  const out: VariableValues = {};
+  for (const v of PREDEFINED_VARIABLES) {
+    if (v.computed || v.emailOnly) continue;
+    const value = (fields[v.key] ?? (v.alias ? fields[v.alias] : undefined))?.trim();
+    if (value) out[v.key] = value.slice(0, 200);
+  }
+  return out;
+}
+
 export function extractVariableKeys(text: string): string[] {
   const keys = new Set<string>();
   for (const m of text.matchAll(VAR_RE)) if (m[1]) keys.add(m[1]);

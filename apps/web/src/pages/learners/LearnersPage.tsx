@@ -28,6 +28,7 @@ import {
   X,
 } from 'lucide-react';
 import { toCsv } from '@flowdsiml/core';
+import type { Json } from '@flowdsiml/supabase-types';
 import { Alert, Button } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { downloadText } from '../../lib/download';
@@ -40,6 +41,7 @@ import { Menu, type MenuItem } from '../../components/Menu';
 import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
 import { ScrollX } from '../../components/ScrollX';
 import { PathsDialog } from './PathsDialog';
+import { ReminderDialog, type Reminder } from './ReminderDialog';
 import {
   applyFilters,
   buildRows,
@@ -118,7 +120,7 @@ type Overlay =
 /** L13 : suivi des apprenants (liste, fiche, vue par formation, export CSV, suppression RGPD). */
 export function LearnersPage() {
   const { t } = useTranslation();
-  const { current, can } = useWorkspace();
+  const { current, can, reload: refresh } = useWorkspace();
   const toast = useToast();
   const [params, setParams] = useSearchParams();
   const [data, setData] = useState<ProgressData | null>(null);
@@ -168,16 +170,30 @@ export function LearnersPage() {
   const rows = useMemo(() => (data ? buildRows(data, now) : []), [data, now]);
   const filtered = useMemo(() => applyFilters(rows, filters), [rows, JSON.stringify(filters)]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function remind(ids: string[]) {
+  // L46-bis : « Préparer la relance » avant la messagerie (variables communes à tous)
+  const [reminding, setReminding] = useState<string[] | null>(null);
+  function remind(ids: string[]) {
     const list = rows.filter((r) => ids.includes(r.raw.id) && canRemind(r.raw, now));
     if (!list.length) return toast(t('learners.remind.none'));
+    setReminding(ids);
+  }
+  async function sendReminder(ids: string[], text: Reminder, keep: Reminder | null) {
+    const list = rows.filter((r) => ids.includes(r.raw.id) && canRemind(r.raw, now));
     await run(async () => {
+      if (keep) {
+        const settings = {
+          ...((current!.settings as Record<string, unknown> | null) ?? {}),
+          reminder: { subject: keep.subject, body: keep.body },
+        } as NonNullable<Json>;
+        check(await supabase.from('workspaces').update({ settings }).eq('id', current!.id));
+        await refresh();
+      }
       const kept =
         check(await supabase.rpc('record_reminders', { p_learners: list.map((r) => r.raw.id) })) ?? [];
       const emails = list.filter((r) => kept.includes(r.raw.id)).map((r) => r.raw.email!);
       if (emails.length) {
-        const subject = encodeURIComponent(t('learners.remind.subject'));
-        const body = encodeURIComponent(t('learners.remind.body'));
+        const subject = encodeURIComponent(text.subject);
+        const body = encodeURIComponent(text.body);
         window.location.href = `mailto:?bcc=${emails.map(encodeURIComponent).join(',')}&subject=${subject}&body=${body}`;
       }
       const skipped = ids.length - emails.length;
@@ -226,7 +242,7 @@ export function LearnersPage() {
       label: t('learners.actions.remind'),
       icon: <BellRing />,
       disabled: !canRemind(r.raw, now),
-      onSelect: () => void remind([r.raw.id]),
+      onSelect: () => remind([r.raw.id]),
     },
     {
       label: t('learners.actions.grant'),
@@ -262,6 +278,19 @@ export function LearnersPage() {
         onExport={() => setOverlay({ kind: 'export' })}
         onPaths={() => setOverlay({ kind: 'paths' })}
       />
+      {reminding && current && (
+        <ReminderDialog
+          ws={current}
+          count={reminding.length}
+          canSave={can('workspace.settings')}
+          onClose={() => setReminding(null)}
+          onSend={(text, keep) => {
+            const ids = reminding;
+            setReminding(null);
+            void sendReminder(ids, text, keep);
+          }}
+        />
+      )}
       {(loadError || error) && <Alert kind="error">{loadError ?? error}</Alert>}
       <div className="tabs l13-tabs" role="tablist" aria-label={t('learners.tabs.label')}>
         {(['liste', 'formation'] as const).map((id) => (
@@ -319,7 +348,7 @@ export function LearnersPage() {
           selected={selected}
           setSelected={setSelected}
           onOpen={(id) => setOverlay({ kind: 'fiche', id })}
-          onRemind={(ids) => void remind(ids)}
+          onRemind={(ids) => remind(ids)}
           onGrant={(r) => void grant(r)}
           onExport={() => setOverlay({ kind: 'export' })}
           actions={actionItems}
@@ -345,7 +374,7 @@ export function LearnersPage() {
           canErase={can('members.manage')}
           inert={overlay?.kind === 'erase'}
           onClose={() => setOverlay(null)}
-          onRemind={() => void remind([fiche.raw.id])}
+          onRemind={() => remind([fiche.raw.id])}
           onGrant={() => void grant(fiche)}
           onExport={() => setOverlay({ kind: 'export', preset: { learner: fiche.raw.id } })}
           onErase={() => setOverlay({ kind: 'erase', id: fiche.raw.id })}

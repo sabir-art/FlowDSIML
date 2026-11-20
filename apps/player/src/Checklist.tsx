@@ -42,7 +42,7 @@ export function Checklist({
   const done = items.filter((x) => x.done).length;
   const prevDone = useRef(new Set(items.filter((x) => x.done).map((x) => x.id)));
   const side = position === 'left' ? 'left' : 'right';
-  const label = title || t.checklist;
+  const label = title ? sub(title) : t.checklist;
   const progress = t.checklistProgress
     .replace('{done}', String(done))
     .replace('{total}', String(items.length));

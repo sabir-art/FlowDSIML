@@ -125,6 +125,7 @@ export function StepPanel({
           </div>
           <CtaFields
             idPrefix="st"
+            catalog={catalog}
             label={t('editor.end.showButton')}
             value={asCta(step.cta)}
             disabled={readOnly}

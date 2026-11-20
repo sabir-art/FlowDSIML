@@ -10,7 +10,9 @@ import {
   type Step,
 } from '@flowdsiml/manifest';
 import {
+  applyUrlVariables,
   applyVariables,
+  variablesFromForm,
   buildNeedles,
   escapeHtml,
   markTermsInHtml,
@@ -188,9 +190,12 @@ export function Player({
         : null,
     [m.dataset, rawValues, datasetRowIndex],
   );
+  // L46-bis : valeurs saisies dans un formulaire, pour la session seulement ; l'adresse et le lien
+  // personnalisé (rawValues) ne sont jamais écrasés
+  const [formVars, setFormVars] = useState<VariableValues>({});
   const values = useMemo(
-    () => ({ ...(m.dataset ? datasetVars(m.dataset, dsRow) : {}), ...rawValues }),
-    [m.dataset, dsRow, rawValues],
+    () => ({ ...(m.dataset ? datasetVars(m.dataset, dsRow) : {}), ...formVars, ...rawValues }),
+    [m.dataset, dsRow, formVars, rawValues],
   );
   useEffect(() => {
     if (raw.ab && !preview) tracker.setBaseProps?.({ abt: raw.ab.testId, abv: variant });
@@ -526,7 +531,8 @@ export function Player({
 
   function onCta(url: string, label: string) {
     tracker.track('cta_click', { stepId: step.id, stepIndex: index, props: { label: label.slice(0, 80) } });
-    window.open(url, '_blank', 'noopener');
+    // L46-bis : variables de l'adresse encodées (paramètre vide si aucune valeur)
+    window.open(applyUrlVariables(url, values, defaults), '_blank', 'noopener');
   }
 
   function toggleFullscreen() {
@@ -1089,9 +1095,11 @@ export function Player({
             workspaceName={m.workspaceName}
             t={t}
             sub={sub}
+            rich={(x) => richTextToHtml(sub(x))}
             onSkip={() => markGate(gateForm.id)}
             onSubmit={async (data) => {
               await onLead(gateForm, data);
+              setFormVars((v) => ({ ...v, ...variablesFromForm(data.fields) }));
               tracker.track('form_submit', { stepId: step.id, stepIndex: index });
               markGate(gateForm.id);
             }}

@@ -332,7 +332,7 @@ export function Canvas({
         {popup && !endText && opts.choices.length === 0 && (
           <div className="canvas-popup-acts">
             <span className="p-btn p-btn-primary">
-              {opts.buttonLabel || t('editor.advanced.popup.buttonPlaceholder')}
+              {vp.text(opts.buttonLabel) || t('editor.advanced.popup.buttonPlaceholder')}
             </span>
           </div>
         )}
@@ -644,7 +644,7 @@ export function Canvas({
               ) : (
                 asAction(tipHotspot.action).type !== 'none' && (
                   <span className="p-btn p-btn-primary p-btn-sm">
-                    {asStepOptions(step.options).buttonLabel ||
+                    {vp.text(asStepOptions(step.options).buttonLabel) ||
                       (stepIndex === editor.steps.length - 1
                         ? t('editor.hs.finish')
                         : t('editor.previewNext'))}

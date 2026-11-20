@@ -1,6 +1,8 @@
 import { AppWindow, GitBranch, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { VarTextField } from '../vars/VarTextField';
+import { useVarCatalog } from '../../../lib/varCatalog';
 import type { ChoiceAction, StepOptions } from '@flowdsiml/manifest';
 import { Button, Field, Select, Switch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
@@ -25,6 +27,7 @@ export function GuidedStepFields({
   readOnly: boolean;
 }) {
   const { t } = useTranslation();
+  const catalog = useVarCatalog(editor.variables);
   const opts = asStepOptions(step.options);
   const set = (patch: Partial<StepOptions>) =>
     editor.updateStep(step.id, { options: { ...opts, ...patch } as unknown as StepRow['options'] });
@@ -173,18 +176,19 @@ export function GuidedStepFields({
             </>
           )}
           {!opts.choices.length && (
-            <Field label={t('editor.advanced.popup.button')} htmlFor="gp-button">
-              <input
-                id="gp-button"
-                className="fd-input"
-                maxLength={40}
-                disabled={readOnly}
-                value={opts.buttonLabel}
-                placeholder={t('editor.advanced.popup.buttonPlaceholder')}
-                onChange={(e) => set({ buttonLabel: e.target.value })}
-              />
-              <p className="fd-help">{t('editor.advanced.popup.buttonHelp')}</p>
-            </Field>
+            <VarTextField
+              singleLine
+              id="gp-button"
+              label={t('editor.advanced.popup.button')}
+              maxLength={40}
+              catalog={catalog}
+              canManage={!readOnly}
+              disabled={readOnly}
+              value={opts.buttonLabel}
+              placeholder={t('editor.advanced.popup.buttonPlaceholder')}
+              onChange={(v) => set({ buttonLabel: v })}
+              extra={<p className="fd-help">{t('editor.advanced.popup.buttonHelp')}</p>}
+            />
           )}
         </section>
       )}

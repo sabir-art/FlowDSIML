@@ -3,6 +3,8 @@ import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { Plus, Trash2, X } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { VarTextField } from '../vars/VarTextField';
+import { useVarCatalog } from '../../../lib/varCatalog';
 import type { DemoEditor } from '../useDemoEditor';
 import { asSettings, type DemoSettings } from '../types';
 import { ClipboardList, Database, Lock, Presentation } from 'lucide-react';
@@ -66,6 +68,7 @@ export function SettingsTab({
   onOpenForm: (stepIndex: number, formId: string) => void;
 }) {
   const { t } = useTranslation();
+  const catalog = useVarCatalog(editor.variables);
   const { current: ws } = useWorkspace();
   const settings = asSettings(editor.demo!.settings);
   const set = (patch: Partial<DemoSettings>) =>
@@ -358,18 +361,18 @@ export function SettingsTab({
         />
         {checklist.enabled && (
           <>
-            <div className="field">
-              <label htmlFor="cl-heading">{t('editor.advanced.checklist.heading')}</label>
-              <input
-                id="cl-heading"
-                className="input input-sm"
-                maxLength={80}
-                disabled={readOnly}
-                value={checklist.title}
-                placeholder={t('editor.advanced.checklist.headingPlaceholder')}
-                onChange={(e) => set({ checklist: { ...checklist, title: e.target.value } })}
-              />
-            </div>
+            <VarTextField
+              singleLine
+              id="cl-heading"
+              label={t('editor.advanced.checklist.heading')}
+              maxLength={80}
+              catalog={catalog}
+              canManage={!readOnly}
+              disabled={readOnly}
+              value={checklist.title}
+              placeholder={t('editor.advanced.checklist.headingPlaceholder')}
+              onChange={(v) => set({ checklist: { ...checklist, title: v } })}
+            />
             <div className="field">
               <span className="label" id="cl-pos">
                 {t('editor.advanced.checklist.position')}

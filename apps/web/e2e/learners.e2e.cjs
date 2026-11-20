@@ -86,6 +86,29 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     'L13-01 : bandeau de sélection',
   );
   await page.locator('.l13-sel').getByRole('button', { name: 'Relancer' }).click();
+  // L46-bis : « Préparer la relance » (variables communes seulement)
+  const rm = page.getByRole('dialog', { name: 'Préparer la relance' });
+  await rm.waitFor();
+  const msg = rm.locator('#rm-body');
+  await msg.focus();
+  await page.keyboard.press('Control+End');
+  await page.keyboard.type(' {');
+  const cat = page.getByRole('dialog', { name: 'Variables' });
+  await cat.waitFor();
+  const perPerson = cat.getByRole('option', { name: /Prénom de l’apprenant/ });
+  ok(
+    (await perPerson.getAttribute('aria-disabled')) === 'true',
+    'L46-bis : « Prénom de l’apprenant » désactivé (jamais masqué)',
+  );
+  ok(
+    /pas de valeur par personne/.test(await perPerson.innerText()) &&
+      /Bientôt/.test(await perPerson.innerText()),
+    'L46-bis : raison et « Bientôt »',
+  );
+  await page.keyboard.type('espace');
+  await page.keyboard.press('Enter');
+  ok((await msg.locator('.var-chip').count()) === 1, 'L46-bis : « Nom de l’espace » insère la pastille');
+  await rm.getByRole('button', { name: 'Ouvrir dans ma messagerie' }).click();
   await page.waitForTimeout(400);
   const toast = await page.locator('.mk-toasts').textContent();
   ok(

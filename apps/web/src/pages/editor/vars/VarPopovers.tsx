@@ -164,7 +164,7 @@ export function VarCatalog({
           } else if (e.key === 'Enter') {
             e.preventDefault();
             const it = list[idx];
-            if (it) onPick(it);
+            if (it && !it.disabledReason) onPick(it);
           }
         }}
       />
@@ -191,18 +191,30 @@ export function VarCatalog({
                   data-i={i}
                   role="option"
                   aria-selected={i === idx}
+                  aria-disabled={c.disabledReason ? true : undefined}
                   aria-describedby={`${id}-${i}-d`}
-                  className="var-cat__opt"
+                  className={`var-cat__opt${c.disabledReason ? ' is-disabled' : ''}`}
                   title={c.description || undefined}
                   onMouseEnter={() => setActive(i)}
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => onPick(c)}
+                  onClick={() => !c.disabledReason && onPick(c)}
                 >
                   <span className="var-cat__label">{c.label}</span>
-                  <span className="var-cat__ex">{t('variables.example', { value: c.example })}</span>
-                  <span className="sr-only" id={`${id}-${i}-d`}>
-                    {c.description}
-                  </span>
+                  {c.disabledReason ? (
+                    <>
+                      <span className="var-cat__soon">{t('shell.soon')}</span>
+                      <span className="var-cat__reason" id={`${id}-${i}-d`}>
+                        {c.disabledReason}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="var-cat__ex">{t('variables.example', { value: c.example })}</span>
+                      <span className="sr-only" id={`${id}-${i}-d`}>
+                        {c.description}
+                      </span>
+                    </>
+                  )}
                 </div>
               </li>
             );

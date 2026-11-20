@@ -3268,7 +3268,22 @@
       "left_one": "{{count}} tentative restante",
       "left_other": "{{count}} tentatives restantes"
     },
-    "groupScope": "Groupe : {{group}}"
+    "groupScope": "Groupe : {{group}}",
+    "reminder": {
+      "title": "Préparer la relance",
+      "intro_one": "Un e-mail part à {{count}} apprenant, en copie cachée.",
+      "intro_other": "Un e-mail part à {{count}} apprenants, en copie cachée.",
+      "subject": "Objet",
+      "message": "Message",
+      "keep": "Enregistrer comme message par défaut de l’espace",
+      "open": "Ouvrir dans ma messagerie",
+      "perPerson": "Un seul e-mail part à tous, en copie cachée : pas de valeur par personne.",
+      "vars": {
+        "learner_first_name": "Prénom de l’apprenant",
+        "personal_link": "Lien personnel",
+        "workspace_name": "Nom de l’espace"
+      }
+    }
   },
   "center": {
     "title": "Centre de formation",
@@ -4772,7 +4787,8 @@
     "previewWith": "Aperçu avec",
     "previewExamples": "Exemples",
     "previewFallbacks": "Valeurs de repli",
-    "pillTip": "Si inconnu : {{fallback}}"
+    "pillTip": "Si inconnu : {{fallback}}",
+    "urlHint": "Ajoutée à l’adresse, encodée"
   },
   "kpi": {
     "tablist": "Indicateur affiché",

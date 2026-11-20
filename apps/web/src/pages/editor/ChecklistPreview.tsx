@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next';
+import { useVarCatalog } from '../../lib/varCatalog';
+import { usePreviewMode, varPreview } from './vars/varPreview';
 import { Circle, CircleCheck, ListChecks } from 'lucide-react';
 import type { DemoEditor } from './useDemoEditor';
 import { asSettings } from './types';
@@ -11,6 +13,8 @@ const ICON = { size: 16, 'aria-hidden': true } as const;
  * dernière étape. Repliée : pilule.
  */
 export function ChecklistPreview({ editor, index }: { editor: DemoEditor; index: number }) {
+  const catalog = useVarCatalog(editor.variables);
+  const mode = usePreviewMode();
   const { t } = useTranslation();
   const settings = asSettings(editor.demo?.settings);
   const cl = settings.checklist;
@@ -29,7 +33,9 @@ export function ChecklistPreview({ editor, index }: { editor: DemoEditor; index:
         current: index === i,
       }));
   const done = items.filter((x) => x.done).length;
-  const title = cl.title || t('editor.advanced.checklist.headingPlaceholder');
+  // L46-bis : variables du titre remplacées comme dans le canevas (exemples ou valeurs de repli)
+  const vp = varPreview(catalog, editor.variables, mode);
+  const title = vp.text(cl.title ?? '') || t('editor.advanced.checklist.headingPlaceholder');
   const side = cl.position === 'left' ? 'left' : 'right';
   if (cl.position === 'collapsed')
     return (
