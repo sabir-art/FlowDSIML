@@ -49,6 +49,9 @@ function aiState(state) {
       dataset: true,
       chart: true,
       assistant: true,
+      // L30b : voix et sous-titres décochés par défaut (consentement séparé)
+      voice: false,
+      captions: false,
     },
     used: 12,
     quota: 500,
@@ -56,6 +59,10 @@ function aiState(state) {
     userDailyRequests: 30,
     workspaceQuotaReached: false,
     userQuotaReached: false,
+    ttsUsed: 0,
+    ttsQuota: 300,
+    sttUsed: 0,
+    sttQuota: 300,
     renewsOn: '2026-12-01',
     canEdit: true,
     canManage: true,
@@ -481,6 +488,12 @@ async function install(page, state = seed()) {
       if (!ai.enabled) return json(route, 403, { error: 'AI_DISABLED' });
       if (ai.workspaceQuotaReached)
         return json(route, 429, { error: 'AI_QUOTA_WORKSPACE', renewsOn: ai.renewsOn });
+      // L30b : extrait de voix (sans quota) ; quota audio séparé pour voix et sous-titres
+      if (body.task === 'voice_sample')
+        return json(route, 200, { result: { audio: 'data:audio/mpeg;base64,' }, redacted: 0 });
+      const audio = { voice: ['ttsUsed', 'ttsQuota'], captions: ['sttUsed', 'sttQuota'] }[body.task];
+      if (audio && (ai[audio[0]] || 0) >= (ai[audio[1]] ?? Infinity))
+        return json(route, 429, { error: 'AI_QUOTA_AUDIO', renewsOn: ai.renewsOn });
       if (state.aiFail) return json(route, 502, { error: 'PROVIDER' });
       ai.used += 1;
       const r = state.aiReply

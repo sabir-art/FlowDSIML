@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aiBlock, lostVariables, type AiStatus } from './ai';
+import { aiBlock, formatSeconds, lostVariables, type AiStatus } from './ai';
 
 const base: AiStatus = {
   enabled: true,
@@ -33,8 +33,9 @@ describe('aiBlock', () => {
     expect(aiBlock({ ...base, canEdit: false }, 'write')).toBe('role');
     expect(aiBlock({ ...base, workspaceQuotaReached: true }, 'write')).toBe('quota');
     expect(aiBlock({ ...base, userQuotaReached: true }, 'write')).toBe('userQuota');
-    expect(aiBlock({ ...base, audioQuotaReached: true }, 'voice')).toBe('quota');
-    expect(aiBlock({ ...base, audioQuotaReached: true }, 'write')).toBeNull();
+    expect(aiBlock({ ...base, ttsUsed: 300, ttsQuota: 300 }, 'voice')).toBe('quota');
+    expect(aiBlock({ ...base, ttsUsed: 300, ttsQuota: 300 }, 'captions')).toBeNull();
+    expect(aiBlock({ ...base, ttsUsed: 300, ttsQuota: 300 }, 'write')).toBeNull();
     expect(aiBlock(base, 'write')).toBeNull();
   });
 });
@@ -45,5 +46,14 @@ describe('lostVariables', () => {
       'first_name',
     ]);
     expect(lostVariables('Sans variable', 'Autre')).toEqual([]);
+  });
+});
+
+describe('formatSeconds', () => {
+  it('secondes, puis minutes et secondes au-delà de 120 s', () => {
+    expect(formatSeconds(45)).toBe('45\u00a0s');
+    expect(formatSeconds(120)).toBe('120\u00a0s');
+    expect(formatSeconds(250)).toBe('4\u00a0min 10\u00a0s');
+    expect(formatSeconds(300)).toBe('5\u00a0min');
   });
 });

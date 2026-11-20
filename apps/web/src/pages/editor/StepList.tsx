@@ -492,19 +492,30 @@ function StepBadges({
     step.kind === 'video' && { icon: <Play />, label: t('editor.video.kind') },
     step.kind === 'html' && { icon: <Code />, label: t('editor.html.kind') },
     // L28-02 : étape avec voix off
-    step.voice_path && { icon: <AudioLines />, label: t('editor.voice.railIcon') },
+    // L30-11 : voix de synthèse appliquée, repère « IA »
+    step.voice_path &&
+      ((step.options as { aiVoice?: boolean } | null)?.aiVoice
+        ? { icon: <AudioLines />, label: t('editor.voice.railIconAi'), ai: true }
+        : { icon: <AudioLines />, label: t('editor.voice.railIcon') }),
     hotspots > 0 && { icon: <Target />, label: t('editor.badgeHotspots', { count: hotspots }) },
     step.gate_form_id && { icon: <ClipboardList />, label: t('editor.badgeForm') },
     step.cta && { icon: <MousePointerClick />, label: t('editor.badgeCta') },
     step.zoom && { icon: <ZoomIn />, label: t('editor.badgeZoom') },
     blurs > 0 && { icon: <Droplet />, label: t('editor.badgeBlurs', { count: blurs }) },
-  ].filter(Boolean) as Array<{ icon: React.ReactNode; label: string }>;
+  ].filter(Boolean) as Array<{ icon: React.ReactNode; label: string; ai?: boolean }>;
   if (!items.length) return null;
   return (
     <>
       {items.map((b) => (
-        <span key={b.label} title={b.label} aria-label={b.label} role="img">
+        <span
+          key={b.label}
+          title={b.label}
+          aria-label={b.label}
+          role="img"
+          className={b.ai ? 'rail-ai' : undefined}
+        >
           {b.icon}
+          {b.ai && <span aria-hidden="true">{t('ai.badge')}</span>}
         </span>
       ))}
     </>

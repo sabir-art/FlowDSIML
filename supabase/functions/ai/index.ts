@@ -13,7 +13,7 @@ import {
   STT_MODEL,
   TTS_FORMAT,
   TTS_MODEL,
-  VIDEO_MAX_S,
+  STT_MAX_S,
   VOICES,
   VOICE_MAX_BYTES,
   VOICE_MAX_MS,
@@ -64,13 +64,31 @@ async function reserveOr(ws: string, uid: string, feature: string, audio = 0): P
     p_audio_seconds: audio,
   });
   if (!reserve.error) return null;
-  const code = ['AI_DISABLED', 'AI_QUOTA_WORKSPACE', 'AI_QUOTA_USER', 'FORBIDDEN'].find((c) =>
-    reserve.error!.message.includes(c),
+  const code = ['AI_DISABLED', 'AI_QUOTA_AUDIO', 'AI_QUOTA_WORKSPACE', 'AI_QUOTA_USER', 'FORBIDDEN'].find(
+    (c) => reserve.error!.message.includes(c),
   );
   if (code === 'AI_DISABLED' || code === 'FORBIDDEN') return json(403, { error: code });
   if (code) return json(429, { error: code, renewsOn: renewsOn() });
   console.error('ai: reserve', reserve.error.code);
   return json(500, { error: 'SERVER' });
+}
+
+/** Extrait d'une voix (fourni par le fournisseur) : aucun texte envoyé, aucun quota consommé. */
+async function voiceSample(key: string, voice: string) {
+  const id = VOICES[voice];
+  if (!id) return json(400, { error: 'BAD_VOICE' });
+  const meta = await fetch(`${ELEVEN}/voices/${id}`, { headers: { 'xi-api-key': key } }).catch(() => null);
+  const url = meta?.ok
+    ? ((await meta.json().catch(() => ({}))) as { preview_url?: string }).preview_url
+    : null;
+  if (!url || !/^https:\/\//.test(url)) return json(502, { error: 'PROVIDER' });
+  const mp3 = await fetch(url).catch(() => null);
+  if (!mp3?.ok) return json(502, { error: 'PROVIDER' });
+  const bytes = new Uint8Array(await mp3.arrayBuffer());
+  if (bytes.byteLength > 1024 * 1024) return json(502, { error: 'PROVIDER' });
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return json(200, { result: { audio: `data:audio/mpeg;base64,${btoa(bin)}` } });
 }
 
 /**
@@ -81,6 +99,13 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
   const key = Deno.env.get('ELEVENLABS_API_KEY');
   if (!key) return json(503, { error: 'PROVIDER' });
   const input = (body.input ?? {}) as Record<string, unknown>;
+  if (body.task === 'voice_sample') {
+    // Fonction activée exigée, sans réservation (aucun quota, aucune donnée de l'utilisateur)
+    const { data: cfg } = await admin.rpc('ai_config', { p_ws: ws });
+    const c = cfg as { enabled?: boolean; features?: Record<string, boolean> } | null;
+    if (!c?.enabled || !c.features?.voice) return json(403, { error: 'AI_DISABLED' });
+    return voiceSample(key, String(input.voice ?? ''));
+  }
   let parsed;
   try {
     parsed = body.task === 'voice' ? parseVoice(input) : parseCaptions(input);
@@ -90,7 +115,7 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
   // L'étape doit être visible par l'utilisateur (RLS) et appartenir à l'espace
   const { data: step } = await asUser(req)
     .from('steps')
-    .select('id, demo_id, workspace_id, kind, video_path, video_duration_ms')
+    .select('id, demo_id, workspace_id, kind, video_path, video_duration_ms, voice_path, voice_duration_ms')
     .eq('id', parsed.stepId)
     .maybeSingle();
   if (!step || step.workspace_id !== ws) return json(404, { error: 'NOT_FOUND' });
@@ -104,7 +129,7 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
     const res = await fetch(`${ELEVEN}/text-to-speech/${VOICES[v.voice]}?output_format=${TTS_FORMAT}`, {
       method: 'POST',
       headers: { 'xi-api-key': key, 'content-type': 'application/json', accept: 'audio/mpeg' },
-      body: JSON.stringify({ text: v.text, model_id: TTS_MODEL }),
+      body: JSON.stringify({ text: v.text, model_id: TTS_MODEL, voice_settings: { speed: v.speed } }),
     }).catch(() => null);
     if (!res || !res.ok) {
       await refund();
@@ -118,7 +143,7 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
       p_user: uid,
       p_input: 0,
       p_output: 0,
-      p_audio_seconds: Math.min(3600, Math.ceil(durationMs / 1000)),
+      p_tts_seconds: Math.min(3600, Math.ceil(durationMs / 1000)),
     });
     if (bytes.byteLength > VOICE_MAX_BYTES || durationMs > VOICE_MAX_MS)
       return json(422, { error: 'TOO_LONG' });
@@ -130,19 +155,24 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
     return json(200, { result: { path, durationMs } });
   }
 
-  // Sous-titres : la piste audio de la vidéo de l'étape part chez le fournisseur (annoncé dans l'interface)
-  if (step.kind !== 'video' || !step.video_path) return json(400, { error: 'NO_VIDEO' });
-  const seconds = Math.min(VIDEO_MAX_S, Math.max(1, Math.ceil(Number(step.video_duration_ms ?? 0) / 1000)));
+  // Sous-titres : la piste audio (vidéo de l'étape ou voix off) part chez le fournisseur, après avertissement
+  const c = parsed as ReturnType<typeof parseCaptions>;
+  const bucket = c.source === 'voice' ? 'voices' : 'videos';
+  const path = c.source === 'voice' ? step.voice_path : step.kind === 'video' ? step.video_path : null;
+  const ms = Number((c.source === 'voice' ? step.voice_duration_ms : step.video_duration_ms) ?? 0);
+  if (!path) return json(400, { error: 'NO_AUDIO' });
+  if (ms > STT_MAX_S * 1000) return json(422, { error: 'TOO_LONG' });
+  const seconds = Math.min(STT_MAX_S, Math.max(1, Math.ceil(ms / 1000)));
   const blocked = await reserveOr(ws, uid, 'captions', seconds);
   if (blocked) return blocked;
-  const file = await admin.storage.from('videos').download(step.video_path);
+  const file = await admin.storage.from(bucket).download(path);
   if (file.error || !file.data) {
     await refund();
     return json(404, { error: 'NOT_FOUND' });
   }
   const form = new FormData();
   form.append('model_id', STT_MODEL);
-  form.append('file', file.data, 'video.webm');
+  form.append('file', file.data, path.split('/').pop() ?? 'audio');
   const lang = typeof body.lang === 'string' ? body.lang.slice(0, 2).toLowerCase() : '';
   if (/^[a-z]{2}$/.test(lang)) form.append('language_code', lang);
   const res = await fetch(`${ELEVEN}/speech-to-text`, {
@@ -235,7 +265,8 @@ Deno.serve(async (req) => {
   const uid = await editorOf(req, ws);
   if (!uid) return json(403, { error: 'FORBIDDEN' });
 
-  if (body.task === 'voice' || body.task === 'captions') return audio(req, body, ws, uid);
+  if (body.task === 'voice' || body.task === 'captions' || body.task === 'voice_sample')
+    return audio(req, body, ws, uid);
 
   let parsed;
   try {

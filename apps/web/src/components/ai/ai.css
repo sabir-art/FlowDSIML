@@ -448,6 +448,72 @@
   height: 16px;
   margin-top: 2px;
 }
-.ai-voice-text {
-  text-decoration: none;
+/* L30-11 : panneau Voix de synthèse */
+.mk .ai-voices,
+.mk .ai-speed {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.mk .ai-voices legend,
+.mk .ai-speed legend {
+  padding: 0;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mk .ai-voice-row {
+  display: flex;
+  gap: var(--fd-space-2);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.mk .ai-speed-row {
+  display: flex;
+  gap: var(--fd-space-4);
+  flex-wrap: wrap;
+}
+.mk .ai-captions {
+  display: grid;
+  gap: var(--fd-space-2);
+  justify-items: start;
+  margin-top: var(--fd-space-2);
+}
+.mk .ai-captions .ai-preview {
+  justify-self: stretch;
+}
+/* Repère « IA » de la liste des étapes (voix de synthèse) */
+.mk .rail-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+.mk .rail-ai > span {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--fd-color-primary);
+}
+/* L30b §2 : sous-section Voix et sous-titres */
+.mk .ai-audio {
+  margin-top: var(--fd-space-5);
+  padding-top: var(--fd-space-4);
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .ai-audio .ai-notice {
+  margin: 0 0 var(--fd-space-2);
+}
+.mk .ai-audio-row {
+  display: grid;
+  gap: 2px;
+}
+.mk .ai-audio-row p {
+  margin: 0 0 0 24px;
+}
+.mk .ai-audio-row .ai-bar {
+  margin: 4px 0 6px 24px;
 }

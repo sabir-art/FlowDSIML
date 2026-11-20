@@ -107,9 +107,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(v().captions[1].text === 'Remplissez les champs obligatoires.', 'sous-titre modifié');
   ok(
     (await page
-      .locator('.ai-entry', { hasText: 'Sous-titres automatiques' })
+      .locator('.ai-entry', { hasText: 'Transcription automatique' })
       .getAttribute('aria-disabled')) === 'true',
-    '066 : « Sous-titres automatiques » désactivé tant que l’Assistance IA ne l’est pas',
+    '066 : « Transcription automatique » désactivé tant que l’Assistance IA ne l’est pas',
   );
 
   // Lecture

@@ -4,31 +4,43 @@ import { AiError, redact } from './lib.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Voix proposées (voix préenregistrées du fournisseur, modèle multilingue). */
+/**
+ * Voix proposées (spec L30b §3 : 6 au plus) : voix préenregistrées du fournisseur, lues en français par
+ * le modèle multilingue. Identifiants à confirmer dans la bibliothèque du compte avant la mise en ligne.
+ */
 export const VOICES: Record<string, string> = {
-  feminine: '21m00Tcm4TlvDq8ikWAM',
-  masculine: 'pNInz6obpgDQGcFmaJgB',
+  claire: '21m00Tcm4TlvDq8ikWAM',
+  louise: 'XB0fDUnXU5powFXDhCwa',
+  sarah: 'EXAVITQu4vr4xnSDxMaL',
+  antoine: 'ErXwobaYiN019PkySvjV',
+  adam: 'pNInz6obpgDQGcFmaJgB',
+  daniel: 'onwK4e9ZLuTAKqWW03F9',
 };
+/** Vitesse de lecture (voice_settings.speed). */
+export const SPEEDS: Record<string, number> = { slow: 0.85, normal: 1, fast: 1.15 };
 export const TTS_MODEL = 'eleven_multilingual_v2';
 export const STT_MODEL = 'scribe_v1';
 /** Sortie MP3 à 128 kbit/s : durée = octets × 8 / 128 000. */
 export const TTS_FORMAT = 'mp3_44100_128';
-export const TTS_MAX_CHARS = 2500;
+export const TTS_MAX_CHARS = 1000;
 /** Limites de la voix off (bucket voices) : 2 minutes, 5 Mo. */
 export const VOICE_MAX_MS = 120_000;
 export const VOICE_MAX_BYTES = 5 * 1024 * 1024;
-/** Vidéo d'une étape : 10 minutes au plus (F7). */
-export const VIDEO_MAX_S = 600;
+/** Sous-titres automatiques : 2 minutes d'audio au plus par demande (spec L30b §4). */
+export const STT_MAX_S = 120;
 
 export interface VoiceRequest {
   stepId: string;
   text: string;
   voice: string;
+  speed: number;
   /** Secondes d'audio réservées avant l'appel (estimation ~14 caractères par seconde). */
   estimate: number;
 }
 export interface CaptionsRequest {
   stepId: string;
+  /** video : piste de l'étape vidéo ; voice : voix off enregistrée de l'étape. */
+  source: 'video' | 'voice';
 }
 
 export function parseVoice(input: Record<string, unknown>): VoiceRequest {
@@ -39,14 +51,20 @@ export function parseVoice(input: Record<string, unknown>): VoiceRequest {
   if (text.length > TTS_MAX_CHARS) throw new AiError('TOO_LONG_TEXT');
   // La transcription est lue à voix haute : une donnée personnelle détectée bloque l'envoi
   if (redact(text).count > 0) throw new AiError('PII_IN_TEXT', 422);
-  const voice = typeof input.voice === 'string' && VOICES[input.voice] ? input.voice : 'feminine';
-  return { stepId, text, voice, estimate: Math.min(VOICE_MAX_MS / 1000, Math.ceil(text.length / 14) + 1) };
+  const voice = typeof input.voice === 'string' && VOICES[input.voice] ? input.voice : 'claire';
+  const speed = SPEEDS[String(input.speed)] ?? 1;
+  return { stepId, text, voice, speed, estimate: estimateSeconds(text, speed) };
 }
 
 export function parseCaptions(input: Record<string, unknown>): CaptionsRequest {
   const stepId = String(input.stepId ?? '');
   if (!UUID.test(stepId)) throw new AiError('BAD_STEP');
-  return { stepId };
+  return { stepId, source: input.source === 'voice' ? 'voice' : 'video' };
+}
+
+/** Durée estimée (même calcul que l'interface) : environ 14 caractères par seconde à vitesse normale. */
+export function estimateSeconds(text: string, speed = 1): number {
+  return Math.min(VOICE_MAX_MS / 1000, Math.max(1, Math.ceil(text.trim().length / 14 / speed)));
 }
 
 export const mp3DurationMs = (bytes: number) => Math.round((bytes * 8) / 128);

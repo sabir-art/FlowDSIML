@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layers, Pencil, Plus, Sparkles, Trash2, TriangleAlert, Upload, X } from 'lucide-react';
-import { AiCaptions } from '../../../components/ai/AiAudio';
+import { AiCaptions, languageName, type CaptionsResult } from '../../../components/ai/AiAudio';
+import { useConfirm } from '../../../components/ConfirmDialog';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { asSettings } from '../types';
 import { parseVtt } from '@flowdsiml/core';
@@ -50,7 +51,11 @@ export function VideoFields({
   const ed = useVideoEdit(step.id);
   const file = useRef<HTMLInputElement>(null);
   const [editing, setEditing] = useState(false);
-  const [aiCues, setAiCues] = useState<VideoCaption[] | null>(null);
+  const [aiCues, setAiCues] = useState<CaptionsResult | null>(null);
+  const [dialog, ask] = useConfirm();
+  // « Annuler » du toast : toujours l'éditeur courant
+  const live = useRef(editor);
+  live.current = editor;
   const { current: ws } = useWorkspace();
   const idx = v.pauses.findIndex((p) => p.id === ed.pause);
   const pause = idx >= 0 ? v.pauses[idx] : null;
@@ -233,8 +238,12 @@ export function VideoFields({
           <AiCaptions
             ws={ws.id}
             lang={asSettings(editor.demo!.settings).locale ?? 'fr'}
+            demoId={step.demo_id}
             stepId={step.id}
-            onResult={(cues) => setAiCues(cues)}
+            source="video"
+            durationMs={step.video_duration_ms ?? 0}
+            label={t('ai.captions.open')}
+            onResult={setAiCues}
           />
         )}
         <div className="setting">
@@ -299,13 +308,34 @@ export function VideoFields({
           <p className="help">{t('editor.video.convertHelp')}</p>
         </div>
       )}
+      {dialog}
       {aiCues && (
         <CaptionsDialog
           ai
-          captions={aiCues.slice(0, MAX_CAPTIONS)}
+          language={aiCues.language}
+          captions={aiCues.captions.slice(0, MAX_CAPTIONS)}
           readOnly={readOnly}
           onClose={() => setAiCues(null)}
-          onSave={(captions) => save({ captions, captionsDefault: true })}
+          onSave={async (captions) => {
+            // L30-12 : confirmation si la vidéo a déjà des sous-titres, puis « Annuler » dans le toast
+            const before = v;
+            if (
+              v.captions.length &&
+              !(await ask({
+                title: t('ai.captions.replaceTitle'),
+                body: t('ai.captions.replaceBody', { count: v.captions.length }),
+                confirmLabel: t('ai.captions.replace'),
+              }))
+            )
+              return false;
+            save({ captions, captionsDefault: true });
+            toast(t('ai.captions.applied'), {
+              label: t('ai.undo'),
+              durationMs: 8000,
+              onClick: () =>
+                live.current.updateStep(step.id, { video: before as unknown as StepRow['video'] }),
+            });
+          }}
         />
       )}
       {editing && (
@@ -327,15 +357,19 @@ function CaptionsDialog({
   onClose,
   onSave,
   ai = false,
+  language,
 }: {
   captions: VideoCaption[];
   readOnly: boolean;
   /** 066 : sous-titres proposés par l'Assistance IA, à relire avant l'enregistrement. */
   ai?: boolean;
+  /** 066 : langue détectée par la transcription. */
+  language?: string;
   onClose: () => void;
-  onSave: (c: VideoCaption[]) => void;
+  /** false : enregistrement abandonné (la fenêtre reste ouverte). */
+  onSave: (c: VideoCaption[]) => void | boolean | Promise<void | boolean>;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const id = useId();
   const ref = useRef<HTMLDialogElement>(null);
   const [rows, setRows] = useState(() =>
@@ -348,7 +382,7 @@ function CaptionsDialog({
   }, []);
   const set = (i: number, k: 'from' | 'to' | 'text', val: string) =>
     setRows((r) => r.map((x, j) => (j === i ? { ...x, [k]: val } : x)));
-  function submit() {
+  async function submit() {
     const out: VideoCaption[] = [];
     for (const [i, r] of rows.entries()) {
       const from = parseClock(r.from);
@@ -357,7 +391,7 @@ function CaptionsDialog({
         return setErr(t('editor.video.captionInvalid', { n: i + 1 }));
       out.push({ from, to, text: r.text.trim().slice(0, 200) });
     }
-    onSave(out.sort((a, b) => a.from - b.from));
+    if ((await onSave(out.sort((a, b) => a.from - b.from))) === false) return;
     ref.current?.close();
   }
   return (
@@ -378,6 +412,11 @@ function CaptionsDialog({
           <p className="ai-mention">
             <Sparkles aria-hidden="true" />
             {t('ai.mention')}
+          </p>
+        )}
+        {ai && language && (
+          <p className="t-caption muted">
+            {t('ai.captions.language', { lang: languageName(language, i18n.language) })}
           </p>
         )}
         {rows.length === 0 && <p className="muted">{t('editor.video.noCaption')}</p>}
@@ -441,10 +480,10 @@ function CaptionsDialog({
       </div>
       <div className="modal-foot">
         <button type="button" className="btn btn-secondary" onClick={() => ref.current?.close()}>
-          {t('common.cancel')}
+          {ai ? t('ai.ignore') : t('common.cancel')}
         </button>
         {!readOnly && (
-          <button type="button" className="btn btn-primary" onClick={submit}>
+          <button type="button" className="btn btn-primary" onClick={() => void submit()}>
             {ai ? t('ai.apply') : t('common.save')}
           </button>
         )}

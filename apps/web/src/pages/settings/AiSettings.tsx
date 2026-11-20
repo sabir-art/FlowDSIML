@@ -4,7 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { ImagePlus, Shield, X } from 'lucide-react';
 import { SettingsShell } from './SettingsShell';
 import { supabase } from '../../lib/supabase';
-import { AI_FEATURES, refreshAiStatus, useAiStatus, type AiFeature } from '../../lib/ai';
+import {
+  AI_FEATURES,
+  AUDIO_FEATURES,
+  formatSeconds,
+  refreshAiStatus,
+  useAiStatus,
+  type AiFeature,
+} from '../../lib/ai';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
@@ -21,6 +28,7 @@ export function AiSettings() {
   const [confirmNode, confirm] = useConfirm();
   const { status, error } = useAiStatus(current?.id);
   const [asking, setAsking] = useState(false);
+  const [askingAudio, setAskingAudio] = useState<'voice' | 'captions' | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   // Cases : affichage immédiat, puis état relu en base
@@ -127,7 +135,7 @@ export function AiSettings() {
               </div>
               <fieldset className="ai-features">
                 <legend>{t('ai.settings.features')}</legend>
-                {AI_FEATURES.map((f) => (
+                {AI_FEATURES.filter((f) => !AUDIO_FEATURES.includes(f)).map((f) => (
                   <label key={f} className="check">
                     <input
                       type="checkbox"
@@ -141,6 +149,57 @@ export function AiSettings() {
                     {t(`ai.feature.${f}`)}
                   </label>
                 ))}
+              </fieldset>
+              {/* L30b §2 : voix et sous-titres, consentement séparé (ElevenLabs, audio) */}
+              <fieldset className="ai-features ai-audio">
+                <legend>{t('ai.audioSettings.title')}</legend>
+                <Notice k="ai.audioSettings.notice" />
+                {AUDIO_FEATURES.map((f) => {
+                  const used = (f === 'voice' ? status.ttsUsed : status.sttUsed) ?? 0;
+                  const quota = f === 'voice' ? status.ttsQuota : status.sttQuota;
+                  return (
+                    <div key={f} className="ai-audio-row">
+                      <label className="check">
+                        <input
+                          type="checkbox"
+                          checked={local[f] ?? status.features[f]}
+                          disabled={!manage || busy}
+                          onChange={(e) => {
+                            if (e.target.checked) return setAskingAudio(f as 'voice' | 'captions');
+                            setLocal((l) => ({ ...l, [f]: false }));
+                            void save(true, { [f]: false });
+                          }}
+                        />
+                        {t(`ai.feature.${f}`)}
+                      </label>
+                      <p className="t-caption" id={`ai-q-${f}`}>
+                        {quota != null
+                          ? t(`ai.audioSettings.quota_${f}`, {
+                              used: formatSeconds(used),
+                              quota: formatSeconds(quota),
+                            })
+                          : t(`ai.audioSettings.used_${f}`, { used: formatSeconds(used) })}
+                      </p>
+                      {quota != null && (
+                        <div
+                          className="ai-bar"
+                          role="progressbar"
+                          aria-labelledby={`ai-q-${f}`}
+                          aria-valuemin={0}
+                          aria-valuemax={quota}
+                          aria-valuenow={Math.min(used, quota)}
+                        >
+                          <span style={{ width: `${Math.min(100, (used / Math.max(1, quota)) * 100)}%` }} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {status.renewsOn && (
+                  <p className="t-caption muted">
+                    {t('ai.settings.renews', { date: date(status.renewsOn) })}
+                  </p>
+                )}
                 {SOON.map((s) => (
                   <label key={s.k} className="check is-soon">
                     <input type="checkbox" disabled aria-describedby={`ai-soon-${s.k}`} />
@@ -157,6 +216,21 @@ export function AiSettings() {
         </div>
       </section>
       {confirmNode}
+      {askingAudio && (
+        <EnableDialog
+          audio={askingAudio}
+          onClose={() => setAskingAudio(null)}
+          onConfirm={async () => {
+            const f = askingAudio;
+            setLocal((l) => ({ ...l, [f]: true }));
+            if (await save(true, { [f]: true })) {
+              setAskingAudio(null);
+              toast(t(`ai.audioSettings.onToast_${f}`));
+            }
+          }}
+          busy={busy}
+        />
+      )}
       {asking && (
         <EnableDialog
           onClose={() => setAsking(false)}
@@ -174,12 +248,12 @@ export function AiSettings() {
 }
 
 /** Bandeau de confidentialité (texte de la spec, vérifié contre la configuration réelle). */
-function Notice() {
+function Notice({ k = 'ai.settings.notice' }: { k?: string }) {
   const { t } = useTranslation();
   return (
     <div className="alert ai-notice">
       <Shield aria-hidden="true" />
-      <p>{t('ai.settings.notice')}</p>
+      <p>{t(k)}</p>
     </div>
   );
 }
@@ -188,10 +262,13 @@ function EnableDialog({
   onClose,
   onConfirm,
   busy,
+  audio,
 }: {
   onClose: () => void;
   onConfirm: () => void;
   busy: boolean;
+  /** L30b §2 : confirmation dédiée à la voix ou aux sous-titres (autre fournisseur, audio). */
+  audio?: 'voice' | 'captions';
 }) {
   const { t } = useTranslation();
   const [read, setRead] = useState(false);
@@ -205,7 +282,9 @@ function EnableDialog({
       <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="ai-on-t">
           <div className="modal-head">
-            <h2 id="ai-on-t">{t('ai.settings.enableTitle')}</h2>
+            <h2 id="ai-on-t">
+              {audio ? t(`ai.audioSettings.enableTitle_${audio}`) : t('ai.settings.enableTitle')}
+            </h2>
             <button
               type="button"
               className="btn btn-ghost btn-icon btn-sm"
@@ -216,7 +295,7 @@ function EnableDialog({
             </button>
           </div>
           <div className="modal-body">
-            <Notice />
+            <Notice k={audio ? 'ai.audioSettings.notice' : undefined} />
             <label className="check">
               <input type="checkbox" checked={read} onChange={(e) => setRead(e.target.checked)} autoFocus />
               {t('ai.settings.read')}

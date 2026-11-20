@@ -94,7 +94,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.getByText('Assistance IA activée pour l’espace.').waitFor();
   ok(state.ai.enabled === true, 'Activation enregistrée (set_ai_settings)');
   await page.getByText(/Ce mois-ci\s?: 12 demandes sur 500/).waitFor();
-  const bar = page.getByRole('progressbar');
+  const bar = page.getByRole('progressbar').first();
   ok(
     (await bar.getAttribute('aria-valuenow')) === '12' && (await bar.getAttribute('aria-valuemax')) === '500',
     'Quota : barre avec valeurs ARIA',

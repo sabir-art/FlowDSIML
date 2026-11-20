@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mic, Pause, Play, Square, Upload } from 'lucide-react';
-import { AiVoice } from '../../../components/ai/AiAudio';
+import { AiCaptions, AiVoice, TranscriptPreview } from '../../../components/ai/AiAudio';
+import { useToast } from '../../../components/Toast';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { asSettings } from '../types';
 import { supabase } from '../../../lib/supabase';
@@ -34,6 +35,12 @@ export function VoiceFields({
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [announce, setAnnounce] = useState('');
+  const toast = useToast();
+  // Les « Annuler » des toasts agissent après d'autres rendus : toujours l'éditeur courant
+  const live = useRef(editor);
+  live.current = editor;
+  const [heard, setHeard] = useState<{ text: string; language: string } | null>(null);
+  useEffect(() => setHeard(null), [step.id]);
   const file = useRef<HTMLInputElement>(null);
   const media = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
@@ -82,6 +89,8 @@ export function VoiceFields({
         voice_transcript: step.voice_transcript?.trim()
           ? step.voice_transcript
           : bubbleText(step, editor.hotspots),
+        // Voix enregistrée ou importée : plus de repère « IA »
+        options: { ...((step.options ?? {}) as Record<string, unknown>), aiVoice: undefined },
       });
       if (old) void supabase.storage.from('voices').remove([old]);
     } catch {
@@ -170,26 +179,60 @@ export function VoiceFields({
     });
     if (!ok || !step.voice_path) return;
     const old = step.voice_path;
-    editor.updateStep(step.id, { voice_path: null, voice_duration_ms: null });
+    editor.updateStep(step.id, {
+      voice_path: null,
+      voice_duration_ms: null,
+      options: { ...((step.options ?? {}) as Record<string, unknown>), aiVoice: undefined },
+    });
     void supabase.storage.from('voices').remove([old]);
   }
 
-  // 065 : voix de synthèse (ElevenLabs) à partir de la transcription, sinon du texte de la bulle
+  const settings = asSettings(editor.demo!.settings);
+  const lang = settings.locale ?? 'fr';
+  const opts = (step.options ?? {}) as Record<string, unknown>;
+  const generated = !!opts.aiVoice;
+  // 065 (L30-11) : voix de synthèse (ElevenLabs) à partir de la transcription, sinon du texte de la bulle
   const aiVoice =
     ws && !readOnly ? (
       <AiVoice
         ws={ws.id}
-        lang={asSettings(editor.demo!.settings).locale ?? 'fr'}
+        lang={lang}
         stepId={step.id}
-        text={step.voice_transcript?.trim() || bubbleText(step, editor.hotspots)}
+        initialText={step.voice_transcript?.trim() || bubbleText(step, editor.hotspots)}
+        variables={editor.variables.map((v) => ({ key: v.key, default_value: v.default_value ?? '' }))}
+        savedVoice={settings.aiVoice}
+        hasRecording={!!step.voice_path && !generated}
+        onRememberVoice={(v) =>
+          v !== settings.aiVoice && editor.updateDemo({ settings: { ...settings, aiVoice: v } })
+        }
         onApply={(r) => {
-          const old = step.voice_path;
+          const before = {
+            voice_path: step.voice_path,
+            voice_duration_ms: step.voice_duration_ms,
+            voice_transcript: step.voice_transcript,
+            options: { ...opts, aiVoice: opts.aiVoice || undefined } as StepRow['options'],
+          };
           editor.updateStep(step.id, {
             voice_path: r.path,
             voice_duration_ms: Math.max(1, Math.round(r.durationMs)),
             voice_transcript: r.transcript,
+            options: { ...opts, aiVoice: true },
           });
-          if (old) void supabase.storage.from('voices').remove([old]);
+          // L'ancien fichier n'est retiré qu'une fois l'annulation impossible
+          let undone = false;
+          toast(t('ai.voice.applied'), {
+            label: t('ai.undo'),
+            durationMs: 8000,
+            onClick: () => {
+              undone = true;
+              live.current.updateStep(step.id, before);
+              void supabase.storage.from('voices').remove([r.path]);
+            },
+          });
+          if (before.voice_path)
+            window.setTimeout(() => {
+              if (!undone) void supabase.storage.from('voices').remove([before.voice_path!]);
+            }, 9000);
         }}
       />
     ) : null;
@@ -286,6 +329,36 @@ export function VoiceFields({
             <span className="help" id={`voice-tr-h-${step.id}`}>
               {t('editor.voice.transcriptHelp')}
             </span>
+            {/* 066 (L30-12) : transcription automatique d'une voix enregistrée */}
+            {ws && !readOnly && !generated && !heard && (
+              <AiCaptions
+                ws={ws.id}
+                lang={lang}
+                demoId={step.demo_id}
+                stepId={step.id}
+                source="voice"
+                durationMs={step.voice_duration_ms ?? 0}
+                label={t('ai.captions.voiceOpen')}
+                onResult={(r) => setHeard({ text: r.text, language: r.language })}
+              />
+            )}
+            {heard && (
+              <TranscriptPreview
+                text={heard.text}
+                language={heard.language}
+                onIgnore={() => setHeard(null)}
+                onApply={() => {
+                  const before = step.voice_transcript;
+                  editor.updateStep(step.id, { voice_transcript: heard.text.slice(0, 4000) });
+                  setHeard(null);
+                  toast(t('ai.captions.transcriptApplied'), {
+                    label: t('ai.undo'),
+                    durationMs: 8000,
+                    onClick: () => live.current.updateStep(step.id, { voice_transcript: before }),
+                  });
+                }}
+              />
+            )}
             {missing && (
               <span className="field-error" role="alert">
                 {t('editor.voice.transcriptMissing')}

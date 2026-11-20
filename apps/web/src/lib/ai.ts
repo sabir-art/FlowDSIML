@@ -19,7 +19,7 @@ export const AI_FEATURES: AiFeature[] = [
   'voice',
   'captions',
 ];
-export type AiTask = AiFeature | 'write_all';
+export type AiTask = AiFeature | 'write_all' | 'voice_sample';
 /** 065/066 : fonctions audio (ElevenLabs), quota en secondes. */
 export const AUDIO_FEATURES: AiFeature[] = ['voice', 'captions'];
 
@@ -32,12 +32,30 @@ export interface AiStatus {
   userDailyRequests: number;
   workspaceQuotaReached: boolean;
   userQuotaReached: boolean;
-  audioUsed?: number;
-  audioQuota?: number | null;
-  audioQuotaReached?: boolean;
+  /** 065/066 : secondes utilisées ce mois-ci et quota (null : non défini). */
+  ttsUsed?: number;
+  ttsQuota?: number | null;
+  sttUsed?: number;
+  sttQuota?: number | null;
   renewsOn: string | null;
   canEdit: boolean;
   canManage: boolean;
+}
+
+/** Secondes restantes ce mois-ci pour la voix ou les sous-titres (null : quota non défini). */
+export function audioLeft(s: AiStatus | null, feature: AiFeature): number | null {
+  if (!s) return null;
+  const [used, quota] = feature === 'voice' ? [s.ttsUsed, s.ttsQuota] : [s.sttUsed, s.sttQuota];
+  if (quota == null) return null;
+  return Math.max(0, quota - (used ?? 0));
+}
+
+/** « 45 s », au-delà de 120 s « 4 min 10 s » (spec L30b §2). */
+export function formatSeconds(n: number): string {
+  if (n <= 120) return `${n}\u00a0s`;
+  const m = Math.floor(n / 60);
+  const r = n % 60;
+  return r ? `${m}\u00a0min ${r}\u00a0s` : `${m}\u00a0min`;
 }
 
 /** Pourquoi une entrée IA est indisponible (null : disponible). */
@@ -47,7 +65,7 @@ export function aiBlock(s: AiStatus | null, feature: AiFeature): AiBlock {
   if (!s || !s.enabled || !s.features[feature]) return 'disabled';
   if (!s.canEdit) return 'role';
   if (s.workspaceQuotaReached) return 'quota';
-  if (AUDIO_FEATURES.includes(feature) && s.audioQuotaReached) return 'quota';
+  if (AUDIO_FEATURES.includes(feature) && audioLeft(s, feature) === 0) return 'quota';
   if (s.userQuotaReached) return 'userQuota';
   return null;
 }

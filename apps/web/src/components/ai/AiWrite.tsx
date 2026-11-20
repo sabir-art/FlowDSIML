@@ -71,10 +71,13 @@ export function DisabledEntry({
   status,
   label,
   feature = 'write',
+  tip,
 }: {
   status: AiStatus | null;
   label: string;
   feature?: AiFeature;
+  /** Infobulle propre à la fonction quand elle est désactivée (voix, sous-titres). */
+  tip?: string;
 }) {
   const id = useId();
   const blockText = useBlockText();
@@ -93,7 +96,7 @@ export function DisabledEntry({
         {label}
       </button>
       <span id={id} className="ai-tip" role="tooltip">
-        {blockText(b, status)}
+        {b === 'disabled' && tip ? tip : blockText(b, status)}
       </span>
       {status?.canManage && b === 'disabled' && (
         <Link className="t-caption" to="/settings/ai">

@@ -1620,7 +1620,8 @@
       "tooBig": "Fichier trop lourd : 5 Mo au plus.",
       "tooLong": "Piste trop longue : 2 minutes au plus.",
       "uploadError": "La voix off n’a pas pu être enregistrée. Réessayez.",
-      "railIcon": "Voix off"
+      "railIcon": "Voix off",
+      "railIconAi": "Voix off générée par l’IA"
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
@@ -4342,26 +4343,97 @@
       "cleared": "La conversation est effacée à la fermeture."
     },
     "voice": {
-      "open": "Générer la voix",
+      "open": "Générer à partir du texte",
       "title": "Voix de synthèse",
-      "notice": "La transcription ci-dessous est envoyée à ElevenLabs, fournisseur de voix de synthèse de TutoClick, pour produire la voix. Rien d’autre n’est envoyé.",
-      "noText": "Aucun texte : renseignez la transcription ou le texte de la bulle.",
+      "text": "Texte à lire",
+      "varsHelp": "Les variables sont lues avec leur valeur par défaut ({{key}} → « {{value}} »).",
+      "varsExample": "votre entreprise",
       "voice": "Voix",
-      "feminine": "Voix féminine",
-      "masculine": "Voix masculine",
-      "go": "Générer",
+      "v": {
+        "claire": {
+          "name": "Claire",
+          "desc": "Féminine, posée"
+        },
+        "louise": {
+          "name": "Louise",
+          "desc": "Féminine, chaleureuse"
+        },
+        "sarah": {
+          "name": "Sarah",
+          "desc": "Féminine, douce"
+        },
+        "antoine": {
+          "name": "Antoine",
+          "desc": "Masculin, dynamique"
+        },
+        "adam": {
+          "name": "Adam",
+          "desc": "Masculin, grave"
+        },
+        "daniel": {
+          "name": "Daniel",
+          "desc": "Masculin, posé"
+        }
+      },
+      "sample": "Écouter un exemple",
+      "sampleOf": "Écouter un exemple de la voix {{name}}",
+      "sampleError": "Exemple indisponible pour le moment.",
+      "speed": "Vitesse",
+      "speed_slow": "Lente",
+      "speed_normal": "Normale",
+      "speed_fast": "Rapide",
+      "estimate": "Environ {{n}} s",
+      "notice": "Le texte ci-dessus sera envoyé à ElevenLabs pour produire l’audio.",
+      "go": "Générer la voix",
       "busy": "Génération de la voix en cours…",
       "preview": "Aperçu de la voix générée",
-      "pii": "La transcription contient une donnée personnelle (nom, e-mail, téléphone…) : retirez-la avant de générer la voix.",
-      "tooLong": "Texte trop long : la voix off dure 2 minutes au plus."
+      "duration": "Durée : {{d}}",
+      "again": "Générer à nouveau",
+      "replaceTitle": "Remplacer votre enregistrement par la voix de synthèse ?",
+      "replaceBody": "L’enregistrement actuel de cette étape sera remplacé. Vous pourrez annuler juste après.",
+      "replace": "Remplacer",
+      "applied": "Voix appliquée.",
+      "pii": "Le texte contient une donnée personnelle (nom, e-mail, téléphone…) : retirez-la avant de générer la voix.",
+      "tooLong": "Texte trop long : la voix off dure 2 min au plus."
     },
     "captions": {
-      "open": "Sous-titres automatiques",
-      "title": "Sous-titres automatiques",
-      "notice": "La piste audio de cette vidéo est envoyée à ElevenLabs, fournisseur de transcription de TutoClick, pour produire les sous-titres. Vous les relisez avant de les appliquer.",
-      "go": "Transcrire",
+      "open": "Transcription automatique",
+      "voiceOpen": "Transcrire la voix",
       "busy": "Transcription en cours…",
-      "empty": "Aucune parole détectée dans la vidéo."
+      "empty": "Aucune parole détectée.",
+      "tooLong": "Audio trop long pour une transcription automatique (2 min au plus).",
+      "videoTooLong": "Vidéo trop longue pour une transcription automatique (2 min au plus). Importez un fichier .vtt.",
+      "askTitle": "Envoyer l’audio pour transcription ?",
+      "askBody_video": "La piste audio de cette étape ({{d}}) sera envoyée à ElevenLabs. Vérifiez qu’elle ne contient pas de nom, de numéro ou d’information sur une personne réelle.",
+      "askBody_voice": "La piste audio de cette étape ({{d}}) sera envoyée à ElevenLabs. Vérifiez qu’elle ne contient pas de nom, de numéro ou d’information sur une personne réelle.",
+      "send": "Envoyer",
+      "noAsk": "Ne plus demander pour cette démo",
+      "language": "Langue détectée : {{lang}}",
+      "replaceTitle": "Remplacer les sous-titres existants ?",
+      "replaceBody_one": "Le sous-titre actuel de cette vidéo sera remplacé. Vous pourrez annuler juste après.",
+      "replaceBody_other": "Les {{count}} sous-titres actuels de cette vidéo seront remplacés. Vous pourrez annuler juste après.",
+      "replace": "Remplacer",
+      "applied": "Sous-titres appliqués.",
+      "transcriptApplied": "Transcription appliquée."
+    },
+    "audioSettings": {
+      "title": "Voix et sous-titres",
+      "notice": "La voix de synthèse envoie le texte à lire au fournisseur ElevenLabs. Les sous-titres automatiques envoient la piste audio de l’étape (votre voix ou le son de la vidéo) au même fournisseur. Aucune image n’est envoyée. Les fichiers produits sont enregistrés dans votre espace. ElevenLabs conserve un historique des demandes selon ses conditions. Rien n’est appliqué sans votre validation.",
+      "enableTitle_voice": "Activer la voix de synthèse ?",
+      "enableTitle_captions": "Activer les sous-titres automatiques ?",
+      "onToast_voice": "Voix de synthèse activée pour l’espace.",
+      "onToast_captions": "Sous-titres automatiques activés pour l’espace.",
+      "quota_voice": "Voix de synthèse : {{used}} sur {{quota}} ce mois-ci",
+      "quota_captions": "Sous-titres automatiques : {{used}} sur {{quota}} ce mois-ci",
+      "used_voice": "Voix de synthèse : {{used}} ce mois-ci",
+      "used_captions": "Sous-titres automatiques : {{used}} ce mois-ci"
+    },
+    "audio": {
+      "disabled_voice": "Voix de synthèse désactivée dans cet espace. Un administrateur peut l’activer dans Paramètres > Assistance IA.",
+      "disabled_captions": "Sous-titres automatiques désactivés dans cet espace. Un administrateur peut les activer dans Paramètres > Assistance IA.",
+      "quota_voice": "Quota de voix de synthèse atteint pour ce mois ({{quota}} s).",
+      "quota_captions": "Quota de sous-titres automatiques atteint pour ce mois ({{quota}} s).",
+      "over": "Il reste {{left}} s ce mois-ci, la demande en demande environ {{need}} s."
     }
   }
 }

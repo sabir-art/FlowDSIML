@@ -1620,7 +1620,8 @@
       "tooBig": "File too large: 5 MB max.",
       "tooLong": "Track too long: 2 minutes max.",
       "uploadError": "The voice-over could not be saved. Try again.",
-      "railIcon": "Voice-over"
+      "railIcon": "Voice-over",
+      "railIconAi": "AI-generated voice-over"
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
@@ -4342,26 +4343,97 @@
       "cleared": "The conversation is cleared when the panel closes."
     },
     "voice": {
-      "open": "Generate the voice",
-      "title": "Synthetic voice",
-      "notice": "The transcript below is sent to ElevenLabs, TutoClick’s voice provider, to produce the voice. Nothing else is sent.",
-      "noText": "No text: fill in the transcript or the bubble text.",
+      "open": "Generate from text",
+      "title": "Text-to-speech voice",
+      "text": "Text to read",
+      "varsHelp": "Variables are read with their default value ({{key}} → “{{value}}”).",
+      "varsExample": "your company",
       "voice": "Voice",
-      "feminine": "Female voice",
-      "masculine": "Male voice",
-      "go": "Generate",
-      "busy": "Generating the voice…",
-      "preview": "Preview of the generated voice",
-      "pii": "The transcript contains personal data (name, email, phone…): remove it before generating the voice.",
-      "tooLong": "Text too long: a voice-over lasts 2 minutes at most."
+      "v": {
+        "claire": {
+          "name": "Claire",
+          "desc": "Female, calm"
+        },
+        "louise": {
+          "name": "Louise",
+          "desc": "Female, warm"
+        },
+        "sarah": {
+          "name": "Sarah",
+          "desc": "Female, soft"
+        },
+        "antoine": {
+          "name": "Antoine",
+          "desc": "Male, lively"
+        },
+        "adam": {
+          "name": "Adam",
+          "desc": "Male, deep"
+        },
+        "daniel": {
+          "name": "Daniel",
+          "desc": "Male, calm"
+        }
+      },
+      "sample": "Play a sample",
+      "sampleOf": "Play a sample of the {{name}} voice",
+      "sampleError": "Sample unavailable right now.",
+      "speed": "Speed",
+      "speed_slow": "Slow",
+      "speed_normal": "Normal",
+      "speed_fast": "Fast",
+      "estimate": "About {{n}} s",
+      "notice": "The text above will be sent to ElevenLabs to produce the audio.",
+      "go": "Generate voice",
+      "busy": "Generating voice…",
+      "preview": "Generated voice preview",
+      "duration": "Duration: {{d}}",
+      "again": "Generate again",
+      "replaceTitle": "Replace your recording with the generated voice?",
+      "replaceBody": "The current recording of this step will be replaced. You can undo right after.",
+      "replace": "Replace",
+      "applied": "Voice applied.",
+      "pii": "The text contains personal data (name, email, phone…): remove it before generating the voice.",
+      "tooLong": "Text too long: voice-overs last 2 min at most."
     },
     "captions": {
-      "open": "Automatic captions",
-      "title": "Automatic captions",
-      "notice": "This video’s audio track is sent to ElevenLabs, TutoClick’s transcription provider, to produce the captions. You review them before applying.",
-      "go": "Transcribe",
+      "open": "Automatic transcription",
+      "voiceOpen": "Transcribe voice",
       "busy": "Transcribing…",
-      "empty": "No speech detected in the video."
+      "empty": "No speech detected.",
+      "tooLong": "Audio too long for automatic transcription (2 min at most).",
+      "videoTooLong": "Video too long for automatic transcription (2 min at most). Import a .vtt file.",
+      "askTitle": "Send the audio for transcription?",
+      "askBody_video": "This step’s audio track ({{d}}) will be sent to ElevenLabs. Check it contains no name, number or information about a real person.",
+      "askBody_voice": "This step’s audio track ({{d}}) will be sent to ElevenLabs. Check it contains no name, number or information about a real person.",
+      "send": "Send",
+      "noAsk": "Don’t ask again for this demo",
+      "language": "Detected language: {{lang}}",
+      "replaceTitle": "Replace existing captions?",
+      "replaceBody_one": "This video’s current caption will be replaced. You can undo right after.",
+      "replaceBody_other": "This video’s {{count}} current captions will be replaced. You can undo right after.",
+      "replace": "Replace",
+      "applied": "Captions applied.",
+      "transcriptApplied": "Transcript applied."
+    },
+    "audioSettings": {
+      "title": "Voice and captions",
+      "notice": "Synthetic voice sends the text to read to the provider ElevenLabs. Automatic captions send the step’s audio track (your voice or the video’s sound) to the same provider. No image is sent. The files produced are stored in your workspace. ElevenLabs keeps a request history under its terms. Nothing is applied without your approval.",
+      "enableTitle_voice": "Turn on synthetic voice?",
+      "enableTitle_captions": "Turn on automatic captions?",
+      "onToast_voice": "Synthetic voice turned on for the workspace.",
+      "onToast_captions": "Automatic captions turned on for the workspace.",
+      "quota_voice": "Synthetic voice: {{used}} of {{quota}} this month",
+      "quota_captions": "Automatic captions: {{used}} of {{quota}} this month",
+      "used_voice": "Synthetic voice: {{used}} this month",
+      "used_captions": "Automatic captions: {{used}} this month"
+    },
+    "audio": {
+      "disabled_voice": "Text-to-speech is turned off in this workspace. An admin can turn it on in Settings > AI assistance.",
+      "disabled_captions": "Automatic captions are turned off in this workspace. An admin can turn them on in Settings > AI assistance.",
+      "quota_voice": "Text-to-speech quota reached for this month ({{quota}} s).",
+      "quota_captions": "Automatic captions quota reached for this month ({{quota}} s).",
+      "over": "{{left}} s left this month; this request needs about {{need}} s."
     }
   }
 }

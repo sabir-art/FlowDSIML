@@ -70,10 +70,10 @@ function wav(sec) {
       (await sec.getByRole('button', { name: 'Importer un fichier' }).count()) === 1,
     'section vide : Enregistrer et Importer un fichier',
   );
-  const gen = sec.locator('.ai-entry', { hasText: 'Générer la voix' });
+  const gen = sec.locator('.ai-entry', { hasText: 'Générer à partir du texte' });
   ok(
     (await gen.getAttribute('aria-disabled')) === 'true',
-    '065 : « Générer la voix » désactivé tant que l’Assistance IA ne l’est pas',
+    '065 : « Générer à partir du texte » désactivé tant que l’Assistance IA ne l’est pas',
   );
   ok(
     /Une piste par étape, 2 minutes au plus\. MP3, M4A, WAV ou WebM, 5 Mo au plus\./.test(
