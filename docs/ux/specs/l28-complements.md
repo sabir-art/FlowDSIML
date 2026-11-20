@@ -66,7 +66,7 @@ Fonction 035. Il s'agit d'ajouter une voix enregistrée sur une étape déjà ca
   - boutons « Réenregistrer », « Remplacer », et « Supprimer » (avec confirmation) ;
   - option « Lancer la voix à l'arrivée sur l'étape » (activée par défaut).
 - **Transcription** (obligatoire pour publier) :
-  - champ texte, prérempli avec le texte de la bulle ;
+  - champ texte, prérempli avec le texte de la bulle. Les variables (`{{company}}`) sont gardées telles quelles et remplacées dans le lecteur, comme dans la bulle ;
   - aide : « Le texte affiché en sous-titre. Corrigez-le pour qu'il suive la voix. » ;
   - sans transcription, la publication est bloquée par le message de l'infobulle de « Publier » : « Étape {{n}} : la voix off n'a pas de transcription. Aller à l'étape {{n}} ».
 - **Liste des étapes** : l'icône `audio-lines` signale les étapes qui ont une voix off.
@@ -104,8 +104,8 @@ Fonction 021. Elle s'applique à toute la démo. Le recadrage d'une seule étape
   - « Appliquer à toutes les étapes » ouvre une confirmation : « {{n}} étapes passent en {{format}}. Les repères et les flous suivent l'image. Les images d'origine sont conservées. » ;
   - toast : « Format appliqué à {{n}} étapes. », avec « Annuler ».
 - **Retour** : le lien « Revenir aux images d'origine » reste disponible dans la section.
-- **Étapes HTML** : elles sont rendues dans le nouveau format, sans recadrage (A8).
-- **Étapes vidéo** : « Adapter » seulement. L'option « Recadrer » est désactivée pour elles, avec l'aide « Les vidéos ne sont pas recadrées. ».
+- **Périmètre livré** : seules les captures (étapes image) changent de format. La section l'écrit : « S'applique aux captures (étapes image). Les étapes HTML et vidéo ne changent pas. ».
+  - Le rendu des étapes HTML au nouveau format et le mode « Adapter » pour les vidéos sont une suite possible, non prioritaire.
 
 ## 5. Remplacer une image dans une capture HTML (L28-05)
 
