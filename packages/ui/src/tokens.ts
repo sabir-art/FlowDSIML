@@ -49,9 +49,10 @@ export const palette = {
   noir: { 900: '#080808' /* ← charte */ },
   // Couleurs du LOGO TutoClick (fourni par le client). Réservées au logo, aux icônes d'app et aux
   // supports de marque : l'interface utilise les rôles DSI ci-dessous (voir identite-visuelle.md §3).
+  // Logo officiel du 20 novembre 2026 (LOGO-01) : magenta, encre, nuit. L'ancien dégradé et le bleu
+  // du logo précédent sont abandonnés.
   brand: {
-    'bordeaux': '#A52B60', 'bordeaux-fonce': '#7D204C', 'orange': '#E49A32',
-    'bleu': '#4A9BCB', 'vert': '#91B83E', 'encre': '#25232A',
+    'magenta': '#A3195B', 'encre': '#1A1A1A', 'nuit': '#123A49',
   },
   success: { fg: '#557014', bg: '#F5F9E8', fgDark: '#AED054', bgDark: '#1C2409' },
   warning: { fg: '#855104', bg: '#FFF6E8', fgDark: '#F8BB61', bgDark: '#2B1D05' },

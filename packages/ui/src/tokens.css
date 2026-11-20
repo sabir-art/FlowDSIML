@@ -76,12 +76,9 @@
   --fd-ardoise-900: #161A20;
   --fd-ardoise-950: #0B0D10;
   --fd-noir-900: #080808;
-  --fd-brand-bordeaux: #A52B60;
-  --fd-brand-bordeaux-fonce: #7D204C;
-  --fd-brand-orange: #E49A32;
-  --fd-brand-bleu: #4A9BCB;
-  --fd-brand-vert: #91B83E;
-  --fd-brand-encre: #25232A;
+  --fd-brand-magenta: #A3195B;
+  --fd-brand-encre: #1A1A1A;
+  --fd-brand-nuit: #123A49;
   --fd-font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --fd-font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --fd-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
