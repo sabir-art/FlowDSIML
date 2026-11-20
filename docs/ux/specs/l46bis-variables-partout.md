@@ -24,10 +24,11 @@ On garde le composant de L46 (`VarTextField`) en deux variantes :
 | **Bouton d'action** | `CtaFields` | Libellé ; **adresse du lien** | Une ligne |
 | **Écran de fin** (dernière étape de texte, « Merci ! ») | `StepPanel`, étape de texte | Titre ; texte ; libellé du bouton | Une ligne, texte riche, une ligne |
 | **Étape pop-up** | `GuidedStepFields`, `editor.advanced.popup` | Titre ; texte ; libellé du bouton | Une ligne, texte riche, une ligne |
-| **Formulaire** | `FormPanel` | Titre ; introduction ; message de remerciement | Une ligne, texte riche, texte riche |
-| **Checklist** | `SettingsTab`, `editor.advanced.checklist` | Titre ; éléments (un par chapitre) | Une ligne |
+| **Formulaire** | `FormPanel` | Titre ; introduction (`formSchema` : title, description) | Une ligne, texte riche |
+| **Checklist** | `SettingsTab`, `editor.advanced.checklist` | Titre | Une ligne |
 | **Relance des apprenants** | `LearnersPage`, `learners.remind` | Objet ; message (§3) | Une ligne, texte simple |
 
+- **Corrigé le 20 novembre** : le formulaire n'a pas de message de remerciement dans le manifeste (`formSchema` : title, description, submitLabel, consentText). On n'en ajoute pas : les variables s'appliquent au titre et à l'introduction. Les éléments de la checklist sont les noms de chapitres, exclus ci-dessous : seul le titre de la checklist a « + Variable ».
 - **Pas de variables** dans les libellés des champs du formulaire (« Adresse e-mail »…), dans les textes alternatifs, ni dans les noms de chapitres côté éditeur. Ce sont des textes d'interface, pas des messages.
 - **Adresse du lien** du bouton d'action :
   - la valeur est encodée dans l'adresse (`encodeURIComponent`) ;
@@ -35,7 +36,7 @@ On garde le composant de L46 (`VarTextField`) en deux variantes :
   - au survol de la pastille, une ligne d'aide : « Ajoutée à l'adresse, encodée ».
   - Avec une valeur inconnue et sans repli, le paramètre est vide (`?prenom=`), le lien reste valide.
 - **Formulaire** : **nouveau comportement du lecteur**. Aujourd'hui, les valeurs viennent seulement de l'adresse (`?company=…`) et du lien personnalisé (`main.tsx`). Après l'envoi du formulaire :
-  - les champs saisis qui correspondent à une variable (prénom, nom, fonction, entreprise) prennent leur valeur pour la suite de la session, dans le remerciement, les bulles suivantes et l'écran de fin ;
+  - les champs saisis qui correspondent à une variable (prénom, nom, fonction, entreprise) prennent leur valeur pour la suite de la session, dans les bulles suivantes et l'écran de fin ;
   - une valeur de l'adresse ou du lien personnalisé n'est jamais écrasée ;
   - rien n'est gardé après la session.
 
@@ -64,8 +65,8 @@ On garde le composant de L46 (`VarTextField`) en deux variantes :
 1. Chaque champ du tableau §2 a « + Variable » ; `{` ouvre le catalogue ; la pastille montre le nom seul.
 2. Bouton d'action avec l'adresse `https://intranet.example/inscription?prenom=` suivie de « Prénom du visiteur » : avec « Camille », le lecteur ouvre `…?prenom=Camille` ; avec « Jean Ö », il ouvre `…?prenom=Jean%20%C3%96`.
 3. Écran de fin « Merci Prénom du visiteur ! », avec le repli « » : un visiteur inconnu lit « Merci ! », sans espace double.
-4. Checklist « Votre parcours, Prénom du visiteur » : l'aperçu en mode « Valeurs de repli » montre le repli.
-5. Formulaire envoyé avec le prénom « Camille », sans `?first_name` dans l'adresse : le remerciement dit « Merci Camille » ; avec `?first_name=Léa` dans l'adresse, il dit « Merci Léa ».
+4. Checklist titrée « Votre parcours, Prénom du visiteur » : l'aperçu en mode « Valeurs de repli » montre le repli ; les éléments (noms de chapitres) n'ont pas « + Variable ».
+5. Formulaire envoyé avec le prénom « Camille », sans `?first_name` dans l'adresse : l'écran de fin « Merci Prénom du visiteur ! » dit « Merci Camille ! » ; avec `?first_name=Léa` dans l'adresse, il dit « Merci Léa ! ».
 6. Relance : « Prénom de l'apprenant » est désactivé, avec sa raison et « Bientôt ». « Nom de l'espace » insère la pastille, et la messagerie s'ouvre avec « Acme Formation » dans le message.
 7. Relance : le message modifié est proposé de nouveau à la relance suivante, si la case est restée cochée.
 8. Clavier : pour chaque surface, `{`, puis les flèches, puis Entrée insèrent la pastille ; Retour arrière la supprime d'un coup.
