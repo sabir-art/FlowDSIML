@@ -24,6 +24,8 @@ jobs:
       - run: pnpm format:check
       - name: Appels RPC des Edge Functions conformes aux signatures des migrations
         run: pnpm check:rpc
+      - name: Aucune barre de couleur à gauche des blocs
+        run: node scripts/check-left-bars.mjs
       - name: Scripts d'exploitation (tests)
         run: node --test scripts/*.test.mjs
       - run: pnpm turbo run lint typecheck test build

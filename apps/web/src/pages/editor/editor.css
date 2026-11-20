@@ -334,7 +334,6 @@
   max-width: 300px;
   padding: 10px 12px;
   border: 1px solid var(--fd-color-border);
-  border-left: 3px solid var(--fd-color-danger);
   border-radius: var(--fd-radius-md);
   background: var(--fd-color-surface);
   box-shadow: var(--fd-shadow-md, 0 8px 24px rgb(0 0 0 / 0.12));
@@ -914,7 +913,6 @@
 /* L22-05 : commentaire ouvert depuis une notification */
 .cm-item--focus {
   background: var(--fd-color-primary-soft);
-  box-shadow: inset 3px 0 0 var(--fd-color-primary);
 }
 .cm-avatar {
   display: grid;
@@ -3056,7 +3054,6 @@
   list-style: none;
   padding: 8px 10px;
   margin: 10px 0 0;
-  border-left: 3px solid var(--fd-color-warning);
   border-radius: var(--fd-radius-sm);
   background: color-mix(in srgb, var(--fd-color-warning) 10%, transparent);
   display: grid;

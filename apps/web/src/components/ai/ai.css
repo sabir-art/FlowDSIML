@@ -283,8 +283,9 @@
 }
 .ai-sg-proposal {
   margin: 0;
-  padding: 6px 8px;
-  border-left: 3px solid var(--fd-color-primary);
+  padding: 8px 10px;
+  border-radius: var(--fd-radius-sm);
+  background: var(--fd-color-surface-sunken);
   white-space: pre-wrap;
 }
 .ai-empty {
