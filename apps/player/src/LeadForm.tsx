@@ -1,4 +1,5 @@
 import { useState } from 'preact/hooks';
+import { useModalFocus } from './modalFocus';
 import type { LeadForm as LeadFormT } from '@flowdsiml/manifest';
 import { ArrowRight } from 'lucide-preact';
 import { fmt, type Dict } from './i18n';
@@ -44,8 +45,9 @@ export function LeadForm({
     }
   }
 
+  const modal = useModalFocus<HTMLDivElement>();
   return (
-    <div class="p-overlay" role="dialog" aria-modal="true" aria-labelledby="p-form-title">
+    <div ref={modal} class="p-overlay" role="dialog" aria-modal="true" aria-labelledby="p-form-title">
       <form class="p-form" onSubmit={submit}>
         <h2 id="p-form-title">{sub(form.title)}</h2>
         {form.description && <p>{sub(form.description)}</p>}

@@ -975,6 +975,26 @@ export function EditorPage() {
                 aria-selected={tab === k}
                 tabIndex={tab === k ? 0 : -1}
                 onClick={() => setTab(k)}
+                onKeyDown={(e) => {
+                  // L34 : onglets au clavier (motif ARIA) : flèches, Début, Fin ; l'onglet suit le focus
+                  const keys: Tab[] = ['step', 'design', 'settings'];
+                  const i = keys.indexOf(k);
+                  const to =
+                    e.key === 'ArrowRight'
+                      ? (i + 1) % keys.length
+                      : e.key === 'ArrowLeft'
+                        ? (i + keys.length - 1) % keys.length
+                        : e.key === 'Home'
+                          ? 0
+                          : e.key === 'End'
+                            ? keys.length - 1
+                            : -1;
+                  if (to < 0) return;
+                  e.preventDefault();
+                  const next = keys[to]!;
+                  setTab(next);
+                  requestAnimationFrame(() => document.getElementById(`ed-tab-${next}`)?.focus());
+                }}
               >
                 {t(`editor.tab_${k}`)}
               </button>

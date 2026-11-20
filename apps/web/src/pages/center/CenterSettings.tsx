@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ArrowDown,
+  ArrowUp,
   CircleCheck,
   FileText,
   CircleAlert,
@@ -661,6 +663,27 @@ export function CenterSettings() {
                           </span>
                           <span className="fd-help">
                             {t('learners.count', { count: counts.paths[p.id] ?? 0 })}
+                          </span>
+                          {/* L34 (WCAG 2.5.7) : réordonner sans glisser, d'un clic */}
+                          <span className="vis-move">
+                            <button
+                              type="button"
+                              className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+                              aria-label={t('center.moveUp', { title: p.title || t('learners.untitled') })}
+                              disabled={i === 0}
+                              onClick={() => move(i, -1)}
+                            >
+                              <ArrowUp aria-hidden="true" />
+                            </button>
+                            <button
+                              type="button"
+                              className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+                              aria-label={t('center.moveDown', { title: p.title || t('learners.untitled') })}
+                              disabled={i === (draft.paths ?? []).length - 1}
+                              onClick={() => move(i, 1)}
+                            >
+                              <ArrowDown aria-hidden="true" />
+                            </button>
                           </span>
                         </li>
                       );

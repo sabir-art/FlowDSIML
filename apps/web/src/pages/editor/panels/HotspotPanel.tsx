@@ -2,6 +2,7 @@ import { ChevronLeft, Crop, Layers, MessageSquare, Target, Trash2 } from 'lucide
 import { useState } from 'react';
 import { ApplyStyleDialog } from '../ApplyStyleDialog';
 import { useTranslation } from 'react-i18next';
+import { RectFields } from './RectFields';
 import type { HotspotAction, StepOptions } from '@flowdsiml/manifest';
 import type { DemoEditor } from '../useDemoEditor';
 import {
@@ -151,6 +152,13 @@ export function HotspotPanel({
           </label>
         )}
       </div>
+
+      <RectFields
+        id="hs-rect"
+        rect={hotspot}
+        disabled={readOnly}
+        onChange={(r) => set({ x: r.x, y: r.y, w: r.w, h: r.h })}
+      />
 
       <div className="sec">
         <div className="sec-title">{t('editor.tooltipBody')}</div>

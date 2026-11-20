@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, Info, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { RectFields } from './RectFields';
 import type { DemoEditor } from '../useDemoEditor';
 import { asMasks, type MaskRect, type Selection, type StepRow } from '../types';
 
@@ -246,6 +247,15 @@ export function BlurPanel({
           </>
         )}
       </div>
+
+      {m && (
+        <RectFields
+          id="blur-rect"
+          rect={m}
+          disabled={readOnly}
+          onChange={(r) => patch({ x: r.x, y: r.y, w: r.w, h: r.h })}
+        />
+      )}
 
       <div className="sec">
         <div className="sec-title">{t('editor.blur.applyTo')}</div>

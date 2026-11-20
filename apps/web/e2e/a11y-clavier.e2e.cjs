@@ -76,6 +76,8 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
   /** Parcourt la page au clavier et renvoie les éléments focalisés sans indicateur visible. */
   async function tabWalk(p, n) {
     const missing = new Set();
+    // L34 (WCAG 2.4.11) : élément focalisé entièrement caché par un autre (barre collante, panneau)
+    const obscured = new Set();
     let seen = 0;
     for (let i = 0; i < n; i++) {
       await p.keyboard.press('Tab');
@@ -105,13 +107,36 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
             ? `.${el.className.trim().split(/\s+/).slice(0, 2).join('.')}`
             : '') +
           ` « ${(el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 30)} »`;
-        return { visible: outline || shadow || sibling || parent, name };
+        // Focus non masqué : au moins un des 5 points de la boîte touche l'élément (ou un parent, un enfant)
+        const box = el.getBoundingClientRect();
+        let hidden = false;
+        if (box.width > 2 && box.height > 2) {
+          hidden = true;
+          for (const [fx, fy] of [
+            [0.5, 0.5],
+            [0.2, 0.2],
+            [0.8, 0.2],
+            [0.2, 0.8],
+            [0.8, 0.8],
+          ]) {
+            const x = box.left + box.width * fx;
+            const y = box.top + box.height * fy;
+            if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) continue;
+            const hit = document.elementFromPoint(x, y);
+            if (hit && (hit === el || el.contains(hit) || hit.contains(el))) {
+              hidden = false;
+              break;
+            }
+          }
+        }
+        return { visible: outline || shadow || sibling || parent, hidden, name };
       });
       if (!r) continue;
       seen++;
       if (!r.visible) missing.add(r.name);
+      if (r.hidden) obscured.add(r.name);
     }
-    return { seen, missing: [...missing] };
+    return { seen, missing: [...missing], obscured: [...obscured] };
   }
 
   // 1. Lien d'évitement
@@ -230,6 +255,10 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       r.seen > 10 && r.missing.length === 0,
       `Focus visible : ${name} (${r.seen} arrêts)${r.missing.length ? ` → ${r.missing.join(' | ')}` : ''}`,
     );
+    ok(
+      r.obscured.length === 0,
+      `Focus non masqué (2.4.11) : ${name}${r.obscured.length ? ` → ${r.obscured.join(' | ')}` : ''}`,
+    );
     await ctx.close();
   }
   for (const [name, path, center] of [
@@ -241,6 +270,10 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     ok(
       r.seen > 3 && r.missing.length === 0,
       `Focus visible : ${name} (${r.seen} arrêts)${r.missing.length ? ` → ${r.missing.join(' | ')}` : ''}`,
+    );
+    ok(
+      r.obscured.length === 0,
+      `Focus non masqué (2.4.11) : ${name}${r.obscured.length ? ` → ${r.obscured.join(' | ')}` : ''}`,
     );
     await ctx.close();
   }
@@ -409,6 +442,132 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         `A11Y-03 : après « Suivant » de la bulle, focus sur le titre de l’étape (${r.cls || 'body'})`,
       );
     } else ok(false, 'A11Y-03 : bulle avec bouton « Suivant » introuvable');
+    await ctx.close();
+  }
+
+  // 9. L34 : parcours complet de l'éditeur au clavier seul (rail, déplacement d'étape, zone du canevas,
+  //    champs, onglets, modale des raccourcis et retour du focus)
+  {
+    const { p, ctx } = await app(`/#/demos/${DEMO}/edit`);
+    await p.locator('.ed-title:not(.ed-title--sk)').waitFor();
+    const active = () =>
+      p.evaluate(() => {
+        const el = document.activeElement;
+        return {
+          step: el?.getAttribute('data-step-index'),
+          id: el?.id || '',
+          role: el?.getAttribute('role') || '',
+          label: el?.getAttribute('aria-label') || '',
+          text: (el?.textContent || '').trim().slice(0, 40),
+        };
+      });
+    async function tabTo(pred, max = 120) {
+      for (let i = 0; i < max; i++) {
+        await p.keyboard.press('Tab');
+        if (pred(await active())) return true;
+      }
+      return false;
+    }
+    ok(await tabTo((a) => a.step === '0'), 'Éditeur au clavier : rail atteint à la tabulation');
+    await p.keyboard.press('ArrowDown');
+    await p.waitForTimeout(150);
+    ok((await active()).step === '1', 'Éditeur au clavier : ↓ passe à l’étape 2 dans le rail');
+    ok(
+      (await p.locator('[data-step-index="1"][aria-current="step"]').count()) === 1,
+      'Éditeur au clavier : l’étape 2 est sélectionnée',
+    );
+    // Titre de l'étape sans son numéro (qui change avec la position)
+    const title = async (i) =>
+      ((await p.locator(`[data-step-index="${i}"]`).textContent()) || '').replace(/^\s*\d+/, '').trim();
+    const before = await title(1);
+    await p.keyboard.press(' ');
+    await p.keyboard.press('ArrowDown');
+    await p.waitForTimeout(300);
+    await p.keyboard.press(' ');
+    await p.waitForTimeout(150);
+    const moved = await title(2);
+    const live = (await p.locator('.rail .sr-only[aria-live]').first().textContent()) || '';
+    ok(
+      moved === before && /position 3/.test(live),
+      `Éditeur au clavier : Espace, ↓, Espace déplace l’étape et l’annonce (« ${live.trim()} »)`,
+    );
+    // Zone du canevas : sélection (Entrée) puis déplacement aux flèches, champs de position à jour
+    await p.locator('[data-step-index="0"]').focus();
+    await p.keyboard.press('Enter');
+    await p.waitForTimeout(200);
+    ok(
+      await tabTo((a) => a.role === 'button' && /^Hotspot 1/.test(a.label)),
+      'Éditeur au clavier : zone du canevas atteinte à la tabulation',
+    );
+    await p.keyboard.press('Enter');
+    await p.locator('#hs-rect-x').waitFor();
+    const x0 = Number(await p.locator('#hs-rect-x').inputValue());
+    await p.keyboard.press('ArrowRight');
+    await p.waitForTimeout(150);
+    const x1 = Number(await p.locator('#hs-rect-x').inputValue());
+    ok(Math.abs(x1 - x0 - 1) < 0.2, `Éditeur au clavier : → déplace la zone de 1 % (${x0} → ${x1})`);
+    // Champs du panneau et onglets
+    await p.locator('#hs-rect-x').focus();
+    await p.keyboard.press('ArrowUp');
+    await p.waitForTimeout(100);
+    ok(
+      Number(await p.locator('#hs-rect-x').inputValue()) === Math.round(x1 + 1),
+      'Éditeur au clavier : la position se règle aussi dans le panneau (sans glisser)',
+    );
+    const tab = p.getByRole('tab', { name: 'Design' });
+    await p.getByRole('tab', { name: 'Étape' }).focus();
+    await p.keyboard.press('ArrowRight');
+    await p.waitForTimeout(150);
+    ok(
+      (await tab.getAttribute('aria-selected')) === 'true',
+      'Éditeur au clavier : → dans les onglets du panneau ouvre « Design »',
+    );
+    // Modale des raccourcis : ouverte par « ? », focus dedans, Échap rend le focus
+    await p.getByRole('tab', { name: 'Étape' }).focus();
+    await p.keyboard.press('Shift+?');
+    const dlg = p.locator('[role="dialog"][aria-modal="true"]');
+    await dlg.waitFor();
+    ok(
+      await p.evaluate(() => !!document.activeElement?.closest('[role="dialog"]')),
+      'Éditeur au clavier : « ? » ouvre les raccourcis, focus dans la fenêtre',
+    );
+    // Tabulation enfermée dans la fenêtre (L34 : fenêtres « aria-modal » comme les <dialog>)
+    let escaped = false;
+    for (let i = 0; i < 6; i++) {
+      await p.keyboard.press('Tab');
+      if (!(await p.evaluate(() => !!document.activeElement?.closest('[role="dialog"]')))) escaped = true;
+    }
+    ok(!escaped, 'Éditeur au clavier : la tabulation reste dans la fenêtre des raccourcis');
+    await p.keyboard.press('Escape');
+    await p.waitForTimeout(200);
+    ok(
+      (await dlg.count()) === 0 && (await active()).role === 'tab',
+      'Éditeur au clavier : Échap ferme les raccourcis et rend le focus',
+    );
+    await ctx.close();
+  }
+
+  // 10. L34 : lecteur au clavier jusqu'à une fenêtre modale (formulaire de contact, sinon fin de la démo) :
+  //     le focus y entre et la tabulation y reste
+  {
+    const { p, ctx } = await player(`/d/${DEMO}`);
+    const modal = p.locator('[role="dialog"][aria-modal="true"]');
+    for (let i = 0; i < 40 && !(await modal.count()); i++) {
+      await p.keyboard.press('ArrowRight');
+      await p.waitForTimeout(120);
+    }
+    ok((await modal.count()) === 1, 'Lecteur au clavier : → mène à la fenêtre du formulaire de contact');
+    if (await modal.count()) {
+      await p.waitForTimeout(200);
+      const inside = () => p.evaluate(() => !!document.activeElement?.closest('[aria-modal="true"]'));
+      ok(await inside(), 'Lecteur : le focus entre dans la fenêtre');
+      let out = false;
+      for (let i = 0; i < 10; i++) {
+        await p.keyboard.press(i % 3 === 2 ? 'Shift+Tab' : 'Tab');
+        if (!(await inside())) out = true;
+      }
+      ok(!out, 'Lecteur : la tabulation reste dans la fenêtre (dans les deux sens)');
+    }
     await ctx.close();
   }
 

@@ -188,6 +188,14 @@ export function CropPanel({
     const rh = clamp(h / H, MIN, 1 - draft.rect.y);
     setDraft({ ...draft, ratio: 'free', rect: { ...draft.rect, w: r4(rw), h: r4(rh) } });
   };
+  // L34 (WCAG 2.5.7) : position du cadre au clavier ou d'un clic, sans glisser
+  const px = Math.round(draft.rect.x * W);
+  const py = Math.round(draft.rect.y * H);
+  const setPos = (x: number, y: number) => {
+    const rx = clamp(x / W, 0, 1 - draft.rect.w);
+    const ry = clamp(y / H, 0, 1 - draft.rect.h);
+    setDraft({ ...draft, rect: { ...draft.rect, x: r4(rx), y: r4(ry) } });
+  };
   const apply = () => {
     const next = asCrop(draft.rect);
     const targets = draft.scope === 'all' ? same : [step];
@@ -249,6 +257,34 @@ export function CropPanel({
               max={H}
               value={ph}
               onChange={(e) => setSize(pw, Number(e.target.value) || 1)}
+            />
+          </div>
+          <div className="field">
+            <label className="t-label" htmlFor="crop-x">
+              {t('editor.crop.left')}
+            </label>
+            <input
+              id="crop-x"
+              className="input input-sm num"
+              type="number"
+              min={0}
+              max={W - pw}
+              value={px}
+              onChange={(e) => setPos(Number(e.target.value) || 0, py)}
+            />
+          </div>
+          <div className="field">
+            <label className="t-label" htmlFor="crop-y">
+              {t('editor.crop.top')}
+            </label>
+            <input
+              id="crop-y"
+              className="input input-sm num"
+              type="number"
+              min={0}
+              max={H - ph}
+              value={py}
+              onChange={(e) => setPos(px, Number(e.target.value) || 0)}
             />
           </div>
         </div>

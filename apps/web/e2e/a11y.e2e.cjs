@@ -17,7 +17,7 @@ const { seedExport } = require('./export-data.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
-const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const BLOCKING = new Set(['serious', 'critical']);
 const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' };
 
@@ -498,6 +498,27 @@ const APP_PAGES = [
       await p.getByRole('radiogroup', { name: 'Style de masquage' }).waitFor();
     },
   },
+  {
+    // L34 : panneau d'une zone avec position et taille (alternative au glisser, WCAG 2.5.7)
+    name: 'Éditeur · hotspot sélectionné',
+    route: `/#/demos/${DEMO}/edit`,
+    open: async (p) => {
+      await p
+        .getByRole('button', { name: /^Hotspot 1/ })
+        .first()
+        .focus();
+      await p.keyboard.press('Enter');
+      await p.locator('#hs-rect-x').waitFor();
+    },
+  },
+  {
+    name: 'Éditeur · recadrage',
+    route: `/#/demos/${DEMO}/edit`,
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Recadrer la capture' }).click();
+      await p.locator('#crop-x').waitFor();
+    },
+  },
   { name: 'Diffuser', route: `/#/demos/${DEMO}/distribute` },
   { name: 'Présentateur', route: `/#/demos/${DEMO}/present` },
   {
@@ -758,11 +779,66 @@ const APP_PAGES = [
     seed: seedWebhooks,
     open: (p) => p.locator('.l23-log tbody tr').first().click(),
   },
+  // L34 : routes et états ajoutés depuis L24
+  { name: 'Mentions légales', route: '/#/legal/terms', signedOut: true },
+  { name: 'Confidentialité (page légale)', route: '/#/legal/privacy', signedOut: true },
+  { name: 'Nouveau mot de passe', route: '/#/reset-password' },
+  { name: 'Invitation', route: '/#/invite/jeton-invitation-a11y' },
+  { name: 'Écran public du présentateur', route: `/#/present/${DEMO}/screen` },
+  {
+    name: 'Éditeur (écran étroit)',
+    route: `/#/demos/${DEMO}/edit`,
+    viewport: { width: 390, height: 844 },
+  },
+  {
+    name: 'Démos · erreur de chargement',
+    route: '/#/',
+    seed: (d) => {
+      d.homeFail = true;
+    },
+    open: (p) => p.getByRole('alert').waitFor(),
+  },
+  {
+    name: 'Éditeur · erreur de chargement',
+    route: `/#/demos/${DEMO}/edit`,
+    seed: (d) => {
+      d.homeFail = true;
+    },
+    open: (p) => p.getByRole('alert').waitFor(),
+  },
+  {
+    name: 'Démos · chargement (squelette)',
+    route: '/#/',
+    seed: (d) => {
+      d.homeDelay = 20_000;
+    },
+  },
+  {
+    name: 'Espace · erreur de lecture',
+    route: '/#/settings/profile',
+    open: async (p) => {
+      await p.route('**/rest/v1/members**', (r) => r.abort());
+      await p.reload();
+      await p.getByRole('alert').waitFor();
+    },
+  },
 ];
 
 /** Pages du lecteur et du centre (réponses des fonctions simulées). */
 const PLAYER_PAGES = [
   { name: 'Lecteur · démo', path: '/d/0b5c1f0e-0000-4000-8000-000000000001' },
+  {
+    // L34 : fenêtre du formulaire de contact (étape 3 de la démo de test)
+    name: 'Lecteur · formulaire de contact',
+    path: '/d/0b5c1f0e-0000-4000-8000-000000000001',
+    open: async (p) => {
+      for (let i = 0; i < 6 && !(await p.locator('[aria-modal="true"]').count()); i++) {
+        await p.keyboard.press('ArrowRight');
+        await p.waitForTimeout(150);
+      }
+      await p.locator('[aria-modal="true"]').waitFor();
+    },
+  },
   // L27 : page publique d'une démo (L19b)
   {
     name: 'Lecteur · page publique',
@@ -827,7 +903,7 @@ async function audit(page, exclude) {
 
 async function appPage(b, s, theme) {
   const ctx = await b.newContext({
-    viewport: { width: 1440, height: 900 },
+    viewport: s.viewport ?? { width: 1440, height: 900 },
     locale: 'fr-FR',
     colorScheme: theme,
   });
@@ -844,6 +920,11 @@ async function appPage(b, s, theme) {
   await install(p, { ...data, signedOut: Boolean(s.signedOut) });
   await p.goto(`${APP}${s.route}`);
   await p.waitForTimeout(1500);
+  // L34 : une page connectée renvoyée vers la connexion (faux Supabase mal configuré) n'est pas auditée en silence
+  if (!s.signedOut && /#\/login/.test(p.url()))
+    throw new Error(
+      `session fictive non reconnue (VITE_SUPABASE_URL ≠ ${'https://api.tutoclick.example'} ?)`,
+    );
   if (s.open) await s.open(p);
   await p.waitForTimeout(300);
   const v = await audit(p, s.exclude);
@@ -874,6 +955,7 @@ async function playerPage(b, s, theme) {
   );
   await p.goto(`${PLAYER}/#${s.path}`);
   await p.waitForTimeout(1500);
+  if (s.open) await s.open(p);
   const v = await audit(p);
   await ctx.close();
   return v;

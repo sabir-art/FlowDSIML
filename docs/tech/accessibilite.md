@@ -10,7 +10,7 @@ Deux scripts tournent en intégration continue, dans le job « Accessibilité (a
 
 | Script | Ce qu'il vérifie |
 |---|---|
-| `apps/web/e2e/a11y.e2e.cjs` | Audit axe-core (règles WCAG 2.1 A et AA) sur 28 pages, en clair et en sombre, soit 56 audits. Il échoue dès qu'une violation « serious » ou « critical » apparaît. L'option `--report` écrit le détail en JSON, qui est conservé comme artefact de la CI. |
+| `apps/web/e2e/a11y.e2e.cjs` | Audit axe-core sur toutes les routes de l'app et du lecteur, en clair et en sombre : règles WCAG 2.1 A et AA (L24), puis WCAG 2.2 AA depuis L34 (§ 7). Il échoue dès qu'une violation « serious » ou « critical » apparaît. L'option `--report` écrit le détail en JSON, qui est conservé comme artefact de la CI. |
 | `apps/web/e2e/a11y-clavier.e2e.cjs` | Les points qu'axe ne voit pas : lien d'évitement, focus visible sur 9 pages au clavier, focus enfermé dans les modales puis rendu au bouton d'origine, zone des messages, animations réduites, zoom 200 % sans défilement horizontal, lecteur utilisable au clavier et annoncé. 35 contrôles. |
 
 Pages auditées :
@@ -108,3 +108,57 @@ Autre amélioration demandée par le chef : sur l'attestation (L15-07), le centr
   - L'aperçu de la modale de style (`aria-hidden`) montre volontairement les couleurs choisies, même sous le seuil : il est exclu de la règle de contraste pour cet état seulement. Le contraste est annoncé en texte sous chaque champ (« Bulle : contraste 1,6:1, insuffisant. ») avec la couleur proposée.
   - Une action indisponible d'un menu (« Supprimer » sur le style par défaut) reste focalisable en `aria-disabled`, avec son explication reliée par `aria-describedby`.
   - Les deux contrôles d'une couleur ont des noms distincts : « Couleur principale » (saisie) et « Nuancier : Couleur principale ».
+
+## 7. Audit WCAG 2.2 AA (lot L34)
+
+Référentiel : WCAG 2.2 niveaux A et AA (le RGAA 4.1 reprend la version 2.1 ; les critères ajoutés par 2.2
+sont vérifiés en plus).
+
+### 7.1 Audit automatique (axe-core)
+
+- Règles `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` et `wcag22aa` (taille des cibles, 2.5.8).
+- Routes ajoutées depuis L27 : pages légales, nouveau mot de passe, invitation, écran public du
+  présentateur, vue mobile de l'éditeur, squelette de chargement, cartes d'erreur (démos, éditeur, lecture
+  des espaces), panneau d'une zone sélectionnée, recadrage, formulaire de contact du lecteur.
+- Résultat : __AUDIT__
+- Le script échoue maintenant si une page connectée retombe sur l'écran de connexion (session fictive mal
+  configurée) : sans ce garde-fou, la page de connexion était auditée à la place, sans erreur.
+
+### 7.2 Critères ajoutés par WCAG 2.2
+
+| Critère | Constat | Correction | Contrôle |
+|---|---|---|---|
+| 2.4.11 Focus non masqué (minimum) | Aucun élément focalisé entièrement caché par la barre du haut, les panneaux ou les commentaires. | — | `a11y-clavier` : 5 points de chaque élément focalisé testés sur 7 pages de l'app, le lecteur et le centre |
+| 2.5.7 Mouvements de glisser | Déplacer ou redimensionner une zone (hotspot, flou), placer le recadrage, réordonner les formations du centre et régler la hauteur des commentaires demandaient un glisser (ou le clavier, qui ne compte pas comme alternative de pointeur). | Section « Position et taille » (gauche, haut, largeur, hauteur en %) dans les panneaux hotspot et flou ; champs « Gauche » et « Haut » du recadrage ; boutons Monter et Descendre des formations du centre ; un clic sur la poignée des commentaires passe à la taille suivante. Les étapes du rail, les champs du formulaire et les questions du quiz avaient déjà des boutons. Le curseur avant/après du lecteur est un `input type=range` natif (un clic suffit). | audit axe des panneaux ; `a11y-clavier` (position réglée dans le panneau) |
+| 2.5.8 Taille des cibles (minimum) | Aucune cible sous 24 × 24 px sans espacement suffisant. | Nouveaux boutons à 32 px. | axe (`target-size`) |
+| 3.2.6 Aide cohérente | Le bouton Aide (F1) est au même endroit dans toutes les barres du haut. | — | revue |
+| 3.3.7 Saisie redondante | Aucun parcours ne redemande une information déjà donnée. | — | revue |
+| 3.3.8 Authentification accessible | Champs `autocomplete` (`email`, `current-password`, `new-password`), collage permis, lien de connexion par e-mail, aucun test cognitif. | — | revue |
+
+### 7.3 Clavier, modales et annonces
+
+- **Onglets du panneau de l'éditeur** (Étape, Design, Réglages) : les onglets inactifs étaient en
+  `tabindex=-1` sans gestion des flèches, donc inatteignables au clavier (échec 2.1.1). Flèches, Début et
+  Fin les activent maintenant, comme dans les autres listes d'onglets de l'app (toutes vérifiées).
+- **Fenêtres modales en `role="dialog" aria-modal="true"`** (raccourcis, styles, assistance IA,
+  glossaire, plans, variables, mesure des visites…) : la tabulation pouvait sortir vers la page et le
+  focus n'était pas toujours placé dans la fenêtre. `lib/dialogFocus.ts` les traite maintenant comme les
+  `<dialog>` natifs : focus dans la fenêtre à l'ouverture, tabulation enfermée dans les deux sens, focus
+  rendu à l'élément d'origine à la fermeture.
+- **Lecteur** : fenêtre de fin, formulaire de contact et reprise du parcours gèrent leur focus de la même
+  façon (`apps/player/src/modalFocus.tsx`).
+- **Parcours complet au clavier**, ajouté à `a11y-clavier.e2e.cjs` :
+  - éditeur : rail atteint, changement d'étape aux flèches, déplacement d'une étape (Espace, flèche,
+    Espace) annoncé, zone du canevas sélectionnée et déplacée aux flèches, position réglée dans le
+    panneau, onglets aux flèches, fenêtre des raccourcis (« ? ») avec focus enfermé puis rendu ;
+  - lecteur : navigation aux flèches jusqu'au formulaire de contact, focus dans la fenêtre et tabulation
+    enfermée dans les deux sens.
+- **Annonces `aria-live`** : changement d'étape du lecteur, déplacement d'une étape du rail, sélection et
+  déplacement d'une zone du canevas, dimensions du recadrage, chargements (squelettes L32) et messages ;
+  toutes présentes dans le DOM avant le message.
+
+### 7.4 Limites
+
+- Le PDF balisé (A11Y-10) reste une dette connue.
+- Aucun test avec lecteurs d'écran réels (NVDA, VoiceOver) dans ce lot : ce rapport ne vaut pas
+  déclaration de conformité.

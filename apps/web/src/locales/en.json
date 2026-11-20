@@ -530,7 +530,7 @@
       "collapse": "Collapse comments",
       "expand": "Show comments",
       "resize": "Resize the comments panel",
-      "resizeHint": "Drag to resize · Enter to collapse",
+      "resizeHint": "Drag or click to resize · Enter to collapse",
       "placeholder": "Add a comment for your team…",
       "placeholderShort": "Add a comment…",
       "send": "Send comment",
@@ -1404,7 +1404,9 @@
       "handle_se": "Bottom right handle",
       "handle_s": "Bottom handle",
       "handle_sw": "Bottom left handle",
-      "handle_w": "Left handle"
+      "handle_w": "Left handle",
+      "left": "Left (px)",
+      "top": "Top (px)"
     },
     "frame": {
       "title": "Browser frame",
@@ -1633,6 +1635,14 @@
       "default": "Screenshot: {{title}}.",
       "help": "Describe what the screen shows, in one sentence. If left empty, the text is “Screenshot: {{title}}.”",
       "count": "{{n}} / 250"
+    },
+    "rect": {
+      "title": "Position and size",
+      "x": "Left",
+      "y": "Top",
+      "w": "Width",
+      "h": "Height",
+      "help": "As a percentage of the screenshot. You can also move the area on the canvas, or with the arrow keys."
     }
   },
   "status": {
@@ -3184,7 +3194,9 @@
       "ctaInvalid": "Enter an https link and a label of 40 characters at most.",
       "ctaForm": "Lead form instead of the link",
       "soon": "Soon"
-    }
+    },
+    "moveUp": "Move “{{title}}” up",
+    "moveDown": "Move “{{title}}” down"
   },
   "export": {
     "menu": "Export (PDF, GIF)",

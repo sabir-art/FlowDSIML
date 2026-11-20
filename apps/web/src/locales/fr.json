@@ -530,7 +530,7 @@
       "collapse": "Replier les commentaires",
       "expand": "Afficher les commentaires",
       "resize": "Redimensionner le panneau Commentaires",
-      "resizeHint": "Glisser pour redimensionner · Entrée pour replier",
+      "resizeHint": "Glisser ou cliquer pour redimensionner · Entrée pour replier",
       "placeholder": "Ajouter un commentaire pour l'équipe…",
       "placeholderShort": "Ajouter un commentaire…",
       "send": "Envoyer le commentaire",
@@ -1404,7 +1404,9 @@
       "handle_se": "Poignée bas droite",
       "handle_s": "Poignée bas",
       "handle_sw": "Poignée bas gauche",
-      "handle_w": "Poignée gauche"
+      "handle_w": "Poignée gauche",
+      "left": "Gauche (px)",
+      "top": "Haut (px)"
     },
     "frame": {
       "title": "Cadre du navigateur",
@@ -1633,6 +1635,14 @@
       "default": "Capture d’écran : {{title}}.",
       "help": "Décrivez ce que montre l’écran, en une phrase. Laissé vide, le texte est « Capture d’écran : {{title}}. ».",
       "count": "{{n}} / 250"
+    },
+    "rect": {
+      "title": "Position et taille",
+      "x": "Gauche",
+      "y": "Haut",
+      "w": "Largeur",
+      "h": "Hauteur",
+      "help": "En pourcentage de la capture. Vous pouvez aussi déplacer la zone sur le canevas, ou avec les flèches du clavier."
     }
   },
   "status": {
@@ -3184,7 +3194,9 @@
       "ctaInvalid": "Indiquez un lien https et un libellé de 40 caractères au plus.",
       "ctaForm": "Formulaire de lead à la place du lien",
       "soon": "Bientôt"
-    }
+    },
+    "moveUp": "Monter « {{title}} »",
+    "moveDown": "Descendre « {{title}} »"
   },
   "export": {
     "menu": "Exporter (PDF, GIF)",

@@ -3,6 +3,7 @@ import { ArrowRight, CircleCheck, Clock, Lock, Play } from 'lucide-preact';
 import type { ResumeInfo } from './api';
 import { fmt, type Dict } from './i18n';
 import { SysFrame } from './Gate';
+import { ModalBox } from './modalFocus';
 
 /** Reprise utile : prénom connu, module commencé mais pas terminé. */
 export function resumable(r: ResumeInfo | null): r is Required<Pick<ResumeInfo, 'firstName'>> & ResumeInfo {
@@ -39,7 +40,7 @@ export function ResumeCard({
   const next = m.seen + 1;
   return (
     <SysFrame t={t} info={{ title, workspace }} label={fmt(r, 'title', { name: info.firstName! })}>
-      <div class="p-card p-sys-card p-resume" role="dialog" aria-modal="true" aria-labelledby="p-rs-t">
+      <ModalBox class="p-card p-sys-card p-resume" labelledby="p-rs-t">
         <span class="p-resume-badge">
           <Clock size={16} aria-hidden="true" />
           {r.badge}
@@ -97,7 +98,7 @@ export function ResumeCard({
             <ArrowRight size={18} aria-hidden="true" />
           </button>
         </div>
-      </div>
+      </ModalBox>
     </SysFrame>
   );
 }

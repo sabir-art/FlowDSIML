@@ -1,3 +1,4 @@
+import { ModalBox } from './modalFocus';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   DEFAULT_FRAME,
@@ -1015,7 +1016,7 @@ export function Player({
         )}
         {ended && <div class="p-scrim" aria-hidden="true" />}
         {ended && (
-          <div class="p-card p-end" role="dialog" aria-modal="true" aria-labelledby="p-end-title">
+          <ModalBox class="p-card p-end" labelledby="p-end-title">
             <span class="p-end-chip" aria-hidden="true">
               <CheckCircle2 {...ICON} size={24} />
             </span>
@@ -1042,7 +1043,7 @@ export function Player({
                 {t.restart}
               </button>
             </div>
-          </div>
+          </ModalBox>
         )}
         {m.checklist && items.length > 0 && !gateForm && !compact && !checklistDocked && (
           <Checklist

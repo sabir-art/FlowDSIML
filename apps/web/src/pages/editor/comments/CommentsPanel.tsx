@@ -171,7 +171,7 @@ export function CommentsPanel({
   const sectionRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
   const draftRef = useRef<HTMLTextAreaElement>(null);
-  const drag = useRef<{ y: number; h: number } | null>(null);
+  const drag = useRef<{ y: number; h: number; moved: boolean } | null>(null);
   const openedByUser = useRef(false);
   const pendingRef = useRef(0);
   pendingRef.current = pending;
@@ -304,11 +304,22 @@ export function CommentsPanel({
     }
   }
   function onPointerDown(e: PointerEvent<HTMLDivElement>) {
-    drag.current = { y: e.clientY, h: height };
+    drag.current = { y: e.clientY, h: height, moved: false };
     e.currentTarget.setPointerCapture(e.pointerId);
   }
   function onPointerMove(e: PointerEvent<HTMLDivElement>) {
-    if (drag.current) setHeight(clamp(drag.current.h + (drag.current.y - e.clientY)));
+    if (!drag.current) return;
+    if (Math.abs(drag.current.y - e.clientY) > 3) drag.current.moved = true;
+    setHeight(clamp(drag.current.h + (drag.current.y - e.clientY)));
+  }
+  /** L34 (WCAG 2.5.7) : un clic sans glisser fait passer la hauteur à la taille suivante (petite, moyenne, grande). */
+  function onPointerUp() {
+    const d = drag.current;
+    drag.current = null;
+    if (!d || d.moved) return;
+    const sizes = [MIN_H, clamp((MIN_H + MAX_H) / 2), clamp(MAX_H)];
+    const next = sizes.find((x) => x > height + 1) ?? sizes[0]!;
+    setHeight(next);
   }
   function onHandleKey(e: KeyboardEvent<HTMLDivElement>) {
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
@@ -417,7 +428,7 @@ export function CommentsPanel({
           tabIndex={0}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
-          onPointerUp={() => (drag.current = null)}
+          onPointerUp={onPointerUp}
           onPointerCancel={() => (drag.current = null)}
           onKeyDown={onHandleKey}
         >
