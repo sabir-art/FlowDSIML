@@ -43,12 +43,14 @@ import {
   Trash2,
   User,
   Users,
+  Map as MapIcon,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Empty, Select } from '@flowdsiml/ui';
 import { NoMatch } from '../../components/empty/NoMatch';
 import { ExtensionDialog } from '../../components/ExtensionDialog';
-import { completionRate, countTrend, rateTrend } from '@flowdsiml/core';
+import { completionRate, contentType, countTrend, rateTrend, type ContentType } from '@flowdsiml/core';
+import { TypeBadge } from '../../components/TypeBadge';
 import { TrendBadge } from '../../components/kpi/KpiTabs';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
@@ -107,7 +109,13 @@ type Kpis = Stats;
 type StatusFilter = 'all' | 'draft' | 'published';
 type Sort = 'updated' | 'created' | 'title' | 'views';
 
-export function DemosPage() {
+type TypeFilter = 'all' | 'captures' | 'html';
+
+/**
+ * Page Démos ; L48-G §4 : la même page sert le Sandbox (/sandbox), filtrée sur kind = sandbox, avec ses
+ * propres titres ; Démos regroupe les démos guidées (captures et HTML), avec un filtre Type et un badge.
+ */
+export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const navigate = useNavigate();
@@ -125,6 +133,11 @@ export function DemosPage() {
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [covers, setCovers] = useState<Record<string, string>>({});
   const [stepCounts, setStepCounts] = useState<Record<string, number>>({});
+  const [htmlCounts, setHtmlCounts] = useState<Record<string, number>>({});
+  /** L48-G §2 : type de contenu d'une démo de la liste. */
+  const typeOf = (d: Demo): ContentType =>
+    contentType(d, { total: stepCounts[d.id] ?? 0, html: htmlCounts[d.id] ?? 0 });
+  const [ctype, setCtype] = useState<TypeFilter>('all');
   /** DSH-10 : date de la dernière publication, pour le badge « Modifiée ». */
   const [publishedAt, setPublishedAt] = useState<Record<string, string>>({});
   // L48-A §2 : entrée choisie dans l'adresse (?dossier={id}, ?vue=mes-demos, ?vue=archivees)
@@ -244,8 +257,10 @@ export function DemosPage() {
     setHidden(h.hidden);
     setStats(Object.fromEntries(h.overview.map((r) => [r.demo_id, r])));
     setStepCounts(h.stepCounts);
+    setHtmlCounts(h.htmlCounts);
     setPublishedAt(h.publishedAt);
-    setDemos(h.demos);
+    // L48-G §4 : Démos sans les Sandbox ; Sandbox seulement les Sandbox
+    setDemos(h.demos.filter((d) => (d.kind === 'sandbox') === sandbox));
     if (h.kpis.cur) setKpis({ cur: h.kpis.cur, prev: h.kpis.prev });
     else {
       // Repli sur la somme de workspace_overview si workspace_kpis manque
@@ -314,6 +329,7 @@ export function DemosPage() {
         inScope(d) &&
         byAuthor(d) &&
         (status === 'all' || d.status === status) &&
+        (ctype === 'all' || typeOf(d) === ctype) &&
         (!needle || d.title.toLowerCase().includes(needle)) &&
         (tagFilter.length === 0 || matchTags(d.id)),
     );
@@ -323,7 +339,23 @@ export function DemosPage() {
       return [...list].sort((a, b) => (stats[b.id]?.views ?? 0) - (stats[a.id]?.views ?? 0));
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- inScope et byAuthor suivent scope, author, user
-  }, [demos, scope, author, user, status, q, sort, stats, i18n.language, tagFilter, tagMode, tagStore.links]);
+  }, [
+    demos,
+    scope,
+    author,
+    user,
+    status,
+    ctype,
+    htmlCounts,
+    stepCounts,
+    q,
+    sort,
+    stats,
+    i18n.language,
+    tagFilter,
+    tagMode,
+    tagStore.links,
+  ]);
 
   const [newOpen, setNewOpen] = useState(false);
   const [generating, setGenerating] = useState<{ folder: string | null } | null>(null);
@@ -454,13 +486,13 @@ export function DemosPage() {
                 <ol>
                   <li>
                     <a
-                      href="#/"
+                      href={sandbox ? '#/sandbox' : '#/'}
                       onClick={(e) => {
                         e.preventDefault();
                         setFolder('all');
                       }}
                     >
-                      {t('demos.title')}
+                      {sandbox ? t('sandboxPage.title') : t('demos.title')}
                     </a>
                   </li>
                   <li aria-current="page">
@@ -473,8 +505,8 @@ export function DemosPage() {
             </>
           ) : (
             <>
-              <h1>{t('demos.title')}</h1>
-              <p className="page-head__sub">{t('demos.subtitle')}</p>
+              <h1>{sandbox ? t('sandboxPage.title') : t('demos.title')}</h1>
+              <p className="page-head__sub">{sandbox ? t('sandboxPage.subtitle') : t('demos.subtitle')}</p>
             </>
           )}
         </div>
@@ -495,7 +527,7 @@ export function DemosPage() {
           </label>
           {editable && (
             <Button variant="primary" size="lg" icon={<Plus />} onClick={openNew}>
-              {t('demos.new')}
+              {sandbox ? t('sandboxPage.new') : t('demos.new')}
             </Button>
           )}
         </div>
@@ -652,7 +684,7 @@ export function DemosPage() {
         {error && <Alert kind="error">{error}</Alert>}
 
         {/* L48-B §4 : indicateurs masqués tant qu'aucune démo n'est publiée */}
-        {kpis && anyPublished && (
+        {kpis && anyPublished && !sandbox && (
           <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
             {(
               [
@@ -705,17 +737,19 @@ export function DemosPage() {
         )}
 
         {/* L26-01 : « Prise en main de votre espace », après les indicateurs (L32 §2) */}
-        <OnboardingCard
-          onb={onb}
-          onCapture={openNew}
-          latestDemoId={demos[0]?.id ?? null}
-          publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
-          collapsedByDefault={demos.length === 0}
-        />
+        {!sandbox && (
+          <OnboardingCard
+            onb={onb}
+            onCapture={openNew}
+            latestDemoId={demos[0]?.id ?? null}
+            publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
+            collapsedByDefault={demos.length === 0}
+          />
+        )}
 
         <section aria-labelledby="demos-list-title" className="demos-section">
           <h2 id="demos-list-title" className="demos-list-title">
-            {t('demos.allDemos')}
+            {sandbox ? t('sandboxPage.all') : t('demos.allDemos')}
           </h2>
           {/* L40 : Statut, Dossier, Étiquettes et Réinitialiser à gauche ; tri et affichage à droite */}
           {/* L48-B §4 : pas de barre de liste tant qu'il n'y a aucune démo */}
@@ -724,12 +758,14 @@ export function DemosPage() {
               className="list-toolbar--cq"
               activeCount={
                 (status !== 'all' ? 1 : 0) +
+                (ctype !== 'all' ? 1 : 0) +
                 (scope !== 'all' && !wide ? 1 : 0) +
                 (author !== 'all' ? 1 : 0) +
                 (tagFilter.length ? 1 : 0)
               }
               onReset={() => {
                 setStatus('all');
+                setCtype('all');
                 if (!wide) setFolder('all');
                 setAuthor('all');
                 setTagFilter([]);
@@ -750,6 +786,16 @@ export function DemosPage() {
                       </button>
                     ))}
                   </div>
+                  {/* L48-G §4 : Type, après Statut (pas sur la page Sandbox) */}
+                  {!sandbox && (
+                    <div className="fd-segmented" role="group" aria-label={t('ctype.filter')}>
+                      {(['all', 'captures', 'html'] as TypeFilter[]).map((k) => (
+                        <button key={k} type="button" aria-pressed={ctype === k} onClick={() => setCtype(k)}>
+                          {k === 'all' ? t('ctype.all') : t(`ctype.short.${k}`)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </>
               }
               filters={
@@ -940,7 +986,20 @@ export function DemosPage() {
             />
           )}
 
-          {demos.length === 0 ? (
+          {demos.length === 0 && sandbox ? (
+            <Empty
+              icon={<MapIcon />}
+              title={t('sandboxPage.emptyTitle')}
+              body={t('sandboxPage.emptyBody')}
+              action={
+                editable ? (
+                  <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                    {t('sandboxPage.new')}
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : demos.length === 0 ? (
             // L48-B §4 : état vide avec trois tuiles de départ
             <Empty
               icon={<MonitorPlay />}
@@ -1017,6 +1076,7 @@ export function DemosPage() {
               query={q}
               filters={
                 (status !== 'all' ? 1 : 0) +
+                (ctype !== 'all' ? 1 : 0) +
                 (author !== 'all' ? 1 : 0) +
                 (tagFilter.length ? 1 : 0) +
                 (scope !== 'all' && !wide ? 1 : 0)
@@ -1024,6 +1084,7 @@ export function DemosPage() {
               onReset={() => {
                 setQ('');
                 setStatus('all');
+                setCtype('all');
                 setAuthor('all');
                 setTagFilter([]);
                 if (!wide) setFolder('all');
@@ -1036,6 +1097,7 @@ export function DemosPage() {
                 <thead>
                   <tr>
                     <th scope="col">{t('demos.colName')}</th>
+                    {!sandbox && <th scope="col">{t('ctype.col')}</th>}
                     <th scope="col">{t('demos.colStatus')}</th>
                     <th scope="col">{t('demos.colFolder')}</th>
                     <th scope="col" className="r">
@@ -1071,6 +1133,11 @@ export function DemosPage() {
                             </span>
                           )}
                         </td>
+                        {!sandbox && (
+                          <td>
+                            <TypeBadge type={typeOf(d)} />
+                          </td>
+                        )}
                         <td>
                           <span className={`fd-badge status-${statusOf(d)}`}>
                             {t(`status.${statusOf(d)}`)}
@@ -1122,6 +1189,7 @@ export function DemosPage() {
                       }
                     }}
                   >
+                    {!sandbox && <TypeBadge type={typeOf(d)} cover />}
                     <div className={`demo-cover${covers[d.id] ? ' fd-player-scope' : ''}`} aria-hidden="true">
                       {covers[d.id] ? (
                         <img src={covers[d.id]} alt="" loading="lazy" />
@@ -1150,6 +1218,8 @@ export function DemosPage() {
                           </span>
                         )}
                         <span>
+                          {/* L48-G §4 : un Sandbox dit toujours son nombre de pages */}
+                          {sandbox && <>{t('sandboxPage.pages', { count: stepCounts[d.id] ?? 0 })} · </>}
                           {d.status === 'published' ? (
                             <>
                               {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })} ·{' '}
@@ -1157,7 +1227,7 @@ export function DemosPage() {
                               ·{' '}
                             </>
                           ) : (
-                            <>{t('demos.steps', { count: stepCounts[d.id] ?? 0 })} · </>
+                            !sandbox && <>{t('demos.steps', { count: stepCounts[d.id] ?? 0 })} · </>
                           )}
                           <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
                             {formatRelativeShort(d.updated_at)}
@@ -1209,6 +1279,7 @@ export function DemosPage() {
               folders={folders}
               defaultFolder={folder !== 'all' && folder !== 'none' ? folder : null}
               onClose={() => setNewOpen(false)}
+              initialType={sandbox ? 'sandbox' : undefined}
               onEmpty={async (f) => {
                 setNewOpen(false);
                 await createDemo(f);

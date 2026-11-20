@@ -62,6 +62,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   // ===== L26-04 : bibliothèque =====
   await page.goto(`${BASE}/#/`);
   await page.getByRole('button', { name: 'Nouvelle démo' }).first().click();
+  // L48-G : étape 1 (type de contenu), puis la source
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
   const nd = page.getByRole('dialog', { name: 'Nouvelle démo' });
   await nd.waitFor();
   await nd.getByRole('button', { name: /Partir d’un modèle/ }).click();

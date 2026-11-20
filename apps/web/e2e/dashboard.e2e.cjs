@@ -141,6 +141,8 @@ const SHOTS = process.env.SHOTS_DIR;
   );
   await d2.keyboard.press('Escape');
   await d2.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+  // L48-G : étape 1 (type de contenu), puis la source
+  await d2.getByRole('button', { name: 'Continuer', exact: true }).click();
   await d2.waitForSelector('dialog.new-demo-dialog[open]');
   ok(
     (await d2.locator('.nd-choice.is-soon').count()) === 0 &&

@@ -231,6 +231,17 @@ const APP_PAGES = [
     },
   },
   {
+    name: 'Démos · nouvelle démo (source)',
+    route: '/#/',
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
+      await p.getByRole('button', { name: 'Continuer', exact: true }).click();
+      await p.waitForSelector('dialog[open] .nd-choices');
+    },
+  },
+  // L48-G : page Sandbox (vide dans le jeu de base)
+  { name: 'Sandbox', route: '/#/sandbox' },
+  {
     name: 'Démos · aide',
     route: '/#/',
     open: async (p) => {
@@ -252,6 +263,8 @@ const APP_PAGES = [
     route: '/#/',
     open: async (p) => {
       await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
+      // L48-G : étape 1 (type de contenu), puis la source
+      await p.getByRole('button', { name: 'Continuer', exact: true }).click();
       await p.getByRole('button', { name: /Partir d’un modèle/ }).click();
       await p.getByRole('radio').first().waitFor();
     },
@@ -433,6 +446,8 @@ const APP_PAGES = [
     },
     open: async (p) => {
       await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
+      // L48-G : étape 1 (type de contenu), puis la source
+      await p.getByRole('button', { name: 'Continuer', exact: true }).click();
       await p.getByRole('button', { name: /Générer avec l’IA/ }).click();
       await p.getByLabel('Décrivez la procédure, une étape par ligne').fill('Ouvrir le menu');
       await p.getByRole('button', { name: 'Proposer les étapes' }).click();

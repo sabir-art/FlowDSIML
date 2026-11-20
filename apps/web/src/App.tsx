@@ -248,6 +248,7 @@ export function App() {
                     }
                   >
                     <Route index element={<DemosPage />} />
+                    <Route path="/sandbox" element={<DemosPage key="sandbox" sandbox />} />
                     <Route path="/demos/:demoId/share" element={<SharePage />} />
                     <Route path="/demos/:demoId/distribute" element={<DistributeRoute />} />
                     <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />

@@ -32,13 +32,16 @@ function readSaved(): string | null {
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  // Suivre l'identifiant, pas l'objet : une mise à jour du compte (métadonnées, jeton rafraîchi) ne doit
+  // pas recharger les espaces ni démonter la page (L48-G : type de contenu gardé dans le compte)
+  const uid = user?.id ?? null;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [workspaces, setWorkspaces] = useState<WorkspaceWithRole[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(readSaved);
 
   const reload = useCallback(async () => {
-    if (!user) {
+    if (!uid) {
       setWorkspaces([]);
       setLoading(false);
       return;
@@ -46,7 +49,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     const { data, error: readError } = await supabase
       .from('members')
       .select('role, workspaces(*)')
-      .eq('user_id', user.id)
+      .eq('user_id', uid)
       .order('created_at');
     // Panne de lecture : on garde la liste connue et on le signale (jamais « aucun espace » → onboarding)
     if (readError) {
@@ -60,7 +63,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       .map((m) => ({ ...(m.workspaces as Tables<'workspaces'>), role: m.role }));
     setWorkspaces(list);
     setLoading(false);
-  }, [user]);
+  }, [uid]);
 
   useEffect(() => {
     setLoading(true);

@@ -19,7 +19,8 @@
     "typeToConfirm": "Type “{{text}}” to confirm",
     "yes": "Yes",
     "no": "No",
-    "undo": "Undo"
+    "undo": "Undo",
+    "continue": "Continue"
   },
   "nav": {
     "main": "Main navigation",
@@ -41,7 +42,8 @@
     "paths": "Learning paths",
     "utilities": "Utilities",
     "extension": "Extension",
-    "helpCenter": "Help centre"
+    "helpCenter": "Help centre",
+    "sandbox": "Sandbox"
   },
   "roles": {
     "owner": "Owner",
@@ -5092,5 +5094,62 @@
     "renews": "Available again on {{date}}.",
     "near": "Almost reached: {{used}} of {{total}}.",
     "storage": "Storage: {{used}} of {{total}}"
+  },
+  "ctype": {
+    "filter": "Type",
+    "all": "All",
+    "col": "Type",
+    "name": {
+      "captures": "Screenshot demo",
+      "html": "HTML demo",
+      "sandbox": "Sandbox"
+    },
+    "short": {
+      "captures": "Screenshots",
+      "html": "HTML",
+      "sandbox": "Sandbox"
+    },
+    "line": {
+      "captures": "A guided tour, one screenshot per step, with a bubble on each click.",
+      "html": "A guided tour on real HTML pages: editable text and data, sharp on every screen.",
+      "sandbox": "Linked HTML pages: visitors explore freely, with no set steps."
+    },
+    "plus": {
+      "captures1": "Fastest to create",
+      "captures2": "Ideal for a step-by-step procedure",
+      "html1": "Edit text without recapturing",
+      "html2": "Sample data easy to replace",
+      "sandbox1": "Practise without risk",
+      "sandbox2": "Links connected automatically"
+    },
+    "question": "What do you want to create?",
+    "stepOf": "Step {{n}} of {{total}}",
+    "step1": "Content type",
+    "step2": "Source",
+    "nextHint": "Next step: the source (extension, images, template…)",
+    "newTitle": {
+      "captures": "New screenshot demo",
+      "html": "New HTML demo",
+      "sandbox": "New Sandbox"
+    },
+    "extensionBody": {
+      "html": "Capture pages in HTML mode: the “Guided demo” type is preset on review.",
+      "sandbox": "Capture pages in HTML mode: the “Sandbox” type is preset on review."
+    },
+    "extensionHelp": "In the extension, choose “Capture as HTML”, browse the pages, then review the capture.",
+    "noTemplate": {
+      "html": "No HTML demo template yet.",
+      "sandbox": "No Sandbox template yet."
+    }
+  },
+  "sandboxPage": {
+    "title": "Sandbox",
+    "subtitle": "Linked HTML pages to explore freely.",
+    "new": "New Sandbox",
+    "all": "All Sandboxes",
+    "emptyTitle": "No Sandbox yet",
+    "emptyBody": "Capture a few pages as HTML with the extension: their links are connected automatically.",
+    "pages_one": "{{count}} page",
+    "pages_other": "{{count}} pages"
   }
 }

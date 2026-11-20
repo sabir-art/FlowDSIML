@@ -38,6 +38,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-0000000000e1';
     await install(page);
     await page.goto(`${APP}/#/`);
     await page.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+    // L48-G : étape 1 (type de contenu), puis la source
+    await page.getByRole('button', { name: 'Continuer', exact: true }).click();
     const nd = page.getByRole('dialog', { name: 'Nouvelle démo' });
     await nd.waitFor();
     const link = nd.getByRole('link', { name: 'Ouvrir le réglage' });

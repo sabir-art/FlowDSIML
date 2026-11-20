@@ -122,6 +122,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
   const nd = page.getByRole('dialog', { name: 'Nouvelle démo' });
   await nd.waitFor();
+  // L48-G : étape 1 (type de contenu), puis la source
+  await nd.getByRole('button', { name: 'Continuer', exact: true }).click();
 
   // ===== Nouvelle démo > Importer des images =====
   const imp = nd.getByRole('button', { name: /Importer des images/ });
@@ -155,6 +157,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.goto(`${APP}/#/?new=1`);
   const nd2 = page.getByRole('dialog', { name: 'Nouvelle démo' });
   await nd2.waitFor();
+  await nd2.getByRole('button', { name: 'Continuer', exact: true }).click();
   await nd2
     .getByRole('button', { name: /Partir d’un modèle/ })
     .first()

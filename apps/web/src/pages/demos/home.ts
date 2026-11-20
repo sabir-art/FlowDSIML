@@ -13,6 +13,8 @@ export interface HomeData {
   /** Dossiers restreints : membres qui ne les voient pas. */
   hidden: Record<string, number>;
   stepCounts: Record<string, number>;
+  /** L48-G : étapes HTML par démo (type de contenu). */
+  htmlCounts: Record<string, number>;
   publishedAt: Record<string, string>;
   /** Chemin (bucket captures) de la première image de chaque démo. */
   covers: Record<string, string>;
@@ -24,7 +26,11 @@ export interface HomeData {
 /** Une seule lecture (dashboard_home) ; repli sur les lectures séparées si la migration L32 manque. */
 export async function loadHome(ws: { id: string }): Promise<HomeData> {
   const one = await supabase.rpc('dashboard_home', { p_ws: ws.id });
-  if (!one.error && one.data) return one.data as unknown as HomeData;
+  if (!one.error && one.data) {
+    const h = one.data as unknown as HomeData;
+    // Avant la migration L48-G : pas de htmlCounts (toutes les démos guidées comptent comme captures)
+    return { ...h, htmlCounts: h.htmlCounts ?? {} };
+  }
   // Repli seulement si la fonction n'existe pas encore ; toute autre erreur va à l'écran d'erreur (L32 §4)
   if (one.error && !isMissingFunction(one.error)) throw one.error;
   return loadSeparately(ws);
@@ -69,16 +75,22 @@ async function loadSeparately(ws: { id: string }): Promise<HomeData> {
       ),
     ),
     ids.length
-      ? supabase.from('steps').select('demo_id, image_path, position').in('demo_id', ids).order('position')
-      : Promise.resolve({ data: [] as Array<{ demo_id: string; image_path: string | null }> }),
+      ? supabase
+          .from('steps')
+          .select('demo_id, image_path, position, kind')
+          .in('demo_id', ids)
+          .order('position')
+      : Promise.resolve({ data: [] as Array<{ demo_id: string; image_path: string | null; kind: string }> }),
     versions.length
       ? supabase.from('demo_versions').select('demo_id, published_at').in('id', versions)
       : Promise.resolve({ data: [] as Array<{ demo_id: string; published_at: string | null }> }),
   ]);
   const stepCounts: Record<string, number> = {};
+  const htmlCounts: Record<string, number> = {};
   const covers: Record<string, string> = {};
   for (const r of steps.data ?? []) {
     stepCounts[r.demo_id] = (stepCounts[r.demo_id] ?? 0) + 1;
+    if (r.kind === 'html') htmlCounts[r.demo_id] = (htmlCounts[r.demo_id] ?? 0) + 1;
     if (r.image_path && !covers[r.demo_id]) covers[r.demo_id] = r.image_path;
   }
   return {
@@ -92,6 +104,7 @@ async function loadSeparately(ws: { id: string }): Promise<HomeData> {
     locked: (lk.data ?? []).map((x) => x.demo_id),
     hidden: Object.fromEntries(hidden),
     stepCounts,
+    htmlCounts,
     publishedAt: Object.fromEntries(
       (v.data ?? []).filter((r) => r.published_at).map((r) => [r.demo_id, r.published_at!]),
     ),

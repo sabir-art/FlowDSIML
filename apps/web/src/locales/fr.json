@@ -19,7 +19,8 @@
     "typeToConfirm": "Saisissez « {{text}} » pour confirmer",
     "yes": "Oui",
     "no": "Non",
-    "undo": "Annuler"
+    "undo": "Annuler",
+    "continue": "Continuer"
   },
   "nav": {
     "main": "Navigation principale",
@@ -41,7 +42,8 @@
     "paths": "Parcours de formation",
     "utilities": "Utilitaires",
     "extension": "Extension",
-    "helpCenter": "Centre d’aide"
+    "helpCenter": "Centre d’aide",
+    "sandbox": "Sandbox"
   },
   "roles": {
     "owner": "Propriétaire",
@@ -5092,5 +5094,62 @@
     "renews": "Disponible à nouveau le {{date}}.",
     "near": "Bientôt atteinte : {{used}} sur {{total}}.",
     "storage": "Stockage : {{used}} sur {{total}}"
+  },
+  "ctype": {
+    "filter": "Type",
+    "all": "Tous",
+    "col": "Type",
+    "name": {
+      "captures": "Démo par captures",
+      "html": "Démo HTML",
+      "sandbox": "Sandbox"
+    },
+    "short": {
+      "captures": "Captures",
+      "html": "HTML",
+      "sandbox": "Sandbox"
+    },
+    "line": {
+      "captures": "Un parcours guidé, une capture d'écran par étape, avec une bulle à chaque clic.",
+      "html": "Un parcours guidé sur de vraies pages HTML : textes et données modifiables, net sur tous les écrans.",
+      "sandbox": "Des pages HTML reliées entre elles : le visiteur explore librement, sans étapes imposées."
+    },
+    "plus": {
+      "captures1": "Le plus rapide à créer",
+      "captures2": "Idéal pour une procédure pas à pas",
+      "html1": "Textes modifiables sans recapturer",
+      "html2": "Données fictives faciles à remplacer",
+      "sandbox1": "S'entraîner sans risque",
+      "sandbox2": "Liens reliés automatiquement"
+    },
+    "question": "Que voulez-vous créer ?",
+    "stepOf": "Étape {{n}} sur {{total}}",
+    "step1": "Type de contenu",
+    "step2": "Source",
+    "nextHint": "Étape suivante : la source (extension, images, modèle…)",
+    "newTitle": {
+      "captures": "Nouvelle démo par captures",
+      "html": "Nouvelle démo HTML",
+      "sandbox": "Nouveau Sandbox"
+    },
+    "extensionBody": {
+      "html": "Capturez les pages en mode HTML : le type « Démo guidée » est prérempli à la vérification.",
+      "sandbox": "Capturez les pages en mode HTML : le type « Sandbox » est prérempli à la vérification."
+    },
+    "extensionHelp": "Dans l'extension, choisissez « Capturer en HTML », parcourez les pages, puis vérifiez la capture.",
+    "noTemplate": {
+      "html": "Aucun modèle de démo HTML pour l'instant.",
+      "sandbox": "Aucun modèle de Sandbox pour l'instant."
+    }
+  },
+  "sandboxPage": {
+    "title": "Sandbox",
+    "subtitle": "Des pages HTML reliées entre elles, à explorer librement.",
+    "new": "Nouveau Sandbox",
+    "all": "Tous les Sandbox",
+    "emptyTitle": "Aucun Sandbox",
+    "emptyBody": "Capturez quelques pages en HTML avec l'extension : leurs liens sont reliés automatiquement.",
+    "pages_one": "{{count}} page",
+    "pages_other": "{{count}} pages"
   }
 }

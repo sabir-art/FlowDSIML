@@ -57,6 +57,8 @@ const SHOTS = process.env.SHOTS_DIR;
   // L30-09 : carte désactivée tant que l'espace n'a pas activé l'Assistance IA
   await page.goto(`${APP}/#/demos`);
   await page.getByRole('button', { name: 'Nouvelle démo' }).first().click();
+  // L48-G : étape 1 (type de contenu), puis la source
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
   const nd = page.getByRole('dialog', { name: 'Nouvelle démo' });
   await nd.waitFor();
   const card = nd.getByRole('button', { name: /Générer avec l’IA/ });
@@ -75,6 +77,8 @@ const SHOTS = process.env.SHOTS_DIR;
   state.ai.enabled = true;
   await page.goto(`${APP}/#/demos`);
   await page.getByRole('button', { name: 'Nouvelle démo' }).first().click();
+  // L48-G : étape 1 (type de contenu), puis la source
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
   await nd.waitFor();
   await page.waitForTimeout(300);
   ok((await card.getAttribute('aria-disabled')) === null, 'Activée : carte cliquable');

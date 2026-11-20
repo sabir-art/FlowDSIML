@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Languages,
   LayoutGrid,
+  Map as MapIcon,
   LogOut,
   Megaphone,
   Menu as MenuIcon,
@@ -162,6 +163,8 @@ export function Layout() {
         <nav aria-label={t('nav.main')} className="fd-nav">
           {/* RF6 : « Démos » reste actif dans les sous-pages d'une démo (analytics, partage…) */}
           {item('/', path === '/' || path.startsWith('/demos/'), <LayoutGrid {...ICON} />, t('nav.demos'))}
+          {/* L48-G §4 : le Sandbox a sa propre entrée (pages reliées, exploration libre) */}
+          {item('/sandbox', path === '/sandbox', <MapIcon {...ICON} />, t('nav.sandbox'))}
           {/* L14 : parcours (centre de formation), propriétaires et admins (droits inchangés) */}
           {can('members.manage') && item('/center', path === '/center', <Route {...ICON} />, t('nav.paths'))}
           {/* Leads reste un onglet d'Analytics (?tab=leads) */}

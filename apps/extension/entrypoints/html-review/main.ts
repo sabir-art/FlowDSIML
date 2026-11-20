@@ -5,6 +5,7 @@ import { APP_URL } from '@/lib/config';
 import { strings } from '@/lib/i18n';
 import { htmlStore, type PendingHtmlPage } from '@/lib/htmlStore';
 import { sendHtml, type HtmlDemoKind } from '@/lib/htmlUpload';
+import { supabase } from '@/lib/supabase';
 
 /**
  * A8 : vérification de la capture HTML. Aperçus en iframe sandbox vide (aucun script, origine
@@ -69,9 +70,16 @@ async function main() {
     return;
   }
   $('pages').replaceChildren(...pages.map(card));
-  // Sandbox proposé d'office quand les pages sont reliées entre elles
-  if (pages.length > 2 && pages.filter((p) => p.clickSel).length < pages.length - 1)
-    (document.querySelector('input[value="sandbox"]') as HTMLInputElement).checked = true;
+  // L48-G §3 : type choisi dans « Nouvelle démo » (métadonnées du compte), prérempli et modifiable ;
+  // à défaut, Sandbox proposé d'office quand les pages sont reliées entre elles
+  const chosen = await supabase.auth
+    .getUser()
+    .then(({ data }) => data.user?.user_metadata?.content_type as unknown)
+    .catch(() => null);
+  const preset: HtmlDemoKind | null = chosen === 'sandbox' ? 'sandbox' : chosen === 'html' ? 'guided' : null;
+  const linked = pages.length > 2 && pages.filter((p) => p.clickSel).length < pages.length - 1;
+  if (preset ?? (linked ? 'sandbox' : null))
+    (document.querySelector(`input[value="${preset ?? 'sandbox'}"]`) as HTMLInputElement).checked = true;
   send.addEventListener('click', async () => {
     send.disabled = true;
     alert(null);

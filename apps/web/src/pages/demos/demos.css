@@ -300,7 +300,179 @@
 }
 /* DSH-06 : modale « Nouvelle démo » */
 .new-demo-dialog {
-  width: min(760px, calc(100vw - 32px));
+  width: min(880px, calc(100vw - 32px));
+}
+/* L48-G §3 : étape 1, type de contenu (3 cartes radio illustrées) */
+.nd-titles h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nd-step {
+  margin: 4px 0 0;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+}
+.nd-types {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.nd-legend {
+  padding: 0;
+  margin-bottom: var(--fd-space-3);
+  font-weight: 600;
+}
+.nd-types__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--fd-space-3);
+}
+.nd-type {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-lg);
+  background: var(--fd-color-surface);
+  cursor: pointer;
+}
+.nd-type.is-selected {
+  border: 2px solid var(--fd-color-primary);
+  padding: 13px;
+  background: var(--fd-color-primary-soft, var(--fd-color-surface-selected));
+}
+.nd-type input {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  margin: 0;
+  accent-color: var(--fd-color-primary);
+}
+.nd-type:has(input:focus-visible) {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: 2px;
+}
+.nd-art {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+}
+.nd-art__bg {
+  fill: var(--fd-color-surface-sunken);
+}
+.nd-art__card {
+  fill: var(--fd-color-surface);
+  stroke: var(--fd-color-border);
+}
+.nd-art__card--on {
+  stroke: var(--fd-color-primary);
+  stroke-width: 2;
+}
+.nd-art__line {
+  fill: var(--fd-color-border);
+}
+.nd-art__dash {
+  fill: none;
+  stroke: var(--fd-color-primary);
+  stroke-dasharray: 3 2;
+}
+.nd-art__stroke {
+  fill: none;
+  stroke: var(--fd-color-text-muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.nd-art__dot {
+  fill: var(--fd-color-primary);
+}
+.nd-art__bubble {
+  fill: var(--fd-color-text);
+}
+.nd-art__on {
+  fill: var(--fd-color-surface);
+}
+.nd-type__txt {
+  display: grid;
+  gap: 6px;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+}
+.nd-type__txt b {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fd-color-text);
+}
+.nd-type__txt ul {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  color: var(--fd-color-text);
+}
+.nd-type__txt li {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.nd-type__txt li svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  color: var(--fd-color-success);
+}
+.nd-next {
+  margin: 0;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+}
+@media (max-width: 720px) {
+  .nd-types__grid {
+    grid-template-columns: 1fr;
+  }
+  .nd-type {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .nd-art {
+    width: 96px;
+    flex: none;
+  }
+  .nd-next {
+    display: none;
+  }
+}
+/* L48-G §4 : badge de type (cartes, liste) */
+.ct-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--fd-color-surface);
+  border: 1px solid var(--fd-color-border);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fd-color-text);
+  white-space: nowrap;
+}
+.ct-badge svg {
+  width: 13px;
+  height: 13px;
+}
+.ct-badge--cover {
+  position: absolute;
+  top: calc(var(--fd-space-3) + 8px);
+  left: calc(var(--fd-space-3) + 8px);
+  z-index: 2;
+  pointer-events: none;
 }
 .nd-head {
   display: flex;

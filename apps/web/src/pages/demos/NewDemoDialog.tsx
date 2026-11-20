@@ -1,16 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImagePlus, Info, LayoutTemplate, Puzzle, WandSparkles, X } from 'lucide-react';
+import { Check, ImagePlus, Info, LayoutTemplate, Puzzle, WandSparkles, X } from 'lucide-react';
+import type { ContentType } from '@flowdsiml/core';
+import { CONTENT_TYPES } from '@flowdsiml/core';
 import { aiBlock, useAiStatus } from '../../lib/ai';
 import { useBlockText } from '../../components/ai/AiWrite';
 import { Link } from 'react-router-dom';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { IMAGE_ACCEPT } from './importImages';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../auth/AuthProvider';
+import { TypeBadge } from '../../components/TypeBadge';
 
 /**
- * DSH-06 : modale « Nouvelle démo » de la maquette. L26-04 : troisième carte « Partir d'un modèle ».
- * Capturer avec l'extension (recommandé) ; REV-06 : importer des images (plusieurs fichiers, une étape par
- * image). Le dossier préremplit celui qui est filtré ; il s'applique à l'import, au modèle et à la démo vide.
+ * DSH-06, L48-G §3 : « Nouvelle démo » en deux étapes.
+ * 1. Type de contenu (Démo par captures, Démo HTML, Sandbox) : 3 cartes radio illustrées ; par défaut le
+ *    dernier type choisi (user_metadata.content_type, que l'extension lit aussi pour préremplir html-review).
+ * 2. Source, filtrée par type : extension (recommandé), images, modèle, IA, démo vide (captures seulement).
+ * Le dossier préremplit celui qui est filtré ; il s'applique à l'import, au modèle et à la démo vide.
  */
 export function NewDemoDialog({
   open,
@@ -22,23 +29,34 @@ export function NewDemoDialog({
   onGenerate,
   ws,
   onClose,
+  initialType,
 }: {
   open: boolean;
   folders: Tables<'folders'>[];
   defaultFolder: string | null;
   onEmpty: (folderId: string | null) => Promise<void> | void;
-  /** L26-04 : troisième carte, « Partir d'un modèle ». */
+  /** L26-04 : « Partir d'un modèle ». */
   onTemplate: (folderId: string | null) => void;
   /** REV-06 : images choisies (au moins une). */
   onImport: (files: File[], folderId: string | null) => Promise<void> | void;
-  /** L30-05 : quatrième carte, « Générer avec l'IA ». */
+  /** L30-05 : « Générer avec l'IA ». */
   onGenerate: (folderId: string | null) => void;
   ws: string;
   onClose: () => void;
+  /** L48-G §4 : « Nouveau Sandbox » ouvre directement l'étape 2 avec ce type. */
+  initialType?: ContentType;
 }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const ref = useRef<HTMLDialogElement>(null);
   const picker = useRef<HTMLInputElement>(null);
+  const cards = useRef<HTMLDivElement>(null);
+  const last = user?.user_metadata?.content_type as unknown;
+  const remembered: ContentType = CONTENT_TYPES.includes(last as ContentType)
+    ? (last as ContentType)
+    : 'captures';
+  const [type, setType] = useState<ContentType>(initialType ?? remembered);
+  const [step, setStep] = useState<1 | 2>(initialType ? 2 : 1);
   const [folder, setFolder] = useState<string>(defaultFolder ?? '');
   const [busy, setBusy] = useState(false);
   const { status: ai } = useAiStatus(open ? ws : undefined);
@@ -52,14 +70,40 @@ export function NewDemoDialog({
     if (!d) return;
     if (open && !d.open) {
       setFolder(defaultFolder ?? '');
+      setType(initialType ?? remembered);
+      setStep(initialType ? 2 : 1);
       d.showModal();
     } else if (!open && d.open) d.close();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- à l'ouverture seulement
   }, [open, defaultFolder]);
 
+  /** Garde le type choisi (défaut suivant, préremplissage de l'extension) ; échec sans conséquence. */
+  const next = () => {
+    setStep(2);
+    if (type !== last) void supabase.auth.updateUser({ data: { content_type: type } }).catch(() => undefined);
+  };
+  const onCardKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].includes(e.key)) return;
+    e.preventDefault();
+    const i = CONTENT_TYPES.indexOf(type);
+    const fwd = e.key === 'ArrowRight' || e.key === 'ArrowDown';
+    const n = CONTENT_TYPES[(i + (fwd ? 1 : CONTENT_TYPES.length - 1)) % CONTENT_TYPES.length]!;
+    setType(n);
+    cards.current?.querySelector<HTMLInputElement>(`input[value="${n}"]`)?.focus();
+  };
+
   return (
-    <dialog ref={ref} className="dialog new-demo-dialog" onClose={onClose} aria-labelledby="nd-title">
+    <dialog ref={ref} className="dialog new-demo-dialog" onClose={onClose} aria-labelledby="nd-title nd-step">
       <div className="nd-head">
-        <h2 id="nd-title">{t('demos.newTitle')}</h2>
+        <div className="nd-titles">
+          <h2 id="nd-title">
+            {step === 1 ? t('demos.newTitle') : t(`ctype.newTitle.${type}`)}
+            {step === 2 && <TypeBadge type={type} />}
+          </h2>
+          <p id="nd-step" className="nd-step">
+            {t('ctype.stepOf', { n: step, total: 2 })} · {step === 1 ? t('ctype.step1') : t('ctype.step2')}
+          </p>
+        </div>
         <button
           type="button"
           className="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon"
@@ -69,106 +113,222 @@ export function NewDemoDialog({
           <X aria-hidden="true" />
         </button>
       </div>
-      <div className="nd-choices">
-        <div className="nd-choice is-selected" aria-current="true">
-          <Puzzle aria-hidden="true" />
-          <b>{t('demos.newExtension')}</b>
-          <span className="fd-muted">{t('demos.newExtensionBody')}</span>
-        </div>
-        <button
-          type="button"
-          className="nd-choice nd-choice--btn"
-          disabled={busy}
-          onClick={() => picker.current?.click()}
-        >
-          <ImagePlus aria-hidden="true" />
-          <b>{t('demos.newImport')}</b>
-          <span className="fd-muted">{t('demos.newImportBody')}</span>
-        </button>
-        <input
-          ref={picker}
-          type="file"
-          accept={IMAGE_ACCEPT}
-          multiple
-          hidden
-          aria-label={t('demos.newImport')}
-          onChange={async (e) => {
-            const files = [...(e.target.files ?? [])];
-            e.target.value = '';
-            if (!files.length) return;
-            setBusy(true);
-            try {
-              await onImport(files, folder || null);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        />
-        <button type="button" className="nd-choice nd-choice--btn" onClick={() => onTemplate(folder || null)}>
-          <LayoutTemplate aria-hidden="true" />
-          <b>{t('templates.title')}</b>
-          <span className="fd-muted">{t('templates.cardBody')}</span>
-        </button>
-        <div className="ai-disabled-wrap nd-ai">
-          <button
-            type="button"
-            className="nd-choice nd-choice--btn ai-entry"
-            aria-disabled={aiDisabled || undefined}
-            aria-describedby={aiDisabled ? 'nd-ai-tip' : undefined}
-            onClick={() => !aiDisabled && onGenerate(folder || null)}
-          >
-            <WandSparkles aria-hidden="true" />
-            <b>{t('ai.generate.card')}</b>
-            <span className="fd-muted">{t('ai.generate.cardBody')}</span>
-          </button>
-          {aiDisabled && (
-            <span id="nd-ai-tip" className="ai-tip" role="tooltip">
-              {blockText(aiOff, ai)}
-            </span>
-          )}
-          {aiDisabled && aiOff === 'disabled' && ai?.canManage && (
-            <Link className="t-caption" to="/settings/ai">
-              {t('ai.disabledAdmin')}
-            </Link>
-          )}
-        </div>
-      </div>
-      <p className="nd-help">
-        <Info aria-hidden="true" />
-        {t('demos.newExtensionHelp')}
-      </p>
-      <label className="fd-field nd-folder">
-        <span className="fd-label">{t('demos.colFolder')}</span>
-        <select className="fd-input" value={folder} onChange={(e) => setFolder(e.target.value)}>
-          <option value="">{t('demos.noFolder')}</option>
-          {folders.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <div className="dialog-actions nd-actions">
-        <button
-          type="button"
-          className="fd-btn fd-btn--ghost nd-empty"
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true);
-            try {
-              await onEmpty(folder || null);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          {t('demos.newEmpty')}
-        </button>
-        <span className="grow" />
-        <button type="button" className="fd-btn" onClick={onClose}>
-          {t('common.cancel')}
-        </button>
-      </div>
+
+      {step === 1 ? (
+        <>
+          <fieldset className="nd-types">
+            <legend className="nd-legend">{t('ctype.question')}</legend>
+            <div ref={cards} className="nd-types__grid">
+              {CONTENT_TYPES.map((k) => (
+                <label key={k} className={`nd-type${type === k ? ' is-selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="nd-type"
+                    value={k}
+                    checked={type === k}
+                    onChange={() => setType(k)}
+                    onKeyDown={onCardKey}
+                  />
+                  <TypeArt type={k} />
+                  <span className="nd-type__txt">
+                    <b>{t(`ctype.name.${k}`)}</b>
+                    <span>{t(`ctype.line.${k}`)}</span>
+                    <ul>
+                      {[1, 2].map((n) => (
+                        <li key={n}>
+                          <Check aria-hidden="true" />
+                          {t(`ctype.plus.${k}${n}`)}
+                        </li>
+                      ))}
+                    </ul>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <div className="dialog-actions nd-actions">
+            <p className="nd-next">{t('ctype.nextHint')}</p>
+            <span className="grow" />
+            <button type="button" className="fd-btn" onClick={onClose}>
+              {t('common.cancel')}
+            </button>
+            <button type="button" className="fd-btn fd-btn--primary" onClick={next}>
+              {t('common.continue')}
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="nd-choices">
+            <div className="nd-choice is-selected" aria-current="true">
+              <Puzzle aria-hidden="true" />
+              <b>{t('demos.newExtension')}</b>
+              <span className="fd-muted">
+                {type === 'captures' ? t('demos.newExtensionBody') : t(`ctype.extensionBody.${type}`)}
+              </span>
+            </div>
+            {type === 'captures' && (
+              <>
+                <button
+                  type="button"
+                  className="nd-choice nd-choice--btn"
+                  disabled={busy}
+                  onClick={() => picker.current?.click()}
+                >
+                  <ImagePlus aria-hidden="true" />
+                  <b>{t('demos.newImport')}</b>
+                  <span className="fd-muted">{t('demos.newImportBody')}</span>
+                </button>
+                <input
+                  ref={picker}
+                  type="file"
+                  accept={IMAGE_ACCEPT}
+                  multiple
+                  hidden
+                  aria-label={t('demos.newImport')}
+                  onChange={async (e) => {
+                    const files = [...(e.target.files ?? [])];
+                    e.target.value = '';
+                    if (!files.length) return;
+                    setBusy(true);
+                    try {
+                      await onImport(files, folder || null);
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                />
+              </>
+            )}
+            {type === 'captures' ? (
+              <button
+                type="button"
+                className="nd-choice nd-choice--btn"
+                onClick={() => onTemplate(folder || null)}
+              >
+                <LayoutTemplate aria-hidden="true" />
+                <b>{t('templates.title')}</b>
+                <span className="fd-muted">{t('templates.cardBody')}</span>
+              </button>
+            ) : (
+              // Aucun modèle HTML ni Sandbox pour l'instant : visible, désactivé, « Bientôt »
+              <div className="nd-choice is-soon" aria-disabled="true">
+                <LayoutTemplate aria-hidden="true" />
+                <b>
+                  {t('templates.title')} <span className="fd-badge nd-soon">{t('shell.soon')}</span>
+                </b>
+                <span className="fd-muted">{t(`ctype.noTemplate.${type}`)}</span>
+              </div>
+            )}
+            {type === 'captures' && (
+              <div className="ai-disabled-wrap nd-ai">
+                <button
+                  type="button"
+                  className="nd-choice nd-choice--btn ai-entry"
+                  aria-disabled={aiDisabled || undefined}
+                  aria-describedby={aiDisabled ? 'nd-ai-tip' : undefined}
+                  onClick={() => !aiDisabled && onGenerate(folder || null)}
+                >
+                  <WandSparkles aria-hidden="true" />
+                  <b>{t('ai.generate.card')}</b>
+                  <span className="fd-muted">{t('ai.generate.cardBody')}</span>
+                </button>
+                {aiDisabled && (
+                  <span id="nd-ai-tip" className="ai-tip" role="tooltip">
+                    {blockText(aiOff, ai)}
+                  </span>
+                )}
+                {aiDisabled && aiOff === 'disabled' && ai?.canManage && (
+                  <Link className="t-caption" to="/settings/ai">
+                    {t('ai.disabledAdmin')}
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+          <p className="nd-help">
+            <Info aria-hidden="true" />
+            {type === 'captures' ? t('demos.newExtensionHelp') : t('ctype.extensionHelp')}
+          </p>
+          <label className="fd-field nd-folder">
+            <span className="fd-label">{t('demos.colFolder')}</span>
+            <select className="fd-input" value={folder} onChange={(e) => setFolder(e.target.value)}>
+              <option value="">{t('demos.noFolder')}</option>
+              {folders.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="dialog-actions nd-actions">
+            <button type="button" className="fd-btn" onClick={() => setStep(1)}>
+              {t('common.back')}
+            </button>
+            {type === 'captures' && (
+              <button
+                type="button"
+                className="fd-btn fd-btn--ghost nd-empty"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    await onEmpty(folder || null);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                {t('demos.newEmpty')}
+              </button>
+            )}
+            <span className="grow" />
+            <button type="button" className="fd-btn" onClick={onClose}>
+              {t('common.cancel')}
+            </button>
+          </div>
+        </>
+      )}
     </dialog>
+  );
+}
+
+/** Illustration schématique 16:9 (tokens, aucune capture réelle), décorative. */
+function TypeArt({ type }: { type: ContentType }) {
+  return (
+    <svg className="nd-art" viewBox="0 0 160 90" aria-hidden="true" focusable="false">
+      <rect x="1" y="1" width="158" height="88" rx="8" className="nd-art__bg" />
+      {type === 'captures' && (
+        <>
+          <rect x="14" y="14" width="96" height="62" rx="4" className="nd-art__card" />
+          <rect x="22" y="22" width="40" height="6" rx="3" className="nd-art__line" />
+          <rect x="22" y="34" width="70" height="4" rx="2" className="nd-art__line" />
+          <rect x="22" y="42" width="56" height="4" rx="2" className="nd-art__line" />
+          <circle cx="86" cy="58" r="6" className="nd-art__dot" />
+          <rect x="96" y="44" width="52" height="22" rx="5" className="nd-art__bubble" />
+          <rect x="102" y="51" width="38" height="3" rx="1.5" className="nd-art__on" />
+          <rect x="102" y="57" width="26" height="3" rx="1.5" className="nd-art__on" />
+        </>
+      )}
+      {type === 'html' && (
+        <>
+          <rect x="14" y="14" width="132" height="62" rx="4" className="nd-art__card" />
+          <rect x="14" y="14" width="132" height="10" rx="4" className="nd-art__line" />
+          <path d="M30 42 l-8 8 l8 8 M50 42 l8 8 l-8 8" className="nd-art__stroke" />
+          <rect x="70" y="40" width="60" height="5" rx="2.5" className="nd-art__line" />
+          <rect x="70" y="50" width="44" height="5" rx="2.5" className="nd-art__dash" />
+          <rect x="70" y="60" width="52" height="5" rx="2.5" className="nd-art__line" />
+        </>
+      )}
+      {type === 'sandbox' && (
+        <>
+          <path d="M44 30 L80 52 M116 30 L80 52 M44 30 L116 30 M80 52 L80 66" className="nd-art__stroke" />
+          <rect x="22" y="18" width="44" height="24" rx="4" className="nd-art__card" />
+          <rect x="94" y="18" width="44" height="24" rx="4" className="nd-art__card" />
+          <rect x="58" y="48" width="44" height="26" rx="4" className="nd-art__card nd-art__card--on" />
+          <circle cx="80" cy="61" r="4" className="nd-art__dot" />
+        </>
+      )}
+    </svg>
   );
 }

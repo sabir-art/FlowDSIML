@@ -708,9 +708,11 @@ async function install(page, state = seed()) {
           const folders = (t.folders || []).filter((f) => f.workspace_id === ws).sort(byKey('name'));
           const steps = t.steps.filter((st) => ids.has(st.demo_id)).sort(byKey('position'));
           const stepCounts = {};
+          const htmlCounts = {};
           const covers = {};
           for (const st of steps) {
             stepCounts[st.demo_id] = (stepCounts[st.demo_id] || 0) + 1;
+            if (st.kind === 'html') htmlCounts[st.demo_id] = (htmlCounts[st.demo_id] || 0) + 1;
             if (st.image_path && !covers[st.demo_id]) covers[st.demo_id] = st.image_path;
           }
           const publishedAt = {};
@@ -733,6 +735,7 @@ async function install(page, state = seed()) {
               folders.filter((f) => f.restricted).map((f) => [f.id, hiddenCount(f.id)]),
             ),
             stepCounts,
+            htmlCounts,
             publishedAt,
             covers,
             shareRulesPlan: !!plan?.limits?.share_rules,
