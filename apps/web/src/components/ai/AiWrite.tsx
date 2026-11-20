@@ -263,7 +263,7 @@ export function AiWrite({
                   className="btn btn-secondary btn-sm"
                   onClick={() => setView({ kind: 'idle' })}
                 >
-                  {t('ai.ignore')}
+                  {t('common.close')}
                 </button>
               </div>
             </>

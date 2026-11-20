@@ -92,6 +92,7 @@ export function AiSettings() {
                 disabled={!manage || busy || !status}
                 onChange={(e) => void onSwitch(e.target.checked)}
               />
+              <span aria-hidden="true" />
             </span>
           </div>
           <Notice />
