@@ -6,7 +6,7 @@
 
 ## 1. Page Intégrations (`/settings/integrations`)
 
-- Dans les Paramètres (navigation de L48-A), groupe **Espace**. Fil d'Ariane : « Paramètres › Espace ». Titre « Intégrations », puis une phrase : « Envoyez les événements de vos démos vers vos outils. »
+- Dans les Paramètres (navigation de L48-A), groupe **Connexions** (corrigé le 20 novembre : c'est le groupe de L48-A). Fil d'Ariane : « Paramètres › Connexions ». Titre « Intégrations », puis une phrase : « Envoyez les événements de vos démos vers vos outils. »
 - **Filtre** en segmenté au-dessus de la liste. Pas de colonne de catégories : la page a déjà la navigation des Paramètres.
   - Options : Toutes, Connectées, Communication, Mesure d'audience, Automatisation, Relation usagers.
   - Aucun compteur. Le filtre est gardé dans l'URL (`?categorie=automatisation`).
@@ -27,7 +27,7 @@
 | Automatisation | **Webhooks** (disponible), Zapier, Clés d'API, Pilotage du player (Bientôt) |
 | Communication | Slack, Microsoft Teams, Outils d'e-mailing (Bientôt) |
 | Mesure d'audience | Google Analytics, Matomo (Bientôt) |
-| Relation usagers | CRM (Bientôt) |
+| Relation usagers | CRM, Enrichissement des visiteurs (Bientôt) |
 
 - **Webhooks** reste en tête de la catégorie Automatisation, et dans « Connectées » dès qu'un webhook est actif.
   - Sans webhook : bouton « Connecter », qui ouvre directement la boîte « Ajouter un webhook » (existante).
@@ -48,7 +48,7 @@
 - Le contenu ne change pas : tableau, état vide, actions.
   - Le bouton principal « Ajouter un webhook » passe en haut à droite. C'est la seule action principale de la page.
   - Le tableau suit T4 : l'état en texte avec un point (Actif, En pause, Désactivé), sans badge.
-- `WebhookDetail` (`/settings/integrations/:id`) : le fil d'Ariane devient « Paramètres › Intégrations › Webhooks ».
+- `WebhookDetail` (`/settings/integrations/:id`) : le fil d'Ariane va jusqu'à « … › Intégrations › Webhooks », le h1 est l'hôte du webhook, et le bouton « ← Intégrations » disparaît.
 - Les anciens liens `/settings/integrations#webhooks` mènent à cette page.
 
 ## 3. Mobile (moins de 768 px)
@@ -73,7 +73,7 @@
 
 ## 5. Recette
 
-1. « Toutes » : 4 groupes, 10 lignes ; seule « Webhooks » a un bouton ou un chevron, les 9 autres disent « Bientôt » et ne réagissent pas au clic.
+1. « Toutes » : 4 groupes, 11 lignes (Enrichissement des visiteurs, rangée ici par L48-A, reste visible) ; seule « Webhooks » a un bouton ou un chevron, les 10 autres disent « Bientôt » et ne réagissent pas au clic.
 2. « Connectées » sans webhook : état vide et lien « Ajouter un webhook » ; avec 2 webhooks actifs : une ligne « Webhooks · 2 actifs ».
 3. « Connecter » sur Webhooks : la boîte « Ajouter un webhook » s'ouvre.
 4. Lien du support `mailto:dsi@example.com` : « Faire une demande à la DSI » ouvre un e-mail avec le sujet « Demande de connexion ». Champ vide : « Renseigner le lien du support » mène au champ.
