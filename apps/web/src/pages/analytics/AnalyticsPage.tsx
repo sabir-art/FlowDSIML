@@ -1,4 +1,15 @@
-import { ArrowDown, ArrowUp, Calendar, Download, Info, ShieldCheck, TriangleAlert } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  Calendar,
+  Check,
+  Download,
+  Info,
+  Link2,
+  Monitor,
+  ShieldCheck,
+  TriangleAlert,
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +25,7 @@ import { initials } from '../../lib/initials';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
+import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
 import { LiveTab } from './advanced/LiveTab';
 import { SurveysTab } from './advanced/SurveysTab';
@@ -223,34 +235,70 @@ export function AnalyticsPage() {
           <h1>{t('analytics.title')}</h1>
           <p className="muted an-sub">{t('analytics.updated', { when: formatRelativeShort(loadedAt) })}</p>
         </div>
-        <div className="row wrap">
+        {/* L40 : actions de page dans l'en-tête, à droite (40 px) */}
+        <div className="row wrap an-head-actions">
           <NotificationBell />
-          <select
-            className="select input-sm an-select"
-            aria-label={t('analytics.demoFilter')}
-            value={demo}
-            onChange={(e) => setDemo(e.target.value)}
-          >
-            <option value="">{t('analytics.allDemos')}</option>
-            {demos.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.title}
-              </option>
-            ))}
-          </select>
-          <select
-            className="select input-sm an-select"
-            aria-label={t('analytics.sourceFilter')}
-            value={source}
-            onChange={(e) => setSource(e.target.value as Source | '')}
-          >
-            <option value="">{t('analytics.allSources')}</option>
-            <option value="direct">{t('analytics.src.direct')}</option>
-            <option value="embed">{t('analytics.src.embed')}</option>
-            <option value="link">{t('analytics.src.link')}</option>
-            <option value="page">{t('analytics.src.page')}</option>
-          </select>
-          <div className="segmented" role="radiogroup" aria-label={t('analytics.period')}>
+          <button type="button" className="btn btn-secondary" onClick={() => setMeasureOpen(true)}>
+            <ShieldCheck aria-hidden="true" />
+            {t('analytics.ret.measure')}
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={() => void exportCsv()}>
+            <Download aria-hidden="true" />
+            {t('analytics.export')}
+          </button>
+        </div>
+      </div>
+
+      {/* L40 : barre commune à tous les onglets (au-dessus d'eux) : Démo, Source | Période */}
+      <ListToolbar
+        className="an-toolbar"
+        activeCount={(demo ? 1 : 0) + (source ? 1 : 0)}
+        onReset={() => {
+          setDemo('');
+          setSource('');
+        }}
+        status={t('analytics.filteredOn', {
+          demo: demo ? title(demo) : t('analytics.allDemos'),
+          source: source ? t(`analytics.src.${source}`) : t('analytics.allSources'),
+        })}
+        filters={
+          <>
+            <FilterMenu
+              icon={<Monitor />}
+              label={t('analytics.demoLabel')}
+              value={demo ? title(demo) : t('toolbar.allF')}
+              active={!!demo}
+              items={[
+                { label: t('toolbar.allF'), icon: demo ? <span /> : <Check />, onSelect: () => setDemo('') },
+                ...demos.map((d) => ({
+                  label: d.title,
+                  icon: demo === d.id ? <Check /> : <span />,
+                  onSelect: () => setDemo(d.id),
+                })),
+              ]}
+            />
+            <FilterMenu
+              icon={<Link2 />}
+              label={t('analytics.sourceLabel')}
+              value={source ? t(`analytics.src.${source}`) : t('toolbar.allF')}
+              active={!!source}
+              items={[
+                {
+                  label: t('toolbar.allF'),
+                  icon: source ? <span /> : <Check />,
+                  onSelect: () => setSource(''),
+                },
+                ...(['direct', 'embed', 'link', 'page'] as Source[]).map((k) => ({
+                  label: t(`analytics.src.${k}`),
+                  icon: source === k ? <Check /> : <span />,
+                  onSelect: () => setSource(k),
+                })),
+              ]}
+            />
+          </>
+        }
+        end={
+          <div className="fd-segmented" role="radiogroup" aria-label={t('analytics.period')}>
             {PERIODS.map((p) => (
               <button key={p} type="button" role="radio" aria-checked={days === p} onClick={() => setDays(p)}>
                 {t('analytics.daysShort', { count: p })}
@@ -269,16 +317,8 @@ export function AnalyticsPage() {
               <span className="badge an-soon">{t('shell.soon')}</span>
             </button>
           </div>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setMeasureOpen(true)}>
-            <ShieldCheck aria-hidden="true" />
-            {t('analytics.ret.measure')}
-          </button>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => void exportCsv()}>
-            <Download aria-hidden="true" />
-            {t('analytics.export')}
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="tabs an-tabs" role="tablist" aria-label={t('analytics.views_label')}>
         {tabs.map((k) => (

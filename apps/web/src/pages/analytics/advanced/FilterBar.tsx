@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, X } from 'lucide-react';
+import { Filter, Layers, Plus, X } from 'lucide-react';
 import { AddFilterDialog, useChipLabel } from './segmentUi';
 import { MAX_CONDITIONS, type Condition, type SegmentDef } from './segmentModel';
 import type { Segment } from './SegmentsTab';
@@ -36,67 +36,83 @@ export function FilterBar({
   const conds = def?.conditions ?? [];
   const add = (c: Condition) => onChange({ match: def?.match ?? 'all', conditions: [...conds, c] });
   return (
-    <div className="l19-filterbar" role="group" aria-label={t('analytics.adv.seg.filters')}>
-      <div className="chips">
-        {segment && (
-          <span className="chip">
-            {t('analytics.adv.seg.segmentChip')}&#8239;: <b>{segment.name}</b>
-            <button
-              type="button"
-              aria-label={t('analytics.adv.seg.removeFilter', { name: segment.name })}
-              onClick={() => onSegment(null)}
-            >
-              <X aria-hidden="true" />
-            </button>
-          </span>
-        )}
-        {conds.map((c, i) => {
-          const l = chip(c);
-          return (
-            <span key={i} className="chip">
-              {l.name}&#8239;: <b>{l.value}</b>
+    // L40 : barre propre à l'onglet, à gauche ; critères en « Libellé : valeur » actifs (40 px)
+    <div className="l19-filterbar">
+      <div className="fd-toolbar">
+        <div className="fd-toolbar__group" role="group" aria-label={t('analytics.adv.seg.filters')}>
+          {segment && (
+            <span className="fd-btn fd-filter fd-filter--active l19-cond">
+              <Layers aria-hidden="true" />
+              <span className="fd-filter__label">{t('analytics.adv.seg.segmentChip')}&#8239;: </span>
+              <span className="fd-filter__value" title={segment.name}>
+                {segment.name}
+              </span>
               <button
                 type="button"
-                aria-label={t('analytics.adv.seg.removeFilter', { name: l.name })}
-                onClick={() => {
-                  const rest = conds.filter((_, j) => j !== i);
-                  onChange(rest.length ? { match: def!.match, conditions: rest } : null);
-                }}
+                aria-label={t('analytics.adv.seg.removeFilter', { name: segment.name })}
+                onClick={() => onSegment(null)}
               >
                 <X aria-hidden="true" />
               </button>
             </span>
-          );
-        })}
-        {!segment && conds.length < MAX_CONDITIONS && (
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAdding(true)}>
-            <Plus aria-hidden="true" />
-            {t('analytics.adv.seg.addFilter')}
-          </button>
-        )}
-        {canEdit && conds.length > 0 && (
-          <button type="button" className="btn btn-secondary btn-sm" onClick={onSave}>
-            {t('analytics.adv.seg.saveAs')}
-          </button>
-        )}
-        {segments.length > 0 && (
-          <span className="t-caption muted l19-seglinks">
-            {t('analytics.adv.seg.segmentsLine')}{' '}
-            {segments.slice(0, 4).map((s, i) => (
-              <span key={s.id}>
-                {i > 0 && ' · '}
+          )}
+          {conds.map((c, i) => {
+            const l = chip(c);
+            return (
+              <span key={i} className="fd-btn fd-filter fd-filter--active l19-cond">
+                <Filter aria-hidden="true" />
+                <span className="fd-filter__label">{l.name}&#8239;: </span>
+                <span className="fd-filter__value" title={l.value}>
+                  {l.value}
+                </span>
                 <button
                   type="button"
-                  className="l19-link"
-                  aria-pressed={segment?.id === s.id}
-                  onClick={() => onSegment(s)}
+                  aria-label={t('analytics.adv.seg.removeFilter', { name: l.name })}
+                  onClick={() => {
+                    const rest = conds.filter((_, j) => j !== i);
+                    onChange(rest.length ? { match: def!.match, conditions: rest } : null);
+                  }}
                 >
-                  {s.name}
+                  <X aria-hidden="true" />
                 </button>
               </span>
-            ))}
-          </span>
-        )}
+            );
+          })}
+          {!segment && conds.length < MAX_CONDITIONS && (
+            <button
+              type="button"
+              className="fd-btn fd-filter"
+              aria-haspopup="dialog"
+              onClick={() => setAdding(true)}
+            >
+              <Plus aria-hidden="true" />
+              <span className="fd-filter__value">{t('analytics.adv.seg.addFilter')}</span>
+            </button>
+          )}
+          {canEdit && conds.length > 0 && (
+            <button type="button" className="fd-btn" onClick={onSave}>
+              {t('analytics.adv.seg.saveAs')}
+            </button>
+          )}
+          {segments.length > 0 && (
+            <span className="t-caption muted l19-seglinks">
+              {t('analytics.adv.seg.segmentsLine')}{' '}
+              {segments.slice(0, 4).map((s, i) => (
+                <span key={s.id}>
+                  {i > 0 && ' · '}
+                  <button
+                    type="button"
+                    className="l19-link"
+                    aria-pressed={segment?.id === s.id}
+                    onClick={() => onSegment(s)}
+                  >
+                    {s.name}
+                  </button>
+                </span>
+              ))}
+            </span>
+          )}
+        </div>
       </div>
       {tooSmall && (
         <p className="help l19-small" role="status">

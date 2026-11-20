@@ -191,6 +191,57 @@ const measure = (bar) =>
     }
   }
 
+  // ===== Analytics =====
+  if (!only.length || only.includes('analytics')) {
+    const long = 'Créer une fiche usager complète avec ses rendez-vous';
+    const seed = (d) => {
+      d.tables.demos[0].title = long;
+    };
+    const page = await open('/#/analytics', 1440, seed);
+    const bar = page.locator('.an-toolbar');
+    await bar.waitFor();
+    const head = page.locator('.page-head');
+    ok(
+      (await head.getByRole('button', { name: /Mesure des visites/ }).count()) === 1 &&
+        (await head.getByRole('button', { name: /Exporter/ }).count()) === 1 &&
+        (await bar.getByRole('button', { name: /Mesure des visites|Exporter/ }).count()) === 0,
+      'Analytics : Mesure des visites et Exporter dans l’en-tête, pas dans la barre',
+    );
+    ok(
+      (await bar.boundingBox()).y < (await page.locator('.an-tabs').boundingBox()).y,
+      'Analytics : barre au-dessus des onglets',
+    );
+    ok((await bar.locator('select').count()) === 0, 'Analytics : plus de listes natives');
+    let m = await measure(bar);
+    ok(
+      m.heights.length >= 3 && m.heights.every((h) => h === 40),
+      `Analytics : contrôles de 40 px (${m.heights})`,
+    );
+    ok(m.lines === 1, 'Analytics : une ligne sans filtre actif');
+    await page.getByRole('button', { name: /^Démo\s*:/ }).click();
+    await page.getByRole('menuitem', { name: long }).click();
+    await page.getByRole('button', { name: /^Source\s*:/ }).click();
+    await page.getByRole('menuitem', { name: /Lien/ }).first().click();
+    await page.waitForTimeout(300);
+    m = await measure(bar);
+    ok(
+      m.lines === 1 && m.heights.every((h) => h === 40),
+      'Analytics : une ligne avec 2 filtres actifs (valeur longue)',
+    );
+    ok(
+      (await page.getByRole('button', { name: new RegExp(`^Démo\\s*: ${long}$`) }).count()) === 1,
+      'Analytics : nom accessible complet « Démo : … » (valeur tronquée à l’écran)',
+    );
+    await page.context().close();
+    for (const w of [1024, 390]) {
+      const p = await open('/#/analytics', w, seed);
+      await p.locator('.an-toolbar').waitFor();
+      await p.waitForTimeout(300);
+      ok(await noHScroll(p), `Analytics ${w} px : pas de défilement horizontal`);
+      await p.context().close();
+    }
+  }
+
   ok(errors.length === 0, `aucune erreur JavaScript (${errors.join(' | ')})`);
   await b.close();
 })().catch((e) => {

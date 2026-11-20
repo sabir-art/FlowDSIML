@@ -2432,7 +2432,10 @@
       "adminOnly": "Réservé aux propriétaires et administrateurs de l'espace.",
       "saved": "Mesure des visites enregistrée.",
       "saveError": "L'enregistrement a échoué. Réessayez."
-    }
+    },
+    "filteredOn": "Statistiques : {{demo}}, {{source}}",
+    "demoLabel": "Démo",
+    "sourceLabel": "Source"
   },
   "leads": {
     "title": "Leads",
