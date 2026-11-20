@@ -56,6 +56,7 @@ Le détail est dans docs/tech/dettes.md. Les points encore ouverts :
 2. **API et intégrations** (clés d'API, pilotage du lecteur, accès par jeton) : 2 écrans, plus le mode
    « Par jeton », reportés.
 3. **Domaine personnalisé** pour isoler le lecteur et les contenus publiés, requis avant une ouverture large.
+   Aperçu Open Graph : attend un domaine personnalisé (décision client).
 4. **Conservation zéro chez ElevenLabs** : les éléments sont déjà supprimés chez le fournisseur juste après
    chaque génération. Une garantie contractuelle demande l'offre Entreprise du fournisseur.
 5. **Paiement** : les plans et leurs limites sont en base ; l'intégration d'un moyen de paiement est reportée.
