@@ -194,6 +194,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // Exports désactivés (menu de l'éditeur) et diffusion réservée
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
+  // L32 : attendre l'éditeur réel (le squelette a aussi un bouton « Publier », inactif)
+  await page.locator('main.ed[aria-busy="false"]').waitFor();
   const pub = page.getByRole('button', { name: /Publier/ }).first();
   await pub.waitFor();
   ok(
