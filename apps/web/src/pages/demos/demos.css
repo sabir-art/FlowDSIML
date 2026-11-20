@@ -199,16 +199,6 @@
   background: var(--fd-color-hotspot);
   box-shadow: 0 0 0 4px var(--fd-color-surface);
 }
-/* Bouton rond ↗ du KPI héros, en haut à droite */
-.kpi-action {
-  margin-left: auto;
-  /* CAD-07 : reste un petit rond (pas étiré par les règles mobiles des boutons) */
-  flex: none;
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
-  padding: 0;
-}
 
 @media (max-width: 640px) {
   .search-pill {
@@ -914,7 +904,7 @@
 .stats-later-row {
   position: relative;
 }
-.stat-row--ghost {
+.kpi-short--ghost {
   visibility: hidden;
 }
 .stats-later-row .stats-later {

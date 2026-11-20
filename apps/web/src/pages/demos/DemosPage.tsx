@@ -5,12 +5,11 @@ import { withRestLocale } from '../../i18n';
 import {
   Archive,
   ArrowUpDown,
-  ArrowUpRight,
+  ArrowRight,
   BarChart3,
   Check,
   Copy,
   Download,
-  Eye,
   Folder,
   FolderInput,
   FolderOpen,
@@ -20,22 +19,19 @@ import {
   LayoutGrid,
   Link2,
   List,
-  Mail,
   Pencil,
   Plus,
   Presentation,
-  Route,
   Search,
   Send,
   Share2,
   Tag,
   Trash2,
-  Users,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Card, Select } from '@flowdsiml/ui';
-import { completionRate } from '@flowdsiml/core';
-import { StatTile, variation } from '../../components/charts';
+import { completionRate, countTrend, rateTrend } from '@flowdsiml/core';
+import { TrendBadge } from '../../components/kpi/KpiTabs';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
@@ -457,10 +453,6 @@ export function DemosPage() {
   };
   const inFolder = (id: string | 'none') =>
     demos.filter((d) => (id === 'none' ? !d.folder_id : d.folder_id === id)).length;
-  const kpi = {
-    deltaLabel: t('analytics.vsPreviousDays', { count: 30 }),
-    noDeltaLabel: t('analytics.noComparison'),
-  };
   const sortLabels: Record<Sort, string> = {
     updated: t('demos.sortUpdated'),
     created: t('demos.sortCreated'),
@@ -488,59 +480,55 @@ export function DemosPage() {
         </div>
       )}
       {kpis && anyPublished && (
-        <section className="stat-row" aria-label={t('analytics.kpis', { count: 30 })}>
-          <StatTile
-            hero
-            icon={<Eye />}
-            label={t('demos.kpiViews')}
-            value={formatNumber(kpis.cur.views)}
-            action={
-              <Link
-                to="/analytics"
-                className="fd-btn fd-btn--round fd-btn--inverse fd-btn--sm kpi-action"
-                aria-label={t('demos.seeAnalytics')}
-              >
-                <ArrowUpRight aria-hidden="true" />
-              </Link>
-            }
-            delta={kpis.prev ? variation(kpis.cur.views, kpis.prev.views) : undefined}
-            {...kpi}
-          />
-          <StatTile
-            icon={<Users />}
-            label={t('analytics.visitors')}
-            value={formatNumber(kpis.cur.visitors)}
-            delta={kpis.prev ? variation(kpis.cur.visitors, kpis.prev.visitors) : undefined}
-            {...kpi}
-          />
-          <StatTile
-            icon={<Route />}
-            label={t('analytics.completion')}
-            value={`${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)} %`}
-            deltaAbs={
-              kpis.prev
-                ? kpis.prev.visitors > 0
-                  ? {
-                      value: Math.round(
-                        (completionRate(kpis.cur.visitors, kpis.cur.completions) -
-                          completionRate(kpis.prev.visitors, kpis.prev.completions)) *
-                          100,
-                      ),
-                      unit: t('demos.pts'),
-                    }
-                  : null
-                : undefined
-            }
-            {...kpi}
-          />
-          <StatTile
-            icon={<Mail />}
-            label={t('analytics.leads')}
-            value={formatNumber(kpis.cur.leads)}
-            deltaAbs={kpis.prev ? { value: kpis.cur.leads - kpis.prev.leads } : undefined}
-            {...kpi}
-          />
-        </section>
+        <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
+          {(
+            [
+              [
+                'views',
+                t('kpi.views'),
+                formatNumber(kpis.cur.views),
+                countTrend(kpis.cur.views, kpis.prev?.views ?? 0),
+              ],
+              [
+                'visitors',
+                t('kpi.visitorsUnique'),
+                formatNumber(kpis.cur.visitors),
+                countTrend(kpis.cur.visitors, kpis.prev?.visitors ?? 0),
+              ],
+              [
+                'completion',
+                t('kpi.completion'),
+                `${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)} %`,
+                rateTrend(
+                  completionRate(kpis.cur.visitors, kpis.cur.completions),
+                  kpis.prev ? completionRate(kpis.prev.visitors, kpis.prev.completions) : 0,
+                  kpis.prev?.visitors ?? 0,
+                ),
+              ],
+              [
+                'leads',
+                t('kpi.leads'),
+                formatNumber(kpis.cur.leads),
+                countTrend(kpis.cur.leads, kpis.prev?.leads ?? 0),
+              ],
+            ] as const
+          ).map(([k, label, value, trend]) => (
+            <Link key={k} className="kpi-sc" to={`/analytics?indicateur=${k}`}>
+              <span className="kpi-tab__l">{label}</span>
+              <span className="kpi-tab__v">{value}</span>
+              {kpis.prev ? (
+                <TrendBadge trend={trend} days={30} />
+              ) : (
+                <span className="kpi-trend">{'\u00a0'}</span>
+              )}
+              <span className="kpi-sc__go" aria-hidden="true">
+                <span className="kpi-sc__go-t">{t('kpi.analytics')}</span>
+                <ArrowRight />
+              </span>
+              <span className="sr-only">{t('kpi.seeAnalytics')}</span>
+            </Link>
+          ))}
+        </nav>
       )}
 
       {/* L26-01 : « Prise en main de votre espace », après les indicateurs (L32 §2) */}

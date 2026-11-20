@@ -603,18 +603,6 @@
 .mk .chart-card {
   padding: 20px 24px;
 }
-.mk .chart {
-  width: 100%;
-  height: 220px;
-  display: block;
-}
-.mk .chart .grid line {
-  stroke: var(--fd-color-border);
-}
-.mk .chart text {
-  fill: var(--fd-color-text-subtle);
-  font: 11px var(--fd-font-sans);
-}
 .mk .funnel {
   display: grid;
   gap: 8px;
@@ -673,26 +661,6 @@
     grid-template-columns: 1fr;
   }
 }
-.mk .legend {
-  display: flex;
-  gap: 16px;
-  font-size: var(--fd-text-caption-size);
-  color: var(--fd-color-text-muted);
-}
-.mk .legend i {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  margin-right: 6px;
-  vertical-align: -1px;
-}
-.mk .legend .an-l1 {
-  background: var(--fd-color-chart-1);
-}
-.mk .legend .an-l2 {
-  background: var(--fd-color-chart-2);
-}
 .mk .an-sub {
   margin-top: 4px;
 }
@@ -729,12 +697,6 @@
 }
 .mk .an-empty {
   margin: 16px 0 0;
-}
-.mk .an-arrow {
-  width: 12px;
-  height: 12px;
-  vertical-align: -1px;
-  margin-right: 2px;
 }
 .mk .an-warn {
   width: 14px;

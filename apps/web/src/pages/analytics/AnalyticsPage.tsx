@@ -1,23 +1,27 @@
-import {
-  ArrowDown,
-  ArrowUp,
-  Calendar,
-  Check,
-  Download,
-  Info,
-  Link2,
-  Monitor,
-  ShieldCheck,
-  TriangleAlert,
-} from 'lucide-react';
+import { Calendar, Check, Download, Info, Link2, Monitor, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { completionRate, computeFunnel, toCsv } from '@flowdsiml/core';
-import { MeasureDialog, ReturningCard, ReturningKpi, VisitBadge, type Returning } from './returning';
+import { completionRate, computeFunnel, countTrend, rateTrend, toCsv } from '@flowdsiml/core';
+import { MeasureDialog, ReturningCard, VisitBadge, type Returning } from './returning';
+import {
+  KPI_KEYS,
+  WS_KPI_KEYS,
+  KpiTabs,
+  MetricTable,
+  TrendChart,
+  alignDays,
+  dayValue,
+  kpiFromParam,
+  metricValues,
+  type KpiItem,
+  type KpiKey,
+  type Series,
+  type SeriesDay,
+} from '../../components/kpi/KpiTabs';
 import { supabase } from '../../lib/supabase';
 import { downloadText } from '../../lib/download';
-import { formatDate, formatNumber, formatRelativeShort } from '../../lib/format';
+import { formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { LeadsMkTable } from './LeadsMkTable';
@@ -135,6 +139,8 @@ export function AnalyticsPage() {
   const [demos, setDemos] = useState<Array<{ id: string; title: string }>>([]);
   const [data, setData] = useState<WsAnalytics | null>(null);
   const [prev, setPrev] = useState<WsAnalytics | null>(null);
+  // L47 : séries quotidiennes et détail par démo de chaque indicateur (période et précédente)
+  const [series, setSeries] = useState<{ cur: Series | null; prev: Series | null; end: number } | null>(null);
   const [loadedAt, setLoadedAt] = useState<string>('');
   const [leadCount, setLeadCount] = useState<number | null>(null);
   // L26-06 : visiteurs récurrents ; L26-08 : modale « Mesure des visites »
@@ -168,13 +174,21 @@ export function AnalyticsPage() {
       p_segment: pSegment as never,
     };
     setRet(null);
+    setSeries(null);
     void supabase
       .rpc('workspace_returning', { ...args, p_from: iso(days), p_to: new Date(now).toISOString() })
       .then(({ data: r }) => setRet((r as unknown as Returning) ?? null));
     void Promise.all([
       supabase.rpc('workspace_analytics', { ...args, p_from: iso(days), p_to: new Date(now).toISOString() }),
       supabase.rpc('workspace_analytics', { ...args, p_from: iso(2 * days), p_to: iso(days) }),
-    ]).then(([c, p]) => {
+      supabase.rpc('analytics_series', { ...args, p_from: iso(days), p_to: new Date(now).toISOString() }),
+      supabase.rpc('analytics_series', { ...args, p_from: iso(2 * days), p_to: iso(days) }),
+    ]).then(([c, p, sc, sp]) => {
+      setSeries({
+        cur: sc.error ? null : ((sc.data as unknown as Series) ?? null),
+        prev: sp.error ? null : ((sp.data as unknown as Series) ?? null),
+        end: now,
+      });
       setData((c.data as unknown as WsAnalytics) ?? emptyAnalytics());
       setPrev((p.data as unknown as WsAnalytics) ?? null);
       setLoadedAt(new Date().toISOString());
@@ -379,6 +393,9 @@ export function AnalyticsPage() {
             wsId={ws.id}
             data={data}
             prev={prev}
+            series={series}
+            metric={kpiFromParam(params.get('indicateur'), WS_KPI_KEYS)}
+            onMetric={(k) => patchParams({ indicateur: k === 'views' ? null : k })}
             days={days}
             demo={demo}
             demos={demos}
@@ -464,29 +481,13 @@ function emptyAnalytics(): WsAnalytics {
   };
 }
 
-function Delta({ value, unit, label }: { value: number | null; unit: string; label: string }) {
-  if (value === null) return <span className="subtle">{label}</span>;
-  const up = value >= 0;
-  return (
-    <>
-      <span className={up ? 'delta-up' : 'delta-down'}>
-        {up ? (
-          <ArrowUp aria-hidden="true" className="an-arrow" />
-        ) : (
-          <ArrowDown aria-hidden="true" className="an-arrow" />
-        )}
-        {formatNumber(Math.abs(value))}
-        {unit}
-      </span>{' '}
-      <span className="subtle">{label}</span>
-    </>
-  );
-}
-
 function Overview({
   wsId,
   data,
   prev,
+  series,
+  metric,
+  onMetric,
   days,
   demo,
   demos,
@@ -499,25 +500,61 @@ function Overview({
   wsId: string;
   data: WsAnalytics;
   prev: WsAnalytics | null;
+  series: { cur: Series | null; prev: Series | null; end: number } | null;
+  metric: KpiKey;
+  onMetric: (k: KpiKey) => void;
   days: number;
   demo: string;
   demos: Array<{ id: string; title: string }>;
   title: (id: string) => string;
 }) {
-  const { t, i18n } = useTranslation();
-  const vs = t('analytics.vsPrev', { count: days });
-  const pctChange = (c: number, p: number | undefined) =>
-    p && p > 0 ? Math.round(((c - p) / p) * 100) : null;
+  const { t } = useTranslation();
   const rate = completionRate(data.visitors, data.completions);
-  const prevRate = prev && prev.visitors > 0 ? completionRate(prev.visitors, prev.completions) : null;
-  const share = (n: number) =>
-    data.visitors > 0
-      ? new Intl.NumberFormat(i18n.language === 'en' ? 'en-GB' : 'fr-FR', {
-          style: 'percent',
-          maximumFractionDigits: 1,
-        }).format(n / data.visitors)
-      : '—';
-  const pctUnit = ' %';
+  const none = { kind: 'none' } as const;
+  const items: KpiItem[] = [
+    {
+      key: 'views',
+      label: t('kpi.views'),
+      value: formatNumber(data.views),
+      trend: prev ? countTrend(data.views, prev.views) : none,
+    },
+    {
+      key: 'visitors',
+      label: t('kpi.visitors'),
+      value: formatNumber(data.visitors),
+      trend: prev ? countTrend(data.visitors, prev.visitors) : none,
+    },
+    {
+      key: 'returning',
+      label: t('analytics.ret.kpi'),
+      value:
+        !ret || !ret.enabled ? '—' : `${ret.total ? Math.round((ret.visitors / ret.total) * 100) : 0}\u00a0%`,
+      note: !ret
+        ? undefined
+        : !ret.enabled
+          ? t('analytics.ret.off')
+          : t('analytics.ret.kpiSub', { n: formatNumber(ret.visitors), total: formatNumber(ret.total) }),
+    },
+    {
+      key: 'completion',
+      label: t('kpi.completion'),
+      value: `${Math.round(rate * 100)} %`,
+      trend: prev ? rateTrend(rate, completionRate(prev.visitors, prev.completions), prev.visitors) : none,
+    },
+    {
+      key: 'leads',
+      label: t('kpi.leads'),
+      value: formatNumber(data.leads),
+      trend: prev ? countTrend(data.leads, prev.leads) : none,
+    },
+    {
+      key: 'cta',
+      label: t('kpi.cta'),
+      value: formatNumber(data.ctaClicks),
+      trend: prev ? countTrend(data.ctaClicks, prev.ctaClicks) : none,
+    },
+  ];
+  const pick = (d: SeriesDay) => dayValue(d, metric);
 
   // Entonnoir : démo filtrée, sinon la démo la plus vue sur la période
   const [funnelDemo, setFunnelDemo] = useState<string>('');
@@ -573,74 +610,36 @@ function Overview({
 
   return (
     <>
-      <div className="kpis">
-        <div className="card kpi">
-          <span className="t-caption muted">{t('analytics.views')}</span>
-          <div className="value">{formatNumber(data.views)}</div>
-          <span className="t-caption">
-            <Delta value={pctChange(data.views, prev?.views)} unit={pctUnit} label={vs} />
-          </span>
-        </div>
-        <div className="card kpi">
-          <span className="t-caption muted">{t('analytics.visitors')}</span>
-          <div className="value">{formatNumber(data.visitors)}</div>
-          <span className="t-caption">
-            <Delta value={pctChange(data.visitors, prev?.visitors)} unit={pctUnit} label={vs} />
-          </span>
-        </div>
-        <ReturningKpi ret={ret} />
-        <div className="card kpi">
-          <span className="t-caption muted">{t('analytics.completion')}</span>
-          <div className="value">{Math.round(rate * 100)}&nbsp;%</div>
-          <span className="t-caption">
-            <Delta
-              value={prevRate === null ? null : Math.round((rate - prevRate) * 100)}
-              unit={t('demos.pts')}
-              label={vs}
-            />
-          </span>
-        </div>
-        <div className="card kpi">
-          <span className="t-caption muted">{t('analytics.leadsCollected')}</span>
-          <div className="value">{formatNumber(data.leads)}</div>
-          <span className="t-caption">
-            <Delta
-              value={pctChange(data.leads, prev?.leads)}
-              unit={pctUnit}
-              label={t('analytics.ofVisitors', { pct: share(data.leads) })}
-            />
-          </span>
-        </div>
-        <div className="card kpi">
-          <span className="t-caption muted">{t('analytics.ctaClicks')}</span>
-          <div className="value">{formatNumber(data.ctaClicks)}</div>
-          <span className="t-caption">
-            <Delta
-              value={pctChange(data.ctaClicks, prev?.ctaClicks)}
-              unit={pctUnit}
-              label={t('analytics.ofVisitors', { pct: share(data.ctaClicks) })}
-            />
-          </span>
-        </div>
-      </div>
+      <KpiTabs items={items} active={metric} onSelect={onMetric} days={days}>
+        <TrendChart
+          title={metric === 'returning' ? t('kpi.perDayReturning') : t(`kpi.perDay.${metric}`)}
+          days={days}
+          rate={metric === 'completion'}
+          loading={!series}
+          cur={
+            series?.cur && metric !== 'returning' ? alignDays(series.cur.daily, days, series.end, pick) : null
+          }
+          prev={
+            series?.prev && metric !== 'returning'
+              ? alignDays(series.prev.daily, days, series.end - days * 86400_000, pick)
+              : null
+          }
+        />
+      </KpiTabs>
 
       <div className="two an-two">
-        <div className="card chart-card">
-          <div className="row between">
-            <h2 className="t-h3">{t('analytics.viewsAndCompletions')}</h2>
-            <div className="legend">
-              <span>
-                <i className="an-l1" />
-                {t('analytics.views')}
-              </span>
-              <span>
-                <i className="an-l2" />
-                {t('analytics.completedDemos')}
-              </span>
-            </div>
-          </div>
-          <LineChart daily={data.daily} days={days} />
-        </div>
+        <MetricTable
+          title={t('kpi.byDemo')}
+          nameLabel={t('kpi.demo')}
+          active={metric}
+          columns={KPI_KEYS.map((k) => ({ key: k, label: t(`kpi.col.${k}`), rate: k === 'completion' }))}
+          rows={(series?.cur?.byDemo ?? []).map((r) => ({
+            id: r.demo_id,
+            name: <Link to={`/analytics/${r.demo_id}`}>{title(r.demo_id)}</Link>,
+            values: metricValues(r),
+          }))}
+          more={{ to: '/demos', label: t('kpi.allDemos') }}
+        />
         <div className="card chart-card">
           <h2 className="t-h3">{t('analytics.sources')}</h2>
           <div className="col an-sources">
@@ -750,66 +749,6 @@ function Overview({
         )}
       </div>
     </>
-  );
-}
-
-/** Courbes « Vues » (pleine) et « Démos terminées » (pointillés), comme la maquette. */
-function LineChart({ daily, days }: { daily: WsAnalytics['daily']; days: number }) {
-  const { t } = useTranslation();
-  const series = useMemo(() => {
-    const byDay = new Map(daily.map((d) => [d.day, d]));
-    const out: Array<{ day: string; views: number; completions: number }> = [];
-    for (let i = days - 1; i >= 0; i--) {
-      const day = new Date(Date.now() - i * 86400_000).toISOString().slice(0, 10);
-      const d = byDay.get(day);
-      out.push({ day, views: Number(d?.views ?? 0), completions: Number(d?.completions ?? 0) });
-    }
-    return out;
-  }, [daily, days]);
-  const max = Math.max(1, ...series.map((d) => d.views));
-  const W = 600;
-  const H = 220;
-  const top = 20;
-  const bottom = 30;
-  const x = (i: number) => (series.length > 1 ? (i / (series.length - 1)) * W : 0);
-  const y = (v: number) => H - bottom - (v / max) * (H - top - bottom);
-  const path = (k: 'views' | 'completions') =>
-    series.map((d, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(d[k]).toFixed(1)}`).join(' ');
-  const mid = Math.floor(series.length / 2);
-  const fmt = (d: string) => formatDate(d, { day: 'numeric', month: 'short' });
-  const total = series.reduce((s, d) => s + d.views, 0);
-  return (
-    <svg
-      className="chart"
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="none"
-      role="img"
-      aria-label={t('analytics.chartLabel', { count: days, total: formatNumber(total) })}
-    >
-      <g className="grid">
-        <line x1="0" x2={W} y1="40" y2="40" />
-        <line x1="0" x2={W} y1="100" y2="100" />
-        <line x1="0" x2={W} y1="160" y2="160" />
-      </g>
-      <path d={path('views')} fill="none" stroke="var(--fd-color-chart-1)" strokeWidth="2.5" />
-      <path d={`${path('views')} L${W} ${H} L0 ${H}Z`} fill="var(--fd-color-chart-1)" opacity=".08" />
-      <path
-        d={path('completions')}
-        fill="none"
-        stroke="var(--fd-color-chart-2)"
-        strokeWidth="2.5"
-        strokeDasharray="6 4"
-      />
-      <text x="2" y="214">
-        {fmt(series[0]!.day)}
-      </text>
-      <text x={W / 2 - 30} y="214">
-        {fmt(series[mid]!.day)}
-      </text>
-      <text x={W - 52} y="214">
-        {fmt(series[series.length - 1]!.day)}
-      </text>
-    </svg>
   );
 }
 
