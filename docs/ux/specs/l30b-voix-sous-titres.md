@@ -2,18 +2,19 @@
 
 > Suite de L30, avec un second fournisseur : ElevenLabs. Version courte, écrans existants plus deltas, sans maquette.
 > Les règles communes de L30 §0 s'appliquent : aperçu avant d'appliquer, mention « Généré par IA, à vérifier », états désactivé, quota atteint, en cours et erreur.
+> Codes alignés sur ceux du développeur (L30-10 voix, L30-11 sous-titres).
 > S'appuie sur L28 §3 (voix off par étape), L21 (étape vidéo, sous-titres `.vtt`) et L28-03 (lecteur : « Activer le son », sous-titres).
 
 ## 1. États et codes
 
 | Code | État | Où |
 |---|---|---|
-| L30-10 | Réglage : voix de synthèse et sous-titres automatiques (activation séparée, quota en secondes) | Paramètres > Assistance IA |
-| L30-11 | Voix de synthèse : choix de la voix, avertissement, aperçu, appliquer | Éditeur > Étape > Voix off |
-| L30-12 | Sous-titres automatiques : avertissement avant l'envoi de l'audio, aperçu éditable | Éditeur > Étape vidéo > Sous-titres, et Voix off > Transcription |
+| L30-10 | Voix de synthèse : choix de la voix, avertissement, aperçu, appliquer (et réglage §2) | Éditeur > Étape > Voix off ; Paramètres > Assistance IA |
+| L30-11 | Sous-titres automatiques : avertissement avant l'envoi de l'audio, aperçu éditable | Éditeur > Étape vidéo > Sous-titres, et Voix off > Transcription |
+| L30-12 | (non utilisé : le réglage §2 est suivi avec L30-10) | — |
 | L30-13 | Quota de secondes atteint ou fonction désactivée | Entrées 065 et 066 |
 
-## 2. Réglage (L30-10)
+## 2. Réglage (suivi avec L30-10)
 
 - **Emplacement** : dans Paramètres > Assistance IA, les lignes « Voix de synthèse » et « Sous-titres automatiques » perdent le badge « Bientôt ». Elles forment une sous-section « Voix et sous-titres », avec leur propre bandeau. « Images générées » reste en « Bientôt ».
 - **Activation séparée** : un autre fournisseur et des données d'une autre nature (l'audio) justifient un consentement à part. Ces deux fonctions restent décochées même si l'Assistance IA est activée.
@@ -27,7 +28,7 @@
   - renouvellement : « Renouvellement le {{date}} ». Si la date n'est pas connue, la ligne est omise ;
   - jamais de chiffre inventé : si le quota n'est pas défini, on affiche seulement le temps utilisé.
 
-## 3. Voix de synthèse, 065 (L30-11)
+## 3. Voix de synthèse, 065 (L30-10)
 
 - **Entrée** : dans la section « Voix off » de l'étape (L28 §3.1), le bouton « Générer à partir du texte » perd « Bientôt ». Il est désactivé selon la règle 4 de L30 si la fonction est coupée.
 - **Panneau « Voix de synthèse »** (dans la section, sans modale) :
@@ -58,7 +59,7 @@
 - **Lecteur** : aucune différence avec une voix enregistrée (L28-03). Les sous-titres sont obligatoires et viennent du texte lu.
 - **Hors périmètre** : clonage de voix (jamais), voix sur les étapes vidéo (la piste vidéo garde son son).
 
-## 4. Sous-titres automatiques, 066 (L30-12)
+## 4. Sous-titres automatiques, 066 (L30-11)
 
 - **Entrées** :
   - étape vidéo (L21) : panneau Sous-titres, « Transcription automatique » perd « Bientôt » ;

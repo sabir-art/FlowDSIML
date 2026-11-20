@@ -155,10 +155,10 @@
 
 - **Entrée** : outil Graphique (L25), bouton « Décrire le graphique ».
 - **Saisie** : « Que doit montrer le graphique ? », par exemple « Évolution mensuelle des entrées en formation, par structure ».
-  - Le graphique utilise le jeu de données relié à la démo.
+  - Le graphique utilise le jeu de données relié à la démo. Seuls les noms de colonnes et 5 lignes d'exemple sont envoyés ; les valeurs sont calculées dans le navigateur.
   - S'il n'y en a pas : « Reliez d'abord un jeu de données, ou générez-en un. », avec un lien vers §7.
 - **Aperçu** :
-  - le graphique rendu, avec son type (barres, courbe, aires, secteurs), les colonnes utilisées et le titre proposé ;
+  - le graphique rendu, avec son type (ceux de L25 : barres, courbe, anneau), les colonnes utilisées et le titre proposé ;
   - la mention de la règle 2 ;
   - les boutons « Appliquer » et « Ignorer ».
   - Les réglages du graphique restent modifiables après.
