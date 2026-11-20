@@ -111,12 +111,10 @@ Fonction 021. Elle s'applique à toute la démo. Le recadrage d'une seule étape
 
 Fonction 051, aujourd'hui en « Bientôt ». Dans une étape HTML (A8), on remplace une image de la page capturée, par exemple un logo réel, une photo ou un graphique, par une autre image.
 
-- **Éléments concernés** : `<img>`, `<picture>`, `<svg>` et tout élément qui a une image de fond (`background-image`).
-- **Déclencheur** : on sélectionne l'élément sur le canevas (contour existant). Le panneau de l'élément affiche alors « Remplacer l'image » (icône `image-up`).
+- **Éléments concernés** : `<img>`, y compris les graphiques capturés en image. `<picture>`, `<svg>` et `background-image` sont une suite possible, non prioritaire.
+- **Déclencheur** : on sélectionne l'élément sur le canevas (contour existant). Pour une image, la barre de l'élément affiche « Remplacer l'image » (icône `image-up`) à la place de « Modifier le texte », et le panneau a une section « Image » : Remplacer, Ajuster ou Remplir, Revenir à l'image d'origine, Masquer l'image.
   - Sur un autre élément, l'action n'apparaît pas.
-- **Choix de la nouvelle image** : fenêtre en deux onglets.
-  - « Importer » : PNG, JPEG, WebP ou SVG, 5 Mo au plus.
-  - « Médiathèque » : la médiathèque existante (L18-03).
+- **Choix de la nouvelle image** : la médiathèque (L18-03), qui a son propre bouton d'import (PNG, JPEG, WebP ou SVG, 5 Mo au plus).
 - **Ajustement** : l'image prend la taille de l'élément d'origine. Choix « Ajuster » (par défaut, `object-fit: contain`) ou « Remplir » (`cover`).
 - **Résultat** :
   - l'image est remplacée dans le DOM stocké de l'étape. L'image d'origine n'est plus publiée ;
