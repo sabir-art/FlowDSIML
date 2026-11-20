@@ -2101,7 +2101,7 @@
     "visitors": "Visiteurs uniques",
     "completion": "Taux de complétion",
     "completionHint": "{{n}} sessions terminées",
-    "ctaClicks": "Clics sur le CTA final",
+    "ctaClicks": "Clics sur le bouton d’action",
     "leads": "Leads",
     "viewsPerDay": "Vues par jour",
     "noData": "Pas encore de données sur la période.",
@@ -2799,24 +2799,36 @@
     "picker": "Nuancier : {{label}}"
   },
   "vars": {
-    "help1": "Personnalisez les textes avec",
-    "help2": ". Remplies par l’URL, un lien personnalisé ou un formulaire.",
     "new": "Nouvelle variable",
-    "variable": "Variable",
-    "type": "Type",
-    "default": "Valeur par défaut",
     "usedIn": "Utilisée dans",
-    "text": "Texte",
     "demos_one": "{{n}} démo",
     "demos_other": "{{n}} démos",
     "unused": "Aucune démo",
     "empty": "Aucune variable pour l’instant. Créez-en une pour personnaliser vos démos.",
-    "key": "Nom de la variable",
-    "keyHelp": "Lettres minuscules, chiffres et _ ; commence par une lettre (ex. first_name).",
-    "keyInvalid": "Utilisez des lettres minuscules, des chiffres et _, en commençant par une lettre.",
-    "keyTaken": "Cette variable existe déjà.",
     "create": "Créer la variable",
-    "created": "Variable {{key}} créée"
+    "created": "Variable « {{name}} » créée",
+    "intro": "Des mots que vous définissez une fois, puis insérez dans toutes les démos. Elles s’ajoutent aux variables prédéfinies (visiteur, entreprise, démo, date).",
+    "name": "Nom",
+    "description": "Description",
+    "example": "Exemple",
+    "exampleHelp": "Sert à l’aperçu dans l’éditeur.",
+    "value": "Valeur fixe de l’espace",
+    "valueHelp": "Sinon, la valeur vient du lien ou du fichier CSV.",
+    "ifUnknown": "Si inconnu",
+    "ifUnknownHelp": "Proposé à chaque insertion ; laissé vide, le mot disparaît.",
+    "actions": "Actions",
+    "actionsFor": "Actions pour {{name}}",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer « {{name}} » ?",
+    "deleteBody_one": "Elle est utilisée dans {{count}} démo : ses pastilles deviendront « Variable supprimée » et n’afficheront rien.",
+    "deleteBody_other": "Elle est utilisée dans {{count}} démos : ses pastilles deviendront « Variable supprimée » et n’afficheront rien.",
+    "deleteUnused": "Elle n’est utilisée dans aucune démo.",
+    "deleted": "Variable « {{name}} » supprimée",
+    "editTitle": "Modifier la variable",
+    "saved": "Variable « {{name}} » enregistrée",
+    "required": "Le nom et l’exemple sont obligatoires.",
+    "keyForCsv": "Nom de colonne pour un fichier CSV :"
   },
   "access": {
     "who": "Qui peut voir la démo ?",
@@ -4661,5 +4673,150 @@
     "close": "Fermer",
     "all": "Tous",
     "allF": "Toutes"
+  },
+  "variables": {
+    "groups": {
+      "visitor": "Visiteur",
+      "company": "Entreprise",
+      "demo": "Démo",
+      "date": "Date",
+      "workspace": "Votre espace"
+    },
+    "builtin": {
+      "first_name": {
+        "label": "Prénom du visiteur",
+        "description": "Prénom de la personne qui regarde la démo.",
+        "example": "Camille",
+        "fallback": "vous"
+      },
+      "last_name": {
+        "label": "Nom du visiteur",
+        "description": "Nom de famille.",
+        "example": "Martin",
+        "fallback": ""
+      },
+      "job_title": {
+        "label": "Fonction du visiteur",
+        "description": "Son poste, s’il est connu.",
+        "example": "Conseillère",
+        "fallback": ""
+      },
+      "email": {
+        "label": "E-mail du visiteur",
+        "description": "Adresse e-mail, pour un e-mail de suivi.",
+        "example": "camille.martin@example.com",
+        "fallback": ""
+      },
+      "company": {
+        "label": "Nom de l’entreprise",
+        "description": "Structure du visiteur.",
+        "example": "Acme Formation",
+        "fallback": "votre structure"
+      },
+      "demo_title": {
+        "label": "Titre de la démo",
+        "description": "Le titre affiché en haut du lecteur.",
+        "example": "Créer un rapport",
+        "fallback": ""
+      },
+      "step_count": {
+        "label": "Nombre d’étapes",
+        "description": "Total des étapes de la démo.",
+        "example": "7",
+        "fallback": ""
+      },
+      "today": {
+        "label": "Date du jour",
+        "description": "Au moment où la démo est vue.",
+        "example": "20 novembre 2026",
+        "fallback": ""
+      }
+    },
+    "add": "Variable",
+    "addLabel": "Insérer une variable",
+    "search": "Rechercher une variable",
+    "catalog": "Variables",
+    "example": "Ex. : {{value}}",
+    "none": "Aucune variable ne correspond.",
+    "create": "Créer la variable « {{name}} »",
+    "manage": "Gérer les variables de l’espace",
+    "help": "Une variable est un mot qui s’adapte à chaque visiteur : « Bonjour Prénom du visiteur » devient « Bonjour Camille ».",
+    "helpOk": "Compris",
+    "pillAria": "Variable : {{label}}",
+    "pillAriaFallback": "Variable : {{label}}, si inconnu : {{fallback}}",
+    "deleted": "Variable supprimée",
+    "deletedHelp": "Elle n’affiche rien chez le visiteur. Remplacez-la ou retirez-la.",
+    "settings": "Réglage de la variable",
+    "ifUnknown": "Si inconnu, afficher",
+    "ifUnknownHelp": "Laissé vide, le mot disparaît et les espaces autour sont corrigés.",
+    "computedHelp": "Toujours connue du lecteur : pas de valeur de repli.",
+    "source": "Dans un lien ou un fichier CSV",
+    "sourceHelp": "Ajoutez à l’adresse de la démo ?{{param}}={{example}}, ou une colonne « {{key}} » à l’import CSV.",
+    "remove": "Retirer",
+    "apply": "Appliquer",
+    "close": "Fermer",
+    "previewWith": "Aperçu avec",
+    "previewExamples": "Exemples",
+    "previewFallbacks": "Valeurs de repli"
+  },
+  "kpi": {
+    "tablist": "Indicateur affiché",
+    "plus": "plus",
+    "minus": "moins",
+    "new": "Nouveau",
+    "srNone": "Pas d’activité sur les deux périodes",
+    "srNew": "Nouveau : aucune activité sur la période précédente",
+    "srMult": "multiplié par {{value}} par rapport à la période précédente",
+    "srAbs": "{{sign}} {{value}} par rapport à {{previous}} sur la période précédente",
+    "srPts": "{{sign}} {{value}} points par rapport à la période précédente",
+    "srPct": "{{sign}} {{value}} % par rapport à la période précédente",
+    "vs_one": "vs {{count}} j précédent",
+    "vs_other": "vs {{count}} j précédents",
+    "vsValue": "vs {{value}}",
+    "theDays_one": "le jour précédent",
+    "theDays_other": "les {{count}} j précédents",
+    "pts": "pts",
+    "lastDays_one": "Dernier jour",
+    "lastDays_other": "{{count}} derniers jours",
+    "previous": "Période précédente",
+    "day": "Jour",
+    "noDaily": "Pas encore de données jour par jour pour cet indicateur",
+    "chartLabel_one": "{{metric}} sur {{count}} jour, comparé à la période précédente",
+    "chartLabel_other": "{{metric}} sur {{count}} jours, comparé à la période précédente",
+    "views": "Vues",
+    "visitors": "Visiteurs",
+    "visitorsUnique": "Visiteurs uniques",
+    "completion": "Taux de complétion",
+    "leads": "Leads",
+    "cta": "Clics sur le bouton d’action",
+    "perDay": {
+      "views": "Vues par jour",
+      "visitors": "Visiteurs par jour",
+      "completion": "Taux de complétion par jour",
+      "leads": "Leads par jour",
+      "cta": "Clics sur le bouton d’action par jour"
+    },
+    "col": {
+      "views": "Vues",
+      "visitors": "Visiteurs",
+      "completion": "Complétion",
+      "leads": "Leads",
+      "cta": "Clics"
+    },
+    "byDemo": "Par démo",
+    "demo": "Démo",
+    "allDemos": "Voir toutes les démos",
+    "bySource": "Par source",
+    "source": "Source",
+    "sourceName": {
+      "embed": "Intégration",
+      "link": "Lien",
+      "page": "Page publique",
+      "direct": "Direct"
+    },
+    "seeAnalytics": ", voir dans Analytics",
+    "analytics": "Analytics",
+    "shortcuts": "Indicateurs des 30 derniers jours",
+    "perDayReturning": "Visiteurs récurrents par jour"
   }
 }

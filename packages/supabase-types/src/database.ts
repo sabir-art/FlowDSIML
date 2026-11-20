@@ -2215,24 +2215,33 @@ export type Database = {
       variables: {
         Row: {
           default_value: string;
+          description: string;
+          example: string;
           id: string;
           key: string;
           label: string;
+          value: string | null;
           workspace_id: string;
         };
         ComputedFields: never;
         Insert: {
           default_value?: string;
+          description?: string;
+          example?: string;
           id?: string;
           key: string;
           label?: string;
+          value?: string | null;
           workspace_id: string;
         };
         Update: {
           default_value?: string;
+          description?: string;
+          example?: string;
           id?: string;
           key?: string;
           label?: string;
+          value?: string | null;
           workspace_id?: string;
         };
         Relationships: [
@@ -2311,6 +2320,17 @@ export type Database = {
     };
     Functions: {
       accept_invitation: { Args: { p_token: string }; Returns: string };
+      analytics_series: {
+        Args: {
+          p_demo?: string | null;
+          p_from: string;
+          p_source?: string | null;
+          p_segment?: Json | null;
+          p_to?: string;
+          p_workspace: string;
+        };
+        Returns: Json;
+      };
       create_workspace: {
         Args: { p_name: string; p_slug?: string };
         Returns: {

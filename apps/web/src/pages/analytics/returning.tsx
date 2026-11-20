@@ -24,25 +24,6 @@ export const RETURNING_SENTENCE_MIN = 20;
 
 const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 100) : 0);
 
-/** KPI « Visiteurs récurrents » (après « Visiteurs uniques »). */
-export function ReturningKpi({ ret }: { ret: Returning | null }) {
-  const { t } = useTranslation();
-  const off = ret && !ret.enabled;
-  return (
-    <div className="card kpi">
-      <span className="t-caption muted">{t('analytics.ret.kpi')}</span>
-      <div className="value">{!ret || off ? '—' : `${pct(ret.visitors, ret.total)}\u00a0%`}</div>
-      <span className="t-caption muted">
-        {!ret
-          ? '\u00a0'
-          : !ret.enabled
-            ? t('analytics.ret.off')
-            : t('analytics.ret.kpiSub', { n: formatNumber(ret.visitors), total: formatNumber(ret.total) })}
-      </span>
-    </div>
-  );
-}
-
 /** Carte « Nouveaux et récurrents » (deux barres, définition, « Comment c'est mesuré »). */
 export function ReturningCard({ ret, onHow }: { ret: Returning | null; onHow: () => void }) {
   const { t, i18n } = useTranslation();

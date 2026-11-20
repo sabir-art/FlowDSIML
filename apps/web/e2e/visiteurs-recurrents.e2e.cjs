@@ -47,24 +47,22 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // ===== L26-06 : vue d'ensemble =====
   await page.goto(`${APP}/#/analytics`);
-  const kpi = page.locator('.kpi', { hasText: 'Visiteurs récurrents' });
+  const kpi = page.locator('.kpi-tab', { hasText: 'Visiteurs récurrents' });
   await kpi.waitFor();
   ok(
-    (await page.locator('.kpi .t-caption.muted:first-child').allTextContents())
+    (await page.locator('.kpi-tab .kpi-tab__l').allTextContents())
       .map(sp)
       .join('|')
-      .includes('Visiteurs uniques|Visiteurs récurrents'),
-    'KPI « Visiteurs récurrents » après « Visiteurs uniques »',
+      .includes('Visiteurs|Visiteurs récurrents'),
+    'KPI « Visiteurs récurrents » après « Visiteurs »',
   );
   // Chiffres cohérents avec la vue d'ensemble : même population que « Visiteurs uniques »
   const num = (x) => Number(sp(x).replace(/\D/g, ''));
-  const uniq = num(
-    await page.locator('.kpi', { hasText: 'Visiteurs uniques' }).locator('.value').innerText(),
-  );
+  const uniq = num(await page.locator('.kpi-tab').nth(1).locator('.kpi-tab__v').innerText());
   const n = Math.round(uniq * 0.34);
   const pRet = Math.round((n / uniq) * 100);
   const fmt = (x) => x.toLocaleString('fr-FR').replace(/[\u00a0\u202f]/g, ' ');
-  ok(sp(await kpi.locator('.value').innerText()) === `${pRet} %`, `KPI : pourcentage réel (${pRet} %)`);
+  ok(sp(await kpi.locator('.kpi-tab__v').innerText()) === `${pRet} %`, `KPI : pourcentage réel (${pRet} %)`);
   ok(
     sp(await kpi.innerText()).includes(`${fmt(n)} sur ${fmt(uniq)} · revenus au moins une fois`),
     `KPI : ${n} sur ${uniq} (visiteurs uniques)`,

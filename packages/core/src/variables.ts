@@ -29,15 +29,67 @@ export function extractVariableKeys(text: string): string[] {
   return [...keys];
 }
 
-/** Lit les variables depuis une query string : ?company=Acme ou ?v_company=Acme. */
+/** L46 : groupes du catalogue des variables, dans l'ordre d'affichage. */
+export type VariableGroup = 'visitor' | 'company' | 'demo' | 'date' | 'workspace';
+
+export interface PredefinedVariable {
+  key: string;
+  group: Exclude<VariableGroup, 'workspace'>;
+  /** Alias français accepté dans l'adresse (?prenom=Camille). */
+  alias?: string;
+  /** Calculée par le lecteur (toujours une valeur, jamais de repli). */
+  computed?: boolean;
+  /** Donnée personnelle : seulement dans les e-mails et les formulaires, jamais à l'écran. */
+  emailOnly?: boolean;
+}
+
+/**
+ * L46 : variables prédéfinies, disponibles dans toutes les démos sans les créer. Libellés,
+ * descriptions, exemples et replis proposés : traductions de l'app (variables.builtin.<clé>).
+ */
+export const PREDEFINED_VARIABLES: readonly PredefinedVariable[] = [
+  { key: 'first_name', group: 'visitor', alias: 'prenom' },
+  { key: 'last_name', group: 'visitor', alias: 'nom' },
+  { key: 'job_title', group: 'visitor', alias: 'fonction' },
+  { key: 'email', group: 'visitor', emailOnly: true },
+  { key: 'company', group: 'company', alias: 'entreprise' },
+  { key: 'demo_title', group: 'demo', computed: true },
+  { key: 'step_count', group: 'demo', computed: true },
+  { key: 'today', group: 'date', computed: true },
+];
+export const PREDEFINED_KEYS = PREDEFINED_VARIABLES.map((v) => v.key);
+
+/**
+ * Lit les variables depuis une query string : ?company=Acme, ?v_company=Acme ou, pour les variables
+ * prédéfinies, l'alias français (?entreprise=Acme). Les variables calculées ne se lisent jamais dans
+ * l'adresse.
+ */
 export function variablesFromSearch(search: string, allowedKeys: string[]): VariableValues {
   const params = new URLSearchParams(search);
   const out: VariableValues = {};
-  for (const key of allowedKeys) {
-    const v = params.get(key) ?? params.get(`v_${key}`);
+  const keys = [...new Set([...allowedKeys, ...PREDEFINED_KEYS])];
+  for (const key of keys) {
+    const def = PREDEFINED_VARIABLES.find((p) => p.key === key);
+    if (def?.computed) continue;
+    const v = params.get(key) ?? params.get(`v_${key}`) ?? (def?.alias ? params.get(def.alias) : null);
     if (v !== null) out[key] = v.slice(0, 200);
   }
   return out;
+}
+
+/** L46 : valeurs calculées par le lecteur (titre de la démo, nombre d'étapes, date du jour). */
+export function computedVariables(
+  demo: { title: string; stepCount: number },
+  locale: string,
+  now: Date = new Date(),
+): VariableValues {
+  let today: string;
+  try {
+    today = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+  } catch {
+    today = now.toISOString().slice(0, 10);
+  }
+  return { demo_title: demo.title, step_count: String(demo.stepCount), today };
 }
 
 /**

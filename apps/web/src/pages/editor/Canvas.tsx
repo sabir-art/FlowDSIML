@@ -6,7 +6,6 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
-import { applyVariables, escapeHtml, richTextToHtml } from '@flowdsiml/core';
 import { themeSchema } from '@flowdsiml/manifest';
 import {
   beaconCenter,
@@ -22,7 +21,8 @@ import {
 import { ChevronRight, ImagePlus, ClipboardList, ExternalLink, Info, Move, RotateCcw } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
 import type { DemoEditor } from './useDemoEditor';
-import { withVariablePills } from './RichTextField';
+import { useVarCatalog } from '../../lib/varCatalog';
+import { usePreviewMode, varPreview } from './vars/varPreview';
 import { textOn } from '../../lib/publish';
 import { BeforeAfterCanvas } from './BeforeAfterEditor';
 import { VideoCanvas } from './video/VideoCanvas';
@@ -85,6 +85,9 @@ export function Canvas({
   abPreview,
 }: Props) {
   const { t } = useTranslation();
+  // L46 : variables remplacées par les exemples (ou les replis) dans le canevas, jamais de {{…}}
+  const varCatalog = useVarCatalog(editor.variables);
+  const vp = varPreview(varCatalog, editor.variables, usePreviewMode());
   const frame = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
   const hotspots = editor.hotspots.filter((h) => h.step_id === step.id);
@@ -323,8 +326,8 @@ export function Canvas({
             )}
           </span>
         )}
-        <h2>{step.title || t('editor.untitled')}</h2>
-        <div dangerouslySetInnerHTML={{ __html: withVariablePills(richTextToHtml(step.body)) }} />
+        <h2>{vp.text(step.title) || t('editor.untitled')}</h2>
+        <div dangerouslySetInnerHTML={{ __html: vp.html(step.body) }} />
         {/* A2-02 : bouton de la pop-up, comme dans le lecteur (vide = « Suivant ») */}
         {popup && !endText && opts.choices.length === 0 && (
           <div className="canvas-popup-acts">
@@ -390,8 +393,7 @@ export function Canvas({
   const url = editor.imageUrls[step.image_path];
   // Aperçu WYSIWYG (ED2) : mêmes classes et même thème que le player.
   const theme = themeSchema.parse(asSettings(editor.demo?.settings).theme ?? {});
-  const defaults = Object.fromEntries(editor.variables.map((v) => [v.key, v.default_value]));
-  const sub = (txt: string) => applyVariables(txt, {}, defaults);
+  const sub = vp.text;
   const tipBase =
     (selection.kind === 'hotspot' ? hotspots.find((h) => h.id === selection.id) : undefined) ?? hotspots[0];
   const tipHotspot =
@@ -623,14 +625,11 @@ export function Canvas({
             {tipHotspot.title && (
               <div
                 className="p-tip-title"
-                dangerouslySetInnerHTML={{ __html: withVariablePills(escapeHtml(tipHotspot.title)) }}
+                dangerouslySetInnerHTML={{ __html: vp.plainHtml(tipHotspot.title) }}
               />
             )}
             {tipHotspot.body && (
-              <div
-                className="p-rich"
-                dangerouslySetInnerHTML={{ __html: withVariablePills(richTextToHtml(tipHotspot.body)) }}
-              />
+              <div className="p-rich" dangerouslySetInnerHTML={{ __html: vp.html(tipHotspot.body) }} />
             )}
             <div className="p-actions">
               <span />

@@ -58,8 +58,8 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   const h = t.hotspots.find((x) => x.step_id === steps()[0].id);
   ok(h && h.title === '', 'n° 9 : bulle posée sans titre enregistré');
   ok(
-    (await page.locator('#hs-title').inputValue()) === '' &&
-      (await page.locator('#hs-title').getAttribute('placeholder')) === 'Cliquez ici',
+    (await page.locator('#hs-title').innerText()).trim() === '' &&
+      (await page.locator('#hs-title').getAttribute('data-placeholder')) === 'Cliquez ici',
     'n° 9 : « Cliquez ici » en placeholder',
   );
   ok((await guide.textContent()).includes('Écrivez la consigne'), 'n° 8 : aide « Écrivez la consigne… »');

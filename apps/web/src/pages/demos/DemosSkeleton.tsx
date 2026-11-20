@@ -1,3 +1,4 @@
+import '../../components/kpi/kpi.css';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpDown, Folder, LayoutGrid, List, Tag as TagIcon } from 'lucide-react';
 import { FilterContent } from '../../components/toolbar/ListToolbar';
@@ -94,27 +95,24 @@ export function DemosSkeleton({ onboardingHeight }: { onboardingHeight: number }
 }
 
 /**
- * Rangée des 4 indicateurs en squelette (carte héros comprise). Sert aussi de gabarit invisible pour
- * « Les statistiques apparaîtront après la première publication » : même hauteur, aucun décalage.
+ * Bande des 4 raccourcis en squelette (L47). Sert aussi de gabarit invisible pour « Les statistiques
+ * apparaîtront après la première publication » : même hauteur, aucun décalage.
  */
 export function KpiSkeletonRow({ hidden = false }: { hidden?: boolean }) {
   return (
-    <div className={`stat-row${hidden ? ' stat-row--ghost' : ''}`} aria-hidden="true">
+    <div className={`kpi-short${hidden ? ' kpi-short--ghost' : ''}`} aria-hidden="true">
       {[0, 1, 2, 3].map((i) => (
-        <article key={i} className={`fd-card fd-kpi stat-tile${i === 0 ? ' fd-card--hero' : ''}`}>
-          <div className="fd-card__head" style={{ margin: 0 }}>
-            <Sk w={36} h={36} className="sk--round" />
-            <span className="fd-kpi__label stat-label sk-line">
-              <Sk w="60%" />
-            </span>
-          </div>
-          <span className="fd-kpi__value stat-value sk-line">
-            <Sk w="40%" h={40} />
+        <div key={i} className="kpi-sc">
+          <span className="kpi-tab__l">
+            <Sk w="60%" />
           </span>
-          <span className="fd-kpi__foot sk-line sk-fixed-24">
+          <span className="kpi-tab__v">
+            <Sk w="40%" h={35} />
+          </span>
+          <span className="kpi-trend">
             <Sk w="80%" />
           </span>
-        </article>
+        </div>
       ))}
     </div>
   );

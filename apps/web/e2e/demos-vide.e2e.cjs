@@ -49,7 +49,7 @@ const SHOTS = process.env.SHOTS_DIR;
     'état vide : une phrase avec « Démarrer la capture »',
   );
   ok((await empty.getByRole('button', { name: 'Nouvelle démo' }).count()) === 1, 'bouton « Nouvelle démo »');
-  ok((await page.locator('.stat-row:not(.stat-row--ghost)').count()) === 0, 'aucun indicateur à zéro');
+  ok((await page.locator('.kpi-short:not(.kpi-short--ghost)').count()) === 0, 'aucun indicateur à zéro');
   await shot('rev-05-demos-vide');
 
   // Des brouillons, rien de publié
@@ -63,7 +63,7 @@ const SHOTS = process.env.SHOTS_DIR;
     'brouillons : « Les statistiques apparaîtront après la première publication. »',
   );
   ok(
-    (await page.locator('.stat-row:not(.stat-row--ghost)').count()) === 0,
+    (await page.locator('.kpi-short:not(.kpi-short--ghost)').count()) === 0,
     'brouillons : indicateurs masqués',
   );
   await shot('rev-05-demos-brouillons');
@@ -71,7 +71,7 @@ const SHOTS = process.env.SHOTS_DIR;
   // Une démo publiée : les indicateurs reviennent
   t.demos[0].status = 'published';
   await page.reload();
-  await page.locator('.stat-row').waitFor();
+  await page.locator('.kpi-short:not(.kpi-short--ghost)').waitFor();
   ok((await page.locator('.stats-later').count()) === 0, 'publiée : indicateurs affichés');
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);

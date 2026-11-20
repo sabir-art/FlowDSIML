@@ -12,3 +12,4 @@ export * from './htmlOps';
 export * from './htmlSanitize';
 export * from './pii';
 export * from './dataset';
+export * from './trend';

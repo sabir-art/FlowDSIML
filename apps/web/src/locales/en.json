@@ -2101,7 +2101,7 @@
     "visitors": "Unique visitors",
     "completion": "Completion rate",
     "completionHint": "{{n}} completed sessions",
-    "ctaClicks": "Final CTA clicks",
+    "ctaClicks": "Action button clicks",
     "leads": "Leads",
     "viewsPerDay": "Views per day",
     "noData": "No data for this period yet.",
@@ -2799,24 +2799,36 @@
     "picker": "Color picker: {{label}}"
   },
   "vars": {
-    "help1": "Personalise texts with",
-    "help2": ". Filled from the URL, a personalised link or a form.",
     "new": "New variable",
-    "variable": "Variable",
-    "type": "Type",
-    "default": "Default value",
     "usedIn": "Used in",
-    "text": "Text",
     "demos_one": "{{n}} demo",
     "demos_other": "{{n}} demos",
     "unused": "No demo",
     "empty": "No variables yet. Create one to personalise your demos.",
-    "key": "Variable name",
-    "keyHelp": "Lowercase letters, digits and _; starts with a letter (e.g. first_name).",
-    "keyInvalid": "Use lowercase letters, digits and _, starting with a letter.",
-    "keyTaken": "This variable already exists.",
     "create": "Create variable",
-    "created": "Variable {{key}} created"
+    "created": "Variable “{{name}}” created",
+    "intro": "Words you define once, then insert in every demo. They add to the predefined variables (visitor, company, demo, date).",
+    "name": "Name",
+    "description": "Description",
+    "example": "Example",
+    "exampleHelp": "Used for the editor preview.",
+    "value": "Fixed workspace value",
+    "valueHelp": "Otherwise the value comes from the link or CSV file.",
+    "ifUnknown": "If unknown",
+    "ifUnknownHelp": "Suggested at each insertion; left empty, the word disappears.",
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteBody_one": "It is used in {{count}} demo: its chips will become “Deleted variable” and show nothing.",
+    "deleteBody_other": "It is used in {{count}} demos: its chips will become “Deleted variable” and show nothing.",
+    "deleteUnused": "It is not used in any demo.",
+    "deleted": "Variable “{{name}}” deleted",
+    "editTitle": "Edit variable",
+    "saved": "Variable “{{name}}” saved",
+    "required": "Name and example are required.",
+    "keyForCsv": "Column name for a CSV file:"
   },
   "access": {
     "who": "Who can see the demo?",
@@ -4661,5 +4673,150 @@
     "close": "Close",
     "all": "All",
     "allF": "All"
+  },
+  "variables": {
+    "groups": {
+      "visitor": "Visitor",
+      "company": "Company",
+      "demo": "Demo",
+      "date": "Date",
+      "workspace": "Your workspace"
+    },
+    "builtin": {
+      "first_name": {
+        "label": "Visitor first name",
+        "description": "First name of the person watching the demo.",
+        "example": "Camille",
+        "fallback": "you"
+      },
+      "last_name": {
+        "label": "Visitor last name",
+        "description": "Family name.",
+        "example": "Martin",
+        "fallback": ""
+      },
+      "job_title": {
+        "label": "Visitor job title",
+        "description": "Their role, if known.",
+        "example": "Advisor",
+        "fallback": ""
+      },
+      "email": {
+        "label": "Visitor email",
+        "description": "Email address, for a follow-up email.",
+        "example": "camille.martin@example.com",
+        "fallback": ""
+      },
+      "company": {
+        "label": "Company name",
+        "description": "The visitor’s organisation.",
+        "example": "Acme Training",
+        "fallback": "your organisation"
+      },
+      "demo_title": {
+        "label": "Demo title",
+        "description": "The title shown at the top of the player.",
+        "example": "Create a report",
+        "fallback": ""
+      },
+      "step_count": {
+        "label": "Number of steps",
+        "description": "Total steps in the demo.",
+        "example": "7",
+        "fallback": ""
+      },
+      "today": {
+        "label": "Today’s date",
+        "description": "When the demo is viewed.",
+        "example": "20 November 2026",
+        "fallback": ""
+      }
+    },
+    "add": "Variable",
+    "addLabel": "Insert a variable",
+    "search": "Search a variable",
+    "catalog": "Variables",
+    "example": "E.g. {{value}}",
+    "none": "No variable matches.",
+    "create": "Create the “{{name}}” variable",
+    "manage": "Manage workspace variables",
+    "help": "A variable is a word that adapts to each visitor: “Hello Visitor first name” becomes “Hello Camille”.",
+    "helpOk": "Got it",
+    "pillAria": "Variable: {{label}}",
+    "pillAriaFallback": "Variable: {{label}}, if unknown: {{fallback}}",
+    "deleted": "Deleted variable",
+    "deletedHelp": "It shows nothing to visitors. Replace or remove it.",
+    "settings": "Variable settings",
+    "ifUnknown": "If unknown, show",
+    "ifUnknownHelp": "Left empty, the word disappears and surrounding spaces are fixed.",
+    "computedHelp": "Always known by the player: no fallback.",
+    "source": "In a link or a CSV file",
+    "sourceHelp": "Add ?{{param}}={{example}} to the demo address, or a “{{key}}” column to the CSV import.",
+    "remove": "Remove",
+    "apply": "Apply",
+    "close": "Close",
+    "previewWith": "Preview with",
+    "previewExamples": "Examples",
+    "previewFallbacks": "Fallback values"
+  },
+  "kpi": {
+    "tablist": "Displayed metric",
+    "plus": "plus",
+    "minus": "minus",
+    "new": "New",
+    "srNone": "No activity in either period",
+    "srNew": "New: no activity in the previous period",
+    "srMult": "multiplied by {{value}} compared with the previous period",
+    "srAbs": "{{sign}} {{value}} compared with {{previous}} in the previous period",
+    "srPts": "{{sign}} {{value}} points compared with the previous period",
+    "srPct": "{{sign}} {{value}}% compared with the previous period",
+    "vs_one": "vs previous {{count}} day",
+    "vs_other": "vs previous {{count}} days",
+    "vsValue": "vs {{value}}",
+    "theDays_one": "the previous day",
+    "theDays_other": "the previous {{count}} days",
+    "pts": "pts",
+    "lastDays_one": "Last day",
+    "lastDays_other": "Last {{count}} days",
+    "previous": "Previous period",
+    "day": "Day",
+    "noDaily": "No day-by-day data for this metric yet",
+    "chartLabel_one": "{{metric}} over {{count}} day, compared with the previous period",
+    "chartLabel_other": "{{metric}} over {{count}} days, compared with the previous period",
+    "views": "Views",
+    "visitors": "Visitors",
+    "visitorsUnique": "Unique visitors",
+    "completion": "Completion rate",
+    "leads": "Leads",
+    "cta": "Action button clicks",
+    "perDay": {
+      "views": "Views per day",
+      "visitors": "Visitors per day",
+      "completion": "Completion rate per day",
+      "leads": "Leads per day",
+      "cta": "Action button clicks per day"
+    },
+    "col": {
+      "views": "Views",
+      "visitors": "Visitors",
+      "completion": "Completion",
+      "leads": "Leads",
+      "cta": "Clicks"
+    },
+    "byDemo": "By demo",
+    "demo": "Demo",
+    "allDemos": "See all demos",
+    "bySource": "By source",
+    "source": "Source",
+    "sourceName": {
+      "embed": "Embed",
+      "link": "Link",
+      "page": "Public page",
+      "direct": "Direct"
+    },
+    "seeAnalytics": ", see in Analytics",
+    "analytics": "Analytics",
+    "shortcuts": "Metrics for the last 30 days",
+    "perDayReturning": "Returning visitors per day"
   }
 }

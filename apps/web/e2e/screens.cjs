@@ -71,7 +71,7 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await p.waitForURL(/share/);
   await p.waitForTimeout(500);
   await shot(p, '09-partage', true);
-  await go(`/demos/${DEMO2}/analytics`, '.stat-tile');
+  await go(`/demos/${DEMO2}/analytics`, '.kpi-tab');
   await shot(p, '10-analytics-demo', true);
   await go('/analytics', '.fd-table tbody tr');
   await shot(p, '11-analytics-workspace');

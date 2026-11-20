@@ -26,17 +26,37 @@ const SHOTS = process.env.SHOTS_DIR;
     !(await page.textContent('main')).includes('1 / 25'),
     'pas de quota dans le sous-titre (il est dans Plans)',
   );
+  // L47 §8 : 4 raccourcis identiques vers Analytics, chacun avec son indicateur
   ok(
-    (await page.locator('.stat-tile a[href="#/analytics"]').count()) === 1,
-    'KPI Vues : bouton ↗ vers Analytics',
+    JSON.stringify(
+      await page.locator('.kpi-short a.kpi-sc').evaluateAll((l) => l.map((a) => a.getAttribute('href'))),
+    ) ===
+      JSON.stringify([
+        '#/analytics?indicateur=views',
+        '#/analytics?indicateur=visitors',
+        '#/analytics?indicateur=completion',
+        '#/analytics?indicateur=leads',
+      ]),
+    'raccourcis vers Analytics (Vues, Visiteurs, Complétion, Leads)',
+  );
+  ok(
+    /, voir dans Analytics$/.test(
+      (await page.locator('.kpi-sc').nth(3).innerText()).replace(/\s+/g, ' ').trim(),
+    ) ||
+      (await page.locator('.kpi-sc').nth(3).locator('.sr-only').last().textContent()) ===
+        ', voir dans Analytics',
+    'nom accessible : « …, voir dans Analytics »',
   );
   ok(!/Invalid Date/.test(await page.textContent('main')), 'dates formatées (pas de « Invalid Date »)');
 
   await page.fill('input[type=search]', 'onboard');
   ok((await page.locator('.demo-card').count()) === 1, 'recherche par titre');
   await page.fill('input[type=search]', '');
-  ok((await page.locator('.stat-tile').count()) === 4, 'KPI du workspace (4 cartes)');
-  ok((await page.locator('.stat-tile.fd-card--hero').count()) === 1, 'une seule carte héro');
+  ok((await page.locator('.kpi-sc').count()) === 4, 'KPI du workspace (4 raccourcis)');
+  ok(
+    (await page.locator('.kpi-short .fd-card--hero, .kpi-action').count()) === 0,
+    'aucune carte héro ni bouton rond',
+  );
   await page.getByRole('button', { name: /^Brouillons · 1/ }).click();
   ok((await page.locator('.demo-card').count()) === 1, 'filtre par statut (segmenté)');
   await page.getByRole('button', { name: /^Toutes · 2/ }).click();

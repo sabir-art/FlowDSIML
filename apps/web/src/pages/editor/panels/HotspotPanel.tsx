@@ -15,8 +15,8 @@ import {
   type Selection,
   type StepRow,
 } from '../types';
-import { RichTextField } from '../RichTextField';
-import { VariablePreview } from '../VariablePreview';
+import { VarTextField } from '../vars/VarTextField';
+import { useVarCatalog } from '../../../lib/varCatalog';
 import { CtaFields } from './CtaFields';
 import { AiBadge, AiWrite, isAiApplied } from '../../../components/ai/AiWrite';
 import { AiSpellAll } from '../../../components/ai/AiSpellAll';
@@ -49,7 +49,8 @@ export function HotspotPanel({
   const [spellAll, setSpellAll] = useState(false);
   const { current: ws } = useWorkspace();
   const action = asAction(hotspot.action);
-  const varKeys = editor.variables.map((v) => v.key);
+  // L46 : catalogue des variables (libellés, exemples, replis)
+  const catalog = useVarCatalog(editor.variables);
   const set = (patch: Partial<HotspotRow>) => editor.updateHotspot(hotspot.id, patch);
   const demoSpotlight = asSettings(editor.demo!.settings).mode === 'spotlight';
   const style = demoSpotlight ? 'spotlight' : hotspot.style === 'spotlight' ? 'spotlight' : 'beacon';
@@ -163,36 +164,33 @@ export function HotspotPanel({
 
       <div className="sec">
         <div className="sec-title">{t('editor.tooltipBody')}</div>
-        <div className="field">
-          <label htmlFor="hs-title">
-            {t('editor.hs.title')} <span className="opt">{t('editor.hs.optional')}</span>
-          </label>
-          <input
-            id="hs-title"
-            className="input input-sm"
-            maxLength={200}
-            disabled={readOnly}
-            placeholder={t('editor.newHotspot')}
-            value={hotspot.title}
-            onChange={(e) => {
-              set({ title: e.target.value });
-              // L38-9 : l'étape reprend le titre de sa première bulle tant qu'il n'a pas été saisi
-              const first = editor.hotspots
-                .filter((h) => h.step_id === hotspot.step_id)
-                .sort((a, b) => a.position - b.position)[0];
-              if (step && first?.id === hotspot.id && (!step.title.trim() || step.title === hotspot.title))
-                editor.updateStep(step.id, { title: e.target.value });
-              setAiMark(false);
-            }}
-          />
-          <VariablePreview text={hotspot.title} variables={editor.variables} />
-        </div>
-        <RichTextField
-          mk
+        <VarTextField
+          singleLine
+          id="hs-title"
+          placeholder={t('editor.newHotspot')}
+          label={`${t('editor.hs.title')} ${t('editor.hs.optional')}`}
+          maxLength={200}
+          catalog={catalog}
+          canManage={!readOnly}
+          disabled={readOnly}
+          value={hotspot.title}
+          onChange={(v) => {
+            set({ title: v });
+            // L38-9 : l'étape reprend le titre de sa première bulle tant qu'il n'a pas été saisi
+            const first = editor.hotspots
+              .filter((h) => h.step_id === hotspot.step_id)
+              .sort((a, b) => a.position - b.position)[0];
+            if (step && first?.id === hotspot.id && (!step.title.trim() || step.title === hotspot.title))
+              editor.updateStep(step.id, { title: v });
+            setAiMark(false);
+          }}
+        />
+        <VarTextField
           id="hs-body"
           label={t('editor.hs.text')}
           value={hotspot.body}
-          variables={varKeys}
+          catalog={catalog}
+          canManage={!readOnly}
           disabled={readOnly}
           onChange={(v) => {
             set({ body: v });
@@ -232,7 +230,6 @@ export function HotspotPanel({
             onClose={() => setSpellAll(false)}
           />
         )}
-        <VariablePreview text={hotspot.body} variables={editor.variables} />
       </div>
 
       {/* L38-10 : voix off juste sous la consigne qu'elle lit (même piste que l'onglet Étape) */}

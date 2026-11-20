@@ -1,26 +1,26 @@
-import {
-  ArrowLeft,
-  BarChart3,
-  Download,
-  Eye,
-  Mail,
-  MousePointerClick,
-  Pencil,
-  PieChart,
-  Route,
-  Share2,
-  Users,
-} from 'lucide-react';
+import { ArrowLeft, Download, Mail, Pencil, Route, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { completionRate, computeFunnel, toCsv } from '@flowdsiml/core';
+import { completionRate, computeFunnel, countTrend, rateTrend, toCsv } from '@flowdsiml/core';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Card } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { errorMessage } from '../../lib/errors';
 import { downloadText } from '../../lib/download';
-import { DailyBars, Donut, Funnel, StatTile, variation } from '../../components/charts';
+import { Funnel } from '../../components/charts';
+import {
+  KPI_KEYS,
+  KpiTabs,
+  MetricTable,
+  TrendChart,
+  alignDays,
+  dayValue,
+  kpiFromParam,
+  metricValues,
+  type KpiItem,
+  type Series,
+} from '../../components/kpi/KpiTabs';
 import { formatNumber } from '../../lib/format';
 import { Loading } from '../../components/guards';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -51,7 +51,16 @@ export function DemoAnalyticsPage() {
   const [data, setData] = useState<Analytics | null>(null);
   const [prev, setPrev] = useState<Analytics | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [metric, setMetric] = useState<'views' | 'visitors'>('views');
+  // L47 : l'indicateur actif est gardé dans l'adresse (?indicateur=)
+  const [params, setParams] = useSearchParams();
+  const metric = kpiFromParam(params.get('indicateur'), KPI_KEYS);
+  const setMetric = (k: string) => {
+    const next = new URLSearchParams(params);
+    if (k === 'views') next.delete('indicateur');
+    else next.set('indicateur', k);
+    setParams(next, { replace: true });
+  };
+  const [series, setSeries] = useState<{ cur: Series | null; prev: Series | null; end: number } | null>(null);
   const [versionNumber, setVersionNumber] = useState<number | null>(null);
 
   useEffect(() => {
@@ -73,6 +82,25 @@ export function DemoAnalyticsPage() {
       setSteps(s.data ?? []);
     })();
   }, [demoId]);
+
+  // Séries quotidiennes et détail par source (espace de la démo, filtre démo)
+  useEffect(() => {
+    if (!demo) return;
+    setSeries(null);
+    const now = Date.now();
+    const iso = (d: number) => new Date(now - d * 86400_000).toISOString();
+    const args = { p_workspace: demo.workspace_id, p_demo: demoId };
+    void Promise.all([
+      supabase.rpc('analytics_series', { ...args, p_from: iso(days), p_to: new Date(now).toISOString() }),
+      supabase.rpc('analytics_series', { ...args, p_from: iso(2 * days), p_to: iso(days) }),
+    ]).then(([c, p]) =>
+      setSeries({
+        cur: c.error ? null : ((c.data as unknown as Series) ?? null),
+        prev: p.error ? null : ((p.data as unknown as Series) ?? null),
+        end: now,
+      }),
+    );
+  }, [demo, demoId, days]);
 
   useEffect(() => {
     setData(null);
@@ -99,9 +127,46 @@ export function DemoAnalyticsPage() {
     { length: Math.max(totalSteps, steps.length) },
     (_, i) => steps[i]?.title || t('editor.stepN', { n: i + 1 }),
   );
-  const pct = (v: number) => `${Math.round(v * 100)} %`;
-  const vs = t('analytics.vsPreviousDays', { count: days });
-  const kpi = { deltaLabel: vs, noDeltaLabel: t('analytics.noComparison') };
+  const none = { kind: 'none' } as const;
+  const rate = data ? completionRate(data.visitors, data.completions) : 0;
+  const items: KpiItem[] = data
+    ? [
+        {
+          key: 'views',
+          label: t('kpi.views'),
+          value: formatNumber(data.views),
+          trend: prev ? countTrend(data.views, prev.views) : none,
+        },
+        {
+          key: 'visitors',
+          label: t('kpi.visitors'),
+          value: formatNumber(data.visitors),
+          trend: prev ? countTrend(data.visitors, prev.visitors) : none,
+        },
+        {
+          key: 'completion',
+          label: t('kpi.completion'),
+          value: `${Math.round(rate * 100)} %`,
+          trend: prev
+            ? rateTrend(rate, completionRate(prev.visitors, prev.completions), prev.visitors)
+            : none,
+        },
+        {
+          key: 'leads',
+          label: t('kpi.leads'),
+          value: formatNumber(data.leads),
+          trend: prev ? countTrend(data.leads, prev.leads) : none,
+        },
+        {
+          key: 'cta',
+          label: t('kpi.cta'),
+          value: formatNumber(data.ctaClicks),
+          trend: prev ? countTrend(data.ctaClicks, prev.ctaClicks) : none,
+        },
+      ]
+    : [];
+  const pick = (d: Parameters<typeof dayValue>[0]) => dayValue(d, metric);
+  const SOURCES = ['embed', 'link', 'page', 'direct'] as const;
 
   function exportFunnel() {
     downloadText(
@@ -129,7 +194,6 @@ export function DemoAnalyticsPage() {
     );
   }
 
-  const sources = data?.sources;
   return (
     <div className="stack page-wide">
       <header className="page-head page-head--refonte">
@@ -169,110 +233,32 @@ export function DemoAnalyticsPage() {
         <Loading />
       ) : (
         <>
-          <section className="stat-row stat-row--5" aria-label={t('analytics.kpis', { count: days })}>
-            <StatTile
-              hero
-              icon={<Eye />}
-              label={t('analytics.views')}
-              value={formatNumber(data.views)}
-              delta={prev && variation(data.views, prev.views)}
-              {...kpi}
-            />
-            <StatTile
-              icon={<Users />}
-              label={t('analytics.visitors')}
-              value={formatNumber(data.visitors)}
-              delta={prev && variation(data.visitors, prev.visitors)}
-              {...kpi}
-            />
-            <StatTile
-              icon={<Route />}
-              label={t('analytics.completion')}
-              value={pct(completionRate(data.visitors, data.completions))}
-              delta={
-                prev && prev.visitors > 0
-                  ? variation(
-                      completionRate(data.visitors, data.completions),
-                      completionRate(prev.visitors, prev.completions),
-                    )
-                  : null
+          <KpiTabs items={items} active={metric} onSelect={setMetric} days={days}>
+            <TrendChart
+              title={t(`kpi.perDay.${metric}`)}
+              days={days}
+              rate={metric === 'completion'}
+              loading={!series}
+              cur={series?.cur ? alignDays(series.cur.daily, days, series.end, pick) : null}
+              prev={
+                series?.prev ? alignDays(series.prev.daily, days, series.end - days * 86400_000, pick) : null
               }
-              {...kpi}
             />
-            <StatTile
-              icon={<MousePointerClick />}
-              label={t('analytics.ctaClicks')}
-              value={formatNumber(data.ctaClicks)}
-              delta={prev && variation(data.ctaClicks, prev.ctaClicks)}
-              {...kpi}
-            />
-            <StatTile
-              icon={<Mail />}
-              label={t('analytics.leads')}
-              value={formatNumber(data.leads)}
-              delta={prev && variation(data.leads, prev.leads)}
-              {...kpi}
-            />
-          </section>
-          <div className="grid-2-1">
-            <Card>
-              <div className="fd-card__head">
-                <span className="fd-icon-chip" aria-hidden="true">
-                  <BarChart3 />
-                </span>
-                <h2 className="fd-card__title">
-                  {metric === 'views' ? t('analytics.viewsPerDay') : t('analytics.visitorsPerDay')}
-                </h2>
-                <div className="fd-segmented" role="group" aria-label={t('analytics.metric')}>
-                  {(['views', 'visitors'] as const).map((m) => (
-                    <button key={m} type="button" aria-pressed={metric === m} onClick={() => setMetric(m)}>
-                      {t(`analytics.${m}Short`)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <DailyBars
-                data={data.daily}
-                metric={metric}
-                label={metric === 'views' ? t('analytics.viewsPerDay') : t('analytics.visitorsPerDay')}
-                emptyText={t('analytics.noData')}
-              />
-            </Card>
-            <Card>
-              <div className="fd-card__head">
-                <span className="fd-icon-chip" aria-hidden="true">
-                  <PieChart />
-                </span>
-                <h2 className="fd-card__title">{t('analytics.sources')}</h2>
-              </div>
-              {sources ? (
-                <Donut
-                  label={t('analytics.sources')}
-                  totalLabel={t('analytics.viewsUnit', { count: data.views })}
-                  valueLabel={(n) => t('demos.views', { count: n, n: formatNumber(n) })}
-                  segments={[
-                    {
-                      label: t('analytics.source_direct'),
-                      value: sources.direct,
-                      color: 'var(--fd-color-chart-2)',
-                    },
-                    {
-                      label: t('analytics.source_embed'),
-                      value: sources.embed,
-                      color: 'var(--fd-color-chart-3)',
-                    },
-                    {
-                      label: t('analytics.source_link'),
-                      value: sources.link,
-                      color: 'var(--fd-color-chart-4)',
-                    },
-                  ]}
-                />
-              ) : (
-                <p className="fd-muted">{t('analytics.noData')}</p>
-              )}
-            </Card>
-          </div>
+          </KpiTabs>
+          <MetricTable
+            title={t('kpi.bySource')}
+            nameLabel={t('kpi.source')}
+            active={metric}
+            columns={KPI_KEYS.map((k) => ({ key: k, label: t(`kpi.col.${k}`), rate: k === 'completion' }))}
+            rows={SOURCES.map((src) => {
+              const r = series?.cur?.bySource.find((x) => x.source === src);
+              return {
+                id: src,
+                name: t(`kpi.sourceName.${src}`),
+                values: metricValues(r ?? { views: 0, visitors: 0, completions: 0, cta: 0, leads: 0 }),
+              };
+            })}
+          />
           <Card>
             <div className="fd-card__head">
               <span className="fd-icon-chip" aria-hidden="true">

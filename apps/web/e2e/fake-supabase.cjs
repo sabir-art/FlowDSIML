@@ -851,6 +851,39 @@ async function install(page, state = seed()) {
             },
           });
         }
+        case 'analytics_series': {
+          // L47 : mêmes agrégats synthétiques que workspace_analytics, ventilés par jour, démo et source
+          const previous = a.p_to && Date.parse(a.p_to) < Date.now() - 86400000;
+          const pubs = t.demos.filter(
+            (d) => d.status === 'published' && !d.deleted_at && (!a.p_demo || d.id === a.p_demo),
+          );
+          const k = previous ? 0.85 : 1;
+          const views = Math.round(267 * pubs.length * k);
+          const end = Date.parse(a.p_to || new Date().toISOString());
+          const days = Math.max(1, Math.round((end - Date.parse(a.p_from)) / 86400000));
+          const row = (v) => ({
+            views: v,
+            visitors: Math.round(v * 0.65),
+            completions: Math.round(v * 0.65 * 0.64),
+            cta: Math.round(v * 0.05),
+            leads: Math.round(v * 0.0266),
+          });
+          const daily = Array.from({ length: days }, (_, i) => ({
+            day: new Date(end - (days - 1 - i) * 86400000).toISOString().slice(0, 10),
+            ...row(Math.round((views / days) * (0.7 + 0.6 * Math.abs(Math.sin(i / 3))))),
+          }));
+          const weights = pubs.map((_, i) => 1 / (i + 1));
+          const total = weights.reduce((x, y) => x + y, 0) || 1;
+          return json(route, 200, {
+            daily,
+            byDemo: pubs.map((d, i) => ({ demo_id: d.id, ...row(Math.round((views * weights[i]) / total)) })),
+            bySource: [
+              { source: 'embed', ...row(Math.round(views * 0.6)) },
+              { source: 'link', ...row(Math.round(views * 0.21)) },
+              { source: 'direct', ...row(Math.round(views * 0.19)) },
+            ],
+          });
+        }
         case 'workspace_leads': {
           const rows = t.leads
             .filter((l) => !a.p_demo || l.demo_id === a.p_demo)

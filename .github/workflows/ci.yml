@@ -119,6 +119,12 @@ jobs:
       - name: L45 espacements (E1 à E21)
         if: always()
         run: cd apps/web && node e2e/l45-espacements.e2e.cjs
+      - name: Variables lisibles L46 (pastilles, catalogue, repli, aperçu, Paramètres)
+        if: always()
+        run: cd apps/web && node e2e/variables.e2e.cjs
+      - name: Indicateurs en onglets L47 (Analytics espace et démo, clavier, adresse)
+        if: always()
+        run: cd apps/web && node e2e/analytics.e2e.cjs
       - name: Rapport
         if: always()
         uses: actions/upload-artifact@v4

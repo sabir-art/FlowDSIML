@@ -1,5 +1,5 @@
 import type { Manifest } from '@flowdsiml/manifest';
-import { applyVariables, richTextToPlain } from '@flowdsiml/core';
+import { applyVariables, computedVariables, richTextToPlain } from '@flowdsiml/core';
 
 /** Une étape exportée : titre et texte de la bulle, capture (déjà floutée à la publication). */
 export interface ExportStep {
@@ -73,7 +73,11 @@ export function demoLang(locale: string | undefined): string {
  * les données d'un apprenant. Les formulaires et commentaires ne sont pas dans le manifeste.
  */
 export function stepsFromManifest(m: Manifest): ExportStep[] {
-  const defaults = Object.fromEntries(m.variables.map((v) => [v.key, v.default ?? '']));
+  // L46 : variables calculées (titre, nombre d'étapes, date) connues à l'export
+  const defaults = {
+    ...computedVariables({ title: m.title, stepCount: m.steps.length }, m.locale),
+    ...Object.fromEntries(m.variables.map((v) => [v.key, v.default ?? ''])),
+  };
   const txt = (s: string) => applyVariables(richTextToPlain(s), {}, defaults).trim();
   return m.steps.map((s) => {
     const h = s.hotspots[0];
