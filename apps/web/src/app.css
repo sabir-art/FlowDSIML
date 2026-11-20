@@ -1472,7 +1472,8 @@
 }
 .tg--orange {
   background: var(--fd-orange-50);
-  color: var(--fd-orange-700);
+  /* L52-01 : 5,76:1 sur le fond orange clair (la teinte 700 ne donnait que 4,37:1) */
+  color: #8f5300;
 }
 .tg--raspberry {
   background: var(--fd-framboise-50);
