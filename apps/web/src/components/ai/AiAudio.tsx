@@ -347,13 +347,13 @@ export function AiVoice({
                 </label>
                 <button
                   type="button"
-                  className="btn btn-ghost btn-xs"
+                  className="btn btn-ghost btn-icon btn-sm"
                   aria-label={t('ai.voice.sampleOf', { name: t(`ai.voice.v.${v}.name`) })}
+                  title={t('ai.voice.sample')}
                   aria-busy={sample?.voice === v && sample.state === 'loading'}
                   onClick={() => void playSample(v)}
                 >
                   <Play aria-hidden="true" />
-                  {t('ai.voice.sample')}
                 </button>
               </div>
             ))}
