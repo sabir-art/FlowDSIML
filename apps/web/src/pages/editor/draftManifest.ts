@@ -195,8 +195,9 @@ function draftQuiz(ed: DemoEditor, settings: ReturnType<typeof asSettings>) {
   };
 }
 
-type PageMeta = { url?: string; links?: Array<{ sel: string; href: string }> };
-const norm = (u: string) => u.replace(/#.*$/, '').replace(/\/$/, '');
+type PageMeta = { url?: string; links?: Array<{ sel: string; href: string; label?: string }> };
+/** Adresse comparable (sans ancre ni barre finale) : même règle que publish_demo. */
+export const normUrl = (u: string) => u.replace(/#.*$/, '').replace(/\/$/, '');
 /** Liens d'une page vers une autre page de la démo (même adresse) : même règle que publish_demo. */
 export function resolveLinks(s: StepRow, steps: StepRow[]) {
   const links = ((s.html_meta as PageMeta | null)?.links ?? []).slice(0, 300);
@@ -206,7 +207,7 @@ export function resolveLinks(s: StepRow, steps: StepRow[]) {
       (t) =>
         t.kind === 'html' &&
         t.id !== s.id &&
-        norm((t.html_meta as PageMeta | null)?.url ?? '') === norm(l.href),
+        normUrl((t.html_meta as PageMeta | null)?.url ?? '') === normUrl(l.href),
     );
     if (target) out.push({ sel: l.sel, step: target.id });
   }

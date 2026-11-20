@@ -125,6 +125,9 @@ jobs:
       - name: Types de contenu L48-G (création en deux étapes, Sandbox, filtre Type)
         if: always()
         run: cd apps/web && node e2e/l48g-types.e2e.cjs
+      - name: Sandbox L48-G (liens sans page)
+        if: always()
+        run: cd apps/web && node e2e/l48g-liens.e2e.cjs
       - name: Assistant de démarrage L48-C (5 étapes, reprise, extension détectée, Nouvel espace)
         if: always()
         run: cd apps/web && node e2e/onboarding-import.e2e.cjs

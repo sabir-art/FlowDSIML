@@ -1,5 +1,5 @@
 import type { StepRow } from '../types';
-import { resolveLinks, sandboxOf } from '../draftManifest';
+import { normUrl, resolveLinks, sandboxOf } from '../draftManifest';
 import { asOps } from './htmlModel';
 
 export interface SbNode {
@@ -69,4 +69,71 @@ export function sandboxGraph(steps: StepRow[], sandbox: unknown): { nodes: SbNod
     };
   });
   return { nodes, start: sb.start };
+}
+
+/** L48-G §5 : lien d'une page vers une page du même site qui n'a pas été capturée. */
+export interface DeadLink {
+  /** Page d'origine. */
+  from: string;
+  /** Sélecteur de l'élément cliquable (pour « Relier à une page »). */
+  sel: string;
+  /** Adresse visée (sans ancre). */
+  url: string;
+  label: string;
+}
+
+/** Liens laissés volontairement (demos.sandbox.ignoredLinks). */
+export function ignoredOf(sandbox: unknown): Array<{ url: string; from: string }> {
+  const v =
+    (sandbox && typeof sandbox === 'object' ? (sandbox as Record<string, unknown>).ignoredLinks : null) ?? [];
+  return Array.isArray(v)
+    ? v.filter(
+        (x): x is { url: string; from: string } =>
+          !!x && typeof x === 'object' && typeof x.url === 'string' && typeof x.from === 'string',
+      )
+    : [];
+}
+
+/**
+ * L48-G §5 : liens sans page. Un lien de html_meta.links compte s'il vise le même site que sa page
+ * (http ou https), une autre adresse que la page elle-même, aucune page capturée (même normalisation que
+ * resolveLinks), et s'il n'est pas relié à la main (op « link »). Les liens externes et les ancres sont
+ * ignorés. `ignored` : ceux que la personne a laissés volontairement.
+ */
+export function deadLinks(steps: StepRow[], sandbox: unknown): { dead: DeadLink[]; ignored: DeadLink[] } {
+  const pages = steps.filter((s) => s.kind === 'html');
+  type Meta = { url?: string; links?: Array<{ sel: string; href: string; label?: string }> };
+  const known = new Set(pages.map((p) => normUrl((p.html_meta as Meta | null)?.url ?? '')).filter(Boolean));
+  const skip = new Set(ignoredOf(sandbox).map((x) => `${x.from} ${normUrl(x.url)}`));
+  const dead: DeadLink[] = [];
+  const ignored: DeadLink[] = [];
+  const seen = new Set<string>();
+  for (const p of pages) {
+    const meta = (p.html_meta as Meta | null) ?? {};
+    let base: URL;
+    try {
+      base = new URL(meta.url ?? '');
+    } catch {
+      continue;
+    }
+    const linked = new Set(asOps(p.html_ops).flatMap((o) => (o.op === 'link' ? [o.sel] : [])));
+    for (const l of (meta.links ?? []).slice(0, 300)) {
+      if (!l.href || l.href.startsWith('#') || linked.has(l.sel)) continue;
+      let u: URL;
+      try {
+        u = new URL(l.href, base);
+      } catch {
+        continue;
+      }
+      if ((u.protocol !== 'https:' && u.protocol !== 'http:') || u.origin !== base.origin) continue;
+      const url = normUrl(u.href);
+      if (url === normUrl(base.href) || known.has(url)) continue;
+      const key = `${p.id} ${url}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const item = { from: p.id, sel: l.sel, url, label: (l.label ?? '').trim() || url };
+      (skip.has(key) ? ignored : dead).push(item);
+    }
+  }
+  return { dead, ignored };
 }

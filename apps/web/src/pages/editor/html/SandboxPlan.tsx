@@ -1,10 +1,21 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Code, Map as MapIcon, Plus } from 'lucide-react';
+import {
+  AlertTriangle,
+  Code,
+  ExternalLink,
+  Link2,
+  Map as MapIcon,
+  MessageSquareOff,
+  Plus,
+  Unlink,
+} from 'lucide-react';
 import type { Json } from '@flowdsiml/supabase-types';
 import type { DemoEditor } from '../useDemoEditor';
 import { sandboxOf } from '../draftManifest';
-import { sandboxGraph, type SbNode } from './sandboxGraph';
+import { deadLinks, ignoredOf, sandboxGraph, type DeadLink, type SbNode } from './sandboxGraph';
+import { upsertOp } from './htmlModel';
+import { Menu } from '../../../components/Menu';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
 
@@ -59,8 +70,19 @@ export function SandboxPlan({
   const keySet = new Set(sb.keyPages.length ? sb.keyPages : [...linkedDefault]);
   const cols = Math.max(1, ...nodes.map((n) => n.col + 1));
   const rows = Math.max(1, ...nodes.map((n) => n.row + 1));
-  const width = cols * (W + GX) - GX + 48;
-  const height = rows * (H + GY) - GY + 48;
+  // L48-G §5 : liens sans page ; un nœud fantôme par adresse non capturée, dans une colonne à droite
+  const { dead, ignored } = useMemo(
+    () => deadLinks(editor.steps, demo.sandbox),
+    [editor.steps, demo.sandbox],
+  );
+  const [showIgnored, setShowIgnored] = useState(false);
+  const ghostUrls = [...new Set(dead.map((d) => d.url))];
+  const deadBy = (id: string) => dead.filter((d) => d.from === id).length;
+  const allCols = cols + (ghostUrls.length ? 1 : 0);
+  const allRows = Math.max(rows, ghostUrls.length);
+  const width = allCols * (W + GX) - GX + 48;
+  const height = allRows * (H + GY) - GY + 48;
+  const ghostPos = (i: number) => ({ x: 24 + cols * (W + GX), y: 24 + i * (H + GY) });
   const pos = (n: SbNode) => ({ x: 24 + n.col * (W + GX), y: 24 + n.row * (H + GY) });
 
   // Paires de pages (sans doublon) : a → b, et both si b → a existe aussi
@@ -106,11 +128,23 @@ export function SandboxPlan({
         }),
       ),
     ...orphans.map((n) => t('editor.sandbox.descOrphan', { page: n.title })),
+    ...(dead.length ? [t('editor.sandbox.deadDesc', { count: dead.length })] : []),
   ].join(' ; ');
 
   function save(patch: Record<string, unknown>) {
-    editor.updateDemo({ sandbox: { ...sb, ...patch } as unknown as Json });
+    // Les liens laissés (ignoredLinks) ne sont pas dans sandboxOf : on les garde
+    editor.updateDemo({
+      sandbox: { ...sb, ignoredLinks: ignoredOf(demo.sandbox), ...patch } as unknown as Json,
+    });
   }
+  const leave = (d: DeadLink) =>
+    save({ ignoredLinks: [...ignoredOf(demo.sandbox), { url: d.url, from: d.from }] });
+  const restore = (d: DeadLink) =>
+    save({ ignoredLinks: ignoredOf(demo.sandbox).filter((x) => !(x.from === d.from && x.url === d.url)) });
+  const linkTo = (d: DeadLink, page: string) => {
+    const step = editor.steps.find((x) => x.id === d.from);
+    if (step) upsertOp(editor, step, { sel: d.sel, op: 'link', value: page }, 'step');
+  };
   const open = (id: string) => onOpen(editor.steps.findIndex((s) => s.id === id));
 
   return (
@@ -118,65 +152,178 @@ export function SandboxPlan({
       <div className="sb-main">
         <h2 className="sb-title">{t('editor.sandbox.planTitle', { title: demo.title })}</h2>
         <p className="muted sb-sub">{t('editor.sandbox.sub', { count: pages.length })}</p>
-        <div className="sb-scroll">
-          <div
-            className="sbmap"
-            role="img"
-            aria-label={t('editor.sandbox.mapLabel', { desc })}
-            style={{ width, height }}
-          >
-            <svg className="links" width={width} height={height} aria-hidden="true">
-              <defs>
-                <marker
-                  id="sb-arrow"
-                  viewBox="0 0 10 10"
-                  refX="9"
-                  refY="5"
-                  markerWidth="7"
-                  markerHeight="7"
-                  orient="auto-start-reverse"
-                >
-                  <path d="M0 0 L10 5 L0 10 z" fill="var(--fd-color-primary)" />
-                </marker>
-              </defs>
-              {/* L20-02 : un seul tracé par paire de pages (flèche à chaque bout si le lien va dans les deux
+        <div className="sb-row">
+          {/* Zone défilante atteignable au clavier quand le plan dépasse (RGAA 7.3) */}
+          <div className="sb-scroll" tabIndex={0} role="region" aria-label={t('editor.sandbox.mapRegion')}>
+            <div
+              className="sbmap"
+              role="img"
+              aria-label={t('editor.sandbox.mapLabel', { desc })}
+              style={{ width, height }}
+            >
+              <svg className="links" width={width} height={height} aria-hidden="true">
+                <defs>
+                  <marker
+                    id="sb-arrow"
+                    viewBox="0 0 10 10"
+                    refX="9"
+                    refY="5"
+                    markerWidth="7"
+                    markerHeight="7"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M0 0 L10 5 L0 10 z" fill="var(--fd-color-primary)" />
+                  </marker>
+                </defs>
+                {/* L20-02 : un seul tracé par paire de pages (flèche à chaque bout si le lien va dans les deux
                   sens), routé dans les couloirs entre les cartes : jamais sous une carte */}
-              <g stroke="var(--fd-color-primary)" strokeWidth="2" fill="none">
-                {edges.map((e) => (
-                  <path
-                    key={e.key}
-                    d={e.d}
-                    markerEnd="url(#sb-arrow)"
-                    markerStart={e.both ? 'url(#sb-arrow)' : undefined}
-                  />
-                ))}
-              </g>
-            </svg>
-            {nodes.map((n) => {
-              const p = pos(n);
-              return (
-                <div
-                  key={n.id}
-                  className={`sbnode${n.start ? ' start' : ''}${n.orphan ? ' warn' : ''}`}
-                  style={{ left: p.x, top: p.y, width: W, height: H }}
-                >
-                  {n.start && <span className="badge badge-success">{t('editor.sandbox.start')}</span>}
-                  {n.orphan && <span className="badge badge-warning">{t('editor.sandbox.toLink')}</span>}
-                  <div className="mini">
-                    <Code {...ICON} />
+                {/* L48-G §5 : traits pointillés vers les pages non capturées */}
+                <g stroke="var(--fd-color-danger)" strokeWidth="2" strokeDasharray="5 4" fill="none">
+                  {dead.map((d) => {
+                    const n = byId.get(d.from);
+                    if (!n) return null;
+                    const a = pos(n);
+                    const b = ghostPos(ghostUrls.indexOf(d.url));
+                    const gx = b.x - GX / 2;
+                    return (
+                      <path
+                        key={`${d.from} ${d.url}`}
+                        d={`M${a.x + W} ${a.y + H / 2} H${gx} V${b.y + H / 2} H${b.x}`}
+                      />
+                    );
+                  })}
+                </g>
+                <g stroke="var(--fd-color-primary)" strokeWidth="2" fill="none">
+                  {edges.map((e) => (
+                    <path
+                      key={e.key}
+                      d={e.d}
+                      markerEnd="url(#sb-arrow)"
+                      markerStart={e.both ? 'url(#sb-arrow)' : undefined}
+                    />
+                  ))}
+                </g>
+              </svg>
+              {nodes.map((n) => {
+                const p = pos(n);
+                return (
+                  <div
+                    key={n.id}
+                    className={`sbnode${n.start ? ' start' : ''}${n.orphan ? ' warn' : ''}`}
+                    style={{ left: p.x, top: p.y, width: W, height: H }}
+                  >
+                    {n.start && <span className="badge badge-success">{t('editor.sandbox.start')}</span>}
+                    {n.orphan && <span className="badge badge-warning">{t('editor.sandbox.toLink')}</span>}
+                    <div className="mini">
+                      <Code {...ICON} />
+                    </div>
+                    <b>{n.title}</b>
+                    <small>
+                      {n.to.length
+                        ? n.start
+                          ? `${t('editor.sandbox.start')} · ${t('editor.sandbox.links', { count: n.to.length })}`
+                          : t('editor.sandbox.links', { count: n.to.length })
+                        : t('editor.sandbox.noLinkedPage')}
+                    </small>
+                    {deadBy(n.id) > 0 && (
+                      <small className="sb-dead">
+                        {t('editor.sandbox.deadCount', { count: deadBy(n.id) })}
+                      </small>
+                    )}
                   </div>
-                  <b>{n.title}</b>
-                  <small>
-                    {n.to.length
-                      ? n.start
-                        ? `${t('editor.sandbox.start')} · ${t('editor.sandbox.links', { count: n.to.length })}`
-                        : t('editor.sandbox.links', { count: n.to.length })
-                      : t('editor.sandbox.noLinkedPage')}
-                  </small>
-                </div>
-              );
-            })}
+                );
+              })}
+              {ghostUrls.map((u, i) => {
+                const p = ghostPos(i);
+                return (
+                  <div
+                    key={u}
+                    className="sbnode sbnode--ghost"
+                    style={{ left: p.x, top: p.y, width: W, height: H }}
+                  >
+                    <Unlink {...ICON} />
+                    <b>{t('editor.sandbox.ghost')}</b>
+                    <small title={u}>{u.replace(/^https?:\/\//, '')}</small>
+                  </div>
+                );
+              })}
+            </div>
           </div>
+          {(dead.length > 0 || ignored.length > 0) && (
+            <section className="card sb-deadpanel" aria-labelledby="sb-dead-h">
+              <h3 id="sb-dead-h">
+                {t('editor.sandbox.deadTitle')} <span className="sb-deadpanel__n">{dead.length}</span>
+              </h3>
+              {dead.length > 0 && <p className="help">{t(`editor.sandbox.deadHelp.${sb.unlinked}`)}</p>}
+              <ul className="sb-deadlist">
+                {dead.map((d) => (
+                  <li key={`${d.from} ${d.url}`}>
+                    <b>{d.label}</b>
+                    <span className="sb-deadlist__path">
+                      {title(d.from)} → <span title={d.url}>{d.url.replace(/^https?:\/\//, '')}</span>
+                    </span>
+                    {!readOnly && (
+                      <span className="sb-deadlist__actions">
+                        <a className="link-btn" href={d.url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink {...ICON} />
+                          {t('editor.sandbox.deadCapture')}
+                        </a>
+                        <Menu
+                          label={t('editor.sandbox.deadLinkTo', { link: d.label })}
+                          custom={{
+                            className: 'link-btn sb-deadlist__link',
+                            content: (
+                              <>
+                                <Link2 {...ICON} />
+                                {t('editor.sandbox.deadLink')}
+                                <span className="sr-only"> : {d.label}</span>
+                              </>
+                            ),
+                          }}
+                          items={nodes
+                            .filter((n) => n.id !== d.from)
+                            .map((n) => ({ label: n.title, onSelect: () => linkTo(d, n.id) }))}
+                        />
+                        <button type="button" className="link-btn" onClick={() => leave(d)}>
+                          <MessageSquareOff {...ICON} />
+                          {t('editor.sandbox.deadLeave')}
+                        </button>
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {ignored.length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    className="link-btn"
+                    aria-expanded={showIgnored}
+                    onClick={() => setShowIgnored(!showIgnored)}
+                  >
+                    {t('editor.sandbox.deadShowLeft', { count: ignored.length })}
+                  </button>
+                  {showIgnored && (
+                    <ul className="sb-deadlist sb-deadlist--left">
+                      {ignored.map((d) => (
+                        <li key={`${d.from} ${d.url}`}>
+                          <b>{d.label}</b>
+                          <span className="sb-deadlist__path">
+                            {title(d.from)} → {d.url.replace(/^https?:\/\//, '')}
+                          </span>
+                          {!readOnly && (
+                            <button type="button" className="link-btn" onClick={() => restore(d)}>
+                              {t('editor.sandbox.deadRestore')}
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+            </section>
+          )}
         </div>
         {orphans.map((n) => (
           <div key={n.id} className="alert alert-warning sb-alert" role="alert">

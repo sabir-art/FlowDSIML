@@ -13,6 +13,7 @@ import { errorMessage } from '../../lib/errors';
 import type { DemoEditor } from './useDemoEditor';
 import { GdprDialog, type GdprAck } from './GdprDialog';
 import { publishTodo } from './publishTodo';
+import { deadLinks } from './html/sandboxGraph';
 import { firstInvalid } from './quizValidation';
 import { asAnswers, asSettings } from './types';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -21,6 +22,7 @@ export function PublishButton({
   editor,
   onReviewStep,
   onRename,
+  onPlan,
   republishLabel,
   onPublished,
 }: {
@@ -33,6 +35,8 @@ export function PublishButton({
   onReviewStep?: (index: number) => void;
   /** L38 : « Renommer » depuis « À compléter » (titre par défaut) : ferme la modale, focus sur le titre. */
   onRename?: () => void;
+  /** L48-G §5 : « Voir le plan » depuis « À compléter » (liens sans page du Sandbox). */
+  onPlan?: () => void;
 }) {
   const { t } = useTranslation();
   // L22-09 : avertissements de branchement rappelés dans la modale de publication (non bloquants)
@@ -62,8 +66,19 @@ export function PublishButton({
         hotspots: editor.hotspots,
         quizOpened: !!asSettings(editor.demo?.settings).quiz,
         questions: editor.questions.length,
+        deadLinks:
+          editor.demo?.kind === 'sandbox' ? deadLinks(editor.steps, editor.demo.sandbox).dead.length : 0,
       }),
-    [editor.demo?.title, editor.demo?.settings, editor.steps, editor.hotspots, editor.questions.length, t],
+    [
+      editor.demo?.title,
+      editor.demo?.settings,
+      editor.demo?.kind,
+      editor.demo?.sandbox,
+      editor.steps,
+      editor.hotspots,
+      editor.questions.length,
+      t,
+    ],
   );
   const navigate = useNavigate();
   // L25-09 : le bilan RGPD compte le jeu de données publié
@@ -166,6 +181,13 @@ export function PublishButton({
           setGdprOpen(false);
           navigate(`/demos/${demo.id}/quiz`);
         }}
+        onPlan={
+          onPlan &&
+          (() => {
+            setGdprOpen(false);
+            onPlan();
+          })
+        }
         onRename={
           onRename &&
           (() => {

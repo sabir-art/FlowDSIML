@@ -755,6 +755,7 @@ export function EditorPage() {
                   el?.select();
                 })
               }
+              onPlan={sandbox ? () => setPlanView(true) : undefined}
             />
           </span>
         )}

@@ -71,6 +71,7 @@ export function GdprDialog({
   todo = [],
   onQuiz,
   onRename,
+  onPlan,
 }: {
   open: boolean;
   steps: (Pick<StepRow, 'blurs' | 'element_meta'> &
@@ -92,6 +93,8 @@ export function GdprDialog({
   onQuiz?: () => void;
   /** Titre par défaut : renommer la démo (focus sur son titre). */
   onRename?: () => void;
+  /** L48-G : « Voir le plan » (liens sans page du Sandbox). */
+  onPlan?: () => void;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
@@ -151,7 +154,7 @@ export function GdprDialog({
                     <li key={line.key}>
                       <span>
                         {line.index === undefined
-                          ? t(`editor.todo.${line.kinds[0]}`)
+                          ? t(`editor.todo.${line.kinds[0]}`, { count: line.count })
                           : t('editor.todo.step', {
                               n: line.index + 1,
                               issues: line.kinds.map((k) => t(`editor.todo.k.${k}`)).join(', '),
@@ -169,6 +172,10 @@ export function GdprDialog({
                       ) : line.kinds[0] === 'quizEmpty' && onQuiz ? (
                         <button type="button" className="mk-link-inline" onClick={onQuiz}>
                           {t('editor.todo.see')}
+                        </button>
+                      ) : line.kinds[0] === 'deadLinks' && onPlan ? (
+                        <button type="button" className="mk-link-inline" onClick={onPlan}>
+                          {t('editor.todo.seePlan')}
                         </button>
                       ) : line.kinds[0] === 'demoTitle' && onRename ? (
                         <button type="button" className="mk-link-inline" onClick={onRename}>

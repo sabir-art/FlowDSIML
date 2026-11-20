@@ -405,3 +405,109 @@
 .st-row .field {
   margin-top: 0;
 }
+
+/* L48-G §5 : liens sans page (nœuds fantômes, compteur, panneau à droite du plan) */
+.sb-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  min-width: 0;
+}
+.sb-row > .sb-scroll {
+  flex: 1;
+  min-width: 0;
+}
+.sbnode .sb-dead {
+  color: var(--fd-color-danger);
+  font-weight: 600;
+}
+.sbnode--ghost {
+  align-items: flex-start;
+  background: transparent;
+  box-shadow: none;
+  border: 2px dashed var(--fd-color-danger);
+  color: var(--fd-color-text-muted);
+}
+.sbnode--ghost b {
+  color: var(--fd-color-text);
+}
+.sbnode--ghost small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.sb-deadpanel {
+  flex: none;
+  width: 320px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+.sb-deadpanel h3 {
+  margin: 0;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sb-deadpanel__n {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  display: inline-grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--fd-color-danger);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.sb-deadlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.sb-deadlist > li {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+.sb-deadlist > li + li {
+  border-top: 1px solid var(--fd-color-border);
+  padding-top: 12px;
+}
+.sb-deadlist__path {
+  color: var(--fd-color-text-muted);
+  overflow-wrap: anywhere;
+}
+.sb-deadlist__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: center;
+}
+.sb-deadlist__actions .link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+@media (max-width: 1100px) {
+  .sb-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .sb-deadpanel {
+    width: auto;
+  }
+}
+.sb-scroll:focus-visible {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: 2px;
+}
+.sb-deadlist__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

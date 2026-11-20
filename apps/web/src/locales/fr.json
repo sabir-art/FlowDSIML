@@ -1320,7 +1320,26 @@
       "open": "Ouvrir la page {{page}}",
       "viewLabel": "Affichage du canevas",
       "viewPage": "Page",
-      "viewPlan": "Plan"
+      "viewPlan": "Plan",
+      "deadDesc_one": "{{count}} lien mène à une page non capturée",
+      "deadDesc_other": "{{count}} liens mènent à des pages non capturées",
+      "deadCount_one": "{{count}} sans page",
+      "deadCount_other": "{{count}} sans page",
+      "ghost": "Page non capturée",
+      "deadTitle": "Liens sans page",
+      "deadHelp": {
+        "toast": "Ces liens mènent à des pages que vous n’avez pas capturées. Au clic, le visiteur voit « Cette partie n’est pas disponible dans la démo ».",
+        "none": "Ces liens mènent à des pages que vous n’avez pas capturées. Au clic, rien ne se passe pour le visiteur.",
+        "highlight": "Ces liens mènent à des pages que vous n’avez pas capturées. Au clic, le visiteur voit les zones cliquables mises en évidence."
+      },
+      "deadCapture": "Capturer cette page",
+      "deadLink": "Relier à une page",
+      "deadLinkTo": "Relier « {{link}} » à une page",
+      "deadLeave": "Laisser le message",
+      "deadShowLeft_one": "Afficher le lien laissé ({{count}})",
+      "deadShowLeft_other": "Afficher les liens laissés ({{count}})",
+      "deadRestore": "Rétablir",
+      "mapRegion": "Plan des pages"
     },
     "importUnverified": "Cette image n’est pas vérifiée automatiquement : floutez les données personnelles avant de publier.",
     "noFormShort": "Aucun formulaire",
@@ -1651,7 +1670,10 @@
         "noBubble": "aucune bulle",
         "emptyBubble": "bulle vide"
       },
-      "rename": "Renommer"
+      "rename": "Renommer",
+      "deadLinks_one": "{{count}} lien mène à une page non capturée",
+      "deadLinks_other": "{{count}} liens mènent à des pages non capturées",
+      "seePlan": "Voir le plan"
     },
     "guide": {
       "place": "Cliquez sur l’écran à l’endroit où l’apprenant doit cliquer, puis écrivez la consigne.",
@@ -4158,14 +4180,20 @@
     "emailing": {
       "title": "Outils d'e-mailing",
       "body": "Ajouter les leads à une liste ou déclencher un scénario d'e-mails.",
-      "items": ["Listes et scénarios", "Respect du consentement du formulaire"],
+      "items": [
+        "Listes et scénarios",
+        "Respect du consentement du formulaire"
+      ],
       "action": "Connecter",
       "why": "Nécessite des comptes et des clés des éditeurs. En attendant : webhooks."
     },
     "enrich": {
       "title": "Enrichissement des visiteurs",
       "body": "Identifier l'organisation d'un visiteur anonyme.",
-      "items": ["Entreprise à partir du réseau", "Taille, secteur"],
+      "items": [
+        "Entreprise à partir du réseau",
+        "Taille, secteur"
+      ],
       "action": "Activer",
       "why": "Non prévu sans analyse juridique : traitement de données personnelles par un tiers (RGPD)."
     },
