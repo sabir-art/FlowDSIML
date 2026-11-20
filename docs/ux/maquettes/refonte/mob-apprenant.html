@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parcours mobile de l'apprenant — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
+<style>
+  /* Parcours de l'apprenant à 390 px. Spec : docs/ux/specs/mob-apprenant.md. Données fictives. */
+  .mrow { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start; }
+  .mfig { display: flex; flex-direction: column; gap: 8px; } .mfig > small { font-size: 13px; color: var(--fd-color-text-muted); }
+  .ph { width: 390px; height: 844px; overflow: hidden; border-radius: 36px; background: var(--fd-color-bg, #eef0f4); color: var(--fd-color-text); box-shadow: 0 8px 32px rgb(8 10 14 / .12); display: flex; flex-direction: column; position: relative; }
+  .ph img.av { width: 390px; display: block; }
+  .m-top { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 16px; background: var(--fd-color-surface); border-bottom: 1px solid var(--fd-color-border); flex: none; }
+  .m-ws { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #a3195b; color: #fff; font-size: 13px; font-weight: 700; } .m-top b { display: block; font-size: 15px; } .m-top small { font-size: 12px; color: var(--fd-color-text-muted); } .m-top .me { margin-left: auto; width: 36px; height: 36px; border-radius: 50%; background: var(--fd-color-surface-sunken); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+  .m-b { padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; overflow: hidden; } .m-b > * { flex: none; }
+  .m-b h1 { margin: 0; font-size: 28px; line-height: 1.15; } .m-b .sub { margin: -12px 0 0; font-size: 15px; color: var(--fd-color-text-muted); line-height: 1.45; }
+  .m-search { height: 44px; border-radius: 999px; border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); display: flex; align-items: center; gap: 10px; padding: 0 16px; font-size: 15px; color: var(--fd-color-text-muted); background: var(--fd-color-surface); }
+  .m-card { background: var(--fd-color-surface); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .m-card .k { font-size: 13px; color: var(--fd-color-text-muted); } .m-card .t { font-size: 17px; font-weight: 600; } .m-card .l { font-size: 14px; color: var(--fd-color-text-muted); }
+  .bar6 { height: 6px; border-radius: 999px; background: var(--fd-color-surface-sunken); overflow: hidden; } .bar6 i { display: block; height: 100%; background: var(--fd-color-text); border-radius: 999px; }
+  .m-chips { display: flex; gap: 8px; overflow: hidden; margin-right: -20px; } .m-chips span { flex: none; height: 36px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; background: var(--fd-color-surface); font-size: 14px; } .m-chips span.on { background: var(--fd-color-text); color: var(--fd-color-surface); font-weight: 600; }
+  .m-h2 { display: flex; align-items: baseline; gap: 8px; } .m-h2 b { font-size: 19px; } .m-h2 small { font-size: 13px; color: var(--fd-color-text-muted); }
+  .m-fc { background: var(--fd-color-surface); border-radius: 18px; overflow: hidden; text-decoration: none; color: inherit; }
+  .m-fc .th { height: 120px; background: var(--fd-color-surface-sunken); display: grid; grid-template-columns: 30% 1fr; } .m-fc .th i { background: #1f2a37; }
+  .m-fc .bd { padding: 14px 16px 16px; display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; } .m-fc .bd b { font-size: 16px; } .m-fc .bd span { grid-column: 1; font-size: 13px; color: var(--fd-color-text-muted); } .m-fc .bd svg { grid-row: 1 / 3; grid-column: 2; color: var(--fd-color-text-muted); } .m-fc .bd .bar6 { grid-column: 1 / -1; }
+  .ok { color: var(--fd-color-success, #1c7a4a); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+  .crumb { font-size: 13px; color: var(--fd-color-text-muted); } .crumb a { color: var(--fd-color-primary); }
+  .m-done { background: var(--fd-color-surface); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .m-done svg.aw { color: var(--fd-color-success, #1c7a4a); } .m-done b { font-size: 19px; } .m-done p { margin: 0; font-size: 14px; color: var(--fd-color-text-muted); line-height: 1.5; }
+  .m-mod { background: var(--fd-color-surface); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; } .m-mod b { flex: 1; font-size: 15px; font-weight: 600; } .m-mod b small { display: block; font-weight: 400; font-size: 13px; color: var(--fd-color-success, #1c7a4a); }
+  .m-link { font-size: 14px; font-weight: 600; color: var(--fd-color-primary); }
+  .mp-top { display: flex; align-items: center; height: 56px; padding: 0 16px; font-size: 15px; font-weight: 600; flex: none; } .mp-top span { margin-left: auto; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--fd-color-border); display: grid; place-items: center; }
+  .mp-shot { margin: 12px 16px 0; flex: none; box-sizing: border-box; height: 240px; border-radius: 16px; background: #fff; box-shadow: 0 4px 16px rgb(8 10 14 / .08); position: relative; overflow: hidden; }
+  .mp-shot .c { position: absolute; left: 12px; top: 10px; width: 46%; height: 40px; border-radius: 8px; background: #f2f4f7; } .mp-shot .c2 { left: 54%; } .mp-shot .btn { position: absolute; left: 12px; top: 64px; padding: 6px 12px; border-radius: 6px; background: #3b4cca; color: #fff; font-size: 12px; font-weight: 600; } .mp-shot .hs { position: absolute; left: 44%; top: 110px; width: 18px; height: 18px; border-radius: 50%; background: #a3195b; box-shadow: 0 0 0 6px rgb(163 25 91 / .2); }
+  .mp-more { align-self: flex-end; margin: 10px 16px 0; display: inline-flex; gap: 6px; align-items: center; font-size: 14px; font-weight: 600; color: var(--fd-color-text); }
+  .mp-bub { margin: auto 12px 12px; background: #fff; color: #0b0d10; border-radius: 16px; padding: 16px; box-shadow: 0 8px 24px rgb(8 10 14 / .14); font-size: 15px; } .mp-bub b { display: block; margin-bottom: 4px; } .mp-bub .r { display: flex; align-items: center; margin-top: 12px; font-size: 13px; color: #5b6472; } .mp-bub .r span { margin-left: auto; padding: 9px 18px; border-radius: 999px; background: #a3195b; color: #fff; font-weight: 600; font-size: 14px; }
+  .mp-ctl { margin: 0 auto 8px; display: flex; align-items: center; gap: 12px; padding: 6px 8px; border-radius: 999px; background: var(--fd-color-surface); box-shadow: 0 2px 8px rgb(8 10 14 / .08); font-size: 13px; flex: none; } .mp-ctl i { width: 120px; height: 4px; border-radius: 9px; background: var(--fd-color-surface-sunken); } .mp-ctl i::before { content: ''; display: block; width: 50%; height: 100%; background: #a3195b; border-radius: 9px; } .mp-ctl span.b { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; }
+  .mp-foot { text-align: center; font-size: 12px; color: var(--fd-color-text-muted); padding-bottom: 12px; flex: none; }
+  .qz { margin: 12px 16px 0; background: #fff; color: #0b0d10; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 0; }
+  .qz .qin { padding: 24px 20px 12px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+  .qring { width: 120px; height: 120px; } .qz h2 { margin: 4px 0 0; font-size: 22px; } .qz .one { font-size: 15px; color: #4a5562; margin: 0; }
+  .qz ul { align-self: stretch; list-style: none; margin: 8px 0 0; padding: 0; width: 100%; text-align: left; } .qz li { text-align: left; display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid #e3e8ee; font-size: 14px; } .qz li span { flex: 1; } .qz li a { color: #a3195b; font-weight: 600; font-size: 14px; }
+  .qz .qx { color: #b4234b; } .qz .qv { color: #1c7a4a; }
+  .qz .qact { margin-top: auto; padding: 14px 20px 18px; border-top: 1px solid #e3e8ee; display: flex; flex-direction: column; align-items: center; gap: 10px; } .qz .qact span.p { width: 100%; text-align: center; padding: 12px; border-radius: 999px; background: #a3195b; color: #fff; font-weight: 600; font-size: 15px; } .qz .qact a { color: #a3195b; font-weight: 600; font-size: 14px; }
+</style>
+</head>
+<body>
+<main class="u2">
+  <header class="u2-head"><div><small>Parcours de l’apprenant · 390 px</small><h1>Centre, module, quiz, attestation</h1><p>Relevé sur dev-mvp 09db6a8, sans défilement horizontal nulle part. Quatre écrans à reprendre : plus d’aplat vert-jaune, des cartes courtes, et l’action principale du quiz toujours visible.</p></div></header>
+  <section class="u2-sec"><h2>Centre de formation (M1 à M4, M9)</h2><div class="mrow" id="a1"></div></section>
+  <section class="u2-sec"><h2>Module et quiz (M5 à M7)</h2><div class="mrow" id="a2"></div></section>
+  <section class="u2-sec"><h2>Attestation et réussite (M2, M8), en sombre</h2><div class="mrow" id="a3"></div></section>
+</main>
+<script>
+  const { I } = U2;
+  const fig = (cap, inner, dark) => `<div class="mfig"><div class="ph"${dark ? ' data-theme="dark"' : ''}>${inner}</div><small>${cap}</small></div>`;
+  const avant = (cap, src) => `<div class="mfig"><div class="ph" style="height:auto;max-height:844px"><img class="av" src="img/avant/${src}" alt="${cap}"></div><small>${cap}</small></div>`;
+  const mtop = `<header class="m-top"><span class="m-ws">ML</span><span><b>Mission Locale Exemple</b><small>Centre de formation</small></span><span class="me">AL</span></header>`;
+  const fc = (t, l, p) => `<a class="m-fc" href="#"><div class="th"><i></i><span></span></div><div class="bd"><b>${t}</b>${I('right', 20)}<span>${l}</span><div class="bar6"><i style="width:${p}%"></i></div></div></a>`;
+  const centre = `${mtop}<div class="m-b"><h1>Se former aux outils de la Mission Locale</h1><p class="sub">Des tutoriels interactifs, à votre rythme.</p>
+    <div class="m-search">${I('search', 18)}Rechercher une formation</div>
+    <div class="m-card"><span class="k">Reprendre votre formation</span><span class="t">Nouvel outil de gestion</span><span class="l">Module en cours : Fiches usagers · 1 sur 4 validé</span><div class="bar6"><i style="width:25%"></i></div><button class="fd-btn fd-btn--primary" type="button" style="align-self:flex-start">Reprendre${I('arrow', 16)}</button></div>
+    <div class="m-chips"><span class="on">Toutes</span><span>Bureautique</span><span>Logiciel métier</span><span>Nouveaux agents</span><span>Pilotage</span></div>
+    <div class="m-h2"><b>Formations</b><small>4 formations · 13 modules</small></div>
+    ${fc('Nouvel outil de gestion', 'En cours · 1 module sur 4 validé', 25)}${fc('Agenda partagé', 'Terminée · 2 modules sur 2', 100)}</div>`;
+  document.getElementById('a1').innerHTML = fig('Après', centre) + avant('Avant (09db6a8)', 'mob-centre.png');
+  const mod = `<div class="mp-top">Fiches usagers<span>${I('info', 18)}</span></div><div class="mp-shot"><span class="c"></span><span class="c c2"></span><span class="btn">+ Nouvelle opportunité</span><span class="hs"></span></div><span class="mp-more">${I('ext', 16)}Voir tout l’écran</span>
+    <div class="mp-bub"><b>Ouvrez la fiche de l’usager</b>Cliquez sur le nom dans la liste.<div class="r">1 / 2<span>Suivant</span></div></div><div class="mp-ctl"><span class="b">${I('left', 18)}</span><i></i>1 / 2<span class="b">${I('right', 18)}</span></div><div class="mp-foot">Créé avec TutoClick</div>`;
+  const qring = (p, c) => `<svg class="qring" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="none" stroke="#e3e8ee" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="${c}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(p / 100 * 326.7).toFixed(1)} 400" transform="rotate(-90 60 60)"/><text x="60" y="68" text-anchor="middle" font-size="28" font-weight="700" fill="#0b0d10">${p} %</text></svg>`;
+  const fail = `<div class="mp-top">Créer un rendez-vous<span>${I('info', 18)}</span></div><div class="qz"><div class="qin">${qring(33, '#5b6472')}<span style="font-size:13px;color:#5b6472">Seuil de validation : 70 %</span><h2>Encore un peu d’entraînement</h2><p class="one">1 bonne réponse sur 3 · il vous reste 2 tentatives</p>
+    <ul><li><span class="qx">${I('x', 18)}</span><span>Où créer un rendez-vous ?</span><a href="#">Revoir</a></li><li><span class="qx">${I('x', 18)}</span><span>Quelles informations sont obligatoires ?</span><a href="#">Revoir</a></li><li><span class="qv">${I('check', 18)}</span><span>Un rendez-vous peut être déplacé.</span></li></ul></div>
+    <div class="qact"><span class="p">Réessayer le quiz</span><a href="#">Revoir le module</a></div></div><div class="mp-ctl" style="margin-top:12px"><span class="b">${I('left', 18)}</span><i></i>Quiz<span class="b">${I('right', 18)}</span></div><div class="mp-foot">Créé avec TutoClick</div>`;
+  document.getElementById('a2').innerHTML = fig('Module, après : capture en haut, « Voir tout l’écran » dessous', mod) + avant('Avant', 'mob-module.png') + fig('Quiz échoué, après : l’action principale est visible', fail) + avant('Avant : « Réessayer » coupé sous la barre', 'mob-quiz-echec.png');
+  const att = `${mtop}<div class="m-b"><p class="crumb"><a href="#">Centre de formation</a> › Agenda partagé</p><h1>Agenda partagé</h1><p class="sub">2 modules en ordre libre · 2 sur 2 validés</p>
+    <div class="m-done">${I('award', 24).replace('<svg', '<svg class="aw"')}<b>Formation terminée, bravo Alex</b><p>Vous avez validé tous les modules. Vous pouvez les revoir quand vous le souhaitez.</p><button class="fd-btn fd-btn--primary" type="button" style="align-self:flex-start">${I('download', 16)}Télécharger mon attestation (PDF)</button></div>
+    <div class="m-mod"><b>Partager un agenda<small>Validé</small></b><span class="m-link">Revoir</span></div><div class="m-mod"><b>Planifier un rendez-vous<small>Validé</small></b><span class="m-link">Revoir</span></div>
+    <p style="margin:0;font-size:13px;color:var(--fd-color-text-muted)">L’attestation reprend votre nom, la formation, les modules validés et le nom de la structure. Ce n’est pas une certification.</p></div>`;
+  document.getElementById('a3').innerHTML = fig('Attestation, après, en sombre', att, true) + avant('Avant, en clair', 'mob-attestation.png');
+</script>
+</body>
+</html>
