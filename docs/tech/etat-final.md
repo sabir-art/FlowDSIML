@@ -71,7 +71,7 @@ Builds de production, audit mobile avec ralentissement simulé du réseau et du 
 |---|---|---|
 | Connexion | 95 | 100 |
 | Tableau de bord | 90 à 92 | 100 |
-| Éditeur (vue mobile) | 92 | 100 |
+| Éditeur (vue mobile) | 91 à 93 | 100 |
 | Lecteur (démo publiée) | 97 | 100 |
 
 Scores relevés sur plusieurs passages (le simulateur varie d'un point). Avant L33 : 81 pour le tableau de
