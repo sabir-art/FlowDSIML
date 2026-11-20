@@ -159,18 +159,15 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
   await page.getByRole('button', { name: 'Plus d’options' }).click();
-  const ai = page.getByRole('menuitem', { name: /Assistance IA/ });
-  ok((await ai.count()) === 1 && /Bientôt/.test(await ai.innerText()), 'menu ⋯ : « Assistance IA » Bientôt');
+  // L30 en ligne : plus d'entrée « Assistance IA – Bientôt » dans le menu ⋯ ; aucun « Bientôt » IA périmé
+  ok(
+    (await page.getByRole('menuitem', { name: /Assistance IA/ }).count()) === 0,
+    'menu ⋯ : plus d’entrée « Assistance IA – Bientôt »',
+  );
   const writer = page.getByRole('menuitem', { name: /Rédiger les textes/ });
   ok(!/Bientôt|V2/.test(await writer.innerText()), 'L30-02 : « Rédiger les textes » n’est plus en Bientôt');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/vb-01-menu${sfx}.png` });
-  const [tab] = await Promise.all([ctx.waitForEvent('page'), ai.click()]);
-  await tab.waitForLoadState();
-  ok(
-    /#\/settings\/soon\?tab=ia$/.test(tab.url()),
-    'ouvre « Fonctions à venir » (onglet IA) dans un nouvel onglet',
-  );
-  await tab.close();
+  await page.keyboard.press('Escape');
   await page.locator('.canvas-hotspot').first().click();
   await page.waitForSelector('#hs-title');
   // L30-02 : l'entrée « Bientôt » est remplacée par l'Assistance IA (désactivée par défaut)
