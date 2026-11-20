@@ -109,7 +109,7 @@
 | # | Impact | Constat | Correction |
 |---|---|---|---|
 | S1 | A | « Plans et facturation » dans le menu, « Plan Pro » dans le sélecteur d'espace : il n'y a ni prix ni offre. | L48-A §6 (« Utilisation »), déjà spécifié. |
-| S2 | B | Navigation : « WORKSPACE » en capitales anglaises, une icône par entrée, entrée active en aplat rose. | Groupes « Espace », « Marque », « Contenu », « Compte » en 11 px ; pas d'icône ; entrée active en fond `surface` et graisse 600 (L48-A §4, T5). |
+| S2 | B | Navigation : « WORKSPACE » en capitales anglaises, une icône par entrée, entrée active en aplat rose. | Groupes « Espace », « Marque », « Contenu », « Compte » en capitales de 11 px ; pas d'icône ; entrée active en fond `surface` et graisse 600 (L48-A §4, T5). |
 | S3 | B | « Autoriser les liens publics » a une aide de 3 lignes ; « Contact d'aide » en a 2. | Une ligne ; le reste dans l'aide (T7). |
 | S4 | C | « Nom du workspace » ; 3 « Bientôt » en pastille (logo, langue…). | « Nom de l'espace » ; « Bientôt » en texte. |
 
@@ -129,7 +129,7 @@
 | X2 | B | Double contour au focus des champs (bordure `primary` et halo `--fd-shadow-focus` bleu) : recherche, catalogue de variables, options du quiz. | Un seul indicateur : le halo, au clavier seulement (`:focus-visible`). La bordure reste `border-strong`. |
 | X3 | A | Aplats vert-jaune `hero` sur des cartes : Apprenants, centre, attestation, raccourcis de Démos (déjà corrigé). | Retirer `hero` des cartes ; le token reste pour les illustrations. |
 | X4 | B | Pastilles pour des états qui se disent en texte : statuts, « Bientôt », « Nouveau », « Brouillon », étiquettes. | Composant `fd-status` : un point de 8 px et un texte de 13 ou 14 px. Les pastilles restent pour les étiquettes choisies par l'utilisateur. |
-| X5 | B | Titres de section en capitales espacées : éditeur, aide, navigation des Paramètres. | Casse normale partout ; seuls les groupes de navigation gardent 11 px, sans capitales. |
+| X5 | B | Titres de section en capitales espacées : éditeur, aide, navigation des Paramètres. | Casse normale pour les titres de section. Exception : les titres de groupe de la navigation des Paramètres restent en capitales de 11 px, comme dans la maquette L48-A. |
 | X6 | C | Mots anglais et variantes : « workspace », « Email », « Plans ». | « espace », « e-mail », « Utilisation ». |
 
 ### Ordre conseillé (paquets 2 et 3)
