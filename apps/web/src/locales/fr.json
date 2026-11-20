@@ -239,7 +239,6 @@
     "countUnlimited_other": "{{count}} membres, membres illimités dans le plan {{plan}}.",
     "inviteMany": "Inviter des membres",
     "search": "Rechercher un membre",
-    "filterRole": "Filtrer par rôle",
     "allRoles": "Tous les rôles",
     "tableCaption": "Membres du workspace",
     "lastActivity": "Dernière activité",
@@ -279,7 +278,10 @@
     "removeLoses": "{{name}} perdra l’accès au workspace et à ses démos.",
     "removeDemos_one": "Sa démo reste dans le workspace.",
     "removeDemos_other": "Ses {{count}} démos restent dans le workspace.",
-    "removeNoDemos": "Les démos du workspace ne sont pas modifiées."
+    "removeNoDemos": "Les démos du workspace ne sont pas modifiées.",
+    "roleLabel": "Rôle",
+    "resultCount_one": "{{count}} membre ou invitation",
+    "resultCount_other": "{{count}} membres ou invitations"
   },
   "workspace": {
     "title": "Paramètres du workspace",

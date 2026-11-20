@@ -18,15 +18,7 @@
   overflow: auto;
   max-height: 60vh;
 }
-.md-tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-}
 .md-search {
-  width: 260px;
   max-width: 100%;
 }
 .md-grid {

@@ -819,6 +819,19 @@
     width: 120px;
   }
 }
+/* Petits écrans : « Masquer la prise en main » passe sous le texte (pas de colonne étroite) */
+@media (max-width: 600px) {
+  .onb-foot {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    row-gap: 8px;
+  }
+  .onb-foot > .fd-btn {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
 /* L27-07 : démo bloquée par les règles de partage (« Accès à régler ») */
 .fd-badge--warning {
   background: var(--fd-color-warning-soft);

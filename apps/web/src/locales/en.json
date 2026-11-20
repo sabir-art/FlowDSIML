@@ -239,7 +239,6 @@
     "countUnlimited_other": "{{count}} members, unlimited members in the {{plan}} plan.",
     "inviteMany": "Invite members",
     "search": "Search a member",
-    "filterRole": "Filter by role",
     "allRoles": "All roles",
     "tableCaption": "Workspace members",
     "lastActivity": "Last activity",
@@ -279,7 +278,10 @@
     "removeLoses": "{{name}} will lose access to the workspace and its demos.",
     "removeDemos_one": "Their demo stays in the workspace.",
     "removeDemos_other": "Their {{count}} demos stay in the workspace.",
-    "removeNoDemos": "The workspace demos are not changed."
+    "removeNoDemos": "The workspace demos are not changed.",
+    "roleLabel": "Role",
+    "resultCount_one": "{{count}} member or invitation",
+    "resultCount_other": "{{count}} members or invitations"
   },
   "workspace": {
     "title": "Workspace settings",

@@ -850,16 +850,9 @@
 .mk .st-alert {
   margin-bottom: 16px;
 }
-.mk .st-filters {
+.mk .st-toolbar {
   padding: 12px 16px;
   border-bottom: 1px solid var(--fd-color-border);
-  gap: 12px;
-}
-.mk .st-search {
-  max-width: 320px;
-}
-.mk .st-select {
-  width: auto;
 }
 .mk .st-you {
   margin-left: 6px;
