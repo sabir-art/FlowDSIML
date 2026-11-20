@@ -34,7 +34,7 @@ Un seul composant, pour remplacer les compositions actuelles :
 | Contexte | Placeholder | Mention dessous | Particularités |
 |---|---|---|---|
 | Assistant IA | « Posez une question sur cette démo… » | « La conversation est effacée à la fermeture. » | Pendant une réponse, le bouton devient « Arrêter la réponse » (icône `square` pleine, fond `text`, icône `surface`) et remplace « Arrêter » au-dessus du champ. Le champ reste modifiable pendant la réponse. 2 000 caractères au plus. |
-| Nouveau commentaire | « Écrire un commentaire… @ pour mentionner » (le placeholder court existant sous 480 px) | « Interne à l'équipe, jamais publié. » | L'avatar actuel, à gauche du champ, est retiré : il prend de la largeur sans rien apporter (les commentaires montrent déjà les auteurs). 500 caractères. |
+| Nouveau commentaire | « Écrire un commentaire… @ pour mentionner » (le placeholder court existant sous 480 px) | « Interne à l'équipe, jamais publié. » | L'avatar à gauche du champ est **conservé** (choix du client, révision L45 §4) : il est centré sur le cadre du champ quand celui-ci fait une ligne, et aligné en haut quand il en fait plusieurs. 500 caractères. |
 | Réponse à un commentaire | « Répondre… » | aucune | Même composant, plus compact (1 ligne au départ). |
 | Modification d'un commentaire | texte existant | « Entrée pour enregistrer, Échap pour annuler » (aujourd'hui, c'est Ctrl + Entrée : on aligne sur la règle Entrée) | Le bouton prend l'icône `check` et le nom « Enregistrer ». « Annuler » reste en lien sous le champ. |
 

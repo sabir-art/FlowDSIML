@@ -392,6 +392,32 @@ Exception unique : 6 px (libellé → champ, gap des boutons `sm`). **Interdits*
 | Padding de page (app) | 32 px desktop, 16 px mobile |
 | Élément de liste (rail, menu, navigation) | padding 8 px, gap 4 px entre éléments |
 
+### 15.4 bis Loi de proximité : espacements par relation (règle obligatoire, L45)
+
+> Retour client : des blocs collés (« Largeur de sortie » sous les boutons radio de Format ; « Importer un fichier CSV » collé à son texte) alors que d'autres sont bien espacés (Formulaire de lead).
+> Règle : **plus deux éléments sont liés, plus ils sont proches**. L'écart dépend de la **relation** entre les deux éléments, jamais du composant. Chaque relation a un token sémantique (à ajouter à `tokens.css`, en alias de l'échelle §15.4).
+
+| Relation | Token | Panneau compact (éditeur, tiroirs, ≤ 360 px) | Pages, cartes, modales |
+|---|---|---|---|
+| Libellé → son champ | `--fd-gap-label` | 6 px | 6 px |
+| Champ → son aide, son compteur ou son erreur | `--fd-gap-help` | 4 px | 6 px |
+| Option → option (radios, cases, au sein d'un groupe) | `--fd-gap-option` | 8 px | 8 px |
+| Légende d'un groupe d'options → première option | `--fd-gap-label` | 6 px | 6 px |
+| Texte (description, aide, état vide) → son bouton ou son lien d'action | `--fd-gap-action` | 12 px | 12 px |
+| Champ → champ, dans un même groupe | `--fd-gap-field` | 16 px | 20 px |
+| Ligne d'interrupteur → ligne d'interrupteur | `--fd-gap-field` | 16 px | 20 px |
+| Groupe → groupe, dans une même section (ex. Format → Largeur de sortie) | `--fd-gap-group` | 20 px | 24 px |
+| Titre de section → premier contenu | `--fd-gap-title` | 12 px | 16 px |
+| Section → section | `--fd-gap-section` | filet 1 px `border`, avec 16 px au-dessus et au-dessous | filet, avec 24 px au-dessus et au-dessous |
+| Dernier champ → boutons de validation de la carte ou de la modale | `--fd-gap-group` | 20 px | 24 px |
+| Bouton → bouton (même rangée) | `--fd-space-2` | 8 px | 8 px |
+
+- **Un groupe** est un ensemble qui se lit ensemble : un libellé, son champ et son aide ; un groupe de radios et sa légende ; un interrupteur et sa description. Un groupe est un `<div>` (ou `<fieldset>`) qui porte `gap` ; les marges des enfants sont à zéro.
+- **Pas de marge sur les composants** (`margin-top` sur un bouton, `<p>` avec marge par défaut) : l'écart est porté **uniquement** par le `gap` du conteneur. Les `<p>` des panneaux ont `margin: 0`.
+- **Aide sous un interrupteur** : elle fait partie de la ligne (écart `--fd-gap-help`), pas de la ligne suivante.
+- **Une seule exception** de taille : un écart plus grand que `--fd-gap-group` à l'intérieur d'une section signale qu'il faut une nouvelle section.
+- **Contrôle** : la recette mesure les écarts entre blocs voisins (script de l'audit L45, `docs/ux/specs/l45-espacements.md` §5). Tout écart hors de ce tableau est un défaut.
+
 ### 15.5 Typographie et accents
 
 - **Accents sur les capitales obligatoires** : « Écran », « Étape », « État », « À propos ». Jamais « Ecran ».
