@@ -2,9 +2,12 @@
 
 > Besoin client, dans une démarche d'amélioration continue. Aujourd'hui, « Cet article vous a aidé ? » (L26-02) n'alimente qu'un compteur global et anonyme (`help_feedback` : article, oui, non), invisible pour tous.
 >
-> **Révision du 20 nov. (correction client)** : les retours ne vont **pas** dans les Paramètres de l'espace. Les admins d'espace sont des clients ; ce ne sont pas eux qui font évoluer l'outil. Les retours vont dans une **Console propriétaire** séparée, réservée aux propriétaires de TutoClick (l'équipe qui développe l'outil), hors de tout espace client. Cette version remplace la précédente (bab6260).
+> **Révision 3 (20 nov.)** : le client valide la Console et l'étend. Elle comprend désormais : plusieurs comptes avec des rôles, un journal d'audit, le regroupement des retours en éléments, un lien vers un ticket GitHub, une page « Nouveautés » côté clients, et 5 onglets.
+> Maquette cliquable du parcours complet : `docs/ux/maquettes/refonte/l41-console.html`. Captures commentées : `docs/ux/captures/l41-console/` (13 étapes, clair et sombre).
 >
-> Côté client, **seul** le champ « Qu'est-ce qui vous manquait ? » apparaît (§2). Il n'y a ni écran, ni badge, ni export dans les espaces.
+> **Révision 2 (20 nov., correction client)** : les retours ne vont **pas** dans les Paramètres de l'espace. Les admins d'espace sont des clients ; ce ne sont pas eux qui font évoluer l'outil. Les retours vont dans une **Console propriétaire** séparée, réservée aux propriétaires de TutoClick (l'équipe qui développe l'outil), hors de tout espace client. Cette version remplace la précédente (bab6260).
+>
+> Côté client, deux éléments seulement : le champ « Qu'est-ce qui vous manquait ? » (§2) et la page « Nouveautés » (§7). Il n'y a ni écran de retours, ni export dans les espaces.
 > Version courte, sans maquette : composants du design system, icônes Lucide, barres de liste selon L40.
 > Données fictives dans les tests : espaces « Acme » et « Globex », adresses `@example.com`.
 
@@ -24,14 +27,16 @@
 
 | Code | État | Où |
 |---|---|---|
-| L41-01 | Après « Non » : champ « Qu'est-ce qui vous manquait ? » | Panneau d'aide, bas d'un article (côté client) |
-| L41-02 | Commentaire envoyé, erreur d'envoi, donnée personnelle détectée | Même emplacement |
-| L41-03 | Console : accès et cadre | `#/console`, hors espace |
-| L41-04 | Console > Retours sur l'aide, onglet Articles | Console |
-| L41-05 | Console > Retours sur l'aide, onglet Commentaires | Console |
-| L41-06 | Console > Backlog d'amélioration (liste et fiche d'un élément) | Console |
-| L41-07 | Export CSV | Console |
-| L41-08 | États vides, chargement, erreur | Console |
+| L41-01 | Après « Non » : champ « Qu'est-ce qui vous manquait ? » | Panneau d'aide (client) |
+| L41-02 | Commentaire envoyé, erreur, donnée personnelle détectée | Panneau d'aide (client) |
+| L41-03 | Accès à la console, cadre et onglets | Menu du compte, puis `#/console` |
+| L41-04 | Vue d'ensemble | Console |
+| L41-05 | Retours (Articles, Commentaires), Créer un élément, Rattacher à… | Console |
+| L41-06 | Backlog en colonnes, fiche d'un élément, passage à Fait | Console |
+| L41-07 | Nouveautés : « Annoncer cette amélioration ? », rédaction, publication | Console |
+| L41-08 | Équipe (rôles) et journal d'audit | Console |
+| L41-09 | Page « Nouveautés » et point de nouveauté | App client |
+| L41-10 | Export CSV, états vides, chargement, erreur, lecture seule | Console |
 
 ## 2. Côté client : après « Non » (L41-01, L41-02)
 
@@ -62,173 +67,178 @@ Après « Non » :
    - l'espace actif et la date ;
    - **rien d'autre** : pas d'URL, pas d'identifiant de démo.
 
-## 3. Console propriétaire : accès et cadre (L41-03)
+## 3. Console propriétaire : accès, rôles et cadre (L41-03)
 
-- **Qui** : les comptes marqués « propriétaire de la plateforme » (équipe TutoClick).
-  - Ce droit ne dépend **d'aucun rôle d'espace**. Être propriétaire d'un espace client ne donne pas accès à la console.
-  - Le droit est donné en base par l'équipe, hors de l'app (table `platform_owners`, ou claim `app_metadata`). L'app n'a aucun écran pour l'attribuer.
-- **Adresse** : `#/console`, avec les sous-pages `#/console/aide` et `#/console/backlog`. Pour tout autre compte, l'adresse affiche la page « Page introuvable » existante, pour ne pas révéler l'existence de la console.
+- **Qui** : les comptes enregistrés comme **propriétaires de la plateforme** (équipe TutoClick).
+  - Ce droit ne dépend d'aucun rôle d'espace.
+  - Le premier compte est créé en base. Les suivants sont ajoutés depuis l'onglet Équipe (§8).
+- **Rôles** :
+
+| Rôle | Peut |
+|---|---|
+| Admin | Tout : traiter les retours, gérer le backlog, publier ou retirer une nouveauté, gérer l'équipe, exporter |
+| Lecture seule | Consulter tous les onglets et exporter. Les actions sont visibles mais désactivées (`aria-disabled`, infobulle « Lecture seule : action réservée aux admins »), et un bandeau neutre le rappelle en haut de page. |
+
+- **Règles** :
+  - il reste toujours au moins un admin ;
+  - personne ne peut modifier son propre rôle ;
+  - toute modification passe au journal (§8).
 - **Entrée** :
-  - un lien « Console propriétaire » (icône `shield-check`) dans le menu du profil (en bas de la barre latérale), visible seulement pour les propriétaires de la plateforme ;
+  - dans le menu du compte, un groupe « Équipe TutoClick » contient « Console propriétaire » (`shield-check`) ;
+  - ce groupe est visible des propriétaires de la plateforme seulement, et absent pour tous les autres comptes ;
   - aucune entrée dans la navigation des espaces.
-- **Cadre** : un en-tête propre à la console, sans sélecteur d'espace ni barre latérale d'espace.
-  - **À gauche** : le logo TutoClick et la mention « Console propriétaire ».
-  - **Navigation par onglets** : « Retours sur l'aide », puis « Backlog · {{n à trier}} ».
-  - **À droite** : « Retour à l'app ».
-  - Fond `bg`, cartes `surface` : le même design system que l'app, pour que la console ne se confonde pas avec un espace client tout en restant dans la charte.
-- **Données personnelles** : aucune adresse ni aucun nom d'utilisateur client n'apparaît dans la console, seulement le nom de l'espace.
+  - Pour un autre compte, `#/console` affiche « Page introuvable ».
+- **Connexion** : l'écran habituel ; il n'y a pas de connexion séparée. La double authentification sera exigée pour les comptes propriétaires dès qu'elle existera dans l'app (elle n'existe pas aujourd'hui ; on n'affiche rien).
+- **Cadre** (maquette, étape 3) :
+  - en-tête de 72 px : logo et « Console propriétaire · Équipe TutoClick · tous les espaces » ;
+  - **5 onglets** : Vue d'ensemble, Retours · n nouveaux, Backlog · n à trier, Nouveautés, Équipe et journal ;
+  - à droite : le badge du rôle (« Admin » ou « Lecture seule ») et « Retour à l'app ».
+- **Adresses** : `#/console`, `#/console/retours`, `#/console/backlog`, `#/console/backlog/{{id}}`, `#/console/nouveautes`, `#/console/equipe`.
 
-## 4. Retours sur l'aide (L41-04, L41-05)
+## 4. Vue d'ensemble (L41-04)
 
-### 4.1 En-tête et barre
+- **4 chiffres sur 90 jours, tous espaces** :
+  - « Satisfaction » (« {{x}} % », avec « {{oui}} Oui, {{non}} Non ») ;
+  - « Réponses » (« sur {{n}} articles notés ») ;
+  - « Commentaires nouveaux » ;
+  - « Éléments à trier ».
+  - Sans données : « — ».
+- **« 3 articles à surveiller »** :
+  - les 3 moins bien notés parmi ceux qui ont au moins 5 réponses ;
+  - pour chacun : titre, rubrique, nombre de Non et de commentaires, satisfaction (valeur écrite et barre), bouton « Voir les retours » (ouvre Retours filtré sur l'article).
+- **« Activité de l'équipe »** : les 4 dernières entrées du journal, avec les initiales, l'action, l'objet, la personne et la date.
 
-- **Titre** : « Retours sur l'aide ».
-- **Sous-titre** : « Tous les espaces. Les réponses sont anonymes. »
-- **Action à droite** : « Exporter (CSV) » (§6).
-- **Trois indicateurs** sur la période :
-  - « Réponses » ;
-  - « Satisfaction », la part de Oui en %, avec « {{oui}} Oui, {{non}} Non » ;
-  - « Commentaires nouveaux ».
-  - Sans réponse, la valeur est « — ».
-- **Barre (L40)** :
-  - à gauche : période (segmenté « 30 j », « 90 j », « 12 mois », par défaut 90 j), « Espace : Tous » (facultatif, liste cherchable), « Rubrique : Toutes », Réinitialiser ;
-  - à droite : le tri.
-- **Onglets** : « Articles » et « Commentaires · {{n nouveaux}} ».
+## 5. Retours (L41-05)
 
-### 4.2 Onglet Articles
+### 5.1 Articles
+- Tableau : Article (et sa rubrique), Oui, Non, Satisfaction, Commentaires, Backlog (éléments ouverts liés).
+- Tri par défaut « Moins bien notés » : les articles de moins de 5 réponses viennent après, avec le badge « Peu de réponses ».
+- Barre L40 : période (30 j, 90 j, 12 mois), « Espace : Tous », « Rubrique : Toutes » | Tri.
 
-Une ligne par article ayant reçu au moins une réponse sur la période.
-
-| Colonne | Contenu |
-|---|---|
-| Article | Titre (lien « Voir l'article », qui ouvre le panneau d'aide en lecture), avec la rubrique en dessous |
-| Oui / Non | Nombres |
-| Satisfaction | « {{x}} % », avec une barre de 80 px. La valeur est toujours écrite. |
-| Commentaires | « {{n}} », dont « {{m}} nouveaux » ; un clic ouvre l'onglet Commentaires filtré sur l'article |
-| Backlog | Nombre d'éléments liés à l'article qui ne sont pas encore « Fait » ou « Rejeté » ; un clic ouvre le backlog filtré |
-| Dernier retour | Date relative, avec la date complète en infobulle |
-
-- **Tri par défaut, « Moins bien notés »** :
-  - satisfaction croissante, puis le plus de Non en premier ;
-  - les articles qui ont **moins de 5 réponses** viennent ensuite, avec le badge « Peu de réponses ».
-- **Autres tris** : « Plus de Non », « Plus de réponses », « Titre (A à Z) ».
-- **Sous le tableau** : « {{n}} articles n'ont reçu aucune réponse sur la période. ».
-- **Action de ligne** (menu ⋯) : « Créer un élément de backlog » (§5.3), avec l'article prérempli.
-
-### 4.3 Onglet Commentaires
-
-Une liste de cartes ; les « Non » sans commentaire n'y figurent pas.
-
-- **Carte** :
-  - en tête : l'article (lien), « Page : {{page}} », le nom de l'espace et la date (« 18 nov. 2026, 14:05 ») ;
-  - le texte, en texte brut (aucun lien rendu cliquable) ;
-  - en pied : le statut, puis les actions.
-- **Statuts d'un commentaire** :
-
-| Statut | Badge | Sens |
-|---|---|---|
-| Nouveau | `info-soft`, `circle-dot` | Pas encore lu |
-| Rattaché | `primary-soft`, `link` | Lié à un élément du backlog (« Rattaché à : {{titre de l'élément}} », avec un lien) |
-| Classé | neutre, `archive` | Lu, sans suite (doublon, hors sujet, déjà corrigé) |
-
-- **Actions** :
+### 5.2 Commentaires
+- **Carte** : article (lien), « Page : … », espace, date ; texte brut ; statut ; actions.
+- **Statuts** : « Nouveau » (`circle-dot`), « Rattaché à : {{titre}} » (`link`, primary-soft) et « Classé » (`archive`).
+- **Actions** d'un commentaire nouveau :
   - « Créer un élément » (primaire) ;
-  - « Rattacher à un élément… », qui ouvre une liste cherchable des éléments ouverts ;
+  - « Rattacher à… » ;
   - « Classer sans suite » ;
-  - dans le menu ⋯ : « Supprimer le commentaire », avec la confirmation « Supprimer ce commentaire ? Le vote Non reste compté. ». Elle sert si un commentaire contient malgré tout une donnée personnelle.
-  - Toasts : « Élément créé. », « Commentaire rattaché. », « Commentaire classé. », chacun avec « Annuler ».
-- **Filtres** :
-  - statut (segmenté : « Nouveaux » par défaut, « Rattachés », « Classés », « Tous ») ;
-  - Espace, Article, Page.
-  - Tri : « Plus récents ».
-- **Sélection multiple** : « Rattacher à un élément… » et « Classer sans suite » pour plusieurs commentaires (par exemple dix demandes identiques).
-- **Conservation** :
-  - les commentaires sont supprimés 12 mois après leur création ; les votes restent comptés ;
-  - le texte « Les commentaires sont conservés 12 mois. » figure sous la liste.
+  - dans le menu ⋯ : « Supprimer le commentaire ».
+- **« Créer un élément »** (maquette, étape 5) :
+  - une modale avec Titre (prérempli, modifiable), Priorité (Moyenne par défaut), Article lié (prérempli), Ticket GitHub (facultatif) ;
+  - le rappel du commentaire rattaché ;
+  - « Créer l'élément » le crée dans « À trier » ; toast « Élément créé dans « À trier ». Le commentaire y est rattaché. ».
+- **« Rattacher à… »** (maquette, étape 6) :
+  - un popover (dialogue non modal) avec une recherche, qui liste les éléments **ouverts**, ceux du même article en premier, avec leur statut et leur nombre de retours ;
+  - le choix incrémente le compteur ; toast « Commentaire rattaché à « … » (n retours). » avec « Annuler ».
+  - Plusieurs commentaires peuvent être rattachés en une fois (sélection multiple).
+- **Regroupement** : un élément compte ses retours rattachés, affichés « n retours » sur la carte du backlog et listés dans la fiche. Détacher un retour le remet à « Nouveau ».
+- **Conservation** : 12 mois pour les commentaires, rappelée sous la liste.
 
-## 5. Backlog d'amélioration (L41-06)
+## 6. Backlog (L41-06)
 
-### 5.1 Liste
+- **Vue en colonnes** (maquette, étape 7) :
+  - 4 colonnes : À trier, Planifié, En cours, Fait, chacune avec son compteur ;
+  - « Rejetés (n) » est un bloc repliable sous les colonnes, avec le titre et le motif.
+  - Fond de colonne `surface-sunken`, cartes `surface` avec une bordure uniforme (jamais de barre de couleur, §15.6).
+  - Un élément créé à l'instant a une bordure `primary` jusqu'au prochain chargement.
+- **Carte** :
+  - titre ;
+  - badge de priorité (« Haute », « Moyenne », « Basse », toujours écrite) ;
+  - « n retours » ;
+  - ticket « #431 » s'il existe ;
+  - « Annoncé » si une nouveauté est publiée ;
+  - l'article lié.
+  - La carte entière est un bouton qui ouvre la fiche. Son nom accessible dit le titre, le statut, la priorité et le nombre de retours.
+- **Déplacer un élément** :
+  - dans la fiche, les 5 boutons de statut (groupe `aria-pressed`) ;
+  - le glisser-déposer entre colonnes est un plus, jamais le seul moyen ;
+  - au clavier : le menu ⋯ de la carte propose « Déplacer vers… ».
+  - Rejeté demande un motif (280 caractères, obligatoire).
+- **Fiche** (tiroir de 560 px, maquette étape 8) :
+  - en-tête : statut, « Élément du backlog », « Enregistré », Fermer ;
+  - Titre, Statut, Priorité, Article lié, **Ticket GitHub**, Note interne, Retours regroupés · n, Historique.
+  - Enregistrement automatique.
+- **Ticket GitHub** :
+  - champ URL facultatif, au format `https://github.com/<organisation>/<dépôt>/issues/<n>` ou `/pull/<n>` (sinon : « Collez l'adresse d'un ticket ou d'une demande de fusion GitHub. ») ;
+  - affiché « #n » sur la carte, avec le lien « Ouvrir le ticket #n » (nouvel onglet) ;
+  - aide : « Lien seulement : le statut du ticket n'est pas synchronisé. ».
+  - **Aucune intégration** : ni appel à l'API GitHub, ni jeton.
+- **Nouvel élément** : la même modale que « Créer un élément », sans retour rattaché.
 
-- **Titre** : « Backlog d'amélioration ».
-- **Action à droite** : « Nouvel élément » (primaire) et « Exporter (CSV) ».
-- **Barre (L40)** :
-  - à gauche : statut (segmenté « À trier · n », « Planifié · n », « En cours · n », « Fait », « Rejeté », « Tous »), « Priorité : Toutes », « Article : Tous », Réinitialiser ;
-  - à droite : « Tri : Priorité » (par défaut), « Plus récents », « Plus de retours liés ».
-- **Tableau** :
+## 7. Nouveautés (L41-07, L41-09)
 
-| Colonne | Contenu |
-|---|---|
-| Élément | Titre (lien vers la fiche), avec l'article lié en dessous s'il existe |
-| Statut | Badge (§5.4) |
-| Priorité | Badge texte « Haute », « Moyenne » ou « Basse » (jamais la couleur seule) |
-| Retours liés | Nombre de commentaires rattachés, et nombre de Non de l'article sur 90 j |
-| Mis à jour | Date relative, et le prénom de la personne de l'équipe |
+### 7.1 Annoncer (console)
+- **Au passage d'un élément à « Fait »** (s'il n'a pas déjà été annoncé), un dialogue (`alertdialog`) s'ouvre :
+  - titre « Annoncer cette amélioration ? » ;
+  - texte « L'élément est passé à Fait. Une annonce prévient les clients dans « Nouveautés », avec un point sur le menu du compte. Vous pourrez la relire avant de la publier. » ;
+  - boutons « Plus tard » et « Rédiger l'annonce ».
+  - « Plus tard » ne crée rien ; l'action « Annoncer » reste dans la fiche tant que rien n'est publié.
+- **Rédaction** (modale large) :
+  - Titre (90 caractères au plus) ;
+  - Texte (400 caractères au plus ; aide « Ni nom de client, ni donnée d'un espace. ») ;
+  - Lien vers l'aide (l'article lié, prérempli, facultatif) ;
+  - Public : « Tous les espaces » (seule option) ;
+  - **aperçu côté client** à droite ;
+  - boutons « Enregistrer le brouillon » et « Publier l'annonce ».
+  - Toast : « Annonce publiée. Les clients voient un point sur « Nouveautés ». ».
+- **Onglet Nouveautés** :
+  - « Publiées · n » et « Brouillons · n » ;
+  - chaque annonce porte sa date, son titre, son texte, son lien d'aide et l'élément lié (ou « Annonce libre »), avec les actions « Modifier » et « Retirer » ;
+  - « Nouvelle annonce » permet une annonce sans élément ;
+  - « Voir côté client » ouvre l'aperçu.
+  - Retirer une annonce la masque chez les clients, et passe au journal.
 
-### 5.2 Fiche d'un élément
+### 7.2 Côté client
+- **Entrée** : « Nouveautés » (`megaphone`) dans le menu du compte, pour tous les rôles de tous les espaces.
+- **Point de nouveauté** :
+  - un point `primary` de 8 px sur l'avatar du pied de la barre latérale et sur l'entrée « Nouveautés » du menu, quand une annonce a été publiée depuis la dernière visite de la page par **cette personne** ;
+  - nom accessible du bouton du menu : « Menu du compte, 1 nouveauté » ;
+  - le point disparaît à l'ouverture de la page.
+- **Page `#/nouveautes`** :
+  - titre « Nouveautés » ;
+  - sous-titre « Les améliorations récentes de TutoClick, souvent nées de vos retours sur l'aide. » ;
+  - cartes de la plus récente à la plus ancienne : date, badge « Nouveau » (non lu), titre (h2), texte, « Lire l'article d'aide : … » ;
+  - largeur de lecture de 760 px au plus ;
+  - état vide : « Aucune nouveauté pour l'instant. ».
+- **Aucun lien** vers le backlog, les retours ou la console, et aucun nom de client.
 
-Elle s'ouvre en panneau latéral (tiroir de 560 px), avec l'adresse `#/console/backlog/{{id}}`.
+## 8. Équipe et journal (L41-08)
 
-- **Titre** : modifiable, 120 caractères au plus, obligatoire.
-- **Description** : facultative, 2 000 caractères au plus. Elle décrit le problème ou l'amélioration, rédigée par l'équipe.
-- **Statut** : liste (§5.4). Passer à « Rejeté » demande un motif court (obligatoire, 280 caractères), affiché dans la fiche.
-- **Priorité** : « Haute », « Moyenne » (par défaut) ou « Basse ».
-- **Article lié** : choix cherchable dans les articles d'aide (facultatif), avec le lien « Voir l'article ».
-- **Note interne** : 2 000 caractères au plus, par exemple « Réécrire la section 2 ; capture à refaire ».
-- **Retours liés** : la liste des commentaires rattachés (date, espace, texte).
-  - Chacun a l'action « Détacher ».
-  - Après la purge des 12 mois, la ligne affiche « Commentaire supprimé (conservation 12 mois) ».
-  - L'élément ne **copie** jamais le texte d'un commentaire : il garde un lien, pour que la purge s'applique.
-- **Historique** : création et changements de statut, avec la date et le prénom de la personne de l'équipe.
-- **Enregistrement** : automatique en sortant d'un champ (« Enregistré »), comme dans l'éditeur.
-- **Supprimer l'élément** : dans le menu ⋯, avec confirmation ; les commentaires rattachés repassent « Nouveau ».
+- **Équipe** :
+  - tableau Personne (nom, e-mail `@tutoclick…`), Rôle (liste Admin ou Lecture seule), Dernière activité, Retirer ;
+  - « Ajouter un propriétaire » : e-mail d'un compte TutoClick **existant** et rôle. Il n'y a pas d'invitation par e-mail, l'envoi n'existant pas encore.
+  - Retirer demande une confirmation ; le compte garde son accès normal à ses espaces.
+- **Journal d'audit** :
+  - tableau Date, Personne, Action, Objet ; filtres Personne et Action ; export CSV ;
+  - actions tracées : connexion à la console, création, rattachement, classement et suppression d'un retour, création d'un élément et tout changement de statut, de priorité ou de ticket, publication, modification ou retrait d'une nouveauté, ajout, retrait ou changement de rôle d'un propriétaire, exports ;
+  - le journal ne peut être ni modifié ni effacé depuis la console. Conservation : 12 mois, rappelée sous le tableau.
+  - Il ne contient jamais le texte d'un commentaire, seulement son article.
 
-### 5.3 Créer un élément
+## 9. Export CSV et états (L41-10)
 
-- **Points d'entrée** : un commentaire (« Créer un élément »), une ligne d'article (menu ⋯), ou « Nouvel élément ».
-- **Modale courte** : Titre (prérempli « Article “{{titre}}” : à améliorer » quand on part d'un article), Priorité et Article lié (prérempli). Les commentaires d'origine sont rattachés automatiquement.
-- **Création** : l'élément est créé avec le statut « À trier », puis la fiche s'ouvre.
+- **Exports** : Retours (synthèse par article, ou commentaires), Backlog (titre, statut, priorité, article, retours, ticket, motif de rejet, dates, note), Journal. Les filtres en cours s'appliquent ; format `;`, UTF-8 avec BOM, dates ISO ; jamais l'identité d'un répondant.
+- **États vides** :
+  - « Aucun retour sur cette période » ;
+  - « Tout est lu. » ;
+  - « Aucun élément pour l'instant », avec « Nouvel élément » ;
+  - « Aucune annonce. ».
+- **Chargement** : squelettes (L32).
+- **Erreur** : « Impossible de charger la console. » avec « Réessayer ».
 
-### 5.4 Statuts
-
-| Statut | Badge | Règle |
-|---|---|---|
-| À trier | neutre, `inbox` | Statut de départ |
-| Planifié | `info-soft`, `calendar` | — |
-| En cours | `warning-soft`, `loader` (icône fixe, sans rotation) | — |
-| Fait | `success-soft`, `check` | Les commentaires rattachés restent visibles dans la fiche |
-| Rejeté | neutre barré, `x` | Motif obligatoire |
-
-- On peut passer d'un statut à n'importe quel autre ; l'historique garde la trace.
-- Le compteur de l'onglet « Backlog · n » compte les éléments « À trier ».
-
-## 6. Export CSV (L41-07)
-
-- « Exporter (CSV) » dans Retours sur l'aide propose deux choix :
-  - « Synthèse par article » : article, rubrique, oui, non, satisfaction (%), commentaires, nouveaux, éléments ouverts, dernier retour ;
-  - « Commentaires » : date, espace, article, page, commentaire, statut, élément rattaché.
-- « Exporter (CSV) » dans le Backlog : titre, statut, priorité, article, retours liés, motif de rejet, créé le, mis à jour le, note interne.
-- La période et les filtres en cours s'appliquent, et la modale les rappelle.
-- **Format** : `;`, UTF-8 avec BOM, dates ISO. Nom du fichier : `console-retours-aide-{{AAAA-MM-JJ}}.csv` ou `console-backlog-{{AAAA-MM-JJ}}.csv`.
-- Jamais d'identité de la personne qui a répondu.
-
-## 7. États (L41-08)
-
-- **Aucune réponse sur la période** : icône `message-square-text`, « Aucun retour sur cette période », « Les utilisateurs répondent depuis le bas de chaque article d'aide. ».
-- **Aucun commentaire nouveau** : « Tout est lu. », avec le lien « Voir tous les commentaires ».
-- **Backlog vide** : icône `list-todo`, « Aucun élément pour l'instant », « Créez un élément depuis un commentaire ou un article mal noté. », bouton « Nouvel élément ».
-- **Chargement** : squelettes (L32), même géométrie.
-- **Erreur** : carte « Impossible de charger la console. » avec « Réessayer ».
-
-## 8. Données (indications pour le dev)
+## 10. Données (indications pour le dev)
 
 - **`help_feedback_entries`** :
   - colonnes : `id`, `workspace_id`, `article`, `helpful`, `page`, `author_id`, `comment` (500 au plus, nullable), `comment_status` (`new`, `linked` ou `archived`, seulement si `comment` existe), `backlog_item_id` (nullable), `created_at` ;
   - unicité sur (`workspace_id`, `article`, `author_id`).
-- **`improvement_items`** : `id`, `title`, `description`, `status` (`triage`, `planned`, `in_progress`, `done`, `rejected`), `priority` (`high`, `medium`, `low`), `article` (nullable), `note`, `reject_reason`, `created_by`, `updated_by`, `created_at`, `updated_at`. Plus une table d'historique des statuts.
+- **`improvement_items`** : `id`, `title`, `description`, `status` (`triage`, `planned`, `in_progress`, `done`, `rejected`), `priority` (`high`, `medium`, `low`), `article` (nullable), `note`, `reject_reason`, `github_url` (nullable, format validé côté serveur), `announced_at`, `created_by`, `updated_by`, `created_at`, `updated_at`. Plus une table d'historique des statuts.
+- **`platform_owners`** : `user_id`, `role` (`admin` ou `read_only`), `added_by`, `added_at`. Contrainte : au moins un admin. `is_platform_owner()` et `is_platform_admin()` sont utilisés par toutes les RPC de la console.
+- **`console_audit`** : `id`, `at`, `actor_id`, `action`, `object_type`, `object_id`, `object_label`. Insertion seulement, par les RPC (aucune mise à jour ni suppression, hors purge à 12 mois).
+- **`product_news`** : `id`, `title` (90 au plus), `body` (400 au plus), `article`, `item_id` (nullable), `state` (`draft`, `published` ou `withdrawn`), `published_at`, `created_by`. Lecture côté client : les annonces publiées, par une RPC ouverte à `authenticated`.
+- **`news_seen`** : (`user_id`, `last_seen_at`) pour le point de nouveauté.
 - **Accès** :
   - aucune lecture pour `authenticated` ;
-  - la lecture et l'écriture de la console passent par des RPC `security definer` qui vérifient `is_platform_owner()` et ne renvoient **jamais** `author_id` ;
+  - la lecture de la console passe par des RPC `security definer` qui vérifient `is_platform_owner()`, et l'écriture par `is_platform_admin()` ; aucune ne renvoie **jamais** `author_id` ;
+  - chaque RPC d'écriture ajoute sa ligne à `console_audit` dans la même transaction ;
   - l'écriture du vote et du commentaire côté client se fait par RPC (contrôles de longueur, `PERSONAL_DATA`, 20 commentaires par personne et par jour au plus).
 - **« Mes données » et suppression du compte** :
   - les commentaires de la personne sont dans son export ;
@@ -236,18 +246,24 @@ Elle s'ouvre en panneau latéral (tiroir de 560 px), avec l'adresse `#/console/b
 - **Purge** : les commentaires de plus de 12 mois passent par la tâche planifiée existante (le commentaire est vidé, le lien vers l'élément devient « supprimé »).
 - **Suppression d'un espace** : ses votes sont anonymisés (`workspace_id` mis à null, « Espace supprimé » dans la console), ses commentaires sont supprimés.
 
-## 9. Recette
+## 11. Recette
 
 - **Côté client** :
   - « Non », puis un commentaire de 500 caractères ; le 501e est refusé ;
   - `test@example.com` est bloqué, côté client comme côté serveur ;
   - « Passer » et Échap ; changer sa réponse ;
-  - un propriétaire et un admin d'espace : **aucune** entrée « Console », et `#/console` affiche « Page introuvable ».
+  - un propriétaire et un admin d'espace : **aucune** entrée « Console », et `#/console` affiche « Page introuvable » ;
+  - Nouveautés : après une publication, le point apparaît sur l'avatar et dans le menu, puis disparaît à l'ouverture de la page, pour cette personne seulement ; une annonce retirée disparaît.
 - **Console** (compte propriétaire de la plateforme, données fictives de 2 espaces) :
   - classement « Moins bien notés » avec un article à 1 réponse, qui ne doit pas arriver en tête ;
   - filtre Espace ;
   - créer un élément depuis un commentaire, rattacher 3 commentaires en une fois, classer sans suite, Annuler ;
   - parcourir les 5 statuts ; Rejeté sans motif est refusé ;
-  - les trois exports, avec les filtres appliqués ;
+  - passer un élément à Fait, puis « Annoncer cette amélioration ? » : rédiger, voir l'aperçu, publier ; « Plus tard » ne crée rien ;
+  - ticket GitHub : une adresse valide affiche « #n », une adresse invalide est refusée, et aucun appel n'est fait vers GitHub ;
+  - un compte **Lecture seule** : tous les onglets se lisent, les actions sont désactivées, l'export fonctionne, et une RPC d'écriture appelée directement est refusée ;
+  - équipe : ajouter un propriétaire, changer un rôle, retirer le dernier admin (refusé), changer son propre rôle (impossible) ;
+  - journal : chaque action du parcours y figure, et il ne peut être ni modifié ni effacé ;
+  - les exports (retours, backlog, journal), avec les filtres appliqués ;
   - aucun nom ni aucune adresse d'utilisateur à l'écran, dans les exports ou dans les réponses réseau.
 - **Contrôles** : 1 440, 1 024 et 390 px, en clair et en sombre, avec axe sans violation.

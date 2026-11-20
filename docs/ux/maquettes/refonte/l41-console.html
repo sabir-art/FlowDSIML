@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console propriétaire (lot L41) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* Maquette cliquable L41 : parcours complet de la Console propriétaire. Données fictives, sans backend.
+     Composants du design system (fd-btn, fd-card, fd-segmented, fd-input, fd-badge, fd-table) ; barres de liste selon L40. */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  body { background: var(--fd-color-bg); }
+  .ic { width: 18px; height: 18px; flex: none; }
+  .ic-sm { width: 16px; height: 16px; flex: none; }
+  [hidden] { display: none !important; }
+
+  /* --- Connexion --- */
+  .login { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+  .login__card { width: 420px; max-width: 100%; padding: 40px; display: flex; flex-direction: column; gap: 20px; }
+  .login__card img { height: 44px; align-self: flex-start; }
+  .login__card h1 { margin: 0; font-size: 26px; }
+  .login__card p { margin: 0; color: var(--fd-color-text-muted); }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label, .field .lbl { font-weight: 600; font-size: var(--fd-text-label-size); }
+  .field .help { font-size: 13px; color: var(--fd-color-text-muted); }
+
+  /* --- Menu du compte (app client) --- */
+  .acct-menu { position: fixed; left: 16px; bottom: 96px; width: 260px; padding: 6px; background: var(--fd-color-surface-raised, var(--fd-color-surface)); border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-lg); box-shadow: var(--fd-shadow-lg); z-index: 40; }
+  .acct-menu button { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 12px; border-radius: var(--fd-radius-md); cursor: pointer; font: 500 var(--fd-text-label-size) var(--fd-font-sans); color: var(--fd-color-text); }
+  .acct-menu button:hover, .acct-menu button:focus-visible { background: var(--fd-color-surface-hover); }
+  .acct-menu hr { border: 0; border-top: 1px solid var(--fd-color-border); margin: 6px 0; }
+  .acct-menu .sep-label { padding: 6px 12px 2px; font-size: 11px; font-weight: 700; color: var(--fd-color-text-subtle, var(--fd-color-text-muted)); text-transform: uppercase; letter-spacing: .04em; }
+  .newdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fd-color-primary); margin-left: auto; }
+  .avatar-wrap { position: relative; }
+  .avatar-wrap .newdot { position: absolute; right: -1px; top: -1px; margin: 0; box-shadow: 0 0 0 2px var(--fd-color-bg); }
+  .menu-active { outline: none; }
+
+  /* --- Console : cadre --- */
+  .cs { min-height: 100vh; display: flex; flex-direction: column; }
+  .cs-head { display: flex; align-items: center; gap: 24px; padding: 0 32px; height: 72px; background: var(--fd-color-surface); border-bottom: 1px solid var(--fd-color-border); position: sticky; top: 0; z-index: 20; }
+  .cs-brand { display: flex; align-items: center; gap: 12px; }
+  .cs-brand img { height: 32px; }
+  .cs-brand b { font-size: 15px; }
+  .cs-brand small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .cs-tabs { display: flex; gap: 4px; height: 100%; }
+  .cs-tabs button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; height: 100%; font: 600 var(--fd-text-label-size) var(--fd-font-sans); color: var(--fd-color-text-muted); box-shadow: inset 0 -2px 0 transparent; }
+  .cs-tabs button[aria-selected='true'] { color: var(--fd-color-text); box-shadow: inset 0 -2px 0 var(--fd-color-primary); }
+  .cs-tabs button:focus-visible { box-shadow: var(--fd-shadow-focus); border-radius: 6px; }
+  .cnt { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--fd-color-surface-sunken); color: var(--fd-color-text); font-size: 12px; font-weight: 700; }
+  .cs-head__end { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .role-badge { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-size: 12px; font-weight: 700; }
+  .role-badge--ro { background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+  .cs-main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
+  .page-t { display: flex; align-items: flex-start; gap: 16px; }
+  .page-t h1 { margin: 0; font-size: 28px; }
+  .page-t p { margin: 4px 0 0; color: var(--fd-color-text-muted); }
+  .page-t .end { margin-left: auto; display: flex; gap: 8px; }
+  .ro-note { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--fd-radius-md); background: var(--fd-color-surface-sunken); border: 1px solid var(--fd-color-border); color: var(--fd-color-text-muted); font-size: 14px; }
+
+  /* --- Barres L40 --- */
+  .fd-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; }
+  .fd-toolbar__group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .fd-toolbar__group--end { margin-left: auto; }
+  .fd-toolbar .fd-btn { height: 40px; }
+  .fd-toolbar .fd-segmented { padding: 3px; }
+  .fd-toolbar .fd-segmented > button { height: 32px; padding: 0 12px; }
+  .fd-filter { padding: 0 12px 0 16px; gap: 8px; }
+  .fd-filter .lab { color: var(--fd-color-text-muted); font-weight: 500; }
+
+  /* --- Vue d'ensemble --- */
+  .kpis4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .kpi { padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .kpi .l { display: flex; align-items: center; gap: 8px; color: var(--fd-color-text-muted); font-weight: 600; font-size: 14px; }
+  .kpi .v { font-size: 36px; font-weight: 800; letter-spacing: -.02em; }
+  .kpi .f { color: var(--fd-color-text-muted); font-size: 13px; }
+  .twocol { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+  .card-pad { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .card-pad h2 { margin: 0; font-size: 18px; }
+  .card-pad .sub { margin: -8px 0 0; color: var(--fd-color-text-muted); font-size: 14px; }
+  .prob { display: grid; grid-template-columns: 1fr 120px auto; gap: 16px; align-items: center; padding: 14px 0; border-top: 1px solid var(--fd-color-border); }
+  .prob:first-of-type { border-top: 0; }
+  .prob b { display: block; }
+  .prob small { color: var(--fd-color-text-muted); }
+  .sat { display: flex; flex-direction: column; gap: 6px; font-weight: 700; font-size: 14px; }
+  .bar { height: 6px; border-radius: 999px; background: var(--fd-color-surface-sunken); overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--fd-color-primary); }
+  .act { display: flex; flex-direction: column; }
+  .act li { list-style: none; display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--fd-color-border); font-size: 14px; }
+  .act li:first-child { border-top: 0; }
+  .act small { display: block; color: var(--fd-color-text-muted); }
+  .act ul { margin: 0; padding: 0; }
+  .ava { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-size: 11px; font-weight: 700; }
+
+  /* --- Retours --- */
+  .cmt { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .cmt__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 13px; color: var(--fd-color-text-muted); }
+  .cmt__meta a { color: var(--fd-color-text); font-weight: 600; }
+  .cmt__txt { margin: 0; font-size: 15px; line-height: 1.5; }
+  .cmt__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .cmt__foot .end { margin-left: auto; display: flex; gap: 8px; }
+  .st { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .st svg { width: 14px; height: 14px; }
+  .st--new { background: var(--fd-color-info-soft, var(--fd-color-surface-sunken)); color: var(--fd-color-text); }
+  .st--linked { background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); }
+  .st--arch { background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+  .list { display: flex; flex-direction: column; gap: 12px; }
+  .tbl-card { padding: 8px 8px 4px; overflow-x: auto; }
+  .fd-table td small { display: block; color: var(--fd-color-text-muted); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* --- Popover « Rattacher à… » --- */
+  .pop { position: absolute; z-index: 50; width: 360px; padding: 8px; background: var(--fd-color-surface-raised, var(--fd-color-surface)); border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-lg); box-shadow: var(--fd-shadow-lg); }
+  .pop .fd-input { width: 100%; height: 40px; margin-bottom: 6px; }
+  .pop button.opt { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; width: 100%; padding: 10px 12px; border-radius: var(--fd-radius-md); cursor: pointer; }
+  .pop button.opt:hover, .pop button.opt:focus-visible { background: var(--fd-color-surface-hover); }
+  .pop button.opt small { color: var(--fd-color-text-muted); font-size: 12px; }
+
+  /* --- Backlog en colonnes --- */
+  .kb { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .kb-col { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: var(--fd-radius-lg); background: var(--fd-color-surface-sunken); border: 1px solid var(--fd-color-border); min-height: 360px; }
+  .kb-col h2 { margin: 0; padding: 4px 4px 6px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .kb-col h2 .cnt { background: var(--fd-color-surface); }
+  .kb-card { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--fd-radius-md); background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-xs); cursor: pointer; }
+  .kb-card:hover { border-color: var(--fd-color-border-strong); }
+  .kb-card:focus-visible { box-shadow: var(--fd-shadow-focus); }
+  .kb-card[data-new='true'] { border-color: var(--fd-color-primary); }
+  .kb-card b { font-size: 14px; line-height: 1.35; }
+  .kb-card .meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--fd-color-text-muted); }
+  .chip { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); font-size: 12px; font-weight: 600; }
+  .chip svg { width: 13px; height: 13px; }
+  .prio { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 700; border: 1px solid var(--fd-color-border); }
+  .prio--haute { background: var(--fd-color-danger-soft, var(--fd-color-primary-soft)); color: var(--fd-color-text); }
+  .rejected { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+  .rejected summary { cursor: pointer; font-weight: 600; }
+  .rejected p { margin: 0; color: var(--fd-color-text-muted); font-size: 14px; }
+
+  /* --- Tiroir (fiche d'élément) --- */
+  .scrim { position: fixed; inset: 0; background: rgba(8, 10, 14, .38); z-index: 60; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 560px; max-width: 100%; background: var(--fd-color-surface); border-left: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-lg); z-index: 61; display: flex; flex-direction: column; }
+  .drawer__head { display: flex; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid var(--fd-color-border); }
+  .drawer__head h2 { margin: 0; font-size: 18px; flex: 1; }
+  .drawer__body { flex: 1; overflow: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+  .move { display: flex; flex-wrap: wrap; gap: 8px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .fd-input, .fd-select { width: 100%; }
+  textarea.fd-input { height: auto; min-height: 84px; padding: 10px 12px; resize: vertical; font: inherit; }
+  .linked { display: flex; flex-direction: column; gap: 8px; }
+  .linked li { list-style: none; padding: 12px 14px; border-radius: var(--fd-radius-md); background: var(--fd-color-surface-sunken); font-size: 14px; }
+  .linked li small { display: block; color: var(--fd-color-text-muted); margin-bottom: 4px; }
+  .linked ul { margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .hist { margin: 0; padding: 0; font-size: 13px; color: var(--fd-color-text-muted); display: flex; flex-direction: column; gap: 6px; }
+  .hist li { list-style: none; }
+  .saved { font-size: 13px; color: var(--fd-color-text-muted); display: inline-flex; align-items: center; gap: 6px; }
+
+  /* --- Modales --- */
+  .modal { position: fixed; z-index: 70; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 560px; max-width: calc(100vw - 32px); max-height: calc(100vh - 48px); overflow: auto; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); border-radius: 16px; box-shadow: var(--fd-shadow-lg); padding: 28px; display: flex; flex-direction: column; gap: 18px; }
+  .modal h2 { margin: 0; font-size: 20px; }
+  .modal p { margin: 0; color: var(--fd-color-text-muted); }
+  .modal .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+  .modal--wide { width: 880px; }
+  .compose { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .preview-lab { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--fd-color-text-muted); }
+
+  /* --- Nouveautés --- */
+  .news { padding: 24px; display: flex; flex-direction: column; gap: 10px; }
+  .news__date { font-size: 13px; color: var(--fd-color-text-muted); display: flex; align-items: center; gap: 8px; }
+  .news h3 { margin: 0; font-size: 18px; }
+  .news p { margin: 0; line-height: 1.55; }
+  .news a { font-weight: 600; color: var(--fd-color-primary); display: inline-flex; align-items: center; gap: 6px; }
+  .news__foot { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .news__foot .end { margin-left: auto; display: flex; gap: 8px; }
+  .tag-new { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-size: 12px; font-weight: 700; }
+
+  /* --- Équipe et journal --- */
+  .two { display: grid; grid-template-columns: 1fr; gap: 24px; }
+  .fd-table select.fd-select { width: 160px; height: 36px; }
+
+  /* --- Toast --- */
+  .toast-l41 { position: fixed; right: 24px; bottom: 24px; z-index: 80; display: flex; align-items: center; gap: 12px; min-width: 320px; padding: 12px 16px; background: var(--fd-color-surface-raised, var(--fd-color-surface)); border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-lg); box-shadow: var(--fd-shadow-md); font-size: 14px; }
+  .toast-l41 svg { color: var(--fd-color-success); }
+
+  /* --- Barre de la maquette (hors produit) --- */
+  .mockbar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 90; display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 14px; border-radius: 999px; background: #12161B; color: #fff; font: 600 12px var(--fd-font-sans); box-shadow: var(--fd-shadow-lg); }
+  .mockbar button { all: unset; cursor: pointer; padding: 6px 10px; border-radius: 999px; }
+  .mockbar button:hover, .mockbar button[aria-pressed='true'] { background: rgba(255,255,255,.16); }
+  .mockbar .step { opacity: .8; }
+  @media print { .mockbar { display: none; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="mockbar" role="region" aria-label="Commandes de la maquette (hors produit)">
+  <span class="step" id="mk-step">Étape 1</span>
+  <button type="button" data-mk="prev">Précédent</button>
+  <button type="button" data-mk="next">Suivant</button>
+  <button type="button" data-mk="ro" aria-pressed="false">Lecture seule</button>
+  <button type="button" data-mk="theme">Sombre</button>
+  <button type="button" data-mk="reset">Recommencer</button>
+</div>
+
+<script>
+/* Icônes : tracés Lucide (licence ISC). */
+const P = {
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  megaphone: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+  inbox: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+  loader: '<path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  checkCircle: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  ticket: '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
+  external: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  message: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/>',
+  archive: '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+  dot: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  dash: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+  kanban: '<path d="M6 5v11"/><path d="M12 5v6"/><path d="M18 5v14"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  arrowLeft: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  arrowRight: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+  user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+  fileDown: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16v-6"/>',
+  graduation: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+  settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  book: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  thumbUp: '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
+  chevronDown: '<path d="m6 9 6 6 6-6"/>',
+  eye: '<path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/>'
+};
+const I = (n, c = 'ic') => `<svg class="${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${P[n] || ''}</svg>`;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const LOGO = '../../brand-tutoclic/production/logo-tutoclick-compact.svg';
+const LOGO_D = '../../brand-tutoclic/production/logo-tutoclick-compact-sombre.svg';
+const logo = (h) => `<img class="wm-l" src="${LOGO}" alt="TutoClick" style="height:${h}px"><img class="wm-d" src="${LOGO_D}" alt="TutoClick" style="height:${h}px">`;
+
+/* ---------- Données fictives ---------- */
+const ME = { name: 'Léa Fictive', initials: 'LF', email: 'lea@tutoclick.example' };
+function initial() {
+  return {
+    screen: 'login', tab: 'apercu', sub: 'comments', menu: false, readonly: false, theme: 'light',
+    drawer: null, modal: null, pop: null, toast: null, seenNews: false, newsTab: 'published',
+    comments: [
+      { id: 'c1', article: 'Exporter un paquet SCORM', page: 'Diffuser', ws: 'Mission Locale Exemple', date: '20 nov. 2026, 10:42', text: 'Je ne trouve pas où choisir entre SCORM 1.2 et SCORM 2004. Notre plateforme n’accepte que la 1.2.', status: 'new' },
+      { id: 'c2', article: 'Exporter un paquet SCORM', page: 'Diffuser', ws: 'Acme Formation', date: '19 nov. 2026, 16:05', text: 'L’article ne dit pas quelle version de SCORM est produite par défaut.', status: 'new' },
+      { id: 'c3', article: 'Suivre les apprenants', page: 'Apprenants', ws: 'Globex', date: '19 nov. 2026, 09:12', text: 'Comment relancer seulement les personnes d’une session ?', status: 'new' },
+      { id: 'c4', article: 'Partager un lien', page: 'Partager', ws: 'Acme Formation', date: '18 nov. 2026, 14:30', text: 'Il manque un exemple de lien personnalisé.', status: 'new' },
+      { id: 'c5', article: 'Flouter les données', page: 'Éditeur', ws: 'Mission Locale Exemple', date: '15 nov. 2026, 11:20', text: 'La zone floutée bouge quand je recadre la capture.', status: 'linked', item: 'b2' }
+    ],
+    articles: [
+      { t: 'Exporter un paquet SCORM', r: 'Diffuser', yes: 18, no: 21, cm: 2 },
+      { t: 'Suivre les apprenants', r: 'Formation', yes: 31, no: 19, cm: 1 },
+      { t: 'Flouter les données', r: 'Éditeur', yes: 40, no: 17, cm: 1 },
+      { t: 'Partager un lien', r: 'Partager', yes: 62, no: 14, cm: 1 },
+      { t: 'Créer une démo avec l’extension', r: 'Créer', yes: 88, no: 9, cm: 0 },
+      { t: 'Thème de la démo', r: 'Éditeur', yes: 3, no: 1, cm: 0 }
+    ],
+    items: [
+      { id: 'b1', title: 'Apprenants : expliquer le filtre Groupe et la relance', status: 'planned', prio: 'Moyenne', article: 'Suivre les apprenants', gh: 'https://github.com/tutoclick-exemple/app/issues/412', count: 3, note: '', hist: ['14 nov. · Créé par Noé Test', '16 nov. · Planifié par Léa Fictive'] },
+      { id: 'b2', title: 'Flou qui se décale après un recadrage', status: 'progress', prio: 'Haute', article: 'Flouter les données', gh: 'https://github.com/tutoclick-exemple/app/issues/398', count: 4, note: 'Correctif en recette.', hist: ['10 nov. · Créé par Léa Fictive', '12 nov. · En cours par Noé Test'] },
+      { id: 'b3', title: 'Glossaire : import CSV', status: 'triage', prio: 'Basse', article: '', gh: '', count: 1, note: '', hist: ['18 nov. · Créé par Sam Exemple'] },
+      { id: 'b4', title: 'Page publique : choisir l’ordre des démos', status: 'done', prio: 'Moyenne', article: 'Page publique', gh: 'https://github.com/tutoclick-exemple/app/issues/377', count: 2, note: '', hist: ['2 nov. · Créé', '9 nov. · Fait par Noé Test'], announced: true },
+      { id: 'b5', title: 'Thème sombre pour le lecteur intégré', status: 'rejected', prio: 'Basse', article: '', gh: '', count: 1, note: '', reason: 'Le lecteur suit déjà le thème du système du visiteur.', hist: ['5 nov. · Rejeté par Léa Fictive'] }
+    ],
+    news: [
+      { id: 'n1', title: 'Page publique : choisissez l’ordre des démos', text: 'Dans Partager > Page publique, faites glisser les démos pour choisir leur ordre d’affichage.', article: 'Page publique', date: '9 nov. 2026', state: 'published' }
+    ],
+    team: [
+      { name: 'Léa Fictive', email: 'lea@tutoclick.example', role: 'Admin', last: 'à l’instant', me: true },
+      { name: 'Noé Test', email: 'noe@tutoclick.example', role: 'Admin', last: 'il y a 2 h' },
+      { name: 'Sam Exemple', email: 'sam@tutoclick.example', role: 'Lecture seule', last: 'il y a 3 j' }
+    ],
+    audit: [
+      { d: '20 nov. 2026, 09:58', who: 'Léa Fictive', a: 'Rejeté : le lecteur suit déjà le thème du système', o: 'Thème sombre pour le lecteur intégré' },
+      { d: '19 nov. 2026, 17:40', who: 'Noé Test', a: 'Statut modifié : Planifié → En cours', o: 'Flou qui se décale après un recadrage' },
+      { d: '18 nov. 2026, 11:02', who: 'Sam Exemple', a: 'Export CSV', o: 'Retours sur l’aide (90 j)' },
+      { d: '17 nov. 2026, 15:21', who: 'Léa Fictive', a: 'Rôle modifié : Admin → Lecture seule', o: 'Sam Exemple' }
+    ]
+  };
+}
+let S = initial();
+const STEPS = ['Connexion', 'Menu du compte', 'Vue d’ensemble', 'Retours', 'Créer un élément', 'Rattacher à…', 'Backlog', 'Fiche, passage à Fait', 'Annoncer', 'Nouveautés', 'Équipe et journal', 'Côté client : point de nouveauté', 'Côté client : page Nouveautés'];
+const now = () => '20 nov. 2026, ' + ['10:51', '10:52', '10:54', '10:55', '10:57', '10:58', '11:00'][Math.min(S.audit.length - 4, 6)];
+const log = (a, o) => S.audit.unshift({ d: now(), who: ME.name, a, o });
+const toast = (t) => { S.toast = t; };
+const counts = () => ({
+  newC: S.comments.filter((c) => c.status === 'new').length,
+  triage: S.items.filter((i) => i.status === 'triage').length
+});
+const STATUS = { triage: ['À trier', 'inbox'], planned: ['Planifié', 'calendar'], progress: ['En cours', 'loader'], done: ['Fait', 'check'], rejected: ['Rejeté', 'x'] };
+const ro = () => S.readonly;
+const dis = () => (ro() ? ' disabled aria-disabled="true" title="Lecture seule : action réservée aux admins"' : '');
+
+/* ---------- Écrans ---------- */
+function vLogin() {
+  return `<main class="login"><form class="fd-card login__card" data-act="login" aria-labelledby="lg-t">
+    ${logo(44)}
+    <div><h1 id="lg-t">Connexion</h1><p>Accédez à votre espace TutoClick.</p></div>
+    <div class="field"><label for="lg-e">Adresse e-mail</label><input id="lg-e" class="fd-input" type="email" value="${ME.email}" autocomplete="username"></div>
+    <div class="field"><label for="lg-p">Mot de passe</label><input id="lg-p" class="fd-input" type="password" value="motdepassefictif" autocomplete="current-password"></div>
+    <button class="fd-btn fd-btn--primary fd-btn--lg" type="submit">Se connecter</button>
+  </form></main>`;
+}
+function vApp(page) {
+  const unseen = S.news.some((n) => n.state === 'published' && n.fresh) && !S.seenNews;
+  const body = page === 'news' ? vClientNews() : `
+    <header class="topbar"><div><h1>Démos</h1><p class="sub">Vos parcours interactifs, prêts à partager.</p></div></header>
+    <section class="kpis" aria-label="Indicateurs"><article class="fd-card fd-kpi"><span class="fd-kpi__label">Vues (30 jours)</span><span class="fd-kpi__value">1 440</span></article><article class="fd-card fd-kpi"><span class="fd-kpi__label">Visiteurs uniques</span><span class="fd-kpi__value">1 080</span></article><article class="fd-card fd-kpi"><span class="fd-kpi__label">Taux de complétion</span><span class="fd-kpi__value">44 %</span></article></section>`;
+  return `<div class="app">
+    <aside class="side" aria-label="Navigation principale">
+      <a class="brand" href="#" data-act="home"><img class="brand__logo wm-l" src="${LOGO}" alt="TutoClick"><img class="brand__logo wm-d" src="${LOGO_D}" alt="TutoClick"><span class="brand__sub">DSI des Missions Locales</span></a>
+      <nav class="fd-nav">
+        <a class="fd-nav__item" href="#" data-act="home" ${page !== 'news' ? 'aria-current="page"' : ''}>${I('grid')}Démos</a>
+        <a class="fd-nav__item" href="#">${I('chart')}Analytics</a>
+        <span class="fd-nav__section">Formation</span>
+        <a class="fd-nav__item" href="#">${I('graduation')}Apprenants</a>
+        <span class="fd-nav__section">Workspace</span>
+        <a class="fd-nav__item" href="#">${I('users')}Membres</a>
+        <a class="fd-nav__item" href="#">${I('settings')}Paramètres</a>
+      </nav>
+      <div class="side__foot">
+        <span class="avatar-wrap"><span class="avatar" aria-hidden="true">${ME.initials}</span>${unseen ? '<span class="newdot" aria-hidden="true"></span>' : ''}</span>
+        <span><b>${ME.name}</b><small>Propriétaire · Acme</small></span>
+        <button class="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon" type="button" data-act="menu" aria-haspopup="menu" aria-expanded="${S.menu}" aria-label="Menu du compte${unseen ? ', 1 nouveauté' : ''}">${I('more')}</button>
+      </div>
+    </aside>
+    <main class="main">${body}</main>
+  </div>
+  ${S.menu ? `<div class="acct-menu" role="menu" aria-label="Menu du compte">
+      <button role="menuitem" type="button">${I('user')}Mon profil</button>
+      <button role="menuitem" type="button">${I('fileDown')}Mes données</button>
+      <button role="menuitem" type="button" data-act="news-client">${I('megaphone')}Nouveautés${unseen ? '<span class="newdot" aria-hidden="true"></span><span class="sr-only">, 1 nouvelle</span>' : ''}</button>
+      <hr>
+      <div class="sep-label" aria-hidden="true">Équipe TutoClick</div>
+      <button role="menuitem" type="button" data-act="console">${I('shield')}Console propriétaire</button>
+      <hr>
+      <button role="menuitem" type="button" data-act="logout">${I('logout')}Se déconnecter</button>
+    </div>` : ''}`;
+}
+function vClientNews() {
+  const pub = S.news.filter((n) => n.state === 'published');
+  return `<header class="topbar"><div><h1>Nouveautés</h1><p class="sub">Les améliorations récentes de TutoClick, souvent nées de vos retours sur l’aide.</p></div></header>
+    <div class="list" style="max-width:760px">${pub.map((n) => `<article class="fd-card news" aria-labelledby="nw-${n.id}">
+      <span class="news__date">${I('calendar', 'ic-sm')}${n.date}${n.fresh ? ' <span class="tag-new">Nouveau</span>' : ''}</span>
+      <h3 id="nw-${n.id}">${esc(n.title)}</h3><p>${esc(n.text)}</p>
+      ${n.article ? `<a href="#">${I('book', 'ic-sm')}Lire l’article d’aide : ${esc(n.article)}</a>` : ''}
+    </article>`).join('')}</div>`;
+}
+
+function vConsole() {
+  const c = counts();
+  const tabs = [['apercu', 'Vue d’ensemble', 'dash', ''], ['retours', 'Retours', 'message', c.newC], ['backlog', 'Backlog', 'kanban', c.triage], ['news', 'Nouveautés', 'megaphone', ''], ['team', 'Équipe et journal', 'history', '']];
+  const views = { apercu: vOverview, retours: vRetours, backlog: vBacklog, news: vNews, team: vTeam };
+  return `<div class="cs">
+    <header class="cs-head">
+      <div class="cs-brand">${logo(30)}<span><b>Console propriétaire</b><small>Équipe TutoClick · tous les espaces</small></span></div>
+      <nav class="cs-tabs" role="tablist" aria-label="Console">${tabs.map(([k, l, ic, n]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${I(ic, 'ic-sm')}${l}${n ? ` <span class="cnt" aria-label="${n} ${k === 'retours' ? 'nouveaux' : 'à trier'}">${n}</span>` : ''}</button>`).join('')}</nav>
+      <div class="cs-head__end">
+        <span class="role-badge ${ro() ? 'role-badge--ro' : ''}">${I(ro() ? 'eye' : 'shield', 'ic-sm')}${ro() ? 'Lecture seule' : 'Admin'}</span>
+        <button class="fd-btn" type="button" data-act="back-app">${I('arrowLeft', 'ic-sm')}Retour à l’app</button>
+      </div>
+    </header>
+    <main class="cs-main" role="tabpanel">${ro() ? `<p class="ro-note">${I('lock', 'ic-sm')}Vous êtes en lecture seule : vous pouvez consulter et exporter, mais pas modifier.</p>` : ''}${views[S.tab]()}</main>
+  </div>${vOverlays()}`;
+}
+function satOf(a) { return Math.round((a.yes / (a.yes + a.no)) * 100); }
+function vOverview() {
+  const tot = S.articles.reduce((s, a) => ({ yes: s.yes + a.yes, no: s.no + a.no }), { yes: 0, no: 0 });
+  const c = counts();
+  const prob = S.articles.filter((a) => a.yes + a.no >= 5).sort((a, b) => satOf(a) - satOf(b)).slice(0, 3);
+  return `<div class="page-t"><div><h1>Vue d’ensemble</h1><p>90 derniers jours · tous les espaces.</p></div></div>
+    <section class="kpis4" aria-label="Chiffres clés">
+      <article class="fd-card kpi"><span class="l">${I('thumbUp', 'ic-sm')}Satisfaction</span><span class="v">${Math.round((tot.yes / (tot.yes + tot.no)) * 100)} %</span><span class="f">${tot.yes} Oui, ${tot.no} Non</span></article>
+      <article class="fd-card kpi"><span class="l">${I('message', 'ic-sm')}Réponses</span><span class="v">${tot.yes + tot.no}</span><span class="f">sur ${S.articles.length} articles notés</span></article>
+      <article class="fd-card kpi"><span class="l">${I('dot', 'ic-sm')}Commentaires nouveaux</span><span class="v">${c.newC}</span><span class="f">à lire dans Retours</span></article>
+      <article class="fd-card kpi"><span class="l">${I('inbox', 'ic-sm')}Éléments à trier</span><span class="v">${c.triage}</span><span class="f">dans le backlog</span></article>
+    </section>
+    <div class="twocol">
+      <section class="fd-card card-pad" aria-labelledby="pb-t"><h2 id="pb-t">3 articles à surveiller</h2><p class="sub">Les moins bien notés, parmi ceux qui ont au moins 5 réponses.</p>
+        ${prob.map((a) => `<div class="prob"><span><b>${esc(a.t)}</b><small>${esc(a.r)} · ${a.no} Non · ${a.cm} commentaire${a.cm > 1 ? 's' : ''}</small></span><span class="sat">${satOf(a)} %<span class="bar"><i style="width:${satOf(a)}%"></i></span></span><button class="fd-btn" type="button" data-act="see-article" data-a="${esc(a.t)}">Voir les retours</button></div>`).join('')}
+      </section>
+      <section class="fd-card card-pad act" aria-labelledby="ac-t"><h2 id="ac-t">Activité de l’équipe</h2><ul>${S.audit.slice(0, 4).map((e) => `<li><span class="ava" aria-hidden="true">${e.who.split(' ').map((x) => x[0]).join('')}</span><span>${esc(e.a)}${e.o !== '—' ? ` · <b>${esc(e.o)}</b>` : ''}<small>${e.who} · ${e.d}</small></span></li>`).join('')}</ul></section>
+    </div>`;
+}
+function vRetours() {
+  const c = counts();
+  const head = `<div class="page-t"><div><h1>Retours sur l’aide</h1><p>Tous les espaces. Les réponses sont anonymes.</p></div><div class="end"><button class="fd-btn" type="button">${I('download', 'ic-sm')}Exporter (CSV)</button></div></div>
+    <div class="fd-segmented" role="tablist" aria-label="Vue" style="align-self:flex-start"><button type="button" role="tab" data-sub="articles" aria-selected="${S.sub === 'articles'}">Articles</button><button type="button" role="tab" data-sub="comments" aria-selected="${S.sub === 'comments'}">Commentaires · ${c.newC} nouveaux</button></div>
+    <div class="fd-toolbar"><div class="fd-toolbar__group" role="group" aria-label="Filtres">
+      <div class="fd-segmented" role="radiogroup" aria-label="Période"><button type="button" role="radio" aria-checked="false">30 j</button><button type="button" role="radio" aria-checked="true" aria-pressed="true">90 j</button><button type="button" role="radio" aria-checked="false">12 mois</button></div>
+      <button class="fd-btn fd-filter" type="button" aria-haspopup="listbox"><span class="lab">Espace :</span>Tous${I('chevronDown', 'ic-sm')}</button>
+      ${S.sub === 'comments' ? `<button class="fd-btn fd-filter" type="button" aria-haspopup="menu"><span class="lab">Statut :</span>Nouveaux${I('chevronDown', 'ic-sm')}</button>` : `<button class="fd-btn fd-filter" type="button" aria-haspopup="menu"><span class="lab">Rubrique :</span>Toutes${I('chevronDown', 'ic-sm')}</button>`}
+    </div><div class="fd-toolbar__group fd-toolbar__group--end"><button class="fd-btn fd-filter" type="button" aria-haspopup="menu"><span class="lab">Tri :</span>${S.sub === 'comments' ? 'Plus récents' : 'Moins bien notés'}${I('chevronDown', 'ic-sm')}</button></div></div>`;
+  if (S.sub === 'articles') {
+    const rows = [...S.articles].sort((a, b) => ((a.yes + a.no < 5) - (b.yes + b.no < 5)) || satOf(a) - satOf(b));
+    return head + `<div class="fd-card tbl-card"><table class="fd-table"><caption class="sr-only">Satisfaction par article</caption><thead><tr><th scope="col">Article</th><th scope="col">Oui</th><th scope="col">Non</th><th scope="col">Satisfaction</th><th scope="col">Commentaires</th><th scope="col">Backlog</th></tr></thead><tbody>
+      ${rows.map((a) => { const open = S.items.filter((i) => i.article === a.t && !['done', 'rejected'].includes(i.status)).length; return `<tr><td><b>${esc(a.t)}</b><small>${esc(a.r)}${a.yes + a.no < 5 ? ' · <span class="chip">Peu de réponses</span>' : ''}</small></td><td class="num">${a.yes}</td><td class="num">${a.no}</td><td><span class="sat" style="width:110px">${satOf(a)} %<span class="bar"><i style="width:${satOf(a)}%"></i></span></span></td><td class="num">${a.cm}</td><td class="num">${open ? `${open} ouvert${open > 1 ? 's' : ''}` : '—'}</td></tr>`; }).join('')}
+    </tbody></table></div>`;
+  }
+  const list = S.comments.filter((x) => S.filterArticle ? x.article === S.filterArticle : true);
+  return head + (S.filterArticle ? `<p class="ro-note" style="background:var(--fd-color-surface)">Article : <b>${esc(S.filterArticle)}</b> <button class="fd-btn fd-btn--ghost fd-btn--sm" type="button" data-act="clear-article">Voir tous les articles</button></p>` : '') + `<div class="list">${list.map((x) => {
+    const it = x.item && S.items.find((i) => i.id === x.item);
+    const badge = x.status === 'new' ? `<span class="st st--new">${I('dot')}Nouveau</span>` : x.status === 'linked' ? `<span class="st st--linked">${I('link')}Rattaché à : ${esc(it ? it.title : '')}</span>` : `<span class="st st--arch">${I('archive')}Classé</span>`;
+    return `<article class="fd-card cmt" aria-label="Commentaire du ${x.date}" id="cmt-${x.id}">
+      <div class="cmt__meta"><a href="#">${esc(x.article)}</a><span>Page : ${esc(x.page)}</span><span>${esc(x.ws)}</span><span>${x.date}</span></div>
+      <p class="cmt__txt">${esc(x.text)}</p>
+      <div class="cmt__foot">${badge}${x.status === 'new' ? `<div class="end">
+        <button class="fd-btn" type="button" data-act="archive" data-c="${x.id}"${dis()}>${I('archive', 'ic-sm')}Classer sans suite</button>
+        <button class="fd-btn" type="button" data-act="attach" data-c="${x.id}" aria-haspopup="dialog"${dis()}>${I('link', 'ic-sm')}Rattacher à…</button>
+        <button class="fd-btn fd-btn--primary" type="button" data-act="create" data-c="${x.id}"${dis()}>${I('plus', 'ic-sm')}Créer un élément</button></div>` : ''}</div>
+    </article>`; }).join('')}</div><p class="ro-note" style="background:transparent;border:0;padding:0">Les commentaires sont conservés 12 mois.</p>`;
+}
+function vBacklog() {
+  const cols = ['triage', 'planned', 'progress', 'done'];
+  const rej = S.items.filter((i) => i.status === 'rejected');
+  return `<div class="page-t"><div><h1>Backlog d’amélioration</h1><p>Chaque élément regroupe un ou plusieurs retours.</p></div><div class="end"><button class="fd-btn" type="button">${I('download', 'ic-sm')}Exporter (CSV)</button><button class="fd-btn fd-btn--primary" type="button" data-act="new-item"${dis()}>${I('plus', 'ic-sm')}Nouvel élément</button></div></div>
+    <div class="fd-toolbar"><div class="fd-toolbar__group" role="group" aria-label="Filtres"><button class="fd-btn fd-filter" type="button"><span class="lab">Priorité :</span>Toutes${I('chevronDown', 'ic-sm')}</button><button class="fd-btn fd-filter" type="button"><span class="lab">Article :</span>Tous${I('chevronDown', 'ic-sm')}</button></div><div class="fd-toolbar__group fd-toolbar__group--end"><button class="fd-btn fd-filter" type="button"><span class="lab">Tri :</span>Priorité${I('chevronDown', 'ic-sm')}</button></div></div>
+    <div class="kb">${cols.map((k) => { const its = S.items.filter((i) => i.status === k).sort((a, b) => ({ Haute: 0, Moyenne: 1, Basse: 2 }[a.prio] - { Haute: 0, Moyenne: 1, Basse: 2 }[b.prio])); return `<section class="kb-col" aria-labelledby="kb-${k}"><h2 id="kb-${k}">${I(STATUS[k][1], 'ic-sm')}${STATUS[k][0]} <span class="cnt">${its.length}</span></h2>
+      ${its.map((i) => `<button class="kb-card" type="button" data-act="open" data-i="${i.id}" data-new="${!!i.fresh}" aria-label="${esc(i.title)}, ${STATUS[k][0]}, priorité ${i.prio}, ${i.count} retour${i.count > 1 ? 's' : ''}">
+        <b>${esc(i.title)}</b>
+        <span class="meta"><span class="prio ${i.prio === 'Haute' ? 'prio--haute' : ''}">${i.prio}</span><span class="chip">${I('message')}${i.count} retour${i.count > 1 ? 's' : ''}</span>${i.gh ? `<span class="chip">${I('ticket')}#${i.gh.split('/').pop()}</span>` : ''}${i.status === 'done' && i.announced ? `<span class="chip">${I('megaphone')}Annoncé</span>` : ''}</span>
+        ${i.article ? `<span class="meta">${I('book', 'ic-sm')}${esc(i.article)}</span>` : ''}
+      </button>`).join('') || `<p style="margin:8px 4px;color:var(--fd-color-text-muted);font-size:13px">Aucun élément.</p>`}
+    </section>`; }).join('')}</div>
+    <details class="fd-card rejected"><summary>Rejetés (${rej.length})</summary>${rej.map((i) => `<p><b style="color:var(--fd-color-text)">${esc(i.title)}</b> · ${esc(i.reason)}</p>`).join('')}</details>`;
+}
+function vNews() {
+  const list = S.news.filter((n) => (S.newsTab === 'published' ? n.state === 'published' : n.state === 'draft'));
+  return `<div class="page-t"><div><h1>Nouveautés</h1><p>Les annonces visibles par tous les espaces, dans « Nouveautés » du menu du compte.</p></div><div class="end"><button class="fd-btn fd-btn--primary" type="button" data-act="compose-free"${dis()}>${I('plus', 'ic-sm')}Nouvelle annonce</button></div></div>
+    <div class="fd-segmented" role="tablist" aria-label="Annonces" style="align-self:flex-start"><button type="button" role="tab" data-ntab="published" aria-selected="${S.newsTab === 'published'}">Publiées · ${S.news.filter((n) => n.state === 'published').length}</button><button type="button" role="tab" data-ntab="draft" aria-selected="${S.newsTab === 'draft'}">Brouillons · ${S.news.filter((n) => n.state === 'draft').length}</button></div>
+    <div class="list" style="max-width:820px">${list.map((n) => `<article class="fd-card news"><span class="news__date">${I('calendar', 'ic-sm')}${n.state === 'published' ? 'Publiée le ' + n.date : 'Brouillon'}${n.fresh ? ' <span class="tag-new">Nouveau</span>' : ''}</span><h3>${esc(n.title)}</h3><p>${esc(n.text)}</p>${n.article ? `<a href="#">${I('book', 'ic-sm')}Lire l’article d’aide : ${esc(n.article)}</a>` : ''}
+      <div class="news__foot"><span class="chip">${I('kanban')}${n.item ? 'Élément : ' + esc(S.items.find((i) => i.id === n.item).title) : 'Annonce libre'}</span><div class="end"><button class="fd-btn fd-btn--sm" type="button"${dis()}>Modifier</button>${n.state === 'published' ? `<button class="fd-btn fd-btn--sm" type="button"${dis()}>Retirer</button>` : ''}</div></div></article>`).join('') || '<p class="ro-note">Aucune annonce.</p>'}</div>
+    ${S.news.some((n) => n.fresh) ? `<div><button class="fd-btn" type="button" data-act="see-client">${I('eye', 'ic-sm')}Voir côté client</button></div>` : ''}`;
+}
+function vTeam() {
+  return `<div class="page-t"><div><h1>Équipe et journal</h1><p>Les comptes propriétaires de TutoClick et la trace de leurs actions.</p></div></div>
+    <section class="fd-card card-pad" aria-labelledby="tm-t"><div class="page-t" style="align-items:center"><h2 id="tm-t" style="margin:0">Équipe · ${S.team.length}</h2><div class="end"><button class="fd-btn fd-btn--primary" type="button" data-act="add-owner"${dis()}>${I('plus', 'ic-sm')}Ajouter un propriétaire</button></div></div>
+      <table class="fd-table"><caption class="sr-only">Comptes propriétaires</caption><thead><tr><th scope="col">Personne</th><th scope="col">Rôle</th><th scope="col">Dernière activité</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead><tbody>
+      ${S.team.map((m, k) => `<tr><td><b>${m.name}${m.me ? ' (vous)' : ''}</b><small>${m.email}</small></td><td><select class="fd-select" aria-label="Rôle de ${m.name}" data-role="${k}"${dis()}${m.me ? ' disabled title="Vous ne pouvez pas changer votre propre rôle"' : ''}><option${m.role === 'Admin' ? ' selected' : ''}>Admin</option><option${m.role === 'Lecture seule' ? ' selected' : ''}>Lecture seule</option></select></td><td>${m.last}</td><td>${m.me ? '' : `<button class="fd-btn fd-btn--ghost fd-btn--sm" type="button"${dis()}>Retirer</button>`}</td></tr>`).join('')}
+      </tbody></table>
+      <p class="sub" style="margin:0">Admin : toutes les actions. Lecture seule : consulter et exporter. Il reste toujours au moins un admin.</p>
+    </section>
+    <section class="fd-card card-pad" aria-labelledby="au-t"><div class="page-t" style="align-items:center"><h2 id="au-t" style="margin:0">Journal d’audit</h2><div class="end"><button class="fd-btn" type="button">${I('download', 'ic-sm')}Exporter (CSV)</button></div></div>
+      <div class="fd-toolbar"><div class="fd-toolbar__group"><button class="fd-btn fd-filter" type="button"><span class="lab">Personne :</span>Toutes${I('chevronDown', 'ic-sm')}</button><button class="fd-btn fd-filter" type="button"><span class="lab">Action :</span>Toutes${I('chevronDown', 'ic-sm')}</button></div></div>
+      <table class="fd-table"><caption class="sr-only">Journal d’audit</caption><thead><tr><th scope="col">Date</th><th scope="col">Personne</th><th scope="col">Action</th><th scope="col">Objet</th></tr></thead><tbody>
+      ${S.audit.map((e) => `<tr><td class="num">${e.d}</td><td>${e.who}</td><td>${esc(e.a)}</td><td>${esc(e.o)}</td></tr>`).join('')}</tbody></table>
+      <p class="sub" style="margin:0">Le journal ne peut être ni modifié ni effacé depuis la console. Conservation : 12 mois.</p>
+    </section>`;
+}
+
+/* ---------- Superpositions ---------- */
+function vOverlays() {
+  let h = '';
+  if (S.pop) {
+    const open = S.items.filter((i) => !['done', 'rejected'].includes(i.status));
+    h += `<div class="pop" role="dialog" aria-label="Rattacher à un élément" style="left:${S.pop.x}px;top:${S.pop.y}px"><label class="sr-only" for="pop-q">Rechercher un élément</label><input id="pop-q" class="fd-input" type="search" placeholder="Rechercher un élément ouvert" value="SCORM">
+      ${open.filter((i) => /SCORM/i.test(i.title)).concat(open.filter((i) => !/SCORM/i.test(i.title)).slice(0, 2)).map((i) => `<button class="opt" type="button" data-act="attach-to" data-i="${i.id}"><b>${esc(i.title)}</b><small>${STATUS[i.status][0]} · ${i.count} retour${i.count > 1 ? 's' : ''}</small></button>`).join('')}</div>`;
+  }
+  if (S.drawer) {
+    const i = S.items.find((x) => x.id === S.drawer);
+    const linked = S.comments.filter((c) => c.item === i.id);
+    h += `<div class="scrim" data-act="close"></div><aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-t">
+      <div class="drawer__head"><span class="st st--linked">${I(STATUS[i.status][1])}${STATUS[i.status][0]}</span><h2 id="dr-t">Élément du backlog</h2><span class="saved">${I('checkCircle', 'ic-sm')}Enregistré</span><button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" data-act="close" aria-label="Fermer">${I('x')}</button></div>
+      <div class="drawer__body">
+        <div class="field"><label for="dr-title">Titre</label><input id="dr-title" class="fd-input" value="${esc(i.title)}"${dis()}></div>
+        <div class="field"><span class="lbl" id="mv-l">Statut</span><div class="move" role="group" aria-labelledby="mv-l">${['triage', 'planned', 'progress', 'done', 'rejected'].map((k) => `<button class="fd-btn ${i.status === k ? 'fd-btn--primary' : ''}" type="button" data-act="status" data-s="${k}" aria-pressed="${i.status === k}"${dis()}>${I(STATUS[k][1], 'ic-sm')}${STATUS[k][0]}</button>`).join('')}</div></div>
+        <div class="grid2">
+          <div class="field"><label for="dr-prio">Priorité</label><select id="dr-prio" class="fd-select"${dis()}><option${i.prio === 'Haute' ? ' selected' : ''}>Haute</option><option${i.prio === 'Moyenne' ? ' selected' : ''}>Moyenne</option><option${i.prio === 'Basse' ? ' selected' : ''}>Basse</option></select></div>
+          <div class="field"><label for="dr-art">Article lié</label><select id="dr-art" class="fd-select"${dis()}><option>${esc(i.article || 'Aucun')}</option></select></div>
+        </div>
+        <div class="field"><label for="dr-gh">Ticket GitHub</label><input id="dr-gh" class="fd-input" type="url" placeholder="https://github.com/organisation/depot/issues/123" value="${esc(i.gh)}"${dis()}><span class="help">Lien seulement : le statut du ticket n’est pas synchronisé.${i.gh ? ` <a href="#">Ouvrir le ticket #${i.gh.split('/').pop()}</a>` : ''}</span></div>
+        <div class="field"><label for="dr-note">Note interne</label><textarea id="dr-note" class="fd-input" placeholder="Visible par l’équipe TutoClick seulement"${dis()}>${esc(i.note)}</textarea></div>
+        <div class="field linked"><span class="lbl">Retours regroupés · ${i.count}</span><ul>${linked.map((c) => `<li><small>${c.date} · ${esc(c.ws)} · Page : ${esc(c.page)}</small>${esc(c.text)}</li>`).join('')}${i.count > linked.length ? `<li><small>${i.count - linked.length} retour${i.count - linked.length > 1 ? 's' : ''} plus ancien${i.count - linked.length > 1 ? 's' : ''}</small>Voir dans Retours</li>` : ''}</ul></div>
+        <div class="field"><span class="lbl">Historique</span><ul class="hist">${i.hist.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+      </div></aside>`;
+  }
+  if (S.modal) {
+    const m = S.modal;
+    h += `<div class="scrim" data-act="close-modal"></div>`;
+    if (m.kind === 'create') {
+      const c = S.comments.find((x) => x.id === m.c);
+      h += `<form class="modal" role="dialog" aria-modal="true" aria-labelledby="mc-t" data-act="do-create"><h2 id="mc-t">Créer un élément de backlog</h2><p>Le commentaire y sera rattaché. D’autres retours pourront le rejoindre avec « Rattacher à… ».</p>
+        <div class="field"><label for="mc-title">Titre</label><input id="mc-title" class="fd-input" value="Export SCORM : rendre visible le choix de la version (1.2 ou 2004)"></div>
+        <div class="grid2"><div class="field"><label for="mc-p">Priorité</label><select id="mc-p" class="fd-select"><option>Haute</option><option selected>Moyenne</option><option>Basse</option></select></div><div class="field"><label for="mc-a">Article lié</label><select id="mc-a" class="fd-select"><option>${esc(c.article)}</option></select></div></div>
+        <div class="field"><label for="mc-gh">Ticket GitHub (facultatif)</label><input id="mc-gh" class="fd-input" type="url" placeholder="https://github.com/organisation/depot/issues/123" value="https://github.com/tutoclick-exemple/app/issues/431"></div>
+        <div class="linked"><ul><li><small>Retour rattaché · ${c.date} · ${esc(c.ws)}</small>${esc(c.text)}</li></ul></div>
+        <div class="actions"><button class="fd-btn" type="button" data-act="close-modal">Annuler</button><button class="fd-btn fd-btn--primary" type="submit">Créer l’élément</button></div></form>`;
+    }
+    if (m.kind === 'announce') {
+      h += `<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="ma-t" aria-describedby="ma-d"><h2 id="ma-t">Annoncer cette amélioration ?</h2><p id="ma-d">L’élément est passé à Fait. Une annonce prévient les clients dans « Nouveautés », avec un point sur le menu du compte. Vous pourrez la relire avant de la publier.</p>
+        <div class="actions"><button class="fd-btn" type="button" data-act="close-modal">Plus tard</button><button class="fd-btn fd-btn--primary" type="button" data-act="compose">${I('megaphone', 'ic-sm')}Rédiger l’annonce</button></div></div>`;
+    }
+    if (m.kind === 'compose') {
+      const i = S.items.find((x) => x.id === m.i) || {};
+      h += `<form class="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="mn-t" data-act="publish"><h2 id="mn-t">Nouvelle annonce</h2>
+        <div class="compose"><div class="list">
+          <div class="field"><label for="mn-title">Titre</label><input id="mn-title" class="fd-input" maxlength="90" value="Export SCORM : choisissez la version 1.2 ou 2004"></div>
+          <div class="field"><label for="mn-text">Texte</label><textarea id="mn-text" class="fd-input" maxlength="400" style="min-height:120px">Dans Diffuser > Plateforme de formation, la version du paquet SCORM se choisit maintenant avant le téléchargement. L’article d’aide explique laquelle prendre selon votre plateforme.</textarea><span class="help">400 caractères au plus. Ni nom de client, ni donnée d’un espace.</span></div>
+          <div class="field"><label for="mn-art">Lien vers l’aide (facultatif)</label><select id="mn-art" class="fd-select"><option>${esc(i.article || 'Aucun')}</option></select></div>
+          <div class="field"><span class="lbl">Public</span><span class="help">Tous les espaces, dans « Nouveautés » du menu du compte.</span></div>
+        </div><div class="list"><span class="preview-lab">Aperçu côté client</span><article class="fd-card news"><span class="news__date">${I('calendar', 'ic-sm')}20 nov. 2026 <span class="tag-new">Nouveau</span></span><h3>Export SCORM : choisissez la version 1.2 ou 2004</h3><p>Dans Diffuser > Plateforme de formation, la version du paquet SCORM se choisit maintenant avant le téléchargement. L’article d’aide explique laquelle prendre selon votre plateforme.</p><a href="#">${I('book', 'ic-sm')}Lire l’article d’aide : ${esc(i.article || '')}</a></article></div></div>
+        <div class="actions"><button class="fd-btn" type="button" data-act="draft">Enregistrer le brouillon</button><button class="fd-btn fd-btn--primary" type="submit">${I('megaphone', 'ic-sm')}Publier l’annonce</button></div></form>`;
+    }
+  }
+  if (S.toast) h += `<div class="toast-l41" role="status">${I('checkCircle')}<span>${S.toast}</span></div>`;
+  return h;
+}
+
+/* ---------- Rendu et parcours ---------- */
+function render() {
+  const r = document.getElementById('root');
+  r.innerHTML = S.screen === 'login' ? vLogin() : S.screen === 'app' ? vApp() : S.screen === 'client-news' ? vApp('news') : vConsole();
+  document.documentElement.dataset.theme = S.theme;
+  document.getElementById('mk-step').textContent = 'Étape ' + (stepIndex() + 1) + ' · ' + STEPS[stepIndex()];
+  document.querySelector('[data-mk="ro"]').setAttribute('aria-pressed', String(S.readonly));
+  document.querySelector('[data-mk="theme"]').textContent = S.theme === 'light' ? 'Sombre' : 'Clair';
+  if (S.toast) { const t = S.toast; setTimeout(() => { if (S.toast === t) { S.toast = null; render(); } }, 3200); }
+}
+let STEP = 0;
+function stepIndex() { return STEP; }
+const go = {
+  login() { S.screen = 'app'; S.menu = false; STEP = 1; },
+  menu() { S.menu = !S.menu; STEP = 1; },
+  console() { S.screen = 'console'; S.menu = false; S.tab = 'apercu'; log('Connexion à la console', '—'); STEP = 2; }
+};
+function stepTo(n) {
+  S = initial(); S.theme = document.documentElement.dataset.theme || 'light'; STEP = 0;
+  const seq = [
+    () => {},
+    () => { S.screen = 'app'; S.menu = true; },
+    () => { go.console(); },
+    () => { S.tab = 'retours'; S.sub = 'comments'; },
+    () => { S.modal = { kind: 'create', c: 'c1' }; },
+    () => { doCreate(); S.modal = null; S.toast = null; S.pop = { c: 'c2', x: 560, y: 540 }; },
+    () => { attachTo('b6'); S.pop = null; S.toast = null; S.tab = 'backlog'; },
+    () => { S.drawer = 'b6'; setStatus('planned'); setStatus('progress'); setStatus('done'); S.modal = null; },
+    () => { S.modal = { kind: 'announce', i: 'b6' }; },
+    () => { S.modal = null; S.drawer = null; publish(); S.tab = 'news'; S.toast = null; },
+    () => { S.tab = 'team'; },
+    () => { S.screen = 'app'; S.menu = true; },
+    () => { S.screen = 'client-news'; S.menu = false; S.seenNews = true; }
+  ];
+  for (let k = 0; k <= n; k++) { seq[k](); STEP = k; }
+  render();
+}
+function doCreate() {
+  const c = S.comments.find((x) => x.id === 'c1');
+  const t = (document.getElementById('mc-title') || {}).value || 'Export SCORM : rendre visible le choix de la version (1.2 ou 2004)';
+  S.items.push({ id: 'b6', title: t, status: 'triage', prio: 'Moyenne', article: c.article, gh: 'https://github.com/tutoclick-exemple/app/issues/431', count: 1, note: '', hist: ['20 nov. · Créé par Léa Fictive depuis un retour'], fresh: true });
+  c.status = 'linked'; c.item = 'b6';
+  log('Élément créé depuis un retour', t); toast('Élément créé dans « À trier ». Le commentaire y est rattaché.');
+}
+function attachTo(id) {
+  const c = S.comments.find((x) => x.id === (S.pop ? S.pop.c : 'c2'));
+  const i = S.items.find((x) => x.id === id) || S.items.find((x) => x.id === 'b6');
+  c.status = 'linked'; c.item = i.id; i.count += 1;
+  log('Retour rattaché', i.title); toast(`Commentaire rattaché à « ${i.title} » (${i.count} retours).`);
+}
+function setStatus(k) {
+  const i = S.items.find((x) => x.id === S.drawer);
+  if (i.status === k) return;
+  const from = STATUS[i.status][0];
+  i.status = k; i.hist.push(`20 nov. · ${STATUS[k][0]} par Léa Fictive`);
+  log(`Statut modifié : ${from} → ${STATUS[k][0]}`, i.title);
+  if (k === 'done' && !i.announced) S.modal = { kind: 'announce', i: i.id };
+}
+function publish(draft) {
+  const i = S.items.find((x) => x.id === 'b6');
+  S.news.forEach((n) => (n.fresh = false));
+  S.news.unshift({ id: 'n2', title: 'Export SCORM : choisissez la version 1.2 ou 2004', text: 'Dans Diffuser > Plateforme de formation, la version du paquet SCORM se choisit maintenant avant le téléchargement. L’article d’aide explique laquelle prendre selon votre plateforme.', article: i.article, date: '20 nov. 2026', state: draft ? 'draft' : 'published', fresh: !draft, item: 'b6' });
+  if (!draft) { i.announced = true; log('Nouveauté publiée', 'Export SCORM : choisissez la version 1.2 ou 2004'); toast('Annonce publiée. Les clients voient un point sur « Nouveautés ».'); }
+  else { log('Brouillon d’annonce enregistré', i.title); toast('Brouillon enregistré.'); }
+}
+
+document.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const a = e.target.dataset.act;
+  if (a === 'login') go.login();
+  if (a === 'do-create') { doCreate(); S.modal = null; STEP = 5; }
+  if (a === 'publish') { publish(); S.modal = null; S.drawer = null; S.tab = 'news'; STEP = 9; }
+  render();
+});
+document.addEventListener('click', (e) => {
+  const mk = e.target.closest('[data-mk]');
+  if (mk) {
+    const k = mk.dataset.mk;
+    if (k === 'next') stepTo(Math.min(STEP + 1, STEPS.length - 1));
+    if (k === 'prev') stepTo(Math.max(STEP - 1, 0));
+    if (k === 'reset') stepTo(0);
+    if (k === 'ro') { S.readonly = !S.readonly; render(); }
+    if (k === 'theme') { S.theme = S.theme === 'light' ? 'dark' : 'light'; render(); }
+    return;
+  }
+  const t = e.target.closest('[data-act],[data-tab],[data-sub],[data-ntab]');
+  if (!t) { if (S.menu && !e.target.closest('.acct-menu')) { S.menu = false; render(); } if (S.pop && !e.target.closest('.pop')) { S.pop = null; render(); } return; }
+  if (t.dataset.tab) { S.tab = t.dataset.tab; S.pop = null; STEP = { apercu: 2, retours: 3, backlog: 6, news: 9, team: 10 }[S.tab]; render(); return; }
+  if (t.dataset.sub) { S.sub = t.dataset.sub; render(); return; }
+  if (t.dataset.ntab) { S.newsTab = t.dataset.ntab; render(); return; }
+  const a = t.dataset.act;
+  if (t.tagName === 'A') e.preventDefault();
+  if (t.disabled) return;
+  switch (a) {
+    case 'menu': go.menu(); break;
+    case 'console': go.console(); break;
+    case 'logout': S = initial(); STEP = 0; break;
+    case 'home': S.screen = 'app'; S.menu = false; break;
+    case 'back-app': S.screen = 'app'; S.menu = false; break;
+    case 'news-client': S.screen = 'client-news'; S.menu = false; S.seenNews = true; STEP = 12; break;
+    case 'see-client': S.screen = 'app'; S.menu = true; STEP = 11; break;
+    case 'see-article': S.tab = 'retours'; S.sub = 'comments'; S.filterArticle = t.dataset.a; STEP = 3; break;
+    case 'clear-article': S.filterArticle = null; break;
+    case 'create': S.modal = { kind: 'create', c: t.dataset.c }; STEP = 4; break;
+    case 'close-modal': S.modal = null; break;
+    case 'attach': { const r = t.getBoundingClientRect(); S.pop = { c: t.dataset.c, x: Math.max(16, r.right - 360 + window.scrollX), y: r.bottom + 6 + window.scrollY }; STEP = 5; break; }
+    case 'attach-to': attachTo(t.dataset.i); S.pop = null; break;
+    case 'archive': { const c = S.comments.find((x) => x.id === t.dataset.c); c.status = 'archived'; log('Retour classé sans suite', c.article); toast('Commentaire classé.'); break; }
+    case 'open': S.drawer = t.dataset.i; STEP = 7; break;
+    case 'close': S.drawer = null; break;
+    case 'status': setStatus(t.dataset.s); if (S.modal) STEP = 8; break;
+    case 'compose': S.modal = { kind: 'compose', i: S.modal.i }; break;
+    case 'compose-free': S.modal = { kind: 'compose', i: 'b6' }; break;
+    case 'draft': publish(true); S.modal = null; S.drawer = null; S.tab = 'news'; S.newsTab = 'draft'; break;
+    case 'new-item': S.modal = { kind: 'create', c: 'c3' }; break;
+    case 'add-owner': toast('Saisissez l’adresse d’un compte TutoClick existant, puis choisissez son rôle.'); break;
+  }
+  render();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (S.modal) S.modal = null; else if (S.pop) S.pop = null; else if (S.drawer) S.drawer = null; else if (S.menu) S.menu = false; else return;
+  render();
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const q = new URLSearchParams(location.search);
+  if (q.get('theme')) S.theme = q.get('theme');
+  const st = parseInt(q.get('step') || '0', 10);
+  stepTo(isNaN(st) ? 0 : st - 1 < 0 ? 0 : st - 1);
+  if (q.get('ro') === '1') { S.readonly = true; render(); }
+});
+</script>
+</body>
+</html>
