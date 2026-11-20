@@ -66,7 +66,7 @@ export function EditorSkeleton({
   showBlocks: boolean;
   demoId: string;
   status?: ReactNode;
-  /** Sous le contenu (ligne « plus long que prévu »). */
+  /** Ligne « plus long que prévu », dans l'en-tête de la scène. */
   after?: ReactNode;
   children?: ReactNode;
 }) {
@@ -154,7 +154,8 @@ export function EditorSkeleton({
           <section className="stage" aria-label={t('editor.canvas')} id="canvas">
             <div className="row stage-head">
               <span className="t-caption muted sk-line">{showBlocks && <Sk w={160} />}</span>
-              <span className="grow" />
+              {/* Ligne « plus long que prévu » dans l'en-tête : aucun décalage de la scène */}
+              {after || <span className="grow" />}
               <select className="select input-sm stage-zoom" aria-label={t('editor.zoom')} disabled>
                 <option>{t('editor.zoomFit')}</option>
               </select>
@@ -245,7 +246,6 @@ export function EditorSkeleton({
           </aside>
         </div>
       )}
-      {after}
     </main>
   );
 }
