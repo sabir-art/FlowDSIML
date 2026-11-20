@@ -77,9 +77,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'Mention de l’effacement',
   );
   ok(
-    await panel
-      .getByLabel('Demandez une modification ou une explication')
-      .evaluate((e) => e === document.activeElement),
+    await panel.getByLabel('Message à l’assistant').evaluate((e) => e === document.activeElement),
     'Focus dans le champ',
   );
   await shot('l30-08-vide');
@@ -105,7 +103,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.waitForTimeout(900);
   ok(hs('h1').body === 'Cliquez sur « + Nouvelle opportunité ».', 'Appliquer : bulle modifiée');
   // Question explicative, Maj+Entrée puis Entrée
-  const field = panel.getByLabel('Demandez une modification ou une explication');
+  const field = panel.getByLabel('Message à l’assistant');
   await field.fill('Combien d’étapes');
   await field.press('Shift+Enter');
   ok((await field.inputValue()).includes('\n'), 'Maj+Entrée : retour à la ligne');

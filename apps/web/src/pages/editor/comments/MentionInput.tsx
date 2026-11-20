@@ -5,6 +5,7 @@
  */
 import {
   forwardRef,
+  useEffect,
   useId,
   useImperativeHandle,
   useLayoutEffect,
@@ -40,12 +41,31 @@ type Props = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'value' | 'onChan
   /** Membres présents sur la démo (L22-08) : « sur cette démo » dans la liste. */
   presentIds?: Set<string>;
   wrapClassName?: string;
+  /** L43 : bouton « Mentionner » : chaque incrément insère « @ » au curseur et ouvre la liste. */
+  openSignal?: number;
+  /** L43 : liste ouverte ou fermée (aria-expanded du bouton « Mentionner »). */
+  onOpenChange?: (open: boolean) => void;
+  /** Id donné à la liste (aria-controls du bouton « Mentionner »). */
+  listId?: string;
 };
 
 const MAX_OPTIONS = 6;
 
 export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function MentionInput(
-  { value, mentions, onValueChange, members, presentIds, wrapClassName, onKeyDown, className, ...rest },
+  {
+    value,
+    mentions,
+    onValueChange,
+    members,
+    presentIds,
+    wrapClassName,
+    openSignal = 0,
+    onOpenChange,
+    listId,
+    onKeyDown,
+    className,
+    ...rest
+  },
   ref,
 ) {
   const { t } = useTranslation();
@@ -60,8 +80,46 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function Ment
   const options = query
     ? members.filter((m) => matchesMember(query.query, m.full_name, m.email)).slice(0, MAX_OPTIONS)
     : [];
-  const open = !!query && dismissed !== query.start && options.length > 0;
+  const shown = !!query && dismissed !== query.start;
+  const open = shown && options.length > 0;
+  // L43 : personne d'autre dans l'espace : la liste le dit au lieu de ne rien afficher
+  const noOne = shown && members.length === 0;
   const activeIdx = Math.min(active, options.length - 1);
+  const acId = listId ?? `${id}-ac`;
+  const list = useRef<HTMLDivElement>(null);
+  const [below, setBelow] = useState(false);
+
+  useEffect(() => onOpenChange?.(open || noOne), [open, noOne, onOpenChange]);
+  // Au-dessus du cadre ; dessous si la place manque (règle de placement L44)
+  useLayoutEffect(() => {
+    if (!(open || noOne) || !list.current || !ta.current) return setBelow(false);
+    const h = list.current.offsetHeight;
+    setBelow(ta.current.getBoundingClientRect().top - h - 6 < 8);
+  }, [open, noOne, options.length]);
+
+  // Bouton « Mentionner » : « @ » au curseur (précédé d'une espace si besoin), liste ouverte
+  const signal = useRef(openSignal);
+  useEffect(() => {
+    if (openSignal === signal.current) return;
+    signal.current = openSignal;
+    const el = ta.current;
+    if (!el) return;
+    const at = el.selectionStart ?? value.length;
+    const end = el.selectionEnd ?? at;
+    const before = value.slice(0, at);
+    const ins = before && !/\s$/.test(before) ? ' @' : '@';
+    const text = before + ins + value.slice(end);
+    if (text.length > (el.maxLength > 0 ? el.maxLength : Infinity)) return el.focus();
+    onValueChange(text, mentions);
+    const caret = at + ins.length;
+    setDismissed(null);
+    setQuery({ start: caret - 1, query: '' });
+    setActive(0);
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(caret, caret);
+    });
+  }, [openSignal, value, mentions, onValueChange]);
 
   const refreshQuery = (text: string, caret: number) => {
     const q = mentionQuery(text, caret);
@@ -87,6 +145,12 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function Ment
   };
 
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (noOne && e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      setDismissed(query!.start);
+      return;
+    }
     if (open) {
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
@@ -149,7 +213,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function Ment
         className={`mi-input ${className ?? ''}`}
         value={value}
         aria-autocomplete="list"
-        aria-controls={open ? `${id}-ac` : undefined}
+        aria-controls={open ? acId : undefined}
         aria-activedescendant={open ? `${id}-o${activeIdx}` : undefined}
         onChange={(e) => {
           onValueChange(e.target.value, mentions);
@@ -166,37 +230,45 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function Ment
         }}
         onKeyDown={onKey}
       />
-      {open && (
-        <ul className="mi-ac" id={`${id}-ac`} role="listbox" aria-label={t('editor.comments.mentionList')}>
-          {options.map((m, i) => (
-            <li
-              key={m.user_id}
-              id={`${id}-o${i}`}
-              role="option"
-              aria-selected={i === activeIdx}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                choose(m);
-              }}
-              onMouseEnter={() => setActive(i)}
-            >
-              <span className={`cm-avatar cm-avatar--${avatarTone(m.user_id)} mi-avatar`} aria-hidden="true">
-                {initials(m.full_name || m.email)}
-              </span>
-              <span>
-                <b>{m.full_name || m.email}</b>
-                <small>
-                  {[
-                    m.role ? t(`roles.${m.role}`) : null,
-                    presentIds?.has(m.user_id) ? t('editor.comments.onDemo') : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </small>
-              </span>
-            </li>
-          ))}
-        </ul>
+      {(open || noOne) && (
+        <div ref={list} className={`mi-ac${below ? ' is-below' : ''}`}>
+          <p className="mi-ac__title" aria-hidden="true">
+            {t('editor.comments.mentionTitle')}
+          </p>
+          {noOne ? (
+            <p className="mi-ac__empty" role="status">
+              {t('editor.comments.mentionNoOne')}
+            </p>
+          ) : (
+            <ul id={acId} role="listbox" aria-label={t('editor.comments.mentionList')}>
+              {options.map((m, i) => (
+                <li
+                  key={m.user_id}
+                  id={`${id}-o${i}`}
+                  role="option"
+                  aria-selected={i === activeIdx}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    choose(m);
+                  }}
+                  onMouseEnter={() => setActive(i)}
+                >
+                  <span
+                    className={`cm-avatar cm-avatar--${avatarTone(m.user_id)} mi-avatar`}
+                    aria-hidden="true"
+                  >
+                    {initials(m.full_name || m.email)}
+                  </span>
+                  <span className="mi-ac__name">
+                    <b>{m.full_name || m.email}</b>
+                    {presentIds?.has(m.user_id) && <small>{t('editor.comments.onDemo')}</small>}
+                  </span>
+                  {m.role && <span className="mi-ac__role">{t(`roles.${m.role}`)}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </div>
   );

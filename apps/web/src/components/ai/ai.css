@@ -430,10 +430,10 @@
   white-space: pre-wrap;
 }
 .ai-as-form {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  align-items: end;
+  margin-top: 8px;
+}
+.ai-as-cleared {
+  margin-top: -4px;
 }
 /* 065/066 : avertissement avant l'envoi au fournisseur */
 .ai-notice-line {

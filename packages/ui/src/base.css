@@ -3,6 +3,7 @@
 @import './tokens.css';
 @import './select.css';
 @import './tooltip.css';
+@import './composer.css';
 
 *,
 *::before,

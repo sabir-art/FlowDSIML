@@ -1017,23 +1017,6 @@
     opacity: 1;
   }
 }
-.cm-edit .fd-textarea {
-  min-height: 64px;
-  margin-top: var(--fd-space-1);
-}
-.cm-edit__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--fd-space-2);
-  margin-top: var(--fd-space-2);
-}
-.cm-edit__actions .cm-hint {
-  margin-right: auto;
-}
-.cm-hint {
-  font-size: var(--fd-text-caption-size);
-  color: var(--fd-color-text-subtle);
-}
 .cm-state {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -1121,52 +1104,8 @@
   padding-top: var(--fd-space-3);
   border-top: 1px solid var(--fd-color-border);
 }
-.cm-compose .fd-alert {
-  margin-bottom: var(--fd-space-2);
-}
-.cm-compose__row {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--fd-space-2);
-}
-.cm-compose__input {
-  flex: 1;
-  min-height: 40px;
-  max-height: 120px;
-  resize: none;
-  border-radius: var(--fd-radius-xl);
-  overflow-y: auto;
-}
-.cm-send.fd-btn {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 50%;
-  flex: none;
-}
-.cm-compose__foot {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--fd-space-2);
-  min-height: 0;
-  padding-left: 40px;
-}
-.cm-compose__foot {
-  margin-top: 4px;
-}
-/* Aide visible quand le champ a le focus ; sa place reste réservée (le bouton ne bouge pas au clic) */
-.cm-hint--idle {
-  visibility: hidden;
-}
-.cm-counter {
-  margin-left: auto;
-  font-size: var(--fd-text-caption-size);
-  font-variant-numeric: tabular-nums;
-  color: var(--fd-color-text-muted);
-}
-.cm-counter.is-max {
-  color: var(--fd-color-danger);
-  font-weight: 600;
+.cm-edit {
+  margin-top: var(--fd-space-1);
 }
 
 /* Replié : barre de 48 px, toute la barre est un bouton */
@@ -1234,10 +1173,6 @@
   bottom: 0;
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--fd-color-surface);
-}
-.cm--mobile .cm-send.fd-btn {
-  width: 44px;
-  height: 44px;
 }
 @media (pointer: coarse) {
   .cm-actions .fd-btn,
@@ -1685,9 +1620,6 @@
   position: relative;
   min-width: 0;
 }
-.cm-compose__field {
-  flex: 1;
-}
 .mi-input {
   position: relative;
   z-index: 1;
@@ -1728,23 +1660,48 @@
 .cm-mtag {
   font-weight: 700;
 }
+/* L43 : liste des mentions au-dessus du cadre du composeur (dessous si la place manque) */
+.mi textarea.mi-input {
+  color: transparent;
+}
 .mi-ac {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(100% + 6px);
+  left: -1px;
+  bottom: calc(100% + 7px);
   z-index: 20;
-  list-style: none;
-  margin: 0;
+  width: 280px;
+  max-width: calc(100vw - 32px);
   padding: 4px;
   border-radius: 12px;
   background: var(--fd-color-surface);
   border: 1px solid var(--fd-color-border);
   box-shadow: var(--fd-shadow-lg);
 }
+.mi-ac.is-below {
+  bottom: auto;
+  top: calc(100% + 54px);
+}
+.mi-ac ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mi-ac__title {
+  margin: 0;
+  padding: 6px 8px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fd-color-text-muted);
+}
+.mi-ac__empty {
+  margin: 0;
+  padding: 6px 8px 8px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
 .mi-ac li {
   display: grid;
-  grid-template-columns: 28px 1fr;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
   padding: 6px 8px;
@@ -1755,15 +1712,25 @@
 .mi-ac li[aria-selected='true'] {
   background: var(--fd-color-primary-soft);
 }
+.mi-ac__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .mi-ac small {
   display: block;
   color: var(--fd-color-text-muted);
   font-size: 11px;
 }
+.mi-ac__role {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
 .cm-avatar.mi-avatar {
-  width: 24px;
-  height: 24px;
-  font-size: 9px;
+  width: 28px;
+  height: 28px;
+  font-size: 10px;
 }
 
 /* L22-08 : présence (maquette editeur-collab.html ?etat=presence) */
