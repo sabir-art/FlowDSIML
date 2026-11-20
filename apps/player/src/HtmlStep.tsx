@@ -94,6 +94,7 @@ export function HtmlStep({
           sel: o.sel,
           op: o.op,
           ...(o.sels ? { sels: o.sels } : {}),
+          ...(o.fit ? { fit: o.fit } : {}),
           // Style et graphique : objets revalidés dans la page (liste blanche, valeurs numériques)
           value: o.op === 'text' ? sub(typeof o.value === 'string' ? o.value : '') : o.value,
         })),

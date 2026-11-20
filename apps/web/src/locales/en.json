@@ -1244,7 +1244,7 @@
       "link": "Link to a step",
       "linkTo": "Link to step {{n}}: {{title}}",
       "unlink": "Remove link",
-      "more": "More actions: replace image, delete element, copy selector",
+      "more": "More actions: delete element, copy selector",
       "replaceImage": "Replace image",
       "replaceImageOnlyImg": "Select an image on the page.",
       "restoreImage": "Back to the original image",
@@ -1282,7 +1282,18 @@
       "reminder": "HTML capture: sanitized copy of the page (scripts removed, fields emptied), served from the content domain. Changes never touch the real site.",
       "badgeAll": "All steps",
       "undo_style": "Undo the style of {{sel}}",
-      "undo_chart": "Restore the original chart ({{sel}})"
+      "undo_chart": "Restore the original chart ({{sel}})",
+      "imageSec": "Image",
+      "fit": "Sizing",
+      "fitContain": "Fit",
+      "fitCover": "Fill",
+      "fitHelp": "The image takes the size of the original element.",
+      "maskImage": "Hide the image",
+      "maskHelp": "Replaces the image with a block of the background colour, at the same size.",
+      "imageReplaced": "Image replaced.",
+      "modImage": "Image replaced",
+      "modMask": "Image hidden",
+      "undo_mask": "Undo hiding the image of {{sel}}"
     },
     "sandbox": {
       "planTitle": "Sandbox · {{title}}",

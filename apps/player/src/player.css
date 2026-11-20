@@ -2768,6 +2768,13 @@ h1.p-title {
   outline: 2px solid var(--p-primary);
   outline-offset: 2px;
 }
+/* L28-03 : sous-titres actifs signalés sans la couleur de marque (contraste sûr en clair comme en
+   sombre) : fond teinté et barre sous l'icône, dans la couleur du texte des contrôles. */
 .p-controls .p-cc[aria-pressed='true'] {
-  color: var(--p-primary);
+  background: color-mix(in srgb, currentColor 16%, transparent);
+  box-shadow: inset 0 -2px 0 currentColor;
+}
+.is-dark .p-controls .p-cc[aria-pressed='true'] {
+  color: var(--p-chrome-text);
+  background: rgb(255 255 255 / 0.16);
 }

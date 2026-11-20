@@ -189,21 +189,13 @@ const page = (h1) => `<!doctype html><html><head><meta charset="utf-8"><title>${
   await p.waitForTimeout(200);
   await frame.locator('img[data-fd-canvas]').click();
   await p.getByText('Élément · img').waitFor();
+  // Graphique capturé en image : il se remplace (L28-05), il ne se réécrit pas
   ok(
-    await bar.getByRole('button', { name: 'Modifier le texte' }).isDisabled(),
-    'graphique : « Modifier le texte » désactivé',
+    (await bar.getByRole('button', { name: 'Modifier le texte', exact: true }).count()) === 0 &&
+      (await bar.getByRole('button', { name: 'Remplacer l’image', exact: true }).count()) === 1 &&
+      (await p.getByRole('group', { name: 'Image' }).count()) === 1,
+    'graphique (image) : « Remplacer l’image » dans la barre et section « Image »',
   );
-  ok(
-    (await p.getByText('Graphique non modifiable\u202f: remplacez l’image').count()) >= 1,
-    'aide « Graphique non modifiable »',
-  );
-  // Menu ⋯ : Remplacer l'image (L28 051) actif sur un élément image
-  await bar.getByRole('button', { name: /Plus d’actions/ }).click();
-  ok(
-    !(await p.getByRole('menuitem', { name: /Remplacer l’image/ }).isDisabled()),
-    'Remplacer l’image : actif sur une image (L28 051)',
-  );
-  await p.keyboard.press('Escape');
   // Introuvable : suppression
   await p.getByRole('button', { name: 'Supprimer la modification de a.export-disparu' }).click();
   await p.waitForTimeout(1300);

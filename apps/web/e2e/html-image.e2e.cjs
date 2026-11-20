@@ -82,29 +82,40 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Accueil</t
       .getByRole('toolbar', { name: 'Actions sur l’élément sélectionné' })
       .getByRole('button', { name: /Plus/ });
 
-  // Élément qui n'est pas une image : action désactivée
-  await frame.locator('h1').click();
-  await more().click();
-  ok(
-    await p.getByRole('menuitem', { name: 'Remplacer l’image' }).isDisabled(),
-    'élément non image : « Remplacer l’image » désactivé',
-  );
-  ok(
-    (await p.getByRole('menuitem', { name: 'Remplacer l’image' }).locator('.badge').count()) === 0,
-    'plus de badge « Bientôt »',
-  );
-  await p.keyboard.press('Escape');
+  const bar = () => p.getByRole('toolbar', { name: 'Actions sur l’élément sélectionné' });
 
-  // Image : médiathèque, choix du fichier
+  // Élément qui n'est pas une image : pas d'action d'image, pas de section « Image »
+  await frame.locator('h1').click();
+  await bar().waitFor();
+  ok(
+    (await bar().getByRole('button', { name: 'Remplacer l’image', exact: true }).count()) === 0 &&
+      (await bar().getByRole('button', { name: 'Modifier le texte', exact: true }).count()) === 1 &&
+      (await p.getByRole('group', { name: 'Image' }).count()) === 0,
+    'élément non image : « Modifier le texte », aucune action d’image',
+  );
+
+  // Image : la barre propose « Remplacer l'image » à la place de « Modifier le texte »
   await frame.locator('img.logo').click();
-  await more().click();
-  await p.getByRole('menuitem', { name: 'Remplacer l’image' }).click();
+  await p.getByRole('group', { name: 'Image' }).waitFor();
+  ok(
+    (await bar().getByRole('button', { name: 'Remplacer l’image', exact: true }).count()) === 1 &&
+      (await bar().getByRole('button', { name: 'Modifier le texte', exact: true }).count()) === 0,
+    'image : « Remplacer l’image » dans la barre, à la place de « Modifier le texte »',
+  );
+  ok((await p.locator('#html-text').count()) === 0, 'image : pas de champ « Texte » dans le panneau');
+  ok(
+    await p.getByRole('radio', { name: 'Ajuster' }).isDisabled(),
+    'Ajuster / Remplir inactifs tant que l’image n’est pas remplacée',
+  );
+  await bar().getByRole('button', { name: 'Remplacer l’image', exact: true }).click();
   const lib = p.getByRole('dialog').filter({ hasText: 'logo-acme-2026.png' });
   await lib.waitFor();
   ok(true, 'médiathèque de l’espace ouverte');
   await lib.getByRole('button', { name: 'logo-acme-2026.png' }).click();
   await lib.getByRole('button', { name: 'Utiliser ce fichier' }).click();
+  await p.getByText('Image remplacée.', { exact: true }).waitFor();
   await p.getByText(/Image importée.: aucune détection automatique/).waitFor();
+  ok(true, 'toasts « Image remplacée. » (avec Annuler) et avertissement d’import');
   for (let i = 0; i < 40 && !ops().some((o) => o.op === 'image'); i++) await p.waitForTimeout(100);
   ok(
     ops().some((o) => o.op === 'image' && o.sel && o.value === `${ws}/logo-acme-2026.png`),
@@ -116,8 +127,22 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Accueil</t
     /\/storage\/v1\/object\/public\/media\/.*logo-acme-2026\.png$/.test(src || ''),
     'aperçu : nouvelle image dans la page',
   );
+  ok(
+    (await frame.locator('img.logo').evaluate((e) => getComputedStyle(e).objectFit)) === 'contain',
+    'Ajuster par défaut (contain)',
+  );
+  await p.getByRole('radio', { name: 'Remplir' }).click();
+  for (let i = 0; i < 40 && !ops().some((o) => o.op === 'image' && o.fit === 'cover'); i++)
+    await p.waitForTimeout(100);
+  await p.waitForTimeout(400);
+  ok(
+    ops().some((o) => o.op === 'image' && o.fit === 'cover') &&
+      (await frame.locator('img.logo').evaluate((e) => getComputedStyle(e).objectFit)) === 'cover',
+    'Remplir : cover enregistré et appliqué',
+  );
   if (SHOTS) {
     await p.mouse.move(0, 0);
+    await p.waitForTimeout(8500);
     await p.screenshot({ path: `${SHOTS}/l28-05-image-html${sfx}.png` });
   }
 
@@ -135,12 +160,30 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Accueil</t
   );
   await gdpr.getByRole('button', { name: 'Annuler' }).click();
 
-  // Retour à l'image d'origine
+  // Retour à l'image d'origine (panneau), puis « Masquer l'image »
   await frame.locator('img.logo').click();
-  await more().click();
-  await p.getByRole('menuitem', { name: 'Revenir à l’image d’origine' }).click();
-  await p.waitForTimeout(1300);
+  await p.getByRole('button', { name: 'Revenir à l’image d’origine' }).click();
+  for (let i = 0; i < 40 && ops().some((o) => o.op === 'image'); i++) await p.waitForTimeout(100);
   ok(!ops().some((o) => o.op === 'image'), 'retour à l’image d’origine : opération retirée');
+  await p.getByRole('button', { name: 'Masquer l’image' }).click();
+  for (let i = 0; i < 40 && !ops().some((o) => o.op === 'mask'); i++) await p.waitForTimeout(100);
+  await p.waitForTimeout(400);
+  const masked = await frame.locator('img.logo').evaluate((e) => ({
+    src: e.getAttribute('src') || '',
+    w: e.getBoundingClientRect().width,
+  }));
+  ok(
+    ops().some((o) => o.op === 'mask') && /^data:image\/gif/.test(masked.src) && masked.w > 0,
+    '« Masquer l’image » : aplat à la même taille, image d’origine retirée',
+  );
+  ok(
+    (await p.getByRole('button', { name: 'Masquer l’image' }).getAttribute('aria-pressed')) === 'true',
+    'bouton « Masquer l’image » enfoncé',
+  );
+  if (SHOTS) {
+    await p.mouse.move(0, 0);
+    await p.locator('.html-image-sec').screenshot({ path: `${SHOTS}/l28-05-panneau${sfx}.png` });
+  }
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();

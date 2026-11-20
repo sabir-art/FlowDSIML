@@ -1244,7 +1244,7 @@
       "link": "Lier à une étape",
       "linkTo": "Lier à l’étape {{n}} : {{title}}",
       "unlink": "Retirer le lien",
-      "more": "Plus d’actions : remplacer l’image, supprimer l’élément, copier le sélecteur",
+      "more": "Plus d’actions : supprimer l’élément, copier le sélecteur",
       "replaceImage": "Remplacer l’image",
       "replaceImageOnlyImg": "Sélectionnez une image de la page.",
       "restoreImage": "Revenir à l’image d’origine",
@@ -1282,7 +1282,18 @@
       "reminder": "Capture HTML : copie assainie de la page (scripts retirés, champs vidés), servie depuis le domaine des contenus. Les modifications ne touchent jamais le vrai site.",
       "badgeAll": "Toutes les étapes",
       "undo_style": "Annuler le style de {{sel}}",
-      "undo_chart": "Rétablir le graphique d'origine ({{sel}})"
+      "undo_chart": "Rétablir le graphique d'origine ({{sel}})",
+      "imageSec": "Image",
+      "fit": "Ajustement",
+      "fitContain": "Ajuster",
+      "fitCover": "Remplir",
+      "fitHelp": "L’image prend la taille de l’élément d’origine.",
+      "maskImage": "Masquer l’image",
+      "maskHelp": "Remplace l’image par un aplat de la couleur de fond, à la même taille.",
+      "imageReplaced": "Image remplacée.",
+      "modImage": "Image remplacée",
+      "modMask": "Image masquée",
+      "undo_mask": "Annuler le masquage de l’image de {{sel}}"
     },
     "sandbox": {
       "planTitle": "Sandbox · {{title}}",

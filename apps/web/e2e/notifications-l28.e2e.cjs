@@ -34,7 +34,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const state = seed();
   const me = state.user.id;
   state.tables.members.push({ workspace_id: 'ws-1', user_id: MARIE, role: 'editor', created_at: ago(9000) });
-  state.memberDirectory = { [MARIE]: { full_name: 'Marie Durand', email: 'marie@acme.example' } };
+  state.memberDirectory = {
+    [MARIE]: { full_name: 'Camille Fictive', email: 'camille.fictive@acme.example' },
+  };
   state.tables.step_comments = [];
   state.tables.notification_mutes = [];
   state.tables.notifications = [

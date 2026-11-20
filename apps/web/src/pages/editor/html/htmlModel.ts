@@ -26,6 +26,8 @@ interface HtmlEditState {
   scope: 'step' | 'all';
   /** L25-07 : sélection multiple (Maj + clic, « Sélectionner les semblables »), 2 éléments au moins. */
   multi: MultiEl[];
+  /** L28-05 : sélecteur de l'image à remplacer (médiathèque ouverte), depuis la barre ou le panneau. */
+  library: string | null;
 }
 let state: HtmlEditState = {
   stepId: null,
@@ -34,6 +36,7 @@ let state: HtmlEditState = {
   focusText: 0,
   scope: 'step',
   multi: [],
+  library: null,
 };
 const subs = new Set<() => void>();
 export function setHtmlEdit(patch: Partial<HtmlEditState>) {
@@ -49,7 +52,7 @@ export function useHtmlEdit(stepId: string): HtmlEditState {
     () => state,
   );
   if (s.stepId !== stepId) {
-    state = { stepId, selected: null, notFound: [], focusText: 0, scope: s.scope, multi: [] };
+    state = { stepId, selected: null, notFound: [], focusText: 0, scope: s.scope, multi: [], library: null };
     return state;
   }
   return s;
@@ -98,6 +101,7 @@ export function upsertOp(
         op: op.op,
         ...(op.sels ? { sels: op.sels } : {}),
         ...(op.value !== undefined ? { value: op.value } : {}),
+        ...(op.fit ? { fit: op.fit } : {}),
         ...(op.before !== undefined
           ? { before: op.before }
           : same?.before !== undefined
@@ -144,7 +148,13 @@ export function addStyleOp(
 
 /** Masquer et supprimer s'excluent ; le reste se cumule (texte + lien, par exemple). */
 function conflicts(a: HtmlOp['op'], b: HtmlOp['op']) {
-  return (a === 'hide' && b === 'remove') || (a === 'remove' && b === 'hide');
+  return (
+    (a === 'hide' && b === 'remove') ||
+    (a === 'remove' && b === 'hide') ||
+    // L28-05 : une image est remplacée ou masquée, pas les deux
+    (a === 'image' && b === 'mask') ||
+    (a === 'mask' && b === 'image')
+  );
 }
 
 /** Retire une opération ; si elle appartient à un groupe, le groupe entier sur toutes les étapes. */

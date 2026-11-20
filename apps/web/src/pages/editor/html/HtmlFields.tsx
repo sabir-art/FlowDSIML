@@ -6,6 +6,8 @@ import {
   Droplet,
   EyeOff,
   Image,
+  ImageOff,
+  ImageUp,
   Link2,
   Paintbrush,
   PenLine,
@@ -39,6 +41,7 @@ const OP_ICON: Record<HtmlOp['op'], typeof PenLine> = {
   remove: Trash2,
   style: Paintbrush,
   chart: BarChart3,
+  mask: ImageOff,
 };
 
 /**
@@ -108,6 +111,10 @@ export function HtmlFields({
         });
       case 'remove':
         return t('editor.html.modRemove');
+      case 'image':
+        return t('editor.html.modImage');
+      case 'mask':
+        return t('editor.html.modMask');
       default:
         return '';
     }
@@ -117,7 +124,10 @@ export function HtmlFields({
     <>
       {multi && <StyleFields editor={editor} step={step} readOnly={readOnly} />}
       {sel?.chart && <ChartFields editor={editor} step={step} chart={sel.chart} readOnly={readOnly} />}
-      {sel && !sel.chart && (
+      {sel && !sel.chart && sel.img && (
+        <ImageSection editor={editor} step={step} sel={sel.sel} short={sel.short} readOnly={readOnly} />
+      )}
+      {sel && !sel.chart && !sel.img && (
         <div className="sec">
           <div className="sec-title">{t('editor.html.element', { sel: sel.short })}</div>
           <div className="field">
@@ -231,5 +241,110 @@ export function HtmlFields({
         </p>
       </div>
     </>
+  );
+}
+
+/**
+ * L28-05 : section « Image » d'un élément image de la capture : remplacer (médiathèque), Ajuster ou
+ * Remplir à la taille d'origine, revenir à l'image d'origine, masquer (aplat de la couleur de fond).
+ */
+function ImageSection({
+  editor,
+  step,
+  sel,
+  short,
+  readOnly,
+}: {
+  editor: DemoEditor;
+  step: StepRow;
+  sel: string;
+  short: string;
+  readOnly: boolean;
+}) {
+  const { t } = useTranslation();
+  const image = opOn(step, sel, 'image');
+  const mask = opOn(step, sel, 'mask');
+  const fit = image?.fit ?? 'contain';
+  const setFit = (f: 'contain' | 'cover') => {
+    if (!image || typeof image.value !== 'string' || f === fit) return;
+    upsertOp(editor, step, { sel, op: 'image', value: image.value, fit: f }, 'step');
+  };
+  return (
+    <div className="sec html-image-sec">
+      <div className="sec-title">{t('editor.html.element', { sel: short })}</div>
+      <span className="label" id="html-img-t">
+        {t('editor.html.imageSec')}
+      </span>
+      <div className="row wrap" role="group" aria-labelledby="html-img-t">
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          disabled={readOnly}
+          onClick={() => setHtmlEdit({ library: sel })}
+        >
+          <ImageUp {...ICON} />
+          {t('editor.html.replaceImage')}
+        </button>
+        {(image || mask) && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            disabled={readOnly}
+            onClick={() => removeOp(editor, step, (image ?? mask)!.id)}
+          >
+            <Undo2 {...ICON} />
+            {t('editor.html.restoreImage')}
+          </button>
+        )}
+      </div>
+      <div className="field" style={{ marginTop: 10 }}>
+        <span className="label" id="html-fit">
+          {t('editor.html.fit')}
+        </span>
+        <div className="segmented" role="radiogroup" aria-labelledby="html-fit" aria-describedby="html-fit-h">
+          {(['contain', 'cover'] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              role="radio"
+              aria-checked={fit === f}
+              disabled={readOnly || !image}
+              tabIndex={fit === f ? 0 : -1}
+              onClick={() => setFit(f)}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setFit(fit === 'contain' ? 'cover' : 'contain');
+                }
+              }}
+            >
+              {f === 'contain' ? t('editor.html.fitContain') : t('editor.html.fitCover')}
+            </button>
+          ))}
+        </div>
+        <span className="help" id="html-fit-h">
+          {t('editor.html.fitHelp')}
+        </span>
+      </div>
+      <div className="field" style={{ marginTop: 10 }}>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          aria-pressed={!!mask}
+          aria-describedby="html-mask-h"
+          disabled={readOnly}
+          onClick={() =>
+            mask ? removeOp(editor, step, mask.id) : upsertOp(editor, step, { sel, op: 'mask' }, 'step')
+          }
+        >
+          <ImageOff {...ICON} />
+          {t('editor.html.maskImage')}
+        </button>
+        <span className="help" id="html-mask-h">
+          {t('editor.html.maskHelp')}
+        </span>
+      </div>
+    </div>
   );
 }

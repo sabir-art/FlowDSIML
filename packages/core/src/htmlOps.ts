@@ -5,7 +5,7 @@ import { applyVariables, type VariableValues } from './variables';
  * valeur) et non comme un DOM réécrit. Elles survivent à une nouvelle capture : un sélecteur qui ne
  * trouve plus rien est mis de côté (notFound), sans bloquer la publication.
  */
-export type HtmlOpKind = 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart';
+export type HtmlOpKind = 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart' | 'mask';
 
 /**
  * L25-07 : style posé en masse. Liste blanche stricte (aucune chaîne CSS libre) : couleurs en
@@ -41,6 +41,8 @@ export interface HtmlOp {
    * style : propriétés en liste blanche ; chart : type et valeurs.
    */
   value?: string | HtmlStyle | HtmlChart;
+  /** L28-05 : image remplacée : « contain » (Ajuster, par défaut) ou « cover » (Remplir). */
+  fit?: 'contain' | 'cover';
   /** Valeur avant modification (texte d'origine, affiché dans la liste « avant → après »). */
   before?: string;
   /** « Toutes les étapes » : même groupe sur chaque étape, une seule annulation. */
@@ -48,9 +50,22 @@ export interface HtmlOp {
   group?: string;
 }
 
+/** Pixel transparent (« Masquer l'image ») : l'élément garde sa place, sans l'image d'origine. */
+export const TRANSPARENT_GIF =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 export const HTML_OPS_MAX = 500;
 export const HTML_MAX_BYTES = 10 * 1024 * 1024;
-const KINDS: readonly HtmlOpKind[] = ['text', 'hide', 'blur', 'link', 'image', 'remove', 'style', 'chart'];
+const KINDS: readonly HtmlOpKind[] = [
+  'text',
+  'hide',
+  'blur',
+  'link',
+  'image',
+  'remove',
+  'style',
+  'chart',
+  'mask',
+];
 const ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
 const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -95,7 +110,7 @@ export function validHtmlOps(ops: unknown): ops is HtmlOp[] {
   return ops.every((o) => {
     if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
     const r = o as Record<string, unknown>;
-    const allowed = ['id', 'sel', 'sels', 'op', 'value', 'before', 'scope', 'group'];
+    const allowed = ['id', 'sel', 'sels', 'op', 'value', 'before', 'scope', 'group', 'fit'];
     if (Object.keys(r).some((k) => !allowed.includes(k))) return false;
     if (typeof r.id !== 'string' || !ID_RE.test(r.id)) return false;
     if (typeof r.sel !== 'string' || r.sel.length < 1 || r.sel.length > 500) return false;
@@ -118,6 +133,8 @@ export function validHtmlOps(ops: unknown): ops is HtmlOp[] {
     } else if (r.value !== undefined && (typeof r.value !== 'string' || r.value.length > 5000)) return false;
     if (r.before !== undefined && (typeof r.before !== 'string' || r.before.length > 5000)) return false;
     if ((r.op === 'text' || r.op === 'link' || r.op === 'image') && typeof r.value !== 'string') return false;
+    if (r.fit !== undefined && (r.op !== 'image' || (r.fit !== 'contain' && r.fit !== 'cover'))) return false;
+    if (r.op === 'mask' && r.value !== undefined) return false;
     return true;
   });
 }
@@ -276,9 +293,20 @@ export function applyHtmlOps(
         break;
       }
       case 'image':
-        if (el.tagName === 'IMG' && typeof o.value === 'string' && o.value)
+        if (el.tagName === 'IMG' && typeof o.value === 'string' && o.value) {
           el.setAttribute('src', opts.imageUrl ? opts.imageUrl(o.value) : o.value);
+          h.style.setProperty('object-fit', o.fit === 'cover' ? 'cover' : 'contain');
+        }
         el.removeAttribute('srcset');
+        break;
+      case 'mask':
+        // L28-05 : l'image d'origine n'est plus servie ; aplat transparent sur le fond de la page
+        if (el.tagName === 'IMG') {
+          el.setAttribute('src', TRANSPARENT_GIF);
+          el.removeAttribute('srcset');
+          el.setAttribute('alt', '');
+          h.setAttribute('data-fd-masked', '');
+        }
         break;
       case 'style':
         for (const s of o.sels ?? [o.sel]) {

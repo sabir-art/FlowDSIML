@@ -13,7 +13,9 @@
 export interface FrameOp {
   id: string;
   sel: string;
-  op: 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart';
+  op: 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart' | 'mask';
+  /** L28-05 : image remplacée, Ajuster (contain, par défaut) ou Remplir (cover). */
+  fit?: 'contain' | 'cover';
   /** L25-07 : style posé sur plusieurs éléments. */
   sels?: string[];
   /** Texte, id d'étape ou URL ; L25-07/08 : objet de style ou de graphique (revalidé dans la page). */
@@ -443,6 +445,9 @@ export const FRAME_RUNTIME = `(function () {
     if (multi.length === 1) { var only = q(multi[0]); multi = []; postMulti(); select(only); return; }
     postMulti();
   }
+  // L28-05 : l'image remplacée ou masquée garde la taille de l'élément d'origine
+  var BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  function keepSize(el) { var r = el.getBoundingClientRect(); if (r.width && r.height) { el.style.width = r.width + 'px'; el.style.height = r.height + 'px'; } }
   function safeImg(u) { return typeof u === 'string' && (/^https:\\/\\//.test(u) || /^data:image\\/(png|jpe?g|gif|webp|avif);/.test(u)); }
   function apply() {
     if (original) {
@@ -471,7 +476,8 @@ export const FRAME_RUNTIME = `(function () {
         if (mode === 'player') { el.style.setProperty('display', 'none', 'important'); el.setAttribute('aria-hidden', 'true'); }
         else el.setAttribute(o.op === 'hide' ? 'data-fd-hidden' : 'data-fd-removed', '');
       } else if (o.op === 'link') el.setAttribute('data-fd-link', String(o.value || ''));
-      else if (o.op === 'image' && el.tagName === 'IMG' && safeImg(o.value)) { el.setAttribute('src', o.value); el.removeAttribute('srcset'); }
+      else if (o.op === 'image' && el.tagName === 'IMG' && safeImg(o.value)) { keepSize(el); el.style.objectFit = o.fit === 'cover' ? 'cover' : 'contain'; el.setAttribute('src', o.value); el.removeAttribute('srcset'); }
+      else if (o.op === 'mask' && el.tagName === 'IMG') { keepSize(el); el.style.backgroundColor = bgOf(el.parentElement || el); el.setAttribute('src', BLANK); el.removeAttribute('srcset'); el.setAttribute('alt', ''); el.setAttribute('data-fd-masked', ''); }
       else if (o.op === 'chart') drawChart(el, o.value);
     }
     if (mode === 'player') {

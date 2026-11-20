@@ -161,4 +161,23 @@ describe('htmlOps', () => {
     expect(validChart({ type: 'line', rows: [{ label: 'a', value: NaN }] })).toBe(false);
     expect(validChart({ type: 'donut', rows, color: '#000000' })).toBe(false);
   });
+  it('L28-05 : image Ajuster/Remplir et « Masquer l’image » (forme validée, rendu)', () => {
+    const base = { id: 'i1', sel: 'img.logo', scope: 'step' as const };
+    expect(validHtmlOps([{ ...base, op: 'image', value: 'w/x.png', fit: 'cover' }])).toBe(true);
+    expect(validHtmlOps([{ ...base, op: 'image', value: 'w/x.png', fit: 'stretch' }])).toBe(false);
+    expect(validHtmlOps([{ ...base, op: 'text', value: 'x', fit: 'cover' }])).toBe(false);
+    expect(validHtmlOps([{ ...base, op: 'mask' }])).toBe(true);
+    expect(validHtmlOps([{ ...base, op: 'mask', value: 'https://ailleurs.example/x.png' }])).toBe(false);
+    const d = page();
+    applyHtmlOps(d, [{ ...base, op: 'image', value: 'w/x.png', fit: 'cover' }], { mode: 'player' });
+    const img = d.querySelector('img.logo') as HTMLImageElement;
+    expect(img.getAttribute('src')).toBe('w/x.png');
+    expect(img.style.objectFit).toBe('cover');
+    const d2 = page();
+    applyHtmlOps(d2, [{ ...base, op: 'mask' }], { mode: 'player' });
+    const m = d2.querySelector('img.logo') as HTMLImageElement;
+    expect(m.getAttribute('src')).toMatch(/^data:image\/gif;base64,/);
+    expect(m.hasAttribute('srcset')).toBe(false);
+    expect(m.getAttribute('alt')).toBe('');
+  });
 });

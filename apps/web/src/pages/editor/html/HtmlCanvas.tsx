@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { Copy, Droplet, EyeOff, Image, ImageOff, Link2, MoreHorizontal, PenLine, Trash2 } from 'lucide-react';
+import { Copy, Droplet, EyeOff, ImageUp, Link2, MoreHorizontal, PenLine, Trash2 } from 'lucide-react';
 import { MediaLibrary, mediaUrl } from '../../../components/media/MediaLibrary';
 import { useToast } from '../../../components/Toast';
 import {
@@ -44,8 +44,6 @@ export function HtmlCanvas({
   const [failed, setFailed] = useState(false);
   const [scale, setScale] = useState(1);
   const [menu, setMenu] = useState<'more' | 'link' | null>(null);
-  // L28 051 : « Remplacer l'image » d'un élément image capturé (médiathèque de l'espace)
-  const [library, setLibrary] = useState<string | null>(null);
   const toast = useToast();
   const [notice, setNotice] = useState('');
   const [barPos, setBarPos] = useState<{ left: number; top: number } | null>(null);
@@ -67,6 +65,7 @@ export function HtmlCanvas({
         op: o.op,
         value: o.op === 'image' && typeof o.value === 'string' ? mediaUrl(o.value) : o.value,
         ...(o.sels ? { sels: o.sels } : {}),
+        ...(o.fit ? { fit: o.fit } : {}),
       })),
     [step.html_ops], // eslint-disable-line react-hooks/exhaustive-deps
   );
@@ -243,15 +242,23 @@ export function HtmlCanvas({
             <span className="eltb-tag" aria-hidden="true">
               {sel.short}
             </span>
-            <button
-              type="button"
-              disabled={sel.canvas || sel.img}
-              title={sel.canvas ? t('editor.html.canvasHelp') : undefined}
-              onClick={() => setHtmlEdit({ focusText: ed.focusText + 1 })}
-            >
-              <PenLine {...ICON} />
-              {t('editor.html.editText')}
-            </button>
+            {/* L28-05 : une image se remplace, elle ne se réécrit pas */}
+            {sel.img ? (
+              <button type="button" onClick={() => setHtmlEdit({ library: sel.sel })}>
+                <ImageUp {...ICON} />
+                {t('editor.html.replaceImage')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={sel.canvas}
+                title={sel.canvas ? t('editor.html.canvasHelp') : undefined}
+                onClick={() => setHtmlEdit({ focusText: ed.focusText + 1 })}
+              >
+                <PenLine {...ICON} />
+                {t('editor.html.editText')}
+              </button>
+            )}
             <button type="button" aria-pressed={!!opOn(step, sel.sel, 'hide')} onClick={() => toggle('hide')}>
               <EyeOff {...ICON} />
               {opOn(step, sel.sel, 'hide') ? t('editor.html.unhide') : t('editor.html.hide')}
@@ -304,33 +311,6 @@ export function HtmlCanvas({
                 <button
                   type="button"
                   role="menuitem"
-                  disabled={!sel?.img}
-                  title={sel?.img ? undefined : t('editor.html.replaceImageOnlyImg')}
-                  onClick={() => {
-                    setMenu(null);
-                    if (sel) setLibrary(sel.sel);
-                  }}
-                >
-                  <Image {...ICON} />
-                  {t('editor.html.replaceImage')}
-                </button>
-                {sel && opOn(step, sel.sel, 'image') && (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      setMenu(null);
-                      const o = opOn(step, sel.sel, 'image');
-                      if (o) removeOp(editor, step, o.id);
-                    }}
-                  >
-                    <ImageOff {...ICON} />
-                    {t('editor.html.restoreImage')}
-                  </button>
-                )}
-                <button
-                  type="button"
-                  role="menuitem"
                   onClick={() => {
                     setMenu(null);
                     toggle('remove');
@@ -352,15 +332,27 @@ export function HtmlCanvas({
       <div className="sr-only" role="status" aria-live="polite">
         {notice}
       </div>
-      {library && (
+      {ed.library && !readOnly && (
         <MediaLibrary
           wsId={step.workspace_id}
           kind="image"
-          onClose={() => setLibrary(null)}
+          onClose={() => setHtmlEdit({ library: null })}
           onPick={(f) => {
-            if (f.kind === 'font') return;
-            upsertOp(editor, step, { sel: library, op: 'image', value: f.path }, 'step');
-            setLibrary(null);
+            const target = ed.library;
+            if (f.kind === 'font' || !target) return;
+            const fit = opOn(step, target, 'image')?.fit;
+            upsertOp(
+              editor,
+              step,
+              { sel: target, op: 'image', value: f.path, ...(fit ? { fit } : {}) },
+              'step',
+            );
+            setHtmlEdit({ library: null });
+            toast(t('editor.html.imageReplaced'), {
+              label: t('editor.undo'),
+              onClick: () => editor.undo(),
+              durationMs: 8000,
+            });
             // Image importée : aucune détection automatique, comptée au bilan RGPD
             toast(t('editor.importWarn'), undefined, { tone: 'warning' });
           }}
