@@ -73,10 +73,10 @@ export function pinnedFetch(dial: Dial = tlsDial): Fetcher {
     if (lines.some((l) => /[\r\n]/.test(l))) throw new TypeError('en-tête invalide');
     const signal = init.signal;
     if (signal?.aborted) throw signal.reason;
-    const conn = await dial(ip, port, url.hostname);
+    let conn: Deno.Conn | null = null;
     let closed = false;
     const close = () => {
-      if (closed) return;
+      if (closed || !conn) return;
       closed = true;
       try {
         conn.close();
@@ -84,21 +84,39 @@ export function pinnedFetch(dial: Dial = tlsDial): Fetcher {
         /* déjà fermée */
       }
     };
+    // Le délai couvre tout l'échange, connexion TCP et négociation TLS comprises
     const aborted = new Promise<never>((_, reject) => {
       signal?.addEventListener('abort', () => {
         close();
         reject(signal.reason);
       });
     });
+    aborted.catch(() => undefined);
+    const dialing = dial(ip, port, url.hostname);
+    // Connexion aboutie après l'abandon : fermée aussitôt
+    void dialing.then(
+      (c) => {
+        if (signal?.aborted) {
+          try {
+            c.close();
+          } catch {
+            /* déjà fermée */
+          }
+        }
+      },
+      () => undefined,
+    );
+    const open = await Promise.race([dialing, aborted]);
+    conn = open;
     const exchange = async (): Promise<Response> => {
-      await writeAll(conn, concat(enc.encode(lines.join('\r\n') + '\r\n\r\n'), body));
+      await writeAll(open, concat(enc.encode(lines.join('\r\n') + '\r\n\r\n'), body));
       let raw: Uint8Array = new Uint8Array(0);
       let headEnd = -1;
       let limit = MAX_HEAD;
       const chunk = new Uint8Array(4096);
       let chunked = false;
       for (;;) {
-        const n = await conn.read(chunk);
+        const n = await open.read(chunk);
         if (n === null) break;
         raw = concat(raw, chunk.subarray(0, n));
         if (headEnd < 0) {

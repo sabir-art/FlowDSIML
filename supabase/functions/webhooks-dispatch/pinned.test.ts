@@ -115,3 +115,42 @@ Deno.test('réponse invalide ou en-tête avec retour à la ligne : refus', async
 Deno.test('dechunk : morceaux bornés', () => {
   assertEquals(dec.decode(dechunk(enc.encode('5\r\nhello\r\n5\r\nworld\r\n0\r\n\r\n'), 7)), 'hellowo');
 });
+
+Deno.test('délai dépassé pendant la connexion (TCP ou TLS qui ne répond pas) : TimeoutError', async () => {
+  const t0 = Date.now();
+  const err = await assertRejects(() =>
+    pinnedFetch(() => new Promise<Deno.Conn>(() => {}))(
+      'https://hooks.acme.example/',
+      init({ signal: AbortSignal.timeout(100) }),
+      '93.184.215.14',
+    ),
+  );
+  assertEquals((err as Error).name, 'TimeoutError');
+  assert(Date.now() - t0 < 1000, 'le délai couvre la connexion');
+});
+
+Deno.test('connexion aboutie après l’abandon : fermée aussitôt, rien n’est envoyé', async () => {
+  let closed = false;
+  let written = 0;
+  let resolveDial: (c: Deno.Conn) => void = () => {};
+  const late = {
+    write: (b: Uint8Array) => {
+      written += b.length;
+      return Promise.resolve(b.length);
+    },
+    read: () => Promise.resolve(null),
+    close: () => {
+      closed = true;
+    },
+  } as unknown as Deno.Conn;
+  const p = pinnedFetch(() => new Promise<Deno.Conn>((r) => (resolveDial = r)))(
+    'https://hooks.acme.example/',
+    init({ signal: AbortSignal.timeout(50) }),
+    '93.184.215.14',
+  );
+  await assertRejects(() => p);
+  resolveDial(late);
+  await new Promise((r) => setTimeout(r, 10));
+  assert(closed, 'connexion tardive fermée');
+  assertEquals(written, 0);
+});
