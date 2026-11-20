@@ -1,6 +1,6 @@
 # TutoClick : état final (novembre 2026)
 
-> Version reformulée pour le client par la Lead UX, à partir de `docs/tech/etat-final.md` (main, a01f2ed). Le fichier de `docs/tech` reste la version de l’'équipe technique ; à reporter si le chef d'équipe le décide.
+> Version reformulée pour le client par la Lead UX, à partir de `docs/tech/etat-final.md` (main, a01f2ed). Le fichier de `docs/tech` reste la version de l’équipe technique ; à reporter si le chef d'équipe le décide.
 
 Ce document résume ce qui a été livré, ce qui a des limites et ce qui attend une décision de votre part.
 
