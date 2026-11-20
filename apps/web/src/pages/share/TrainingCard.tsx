@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { GraduationCap, PackageOpen } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
+import { Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 
@@ -84,9 +85,8 @@ export function TrainingCard({
         <form className="sh-training-add" onSubmit={add}>
           <div className="field">
             <label htmlFor={`${ids}-p`}>{t('share.training.path')}</label>
-            <select
+            <Select
               id={`${ids}-p`}
-              className="input input-sm"
               value={chosen}
               onChange={(e) => {
                 setPathId(e.target.value);
@@ -98,16 +98,11 @@ export function TrainingCard({
                   {p.title || t('learners.untitled')}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="field">
             <label htmlFor={`${ids}-n`}>{t('share.training.position')}</label>
-            <select
-              id={`${ids}-n`}
-              className="input input-sm"
-              value={at}
-              onChange={(e) => setPos(Number(e.target.value))}
-            >
+            <Select id={`${ids}-n`} value={at} onChange={(e) => setPos(Number(e.target.value))}>
               {Array.from({ length: count + 1 }, (_, i) => (
                 <option key={i} value={i}>
                   {i === count
@@ -115,9 +110,9 @@ export function TrainingCard({
                     : t('share.training.at', { n: i + 1 })}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
-          <button type="submit" className="btn btn-secondary btn-sm">
+          <button type="submit" className="btn btn-secondary">
             {t('share.training.add')}
           </button>
         </form>

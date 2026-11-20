@@ -696,8 +696,8 @@
 .mk .an-sub {
   margin-top: 4px;
 }
-.mk .an-select {
-  width: auto;
+.mk .an-toolbar {
+  margin-bottom: 16px;
 }
 .mk .an-tabs {
   margin-bottom: 24px;

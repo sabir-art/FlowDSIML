@@ -2432,7 +2432,10 @@
       "adminOnly": "Reserved for workspace owners and admins.",
       "saved": "Visit measurement saved.",
       "saveError": "Saving failed. Try again."
-    }
+    },
+    "filteredOn": "Statistics: {{demo}}, {{source}}",
+    "demoLabel": "Demo",
+    "sourceLabel": "Source"
   },
   "leads": {
     "title": "Leads",
