@@ -94,8 +94,9 @@ select pg_temp.login('00000000-0000-0000-0000-0000000080a1');
 reset role;
 update public.workspaces set plan_code = 'pro' where id = (select ws from ctx);
 select pg_temp.login('00000000-0000-0000-0000-0000000080a1');
-select throws_ok($$ select public.set_folder_access('00000000-0000-0000-0000-0000000080f1', true, '{}') $$,
-  'P0001', 'PLAN_REQUIRED:share_rules', 'plan inférieur à Enterprise : refusé');
+-- L48-A : plus aucune fonction réservée à une offre
+select lives_ok($$ select public.set_folder_access('00000000-0000-0000-0000-0000000080f1', true, '{}') $$,
+  'accès restreint permis pour toutes les offres (L48-A)');
 reset role;
 update public.workspaces set plan_code = 'enterprise' where id = (select ws from ctx);
 select pg_temp.login('00000000-0000-0000-0000-0000000080a1');

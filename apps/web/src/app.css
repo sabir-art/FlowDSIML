@@ -910,8 +910,7 @@
   margin: 4px 0 0;
   color: var(--fd-color-text);
 }
-.help-warning svg,
-.preview-plan-banner svg {
+.help-warning svg {
   flex: none;
   color: var(--fd-color-warning);
 }
@@ -923,18 +922,6 @@
 }
 .panel-title-row .panel-title {
   margin: 0;
-}
-.preview-plan-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: 0;
-  padding: 8px 16px;
-  background: var(--fd-color-warning-soft);
-  color: var(--fd-color-text);
-  font-size: var(--fd-font-sm);
-  font-weight: 500;
 }
 /* Segment actif distinct du survol, dans les deux thèmes */
 .segmented button:hover:not([aria-pressed='true']):not([aria-checked='true']) {

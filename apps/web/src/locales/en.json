@@ -1934,9 +1934,6 @@
     "fixed": "Fixed size",
     "popup": "Button + pop-up",
     "copyCode": "Copy code",
-    "hideBranding": "Hide watermark",
-    "included": "Included in your plan",
-    "upgradePlan": "Higher plan",
     "clickToStart": "Start on click (cover + “Launch the demo” button)",
     "cspNote": "The host site must allow iframes from {{host}} (CSP frame-src header).",
     "persoHelp": "One link per person, with pre-filled variables and its own statistics.",
@@ -2650,18 +2647,6 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
-  },
-  "planForms": {
-    "notPublishedTitle": "This form won't be published.",
-    "notPublishedBody": "Your Free plan doesn't include lead forms: you can set it up, but visitors won't see it.",
-    "seePlans": "See plans",
-    "badge": "Not published",
-    "stepHelp": "Not published on the Free plan",
-    "confirmTitle": "Publish without the lead form?",
-    "confirmBody": "Your Free plan doesn't include forms. The demo will be published <strong>without</strong> the “{{name}}” form (before step {{n}}): no leads will be collected.",
-    "confirmLabel": "Publish without form",
-    "sharePublished": "Published without lead form (Free plan).",
-    "previewBanner": "Preview: not published with your plan"
   },
   "shell": {
     "sections": "Sections",
@@ -4276,8 +4261,6 @@
   },
   "rules": {
     "title": "Sharing rules",
-    "seePlans": "See plans",
-    "planNote": "Sharing rules are part of the Enterprise plan. Current values are shown.",
     "roleNote": "Only admins and owners can change sharing rules.",
     "modes": "Allowed access modes",
     "modesHelp": "The modes members can choose in Share.",

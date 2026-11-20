@@ -10,7 +10,7 @@ import { publicDemoUrl } from '../../lib/embed';
 export type ExportSource =
   { kind: 'ok'; demo: ExportDemo; logoUrl: string | null } | { kind: 'unpublished'; title: string };
 
-export async function loadExportSource(demoId: string, removeBranding: boolean): Promise<ExportSource> {
+export async function loadExportSource(demoId: string): Promise<ExportSource> {
   const { data: d, error } = await supabase
     .from('demos')
     .select('id, title, status, current_version_id, workspace_id')
@@ -55,7 +55,8 @@ export async function loadExportSource(demoId: string, removeBranding: boolean):
       version: v.data.number ?? 1,
       url: publicDemoUrl(demoId),
       context: path ? `Formation « ${path} »` : '',
-      showBranding: !removeBranding,
+      // L48-A : plus de mention imposée par l'offre (fonctions ouvertes à tous)
+      showBranding: false,
       device: m.device === 'mobile' ? 'mobile' : 'desktop',
       // L29 : langue de la démo (métadonnées du PDF, version accessible), chapitres et quiz
       lang: demoLang(m.locale),

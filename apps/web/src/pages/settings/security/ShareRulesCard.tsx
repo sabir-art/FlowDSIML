@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { APP_NAME } from '@flowdsiml/core';
@@ -18,7 +17,7 @@ type Preview = {
 };
 
 /**
- * L27-06 / L27-07 / L27-10 : Paramètres > Sécurité, carte « Règles de partage » (Enterprise).
+ * L27-06 / L27-07 / L27-10 : Paramètres > Sécurité, carte « Règles de partage » (L48-A : toutes les offres).
  * Administrateurs et propriétaires : modifiables ; autres rôles et plans inférieurs : valeurs actuelles,
  * désactivées (aria-disabled, focalisables, explication reliée). Enregistrer une règle plus stricte
  * annonce les liens actifs qui ne la respectent pas et propose de les mettre en conformité.
@@ -30,24 +29,16 @@ export function ShareRulesCard() {
   const ws = current!;
   const saved = useShareRules(ws.id);
   const [draft, setDraft] = useState<ShareRules>(saved);
-  const [enterprise, setEnterprise] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [conflicts, setConflicts] = useState<Preview | null>(null);
   const [busy, setBusy] = useState(false);
   const id = useId();
   useEffect(() => setDraft(saved), [saved]);
-  useEffect(() => {
-    void supabase
-      .from('plans')
-      .select('limits')
-      .eq('code', ws.plan_code)
-      .maybeSingle()
-      .then(({ data }) => setEnterprise(!!(data?.limits as { share_rules?: boolean } | null)?.share_rules));
-  }, [ws.plan_code]);
 
   const isAdmin = can('workspace.settings');
-  const locked = !isAdmin || enterprise === false;
-  const why = enterprise === false ? `${id}-plan` : `${id}-role`;
+  // L48-A : plus réservé à une offre ; seul le rôle compte
+  const locked = !isAdmin;
+  const why = `${id}-role`;
   const dirty = JSON.stringify(draft) !== JSON.stringify(saved);
   const modesEmpty = draft.modes.length === 0;
 
@@ -111,24 +102,13 @@ export function ShareRulesCard() {
     <section className="card sr-card" aria-labelledby={`${id}-t`}>
       <div className="sr-head">
         <h3 className="t-h3" id={`${id}-t`}>
-          {t('rules.title')} {enterprise === false && <span className="badge badge-brand">Enterprise</span>}
+          {t('rules.title')}
         </h3>
-        {enterprise === false && (
-          <Link className="mk-link" to="/settings/plans">
-            {t('rules.seePlans')}
-          </Link>
-        )}
       </div>
-      {enterprise === false ? (
-        <p className="t-caption muted" id={`${id}-plan`}>
-          {t('rules.planNote')}
+      {!isAdmin && (
+        <p className="t-caption muted" id={`${id}-role`}>
+          {t('rules.roleNote')}
         </p>
-      ) : (
-        !isAdmin && (
-          <p className="t-caption muted" id={`${id}-role`}>
-            {t('rules.roleNote')}
-          </p>
-        )
       )}
 
       <fieldset

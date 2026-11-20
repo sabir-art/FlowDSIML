@@ -54,33 +54,17 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await page.screenshot({ path: `${SHOTS}/${name}${sfx}.png` });
   };
 
-  // ===== L27-10 : plan inférieur à Enterprise =====
+  // ===== L48-A : règles de partage ouvertes à toutes les offres =====
   await page.goto(`${APP}/#/settings/security`);
   const card = page.getByRole('region', { name: /Règles de partage/ });
   await card.waitFor();
-  await card.getByText('Enterprise', { exact: true }).waitFor();
+  ok((await card.getByText('Enterprise', { exact: true }).count()) === 0, 'L48-A : plus de badge Enterprise');
   ok(
-    (await card.getByRole('link', { name: 'Voir les plans' }).count()) === 1,
-    'Enterprise : badge et « Voir les plans »',
+    (await card.getByRole('link', { name: 'Voir les plans' }).count()) === 0,
+    'L48-A : plus de « Voir les plans »',
   );
-  ok(
-    !/Bientôt/.test((await card.locator('.sr-head').innerText()) || ''),
-    'pas de badge « Bientôt » sur la carte',
-  );
-  const linkBox = card.getByRole('checkbox', { name: 'Toute personne avec le lien' });
-  ok(
-    (await linkBox.getAttribute('aria-disabled')) === 'true' && (await linkBox.isChecked()),
-    'contrôles : valeurs actuelles, désactivés (aria-disabled)',
-  );
-  await linkBox.click({ force: true });
-  ok(await linkBox.isChecked(), 'contrôle désactivé : aucun changement');
-  ok(
-    (await card.getByRole('button', { name: 'Enregistrer les règles' }).count()) === 0,
-    'pas d’enregistrement',
-  );
-  const ssoTop = await page.getByRole('heading', { name: /Connexion unique/ }).boundingBox();
-  const rulesTop = await card.boundingBox();
-  ok(rulesTop.y < ssoTop.y, 'carte au-dessus de « Connexion unique »');
+  await card.getByRole('button', { name: 'Enregistrer les règles' }).waitFor();
+  ok(true, 'L48-A : offre Free, règles modifiables par un admin');
   await shot('l27-10-regles-plan');
 
   // ===== L27-06 : Enterprise, administrateur =====

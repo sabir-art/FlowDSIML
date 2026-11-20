@@ -60,7 +60,6 @@ import {
   type StepImages,
   type Subtitles,
 } from '@flowdsiml/exports/mp4';
-import { usePlan } from '../../lib/plan';
 import {
   bitmapToDataUrl,
   download,
@@ -108,7 +107,6 @@ export function ExportDialog({
   initialFormat?: Fmt;
 }) {
   const { t, i18n } = useTranslation();
-  const plan = usePlan();
   const id = useId();
   const ref = useRef<HTMLDialogElement>(null);
   const [src, setSrc] = useState<ExportSource | null>(null);
@@ -146,7 +144,7 @@ export function ExportDialog({
 
   useEffect(() => {
     let alive = true;
-    loadExportSource(demoId, plan.removeBranding)
+    loadExportSource(demoId)
       .then((s) => {
         if (!alive) return;
         setSrc(s);
@@ -170,7 +168,7 @@ export function ExportDialog({
       alive = false;
       abort.current?.abort();
     };
-  }, [demoId, plan.removeBranding]);
+  }, [demoId]);
 
   const demo = src?.kind === 'ok' ? src.demo : null;
   const pages = useMemo<Page[]>(

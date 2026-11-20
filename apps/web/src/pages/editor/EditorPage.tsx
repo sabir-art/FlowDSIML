@@ -38,7 +38,6 @@ import { CoBanner, PresenceStack, RemoteCursors } from './presence/PresenceUI';
 import { useShowCursors } from './presence/showCursors';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { PLAN_DEFAULTS, type PlanCode } from '@flowdsiml/core';
 import { errorMessage } from '../../lib/errors';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useDemoEditor } from './useDemoEditor';
@@ -446,7 +445,6 @@ export function EditorPage() {
       </EditorSkeleton>
     );
 
-  const plan = PLAN_DEFAULTS[(ws?.plan_code ?? 'free') as PlanCode] ?? PLAN_DEFAULTS.free;
   const hotspot =
     selection.kind === 'hotspot' ? editor.hotspots.find((h) => h.id === selection.id) : undefined;
 
@@ -1051,7 +1049,6 @@ export function EditorPage() {
               <FormPanel
                 editor={editor}
                 readOnly={readOnly}
-                leadFormsAllowed={plan.leadForms}
                 form={selectedForm}
                 onBack={() => setSelection({ kind: 'step' })}
                 onMove={(i) => {
@@ -1103,7 +1100,6 @@ export function EditorPage() {
                 readOnly={readOnly}
                 showCursors={showCursors}
                 onShowCursors={setShowCursors}
-                leadFormsAllowed={plan.leadForms}
                 onOpenForm={(i, id) => {
                   setSelection({ kind: 'form', id });
                   setIndex(i);

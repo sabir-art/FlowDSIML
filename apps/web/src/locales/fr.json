@@ -1934,9 +1934,6 @@
     "fixed": "Taille fixe",
     "popup": "Bouton + pop-up",
     "copyCode": "Copier le code",
-    "hideBranding": "Masquer le filigrane",
-    "included": "Inclus dans votre plan",
-    "upgradePlan": "Plan supérieur",
     "clickToStart": "Démarrer au clic (couverture + bouton « Lancer la démo »)",
     "cspNote": "Le site d’accueil doit autoriser les iframes provenant de {{host}} (en-tête CSP frame-src).",
     "persoHelp": "Un lien par personne, avec ses variables pré-remplies et ses propres statistiques.",
@@ -2650,18 +2647,6 @@
     "light": "Clair",
     "dark": "Sombre",
     "system": "Système"
-  },
-  "planForms": {
-    "notPublishedTitle": "Ce formulaire ne sera pas publié.",
-    "notPublishedBody": "Votre plan Free n'inclut pas les formulaires de lead : vous pouvez le préparer, mais les visiteurs ne le verront pas.",
-    "seePlans": "Voir les plans",
-    "badge": "Non publié",
-    "stepHelp": "Non publié avec le plan Free",
-    "confirmTitle": "Publier sans le formulaire de lead ?",
-    "confirmBody": "Votre plan Free n'inclut pas les formulaires. La démo sera publiée <strong>sans</strong> le formulaire « {{name}} » (avant l'étape {{n}}) : aucun lead ne sera collecté.",
-    "confirmLabel": "Publier sans formulaire",
-    "sharePublished": "Publiée sans formulaire de lead (plan Free).",
-    "previewBanner": "Aperçu : non publié avec votre plan"
   },
   "shell": {
     "sections": "Sections",
@@ -4276,8 +4261,6 @@
   },
   "rules": {
     "title": "Règles de partage",
-    "seePlans": "Voir les plans",
-    "planNote": "Les règles de partage font partie du plan Enterprise. Les valeurs actuelles sont affichées.",
     "roleNote": "Seuls les administrateurs et propriétaires modifient les règles de partage.",
     "modes": "Modes d’accès autorisés",
     "modesHelp": "Les modes que les membres peuvent choisir dans Partager.",

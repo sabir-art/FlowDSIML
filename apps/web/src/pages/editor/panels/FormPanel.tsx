@@ -8,7 +8,6 @@ import { VarTextField } from '../vars/VarTextField';
 import { useVarCatalog } from '../../../lib/varCatalog';
 import type { DemoEditor } from '../useDemoEditor';
 import { asFields, type FormField, type FormRow } from '../types';
-import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
 
 const OPTIONAL: Array<Omit<FormField, 'label'> & { labelKey: string }> = [
   { key: 'full_name', type: 'text', required: false, labelKey: 'editor.fieldName' },
@@ -24,14 +23,12 @@ const OPTIONAL: Array<Omit<FormField, 'label'> & { labelKey: string }> = [
 export function FormPanel({
   editor,
   readOnly,
-  leadFormsAllowed,
   form,
   onBack,
   onMove,
 }: {
   editor: DemoEditor;
   readOnly: boolean;
-  leadFormsAllowed: boolean;
   form: FormRow;
   onBack: () => void;
   /** Après un changement d'étape déclencheuse : nouvel index de cette étape. */
@@ -106,11 +103,7 @@ export function FormPanel({
         )}
       </div>
       <div className="sec">
-        <div className="sec-title">
-          {t('editor.leadForm')}
-          {!leadFormsAllowed && <span className="badge badge-warning">{t('planForms.badge')}</span>}
-        </div>
-        {!leadFormsAllowed && <PlanFormsWarning />}
+        <div className="sec-title">{t('editor.leadForm')}</div>
         <VarTextField
           singleLine
           id="f-title"

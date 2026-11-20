@@ -1,6 +1,6 @@
 import { VoiceFields } from '../voice/VoiceFields';
 import { useConfirm } from '../../../components/ConfirmDialog';
-import { EyeOff, Lock, Presentation, Target, Trash2, TriangleAlert } from 'lucide-react';
+import { EyeOff, Lock, Presentation, Target, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import { asCta, asRects, asStepOptions, asZoom, type Selection, type StepRow } from '../types';
@@ -11,7 +11,6 @@ import { GuidedStepFields } from './GuidedStepFields';
 import { NextRulesFields } from './NextRulesFields';
 import { BeforeAfterFields } from '../BeforeAfterEditor';
 import { AbSection, type AbState } from '../ab/AbTest';
-import { usePlan } from '../../../lib/plan';
 import { VideoFields } from '../video/VideoFields';
 import { HtmlFields } from '../html/HtmlFields';
 import { CaptureTabFields } from '../capture/CaptureFields';
@@ -52,7 +51,6 @@ export function StepPanel({
     .sort((a, b) => a.position - b.position)[0];
   const blurs = asRects(step.blurs);
   const catalog = useVarCatalog(editor.variables);
-  const plan = usePlan();
   const hotspots = editor.hotspots.filter((h) => h.step_id === step.id);
 
   const last = index === editor.steps.length - 1;
@@ -388,12 +386,6 @@ export function StepPanel({
           </select>
           {/* L18-01 : libellé court dans le select, explication en aide */}
           {!editor.forms.length && <p className="help">{t('editor.noForm')}</p>}
-          {step.gate_form_id && !plan.leadForms && (
-            <p className="help help-warning">
-              <TriangleAlert size={16} aria-hidden="true" />
-              {t('planForms.stepHelp')}
-            </p>
-          )}
         </div>
       </div>
 

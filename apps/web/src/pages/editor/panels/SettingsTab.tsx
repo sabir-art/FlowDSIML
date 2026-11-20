@@ -10,7 +10,6 @@ import { asSettings, type DemoSettings } from '../types';
 import { ClipboardList, Database, Lock, Presentation } from 'lucide-react';
 import { DATASET_OPEN } from '../html/ChartFields';
 import { publishedColumns, useDataset } from '../data/datasetStore';
-import { PlanFormsWarning } from '../../../components/PlanFormsWarning';
 import { DEMO_TAG_LIMIT, TAG_COLORS, TAG_LIMIT, useWorkspaceTags } from '../../../components/Tags';
 
 /** Interrupteur de la maquette (.setting + .switch). */
@@ -53,14 +52,12 @@ function SettingSwitch({
 export function SettingsTab({
   editor,
   readOnly,
-  leadFormsAllowed,
   onOpenForm,
   showCursors = true,
   onShowCursors,
 }: {
   editor: DemoEditor;
   readOnly: boolean;
-  leadFormsAllowed: boolean;
   /** L22-08 : curseurs des autres personnes (préférence de ce navigateur). */
   showCursors?: boolean;
   onShowCursors?: (on: boolean) => void;
@@ -277,7 +274,6 @@ export function SettingsTab({
 
       <div className="sec">
         <div className="sec-title">{t('editor.leadForm')}</div>
-        {!leadFormsAllowed && <PlanFormsWarning />}
         <p className="help sec-help">
           {form && gateIndex >= 0
             ? t('editor.form.inRail', { n: gateIndex + 1 })

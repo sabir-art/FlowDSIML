@@ -30,8 +30,6 @@ import { Menu } from '../../components/Menu';
 import { asSettings } from '../editor/types';
 import { useDemoEditor } from '../editor/useDemoEditor';
 import { PublishButton } from '../editor/PublishButton';
-import { usePlan } from '../../lib/plan';
-import { PlanFormsWarning } from '../../components/PlanFormsWarning';
 import { AccessPanel, AccessSummary, useDemoAccess } from './AccessPanel';
 import { useShareRules } from '../../lib/shareRules';
 import { CopyButton } from './codeBlock';
@@ -109,10 +107,8 @@ export function SharePage() {
   const [creating, setCreating] = useState(false);
   const [exporting, setExporting] = useState<boolean | 'gif'>(false);
   const [week, setWeek] = useState<{ views: number; leads: number } | null>(null);
-  const [gatedSteps, setGatedSteps] = useState(0);
   const { error, success, run } = useAction();
   const editable = can('demo.edit');
-  const plan = usePlan();
 
   /** L38-2 : liens exportés en CSV (lien du centre pour un module de formation). */
   const exportCsv = (rows: Pick<Tables<'share_links'>, 'name' | 'variables' | 'cohort' | 'token'>[]) =>
@@ -141,7 +137,7 @@ export function SharePage() {
     setDemo(d.data);
     if (!d.data) return;
     setOrigins((asSettings(d.data.settings).allowedEmbedOrigins ?? []).join('\n'));
-    const [l, v, vars, gated, a] = await Promise.all([
+    const [l, v, vars, a] = await Promise.all([
       supabase
         .from('share_links')
         .select('*')
@@ -155,11 +151,6 @@ export function SharePage() {
             .maybeSingle()
         : Promise.resolve({ data: null }),
       supabase.from('variables').select('*').eq('workspace_id', d.data.workspace_id).order('key'),
-      supabase
-        .from('steps')
-        .select('id', { count: 'exact', head: true })
-        .eq('demo_id', demoId)
-        .not('gate_form_id', 'is', null),
       supabase.rpc('demo_analytics', {
         p_demo: demoId,
         p_from: new Date(Date.now() - 7 * 86400_000).toISOString(),
@@ -226,7 +217,6 @@ export function SharePage() {
       const c = Math.max(0, dsd.link_column ? dsd.columns.indexOf(dsd.link_column) : 0);
       setDsRows(dsd.rows.map((r) => r[c] ?? ''));
     } else setDsRows(null);
-    setGatedSteps(gated.count ?? 0);
     const w = a.data as unknown as { views: number; leads: number } | null;
     setWeek(w ? { views: Number(w.views), leads: Number(w.leads) } : null);
     // Vues et dernière vue de chaque lien personnalisé (événements demo_view portant le lien)
@@ -348,7 +338,6 @@ export function SharePage() {
           {t('share.justPublished')}
         </div>
       )}
-      {published && !plan.leadForms && gatedSteps > 0 && <PlanFormsWarning variant="share" />}
       {error && (
         <div className="alert alert-danger sh-alert" role="alert">
           {error}
@@ -523,7 +512,6 @@ export function SharePage() {
                   editable={editable}
                   origins={origins}
                   setOrigins={setOrigins}
-                  removeBranding={plan.removeBranding}
                   onSaveOrigins={() =>
                     void run(async () => {
                       const list = origins
@@ -938,7 +926,6 @@ function EmbedPanel({
   editable,
   origins,
   setOrigins,
-  removeBranding,
   onSaveOrigins,
 }: {
   url: string;
@@ -948,7 +935,6 @@ function EmbedPanel({
   editable: boolean;
   origins: string;
   setOrigins: (v: string) => void;
-  removeBranding: boolean;
   onSaveOrigins: () => void;
 }) {
   const { t } = useTranslation();
@@ -1021,16 +1007,6 @@ function EmbedPanel({
         />
       </div>
       <hr className="divider sh-hr" />
-      <div className="setting">
-        <span className="t-label">{t('share.hideBranding')}</span>
-        {removeBranding ? (
-          <span className="badge badge-success">{t('share.included')}</span>
-        ) : (
-          <Link to="/settings/plans" className="badge badge-accent">
-            {t('share.upgradePlan')}
-          </Link>
-        )}
-      </div>
       <div className="setting">
         <span className="t-label">
           {t('share.clickToStart')} <span className="badge">{t('shell.soon')}</span>

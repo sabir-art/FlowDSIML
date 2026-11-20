@@ -7,10 +7,7 @@ import { asAction, asStepOptions, beforeAfterComplete } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { canPublishWith, useShareRules } from '../../lib/shareRules';
-import { Trans } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
-import { useConfirm } from '../../components/ConfirmDialog';
-import { usePlan } from '../../lib/plan';
 import { publishDemo } from '../../lib/publish';
 import { errorMessage } from '../../lib/errors';
 import type { DemoEditor } from './useDemoEditor';
@@ -80,32 +77,10 @@ export function PublishButton({
   const demo = editor.demo!;
   const { current } = useWorkspace();
   const restricted = !canPublishWith(useShareRules(demo.workspace_id), current?.role);
-  const plan = usePlan();
-  const [dialog, ask] = useConfirm();
   const [gdprOpen, setGdprOpen] = useState(false);
   const { current: ws } = useWorkspace();
 
   async function publish() {
-    // Plan sans formulaires de lead : prévenir que le formulaire sera retiré de la version publiée
-    const gated = plan.leadForms ? -1 : editor.steps.findIndex((s) => s.gate_form_id);
-    if (gated >= 0) {
-      const form = editor.forms.find((f) => f.id === editor.steps[gated]!.gate_form_id);
-      const yes = await ask({
-        title: t('planForms.confirmTitle'),
-        body: (
-          <p>
-            <Trans
-              i18nKey="planForms.confirmBody"
-              values={{ name: form?.title ?? '', n: gated + 1 }}
-              components={{ strong: <strong /> }}
-            />
-          </p>
-        ),
-        confirmLabel: t('planForms.confirmLabel'),
-        secondary: { label: t('planForms.seePlans'), onSelect: () => navigate('/settings/plans') },
-      });
-      if (!yes) return;
-    }
     // F2 : publication bloquée tant qu'une question du quiz est incomplète
     const mode = asSettings(demo.settings).quiz?.mode === 'survey' ? 'survey' : 'quiz';
     const bad = firstInvalid(
@@ -182,7 +157,6 @@ export function PublishButton({
 
   return (
     <>
-      {dialog}
       <GdprDialog
         open={gdprOpen}
         steps={editor.steps}

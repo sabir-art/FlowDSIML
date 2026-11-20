@@ -46,8 +46,9 @@ select throws_ok($$ select public.share_rules_of((select ws from ctx)) $$, '4250
 reset role;
 select is((select publish_role from public.share_rules_of((select ws from ctx))), 'editor', 'défaut : éditeurs publient');
 select pg_temp.login('00000000-0000-0000-0000-0000000070a1');
-select throws_ok($$ select public.set_share_rules((select ws from ctx), array['password'], null, 'editor', true) $$,
-  'P0001', 'PLAN_REQUIRED:share_rules', 'plan inférieur à Enterprise : refusé');
+-- L48-A : plus aucune fonction réservée à une offre
+select lives_ok($$ select public.set_share_rules((select ws from ctx), array['password'], null, 'editor', true) $$,
+  'règles de partage permises pour toutes les offres (L48-A)');
 reset role;
 update public.workspaces set plan_code = 'enterprise' where id = (select ws from ctx);
 
@@ -55,7 +56,7 @@ update public.workspaces set plan_code = 'enterprise' where id = (select ws from
 select pg_temp.login('00000000-0000-0000-0000-0000000070a2');
 select throws_ok($$ select public.set_share_rules((select ws from ctx), array['password'], null, 'editor', true) $$,
   '42501', null, 'éditeur : pas de modification des règles');
-select is((select count(*)::int from public.share_rules where workspace_id = (select ws from ctx)), 0, 'éditeur : lecture des règles');
+select is((select count(*)::int from public.share_rules where workspace_id = (select ws from ctx)), 1, 'éditeur : lecture des règles');
 select throws_ok($$ select public.share_rules_preview((select ws from ctx), array['password'], null) $$,
   '42501', null, 'éditeur : pas d’aperçu des liens');
 select pg_temp.login('00000000-0000-0000-0000-0000000070a1');
