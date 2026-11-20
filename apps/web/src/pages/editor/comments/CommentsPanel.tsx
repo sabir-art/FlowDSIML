@@ -7,8 +7,6 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type KeyboardEvent,
-  type PointerEvent,
   type ReactNode,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,8 +14,6 @@ import {
   ArrowDown,
   ArrowUp,
   AtSign,
-  ChevronDown,
-  ChevronUp,
   CircleCheck,
   Lock,
   MessageSquare,
@@ -35,12 +31,6 @@ import { formatDateTime, formatRelative } from '../../../lib/format';
 import { initials } from '../../../lib/initials';
 import type { StepComment, StepCommentsApi } from './useStepComments';
 
-/** Spec docs/ux/commentaires.md : hauteur 160–520 px (280 par défaut, 220 entre 1 024 et 1 280 px). */
-const HEIGHT_KEY = 'fd.editor.comments.height';
-const COLLAPSED_KEY = 'fd.editor.comments.collapsed';
-const MIN_H = 160;
-const MAX_H = 520;
-const STEP_H = 24;
 const MAX_LEN = 500;
 const NEW_MS = 4000;
 /** Dernière lecture des commentaires, par étape (ouverture sur le premier non lu). */
@@ -53,7 +43,6 @@ function readSeen(): Record<string, string> {
   }
 }
 
-const defaultHeight = () => (window.innerWidth < 1280 ? 220 : 280);
 function read(key: string): string | null {
   try {
     return localStorage.getItem(key);
@@ -124,7 +113,7 @@ export function CommentsPanel({
   stepIndex,
   api,
   canComment = true,
-  variant = 'panel',
+  variant = 'side',
   header,
   focusComment,
 }: {
@@ -133,7 +122,8 @@ export function CommentsPanel({
   api: StepCommentsApi;
   /** Tout membre peut commenter (viewer compris, décision du chef d'équipe). */
   canComment?: boolean;
-  variant?: 'panel' | 'mobile';
+  /** L48-E §5 : « side » : panneau du rail de l'éditeur (400 px) ; « mobile » : écran étroit. */
+  variant?: 'side' | 'mobile';
   /** Contenu inséré sous l'en-tête (sélecteur d'étape en mobile). */
   header?: ReactNode;
   /** L22-05 : commentaire à montrer (lien d'une notification) : panneau déplié, fil visible. */
@@ -147,12 +137,6 @@ export function CommentsPanel({
   const isAdmin = current?.role === 'owner' || current?.role === 'admin';
   const isEditor = isAdmin || current?.role === 'editor';
 
-  const [height, setHeight] = useState(() => {
-    const v = Number(read(HEIGHT_KEY));
-    return Number.isFinite(v) && v >= MIN_H ? Math.min(v, MAX_H) : defaultHeight();
-  });
-  // Replié par défaut (absent de la maquette d'origine de l'éditeur) ; l'état choisi est mémorisé
-  const [collapsed, setCollapsed] = useState(() => !mobile && read(COLLAPSED_KEY) !== '0');
   const [showResolved, setShowResolved] = useState(false);
   const [draft, setDraft] = useState('');
   const [draftMentions, setDraftMentions] = useState<Mention[]>([]);
@@ -175,8 +159,6 @@ export function CommentsPanel({
   const sectionRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
   const draftRef = useRef<HTMLTextAreaElement>(null);
-  const drag = useRef<{ y: number; h: number; moved: boolean } | null>(null);
-  const openedByUser = useRef(false);
   const pendingRef = useRef(0);
   pendingRef.current = pending;
 
@@ -196,7 +178,6 @@ export function CommentsPanel({
   useEffect(() => {
     if (!target || highlight === target.id) return;
     setHighlight(target.id);
-    setCollapsed(false);
     if (target.resolved_at) setShowResolved(true);
   }, [target, highlight]);
   useEffect(() => {
@@ -217,17 +198,9 @@ export function CommentsPanel({
     });
 
   useEffect(() => {
-    if (!mobile) store(HEIGHT_KEY, String(Math.round(height)));
-  }, [height, mobile]);
-  useEffect(() => {
-    if (!mobile) store(COLLAPSED_KEY, collapsed ? '1' : '0');
-  }, [collapsed, mobile]);
-  useEffect(() => {
     setShowResolved(false);
     setEditing(null);
     setPending(0);
-    // Focus sur la saisie à l'ouverture d'une étape, seulement si l'utilisateur a ouvert le panneau
-    if (openedByUser.current) draftRef.current?.focus();
   }, [stepId]);
 
   // Temps réel : annonce, badge « Nouveau » 4 s, pas de défilement forcé si l'utilisateur lit plus haut
@@ -278,54 +251,10 @@ export function CommentsPanel({
     const item = list?.querySelector<HTMLElement>(`[data-comment="${visible[idx]!.id}"]`);
     if (list && item) {
       anchoredFor.current = { step: stepId, len: forStep.length };
-      if (mobile) item.scrollIntoView({ block: 'center' });
-      else list.scrollTop = Math.max(0, item.offsetTop - 8);
+      item.scrollIntoView({ block: 'center' });
     }
     if (idx > 0) setOlderAbove(idx);
   }, [stepId, api.loading, visible.length]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /** Jamais plus de 60 % de la colonne : le canevas garde au moins 240 px. */
-  function clamp(h: number) {
-    // Hauteur de la colonne centrale (.stage) : le parent direct (.stage-comments) épouse le panneau.
-    const el = sectionRef.current;
-    const col = (el?.closest('.stage') ?? el?.parentElement)?.clientHeight ?? window.innerHeight;
-    const max = Math.max(MIN_H, Math.min(MAX_H, col * 0.6, col - 240));
-    return Math.round(Math.max(MIN_H, Math.min(max, h)));
-  }
-  function toggle(next: boolean) {
-    setCollapsed(next);
-    if (!next) {
-      openedByUser.current = true;
-      requestAnimationFrame(() => draftRef.current?.focus());
-    }
-  }
-  function onPointerDown(e: PointerEvent<HTMLDivElement>) {
-    drag.current = { y: e.clientY, h: height, moved: false };
-    e.currentTarget.setPointerCapture(e.pointerId);
-  }
-  function onPointerMove(e: PointerEvent<HTMLDivElement>) {
-    if (!drag.current) return;
-    if (Math.abs(drag.current.y - e.clientY) > 3) drag.current.moved = true;
-    setHeight(clamp(drag.current.h + (drag.current.y - e.clientY)));
-  }
-  /** L34 (WCAG 2.5.7) : un clic sans glisser fait passer la hauteur à la taille suivante (petite, moyenne, grande). */
-  function onPointerUp() {
-    const d = drag.current;
-    drag.current = null;
-    if (!d || d.moved) return;
-    const sizes = [MIN_H, clamp((MIN_H + MAX_H) / 2), clamp(MAX_H)];
-    const next = sizes.find((x) => x > height + 1) ?? sizes[0]!;
-    setHeight(next);
-  }
-  function onHandleKey(e: KeyboardEvent<HTMLDivElement>) {
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      setHeight((h) => clamp(h + (e.key === 'ArrowUp' ? STEP_H : -STEP_H)));
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      toggle(true);
-    }
-  }
 
   async function send() {
     const text = draft.trim();
@@ -395,59 +324,14 @@ export function CommentsPanel({
     </span>
   );
 
-  if (collapsed && !mobile)
-    return (
-      <section ref={sectionRef} className="cm cm--collapsed" aria-label={t('editor.comments.title')}>
-        <button
-          type="button"
-          className="cm-collapsed-bar"
-          aria-expanded="false"
-          onClick={() => toggle(false)}
-        >
-          <span className="fd-icon-chip" aria-hidden="true">
-            <MessageSquare />
-          </span>
-          <span className="cm-collapsed-bar__title">{t('editor.comments.title')}</span>
-          {badge}
-          {privateNote}
-          <span className="cm-collapsed-bar__end">
-            <span className="sr-only">{t('editor.comments.expand')}</span>
-            <ChevronUp aria-hidden="true" />
-          </span>
-        </button>
-      </section>
-    );
-
   return (
     <section
       ref={sectionRef}
       id="cm-panel"
-      className={`cm${mobile ? ' cm--mobile' : ''}`}
-      style={mobile ? undefined : { height }}
+      className={`cm${variant === 'mobile' ? ' cm--mobile' : variant === 'side' ? ' cm--side' : ''}`}
       aria-labelledby="cm-title"
     >
       {dialog}
-      {!mobile && (
-        <div
-          className="cm-handle"
-          role="separator"
-          aria-orientation="horizontal"
-          aria-label={t('editor.comments.resize')}
-          aria-valuemin={MIN_H}
-          aria-valuemax={MAX_H}
-          aria-valuenow={height}
-          aria-controls="cm-panel"
-          title={t('editor.comments.resizeHint')}
-          tabIndex={0}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={() => (drag.current = null)}
-          onKeyDown={onHandleKey}
-        >
-          <span className="cm-handle__grip" aria-hidden="true" />
-        </div>
-      )}
       <div className="cm-card">
         <header className="cm-head">
           <span className="fd-icon-chip" aria-hidden="true">
@@ -474,18 +358,6 @@ export function CommentsPanel({
                 label={t('editor.comments.showResolved', { count: resolvedCount })}
                 checked={showResolved}
                 onChange={(e) => setShowResolved(e.target.checked)}
-              />
-            )}
-            {!mobile && (
-              <Button
-                size="sm"
-                variant="ghost"
-                icon={<ChevronDown />}
-                aria-label={t('editor.comments.collapse')}
-                title={t('editor.comments.collapse')}
-                aria-expanded="true"
-                aria-controls="cm-panel"
-                onClick={() => toggle(true)}
               />
             )}
           </div>
@@ -683,8 +555,7 @@ export function CommentsPanel({
           <div className="cm-compose">
             <Composer
               label={t('editor.comments.composeLabel')}
-              // Panneau bas : la barre d'actions reste visible (en-tête, barre et une ligne de fil gardés)
-              maxLines={mobile ? 8 : Math.floor((height - 200) / 22)}
+              maxLines={8}
               placeholder={
                 !stepId
                   ? t('editor.comments.placeholderNoStep')

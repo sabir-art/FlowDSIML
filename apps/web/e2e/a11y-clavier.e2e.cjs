@@ -295,6 +295,9 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       if (!(await p.evaluate(() => !!document.activeElement?.closest('dialog[open]')))) inside = false;
     }
     ok(inside, 'Modale « Nouvelle démo » : le focus reste dans la modale');
+    // L48-G : l'étape 1 n'a que 4 arrêts ; 20 Tab passent par l'interface du navigateur, où Échap
+    // n'atteint pas la page : on revient dans la modale avant Échap
+    await p.locator('dialog[open] [role=radio]:checked, dialog[open] input[type=radio]:checked').first().focus();
     await p.keyboard.press('Escape');
     await p.waitForTimeout(200);
     ok(

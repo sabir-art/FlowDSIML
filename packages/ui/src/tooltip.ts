@@ -197,6 +197,8 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
       const keys = shortcutKeys(spec, mac);
       const kbd = doc.createElement('span');
       kbd.className = 'fd-tooltip__keys';
+      // Pastilles des touches nommées par l'énoncé du raccourci (role img : aria-label permis)
+      kbd.setAttribute('role', 'img');
       kbd.setAttribute(
         'aria-label',
         `${/^en/.test(doc.documentElement.lang) ? 'shortcut' : 'raccourci'} ${keys.join(' ')}`,

@@ -1,9 +1,9 @@
 import { VoiceFields } from '../voice/VoiceFields';
 import { useConfirm } from '../../../components/ConfirmDialog';
-import { EyeOff, Lock, Presentation, Target, Trash2 } from 'lucide-react';
+import { Lock, Presentation, Target, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
-import { asCta, asRects, asStepOptions, asZoom, type Selection, type StepRow } from '../types';
+import { asCta, asStepOptions, asZoom, type StepRow } from '../types';
 import { VarTextField } from '../vars/VarTextField';
 import { useVarCatalog } from '../../../lib/varCatalog';
 import { CtaFields } from './CtaFields';
@@ -21,16 +21,21 @@ export function StepPanel({
   step,
   index,
   readOnly,
-  setSelection,
   ab,
+  section,
 }: {
   editor: DemoEditor;
   step: StepRow;
   index: number;
   readOnly: boolean;
-  setSelection: (s: Selection) => void;
   /** L18 : test A/B de la démo (section « Test A/B » des étapes à bulle). */
   ab?: AbState;
+  /**
+   * L48-E : partie affichée, selon l'outil du rail : Étape (titre, textes, type d'étape, texte
+   * alternatif, animation, organisation, parcours guidé, A/B, notes), Bouton d'action, Voix off,
+   * Suite du parcours, Zoom, Image (onglet de la capture).
+   */
+  section: 'step' | 'cta' | 'voice' | 'next' | 'zoom' | 'image';
 }) {
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
@@ -49,9 +54,7 @@ export function StepPanel({
   const firstHotspot = editor.hotspots
     .filter((h) => h.step_id === step.id)
     .sort((a, b) => a.position - b.position)[0];
-  const blurs = asRects(step.blurs);
   const catalog = useVarCatalog(editor.variables);
-  const hotspots = editor.hotspots.filter((h) => h.step_id === step.id);
 
   const last = index === editor.steps.length - 1;
   const textTitle = last ? t('editor.end.title') : t('editor.end.textTitle');
@@ -60,63 +63,52 @@ export function StepPanel({
   return (
     <div className="sp-panel">
       {dialog}
-      <div className="sec">
-        <div className="sec-title">
-          {step.kind === 'text' ? textTitle : t('editor.stepN', { n: index + 1 })}
-          {!readOnly && (
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm btn-icon"
-              aria-label={t('editor.deleteStep')}
-              title={t('editor.deleteStep')}
-              onClick={() => {
-                void ask({
-                  title: t('editor.confirmDeleteStep'),
-                  confirmLabel: t('common.delete'),
-                  danger: true,
-                }).then((yes) => yes && void editor.deleteStep(step.id));
-              }}
-            >
-              <Trash2 aria-hidden="true" />
-            </button>
-          )}
-        </div>
-        <VarTextField
-          singleLine
-          id="st-title"
-          label={step.kind === 'text' ? t('editor.hs.title') : t('editor.stepTitle')}
-          maxLength={200}
-          catalog={catalog}
-          canManage={!readOnly}
-          disabled={readOnly}
-          value={step.title}
-          onChange={(v) => editor.updateStep(step.id, { title: v })}
-        />
-        {step.kind === 'text' && (
-          <>
+      {section === 'step' && (
+        <>
+          <div className="sec">
+            <div className="sec-title">
+              {step.kind === 'text' ? textTitle : t('editor.stepN', { n: index + 1 })}
+            </div>
             <VarTextField
-              id="st-body"
-              label={t('editor.hs.text')}
-              value={step.body}
+              singleLine
+              id="st-title"
+              label={step.kind === 'text' ? t('editor.hs.title') : t('editor.stepTitle')}
+              maxLength={200}
               catalog={catalog}
               canManage={!readOnly}
               disabled={readOnly}
-              onChange={(v) => editor.updateStep(step.id, { body: v })}
+              value={step.title}
+              onChange={(v) => editor.updateStep(step.id, { title: v })}
             />
-          </>
-        )}
-        {step.page_url && (
-          <p className="help sp-url">
-            {t('editor.capturedOn')} {step.page_url}
-          </p>
-        )}
-      </div>
+            {step.kind === 'text' && (
+              <>
+                <VarTextField
+                  id="st-body"
+                  label={t('editor.hs.text')}
+                  value={step.body}
+                  catalog={catalog}
+                  canManage={!readOnly}
+                  disabled={readOnly}
+                  onChange={(v) => editor.updateStep(step.id, { body: v })}
+                />
+              </>
+            )}
+            {step.page_url && (
+              <p className="help sp-url">
+                {t('editor.capturedOn')} {step.page_url}
+              </p>
+            )}
+          </div>
 
-      {step.kind === 'before_after' && <BeforeAfterFields editor={editor} step={step} readOnly={readOnly} />}
-      {step.kind === 'video' && <VideoFields editor={editor} step={step} readOnly={readOnly} />}
-      {step.kind === 'html' && <HtmlFields editor={editor} step={step} readOnly={readOnly} />}
+          {step.kind === 'before_after' && (
+            <BeforeAfterFields editor={editor} step={step} readOnly={readOnly} />
+          )}
+          {step.kind === 'video' && <VideoFields editor={editor} step={step} readOnly={readOnly} />}
+          {step.kind === 'html' && <HtmlFields editor={editor} step={step} readOnly={readOnly} />}
+        </>
+      )}
 
-      {step.kind !== 'before_after' && step.kind !== 'video' && (
+      {section === 'cta' && step.kind !== 'before_after' && step.kind !== 'video' && (
         <div className="sec">
           <div className="sec-title">
             {step.kind === 'text' ? t('editor.end.primary') : t('editor.end.stepCta')}
@@ -132,7 +124,7 @@ export function StepPanel({
         </div>
       )}
 
-      {step.kind === 'text' && last && (
+      {section === 'cta' && step.kind === 'text' && last && (
         <div className="sec">
           <div className="sec-title">
             {t('editor.end.secondary')}
@@ -145,52 +137,7 @@ export function StepPanel({
         </div>
       )}
 
-      {step.kind === 'image' && (
-        <div className="sec">
-          <div className="sec-title">{t('editor.end.elements')}</div>
-          {hotspots.length === 0 &&
-            blurs.length === 0 &&
-            (readOnly ? (
-              <p className="help">{t('editor.noHotspot')}</p>
-            ) : (
-              // L38-8 : active l'outil Hotspot (écouté par l'éditeur), au lieu d'une consigne à chercher
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => window.dispatchEvent(new Event('fd:add-hotspot'))}
-              >
-                <Target aria-hidden="true" />
-                {t('editor.addHotspot')}
-              </button>
-            ))}
-          {hotspots.map((h, i) => (
-            <button
-              key={h.id}
-              type="button"
-              className="field-row sp-item"
-              onClick={() => setSelection({ kind: 'hotspot', id: h.id })}
-            >
-              <Target aria-hidden="true" />
-              <span className="grow">
-                {i + 1}. {h.title || t('editor.untitled')}
-              </span>
-            </button>
-          ))}
-          {blurs.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              className="field-row sp-item"
-              onClick={() => setSelection({ kind: 'blur', index: i })}
-            >
-              <EyeOff aria-hidden="true" />
-              <span className="grow">{t('editor.blurN', { n: i + 1 })}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {(step.kind === 'image' || step.kind === 'html') && (
+      {section === 'step' && (step.kind === 'image' || step.kind === 'html') && (
         // L29 §3.5 : texte alternatif de la capture (lecteur, version accessible), facultatif
         <div className="sec">
           <div className="sec-title">{t('editor.alt.section')}</div>
@@ -217,7 +164,7 @@ export function StepPanel({
         </div>
       )}
 
-      {step.kind === 'image' && (
+      {section === 'zoom' && step.kind === 'image' && (
         <div className="sec">
           <div className="sec-title">{t('editor.zoom')}</div>
           <div className="setting">
@@ -344,92 +291,127 @@ export function StepPanel({
         </div>
       )}
 
-      {step.kind === 'image' && <AnimationFields editor={editor} step={step} readOnly={readOnly} />}
-      {step.kind === 'image' && <CaptureTabFields editor={editor} step={step} readOnly={readOnly} />}
+      {section === 'step' && step.kind === 'image' && (
+        <AnimationFields editor={editor} step={step} readOnly={readOnly} />
+      )}
+      {section === 'image' && step.kind === 'image' && (
+        <CaptureTabFields editor={editor} step={step} readOnly={readOnly} />
+      )}
       {/* L28-02 : voix off ajoutée après coup (toutes les étapes ; vidéo : remplace la piste son) */}
-      <VoiceFields editor={editor} step={step} readOnly={readOnly} />
+      {section === 'voice' && <VoiceFields editor={editor} step={step} readOnly={readOnly} />}
 
-      <div className="sec">
-        <div className="sec-title">{t('editor.end.organisation')}</div>
-        <div className="field">
-          <label htmlFor="st-chapter">{t('editor.chapter')}</label>
-          <select
-            id="st-chapter"
-            className="select input-sm"
-            disabled={readOnly}
-            value={step.chapter_id ?? ''}
-            onChange={(e) => editor.updateStep(step.id, { chapter_id: e.target.value || null })}
-          >
-            <option value="">{t('common.none')}</option>
-            {editor.chapters.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.title || t('editor.untitled')}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="field">
-          <label htmlFor="st-gate">{t('editor.gateForm')}</label>
-          <select
-            id="st-gate"
-            className="select input-sm"
-            disabled={readOnly || !editor.forms.length}
-            value={step.gate_form_id ?? ''}
-            onChange={(e) => editor.updateStep(step.id, { gate_form_id: e.target.value || null })}
-          >
-            <option value="">{editor.forms.length ? t('common.none') : t('editor.noFormShort')}</option>
-            {editor.forms.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.title}
-              </option>
-            ))}
-          </select>
-          {/* L18-01 : libellé court dans le select, explication en aide */}
-          {!editor.forms.length && <p className="help">{t('editor.noForm')}</p>}
-        </div>
-      </div>
+      {section === 'step' && (
+        <>
+          <div className="sec">
+            <div className="sec-title">{t('editor.end.organisation')}</div>
+            <div className="field">
+              <label htmlFor="st-chapter">{t('editor.chapter')}</label>
+              <select
+                id="st-chapter"
+                className="select input-sm"
+                disabled={readOnly}
+                value={step.chapter_id ?? ''}
+                onChange={(e) => editor.updateStep(step.id, { chapter_id: e.target.value || null })}
+              >
+                <option value="">{t('common.none')}</option>
+                {editor.chapters.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title || t('editor.untitled')}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="st-gate">{t('editor.gateForm')}</label>
+              <select
+                id="st-gate"
+                className="select input-sm"
+                disabled={readOnly || !editor.forms.length}
+                value={step.gate_form_id ?? ''}
+                onChange={(e) => editor.updateStep(step.id, { gate_form_id: e.target.value || null })}
+              >
+                <option value="">{editor.forms.length ? t('common.none') : t('editor.noFormShort')}</option>
+                {editor.forms.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.title}
+                  </option>
+                ))}
+              </select>
+              {/* L18-01 : libellé court dans le select, explication en aide */}
+              {!editor.forms.length && <p className="help">{t('editor.noForm')}</p>}
+            </div>
+          </div>
 
-      <div className="sec">
-        <GuidedStepFields editor={editor} step={step} index={index} readOnly={readOnly} />
-      </div>
+          <div className="sec">
+            <GuidedStepFields editor={editor} step={step} index={index} readOnly={readOnly} />
+          </div>
+        </>
+      )}
 
       {/* L25-10 : « Suite de l'étape » (un menu de choix a ses propres règles, L22-09) */}
-      {!asStepOptions(step.options).choices.length && (
+      {section === 'next' && !asStepOptions(step.options).choices.length && (
         <div className="sec">
           <NextRulesFields editor={editor} step={step} index={index} readOnly={readOnly} />
         </div>
       )}
 
-      {ab && <AbSection editor={editor} step={step} index={index} readOnly={readOnly} ab={ab} />}
+      {section === 'step' && ab && (
+        <AbSection editor={editor} step={step} index={index} readOnly={readOnly} ab={ab} />
+      )}
 
       {/* L22-01 : notes du présentateur, jamais publiées ni exportées */}
-      <div className="sec notes-sec">
-        <div className="sec-title">
-          <Presentation aria-hidden="true" />
-          {t('editor.notes.title')}
-          <span className="lock">
-            <Lock aria-hidden="true" />
-            {t('editor.notes.private')}
-          </span>
-        </div>
-        <div className="field">
-          <label className="sr-only" htmlFor="st-notes">
-            {t('editor.notes.label')}
-          </label>
-          <textarea
-            id="st-notes"
-            className="textarea"
-            maxLength={1000}
-            aria-describedby="st-notes-h"
-            readOnly={readOnly}
-            value={step.presenter_notes ?? ''}
-            onChange={(e) => editor.updateStep(step.id, { presenter_notes: e.target.value.slice(0, 1000) })}
-          />
-        </div>
-        <p className="help" id="st-notes-h">
-          {t('editor.notes.help')}
-        </p>
-      </div>
+      {section === 'step' && (
+        <>
+          <div className="sec notes-sec">
+            <div className="sec-title">
+              <Presentation aria-hidden="true" />
+              {t('editor.notes.title')}
+              <span className="lock">
+                <Lock aria-hidden="true" />
+                {t('editor.notes.private')}
+              </span>
+            </div>
+            <div className="field">
+              <label className="sr-only" htmlFor="st-notes">
+                {t('editor.notes.label')}
+              </label>
+              <textarea
+                id="st-notes"
+                className="textarea"
+                maxLength={1000}
+                aria-describedby="st-notes-h"
+                readOnly={readOnly}
+                value={step.presenter_notes ?? ''}
+                onChange={(e) =>
+                  editor.updateStep(step.id, { presenter_notes: e.target.value.slice(0, 1000) })
+                }
+              />
+            </div>
+            <p className="help" id="st-notes-h">
+              {t('editor.notes.help')}
+            </p>
+          </div>
+          {/* L48-E §3 : « Supprimer l'étape » en pied du panneau Étape, avec confirmation */}
+          {!readOnly && (
+            <div className="sp-foot">
+              <button
+                type="button"
+                className="fd-btn fd-btn--ghost sp-delete"
+                onClick={() => {
+                  void ask({
+                    title: t('editor.confirmDeleteStep'),
+                    confirmLabel: t('common.delete'),
+                    danger: true,
+                  }).then((yes) => yes && void editor.deleteStep(step.id));
+                }}
+              >
+                <Trash2 aria-hidden="true" />
+                {t('editor.deleteStep')}
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

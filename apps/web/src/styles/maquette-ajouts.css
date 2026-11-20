@@ -1095,9 +1095,17 @@
   padding: 8px 12px 0;
 }
 .mk .ed-body {
-  display: grid;
-  grid-template-columns: var(--fd-layout-editor-rail-width) 1fr var(--fd-layout-editor-panel-width);
+  /* L48-E §1 : étapes, canevas, panneau de l'outil, rail d'outils */
+  position: relative;
+  display: flex;
   min-height: 0;
+}
+.mk .ed-body > .rail {
+  flex: 0 0 var(--fd-layout-editor-rail-width);
+}
+.mk .ed-body > .stage {
+  flex: 1;
+  min-width: 0;
 }
 .mk .rail {
   background: var(--fd-color-surface);
@@ -1382,51 +1390,6 @@
   margin: 8px 0 0;
   text-align: center;
 }
-.mk .floatbar {
-  position: absolute;
-  left: 50%;
-  bottom: 64px;
-  translate: -50% 0;
-  display: flex;
-  gap: 2px;
-  padding: 4px;
-  background: var(--fd-color-surface-raised);
-  border: 1px solid var(--fd-color-border);
-  border-radius: 12px;
-  box-shadow: var(--fd-shadow-md);
-  z-index: 2;
-}
-.mk .floatbar .sep {
-  width: 1px;
-  background: var(--fd-color-border);
-  margin: 6px 4px;
-}
-.mk .floatbar .btn[aria-pressed='true'] {
-  background: var(--fd-color-surface-selected);
-  color: var(--fd-color-primary);
-}
-.mk .stage-comments {
-  border-top: 1px solid var(--fd-color-border);
-  background: var(--fd-color-surface);
-  max-height: 40%;
-  overflow: auto;
-}
-.mk .panel {
-  background: var(--fd-color-surface);
-  border-left: 1px solid var(--fd-color-border);
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-.mk .panel .tabs {
-  padding: 0 16px;
-  gap: 20px;
-}
-.mk .panel-body {
-  overflow: auto;
-  padding: 16px;
-  flex: 1;
-}
 .mk .ed-publish .fd-btn {
   height: var(--fd-layout-control-height-sm);
   padding: 0 12px;
@@ -1453,9 +1416,6 @@
 .mk .stage-inner:has(> .html-crumbs-slot, > .video-tl-slot) > .frame {
   margin: 0;
 }
-.mk .stage-main .floatbar {
-  bottom: 24px;
-}
 .mk .rail-foot div.menu:not([role='menu']) {
   display: block;
   width: 100%;
@@ -1463,9 +1423,6 @@
 .mk .rail-foot .menu-trigger {
   width: 100%;
   justify-content: center;
-}
-.mk .stage-comments .cm {
-  border-radius: 0;
 }
 .mk.ed {
   display: flex;
@@ -2024,29 +1981,6 @@
   border-color: var(--fd-color-primary);
   border-style: dashed;
   background: var(--fd-color-surface-selected);
-}
-/* ---- EDT-05 : barre d'outils flottante ---- */
-.mk .floatbar .btn[aria-pressed='true'] {
-  background: var(--fd-color-primary-soft);
-  color: var(--fd-color-primary-soft-text);
-}
-.mk .floatbar .btn[aria-disabled='true'] {
-  position: relative;
-  opacity: 1;
-  color: var(--fd-color-text-subtle);
-}
-.mk .floatbar .fb-soon {
-  position: absolute;
-  top: -9px;
-  right: -10px;
-  padding: 0 4px;
-  border-radius: 999px;
-  font: 600 9px/14px var(--fd-font-sans);
-  background: var(--fd-color-surface-sunken);
-  color: var(--fd-color-text-muted);
-  border: 1px solid var(--fd-color-border);
-  white-space: nowrap;
-  pointer-events: none;
 }
 /* ---- EDT-07 : panneau Zone de flou et zone sur le canevas ---- */
 .mk .blur-panel .segmented {

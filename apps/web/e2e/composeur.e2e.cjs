@@ -24,13 +24,10 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
     console.log(`${cond ? 'ok' : 'NOT OK'} - ${label}`);
     if (!cond) process.exitCode = 1;
   };
-  const open = async (state, viewport = { width: 1440, height: 900 }, panel = 480) => {
+  const open = async (state, viewport = { width: 1440, height: 900 }) => {
     const ctx = await themedContext(b, { viewport });
-    await ctx.addInitScript((h) => {
-      if (localStorage.getItem('fd.editor.comments.collapsed') === null)
-        localStorage.setItem('fd.editor.comments.collapsed', '0');
-      localStorage.setItem('fd.editor.comments.height', String(h));
-    }, panel);
+    // L48-E : les commentaires sont un outil du rail (dernier outil ouvert gardé)
+    await ctx.addInitScript(() => localStorage.setItem('fd.editor.tool', 'comments'));
     const page = await ctx.newPage();
     page.on('pageerror', (e) => errors.push(e.message));
     await install(page, state);
@@ -218,14 +215,14 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   );
   await page.context().close();
 
-  // Panneau bas : moins de lignes, la barre d'actions reste dans le panneau
+  // Fenêtre basse : la barre d'actions reste dans le panneau
   {
-    const p = await open(seed(), undefined, 240);
+    const p = await open(seed(), { width: 1440, height: 600 });
     const field = p.getByRole('textbox', { name: 'Nouveau commentaire' });
     await field.fill(Array.from({ length: 12 }, (_, i) => `Ligne ${i + 1}`).join('\n'));
     const bar = await p.locator('.cm-compose .fd-composer__bar').boundingBox();
     const card = await p.locator('.cm-card').boundingBox();
-    ok(bar.y + bar.height <= card.y + card.height + 1, 'panneau bas : barre d’actions visible');
+    ok(bar.y + bar.height <= card.y + card.height + 1, 'fenêtre basse : barre d’actions visible');
     await p.context().close();
   }
 

@@ -3,30 +3,27 @@ import { FormPanel } from './panels/FormPanel';
 import { FormPreview } from './FormPreview';
 import {
   ArrowLeft,
-  CheckCircle2,
+  CircleHelp,
   Clock,
   Copy,
   LayoutTemplate,
-  Crop,
   Download,
-  Droplet,
   GraduationCap,
-  Image as ImageIcon,
+  ImagePlus,
   Keyboard,
-  Palette,
   PenLine,
   Presentation,
   Redo2,
   Search,
   Send,
   Share2,
-  Target,
   Undo2,
-  ZoomIn,
   Languages,
   Lightbulb,
-  MessageSquareText,
 } from 'lucide-react';
+import { EditorRail, TOOL_KEY, TOOL_ORDER, ToolPanel, savedTool, type ToolId } from './EditorRail';
+import { HotspotsTool } from './panels/HotspotsTool';
+import { BlurModal } from './BlurModal';
 import { AssistantPanel } from '../../components/ai/AssistantPanel';
 import { SuggestionsPanel } from '../../components/ai/SuggestionsPanel';
 import { TranslateDialog } from '../../components/ai/TranslateDialog';
@@ -56,9 +53,7 @@ import { StepPanel } from './panels/StepPanel';
 import { AbCanvasSwitch, asVariantB, useAbTest } from './ab/AbTest';
 import { fontFaceCss } from '@flowdsiml/player-core';
 import { themeSchema } from '@flowdsiml/manifest';
-import { asSettings } from './types';
-import { HotspotPanel } from './panels/HotspotPanel';
-import { BlurPanel } from './panels/BlurPanel';
+import { asSettings, asStepOptions } from './types';
 import { ThemePanel } from './panels/ThemePanel';
 import { buildDraftManifest } from './draftManifest';
 import type { Selection } from './types';
@@ -73,7 +68,6 @@ import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
 import { Menu } from '../../components/Menu';
 import { SaveTemplateDialog } from './SaveTemplateDialog';
-import { HelpButton } from '../../help/HelpButton';
 import { LoadError, LoadStatus, SlowLine, useSkeleton } from '../../components/Skeleton';
 import { EditorSkeleton, storeEditorGeometry } from './EditorSkeleton';
 import { EditorNarrowView } from './EditorNarrow';
@@ -92,7 +86,6 @@ const DistributeDialog = lazy(() =>
   import('../share/DistributeDialog').then((m) => ({ default: m.DistributeDialog })),
 );
 
-type Tab = 'step' | 'design' | 'settings';
 type Zoom = 'fit' | '50' | '100';
 
 export function EditorPage() {
@@ -202,16 +195,41 @@ export function EditorPage() {
   // L18 : test A/B en cours de la démo
   const ab = useAbTest(demoId);
   const [selection, setSelection] = useState<Selection>({ kind: 'step' });
+  /** Outils du rail visibles (Assistant : éditeurs), dans l'ordre (raccourcis Alt + 1 à 9). */
+  const railOrder = TOOL_ORDER.filter((x) => x !== 'assistant' || can('demo.edit'));
   const [params] = useSearchParams();
-  // ANA-09 : « Ajouter un formulaire » ouvre directement l'onglet Réglages
-  const [tab, setTab] = useState<Tab>(params.get('tab') === 'settings' ? 'settings' : 'step');
-  // L26-02 : les articles « Sur cette page » de l'aide suivent l'onglet du panneau
+  // L48-E §3 : outil du rail ouvert (un seul panneau) ; ANA-09 : ?tab=settings ouvre les Réglages,
+  // L48-E §5 : ?outil=commentaires (lien d'une notification) ouvre les Commentaires
+  const [panel, setPanelState] = useState<ToolId | null>(() =>
+    params.get('tab') === 'settings'
+      ? 'settings'
+      : params.get('outil') === 'commentaires' || params.get('comment')
+        ? 'comments'
+        : savedTool(),
+  );
+  const setPanel = (p: ToolId | null) => {
+    setPanelState(p);
+    if (p && p !== 'blur' && p !== 'assistant')
+      try {
+        localStorage.setItem(TOOL_KEY, p);
+      } catch {
+        /* préférence non gardée */
+      }
+    // Le titre du panneau prend le focus à l'ouverture
+    if (p) requestAnimationFrame(() => document.getElementById('ed-tool-title')?.focus());
+  };
+  const panelRef = useRef(panel);
+  panelRef.current = panel;
+  // L26-02 : les articles « Sur cette page » de l'aide suivent l'outil ouvert
   const help = useHelp();
   const setHelpTab = help?.setEditorTab;
+  const helpTab = panel === 'design' ? 'design' : panel === 'settings' ? 'settings' : 'step';
   useEffect(() => {
-    setHelpTab?.(tab);
+    setHelpTab?.(helpTab);
     return () => setHelpTab?.(null);
-  }, [tab, setHelpTab]);
+  }, [helpTab, setHelpTab]);
+  // L48-E §4 : modale « Flouter des zones » (zone choisie à l'ouverture)
+  const [blurOpen, setBlurOpen] = useState<{ index?: number } | null>(null);
   const readOnly = !can('demo.edit');
   const narrow = useNarrow(1024);
   const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);
@@ -279,12 +297,12 @@ export function EditorPage() {
     };
     const onFocus = (e: FocusEvent) => {
       const el = e.target as HTMLElement | null;
-      if (!el?.closest?.('.panel')) return;
+      if (!el?.closest?.('.ed-tool')) return;
       lastActive = Date.now();
       presence.update({ a: activityOf(el.id), t: lastActive });
     };
     const onBlur = (e: FocusEvent) => {
-      if ((e.target as HTMLElement | null)?.closest?.('.panel')) presence.update({ a: null });
+      if ((e.target as HTMLElement | null)?.closest?.('.ed-tool')) presence.update({ a: null });
     };
     const onMove = (e: PointerEvent) => {
       active();
@@ -331,6 +349,17 @@ export function EditorPage() {
   );
   const selectedForm =
     selection.kind === 'form' ? editor.forms.find((f) => f.id === selection.id) : undefined;
+  // L48-E §3 : lien avec le canevas. Un point choisi ouvre « Points d'intérêt » ; une zone floutée
+  // ouvre la modale du flou sur cette zone ; le recadrage a son panneau.
+  useEffect(() => {
+    if (selection.kind === 'hotspot') setPanelState('hotspots');
+    else if (selection.kind === 'crop') setPanelState('crop');
+    else if (selection.kind === 'blur') {
+      setBlurOpen({ index: selection.index });
+      setSelection({ kind: 'step' });
+      setTool('select');
+    }
+  }, [selection]);
 
   // Raccourcis clavier : flèches pour naviguer, Suppr pour le hotspot sélectionné.
   useEffect(() => {
@@ -364,6 +393,15 @@ export function EditorPage() {
         editor.redo();
         return;
       }
+      // L48-E §2 : Alt + 1 à 9 ouvre les outils du rail (jamais pendant la saisie, vérifié plus haut)
+      if (e.altKey && !mod && /^Digit[1-9]$/.test(e.code)) {
+        const id = railOrder[Number(e.code.slice(5)) - 1];
+        if (id) {
+          e.preventDefault();
+          document.querySelector<HTMLButtonElement>(`.ed-rail button[data-tool="${id}"]`)?.click();
+        }
+        return;
+      }
       if (mod || e.altKey) return;
       // Raccourcis à une lettre : jamais pendant la saisie (vérifié plus haut)
       if (e.key === '?') {
@@ -378,11 +416,15 @@ export function EditorPage() {
         step?.kind !== 'before_after' &&
         step?.kind !== 'video'
       ) {
-        const k = key === 'h' ? 'hotspot' : 'blur';
-        setTool((cur) => (cur === k ? 'select' : k));
+        // L48-E §4 : B ouvre la modale du flou (capture seulement)
+        if (key === 'b') {
+          if (step?.kind === 'image') setBlurOpen({});
+          return;
+        }
+        setTool((cur) => (cur === 'hotspot' ? 'select' : 'hotspot'));
         return;
       }
-      if ((e.target as HTMLElement)?.closest?.('[data-canvas-item], .cm, #fd-portal')) return;
+      if ((e.target as HTMLElement)?.closest?.('[data-canvas-item], .cm, #fd-portal, .ed-rail')) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight')
         setIndex((i) => Math.min(i + 1, editor.steps.length - 1));
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') setIndex((i) => Math.max(i - 1, 0));
@@ -393,10 +435,19 @@ export function EditorPage() {
       if (e.key === 'Escape') {
         setTool('select');
         setSelection({ kind: 'step' });
+        // L48-E §3 : Échap ferme le panneau et rend le focus à l'outil
+        if (panelRef.current && !document.querySelector('dialog[open]')) {
+          const id = panelRef.current;
+          setPanelState(null);
+          requestAnimationFrame(() =>
+            document.querySelector<HTMLButtonElement>(`.ed-rail button[data-tool="${id}"]`)?.focus(),
+          );
+        }
       }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- railOrder suit les droits
   }, [editor, selection, readOnly, ws, step?.kind]);
 
   // L32 : squelette (même géométrie), erreur, délais (docs/ux/specs/l32-squelettes.md §3-4)
@@ -445,9 +496,6 @@ export function EditorPage() {
       </EditorSkeleton>
     );
 
-  const hotspot =
-    selection.kind === 'hotspot' ? editor.hotspots.find((h) => h.id === selection.id) : undefined;
-
   function preview() {
     setPreviewManifest(buildDraftManifest(editor, ws?.name ?? ''));
   }
@@ -457,20 +505,171 @@ export function EditorPage() {
   const unpublished =
     editor.demo.status !== 'published' ||
     (publishedAt !== null && Date.parse(editor.demo.updated_at) > Date.parse(publishedAt) + 2000);
-  const toolBtn = (k: Tool, Icon: typeof Target, label: string) => (
-    <button
-      key={k}
-      type="button"
-      className="btn btn-ghost btn-icon"
-      aria-pressed={tool === k}
-      aria-label={label}
-      title={label}
-      onClick={() => setTool(tool === k ? 'select' : k)}
-      disabled={readOnly || step?.kind !== 'image'}
-    >
-      <Icon aria-hidden="true" />
-    </button>
-  );
+  // L48-E §2 : outils sans objet pour l'étape : visibles, désactivés, avec la raison
+  const capOnly = t('editor.rail.why.capture');
+  const noStep = step ? undefined : t('editor.rail.why.noStep');
+  const why: Partial<Record<ToolId, string>> = step
+    ? {
+        cta: step.kind === 'before_after' || step.kind === 'video' ? t('editor.rail.why.cta') : undefined,
+        hotspots: step.kind !== 'image' ? capOnly : undefined,
+        next: asStepOptions(step.options).choices.length ? t('editor.rail.why.next') : undefined,
+        blur: step.kind !== 'image' ? capOnly : undefined,
+        zoom:
+          step.kind === 'html' ? t('editor.rail.why.zoomHtml') : step.kind !== 'image' ? capOnly : undefined,
+        crop: readOnly
+          ? t('editor.rail.why.readOnly')
+          : step.kind === 'html'
+            ? t('editor.rail.why.cropHtml')
+            : step.kind !== 'image' || !step.image_path
+              ? capOnly
+              : undefined,
+        image: readOnly ? t('editor.rail.why.readOnly') : step.kind !== 'image' ? capOnly : undefined,
+      }
+    : {
+        step: noStep,
+        cta: noStep,
+        hotspots: noStep,
+        voice: noStep,
+        next: noStep,
+        blur: noStep,
+        zoom: noStep,
+        crop: noStep,
+        image: noStep,
+      };
+  // Point « non lu » des Commentaires : commentaire d'un autre membre sur l'étape, après la dernière visite
+  const unread = (() => {
+    if (!step || !user) return false;
+    let seen = 0;
+    try {
+      const map = JSON.parse(localStorage.getItem('fd.editor.comments.seen') ?? '{}') as Record<
+        string,
+        string
+      >;
+      seen = Date.parse(map[step.id] ?? '') || 0;
+    } catch {
+      /* stockage indisponible */
+    }
+    return comments.comments.some(
+      (c) => c.step_id === step.id && c.author_id !== user.id && Date.parse(c.created_at) > seen,
+    );
+  })();
+  function closePanel() {
+    if (selectedForm) return setSelection({ kind: 'step' });
+    const id = panel;
+    if (id === 'hotspots') setTool('select');
+    if (id === 'crop' || id === 'hotspots') setSelection({ kind: 'step' });
+    setPanelState(null);
+    requestAnimationFrame(() =>
+      document.querySelector<HTMLButtonElement>(`.ed-rail button[data-tool="${id}"]`)?.focus(),
+    );
+  }
+  function toggleTool(id: ToolId) {
+    if (id === 'assistant') {
+      setSuggesting(false);
+      setAssisting((v) => !v);
+      return;
+    }
+    if (id === 'blur') return setBlurOpen({});
+    if (id === panel && !selectedForm) return closePanel();
+    if (selectedForm || panel === 'crop' || panel === 'hotspots') setSelection({ kind: 'step' });
+    setTool(id === 'hotspots' ? 'hotspot' : 'select');
+    if (id === 'crop' && step) {
+      setCropDraft(cropDraftFor(step));
+      setSelection({ kind: 'crop' });
+    }
+    setPanel(id);
+  }
+  function panelBody() {
+    if (selectedForm)
+      return (
+        <FormPanel
+          editor={editor}
+          readOnly={readOnly}
+          form={selectedForm}
+          onBack={() => setSelection({ kind: 'step' })}
+          onMove={(i) => {
+            setSelection({ kind: 'form', id: selectedForm.id });
+            setIndex(i);
+          }}
+        />
+      );
+    if (panel === 'design') return <ThemePanel editor={editor} readOnly={readOnly} />;
+    if (panel === 'settings')
+      return (
+        <SettingsTab
+          editor={editor}
+          readOnly={readOnly}
+          showCursors={showCursors}
+          onShowCursors={setShowCursors}
+          onOpenForm={(i, id) => {
+            setSelection({ kind: 'form', id });
+            setIndex(i);
+          }}
+        />
+      );
+    if (panel === 'comments')
+      return (
+        <CommentsPanel
+          stepId={step?.id ?? null}
+          stepIndex={safeIndex}
+          api={comments}
+          focusComment={focusComment}
+          variant="side"
+        />
+      );
+    if (!step || !panel) return <p className="help">{t('editor.empty')}</p>;
+    const reason = why[panel];
+    if (reason) return <p className="help ed-tool__why">{reason}</p>;
+    if (panel === 'hotspots')
+      return (
+        <HotspotsTool
+          editor={editor}
+          step={step}
+          selection={selection}
+          setSelection={setSelection}
+          readOnly={readOnly}
+          onAdd={() => setTool('hotspot')}
+        />
+      );
+    if (panel === 'crop')
+      return selection.kind === 'crop' && cropDraft ? (
+        <CropPanel
+          editor={editor}
+          step={step}
+          draft={cropDraft}
+          setDraft={setCropDraft}
+          onClose={() => closePanel()}
+        />
+      ) : null;
+    const section =
+      panel === 'cta' || panel === 'voice' || panel === 'next' || panel === 'zoom' || panel === 'image'
+        ? panel
+        : 'step';
+    return (
+      <>
+        {panel === 'image' && (
+          <div className="sec">
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => replacePicker.current?.click()}
+            >
+              <ImagePlus aria-hidden="true" />
+              {t('editor.toolReplace')}
+            </button>
+          </div>
+        )}
+        <StepPanel
+          editor={editor}
+          step={step}
+          index={index}
+          readOnly={readOnly}
+          ab={ab}
+          section={section}
+        />
+      </>
+    );
+  }
 
   return (
     <main className="mk ed" id="main" aria-busy="false">
@@ -509,7 +708,7 @@ export function EditorPage() {
             if (i >= 0) {
               setIndex(i);
               setSelection({ kind: 'step' });
-              setTab('step');
+              setPanel('step');
             }
           }}
         />
@@ -545,16 +744,17 @@ export function EditorPage() {
           value={editor.demo.title}
           onChange={(e) => editor.updateDemo({ title: e.target.value })}
         />
-        {unpublished && (
-          <span className="badge badge-warning">
-            {editor.demo.status === 'published' ? t('editor.unpublishedChanges') : t('status.draft')}
+        {/* L48-E §6 : état en texte, sans pastille : « Enregistré · Non publié » */}
+        <span className="ed-state">
+          <span role="status" aria-live="polite">
+            {t(`editor.save_${editor.saveState === 'idle' ? 'saved' : editor.saveState}`)}
           </span>
-        )}
-        <span className="save-state" role="status" aria-live="polite">
-          {(editor.saveState === 'saved' || editor.saveState === 'idle') && (
-            <CheckCircle2 aria-hidden="true" />
+          {unpublished && (
+            <span className="ed-state__unpub">
+              <i aria-hidden="true" />
+              {editor.demo.status === 'published' ? t('editor.unpublishedChanges') : t('editor.notPublished')}
+            </span>
           )}
-          {t(`editor.save_${editor.saveState === 'idle' ? 'saved' : editor.saveState}`)}
         </span>
         <span className="grow" />
         {user && (
@@ -611,50 +811,19 @@ export function EditorPage() {
             {t('editor.preview')}
           </button>
         </div>
-        {/* L30-08 : Assistant (panneau latéral, conversation effacée à la fermeture) */}
-        {can('demo.edit') && ws && (
-          <button
-            type="button"
-            className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-            aria-label={t('ai.assistant.open')}
-            title={t('ai.assistant.open')}
-            aria-expanded={assisting}
-            onClick={() => {
-              setSuggesting(false);
-              setAssisting((v) => !v);
-            }}
-          >
-            <MessageSquareText aria-hidden="true" />
-          </button>
-        )}
-        {/* L30-04 : Suggestions, à côté de l'aide */}
-        {can('demo.edit') && ws && (
-          <button
-            type="button"
-            className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-            aria-label={t('ai.suggest.open_btn')}
-            title={t('ai.suggest.open_btn')}
-            aria-expanded={suggesting}
-            onClick={() => {
-              setAssisting(false);
-              setSuggesting((v) => !v);
-            }}
-          >
-            <Lightbulb aria-hidden="true" />
-          </button>
-        )}
-        <HelpButton className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" />
         <Menu
           label={t('editor.more')}
           items={[
+            // L48-E §6 : Présenter, Diffuser, Exporter, Traduire, Rédiger, Quiz, Rechercher ; puis l'aide
             {
-              label: t('editor.versions'),
-              icon: <Clock />,
-              disabled: true,
-              end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
-              onSelect: () => undefined,
+              label: t('present.button'),
+              icon: <Presentation />,
+              disabled: !editor.steps.length,
+              onSelect: () => setPresenting(true),
             },
-            { label: t('editor.themeOfDemo'), icon: <Palette />, onSelect: () => setTab('design') },
+            ...(can('demo.edit')
+              ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(true) }]
+              : []),
             {
               label: t('export.menu'),
               icon: <Download />,
@@ -662,14 +831,6 @@ export function EditorPage() {
               disabled: !rules.exports_allowed,
               hint: rules.exports_allowed ? undefined : t('rules.errExports'),
               onSelect: () => setExporting(true),
-            },
-            ...(can('demo.edit')
-              ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(true) }]
-              : []),
-            {
-              label: t('editor.quiz.open') + (editor.questions.length ? ` (${editor.questions.length})` : ''),
-              icon: <GraduationCap />,
-              onSelect: () => navigate(`/demos/${demoId}/quiz`),
             },
             // L30-03 : copie traduite (Assistance IA)
             ...(can('demo.edit')
@@ -691,21 +852,57 @@ export function EditorPage() {
                 );
               },
             },
+            // L30-04 : suggestions de l'IA (l'ancienne ampoule de l'en-tête)
+            ...(can('demo.edit') && ws
+              ? [
+                  {
+                    label: t('ai.suggest.open_btn'),
+                    icon: <Lightbulb />,
+                    onSelect: () => {
+                      setAssisting(false);
+                      setSuggesting(true);
+                    },
+                  },
+                ]
+              : []),
+            {
+              label: t('editor.quiz.open') + (editor.questions.length ? ` (${editor.questions.length})` : ''),
+              icon: <GraduationCap />,
+              onSelect: () => navigate(`/demos/${demoId}/quiz`),
+            },
             {
               label: t('editor.find.label'),
               icon: <Search />,
               end: <kbd className="menu-kbd">{isMac ? '⌘' : 'Ctrl'} F</kbd>,
               onSelect: () => setFindOpen(true),
             },
+            'separator',
             {
               label: t('editor.shortcuts'),
               icon: <Keyboard />,
               end: <kbd className="menu-kbd">?</kbd>,
               onSelect: () => setKeysOpen(true),
             },
-            'separator',
-            ...(can('demo.edit')
+            ...(help
               ? [
+                  {
+                    label: t('help.open'),
+                    icon: <CircleHelp />,
+                    end: <kbd className="menu-kbd">F1</kbd>,
+                    onSelect: () => help.toggle(),
+                  },
+                ]
+              : []),
+            {
+              label: t('editor.versions'),
+              icon: <Clock />,
+              disabled: true,
+              end: <span className="menu-soon-text">{t('shell.soon')}</span>,
+              onSelect: () => undefined,
+            },
+            ...(can('demo.edit')
+              ? ([
+                  'separator',
                   {
                     label: t('editor.duplicateDemo'),
                     icon: <Copy />,
@@ -721,19 +918,10 @@ export function EditorPage() {
                     icon: <LayoutTemplate />,
                     onSelect: () => setSavingTpl(true),
                   },
-                ]
+                ] as const)
               : []),
           ]}
         />
-        <button
-          type="button"
-          className="btn btn-secondary btn-sm"
-          disabled={!editor.steps.length}
-          onClick={() => setPresenting(true)}
-        >
-          <Presentation aria-hidden="true" />
-          {t('present.button')}
-        </button>
         <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/share`}>
           <Share2 aria-hidden="true" />
           {t('editor.share')}
@@ -746,7 +934,7 @@ export function EditorPage() {
               onReviewStep={(i) => {
                 setIndex(i);
                 setSelection({ kind: 'step' });
-                setTab('step');
+                setPanel('step');
               }}
               onRename={() =>
                 requestAnimationFrame(() => {
@@ -785,7 +973,6 @@ export function EditorPage() {
             onSelectForm={(i, id) => {
               setSelection({ kind: 'form', id });
               setIndex(i);
-              setTab('step');
             }}
           />
         </nav>
@@ -838,7 +1025,7 @@ export function EditorPage() {
               onGoto={(i, hotspotId) => {
                 setIndex(i);
                 setSelection(hotspotId ? { kind: 'hotspot', id: hotspotId } : { kind: 'step' });
-                setTab('step');
+                if (!hotspotId) setPanel('step');
               }}
             />
           )}
@@ -935,181 +1122,51 @@ export function EditorPage() {
               )}
               {tool !== 'select' && <p className="muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
             </div>
-            {step?.kind !== 'before_after' && step?.kind !== 'video' && step?.kind !== 'html' && (
-              <div className="floatbar" role="toolbar" aria-label={t('editor.tools')}>
-                {toolBtn('hotspot', Target, t('editor.toolHotspot'))}
-                {toolBtn('blur', Droplet, t('editor.toolBlur'))}
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-icon"
-                  aria-label={t('editor.toolZoom')}
-                  title={t('editor.toolZoom')}
-                  disabled={readOnly || step?.kind !== 'image'}
-                  onClick={() => {
-                    setSelection({ kind: 'step' });
-                    setTab('step');
-                  }}
-                >
-                  <ZoomIn aria-hidden="true" />
-                </button>
-                {/* L25-02 : recadrer la capture (outil actif) */}
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-icon"
-                  aria-label={t('editor.toolCrop')}
-                  title={t('editor.toolCrop')}
-                  aria-pressed={selection.kind === 'crop'}
-                  disabled={readOnly || step?.kind !== 'image' || !step?.image_path}
-                  onClick={() => {
-                    if (!step) return;
-                    setCropDraft(cropDraftFor(step));
-                    setSelection({ kind: 'crop' });
-                    setTab('step');
-                  }}
-                >
-                  <Crop aria-hidden="true" />
-                </button>
-                <span className="sep" />
-                {/* REV-06 : remplacer l'image de l'étape (image importée, signalée et comptée au bilan RGPD) */}
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-icon"
-                  aria-label={t('editor.toolReplace')}
-                  title={t('editor.toolReplace')}
-                  disabled={readOnly || step?.kind !== 'image'}
-                  onClick={() => replacePicker.current?.click()}
-                >
-                  <ImageIcon aria-hidden="true" />
-                </button>
-                <input
-                  ref={replacePicker}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  hidden
-                  aria-label={t('editor.toolReplace')}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    e.target.value = '';
-                    if (!f || !step) return;
-                    void editor.captureStep(step.id, f).then((r) => {
-                      if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
-                    });
-                  }}
-                />
-              </div>
-            )}
-          </div>
-          {/* Commentaires d'équipe (lot A6) : gardés sous le canevas, repliables */}
-          <div className="stage-comments">
-            <CommentsPanel
-              stepId={step?.id ?? null}
-              stepIndex={safeIndex}
-              api={comments}
-              focusComment={focusComment}
-            />
           </div>
         </section>
-        <aside className="panel fd-dense" aria-label={t('editor.properties')}>
-          <div className="tabs" role="tablist" aria-label={t('editor.properties')}>
-            {(['step', 'design', 'settings'] as Tab[]).map((k) => (
-              <button
-                key={k}
-                type="button"
-                role="tab"
-                id={`ed-tab-${k}`}
-                aria-selected={tab === k}
-                tabIndex={tab === k ? 0 : -1}
-                onClick={() => setTab(k)}
-                onKeyDown={(e) => {
-                  // L34 : onglets au clavier (motif ARIA) : flèches, Début, Fin ; l'onglet suit le focus
-                  const keys: Tab[] = ['step', 'design', 'settings'];
-                  const i = keys.indexOf(k);
-                  const to =
-                    e.key === 'ArrowRight'
-                      ? (i + 1) % keys.length
-                      : e.key === 'ArrowLeft'
-                        ? (i + keys.length - 1) % keys.length
-                        : e.key === 'Home'
-                          ? 0
-                          : e.key === 'End'
-                            ? keys.length - 1
-                            : -1;
-                  if (to < 0) return;
-                  e.preventDefault();
-                  const next = keys[to]!;
-                  setTab(next);
-                  requestAnimationFrame(() => document.getElementById(`ed-tab-${next}`)?.focus());
-                }}
-              >
-                {t(`editor.tab_${k}`)}
-              </button>
-            ))}
-          </div>
-          <div className="panel-body" role="tabpanel" aria-labelledby={`ed-tab-${tab}`}>
-            {tab === 'step' && selectedForm && (
-              <FormPanel
-                editor={editor}
-                readOnly={readOnly}
-                form={selectedForm}
-                onBack={() => setSelection({ kind: 'step' })}
-                onMove={(i) => {
-                  setSelection({ kind: 'form', id: selectedForm.id });
-                  setIndex(i);
-                }}
-              />
-            )}
-            {tab === 'step' && step && selection.kind === 'step' && (
-              <StepPanel
-                editor={editor}
-                step={step}
-                index={index}
-                readOnly={readOnly}
-                setSelection={setSelection}
-                ab={ab}
-              />
-            )}
-            {tab === 'step' && step && hotspot && (
-              <HotspotPanel
-                editor={editor}
-                hotspot={hotspot}
-                readOnly={readOnly}
-                setSelection={setSelection}
-              />
-            )}
-            {tab === 'step' && step && selection.kind === 'crop' && cropDraft && (
-              <CropPanel
-                editor={editor}
-                step={step}
-                draft={cropDraft}
-                setDraft={setCropDraft}
-                onClose={() => setSelection({ kind: 'step' })}
-              />
-            )}
-            {tab === 'step' && step && selection.kind === 'blur' && (
-              <BlurPanel
-                editor={editor}
-                step={step}
-                index={selection.index}
-                readOnly={readOnly}
-                setSelection={setSelection}
-              />
-            )}
-            {tab === 'design' && <ThemePanel editor={editor} readOnly={readOnly} />}
-            {tab === 'settings' && (
-              <SettingsTab
-                editor={editor}
-                readOnly={readOnly}
-                showCursors={showCursors}
-                onShowCursors={setShowCursors}
-                onOpenForm={(i, id) => {
-                  setSelection({ kind: 'form', id });
-                  setIndex(i);
-                  setTab('step');
-                }}
-              />
-            )}
-          </div>
-        </aside>
+        {/* L48-E §3 : panneau de l'outil actif (un seul à la fois), puis le rail d'outils */}
+        {(selectedForm || (panel && panel !== 'blur' && panel !== 'assistant')) && (
+          <ToolPanel
+            id={selectedForm ? 'form' : panel!}
+            title={selectedForm ? t('editor.leadForm') : t(`editor.rail.${panel}`)}
+            wide={!selectedForm && panel === 'comments'}
+            onClose={closePanel}
+          >
+            {panelBody()}
+          </ToolPanel>
+        )}
+        <EditorRail
+          active={assisting ? 'assistant' : selectedForm ? null : panel}
+          onToggle={toggleTool}
+          disabled={why}
+          dot={{ comments: unread && panel !== 'comments' }}
+          hidden={can('demo.edit') ? [] : ['assistant']}
+        />
+        {blurOpen && step && step.kind === 'image' && (
+          <BlurModal
+            editor={editor}
+            step={step}
+            readOnly={readOnly}
+            initial={blurOpen.index}
+            onClose={() => setBlurOpen(null)}
+          />
+        )}
+        {/* REV-06 : remplacer l'image de l'étape (image importée, signalée et comptée au bilan RGPD) */}
+        <input
+          ref={replacePicker}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          hidden
+          aria-label={t('editor.toolReplace')}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            e.target.value = '';
+            if (!f || !step) return;
+            void editor.captureStep(step.id, f).then((r) => {
+              if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
+            });
+          }}
+        />
       </div>
       <PreviewDialog manifest={previewManifest} onClose={() => setPreviewManifest(null)} />
     </main>

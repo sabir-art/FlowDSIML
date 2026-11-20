@@ -35,7 +35,8 @@ async function gap(p, a, b) {
 
   // ===== Éditeur > Réglages (E1 à E6) =====
   await appPage(b, editor, 'light', async (p) => {
-    await p.getByRole('tab', { name: 'Réglages' }).click();
+    // L48-E : outils du rail (Réglages de la démo, Design, Suite du parcours)
+    await p.locator('.ed-rail [data-tool="settings"]').click();
     await p.waitForTimeout(400);
     const e1 = await gap(p, '.fmt-sec .fmt-group:last-of-type', '.fmt-sec .field:has(#fmt-out)');
     ok(near(e1, 20), `E1 : format → « Largeur de sortie » : ${e1} px (20)`);
@@ -53,7 +54,7 @@ async function gap(p, a, b) {
     });
     ok(e3 === 0, `E3 : légende alignée sur les radios (${e3} px)`);
     const e4 = await p.evaluate(() => {
-      const sec = [...document.querySelectorAll('.panel .sec')].find((s) =>
+      const sec = [...document.querySelectorAll('.ed-tool .sec')].find((s) =>
         /Jeu de données/i.test(s.querySelector('.sec-title')?.textContent || ''),
       );
       const help = sec.querySelector('.help');
@@ -62,7 +63,7 @@ async function gap(p, a, b) {
     });
     ok(near(e4, 12), `E4 : « Aucun jeu de données… » → bouton : ${e4} px (12)`);
     const e5 = await p.evaluate(() => {
-      const t = document.querySelector('.panel .notes-sec .sec-title');
+      const t = document.querySelector('.ed-tool .notes-sec .sec-title');
       const lock = t.querySelector('.lock');
       const svg = lock.querySelector('svg');
       return {
@@ -72,7 +73,7 @@ async function gap(p, a, b) {
     });
     ok(e5.oneLine && e5.sameLine, 'E5 : en-tête des notes sur une ligne, cadenas à côté de « Privées »');
     const e6 = await p.evaluate(() => {
-      const sec = [...document.querySelectorAll('.panel .sec')].find((s) =>
+      const sec = [...document.querySelectorAll('.ed-tool .sec')].find((s) =>
         /Lecture/i.test(s.querySelector('.sec-title')?.textContent || ''),
       );
       const rows = [...sec.querySelectorAll('.setting')];
@@ -93,7 +94,7 @@ async function gap(p, a, b) {
   // ===== Éditeur > Étape (E7 à E9) et Design (E10 à E12) =====
   await appPage(b, editor, 'light', async (p) => {
     const e7 = await p.evaluate(() => {
-      const st = document.querySelector('.panel .ab-sec .fd-stack--action');
+      const st = document.querySelector('.ed-tool .ab-sec .fd-stack--action');
       if (!st) return null;
       return Math.round(
         st.querySelector(':scope > button').getBoundingClientRect().top -
@@ -101,36 +102,42 @@ async function gap(p, a, b) {
       );
     });
     ok(near(e7, 12), `E7 : test A/B, texte → « Créer une variante B » : ${e7} px (12)`);
-    const e9 = await p.evaluate(() => {
-      const h = document.querySelector('.panel .rules-sec .sec-title');
-      const ref = document.querySelector('.panel .sec:not(.rules-sec) > .sec-title');
-      if (!h || !ref) return null;
-      const a = getComputedStyle(h);
-      const r = getComputedStyle(ref);
-      return (
-        a.fontSize === r.fontSize &&
-        a.textTransform === r.textTransform &&
-        !h.parentElement.querySelector('.fd-icon-chip')
-      );
-    });
+    // E9 : « Suite de l'étape » (outil Suite du parcours) avec le même titre de section que l'outil Étape
+    const style = (sel) =>
+      p.evaluate((q) => {
+        const el = document.querySelector(q);
+        if (!el) return null;
+        const c = getComputedStyle(el);
+        return {
+          fontSize: c.fontSize,
+          textTransform: c.textTransform,
+          chip: !!el.parentElement.querySelector('.fd-icon-chip'),
+        };
+      }, sel);
+    const ref = await style('.ed-tool .sec > .sec-title');
+    await p.locator('.ed-rail [data-tool="next"]').click();
+    await p.waitForTimeout(300);
+    const h = await style('.ed-tool .rules-sec .sec-title');
+    const e9 =
+      !!h && !!ref && h.fontSize === ref.fontSize && h.textTransform === ref.textTransform && !h.chip;
     ok(e9 === true, 'E9 : « Suite de l’étape » avec le titre de section commun');
-    await p.getByRole('tab', { name: 'Design' }).click();
+    await p.locator('.ed-rail [data-tool="design"]').click();
     await p.waitForTimeout(400);
     const e10 = await p.evaluate(() => {
-      const f = document.querySelector('.panel .fr-fields');
+      const f = document.querySelector('.ed-tool .fr-fields');
       const sw = f.querySelector('.setting');
       const field = sw.nextElementSibling;
       return Math.round(field.getBoundingClientRect().top - sw.getBoundingClientRect().bottom);
     });
     ok(near(e10, 20), `E10 : « Barre d’adresse » → « Adresse affichée » : ${e10} px (20)`);
     const e10b = await p.evaluate(() => {
-      const f = document.querySelector('.panel .fr-fields');
+      const f = document.querySelector('.ed-tool .fr-fields');
       const next = f.nextElementSibling;
       return Math.round(next.getBoundingClientRect().top - f.getBoundingClientRect().bottom);
     });
     ok(near(e10b, 20), `E10 : cadre → « Fond autour du cadre » : ${e10b} px (20)`);
     const e11 = await p.evaluate(() => {
-      const btn = document.querySelector('.panel .sty-save');
+      const btn = document.querySelector('.ed-tool .sty-save');
       const prev = btn?.previousElementSibling;
       return btn && prev
         ? Math.round(btn.getBoundingClientRect().top - prev.getBoundingClientRect().bottom)
@@ -138,7 +145,7 @@ async function gap(p, a, b) {
     });
     ok(near(e11, 12), `E11 : styles → « Enregistrer le style actuel » : ${e11} px (12)`);
     const e12 = await p.evaluate(() => {
-      const row = document.querySelector('.panel .logo-row');
+      const row = document.querySelector('.ed-tool .logo-row');
       const check = row.parentElement.querySelector('.check');
       return Math.round(check.getBoundingClientRect().top - row.getBoundingClientRect().bottom);
     });

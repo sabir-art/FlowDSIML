@@ -296,10 +296,11 @@ const APP_PAGES = [
   { name: 'Éditeur', route: `/#/demos/${DEMO}/edit` },
   // L27 : écrans ajoutés depuis L24
   {
-    name: 'Éditeur · onglet Design (styles)',
+    name: 'Éditeur · Design (styles)',
     route: `/#/demos/${DEMO}/edit`,
     open: async (p) => {
-      await p.getByRole('tab', { name: 'Design' }).click();
+      // L48-E : outil « Design » du rail
+      await p.locator('.ed-rail [data-tool="design"]').click();
       await p.waitForTimeout(400);
     },
   },
@@ -408,7 +409,9 @@ const APP_PAGES = [
       });
     },
     open: async (p) => {
-      await p.getByRole('button', { name: 'Suggestions' }).click();
+      // L48-E : Suggestions dans le menu « Plus »
+      await p.getByRole('button', { name: 'Plus d’options' }).click();
+      await p.getByRole('menuitem', { name: 'Suggestions' }).click();
       await p.getByRole('button', { name: 'Analyser la démo' }).click();
       await p.getByRole('button', { name: 'Analyser à nouveau' }).waitFor();
     },
@@ -498,6 +501,23 @@ const APP_PAGES = [
       await p.waitForTimeout(400);
     },
   },
+  // L48-E : commentaires dans le rail, flou en modale plein écran
+  {
+    name: 'Éditeur · Commentaires',
+    route: `/#/demos/${DEMO}/edit`,
+    open: async (p) => {
+      await p.locator('.ed-rail [data-tool="comments"]').click();
+      await p.locator('.ed-tool .cm').waitFor();
+    },
+  },
+  {
+    name: 'Éditeur · Flouter des zones',
+    route: `/#/demos/${DEMO}/edit`,
+    open: async (p) => {
+      await p.locator('.ed-rail [data-tool="blur"]').click();
+      await p.getByRole('dialog', { name: 'Flouter des zones' }).waitFor();
+    },
+  },
   {
     name: 'Éditeur · zone de flou',
     route: `/#/demos/${DEMO}/edit`,
@@ -524,7 +544,7 @@ const APP_PAGES = [
     name: 'Éditeur · recadrage',
     route: `/#/demos/${DEMO}/edit`,
     open: async (p) => {
-      await p.getByRole('button', { name: 'Recadrer la capture' }).click();
+      await p.locator('.ed-rail [data-tool="crop"]').click();
       await p.locator('#crop-x').waitFor();
     },
   },
@@ -534,7 +554,8 @@ const APP_PAGES = [
     name: 'Présenter · lancement',
     route: `/#/demos/${DEMO}/edit`,
     open: async (p) => {
-      await p.getByRole('button', { name: 'Présenter', exact: true }).click();
+      await p.getByRole('button', { name: 'Plus d’options' }).click();
+      await p.getByRole('menuitem', { name: 'Présenter' }).click();
       await p.waitForSelector('dialog[open]');
     },
   },
