@@ -103,8 +103,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     /Renouvellement le 1 décembre 2026/.test(await page.locator('.ai-quota').textContent()),
     'Quota : date de renouvellement',
   );
-  ok((await page.locator('.ai-features input:not([disabled])').count()) === 7, '7 fonctions cochables');
-  ok((await page.locator('.ai-features .is-soon').count()) === 3, '3 fonctions en Bientôt');
+  ok(
+    (await page.locator('.ai-features input:not([disabled])').count()) === 9,
+    '9 fonctions cochables (dont voix et sous-titres)',
+  );
+  ok((await page.locator('.ai-features .is-soon').count()) === 1, 'Images générées en Bientôt');
   await page.getByLabel('Graphique').uncheck();
   await page.waitForTimeout(300);
   ok(state.ai.features.chart === false, 'Fonction décochée enregistrée');
@@ -114,7 +117,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // ---- §11 : Fonctions à venir
   await page.goto(`${APP}/#/settings/soon?tab=ia`);
   await page.locator('.soon-card').first().waitFor();
-  ok((await page.locator('.soon-card').count()) === 3, '§11 : trois cartes Bientôt restantes');
+  ok((await page.locator('.soon-card').count()) === 1, '§11 : carte Images générées restante');
   ok(
     /disponibles dans Paramètres > Assistance IA/.test(await page.locator('.soon-alert').textContent()),
     '§11 : nouveau bandeau',

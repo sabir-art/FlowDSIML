@@ -106,8 +106,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.waitForTimeout(1200);
   ok(v().captions[1].text === 'Remplissez les champs obligatoires.', 'sous-titre modifié');
   ok(
-    (await page.getByText('Transcription automatique').locator('..').getByText('Bientôt').count()) === 1,
-    'transcription « Bientôt »',
+    (await page
+      .locator('.ai-entry', { hasText: 'Sous-titres automatiques' })
+      .getAttribute('aria-disabled')) === 'true',
+    '066 : « Sous-titres automatiques » désactivé tant que l’Assistance IA ne l’est pas',
   );
 
   // Lecture

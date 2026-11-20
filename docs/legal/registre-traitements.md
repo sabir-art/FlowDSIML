@@ -28,6 +28,7 @@ TutoClick tient deux rôles, et le registre a deux parties :
 | Supabase | Base de données, authentification, stockage des fichiers, fonctions serveur, envoi des e-mails d'authentification | Union européenne (région Irlande) | DPA du fournisseur ; clauses contractuelles types pour tout accès depuis un pays tiers [à vérifier] |
 | GitHub (Pages) | Hébergement des fichiers statiques de l'application et du lecteur (aucune donnée de compte) | États-Unis | Journaux techniques d'accès (adresse IP) tenus par le fournisseur ; DPA et clauses contractuelles types [à vérifier] |
 | Anthropic (API Claude) | Assistance IA (L30) : propositions de textes, traductions, suggestions, à la demande d'un éditeur, seulement si l'espace l'a activée | États-Unis | DPA du fournisseur et clauses contractuelles types [à vérifier] ; entrées et sorties de l'API non utilisées pour l'entraînement par défaut (conditions commerciales et centre de confidentialité du fournisseur ; aucun programme d'entraînement volontaire ni bouton de retour utilisé par TutoClick) [à confirmer par le juriste] |
+| ElevenLabs | Assistance IA (065/066) : voix de synthèse à partir de la transcription d'une étape, sous-titres automatiques à partir de la piste audio d'une vidéo, à la demande d'un éditeur, seulement si l'espace l'a activée | États-Unis [à vérifier : région de traitement proposée par le fournisseur] | DPA du fournisseur et clauses contractuelles types [à vérifier] ; conditions d'usage des données pour l'entraînement [à vérifier] |
 
 Aucun autre service tiers n'est appelé par le produit : pas de paiement en ligne, d'outil d'analyse
 tiers ni d'enrichissement de données à ce jour. Les intégrations sortantes (webhooks) sont configurées
@@ -130,10 +131,10 @@ TutoClick traite sur instruction documentée (DPA).
 |---|---|
 | Finalité | Proposer des textes (rédaction, traduction, suggestions, plan de démo, données fictives, graphique) que l'éditeur applique ou ignore |
 | Base | Exécution du contrat avec le client ; activation explicite par un propriétaire ou un administrateur de l'espace (désactivée par défaut) |
-| Données envoyées au fournisseur | Textes nécessaires à la demande (titres, textes des bulles, plan) ; données personnelles détectées remplacées par un repère avant l'envoi (Edge Function `ai`). Jamais : images, zones floutées, commentaires internes, leads, données des apprenants, identité de l'utilisateur |
-| Données conservées par TutoClick | Compteurs seulement (table `ai_usage` : espace, utilisateur, jour, nombre de demandes, jetons) ; aucun texte de demande ni de réponse, aucun journal du contenu |
+| Données envoyées au fournisseur | Textes nécessaires à la demande (titres, textes des bulles, plan) ; voix de synthèse : transcription de l'étape (refusée si une donnée personnelle y est détectée) ; sous-titres : piste audio de la vidéo de l'étape (l'utilisateur en est averti avant l'envoi ; la voix enregistrée est une donnée personnelle de la personne qui parle) ; données personnelles détectées remplacées par un repère avant l'envoi (Edge Function `ai`). Jamais : images, zones floutées, commentaires internes, leads, données des apprenants, identité de l'utilisateur |
+| Données conservées par TutoClick | Compteurs seulement (table `ai_usage` : espace, utilisateur, jour, nombre de demandes, jetons, secondes d'audio) ; voix générée : fichier MP3 de la voix off (bucket voices) une fois appliqué ; aucun texte de demande ni de réponse, aucun journal du contenu |
 | Durée de conservation | Compteurs : vie de l'espace [durée à fixer] ; chez le fournisseur : selon ses conditions de conservation de l'API [à vérifier] |
-| Sous-traitant ultérieur | Anthropic (États-Unis) |
+| Sous-traitant ultérieur | Anthropic (États-Unis) ; ElevenLabs pour la voix de synthèse et les sous-titres automatiques |
 
 ---
 
@@ -152,5 +153,5 @@ TutoClick traite sur instruction documentée (DPA).
 2. Vérifier les documents contractuels des fournisseurs (DPA, clauses contractuelles types).
 3. Désigner ou non un délégué à la protection des données.
 4. Analyse d'impact : à évaluer pour le suivi des apprenants à grande échelle.
-5. Assistance IA : informer les clients de l'ajout d'Anthropic à l'annexe 2 du DPA (article 5 : droit
+5. Assistance IA : informer les clients de l'ajout d'Anthropic et d'ElevenLabs à l'annexe 2 du DPA (article 5 : droit
    d'opposition) ; vérifier le DPA et la durée de conservation de l'API du fournisseur.

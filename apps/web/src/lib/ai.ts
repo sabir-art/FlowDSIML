@@ -6,7 +6,8 @@ import { supabase } from './supabase';
  * demandes à l'Edge Function `ai`. Aucun texte n'est envoyé si l'espace est désactivé ou si le
  * quota est atteint (vérifié ici avant l'appel, puis par la base).
  */
-export type AiFeature = 'write' | 'translate' | 'suggest' | 'generate' | 'dataset' | 'chart' | 'assistant';
+export type AiFeature =
+  'write' | 'translate' | 'suggest' | 'generate' | 'dataset' | 'chart' | 'assistant' | 'voice' | 'captions';
 export const AI_FEATURES: AiFeature[] = [
   'write',
   'translate',
@@ -15,8 +16,12 @@ export const AI_FEATURES: AiFeature[] = [
   'dataset',
   'chart',
   'assistant',
+  'voice',
+  'captions',
 ];
 export type AiTask = AiFeature | 'write_all';
+/** 065/066 : fonctions audio (ElevenLabs), quota en secondes. */
+export const AUDIO_FEATURES: AiFeature[] = ['voice', 'captions'];
 
 export interface AiStatus {
   enabled: boolean;
@@ -27,6 +32,9 @@ export interface AiStatus {
   userDailyRequests: number;
   workspaceQuotaReached: boolean;
   userQuotaReached: boolean;
+  audioUsed?: number;
+  audioQuota?: number | null;
+  audioQuotaReached?: boolean;
   renewsOn: string | null;
   canEdit: boolean;
   canManage: boolean;
@@ -39,6 +47,7 @@ export function aiBlock(s: AiStatus | null, feature: AiFeature): AiBlock {
   if (!s || !s.enabled || !s.features[feature]) return 'disabled';
   if (!s.canEdit) return 'role';
   if (s.workspaceQuotaReached) return 'quota';
+  if (AUDIO_FEATURES.includes(feature) && s.audioQuotaReached) return 'quota';
   if (s.userQuotaReached) return 'userQuota';
   return null;
 }

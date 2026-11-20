@@ -11,6 +11,8 @@ const base: AiStatus = {
     dataset: true,
     chart: true,
     assistant: true,
+    voice: true,
+    captions: true,
   },
   used: 0,
   quota: 500,
@@ -31,6 +33,8 @@ describe('aiBlock', () => {
     expect(aiBlock({ ...base, canEdit: false }, 'write')).toBe('role');
     expect(aiBlock({ ...base, workspaceQuotaReached: true }, 'write')).toBe('quota');
     expect(aiBlock({ ...base, userQuotaReached: true }, 'write')).toBe('userQuota');
+    expect(aiBlock({ ...base, audioQuotaReached: true }, 'voice')).toBe('quota');
+    expect(aiBlock({ ...base, audioQuotaReached: true }, 'write')).toBeNull();
     expect(aiBlock(base, 'write')).toBeNull();
   });
 });

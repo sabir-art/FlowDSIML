@@ -50,15 +50,15 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'L30 §11 : bandeau « disponibles dans Paramètres > Assistance IA »',
   );
   ok(
-    (await page.locator('.soon-card').count()) === 3,
-    'L30 §11 : trois cartes IA (voix, sous-titres, images)',
+    (await page.locator('.soon-card').count()) === 1,
+    'L30 §11 : une carte IA restante (images générées ; voix et sous-titres livrés)',
   );
   ok(
-    (await page.locator('.soon-badge', { hasText: 'Bientôt disponible' }).count()) === 3,
+    (await page.locator('.soon-badge', { hasText: 'Bientôt disponible' }).count()) === 1,
     'badge sur chaque carte',
   );
   ok(
-    (await page.locator('.soon-card button').count()) === 3 &&
+    (await page.locator('.soon-card button').count()) === 1 &&
       (await page.locator('.soon-card button:not([disabled])').count()) === 0,
     'contrôles désactivés',
   );

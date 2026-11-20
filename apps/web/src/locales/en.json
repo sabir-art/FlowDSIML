@@ -1200,7 +1200,6 @@
       "captions": "Captions",
       "editCaptions": "Edit ({{count}})",
       "importVtt": "Import .vtt",
-      "transcription": "Automatic transcription",
       "captionsDefault": "Show captions by default",
       "playback": "Playback",
       "autoplayMuted": "Autoplay, muted at first",
@@ -1598,7 +1597,6 @@
       "title": "Voice-over",
       "record": "Record",
       "import": "Import a file",
-      "generate": "Generate from text",
       "help": "One track per step, 2 minutes max. MP3, M4A, WAV or WebM, 5 MB max.",
       "micBlocked": "The microphone is blocked. Allow it in the browser settings, or import a file.",
       "recording": "Recording",
@@ -4025,20 +4023,6 @@
     "aiEntry": "AI assistance",
     "security": "Security",
     "securitySub": "Sign-in and access to the workspace.",
-    "tts": {
-      "title": "Synthetic voice",
-      "body": "Generate a voice-over from the bubble text.",
-      "items": ["Several voices", "Adjustable speed", "Review before publishing"],
-      "action": "Generate voice",
-      "why": "Requires a speech synthesis service. Meanwhile: recorded voice."
-    },
-    "captions": {
-      "title": "Automatic captions",
-      "body": "Transcribe the voice of a video step into editable captions.",
-      "items": ["Transcription", "Editable captions", ".vtt format"],
-      "action": "Transcribe",
-      "why": "Requires a transcription service. Meanwhile: import .vtt captions."
-    },
     "images": {
       "title": "Generated images",
       "body": "Create an illustration from a description.",
@@ -4160,11 +4144,11 @@
       "generate": "Generate a demo",
       "dataset": "Sample dataset",
       "chart": "Chart",
-      "assistant": "Editor assistant"
+      "assistant": "Editor assistant",
+      "voice": "Synthetic voice",
+      "captions": "Automatic captions"
     },
     "soon": {
-      "tts": "Synthetic voice",
-      "captions": "Automatic captions",
       "images": "Generated images"
     },
     "settings": {
@@ -4356,6 +4340,28 @@
       "s3": "Check text consistency",
       "ignored": "Proposal dismissed.",
       "cleared": "The conversation is cleared when the panel closes."
+    },
+    "voice": {
+      "open": "Generate the voice",
+      "title": "Synthetic voice",
+      "notice": "The transcript below is sent to ElevenLabs, TutoClick’s voice provider, to produce the voice. Nothing else is sent.",
+      "noText": "No text: fill in the transcript or the bubble text.",
+      "voice": "Voice",
+      "feminine": "Female voice",
+      "masculine": "Male voice",
+      "go": "Generate",
+      "busy": "Generating the voice…",
+      "preview": "Preview of the generated voice",
+      "pii": "The transcript contains personal data (name, email, phone…): remove it before generating the voice.",
+      "tooLong": "Text too long: a voice-over lasts 2 minutes at most."
+    },
+    "captions": {
+      "open": "Automatic captions",
+      "title": "Automatic captions",
+      "notice": "This video’s audio track is sent to ElevenLabs, TutoClick’s transcription provider, to produce the captions. You review them before applying.",
+      "go": "Transcribe",
+      "busy": "Transcribing…",
+      "empty": "No speech detected in the video."
     }
   }
 }

@@ -434,3 +434,20 @@
   gap: 8px;
   align-items: end;
 }
+/* 065/066 : avertissement avant l'envoi au fournisseur */
+.ai-notice-line {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin: 0;
+  font-size: 13px;
+}
+.ai-notice-line svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+.ai-voice-text {
+  text-decoration: none;
+}

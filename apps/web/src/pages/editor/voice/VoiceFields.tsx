@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mic, Pause, Play, Square, Upload, WandSparkles } from 'lucide-react';
+import { Mic, Pause, Play, Square, Upload } from 'lucide-react';
+import { AiVoice } from '../../../components/ai/AiAudio';
+import { useWorkspace } from '../../../workspace/WorkspaceProvider';
+import { asSettings } from '../types';
 import { supabase } from '../../../lib/supabase';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import type { DemoEditor } from '../useDemoEditor';
@@ -23,6 +26,7 @@ export function VoiceFields({
   step: StepRow;
   readOnly: boolean;
 }) {
+  const { current: ws } = useWorkspace();
   const { t } = useTranslation();
   const [dialog, ask] = useConfirm();
   const [url, setUrl] = useState<string | null>(null);
@@ -170,6 +174,25 @@ export function VoiceFields({
     void supabase.storage.from('voices').remove([old]);
   }
 
+  // 065 : voix de synthèse (ElevenLabs) à partir de la transcription, sinon du texte de la bulle
+  const aiVoice =
+    ws && !readOnly ? (
+      <AiVoice
+        ws={ws.id}
+        lang={asSettings(editor.demo!.settings).locale ?? 'fr'}
+        stepId={step.id}
+        text={step.voice_transcript?.trim() || bubbleText(step, editor.hotspots)}
+        onApply={(r) => {
+          const old = step.voice_path;
+          editor.updateStep(step.id, {
+            voice_path: r.path,
+            voice_duration_ms: Math.max(1, Math.round(r.durationMs)),
+            voice_transcript: r.transcript,
+          });
+          if (old) void supabase.storage.from('voices').remove([old]);
+        }}
+      />
+    ) : null;
   const has = !!step.voice_path;
   const missing = has && !step.voice_transcript?.trim();
   return (
@@ -227,6 +250,7 @@ export function VoiceFields({
                 <Upload aria-hidden="true" />
                 {t('editor.voice.replace')}
               </button>
+              {aiVoice}
               <button
                 type="button"
                 className="btn btn-ghost btn-sm voice-del"
@@ -291,12 +315,8 @@ export function VoiceFields({
                 <Upload aria-hidden="true" />
                 {t('editor.voice.import')}
               </button>
-              <button type="button" className="btn btn-ghost btn-sm" aria-disabled="true">
-                <WandSparkles aria-hidden="true" />
-                {t('editor.voice.generate')}
-                <span className="badge">{t('shell.soon')}</span>
-              </button>
             </div>
+            {aiVoice}
             <p className="help">{t('editor.voice.help')}</p>
           </>
         )

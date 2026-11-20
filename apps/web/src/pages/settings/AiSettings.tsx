@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { AudioLines, Captions, ImagePlus, Shield, X } from 'lucide-react';
+import { ImagePlus, Shield, X } from 'lucide-react';
 import { SettingsShell } from './SettingsShell';
 import { supabase } from '../../lib/supabase';
 import { AI_FEATURES, refreshAiStatus, useAiStatus, type AiFeature } from '../../lib/ai';
@@ -11,11 +11,7 @@ import { useConfirm } from '../../components/ConfirmDialog';
 import '../../components/ai/ai.css';
 
 /** Fonctions à venir, listées sous les cases (§2) : toujours désactivées, badge « Bientôt ». */
-const SOON = [
-  { k: 'tts', icon: <AudioLines aria-hidden="true" /> },
-  { k: 'captions', icon: <Captions aria-hidden="true" /> },
-  { k: 'images', icon: <ImagePlus aria-hidden="true" /> },
-] as const;
+const SOON = [{ k: 'images', icon: <ImagePlus aria-hidden="true" /> }] as const;
 
 /** L30-01 : Paramètres › Assistance IA (opt-in de l'espace, quota du mois, fonctions activables). */
 export function AiSettings() {

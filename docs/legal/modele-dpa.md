@@ -145,3 +145,4 @@ Fait à [lieu], le [date], en deux exemplaires.
 | Supabase | Base de données, authentification, stockage, fonctions serveur | Union européenne (Irlande) |
 | GitHub (Pages) | Hébergement des fichiers statiques de l'application et du lecteur, sans donnée du Responsable de traitement | États-Unis (journaux techniques uniquement) |
 | Anthropic (API Claude) | Assistance IA, uniquement si le Responsable de traitement l'active pour son espace : textes des démos nécessaires à chaque demande, données personnelles détectées masquées avant l'envoi, aucune image | États-Unis (clauses contractuelles types) |
+| ElevenLabs | Voix de synthèse et sous-titres automatiques, uniquement si le Responsable de traitement active l'Assistance IA : transcription d'une étape, piste audio d'une vidéo d'étape | États-Unis (clauses contractuelles types) [à vérifier] |

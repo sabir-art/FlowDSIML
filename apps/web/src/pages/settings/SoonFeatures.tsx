@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AudioLines, Building2, Captions, ImagePlus, Lock, Mail, Sparkles, Users } from 'lucide-react';
+import { Building2, ImagePlus, Lock, Mail, Sparkles, Users } from 'lucide-react';
 import { ShareRulesCard } from './security/ShareRulesCard';
 import { SettingsShell } from './SettingsShell';
 import { SoonButton, SoonCard } from '../../components/soon/SoonCard';
@@ -72,12 +72,6 @@ function IaPane() {
         </div>
       </div>
       <div className="soon-grid">
-        <SoonCard k="tts" icon={<AudioLines />} control={<SoonButton label={t('soon.tts.action')} />} />
-        <SoonCard
-          k="captions"
-          icon={<Captions />}
-          control={<SoonButton label={t('soon.captions.action')} />}
-        />
         <SoonCard k="images" icon={<ImagePlus />} control={<SoonButton label={t('soon.images.action')} />} />
       </div>
     </>

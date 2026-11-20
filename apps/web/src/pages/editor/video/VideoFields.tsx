@@ -1,6 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Layers, Pencil, Plus, Trash2, TriangleAlert, Upload, X } from 'lucide-react';
+import { Layers, Pencil, Plus, Sparkles, Trash2, TriangleAlert, Upload, X } from 'lucide-react';
+import { AiCaptions } from '../../../components/ai/AiAudio';
+import { useWorkspace } from '../../../workspace/WorkspaceProvider';
+import { asSettings } from '../types';
 import { parseVtt } from '@flowdsiml/core';
 import { useToast } from '../../../components/Toast';
 import type { DemoEditor } from '../useDemoEditor';
@@ -47,6 +50,8 @@ export function VideoFields({
   const ed = useVideoEdit(step.id);
   const file = useRef<HTMLInputElement>(null);
   const [editing, setEditing] = useState(false);
+  const [aiCues, setAiCues] = useState<VideoCaption[] | null>(null);
+  const { current: ws } = useWorkspace();
   const idx = v.pauses.findIndex((p) => p.id === ed.pause);
   const pause = idx >= 0 ? v.pauses[idx] : null;
   const save = (patch: Partial<VideoConfig>) =>
@@ -223,9 +228,15 @@ export function VideoFields({
             }}
           />
         </div>
-        <p className="help">
-          {t('editor.video.transcription')} <span className="badge">{t('shell.soon')}</span>
-        </p>
+        {/* 066 : sous-titres automatiques (ElevenLabs), remplace l'entrée « Bientôt » */}
+        {!readOnly && ws && step.video_path && (
+          <AiCaptions
+            ws={ws.id}
+            lang={asSettings(editor.demo!.settings).locale ?? 'fr'}
+            stepId={step.id}
+            onResult={(cues) => setAiCues(cues)}
+          />
+        )}
         <div className="setting">
           <span className="t-label" id={`${id}-cd`}>
             {t('editor.video.captionsDefault')}
@@ -288,6 +299,15 @@ export function VideoFields({
           <p className="help">{t('editor.video.convertHelp')}</p>
         </div>
       )}
+      {aiCues && (
+        <CaptionsDialog
+          ai
+          captions={aiCues.slice(0, MAX_CAPTIONS)}
+          readOnly={readOnly}
+          onClose={() => setAiCues(null)}
+          onSave={(captions) => save({ captions, captionsDefault: true })}
+        />
+      )}
       {editing && (
         <CaptionsDialog
           captions={v.captions}
@@ -306,9 +326,12 @@ function CaptionsDialog({
   readOnly,
   onClose,
   onSave,
+  ai = false,
 }: {
   captions: VideoCaption[];
   readOnly: boolean;
+  /** 066 : sous-titres proposés par l'Assistance IA, à relire avant l'enregistrement. */
+  ai?: boolean;
   onClose: () => void;
   onSave: (c: VideoCaption[]) => void;
 }) {
@@ -351,6 +374,12 @@ function CaptionsDialog({
         </button>
       </div>
       <div className="modal-body">
+        {ai && (
+          <p className="ai-mention">
+            <Sparkles aria-hidden="true" />
+            {t('ai.mention')}
+          </p>
+        )}
         {rows.length === 0 && <p className="muted">{t('editor.video.noCaption')}</p>}
         <ol className="vd-caps">
           {rows.map((r, i) => (
@@ -416,7 +445,7 @@ function CaptionsDialog({
         </button>
         {!readOnly && (
           <button type="button" className="btn btn-primary" onClick={submit}>
-            {t('common.save')}
+            {ai ? t('ai.apply') : t('common.save')}
           </button>
         )}
       </div>

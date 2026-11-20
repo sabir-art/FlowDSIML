@@ -11,6 +11,7 @@ import {
   lostVariables,
   useAiStatus,
   type AiBlock,
+  type AiFeature,
   type AiStatus,
 } from '../../lib/ai';
 import './ai.css';
@@ -66,11 +67,19 @@ export function useBlockText() {
 }
 
 /** Entrée désactivée (aria-disabled, focalisable) avec explication ; lien vers le réglage pour un admin. */
-export function DisabledEntry({ status, label }: { status: AiStatus | null; label: string }) {
+export function DisabledEntry({
+  status,
+  label,
+  feature = 'write',
+}: {
+  status: AiStatus | null;
+  label: string;
+  feature?: AiFeature;
+}) {
   const id = useId();
   const blockText = useBlockText();
   const { t } = useTranslation();
-  const b = aiBlock(status, 'write');
+  const b = aiBlock(status, feature);
   return (
     <span className="ai-disabled-wrap">
       <button
