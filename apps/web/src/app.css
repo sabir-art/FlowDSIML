@@ -1786,3 +1786,38 @@
   display: inline-block;
   box-shadow: none;
 }
+
+/* L48-A §1 : utilitaires en bas de la barre latérale (Extension, Centre d'aide, Paramètres) */
+.fd-nav--utils {
+  padding-top: var(--fd-space-2);
+  border-top: 1px solid var(--fd-color-border);
+}
+.fd-nav--utils .fd-nav__item {
+  height: 36px;
+  font-size: 14px;
+}
+button.fd-nav__item {
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+button.fd-nav__item:hover {
+  background: var(--fd-color-nav-hover);
+}
+.ext-dialog .ext-steps {
+  margin: var(--fd-space-3) 0;
+  padding-left: 1.4em;
+}
+.ext-dialog .ext-steps li + li {
+  margin-top: var(--fd-space-1);
+}
+.ext-dialog .ext-ok {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+}
+.ext-dialog .ext-ok svg {
+  color: var(--fd-color-success);
+}

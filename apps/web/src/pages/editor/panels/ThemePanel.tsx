@@ -250,7 +250,6 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
               />
               {t('editor.showBranding')}
             </label>
-            <p className="help">{t('editor.brandingHint')}</p>
           </div>
         </div>
       </div>

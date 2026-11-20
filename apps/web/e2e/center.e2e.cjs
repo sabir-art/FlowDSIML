@@ -344,7 +344,7 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     const state = await install(p, s);
     const tc = () => state.tables.training_centers[0];
     await p.goto(`${APP}/#/`);
-    await p.getByRole('link', { name: 'Centre de formation' }).click();
+    await p.getByRole('link', { name: 'Parcours de formation' }).click();
     await p.waitForSelector('.cfg14');
     ok(
       (await p.locator('.page-head__sub').textContent()).includes('1 modification non publiée'),
@@ -421,7 +421,7 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     await e.goto(`${APP}/#/learners`);
     await e.waitForTimeout(1200);
     ok(
-      (await e.getByRole('link', { name: 'Centre de formation' }).count()) === 0,
+      (await e.getByRole('link', { name: 'Parcours de formation' }).count()) === 0,
       'L14-08 : entrée réservée aux propriétaires et admins',
     );
     await e.close();

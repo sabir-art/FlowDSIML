@@ -14,6 +14,7 @@ import {
   Mail,
   Plus,
   Send,
+  Users,
   Webhook as WebhookIcon,
   X,
 } from 'lucide-react';
@@ -113,12 +114,9 @@ export function IntegrationsPage() {
 
   return (
     <SettingsShell>
-      <section className="l23" aria-labelledby="int-t">
+      <section className="l23" aria-labelledby="st-title">
         <div className="row between wrap l23-head">
           <div>
-            <h2 className="t-h2" id="int-t">
-              {t('integrations.title')}
-            </h2>
             <p className="muted">{t('integrations.sub')}</p>
           </div>
         </div>
@@ -360,10 +358,19 @@ function SoonCards() {
             </button>
           </p>
         </li>
+        {/* L48-A §4 : ancienne page « Fonctions à venir », l'enrichissement des visiteurs est rangé ici */}
+        <li className="int-card" aria-disabled="true">
+          <div className="hd">
+            <span className="int-lg" aria-hidden="true">
+              <Users />
+            </span>
+            <b>{t('soon.enrich.title')}</b>
+            <span className="badge">{t('shell.soon')}</span>
+          </div>
+          <p>{t('soon.enrich.body')}</p>
+          <p className="soon-why">{t('soon.enrich.why')}</p>
+        </li>
       </ul>
-      <p className="t-caption muted l23-soon-more">
-        <Link to="/settings/soon?tab=crm">{t('soon.title')}</Link>
-      </p>
     </div>
   );
 }

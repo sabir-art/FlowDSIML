@@ -67,10 +67,7 @@ export function AiSettings() {
 
   return (
     <SettingsShell>
-      <section className="soon-page ai-settings" aria-labelledby="ai-t">
-        <h2 className="t-h2" id="ai-t">
-          {t('ai.name')}
-        </h2>
+      <section className="soon-page ai-settings" aria-labelledby="st-title">
         <p className="muted">{t('ai.settings.sub')}</p>
         {error && (
           <p className="alert alert-danger" role="alert">

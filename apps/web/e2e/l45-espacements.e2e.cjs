@@ -209,19 +209,24 @@ async function gap(p, a, b) {
       const col = document.querySelector('[aria-labelledby="br-col-t"]');
       const lastField = [...col.querySelectorAll('.br-colors')].at(-1);
       const save = col.querySelector('.br-actions');
-      const pp = document.querySelector('[aria-labelledby="br-pp-t"]');
-      const f = [...pp.querySelectorAll(':scope > .field')];
       const sty = document.querySelector('[aria-labelledby="br-sty-t"]');
       const mine = sty.querySelector('#br-mine-t');
       return {
         e18: save ? Math.round(r(save).top - r(lastField).bottom) : null,
-        e19: Math.round(r(f[1]).top - r(f[0]).bottom),
         e20: Math.round(r(mine.nextElementSibling).top - r(mine).bottom),
       };
     });
     ok(near(m.e18, 24), `E18 : couleurs → « Enregistrer » : ${m.e18} px (24)`);
-    ok(near(m.e19, 24), `E19 : « Bouton principal » → « Bouton secondaire » : ${m.e19} px (24)`);
     ok(near(m.e20, 12), `E20 : « Styles de l’espace » → contenu : ${m.e20} px (12)`);
+    return [];
+  });
+  // L48-A : la page publique a sa propre route (Paramètres > Marque > Page publique)
+  await appPage(b, page('Page publique'), 'light', async (p) => {
+    const e19 = await p.evaluate(() => {
+      const f = [...document.querySelectorAll('[aria-labelledby="br-pp-t"] > .field')];
+      return Math.round(f[1].getBoundingClientRect().top - f[0].getBoundingClientRect().bottom);
+    });
+    ok(near(e19, 24), `E19 : « Bouton principal » → « Bouton secondaire » : ${e19} px (24)`);
     return [];
   });
 

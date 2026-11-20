@@ -251,7 +251,7 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       },
     ],
     ['Centre (réglages)', '/#/center', (d) => seedCenterTables(d)],
-    ['Membres', '/#/settings/members'],
+    ['Équipe', '/#/settings/members'],
   ]) {
     const { p, ctx } = await app(route, { seed });
     const r = await tabWalk(p, 45);
@@ -376,7 +376,7 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         }),
     ],
     ['Centre (réglages)', () => app('/#/center', { viewport: zoom, seed: (d) => seedCenterTables(d) })],
-    ['Plans', () => app('/#/settings/plans', { viewport: zoom })],
+    ['Utilisation', () => app('/#/settings/usage', { viewport: zoom })],
     ['Lecteur', () => player(`/d/${DEMO}`, { viewport: zoom })],
     [
       'Centre',

@@ -133,9 +133,8 @@ export function DemosPage() {
   const [exporting, setExporting] = useState<string | null>(null);
   const [distributing, setDistributing] = useState<string | null>(null);
   const [folderToDelete, setFolderToDelete] = useState<FolderRow | null>(null);
-  // L27-09 : accès par dossier (administrateurs, plan Enterprise)
+  // L27-09 : accès par dossier (administrateurs ; ouvert à tous les espaces depuis L48-A)
   const [folderAccess, setFolderAccess] = useState<FolderRow | null>(null);
-  const [enterprise, setEnterprise] = useState(false);
   const [hidden, setHidden] = useState<Record<string, number>>({});
   const [memberCount, setMemberCount] = useState(0);
   const [pendingMove, setPendingMove] = useState<{ demoId: string; folderId: string; n: number } | null>(
@@ -156,14 +155,13 @@ export function DemosPage() {
     // L32 : une seule lecture (dashboard_home) pour la liste, les dossiers, les indicateurs et les cartes
     let h;
     try {
-      h = await loadHome({ id: ws.id, plan_code: ws.plan_code });
+      h = await loadHome({ id: ws.id });
     } catch {
       setLoadError(true);
       return;
     }
     setLoadError(false);
     onb.provide(h.onboarding);
-    setEnterprise(h.shareRulesPlan);
     setMemberCount(h.memberCount);
     setLockedIds(new Set(h.locked));
     // Liste et indicateurs affichés ensemble (aucun saut de mise en page au chargement)
@@ -198,7 +196,7 @@ export function DemosPage() {
       setCovers(Object.fromEntries(first.map(([demoId, path]) => [demoId, byPath.get(path) ?? ''])));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- onb.provide est stable (useCallback)
-  }, [ws.id, ws.plan_code]);
+  }, [ws.id]);
 
   useEffect(() => {
     setDemos(null);
@@ -626,11 +624,6 @@ export function DemosPage() {
                                     {
                                       label: t('folderAccess.menu'),
                                       icon: <Lock />,
-                                      disabled: !enterprise,
-                                      hint: enterprise ? undefined : t('rules.errPlan'),
-                                      end: enterprise ? undefined : (
-                                        <span className="fd-badge menu-soon">Enterprise</span>
-                                      ),
                                       onSelect: () =>
                                         setFolderAccess(folders.find((x) => x.id === folder) ?? null),
                                     },

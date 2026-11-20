@@ -31,15 +31,8 @@ export function WorkspaceSwitcher() {
   const navigate = useNavigate();
   const { workspaces, current, select } = useWorkspace();
   const toast = useToast();
-  const [plans, setPlans] = useState<Record<string, string>>({});
   const [members, setMembers] = useState<number | null>(null);
 
-  useEffect(() => {
-    void supabase
-      .from('plans')
-      .select('code, name')
-      .then(({ data }) => setPlans(Object.fromEntries((data ?? []).map((p) => [p.code, p.name]))));
-  }, []);
   useEffect(() => {
     if (!current) return;
     setMembers(null);
@@ -49,8 +42,8 @@ export function WorkspaceSwitcher() {
   }, [current]);
 
   if (!current) return null;
-  const plan = plans[current.plan_code] ?? current.plan_code;
-  const meta = [t('nav.wsPlan', { plan }), members !== null ? t('nav.wsMembers', { count: members }) : null]
+  // L48-A §1 : « Espace · n membres » (plus de nom d'offre)
+  const meta = [t('nav.workspace'), members !== null ? t('nav.wsMembers', { count: members }) : null]
     .filter(Boolean)
     .join(' · ');
 

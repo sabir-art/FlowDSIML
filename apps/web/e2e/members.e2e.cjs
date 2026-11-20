@@ -18,10 +18,25 @@ const SHOTS = process.env.SHOTS_DIR;
   };
   await page.goto(`${APP}/#/settings/members`);
   await page.waitForSelector('.snav');
+  // L48-A §4 : cinq groupes, « Bientôt » à sa place (sans lien), fil d'Ariane, h1 = nom de la section
   ok(
-    (await page.locator('.snav .snav-item').count()) === 12,
-    'navigation interne : 12 sections (dont Intégrations, Glossaire, Sécurité, Confidentialité, Assistance IA, Fonctions à venir)',
+    (await page.locator('.snav .grp').allTextContents()).join('|') ===
+      'Espace|Marque|Contenu|Connexions|Mon compte',
+    'Paramètres : cinq groupes',
   );
+  ok(
+    (await page.locator('.snav a.snav-item').count()) === 12 &&
+      (await page.locator('.snav .snav-item--soon').count()) === 4,
+    'Paramètres : 12 sections et 4 « Bientôt » (Domaine, Étiquettes, Clés d’accès, Notifications)',
+  );
+  ok(
+    (await page.getByRole('navigation', { name: 'Fil d’Ariane' }).innerText()).replace(/\s+/g, ' ').trim() ===
+      'Paramètres Espace Équipe' &&
+      (await page.locator('.st-crumb [aria-current="page"]').textContent()) === 'Équipe' &&
+      (await page.getByRole('heading', { level: 1 }).textContent()) === 'Équipe',
+    'fil d’Ariane « Paramètres > Espace > Équipe » et titre « Équipe »',
+  );
+  ok((await page.locator('.snav a.is-active').textContent()) === 'Équipe', 'entrée « Équipe » active');
   await page.waitForSelector('text=Thomas Bernard');
   ok((await page.locator('tbody tr').count()) >= 6, 'membres et invitation en attente');
   ok((await page.locator('text=En attente').count()) === 1, 'badge « En attente »');
@@ -29,9 +44,12 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.fill('input[type=search]', 'nina');
   ok((await page.locator('table').first().locator('tbody tr').count()) === 1, 'recherche d’un membre');
   await page.fill('input[type=search]', '');
-  await page.getByLabel('Filtrer par rôle').selectOption('editor');
+  // L40 : filtre de rôle en menu
+  await page.getByRole('button', { name: /^Rôle/ }).click();
+  await page.getByRole('menuitem', { name: 'Éditeur' }).click();
   ok((await page.locator('table').first().locator('tbody tr').count()) === 3, 'filtre par rôle');
-  await page.getByLabel('Filtrer par rôle').selectOption('');
+  await page.getByRole('button', { name: /^Rôle/ }).click();
+  await page.getByRole('menuitem', { name: 'Tous les rôles' }).click();
 
   await page.getByRole('button', { name: 'Inviter des membres' }).click();
   await page.waitForSelector('[role=dialog]');
@@ -51,7 +69,7 @@ const SHOTS = process.env.SHOTS_DIR;
     await page.getByRole('menuitem', { name: /Transférer la propriété/ }).isDisabled(),
     'transfert : Bientôt',
   );
-  await page.getByRole('menuitem', { name: 'Retirer du workspace' }).click();
+  await page.getByRole('menuitem', { name: 'Retirer de l’espace' }).click();
   await page.waitForSelector('dialog[open] .dialog-head');
   ok(
     /^Retirer Nina Roux \?$/.test((await page.textContent('dialog[open] h2')).replace(/\u202f/g, ' ')) &&
@@ -62,8 +80,8 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.waitForTimeout(400);
   ok(!state.tables.members.some((m) => m.user_id === 'u-5'), 'membre retiré');
 
-  await page.getByRole('link', { name: 'Marque' }).click();
-  // L27 : la Marque est active ; seule la carte « Page publique » reste « Bientôt »
+  // L48-A : la page publique a sa propre entrée (Marque > Page publique), toujours « Bientôt »
+  await page.getByRole('link', { name: 'Page publique' }).click();
   const pp = page.getByRole('region', { name: /Page publique/ });
   await pp.waitFor();
   ok(
@@ -71,22 +89,9 @@ const SHOTS = process.env.SHOTS_DIR;
     'PRM-07 : page publique toujours « Bientôt »',
   );
 
-  await page.getByRole('link', { name: 'Variables' }).click();
-  await page.getByRole('button', { name: 'Nouvelle variable' }).click();
-  await page.fill('#var-key', 'first_name');
-  await page.getByRole('button', { name: 'Créer la variable' }).click();
-  ok(/existe déjà/.test(await page.textContent('.modal')), 'PRM-08 : nom de variable déjà pris refusé');
-  await page.fill('#var-key', 'job_title');
-  await page.fill('#var-def', 'votre poste');
-  await page.getByRole('button', { name: 'Créer la variable' }).click();
-  await page.waitForSelector('.st-vars td >> text={{job_title}}');
-  await page.waitForSelector('.modal-backdrop', { state: 'detached' });
-  ok(
-    state.tables.variables.some((v) => v.key === 'job_title' && v.default_value === 'votre poste'),
-    'PRM-08 : variable créée dans le workspace',
-  );
+  // PRM-08 (variables) : couvert par variables.e2e (L46)
 
-  await page.getByRole('link', { name: 'Mon profil' }).click();
+  await page.locator('.snav').getByRole('link', { name: 'Profil' }).click();
   await page.waitForSelector('#fn');
   ok(
     (await page.locator('.st-pf .form-sec .intro h2').allTextContents()).join('|') === 'Profil|Préférences',
@@ -95,7 +100,7 @@ const SHOTS = process.env.SHOTS_DIR;
 
   await page.getByRole('link', { name: 'Général' }).click();
   await page.waitForSelector('#ws-name');
-  await page.getByRole('button', { name: 'Supprimer le workspace' }).click();
+  await page.getByRole('button', { name: 'Supprimer l’espace' }).click();
   await page.waitForSelector('dialog[open] .dialog-require');
   ok(
     (await page.locator('dialog[open] .dialog-require b').count()) === 1 &&

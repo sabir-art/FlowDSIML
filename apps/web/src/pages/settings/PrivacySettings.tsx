@@ -13,10 +13,7 @@ export function PrivacySettings() {
   const gap = current?.visit_gap_minutes === 1440 ? t('analytics.ret.gap24h') : t('analytics.ret.gap30');
   return (
     <SettingsShell>
-      <section className="soon-page" aria-labelledby="pv-t">
-        <h2 className="t-h2" id="pv-t">
-          {t('privacy.title')}
-        </h2>
+      <section className="soon-page" aria-labelledby="st-title">
         <p className="muted">{t('privacy.sub')}</p>
         <div className="card card-pad">
           <div className="setting">

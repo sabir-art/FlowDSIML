@@ -16,14 +16,13 @@ export interface HomeData {
   publishedAt: Record<string, string>;
   /** Chemin (bucket captures) de la première image de chaque démo. */
   covers: Record<string, string>;
-  shareRulesPlan: boolean;
   memberCount: number;
   /** État de la prise en main (éditeurs et plus), comme workspace_onboarding ; absent en repli. */
   onboarding?: unknown;
 }
 
 /** Une seule lecture (dashboard_home) ; repli sur les lectures séparées si la migration L32 manque. */
-export async function loadHome(ws: { id: string; plan_code: string }): Promise<HomeData> {
+export async function loadHome(ws: { id: string }): Promise<HomeData> {
   const one = await supabase.rpc('dashboard_home', { p_ws: ws.id });
   if (!one.error && one.data) return one.data as unknown as HomeData;
   // Repli seulement si la fonction n'existe pas encore ; toute autre erreur va à l'écran d'erreur (L32 §4)
@@ -35,10 +34,10 @@ export async function loadHome(ws: { id: string; plan_code: string }): Promise<H
 export const isMissingFunction = (e: { code?: string; message?: string }) =>
   e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message ?? '');
 
-async function loadSeparately(ws: { id: string; plan_code: string }): Promise<HomeData> {
+async function loadSeparately(ws: { id: string }): Promise<HomeData> {
   const now = Date.now();
   const iso = (days: number) => new Date(now - days * 86400_000).toISOString();
-  const [d, f, o, lk, cur, prev, plan, members] = await Promise.all([
+  const [d, f, o, lk, cur, prev, members] = await Promise.all([
     supabase
       .from('demos')
       .select('*')
@@ -54,7 +53,6 @@ async function loadSeparately(ws: { id: string; plan_code: string }): Promise<Ho
       p_to: new Date(now).toISOString(),
     }),
     supabase.rpc('workspace_kpis', { p_workspace: ws.id, p_from: iso(60), p_to: iso(30) }),
-    supabase.from('plans').select('limits').eq('code', ws.plan_code).maybeSingle(),
     supabase.rpc('list_members', { p_workspace: ws.id }),
   ]);
   const demos = d.data ?? [];
@@ -98,7 +96,6 @@ async function loadSeparately(ws: { id: string; plan_code: string }): Promise<Ho
       (v.data ?? []).filter((r) => r.published_at).map((r) => [r.demo_id, r.published_at!]),
     ),
     covers,
-    shareRulesPlan: !!(plan.data?.limits as { share_rules?: boolean } | null)?.share_rules,
     memberCount: (members.data ?? []).length,
   };
 }

@@ -45,8 +45,7 @@ export function Members() {
   const { current, can, reload: reloadWs } = useWorkspace();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [invites, setInvites] = useState<Tables<'invitations'>[]>([]);
-  const [usage, setUsage] = useState<{ plan: string; limits: { members: number | null } } | null>(null);
-  const [planName, setPlanName] = useState('');
+  const [usage, setUsage] = useState<{ limits: { members: number | null } } | null>(null);
   const [q, setQ] = useState('');
   const [roleFilter, setRoleFilter] = useState<WorkspaceRole | ''>('');
   // L26-01 : « Inviter » de la prise en main ouvre directement la création d'invitation
@@ -72,12 +71,10 @@ export function Members() {
             .order('created_at', { ascending: false })
         : Promise.resolve({ data: [] as Tables<'invitations'>[] }),
     ]);
-    const us = u.data as unknown as { plan: string; limits: { members: number | null } } | null;
-    const p = us ? await supabase.from('plans').select('name').eq('code', us.plan).maybeSingle() : null;
+    const us = u.data as unknown as { limits: { members: number | null } } | null;
     setMembers((m.data ?? []) as MemberRow[]);
     setInvites(i.data ?? []);
     setUsage(us);
-    if (us) setPlanName(p?.data?.name ?? us.plan);
   }, [ws.id, canManage]);
 
   useEffect(() => {
@@ -130,16 +127,13 @@ export function Members() {
   return (
     <SettingsShell>
       {dialog}
-      <section aria-labelledby="mem-title">
+      <section aria-labelledby="st-title">
         <div className="row between wrap st-head">
           <div>
-            <h2 className="t-h2" id="mem-title">
-              {t('settings.members')}
-            </h2>
             <p className="muted st-sub">
               {limit === null || limit === undefined
-                ? t('members.countUnlimited', { count: members.length, plan: planName })
-                : t('members.countOf', { count: members.length, limit, plan: planName })}
+                ? t('members.countUnlimited', { count: members.length })
+                : t('members.countOf', { count: members.length, limit })}
             </p>
           </div>
           {can('members.invite') && (

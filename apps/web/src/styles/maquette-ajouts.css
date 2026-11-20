@@ -456,142 +456,6 @@
   align-items: center;
 }
 
-/* ---- Plans et facturation (PLN-01) : styles de page et styles en ligne de plans.html ---- */
-.mk.pl {
-  background: transparent;
-}
-.mk .plans {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  align-items: stretch;
-}
-@media (max-width: 1180px) {
-  .mk .plans {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-@media (max-width: 640px) {
-  .mk .plans {
-    grid-template-columns: 1fr;
-  }
-}
-.mk .plan {
-  display: flex;
-  flex-direction: column;
-  padding: 24px;
-  position: relative;
-}
-.mk .plan.current {
-  border: 2px solid var(--fd-color-primary);
-  padding: 23px;
-}
-.mk .plan.reco {
-  border-color: var(--fd-color-border-strong);
-}
-.mk .plan .price {
-  font: 700 2.25rem/1 var(--fd-font-display);
-  letter-spacing: -0.02em;
-  margin: 16px 0 4px;
-}
-.mk .plan .price small {
-  font: 500 14px var(--fd-font-sans);
-  color: var(--fd-color-text-muted);
-  letter-spacing: 0;
-}
-.mk .plan ul {
-  list-style: none;
-  padding: 0;
-  margin: 20px 0 24px;
-  display: grid;
-  gap: 10px;
-  flex: 1;
-  align-content: start;
-}
-.mk .plan li {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  font-size: var(--fd-text-body-size);
-}
-.mk .plan li svg {
-  width: 16px;
-  height: 16px;
-  color: var(--fd-color-success);
-  flex: none;
-  margin-top: 2px;
-}
-.mk .plan li svg.pl-no {
-  color: var(--fd-color-text-subtle);
-}
-.mk .plan .tag {
-  position: absolute;
-  top: -11px;
-  left: 24px;
-}
-.mk .usage-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
-@media (max-width: 900px) {
-  .mk .usage-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.mk .pl-sub {
-  margin-top: 4px;
-}
-.mk .pl-alert {
-  margin-bottom: 24px;
-}
-.mk .pl-usage-grid {
-  margin-top: 16px;
-}
-.mk .pl-progress {
-  margin-top: 8px;
-}
-.mk .pl-track {
-  width: 100%;
-  background: var(--fd-color-surface-sunken) !important;
-}
-.mk .pl-help {
-  margin-top: 6px;
-}
-.mk .pl-choose {
-  margin: 40px 0 20px;
-  gap: 12px;
-}
-.mk .pl-choose .segmented {
-  align-items: center;
-}
-.mk .pl-choose .segmented button[aria-disabled='true'] {
-  cursor: default;
-}
-.mk .pl-soon {
-  margin: 0 4px;
-}
-.mk .pl-quote {
-  font-size: 1.75rem;
-}
-.mk .pl-foot {
-  margin-top: 16px;
-}
-.mk .pl-invoices {
-  margin-top: 40px;
-}
-.mk .pl-empty {
-  padding: var(--fd-space-5) var(--fd-space-6);
-  margin: 0;
-}
-.mk .pl-limit {
-  margin-top: 40px;
-  gap: 16px;
-  border-color: var(--fd-color-warning);
-}
-.mk .pl-field {
-  margin-top: 16px;
-}
 .mk a.btn {
   text-decoration: none;
 }
@@ -728,7 +592,7 @@
 }
 .mk .settings {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 232px minmax(0, 1fr);
   gap: 32px;
   align-items: start;
 }
@@ -755,9 +619,151 @@
   text-decoration: none;
 }
 .mk .snav .snav-item.is-active {
-  background: var(--fd-color-surface-selected);
+  background: var(--fd-color-primary-soft);
   color: var(--fd-color-primary-soft-text);
   font-weight: 600;
+}
+/* L48-A §4 : groupes (transparents pour la mise en page) et entrées « Bientôt » sans lien */
+.mk .snav-grp {
+  display: contents;
+}
+.mk .snav .snav-item--soon,
+.mk .snav .snav-item--soon:hover {
+  background: none;
+  cursor: default;
+}
+.mk .snav .snav-item--soon em {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 12px;
+  color: var(--fd-color-text-subtle);
+}
+.mk .st-crumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 4px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.mk .st-crumb li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.mk .st-crumb a {
+  color: inherit;
+}
+/* L48-A §6 : Utilisation, une ligne par quota (nom, barre fine, chiffre), état à partir de 80 % */
+.mk .us-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.mk .us-hint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.mk .us-card {
+  margin: 0;
+  padding: 8px 28px;
+  list-style: none;
+  background: var(--fd-color-surface);
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-lg);
+}
+.mk .us-row {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 180px;
+  gap: 8px 32px;
+  align-items: center;
+  padding: 22px 0;
+}
+.mk .us-row + .us-row {
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .us-name b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.mk .us-name small,
+.mk .us-val small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.mk .us-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+  overflow: hidden;
+}
+.mk .us-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--fd-color-text);
+}
+.mk .us-row--warn .us-bar i {
+  background: var(--fd-color-warning);
+}
+.mk .us-row--full .us-bar i {
+  background: var(--fd-color-danger);
+}
+.mk .us-val {
+  text-align: right;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.mk .us-val .us-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--fd-color-text);
+  background: color-mix(in srgb, var(--fd-color-warning) 14%, transparent);
+}
+.mk .us-val .us-state--full {
+  background: color-mix(in srgb, var(--fd-color-danger) 14%, transparent);
+}
+.mk .us-blocked {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+@media (max-width: 720px) {
+  .mk .us-head {
+    flex-direction: column;
+  }
+  .mk .us-card {
+    padding: 4px 20px;
+  }
+  .mk .us-row {
+    grid-template-columns: 1fr auto;
+    gap: 8px 16px;
+  }
+  .mk .us-name small {
+    display: none;
+  }
+  .mk .us-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .mk .us-bar-none {
+    display: none;
+  }
 }
 .mk .snav svg {
   width: 18px;
@@ -2410,31 +2416,6 @@
   bottom: -5px;
   cursor: nwse-resize;
 }
-/* PLN-05 : tableau des factures en aperçu (lignes squelettes, badge Bientôt collé au titre) */
-.mk .pl-inv-head {
-  justify-content: flex-start;
-  gap: 8px;
-}
-.mk .pl-inv-skel:hover {
-  background: none;
-}
-.mk .pl-inv-skel td {
-  opacity: 0.7;
-}
-.mk .pl-sk {
-  display: inline-block;
-  height: 10px;
-  vertical-align: middle;
-}
-.mk .pl-sk--badge {
-  width: 56px;
-  height: 20px;
-  border-radius: 6px;
-}
-.mk .pl-inv-table .btn[aria-disabled='true'] {
-  color: var(--fd-color-text-muted);
-  cursor: default;
-}
 /* PRM-11 : Général en une carte à sections (logo, pied Annuler / Enregistrer, zone de danger) */
 .mk .st-gen .logo-up {
   display: flex;
@@ -3208,29 +3189,6 @@
 .mk .soon-page > .muted {
   margin: 4px 0 var(--fd-space-4);
 }
-.mk .soon-tabs {
-  max-width: 640px;
-  margin-bottom: var(--fd-space-5);
-  /* Retour Lead UX VB-02 : le contour de focus n'est plus coupé par le défilement de la barre */
-  padding: 4px 4px 0;
-}
-.mk .soon-tabs [role='tab']:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: -2px;
-  border-radius: 6px;
-}
-.mk .soon-alert {
-  margin-bottom: var(--fd-space-4);
-}
-/* L30 §11 : lien dans le texte du bandeau, distinct sans la couleur seule (RGAA) */
-.mk .soon-alert a {
-  text-decoration: underline;
-}
-.mk .soon-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-  gap: var(--fd-space-4);
-}
 .mk .soon-card {
   display: flex;
   flex-direction: column;
@@ -3294,9 +3252,6 @@
   gap: 6px;
   color: var(--fd-color-text-muted);
   font-size: var(--fd-text-body-size);
-}
-.mk .soon-ctl {
-  align-self: flex-start;
 }
 .mk .soon-card [disabled] {
   opacity: 0.55;

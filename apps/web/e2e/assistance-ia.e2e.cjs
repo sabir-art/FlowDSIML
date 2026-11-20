@@ -69,13 +69,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
   // ---- L30-01 : réglage
   await page.goto(`${APP}/#/settings/ai`);
-  await page.getByRole('heading', { name: 'Assistance IA', level: 2 }).waitFor();
-  const nav = page.locator('.snav-item');
-  const labels = await nav.allTextContents();
-  ok(
-    labels.indexOf('Assistance IA') === labels.indexOf('Confidentialité') + 1,
-    'L30-01 : rubrique placée après Confidentialité',
-  );
+  await page.getByRole('heading', { name: 'Assistance IA', level: 1 }).waitFor();
+  // L48-A §4 : Assistance IA est rangée dans le groupe « Contenu »
+  const labels = await page
+    .locator('.snav-grp', { hasText: 'Contenu' })
+    .locator('.snav-item')
+    .allTextContents();
+  ok(labels.at(-1) === 'Assistance IA', 'L48-A : rubrique dans « Contenu », après Glossaire et Étiquettes');
   const sw = page.getByRole('switch', { name: 'Activer l’Assistance IA pour cet espace' });
   ok(!(await sw.isChecked()), 'L30-01 : désactivée par défaut');
   ok(
@@ -144,15 +144,6 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await audio.getByRole('checkbox', { name: 'Voix de synthèse' }).uncheck();
   await page.waitForTimeout(300);
   ok(state.ai.features.voice === false, 'L30-10 : décocher enregistre directement');
-
-  // ---- §11 : Fonctions à venir
-  await page.goto(`${APP}/#/settings/soon?tab=ia`);
-  await page.locator('.soon-card').first().waitFor();
-  ok((await page.locator('.soon-card').count()) === 1, '§11 : carte Images générées restante');
-  ok(
-    /disponibles dans Paramètres > Assistance IA/.test(await page.locator('.soon-alert').textContent()),
-    '§11 : nouveau bandeau',
-  );
 
   // ---- L30-02 : Rédiger
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);

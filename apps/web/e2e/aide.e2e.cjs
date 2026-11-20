@@ -50,7 +50,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   ok(/support@acme\.example/.test(await drawer.locator('.help-foot').innerText()), 'pied : contact d’aide');
   ok(
-    (await drawer.getByRole('link', { name: 'Contacter le support de la DSI' }).getAttribute('href')) ===
+    (await drawer.getByRole('link', { name: 'Contacter la DSI' }).getAttribute('href')) ===
       'mailto:support@acme.example',
     'pied : lien mailto',
   );
@@ -157,20 +157,17 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(true, 'éditeur : les articles suivent l’onglet Design');
   await page.keyboard.press('Escape');
 
-  // ===== Sans contact : administrateurs =====
+  // ===== L48-A §5 : sans lien du support, pas de pied « Contacter la DSI » =====
   state.tables.workspaces[0].settings = { ...state.tables.workspaces[0].settings, helpContact: null };
   await page.goto(`${BASE}/#/settings/workspace`);
   await page.reload();
   await page.getByRole('button', { name: 'Aide', exact: true }).first().click();
-  await drawer.locator('.help-foot').waitFor();
+  await drawer.waitFor();
   await page.waitForTimeout(300);
-  ok(
-    /Demandez à un administrateur de l’espace\.\s*Alice/.test(await drawer.locator('.help-foot').innerText()),
-    'sans contact : administrateurs listés',
-  );
+  ok((await drawer.locator('.help-foot').count()) === 0, 'sans lien du support : pied masqué');
   await page.keyboard.press('Escape');
   // Réglage « Contact d'aide »
-  const field = page.getByLabel('Contact d’aide');
+  const field = page.getByLabel('Lien du support');
   await field.fill('pas une adresse');
   await page.getByRole('button', { name: 'Enregistrer' }).first().click();
   ok(
@@ -180,7 +177,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await field.fill('support@acme.example');
   await page.getByRole('button', { name: 'Enregistrer' }).first().click();
   await page.waitForTimeout(500);
-  ok(state.tables.workspaces[0].settings.helpContact === 'support@acme.example', 'contact d’aide enregistré');
+  ok(
+    state.tables.workspaces[0].settings.helpContact === 'support@acme.example',
+    'lien du support enregistré',
+  );
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();

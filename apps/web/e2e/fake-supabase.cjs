@@ -777,6 +777,8 @@ async function install(page, state = seed()) {
             published_demos: live.filter((d) => d.status === 'published').length,
             demos: live.length,
             members: t.members.filter((m) => m.workspace_id === w.id).length,
+            // L48-A §6 : octets par type (state.storageUsage pour un test, sinon rien)
+            storage: { media: 0, videos: 0, voices: 0, ...(state.storageUsage || {}), limit: 524288000 },
           });
         }
         case 'set_comment_resolved': {

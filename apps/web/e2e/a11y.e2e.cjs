@@ -608,10 +608,11 @@ const APP_PAGES = [
   },
   { name: 'Centre de formation (réglages)', route: '/#/center', seed: (d) => seedCenterTables(d) },
   { name: 'Profil', route: '/#/settings/profile' },
-  { name: 'Membres', route: '/#/settings/members' },
-  { name: 'Workspace', route: '/#/settings/workspace' },
-  { name: 'Plans', route: '/#/settings/plans' },
+  { name: 'Équipe', route: '/#/settings/members' },
+  { name: 'Général', route: '/#/settings/workspace' },
+  { name: 'Utilisation', route: '/#/settings/usage' },
   { name: 'Marque', route: '/#/settings/brand' },
+  { name: 'Page publique', route: '/#/settings/brand/page' },
   {
     name: 'Marque · modifier le style',
     route: '/#/settings/brand',
@@ -717,10 +718,7 @@ const APP_PAGES = [
   { name: 'Glossaire (vide)', route: '/#/settings/glossary' },
   { name: 'Glossaire', route: '/#/settings/glossary', seed: seedGlossary },
   { name: 'Intégrations', route: '/#/settings/integrations', seed: seedWebhooks },
-  // VB-01 à 03 : fonctions à venir et Sécurité (cartes « Bientôt »)
-  { name: 'Fonctions à venir (IA)', route: '/#/settings/soon?tab=ia' },
-  { name: 'Fonctions à venir (CRM)', route: '/#/settings/soon?tab=crm' },
-  { name: 'Fonctions à venir (SSO)', route: '/#/settings/soon?tab=sso' },
+  // VB-03 : Sécurité (connexion unique « Bientôt » ; « Fonctions à venir » supprimée en L48-A)
   { name: 'Sécurité', route: '/#/settings/security' },
   { name: 'Confidentialité', route: '/#/settings/privacy' },
   // L30-01 : Assistance IA désactivée, puis activée (quota, fonctions)

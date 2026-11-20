@@ -1,71 +1,140 @@
 import type { ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Clock,
-  Code,
-  EyeOff,
-  CreditCard,
-  Notebook,
-  Palette,
-  Plug,
-  Settings,
-  Shield,
-  UserRound,
-  Users,
-  WandSparkles,
-} from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import type { Action } from '@flowdsiml/core';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
 
+/** Une entrée : une route, ou « Bientôt » (jamais masquée, pas de lien). */
+interface Entry {
+  label: string;
+  to?: string;
+  /** Droit requis pour voir l'entrée (règles existantes). */
+  perm?: Action;
+}
+/** Titre de groupe → entrées (L48-A §4). */
+const GROUPS: Array<{ key: string; entries: Entry[] }> = [
+  {
+    key: 'space',
+    entries: [
+      { label: 'settings.general', to: '/settings/workspace' },
+      { label: 'settings.members', to: '/settings/members' },
+      { label: 'settings.usage', to: '/settings/usage' },
+      { label: 'soon.security', to: '/settings/security' },
+      { label: 'privacy.title', to: '/settings/privacy' },
+    ],
+  },
+  {
+    key: 'brand',
+    entries: [
+      { label: 'settings.brandTheme', to: '/settings/brand' },
+      { label: 'settings.publicPage', to: '/settings/brand/page' },
+      { label: 'settings.domain' },
+    ],
+  },
+  {
+    key: 'content',
+    entries: [
+      { label: 'settings.variables', to: '/settings/variables' },
+      // L17 : glossaire, propriétaires, admins et éditeurs (les lecteurs ne voient pas l'entrée)
+      { label: 'settings.glossary', to: '/settings/glossary', perm: 'demo.edit' },
+      { label: 'settings.tags' },
+      { label: 'ai.name', to: '/settings/ai' },
+    ],
+  },
+  {
+    key: 'connections',
+    entries: [
+      // L23 : intégrations, propriétaires et admins seulement
+      { label: 'settings.integrations', to: '/settings/integrations', perm: 'integrations.manage' },
+      { label: 'settings.keys' },
+    ],
+  },
+  {
+    key: 'account',
+    entries: [{ label: 'settings.profile', to: '/settings/profile' }, { label: 'settings.notifications' }],
+  },
+];
+
+/** Groupe et entrée de la page courante (les sous-pages, ex. un webhook, gardent leur entrée). */
+function currentEntry(path: string) {
+  let best: { group: string; entry: Entry } | null = null;
+  for (const g of GROUPS)
+    for (const e of g.entries)
+      if (e.to && (path === e.to || path.startsWith(`${e.to}/`)))
+        if (!best || e.to.length > (best.entry.to?.length ?? 0)) best = { group: g.key, entry: e };
+  return best;
+}
+
 /**
- * Cadre des paramètres (maquette parametres.html) : titre « Paramètres » et navigation interne
- * WORKSPACE (Général, Membres, Marque, Variables) / COMPTE (Mon profil, Plans et facturation).
+ * L48-A §4 : cadre des Paramètres. Cinq groupes (Espace, Marque, Contenu, Connexions, Mon compte),
+ * fil d'Ariane « Paramètres > Groupe > Page » au-dessus du titre de la page (h1, le nom de la section).
  * Chaque section garde sa route (/settings/…) pour les liens directs.
  */
 export function SettingsShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { can } = useWorkspace();
-  const item = (to: string, icon: ReactNode, label: string) => (
-    <NavLink to={to} className={({ isActive }) => `snav-item${isActive ? ' is-active' : ''}`}>
-      {icon}
-      {label}
-    </NavLink>
-  );
+  const { pathname } = useLocation();
+  const here = currentEntry(pathname);
   return (
     <div className="mk st">
       <div className="page-head">
-        <h1>{t('settings.title')}</h1>
+        <div>
+          <nav className="st-crumb" aria-label={t('settings.breadcrumb')}>
+            <ol>
+              <li>
+                <Link to="/settings/workspace">{t('settings.title')}</Link>
+              </li>
+              {here && (
+                <>
+                  <li>
+                    <ChevronRight size={14} aria-hidden="true" />
+                    {t(`settings.grp.${here.group}`)}
+                  </li>
+                  <li aria-current="page">
+                    <ChevronRight size={14} aria-hidden="true" />
+                    {t(here.entry.label)}
+                  </li>
+                </>
+              )}
+            </ol>
+          </nav>
+          <h1 id="st-title">{here ? t(here.entry.label) : t('settings.title')}</h1>
+        </div>
         <div className="page-head__actions">
           <NotificationBell />
         </div>
       </div>
       <div className="settings">
         <nav className="snav" aria-label={t('settings.sections')}>
-          <span className="grp">{t('settings.workspace')}</span>
-          {item('/settings/workspace', <Settings aria-hidden="true" />, t('settings.general'))}
-          {item('/settings/members', <Users aria-hidden="true" />, t('settings.members'))}
-          {item('/settings/brand', <Palette aria-hidden="true" />, t('settings.brand'))}
-          {item('/settings/variables', <Code aria-hidden="true" />, t('settings.variables'))}
-          {/* L17 : glossaire, propriétaires, admins et éditeurs (les lecteurs ne voient pas l'onglet) */}
-          {can('demo.edit') &&
-            item('/settings/glossary', <Notebook aria-hidden="true" />, t('settings.glossary'))}
-          {/* L23 : intégrations, propriétaires et admins seulement */}
-          {can('integrations.manage') &&
-            item('/settings/integrations', <Plug aria-hidden="true" />, t('settings.integrations'))}
-          {/* VB-03 : Sécurité (connexion unique « Bientôt ») ; VB-01 à 03 : fonctions à venir */}
-          {item('/settings/security', <Shield aria-hidden="true" />, t('soon.security'))}
-          {/* L26-08 : Confidentialité (mesure des visites) */}
-          {item('/settings/privacy', <EyeOff aria-hidden="true" />, t('privacy.title'))}
-          {/* L30-01 : Assistance IA, après Confidentialité (lecture seule hors owner/admin) */}
-          {item('/settings/ai', <WandSparkles aria-hidden="true" />, t('ai.name'))}
-          {item('/settings/soon', <Clock aria-hidden="true" />, t('soon.nav'))}
-          <span className="grp">{t('settings.account')}</span>
-          {item('/settings/profile', <UserRound aria-hidden="true" />, t('settings.profile'))}
-          {item('/settings/plans', <CreditCard aria-hidden="true" />, t('settings.plans'))}
+          {GROUPS.map((g) => (
+            <div key={g.key} className="snav-grp">
+              <span className="grp">{t(`settings.grp.${g.key}`)}</span>
+              {g.entries
+                .filter((e) => !e.perm || can(e.perm))
+                .map((e) =>
+                  e.to ? (
+                    <NavLink
+                      key={e.label}
+                      to={e.to}
+                      end={e.to === '/settings/brand'}
+                      className={({ isActive }) => `snav-item${isActive ? ' is-active' : ''}`}
+                    >
+                      {t(e.label)}
+                    </NavLink>
+                  ) : (
+                    <span key={e.label} className="snav-item snav-item--soon">
+                      {t(e.label)}
+                      <em>{t('shell.soon')}</em>
+                    </span>
+                  ),
+                )}
+            </div>
+          ))}
         </nav>
         <div className="st-body">{children}</div>
       </div>

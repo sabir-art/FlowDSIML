@@ -1,28 +1,29 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useMediaQuery } from '../lib/useMediaQuery';
 import { BrandMark } from './BrandMark';
 import { initials } from '../lib/initials';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  BarChart3,
-  CreditCard,
-  Contact,
+  ChartColumn,
+  CircleHelp,
   GraduationCap,
-  LayoutTemplate,
   Languages,
   LayoutGrid,
   LogOut,
   Megaphone,
   Menu as MenuIcon,
   Plus,
+  Puzzle,
+  Route,
   Settings,
   ShieldCheck,
   UserRound,
-  Users,
   X,
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
+import { useHelp } from '../help/HelpProvider';
+import { ExtensionDialog } from './ExtensionDialog';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { setLocale } from '../i18n';
 import { supabase } from '../lib/supabase';
@@ -45,6 +46,8 @@ export function Layout() {
   const platformRole = usePlatformRole();
   const { current, can } = useWorkspace();
   const [open, setOpen] = useState(false);
+  const [extension, setExtension] = useState(false);
+  const help = useHelp();
 
   const menuBtn = useRef<HTMLButtonElement>(null);
   const sidebar = useRef<HTMLElement>(null);
@@ -100,16 +103,18 @@ export function Layout() {
         .then(() => undefined);
   };
 
-  const nav = [
-    { to: '/', end: true, icon: <LayoutGrid {...ICON} />, label: t('nav.demos') },
-    { to: '/analytics', icon: <BarChart3 {...ICON} />, label: t('nav.analytics') },
-    { to: '/analytics?tab=leads', icon: <Contact {...ICON} />, label: t('nav.leads') },
-  ];
-  const admin = [
-    { to: '/settings/members', icon: <Users {...ICON} />, label: t('nav.members') },
-    { to: '/settings/workspace', icon: <Settings {...ICON} />, label: t('nav.workspaceSettings') },
-    { to: '/settings/plans', icon: <CreditCard {...ICON} />, label: t('nav.plans') },
-  ];
+  // L48-A §1 : Contenus (Démos, Parcours de formation, Analytics), puis Formation › Apprenants
+  const path = location.pathname;
+  const item = (to: string, active: boolean, icon: ReactNode, label: string) => (
+    <Link
+      to={to}
+      className={`fd-nav__item${active ? ' active' : ''}`}
+      aria-current={active ? 'page' : undefined}
+    >
+      {icon}
+      {label}
+    </Link>
+  );
 
   return (
     <div className={`shell ${open ? 'nav-open' : ''}`}>
@@ -155,61 +160,39 @@ export function Layout() {
         {/* CAD-02 : sélecteur de workspace toujours visible (maquette) */}
         <WorkspaceSwitcher />
         <nav aria-label={t('nav.main')} className="fd-nav">
-          {nav.map((n) => {
-            // RF6 : « Démos » reste actif dans les sous-pages d'une démo (analytics, partage…)
-            if (n.to === '/') {
-              const active = location.pathname === '/' || location.pathname.startsWith('/demos/');
-              return (
-                <Link
-                  key={n.to}
-                  to={n.to}
-                  className={`fd-nav__item${active ? ' active' : ''}`}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  {n.icon}
-                  {n.label}
-                </Link>
-              );
-            }
-            // ANA-10 : « Leads » ouvre Analytics sur l'onglet Leads ; une seule des deux entrées est active
-            const onLeads =
-              location.pathname === '/analytics' &&
-              new URLSearchParams(location.search).get('tab') === 'leads';
-            const active = location.pathname === '/analytics' && (n.to === '/analytics' ? !onLeads : onLeads);
-            return (
-              <Link
-                key={n.to}
-                to={n.to}
-                className={`fd-nav__item${active ? ' active' : ''}`}
-                aria-current={active ? 'page' : undefined}
-              >
-                {n.icon}
-                {n.label}
-              </Link>
-            );
-          })}
-          {/* L13 : section Formation › Apprenants */}
+          {/* RF6 : « Démos » reste actif dans les sous-pages d'une démo (analytics, partage…) */}
+          {item('/', path === '/' || path.startsWith('/demos/'), <LayoutGrid {...ICON} />, t('nav.demos'))}
+          {/* L14 : parcours (centre de formation), propriétaires et admins (droits inchangés) */}
+          {can('members.manage') && item('/center', path === '/center', <Route {...ICON} />, t('nav.paths'))}
+          {/* Leads reste un onglet d'Analytics (?tab=leads) */}
+          {item('/analytics', path === '/analytics', <ChartColumn {...ICON} />, t('nav.analytics'))}
           <div className="fd-nav__section">{t('nav.training')}</div>
-          <NavLink to="/learners" className="fd-nav__item">
-            <GraduationCap {...ICON} />
-            {t('nav.learners')}
-          </NavLink>
-          {/* L14 : réglages du centre de formation (propriétaires et admins) */}
-          {can('members.manage') && (
-            <NavLink to="/center" className="fd-nav__item">
-              <LayoutTemplate {...ICON} />
-              {t('nav.center')}
-            </NavLink>
-          )}
-          <div className="fd-nav__section">{t('nav.workspace')}</div>
-          {admin.map((n) => (
-            <NavLink key={n.to} to={n.to} className="fd-nav__item">
-              {n.icon}
-              {n.label}
-            </NavLink>
-          ))}
+          {item('/learners', path === '/learners', <GraduationCap {...ICON} />, t('nav.learners'))}
         </nav>
         <div className="spacer" />
+        <nav aria-label={t('nav.utilities')} className="fd-nav fd-nav--utils">
+          <button type="button" className="fd-nav__item" onClick={() => setExtension(true)}>
+            <Puzzle {...ICON} />
+            {t('nav.extension')}
+          </button>
+          {help && (
+            <button
+              type="button"
+              className="fd-nav__item"
+              aria-expanded={help.open}
+              onClick={(e) => help.toggle(e.currentTarget)}
+            >
+              <CircleHelp {...ICON} />
+              {t('nav.helpCenter')}
+            </button>
+          )}
+          {item(
+            '/settings/workspace',
+            path.startsWith('/settings/'),
+            <Settings {...ICON} />,
+            t('nav.workspaceSettings'),
+          )}
+        </nav>
         <div className="user-block">
           <span className="avatar avatar--brand" aria-hidden="true">
             {initials(profile?.full_name || user?.email || '?')}
@@ -278,6 +261,7 @@ export function Layout() {
           menuBtn.current?.focus();
         }}
       />
+      {extension && <ExtensionDialog onClose={() => setExtension(false)} />}
       <main className="main" id="main" tabIndex={-1}>
         {/* Changement d'espace : la page est remontée, ses données et requêtes de l'ancien espace abandonnées */}
         <Outlet key={current?.id ?? 'none'} />

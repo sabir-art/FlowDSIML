@@ -183,9 +183,10 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await page.goto(`${APP}/#/leads`);
   await page.waitForURL(/analytics\?tab=leads/);
   await page.waitForSelector('#an-panel-leads >> text=prospect@globex.example');
+  // L48-A : plus d'entrée « Leads » dans la barre ; Analytics reste la page active
   ok(
-    (await page.locator('.fd-nav__item.active').textContent()).trim() === 'Leads',
-    'ANA-10 : entrée « Leads » active, onglet Leads d’Analytics',
+    (await page.locator('.fd-nav__item[aria-current="page"]').textContent()).trim() === 'Analytics',
+    'ANA-10 : onglet Leads d’Analytics, entrée « Analytics » active',
   );
   const [dl2] = await Promise.all([
     page.waitForEvent('download'),

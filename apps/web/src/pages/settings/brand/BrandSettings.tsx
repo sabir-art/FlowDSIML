@@ -50,7 +50,6 @@ export function BrandSettings() {
   return (
     <SettingsShell>
       <div className="br-page">
-        <h2 className="sr-only">{t('settings.brand')}</h2>
         {!isAdmin && (
           <div className="alert alert-info br-note" role="note">
             <Info aria-hidden="true" />
@@ -60,7 +59,6 @@ export function BrandSettings() {
         <LogoCard ws={ws} isAdmin={isAdmin} onLibrary={() => setLibrary(true)} />
         <ColorsCard ws={ws} isAdmin={isAdmin} />
         <StylesCard wsId={ws.id} isAdmin={isAdmin} canCreate={can('demo.edit')} />
-        <PublicPageSoon />
         {library && <MediaLibrary wsId={ws.id} onClose={() => setLibrary(false)} />}
       </div>
     </SettingsShell>
@@ -634,56 +632,56 @@ function StylesCard({ wsId, isAdmin, canCreate }: { wsId: string; isAdmin: boole
   );
 }
 
-/** Page publique (PRM-07) : boutons et mention du produit, toujours « Bientôt ». */
-function PublicPageSoon() {
+/** L48-A §4 : Paramètres > Marque > Page publique (PRM-07) : boutons et mention du produit, « Bientôt ». */
+export function BrandPublicPage() {
   const { t } = useTranslation();
-  const [brandingPlan, setBrandingPlan] = useState<string | null>(null);
-  useEffect(() => {
-    void supabase
-      .from('plans')
-      .select('name, limits, sort')
-      .order('sort')
-      .then(({ data }) => {
-        const p = (data ?? []).find((x) => (x.limits as { remove_branding?: boolean }).remove_branding);
-        setBrandingPlan(p?.name ?? null);
-      });
-  }, []);
   return (
-    <section className="card br-card" aria-labelledby="br-pp-t">
-      <div className="card-head">
-        <div>
-          <h3 className="t-h3" id="br-pp-t">
-            {t('brand.pageTitle')} <span className="badge">{t('shell.soon')}</span>
-          </h3>
-          <p className="t-caption muted">{t('brand.pageHelp')}</p>
+    <SettingsShell>
+      <section className="card br-card" aria-labelledby="br-pp-t">
+        <div className="card-head">
+          <div>
+            <h2 className="t-h3" id="br-pp-t">
+              {t('brand.pageTitle')} <span className="badge">{t('shell.soon')}</span>
+            </h2>
+            <p className="t-caption muted">{t('brand.pageHelp')}</p>
+          </div>
         </div>
-      </div>
-      <div className="field">
-        <label htmlFor="br-c1">{t('brand.cta1')}</label>
-        <div className="st-pair">
-          <input id="br-c1" className="input" disabled placeholder={t('brand.ctaLabel')} />
-          <input className="input t-mono" disabled placeholder="https://…" aria-label={t('brand.cta1Url')} />
+        <div className="field">
+          <label htmlFor="br-c1">{t('brand.cta1')}</label>
+          <div className="st-pair">
+            <input id="br-c1" className="input" disabled placeholder={t('brand.ctaLabel')} />
+            <input
+              className="input t-mono"
+              disabled
+              placeholder="https://…"
+              aria-label={t('brand.cta1Url')}
+            />
+          </div>
         </div>
-      </div>
-      <div className="field">
-        <label htmlFor="br-c2">
-          {t('brand.cta2')} <span className="opt">{t('plans.optional')}</span>
-        </label>
-        <div className="st-pair">
-          <input id="br-c2" className="input" disabled placeholder={t('brand.ctaLabel')} />
-          <input className="input t-mono" disabled placeholder="https://…" aria-label={t('brand.cta2Url')} />
+        <div className="field">
+          <label htmlFor="br-c2">
+            {t('brand.cta2')} <span className="opt">{t('plans.optional')}</span>
+          </label>
+          <div className="st-pair">
+            <input id="br-c2" className="input" disabled placeholder={t('brand.ctaLabel')} />
+            <input
+              className="input t-mono"
+              disabled
+              placeholder="https://…"
+              aria-label={t('brand.cta2Url')}
+            />
+          </div>
         </div>
-      </div>
-      <div className="setting st-pf-notif">
-        <div>
-          <b id="br-wm">{t('brand.hideBranding', { app: APP_NAME })}</b>
-          {brandingPlan && <p className="t-caption muted">{t('brand.fromPlan', { plan: brandingPlan })}</p>}
+        <div className="setting st-pf-notif">
+          <div>
+            <b id="br-wm">{t('brand.hideBranding', { app: APP_NAME })}</b>
+          </div>
+          <span className="switch">
+            <input type="checkbox" disabled aria-labelledby="br-wm" />
+            <span />
+          </span>
         </div>
-        <span className="switch">
-          <input type="checkbox" disabled aria-labelledby="br-wm" />
-          <span />
-        </span>
-      </div>
-    </section>
+      </section>
+    </SettingsShell>
   );
 }

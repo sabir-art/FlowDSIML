@@ -46,8 +46,8 @@ const Members = lazyRest(() => import('./pages/settings/Members').then((m) => ({
 const WorkspaceSettings = lazyRest(() =>
   import('./pages/settings/WorkspaceSettings').then((m) => ({ default: m.WorkspaceSettings })),
 );
-const PlansPage = lazyRest(() =>
-  import('./pages/settings/PlansPage').then((m) => ({ default: m.PlansPage })),
+const UsagePage = lazyRest(() =>
+  import('./pages/settings/UsagePage').then((m) => ({ default: m.UsagePage })),
 );
 const GlossarySettings = lazyRest(() =>
   import('./pages/settings/GlossarySettings').then((m) => ({ default: m.GlossarySettings })),
@@ -85,11 +85,11 @@ const BrandSettings = lazyRest(() =>
 const VariablesSettings = lazyRest(() =>
   import('./pages/settings/SoonSections').then((m) => ({ default: m.VariablesSettings })),
 );
-const SecuritySettings = lazyRest(() =>
-  import('./pages/settings/SoonFeatures').then((m) => ({ default: m.SecuritySettings })),
+const BrandPublicPage = lazyRest(() =>
+  import('./pages/settings/brand/BrandSettings').then((m) => ({ default: m.BrandPublicPage })),
 );
-const SoonFeatures = lazyRest(() =>
-  import('./pages/settings/SoonFeatures').then((m) => ({ default: m.SoonFeatures })),
+const SecuritySettings = lazyRest(() =>
+  import('./pages/settings/SecuritySettings').then((m) => ({ default: m.SecuritySettings })),
 );
 const PresenterPage = lazyRest(() =>
   import('./pages/present/PresenterPage').then((m) => ({ default: m.PresenterPage })),
@@ -256,14 +256,17 @@ export function App() {
                     <Route path="/settings/profile" element={<Profile />} />
                     <Route path="/settings/members" element={<Members />} />
                     <Route path="/settings/workspace" element={<WorkspaceSettings />} />
-                    <Route path="/settings/plans" element={<PlansPage />} />
+                    <Route path="/settings/usage" element={<UsagePage />} />
+                    {/* L48-A : « Plans et facturation » devient « Utilisation » ; « Fonctions à venir » supprimée */}
+                    <Route path="/settings/plans" element={<Navigate to="/settings/usage" replace />} />
+                    <Route path="/settings/soon" element={<Navigate to="/settings/workspace" replace />} />
                     <Route path="/settings/brand" element={<BrandSettings />} />
+                    <Route path="/settings/brand/page" element={<BrandPublicPage />} />
                     <Route path="/settings/variables" element={<VariablesSettings />} />
                     <Route path="/settings/glossary" element={<GlossarySettings />} />
                     <Route path="/settings/security" element={<SecuritySettings />} />
                     <Route path="/settings/privacy" element={<PrivacySettings />} />
                     <Route path="/settings/ai" element={<AiSettings />} />
-                    <Route path="/settings/soon" element={<SoonFeatures />} />
                     <Route path="/settings/integrations" element={<IntegrationsPage />} />
                     <Route path="/settings/integrations/:id" element={<WebhookDetail />} />
                   </Route>

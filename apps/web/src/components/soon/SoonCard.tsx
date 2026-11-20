@@ -59,14 +59,3 @@ export function SoonCard({
     </article>
   );
 }
-
-/** Bouton désactivé d'une carte à venir (annoncé comme indisponible). */
-export function SoonButton({ label }: { label: string }) {
-  const { t } = useTranslation();
-  return (
-    <button type="button" className="btn btn-secondary btn-sm soon-ctl" disabled>
-      {label}
-      <span className="sr-only"> ({t('soon.badge')})</span>
-    </button>
-  );
-}

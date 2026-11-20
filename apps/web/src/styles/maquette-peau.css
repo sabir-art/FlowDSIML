@@ -83,35 +83,10 @@
   background: linear-gradient(90deg, var(--ref-reco-from), var(--ref-reco-mid));
   color: var(--fd-color-accent-soft-text);
 }
-.mk .plans .plan.reco {
-  border-color: var(--ref-reco-border);
-  background: linear-gradient(
-    180deg,
-    var(--ref-reco-from) 0%,
-    var(--ref-reco-mid) 24%,
-    var(--fd-color-surface) 52%
-  );
-}
-.mk .plans .plan.reco .tag {
-  background: var(--ref-hot);
-  color: #ffffff;
-}
-.mk .plans .plan.current {
-  border-color: var(--ref-current);
-}
-.mk .plans .plan.current .tag {
-  background: var(--ref-current);
-  /* L24 : encre foncée sur le bleu (le blanc ne fait que 3,2:1) */
-  color: var(--fd-bleu-950);
-}
 .mk .badge-success {
   background: var(--ref-good-soft);
   color: var(--ref-good-text);
 }
-.mk .usage-grid > div:nth-child(1) .progress > span {
-  background: var(--ref-gauge-1);
-}
-.mk .usage-grid > div:nth-child(2) .progress > span,
 .mk .progress.warn > span {
   background: var(--ref-gauge-2);
 }

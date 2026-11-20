@@ -1,6 +1,6 @@
 /**
  * Test e2e VB-01 à VB-03 : fonctions de la vague B en « Bientôt disponible » (jamais actives, jamais
- * « V2 ») : page « Fonctions à venir », Sécurité (SSO), carte e-mailing des Intégrations, entrées
+ * « V2 ») : Sécurité (SSO), cartes e-mailing et enrichissement des Intégrations, entrées
  * « Assistance IA » de l'éditeur. Données fictives.
  * Usage : SHOTS_DIR=… [THEME=dark] node e2e/vague-b.e2e.cjs
  */
@@ -34,78 +34,20 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const noV2 = async (where) =>
     ok(!/\bV2\b/.test(await page.locator('main, .mk').first().innerText()), `${where} : jamais « V2 »`);
 
-  // ===== VB-01 : Fonctions à venir, onglet Assistance IA =====
+  // ===== L48-A : « Fonctions à venir » supprimée, chaque fonction à sa place =====
   await page.goto(`${APP}/#/settings/soon`);
-  await page.getByRole('heading', { level: 2, name: 'Fonctions à venir' }).waitFor();
-  ok(
-    (await page.getByRole('tab', { name: 'Assistance IA' }).getAttribute('aria-selected')) === 'true',
-    'onglet Assistance IA par défaut',
-  );
-  ok(
-    (await page
-      .getByText('Les autres fonctions d’Assistance IA sont disponibles dans Paramètres > Assistance IA.', {
-        exact: false,
-      })
-      .count()) === 1,
-    'L30 §11 : bandeau « disponibles dans Paramètres > Assistance IA »',
-  );
-  ok(
-    (await page.locator('.soon-card').count()) === 1,
-    'L30 §11 : une carte IA restante (images générées ; voix et sous-titres livrés)',
-  );
-  ok(
-    (await page.locator('.soon-badge', { hasText: 'Bientôt disponible' }).count()) === 1,
-    'badge sur chaque carte',
-  );
-  ok(
-    (await page.locator('.soon-card button').count()) === 1 &&
-      (await page.locator('.soon-card button:not([disabled])').count()) === 0,
-    'contrôles désactivés',
-  );
-  ok(
-    await page
-      .locator('.soon-card')
-      .first()
-      .evaluate((el) => getComputedStyle(el).borderStyle === 'dashed'),
-    'bordure pointillée',
-  );
-  ok(
-    !(await page.locator('.soon-page').innerText()).match(/Essayer|liste d.attente|Nouveau/i),
-    'ni « Essayer », ni liste d’attente, ni « Nouveau »',
-  );
-  await noV2('Fonctions à venir');
-  await full('vb-01-ia');
-
-  // Onglets au clavier
-  await page.getByRole('tab', { name: 'Assistance IA' }).focus();
-  await page.keyboard.press('ArrowRight');
-  await page.waitForSelector('#soon-tab-crm[aria-selected="true"]', { timeout: 3000 }).catch(() => {});
-  ok(
-    await page.evaluate(() => {
-      const el = document.getElementById('soon-tab-crm');
-      const bar = el.parentElement.getBoundingClientRect();
-      const r = el.getBoundingClientRect();
-      return el.matches(':focus-visible') && r.top - bar.top >= 2 && r.left - bar.left >= 2;
-    }),
-    'onglet actif : contour de focus entier (non coupé)',
-  );
-  if (SHOTS) await page.locator('.soon-tabs').screenshot({ path: `${SHOTS}/vb-02-focus${sfx}.png` });
-  ok(
-    (await page.getByRole('tab', { name: 'CRM et e-mailing' }).getAttribute('aria-selected')) === 'true',
-    'onglets au clavier (→)',
-  );
-
-  // ===== VB-02 : CRM et e-mailing =====
-  ok((await page.locator('.soon-card').count()) === 3, 'trois cartes CRM, e-mailing, enrichissement');
-  ok(
-    (await page.getByRole('heading', { name: "Outils d'e-mailing" }).count()) === 1,
-    'carte « Outils d’e-mailing »',
-  );
-  await full('vb-02-crm');
-  await page.getByRole('link', { name: 'Utiliser les webhooks' }).click();
+  await page.waitForURL(/settings\/workspace/);
+  ok(true, '/settings/soon redirige vers Général');
+  await page.goto(`${APP}/#/settings/ai`);
+  await page.getByRole('heading', { level: 1, name: 'Assistance IA' }).waitFor();
+  await noV2('Assistance IA');
+  await page.goto(`${APP}/#/settings/integrations`);
   await page.getByRole('heading', { name: 'Webhooks' }).waitFor();
-  await page.waitForTimeout(300);
-  ok(await page.evaluate(() => document.activeElement?.id === 'webhooks'), 'webhooks : focus sur la carte');
+  const enrich = page.locator('.int-card', { hasText: 'Enrichissement des visiteurs' });
+  ok(
+    (await enrich.count()) === 1 && /Bientôt/.test(await enrich.locator('.badge').innerText()),
+    'Intégrations : enrichissement des visiteurs « Bientôt »',
+  );
   // Intégrations : carte e-mailing avec l'alternative
   const mail = page.locator('.int-card', { hasText: 'Outils d' });
   ok(
@@ -126,7 +68,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
   // ===== VB-03 : Sécurité =====
   await page.getByRole('link', { name: 'Sécurité' }).click();
-  await page.getByRole('heading', { level: 2, name: 'Sécurité' }).waitFor();
+  await page.getByRole('heading', { level: 1, name: 'Sécurité' }).waitFor();
   ok((await page.getByRole('heading', { name: 'Connexion unique (SSO / SAML)' }).count()) === 1, 'carte SSO');
   ok(
     await page.getByLabel('URL des métadonnées du fournisseur').isDisabled(),
@@ -151,9 +93,6 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
   await noV2('Sécurité');
   await full('vb-03-securite');
-  await page.goto(`${APP}/#/settings/soon?tab=sso`);
-  await page.getByRole('heading', { name: 'Connexion unique (SSO / SAML)' }).waitFor();
-  ok(true, 'onglet Connexion unique');
 
   // ===== VB-01 : éditeur =====
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);

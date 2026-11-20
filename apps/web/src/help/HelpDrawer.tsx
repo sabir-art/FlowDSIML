@@ -15,6 +15,7 @@ import { TourDialog } from './TourDialog';
 import { PAGE_TOUR, loadTours } from './tours';
 import { Academy } from './Academy';
 import { usePlatformRole } from '../pages/console/platform';
+import { supportContact, supportHref } from '../lib/support';
 import {
   PAGE_ARTICLES,
   articleBySlug,
@@ -26,9 +27,6 @@ import {
   type Article,
 } from './articles';
 import './help.css';
-
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const HTTPS = /^https:\/\/[^\s]+$/;
 
 function Marked({ text, terms }: { text: string; terms: string[] }) {
   return (
@@ -82,7 +80,6 @@ export function HelpDrawer({
   const [tour, setTour] = useState<{ id: string; title: string } | null>(null);
   const [touring, setTouring] = useState(false);
   const [keys, setKeys] = useState(false);
-  const [admins, setAdmins] = useState<string[] | null>(null);
   const search = useRef<HTMLInputElement>(null);
   const back = useRef<HTMLButtonElement>(null);
   const lastLink = useRef<string | null>(null);
@@ -110,19 +107,9 @@ export function HelpDrawer({
     });
   }, [page]);
 
-  // Contact d'aide de l'espace, sinon les administrateurs
-  const settings = (ws.settings ?? {}) as Record<string, unknown>;
-  const contact = typeof settings.helpContact === 'string' ? settings.helpContact.trim() : '';
-  const contactHref = EMAIL.test(contact) ? `mailto:${contact}` : HTTPS.test(contact) ? contact : null;
-  useEffect(() => {
-    if (contactHref) return;
-    void supabase.rpc('list_members', { p_workspace: ws.id }).then(({ data }) => {
-      const rows = (data ?? []) as Array<{ full_name: string; email: string; role: string }>;
-      setAdmins(
-        rows.filter((r) => r.role === 'admin' || r.role === 'owner').map((r) => r.full_name || r.email),
-      );
-    });
-  }, [contactHref, ws.id]);
+  // L48-A §5 : « Contacter la DSI », masqué tant que le lien du support est vide
+  const contact = supportContact(ws.settings);
+  const contactHref = supportHref(ws.settings);
 
   const terms = useMemo(() => termsOf(q), [q]);
   // L41 : l'article de la console n'apparaît qu'aux comptes qui ont un rôle dans la console
@@ -272,28 +259,19 @@ export function HelpDrawer({
           </>
         )}
       </div>
-      <footer className="help-foot">
-        <b>{t('help.need')}</b>{' '}
-        {contactHref ? (
-          <>
-            <a
-              href={contactHref}
-              target={contactHref.startsWith('https') ? '_blank' : undefined}
-              rel="noopener noreferrer"
-            >
-              {t('help.contact')}
-            </a>
-            <span className="help-muted help-block">{contact}</span>
-          </>
-        ) : (
-          <>
-            <span>{t('help.askAdmin')}</span>
-            {admins && admins.length > 0 && (
-              <span className="help-muted help-block">{admins.join(', ')}</span>
-            )}
-          </>
-        )}
-      </footer>
+      {contactHref && (
+        <footer className="help-foot">
+          <b>{t('help.need')}</b>{' '}
+          <a
+            href={contactHref}
+            target={contactHref.startsWith('https') ? '_blank' : undefined}
+            rel="noopener noreferrer"
+          >
+            {t('help.contact')}
+          </a>
+          <span className="help-muted help-block">{contact}</span>
+        </footer>
+      )}
       {touring && tour && (
         <TourDialog tourId={tour.id} title={tour.title} onClose={() => setTouring(false)} />
       )}

@@ -9,6 +9,7 @@ import { formatNumber } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
 import { WsLogo } from '../../components/WorkspaceSwitcher';
+import { SUPPORT_EMAIL_RE, SUPPORT_HTTPS_RE } from '../../lib/support';
 
 const HTTPS = /^https:\/\/\S+$/;
 
@@ -79,7 +80,7 @@ export function WorkspaceSettings() {
       }
     }
     const hc = helpContact.trim();
-    if (hc && !HTTPS.test(hc) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(hc)) {
+    if (hc && !SUPPORT_HTTPS_RE.test(hc) && !SUPPORT_EMAIL_RE.test(hc)) {
       setUrlError({ id: 'ws-help', text: t('help.contactInvalid') });
       document.getElementById('ws-help')?.focus();
       return;

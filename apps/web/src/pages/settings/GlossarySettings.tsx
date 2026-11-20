@@ -90,12 +90,9 @@ export function GlossarySettings() {
 
   return (
     <SettingsShell>
-      <section className="gl-page" aria-labelledby="gl-title">
+      <section className="gl-page" aria-labelledby="st-title">
         <div className="gl-head">
           <div>
-            <h2 className="t-h2" id="gl-title">
-              {t('glossary.title')}
-            </h2>
             <p className="muted">{t('glossary.intro')}</p>
           </div>
           <div className="gl-acts">
