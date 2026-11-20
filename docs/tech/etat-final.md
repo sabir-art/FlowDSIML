@@ -26,7 +26,8 @@ Synthèse pour le client. Le suivi écran par écran est dans le tableau de suiv
   suggestions, génération d'une démo à partir d'un plan, données fictives, graphiques, assistant de l'éditeur
   (Claude, Anthropic), voix de synthèse et sous-titres automatiques (ElevenLabs). Rien n'est appliqué sans
   validation, et un quota mensuel s'applique.
-- **Qualité** : interface en français et en anglais, accessibilité (audit RGAA, déclaration d'accessibilité),
+- **Qualité** : interface en français et en anglais, accessibilité (WCAG 2.2 AA vérifié automatiquement,
+  PDF balisés, déclaration d'accessibilité ; audit RGAA complet à faire),
   revue de sécurité (droits en base vérifiés par plus de 900 tests), tests automatiques de bout en bout.
 
 ## Limites connues
@@ -77,6 +78,18 @@ Builds de production, audit mobile avec ralentissement simulé du réseau et du 
 
 Scores relevés sur plusieurs passages (le simulateur varie d'un point). Avant L33 : 81 pour le tableau de
 bord, 75 pour l'éditeur.
+
+Accessibilité (L24, L34, L35 ; détail dans docs/tech/accessibilite.md) :
+
+- audit axe-core WCAG 2.0, 2.1 et 2.2 de niveaux A et AA : 94 écrans × 2 thèmes, soit 188 audits, aucune
+  violation ; il tourne en intégration continue ;
+- 77 contrôles clavier et focus automatisés : focus visible et jamais masqué, fenêtres modales,
+  annonces, zoom 200 %, animations réduites, parcours complets de l'éditeur et du lecteur au clavier ;
+- alternative au glisser pour chaque action (WCAG 2.5.7) ;
+- PDF exportés balisés (structure, titres, texte alternatif des captures, langue) ;
+- déclaration d'accessibilité (docs/ux/a11y/declaration-accessibilite.md) : « non conforme » au sens du
+  RGAA tant que l'audit complet n'est pas fait ; elle liste ce qui a été vérifié et ce qui ne l'a pas été
+  (lecteurs d'écran réels, validation PDF/UA, contenus des auteurs).
 
 Corrections faites :
 
