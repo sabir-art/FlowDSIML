@@ -3,25 +3,26 @@
  * Liste des webhooks, cartes « Bientôt », création ou modification, secret affiché une seule fois.
  * Réservé aux propriétaires et admins (RLS côté base ; message d'accès refusé ici).
  */
-import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Building2,
-  ChartColumn,
   Copy,
   Gamepad2,
-  Hash,
   KeyRound,
   Mail,
-  MessageSquare,
   Plus,
   Send,
   Webhook as WebhookIcon,
   X,
-  Zap,
 } from 'lucide-react';
 import { SettingsShell } from '../SettingsShell';
+import slackLogo from '../../../assets/brands/slack.svg';
+import zapierLogo from '../../../assets/brands/zapier.svg';
+import gaLogo from '../../../assets/brands/google-analytics.svg';
+import matomoLogo from '../../../assets/brands/matomo.svg';
+import teamsLogo from '../../../assets/brands/microsoft-teams.svg';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useToast } from '../../../components/Toast';
 import { useConfirm } from '../../../components/ConfirmDialog';
@@ -312,12 +313,13 @@ function focusWebhooks() {
 
 function SoonCards() {
   const { t } = useTranslation();
-  const cards = [
-    { k: 'slack', icon: <Hash /> },
-    { k: 'zapier', icon: <Zap /> },
-    { k: 'ga', icon: <ChartColumn /> },
-    { k: 'matomo', icon: <ChartColumn /> },
-    { k: 'teams', icon: <MessageSquare /> },
+  const cards: { k: string; logo?: string; icon?: ReactNode }[] = [
+    // Logos officiels des marques (sources et licences : src/assets/brands/CREDITS.md)
+    { k: 'slack', logo: slackLogo },
+    { k: 'zapier', logo: zapierLogo },
+    { k: 'ga', logo: gaLogo },
+    { k: 'matomo', logo: matomoLogo },
+    { k: 'teams', logo: teamsLogo },
     { k: 'crm', icon: <Building2 /> },
     // A5-04 / A5-06 (bloque_client) : visibles, désactivées, « Bientôt »
     { k: 'keys', icon: <KeyRound /> },
@@ -331,8 +333,8 @@ function SoonCards() {
         {cards.map((c) => (
           <li key={c.k} className="int-card" aria-disabled="true">
             <div className="hd">
-              <span className="int-lg" aria-hidden="true">
-                {c.icon}
+              <span className={`int-lg${c.logo ? ' int-lg--brand' : ''}`} aria-hidden="true">
+                {c.logo ? <img src={c.logo} alt="" width={20} height={20} /> : c.icon}
               </span>
               <b>{t(`integrations.soon_${c.k}`)}</b>
               <span className="badge">{t('shell.soon')}</span>
