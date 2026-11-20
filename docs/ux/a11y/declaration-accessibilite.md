@@ -4,12 +4,12 @@
 > - ce modèle suit la structure attendue par l'administration : modèle de déclaration du RGAA 4.1, publié par la DINUM ;
 > - les zones `[entre crochets]` sont à remplir par l'organisme qui publie le service ;
 > - les taux restent vides tant que l'audit complet n'est pas fait (`audit-rgaa-l24.md` §5) ;
-> - la déclaration se publie sur une page dédiée, reliée depuis le pied de chaque page par le lien « Accessibilité : partiellement conforme » ;
+> - la déclaration se publie sur une page dédiée, reliée depuis le pied de chaque page par le lien « Accessibilité : non conforme » tant que l'audit complet n'est pas fait ;
 > - côté centre de formation, ce lien est le réglage « Lien vers la déclaration » (L14-08).
 >
 > **À propos de l'état de conformité** (à faire valider par la personne référente accessibilité) :
 > - le RGAA définit trois mentions : « totalement conforme » (100 % des critères respectés), « partiellement conforme » (au moins 50 %) et « non conforme » (moins de 50 %, ou aucun audit) ;
-> - la mention « partiellement conforme » demandée ici n'est donc fondée qu'une fois un premier audit mesuré à 50 % au moins ;
+> - la mention « partiellement conforme » n'est donc fondée qu'une fois un premier audit mesuré à 50 % au moins ;
 > - d'ici là, la page doit afficher « Accessibilité : non conforme » ou « non évaluée » (réglage par défaut du centre, L14-08), et non « partiellement conforme ».
 
 ---
@@ -27,32 +27,46 @@ Cette déclaration d'accessibilité s'applique à **TutoClick, plateforme de tut
 
 ## État de conformité
 
-**TutoClick** est **partiellement conforme** avec le référentiel général d'amélioration de l'accessibilité (RGAA), version 4.1, en raison des non-conformités et des dérogations énumérées ci-dessous.
+**TutoClick** n'a pas encore fait l'objet d'un audit de conformité RGAA complet (106 critères, avec
+restitutions par des lecteurs d'écran). En l'absence de cet audit, le service est déclaré **non conforme**
+au sens du référentiel général d'amélioration de l'accessibilité (RGAA), version 4.1. Aucun taux de
+conformité n'est publié.
 
-## Résultats des tests
+Les vérifications déjà faites sont décrites ci-dessous. Elles ne remplacent pas l'audit complet.
 
-L'audit de conformité réalisé par **[nom de l'entité ou du prestataire qui a fait l'audit]** révèle que :
+## Vérifications réalisées
 
-- **[n] %** des critères du RGAA version 4.1 sont respectés ;
-- le taux moyen de conformité du service en ligne s'élève à **[n] %**.
+Mises à jour le 20/11/2026 (lots L24, L34 et L35 ; détail dans `docs/tech/accessibilite.md`).
+
+- **Audit automatique (axe-core)** : règles WCAG 2.0, 2.1 et 2.2 de niveaux A et AA, sur 94 écrans de
+  l'application, du lecteur et du centre de formation, en thème clair et sombre, soit 188 audits.
+  Résultat : aucune violation, quel que soit son niveau de gravité. Cet audit tourne à chaque modification
+  du code.
+- **Contrôles du clavier et du focus, automatisés** (77 vérifications) : lien d'évitement, focus visible et jamais masqué,
+  focus enfermé dans les fenêtres modales puis rendu, annonces des messages et des changements d'étape,
+  animations réduites, zoom à 200 % sans défilement horizontal, parcours complets au clavier de l'éditeur
+  et du lecteur.
+- **Audit manuel préliminaire** (lot L24) : 14 écarts relevés, tous corrigés.
+- **Critères ajoutés par WCAG 2.2** : focus non masqué, alternative au glisser pour chaque action,
+  taille des cibles, aide au même endroit, authentification sans test cognitif.
+- **Documents PDF exportés** (modes d'emploi, attestations de suivi) : balisés depuis le lot L35
+  (structure, titres, ordre de lecture, texte alternatif des captures, langue).
 
 ## Contenus non accessibles
 
 ### Non conformité
 
-Liste des non-conformités relevées lors de l'audit manuel préliminaire (lot L24). La liste définitive sera celle de l'audit complet.
+Aucune non-conformité connue à ce jour parmi les points vérifiés. Les écarts relevés lors de l'audit manuel préliminaire (titres de
+page, focus, lecteur, contrastes, hiérarchie des titres, références ARIA, PDF non balisés) ont été corrigés.
+La liste définitive sera établie par l'audit complet.
 
-- Le titre de la page ne décrit pas l'écran affiché dans l'application d'administration (critère 8.6).
-- Lors d'un changement d'écran, le focus n'est pas replacé et le changement n'est pas annoncé (critères 7.1, 12.8).
-- Dans le lecteur de démonstration :
-  - le passage à l'étape suivante n'est pas annoncé et le focus se perd (critères 7.1, 7.5, 12.8) ;
-  - certains boutons n'ont pas de focus visible (critère 10.7) ;
-  - la page n'a pas de titre principal ni de zone de contenu principal (critères 9.1, 12.6) ;
-  - l'alternative des captures d'écran n'est pas pertinente (critère 1.3).
-- La hiérarchie des titres saute un niveau sur certaines pages (critère 9.1).
-- Certains attributs ARIA font référence à des éléments absents, et un identifiant est dupliqué (critère 8.2).
-- En thème clair, certains textes discrets, certaines bordures de champs et l'indicateur de focus n'ont pas un contraste suffisant (critères 3.2, 3.3, 10.7).
-- Les documents PDF exportés (modes d'emploi, attestations de suivi) sont balisés depuis novembre 2026 : titres structurés, ordre de lecture, alternative textuelle des captures, langue et titre du document. Leur conformité n'a pas encore été vérifiée avec un validateur PDF/UA ; elle le sera lors de l'audit complet. Une version HTML accessible du même contenu est aussi proposée à chaque export (critère 13.3).
+Points non vérifiés à ce jour :
+
+- restitution par des lecteurs d'écran réels (NVDA, JAWS, VoiceOver) ;
+- validation des PDF par un outil spécialisé (PAC, veraPDF) ;
+- contenus créés par les auteurs des démonstrations : couleurs de marque, textes des bulles et titres
+  d'étapes (l'éditeur vérifie le contraste de la couleur de marque et propose un texte alternatif par
+  défaut pour chaque capture).
 
 ### Dérogations pour charge disproportionnée
 
@@ -130,15 +144,17 @@ Vous pouvez :
 
 ## Plan d'action [année]
 
-| Priorité | Action | Critères | Référence | Échéance |
+| Priorité | Action | Critères | Référence | État |
 |---|---|---|---|---|
-| 1 | Annoncer le changement d'étape dans le lecteur et y garder le focus | 7.1, 7.5, 12.8 | A11Y-03 | [date] |
-| 1 | Titre de page propre à chaque écran, et focus replacé au changement d'écran | 8.6, 12.8 | A11Y-01, A11Y-02 | [date] |
-| 1 | Focus visible sur tous les boutons du lecteur | 10.7 | A11Y-04 | [date] |
-| 2 | Structure du lecteur (titre principal, zone principale) et alternatives des captures | 9.1, 12.6, 1.3 | A11Y-05, A11Y-06 | [date] |
-| 2 | Contrastes du thème clair : texte discret, bordures, focus | 3.2, 3.3, 10.7 | A11Y-11 à A11Y-13 | [date] |
-| 3 | Hiérarchie des titres, identifiants uniques, références ARIA | 9.1, 8.2 | A11Y-07 à A11Y-09 | [date] |
-| 3 | Valeurs écrites sur tous les graphiques | 3.3 | A11Y-14 | [date] |
-| 4 | PDF exportés accessibles : balisage fait (novembre 2026) et version HTML équivalente proposée ; reste la vérification avec un validateur PDF/UA (PAC ou veraPDF) | 13.3 | A11Y-10 | [date] |
+| 1 | Annoncer le changement d'étape dans le lecteur et y garder le focus | 7.1, 7.5, 12.8 | A11Y-03 | Fait (L24) |
+| 1 | Titre de page propre à chaque écran, et focus replacé au changement d'écran | 8.6, 12.8 | A11Y-01, A11Y-02 | Fait (L24) |
+| 1 | Focus visible sur tous les boutons du lecteur | 10.7 | A11Y-04 | Fait (L24) |
+| 2 | Structure du lecteur (titre principal, zone principale) et alternatives des captures | 9.1, 12.6, 1.3 | A11Y-05, A11Y-06 | Fait (L24) |
+| 2 | Contrastes du thème clair : texte discret, bordures, focus | 3.2, 3.3, 10.7 | A11Y-11 à A11Y-13 | Fait (L24) |
+| 3 | Hiérarchie des titres, identifiants uniques, références ARIA | 9.1, 8.2 | A11Y-07 à A11Y-09 | Fait (L24) |
+| 3 | Valeurs écrites sur tous les graphiques | 3.3 | A11Y-14 | Fait (L24) |
+| 4 | PDF exportés accessibles (balisage, alternatives) | 13.3 | A11Y-10 | Fait (L35) |
+| 4 | Critères WCAG 2.2 : focus non masqué, alternative au glisser, onglets et fenêtres modales au clavier | 2.4.11, 2.5.7, 2.1.1 | L34 | Fait (L34) |
 | — | Audit complet des 106 critères, avec restitutions vocales réelles, puis publication du taux | — | Audit §5 | [date] |
+| — | Validation des PDF avec un outil spécialisé (PAC ou veraPDF) | 13.3 | — | [date] |
 | — | Formation des personnes qui créent les démos : titres d'étapes explicites, texte de bulle autoportant, floutage des données | — | — | [date] |
