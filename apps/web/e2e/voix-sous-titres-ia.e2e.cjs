@@ -165,7 +165,10 @@ function prepare(over = {}) {
       1,
     'Avertissement au-dessus du bouton',
   );
-  ok(!(state.aiCalls || []).length, 'Rien n’est envoyé à l’ouverture');
+  ok(
+    (state.aiCalls || []).every((c) => c.task === 'voice_list'),
+    'Rien n’est envoyé à l’ouverture (liste des voix seulement)',
+  );
   const used0 = state.ai.used;
   await panel.getByRole('button', { name: 'Écouter un exemple de la voix Antoine' }).click();
   await until(() => (state.aiCalls || []).some((c) => c.task === 'voice_sample'));
@@ -320,8 +323,16 @@ function prepare(over = {}) {
 
   // ===== L30-13 : quotas et fonction désactivée =====
   state = prepare({ ttsUsed: 298 });
+  state.aiVoices = ['claire', 'louise', 'sarah', 'antoine', 'daniel'];
   await open(state);
   await sec.getByRole('button', { name: 'Générer à partir du texte' }).click();
+  await panel.getByRole('radio', { name: /Claire/ }).waitFor();
+  await page.waitForTimeout(500);
+  ok(
+    (await panel.getByRole('radio', { name: /Adam/ }).count()) === 0 &&
+      (await panel.getByRole('button', { name: /^Écouter un exemple de la voix/ }).count()) === 5,
+    'Voix absente chez le fournisseur : masquée',
+  );
   await panel.getByText(/Il reste 2\ss ce mois-ci, la demande en demande environ \d+\ss\./).waitFor();
   ok(
     await panel.getByRole('button', { name: 'Générer la voix' }).isDisabled(),

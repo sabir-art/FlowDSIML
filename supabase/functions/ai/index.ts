@@ -73,10 +73,34 @@ async function reserveOr(ws: string, uid: string, feature: string, audio = 0): P
   return json(500, { error: 'SERVER' });
 }
 
+/**
+ * Voix prédéfinies réellement disponibles sur le compte (GET /voices, cache d'une heure) : les voix
+ * absentes sont masquées. En cas d'erreur du fournisseur, la liste complète est gardée sans être mise en cache.
+ */
+let catalog: { at: number; keys: string[] } | null = null;
+async function availableVoices(key: string): Promise<string[]> {
+  if (catalog && Date.now() - catalog.at < 3_600_000) return catalog.keys;
+  const res = await fetch(`${ELEVEN}/voices?show_legacy=true`, { headers: { 'xi-api-key': key } }).catch(
+    () => null,
+  );
+  if (!res?.ok) return Object.keys(VOICES);
+  const out = (await res.json().catch(() => ({}))) as { voices?: Array<{ voice_id?: string }> };
+  const ids = new Set((out.voices ?? []).map((v) => v.voice_id));
+  const keys = Object.keys(VOICES).filter((k) => ids.has(VOICES[k]));
+  catalog = { at: Date.now(), keys };
+  return keys;
+}
+
+/** Suppression immédiate côté fournisseur après génération (historique TTS, transcription STT). */
+async function purge(key: string, url: string, what: string) {
+  const res = await fetch(url, { method: 'DELETE', headers: { 'xi-api-key': key } }).catch(() => null);
+  if (!res?.ok) console.error(`ai: purge ${what}`, res?.status ?? 'network');
+}
+
 /** Extrait d'une voix (fourni par le fournisseur) : aucun texte envoyé, aucun quota consommé. */
 async function voiceSample(key: string, voice: string) {
   const id = VOICES[voice];
-  if (!id) return json(400, { error: 'BAD_VOICE' });
+  if (!id || !(await availableVoices(key)).includes(voice)) return json(400, { error: 'BAD_VOICE' });
   const meta = await fetch(`${ELEVEN}/voices/${id}`, { headers: { 'xi-api-key': key } }).catch(() => null);
   const url = meta?.ok
     ? ((await meta.json().catch(() => ({}))) as { preview_url?: string }).preview_url
@@ -99,11 +123,12 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
   const key = Deno.env.get('ELEVENLABS_API_KEY');
   if (!key) return json(503, { error: 'PROVIDER' });
   const input = (body.input ?? {}) as Record<string, unknown>;
-  if (body.task === 'voice_sample') {
+  if (body.task === 'voice_sample' || body.task === 'voice_list') {
     // Fonction activée exigée, sans réservation (aucun quota, aucune donnée de l'utilisateur)
     const { data: cfg } = await admin.rpc('ai_config', { p_ws: ws });
     const c = cfg as { enabled?: boolean; features?: Record<string, boolean> } | null;
     if (!c?.enabled || !c.features?.voice) return json(403, { error: 'AI_DISABLED' });
+    if (body.task === 'voice_list') return json(200, { result: { voices: await availableVoices(key) } });
     return voiceSample(key, String(input.voice ?? ''));
   }
   let parsed;
@@ -124,6 +149,7 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
 
   if (body.task === 'voice') {
     const v = parsed as ReturnType<typeof parseVoice>;
+    if (!(await availableVoices(key)).includes(v.voice)) return json(400, { error: 'BAD_VOICE' });
     const blocked = await reserveOr(ws, uid, 'voice', v.estimate);
     if (blocked) return blocked;
     const res = await fetch(`${ELEVEN}/text-to-speech/${VOICES[v.voice]}?output_format=${TTS_FORMAT}`, {
@@ -137,6 +163,9 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
       return json(res?.status === 429 ? 503 : 502, { error: 'PROVIDER' });
     }
     const bytes = new Uint8Array(await res.arrayBuffer());
+    // Historique de la génération supprimé chez le fournisseur (identifiant renvoyé dans l'en-tête)
+    const hid = res.headers.get('history-item-id');
+    if (hid && /^[A-Za-z0-9]{1,64}$/.test(hid)) await purge(key, `${ELEVEN}/history/${hid}`, 'tts');
     const durationMs = mp3DurationMs(bytes.byteLength);
     await admin.rpc('ai_commit', {
       p_ws: ws,
@@ -186,10 +215,22 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
     return json(res?.status === 429 ? 503 : 502, { error: 'PROVIDER' });
   }
   const out = (await res.json().catch(() => ({}))) as {
+    text?: string;
+    language_code?: string;
+    transcription_id?: string;
     words?: Array<{ text: string; start: number; end: number; type?: string }>;
   };
-  await admin.rpc('ai_commit', { p_ws: ws, p_user: uid, p_input: 0, p_output: 0, p_audio_seconds: seconds });
-  return json(200, { result: { captions: cuesFromWords(Array.isArray(out.words) ? out.words : []) } });
+  // Transcription supprimée chez le fournisseur dès réception
+  if (typeof out.transcription_id === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(out.transcription_id))
+    await purge(key, `${ELEVEN}/speech-to-text/transcripts/${out.transcription_id}`, 'stt');
+  await admin.rpc('ai_commit', { p_ws: ws, p_user: uid, p_input: 0, p_output: 0, p_stt_seconds: seconds });
+  return json(200, {
+    result: {
+      captions: cuesFromWords(Array.isArray(out.words) ? out.words : []),
+      text: typeof out.text === 'string' ? out.text.trim().slice(0, 4000) : '',
+      language: typeof out.language_code === 'string' ? out.language_code.slice(0, 8) : '',
+    },
+  });
 }
 
 async function editorOf(req: Request, ws: string): Promise<string | null> {
@@ -265,7 +306,12 @@ Deno.serve(async (req) => {
   const uid = await editorOf(req, ws);
   if (!uid) return json(403, { error: 'FORBIDDEN' });
 
-  if (body.task === 'voice' || body.task === 'captions' || body.task === 'voice_sample')
+  if (
+    body.task === 'voice' ||
+    body.task === 'captions' ||
+    body.task === 'voice_sample' ||
+    body.task === 'voice_list'
+  )
     return audio(req, body, ws, uid);
 
   let parsed;

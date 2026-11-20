@@ -19,7 +19,7 @@ export const AI_FEATURES: AiFeature[] = [
   'voice',
   'captions',
 ];
-export type AiTask = AiFeature | 'write_all' | 'voice_sample';
+export type AiTask = AiFeature | 'write_all' | 'voice_sample' | 'voice_list';
 /** 065/066 : fonctions audio (ElevenLabs), quota en secondes. */
 export const AUDIO_FEATURES: AiFeature[] = ['voice', 'captions'];
 

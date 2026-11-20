@@ -489,6 +489,12 @@ async function install(page, state = seed()) {
       if (ai.workspaceQuotaReached)
         return json(route, 429, { error: 'AI_QUOTA_WORKSPACE', renewsOn: ai.renewsOn });
       // L30b : extrait de voix (sans quota) ; quota audio séparé pour voix et sous-titres
+      // L30b : voix prédéfinies disponibles (state.aiVoices pour en masquer)
+      if (body.task === 'voice_list')
+        return json(route, 200, {
+          result: { voices: state.aiVoices || ['claire', 'louise', 'sarah', 'antoine', 'adam', 'daniel'] },
+          redacted: 0,
+        });
       if (body.task === 'voice_sample')
         return json(route, 200, { result: { audio: 'data:audio/mpeg;base64,' }, redacted: 0 });
       const audio = { voice: ['ttsUsed', 'ttsQuota'], captions: ['sttUsed', 'sttQuota'] }[body.task];

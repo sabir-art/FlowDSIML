@@ -186,6 +186,23 @@ export function AiVoice({
   const [res, setRes] = useState<{ path: string; durationMs: number; url: string } | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [sample, setSample] = useState<{ voice: VoiceChoice; state: 'loading' | 'error' } | null>(null);
+  // Voix prédéfinies réellement disponibles chez le fournisseur (les autres sont masquées)
+  const [available, setAvailable] = useState<readonly VoiceChoice[]>(VOICE_CHOICES);
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    callAi<{ voices: string[] }>(ws, 'voice_list', lang, {})
+      .then((r) => {
+        const list = VOICE_CHOICES.filter((v) => r.voices.includes(v));
+        if (!live || !list.length) return;
+        setAvailable(list);
+        setVoice((cur) => (list.includes(cur) ? cur : list[0]!));
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [open, ws, lang]);
   const ctrl = useRef<AbortController | null>(null);
   const sampleAudio = useRef<HTMLAudioElement | null>(null);
   useEffect(
@@ -313,7 +330,7 @@ export function AiVoice({
           </div>
           <fieldset className="ai-voices" disabled={phase === 'busy'}>
             <legend>{t('ai.voice.voice')}</legend>
-            {VOICE_CHOICES.map((v) => (
+            {available.map((v) => (
               <div key={v} className="ai-voice-row">
                 <label className="check">
                   <input

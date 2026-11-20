@@ -279,7 +279,7 @@ export function GenerateDialog({
                   {t('editor.chars', { n: text.length, max: PLAN_MAX })}
                 </span>
               </label>
-              <label className="check">
+              <label className="fd-check">
                 <input
                   type="checkbox"
                   checked={withQuiz}
