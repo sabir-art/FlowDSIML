@@ -18,6 +18,8 @@ create table if not exists auth.users (
   raw_user_meta_data jsonb default '{}'::jsonb,
   created_at timestamptz default now()
 );
+-- Comme Supabase : mot de passe chiffré (bcrypt), vide pour un compte sans mot de passe (lien magique, Google)
+alter table auth.users add column if not exists encrypted_password text;
 create or replace function auth.uid() returns uuid language sql stable as $$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
 $$;

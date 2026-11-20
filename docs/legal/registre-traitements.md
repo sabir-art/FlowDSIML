@@ -45,7 +45,7 @@ par le client vers ses propres outils, sous sa responsabilité.
 | Personnes concernées | Utilisateurs de l'application (propriétaires, administrateurs, éditeurs, lecteurs) ; personnes invitées |
 | Données | Adresse e-mail, nom affiché, langue, préférences (thème, notifications), rôle dans chaque espace, dates de connexion, invitations envoyées (adresse de l'invité) |
 | Destinataires | Personnel habilité de TutoClick ; membres du même espace (nom, e-mail, rôle) ; sous-traitants ci-dessus |
-| Durée de conservation | Pendant la vie du compte. Suppression à la demande (« Supprimer mon compte », lot L28) ; invitations non acceptées : [durée à fixer] |
+| Durée de conservation | Pendant la vie du compte. Suppression immédiate à la demande (« Supprimer mon compte » : profil, préférences, rôles ; commentaires gardés et signés « Ancien membre » ; espaces dont la personne est le seule membre supprimés avec leurs fichiers, les fichiers non effacés étant inscrits pour une purge différée) ; invitations non acceptées : [durée à fixer] |
 | Sécurité | Authentification gérée par Supabase ; mots de passe jamais stockés en clair ; cloisonnement par espace en base (sécurité au niveau des lignes) ; accès restreint par dossier (plan Enterprise) |
 | Transferts hors UE | Non pour les données de compte (voir GitHub Pages pour les journaux techniques) |
 
@@ -127,8 +127,8 @@ TutoClick traite sur instruction documentée (DPA).
 
 ## Droits des personnes
 
-- **Utilisateurs (partie A)** : accès, rectification (profil), portabilité (« Exporter mes données »,
-  lot L28), effacement (« Supprimer mon compte », lot L28), opposition et limitation via
+- **Utilisateurs (partie A)** : accès, rectification (profil), portabilité (« Exporter mes données » :
+  fichier .zip préparé et téléchargé dans le navigateur, rien n'est conservé sur le serveur), effacement (« Supprimer mon compte », lot L28), opposition et limitation via
   [adresse de contact].
 - **Personnes des parties B** : les demandes sont transmises sans délai au client concerné, qui y répond.
   TutoClick l'assiste (export, suppression d'un lead ou d'un apprenant depuis l'application).

@@ -3281,3 +3281,47 @@
   background: var(--fd-color-surface-hover);
   text-decoration: none;
 }
+
+/* L28-07 / L28-08 : carte « Mes données » (Mon profil) */
+.mk .st-mydata-act {
+  align-items: center;
+  gap: 12px;
+}
+.mk .st-mydata-bar {
+  height: 4px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--fd-color-primary), transparent);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  animation: st-mydata-bar 1.2s linear infinite;
+}
+@keyframes st-mydata-bar {
+  from {
+    background-position: -50% 0;
+  }
+  to {
+    background-position: 150% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk .st-mydata-bar {
+    animation: none;
+    background: var(--fd-color-primary);
+    opacity: 0.4;
+  }
+}
+.mk .st-mydata-del {
+  color: var(--fd-color-danger);
+}
+.mk .st-mydata-dlg {
+  width: min(520px, calc(100vw - 32px));
+}
+.mk .st-mydata-list {
+  display: grid;
+  gap: 6px;
+  padding-left: 18px;
+}
+.mk .st-mydata-solo {
+  margin: 8px 0;
+}

@@ -526,7 +526,8 @@ export function CommentsPanel({
             >
               {visible.map((c) => {
                 const mineC = c.author_id === user?.id;
-                const authorName = name(c.author_id);
+                // L28-08 : auteur dont le compte a été supprimé
+                const authorName = c.author_id ? name(c.author_id) : t('editor.comments.formerMember');
                 const edited = Date.parse(c.updated_at) - Date.parse(c.created_at) > 1000 && !c.resolved_at;
                 const isFresh = !!fresh[c.id];
                 const canResolve = isEditor || mineC;
@@ -551,7 +552,7 @@ export function CommentsPanel({
                     className={`cm-item${c.resolved_at ? ' cm-item--resolved' : ''}${isFresh ? ' cm-item--new' : ''}${c.id === highlight ? ' cm-item--focus' : ''}`}
                     onMouseEnter={() => isFresh && unfresh(c.id)}
                   >
-                    <Avatar id={c.author_id} label={authorName} />
+                    <Avatar id={c.author_id ?? c.id} label={authorName} />
                     <div className="cm-item__main">
                       <div className="cm-meta">
                         <strong>{authorName}</strong>

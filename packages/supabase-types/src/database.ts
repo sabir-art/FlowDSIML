@@ -1787,7 +1787,7 @@ export type Database = {
       };
       step_comments: {
         Row: {
-          author_id: string;
+          author_id: string | null;
           body: string;
           created_at: string;
           demo_id: string;
@@ -2435,6 +2435,12 @@ export type Database = {
       choice_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
       purge_old_events: { Args: Record<PropertyKey, never>; Returns: number };
       restore_original_sizes: { Args: { p_demo: string }; Returns: number };
+      account_deletion_check: { Args: Record<PropertyKey, never>; Returns: Json };
+      delete_my_account: {
+        Args: { p_email: string; p_password?: string | null; p_orphans?: Json };
+        Returns: undefined;
+      };
+      export_my_data: { Args: Record<PropertyKey, never>; Returns: Json };
       resolve_demo_address: { Args: { p_address: string }; Returns: string | null };
       resolve_share_link: { Args: { p_token: string }; Returns: Json };
       set_demo_address: { Args: { p_demo: string; p_label: string }; Returns: string };

@@ -499,6 +499,16 @@ async function install(page, state = seed()) {
       state.events.push(...(batch.events || []));
       return json(route, 200, { inserted: (batch.events || []).length });
     }
+    // L28-08 : nouvelle connexion par mot de passe juste avant une action sensible (option du test)
+    if (state.passwordSession && p.startsWith('/auth/v1/token'))
+      return json(route, 200, {
+        access_token: 'fake-token',
+        token_type: 'bearer',
+        expires_in: 3600,
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        refresh_token: 'fake-refresh',
+        user: state.user,
+      });
     if (state.signedOut && p.startsWith('/auth/v1/token'))
       return json(route, 400, { error: 'invalid_grant', error_description: 'Invalid login credentials' });
     if (p.startsWith('/auth/v1/user')) {
@@ -680,6 +690,62 @@ async function install(page, state = seed()) {
             completions: (previous ? 30 : 40) * pub,
             leads: (previous ? 0 : 1) * pub,
           });
+        }
+        case 'export_my_data': {
+          // L28-07 : données de l'utilisateur courant seulement
+          const me = state.user.id;
+          return json(route, 200, {
+            exportedAt: new Date().toISOString(),
+            profile: { id: me, email: state.user.email, fullName: t.profiles[0]?.full_name ?? '' },
+            workspaces: t.members
+              .filter((m) => m.user_id === me)
+              .map((m) => ({ name: t.workspaces.find((w) => w.id === m.workspace_id)?.name, role: m.role })),
+            comments: (t.step_comments || [])
+              .filter((c) => c.author_id === me)
+              .map((c) => ({ body: c.body })),
+            notifications: (t.notifications || [])
+              .filter((n) => n.user_id === me)
+              .map((n) => ({ kind: n.kind })),
+            preferences: { notifications: null, mutedDemos: [] },
+            publicationConfirmations: [],
+          });
+        }
+        case 'account_deletion_check': {
+          const me = state.user.id;
+          const mine = t.members.filter((m) => m.user_id === me);
+          const others = (ws) => t.members.filter((m) => m.workspace_id === ws && m.user_id !== me);
+          return json(route, 200, {
+            blocking: mine
+              .filter(
+                (m) =>
+                  m.role === 'owner' &&
+                  others(m.workspace_id).length &&
+                  !others(m.workspace_id).some((o) => o.role === 'owner'),
+              )
+              .map((m) => ({
+                id: m.workspace_id,
+                name: t.workspaces.find((w) => w.id === m.workspace_id)?.name,
+              })),
+            solo: mine
+              .filter((m) => !others(m.workspace_id).length)
+              .map((m) => ({
+                id: m.workspace_id,
+                name: t.workspaces.find((w) => w.id === m.workspace_id)?.name,
+                demos: t.demos.filter((d) => d.workspace_id === m.workspace_id && !d.deleted_at).length,
+              })),
+            hasPassword: state.hasPassword !== false,
+          });
+        }
+        case 'delete_my_account': {
+          if (state.reauthRequired) return json(route, 400, { message: 'REAUTH_REQUIRED', code: 'P0001' });
+          if (
+            String(a.p_email || '')
+              .trim()
+              .toLowerCase() !== String(state.user.email).toLowerCase()
+          )
+            return json(route, 400, { message: 'EMAIL_MISMATCH', code: 'P0001' });
+          state.accountDeleted = { email: a.p_email, orphans: a.p_orphans };
+          return json(route, 200, null);
         }
         case 'restore_original_sizes': {
           // L28-04 : retour aux images d'origine (image, taille, flous, zoom, recadrage, repères)

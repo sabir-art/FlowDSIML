@@ -7,6 +7,7 @@ import { useAuth } from '../../auth/AuthProvider';
 import { setLocale } from '../../i18n';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { useToast } from '../../components/Toast';
+import { MyDataCard } from './MyDataCard';
 
 /**
  * Paramètres › Mon profil (PRM-09), mise en page de la maquette : une carte à sections en deux colonnes
@@ -173,6 +174,9 @@ export function Profile() {
           </div>
         </div>
       </form>
+
+      {/* L28-07 / L28-08 : mes données (export, suppression du compte) */}
+      <MyDataCard />
     </SettingsShell>
   );
 }

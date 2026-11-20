@@ -13,6 +13,16 @@ export function Login() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [params] = useSearchParams();
+  // L28-08 : compte supprimé (drapeau de session, lu une fois)
+  const [deletedNotice] = useState(() => {
+    try {
+      const v = sessionStorage.getItem('fd.accountDeleted') === '1' || params.get('deleted') === '1';
+      sessionStorage.removeItem('fd.accountDeleted');
+      return v;
+    } catch {
+      return params.get('deleted') === '1';
+    }
+  });
   const redirect = params.get('redirect') || '/';
   const [mode, setMode] = useState<'password' | 'magic'>('password');
   const [email, setEmail] = useState('');
@@ -58,6 +68,12 @@ export function Login() {
 
   return (
     <AuthLayout title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')}>
+      {/* L28-08 : retour après la suppression du compte */}
+      {deletedNotice && (
+        <div className="alert alert-success" role="status">
+          {t('myData.deletedNotice')}
+        </div>
+      )}
       <div className="oauth">
         {/* Connexion Google : prévue (V2), visible mais inactive */}
         <button

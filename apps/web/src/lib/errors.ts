@@ -22,6 +22,11 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/HTML_MISSING|HTML_OBJECT_MISSING|HTML_PATH/, 'errors.htmlMissingAny'],
     [/NO_VISIBLE_DEMO/, 'errors.noVisibleDemo'],
     [/PUBLIC_DISABLED/, 'errors.publicDisabled'],
+    // L28-08 : suppression du compte
+    [/REAUTH_REQUIRED/, 'myData.errReauth'],
+    [/EMAIL_MISMATCH/, 'myData.errEmail'],
+    [/PASSWORD_MISMATCH/, 'myData.errPassword'],
+    [/ACCOUNT_SOLE_OWNER/, 'myData.blockedBody'],
     // L28 035 : voix off
     [/VOICE_TRANSCRIPT/, 'editor.voice.publishMissingAny'],
     [/VOICE_OBJECT_MISSING|VOICE_PATH/, 'editor.voice.uploadError'],
