@@ -57,8 +57,8 @@ Toutes les fonctions ci-dessus fixent `search_path = ''` et qualifient les objet
 |---|---|---|---|
 | R5 | Retirer `execute` à `public`, `anon` et `authenticated` sur les 6 fonctions de déclencheur | Non (appel déjà impossible) | Fait : migration `20261123150000_securite_revue.sql`, test pgTAP |
 | R3 | Plafond par démo pour `submit_lead` : 300 leads par heure et par démo, au-delà `RATE_LIMITED` (en plus des 20 par visiteur) | Non (anti-abus, aucun accès retiré) | Fait : même migration, test pgTAP |
-| R1 | `resolve_share_link` : retirer `email` des variables renvoyées, comme `personal_page` | Oui (réduit ce que voit le porteur du lien) | Proposé au chef (schéma F) ; à vérifier : le lecteur n'utilise pas `{{email}}` dans les textes |
-| R2 | `learner_resume` : exiger `public_links_enabled`, comme `issue_certificate` | Oui (accès anonyme retiré quand l'espace coupe ses liens publics) | Proposé au chef (schéma F) |
+| R1 | `resolve_share_link` : retirer `email` des variables renvoyées, comme `personal_page` | Oui (réduit ce que voit le porteur du lien) | Fait (schéma F validé) : migration `20261123180000_securite_f.sql` ; vérifié : le lecteur ne préremplit rien avec l'e-mail du lien ; test pgTAP |
+| R2 | `learner_resume` : exiger `public_links_enabled`, comme `issue_certificate` | Oui (accès anonyme retiré quand l'espace coupe ses liens publics) | Fait (schéma F validé) : même migration, test pgTAP |
 | R4 | `track_events` : plafond par démo et par minute ; marquer `embed_origin` « déclaré par le lecteur » dans l'écran « Où elle est diffusée » | R4 a : non ; R4 b : texte UX | Proposé (à mesurer avant de fixer le plafond) |
 | S1 | Filtre de dossier sur le stockage | Oui | Fait (schéma E validé) : migration `20261123170000_stockage_dossiers.sql`, test pgTAP |
 | S2 | Aide de la médiathèque | Non (texte) | Proposé à la Lead UX |

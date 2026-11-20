@@ -2,7 +2,7 @@
 -- tentatives accordées, droits, agrégats masqués, reprise, effacement RGPD, purge selon le plan).
 begin;
 set search_path = public, extensions;
-select plan(31);
+select plan(33);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000001a1', 'admin-suivi@example.com'),
@@ -86,6 +86,18 @@ reset role;
 update public.share_links set expires_at = now() - interval '1 day' where token = 'tok-marc';
 set local role anon;
 select is(public.learner_resume('tok-marc', '00000000-0000-0000-0000-0000000001d2'), '{}'::jsonb, 'reprise : lien expiré');
+reset role;
+-- Revue de sécurité R2 : liens publics coupés par l'espace : réponse vide
+update public.workspaces set public_links_enabled = false where id = (select ws from ctx);
+set local role anon;
+select is(public.learner_resume('tok-paul', '00000000-0000-0000-0000-0000000001d2'), '{}'::jsonb,
+  'reprise : liens publics coupés, réponse vide');
+reset role;
+update public.workspaces set public_links_enabled = true where id = (select ws from ctx);
+-- Revue de sécurité R1 : l'e-mail du destinataire ne sort jamais du lien
+update public.share_links set variables = coalesce(variables, '{}') || '{"email": "paul@nord.example"}' where token = 'tok-paul';
+set local role anon;
+select ok(public.resolve_share_link('tok-paul') -> 'variables' ->> 'email' is null, 'lien : e-mail du destinataire non renvoyé');
 reset role;
 -- Modules brouillon et supprimé dans le parcours : leurs titres ne sortent pas vers un détenteur de lien
 insert into public.demos (id, workspace_id, title, created_by, status, deleted_at) values
