@@ -20,7 +20,7 @@ const dict = {
     next: 'Suivant',
     prev: 'Précédent',
     start: 'Commencer',
-    /** L16 : couverture « Démarrer au clic » d'une intégration. */
+    /** L16 : couverture «\u202fDémarrer au clic\u202f» d'une intégration. */
     launch: 'Lancer la démo',
     restart: 'Recommencer',
     of: 'sur',
@@ -56,7 +56,7 @@ const dict = {
     after: 'Maintenant',
     baShow: 'Afficher',
     baSlider: 'Curseur de comparaison Avant / Maintenant',
-    baSliderValue: '{{n}} % Avant visible',
+    baSliderValue: '{{n}}\u202f% Avant visible',
     baCompare: 'Comparaison : à gauche l’ancien écran ({{before}}), à droite le nouvel écran ({{after}})',
     loading: 'Chargement de la démo…',
     notFound: "Cette démo n'existe pas ou n'est plus publiée.",
@@ -316,7 +316,7 @@ const dict = {
       region: 'Quiz : {{module}}',
       progress: 'Question {{n}} sur {{total}}',
       progressLabel: 'Progression du quiz',
-      threshold: 'Seuil : {{value}} %',
+      threshold: 'Seuil : {{value}}\u202f%',
       hintSingle: 'Une seule réponse possible.',
       hintMultiple: 'Plusieurs réponses possibles.',
       hintTrueFalse: 'Vrai ou faux ?',
@@ -343,18 +343,18 @@ const dict = {
       correctCount_one: '{{count}} bonne réponse',
       correctCount_other: '{{count}} bonnes réponses',
       label: 'Quiz',
-      scoreRing: '{{score}} %',
-      scoreThreshold: 'seuil {{value}} %',
+      scoreRing: '{{score}}\u202f%',
+      scoreThreshold: 'seuil {{value}}\u202f%',
       passBadge: 'Module validé',
-      passTitle: 'Bravo, vous avez validé « {{module}} »',
+      passTitle: 'Bravo, vous avez validé «\u202f{{module}}\u202f»',
       scoreLine:
-        'Score : {{correctText}} sur {{total}}, soit {{score}} %. Le seuil de réussite est de {{threshold}} %.',
+        'Score : {{correctText}} sur {{total}}, soit {{score}}\u202f%. Le seuil de réussite est de {{threshold}}\u202f%.',
       failBadge: 'Pas encore validé',
       failTitle: "Encore un peu d'entraînement",
       failLine_one:
-        'Score : {{correctText}} sur {{total}}, soit {{score}} %. Il faut {{threshold}} % pour valider le module. Revoyez les étapes liées aux erreurs, puis réessayez : il vous reste {{count}} tentative.',
+        'Score : {{correctText}} sur {{total}}, soit {{score}}\u202f%. Il faut {{threshold}}\u202f% pour valider le module. Revoyez les étapes liées aux erreurs, puis réessayez : il vous reste {{count}} tentative.',
       failLine_other:
-        'Score : {{correctText}} sur {{total}}, soit {{score}} %. Il faut {{threshold}} % pour valider le module. Revoyez les étapes liées aux erreurs, puis réessayez : il vous reste {{count}} tentatives.',
+        'Score : {{correctText}} sur {{total}}, soit {{score}}\u202f%. Il faut {{threshold}}\u202f% pour valider le module. Revoyez les étapes liées aux erreurs, puis réessayez : il vous reste {{count}} tentatives.',
       noAttemptsLeft:
         'Vous avez utilisé toutes vos tentatives. Votre formateur ou formatrice peut vous en accorder de nouvelles.',
       recapLabel: 'Détail des réponses',

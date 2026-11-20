@@ -450,12 +450,20 @@
 .nd-folder {
   margin-top: var(--fd-space-4);
 }
+/* L38-13 : carte et lien « Ouvrir le réglage » empilés dans le flux (plus de débordement sur l'aide) */
 .nd-ai {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
 }
 .nd-ai > .nd-choice {
-  height: 100%;
+  flex: 1;
   text-align: start;
+}
+.nd-ai > a {
+  align-self: flex-start;
+  padding-inline: 4px;
 }
 .nd-actions .grow {
   flex: 1;
