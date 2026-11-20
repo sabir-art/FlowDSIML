@@ -551,32 +551,36 @@ export function Player({
     else a.pause();
   }
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        // L16 : Échap traité ici n'est pas relayé à la page hôte (widget)
-        if (menu) {
-          e.preventDefault();
-          return setMenu(false);
-        }
-        // Spec a2 §2 : Échap vaut « Suivant » sur une pop-up sans choix
-        if (popup && !choices.length && !last && !gateForm) {
-          e.preventDefault();
-          return next();
-        }
+  // Clavier : écouteur posé une fois, gestionnaire courant lu dans une ref (mis à jour à chaque rendu),
+  // pour qu'une touche reçue entre un rendu et son effet ne voie jamais l'étape précédente
+  const keyHandler = useRef<(e: KeyboardEvent) => void>(() => undefined);
+  keyHandler.current = function onKey(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      // L16 : Échap traité ici n'est pas relayé à la page hôte (widget)
+      if (menu) {
+        e.preventDefault();
+        return setMenu(false);
       }
-      // L17 : les flèches d'un champ (curseur Avant / Après, recherche du glossaire) lui appartiennent
-      const tgt = e.target as HTMLElement | null;
-      if (tgt?.closest?.('form, input, textarea, select, dialog') || gateForm || view === 'quiz') return;
-      // L28-03 : C masque ou affiche les sous-titres de la voix off
-      if ((e.key === 'c' || e.key === 'C') && voice && !e.ctrlKey && !e.metaKey && !e.altKey)
-        setVoiceCc((v) => !v);
-      if (e.key === 'ArrowRight') next();
-      if (e.key === 'ArrowLeft') go(index - 1);
+      // Spec a2 §2 : Échap vaut « Suivant » sur une pop-up sans choix
+      if (popup && !choices.length && !last && !gateForm) {
+        e.preventDefault();
+        return next();
+      }
     }
+    // L17 : les flèches d'un champ (curseur Avant / Après, recherche du glossaire) lui appartiennent
+    const tgt = e.target as HTMLElement | null;
+    if (tgt?.closest?.('form, input, textarea, select, dialog') || gateForm || view === 'quiz') return;
+    // L28-03 : C masque ou affiche les sous-titres de la voix off
+    if ((e.key === 'c' || e.key === 'C') && voice && !e.ctrlKey && !e.metaKey && !e.altKey)
+      setVoiceCc((v) => !v);
+    if (e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowLeft') go(index - 1);
+  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => keyHandler.current(e);
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
-  });
+  }, []);
 
   // PLY-01 : thème sombre du système (refonte), quand la démo garde les couleurs par défaut
   const dark =
