@@ -134,7 +134,26 @@ const MB = 1024 * 1024;
         .trim() === 'Paramètres Espace Utilisation',
       'fil d’Ariane « Paramètres > Espace > Utilisation »',
     );
-    ok((await page.locator('.us-row').count()) === 6, 'six lignes de quota');
+    ok((await page.locator('.us-row').count()) === 7, 'sept lignes de quota');
+    // L48-03 : voix de synthèse et sous-titres, deux lignes distinctes (minutes)
+    ok(
+      (await page.locator('.us-row', { hasText: 'Voix de synthèse' }).getByRole('meter').count()) === 1 &&
+        /0 \/ 5 min/.test(await page.locator('.us-row', { hasText: 'Sous-titres' }).innerText()),
+      'voix de synthèse et sous-titres : deux jauges en minutes',
+    );
+    // L48-01 (T5) : entrée active en fond surface, texte courant, graisse 600
+    const active = await page.locator('.snav .is-active').evaluate((el) => {
+      const c = getComputedStyle(el);
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--fd-color-text)';
+      probe.style.background = 'var(--fd-color-surface)';
+      document.body.append(probe);
+      const p = getComputedStyle(probe);
+      const r = { ok: c.color === p.color && c.backgroundColor === p.backgroundColor, w: c.fontWeight };
+      probe.remove();
+      return r;
+    });
+    ok(active.ok && active.w === '600', 'Paramètres : entrée active surface, texte, 600');
     const storage = page.locator('.us-row', { hasText: 'Stockage' });
     ok(
       (await storage.getByRole('meter').getAttribute('aria-valuenow')) === '100' &&
@@ -163,6 +182,11 @@ const MB = 1024 * 1024;
     ok(
       (await page.getByRole('link', { name: 'Demander plus à la DSI' }).count()) === 0,
       'sans lien du support : pas de demande',
+    );
+    ok(
+      (await page.getByRole('link', { name: 'Renseigner le lien du support' }).getAttribute('href')) ===
+        '#/settings/workspace',
+      'U2 : propriétaire sans lien du support : « Renseigner le lien du support »',
     );
     const axe = await new AxeBuilder({ page }).analyze();
     ok(axe.violations.length === 0, `axe : Utilisation (${axe.violations.map((v) => v.id).join(', ')})`);

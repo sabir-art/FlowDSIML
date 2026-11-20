@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { TriangleAlert } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { formatNumber } from '../../lib/format';
@@ -44,7 +45,7 @@ const MB = 1024 * 1024;
  */
 export function UsagePage() {
   const { t, i18n } = useTranslation();
-  const { current } = useWorkspace();
+  const { current, can } = useWorkspace();
   const [usage, setUsage] = useState<Usage | null>(null);
   const { status: ai } = useAiStatus(current?.id);
 
@@ -64,10 +65,18 @@ export function UsagePage() {
   const reset = month ? t('usage.resetOn', { month }) : '';
   const l = usage.limits;
   const s = usage.storage;
-  // Voix off et sous-titres : secondes des deux quotas, affichées en minutes
-  const audioQuota =
-    ai && (ai.ttsQuota != null || ai.sttQuota != null) ? (ai.ttsQuota ?? 0) + (ai.sttQuota ?? 0) : null;
-  const audioUsed = (ai?.ttsUsed ?? 0) + (ai?.sttUsed ?? 0);
+  // L48-03 : voix de synthèse et sous-titres, deux quotas distincts (secondes, affichées en minutes)
+  const audio = (key: 'tts' | 'stt', used = 0, quota: number | null = null): Row => ({
+    key,
+    note: reset,
+    used,
+    limit: quota,
+    value:
+      quota != null
+        ? t('usage.minutes', { used: num(used / 60), limit: num(quota / 60) })
+        : t('usage.unlimitedValue', { used: num(used / 60) }),
+    blocked: t(`usage.blocked.${key}`),
+  });
   const retentionMonths = l ? Math.round(l.analytics_retention_days / 30.4) : null;
 
   const rows: Row[] = [
@@ -82,17 +91,8 @@ export function UsagePage() {
           : t('usage.unlimitedValue', { used: num(ai?.used ?? 0) }),
       blocked: t('usage.blocked.ai'),
     },
-    {
-      key: 'audio',
-      note: reset,
-      used: audioUsed,
-      limit: audioQuota,
-      value:
-        audioQuota != null
-          ? t('usage.minutes', { used: num(audioUsed / 60), limit: num(audioQuota / 60) })
-          : t('usage.unlimitedValue', { used: num(audioUsed / 60) }),
-      blocked: t('usage.blocked.audio'),
-    },
+    audio('tts', ai?.ttsUsed, ai?.ttsQuota ?? null),
+    audio('stt', ai?.sttUsed, ai?.sttQuota ?? null),
     {
       key: 'storage',
       note: t('usage.storageDetail', {
@@ -158,6 +158,12 @@ export function UsagePage() {
         <div className="us-head">
           <p className="muted">{t('usage.sub', { workspace: current.name })}</p>
           {askButton('fd-btn', t('usage.ask'))}
+          {/* L48-01 (U2) : sans lien du support, les administrateurs sont invités à le renseigner */}
+          {!ask && can('workspace.settings') && (
+            <Link className="fd-btn" to="/settings/workspace">
+              {t('usage.setSupport')}
+            </Link>
+          )}
         </div>
         {ask && <p className="us-hint">{t('usage.hint')}</p>}
         <ul className="us-card">

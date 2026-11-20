@@ -619,8 +619,9 @@
   text-decoration: none;
 }
 .mk .snav .snav-item.is-active {
-  background: var(--fd-color-primary-soft);
-  color: var(--fd-color-primary-soft-text);
+  /* L48-01 (T5) : fond surface, texte courant, graisse 600 */
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
   font-weight: 600;
 }
 /* L48-A §4 : groupes (transparents pour la mise en page) et entrées « Bientôt » sans lien */

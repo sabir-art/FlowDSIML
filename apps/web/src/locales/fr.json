@@ -4988,7 +4988,8 @@
     "full": "Limite atteinte",
     "rows": {
       "ai": "Assistance IA",
-      "audio": "Voix off et sous-titres",
+      "tts": "Voix de synthèse",
+      "stt": "Sous-titres",
       "storage": "Stockage",
       "members": "Membres",
       "published": "Démos publiées",
@@ -4996,11 +4997,13 @@
     },
     "blocked": {
       "ai": "Les demandes à l’assistance IA sont bloquées jusqu’à la remise à zéro.",
-      "audio": "Voix off et sous-titres automatiques bloqués jusqu’à la remise à zéro.",
       "storage": "Ajout de fichiers bloqué (images, vidéos, voix off).",
       "members": "Nouvelles invitations bloquées.",
-      "published": "Publication de nouvelles démos bloquée."
-    }
+      "published": "Publication de nouvelles démos bloquée.",
+      "tts": "Voix de synthèse bloquée jusqu’à la remise à zéro.",
+      "stt": "Sous-titres automatiques bloqués jusqu’à la remise à zéro."
+    },
+    "setSupport": "Renseigner le lien du support"
   },
   "extension": {
     "installTitle": "Installer l’extension",

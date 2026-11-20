@@ -4988,7 +4988,8 @@
     "full": "Limit reached",
     "rows": {
       "ai": "AI assistance",
-      "audio": "Voice-over and captions",
+      "tts": "Text-to-speech",
+      "stt": "Captions",
       "storage": "Storage",
       "members": "Members",
       "published": "Published demos",
@@ -4996,11 +4997,13 @@
     },
     "blocked": {
       "ai": "AI assistance requests are blocked until the reset.",
-      "audio": "Voice-over and automatic captions are blocked until the reset.",
       "storage": "Adding files is blocked (images, videos, voice-over).",
       "members": "New invitations are blocked.",
-      "published": "Publishing new demos is blocked."
-    }
+      "published": "Publishing new demos is blocked.",
+      "tts": "Text-to-speech is blocked until the reset.",
+      "stt": "Automatic captions are blocked until the reset."
+    },
+    "setSupport": "Set the support link"
   },
   "extension": {
     "installTitle": "Install the extension",
