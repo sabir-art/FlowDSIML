@@ -1218,6 +1218,8 @@
       "unlink": "Remove link",
       "more": "More actions: replace image, delete element, copy selector",
       "replaceImage": "Replace image",
+      "replaceImageOnlyImg": "Select an image on the page.",
+      "restoreImage": "Back to the original image",
       "remove": "Delete element",
       "copySel": "Copy selector",
       "copied": "Selector copied",

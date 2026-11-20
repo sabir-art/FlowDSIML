@@ -1218,6 +1218,8 @@
       "unlink": "Retirer le lien",
       "more": "Plus d’actions : remplacer l’image, supprimer l’élément, copier le sélecteur",
       "replaceImage": "Remplacer l’image",
+      "replaceImageOnlyImg": "Sélectionnez une image de la page.",
+      "restoreImage": "Revenir à l’image d’origine",
       "remove": "Supprimer l’élément",
       "copySel": "Copier le sélecteur",
       "copied": "Sélecteur copié",

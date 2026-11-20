@@ -6,7 +6,8 @@ import { asBeforeAfter, type StepRow } from './types';
 
 /** Bilan RGPD d'une démo (même calcul que publish_demo côté serveur). Pur, testé. */
 export function gdprSummary(
-  steps: (Pick<StepRow, 'blurs' | 'element_meta'> & Partial<Pick<StepRow, 'kind' | 'options'>>)[],
+  steps: (Pick<StepRow, 'blurs' | 'element_meta'> &
+    Partial<Pick<StepRow, 'kind' | 'options' | 'html_ops'>>)[],
 ) {
   let blurred = 0;
   let pending = 0;
@@ -20,6 +21,9 @@ export function gdprSummary(
     }
     // REV-07 : image importée (« Importer une image », image ajoutée au rail)
     else if ((s.element_meta as { imported?: boolean } | null)?.imported) imported += 1;
+    // L28 051 : image remplacée dans une capture HTML (fichier importé, non vérifié)
+    if (s.kind === 'html' && Array.isArray(s.html_ops))
+      imported += (s.html_ops as Array<{ op?: string }>).filter((o) => o?.op === 'image').length;
     if (Array.isArray(s.blurs)) blurred += s.blurs.length;
     const pii = (s.element_meta as { pii?: Array<{ blurred?: boolean }> } | null)?.pii;
     if (!Array.isArray(pii)) return;

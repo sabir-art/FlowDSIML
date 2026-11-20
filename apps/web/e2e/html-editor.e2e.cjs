@@ -197,11 +197,11 @@ const page = (h1) => `<!doctype html><html><head><meta charset="utf-8"><title>${
     (await p.getByText('Graphique non modifiable\u202f: remplacez l’image').count()) >= 1,
     'aide « Graphique non modifiable »',
   );
-  // Menu ⋯ : Remplacer l'image « Bientôt »
+  // Menu ⋯ : Remplacer l'image (L28 051) actif sur un élément image
   await bar.getByRole('button', { name: /Plus d’actions/ }).click();
   ok(
-    await p.getByRole('menuitem', { name: /Remplacer l’image/ }).isDisabled(),
-    'Remplacer l’image : « Bientôt »',
+    !(await p.getByRole('menuitem', { name: /Remplacer l’image/ }).isDisabled()),
+    'Remplacer l’image : actif sur une image (L28 051)',
   );
   await p.keyboard.press('Escape');
   // Introuvable : suppression

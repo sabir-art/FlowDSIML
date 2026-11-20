@@ -36,4 +36,18 @@ describe('gdprSummary', () => {
     ]);
     expect(s.imported).toBe(2);
   });
+  it('L28 051 : image remplacée dans une capture HTML comptée comme importée', () => {
+    const s = gdprSummary([
+      {
+        kind: 'html',
+        blurs: [],
+        element_meta: null,
+        html_ops: [
+          { id: 'a', sel: 'img', op: 'image', value: 'w/x.png', scope: 'step' },
+          { id: 'b', sel: 'h1', op: 'text', value: 'Titre', scope: 'step' },
+        ],
+      },
+    ] as never);
+    expect(s.imported).toBe(1);
+  });
 });

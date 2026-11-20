@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { Copy, Droplet, EyeOff, Image, Link2, MoreHorizontal, PenLine, Trash2 } from 'lucide-react';
+import { Copy, Droplet, EyeOff, Image, ImageOff, Link2, MoreHorizontal, PenLine, Trash2 } from 'lucide-react';
+import { MediaLibrary, mediaUrl } from '../../../components/media/MediaLibrary';
+import { useToast } from '../../../components/Toast';
 import {
   FRAME_SANDBOX,
   buildSrcdoc,
@@ -42,6 +44,9 @@ export function HtmlCanvas({
   const [failed, setFailed] = useState(false);
   const [scale, setScale] = useState(1);
   const [menu, setMenu] = useState<'more' | 'link' | null>(null);
+  // L28 051 : « Remplacer l'image » d'un élément image capturé (médiathèque de l'espace)
+  const [library, setLibrary] = useState<string | null>(null);
+  const toast = useToast();
   const [notice, setNotice] = useState('');
   const [barPos, setBarPos] = useState<{ left: number; top: number } | null>(null);
   const url = step.html_path ? editor.imageUrls[step.html_path] : undefined;
@@ -54,17 +59,15 @@ export function HtmlCanvas({
   const vh = meta.viewport?.h ?? 800;
   const ops = asOps(step.html_ops);
   const frameOps = useMemo<FrameOp[]>(
-    // Dans l'éditeur, les images remplacées gardent la page d'origine (aperçu dans le lecteur)
+    // L28 051 : images remplacées affichées depuis la médiathèque (fichier public de l'espace)
     () =>
-      ops
-        .filter((o) => o.op !== 'image')
-        .map((o) => ({
-          id: o.id,
-          sel: o.sel,
-          op: o.op,
-          value: o.value,
-          ...(o.sels ? { sels: o.sels } : {}),
-        })),
+      ops.map((o) => ({
+        id: o.id,
+        sel: o.sel,
+        op: o.op,
+        value: o.op === 'image' && typeof o.value === 'string' ? mediaUrl(o.value) : o.value,
+        ...(o.sels ? { sels: o.sels } : {}),
+      })),
     [step.html_ops], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const ready = useRef(false);
@@ -298,11 +301,33 @@ export function HtmlCanvas({
             )}
             {menu === 'more' && (
               <div className="menu eltb-menu" role="menu">
-                <button type="button" role="menuitem" aria-disabled="true" disabled>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={!sel?.img}
+                  title={sel?.img ? undefined : t('editor.html.replaceImageOnlyImg')}
+                  onClick={() => {
+                    setMenu(null);
+                    if (sel) setLibrary(sel.sel);
+                  }}
+                >
                   <Image {...ICON} />
                   {t('editor.html.replaceImage')}
-                  <span className="badge">{t('editor.html.soon')}</span>
                 </button>
+                {sel && opOn(step, sel.sel, 'image') && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenu(null);
+                      const o = opOn(step, sel.sel, 'image');
+                      if (o) removeOp(editor, step, o.id);
+                    }}
+                  >
+                    <ImageOff {...ICON} />
+                    {t('editor.html.restoreImage')}
+                  </button>
+                )}
                 <button
                   type="button"
                   role="menuitem"
@@ -327,6 +352,20 @@ export function HtmlCanvas({
       <div className="sr-only" role="status" aria-live="polite">
         {notice}
       </div>
+      {library && (
+        <MediaLibrary
+          wsId={step.workspace_id}
+          kind="image"
+          onClose={() => setLibrary(null)}
+          onPick={(f) => {
+            if (f.kind === 'font') return;
+            upsertOp(editor, step, { sel: library, op: 'image', value: f.path }, 'step');
+            setLibrary(null);
+            // Image importée : aucune détection automatique, comptée au bilan RGPD
+            toast(t('editor.importWarn'), undefined, { tone: 'warning' });
+          }}
+        />
+      )}
     </div>
   );
 }

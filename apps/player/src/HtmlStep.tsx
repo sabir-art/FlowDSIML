@@ -1,3 +1,4 @@
+import { mediaPublicUrl } from './config';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { SandboxSettings, Step } from '@flowdsiml/manifest';
 import {
@@ -79,6 +80,12 @@ export function HtmlStep({
   const ops = useMemo<FrameOp[]>(
     () =>
       h.ops
+        // L28 051 : image remplacée prise dans la médiathèque de l'espace (fichier public)
+        .map((o) =>
+          o.op === 'image' && typeof o.value === 'string' && /^[0-9a-f-]{36}\//.test(o.value)
+            ? { ...o, value: mediaPublicUrl(o.value) }
+            : o,
+        )
         .filter(
           (o) => o.op !== 'image' || (typeof o.value === 'string' && /^(https:|data:image\/)/.test(o.value)),
         )
