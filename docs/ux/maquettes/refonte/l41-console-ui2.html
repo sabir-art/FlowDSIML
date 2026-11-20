@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console propriétaire, reprise UI (lot L41) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
+<style>
+  /* L41, reprise UI (composants §17) des écrans clés. Le parcours complet reste l41-console.html ; ces règles s'appliquent à tous ses onglets. Données fictives. */
+  .c-top { display: flex; align-items: center; gap: 32px; padding: 0 40px; height: 72px; background: var(--fd-color-surface); }
+  .c-top img { height: 32px; } .c-top .t { font-weight: 700; font-size: 16px; }
+  .c-tabs { display: flex; gap: 28px; height: 100%; flex: 1; }
+  .c-tabs a { display: flex; align-items: center; position: relative; font-size: 15px; color: var(--fd-color-text-muted); text-decoration: none; }
+  .c-tabs a[aria-current] { color: var(--fd-color-text); font-weight: 600; }
+  .c-tabs a[aria-current]::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--fd-color-text); }
+  .c-tabs a .n { margin-left: 6px; font-size: 13px; color: var(--fd-color-text-muted); }
+  .c-body { padding: 40px; display: flex; flex-direction: column; gap: 32px; max-width: 1200px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+  .c-kpi { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--fd-color-surface); border-radius: 20px; }
+  .c-kpi div { padding: 24px 28px; display: flex; flex-direction: column; gap: 6px; position: relative; }
+  .c-kpi div + div::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 24px; border-left: 1px solid var(--fd-color-border); }
+  .c-kpi span { font-size: 14px; color: var(--fd-color-text-muted); } .c-kpi b { font-size: 32px; font-variant-numeric: tabular-nums; } .c-kpi small { font-size: 13px; color: var(--fd-color-text-muted); }
+  .c-two { display: grid; grid-template-columns: 3fr 2fr; gap: 24px; }
+  .c-row { gap: 24px; cursor: pointer; } .c-row span:first-child { flex: 1; } .c-row b { font-weight: 600; display: block; } .c-row small { font-size: 13px; color: var(--fd-color-text-muted); }
+  .c-pct { width: 140px; display: flex; align-items: center; gap: 12px; font-variant-numeric: tabular-nums; font-size: 15px; }
+  .c-pct i { flex: 1; height: 6px; border-radius: 999px; background: var(--fd-color-surface-sunken); overflow: hidden; } .c-pct i::after { content: ''; display: block; height: 100%; width: var(--w); background: var(--fd-color-text); border-radius: 999px; }
+  .c-act { font-size: 14px; line-height: 1.45; } .c-act small { display: block; font-size: 13px; color: var(--fd-color-text-muted); }
+  .c-fb { gap: 20px; align-items: flex-start !important; padding: 20px 0; }
+  .c-fb .v { width: 56px; font-size: 14px; font-weight: 600; flex: none; } .c-fb p { margin: 0; font-size: 15px; line-height: 1.5; } .c-fb small { display: block; margin-top: 6px; font-size: 13px; color: var(--fd-color-text-muted); }
+  .c-fb .new::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--fd-color-primary); margin-right: 8px; vertical-align: 1px; }
+  .c-flt { display: flex; gap: 8px; align-items: center; } .c-flt .end { margin-left: auto; }
+</style>
+</head>
+<body>
+<main class="u2">
+  <header class="u2-head"><div><small>Lot L41 · Reprise UI</small><h1>Console propriétaire</h1><p>Les écrans clés repris avec les règles §17 : quatre chiffres en bande, des listes au lieu de cartes, une ligne cliquable au lieu de trois boutons. Les autres onglets du parcours (<code>l41-console.html</code>) suivent les mêmes règles.</p></div></header>
+  <div id="a1"></div><div id="a2"></div>
+  <section class="u2-sec"><h2>En sombre</h2><div id="a3"></div></section>
+</main>
+<script>
+  const { I, app, pair } = U2;
+  const ctop = (cur) => `<header class="c-top"><img src="../../brand-tutoclic/production/symbole-tutoclick.svg" alt="TutoClick"><span class="t">Console</span><nav class="c-tabs" aria-label="Console">${[['ov', 'Vue d’ensemble'], ['fb', 'Retours', 4], ['bk', 'Backlog', 1], ['nw', 'Nouveautés'], ['jr', 'Équipe et journal']].map(([k, t, n]) => `<a href="#" ${cur === k ? 'aria-current="page"' : ''}>${t}${n ? `<span class="n">${n}</span>` : ''}</a>`).join('')}</nav><button class="fd-btn fd-btn--ghost" type="button">${I('arrow', 16)}Retour à l’app</button></header>`;
+  const ov = `${ctop('ov')}<div class="c-body"><div><h1 style="margin:0;font-size:28px">Vue d’ensemble</h1><p class="u2-s" style="margin:4px 0 0;font-size:15px">90 derniers jours, tous les espaces</p></div>
+    <div class="c-kpi"><div><span>Satisfaction</span><b>75 %</b><small>242 oui, 81 non</small></div><div><span>Réponses</span><b>323</b><small>sur 6 articles</small></div><div><span>Commentaires nouveaux</span><b>4</b><small>à lire</small></div><div><span>À trier</span><b>1</b><small>dans le backlog</small></div></div>
+    <div class="c-two"><section class="u2-card"><h3>Articles à surveiller</h3><ul class="u2-list" style="margin-top:8px">${[['Exporter un paquet SCORM', 'Diffuser · 21 non', 46], ['Suivre les apprenants', 'Formation · 19 non', 62], ['Flouter les données', 'Éditeur · 17 non', 70]].map(([t, s, p]) => `<li class="c-row" style="min-height:68px"><span><b>${t}</b><small>${s}</small></span><span class="c-pct"><i style="--w:${p}%"></i>${p} %</span>${I('right', 16)}</li>`).join('')}</ul></section>
+    <section class="u2-card"><h3>Activité de l’équipe</h3><ul class="u2-list" style="margin-top:8px">${[['Léa Fictive a rejeté « Thème sombre du lecteur »', '20 nov., 09:58'], ['Noé Test a passé « Flou après recadrage » en cours', '19 nov., 17:40'], ['Sam Exemple a exporté les retours (90 j)', '18 nov., 11:02']].map(([t, d]) => `<li class="c-act" style="min-height:64px"><span>${t}<small>${d}</small></span></li>`).join('')}</ul></section></div></div>`;
+  document.getElementById('a1').outerHTML = pair('Vue d’ensemble', app('', ov, { bare: true, h: 820 }).replace('<main class="u2-main">', '<main class="u2-main" style="padding:0;gap:0">'), 'img/avant/l41-maquette-precedente.png', 'Maquette précédente de la vue d’ensemble', 'Plus d’icône devant chaque libellé, plus de badge « Admin », plus de trois boutons « Voir les retours » : chaque ligne est un lien.', 'Avant (maquette précédente)');
+  const fb = `${ctop('fb')}<div class="c-body"><div class="c-flt"><h1 style="margin:0;font-size:28px;margin-right:16px">Retours</h1><span class="fd-segmented" role="group" aria-label="Réponse"><button type="button" aria-pressed="true">Tous</button><button type="button" aria-pressed="false">Non</button><button type="button" aria-pressed="false">Oui</button></span><span class="end"><button class="fd-btn" type="button">${I('download', 16)}Exporter</button></span></div>
+    <section class="u2-card" style="padding:4px 28px"><ul class="u2-list">${[['Non', 'Il manque la marche à suivre quand le paquet est refusé par la plateforme.', 'Exporter un paquet SCORM · Espace Acme Formation · il y a 2 h', 1], ['Non', 'Je ne trouve pas comment relancer un apprenant.', 'Suivre les apprenants · Espace Démo · hier', 1], ['Oui', '', 'Flouter les données · Espace Acme Formation · hier', 0], ['Non', 'La capture se décale après un recadrage.', 'Flouter les données · Espace Démo · 18 nov.', 0]].map(([v, c, m, n]) => `<li class="c-fb"><span class="v ${v === 'Non' ? 'u2-bad' : 'u2-ok'}">${v}</span><span style="flex:1"><p class="${n ? 'new' : ''}">${c || '<span class="u2-muted">Sans commentaire</span>'}</p><small>${m}</small></span><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Ajouter au backlog</button></li>`).join('')}</ul></section></div>`;
+  document.getElementById('a2').outerHTML = pair('Retours', app('', fb, { bare: true, h: 700 }).replace('<main class="u2-main">', '<main class="u2-main" style="padding:0;gap:0">'), 'img/avant/l41-retours-precedent.png', 'Maquette précédente des retours', 'Le commentaire d’abord, le contexte en gris dessous ; « nouveau » marqué d’un point ; une action secondaire par ligne.', 'Avant (maquette précédente)');
+  document.getElementById('a3').innerHTML = app('', ov, { bare: true, theme: 'dark', h: 820 }).replace('<main class="u2-main">', '<main class="u2-main" style="padding:0;gap:0">');
+</script>
+</body>
+</html>

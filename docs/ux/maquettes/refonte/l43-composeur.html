@@ -6,147 +6,50 @@
 <title>Composeur de message (lot L43) — TutoClick</title>
 <link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
 <link rel="stylesheet" href="refonte.css">
-<script src="refonte.js" defer></script>
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
 <style>
-  /* L43 révision 2 : un seul cadre (texte en haut, barre d'actions en bas). Données fictives. Spec : docs/ux/specs/l43-composeur.md */
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-  body { background: var(--fd-color-bg); }
-  .l43 { max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 32px; color: var(--fd-color-text); font-family: var(--fd-font-sans); }
-  .l43 h1 { margin: 0; font-size: 28px; } .l43 > p { margin: 0; max-width: 860px; color: var(--fd-color-text-muted); }
-  .sec { display: flex; flex-direction: column; gap: 16px; } .sec > h2 { margin: 0; font-size: 20px; }
-  .lab { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--fd-color-text-muted); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; align-items: start; }
-  .stage { padding: 24px; border-radius: 20px; background: var(--fd-color-bg); border: 1px solid var(--fd-color-border); }
-
-  /* ===== Composant fd-composer (packages/ui), révision 2 : tout dans un seul cadre ===== */
-  .fd-composer { position: relative; display: flex; flex-direction: column; border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); border-radius: 16px; background: var(--fd-color-surface); transition: border-color .15s; }
-  .fd-composer:focus-within { border-color: var(--fd-color-primary); box-shadow: var(--fd-shadow-focus); }
-  .fd-composer textarea { all: unset; box-sizing: border-box; display: block; width: 100%; min-height: 34px; max-height: 192px; overflow-y: auto; padding: 12px 16px 0; font: 400 15px/22px var(--fd-font-sans); color: var(--fd-color-text); white-space: pre-wrap; word-wrap: break-word; }
-  .fd-composer textarea::placeholder { color: var(--fd-color-text-muted); }
-  .fd-composer__bar { display: flex; align-items: center; gap: 2px; padding: 6px 8px 8px; }
-  .fd-composer__tool { all: unset; display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; color: var(--fd-color-text-muted); cursor: pointer; }
-  .fd-composer__tool:hover, .fd-composer__tool[aria-expanded='true'] { background: var(--fd-color-surface-sunken); color: var(--fd-color-text); }
-  .fd-composer__tool:focus-visible { box-shadow: var(--fd-shadow-focus); }
-  .fd-composer__tool svg { width: 18px; height: 18px; }
-  .fd-composer__end { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-  .fd-composer__count { font-size: 12px; color: var(--fd-color-text-muted); font-variant-numeric: tabular-nums; }
-  .fd-composer__cancel { all: unset; font-size: 13px; font-weight: 600; padding: 0 8px; height: 32px; display: inline-flex; align-items: center; border-radius: 8px; color: var(--fd-color-text-muted); cursor: pointer; }
-  .fd-composer__send { width: 32px; height: 32px; border: 0; border-radius: 50%; display: grid; place-items: center; background: var(--fd-color-primary); color: var(--fd-color-on-primary, #fff); cursor: pointer; }
-  .fd-composer__send svg { width: 18px; height: 18px; }
-  .fd-composer__send:disabled { background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); cursor: not-allowed; }
-  .fd-composer__send.is-stop { background: var(--fd-color-text); color: var(--fd-color-surface); }
-  .fd-composer__send:focus-visible { outline: none; box-shadow: var(--fd-shadow-focus); }
-  .fd-composer.is-error { border-color: var(--fd-color-danger, #b4234b); }
-  .err { margin: 8px 4px 0; font-size: 13px; color: var(--fd-color-danger, #b4234b); display: flex; align-items: center; gap: 6px; }
-  .err button { all: unset; cursor: pointer; text-decoration: underline; font-weight: 600; }
-  /* Liste des mentions : au-dessus du cadre, alignée à gauche */
-  .mlist { position: absolute; left: 0; bottom: calc(100% + 6px); width: 280px; padding: 6px; border-radius: 12px; background: var(--fd-color-surface-raised, var(--fd-color-surface)); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-lg); z-index: 2; }
-  .mlist__h { margin: 4px 8px 6px; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--fd-color-text-muted); }
-  .mopt { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 8px; font-size: 14px; }
-  .mopt.is-act { background: var(--fd-color-surface-sunken); }
-  .mopt small { margin-left: auto; color: var(--fd-color-text-muted); font-size: 12px; }
-  .tipb { position: absolute; right: -6px; bottom: calc(100% + 8px); padding: 6px 10px; border-radius: 8px; background: #12161B; color: #fff; font-size: 13px; white-space: nowrap; display: flex; gap: 6px; align-items: center; }
-  .tipb kbd { background: rgb(255 255 255 / .14); border: 0; color: #fff; }
-  [data-theme='dark'] .tipb { background: #2A3039; border: 1px solid #3A424D; }
-
-  /* Habillage des contextes (panneau de l'assistant, panneau des commentaires) */
-  .panel { width: 400px; max-width: 100%; color: var(--fd-color-text); background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); border-radius: 16px; box-shadow: var(--fd-shadow-md); display: flex; flex-direction: column; }
-  .panel__head { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--fd-color-border); font-weight: 700; }
-  .panel__head .x { margin-left: auto; }
-  .panel__head small { display: block; font-weight: 400; font-size: 12px; color: var(--fd-color-text-muted); }
-  .panel__body { padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 150px; }
-  .msgb { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.45; }
-  .msgb.me { align-self: flex-end; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); }
-  .msgb.ai { align-self: flex-start; background: var(--fd-color-surface-sunken); }
-  .panel__foot { padding: 12px; }
-  .cmt { display: flex; gap: 10px; font-size: 14px; } .ava { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-size: 11px; font-weight: 700; }
-  .cmt b { display: block; font-size: 13px; } .cmt small { color: var(--fd-color-text-muted); }
-  .mention { color: var(--fd-color-primary); font-weight: 600; }
-  .typing { display: inline-flex; gap: 4px; } .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--fd-color-text-muted); display: block; }
-  .notes { margin: 0; padding-left: 20px; color: var(--fd-color-text-muted); display: grid; gap: 6px; font-size: 14px; max-width: 900px; }
-  kbd { font: 600 12px var(--fd-font-sans); padding: 1px 6px; border-radius: 6px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface-sunken); }
+  /* L43 révision 2, reprise UI (composants §17). Spec : docs/ux/specs/l43-composeur.md. Données fictives. */
+  .m-ed { display: grid; grid-template-columns: minmax(0, 1fr) 400px; height: 760px; }
+  .m-canvas { background: var(--fd-color-surface-sunken); display: grid; place-items: center; }
+  .m-side { background: var(--fd-color-surface); display: flex; flex-direction: column; }
+  .m-head { padding: 24px 24px 8px; } .m-head h2 { margin: 0; font-size: 18px; } .m-head p { margin: 4px 0 0; font-size: 13px; color: var(--fd-color-text-muted); }
+  .m-thread { flex: 1; padding: 8px 24px; display: flex; flex-direction: column; gap: 20px; overflow: hidden; }
+  .m-msg { display: flex; gap: 12px; font-size: 15px; line-height: 1.5; }
+  .m-msg i { width: 32px; height: 32px; border-radius: 50%; background: var(--fd-color-surface-sunken); display: grid; place-items: center; font: 600 12px var(--fd-font-sans); font-style: normal; flex: none; }
+  .m-msg b { font-size: 14px; } .m-msg small { font-size: 13px; color: var(--fd-color-text-muted); margin-left: 6px; } .m-msg p { margin: 2px 0 0; }
+  .m-msg .at { color: var(--fd-color-primary); font-weight: 600; }
+  .m-foot { padding: 16px 24px 24px; position: relative; }
+  .m-comp { border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); border-radius: 16px; }
+  .m-comp.focus { border-color: var(--fd-color-primary); box-shadow: var(--fd-shadow-focus); }
+  .m-comp .tx { padding: 12px 16px 4px; font-size: 15px; line-height: 22px; min-height: 22px; }
+  .m-comp .tx.ph { color: var(--fd-color-text-muted); }
+  .m-comp .bar { display: flex; align-items: center; padding: 4px 8px 8px; }
+  .m-comp .tool { all: unset; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; color: var(--fd-color-text-muted); cursor: pointer; }
+  .m-comp .send { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; border: 0; display: grid; place-items: center; background: var(--fd-color-primary); color: var(--fd-color-on-primary, #fff); }
+  .m-comp .send:disabled { background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+  .m-men { position: absolute; left: 24px; bottom: 132px; width: 260px; padding: 6px; border-radius: 14px; background: var(--fd-color-surface); box-shadow: 0 16px 48px rgb(8 10 14 / .18); }
+  .m-men div { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; font-size: 15px; }
+  .m-men div.act { background: var(--fd-color-surface-sunken); }
+  .m-men i { width: 28px; height: 28px; border-radius: 50%; background: var(--fd-color-surface-sunken); display: grid; place-items: center; font: 600 11px var(--fd-font-sans); font-style: normal; }
+  .m-men div.act i { background: var(--fd-color-surface); }
 </style>
 </head>
 <body>
-<main class="l43">
-  <h1>L43 : composeur de message</h1>
-  <p>Révision 2, modèle des messageries actuelles : tout tient dans un seul cadre arrondi. En haut, le texte, qui grandit avec le contenu ; en bas, dans le même cadre, une barre d'actions (outils discrets à gauche, envoi en icône à droite). Pas d'avatar à l'extérieur, pas de ligne d'aide sous le champ : l'aide est dans le placeholder et dans l'infobulle du bouton. Même composant pour l'assistant IA, les commentaires (nouveau, réponse, modification) et les futures zones de message. Données fictives.</p>
-
-  <section class="sec" aria-labelledby="s2"><h2 id="s2">Commentaires</h2>
-    <div class="grid" data-slot="cm"></div>
-  </section>
-  <section class="sec" aria-labelledby="s1"><h2 id="s1">Assistant IA</h2>
-    <div class="grid" data-slot="ai"></div>
-  </section>
-  <section class="sec" aria-labelledby="s3"><h2 id="s3">En sombre</h2>
-    <div class="stage" data-theme="dark"><div class="grid" data-slot="dark"></div></div>
-  </section>
-  <section class="sec" aria-labelledby="s4"><h2 id="s4">Règles</h2>
-    <ul class="notes">
-      <li>Cadre unique : bordure 1 px, arrondi 16 px. Au focus, l'anneau entoure tout le cadre, barre comprise.</li>
-      <li>Texte : 1 ligne au départ, grandit jusqu'à 8 lignes (192 px), puis défile. La barre d'actions reste toujours visible sous le texte.</li>
-      <li>Barre : à gauche, <code>@</code> « Mentionner » (commentaires seulement) ; à droite, le compteur (à partir de 80 % de la limite) et l'envoi. Infobulles L44 sur chaque icône. Pas de « joindre » tant que la pièce jointe n'existe pas dans ces zones.</li>
-      <li><kbd>Entrée</kbd> envoie ; <kbd>Maj</kbd> + <kbd>Entrée</kbd> passe à la ligne ; jamais d'envoi pendant une composition (accents, IME). Liste des mentions ouverte : Entrée choisit la personne.</li>
-      <li>Envoi désactivé tant que le champ est vide ou ne contient que des espaces. Assistant pendant une réponse : « Arrêter la réponse » (icône <code>square</code>).</li>
-      <li>Les mentions de contexte quittent le dessous du champ : « La conversation est effacée à la fermeture. » et « Interne à l'équipe, jamais publié. » passent sous le titre du panneau.</li>
-    </ul>
-  </section>
+<main class="u2">
+  <header class="u2-head"><div><small>Lot L43 · Reprise UI</small><h1>Composeur de message</h1><p>Un seul cadre : le texte, puis une barre discrète avec @ et l’envoi. Les commentaires passent dans un panneau latéral, comme l’assistant, au lieu d’un tiroir qui écrase le canevas.</p></div></header>
+  <div id="a1"></div>
+  <section class="u2-sec"><h2>Mention ouverte, et en sombre</h2><div id="a2"></div></section>
 </main>
 <script>
-  const I = {
-    up: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
-    check: '<path d="M20 6 9 17l-5-5"/>',
-    stop: '<rect width="12" height="12" x="6" y="6" rx="2" fill="currentColor"/>',
-    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
-    at: '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>',
-    msg: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-    spark: '<path d="M9.94 14.06 2 22"/><path d="m15 5 4 4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>',
-    alert: '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>'
-  };
-  const svg = (n, s) => `<svg${s ? ` width="${s}" height="${s}"` : ''} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${I[n]}</svg>`;
-  let n = 0;
-  const composer = ({ value = '', placeholder, state = 'idle', count, label, mention, mentionOpen, edit, tip, focus, rows }) => {
-    const id = 'c' + (++n);
-    const send = state === 'busy'
-      ? `<button type="button" class="fd-composer__send is-stop" aria-label="Arrêter la réponse">${svg('stop')}</button>`
-      : `<button type="submit" class="fd-composer__send" aria-label="${edit ? 'Enregistrer' : 'Envoyer'}"${value.trim() ? '' : ' disabled'}>${svg(edit ? 'check' : 'up')}</button>`;
-    const ml = mentionOpen ? `<div class="mlist" role="listbox" aria-label="Mentionner"><p class="mlist__h">Mentionner</p>
-      <div class="mopt is-act" role="option" aria-selected="true"><span class="ava" aria-hidden="true">LF</span>Léa Fictive<small>Admin</small></div>
-      <div class="mopt" role="option" aria-selected="false"><span class="ava" aria-hidden="true">LM</span>Lucas Modèle<small>Éditeur</small></div></div>` : '';
-    return `<form onsubmit="return false" style="position:relative">${ml}<div class="fd-composer${state === 'error' ? ' is-error' : ''}"${focus ? ' style="border-color:var(--fd-color-primary);box-shadow:var(--fd-shadow-focus)"' : ''}>
-      <label class="sr-only" for="${id}">${label}</label>
-      <textarea id="${id}" rows="${rows || 1}" placeholder="${placeholder}">${value}</textarea>
-      <div class="fd-composer__bar">${mention ? `<button type="button" class="fd-composer__tool" aria-label="Mentionner" aria-expanded="${!!mentionOpen}">${svg('at')}</button>` : ''}
-        <span class="fd-composer__end">${count ? `<span class="fd-composer__count">${count}</span>` : ''}${edit ? '<button type="button" class="fd-composer__cancel">Annuler</button>' : ''}<span style="position:relative">${tip ? `<span class="tipb" role="tooltip">${edit ? 'Enregistrer' : 'Envoyer'} <kbd>Entrée</kbd></span>` : ''}${send}</span></span></div></div>
-      ${state === 'error' ? `<p class="err" role="alert">${svg('alert', 16)}Le message n'a pas pu être envoyé. <button type="button">Réessayer</button></p>` : ''}</form>`;
-  };
-  const ai = (title, body, c) => `<div><span class="lab">${title}</span><aside class="panel" aria-label="Assistant"><div class="panel__head">${svg('spark', 18)}<span>Assistant<small>La conversation est effacée à la fermeture.</small></span><button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm x" type="button" aria-label="Fermer">${svg('x')}</button></div><div class="panel__body">${body}</div><div class="panel__foot">${c}</div></aside></div>`;
-  const AIN = { placeholder: 'Posez une question sur cette démo…', label: 'Message à l’assistant' };
-  const conv = '<p class="msgb me">Comment rendre l’étape 3 plus claire ?</p><p class="msgb ai">Précisez l’action attendue dans le titre de la bulle, par exemple « Cliquez sur Nouvelle opportunité ».</p>';
-  const aiCases = () => [
-    ai('Vide', '<p style="margin:auto;color:var(--fd-color-text-muted);font-size:14px;text-align:center">Posez une question sur la démo ouverte.</p>', composer({ ...AIN })),
-    ai('Multiligne', conv, composer({ ...AIN, value: 'Propose deux formulations pour la bulle de l’étape 4.\nGarde le vouvoiement.\nEt une version courte pour le mobile.', rows: 3, focus: 1 })),
-    ai('Réponse en cours', conv + '<p class="msgb ai"><span class="typing" aria-label="Réponse en cours"><i></i><i></i><i></i></span></p>', composer({ ...AIN, state: 'busy' })),
-    ai('Erreur d’envoi', conv, composer({ ...AIN, state: 'error', value: 'Et pour l’étape 5 ?' }))
-  ];
-  const CMN = { placeholder: 'Écrire un commentaire, @ pour mentionner', label: 'Nouveau commentaire', mention: 1 };
-  const thread = '<div class="cmt"><span class="ava" aria-hidden="true">NT</span><p style="margin:0"><b>Noé Test <small>il y a 2 h</small></b>La capture de l’étape 2 date d’avant la mise à jour.</p></div><div class="cmt"><span class="ava" aria-hidden="true">LF</span><p style="margin:0"><b>Léa Fictive <small>il y a 1 h</small></b><span class="mention">@Noé Test</span> je la refais demain.</p></div>';
-  const cm = (title, c, body = thread) => `<div><span class="lab">${title}</span><aside class="panel" aria-label="Commentaires"><div class="panel__head">${svg('msg', 18)}<span>Commentaires · 2<small>Interne à l’équipe, jamais publié.</small></span></div><div class="panel__body">${body}</div><div class="panel__foot">${c}</div></aside></div>`;
-  const cmCases = () => [
-    cm('Vide', composer({ ...CMN })),
-    cm('Rempli (infobulle de l’envoi)', composer({ ...CMN, value: 'Merci, je vérifie l’étape 3 aussi.', focus: 1, tip: 1 })),
-    cm('Multiligne, près de la limite', composer({ ...CMN, value: '@Léa Fictive merci ! Pense aussi à flouter l’adresse en haut à droite de la capture.\nEt à vérifier le libellé du bouton, il a changé dans la dernière version.', rows: 4, count: '412 / 500', focus: 1 })),
-    cm('Liste des mentions ouverte', composer({ ...CMN, value: 'Bien vu @L', focus: 1, mentionOpen: 1 })),
-    cm('Modification d’un commentaire', composer({ ...CMN, label: 'Modifier le commentaire', value: 'La capture de l’étape 2 date d’avant la mise à jour du logiciel.', rows: 2, edit: 1, focus: 1 }))
-  ];
-  document.querySelector('[data-slot="cm"]').innerHTML = cmCases().join('');
-  document.querySelector('[data-slot="ai"]').innerHTML = aiCases().join('');
-  document.querySelector('[data-slot="dark"]').innerHTML = [cmCases()[0], cmCases()[3], aiCases()[1]].join('');
-  document.querySelectorAll('.fd-composer textarea').forEach((t) => {
-    const fit = () => { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 192) + 'px'; const b = t.closest('.fd-composer').querySelector('.fd-composer__send:not(.is-stop)'); if (b) b.disabled = !t.value.trim(); };
-    t.addEventListener('input', fit); fit();
-    t.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); if (t.value.trim()) { t.value = ''; fit(); } } });
-  });
+  const { I, app, pair } = U2;
+  const comp = (txt, focus) => `<form class="m-comp${focus ? ' focus' : ''}" onsubmit="return false"><label class="sr-only" for="c${txt.length}">Nouveau commentaire</label><div class="tx${txt ? '' : ' ph'}" id="c${txt.length}" role="textbox" contenteditable="true">${txt || 'Écrire un commentaire, @ pour mentionner'}</div><div class="bar"><button class="tool" type="button" aria-label="Mentionner">${I('at')}</button><button class="send" type="submit" aria-label="Envoyer"${txt ? '' : ' disabled'}>${I('send', 18)}</button></div></form>`;
+  const side = (txt, men, focus) => `<div class="m-ed"><div class="m-canvas"><div class="u2-fake" aria-hidden="true"><div><i style="width:40%"></i><i style="width:70%"></i></div></div></div>
+    <aside class="m-side" aria-labelledby="mh"><div class="m-head"><h2 id="mh">Commentaires · Étape 1</h2><p>Internes à l’équipe, jamais publiés</p></div>
+      <div class="m-thread"><div class="m-msg"><i>NT</i><div><b>Noé Test</b><small>il y a 2 h</small><p>La capture de l’étape 2 date d’avant la mise à jour.</p></div></div><div class="m-msg"><i>LF</i><div><b>Léa Fictive</b><small>il y a 1 h</small><p><span class="at">@Noé Test</span> je la refais demain.</p></div></div></div>
+      <div class="m-foot">${men ? `<div class="m-men" role="listbox" aria-label="Mentionner"><div class="act" role="option" aria-selected="true"><i>LF</i>Léa Fictive</div><div role="option" aria-selected="false"><i>LM</i>Lucas Modèle</div></div>` : ''}${comp(txt, focus)}</div></aside></div>`;
+  document.getElementById('a1').outerHTML = pair('Commentaires de l’éditeur', app('', side('Merci, je vérifie l’étape 3 aussi.', false, true), { bare: true, h: 760 }).replace('<main class="u2-main">', '<main class="u2-main" style="padding:0">'), 'img/avant/l43-commentaires.png', 'Composeur actuel : avatar, champ, bouton à côté, aide sous le champ', 'Pas d’avatar devant le champ, pas de ligne d’aide dessous ; l’envoi s’active quand on écrit.');
+  document.getElementById('a2').innerHTML = `<div class="u2-row"><div style="flex:1">${app('', side('Bien vu @L', true, true), { bare: true, h: 760 }).replace('<main class="u2-main">', '<main class="u2-main" style="padding:0">')}</div></div><div style="margin-top:24px">${app('', side('', false, false), { bare: true, theme: 'dark', h: 760 }).replace('<main class="u2-main">', '<main class="u2-main" style="padding:0">')}</div>`;
 </script>
 </body>
 </html>

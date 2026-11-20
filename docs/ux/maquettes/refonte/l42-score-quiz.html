@@ -6,160 +6,38 @@
 <title>Score du quiz (lot L42) — TutoClick</title>
 <link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
 <link rel="stylesheet" href="refonte.css">
-<script src="refonte.js" defer></script>
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
 <style>
-  /* L42 : résultat du quiz sans cercle ni trait de seuil. Données fictives. Spec : docs/ux/specs/l42-score-quiz.md */
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-  body { background: var(--fd-color-bg); }
-  .l42 { max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 32px; color: var(--fd-color-text); font-family: var(--fd-font-sans); }
-  .l42 h1 { margin: 0; font-size: 28px; }
-  .l42 > p { margin: 0; max-width: 860px; color: var(--fd-color-text-muted); }
-  .sec { display: flex; flex-direction: column; gap: 16px; }
-  .sec > h2 { margin: 0; font-size: 20px; }
-  .lab { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--fd-color-text-muted); }
-  .row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
-  .before img { display: block; width: 100%; border-radius: 16px; border: 1px solid var(--fd-color-border); }
-  .before figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
-  .before figcaption { font-size: 13px; color: var(--fd-color-text-muted); }
-  .stage { padding: 24px; border-radius: 20px; background: var(--fd-color-bg); border: 1px solid var(--fd-color-border); }
-  .stage .lab { display: block; margin-bottom: 10px; }
-
-  /* ===== Composant proposé : carte de résultat du lecteur (p-quiz-result) ===== */
-  .qr { background: var(--fd-color-surface); color: var(--fd-color-text); border-radius: 24px; box-shadow: var(--fd-shadow-md); padding: 28px 24px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0; }
-  /* Bloc score : chiffre, barre fine, seuil en texte. Pas de cercle, pas de marqueur. */
-  /* Anneau propre : piste et arc de 12 px, bouts arrondis, seuil = encoche dans la piste (pas de trait), seuil écrit dessous. */
-  .qs { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .qs__ring { position: relative; width: 168px; height: 168px; }
-  .qs__ring svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
-  .qs__track { fill: none; stroke: color-mix(in srgb, var(--fd-color-text) 10%, transparent); stroke-width: 12; stroke-linecap: butt; }
-  .qs__arc { fill: none; stroke: #5b6675; stroke-width: 12; stroke-linecap: round; }
-  .is-pass .qs__arc { stroke: var(--fd-color-primary); }
-  [data-theme='dark'] .qs__arc { stroke: #A9B3BF; }
-  [data-theme='dark'] .is-pass .qs__arc { stroke: var(--fd-color-primary); }
-  .qs__num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; margin: 0; font-size: 44px; line-height: 1; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-  .qs__num small { font-size: .5em; font-weight: 700; margin: .35em 0 0 .08em; }
-  .qs__meta { margin: 0; font-size: 14px; color: var(--fd-color-text-muted); }
-  /* Reste de la carte : inchangé (badge, titre, phrase de score, récapitulatif, boutons) */
-  .qb { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; }
-  .qb svg { width: 16px; height: 16px; }
-  .qb.is-pass { background: #95c11f; color: #080808; }
-  .qb.is-fail { border: 1px solid color-mix(in srgb, var(--fd-color-text) 30%, transparent); }
-  .qr h3 { margin: 12px 0 6px; font-size: 22px; line-height: 1.25; }
-  .qr .line { margin: 0; font-size: 15px; line-height: 1.5; max-width: 52ch; }
-  .recap { list-style: none; margin: 18px 0 0; padding: 0; width: 100%; display: grid; gap: 6px; text-align: left; }
-  .recap li { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; background: color-mix(in srgb, var(--fd-color-text) 5%, transparent); font-size: 14px; }
-  .recap svg { width: 16px; height: 16px; flex: none; display: block; }
-  .recap .ok, .recap .ko { display: inline-flex; }
-  .ok { color: #3e7a1a; } .ko { color: #b4234b; }
-  [data-theme='dark'] .ok { color: #9fd36a; } [data-theme='dark'] .ko { color: #f08aa6; }
-  .acts { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; }
-  .lnk { margin-top: 10px; font-weight: 600; color: var(--fd-color-primary); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; }
-  .mob { width: 390px; padding: 16px; border-radius: 28px; background: var(--fd-color-bg); border: 1px solid var(--fd-color-border); }
-  .mobs { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
-  .mob .qr { padding: 24px 16px 20px; }
-  .mob .qs__ring { width: 144px; height: 144px; }
-  .mob .qs__num { font-size: 38px; }
-  .notes { margin: 0; padding-left: 20px; color: var(--fd-color-text-muted); display: grid; gap: 6px; font-size: 14px; max-width: 900px; }
-  @media (max-width: 1100px) { .row { grid-template-columns: 1fr; } }
+  /* L42, reprise UI (composants §17). L'anneau livré (d6aa3e4) est conservé ; on allège ce qui l'entoure. Spec : docs/ux/specs/l42-score-quiz.md. Données fictives. */
+  .q-stage { min-height: 760px; display: grid; place-items: center; padding: 40px; }
+  .q-card { width: 560px; max-width: 100%; background: var(--fd-color-surface); border-radius: 24px; padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
+  .q-ring { position: relative; width: 168px; height: 168px; }
+  .q-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .q-ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 40px; }
+  .q-card h1 { margin: 0; font-size: 26px; } .q-card > p { margin: -12px 0 0; font-size: 15px; color: var(--fd-color-text-muted); }
+  .q-list { width: 100%; text-align: left; }
+  .q-list li { gap: 12px; min-height: 52px !important; font-size: 15px; }
+  .q-list li span { flex: 1; } .q-list a { font-size: 14px; font-weight: 600; color: var(--fd-color-primary); text-decoration: none; }
+  .q-acts { display: flex; gap: 8px; }
 </style>
 </head>
 <body>
-<main class="l42">
-  <h1>L42 : score du quiz</h1>
-  <p>Le cercle est conservé mais redessiné : piste et arc de même épaisseur, bouts arrondis, seuil marqué par une simple encoche dans la piste (plus de trait noir) et écrit en texte sous le cercle. Le badge, le titre et la phrase de score ne changent pas : la réussite ne dépend jamais de la couleur. Données fictives.</p>
-
-  <section class="sec" aria-labelledby="s0">
-    <h2 id="s0">Avant</h2>
-    <div class="row before">
-      <figure><img src="img/l42-avant-valide.png" alt="Résultat actuel, quiz validé : cercle rempli à 100 % et trait noir du seuil vers la gauche."><figcaption>Validé (bureau)</figcaption></figure>
-      <figure><img src="img/l42-avant-non-valide.png" alt="Résultat actuel, quiz non validé : cercle ardoise à 33 % et trait noir du seuil à 70 %."><figcaption>Non validé (bureau)</figcaption></figure>
-      <figure style="max-width:300px"><img src="img/l42-avant-mobile.png" alt="Résultat actuel sur mobile : cercle de score et trait noir du seuil."><figcaption>Mobile, 390 px</figcaption></figure>
-    </div>
-  </section>
-
-  <template id="tpl-pass">
-    <article class="qr is-pass" aria-labelledby="__ID__">
-      <div class="qs">
-        <div class="qs__ring" data-score="85" data-th="70"><svg viewBox="0 0 168 168" aria-hidden="true" focusable="false"></svg><p class="qs__num"><span class="sr-only">Votre score : </span>85<small>&#8239;%</small></p></div>
-        <p class="qs__meta">Seuil de validation&#8239;: 70&#8239;%</p>
-      </div>
-      <span class="qb is-pass"><i data-icon="award"></i>Module validé</span>
-      <h3 id="__ID__">Bravo, vous avez validé «&#8239;Créer un rendez-vous&#8239;»</h3>
-      <p class="line" role="status">Score&#8239;: 17 bonnes réponses sur 20, soit 85&#8239;%. Le seuil de réussite est de 70&#8239;%.</p>
-      <ul class="recap"><li><span class="ok"><i data-icon="checkCircle"></i></span><span class="sr-only">Réponse juste : </span>1. Où créer un rendez-vous&#8239;?</li><li><span class="ok"><i data-icon="checkCircle"></i></span><span class="sr-only">Réponse juste : </span>2. Quelles informations sont obligatoires&#8239;?</li><li><span class="ko"><i data-icon="xCircle"></i></span><span class="sr-only">Réponse fausse : </span>3. Un rendez-vous peut être déplacé.</li></ul>
-      <div class="acts"><button class="fd-btn fd-btn--primary" type="button">Terminer</button></div>
-      <a class="lnk" href="#">Repasser le quiz</a>
-    </article>
-  </template>
-  <template id="tpl-fail">
-    <article class="qr" aria-labelledby="__ID__">
-      <div class="qs">
-        <div class="qs__ring" data-score="55" data-th="70"><svg viewBox="0 0 168 168" aria-hidden="true" focusable="false"></svg><p class="qs__num"><span class="sr-only">Votre score : </span>55<small>&#8239;%</small></p></div>
-        <p class="qs__meta">Seuil de validation&#8239;: 70&#8239;%</p>
-      </div>
-      <span class="qb is-fail"><i data-icon="refresh"></i>Pas encore validé</span>
-      <h3 id="__ID__">Encore un peu d'entraînement</h3>
-      <p class="line" role="status">Score&#8239;: 11 bonnes réponses sur 20, soit 55&#8239;%. Il faut 70&#8239;% pour valider le module. Revoyez les étapes liées aux erreurs, puis réessayez&#8239;: il vous reste 2 tentatives.</p>
-      <ul class="recap"><li><span class="ko"><i data-icon="xCircle"></i></span><span class="sr-only">Réponse fausse : </span>1. Où créer un rendez-vous&#8239;?</li><li><span class="ok"><i data-icon="checkCircle"></i></span><span class="sr-only">Réponse juste : </span>2. Quelles informations sont obligatoires&#8239;?</li><li><span class="ko"><i data-icon="xCircle"></i></span><span class="sr-only">Réponse fausse : </span>3. Un rendez-vous peut être déplacé.</li></ul>
-      <div class="acts"><button class="fd-btn" type="button">Revoir le module</button><button class="fd-btn fd-btn--primary" type="button">Réessayer le quiz</button></div>
-    </article>
-  </template>
-  <template id="tpl-zero">
-    <article class="qr" aria-labelledby="__ID__">
-      <div class="qs">
-        <div class="qs__ring" data-score="0" data-th="70"><svg viewBox="0 0 168 168" aria-hidden="true" focusable="false"></svg><p class="qs__num"><span class="sr-only">Votre score : </span>0<small>&#8239;%</small></p></div>
-        <p class="qs__meta">Seuil de validation&#8239;: 70&#8239;%</p>
-      </div>
-      <span class="qb is-fail"><i data-icon="refresh"></i>Pas encore validé</span>
-      <h3 id="__ID__">Encore un peu d'entraînement</h3>
-      <p class="line" role="status">Score&#8239;: 0 bonne réponse sur 3, soit 0&#8239;%. Il faut 70&#8239;% pour valider le module. Revoyez les étapes liées aux erreurs, puis réessayez&#8239;: il vous reste 1 tentative.</p>
-      <ul class="recap"><li><span class="ko"><i data-icon="xCircle"></i></span><span class="sr-only">Réponse fausse : </span>1. Où créer un rendez-vous&#8239;?</li><li><span class="ko"><i data-icon="xCircle"></i></span><span class="sr-only">Réponse fausse : </span>2. Quelles informations sont obligatoires&#8239;?</li><li><span class="ko"><i data-icon="xCircle"></i></span><span class="sr-only">Réponse fausse : </span>3. Un rendez-vous peut être déplacé.</li></ul>
-      <div class="acts"><button class="fd-btn" type="button">Revoir le module</button><button class="fd-btn fd-btn--primary" type="button">Réessayer le quiz</button></div>
-    </article>
-  </template>
-
-  <section class="sec" aria-labelledby="s1">
-    <h2 id="s1">Après, en clair</h2>
-    <div class="row" data-slot="light"></div>
-  </section>
-  <section class="sec" aria-labelledby="s2">
-    <h2 id="s2">Après, en sombre</h2>
-    <div class="stage" data-theme="dark"><div class="row" data-slot="dark"></div></div>
-  </section>
-  <section class="sec" aria-labelledby="s3">
-    <h2 id="s3">Après, sur mobile (390 px)</h2>
-    <div class="mobs" data-slot="mobile"></div>
-  </section>
-
-  <section class="sec" aria-labelledby="s4">
-    <h2 id="s4">Règles</h2>
-    <ul class="notes">
-      <li>Anneau de 168 px (144 px sous 480 px) : piste et arc de 12 px, arc aux bouts arrondis, départ en haut, sens horaire. Aucun trait, aucune ombre, aucun dégradé.</li>
-      <li>Seuil : une encoche de 6 px <b>découpée dans la piste</b>, de la couleur du fond de la carte. Elle n'est visible que tant que le score ne l'a pas atteinte, car l'arc passe par-dessus. Le seuil est toujours écrit dessous : « Seuil de validation : 70 % ».</li>
-      <li>Le chiffre est toujours de la couleur du texte ; l'arc est prune si validé, ardoise sinon. Le résultat est porté par le badge et le titre, jamais par la couleur seule.</li>
-      <li>0 % : aucun arc (pas de point dû au bout arrondi). 100 % : cercle plein.</li>
-      <li>L'anneau est masqué aux lecteurs d'écran ; le chiffre est lu « Votre score : 85 % », puis le seuil.</li>
-      <li>Arc animé de 0 au score en 600 ms ; aucune animation avec la réduction des animations.</li>
-    </ul>
-  </section>
+<main class="u2">
+  <header class="u2-head"><div><small>Lot L42 · Reprise UI</small><h1>Résultat du quiz</h1><p>L’anneau livré est conforme et reste tel quel. Autour : un titre, une ligne, la liste des questions, deux actions. Le badge « Pas encore validé » et le paragraphe redisaient le titre.</p></div></header>
+  <div id="a1"></div>
+  <section class="u2-sec"><h2>Réussite, en sombre</h2><div class="u2-row" id="a2"></div></section>
 </main>
 <script>
-  const fill = (slot, wrap) => {
-    const el = document.querySelector(`[data-slot="${slot}"]`);
-    ['pass', 'fail', 'zero'].forEach((k, n) => {
-      const html = document.getElementById('tpl-' + k).innerHTML.replace(/__ID__/g, `${slot}-${k}`);
-      const label = ['Validé (85 %)', 'Non validé (55 %)', '0 %'][n];
-      el.insertAdjacentHTML('beforeend', wrap ? `<div class="mob"><span class="lab">${label}</span>${html}</div>` : `<div><span class="lab" style="display:block;margin-bottom:10px">${label}</span>${html}</div>`);
-    });
-  };
-  fill('light'); fill('dark'); fill('mobile', true);
-  document.querySelectorAll('.qs__ring').forEach((el) => {
-    const score = +el.dataset.score, th = +el.dataset.th, R = 74, C = 2 * Math.PI * R, G = 6;
-    const t = (th / 100) * C;
-    const track = `<circle class="qs__track" cx="84" cy="84" r="${R}" stroke-dasharray="${t - G / 2} ${G} ${C}" />`;
-    const arc = score > 0 ? `<circle class="qs__arc" cx="84" cy="84" r="${R}" stroke-dasharray="${score >= 100 ? C : (score / 100) * C} ${C}" />` : '';
-    el.querySelector('svg').innerHTML = track + arc;
-  });
+  const { I, app, pair } = U2;
+  const ring = (p, ok) => { const r = 74, C = 2 * Math.PI * r; return `<div class="q-ring" role="img" aria-label="Score : ${p} %"><svg viewBox="0 0 168 168" aria-hidden="true"><circle cx="84" cy="84" r="${r}" fill="none" stroke="var(--fd-color-surface-sunken)" stroke-width="12" stroke-dasharray="${C * .7 - 3} 6 ${C}"/><circle cx="84" cy="84" r="${r}" fill="none" stroke="${ok ? 'var(--fd-color-primary)' : 'var(--fd-color-text-muted)'}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C * p / 100} ${C}"/></svg><b>${p} %</b></div>`; };
+  const q = (ok, t, link) => `<li><span class="${ok ? 'u2-ok' : 'u2-bad'}" style="flex:none">${I(ok ? 'check' : 'x', 18)}</span><span>${t}</span>${link ? '<a href="#">Revoir</a>' : ''}</li>`;
+  const fail = `<div class="q-stage"><section class="q-card" aria-labelledby="qt">${ring(33, false)}<span class="u2-s" style="margin-top:-12px">Seuil de validation : 70 %</span><h1 id="qt" tabindex="-1">Encore un peu d’entraînement</h1><p>1 bonne réponse sur 3 · il vous reste 2 tentatives</p>
+    <ul class="u2-list q-list">${q(false, 'Où créer un rendez-vous ?', 1)}${q(false, 'Quelles informations sont obligatoires ?', 1)}${q(true, 'Un rendez-vous peut être déplacé.')}</ul>
+    <div class="q-acts"><button class="fd-btn" type="button">Revoir le module</button><button class="fd-btn fd-btn--primary" type="button">Réessayer le quiz</button></div></section></div>`;
+  document.getElementById('a1').outerHTML = pair('Échec : moins de texte, même information', app('', fail, { bare: true, h: 760 }).replace('<main class="u2-main">', '<main class="u2-main" style="padding:0">'), 'img/avant/l42-echec.png', 'Résultat livré (d6aa3e4)', '« Revoir » sur chaque question ratée, pas seulement la première ; le reste du texte d’explication passe dans la ligne sous le titre.', 'Avant (livré)');
+  const ok = `<div class="q-stage" style="min-height:620px"><section class="q-card">${ring(100, true)}<span class="u2-s" style="margin-top:-12px">Seuil de validation : 70 %</span><h1>Module validé</h1><p>3 bonnes réponses sur 3</p><div class="q-acts"><button class="fd-btn" type="button">Repasser le quiz</button><button class="fd-btn fd-btn--primary" type="button">Module suivant</button></div></section></div>`;
+  document.getElementById('a2').innerHTML = `<div style="flex:1">${app('', ok, { bare: true, h: 620 }).replace('<main class="u2-main">', '<main class="u2-main" style="padding:0">')}</div><div style="flex:1">${app('', ok, { bare: true, theme: 'dark', h: 620 }).replace('<main class="u2-main">', '<main class="u2-main" style="padding:0">')}</div>`;
 </script>
 </body>
 </html>

@@ -62,7 +62,7 @@ window.U2 = (() => {
       }));
     });
   };
-  const pair = (title, after, beforeSrc, beforeAlt, sub = '') => `<section class="u2-sec" data-u2-pair><div style="display:flex;align-items:center;gap:16px"><h2 style="margin:0;font-size:18px;flex:1">${title}</h2><span class="fd-segmented u2-seg" role="group" aria-label="Version affichée"><button type="button" aria-pressed="true" data-show="apres">Après</button><button type="button" aria-pressed="false" data-show="avant">Avant (app actuelle)</button></span></div>${sub ? `<p>${sub}</p>` : ''}<div data-pane="apres">${after}</div><div class="u2-av" data-pane="avant" hidden><img src="${beforeSrc}" alt="${beforeAlt}"></div></section>`;
+  const pair = (title, after, beforeSrc, beforeAlt, sub = '', beforeLabel = 'Avant (app actuelle)') => `<section class="u2-sec" data-u2-pair><div style="display:flex;align-items:center;gap:16px"><h2 style="margin:0;font-size:18px;flex:1">${title}</h2><span class="fd-segmented u2-seg" role="group" aria-label="Version affichée"><button type="button" aria-pressed="true" data-show="apres">Après</button><button type="button" aria-pressed="false" data-show="avant">${beforeLabel}</button></span></div>${sub ? `<p>${sub}</p>` : ''}<div data-pane="apres">${after}</div><div class="u2-av" data-pane="avant" hidden><img src="${beforeSrc}" alt="${beforeAlt}"></div></section>`;
   document.addEventListener('DOMContentLoaded', () => setTimeout(switcher, 0));
   return { I, app, side, pair };
 })();
