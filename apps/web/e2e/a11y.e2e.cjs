@@ -296,6 +296,74 @@ const APP_PAGES = [
       await p.waitForTimeout(400);
     },
   },
+  // L30-02 et L30-03 : proposition « Rédiger » et aperçu de la traduction
+  {
+    name: 'Éditeur · Assistance IA (proposition)',
+    route: `/#/demos/${DEMO}/edit`,
+    seed: (d) => {
+      d.ai = {
+        enabled: true,
+        features: {
+          write: true,
+          translate: true,
+          suggest: true,
+          generate: true,
+          dataset: true,
+          chart: true,
+          assistant: true,
+        },
+        used: 1,
+        quota: 500,
+        userToday: 0,
+        userDailyRequests: 30,
+        workspaceQuotaReached: false,
+        userQuotaReached: false,
+        renewsOn: '2026-12-01',
+        canEdit: true,
+        canManage: true,
+      };
+    },
+    open: async (p) => {
+      await p.locator('.canvas-hotspot').first().click();
+      await p.getByRole('button', { name: 'Assistance IA' }).click();
+      await p.getByRole('menuitem', { name: 'Raccourcir' }).click();
+      await p.getByRole('button', { name: 'Appliquer', exact: true }).waitFor();
+    },
+  },
+  {
+    name: 'Éditeur · Traduire (aperçu)',
+    route: `/#/demos/${DEMO}/edit`,
+    seed: (d) => {
+      d.ai = {
+        enabled: true,
+        features: {
+          write: true,
+          translate: true,
+          suggest: true,
+          generate: true,
+          dataset: true,
+          chart: true,
+          assistant: true,
+        },
+        used: 1,
+        quota: 500,
+        userToday: 0,
+        userDailyRequests: 30,
+        workspaceQuotaReached: false,
+        userQuotaReached: false,
+        renewsOn: '2026-12-01',
+        canEdit: true,
+        canManage: true,
+      };
+      d.aiReply = (task, input) => ({ items: input.items.map((i) => ({ id: i.id, text: `EN ${i.text}` })) });
+    },
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Plus d’options' }).click();
+      await p.getByRole('menuitem', { name: 'Traduire la démo…' }).click();
+      await p.getByRole('button', { name: 'Préparer la traduction' }).click();
+      await p.getByRole('button', { name: 'Créer la copie' }).waitFor();
+    },
+  },
   {
     name: 'Éditeur · test A/B',
     route: `/#/demos/${DEMO}/edit`,
@@ -517,6 +585,35 @@ const APP_PAGES = [
   { name: 'Fonctions à venir (SSO)', route: '/#/settings/soon?tab=sso' },
   { name: 'Sécurité', route: '/#/settings/security' },
   { name: 'Confidentialité', route: '/#/settings/privacy' },
+  // L30-01 : Assistance IA désactivée, puis activée (quota, fonctions)
+  { name: 'Assistance IA (désactivée)', route: '/#/settings/ai' },
+  {
+    name: 'Assistance IA (activée)',
+    route: '/#/settings/ai',
+    seed: (d) => {
+      d.ai = {
+        enabled: true,
+        features: {
+          write: true,
+          translate: true,
+          suggest: true,
+          generate: true,
+          dataset: true,
+          chart: false,
+          assistant: true,
+        },
+        used: 12,
+        quota: 500,
+        userToday: 0,
+        userDailyRequests: 30,
+        workspaceQuotaReached: false,
+        userQuotaReached: false,
+        renewsOn: '2026-12-01',
+        canEdit: true,
+        canManage: true,
+      };
+    },
+  },
   // L26-11 : télécommande (saisie du code, sans compte)
   { name: 'Télécommande', route: '/#/t' },
   // L16 : modale « Diffuser » (onglets SCORM, Intranet, E-mail, Où elle est diffusée)

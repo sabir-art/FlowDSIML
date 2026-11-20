@@ -4229,6 +4229,42 @@
       "noBubble": "Add a bubble to the step to use AI Assist."
     },
     "beforeSr": "Before:",
-    "afterSr": "After:"
+    "afterSr": "After:",
+    "lang": {
+      "fr": "French",
+      "en": "English",
+      "es": "Spanish",
+      "de": "German",
+      "it": "Italian",
+      "pt": "Portuguese",
+      "ar": "Arabic"
+    },
+    "translate": {
+      "menu": "Translate the demo…",
+      "title": "Translate the demo",
+      "target": "Target language",
+      "copyHelp": "A translated copy is created as a draft. The original demo does not change.",
+      "prepare": "Prepare the translation",
+      "busy": "Translating…",
+      "create": "Create the copy",
+      "created": "Translated copy created.",
+      "open": "Open",
+      "createError": "The copy could not be created. Try again.",
+      "colStep": "Step",
+      "colSource": "Original text",
+      "colTarget": "Translation",
+      "demo": "Demo",
+      "demoTitle": "Demo title",
+      "stepTitle": "Title",
+      "stepBody": "Text",
+      "bubbleTitle": "Bubble title",
+      "bubbleBody": "Bubble text",
+      "edit": "Translation, row {{n}}",
+      "tableCaption": "Translation into {{lang}}, editable before the copy is created",
+      "glossaryTerm": "Glossary term",
+      "glossaryList": "Glossary term: {{terms}}",
+      "glossaryWarn_one": "1 row does not keep a glossary term.",
+      "glossaryWarn_other": "{{count}} rows do not keep a glossary term."
+    }
   }
 }

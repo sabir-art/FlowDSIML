@@ -25,7 +25,9 @@ import {
   Target,
   Undo2,
   ZoomIn,
+  Languages,
 } from 'lucide-react';
+import { TranslateDialog } from '../../components/ai/TranslateDialog';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '../../components/Toast';
 import { activityOf, type EditTable, type PresencePayload } from './presence/presence';
@@ -209,6 +211,7 @@ export function EditorPage() {
   // L26-05 : enregistrer comme modèle
   const [savingTpl, setSavingTpl] = useState(false);
   // L16 : « Diffuser » (menu « … », aussi ouvert par #/demos/:id/distribute → ?distribute=1)
+  const [translating, setTranslating] = useState(false);
   const [distributing, setDistributing] = useState(() => params.get('distribute') === '1');
   // L22-02 : « Présenter » (aussi ouvert depuis le menu d'une démo par ?present=1)
   // L22-05 : lien d'une notification (?step=…&comment=…) → étape choisie une fois chargée
@@ -479,6 +482,9 @@ export function EditorPage() {
           }}
         />
       )}
+      {translating && ws && can('demo.edit') && (
+        <TranslateDialog editor={editor} ws={ws.id} onClose={() => setTranslating(false)} />
+      )}
       {distributing && demoId && can('demo.edit') && (
         <DistributeDialog demoId={demoId} onClose={() => setDistributing(false)} />
       )}
@@ -606,6 +612,10 @@ export function EditorPage() {
               end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
               onSelect: () => openSoon('ia'),
             },
+            // L30-03 : copie traduite (Assistance IA)
+            ...(can('demo.edit')
+              ? [{ label: t('ai.translate.menu'), icon: <Languages />, onSelect: () => setTranslating(true) }]
+              : []),
             // L30-02 : « Rédiger les textes » ouvre le menu Assistance IA de la première bulle de l'étape
             {
               label: t('editor.aiWriter'),

@@ -18,7 +18,8 @@ export type VariableRow = Tables<'variables'>;
 export type QuestionRow = Tables<'quiz_questions'>;
 
 export type DemoSettings = {
-  locale?: 'fr' | 'en';
+  /** Langue du contenu (L30-03 : copies traduites ; arabe lu de droite à gauche). */
+  locale?: 'fr' | 'en' | 'es' | 'de' | 'it' | 'pt' | 'ar';
   allowedEmbedOrigins?: string[];
   theme?: Partial<Theme>;
   cta?: Cta | null;

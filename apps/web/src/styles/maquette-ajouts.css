@@ -3091,6 +3091,10 @@
 .mk .soon-alert {
   margin-bottom: var(--fd-space-4);
 }
+/* L30 §11 : lien dans le texte du bandeau, distinct sans la couleur seule (RGAA) */
+.mk .soon-alert a {
+  text-decoration: underline;
+}
 .mk .soon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));

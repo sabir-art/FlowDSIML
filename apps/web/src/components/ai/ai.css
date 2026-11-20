@@ -173,3 +173,58 @@
     transition: none;
   }
 }
+/* L30-03 : aperçu de la traduction */
+.ai-tr-table-wrap {
+  max-height: min(56vh, 520px);
+  overflow: auto;
+}
+.ai-tr-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.ai-tr-table th,
+.ai-tr-table td {
+  padding: 8px;
+  vertical-align: top;
+  text-align: start;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.ai-tr-table thead th:first-child {
+  width: 22%;
+}
+.ai-tr-table tbody th {
+  font-weight: 600;
+}
+.ai-tr-kind {
+  display: block;
+  font-weight: 400;
+}
+.ai-tr-table td:first-of-type {
+  white-space: pre-wrap;
+}
+.mk .ai-tr-table textarea {
+  width: 100%;
+  min-height: 0;
+  resize: vertical;
+}
+.mk .ai-tr-table textarea.ai-tr-flag {
+  border-color: var(--fd-color-warning, #b45309);
+  box-shadow: 0 0 0 1px var(--fd-color-warning, #b45309);
+}
+.ai-tr-term {
+  display: block;
+  margin-top: 4px;
+  color: var(--fd-color-warning-text, var(--fd-color-text));
+}
+@media (max-width: 640px) {
+  .ai-tr-table thead {
+    display: none;
+  }
+  .ai-tr-table tr,
+  .ai-tr-table th,
+  .ai-tr-table td {
+    display: block;
+    width: auto;
+  }
+}

@@ -4229,6 +4229,42 @@
       "noBubble": "Ajoutez une bulle à l’étape pour utiliser l’Assistance IA."
     },
     "beforeSr": "Avant :",
-    "afterSr": "Après :"
+    "afterSr": "Après :",
+    "lang": {
+      "fr": "Français",
+      "en": "Anglais",
+      "es": "Espagnol",
+      "de": "Allemand",
+      "it": "Italien",
+      "pt": "Portugais",
+      "ar": "Arabe"
+    },
+    "translate": {
+      "menu": "Traduire la démo…",
+      "title": "Traduire la démo",
+      "target": "Langue cible",
+      "copyHelp": "Une copie traduite est créée en brouillon. La démo d’origine ne change pas.",
+      "prepare": "Préparer la traduction",
+      "busy": "Traduction en cours…",
+      "create": "Créer la copie",
+      "created": "Copie traduite créée.",
+      "open": "Ouvrir",
+      "createError": "La copie n’a pas pu être créée. Réessayez.",
+      "colStep": "Étape",
+      "colSource": "Texte d’origine",
+      "colTarget": "Traduction",
+      "demo": "Démo",
+      "demoTitle": "Titre de la démo",
+      "stepTitle": "Titre",
+      "stepBody": "Texte",
+      "bubbleTitle": "Titre de la bulle",
+      "bubbleBody": "Texte de la bulle",
+      "edit": "Traduction, ligne {{n}}",
+      "tableCaption": "Traduction en {{lang}}, modifiable avant la création de la copie",
+      "glossaryTerm": "Terme du glossaire",
+      "glossaryList": "Terme du glossaire : {{terms}}",
+      "glossaryWarn_one": "1 ligne ne garde pas un terme du glossaire.",
+      "glossaryWarn_other": "{{count}} lignes ne gardent pas un terme du glossaire."
+    }
   }
 }

@@ -1148,6 +1148,13 @@ async function install(page, state = seed()) {
             status: 'draft',
             current_version_id: null,
           });
+          // L30-03 : étapes et bulles copiées (positions conservées), comme la RPC réelle
+          for (const st of t.steps.filter((x) => x.demo_id === src.id)) {
+            const sid = `${st.id}-${id}`;
+            t.steps.push({ ...st, id: sid, demo_id: id });
+            for (const h of t.hotspots.filter((x) => x.step_id === st.id))
+              t.hotspots.push({ ...h, id: `${h.id}-${id}`, step_id: sid, demo_id: id });
+          }
           return json(route, 200, id);
         }
         case 'publish_demo': {

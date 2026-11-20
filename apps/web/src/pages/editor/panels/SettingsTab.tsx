@@ -188,10 +188,28 @@ export function SettingsTab({
           aria-label={t('editor.settings.language')}
           disabled={readOnly}
           value={settings.locale ?? 'fr'}
-          onChange={(e) => set({ locale: e.target.value === 'en' ? 'en' : 'fr' })}
+          onChange={(e) => set({ locale: e.target.value as NonNullable<DemoSettings['locale']> })}
         >
+          {/* L30-03 : langues des copies traduites, chaque nom dans sa langue */}
           <option value="fr">Français</option>
-          <option value="en">English</option>
+          <option value="en" lang="en">
+            English
+          </option>
+          <option value="es" lang="es">
+            Español
+          </option>
+          <option value="de" lang="de">
+            Deutsch
+          </option>
+          <option value="it" lang="it">
+            Italiano
+          </option>
+          <option value="pt" lang="pt">
+            Português
+          </option>
+          <option value="ar" lang="ar" dir="rtl">
+            {'\u0627\u0644\u0639\u0631\u0628\u064a\u0629'}
+          </option>
         </select>
       </div>
 

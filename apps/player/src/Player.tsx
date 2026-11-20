@@ -641,6 +641,9 @@ export function Player({
       class={`p-root ${compact ? 'is-compact' : ''}${mobile ? ' is-mobile' : ''}${framed ? ' is-framed' : ''}${dark ? ' is-dark' : ''}${present ? ' is-present' : ''}${present?.hideHotspots ? ' is-present-nohs' : ''}`}
       style={style}
       ref={rootRef}
+      // L30-03 : langue du contenu (copies traduites) ; l'arabe se lit de droite à gauche
+      lang={m.locale}
+      dir={m.locale === 'ar' ? 'rtl' : undefined}
     >
       {/* L18 : police de la médiathèque (WOFF2 https, URL contrôlée) */}
       {fontFaceCss(theme) && <style>{fontFaceCss(theme)}</style>}
