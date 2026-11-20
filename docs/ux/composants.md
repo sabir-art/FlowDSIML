@@ -533,3 +533,69 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
   - poser la version couleur sur du magenta, du prune ou du framboise ;
   - utiliser l'icône petite au-dessus de 23 px ou l'icône complète en dessous de 24 px.
 - **Contrôle CI suggéré** : aucun fichier de l'ancien logo (dégradé `#A52B60`) dans `apps/*/public` et `packages/*` ; tous les `<img>` du logo ont `alt="TutoClick"`.
+
+## 17. Qualité visuelle (UI) : règles mesurables
+
+> Retour du client du 20 novembre : les maquettes doivent être lisibles d'un coup d'œil, légères et aérées, avec une hiérarchie nette et sans « slop ». Ces règles s'appliquent à toute nouvelle maquette et à toute reprise. Les maquettes L41 à L49 ont été reprises selon elles (`specs/ui-deltas-l41-l49.md`).
+
+### 17.1 Un écran, une intention
+- **Une seule action principale visible** (`fd-btn--primary`) par écran ou par dialogue. Les autres actions sont secondaires (contour) ou en lien.
+- **Emplacements connus (Jakob)** :
+  - action principale de page en haut à droite ;
+  - action de dialogue en bas à droite ;
+  - Annuler à gauche de l'action.
+- **Au plus 7 éléments de premier niveau** par écran (Miller) : au-delà, on regroupe (sections, onglets, « Plus »).
+- **Au plus 5 choix visibles** dans une décision (Hick) : au-delà, on ajoute une recherche ou un regroupement.
+
+### 17.2 Hiérarchie
+- **Trois tailles de texte au plus par écran** :
+  - titre de page 28/700 ;
+  - titre de section 18/700 ;
+  - corps 15/400 ;
+  - le texte secondaire en 13/400 `text-muted` ne compte pas comme une taille.
+- **Ordre de lecture** : le titre, l'essentiel (chiffre, état, action), puis le détail (repliable, infobulle ou aide).
+- **Texte** :
+  - une ligne d'aide au plus sous un champ ;
+  - pas de paragraphe d'explication dans l'interface : il va dans l'aide (F1) ;
+  - pas de phrase qui répète le titre.
+
+### 17.3 Espace et alignement
+- **Grille de 8 px** et écarts de §15.4 bis.
+- **Marges** :
+  - 32 px entre deux sections d'une page ;
+  - 24 px de marge intérieure dans une carte ;
+  - 16 px entre deux lignes d'une liste.
+- **Alignement** : à gauche, sur une seule ligne de départ par colonne. Les chiffres sont alignés à droite, en `tabular-nums`.
+- **Réglages** : disposition en deux colonnes, libellé et une ligne d'aide à gauche (40 %), contrôle à droite, comme Paramètres > Sécurité aujourd'hui.
+
+### 17.4 Sobriété (anti-« slop »)
+- **Cartes** :
+  - une carte égale un objet ;
+  - jamais de carte dans une carte ;
+  - bordure **ou** ombre, pas les deux ;
+  - pas de carte autour d'une liste qui est déjà dans une carte.
+- **Badges** :
+  - au plus un par ligne ou par carte ;
+  - seulement pour un état qui change ce que l'on peut faire (Bientôt, Brouillon, Bloqué, Erreur) ;
+  - pas de badge décoratif (« Admins », « Recommandé », compteurs redondants). Un état simple s'écrit en texte, `text-muted` ou couleur d'état.
+- **Icônes** :
+  - une par élément au plus, à 18 px ;
+  - pas de pastille de fond systématique derrière les icônes ;
+  - pas d'icône devant chaque ligne d'une liste de texte.
+- **Couleur** :
+  - neutre par défaut ;
+  - couleur de marque pour l'action principale, la sélection et les liens ;
+  - couleurs d'état (succès, avertissement, danger) seulement pour un état réel ;
+  - jamais de grand aplat de couleur pour mettre en avant un élément ordinaire.
+- **Toujours interdits** : barre colorée sur un bord (§15.6), dégradés, ombres colorées, emoji, texte en capitales au-delà des sur-titres de 11 px.
+
+### 17.5 Cibles et confort
+- **Taille des cibles (Fitts)** : 40 px de haut au moins sur ordinateur, 44 px au toucher. La zone cliquable couvre toute la ligne quand la ligne entière est une action.
+- **Esthétique et utilisabilité** :
+  - les états vides, les chargements et les erreurs sont dessinés avec le même soin que l'état nominal ;
+  - aucun texte tronqué sans infobulle.
+
+### 17.6 Présentation des maquettes
+- Chaque maquette ouvre sur l'**après**, à la taille réelle, dans le cadre de l'app (barre latérale incluse quand c'est pertinent), avec un sélecteur **Après / Avant** (capture de l'app actuelle).
+- Viennent ensuite les états utiles (3 au plus), puis le sombre et le mobile.
+- Les annotations restent hors de l'écran dessiné, en une ligne chacune : le détail est dans la spec.

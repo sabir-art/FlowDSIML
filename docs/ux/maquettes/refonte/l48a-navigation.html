@@ -6,189 +6,62 @@
 <title>Navigation et Paramètres (lot L48-A) — TutoClick</title>
 <link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
 <link rel="stylesheet" href="refonte.css">
-<script src="refonte.js" defer></script>
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
 <style>
-  /* L48-A : barre latérale en trois zones, colonne Dossiers sur Démos, Paramètres groupés avec fil d'Ariane. Données fictives. Spec : docs/ux/specs/l48a-navigation.md */
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-  body { background: var(--fd-color-bg); }
-  .n48 { max-width: 1480px; margin: 0 auto; padding: 32px 20px 64px; display: flex; flex-direction: column; gap: 32px; color: var(--fd-color-text); font-family: var(--fd-font-sans); }
-  .n48 h1 { margin: 0; font-size: 28px; } .n48 > p { margin: 0; max-width: 940px; color: var(--fd-color-text-muted); }
-  .n48-blk { display: flex; flex-direction: column; gap: 12px; } .n48-blk > h2 { margin: 0; font-size: 20px; }
-  .n48-lab { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--fd-color-text-muted); }
-  .n48-ico { width: 18px; height: 18px; flex: none; }
-
-  /* Écran d'app */
-  .n48-app { width: 1440px; max-width: 100%; height: 820px; display: grid; grid-template-columns: 248px 1fr; border-radius: 16px; overflow: hidden; border: 1px solid var(--fd-color-border); background: var(--fd-color-bg); color: var(--fd-color-text); }
-  .n48-side { display: flex; flex-direction: column; padding: 20px 14px 14px; gap: 4px; }
-  .n48-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 12px; font-weight: 800; font-size: 18px; }
-  .n48-brand i { width: 34px; height: 34px; border-radius: 10px; background: var(--fd-color-primary); display: block; }
-  .n48-brand small { display: block; font-size: 11px; font-weight: 500; color: var(--fd-color-text-muted); }
-  .n48-ws { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 8px; border-radius: 12px; font-size: 14px; }
-  .n48-ws b { display: block; } .n48-ws small { color: var(--fd-color-text-muted); font-size: 12px; }
-  .n48-ws .av { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: #F7E1A6; color: #5a4200; font-weight: 700; font-size: 13px; }
-  .n48-ws .n48-ico { margin-left: auto; width: 16px; color: var(--fd-color-text-muted); }
-  .n48-sec { margin: 14px 10px 4px; font-size: 12px; font-weight: 600; color: var(--fd-color-text-muted); }
-  .n48-it { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 12px; border-radius: 999px; font-size: 15px; color: var(--fd-color-text); text-decoration: none; }
-  .n48-it:hover { background: var(--fd-color-surface-sunken); }
-  .n48-it[aria-current='page'] { background: var(--fd-color-text); color: var(--fd-color-surface); font-weight: 600; }
-  .n48-it .soon { margin-left: auto; }
-  .n48-it .cnt { margin-left: auto; font-size: 12px; color: var(--fd-color-text-muted); font-variant-numeric: tabular-nums; }
-  .n48-spacer { flex: 1; }
-  .n48-util { border-top: 1px solid var(--fd-color-border); padding-top: 8px; display: flex; flex-direction: column; gap: 2px; }
-  .n48-util .n48-it { height: 36px; font-size: 14px; }
-  .n48-me { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 10px; border-radius: 14px; background: var(--fd-color-surface); font-size: 14px; }
-  .n48-me .av { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--fd-color-primary); color: #fff; font-weight: 700; font-size: 13px; }
-  .n48-me small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
-  .n48-me .n48-ico { margin-left: auto; color: var(--fd-color-text-muted); }
-  .soon { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; border: 1px solid var(--fd-color-border); font-size: 11px; font-weight: 700; color: var(--fd-color-text-muted); }
-
-  /* Zone principale */
-  .n48-main { display: grid; grid-template-columns: 232px 1fr; min-width: 0; border-left: 1px solid var(--fd-color-border); }
-  .n48-main--full { grid-template-columns: 1fr; }
-  .n48-fold { padding: 24px 12px; border-right: 1px solid var(--fd-color-border); background: var(--fd-color-surface); display: flex; flex-direction: column; gap: 2px; }
-  .n48-fold__h { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 8px; font-weight: 700; font-size: 14px; }
-  .n48-fit { text-decoration: none; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 10px; font-size: 14px; color: var(--fd-color-text); }
-  .n48-fit:hover { background: var(--fd-color-surface-sunken); }
-  .n48-fit[aria-current='true'] { background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-weight: 600; }
-  .n48-fit .cnt { margin-left: auto; font-size: 12px; color: var(--fd-color-text-muted); font-variant-numeric: tabular-nums; }
-  .n48-fit[aria-current='true'] .cnt { color: inherit; }
-  .n48-fit.sub { padding-left: 34px; }
-  .n48-fit .n48-ico { width: 16px; height: 16px; }
-  .n48-fsep { height: 1px; background: var(--fd-color-border); margin: 8px 6px; }
-  .n48-fsec { padding: 6px 10px 2px; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--fd-color-text-muted); }
-  .n48-fit.add { color: var(--fd-color-primary); font-weight: 600; }
-  .n48-fit.drop { box-shadow: inset 0 0 0 2px var(--fd-color-primary); background: var(--fd-color-primary-soft); }
-  .n48-con { padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; min-width: 0; overflow: hidden; }
-  .n48-hd { display: flex; align-items: center; gap: 12px; }
-  .n48-hd h3 { margin: 0; font-size: 28px; flex: 1; } .n48-hd p { margin: 2px 0 0; font-size: 14px; color: var(--fd-color-text-muted); }
-  .n48-crumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fd-color-text-muted); margin: 0; padding: 0; list-style: none; }
-  .n48-crumb a { color: inherit; text-decoration: none; } .n48-crumb li[aria-current] { color: var(--fd-color-text); font-weight: 600; }
-  .n48-crumb .n48-ico { width: 14px; height: 14px; }
-  .n48-search { display: flex; align-items: center; gap: 8px; width: 260px; height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); background: var(--fd-color-surface); color: var(--fd-color-text-muted); font-size: 14px; }
-  .n48-tb { display: flex; align-items: center; gap: 8px; height: 40px; }
-  .n48-tb .end { margin-left: auto; display: flex; gap: 8px; }
-  .n48-flt { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); font-size: 14px; color: var(--fd-color-text); white-space: nowrap; }
-  .n48-flt span { color: var(--fd-color-text-muted); } .n48-flt .n48-ico { width: 16px; height: 16px; }
-  .n48-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-  .n48-card { border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); overflow: hidden; }
-  .n48-card i { display: block; aspect-ratio: 16 / 9; background: linear-gradient(180deg, #2b3242 0 14%, #eef1f6 14%); }
-  [data-theme='dark'] .n48-card i { background: linear-gradient(180deg, #0d1016 0 14%, #262c36 14%); }
-  .n48-card div { padding: 12px 14px; font-size: 14px; } .n48-card b { display: block; margin-bottom: 4px; } .n48-card small { color: var(--fd-color-text-muted); }
-
-  /* Paramètres */
-  .n48-snav { padding: 24px 12px; border-right: 1px solid var(--fd-color-border); display: flex; flex-direction: column; gap: 2px; }
-  .n48-sg { padding: 12px 10px 4px; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--fd-color-text-muted); }
-  .n48-sg:first-child { padding-top: 0; }
-  .n48-panel { padding: 24px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); display: flex; flex-direction: column; gap: 16px; }
-  .n48-panel h4 { margin: 0; font-size: 18px; } .n48-panel p { margin: 0; font-size: 14px; color: var(--fd-color-text-muted); }
-  .n48-row { display: grid; grid-template-columns: 36px 1fr 160px 120px; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--fd-color-border); font-size: 14px; }
-  .n48-row .av { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-size: 12px; font-weight: 700; }
-  .n48-row small { display: block; color: var(--fd-color-text-muted); font-size: 12.5px; }
-
-  /* Mobile */
-  .n48-ph { width: 390px; height: 760px; border-radius: 28px; overflow: hidden; border: 1px solid var(--fd-color-border); background: var(--fd-color-bg); position: relative; color: var(--fd-color-text); }
-  .n48-ph .n48-side { position: absolute; inset: 0 70px 0 0; background: var(--fd-color-bg); box-shadow: var(--fd-shadow-lg); z-index: 2; }
-  .n48-ph::after { content: ''; position: absolute; inset: 0; background: rgb(8 10 14 / .38); z-index: 1; }
-  .n48-duo { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
-  .n48-notes { margin: 0; padding-left: 20px; color: var(--fd-color-text-muted); display: grid; gap: 6px; font-size: 14px; max-width: 940px; }
+  /* L48-A, reprise UI (composants §17). Spec : docs/ux/specs/l48a-navigation.md. Données fictives. */
+  .n-wrap { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; }
+  .n-fold { display: flex; flex-direction: column; gap: 2px; padding-top: 4px; }
+  .n-fold h2 { margin: 0 12px 12px; font-size: 13px; font-weight: 600; color: var(--fd-color-text-muted); }
+  .n-fold a { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 10px; font-size: 14px; color: var(--fd-color-text); text-decoration: none; }
+  .n-fold a .c { margin-left: auto; font-size: 13px; color: var(--fd-color-text-muted); font-variant-numeric: tabular-nums; }
+  .n-fold a[aria-current] { background: var(--fd-color-surface); font-weight: 600; }
+  .n-fold a.sub { padding-left: 28px; }
+  .n-fold a.add { color: var(--fd-color-primary); font-weight: 600; }
+  .n-fold a.drop { box-shadow: inset 0 0 0 2px var(--fd-color-primary); }
+  .n-fold hr { border: 0; border-top: 1px solid var(--fd-color-border); margin: 12px 12px; }
+  .n-fold svg { color: var(--fd-color-text-muted); }
+  .n-bar { display: flex; align-items: center; gap: 8px; }
+  .n-flt { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 999px; background: var(--fd-color-surface); font-size: 14px; white-space: nowrap; }
+  .n-flt span { color: var(--fd-color-text-muted); } .n-bar .end { margin-left: auto; display: flex; gap: 8px; }
+  .n-ib { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: var(--fd-color-surface); }
+  .n-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .n-card { border-radius: 20px; background: var(--fd-color-surface); overflow: hidden; }
+  .n-card i { display: block; aspect-ratio: 16 / 9; background: var(--fd-color-surface-sunken); }
+  .n-card div { padding: 16px 20px 20px; } .n-card b { display: block; font-size: 15px; } .n-card small { font-size: 13px; color: var(--fd-color-text-muted); }
+  .n-snav { display: flex; flex-direction: column; gap: 2px; padding-top: 4px; }
+  .n-snav b { margin: 16px 12px 6px; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--fd-color-text-muted); } .n-snav b:first-child { margin-top: 0; }
+  .n-snav a { display: flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; font-size: 14px; color: var(--fd-color-text); text-decoration: none; }
+  .n-snav a[aria-current] { background: var(--fd-color-surface); font-weight: 600; }
+  .n-snav a em { margin-left: auto; font-style: normal; font-size: 12px; color: var(--fd-color-text-muted); }
+  .n-mem { gap: 16px; } .n-mem i { width: 36px; height: 36px; border-radius: 50%; background: var(--fd-color-surface-sunken); display: grid; place-items: center; font: 600 13px var(--fd-font-sans); font-style: normal; flex: none; }
+  .n-mem span:nth-child(2) { flex: 1; } .n-mem small { display: block; font-size: 13px; color: var(--fd-color-text-muted); }
+  .n-role { font-size: 14px; color: var(--fd-color-text); display: inline-flex; align-items: center; gap: 4px; }
 </style>
 </head>
 <body>
-<main class="n48">
-  <h1>L48-A : navigation, colonne Dossiers et Paramètres</h1>
-  <p>La barre latérale passe en trois zones : contenus, formation, puis utilitaires en bas (Extension, Centre d'aide, Paramètres) et le profil. Les doublons (Leads, Membres, Plans) quittent la barre. La page Démos reçoit une colonne Dossiers persistante avec compteurs. Les Paramètres sont groupés, avec un fil d'Ariane. Données fictives.</p>
-
-  <section class="n48-blk" aria-labelledby="a1"><h2 id="a1">1. Démos, avec la colonne Dossiers (dossier « Procédures » ouvert)</h2><div data-slot="demos-l"></div></section>
-  <section class="n48-blk" aria-labelledby="a2"><h2 id="a2">2. Paramètres groupés, avec fil d'Ariane</h2><div data-slot="settings"></div></section>
-  <section class="n48-blk" aria-labelledby="a3"><h2 id="a3">3. En sombre, glisser une démo sur un dossier</h2><div data-slot="demos-d" data-theme="dark"></div></section>
-  <section class="n48-blk" aria-labelledby="a4"><h2 id="a4">4. Mobile (390 px) : menu ouvert, en clair et en sombre</h2><div class="n48-duo" data-slot="mob"></div></section>
-  <section class="n48-blk" aria-labelledby="a5"><h2 id="a5">Règles</h2>
-    <ul class="n48-notes">
-      <li>Barre latérale : Contenus (Démos, Parcours, Analytics), Formation (Apprenants), puis en bas Extension, Centre d'aide, Paramètres et le profil. « Workspace » devient « Espace ».</li>
-      <li>Colonne Dossiers (232 px) : Toutes les démos, Mes démos, les dossiers (sous-dossiers en retrait), « Nouveau dossier », puis Archivées. Compteurs à droite. Elle remplace le filtre « Dossier » de la barre de liste.</li>
-      <li>Barre de liste (L40) : Statut, Créé par, Étiquettes, Réinitialiser à gauche ; Tri (avec « Date de création ») et Affichage à droite. Quand la barre fait moins de 1 100 px (colonne Dossiers ouverte), le Tri passe en icône, avec son nom complet en infobulle et pour les lecteurs d'écran.</li>
-      <li>Paramètres : groupes Espace, Marque, Contenu, Connexions, Mon compte. Fil d'Ariane au-dessus du titre. « Fonctions à venir » disparaît : chaque fonction à venir est à sa place avec « Bientôt ».</li>
-    </ul>
-  </section>
+<main class="u2">
+  <header class="u2-head"><div><small>Lot L48-A · Reprise UI</small><h1>Navigation, dossiers et paramètres</h1><p>Trois zones dans la barre latérale, une colonne Dossiers en texte simple, des paramètres groupés. Moins d’icônes, moins de cadres : la hiérarchie vient de la typographie et de l’espace.</p></div></header>
+  <div id="a1"></div><div id="a2"></div>
+  <section class="u2-sec"><h2>En sombre : glisser une démo sur un dossier</h2><div id="a3"></div></section>
 </main>
 <script>
-  const P = {
-    grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
-    route: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
-    chart: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
-    grad: '<path d="M21.42 10.92a1 1 0 0 0-.02-1.84L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
-    puzzle: '<path d="M19.44 7.85c-.47.47-1.1.72-1.73.72H16a1 1 0 0 1-1-1V5.3c0-.64.25-1.27.72-1.73a2.5 2.5 0 1 0-3.44 0c.47.46.72 1.09.72 1.73v1.27a1 1 0 0 1-1 1H8.3c-.64 0-1.27-.25-1.73-.72a2.5 2.5 0 1 0 0 3.44c.46-.47 1.09-.72 1.73-.72H10a1 1 0 0 1 1 1v1.71c0 .64-.25 1.27-.72 1.73a2.5 2.5 0 1 0 3.44 0c-.47-.46-.72-1.09-.72-1.73V12.3a1 1 0 0 1 1-1h1.71c.64 0 1.27.25 1.73.72a2.5 2.5 0 1 0 0-3.44"/>',
-    help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
-    gear: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
-    down: '<path d="m6 9 6 6 6-6"/>',
-    right: '<path d="m9 18 6-6-6-6"/>',
-    dots: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
-    layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
-    user: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
-    folder: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
-    lock: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-    archive: '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
-    plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
-    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
-    tag: '<path d="M12.59 2.59A2 2 0 0 0 11.17 2H4a2 2 0 0 0-2 2v7.17a2 2 0 0 0 .59 1.41l8.7 8.7a2.43 2.43 0 0 0 3.42 0l6.58-6.58a2.43 2.43 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
-    sort: '<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>',
-    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-    list: '<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
-    bell: '<path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/>'
-  };
-  const I = (n) => `<svg class="n48-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${P[n]}</svg>`;
-  const side = (cur) => `<aside class="n48-side"><div class="n48-brand"><i aria-hidden="true"></i><span>TutoClick<small>DSI des Missions Locales</small></span></div>
-    <button class="n48-ws" type="button" aria-haspopup="menu" style="all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px;margin-bottom:8px;border-radius:12px;font-size:14px;cursor:pointer"><span class="av" style="width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#F7E1A6;color:#5a4200;font-weight:700;font-size:13px">A</span><span><b style="display:block">Acme Formation</b><small style="color:var(--fd-color-text-muted);font-size:12px">Espace · 5 membres</small></span>${I('down')}</button>
-    <nav aria-label="Navigation principale" style="display:flex;flex-direction:column;gap:2px">
-      <a class="n48-it" href="#" ${cur === 'demos' ? 'aria-current="page"' : ''}>${I('grid')}Démos</a>
-      <a class="n48-it" href="#">${I('route')}Parcours de formation</a>
-      <a class="n48-it" href="#">${I('chart')}Analytics</a>
-      <div class="n48-sec">Formation</div>
-      <a class="n48-it" href="#">${I('grad')}Apprenants</a>
-    </nav>
-    <div class="n48-spacer"></div>
-    <nav class="n48-util" aria-label="Utilitaires">
-      <a class="n48-it" href="#">${I('puzzle')}Extension</a>
-      <a class="n48-it" href="#">${I('help')}Centre d’aide</a>
-      <a class="n48-it" href="#" ${cur === 'settings' ? 'aria-current="page"' : ''}>${I('gear')}Paramètres</a>
-    </nav>
-    <button class="n48-me" type="button" aria-haspopup="menu" style="all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px;border-radius:14px;background:var(--fd-color-surface);font-size:14px;cursor:pointer"><span class="av" style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--fd-color-primary);color:#fff;font-weight:700;font-size:13px">CM</span><span><b>Camille Martin</b><small style="display:block;color:var(--fd-color-text-muted);font-size:12px">Propriétaire</small></span>${I('dots')}</button>
-  </aside>`;
-  const folders = (drop) => `<nav class="n48-fold" aria-label="Dossiers"><div class="n48-fold__h">Dossiers<button class="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" type="button" aria-label="Nouveau dossier">${I('plus')}</button></div>
-    <a class="n48-fit" href="#">${I('layers')}Toutes les démos<span class="cnt">24</span></a>
-    <a class="n48-fit" href="#">${I('user')}Mes démos<span class="cnt">9</span></a>
-    <div class="n48-fsep"></div><div class="n48-fsec">Dossiers de l’espace</div>
-    <a class="n48-fit${drop ? ' drop' : ''}" href="#">${I('folder')}Prise en main<span class="cnt">6</span></a>
-    <a class="n48-fit" href="#" aria-current="true">${I('folder')}Procédures<span class="cnt">8</span></a>
-    <a class="n48-fit sub" href="#">${I('folder')}Logiciel métier<span class="cnt">5</span></a>
-    <a class="n48-fit" href="#">${I('lock')}Communication interne<span class="cnt">4</span></a>
-    <a class="n48-fit add" href="#">${I('plus')}Nouveau dossier</a>
-    <div class="n48-fsep"></div>
-    <a class="n48-fit" href="#">${I('archive')}Archivées<span class="cnt">3</span></a></nav>`;
+  const { I, app, pair } = U2;
+  const fold = (drop) => `<nav class="n-fold" aria-label="Dossiers"><h2>Dossiers</h2>
+    <a href="#">Toutes les démos<span class="c">24</span></a><a href="#">Mes démos<span class="c">9</span></a><hr>
+    <a href="#" class="${drop ? 'drop' : ''}">Prise en main<span class="c">6</span></a><a href="#" aria-current="true">Procédures<span class="c">8</span></a><a href="#" class="sub">Logiciel métier<span class="c">5</span></a><a href="#">${I('lock', 14)}Communication interne<span class="c">4</span></a><a href="#" class="add">${I('plus', 16)}Nouveau dossier</a><hr>
+    <a href="#">Archivées<span class="c">3</span></a></nav>`;
   const cards = [['Créer un rapport', 'Publiée · 120 vues'], ['Saisir un entretien', 'Publiée · 86 vues'], ['Exporter une liste', 'Brouillon'], ['Planifier un atelier', 'Publiée · 40 vues'], ['Mettre à jour un dossier', 'Publiée · 22 vues'], ['Joindre un justificatif', 'Brouillon']];
-  const demos = (drop) => `<div class="n48-app">${side('demos')}<div class="n48-main">${folders(drop)}<div class="n48-con">
-    <div class="n48-hd"><div style="flex:1"><ol class="n48-crumb" aria-label="Fil d’Ariane"><li><a href="#">Démos</a></li><li aria-hidden="true">${I('right')}</li><li aria-current="page">Procédures</li></ol><h3>Procédures</h3></div>
-      <button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" aria-label="Notifications">${I('bell')}</button><span class="n48-search">${I('search')}Rechercher une démo</span><button class="fd-btn fd-btn--primary fd-btn--lg" type="button">${I('plus')}Nouvelle démo</button></div>
-    <div class="n48-tb" role="toolbar" aria-label="Filtres et tri"><span class="fd-segmented" role="group" aria-label="Statut"><button type="button" aria-pressed="true">Toutes · 8</button><button type="button" aria-pressed="false">Publiées · 6</button><button type="button" aria-pressed="false">Brouillons · 2</button></span>
-      <span class="n48-flt">${I('users')}<span>Créé par :</span>Tous${I('down')}</span><span class="n48-flt">${I('tag')}<span>Étiquettes :</span>Toutes${I('down')}</span>
-      <span class="end"><button class="fd-btn fd-btn--icon" type="button" aria-label="Tri : Modifiées récemment" style="width:40px;height:40px;border-radius:999px;border:1px solid var(--fd-color-border);background:var(--fd-color-surface)">${I('sort')}</button><span class="fd-segmented" role="group" aria-label="Affichage"><button type="button" aria-pressed="true" aria-label="Grille">${I('grid')}</button><button type="button" aria-pressed="false" aria-label="Liste">${I('list')}</button></span></span></div>
-    <div class="n48-grid">${cards.map(([t, s], i) => `<article class="n48-card"${drop && i === 0 ? ' style="opacity:.5"' : ''}><i></i><div><b>${t}</b><small>${s}</small></div></article>`).join('')}</div>
-  </div></div></div>`;
-  const settings = () => `<div class="n48-app">${side('settings')}<div class="n48-main" style="grid-template-columns:232px 1fr"><nav class="n48-snav" aria-label="Sections des paramètres">
-      <div class="n48-sg">Espace</div><a class="n48-fit" href="#">Général</a><a class="n48-fit" href="#" aria-current="true">Équipe</a><a class="n48-fit" href="#">Utilisation</a><a class="n48-fit" href="#">Sécurité</a><a class="n48-fit" href="#">Confidentialité</a>
-      <div class="n48-sg">Marque</div><a class="n48-fit" href="#">Thème et couleurs</a><a class="n48-fit" href="#">Page publique</a><a class="n48-fit" href="#">Domaine<span class="soon" style="margin-left:auto">Bientôt</span></a>
-      <div class="n48-sg">Contenu</div><a class="n48-fit" href="#">Variables</a><a class="n48-fit" href="#">Glossaire</a><a class="n48-fit" href="#">Étiquettes</a><a class="n48-fit" href="#">Assistance IA</a>
-      <div class="n48-sg">Connexions</div><a class="n48-fit" href="#">Intégrations</a><a class="n48-fit" href="#">Clés d’accès<span class="soon" style="margin-left:auto">Bientôt</span></a>
-      <div class="n48-sg">Mon compte</div><a class="n48-fit" href="#">Profil</a><a class="n48-fit" href="#">Notifications<span class="soon" style="margin-left:auto">Bientôt</span></a></nav>
-    <div class="n48-con"><div><ol class="n48-crumb" aria-label="Fil d’Ariane"><li><a href="#">Paramètres</a></li><li aria-hidden="true">${I('right')}</li><li><a href="#">Espace</a></li><li aria-hidden="true">${I('right')}</li><li aria-current="page">Équipe</li></ol><div class="n48-hd" style="margin-top:6px"><h3>Équipe</h3><button class="fd-btn fd-btn--primary" type="button">${I('plus')}Inviter</button></div></div>
-      <div class="n48-panel"><h4>Membres · 5</h4><p>Les éditeurs créent et modifient les démos ; les lecteurs consultent et commentent.</p>
-        ${[['CM', 'Camille Martin', 'camille.martin@example.com', 'Propriétaire'], ['LF', 'Léa Fictive', 'lea.fictive@example.com', 'Admin'], ['NT', 'Noé Test', 'noe.test@example.com', 'Éditeur'], ['LM', 'Lucas Modèle', 'lucas.modele@example.com', 'Lecteur']].map(([a, n, e, r]) => `<div class="n48-row"><span class="av" aria-hidden="true">${a}</span><span><b>${n}</b><small>${e}</small></span><span class="n48-flt" style="height:36px">${r}${I('down')}</span><span style="color:var(--fd-color-text-muted);font-size:13px">Actif</span></div>`).join('')}
-      </div></div></div></div>`;
-  document.querySelector('[data-slot="demos-l"]').innerHTML = demos(false);
-  document.querySelector('[data-slot="settings"]').innerHTML = settings();
-  document.querySelector('[data-slot="demos-d"]').innerHTML = demos(true);
-  const mob = (th) => `<div><span class="n48-lab">${th === 'dark' ? 'Sombre' : 'Clair'}</span><div class="n48-ph" data-theme="${th}" style="margin-top:8px">${side('demos')}</div></div>`;
-  document.querySelector('[data-slot="mob"]').innerHTML = mob('light') + mob('dark');
+  const demos = (drop) => `<div class="n-wrap">${fold(drop)}<div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+    <div class="u2-top"><div style="flex:1"><p class="u2-crumb">Démos</p><h1>Procédures</h1></div><button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" aria-label="Rechercher">${I('search')}</button><button class="fd-btn fd-btn--primary fd-btn--lg" type="button">${I('plus')}Nouvelle démo</button></div>
+    <div class="n-bar"><span class="fd-segmented" role="group" aria-label="Statut"><button type="button" aria-pressed="true">Toutes</button><button type="button" aria-pressed="false">Publiées</button><button type="button" aria-pressed="false">Brouillons</button></span><span class="n-flt"><span>Créé par :</span>Tous${I('down', 16)}</span><span class="n-flt"><span>Étiquettes :</span>Toutes${I('down', 16)}</span><span class="end"><span class="n-ib" role="button" aria-label="Tri : Modifiées récemment">${I('sort')}</span><span class="fd-segmented" role="group" aria-label="Affichage"><button type="button" aria-pressed="true" aria-label="Grille">${I('grid', 16)}</button><button type="button" aria-pressed="false" aria-label="Liste">${I('list', 16)}</button></span></span></div>
+    <div class="n-grid">${cards.map(([t, s], i) => `<article class="n-card"${drop && i === 0 ? ' style="opacity:.4"' : ''}><i></i><div><b>${t}</b><small>${s}</small></div></article>`).join('')}</div></div></div>`;
+  document.getElementById('a1').outerHTML = pair('Démos : barre latérale en trois zones et colonne Dossiers', app('demos', demos(false)), 'img/avant/l47-l48-demos.png', 'Page Démos actuelle', 'Contenus en haut, utilitaires en bas. Les dossiers sont une liste de texte : compteur discret à droite, sélection en fond blanc, un cadenas seulement pour l’accès restreint.');
+  const set = `<div class="n-wrap"><nav class="n-snav" aria-label="Sections des paramètres"><b>Espace</b><a href="#">Général</a><a href="#" aria-current="page">Équipe</a><a href="#">Utilisation</a><a href="#">Sécurité</a><a href="#">Confidentialité</a><b>Marque</b><a href="#">Thème et couleurs</a><a href="#">Page publique</a><a href="#">Domaine<em>Bientôt</em></a><b>Contenu</b><a href="#">Variables</a><a href="#">Glossaire</a><a href="#">Étiquettes</a><a href="#">Assistance IA</a><b>Connexions</b><a href="#">Intégrations</a><b>Mon compte</b><a href="#">Profil</a><a href="#">Notifications<em>Bientôt</em></a></nav>
+    <div style="display:flex;flex-direction:column;gap:24px;min-width:0"><div class="u2-top"><div style="flex:1"><p class="u2-crumb">Paramètres › Espace</p><h1>Équipe</h1></div><button class="fd-btn fd-btn--primary" type="button">${I('plus')}Inviter</button></div>
+    <section class="u2-card" style="padding:8px 24px"><ul class="u2-list">${[['CM', 'Camille Martin', 'camille.martin@example.com', 'Propriétaire'], ['LF', 'Léa Fictive', 'lea.fictive@example.com', 'Admin'], ['NT', 'Noé Test', 'noe.test@example.com', 'Éditeur'], ['LM', 'Lucas Modèle', 'lucas.modele@example.com', 'Lecteur']].map(([a, n, e, r]) => `<li class="n-mem" style="min-height:72px"><i>${a}</i><span><b style="font-weight:600">${n}</b><small>${e}</small></span><span class="n-role">${r}${I('down', 16)}</span></li>`).join('')}</ul></section></div></div>`;
+  document.getElementById('a2').outerHTML = pair('Paramètres : cinq groupes et un fil d’Ariane', app('settings', set), 'img/avant/l48a-parametres.png', 'Paramètres actuels : 12 entrées à plat', '« Bientôt » en texte discret à droite, sans pastille. La liste des membres sans cadre ni icône inutile.');
+  document.getElementById('a3').innerHTML = app('demos', demos(true), { theme: 'dark' });
 </script>
 </body>
 </html>
