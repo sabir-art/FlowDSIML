@@ -2277,6 +2277,7 @@ function defaults(table, r) {
       variables: {},
       expires_at: null,
       is_active: true,
+      cohort: '',
     };
   if (table === 'chapters') return { title: '' };
   return {};

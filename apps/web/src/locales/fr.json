@@ -1994,7 +1994,50 @@
     "centerLink": "Lien du centre",
     "centerLinkOf": "Copier le lien du centre de {{name}} (progression et attestation)",
     "demoLinkOf": "Copier le lien de la démo seule de {{name}}",
-    "centerLinkCreated": "Lien créé. Le lien du centre (progression et attestation) est copié dans le presse-papiers."
+    "centerLinkCreated": "Lien créé. Le lien du centre (progression et attestation) est copié dans le presse-papiers.",
+    "cohort": "Groupe",
+    "cohortPlaceholder": "Ex. Session du 12 novembre",
+    "import": {
+      "open": "Importer une liste (CSV)",
+      "title": "Importer une liste d’apprenants",
+      "help": "Un lien personnalisé par ligne. Colonnes : prénom, nom, e-mail, et groupe (facultatif). Les liens sont vérifiés avant d’être créés ; TutoClick n’envoie aucun e-mail.",
+      "template": "Télécharger le modèle",
+      "templateFile": "modele-apprenants.csv",
+      "file": "Fichier CSV",
+      "cohortHelp": "Appliqué aux lignes sans groupe.",
+      "missing": "Colonnes introuvables dans « {{file}} » : {{columns}}. Partez du modèle.",
+      "col": {
+        "name": "Nom",
+        "email": "E-mail"
+      },
+      "summary_one": "{{count}} lien prêt à être créé.",
+      "summary_other": "{{count}} liens prêts à être créés.",
+      "errors_one": "{{count}} ligne en erreur ne sera pas importée.",
+      "errors_other": "{{count}} lignes en erreur ne seront pas importées.",
+      "truncated_one": "{{count}} ligne au-delà de 500 est ignorée.",
+      "truncated_other": "{{count}} lignes au-delà de 500 sont ignorées.",
+      "caption": "Aperçu de l’import, ligne par ligne",
+      "line": "Ligne",
+      "check": "Contrôle",
+      "ok": "Prêt",
+      "err": {
+        "name": "Prénom ou nom manquant",
+        "email": "E-mail invalide",
+        "duplicate": "Doublon dans le fichier",
+        "exists": "Déjà un lien pour cet e-mail",
+        "cohort": "Groupe trop long"
+      },
+      "create_one": "Créer {{count}} lien",
+      "create_other": "Créer {{count}} liens",
+      "creating": "Création…",
+      "done_one": "{{count}} lien créé.",
+      "done_other": "{{count}} liens créés.",
+      "doneHelp": "Exportez-les pour un envoi depuis votre messagerie (publipostage).",
+      "export": "Exporter les liens (CSV)",
+      "exportAll": "Exporter les liens (CSV)",
+      "exportFile": "liens-apprenants.csv",
+      "demoLink": "Lien de la démo"
+    }
   },
   "analytics": {
     "title": "Analytics",
@@ -2855,7 +2898,8 @@
       "all": "Toutes",
       "allF": "Toutes",
       "change": "Changer le filtre {{label}}",
-      "clear": "Retirer le filtre {{label}}"
+      "clear": "Retirer le filtre {{label}}",
+      "group": "Groupe"
     },
     "kpi": {
       "doneFoot": "{{pct}} des apprenants",
@@ -3019,7 +3063,8 @@
       "status": "Statut",
       "last": "Dernière activité",
       "best": "Meilleur score (%)",
-      "attempts": "Tentatives"
+      "attempts": "Tentatives",
+      "group": "Groupe"
     },
     "paths": {
       "title": "Formations et structures",
@@ -3081,7 +3126,10 @@
       "optional": "(facultatif)"
     },
     "daysAgo_one": "il y a {{count}} j",
-    "daysAgo_other": "il y a {{count}} j"
+    "daysAgo_other": "il y a {{count}} j",
+    "noGroup": "Sans groupe",
+    "groupPlaceholder": "Ex. Session du 12 novembre",
+    "groupSaved": "Groupe enregistré."
   },
   "center": {
     "title": "Centre de formation",

@@ -60,6 +60,7 @@ const data: ProgressData = {
       structureId: 's1',
       createdAt: daysAgo(30),
       lastReminder: null,
+      group: 'Session du 12 novembre',
       modules: [
         mod('d1', { seen: 10, status: 'validated', lastActivity: daysAgo(20) }),
         mod('d2', { seen: 2, hasQuiz: true, status: 'in_progress', lastActivity: daysAgo(12) }),
@@ -134,13 +135,16 @@ describe('suivi des apprenants', () => {
   });
 
   it('filtre par formation (statut de la formation), structure, module et recherche', () => {
-    const f = { path: '', status: '' as const, structure: '', q: '', module: '' };
+    const f = { path: '', status: '' as const, structure: '', group: '', q: '', module: '' };
     expect(applyFilters(rows, { ...f, path: 'p2' }).map((r) => r.raw.id)).toEqual(['a']);
     expect(applyFilters(rows, { ...f, path: 'p2', status: 'done' }).map((r) => r.raw.id)).toEqual(['a']);
     expect(applyFilters(rows, { ...f, structure: 'none' }).map((r) => r.raw.id)).toEqual(['b']);
     expect(applyFilters(rows, { ...f, module: 'd2' }).map((r) => r.raw.id)).toEqual(['a', 'c']);
     expect(applyFilters(rows, { ...f, q: 'HUGO' }).map((r) => r.raw.id)).toEqual(['b']);
     expect(applyFilters(rows, { ...f, status: 'stale' }).map((r) => r.raw.id)).toEqual(['a']);
+    // L38-3 : groupe (session) et « sans groupe »
+    expect(applyFilters(rows, { ...f, group: 'Session du 12 novembre' }).map((r) => r.raw.id)).toEqual(['a']);
+    expect(applyFilters(rows, { ...f, group: 'none' }).map((r) => r.raw.id)).toEqual(['b', 'c']);
   });
 
   it('trie', () => {
@@ -172,6 +176,7 @@ describe('suivi des apprenants', () => {
       name: 'Nom',
       email: 'E-mail',
       structure: 'Structure',
+      group: 'Groupe',
       source: 'Identifié par',
       sourceValue: (s: string) => s,
       paths: 'Formations',
@@ -188,6 +193,7 @@ describe('suivi des apprenants', () => {
       'Nom',
       'E-mail',
       'Structure',
+      'Groupe',
       'Identifié par',
       'Logiciel métier · Prise en main',
       'Logiciel métier · Quiz final',
@@ -197,6 +203,7 @@ describe('suivi des apprenants', () => {
       'Léa Exemple',
       'lea@exemple.invalid',
       'Antenne Nord',
+      'Session du 12 novembre',
       'link',
       'validated (100 %)',
       'in_progress (20 %)',

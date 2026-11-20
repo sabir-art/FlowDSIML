@@ -10,6 +10,7 @@ import {
   Power,
   ShieldCheck,
   Trash2,
+  Upload,
   X,
 } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
@@ -48,6 +49,9 @@ import { popupAllowed } from './snippets';
 import { popupCode } from './distribute';
 import { PLAYER_URL } from '../../lib/env';
 import { centerLinkUrl, centerModuleOf, type CenterModule } from './centerModule';
+import { ImportLinksDialog } from './ImportLinksDialog';
+import { COHORT_MAX, cohorts, exportLinks, linkFromRow } from './linksCsv';
+import { downloadText } from '../../lib/download';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
@@ -87,6 +91,9 @@ export function SharePage() {
   const [origins, setOrigins] = useState('');
   /** L38-1 : module d'une formation publiée dans le centre (le lien du centre passe alors en premier). */
   const [centerModule, setCenterModule] = useState<CenterModule | null>(null);
+  /** L38-3 : groupes déjà utilisés dans l'espace (suggestions) ; L38-2 : import d'une liste. */
+  const [cohortList, setCohortList] = useState<string[]>([]);
+  const [importing, setImporting] = useState(false);
   // RP-2 : la modale RGPD ouvre directement l'onglet Accès (?tab=access)
   const [tab, setTab] = useState<Tab>(() => {
     const q = params.get('tab');
@@ -99,6 +106,28 @@ export function SharePage() {
   const { error, success, run } = useAction();
   const editable = can('demo.edit');
   const plan = usePlan();
+
+  /** L38-2 : liens exportés en CSV (lien du centre pour un module de formation). */
+  const exportCsv = (rows: Pick<Tables<'share_links'>, 'name' | 'variables' | 'cohort' | 'token'>[]) =>
+    downloadText(
+      t('share.import.exportFile'),
+      exportLinks(
+        rows.map((l) => ({
+          name: l.name,
+          email: ((l.variables as Record<string, string>) ?? {}).email ?? '',
+          cohort: l.cohort,
+          center: centerModule ? centerLinkUrl(PLAYER_URL, centerModule.slug, l.token) : null,
+          demo: shareLinkUrl(l.token),
+        })),
+        {
+          name: t('share.linkNameShort'),
+          email: t('share.import.col.email'),
+          cohort: t('share.cohort'),
+          center: t('share.centerLink'),
+          demo: t('share.import.demoLink'),
+        },
+      ),
+    );
 
   const load = useCallback(async () => {
     const d = await supabase.from('demos').select('*').eq('id', demoId).maybeSingle();
@@ -132,7 +161,7 @@ export function SharePage() {
     ]);
     const list = l.data ?? [];
     setLinks(list);
-    const [center, paths, mods] = await Promise.all([
+    const [center, paths, mods, groups] = await Promise.all([
       supabase
         .from('training_centers')
         .select('slug, published')
@@ -143,8 +172,10 @@ export function SharePage() {
         .from('path_modules')
         .select('path_id, demo_id, position')
         .eq('workspace_id', d.data.workspace_id),
+      supabase.from('share_links').select('cohort').eq('workspace_id', d.data.workspace_id).neq('cohort', ''),
     ]);
     setCenterModule(centerModuleOf(center.data, paths.data ?? [], mods.data ?? [], demoId));
+    setCohortList(cohorts((groups.data ?? []).map((g) => g.cohort)));
     const ver = v.data as { published_at: string; public_ack: { by?: string; at?: string } | null } | null;
     setPublishedAt(ver?.published_at ?? null);
     const pa = ver?.public_ack;
@@ -509,16 +540,34 @@ export function SharePage() {
               <section role="tabpanel" id="sh-panel-perso" aria-labelledby="sh-tab-perso">
                 <div className="row between sh-perso-head">
                   <p className="muted">{t('share.persoHelp')}</p>
-                  {editable && (
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={() => setCreating(true)}
-                    >
-                      <Plus aria-hidden="true" />
-                      {t('share.newLink')}
-                    </button>
-                  )}
+                  <div className="row sh-perso-acts">
+                    {links.length > 0 && (
+                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => exportCsv(links)}>
+                        <Download aria-hidden="true" />
+                        {t('share.import.exportAll')}
+                      </button>
+                    )}
+                    {editable && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => setImporting(true)}
+                      >
+                        <Upload aria-hidden="true" />
+                        {t('share.import.open')}
+                      </button>
+                    )}
+                    {editable && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => setCreating(true)}
+                      >
+                        <Plus aria-hidden="true" />
+                        {t('share.newLink')}
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {centerModule && (
                   <p className="sh-center-note" role="note">
@@ -565,6 +614,7 @@ export function SharePage() {
                                 )}
                               </th>
                               <td>
+                                {l.cohort && <span className="badge sh-cohort">{l.cohort}</span>}
                                 {vars.map((v) => (
                                   <span key={v} className="badge sh-var" title={v}>
                                     {v}
@@ -579,7 +629,9 @@ export function SharePage() {
                                         })}
                                   </span>
                                 )}
-                                {!vars.length && !l.expires_at && <span className="muted">—</span>}
+                                {!vars.length && !l.expires_at && !l.cohort && (
+                                  <span className="muted">—</span>
+                                )}
                               </td>
                               <td>
                                 {l.page_enabled && l.page_code ? (
@@ -767,12 +819,13 @@ export function SharePage() {
           members={signers}
           datasetRows={dsRows}
           demoTitle={demo.title}
+          cohortList={cohortList}
           onEnablePublicPage={() => {
             setCreating(false);
             setTab('page');
           }}
           onClose={() => setCreating(false)}
-          onCreate={async (name, vars, days, pp) => {
+          onCreate={async (name, vars, days, pp, cohort) => {
             await run(
               async () => {
                 const created = check(
@@ -783,6 +836,7 @@ export function SharePage() {
                       workspace_id: demo.workspace_id,
                       name,
                       variables: vars,
+                      cohort,
                       expires_at: days ? new Date(Date.now() + days * 86400_000).toISOString() : null,
                       // L25-13 : page personnalisée (le code est tiré par la base)
                       ...(pp.enabled && pubPage.enabled
@@ -816,6 +870,40 @@ export function SharePage() {
               },
               t(centerModule ? 'share.centerLinkCreated' : 'share.linkCreatedCopied'),
             );
+          }}
+        />
+      )}
+      {importing && (
+        <ImportLinksDialog
+          existing={
+            new Set(
+              links
+                .map((l) => (((l.variables as Record<string, string>) ?? {}).email ?? '').toLowerCase())
+                .filter(Boolean),
+            )
+          }
+          cohortList={cohortList}
+          onClose={() => setImporting(false)}
+          onExport={(tokens) => exportCsv(links.filter((l) => tokens.includes(l.token)))}
+          onImport={async (rows) => {
+            let tokens: string[] = [];
+            await run(async () => {
+              const made = check(
+                await supabase
+                  .from('share_links')
+                  .insert(
+                    rows.map((r) => ({
+                      demo_id: demoId,
+                      workspace_id: demo.workspace_id,
+                      ...linkFromRow(r),
+                    })),
+                  )
+                  .select('token'),
+              );
+              tokens = made.map((m) => m.token);
+              await load();
+            });
+            return tokens;
           }}
         />
       )}
@@ -1001,11 +1089,13 @@ function NewLinkDialog({
   members,
   datasetRows,
   demoTitle,
+  cohortList,
   onEnablePublicPage,
   onClose,
   onCreate,
 }: {
   variables: Tables<'variables'>[];
+  cohortList: string[];
   publicPage: { enabled: boolean; cta: { label: string; url: string } | null };
   members: Array<{ id: string; name: string }>;
   datasetRows: string[] | null;
@@ -1017,10 +1107,12 @@ function NewLinkDialog({
     vars: Record<string, string>,
     days: number | null,
     pp: PersonalPageDraft,
+    cohort: string,
   ) => Promise<void>;
 }) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
+  const [cohort, setCohort] = useState('');
   const [values, setValues] = useState<Record<string, string>>({});
   const [expires, setExpires] = useState(false);
   const [days, setDays] = useState(30);
@@ -1045,7 +1137,7 @@ function NewLinkDialog({
     setErr(errs);
     if (Object.keys(errs).length || Object.keys(ppErr).length) return;
     const vars = Object.fromEntries(Object.entries(values).filter(([, v]) => v.trim()));
-    await onCreate(name.trim(), vars, expires ? days : null, pp);
+    await onCreate(name.trim(), vars, expires ? days : null, pp, cohort.trim().replace(/\s+/g, ' '));
   }
   return (
     <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -1090,6 +1182,26 @@ function NewLinkDialog({
             <span className="help" id="sh-ln-h">
               {t('share.linkNameHelp')}
             </span>
+          </div>
+          {/* L38-3 : groupe (session de formation), avec les groupes existants en suggestion */}
+          <div className="field">
+            <label htmlFor="sh-cohort">
+              {t('share.cohort')} <span className="opt">{t('plans.optional')}</span>
+            </label>
+            <input
+              id="sh-cohort"
+              className="input"
+              list="sh-cohort-l"
+              maxLength={COHORT_MAX}
+              placeholder={t('share.cohortPlaceholder')}
+              value={cohort}
+              onChange={(e) => setCohort(e.target.value)}
+            />
+            <datalist id="sh-cohort-l">
+              {cohortList.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
           </div>
           {variables.length > 0 && (
             <div className="grid sh-vars">

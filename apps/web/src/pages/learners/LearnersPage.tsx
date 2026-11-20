@@ -50,8 +50,10 @@ import {
   type LearnerRow,
   type LearnerStatus,
   type ProgressData,
+  type RawLearner,
   type SortKey,
 } from './progress';
+import { COHORT_MAX, cohorts } from '../share/linksCsv';
 import './learners.css';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
 
@@ -131,6 +133,7 @@ export function LearnersPage() {
     status: (['done', 'active', 'stale'].includes(params.get('statut') ?? '') ? params.get('statut') : '') as
       LearnerStatus | '',
     structure: params.get('structure') ?? '',
+    group: params.get('groupe') ?? '',
     q: params.get('q') ?? '',
     module: params.get('module') ?? '',
   };
@@ -448,6 +451,7 @@ function filterSummary(t: TFn, d: ProgressData, f: Filters): string {
         ? t('learners.noStructure')
         : (d.structures.find((s) => s.id === f.structure)?.name ?? ''),
     );
+  if (f.group) parts.push(f.group === 'none' ? t('learners.noGroup') : f.group);
   if (f.module) parts.push(d.paths.flatMap((p) => p.modules).find((m) => m.demoId === f.module)?.title ?? '');
   if (f.q.trim()) parts.push(`« ${f.q.trim()} »`);
   return parts.filter(Boolean).join(', ');
@@ -533,6 +537,7 @@ function ListView(props: {
   );
   const pathTitle = (id: string) => data.paths.find((p) => p.id === id)?.title || t('learners.untitled');
   const moduleTitle = data.paths.flatMap((p) => p.modules).find((m) => m.demoId === f.module)?.title;
+  const groups = cohorts(data.learners.map((l) => l.group));
   const allShown = shown.length > 0 && shown.every((r) => selected.has(r.raw.id));
   const toggle = (id: string) => {
     const n = new Set(selected);
@@ -604,6 +609,21 @@ function ListView(props: {
             { label: t('learners.noStructure'), onSelect: () => setParam({ structure: 'none' }) },
           ]}
         />
+        {/* L38-3 : groupe (session de formation) des liens personnalisés */}
+        {groups.length > 0 && (
+          <FilterChip
+            label={t('learners.filters.group')}
+            value={
+              !f.group ? t('learners.filters.all') : f.group === 'none' ? t('learners.noGroup') : f.group
+            }
+            active={!!f.group}
+            onClear={() => setParam({ groupe: null })}
+            items={[
+              ...groups.map((g) => ({ label: g, onSelect: () => setParam({ groupe: g }) })),
+              { label: t('learners.noGroup'), onSelect: () => setParam({ groupe: 'none' }) },
+            ]}
+          />
+        )}
         <label className="fd-field l13-search">
           <span className="sr-only">{t('learners.searchLabel')}</span>
           <input
@@ -1235,6 +1255,14 @@ function LearnerDrawer({
               ))}
             </select>
           </label>
+          {/* L38-3 : groupe porté par le lien personnalisé de l'apprenant */}
+          {l.linkId && (
+            <GroupField
+              learner={l}
+              groups={cohorts(data.learners.map((x) => x.group))}
+              onChanged={onChanged}
+            />
+          )}
           <section>
             <h3>{t('learners.fiche.paths')}</h3>
             {row.paths.length === 0 ? (
@@ -1384,6 +1412,62 @@ function LearnerDrawer({
 // ---------------------------------------------------------------------------
 // L13-05 : suppression RGPD
 // ---------------------------------------------------------------------------
+/** L38-3 : groupe de l'apprenant (lien personnalisé), enregistré en quittant le champ ou avec Entrée. */
+function GroupField({
+  learner,
+  groups,
+  onChanged,
+}: {
+  learner: RawLearner;
+  groups: string[];
+  onChanged: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [value, setValue] = useState(learner.group ?? '');
+  const [saved, setSaved] = useState(false);
+  useEffect(() => setValue(learner.group ?? ''), [learner.group]);
+  const save = async () => {
+    const v = value.trim().replace(/\s+/g, ' ').slice(0, COHORT_MAX);
+    if (v === (learner.group ?? '')) return;
+    const { error } = await supabase.from('share_links').update({ cohort: v }).eq('id', learner.linkId!);
+    if (!error) {
+      setSaved(true);
+      await onChanged();
+    }
+  };
+  return (
+    <label className="fd-field l13-structure">
+      <span className="fd-label">{t('learners.filters.group')}</span>
+      <input
+        className="fd-input fd-input--sm"
+        list="l13-groups"
+        maxLength={COHORT_MAX}
+        value={value}
+        placeholder={t('learners.groupPlaceholder')}
+        onChange={(e) => {
+          setValue(e.target.value);
+          setSaved(false);
+        }}
+        onBlur={() => void save()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            void save();
+          }
+        }}
+      />
+      <datalist id="l13-groups">
+        {groups.map((g) => (
+          <option key={g} value={g} />
+        ))}
+      </datalist>
+      <span className="fd-help" role="status">
+        {saved ? t('learners.groupSaved') : ''}
+      </span>
+    </label>
+  );
+}
+
 function EraseDialog({
   row,
   onCancel,
@@ -1551,6 +1635,7 @@ function ExportDialog({
         name: t('learners.csv.name'),
         email: t('learners.csv.email'),
         structure: t('learners.csv.structure'),
+        group: t('learners.csv.group'),
         source: t('learners.csv.source'),
         sourceValue: (s) => t(`learners.csv.source_${s}`),
         paths: t('learners.csv.paths'),

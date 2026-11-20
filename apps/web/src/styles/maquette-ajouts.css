@@ -1119,6 +1119,24 @@
   height: 18px;
   margin-top: 1px;
 }
+.mk .sh-perso-acts {
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.mk .sh-cohort {
+  margin-right: 4px;
+}
+.mk .sh-import-preview {
+  margin-top: 12px;
+}
+.mk .sh-import-preview .table-wrap {
+  max-height: 320px;
+  overflow: auto;
+}
+.mk .sh-import-ko td {
+  background: var(--fd-color-surface-sunken);
+}
 .mk .sh-actions .btn-sm svg {
   width: 14px;
   height: 14px;

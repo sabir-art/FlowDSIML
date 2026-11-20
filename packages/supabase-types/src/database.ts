@@ -1741,6 +1741,7 @@ export type Database = {
           cta_label: string | null;
           cta_url: string | null;
           page_code: string | null;
+          cohort: string;
         };
         ComputedFields: never;
         Insert: {
@@ -1761,6 +1762,7 @@ export type Database = {
           dataset_row?: number | null;
           cta_label?: string | null;
           cta_url?: string | null;
+          cohort?: string;
         };
         Update: {
           created_at?: string;
@@ -1780,6 +1782,7 @@ export type Database = {
           dataset_row?: number | null;
           cta_label?: string | null;
           cta_url?: string | null;
+          cohort?: string;
         };
         Relationships: [
           {

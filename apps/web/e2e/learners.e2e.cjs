@@ -141,7 +141,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   const csv = fs.readFileSync(await dl.path(), 'utf8');
   const head = csv.replace(/^﻿/, '').split('\r\n')[0];
   ok(
-    head.startsWith('Nom;E-mail;Structure;Identifié par;Formations;') &&
+    head.startsWith('Nom;E-mail;Structure;Groupe;Identifié par;Formations;') &&
       head.includes('Logiciel métier · Quiz final'),
     'L13-04 : CSV UTF-8, point-virgule, détail par module',
   );

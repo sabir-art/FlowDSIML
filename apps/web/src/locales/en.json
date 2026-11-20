@@ -1994,7 +1994,50 @@
     "centerLink": "Centre link",
     "centerLinkOf": "Copy the centre link of {{name}} (progress and certificate)",
     "demoLinkOf": "Copy the demo-only link of {{name}}",
-    "centerLinkCreated": "Link created. The centre link (progress and certificate) is copied to the clipboard."
+    "centerLinkCreated": "Link created. The centre link (progress and certificate) is copied to the clipboard.",
+    "cohort": "Group",
+    "cohortPlaceholder": "E.g. 12 November session",
+    "import": {
+      "open": "Import a list (CSV)",
+      "title": "Import a list of learners",
+      "help": "One personalised link per row. Columns: first name, last name, email, and group (optional). Links are checked before they are created; TutoClick sends no email.",
+      "template": "Download the template",
+      "templateFile": "learners-template.csv",
+      "file": "CSV file",
+      "cohortHelp": "Applied to rows without a group.",
+      "missing": "Columns not found in “{{file}}”: {{columns}}. Start from the template.",
+      "col": {
+        "name": "Name",
+        "email": "Email"
+      },
+      "summary_one": "{{count}} link ready to be created.",
+      "summary_other": "{{count}} links ready to be created.",
+      "errors_one": "{{count}} row with an error will not be imported.",
+      "errors_other": "{{count}} rows with an error will not be imported.",
+      "truncated_one": "{{count}} row beyond 500 is ignored.",
+      "truncated_other": "{{count}} rows beyond 500 are ignored.",
+      "caption": "Import preview, row by row",
+      "line": "Row",
+      "check": "Check",
+      "ok": "Ready",
+      "err": {
+        "name": "First or last name missing",
+        "email": "Invalid email",
+        "duplicate": "Duplicate in the file",
+        "exists": "A link already exists for this email",
+        "cohort": "Group too long"
+      },
+      "create_one": "Create {{count}} link",
+      "create_other": "Create {{count}} links",
+      "creating": "Creating…",
+      "done_one": "{{count}} link created.",
+      "done_other": "{{count}} links created.",
+      "doneHelp": "Export them to send from your own email (mail merge).",
+      "export": "Export the links (CSV)",
+      "exportAll": "Export the links (CSV)",
+      "exportFile": "learner-links.csv",
+      "demoLink": "Demo link"
+    }
   },
   "analytics": {
     "title": "Analytics",
@@ -2855,7 +2898,8 @@
       "all": "All",
       "allF": "All",
       "change": "Change the {{label}} filter",
-      "clear": "Remove the {{label}} filter"
+      "clear": "Remove the {{label}} filter",
+      "group": "Group"
     },
     "kpi": {
       "doneFoot": "{{pct}} of learners",
@@ -3019,7 +3063,8 @@
       "status": "Status",
       "last": "Last activity",
       "best": "Best score (%)",
-      "attempts": "Attempts"
+      "attempts": "Attempts",
+      "group": "Group"
     },
     "paths": {
       "title": "Courses and structures",
@@ -3081,7 +3126,10 @@
       "optional": "(optional)"
     },
     "daysAgo_one": "{{count}}d ago",
-    "daysAgo_other": "{{count}}d ago"
+    "daysAgo_other": "{{count}}d ago",
+    "noGroup": "No group",
+    "groupPlaceholder": "E.g. 12 November session",
+    "groupSaved": "Group saved."
   },
   "center": {
     "title": "Training center",

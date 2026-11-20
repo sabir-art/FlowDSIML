@@ -28,6 +28,9 @@ export interface RawLearner {
   structureId: string | null;
   createdAt: string;
   lastReminder: string | null;
+  /** L38-3 : groupe (session) porté par le lien personnalisé, et ce lien (absent avant la migration). */
+  group?: string;
+  linkId?: string | null;
   modules: RawModule[];
 }
 
@@ -161,6 +164,8 @@ export interface Filters {
   path: string;
   status: LearnerStatus | '';
   structure: string;
+  /** L38-3 : groupe ('' : tous, 'none' : sans groupe). */
+  group: string;
   q: string;
   /** Module (démo) non validé : ouvert depuis la vue par formation. */
   module: string;
@@ -179,6 +184,7 @@ export function applyFilters(rows: LearnerRow[], f: Filters): LearnerRow[] {
       f.structure === 'none' ? r.raw.structureId !== null : f.structure && r.raw.structureId !== f.structure
     )
       return false;
+    if (f.group === 'none' ? !!r.raw.group : f.group && r.raw.group !== f.group) return false;
     if (f.module && r.raw.modules.find((m) => m.demoId === f.module)?.status === 'validated') return false;
     if (q && !r.label.toLowerCase().includes(q) && !(r.raw.email ?? '').includes(q)) return false;
     return true;
@@ -285,6 +291,7 @@ export interface CsvLabels {
   name: string;
   email: string;
   structure: string;
+  group: string;
   source: string;
   sourceValue: (s: 'lead' | 'link') => string;
   paths: string;
@@ -306,14 +313,20 @@ export function csvTable(
   const structure = (id: string | null) => d.structures.find((s) => s.id === id)?.name ?? '';
   const mods = d.paths.flatMap((p) => p.modules.map((m) => ({ p, m })));
   const headers: string[] = [];
-  if (cols.includes('identity')) headers.push(L.name, L.email, L.structure, L.source);
+  if (cols.includes('identity')) headers.push(L.name, L.email, L.structure, L.group, L.source);
   if (cols.includes('progress')) headers.push(L.paths, L.progress, L.status, L.lastActivity);
   if (cols.includes('quiz')) headers.push(L.best, L.attempts);
   if (cols.includes('modules')) headers.push(...mods.map(({ p, m }) => `${p.title} · ${m.title}`));
   const data = rows.map((r) => {
     const out: unknown[] = [];
     if (cols.includes('identity'))
-      out.push(r.raw.name, r.raw.email ?? '', structure(r.raw.structureId), L.sourceValue(r.raw.source));
+      out.push(
+        r.raw.name,
+        r.raw.email ?? '',
+        structure(r.raw.structureId),
+        r.raw.group ?? '',
+        L.sourceValue(r.raw.source),
+      );
     if (cols.includes('progress'))
       out.push(
         r.paths.map((s) => s.path.title).join(' | '),
