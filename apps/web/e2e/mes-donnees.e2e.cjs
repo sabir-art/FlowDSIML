@@ -46,15 +46,19 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     ),
     'texte : contenu exact de l’export',
   );
-  ok(/Téléchargement immédiat\./.test(await card.innerText()), 'téléchargement immédiat (rien de conservé)');
+  const [dl] = await Promise.all([
+    page.waitForEvent('download'),
+    card.getByRole('button', { name: 'Télécharger mes données (.zip)' }).click(),
+  ]);
+  await card
+    .getByRole('status')
+    .getByText('Fichier téléchargé. Il n’est pas conservé sur nos serveurs.')
+    .waitFor();
+  ok(true, 'après le téléchargement : « Fichier téléchargé. Il n’est pas conservé sur nos serveurs. »');
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await card.screenshot({ path: `${SHOTS}/l28-07-mes-donnees${sfx}.png` });
   }
-  const [dl] = await Promise.all([
-    page.waitForEvent('download'),
-    card.getByRole('button', { name: 'Préparer l’export' }).click(),
-  ]);
   ok(
     /^mes-donnees-\d{4}-\d{2}-\d{2}\.zip$/.test(dl.suggestedFilename()),
     `nom du fichier (${dl.suggestedFilename()})`,
@@ -74,7 +78,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       ].join(),
     'zip : un JSON par catégorie + LISEZMOI.txt',
   );
-  ok(/profil\.json :/.test(strFromU8(files['LISEZMOI.txt'])), 'LISEZMOI décrit chaque fichier');
+  ok(/profil\.json\s:/.test(strFromU8(files['LISEZMOI.txt'])), 'LISEZMOI décrit chaque fichier');
   ok(JSON.parse(strFromU8(files['profil.json'])).email === state.user.email, 'profil exporté');
 
   // Seule propriétaire d'un espace avec d'autres membres : bloquée
@@ -97,6 +101,28 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     t.members.findIndex((m) => m.user_id === CAMILLE),
     1,
   );
+
+  // Compte sans mot de passe, connexion de plus de 5 minutes : reconnexion d'abord
+  state.hasPassword = false;
+  state.recentAuth = false;
+  await card.getByRole('button', { name: 'Supprimer mon compte' }).click();
+  const dlgR = page.getByRole('dialog', { name: 'Supprimer votre compte ?' });
+  await dlgR.waitFor();
+  ok(
+    /Pour votre sécurité, reconnectez-vous avant de supprimer votre compte\./.test(await dlgR.innerText()) &&
+      (await dlgR.getByRole('button', { name: 'Me reconnecter' }).count()) === 1 &&
+      (await dlgR.getByLabel('Mot de passe actuel').count()) === 0 &&
+      (await dlgR.getByRole('textbox').count()) === 0 &&
+      (await dlgR.getByRole('button', { name: 'Supprimer mon compte' }).isDisabled()),
+    'connexion ancienne : « Me reconnecter », pas de mot de passe, suppression inactive',
+  );
+  if (SHOTS) {
+    await page.mouse.move(0, 0);
+    await dlgR.screenshot({ path: `${SHOTS}/l28-08-reconnexion${sfx}.png` });
+  }
+  await dlgR.getByRole('button', { name: 'Annuler' }).click();
+  state.hasPassword = true;
+  state.recentAuth = true;
   await card.getByRole('button', { name: 'Supprimer mon compte' }).click();
   const dlg = page.getByRole('dialog', { name: 'Supprimer votre compte ?' });
   await dlg.waitFor();
@@ -108,11 +134,18 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   const del = dlg.getByRole('button', { name: 'Supprimer mon compte' });
   ok(await del.isDisabled(), 'bouton inactif tant que rien n’est rempli');
-  await dlg.getByLabel('Votre adresse e-mail').fill(state.user.email);
+  const mail = dlg.getByLabel('Saisissez votre adresse e-mail pour confirmer');
+  ok(/Adresse du compte\s:\s/.test(await dlg.innerText()), 'adresse du compte en aide');
+  await mail.fill('autre@acme.example');
   await dlg.getByLabel('Mot de passe actuel').fill('Correct-Horse-9');
   ok(await del.isDisabled(), 'case non cochée : toujours inactif');
   await dlg.getByRole('checkbox', { name: /Je comprends que cette action est définitive/ }).check();
   ok(!(await del.isDisabled()), 'tout rempli : actif');
+  await del.click();
+  await dlg.getByRole('alert').getByText('L’adresse ne correspond pas à votre compte.').waitFor();
+  ok(!state.accountDeleted, 'adresse différente : « L’adresse ne correspond pas à votre compte. »');
+  await mail.fill(state.user.email);
+  ok((await dlg.getByRole('alert').count()) === 0, 'erreur effacée dès que l’adresse change');
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await dlg.screenshot({ path: `${SHOTS}/l28-08-confirmation${sfx}.png` });
@@ -121,7 +154,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.waitForURL(/#\/login/);
   await page.getByText('Votre compte a été supprimé.').waitFor();
   ok(
-    state.accountDeleted?.email === state.user.email,
+    state.accountDeleted?.email?.toLowerCase() === state.user.email,
     'compte supprimé, déconnexion, message sur la connexion',
   );
 

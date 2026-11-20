@@ -5,10 +5,12 @@
 --    téléchargé dans le navigateur : rien n'est conservé sur le serveur.
 --  * account_deletion_check() : espaces qui bloquent (seul propriétaire avec d'autres membres) et espaces
 --    supprimés avec le compte (seul membre), pour la modale.
---  * delete_my_account(p_email, p_password, p_orphans) : session de moins de 5 minutes (sinon
---    REAUTH_REQUIRED), adresse e-mail saisie, mot de passe vérifié s'il existe (comptes Google ou lien
---    magique : aucun). Les fichiers des espaces supprimés sont effacés par l'app avant l'appel ; les
---    chemins qu'elle n'a pas pu effacer sont inscrits dans storage_orphans pour la purge différée.
+--  * delete_my_account(p_email, p_password, p_orphans) : authentification de moins de 5 minutes (sinon
+--    REAUTH_REQUIRED) : horodatage de la connexion elle-même (amr du jeton, inchangé par un simple
+--    rafraîchissement, ou à défaut auth.users.last_sign_in_at), jamais iat ; adresse e-mail saisie ; mot
+--    de passe vérifié s'il existe (comptes Google ou lien magique : aucun). Les fichiers des espaces
+--    supprimés sont effacés par l'app avant l'appel ; les chemins qu'elle n'a pas pu effacer sont inscrits
+--    dans storage_orphans pour la purge différée.
 --  * Les commentaires de l'utilisateur restent, signés « Ancien membre » (author_id passe à null).
 
 -- ===== Commentaires gardés après la suppression d'un compte =====
@@ -95,6 +97,24 @@ revoke all on function public.export_my_data() from public, anon;
 grant execute on function public.export_my_data() to authenticated;
 
 -- ===== Suppression du compte =====
+-- Connexion récente : date de la dernière authentification (amr), pas celle du jeton (iat), qu'un simple
+-- rafraîchissement de session renouvelle sans rien saisir.
+create or replace function public.recent_auth(p_seconds int default 300)
+returns boolean language plpgsql stable security definer set search_path = '' as $$
+declare
+  v_amr jsonb := auth.jwt() -> 'amr';
+  v_at bigint;
+begin
+  if jsonb_typeof(v_amr) = 'array' and jsonb_array_length(v_amr) > 0 then
+    select max((a ->> 'timestamp')::bigint) into v_at from jsonb_array_elements(v_amr) a
+     where jsonb_typeof(a -> 'timestamp') = 'number';
+  else
+    select extract(epoch from u.last_sign_in_at)::bigint into v_at from auth.users u where u.id = (select auth.uid());
+  end if;
+  return v_at is not null and v_at >= extract(epoch from now())::bigint - p_seconds;
+end $$;
+revoke all on function public.recent_auth(int) from public, anon;
+grant execute on function public.recent_auth(int) to authenticated;
 create or replace function public.account_deletion_check()
 returns jsonb language sql stable security definer set search_path = '' as $$
   select jsonb_build_object(
@@ -115,7 +135,8 @@ returns jsonb language sql stable security definer set search_path = '' as $$
                          and not exists (select 1 from public.members o where o.workspace_id = m.workspace_id
                                            and o.user_id <> m.user_id)), '[]'::jsonb),
     'hasPassword', coalesce((select coalesce(u.encrypted_password, '') <> '' from auth.users u
-                              where u.id = (select auth.uid())), false));
+                              where u.id = (select auth.uid())), false),
+    'recentAuth', public.recent_auth());
 $$;
 revoke all on function public.account_deletion_check() from public, anon;
 grant execute on function public.account_deletion_check() to authenticated;
@@ -127,12 +148,11 @@ declare
   v_uid uuid := (select auth.uid());
   v_user record;
   v_check jsonb;
-  v_iat bigint := nullif(auth.jwt() ->> 'iat', '')::bigint;
   v_solo uuid[];
 begin
   if v_uid is null then raise exception 'FORBIDDEN' using errcode = '42501'; end if;
-  -- Session récente exigée (moins de 5 minutes) : l'app redemande la connexion sinon
-  if v_iat is null or v_iat < extract(epoch from now())::bigint - 300 then
+  -- Authentification de moins de 5 minutes exigée : l'app redemande la connexion sinon
+  if not public.recent_auth() then
     raise exception 'REAUTH_REQUIRED' using errcode = 'P0001';
   end if;
   select id, email, coalesce(encrypted_password, '') as pw into v_user from auth.users where id = v_uid;

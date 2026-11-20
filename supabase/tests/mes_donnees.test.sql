@@ -3,17 +3,22 @@
 -- commentaires gardés (« Ancien membre »), chemins orphelins limités aux espaces supprimés.
 begin;
 set search_path = public, extensions;
-select plan(17);
+select plan(20);
 
 insert into auth.users (id, email, encrypted_password) values
   ('00000000-0000-0000-0000-0000000171a1', 'camille@acme.example', extensions.crypt('Correct-Horse-9', extensions.gen_salt('bf'))),
   ('00000000-0000-0000-0000-0000000171a2', 'alice@acme.example', null),
   ('00000000-0000-0000-0000-0000000171a3', 'jules@acme.example', '');
+-- age : secondes depuis la connexion (amr) ; le jeton (iat) est toujours frais, comme après un rafraîchissement.
+-- age null : jeton sans amr (repli sur auth.users.last_sign_in_at)
 create function pg_temp.login(uid uuid, age int default 10) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claim.sub', uid::text, true);
-  perform set_config('request.jwt.claims',
-    json_build_object('sub', uid, 'iat', extract(epoch from now())::bigint - age)::text, true);
+  perform set_config('request.jwt.claims', case when age is null
+    then json_build_object('sub', uid, 'iat', extract(epoch from now())::bigint)
+    else json_build_object('sub', uid, 'iat', extract(epoch from now())::bigint,
+      'amr', json_build_array(json_build_object('method', 'password', 'timestamp', extract(epoch from now())::bigint - age)))
+    end::text, true);
   execute 'set local role authenticated';
 end $$;
 
@@ -47,7 +52,13 @@ reset role;
 -- ===== Suppression : contrôles =====
 select pg_temp.login('00000000-0000-0000-0000-0000000171a1', 600);
 select throws_ok($$ select public.delete_my_account('camille@acme.example', 'Correct-Horse-9') $$,
-  'P0001', 'REAUTH_REQUIRED', 'session de plus de 5 minutes : nouvelle connexion exigée');
+  'P0001', 'REAUTH_REQUIRED', 'jeton rafraîchi (iat récent) avec amr ancien : nouvelle connexion exigée');
+select is((select public.account_deletion_check() ->> 'recentAuth'), 'false', 'vérification : connexion ancienne signalée');
+reset role;
+update auth.users set last_sign_in_at = now() - interval '1 hour' where id = '00000000-0000-0000-0000-0000000171a1';
+select pg_temp.login('00000000-0000-0000-0000-0000000171a1', null);
+select throws_ok($$ select public.delete_my_account('camille@acme.example', 'Correct-Horse-9') $$,
+  'P0001', 'REAUTH_REQUIRED', 'sans amr : dernière connexion ancienne (last_sign_in_at) refusée');
 reset role;
 select pg_temp.login('00000000-0000-0000-0000-0000000171a1');
 select throws_ok($$ select public.delete_my_account('autre@acme.example', 'Correct-Horse-9') $$,
@@ -82,8 +93,10 @@ select ok((select count(*) = 1 and bool_and(author_id is null) from public.step_
 select is((select count(*)::int from public.storage_orphans), 2,
   'orphelins inscrits : seulement ceux des espaces supprimés');
 
--- Compte sans mot de passe (lien magique) : l'adresse suffit, avec une session récente
-select pg_temp.login('00000000-0000-0000-0000-0000000171a3');
+-- Compte sans mot de passe (lien magique) : l'adresse suffit, avec une connexion récente (repli last_sign_in_at)
+update auth.users set last_sign_in_at = now() - interval '1 minute' where id = '00000000-0000-0000-0000-0000000171a3';
+select pg_temp.login('00000000-0000-0000-0000-0000000171a3', null);
+select is((select public.account_deletion_check() ->> 'recentAuth'), 'true', 'vérification : connexion récente');
 select lives_ok($$ select public.delete_my_account('jules@acme.example') $$, 'compte sans mot de passe : supprimé');
 reset role;
 

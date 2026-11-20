@@ -74,7 +74,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   // Menu ⋯ : couper la démo
   await row.getByRole('button', { name: /Actions pour la notification/ }).click();
   await page.getByRole('menuitem', { name: 'Couper les notifications de cette démo' }).click();
-  await page.getByText(/Notifications coupées pour « .+ »\. Les mentions restent signalées\./).waitFor();
+  await page.getByText(/Notifications coupées pour «\s.+\s»\. Les mentions restent signalées\./).waitFor();
   ok(
     state.tables.notification_mutes.length === 1 && state.tables.notification_mutes[0].demo_id === DEMO,
     'démo coupée enregistrée',

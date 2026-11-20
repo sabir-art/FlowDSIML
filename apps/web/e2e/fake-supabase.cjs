@@ -734,6 +734,7 @@ async function install(page, state = seed()) {
                 demos: t.demos.filter((d) => d.workspace_id === m.workspace_id && !d.deleted_at).length,
               })),
             hasPassword: state.hasPassword !== false,
+            recentAuth: state.recentAuth !== false,
           });
         }
         case 'delete_my_account': {
