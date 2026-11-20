@@ -4284,6 +4284,37 @@
         "accessibility": "Accessibility",
         "consistency": "Consistency"
       }
+    },
+    "generate": {
+      "card": "Generate with AI",
+      "cardBody": "Describe the procedure: AI Assist proposes the steps and bubbles.",
+      "title": "Generate a demo with AI",
+      "source": "Source",
+      "fromText": "Text outline",
+      "fromHtml": "HTML capture",
+      "fromHtmlSoon": "From an HTML capture: coming soon.",
+      "planLabel": "Describe the procedure, one step per line",
+      "planPlaceholder": "Open the Users menu\nClick Add\nFill in the identity…",
+      "withQuiz": "With a 3-question quiz",
+      "go": "Propose the steps",
+      "busy": "Writing the steps…",
+      "demoTitle": "Demo title",
+      "count_one": "1 step",
+      "count_other": "{{count}} steps",
+      "chapter": "Chapter {{n}}",
+      "noChapter": "Steps",
+      "stepTitle": "Step {{n}} title",
+      "stepText": "Bubble text, step {{n}}",
+      "removeStep": "Remove step {{n}}",
+      "addStep": "Add a step",
+      "quiz_one": "Quiz (1 question)",
+      "quiz_other": "Quiz ({{count}} questions)",
+      "correct": "correct answer",
+      "create": "Create the demo",
+      "created": "Demo created. Check each step before publishing.",
+      "createError": "The demo could not be created. Try again.",
+      "gdpr_one": "AI-generated texts in 1 step, to review",
+      "gdpr_other": "AI-generated texts in {{count}} steps, to review"
     }
   }
 }

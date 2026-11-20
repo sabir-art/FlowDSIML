@@ -407,6 +407,45 @@ const APP_PAGES = [
     },
   },
   {
+    name: 'Générer une démo (aperçu)',
+    route: '/#/demos',
+    seed: (d) => {
+      d.ai = {
+        enabled: true,
+        features: {
+          write: true,
+          translate: true,
+          suggest: true,
+          generate: true,
+          dataset: true,
+          chart: true,
+          assistant: true,
+        },
+        used: 1,
+        quota: 500,
+        userToday: 0,
+        userDailyRequests: 30,
+        workspaceQuotaReached: false,
+        userQuotaReached: false,
+        renewsOn: '2026-12-01',
+        canEdit: true,
+        canManage: true,
+      };
+      d.aiReply = () => ({
+        title: 'Créer un usager',
+        chapters: [{ title: '', steps: [{ title: 'Ouvrir', text: 'Ouvrez le menu.' }] }],
+        quiz: [],
+      });
+    },
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
+      await p.getByRole('button', { name: /Générer avec l’IA/ }).click();
+      await p.getByLabel('Décrivez la procédure, une étape par ligne').fill('Ouvrir le menu');
+      await p.getByRole('button', { name: 'Proposer les étapes' }).click();
+      await p.getByRole('button', { name: 'Créer la démo' }).waitFor();
+    },
+  },
+  {
     name: 'Éditeur · test A/B',
     route: `/#/demos/${DEMO}/edit`,
     open: async (p) => {

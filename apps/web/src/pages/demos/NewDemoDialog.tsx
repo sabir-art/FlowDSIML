@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImagePlus, Info, LayoutTemplate, Puzzle, X } from 'lucide-react';
+import { ImagePlus, Info, LayoutTemplate, Puzzle, WandSparkles, X } from 'lucide-react';
+import { aiBlock, useAiStatus } from '../../lib/ai';
+import { useBlockText } from '../../components/ai/AiWrite';
+import { Link } from 'react-router-dom';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { IMAGE_ACCEPT } from './importImages';
 
@@ -16,6 +19,8 @@ export function NewDemoDialog({
   onEmpty,
   onTemplate,
   onImport,
+  onGenerate,
+  ws,
   onClose,
 }: {
   open: boolean;
@@ -26,6 +31,9 @@ export function NewDemoDialog({
   onTemplate: (folderId: string | null) => void;
   /** REV-06 : images choisies (au moins une). */
   onImport: (files: File[], folderId: string | null) => Promise<void> | void;
+  /** L30-05 : quatrième carte, « Générer avec l'IA ». */
+  onGenerate: (folderId: string | null) => void;
+  ws: string;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -33,6 +41,11 @@ export function NewDemoDialog({
   const picker = useRef<HTMLInputElement>(null);
   const [folder, setFolder] = useState<string>(defaultFolder ?? '');
   const [busy, setBusy] = useState(false);
+  const { status: ai } = useAiStatus(open ? ws : undefined);
+  const blockText = useBlockText();
+  // Règle 4 : désactivée (espace, fonction, rôle) ; quota atteint : la carte reste active (message dans l'aperçu)
+  const aiOff = aiBlock(ai, 'generate');
+  const aiDisabled = aiOff === 'disabled' || aiOff === 'role';
 
   useEffect(() => {
     const d = ref.current;
@@ -96,6 +109,29 @@ export function NewDemoDialog({
           <b>{t('templates.title')}</b>
           <span className="fd-muted">{t('templates.cardBody')}</span>
         </button>
+        <div className="ai-disabled-wrap nd-ai">
+          <button
+            type="button"
+            className="nd-choice nd-choice--btn ai-entry"
+            aria-disabled={aiDisabled || undefined}
+            aria-describedby={aiDisabled ? 'nd-ai-tip' : undefined}
+            onClick={() => !aiDisabled && onGenerate(folder || null)}
+          >
+            <WandSparkles aria-hidden="true" />
+            <b>{t('ai.generate.card')}</b>
+            <span className="fd-muted">{t('ai.generate.cardBody')}</span>
+          </button>
+          {aiDisabled && (
+            <span id="nd-ai-tip" className="ai-tip" role="tooltip">
+              {blockText(aiOff, ai)}
+            </span>
+          )}
+          {aiDisabled && aiOff === 'disabled' && ai?.canManage && (
+            <Link className="t-caption" to="/settings/ai">
+              {t('ai.disabledAdmin')}
+            </Link>
+          )}
+        </div>
       </div>
       <p className="nd-help">
         <Info aria-hidden="true" />

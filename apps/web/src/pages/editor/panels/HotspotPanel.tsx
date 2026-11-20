@@ -56,6 +56,18 @@ export function HotspotPanel({
   const step = editor.steps.find((st) => st.id === hotspot.step_id);
   const opts = asStepOptions(step?.options);
   const isLast = !!step && editor.steps[editor.steps.length - 1]?.id === step.id;
+  /** L30 : repère « IA » de l'étape (bilan RGPD), posé par une proposition appliquée, retiré à la saisie. */
+  const aiMarked = !!(step?.options as { aiText?: boolean } | null)?.aiText;
+  // force : appel depuis un toast (closure d'un rendu antérieur), écriture sans comparer l'état
+  const setAiMark = (on: boolean, force = false) =>
+    step &&
+    (force || aiMarked !== on) &&
+    editor.updateStep(step.id, {
+      options: {
+        ...(step.options as Record<string, unknown>),
+        aiText: on || undefined,
+      } as unknown as StepRow['options'],
+    });
   const setOpts = (patch: Partial<StepOptions>) =>
     step && editor.updateStep(step.id, { options: { ...opts, ...patch } as unknown as StepRow['options'] });
 
@@ -153,7 +165,10 @@ export function HotspotPanel({
             disabled={readOnly}
             placeholder={t('editor.hs.titlePlaceholder')}
             value={hotspot.title}
-            onChange={(e) => set({ title: e.target.value })}
+            onChange={(e) => {
+              set({ title: e.target.value });
+              setAiMark(false);
+            }}
           />
           <VariablePreview text={hotspot.title} variables={editor.variables} />
         </div>
@@ -164,13 +179,16 @@ export function HotspotPanel({
           value={hotspot.body}
           variables={varKeys}
           disabled={readOnly}
-          onChange={(v) => set({ body: v })}
+          onChange={(v) => {
+            set({ body: v });
+            setAiMark(false);
+          }}
           extra={
             // L30-02 : repère « IA » jusqu'à la prochaine modification manuelle
-            isAiApplied(`hs:${hotspot.id}:body`, hotspot.body) ? (
+            isAiApplied(`hs:${hotspot.id}:body`, hotspot.body) || aiMarked ? (
               <>
                 {' · '}
-                <AiBadge fieldKey={`hs:${hotspot.id}:body`} text={hotspot.body} />
+                <AiBadge fieldKey={`hs:${hotspot.id}:body`} text={hotspot.body} marked={aiMarked} />
               </>
             ) : undefined
           }
@@ -182,7 +200,12 @@ export function HotspotPanel({
             fieldKey={`hs:${hotspot.id}:body`}
             text={hotspot.body}
             title={hotspot.title || step?.title || ''}
-            onApply={(next) => set({ body: next })}
+            onApply={(next, _before, undo) =>
+              editor.batch(() => {
+                set({ body: next });
+                setAiMark(!undo, !!undo);
+              })
+            }
             onAll={() => setSpellAll(true)}
           />
         )}

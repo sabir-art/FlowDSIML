@@ -4284,6 +4284,37 @@
         "accessibility": "Accessibilité",
         "consistency": "Cohérence"
       }
+    },
+    "generate": {
+      "card": "Générer avec l’IA",
+      "cardBody": "Décrivez la procédure : l’Assistance IA propose les étapes et les bulles.",
+      "title": "Générer une démo avec l’IA",
+      "source": "Source",
+      "fromText": "Plan texte",
+      "fromHtml": "Capture HTML",
+      "fromHtmlSoon": "À partir d’une capture HTML : prochainement.",
+      "planLabel": "Décrivez la procédure, une étape par ligne",
+      "planPlaceholder": "Ouvrir le menu Usagers\nCliquer sur Ajouter\nRenseigner l’identité…",
+      "withQuiz": "Avec un quiz de 3 questions",
+      "go": "Proposer les étapes",
+      "busy": "Rédaction des étapes en cours…",
+      "demoTitle": "Titre de la démo",
+      "count_one": "1 étape",
+      "count_other": "{{count}} étapes",
+      "chapter": "Chapitre {{n}}",
+      "noChapter": "Étapes",
+      "stepTitle": "Titre de l’étape {{n}}",
+      "stepText": "Texte de la bulle, étape {{n}}",
+      "removeStep": "Retirer l’étape {{n}}",
+      "addStep": "Ajouter une étape",
+      "quiz_one": "Quiz (1 question)",
+      "quiz_other": "Quiz ({{count}} questions)",
+      "correct": "bonne réponse",
+      "create": "Créer la démo",
+      "created": "Démo créée. Vérifiez chaque étape avant de publier.",
+      "createError": "La démo n’a pas pu être créée. Réessayez.",
+      "gdpr_one": "Textes générés par IA dans 1 étape, à relire",
+      "gdpr_other": "Textes générés par IA dans {{count}} étapes, à relire"
     }
   }
 }

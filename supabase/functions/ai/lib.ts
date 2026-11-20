@@ -193,7 +193,7 @@ export function parseRequest(body: Record<string, unknown>): Request {
       break;
     case 'generate': {
       const plan = str(input.plan, 4000, 'PLAN');
-      payload = { plan: r(plan) };
+      payload = { plan: r(plan), withQuiz: input.withQuiz === true };
       break;
     }
     case 'dataset': {
@@ -337,12 +337,29 @@ export function buildPrompt(req: Request): Prompt {
       return {
         model: SONNET,
         system:
-          `${BASE} À partir du plan fourni, propose une démo : un titre court et 3 à 30 étapes. ` +
+          `${BASE} À partir du plan fourni, propose une démo : un titre court et 3 à 30 étapes, ` +
+          "regroupées en 1 à 6 chapitres (titre de chapitre vide s'il n'y en a qu'un). " +
           "Chaque étape a un titre (5 mots au plus, à l'impératif) et un texte de bulle (une à deux phrases). " +
+          (p.withQuiz
+            ? 'Ajoute exactement 3 questions de quiz à choix unique sur la procédure, 3 ou 4 réponses chacune, une seule correcte. '
+            : 'Liste de questions de quiz vide. ') +
           `N'invente pas d'écran qui n'est pas décrit dans le plan. ${inLang}`,
         messages: user(p.plan),
-        schema: obj({ title: S, steps: { type: 'array', items: obj({ title: S, text: S }) } }),
-        maxTokens: 8000,
+        schema: obj({
+          title: S,
+          chapters: {
+            type: 'array',
+            items: obj({ title: S, steps: { type: 'array', items: obj({ title: S, text: S }) } }),
+          },
+          quiz: {
+            type: 'array',
+            items: obj({
+              prompt: S,
+              answers: { type: 'array', items: obj({ text: S, correct: { type: 'boolean' } }) },
+            }),
+          },
+        }),
+        maxTokens: 10000,
       };
     case 'dataset':
       return {
@@ -405,10 +422,41 @@ export function checkOutput(task: Task, out: any, payload: Record<string, any>):
     case 'suggest':
       if (!Array.isArray(out?.suggestions)) throw new AiError('EMPTY', 502);
       return { suggestions: out.suggestions.filter((s: { id: string }) => ids.has(s.id)).slice(0, 10) };
-    case 'generate':
-      if (!isStr(out?.title) || !Array.isArray(out?.steps) || out.steps.length === 0)
-        throw new AiError('EMPTY', 502);
-      return { title: out.title.slice(0, 120), steps: out.steps.slice(0, 30) };
+    case 'generate': {
+      if (!isStr(out?.title) || !Array.isArray(out?.chapters)) throw new AiError('EMPTY', 502);
+      // 30 étapes au plus en tout, 6 chapitres au plus
+      let left = 30;
+      const chapters = (out.chapters as Array<{ title: unknown; steps: unknown }>)
+        .slice(0, 6)
+        .map((c) => {
+          const steps = (Array.isArray(c.steps) ? c.steps : [])
+            .filter((s: { title?: unknown; text?: unknown }) => isStr(s?.title) && isStr(s?.text))
+            .slice(0, left)
+            .map((s: { title: string; text: string }) => ({
+              title: s.title.slice(0, 200),
+              text: s.text.slice(0, 2000),
+            }));
+          left -= steps.length;
+          return { title: isStr(c.title) ? (c.title as string).slice(0, 120) : '', steps };
+        })
+        .filter((c) => c.steps.length);
+      if (!chapters.length) throw new AiError('EMPTY', 502);
+      const quiz =
+        payload.withQuiz && Array.isArray(out.quiz)
+          ? (out.quiz as Array<{ prompt: unknown; answers: unknown }>)
+              .filter((q) => isStr(q.prompt) && Array.isArray(q.answers))
+              .slice(0, 3)
+              .map((q) => {
+                const answers = (q.answers as Array<{ text: unknown; correct: unknown }>)
+                  .filter((a) => isStr(a.text))
+                  .slice(0, 4)
+                  .map((a) => ({ text: (a.text as string).slice(0, 200), correct: a.correct === true }));
+                return { prompt: (q.prompt as string).slice(0, 200), answers };
+              })
+              .filter((q) => q.answers.length >= 2 && q.answers.filter((a) => a.correct).length === 1)
+          : [];
+      return { title: out.title.slice(0, 120), chapters, quiz };
+    }
     case 'dataset': {
       const n = (payload.columns as string[]).length;
       if (!Array.isArray(out?.rows)) throw new AiError('EMPTY', 502);

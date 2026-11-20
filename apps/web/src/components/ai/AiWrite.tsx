@@ -23,9 +23,17 @@ const applied = new Map<string, string>();
 export const markAiApplied = (key: string, text: string) => applied.set(key, text);
 export const isAiApplied = (key: string, text: string) => applied.get(key) === text;
 
-export function AiBadge({ fieldKey, text }: { fieldKey: string; text: string }) {
+export function AiBadge({
+  fieldKey,
+  text,
+  marked = false,
+}: {
+  fieldKey: string;
+  text: string;
+  marked?: boolean;
+}) {
   const { t } = useTranslation();
-  if (!isAiApplied(fieldKey, text)) return null;
+  if (!marked && !isAiApplied(fieldKey, text)) return null;
   return (
     <span className="ai-badge" title={t('ai.badgeLabel')}>
       <span aria-hidden="true">{t('ai.badge')}</span>
@@ -113,7 +121,8 @@ export function AiWrite({
   fieldKey: string;
   text: string;
   title: string;
-  onApply: (next: string, before: string) => void;
+  /** `undo` : retour au texte d'avant (Annuler du toast), le repère « IA » est alors retiré. */
+  onApply: (next: string, before: string, undo?: boolean) => void;
   /** « Pour toutes les étapes » (Corriger l'orthographe seulement). */
   onAll?: () => void;
 }) {
@@ -203,7 +212,7 @@ export function AiWrite({
     toast(t('ai.applied'), {
       label: t('ai.undo'),
       durationMs: 8000,
-      onClick: () => onApply(prev, view.text),
+      onClick: () => onApply(prev, view.text, true),
     });
   };
 

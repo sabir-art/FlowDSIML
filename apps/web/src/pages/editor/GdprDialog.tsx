@@ -1,4 +1,4 @@
-import { Database, EyeOff, ImageUp, MessageSquareLock, Shield, TriangleAlert } from 'lucide-react';
+import { Database, EyeOff, ImageUp, MessageSquareLock, Shield, Sparkles, TriangleAlert } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
@@ -14,7 +14,10 @@ export function gdprSummary(
   /** L17-02 / L18-03 : images importées, sans détection automatique des données personnelles. */
   let imported = 0;
   const pendingSteps: number[] = [];
+  /** L30-05 : étapes dont un texte vient de l'Assistance IA et n'a pas été modifié depuis. */
+  let aiText = 0;
   steps.forEach((s, i) => {
+    if ((s.options as { aiText?: boolean } | null)?.aiText) aiText += 1;
     if (s.kind === 'before_after') {
       const src = asBeforeAfter(s.options).sources;
       imported += [src.before, src.after].filter((x) => x?.kind === 'upload').length;
@@ -34,7 +37,7 @@ export function gdprSummary(
       pendingSteps.push(i + 1);
     }
   });
-  return { blurred, pending, pendingSteps, imported };
+  return { blurred, pending, pendingSteps, imported, aiText };
 }
 
 export type GdprAck = { reviewed: true; fictional: true };
@@ -57,7 +60,8 @@ export function GdprDialog({
   dataset = null,
 }: {
   open: boolean;
-  steps: Pick<StepRow, 'blurs' | 'element_meta'>[];
+  steps: (Pick<StepRow, 'blurs' | 'element_meta'> &
+    Partial<Pick<StepRow, 'kind' | 'options' | 'html_ops'>>)[];
   publicEnabled: boolean;
   onConfirm: (ack: GdprAck) => void;
   onReview: (stepIndex: number) => void;
@@ -150,6 +154,12 @@ export function GdprDialog({
                   <span>
                     {t('editor.branch.publishWarn')} {branchWarnings.join(' ')}
                   </span>
+                </li>
+              )}
+              {sum.aiText > 0 && (
+                <li className="is-warning">
+                  <Sparkles aria-hidden="true" />
+                  {t('ai.generate.gdpr', { count: sum.aiText })}
                 </li>
               )}
               {dataset && (

@@ -165,10 +165,15 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.waitForTimeout(900);
   ok(hs('h1').body === `${before} (proposition)`, 'Appliquer : texte écrit');
   ok((await page.locator('.ai-badge').count()) === 1, 'Repère « IA » sur le champ');
+  ok(
+    state.tables.steps.find((x) => x.id === 's1').options?.aiText === true,
+    'Repère IA enregistré sur l’étape (bilan RGPD)',
+  );
   await shot('l30-02-applique', true);
   await page.locator('.toast').getByRole('button', { name: 'Annuler' }).click();
   await page.waitForTimeout(900);
   ok(hs('h1').body === before, 'Annuler (toast) : texte d’origine');
+  ok(!state.tables.steps.find((x) => x.id === 's1').options?.aiText, 'Annuler : repère IA retiré');
 
   // Variable disparue, Ignorer
   state.aiReply = () => ({ text: 'Bienvenue : cliquez sur « + Nouvelle opportunité ».' });

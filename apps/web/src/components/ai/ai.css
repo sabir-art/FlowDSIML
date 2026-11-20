@@ -300,3 +300,58 @@
   height: 16px;
   margin-top: 2px;
 }
+/* L30-05 : Générer une démo */
+.ai-generate {
+  width: min(720px, calc(100vw - 32px));
+}
+.ai-gen-tabs {
+  display: flex;
+  gap: 4px;
+}
+.ai-gen-tabs [aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ai-gen-plan {
+  min-height: 160px;
+}
+.ai-gen-count {
+  margin: 0;
+  font-weight: 600;
+}
+.ai-gen-list {
+  display: grid;
+  gap: 14px;
+  max-height: min(48vh, 460px);
+  overflow: auto;
+}
+.ai-gen-steps {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+.ai-gen-step {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 8px;
+  align-items: start;
+}
+.ai-gen-n {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken, var(--fd-color-border));
+  font-size: 12px;
+  font-weight: 600;
+}
+.ai-gen-quiz ul {
+  margin: 4px 0 8px;
+}
+.ai-gen-ok {
+  margin-left: 6px;
+}

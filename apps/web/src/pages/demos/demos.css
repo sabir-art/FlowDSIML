@@ -380,7 +380,8 @@
 }
 .nd-choices {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* L30-05 : quatre cartes, deux par ligne */
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--fd-space-3);
 }
 .nd-choice {
@@ -448,6 +449,13 @@
 }
 .nd-folder {
   margin-top: var(--fd-space-4);
+}
+.nd-ai {
+  display: grid;
+}
+.nd-ai > .nd-choice {
+  height: 100%;
+  text-align: start;
 }
 .nd-actions .grow {
   flex: 1;

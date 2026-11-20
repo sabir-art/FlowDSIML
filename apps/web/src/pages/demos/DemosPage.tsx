@@ -54,6 +54,7 @@ import { DistributeDialog } from '../share/DistributeDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
+import { GenerateDialog } from '../../components/ai/GenerateDialog';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 type Demo = Tables<'demos'>;
@@ -265,6 +266,7 @@ export function DemosPage() {
   }, [demos, folder, status, q, sort, stats, i18n.language, tagFilter, tagMode, tagStore.links]);
 
   const [newOpen, setNewOpen] = useState(false);
+  const [generating, setGenerating] = useState<{ folder: string | null } | null>(null);
   // REV-04 : « Démarrer » de l'onboarding arrive ici avec ?new=1 et ouvre « Nouvelle démo »
   const [params, setParams] = useSearchParams();
   useEffect(() => {
@@ -852,6 +854,16 @@ export function DemosPage() {
 
       {tagging && <TagsDialog demo={tagging} store={tagStore} onClose={() => setTagging(null)} />}
       {managingTags && <ManageTagsDialog store={tagStore} onClose={() => setManagingTags(false)} />}
+      {/* L30-05 : démo générée depuis un plan texte (langue de l'interface) */}
+      {generating && (
+        <GenerateDialog
+          ws={ws.id}
+          userId={user!.id}
+          folderId={generating.folder}
+          lang={i18n.language.startsWith('en') ? 'en' : 'fr'}
+          onClose={() => setGenerating(null)}
+        />
+      )}
       <NewDemoDialog
         open={newOpen}
         folders={folders}
@@ -875,6 +887,11 @@ export function DemosPage() {
           setNewOpen(false);
           toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
           navigate(`/demos/${id}/edit`);
+        }}
+        ws={ws.id}
+        onGenerate={(f) => {
+          setNewOpen(false);
+          setGenerating({ folder: f });
         }}
         onTemplate={(f) => {
           setNewOpen(false);

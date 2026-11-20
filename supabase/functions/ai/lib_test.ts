@@ -106,3 +106,36 @@ Deno.test('checkOutput : ids inconnus écartés, jeu de données sans valeur ré
   assert(!looksReal('01 99 00 12 34'));
   assert(looksReal('06 12 34 56 78'));
 });
+
+Deno.test('generate : chapitres bornés, quiz à une bonne réponse', () => {
+  const payload = parseRequest({
+    task: 'generate',
+    input: { plan: 'Ouvrir\nCliquer', withQuiz: true },
+  }).payload;
+  const out = checkOutput(
+    'generate',
+    {
+      title: 'Créer un usager',
+      chapters: [{ title: '', steps: Array.from({ length: 40 }, (_, i) => ({ title: `É${i}`, text: 'T' })) }],
+      quiz: [
+        {
+          prompt: 'Q1',
+          answers: [
+            { text: 'a', correct: true },
+            { text: 'b', correct: false },
+          ],
+        },
+        {
+          prompt: 'Q2',
+          answers: [
+            { text: 'a', correct: true },
+            { text: 'b', correct: true },
+          ],
+        },
+      ],
+    },
+    payload,
+  ) as { chapters: Array<{ steps: unknown[] }>; quiz: unknown[] };
+  assertEquals(out.chapters[0]!.steps.length, 30);
+  assertEquals(out.quiz.length, 1);
+});
