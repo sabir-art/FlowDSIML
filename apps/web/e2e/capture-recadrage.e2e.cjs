@@ -48,7 +48,7 @@ const near = (a, b) => Math.abs(a - b) < 0.002;
   await page.waitForSelector('.canvas-frame img');
 
   // ===== Ouverture : capture entière, voile, poignées, panneau =====
-  await page.getByRole('button', { name: 'Recadrer la capture' }).click();
+  await page.locator('.ed-rail [data-tool="crop"][aria-pressed="false"]').click();
   await page.waitForSelector('.crop-frame');
   ok((await page.locator('.crop-h').count()) === 8, '8 poignées nommées');
   ok(
@@ -107,7 +107,7 @@ const near = (a, b) => Math.abs(a - b) < 0.002;
     near(after.x, (before.x - c1.x) / c1.w) && near(after.w, before.w / c1.w),
     'le hotspot suit le recadrage',
   );
-  const fr = await page.locator('.canvas-frame').boundingBox();
+  const fr = await page.locator('.stage .canvas-frame').boundingBox();
   ok(Math.abs(fr.width / fr.height - 880 / 495) < 0.02, 'canevas au format recadré');
   ok(
     (await page.locator('[data-step-index="1"] [aria-label="Hotspot hors du cadre"]').count()) === 1,
@@ -116,7 +116,7 @@ const near = (a, b) => Math.abs(a - b) < 0.002;
   await shot(page, 'l25-02-recadre');
 
   // ===== Réinitialiser : retour à la capture entière, hotspot à sa place =====
-  await page.getByRole('button', { name: 'Recadrer la capture' }).click();
+  await page.locator('.ed-rail [data-tool="crop"][aria-pressed="false"]').click();
   await page.waitForSelector('.crop-frame');
   await panel.getByRole('button', { name: 'Réinitialiser' }).click();
   await panel.getByRole('button', { name: 'Recadrer', exact: true }).click();
@@ -127,7 +127,7 @@ const near = (a, b) => Math.abs(a - b) < 0.002;
     'réinitialisé : capture entière, hotspot revenu',
   );
   // Annuler ne change rien
-  await page.getByRole('button', { name: 'Recadrer la capture' }).click();
+  await page.locator('.ed-rail [data-tool="crop"][aria-pressed="false"]').click();
   await panel.getByRole('radio', { name: '1:1' }).click();
   await panel.getByRole('button', { name: 'Annuler' }).click();
   ok(!s1.options?.crop && (await page.locator('.crop-frame').count()) === 0, 'annuler : rien ne change');

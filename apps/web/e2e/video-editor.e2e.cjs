@@ -45,7 +45,14 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.locator('.vd-stage video').waitFor();
   const v = () => state.tables.steps.find((s) => s.id === 'vid-1').video;
 
-  ok((await page.locator('.floatbar').count()) === 0, 'barre d’outils de capture masquée');
+  ok(
+    (await page
+      .locator(
+        '.ed-rail [data-tool="hotspots"][aria-disabled="true"], .ed-rail [data-tool="blur"][aria-disabled="true"], .ed-rail [data-tool="zoom"][aria-disabled="true"]',
+      )
+      .count()) === 3,
+    'L48-E : outils de capture désactivés dans le rail',
+  );
   ok((await page.getByRole('img', { name: /Piste vidéo de 00:12/ }).count()) === 1, 'piste vidéo résumée');
   ok((await page.getByText('00:00 / 00:12 · après coupe 00:12').count()) === 1, 'temps et durée après coupe');
 

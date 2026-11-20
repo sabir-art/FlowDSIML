@@ -47,7 +47,14 @@ const N = ' ';
   await page.waitForSelector('.ba-canvas');
   const ba = state.tables.steps.find((s) => s.kind === 'before_after');
   ok(!!ba && ba.options.beforeAfter.layout === 'side', 'Étape before_after créée (côte à côte par défaut)');
-  ok((await page.locator('.floatbar').count()) === 0, 'Outils hotspot, flou et zoom masqués');
+  ok(
+    (await page
+      .locator(
+        '.ed-rail [data-tool="hotspots"][aria-disabled="true"], .ed-rail [data-tool="blur"][aria-disabled="true"], .ed-rail [data-tool="zoom"][aria-disabled="true"]',
+      )
+      .count()) === 3,
+    'L48-E : points, flou et zoom désactivés dans le rail',
+  );
   ok((await page.locator('.ba-missing').count()) === 2, 'Deux captures à choisir sur le canevas');
 
   // Publication bloquée
@@ -181,7 +188,7 @@ const N = ' ';
   await page.waitForSelector('.ed-bar');
 
   // Réglage « Glossaire » de la démo (Réglages > Lecture)
-  await page.getByRole('tab', { name: 'Réglages' }).click();
+  await page.locator('.ed-rail [data-tool="settings"][aria-pressed="false"]').click();
   const gl = page.getByLabel('Glossaire', { exact: true });
   await gl.scrollIntoViewIfNeeded();
   ok(await gl.isChecked(), 'Glossaire activé par défaut pour la démo');

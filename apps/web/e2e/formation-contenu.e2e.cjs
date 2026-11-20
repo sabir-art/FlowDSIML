@@ -42,16 +42,16 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   // ===== n° 8 : guidage après l'import =====
   await page.waitForURL(/\/edit\?guide=1$/);
   const id = page.url().match(/demos\/([^/?]+)\/edit/)[1];
-  const tool = page.getByRole('button', { name: 'Hotspot', exact: true });
-  await page.locator('.canvas-frame').waitFor();
+  const placing = async () => (await page.locator('.stage .canvas-frame.tool-hotspot').count()) === 1;
+  await page.locator('.stage .canvas-frame').waitFor();
   await page.waitForTimeout(300);
-  ok((await tool.getAttribute('aria-pressed')) === 'true', 'n° 8 : outil Hotspot actif à l’ouverture');
+  ok(await placing(), 'n° 8 : mode « placer un point » actif à l’ouverture');
   const guide = page.locator('.guide-bar');
   ok(
     (await guide.textContent()).includes('Cliquez sur l’écran à l’endroit où l’apprenant doit cliquer'),
     'n° 8 : aide « Cliquez sur l’écran… »',
   );
-  const frame = await page.locator('.canvas-frame').boundingBox();
+  const frame = await page.locator('.stage .canvas-frame').boundingBox();
   await page.mouse.click(frame.x + frame.width * 0.5, frame.y + frame.height * 0.4);
   await page.locator('#hs-title').waitFor();
 
@@ -83,15 +83,14 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await next.click();
   await page.waitForTimeout(300);
   ok(
-    /^Étape 2 · /.test(await page.locator('.stage-head .t-caption').first().innerText()) &&
-      (await tool.getAttribute('aria-pressed')) === 'true',
-    'n° 8 : « Étape suivante sans bulle » ouvre l’étape 2, outil Hotspot actif',
+    /^Étape 2 · /.test(await page.locator('.stage-head .t-caption').first().innerText()) && (await placing()),
+    'n° 8 : « Étape suivante sans bulle » ouvre l’étape 2, mode « placer un point » actif',
   );
-  await tool.click();
-  ok((await tool.getAttribute('aria-pressed')) === 'false', 'outil désactivé');
+  await page.keyboard.press('Escape');
+  ok(!(await placing()), 'Échap : mode « placer un point » quitté');
   const add = page.getByRole('button', { name: 'Ajouter un hotspot' }).first();
   await add.click();
-  ok((await tool.getAttribute('aria-pressed')) === 'true', 'n° 8 : « Ajouter un hotspot » active l’outil');
+  ok(await placing(), 'n° 8 : « Ajouter un hotspot » active le mode « placer un point »');
   const axe = await new AxeBuilder({ page })
     .include('.guide-bar')
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])

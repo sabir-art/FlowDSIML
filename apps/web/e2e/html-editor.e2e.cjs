@@ -76,7 +76,14 @@ const page = (h1) => `<!doctype html><html><head><meta charset="utf-8"><title>${
     (await p.locator('.html-stage iframe').getAttribute('sandbox')) === 'allow-scripts',
     'iframe sandbox="allow-scripts"',
   );
-  ok((await p.locator('.floatbar').count()) === 0, 'barre flottante (hotspot, flou, zoom) masquée');
+  ok(
+    (await p
+      .locator(
+        '.ed-rail [data-tool="hotspots"][aria-disabled="true"], .ed-rail [data-tool="blur"][aria-disabled="true"], .ed-rail [data-tool="zoom"][aria-disabled="true"]',
+      )
+      .count()) === 3,
+    'L48-E : points, flou et zoom désactivés dans le rail',
+  );
   ok(
     (await p.getByText('Élément introuvable dans la nouvelle capture').count()) === 1,
     'élément introuvable signalé',

@@ -77,7 +77,7 @@ const SCREENS = {
     },
     // EDT-08 : le formulaire se place dans le rail (avant l'étape 2) et s'édite dans l'onglet Étape
     async prepare(p) {
-      await p.getByRole('tab', { name: 'Réglages' }).click();
+      await p.locator('.ed-rail [data-tool="settings"][aria-pressed="false"]').click();
       await p.getByRole('button', { name: 'Créer le formulaire' }).click();
       await p.waitForSelector('#f-title');
       await p
@@ -97,7 +97,8 @@ const SCREENS = {
     async prepare(p) {
       await p.locator('.rail-list .step').nth(2).click();
       await p.waitForTimeout(400);
-      // Bouton principal activé, pour valider la section « Bouton principal (CTA) »
+      // Bouton principal activé, pour valider la section « Bouton principal (CTA) » (L48-E : outil du rail)
+      await p.locator('.ed-rail [data-tool="cta"][aria-pressed="false"]').click();
       await p.locator('#st-cta-on').check();
       await p.locator('#st-cta-l').fill('Réserver une démo');
       await p.locator('#st-cta-u').fill('https://agenda.example.com/demo');
@@ -112,7 +113,7 @@ const SCREENS = {
       await p.waitForTimeout(200);
     },
     async prepare(p) {
-      await p.getByRole('tab', { name: 'Design' }).click();
+      await p.locator('.ed-rail [data-tool="design"][aria-pressed="false"]').click();
       await p.waitForTimeout(400);
     },
   },
@@ -124,7 +125,7 @@ const SCREENS = {
       await p.waitForTimeout(200);
     },
     async prepare(p) {
-      await p.getByRole('tab', { name: 'Réglages' }).click();
+      await p.locator('.ed-rail [data-tool="settings"][aria-pressed="false"]').click();
       await p.waitForTimeout(400);
     },
   },
@@ -335,11 +336,9 @@ const SCREENS = {
     maquette: 'reference/editeur.html',
     route: '/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit',
     async prepare(p) {
-      await p
-        .locator('.floatbar')
-        .getByRole('button', { name: /Flou|Zone de flou/ })
-        .first()
-        .click();
+      // L48-E : le flou s'ouvre dans sa fenêtre (outil « Flou » du rail)
+      await p.locator('.ed-rail [data-tool="blur"]').click();
+      await p.locator('#blurm-title').waitFor();
       await p.waitForTimeout(200);
       await p.mouse.move(0, 0);
     },
