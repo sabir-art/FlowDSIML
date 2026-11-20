@@ -47,9 +47,11 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // ===== L26-06 : vue d'ensemble =====
   await page.goto(`${APP}/#/analytics`);
-  // L47-01 : les visiteurs récurrents ont leur bloc (plus d'indicateur en onglet)
-  const card = page.locator('.an-ret');
-  await card.waitFor();
+  // L48-D : widget « Nouveaux et récurrents » (plus d'indicateur en onglet)
+  const card = page.locator('section.an-w', {
+    has: page.getByRole('heading', { name: 'Nouveaux et récurrents' }),
+  });
+  await card.locator('.an-nr').waitFor();
   ok(
     (await page.locator('.kpi-tab', { hasText: 'Visiteurs récurrents' }).count()) === 0,
     'pas d’onglet « Visiteurs récurrents »',
@@ -58,27 +60,13 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const num = (x) => Number(sp(x).replace(/\D/g, ''));
   const uniq = num(await page.locator('.kpi-tab').nth(1).locator('.kpi-tab__v').innerText());
   const n = Math.round(uniq * 0.34);
-  const pRet = Math.round((n / uniq) * 100);
-  const fmt = (x) => x.toLocaleString('fr-FR').replace(/[\u00a0\u202f]/g, ' ');
   ok(sp(await card.innerText()).includes('revenu après plus de 30 minutes'), 'définition (30 min)');
+  const nums = card.locator('.an-nr__nums b');
   ok(
-    sp(await card.locator('[role="img"]').getAttribute('aria-label')) ===
-      `Nouveaux : ${fmt(uniq - n)}, ${100 - pRet} %. Récurrents : ${fmt(n)}, ${pRet} %.`,
-    'barres sur les vraies données (role="img")',
-  );
-  ok(
-    sp(await card.innerText()).includes('revient en moyenne 2,4 fois') &&
-      /« [^»]+ » \(\d+ % de récurrents\)/.test(sp(await card.innerText())),
-    'phrase : visites moyennes et démos les plus revues',
+    num(await nums.nth(0).innerText()) === uniq - n && num(await nums.nth(1).innerText()) === n,
+    'nouveaux et récurrents sur les vraies données',
   );
   await shot('l26-06-vue');
-
-  // Moins de 20 récurrents : phrase omise
-  state.returningShare = 0.1;
-  await page.reload();
-  await card.waitFor();
-  ok(!sp(await card.innerText()).includes('en moyenne'), 'moins de 20 récurrents : phrase omise');
-  state.returningShare = 0.34;
 
   // ===== L26-08 : modale « Mesure des visites » =====
   await page
@@ -100,7 +88,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await dlg.getByRole('button', { name: 'Enregistrer' }).click();
   await dlg.waitFor({ state: 'detached' });
   ok(state.tables.workspaces[0].visit_gap_minutes === 1440, 'écart de 24 h enregistré');
-  await page.getByRole('button', { name: 'Mesure des visites' }).click();
+  // L48-D : « Mesure des visites » passe dans le menu « Plus »
+  await page.locator('.an-more').click();
+  await page.getByRole('menuitem', { name: 'Mesure des visites' }).click();
   await dlg.waitFor();
   await sw.uncheck();
   await dlg.getByRole('button', { name: 'Enregistrer' }).click();
@@ -176,7 +166,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // ===== Paramètres › Confidentialité =====
   await page.goto(`${APP}/#/settings/privacy`);
-  await page.getByRole('heading', { level: 2, name: 'Confidentialité' }).waitFor();
+  await page.getByRole('heading', { level: 1, name: 'Confidentialité' }).waitFor();
   ok(
     sp(await page.locator('.setting').innerText()).includes('nouvelle visite après 30 minutes'),
     'Confidentialité : état',
@@ -190,7 +180,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   state.tables.members[0].role = 'viewer';
   await page.goto(`${APP}/#/analytics`);
   await page.reload();
-  await page.getByRole('button', { name: 'Mesure des visites' }).click();
+  // L48-D : « Mesure des visites » passe dans le menu « Plus »
+  await page.locator('.an-more').click();
+  await page.getByRole('menuitem', { name: 'Mesure des visites' }).click();
   await dlg.waitFor();
   ok(
     (await sw.isDisabled()) && (await dlg.getByRole('button', { name: 'Enregistrer' }).count()) === 0,

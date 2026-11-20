@@ -198,16 +198,17 @@ const measure = (bar) =>
     const page = await open('/#/analytics', 1440, seed);
     const bar = page.locator('.an-toolbar');
     await bar.waitFor();
-    const head = page.locator('.page-head');
+    // L48-D §2 : Exporter à la fin de la barre, « Mesure des visites » dans le menu « Plus » ; barre sous les onglets
     ok(
-      (await head.getByRole('button', { name: /Mesure des visites/ }).count()) === 1 &&
-        (await head.getByRole('button', { name: /Exporter/ }).count()) === 1 &&
-        (await bar.getByRole('button', { name: /Mesure des visites|Exporter/ }).count()) === 0,
-      'Analytics : Mesure des visites et Exporter dans l’en-tête, pas dans la barre',
+      (await page
+        .locator('.page-head')
+        .getByRole('button', { name: /Mesure des visites|Exporter/ })
+        .count()) === 0 && (await bar.getByRole('button', { name: /^Exporter$/ }).count()) === 1,
+      'Analytics : Exporter dans la barre, plus rien dans l’en-tête',
     );
     ok(
-      (await bar.boundingBox()).y < (await page.locator('.an-tabs').boundingBox()).y,
-      'Analytics : barre au-dessus des onglets',
+      (await bar.boundingBox()).y > (await page.locator('.an-tabrow').boundingBox()).y,
+      'Analytics : barre sous les onglets',
     );
     ok((await bar.locator('select').count()) === 0, 'Analytics : plus de listes natives');
     let m = await measure(bar);

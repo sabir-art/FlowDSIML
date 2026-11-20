@@ -150,8 +150,8 @@ const live = (n) => ({
   await page.goto(`${APP}/#/analytics?tab=live`);
   await page.getByRole('heading', { name: 'Visiteurs actifs' }).waitFor();
   ok(
-    (await page.getByRole('tab', { name: /Temps réel/ }).getAttribute('aria-selected')) === 'true',
-    'onglet Temps réel ouvert depuis l’URL',
+    (await page.locator('.an-more.is-active').innerText()).includes('Temps réel'),
+    'onglet Temps réel ouvert depuis l’URL (« Plus » prend son nom, L48-D)',
   );
   ok((await page.locator('.kpis .kpi').count()) === 4, '4 KPI');
   ok((await page.locator('.l19-hero .value').textContent()) === '7', 'visiteurs en ce moment');
@@ -200,7 +200,8 @@ const live = (n) => ({
   );
 
   // ===== L19-03 : sondages et tests =====
-  await page.getByRole('tab', { name: 'Sondages et tests' }).click();
+  await page.locator('.an-more').click();
+  await page.getByRole('menuitem', { name: 'Sondages et tests' }).click();
   await page.getByLabel('Démo analysée').selectOption(DEMO);
   await page.getByRole('heading', { name: 'Test A/B · étape 3' }).waitFor();
   ok(new URL(page.url().replace('#/', '')).searchParams.get('tab') === 'tests', 'onglet gardé dans l’URL');
@@ -225,7 +226,8 @@ const live = (n) => ({
   await drawer.getByRole('button', { name: 'Fermer' }).click();
 
   // ===== L19-04 : segments =====
-  await page.getByRole('tab', { name: 'Segments' }).click();
+  await page.locator('.an-more').click();
+  await page.getByRole('menuitem', { name: 'Segments' }).click();
   await page.getByRole('heading', { name: 'Nouveau segment' }).waitFor();
   await page.getByRole('button', { name: 'Ajouter un filtre' }).click();
   const fd = page.getByRole('dialog', { name: 'Ajouter un filtre' });
@@ -302,7 +304,8 @@ const live = (n) => ({
   await page.getByRole('button', { name: 'Retirer le filtre Conseillers sur mobile' }).click();
 
   // ===== L19-05 / 06 : alertes =====
-  await page.getByRole('tab', { name: /Alertes/ }).click();
+  await page.locator('.an-more').click();
+  await page.getByRole('menuitem', { name: 'Alertes' }).click();
   await page.getByText(/Aucune alerte/).waitFor();
   await page.getByRole('button', { name: 'Nouvelle alerte' }).click();
   const dlg = page.getByRole('dialog', { name: 'Nouvelle alerte' });
@@ -331,10 +334,6 @@ const live = (n) => ({
   await page.waitForTimeout(400);
   ok(state.tables.alerts[1].active === false, 'alerte mise en pause');
   ok((await page.getByText('En pause').count()) === 1, 'badge « En pause »');
-  ok(
-    (await page.getByRole('tab', { name: /Alertes/ }).textContent()).includes('1'),
-    'compteur des alertes actives',
-  );
   // Modifier
   await page.getByRole('button', { name: 'Nouveau lead' }).click();
   await page.getByRole('dialog', { name: 'Modifier l’alerte' }).getByLabel('Quand').selectOption('cta');
@@ -371,7 +370,8 @@ const live = (n) => ({
     await page.reload();
     await page.getByRole('heading', { name: 'Personne sur la démo en ce moment' }).waitFor();
     await shot('l19-02-temps-reel-vide');
-    await page.getByRole('tab', { name: 'Sondages et tests' }).click();
+    await page.locator('.an-more').click();
+    await page.getByRole('menuitem', { name: 'Sondages et tests' }).click();
     await page.getByLabel('Démo analysée').selectOption(DEMO);
     await page.getByRole('heading', { name: 'Test A/B · étape 3' }).waitFor();
     ok(
@@ -379,7 +379,8 @@ const live = (n) => ({
       'L19-03 : mention des filtres',
     );
     await shot('l19-03-sondages-tests');
-    await page.getByRole('tab', { name: 'Segments' }).click();
+    await page.locator('.an-more').click();
+    await page.getByRole('menuitem', { name: 'Segments' }).click();
     await page.getByRole('heading', { name: 'Nouveau segment' }).waitFor();
     await page.getByRole('button', { name: 'Ajouter une condition' }).click();
     await page.getByLabel('Critère de la condition 1').selectOption('device');
@@ -409,7 +410,8 @@ const live = (n) => ({
       .getByRole('button', { name: /Annuler|Fermer/ })
       .first()
       .click();
-    await page.getByRole('tab', { name: /Alertes/ }).click();
+    await page.locator('.an-more').click();
+    await page.getByRole('menuitem', { name: 'Alertes' }).click();
     await page.getByText('Clic sur le bouton d’action', { exact: true }).waitFor();
     ok(
       /dans l’app et webhook/.test(await page.locator('main').textContent()),
@@ -448,7 +450,8 @@ const live = (n) => ({
   await p2.getByText(`Taux de complétion sous 50${N}%`).waitFor();
   ok((await p2.getByRole('button', { name: 'Nouvelle alerte' }).count()) === 0, 'lecteur : pas de création');
   ok(await p2.getByRole('switch').first().isDisabled(), 'lecteur : interrupteurs désactivés');
-  await p2.getByRole('tab', { name: 'Sondages et tests' }).click();
+  await p2.locator('.an-more').click();
+  await p2.getByRole('menuitem', { name: 'Sondages et tests' }).click();
   await p2.getByLabel('Démo analysée').selectOption(DEMO);
   await p2.getByText('Les réponses écrites sont lisibles par les éditeurs.').waitFor();
   ok(

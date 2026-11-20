@@ -1794,3 +1794,15 @@ button.fd-nav__item:hover {
 .ext-dialog .ext-ok svg {
   color: var(--fd-color-success);
 }
+
+/* L48-D : recherche en haut d'un menu (longues listes) */
+.menu-search {
+  width: calc(100% - 8px);
+  height: 36px;
+  margin: 4px 4px 6px;
+}
+.menu-empty {
+  margin: 4px 12px 8px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}

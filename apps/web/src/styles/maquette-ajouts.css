@@ -261,50 +261,6 @@
   display: grid;
   gap: 8px;
 }
-.mk .funnel-row {
-  display: grid;
-  grid-template-columns: 28px 1fr 64px 72px;
-  gap: 12px;
-  align-items: center;
-  font-size: var(--fd-text-body-size);
-}
-.mk .funnel-bar {
-  height: 28px;
-  border-radius: 6px;
-  background: var(--fd-color-surface-sunken);
-  position: relative;
-  overflow: hidden;
-}
-.mk .funnel-bar > span {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--fd-color-chart-1);
-  opacity: 0.9;
-  border-radius: 6px;
-}
-.mk .funnel-bar > b {
-  position: relative;
-  z-index: 1;
-  padding: 0 10px;
-  line-height: 28px;
-  font-weight: 500;
-  color: var(--fd-color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-.mk .funnel-bar > span + b {
-  /* L24 : encre sur l'orange des graphiques (le blanc ne fait que 2,2:1) */
-  color: #080808;
-}
-:root[data-theme='dark'] .mk .funnel-bar > span + b {
-  color: var(--fd-lagoon-950);
-}
-.mk .drop {
-  color: var(--fd-color-danger);
-  font-weight: 600;
-}
 .mk .two {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
@@ -320,43 +276,6 @@
 }
 .mk .an-toolbar {
   margin-bottom: 16px;
-}
-.mk .an-tabs {
-  margin-bottom: 24px;
-}
-.mk .an-two {
-  margin-top: 16px;
-}
-.mk .an-sources {
-  gap: 14px;
-  margin-top: 16px;
-}
-.mk .an-progress {
-  margin-top: 6px;
-}
-.mk .an-funnel-card {
-  margin-top: 16px;
-}
-.mk .an-funnel-sub {
-  margin-top: 2px;
-}
-.mk .an-funnel {
-  margin-top: 16px;
-}
-.mk .an-r {
-  text-align: right;
-}
-.mk .an-alert {
-  margin-top: 16px;
-}
-.mk .an-empty {
-  margin: 16px 0 0;
-}
-.mk .an-warn {
-  width: 14px;
-  height: 14px;
-  vertical-align: -2px;
-  margin-right: 4px;
 }
 .mk .an-soon {
   height: 16px;
@@ -3078,31 +2997,9 @@
 }
 
 /* L26-06 à 08 : visiteurs récurrents */
-.mk .an-ret {
-  display: block;
-  margin-top: var(--fd-space-4);
-}
-.mk .an-ret .an-sources {
-  align-items: stretch;
-  align-self: stretch;
-  width: 100%;
-  max-width: 640px;
-}
-.mk .an-ret .an-sources > div {
-  width: 100%;
-}
 /* L26-06 : six indicateurs sur une ligne en grand écran */
 .mk.an .kpis {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-}
-.mk .an-ret-def {
-  margin: 4px 0 12px;
-}
-.mk .an-ret-sentence {
-  margin: 12px 0 0;
-}
-.mk .an-progress-ret > span {
-  background: var(--fd-color-accent, var(--fd-color-primary));
 }
 .mk .an-visit {
   display: flex;

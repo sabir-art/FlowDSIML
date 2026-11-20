@@ -860,6 +860,18 @@ async function install(page, state = seed()) {
               link: Math.round(views * 0.21),
               direct: Math.round(views * 0.19),
             },
+            // L48-D : vues par appareil et par navigateur
+            devices: views
+              ? { desktop: Math.round(views * 0.7), mobile: Math.round(views * 0.25), tablet: Math.round(views * 0.05) }
+              : {},
+            browsers: views
+              ? {
+                  chrome: Math.round(views * 0.55),
+                  edge: Math.round(views * 0.2),
+                  firefox: Math.round(views * 0.15),
+                  safari: Math.round(views * 0.1),
+                }
+              : {},
           });
         }
         case 'analytics_series': {

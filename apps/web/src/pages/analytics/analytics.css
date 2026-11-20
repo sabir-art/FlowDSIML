@@ -1,0 +1,316 @@
+/* L48-D : onglets et « Plus », barre de filtres, grille de widgets, onglet Démos. */
+.mk .an-tabrow {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  border-bottom: 1px solid var(--fd-color-border);
+  margin-bottom: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mk .an-tabrow::-webkit-scrollbar {
+  display: none;
+}
+.mk .an-tabs2 {
+  display: flex;
+  gap: 4px;
+}
+.mk .an-tabs2 > button,
+.mk .an-more {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mk .an-more svg {
+  width: 16px;
+  height: 16px;
+}
+.mk .an-tabs2 > button[aria-selected='true'],
+.mk .an-more.is-active {
+  color: var(--fd-color-text);
+  font-weight: 600;
+  border-bottom-color: var(--fd-color-text);
+}
+.mk .an-tabs2 > button:hover,
+.mk .an-more:hover {
+  color: var(--fd-color-text);
+}
+.mk .an-toolbar {
+  margin-bottom: 16px;
+}
+.mk .an-toolbar__end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* §3.2 : grille de widgets, 2 par ligne au-dessus de 1100 px */
+.mk .an-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+@media (min-width: 1100px) {
+  .mk .an-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.mk .an-w {
+  padding: 24px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mk .an-w__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+}
+.mk .an-w__t {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.mk .an-w__pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.mk .an-w__sub {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fd-color-text-muted);
+}
+.mk .an-w__foot,
+.mk .an-w__off {
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.mk .an-w__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  color: var(--fd-color-text-muted);
+}
+.mk .an-w__empty svg {
+  width: 32px;
+  height: 32px;
+}
+.mk .an-w__empty p {
+  margin: 0;
+}
+.mk .an-w__wait {
+  flex: 1;
+}
+
+/* Lignes : nom et chiffre sur une ligne, barre de 6 px dessous, 14 px entre deux lignes */
+.mk .an-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.mk .an-rows > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 12px;
+  font-size: 14px;
+}
+.mk .an-rows__l {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mk .an-rows__v {
+  font-variant-numeric: tabular-nums;
+  color: var(--fd-color-text-muted);
+}
+.mk .an-rows > li.is-danger .an-rows__v,
+.mk .an-rows > li.is-danger .an-rows__l {
+  color: var(--fd-color-danger);
+  font-weight: 600;
+}
+.mk .an-rows__bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--fd-color-surface-sunken);
+  overflow: hidden;
+}
+.mk .an-rows__bar > i,
+.mk .an-nr__bar > i {
+  display: block;
+  height: 100%;
+  background: var(--fd-color-text-muted);
+  border-radius: 3px;
+}
+
+/* Nouveaux et récurrents : 2 chiffres et une barre empilée en 2 tons de gris */
+.mk .an-nr {
+  display: grid;
+  gap: 12px;
+}
+.mk .an-nr__nums {
+  display: flex;
+  gap: 32px;
+}
+.mk .an-nr__nums > span {
+  display: grid;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.mk .an-nr__nums b {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--fd-color-text);
+  font-variant-numeric: tabular-nums;
+}
+.mk .an-nr__bar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--fd-color-border-strong, var(--fd-color-border));
+  overflow: hidden;
+}
+.mk .an-nr__bar > i {
+  background: var(--fd-color-text);
+}
+
+/* §4 : onglet Démos */
+.mk .an-demos {
+  padding: 0;
+  overflow: hidden;
+}
+.mk .an-demos__sort {
+  display: none;
+  padding: 12px 16px;
+}
+.mk .an-demos__t {
+  width: 100%;
+  border-collapse: collapse;
+}
+.mk .an-demos__t th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fd-color-text-muted);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mk .an-demos__t th.r,
+.mk .an-demos__t td.r {
+  text-align: right;
+}
+.mk .an-demos__t th.is-sorted {
+  font-weight: 600;
+  color: var(--fd-color-text);
+}
+.mk .an-demos__h {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.mk .an-demos__h svg {
+  width: 14px;
+  height: 14px;
+}
+.mk .an-demos__t td {
+  height: 64px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mk .an-demos__t tbody tr {
+  cursor: pointer;
+}
+.mk .an-demos__t tbody tr:hover {
+  background: var(--fd-color-surface-sunken);
+}
+.mk .an-demos__t td.num {
+  font-variant-numeric: tabular-nums;
+}
+.mk .an-demos__name {
+  display: block;
+  color: var(--fd-color-text);
+  font-weight: 500;
+  text-decoration: none;
+}
+.mk .an-demos__name:hover {
+  text-decoration: underline;
+}
+.mk .an-demos__folder {
+  display: block;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.mk .an-dash {
+  color: var(--fd-color-text-muted);
+}
+.mk .an-demos__go {
+  width: 40px;
+  color: var(--fd-color-text-muted);
+}
+.mk .an-demos__go svg {
+  width: 16px;
+  height: 16px;
+}
+.mk .an-demos__more {
+  margin: 12px 16px;
+}
+
+/* §5 : mobile */
+@media (max-width: 767px) {
+  .mk .an-demos__sort {
+    display: block;
+  }
+  .mk .an-demos__t .an-demos__opt {
+    display: none;
+  }
+  .mk .an-toolbar__end {
+    width: 100%;
+  }
+  /* Indicateurs en grille 2 × 2 (au lieu du carrousel L47) ; le soulignement reste sous la cellule */
+  .mk.an .kpi-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .mk.an .kpi-tab {
+    flex: none;
+  }
+  .mk.an .kpi-tab:nth-child(odd) {
+    border-left: 0;
+  }
+  .mk.an .kpi-tab:nth-child(n + 3) {
+    border-top: 1px solid var(--fd-color-border);
+  }
+}

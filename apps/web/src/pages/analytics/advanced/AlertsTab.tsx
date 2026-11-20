@@ -62,7 +62,7 @@ export function AlertsTab({
   segments: Segment[];
   canEdit: boolean;
   isAdmin: boolean;
-  onCount: (n: number) => void;
+  onCount?: (n: number) => void;
 }) {
   const { t } = useTranslation();
   const [alerts, setAlerts] = useState<Alert[] | null>(null);
@@ -77,7 +77,7 @@ export function AlertsTab({
       .order('created_at', { ascending: true });
     const list = (data ?? []) as Alert[];
     setAlerts(list);
-    onCount(list.filter((a) => a.active).length);
+    onCount?.(list.filter((a) => a.active).length);
   };
   useEffect(() => {
     void load();

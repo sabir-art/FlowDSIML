@@ -21,6 +21,7 @@ export function FilterMenu({
   sort = false,
   items,
   align = 'start',
+  search,
 }: {
   icon: ReactNode;
   label: string;
@@ -30,9 +31,12 @@ export function FilterMenu({
   sort?: boolean;
   items: Array<MenuItem | 'separator'>;
   align?: 'start' | 'end';
+  /** L48-D : recherche dans le menu (longues listes). */
+  search?: { label: string; empty: string; keep?: number };
 }) {
   return (
     <Menu
+      search={search}
       label={label}
       align={align}
       custom={{

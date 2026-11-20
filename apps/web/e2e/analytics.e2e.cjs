@@ -102,7 +102,7 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   ]);
   ok(dl.suggestedFilename().endsWith('.csv'), 'export CSV de l’entonnoir');
 
-  // Analytics du workspace (ANA-01) : 6 KPI (L26-06 : visiteurs récurrents), période, filtre par démo, onglets
+  // Analytics de l'espace (ANA-01, L48-D) : 4 indicateurs, période, filtre par démo, onglets
   await page.goto(`${APP}/#/analytics`);
   await page.waitForSelector('.mk .kpi-tab');
   ok(
@@ -116,14 +116,6 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await selected(3);
   ok(/indicateur=leads/.test(page.url()), 'espace : ?indicateur=leads');
   ok((await page.locator('.kpi-chart__t').textContent()) === 'Leads par jour', 'espace : « Leads par jour »');
-  const leadsCol = await page.locator('.kpi-tbl tbody tr td.on').allTextContents();
-  ok(
-    leadsCol.length >= 1 &&
-      leadsCol.every(
-        (v, i) => i === 0 || Number(v.replace(/\D/g, '')) <= Number(leadsCol[i - 1].replace(/\D/g, '')),
-      ),
-    `« Par démo » trié par leads (${leadsCol.join(', ')})`,
-  );
   ok(
     (await page.locator('.kpi-chart__svg path, .kpi-chart__svg polygon').count()) === 0,
     'courbe seule, sans aplat sous la courbe',
@@ -131,7 +123,9 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l47-espace.png`, fullPage: true });
   await wsTabs.nth(0).click();
   await selected(0);
-  ok((await page.locator('.funnel-row[role=row]').count()) >= 2, 'parcours étape par étape');
+  const steps = page.locator('section.an-w', { has: page.getByRole('heading', { name: /Étape par étape/ }) });
+  await steps.locator('.an-rows li').first().waitFor();
+  ok((await steps.locator('.an-rows li').count()) >= 2, 'widget étape par étape (L48-D)');
   await page.getByRole('radio', { name: '7 j' }).click();
   await page.waitForTimeout(400);
   ok(
@@ -198,11 +192,11 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await page.locator('dialog[open]').getByRole('button', { name: 'Supprimer' }).click();
   await page.waitForTimeout(500);
   ok(state.tables.leads.length === 0, 'suppression d’un lead (RGPD)');
-  await page.waitForSelector('#an-panel-leads .empty');
+  await page.waitForSelector('#an-panel-leads .fd-empty');
   ok(
-    /prospects/.test(await page.textContent('#an-panel-leads .empty')) &&
+    /prospects/.test(await page.textContent('#an-panel-leads .fd-empty')) &&
       (await page
-        .locator('#an-panel-leads .empty a.btn-primary', { hasText: 'Ajouter un formulaire' })
+        .locator('#an-panel-leads .fd-empty a.fd-btn--primary', { hasText: 'Ajouter un formulaire' })
         .count()) === 1,
     'ANA-09 : état vide avec « Ajouter un formulaire »',
   );

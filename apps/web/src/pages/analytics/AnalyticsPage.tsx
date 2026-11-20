@@ -1,18 +1,16 @@
-import { Calendar, Check, Download, Info, Link2, Monitor, ShieldCheck, TriangleAlert } from 'lucide-react';
+import { Calendar, Check, ChevronDown, Download, Info, Link2, Monitor, ShieldCheck } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { completionRate, computeFunnel, countTrend, rateTrend, toCsv } from '@flowdsiml/core';
-import { MeasureDialog, ReturningCard, VisitBadge, type Returning } from './returning';
+import { completionRate, countTrend, rateTrend, toCsv } from '@flowdsiml/core';
+import { MeasureDialog, VisitBadge, type Returning } from './returning';
 import {
   KPI_KEYS,
   KpiTabs,
-  MetricTable,
   TrendChart,
   alignDays,
   dayValue,
   kpiFromParam,
-  metricValues,
   type KpiItem,
   type KpiKey,
   type Series,
@@ -23,6 +21,7 @@ import { downloadText } from '../../lib/download';
 import { formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
+import { Menu } from '../../components/Menu';
 import { LeadsMkTable } from './LeadsMkTable';
 import { initials } from '../../lib/initials';
 import '../../styles/maquette.css';
@@ -36,7 +35,10 @@ import { SegmentsTab, type Segment } from './advanced/SegmentsTab';
 import { AlertsTab } from './advanced/AlertsTab';
 import { FilterBar } from './advanced/FilterBar';
 import { decodeDef, encodeDef, type SegmentDef } from './advanced/segmentModel';
+import { DemosTab } from './DemosTab';
+import { DevicesWidget, ReturningWidget, SourcesWidget, StepsWidget } from './widgets';
 import './advanced/advanced.css';
+import './analytics.css';
 
 /** L19b : « page » = lecteur affiché dans la page publique. */
 type Source = 'direct' | 'embed' | 'link' | 'page';
@@ -48,6 +50,9 @@ interface WsAnalytics {
   leads: number;
   daily: Array<{ day: string; views: number; completions: number }>;
   sources: Record<Exclude<Source, 'page'>, number> & { page?: number };
+  /** L48-D : vues par type d'appareil et par navigateur (migration 150000). */
+  devices?: Record<string, number>;
+  browsers?: Record<string, number>;
   /** L19 : visiteurs du segment appliqué (null sans segment). */
   segmentVisitors?: number | null;
 }
@@ -64,15 +69,17 @@ interface Session {
   lead_email: string | null;
   lead_fields: Record<string, unknown> | null;
 }
-type Tab = 'overview' | 'sessions' | 'leads' | 'live' | 'tests' | 'segments' | 'alerts';
-/** L19 : onglets d'analytics avancées (après Vue d'ensemble, Sessions et Leads). */
-const ADV: Tab[] = ['live', 'tests', 'segments', 'alerts'];
+type Tab = 'overview' | 'demos' | 'sessions' | 'leads' | 'live' | 'tests' | 'segments' | 'alerts';
+/** L48-D §1 : onglets rangés dans le menu « Plus » (routes inchangées). */
+const MORE: Tab[] = ['live', 'tests', 'segments', 'alerts'];
 /** Onglets où la barre de filtres (segment) s'applique. */
-const FILTERED: Tab[] = ['overview', 'sessions', 'leads', 'segments'];
+const FILTERED: Tab[] = ['overview', 'demos', 'sessions', 'leads', 'segments'];
 const PERIODS = [7, 30, 90] as const;
 const PAGE = 25;
+/** L48-D §2 : au-delà, le menu Démo a un champ de recherche. */
+const SEARCH_MIN = 10;
 
-/** Analytics du workspace (ANA-01), à l'identique de la maquette analytics.html, sur les données réelles. */
+/** Analytics de l'espace (ANA-01, L48-D) : 4 onglets et « Plus », 4 indicateurs, grille de widgets. */
 export function AnalyticsPage() {
   const { t } = useTranslation();
   const { current, can } = useWorkspace();
@@ -80,10 +87,10 @@ export function AnalyticsPage() {
   // Données personnelles des leads : rôles editor et plus (comme la RLS leads_select)
   const canLeads = can('leads.view');
   const canEdit = can('demo.edit');
-  const tabs: Tab[] = [
-    ...(canLeads ? (['overview', 'sessions', 'leads'] as Tab[]) : (['overview', 'sessions'] as Tab[])),
-    ...ADV,
-  ];
+  const primary: Tab[] = canLeads
+    ? ['overview', 'demos', 'sessions', 'leads']
+    : ['overview', 'demos', 'sessions'];
+  const tabs: Tab[] = [...primary, ...MORE];
   const [days, setDays] = useState<number>(30);
   const [demo, setDemo] = useState<string>('');
   const [source, setSource] = useState<Source | ''>('');
@@ -126,40 +133,36 @@ export function AnalyticsPage() {
   );
   const segKey = JSON.stringify(pSegment);
   const [segInitial, setSegInitial] = useState<SegmentDef | null>(null);
-  const [alertCount, setAlertCount] = useState<number | null>(null);
-  useEffect(() => {
-    void supabase
-      .from('alerts')
-      .select('id', { count: 'exact', head: true })
-      .eq('workspace_id', ws.id)
-      .eq('active', true)
-      .then(({ count }) => setAlertCount(count ?? 0));
-  }, [ws.id]);
-  const [demos, setDemos] = useState<Array<{ id: string; title: string }>>([]);
+  const [demos, setDemos] = useState<Array<{ id: string; title: string; folder: string | null }>>([]);
   const [data, setData] = useState<WsAnalytics | null>(null);
   const [prev, setPrev] = useState<WsAnalytics | null>(null);
   // L47 : séries quotidiennes et détail par démo de chaque indicateur (période et précédente)
   const [series, setSeries] = useState<{ cur: Series | null; prev: Series | null; end: number } | null>(null);
   const [loadedAt, setLoadedAt] = useState<string>('');
-  const [leadCount, setLeadCount] = useState<number | null>(null);
   // L26-06 : visiteurs récurrents ; L26-08 : modale « Mesure des visites »
   const [ret, setRet] = useState<Returning | null>(null);
   const [measureOpen, setMeasureOpen] = useState(false);
   const [measureTick, setMeasureTick] = useState(0);
 
   useEffect(() => {
-    void supabase
-      .from('demos')
-      .select('id, title')
-      .eq('workspace_id', ws.id)
-      .is('deleted_at', null)
-      .order('title')
-      .then(({ data: d }) => setDemos(d ?? []));
-    void supabase
-      .from('leads')
-      .select('id', { count: 'exact', head: true })
-      .eq('workspace_id', ws.id)
-      .then(({ count }) => setLeadCount(count ?? 0));
+    void Promise.all([
+      supabase
+        .from('demos')
+        .select('id, title, folder_id')
+        .eq('workspace_id', ws.id)
+        .is('deleted_at', null)
+        .order('title'),
+      supabase.from('folders').select('id, name').eq('workspace_id', ws.id),
+    ]).then(([d, f]) => {
+      const names = new Map((f.data ?? []).map((x) => [x.id, x.name]));
+      setDemos(
+        (d.data ?? []).map((x) => ({
+          id: x.id,
+          title: x.title,
+          folder: x.folder_id ? (names.get(x.folder_id) ?? null) : null,
+        })),
+      );
+    });
   }, [ws.id]);
 
   useEffect(() => {
@@ -197,9 +200,10 @@ export function AnalyticsPage() {
 
   if (!data) return <Loading />;
   const title = (id: string) => demos.find((d) => d.id === id)?.title ?? '—';
+  const byDemo = series?.cur?.byDemo ?? [];
 
   const exportCsv = async () => {
-    // Onglet Leads : export des leads de la période (rôle editor et plus) ; sinon la série quotidienne
+    // Onglet Leads : export des leads de la période (rôle editor et plus)
     if (tab === 'leads' && canLeads) {
       const { data: r } = await supabase.rpc('workspace_leads', {
         p_workspace: ws.id,
@@ -232,6 +236,22 @@ export function AnalyticsPage() {
         ),
       );
     }
+    // Onglet Démos : une ligne par démo de la période
+    if (tab === 'demos') {
+      return downloadText(
+        `demos-${days}j.csv`,
+        toCsv(
+          ['demo', 'views', 'visitors', 'completions', ...(canLeads ? ['leads'] : [])],
+          byDemo.map((r) => [
+            title(r.demo_id),
+            r.views,
+            r.visitors,
+            r.completions,
+            ...(canLeads ? [r.leads] : []),
+          ]),
+        ),
+      );
+    }
     downloadText(
       `analytics-${days}j.csv`,
       toCsv(
@@ -241,6 +261,7 @@ export function AnalyticsPage() {
     );
   };
 
+  const inMore = MORE.includes(tab);
   return (
     <div className="mk an">
       <div className="page-head">
@@ -248,21 +269,76 @@ export function AnalyticsPage() {
           <h1>{t('analytics.title')}</h1>
           <p className="muted an-sub">{t('analytics.updated', { when: formatRelativeShort(loadedAt) })}</p>
         </div>
-        {/* L40 : actions de page dans l'en-tête, à droite (40 px) */}
         <div className="row wrap an-head-actions">
           <NotificationBell />
-          <button type="button" className="btn btn-secondary" onClick={() => setMeasureOpen(true)}>
-            <ShieldCheck aria-hidden="true" />
-            {t('analytics.ret.measure')}
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={() => void exportCsv()}>
-            <Download aria-hidden="true" />
-            {t('analytics.export')}
-          </button>
         </div>
       </div>
 
-      {/* L40 : barre commune à tous les onglets (au-dessus d'eux) : Démo, Source | Période */}
+      {/* L48-D §1 : 4 onglets au premier niveau, puis « Plus » (menu), qui prend le nom de l'onglet ouvert */}
+      <div className="an-tabrow">
+        <div className="an-tabs2" role="tablist" aria-label={t('analytics.views_label')}>
+          {primary.map((k) => (
+            <button
+              key={k}
+              type="button"
+              role="tab"
+              id={`an-tab-${k}`}
+              aria-selected={tab === k}
+              aria-controls={tab === k ? `an-panel-${k}` : undefined}
+              tabIndex={tab === k || (inMore && k === 'overview') ? 0 : -1}
+              onClick={() => selectTab(k)}
+              onKeyDown={(e) => {
+                const i = primary.indexOf(k);
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                  const n =
+                    primary[(i + (e.key === 'ArrowRight' ? 1 : primary.length - 1)) % primary.length]!;
+                  selectTab(n);
+                  document.getElementById(`an-tab-${n}`)?.focus();
+                }
+              }}
+            >
+              {t(`analytics.tab.${k}`)}
+            </button>
+          ))}
+        </div>
+        <Menu
+          label={t('analytics.more')}
+          align="end"
+          custom={{
+            className: `an-more${inMore ? ' is-active' : ''}`,
+            content: (
+              <>
+                {inMore ? t(`analytics.tab.${tab}`) : t('analytics.more')}
+                <ChevronDown aria-hidden="true" />
+              </>
+            ),
+          }}
+          items={[
+            ...MORE.map((k) => ({
+              label: t(`analytics.tab.${k}`),
+              current: tab === k,
+              end: tab === k ? <Check aria-hidden="true" /> : undefined,
+              onSelect: () => selectTab(k),
+            })),
+            'separator' as const,
+            {
+              label: t('analytics.ret.measure'),
+              icon: <ShieldCheck />,
+              onSelect: () => setMeasureOpen(true),
+            },
+            {
+              label: t('analytics.dates'),
+              icon: <Calendar />,
+              disabled: true,
+              hint: t('shell.soon'),
+              end: <span className="badge an-soon">{t('shell.soon')}</span>,
+              onSelect: () => undefined,
+            },
+          ]}
+        />
+      </div>
+
+      {/* L48-D §2 : Démo, Source | période, Exporter */}
       <ListToolbar
         className="an-toolbar"
         activeCount={(demo ? 1 : 0) + (source ? 1 : 0)}
@@ -279,10 +355,19 @@ export function AnalyticsPage() {
             <FilterMenu
               icon={<Monitor />}
               label={t('analytics.demoLabel')}
-              value={demo ? title(demo) : t('toolbar.allF')}
+              value={demo ? title(demo) : t('analytics.allDemos')}
               active={!!demo}
+              search={
+                demos.length > SEARCH_MIN
+                  ? { label: t('analytics.searchDemo'), empty: t('analytics.noDemoMatch'), keep: 1 }
+                  : undefined
+              }
               items={[
-                { label: t('toolbar.allF'), icon: demo ? <span /> : <Check />, onSelect: () => setDemo('') },
+                {
+                  label: t('analytics.allDemos'),
+                  icon: demo ? <span /> : <Check />,
+                  onSelect: () => setDemo(''),
+                },
                 ...demos.map((d) => ({
                   label: d.title,
                   icon: demo === d.id ? <Check /> : <span />,
@@ -293,11 +378,11 @@ export function AnalyticsPage() {
             <FilterMenu
               icon={<Link2 />}
               label={t('analytics.sourceLabel')}
-              value={source ? t(`analytics.src.${source}`) : t('toolbar.allF')}
+              value={source ? t(`analytics.src.${source}`) : t('analytics.allSources')}
               active={!!source}
               items={[
                 {
-                  label: t('toolbar.allF'),
+                  label: t('analytics.allSources'),
                   icon: source ? <span /> : <Check />,
                   onSelect: () => setSource(''),
                 },
@@ -311,57 +396,27 @@ export function AnalyticsPage() {
           </>
         }
         end={
-          <div className="fd-segmented" role="radiogroup" aria-label={t('analytics.period')}>
-            {PERIODS.map((p) => (
-              <button key={p} type="button" role="radio" aria-checked={days === p} onClick={() => setDays(p)}>
-                {t('analytics.daysShort', { count: p })}
-              </button>
-            ))}
-            {/* Plage de dates libre : pas encore disponible */}
-            <button
-              type="button"
-              role="radio"
-              aria-checked="false"
-              aria-disabled="true"
-              title={t('shell.soon')}
-            >
-              <Calendar aria-hidden="true" />
-              {t('analytics.dates')}
-              <span className="badge an-soon">{t('shell.soon')}</span>
+          <div className="an-toolbar__end">
+            <div className="fd-segmented" role="radiogroup" aria-label={t('analytics.period')}>
+              {PERIODS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  role="radio"
+                  aria-checked={days === p}
+                  onClick={() => setDays(p)}
+                >
+                  {t('analytics.daysShort', { count: p })}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="btn btn-secondary" onClick={() => void exportCsv()}>
+              <Download aria-hidden="true" />
+              {t('analytics.export')}
             </button>
           </div>
         }
       />
-
-      <div className="tabs an-tabs" role="tablist" aria-label={t('analytics.views_label')}>
-        {tabs.map((k) => (
-          <button
-            key={k}
-            type="button"
-            role="tab"
-            id={`an-tab-${k}`}
-            aria-selected={tab === k}
-            aria-controls={tab === k ? `an-panel-${k}` : undefined}
-            tabIndex={tab === k ? 0 : -1}
-            onClick={() => selectTab(k)}
-            onKeyDown={(e) => {
-              const i = tabs.indexOf(k);
-              if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]!;
-                selectTab(n);
-                document.getElementById(`an-tab-${n}`)?.focus();
-              }
-            }}
-          >
-            {k === 'live' && <span className="live-dot" aria-hidden="true" />}
-            {t(`analytics.tab.${k}`)}
-            {k === 'leads' && leadCount !== null && (
-              <span className="badge badge-primary">{formatNumber(leadCount)}</span>
-            )}
-            {k === 'alerts' && !!alertCount && <span className="badge">{formatNumber(alertCount)}</span>}
-          </button>
-        ))}
-      </div>
 
       {FILTERED.includes(tab) && (
         <FilterBar
@@ -389,19 +444,35 @@ export function AnalyticsPage() {
       {tab === 'overview' && (
         <section role="tabpanel" id="an-panel-overview" aria-labelledby="an-tab-overview">
           <Overview
-            wsId={ws.id}
             data={data}
             prev={prev}
             series={series}
-            metric={kpiFromParam(params.get('indicateur'), KPI_KEYS)}
+            keys={canLeads ? KPI_KEYS : KPI_KEYS.filter((k) => k !== 'leads')}
+            metric={kpiFromParam(
+              params.get('indicateur'),
+              canLeads ? KPI_KEYS : KPI_KEYS.filter((k) => k !== 'leads'),
+            )}
             onMetric={(k) => patchParams({ indicateur: k === 'views' ? null : k })}
             days={days}
+            onWiden={() => setDays(90)}
             demo={demo}
             demos={demos}
-            title={title}
             ret={ret}
             onHow={() => setMeasureOpen(true)}
           />
+        </section>
+      )}
+      {tab === 'demos' && (
+        <section role="tabpanel" id="an-panel-demos" aria-labelledby="an-tab-demos">
+          {series ? (
+            <DemosTab
+              demos={demo ? demos.filter((d) => d.id === demo) : demos}
+              rows={byDemo}
+              canLeads={canLeads}
+            />
+          ) : (
+            <Loading />
+          )}
         </section>
       )}
       {measureOpen && (
@@ -419,24 +490,23 @@ export function AnalyticsPage() {
             days={days}
             demo={demo}
             title={title}
-            onChange={setLeadCount}
             formDemo={demo || demos[0]?.id}
             segment={pSegment}
           />
         </section>
       )}
       {tab === 'live' && (
-        <section role="tabpanel" id="an-panel-live" aria-labelledby="an-tab-live">
+        <section role="tabpanel" id="an-panel-live" aria-label={t('analytics.tab.live')}>
           <LiveTab wsId={ws.id} demo={demo} demos={demos} />
         </section>
       )}
       {tab === 'tests' && (
-        <section role="tabpanel" id="an-panel-tests" aria-labelledby="an-tab-tests">
+        <section role="tabpanel" id="an-panel-tests" aria-label={t('analytics.tab.tests')}>
           <SurveysTab demo={demo} demos={demos} days={days} canEdit={canEdit} />
         </section>
       )}
       {tab === 'segments' && (
-        <section role="tabpanel" id="an-panel-segments" aria-labelledby="an-tab-segments">
+        <section role="tabpanel" id="an-panel-segments" aria-label={t('analytics.tab.segments')}>
           <SegmentsTab
             wsId={ws.id}
             days={days}
@@ -453,14 +523,13 @@ export function AnalyticsPage() {
         </section>
       )}
       {tab === 'alerts' && (
-        <section role="tabpanel" id="an-panel-alerts" aria-labelledby="an-tab-alerts">
+        <section role="tabpanel" id="an-panel-alerts" aria-label={t('analytics.tab.alerts')}>
           <AlertsTab
             wsId={ws.id}
             demos={demos}
             segments={segments}
             canEdit={canEdit}
             isAdmin={can('integrations.manage')}
-            onCount={setAlertCount}
           />
         </section>
       )}
@@ -481,36 +550,36 @@ function emptyAnalytics(): WsAnalytics {
 }
 
 function Overview({
-  wsId,
   data,
   prev,
   series,
+  keys,
   metric,
   onMetric,
   days,
+  onWiden,
   demo,
   demos,
-  title,
   ret,
   onHow,
 }: {
-  ret: Returning | null;
-  onHow: () => void;
-  wsId: string;
   data: WsAnalytics;
   prev: WsAnalytics | null;
   series: { cur: Series | null; prev: Series | null; end: number } | null;
+  keys: KpiKey[];
   metric: KpiKey;
   onMetric: (k: KpiKey) => void;
   days: number;
+  onWiden: () => void;
   demo: string;
   demos: Array<{ id: string; title: string }>;
-  title: (id: string) => string;
+  ret: Returning | null;
+  onHow: () => void;
 }) {
   const { t } = useTranslation();
   const rate = completionRate(data.visitors, data.completions);
   const none = { kind: 'none' } as const;
-  const items: KpiItem[] = [
+  const all: KpiItem[] = [
     {
       key: 'views',
       label: t('kpi.views'),
@@ -536,59 +605,12 @@ function Overview({
       trend: prev ? countTrend(data.leads, prev.leads) : none,
     },
   ];
+  const items = all.filter((i) => keys.includes(i.key as KpiKey));
   const pick = (d: SeriesDay) => dayValue(d, metric);
-
-  // Entonnoir : démo filtrée, sinon la démo la plus vue sur la période
-  const [funnelDemo, setFunnelDemo] = useState<string>('');
-  const [funnel, setFunnel] = useState<{
-    steps: Array<{ stepIndex: number; visitors: number }>;
-    visitors: number;
-    labels: string[];
-  } | null>(null);
-  useEffect(() => {
-    let alive = true;
-    void (async () => {
-      const from = new Date(Date.now() - days * 86400_000).toISOString();
-      let id = demo;
-      if (!id && demos.length) {
-        const o = await supabase.rpc('workspace_overview', { p_workspace: wsId, p_days: days });
-        const rows = ((o.data ?? []) as Array<{ demo_id: string; views: number }>).sort(
-          (a, b) => b.views - a.views,
-        );
-        id = rows[0]?.demo_id ?? demos[0]!.id;
-      }
-      if (!id) return alive && setFunnel(null);
-      const [a, s] = await Promise.all([
-        supabase.rpc('demo_analytics', { p_demo: id, p_from: from, p_to: new Date().toISOString() }),
-        supabase.from('steps').select('title, position').eq('demo_id', id).order('position'),
-      ]);
-      if (!alive) return;
-      const r = a.data as unknown as {
-        steps: Array<{ stepIndex: number; visitors: number }>;
-        visitors: number;
-      } | null;
-      setFunnelDemo(id);
-      setFunnel(
-        r ? { steps: r.steps, visitors: r.visitors, labels: (s.data ?? []).map((x) => x.title ?? '') } : null,
-      );
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [wsId, demo, demos, days]);
-
-  const rows = funnel
-    ? computeFunnel(
-        funnel.steps,
-        Math.max(funnel.labels.length, ...funnel.steps.map((x) => x.stepIndex + 1)),
-        funnel.visitors,
-      )
-    : [];
-  const worst = rows
-    .slice(1)
-    .reduce<(typeof rows)[number] | null>((w, r) => (!w || r.dropOff > w.dropOff ? r : w), null);
-  const totalSources =
-    data.sources.direct + data.sources.embed + data.sources.link + (data.sources.page ?? 0);
+  // Étape par étape : démo filtrée, sinon la plus vue de la période, sinon la première
+  const top = [...(series?.cur?.byDemo ?? [])].sort((a, b) => b.views - a.views)[0]?.demo_id;
+  const initial = demo || top || demos[0]?.id || '';
+  const common = { days, onWiden };
 
   return (
     <>
@@ -602,127 +624,11 @@ function Overview({
           prev={series?.prev ? alignDays(series.prev.daily, days, series.end - days * 86400_000, pick) : null}
         />
       </KpiTabs>
-
-      <div className="two an-two">
-        <MetricTable
-          title={t('kpi.byDemo')}
-          nameLabel={t('kpi.demo')}
-          active={metric}
-          columns={KPI_KEYS.map((k) => ({ key: k, label: t(`kpi.col.${k}`), rate: k === 'completion' }))}
-          rows={(series?.cur?.byDemo ?? []).map((r) => ({
-            id: r.demo_id,
-            name: <Link to={`/analytics/${r.demo_id}`}>{title(r.demo_id)}</Link>,
-            values: metricValues(r),
-          }))}
-          more={{ to: '/demos', label: t('kpi.allDemos') }}
-        />
-        <div className="card chart-card">
-          <h2 className="t-h3">{t('analytics.sources')}</h2>
-          <div className="col an-sources">
-            {(['embed', 'link', 'direct', 'page'] as Source[]).map((k) => {
-              const n = data.sources[k] ?? 0;
-              const p = totalSources ? Math.round((n / totalSources) * 100) : 0;
-              return (
-                <div key={k}>
-                  <div className="row between t-label">
-                    <span>{t(`analytics.srcLong.${k}`)}</span>
-                    <span className="num">
-                      {formatNumber(n)} · {p}&nbsp;%
-                    </span>
-                  </div>
-                  <div className="progress an-progress">
-                    <span style={{ width: `${p}%` }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <hr className="divider" />
-          <div className="row between t-caption muted">
-            <span>{t('analytics.devices')}</span>
-            {/* Le type d'appareil n'est pas encore enregistré avec les événements */}
-            <span className="badge">{t('shell.soon')}</span>
-          </div>
-        </div>
-      </div>
-
-      <ReturningCard ret={ret} onHow={onHow} />
-
-      <div className="card chart-card an-funnel-card">
-        <div className="row between">
-          <div>
-            <h2 className="t-h3">{t('analytics.stepByStep')}</h2>
-            <p className="t-caption muted an-funnel-sub">
-              {funnelDemo ? `${title(funnelDemo)} · ` : ''}
-              {t('analytics.stepShare')}
-            </p>
-          </div>
-          {funnelDemo && (
-            <Link className="btn btn-secondary btn-sm" to={`/demos/${funnelDemo}/edit`}>
-              {t('analytics.openInEditor')}
-            </Link>
-          )}
-        </div>
-        {rows.length === 0 ? (
-          <p className="muted an-empty">{t('analytics.noStepData')}</p>
-        ) : (
-          <div className="funnel an-funnel" role="table" aria-label={t('analytics.funnelLabel')}>
-            <div className="funnel-row t-caption muted" role="row">
-              <span role="columnheader">#</span>
-              <span role="columnheader">{t('analytics.step')}</span>
-              <span role="columnheader" className="an-r">
-                {t('analytics.visitors_short')}
-              </span>
-              <span role="columnheader" className="an-r">
-                {t('analytics.dropOffShort')}
-              </span>
-            </div>
-            {rows.map((r) => {
-              const isWorst = worst && r.stepIndex === worst.stepIndex && worst.dropOff >= 0.1;
-              return (
-                <div key={r.stepIndex} className="funnel-row" role="row">
-                  <span className="subtle" role="cell">
-                    {r.stepIndex + 1}
-                  </span>
-                  <div className="funnel-bar" role="cell">
-                    <span style={{ width: `${Math.round(r.reach * 100)}%` }} />
-                    <b>{funnel!.labels[r.stepIndex] || t('editor.stepN', { n: r.stepIndex + 1 })}</b>
-                  </div>
-                  <span className="num an-r" role="cell">
-                    {Math.round(r.reach * 100)}&nbsp;%
-                  </span>
-                  <span
-                    className={`num an-r${isWorst ? ' drop' : r.stepIndex === 0 ? ' subtle' : ''}`}
-                    role="cell"
-                  >
-                    {r.stepIndex === 0 ? (
-                      '—'
-                    ) : (
-                      <>
-                        {isWorst && <TriangleAlert aria-hidden="true" className="an-warn" />}−
-                        {Math.round(r.dropOff * 100)}&nbsp;%
-                      </>
-                    )}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {worst && worst.dropOff >= 0.1 && (
-          <div className="alert alert-warning an-alert">
-            <TriangleAlert aria-hidden="true" />
-            <span>
-              <b>
-                {t('analytics.dropAlert', {
-                  step: funnel!.labels[worst.stepIndex] || t('editor.stepN', { n: worst.stepIndex + 1 }),
-                  pct: Math.round(worst.dropOff * 100),
-                })}
-              </b>{' '}
-              {t('analytics.dropAdvice')}
-            </span>
-          </div>
-        )}
+      <div className="an-grid">
+        <SourcesWidget {...common} sources={data.sources} />
+        <StepsWidget {...common} demos={demos} initial={initial} />
+        <ReturningWidget {...common} ret={ret} onHow={onHow} />
+        <DevicesWidget {...common} devices={data.devices ?? {}} browsers={data.browsers ?? {}} />
       </div>
     </>
   );

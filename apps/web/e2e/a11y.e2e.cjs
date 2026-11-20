@@ -550,11 +550,13 @@ const APP_PAGES = [
   { name: 'Analytics d’une démo', route: `/#/demos/${DEMO}/analytics` },
   { name: 'Analytics', route: '/#/analytics' },
   { name: 'Analytics · sessions', route: '/#/analytics?tab=sessions' },
+  { name: 'Analytics · démos', route: '/#/analytics?tab=demos' },
   {
     name: 'Analytics · mesure des visites',
     route: '/#/analytics',
     open: async (p) => {
-      await p.getByRole('button', { name: 'Mesure des visites' }).click();
+      await p.locator('.an-more').click();
+      await p.getByRole('menuitem', { name: 'Mesure des visites' }).click();
       await p.getByRole('dialog', { name: 'Mesure des visites' }).waitFor();
     },
   },

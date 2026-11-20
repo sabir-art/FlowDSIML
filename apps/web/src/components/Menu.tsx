@@ -48,6 +48,7 @@ export function Menu({
   trigger,
   icon,
   custom,
+  search,
 }: {
   label: string;
   items: Array<MenuItem | MenuRadioGroup | 'separator'>;
@@ -65,6 +66,11 @@ export function Menu({
   icon?: ReactNode;
   /** Déclencheur entièrement personnalisé (contenu et classe), ex. sélecteur de workspace. */
   custom?: { content: ReactNode; className: string };
+  /**
+   * L48-D : champ de recherche en haut du menu (filtre à la frappe, sans casse ni accents). Les `keep`
+   * premiers éléments restent hors du filtre (ex. « Toutes les démos »).
+   */
+  search?: { label: string; empty: string; keep?: number };
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -74,6 +80,16 @@ export function Menu({
   const preferred: Placement = placement ?? (align === 'start' ? 'bottom-start' : 'bottom-end');
   const count = items.filter((x) => x !== 'separator').length;
   const [sheet, setSheet] = useState(false);
+  const [q, setQ] = useState('');
+  const fold = (v: string) => v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const needle = fold(q.trim());
+  const shown = search
+    ? items.filter(
+        (it, i) =>
+          i < (search.keep ?? 0) ||
+          (it !== 'separator' && !('radios' in it) && (!needle || fold(it.label).includes(needle))),
+      )
+    : items;
 
   const close = useCallback((restoreFocus: boolean) => {
     setOpen(false);
@@ -124,14 +140,18 @@ export function Menu({
     window.addEventListener('resize', onMove);
     window.addEventListener('scroll', onMove, true);
     window.visualViewport?.addEventListener('resize', onMove);
-    list.current?.querySelector<HTMLButtonElement>('[role^="menuitem"]:not(:disabled)')?.focus();
+    if (search) list.current?.querySelector<HTMLInputElement>('.menu-search')?.focus();
+    else list.current?.querySelector<HTMLButtonElement>('[role^="menuitem"]:not(:disabled)')?.focus();
     return () => {
       document.removeEventListener('mousedown', onDoc);
       window.removeEventListener('resize', onMove);
       window.removeEventListener('scroll', onMove, true);
       window.visualViewport?.removeEventListener('resize', onMove);
     };
-  }, [open, place, close]);
+  }, [open, place, close, search]);
+  useEffect(() => {
+    if (!open) setQ('');
+  }, [open]);
 
   function onKey(e: React.KeyboardEvent) {
     const els = Array.from(
@@ -200,7 +220,22 @@ export function Menu({
             aria-label={trigger ? trigger.text : label}
             onKeyDown={onKey}
           >
-            {items.map((it, i) =>
+            {search && (
+              <input
+                className="fd-input menu-search"
+                type="search"
+                aria-label={search.label}
+                placeholder={search.label}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            )}
+            {search && needle && shown.length <= (search.keep ?? 0) && (
+              <p className="menu-empty" role="status">
+                {search.empty}
+              </p>
+            )}
+            {shown.map((it, i) =>
               it === 'separator' ? (
                 <div key={`s${i}`} className="menu-sep" role="separator" />
               ) : 'radios' in it ? (

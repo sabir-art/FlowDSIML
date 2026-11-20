@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Repeat, ShieldCheck, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { formatNumber } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
 
@@ -18,82 +17,6 @@ export type Returning =
       avgVisits: number | null;
       topDemos: Array<{ demoId: string; title: string; visitors: number; returning: number }>;
     };
-
-/** Sous ce nombre de récurrents, la phrase d'analyse est omise (spec L26 §5). */
-export const RETURNING_SENTENCE_MIN = 20;
-
-const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 100) : 0);
-
-/** Carte « Nouveaux et récurrents » (deux barres, définition, « Comment c'est mesuré »). */
-export function ReturningCard({ ret, onHow }: { ret: Returning | null; onHow: () => void }) {
-  const { t, i18n } = useTranslation();
-  if (!ret) return null;
-  const gap = ret.gapMinutes === 1440 ? t('analytics.ret.gap24h') : t('analytics.ret.gap30');
-  const head = (
-    <div className="row between">
-      <h2 className="t-h3">{t('analytics.ret.title')}</h2>
-      <button type="button" className="link-btn" onClick={onHow}>
-        {t('analytics.ret.how')}
-      </button>
-    </div>
-  );
-  if (!ret.enabled)
-    return (
-      <div className="card chart-card an-ret">
-        {head}
-        <p className="muted">{t('analytics.ret.offBody')}</p>
-      </div>
-    );
-  const fresh = ret.total - ret.visitors;
-  const pNew = pct(fresh, ret.total);
-  const pRet = ret.total ? 100 - pNew : 0;
-  const num = (n: number) =>
-    new Intl.NumberFormat(i18n.language === 'en' ? 'en-GB' : 'fr-FR', { maximumFractionDigits: 1 }).format(n);
-  const top = ret.topDemos
-    .map((d) => t('analytics.ret.topItem', { title: d.title, pct: pct(d.returning, d.visitors) }))
-    .join(', ');
-  return (
-    <div className="card chart-card an-ret">
-      {head}
-      <p className="t-caption muted an-ret-def">{t('analytics.ret.definition', { gap })}</p>
-      <div
-        className="col an-sources"
-        role="img"
-        aria-label={t('analytics.ret.summary', {
-          fresh: formatNumber(fresh),
-          pNew,
-          ret: formatNumber(ret.visitors),
-          pRet,
-        })}
-      >
-        {(
-          [
-            ['new', fresh, pNew],
-            ['ret', ret.visitors, pRet],
-          ] as const
-        ).map(([k, n, p]) => (
-          <div key={k}>
-            <div className="row between t-label">
-              <span>{t(`analytics.ret.${k}`)}</span>
-              <span className="num">
-                {formatNumber(n)} · {p}&nbsp;%
-              </span>
-            </div>
-            <div className={`progress an-progress${k === 'ret' ? ' an-progress-ret' : ''}`}>
-              <span style={{ width: `${p}%` }} />
-            </div>
-          </div>
-        ))}
-      </div>
-      {ret.visitors >= RETURNING_SENTENCE_MIN && ret.avgVisits != null && (
-        <p className="t-caption an-ret-sentence">
-          {t('analytics.ret.sentence', { avg: num(ret.avgVisits) })}
-          {top && ` ${t('analytics.ret.sentenceTop', { list: top })}`}
-        </p>
-      )}
-    </div>
-  );
-}
 
 /** Badge « Nouveau » ou « Récurrent · visite n° n » (texte, jamais la couleur seule). */
 export function VisitBadge({ no }: { no: number | null | undefined }) {
