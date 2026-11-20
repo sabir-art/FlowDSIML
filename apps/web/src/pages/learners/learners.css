@@ -132,6 +132,19 @@
 .st-badge.relance svg {
   color: var(--fd-orange-600, var(--fd-orange-500));
 }
+.st-badge.quiz {
+  background: var(--fd-color-danger-soft, var(--fd-color-warning-soft));
+  color: var(--fd-color-text);
+}
+.l13-quizleft {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
+}
+.lp--done .fd-bar__fill {
+  background: var(--fd-color-hero);
+}
 .lp {
   display: grid;
   grid-template-columns: minmax(80px, 1fr) 44px;
@@ -289,6 +302,10 @@
 .fo-split span:nth-child(3),
 .fo-legend .lg-stale {
   background: var(--fd-orange-500);
+}
+.fo-split span:nth-child(4),
+.fo-legend .lg-quiz {
+  background: var(--fd-color-danger);
 }
 .fo-legend {
   display: flex;

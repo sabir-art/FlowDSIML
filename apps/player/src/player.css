@@ -167,6 +167,29 @@ body {
   object-fit: contain;
   user-select: none;
 }
+/* L38-11 : bascule du cadrage automatique (petit écran) */
+.p-autozoom {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(8 8 8 / 0.72);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.p-autozoom:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
 .p-img-missing {
   position: absolute;
   inset: 0;

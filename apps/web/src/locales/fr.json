@@ -1622,7 +1622,8 @@
       "tooLong": "Piste trop longue : 2 minutes au plus.",
       "uploadError": "La voix off n’a pas pu être enregistrée. Réessayez.",
       "railIcon": "Voix off",
-      "railIconAi": "Voix off générée par l’IA"
+      "railIconAi": "Voix off générée par l’IA",
+      "nextStep": "Étape suivante"
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
@@ -1664,7 +1665,10 @@
       "done": "Toutes les étapes ont une bulle. Relisez-les, puis publiez.",
       "hide": "Masquer l’aide"
     },
-    "addHotspot": "Ajouter un hotspot"
+    "addHotspot": "Ajouter un hotspot",
+    "railQuizAdd": "Ajouter un quiz",
+    "railQuizThreshold_one": "Quiz · {{count}} question · seuil {{pct}}",
+    "railQuizThreshold_other": "Quiz · {{count}} questions · seuil {{pct}}"
   },
   "status": {
     "draft": "Brouillon",
@@ -2058,6 +2062,20 @@
       "exportAll": "Exporter les liens (CSV)",
       "exportFile": "liens-apprenants.csv",
       "demoLink": "Lien de la démo"
+    },
+    "training": {
+      "title": "Formation",
+      "moduleOf": "Module {{n}} de « {{path}} ».",
+      "none": "Cette démo ne fait partie d’aucune formation.",
+      "path": "Ajouter à la formation",
+      "position": "Position",
+      "last": "Module {{n}} (en dernier)",
+      "at": "Module {{n}}",
+      "add": "Ajouter à la formation",
+      "added": "Démo ajoutée à « {{path}} ».",
+      "noPath": "Aucune formation dans l’espace.",
+      "toLearners": "Créer une formation dans Apprenants",
+      "scorm": "Paquet SCORM pour votre plateforme de formation"
     }
   },
   "analytics": {
@@ -2901,7 +2919,8 @@
     "status": {
       "done": "Terminé",
       "active": "En cours",
-      "stale": "À relancer"
+      "stale": "À relancer",
+      "quiz": "Quiz non validé"
     },
     "moduleStatus": {
       "validated": "Validé",
@@ -2982,7 +3001,7 @@
       "quiz_one": "{{count}} quiz",
       "quiz_other": "{{count}} quiz",
       "noQuiz": "sans quiz",
-      "splitAria": "{{done}} % terminé, {{active}} % en cours, {{stale}} % à relancer",
+      "splitAria": "{{done}} % terminé, {{active}} % en cours, {{stale}} % à relancer, {{quiz}} % quiz non validé",
       "ofLearners": "{{n}} apprenants sur {{total}}",
       "quizSuccess": "Réussite au quiz",
       "firstTry": "au 1er essai : {{pct}}",
@@ -3150,7 +3169,12 @@
     "daysAgo_other": "il y a {{count}} j",
     "noGroup": "Sans groupe",
     "groupPlaceholder": "Ex. Session du 12 novembre",
-    "groupSaved": "Groupe enregistré."
+    "groupSaved": "Groupe enregistré.",
+    "quiz": {
+      "exhausted": "Tentatives épuisées.",
+      "left_one": "{{count}} tentative restante",
+      "left_other": "{{count}} tentatives restantes"
+    }
   },
   "center": {
     "title": "Centre de formation",

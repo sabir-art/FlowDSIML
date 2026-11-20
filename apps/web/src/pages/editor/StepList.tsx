@@ -35,7 +35,7 @@ import {
   ZoomIn,
 } from 'lucide-react';
 import { Menu, type MenuItem } from '../../components/Menu';
-import { asStepOptions, type StepRow } from './types';
+import { asSettings, asStepOptions, type StepRow } from './types';
 import { Fragment, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -408,10 +408,23 @@ export function StepList({
         })}
       </ol>
       {/* REV-08 : le quiz (après la dernière étape) est visible dans le rail et s'ouvre en un clic */}
-      {editor.questions.length > 0 && editor.demo && (
-        <Link className="rail-quiz" to={`/demos/${editor.demo.id}/quiz`}>
-          <GraduationCap aria-hidden="true" />
-          <span>{t('editor.railQuiz', { count: editor.questions.length })}</span>
+      {/* L38-6 : toujours présent pour un éditeur : « Ajouter un quiz », ou questions et seuil */}
+      {editor.demo && (editor.questions.length > 0 || !readOnly) && (
+        <Link
+          className={`rail-quiz${editor.questions.length ? '' : ' rail-quiz--add'}`}
+          to={`/demos/${editor.demo.id}/quiz`}
+        >
+          {editor.questions.length ? <GraduationCap aria-hidden="true" /> : <Plus aria-hidden="true" />}
+          <span>
+            {!editor.questions.length
+              ? t('editor.railQuizAdd')
+              : asSettings(editor.demo.settings).quiz?.mode === 'survey'
+                ? t('editor.railQuiz', { count: editor.questions.length })
+                : t('editor.railQuizThreshold', {
+                    count: editor.questions.length,
+                    pct: `${asSettings(editor.demo.settings).quiz?.threshold ?? 70}\u202f%`,
+                  })}
+          </span>
         </Link>
       )}
       {!readOnly && (

@@ -7,6 +7,7 @@ import {
   learnerCounts,
   csvTable,
   kpis,
+  learnerRow,
   pathStats,
   sortRows,
   splitPercents,
@@ -129,6 +130,7 @@ describe('suivi des apprenants', () => {
       done: 1,
       active: 1,
       stale: 1,
+      quiz: 0,
       avgScore: 90,
       threshold: 70,
     });
@@ -219,5 +221,29 @@ describe('suivi des apprenants', () => {
 
   it('compte les apprenants par formation et structure', () => {
     expect(learnerCounts(rows)).toEqual({ paths: { p1: 3, p2: 1 }, structures: { s1: 2 } });
+  });
+
+  it('L38-12 : quiz tenté et non validé : statut « Quiz non validé », tentatives restantes, barre non validée', () => {
+    const base = data.learners[0]!;
+    const withQuiz = (o: Partial<RawModule>) => ({
+      ...base,
+      modules: [
+        mod('d1', { seen: 10, status: 'validated', lastActivity: daysAgo(1) }),
+        mod('d2', { seen: 10, hasQuiz: true, best: 55, lastActivity: daysAgo(1), ...o }),
+      ],
+    });
+    const left = learnerRow(withQuiz({ used: 1, max: 2, status: 'in_progress' }), data.paths, NOW);
+    expect(left.status).toBe('quiz');
+    expect(left.quiz).toEqual({ demoId: 'd2', left: 1 });
+    expect(left.paths[0]!.status).toBe('quiz');
+    expect(left.paths[0]!.done).toBe(false);
+    const out = learnerRow(withQuiz({ used: 2, max: 2, status: 'failed' }), data.paths, NOW);
+    expect(out.quiz).toEqual({ demoId: 'd2', left: 0 });
+    const free = learnerRow(withQuiz({ used: 3, max: null, status: 'in_progress' }), data.paths, NOW);
+    expect(free.quiz).toEqual({ demoId: 'd2', left: null });
+    // Pas encore tenté : statut d'activité habituel
+    expect(learnerRow(withQuiz({ used: 0, status: 'in_progress' }), data.paths, NOW).status).toBe('active');
+    // Validé : plus de remarque
+    expect(learnerRow(withQuiz({ used: 1, best: 80, status: 'validated' }), data.paths, NOW).quiz).toBeNull();
   });
 });

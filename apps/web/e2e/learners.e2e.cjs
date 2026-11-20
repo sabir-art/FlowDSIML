@@ -40,20 +40,23 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     'L13-01 : une ligne par apprenant identifié',
   );
   const kpi = await page.locator('.fd-kpi__value').allTextContents();
-  ok(kpi.length === 4 && kpi[0] === '25' && kpi[2] === '8', 'L13-01 : KPI Terminé et À relancer calculés');
+  ok(
+    kpi.length === 4 && kpi[0] === '25' && kpi[2] === '7',
+    'L13-01 : KPI Terminé et À relancer calculés (L38-12 : quiz non validé à part)',
+  );
 
   // Filtre Statut par la puce, gardé dans l'URL
   await page.getByRole('button', { name: 'Changer le filtre Statut' }).click();
   await page.getByRole('menuitem', { name: 'À relancer' }).click();
   await page.waitForTimeout(200);
   ok(page.url().includes('statut=stale'), 'L13-01 : filtre gardé dans l’URL');
-  ok((await page.locator('.l13-table tbody tr').count()) === 8, 'L13-01 : filtre À relancer');
+  ok((await page.locator('.l13-table tbody tr').count()) === 7, 'L13-01 : filtre À relancer');
   ok(
-    (await page.locator('.l13-table .st-badge.relance').count()) === 8,
+    (await page.locator('.l13-table .st-badge.relance').count()) === 7,
     'L13-01 : badges À relancer (texte et icône)',
   );
   ok(
-    await page.getByRole('button', { name: 'Relancer les 8' }).isVisible(),
+    await page.getByRole('button', { name: 'Relancer les 7' }).isVisible(),
     'L13-01 : « Relancer les n » en tête de carte',
   );
 
@@ -116,7 +119,11 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     'L13-02 : Échap ferme et rend le focus à la ligne',
   );
 
-  // Accorder une tentative (quiz épuisé) depuis le menu ⋯
+  // Accorder une tentative (quiz épuisé) depuis le menu ⋯ ; L38-12 : Camille est « Quiz non validé »
+  await page.getByRole('button', { name: 'Retirer le filtre Statut' }).click();
+  await page.getByRole('button', { name: 'Changer le filtre Statut' }).click();
+  await page.getByRole('menuitem', { name: 'Quiz non validé' }).click();
+  await page.waitForTimeout(200);
   await page.getByRole('button', { name: 'Actions pour Camille Exemple' }).click();
   await page.getByRole('menuitem', { name: 'Accorder une tentative' }).click();
   await page.waitForTimeout(300);
@@ -124,19 +131,23 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     state.learners.learners.find((l) => l.id === 'l-4').modules.find((m) => m.demoId === 'm-quiz').max === 4,
     'L13-02 : tentative accordée (grant_quiz_attempt)',
   );
+  await page.getByRole('button', { name: 'Retirer le filtre Statut' }).click();
+  await page.getByRole('button', { name: 'Changer le filtre Statut' }).click();
+  await page.getByRole('menuitem', { name: 'À relancer' }).click();
+  await page.waitForTimeout(200);
 
   // Export CSV : séparateur point-virgule, colonnes, trace
   await page.getByRole('button', { name: 'Exporter CSV' }).click();
   const ex = page.getByRole('dialog', { name: 'Exporter en CSV' });
   await ex.waitFor();
   ok(
-    (await ex.getByRole('button', { name: /^Exporter \d+ lignes?$/ }).textContent()).includes('8 lignes'),
+    (await ex.getByRole('button', { name: /^Exporter \d+ lignes?$/ }).textContent()).includes('7 lignes'),
     'L13-04 : bouton compté (filtre)',
   );
   await ex.getByRole('checkbox', { name: /Détail par module/ }).check();
   const [dl] = await Promise.all([
     page.waitForEvent('download'),
-    ex.getByRole('button', { name: /^Exporter 8 lignes$/ }).click(),
+    ex.getByRole('button', { name: /^Exporter 7 lignes$/ }).click(),
   ]);
   const csv = fs.readFileSync(await dl.path(), 'utf8');
   const head = csv.replace(/^﻿/, '').split('\r\n')[0];
@@ -145,9 +156,9 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
       head.includes('Logiciel métier · Quiz final'),
     'L13-04 : CSV UTF-8, point-virgule, détail par module',
   );
-  ok(csv.split('\r\n').length === 9, 'L13-04 : une ligne par apprenant filtré');
+  ok(csv.split('\r\n').length === 8, 'L13-04 : une ligne par apprenant filtré');
   ok(
-    state.audit?.some((a) => a.action === 'learners.export' && a.rows === 8),
+    state.audit?.some((a) => a.action === 'learners.export' && a.rows === 7),
     'L13-04 : export tracé (log_learners_export)',
   );
 
@@ -167,7 +178,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
       state.audit.some((a) => a.action === 'learner.erase'),
     'L13-05 : données supprimées et tracées',
   );
-  ok((await page.locator('.l13-table tbody tr').count()) === 7, 'L13-05 : apprenant retiré de la liste');
+  ok((await page.locator('.l13-table tbody tr').count()) === 6, 'L13-05 : apprenant retiré de la liste');
 
   // Vue par formation
   await page.getByRole('tab', { name: 'Par formation' }).click();

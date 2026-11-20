@@ -9,6 +9,7 @@ import {
   BellRing,
   ChevronDown,
   CircleHelp,
+  CircleX,
   Clock,
   Download,
   Eye,
@@ -49,6 +50,7 @@ import {
   type Filters,
   type LearnerRow,
   type LearnerStatus,
+  type QuizIssue,
   type ProgressData,
   type RawLearner,
   type SortKey,
@@ -66,8 +68,14 @@ const STATUS_ICON: Record<LearnerStatus, ReactNode> = {
   done: <Award {...ICON} />,
   active: <Clock {...ICON} />,
   stale: <BellRing {...ICON} />,
+  quiz: <CircleX {...ICON} />,
 };
-const STATUS_CLASS: Record<LearnerStatus, string> = { done: 'done', active: 'prog', stale: 'relance' };
+const STATUS_CLASS: Record<LearnerStatus, string> = {
+  done: 'done',
+  active: 'prog',
+  stale: 'relance',
+  quiz: 'quiz',
+};
 
 export function StatusBadge({ status, children }: { status: LearnerStatus; children?: ReactNode }) {
   const { t } = useTranslation();
@@ -79,10 +87,11 @@ export function StatusBadge({ status, children }: { status: LearnerStatus; child
   );
 }
 
-function ProgressBar({ value }: { value: number }) {
+/** L38-12 : barre verte seulement quand la formation est validée. */
+function ProgressBar({ value, done = false }: { value: number; done?: boolean }) {
   const { t } = useTranslation();
   return (
-    <span className="lp">
+    <span className={`lp${done ? ' lp--done' : ''}`}>
       <span
         className="fd-bar fd-bar--h"
         role="img"
@@ -130,8 +139,9 @@ export function LearnersPage() {
   const tab = params.get('tab') === 'formation' ? 'formation' : 'liste';
   const filters: Filters = {
     path: params.get('formation') ?? '',
-    status: (['done', 'active', 'stale'].includes(params.get('statut') ?? '') ? params.get('statut') : '') as
-      LearnerStatus | '',
+    status: (['done', 'active', 'stale', 'quiz'].includes(params.get('statut') ?? '')
+      ? params.get('statut')
+      : '') as LearnerStatus | '',
     structure: params.get('structure') ?? '',
     group: params.get('groupe') ?? '',
     q: params.get('q') ?? '',
@@ -306,6 +316,7 @@ export function LearnersPage() {
           setSelected={setSelected}
           onOpen={(id) => setOverlay({ kind: 'fiche', id })}
           onRemind={(ids) => void remind(ids)}
+          onGrant={(r) => void grant(r)}
           onExport={() => setOverlay({ kind: 'export' })}
           actions={actionItems}
         />
@@ -441,6 +452,21 @@ export function LearnersPage() {
 
 type TFn = ReturnType<typeof useTranslation>['t'];
 
+function QuizLeft({ issue, onGrant }: { issue: QuizIssue; onGrant: () => void }) {
+  const { t } = useTranslation();
+  if (issue.left === 0)
+    return (
+      <span className="l13-quizleft">
+        {t('learners.quiz.exhausted')}{' '}
+        <button type="button" className="l13-link" onClick={onGrant}>
+          {t('learners.actions.grant')}
+        </button>
+      </span>
+    );
+  if (issue.left === null) return null;
+  return <span className="l13-quizleft">{t('learners.quiz.left', { count: issue.left })}</span>;
+}
+
 function filterSummary(t: TFn, d: ProgressData, f: Filters): string {
   const parts: string[] = [];
   if (f.path) parts.push(d.paths.find((p) => p.id === f.path)?.title ?? '');
@@ -517,6 +543,7 @@ function ListView(props: {
   setSelected: (s: Set<string>) => void;
   onOpen: (id: string) => void;
   onRemind: (ids: string[]) => void;
+  onGrant: (r: LearnerRow) => void;
   onExport: () => void;
   actions: (r: LearnerRow) => MenuItem[];
 }) {
@@ -587,7 +614,7 @@ function ListView(props: {
           value={f.status ? t(`learners.status.${f.status}`) : t('learners.filters.all')}
           active={!!f.status}
           onClear={() => setParam({ statut: null })}
-          items={(['done', 'active', 'stale'] as const).map((s) => ({
+          items={(['done', 'active', 'quiz', 'stale'] as const).map((s) => ({
             label: t(`learners.status.${s}`),
             icon: STATUS_ICON[s],
             onSelect: () => setParam({ statut: s }),
@@ -807,7 +834,10 @@ function ListView(props: {
                         </span>
                       </td>
                       <td>
-                        <ProgressBar value={scope ? scope.pct : r.pct} />
+                        <ProgressBar
+                          value={scope ? scope.pct : r.pct}
+                          done={scope ? scope.done : r.status === 'done'}
+                        />
                       </td>
                       <td className="num">{r.best === null ? '—' : `${r.best}${NNBSP}%`}</td>
                       <td>
@@ -819,6 +849,10 @@ function ListView(props: {
                       </td>
                       <td>
                         <StatusBadge status={scope ? scope.status : r.status} />
+                        {/* L38-12 : tentatives restantes, ou « Accorder une tentative » si épuisées */}
+                        {(scope ? scope.quiz : r.quiz) && (
+                          <QuizLeft issue={(scope ? scope.quiz : r.quiz)!} onGrant={() => props.onGrant(r)} />
+                        )}
                       </td>
                       <td>
                         <Menu
@@ -893,7 +927,7 @@ function FormationView({
       <div className="fo-grid" role="list" aria-label={t('learners.fo.list')}>
         {data.paths.map((p) => {
           const ps = pathStats(rows, p);
-          const [d, a, st] = splitPercents([ps.done, ps.active, ps.stale]);
+          const [d = 0, a = 0, st = 0, qz = 0] = splitPercents([ps.done, ps.active, ps.stale, ps.quiz]);
           const on = p.id === path.id;
           return (
             <article
@@ -921,13 +955,14 @@ function FormationView({
               <div
                 className="fo-split"
                 role="img"
-                aria-label={t('learners.fo.splitAria', { done: d, active: a, stale: st })}
+                aria-label={t('learners.fo.splitAria', { done: d, active: a, stale: st, quiz: qz })}
               >
                 {ps.learners > 0 && (
                   <>
                     <span style={{ width: `${d}%` }} />
                     <span style={{ width: `${a}%` }} />
                     <span style={{ width: `${st}%` }} />
+                    <span style={{ width: `${qz}%` }} />
                   </>
                 )}
               </div>
@@ -947,6 +982,13 @@ function FormationView({
                   {t('learners.status.stale')} {st}
                   {NNBSP}%
                 </span>
+                {qz > 0 && (
+                  <span>
+                    <i className="lg-quiz" />
+                    {t('learners.status.quiz')} {qz}
+                    {NNBSP}%
+                  </span>
+                )}
               </div>
             </article>
           );

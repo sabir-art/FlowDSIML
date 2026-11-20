@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mic, Pause, Play, Square, Upload } from 'lucide-react';
+import { ArrowRight, Mic, Pause, Play, Square, Upload } from 'lucide-react';
 import { AiCaptions, AiVoice, TranscriptPreview } from '../../../components/ai/AiAudio';
 import { useToast } from '../../../components/Toast';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -22,10 +22,13 @@ export function VoiceFields({
   editor,
   step,
   readOnly,
+  chain = false,
 }: {
   editor: DemoEditor;
   step: StepRow;
   readOnly: boolean;
+  /** L38-10 : après un enregistrement, « Étape suivante » pour enregistrer à la suite. */
+  chain?: boolean;
 }) {
   const { current: ws } = useWorkspace();
   const { t } = useTranslation();
@@ -398,6 +401,16 @@ export function VoiceFields({
         <p className="field-error" role="alert">
           {err}
         </p>
+      )}
+      {chain && has && !rec && !readOnly && editor.steps[editor.steps.length - 1]?.id !== step.id && (
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm voice-next"
+          onClick={() => window.dispatchEvent(new Event('fd:next-step'))}
+        >
+          {t('editor.voice.nextStep')}
+          <ArrowRight aria-hidden="true" />
+        </button>
       )}
       <input
         ref={file}

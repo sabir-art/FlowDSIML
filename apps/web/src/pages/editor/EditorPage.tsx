@@ -175,6 +175,21 @@ export function EditorPage() {
     window.addEventListener('fd:pick-field', on);
     return () => window.removeEventListener('fd:pick-field', on);
   }, []);
+  // L38-10 : « Étape suivante » de la voix off : étape suivante, sur sa première bulle s'il y en a une
+  useEffect(() => {
+    const on = () => {
+      const i = Math.min(index + 1, editor.steps.length - 1);
+      const next = editor.steps[i];
+      if (!next || i === index) return;
+      setIndex(i);
+      const first = editor.hotspots
+        .filter((h) => h.step_id === next.id)
+        .sort((a, b) => a.position - b.position)[0];
+      setSelection(first ? { kind: 'hotspot', id: first.id } : { kind: 'step' });
+    };
+    window.addEventListener('fd:next-step', on);
+    return () => window.removeEventListener('fd:next-step', on);
+  }, [index, editor.steps, editor.hotspots]);
   // L38-8 : « Ajouter un hotspot » du panneau Étape
   useEffect(() => {
     const on = () => setTool('hotspot');
