@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
 
   const reply = await openCenter(await req.text(), {
     async gate(args) {
+      // @rpc-params p_slug, p_password, p_grant, p_client, p_link_token, p_visitor (voir logic.ts)
       const { data, error } = await supabase.rpc('center_open', args);
       return error ? null : (data as CenterGate);
     },

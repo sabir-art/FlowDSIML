@@ -15,6 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:test:local": "bash supabase/tests/local/run.sh",
+    "check:rpc": "node scripts/check-rpc-signatures.mjs",
     "db:types": "supabase gen types typescript --project-id ffzlhlxfratcbitkuvli --schema public > packages/supabase-types/src/database.ts",
     "db:types:local": "supabase gen types typescript --local --schema public > packages/supabase-types/src/database.ts"
   },

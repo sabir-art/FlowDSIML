@@ -22,6 +22,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
+      - name: Appels RPC des Edge Functions conformes aux signatures des migrations
+        run: pnpm check:rpc
       - run: pnpm turbo run lint typecheck test build
       - name: Edge Functions (deno check + tests du dispatch des webhooks, de la médiathèque, de html-ingest et de l'Assistance IA)
         working-directory: supabase/functions
