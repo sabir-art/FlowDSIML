@@ -34,7 +34,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // EDT-08 : le formulaire est placé dans le rail, avant l'étape 2
   ok((await app.locator('.rail-list .step--form').count()) === 1, 'formulaire affiché dans le rail');
   await app.locator('.rail-list .step:not(.step--form)').nth(1).click();
-  await app.locator('.ed-rail [data-tool="step"][aria-pressed="false"]').click().catch(() => {});
+  await app
+    .locator('.ed-rail [data-tool="step"][aria-pressed="false"]')
+    .click()
+    .catch(() => {});
   await app.selectOption('#st-gate', { index: 1 });
   await app.waitForTimeout(900);
   app.on('dialog', (d) => {
