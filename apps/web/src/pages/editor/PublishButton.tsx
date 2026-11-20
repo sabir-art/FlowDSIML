@@ -23,6 +23,7 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 export function PublishButton({
   editor,
   onReviewStep,
+  onRename,
   republishLabel,
   onPublished,
 }: {
@@ -33,6 +34,8 @@ export function PublishButton({
   republishLabel?: string;
   /** « Revoir l'étape n » depuis l'avertissement RGPD. */
   onReviewStep?: (index: number) => void;
+  /** L38 : « Renommer » depuis « À compléter » (titre par défaut) : ferme la modale, focus sur le titre. */
+  onRename?: () => void;
 }) {
   const { t } = useTranslation();
   // L22-09 : avertissements de branchement rappelés dans la modale de publication (non bloquants)
@@ -189,6 +192,13 @@ export function PublishButton({
           setGdprOpen(false);
           navigate(`/demos/${demo.id}/quiz`);
         }}
+        onRename={
+          onRename &&
+          (() => {
+            setGdprOpen(false);
+            onRename();
+          })
+        }
         dataset={dataset ? { rows: dataset.rows.length, columns: publishedColumns(dataset).length } : null}
         publicEnabled={ws?.public_links_enabled !== false}
         onConfirm={(ack) => void doPublish(ack)}

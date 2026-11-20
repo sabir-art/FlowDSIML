@@ -757,6 +757,13 @@ export function EditorPage() {
                 setSelection({ kind: 'step' });
                 setTab('step');
               }}
+              onRename={() =>
+                requestAnimationFrame(() => {
+                  const el = document.querySelector<HTMLInputElement>('.ed-title');
+                  el?.focus();
+                  el?.select();
+                })
+              }
             />
           </span>
         )}

@@ -73,6 +73,7 @@ export function SharePage() {
   const access = useDemoAccess(demoId);
   const [demo, setDemo] = useState<Tables<'demos'> | null>(null);
   const [links, setLinks] = useState<Tables<'share_links'>[]>([]);
+  const hasCohort = links.some((l) => l.cohort);
   const [linkStats, setLinkStats] = useState<LinkStats>({});
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   /** L17-01 : confirmation RGPD enregistrée avec la version en ligne (auteur et date). */
@@ -596,6 +597,7 @@ export function SharePage() {
                       <thead>
                         <tr>
                           <th>{t('share.linkNameShort')}</th>
+                          {hasCohort && <th>{t('share.cohort')}</th>}
                           <th>{t('editor.variables')}</th>
                           <th>{t('share.pp.column')}</th>
                           {/* L25-13 : vues et dernière vue dans une colonne (table plus étroite) */}
@@ -620,8 +622,12 @@ export function SharePage() {
                                   <span className="badge sh-state">{t('share.disabled')}</span>
                                 )}
                               </th>
+                              {hasCohort && (
+                                <td className="sh-cohort-cell">
+                                  {l.cohort || <span className="muted">—</span>}
+                                </td>
+                              )}
                               <td>
-                                {l.cohort && <span className="badge sh-cohort">{l.cohort}</span>}
                                 {vars.map((v) => (
                                   <span key={v} className="badge sh-var" title={v}>
                                     {v}
@@ -636,9 +642,7 @@ export function SharePage() {
                                         })}
                                   </span>
                                 )}
-                                {!vars.length && !l.expires_at && !l.cohort && (
-                                  <span className="muted">—</span>
-                                )}
+                                {!vars.length && !l.expires_at && <span className="muted">—</span>}
                               </td>
                               <td>
                                 {l.page_enabled && l.page_code ? (

@@ -3,7 +3,7 @@
  * ligne avant toute création ; seules les lignes sans erreur deviennent des liens. Après la création, les
  * liens s'exportent en CSV pour un publipostage. Aucun e-mail n'est envoyé par TutoClick.
  */
-import { useEffect, useId, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, Upload, X } from 'lucide-react';
 import { downloadText } from '../../lib/download';
@@ -30,6 +30,7 @@ export function ImportLinksDialog({
   const ids = useId();
   const [text, setText] = useState<string | null>(null);
   const [fileName, setFileName] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
   const [cohort, setCohort] = useState('');
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<string[] | null>(null);
@@ -106,11 +107,16 @@ export function ImportLinksDialog({
                 </button>
               </p>
               <div className="field">
-                <label htmlFor={`${ids}-f`}>{t('share.import.file')}</label>
+                <label htmlFor={`${ids}-f`} id={`${ids}-fl`}>
+                  {t('share.import.file')}
+                </label>
+                {/* Champ natif masqué (libellé « Choose File » non traduisible) : bouton du design system */}
                 <input
+                  ref={fileRef}
                   id={`${ids}-f`}
                   type="file"
                   accept=".csv,text/csv"
+                  hidden
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (!f) return;
@@ -118,6 +124,25 @@ export function ImportLinksDialog({
                     void f.text().then(setText);
                   }}
                 />
+                <div className="sh-file">
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    aria-labelledby={`${ids}-fl ${ids}-fb`}
+                    aria-describedby={`${ids}-fn`}
+                    onClick={() => fileRef.current?.click()}
+                  >
+                    <Upload aria-hidden="true" />
+                    <span id={`${ids}-fb`}>{t('share.import.choose')}</span>
+                  </button>
+                  <span
+                    className={`sh-file-name${fileName ? '' : ' muted'}`}
+                    id={`${ids}-fn`}
+                    title={fileName}
+                  >
+                    {fileName || t('share.import.noFile')}
+                  </span>
+                </div>
               </div>
               <div className="field">
                 <label htmlFor={`${ids}-g`}>
@@ -181,9 +206,13 @@ export function ImportLinksDialog({
                           {preview.rows.map((r) => (
                             <tr key={r.line} className={r.errors.length ? 'sh-import-ko' : undefined}>
                               <td>{r.line}</td>
-                              <td>{[r.firstName, r.lastName].filter(Boolean).join(' ') || '—'}</td>
-                              <td>{r.email || '—'}</td>
-                              <td>{r.cohort || '—'}</td>
+                              <td className="sh-import-name">
+                                {[r.firstName, r.lastName].filter(Boolean).join(' ') || '—'}
+                              </td>
+                              <td className="sh-import-email" title={r.email || undefined}>
+                                {r.email || '—'}
+                              </td>
+                              <td className="sh-import-cohort">{r.cohort || '—'}</td>
                               <td>
                                 {r.errors.length ? (
                                   <span className="badge badge-danger">

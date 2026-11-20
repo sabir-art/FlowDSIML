@@ -69,6 +69,12 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await page.fill('#hs-title', 'Ouvrez l’agenda partagé');
   await page.waitForTimeout(900);
   ok(steps()[0].title === 'Ouvrez l’agenda partagé', 'n° 9 : le titre suit tant qu’il n’a pas été saisi');
+  // Retour Lead UX : une phrase accompagne « Étape suivante sans bulle »
+  const said = (await guide.locator('.grow').textContent()).replace(/\s/g, ' ');
+  ok(
+    /^Bulle de l’étape 1 prête\. Il reste \d+ étapes? sans bulle\.$/.test(said),
+    `Lead UX : barre d’aide « ${said} »`,
+  );
 
   // Suite du guidage
   const next = guide.getByRole('button', { name: 'Étape suivante sans bulle' });
@@ -115,6 +121,17 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     axe2.violations.length === 0,
     `n° 5 : modale sans violation axe (${axe2.violations.map((v) => v.id).join(', ')})`,
   );
+  // Retour Lead UX : « Renommer » ferme la modale et met le focus sur le titre de la démo
+  await todo.getByRole('button', { name: 'Renommer' }).click();
+  await dlg.waitFor({ state: 'detached' }).catch(() => undefined);
+  await page.waitForTimeout(200);
+  ok(
+    (await page.locator('dialog.gdpr-dialog[open]').count()) === 0 &&
+      (await page.evaluate(() => document.activeElement?.classList.contains('ed-title'))),
+    'Lead UX : « Renommer » ferme la modale, focus sur le titre de la démo',
+  );
+  await page.getByRole('button', { name: 'Publier' }).click();
+  await dlg.waitFor();
   await todo.getByRole('button', { name: 'Voir l’étape 3' }).click();
   await dlg.waitFor({ state: 'detached' }).catch(() => undefined);
   ok((await page.locator('dialog.gdpr-dialog[open]').count()) === 0, 'n° 5 : « Voir » ferme la modale');

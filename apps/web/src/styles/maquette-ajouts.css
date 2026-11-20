@@ -1148,15 +1148,40 @@
   flex-wrap: wrap;
   justify-content: flex-end;
 }
-.mk .sh-cohort {
-  margin-right: 4px;
-}
 .mk .sh-import-preview {
   margin-top: 12px;
 }
 .mk .sh-import-preview .table-wrap {
   max-height: 320px;
   overflow: auto;
+}
+.mk .sh-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.mk .sh-file .btn {
+  flex: none;
+}
+.mk .sh-file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fd-text-label-size);
+}
+.mk .sh-import-preview .sh-import-name {
+  min-width: 140px;
+}
+.mk .sh-import-preview .sh-import-cohort {
+  white-space: nowrap;
+}
+.mk .sh-import-preview .sh-import-email {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .mk .sh-import-ko td {
   background: var(--fd-color-surface-sunken);
@@ -1330,11 +1355,27 @@
 }
 .mk .sh-perso-head p {
   margin: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 0;
 }
 .mk .sh-perso-head .btn {
   flex: none;
+}
+/* Les trois actions (Exporter, Importer, Nouveau lien) sur une ligne, à droite du texte d'aide */
+.mk .sh-perso-head .sh-perso-acts {
+  flex: none;
+  flex-wrap: nowrap;
+}
+@media (max-width: 760px) {
+  .mk .sh-perso-head {
+    flex-wrap: wrap;
+  }
+  .mk .sh-perso-head .sh-perso-acts {
+    flex-wrap: wrap;
+  }
+}
+.mk .sh-cohort-cell {
+  white-space: nowrap;
 }
 
 /* ---- Éditeur (EDT-01) : styles de page de editeur.html ---- */
