@@ -4265,6 +4265,25 @@
       "glossaryList": "Glossary term: {{terms}}",
       "glossaryWarn_one": "1 row does not keep a glossary term.",
       "glossaryWarn_other": "{{count}} rows do not keep a glossary term."
+    },
+    "suggest": {
+      "title": "Suggestions",
+      "open_btn": "Suggestions",
+      "analyse": "Analyse the demo",
+      "again": "Analyse again",
+      "busy": "Analysing…",
+      "none": "No suggestions for this demo.",
+      "intro": "Checks made without AI appear here. “Analyse the demo” asks AI Assist for suggestions.",
+      "check": "Check",
+      "open": "Open the step",
+      "altMissing": "The screenshot has no alternative text.",
+      "tooLong": "{{n}}-character bubble: above {{max}}, it is hard to read.",
+      "type": {
+        "clarity": "Clarity",
+        "length": "Length",
+        "accessibility": "Accessibility",
+        "consistency": "Consistency"
+      }
     }
   }
 }

@@ -4265,6 +4265,25 @@
       "glossaryList": "Terme du glossaire : {{terms}}",
       "glossaryWarn_one": "1 ligne ne garde pas un terme du glossaire.",
       "glossaryWarn_other": "{{count}} lignes ne gardent pas un terme du glossaire."
+    },
+    "suggest": {
+      "title": "Suggestions",
+      "open_btn": "Suggestions",
+      "analyse": "Analyser la démo",
+      "again": "Analyser à nouveau",
+      "busy": "Analyse en cours…",
+      "none": "Aucune suggestion pour cette démo.",
+      "intro": "Les vérifications sans IA s’affichent ici. « Analyser la démo » demande des suggestions à l’Assistance IA.",
+      "check": "Vérification",
+      "open": "Ouvrir l’étape",
+      "altMissing": "La capture n’a pas de texte alternatif.",
+      "tooLong": "Bulle de {{n}} caractères : au-delà de {{max}}, elle est difficile à lire.",
+      "type": {
+        "clarity": "Clarté",
+        "length": "Longueur",
+        "accessibility": "Accessibilité",
+        "consistency": "Cohérence"
+      }
     }
   }
 }

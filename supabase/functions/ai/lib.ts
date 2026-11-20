@@ -316,9 +316,9 @@ export function buildPrompt(req: Request): Prompt {
       return {
         model: SONNET,
         system:
-          `${BASE} Relis les étapes (titre et texte) et propose au plus 10 améliorations utiles, les plus importantes d'abord. ` +
+          `${BASE} Relis les textes de la démo (chaque élément a un id et un rôle : titre d'étape, titre ou texte de bulle) et propose au plus 10 améliorations utiles, les plus importantes d'abord. Ne propose rien pour un texte déjà clair. ` +
           'Types : clarity (phrase ambiguë ou trop complexe), length (texte trop long pour une bulle), accessibility (consigne qui dépend de la couleur ou de la position seule, lien peu explicite), consistency (même action nommée différemment). ' +
-          `message : constat en une phrase. proposal : texte de remplacement complet de l'étape, ou chaîne vide. ${inLang}`,
+          `message : constat en une phrase. id : celui de l'élément concerné. proposal : texte de remplacement complet de cet élément (même rôle), ou chaîne vide. ${inLang}`,
         messages: user({ items: p.items }),
         schema: obj({
           suggestions: {

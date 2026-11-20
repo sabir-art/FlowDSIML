@@ -365,6 +365,48 @@ const APP_PAGES = [
     },
   },
   {
+    name: 'Éditeur · Suggestions',
+    route: `/#/demos/${DEMO}/edit`,
+    seed: (d) => {
+      d.ai = {
+        enabled: true,
+        features: {
+          write: true,
+          translate: true,
+          suggest: true,
+          generate: true,
+          dataset: true,
+          chart: true,
+          assistant: true,
+        },
+        used: 1,
+        quota: 500,
+        userToday: 0,
+        userDailyRequests: 30,
+        workspaceQuotaReached: false,
+        userQuotaReached: false,
+        renewsOn: '2026-12-01',
+        canEdit: true,
+        canManage: true,
+      };
+      d.aiReply = (task, input) => ({
+        suggestions: [
+          {
+            id: input.items[0].id,
+            type: 'clarity',
+            message: 'Phrase ambiguë.',
+            proposal: 'Ouvrez la fiche.',
+          },
+        ],
+      });
+    },
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Suggestions' }).click();
+      await p.getByRole('button', { name: 'Analyser la démo' }).click();
+      await p.getByRole('button', { name: 'Analyser à nouveau' }).waitFor();
+    },
+  },
+  {
     name: 'Éditeur · test A/B',
     route: `/#/demos/${DEMO}/edit`,
     open: async (p) => {

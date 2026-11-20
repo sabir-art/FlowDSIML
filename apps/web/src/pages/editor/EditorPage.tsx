@@ -26,7 +26,9 @@ import {
   Undo2,
   ZoomIn,
   Languages,
+  Lightbulb,
 } from 'lucide-react';
+import { SuggestionsPanel } from '../../components/ai/SuggestionsPanel';
 import { TranslateDialog } from '../../components/ai/TranslateDialog';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '../../components/Toast';
@@ -212,6 +214,7 @@ export function EditorPage() {
   const [savingTpl, setSavingTpl] = useState(false);
   // L16 : « Diffuser » (menu « … », aussi ouvert par #/demos/:id/distribute → ?distribute=1)
   const [translating, setTranslating] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
   const [distributing, setDistributing] = useState(() => params.get('distribute') === '1');
   // L22-02 : « Présenter » (aussi ouvert depuis le menu d'une démo par ?present=1)
   // L22-05 : lien d'une notification (?step=…&comment=…) → étape choisie une fois chargée
@@ -482,6 +485,21 @@ export function EditorPage() {
           }}
         />
       )}
+      {suggesting && ws && can('demo.edit') && (
+        <SuggestionsPanel
+          editor={editor}
+          ws={ws.id}
+          onClose={() => setSuggesting(false)}
+          onOpenStep={(id) => {
+            const i = editor.steps.findIndex((st) => st.id === id);
+            if (i >= 0) {
+              setIndex(i);
+              setSelection({ kind: 'step' });
+              setTab('step');
+            }
+          }}
+        />
+      )}
       {translating && ws && can('demo.edit') && (
         <TranslateDialog editor={editor} ws={ws.id} onClose={() => setTranslating(false)} />
       )}
@@ -577,6 +595,19 @@ export function EditorPage() {
             {t('editor.preview')}
           </button>
         </div>
+        {/* L30-04 : Suggestions, à côté de l'aide */}
+        {can('demo.edit') && ws && (
+          <button
+            type="button"
+            className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+            aria-label={t('ai.suggest.open_btn')}
+            title={t('ai.suggest.open_btn')}
+            aria-expanded={suggesting}
+            onClick={() => setSuggesting((v) => !v)}
+          >
+            <Lightbulb aria-hidden="true" />
+          </button>
+        )}
         <HelpButton className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" />
         <Menu
           label={t('editor.more')}
