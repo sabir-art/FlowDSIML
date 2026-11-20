@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Étiquettes (lot L52) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
+<style>
+  /* L52, composants §17. Spec : docs/ux/specs/l52-etiquettes.md. Données fictives. */
+  .q-wrap { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; }
+  .q-snav { display: flex; flex-direction: column; gap: 2px; padding-top: 4px; }
+  .q-snav b { margin: 16px 12px 6px; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--fd-color-text-muted); } .q-snav b:first-child { margin-top: 0; }
+  .q-snav a { display: flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; font-size: 14px; color: var(--fd-color-text); text-decoration: none; }
+  .q-snav a[aria-current] { background: var(--fd-color-surface); font-weight: 600; }
+  .t-main { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+  .t-quota { font-size: 13px; color: var(--fd-color-text-muted); margin-right: 12px; }
+  .t-card { background: var(--fd-color-surface); border-radius: 20px; padding: 8px 28px 12px; }
+  .t-head, .t-row { display: grid; grid-template-columns: minmax(0, 1fr) 180px 40px; align-items: center; gap: 16px; }
+  .t-head { height: 44px; font-size: 13px; color: var(--fd-color-text-muted); } .t-head .on { color: var(--fd-color-text); font-weight: 600; display: inline-flex; gap: 4px; align-items: center; }
+  .t-row { min-height: 56px; border-top: 1px solid var(--fd-color-border); } .t-row > .tg { justify-self: start; }
+  .t-row a { font-size: 14px; color: var(--fd-color-text-muted); text-decoration: none; } .t-row a:hover { color: var(--fd-color-primary); text-decoration: underline; }
+  .t-row .m { font-size: 14px; color: var(--fd-color-text-muted); }
+  .ib { all: unset; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--fd-color-text-muted); cursor: pointer; } .ib.h { background: var(--fd-color-surface-sunken); color: var(--fd-color-text); }
+  .tg { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .tg::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .c-blue { background: #EDF6FC; color: #1E6A95; } .c-green { background: #F5F9E8; color: #557014; } .c-orange { background: #FFF6E8; color: #8F5300; } .c-raspberry { background: #FDEFF3; color: #AE0A44; }
+  .c-plum { background: #FBF0F5; color: #85164B; } .c-slate { background: #F6F8FA; color: #3A424D; box-shadow: inset 0 0 0 1px #E2E8EF; } .c-teal { background: #EAF6F5; color: #0B6660; } .c-violet { background: #F3F0FB; color: #5A3A9C; }
+  [data-theme='dark'] .c-blue { background: rgb(81 171 221 / .18); color: #A3D2ED; } [data-theme='dark'] .c-green { background: rgb(149 193 31 / .18); color: #C7DE89; } [data-theme='dark'] .c-orange { background: rgb(245 167 48 / .18); color: #FAD091; }
+  [data-theme='dark'] .c-raspberry { background: rgb(227 88 137 / .18); color: #F0A6C0; } [data-theme='dark'] .c-plum { background: rgb(192 98 143 / .22); color: #E3A9C4; } [data-theme='dark'] .c-slate { background: rgb(135 147 163 / .18); color: #E2E8EF; box-shadow: none; }
+  [data-theme='dark'] .c-teal { background: rgb(43 167 156 / .18); color: #9ED9D3; } [data-theme='dark'] .c-violet { background: rgb(138 106 214 / .18); color: #CDBDF0; }
+  .t-edit { display: flex; align-items: center; gap: 10px; } .t-edit .fd-input { width: 280px; }
+  .t-err { grid-column: 1 / -1; margin: -6px 0 12px; font-size: 13px; color: var(--fd-color-danger, #b4234b); } .t-err a { color: var(--fd-color-primary); font-weight: 600; text-decoration: none; margin-left: 6px; }
+  .pop { position: absolute; background: var(--fd-color-surface); border-radius: 16px; box-shadow: 0 16px 48px rgb(8 10 14 / .18); padding: 8px; z-index: 3; }
+  .mi { display: flex; align-items: center; height: 38px; padding: 0 12px; border-radius: 10px; font-size: 14px; } .mi.h { background: var(--fd-color-surface-sunken); } .mi.d { color: var(--fd-color-danger, #b4234b); }
+  .ms { height: 1px; margin: 6px 4px; background: var(--fd-color-border); }
+  .sw { display: grid; grid-template-columns: repeat(4, 28px); gap: 12px; padding: 12px; }
+  .sw span { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #fff; }
+  .sw span.on { box-shadow: 0 0 0 2px var(--fd-color-surface), 0 0 0 4px var(--fd-color-text); }
+  .sw-cap { font-size: 12px; color: var(--fd-color-text-muted); padding: 0 12px 8px; }
+  .dlg { width: 440px; background: var(--fd-color-surface); color: var(--fd-color-text); border-radius: 20px; box-shadow: 0 24px 64px rgb(8 10 14 / .18); padding: 24px; display: flex; flex-direction: column; gap: 14px; align-self: flex-start; }
+  .dlg h2 { margin: 0; font-size: 20px; } .dlg p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--fd-color-text-muted); }
+  .dlg .f { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+  .sel { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); font-size: 14px; } .sel span.n { margin-left: auto; color: var(--fd-color-text-muted); font-size: 13px; }
+  .btn-danger { background: var(--fd-color-danger, #b4234b) !important; color: #fff !important; border-color: transparent !important; }
+  .dc { width: 300px; background: var(--fd-color-surface); border-radius: 18px; overflow: hidden; align-self: flex-start; position: relative; box-shadow: 0 0 0 2px var(--fd-color-text) inset; }
+  .dc .th { height: 150px; background: var(--fd-color-surface-sunken); display: grid; grid-template-columns: 28% 1fr; } .dc .th i { background: #1f2a37; }
+  .dc .bd { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; } .dc b { font-size: 16px; } .dc small { font-size: 13px; color: var(--fd-color-text-muted); }
+  .dc .add { font-size: 13px; font-weight: 600; color: var(--fd-color-primary); }
+  .pk { width: 300px; } .pk .fd-input { width: 100%; box-sizing: border-box; margin-bottom: 4px; }
+  .pk .o { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; } .pk .o input { accent-color: var(--fd-color-text); width: 16px; height: 16px; margin: 0; }
+  .pk .cr { font-size: 14px; font-weight: 600; color: var(--fd-color-primary); } .pk .ft { font-size: 13px; color: var(--fd-color-primary); font-weight: 600; padding: 8px 10px 4px; }
+  .cap { font-size: 13px; color: var(--fd-color-text-muted); margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<main class="u2">
+  <header class="u2-head"><div><small>Lot L52 · après L49</small><h1>Étiquettes</h1><p>Un seul endroit pour les gérer : une ligne par étiquette, son nombre de démos, et un menu. On crée aussi depuis la carte d’une démo.</p></div></header>
+  <div id="a1"></div>
+  <section class="u2-sec"><h2>Couleur, renommage, fusion, suppression</h2><div class="u2-row" id="a2" style="align-items:flex-start"></div></section>
+  <section class="u2-sec"><h2>Depuis la carte d’une démo</h2><p>« + Étiquette » au survol et au focus ; le sélecteur existant, avec un lien vers la page.</p><div class="u2-row" id="a3" style="align-items:flex-start"></div></section>
+  <section class="u2-sec"><h2>Les 8 couleurs, en clair et en sombre</h2><p>Texte sur fond de l’étiquette : 5,3:1 au moins en clair, 7,3:1 en sombre. L’orange passe de 4,4:1 à 5,8:1.</p><div class="u2-row" id="a4" style="align-items:flex-start"></div></section>
+</main>
+<script>
+  const { I, app, pair } = U2;
+  const C = [['blue', 'Bleu', '#1E6A95'], ['green', 'Vert', '#557014'], ['orange', 'Orange', '#8F5300'], ['raspberry', 'Framboise', '#AE0A44'], ['plum', 'Prune', '#85164B'], ['slate', 'Ardoise', '#3A424D'], ['teal', 'Sarcelle', '#0B6660'], ['violet', 'Violet', '#5A3A9C']];
+  const tg = (n, c) => `<span class="tg c-${c}">${n}</span>`;
+  const T = [['Accueil', 'teal', 6], ['Logiciel métier', 'blue', 12], ['Nouveaux agents', 'green', 9], ['Outil CRM', 'violet', 7], ['Outil métier', 'orange', 7], ['Pilotage', 'plum', 3], ['Réglementaire', 'raspberry', 0], ['Tutoriel interne', 'slate', 2]];
+  const row = (n, c, k, h) => `<div class="t-row">${tg(n, c)}${k ? `<a href="#">${k} démo${k > 1 ? 's' : ''}</a>` : '<span class="m">Aucune démo</span>'}<button class="ib${h ? ' h' : ''}" type="button" aria-label="Plus d’actions pour ${n}" aria-haspopup="menu">${I('dots', 18)}</button></div>`;
+  const snav = `<nav class="q-snav" aria-label="Sections des paramètres"><b>Espace</b><a href="#">Général</a><a href="#">Équipe</a><a href="#">Utilisation</a><a href="#">Sécurité</a><b>Marque</b><a href="#">Thème et couleurs</a><a href="#">Page publique</a><b>Contenu</b><a href="#">Variables</a><a href="#">Glossaire</a><a href="#" aria-current="page">Étiquettes</a><b>Connexions</b><a href="#">Intégrations</a></nav>`;
+  const menu = `<div class="pop" role="menu" style="right:28px;top:250px;width:220px"><div class="mi h">Renommer</div><div class="mi">Couleur</div><div class="mi">Fusionner avec…</div><div class="ms"></div><div class="mi d">Supprimer</div></div>`;
+  const page = `<div class="q-wrap">${snav}<div class="t-main" style="position:relative"><div class="u2-top"><div style="flex:1"><p class="u2-crumb">Paramètres › Contenu</p><h1>Étiquettes</h1><p>Pour organiser et filtrer vos démos.</p></div><span class="t-quota">8 sur 20</span><button class="fd-btn fd-btn--primary" type="button">${I('plus')}Nouvelle étiquette</button></div>
+    <div class="t-card" role="table" aria-label="Étiquettes de l’espace"><div class="t-head" role="row"><span class="on" role="columnheader" aria-sort="ascending">Nom${I('sort', 14)}</span><span role="columnheader">Démos</span><span></span></div>${T.map(([n, c, k], i) => row(n, c, k, i === 4)).join('')}</div>${menu.replace('top:250px', 'top:430px')}</div></div>`;
+  document.getElementById('a1').outerHTML = pair('Paramètres › Contenu › Étiquettes', app('settings', page, { h: 760 }), 'img/avant/l48a-parametres.png', 'Aujourd’hui : « Étiquettes · Bientôt » dans les Paramètres', 'Le nombre de démos mène à Démos filtré. Le menu de chaque ligne regroupe Renommer, Couleur, Fusionner et Supprimer.', 'Avant (Bientôt)');
+  const colorPop = `<div><p class="cap">Couleur de « Outil CRM »</p><div class="pop" role="radiogroup" aria-label="Couleur" style="position:static;width:auto">${'<div class="sw">' + C.map(([k, n, hex]) => `<span role="radio" aria-checked="${k === 'violet'}" aria-label="${n}" class="${k === 'violet' ? 'on' : ''}" style="background:${hex}">${k === 'violet' ? I('check', 16) : ''}</span>`).join('') + '</div>'}<div class="sw-cap">Violet</div></div></div>`;
+  const rename = `<div style="width:520px"><p class="cap">Renommer : nom déjà pris</p><div class="t-card" style="padding:4px 20px"><div class="t-row" style="border-top:0;grid-template-columns:1fr"><div class="t-edit"><input class="fd-input" value="outil crm" aria-invalid="true"><span class="m" style="font-size:13px;color:var(--fd-color-text-muted)">Entrée pour valider</span></div></div><p class="t-err">Cette étiquette existe déjà.<a href="#">Fusionner avec « Outil CRM »</a></p></div></div>`;
+  const merge = `<div class="dlg" role="dialog" aria-labelledby="mg"><h2 id="mg">Fusionner « Outil métier »</h2><p>Les 7 démos de « Outil métier » reçoivent l’étiquette choisie. « Outil métier » est ensuite supprimée.</p><b style="font-size:14px">Avec</b><div class="sel">${tg('Outil CRM', 'violet')}<span class="n">7 démos</span>${I('down', 16)}</div><div class="f"><button class="fd-btn fd-btn--ghost" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button">Fusionner</button></div></div>`;
+  const del = `<div class="dlg" role="alertdialog" aria-labelledby="dl"><h2 id="dl">Supprimer « Pilotage » ?</h2><p>Elle sera retirée de 3 démos. Les démos ne sont pas supprimées.</p><div class="f"><button class="fd-btn fd-btn--ghost" type="button">Annuler</button><button class="fd-btn btn-danger" type="button">Supprimer</button></div></div>`;
+  document.getElementById('a2').innerHTML = colorPop + rename + merge + del;
+  const card = `<div><p class="cap">Carte survolée, sans étiquette</p><div class="dc"><div class="th"><i></i><span></span></div><div class="bd"><b>Créer une fiche usager</b><small>Publiée · 7 étapes</small><span class="add">+ Étiquette</span></div></div></div>`;
+  const picker = `<div><p class="cap">Sélecteur ouvert depuis la carte</p><div class="pop pk" style="position:static"><input class="fd-input" value="Nouv" aria-label="Chercher ou créer une étiquette"><label class="o"><input type="checkbox">${tg('Nouveaux agents', 'green')}</label><div class="o cr">${I('plus', 16)}Créer « Nouv »</div><div class="ms"></div><div class="ft">Gérer les étiquettes</div></div></div>`;
+  document.getElementById('a3').innerHTML = card + picker;
+  const pal = (dark) => `<div class="t-card"${dark ? ' data-theme="dark"' : ''} style="display:flex;flex-wrap:wrap;gap:10px;padding:20px;width:420px">${C.map(([k, n]) => tg(n, k)).join('')}</div>`;
+  document.getElementById('a4').innerHTML = pal(false) + pal(true);
+</script>
+</body>
+</html>
