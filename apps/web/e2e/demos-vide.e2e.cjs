@@ -62,7 +62,10 @@ const SHOTS = process.env.SHOTS_DIR;
       'Les statistiques apparaîtront après la première publication.',
     'brouillons : « Les statistiques apparaîtront après la première publication. »',
   );
-  ok((await page.locator('.stat-row:not(.stat-row--ghost)').count()) === 0, 'brouillons : indicateurs masqués');
+  ok(
+    (await page.locator('.stat-row:not(.stat-row--ghost)').count()) === 0,
+    'brouillons : indicateurs masqués',
+  );
   await shot('rev-05-demos-brouillons');
 
   // Une démo publiée : les indicateurs reviennent
