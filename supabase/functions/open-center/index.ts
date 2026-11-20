@@ -73,7 +73,9 @@ Deno.serve(async (req) => {
     },
     async sign(paths, ttl) {
       const { data } = await supabase.storage.from('published').createSignedUrls(paths, ttl);
-      return new Map((data ?? []).filter((u) => u.path && u.signedUrl).map((u) => [u.path!, u.signedUrl]));
+      const out = new Map<string, string>();
+      for (const u of data ?? []) if (u.path && u.signedUrl) out.set(u.path, u.signedUrl);
+      return out;
     },
     async clientKey(slug) {
       const sig = await crypto.subtle.sign(
