@@ -18,8 +18,9 @@
 | 7 | Intégrations (catégories, demande d'intégration) | Moyen | Faible | Retenu | L48-F |
 | 8 | Support (bouton et centre d'aide) | Faible | Faible | Retenu, dans L48-A | L48-A |
 | 9 | Barres de liste | Faible | Faible | L40 maintenu, deux ajouts | L48-A |
+| 10 | Types de contenu (captures, HTML, Sandbox) | Fort | Moyen | Retenu, avec L48-A | L48-G |
 
-Ordre de livraison au dev, **après L41** : L48-A, L48-B, L48-C, L48-D (avec L47), L48-F, puis L48-E.
+Ordre de livraison au dev, **après L41** : L48-A (avec L48-G), L48-B, L48-C, L48-D (avec L47), L48-F, puis L48-E.
 
 ---
 
@@ -279,6 +280,21 @@ Ordre de livraison au dev, **après L41** : L48-A, L48-B, L48-C, L48-D (avec L47
 - Le filtre Dossier quitte la barre au profit de la colonne Dossiers (§1).
 
 ---
+
+## 10. Types de contenu (rang 10, ajouté le 20 novembre)
+
+**Ce qu'ils font.** Trois produits présentés comme des types de contenu distincts : démo interactive par captures, démo HTML guidée, et sandbox (pages HTML reliées, exploration libre). Chaque type a son entrée de navigation et sa carte de création, avec une illustration et une ligne d'explication.
+
+**Ce qu'on a.**
+- Les trois existent dans les données : `demos.kind` (`guided` ou `sandbox`), et des étapes `image` ou `html`.
+- Mais « Nouvelle démo » ne propose que des sources : le type n'est choisi que dans l'extension, après une capture HTML.
+- Rien ne les distingue dans la navigation ni sur les cartes.
+- Le Sandbox relie déjà les liens identiques, affiche un plan, une page de départ et les pages « À relier ». En revanche, il ne signale pas les liens vers des pages non capturées.
+
+**Recommandation (L48-G, spec `specs/l48g-types.md`).**
+- « Nouvelle démo » en deux étapes : d'abord le type (3 cartes illustrées), puis la source, filtrée selon le type.
+- Une entrée « Sandbox » distincte de « Démos » dans la barre latérale. Dans Démos, un filtre Type (Captures ou HTML). Un badge de type sur chaque carte.
+- Un panneau « Liens sans page » dans le plan du Sandbox, avec trois actions : Capturer cette page, Relier à une page, Laisser le message.
 
 ## Hors périmètre (non retenu)
 
