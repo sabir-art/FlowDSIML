@@ -3,17 +3,20 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import {
   ArrowRight,
   Ban,
+  Building2,
+  CircleCheck,
   Clock,
   ExternalLink,
   Eye,
   EyeOff,
   Key,
+  Mail,
   Play,
   RotateCw,
   SearchX,
   WifiOff,
 } from 'lucide-preact';
-import { openDemo, type GateInfo } from './api';
+import { openDemo, requestAccess, type GateInfo } from './api';
 import { fmt, strings, type Dict } from './i18n';
 import { initials } from './Player';
 
@@ -259,6 +262,173 @@ export function PasswordGate({
         {state.status === 'password_wrong' && typeof state.remaining === 'number' && !locked && (
           <p class="p-gate-foot">{fmt(g, 'remaining', { count: state.remaining })}</p>
         )}
+      </form>
+    </SysFrame>
+  );
+}
+
+/**
+ * L39 (L11-09 à 11, L11-13) : démo « Sur invitation » ou « Par domaine e-mail ». Le visiteur saisit son
+ * adresse ; s'il y a droit, il reçoit un lien d'accès personnel (valable 1 heure). La réponse est la même
+ * que l'adresse soit sur la liste ou non ; seul un domaine refusé est signalé (le visiteur le connaît).
+ */
+export function EmailGate({ demoId, locale, info }: { demoId: string; locale: string; info: GateInfo }) {
+  const t = strings(locale.startsWith('en') ? 'en' : 'fr');
+  const g = t.gate as unknown as Record<string, string>;
+  const domain = info.mode === 'domain';
+  const [view, setView] = useState<'form' | 'sent' | 'expired'>(
+    info.status === 'link_expired' ? 'expired' : 'form',
+  );
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(
+    info.status === 'email_not_allowed' ? ((domain ? g.domainRefused : g.notAllowed) ?? null) : null,
+  );
+  const [busy, setBusy] = useState(false);
+  const [wait, setWait] = useState(0);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (wait <= 0) return;
+    const id = setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => clearTimeout(id);
+  }, [wait]);
+
+  const allowed = (e: string) =>
+    !domain || !info.domains?.length || info.domains.includes(e.split('@')[1] ?? '');
+  const ask = async () => {
+    const e = email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) {
+      setError(g.emailInvalid ?? '');
+      input.current?.focus();
+      return;
+    }
+    if (!allowed(e)) {
+      setError(g.domainRefused ?? '');
+      input.current?.focus();
+      return;
+    }
+    setBusy(true);
+    const r = await requestAccess(demoId, e).catch(() => 'error' as const);
+    setBusy(false);
+    if (r === 'domain_refused') {
+      setError(g.domainRefused ?? '');
+      input.current?.focus();
+    } else if (r === 'error') {
+      setError(g.error ?? '');
+    } else {
+      setError(null);
+      setView('sent');
+      setWait(60);
+    }
+  };
+
+  if (view === 'sent')
+    return (
+      <SysFrame t={t} info={info} label={g.sentTitle ?? ''}>
+        <div class="p-card p-sys-card p-gate">
+          <span class="p-sys-chip p-sys-chip--ok" aria-hidden="true">
+            <CircleCheck size={22} />
+          </span>
+          <h1 id="p-gate-t">{g.sentTitle}</h1>
+          <p class="p-sub" role="status">
+            {fmt(g, 'sentText', { email: email.trim().toLowerCase() })}
+          </p>
+          <button
+            type="button"
+            class="p-btn p-btn-primary p-gate-submit"
+            disabled={wait > 0 || busy}
+            onClick={() => void ask()}
+          >
+            {wait > 0 ? <span>{fmt(g, 'resendIn', { time: clock(wait) })}</span> : g.resend}
+          </button>
+          <button
+            type="button"
+            class="p-link p-link--muted"
+            onClick={() => {
+              setView('form');
+              setTimeout(() => input.current?.focus(), 0);
+            }}
+          >
+            {g.changeEmail}
+          </button>
+          <p class="p-gate-foot">{g.spam}</p>
+        </div>
+      </SysFrame>
+    );
+
+  if (view === 'expired')
+    return (
+      <SysFrame t={t} info={info} label={g.linkExpiredTitle ?? ''}>
+        <div class="p-card p-sys-card p-gate">
+          <span class="p-sys-chip p-sys-chip--warn" aria-hidden="true">
+            <Clock size={22} />
+          </span>
+          <h1 id="p-gate-t">{g.linkExpiredTitle}</h1>
+          <p class="p-sub">{g.linkExpiredText}</p>
+          <button
+            type="button"
+            class="p-btn p-btn-primary p-gate-submit"
+            autoFocus
+            onClick={() => {
+              setView('form');
+              setTimeout(() => input.current?.focus(), 0);
+            }}
+          >
+            {g.newLink}
+            <ArrowRight size={16} aria-hidden="true" />
+          </button>
+        </div>
+      </SysFrame>
+    );
+
+  const title = (domain ? g.domainTitle : g.inviteTitle) ?? '';
+  return (
+    <SysFrame t={t} info={info} label={title}>
+      <form
+        class="p-card p-sys-card p-gate"
+        aria-labelledby="p-gate-t"
+        novalidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!busy) void ask();
+        }}
+      >
+        <span class="p-sys-chip" aria-hidden="true">
+          {domain ? <Building2 size={22} /> : <Mail size={22} />}
+        </span>
+        <h1 id="p-gate-t">{title}</h1>
+        <p class="p-sub">
+          {domain && info.domains?.length
+            ? fmt(g, 'domainText', { domains: info.domains.map((d) => `@${d}`).join(` ${g.or} `) })
+            : domain
+              ? g.domainTextNoList
+              : g.inviteText}
+        </p>
+        <div class="p-field p-gate-field">
+          <label for="p-gate-email">{domain ? g.workEmail : g.email}</label>
+          <input
+            ref={input}
+            id="p-gate-email"
+            class="p-input"
+            type="email"
+            autocomplete="email"
+            autoFocus
+            required
+            value={email}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? 'p-gate-err' : undefined}
+            onInput={(e) => setEmail((e.target as HTMLInputElement).value)}
+          />
+          {error && (
+            <span class="p-gate-err" id="p-gate-err" role="alert">
+              {error}
+            </span>
+          )}
+        </div>
+        <button type="submit" class="p-btn p-btn-primary p-gate-submit" disabled={busy}>
+          {g.request}
+          <ArrowRight size={16} aria-hidden="true" />
+        </button>
+        <p class="p-gate-foot">{g.emailUse}</p>
       </form>
     </SysFrame>
   );

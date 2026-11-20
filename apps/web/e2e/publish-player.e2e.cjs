@@ -217,8 +217,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await app.waitForSelector('.toast');
   ok(state.tables.demo_access[0]?.mode === 'password', 'L11 : démo protégée par mot de passe');
   ok(
-    (await app.locator('.l11-opt.is-soon input:disabled').count()) === 3,
-    'L11 : invitation, domaine e-mail et jeton (A1-11) en Bientôt',
+    (await app.locator('.l11-opt.is-soon input:disabled').count()) === 1,
+    'L11 / L39 : seul le jeton (A1-11) reste en Bientôt',
   );
   ok(/Avec un mot de passe/.test(await app.textContent('.l11-sum')), 'L11 : carte « Accès à la démo »');
 

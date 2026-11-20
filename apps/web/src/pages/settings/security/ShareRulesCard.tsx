@@ -143,7 +143,7 @@ export function ShareRulesCard() {
           </p>
         </div>
         <div className="sr-ctl sr-checks">
-          {(['link', 'password'] as const).map((m) => (
+          {(['link', 'password', 'invite', 'domain'] as const).map((m) => (
             <label key={m} className="check">
               <input
                 type="checkbox"
@@ -155,22 +155,6 @@ export function ShareRulesCard() {
               {t(`access.mode.${m}`)}
             </label>
           ))}
-          {(['invite', 'domain'] as const).map((m) => (
-            <label key={m} className="check is-soon">
-              <input
-                type="checkbox"
-                checked={false}
-                aria-disabled="true"
-                aria-describedby={`${id}-soon`}
-                readOnly
-                onClick={(e) => e.preventDefault()}
-              />
-              {t(`access.mode.${m}`)} <span className="badge">{t('shell.soon')}</span>
-            </label>
-          ))}
-          <span id={`${id}-soon`} className="sr-only">
-            {t('rules.soonModes')}
-          </span>
           {modesEmpty && (
             <p className="field-error" id={`${id}-modes-err`} role="alert">
               {t('rules.modesEmpty')}

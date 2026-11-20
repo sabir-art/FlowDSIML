@@ -223,6 +223,22 @@ const manifest = {
     (await page.locator('.p-quiz-badge').textContent()) === 'Pas encore validé',
     'échec : badge neutre « Pas encore validé »',
   );
+  // L42 : anneau redessiné (encoche du seuil dans la piste, seuil en texte, plus de trait noir)
+  ok((await page.locator('.p-ring__threshold').count()) === 0, 'L42 : plus de trait du seuil');
+  ok(
+    (await page.locator('.p-ring__threshold-text').textContent()) === 'Seuil de validation : 70\u202f%',
+    'L42 : seuil écrit sous l’anneau',
+  );
+  ok(
+    /Votre score :\s*33\s*%/.test(await page.locator('.p-ring__score').textContent()),
+    'L42 : « Votre score : 33 % » au centre',
+  );
+  ok(
+    !!(await page.locator('.p-ring__track').getAttribute('stroke-dasharray')) &&
+      (await page.locator('.p-ring__arc').evaluate((el) => getComputedStyle(el).stroke)) ===
+        'rgb(91, 102, 117)',
+    'L42 : encoche dans la piste, arc ardoise sous le seuil',
+  );
   ok(
     await page.locator('.p-quiz-result h2').evaluate((el) => el === document.activeElement),
     'focus sur le titre du résultat',
@@ -235,6 +251,7 @@ const manifest = {
     submits.length === 1 && submits[0].answers.length === 3 && !!submits[0].visitorId,
     'tentative envoyée au serveur',
   );
+  await page.waitForTimeout(700); // fin du tracé de l'arc (600 ms)
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-resultat-echec${sfx}.png` });
 
   // Seconde tentative réussie
@@ -261,6 +278,13 @@ const manifest = {
   ok(
     (await page.getByRole('button', { name: 'Repasser le quiz' }).count()) === 1,
     'réussite : « Repasser le quiz » (tentative restante)',
+  );
+  await page.waitForTimeout(700);
+  ok(
+    await page
+      .locator('.p-ring.is-pass .p-ring__arc')
+      .evaluate((el) => Math.abs(parseFloat(getComputedStyle(el).strokeDasharray) - 2 * Math.PI * 74) < 1),
+    'L42 : 100 % : cercle plein, couleur principale',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-resultat-reussite${sfx}.png` });
   await page.waitForTimeout(2600);

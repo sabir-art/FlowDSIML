@@ -12,6 +12,8 @@ export const OPEN_URL: string = env.VITE_OPEN_URL || `${SUPABASE_URL}/functions/
 export const publishedBase = (demoId: string) =>
   `${SUPABASE_URL}/storage/v1/object/public/published/${demoId}/`;
 /** L14 : Edge Function du centre de formation public. */
+/** L39 : liens d'accès des démos « Sur invitation » et « Par domaine e-mail ». */
+export const ACCESS_URL: string = env.VITE_ACCESS_URL || `${SUPABASE_URL}/functions/v1/access-email`;
 export const CENTER_URL: string = env.VITE_CENTER_URL || `${SUPABASE_URL}/functions/v1/open-center`;
 /** Logos du centre : bucket public « branding » (L14). */
 export const brandingUrl = (path: string) => `${SUPABASE_URL}/storage/v1/object/public/branding/${path}`;

@@ -1,5 +1,13 @@
 import { parseManifest, type EventType, type Manifest } from '@flowdsiml/manifest';
-import { CENTER_URL, OPEN_URL, publishedBase, SUPABASE_ANON_KEY, SUPABASE_URL, TRACK_URL } from './config';
+import {
+  ACCESS_URL,
+  CENTER_URL,
+  OPEN_URL,
+  publishedBase,
+  SUPABASE_ANON_KEY,
+  SUPABASE_URL,
+  TRACK_URL,
+} from './config';
 import { resolveAssets, randomId } from './logic';
 import { visitorIdFor } from './visitor';
 
@@ -43,8 +51,15 @@ export type GateInfo = {
     | 'password_required'
     | 'password_wrong'
     | 'locked'
+    | 'email_required'
+    | 'email_not_allowed'
+    | 'link_expired'
     | 'network'
     | 'error';
+  /** L39 : accès par e-mail (« Sur invitation » ou « Par domaine e-mail ») et domaines autorisés. */
+  mode?: 'invite' | 'domain';
+  domains?: string[];
+  grantDays?: number;
   title?: string;
   workspace?: string;
   website?: string | null;
@@ -59,21 +74,39 @@ export type GateInfo = {
 
 const grantKey = (demoId: string) => `fd.grant.${demoId}`;
 
-/**
- * Ouvre une démo publiée via open-demo : le serveur applique l'accès (expiration, mot de passe) et
- * renvoie le manifeste avec des URL d'images signées. Le jeton d'accès reste pour la session.
- */
-export async function openDemo(demoId: string, password?: string): Promise<GateInfo> {
-  let grant: string | null = null;
+/** Accès remis par open-demo : session (mot de passe), ou 7 jours sur cet appareil (accès par e-mail). */
+function readGrant(demoId: string): string | null {
   try {
-    grant = sessionStorage.getItem(grantKey(demoId));
+    return sessionStorage.getItem(grantKey(demoId)) ?? localStorage.getItem(grantKey(demoId));
+  } catch {
+    return null;
+  }
+}
+function keepGrant(demoId: string, grant: string, days?: number) {
+  try {
+    if (days) localStorage.setItem(grantKey(demoId), grant);
+    else sessionStorage.setItem(grantKey(demoId), grant);
   } catch {
     /* stockage indisponible */
   }
+}
+
+/**
+ * Ouvre une démo publiée via open-demo : le serveur applique l'accès (expiration, mot de passe, adresse
+ * vérifiée) et renvoie le manifeste avec des URL d'images signées. L39 : `accessToken` (retour d'un lien
+ * d'accès) n'est envoyé qu'une fois et n'est jamais conservé ; seul l'accès rendu (grant) est gardé.
+ */
+export async function openDemo(demoId: string, password?: string, accessToken?: string): Promise<GateInfo> {
+  const grant = readGrant(demoId);
   const res = await send(OPEN_URL, {
     method: 'POST',
     headers: rpcHeaders(),
-    body: JSON.stringify({ demoId, password: password || undefined, grant: grant || undefined }),
+    body: JSON.stringify({
+      demoId,
+      password: password || undefined,
+      grant: grant || undefined,
+      accessToken: accessToken || undefined,
+    }),
   }).catch(() => null);
   if (!res) return { status: 'network' };
   if (!res.ok && res.status !== 429) return { status: 'error' };
@@ -81,13 +114,7 @@ export async function openDemo(demoId: string, password?: string): Promise<GateI
   if (!body) return { status: 'error' };
   if (res.status === 429) return { status: 'locked', retryIn: 60 };
   if (body.status === 'ok') {
-    if (body.grant) {
-      try {
-        sessionStorage.setItem(grantKey(demoId), body.grant);
-      } catch {
-        /* stockage indisponible */
-      }
-    }
+    if (body.grant) keepGrant(demoId, body.grant, body.grantDays);
     try {
       return { ...body, manifest: resolveAssets(parseManifest(body.manifest), publishedBase(demoId)) };
     } catch {
@@ -95,6 +122,40 @@ export async function openDemo(demoId: string, password?: string): Promise<GateI
     }
   }
   return body as GateInfo;
+}
+
+/**
+ * L39 : demande d'un lien d'accès (invitation, domaine). Réponse identique que l'adresse soit autorisée
+ * ou non (« sent »), sauf pour un domaine refusé, que le visiteur connaît déjà.
+ */
+export async function requestAccess(
+  demoId: string,
+  email: string,
+): Promise<'sent' | 'domain_refused' | 'error'> {
+  const res = await send(ACCESS_URL, {
+    method: 'POST',
+    headers: rpcHeaders(),
+    body: JSON.stringify({ action: 'request', demoId, email }),
+  }).catch(() => null);
+  if (!res?.ok) return 'error';
+  const body = (await res.json().catch(() => null)) as { status?: string } | null;
+  return body?.status === 'domain_refused' ? 'domain_refused' : body?.status === 'sent' ? 'sent' : 'error';
+}
+
+/**
+ * L39 : retour d'un lien d'accès (?acces=<démo>, jeton ou erreur dans le fragment). Lit le jeton, réécrit
+ * aussitôt l'adresse (#/d/<démo>, sans jeton) et le rend une seule fois ; null si l'adresse n'en vient pas.
+ */
+export function takeAccessReturn(
+  loc: Location,
+  history: History,
+): { demoId: string; token: string | null } | null {
+  const id = new URLSearchParams(loc.search).get('acces');
+  if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const frag = new URLSearchParams(loc.hash.replace(/^#/, ''));
+  const token = frag.get('access_token');
+  history.replaceState(null, '', `${loc.pathname}#/d/${id}`);
+  return { demoId: id, token: token && token.length <= 4096 ? token : null };
 }
 
 /** L28 082 : adresse personnalisée → identifiant de la démo publiée (null si inconnue ou expirée). */

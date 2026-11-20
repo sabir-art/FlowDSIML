@@ -13,7 +13,7 @@ export interface ShareRules {
   exports_allowed: boolean;
 }
 export const DEFAULT_RULES: ShareRules = {
-  modes: ['link', 'password'],
+  modes: ['link', 'password', 'invite', 'domain'],
   max_link_days: null,
   publish_role: 'editor',
   exports_allowed: true,

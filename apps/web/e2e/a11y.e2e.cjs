@@ -703,11 +703,11 @@ const APP_PAGES = [
     },
     open: async (p) => {
       await p
-        .getByRole('button', { name: /Dossiers/ })
+        .getByRole('button', { name: /^Dossier/ })
         .first()
         .click();
       await p.getByRole('menuitem', { name: /^RH/ }).click();
-      await p.getByRole('button', { name: /RH/ }).first().click();
+      await p.getByRole('button', { name: /^Dossier\s*: RH/ }).click();
       await p.getByRole('menuitem', { name: /Accès/ }).click();
       await p.getByRole('radio', { name: 'Membres choisis' }).check();
       await p.waitForSelector('dialog[open] .fa-list');

@@ -47,6 +47,7 @@ export type Database = {
         Row: {
           ask_email: boolean;
           demo_id: string;
+          domains: string[];
           expires_at: string | null;
           locked_by_rules: boolean;
           mode: string;
@@ -58,6 +59,7 @@ export type Database = {
         Insert: {
           ask_email?: boolean;
           demo_id: string;
+          domains?: string[];
           expires_at?: string | null;
           locked_by_rules?: boolean;
           mode?: string;
@@ -68,11 +70,43 @@ export type Database = {
         Update: {
           ask_email?: boolean;
           demo_id?: string;
+          domains?: string[];
           expires_at?: string | null;
           locked_by_rules?: boolean;
           mode?: string;
           password_changed_at?: string | null;
           updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
+      demo_access_invites: {
+        Row: {
+          demo_id: string;
+          email: string;
+          invited_at: string;
+          invited_by: string | null;
+          last_sent_at: string | null;
+          opened_at: string | null;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          demo_id: string;
+          email: string;
+          invited_at?: string;
+          invited_by?: string | null;
+          last_sent_at?: string | null;
+          opened_at?: string | null;
+          workspace_id: string;
+        };
+        Update: {
+          demo_id?: string;
+          email?: string;
+          invited_at?: string;
+          invited_by?: string | null;
+          last_sent_at?: string | null;
+          opened_at?: string | null;
           workspace_id?: string;
         };
         Relationships: [];
@@ -2484,6 +2518,9 @@ export type Database = {
         Returns: undefined;
       };
       set_demo_password: { Args: { p_demo: string; p_password: string }; Returns: undefined };
+      set_demo_domains: { Args: { p_demo: string; p_domains: string[] }; Returns: string[] };
+      add_demo_invites: { Args: { p_demo: string; p_emails: string[] }; Returns: string[] };
+      remove_demo_invite: { Args: { p_demo: string; p_email: string }; Returns: undefined };
       submit_lead: {
         Args: {
           p_consent?: boolean;

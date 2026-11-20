@@ -895,44 +895,75 @@ a.p-btn:hover {
   font-size: 14px;
   color: color-mix(in srgb, var(--p-text) 72%, transparent);
 }
+/* L42 : anneau de score (piste et arc de même épaisseur, encoche du seuil dans la piste, seuil en texte) */
 .p-ring {
-  display: block;
+  position: relative;
+  display: grid;
+  justify-items: center;
   margin: 0 auto;
+}
+.p-ring svg {
+  display: block;
+  width: 168px;
+  height: 168px;
+  transform: rotate(-90deg);
 }
 .p-ring circle {
   fill: none;
-  stroke-width: 14;
+  stroke-width: 12;
 }
 .p-ring__track {
   stroke: color-mix(in srgb, var(--p-text) 10%, transparent);
+  stroke-linecap: butt;
 }
 .p-ring__arc {
-  /* F2-06 : ardoise plus soutenue (contraste 3:1 sur le fond) */
-  stroke: #5b6675;
+  /* Non validé : ardoise (4,5:1 sur la piste claire) ; validé : couleur principale, contrôlée (--p-ring-pass) */
+  stroke: var(--p-ring-fail, #5b6675);
   stroke-linecap: round;
-  transition: stroke-dasharray 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation: p-ring-draw 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .p-ring.is-pass .p-ring__arc {
-  stroke: var(--p-primary);
+  stroke: var(--p-ring-pass, var(--p-primary));
 }
-.p-ring__threshold {
-  stroke: #080808;
-  stroke-width: 3;
+@keyframes p-ring-draw {
+  from {
+    stroke-dasharray: 0 466;
+  }
 }
 .p-ring__score {
-  text-anchor: middle;
-  font-size: 34px;
+  position: absolute;
+  top: 84px;
+  left: 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  font-size: 44px;
   font-weight: 800;
-  fill: var(--p-text);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--p-text);
+  white-space: nowrap;
 }
-.p-ring__label {
-  text-anchor: middle;
-  font-size: 13px;
-  fill: color-mix(in srgb, var(--p-text) 72%, transparent);
+.p-ring__pct {
+  font-size: 0.5em;
+}
+.p-ring__threshold-text {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: color-mix(in srgb, var(--p-text) 72%, transparent);
+}
+@media (max-width: 479.98px) {
+  .p-ring svg {
+    width: 144px;
+    height: 144px;
+  }
+  .p-ring__score {
+    top: 72px;
+    font-size: 38px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .p-ring__arc {
-    transition: none;
+    animation: none;
   }
 }
 .p-quiz-badge {
@@ -1485,6 +1516,19 @@ a.p-btn:hover {
 .p-sys-chip--warn {
   background: #fff4e5;
   color: #9a4d00;
+}
+.p-sys-chip--ok {
+  background: #e7f6ec;
+  color: #1d6b38;
+}
+@media (prefers-color-scheme: dark) {
+  .p-sys-chip--ok {
+    background: rgb(46 160 90 / 0.18);
+    color: #8fd6a8;
+  }
+}
+.p-gate > .p-link--muted {
+  margin-top: 4px;
 }
 .p-sys-act {
   display: inline-flex;

@@ -2,7 +2,7 @@ import { formatDate } from '../../lib/format';
 import { initials } from '../../lib/initials';
 export { initials };
 import { useConfirm } from '../../components/ConfirmDialog';
-import { Check, Copy, Info, LogOut, Mail, Plus, Search, Star, Trash2, X } from 'lucide-react';
+import { Check, Copy, Info, LogOut, Mail, Plus, Search, Star, Trash2, UserCog, X } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { assignableRoles, can as roleCan, ROLES, type Action, type Role } from '@flowdsiml/core';
@@ -12,6 +12,7 @@ import { APP_URL } from '../../lib/env';
 import { check, useAction } from '../../lib/useAction';
 import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
+import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { SettingsShell } from './SettingsShell';
 
@@ -159,32 +160,53 @@ export function Members() {
           </div>
         )}
         <div className="card">
-          <div className="row st-filters">
-            <div className="input-affix grow st-search">
-              <Search aria-hidden="true" />
-              <input
-                className="input input-sm"
-                type="search"
-                placeholder={t('members.search')}
-                aria-label={t('members.search')}
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
+          {/* L40 : recherche et filtre Rôle en barre de liste (40 px) */}
+          <ListToolbar
+            className="st-toolbar"
+            activeCount={(q.trim() ? 1 : 0) + (roleFilter ? 1 : 0)}
+            onReset={() => {
+              setQ('');
+              setRoleFilter('');
+            }}
+            status={t('members.resultCount', {
+              count:
+                members.filter((m) => match(m.full_name, m.email, m.role)).length +
+                invites.filter((i) => match('', i.email, i.role)).length,
+            })}
+            lead={
+              <label className="fd-toolbar__search">
+                <span className="sr-only">{t('members.search')}</span>
+                <Search aria-hidden="true" />
+                <input
+                  className="fd-input"
+                  type="search"
+                  placeholder={t('members.search')}
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+              </label>
+            }
+            filters={
+              <FilterMenu
+                icon={<UserCog />}
+                label={t('members.roleLabel')}
+                value={roleFilter ? t(`roles.${roleFilter}`) : t('toolbar.all')}
+                active={!!roleFilter}
+                items={[
+                  {
+                    label: t('members.allRoles'),
+                    icon: roleFilter ? <span /> : <Check />,
+                    onSelect: () => setRoleFilter(''),
+                  },
+                  ...ROLE_ORDER.map((r) => ({
+                    label: t(`roles.${r}`),
+                    icon: roleFilter === r ? <Check /> : <span />,
+                    onSelect: () => setRoleFilter(r),
+                  })),
+                ]}
               />
-            </div>
-            <select
-              className="select input-sm st-select"
-              aria-label={t('members.filterRole')}
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value as WorkspaceRole | '')}
-            >
-              <option value="">{t('members.allRoles')}</option>
-              {ROLE_ORDER.map((r) => (
-                <option key={r} value={r}>
-                  {t(`roles.${r}`)}
-                </option>
-              ))}
-            </select>
-          </div>
+            }
+          />
           <div className="table-wrap">
             <table className="table">
               <caption className="sr-only">{t('members.tableCaption')}</caption>

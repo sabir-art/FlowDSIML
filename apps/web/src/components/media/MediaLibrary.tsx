@@ -187,32 +187,35 @@ export function MediaLibrary({
           </div>
         )}
         {/* L18-04 : recherche et filtre toujours présents (inactifs quand la médiathèque est vide) */}
-        <div className="md-tools">
-          <div className="input-affix md-search">
-            <Search aria-hidden="true" />
-            <input
-              className="input input-sm"
-              type="search"
-              placeholder={t('media.search')}
-              aria-label={t('media.search')}
-              value={q}
-              disabled={empty}
-              onChange={(e) => setQ(e.target.value)}
-            />
-          </div>
-          <div className="segmented" role="radiogroup" aria-label={t('media.filter')}>
-            {(['all', 'logo', 'image', 'font'] as const).map((f) => (
-              <button
-                key={f}
-                type="button"
-                role="radio"
-                aria-checked={filter === f}
+        {/* L40 : barre de liste (recherche puis filtre de type, 40 px) */}
+        <div className="fd-toolbar md-tools">
+          <div className="fd-toolbar__group" role="group" aria-label={t('toolbar.filters')}>
+            <label className="fd-toolbar__search md-search">
+              <span className="sr-only">{t('media.search')}</span>
+              <Search aria-hidden="true" />
+              <input
+                className="fd-input"
+                type="search"
+                placeholder={t('media.search')}
+                value={q}
                 disabled={empty}
-                onClick={() => setFilter(f)}
-              >
-                {t(`media.filter_${f}`)}
-              </button>
-            ))}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </label>
+            <div className="fd-segmented" role="radiogroup" aria-label={t('media.filter')}>
+              {(['all', 'logo', 'image', 'font'] as const).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  role="radio"
+                  aria-checked={filter === f}
+                  disabled={empty}
+                  onClick={() => setFilter(f)}
+                >
+                  {t(`media.filter_${f}`)}
+                </button>
+              ))}
+            </div>
           </div>
           <span className="sr-only" role="status">
             {files ? t('media.count', { count: shown.length }) : ''}

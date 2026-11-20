@@ -241,6 +241,7 @@ function seed() {
       ],
       share_links: [],
       demo_access: [],
+      demo_access_invites: [],
       share_rules: [],
       folder_members: [],
       demo_addresses: [],
@@ -442,6 +443,31 @@ async function install(page, state = seed()) {
         json(route, 200, { ...info, ...extra, status: 'ok', manifest: sign(JSON.parse(f.data.toString())) });
       if (!acc || acc.mode === 'link') return ok();
       state.grants = state.grants || {};
+      // L39 : invitation ou domaine ; jeton de lien factice « fake-token:<adresse> » (vérifié par la fonction)
+      if (acc.mode === 'invite' || acc.mode === 'domain') {
+        const allowed = (e) =>
+          acc.mode === 'invite'
+            ? (state.tables.demo_access_invites || []).some((i) => i.demo_id === id && i.email === e)
+            : (acc.domains || []).includes(e.split('@')[1]);
+        const extra =
+          acc.mode === 'domain' ? { mode: acc.mode, domains: acc.domains || [] } : { mode: acc.mode };
+        const g = req0.grant && state.grants[req0.grant];
+        if (g && g.id === id && allowed(g.email)) return ok({ mode: acc.mode });
+        const tok = typeof req0.accessToken === 'string' ? req0.accessToken : '';
+        state.accessTokensSeen = [...(state.accessTokensSeen || []), tok].filter(Boolean);
+        const email = tok.startsWith('fake-token:') ? tok.slice(11) : null;
+        if (email) {
+          if (!allowed(email)) return json(route, 200, { ...info, ...extra, status: 'email_not_allowed' });
+          const grant = `grant-mail-${Object.keys(state.grants).length + 1}`;
+          state.grants[grant] = { id, email };
+          const inv = (state.tables.demo_access_invites || []).find(
+            (i) => i.demo_id === id && i.email === email,
+          );
+          if (inv) inv.opened_at = inv.opened_at || new Date().toISOString();
+          return ok({ mode: acc.mode, grant, grantDays: 7 });
+        }
+        return json(route, 200, { ...info, ...extra, status: 'email_required' });
+      }
       if (req0.grant && state.grants[req0.grant] === id) return ok();
       if (!req0.password) return json(route, 200, { ...info, status: 'password_required' });
       acc.failures = acc.failures || 0;
@@ -460,6 +486,33 @@ async function install(page, state = seed()) {
         return json(route, 200, { ...info, status: 'locked', retryIn: 60 });
       }
       return json(route, 200, { ...info, status: 'password_wrong', remaining: 5 - acc.failures });
+    }
+    // L39 : liens d'accès (aucun envoi réel : les demandes sont notées dans state.accessEmails)
+    if (p.startsWith('/functions/v1/access-email')) {
+      const b = JSON.parse(req.postData() || '{}');
+      state.accessEmails = state.accessEmails || [];
+      const acc = (state.tables.demo_access || []).find((a) => a.demo_id === b.demoId);
+      if (b.action === 'request') {
+        if (acc?.mode === 'domain' && !(acc.domains || []).includes(String(b.email).split('@')[1]))
+          return json(route, 200, { status: 'domain_refused' });
+        state.accessEmails.push({ action: 'request', email: b.email });
+        return json(route, 200, { status: 'sent' });
+      }
+      if (b.action === 'invite') {
+        const limit = state.accessLimit ?? 10;
+        const sent = b.emails.slice(0, limit);
+        for (const e of sent) {
+          state.accessEmails.push({ action: 'invite', email: e });
+          const inv = state.tables.demo_access_invites.find((i) => i.demo_id === b.demoId && i.email === e);
+          if (inv) inv.last_sent_at = new Date().toISOString();
+        }
+        return json(route, 200, { sent, limited: b.emails.slice(limit), failed: [] });
+      }
+      if (b.action === 'link')
+        return json(route, 200, {
+          url: `${PUBLIC_PLAYER}/?acces=${b.demoId}#access_token=fake-token:${b.email}`,
+        });
+      return json(route, 400, { error: 'bad_action' });
     }
     // L23 : envoi immédiat (test, rejeu) ; résultat réglable par state.dispatchResult
     if (p.startsWith('/functions/v1/webhooks-dispatch')) {
@@ -1396,6 +1449,14 @@ async function install(page, state = seed()) {
           let row = t.demo_access.find((x) => x.demo_id === a.p_demo);
           if (fn === 'set_demo_access' && a.p_mode === 'password' && !row?.password)
             return json(route, 400, { code: 'P0001', message: 'PASSWORD_REQUIRED' });
+          if (
+            fn === 'set_demo_access' &&
+            a.p_mode === 'invite' &&
+            !t.demo_access_invites.some((i) => i.demo_id === a.p_demo)
+          )
+            return json(route, 400, { code: 'P0001', message: 'INVITES_REQUIRED' });
+          if (fn === 'set_demo_access' && a.p_mode === 'domain' && !(row?.domains || []).length)
+            return json(route, 400, { code: 'P0001', message: 'DOMAINS_REQUIRED' });
           if (fn === 'set_demo_password' && (a.p_password || '').length < 8)
             return json(route, 400, { code: 'P0001', message: 'PASSWORD_LENGTH' });
           const demo = t.demos.find((d) => d.id === a.p_demo);
@@ -1424,6 +1485,48 @@ async function install(page, state = seed()) {
             });
           row.updated_at = new Date().toISOString();
           return json(route, 200, null);
+        }
+        // L39 : invités et domaines d'une démo
+        case 'add_demo_invites': {
+          const demo = t.demos.find((d) => d.id === a.p_demo);
+          const list = [...new Set(a.p_emails.map((e) => e.trim().toLowerCase()))];
+          const added = list.filter(
+            (e) => !t.demo_access_invites.some((i) => i.demo_id === a.p_demo && i.email === e),
+          );
+          for (const e of added)
+            t.demo_access_invites.push({
+              demo_id: a.p_demo,
+              workspace_id: demo?.workspace_id,
+              email: e,
+              invited_at: new Date().toISOString(),
+              last_sent_at: null,
+              opened_at: null,
+            });
+          return json(route, 200, added.sort());
+        }
+        case 'remove_demo_invite': {
+          t.demo_access_invites = t.demo_access_invites.filter(
+            (i) => !(i.demo_id === a.p_demo && i.email === a.p_email),
+          );
+          return json(route, 200, null);
+        }
+        case 'set_demo_domains': {
+          const v = [...new Set(a.p_domains.map((d) => d.trim().toLowerCase().replace(/^@/, '')))].sort();
+          if (v.some((d) => !/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(d) || d === 'gmail.com'))
+            return json(route, 400, { code: 'P0001', message: 'DOMAIN_INVALID' });
+          let row = t.demo_access.find((x) => x.demo_id === a.p_demo);
+          if (!row) {
+            row = {
+              demo_id: a.p_demo,
+              workspace_id: t.demos.find((d) => d.id === a.p_demo)?.workspace_id,
+              mode: 'link',
+              ask_email: false,
+              expires_at: null,
+            };
+            t.demo_access.push(row);
+          }
+          row.domains = v;
+          return json(route, 200, v);
         }
         // L14 : centre de formation (réglages)
         case 'center_slug_available': {
