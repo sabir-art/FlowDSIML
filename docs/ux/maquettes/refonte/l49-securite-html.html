@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sécurité des captures HTML (lot L49) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* L49 : réglage « Captures HTML » par espace, rapport d'analyse après chaque capture, liens externes désactivés, mention d'autorisation. Données fictives. Spec : docs/ux/specs/l49-securite-html.md */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  body { background: var(--fd-color-bg); }
+  .s49 { max-width: 1320px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 32px; color: var(--fd-color-text); font-family: var(--fd-font-sans); }
+  .s49 h1 { margin: 0; font-size: 28px; } .s49 > p { margin: 0; max-width: 940px; color: var(--fd-color-text-muted); }
+  .s49-blk { display: flex; flex-direction: column; gap: 16px; } .s49-blk > h2 { margin: 0; font-size: 20px; }
+  .s49-lab { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+  .s49-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  .s49-ico { width: 18px; height: 18px; flex: none; }
+  .s49-card { padding: 24px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); display: flex; flex-direction: column; gap: 16px; color: var(--fd-color-text); }
+  .s49-card h3 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; } .s49-card h3 .s49-tag { margin-left: auto; }
+  .s49-card > p { margin: 0; font-size: 14px; color: var(--fd-color-text-muted); }
+  .s49-tag { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--fd-color-surface-sunken); color: var(--fd-color-text); white-space: nowrap; }
+  .s49-tag svg { width: 13px; height: 13px; }
+  .s49-ok { background: color-mix(in srgb, var(--fd-color-success, #1f7a3d) 14%, var(--fd-color-surface)); }
+  .s49-warn { background: color-mix(in srgb, var(--fd-color-warning, #b26b00) 16%, var(--fd-color-surface)); }
+  .s49-opts { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; }
+  .s49-opts legend { padding: 0; margin-bottom: 6px; font-weight: 700; font-size: 14px; }
+  .s49-opt { display: grid; grid-template-columns: 20px 1fr; gap: 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--fd-color-border); cursor: pointer; }
+  .s49-opt input { margin: 2px 0 0; width: 18px; height: 18px; accent-color: var(--fd-color-primary); }
+  .s49-opt b { display: block; font-size: 14px; } .s49-opt small { font-size: 13px; color: var(--fd-color-text-muted); }
+  .s49-opt.is-on { border-color: var(--fd-color-primary); box-shadow: inset 0 0 0 1px var(--fd-color-primary); background: var(--fd-color-primary-soft); }
+  .s49-doms { grid-column: 2; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .s49-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .s49-chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 12px; border-radius: 999px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); font-size: 13px; font-family: ui-monospace, monospace; }
+  .s49-chip button { all: unset; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; } .s49-chip button svg { width: 14px; height: 14px; }
+  .s49-add { display: flex; gap: 8px; } .s49-add .fd-input { flex: 1; height: 40px; }
+  .s49-note { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--fd-color-surface-sunken); font-size: 13.5px; line-height: 1.45; }
+  .s49-note b { display: block; }
+  .s49-foot { display: flex; align-items: center; gap: 8px; } .s49-foot span { flex: 1; font-size: 13px; color: var(--fd-color-text-muted); }
+  /* Rapport */
+  .s49-rep { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); }
+  .s49-rep__h { display: flex; align-items: center; gap: 10px; } .s49-rep__h b { flex: 1; font-size: 15px; }
+  .s49-rep ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; font-size: 13.5px; }
+  .s49-rep li { display: flex; align-items: center; gap: 8px; } .s49-rep li b { font-variant-numeric: tabular-nums; min-width: 22px; text-align: right; }
+  .s49-rep li svg { width: 15px; height: 15px; color: var(--fd-color-text-muted); }
+  .s49-pages { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .s49-pg { display: grid; grid-template-columns: 72px 1fr auto; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--fd-color-border); font-size: 14px; }
+  .s49-pg i { display: block; height: 44px; border-radius: 6px; background: var(--fd-color-surface-sunken); }
+  .s49-pg small { display: block; color: var(--fd-color-text-muted); font-size: 12.5px; }
+  .s49-ext { display: flex; flex-direction: column; gap: 8px; }
+  .s49-lk { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--fd-color-border); font-size: 13.5px; }
+  .s49-lk b { font-size: 14px; } .s49-lk small { grid-column: 1; color: var(--fd-color-text-muted); font-family: ui-monospace, monospace; font-size: 12px; }
+  .s49-sw { grid-row: 1 / 3; grid-column: 2; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .s49-tg { width: 40px; height: 24px; border-radius: 999px; background: var(--fd-color-border-strong, #8a95a3); position: relative; flex: none; }
+  .s49-tg::after { content: ''; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; }
+  .s49-tg.on { background: var(--fd-color-text); } .s49-tg.on::after { left: 19px; }
+  .s49-ph { width: 390px; padding: 16px; border-radius: 28px; border: 1px solid var(--fd-color-border); background: var(--fd-color-bg); color: var(--fd-color-text); display: flex; flex-direction: column; gap: 12px; }
+  .s49-ph .s49-rep ul { grid-template-columns: 1fr; }
+  .s49-duo { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+  .s49-ext-pop { width: 420px; border-radius: 16px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); box-shadow: var(--fd-shadow-lg); padding: 18px; display: flex; flex-direction: column; gap: 12px; color: var(--fd-color-text); }
+  .s49-notes { margin: 0; padding-left: 20px; color: var(--fd-color-text-muted); display: grid; gap: 6px; font-size: 14px; max-width: 940px; }
+</style>
+</head>
+<body>
+<main class="s49">
+  <h1>L49 : sécurité des captures HTML</h1>
+  <p>Certaines structures partenaires interdisent la reproduction HTML de leurs logiciels, et une page capturée pourrait contenir du code malveillant ou servir à tromper. Un admin choisit donc si les captures HTML sont autorisées, limitées à des domaines ou désactivées ; chaque capture affiche son rapport d'analyse ; les liens externes sont désactivés par défaut et les formulaires toujours neutralisés. Données fictives.</p>
+
+  <section class="s49-blk" aria-labelledby="h1"><h2 id="h1">1. Paramètres > Espace > Sécurité : « Captures HTML » (admins)</h2><div class="s49-row" data-slot="set"></div></section>
+  <section class="s49-blk" aria-labelledby="h2"><h2 id="h2">2. Extension, après la capture : rapport avant l'envoi</h2><div class="s49-row" data-slot="ext"></div></section>
+  <section class="s49-blk" aria-labelledby="h3"><h2 id="h3">3. Éditeur : sécurité de la page et liens externes</h2><div class="s49-row" data-slot="ed"></div></section>
+  <section class="s49-blk" aria-labelledby="h4"><h2 id="h4">4. Captures HTML désactivées ou domaine non autorisé</h2><div class="s49-row" data-slot="off"></div></section>
+  <section class="s49-blk" aria-labelledby="h5"><h2 id="h5">5. En sombre et sur mobile</h2><div class="s49-duo" data-slot="dark"></div></section>
+  <section class="s49-blk" aria-labelledby="h6"><h2 id="h6">Règles</h2>
+    <ul class="s49-notes">
+      <li>Le réglage s'applique partout : l'app (création), l'extension (capture) et le serveur (réception des pages). Le serveur refuse une page hors réglage, même envoyée autrement.</li>
+      <li>Rapport : chiffres réels de l'assainissement, jamais estimés. « Page sûre » s'il n'y avait rien d'actif à retirer ; « Éléments retirés » sinon. Les deux sont publiables : tout ce qui pouvait s'exécuter a été retiré.</li>
+      <li>Liens externes : désactivés par défaut ; un éditeur peut en autoriser un, qui s'ouvre alors dans un nouvel onglet après un avertissement « Vous quittez la démo ». Formulaires : toujours neutralisés, sans option.</li>
+      <li>Mention « Capturez uniquement des logiciels que vous êtes autorisé à reproduire. » au lancement de la capture HTML, à la création et dans le réglage.</li>
+    </ul>
+  </section>
+</main>
+<script>
+  const P = {
+    shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+    check: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+    form: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 13H8M16 17H8M16 13h-2"/>',
+    ext: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+    frame: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
+    user: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+    lock: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    img: '<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/>',
+    map: '<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/>'
+  };
+  const I = (n) => `<svg class="s49-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${P[n]}</svg>`;
+  const lab = (l, h) => `<div><span class="s49-lab">${l}</span>${h}</div>`;
+  const NOTE = `<div class="s49-note" role="note">${I('info')}<span><b>Capturez uniquement des logiciels que vous êtes autorisé à reproduire.</b>Certaines structures interdisent la copie HTML de leurs écrans : utilisez alors des captures d’écran.</span></div>`;
+  let sid = 0;
+  const setting = (mode) => { const g = 'm' + (++sid); return `<section class="s49-card" aria-labelledby="sc-${g}"><h3 id="sc-${g}">${I('code')}Captures HTML<span class="s49-tag">${I('lock')}Admins</span></h3><p>Une capture HTML copie la structure des pages (démo HTML, Sandbox). Une capture d’écran ne copie qu’une image.</p>
+    <fieldset class="s49-opts"><legend>Autoriser les captures HTML</legend>
+      <label class="s49-opt${mode === 'all' ? ' is-on' : ''}"><input type="radio" name="${g}" ${mode === 'all' ? 'checked' : ''}><span><b>Autorisées</b><small>Sur tous les sites. Chaque page est analysée et nettoyée.</small></span></label>
+      <label class="s49-opt${mode === 'dom' ? ' is-on' : ''}"><input type="radio" name="${g}" ${mode === 'dom' ? 'checked' : ''}><span><b>Seulement sur ces domaines</b><small>Ailleurs, l’extension propose les captures d’écran uniquement.</small></span>${mode === 'dom' ? `<div class="s49-doms"><div class="s49-chips"><span class="s49-chip">app.example.com<button type="button" aria-label="Retirer app.example.com">${I('x')}</button></span><span class="s49-chip">*.intranet.example<button type="button" aria-label="Retirer *.intranet.example">${I('x')}</button></span></div><div class="s49-add"><label class="sr-only" for="dm">Ajouter un domaine</label><input id="dm" class="fd-input" placeholder="crm.example.org ou *.example.org"><button class="fd-btn" type="button">${I('plus')}Ajouter</button></div></div>` : ''}</label>
+      <label class="s49-opt${mode === 'off' ? ' is-on' : ''}"><input type="radio" name="${g}" ${mode === 'off' ? 'checked' : ''}><span><b>Désactivées</b><small>Captures d’écran uniquement. Les démos HTML et les Sandbox existants restent lisibles, sans nouvelle page.</small></span></label>
+    </fieldset>${NOTE}<div class="s49-foot"><span>Appliqué par l’app, l’extension et le serveur.</span><button class="fd-btn fd-btn--primary" type="button">Enregistrer</button></div></section>`; };
+  document.querySelector('[data-slot="set"]').innerHTML = lab('Seulement sur ces domaines', setting('dom')) + lab('Désactivées', setting('off'));
+  const rep = (warn, n) => `<div class="s49-rep" role="group" aria-label="Analyse de sécurité"><div class="s49-rep__h">${I(warn ? 'alert' : 'check')}<b>Analyse de sécurité</b><span class="s49-tag ${warn ? 's49-warn' : 's49-ok'}">${warn ? 'Éléments retirés' : 'Page sûre'}</span></div>
+    <ul>${(n || [3, 12, 1, 4, 2, 6]).map((v, i) => `<li>${I(['code', 'code', 'form', 'ext', 'frame', 'user'][i])}<b>${v}</b>${['scripts retirés', 'actions au clic retirées', 'formulaire neutralisé', 'liens externes désactivés', 'cadres intégrés retirés', 'données personnelles remplacées'][i]}</li>`).join('')}</ul>
+    <p style="margin:0;font-size:13px;color:var(--fd-color-text-muted)">${warn ? 'Tout ce qui pouvait s’exécuter ou envoyer des données a été retiré. La page est publiable.' : 'Rien d’actif à retirer sur cette page.'}</p></div>`;
+  const pg = (t, u, warn) => `<li class="s49-pg"><i></i><span><b>${t}</b><small>${u}</small></span><span class="s49-tag ${warn ? 's49-warn' : 's49-ok'}">${I(warn ? 'alert' : 'check')}${warn ? 'Éléments retirés' : 'Page sûre'}</span></li>`;
+  document.querySelector('[data-slot="ext"]').innerHTML = lab('Vérification de la capture HTML (extension)', `<section class="s49-card"><h3>${I('shield')}Vérifiez avant l’envoi</h3>${rep(true)}<ul class="s49-pages">${pg('Accueil', 'app.example.com/', true)}${pg('Usagers', 'app.example.com/usagers', true)}${pg('Aide', 'app.example.com/aide', false)}</ul><div class="s49-foot"><span>Rien n’est envoyé avant « Envoyer ».</span><button class="fd-btn" type="button">Supprimer</button><button class="fd-btn fd-btn--primary" type="button">Envoyer 3 pages</button></div></section>`) +
+    lab('Détail d’une page sûre', `<section class="s49-card">${rep(false, [0, 0, 0, 0, 0, 2])}</section>`);
+  const lk = (t, u, on) => `<div class="s49-lk"><b>${t}</b><small>${u}</small><span class="s49-sw"><span class="s49-tg${on ? ' on' : ''}" role="switch" aria-checked="${on}" tabindex="0" aria-label="Autoriser le lien ${t}"></span>${on ? 'Autorisé' : 'Désactivé'}</span></div>`;
+  document.querySelector('[data-slot="ed"]').innerHTML = lab('Panneau Étape > Sécurité de la page', `<section class="s49-card">${rep(true)}<h3 style="font-size:15px">${I('ext')}Liens externes · 4</h3><p>Désactivés par défaut : au clic, rien ne se passe. Autorisé, un lien s’ouvre dans un nouvel onglet après un avertissement.</p><div class="s49-ext">${lk('Documentation', 'https://docs.example.com/guide', true)}${lk('Support', 'https://support.example.net', false)}${lk('Mentions légales', 'https://example.org/mentions', false)}</div></section>`) +
+    lab('Visiteur : lien externe autorisé', `<div class="s49-ext-pop" role="dialog" aria-labelledby="lv"><b id="lv" style="display:flex;gap:8px;align-items:center;font-size:16px">${I('ext')}Vous quittez la démo</b><p style="margin:0;font-size:14px">Ce lien ouvre un site extérieur dans un nouvel onglet :</p><p style="margin:0;font:600 14px ui-monospace,monospace">docs.example.com</p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="fd-btn" type="button">Rester dans la démo</button><button class="fd-btn fd-btn--primary" type="button">${I('ext')}Ouvrir</button></div></div>`);
+  const typeOff = `<section class="s49-card"><h3>Nouvelle démo · Type de contenu</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${[['img', 'Démo par captures', 0], ['code', 'Démo HTML', 1], ['map', 'Sandbox', 1]].map(([i, t, off]) => `<div style="padding:14px;border-radius:14px;border:1px solid var(--fd-color-border);${off ? 'opacity:.6' : 'border-color:var(--fd-color-primary);box-shadow:inset 0 0 0 1px var(--fd-color-primary)'}" ${off ? 'aria-disabled="true"' : ''}><div style="display:flex;gap:8px;align-items:center;font-weight:700">${I(i)}${t}</div>${off ? '<small style="display:block;margin-top:6px;font-size:12.5px;color:var(--fd-color-text-muted)">Désactivé par un admin (Sécurité &gt; Captures HTML)</small>' : ''}</div>`).join('')}</div></section>`;
+  const extOff = `<section class="s49-card" style="max-width:380px"><h3 style="font-size:15px">${I('code')}Capture HTML</h3><div class="s49-note">${I('lock')}<span><b>Non autorisée sur ce site</b>crm.partenaire.example n’est pas dans la liste des domaines de votre espace. Utilisez la capture d’écran, ou demandez à un admin.</span></div><div style="display:flex;gap:8px"><button class="fd-btn fd-btn--primary" type="button">${I('img')}Capture d’écran</button><button class="fd-btn" type="button" aria-disabled="true" style="opacity:.6">${I('code')}Capture HTML</button></div></section>`;
+  document.querySelector('[data-slot="off"]').innerHTML = lab('App : types HTML visibles mais désactivés, avec la raison', typeOff) + lab('Extension : domaine hors liste', extOff);
+  document.querySelector('[data-slot="dark"]').innerHTML = `<div style="flex:1;min-width:620px"><div data-theme="dark" style="padding:20px;border-radius:20px;background:var(--fd-color-bg)">${setting('dom')}</div></div><div class="s49-ph">${rep(true)}${NOTE}</div>`;
+</script>
+</body>
+</html>
