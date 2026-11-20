@@ -1708,8 +1708,6 @@
     "blurModal": {
       "title": "Flouter des zones",
       "apply": "Appliquer le flou",
-      "zones_one": "{{count}} zone",
-      "zones_other": "{{count}} zones",
       "none": "Dessinez une zone au glisser sur la capture.",
       "remove": "Retirer",
       "removeN": "Retirer la zone {{n}}",
@@ -1717,7 +1715,9 @@
       "zoomOut": "Réduire",
       "discardTitle": "Abandonner les zones modifiées ?",
       "discardBody": "Les zones dessinées ou modifiées depuis l’ouverture seront perdues.",
-      "discard": "Abandonner"
+      "discard": "Abandonner",
+      "zones": "Zones · {{count}}",
+      "noZone": "Aucune zone"
     },
     "notPublished": "Non publié",
     "stepMove": {

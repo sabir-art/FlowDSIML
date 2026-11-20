@@ -338,17 +338,14 @@
   border-radius: 16px;
 }
 .fd-empty__icon {
+  /* L48-B (B4), L48-F (F4), L48-E (E6) : icône seule, 32 à 40 px, text-muted, sans pastille */
   display: inline-grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 20px;
-  background: var(--fd-color-primary-soft);
-  color: var(--fd-color-primary);
+  color: var(--fd-color-text-muted);
 }
 .fd-empty__icon svg {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
 }
 .fd-empty__text {
   display: flex;
@@ -374,31 +371,23 @@
   gap: 8px;
   margin-top: 4px;
 }
-.fd-empty--search .fd-empty__icon {
-  background: var(--fd-color-surface-sunken);
-  color: var(--fd-color-text-muted);
-}
 .fd-empty--compact {
   flex-direction: row;
   align-items: center;
   gap: 16px;
   padding: 20px;
   text-align: left;
+  /* L48-F (F3), L48-E (E6) : dans une carte ou un panneau, ni cadre ni fond */
   background: transparent;
-  border-style: dashed;
-  border-radius: 12px;
+  border: 0;
+  border-radius: 0;
 }
 .fd-empty--compact .fd-empty__icon {
   flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--fd-color-surface-sunken);
-  color: var(--fd-color-text-muted);
 }
 .fd-empty--compact .fd-empty__icon svg {
-  width: 20px;
-  height: 20px;
+  width: 32px;
+  height: 32px;
 }
 .fd-empty--compact .fd-empty__text {
   flex: 1;

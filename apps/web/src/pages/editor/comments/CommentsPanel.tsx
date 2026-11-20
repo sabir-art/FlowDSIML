@@ -127,6 +127,7 @@ export function CommentsPanel({
   const { current } = useWorkspace();
   const [dialog, ask] = useConfirm();
   const mobile = variant === 'mobile';
+  const side = variant === 'side';
   const isAdmin = current?.role === 'owner' || current?.role === 'admin';
   const isEditor = isAdmin || current?.role === 'editor';
 
@@ -327,17 +328,27 @@ export function CommentsPanel({
       {dialog}
       <div className="cm-card">
         <header className="cm-head">
-          <span className="fd-icon-chip" aria-hidden="true">
-            <MessageSquare />
-          </span>
+          {!side && (
+            <span className="fd-icon-chip" aria-hidden="true">
+              <MessageSquare />
+            </span>
+          )}
           <div className="cm-head__titles">
             <div className="cm-head__line">
-              <h2 id="cm-title" className="fd-card__title">
+              {/* L48-E (E5) : dans le panneau d'outil, l'en-tête « Commentaires » suffit ; titre gardé pour les lecteurs d'écran */}
+              <h2 id="cm-title" className={side ? 'sr-only' : 'fd-card__title'}>
                 {t('editor.comments.titleStep', { n: stepIndex + 1 })}
               </h2>
               {badge}
             </div>
-            {privateNote}
+            {side ? (
+              <p className="cm-sub">
+                {t('editor.stepN', { n: stepIndex + 1 })} ·{' '}
+                <span id="cm-private">{t('editor.comments.private')}</span>
+              </p>
+            ) : (
+              privateNote
+            )}
             {!api.online && (
               <span className="cm-offline" role="status">
                 <WifiOff aria-hidden="true" />

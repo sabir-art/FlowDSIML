@@ -112,9 +112,12 @@ export function BlurModal({
             >
               <Minus aria-hidden="true" />
             </button>
-            <span className="blurm-zoom__v" aria-live="polite">
-              {zoom === 'fit' ? t('editor.zoomFit') : `${Math.round(zoom * 100)} %`}
-            </span>
+            {/* E2 : le pourcentage entre − et +, « Ajuster » une seule fois (après) */}
+            {zoom !== 'fit' && (
+              <span className="blurm-zoom__v" aria-live="polite">
+                {`${Math.round(zoom * 100)} %`}
+              </span>
+            )}
             <button
               type="button"
               className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
@@ -123,7 +126,12 @@ export function BlurModal({
             >
               <Plus aria-hidden="true" />
             </button>
-            <button type="button" className="fd-btn fd-btn--ghost fd-btn--sm" onClick={() => setZoom('fit')}>
+            <button
+              type="button"
+              className="fd-btn fd-btn--ghost fd-btn--sm"
+              aria-pressed={zoom === 'fit'}
+              onClick={() => setZoom('fit')}
+            >
               {t('editor.zoomFit')}
             </button>
           </div>
@@ -142,6 +150,7 @@ export function BlurModal({
                   setSelection={setSelection}
                   readOnly={readOnly}
                   hideFormChip
+                  hideHotspots
                 />
               </div>
             </div>
@@ -149,8 +158,11 @@ export function BlurModal({
           {!readOnly && <p className="muted blurm-hint">{t('editor.hint_blur')}</p>}
         </div>
         <aside className="blurm-side fd-dense" aria-labelledby="blurm-list">
-          <h3 id="blurm-list" className="sec-title">
-            {t('editor.blurModal.zones', { count: masks.length })}
+          {/* E3 : casse normale, 13 px 600 */}
+          <h3 id="blurm-list" className="blurm-side__title">
+            {masks.length
+              ? t('editor.blurModal.zones', { count: masks.length })
+              : t('editor.blurModal.noZone')}
           </h3>
           {masks.length === 0 && <p className="help">{t('editor.blurModal.none')}</p>}
           <ul className="blurm-zones">

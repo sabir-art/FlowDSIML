@@ -96,11 +96,40 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'outil gardé (fd.editor.tool)',
   );
 
+  {
+    const act = rail.locator('.ed-rail__btn.is-active').first();
+    await p.mouse.click(5, 5);
+    const sh = await act.evaluate(
+      (el) => getComputedStyle(el).boxShadow + '|' + getComputedStyle(el).outlineStyle,
+    );
+    ok(sh === 'none|none', `E1 : outil actif sans contour hors focus clavier (${sh})`);
+  }
+
   // ===== Flou en modale =====
   await rail.locator('[data-tool="blur"]').click();
   const dlg = p.getByRole('dialog', { name: 'Flouter des zones' });
   await dlg.waitFor();
   const before = JSON.stringify(state.tables.steps.find((s) => s.id === 's1').blurs ?? null);
+  ok(
+    (await dlg.getByRole('button', { name: 'Ajuster' }).count()) === 1 &&
+      !(await dlg.locator('.blurm-zoom').innerText()).replace('Ajuster', '').includes('Ajuster'),
+    'E2 : « Ajuster » une seule fois',
+  );
+  ok(
+    (await dlg.locator('.canvas-hotspot').count()) === 0,
+    'E4 : pas de point d’intérêt dans la fenêtre du flou',
+  );
+  {
+    const h = dlg.locator('#blurm-list');
+    const st = await h.evaluate((el) => {
+      const c = getComputedStyle(el);
+      return { tt: c.textTransform, fs: c.fontSize, fw: c.fontWeight };
+    });
+    ok(
+      (await h.innerText()) === 'Aucune zone' && st.tt === 'none' && st.fs === '13px' && st.fw === '600',
+      `E3 : « Aucune zone » en casse normale, 13 px 600 (${st.tt} ${st.fs} ${st.fw})`,
+    );
+  }
   const draw = async (x, y) => {
     const box = await dlg.locator('.canvas-frame').boundingBox();
     await p.mouse.move(box.x + box.width * x, box.y + box.height * y);
@@ -111,6 +140,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await draw(0.1, 0.1);
   await draw(0.78, 0.04);
   ok((await dlg.locator('.blurm-zones > li').count()) === 2, '2 zones dessinées');
+  ok((await dlg.locator('#blurm-list').innerText()) === 'Zones · 2', 'E3 : « Zones · 2 »');
   await dlg.getByRole('button', { name: 'Annuler' }).first().click();
   const confirm = p.getByRole('dialog', { name: 'Abandonner les zones modifiées ?' });
   await confirm.waitFor();
@@ -138,6 +168,24 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(Math.round((await p.locator('.ed-tool').boundingBox()).width) === 400, 'panneau Commentaires de 400 px');
   ok(Math.abs((await p.locator('.stage').boundingBox()).height - h0) < 2, 'le canevas garde sa hauteur');
   ok((await p.locator('.ed-tool .fd-composer').count()) === 1, 'composeur dans le panneau');
+  ok(
+    (await p.locator('.ed-tool .cm .fd-card__title, .ed-tool .cm .fd-icon-chip').count()) === 0 &&
+      /^Étape 1 · Interne à l’équipe/.test(await p.locator('.ed-tool .cm-sub').innerText()),
+    'E5 : en-tête seul, « Étape 1 · Interne à l’équipe… » dessous',
+  );
+  {
+    const empty = p.locator('.ed-tool .fd-empty');
+    if (await empty.count()) {
+      const st = await empty.evaluate((el) => ({
+        b: getComputedStyle(el).borderTopStyle,
+        bg: getComputedStyle(el.querySelector('.fd-empty__icon')).backgroundColor,
+      }));
+      ok(
+        st.b === 'none' && st.bg === 'rgba(0, 0, 0, 0)',
+        `E6 : état vide sans cadre ni pastille (${st.b} ${st.bg})`,
+      );
+    }
+  }
 
   // ===== En-tête =====
   ok(

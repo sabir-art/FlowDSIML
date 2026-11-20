@@ -54,6 +54,8 @@ interface Props {
   onEditForm?: () => void;
   /** EDT-08 : pastille masquée quand l'aperçu du formulaire est affiché. */
   hideFormChip?: boolean;
+  /** L48-E (E4) : fenêtre du flou, sans points d'intérêt ni leur cadre (seulement l'écran et les zones). */
+  hideHotspots?: boolean;
   /** L18-02 : variante B affichée sur le canevas (texte de la bulle testée remplacé). */
   abPreview?: { hotspotId: string; title: string; body: string; cta: unknown } | null;
 }
@@ -82,6 +84,7 @@ export function Canvas({
   readOnly,
   onEditForm,
   hideFormChip,
+  hideHotspots = false,
   abPreview,
 }: Props) {
   const { t } = useTranslation();
@@ -90,7 +93,7 @@ export function Canvas({
   const vp = varPreview(varCatalog, editor.variables, usePreviewMode());
   const frame = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
-  const hotspots = editor.hotspots.filter((h) => h.step_id === step.id);
+  const hotspots = hideHotspots ? [] : editor.hotspots.filter((h) => h.step_id === step.id);
   const blurs = asMasks(step.blurs);
   const zoom = asZoom(step.zoom);
   // Champs du zoom au-delà de x, y, scale (transition, garder) conservés à chaque modification

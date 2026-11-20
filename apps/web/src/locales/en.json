@@ -1708,8 +1708,6 @@
     "blurModal": {
       "title": "Blur areas",
       "apply": "Apply blur",
-      "zones_one": "{{count}} area",
-      "zones_other": "{{count}} areas",
       "none": "Drag on the screenshot to draw an area.",
       "remove": "Remove",
       "removeN": "Remove area {{n}}",
@@ -1717,7 +1715,9 @@
       "zoomOut": "Zoom out",
       "discardTitle": "Discard changed areas?",
       "discardBody": "Areas drawn or changed since opening will be lost.",
-      "discard": "Discard"
+      "discard": "Discard",
+      "zones": "Zones · {{count}}",
+      "noZone": "No zone"
     },
     "notPublished": "Not published",
     "stepMove": {
