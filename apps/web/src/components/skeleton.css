@@ -91,8 +91,11 @@
   margin: 0;
   font-size: var(--fd-text-h3-size, 20px);
 }
-.load-error__title:focus:not(:focus-visible) {
+/* Focus donné par programme (tabindex=-1, annonce) : pas d'anneau, comme le titre de l'onboarding */
+.load-error__title[tabindex='-1']:focus,
+.load-error__title[tabindex='-1']:focus-visible {
   outline: none;
+  box-shadow: none;
 }
 .load-error p {
   margin: 0;
@@ -129,6 +132,8 @@
   margin-top: 8px;
   border-radius: var(--fd-radius-md, 8px);
 }
-.canvas-frame--sk {
+.mk .canvas-frame.canvas-frame--sk {
   display: flex;
+  /* Fond noir du canevas réel retiré : le bloc qui pulse garde la teinte des autres blocs */
+  background: var(--fd-color-surface);
 }
