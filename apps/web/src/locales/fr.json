@@ -4435,5 +4435,19 @@
       "quota_captions": "Quota de sous-titres automatiques atteint pour ce mois ({{quota}} s).",
       "over": "Il reste {{left}} s ce mois-ci, la demande en demande environ {{need}} s."
     }
+  },
+  "loading": {
+    "demos": "Chargement des démos…",
+    "demosDone": "Démos chargées.",
+    "editor": "Chargement de l’éditeur…",
+    "editorDone": "Éditeur prêt.",
+    "slow": "Le chargement prend plus de temps que prévu.",
+    "retry": "Réessayer",
+    "demosError": "Impossible de charger les démos",
+    "editorError": "Impossible de charger l’éditeur",
+    "errorBody": "Vérifiez votre connexion, puis réessayez. Vos modifications enregistrées ne sont pas perdues.",
+    "unavailableTitle": "Cette démo n’est pas disponible",
+    "unavailableBody": "Elle a peut-être été supprimée, ou vous n’y avez plus accès.",
+    "backToDemos": "Retour aux démos"
   }
 }

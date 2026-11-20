@@ -39,7 +39,8 @@ import { check, useAction } from '../../lib/useAction';
 import { formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
-import { Loading } from '../../components/guards';
+import { LoadError, LoadStatus, SlowLine, useMainBusy, useSkeleton } from '../../components/Skeleton';
+import { DemosSkeleton, KpiSkeletonRow } from './DemosSkeleton';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
@@ -76,7 +77,9 @@ export function DemosPage() {
   const { current, can } = useWorkspace();
   const ws = current!;
   const [demos, setDemos] = useState<Demo[] | null>(null);
-  const onb = useOnboarding();
+  const onb = useOnboarding({ deferred: true });
+  // L32 : erreur de la requête de démarrage (carte d'erreur, « Réessayer »)
+  const [loadError, setLoadError] = useState(false);
   const rules = useShareRules(ws.id);
   // L27-07 : démos bloquées par les règles (mot de passe exigé, aucun défini) : « Accès à régler »
   const [lockedIds, setLockedIds] = useState<Set<string>>(new Set());
@@ -133,7 +136,15 @@ export function DemosPage() {
 
   const load = useCallback(async () => {
     // L32 : une seule lecture (dashboard_home) pour la liste, les dossiers, les indicateurs et les cartes
-    const h = await loadHome({ id: ws.id, plan_code: ws.plan_code });
+    let h;
+    try {
+      h = await loadHome({ id: ws.id, plan_code: ws.plan_code });
+    } catch {
+      setLoadError(true);
+      return;
+    }
+    setLoadError(false);
+    onb.provide(h.onboarding);
     setEnterprise(h.shareRulesPlan);
     setMemberCount(h.memberCount);
     setLockedIds(new Set(h.locked));
@@ -168,12 +179,38 @@ export function DemosPage() {
       const byPath = new Map((signed.data ?? []).map((x) => [x.path, x.signedUrl]));
       setCovers(Object.fromEntries(first.map(([demoId, path]) => [demoId, byPath.get(path) ?? ''])));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- onb.provide est stable (useCallback)
   }, [ws.id, ws.plan_code]);
 
   useEffect(() => {
     setDemos(null);
     void load();
   }, [load]);
+  const sk = useSkeleton(!demos || !onb.ready);
+  // L32 : hauteur de la prise en main à la dernière visite (place réservée dans le squelette)
+  const onbKey = `fd.onb.h.${ws.id}`;
+  const onbHeight = useMemo(() => {
+    try {
+      return Number(localStorage.getItem(onbKey)) || 0;
+    } catch {
+      return 0;
+    }
+  }, [onbKey]);
+  useEffect(() => {
+    if (sk.phase !== 'content') return;
+    const h = Math.round(document.querySelector('.onb-card')?.getBoundingClientRect().height ?? 0);
+    try {
+      localStorage.setItem(onbKey, String(h));
+    } catch {
+      /* stockage indisponible : pas de place réservée */
+    }
+  }, [sk.phase, onbKey, onb.state]);
+  useMainBusy((!demos || !onb.ready || sk.phase !== 'content') && !loadError);
+  const retry = () => {
+    setLoadError(false);
+    setDemos(null);
+    void load();
+  };
 
   const visible = useMemo(() => {
     const matchTags = (demoId: string) => {
@@ -254,7 +291,54 @@ export function DemosPage() {
     });
   }
 
-  if (!demos || !onb.ready) return <Loading />;
+  // L32 : squelette (même géométrie que la page), erreur et délais (docs/ux/specs/l32-squelettes.md)
+  function pageHead(loading: boolean) {
+    return (
+      <header className="page-head page-head--refonte">
+        <div className="page-head__titles">
+          <h1>{t('demos.title')}</h1>
+          <p className="page-head__sub">{t('demos.subtitle')}</p>
+        </div>
+        <div className="page-head__actions">
+          <NotificationBell />
+          <label className="search-pill">
+            <Search aria-hidden="true" />
+            <input
+              className="fd-input"
+              type="search"
+              placeholder={t('demos.search')}
+              aria-label={t('demos.search')}
+              value={q}
+              aria-disabled={loading || undefined}
+              readOnly={loading}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </label>
+          {editable && (
+            <Button variant="primary" size="lg" icon={<Plus />} onClick={openNew}>
+              {t('demos.new')}
+            </Button>
+          )}
+        </div>
+      </header>
+    );
+  }
+  if (loadError || (sk.timedOut && !demos))
+    return (
+      <div className="stack page-wide">
+        {pageHead(true)}
+        <LoadError title={t('loading.demosError')} body={t('loading.errorBody')} onRetry={retry} />
+      </div>
+    );
+  if (!demos || !onb.ready || sk.phase !== 'content')
+    return (
+      <div className="stack page-wide">
+        <LoadStatus loading busy={t('loading.demos')} done="" longLoad={false} />
+        {pageHead(true)}
+        {sk.phase === 'skeleton' && <DemosSkeleton onboardingHeight={onbHeight} />}
+        {sk.slow && <SlowLine onRetry={retry} />}
+      </div>
+    );
 
   /** DSH-10 : publiée puis modifiée (changements non publiés). */
   const isModified = (d: Demo) =>
@@ -357,44 +441,19 @@ export function DemosPage() {
         {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
         {distributing && <DistributeDialog demoId={distributing} onClose={() => setDistributing(null)} />}
       </Suspense>
-      <header className="page-head page-head--refonte">
-        <div className="page-head__titles">
-          <h1>{t('demos.title')}</h1>
-          <p className="page-head__sub">{t('demos.subtitle')}</p>
-        </div>
-        <div className="page-head__actions">
-          <NotificationBell />
-          <label className="search-pill">
-            <Search aria-hidden="true" />
-            <input
-              className="fd-input"
-              type="search"
-              placeholder={t('demos.search')}
-              aria-label={t('demos.search')}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
-          </label>
-          {editable && (
-            <Button variant="primary" size="lg" icon={<Plus />} onClick={openNew}>
-              {t('demos.new')}
-            </Button>
-          )}
-        </div>
-      </header>
+      <LoadStatus loading={false} longLoad={sk.longLoad} busy="" done={t('loading.demosDone')} />
+      {pageHead(false)}
       {error && <Alert kind="error">{error}</Alert>}
 
-      {/* L26-01 : « Prise en main de votre espace » (remplace « Premiers pas ») */}
-      <OnboardingCard
-        onb={onb}
-        onCapture={openNew}
-        latestDemoId={demos[0]?.id ?? null}
-        publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
-      />
-
       {/* REV-05 : pas d'indicateurs à zéro tant qu'aucune démo n'est publiée */}
-      {kpis && !anyPublished && demos.length > 0 && (
-        <p className="fd-muted stats-later">{t('demos.statsLater')}</p>
+      {/* L32 : même hauteur que la rangée d'indicateurs (gabarit invisible), aucun décalage après le squelette */}
+      {kpis && !anyPublished && (
+        <div className="stats-later-row">
+          <KpiSkeletonRow hidden />
+          <div className="fd-card stats-later">
+            <p className="fd-muted">{t('demos.statsLater')}</p>
+          </div>
+        </div>
       )}
       {kpis && anyPublished && (
         <section className="stat-row" aria-label={t('analytics.kpis', { count: 30 })}>
@@ -451,6 +510,14 @@ export function DemosPage() {
           />
         </section>
       )}
+
+      {/* L26-01 : « Prise en main de votre espace », après les indicateurs (L32 §2) */}
+      <OnboardingCard
+        onb={onb}
+        onCapture={openNew}
+        latestDemoId={demos[0]?.id ?? null}
+        publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
+      />
 
       <section aria-labelledby="demos-list-title" className="demos-section">
         <div className="filter-bar">

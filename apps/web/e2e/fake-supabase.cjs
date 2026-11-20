@@ -643,6 +643,9 @@ async function install(page, state = seed()) {
       switch (fn) {
         // L32 : lectures de démarrage regroupées (mêmes données que les lectures séparées)
         case 'dashboard_home': {
+          // L32 : délai simulé (squelettes) et panne simulée (carte d'erreur)
+          if (state.homeDelay) await new Promise((res) => setTimeout(res, state.homeDelay));
+          if (state.homeFail) return json(route, 503, { code: 'PGRST000', message: 'unavailable' });
           const ws = a.p_ws;
           const demos = t.demos
             .filter((d) => d.workspace_id === ws && !d.deleted_at)
@@ -683,6 +686,8 @@ async function install(page, state = seed()) {
           });
         }
         case 'editor_load': {
+          if (state.homeDelay) await new Promise((res) => setTimeout(res, state.homeDelay));
+          if (state.homeFail) return json(route, 503, { code: 'PGRST000', message: 'unavailable' });
           const d = t.demos.find((x) => x.id === a.p_demo);
           if (!d) return json(route, 200, null);
           const of = (table, ...keys) =>

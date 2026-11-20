@@ -910,8 +910,23 @@
 .demos-empty p {
   margin: 0;
 }
-.stats-later {
-  margin: 0 0 8px;
+/* REV-05 + L32 : message à la place des indicateurs, à la hauteur exacte de leur rangée */
+.stats-later-row {
+  position: relative;
+}
+.stat-row--ghost {
+  visibility: hidden;
+}
+.stats-later-row .stats-later {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  text-align: center;
+}
+.stats-later p {
+  margin: 0;
 }
 /* REV-08 : le quiz du modèle, après les étapes */
 .tpl-quiz {

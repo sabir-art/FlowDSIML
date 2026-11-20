@@ -5,6 +5,7 @@ import type { Json, TablesUpdate } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
 import type { ChapterRow, DemoRow, FormRow, HotspotRow, QuestionRow, StepRow, VariableRow } from './types';
 import { asVideo } from './video/videoModel';
+import { isMissingFunction } from '../demos/home';
 
 type Table = 'demos' | 'steps' | 'hotspots' | 'chapters' | 'forms' | 'variables' | 'quiz_questions';
 type Patch = Record<string, unknown>;
@@ -57,6 +58,8 @@ async function loadSeparately(demoId: string): Promise<EditorData | null> {
 export function useDemoEditor(demoId: string) {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // L32 : erreur de la requête de démarrage (carte d'erreur et « Réessayer »)
+  const [loadError, setLoadError] = useState(false);
   const [demo, setDemo] = useState<DemoRow | null>(null);
   const [steps, setSteps] = useState<StepRow[]>([]);
   const [hotspots, setHotspots] = useState<HotspotRow[]>([]);
@@ -153,11 +156,18 @@ export function useDemoEditor(demoId: string) {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
+    setNotFound(false);
     // L32 : une seule lecture (editor_load), sinon les lectures séparées (migration pas encore appliquée)
     const one = await supabase.rpc('editor_load', { p_demo: demoId });
     let data: EditorData | null;
     if (!one.error) data = (one.data as unknown as EditorData | null) ?? null;
-    else data = await loadSeparately(demoId);
+    else if (isMissingFunction(one.error)) data = await loadSeparately(demoId);
+    else {
+      setLoadError(true);
+      setLoading(false);
+      return;
+    }
     if (!data) {
       setNotFound(true);
       setLoading(false);
@@ -692,6 +702,7 @@ export function useDemoEditor(demoId: string) {
   return {
     loading,
     notFound,
+    loadError,
     demo,
     steps,
     hotspots,

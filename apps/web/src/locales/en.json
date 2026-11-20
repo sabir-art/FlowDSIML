@@ -4435,5 +4435,19 @@
       "quota_captions": "Automatic captions quota reached for this month ({{quota}} s).",
       "over": "{{left}} s left this month; this request needs about {{need}} s."
     }
+  },
+  "loading": {
+    "demos": "Loading demos…",
+    "demosDone": "Demos loaded.",
+    "editor": "Loading the editor…",
+    "editorDone": "Editor ready.",
+    "slow": "Loading is taking longer than expected.",
+    "retry": "Retry",
+    "demosError": "Couldn’t load demos",
+    "editorError": "Couldn’t load the editor",
+    "errorBody": "Check your connection, then try again. Your saved changes are not lost.",
+    "unavailableTitle": "This demo isn’t available",
+    "unavailableBody": "It may have been deleted, or you no longer have access.",
+    "backToDemos": "Back to demos"
   }
 }

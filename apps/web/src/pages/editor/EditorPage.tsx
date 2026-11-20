@@ -40,7 +40,7 @@ import { CoBanner, PresenceStack, RemoteCursors } from './presence/PresenceUI';
 import { useShowCursors } from './presence/showCursors';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Alert, Select } from '@flowdsiml/ui';
+import { Select } from '@flowdsiml/ui';
 import { PLAN_DEFAULTS, type PlanCode } from '@flowdsiml/core';
 import { errorMessage } from '../../lib/errors';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -78,6 +78,8 @@ import './editor.css';
 import { Menu } from '../../components/Menu';
 import { SaveTemplateDialog } from './SaveTemplateDialog';
 import { HelpButton } from '../../help/HelpButton';
+import { LoadError, LoadStatus, SlowLine, useSkeleton } from '../../components/Skeleton';
+import { EditorSkeleton, storeEditorGeometry } from './EditorSkeleton';
 import { useHelp } from '../../help/HelpProvider';
 import { supabase } from '../../lib/supabase';
 import { DatasetDialog } from './data/DatasetDialog';
@@ -385,6 +387,13 @@ export function EditorPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [editor, selection, readOnly, ws, step?.kind]);
 
+  // L32 : squelette (même géométrie), erreur, délais (docs/ux/specs/l32-squelettes.md §3-4)
+  const sk = useSkeleton(editor.loading);
+  const ready = sk.phase === 'content' && !!editor.demo && !narrow;
+  useEffect(() => {
+    if (ready) storeEditorGeometry(demoId);
+  }, [ready, demoId]);
+
   if (narrow) {
     // Écran étroit : l'éditeur reste indisponible, mais on lit et on répond aux commentaires (commentaires.md §5)
     if (editor.loading) return <Loading />;
@@ -439,13 +448,41 @@ export function EditorPage() {
       </main>
     );
   }
-  if (editor.loading) return <Loading />;
+  const backToDemos = (primary = false) => (
+    <Link to="/" className={`fd-btn${primary ? ' fd-btn--primary' : ''}`}>
+      {t('loading.backToDemos')}
+    </Link>
+  );
+  if ((editor.loading || sk.phase !== 'content') && !(sk.timedOut && editor.loading))
+    return (
+      <EditorSkeleton
+        demoId={demoId}
+        showBlocks={sk.phase === 'skeleton'}
+        status={<LoadStatus loading busy={t('loading.editor')} done="" longLoad={false} />}
+        after={sk.slow && <SlowLine onRetry={() => void editor.reload()} />}
+      />
+    );
+  if (editor.loadError || editor.loading)
+    return (
+      <EditorSkeleton demoId={demoId} showBlocks={false}>
+        <LoadError
+          title={t('loading.editorError')}
+          body={t('loading.errorBody')}
+          onRetry={() => void editor.reload()}
+          extra={backToDemos()}
+        />
+      </EditorSkeleton>
+    );
+  // Démo introuvable ou accès retiré : même message (ne jamais révéler si elle existe)
   if (editor.notFound || !editor.demo)
     return (
-      <div className="center">
-        <Alert kind="error">{t('editor.notFound')}</Alert>
-        <Link to="/">{t('common.back')}</Link>
-      </div>
+      <EditorSkeleton demoId={demoId} showBlocks={false}>
+        <LoadError
+          title={t('loading.unavailableTitle')}
+          body={t('loading.unavailableBody')}
+          extra={backToDemos(true)}
+        />
+      </EditorSkeleton>
     );
 
   const plan = PLAN_DEFAULTS[(ws?.plan_code ?? 'free') as PlanCode] ?? PLAN_DEFAULTS.free;
@@ -477,7 +514,8 @@ export function EditorPage() {
   );
 
   return (
-    <main className="mk ed" id="main">
+    <main className="mk ed" id="main" aria-busy="false">
+      <LoadStatus loading={false} longLoad={sk.longLoad} busy="" done={t('loading.editorDone')} />
       {/* L25-09 : modale « Jeu de données » (Réglages ou graphique) */}
       <DatasetDialog editor={editor} readOnly={readOnly} />
       <Suspense fallback={null}>

@@ -30,7 +30,7 @@ interface State {
  * État de la prise en main, chargé par la page Démos avant son premier affichage (la carte arrive en
  * même temps que la liste : aucun saut de mise en page).
  */
-export function useOnboarding() {
+export function useOnboarding({ deferred = false }: { deferred?: boolean } = {}) {
   const { current, can } = useWorkspace();
   const wsId = current?.id;
   const editor = can('demo.edit');
@@ -43,13 +43,24 @@ export function useOnboarding() {
       .then(({ data }) => setState(data as State | null))
       .then(() => setReady(true));
   }, [wsId, editor]);
-  useEffect(load, [load]);
+  // L32 : la page Démos fournit l'état reçu avec sa requête de démarrage (deferred), sans requête à part
+  useEffect(() => {
+    if (!deferred) load();
+  }, [load, deferred]);
+  const provide = useCallback(
+    (data: unknown) => {
+      if (data === undefined) return load();
+      setState((data as State | null) ?? null);
+      setReady(true);
+    },
+    [load],
+  );
   // « Reprendre la prise en main » depuis l'aide
   useEffect(() => {
     addEventListener('fd:onboarding', load);
     return () => removeEventListener('fd:onboarding', load);
   }, [load]);
-  return { state, setState, ready };
+  return { state, setState, ready, provide };
 }
 export type Onboarding = ReturnType<typeof useOnboarding>;
 

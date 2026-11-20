@@ -18,14 +18,22 @@ export interface HomeData {
   covers: Record<string, string>;
   shareRulesPlan: boolean;
   memberCount: number;
+  /** État de la prise en main (éditeurs et plus), comme workspace_onboarding ; absent en repli. */
+  onboarding?: unknown;
 }
 
 /** Une seule lecture (dashboard_home) ; repli sur les lectures séparées si la migration L32 manque. */
 export async function loadHome(ws: { id: string; plan_code: string }): Promise<HomeData> {
   const one = await supabase.rpc('dashboard_home', { p_ws: ws.id });
   if (!one.error && one.data) return one.data as unknown as HomeData;
+  // Repli seulement si la fonction n'existe pas encore ; toute autre erreur va à l'écran d'erreur (L32 §4)
+  if (one.error && !isMissingFunction(one.error)) throw one.error;
   return loadSeparately(ws);
 }
+
+/** PostgREST : fonction absente du schéma (migration L32 pas encore appliquée). */
+export const isMissingFunction = (e: { code?: string; message?: string }) =>
+  e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message ?? '');
 
 async function loadSeparately(ws: { id: string; plan_code: string }): Promise<HomeData> {
   const now = Date.now();

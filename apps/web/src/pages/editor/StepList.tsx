@@ -314,6 +314,8 @@ export function StepList({
                         <img
                           src={url}
                           alt=""
+                          loading="lazy"
+                          decoding="async"
                           style={cropImageStyle(asCrop((s.options as { crop?: unknown } | null)?.crop))}
                         />
                         {(() => {

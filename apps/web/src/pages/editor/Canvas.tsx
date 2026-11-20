@@ -425,6 +425,8 @@ export function Canvas({
         <img
           src={url}
           alt={step.title || t('editor.untitled')}
+          // L32 : image de l'étape affichée en priorité haute (vignettes du rail en différé)
+          fetchPriority="high"
           draggable={false}
           style={cropImageStyle(crop)}
         />
