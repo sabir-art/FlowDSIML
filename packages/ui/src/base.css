@@ -216,11 +216,11 @@ a {
 .fd-textarea:hover {
   border-color: var(--fd-color-text-subtle);
 }
+/* L50 X2 : un seul indicateur de focus, le halo (pas de bordure primary en plus) */
 .fd-input:focus,
 .fd-select:focus,
 .fd-textarea:focus {
   outline: none;
-  border-color: var(--fd-color-primary);
   box-shadow: var(--fd-shadow-focus);
 }
 .fd-input::placeholder,

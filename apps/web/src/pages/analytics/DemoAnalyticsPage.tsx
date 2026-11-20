@@ -157,12 +157,6 @@ export function DemoAnalyticsPage() {
           value: formatNumber(data.leads),
           trend: prev ? countTrend(data.leads, prev.leads) : none,
         },
-        {
-          key: 'cta',
-          label: t('kpi.cta'),
-          value: formatNumber(data.ctaClicks),
-          trend: prev ? countTrend(data.ctaClicks, prev.ctaClicks) : none,
-        },
       ]
     : [];
   const pick = (d: Parameters<typeof dayValue>[0]) => dayValue(d, metric);

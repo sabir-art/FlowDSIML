@@ -32,7 +32,7 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
         () => true,
         () => false,
       );
-  ok((await tabs.count()) === 5, 'démo : 5 indicateurs en onglets');
+  ok((await tabs.count()) === 4, 'démo : 4 indicateurs en onglets (L47-01)');
   ok((await tabs.first().locator('.kpi-tab__v').textContent()) === '120', 'onglet Vues : 120');
   ok((await tabs.first().getAttribute('aria-selected')) === 'true', 'Vues actif par défaut');
   ok(
@@ -80,21 +80,19 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
     'taux : courbe en %',
   );
   await page.keyboard.press('End');
-  ok(await selected(4), 'Fin : dernier indicateur');
+  ok(await selected(3), 'Fin : dernier indicateur');
   await page.keyboard.press('ArrowRight');
   ok(await selected(0), 'le parcours boucle');
   await page.keyboard.press('End');
-  await selected(4);
+  await selected(3);
   await page.waitForTimeout(100);
   ok(
-    (await page.evaluate(() => document.activeElement?.textContent)).startsWith(
-      'Clics sur le bouton d’action',
-    ),
-    'focus suit l’onglet (« Clics sur le bouton d’action »)',
+    (await page.evaluate(() => document.activeElement?.textContent)).startsWith('Leads'),
+    'focus suit l’onglet (« Leads »)',
   );
   await page.reload();
   await page.waitForSelector('.kpi-tab');
-  ok(await selected(4), 'rechargement : indicateur gardé');
+  ok(await selected(3), 'rechargement : indicateur gardé');
   await page.waitForSelector('text=prospect@globex.example', { timeout: 3000 }).catch(() => null);
   ok((await page.locator('text=prospect@globex.example').count()) === 1, 'leads de la démo listés');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/analytics-demo.png`, fullPage: true });
@@ -107,12 +105,15 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   // Analytics du workspace (ANA-01) : 6 KPI (L26-06 : visiteurs récurrents), période, filtre par démo, onglets
   await page.goto(`${APP}/#/analytics`);
   await page.waitForSelector('.mk .kpi-tab');
-  ok((await page.locator('.kpi-tab').count()) === 6, 'analytics du workspace : 6 indicateurs en onglets');
+  ok(
+    (await page.locator('.kpi-tab').count()) === 4,
+    'analytics du workspace : 4 indicateurs en onglets (L47-01)',
+  );
   await page.waitForSelector('.kpi-chart__svg');
   ok((await page.locator('.kpi-chart__svg').count()) === 1, 'courbe de l’indicateur actif');
   const wsTabs = page.locator('.kpi-tabs [role=tab]');
-  await wsTabs.nth(4).click();
-  await selected(4);
+  await wsTabs.nth(3).click();
+  await selected(3);
   ok(/indicateur=leads/.test(page.url()), 'espace : ?indicateur=leads');
   ok((await page.locator('.kpi-chart__t').textContent()) === 'Leads par jour', 'espace : « Leads par jour »');
   const leadsCol = await page.locator('.kpi-tbl tbody tr td.on').allTextContents();
@@ -123,12 +124,9 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
       ),
     `« Par démo » trié par leads (${leadsCol.join(', ')})`,
   );
-  await wsTabs.nth(2).click();
-  await selected(2);
   ok(
-    (await page.locator('.kpi-chart__none').textContent()) ===
-      'Pas encore de données jour par jour pour cet indicateur',
-    'récurrents : pas de série jour par jour, aucune valeur inventée',
+    (await page.locator('.kpi-chart__svg path, .kpi-chart__svg polygon').count()) === 0,
+    'courbe seule, sans aplat sous la courbe',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l47-espace.png`, fullPage: true });
   await wsTabs.nth(0).click();

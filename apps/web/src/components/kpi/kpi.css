@@ -7,7 +7,7 @@
 }
 .kpi-tabs {
   display: grid;
-  grid-template-columns: repeat(var(--kpi-n, 5), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--kpi-n, 4), minmax(0, 1fr));
   /* Libellé, valeur, évolution alignés d'un onglet à l'autre, même si un libellé passe sur 2 lignes */
   grid-template-rows: auto auto 1fr;
   border-bottom: 1px solid var(--fd-color-border);
@@ -85,11 +85,9 @@
 .kpi-trend__v.is-down {
   color: var(--fd-color-trend-down);
 }
+/* « Nouveau » : texte de 13 px, sans pastille (L47-01) */
 .kpi-trend__v.is-new {
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--fd-color-primary-soft);
-  color: var(--fd-color-primary-soft-text);
+  color: var(--fd-color-text);
 }
 .kpi-trend__v.is-none {
   font-weight: 400;
@@ -151,10 +149,6 @@
   stroke: var(--fd-color-text-muted);
   stroke-width: 1.5;
   stroke-dasharray: 5 5;
-}
-.kpi-chart__area {
-  fill: var(--fd-color-primary);
-  opacity: 0.06;
 }
 .kpi-chart__axis {
   position: absolute;

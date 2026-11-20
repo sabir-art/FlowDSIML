@@ -2103,7 +2103,6 @@
     "visitors": "Visiteurs uniques",
     "completion": "Taux de complétion",
     "completionHint": "{{n}} sessions terminées",
-    "ctaClicks": "Clics sur le bouton d’action",
     "leads": "Leads",
     "viewsPerDay": "Vues par jour",
     "noData": "Pas encore de données sur la période.",
@@ -2412,8 +2411,6 @@
       "filtersNotApplied": "Les filtres ne s’appliquent pas encore à cet onglet."
     },
     "ret": {
-      "kpi": "Visiteurs récurrents",
-      "kpiSub": "{{n}} sur {{total}} · revenus au moins une fois",
       "off": "Mesure désactivée",
       "offBody": "La mesure des visites est désactivée : aucun identifiant n'est créé et les identifiants existants sont ignorés.",
       "title": "Nouveaux et récurrents",
@@ -4774,7 +4771,8 @@
     "close": "Fermer",
     "previewWith": "Aperçu avec",
     "previewExamples": "Exemples",
-    "previewFallbacks": "Valeurs de repli"
+    "previewFallbacks": "Valeurs de repli",
+    "pillTip": "Si inconnu : {{fallback}}"
   },
   "kpi": {
     "tablist": "Indicateur affiché",
@@ -4805,20 +4803,17 @@
     "visitorsUnique": "Visiteurs uniques",
     "completion": "Taux de complétion",
     "leads": "Leads",
-    "cta": "Clics sur le bouton d’action",
     "perDay": {
       "views": "Vues par jour",
       "visitors": "Visiteurs par jour",
       "completion": "Taux de complétion par jour",
-      "leads": "Leads par jour",
-      "cta": "Clics sur le bouton d’action par jour"
+      "leads": "Leads par jour"
     },
     "col": {
       "views": "Vues",
       "visitors": "Visiteurs",
       "completion": "Complétion",
-      "leads": "Leads",
-      "cta": "Clics"
+      "leads": "Leads"
     },
     "byDemo": "Par démo",
     "demo": "Démo",
@@ -4833,8 +4828,7 @@
     },
     "seeAnalytics": ", voir dans Analytics",
     "analytics": "Analytics",
-    "shortcuts": "Indicateurs des 30 derniers jours",
-    "perDayReturning": "Visiteurs récurrents par jour"
+    "shortcuts": "Indicateurs des 30 derniers jours"
   },
   "console": {
     "entry": "Console propriétaire",

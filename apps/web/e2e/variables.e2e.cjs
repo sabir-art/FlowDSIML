@@ -46,7 +46,11 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   const txt = await body.innerText();
   ok(!/\{\{|\}\}|\*\*/.test(txt), `champ : ni {{ }} ni ** visibles (« ${txt.trim()} »)`);
   const chip = body.locator('.var-chip').first();
-  ok(/Prénom du visiteur\s*·\s*vous/.test(await chip.innerText()), 'pastille : libellé et repli « · vous »');
+  ok(
+    (await chip.innerText()).trim() === 'Prénom du visiteur',
+    'pastille : le nom seul, sans accolades ni repli (L46-01)',
+  );
+  ok((await chip.getAttribute('data-tip')) === 'Si inconnu : vous', 'repli dans l’infobulle');
   ok(
     (await chip.getAttribute('aria-label')) === 'Variable : Prénom du visiteur, si inconnu : vous',
     'pastille lue « Variable : Prénom du visiteur, si inconnu : vous »',
@@ -127,8 +131,8 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   await p.waitForTimeout(1200);
   ok(/\{\{first_name\|à vous\}\}/.test(h1.body), 'repli réglé sur la pastille : {{first_name|à vous}}');
   ok(
-    /·\s*à vous/.test(await body.locator('.var-chip').first().innerText()),
-    'repli visible dans la pastille',
+    (await body.locator('.var-chip').first().getAttribute('data-tip')) === 'Si inconnu : à vous',
+    'repli dans l’infobulle de la pastille',
   );
   ok(
     (await new AxeBuilder({ page: p }).include('.panel').withTags(TAGS).analyze()).violations.length === 0,

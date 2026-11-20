@@ -6,7 +6,6 @@ import { completionRate, computeFunnel, countTrend, rateTrend, toCsv } from '@fl
 import { MeasureDialog, ReturningCard, VisitBadge, type Returning } from './returning';
 import {
   KPI_KEYS,
-  WS_KPI_KEYS,
   KpiTabs,
   MetricTable,
   TrendChart,
@@ -394,7 +393,7 @@ export function AnalyticsPage() {
             data={data}
             prev={prev}
             series={series}
-            metric={kpiFromParam(params.get('indicateur'), WS_KPI_KEYS)}
+            metric={kpiFromParam(params.get('indicateur'), KPI_KEYS)}
             onMetric={(k) => patchParams({ indicateur: k === 'views' ? null : k })}
             days={days}
             demo={demo}
@@ -525,17 +524,6 @@ function Overview({
       trend: prev ? countTrend(data.visitors, prev.visitors) : none,
     },
     {
-      key: 'returning',
-      label: t('analytics.ret.kpi'),
-      value:
-        !ret || !ret.enabled ? '—' : `${ret.total ? Math.round((ret.visitors / ret.total) * 100) : 0}\u00a0%`,
-      note: !ret
-        ? undefined
-        : !ret.enabled
-          ? t('analytics.ret.off')
-          : t('analytics.ret.kpiSub', { n: formatNumber(ret.visitors), total: formatNumber(ret.total) }),
-    },
-    {
       key: 'completion',
       label: t('kpi.completion'),
       value: `${Math.round(rate * 100)} %`,
@@ -546,12 +534,6 @@ function Overview({
       label: t('kpi.leads'),
       value: formatNumber(data.leads),
       trend: prev ? countTrend(data.leads, prev.leads) : none,
-    },
-    {
-      key: 'cta',
-      label: t('kpi.cta'),
-      value: formatNumber(data.ctaClicks),
-      trend: prev ? countTrend(data.ctaClicks, prev.ctaClicks) : none,
     },
   ];
   const pick = (d: SeriesDay) => dayValue(d, metric);
@@ -612,18 +594,12 @@ function Overview({
     <>
       <KpiTabs items={items} active={metric} onSelect={onMetric} days={days}>
         <TrendChart
-          title={metric === 'returning' ? t('kpi.perDayReturning') : t(`kpi.perDay.${metric}`)}
+          title={t(`kpi.perDay.${metric}`)}
           days={days}
           rate={metric === 'completion'}
           loading={!series}
-          cur={
-            series?.cur && metric !== 'returning' ? alignDays(series.cur.daily, days, series.end, pick) : null
-          }
-          prev={
-            series?.prev && metric !== 'returning'
-              ? alignDays(series.prev.daily, days, series.end - days * 86400_000, pick)
-              : null
-          }
+          cur={series?.cur ? alignDays(series.cur.daily, days, series.end, pick) : null}
+          prev={series?.prev ? alignDays(series.prev.daily, days, series.end - days * 86400_000, pick) : null}
         />
       </KpiTabs>
 

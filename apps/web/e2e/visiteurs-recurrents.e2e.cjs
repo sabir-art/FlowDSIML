@@ -47,27 +47,19 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // ===== L26-06 : vue d'ensemble =====
   await page.goto(`${APP}/#/analytics`);
-  const kpi = page.locator('.kpi-tab', { hasText: 'Visiteurs récurrents' });
-  await kpi.waitFor();
+  // L47-01 : les visiteurs récurrents ont leur bloc (plus d'indicateur en onglet)
+  const card = page.locator('.an-ret');
+  await card.waitFor();
   ok(
-    (await page.locator('.kpi-tab .kpi-tab__l').allTextContents())
-      .map(sp)
-      .join('|')
-      .includes('Visiteurs|Visiteurs récurrents'),
-    'KPI « Visiteurs récurrents » après « Visiteurs »',
+    (await page.locator('.kpi-tab', { hasText: 'Visiteurs récurrents' }).count()) === 0,
+    'pas d’onglet « Visiteurs récurrents »',
   );
-  // Chiffres cohérents avec la vue d'ensemble : même population que « Visiteurs uniques »
+  // Chiffres cohérents avec la vue d'ensemble : même population que « Visiteurs »
   const num = (x) => Number(sp(x).replace(/\D/g, ''));
   const uniq = num(await page.locator('.kpi-tab').nth(1).locator('.kpi-tab__v').innerText());
   const n = Math.round(uniq * 0.34);
   const pRet = Math.round((n / uniq) * 100);
   const fmt = (x) => x.toLocaleString('fr-FR').replace(/[\u00a0\u202f]/g, ' ');
-  ok(sp(await kpi.locator('.kpi-tab__v').innerText()) === `${pRet} %`, `KPI : pourcentage réel (${pRet} %)`);
-  ok(
-    sp(await kpi.innerText()).includes(`${fmt(n)} sur ${fmt(uniq)} · revenus au moins une fois`),
-    `KPI : ${n} sur ${uniq} (visiteurs uniques)`,
-  );
-  const card = page.locator('.an-ret');
   ok(sp(await card.innerText()).includes('revenu après plus de 30 minutes'), 'définition (30 min)');
   ok(
     sp(await card.locator('[role="img"]').getAttribute('aria-label')) ===
@@ -115,7 +107,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await dlg.waitFor({ state: 'detached' });
   ok(state.tables.workspaces[0].visit_measure === false, 'mesure désactivée');
   await page.waitForTimeout(500);
-  ok(sp(await kpi.innerText()).includes('Mesure désactivée'), 'KPI : « Mesure désactivée »');
+  ok(
+    sp(await card.innerText()).includes('La mesure des visites est désactivée'),
+    'bloc : « mesure désactivée »',
+  );
   state.tables.workspaces[0].visit_measure = true;
   state.tables.workspaces[0].visit_gap_minutes = 30;
   await page.reload();

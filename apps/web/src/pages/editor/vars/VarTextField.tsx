@@ -24,14 +24,12 @@ import type { CatalogItem } from '../../../lib/varCatalog';
 import { VarCatalog, VarSettings, markHelpSeen } from './VarPopovers';
 import './vars.css';
 
-const BRACES =
-  '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></svg>';
-
 type Pill = { pos: number; rect: DOMRect; key: string; fallback: string | null };
 
 interface Ctx {
   catalog: CatalogItem[];
   aria: (label: string, fallback: string | null) => string;
+  tip: (fallback: string) => string;
   deletedLabel: string;
   onOpen: (p: Pill) => void;
   renders: Set<() => void>;
@@ -90,16 +88,10 @@ const VariableNode = Node.create<{ ctx: { current: Ctx } }>({
         const item = c.catalog.find((x) => x.key === key);
         dom.className = `var-chip${item ? (item.group === 'workspace' ? ' var-chip--ws' : '') : ' var-chip--gone'}`;
         const label = item ? item.label : c.deletedLabel;
-        dom.innerHTML = BRACES;
-        const l = document.createElement('span');
-        l.textContent = label;
-        dom.append(l);
-        if (item && fb) {
-          const f = document.createElement('span');
-          f.className = 'var-chip__fb';
-          f.textContent = ` · ${fb}`;
-          dom.append(f);
-        }
+        // L46-01 : le nom seul ; le repli est dans l'infobulle et dans le réglage de la pastille
+        dom.textContent = label;
+        if (item && fb) dom.dataset.tip = c.tip(fb);
+        else delete dom.dataset.tip;
         dom.setAttribute('aria-label', c.aria(label, item && fb ? fb : null));
       };
       render();
@@ -205,6 +197,7 @@ export function VarTextField({
     catalog,
     aria: (l, f) =>
       f ? t('variables.pillAriaFallback', { label: l, fallback: f }) : t('variables.pillAria', { label: l }),
+    tip: (f) => t('variables.pillTip', { fallback: f }),
     deletedLabel: t('variables.deleted'),
     onOpen: (p) => setPill(p),
     renders: new Set(),

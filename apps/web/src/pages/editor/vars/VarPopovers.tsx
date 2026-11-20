@@ -143,7 +143,7 @@ export function VarCatalog({
       )}
       <input
         ref={search}
-        className="input input-sm var-cat__search"
+        className="fd-input var-cat__search"
         type="search"
         role="combobox"
         aria-expanded="true"

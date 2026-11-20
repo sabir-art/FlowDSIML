@@ -109,7 +109,7 @@
 .var-rte__area a {
   color: var(--fd-color-primary);
 }
-/* Pastille : 24 px, libellé (jamais la clé), repli en grisé */
+/* Pastille : 24 px, nom seul (jamais la clé ni le repli, qui est dans l'infobulle) */
 .var-chip {
   display: inline-flex;
   align-items: center;
@@ -127,13 +127,6 @@
   white-space: nowrap;
   cursor: grab;
   user-select: none;
-}
-.var-chip svg {
-  flex: none;
-}
-.var-chip__fb {
-  font-weight: 500;
-  opacity: 0.75;
 }
 .var-chip--ws {
   background: var(--fd-color-info-soft, #edf6fc);
@@ -177,6 +170,7 @@
 }
 .var-cat__search {
   width: 100%;
+  height: 40px;
 }
 .var-cat__list {
   list-style: none;

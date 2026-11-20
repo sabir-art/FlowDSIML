@@ -12,10 +12,9 @@ import { formatDate, formatNumber } from '../../lib/format';
 import { Sk } from '../Skeleton';
 import './kpi.css';
 
-export type KpiKey = 'views' | 'visitors' | 'returning' | 'completion' | 'leads' | 'cta';
-/** Indicateurs d'une démo ; l'espace ajoute « Visiteurs récurrents » après « Visiteurs ». */
-export const KPI_KEYS: KpiKey[] = ['views', 'visitors', 'completion', 'leads', 'cta'];
-export const WS_KPI_KEYS: KpiKey[] = ['views', 'visitors', 'returning', 'completion', 'leads', 'cta'];
+/** L47-01 : 4 indicateurs (les visiteurs récurrents ont leur bloc ; les clics vont sous « Étape par étape »). */
+export type KpiKey = 'views' | 'visitors' | 'completion' | 'leads';
+export const KPI_KEYS: KpiKey[] = ['views', 'visitors', 'completion', 'leads'];
 /** Indicateur lu dans l'adresse (?indicateur=) ; inconnu : Vues. */
 export const kpiFromParam = (v: string | null, keys: KpiKey[]): KpiKey =>
   keys.includes(v as KpiKey) ? (v as KpiKey) : 'views';
@@ -37,15 +36,13 @@ export interface Series {
 /** Valeur d'un indicateur pour une ligne (jour, démo ou source) ; complétion : 0–1. */
 export function dayValue(r: SeriesRow, k: KpiKey): number {
   if (k === 'completion') return completionRate(r.visitors, r.completions);
-  // Pas de série quotidienne des visiteurs récurrents : l'appelant affiche « Pas encore de données »
-  return k === 'returning' ? 0 : r[k];
+  return r[k];
 }
 export const metricValues = (r: SeriesRow): Partial<Record<KpiKey, number>> => ({
   views: r.views,
   visitors: r.visitors,
   completion: r.visitors > 0 ? completionRate(r.visitors, r.completions) : undefined,
   leads: r.leads,
-  cta: r.cta,
 });
 
 /** Évolution : texte visible court, phrase complète pour les lecteurs d'écran. */
@@ -121,9 +118,7 @@ export interface KpiItem {
   key: KpiKey;
   label: string;
   value: string;
-  /** Évolution ; à défaut, une note (ex. « 12 sur 120 visiteurs »). */
-  trend?: Trend;
-  note?: string;
+  trend: Trend;
 }
 
 export function KpiTabs({
@@ -184,11 +179,7 @@ export function KpiTabs({
           >
             <span className="kpi-tab__l">{it.label}</span>
             <span className="kpi-tab__v">{it.value}</span>
-            {it.trend ? (
-              <TrendBadge trend={it.trend} days={days} />
-            ) : (
-              <span className="kpi-trend">{it.note ?? '\u00a0'}</span>
-            )}
+            <TrendBadge trend={it.trend} days={days} />
           </button>
         ))}
       </div>
@@ -292,7 +283,6 @@ export function TrendChart({
             {prev && (
               <polyline points={pts(prev)} className="kpi-chart__prev" vectorEffect="non-scaling-stroke" />
             )}
-            <polygon points={`0,${H} ${pts(cur)} ${W},${H}`} className="kpi-chart__area" />
             <polyline points={pts(cur)} className="kpi-chart__cur" vectorEffect="non-scaling-stroke" />
           </svg>
           {rate && (

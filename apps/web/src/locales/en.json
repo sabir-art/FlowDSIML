@@ -2103,7 +2103,6 @@
     "visitors": "Unique visitors",
     "completion": "Completion rate",
     "completionHint": "{{n}} completed sessions",
-    "ctaClicks": "Action button clicks",
     "leads": "Leads",
     "viewsPerDay": "Views per day",
     "noData": "No data for this period yet.",
@@ -2412,8 +2411,6 @@
       "filtersNotApplied": "Filters do not apply to this tab yet."
     },
     "ret": {
-      "kpi": "Returning visitors",
-      "kpiSub": "{{n}} of {{total}} · came back at least once",
       "off": "Measurement off",
       "offBody": "Visit measurement is off: no identifier is created and existing identifiers are ignored.",
       "title": "New and returning",
@@ -4774,7 +4771,8 @@
     "close": "Close",
     "previewWith": "Preview with",
     "previewExamples": "Examples",
-    "previewFallbacks": "Fallback values"
+    "previewFallbacks": "Fallback values",
+    "pillTip": "If unknown: {{fallback}}"
   },
   "kpi": {
     "tablist": "Displayed metric",
@@ -4805,20 +4803,17 @@
     "visitorsUnique": "Unique visitors",
     "completion": "Completion rate",
     "leads": "Leads",
-    "cta": "Action button clicks",
     "perDay": {
       "views": "Views per day",
       "visitors": "Visitors per day",
       "completion": "Completion rate per day",
-      "leads": "Leads per day",
-      "cta": "Action button clicks per day"
+      "leads": "Leads per day"
     },
     "col": {
       "views": "Views",
       "visitors": "Visitors",
       "completion": "Completion",
-      "leads": "Leads",
-      "cta": "Clicks"
+      "leads": "Leads"
     },
     "byDemo": "By demo",
     "demo": "Demo",
@@ -4833,8 +4828,7 @@
     },
     "seeAnalytics": ", see in Analytics",
     "analytics": "Analytics",
-    "shortcuts": "Metrics for the last 30 days",
-    "perDayReturning": "Returning visitors per day"
+    "shortcuts": "Metrics for the last 30 days"
   },
   "console": {
     "entry": "Owner console",

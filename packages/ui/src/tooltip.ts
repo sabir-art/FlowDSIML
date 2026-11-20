@@ -17,7 +17,8 @@ const GRACE_MS = 100;
 const LONG_PRESS = 500;
 const TOUCH_SHOW = 1500;
 
-const TARGET = 'button, a[href], [role="button"]';
+/** Boutons et liens ; tout élément qui porte `data-tip` (ex. pastille de variable : son repli). */
+const TARGET = 'button, a[href], [role="button"], [data-tip]';
 const HIDDEN_TEXT = '.sr-only, .visually-hidden';
 
 export interface Rect {
