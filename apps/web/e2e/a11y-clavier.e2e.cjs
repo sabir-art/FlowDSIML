@@ -90,11 +90,15 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         // Interrupteurs : l'indicateur est porté par la piste voisine
         const sib = el.nextElementSibling ? getComputedStyle(el.nextElementSibling) : null;
         // Champ dont le cadre parent porte l'indicateur (:focus-within)
-        const par = el.matches('input, textarea, select') ? getComputedStyle(el.parentElement) : null;
-        const parent =
-          par &&
-          ((par.outlineStyle !== 'none' && parseFloat(par.outlineWidth) > 0) ||
-            (par.boxShadow && par.boxShadow !== 'none'));
+        // (contenteditable compris : le champ riche à variables porte l'anneau sur son cadre, jusqu'à 3 niveaux)
+        const ring = (s) =>
+          (s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0) ||
+          (s.boxShadow && s.boxShadow !== 'none');
+        let parent = false;
+        if (el.matches('input, textarea, select, [contenteditable="true"]')) {
+          let a = el.parentElement;
+          for (let k = 0; a && k < 3 && !parent; k++, a = a.parentElement) parent = ring(getComputedStyle(a));
+        }
         const sibling =
           el.matches('input[type=checkbox], input[type=radio]') &&
           sib &&
