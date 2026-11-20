@@ -100,12 +100,7 @@ La largeur de la modale (1 120 px), l'aperçu à droite, les options « Contenu 
 
 ## 4. Composeur des commentaires : avatar
 
-**Révision de L43** : l'avatar est **conservé** à gauche du champ (choix du client), mais aligné correctement.
-
-- **Champ sur une ligne** : l'avatar (32 px) est centré verticalement sur le **cadre du champ** (48 px), pas sur le bloc champ + aide. Le conteneur aligne l'avatar et le cadre en `align-items: center` ; la ligne d'aide est hors de cette rangée.
-- **Champ sur plusieurs lignes** : l'avatar reste en haut, aligné sur la première ligne. Rangée en `align-items: flex-start`, avec une marge haute de 8 px sur l'avatar (centré sur la hauteur d'une ligne de 48 px).
-- **Mise en œuvre** : une seule règle CSS, `align-self` de l'avatar selon l'état « multiligne » (`textarea.scrollHeight > 48`), sans saut au passage d'une ligne à deux.
-- Le bouton d'envoi est dans le champ, en bas à droite (L43). La spec L43 est corrigée sur ce point : l'avatar est conservé.
+**Remplacé par L43 révision 2 (20 novembre)** : le client a choisi le modèle des messageries actuelles. L'avatar est **retiré** à côté du champ, et tout tient dans un seul cadre (texte, puis barre d'actions). Voir `l43-composeur.md` §1. Ce paragraphe ne s'applique plus.
 
 ## 5. Recette
 
@@ -114,4 +109,4 @@ La largeur de la modale (1 120 px), l'aperçu à droite, les options « Contenu 
   - aucune valeur hors du tableau du §1. Les mesures de l'audit sont dans le message de livraison.
 - **Captures avant/après** des écarts E1 à E20, à 1 440 px, en clair et en sombre.
 - **Modale Exporter** : 1 440 × 900 (sans défilement), 1 280 × 800 (la colonne gauche défile, le pied reste visible), 390 px.
-- **Composeur** : sur une ligne, l'avatar est centré sur le cadre à ±1 px ; sur trois lignes, il est en haut ; aucun saut visible au passage à deux lignes.
+- **Composeur** : voir la recette de L43 (révision 2).
