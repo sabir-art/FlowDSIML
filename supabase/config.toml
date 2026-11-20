@@ -441,6 +441,11 @@ verify_jwt = false
 enabled = true
 verify_jwt = true
 
+# L30 : Assistance IA, seule à lire ANTHROPIC_API_KEY ; JWT vérifié par la plateforme et par la fonction.
+[functions.ai]
+enabled = true
+verify_jwt = true
+
 # A8 : seule porte d'écriture du bucket html (second assainissement des captures), JWT vérifié.
 [functions.html-ingest]
 enabled = true
