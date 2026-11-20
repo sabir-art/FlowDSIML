@@ -70,9 +70,12 @@ Builds de production, audit mobile avec ralentissement simulé du réseau et du 
 | Page | Performance | Accessibilité |
 |---|---|---|
 | Connexion | 95 | 100 |
-| Tableau de bord | 81 | 100 |
-| Éditeur | 75 | 100 |
+| Tableau de bord | 90 à 92 | 100 |
+| Éditeur (vue mobile) | 92 | 100 |
 | Lecteur (démo publiée) | 97 | 100 |
+
+Scores relevés sur plusieurs passages (le simulateur varie d'un point). Avant L33 : 81 pour le tableau de
+bord, 75 pour l'éditeur.
 
 Corrections faites :
 
@@ -85,8 +88,17 @@ Corrections faites :
 - squelettes de chargement à la géométrie de la page finale (tableau de bord et éditeur), visibles
   seulement au-delà de 200 ms ; message à 10 s, carte d'erreur avec « Réessayer » à 30 s.
 
-Dans un navigateur réel, le contenu principal s'affiche en moins d'une seconde (0,7 s pour le tableau de
-bord, 0,9 s pour l'éditeur). Les scores mobiles restent sous 90 à cause du volume de code chargé avant le
-premier affichage, environ 250 Ko compressés, dont les textes de l'interface en français. Pour aller plus
-loin, il faudrait découper les textes par page et alléger la vue mobile de l'éditeur, qui n'affiche qu'un
-message et la liste des étapes. Ce chantier reste à planifier.
+L33 (code chargé au premier affichage) :
+
+- textes de l'interface en deux parties : le socle (connexion, coquille, tableau de bord, 9 Ko compressés
+  au lieu de 60) et la suite, chargée avec les autres pages ; le socle est recalculé à chaque build à partir
+  du code du démarrage, et un garde-fou signale en développement tout texte affiché trop tôt ;
+- sur écran étroit, une page légère (avis et commentaires) remplace l'éditeur complet ;
+- code de la page d'arrivée préchargé dès le HTML ;
+- boîtes de dialogue du tableau de bord (nouvelle démo, modèles, génération, accès au dossier) et cloche des
+  notifications chargées après le premier affichage ;
+- polices servies par l'app (Fontsource, licence OFL) au lieu de Google Fonts, et Plus Jakarta Sans réduite
+  aux caractères de l'interface (17 Ko au lieu de 27, apps/web/src/assets/fonts/README.md).
+
+Code chargé au premier affichage (compressé) : tableau de bord 217 Ko de JS au lieu de 281, vue mobile de
+l'éditeur 213 Ko au lieu de 405. Ce qui reste est surtout React (67 Ko) et le client Supabase (58 Ko).
