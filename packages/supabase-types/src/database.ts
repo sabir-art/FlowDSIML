@@ -1813,6 +1813,7 @@ export type Database = {
       };
       steps: {
         Row: {
+          original: Json | null;
           voice_autoplay: boolean;
           voice_duration_ms: number | null;
           voice_path: string | null;
@@ -1854,6 +1855,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          original?: Json | null;
           voice_autoplay?: boolean;
           voice_duration_ms?: number | null;
           voice_path?: string | null;
@@ -1894,6 +1896,7 @@ export type Database = {
           presenter_notes?: string;
         };
         Update: {
+          original?: Json | null;
           voice_autoplay?: boolean;
           voice_duration_ms?: number | null;
           voice_path?: string | null;
@@ -2417,6 +2420,7 @@ export type Database = {
       survey_texts: { Args: { p_demo: string; p_question?: string | null; p_limit?: number }; Returns: Json };
       choice_results: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
       purge_old_events: { Args: Record<PropertyKey, never>; Returns: number };
+      restore_original_sizes: { Args: { p_demo: string }; Returns: number };
       resolve_demo_address: { Args: { p_address: string }; Returns: string | null };
       resolve_share_link: { Args: { p_token: string }; Returns: Json };
       set_demo_address: { Args: { p_demo: string; p_label: string }; Returns: string };

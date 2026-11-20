@@ -2987,3 +2987,96 @@
 .voice-auto {
   margin: 4px 0 10px;
 }
+
+/* L28-04 : format des écrans (onglet Réglages) */
+.fmt-sec .fmt-group {
+  border: 0;
+  padding: 0;
+  margin: 10px 0 0;
+  min-width: 0;
+}
+.fmt-sec .fmt-radios {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+.fmt-sec .fmt-radios .check {
+  align-items: flex-start;
+}
+.fmt-sec .fmt-mode-help {
+  display: block;
+  margin-top: 2px;
+}
+.fmt-sec .fmt-custom {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.fmt-sec .fmt-custom .field {
+  width: 110px;
+  margin: 0;
+}
+.fmt-sec .fmt-custom #fmt-custom-h {
+  flex-basis: 100%;
+}
+.fmt-preview {
+  margin-top: 12px;
+}
+.fmt-thumbs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.fmt-thumbs figure {
+  margin: 0;
+}
+.fmt-thumbs img,
+.fmt-thumbs .fmt-ph {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-sm);
+  background: var(--fd-color-surface-sunken);
+}
+.fmt-thumbs figcaption {
+  margin-top: 4px;
+  font-size: var(--fd-font-xs);
+  color: var(--fd-color-text-muted);
+  text-align: center;
+}
+.fmt-nav {
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.fmt-warn {
+  list-style: none;
+  padding: 8px 10px;
+  margin: 10px 0 0;
+  border-left: 3px solid var(--fd-color-warning);
+  border-radius: var(--fd-radius-sm);
+  background: color-mix(in srgb, var(--fd-color-warning) 10%, transparent);
+  display: grid;
+  gap: 4px;
+  font-size: var(--fd-font-xs);
+}
+.fmt-warn li {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.fmt-warn svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  color: var(--fd-color-warning);
+  margin-top: 1px;
+}
+.fmt-actions {
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+}

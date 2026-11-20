@@ -1,3 +1,4 @@
+import { FormatSection } from '../format/FormatSection';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { Plus, Trash2, X } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
@@ -130,6 +131,8 @@ export function SettingsTab({
           />
         </div>
       )}
+      {/* L28-04 : format des écrans après capture */}
+      <FormatSection editor={editor} readOnly={readOnly} />
       <div className="sec">
         <div className="sec-title">{t('editor.settings.reading')}</div>
         <SettingSwitch

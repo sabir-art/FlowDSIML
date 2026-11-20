@@ -681,6 +681,30 @@ async function install(page, state = seed()) {
             leads: (previous ? 0 : 1) * pub,
           });
         }
+        case 'restore_original_sizes': {
+          // L28-04 : retour aux images d'origine (image, taille, flous, zoom, recadrage, repères)
+          let n = 0;
+          for (const st of t.steps.filter((x) => x.demo_id === a.p_demo && x.original)) {
+            const o = st.original;
+            Object.assign(st, {
+              image_path: o.image_path,
+              image_width: o.image_width,
+              image_height: o.image_height,
+              blurs: o.blurs || [],
+              zoom: o.zoom || null,
+              options: o.crop
+                ? { ...(st.options || {}), crop: o.crop }
+                : (({ crop, ...r }) => r)(st.options || {}),
+              original: null,
+            });
+            for (const h of o.hotspots || []) {
+              const row = t.hotspots.find((x) => x.id === h.id);
+              if (row) Object.assign(row, { x: h.x, y: h.y, w: h.w, h: h.h });
+            }
+            n += 1;
+          }
+          return json(route, 200, n);
+        }
         case 'set_demo_address': {
           // L28 082 : partie lisible validée, suffixe base62 de 6 caractères, ancienne adresse retirée
           const label = String(a.p_label || '').toLowerCase();
