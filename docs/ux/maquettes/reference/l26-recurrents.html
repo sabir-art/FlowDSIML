@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visiteurs récurrents (lot L26) · TutoClick (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  .chart-card { padding: 20px 24px; }
+  .chart { width: 100%; height: 220px; display: block; }
+  .chart .grid line { stroke: var(--fd-color-border); }
+  .chart text { fill: var(--fd-color-text-subtle); font: 11px var(--fd-font-sans); }
+  .funnel { display: grid; gap: 8px; }
+  .funnel-row { display: grid; grid-template-columns: 28px 1fr 64px 72px; gap: 12px; align-items: center; font-size: var(--fd-text-body-size); }
+  .funnel-bar { height: 28px; border-radius: 6px; background: var(--fd-color-surface-sunken); position: relative; overflow: hidden; }
+  .funnel-bar > span { position: absolute; inset: 0 auto 0 0; background: var(--fd-color-chart-1); opacity: .9; border-radius: 6px; }
+  .funnel-bar > b { position: relative; z-index: 1; padding: 0 10px; line-height: 28px; font-weight: 500; color: var(--fd-color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; mix-blend-mode: normal; }
+  .funnel-bar > span + b { color: #fff; }
+  [data-theme="dark"] .funnel-bar > span + b { color: var(--fd-lagoon-950); }
+  .drop { color: var(--fd-color-danger); font-weight: 600; }
+  .two { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+  @media (max-width: 1100px) { .two { grid-template-columns: 1fr; } }
+  .legend { display: flex; gap: 16px; font-size: var(--fd-text-caption-size); color: var(--fd-color-text-muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+</style>
+<style>
+  .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
+  .kpi.new { outline: 2px solid var(--fd-color-primary); outline-offset: -2px; }
+  .nr-bars { display: grid; gap: 10px; margin-top: 12px; }
+  .nr-bars .r { display: grid; grid-template-columns: 110px 1fr 120px; gap: 10px; align-items: center; font-size: 14px; }
+  .nr-bars .t { height: 12px; border-radius: 6px; background: var(--fd-color-surface-sunken); overflow: hidden; } .nr-bars .t span { display: block; height: 100%; border-radius: 6px; }
+  .vbadge { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--fd-color-surface-sunken); color: var(--fd-color-text); box-shadow: inset 0 0 0 1px var(--fd-color-border); }
+  .vbadge svg { width: 12px; height: 12px; }
+  body:not([data-l26="vue"]) .only-vue { display: none !important; }
+  .mock-l26 { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #141311; }
+  .mock-l26 button { border: 0; background: transparent; color: #fff; font: 500 13px var(--fd-font-sans); padding: 6px 12px; border-radius: 999px; cursor: pointer; } .mock-l26 button[aria-pressed="true"] { background: #fff; color: #141311; }
+  @media (max-width: 1200px) { .kpis { grid-template-columns: repeat(3, minmax(0,1fr)) !important; } }
+</style>
+</head>
+<body data-shell="app" data-page="analytics" data-crumbs='<span aria-current="page">Analytics</span>'>
+<main>
+  <div class="content">
+    <div class="page-head">
+      <div><h1>Analytics</h1><p class="muted" style="margin-top:4px">Données mises à jour il y a 2 min</p></div>
+      <div class="row wrap">
+        <select class="select input-sm" style="width:auto" aria-label="Démo"><option>Toutes les démos</option><option>Créer un rapport en 2 minutes</option></select>
+        <select class="select input-sm" style="width:auto" aria-label="Source"><option>Toutes les sources</option><option>Lien public</option><option>Intégration (embed)</option><option>Liens personnalisés</option></select>
+        <div class="segmented" role="radiogroup" aria-label="Période" data-seg><button role="radio" aria-checked="false">7 j</button><button role="radio" aria-checked="true">30 j</button><button role="radio" aria-checked="false">90 j</button><button role="radio" aria-checked="false"><i data-icon="calendar"></i>Dates</button></div>
+        <button class="btn btn-ghost btn-sm" data-open="m-mesure"><i data-icon="settings"></i>Mesure des visites</button>
+        <button class="btn btn-secondary btn-sm" data-toast="Export CSV en préparation : vous recevrez un email"><i data-icon="download"></i>Exporter</button>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Vues" style="margin-bottom:24px">
+      <button role="tab" aria-selected="true" aria-controls="v-over" id="vt1">Vue d'ensemble</button>
+      <button role="tab" aria-selected="false" aria-controls="v-sess" id="vt2" tabindex="-1">Sessions</button>
+      <button role="tab" aria-selected="false" aria-controls="v-leads" id="vt3" tabindex="-1">Leads <span class="badge badge-primary">128</span></button>
+    </div>
+
+    <section role="tabpanel" id="v-over" aria-labelledby="vt1">
+      <div class="kpis">
+        <div class="card kpi"><span class="t-caption muted">Vues</span><div class="value">4 812</div><span class="t-caption"><span class="delta-up">▲ 18 %</span> <span class="subtle">vs 30 j précédents</span></span></div>
+        <div class="card kpi"><span class="t-caption muted">Visiteurs uniques</span><div class="value">3 127</div><span class="t-caption"><span class="delta-up">▲ 11 %</span> <span class="subtle">vs 30 j précédents</span></span></div>
+        <div class="card kpi new"><span class="t-caption muted">Visiteurs récurrents</span><div class="value">34 %</div><span class="t-caption"><span class="subtle">1 063 sur 3 127 · revenus au moins une fois</span></span></div>
+        <div class="card kpi"><span class="t-caption muted">Taux de complétion</span><div class="value">64 %</div><span class="t-caption"><span class="delta-down">▼ 3 pts</span> <span class="subtle">vs 30 j précédents</span></span></div>
+        <div class="card kpi"><span class="t-caption muted">Leads collectés</span><div class="value">128</div><span class="t-caption"><span class="delta-up">▲ 32 %</span> <span class="subtle">4,1 % des visiteurs</span></span></div>
+        <div class="card kpi"><span class="t-caption muted">Clics sur le CTA final</span><div class="value">241</div><span class="t-caption"><span class="delta-up">▲ 9 %</span> <span class="subtle">7,7 % des visiteurs</span></span></div>
+      </div>
+
+      <div class="two" style="margin-top:16px">
+        <div class="card chart-card">
+          <div class="row between"><h2 class="t-h3">Vues et complétions</h2><div class="legend"><span><i style="background:var(--fd-color-chart-1)"></i>Vues</span><span><i style="background:var(--fd-color-chart-2)"></i>Démos terminées</span></div></div>
+          <svg class="chart" viewBox="0 0 600 220" preserveAspectRatio="none" role="img" aria-label="Courbe des vues quotidiennes sur 30 jours, de 90 à 230 vues par jour, avec un pic le 12 novembre ; les démos terminées suivent la même tendance, autour de 60 % des vues.">
+            <g class="grid"><line x1="0" x2="600" y1="40" y2="40"/><line x1="0" x2="600" y1="100" y2="100"/><line x1="0" x2="600" y1="160" y2="160"/></g>
+            <path d="M0 150 L40 140 L80 146 L120 120 L160 128 L200 110 L240 116 L280 90 L320 60 L360 84 L400 92 L440 78 L480 70 L520 82 L560 64 L600 58" fill="none" stroke="var(--fd-color-chart-1)" stroke-width="2.5"/>
+            <path d="M0 150 L40 140 L80 146 L120 120 L160 128 L200 110 L240 116 L280 90 L320 60 L360 84 L400 92 L440 78 L480 70 L520 82 L560 64 L600 58 L600 220 L0 220Z" fill="var(--fd-color-chart-1)" opacity=".08"/>
+            <path d="M0 180 L40 174 L80 178 L120 164 L160 168 L200 156 L240 160 L280 146 L320 128 L360 142 L400 148 L440 138 L480 132 L520 140 L560 128 L600 124" fill="none" stroke="var(--fd-color-chart-2)" stroke-width="2.5" stroke-dasharray="6 4"/>
+            <text x="2" y="214">18 oct.</text><text x="270" y="214">1 nov.</text><text x="548" y="214">17 nov.</text>
+          </svg>
+        </div>
+        <div class="card chart-card">
+          <h2 class="t-h3">Sources</h2>
+          <div class="col" style="gap:14px;margin-top:16px">
+            <div><div class="row between t-label"><span>Intégration sur le site</span><span class="num">2 904 · 60 %</span></div><div class="progress" style="margin-top:6px"><span style="width:60%"></span></div></div>
+            <div><div class="row between t-label"><span>Liens personnalisés</span><span class="num">1 012 · 21 %</span></div><div class="progress" style="margin-top:6px"><span style="width:21%"></span></div></div>
+            <div><div class="row between t-label"><span>Lien public</span><span class="num">848 · 18 %</span></div><div class="progress" style="margin-top:6px"><span style="width:18%"></span></div></div>
+            <div><div class="row between t-label"><span>Aperçus internes</span><span class="num subtle">48 · exclus</span></div></div>
+          </div>
+          <hr class="divider">
+          <div class="row between t-caption muted"><span>Appareils</span><span>Desktop 78 % · Mobile 19 % · Tablette 3 %</span></div>
+        </div>
+      </div>
+
+      <div class="card chart-card only-vue" style="margin-top:16px">
+        <div class="row between"><div><h2 class="t-h3">Nouveaux et récurrents</h2><p class="t-caption muted" style="margin-top:2px">Récurrent : même navigateur revenu après plus de 30 minutes, ou apprenant identifié déjà venu.</p></div><a class="btn btn-ghost btn-sm" href="#" data-open="m-mesure">Comment c'est mesuré</a></div>
+        <div class="nr-bars" role="img" aria-label="Nouveaux visiteurs 2 064, soit 66 pour cent ; visiteurs récurrents 1 063, soit 34 pour cent">
+          <div class="r"><span>Nouveaux</span><span class="t"><span style="width:66%;background:var(--fd-color-chart-1)"></span></span><span class="num">2 064 · 66 %</span></div>
+          <div class="r"><span>Récurrents</span><span class="t"><span style="width:34%;background:var(--fd-color-chart-2)"></span></span><span class="num">1 063 · 34 %</span></div>
+        </div>
+        <p class="t-caption muted" style="margin-top:12px">Un visiteur récurrent revient en moyenne 2,8 fois sur la période. Les démos les plus revues : « Créer un rapport en 2 minutes » (41 % de récurrents), « Onboarding — import de données » (37 %).</p>
+      </div>
+      <div class="card chart-card" style="margin-top:16px">
+        <div class="row between"><div><h2 class="t-h3">Parcours étape par étape</h2><p class="t-caption muted" style="margin-top:2px">Créer un rapport en 2 minutes · part des visiteurs ayant vu chaque étape</p></div><a class="btn btn-secondary btn-sm" href="editeur.html">Ouvrir dans l'éditeur</a></div>
+        <div class="funnel" style="margin-top:16px" role="table" aria-label="Entonnoir par étape">
+          <div class="funnel-row t-caption muted" role="row"><span role="columnheader">#</span><span role="columnheader">Étape</span><span role="columnheader" style="text-align:right">Visiteurs</span><span role="columnheader" style="text-align:right">Abandon</span></div>
+          <div class="funnel-row" role="row"><span class="subtle">1</span><div class="funnel-bar"><span style="width:100%"></span><b>Introduction</b></div><span class="num" style="text-align:right">100 %</span><span class="num subtle" style="text-align:right">—</span></div>
+          <div class="funnel-row" role="row"><span class="subtle">2</span><div class="funnel-bar"><span style="width:91%"></span><b>Bienvenue</b></div><span class="num" style="text-align:right">91 %</span><span class="num" style="text-align:right">−9 %</span></div>
+          <div class="funnel-row" role="row"><span class="subtle">3</span><div class="funnel-bar"><span style="width:86%"></span><b>Nouveau rapport</b></div><span class="num" style="text-align:right">86 %</span><span class="num" style="text-align:right">−5 %</span></div>
+          <div class="funnel-row" role="row"><span class="subtle">4</span><div class="funnel-bar"><span style="width:83%"></span><b>Choisir un modèle</b></div><span class="num" style="text-align:right">83 %</span><span class="num" style="text-align:right">−3 %</span></div>
+          <div class="funnel-row" role="row"><span class="subtle">5</span><div class="funnel-bar"><span style="width:66%"></span><b>Formulaire de lead</b></div><span class="num" style="text-align:right">66 %</span><span class="drop num" style="text-align:right">⚠ −17 %</span></div>
+          <div class="funnel-row" role="row"><span class="subtle">6</span><div class="funnel-bar"><span style="width:64%"></span><b>Écran de fin</b></div><span class="num" style="text-align:right">64 %</span><span class="num" style="text-align:right">−2 %</span></div>
+        </div>
+        <div class="alert alert-warning" style="margin-top:16px"><i data-icon="alert"></i><span><b>Le formulaire fait perdre 17 % des visiteurs.</b> Essayez de le rendre facultatif ou de le déplacer en fin de démo.</span></div>
+      </div>
+    </section>
+
+    <section role="tabpanel" id="v-sess" aria-labelledby="vt2" hidden>
+      <div class="card"><div class="table-wrap"><table class="table">
+        <caption class="sr-only">Sessions</caption>
+        <thead><tr><th>Visiteur</th><th>Démo</th><th>Source</th><th class="r">Durée</th><th class="r">Progression</th><th>Date</th></tr></thead>
+        <tbody>
+          <tr><td><div class="row"><span class="avatar avatar-sm">LD</span><div><b>Léa Dupont</b><div class="t-caption subtle">lea@globex.example · Globex</div><span class="vbadge" style="margin-top:4px"><i data-icon="repeat"></i>Récurrent · visite n° 3</span></div></div></td><td>Créer un rapport…</td><td><span class="badge">Lien perso</span></td><td class="r">2 min 14 s</td><td class="r"><span class="badge badge-success">Terminée</span></td><td class="muted">il y a 2 h</td></tr>
+          <tr><td><div class="row"><span class="avatar avatar-sm" style="background:var(--fd-stone-200);color:var(--fd-stone-700)">?</span><div><b>Visiteur anonyme</b><div class="t-caption subtle">Lyon, France · Chrome</div><span class="vbadge" style="margin-top:4px">Nouveau</span></div></div></td><td>Créer un rapport…</td><td><span class="badge">Site web</span></td><td class="r">48 s</td><td class="r num">4 / 6</td><td class="muted">il y a 3 h</td></tr>
+          <tr><td><div class="row"><span class="avatar avatar-sm">MP</span><div><b>Marc Petit</b><div class="t-caption subtle">m.petit@initech.example</div><span class="vbadge" style="margin-top:4px"><i data-icon="repeat"></i>Récurrent · visite n° 2</span></div></div></td><td>Intégration HubSpot</td><td><span class="badge">Site web</span></td><td class="r">3 min 02 s</td><td class="r"><span class="badge badge-success">Terminée</span></td><td class="muted">hier</td></tr>
+        </tbody></table></div>
+        <div class="row between" style="padding:12px 16px"><span class="t-caption muted">1–3 sur 3 127</span><div class="row"><button class="btn btn-secondary btn-sm" aria-disabled="true">Précédent</button><button class="btn btn-secondary btn-sm">Suivant</button></div></div>
+      </div>
+    </section>
+
+    <section role="tabpanel" id="v-leads" aria-labelledby="vt3" hidden>
+      <div class="card"><div class="table-wrap"><table class="table">
+        <caption class="sr-only">Leads</caption>
+        <thead><tr><th><input type="checkbox" aria-label="Tout sélectionner"></th><th>Email</th><th>Entreprise</th><th>Démo</th><th class="r">Progression</th><th>Collecté</th></tr></thead>
+        <tbody>
+          <tr><td><input type="checkbox" aria-label="Sélectionner lea@globex.example"></td><td><b>lea@globex.example</b></td><td>Globex</td><td>Créer un rapport…</td><td class="r"><span class="badge badge-success">Terminée</span></td><td class="muted">il y a 2 h</td></tr>
+          <tr><td><input type="checkbox" aria-label="Sélectionner j.martin@umbrella.example"></td><td><b>j.martin@umbrella.example</b></td><td>Umbrella</td><td>Créer un rapport…</td><td class="r num">5 / 6</td><td class="muted">hier</td></tr>
+        </tbody></table></div></div>
+      <h2 class="t-h3" style="margin:32px 0 12px">État vide</h2>
+      <div class="card"><div class="empty"><i data-icon="users"></i><h3>Aucun lead pour l'instant</h3><p class="muted">Ajoutez un formulaire à une démo pour collecter des emails, ou partagez des liens personnalisés pour identifier vos prospects.</p><a class="btn btn-primary" href="editeur.html">Ajouter un formulaire</a></div></div>
+    </section>
+  </div>
+</main>
+<script>document.addEventListener('fd:ready',()=>{ if(location.hash==='#leads'){ document.getElementById('vt3').click(); } });</script>
+<div class="modal-backdrop" id="m-mesure" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-mesure-t">
+    <div class="modal-head"><h2 id="m-mesure-t">Mesure des visites</h2><button class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="modal-body col" style="gap:14px">
+      <div class="setting" style="padding:0"><div><b id="mr-l">Reconnaître les visiteurs qui reviennent</b><p class="t-caption muted" id="mr-d" style="margin:2px 0 0">Un identifiant aléatoire, propre à votre espace, est gardé dans le navigateur du visiteur pour 13 mois au plus. Il ne contient aucune donnée personnelle et n'est jamais partagé avec un autre site.</p></div><span class="switch"><input type="checkbox" checked aria-labelledby="mr-l" aria-describedby="mr-d"><span></span></span></div>
+      <div class="field" style="margin:0"><label for="mr-w">Durée entre deux visites</label><select id="mr-w" class="select"><option>30 minutes (par défaut)</option><option>24 heures</option></select><span class="help">En dessous, c'est la même visite.</span></div>
+      <div class="alert"><i data-icon="shield"></i><span class="t-caption">Mesure d'audience seule, sans cookie tiers ni recoupement : pensée pour l'exemption de consentement de la CNIL. À faire valider par votre DPO. Le lecteur affiche « Ne pas mesurer mes visites » dans ses informations, et respecte ce choix.</span></div>
+      <p class="help" style="margin:0">Désactivée : plus aucun identifiant n'est créé, les identifiants existants sont ignorés, et « Visiteurs récurrents » affiche « Mesure désactivée ».</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" data-close>Annuler</button><button class="btn btn-primary" data-close data-toast="Réglage enregistré">Enregistrer</button></div>
+  </div>
+</div>
+<div class="mock-l26" role="group" aria-label="État de la maquette L26"><button type="button" data-g="vue">Vue d'ensemble</button><button type="button" data-g="sessions">Sessions</button><button type="button" data-g="mesure">Réglage de mesure</button></div>
+<script>
+document.addEventListener('fd:ready', () => {
+  const go = (k) => {
+    document.body.dataset.l26 = k;
+    document.querySelectorAll('.mock-l26 button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.g === k)));
+    const tab = document.getElementById(k === 'sessions' ? 'vt2' : 'vt1'); if (tab) tab.click();
+    document.getElementById('m-mesure').hidden = k !== 'mesure';
+  };
+  document.addEventListener('click', (e) => { const b = e.target.closest('.mock-l26 [data-g]'); if (b) go(b.dataset.g); });
+  go(new URLSearchParams(location.search).get('etat') || 'vue');
+});
+</script>
+</body>
+</html>

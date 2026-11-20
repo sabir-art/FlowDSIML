@@ -1,5 +1,8 @@
 # TutoClick : état final (novembre 2026)
 
+> Version pour le client, reformulée par la Lead UX : [docs/ux/livrables/etat-final-client.md](../ux/livrables/etat-final-client.md).
+> Ce fichier reste la version de l'équipe technique.
+
 Synthèse pour le client. Le suivi écran par écran est dans le tableau de suivi du projet : 352 écrans et
 états, dont 339 conformes. Les 13 autres attendent une décision du client (voir plus bas).
 

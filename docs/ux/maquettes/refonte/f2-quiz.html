@@ -12,9 +12,13 @@
 <div data-view="build">
 
   <section data-pane="build" class="qz-build" style="display:none">
+    <header class="qz-head">
+      <a class="icon-btn" href="editeur.html" aria-label="Retour à l'éditeur"><i data-icon="arrowLeft"></i></a>
+      <div><h1>Quiz du module</h1><p class="fd-help" style="margin:0">« Créer une fiche usager » · 5 questions</p></div>
+      <span class="qz-saved">Enregistré</span>
+      <button class="fd-btn" type="button" style="margin-left:auto"><i data-icon="play"></i>Tester le quiz</button>
+    </header>
     <aside style="display:flex;flex-direction:column;gap:12px">
-      <h1 style="margin:0;font-size:var(--fd-text-h2-size)">Quiz du module</h1>
-      <p class="fd-help" style="margin:0">« Créer une fiche usager » · 5 questions</p>
       <ol class="qz-qlist" aria-label="Questions">
         <li><span class="n">1</span><span>Où se trouve la liste des usagers ?<small>Choix unique</small></span></li>
         <li aria-current="true"><span class="n">2</span><span>Comment créer une fiche usager ?<small>Choix unique · lié à l'étape 4</small></span></li>
@@ -36,7 +40,10 @@
       </div></div>
       <div class="fd-field" style="margin:0"><label class="fd-label" for="qe">Explication (affichée après la réponse)</label><textarea class="fd-input" id="qe" rows="3" style="height:auto;padding-top:10px;border-radius:16px">La création se fait depuis la liste des usagers : le bouton « + Ajouter » est en haut à droite. L'agenda ne crée que des rendez-vous.</textarea></div>
       <div class="row-2"><div class="fd-field" style="margin:0"><label class="fd-label" for="ql">Étape à revoir en cas d'erreur</label><select class="fd-select" id="ql"><option>4 · Liste des usagers</option></select></div><div class="fd-field" style="margin:0"><label class="fd-label" for="qp">Points</label><input class="fd-input" id="qp" value="1" inputmode="numeric"></div></div>
+      <hr style="margin:0">
+      <button class="fd-btn fd-btn--ghost" type="button" style="color:var(--fd-color-danger);align-self:flex-start"><i data-icon="trash"></i>Supprimer la question</button>
     </article>
+    <div style="display:flex;flex-direction:column;gap:var(--fd-space-5)">
     <aside class="fd-card" style="display:flex;flex-direction:column;gap:16px">
       <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="award"></i></span><h2 class="fd-card__title">Validation du module</h2></div>
       <div class="fd-field" style="margin:0"><label class="fd-label" for="qs">Seuil de réussite</label><div style="display:flex;align-items:center;gap:12px"><input type="range" id="qs" min="0" max="100" step="5" value="70" style="flex:1;accent-color:var(--fd-color-primary)" aria-valuetext="70 %"><b>70 %</b></div></div>
@@ -45,8 +52,20 @@
       <label class="fd-check" style="justify-content:space-between"><span>Mélanger les questions et les réponses</span><span class="fd-switch"><input type="checkbox" checked aria-label="Mélanger"><span class="fd-switch__track"></span></span></label>
       <label class="fd-check" style="justify-content:space-between"><span>Quiz obligatoire pour terminer le module</span><span class="fd-switch"><input type="checkbox" checked aria-label="Obligatoire"><span class="fd-switch__track"></span></span></label>
       <p class="fd-help" style="margin:0">Position : après la dernière étape du module. Les résultats alimentent le suivi des apprenants (F3).</p>
-      <button class="fd-btn" type="button"><i data-icon="eye"></i>Tester le quiz</button>
     </aside>
+    <section class="fd-card" style="display:flex;flex-direction:column;gap:12px" aria-labelledby="qz-rate">
+      <div class="fd-card__head" style="margin:0"><span class="fd-icon-chip"><i data-icon="chart"></i></span><h2 class="fd-card__title" id="qz-rate">Réussite par question</h2></div>
+      <p class="fd-help" style="margin:0">42 tentatives sur 30 jours.</p>
+      <ul class="qz-rates">
+        <li><span>1. Où se trouve la liste…</span><span class="qz-rate"><span style="width:92%"></span></span><b>92 %</b></li>
+        <li><span>2. Comment créer une fiche…</span><span class="qz-rate is-low"><span style="width:48%"></span></span><b>48 %</b></li>
+        <li><span>3. L'agenda est partagé…</span><span class="qz-rate"><span style="width:81%"></span></span><b>81 %</b></li>
+        <li><span>4. Informations obligatoires</span><span class="qz-rate"><span style="width:74%"></span></span><b>74 %</b></li>
+        <li><span>5. Clôturer un accompagnement</span><span class="qz-rate"><span style="width:69%"></span></span><b>69 %</b></li>
+      </ul>
+      <p class="fd-help" style="margin:0">Sous 50 % : la question ou l'étape liée est sans doute à revoir. Sans tentative : « Aucune tentative pour l'instant. »</p>
+    </section>
+    </div>
   </section>
 
   <section data-pane="q" class="qz-play fd-player-scope" style="display:none">

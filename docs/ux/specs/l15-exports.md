@@ -20,7 +20,7 @@
 
 ## 2. Modale d'export (L15-01, L15-02)
 
-- **Points d'entrée** : ceux d'A3 §1 (menu « … » d'une démo, éditeur, page Partager).
+- **Points d'entrée** : ceux d'A3 §1 (menu « … » d'une démo, éditeur, page Partager). Une démo jamais publiée ouvre une petite modale qui explique qu'il faut d'abord la publier.
 - **Gabarit** : modale large (1 120 px), titre « Exporter « {{démo}} » », options à gauche et aperçu à droite sur fond ardoise (`#5B6670`). Sous 1 100 px, l'aperçu passe sous les options.
 - **Formats** (`radiogroup` de 4 cartes ; la carte choisie a une bordure prune de 2 px sur fond `primary-soft`) :
   - **PDF** (choisi par défaut) ;
@@ -39,11 +39,11 @@
 - **Options GIF** :
   - **Vitesse** : segmenté Lente (4 s par étape), Normale (2,5 s, par défaut), Rapide (1,5 s) ;
   - **Taille** : 640, 960 (recommandé) ou 1 280 px de large ;
-  - **Étapes** : toutes, ou une plage ;
+  - **Étapes** : toutes, ou « Une plage d'étapes » qui affiche deux listes « De l'étape » et « À l'étape » ;
   - **Contenu** : interrupteurs « Bulle de l'étape », « Curseur et animation de clic » et « Lecture en boucle », tous actifs par défaut.
 - **Alerte d'information**, toujours visible : les zones floutées restent floutées ; les commentaires internes et les étapes de formulaire ne sont jamais exportés.
 - **Pied** :
-  - une aide calculée : nombre de pages du PDF, ou durée du GIF (nombre d'étapes × vitesse) ;
+  - une aide calculée : « n pages · texte réel, titre et langue du document renseignés » pour le PDF, ou la durée du GIF (nombre d'étapes × vitesse) ;
   - on n'affiche **aucun poids estimé** avant la création du fichier, pour ne pas donner un chiffre faux. Le poids réel apparaît dans L15-04 ;
   - pour le GIF, l'aide ajoute « Au-delà de 15 étapes, préférez le PDF » ;
   - les boutons « Annuler » et « Exporter en PDF » ou « Exporter en GIF ».
@@ -87,11 +87,13 @@
 - **Une étape par page** :
   - pastille noire numérotée, titre, texte de la bulle ;
   - la capture en grand, avec le cadre et la pastille du même numéro ;
-  - l'encadré « À retenir » si l'étape a des notes.
+  - l'encadré « À retenir » si l'étape a des notes. **Pas dans cette version** : le manifeste n'a pas encore de champ de notes par étape.
 - **Deux étapes par page** : même bloc, deux fois, comme F5.
 - **Sans captures** : liste numérotée des étapes (titre et texte), séparées par un filet.
 - **Sans numérotation** : on retire les pastilles et les cadres, et les titres gardent leur numéro écrit (« 3. Cliquer sur… »).
-- **Accessibilité** : PDF balisé (H1 couverture, H2 sections, H3 étapes), texte réel, langue, titre du document. Chaque capture a le texte alternatif « Capture de l'étape n : {{titre}} ». Repères décoratifs.
+- **Accessibilité** :
+  - **livré** : texte réel (jamais une image de texte), titre du document et langue renseignés, ordre de lecture des étapes ;
+  - **dette connue** : pas de balisage (H1/H2/H3, textes alternatifs des captures, repères en artefacts), que jsPDF ne sait pas produire. À reprendre si l'on change de moteur de génération. En attendant, l'aide du pied de modale dit seulement « n pages · texte réel, titre et langue du document renseignés », sans parler de « PDF balisé ».
 
 ## 5. Attestation de suivi (L15-07)
 

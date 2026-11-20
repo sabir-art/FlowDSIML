@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lecteur, vidéo et mobile (lot L21) · TutoClick (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  /* Le player n'hérite jamais du thème de l'app : .fd-player-scope force les couleurs claires */
+  html, body { background: var(--fd-player-backdrop); }
+  body { font-family: var(--fd-player-font); min-height: 100vh; }
+  .pl { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+  .pl-top { display: flex; align-items: center; gap: 12px; padding: 14px 24px; }
+  .pl-brand { display: flex; align-items: center; gap: 10px; font: 700 15px var(--fd-font-display); color: var(--fd-stone-900); }
+  .pl-brand .lg { width: 28px; height: 28px; border-radius: 8px; background: var(--fd-ember-100); color: var(--fd-ember-800); display: grid; place-items: center; font: 700 13px var(--fd-font-display); }
+  .pl-cta { margin-left: auto; display: flex; gap: 8px; }
+  .pbtn { height: 38px; padding: 0 16px; border-radius: 10px; border: 0; font: 600 14px var(--fd-player-font); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none !important; }
+  .pbtn.p { background: var(--fd-player-primary); color: var(--fd-player-on-primary); }
+  .pbtn.s { background: #fff; color: var(--fd-stone-900); box-shadow: inset 0 0 0 1px var(--fd-stone-300); }
+  .pbtn.g { background: transparent; color: var(--fd-player-tooltip-muted); }
+  .pbtn:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--fd-player-primary); }
+  .pl-main { display: grid; place-items: center; padding: 8px 24px 16px; }
+  .pl-frame { width: min(1100px, 100%); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: var(--fd-player-shadow); position: relative; }
+  .pl-progress { display: flex; gap: 3px; padding: 0; height: 4px; background: var(--fd-stone-100); }
+  .pl-progress span { flex: 1; background: var(--fd-stone-200); }
+  .pl-progress span.on { background: var(--fd-player-primary); }
+  .browser { height: 34px; background: var(--fd-player-browser-bar); display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+  .browser i { width: 10px; height: 10px; border-radius: 50%; background: var(--fd-stone-300); display: block; }
+  .browser .url { margin-left: 16px; flex: 1; max-width: 360px; height: 22px; border-radius: 6px; background: #fff; font: 11px var(--fd-font-sans); color: var(--fd-stone-500); display: flex; align-items: center; padding: 0 10px; }
+  .shot { position: relative; aspect-ratio: 16/9.2; overflow: hidden; }
+  .shot [data-fake] { transition: opacity var(--fd-motion-duration-slow) var(--fd-motion-ease-standard); }
+  .hotspot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--fd-player-hotspot); border: 0; cursor: pointer; padding: 0; z-index: 2; }
+  .hotspot::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: #fff; }
+  .hotspot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--fd-player-hotspot); opacity: .55; animation: pulse var(--fd-motion-duration-pulse) infinite; z-index: -1; }
+  .hotspot:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--fd-player-primary); }
+  @keyframes pulse { to { transform: scale(2.4); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .hotspot::after { animation: none; transform: scale(1.7); opacity: .3; } }
+  .tip { position: absolute; width: 320px; background: var(--fd-player-tooltip-bg); color: var(--fd-player-tooltip-text); border-radius: var(--fd-player-radius); box-shadow: var(--fd-shadow-lg); padding: 18px; z-index: 3; animation: fd-pop var(--fd-motion-duration-base) var(--fd-motion-ease-standard); }
+  .tip .cnt { font: 500 12px var(--fd-font-sans); color: var(--fd-player-tooltip-muted); }
+  .tip h2 { font: 600 16px/1.3 var(--fd-player-font); margin: 4px 0 0; }
+  .tip p { font-size: 15px; line-height: 1.5; margin: 6px 0 16px; }
+  .tip .acts { display: flex; justify-content: space-between; align-items: center; }
+  .ov { position: absolute; inset: 0; background: var(--fd-player-overlay); display: grid; place-items: center; z-index: 4; padding: 16px; animation: fd-fade var(--fd-motion-duration-slow); }
+  .pop { width: min(420px, 100%); background: #fff; color: var(--fd-stone-900); border-radius: var(--fd-player-radius); padding: 28px; box-shadow: var(--fd-shadow-lg); }
+  .pop h2 { font: 700 22px/1.25 var(--fd-font-display); }
+  .pop p { color: var(--fd-stone-600); margin: 8px 0 18px; }
+  .pop .input { background: #fff; color: var(--fd-stone-900); border-color: var(--fd-stone-400); }
+  .pop .field label { color: var(--fd-stone-900); }
+  .pl-controls { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 4px 24px 20px; color: var(--fd-stone-600); font: 500 13px var(--fd-font-sans); }
+  .ctl { width: 36px; height: 36px; border-radius: 10px; border: 0; background: rgba(255,255,255,.7); color: var(--fd-stone-800); display: grid; place-items: center; cursor: pointer; }
+  .ctl svg { width: 18px; height: 18px; }
+  .ctl:focus-visible { box-shadow: 0 0 0 3px var(--fd-player-primary); }
+  .wm { position: fixed; right: 16px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 99px; background: rgba(255,255,255,.85); color: var(--fd-stone-700); font: 600 12px var(--fd-font-sans); text-decoration: none !important; box-shadow: var(--fd-shadow-sm); }
+  .sheet-handle { display: none; }
+  .pl-controls[hidden] { display: none; }
+  /* ---- Mobile : bulle en feuille du bas ---- */
+  @media (max-width: 639px) {
+    .pl-top { padding: 10px 14px; } .pl-cta .pbtn.s { display: none; }
+    .pl-main { padding: 0; place-items: start stretch; }
+    .pl-frame { border-radius: 0; box-shadow: none; }
+    .browser { display: none; }
+    .tip { position: fixed; left: 0 !important; right: 0 !important; bottom: 0; top: auto !important; width: auto; border-radius: 20px 20px 0 0; padding: 12px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 30px rgba(0,0,0,.15); }
+    .sheet-handle { display: block; width: 36px; height: 4px; border-radius: 4px; background: var(--fd-stone-300); margin: 0 auto 10px; }
+    .tip .pbtn { height: 44px; padding: 0 20px; }
+    .pl-controls { display: none; }
+    .wm { bottom: 230px; right: 12px; }
+  }
+  .sys { width: min(420px, 100%); text-align: center; }
+
+  [data-st]:not(.on) { display: none !important; }
+  .vid { position: relative; aspect-ratio: 16/9; background: #000; }
+  .vsub { position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); background: rgba(0,0,0,.82); color: #fff; font: 600 15px var(--fd-font-sans); padding: 6px 12px; border-radius: 6px; white-space: nowrap; }
+  .vctl { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: linear-gradient(transparent, rgba(0,0,0,.65)); color: #fff; font: 500 13px var(--fd-font-mono); }
+  .vctl button { width: 36px; height: 36px; border-radius: 8px; border: 0; background: rgba(255,255,255,.14); color: #fff; display: grid; place-items: center; cursor: pointer; }
+  .vctl button svg { width: 18px; height: 18px; } .vctl button:focus-visible { outline: 3px solid #fff; outline-offset: 1px; }
+  .vctl .bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.3); position: relative; } .vctl .bar span { position: absolute; inset: 0 auto 0 0; width: 31%; background: #fff; border-radius: 3px; }
+  .vctl .bar i { position: absolute; top: -3px; width: 4px; height: 12px; border-radius: 2px; background: #C5E86C; }
+  .vctl .cc[aria-pressed="true"] { background: #fff; color: #000; }
+  .mute { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 99px; border: 0; background: #fff; color: #000; font: 600 13px var(--fd-font-sans); box-shadow: var(--fd-shadow-md); }
+  .phone-wrap { display: grid; place-items: center; padding: 8px 0 24px; }
+  .phone { width: 300px; aspect-ratio: 9/19.5; border-radius: 44px; background: #0B0D10; padding: 12px; box-shadow: var(--fd-shadow-lg); position: relative; }
+  .phone .scr { width: 100%; height: 100%; border-radius: 34px; overflow: hidden; background: #fff; position: relative; }
+  .phone .notch { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); width: 96px; height: 24px; border-radius: 12px; background: #0B0D10; z-index: 3; }
+  .tap { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; box-shadow: 0 0 0 3px #D60B52, 0 0 0 9px rgba(214,11,82,.2); background: rgba(214,11,82,.12); }
+  .sheet { position: absolute; left: 8px; right: 8px; background: #fff; color: var(--fd-stone-900); border-radius: 18px; padding: 12px 14px; box-shadow: 0 -8px 24px rgba(0,0,0,.18); font-size: 14px; z-index: 2; }
+  .sheet .cnt { font-size: 12px; color: var(--fd-stone-600); } .sheet b { display: block; margin: 4px 0 10px; }
+  .mock-l21 { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 9000; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #141311; }
+  .mock-l21 button { border: 0; background: transparent; color: #fff; font: 500 12px var(--fd-font-sans); padding: 6px 10px; border-radius: 999px; cursor: pointer; } .mock-l21 button[aria-pressed="true"] { background: #fff; color: #141311; }
+</style>
+</head>
+<body class="fd-player-scope" data-nomocknav>
+<div class="pl">
+  <header class="pl-top"><span class="pl-brand"><span class="lg">A</span>Acme Analytics</span></header>
+  <main class="pl-main">
+    <div class="pl-frame" data-st="video" role="region" aria-roledescription="démo interactive" aria-label="Créer et valider un rapport">
+      <div class="pl-progress" aria-hidden="true"><span class="on"></span><span class="on"></span><span></span><span></span></div>
+      <div class="vid">
+        <div data-fake="list" style="position:absolute;inset:0"></div>
+        <button class="mute">Activer le son</button>
+        <div class="tip" role="dialog" aria-label="Pause 2 sur 3" style="left:16%;top:30%"><span class="cnt">Pause 2 sur 3</span><p>Cliquez sur « Nouveau rapport » en haut à droite.</p><div class="acts"><span></span><button class="pbtn p">Continuer</button></div></div>
+        <span class="vsub">Cliquez sur « Nouveau rapport » en haut à droite.</span>
+        <div class="vctl" role="group" aria-label="Contrôles de la vidéo">
+          <button aria-label="Lire"><i data-icon="play"></i></button>
+          <span>00:42 / 01:38</span>
+          <div class="bar" role="slider" tabindex="0" aria-label="Position dans la vidéo" aria-valuetext="42 secondes sur 1 minute 38" aria-valuenow="42" aria-valuemin="0" aria-valuemax="98"><span></span><i style="left:15%"></i><i style="left:43%"></i><i style="left:86%"></i></div>
+          <button class="cc" aria-pressed="true" aria-label="Sous-titres"><span style="font:700 11px var(--fd-font-sans)">CC</span></button>
+          <button aria-label="Plein écran"><i data-icon="maximize"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="phone-wrap" data-st="mobile mobile-haut">
+      <div class="phone"><span class="notch"></span><div class="scr" role="region" aria-roledescription="démo interactive" aria-label="Planifier un rendez-vous (mobile)">
+        <div style="position:absolute;inset:0;background:#F4F6F9;font:13px var(--fd-font-sans);color:#1E2731">
+          <div style="background:#1E2731;color:#fff;padding:52px 16px 12px;font-weight:700">Rapports</div>
+          <div style="padding:12px;display:grid;gap:8px">
+            <div style="background:#fff;border-radius:10px;padding:12px;box-shadow:0 0 0 1px #E2E8EF">Rapport mensuel · octobre</div>
+            <div style="background:#fff;border-radius:10px;padding:12px;box-shadow:0 0 0 1px #E2E8EF">Suivi des inscriptions</div>
+            <div style="background:#fff;border-radius:10px;padding:12px;box-shadow:0 0 0 1px #E2E8EF">Activité de l'équipe</div>
+          </div>
+          <div style="position:absolute;left:12px;bottom:12px;right:12px;display:flex;justify-content:space-around;background:#fff;border-radius:12px;padding:10px;box-shadow:0 0 0 1px #E2E8EF;font-size:12px"><span>Accueil</span><b>Rapports</b><span>Profil</span></div>
+          <span style="position:absolute;right:20px;bottom:76px;width:48px;height:48px;border-radius:50%;background:#2F5DB8;color:#fff;display:grid;place-items:center;font:700 22px var(--fd-font-sans)">+</span>
+        </div>
+        <span class="tap" data-st="mobile" style="left:30%;top:18%"></span>
+        <span class="tap" data-st="mobile-haut" style="left:84%;top:84%"></span>
+        <div class="sheet" data-st="mobile" style="bottom:8px"><span class="cnt">Étape 3 sur 6</span><b>Touchez « Rapport mensuel » pour l'ouvrir.</b><div style="display:flex;justify-content:flex-end"><span class="pbtn p" style="height:44px">Suivant</span></div></div>
+        <div class="sheet" data-st="mobile-haut" style="top:48px;box-shadow:0 8px 24px rgba(0,0,0,.18)"><span class="cnt">Étape 4 sur 6</span><b>Touchez « + » en bas à droite pour créer un rapport.</b><div style="display:flex;justify-content:flex-end"><span class="pbtn p" style="height:44px">Suivant</span></div></div>
+      </div></div>
+    </div>
+  </main>
+</div>
+<div class="mock-l21" role="group" aria-label="État de la maquette L21"><button data-g="video">Vidéo</button><button data-g="mobile">Mobile</button><button data-g="mobile-haut">Mobile, hotspot en bas</button></div>
+<script>
+document.addEventListener('fd:ready', () => {
+  const go = (k) => { document.querySelectorAll('[data-st]').forEach((e) => e.classList.toggle('on', e.dataset.st.split(' ').includes(k))); document.querySelectorAll('.mock-l21 button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.g === k))); window.fdRenderFakes && fdRenderFakes(); };
+  document.addEventListener('click', (e) => { const b = e.target.closest('.mock-l21 [data-g]'); if (b) go(b.dataset.g); });
+  go(new URLSearchParams(location.search).get('etat') || 'video');
+});
+</script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 /* Maquettes refonte DSI : mise en page des écrans. Composants et couleurs : packages/ui (base.css,
    controls.css, tokens). Ce fichier ne contient que de la mise en page et n'utilise que des --fd-*. */
+/* Polices : chargées ici (l'app les charge dans index.html, base.css ne les importe plus). */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import url('../../../../packages/ui/src/base.css');
 @import url('../../../../packages/ui/src/controls.css');
 
@@ -2068,3 +2070,16 @@ body:has(.mock-state) .ed {
 [data-view='nonpubliee'] .mini-preview { filter: grayscale(1); opacity: .6; }
 .draft-cta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .draft-cta svg { width: 16px; height: 16px; }
+
+/* ---- F2 : en-tête de l'éditeur du quiz et réussite par question ---- */
+.qz-head { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; }
+.qz-head h1 { margin: 0; font-size: var(--fd-text-h2-size); }
+.qz-head svg { width: 16px; height: 16px; }
+.qz-saved { padding: 4px 10px; border-radius: 999px; background: var(--fd-color-surface); color: var(--fd-color-text-muted); font-size: var(--fd-text-caption-size); }
+.qz-rates { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.qz-rates li { display: grid; grid-template-columns: minmax(0, 1fr) 80px 40px; gap: 10px; align-items: center; font-size: var(--fd-text-label-size); }
+.qz-rates li > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qz-rates b { text-align: right; font-variant-numeric: tabular-nums; }
+.qz-rate { height: 6px; border-radius: 999px; background: var(--fd-color-surface-sunken); overflow: hidden; }
+.qz-rate > span { display: block; height: 100%; background: var(--fd-color-primary); }
+.qz-rate.is-low > span { background: var(--fd-color-accent); }

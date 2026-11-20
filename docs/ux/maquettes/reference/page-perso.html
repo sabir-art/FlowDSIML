@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votre démo · Acme</title>
+<meta name="description" content="Suivez pas à pas la création d'un rapport, du choix du modèle à l'export. À votre rythme, sans compte.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  html, body { background: var(--fd-player-backdrop); }
+  body { font-family: var(--fd-player-font); color: var(--fd-stone-900); min-height: 100vh; }
+  .pp { max-width: 1120px; margin: 0 auto; padding: 0 24px 40px; }
+  .pp-top { display: flex; align-items: center; gap: 10px; padding: 18px 0; }
+  .pp-top .lg { width: 32px; height: 32px; border-radius: 9px; background: #A3195B; color: #fff; display: grid; place-items: center; font: 700 14px var(--fd-font-display); }
+  .pp-top b { font: 700 16px var(--fd-font-display); }
+  .pp-top .cta { margin-left: auto; }
+  .pill { height: 42px; padding: 0 20px; border-radius: 999px; border: 0; font: 600 15px var(--fd-player-font); display: inline-flex; align-items: center; gap: 8px; text-decoration: none !important; cursor: pointer; }
+  .pill.p { background: #A3195B; color: #fff; } .pill.k { background: #080808; color: #fff; }
+  .pill:focus-visible { outline: 3px solid #1F7FB6; outline-offset: 2px; }
+  .hero { padding: 24px 0 20px; max-width: 760px; }
+  .hero h1 { font: 800 40px/1.1 var(--fd-font-display); letter-spacing: -.02em; margin: 0; }
+  .hero p { font-size: 18px; line-height: 1.5; color: var(--fd-stone-600); margin: 12px 0 14px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; } .meta span { padding: 4px 10px; border-radius: 99px; background: #fff; box-shadow: inset 0 0 0 1px var(--fd-stone-200); font-size: 13px; color: var(--fd-stone-700); }
+  .stage { border-radius: 20px; overflow: hidden; box-shadow: var(--fd-player-shadow); background: #fff; aspect-ratio: 16/9; position: relative; }
+  .stage .ov { position: absolute; inset: 0; background: rgba(10,14,20,.38); display: grid; place-items: center; }
+  .ctab { margin-top: 24px; border-radius: 20px; background: #C5E86C; color: #12210A; padding: 28px 32px; display: flex; align-items: center; gap: 24px; justify-content: space-between; }
+  .ctab h2 { font: 800 26px var(--fd-font-display); margin: 0; } .ctab p { margin: 6px 0 0; font-size: 16px; }
+  .foot { margin-top: 28px; font-size: 13px; color: var(--fd-stone-600); display: flex; gap: 8px; flex-wrap: wrap; }
+  .foot a { color: var(--fd-stone-800); }
+  .na { min-height: 70vh; display: grid; place-items: center; text-align: center; }
+  .na .box { max-width: 440px; } .na h1 { font: 800 28px var(--fd-font-display); margin: 12px 0 8px; } .na p { color: var(--fd-stone-600); }
+  .pill svg { width: 18px; height: 18px; flex: none; } .na svg { width: 40px; height: 40px; color: var(--fd-stone-500); }
+  .for { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 99px; background: #F6E3EC; color: #7A1144; font-size: 13px; font-weight: 600; margin-bottom: 14px; } .for svg { width: 15px; height: 15px; }
+  .msg { display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start; margin: 18px 0 18px; padding: 16px 18px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px var(--fd-stone-200); max-width: 760px; }
+  .msg .av { width: 44px; height: 44px; border-radius: 50%; background: #2F5DB8; color: #fff; display: grid; place-items: center; font: 700 15px var(--fd-font-display); }
+  .msg p { margin: 0; font-size: 16px; line-height: 1.55; color: var(--fd-stone-800); } .msg .who { margin-top: 8px; font-size: 13px; color: var(--fd-stone-600); }
+  .note { margin-top: 10px; font-size: 13px; color: var(--fd-stone-600); display: flex; gap: 6px; align-items: center; } .note svg { width: 15px; height: 15px; }
+  [data-v]:not(.on) { display: none !important; }
+  @media (max-width: 900px) { .ctab { flex-direction: column; align-items: flex-start; } }
+  @media (max-width: 639px) { .pp { padding: 0 16px 32px; } .hero h1 { font-size: 30px; } .hero p { font-size: 16px; } .stage { aspect-ratio: 4/5; border-radius: 16px; } .pp-top .cta { display: none; } }
+  .mock-l19b { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 9000; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #141311; }
+  .mock-l19b button { border: 0; background: transparent; color: #fff; font: 500 12px var(--fd-font-sans); padding: 6px 10px; border-radius: 999px; cursor: pointer; } .mock-l19b button[aria-pressed="true"] { background: #fff; color: #141311; }
+</style>
+</head>
+<body class="fd-player-scope" data-nomocknav>
+<div class="pp" data-v="perso">
+  <header class="pp-top"><span class="lg" aria-hidden="true">A</span><b>Acme</b><a class="pill p cta" href="#">Réserver un créneau</a></header>
+  <main>
+    <section class="hero" style="max-width:none"><span class="for"><i data-icon="users"></i>Préparée pour Globex</span><h1>Bonjour Léa, voici la démo préparée pour Globex</h1>
+      <div class="msg"><span class="av" aria-hidden="true">CF</span><div><p>Comme convenu, voici la création d'un rapport sur les chiffres de votre équipe. Les deux premières étapes reprennent votre tableau de bord ; la suite montre l'export.</p><p class="who">Camille Fictive · Acme</p></div></div>
+      <div class="meta"><span>6 étapes</span><span>Mis à jour le 14 nov. 2026</span></div></section>
+    <section class="stage" aria-label="Démo interactive : Créer un rapport en 2 minutes"><div data-fake="dashboard" style="position:absolute;inset:0"></div><div class="ov"><button class="pill p" style="height:48px"><i data-icon="play"></i>Lancer la démo</button></div></section>
+    <section class="ctab"><div><h2>On en parle ensemble, Léa ?</h2><p>30 minutes avec Camille pour l'adapter à Globex.</p></div><a class="pill k" href="#">Réserver un créneau<i data-icon="arrowRight"></i></a></section>
+  </main>
+  <footer class="foot"><span>Créé avec TutoClick</span><span aria-hidden="true">·</span><a href="#">Politique de confidentialité</a><span aria-hidden="true">·</span><a href="#">Accessibilité : non conforme</a></footer>
+  <p class="note"><i data-icon="lock"></i>Page préparée pour vous, non référencée. Votre visite est visible par Acme.</p>
+</div>
+<div class="pp na" data-v="expire"><div class="box"><i data-icon="clock"></i><h1>Ce lien n'est plus actif</h1><p>Il a expiré ou a été désactivé. Demandez une nouvelle adresse à la personne qui vous l'a envoyé.</p><p style="margin-top:16px"><a class="pill p" href="#" style="display:inline-flex">Voir la démo publique</a></p></div></div>
+<div class="mock-l19b" role="group" aria-label="État de la maquette"><button data-g="perso">Page personnalisée</button><button data-g="expire">Lien expiré</button></div>
+<script>
+document.addEventListener('fd:ready', () => {
+  const go = (v) => { document.querySelectorAll('[data-v]').forEach((e) => e.classList.toggle('on', e.dataset.v === v)); document.querySelectorAll('.mock-l19b button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.g === v))); document.title = v === 'expire' ? 'Lien inactif · TutoClick' : 'Démo préparée pour Globex · Acme'; };
+  document.addEventListener('click', (e) => { const b = e.target.closest('.mock-l19b [data-g]'); if (b) go(b.dataset.g); });
+  go(new URLSearchParams(location.search).get('etat') || 'perso');
+});
+</script>
+</body>
+</html>

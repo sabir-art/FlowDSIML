@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lecteur, Avant / Après et glossaire (lot L17) · TutoClick (maquette)</title>
+<link rel="stylesheet" href="assets/mockup.css">
+<link rel="stylesheet" href="assets/reference.css">
+<script src="assets/mockup.js" defer></script>
+<style>
+  /* Le player n'hérite jamais du thème de l'app : .fd-player-scope force les couleurs claires */
+  html, body { background: var(--fd-player-backdrop); }
+  body { font-family: var(--fd-player-font); min-height: 100vh; }
+  .pl { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+  .pl-top { display: flex; align-items: center; gap: 12px; padding: 14px 24px; }
+  .pl-brand { display: flex; align-items: center; gap: 10px; font: 700 15px var(--fd-font-display); color: var(--fd-stone-900); }
+  .pl-brand .lg { width: 28px; height: 28px; border-radius: 8px; background: var(--fd-ember-100); color: var(--fd-ember-800); display: grid; place-items: center; font: 700 13px var(--fd-font-display); }
+  .pl-cta { margin-left: auto; display: flex; gap: 8px; }
+  .pbtn { height: 38px; padding: 0 16px; border-radius: 10px; border: 0; font: 600 14px var(--fd-player-font); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none !important; }
+  .pbtn.p { background: var(--fd-player-primary); color: var(--fd-player-on-primary); }
+  .pbtn.s { background: #fff; color: var(--fd-stone-900); box-shadow: inset 0 0 0 1px var(--fd-stone-300); }
+  .pbtn.g { background: transparent; color: var(--fd-player-tooltip-muted); }
+  .pbtn:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--fd-player-primary); }
+  .pl-main { display: grid; place-items: center; padding: 8px 24px 16px; }
+  .pl-frame { width: min(1100px, 100%); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: var(--fd-player-shadow); position: relative; }
+  .pl-progress { display: flex; gap: 3px; padding: 0; height: 4px; background: var(--fd-stone-100); }
+  .pl-progress span { flex: 1; background: var(--fd-stone-200); }
+  .pl-progress span.on { background: var(--fd-player-primary); }
+  .browser { height: 34px; background: var(--fd-player-browser-bar); display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+  .browser i { width: 10px; height: 10px; border-radius: 50%; background: var(--fd-stone-300); display: block; }
+  .browser .url { margin-left: 16px; flex: 1; max-width: 360px; height: 22px; border-radius: 6px; background: #fff; font: 11px var(--fd-font-sans); color: var(--fd-stone-500); display: flex; align-items: center; padding: 0 10px; }
+  .shot { position: relative; aspect-ratio: 16/9.2; overflow: hidden; }
+  .shot [data-fake] { transition: opacity var(--fd-motion-duration-slow) var(--fd-motion-ease-standard); }
+  .hotspot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--fd-player-hotspot); border: 0; cursor: pointer; padding: 0; z-index: 2; }
+  .hotspot::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: #fff; }
+  .hotspot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--fd-player-hotspot); opacity: .55; animation: pulse var(--fd-motion-duration-pulse) infinite; z-index: -1; }
+  .hotspot:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--fd-player-primary); }
+  @keyframes pulse { to { transform: scale(2.4); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .hotspot::after { animation: none; transform: scale(1.7); opacity: .3; } }
+  .tip { position: absolute; width: 320px; background: var(--fd-player-tooltip-bg); color: var(--fd-player-tooltip-text); border-radius: var(--fd-player-radius); box-shadow: var(--fd-shadow-lg); padding: 18px; z-index: 3; animation: fd-pop var(--fd-motion-duration-base) var(--fd-motion-ease-standard); }
+  .tip .cnt { font: 500 12px var(--fd-font-sans); color: var(--fd-player-tooltip-muted); }
+  .tip h2 { font: 600 16px/1.3 var(--fd-player-font); margin: 4px 0 0; }
+  .tip p { font-size: 15px; line-height: 1.5; margin: 6px 0 16px; }
+  .tip .acts { display: flex; justify-content: space-between; align-items: center; }
+  .ov { position: absolute; inset: 0; background: var(--fd-player-overlay); display: grid; place-items: center; z-index: 4; padding: 16px; animation: fd-fade var(--fd-motion-duration-slow); }
+  .pop { width: min(420px, 100%); background: #fff; color: var(--fd-stone-900); border-radius: var(--fd-player-radius); padding: 28px; box-shadow: var(--fd-shadow-lg); }
+  .pop h2 { font: 700 22px/1.25 var(--fd-font-display); }
+  .pop p { color: var(--fd-stone-600); margin: 8px 0 18px; }
+  .pop .input { background: #fff; color: var(--fd-stone-900); border-color: var(--fd-stone-400); }
+  .pop .field label { color: var(--fd-stone-900); }
+  .pl-controls { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 4px 24px 20px; color: var(--fd-stone-600); font: 500 13px var(--fd-font-sans); }
+  .ctl { width: 36px; height: 36px; border-radius: 10px; border: 0; background: rgba(255,255,255,.7); color: var(--fd-stone-800); display: grid; place-items: center; cursor: pointer; }
+  .ctl svg { width: 18px; height: 18px; }
+  .ctl:focus-visible { box-shadow: 0 0 0 3px var(--fd-player-primary); }
+  .wm { position: fixed; right: 16px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 99px; background: rgba(255,255,255,.85); color: var(--fd-stone-700); font: 600 12px var(--fd-font-sans); text-decoration: none !important; box-shadow: var(--fd-shadow-sm); }
+  .sheet-handle { display: none; }
+  .pl-controls[hidden] { display: none; }
+  /* ---- Mobile : bulle en feuille du bas ---- */
+  @media (max-width: 639px) {
+    .pl-top { padding: 10px 14px; } .pl-cta .pbtn.s { display: none; }
+    .pl-main { padding: 0; place-items: start stretch; }
+    .pl-frame { border-radius: 0; box-shadow: none; }
+    .browser { display: none; }
+    .tip { position: fixed; left: 0 !important; right: 0 !important; bottom: 0; top: auto !important; width: auto; border-radius: 20px 20px 0 0; padding: 12px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 30px rgba(0,0,0,.15); }
+    .sheet-handle { display: block; width: 36px; height: 4px; border-radius: 4px; background: var(--fd-stone-300); margin: 0 auto 10px; }
+    .tip .pbtn { height: 44px; padding: 0 20px; }
+    .pl-controls { display: none; }
+    .wm { bottom: 230px; right: 12px; }
+  }
+  .sys { width: min(420px, 100%); text-align: center; }
+
+  /* ===== L17 ===== */
+  body[data-l17="cote"] [data-st]:not([data-st~="cote"]), body[data-l17="curseur"] [data-st]:not([data-st~="curseur"]), body[data-l17="bascule"] [data-st]:not([data-st~="bascule"]),
+  body[data-l17="terme"] [data-st]:not([data-st~="terme"]), body[data-l17="tiroir"] [data-st]:not([data-st~="tiroir"]) { display: none !important; }
+  .pbtn svg { width: 16px; height: 16px; } .drawer header svg { width: 20px; height: 20px; flex: none; }
+  .stage { position: relative; aspect-ratio: 16/9.2; background: var(--fd-stone-100); }
+  .av2 { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 16px 16px 84px; }
+  .avc { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .avl { align-self: flex-start; padding: 3px 12px; border-radius: 99px; font: 600 13px var(--fd-font-sans); }
+  .avl.av { background: var(--fd-stone-200); color: var(--fd-stone-800); } .avl.ap { background: #C5E86C; color: #12210A; }
+  .avp { position: relative; flex: 1; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px var(--fd-stone-300); background: #fff; }
+  .avp.old { filter: grayscale(1); opacity: .85; }
+  .avn { position: absolute; left: 16px; right: 16px; bottom: 14px; background: #fff; color: var(--fd-stone-900); border-radius: 12px; padding: 10px 16px; font-size: 14px; box-shadow: var(--fd-shadow-md); display: flex; gap: 16px; align-items: center; }
+  .avn .t { display: grid; gap: 2px; flex: 1; }
+  .cmp { position: absolute; inset: 16px 16px 84px; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px var(--fd-stone-300); background: #fff; }
+  .cmp .layer { position: absolute; inset: 0; }
+  .cmp .old { clip-path: inset(0 45% 0 0); filter: grayscale(1); }
+  .cmp .bar { position: absolute; top: 0; bottom: 0; left: 55%; width: 3px; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
+  .cmp .knob { position: absolute; top: 50%; left: 55%; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; background: #fff; box-shadow: var(--fd-shadow-md); display: grid; place-items: center; color: var(--fd-stone-800); }
+  .cmp .tag { position: absolute; top: 10px; padding: 3px 12px; border-radius: 99px; font: 600 13px var(--fd-font-sans); }
+  .rng { position: absolute; left: 16px; right: 16px; bottom: 66px; }
+  .rng input { width: 100%; accent-color: var(--fd-player-primary); }
+  .seg-ab { display: inline-flex; padding: 3px; border-radius: 99px; background: var(--fd-stone-200); }
+  .seg-ab button { border: 0; border-radius: 99px; padding: 6px 14px; font: 600 13px var(--fd-font-sans); background: transparent; color: var(--fd-stone-700); }
+  .seg-ab button[aria-pressed="true"] { background: #fff; color: var(--fd-stone-900); box-shadow: var(--fd-shadow-xs); }
+  .gl { border-bottom: 1.5px dotted currentColor; cursor: help; }
+  .gl:focus-visible { outline: 2px solid var(--fd-player-primary); outline-offset: 2px; border-radius: 2px; }
+  .gtip { position: absolute; z-index: 6; width: 260px; background: var(--fd-stone-900); color: #fff; border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.45; box-shadow: var(--fd-shadow-lg); }
+  .gtip .old { color: #C9D0D8; display: block; margin-bottom: 4px; } .gtip b { display: block; margin-bottom: 2px; }
+  .gtip::after { content: ""; position: absolute; left: 40px; top: -6px; width: 12px; height: 12px; background: var(--fd-stone-900); transform: rotate(45deg); }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 380px; max-width: 100vw; background: #fff; color: var(--fd-stone-900); box-shadow: -12px 0 32px rgba(0,0,0,.18); z-index: 20; display: flex; flex-direction: column; }
+  .drawer header { display: flex; align-items: center; gap: 8px; padding: 16px 18px; border-bottom: 1px solid var(--fd-stone-200); }
+  .drawer header h2 { font: 700 18px var(--fd-font-display); margin: 0; flex: 1; }
+  .drawer .srch { margin: 14px 18px 6px; }
+  .drawer .srch input { width: 100%; height: 40px; border-radius: 10px; border: 1px solid var(--fd-stone-400); padding: 0 12px 0 34px; font: 14px var(--fd-player-font); color: var(--fd-stone-900); background: #fff; }
+  .drawer .srch { position: relative; } .drawer .srch svg { position: absolute; left: 10px; top: 11px; width: 18px; height: 18px; color: var(--fd-stone-500); }
+  .drawer dl { margin: 0; padding: 6px 18px 18px; overflow: auto; }
+  .drawer dt { margin-top: 14px; font-weight: 700; font-size: 15px; } .drawer dt .old { display: block; font-weight: 500; font-size: 13px; color: var(--fd-stone-600); }
+  .drawer dd { margin: 4px 0 0; font-size: 14px; color: var(--fd-stone-700); line-height: 1.45; padding-bottom: 12px; border-bottom: 1px solid var(--fd-stone-100); }
+  .shade { position: fixed; inset: 0; background: rgba(10,14,20,.35); z-index: 19; }
+  .mock-l17 { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 9000; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #141311; }
+  .mock-l17 button { border: 0; background: transparent; color: #fff; font: 500 12px var(--fd-font-sans); padding: 6px 10px; border-radius: 999px; cursor: pointer; }
+  .mock-l17 button[aria-pressed="true"] { background: #fff; color: #141311; }
+  @media (max-width: 639px) { .stage { aspect-ratio: auto; height: calc(100vh - 230px); } .avn { flex-direction: column; align-items: stretch; gap: 6px; } }
+</style>
+</head>
+<body class="fd-player-scope" data-nomocknav>
+<a class="skip" href="#demo">Aller à la démo</a>
+<div class="pl">
+  <header class="pl-top">
+    <span class="pl-brand"><span class="lg">A</span>Centre de formation Acme</span>
+    <div class="pl-cta"><button class="pbtn s" data-l17-go="tiroir" aria-haspopup="dialog"><i data-icon="notebook"></i>Glossaire</button></div>
+  </header>
+  <main class="pl-main">
+    <div class="pl-frame" id="demo" role="region" aria-roledescription="démo interactive" aria-label="Créer un rapport dans le nouvel outil">
+      <div class="pl-progress" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></div>
+      <div class="browser" aria-hidden="true"><i></i><i></i><i></i><span class="url">app.acme-analytics.example/reports</span></div>
+
+      <!-- L17-03 côte à côte / L17-05 bascule -->
+      <div class="stage" data-st="cote bascule">
+        <div class="av2" data-st="cote">
+          <div class="avc"><span class="avl av">Avant</span><div class="avp old"><div data-fake="list" style="position:absolute;inset:0"></div></div></div>
+          <div class="avc"><span class="avl ap">Maintenant</span><div class="avp"><div data-fake="dashboard" style="position:absolute;inset:0"></div></div></div>
+        </div>
+        <div class="av2" data-st="bascule" style="grid-template-columns:1fr">
+          <div class="avc"><div class="seg-ab" role="group" aria-label="Afficher"><button aria-pressed="false">Avant</button><button aria-pressed="true">Maintenant</button></div><div class="avp"><div data-fake="dashboard" style="position:absolute;inset:0"></div></div></div>
+        </div>
+        <div class="avn"><span class="t"><span><b>Avant :</b> Rapports, puis Exporter, puis tableur.</span><span><b>Maintenant :</b> bouton « Nouveau rapport » en haut à droite.</span></span><button class="pbtn p">Suivant</button></div>
+      </div>
+
+      <!-- L17-04 curseur -->
+      <div class="stage" data-st="curseur">
+        <div class="cmp" role="img" aria-label="Comparaison : à gauche l'ancien écran (Avant), à droite le nouvel écran (Maintenant)">
+          <div class="layer"><div data-fake="dashboard" style="position:absolute;inset:0"></div></div>
+          <div class="layer old"><div data-fake="list" style="position:absolute;inset:0"></div></div>
+          <span class="bar"></span><span class="knob"><i data-icon="move"></i></span>
+          <span class="tag" style="left:10px;background:var(--fd-stone-200);color:var(--fd-stone-800)">Avant</span><span class="tag" style="right:10px;background:#C5E86C;color:#12210A">Maintenant</span>
+        </div>
+        <div class="rng"><input type="range" min="0" max="100" value="55" aria-label="Curseur de comparaison Avant / Maintenant" aria-valuetext="55 % Avant visible"></div>
+        <div class="avn"><span class="t"><span><b>Avant :</b> Rapports, puis Exporter, puis tableur.</span><span><b>Maintenant :</b> bouton « Nouveau rapport » en haut à droite.</span></span><button class="pbtn p">Suivant</button></div>
+      </div>
+
+      <!-- L17-09 terme / L17-10 tiroir -->
+      <div class="shot" data-st="terme tiroir"><div data-fake="dashboard" style="position:absolute;inset:0"></div>
+        <button class="hotspot" style="left:88.5%;top:10.5%" aria-label="Étape 5 : créer un rapport"></button>
+        <div class="tip" role="group" aria-label="Étape 5 sur 6" style="right:2%;top:19%">
+          <span class="cnt">5 / 6</span><h2>Créer un rapport</h2>
+          <p>Cliquez sur « Nouveau rapport ». Le <span class="gl" tabindex="0" aria-describedby="gt1">tableau de bord</span> se met à jour tout seul.</p>
+          <div class="acts"><button class="pbtn g">Précédent</button><button class="pbtn p">Suivant</button></div>
+        </div>
+        <div class="gtip" role="tooltip" id="gt1" data-st="terme" style="right:9%;top:53%"><b>Tableau de bord</b><span class="old">Ancien terme : <s>synthèse mensuelle</s></span>Page d'accueil qui regroupe vos indicateurs, mise à jour en continu.</div>
+      </div>
+    </div>
+  </main>
+  <nav class="pl-controls" aria-label="Navigation de la démo">
+    <button class="ctl" aria-label="Étape précédente"><i data-icon="chevronLeft"></i></button>
+    <span class="num">4 / 6</span>
+    <button class="ctl" aria-label="Étape suivante"><i data-icon="chevronRight"></i></button>
+  </nav>
+</div>
+<div class="shade" data-st="tiroir"></div>
+<aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-t" data-st="tiroir">
+  <header><i data-icon="notebook"></i><h2 id="dr-t">Glossaire</h2><button class="ctl" aria-label="Fermer le glossaire"><i data-icon="x"></i></button></header>
+  <div class="srch"><i data-icon="search"></i><input type="search" aria-label="Rechercher un terme" placeholder="Rechercher un terme"></div>
+  <p class="t-caption" style="margin:0 18px;color:var(--fd-stone-600)" role="status">4 termes</p>
+  <dl>
+    <dt>Dossier usager<span class="old">Ancien terme : <s>fiche bénéficiaire</s></span></dt><dd>Toutes les informations d'une personne accompagnée, au même endroit.</dd>
+    <dt>Nouveau rapport<span class="old">Ancien terme : <s>export tableur</s></span></dt><dd>Crée un rapport à partir d'un modèle, sans passer par un tableur.</dd>
+    <dt>Rendez-vous<span class="old">Ancien terme : <s>entretien planifié</s></span></dt><dd>Rencontre prévue avec une personne accompagnée, visible dans l'agenda partagé.</dd>
+    <dt>Tableau de bord<span class="old">Ancien terme : <s>synthèse mensuelle</s></span></dt><dd>Page d'accueil qui regroupe vos indicateurs, mise à jour en continu.</dd>
+  </dl>
+</aside>
+<div class="mock-l17" role="group" aria-label="État de la maquette L17">
+  <button type="button" data-l17-go="cote">Côte à côte</button><button type="button" data-l17-go="curseur">Curseur</button><button type="button" data-l17-go="bascule">Bascule (mobile)</button><button type="button" data-l17-go="terme">Terme</button><button type="button" data-l17-go="tiroir">Glossaire</button>
+</div>
+<script>
+document.addEventListener('fd:ready', () => {
+  const go = (k) => { document.body.dataset.l17 = k; document.querySelector('.pl-controls .num').textContent = (k === 'terme' || k === 'tiroir') ? '5 / 6' : '4 / 6'; document.querySelectorAll('.mock-l17 button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.l17Go === k))); window.fdRenderFakes && fdRenderFakes(); };
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-l17-go]'); if (b) go(b.dataset.l17Go); });
+  go(new URLSearchParams(location.search).get('etat') || 'cote');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Export MP4 (lot L25) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* Lot L15 : exports. Modale A3 (export.html), document F5 (f5-pdf.html), peau DSI, marque du workspace dans les PDF. */
+  .l15 [data-pane] { display: none; }
+  .l15[data-view='pdf'] [data-pane~='pdf'], .l15[data-view='gif'] [data-pane~='pdf'], .l15[data-view='mp4'] [data-pane~='pdf'] { display: grid; }
+  .l15[data-view='mp4-en-cours'] [data-pane~='dlg'], .l15[data-view='mp4-termine'] [data-pane~='dlg'] { display: grid; }
+  .l15[data-view='en-cours'] [data-pane~='dlg'], .l15[data-view='termine'] [data-pane~='dlg'], .l15[data-view='erreur'] [data-pane~='dlg'] { display: grid; }
+  .l15[data-view='gabarit'] [data-pane~='gabarit'], .l15[data-view='attestation'] [data-pane~='attestation'] { display: block; }
+  .l15 [data-only] { }
+  .l15[data-view='pdf'] [data-only]:not([data-only~='pdf']),
+  .l15[data-view='gif'] [data-only]:not([data-only~='gif']),
+  .l15[data-view='mp4'] [data-only]:not([data-only~='mp4']),
+  .l15[data-view='mp4-en-cours'] [data-only]:not([data-only~='mp4-en-cours']),
+  .l15[data-view='mp4-termine'] [data-only]:not([data-only~='mp4-termine']),
+  .l15[data-view='en-cours'] [data-only]:not([data-only~='en-cours']),
+  .l15[data-view='termine'] [data-only]:not([data-only~='termine']),
+  .l15[data-view='erreur'] [data-only]:not([data-only~='erreur']) { display: none !important; }
+
+  /* Modale d'export large : options à gauche, aperçu à droite */
+  .x15 { position: fixed; inset: 0; z-index: 5; place-items: center; padding: 64px 24px 24px; background: var(--fd-color-overlay); }
+  .x15-dlg { width: min(1120px, 100%); max-height: calc(100vh - 88px); overflow: auto; display: grid; grid-template-columns: minmax(0, 1fr) 380px; border-radius: var(--fd-radius-2xl); background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: var(--fd-shadow-lg); }
+  .x15-main { padding: 24px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .x15-head { display: flex; align-items: center; gap: 12px; }
+  .x15-head h2 { margin: 0; font-size: var(--fd-text-h2-size); }
+  .x15-head .fd-btn { margin-left: auto; }
+  .x15 .exp-formats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .x15 .exp-format { position: relative; }
+  .x15 .exp-format[aria-disabled='true'] { cursor: not-allowed; opacity: .78; background: var(--fd-color-surface-sunken); }
+  .soon { position: absolute; top: 12px; right: 12px; display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: var(--fd-color-surface); color: var(--fd-color-text-muted); box-shadow: inset 0 0 0 1px var(--fd-color-border); font-size: 11px; font-weight: 700; }
+  .x15 fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .x15 legend { padding: 0; margin-bottom: 8px; }
+  .x15 .opts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 24px; }
+  .x15 .fd-switch { font-size: 14px; }
+  .x15 .fd-switch small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+  .x15-foot { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .x15-foot .fd-help { margin: 0 auto 0 0; }
+  .x15-side { padding: 20px; background: #5B6670; display: flex; flex-direction: column; align-items: center; gap: 12px; border-radius: 0 var(--fd-radius-2xl) var(--fd-radius-2xl) 0; }
+  .x15-side .cap { align-self: stretch; display: flex; justify-content: space-between; color: #FFFFFF; font-size: 13px; }
+  .x15-side .pg { width: 420px; zoom: .76; }
+  .x15-side .pager { display: flex; align-items: center; gap: 10px; color: #FFFFFF; font-size: var(--fd-text-label-size); }
+  .x15-side .pager button { width: 36px; height: 36px; border-radius: 50%; border: 0; background: rgba(255,255,255,.15); color: #FFFFFF; display: grid; place-items: center; cursor: pointer; }
+  .x15-side .pager svg { width: 16px; height: 16px; }
+  /* Aperçu GIF */
+  .gif-frame { width: 100%; border-radius: 12px; overflow: hidden; background: #EEF2F6; box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+  .gif-frame .shotp { border-radius: 0; box-shadow: none; }
+  .gif-frame .bub { position: absolute; left: 44%; top: 30%; width: 46%; padding: 8px 10px; border-radius: 10px; background: #FFFFFF; color: #12161B; box-shadow: 0 6px 18px rgba(0,0,0,.18); font-size: 9px; line-height: 1.35; }
+  .gif-frame .bub b { display: block; font-size: 10px; margin-bottom: 2px; }
+  .gif-frame .cur { position: absolute; left: 82%; top: 12%; width: 14px; height: 14px; color: #12161B; }
+  .gif-meta { display: flex; justify-content: space-between; align-self: stretch; color: #FFFFFF; font-size: 13px; }
+  .gif-dots { display: flex; gap: 4px; align-self: stretch; }
+  .gif-dots span { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.25); }
+  .gif-dots span.on { background: #FFFFFF; }
+
+  /* Petites modales : en cours, terminé, erreur (gabarit A3) */
+  /* L25 : corps défilant, pied toujours visible */
+  .l15[data-view='mp4'] .x15-main { max-height: calc(100vh - 88px); overflow: auto; padding-bottom: 0; }
+  .l15[data-view='mp4'] .x15-foot { position: sticky; bottom: 0; z-index: 1; background: var(--fd-color-surface); padding: 12px 0 20px; border-top: 1px solid var(--fd-color-border); margin-top: 0; }
+  .x15-small { width: min(540px, 100%); padding: 24px; border-radius: var(--fd-radius-2xl); background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: var(--fd-shadow-lg); display: flex; flex-direction: column; gap: 16px; }
+  .x15-small .x15-foot { justify-content: flex-end; }
+  .x15-small .exp-bar span { width: 48%; }
+  .err-box { padding: 10px 12px; border-radius: 10px; background: var(--fd-color-surface-sunken); font-size: 13px; color: var(--fd-color-text-muted); }
+  .err-box b { color: var(--fd-color-text); }
+
+  /* Documents PDF à la marque du workspace */
+  .l15 .pdf-desk { position: relative; z-index: 1; padding-top: 72px; }
+  .wsl { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 4px; background: #A3195B; color: #FFFFFF; font-size: 6.5px; font-weight: 800; }
+  .pg .run .ws { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #12161B; }
+  .cover .brand .wsl { width: 22px; height: 22px; border-radius: 6px; font-size: 8px; }
+  .pg.one .shotp { aspect-ratio: 16 / 10; }
+  .pg.one .stepblk h3 { font-size: 14px; }
+  .pg.one .stepblk p { font-size: 12px; }
+  .txt-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .txt-list li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid #E3E8EE; }
+  .txt-list .num { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #080808; color: #FFFFFF; font-weight: 800; font-size: 11px; }
+  .txt-list h3 { margin: 0; } .txt-list p { margin: 3px 0 0; font-size: 11px; }
+  .pdf-label { display: block; text-align: center; color: #FFFFFF; font-size: 13px; margin-top: 10px; }
+  .pdf-col { display: flex; flex-direction: column; align-items: center; }
+  /* Attestation */
+  .att { padding: 40px 40px 44px; gap: 16px; }
+  .att .hd { display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 2px solid #12161B; }
+  .att .hd .wsl { width: 30px; height: 30px; border-radius: 8px; font-size: 11px; }
+  .att .hd b { font-size: 12px; } .att .hd small { display: block; font-size: 9px; color: #4A5562; }
+  .att h1 { font-size: 24px; margin-top: 14px; }
+  .att .kind { display: inline-flex; align-self: flex-start; padding: 3px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px #12161B; font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .att p { margin: 0; font-size: 11px; line-height: 1.6; }
+  .att table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  .att th { text-align: left; font-size: 9px; color: #4A5562; font-weight: 700; padding: 6px 0; border-bottom: 1px solid #12161B; }
+  .att td { padding: 7px 0; border-bottom: 1px solid #E3E8EE; }
+  .att td:last-child, .att th:last-child { text-align: right; }
+  .att .note { margin-top: auto; padding: 10px 12px; border-radius: 6px; background: #F3F5F8; font-size: 9.5px; color: #12161B; }
+  .att .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 9.5px; color: #4A5562; }
+  .att .sign span { display: block; height: 36px; border-bottom: 1px solid #9AA5B1; margin-top: 4px; }
+  @media (max-width: 1100px) { .x15-dlg { grid-template-columns: minmax(0, 1fr); } .x15-side { border-radius: 0 0 var(--fd-radius-2xl) var(--fd-radius-2xl); } .x15 .exp-formats { grid-template-columns: 1fr 1fr; } .x15 .opts { grid-template-columns: minmax(0, 1fr); } }
+  .mock-state { z-index: 90; }
+</style>
+</head>
+<body>
+<div class="l15" data-view="mp4">
+<div class="page-bg"></div>
+
+<!-- L25 : modale d'export, format Vidéo MP4 (dérivée de L15-01 et L15-02) -->
+<div class="x15" data-pane="pdf">
+  <section class="x15-dlg" role="dialog" aria-modal="true" aria-labelledby="x-t">
+    <div class="x15-main">
+      <div class="x15-head"><span class="fd-icon-chip"><i data-icon="download"></i></span><h2 id="x-t">Exporter « Créer une fiche usager »</h2><button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" aria-label="Fermer"><i data-icon="x"></i></button></div>
+      <div class="exp-formats" role="radiogroup" aria-label="Format">
+        <button class="exp-format" type="button" role="radio" aria-checked="true" aria-pressed="true" data-only="pdf"><span class="fd-icon-chip"><i data-icon="fileText"></i></span><b>PDF</b><small>À imprimer ou à joindre. Étapes, captures et textes des bulles.</small></button>
+        <button class="exp-format" type="button" role="radio" aria-checked="false" aria-pressed="false" data-only="gif mp4" data-view-set="pdf"><span class="fd-icon-chip"><i data-icon="fileText"></i></span><b>PDF</b><small>À imprimer ou à joindre. Étapes, captures et textes des bulles.</small></button>
+        <button class="exp-format" type="button" role="radio" aria-checked="false" aria-pressed="false" data-only="pdf mp4" data-view-set="gif"><span class="fd-icon-chip"><i data-icon="gif"></i></span><b>GIF animé</b><small>Boucle courte, sans son. Pour une documentation ou un ticket.</small></button>
+        <button class="exp-format" type="button" role="radio" aria-checked="true" aria-pressed="true" data-only="gif"><span class="fd-icon-chip"><i data-icon="gif"></i></span><b>GIF animé</b><small>Boucle courte, sans son. Pour une documentation ou un ticket.</small></button>
+        <button class="exp-format" type="button" role="radio" aria-checked="false" aria-pressed="false" data-only="pdf gif" data-view-set="mp4"><span class="fd-icon-chip"><i data-icon="film"></i></span><b>Vidéo MP4</b><small>Lecture automatique avec les bulles. Pour un intranet, une formation ou un réseau social.</small></button>
+        <button class="exp-format" type="button" role="radio" aria-checked="true" aria-pressed="true" data-only="mp4"><span class="fd-icon-chip"><i data-icon="film"></i></span><b>Vidéo MP4</b><small>Lecture automatique avec les bulles. Pour un intranet, une formation ou un réseau social.</small></button>
+        <button class="exp-format" type="button" role="radio" aria-checked="false" aria-disabled="true" aria-describedby="soon-zip"><span class="soon" id="soon-zip">Bientôt</span><span class="fd-icon-chip"><i data-icon="archive"></i></span><b>Hors ligne (.zip)</b><small>Démo autonome, ouvrable sans Internet.</small></button>
+      </div>
+
+      <!-- Options PDF -->
+      <fieldset data-only="pdf"><legend class="fd-label">Mise en page</legend>
+        <div class="fd-segmented" role="radiogroup" aria-label="Mise en page" style="align-self:flex-start">
+          <button type="button" role="radio" aria-checked="true" aria-pressed="true">Une étape par page</button>
+          <button type="button" role="radio" aria-checked="false" aria-pressed="false">Deux étapes par page</button>
+        </div>
+      </fieldset>
+      <fieldset data-only="pdf"><legend class="fd-label">Contenu</legend>
+        <div class="opts">
+          <label class="fd-switch"><span>Captures d'écran<small>Avec les zones floutées déjà appliquées</small></span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+          <label class="fd-switch"><span>Texte des bulles<small>Titre et texte de chaque étape</small></span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+          <label class="fd-switch"><span>Numérotation des étapes<small>Pastille numérotée et cadre sur la capture</small></span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+          <label class="fd-switch"><span>Couverture et sommaire<small>Titre, workspace, liste des étapes</small></span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+        </div>
+      </fieldset>
+      <div class="row-2" data-only="pdf">
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="fmt">Format</label><select class="fd-select" id="fmt"><option>A4 portrait</option><option>A4 paysage</option></select></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="lng">Langue du document</label><select class="fd-select" id="lng"><option>Français</option></select></div>
+      </div>
+
+      <!-- Options GIF -->
+      <fieldset data-only="gif mp4"><legend class="fd-label">Vitesse</legend>
+        <div class="fd-segmented" role="radiogroup" aria-label="Vitesse" style="align-self:flex-start">
+          <button type="button" role="radio" aria-checked="false" aria-pressed="false">Lente · 4 s par étape</button>
+          <button type="button" role="radio" aria-checked="true" aria-pressed="true">Normale · 2,5 s</button>
+          <button type="button" role="radio" aria-checked="false" aria-pressed="false">Rapide · 1,5 s</button>
+        </div>
+      </fieldset>
+      <div class="row-2" data-only="mp4">
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="msz">Format de l'image</label><select class="fd-select" id="msz"><option selected>16:9 · 1 920 × 1 080 (recommandé)</option><option>16:9 · 1 280 × 720 (léger)</option><option>1:1 · 1 080 × 1 080 (réseaux sociaux)</option><option>9:16 · 1 080 × 1 920 (démo mobile)</option></select></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="mrg">Étapes</label><select class="fd-select" id="mrg"><option>Toutes les étapes (7)</option><option>Étapes 1 à 4</option></select></div>
+      </div>
+      <fieldset data-only="mp4"><legend class="fd-label">Contenu</legend>
+        <div class="opts">
+          <label class="fd-switch"><span>Bulle de l'étape</span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+          <label class="fd-switch"><span>Curseur et animation de clic<small>Déplacement du curseur entre deux étapes</small></span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+          <label class="fd-switch"><span>Zooms de l'éditeur<small>Les zooms et panoramiques réglés par étape</small></span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+          <label class="fd-switch"><span>Écran de titre<small>Titre de la démo et logo du workspace, 3 s</small></span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+        </div>
+      </fieldset>
+      <fieldset data-only="mp4"><legend class="fd-label">Sous-titres</legend>
+        <div class="fd-segmented" role="radiogroup" aria-label="Sous-titres" style="align-self:flex-start">
+          <button type="button" role="radio" aria-checked="true" aria-pressed="true">Fichier .vtt à part (recommandé)</button>
+          <button type="button" role="radio" aria-checked="false" aria-pressed="false">Incrustés dans l'image</button>
+          <button type="button" role="radio" aria-checked="false" aria-pressed="false">Aucun</button>
+        </div>
+        <p class="fd-help" style="margin:0">Les sous-titres reprennent le texte des bulles et les sous-titres des étapes vidéo. Sans son ni sous-titres, une vidéo n'est pas accessible.</p>
+      </fieldset>
+      <div class="row-2" data-only="gif">
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="gsz">Taille</label><select class="fd-select" id="gsz"><option>640 px de large (léger)</option><option selected>960 px de large (recommandé)</option><option>1 280 px de large</option></select></div>
+        <div class="fd-field" style="margin:0"><label class="fd-label" for="grg">Étapes</label><select class="fd-select" id="grg"><option>Toutes les étapes (7)</option><option>Étapes 1 à 4</option></select></div>
+      </div>
+      <fieldset data-only="gif"><legend class="fd-label">Contenu</legend>
+        <div class="opts">
+          <label class="fd-switch"><span>Bulle de l'étape</span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+          <label class="fd-switch"><span>Curseur et animation de clic</span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+          <label class="fd-switch"><span>Lecture en boucle</span><input type="checkbox" role="switch" checked><span class="fd-switch__track"></span></label>
+        </div>
+      </fieldset>
+
+      <div class="fd-alert" style="background:var(--fd-color-info-soft)"><i data-icon="lock"></i><div>Les zones floutées restent floutées. Les commentaires internes et les étapes de formulaire ne sont jamais exportés.</div></div>
+      <div class="x15-foot">
+        <p class="fd-help" data-only="pdf">9 pages · PDF balisé (titres, texte réel, langue), lisible au lecteur d'écran.</p>
+        <p class="fd-help" data-only="mp4">20,5 secondes (écran de titre compris) · son des étapes vidéo seulement. Le fichier se crée dans votre navigateur.</p>
+        <p class="fd-help" data-only="gif">17,5 secondes en boucle · sans son. Au-delà de 15 étapes, préférez le PDF : un GIF long devient lourd.</p>
+        <button class="fd-btn" type="button">Annuler</button>
+        <button class="fd-btn fd-btn--primary" type="button" data-view-set="en-cours" data-only="pdf"><i data-icon="download"></i>Exporter en PDF</button>
+        <button class="fd-btn fd-btn--primary" type="button" data-only="gif"><i data-icon="download"></i>Exporter en GIF</button>
+        <button class="fd-btn fd-btn--primary" type="button" data-only="mp4" data-view-set="mp4-en-cours"><i data-icon="download"></i>Exporter en MP4</button>
+      </div>
+    </div>
+
+    <aside class="x15-side" aria-label="Aperçu" data-only="pdf">
+      <div class="cap"><span>Aperçu</span><span>se met à jour à chaque option</span></div>
+      <article class="pg one" aria-hidden="true"><div class="run"><span>Créer une fiche usager</span><span class="ws"><span class="wsl">ML</span>Mission Locale Exemple</span></div>
+        <h2>Créer la fiche</h2>
+        <div class="stepblk"><span class="num">3</span><div><h3>Cliquer sur « + Ajouter »</h3><p>Depuis la liste des usagers, le bouton se trouve en haut à droite.</p></div></div>
+        <div class="shotp"><div class="fakeapp"><div class="nav"><b>Logiciel</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><dl><dt>Nom</dt><dd><span class="blurz"></span></dd><dt>Structure</dt><dd>Antenne Nord</dd><dt>Statut</dt><dd>Actif</dd></dl><span class="btnx" style="font-size:6.5px;padding:3px 8px;align-self:flex-end;margin-top:-58px">+ Ajouter</span></div></div><span class="ring" style="left:79%;top:5%;width:16%;height:12%"></span><span class="marker" style="left:85%;top:15%">3</span></div>
+        <div class="foot"><span>Mission Locale Exemple · version 3</span><span>Page 4 / 9</span></div>
+      </article>
+      <div class="pager"><button type="button" aria-label="Page précédente"><i data-icon="arrowLeft"></i></button><span>Page 4 sur 9</span><button type="button" aria-label="Page suivante"><i data-icon="arrowRight"></i></button></div>
+    </aside>
+    <aside class="x15-side" aria-label="Aperçu" data-only="gif mp4">
+      <div class="cap"><span>Aperçu</span><span data-only="gif">960 × 600 px</span><span data-only="mp4">1 920 × 1 080 · 00:07 / 00:20</span></div>
+      <div class="gif-frame" aria-hidden="true"><div class="shotp"><div class="fakeapp"><div class="nav"><b>Logiciel</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><dl><dt>Nom</dt><dd><span class="blurz"></span></dd><dt>Structure</dt><dd>Antenne Nord</dd><dt>Statut</dt><dd>Actif</dd></dl><span class="btnx" style="font-size:6.5px;padding:3px 8px;align-self:flex-end;margin-top:-58px">+ Ajouter</span></div></div><span class="bub"><b>Cliquer sur « + Ajouter »</b>Le bouton se trouve en haut à droite de la liste.</span><span class="cur"><i data-icon="mousePointer"></i></span></div></div>
+      <div class="gif-dots" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span></div>
+      <div class="gif-meta"><span>Étape 3 sur 7</span><button class="fd-btn fd-btn--sm" type="button"><i data-icon="pause"></i>Pause</button></div>
+    </aside>
+  </section>
+</div>
+
+<!-- L15-03 à L15-05 : en cours, terminé, erreur -->
+<div class="x15" data-pane="dlg">
+  <section class="x15-small" role="dialog" aria-labelledby="p-t" data-only="en-cours">
+    <div class="x15-head"><span class="fd-icon-chip"><i data-icon="fileText"></i></span><h2 id="p-t">Export PDF en cours</h2></div>
+    <div class="exp-progress">
+      <div class="exp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="48" aria-label="Progression de l'export"><span></span></div>
+      <p class="fd-label" style="margin:0" aria-live="polite">48 % · page 4 sur 9</p>
+      <ol class="exp-steps">
+        <li class="done"><i data-icon="checkCircle"></i>Préparation des captures</li>
+        <li class="cur"><span class="spin" aria-hidden="true"></span>Mise en page (4 / 9)</li>
+        <li><span class="todo" aria-hidden="true"></span>Assemblage du PDF</li>
+      </ol>
+    </div>
+    <p class="fd-help" style="margin:0">Le document se crée dans votre navigateur : gardez cet onglet ouvert. Vous pouvez travailler dans un autre onglet.</p>
+    <div class="x15-foot"><button class="fd-btn" type="button">Annuler l'export</button></div>
+  </section>
+  <section class="x15-small" role="dialog" aria-labelledby="d-t" data-only="termine">
+    <div class="x15-head"><span class="fd-icon-chip" style="background:var(--fd-color-success-soft);color:var(--fd-color-success)"><i data-icon="checkCircle"></i></span><h2 id="d-t">PDF prêt</h2><button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="exp-file"><span class="fd-icon-chip"><i data-icon="fileText"></i></span><span><b>creer-une-fiche-usager.pdf</b><small>9 pages · 1,9 Mo · A4 portrait</small></span><button class="fd-btn fd-btn--primary" type="button"><i data-icon="download"></i>Télécharger</button></div>
+    <p class="fd-help" style="margin:0">Le téléchargement démarre aussi tout seul. Le fichier n'est pas conservé : relancez l'export pour l'obtenir à nouveau.</p>
+    <div class="x15-foot"><button class="fd-btn" type="button" data-view-set="pdf">Exporter dans un autre format</button></div>
+  </section>
+  <section class="x15-small" role="alertdialog" aria-labelledby="e-t" aria-describedby="e-d" data-only="erreur">
+    <div class="x15-head"><span class="fd-icon-chip" style="background:var(--fd-color-danger-soft);color:var(--fd-color-danger)"><i data-icon="alert"></i></span><h2 id="e-t">L'export n'a pas abouti</h2></div>
+    <p style="margin:0" id="e-d">La capture de l'étape 5 n'a pas pu être chargée. Vérifiez votre connexion et réessayez, ou exportez sans les captures.</p>
+    <div class="err-box"><b>Détail :</b> étape 5 « Choisir la structure de rattachement », image introuvable.</div>
+    <div class="x15-foot"><button class="fd-btn" type="button">Fermer</button><button class="fd-btn" type="button">Exporter sans les captures</button><button class="fd-btn fd-btn--primary" type="button" data-view-set="en-cours"><i data-icon="refresh"></i>Réessayer</button></div>
+  </section>
+</div>
+
+<div class="x15" data-pane="dlg">
+  <section class="x15-small" role="dialog" aria-labelledby="mp-t" data-only="mp4-en-cours">
+    <div class="x15-head"><span class="fd-icon-chip"><i data-icon="film"></i></span><h2 id="mp-t">Export MP4 en cours</h2></div>
+    <div class="exp-progress">
+      <div class="exp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="57" aria-label="Progression de l'export"><span style="width:57%"></span></div>
+      <p class="fd-label" style="margin:0" aria-live="polite">57 % · étape 4 sur 7</p>
+      <ol class="exp-steps">
+        <li class="done"><i data-icon="checkCircle"></i>Préparation des captures</li>
+        <li class="cur"><span class="spin" aria-hidden="true"></span>Rendu des images (étape 4 / 7)</li>
+        <li><span class="todo" aria-hidden="true"></span>Encodage de la vidéo</li>
+        <li><span class="todo" aria-hidden="true"></span>Sous-titres (.vtt)</li>
+      </ol>
+    </div>
+    <p class="fd-help" style="margin:0">La vidéo se crée dans votre navigateur : gardez cet onglet ouvert. Vous pouvez travailler dans un autre onglet.</p>
+    <div class="x15-foot"><button class="fd-btn" type="button">Annuler l'export</button></div>
+  </section>
+  <section class="x15-small" role="dialog" aria-labelledby="md-t" data-only="mp4-termine">
+    <div class="x15-head"><span class="fd-icon-chip" style="background:var(--fd-color-success-soft);color:var(--fd-color-success)"><i data-icon="checkCircle"></i></span><h2 id="md-t">Vidéo prête</h2><button class="fd-btn fd-btn--ghost fd-btn--icon" type="button" aria-label="Fermer"><i data-icon="x"></i></button></div>
+    <div class="exp-file"><span class="fd-icon-chip"><i data-icon="film"></i></span><span><b>creer-une-fiche-usager.mp4</b><small>00:20 · 1 920 × 1 080 · 3,2 Mo</small></span><button class="fd-btn fd-btn--primary" type="button"><i data-icon="download"></i>Télécharger</button></div>
+    <div class="exp-file"><span class="fd-icon-chip"><i data-icon="captions"></i></span><span><b>creer-une-fiche-usager.fr.vtt</b><small>Sous-titres · 9 répliques</small></span><button class="fd-btn" type="button"><i data-icon="download"></i>Télécharger</button></div>
+    <p class="fd-help" style="margin:0">Joignez toujours le fichier .vtt à la vidéo. Le fichier n'est pas conservé : relancez l'export pour l'obtenir à nouveau.</p>
+    <div class="x15-foot"><button class="fd-btn" type="button" data-view-set="mp4">Exporter dans un autre format</button></div>
+  </section>
+</div>
+
+<!-- L15-06 : gabarit des pages PDF à la marque -->
+<section data-pane="gabarit" class="pdf-desk">
+  <div class="pdf-row">
+    <div class="pdf-col">
+      <article class="pg cover" aria-label="Page 1 : couverture">
+        <div class="band"><span class="kick">Tutoriel</span><h1>Créer une fiche usager</h1><span style="font-size:12px;opacity:.95">Formation « Nouvel outil de gestion » · module 2</span></div>
+        <div class="body">
+          <dl><dt>Étapes</dt><dd>7</dd><dt>Version</dt><dd>3</dd><dt>Tutoriel en ligne</dt><dd>formation.tutoclick.example/mission-locale-exemple</dd></dl>
+          <ol class="toc" style="margin-top:4px">
+            <li><span class="n">1</span><span>Ouvrir le menu Usagers</span><span>2</span></li>
+            <li><span class="n">2</span><span>Filtrer par structure</span><span>3</span></li>
+            <li><span class="n">3</span><span>Cliquer sur « + Ajouter »</span><span>4</span></li>
+            <li><span class="n">…</span><span>4 autres étapes</span><span></span></li>
+          </ol>
+        </div>
+        <div class="brand"><span class="wsl">ML</span>Mission Locale Exemple · document interne</div>
+      </article>
+      <span class="pdf-label">Couverture et sommaire</span>
+    </div>
+    <div class="pdf-col">
+      <article class="pg one" aria-label="Page 4 : étape 3"><div class="run"><span>Créer une fiche usager</span><span class="ws"><span class="wsl">ML</span>Mission Locale Exemple</span></div>
+        <div class="stepblk"><span class="num">3</span><div><h3>Cliquer sur « + Ajouter »</h3><p>Depuis la liste des usagers, le bouton se trouve en haut à droite.</p></div></div>
+        <div class="shotp"><div class="fakeapp"><div class="nav"><b>Logiciel</b><span>Accueil</span><span>Usagers</span><span>Agenda</span></div><div class="body"><h4>Usagers</h4><dl><dt>Nom</dt><dd><span class="blurz"></span></dd><dt>Structure</dt><dd>Antenne Nord</dd><dt>Statut</dt><dd>Actif</dd></dl><span class="btnx" style="font-size:6.5px;padding:3px 8px;align-self:flex-end;margin-top:-58px">+ Ajouter</span></div></div><span class="ring" style="left:79%;top:5%;width:16%;height:12%"></span><span class="marker" style="left:85%;top:15%">3</span></div>
+        <div class="keep"><b>À retenir</b>Avant : Dossiers › Nouveau › Usager. Maintenant : « + Ajouter » depuis la liste.</div>
+        <div class="foot"><span>Mission Locale Exemple · version 3</span><span>Page 4 / 9</span></div>
+      </article>
+      <span class="pdf-label">Une étape par page, avec capture</span>
+    </div>
+    <div class="pdf-col">
+      <article class="pg" aria-label="Page 2 : étapes sans captures"><div class="run"><span>Créer une fiche usager</span><span class="ws"><span class="wsl">ML</span>Mission Locale Exemple</span></div>
+        <h2>Étapes</h2>
+        <ol class="txt-list">
+          <li><span class="num">1</span><div><h3>Ouvrir le menu Usagers</h3><p>Dans la barre de gauche, cliquez sur « Usagers ».</p></div></li>
+          <li><span class="num">2</span><div><h3>Filtrer par structure</h3><p>Choisissez votre antenne pour n'afficher que vos usagers.</p></div></li>
+          <li><span class="num">3</span><div><h3>Cliquer sur « + Ajouter »</h3><p>Depuis la liste des usagers, le bouton se trouve en haut à droite.</p></div></li>
+          <li><span class="num">4</span><div><h3>Remplir les champs obligatoires</h3><p>Les champs marqués d'un astérisque sont obligatoires : nom, prénom, date d'entrée.</p></div></li>
+          <li><span class="num">5</span><div><h3>Choisir la structure de rattachement</h3><p>Elle détermine qui voit la fiche.</p></div></li>
+        </ol>
+        <div class="foot"><span>Mission Locale Exemple · version 3</span><span>Page 2 / 3</span></div>
+      </article>
+      <span class="pdf-label">Sans captures (texte des bulles seul)</span>
+    </div>
+  </div>
+</section>
+
+<!-- L15-07 : attestation de suivi -->
+<section data-pane="attestation" class="pdf-desk">
+  <div class="pdf-row">
+    <div class="pdf-col">
+      <article class="pg att" aria-label="Attestation de suivi">
+        <div class="hd"><span class="wsl">ML</span><span><b>Mission Locale Exemple</b><small>Centre de formation</small></span></div>
+        <span class="kind">Attestation de suivi · non certifiante</span>
+        <h1>Attestation de suivi</h1>
+        <p>Mission Locale Exemple atteste que <b>Alex Martin</b> a suivi en ligne la formation <b>« Agenda partagé »</b> et validé l'ensemble de ses modules. Formation validée le <b>24/10/2026</b>.</p>
+        <table>
+          <thead><tr><th scope="col">Module</th><th scope="col">Statut</th><th scope="col">Quiz</th></tr></thead>
+          <tbody>
+            <tr><td>1 · Partager un agenda</td><td>Validé</td><td>—</td></tr>
+            <tr><td>2 · Planifier un rendez-vous</td><td>Validé</td><td>—</td></tr>
+          </tbody>
+        </table>
+        <div class="sign"><div>Pour Mission Locale Exemple<span></span></div><div>Document généré le 18/11/2026<span style="border:0"></span></div></div>
+        <div class="note">Attestation de suivi, non certifiante. Elle indique que les modules ont été suivis et validés en ligne ; elle ne vaut ni diplôme, ni certification, ni habilitation.</div>
+        <div class="foot"><span>Mission Locale Exemple · centre de formation</span><span>Page 1 / 1</span></div>
+      </article>
+      <span class="pdf-label">A4 portrait, une page, en noir et blanc imprimable</span>
+    </div>
+  </div>
+</section>
+
+</div>
+<div class="mock-state fd-segmented" role="group" aria-label="Écran (maquette)" style="left:50%;transform:translateX(-50%);top:16px;bottom:auto">
+  <button type="button" data-view-set="mp4" aria-pressed="true">MP4</button>
+  <button type="button" data-view-set="mp4-en-cours" aria-pressed="false">En cours</button>
+  <button type="button" data-view-set="mp4-termine" aria-pressed="false">Terminé</button>
+</div>
+<div class="mock-theme fd-segmented fd-segmented--strong" role="group" aria-label="Thème de la maquette">
+  <button type="button" data-theme-set="light" aria-pressed="true"><i data-icon="sun"></i> Clair</button>
+  <button type="button" data-theme-set="dark" aria-pressed="false"><i data-icon="moon"></i> Sombre</button>
+</div>
+</body>
+</html>
