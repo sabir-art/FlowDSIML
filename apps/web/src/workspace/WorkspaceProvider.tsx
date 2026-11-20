@@ -8,6 +8,10 @@ export type WorkspaceWithRole = Tables<'workspaces'> & { role: WorkspaceRole };
 
 interface WorkspaceState {
   loading: boolean;
+  /** Lecture des espaces en échec (réseau, serveur) : la liste est inconnue, pas vide. */
+  error: boolean;
+  /** Relit les espaces en repassant par l'état de chargement (bouton « Réessayer »). */
+  retry: () => void;
   workspaces: WorkspaceWithRole[];
   current: WorkspaceWithRole | null;
   select: (id: string) => void;
@@ -29,6 +33,7 @@ function readSaved(): string | null {
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [workspaces, setWorkspaces] = useState<WorkspaceWithRole[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(readSaved);
 
@@ -38,11 +43,18 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    const { data } = await supabase
+    const { data, error: readError } = await supabase
       .from('members')
       .select('role, workspaces(*)')
       .eq('user_id', user.id)
       .order('created_at');
+    // Panne de lecture : on garde la liste connue et on le signale (jamais « aucun espace » → onboarding)
+    if (readError) {
+      setError(true);
+      setLoading(false);
+      return;
+    }
+    setError(false);
     const list = (data ?? [])
       .filter((m) => m.workspaces)
       .map((m) => ({ ...(m.workspaces as Tables<'workspaces'>), role: m.role }));
@@ -62,6 +74,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const value: WorkspaceState = {
     loading,
+    error,
+    retry: () => {
+      setLoading(true);
+      void reload();
+    },
     workspaces,
     current,
     select: (id) => {

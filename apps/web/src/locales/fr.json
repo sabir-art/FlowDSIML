@@ -4448,6 +4448,7 @@
     "errorBody": "Vérifiez votre connexion, puis réessayez. Vos modifications enregistrées ne sont pas perdues.",
     "unavailableTitle": "Cette démo n’est pas disponible",
     "unavailableBody": "Elle a peut-être été supprimée, ou vous n’y avez plus accès.",
-    "backToDemos": "Retour aux démos"
+    "backToDemos": "Retour aux démos",
+    "workspaceError": "Impossible de charger votre espace"
   }
 }

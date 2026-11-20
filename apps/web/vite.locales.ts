@@ -9,7 +9,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { Plugin } from 'vite';
+import type { Plugin, ViteDevServer } from 'vite';
 
 const WEB = fileURLToPath(new URL('./', import.meta.url));
 const SRC = path.join(WEB, 'src');
@@ -135,8 +135,12 @@ const REST = 'virtual:locale-fr-rest';
 
 export function localeSplit(): Plugin {
   let cache: { core: Tree; rest: Tree } | null = null;
+  let server: ViteDevServer | null = null;
   return {
     name: 'locale-split',
+    configureServer(s) {
+      server = s;
+    },
     resolveId: (id) => (id === CORE || id === REST ? `\0${id}` : undefined),
     load(id) {
       if (id !== `\0${CORE}` && id !== `\0${REST}`) return undefined;
@@ -144,9 +148,14 @@ export function localeSplit(): Plugin {
       cache ??= splitLocale(JSON.parse(fs.readFileSync(FR, 'utf8')) as Tree);
       return `export default JSON.parse(${JSON.stringify(JSON.stringify(id === `\0${CORE}` ? cache.core : cache.rest))});`;
     },
-    // En dev, un texte ou un fichier modifié peut changer le découpage
-    watchChange() {
+    // En dev, un texte ou un fichier source modifié peut changer le découpage : modules recalculés
+    watchChange(file) {
+      if (!/\.(tsx?|json)$/.test(file)) return;
       cache = null;
+      for (const id of [CORE, REST]) {
+        const mod = server?.moduleGraph.getModuleById(`\0${id}`);
+        if (mod) server?.moduleGraph.invalidateModule(mod);
+      }
     },
   };
 }

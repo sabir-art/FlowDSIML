@@ -45,7 +45,7 @@ export function Onboarding() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile, user } = useAuth();
-  const { reload, select, workspaces } = useWorkspace();
+  const { reload, select, workspaces, error: wsError } = useWorkspace();
   const help = useHelp();
   const toast = useToast();
   const picker = useRef<HTMLInputElement>(null);
@@ -117,7 +117,8 @@ export function Onboarding() {
   // « Passer » : il faut au moins un espace pour utiliser l'app ; à l'étape 1, on le crée avec le nom saisi
   // (ou un nom par défaut), puis on va aux démos.
   async function skip() {
-    if (!wsId && step === 1 && workspaces.length === 0) {
+    // Liste des espaces inconnue (lecture en échec) : ne pas en créer un sans le vouloir
+    if (!wsId && step === 1 && workspaces.length === 0 && !wsError) {
       const ok = await createWorkspace(
         name.trim() || t('onboarding.defaultName', { name: first || '' }).trim(),
       );

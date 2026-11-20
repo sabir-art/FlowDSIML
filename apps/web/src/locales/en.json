@@ -4448,6 +4448,7 @@
     "errorBody": "Check your connection, then try again. Your saved changes are not lost.",
     "unavailableTitle": "This demo isn’t available",
     "unavailableBody": "It may have been deleted, or you no longer have access.",
-    "backToDemos": "Back to demos"
+    "backToDemos": "Back to demos",
+    "workspaceError": "Couldn’t load your workspace"
   }
 }
