@@ -2,7 +2,7 @@
 
 > Paquet L48-D du benchmark (`benchmark-structure.md`, rang 6). Il se livre **avec L47**.
 > Maquette : `docs/ux/maquettes/refonte/l48d-analytics.html`. Règles visuelles : `composants.md` §17 et les deltas T1 à T9 de `ui-deltas-l41-l49.md`.
-> Code de départ : `apps/web/src/pages/analytics/AnalyticsPage.tsx` (b0aa6cc). **Aucun changement de schéma** : toutes les données existent déjà (`workspace_analytics`, `workspace_overview`, `workspace_returning`, `demo_analytics`).
+> Code de départ : `apps/web/src/pages/analytics/AnalyticsPage.tsx` (b0aa6cc). **Aucun changement de schéma** : toutes les données existent déjà (`workspace_analytics`, `workspace_overview`, `workspace_returning`, `demo_analytics`, colonnes `events.device` et `events.browser`). Un seul ajout côté serveur : les agrégats `devices` et `browsers` dans `workspace_analytics` (§3.2).
 > Données fictives uniquement.
 
 ## 1. Onglets
@@ -53,7 +53,7 @@
 | **Sources** | 6 | Les 4 sources enregistrées (Lien direct, Lien partagé, Intégration, Page publique), une par ligne : nom, barre de 6 px, nombre de vues et part. Triées par nombre décroissant. | `workspace_analytics.sources` |
 | **Étape par étape** | 6 | Démo choisie (menu dans le titre) ; une ligne par étape ; la plus forte perte en texte `danger`. **Pied** : « Bouton de fin : 42 clics » | `demo_analytics.steps` et `demo_analytics.ctaClicks` (même démo) |
 | **Nouveaux et récurrents** | 6 | 2 chiffres (nouveaux, récurrents) et une barre empilée en 2 tons de gris | `workspace_returning` |
-| **Appareils et navigateurs** | 6 | « Bientôt » en texte à droite du titre ; une phrase : « Le type d'appareil n'est pas encore enregistré. » | aucune (jamais masqué) |
+| **Appareils et navigateurs** | 6 | Deux blocs, avec des lignes comme Sources : **Appareil** (Ordinateur, Mobile, Tablette), puis **Navigateur** (les 3 premiers, le reste dans « Autres »). | `events.device` et `events.browser`, déjà envoyés par le lecteur (`deviceInfo()`, L19) et déjà utilisés dans Segments. On ajoute `devices` et `browsers` à la sortie de `workspace_analytics`, avec un compte des `demo_view` par valeur. |
 
 - **Ligne de widget** (Sources, Étape par étape) : nom à gauche et chiffre à droite sur une ligne, barre de 6 px sur toute la largeur dessous, 14 px entre deux lignes. Le nom ne se coupe pas, même dans une demi-largeur.
 - **En-tête de widget** :
@@ -65,7 +65,11 @@
   - « Pas encore de données sur cette période » ;
   - lien « Élargir à 90 jours » si la période est plus courte.
   - Le widget garde sa hauteur minimale (220 px), pour que la grille ne saute pas.
-- **Localisation : non retenue** (minimisation des données, benchmark §6).
+- **Localisation : pas de widget** (minimisation des données, benchmark §6).
+  - **Attention** : le pays est **déjà collecté**. La fonction `track` lit l'en-tête `cf-ipcountry`, qui donne un code à 2 lettres et jamais l'IP (`events.country`, L19). Segments et Temps réel s'en servent.
+  - L48-D n'ajoute aucun affichage du pays.
+  - Garder ou arrêter cette collecte est une question pour le DPO, hors de ce lot.
+- Le badge « Bientôt » actuel de la ligne « Appareils », dans le bloc Sources, est faux : les données existent. Il disparaît avec ce widget.
 
 ## 4. Onglet Démos
 
@@ -104,18 +108,22 @@
 | `analytics.widen` | Élargir à 90 jours |
 | `analytics.newReturning` | Nouveaux et récurrents |
 | `analytics.devicesBrowsers` | Appareils et navigateurs |
-| `analytics.devicesSoon` | Le type d'appareil n'est pas encore enregistré. |
+| `analytics.device` | Appareil |
+| `analytics.browser` | Navigateur |
+| `analytics.deviceKinds.desktop` … `tablet` | Ordinateur, Mobile, Tablette |
+| `analytics.others` | Autres |
 | `analytics.ctaFooter` | Bouton de fin : {{n}} clics |
 | `analytics.sortBy` | Trier par |
 
 ## 7. Recette
 
-1. Rôle avec `leads.view` : 4 onglets et « Plus », 4 indicateurs. Sans ce droit : 3 onglets et 3 indicateurs.
-2. `?tab=segments` : « Plus » affiche « Segments » et passe à l'état actif.
-3. 12 démos : le menu Démo a une recherche ; la saisie de « fiche » filtre la liste ; avec « zzz », « Aucune démo ne correspond » s'affiche.
-4. Espace sans visites sur 7 j : chaque widget montre son état vide à la même hauteur, avec « Élargir à 90 jours ».
-5. Widget Sources › Exporter en CSV : le fichier contient les lignes du widget pour la période et les filtres.
-6. Onglet Démos : clic sur « Complétion » : tri décroissant, en-tête en gras, `aria-sort="descending"` ; un second clic inverse le tri. Clic sur une ligne : Analytics de la démo.
-7. `?indicateur=cta` : Vues est actif.
-8. 390 px : pas de défilement horizontal de la page ; les onglets défilent seuls.
-9. Sombre : textes à 4,5:1 au moins ; filets et barres à 3:1 au moins.
+1. Widget « Appareils et navigateurs » : les comptes égalent ceux d'un segment « Appareil est Mobile » sur la même période.
+2. Rôle avec `leads.view` : 4 onglets et « Plus », 4 indicateurs. Sans ce droit : 3 onglets et 3 indicateurs.
+3. `?tab=segments` : « Plus » affiche « Segments » et passe à l'état actif.
+4. 12 démos : le menu Démo a une recherche ; la saisie de « fiche » filtre la liste ; avec « zzz », « Aucune démo ne correspond » s'affiche.
+5. Espace sans visites sur 7 j : chaque widget montre son état vide à la même hauteur, avec « Élargir à 90 jours ».
+6. Widget Sources › Exporter en CSV : le fichier contient les lignes du widget pour la période et les filtres.
+7. Onglet Démos : clic sur « Complétion » : tri décroissant, en-tête en gras, `aria-sort="descending"` ; un second clic inverse le tri. Clic sur une ligne : Analytics de la démo.
+8. `?indicateur=cta` : Vues est actif.
+9. 390 px : pas de défilement horizontal de la page ; les onglets défilent seuls.
+10. Sombre : textes à 4,5:1 au moins ; filets et barres à 3:1 au moins.
