@@ -3325,3 +3325,43 @@
 .mk .st-mydata-solo {
   margin: 8px 0;
 }
+
+/* L29-01 / L29-02 : snippets d'intégration (« Où intégrer ? », consignes, limite) */
+.snip-where {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.snip-where .segmented {
+  flex-wrap: wrap;
+}
+.snip-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.snip-steps {
+  margin: 0;
+  padding-left: 1.4em;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.snip-limit {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 4px 0 0;
+}
+.snip-limit svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+.segmented [role='radio'][aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

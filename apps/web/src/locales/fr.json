@@ -1972,7 +1972,8 @@
       "badgeOn": "Personnalisée",
       "badgeOff": "Démo seule",
       "copyPage": "Copier l’adresse de la page {{name}}"
-    }
+    },
+    "popupLabel": "Voir la démo"
   },
   "analytics": {
     "title": "Analytics",
@@ -4086,5 +4087,38 @@
     "moveWarn_one": "Cette démo ne sera plus visible pour {{count}} membre.",
     "moveWarn_other": "Cette démo ne sera plus visible pour {{count}} membres.",
     "moveConfirm": "Déplacer"
+  },
+  "snippets": {
+    "where": "Où intégrer ?",
+    "html": "HTML",
+    "wordpress": "WordPress",
+    "sharepoint": "SharePoint",
+    "moodle": "Moodle",
+    "notion": "Notion",
+    "codeLabel": "Code à copier",
+    "addressLabel": "Adresse à copier",
+    "copyCode": "Copier le code",
+    "copyAddress": "Copier l’adresse",
+    "codeCopied": "Code copié.",
+    "addressCopied": "Adresse copiée.",
+    "stepsLabel": "Dans {{tool}}",
+    "html_1": "Collez le code à l’endroit voulu de la page.",
+    "wordpress_1": "Ajoutez un bloc « HTML personnalisé ».",
+    "wordpress_2": "Collez le code.",
+    "wordpress_3": "Prévisualisez la page.",
+    "sharepoint_1": "Modifiez la page.",
+    "sharepoint_2": "Ajoutez le composant « Incorporer ».",
+    "sharepoint_3": "Collez l’adresse.",
+    "moodle_1": "Dans l’éditeur de texte, ouvrez le mode HTML.",
+    "moodle_2": "Collez le code.",
+    "moodle_3": "Enregistrez.",
+    "notion_1": "Tapez /embed.",
+    "notion_2": "Collez l’adresse.",
+    "notion_3": "Ajustez la hauteur du bloc.",
+    "limit_wordpress": "Le mode pop-up demande un thème qui autorise les scripts.",
+    "limit_sharepoint": "Le domaine {{host}} doit être autorisé par l’administrateur SharePoint (sites autorisés pour l’incorporation). Mode pop-up non disponible.",
+    "limit_moodle": "Pour suivre la progression des apprenants, préférez le paquet SCORM (Diffuser > Plateforme de formation).",
+    "limit_notion": "Mode pop-up non disponible.",
+    "openScorm": "Ouvrir Diffuser"
   }
 }

@@ -139,12 +139,11 @@ export async function publishDemo(
     .eq('demo_id', demoId)
     .not('voice_path', 'is', null);
   if (voiced.error) throw voiced.error;
-  for (const v of voiced.data)
-    res.copies.push({
-      from: v.voice_path!,
-      to: `${demoId}/assets/voice-${v.voice_path!.split('/')[2]}`,
-      bucket: 'voices',
-    });
+  for (const v of voiced.data) {
+    const file = v.voice_path?.split('/')[2];
+    if (!file) continue;
+    res.copies.push({ from: v.voice_path!, to: `${demoId}/assets/voice-${file}`, bucket: 'voices' });
+  }
   // Flous par chemin publié (<demo>/assets/…), pour les appliquer dans les pixels.
   const blurByPath = new Map(
     res.manifest.steps.filter((s) => s.image).map((s) => [`${demoId}/${s.image!.url}`, s.blurs ?? []]),

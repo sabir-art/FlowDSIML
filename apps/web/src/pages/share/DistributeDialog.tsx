@@ -36,7 +36,9 @@ import type { Tables } from '@flowdsiml/supabase-types';
 import { parseManifest, type Manifest } from '@flowdsiml/manifest';
 import { supabase } from '../../lib/supabase';
 import { check } from '../../lib/useAction';
-import { publicDemoUrl } from '../../lib/embed';
+import { addressUrl, publicDemoUrl } from '../../lib/embed';
+import { TargetGuide, TargetPicker, useEmbedTarget } from './EmbedGuide';
+import { addressOnly, popupAllowed } from './snippets';
 import { PLAYER_URL, SUPABASE_URL } from '../../lib/env';
 import { formatDate, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -117,7 +119,7 @@ function Segmented<T extends string>({
 }: {
   labelledBy: string;
   value: T;
-  options: Array<{ id: T; label: string }>;
+  options: Array<{ id: T; label: string; disabledBy?: string }>;
   onChange: (v: T) => void;
 }) {
   return (
@@ -128,7 +130,9 @@ function Segmented<T extends string>({
           type="button"
           role="radio"
           aria-checked={value === o.id}
-          onClick={() => onChange(o.id)}
+          aria-disabled={o.disabledBy ? true : undefined}
+          aria-describedby={o.disabledBy}
+          onClick={() => !o.disabledBy && onChange(o.id)}
         >
           {o.label}
         </button>
@@ -814,7 +818,22 @@ function IntranetPanel({
   const { t } = useTranslation();
   const toast = useToast();
   const id = useId();
-  const [format, setFormat] = useState<'iframe' | 'popup'>('iframe');
+  const [chosen, setFormat] = useState<'iframe' | 'popup'>('iframe');
+  // L29-01 / L29-02 : outil cible ; pop-up indisponible pour SharePoint et Notion (adresse seule)
+  const [target, setTarget] = useEmbedTarget();
+  const limitId = useId();
+  const popupOff = !popupAllowed(target);
+  const format = popupOff ? 'iframe' : chosen;
+  const [address, setAddress] = useState<string | null>(null);
+  useEffect(() => {
+    void supabase
+      .from('demo_addresses')
+      .select('address')
+      .eq('demo_id', info.demo.id)
+      .is('retired_at', null)
+      .maybeSingle()
+      .then((r) => setAddress(r.data?.address ?? null));
+  }, [info.demo.id]);
   const [domain, setDomain] = useState('');
   const [clickToStart, setClickToStart] = useState(true);
   const [size, setSize] = useState<'fluid' | 'fixed'>('fluid');
@@ -825,10 +844,11 @@ function IntranetPanel({
   const [lang, setLang] = useState<'demo' | 'fr' | 'en'>('demo');
   const host = hostOf(domain);
   const blocked = host !== null && !originAllowed(host, info.allowed);
-  const url = publicDemoUrl(info.demo.id);
+  const url = address ? addressUrl(address) : publicDemoUrl(info.demo.id);
   const o = { clickToStart, lang: lang === 'demo' ? null : lang };
-  const code =
-    format === 'iframe'
+  const code = addressOnly(target)
+    ? url
+    : format === 'iframe'
       ? iframeCode(
           embedUrl(url, o),
           t('distribute.intranet.iframeTitle', { title: info.demo.title }),
@@ -856,6 +876,7 @@ function IntranetPanel({
   };
   return (
     <>
+      <TargetPicker value={target} onChange={setTarget} />
       <div className="dif-two">
         <div className="dif-col">
           <div>
@@ -868,7 +889,11 @@ function IntranetPanel({
               onChange={setFormat}
               options={[
                 { id: 'iframe', label: t('distribute.intranet.iframe') },
-                { id: 'popup', label: t('distribute.intranet.popup') },
+                {
+                  id: 'popup',
+                  label: t('distribute.intranet.popup'),
+                  disabledBy: popupOff ? limitId : undefined,
+                },
               ]}
             />
           </div>
@@ -1092,6 +1117,15 @@ function IntranetPanel({
         {highlightHtml(code)}
       </pre>
       <p className="help">{t('distribute.intranet.help')}</p>
+      <TargetGuide
+        target={target}
+        code={code}
+        address={url}
+        published
+        codeless
+        limitId={limitId}
+        playerHost={new URL(PLAYER_URL).host}
+      />
     </>
   );
 }

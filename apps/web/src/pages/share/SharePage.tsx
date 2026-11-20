@@ -1,7 +1,7 @@
 import { Copy, Download, Eye, Info, Mail, Play, Plus, Power, ShieldCheck, Trash2, X } from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useId, useState, type FormEvent } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { extractVariableKeys } from '@flowdsiml/core';
@@ -30,6 +30,10 @@ import {
 } from './PersonalPageFields';
 import { ExportDialog } from '../export/ExportDialog';
 import { AddressField } from './AddressField';
+import { TargetGuide, TargetPicker, useEmbedTarget } from './EmbedGuide';
+import { popupAllowed } from './snippets';
+import { popupCode } from './distribute';
+import { PLAYER_URL } from '../../lib/env';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
@@ -444,7 +448,8 @@ export function SharePage() {
             {tab === 'embed' && (
               <section role="tabpanel" id="sh-panel-embed" aria-labelledby="sh-tab-embed">
                 <EmbedPanel
-                  url={url}
+                  url={publicUrl}
+                  demoId={demo.id}
                   title={demo.title}
                   published={published}
                   editable={editable}
@@ -749,6 +754,7 @@ export function SharePage() {
 
 function EmbedPanel({
   url,
+  demoId,
   title,
   published,
   editable,
@@ -758,6 +764,7 @@ function EmbedPanel({
   onSaveOrigins,
 }: {
   url: string;
+  demoId: string;
   title: string;
   published: boolean;
   editable: boolean;
@@ -767,49 +774,61 @@ function EmbedPanel({
   onSaveOrigins: () => void;
 }) {
   const { t } = useTranslation();
-  const [format, setFormat] = useState<'responsive' | 'fixed'>('responsive');
+  const navigate = useNavigate();
+  const [format, setFormat] = useState<'responsive' | 'fixed' | 'popup'>('responsive');
+  // L29-01 : outil cible ; l'adresse personnalisée (L28-01) est reprise si elle existe
+  const [target, setTarget] = useEmbedTarget();
+  const limitId = useId();
+  const popupOff = !popupAllowed(target);
+  const mode = popupOff && format === 'popup' ? 'responsive' : format;
   const safe = title.replace(/[<>"&]/g, '');
   const code =
-    format === 'responsive'
-      ? embedSnippet(url, title)
-      : `<iframe src="${url}" title="${safe}" width="960" height="644" loading="lazy" allow="fullscreen; clipboard-write" style="border:0;border-radius:12px"></iframe>`;
+    mode === 'popup'
+      ? popupCode(PLAYER_URL, demoId, {
+          clickToStart: false,
+          lang: null,
+          label: t('share.popupLabel'),
+          float: false,
+        })
+      : mode === 'responsive'
+        ? embedSnippet(url, title)
+        : `<iframe src="${url}" title="${safe}" width="960" height="644" loading="lazy" allow="fullscreen; clipboard-write" style="border:0;border-radius:12px"></iframe>`;
   return (
     <>
+      <TargetPicker value={target} onChange={setTarget} />
       <div className="segmented" role="radiogroup" aria-label={t('share.embedFormat')}>
         <button
           type="button"
           role="radio"
-          aria-checked={format === 'responsive'}
+          aria-checked={mode === 'responsive'}
           onClick={() => setFormat('responsive')}
         >
           {t('share.responsive')}
         </button>
+        <button type="button" role="radio" aria-checked={mode === 'fixed'} onClick={() => setFormat('fixed')}>
+          {t('share.fixed')}
+        </button>
+        {/* L29-02 : jamais masqué ; désactivé pour un outil sans script, la limite sert d'aide */}
         <button
           type="button"
           role="radio"
-          aria-checked={format === 'fixed'}
-          onClick={() => setFormat('fixed')}
+          aria-checked={mode === 'popup'}
+          aria-disabled={popupOff || undefined}
+          aria-describedby={popupOff ? limitId : undefined}
+          onClick={() => !popupOff && setFormat('popup')}
         >
-          {t('share.fixed')}
-        </button>
-        <button type="button" role="radio" aria-checked="false" aria-disabled="true">
-          {t('share.popup')} <span className="badge sh-badge-xs">{t('shell.soon')}</span>
+          {t('share.popup')}
         </button>
       </div>
-      <pre className="code sh-code">{highlightHtml(code)}</pre>
-      <div className="row sh-embed-actions">
-        {published ? (
-          <CopyButton value={code} label={t('share.copyCode')} primary />
-        ) : (
-          <span className="btn btn-primary" aria-disabled="true">
-            <Copy aria-hidden="true" />
-            {t('share.copyCode')}
-          </span>
-        )}
-        <span className="t-label sh-guides" aria-disabled="true">
-          {t('share.guides')} <span className="badge sh-badge-xs">{t('shell.soon')}</span>
-        </span>
-      </div>
+      <TargetGuide
+        target={target}
+        code={code}
+        address={url}
+        published={published}
+        limitId={limitId}
+        playerHost={new URL(url).host}
+        onScorm={() => navigate(`/demos/${demoId}/distribute`)}
+      />
       <hr className="divider sh-hr" />
       <div className="setting">
         <span className="t-label">{t('share.hideBranding')}</span>

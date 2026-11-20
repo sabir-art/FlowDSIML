@@ -1972,7 +1972,8 @@
       "badgeOn": "Personalised",
       "badgeOff": "Demo only",
       "copyPage": "Copy the page address {{name}}"
-    }
+    },
+    "popupLabel": "View the demo"
   },
   "analytics": {
     "title": "Analytics",
@@ -4086,5 +4087,38 @@
     "moveWarn_one": "This demo will no longer be visible to {{count}} member.",
     "moveWarn_other": "This demo will no longer be visible to {{count}} members.",
     "moveConfirm": "Move"
+  },
+  "snippets": {
+    "where": "Where to embed?",
+    "html": "HTML",
+    "wordpress": "WordPress",
+    "sharepoint": "SharePoint",
+    "moodle": "Moodle",
+    "notion": "Notion",
+    "codeLabel": "Code to copy",
+    "addressLabel": "Address to copy",
+    "copyCode": "Copy code",
+    "copyAddress": "Copy address",
+    "codeCopied": "Code copied.",
+    "addressCopied": "Address copied.",
+    "stepsLabel": "In {{tool}}",
+    "html_1": "Paste the code where you want it on the page.",
+    "wordpress_1": "Add a “Custom HTML” block.",
+    "wordpress_2": "Paste the code.",
+    "wordpress_3": "Preview the page.",
+    "sharepoint_1": "Edit the page.",
+    "sharepoint_2": "Add the “Embed” web part.",
+    "sharepoint_3": "Paste the address.",
+    "moodle_1": "In the text editor, switch to HTML mode.",
+    "moodle_2": "Paste the code.",
+    "moodle_3": "Save.",
+    "notion_1": "Type /embed.",
+    "notion_2": "Paste the address.",
+    "notion_3": "Adjust the block height.",
+    "limit_wordpress": "Pop-up mode needs a theme that allows scripts.",
+    "limit_sharepoint": "The {{host}} domain must be allowed by the SharePoint administrator (sites allowed for embedding). Pop-up mode not available.",
+    "limit_moodle": "To track learner progress, prefer the SCORM package (Distribute > Training platform).",
+    "limit_notion": "Pop-up mode not available.",
+    "openScorm": "Open Distribute"
   }
 }
