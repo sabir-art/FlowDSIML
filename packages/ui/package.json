@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./tokens.css": "./src/tokens.css",
     "./base.css": "./src/base.css",
-    "./controls.css": "./src/controls.css"
+    "./controls.css": "./src/controls.css",
+    "./select.css": "./src/select.css"
   },
   "scripts": {
     "lint": "eslint src",

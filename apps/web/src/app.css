@@ -1492,7 +1492,7 @@
   align-items: center;
   gap: var(--fd-space-2);
   width: 100%;
-  padding: var(--fd-space-2);
+  padding: var(--fd-space-2) var(--fd-space-3) var(--fd-space-2) var(--fd-space-2);
   border: 0;
   border-radius: var(--fd-radius-md);
   background: none;

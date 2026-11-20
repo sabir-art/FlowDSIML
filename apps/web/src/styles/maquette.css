@@ -307,7 +307,7 @@
   padding: 0 var(--fd-space-3);
   border: 1px solid var(--fd-color-border-strong);
   border-radius: var(--fd-radius-md);
-  background: var(--fd-color-surface);
+  background-color: var(--fd-color-surface);
   color: var(--fd-color-text);
   font: inherit;
 }
@@ -870,7 +870,7 @@
   display: flex;
   align-items: center;
   gap: var(--fd-space-2);
-  padding: var(--fd-space-2);
+  padding: var(--fd-space-2) var(--fd-space-3) var(--fd-space-2) var(--fd-space-2);
   border-radius: var(--fd-radius-md);
   border: 0;
   background: none;
