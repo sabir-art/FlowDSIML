@@ -48,7 +48,7 @@ Toutes les fonctions ci-dessus fixent `search_path = ''` et qualifient les objet
 | `media` | oui | toute personne qui connaît le chemin | aucune politique : écriture par l'Edge Function `media` seulement (type vérifié dans les octets, SVG assaini) | **S2** |
 | `branding` | oui | toute personne qui connaît le chemin ; politique de lecture pour les membres | admin | Conforme (logos destinés à être publics) |
 
-- **S1, accès restreint par dossier (dette L27-09, aggravée)** : les politiques ne vérifient que le rôle dans l'espace. Un membre exclu d'un dossier restreint peut **lister** `<espace>/` dans `captures`, `videos`, `voices` ou `html` avec l'API de stockage. Il obtient ainsi les identifiants des démos du dossier, puis leurs fichiers. La dette disait « il faut connaître le chemin exact » : le listage le donne. Correction : schéma E (ajouter `demo_visible(path_uuid(name, 2))`, ou `path_uuid(name, 1)` pour `published`), soumis au chef le 20 novembre.
+- **S1, accès restreint par dossier (dette L27-09, aggravée)** : les politiques ne vérifient que le rôle dans l'espace. Un membre exclu d'un dossier restreint peut **lister** `<espace>/` dans `captures`, `videos`, `voices` ou `html` avec l'API de stockage. Il obtient ainsi les identifiants des démos du dossier, puis leurs fichiers. La dette disait « il faut connaître le chemin exact » : le listage le donne. Corrigé : schéma E (`demo_visible(path_uuid(name, 2))`, ou `path_uuid(name, 1)` pour `published`), validé par le chef le 20 novembre.
 - **S2, médiathèque publique** : voulu, car le lecteur public affiche les images remplacées (L28-05) et les logos. Le chemin `<espace>/<uuid>.<ext>` contient un uuid aléatoire, donc il ne se devine pas, mais un fichier reste lisible par toute personne qui a eu son URL, même après sa suppression de la médiathèque si un cache le garde. À indiquer dans l'aide de la médiathèque : « Les fichiers de la médiathèque sont publics par leur adresse. »
 
 ## 3. Corrections
@@ -60,7 +60,7 @@ Toutes les fonctions ci-dessus fixent `search_path = ''` et qualifient les objet
 | R1 | `resolve_share_link` : retirer `email` des variables renvoyées, comme `personal_page` | Oui (réduit ce que voit le porteur du lien) | Proposé au chef (schéma F) ; à vérifier : le lecteur n'utilise pas `{{email}}` dans les textes |
 | R2 | `learner_resume` : exiger `public_links_enabled`, comme `issue_certificate` | Oui (accès anonyme retiré quand l'espace coupe ses liens publics) | Proposé au chef (schéma F) |
 | R4 | `track_events` : plafond par démo et par minute ; marquer `embed_origin` « déclaré par le lecteur » dans l'écran « Où elle est diffusée » | R4 a : non ; R4 b : texte UX | Proposé (à mesurer avant de fixer le plafond) |
-| S1 | Filtre de dossier sur le stockage | Oui | Schéma E soumis au chef, en attente |
+| S1 | Filtre de dossier sur le stockage | Oui | Fait (schéma E validé) : migration `20261123170000_stockage_dossiers.sql`, test pgTAP |
 | S2 | Aide de la médiathèque | Non (texte) | Proposé à la Lead UX |
 
 ## 4. Points vérifiés sans constat
