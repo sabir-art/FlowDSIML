@@ -1,4 +1,4 @@
-import { ChevronLeft, Crop, Layers, MessageSquare, Target, Trash2, WandSparkles } from 'lucide-react';
+import { ChevronLeft, Crop, Layers, MessageSquare, Target, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { ApplyStyleDialog } from '../ApplyStyleDialog';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,9 @@ import {
 import { RichTextField } from '../RichTextField';
 import { VariablePreview } from '../VariablePreview';
 import { CtaFields } from './CtaFields';
+import { AiBadge, AiWrite, isAiApplied } from '../../../components/ai/AiWrite';
+import { AiSpellAll } from '../../../components/ai/AiSpellAll';
+import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 
 type Side = 'top' | 'bottom' | 'left' | 'right';
 /** Grille 3 × 3 de la maquette : les côtés correspondent aux placements gérés par le player ;
@@ -41,6 +44,8 @@ export function HotspotPanel({
 }) {
   const { t } = useTranslation();
   const [applying, setApplying] = useState(false);
+  const [spellAll, setSpellAll] = useState(false);
+  const { current: ws } = useWorkspace();
   const action = asAction(hotspot.action);
   const varKeys = editor.variables.map((v) => v.key);
   const set = (patch: Partial<HotspotRow>) => editor.updateHotspot(hotspot.id, patch);
@@ -161,22 +166,34 @@ export function HotspotPanel({
           disabled={readOnly}
           onChange={(v) => set({ body: v })}
           extra={
-            <>
-              {' · '}
-              {/* VB-01 : Assistance IA « Bientôt » (ouvre « Fonctions à venir ») */}
-              <a
-                className="hs-ai"
-                href={`${location.pathname}#/settings/soon?tab=ia`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <WandSparkles aria-hidden="true" />
-                {t('soon.aiEntry')}
-              </a>{' '}
-              <span className="badge badge-xs">{t('shell.soon')}</span>
-            </>
+            // L30-02 : repère « IA » jusqu'à la prochaine modification manuelle
+            isAiApplied(`hs:${hotspot.id}:body`, hotspot.body) ? (
+              <>
+                {' · '}
+                <AiBadge fieldKey={`hs:${hotspot.id}:body`} text={hotspot.body} />
+              </>
+            ) : undefined
           }
         />
+        {ws && !readOnly && (
+          <AiWrite
+            ws={ws.id}
+            lang={asSettings(editor.demo!.settings).locale ?? 'fr'}
+            fieldKey={`hs:${hotspot.id}:body`}
+            text={hotspot.body}
+            title={hotspot.title || step?.title || ''}
+            onApply={(next) => set({ body: next })}
+            onAll={() => setSpellAll(true)}
+          />
+        )}
+        {spellAll && ws && (
+          <AiSpellAll
+            editor={editor}
+            ws={ws.id}
+            lang={asSettings(editor.demo!.settings).locale ?? 'fr'}
+            onClose={() => setSpellAll(false)}
+          />
+        )}
         <VariablePreview text={hotspot.body} variables={editor.variables} />
       </div>
 

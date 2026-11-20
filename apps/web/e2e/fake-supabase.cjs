@@ -37,6 +37,31 @@ function builtinStyles() {
 }
 let currentUserId = null;
 
+/** L30 : état de l'Assistance IA du faux Supabase (désactivée par défaut, comme en base). */
+function aiState(state) {
+  return (state.ai ||= {
+    enabled: false,
+    features: {
+      write: true,
+      translate: true,
+      suggest: true,
+      generate: true,
+      dataset: true,
+      chart: true,
+      assistant: true,
+    },
+    used: 12,
+    quota: 500,
+    userToday: 0,
+    userDailyRequests: 30,
+    workspaceQuotaReached: false,
+    userQuotaReached: false,
+    renewsOn: '2026-12-01',
+    canEdit: true,
+    canManage: true,
+  });
+}
+
 function builtinTemplates() {
   const sql = fs.readFileSync(
     path.join(__dirname, '../../../supabase/migrations/20261121090000_modeles.sql'),
@@ -448,6 +473,30 @@ async function install(page, state = seed()) {
       return json(route, 200, { ...r, outcome: d.status });
     }
     // L18 : fonction media (dépôt multipart, suppression) ; type réel simulé d'après le nom du fichier
+    // L30 : Assistance IA. state.ai = état renvoyé par ai_status ; state.aiReply(task, input) = résultat
+    // (par défaut, texte suffixé) ; state.aiCalls garde les demandes reçues (vérifier ce qui part)
+    if (p.startsWith('/functions/v1/ai')) {
+      (state.aiCalls ||= []).push(body);
+      const ai = aiState(state);
+      if (!ai.enabled) return json(route, 403, { error: 'AI_DISABLED' });
+      if (ai.workspaceQuotaReached)
+        return json(route, 429, { error: 'AI_QUOTA_WORKSPACE', renewsOn: ai.renewsOn });
+      if (state.aiFail) return json(route, 502, { error: 'PROVIDER' });
+      ai.used += 1;
+      const r = state.aiReply
+        ? state.aiReply(body.task, body.input)
+        : body.task === 'write_all'
+          ? {
+              items: body.input.items.map((i) => ({
+                id: i.id,
+                text: i.text.replace(/ +/g, ' ').replace(/sasir/g, 'saisir'),
+              })),
+            }
+          : { text: `${body.input.text || body.input.title} (proposition)` };
+      const delay = state.aiDelay || 0;
+      if (delay) await new Promise((res) => setTimeout(res, delay));
+      return json(route, 200, { result: r, redacted: 0 });
+    }
     if (p.startsWith('/functions/v1/media')) {
       const list = (t.media_files ||= []);
       if (method === 'DELETE') {
@@ -522,6 +571,14 @@ async function install(page, state = seed()) {
       const fn = p.split('/').pop();
       const a = body || {};
       switch (fn) {
+        case 'ai_status':
+          return json(route, 200, aiState(state));
+        case 'set_ai_settings': {
+          const ai = aiState(state);
+          ai.enabled = a.p_enabled;
+          if (a.p_features) Object.assign(ai.features, a.p_features);
+          return json(route, 200, ai);
+        }
         case 'workspace_usage': {
           // Calculé depuis l'espace demandé (plan, démos, membres), comme la RPC réelle
           const w = t.workspaces.find((x) => x.id === a.p_workspace) || t.workspaces[0];

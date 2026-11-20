@@ -3983,41 +3983,8 @@
     "tabIa": "AI assistance",
     "tabCrm": "CRM and emailing",
     "tabSso": "Single sign-on",
-    "iaBannerTitle": "AI assistance features: in preparation.",
-    "iaBanner": "They are not active. No data is sent to an AI service, and enabling them will require approval from a workspace admin.",
+    "iaBanner": "Other AI Assist features are available in Settings > AI Assist. These are not active yet: no data is sent for them.",
     "why": "Why, and what to use meanwhile",
-    "gen": {
-      "title": "Generate a demo",
-      "body": "Suggest a first draft of steps (titles, bubble texts) from the captures.",
-      "items": [
-        "Suggested bubble texts and titles",
-        "Split into chapters",
-        "Always reviewed before publishing"
-      ],
-      "action": "Generate",
-      "why": "Requires an AI provider and a GDPR review (capture data). Meanwhile: write manually."
-    },
-    "translate": {
-      "title": "Translate the demo",
-      "body": "Translate bubbles, buttons, quizzes and subtitles into another language.",
-      "items": ["One version per language", "Glossary respected", "Human review recommended"],
-      "action": "Translate",
-      "why": "Requires an AI provider. Meanwhile: manual translation."
-    },
-    "voice": {
-      "title": "Subtitles and voice-over",
-      "body": "Transcribe the voice of a video step and generate a voice-over from text.",
-      "items": ["Automatic transcription", "Synthetic voice-over", "Editable subtitles"],
-      "action": "Transcribe",
-      "why": "Requires transcription and speech synthesis services. Meanwhile: import .vtt subtitles."
-    },
-    "writer": {
-      "title": "Writing assistant",
-      "body": "Rephrase a bubble, simplify a text (easy-to-read), suggest quiz questions.",
-      "items": ["Rephrasing", "Easy to read and understand", "Quiz suggestions"],
-      "action": "Open the assistant",
-      "why": "Requires an AI provider. Meanwhile: write manually."
-    },
     "crm": {
       "title": "CRM",
       "body": "Automatically send leads and demo activity to your CRM.",
@@ -4057,7 +4024,28 @@
     "inviteMembers": "Invite members",
     "aiEntry": "AI assistance",
     "security": "Security",
-    "securitySub": "Sign-in and access to the workspace."
+    "securitySub": "Sign-in and access to the workspace.",
+    "tts": {
+      "title": "Synthetic voice",
+      "body": "Generate a voice-over from the bubble text.",
+      "items": ["Several voices", "Adjustable speed", "Review before publishing"],
+      "action": "Generate voice",
+      "why": "Requires a speech synthesis service. Meanwhile: recorded voice."
+    },
+    "captions": {
+      "title": "Automatic captions",
+      "body": "Transcribe the voice of a video step into editable captions.",
+      "items": ["Transcription", "Editable captions", ".vtt format"],
+      "action": "Transcribe",
+      "why": "Requires a transcription service. Meanwhile: import .vtt captions."
+    },
+    "images": {
+      "title": "Generated images",
+      "body": "Create an illustration from a description.",
+      "items": ["Step illustrations", "Brand style", "Always reviewed"],
+      "action": "Generate",
+      "why": "Requires an image generation service. Meanwhile: media library."
+    }
   },
   "privacy": {
     "title": "Privacy",
@@ -4162,5 +4150,85 @@
     "limit_moodle": "To track learner progress, prefer the SCORM package (Distribute > Training platform).",
     "limit_notion": "Pop-up mode not available.",
     "openScorm": "Open Distribute"
+  },
+  "ai": {
+    "name": "AI Assist",
+    "feature": {
+      "write": "Write texts",
+      "translate": "Translate",
+      "suggest": "Suggestions",
+      "generate": "Generate a demo",
+      "dataset": "Sample dataset",
+      "chart": "Chart",
+      "assistant": "Editor assistant"
+    },
+    "soon": {
+      "tts": "Synthetic voice",
+      "captions": "Automatic captions",
+      "images": "Generated images"
+    },
+    "settings": {
+      "sub": "Text proposals, translations and suggestions in the editor. Nothing is applied without your approval.",
+      "switch": "Turn on AI Assist for this workspace",
+      "on": "On.",
+      "off": "Off.",
+      "readOnly": "Only owners and admins can change this setting.",
+      "notice": "When AI Assist is on, the texts needed for each request (titles, bubbles, outline) are sent to TutoClick’s AI provider (Anthropic) to produce a proposal. Blurred areas, images, internal comments and learner data are never sent. Requests are not used to train models. Nothing is applied without your approval.",
+      "enableTitle": "Turn on AI Assist?",
+      "read": "I have read this information.",
+      "enable": "Turn on",
+      "onToast": "AI Assist turned on for the workspace.",
+      "offTitle": "Turn off AI Assist?",
+      "offBody": "Texts already applied stay in the demos.",
+      "offConfirm": "Turn off",
+      "offToast": "AI Assist turned off for the workspace.",
+      "quota": "This month: {{used}} of {{quota}} requests",
+      "quotaNone_one": "{{count}} request this month",
+      "quotaNone_other": "{{count}} requests this month",
+      "renews": "Renews on {{date}}",
+      "features": "Features",
+      "loadError": "The setting could not be loaded. Reload the page.",
+      "saveError": "The setting could not be saved. Try again."
+    },
+    "disabled": "AI Assist is turned off in this workspace. An admin can turn it on in Settings > AI Assist.",
+    "disabledAdmin": "Open the setting",
+    "role": "AI Assist is available to editors.",
+    "quota": "AI Assist quota reached for this month.",
+    "quotaRenews": "It renews on {{date}}.",
+    "userQuota": "Daily AI Assist limit reached. Try again tomorrow.",
+    "busy": "Writing…",
+    "stop": "Stop",
+    "ready": "Proposal ready.",
+    "error": "The proposal could not be generated. Try again.",
+    "retry": "Try again",
+    "mention": "AI-generated, please review",
+    "apply": "Apply",
+    "ignore": "Dismiss",
+    "another": "Another proposal",
+    "applied": "Text applied.",
+    "undo": "Undo",
+    "badge": "AI",
+    "badgeLabel": "Text proposed by AI Assist",
+    "proposal": "Proposal",
+    "lostVar": "The variable {{name}} is missing from the proposal.",
+    "write": {
+      "menu": "AI Assist",
+      "simplify": "Rephrase more simply",
+      "shorten": "Shorten",
+      "spelling": "Fix spelling",
+      "fromTitle": "Write from the title",
+      "tone": "Adjust the tone",
+      "neutral": "Neutral",
+      "warm": "Warm",
+      "formal": "Formal",
+      "all": "For all steps",
+      "allTitle": "Fix spelling in all steps",
+      "applyAll": "Apply all",
+      "none": "No correction proposed.",
+      "step": "Step {{n}}",
+      "noBubble": "Add a bubble to the step to use AI Assist."
+    },
+    "beforeSr": "Before:",
+    "afterSr": "After:"
   }
 }

@@ -1,16 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Building2,
-  Captions,
-  Languages,
-  Lock,
-  Mail,
-  MessageSquare,
-  Sparkles,
-  Users,
-  WandSparkles,
-} from 'lucide-react';
+import { AudioLines, Building2, Captions, ImagePlus, Lock, Mail, Sparkles, Users } from 'lucide-react';
 import { ShareRulesCard } from './security/ShareRulesCard';
 import { SettingsShell } from './SettingsShell';
 import { SoonButton, SoonCard } from '../../components/soon/SoonCard';
@@ -72,27 +62,23 @@ export function SoonFeatures() {
 
 function IaPane() {
   const { t } = useTranslation();
+  // L30 §11 : les autres fonctions sont dans Paramètres › Assistance IA ; restent ces trois-là
   return (
     <>
       <div className="alert soon-alert">
         <Sparkles aria-hidden="true" />
         <div>
-          <b>{t('soon.iaBannerTitle')}</b> {t('soon.iaBanner')}
+          {t('soon.iaBanner')} <Link to="/settings/ai">{t('ai.name')}</Link>
         </div>
       </div>
       <div className="soon-grid">
-        <SoonCard k="gen" icon={<WandSparkles />} control={<SoonButton label={t('soon.gen.action')} />} />
+        <SoonCard k="tts" icon={<AudioLines />} control={<SoonButton label={t('soon.tts.action')} />} />
         <SoonCard
-          k="translate"
-          icon={<Languages />}
-          control={<SoonButton label={t('soon.translate.action')} />}
+          k="captions"
+          icon={<Captions />}
+          control={<SoonButton label={t('soon.captions.action')} />}
         />
-        <SoonCard k="voice" icon={<Captions />} control={<SoonButton label={t('soon.voice.action')} />} />
-        <SoonCard
-          k="writer"
-          icon={<MessageSquare />}
-          control={<SoonButton label={t('soon.writer.action')} />}
-        />
+        <SoonCard k="images" icon={<ImagePlus />} control={<SoonButton label={t('soon.images.action')} />} />
       </div>
     </>
   );

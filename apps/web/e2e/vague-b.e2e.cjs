@@ -42,16 +42,23 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'onglet Assistance IA par défaut',
   );
   ok(
-    (await page.getByText("Aucune donnée n'est envoyée à un service d'IA", { exact: false }).count()) === 1,
-    'bandeau « Aucune donnée n’est envoyée à un service d’IA »',
+    (await page
+      .getByText('Les autres fonctions d’Assistance IA sont disponibles dans Paramètres > Assistance IA.', {
+        exact: false,
+      })
+      .count()) === 1,
+    'L30 §11 : bandeau « disponibles dans Paramètres > Assistance IA »',
   );
-  ok((await page.locator('.soon-card').count()) === 4, 'quatre cartes IA');
   ok(
-    (await page.locator('.soon-badge', { hasText: 'Bientôt disponible' }).count()) === 4,
+    (await page.locator('.soon-card').count()) === 3,
+    'L30 §11 : trois cartes IA (voix, sous-titres, images)',
+  );
+  ok(
+    (await page.locator('.soon-badge', { hasText: 'Bientôt disponible' }).count()) === 3,
     'badge sur chaque carte',
   );
   ok(
-    (await page.locator('.soon-card button').count()) === 4 &&
+    (await page.locator('.soon-card button').count()) === 3 &&
       (await page.locator('.soon-card button:not([disabled])').count()) === 0,
     'contrôles désactivés',
   );
@@ -155,10 +162,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const ai = page.getByRole('menuitem', { name: /Assistance IA/ });
   ok((await ai.count()) === 1 && /Bientôt/.test(await ai.innerText()), 'menu ⋯ : « Assistance IA » Bientôt');
   const writer = page.getByRole('menuitem', { name: /Rédiger les textes/ });
-  ok(
-    /Bientôt/.test(await writer.innerText()) && !/V2/.test(await writer.innerText()),
-    '« Rédiger les textes » : Bientôt, plus V2',
-  );
+  ok(!/Bientôt|V2/.test(await writer.innerText()), 'L30-02 : « Rédiger les textes » n’est plus en Bientôt');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/vb-01-menu${sfx}.png` });
   const [tab] = await Promise.all([ctx.waitForEvent('page'), ai.click()]);
   await tab.waitForLoadState();
@@ -169,12 +173,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await tab.close();
   await page.locator('.canvas-hotspot').first().click();
   await page.waitForSelector('#hs-title');
-  const link = page.locator('.hs-ai');
+  // L30-02 : l'entrée « Bientôt » est remplacée par l'Assistance IA (désactivée par défaut)
+  const entry = page.locator('.ai-entry');
   ok(
-    (await link.innerText()).includes('Assistance IA') &&
-      (await link.getAttribute('href')).endsWith('#/settings/soon?tab=ia') &&
-      (await link.getAttribute('target')) === '_blank',
-    'panneau de la bulle : lien « Assistance IA »',
+    (await entry.innerText()).includes('Assistance IA') &&
+      (await entry.getAttribute('aria-disabled')) === 'true',
+    'panneau de la bulle : entrée « Assistance IA » désactivée tant que l’espace ne l’a pas activée',
   );
   ok(
     !/\bV2\b/.test(await page.locator('.sp-panel, .hs-panel, aside').last().innerText()),

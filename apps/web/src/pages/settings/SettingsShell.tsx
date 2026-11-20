@@ -13,6 +13,7 @@ import {
   Shield,
   UserRound,
   Users,
+  WandSparkles,
 } from 'lucide-react';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import '../../styles/maquette.css';
@@ -59,6 +60,8 @@ export function SettingsShell({ children }: { children: ReactNode }) {
           {item('/settings/security', <Shield aria-hidden="true" />, t('soon.security'))}
           {/* L26-08 : Confidentialité (mesure des visites) */}
           {item('/settings/privacy', <EyeOff aria-hidden="true" />, t('privacy.title'))}
+          {/* L30-01 : Assistance IA, après Confidentialité (lecture seule hors owner/admin) */}
+          {item('/settings/ai', <WandSparkles aria-hidden="true" />, t('ai.name'))}
           {item('/settings/soon', <Clock aria-hidden="true" />, t('soon.nav'))}
           <span className="grp">{t('settings.account')}</span>
           {item('/settings/profile', <UserRound aria-hidden="true" />, t('settings.profile'))}

@@ -3983,41 +3983,8 @@
     "tabIa": "Assistance IA",
     "tabCrm": "CRM et e-mailing",
     "tabSso": "Connexion unique",
-    "iaBannerTitle": "Fonctions d'assistance par IA : en préparation.",
-    "iaBanner": "Elles ne sont pas actives. Aucune donnée n'est envoyée à un service d'IA, et leur activation demandera l'accord d'un admin du workspace.",
+    "iaBanner": "Les autres fonctions d’Assistance IA sont disponibles dans Paramètres > Assistance IA. Celles-ci ne sont pas encore actives : aucune donnée n’est envoyée pour elles.",
     "why": "Pourquoi et en attendant",
-    "gen": {
-      "title": "Générer une démo",
-      "body": "Proposer un premier jet d'étapes (titres, textes de bulles) à partir des captures.",
-      "items": [
-        "Textes de bulles et titres suggérés",
-        "Découpage en chapitres",
-        "Toujours relu avant publication"
-      ],
-      "action": "Générer",
-      "why": "Nécessite un fournisseur d'IA et une validation RGPD (données des captures). En attendant : rédaction manuelle."
-    },
-    "translate": {
-      "title": "Traduire la démo",
-      "body": "Traduire bulles, boutons, quiz et sous-titres dans une autre langue.",
-      "items": ["Une version par langue", "Glossaire respecté", "Relecture humaine conseillée"],
-      "action": "Traduire",
-      "why": "Nécessite un fournisseur d'IA. En attendant : traduction manuelle."
-    },
-    "voice": {
-      "title": "Sous-titres et voix off",
-      "body": "Transcrire la voix d'une étape vidéo et générer une voix off à partir du texte.",
-      "items": ["Transcription automatique", "Voix off synthétique", "Sous-titres modifiables"],
-      "action": "Transcrire",
-      "why": "Nécessite des services de transcription et de synthèse vocale. En attendant : import de sous-titres .vtt."
-    },
-    "writer": {
-      "title": "Assistant de rédaction",
-      "body": "Reformuler une bulle, simplifier un texte (FALC), suggérer des questions de quiz.",
-      "items": ["Reformulation", "Facile à lire et à comprendre", "Suggestions de quiz"],
-      "action": "Ouvrir l’assistant",
-      "why": "Nécessite un fournisseur d'IA. En attendant : rédaction manuelle."
-    },
     "crm": {
       "title": "CRM",
       "body": "Envoyer automatiquement les leads et l'activité des démos vers votre CRM.",
@@ -4057,7 +4024,28 @@
     "inviteMembers": "Inviter des membres",
     "aiEntry": "Assistance IA",
     "security": "Sécurité",
-    "securitySub": "Connexion et accès au workspace."
+    "securitySub": "Connexion et accès au workspace.",
+    "tts": {
+      "title": "Voix de synthèse",
+      "body": "Générer une voix off à partir du texte des bulles.",
+      "items": ["Plusieurs voix", "Vitesse réglable", "Relecture avant publication"],
+      "action": "Générer la voix",
+      "why": "Nécessite un service de synthèse vocale. En attendant : voix enregistrée."
+    },
+    "captions": {
+      "title": "Sous-titres automatiques",
+      "body": "Transcrire la voix d’une étape vidéo en sous-titres modifiables.",
+      "items": ["Transcription", "Sous-titres modifiables", "Format .vtt"],
+      "action": "Transcrire",
+      "why": "Nécessite un service de transcription. En attendant : import de sous-titres .vtt."
+    },
+    "images": {
+      "title": "Images générées",
+      "body": "Créer une illustration à partir d’une description.",
+      "items": ["Illustrations d’étape", "Style de la marque", "Toujours relu"],
+      "action": "Générer",
+      "why": "Nécessite un service de génération d’images. En attendant : médiathèque."
+    }
   },
   "privacy": {
     "title": "Confidentialité",
@@ -4162,5 +4150,85 @@
     "limit_moodle": "Pour suivre la progression des apprenants, préférez le paquet SCORM (Diffuser > Plateforme de formation).",
     "limit_notion": "Mode pop-up non disponible.",
     "openScorm": "Ouvrir Diffuser"
+  },
+  "ai": {
+    "name": "Assistance IA",
+    "feature": {
+      "write": "Rédiger les textes",
+      "translate": "Traduire",
+      "suggest": "Suggestions",
+      "generate": "Générer une démo",
+      "dataset": "Jeu de données fictif",
+      "chart": "Graphique",
+      "assistant": "Assistant de l’éditeur"
+    },
+    "soon": {
+      "tts": "Voix de synthèse",
+      "captions": "Sous-titres automatiques",
+      "images": "Images générées"
+    },
+    "settings": {
+      "sub": "Propositions de textes, traductions et suggestions dans l’éditeur. Rien n’est appliqué sans votre validation.",
+      "switch": "Activer l’Assistance IA pour cet espace",
+      "on": "Activée.",
+      "off": "Désactivée.",
+      "readOnly": "Seuls les propriétaires et les administrateurs peuvent modifier ce réglage.",
+      "notice": "Quand l’Assistance IA est activée, les textes nécessaires à chaque demande (titres, bulles, plan) sont envoyés au fournisseur d’IA de TutoClick (Anthropic) pour produire une proposition. Les zones floutées, les images, les commentaires internes et les données des apprenants ne sont jamais envoyés. Les demandes ne servent pas à entraîner les modèles. Rien n’est appliqué sans votre validation.",
+      "enableTitle": "Activer l’Assistance IA ?",
+      "read": "J’ai lu ces informations.",
+      "enable": "Activer",
+      "onToast": "Assistance IA activée pour l’espace.",
+      "offTitle": "Désactiver l’Assistance IA ?",
+      "offBody": "Les textes déjà appliqués restent dans les démos.",
+      "offConfirm": "Désactiver",
+      "offToast": "Assistance IA désactivée pour l’espace.",
+      "quota": "Ce mois-ci : {{used}} demandes sur {{quota}}",
+      "quotaNone_one": "{{count}} demande ce mois-ci",
+      "quotaNone_other": "{{count}} demandes ce mois-ci",
+      "renews": "Renouvellement le {{date}}",
+      "features": "Fonctions",
+      "loadError": "Le réglage n’a pas pu être chargé. Rechargez la page.",
+      "saveError": "Le réglage n’a pas pu être enregistré. Réessayez."
+    },
+    "disabled": "Assistance IA désactivée dans cet espace. Un administrateur peut l’activer dans Paramètres > Assistance IA.",
+    "disabledAdmin": "Ouvrir le réglage",
+    "role": "L’Assistance IA est réservée aux éditeurs.",
+    "quota": "Quota d’Assistance IA atteint pour ce mois.",
+    "quotaRenews": "Il se renouvelle le {{date}}.",
+    "userQuota": "Limite quotidienne d’Assistance IA atteinte. Réessayez demain.",
+    "busy": "Rédaction en cours…",
+    "stop": "Arrêter",
+    "ready": "Proposition prête.",
+    "error": "La proposition n’a pas pu être générée. Réessayez.",
+    "retry": "Réessayer",
+    "mention": "Généré par IA, à vérifier",
+    "apply": "Appliquer",
+    "ignore": "Ignorer",
+    "another": "Autre proposition",
+    "applied": "Texte appliqué.",
+    "undo": "Annuler",
+    "badge": "IA",
+    "badgeLabel": "Texte proposé par l’Assistance IA",
+    "proposal": "Proposition",
+    "lostVar": "La variable {{name}} a disparu de la proposition.",
+    "write": {
+      "menu": "Assistance IA",
+      "simplify": "Reformuler plus simplement",
+      "shorten": "Raccourcir",
+      "spelling": "Corriger l’orthographe",
+      "fromTitle": "Rédiger à partir du titre",
+      "tone": "Adapter le ton",
+      "neutral": "Neutre",
+      "warm": "Chaleureux",
+      "formal": "Formel",
+      "all": "Pour toutes les étapes",
+      "allTitle": "Corriger l’orthographe de toutes les étapes",
+      "applyAll": "Appliquer tout",
+      "none": "Aucune correction proposée.",
+      "step": "Étape {{n}}",
+      "noBubble": "Ajoutez une bulle à l’étape pour utiliser l’Assistance IA."
+    },
+    "beforeSr": "Avant :",
+    "afterSr": "Après :"
   }
 }

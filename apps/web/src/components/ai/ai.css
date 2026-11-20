@@ -1,0 +1,175 @@
+/* L30 Assistance IA : réglage, aperçu des propositions, repère « IA ». */
+.mk .ai-notice {
+  display: flex;
+  gap: var(--fd-space-2);
+  align-items: flex-start;
+  margin: var(--fd-space-4) 0 0;
+}
+.mk .ai-notice > svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+.mk .ai-notice p {
+  margin: 0;
+}
+.mk .ai-quota {
+  margin-top: var(--fd-space-5);
+}
+.mk .ai-bar {
+  height: 6px;
+  margin: 8px 0 4px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken, var(--fd-color-border));
+  overflow: hidden;
+}
+.mk .ai-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fd-color-primary);
+}
+.mk .ai-features {
+  display: grid;
+  gap: var(--fd-space-2);
+  margin: var(--fd-space-5) 0 0;
+  padding: 0;
+  border: 0;
+}
+.mk .ai-features legend {
+  margin-bottom: var(--fd-space-2);
+  font-weight: 600;
+}
+.mk .ai-features .is-soon {
+  color: var(--fd-color-text-subtle);
+  cursor: default;
+}
+.mk .ai-features .is-soon svg {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+/* Aperçu (règles communes §0) */
+.ai-preview {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-lg, 10px);
+  background: var(--fd-color-surface);
+}
+.ai-preview h4 {
+  margin: 0;
+  font-size: var(--fd-text-caption-size, 12px);
+  font-weight: 600;
+}
+.ai-before {
+  margin: 0;
+  color: var(--fd-color-text-subtle);
+  text-decoration: line-through;
+  white-space: pre-wrap;
+}
+.ai-after {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.ai-mention {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0;
+  color: var(--fd-color-text-subtle);
+  font-size: var(--fd-text-caption-size, 12px);
+}
+.ai-mention svg {
+  width: 14px;
+  height: 14px;
+}
+.ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.ai-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken, var(--fd-color-border));
+  overflow: hidden;
+}
+.ai-progress::after {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--fd-color-primary);
+  animation: ai-indet 1.2s ease-in-out infinite;
+}
+@keyframes ai-indet {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-progress::after {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
+  }
+}
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--fd-color-primary-subtle, var(--fd-color-surface-sunken));
+  color: var(--fd-color-primary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.ai-entry[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ai-disabled-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+/* Infobulle de l'entrée indisponible (règle 4) : au survol et au focus */
+.ai-tip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  width: max-content;
+  max-width: 280px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--fd-color-text, #1b1b1f);
+  color: var(--fd-color-surface, #fff);
+  font-size: 12px;
+  line-height: 1.4;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.ai-disabled-wrap:hover .ai-tip,
+.ai-entry:focus-visible + .ai-tip {
+  visibility: visible;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-tip {
+    transition: none;
+  }
+}

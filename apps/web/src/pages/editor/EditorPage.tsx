@@ -288,6 +288,9 @@ export function EditorPage() {
   }, [step?.id, rawEditor.loading, narrow]);
   const byStep: Record<string, PresencePayload[]> = {};
   for (const p of others) if (p.s) (byStep[p.s] ||= []).push(p);
+  const firstBubble = step
+    ? editor.hotspots.filter((h) => h.step_id === step.id).sort((a, b) => a.position - b.position)[0]?.id
+    : undefined;
   const stepIndexOf = (id: string | null) => editor.steps.findIndex((st) => st.id === id);
 
   // Changement d'étape → sélection de l'étape.
@@ -603,11 +606,21 @@ export function EditorPage() {
               end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
               onSelect: () => openSoon('ia'),
             },
+            // L30-02 : « Rédiger les textes » ouvre le menu Assistance IA de la première bulle de l'étape
             {
               label: t('editor.aiWriter'),
               icon: <PenLine />,
-              end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
-              onSelect: () => openSoon('ia'),
+              disabled: !firstBubble,
+              hint: firstBubble ? undefined : t('ai.write.noBubble'),
+              onSelect: () => {
+                if (!firstBubble) return;
+                setSelection({ kind: 'hotspot', id: firstBubble });
+                window.setTimeout(
+                  () =>
+                    document.querySelector<HTMLButtonElement>('.ai-write .menu-trigger, .ai-entry')?.focus(),
+                  50,
+                );
+              },
             },
             {
               label: t('editor.find.label'),

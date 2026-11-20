@@ -102,7 +102,9 @@ fournit l'attestation sur demande. Les sauvegardes sont effacées au terme de le
 ## 11. Transferts hors de l'Union européenne
 
 Les données sont hébergées dans l'Union européenne. Tout transfert hors de l'Union est encadré par une
-décision d'adéquation ou par les clauses contractuelles types de la Commission européenne.
+décision d'adéquation ou par les clauses contractuelles types de la Commission européenne. L'Assistance
+IA, désactivée par défaut, transmet des textes à un sous-traitant situé aux États-Unis (annexe 2)
+lorsque le Responsable de traitement l'active.
 
 ## 12. Droit applicable
 
@@ -142,3 +144,4 @@ Fait à [lieu], le [date], en deux exemplaires.
 |---|---|---|
 | Supabase | Base de données, authentification, stockage, fonctions serveur | Union européenne (Irlande) |
 | GitHub (Pages) | Hébergement des fichiers statiques de l'application et du lecteur, sans donnée du Responsable de traitement | États-Unis (journaux techniques uniquement) |
+| Anthropic (API Claude) | Assistance IA, uniquement si le Responsable de traitement l'active pour son espace : textes des démos nécessaires à chaque demande, données personnelles détectées masquées avant l'envoi, aucune image | États-Unis (clauses contractuelles types) |

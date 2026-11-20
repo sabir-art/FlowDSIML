@@ -1014,6 +1014,19 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      ai_usage: {
+        Row: {
+          workspace_id: string;
+          user_id: string;
+          day: string;
+          requests: number;
+          input_tokens: number;
+          output_tokens: number;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       webhook_deliveries: {
         Row: {
           attempt: number;
@@ -2389,6 +2402,19 @@ export type Database = {
       folder_hidden_count: { Args: { p_folder: string }; Returns: number };
       share_rules_preview: {
         Args: { p_ws: string; p_modes: string[]; p_max_days: number | null };
+        Returns: Json;
+      };
+      // L30 : Assistance IA
+      ai_status: { Args: { p_ws: string }; Returns: Json };
+      ai_enabled: { Args: { p_ws: string }; Returns: boolean };
+      set_ai_settings: {
+        Args: {
+          p_ws: string;
+          p_enabled: boolean;
+          p_features?: Json | null;
+          p_monthly_requests?: number | null;
+          p_user_daily_requests?: number | null;
+        };
         Returns: Json;
       };
       set_share_rules: {

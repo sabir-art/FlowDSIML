@@ -1,0 +1,109 @@
+import { useCallback, useEffect, useState } from 'react';
+import { supabase } from './supabase';
+
+/**
+ * L30 : client de l'Assistance IA. État de l'espace (ai_status, sans appel au fournisseur) et
+ * demandes à l'Edge Function `ai`. Aucun texte n'est envoyé si l'espace est désactivé ou si le
+ * quota est atteint (vérifié ici avant l'appel, puis par la base).
+ */
+export type AiFeature = 'write' | 'translate' | 'suggest' | 'generate' | 'dataset' | 'chart' | 'assistant';
+export const AI_FEATURES: AiFeature[] = [
+  'write',
+  'translate',
+  'suggest',
+  'generate',
+  'dataset',
+  'chart',
+  'assistant',
+];
+export type AiTask = AiFeature | 'write_all';
+
+export interface AiStatus {
+  enabled: boolean;
+  features: Record<AiFeature, boolean>;
+  used: number;
+  quota: number | null;
+  userToday: number;
+  userDailyRequests: number;
+  workspaceQuotaReached: boolean;
+  userQuotaReached: boolean;
+  renewsOn: string | null;
+  canEdit: boolean;
+  canManage: boolean;
+}
+
+/** Pourquoi une entrée IA est indisponible (null : disponible). */
+export type AiBlock = 'disabled' | 'quota' | 'userQuota' | 'role' | null;
+
+export function aiBlock(s: AiStatus | null, feature: AiFeature): AiBlock {
+  if (!s || !s.enabled || !s.features[feature]) return 'disabled';
+  if (!s.canEdit) return 'role';
+  if (s.workspaceQuotaReached) return 'quota';
+  if (s.userQuotaReached) return 'userQuota';
+  return null;
+}
+
+const listeners = new Set<() => Promise<void>>();
+/** Recharger l'état après une demande (compteurs) ou un changement de réglage. */
+export const refreshAiStatus = () => Promise.all([...listeners].map((l) => l())).then(() => undefined);
+
+export function useAiStatus(ws: string | undefined) {
+  const [status, setStatus] = useState<AiStatus | null>(null);
+  const [error, setError] = useState(false);
+  const load = useCallback(async () => {
+    if (!ws) return;
+    const { data, error: e } = await supabase.rpc('ai_status', { p_ws: ws });
+    if (e) return setError(true);
+    setError(false);
+    setStatus(data as unknown as AiStatus);
+  }, [ws]);
+  useEffect(() => {
+    void load();
+    listeners.add(load);
+    return () => void listeners.delete(load);
+  }, [load]);
+  return { status, error, reload: load };
+}
+
+export class AiRequestError extends Error {
+  constructor(
+    public code: string,
+    public renewsOn: string | null = null,
+  ) {
+    super(code);
+  }
+}
+
+/** Envoie une demande ; lève AiRequestError (AI_DISABLED, AI_QUOTA_WORKSPACE, AI_QUOTA_USER, ABORTED, …). */
+export async function callAi<T>(
+  ws: string,
+  task: AiTask,
+  lang: string,
+  input: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<T> {
+  const { data, error } = await supabase.functions.invoke('ai', {
+    body: { ws, task, lang, input },
+    signal,
+  });
+  if (signal?.aborted) throw new AiRequestError('ABORTED');
+  refreshAiStatus();
+  if (error) {
+    let body: { error?: string; renewsOn?: string } = {};
+    const ctx = (error as { context?: Response }).context;
+    try {
+      if (ctx && typeof ctx.json === 'function') body = await ctx.json();
+    } catch {
+      /* corps illisible : erreur générique */
+    }
+    throw new AiRequestError(body.error ?? 'NETWORK', body.renewsOn ?? null);
+  }
+  return (data as { result: T }).result;
+}
+
+/** Variables {{x}} présentes dans `before` et absentes de `after`. */
+export function lostVariables(before: string, after: string): string[] {
+  const vars = (s: string) => new Set([...s.matchAll(/\{\{\s*([\w.-]+)[^}]*\}\}/g)].map((m) => m[1]!));
+  const a = vars(after);
+  return [...vars(before)].filter((v) => !a.has(v));
+}

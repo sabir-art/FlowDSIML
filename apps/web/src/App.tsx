@@ -36,6 +36,7 @@ const PlansPage = lazy(() => import('./pages/settings/PlansPage').then((m) => ({
 const GlossarySettings = lazy(() =>
   import('./pages/settings/GlossarySettings').then((m) => ({ default: m.GlossarySettings })),
 );
+const AiSettings = lazy(() => import('./pages/settings/AiSettings').then((m) => ({ default: m.AiSettings })));
 const PrivacySettings = lazy(() =>
   import('./pages/settings/PrivacySettings').then((m) => ({ default: m.PrivacySettings })),
 );
@@ -209,6 +210,7 @@ export function App() {
                     <Route path="/settings/glossary" element={<GlossarySettings />} />
                     <Route path="/settings/security" element={<SecuritySettings />} />
                     <Route path="/settings/privacy" element={<PrivacySettings />} />
+                    <Route path="/settings/ai" element={<AiSettings />} />
                     <Route path="/settings/soon" element={<SoonFeatures />} />
                     <Route path="/settings/integrations" element={<IntegrationsPage />} />
                     <Route path="/settings/integrations/:id" element={<WebhookDetail />} />
