@@ -32,7 +32,7 @@ import {
 import { AssistantPanel } from '../../components/ai/AssistantPanel';
 import { SuggestionsPanel } from '../../components/ai/SuggestionsPanel';
 import { TranslateDialog } from '../../components/ai/TranslateDialog';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '../../components/Toast';
 import { activityOf, type EditTable, type PresencePayload } from './presence/presence';
 import { usePresenceCalm, usePresenceChannel } from './presence/usePresence';
@@ -69,8 +69,6 @@ import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
 import { useShareRules } from '../../lib/shareRules';
 import { PreviewDialog } from './PreviewDialog';
-import { ExportDialog } from '../export/ExportDialog';
-import { DistributeDialog } from '../share/DistributeDialog';
 import { PresentDialog } from '../present/PresentDialog';
 import { FindBar } from './FindBar';
 import { ShortcutsDialog, isMac } from './ShortcutsDialog';
@@ -86,6 +84,12 @@ import { DatasetDialog } from './data/DatasetDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
+
+// L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
+const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
+const DistributeDialog = lazy(() =>
+  import('../share/DistributeDialog').then((m) => ({ default: m.DistributeDialog })),
+);
 
 /** Vrai si la fenêtre est plus étroite que `px` (ED11 : l'éditeur exige un écran large). */
 function useNarrow(px: number) {
@@ -476,7 +480,9 @@ export function EditorPage() {
     <main className="mk ed" id="main">
       {/* L25-09 : modale « Jeu de données » (Réglages ou graphique) */}
       <DatasetDialog editor={editor} readOnly={readOnly} />
-      {exporting && demoId && <ExportDialog demoId={demoId} onClose={() => setExporting(false)} />}
+      <Suspense fallback={null}>
+        {exporting && demoId && <ExportDialog demoId={demoId} onClose={() => setExporting(false)} />}
+      </Suspense>
       {savingTpl && demoId && (
         <SaveTemplateDialog
           demoId={demoId}
@@ -514,9 +520,11 @@ export function EditorPage() {
       {translating && ws && can('demo.edit') && (
         <TranslateDialog editor={editor} ws={ws.id} onClose={() => setTranslating(false)} />
       )}
-      {distributing && demoId && can('demo.edit') && (
-        <DistributeDialog demoId={demoId} onClose={() => setDistributing(false)} />
-      )}
+      <Suspense fallback={null}>
+        {distributing && demoId && can('demo.edit') && (
+          <DistributeDialog demoId={demoId} onClose={() => setDistributing(false)} />
+        )}
+      </Suspense>
       {presenting && demoId && editor.steps.length > 0 && (
         <PresentDialog
           demoId={demoId}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -50,13 +50,17 @@ import { OnboardingCard, useOnboarding } from './OnboardingCard';
 import { loadHome, type Stats } from './home';
 import { FolderAccessDialog } from './FolderAccessDialog';
 import { useShareRules } from '../../lib/shareRules';
-import { ExportDialog } from '../export/ExportDialog';
-import { DistributeDialog } from '../share/DistributeDialog';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
 import { GenerateDialog } from '../../components/ai/GenerateDialog';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
+
+// L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
+const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
+const DistributeDialog = lazy(() =>
+  import('../share/DistributeDialog').then((m) => ({ default: m.DistributeDialog })),
+);
 
 type Demo = Tables<'demos'>;
 type FolderRow = Tables<'folders'>;
@@ -349,8 +353,10 @@ export function DemosPage() {
   };
   return (
     <div className="stack page-wide">
-      {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
-      {distributing && <DistributeDialog demoId={distributing} onClose={() => setDistributing(null)} />}
+      <Suspense fallback={null}>
+        {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
+        {distributing && <DistributeDialog demoId={distributing} onClose={() => setDistributing(null)} />}
+      </Suspense>
       <header className="page-head page-head--refonte">
         <div className="page-head__titles">
           <h1>{t('demos.title')}</h1>
