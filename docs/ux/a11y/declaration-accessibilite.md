@@ -52,7 +52,7 @@ Liste des non-conformités relevées lors de l'audit manuel préliminaire (lot L
 - La hiérarchie des titres saute un niveau sur certaines pages (critère 9.1).
 - Certains attributs ARIA font référence à des éléments absents, et un identifiant est dupliqué (critère 8.2).
 - En thème clair, certains textes discrets, certaines bordures de champs et l'indicateur de focus n'ont pas un contraste suffisant (critères 3.2, 3.3, 10.7).
-- Les documents PDF exportés (modes d'emploi, attestations de suivi) ne sont pas balisés pour l'accessibilité. Leur texte est réel et leur langue est renseignée, mais les titres ne sont pas structurés et les captures n'ont pas d'alternative textuelle (critère 13.3).
+- Les documents PDF exportés (modes d'emploi, attestations de suivi) sont balisés depuis novembre 2026 : titres structurés, ordre de lecture, alternative textuelle des captures, langue et titre du document. Leur conformité n'a pas encore été vérifiée avec un validateur PDF/UA ; elle le sera lors de l'audit complet. Une version HTML accessible du même contenu est aussi proposée à chaque export (critère 13.3).
 
 ### Dérogations pour charge disproportionnée
 
@@ -139,6 +139,6 @@ Vous pouvez :
 | 2 | Contrastes du thème clair : texte discret, bordures, focus | 3.2, 3.3, 10.7 | A11Y-11 à A11Y-13 | [date] |
 | 3 | Hiérarchie des titres, identifiants uniques, références ARIA | 9.1, 8.2 | A11Y-07 à A11Y-09 | [date] |
 | 3 | Valeurs écrites sur tous les graphiques | 3.3 | A11Y-14 | [date] |
-| 4 | PDF exportés accessibles (balisage, alternatives), ou version HTML équivalente | 13.3 | A11Y-10 | [date] |
+| 4 | PDF exportés accessibles : balisage fait (novembre 2026) et version HTML équivalente proposée ; reste la vérification avec un validateur PDF/UA (PAC ou veraPDF) | 13.3 | A11Y-10 | [date] |
 | — | Audit complet des 106 critères, avec restitutions vocales réelles, puis publication du taux | — | Audit §5 | [date] |
 | — | Formation des personnes qui créent les démos : titres d'étapes explicites, texte de bulle autoportant, floutage des données | — | — | [date] |
