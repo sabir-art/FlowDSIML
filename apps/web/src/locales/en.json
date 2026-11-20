@@ -2698,13 +2698,15 @@
       "link": "Anyone with the link",
       "password": "With a password",
       "invite": "By invitation",
-      "domain": "By email domain"
+      "domain": "By email domain",
+      "token": "By authentication token"
     },
     "modeHelp": {
       "link": "Open access, no identification.",
       "password": "Visitors enter a password you give them.",
       "invite": "Only invited addresses receive a personal access link.",
-      "domain": "Any address from an allowed domain, confirmed by an emailed link."
+      "domain": "Any address from an allowed domain, confirmed by an emailed link.",
+      "token": "For an intranet or a portal: your site signs the access."
     },
     "password": "Password",
     "showPw": "Show password",
@@ -3851,7 +3853,11 @@
     "retryIn_one": "retry in {{count}} min",
     "retryIn_other": "retry in {{count}} min",
     "createdBy": "created on {{date}} by {{name}}",
-    "created": "created on {{date}}"
+    "created": "created on {{date}}",
+    "soon_keys": "API keys",
+    "soon_keys_body": "Read analytics and drive demos from your scripts.",
+    "soon_remote": "Player control",
+    "soon_remote_body": "Open, go to a step and listen to events from the host page."
   },
   "glossary": {
     "title": "Glossary",

@@ -175,8 +175,8 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
     'L23-01 : « En pause » et « 6 échecs »',
   );
   ok(
-    (await page.locator('.int-card[aria-disabled="true"]').count()) === 6,
-    'L23-01 : 6 cartes « Bientôt » non cliquables',
+    (await page.locator('.int-card[aria-disabled="true"]').count()) === 8,
+    'L23-01 : 8 cartes « Bientôt » (dont Clés d’API et Pilotage) non cliquables',
   );
   ok(
     (await page.getByRole('button', { name: 'Actions pour hooks.acme.example' }).count()) === 1,

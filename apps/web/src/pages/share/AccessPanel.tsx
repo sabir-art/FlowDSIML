@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Building2, Clock, Eye, EyeOff, Globe, Info, Key, Mail, RefreshCw } from 'lucide-react';
+import { Building2, Clock, Eye, EyeOff, Globe, Info, Key, KeyRound, Mail, RefreshCw } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
 import { check } from '../../lib/useAction';
@@ -14,7 +14,7 @@ type Access = Pick<
   Tables<'demo_access'>,
   'mode' | 'ask_email' | 'expires_at' | 'password_changed_at' | 'updated_at'
 >;
-type Mode = 'link' | 'password' | 'invite' | 'domain';
+type Mode = 'link' | 'password' | 'invite' | 'domain' | 'token';
 const DEFAULT: Access = {
   mode: 'link',
   ask_email: false,
@@ -187,6 +187,8 @@ export function AccessPanel({
     { id: 'password', icon: <Key aria-hidden="true" />, available: true },
     { id: 'invite', icon: <Mail aria-hidden="true" />, available: false },
     { id: 'domain', icon: <Building2 aria-hidden="true" />, available: false },
+    // A1-11 (bloque_client) : jeton signé par le site du client, visible et désactivé
+    { id: 'token', icon: <KeyRound aria-hidden="true" />, available: false },
   ];
 
   const pick = (m: Mode) => {

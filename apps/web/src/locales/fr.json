@@ -2698,13 +2698,15 @@
       "link": "Toute personne avec le lien",
       "password": "Avec un mot de passe",
       "invite": "Sur invitation",
-      "domain": "Par domaine e-mail"
+      "domain": "Par domaine e-mail",
+      "token": "Par jeton d’authentification"
     },
     "modeHelp": {
       "link": "Accès libre, sans identification.",
       "password": "Le visiteur saisit un mot de passe que vous lui communiquez.",
       "invite": "Seules les adresses invitées reçoivent un lien d’accès personnel.",
-      "domain": "Toute adresse d’un domaine autorisé, confirmée par un lien envoyé par e-mail."
+      "domain": "Toute adresse d’un domaine autorisé, confirmée par un lien envoyé par e-mail.",
+      "token": "Pour un intranet ou un portail : votre site signe l’accès."
     },
     "password": "Mot de passe",
     "showPw": "Afficher le mot de passe",
@@ -3851,7 +3853,11 @@
     "retryIn_one": "essai dans {{count}} min",
     "retryIn_other": "essai dans {{count}} min",
     "createdBy": "créé le {{date}} par {{name}}",
-    "created": "créé le {{date}}"
+    "created": "créé le {{date}}",
+    "soon_keys": "Clés d’API",
+    "soon_keys_body": "Lisez les analytics et pilotez les démos depuis vos scripts.",
+    "soon_remote": "Pilotage du player",
+    "soon_remote_body": "Ouvrir, aller à une étape, écouter les événements depuis la page hôte."
   },
   "glossary": {
     "title": "Glossaire",

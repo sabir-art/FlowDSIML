@@ -10,7 +10,9 @@ import {
   Building2,
   ChartColumn,
   Copy,
+  Gamepad2,
   Hash,
+  KeyRound,
   Mail,
   MessageSquare,
   Plus,
@@ -317,6 +319,9 @@ function SoonCards() {
     { k: 'matomo', icon: <ChartColumn /> },
     { k: 'teams', icon: <MessageSquare /> },
     { k: 'crm', icon: <Building2 /> },
+    // A5-04 / A5-06 (bloque_client) : visibles, désactivées, « Bientôt »
+    { k: 'keys', icon: <KeyRound /> },
+    { k: 'remote', icon: <Gamepad2 /> },
   ];
   return (
     <div className="card card-pad l23-soon">
