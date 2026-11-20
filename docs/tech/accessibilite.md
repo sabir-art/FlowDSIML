@@ -120,7 +120,7 @@ sont vérifiés en plus).
 - Routes ajoutées depuis L27 : pages légales, nouveau mot de passe, invitation, écran public du
   présentateur, vue mobile de l'éditeur, squelette de chargement, cartes d'erreur (démos, éditeur, lecture
   des espaces), panneau d'une zone sélectionnée, recadrage, formulaire de contact du lecteur.
-- Résultat : **0 violation, quel que soit l’impact** (y compris modérée et mineure), sur 94 pages × 2 thèmes, soit 188 audits.
+- Résultat : **0 violation, quel que soit l’impact** (y compris modérée et mineure), sur 97 pages × 2 thèmes, soit 194 audits (L36 : écrans « Connexion impossible », capture et vidéo introuvables).
 - Le script échoue maintenant si une page connectée retombe sur l'écran de connexion (session fictive mal
   configurée) : sans ce garde-fou, la page de connexion était auditée à la place, sans erreur.
 

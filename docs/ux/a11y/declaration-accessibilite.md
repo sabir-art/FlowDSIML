@@ -38,8 +38,8 @@ Les vérifications déjà faites sont décrites ci-dessous. Elles ne remplacent 
 
 Mises à jour le 20/11/2026 (lots L24, L34 et L35 ; détail dans `docs/tech/accessibilite.md`).
 
-- **Audit automatique (axe-core)** : règles WCAG 2.0, 2.1 et 2.2 de niveaux A et AA, sur 94 écrans de
-  l'application, du lecteur et du centre de formation, en thème clair et sombre, soit 188 audits.
+- **Audit automatique (axe-core)** : règles WCAG 2.0, 2.1 et 2.2 de niveaux A et AA, sur 97 écrans de
+  l'application, du lecteur et du centre de formation, en thème clair et sombre, soit 194 audits.
   Résultat : aucune violation, quel que soit son niveau de gravité. Cet audit tourne à chaque modification
   du code.
 - **Contrôles du clavier et du focus, automatisés** (77 vérifications) : lien d'évitement, focus visible et jamais masqué,

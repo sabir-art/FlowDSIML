@@ -93,7 +93,7 @@ bord, 75 pour l'éditeur.
 
 Accessibilité (L24, L34, L35 ; détail dans docs/tech/accessibilite.md) :
 
-- audit axe-core WCAG 2.0, 2.1 et 2.2 de niveaux A et AA : 94 écrans × 2 thèmes, soit 188 audits, aucune
+- audit axe-core WCAG 2.0, 2.1 et 2.2 de niveaux A et AA : 97 écrans × 2 thèmes, soit 194 audits, aucune
   violation ; il tourne en intégration continue ;
 - 77 contrôles clavier et focus automatisés : focus visible et jamais masqué, fenêtres modales,
   annonces, zoom 200 %, animations réduites, parcours complets de l'éditeur et du lecteur au clavier ;
