@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Folder, LayoutGrid, List, Tag as TagIcon } from 'lucide-react';
+import { ArrowUpDown, Folder, LayoutGrid, List, Tag as TagIcon } from 'lucide-react';
+import { FilterContent } from '../../components/toolbar/ListToolbar';
 import { Sk } from '../../components/Skeleton';
 
 /**
@@ -16,28 +17,43 @@ export function DemosSkeleton({ onboardingHeight }: { onboardingHeight: number }
         <div className="fd-card sk-reserve" style={{ height: onboardingHeight }} aria-hidden="true" />
       )}
       <section aria-labelledby="demos-list-title" className="demos-section">
-        <div className="filter-bar">
-          <h2 id="demos-list-title">{t('demos.allDemos')}</h2>
-          <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
-            {(['all', 'published', 'draft'] as const).map((k) => (
-              <button key={k} type="button" aria-pressed={k === 'all'} disabled>
-                {t(`demos.filter_${k}`)}
+        <h2 id="demos-list-title" className="demos-list-title">
+          {t('demos.allDemos')}
+        </h2>
+        {/* Barre réelle et désactivée, sans compteur (même gabarit que la page, L40) */}
+        <div className="fd-toolbar list-toolbar">
+          <div className="fd-toolbar__group" role="group" aria-label={t('toolbar.filters')}>
+            <div className="list-toolbar__lead">
+              <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
+                {(['all', 'published', 'draft'] as const).map((k) => (
+                  <button key={k} type="button" aria-pressed={k === 'all'} disabled>
+                    {t(`demos.filter_${k}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="list-toolbar__filters">
+              <button type="button" className="fd-btn fd-filter" disabled>
+                <FilterContent icon={<Folder />} label={t('demos.folderLabel')} value={t('toolbar.all')} />
               </button>
-            ))}
+              <button type="button" className="fd-btn fd-filter" disabled>
+                <FilterContent icon={<TagIcon />} label={t('tags.title')} value={t('toolbar.allF')} />
+              </button>
+            </div>
           </div>
-          <div className="filter-bar__end">
-            <button type="button" className="fd-btn fd-btn--sm menu-trigger" disabled>
-              <span className="fd-btn__icon" aria-hidden="true">
-                <Folder />
-              </span>
-              {t('demos.folders')}
-              <ChevronDown size={16} aria-hidden="true" />
+          <div
+            className="fd-toolbar__group fd-toolbar__group--end"
+            role="group"
+            aria-label={t('toolbar.sortView')}
+          >
+            <button type="button" className="fd-btn fd-filter fd-filter--sort" disabled>
+              <FilterContent
+                icon={<ArrowUpDown />}
+                label={t('demos.sortLabel')}
+                value={t('demos.sortUpdated')}
+              />
             </button>
-            <button type="button" className="fd-btn tg-filter" disabled>
-              <TagIcon aria-hidden="true" />
-              {t('tags.title')}
-            </button>
-            <div className="fd-segmented view-seg" role="radiogroup" aria-label={t('demos.view')}>
+            <div className="fd-segmented fd-segmented--icons" role="radiogroup" aria-label={t('demos.view')}>
               <button type="button" role="radio" aria-checked aria-label={t('demos.viewGrid')} disabled>
                 <LayoutGrid aria-hidden="true" />
               </button>
@@ -51,10 +67,6 @@ export function DemosSkeleton({ onboardingHeight }: { onboardingHeight: number }
                 <List aria-hidden="true" />
               </button>
             </div>
-            <button type="button" className="fd-btn fd-btn--sm menu-trigger" disabled>
-              {t('demos.sortUpdated')}
-              <ChevronDown size={16} aria-hidden="true" />
-            </button>
           </div>
         </div>
         <ul className="demo-grid" aria-hidden="true">

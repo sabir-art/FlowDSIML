@@ -1731,28 +1731,10 @@
   position: relative;
   display: inline-flex;
 }
-.tg-filter.is-active {
-  border-color: var(--fd-color-primary);
-}
-.tg-filter svg {
-  width: 16px;
-  height: 16px;
-}
-.tg-count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background: var(--fd-color-primary);
-  color: var(--fd-color-on-primary, #fff);
-  font: 700 11px var(--fd-font-sans);
-}
 .tg-pop {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
+  left: 0;
   z-index: 40;
   width: 280px;
   display: flex;

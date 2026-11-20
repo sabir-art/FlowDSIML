@@ -25,27 +25,16 @@
   box-shadow: var(--fd-shadow-xs);
 }
 
-/* Barre de filtres : titre, segmenté de statut, tri et dossiers à droite */
+/* L40 : titre de section sur sa ligne, barre de liste (16 px au-dessus et au-dessous), puis la liste */
 .demos-section {
   display: flex;
   flex-direction: column;
   gap: var(--fd-space-4);
   margin-top: var(--fd-space-4);
 }
-.filter-bar {
-  display: flex;
-  align-items: center;
-  gap: var(--fd-space-3);
-  flex-wrap: wrap;
-}
-.filter-bar h2 {
+.demos-list-title {
   margin: 0;
   font-size: var(--fd-text-h2-size);
-}
-.filter-bar__end {
-  margin-left: auto;
-  display: flex;
-  gap: var(--fd-space-2);
 }
 
 /* Grille de cartes de démo */
@@ -225,9 +214,6 @@
   .search-pill {
     width: 100%;
   }
-  .filter-bar__end {
-    margin-left: 0;
-  }
 }
 /* DSH-10 : publiée puis modifiée (changements non publiés) */
 .status-modified {
@@ -279,14 +265,7 @@
 .empty-folder .illu-hot {
   fill: var(--fd-orange-400, #f6a623);
 }
-/* DSH-02 : bascule grille / liste et vue liste */
-.view-seg button {
-  padding: 0 10px;
-}
-.view-seg svg {
-  width: 16px;
-  height: 16px;
-}
+/* DSH-02 : vue liste */
 .demo-table-wrap {
   padding: 0;
   overflow-x: auto;

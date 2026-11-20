@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Plus, Search, Settings, Tag as TagIcon, Trash2, X } from 'lucide-react';
+import { FilterContent } from './toolbar/ListToolbar';
+import { Plus, Search, Settings, Tag as TagIcon, Trash2, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../lib/supabase';
 import { check } from '../lib/useAction';
@@ -297,22 +298,26 @@ export function TagFilter({
   const needle = q.trim().toLowerCase();
   return (
     <div className="tg-anchor" ref={root}>
+      {/* L40 : déclencheur « Étiquettes : valeur » (fd-filter), actif dès qu'une étiquette est choisie */}
       <button
         type="button"
-        className={`fd-btn tg-filter${selected.length ? ' is-active' : ''}`}
+        className={`fd-btn fd-filter tg-filter${selected.length ? ' fd-filter--active' : ''}`}
+        aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? 'tg-pop' : undefined}
         onClick={() => setOpen((v) => !v)}
       >
-        <TagIcon aria-hidden="true" />
-        {t('tags.title')}
-        {selected.length > 0 && (
-          <span className="tg-count">
-            <span aria-hidden="true">{selected.length}</span>
-            <span className="sr-only">{t('tags.activeCount', { count: selected.length })}</span>
-          </span>
-        )}
-        <ChevronDown aria-hidden="true" />
+        <FilterContent
+          icon={<TagIcon />}
+          label={t('tags.title')}
+          value={
+            selected.length === 0
+              ? t('toolbar.allF')
+              : selected.length > 2
+                ? t('tags.countShort', { count: selected.length })
+                : selected.map((id) => store.tags.find((x) => x.id === id)?.name ?? '').join(', ')
+          }
+        />
       </button>
       {open && (
         <div className="tg-pop fd-card" id="tg-pop" role="dialog" aria-label={t('tags.filterBy')}>

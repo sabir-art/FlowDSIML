@@ -1,0 +1,129 @@
+/* L40 : barre de liste (composants fd-toolbar et fd-filter dans packages/ui/src/controls.css) */
+.list-toolbar__lead,
+.list-toolbar__filters {
+  display: contents;
+}
+.list-toolbar__more {
+  display: none;
+}
+.fd-filter__icon {
+  display: inline-flex;
+}
+/* La barre ne porte que des contrôles de 40 px (spec §2.1) */
+.list-toolbar .fd-btn--sm {
+  height: 40px;
+}
+.list-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--fd-z-dropdown) - 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--fd-space-4);
+  background: rgb(8 8 8 / 0.45);
+}
+.list-sheet {
+  width: min(420px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  padding: var(--fd-space-4) var(--fd-space-5) var(--fd-space-5);
+  border-radius: var(--fd-radius-lg);
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: var(--fd-shadow-lg, 0 20px 50px rgb(0 0 0 / 0.25));
+}
+.list-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--fd-space-3);
+}
+.list-sheet__head h2 {
+  margin: 0;
+  font-size: var(--fd-text-h3-size, 18px);
+}
+.list-sheet__body {
+  display: grid;
+  gap: var(--fd-space-2);
+}
+.list-sheet__body .menu,
+.list-sheet__body .fd-filter,
+.list-sheet__body .tg-anchor {
+  width: 100%;
+}
+.list-sheet__body .fd-filter {
+  justify-content: flex-start;
+}
+.list-sheet__body .fd-filter__value {
+  max-width: none;
+  flex: 1;
+  text-align: left;
+}
+/* Libellé toujours visible dans la feuille (place suffisante) */
+.list-sheet__body .fd-filter--active .fd-filter__label {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+}
+.list-sheet__body .fd-toolbar__reset {
+  width: 100%;
+}
+
+/* Sous 768 px : filtre principal en pleine largeur, menus dans la feuille, tri en icône (spec §5) */
+@media (max-width: 767px) {
+  /* Le groupe « Filtres » laisse ses contrôles se placer dans la barre : filtre principal sur la
+     ligne 1, « Filtres · n » à gauche de la ligne 2, tri et affichage à droite */
+  .list-toolbar > .fd-toolbar__group:first-child {
+    display: contents;
+  }
+  .list-toolbar {
+    column-gap: var(--fd-space-2);
+  }
+  .list-toolbar__lead {
+    display: flex;
+    flex: 1 1 100%;
+  }
+  .list-toolbar__lead > .fd-segmented {
+    display: flex;
+    width: 100%;
+  }
+  .list-toolbar__lead > .fd-segmented > button {
+    flex: 1;
+  }
+  .list-toolbar__lead > .fd-toolbar__search {
+    width: 100%;
+  }
+  .list-toolbar__filters {
+    display: none;
+  }
+  .list-toolbar__more {
+    display: inline-flex;
+  }
+  .list-toolbar .fd-filter--sort {
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .list-toolbar .fd-filter--sort .fd-filter__label,
+  .list-toolbar .fd-filter--sort .fd-filter__value {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .list-toolbar .fd-filter--sort .fd-filter__chev {
+    display: none;
+  }
+  .list-sheet-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .list-sheet {
+    width: 100%;
+    border-radius: var(--fd-radius-lg) var(--fd-radius-lg) 0 0;
+  }
+}

@@ -53,7 +53,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   };
   const openFolderMenu = async () => {
     await page
-      .getByRole('button', { name: /Dossiers|RH/ })
+      .getByRole('button', { name: /^Dossier/ })
       .first()
       .click();
   };

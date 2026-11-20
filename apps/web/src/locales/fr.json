@@ -2549,7 +2549,11 @@
       "demo": "Prochaine étape : créez votre première démo.",
       "publish": "Prochaine étape : publiez votre démo « {{title}} » pour la partager.",
       "share": "Prochaine étape : partagez votre démo « {{title}} » pour recevoir vos premières vues."
-    }
+    },
+    "folderLabel": "Dossier",
+    "sortLabel": "Tri",
+    "resultCount_one": "{{count}} démo",
+    "resultCount_other": "{{count}} démos"
   },
   "a11y": {
     "skip": "Aller au contenu"
@@ -2867,8 +2871,6 @@
     "limits": "{{ws}} étiquettes au plus par workspace, {{demo}} par démo.",
     "of": "Étiquettes de {{title}}",
     "filterBy": "Filtrer par étiquettes",
-    "activeCount_one": "{{count}} étiquette sélectionnée",
-    "activeCount_other": "{{count}} étiquettes sélectionnées",
     "none": "Aucune étiquette pour l’instant. Ajoutez-en depuis le menu « … » d’une démo.",
     "combine": "Combinaison",
     "any": "Au moins une",
@@ -2886,7 +2888,9 @@
     "remove": "Retirer {{name}}",
     "add": "Ajouter une étiquette",
     "addPlaceholder": "Ajouter…",
-    "fieldHelp": "Pour organiser et filtrer vos démos (outil, public, module). {{demo}} étiquettes au plus par démo, {{ws}} par workspace."
+    "fieldHelp": "Pour organiser et filtrer vos démos (outil, public, module). {{demo}} étiquettes au plus par démo, {{ws}} par workspace.",
+    "countShort_one": "{{count}} étiquette",
+    "countShort_other": "{{count}} étiquettes"
   },
   "learners": {
     "title": "Apprenants",
@@ -4574,5 +4578,14 @@
     "unavailableBody": "Elle a peut-être été supprimée, ou vous n’y avez plus accès.",
     "backToDemos": "Retour aux démos",
     "workspaceError": "Impossible de charger votre espace"
+  },
+  "toolbar": {
+    "filters": "Filtres",
+    "sortView": "Tri et affichage",
+    "reset": "Réinitialiser les filtres",
+    "moreCount": "Filtres · {{count}}",
+    "close": "Fermer",
+    "all": "Tous",
+    "allF": "Toutes"
   }
 }

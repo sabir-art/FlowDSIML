@@ -231,7 +231,7 @@ const SCREENS = {
     maquette: 'reference/dashboard.html',
     route: '/#/',
     async prepare(p) {
-      await p.getByRole('button', { name: 'Modifiées récemment' }).click();
+      await p.getByRole('button', { name: /^Tri\s*: Modifiées récemment/ }).click();
       await p.waitForTimeout(300);
     },
   },
