@@ -55,7 +55,7 @@
 
 - **Production** :
   - `sanitizeDom` (extension) et `sanitizePage` (serveur) **renvoient des compteurs**, en plus du HTML assaini ;
-  - le serveur recalcule et enregistre **ses** compteurs dans `steps.html_meta.security` : `{ scripts, handlers, frames, forms, externalLinks, piiReplaced, other, analyzedAt }` ;
+  - le serveur recalcule et enregistre **ses** compteurs dans `steps.html_meta.security` : `{ scripts, handlers, frames, forms, externalLinks, dangerousLinks, piiReplaced, other, safeBrowsing: 'ok' | 'unavailable', analyzedAt }` ;
   - l'extension affiche les siens avant l'envoi ; l'éditeur affiche ceux du serveur ;
   - aucun chiffre n'est estimé.
 
@@ -69,9 +69,13 @@
 | `piiReplaced` | {n} donnée(s) personnelle(s) remplacée(s) | remplacements « Xxxxxx » |
 | `other` | {n} autre(s) élément(s) retiré(s) | `base`, `link`, `meta http-equiv`, `srcdoc`, CSS dangereux (affiché seulement s'il est différent de 0) |
 
+| `dangerousLinks` | Liens dangereux bloqués : {n} (vérifiés par Google Safe Browsing) | liens de la page signalés par Google Safe Browsing (§4.1) ; ligne toujours affichée, même à 0 |
+
+- **Vérification indisponible** : si Google Safe Browsing n'a pas répondu (clé absente, quota atteint, délai dépassé), la ligne devient « Vérification Google indisponible », avec l'icône `circle-alert` et la date de la dernière tentative. Le serveur refait la vérification à la publication.
 - **Statut** :
-  - **« Page sûre »** (bouclier coché, fond `success` à 14 %) si `scripts`, `handlers`, `frames`, `forms` et `other` valent 0 ;
+  - **« Page sûre »** (bouclier coché, fond `success` à 14 %) si `scripts`, `handlers`, `frames`, `forms`, `other` et `dangerousLinks` valent 0 ;
   - sinon **« Éléments retirés »** (`triangle-alert`, fond `warning` à 16 %).
+  - si rien n'a été retiré mais que Google Safe Browsing n'a pas répondu : **« Vérification partielle »** (`circle-alert`, fond `surface-sunken`) au lieu de « Page sûre ».
   - Phrase : « Rien d'actif à retirer sur cette page. » ou « Tout ce qui pouvait s'exécuter ou envoyer des données a été retiré. La page est publiable. »
   - Le statut est toujours écrit, jamais porté par la couleur seule.
   - Les deux statuts sont publiables : « Éléments retirés » informe, il ne bloque pas.
@@ -97,6 +101,24 @@
   - L'ouverture se fait par `window.open(url, '_blank', 'noopener,noreferrer')` depuis le lecteur. Le cadre garde son `sandbox` sans popups.
   - Le domaine affiché vient de l'adresse réelle, jamais du texte du lien : c'est la protection contre l'hameçonnage.
 - **Données** : `steps.html_ops` reçoit une opération `{ op: 'extlink', sel, allow: true }` par lien autorisé.
+
+### 4.1 Liens dangereux (Google Safe Browsing)
+
+- **Qui vérifie** : le **serveur** seulement (`html-ingest`, puis de nouveau à la publication), avec la clé fournie par le client.
+  - La clé reste un secret côté serveur, jamais dans l'extension, l'app ou le lecteur.
+  - Méthode recommandée : l'API par préfixes de hachage (Update API), pour ne pas envoyer les adresses complètes à un tiers. À valider avec le DPO ; à mentionner au registre des traitements.
+- **Ce qui est vérifié** : tous les liens de la page, internes et externes, ainsi que les adresses d'images et de styles conservées.
+- **Lien signalé** :
+  - il est désactivé et **ne peut pas être autorisé** ;
+  - badge « Bloqué, site signalé » (icône `shield-alert`, fond `danger` à 14 %, texte écrit) à la place de l'interrupteur ;
+  - l'interrupteur est remplacé par ce texte, et non grisé ;
+  - le lien est compté dans `dangerousLinks`.
+- **Côté visiteur** : un lien signalé ne fait rien. Aucune ouverture, même si un ancien réglage l'avait autorisé : la vérification de la publication l'emporte.
+- **Re-vérification** : à chaque publication. Si un lien déjà autorisé est signalé plus tard, son autorisation est retirée, et une alerte apparaît dans l'éditeur : « Le lien {texte} mène à un site signalé : il a été bloqué. »
+- **Indisponibilité** :
+  - les liens restent désactivés par défaut ;
+  - un lien déjà autorisé reste autorisé ;
+  - l'autorisation d'un **nouveau** lien est refusée tant que la vérification n'a pas répondu, avec la raison « Vérification Google indisponible, réessayez plus tard ».
 
 ## 5. Formulaires
 
@@ -127,4 +149,8 @@
 - **Création** : avec `disabled`, Démo HTML et Sandbox sont visibles, désactivés, avec la raison.
 - **Mention** présente aux 4 endroits.
 - **Lecteur** : un lien externe non autorisé ne fait rien ; un formulaire capturé ne s'envoie jamais (test de `submit`).
+- **Google Safe Browsing** :
+  - avec l'adresse de test officielle de Safe Browsing, le lien est bloqué, porte le badge « Bloqué, site signalé », ne peut pas être autorisé, et le rapport compte 1 lien dangereux ;
+  - clé absente : « Vérification Google indisponible » ;
+  - aucune adresse complète dans les journaux du serveur.
 - Clair, sombre, 390 px (réglage et rapport).
