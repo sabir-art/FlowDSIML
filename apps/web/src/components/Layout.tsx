@@ -250,7 +250,8 @@ export function Layout() {
         }}
       />
       <main className="main" id="main" tabIndex={-1}>
-        <Outlet />
+        {/* Changement d'espace : la page est remontée, ses données et requêtes de l'ancien espace abandonnées */}
+        <Outlet key={current?.id ?? 'none'} />
       </main>
     </div>
   );

@@ -1,0 +1,174 @@
+/* L43 : composeur de message en un seul cadre (zone de texte, puis barre d'actions) */
+.fd-composer-wrap {
+  position: relative;
+}
+.fd-composer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--fd-color-border-strong);
+  border-radius: 16px;
+  background: var(--fd-color-surface);
+  transition:
+    border-color 120ms,
+    box-shadow 120ms;
+}
+.fd-composer:focus-within {
+  border-color: var(--fd-color-primary);
+  box-shadow: var(--fd-shadow-focus);
+}
+.fd-composer.is-error {
+  border-color: var(--fd-color-danger);
+}
+.fd-composer.is-error:focus-within {
+  box-shadow: var(--fd-shadow-focus-danger);
+}
+.fd-composer.is-disabled {
+  background: var(--fd-color-surface-sunken);
+}
+.fd-composer .fd-composer__input {
+  display: block;
+  width: 100%;
+  min-height: 34px;
+  height: auto;
+  margin: 0;
+  padding: 12px 16px 0;
+  border: 0;
+  border-radius: 16px 16px 0 0;
+  background: transparent;
+  color: var(--fd-color-text);
+  font: inherit;
+  font-size: 15px;
+  line-height: 22px;
+  resize: none;
+  overflow-y: hidden;
+  box-shadow: none;
+  outline: none;
+}
+.fd-composer .fd-composer__input:is(:focus, :focus-visible) {
+  /* L'anneau de focus est porté par le cadre entier (barre comprise) */
+  outline: none;
+  box-shadow: none;
+  border-radius: 16px 16px 0 0;
+}
+.fd-composer .fd-composer__input::placeholder {
+  color: var(--fd-color-text-muted);
+}
+.fd-composer__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 46px;
+  padding: 6px 8px 8px;
+}
+.fd-composer__tools,
+.fd-composer__end {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.fd-composer__end {
+  gap: 8px;
+  margin-left: auto;
+}
+.fd-composer__tool {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.fd-composer__tool svg {
+  width: 18px;
+  height: 18px;
+}
+.fd-composer__tool:hover,
+.fd-composer__tool[aria-expanded='true'] {
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text);
+}
+.fd-composer__tool:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.fd-composer__count {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.fd-composer__count.is-max {
+  color: var(--fd-color-danger);
+}
+.fd-composer__cancel {
+  padding: 0 8px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fd-color-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fd-composer__cancel:hover {
+  background: var(--fd-color-surface-sunken);
+}
+.fd-composer__send {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary);
+  cursor: pointer;
+}
+/* Zone cliquable de 40 × 40 px sans changer le dessin */
+.fd-composer__send::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+}
+.fd-composer__send svg {
+  width: 18px;
+  height: 18px;
+}
+.fd-composer__send:hover:not(:disabled) {
+  background: var(--fd-color-primary-hover);
+}
+.fd-composer__send:disabled {
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+  cursor: default;
+}
+.fd-composer__send.is-stop {
+  background: var(--fd-color-text);
+  color: var(--fd-color-surface);
+}
+.fd-composer__send.is-stop svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+.fd-composer__error {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-danger);
+}
+.fd-composer__context {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}

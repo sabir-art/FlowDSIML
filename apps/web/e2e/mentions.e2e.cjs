@@ -36,7 +36,7 @@ const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
 
   await page.goto(`${BASE}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.cm');
-  const input = page.getByRole('textbox', { name: 'Ajouter un commentaire…' });
+  const input = page.getByRole('textbox', { name: 'Nouveau commentaire' });
   await input.click();
   await input.type('Bonjour @ma');
   const list = page.getByRole('listbox', { name: 'Membres à mentionner' });
@@ -114,7 +114,7 @@ const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
   ok((await edit.inputValue()) === 'Bonjour @Mathis Martin merci', 'L22-07 : modification en texte lisible');
   await edit.press('End');
   await edit.type(' !');
-  await edit.press('Control+Enter');
+  await edit.press('Enter');
   await page.waitForTimeout(400);
   ok(
     state.tables.step_comments.find((c) => c.body.startsWith('Bonjour')).body ===

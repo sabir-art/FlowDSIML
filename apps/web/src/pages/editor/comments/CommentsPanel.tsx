@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowDown,
   ArrowUp,
+  AtSign,
   ChevronDown,
   ChevronUp,
   CircleCheck,
@@ -25,7 +26,7 @@ import {
   Trash2,
   WifiOff,
 } from 'lucide-react';
-import { Alert, Button, Switch } from '@flowdsiml/ui';
+import { Button, Composer, Switch } from '@flowdsiml/ui';
 import { useAuth } from '../../../auth/AuthProvider';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useConfirm } from '../../../components/ConfirmDialog';
@@ -40,8 +41,7 @@ const COLLAPSED_KEY = 'fd.editor.comments.collapsed';
 const MIN_H = 160;
 const MAX_H = 520;
 const STEP_H = 24;
-const MAX_LEN = 2000;
-const COUNT_FROM = 1800;
+const MAX_LEN = 500;
 const NEW_MS = 4000;
 /** Dernière lecture des commentaires, par étape (ouverture sur le premier non lu). */
 const SEEN_KEY = 'fd.editor.comments.seen';
@@ -156,7 +156,11 @@ export function CommentsPanel({
   const [showResolved, setShowResolved] = useState(false);
   const [draft, setDraft] = useState('');
   const [draftMentions, setDraftMentions] = useState<Mention[]>([]);
-  const [composeFocus, setComposeFocus] = useState(false);
+  // L43 : bouton « Mentionner » de la barre du composeur (nouveau commentaire et modification)
+  const [mentionSignal, setMentionSignal] = useState(0);
+  const [mentionOpen, setMentionOpen] = useState(false);
+  const [editSignal, setEditSignal] = useState(0);
+  const [editMentionOpen, setEditMentionOpen] = useState(false);
   const [sendError, setSendError] = useState(false);
   const [sending, setSending] = useState(false);
   const [editing, setEditing] = useState<{ id: string; body: string; mentions: Mention[] } | null>(null);
@@ -280,14 +284,6 @@ export function CommentsPanel({
     if (idx > 0) setOlderAbove(idx);
   }, [stepId, api.loading, visible.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Champ de saisie : 40 px qui grandit jusqu'à 120 px puis défile
-  useLayoutEffect(() => {
-    const el = draftRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${Math.min(120, Math.max(40, el.scrollHeight))}px`;
-  }, [draft]);
-
   /** Jamais plus de 60 % de la colonne : le canevas garde au moins 240 px. */
   function clamp(h: number) {
     // Hauteur de la colonne centrale (.stage) : le parent direct (.stage-comments) épouse le panneau.
@@ -375,8 +371,25 @@ export function CommentsPanel({
   const badge = openList.length > 0 && (
     <span className="cm-count">{t('editor.comments.openCount', { count: openList.length })}</span>
   );
+  const mentionTool = (expanded: boolean, onOpen: () => void, listId: string, disabled = false) => (
+    <button
+      type="button"
+      className="fd-composer__tool"
+      aria-label={t('editor.comments.mention')}
+      aria-haspopup="listbox"
+      aria-expanded={expanded}
+      aria-controls={expanded ? listId : undefined}
+      disabled={disabled}
+      // Garde le focus dans le champ (la liste se ferme quand le champ perd le focus)
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onOpen}
+    >
+      <AtSign aria-hidden="true" />
+    </button>
+  );
+
   const privateNote = (
-    <span className="cm-private">
+    <span className="cm-private" id="cm-private">
       <Lock aria-hidden="true" />
       {t('editor.comments.private')}
     </span>
@@ -575,37 +588,38 @@ export function CommentsPanel({
                         {isFresh && <span className="cm-new">{t('editor.comments.new')}</span>}
                       </div>
                       {editing?.id === c.id ? (
-                        <div className="cm-edit">
-                          <MentionInput
-                            className="fd-textarea"
-                            aria-label={t('editor.comments.editLabel')}
-                            autoFocus
-                            rows={2}
-                            maxLength={MAX_LEN}
-                            value={editing.body}
-                            mentions={editing.mentions}
-                            members={mentionable}
-                            onValueChange={(body, mentions) => setEditing({ id: c.id, body, mentions })}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Escape') {
-                                e.stopPropagation();
-                                setEditing(null);
-                              } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                                e.preventDefault();
-                                void saveEdit();
-                              }
-                            }}
-                          />
-                          <div className="cm-edit__actions">
-                            <span className="cm-hint">{t('editor.comments.editHint')}</span>
-                            <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>
-                              {t('editor.comments.cancel')}
-                            </Button>
-                            <Button size="sm" variant="primary" onClick={() => void saveEdit()}>
-                              {t('editor.comments.save')}
-                            </Button>
-                          </div>
-                        </div>
+                        <Composer
+                          className="cm-edit"
+                          label={t('editor.comments.editLabel')}
+                          placeholder={t('editor.comments.placeholderShort')}
+                          maxLength={MAX_LEN}
+                          value={editing.body}
+                          submitLabel={t('editor.comments.saveSubmit')}
+                          submitKey={t('editor.comments.enterKey')}
+                          edit={{
+                            cancelLabel: t('editor.comments.cancel'),
+                            onCancel: () => setEditing(null),
+                          }}
+                          counterLabel={(count, max) => t('editor.comments.counter', { count, max })}
+                          onSubmit={() => void saveEdit()}
+                          tools={mentionTool(
+                            editMentionOpen,
+                            () => setEditSignal((n) => n + 1),
+                            'cm-edit-ac',
+                          )}
+                          renderInput={(props) => (
+                            <MentionInput
+                              {...props}
+                              autoFocus
+                              mentions={editing.mentions}
+                              members={mentionable}
+                              openSignal={editSignal}
+                              onOpenChange={setEditMentionOpen}
+                              listId="cm-edit-ac"
+                              onValueChange={(body, mentions) => setEditing({ id: c.id, body, mentions })}
+                            />
+                          )}
+                        />
                       ) : (
                         <p className="cm-body">
                           <CommentBody body={c.body} />
@@ -667,71 +681,57 @@ export function CommentsPanel({
 
         {canComment && (
           <div className="cm-compose">
-            {sendError && (
-              <Alert kind="error">
-                {t('editor.comments.errorSend')}{' '}
-                <button type="button" className="link-button" onClick={() => void send()}>
-                  {t('editor.comments.retry')}
-                </button>
-              </Alert>
-            )}
-            <form
-              className="cm-compose__row"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void send();
-              }}
-            >
-              {user && <Avatar id={user.id} label={name(user.id) || user.email || '?'} />}
-              <MentionInput
-                ref={draftRef}
-                wrapClassName="cm-compose__field"
-                className="fd-textarea cm-compose__input"
-                rows={1}
-                maxLength={MAX_LEN}
-                placeholder={
-                  mobile ? t('editor.comments.placeholderShort') : t('editor.comments.placeholder')
-                }
-                aria-label={t('editor.comments.placeholderShort')}
-                aria-describedby="cm-compose-hint"
-                value={draft}
-                mentions={draftMentions}
-                members={mentionable}
-                disabled={!stepId}
-                onFocus={() => setComposeFocus(true)}
-                onBlur={() => setComposeFocus(false)}
-                onValueChange={(text, mentions) => {
-                  setDraft(text);
-                  setDraftMentions(mentions);
-                  setSendError(false);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-                    e.preventDefault();
-                    void send();
-                  }
-                }}
-              />
-              <Button
-                type="submit"
-                variant="primary"
-                className="cm-send"
-                icon={<ArrowUp />}
-                disabled={!draft.trim() || !stepId || sending}
-                aria-label={t('editor.comments.send')}
-                title={t('editor.comments.send')}
-              />
-            </form>
-            <div className="cm-compose__foot">
-              <span id="cm-compose-hint" className={`cm-hint${composeFocus ? '' : ' cm-hint--idle'}`}>
-                {t('editor.comments.composeHint')}
-              </span>
-              {draft.length >= COUNT_FROM && (
-                <span className={`cm-counter${draft.length >= MAX_LEN ? ' is-max' : ''}`}>
-                  {t('editor.comments.tooLong', { count: draft.length })}
-                </span>
+            <Composer
+              label={t('editor.comments.composeLabel')}
+              // Panneau bas : la barre d'actions reste visible (en-tête, barre et une ligne de fil gardés)
+              maxLines={mobile ? 8 : Math.floor((height - 200) / 22)}
+              placeholder={
+                !stepId
+                  ? t('editor.comments.placeholderNoStep')
+                  : mobile
+                    ? t('editor.comments.placeholderShort')
+                    : t('editor.comments.placeholder')
+              }
+              maxLength={MAX_LEN}
+              value={draft}
+              disabled={!stepId}
+              sending={sending}
+              submitLabel={t('editor.comments.send')}
+              submitKey={t('editor.comments.enterKey')}
+              describedBy="cm-private"
+              counterLabel={(count, max) => t('editor.comments.counter', { count, max })}
+              onSubmit={() => void send()}
+              error={
+                sendError && (
+                  <>
+                    {t('editor.comments.errorSend')}{' '}
+                    <button type="button" className="link-button" onClick={() => void send()}>
+                      {t('editor.comments.retry')}
+                    </button>
+                  </>
+                )
+              }
+              tools={mentionTool(mentionOpen, () => setMentionSignal((n) => n + 1), 'cm-compose-ac', !stepId)}
+              renderInput={(props) => (
+                <MentionInput
+                  {...props}
+                  ref={(el) => {
+                    draftRef.current = el;
+                    if (typeof props.ref === 'function') props.ref(el);
+                  }}
+                  mentions={draftMentions}
+                  members={mentionable}
+                  openSignal={mentionSignal}
+                  onOpenChange={setMentionOpen}
+                  listId="cm-compose-ac"
+                  onValueChange={(text, mentions) => {
+                    setDraft(text);
+                    setDraftMentions(mentions);
+                    setSendError(false);
+                  }}
+                />
               )}
-            </div>
+            />
           </div>
         )}
       </div>

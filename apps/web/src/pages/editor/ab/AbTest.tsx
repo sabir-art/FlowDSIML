@@ -180,17 +180,20 @@ export function AbSection({
       <div className="sec ab-sec">
         {dialog}
         <div className="sec-title">{t('editor.ab.title')}</div>
-        <p className="help">{t('editor.ab.intro')}</p>
-        <button
-          type="button"
-          className="btn btn-secondary btn-sm"
-          disabled={readOnly || busy || !!test}
-          aria-describedby={test ? 'ab-busy' : undefined}
-          onClick={() => void start()}
-        >
-          <GitBranch aria-hidden="true" />
-          {t('editor.ab.create')}
-        </button>
+        {/* L45 (E7) : texte → son bouton à 12 px */}
+        <div className="fd-stack fd-stack--action">
+          <p className="help">{t('editor.ab.intro')}</p>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            disabled={readOnly || busy || !!test}
+            aria-describedby={test ? 'ab-busy' : undefined}
+            onClick={() => void start()}
+          >
+            <GitBranch aria-hidden="true" />
+            {t('editor.ab.create')}
+          </button>
+        </div>
         {test && (
           <p className="help" id="ab-busy">
             {t('editor.ab.already', { n: otherN })}

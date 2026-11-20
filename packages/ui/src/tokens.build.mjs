@@ -34,6 +34,7 @@ const root = [
   ...pfx('weight', t.fontWeight),
   ...textVars,
   ...pfx('space', t.space),
+  ...pfx('gap', t.gap),
   ...pfx('radius', t.radius),
   ...pfx('border', t.borderWidth),
   ...pfx('motion', t.motion),
@@ -68,6 +69,9 @@ ${block(':root', Object.entries(t.aliases))}
 
 /* Alias de compatibilité avec les tokens provisoires du MVP */
 ${block(':root', Object.entries(t.legacyAliases))}
+
+/* L45 : écarts compacts (panneau de l'éditeur, tiroirs) */
+${block('.fd-dense', pfx('gap', t.gapDense))}
 
 /* Le player et ses aperçus n'héritent jamais du mode sombre de l'app */
 ${block('.fd-player-scope', [...themed('light'), ['color-scheme', 'light']])}

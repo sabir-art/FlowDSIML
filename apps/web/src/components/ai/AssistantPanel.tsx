@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Sparkles, X } from 'lucide-react';
+import { Composer } from '@flowdsiml/ui';
 import type { DemoEditor } from '../../pages/editor/useDemoEditor';
 import { asSettings } from '../../pages/editor/types';
 import { useToast } from '../Toast';
@@ -160,6 +161,9 @@ export function AssistantPanel({
         <p className="t-caption muted ai-as-context">
           {t('ai.assistant.context', { title: editor.demo!.title || t('demos.untitled'), n: stepIndex + 1 })}
         </p>
+        <p className="fd-composer__context ai-as-cleared" id="ai-as-cleared">
+          {t('ai.assistant.cleared')}
+        </p>
         <div className="ai-suggest-body ai-as-log" ref={log} role="log" aria-live="polite" aria-busy={busy}>
           {msgs.length === 0 && (
             <div className="ai-as-starters">
@@ -252,47 +256,32 @@ export function AssistantPanel({
               <p className="ai-as-author">{t('ai.assistant.name')}</p>
               <p className="ai-after">{t('ai.assistant.busy')}</p>
               <div className="ai-progress" aria-hidden="true" />
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => ctrl.current?.abort()}
-              >
-                {t('ai.stop')}
-              </button>
             </div>
           )}
         </div>
-        <form
+        <Composer
           className="ai-as-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void send(draft);
-          }}
-        >
-          <label className="sr-only" htmlFor="ai-as-input">
-            {t('ai.assistant.placeholder')}
-          </label>
-          <textarea
-            id="ai-as-input"
-            ref={input}
-            className="textarea input-sm"
-            rows={2}
-            maxLength={2000}
-            placeholder={t('ai.assistant.placeholder')}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-                e.preventDefault();
-                void send(draft);
-              }
-            }}
-          />
-          <button type="submit" className="btn btn-primary btn-sm" disabled={busy || !draft.trim()}>
-            {t('ai.assistant.send')}
-          </button>
-        </form>
-        <p className="t-caption muted">{t('ai.assistant.cleared')}</p>
+          label={t('ai.assistant.label')}
+          placeholder={t('ai.assistant.placeholder')}
+          maxLength={2000}
+          value={draft}
+          onValueChange={setDraft}
+          submitLabel={t('ai.assistant.send')}
+          submitKey={t('ai.assistant.enterKey')}
+          describedBy="ai-as-cleared"
+          stop={busy ? { label: t('ai.assistant.stop'), onStop: () => ctrl.current?.abort() } : undefined}
+          onSubmit={() => void send(draft)}
+          renderInput={(props) => (
+            <textarea
+              {...props}
+              ref={(el) => {
+                input.current = el;
+                if (typeof props.ref === 'function') props.ref(el);
+              }}
+              onChange={(e) => setDraft(e.target.value)}
+            />
+          )}
+        />
       </aside>
     </div>,
     document.body,

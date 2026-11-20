@@ -110,6 +110,15 @@ jobs:
       - name: Infobulles L44 (boutons à icône nommés, sans title ; clavier, Échap, bords du lecteur)
         if: always()
         run: cd apps/web && node e2e/infobulles.e2e.cjs
+      - name: Composeur L43 (un cadre, Entrée, mentions, modification, erreur, assistant)
+        if: always()
+        run: cd apps/web && node e2e/composeur.e2e.cjs
+      - name: Changement d'espace (retour sur Démos, toast)
+        if: always()
+        run: cd apps/web && node e2e/changement-espace.e2e.cjs
+      - name: L45 espacements (E1 à E21)
+        if: always()
+        run: cd apps/web && node e2e/l45-espacements.e2e.cjs
       - name: Rapport
         if: always()
         uses: actions/upload-artifact@v4

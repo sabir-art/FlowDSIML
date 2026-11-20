@@ -76,12 +76,9 @@
   --fd-ardoise-900: #161A20;
   --fd-ardoise-950: #0B0D10;
   --fd-noir-900: #080808;
-  --fd-brand-bordeaux: #A52B60;
-  --fd-brand-bordeaux-fonce: #7D204C;
-  --fd-brand-orange: #E49A32;
-  --fd-brand-bleu: #4A9BCB;
-  --fd-brand-vert: #91B83E;
-  --fd-brand-encre: #25232A;
+  --fd-brand-magenta: #A3195B;
+  --fd-brand-encre: #1A1A1A;
+  --fd-brand-nuit: #123A49;
   --fd-font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --fd-font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --fd-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -153,6 +150,14 @@
   --fd-space-16: 4rem;
   --fd-space-20: 5rem;
   --fd-space-0-5: 0.125rem;
+  --fd-gap-label: 6px;
+  --fd-gap-help: 6px;
+  --fd-gap-option: 8px;
+  --fd-gap-action: 12px;
+  --fd-gap-field: 20px;
+  --fd-gap-group: 24px;
+  --fd-gap-title: 16px;
+  --fd-gap-section: 24px;
   --fd-radius-none: 0;
   --fd-radius-xs: 6px;
   --fd-radius-sm: 8px;
@@ -496,6 +501,15 @@
   --fd-ember-950: var(--fd-framboise-950);
   --fd-stone-950: var(--fd-ardoise-950);
   --fd-stone-0: var(--fd-ardoise-0);
+}
+
+/* L45 : écarts compacts (panneau de l'éditeur, tiroirs) */
+.fd-dense {
+  --fd-gap-help: 4px;
+  --fd-gap-field: 16px;
+  --fd-gap-group: 20px;
+  --fd-gap-title: 12px;
+  --fd-gap-section: 16px;
 }
 
 /* Le player et ses aperçus n'héritent jamais du mode sombre de l'app */

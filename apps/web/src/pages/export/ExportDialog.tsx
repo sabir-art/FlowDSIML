@@ -988,34 +988,32 @@ function Options(p: {
             <X aria-hidden="true" />
           </button>
         </div>
-        <div className="exp-formats" role="radiogroup" aria-label={t('export.format')}>
+        {/* L45 : formats en liste verticale (une ligne par format), vrais boutons radio */}
+        <fieldset className="exp-formats">
+          <legend className="fd-label">{t('export.format')}</legend>
           {formats.map((f) => {
             const on = f.key === p.fmt;
+            const off = f.soon || f.off;
             return (
-              <button
-                key={f.key}
-                type="button"
-                className="exp-format"
-                role="radio"
-                aria-checked={on}
-                aria-disabled={f.soon || f.off || undefined}
-                aria-describedby={f.soon || f.off ? `${p.id}-soon-${f.key}` : undefined}
-                onClick={() => !f.soon && !f.off && p.setFmt(f.key as Fmt)}
-              >
-                {f.soon && (
-                  <span className="soon" id={`${p.id}-soon-${f.key}`}>
-                    {t('shell.soon')}
-                  </span>
-                )}
+              <label key={f.key} className={`exp-format${on ? ' is-on' : ''}${off ? ' is-off' : ''}`}>
+                <input
+                  type="radio"
+                  name={`${p.id}-fmt`}
+                  value={f.key}
+                  checked={on}
+                  disabled={off}
+                  onChange={() => p.setFmt(f.key as Fmt)}
+                />
                 <span className="fd-icon-chip">{f.icon}</span>
-                <b>{t(`export.fmt_${f.key}`)}</b>
-                <small id={f.off ? `${p.id}-soon-${f.key}` : undefined}>
-                  {f.off ? t('export.mp4Unsupported') : t(`export.fmt_${f.key}_help`)}
-                </small>
-              </button>
+                <span className="exp-format__text">
+                  <b>{t(`export.fmt_${f.key}`)}</b>
+                  <small>{f.off ? t('export.mp4Unsupported') : t(`export.fmt_${f.key}_help`)}</small>
+                </span>
+                {f.soon && <span className="soon">{t('shell.soon')}</span>}
+              </label>
             );
           })}
-        </div>
+        </fieldset>
 
         {p.fmt === 'pdf' || p.fmt === 'html' ? (
           <>
@@ -1051,6 +1049,13 @@ function Options(p: {
                   <>
                     {sw(t('export.numbering'), t('export.numberingHelp'), pdf.numbering, (v) =>
                       setPdf({ ...pdf, numbering: v }),
+                    )}
+                    {sw(
+                      t('export.bubbles'),
+                      pdf.images ? t('export.bubblesHelp') : t('export.bubblesLocked'),
+                      pdf.images && pdf.bubbles,
+                      (v) => setPdf({ ...pdf, bubbles: v }),
+                      !pdf.images,
                     )}
                     {sw(t('export.cover'), t('export.coverHelp'), pdf.cover, (v) =>
                       setPdf({ ...pdf, cover: v }),

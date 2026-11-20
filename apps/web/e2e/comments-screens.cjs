@@ -104,7 +104,7 @@ function withComments(state, { resolvedAll = false } = {}) {
     await p.route('**/rest/v1/step_comments*', (r) =>
       r.request().method() === 'POST' ? r.fulfill({ status: 500, body: '{}' }) : r.fallback(),
     );
-    await p.getByRole('textbox', { name: 'Ajouter un commentaire…' }).fill('Ce commentaire ne passera pas');
+    await p.getByRole('textbox', { name: 'Nouveau commentaire' }).fill('Ce commentaire ne passera pas');
     await p.keyboard.press('Enter');
     await p.waitForTimeout(400);
     await shot(p, '25g-commentaires-erreur');

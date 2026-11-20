@@ -57,20 +57,15 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     ok(/^8 pages/.test(await help(p)), 'L15-01 : 7 étapes + couverture = 8 pages');
     ok(!/balisé/.test(await help(p)), 'L15-01 : aucune promesse de PDF balisé');
-    ok(
-      (await p.getByRole('radio', { name: /PDF/ }).first().getAttribute('aria-checked')) === 'true',
-      'L15-01 : PDF choisi par défaut',
-    );
+    ok(await p.getByRole('radio', { name: /PDF/ }).first().isChecked(), 'L15-01 : PDF choisi par défaut');
     // L25-11 : la carte MP4 est active ; « Hors ligne » reste « Bientôt »
     const zip = p.getByRole('radio', { name: /Hors ligne/ });
     ok(
-      (await zip.getAttribute('aria-disabled')) === 'true' && /Bientôt/.test(await zip.textContent()),
+      (await zip.isDisabled()) &&
+        /Bientôt/.test(await p.locator('label.exp-format', { has: zip }).textContent()),
       'L15-01 : hors ligne « Bientôt »',
     );
-    ok(
-      (await p.getByRole('radio', { name: /Vidéo MP4/ }).getAttribute('aria-disabled')) === null,
-      'L25-11 : MP4 sélectionnable',
-    );
+    ok(!(await p.getByRole('radio', { name: /Vidéo MP4/ }).isDisabled()), 'L25-11 : MP4 sélectionnable');
     ok((await p.locator('.x15-svg').count()) === 1, 'L15-01 : aperçu rendu');
     ok((await p.locator('.x15-side .pager span').textContent()) === 'Page 1 sur 8', 'L15-01 : pager');
     await p.getByRole('button', { name: 'Page suivante' }).click();
@@ -79,6 +74,18 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       'L15-01 : page 2 = étape 1',
     );
     ok((await p.locator('.x15-svg image').count()) === 1, 'L15-01 : capture dans l’aperçu');
+    // Bulles sur les captures (activées par défaut) : l'aperçu montre la bulle, comme le fichier
+    const titleCount = async () =>
+      (await p.locator('.x15-svg text').allTextContents()).filter((x) => x.includes('Ouvrir le menu Usagers'))
+        .length;
+    const bubbles = p.getByRole('switch', { name: /Bulles sur les captures/ });
+    ok(
+      (await bubbles.isChecked()) && (await titleCount()) === 2,
+      'bulle de l’étape dessinée sur la capture (aperçu)',
+    );
+    await bubbles.click();
+    ok((await titleCount()) === 1, 'bulles coupées : capture sans bulle');
+    await bubbles.click();
     await p.getByRole('radio', { name: 'Deux étapes par page' }).click();
     ok(/^5 pages/.test(await help(p)), 'L15-01 : deux étapes par page = 5 pages');
     await p.getByRole('radio', { name: 'Une étape par page' }).click();

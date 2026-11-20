@@ -1003,7 +1003,7 @@ export function EditorPage() {
             />
           </div>
         </section>
-        <aside className="panel" aria-label={t('editor.properties')}>
+        <aside className="panel fd-dense" aria-label={t('editor.properties')}>
           <div className="tabs" role="tablist" aria-label={t('editor.properties')}>
             {(['step', 'design', 'settings'] as Tab[]).map((k) => (
               <button

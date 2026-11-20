@@ -49,9 +49,10 @@ export const palette = {
   noir: { 900: '#080808' /* ← charte */ },
   // Couleurs du LOGO TutoClick (fourni par le client). Réservées au logo, aux icônes d'app et aux
   // supports de marque : l'interface utilise les rôles DSI ci-dessous (voir identite-visuelle.md §3).
+  // Logo officiel du 20 novembre 2026 (LOGO-01) : magenta, encre, nuit. L'ancien dégradé et le bleu
+  // du logo précédent sont abandonnés.
   brand: {
-    'bordeaux': '#A52B60', 'bordeaux-fonce': '#7D204C', 'orange': '#E49A32',
-    'bleu': '#4A9BCB', 'vert': '#91B83E', 'encre': '#25232A',
+    'magenta': '#A3195B', 'encre': '#1A1A1A', 'nuit': '#123A49',
   },
   success: { fg: '#557014', bg: '#F5F9E8', fgDark: '#AED054', bgDark: '#1C2409' },
   warning: { fg: '#855104', bg: '#FFF6E8', fgDark: '#F8BB61', bgDark: '#2B1D05' },
@@ -234,6 +235,19 @@ export const space = {
   '5': '1.25rem', '6': '1.5rem', '8': '2rem', '10': '2.5rem', '12': '3rem', '16': '4rem', '20': '5rem',
 } as const;
 
+/**
+ * L45 (composants §15.4 bis) : écart selon la relation entre deux blocs voisins (loi de proximité).
+ * Valeurs des pages, cartes et modales ; la classe `.fd-dense` (panneau de l'éditeur, tiroirs) applique
+ * les valeurs compactes (`gapDense`).
+ */
+export const gap = {
+  'label': '6px', 'help': '6px', 'option': '8px', 'action': '12px', 'field': '20px', 'group': '24px',
+  'title': '16px', 'section': '24px',
+} as const;
+export const gapDense = {
+  'help': '4px', 'field': '16px', 'group': '20px', 'title': '12px', 'section': '16px',
+} as const;
+
 export const radius = {
   'none': '0', 'xs': '6px', 'sm': '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px',
 } as const;
@@ -401,7 +415,7 @@ export const legacyAliases = {
 export const cssVar = (group: string, name: string): string => `var(--fd-${group}-${name})`;
 
 export const tokens = {
-  palette, colors, fontFamily, fontWeight, textStyles, space, radius, shadow, borderWidth,
+  palette, colors, fontFamily, fontWeight, textStyles, space, gap, gapDense, radius, shadow, borderWidth,
   motion, zIndex, layout, breakpoints, player, aliases, legacyAliases, googleFontsUrl,
 } as const;
 

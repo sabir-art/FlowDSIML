@@ -33,7 +33,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
 
   // Entrée envoie, Maj+Entrée revient à la ligne
-  const input = page.getByRole('textbox', { name: 'Ajouter un commentaire…' });
+  const input = page.getByRole('textbox', { name: 'Nouveau commentaire' });
   await input.fill('Revoir le libellé');
   await input.press('Shift+Enter');
   await input.type('du bouton https://exemple.test/doc');
@@ -68,8 +68,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'menu ⋯ du commentaire en portail (§15.7)',
   );
   await page.getByRole('menuitem', { name: 'Modifier' }).click();
-  await page.getByRole('textbox', { name: 'Modifier votre commentaire' }).fill('Libellé validé');
-  await page.getByRole('textbox', { name: 'Modifier votre commentaire' }).press('Control+Enter');
+  await page.getByRole('textbox', { name: 'Modifier le commentaire' }).fill('Libellé validé');
+  await page.getByRole('textbox', { name: 'Modifier le commentaire' }).press('Enter');
   await page.waitForTimeout(300);
   ok(state.tables.step_comments[0].body === 'Libellé validé', 'modification de son commentaire');
 
@@ -137,8 +137,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await m.goto(`${APP}/#/demos/${DEMO}/edit`);
   await m.waitForSelector('.cm--mobile');
   ok((await m.locator('.cm-handle').count()) === 0, 'mobile : pas de poignée');
-  await m.getByRole('textbox', { name: 'Ajouter un commentaire…' }).fill('Réponse depuis le téléphone');
-  await m.getByRole('button', { name: 'Envoyer le commentaire' }).click();
+  await m.getByRole('textbox', { name: 'Nouveau commentaire' }).fill('Réponse depuis le téléphone');
+  await m.getByRole('button', { name: 'Envoyer', exact: true }).click();
   await m.waitForTimeout(300);
   ok(state.tables.step_comments.length === 1, 'mobile : réponse envoyée');
   await m.selectOption('.editor-narrow__steps', '1');

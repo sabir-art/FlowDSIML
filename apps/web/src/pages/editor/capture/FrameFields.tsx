@@ -78,7 +78,8 @@ export function FrameFields({ editor, readOnly }: { editor: DemoEditor; readOnly
   );
 
   return (
-    <div className="fr-fields">
+    // L45 (E10) : un groupe par réglage (interrupteur, puis le champ qu'il ouvre)
+    <div className="fr-fields fd-stack fd-stack--group">
       <div className="field">
         <span className="t-label" id="fr-style-l">
           {t('editor.frame.style')}

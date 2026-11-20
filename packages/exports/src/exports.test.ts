@@ -152,6 +152,21 @@ describe('plan du PDF', () => {
     expect(texts(pages[0]!)).toMatch(/… \d+ autres étapes/);
     expect(pages).toHaveLength(41);
   });
+  it('bulles sur les captures : dessinées dans la capture, décor ignoré par les lecteurs d’écran', () => {
+    const page = planDemoPdf(demo(1), DEFAULT_PDF, measure)[1]!;
+    const img = page.blocks.find((b) => b.t === 'image')!;
+    const decor = page.blocks.filter((b) => b.t === 'text' && b.decor);
+    expect(decor.length).toBeGreaterThan(0);
+    const box = page.blocks.find((b) => b.t === 'rect' && b.fill === '#FFFFFF')!;
+    expect(img.t === 'image' && box.t === 'rect').toBe(true);
+    if (img.t !== 'image' || box.t !== 'rect') return;
+    expect(box.x).toBeGreaterThanOrEqual(img.x);
+    expect(box.y).toBeGreaterThanOrEqual(img.y);
+    expect(box.x + box.w).toBeLessThanOrEqual(img.x + img.w);
+    expect(box.y + box.h).toBeLessThanOrEqual(img.y + img.h);
+    const off = planDemoPdf(demo(1), { ...DEFAULT_PDF, bubbles: false }, measure)[1]!;
+    expect(off.blocks.some((b) => b.t === 'text' && b.decor)).toBe(false);
+  });
   it('paysage : pages A4 couchées', () => {
     const pages = planDemoPdf(demo(2), { ...DEFAULT_PDF, orientation: 'landscape' }, measure);
     const band = pages[0]!.blocks[0]!;

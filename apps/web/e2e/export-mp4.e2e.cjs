@@ -55,10 +55,7 @@ const SHOTS = process.env.SHOTS_DIR;
   {
     const p = await open();
     await p.getByRole('radio', { name: /Vidéo MP4/ }).click();
-    ok(
-      (await p.getByRole('radio', { name: /Vidéo MP4/ }).getAttribute('aria-checked')) === 'true',
-      'carte MP4 active',
-    );
+    ok(await p.getByRole('radio', { name: /Vidéo MP4/ }).isChecked(), 'carte MP4 active');
     const formats = await p
       .getByLabel('Format de l’image')
       .or(p.getByLabel("Format de l'image"))
@@ -182,8 +179,10 @@ const SHOTS = process.env.SHOTS_DIR;
     });
     const card = p.getByRole('radio', { name: /Vidéo MP4/ });
     ok(
-      (await card.getAttribute('aria-disabled')) === 'true' &&
-        /Votre navigateur ne permet pas de créer une vidéo/.test(await card.textContent()),
+      (await card.isDisabled()) &&
+        /Votre navigateur ne permet pas de créer une vidéo/.test(
+          await p.locator('label.exp-format', { has: card }).textContent(),
+        ),
       'sans WebCodecs : carte désactivée avec l’aide',
     );
     await shot(p, 'l25-12-sans-webcodecs');

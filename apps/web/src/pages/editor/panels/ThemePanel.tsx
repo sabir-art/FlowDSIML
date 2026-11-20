@@ -132,23 +132,25 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
       <div className="sec">
         {/* L25-03 : cadre du navigateur (toute la démo), remplace la bascule d'A2-01 */}
         <div className="sec-title">{t('editor.frame.title')}</div>
-        <FrameFields editor={editor} readOnly={readOnly} />
-        {color('background', t('editor.frame.background'))}
-        <div className="setting">
-          <span className="t-label" id="th-grad-l">
-            {t('editor.design.gradient')}
-          </span>
-          <span className="switch">
-            <input
-              id="th-grad"
-              type="checkbox"
-              aria-labelledby="th-grad-l"
-              checked={theme.backgroundGradient}
-              disabled={readOnly}
-              onChange={(e) => set({ backgroundGradient: e.target.checked })}
-            />
-            <span />
-          </span>
+        <div className="fd-stack fd-stack--group">
+          <FrameFields editor={editor} readOnly={readOnly} />
+          {color('background', t('editor.frame.background'))}
+          <div className="setting">
+            <span className="t-label" id="th-grad-l">
+              {t('editor.design.gradient')}
+            </span>
+            <span className="switch">
+              <input
+                id="th-grad"
+                type="checkbox"
+                aria-labelledby="th-grad-l"
+                checked={theme.backgroundGradient}
+                disabled={readOnly}
+                onChange={(e) => set({ backgroundGradient: e.target.checked })}
+              />
+              <span />
+            </span>
+          </div>
         </div>
       </div>
 
@@ -181,65 +183,74 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
 
       <div className="sec">
         <div className="sec-title">{t('editor.design.brand')}</div>
-        <div className="logo-row">
-          <span className="logo-preview">
-            {theme.logoUrl ? <img src={theme.logoUrl} alt="" /> : <ImageIcon size={18} aria-hidden="true" />}
-          </span>
-          {!readOnly && (
-            <>
-              <input
-                ref={logoInput}
-                id="th-logo"
-                type="file"
-                hidden
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) {
-                    setLogoName(f.name);
-                    void uploadLogo(f);
-                  }
-                  e.target.value = '';
-                }}
-              />
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => logoInput.current?.click()}
-              >
-                <ImageUp aria-hidden="true" />
-                {theme.logoUrl ? t('editor.changeLogo') : t('editor.chooseLogo')}
-              </button>
-              {/* L18-03 : action stylée et alignée avec « Choisir un logo » */}
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setLibrary('logo')}>
-                <Images aria-hidden="true" />
-                {t('media.choose')}
-              </button>
-              {theme.logoUrl && (
+        {/* L45 (E12) : médiathèque → « Afficher Créé avec TutoClick » à 16 px */}
+        <div className="fd-stack">
+          <div className="logo-row">
+            <span className="logo-preview">
+              {theme.logoUrl ? (
+                <img src={theme.logoUrl} alt="" />
+              ) : (
+                <ImageIcon size={18} aria-hidden="true" />
+              )}
+            </span>
+            {!readOnly && (
+              <>
+                <input
+                  ref={logoInput}
+                  id="th-logo"
+                  type="file"
+                  hidden
+                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) {
+                      setLogoName(f.name);
+                      void uploadLogo(f);
+                    }
+                    e.target.value = '';
+                  }}
+                />
                 <button
                   type="button"
-                  className="btn btn-ghost btn-sm btn-icon"
-                  aria-label={t('editor.removeLogo')}
-                  onClick={() => set({ logoUrl: null })}
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => logoInput.current?.click()}
                 >
-                  <X aria-hidden="true" />
+                  <ImageUp aria-hidden="true" />
+                  {theme.logoUrl ? t('editor.changeLogo') : t('editor.chooseLogo')}
                 </button>
-              )}
-            </>
-          )}
+                {/* L18-03 : action stylée et alignée avec « Choisir un logo » */}
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setLibrary('logo')}>
+                  <Images aria-hidden="true" />
+                  {t('media.choose')}
+                </button>
+                {theme.logoUrl && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm btn-icon"
+                    aria-label={t('editor.removeLogo')}
+                    onClick={() => set({ logoUrl: null })}
+                  >
+                    <X aria-hidden="true" />
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+          {logoName && <span className="help">{logoName}</span>}
+          {uploadError && <Alert kind="error">{uploadError}</Alert>}
+          <div className="fd-stack fd-stack--help">
+            <label className="check">
+              <input
+                type="checkbox"
+                disabled={readOnly}
+                checked={theme.showBranding}
+                onChange={(e) => set({ showBranding: e.target.checked })}
+              />
+              {t('editor.showBranding')}
+            </label>
+            <p className="help">{t('editor.brandingHint')}</p>
+          </div>
         </div>
-        {logoName && <span className="help">{logoName}</span>}
-        {uploadError && <Alert kind="error">{uploadError}</Alert>}
-        <label className="check">
-          <input
-            type="checkbox"
-            disabled={readOnly}
-            checked={theme.showBranding}
-            onChange={(e) => set({ showBranding: e.target.checked })}
-          />
-          {t('editor.showBranding')}
-        </label>
-        <p className="help">{t('editor.brandingHint')}</p>
       </div>
 
       {library && (

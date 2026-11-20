@@ -98,12 +98,17 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok((await card.locator('fieldset legend').count()) >= 2, 'groupes en fieldset / legend');
   await card.getByRole('checkbox', { name: 'Toute personne avec le lien' }).uncheck();
   await card.getByRole('checkbox', { name: 'Avec un mot de passe' }).uncheck();
+  // L39 : quatre modes ; on les décoche tous pour vérifier la règle « au moins un mode »
+  await card.getByRole('checkbox', { name: /Sur invitation/ }).uncheck();
+  await card.getByRole('checkbox', { name: /Par domaine e-mail/ }).uncheck();
   ok(
     (await card.getByRole('alert').innerText()) === 'Gardez au moins un mode d’accès.' &&
       (await save.isDisabled()),
     'au moins un mode',
   );
   await card.getByRole('checkbox', { name: 'Avec un mot de passe' }).check();
+  await card.getByRole('checkbox', { name: /Sur invitation/ }).check();
+  await card.getByRole('checkbox', { name: /Par domaine e-mail/ }).check();
   await card.getByRole('combobox', { name: 'Durée maximale des liens' }).selectOption('30');
   await card.getByRole('radio', { name: 'Administrateurs et propriétaires seulement' }).check();
   await card
@@ -142,7 +147,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       call.p_max_days === 30 &&
       call.p_publish_role === 'admin' &&
       call.p_exports === false &&
-      call.p_modes.join() === 'password',
+      [...call.p_modes].sort().join() === 'domain,invite,password',
     'règles envoyées (conformité, 30 jours, admins, sans exports)',
   );
   ok(

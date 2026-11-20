@@ -97,8 +97,9 @@
   right: 2px;
   bottom: 2px;
 }
-.sty-save {
-  margin-top: 10px;
+.mk .sty-save {
+  /* L45 (E11) : grille → son action à 12 px */
+  margin-top: var(--fd-gap-action);
 }
 .sty-custom {
   margin-left: auto;

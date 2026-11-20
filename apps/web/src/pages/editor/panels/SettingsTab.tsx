@@ -92,7 +92,7 @@ export function SettingsTab({
       {/* L12-07 : étiquettes de la démo (organiser et filtrer le tableau de bord) */}
       <TagsField demoId={editor.demo!.id} wsId={editor.demo!.workspace_id} readOnly={readOnly} />
       {/* L26-09 : notes du présentateur pour toute la démo (jamais publiées ni exportées) */}
-      <div className="sec">
+      <div className="sec notes-sec">
         <div className="sec-title">
           <Presentation aria-hidden="true" />
           {t('editor.notes.demoTitle')}
@@ -135,49 +135,56 @@ export function SettingsTab({
       <FormatSection editor={editor} readOnly={readOnly} />
       <div className="sec">
         <div className="sec-title">{t('editor.settings.reading')}</div>
-        <SettingSwitch
-          id="ap-on"
-          label={t('editor.autoplay')}
-          checked={autoplay.enabled}
-          disabled={readOnly}
-          onChange={(v) => set({ autoplay: { ...autoplay, enabled: v } })}
-        />
-        {autoplay.enabled && (
-          <div className="field">
-            <label htmlFor="ap-delay">{t('editor.autoplayDelay')}</label>
-            <input
-              id="ap-delay"
-              className="input input-sm"
-              type="number"
-              min={1.5}
-              max={30}
-              step={0.5}
-              disabled={readOnly}
-              value={autoplay.delayMs / 1000}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                if (Number.isFinite(v))
-                  set({
-                    autoplay: { ...autoplay, delayMs: Math.round(Math.min(30, Math.max(1.5, v)) * 1000) },
-                  });
-              }}
+        {/* L45 (E6) : une ligne par réglage, aide collée à son interrupteur, sans filet */}
+        <div className="fd-stack">
+          <SettingSwitch
+            id="ap-on"
+            label={t('editor.autoplay')}
+            checked={autoplay.enabled}
+            disabled={readOnly}
+            onChange={(v) => set({ autoplay: { ...autoplay, enabled: v } })}
+          />
+          {autoplay.enabled && (
+            <div className="field">
+              <label htmlFor="ap-delay">{t('editor.autoplayDelay')}</label>
+              <input
+                id="ap-delay"
+                className="input input-sm"
+                type="number"
+                min={1.5}
+                max={30}
+                step={0.5}
+                disabled={readOnly}
+                value={autoplay.delayMs / 1000}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  if (Number.isFinite(v))
+                    set({
+                      autoplay: { ...autoplay, delayMs: Math.round(Math.min(30, Math.max(1.5, v)) * 1000) },
+                    });
+                }}
+              />
+              <span className="help">{t('editor.autoplayHelp')}</span>
+            </div>
+          )}
+          {/* L17 : soulignement des termes du glossaire (désactivable par démo) */}
+          <div className="fd-stack fd-stack--help">
+            <SettingSwitch
+              id="gl-on"
+              label={t('editor.settings.glossary')}
+              checked={wsGlossary && settings.glossary !== false}
+              disabled={readOnly || !wsGlossary}
+              onChange={(v) => set({ glossary: v })}
             />
-            <span className="help">{t('editor.autoplayHelp')}</span>
+            <p className="help">
+              {t(wsGlossary ? 'editor.settings.glossaryHelp' : 'editor.settings.glossaryOff')}
+            </p>
           </div>
-        )}
-        {/* L17 : soulignement des termes du glossaire (désactivable par démo) */}
-        <SettingSwitch
-          id="gl-on"
-          label={t('editor.settings.glossary')}
-          checked={wsGlossary && settings.glossary !== false}
-          disabled={readOnly || !wsGlossary}
-          onChange={(v) => set({ glossary: v })}
-        />
-        <p className="help">
-          {t(wsGlossary ? 'editor.settings.glossaryHelp' : 'editor.settings.glossaryOff')}
-        </p>
-        <SettingSwitch id="pg-on" label={t('editor.settings.progress')} checked disabled badge={soon} />
-        <p className="help">{t('editor.settings.progressHelp')}</p>
+          <div className="fd-stack fd-stack--help">
+            <SettingSwitch id="pg-on" label={t('editor.settings.progress')} checked disabled badge={soon} />
+            <p className="help">{t('editor.settings.progressHelp')}</p>
+          </div>
+        </div>
       </div>
 
       <div className="sec">
@@ -469,30 +476,31 @@ function DatasetSection({ editor, readOnly }: { editor: DemoEditor; readOnly: bo
   return (
     <div className="sec">
       <div className="sec-title">{t('editor.dataset.title')}</div>
-      {dataset ? (
-        <p className="help" style={{ marginTop: 0 }}>
-          <b>{dataset.name}</b>
-          {' · '}
-          {t('editor.dataset.summary', {
-            rows: dataset.rows.length,
-            cols: dataset.columns.length,
-            bound: publishedColumns(dataset).length,
-          })}
-        </p>
-      ) : (
-        <p className="help" style={{ marginTop: 0 }}>
-          {t('editor.dataset.none')}
-        </p>
-      )}
-      <button
-        type="button"
-        className="btn btn-secondary btn-sm"
-        disabled={readOnly}
-        onClick={() => window.dispatchEvent(new CustomEvent(DATASET_OPEN))}
-      >
-        <Database aria-hidden="true" />
-        {dataset ? t('editor.dataset.edit') : t('editor.dataset.import')}
-      </button>
+      {/* L45 (E4) : texte → son bouton à 12 px */}
+      <div className="fd-stack fd-stack--action">
+        {dataset ? (
+          <p className="help">
+            <b>{dataset.name}</b>
+            {' · '}
+            {t('editor.dataset.summary', {
+              rows: dataset.rows.length,
+              cols: dataset.columns.length,
+              bound: publishedColumns(dataset).length,
+            })}
+          </p>
+        ) : (
+          <p className="help">{t('editor.dataset.none')}</p>
+        )}
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          disabled={readOnly}
+          onClick={() => window.dispatchEvent(new CustomEvent(DATASET_OPEN))}
+        >
+          <Database aria-hidden="true" />
+          {dataset ? t('editor.dataset.edit') : t('editor.dataset.import')}
+        </button>
+      </div>
     </div>
   );
 }
