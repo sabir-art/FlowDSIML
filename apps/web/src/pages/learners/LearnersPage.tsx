@@ -7,7 +7,9 @@ import {
   ArrowUp,
   Award,
   BellRing,
-  ChevronDown,
+  Building2,
+  Check,
+  CircleDot,
   CircleHelp,
   CircleX,
   Clock,
@@ -19,6 +21,7 @@ import {
   Mail,
   Plus,
   RefreshCw,
+  Search,
   Settings2,
   Trash2,
   Users,
@@ -34,6 +37,7 @@ import { initials } from '../../lib/initials';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
 import { Menu, type MenuItem } from '../../components/Menu';
+import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
 import { ScrollX } from '../../components/ScrollX';
 import { PathsDialog } from './PathsDialog';
 import {
@@ -259,7 +263,7 @@ export function LearnersPage() {
         onPaths={() => setOverlay({ kind: 'paths' })}
       />
       {(loadError || error) && <Alert kind="error">{loadError ?? error}</Alert>}
-      <div className="fd-tabs l13-tabs" role="tablist" aria-label={t('learners.tabs.label')}>
+      <div className="tabs l13-tabs" role="tablist" aria-label={t('learners.tabs.label')}>
         {(['liste', 'formation'] as const).map((id) => (
           <button
             key={id}
@@ -325,6 +329,8 @@ export function LearnersPage() {
           data={data}
           rows={rows}
           selectedPath={filters.path || data.paths[0]!.id}
+          filters={filters}
+          setParam={setParam}
           onPick={(id) => setParam({ formation: id })}
           onList={(patch) => setParam({ tab: null, ...patch })}
           onExport={(path) => setOverlay({ kind: 'export', preset: { path } })}
@@ -493,45 +499,143 @@ function filterSummary(t: TFn, d: ProgressData, f: Filters): string {
 // ---------------------------------------------------------------------------
 // L13-01 : liste
 // ---------------------------------------------------------------------------
-function FilterChip({
-  label,
-  value,
-  active,
-  items,
-  onClear,
+/**
+ * L40 : menus de filtre des apprenants (« Libellé : valeur »). Statut et module seulement dans la liste ;
+ * la vue par formation garde Formation, Structure et Groupe.
+ */
+function ScopeFilters({
+  data,
+  f,
+  setParam,
+  list,
+  moduleTitle,
 }: {
-  label: string;
-  value: string;
-  active: boolean;
-  items: MenuItem[];
-  onClear: () => void;
+  data: ProgressData;
+  f: Filters;
+  setParam: (p: Record<string, string | null>) => void;
+  list: boolean;
+  moduleTitle?: string | null;
 }) {
   const { t } = useTranslation();
+  const groups = cohorts(data.learners.map((l) => l.group));
+  const mark = (on: boolean) => (on ? <Check {...ICON} /> : <span />);
+  const pathTitle = (id: string) => data.paths.find((p) => p.id === id)?.title || t('learners.untitled');
   return (
-    <span className="fchip">
-      {label}
-      {NNBSP}: <b>{value}</b>
-      {active ? (
-        <button type="button" aria-label={t('learners.filters.clear', { label })} onClick={onClear}>
-          <X {...ICON} />
-        </button>
-      ) : (
-        <Menu
-          label={t('learners.filters.change', { label })}
-          align="start"
-          custom={{
-            className: 'fchip__btn',
-            content: (
-              <>
-                <ChevronDown {...ICON} />
-                <span className="sr-only">{t('learners.filters.change', { label })}</span>
-              </>
-            ),
-          }}
-          items={items}
+    <>
+      <FilterMenu
+        icon={<GraduationCap />}
+        label={t('learners.filters.path')}
+        value={f.path ? pathTitle(f.path) : t('learners.filters.allF')}
+        active={list && !!f.path}
+        items={[
+          ...(list
+            ? [
+                {
+                  label: t('learners.filters.allF'),
+                  icon: mark(!f.path),
+                  onSelect: () => setParam({ formation: null, module: null }),
+                },
+              ]
+            : []),
+          ...data.paths.map((p) => ({
+            label: p.title || t('learners.untitled'),
+            icon: mark(f.path === p.id),
+            onSelect: () => setParam({ formation: p.id, module: null }),
+          })),
+        ]}
+      />
+      {list && f.module && (
+        <FilterMenu
+          icon={<Layers />}
+          label={t('learners.filters.module')}
+          value={t('learners.filters.moduleValue', { title: moduleTitle ?? '' })}
+          active
+          items={[
+            {
+              label: t('learners.filters.allModules'),
+              icon: <span />,
+              onSelect: () => setParam({ module: null }),
+            },
+          ]}
         />
       )}
-    </span>
+      {list && (
+        <FilterMenu
+          icon={<CircleDot />}
+          label={t('learners.filters.status')}
+          value={f.status ? t(`learners.status.${f.status}`) : t('learners.filters.all')}
+          active={!!f.status}
+          items={[
+            {
+              label: t('learners.filters.all'),
+              icon: mark(!f.status),
+              onSelect: () => setParam({ statut: null }),
+            },
+            ...(['done', 'active', 'quiz', 'stale'] as const).map((st) => ({
+              label: t(`learners.status.${st}`),
+              icon: STATUS_ICON[st],
+              end: f.status === st ? <Check {...ICON} /> : undefined,
+              onSelect: () => setParam({ statut: st }),
+            })),
+          ]}
+        />
+      )}
+      <FilterMenu
+        icon={<Building2 />}
+        label={t('learners.filters.structure')}
+        value={
+          !f.structure
+            ? t('learners.filters.allF')
+            : f.structure === 'none'
+              ? t('learners.noStructure')
+              : (data.structures.find((x) => x.id === f.structure)?.name ?? '')
+        }
+        active={!!f.structure}
+        items={[
+          {
+            label: t('learners.filters.allF'),
+            icon: mark(!f.structure),
+            onSelect: () => setParam({ structure: null }),
+          },
+          ...data.structures.map((x) => ({
+            label: x.name,
+            icon: mark(f.structure === x.id),
+            onSelect: () => setParam({ structure: x.id }),
+          })),
+          {
+            label: t('learners.noStructure'),
+            icon: mark(f.structure === 'none'),
+            onSelect: () => setParam({ structure: 'none' }),
+          },
+        ]}
+      />
+      {/* L38-3 : groupe (session de formation) des liens personnalisés */}
+      {groups.length > 0 && (
+        <FilterMenu
+          icon={<Users />}
+          label={t('learners.filters.group')}
+          value={!f.group ? t('learners.filters.all') : f.group === 'none' ? t('learners.noGroup') : f.group}
+          active={!!f.group}
+          items={[
+            {
+              label: t('learners.filters.all'),
+              icon: mark(!f.group),
+              onSelect: () => setParam({ groupe: null }),
+            },
+            ...groups.map((g) => ({
+              label: g,
+              icon: mark(f.group === g),
+              onSelect: () => setParam({ groupe: g }),
+            })),
+            {
+              label: t('learners.noGroup'),
+              icon: mark(f.group === 'none'),
+              onSelect: () => setParam({ groupe: 'none' }),
+            },
+          ]}
+        />
+      )}
+    </>
   );
 }
 
@@ -570,9 +674,7 @@ function ListView(props: {
   const stale = filtered.filter(
     (r) => r.status === 'stale' || (f.path && r.paths.find((s) => s.path.id === f.path)?.status === 'stale'),
   );
-  const pathTitle = (id: string) => data.paths.find((p) => p.id === id)?.title || t('learners.untitled');
   const moduleTitle = data.paths.flatMap((p) => p.modules).find((m) => m.demoId === f.module)?.title;
-  const groups = cohorts(data.learners.map((l) => l.group));
   const allShown = shown.length > 0 && shown.every((r) => selected.has(r.raw.id));
   const toggle = (id: string) => {
     const n = new Set(selected);
@@ -597,79 +699,29 @@ function ListView(props: {
 
   return (
     <section className="l13-pane" id="l13-panel-liste" role="tabpanel" aria-labelledby="l13-tab-liste">
-      <div className="filterbar" aria-label={t('learners.filters.label')} role="group">
-        <FilterChip
-          label={t('learners.filters.path')}
-          value={f.path ? pathTitle(f.path) : t('learners.filters.all')}
-          active={!!f.path}
-          onClear={() => setParam({ formation: null, module: null })}
-          items={data.paths.map((p) => ({
-            label: p.title || t('learners.untitled'),
-            onSelect: () => setParam({ formation: p.id }),
-          }))}
-        />
-        {f.module && (
-          <FilterChip
-            label={t('learners.filters.module')}
-            value={t('learners.filters.moduleValue', { title: moduleTitle ?? '' })}
-            active
-            onClear={() => setParam({ module: null })}
-            items={[]}
-          />
-        )}
-        <FilterChip
-          label={t('learners.filters.status')}
-          value={f.status ? t(`learners.status.${f.status}`) : t('learners.filters.all')}
-          active={!!f.status}
-          onClear={() => setParam({ statut: null })}
-          items={(['done', 'active', 'quiz', 'stale'] as const).map((s) => ({
-            label: t(`learners.status.${s}`),
-            icon: STATUS_ICON[s],
-            onSelect: () => setParam({ statut: s }),
-          }))}
-        />
-        <FilterChip
-          label={t('learners.filters.structure')}
-          value={
-            !f.structure
-              ? t('learners.filters.allF')
-              : f.structure === 'none'
-                ? t('learners.noStructure')
-                : (data.structures.find((s) => s.id === f.structure)?.name ?? '')
-          }
-          active={!!f.structure}
-          onClear={() => setParam({ structure: null })}
-          items={[
-            ...data.structures.map((s) => ({ label: s.name, onSelect: () => setParam({ structure: s.id }) })),
-            { label: t('learners.noStructure'), onSelect: () => setParam({ structure: 'none' }) },
-          ]}
-        />
-        {/* L38-3 : groupe (session de formation) des liens personnalisés */}
-        {groups.length > 0 && (
-          <FilterChip
-            label={t('learners.filters.group')}
-            value={
-              !f.group ? t('learners.filters.all') : f.group === 'none' ? t('learners.noGroup') : f.group
-            }
-            active={!!f.group}
-            onClear={() => setParam({ groupe: null })}
-            items={[
-              ...groups.map((g) => ({ label: g, onSelect: () => setParam({ groupe: g }) })),
-              { label: t('learners.noGroup'), onSelect: () => setParam({ groupe: 'none' }) },
-            ]}
-          />
-        )}
-        <label className="fd-field l13-search">
-          <span className="sr-only">{t('learners.searchLabel')}</span>
-          <input
-            className="fd-input"
-            type="search"
-            placeholder={t('learners.searchPlaceholder')}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </label>
-      </div>
+      {/* L40 : recherche et menus de filtre à gauche (Formation, Statut, Structure, Groupe), Réinitialiser */}
+      <ListToolbar
+        activeCount={[f.path, f.module, f.status, f.structure, f.group, f.q].filter(Boolean).length}
+        onReset={() => {
+          setQ('');
+          setParam({ formation: null, module: null, statut: null, structure: null, groupe: null, q: null });
+        }}
+        status={t('learners.count', { count: filtered.length })}
+        lead={
+          <label className="fd-toolbar__search">
+            <span className="sr-only">{t('learners.searchLabel')}</span>
+            <Search aria-hidden="true" />
+            <input
+              className="fd-input"
+              type="search"
+              placeholder={t('learners.searchPlaceholder')}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </label>
+        }
+        filters={<ScopeFilters data={data} f={f} setParam={setParam} list moduleTitle={moduleTitle} />}
+      />
 
       <div className="kpis">
         <article className="fd-card fd-card--hero fd-kpi">
@@ -905,8 +957,10 @@ function ListView(props: {
 // ---------------------------------------------------------------------------
 function FormationView({
   data,
-  rows,
+  rows: allRows,
   selectedPath,
+  filters: f,
+  setParam,
   onPick,
   onList,
   onExport,
@@ -914,12 +968,23 @@ function FormationView({
   data: ProgressData;
   rows: LearnerRow[];
   selectedPath: string;
+  filters: Filters;
+  setParam: (p: Record<string, string | null>) => void;
   onPick: (id: string) => void;
   onList: (patch: Record<string, string | null>) => void;
   onExport: (path: string) => void;
 }) {
   const { t } = useTranslation();
   const path = data.paths.find((p) => p.id === selectedPath) ?? data.paths[0]!;
+  // L40 : la vue par formation suit les filtres Structure et Groupe de sa barre
+  const rows = applyFilters(allRows, {
+    path: '',
+    status: '',
+    structure: f.structure,
+    group: f.group,
+    q: '',
+    module: '',
+  });
   const s = pathStats(rows, path);
   const quizLabel = (p: (typeof data.paths)[number]) => {
     const q = p.modules.filter((m) => m.hasQuiz).length;
@@ -932,6 +997,12 @@ function FormationView({
       role="tabpanel"
       aria-labelledby="l13-tab-formation"
     >
+      <ListToolbar
+        activeCount={[f.structure, f.group].filter(Boolean).length}
+        onReset={() => setParam({ structure: null, groupe: null })}
+        status={t('learners.count', { count: rows.length })}
+        filters={<ScopeFilters data={data} f={{ ...f, path: path.id }} setParam={setParam} list={false} />}
+      />
       <div className="fo-grid" role="list" aria-label={t('learners.fo.list')}>
         {data.paths.map((p) => {
           const ps = pathStats(rows, p);

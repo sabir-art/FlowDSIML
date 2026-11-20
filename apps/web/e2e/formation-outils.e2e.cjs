@@ -258,7 +258,7 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       granted.some((g) => g.p_learner === L[1].id && g.p_demo === 'm-quiz'),
       'n° 12 : « Accorder une tentative » (grant_quiz_attempt)',
     );
-    await page.getByRole('button', { name: 'Changer le filtre Statut' }).click();
+    await page.getByRole('button', { name: /^Statut\s*:/ }).click();
     await page.getByRole('menuitem', { name: 'Quiz non validé' }).click();
     await page.waitForTimeout(300);
     const badges = await page.locator('.l13-table tbody tr .st-badge').allTextContents();

@@ -7,9 +7,6 @@
 .l13 .page-head {
   margin-bottom: 0;
 }
-.l13-tabs {
-  max-width: 520px;
-}
 .l13-pane {
   display: flex;
   flex-direction: column;
@@ -34,69 +31,6 @@
   }
   .l13 .kpis > .fd-card--hero {
     grid-column: 1 / -1;
-  }
-}
-
-/* Filtres en puces */
-.l13 .filterbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--fd-space-2);
-}
-.l13 .fchip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 6px 0 14px;
-  border-radius: 999px;
-  background: var(--fd-color-surface);
-  box-shadow: var(--fd-shadow-xs);
-  font: 600 var(--fd-text-label-size) var(--fd-font-sans);
-  white-space: nowrap;
-}
-.l13 .fchip b {
-  font-weight: 700;
-  color: var(--fd-color-primary-soft-text);
-}
-.l13 .fchip > button,
-.l13 .fchip .fchip__btn {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--fd-color-text-muted);
-  cursor: pointer;
-}
-.l13 .fchip > button:hover,
-.l13 .fchip .fchip__btn:hover {
-  background: var(--fd-color-surface-sunken);
-  color: var(--fd-color-text);
-}
-.l13 .fchip svg {
-  width: 12px;
-  height: 12px;
-}
-.l13 .fchip .menu {
-  display: inline-flex;
-}
-.l13-search {
-  margin: 0 0 0 auto;
-  min-width: 260px;
-}
-.l13-search .fd-input {
-  border-radius: 999px;
-}
-@media (max-width: 720px) {
-  .l13-search {
-    min-width: 0;
-    width: 100%;
-    margin: 0;
   }
 }
 

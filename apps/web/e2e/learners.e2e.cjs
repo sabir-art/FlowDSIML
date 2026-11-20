@@ -46,7 +46,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   );
 
   // Filtre Statut par la puce, gardé dans l'URL
-  await page.getByRole('button', { name: 'Changer le filtre Statut' }).click();
+  await page.getByRole('button', { name: /^Statut\s*:/ }).click();
   await page.getByRole('menuitem', { name: 'À relancer' }).click();
   await page.waitForTimeout(200);
   ok(page.url().includes('statut=stale'), 'L13-01 : filtre gardé dans l’URL');
@@ -120,8 +120,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   );
 
   // Accorder une tentative (quiz épuisé) depuis le menu ⋯ ; L38-12 : Camille est « Quiz non validé »
-  await page.getByRole('button', { name: 'Retirer le filtre Statut' }).click();
-  await page.getByRole('button', { name: 'Changer le filtre Statut' }).click();
+  await page.getByRole('button', { name: /^Statut\s*:/ }).click();
   await page.getByRole('menuitem', { name: 'Quiz non validé' }).click();
   await page.waitForTimeout(200);
   await page.getByRole('button', { name: 'Actions pour Camille Exemple' }).click();
@@ -131,8 +130,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     state.learners.learners.find((l) => l.id === 'l-4').modules.find((m) => m.demoId === 'm-quiz').max === 4,
     'L13-02 : tentative accordée (grant_quiz_attempt)',
   );
-  await page.getByRole('button', { name: 'Retirer le filtre Statut' }).click();
-  await page.getByRole('button', { name: 'Changer le filtre Statut' }).click();
+  await page.getByRole('button', { name: /^Statut\s*:/ }).click();
   await page.getByRole('menuitem', { name: 'À relancer' }).click();
   await page.waitForTimeout(200);
 

@@ -9,6 +9,7 @@
 const { chromium } = require('playwright');
 const { install } = require('./fake-supabase.cjs');
 const { seedMaquette } = require('./maquette-data.cjs');
+const { seedPathTables, learnersFixture } = require('./learners-data.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const only = process.argv.slice(2);
 
@@ -125,6 +126,66 @@ const measure = (bar) =>
           (await p.getByRole('dialog', { name: 'Filtres' }).count()) === 0,
           'Démos 390 px : Échap ferme la feuille',
         );
+      }
+      await p.context().close();
+    }
+  }
+
+  // ===== Apprenants =====
+  if (!only.length || only.includes('learners')) {
+    const seed = (d) => {
+      seedPathTables(d.tables, d.tables.workspaces[0].id);
+      d.learners = learnersFixture().progress;
+      d.learners.learners[0].group = 'Session du 12 novembre, antenne de Valence';
+      d.learners.learners[1].group = 'Session du 12 novembre, antenne de Valence';
+    };
+    const page = await open('/#/learners', 1440, seed);
+    const bar = page.locator('#l13-panel-liste .list-toolbar');
+    await bar.waitFor();
+    ok(
+      (await page.locator('.l13-tabs').getAttribute('class')).split(' ').includes('tabs') &&
+        (await page.getByRole('tab', { name: 'Par formation' }).count()) === 1,
+      'Apprenants : vues en onglets soulignés au-dessus de la barre',
+    );
+    let m = await measure(bar);
+    ok(
+      m.heights.length >= 5 && m.heights.every((h) => h === 40),
+      `Apprenants : contrôles de 40 px (${m.heights})`,
+    );
+    ok(m.lines === 1, 'Apprenants : une ligne sans filtre actif');
+    ok((await bar.locator('.fchip').count()) === 0, 'Apprenants : plus de puces fchip');
+    await page.getByRole('button', { name: /^Groupe\s*:/ }).click();
+    await page.getByRole('menuitem', { name: 'Session du 12 novembre, antenne de Valence' }).click();
+    await page.getByRole('button', { name: /^Statut\s*:/ }).click();
+    await page.getByRole('menuitem', { name: 'En cours' }).click();
+    await page.waitForTimeout(300);
+    m = await measure(bar);
+    ok(
+      m.lines === 1 && m.heights.every((h) => h === 40),
+      'Apprenants : une ligne avec 2 filtres actifs (valeur longue)',
+    );
+    const status = (await bar.locator('[role=status]').textContent()).trim();
+    ok(/^\d+ apprenants?$/.test(status), `Apprenants : nombre de résultats annoncé (« ${status} »)`);
+    await bar.getByRole('button', { name: 'Réinitialiser les filtres' }).click();
+    await page.waitForTimeout(300);
+    ok(!/groupe=|statut=/.test(page.url()), 'Apprenants : Réinitialiser retire Groupe et Statut');
+    await page.getByRole('tab', { name: 'Par formation' }).click();
+    const fbar = page.locator('#l13-panel-formation .list-toolbar');
+    await fbar.waitFor();
+    m = await measure(fbar);
+    ok(
+      m.heights.every((h) => h === 40) && m.lines === 1,
+      'Par formation : barre Formation, Structure, Groupe',
+    );
+    await page.context().close();
+    for (const w of [1024, 390]) {
+      const p = await open('/#/learners', w, seed);
+      await p.locator('#l13-panel-liste .list-toolbar').waitFor();
+      await p.waitForTimeout(300);
+      ok(await noHScroll(p), `Apprenants ${w} px : pas de défilement horizontal`);
+      if (w === 390) {
+        const s = await p.locator('.fd-toolbar__search').boundingBox();
+        ok(s.width >= 300, `Apprenants 390 px : recherche en pleine largeur (${Math.round(s.width)} px)`);
       }
       await p.context().close();
     }
