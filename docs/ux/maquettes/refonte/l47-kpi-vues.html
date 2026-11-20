@@ -58,6 +58,22 @@
   .notes { margin: 0; padding-left: 20px; color: var(--fd-color-text-muted); display: grid; gap: 6px; font-size: 14px; max-width: 920px; }
   kbd { font: 600 12px var(--fd-font-sans); padding: 1px 6px; border-radius: 6px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface-sunken); }
 
+
+  /* Page Démos : 4 cartes identiques, raccourcis vers Analytics */
+  .kl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .klc { position: relative; display: flex; flex-direction: column; gap: 6px; min-height: 112px; padding: 16px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); color: var(--fd-color-text); text-decoration: none; transition: border-color .15s, box-shadow .15s; }
+  .klc:hover, .klc.is-hover { border-color: var(--fd-color-border-strong, var(--fd-color-text-muted)); box-shadow: var(--fd-shadow-md); }
+  .klc:focus-visible, .klc.is-focus { outline: none; box-shadow: var(--fd-shadow-focus); }
+  .klc__h { display: flex; align-items: center; gap: 8px; }
+  .klc__go { margin-top: auto; min-height: 18px; display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--fd-color-primary); opacity: 0; transition: opacity .15s; }
+  .klc__go svg { width: 14px; height: 14px; }
+  .klc:hover .klc__go, .klc:focus-visible .klc__go, .klc.is-hover .klc__go, .klc.is-focus .klc__go { opacity: 1; }
+  @media (hover: none) { .klc__go { opacity: 1; align-self: flex-end; margin-top: -18px; } .klc__go span { display: none; } }
+  .klc.touch .klc__go { opacity: 1; align-self: flex-end; margin-top: -18px; } .klc.touch .klc__go span { display: none; }
+  .badge-new { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-size: 12px; font-weight: 700; }
+  .trend-tbl td:first-child { font-variant-numeric: tabular-nums; }
+  .kl--mob { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
   /* Mobile : cartes en carrousel horizontal */
   .ph .kpitabs { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; scrollbar-width: none; }
   .ph .kt { flex: 0 0 148px; min-height: 100px; scroll-snap-align: start; }
@@ -75,6 +91,8 @@
   <section class="blk" aria-labelledby="h2"><h2 id="h2">2. Clic sur « Leads »</h2><div class="scene" data-slot="ws-leads"></div></section>
   <section class="blk" aria-labelledby="h3"><h2 id="h3">3. En sombre : analytics d'une démo, « Taux de complétion » actif</h2><div class="scene" data-theme="dark" data-slot="demo-dark"></div></section>
   <section class="blk" aria-labelledby="h4"><h2 id="h4">4. Mobile (390 px), en clair et en sombre</h2><div class="duo" data-slot="mob"></div></section>
+  <section class="blk" aria-labelledby="h6"><h2 id="h6">5. Page Démos : 4 cartes, raccourcis vers Analytics</h2><div class="scene" data-slot="demos-kpi"></div></section>
+  <section class="blk" aria-labelledby="h7"><h2 id="h7">6. Évolutions : jamais de pourcentage aberrant</h2><div class="scene" data-slot="trend"></div></section>
   <section class="blk" aria-labelledby="h5"><h2 id="h5">Règles</h2>
     <ul class="notes">
       <li>Les cartes forment un <code>tablist</code> (« Indicateur affiché ») ; chaque carte est un <code>tab</code> avec <code>aria-selected</code> et <code>aria-controls</code> vers le panneau (graphique et tableau).</li>
@@ -82,6 +100,7 @@
       <li>Actif : fond hero, texte noir, contour de 2 px et encoche sous la carte. Survol : bordure plus foncée. Jamais de barre sur le bord gauche.</li>
       <li>Le titre du graphique et la colonne triée du tableau reprennent le nom de l'indicateur ; la colonne est en gras avec une flèche de tri.</li>
       <li>L'indicateur choisi est gardé dans l'adresse (<code>?indicateur=leads</code>), comme l'onglet et la période.</li>
+      <li>Page Démos : les 4 cartes sont identiques (aucune en vedette, pas de flèche dans un rond). La carte entière est un lien vers Analytics avec la carte correspondante active ; « Voir dans Analytics » apparaît au survol et au focus.</li>
     </ul>
   </section>
 </main>
@@ -146,6 +165,30 @@
   const mobList = (m) => `<ul style="list-style:none;margin:0;padding:0;display:grid">${[...DEMOS].sort((a, b) => parseFloat(b[1][m.k].replace(/\D/g, '')) - parseFloat(a[1][m.k].replace(/\D/g, ''))).map(([n, v]) => `<li style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--fd-color-border);font-size:14px"><span>${n}</span><b style="font-variant-numeric:tabular-nums">${v[m.k]}</b></li>`).join('')}</ul>`;
   const mob = (theme) => `<div><span class="lab">${theme === 'dark' ? 'Sombre' : 'Clair'}</span><div class="ph" data-theme="${theme}">${head('Analytics', 1)}${tabs(WS, 'visitors', 'mb' + theme)}${panel(WS, 'visitors', 'mb' + theme, { cw: 360, ch: 180, mobile: mobList })}</div></div>`;
   document.querySelector('[data-slot="mob"]').innerHTML = mob('light') + mob('dark');
+
+  // Page Démos
+  const KL = [
+    { k: 'views', l: 'Vues', i: 'eye', v: '4 812', d: '<b>+12 %</b> vs 30 jours précédents' },
+    { k: 'visitors', l: 'Visiteurs uniques', i: 'users', v: '2 960', d: '<b>+8 %</b> vs 30 jours précédents' },
+    { k: 'completion', l: 'Taux de complétion', i: 'route', v: '64 %', d: '<b>+5 pts</b> vs 30 jours précédents' },
+    { k: 'leads', l: 'Leads', i: 'mail', v: '14', d: '<b>+11</b> vs 3 les 30 jours précédents' }
+  ];
+  const arrow = '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>';
+  P.arrow = arrow;
+  const klc = (x, cls = '') => `<a class="klc ${cls}" href="#/analytics?indicateur=${x.k}"><span class="klc__h"><span class="kt__l">${I(x.i)}${x.l}</span></span><span class="kt__v">${x.v}</span><span class="kt__d">${x.d}</span><span class="klc__go" aria-hidden="true"><span>Voir dans Analytics</span>${I('arrow')}</span><span class="sr-only">, voir dans Analytics</span></a>`;
+  document.querySelector('[data-slot="demos-kpi"]').innerHTML = `<span class="lab" style="margin:0">Au repos, survol (Visiteurs uniques) et focus clavier (Leads)</span><div class="kl">${klc(KL[0])}${klc(KL[1], 'is-hover')}${klc(KL[2])}${klc(KL[3], 'is-focus')}</div>
+    <div class="duo"><div><span class="lab">Sombre</span><div class="ph" data-theme="dark" style="width:560px;border-radius:20px"><div class="kl kl--mob">${klc(KL[0])}${klc(KL[1], 'is-hover')}${klc(KL[2])}${klc(KL[3])}</div></div></div>
+    <div><span class="lab">Mobile (tactile) : flèche toujours visible</span><div class="ph"><div class="kl kl--mob">${KL.map((x) => klc(x, 'touch')).join('')}</div></div></div></div>`;
+  // Règle des évolutions
+  const T = [
+    ['Période précédente ≥ 10', '4 812 vues contre 4 296', '<b style="color:var(--fd-color-success-text,#1f7a3d)">+12 %</b>', 'Pourcentage, arrondi à l’unité'],
+    ['Période précédente entre 1 et 9', '14 leads contre 3', '<b style="color:var(--fd-color-success-text,#1f7a3d)">+11</b> <span style="color:var(--fd-color-text-muted)">(3 avant)</span>', 'Écart en valeur absolue, jamais « +367 % »'],
+    ['Période précédente à 0, période actuelle > 0', '27 vues contre 0', '<span class="badge-new">Nouveau</span>', 'Pas de comparaison possible'],
+    ['Les deux périodes à 0', '0 lead contre 0', '<span style="color:var(--fd-color-text-muted)">—</span>', 'Lecteur d’écran : « Pas d’activité sur les deux périodes »'],
+    ['Taux (complétion)', '64 % contre 59 %, sur 120 visiteurs avant', '<b style="color:var(--fd-color-success-text,#1f7a3d)">+5 pts</b>', 'Toujours en points ; « — » si moins de 10 visiteurs avant'],
+    ['Hausse supérieure à ×10, période précédente ≥ 10', '1 340 vues contre 12', '<b style="color:var(--fd-color-success-text,#1f7a3d)">×112</b>', 'Multiplicateur au-delà de +999 %']
+  ];
+  document.querySelector('[data-slot="trend"]').innerHTML = `<table class="tbl trend-tbl"><caption class="sr-only">Règle d’affichage des évolutions</caption><thead><tr><th>Cas</th><th>Exemple</th><th>Affichage</th><th>Remarque</th></tr></thead><tbody>${T.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   // Comportement : clic et flèches
   document.querySelectorAll('[role=tablist]').forEach((tl) => {
     const ts = [...tl.querySelectorAll('[role=tab]')];

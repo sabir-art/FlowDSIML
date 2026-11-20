@@ -3,7 +3,7 @@
 > Demande du client, validée par le chef de projet : dans Analytics (espace et démo), les cartes d'indicateurs deviennent des **sélecteurs de vue**. Un clic sur une carte la rend active, et le graphique et le tableau dessous passent sur cet indicateur.
 > Modèle d'interaction : les tableaux de bord de paiement ou de suivi de recherche, où la carte choisie pilote la courbe.
 > Cohérent avec L40-03 : en-tête, barre de filtres (Démo, Source) et période à droite, puis les cartes.
-> Maquette : `docs/ux/maquettes/refonte/l47-kpi-vues.html`. Captures : `img/l47-espace.png`, `img/l47-leads.png`, `img/l47-demo-sombre.png` et `img/l47-mobile.png`.
+> Maquette : `docs/ux/maquettes/refonte/l47-kpi-vues.html`. Captures : `img/l47-espace.png`, `img/l47-leads.png`, `img/l47-demo-sombre.png`, `img/l47-mobile.png`, `img/l47-page-demos.png` et `img/l47-evolutions.png`.
 > Données fictives. À réaliser après L46.
 
 ## 1. État actuel (code de `claude/dev-mvp`, 2deaae8)
@@ -75,6 +75,39 @@
 - Le tableau devient une liste à deux colonnes : nom, puis la valeur de l'indicateur actif, triée.
 - Aucun défilement horizontal de la page à 390 px.
 
+## 8. Page Démos : 4 cartes, raccourcis vers Analytics
+
+Aujourd'hui (`DemosPage.tsx`) : 4 `StatTile` (Vues, Visiteurs uniques, Taux de complétion, Leads). La première est en `hero` (verte) avec un bouton rond `arrow-up-right` vers `/analytics`, sans raison visible : le client ne comprend pas à quoi servent ces cartes.
+
+- **Rôle** : ce sont des raccourcis vers Analytics. Les 4 cartes sont **identiques** : aucune en `hero`, aucun bouton rond. Le prop `action` et le bouton `kpi-action` sont retirés.
+- **Lien** : chaque carte entière est un `<a>` vers `#/analytics?indicateur={clé}` (`views`, `visitors`, `completion`, `leads`), qui ouvre Analytics de l'espace avec la carte correspondante active (§2) et la période de 30 jours.
+- **Indicateur « Voir dans Analytics »** :
+  - ligne réservée en bas de la carte (18 px), texte 12,5 px graisse 600 `primary` et icône `arrow-right` de 14 px ;
+  - invisible au repos, affiché au survol et au focus clavier (fondu de 150 ms, aucun avec `prefers-reduced-motion`) ;
+  - sur un écran tactile (`hover: none`) : seule la flèche, toujours visible, en bas à droite.
+- **Survol** : bordure `border-strong` et ombre `shadow-md`. **Focus** : anneau `shadow-focus`.
+- **Nom accessible** : le contenu de la carte, puis « , voir dans Analytics » (texte masqué visuellement). Exemple : « Leads, 14, plus 11 par rapport à 3 sur les 30 jours précédents, voir dans Analytics ».
+- La carte garde son contenu (icône, libellé, valeur, évolution). Les évolutions suivent §9.
+- Sous 768 px : grille de 2 × 2 (inchangé).
+
+## 9. Évolutions : jamais de pourcentage aberrant
+
+Aujourd'hui, `variation()` renvoie un pourcentage dès que la période précédente est supérieure à 0 : « +1 326 % » quand elle est presque vide. Règle commune à la page Démos, à Analytics de l'espace et à celui d'une démo (une seule fonction, par exemple `formatTrend` dans `packages/core`) :
+
+| Cas | Affichage | Exemple |
+|---|---|---|
+| Période précédente ≥ 10 | Pourcentage arrondi à l'unité | « +12 % » |
+| Hausse au-delà de +999 % (période précédente ≥ 10) | Multiplicateur | « ×112 » |
+| Période précédente entre 1 et 9 | Écart en valeur absolue, suivi de la valeur précédente | « +11 vs 3 les 30 jours précédents » |
+| Période précédente à 0, période actuelle > 0 | Pastille « Nouveau » (`primary-soft`) | « Nouveau » |
+| Les deux périodes à 0 | « — » `text-muted` ; lecteur d'écran : « Pas d'activité sur les deux périodes » | « — » |
+| Taux (complétion) | Toujours en points, si la période précédente compte au moins 10 visiteurs ; sinon « — » | « +5 pts » |
+
+- Le seuil de 10 est une constante unique (`TREND_MIN_BASE = 10`).
+- Le signe (« + » ou « − ») porte le sens ; la couleur (succès ou danger) n'est qu'un complément. Dans une carte active (fond hero), le texte est `on-hero`.
+- Pas d'icône de tendance quand l'affichage est « Nouveau » ou « — ».
+- Tests unitaires sur chaque ligne du tableau, et sur les bornes (9 et 10, +999 % et +1 000 %).
+
 ## 7. Recette
 
 - Espace et démo, en clair et en sombre, à 1 440 px, 1 024 px et 390 px.
@@ -83,4 +116,6 @@
 - Lecteur d'écran : « onglet, sélectionné, n sur N » ; le panneau est annoncé par le nom de la carte.
 - Contrôle visuel : l'état actif reste reconnaissable en niveaux de gris (contour et encoche).
 - Aucune barre sur le bord gauche (contrôle CI de §15.6).
-- e2e : `analytics` et `demo-analytics` mis à jour (sélecteurs des cartes, segmenté Vues / Visiteurs retiré).
+- Page Démos : les 4 cartes sont identiques ; chacune ouvre Analytics avec la bonne carte active ; « Voir dans Analytics » au survol et au focus, flèche sur tactile.
+- Évolutions : cas du §9 vérifiés sur des données de test (période précédente à 0, à 3, à 10, à 12 avec une forte hausse).
+- e2e : `analytics`, `demo-analytics` et `dashboard` (page Démos) mis à jour (sélecteurs des cartes, segmenté Vues / Visiteurs retiré).
