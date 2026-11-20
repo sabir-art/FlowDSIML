@@ -20,6 +20,40 @@ export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
  * État de l'éditeur + persistance optimiste : chaque modification est appliquée localement
  * immédiatement, puis écrite en base après un court délai (fusion des patchs par ligne).
  */
+/** Tout ce que l'éditeur charge au démarrage (RPC editor_load, L32). */
+interface EditorData {
+  demo: DemoRow;
+  steps: StepRow[];
+  hotspots: HotspotRow[];
+  chapters: ChapterRow[];
+  forms: FormRow[];
+  variables: VariableRow[];
+  questions: QuestionRow[];
+}
+
+/** Repli : lectures séparées, si la RPC editor_load n'est pas encore déployée. */
+async function loadSeparately(demoId: string): Promise<EditorData | null> {
+  const d = await supabase.from('demos').select('*').eq('id', demoId).maybeSingle();
+  if (!d.data) return null;
+  const [s, h, c, f, v, q] = await Promise.all([
+    supabase.from('steps').select('*').eq('demo_id', demoId).order('position').order('created_at'),
+    supabase.from('hotspots').select('*').eq('demo_id', demoId).order('position').order('created_at'),
+    supabase.from('chapters').select('*').eq('demo_id', demoId).order('position'),
+    supabase.from('forms').select('*').eq('demo_id', demoId).order('created_at'),
+    supabase.from('variables').select('*').eq('workspace_id', d.data.workspace_id).order('key'),
+    supabase.from('quiz_questions').select('*').eq('demo_id', demoId).order('position').order('created_at'),
+  ]);
+  return {
+    demo: d.data,
+    steps: s.data ?? [],
+    hotspots: h.data ?? [],
+    chapters: c.data ?? [],
+    forms: f.data ?? [],
+    variables: v.data ?? [],
+    questions: q.data ?? [],
+  };
+}
+
 export function useDemoEditor(demoId: string) {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -119,28 +153,24 @@ export function useDemoEditor(demoId: string) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const d = await supabase.from('demos').select('*').eq('id', demoId).maybeSingle();
-    if (!d.data) {
+    // L32 : une seule lecture (editor_load), sinon les lectures séparées (migration pas encore appliquée)
+    const one = await supabase.rpc('editor_load', { p_demo: demoId });
+    let data: EditorData | null;
+    if (!one.error) data = (one.data as unknown as EditorData | null) ?? null;
+    else data = await loadSeparately(demoId);
+    if (!data) {
       setNotFound(true);
       setLoading(false);
       return;
     }
-    const [s, h, c, f, v, q] = await Promise.all([
-      supabase.from('steps').select('*').eq('demo_id', demoId).order('position').order('created_at'),
-      supabase.from('hotspots').select('*').eq('demo_id', demoId).order('position').order('created_at'),
-      supabase.from('chapters').select('*').eq('demo_id', demoId).order('position'),
-      supabase.from('forms').select('*').eq('demo_id', demoId).order('created_at'),
-      supabase.from('variables').select('*').eq('workspace_id', d.data.workspace_id).order('key'),
-      supabase.from('quiz_questions').select('*').eq('demo_id', demoId).order('position').order('created_at'),
-    ]);
-    setDemo(d.data);
-    setSteps(s.data ?? []);
-    setHotspots(h.data ?? []);
-    setChapters(c.data ?? []);
-    setForms(f.data ?? []);
-    setVariables(v.data ?? []);
-    setQuestions(q.data ?? []);
-    await signImages(s.data ?? []);
+    setDemo(data.demo);
+    setSteps(data.steps);
+    setHotspots(data.hotspots);
+    setChapters(data.chapters);
+    setForms(data.forms);
+    setVariables(data.variables);
+    setQuestions(data.questions);
+    await signImages(data.steps);
     setLoading(false);
   }, [demoId, signImages]);
 

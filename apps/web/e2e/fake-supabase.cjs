@@ -589,7 +589,116 @@ async function install(page, state = seed()) {
     if (p.startsWith('/rest/v1/rpc/')) {
       const fn = p.split('/').pop();
       const a = body || {};
+      // Calculs partagés par plusieurs RPC (dont dashboard_home, L32)
+      const listMembers = () => {
+        // Annuaire facultatif (maquette) : membres de t.members avec nom et email
+        const dir = state.memberDirectory || {};
+        const me = t.profiles?.[0]?.full_name || 'Alice';
+        const others = (t.members || [])
+          .filter((m) => m.user_id !== state.user.id && dir[m.user_id])
+          .map((m) => ({ user_id: m.user_id, role: m.role, created_at: m.created_at, ...dir[m.user_id] }));
+        return [
+          {
+            user_id: state.user.id,
+            email: state.user.email,
+            full_name: me === 'Alice' ? 'Alice' : me,
+            role: 'owner',
+            created_at: '2026-01-01',
+          },
+          ...others,
+          ...(state.extraMembers || []),
+        ];
+      };
+      const overview = (ws) =>
+        t.demos
+          .filter((d) => !ws || d.workspace_id === ws)
+          .map((d) => ({
+            demo_id: d.id,
+            views: d.status === 'published' ? 120 : 0,
+            visitors: d.status === 'published' ? 90 : 0,
+            completions: d.status === 'published' ? 40 : 0,
+            leads: d.status === 'published' ? 1 : 0,
+          }));
+      const kpis = (previous) => {
+        const pub = t.demos.filter((d) => d.status === 'published' && !d.deleted_at).length;
+        return {
+          views: (previous ? 96 : 120) * pub,
+          visitors: (previous ? 80 : 90) * pub,
+          completions: (previous ? 30 : 40) * pub,
+          leads: (previous ? 0 : 1) * pub,
+        };
+      };
+      const hiddenCount = (folderId) => {
+        const f = t.folders.find((x) => x.id === folderId);
+        if (!f?.restricted) return 0;
+        const others = (t.members || []).filter((m) => m.role !== 'admin' && m.role !== 'owner');
+        return others.filter(
+          (m) => !t.folder_members.some((x) => x.folder_id === f.id && x.user_id === m.user_id),
+        ).length;
+      };
+      const byKey =
+        (k, desc = false) =>
+        (x, y) =>
+          (x[k] > y[k] ? 1 : x[k] < y[k] ? -1 : 0) * (desc ? -1 : 1);
       switch (fn) {
+        // L32 : lectures de démarrage regroupées (mêmes données que les lectures séparées)
+        case 'dashboard_home': {
+          const ws = a.p_ws;
+          const demos = t.demos
+            .filter((d) => d.workspace_id === ws && !d.deleted_at)
+            .sort(byKey('updated_at', true));
+          const ids = new Set(demos.map((d) => d.id));
+          const folders = (t.folders || []).filter((f) => f.workspace_id === ws).sort(byKey('name'));
+          const steps = t.steps.filter((st) => ids.has(st.demo_id)).sort(byKey('position'));
+          const stepCounts = {};
+          const covers = {};
+          for (const st of steps) {
+            stepCounts[st.demo_id] = (stepCounts[st.demo_id] || 0) + 1;
+            if (st.image_path && !covers[st.demo_id]) covers[st.demo_id] = st.image_path;
+          }
+          const publishedAt = {};
+          for (const d of demos) {
+            const v = (t.demo_versions || []).find((x) => x.id === d.current_version_id);
+            if (d.status === 'published' && v?.published_at) publishedAt[d.id] = v.published_at;
+          }
+          const w = t.workspaces.find((x) => x.id === ws);
+          const plan = t.plans.find((x) => x.code === w?.plan_code);
+          state.homeCalls = (state.homeCalls || 0) + 1;
+          return json(route, 200, {
+            demos,
+            folders,
+            overview: overview(ws),
+            kpis: { cur: kpis(false), prev: kpis(true) },
+            locked: (t.demo_access || [])
+              .filter((x) => x.workspace_id === ws && x.locked_by_rules && ids.has(x.demo_id))
+              .map((x) => x.demo_id),
+            hidden: Object.fromEntries(
+              folders.filter((f) => f.restricted).map((f) => [f.id, hiddenCount(f.id)]),
+            ),
+            stepCounts,
+            publishedAt,
+            covers,
+            shareRulesPlan: !!plan?.limits?.share_rules,
+            memberCount: listMembers().length,
+          });
+        }
+        case 'editor_load': {
+          const d = t.demos.find((x) => x.id === a.p_demo);
+          if (!d) return json(route, 200, null);
+          const of = (table, ...keys) =>
+            (t[table] || []).filter((r) => r.demo_id === d.id).sort(byKey(keys[0]));
+          return json(route, 200, {
+            demo: d,
+            steps: of('steps', 'position'),
+            hotspots: of('hotspots', 'position'),
+            chapters: of('chapters', 'position'),
+            forms: of('forms', 'created_at'),
+            variables: (t.variables || [])
+              .filter((v) => v.workspace_id === d.workspace_id)
+              .sort(byKey('key')),
+            questions: of('quiz_questions', 'position'),
+          });
+        }
         case 'ai_status':
           return json(route, 200, aiState(state));
         case 'set_ai_settings': {
@@ -616,39 +725,10 @@ async function install(page, state = seed()) {
           if (c) Object.assign(c, { resolved_at: a.p_resolved ? new Date().toISOString() : null });
           return json(route, 200, null);
         }
-        case 'list_members': {
-          // Annuaire facultatif (maquette) : membres de t.members avec nom et email
-          const dir = state.memberDirectory || {};
-          const me = t.profiles?.[0]?.full_name || 'Alice';
-          const others = (t.members || [])
-            .filter((m) => m.user_id !== state.user.id && dir[m.user_id])
-            .map((m) => ({ user_id: m.user_id, role: m.role, created_at: m.created_at, ...dir[m.user_id] }));
-          return json(route, 200, [
-            {
-              user_id: state.user.id,
-              email: state.user.email,
-              full_name: me === 'Alice' ? 'Alice' : me,
-              role: 'owner',
-              created_at: '2026-01-01',
-            },
-            ...others,
-            ...(state.extraMembers || []),
-          ]);
-        }
+        case 'list_members':
+          return json(route, 200, listMembers());
         case 'workspace_overview':
-          return json(
-            route,
-            200,
-            t.demos
-              .filter((d) => !a.p_workspace || d.workspace_id === a.p_workspace)
-              .map((d) => ({
-                demo_id: d.id,
-                views: d.status === 'published' ? 120 : 0,
-                visitors: d.status === 'published' ? 90 : 0,
-                completions: d.status === 'published' ? 40 : 0,
-                leads: d.status === 'published' ? 1 : 0,
-              })),
-          );
+          return json(route, 200, overview(a.p_workspace));
         case 'demo_analytics':
           if (a.p_to && Date.parse(a.p_to) < Date.now() - 86400000)
             return json(route, 200, {
@@ -757,16 +837,8 @@ async function install(page, state = seed()) {
             200,
             state.quizStats ?? { attempts: 0, visitors: 0, passRate: 0, avgScore: 0, questions: [] },
           );
-        case 'workspace_kpis': {
-          const previous = a.p_to && Date.parse(a.p_to) < Date.now() - 86400000;
-          const pub = t.demos.filter((d) => d.status === 'published' && !d.deleted_at).length;
-          return json(route, 200, {
-            views: (previous ? 96 : 120) * pub,
-            visitors: (previous ? 80 : 90) * pub,
-            completions: (previous ? 30 : 40) * pub,
-            leads: (previous ? 0 : 1) * pub,
-          });
-        }
+        case 'workspace_kpis':
+          return json(route, 200, kpis(a.p_to && Date.parse(a.p_to) < Date.now() - 86400000));
         case 'export_my_data': {
           // L28-07 : données de l'utilisateur courant seulement
           const me = state.user.id;
@@ -887,18 +959,8 @@ async function install(page, state = seed()) {
           state.folderAccessCalls = [...(state.folderAccessCalls || []), a];
           return json(route, 200, null);
         }
-        case 'folder_hidden_count': {
-          const f = t.folders.find((x) => x.id === a.p_folder);
-          if (!f?.restricted) return json(route, 200, 0);
-          const others = (t.members || []).filter((m) => m.role !== 'admin' && m.role !== 'owner');
-          return json(
-            route,
-            200,
-            others.filter(
-              (m) => !t.folder_members.some((x) => x.folder_id === f.id && x.user_id === m.user_id),
-            ).length,
-          );
-        }
+        case 'folder_hidden_count':
+          return json(route, 200, hiddenCount(a.p_folder));
         case 'share_rules_preview': {
           // L27-07 : démos publiées dont le mode est interdit ou sans expiration sous la limite
           const items = [];

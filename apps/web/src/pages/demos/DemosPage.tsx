@@ -47,6 +47,7 @@ import { createDemoFromImages } from './importImages';
 import { NewDemoDialog } from './NewDemoDialog';
 import { TemplatesDialog } from './TemplatesDialog';
 import { OnboardingCard, useOnboarding } from './OnboardingCard';
+import { loadHome, type Stats } from './home';
 import { FolderAccessDialog } from './FolderAccessDialog';
 import { useShareRules } from '../../lib/shareRules';
 import { ExportDialog } from '../export/ExportDialog';
@@ -59,7 +60,6 @@ import { NotificationBell } from '../../components/notifications/NotificationBel
 
 type Demo = Tables<'demos'>;
 type FolderRow = Tables<'folders'>;
-type Stats = { views: number; completions: number; visitors: number; leads: number };
 type Kpis = Stats;
 type StatusFilter = 'all' | 'draft' | 'published';
 type Sort = 'updated' | 'created' | 'title' | 'views';
@@ -73,17 +73,6 @@ export function DemosPage() {
   const ws = current!;
   const [demos, setDemos] = useState<Demo[] | null>(null);
   const onb = useOnboarding();
-  useEffect(() => {
-    void supabase
-      .from('plans')
-      .select('limits')
-      .eq('code', ws.plan_code)
-      .maybeSingle()
-      .then(({ data }) => setEnterprise(!!(data?.limits as { share_rules?: boolean } | null)?.share_rules));
-    void supabase
-      .rpc('list_members', { p_workspace: ws.id })
-      .then(({ data }) => setMemberCount((data ?? []).length));
-  }, [ws.id, ws.plan_code]);
   const rules = useShareRules(ws.id);
   // L27-07 : démos bloquées par les règles (mot de passe exigé, aucun défini) : « Accès à régler »
   const [lockedIds, setLockedIds] = useState<Set<string>>(new Set());
@@ -139,54 +128,22 @@ export function DemosPage() {
   const [kpis, setKpis] = useState<{ cur: Kpis; prev: Kpis | null } | null>(null);
 
   const load = useCallback(async () => {
-    const [d, f, o] = await Promise.all([
-      supabase
-        .from('demos')
-        .select('*')
-        .eq('workspace_id', ws.id)
-        .is('deleted_at', null)
-        .order('updated_at', { ascending: false }),
-      supabase.from('folders').select('*').eq('workspace_id', ws.id).order('name'),
-      supabase.rpc('workspace_overview', { p_workspace: ws.id, p_days: 30 }),
-    ]);
-    const list = d.data ?? [];
-    const lk = await supabase
-      .from('demo_access')
-      .select('demo_id')
-      .eq('workspace_id', ws.id)
-      .eq('locked_by_rules', true);
-    setLockedIds(new Set((lk.data ?? []).map((x) => x.demo_id)));
-    // KPI du workspace sur 30 jours (et les 30 précédents pour les variations). Repli sur la somme
-    // de workspace_overview si la RPC workspace_kpis (migration 130800) n'est pas encore en place.
-    const now = Date.now();
-    const iso = (days: number) => new Date(now - days * 86400_000).toISOString();
-    const [cur, prev] = await Promise.all([
-      supabase.rpc('workspace_kpis', {
-        p_workspace: ws.id,
-        p_from: iso(30),
-        p_to: new Date(now).toISOString(),
-      }),
-      supabase.rpc('workspace_kpis', { p_workspace: ws.id, p_from: iso(60), p_to: iso(30) }),
-    ]);
+    // L32 : une seule lecture (dashboard_home) pour la liste, les dossiers, les indicateurs et les cartes
+    const h = await loadHome({ id: ws.id, plan_code: ws.plan_code });
+    setEnterprise(h.shareRulesPlan);
+    setMemberCount(h.memberCount);
+    setLockedIds(new Set(h.locked));
     // Liste et indicateurs affichés ensemble (aucun saut de mise en page au chargement)
-    setFolders(f.data ?? []);
-    // Dossiers restreints : membres qui ne les voient pas (infobulle, confirmation de déplacement)
-    const restrictedIds = (f.data ?? []).filter((x) => x.restricted).map((x) => x.id);
-    const counts = await Promise.all(
-      restrictedIds.map((id) =>
-        supabase.rpc('folder_hidden_count', { p_folder: id }).then((r) => [id, r.data ?? 0] as const),
-      ),
-    );
-    setHidden(Object.fromEntries(counts));
-    setStats(
-      Object.fromEntries(((o.data ?? []) as Array<Stats & { demo_id: string }>).map((r) => [r.demo_id, r])),
-    );
-    setDemos(list);
-    if (!cur.error && cur.data)
-      setKpis({ cur: cur.data as unknown as Kpis, prev: (prev.data as unknown as Kpis) ?? null });
+    setFolders(h.folders);
+    setHidden(h.hidden);
+    setStats(Object.fromEntries(h.overview.map((r) => [r.demo_id, r])));
+    setStepCounts(h.stepCounts);
+    setPublishedAt(h.publishedAt);
+    setDemos(h.demos);
+    if (h.kpis.cur) setKpis({ cur: h.kpis.cur, prev: h.kpis.prev });
     else {
-      const rows = (o.data ?? []) as Array<Stats>;
-      const sum = (k: keyof Kpis) => rows.reduce((acc, r) => acc + Number(r[k] ?? 0), 0);
+      // Repli sur la somme de workspace_overview si workspace_kpis manque
+      const sum = (k: keyof Kpis) => h.overview.reduce((acc, r) => acc + Number(r[k] ?? 0), 0);
       setKpis({
         cur: {
           views: sum('views'),
@@ -197,48 +154,17 @@ export function DemosPage() {
         prev: null,
       });
     }
-    if (list.length) {
-      const all = await supabase
-        .from('steps')
-        .select('demo_id, page_url')
-        .in(
-          'demo_id',
-          list.map((x) => x.id),
-        );
-      const n: Record<string, number> = {};
-      for (const r of all.data ?? []) n[r.demo_id] = (n[r.demo_id] ?? 0) + 1;
-      setStepCounts(n);
-      // Date de publication de la version en ligne (même règle que la barre de l'éditeur)
-      const versions = list
-        .filter((x) => x.status === 'published' && x.current_version_id)
-        .map((x) => x.current_version_id!);
-      if (versions.length) {
-        const v = await supabase.from('demo_versions').select('demo_id, published_at').in('id', versions);
-        setPublishedAt(
-          Object.fromEntries(
-            (v.data ?? []).filter((r) => r.published_at).map((r) => [r.demo_id, r.published_at!]),
-          ),
-        );
-      }
-      const s = await supabase
-        .from('steps')
-        .select('demo_id, image_path, position')
-        .in(
-          'demo_id',
-          list.map((x) => x.id),
-        )
-        .not('image_path', 'is', null)
-        .order('position');
-      const first = new Map<string, string>();
-      for (const r of s.data ?? [])
-        if (r.image_path && !first.has(r.demo_id)) first.set(r.demo_id, r.image_path);
-      if (first.size) {
-        const signed = await supabase.storage.from('captures').createSignedUrls([...first.values()], 3600);
-        const byPath = new Map((signed.data ?? []).map((x) => [x.path, x.signedUrl]));
-        setCovers(Object.fromEntries([...first].map(([demoId, path]) => [demoId, byPath.get(path) ?? ''])));
-      }
+    // Couvertures : URL signées après l'affichage de la liste
+    const first = Object.entries(h.covers);
+    if (first.length) {
+      const signed = await supabase.storage.from('captures').createSignedUrls(
+        first.map(([, path]) => path),
+        3600,
+      );
+      const byPath = new Map((signed.data ?? []).map((x) => [x.path, x.signedUrl]));
+      setCovers(Object.fromEntries(first.map(([demoId, path]) => [demoId, byPath.get(path) ?? ''])));
     }
-  }, [ws.id]);
+  }, [ws.id, ws.plan_code]);
 
   useEffect(() => {
     setDemos(null);

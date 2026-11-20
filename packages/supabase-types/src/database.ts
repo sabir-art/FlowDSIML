@@ -2300,6 +2300,9 @@ export type Database = {
       demo_analytics: { Args: { p_demo: string; p_from?: string; p_to?: string }; Returns: Json };
       demo_workspace: { Args: { p_demo: string }; Returns: string };
       duplicate_demo: { Args: { p_demo: string }; Returns: string };
+      // L32 : lectures de démarrage regroupées (tableau de bord, éditeur)
+      dashboard_home: { Args: { p_ws: string }; Returns: Json };
+      editor_load: { Args: { p_demo: string }; Returns: Json };
       ensure_events_partitions: { Args: { months_ahead?: number }; Returns: undefined };
       finalize_publication: { Args: { p_version: string }; Returns: undefined };
       get_invitation: {
