@@ -733,7 +733,6 @@ export function Player({
               class="p-btn p-btn-ghost p-btn-sm p-info-btn"
               aria-haspopup="dialog"
               aria-label={t.infoBtn}
-              title={t.infoBtn}
               onClick={() => setInfoOpen(true)}
             >
               <Info {...ICON} size={16} />
@@ -1191,7 +1190,7 @@ export function Player({
             onClick={() => setVoiceCc(!voiceCc)}
             aria-pressed={voiceCc}
             aria-label={t.voice.captions}
-            title={`${t.voice.captions} (C)`}
+            aria-keyshortcuts="C"
           >
             <Captions {...ICON} />
           </button>
@@ -1201,7 +1200,6 @@ export function Player({
           class="p-icon-btn p-icon-btn--ghost p-lang"
           onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
           aria-label={t.language}
-          title={t.language}
         >
           <Globe {...ICON} />
         </button>

@@ -2,6 +2,7 @@
 /* Polices : chargées par index.html (préconnexion, sans bloquer le premier rendu), voir tokens.css */
 @import './tokens.css';
 @import './select.css';
+@import './tooltip.css';
 
 *,
 *::before,

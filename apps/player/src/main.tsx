@@ -24,7 +24,9 @@ import { EmailGate, PasswordGate, StartScreen, SysScreen, type SysKind } from '.
 import { PublicPage } from './PublicPage';
 import { fromCenterParams, type FromCenter } from './CenterNext';
 import '@flowdsiml/player-core/player-core.css';
+import '@flowdsiml/ui/tooltip.css';
 import './player.css';
+import { installTooltips } from '@flowdsiml/ui/tooltip';
 
 type State =
   | { status: 'loading' }
@@ -361,6 +363,8 @@ addEventListener('hashchange', () => {
   const sameCenter = first.kind === 'center' && next.kind === 'center' && next.slug === first.slug;
   if (!sameCenter) location.reload();
 });
+// L44 : infobulles des boutons à icône (Langue, Plein écran, contrôles…)
+installTooltips();
 render(
   first.kind === 'center' ? (
     <CenterApp route={first} />

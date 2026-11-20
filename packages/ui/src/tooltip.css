@@ -1,0 +1,85 @@
+/* L44 : infobulle des boutons à icône (bulle sombre, flèche dans l'axe de l'icône, jamais coupée) */
+.fd-tooltip {
+  --fd-tip-bg: #12161b;
+  position: fixed;
+  z-index: 2147483000;
+  max-width: 240px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--fd-tip-bg);
+  color: #ffffff;
+  font:
+    500 13px/18px 'Plus Jakarta Sans',
+    system-ui,
+    sans-serif;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+  overflow-wrap: break-word;
+  box-shadow: 0 4px 12px rgb(8 10 14 / 0.18);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: fd-tip-in 120ms ease-out;
+}
+.fd-tooltip::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border: inherit;
+  transform: rotate(45deg);
+  z-index: -1;
+}
+.fd-tooltip[data-side='top']::before {
+  bottom: -4px;
+  left: calc(var(--fd-tip-arrow) - 5px);
+  border-width: 0 1px 1px 0;
+}
+.fd-tooltip[data-side='bottom']::before {
+  top: -4px;
+  left: calc(var(--fd-tip-arrow) - 5px);
+  border-width: 1px 0 0 1px;
+}
+.fd-tooltip[data-side='left']::before {
+  right: -4px;
+  top: calc(var(--fd-tip-arrow) - 5px);
+  border-width: 1px 1px 0 0;
+}
+.fd-tooltip[data-side='right']::before {
+  left: -4px;
+  top: calc(var(--fd-tip-arrow) - 5px);
+  border-width: 0 0 1px 1px;
+}
+.fd-tooltip--dark {
+  --fd-tip-bg: #2a3039;
+  color: #f3f5f8;
+  border: 1px solid #3a424d;
+}
+.fd-tooltip__keys {
+  display: inline-flex;
+  gap: 4px;
+  flex: none;
+}
+.fd-tooltip kbd {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.14);
+  font: inherit;
+  font-size: 12px;
+  text-align: center;
+}
+@keyframes fd-tip-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fd-tooltip {
+    animation: none;
+  }
+}

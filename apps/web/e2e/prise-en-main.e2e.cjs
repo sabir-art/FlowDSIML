@@ -87,7 +87,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await how.waitFor({ state: 'detached' }).catch(() => undefined);
 
   // ===== « Apprendre TutoClick » (modules disponibles seulement) =====
-  await page.getByRole('button', { name: 'Aide (F1)' }).first().click();
+  await page.getByRole('button', { name: 'Aide', exact: true }).first().click();
   const drawer = page.getByRole('complementary', { name: 'Aide' });
   const ac = drawer.getByRole('region', { name: 'Apprendre TutoClick' });
   await ac.waitFor();
@@ -132,7 +132,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     state.tables.onboarding_prefs.some((p) => p.hidden_at),
     'masquée pour la personne',
   );
-  await page.getByRole('button', { name: 'Aide (F1)' }).first().click();
+  await page.getByRole('button', { name: 'Aide', exact: true }).first().click();
   await drawer.getByRole('button', { name: /Reprendre la prise en main/ }).click();
   await card.waitFor();
   ok(true, 'aide : « Reprendre la prise en main »');

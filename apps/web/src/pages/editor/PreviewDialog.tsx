@@ -56,7 +56,7 @@ export function PreviewDialog({
 
   return (
     <dialog ref={ref} className="preview-dialog" onClose={onClose} aria-label={t('editor.preview')}>
-      <header className="preview-bar">
+      <header className="preview-bar" data-tip-side="bottom">
         <strong>{t('editor.preview')}</strong>
         <div className="segmented" role="group" aria-label={t('editor.previewDevice')}>
           <button type="button" aria-pressed={device === 'desktop'} onClick={() => setDevice('desktop')}>

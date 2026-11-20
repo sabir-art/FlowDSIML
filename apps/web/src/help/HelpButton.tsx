@@ -12,6 +12,7 @@ export function HelpButton({ className = 'fd-btn fd-btn--ghost fd-btn--icon' }: 
       type="button"
       className={`${className} help-btn`}
       aria-label={t('help.open')}
+      data-tip-side="bottom"
       aria-expanded={help.open}
       aria-controls={help.open ? 'help-drawer' : undefined}
       aria-keyshortcuts="F1"

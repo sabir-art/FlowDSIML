@@ -10,11 +10,14 @@
     "./tokens.css": "./src/tokens.css",
     "./base.css": "./src/base.css",
     "./controls.css": "./src/controls.css",
-    "./select.css": "./src/select.css"
+    "./select.css": "./src/select.css",
+    "./tooltip": "./src/tooltip.ts",
+    "./tooltip.css": "./src/tooltip.css"
   },
   "scripts": {
     "lint": "eslint src",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
   },
   "peerDependencies": {
     "react": "^19.0.0",

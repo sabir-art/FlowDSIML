@@ -81,6 +81,9 @@ importers:
       '@flowdsiml/player-core':
         specifier: workspace:*
         version: link:../../packages/player-core
+      '@flowdsiml/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       lucide-preact:
         specifier: ^0.577.0
         version: 0.577.0(preact@10.29.8)

@@ -121,7 +121,7 @@ export function NotificationBell() {
     <>
       {/* L26-02 : bouton « Aide » à côté de la cloche, dans toutes les barres du haut */}
       <HelpButton />
-      <span className="nb">
+      <span className="nb" data-tip-side="bottom">
         <button
           ref={btn}
           type="button"

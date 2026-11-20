@@ -30,7 +30,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // ===== L26-02 : ouverture par le bouton =====
   await page.goto(`${BASE}/#/`);
-  const btn = page.getByRole('button', { name: 'Aide (F1)' }).first();
+  const btn = page.getByRole('button', { name: 'Aide', exact: true }).first();
   await btn.click();
   const drawer = page.getByRole('complementary', { name: 'Aide' });
   await drawer.waitFor();
@@ -94,7 +94,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     r.fulfill({ contentType: 'application/json', body: JSON.stringify({ version: 1, tours: [] }) }),
   );
   await page.reload();
-  await page.getByRole('button', { name: 'Aide (F1)' }).first().click();
+  await page.getByRole('button', { name: 'Aide', exact: true }).first().click();
   const soonTour = drawer.getByRole('button', { name: /Visite guidée de cette page/ });
   await soonTour.waitFor();
   ok(
@@ -147,7 +147,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // ===== Éditeur : les articles suivent l'onglet =====
   await page.goto(`${BASE}/#/demos/${DEMO}/edit`);
-  await page.getByRole('button', { name: 'Aide (F1)' }).click();
+  await page.getByRole('button', { name: 'Aide', exact: true }).click();
   await drawer.getByRole('region', { name: /Sur cette page · Éditeur · Étape/ }).waitFor();
   ok(true, 'éditeur : onglet Étape');
   // Le tiroir non modal recouvre le panneau : changement d'onglet au clavier
@@ -161,7 +161,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   state.tables.workspaces[0].settings = { ...state.tables.workspaces[0].settings, helpContact: null };
   await page.goto(`${BASE}/#/settings/workspace`);
   await page.reload();
-  await page.getByRole('button', { name: 'Aide (F1)' }).first().click();
+  await page.getByRole('button', { name: 'Aide', exact: true }).first().click();
   await drawer.locator('.help-foot').waitFor();
   await page.waitForTimeout(300);
   ok(
