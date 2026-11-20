@@ -38,7 +38,8 @@
     "wsMembers_other": "{{count}} membres",
     "training": "Formation",
     "learners": "Apprenants",
-    "center": "Centre de formation"
+    "center": "Centre de formation",
+    "wsSwitched": "Vous êtes maintenant dans l’espace {{name}}."
   },
   "roles": {
     "owner": "Propriétaire",
@@ -4192,14 +4193,20 @@
     "emailing": {
       "title": "Outils d'e-mailing",
       "body": "Ajouter les leads à une liste ou déclencher un scénario d'e-mails.",
-      "items": ["Listes et scénarios", "Respect du consentement du formulaire"],
+      "items": [
+        "Listes et scénarios",
+        "Respect du consentement du formulaire"
+      ],
       "action": "Connecter",
       "why": "Nécessite des comptes et des clés des éditeurs. En attendant : webhooks."
     },
     "enrich": {
       "title": "Enrichissement des visiteurs",
       "body": "Identifier l'organisation d'un visiteur anonyme.",
-      "items": ["Entreprise à partir du réseau", "Taille, secteur"],
+      "items": [
+        "Entreprise à partir du réseau",
+        "Taille, secteur"
+      ],
       "action": "Activer",
       "why": "Non prévu sans analyse juridique : traitement de données personnelles par un tiers (RGPD)."
     },
@@ -4221,7 +4228,11 @@
     "images": {
       "title": "Images générées",
       "body": "Créer une illustration à partir d’une description.",
-      "items": ["Illustrations d’étape", "Style de la marque", "Toujours relu"],
+      "items": [
+        "Illustrations d’étape",
+        "Style de la marque",
+        "Toujours relu"
+      ],
       "action": "Générer",
       "why": "Nécessite un service de génération d’images. En attendant : médiathèque."
     }

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
+import { useToast } from './Toast';
 import { Menu } from './Menu';
 
 /** Pastille d'initiale du workspace ; teinte stable dérivée du nom (une couleur par workspace). */
@@ -29,6 +30,7 @@ export function WorkspaceSwitcher() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { workspaces, current, select } = useWorkspace();
+  const toast = useToast();
   const [plans, setPlans] = useState<Record<string, string>>({});
   const [members, setMembers] = useState<number | null>(null);
 
@@ -77,7 +79,13 @@ export function WorkspaceSwitcher() {
             current: w.id === current.id,
             end:
               w.id === current.id ? <Check size={16} aria-hidden="true" className="ws-check" /> : undefined,
-            onSelect: () => select(w.id),
+            onSelect: () => {
+              if (w.id === current.id) return;
+              // Correctif client : un changement d'espace ramène toujours sur Démos du nouvel espace
+              select(w.id);
+              navigate('/');
+              toast(t('nav.wsSwitched', { name: w.name }));
+            },
           })),
           'separator' as const,
           { label: t('nav.newWorkspace'), icon: <Plus />, onSelect: () => navigate('/onboarding') },

@@ -38,7 +38,8 @@
     "wsMembers_other": "{{count}} members",
     "training": "Training",
     "learners": "Learners",
-    "center": "Training center"
+    "center": "Training center",
+    "wsSwitched": "You are now in the {{name}} workspace."
   },
   "roles": {
     "owner": "Owner",
@@ -4192,14 +4193,20 @@
     "emailing": {
       "title": "Emailing tools",
       "body": "Add leads to a list or trigger an email sequence.",
-      "items": ["Lists and sequences", "Form consent respected"],
+      "items": [
+        "Lists and sequences",
+        "Form consent respected"
+      ],
       "action": "Connect",
       "why": "Requires vendor accounts and keys. Meanwhile: webhooks."
     },
     "enrich": {
       "title": "Visitor enrichment",
       "body": "Identify the organisation of an anonymous visitor.",
-      "items": ["Company from the network", "Size, industry"],
+      "items": [
+        "Company from the network",
+        "Size, industry"
+      ],
       "action": "Enable",
       "why": "Not planned without a legal review: personal data processed by a third party (GDPR)."
     },
@@ -4221,7 +4228,11 @@
     "images": {
       "title": "Generated images",
       "body": "Create an illustration from a description.",
-      "items": ["Step illustrations", "Brand style", "Always reviewed"],
+      "items": [
+        "Step illustrations",
+        "Brand style",
+        "Always reviewed"
+      ],
       "action": "Generate",
       "why": "Requires an image generation service. Meanwhile: media library."
     }

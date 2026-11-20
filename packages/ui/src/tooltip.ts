@@ -138,6 +138,9 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
   let pressTimer = 0;
   let lastClosed = 0;
   let suppressClick = false;
+  // Focus donné par la navigation au clavier (Tab, flèches) : seule une tabulation ouvre l'infobulle,
+  // jamais un focus posé par le code (ouverture ou fermeture d'une modale, retour au bouton d'origine)
+  let navKeyAt = -Infinity;
 
   const clearTimers = () => {
     win.clearTimeout(openTimer);
@@ -255,12 +258,13 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
   };
   const onFocusIn = (e: FocusEvent) => {
     const el = targetOf(e);
-    if (el && el.matches(':focus-visible')) open(el);
+    if (el && el.matches(':focus-visible') && win.performance.now() - navKeyAt < 300) open(el);
   };
   const onFocusOut = (e: FocusEvent) => {
     if (targetOf(e) === anchor) close();
   };
   const onKey = (e: KeyboardEvent) => {
+    if (/^(Tab|Arrow(Up|Down|Left|Right)|Home|End)$/.test(e.key)) navKeyAt = win.performance.now();
     if (e.key === 'Escape' && bubble) {
       // Ferme l'infobulle seulement (pas la modale ou le panneau parent)
       e.stopPropagation();
