@@ -66,14 +66,23 @@ jsPDF ne produit pas de PDF balisé (dette de L15 §4). Le PDF reste tel quel, a
 - `<html lang="{{langue}}">`, `<title>` = titre de la démo.
 - `h1` : titre de la démo. `h2` : chapitres. `h3` : « Étape {{n}} · {{titre de l'étape}} ».
 - Chaque capture est un `img` avec un texte alternatif, construit dans cet ordre :
-  1. le texte alternatif saisi sur l'étape, s'il existe ;
-  2. sinon « Capture d'écran : {{titre de l'étape}}. » suivi de l'action du repère, par exemple « Le bouton « Nouvelle opportunité » est entouré. ».
+  1. le texte alternatif saisi sur l'étape (§3.5), s'il existe ;
+  2. sinon « Capture d'écran : {{titre de l'étape}}. », suivi de « La zone à utiliser est entourée. » quand l'étape a un repère. La consigne de la bulle, placée juste après en texte réel, dit quoi faire.
+- Sans chapitre, un `h2` « Étapes » est ajouté pour ne pas sauter de niveau. Avec des chapitres, les étapes hors chapitre vont sous un `h2` « Autres étapes ».
 - La consigne de la bulle suit l'image en texte réel. Les variables sont remplacées par leur valeur par défaut.
 - Les zones floutées restent floutées dans l'image. Le texte alternatif ne contient jamais de texte masqué.
 - L'ordre de lecture est l'ordre des étapes. Il n'y a ni position absolue ni texte dans les images.
 - Un sommaire en tête (`nav` avec liens vers chaque `h3`), puis un lien « Aller au contenu ».
 - Les styles sont intégrés au fichier : contraste d'au moins 4,5:1, texte agrandissable à 200 % sans perte, impression propre.
 - Les étapes vidéo deviennent une image de la première image de la vidéo, avec la transcription. Les quiz deviennent une liste des questions, sans les réponses.
+
+### 3.5 Champ « Texte alternatif » (éditeur)
+- **Emplacement** : onglet Étape, section « Accessibilité », après les hotspots. Elle concerne les étapes image et HTML.
+- **Champ** : « Texte alternatif de la capture », facultatif, 250 caractères au plus.
+  - Aide : « Décrivez ce que montre l'écran, en une phrase. Laissé vide, le texte est « Capture d'écran : {{titre}}. ». »
+  - Le placeholder montre ce texte par défaut.
+- **Usages** : le texte sert à la version accessible, au lecteur (`alt` de l'image d'étape) et au PDF (texte invisible, quand il y en aura un).
+- **Données personnelles** : le champ suit les règles des bulles. Il ne doit jamais contenir une donnée floutée. Le bilan de publication ne le vérifie pas automatiquement.
 
 ### 3.4 Déclaration d'accessibilité
 Ajouter à la déclaration, rubrique « Contenus non accessibles » :
