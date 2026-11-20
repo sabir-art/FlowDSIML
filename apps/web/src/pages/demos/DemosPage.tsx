@@ -917,7 +917,8 @@ export function DemosPage() {
               if (!id) return;
               setNewOpen(false);
               toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
-              navigate(`/demos/${id}/edit`);
+              // L38-8 : l'éditeur s'ouvre en mode guidé (outil Hotspot et aide)
+              navigate(`/demos/${id}/edit?guide=1`);
             }}
             ws={ws.id}
             onGenerate={(f) => {

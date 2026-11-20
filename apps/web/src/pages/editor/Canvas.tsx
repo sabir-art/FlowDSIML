@@ -102,7 +102,8 @@ export function Canvas({
     if (readOnly || e.button !== 0) return;
     const p = rel(e);
     if (tool === 'hotspot') {
-      const h = await editor.addHotspot(step.id, p.x, p.y, t('editor.newHotspot'));
+      // L38-9 : bulle posée sans titre ; « Cliquez ici » n'est qu'un exemple (placeholder du champ)
+      const h = await editor.addHotspot(step.id, p.x, p.y, '');
       if (h) setSelection({ kind: 'hotspot', id: h.id });
       setTool('select');
     } else if (tool === 'field') {

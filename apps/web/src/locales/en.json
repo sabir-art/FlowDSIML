@@ -788,7 +788,6 @@
       "forcedByDemo": "The demo is in Spotlight mode (Design tab): every tooltip shows as an area.",
       "title": "Title",
       "optional": "(optional)",
-      "titlePlaceholder": "E.g. New report",
       "text": "Text",
       "improveAi": "Improve with AI",
       "corner0": "Top left",
@@ -1643,7 +1642,29 @@
       "w": "Width",
       "h": "Height",
       "help": "As a percentage of the screenshot. You can also move the area on the canvas, or with the arrow keys."
-    }
+    },
+    "todo": {
+      "title": "To complete",
+      "help": "You can still publish: these points do not block publication.",
+      "see": "See",
+      "seeStep": "See step {{n}}",
+      "demoTitle": "The demo still has the default title: it will be the module name in the training centre.",
+      "quizEmpty": "The quiz is open but has no question.",
+      "step": "Step {{n}}: {{issues}}.",
+      "k": {
+        "untitled": "no title",
+        "noBubble": "no bubble",
+        "emptyBubble": "empty bubble"
+      }
+    },
+    "guide": {
+      "place": "Click the screen where the learner must click, then write the instruction.",
+      "write": "Write the bubble instruction in the right-hand panel.",
+      "next": "Next step without a bubble",
+      "done": "Every step has a bubble. Review them, then publish.",
+      "hide": "Hide help"
+    },
+    "addHotspot": "Add a hotspot"
   },
   "status": {
     "draft": "Draft",

@@ -153,7 +153,21 @@ export function StepPanel({
       {step.kind === 'image' && (
         <div className="sec">
           <div className="sec-title">{t('editor.end.elements')}</div>
-          {hotspots.length === 0 && blurs.length === 0 && <p className="help">{t('editor.noHotspot')}</p>}
+          {hotspots.length === 0 &&
+            blurs.length === 0 &&
+            (readOnly ? (
+              <p className="help">{t('editor.noHotspot')}</p>
+            ) : (
+              // L38-8 : active l'outil Hotspot (écouté par l'éditeur), au lieu d'une consigne à chercher
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => window.dispatchEvent(new Event('fd:add-hotspot'))}
+              >
+                <Target aria-hidden="true" />
+                {t('editor.addHotspot')}
+              </button>
+            ))}
           {hotspots.map((h, i) => (
             <button
               key={h.id}

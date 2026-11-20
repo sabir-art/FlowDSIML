@@ -3080,3 +3080,57 @@
   align-items: center;
   margin-top: 10px;
 }
+/* L38-5 : contenu à compléter avant publication (avertissement, non bloquant) */
+.publish-todo {
+  padding: 12px 14px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+}
+.publish-todo h3 {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.publish-todo h3 svg {
+  width: 16px;
+  height: 16px;
+}
+.publish-todo ul {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.publish-todo li {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+.publish-todo .help {
+  margin: 0;
+}
+/* L38-8 : aide après un import d'images, au-dessus du canevas */
+.guide-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 10px;
+  padding: 8px 10px 8px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+}
+.guide-bar > svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+.guide-bar .grow {
+  flex: 1;
+}

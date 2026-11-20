@@ -78,6 +78,7 @@ import { HelpButton } from '../../help/HelpButton';
 import { LoadError, LoadStatus, SlowLine, useSkeleton } from '../../components/Skeleton';
 import { EditorSkeleton, storeEditorGeometry } from './EditorSkeleton';
 import { EditorNarrowView } from './EditorNarrow';
+import { GuideBar } from './GuideBar';
 import { useNarrow } from '../../lib/useNarrow';
 import { useHelp } from '../../help/HelpProvider';
 import { supabase } from '../../lib/supabase';
@@ -174,6 +175,12 @@ export function EditorPage() {
     window.addEventListener('fd:pick-field', on);
     return () => window.removeEventListener('fd:pick-field', on);
   }, []);
+  // L38-8 : « Ajouter un hotspot » du panneau Étape
+  useEffect(() => {
+    const on = () => setTool('hotspot');
+    window.addEventListener('fd:add-hotspot', on);
+    return () => window.removeEventListener('fd:add-hotspot', on);
+  }, []);
   // L18 : police de la médiathèque (règle @font-face contrôlée)
   const fontCss = editor.demo
     ? fontFaceCss(themeSchema.parse(asSettings(editor.demo.settings).theme ?? {}))
@@ -223,6 +230,11 @@ export function EditorPage() {
     setStepApplied(true);
   }, [stepApplied, focusStep, editor.steps]);
   const [presenting, setPresenting] = useState(() => params.get('present') === '1');
+  // L38-8 : guidage après un import d'images (?guide=1) : outil Hotspot actif dès l'étape 1
+  const [guide, setGuide] = useState(() => params.get('guide') === '1');
+  useEffect(() => {
+    if (guide) setTool('hotspot');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const navigate = useNavigate();
   const versionId = editor.demo?.current_version_id;
   useEffect(() => {
@@ -836,6 +848,19 @@ export function EditorPage() {
                 />
               ) : step ? (
                 <>
+                  {guide && !readOnly && (
+                    <GuideBar
+                      editor={editor}
+                      index={safeIndex}
+                      tool={tool}
+                      onNext={(i) => {
+                        setIndex(i);
+                        setSelection({ kind: 'step' });
+                        setTool('hotspot');
+                      }}
+                      onHide={() => setGuide(false)}
+                    />
+                  )}
                   {step.kind === 'html' && <div id="html-crumbs-slot" className="html-crumbs-slot" />}
                   <div className={`frame fd-player-scope frame--${zoom}`}>
                     {step.kind !== 'html' && <ChecklistPreview editor={editor} index={safeIndex} />}

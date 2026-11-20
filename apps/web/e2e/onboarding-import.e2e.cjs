@@ -123,7 +123,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   }
   const before = t.demos.length;
   await nd.locator('input[type=file]').setInputFiles(files);
-  await page.waitForURL(/\/edit$/);
+  await page.waitForURL(/\/edit\?guide=1$/);
   ok(t.demos.length === before + 1, 'démo créée');
   const id = page.url().match(/demos\/([^/]+)\/edit/)[1];
   const steps = t.steps.filter((s) => s.demo_id === id).sort((a, b) => a.position - b.position);
@@ -146,7 +146,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.getByRole('heading', { name: 'Installez l’extension de capture' }).waitFor();
   const n = t.demos.length;
   await page.locator('.ob-ext-actions input[type=file]').setInputFiles(files.slice(1));
-  await page.waitForURL(/\/edit$/);
+  await page.waitForURL(/\/edit\?guide=1$/);
   ok(t.demos.length === n + 1, 'onboarding : « Importer des captures à la place » crée une démo');
 
   // ===== Éditeur : « Remplacer l'image » =====

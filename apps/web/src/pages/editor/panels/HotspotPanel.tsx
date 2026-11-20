@@ -171,10 +171,16 @@ export function HotspotPanel({
             className="input input-sm"
             maxLength={200}
             disabled={readOnly}
-            placeholder={t('editor.hs.titlePlaceholder')}
+            placeholder={t('editor.newHotspot')}
             value={hotspot.title}
             onChange={(e) => {
               set({ title: e.target.value });
+              // L38-9 : l'étape reprend le titre de sa première bulle tant qu'il n'a pas été saisi
+              const first = editor.hotspots
+                .filter((h) => h.step_id === hotspot.step_id)
+                .sort((a, b) => a.position - b.position)[0];
+              if (step && first?.id === hotspot.id && (!step.title.trim() || step.title === hotspot.title))
+                editor.updateStep(step.id, { title: e.target.value });
               setAiMark(false);
             }}
           />
