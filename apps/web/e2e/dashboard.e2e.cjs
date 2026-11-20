@@ -145,7 +145,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await d2.getByRole('button', { name: 'Continuer', exact: true }).click();
   await d2.waitForSelector('dialog.new-demo-dialog[open]');
   ok(
-    (await d2.locator('.nd-choice.is-soon').count()) === 0 &&
+    (await d2.locator('.nd-src.is-soon').count()) === 0 &&
       (await d2.getByRole('button', { name: /Importer des images/ }).count()) === 1,
     'DSH-06 / DSH-07 (REV-06) : import d’images actif',
   );

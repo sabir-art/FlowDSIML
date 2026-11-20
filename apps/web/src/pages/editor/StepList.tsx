@@ -168,7 +168,7 @@ export function StepList({
           setGrabbed(to);
           onSelect(to);
           focusStep(to);
-          setAnnounce(t('editor.rail.moved', { n: to + 1, total: n }));
+          setAnnounce(t('editor.stepMove.moved', { n: to + 1, total: n }));
         });
       } else {
         onSelect(to);
@@ -179,16 +179,16 @@ export function StepList({
       e.stopPropagation();
       if (grabbed === null) {
         setGrabbed(i);
-        setAnnounce(t('editor.rail.grabbed', { n: i + 1 }));
+        setAnnounce(t('editor.stepMove.grabbed', { n: i + 1 }));
       } else {
         setGrabbed(null);
-        setAnnounce(t('editor.rail.dropped', { n: i + 1 }));
+        setAnnounce(t('editor.stepMove.dropped', { n: i + 1 }));
       }
     } else if (e.key === 'Escape' && grabbed !== null) {
       e.preventDefault();
       e.stopPropagation();
       setGrabbed(null);
-      setAnnounce(t('editor.rail.dropped', { n: i + 1 }));
+      setAnnounce(t('editor.stepMove.dropped', { n: i + 1 }));
     }
   }
 

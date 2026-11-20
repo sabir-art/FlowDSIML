@@ -341,9 +341,10 @@
   cursor: pointer;
 }
 .nd-type.is-selected {
-  border: 2px solid var(--fd-color-primary);
-  padding: 13px;
-  background: var(--fd-color-primary-soft, var(--fd-color-surface-selected));
+  /* L48-G écart 1 : contour de 2 px couleur texte, ni fond ni bordure primaire */
+  border-color: transparent;
+  outline: 2px solid var(--fd-color-text);
+  outline-offset: -1px;
 }
 .nd-type input {
   position: absolute;
@@ -407,26 +408,6 @@
   font-weight: 700;
   color: var(--fd-color-text);
 }
-.nd-type__txt ul {
-  list-style: none;
-  margin: 4px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 4px;
-  color: var(--fd-color-text);
-}
-.nd-type__txt li {
-  display: flex;
-  gap: 6px;
-  align-items: flex-start;
-}
-.nd-type__txt li svg {
-  flex: none;
-  width: 14px;
-  height: 14px;
-  margin-top: 2px;
-  color: var(--fd-color-success);
-}
 .nd-next {
   margin: 0;
   font-size: var(--fd-text-caption-size);
@@ -484,100 +465,89 @@
   margin: 0;
   font-size: 1.25rem;
 }
-.nd-choices {
-  display: grid;
-  /* L30-05 : quatre cartes, deux par ligne */
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--fd-space-3);
-}
-.nd-choice {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: var(--fd-space-4);
+/* L48-G écart 2 : sources en liste (icône, nom, phrase, chevron) */
+.nd-sources {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   border: 1px solid var(--fd-color-border);
   border-radius: var(--fd-radius-lg);
-  background: var(--fd-color-surface);
-  font-size: var(--fd-text-caption-size);
+  overflow: hidden;
 }
-.nd-choice b {
-  font-size: var(--fd-text-body-size);
-  display: inline-flex;
+.nd-sources > li + li {
+  border-top: 1px solid var(--fd-color-border);
+}
+.nd-src {
+  display: flex;
   align-items: center;
-  gap: 6px;
-}
-.nd-choice svg {
-  width: 20px;
-  height: 20px;
-  color: var(--fd-color-primary);
-}
-.nd-choice.is-selected {
-  border: 2px solid var(--fd-color-primary);
-  background: var(--fd-color-surface-selected);
-}
-.nd-choice--btn {
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 16px;
+  border: 0;
+  background: var(--fd-color-surface);
   font: inherit;
-  font-size: var(--fd-text-caption-size);
   color: var(--fd-color-text);
-  text-align: left;
+  text-align: start;
+}
+button.nd-src {
   cursor: pointer;
 }
-.nd-choice--btn:hover {
-  border-color: var(--fd-color-primary);
+button.nd-src:hover:not(:disabled):not([aria-disabled='true']) {
+  background: var(--fd-color-surface-hover, var(--fd-color-surface-sunken));
 }
-.nd-choice--btn:focus-visible {
+button.nd-src:focus-visible {
   outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
-.nd-choice.is-soon {
-  opacity: 0.8;
+.nd-src > svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--fd-color-text-muted);
 }
-.nd-choice.is-soon svg {
-  color: var(--fd-color-text-subtle);
-}
-.nd-soon {
-  font-size: 10px;
-  padding: 0 6px;
-}
-.nd-help {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  margin: var(--fd-space-3) 0 0;
+.nd-src__txt {
+  flex: 1;
+  display: grid;
+  gap: 2px;
   font-size: var(--fd-text-caption-size);
   color: var(--fd-color-text-muted);
 }
-.nd-help svg {
-  flex: none;
+.nd-src__txt b {
+  font-size: var(--fd-text-body-size);
+  font-weight: 600;
+  color: var(--fd-color-text);
+}
+.nd-src > .nd-src__go {
   width: 16px;
   height: 16px;
-  margin-top: 1px;
+}
+.nd-src.is-soon .nd-src__txt b,
+.nd-src.is-soon > svg {
+  color: var(--fd-color-text-muted);
+}
+.nd-src__soon {
+  flex: none;
+  font-size: var(--fd-text-caption-size);
+  color: var(--fd-color-text-muted);
 }
 .nd-folder {
   margin-top: var(--fd-space-4);
 }
-/* L38-13 : carte et lien « Ouvrir le réglage » empilés dans le flux (plus de débordement sur l'aide) */
+/* L38-13 : lien « Ouvrir le réglage » sous la ligne IA (empilés, pas sur la même ligne) */
 .nd-ai {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 6px;
-}
-.nd-ai > .nd-choice {
-  flex: 1;
-  text-align: start;
+  white-space: normal;
+  gap: 0;
 }
 .nd-ai > a {
-  align-self: flex-start;
-  padding-inline: 4px;
+  display: block;
+  padding: 0 16px 12px 48px;
 }
 .nd-actions .grow {
   flex: 1;
-}
-@media (max-width: 720px) {
-  .nd-choices {
-    grid-template-columns: 1fr;
-  }
 }
 /* DSH-03 : bandeau « Premiers pas » (fond rosé, jauge couleur marque) */
 .gs-banner {

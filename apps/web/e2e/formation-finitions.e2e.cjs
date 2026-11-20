@@ -45,11 +45,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-0000000000e1';
     const link = nd.getByRole('link', { name: 'Ouvrir le réglage' });
     await link.waitFor();
     const l = await link.boundingBox();
-    const help = await nd.locator('.nd-help').boundingBox();
-    const card = await nd.locator('.nd-ai > .nd-choice').boundingBox();
+    const folder = await nd.locator('.nd-folder').boundingBox();
+    const card = await nd.locator('.nd-ai > .nd-src').boundingBox();
     ok(
-      !overlap(l, help) && !overlap(l, card) && l.y >= card.y + card.height - 1,
-      `n° 13 (${viewport.width} px) : « Ouvrir le réglage » sous la carte, sans recouvrir l’aide`,
+      !overlap(l, folder) && !overlap(l, card) && l.y >= card.y + card.height - 1,
+      `n° 13 (${viewport.width} px) : « Ouvrir le réglage » sous la ligne IA, sans recouvrir le dossier`,
     );
     await page.context().close();
   }

@@ -659,14 +659,7 @@ export function EditorPage() {
             </button>
           </div>
         )}
-        <StepPanel
-          editor={editor}
-          step={step}
-          index={index}
-          readOnly={readOnly}
-          ab={ab}
-          section={section}
-        />
+        <StepPanel editor={editor} step={step} index={index} readOnly={readOnly} ab={ab} section={section} />
       </>
     );
   }

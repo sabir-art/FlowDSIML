@@ -43,7 +43,7 @@ const MB = 1024 * 1024;
     const utils = page.getByRole('navigation', { name: 'Utilitaires' });
     const names = (await main.locator('.fd-nav__item').allTextContents()).map((s) => s.trim());
     ok(
-      names.join('|') === 'Démos|Parcours de formation|Analytics|Apprenants',
+      names.join('|') === 'Démos|Sandbox|Parcours de formation|Analytics|Apprenants', // L48-G : entrée Sandbox
       `Contenus puis Formation : ${names.join(', ')}`,
     );
     ok(

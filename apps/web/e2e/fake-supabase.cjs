@@ -865,7 +865,11 @@ async function install(page, state = seed()) {
             },
             // L48-D : vues par appareil et par navigateur
             devices: views
-              ? { desktop: Math.round(views * 0.7), mobile: Math.round(views * 0.25), tablet: Math.round(views * 0.05) }
+              ? {
+                  desktop: Math.round(views * 0.7),
+                  mobile: Math.round(views * 0.25),
+                  tablet: Math.round(views * 0.05),
+                }
               : {},
             browsers: views
               ? {

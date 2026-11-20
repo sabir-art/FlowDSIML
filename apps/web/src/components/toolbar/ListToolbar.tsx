@@ -22,6 +22,7 @@ export function FilterMenu({
   items,
   align = 'start',
   search,
+  compact = false,
 }: {
   icon: ReactNode;
   label: string;
@@ -33,6 +34,8 @@ export function FilterMenu({
   align?: 'start' | 'end';
   /** L48-D : recherche dans le menu (longues listes). */
   search?: { label: string; empty: string; keep?: number };
+  /** L48-G : icône seule sous 1 100 px tant qu'il est inactif (barre sur une ligne). */
+  compact?: boolean;
 }) {
   return (
     <Menu
@@ -40,7 +43,7 @@ export function FilterMenu({
       label={label}
       align={align}
       custom={{
-        className: `fd-btn fd-filter${active && !sort ? ' fd-filter--active' : ''}${sort ? ' fd-filter--sort' : ''}`,
+        className: `fd-btn fd-filter${active && !sort ? ' fd-filter--active' : ''}${sort ? ' fd-filter--sort' : ''}${compact ? ' fd-filter--compact' : ''}`,
         content: <FilterContent icon={icon} label={label} value={value} />,
       }}
       items={items}

@@ -88,7 +88,22 @@ function data() {
     (await nd.locator('.nd-type svg.nd-art[aria-hidden="true"]').count()) === 3,
     'illustrations aria-hidden',
   );
-  ok((await nd.locator('.nd-type li').count()) === 6, 'deux points forts par type');
+  ok((await nd.locator('.nd-type li').count()) === 0, 'écart 1 : aucun point fort');
+  {
+    const sel = await nd.locator('.nd-type.is-selected').evaluate((el) => {
+      const c = getComputedStyle(el);
+      return {
+        ow: c.outlineWidth,
+        oc: c.outlineColor,
+        bg: c.backgroundColor,
+        tx: getComputedStyle(document.body).color,
+      };
+    });
+    ok(
+      sel.ow === '2px' && sel.oc === sel.tx,
+      `écart 1 : sélection en contour 2 px couleur texte (${sel.ow} ${sel.oc})`,
+    );
+  }
   ok(await radios.first().isChecked(), 'par défaut : Démo par captures');
   await axe(p, 'nouvelle démo · étape 1');
   await radios.first().focus();
@@ -108,7 +123,8 @@ function data() {
     'Sandbox : ni images, ni IA, ni démo vide',
   );
   ok(
-    (await nd.locator('.nd-choice.is-soon[aria-disabled="true"]', { hasText: 'Bientôt' }).count()) === 1,
+    (await nd.locator('.nd-src.is-soon[aria-disabled="true"]', { hasText: 'Bientôt' }).count()) === 1 &&
+      (await nd.locator('.nd-src.is-soon .fd-badge').count()) === 0,
     'Sandbox : modèle « Bientôt »',
   );
   await p.waitForTimeout(200);
@@ -130,6 +146,18 @@ function data() {
       (await nd.getByRole('button', { name: /Partir d’un modèle/ }).count()) === 1,
     'Captures : images et modèle',
   );
+  ok(
+    (await nd.locator('.nd-sources .nd-src__go').count()) === 4 &&
+      (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
+    'écart 2 : sources en liste avec chevron, Retour et Annuler',
+  );
+  await nd.getByRole('button', { name: /Capturer avec l’extension/ }).click();
+  await p
+    .locator('dialog[open]')
+    .filter({ hasText: /extension/i })
+    .first()
+    .waitFor();
+  ok(!(await nd.isVisible()), 'écart 2 : la ligne Extension ouvre la fenêtre de l’extension');
   await p.keyboard.press('Escape');
 
   // ===== Navigation, filtre Type et badges =====
@@ -144,9 +172,11 @@ function data() {
   const card = (title) => p.locator('.demo-card', { hasText: title });
   ok((await card('Fiche usager HTML').locator('.ct-badge').innerText()).includes('HTML'), 'badge « HTML »');
   ok((await card('Onboarding').locator('.ct-badge').innerText()).includes('Captures'), 'badge « Captures »');
-  await p.getByRole('group', { name: 'Type' }).getByRole('button', { name: 'HTML' }).click();
+  await p.getByRole('button', { name: /^Type\s*:/ }).click();
+  await p.getByRole('menuitem', { name: 'HTML' }).click();
   ok(JSON.stringify(await titles()) === JSON.stringify(['Fiche usager HTML']), 'filtre Type : HTML');
-  await p.getByRole('group', { name: 'Type' }).getByRole('button', { name: 'Captures' }).click();
+  await p.getByRole('button', { name: /^Type\s*:/ }).click();
+  await p.getByRole('menuitem', { name: 'Captures' }).click();
   ok(!(await titles()).includes('Fiche usager HTML'), 'filtre Type : Captures');
   await axe(p, 'Démos (filtre Type)');
 
@@ -159,7 +189,17 @@ function data() {
     'Sandbox : seulement les Sandbox',
   );
   ok((await card('Portail à explorer').innerText()).includes('3 pages'), 'carte : « 3 pages »');
-  ok((await p.getByRole('group', { name: 'Type' }).count()) === 0, 'Sandbox : pas de filtre Type');
+  ok((await p.getByRole('button', { name: /^Type\s*:/ }).count()) === 0, 'Sandbox : pas de filtre Type');
+  {
+    const head = await p.locator('.page-head').boundingBox();
+    ok(head.height < 70, `écart 4 : en-tête Sandbox sur une ligne (${Math.round(head.height)} px)`);
+  }
+  ok((await p.locator('.demo-new').count()) === 0, 'écart 5 : pas de carte « Nouvelle démo » fantôme');
+  ok(
+    (await p.getByRole('heading', { level: 2, name: 'Tous les Sandbox' }).count()) === 1 &&
+      (await p.getByPlaceholder('Rechercher un Sandbox').count()) === 1,
+    'écart 6 : « Tous les Sandbox », « Rechercher un Sandbox »',
+  );
   await p.locator('.page-head__actions').getByRole('button', { name: 'Nouveau Sandbox' }).click();
   await nd.waitFor();
   ok(

@@ -81,7 +81,11 @@ export function Menu({
   const count = items.filter((x) => x !== 'separator').length;
   const [sheet, setSheet] = useState(false);
   const [q, setQ] = useState('');
-  const fold = (v: string) => v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const fold = (v: string) =>
+    v
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
   const needle = fold(q.trim());
   const shown = search
     ? items.filter(
@@ -298,9 +302,17 @@ export function Menu({
                   );
                   return it.group ? (
                     <div key={it.label} role="group" aria-label={it.group} className="menu-group">
-                      <span className="menu-radios__label" aria-hidden="true">
-                        {it.group}
-                      </span>
+                      {/* Intitulé une seule fois pour des éléments consécutifs du même groupe */}
+                      {(() => {
+                        const prev = shown[i - 1];
+                        return (
+                          !prev || typeof prev === 'string' || 'radios' in prev || prev.group !== it.group
+                        );
+                      })() && (
+                        <span className="menu-radios__label" aria-hidden="true">
+                          {it.group}
+                        </span>
+                      )}
                       {item}
                     </div>
                   ) : (

@@ -44,6 +44,7 @@ import {
   User,
   Users,
   Map as MapIcon,
+  Shapes,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Empty, Select } from '@flowdsiml/ui';
@@ -468,7 +469,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     scope === 'all'
       ? null
       : scope === 'mine'
-        ? t('folders.mine')
+        ? t(sandbox ? 'sandboxPage.mine' : 'folders.mine')
         : scope === 'archived'
           ? t('folders.archived')
           : scope === 'none'
@@ -517,8 +518,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
             <input
               className="fd-input"
               type="search"
-              placeholder={t('demos.search')}
-              aria-label={t('demos.search')}
+              placeholder={t(sandbox ? 'sandboxPage.search' : 'demos.search')}
+              aria-label={t(sandbox ? 'sandboxPage.search' : 'demos.search')}
               value={q}
               aria-disabled={loading || undefined}
               readOnly={loading}
@@ -786,20 +787,25 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                       </button>
                     ))}
                   </div>
-                  {/* L48-G §4 : Type, après Statut (pas sur la page Sandbox) */}
-                  {!sandbox && (
-                    <div className="fd-segmented" role="group" aria-label={t('ctype.filter')}>
-                      {(['all', 'captures', 'html'] as TypeFilter[]).map((k) => (
-                        <button key={k} type="button" aria-pressed={ctype === k} onClick={() => setCtype(k)}>
-                          {k === 'all' ? t('ctype.all') : t(`ctype.short.${k}`)}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </>
               }
               filters={
                 <>
+                  {/* L48-G §4 : Type (pas sur la page Sandbox), en menu : la barre reste sur une ligne */}
+                  {!sandbox && (
+                    <FilterMenu
+                      icon={<Shapes />}
+                      compact
+                      label={t('ctype.filter')}
+                      value={ctype === 'all' ? t('ctype.all') : t(`ctype.short.${ctype}`)}
+                      active={ctype !== 'all'}
+                      items={(['all', 'captures', 'html'] as TypeFilter[]).map((k) => ({
+                        label: k === 'all' ? t('ctype.all') : t(`ctype.short.${k}`),
+                        icon: ctype === k ? <Check /> : <span />,
+                        onSelect: () => setCtype(k),
+                      }))}
+                    />
+                  )}
                   {!wide && (
                     <FilterMenu
                       icon={<Folder />}
@@ -819,7 +825,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                           onSelect: () => setFolder('all'),
                         },
                         {
-                          label: `${t('folders.mine')} · ${inFolder('mine')}`,
+                          label: `${t(sandbox ? 'sandboxPage.mine' : 'folders.mine')} · ${inFolder('mine')}`,
                           icon: scope === 'mine' ? <Check /> : <User />,
                           onSelect: () => setFolder('mine'),
                         },
@@ -1245,7 +1251,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                   </li>
                 );
               })}
-              {editable && (
+              {/* L48-G écart 5 : pas de carte « Nouvelle démo » sur la page Sandbox (bouton de l'en-tête) */}
+              {editable && !sandbox && (
                 <li className="demo-new">
                   <button type="button" className="demo-new__btn" onClick={openNew}>
                     <span className="fd-btn fd-btn--round" aria-hidden="true">
@@ -1293,6 +1300,10 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
               onTemplate={(f) => {
                 setNewOpen(false);
                 setTplFolder(f);
+              }}
+              onExtension={() => {
+                setNewOpen(false);
+                setExtension(true);
               }}
             />
           )}

@@ -1,14 +1,7 @@
 import { avatarTone } from '../../../lib/avatarTone';
 import { bodyParts, serialize, toDraft, type Mention } from '../../../lib/mentions';
 import { MentionInput } from './MentionInput';
-import {
-  Fragment,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowDown,

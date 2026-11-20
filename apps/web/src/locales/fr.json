@@ -1347,12 +1347,14 @@
       },
       "deadCapture": "Capturer cette page",
       "deadLink": "Relier à une page",
-      "deadLinkTo": "Relier « {{link}} » à une page",
       "deadLeave": "Laisser le message",
       "deadShowLeft_one": "Afficher le lien laissé ({{count}})",
       "deadShowLeft_other": "Afficher les liens laissés ({{count}})",
       "deadRestore": "Rétablir",
-      "mapRegion": "Plan des pages"
+      "mapRegion": "Plan des pages",
+      "deadOpen": "Ouvrir la page",
+      "deadMore": "Autres actions pour « {{link}} »",
+      "deadCaptureSoon": "Capture depuis le plan : bientôt, avec l'extension."
     },
     "importUnverified": "Cette image n’est pas vérifiée automatiquement : floutez les données personnelles avant de publier.",
     "noFormShort": "Aucun formulaire",
@@ -1717,7 +1719,12 @@
       "discardBody": "Les zones dessinées ou modifiées depuis l’ouverture seront perdues.",
       "discard": "Abandonner"
     },
-    "notPublished": "Non publié"
+    "notPublished": "Non publié",
+    "stepMove": {
+      "moved": "Étape déplacée en position {{n}} sur {{total}}.",
+      "grabbed": "Étape {{n}} saisie. Flèches pour la déplacer, Espace pour la poser.",
+      "dropped": "Étape posée en position {{n}}."
+    }
   },
   "status": {
     "draft": "Brouillon",
@@ -2579,7 +2586,6 @@
     "newExtensionBody": "Recommandé. Une étape par clic, avec la position du clic.",
     "newImport": "Importer des images",
     "newImportBody": "Une étape par image, dans l’ordre des noms de fichiers. PNG, JPEG ou WebP.",
-    "newExtensionHelp": "Ouvrez la page de votre logiciel, puis cliquez sur l’icône TutoClick de la barre d’outils du navigateur pour lancer la capture. La démo est créée dans cet espace.",
     "newEmpty": "Partir d’une démo vide",
     "gs": {
       "title": "Premiers pas · {{done}} sur {{total}}",
@@ -3561,7 +3567,7 @@
       "brand": "Logo, couleurs et style par défaut",
       "extension": "Pour capturer depuis le navigateur",
       "capture": "Une étape par clic, avec l’extension",
-      "pii": "Vérifier le floutage automatique d’une capture",
+      "pii": "Masquer une donnée sensible dans une capture",
       "publish": "Lien, mot de passe, expiration",
       "invite": "Éditeur ou lecteur",
       "distribute": "Lien personnalisé, intégration, page publique ou paquet SCORM"
@@ -4208,20 +4214,14 @@
     "emailing": {
       "title": "Outils d'e-mailing",
       "body": "Ajouter les leads à une liste ou déclencher un scénario d'e-mails.",
-      "items": [
-        "Listes et scénarios",
-        "Respect du consentement du formulaire"
-      ],
+      "items": ["Listes et scénarios", "Respect du consentement du formulaire"],
       "action": "Connecter",
       "why": "Nécessite des comptes et des clés des éditeurs. En attendant : webhooks."
     },
     "enrich": {
       "title": "Enrichissement des visiteurs",
       "body": "Identifier l'organisation d'un visiteur anonyme.",
-      "items": [
-        "Entreprise à partir du réseau",
-        "Taille, secteur"
-      ],
+      "items": ["Entreprise à partir du réseau", "Taille, secteur"],
       "action": "Activer",
       "why": "Non prévu sans analyse juridique : traitement de données personnelles par un tiers (RGPD)."
     },
@@ -5170,14 +5170,6 @@
       "html": "Un parcours guidé sur de vraies pages HTML : textes et données modifiables, net sur tous les écrans.",
       "sandbox": "Des pages HTML reliées entre elles : le visiteur explore librement, sans étapes imposées."
     },
-    "plus": {
-      "captures1": "Le plus rapide à créer",
-      "captures2": "Idéal pour une procédure pas à pas",
-      "html1": "Textes modifiables sans recapturer",
-      "html2": "Données fictives faciles à remplacer",
-      "sandbox1": "S'entraîner sans risque",
-      "sandbox2": "Liens reliés automatiquement"
-    },
     "question": "Que voulez-vous créer ?",
     "stepOf": "Étape {{n}} sur {{total}}",
     "step1": "Type de contenu",
@@ -5192,7 +5184,6 @@
       "html": "Capturez les pages en mode HTML : le type « Démo guidée » est prérempli à la vérification.",
       "sandbox": "Capturez les pages en mode HTML : le type « Sandbox » est prérempli à la vérification."
     },
-    "extensionHelp": "Dans l'extension, choisissez « Capturer en HTML », parcourez les pages, puis vérifiez la capture.",
     "noTemplate": {
       "html": "Aucun modèle de démo HTML pour l'instant.",
       "sandbox": "Aucun modèle de Sandbox pour l'instant."
@@ -5200,12 +5191,14 @@
   },
   "sandboxPage": {
     "title": "Sandbox",
-    "subtitle": "Des pages HTML reliées entre elles, à explorer librement.",
+    "subtitle": "Des pages reliées, à explorer librement.",
     "new": "Nouveau Sandbox",
     "all": "Tous les Sandbox",
     "emptyTitle": "Aucun Sandbox",
     "emptyBody": "Capturez quelques pages en HTML avec l'extension : leurs liens sont reliés automatiquement.",
     "pages_one": "{{count}} page",
-    "pages_other": "{{count}} pages"
+    "pages_other": "{{count}} pages",
+    "mine": "Mes Sandbox",
+    "search": "Rechercher un Sandbox"
   }
 }

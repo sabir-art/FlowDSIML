@@ -7,6 +7,11 @@ const SHOTS = process.env.SHOTS_DIR;
 (async () => {
   const b = await chromium.launch();
   const page = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  // L48-E : outils du rail (bouton bascule : n'ouvrir que s'il n'est pas déjà ouvert)
+  const tool = async (name) => {
+    const btn = page.locator(`.ed-rail button[aria-label="${name}"]`);
+    if ((await btn.getAttribute('aria-pressed')) !== 'true') await btn.click();
+  };
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const state = await install(page);
@@ -70,7 +75,7 @@ const SHOTS = process.env.SHOTS_DIR;
   );
 
   // Clavier (ED1) : focus, flèche droite ×5 avec Maj, Suppr
-  await page.getByRole('tab', { name: 'Étape' }).click();
+  await tool('Étape');
   const hs = page.locator('.canvas-hotspot').first();
   await hs.focus();
   await page.keyboard.press('Enter');
@@ -83,19 +88,25 @@ const SHOTS = process.env.SHOTS_DIR;
     'annonce aria-live du déplacement',
   );
 
-  // Ajout d'un hotspot avec l'outil
-  await page.getByRole('button', { name: 'Hotspot', exact: true }).click();
-  const frame = await page.locator('.canvas-frame').boundingBox();
+  // L48-E : ajout d'un hotspot depuis l'outil « Points d'intérêt » du rail
+  await page.keyboard.press('Escape');
+  await tool("Points d'intérêt");
+  await page.getByRole('button', { name: 'Ajouter un hotspot' }).click();
+  const frame = await page.locator('.stage .canvas-frame').boundingBox();
   await page.mouse.click(frame.x + frame.width * 0.8, frame.y + frame.height * 0.2);
   await page.waitForTimeout(300);
-  ok((await page.locator('.canvas-hotspot').count()) === 2, 'nouveau hotspot ajouté');
+  ok((await page.locator('.stage .canvas-hotspot').count()) === 2, 'nouveau hotspot ajouté');
 
-  // Flou
-  await page.getByRole('button', { name: 'Flou ou masque', exact: true }).click();
-  await page.mouse.move(frame.x + 50, frame.y + 50);
+  // L48-E : flou dans sa fenêtre (outil « Flou » du rail), puis « Appliquer le flou »
+  await tool('Flou');
+  const bm = page.locator('dialog[open], [role="dialog"]').filter({ has: page.locator('#blurm-title') });
+  await bm.waitFor();
+  const bf = await bm.locator('.canvas-frame').boundingBox();
+  await page.mouse.move(bf.x + 50, bf.y + 50);
   await page.mouse.down();
-  await page.mouse.move(frame.x + 250, frame.y + 100, { steps: 4 });
+  await page.mouse.move(bf.x + 250, bf.y + 100, { steps: 4 });
   await page.mouse.up();
+  await bm.getByRole('button', { name: 'Appliquer le flou' }).click();
   await page.waitForTimeout(900);
   ok(
     state.calls.some(
@@ -118,7 +129,7 @@ const SHOTS = process.env.SHOTS_DIR;
   );
 
   // Onglets thème, formulaire, variables
-  await page.getByRole('tab', { name: 'Design' }).click();
+  await tool('Design');
   await page.getByRole('radio', { name: 'Doux' }).click();
   // EDT-10 : fond dégradé (nouvelle option du thème) et alerte de contraste
   await page.getByLabel('Fond dégradé').check();
@@ -129,7 +140,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.locator('.th-warn button').click();
   await page.waitForTimeout(300);
   ok((await page.locator('.th-warn').count()) === 0, 'couleur proposée appliquée (contraste ≥ 4,5:1)');
-  await page.getByRole('tab', { name: 'Réglages' }).click();
+  await tool('Réglages de la démo');
   await page.getByRole('button', { name: 'Créer le formulaire' }).click();
   await page.waitForSelector('#f-title');
   ok(state.tables.forms.length === 1, 'formulaire de lead créé');
@@ -155,9 +166,9 @@ const SHOTS = process.env.SHOTS_DIR;
     (await page.locator('#f-gate').inputValue()) === '2',
     'EDT-08 : déplacer le formulaire dans le rail change l’étape déclencheuse',
   );
-  await page.getByRole('tab', { name: 'Réglages' }).click();
+  await tool('Réglages de la démo');
   ok((await page.locator('text={{company}}').count()) > 0, 'variables du workspace listées');
-  await page.getByRole('tab', { name: 'Étape' }).click();
+  await tool('Étape');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/editor-after.png` });
   await page.waitForTimeout(900);
   ok(
@@ -176,7 +187,7 @@ const SHOTS = process.env.SHOTS_DIR;
     'EDT-10 : fond dégradé enregistré',
   );
   // F1 : mode de lecture Spotlight (onglet Design)
-  await page.getByRole('tab', { name: 'Design' }).click();
+  await tool('Design');
   await page.getByRole('button', { name: /Spotlight/ }).click();
   await page.waitForTimeout(900);
   ok(
@@ -185,13 +196,13 @@ const SHOTS = process.env.SHOTS_DIR;
     ),
     'F1 : mode Spotlight enregistré pour la démo',
   );
-  await page.getByRole('tab', { name: 'Étape' }).click();
+  await tool('Étape');
   await page.locator('.rail-list .step').first().click();
   ok((await page.locator('.canvas-spotlight').count()) >= 1, 'F1 : canevas en mode Spotlight (WYSIWYG)');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f1-editor-spotlight.png` });
 
   // F1 : checklist (onglet Réglages)
-  await page.getByRole('tab', { name: 'Réglages' }).click();
+  await tool('Réglages de la démo');
   await page.getByLabel('Afficher la checklist dans le player').check();
   await page.waitForTimeout(900);
   ok(
@@ -203,7 +214,7 @@ const SHOTS = process.env.SHOTS_DIR;
   );
 
   // F1 : menu de choix ajouté depuis le rail
-  await page.getByRole('tab', { name: 'Étape' }).click();
+  await tool('Étape');
   await page.locator('.rail-foot').getByRole('button', { name: 'Ajouter une étape' }).click();
   await page.getByRole('menuitem', { name: 'Menu de choix' }).click();
   await page.waitForSelector('.canvas-popup');

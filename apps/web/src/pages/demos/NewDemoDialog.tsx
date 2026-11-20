@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, ImagePlus, Info, LayoutTemplate, Puzzle, WandSparkles, X } from 'lucide-react';
+import { ChevronRight, ImagePlus, LayoutTemplate, Puzzle, WandSparkles, X } from 'lucide-react';
 import type { ContentType } from '@flowdsiml/core';
 import { CONTENT_TYPES } from '@flowdsiml/core';
 import { aiBlock, useAiStatus } from '../../lib/ai';
@@ -14,9 +14,10 @@ import { TypeBadge } from '../../components/TypeBadge';
 
 /**
  * DSH-06, L48-G §3 : « Nouvelle démo » en deux étapes.
- * 1. Type de contenu (Démo par captures, Démo HTML, Sandbox) : 3 cartes radio illustrées ; par défaut le
+ * 1. Type de contenu (Démo par captures, Démo HTML, Sandbox) : 3 cartes radio illustrées, sans points forts ; par défaut le
  *    dernier type choisi (user_metadata.content_type, que l'extension lit aussi pour préremplir html-review).
- * 2. Source, filtrée par type : extension (recommandé), images, modèle, IA, démo vide (captures seulement).
+ * 2. Source, filtrée par type, en liste (icône, nom, phrase, chevron) : un clic ouvre la source.
+ *    Extension (recommandé), images, modèle, IA ; démo vide (captures seulement) dans les actions.
  * Le dossier préremplit celui qui est filtré ; il s'applique à l'import, au modèle et à la démo vide.
  */
 export function NewDemoDialog({
@@ -27,6 +28,7 @@ export function NewDemoDialog({
   onTemplate,
   onImport,
   onGenerate,
+  onExtension,
   ws,
   onClose,
   initialType,
@@ -41,6 +43,8 @@ export function NewDemoDialog({
   onImport: (files: File[], folderId: string | null) => Promise<void> | void;
   /** L30-05 : « Générer avec l'IA ». */
   onGenerate: (folderId: string | null) => void;
+  /** L48-G §3 : « Capturer avec l'extension » ouvre la fenêtre de l'extension (installation, lancement). */
+  onExtension: () => void;
   ws: string;
   onClose: () => void;
   /** L48-G §4 : « Nouveau Sandbox » ouvre directement l'étape 2 avec ce type. */
@@ -133,14 +137,6 @@ export function NewDemoDialog({
                   <span className="nd-type__txt">
                     <b>{t(`ctype.name.${k}`)}</b>
                     <span>{t(`ctype.line.${k}`)}</span>
-                    <ul>
-                      {[1, 2].map((n) => (
-                        <li key={n}>
-                          <Check aria-hidden="true" />
-                          {t(`ctype.plus.${k}${n}`)}
-                        </li>
-                      ))}
-                    </ul>
                   </span>
                 </label>
               ))}
@@ -159,25 +155,33 @@ export function NewDemoDialog({
         </>
       ) : (
         <>
-          <div className="nd-choices">
-            <div className="nd-choice is-selected" aria-current="true">
-              <Puzzle aria-hidden="true" />
-              <b>{t('demos.newExtension')}</b>
-              <span className="fd-muted">
-                {type === 'captures' ? t('demos.newExtensionBody') : t(`ctype.extensionBody.${type}`)}
-              </span>
-            </div>
+          <ul className="nd-sources" aria-label={t('ctype.step2')}>
+            <li>
+              <button type="button" className="nd-src" onClick={onExtension}>
+                <Puzzle aria-hidden="true" />
+                <span className="nd-src__txt">
+                  <b>{t('demos.newExtension')}</b>
+                  <span>
+                    {type === 'captures' ? t('demos.newExtensionBody') : t(`ctype.extensionBody.${type}`)}
+                  </span>
+                </span>
+                <ChevronRight className="nd-src__go" aria-hidden="true" />
+              </button>
+            </li>
             {type === 'captures' && (
-              <>
+              <li>
                 <button
                   type="button"
-                  className="nd-choice nd-choice--btn"
+                  className="nd-src"
                   disabled={busy}
                   onClick={() => picker.current?.click()}
                 >
                   <ImagePlus aria-hidden="true" />
-                  <b>{t('demos.newImport')}</b>
-                  <span className="fd-muted">{t('demos.newImportBody')}</span>
+                  <span className="nd-src__txt">
+                    <b>{t('demos.newImport')}</b>
+                    <span>{t('demos.newImportBody')}</span>
+                  </span>
+                  <ChevronRight className="nd-src__go" aria-hidden="true" />
                 </button>
                 <input
                   ref={picker}
@@ -198,40 +202,45 @@ export function NewDemoDialog({
                     }
                   }}
                 />
-              </>
+              </li>
             )}
-            {type === 'captures' ? (
-              <button
-                type="button"
-                className="nd-choice nd-choice--btn"
-                onClick={() => onTemplate(folder || null)}
-              >
-                <LayoutTemplate aria-hidden="true" />
-                <b>{t('templates.title')}</b>
-                <span className="fd-muted">{t('templates.cardBody')}</span>
-              </button>
-            ) : (
-              // Aucun modèle HTML ni Sandbox pour l'instant : visible, désactivé, « Bientôt »
-              <div className="nd-choice is-soon" aria-disabled="true">
-                <LayoutTemplate aria-hidden="true" />
-                <b>
-                  {t('templates.title')} <span className="fd-badge nd-soon">{t('shell.soon')}</span>
-                </b>
-                <span className="fd-muted">{t(`ctype.noTemplate.${type}`)}</span>
-              </div>
-            )}
+            <li>
+              {type === 'captures' ? (
+                <button type="button" className="nd-src" onClick={() => onTemplate(folder || null)}>
+                  <LayoutTemplate aria-hidden="true" />
+                  <span className="nd-src__txt">
+                    <b>{t('templates.title')}</b>
+                    <span>{t('templates.cardBody')}</span>
+                  </span>
+                  <ChevronRight className="nd-src__go" aria-hidden="true" />
+                </button>
+              ) : (
+                // Aucun modèle HTML ni Sandbox pour l'instant : visible, désactivé, « Bientôt » en texte
+                <div className="nd-src is-soon" aria-disabled="true">
+                  <LayoutTemplate aria-hidden="true" />
+                  <span className="nd-src__txt">
+                    <b>{t('templates.title')}</b>
+                    <span>{t(`ctype.noTemplate.${type}`)}</span>
+                  </span>
+                  <span className="nd-src__soon">{t('shell.soon')}</span>
+                </div>
+              )}
+            </li>
             {type === 'captures' && (
-              <div className="ai-disabled-wrap nd-ai">
+              <li className="ai-disabled-wrap nd-ai">
                 <button
                   type="button"
-                  className="nd-choice nd-choice--btn ai-entry"
+                  className="nd-src ai-entry"
                   aria-disabled={aiDisabled || undefined}
                   aria-describedby={aiDisabled ? 'nd-ai-tip' : undefined}
                   onClick={() => !aiDisabled && onGenerate(folder || null)}
                 >
                   <WandSparkles aria-hidden="true" />
-                  <b>{t('ai.generate.card')}</b>
-                  <span className="fd-muted">{t('ai.generate.cardBody')}</span>
+                  <span className="nd-src__txt">
+                    <b>{t('ai.generate.card')}</b>
+                    <span>{t('ai.generate.cardBody')}</span>
+                  </span>
+                  <ChevronRight className="nd-src__go" aria-hidden="true" />
                 </button>
                 {aiDisabled && (
                   <span id="nd-ai-tip" className="ai-tip" role="tooltip">
@@ -243,13 +252,9 @@ export function NewDemoDialog({
                     {t('ai.disabledAdmin')}
                   </Link>
                 )}
-              </div>
+              </li>
             )}
-          </div>
-          <p className="nd-help">
-            <Info aria-hidden="true" />
-            {type === 'captures' ? t('demos.newExtensionHelp') : t('ctype.extensionHelp')}
-          </p>
+          </ul>
           <label className="fd-field nd-folder">
             <span className="fd-label">{t('demos.colFolder')}</span>
             <select className="fd-input" value={folder} onChange={(e) => setFolder(e.target.value)}>

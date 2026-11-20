@@ -106,6 +106,8 @@
     padding: 0;
     justify-content: center;
   }
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__label,
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__value,
   .list-toolbar .fd-filter--sort .fd-filter__label,
   .list-toolbar .fd-filter--sort .fd-filter__value {
     position: absolute;
@@ -115,6 +117,7 @@
     clip: rect(0 0 0 0);
     white-space: nowrap;
   }
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__chev,
   .list-toolbar .fd-filter--sort .fd-filter__chev {
     display: none;
   }
@@ -133,11 +136,15 @@
   container-type: inline-size;
 }
 @container (max-width: 1099px) {
+  /* L48-G : un filtre « compact » (Type) passe aussi en icône seule tant qu'il est inactif */
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active),
   .list-toolbar .fd-filter--sort {
     width: 40px;
     padding: 0;
     justify-content: center;
   }
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__label,
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__value,
   .list-toolbar .fd-filter--sort .fd-filter__label,
   .list-toolbar .fd-filter--sort .fd-filter__value {
     position: absolute;
@@ -147,6 +154,7 @@
     clip: rect(0 0 0 0);
     white-space: nowrap;
   }
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__chev,
   .list-toolbar .fd-filter--sort .fd-filter__chev {
     display: none;
   }

@@ -166,8 +166,12 @@ const hook = (id, state, ws) => ({
   );
   await m.getByRole('combobox', { name: 'Catégorie' }).selectOption('audience');
   await m.waitForURL(/categorie=mesure/);
-  await m.locator('.int-list > li', { hasText: 'Matomo' }).waitFor();
-  ok((await m.locator('.int-list > li').count()) === 2, '390 px : Mesure d’audience, 2 lignes');
+  // Attendre que la liste soit stable (l'ancienne liste disparaît après le changement de catégorie)
+  const two = await m
+    .waitForFunction(() => document.querySelectorAll('.int-list > li').length === 2, null, { timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  ok(two, '390 px : Mesure d’audience, 2 lignes');
   await axe(m, '390 px');
   await m.context().close();
 

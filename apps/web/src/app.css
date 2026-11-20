@@ -1035,6 +1035,27 @@
   margin: 4px 0 0;
   color: var(--fd-color-text-muted);
 }
+/* L48-G écart 4 : en-tête sur une ligne (titre et sous-titre sans retour, la recherche rétrécit) */
+@media (min-width: 1100px) {
+  .page-head--refonte .page-head__titles {
+    flex: none;
+    max-width: 60%;
+  }
+  .page-head--refonte .page-head__sub {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .page-head--refonte .page-head__actions {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+  .page-head--refonte .search-pill {
+    flex: 0 1 280px;
+    min-width: 160px;
+  }
+}
 .page-head__actions {
   margin-left: auto;
   display: flex;

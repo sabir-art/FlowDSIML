@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
+  Camera,
   Code,
   ExternalLink,
   Link2,
@@ -252,9 +253,12 @@ export function SandboxPlan({
           {(dead.length > 0 || ignored.length > 0) && (
             <section className="card sb-deadpanel" aria-labelledby="sb-dead-h">
               <h3 id="sb-dead-h">
-                {t('editor.sandbox.deadTitle')} <span className="sb-deadpanel__n">{dead.length}</span>
+                {t('editor.sandbox.deadTitle')} <span className="sb-deadpanel__n">({dead.length})</span>
               </h3>
               {dead.length > 0 && <p className="help">{t(`editor.sandbox.deadHelp.${sb.unlinked}`)}</p>}
+              <span id="sb-dead-soon" className="sr-only">
+                {t('editor.sandbox.deadCaptureSoon')}
+              </span>
               <ul className="sb-deadlist">
                 {dead.map((d) => (
                   <li key={`${d.from} ${d.url}`}>
@@ -264,30 +268,41 @@ export function SandboxPlan({
                     </span>
                     {!readOnly && (
                       <span className="sb-deadlist__actions">
+                        {/* L48-G écart 3 : une action visible ; « Bientôt » jusqu'à la liaison avec l'extension */}
+                        <button
+                          type="button"
+                          className="fd-btn fd-btn--sm"
+                          aria-disabled="true"
+                          aria-describedby="sb-dead-soon"
+                        >
+                          <Camera {...ICON} />
+                          {t('editor.sandbox.deadCapture')}
+                          <span className="sb-deadlist__soon">{t('shell.soon')}</span>
+                        </button>
                         <a className="link-btn" href={d.url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink {...ICON} />
-                          {t('editor.sandbox.deadCapture')}
+                          {t('editor.sandbox.deadOpen')}
                         </a>
+                        <span className="grow" />
                         <Menu
-                          label={t('editor.sandbox.deadLinkTo', { link: d.label })}
-                          custom={{
-                            className: 'link-btn sb-deadlist__link',
-                            content: (
-                              <>
-                                <Link2 {...ICON} />
-                                {t('editor.sandbox.deadLink')}
-                                <span className="sr-only"> : {d.label}</span>
-                              </>
-                            ),
-                          }}
-                          items={nodes
-                            .filter((n) => n.id !== d.from)
-                            .map((n) => ({ label: n.title, onSelect: () => linkTo(d, n.id) }))}
+                          label={t('editor.sandbox.deadMore', { link: d.label })}
+                          items={[
+                            ...nodes
+                              .filter((n) => n.id !== d.from)
+                              .map((n) => ({
+                                label: n.title,
+                                icon: <Link2 />,
+                                group: t('editor.sandbox.deadLink'),
+                                onSelect: () => linkTo(d, n.id),
+                              })),
+                            'separator' as const,
+                            {
+                              label: t('editor.sandbox.deadLeave'),
+                              icon: <MessageSquareOff />,
+                              onSelect: () => leave(d),
+                            },
+                          ]}
                         />
-                        <button type="button" className="link-btn" onClick={() => leave(d)}>
-                          <MessageSquareOff {...ICON} />
-                          {t('editor.sandbox.deadLeave')}
-                        </button>
                       </span>
                     )}
                   </li>

@@ -110,19 +110,44 @@ const pages = [
   const panel = p.locator('.sb-deadpanel');
   const items = panel.locator('.sb-deadlist:not(.sb-deadlist--left) > li');
   ok((await items.count()) === 3, 'panneau : 3 liens');
-  ok((await panel.locator('.sb-deadpanel__n').innerText()) === '3', 'compteur dans l’en-tête');
+  {
+    const n = panel.locator('.sb-deadpanel__n');
+    const shape = await n.evaluate((el) => {
+      const c = getComputedStyle(el);
+      return { r: c.borderRadius, sh: c.boxShadow };
+    });
+    ok(
+      (await n.innerText()) === '(3)' && shape.sh === 'none' && ['0px', ''].includes(shape.r),
+      'écart 3 : compteur en texte simple dans l’en-tête, sans cercle',
+    );
+  }
   ok(!(await panel.innerText()).includes('autre.example'), 'lien externe non compté');
   ok(
     (await panel.innerText()).includes('Cette partie n’est pas disponible dans la démo'),
     'phrase selon le clic non relié',
   );
-  const cap = items.first().getByRole('link', { name: 'Capturer cette page' });
+  const first = items.first();
+  const cap = first.getByRole('button', { name: /Capturer cette page/ });
   ok(
-    (await cap.getAttribute('href')) === `${U}/factures` &&
-      (await cap.getAttribute('target')) === '_blank' &&
-      /noopener/.test((await cap.getAttribute('rel')) ?? ''),
-    'Capturer cette page : l’adresse dans un nouvel onglet',
+    (await cap.getAttribute('aria-disabled')) === 'true' && (await cap.innerText()).includes('Bientôt'),
+    'écart 3 : « Capturer cette page » visible, désactivée, « Bientôt »',
   );
+  ok(
+    (await first.getByRole('button', { name: 'Relier à une page' }).count()) === 0 &&
+      (await first.getByRole('button', { name: 'Laisser le message' }).count()) === 0,
+    'écart 3 : Relier et Laisser dans le menu « … »',
+  );
+  const openLink = first.getByRole('link', { name: 'Ouvrir la page' });
+  ok(
+    (await openLink.getAttribute('href')) === `${U}/factures` &&
+      (await openLink.getAttribute('target')) === '_blank' &&
+      /noopener/.test((await openLink.getAttribute('rel')) ?? ''),
+    'Ouvrir la page : l’adresse dans un nouvel onglet',
+  );
+  {
+    const sc = await p.locator('.sb-scroll').evaluate((el) => getComputedStyle(el).paddingTop);
+    ok(sc === '16px', `écart 3 : marge intérieure du plan (${sc})`);
+  }
   await new AxeBuilder({ page: p })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
     .analyze()
@@ -133,7 +158,11 @@ const pages = [
 
   // Relier à une page : « Aide » → Agenda
   const aide = items.filter({ hasText: 'Aide' });
-  await aide.getByRole('button', { name: 'Relier à une page : Aide' }).click();
+  await aide.getByRole('button', { name: 'Autres actions pour « Aide »' }).click();
+  ok(
+    (await p.locator('.menu-group .menu-radios__label', { hasText: 'Relier à une page' }).count()) === 1,
+    'menu « … » : intitulé « Relier à une page » une seule fois',
+  );
   await p.getByRole('menuitem', { name: 'Agenda' }).click();
   await p.waitForFunction(
     () => document.querySelectorAll('.sb-deadlist:not(.sb-deadlist--left) > li').length === 2,
@@ -142,8 +171,9 @@ const pages = [
   // Laisser le message : « Factures » depuis le tableau de bord
   await items
     .filter({ hasText: 'Tableau de bord' })
-    .getByRole('button', { name: 'Laisser le message' })
+    .getByRole('button', { name: /^Autres actions pour/ })
     .click();
+  await p.getByRole('menuitem', { name: 'Laisser le message' }).click();
   await p.waitForFunction(
     () => document.querySelectorAll('.sb-deadlist:not(.sb-deadlist--left) > li').length === 1,
   );

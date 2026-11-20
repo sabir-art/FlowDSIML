@@ -236,7 +236,7 @@ const APP_PAGES = [
     open: async (p) => {
       await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
       await p.getByRole('button', { name: 'Continuer', exact: true }).click();
-      await p.waitForSelector('dialog[open] .nd-choices');
+      await p.waitForSelector('dialog[open] .nd-sources');
     },
   },
   // L48-G : page Sandbox (vide dans le jeu de base)

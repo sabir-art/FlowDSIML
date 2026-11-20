@@ -297,7 +297,10 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     ok(inside, 'Modale « Nouvelle démo » : le focus reste dans la modale');
     // L48-G : l'étape 1 n'a que 4 arrêts ; 20 Tab passent par l'interface du navigateur, où Échap
     // n'atteint pas la page : on revient dans la modale avant Échap
-    await p.locator('dialog[open] [role=radio]:checked, dialog[open] input[type=radio]:checked').first().focus();
+    await p
+      .locator('dialog[open] [role=radio]:checked, dialog[open] input[type=radio]:checked')
+      .first()
+      .focus();
     await p.keyboard.press('Escape');
     await p.waitForTimeout(200);
     ok(
@@ -329,6 +332,10 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
   // 4. Messages (toasts) : zone annoncée présente dès le chargement
   {
     const { p, ctx } = await app('/#/');
+    await p
+      .locator('.toasts')
+      .waitFor({ state: 'attached', timeout: 5000 })
+      .catch(() => {});
     ok(
       (await p.locator('[role=status][aria-live=polite].toasts, .toasts[role=status]').count()) === 1,
       'Toasts : zone role=status aria-live=polite présente avant tout message',
@@ -453,7 +460,7 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
   }
 
   // 9. L34 : parcours complet de l'éditeur au clavier seul (rail, déplacement d'étape, zone du canevas,
-  //    champs, onglets, modale des raccourcis et retour du focus)
+  //    champs, rail d'outils L48-E, modale des raccourcis et retour du focus)
   {
     const { p, ctx } = await app(`/#/demos/${DEMO}/edit`);
     await p.locator('.ed-title:not(.ed-title--sk)').waitFor();
@@ -521,16 +528,20 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       Number(await p.locator('#hs-rect-x').inputValue()) === Math.round(x1 + 1),
       'Éditeur au clavier : la position se règle aussi dans le panneau (sans glisser)',
     );
-    const tab = p.getByRole('tab', { name: 'Design' });
-    await p.getByRole('tab', { name: 'Étape' }).focus();
-    await p.keyboard.press('ArrowRight');
+    // L48-E : rail d'outils, flèches haut et bas entre les outils, Entrée ouvre le panneau
+    const rail = p.getByRole('toolbar', { name: "Outils de l'étape" });
+    await rail.locator('button[data-tool="hotspots"]').focus();
+    await p.keyboard.press('ArrowDown');
     await p.waitForTimeout(150);
     ok(
-      (await tab.getAttribute('aria-selected')) === 'true',
-      'Éditeur au clavier : → dans les onglets du panneau ouvre « Design »',
+      (await active()).label === 'Voix off',
+      'Éditeur au clavier : ↓ dans le rail d’outils passe à l’outil suivant',
     );
+    await p.keyboard.press('Enter');
+    await p.locator('[data-tool-panel="voice"]').waitFor();
+    ok(true, 'Éditeur au clavier : Entrée sur un outil ouvre son panneau');
     // Modale des raccourcis : ouverte par « ? », focus dedans, Échap rend le focus
-    await p.getByRole('tab', { name: 'Étape' }).focus();
+    await rail.locator('button[data-tool="voice"]').focus();
     await p.keyboard.press('Shift+?');
     const dlg = p.locator('[role="dialog"][aria-modal="true"]');
     await dlg.waitFor();
@@ -548,7 +559,7 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     await p.keyboard.press('Escape');
     await p.waitForTimeout(200);
     ok(
-      (await dlg.count()) === 0 && (await active()).role === 'tab',
+      (await dlg.count()) === 0 && (await active()).label === 'Voix off',
       'Éditeur au clavier : Échap ferme les raccourcis et rend le focus',
     );
     await ctx.close();

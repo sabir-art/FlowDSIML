@@ -52,6 +52,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   const next = card.locator('li.next');
   ok(/Flouter les données sensibles/.test(await next.innerText()), 'prochaine étape : flouter');
+  ok(
+    !/automatique/.test(await card.innerText()),
+    'L48-G écart 7 : aucune mention « automatique » dans la prise en main',
+  );
   ok((await next.locator('.fd-btn--primary', { hasText: 'Voir comment' }).count()) === 1, 'bouton principal');
   ok((await card.locator('li:not(.next) .fd-btn--primary').count()) === 0, 'autres boutons discrets');
   ok((await page.locator('.gs-banner').count()) === 0, 'remplace « Premiers pas »');

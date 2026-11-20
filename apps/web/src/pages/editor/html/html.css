@@ -180,8 +180,8 @@
 }
 .sb-scroll {
   overflow: auto;
-  /* L20-02 : marge intérieure, aucune carte ne touche le bord */
-  padding: 8px;
+  /* L20-02, L48-G écart 3 : marge intérieure, ni carte ni badge coupé au bord */
+  padding: 16px;
   border-radius: 20px;
   background: var(--fd-color-surface);
   box-shadow: var(--fd-shadow-sm);
@@ -452,15 +452,8 @@
   gap: 8px;
 }
 .sb-deadpanel__n {
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 11px;
-  display: inline-grid;
-  place-items: center;
-  font-size: 12px;
-  color: var(--fd-color-danger);
-  box-shadow: inset 0 0 0 1px currentColor;
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
 }
 .sb-deadlist {
   list-style: none;
@@ -506,8 +499,11 @@
   outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
   outline-offset: 2px;
 }
-.sb-deadlist__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.sb-deadlist__actions .grow {
+  flex: 1;
+}
+.sb-deadlist__soon {
+  margin-inline-start: 4px;
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
 }
