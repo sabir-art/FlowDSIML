@@ -77,11 +77,14 @@ export type NotificationPrefs = Record<NotificationKind, boolean>;
 /** Préférences stockées (clés absentes = activées). */
 export function readPrefs(raw: unknown): NotificationPrefs {
   const o = raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
-  return Object.fromEntries(NOTIFICATION_KINDS.map((k) => [k, o[k] !== false])) as NotificationPrefs;
+  // L28-06 : les mentions sont toujours signalées
+  return Object.fromEntries(
+    NOTIFICATION_KINDS.map((k) => [k, k === 'mention' || o[k] !== false]),
+  ) as NotificationPrefs;
 }
 
 /** Lien vers l'éditeur, sur l'étape, avec le fil ouvert ; une alerte mène à l'onglet Alertes. */
 export const notificationHref = (n: Pick<NotificationRow, 'kind' | 'demo_id' | 'step_id' | 'comment_id'>) =>
   n.kind === 'alert'
     ? '/analytics?tab=alerts'
-    : `/demos/${n.demo_id}/edit?step=${n.step_id}&comment=${n.comment_id}`;
+    : `/demos/${n.demo_id}/edit?step=${n.step_id}${n.comment_id ? `&comment=${n.comment_id}` : ''}`;

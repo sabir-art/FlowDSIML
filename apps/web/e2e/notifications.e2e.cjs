@@ -141,7 +141,20 @@ function withNotifications() {
   await dlg.getByRole('button', { name: 'Préférences' }).click();
   const prefs = page.getByRole('dialog', { name: 'Préférences de notification' });
   await prefs.waitFor();
-  ok((await prefs.getByRole('switch').count()) === 6, 'L22-05 : 4 types + alertes (L19) + e-mail');
+  ok(
+    (await prefs.getByRole('switch').count()) === 7,
+    'L22-05 : 4 types + alertes (L19) + e-mail + résumé quotidien (L28-06)',
+  );
+  const mentionSw = prefs.getByRole('switch', { name: /On me mentionne/ });
+  ok(
+    (await mentionSw.isChecked()) && (await mentionSw.getAttribute('aria-disabled')) === 'true',
+    'L28-06 : mentions toujours activées (aria-disabled)',
+  );
+  ok(
+    /Les mentions sont toujours signalées\./.test(await prefs.innerText()) &&
+      (await prefs.getByRole('switch', { name: /Résumé quotidien/ }).isDisabled()),
+    'L28-06 : aide des mentions, résumé quotidien « Bientôt »',
+  );
   ok(
     await prefs.getByRole('switch', { name: /e-mail/ }).isDisabled(),
     'L22-05 : e-mail désactivé, « Bientôt »',

@@ -1174,6 +1174,20 @@ export type Database = {
         };
         Relationships: [];
       };
+      notification_mutes: {
+        Row: { created_at: string; demo_id: string; user_id: string; workspace_id: string };
+        Insert: { demo_id: string; workspace_id: string };
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: 'notification_mutes_demo_id_fkey';
+            columns: ['demo_id'];
+            isOneToOne: false;
+            referencedRelation: 'demos';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       notification_settings: {
         Row: {
           prefs: NonNullable<Json>;

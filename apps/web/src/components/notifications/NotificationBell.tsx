@@ -2,7 +2,7 @@
  * L22-05/06 : cloche de la barre du haut et panneau de notifications (commentaires et mentions).
  * Panneau non modal (role=dialog) : Échap ou clic à l'extérieur le ferme, le focus revient à la cloche.
  */
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { HelpButton } from '../../help/HelpButton';
@@ -14,11 +14,14 @@ import {
   CheckCheck,
   CheckCircle2,
   CornerDownRight,
+  BellOff,
   MessageSquare,
   Settings,
   X,
 } from 'lucide-react';
 import { initials } from '../../lib/initials';
+import { Menu } from '../Menu';
+import { useToast } from '../Toast';
 import { formatRelativeShort } from '../../lib/format';
 import { avatarTone } from '../../lib/avatarTone';
 import { useNotifications, type NotificationItem } from './useNotifications';
@@ -43,6 +46,13 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<'list' | 'prefs'>('list');
   const [filter, setFilter] = useState<Filter>('all');
+  // Cloche placée à gauche (barre d'Analytics) : le panneau s'ouvre vers la droite, jamais sous la barre latérale
+  const [toRight, setToRight] = useState(false);
+  useLayoutEffect(() => {
+    if (!open || !btn.current) return;
+    const r = btn.current.getBoundingClientRect();
+    setToRight(r.right - Math.min(440, window.innerWidth - 32) < window.innerWidth * 0.25);
+  }, [open]);
   const btn = useRef<HTMLButtonElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   const tabs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -58,11 +68,37 @@ export function NotificationBell() {
     pop.current?.focus();
     const onDoc = (e: MouseEvent) => {
       const target = e.target as Node;
-      if (!pop.current?.contains(target) && !btn.current?.contains(target)) close(false);
+      // Le menu ⋯ d'une notification est rendu dans le portail : il fait partie du panneau
+      const inPortal = (target as Element).closest?.('#fd-portal');
+      if (!pop.current?.contains(target) && !btn.current?.contains(target) && !inPortal) close(false);
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open]);
+
+  // L28-06 : nouvelle notification annoncée (aria-live polite) au plus une fois par minute, regroupée
+  const toast = useToast();
+  const [announce, setAnnounce] = useState('');
+  const prevUnread = useRef<number | null>(null);
+  const pending = useRef(0);
+  const lastAnnounce = useRef(0);
+  useEffect(() => {
+    if (n.loading) return;
+    if (prevUnread.current !== null && n.unread > prevUnread.current)
+      pending.current += n.unread - prevUnread.current;
+    prevUnread.current = n.unread;
+    if (!pending.current) return;
+    const say = () => {
+      setAnnounce(t('notifications.announce', { count: pending.current }));
+      pending.current = 0;
+      lastAnnounce.current = Date.now();
+    };
+    const wait = 60_000 - (Date.now() - lastAnnounce.current);
+    if (wait <= 0) return say();
+    const id = window.setTimeout(say, wait);
+    return () => window.clearTimeout(id);
+  }, [n.unread, n.loading, t]);
+  const mutedIds = new Set(n.muted.map((m) => m.demoId));
 
   const mentions = n.items.filter((x) => x.kind === 'mention').length;
   const shown = n.items.filter((x) =>
@@ -105,7 +141,7 @@ export function NotificationBell() {
           <div
             ref={pop}
             id={`${id}-pop`}
-            className="nb-pop"
+            className={`nb-pop${toRight ? ' nb-pop--right' : ''}`}
             role="dialog"
             aria-labelledby={`${id}-t`}
             tabIndex={-1}
@@ -186,6 +222,15 @@ export function NotificationBell() {
                             <Row
                               key={x.id}
                               item={x}
+                              muted={!!x.demo_id && mutedIds.has(x.demo_id)}
+                              onMute={async () => {
+                                if (x.demo_id && (await n.mute(x.demo_id)))
+                                  toast(
+                                    t('notifications.mutedToast', {
+                                      demo: x.demoTitle || t('demos.untitled'),
+                                    }),
+                                  );
+                              }}
                               onOpen={() => {
                                 if (!x.read_at) void n.markRead([x.id]);
                                 close(false);
@@ -235,12 +280,22 @@ export function NotificationBell() {
                   {NOTIFICATION_KINDS.map((k) => (
                     <li key={k}>
                       <label className="fd-switch">
-                        <span>{t(`notifications.p_${k}`)}</span>
+                        <span>
+                          {t(`notifications.p_${k}`)}
+                          {k === 'mention' && (
+                            <span className="fd-help nb-pref-help" id={`${id}-mention-h`}>
+                              {t('notifications.mentionAlways')}
+                            </span>
+                          )}
+                        </span>
                         <input
                           type="checkbox"
                           role="switch"
-                          checked={n.prefs[k]}
-                          onChange={(e) => void n.setPref(k, e.target.checked)}
+                          checked={k === 'mention' ? true : n.prefs[k]}
+                          // L28-06 : les mentions sont toujours signalées
+                          aria-disabled={k === 'mention' || undefined}
+                          aria-describedby={k === 'mention' ? `${id}-mention-h` : undefined}
+                          onChange={(e) => k !== 'mention' && void n.setPref(k, e.target.checked)}
                         />
                         <span className="fd-switch__track" aria-hidden="true" />
                       </label>
@@ -255,23 +310,70 @@ export function NotificationBell() {
                       <span className="fd-switch__track" aria-hidden="true" />
                     </label>
                   </li>
+                  <li>
+                    <label className="fd-switch is-soon">
+                      <span>
+                        {t('notifications.p_digest')} <span className="fd-badge">{t('shell.soon')}</span>
+                      </span>
+                      <input type="checkbox" role="switch" checked={false} disabled />
+                      <span className="fd-switch__track" aria-hidden="true" />
+                    </label>
+                  </li>
                 </ul>
+                {/* L28-06 : démos coupées, avec « Réactiver » */}
+                <h3 className="nb-group">{t('notifications.mutedTitle')}</h3>
+                {n.muted.length ? (
+                  <ul className="nb-muted">
+                    {n.muted.map((m) => (
+                      <li key={m.demoId}>
+                        <BellOff aria-hidden="true" />
+                        <span className="grow">{m.title || t('demos.untitled')}</span>
+                        <button
+                          type="button"
+                          className="fd-btn fd-btn--ghost fd-btn--sm"
+                          aria-label={t('notifications.unmuteLabel', {
+                            demo: m.title || t('demos.untitled'),
+                          })}
+                          onClick={() => void n.unmute(m.demoId)}
+                        >
+                          {t('notifications.unmute')}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="fd-help nb-prefs-help">{t('notifications.mutedNone')}</p>
+                )}
               </>
             )}
           </div>
         )}
       </span>
+      <span className="sr-only" aria-live="polite">
+        {announce}
+      </span>
     </>
   );
 }
 
-function Row({ item: x, onOpen }: { item: NotificationItem; onOpen: () => void }) {
+function Row({
+  item: x,
+  onOpen,
+  muted,
+  onMute,
+}: {
+  item: NotificationItem;
+  onOpen: () => void;
+  muted: boolean;
+  onMute: () => void;
+}) {
   const { t } = useTranslation();
   const Icon = KIND_ICON[x.kind];
   if (x.kind === 'alert') return <AlertRow item={x} icon={Icon} onOpen={onOpen} />;
   const actor = x.actorName || t('notifications.someone');
   const step = x.stepNumber ?? '?';
   const quote = (x.kind === 'mention' || x.kind === 'reply') && x.body;
+  // L28-06 : commentaire supprimé : la notification reste lisible
   // Nom en gras sans analyser de balises : le titre de la démo reste du texte brut
   const [before, after = ''] = t(`notifications.k_${x.kind}`, {
     actor: MARK,
@@ -300,6 +402,7 @@ function Row({ item: x, onOpen }: { item: NotificationItem; onOpen: () => void }
             )}
           </span>
         )}
+        {x.deleted && <span className="nb-q nb-deleted">{t('notifications.deleted')}</span>}
         <small>
           <Icon aria-hidden="true" />
           {formatRelativeShort(x.created_at)}
@@ -314,6 +417,14 @@ function Row({ item: x, onOpen }: { item: NotificationItem; onOpen: () => void }
         aria-label={t(`notifications.open_${x.kind}`, { actor, step })}
         onClick={onOpen}
       />
+      {!muted && x.demo_id && (
+        <span className="nb-more">
+          <Menu
+            label={t('notifications.more', { demo: x.demoTitle || t('demos.untitled') })}
+            items={[{ label: t('notifications.mute'), icon: <BellOff />, onSelect: onMute }]}
+          />
+        </span>
+      )}
     </li>
   );
 }

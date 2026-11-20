@@ -19,6 +19,13 @@ export interface NotificationItem extends NotificationRow {
   demoTitle: string;
   stepNumber: number | null;
   body: string | null;
+  /** L28-06 : commentaire supprimé (la notification reste lisible). */
+  deleted: boolean;
+}
+/** L28-06 : démo dont les notifications sont coupées (sauf les mentions). */
+export interface MutedDemo {
+  demoId: string;
+  title: string;
 }
 
 const DAYS = 30;
@@ -70,15 +77,16 @@ export function useNotifications() {
     );
     setItems(
       rows
-        // Le fil n'est plus lisible (supprimé ou accès perdu) : la notification disparaît
-        // (une alerte ne porte pas de fil : elle reste)
-        .filter((r) => r.kind === 'alert' || (r.comment_id && cm.has(r.comment_id)))
+        // L28-06 : commentaire supprimé (comment_id vide) : la notification reste. Accès perdu au fil :
+        // elle disparaît. Une alerte ne porte pas de fil : elle reste.
+        .filter((r) => r.kind === 'alert' || !r.comment_id || cm.has(r.comment_id))
         .map((r) => ({
           ...r,
           actorName: (r.actor_id && names.get(r.actor_id)) || '',
           demoTitle: (r.demo_id && dm.get(r.demo_id)?.title) || '',
           stepNumber: r.step_id && sm.has(r.step_id) ? sm.get(r.step_id)!.position + 1 : null,
           body: (r.comment_id && cm.get(r.comment_id)?.body) || null,
+          deleted: r.kind !== 'alert' && !r.comment_id,
         })),
     );
     setLoading(false);
@@ -140,6 +148,42 @@ export function useNotifications() {
     [me, prefs],
   );
 
+  // L28-06 : démos coupées (privées, RLS)
+  const [muted, setMuted] = useState<MutedDemo[]>([]);
+  const loadMuted = useCallback(async () => {
+    if (!ws || !me) return;
+    const { data } = await supabase
+      .from('notification_mutes')
+      .select('demo_id, demos(title)')
+      .eq('workspace_id', ws);
+    setMuted(
+      ((data ?? []) as unknown as Array<{ demo_id: string; demos: { title: string } | null }>).map((m) => ({
+        demoId: m.demo_id,
+        title: m.demos?.title ?? '',
+      })),
+    );
+  }, [ws, me]);
+  useEffect(() => void loadMuted(), [loadMuted]);
+  const mute = useCallback(
+    async (demoId: string) => {
+      if (!ws) return false;
+      const { error } = await supabase
+        .from('notification_mutes')
+        .insert({ demo_id: demoId, workspace_id: ws });
+      await loadMuted();
+      return !error;
+    },
+    [ws, loadMuted],
+  );
+  const unmute = useCallback(
+    async (demoId: string) => {
+      const { error } = await supabase.from('notification_mutes').delete().eq('demo_id', demoId);
+      await loadMuted();
+      return !error;
+    },
+    [loadMuted],
+  );
+
   const unread = items.filter((n) => !n.read_at).length;
-  return { items, loading, unread, markRead, prefs, setPref, reload };
+  return { items, loading, unread, markRead, prefs, setPref, reload, muted, mute, unmute };
 }

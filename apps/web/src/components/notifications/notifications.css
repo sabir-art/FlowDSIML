@@ -39,6 +39,10 @@
   box-shadow: var(--fd-shadow-lg);
   text-align: left;
 }
+.nb-pop.nb-pop--right {
+  right: auto;
+  left: 0;
+}
 .nb-pop:focus {
   outline: none;
 }
@@ -234,4 +238,40 @@
     top: 72px;
     width: auto;
   }
+}
+
+/* L28-06 : commentaire supprimé, menu ⋯ d'une notification, démos coupées */
+.nb-deleted {
+  font-style: italic;
+  color: var(--fd-color-text-muted);
+}
+.nb-list li {
+  position: relative;
+}
+.nb-more {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+}
+.nb-pref-help {
+  display: block;
+  margin-top: 2px;
+}
+.nb-muted {
+  list-style: none;
+  margin: 0;
+  padding: 0 16px 12px;
+  display: grid;
+  gap: 4px;
+}
+.nb-muted li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fd-font-sm);
+}
+.nb-muted svg {
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
 }
