@@ -191,7 +191,7 @@ export function VoiceFields({
   const lang = settings.locale ?? 'fr';
   const opts = (step.options ?? {}) as Record<string, unknown>;
   const generated = !!opts.aiVoice;
-  // 065 (L30-11) : voix de synthèse (ElevenLabs) à partir de la transcription, sinon du texte de la bulle
+  // 065 (L30-10) : voix de synthèse (ElevenLabs) à partir de la transcription, sinon du texte de la bulle
   const aiVoice =
     ws && !readOnly ? (
       <AiVoice
@@ -329,7 +329,7 @@ export function VoiceFields({
             <span className="help" id={`voice-tr-h-${step.id}`}>
               {t('editor.voice.transcriptHelp')}
             </span>
-            {/* 066 (L30-12) : transcription automatique d'une voix enregistrée */}
+            {/* 066 (L30-11) : transcription automatique d'une voix enregistrée */}
             {ws && !readOnly && !generated && !heard && (
               <AiCaptions
                 ws={ws.id}

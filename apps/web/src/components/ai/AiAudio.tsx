@@ -145,7 +145,7 @@ function ConfirmModal({
 }
 
 /**
- * 065 Voix de synthèse (L30-11) : texte à lire modifiable (variables lues avec leur valeur par
+ * 065 Voix de synthèse (L30-10) : texte à lire modifiable (variables lues avec leur valeur par
  * défaut), 6 voix avec extrait, vitesse, durée estimée, avertissement, aperçu, Appliquer ou Ignorer.
  */
 export function AiVoice({
@@ -325,7 +325,7 @@ export function AiVoice({
                   />
                   <span>
                     <b>{t(`ai.voice.v.${v}.name`)}</b>
-                    <span className="t-caption muted"> · {t(`ai.voice.v.${v}.desc`)}</span>
+                    <span className="t-caption muted ai-voice-desc">{t(`ai.voice.v.${v}.desc`)}</span>
                   </span>
                 </label>
                 <button
@@ -489,7 +489,7 @@ function writeSkip(demoId: string) {
 }
 
 /**
- * 066 Sous-titres automatiques (L30-12) : avertissement avant chaque envoi d'audio (sauf « Ne plus
+ * 066 Sous-titres automatiques (L30-11) : avertissement avant chaque envoi d'audio (sauf « Ne plus
  * demander pour cette démo »), 2 minutes au plus ; le résultat s'ouvre dans l'aperçu éditable.
  */
 export function AiCaptions({

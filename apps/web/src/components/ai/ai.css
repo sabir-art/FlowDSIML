@@ -448,7 +448,7 @@
   height: 16px;
   margin-top: 2px;
 }
-/* L30-11 : panneau Voix de synthèse */
+/* L30-10 : panneau Voix de synthèse */
 .mk .ai-voices,
 .mk .ai-speed {
   display: grid;
@@ -469,8 +469,20 @@
   display: flex;
   gap: var(--fd-space-2);
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
+}
+.mk .ai-voice-row .check {
+  flex: 1;
+  min-width: 0;
+}
+.mk .ai-voice-row .btn {
+  flex: none;
+}
+.mk .ai-voice-row .check {
+  align-items: flex-start;
+}
+.mk .ai-voice-desc {
+  display: block;
+  font-weight: 400;
 }
 .mk .ai-speed-row {
   display: flex;

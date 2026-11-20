@@ -129,11 +129,11 @@ function prepare(over = {}) {
     await page.locator('.vd-stage video').waitFor();
   };
 
-  // ===== L30-11 : voix de synthèse =====
+  // ===== L30-10 : voix de synthèse =====
   let state = prepare();
   await page.addInitScript(() => {
     try {
-      localStorage.clear();
+      localStorage.removeItem('fd.ai.sttNoAsk.0b5c1f0e-0000-4000-8000-000000000001');
     } catch {
       /* */
     }
@@ -176,7 +176,7 @@ function prepare(over = {}) {
   ok(state.ai.used === used0, 'L’exemple ne consomme pas de quota');
   await panel.getByRole('radio', { name: /Antoine/ }).check();
   await panel.getByRole('radio', { name: 'Rapide' }).check();
-  await shot('l30-11-voix-panneau');
+  await shot('l30-10-voix-panneau');
   await panel.getByRole('button', { name: 'Générer la voix' }).click();
   await panel.getByRole('button', { name: 'Appliquer' }).waitFor();
   const call = state.aiCalls.at(-1);
@@ -195,14 +195,14 @@ function prepare(over = {}) {
     'Lien « Générer à nouveau »',
   );
   ok(/b1\.webm$/.test(s1().voice_path), 'Rien n’est appliqué avant « Appliquer »');
-  await shot('l30-11-voix-apercu');
+  await shot('l30-10-voix-apercu');
   await panel.getByRole('button', { name: 'Appliquer' }).click();
   const confirm = page.getByRole('dialog', {
     name: 'Remplacer votre enregistrement par la voix de synthèse ?',
   });
   await confirm.waitFor();
   ok(true, 'Confirmation avant de remplacer la voix enregistrée');
-  await shot('l30-11-voix-remplacer');
+  await shot('l30-10-voix-remplacer');
   await confirm.getByRole('button', { name: 'Remplacer' }).click();
   ok(await until(() => /a1\.mp3$/.test(s1().voice_path || '')), 'Voix de synthèse appliquée');
   ok(
@@ -218,14 +218,14 @@ function prepare(over = {}) {
     (await page.locator('.rail-li .rail-ai[aria-label="Voix off générée par l’IA"]').count()) === 1,
     'Liste des étapes : icône voix avec repère « IA »',
   );
-  await shot('l30-11-voix-appliquee', true);
+  await shot('l30-10-voix-appliquee', true);
   await page.locator('.toast').getByRole('button', { name: 'Annuler' }).click();
   ok(
     await until(() => /b1\.webm$/.test(s1().voice_path || '') && !s1().options?.aiVoice),
     '« Annuler » rétablit l’enregistrement',
   );
 
-  // ===== L30-12 : transcription de la voix enregistrée =====
+  // ===== L30-11 : transcription de la voix enregistrée =====
   await sec.getByRole('button', { name: 'Transcrire la voix' }).click();
   await ask.waitFor();
   ok(
@@ -236,7 +236,7 @@ function prepare(over = {}) {
     !(await ask.getByRole('checkbox', { name: 'Ne plus demander pour cette démo' }).isChecked()),
     'Case non cochée',
   );
-  await shot('l30-12-envoi-audio');
+  await shot('l30-11-envoi-audio');
   const n0 = state.aiCalls.length;
   await ask.getByRole('button', { name: 'Annuler' }).click();
   ok(state.aiCalls.length === n0, '« Annuler » : rien n’est envoyé');
@@ -249,14 +249,14 @@ function prepare(over = {}) {
     'Demande : voix off de l’étape',
   );
   ok(/Langue détectée\s: Français/.test(await tr.textContent()), 'Langue détectée');
-  await shot('l30-12-transcription-voix');
+  await shot('l30-11-transcription-voix');
   await tr.getByRole('button', { name: 'Appliquer' }).click();
   ok(
     await until(() => s1().voice_transcript === 'Ouvrez la fiche du jeune. Renseignez la date d’entrée.'),
     'Transcription remplacée par le texte entendu',
   );
 
-  // ===== L30-12 : sous-titres d'une vidéo =====
+  // ===== L30-11 : sous-titres d'une vidéo =====
   await railTo('Saisie de la fiche');
   await page.getByRole('button', { name: 'Transcription automatique' }).click();
   await ask.waitFor();
@@ -275,7 +275,7 @@ function prepare(over = {}) {
   const texts = await dlg.locator('input[aria-label*="Texte"]').evaluateAll((e) => e.map((x) => x.value));
   ok(texts.includes('Ouvrez la fiche du jeune.'), 'Sous-titres proposés modifiables');
   ok((await dlg.getByRole('button', { name: 'Ignorer' }).count()) === 1, 'Appliquer ou Ignorer');
-  await shot('l30-12-sous-titres-apercu');
+  await shot('l30-11-sous-titres-apercu');
   await dlg.getByRole('button', { name: 'Appliquer' }).click();
   const vid = () => state.tables.steps.find((s) => s.id === 'vid-1').video;
   ok(
@@ -293,7 +293,7 @@ function prepare(over = {}) {
   const rep = page.getByRole('dialog', { name: 'Remplacer les sous-titres existants ?' });
   await rep.waitFor();
   ok(/Les 2 sous-titres actuels/.test(await rep.textContent()), 'Confirmation : sous-titres existants');
-  await shot('l30-12-remplacer');
+  await shot('l30-11-remplacer');
   await rep.getByRole('button', { name: 'Remplacer' }).click();
   ok(await until(() => vid().captions[0]?.text === 'Ouvrez la fiche.'), 'Sous-titres relus appliqués');
   await page.locator('.toast').getByRole('button', { name: 'Annuler' }).click();
@@ -316,7 +316,7 @@ function prepare(over = {}) {
     )
     .waitFor();
   ok(state.aiCalls.length === n2, 'Plus de 2 min : rien n’est envoyé');
-  await shot('l30-12-trop-longue');
+  await shot('l30-11-trop-longue');
 
   // ===== L30-13 : quotas et fonction désactivée =====
   state = prepare({ ttsUsed: 298 });

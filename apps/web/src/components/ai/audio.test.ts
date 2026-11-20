@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { estimateSeconds, languageName, withDefaults } from './AiAudio';
 
-describe('voix de synthèse (L30-11)', () => {
+describe('voix de synthèse (L30-10)', () => {
   it('lit les variables avec leur valeur par défaut, sinon le repli', () => {
     const vars = [{ key: 'company', default_value: 'votre entreprise' }];
     expect(withDefaults('Bienvenue chez {{company}} !', vars)).toBe('Bienvenue chez votre entreprise !');

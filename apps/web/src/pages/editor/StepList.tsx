@@ -492,7 +492,7 @@ function StepBadges({
     step.kind === 'video' && { icon: <Play />, label: t('editor.video.kind') },
     step.kind === 'html' && { icon: <Code />, label: t('editor.html.kind') },
     // L28-02 : étape avec voix off
-    // L30-11 : voix de synthèse appliquée, repère « IA »
+    // L30-10 : voix de synthèse appliquée, repère « IA »
     step.voice_path &&
       ((step.options as { aiVoice?: boolean } | null)?.aiVoice
         ? { icon: <AudioLines />, label: t('editor.voice.railIconAi'), ai: true }

@@ -317,7 +317,7 @@ export function VideoFields({
           readOnly={readOnly}
           onClose={() => setAiCues(null)}
           onSave={async (captions) => {
-            // L30-12 : confirmation si la vidéo a déjà des sous-titres, puis « Annuler » dans le toast
+            // L30-11 : confirmation si la vidéo a déjà des sous-titres, puis « Annuler » dans le toast
             const before = v;
             if (
               v.captions.length &&

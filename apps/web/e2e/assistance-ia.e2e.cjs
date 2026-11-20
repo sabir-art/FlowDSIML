@@ -114,6 +114,35 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.getByLabel('Graphique').check();
   await shot('l30-01-active');
 
+  // ---- L30-10 : voix et sous-titres, consentement séparé
+  const audio = page.locator('fieldset.ai-audio');
+  ok(
+    !(await audio.getByRole('checkbox', { name: 'Voix de synthèse' }).isChecked()) &&
+      !(await audio.getByRole('checkbox', { name: 'Sous-titres automatiques' }).isChecked()),
+    'L30-10 : voix et sous-titres décochés par défaut',
+  );
+  ok(
+    /La voix de synthèse envoie le texte à lire au fournisseur ElevenLabs/.test(await audio.textContent()),
+    'L30-10 : bandeau propre à la sous-section',
+  );
+  await audio.getByRole('checkbox', { name: 'Voix de synthèse' }).click();
+  const adlg = page.getByRole('dialog', { name: 'Activer la voix de synthèse ?' });
+  await adlg.waitFor();
+  ok(await adlg.getByRole('button', { name: 'Activer' }).isDisabled(), 'L30-10 : confirmation dédiée');
+  await adlg.getByLabel('J’ai lu ces informations.').check();
+  await shot('l30-10-reglage-confirmation');
+  await adlg.getByRole('button', { name: 'Activer' }).click();
+  await page.getByText('Voix de synthèse activée pour l’espace.').waitFor();
+  ok(state.ai.features.voice === true, 'L30-10 : voix activée');
+  ok(
+    /Voix de synthèse\s?: 0\ss sur 5\smin ce mois-ci/.test(await audio.textContent()),
+    'L30-10 : quota de la voix en secondes',
+  );
+  await shot('l30-10-reglage-active');
+  await audio.getByRole('checkbox', { name: 'Voix de synthèse' }).uncheck();
+  await page.waitForTimeout(300);
+  ok(state.ai.features.voice === false, 'L30-10 : décocher enregistre directement');
+
   // ---- §11 : Fonctions à venir
   await page.goto(`${APP}/#/settings/soon?tab=ia`);
   await page.locator('.soon-card').first().waitFor();

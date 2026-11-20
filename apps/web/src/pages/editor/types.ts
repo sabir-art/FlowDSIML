@@ -21,7 +21,7 @@ export type DemoSettings = {
   /** Langue du contenu (L30-03 : copies traduites ; arabe lu de droite à gauche). */
   locale?: 'fr' | 'en' | 'es' | 'de' | 'it' | 'pt' | 'ar';
   allowedEmbedOrigins?: string[];
-  /** L30-11 : dernière voix de synthèse choisie pour la démo. */
+  /** L30-10 : dernière voix de synthèse choisie pour la démo. */
   aiVoice?: string;
   theme?: Partial<Theme>;
   cta?: Cta | null;
