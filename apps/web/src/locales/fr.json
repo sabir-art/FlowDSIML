@@ -18,7 +18,8 @@
     "none": "Aucun",
     "typeToConfirm": "Saisissez « {{text}} » pour confirmer",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "undo": "Annuler"
   },
   "nav": {
     "main": "Navigation principale",
@@ -2498,7 +2499,7 @@
     "steps_one": "{{count}} étape",
     "steps_other": "{{count}} étapes",
     "deleteFolderShort": "Supprimer le dossier",
-    "sortCreated": "Créées récemment",
+    "sortCreated": "Date de création",
     "openEditor": "Ouvrir dans l’éditeur",
     "copyLink": "Copier le lien",
     "archive": "Archiver",
@@ -5016,5 +5017,20 @@
     "install": "Installer l’extension",
     "seenOn": "L’extension a été détectée sur votre compte le {{date}}.",
     "capture": "Lancer une capture"
+  },
+  "folders": {
+    "title": "Dossiers",
+    "all": "Toutes les démos",
+    "mine": "Mes démos",
+    "space": "Dossiers de l’espace",
+    "archived": "Archivées",
+    "hide": "Masquer les dossiers",
+    "newSub": "Nouveau sous-dossier",
+    "actions": "Actions du dossier {{name}}",
+    "collapse": "Replier {{name}}",
+    "expand": "Déplier {{name}}",
+    "breadcrumb": "Fil d’Ariane",
+    "author": "Créé par",
+    "me": "Moi"
   }
 }

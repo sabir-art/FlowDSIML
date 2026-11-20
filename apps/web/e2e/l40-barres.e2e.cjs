@@ -72,29 +72,27 @@ const measure = (bar) =>
       (await bar.getByRole('button', { name: 'Réinitialiser les filtres' }).count()) === 0,
       'Démos : pas de Réinitialiser sans filtre',
     );
-    await page.getByRole('button', { name: /^Dossier\s*: Tous/ }).click();
-    await page.getByRole('menuitem', { name: /^Onboarding des nouveaux conseillers/ }).click();
+    // L48-A : le dossier est dans la colonne Dossiers ; « Créé par » est un filtre de la barre
+    await page.getByRole('button', { name: /^Créé par\s*: Tous/ }).click();
+    await page.getByRole('menuitem', { name: 'Moi' }).click();
     await page.getByRole('button', { name: /^Publiées/ }).click();
     await page.waitForTimeout(300);
-    const folderBtn = page.getByRole('button', { name: /^Dossier\s*: Onboarding des nouveaux conseillers$/ });
+    const authorBtn = page.getByRole('button', { name: /^Créé par\s*: Moi$/ });
+    ok((await authorBtn.count()) === 1, 'Démos : nom accessible « Créé par : Moi »');
     ok(
-      (await folderBtn.count()) === 1,
-      'Démos : nom accessible « Dossier : Onboarding des nouveaux conseillers »',
+      (await authorBtn.getAttribute('class')).includes('fd-filter--active'),
+      'Démos : filtre Créé par actif',
     );
-    ok((await folderBtn.getAttribute('class')).includes('fd-filter--active'), 'Démos : filtre Dossier actif');
     m = await measure(bar);
-    ok(
-      m.lines === 1 && m.heights.every((h) => h === 40),
-      'Démos : une ligne avec 2 filtres actifs (valeur longue)',
-    );
+    ok(m.lines === 1 && m.heights.every((h) => h === 40), 'Démos : une ligne avec 2 filtres actifs');
     const status = (await bar.locator('[role=status]').textContent()).trim();
     ok(/^\d+ démos?$/.test(status), `Démos : nombre de résultats annoncé (« ${status} »)`);
     await bar.getByRole('button', { name: 'Réinitialiser les filtres' }).click();
     await page.waitForTimeout(200);
     ok(
-      (await page.getByRole('button', { name: /^Dossier\s*: Tous/ }).count()) === 1 &&
+      (await page.getByRole('button', { name: /^Créé par\s*: Tous/ }).count()) === 1 &&
         (await page.getByRole('button', { name: /^Toutes/ }).getAttribute('aria-pressed')) === 'true',
-      'Démos : Réinitialiser remet Statut et Dossier',
+      'Démos : Réinitialiser remet Statut et Créé par',
     );
     await page.context().close();
 

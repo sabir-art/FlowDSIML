@@ -1,4 +1,13 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type DragEvent,
+  type FormEvent,
+} from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { withRestLocale } from '../../i18n';
@@ -7,6 +16,7 @@ import {
   ArrowUpDown,
   ArrowRight,
   BarChart3,
+  ChevronRight,
   Check,
   Copy,
   Download,
@@ -27,6 +37,8 @@ import {
   Share2,
   Tag,
   Trash2,
+  User,
+  Users,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Card, Select } from '@flowdsiml/ui';
@@ -50,6 +62,8 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
 import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
+import { DEMO_DRAG, FolderColumn, type Scope } from './FolderColumn';
+import { useMediaQuery } from '../../lib/useMediaQuery';
 import { LazyNotificationBell } from '../../components/notifications/LazyNotificationBell';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
@@ -107,7 +121,60 @@ export function DemosPage() {
   const [stepCounts, setStepCounts] = useState<Record<string, number>>({});
   /** DSH-10 : date de la dernière publication, pour le badge « Modifiée ». */
   const [publishedAt, setPublishedAt] = useState<Record<string, string>>({});
-  const [folder, setFolder] = useState<string | 'all' | 'none'>('all');
+  // L48-A §2 : entrée choisie dans l'adresse (?dossier={id}, ?vue=mes-demos, ?vue=archivees)
+  const [params, setParams] = useSearchParams();
+  const vue = params.get('vue');
+  const scope: Scope =
+    vue === 'mes-demos' ? 'mine' : vue === 'archivees' ? 'archived' : (params.get('dossier') ?? 'all');
+  /** Dossier choisi (« none » : sans dossier), sinon « all ». */
+  const folder = scope === 'mine' || scope === 'archived' ? 'all' : scope;
+  const setFolder = (s: Scope) => {
+    const next = new URLSearchParams(params);
+    next.delete('vue');
+    next.delete('dossier');
+    if (s === 'mine') next.set('vue', 'mes-demos');
+    else if (s === 'archived') next.set('vue', 'archivees');
+    else if (s !== 'all') next.set('dossier', s);
+    setParams(next, { replace: true });
+  };
+  /** Toutes les entrées hors Archivées excluent les démos archivées. */
+  const inScope = (d: Demo, s: Scope = scope) =>
+    s === 'archived'
+      ? d.status === 'archived'
+      : d.status !== 'archived' &&
+        (s === 'all' ||
+          (s === 'mine' ? d.created_by === user?.id : s === 'none' ? !d.folder_id : d.folder_id === s));
+  // L48-A §3 : « Créé par » (tous, moi, ou un membre)
+  const [author, setAuthor] = useState<'all' | 'me' | string>('all');
+  const [people, setPeople] = useState<Array<{ user_id: string; full_name: string; email: string }>>([]);
+  useEffect(() => {
+    void supabase
+      .rpc('list_members', { p_workspace: ws.id })
+      .then(({ data }) =>
+        setPeople((data ?? []) as Array<{ user_id: string; full_name: string; email: string }>),
+      );
+  }, [ws.id]);
+  const byAuthor = (d: Demo) => author === 'all' || d.created_by === (author === 'me' ? user?.id : author);
+  // L48-A §2 : colonne Dossiers au-dessus de 1 024 px ; repli gardé pour la personne
+  const wide = useMediaQuery('(min-width: 1024px)');
+  const colKey = `fd.folders.hidden.${user?.id ?? ''}`;
+  const [colHidden, setColHidden] = useState(() => {
+    try {
+      return localStorage.getItem(colKey) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const hideCol = (h: boolean) => {
+    setColHidden(h);
+    try {
+      localStorage.setItem(colKey, h ? '1' : '0');
+    } catch {
+      /* préférence non gardée */
+    }
+  };
+  const showCol = wide && !colHidden;
+  const [newFolderParent, setNewFolderParent] = useState<string | null>(null);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<Sort>('updated');
@@ -236,7 +303,8 @@ export function DemosPage() {
     const needle = q.trim().toLowerCase();
     const list = (demos ?? []).filter(
       (d) =>
-        (folder === 'all' || (folder === 'none' ? !d.folder_id : d.folder_id === folder)) &&
+        inScope(d) &&
+        byAuthor(d) &&
         (status === 'all' || d.status === status) &&
         (!needle || d.title.toLowerCase().includes(needle)) &&
         (tagFilter.length === 0 || matchTags(d.id)),
@@ -246,16 +314,18 @@ export function DemosPage() {
     if (sort === 'views')
       return [...list].sort((a, b) => (stats[b.id]?.views ?? 0) - (stats[a.id]?.views ?? 0));
     return list;
-  }, [demos, folder, status, q, sort, stats, i18n.language, tagFilter, tagMode, tagStore.links]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- inScope et byAuthor suivent scope, author, user
+  }, [demos, scope, author, user, status, q, sort, stats, i18n.language, tagFilter, tagMode, tagStore.links]);
 
   const [newOpen, setNewOpen] = useState(false);
   const [generating, setGenerating] = useState<{ folder: string | null } | null>(null);
   // REV-04 : « Démarrer » de l'onboarding arrive ici avec ?new=1 et ouvre « Nouvelle démo »
-  const [params, setParams] = useSearchParams();
   useEffect(() => {
     if (params.get('new') !== '1') return;
     setNewOpen(true);
-    setParams({}, { replace: true });
+    const next = new URLSearchParams(params);
+    next.delete('new');
+    setParams(next, { replace: true });
   }, [params, setParams]);
   // L26-04 : bibliothèque de modèles (dossier choisi dans « Nouvelle démo »)
   const [tplFolder, setTplFolder] = useState<string | null | undefined>(undefined);
@@ -272,7 +342,8 @@ export function DemosPage() {
   const openNew = () => setNewOpen(true);
   const anyPublished = (demos ?? []).some((d) => d.status === 'published');
 
-  async function moveDemo(demoId: string, target: string) {
+  async function moveDemo(demoId: string, target: string, undo = true) {
+    const before = demos?.find((d) => d.id === demoId)?.folder_id ?? '';
     await run(async () => {
       check(
         await supabase
@@ -281,9 +352,24 @@ export function DemosPage() {
           .eq('id', demoId),
       );
       await load();
-      toast(t('toast.moved', { folder: folders.find((f) => f.id === target)?.name ?? t('demos.noFolder') }));
+      // L48-A §2 : « Annuler » remet la démo dans son dossier d'origine
+      toast(
+        t('toast.moved', { folder: folders.find((f) => f.id === target)?.name ?? t('demos.noFolder') }),
+        undo
+          ? { label: t('common.undo'), onClick: () => void moveDemo(demoId, before, false), durationMs: 8000 }
+          : undefined,
+      );
     });
   }
+  /** Dépôt (glisser ou menu) : confirmation avant un dossier restreint (L27-09). */
+  const requestMove = (demoId: string, target: string) => {
+    if (demos?.find((d) => d.id === demoId)?.folder_id === (target || null)) return;
+    if (target && (hidden[target] ?? 0) > 0) {
+      setPendingMove({ demoId, folderId: target, n: hidden[target]! });
+      return;
+    }
+    void moveDemo(demoId, target);
+  };
 
   async function createDemo(folderId: string | null = folder !== 'all' && folder !== 'none' ? folder : null) {
     const d = await run(async () =>
@@ -309,7 +395,10 @@ export function DemosPage() {
     if (!name) return;
     await run(async () => {
       if (renaming) check(await supabase.from('folders').update({ name }).eq('id', renaming.id));
-      else check(await supabase.from('folders').insert({ workspace_id: ws.id, name }));
+      else
+        check(
+          await supabase.from('folders').insert({ workspace_id: ws.id, name, parent_id: newFolderParent }),
+        );
       toast(renaming ? t('toast.folderRenamed') : t('toast.folderCreated', { name }));
       setRenaming(null);
       setNewFolder(null);
@@ -317,13 +406,51 @@ export function DemosPage() {
     });
   }
 
+  const scopeName =
+    scope === 'all'
+      ? null
+      : scope === 'mine'
+        ? t('folders.mine')
+        : scope === 'archived'
+          ? t('folders.archived')
+          : scope === 'none'
+            ? t('demos.noFolder')
+            : (folders.find((f) => f.id === scope)?.name ?? null);
   // L32 : squelette (même géométrie que la page), erreur et délais (docs/ux/specs/l32-squelettes.md)
   function pageHead(loading: boolean) {
     return (
       <header className="page-head page-head--refonte">
         <div className="page-head__titles">
-          <h1>{t('demos.title')}</h1>
-          <p className="page-head__sub">{t('demos.subtitle')}</p>
+          {scopeName ? (
+            <>
+              {/* L48-A §2 : fil d'Ariane « Démos > {entrée} » et titre de l'entrée choisie */}
+              <nav className="demos-crumb" aria-label={t('folders.breadcrumb')}>
+                <ol>
+                  <li>
+                    <a
+                      href="#/"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setFolder('all');
+                      }}
+                    >
+                      {t('demos.title')}
+                    </a>
+                  </li>
+                  <li aria-current="page">
+                    <ChevronRight aria-hidden="true" />
+                    {scopeName}
+                  </li>
+                </ol>
+              </nav>
+              <h1>{scopeName}</h1>
+            </>
+          ) : (
+            <>
+              <h1>{t('demos.title')}</h1>
+              <p className="page-head__sub">{t('demos.subtitle')}</p>
+            </>
+          )}
         </div>
         <div className="page-head__actions">
           <LazyNotificationBell />
@@ -441,16 +568,27 @@ export function DemosPage() {
   ];
 
   // DSH-09 : les compteurs suivent le dossier affiché
-  const inView = demos.filter(
-    (d) => folder === 'all' || (folder === 'none' ? !d.folder_id : d.folder_id === folder),
-  );
+  const inView = demos.filter((d) => inScope(d) && byAuthor(d));
   const counts = {
     all: inView.length,
     published: inView.filter((d) => d.status === 'published').length,
     draft: inView.filter((d) => d.status === 'draft').length,
   };
-  const inFolder = (id: string | 'none') =>
-    demos.filter((d) => (id === 'none' ? !d.folder_id : d.folder_id === id)).length;
+  const inFolder = (id: Scope) => demos.filter((d) => inScope(d, id)).length;
+  /** Compteur d'une entrée de la colonne : suit le filtre de statut (sauf Archivées). */
+  const colCount = (s: Scope) =>
+    demos.filter((d) => inScope(d, s) && (s === 'archived' || status === 'all' || d.status === status))
+      .length;
+  const demoDrag = (d: Demo) =>
+    editable
+      ? {
+          draggable: true,
+          onDragStart: (e: DragEvent) => {
+            e.dataTransfer.setData(DEMO_DRAG, d.id);
+            e.dataTransfer.effectAllowed = 'move';
+          },
+        }
+      : {};
   const sortLabels: Record<Sort, string> = {
     updated: t('demos.sortUpdated'),
     created: t('demos.sortCreated'),
@@ -458,624 +596,711 @@ export function DemosPage() {
     views: t('demos.sortViews'),
   };
   return (
-    <div className="stack page-wide">
-      <Suspense fallback={null}>
-        {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
-        {distributing && <DistributeDialog demoId={distributing} onClose={() => setDistributing(null)} />}
-      </Suspense>
-      <LoadStatus loading={false} longLoad={sk.longLoad} busy="" done={t('loading.demosDone')} />
-      {pageHead(false)}
-      {error && <Alert kind="error">{error}</Alert>}
-
-      {/* REV-05 : pas d'indicateurs à zéro tant qu'aucune démo n'est publiée */}
-      {/* L32 : même hauteur que la rangée d'indicateurs (gabarit invisible), aucun décalage après le squelette */}
-      {kpis && !anyPublished && (
-        <div className="stats-later-row">
-          <KpiSkeletonRow hidden />
-          <div className="fd-card stats-later">
-            <p className="fd-muted">{t('demos.statsLater')}</p>
-          </div>
-        </div>
-      )}
-      {kpis && anyPublished && (
-        <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
-          {(
-            [
-              [
-                'views',
-                t('kpi.views'),
-                formatNumber(kpis.cur.views),
-                countTrend(kpis.cur.views, kpis.prev?.views ?? 0),
-              ],
-              [
-                'visitors',
-                t('kpi.visitorsUnique'),
-                formatNumber(kpis.cur.visitors),
-                countTrend(kpis.cur.visitors, kpis.prev?.visitors ?? 0),
-              ],
-              [
-                'completion',
-                t('kpi.completion'),
-                `${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)} %`,
-                rateTrend(
-                  completionRate(kpis.cur.visitors, kpis.cur.completions),
-                  kpis.prev ? completionRate(kpis.prev.visitors, kpis.prev.completions) : 0,
-                  kpis.prev?.visitors ?? 0,
-                ),
-              ],
-              [
-                'leads',
-                t('kpi.leads'),
-                formatNumber(kpis.cur.leads),
-                countTrend(kpis.cur.leads, kpis.prev?.leads ?? 0),
-              ],
-            ] as const
-          ).map(([k, label, value, trend]) => (
-            <Link key={k} className="kpi-sc" to={`/analytics?indicateur=${k}`}>
-              <span className="kpi-tab__l">{label}</span>
-              <span className="kpi-tab__v">{value}</span>
-              {kpis.prev ? (
-                <TrendBadge trend={trend} days={30} />
-              ) : (
-                <span className="kpi-trend">{'\u00a0'}</span>
-              )}
-              <span className="kpi-sc__go" aria-hidden="true">
-                <span className="kpi-sc__go-t">{t('kpi.analytics')}</span>
-                <ArrowRight />
-              </span>
-              <span className="sr-only">{t('kpi.seeAnalytics')}</span>
-            </Link>
-          ))}
-        </nav>
-      )}
-
-      {/* L26-01 : « Prise en main de votre espace », après les indicateurs (L32 §2) */}
-      <OnboardingCard
-        onb={onb}
-        onCapture={openNew}
-        latestDemoId={demos[0]?.id ?? null}
-        publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
-      />
-
-      <section aria-labelledby="demos-list-title" className="demos-section">
-        <h2 id="demos-list-title" className="demos-list-title">
-          {t('demos.allDemos')}
-        </h2>
-        {/* L40 : Statut, Dossier, Étiquettes et Réinitialiser à gauche ; tri et affichage à droite */}
-        <ListToolbar
-          activeCount={(status !== 'all' ? 1 : 0) + (folder !== 'all' ? 1 : 0) + (tagFilter.length ? 1 : 0)}
-          onReset={() => {
-            setStatus('all');
-            setFolder('all');
-            setTagFilter([]);
+    <div className="demos-layout">
+      {showCol && (
+        <FolderColumn
+          folders={folders}
+          scope={scope}
+          count={colCount}
+          editable={editable}
+          canManageAccess={can('workspace.settings')}
+          onSelect={setFolder}
+          onHide={() => hideCol(true)}
+          onNew={(parent) => {
+            setNewFolderParent(parent);
+            setNewFolder('');
           }}
-          status={t('demos.resultCount', { count: visible.length })}
-          lead={
-            <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
-              {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
-                <button key={k} type="button" aria-pressed={status === k} onClick={() => setStatus(k)}>
-                  {t(`demos.filter_${k}`)} · {counts[k]}
-                </button>
-              ))}
+          onRename={(f) => setRenaming({ id: f.id, name: f.name })}
+          onAccess={setFolderAccess}
+          onDelete={setFolderToDelete}
+          onDropDemo={requestMove}
+        />
+      )}
+      <div className="stack page-wide demos-main">
+        <Suspense fallback={null}>
+          {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
+          {distributing && <DistributeDialog demoId={distributing} onClose={() => setDistributing(null)} />}
+        </Suspense>
+        <LoadStatus loading={false} longLoad={sk.longLoad} busy="" done={t('loading.demosDone')} />
+        {pageHead(false)}
+        {error && <Alert kind="error">{error}</Alert>}
+
+        {/* REV-05 : pas d'indicateurs à zéro tant qu'aucune démo n'est publiée */}
+        {/* L32 : même hauteur que la rangée d'indicateurs (gabarit invisible), aucun décalage après le squelette */}
+        {kpis && !anyPublished && (
+          <div className="stats-later-row">
+            <KpiSkeletonRow hidden />
+            <div className="fd-card stats-later">
+              <p className="fd-muted">{t('demos.statsLater')}</p>
             </div>
-          }
-          filters={
-            <>
-              <FilterMenu
-                icon={<Folder />}
-                label={t('demos.folderLabel')}
-                value={
-                  folder === 'all'
-                    ? t('toolbar.all')
-                    : folder === 'none'
-                      ? t('demos.noFolder')
-                      : (folders.find((f) => f.id === folder)?.name ?? t('toolbar.all'))
-                }
-                active={folder !== 'all'}
-                items={[
-                  {
-                    label: `${t('demos.allFolders')} · ${demos.length}`,
-                    icon: folder === 'all' ? <Check /> : <Layers />,
-                    onSelect: () => setFolder('all'),
-                  },
-                  {
-                    label: `${t('demos.noFolder')} · ${inFolder('none')}`,
-                    icon: folder === 'none' ? <Check /> : <FolderOpen />,
-                    onSelect: () => setFolder('none'),
-                  },
-                  ...(folders.length ? (['separator'] as const) : []),
-                  ...folders.map((f) => ({
-                    label: `${f.name} · ${inFolder(f.id)}`,
-                    icon: folder === f.id ? <Check /> : <Folder />,
-                    // L27-09 : dossier restreint (cadenas, nombre de membres qui le voient)
-                    end: f.restricted ? (
-                      <span
-                        role="img"
-                        aria-label={t('folderAccess.restricted')}
-                        title={t('folderAccess.visibleBy', { count: memberCount - (hidden[f.id] ?? 0) })}
-                      >
-                        <Lock size={14} aria-hidden="true" />
-                      </span>
-                    ) : undefined,
-                    onSelect: () => setFolder(f.id),
-                  })),
-                  ...(editable
-                    ? ([
-                        'separator',
-                        {
-                          label: t('demos.newFolder'),
-                          icon: <FolderPlus />,
-                          onSelect: () => setNewFolder(''),
-                        },
-                        ...(current && folder !== 'all' && folder !== 'none'
-                          ? [
-                              {
-                                label: t('demos.renameFolder', {
-                                  name: folders.find((f) => f.id === folder)?.name ?? '',
-                                }),
-                                icon: <Pencil />,
-                                onSelect: () => {
-                                  const f = folders.find((x) => x.id === folder);
-                                  if (f) setRenaming({ id: f.id, name: f.name });
-                                },
-                              },
-                              ...(can('workspace.settings')
-                                ? [
-                                    {
-                                      label: t('folderAccess.menu'),
-                                      icon: <Lock />,
-                                      onSelect: () =>
-                                        setFolderAccess(folders.find((x) => x.id === folder) ?? null),
-                                    },
-                                  ]
-                                : []),
-                              {
-                                label: t('demos.deleteFolderShort'),
-                                icon: <Trash2 />,
-                                danger: true,
-                                onSelect: () =>
-                                  setFolderToDelete(folders.find((x) => x.id === folder) ?? null),
-                              },
-                            ]
-                          : []),
-                      ] as Array<MenuItem | 'separator'>)
-                    : []),
-                ]}
-              />
-              <TagFilter
-                store={tagStore}
-                selected={tagFilter}
-                setSelected={setTagFilter}
-                mode={tagMode}
-                setMode={setTagMode}
-                onManage={editable ? () => setManagingTags(true) : undefined}
-              />
-            </>
-          }
-          end={
-            <>
-              <FilterMenu
-                sort
-                align="end"
-                icon={<ArrowUpDown />}
-                label={t('demos.sortLabel')}
-                value={sortLabels[sort]}
-                items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
-                  label: sortLabels[k],
-                  icon: sort === k ? <Check /> : <span />,
-                  onSelect: () => setSort(k),
-                }))}
-              />
-              <div
-                className="fd-segmented fd-segmented--icons"
-                role="radiogroup"
-                aria-label={t('demos.view')}
-              >
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={view === 'grid'}
-                  aria-label={t('demos.viewGrid')}
-                  title={t('demos.viewGrid')}
-                  onClick={() => chooseView('grid')}
-                >
-                  <LayoutGrid aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={view === 'list'}
-                  aria-label={t('demos.viewList')}
-                  title={t('demos.viewList')}
-                  onClick={() => chooseView('list')}
-                >
-                  <List aria-hidden="true" />
-                </button>
-              </div>
-            </>
-          }
+          </div>
+        )}
+        {kpis && anyPublished && (
+          <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
+            {(
+              [
+                [
+                  'views',
+                  t('kpi.views'),
+                  formatNumber(kpis.cur.views),
+                  countTrend(kpis.cur.views, kpis.prev?.views ?? 0),
+                ],
+                [
+                  'visitors',
+                  t('kpi.visitorsUnique'),
+                  formatNumber(kpis.cur.visitors),
+                  countTrend(kpis.cur.visitors, kpis.prev?.visitors ?? 0),
+                ],
+                [
+                  'completion',
+                  t('kpi.completion'),
+                  `${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)} %`,
+                  rateTrend(
+                    completionRate(kpis.cur.visitors, kpis.cur.completions),
+                    kpis.prev ? completionRate(kpis.prev.visitors, kpis.prev.completions) : 0,
+                    kpis.prev?.visitors ?? 0,
+                  ),
+                ],
+                [
+                  'leads',
+                  t('kpi.leads'),
+                  formatNumber(kpis.cur.leads),
+                  countTrend(kpis.cur.leads, kpis.prev?.leads ?? 0),
+                ],
+              ] as const
+            ).map(([k, label, value, trend]) => (
+              <Link key={k} className="kpi-sc" to={`/analytics?indicateur=${k}`}>
+                <span className="kpi-tab__l">{label}</span>
+                <span className="kpi-tab__v">{value}</span>
+                {kpis.prev ? (
+                  <TrendBadge trend={trend} days={30} />
+                ) : (
+                  <span className="kpi-trend">{'\u00a0'}</span>
+                )}
+                <span className="kpi-sc__go" aria-hidden="true">
+                  <span className="kpi-sc__go-t">{t('kpi.analytics')}</span>
+                  <ArrowRight />
+                </span>
+                <span className="sr-only">{t('kpi.seeAnalytics')}</span>
+              </Link>
+            ))}
+          </nav>
+        )}
+
+        {/* L26-01 : « Prise en main de votre espace », après les indicateurs (L32 §2) */}
+        <OnboardingCard
+          onb={onb}
+          onCapture={openNew}
+          latestDemoId={demos[0]?.id ?? null}
+          publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
         />
 
-        {demos.length === 0 ? (
-          // REV-05 : une phrase et « Nouvelle démo » ; les étapes sont dans la prise en main (L26-01)
-          <Card className="demos-empty">
-            <h2 className="card-title">{t('demos.emptyTitle')}</h2>
-            <p className="fd-muted">{editable ? t('demos.emptyBody') : t('demos.emptyBodyViewer')}</p>
-            {editable && (
-              <Button variant="primary" icon={<Plus />} onClick={openNew}>
-                {t('demos.new')}
-              </Button>
-            )}
-          </Card>
-        ) : visible.length === 0 && inView.length === 0 && folder !== 'all' ? (
-          // DSH-09 : dossier vide (carte de la maquette)
-          <div className="fd-card empty-folder">
-            <svg className="illu" viewBox="0 0 140 100" aria-hidden="true">
-              <rect x="10" y="14" width="120" height="76" rx="10" className="illu-bg" />
-              <path
-                d="M28 70c14 0 18-22 34-22s20-18 36-18"
-                fill="none"
-                className="illu-path"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeDasharray="2 7"
-              />
-              <circle cx="28" cy="70" r="6" className="illu-dot" />
-              <circle cx="62" cy="48" r="6" className="illu-dot" />
-              <circle cx="98" cy="30" r="9" className="illu-hot" />
-              <circle cx="98" cy="30" r="3.5" fill="#fff" />
-            </svg>
-            <h3>{t('demos.emptyFolderTitle')}</h3>
-            <p className="fd-muted">{t('demos.emptyFolderBody')}</p>
-            {editable && (
-              <Button variant="primary" icon={<Plus />} onClick={openNew}>
-                {t('demos.new')}
-              </Button>
-            )}
-          </div>
-        ) : visible.length === 0 ? (
-          <p className="fd-muted">{t('demos.noMatch')}</p>
-        ) : view === 'list' ? (
-          <div className="fd-card demo-table-wrap">
-            <table className="demo-table">
-              <caption className="sr-only">{t('demos.listCaption')}</caption>
-              <thead>
-                <tr>
-                  <th scope="col">{t('demos.colName')}</th>
-                  <th scope="col">{t('demos.colStatus')}</th>
-                  <th scope="col">{t('demos.colFolder')}</th>
-                  <th scope="col" className="r">
-                    {t('demos.colViews')}
-                  </th>
-                  <th scope="col" className="r">
-                    {t('demos.colCompletion')}
-                  </th>
-                  <th scope="col">{t('demos.colUpdated')}</th>
-                  <th scope="col">
-                    <span className="sr-only">{t('demos.colActions')}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {visible.map((d) => {
-                  const s = stats[d.id];
-                  const rate = s ? Math.round(completionRate(s.visitors, s.completions) * 100) : 0;
-                  return (
-                    <tr key={d.id}>
-                      <td>
-                        <span className="dt-name">
-                          <span className="dt-thumb" aria-hidden="true">
-                            {covers[d.id] ? <img src={covers[d.id]} alt="" loading="lazy" /> : null}
+        <section aria-labelledby="demos-list-title" className="demos-section">
+          <h2 id="demos-list-title" className="demos-list-title">
+            {t('demos.allDemos')}
+          </h2>
+          {/* L40 : Statut, Dossier, Étiquettes et Réinitialiser à gauche ; tri et affichage à droite */}
+          <ListToolbar
+            className="list-toolbar--cq"
+            activeCount={
+              (status !== 'all' ? 1 : 0) +
+              (scope !== 'all' && !wide ? 1 : 0) +
+              (author !== 'all' ? 1 : 0) +
+              (tagFilter.length ? 1 : 0)
+            }
+            onReset={() => {
+              setStatus('all');
+              if (!wide) setFolder('all');
+              setAuthor('all');
+              setTagFilter([]);
+            }}
+            status={t('demos.resultCount', { count: visible.length })}
+            lead={
+              <>
+                {wide && colHidden && (
+                  <button type="button" className="fd-btn fd-filter" onClick={() => hideCol(false)}>
+                    <Folder aria-hidden="true" />
+                    {t('folders.title')}
+                  </button>
+                )}
+                <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
+                  {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
+                    <button key={k} type="button" aria-pressed={status === k} onClick={() => setStatus(k)}>
+                      {t(`demos.filter_${k}`)} · {counts[k]}
+                    </button>
+                  ))}
+                </div>
+              </>
+            }
+            filters={
+              <>
+                {!wide && (
+                  <FilterMenu
+                    icon={<Folder />}
+                    label={t('demos.folderLabel')}
+                    value={
+                      folder === 'all'
+                        ? t('toolbar.all')
+                        : folder === 'none'
+                          ? t('demos.noFolder')
+                          : (folders.find((f) => f.id === folder)?.name ?? t('toolbar.all'))
+                    }
+                    active={folder !== 'all'}
+                    items={[
+                      {
+                        label: `${t('demos.allFolders')} · ${inFolder('all')}`,
+                        icon: scope === 'all' ? <Check /> : <Layers />,
+                        onSelect: () => setFolder('all'),
+                      },
+                      {
+                        label: `${t('folders.mine')} · ${inFolder('mine')}`,
+                        icon: scope === 'mine' ? <Check /> : <User />,
+                        onSelect: () => setFolder('mine'),
+                      },
+                      {
+                        label: `${t('demos.noFolder')} · ${inFolder('none')}`,
+                        icon: folder === 'none' ? <Check /> : <FolderOpen />,
+                        onSelect: () => setFolder('none'),
+                      },
+                      ...(folders.length ? (['separator'] as const) : []),
+                      ...folders.map((f) => ({
+                        label: `${f.name} · ${inFolder(f.id)}`,
+                        icon: folder === f.id ? <Check /> : <Folder />,
+                        // L27-09 : dossier restreint (cadenas, nombre de membres qui le voient)
+                        end: f.restricted ? (
+                          <span
+                            role="img"
+                            aria-label={t('folderAccess.restricted')}
+                            title={t('folderAccess.visibleBy', { count: memberCount - (hidden[f.id] ?? 0) })}
+                          >
+                            <Lock size={14} aria-hidden="true" />
                           </span>
-                          <Link to={`/demos/${d.id}/edit`}>{d.title}</Link>
+                        ) : undefined,
+                        onSelect: () => setFolder(f.id),
+                      })),
+                      'separator',
+                      {
+                        label: `${t('folders.archived')} · ${inFolder('archived')}`,
+                        icon: scope === 'archived' ? <Check /> : <Archive />,
+                        onSelect: () => setFolder('archived'),
+                      },
+                      ...(editable
+                        ? ([
+                            'separator',
+                            {
+                              label: t('demos.newFolder'),
+                              icon: <FolderPlus />,
+                              onSelect: () => {
+                                setNewFolderParent(null);
+                                setNewFolder('');
+                              },
+                            },
+                            ...(current && folder !== 'all' && folder !== 'none'
+                              ? [
+                                  {
+                                    label: t('demos.renameFolder', {
+                                      name: folders.find((f) => f.id === folder)?.name ?? '',
+                                    }),
+                                    icon: <Pencil />,
+                                    onSelect: () => {
+                                      const f = folders.find((x) => x.id === folder);
+                                      if (f) setRenaming({ id: f.id, name: f.name });
+                                    },
+                                  },
+                                  ...(can('workspace.settings')
+                                    ? [
+                                        {
+                                          label: t('folderAccess.menu'),
+                                          icon: <Lock />,
+                                          onSelect: () =>
+                                            setFolderAccess(folders.find((x) => x.id === folder) ?? null),
+                                        },
+                                      ]
+                                    : []),
+                                  {
+                                    label: t('demos.deleteFolderShort'),
+                                    icon: <Trash2 />,
+                                    danger: true,
+                                    onSelect: () =>
+                                      setFolderToDelete(folders.find((x) => x.id === folder) ?? null),
+                                  },
+                                ]
+                              : []),
+                          ] as Array<MenuItem | 'separator'>)
+                        : []),
+                    ]}
+                  />
+                )}
+                <FilterMenu
+                  icon={<Users />}
+                  label={t('folders.author')}
+                  value={
+                    author === 'all'
+                      ? t('toolbar.all')
+                      : author === 'me'
+                        ? t('folders.me')
+                        : (people.find((p) => p.user_id === author)?.full_name ?? t('toolbar.all'))
+                  }
+                  active={author !== 'all'}
+                  items={[
+                    {
+                      label: t('toolbar.all'),
+                      icon: author === 'all' ? <Check /> : <span />,
+                      onSelect: () => setAuthor('all'),
+                    },
+                    {
+                      label: t('folders.me'),
+                      icon: author === 'me' ? <Check /> : <span />,
+                      onSelect: () => setAuthor('me'),
+                    },
+                    ...(people.some((p) => p.user_id !== user?.id) ? (['separator'] as const) : []),
+                    ...people
+                      .filter((p) => p.user_id !== user?.id)
+                      .map((p) => ({
+                        label: p.full_name || p.email,
+                        icon: author === p.user_id ? <Check /> : <span />,
+                        onSelect: () => setAuthor(p.user_id),
+                      })),
+                  ]}
+                />
+                <TagFilter
+                  store={tagStore}
+                  selected={tagFilter}
+                  setSelected={setTagFilter}
+                  mode={tagMode}
+                  setMode={setTagMode}
+                  onManage={editable ? () => setManagingTags(true) : undefined}
+                />
+              </>
+            }
+            end={
+              <>
+                <FilterMenu
+                  sort
+                  align="end"
+                  icon={<ArrowUpDown />}
+                  label={t('demos.sortLabel')}
+                  value={sortLabels[sort]}
+                  items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
+                    label: sortLabels[k],
+                    icon: sort === k ? <Check /> : <span />,
+                    onSelect: () => setSort(k),
+                  }))}
+                />
+                <div
+                  className="fd-segmented fd-segmented--icons"
+                  role="radiogroup"
+                  aria-label={t('demos.view')}
+                >
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={view === 'grid'}
+                    aria-label={t('demos.viewGrid')}
+                    title={t('demos.viewGrid')}
+                    onClick={() => chooseView('grid')}
+                  >
+                    <LayoutGrid aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={view === 'list'}
+                    aria-label={t('demos.viewList')}
+                    title={t('demos.viewList')}
+                    onClick={() => chooseView('list')}
+                  >
+                    <List aria-hidden="true" />
+                  </button>
+                </div>
+              </>
+            }
+          />
+
+          {demos.length === 0 ? (
+            // REV-05 : une phrase et « Nouvelle démo » ; les étapes sont dans la prise en main (L26-01)
+            <Card className="demos-empty">
+              <h2 className="card-title">{t('demos.emptyTitle')}</h2>
+              <p className="fd-muted">{editable ? t('demos.emptyBody') : t('demos.emptyBodyViewer')}</p>
+              {editable && (
+                <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                  {t('demos.new')}
+                </Button>
+              )}
+            </Card>
+          ) : visible.length === 0 && inView.length === 0 && folder !== 'all' ? (
+            // DSH-09 : dossier vide (carte de la maquette)
+            <div className="fd-card empty-folder">
+              <svg className="illu" viewBox="0 0 140 100" aria-hidden="true">
+                <rect x="10" y="14" width="120" height="76" rx="10" className="illu-bg" />
+                <path
+                  d="M28 70c14 0 18-22 34-22s20-18 36-18"
+                  fill="none"
+                  className="illu-path"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeDasharray="2 7"
+                />
+                <circle cx="28" cy="70" r="6" className="illu-dot" />
+                <circle cx="62" cy="48" r="6" className="illu-dot" />
+                <circle cx="98" cy="30" r="9" className="illu-hot" />
+                <circle cx="98" cy="30" r="3.5" fill="#fff" />
+              </svg>
+              <h3>{t('demos.emptyFolderTitle')}</h3>
+              <p className="fd-muted">{t('demos.emptyFolderBody')}</p>
+              {editable && (
+                <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                  {t('demos.new')}
+                </Button>
+              )}
+            </div>
+          ) : visible.length === 0 ? (
+            <p className="fd-muted">{t('demos.noMatch')}</p>
+          ) : view === 'list' ? (
+            <div className="fd-card demo-table-wrap">
+              <table className="demo-table">
+                <caption className="sr-only">{t('demos.listCaption')}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{t('demos.colName')}</th>
+                    <th scope="col">{t('demos.colStatus')}</th>
+                    <th scope="col">{t('demos.colFolder')}</th>
+                    <th scope="col" className="r">
+                      {t('demos.colViews')}
+                    </th>
+                    <th scope="col" className="r">
+                      {t('demos.colCompletion')}
+                    </th>
+                    <th scope="col">{t('demos.colUpdated')}</th>
+                    <th scope="col">
+                      <span className="sr-only">{t('demos.colActions')}</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visible.map((d) => {
+                    const s = stats[d.id];
+                    const rate = s ? Math.round(completionRate(s.visitors, s.completions) * 100) : 0;
+                    return (
+                      <tr key={d.id} {...demoDrag(d)}>
+                        <td>
+                          <span className="dt-name">
+                            <span className="dt-thumb" aria-hidden="true">
+                              {covers[d.id] ? <img src={covers[d.id]} alt="" loading="lazy" /> : null}
+                            </span>
+                            <Link to={`/demos/${d.id}/edit`}>{d.title}</Link>
+                          </span>
+                          {tagStore.tagsOf(d.id).length > 0 && (
+                            <span className="tg-row tg-row--list" aria-label={t('tags.title')}>
+                              {tagStore.tagsOf(d.id).map((x) => (
+                                <TagChip key={x.id} tag={x} />
+                              ))}
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          <span className={`fd-badge status-${statusOf(d)}`}>
+                            {t(`status.${statusOf(d)}`)}
+                          </span>
+                          {lockedIds.has(d.id) && (
+                            <span className="fd-badge fd-badge--warning" title={t('rules.accessToFixHelp')}>
+                              {t('rules.accessToFix')}
+                            </span>
+                          )}
+                        </td>
+                        <td className="fd-muted">{folders.find((f) => f.id === d.folder_id)?.name ?? '—'}</td>
+                        <td className="r num">{formatNumber(s?.views ?? 0)}</td>
+                        <td className="r">
+                          <span className="dt-rate">
+                            <span className="dt-bar" aria-hidden="true">
+                              <span style={{ width: `${rate}%` }} />
+                            </span>
+                            <span className="num">{rate} %</span>
+                          </span>
+                        </td>
+                        <td className="fd-muted">
+                          <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
+                            {formatRelativeShort(d.updated_at)}
+                          </time>
+                        </td>
+                        <td className="r">
+                          <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <ul className="demo-grid">
+              {visible.map((d) => {
+                const s = stats[d.id];
+                return (
+                  <li
+                    key={d.id}
+                    {...demoDrag(d)}
+                    className="fd-card demo-card"
+                    onKeyDown={(e) => {
+                      // DSH-05 : ⌘D / Ctrl+D duplique la démo dont la carte a le focus
+                      if (editable && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
+                        e.preventDefault();
+                        duplicate(d);
+                      }
+                    }}
+                  >
+                    <div className={`demo-cover${covers[d.id] ? ' fd-player-scope' : ''}`} aria-hidden="true">
+                      {covers[d.id] ? (
+                        <img src={covers[d.id]} alt="" loading="lazy" />
+                      ) : (
+                        <span className="demo-cover-empty">
+                          <span className="fake fd-player-scope" />
+                          <span className="dot" style={dotPosition(d.id)} />
                         </span>
-                        {tagStore.tagsOf(d.id).length > 0 && (
-                          <span className="tg-row tg-row--list" aria-label={t('tags.title')}>
-                            {tagStore.tagsOf(d.id).map((x) => (
-                              <TagChip key={x.id} tag={x} />
-                            ))}
-                          </span>
-                        )}
-                      </td>
-                      <td>
+                      )}
+                    </div>
+                    <div className="demo-body">
+                      <div className="demo-head">
+                        <h3>
+                          {/* Lien étendu : toute la carte est cliquable */}
+                          <Link className="demo-link" to={`/demos/${d.id}/edit`}>
+                            {d.title}
+                          </Link>
+                        </h3>
+                        <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
+                      </div>
+                      <div className="demo-meta">
                         <span className={`fd-badge status-${statusOf(d)}`}>{t(`status.${statusOf(d)}`)}</span>
                         {lockedIds.has(d.id) && (
                           <span className="fd-badge fd-badge--warning" title={t('rules.accessToFixHelp')}>
                             {t('rules.accessToFix')}
                           </span>
                         )}
-                      </td>
-                      <td className="fd-muted">{folders.find((f) => f.id === d.folder_id)?.name ?? '—'}</td>
-                      <td className="r num">{formatNumber(s?.views ?? 0)}</td>
-                      <td className="r">
-                        <span className="dt-rate">
-                          <span className="dt-bar" aria-hidden="true">
-                            <span style={{ width: `${rate}%` }} />
-                          </span>
-                          <span className="num">{rate} %</span>
+                        <span>
+                          {d.status === 'published' ? (
+                            <>
+                              {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })} ·{' '}
+                              {t('demos.leads', { count: s?.leads ?? 0, n: formatNumber(s?.leads ?? 0) })}{' '}
+                              ·{' '}
+                            </>
+                          ) : (
+                            <>{t('demos.steps', { count: stepCounts[d.id] ?? 0 })} · </>
+                          )}
+                          <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
+                            {formatRelativeShort(d.updated_at)}
+                          </time>
                         </span>
-                      </td>
-                      <td className="fd-muted">
-                        <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
-                          {formatRelativeShort(d.updated_at)}
-                        </time>
-                      </td>
-                      <td className="r">
-                        <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <ul className="demo-grid">
-            {visible.map((d) => {
-              const s = stats[d.id];
-              return (
-                <li
-                  key={d.id}
-                  className="fd-card demo-card"
-                  onKeyDown={(e) => {
-                    // DSH-05 : ⌘D / Ctrl+D duplique la démo dont la carte a le focus
-                    if (editable && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
-                      e.preventDefault();
-                      duplicate(d);
-                    }
-                  }}
-                >
-                  <div className={`demo-cover${covers[d.id] ? ' fd-player-scope' : ''}`} aria-hidden="true">
-                    {covers[d.id] ? (
-                      <img src={covers[d.id]} alt="" loading="lazy" />
-                    ) : (
-                      <span className="demo-cover-empty">
-                        <span className="fake fd-player-scope" />
-                        <span className="dot" style={dotPosition(d.id)} />
-                      </span>
-                    )}
-                  </div>
-                  <div className="demo-body">
-                    <div className="demo-head">
-                      <h3>
-                        {/* Lien étendu : toute la carte est cliquable */}
-                        <Link className="demo-link" to={`/demos/${d.id}/edit`}>
-                          {d.title}
-                        </Link>
-                      </h3>
-                      <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
-                    </div>
-                    <div className="demo-meta">
-                      <span className={`fd-badge status-${statusOf(d)}`}>{t(`status.${statusOf(d)}`)}</span>
-                      {lockedIds.has(d.id) && (
-                        <span className="fd-badge fd-badge--warning" title={t('rules.accessToFixHelp')}>
-                          {t('rules.accessToFix')}
-                        </span>
-                      )}
-                      <span>
-                        {d.status === 'published' ? (
-                          <>
-                            {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })} ·{' '}
-                            {t('demos.leads', { count: s?.leads ?? 0, n: formatNumber(s?.leads ?? 0) })}{' '}
-                            ·{' '}
-                          </>
-                        ) : (
-                          <>{t('demos.steps', { count: stepCounts[d.id] ?? 0 })} · </>
-                        )}
-                        <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
-                          {formatRelativeShort(d.updated_at)}
-                        </time>
-                      </span>
-                    </div>
-                    {tagStore.tagsOf(d.id).length > 0 && (
-                      <div className="tg-row" aria-label={t('tags.title')}>
-                        {tagStore.tagsOf(d.id).map((x) => (
-                          <TagChip key={x.id} tag={x} />
-                        ))}
                       </div>
-                    )}
-                  </div>
+                      {tagStore.tagsOf(d.id).length > 0 && (
+                        <div className="tg-row" aria-label={t('tags.title')}>
+                          {tagStore.tagsOf(d.id).map((x) => (
+                            <TagChip key={x.id} tag={x} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+              {editable && (
+                <li className="demo-new">
+                  <button type="button" className="demo-new__btn" onClick={openNew}>
+                    <span className="fd-btn fd-btn--round" aria-hidden="true">
+                      <Plus />
+                    </span>
+                    <strong>{t('demos.new')}</strong>
+                    <span className="fd-muted">{t('demos.newHint')}</span>
+                  </button>
                 </li>
-              );
-            })}
-            {editable && (
-              <li className="demo-new">
-                <button type="button" className="demo-new__btn" onClick={openNew}>
-                  <span className="fd-btn fd-btn--round" aria-hidden="true">
-                    <Plus />
-                  </span>
-                  <strong>{t('demos.new')}</strong>
-                  <span className="fd-muted">{t('demos.newHint')}</span>
-                </button>
-              </li>
-            )}
-          </ul>
-        )}
-      </section>
+              )}
+            </ul>
+          )}
+        </section>
 
-      {tagging && <TagsDialog demo={tagging} store={tagStore} onClose={() => setTagging(null)} />}
-      {managingTags && <ManageTagsDialog store={tagStore} onClose={() => setManagingTags(false)} />}
-      <Suspense fallback={null}>
-        {/* L30-05 : démo générée depuis un plan texte (langue de l'interface) */}
-        {generating && (
-          <GenerateDialog
-            ws={ws.id}
-            userId={user!.id}
-            folderId={generating.folder}
-            lang={i18n.language.startsWith('en') ? 'en' : 'fr'}
-            onClose={() => setGenerating(null)}
-          />
-        )}
-        {newMounted && (
-          <NewDemoDialog
-            open={newOpen}
-            folders={folders}
-            defaultFolder={folder !== 'all' && folder !== 'none' ? folder : null}
-            onClose={() => setNewOpen(false)}
-            onEmpty={async (f) => {
-              setNewOpen(false);
-              await createDemo(f);
-            }}
-            onImport={async (files, f) => {
-              const id = await run(async () =>
-                createDemoFromImages({
-                  workspaceId: ws.id,
-                  userId: user!.id,
-                  folderId: f,
-                  title: t('demos.untitled'),
-                  files,
-                }),
-              );
-              if (!id) return;
-              setNewOpen(false);
-              toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
-              // L38-8 : l'éditeur s'ouvre en mode guidé (outil Hotspot et aide)
-              navigate(`/demos/${id}/edit?guide=1`);
-            }}
-            ws={ws.id}
-            onGenerate={(f) => {
-              setNewOpen(false);
-              setGenerating({ folder: f });
-            }}
-            onTemplate={(f) => {
-              setNewOpen(false);
-              setTplFolder(f);
-            }}
-          />
-        )}
-        {tplMounted && (
-          <TemplatesDialog
-            open={tplFolder !== undefined}
-            workspaceId={ws.id}
-            folderId={tplFolder ?? null}
-            canManage={can('demo.edit')}
-            onClose={() => setTplFolder(undefined)}
-            onCreated={(id) => {
-              setTplFolder(undefined);
-              toast(t('templates.created'));
-              navigate(`/demos/${id}/edit`);
-            }}
-          />
-        )}
-      </Suspense>
-      <ConfirmDialog
-        open={newFolder !== null || renaming !== null}
-        title={renaming ? t('demos.renameFolder', { name: '' }).trim() : t('demos.newFolder')}
-        body={
-          // REV-11 : pas de formulaire imbriqué : Entrée soumet le formulaire de la modale (onConfirm)
-          <label className="fd-field">
-            <span className="sr-only">{t('demos.folderName')}</span>
-            <input
-              className="fd-input"
-              autoFocus
-              maxLength={80}
-              placeholder={t('demos.folderName')}
-              value={renaming ? renaming.name : (newFolder ?? '')}
-              onChange={(e) =>
-                renaming ? setRenaming({ ...renaming, name: e.target.value }) : setNewFolder(e.target.value)
-              }
-            />
-          </label>
-        }
-        confirmLabel={t('common.save')}
-        onClose={() => {
-          setNewFolder(null);
-          setRenaming(null);
-        }}
-        onConfirm={() => saveFolder()}
-      />
-      <ConfirmDialog
-        open={!!toDelete}
-        title={t('demos.deleteTitle', { title: toDelete?.title ?? '' })}
-        body={t('demos.confirmDelete', { title: toDelete?.title ?? '' })}
-        confirmLabel={t('demos.deleteDemo')}
-        danger
-        onClose={() => setToDelete(null)}
-        onConfirm={() =>
-          run(async () => {
-            const d = toDelete!;
-            if (d.status === 'published') check(await supabase.rpc('unpublish_demo', { p_demo: d.id }));
-            check(
-              await supabase.from('demos').update({ deleted_at: new Date().toISOString() }).eq('id', d.id),
-            );
-            await supabase.storage.from('published').remove([`${d.id}/latest.json`]);
-            await load();
-            toast(t('toast.demoDeleted'));
-          }).then(() => undefined)
-        }
-      />
-      <ConfirmDialog
-        open={!!folderToDelete}
-        title={t('demos.deleteFolder', { name: folderToDelete?.name ?? '' })}
-        body={t('demos.confirmDeleteFolder', { name: folderToDelete?.name ?? '' })}
-        confirmLabel={t('common.delete')}
-        danger
-        onClose={() => setFolderToDelete(null)}
-        onConfirm={() =>
-          run(async () => {
-            check(await supabase.from('folders').delete().eq('id', folderToDelete!.id));
-            if (folder === folderToDelete!.id) setFolder('all');
-            await load();
-            toast(t('toast.folderDeleted'));
-          }).then(() => undefined)
-        }
-      />
-      {folderAccess && (
+        {tagging && <TagsDialog demo={tagging} store={tagStore} onClose={() => setTagging(null)} />}
+        {managingTags && <ManageTagsDialog store={tagStore} onClose={() => setManagingTags(false)} />}
         <Suspense fallback={null}>
-          <FolderAccessDialog
-            folder={folderAccess}
-            onClose={() => setFolderAccess(null)}
-            onSaved={() => {
-              toast(t('folderAccess.saved'));
-              void load();
-            }}
-          />
-        </Suspense>
-      )}
-      <ConfirmDialog
-        open={!!pendingMove}
-        title={t('demos.moveTo')}
-        body={pendingMove ? t('folderAccess.moveWarn', { count: pendingMove.n }) : ''}
-        confirmLabel={t('folderAccess.moveConfirm')}
-        onClose={() => setPendingMove(null)}
-        onConfirm={async () => {
-          const m = pendingMove!;
-          setPendingMove(null);
-          await moveDemo(m.demoId, m.folderId);
-        }}
-      />
-      <ConfirmDialog
-        open={!!moving}
-        title={t('demos.moveTo')}
-        body={
-          moving && (
-            <Select
-              aria-label={t('demos.moveTo')}
-              defaultValue={moving.folder_id ?? ''}
-              onChange={(e) => {
-                const target = e.target.value;
-                // L27-09 : confirmation avant de déplacer une démo vers un dossier restreint
-                if (target && (hidden[target] ?? 0) > 0) {
-                  setPendingMove({ demoId: moving.id, folderId: target, n: hidden[target]! });
-                  setMoving(null);
-                  return;
-                }
-                void moveDemo(moving.id, target);
+          {/* L30-05 : démo générée depuis un plan texte (langue de l'interface) */}
+          {generating && (
+            <GenerateDialog
+              ws={ws.id}
+              userId={user!.id}
+              folderId={generating.folder}
+              lang={i18n.language.startsWith('en') ? 'en' : 'fr'}
+              onClose={() => setGenerating(null)}
+            />
+          )}
+          {newMounted && (
+            <NewDemoDialog
+              open={newOpen}
+              folders={folders}
+              defaultFolder={folder !== 'all' && folder !== 'none' ? folder : null}
+              onClose={() => setNewOpen(false)}
+              onEmpty={async (f) => {
+                setNewOpen(false);
+                await createDemo(f);
               }}
-            >
-              <option value="">{t('demos.noFolder')}</option>
-              {folders.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                </option>
-              ))}
-            </Select>
-          )
-        }
-        confirmLabel={t('common.close')}
-        onClose={() => setMoving(null)}
-        onConfirm={() => undefined}
-      />
+              onImport={async (files, f) => {
+                const id = await run(async () =>
+                  createDemoFromImages({
+                    workspaceId: ws.id,
+                    userId: user!.id,
+                    folderId: f,
+                    title: t('demos.untitled'),
+                    files,
+                  }),
+                );
+                if (!id) return;
+                setNewOpen(false);
+                toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
+                // L38-8 : l'éditeur s'ouvre en mode guidé (outil Hotspot et aide)
+                navigate(`/demos/${id}/edit?guide=1`);
+              }}
+              ws={ws.id}
+              onGenerate={(f) => {
+                setNewOpen(false);
+                setGenerating({ folder: f });
+              }}
+              onTemplate={(f) => {
+                setNewOpen(false);
+                setTplFolder(f);
+              }}
+            />
+          )}
+          {tplMounted && (
+            <TemplatesDialog
+              open={tplFolder !== undefined}
+              workspaceId={ws.id}
+              folderId={tplFolder ?? null}
+              canManage={can('demo.edit')}
+              onClose={() => setTplFolder(undefined)}
+              onCreated={(id) => {
+                setTplFolder(undefined);
+                toast(t('templates.created'));
+                navigate(`/demos/${id}/edit`);
+              }}
+            />
+          )}
+        </Suspense>
+        <ConfirmDialog
+          open={newFolder !== null || renaming !== null}
+          title={renaming ? t('demos.renameFolder', { name: '' }).trim() : t('demos.newFolder')}
+          body={
+            // REV-11 : pas de formulaire imbriqué : Entrée soumet le formulaire de la modale (onConfirm)
+            <label className="fd-field">
+              <span className="sr-only">{t('demos.folderName')}</span>
+              <input
+                className="fd-input"
+                autoFocus
+                maxLength={80}
+                placeholder={t('demos.folderName')}
+                value={renaming ? renaming.name : (newFolder ?? '')}
+                onChange={(e) =>
+                  renaming ? setRenaming({ ...renaming, name: e.target.value }) : setNewFolder(e.target.value)
+                }
+              />
+            </label>
+          }
+          confirmLabel={t('common.save')}
+          onClose={() => {
+            setNewFolder(null);
+            setRenaming(null);
+          }}
+          onConfirm={() => saveFolder()}
+        />
+        <ConfirmDialog
+          open={!!toDelete}
+          title={t('demos.deleteTitle', { title: toDelete?.title ?? '' })}
+          body={t('demos.confirmDelete', { title: toDelete?.title ?? '' })}
+          confirmLabel={t('demos.deleteDemo')}
+          danger
+          onClose={() => setToDelete(null)}
+          onConfirm={() =>
+            run(async () => {
+              const d = toDelete!;
+              if (d.status === 'published') check(await supabase.rpc('unpublish_demo', { p_demo: d.id }));
+              check(
+                await supabase.from('demos').update({ deleted_at: new Date().toISOString() }).eq('id', d.id),
+              );
+              await supabase.storage.from('published').remove([`${d.id}/latest.json`]);
+              await load();
+              toast(t('toast.demoDeleted'));
+            }).then(() => undefined)
+          }
+        />
+        <ConfirmDialog
+          open={!!folderToDelete}
+          title={t('demos.deleteFolder', { name: folderToDelete?.name ?? '' })}
+          body={t('demos.confirmDeleteFolder', { name: folderToDelete?.name ?? '' })}
+          confirmLabel={t('common.delete')}
+          danger
+          onClose={() => setFolderToDelete(null)}
+          onConfirm={() =>
+            run(async () => {
+              check(await supabase.from('folders').delete().eq('id', folderToDelete!.id));
+              if (folder === folderToDelete!.id) setFolder('all');
+              await load();
+              toast(t('toast.folderDeleted'));
+            }).then(() => undefined)
+          }
+        />
+        {folderAccess && (
+          <Suspense fallback={null}>
+            <FolderAccessDialog
+              folder={folderAccess}
+              onClose={() => setFolderAccess(null)}
+              onSaved={() => {
+                toast(t('folderAccess.saved'));
+                void load();
+              }}
+            />
+          </Suspense>
+        )}
+        <ConfirmDialog
+          open={!!pendingMove}
+          title={t('demos.moveTo')}
+          body={pendingMove ? t('folderAccess.moveWarn', { count: pendingMove.n }) : ''}
+          confirmLabel={t('folderAccess.moveConfirm')}
+          onClose={() => setPendingMove(null)}
+          onConfirm={async () => {
+            const m = pendingMove!;
+            setPendingMove(null);
+            await moveDemo(m.demoId, m.folderId);
+          }}
+        />
+        <ConfirmDialog
+          open={!!moving}
+          title={t('demos.moveTo')}
+          body={
+            moving && (
+              <Select
+                aria-label={t('demos.moveTo')}
+                defaultValue={moving.folder_id ?? ''}
+                onChange={(e) => {
+                  const target = e.target.value;
+                  // L27-09 : confirmation avant de déplacer une démo vers un dossier restreint
+                  if (target && (hidden[target] ?? 0) > 0) {
+                    setPendingMove({ demoId: moving.id, folderId: target, n: hidden[target]! });
+                    setMoving(null);
+                    return;
+                  }
+                  void moveDemo(moving.id, target);
+                }}
+              >
+                <option value="">{t('demos.noFolder')}</option>
+                {folders.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </Select>
+            )
+          }
+          confirmLabel={t('common.close')}
+          onClose={() => setMoving(null)}
+          onConfirm={() => undefined}
+        />
+      </div>
     </div>
   );
 }

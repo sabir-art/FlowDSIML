@@ -127,3 +127,27 @@
     border-radius: var(--fd-radius-lg) var(--fd-radius-lg) 0 0;
   }
 }
+
+/* L48-A §3 : barre étroite (moins de 1 100 px, colonne Dossiers ouverte) : tri en icône de 40 px */
+.list-toolbar--cq {
+  container-type: inline-size;
+}
+@container (max-width: 1099px) {
+  .list-toolbar .fd-filter--sort {
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .list-toolbar .fd-filter--sort .fd-filter__label,
+  .list-toolbar .fd-filter--sort .fd-filter__value {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .list-toolbar .fd-filter--sort .fd-filter__chev {
+    display: none;
+  }
+}

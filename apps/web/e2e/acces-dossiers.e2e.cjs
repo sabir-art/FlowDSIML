@@ -16,7 +16,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
 (async () => {
   const b = await chromium.launch();
-  const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 }, locale: 'fr-FR' });
+  // L48-A : sous 1 024 px, le filtre « Dossier » reste dans la barre (la colonne est testée par l48a-dossiers)
+  const ctx = await themedContext(b, { viewport: { width: 1000, height: 900 }, locale: 'fr-FR' });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -58,22 +59,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       .click();
   };
 
-  // ===== Plan inférieur à Enterprise : « Accès » désactivé avec le badge =====
+  // ===== Administrateur (fonction ouverte à toutes les offres depuis L48-A) =====
   await page.goto(`${APP}/#/`);
-  await openFolderMenu();
-  await page.getByRole('menuitem', { name: /^RH/ }).click();
-  await openFolderMenu();
-  const accessOff = page.getByRole('menuitem', { name: /Accès/ });
-  ok(
-    (await accessOff.getAttribute('aria-disabled')) === 'true' &&
-      /Enterprise/.test(await accessOff.innerText()),
-    'sous Enterprise : « Accès » désactivé, badge « Enterprise »',
-  );
-  await page.keyboard.press('Escape');
-
-  // ===== Enterprise, administrateur =====
-  t.workspaces[0].plan_code = 'enterprise';
-  await page.reload();
   await openFolderMenu();
   await page.getByRole('menuitem', { name: /^RH/ }).click();
   await openFolderMenu();

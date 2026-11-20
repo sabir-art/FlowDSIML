@@ -62,10 +62,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: /^Toutes · 2/ }).click();
   ok((await page.locator('.demo-new__btn').count()) === 1, 'carte « Nouvelle démo » en fin de grille');
 
-  // Dossiers : menu « Dossiers ▾ » (pas de rangée de pilules)
+  // L48-A : colonne Dossiers (au-dessus de 1 024 px)
   ok((await page.locator('.folder-pills').count()) === 0, 'pas de rangée de dossiers');
-  await page.getByRole('button', { name: /^Dossier/ }).click();
-  await page.getByRole('menuitem', { name: 'Nouveau dossier' }).click();
+  const col = page.getByRole('navigation', { name: 'Dossiers' });
+  await col.getByRole('button', { name: 'Nouveau dossier' }).first().click();
   ok((await page.locator('dialog[open] form form').count()) === 0, 'REV-11 : pas de formulaire imbriqué');
   ok(
     (await page.locator('dialog[open]').getByRole('textbox', { name: 'Nom du dossier' }).count()) === 1,
@@ -84,11 +84,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.locator('dialog[open] select').selectOption({ label: 'Ventes' });
   await page.waitForTimeout(300);
   await page.locator('dialog[open]').getByRole('button', { name: 'Fermer' }).click();
-  await page.getByRole('button', { name: /^Dossier/ }).click();
-  await page.getByRole('menuitem', { name: /^Ventes/ }).click();
+  await col.getByRole('link', { name: /^Ventes/ }).click();
+  await page.waitForTimeout(300);
   ok((await page.locator('.demo-card').count()) === 1, 'démo rangée dans le dossier');
-  await page.getByRole('button', { name: /^Dossier\s*: Ventes/ }).click();
-  await page.getByRole('menuitem', { name: /^Tous les dossiers/ }).click();
+  await col.getByRole('link', { name: /^Toutes les démos/ }).click();
 
   await page.getByRole('button', { name: 'Actions pour Onboarding' }).click();
   await page.getByRole('menuitem', { name: 'Dupliquer' }).click();
@@ -137,8 +136,8 @@ const SHOTS = process.env.SHOTS_DIR;
   await d2.getByRole('radio', { name: 'Grille' }).click();
   await d2.getByRole('button', { name: /^Tri\s*: Modifiées récemment/ }).click();
   ok(
-    (await d2.getByRole('menuitem', { name: 'Créées récemment' }).count()) === 1,
-    'DSH-04 : tri « Créées récemment »',
+    (await d2.getByRole('menuitem', { name: 'Date de création' }).count()) === 1,
+    'DSH-04 : tri « Date de création »',
   );
   await d2.keyboard.press('Escape');
   await d2.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();

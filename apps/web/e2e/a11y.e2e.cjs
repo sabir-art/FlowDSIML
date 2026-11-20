@@ -693,7 +693,6 @@ const APP_PAGES = [
     name: 'Démos · accès au dossier',
     route: '/#/',
     seed: (d) => {
-      d.tables.workspaces[0].plan_code = 'enterprise';
       d.tables.folders.push({
         id: 'f-rh',
         workspace_id: d.tables.workspaces[0].id,
@@ -703,12 +702,10 @@ const APP_PAGES = [
       });
     },
     open: async (p) => {
-      await p
-        .getByRole('button', { name: /^Dossier/ })
-        .first()
-        .click();
-      await p.getByRole('menuitem', { name: /^RH/ }).click();
-      await p.getByRole('button', { name: /^Dossier\s*: RH/ }).click();
+      // L48-A : menu « … » du dossier dans la colonne Dossiers
+      const row = p.locator('.fcol__row', { hasText: 'RH' });
+      await row.hover();
+      await row.getByRole('button', { name: 'Actions du dossier RH' }).click();
       await p.getByRole('menuitem', { name: /Accès/ }).click();
       await p.getByRole('radio', { name: 'Membres choisis' }).check();
       await p.waitForSelector('dialog[open] .fa-list');

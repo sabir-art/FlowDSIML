@@ -18,7 +18,8 @@
     "none": "None",
     "typeToConfirm": "Type “{{text}}” to confirm",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "undo": "Undo"
   },
   "nav": {
     "main": "Main navigation",
@@ -2498,7 +2499,7 @@
     "steps_one": "{{count}} step",
     "steps_other": "{{count}} steps",
     "deleteFolderShort": "Delete folder",
-    "sortCreated": "Recently created",
+    "sortCreated": "Date created",
     "openEditor": "Open in editor",
     "copyLink": "Copy link",
     "archive": "Archive",
@@ -5016,5 +5017,20 @@
     "install": "Install the extension",
     "seenOn": "The extension was detected on your account on {{date}}.",
     "capture": "Start a capture"
+  },
+  "folders": {
+    "title": "Folders",
+    "all": "All demos",
+    "mine": "My demos",
+    "space": "Workspace folders",
+    "archived": "Archived",
+    "hide": "Hide folders",
+    "newSub": "New subfolder",
+    "actions": "Actions for folder {{name}}",
+    "collapse": "Collapse {{name}}",
+    "expand": "Expand {{name}}",
+    "breadcrumb": "Breadcrumb",
+    "author": "Created by",
+    "me": "Me"
   }
 }

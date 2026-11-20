@@ -110,6 +110,9 @@ jobs:
       - name: Navigation L48-A (barre latérale, Extension, Paramètres groupés, Utilisation)
         if: always()
         run: cd apps/web && node e2e/l48a-navigation.e2e.cjs
+      - name: Colonne Dossiers L48-A (sélection, compteurs, sous-dossiers, glisser-déposer, repli)
+        if: always()
+        run: cd apps/web && node e2e/l48a-dossiers.e2e.cjs
       - name: Infobulles L44 (boutons à icône nommés, sans title ; clavier, Échap, bords du lecteur)
         if: always()
         run: cd apps/web && node e2e/infobulles.e2e.cjs
