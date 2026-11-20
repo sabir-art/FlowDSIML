@@ -42,7 +42,7 @@ Mises à jour le 20/11/2026 (lots L24, L34 et L35 ; détail dans `docs/tech/acce
   l'application, du lecteur et du centre de formation, en thème clair et sombre, soit 188 audits.
   Résultat : aucune violation, quel que soit son niveau de gravité. Cet audit tourne à chaque modification
   du code.
-- **Contrôles manuels automatisés** (77 vérifications) : lien d'évitement, focus visible et jamais masqué,
+- **Contrôles du clavier et du focus, automatisés** (77 vérifications) : lien d'évitement, focus visible et jamais masqué,
   focus enfermé dans les fenêtres modales puis rendu, annonces des messages et des changements d'étape,
   animations réduites, zoom à 200 % sans défilement horizontal, parcours complets au clavier de l'éditeur
   et du lecteur.
@@ -56,7 +56,7 @@ Mises à jour le 20/11/2026 (lots L24, L34 et L35 ; détail dans `docs/tech/acce
 
 ### Non conformité
 
-Aucune non-conformité connue à ce jour. Les écarts relevés lors de l'audit manuel préliminaire (titres de
+Aucune non-conformité connue à ce jour parmi les points vérifiés. Les écarts relevés lors de l'audit manuel préliminaire (titres de
 page, focus, lecteur, contrastes, hiérarchie des titres, références ARIA, PDF non balisés) ont été corrigés.
 La liste définitive sera établie par l'audit complet.
 
