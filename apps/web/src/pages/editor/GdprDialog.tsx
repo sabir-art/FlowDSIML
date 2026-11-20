@@ -1,8 +1,18 @@
-import { Database, EyeOff, ImageUp, MessageSquareLock, Shield, Sparkles, TriangleAlert } from 'lucide-react';
+import {
+  Database,
+  EyeOff,
+  ImageUp,
+  ListTodo,
+  MessageSquareLock,
+  Shield,
+  Sparkles,
+  TriangleAlert,
+} from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
 import { asBeforeAfter, type StepRow } from './types';
+import { todoLines, type TodoItem } from './publishTodo';
 
 /** Bilan RGPD d'une démo (même calcul que publish_demo côté serveur). Pur, testé. */
 export function gdprSummary(
@@ -58,6 +68,8 @@ export function GdprDialog({
   onClose,
   branchWarnings = [],
   dataset = null,
+  todo = [],
+  onQuiz,
 }: {
   open: boolean;
   steps: (Pick<StepRow, 'blurs' | 'element_meta'> &
@@ -73,6 +85,10 @@ export function GdprDialog({
   branchWarnings?: string[];
   /** L25-09 : jeu de données publié (lignes, colonnes reliées). */
   dataset?: { rows: number; columns: number } | null;
+  /** L38-5 : contenu à compléter (avertissement, la publication reste possible). */
+  todo?: TodoItem[];
+  /** Ouvre la page Quiz (ligne « quiz sans question »). */
+  onQuiz?: () => void;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
@@ -121,6 +137,43 @@ export function GdprDialog({
           }}
         >
           <div className="dialog-body stack">
+            {todo.length > 0 && (
+              <section className="publish-todo" aria-labelledby={`${id}-todo`}>
+                <h3 id={`${id}-todo`}>
+                  <ListTodo aria-hidden="true" />
+                  {t('editor.todo.title')}
+                </h3>
+                <ul>
+                  {todoLines(todo).map((line) => (
+                    <li key={line.key}>
+                      <span>
+                        {line.index === undefined
+                          ? t(`editor.todo.${line.kinds[0]}`)
+                          : t('editor.todo.step', {
+                              n: line.index + 1,
+                              issues: line.kinds.map((k) => t(`editor.todo.k.${k}`)).join(', '),
+                            })}
+                      </span>
+                      {line.index !== undefined ? (
+                        <button
+                          type="button"
+                          className="mk-link-inline"
+                          aria-label={t('editor.todo.seeStep', { n: line.index + 1 })}
+                          onClick={() => onReview(line.index!)}
+                        >
+                          {t('editor.todo.see')}
+                        </button>
+                      ) : line.kinds[0] === 'quizEmpty' && onQuiz ? (
+                        <button type="button" className="mk-link-inline" onClick={onQuiz}>
+                          {t('editor.todo.see')}
+                        </button>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+                <p className="help">{t('editor.todo.help')}</p>
+              </section>
+            )}
             <p>{t('editor.gdpr.body')}</p>
             <ul className="gdpr-summary">
               <li>

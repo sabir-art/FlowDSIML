@@ -92,7 +92,7 @@ export function Onboarding() {
     );
     if (!id) return;
     toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
-    navigate(`/demos/${id}/edit`, { replace: true });
+    navigate(`/demos/${id}/edit?guide=1`, { replace: true });
   }
 
   async function createWorkspace(wsName: string) {

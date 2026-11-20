@@ -15,6 +15,7 @@ import { publishDemo } from '../../lib/publish';
 import { errorMessage } from '../../lib/errors';
 import type { DemoEditor } from './useDemoEditor';
 import { GdprDialog, type GdprAck } from './GdprDialog';
+import { publishTodo } from './publishTodo';
 import { firstInvalid } from './quizValidation';
 import { asAnswers, asSettings } from './types';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -51,6 +52,19 @@ export function PublishButton({
       ...issues.loops.map((i) => t('editor.branch.publishLoop', { n: i + 1 })),
     ];
   }, [editor.steps, editor.hotspots, editor.chapters, t]);
+  // L38-5 : contenu à compléter, rappelé dans la modale (non bloquant)
+  const todo = useMemo(
+    () =>
+      publishTodo({
+        title: editor.demo?.title ?? '',
+        defaultTitle: t('demos.untitled'),
+        steps: editor.steps,
+        hotspots: editor.hotspots,
+        quizOpened: !!asSettings(editor.demo?.settings).quiz,
+        questions: editor.questions.length,
+      }),
+    [editor.demo?.title, editor.demo?.settings, editor.steps, editor.hotspots, editor.questions.length, t],
+  );
   const navigate = useNavigate();
   // L25-09 : le bilan RGPD compte le jeu de données publié
   const { dataset } = useDataset(editor.demo?.id);
@@ -170,6 +184,11 @@ export function PublishButton({
         open={gdprOpen}
         steps={editor.steps}
         branchWarnings={branchWarnings}
+        todo={todo}
+        onQuiz={() => {
+          setGdprOpen(false);
+          navigate(`/demos/${demo.id}/quiz`);
+        }}
         dataset={dataset ? { rows: dataset.rows.length, columns: publishedColumns(dataset).length } : null}
         publicEnabled={ws?.public_links_enabled !== false}
         onConfirm={(ack) => void doPublish(ack)}

@@ -788,7 +788,6 @@
       "forcedByDemo": "La démo est en mode Spotlight (onglet Design) : toutes les bulles s’affichent en zone.",
       "title": "Titre",
       "optional": "(facultatif)",
-      "titlePlaceholder": "Ex. : Nouveau rapport",
       "text": "Texte",
       "improveAi": "Améliorer avec l’IA",
       "corner0": "En haut à gauche",
@@ -1643,7 +1642,29 @@
       "w": "Largeur",
       "h": "Hauteur",
       "help": "En pourcentage de la capture. Vous pouvez aussi déplacer la zone sur le canevas, ou avec les flèches du clavier."
-    }
+    },
+    "todo": {
+      "title": "À compléter",
+      "help": "Vous pouvez publier quand même : ces points ne bloquent pas la publication.",
+      "see": "Voir",
+      "seeStep": "Voir l’étape {{n}}",
+      "demoTitle": "Le titre de la démo est celui par défaut : il sera le nom du module dans le centre de formation.",
+      "quizEmpty": "Le quiz est ouvert mais n’a aucune question.",
+      "step": "Étape {{n}} : {{issues}}.",
+      "k": {
+        "untitled": "sans titre",
+        "noBubble": "aucune bulle",
+        "emptyBubble": "bulle vide"
+      }
+    },
+    "guide": {
+      "place": "Cliquez sur l’écran à l’endroit où l’apprenant doit cliquer, puis écrivez la consigne.",
+      "write": "Écrivez la consigne de la bulle dans le panneau de droite.",
+      "next": "Étape suivante sans bulle",
+      "done": "Toutes les étapes ont une bulle. Relisez-les, puis publiez.",
+      "hide": "Masquer l’aide"
+    },
+    "addHotspot": "Ajouter un hotspot"
   },
   "status": {
     "draft": "Brouillon",
