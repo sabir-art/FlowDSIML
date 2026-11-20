@@ -95,12 +95,11 @@ export function DemosSkeleton({ onboardingHeight }: { onboardingHeight: number }
 }
 
 /**
- * Bande des 4 raccourcis en squelette (L47). Sert aussi de gabarit invisible pour « Les statistiques
- * apparaîtront après la première publication » : même hauteur, aucun décalage.
+ * Bande des 4 raccourcis en squelette (L47).
  */
-export function KpiSkeletonRow({ hidden = false }: { hidden?: boolean }) {
+function KpiSkeletonRow() {
   return (
-    <div className={`kpi-short${hidden ? ' kpi-short--ghost' : ''}`} aria-hidden="true">
+    <div className="kpi-short" aria-hidden="true">
       {[0, 1, 2, 3].map((i) => (
         <div key={i} className="kpi-sc">
           <span className="kpi-tab__l">

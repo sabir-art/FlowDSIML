@@ -176,6 +176,36 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
     'fichier et ligne supprimés (fonction media)',
   );
 
+  // ===== L48-B §5 : stockage presque plein, puis plein (page neuve) =====
+  const qp = await ctx.newPage();
+  qp.on('pageerror', (e) => errors.push(e.message));
+  const qs = seed();
+  qs.tables.media_files = [];
+  qs.mediaBaseUsed = 524288000 - 2000;
+  qs.mediaFiles = { 'logo-acme.png': fs.readFileSync(logo) };
+  await install(qp, qs);
+  await qp.goto(`${APP}/#/demos/${DEMO}/edit`);
+  await qp.waitForSelector('.canvas-frame img');
+  await qp.getByRole('tab', { name: 'Design' }).click();
+  await qp.getByRole('button', { name: 'Choisir dans la médiathèque' }).click();
+  const qd = qp.getByRole('dialog', { name: 'Médiathèque' });
+  await qd.locator('.md-near').waitFor();
+  ok(
+    /Bientôt atteinte/.test(await qd.locator('.md-near').innerText()),
+    'quota à 80 % : alerte « Bientôt atteinte »',
+  );
+  await qd.locator('input[type=file]').setInputFiles(logo);
+  const full = qp.getByRole('dialog', { name: /Limite atteinte/ });
+  await full.waitFor();
+  ok(
+    /Ajout de fichiers bloqué/.test(await full.innerText()) &&
+      /Stockage\s?: .* sur 500/.test(await full.innerText()) &&
+      (await full.getByRole('link', { name: 'Voir l’utilisation' }).getAttribute('href')) ===
+        '#/settings/usage',
+    'quota atteint : dialogue « Limite atteinte », chiffres, « Voir l’utilisation »',
+  );
+  ok(!/\bplan\b|offre/i.test(await full.innerText()), 'aucun badge ni nom d’offre');
+
   ok(errors.length === 0, `aucune erreur JavaScript${errors.length ? ` (${errors.join(' | ')})` : ''}`);
   await b.close();
 })().catch((e) => {

@@ -699,34 +699,6 @@
 }
 
 /* État vide illustré (A8) */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--fd-space-2);
-  padding: var(--fd-space-8) var(--fd-space-4);
-  text-align: center;
-}
-.empty-state p {
-  margin: 0;
-}
-.empty-state__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: var(--fd-space-2);
-  border-radius: 50%;
-  background: var(--fd-color-primary-soft, var(--fd-color-surface-hover));
-  color: var(--fd-color-primary);
-}
-.empty-state__title {
-  font-weight: 600;
-}
-.empty-state .fd-btn {
-  margin-top: var(--fd-space-2);
-}
 .funnel-step-num {
   font-variant-numeric: tabular-nums;
   color: var(--fd-color-text-muted);

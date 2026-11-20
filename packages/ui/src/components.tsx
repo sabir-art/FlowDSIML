@@ -132,3 +132,53 @@ export function Switch({
     </label>
   );
 }
+
+/**
+ * L48-B : état vide commun. `page` : liste ou page sans contenu (carte, pastille de 64 px) ;
+ * `compact` : widget, panneau, colonne (ligne en pointillés) ; `search` : recherche ou filtres sans
+ * résultat (pastille neutre). `live` : role=status, pour un état qui apparaît après un filtre.
+ */
+export function Empty({
+  icon,
+  title,
+  body,
+  action,
+  secondary,
+  children,
+  variant = 'page',
+  level = 2,
+  live = false,
+  className = '',
+}: {
+  icon: ReactNode;
+  title: string;
+  body?: ReactNode;
+  action?: ReactNode;
+  secondary?: ReactNode;
+  /** Contenu supplémentaire sous les actions (ex. tuiles de départ). */
+  children?: ReactNode;
+  variant?: 'page' | 'compact' | 'search';
+  level?: 2 | 3;
+  live?: boolean;
+  className?: string;
+}) {
+  const H = level === 3 ? 'h3' : 'h2';
+  return (
+    <div className={`fd-empty fd-empty--${variant} ${className}`.trim()} role={live ? 'status' : undefined}>
+      <span className="fd-empty__icon" aria-hidden="true">
+        {icon}
+      </span>
+      <div className="fd-empty__text">
+        <H className="fd-empty__title">{title}</H>
+        {body && <p className="fd-empty__body">{body}</p>}
+      </div>
+      {(action || secondary) && (
+        <div className="fd-empty__actions">
+          {action}
+          {secondary}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}

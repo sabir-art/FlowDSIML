@@ -29,7 +29,8 @@ import {
 } from 'lucide-react';
 import { toCsv } from '@flowdsiml/core';
 import type { Json } from '@flowdsiml/supabase-types';
-import { Alert, Button } from '@flowdsiml/ui';
+import { Alert, Button, Empty } from '@flowdsiml/ui';
+import { NoMatch } from '../../components/empty/NoMatch';
 import { supabase } from '../../lib/supabase';
 import { downloadText } from '../../lib/download';
 import { formatDate, formatDateTime, formatRelativeShort } from '../../lib/format';
@@ -319,20 +320,18 @@ export function LearnersPage() {
       {!data ? (
         !loadError && <p className="fd-muted">{t('common.loading')}</p>
       ) : data.paths.length === 0 ? (
-        <div className="fd-card empty-state">
-          <span className="empty-state__icon" aria-hidden="true">
-            <GraduationCap size={24} />
-          </span>
-          <p className="empty-state__title">{t('learners.empty.noPath')}</p>
-          <p className="fd-muted">{t('learners.empty.noPathHint')}</p>
-          {can('members.manage') ? (
-            <Button variant="primary" size="sm" icon={<Plus />} onClick={() => setOverlay({ kind: 'paths' })}>
-              {t('learners.paths.create')}
-            </Button>
-          ) : (
-            <p className="fd-help">{t('learners.empty.askAdmin')}</p>
-          )}
-        </div>
+        <Empty
+          icon={<GraduationCap />}
+          title={t('learners.empty.noPath')}
+          body={can('members.manage') ? t('learners.empty.noPathHint') : t('learners.empty.askAdmin')}
+          action={
+            can('members.manage') ? (
+              <Button variant="primary" icon={<Plus />} onClick={() => setOverlay({ kind: 'paths' })}>
+                {t('learners.paths.create')}
+              </Button>
+            ) : undefined
+          }
+        />
       ) : tab === 'liste' ? (
         <ListView
           data={data}
@@ -834,15 +833,29 @@ function ListView(props: {
           </div>
         )}
         {rows.length === 0 ? (
-          <div className="empty-state">
-            <span className="empty-state__icon" aria-hidden="true">
-              <Users size={24} />
-            </span>
-            <p className="empty-state__title">{t('learners.empty.none')}</p>
-            <p className="fd-muted">{t('learners.empty.noneHint')}</p>
-          </div>
+          <Empty
+            level={3}
+            icon={<Users />}
+            title={t('learners.empty.none')}
+            body={t('learners.empty.noneHint')}
+          />
         ) : filtered.length === 0 ? (
-          <p className="fd-muted">{t('learners.empty.noMatch')}</p>
+          <NoMatch
+            what="learner"
+            query={f.q}
+            filters={[f.path, f.module, f.status, f.structure, f.group, f.q].filter(Boolean).length}
+            onReset={() => {
+              setQ('');
+              setParam({
+                formation: null,
+                module: null,
+                statut: null,
+                structure: null,
+                groupe: null,
+                q: null,
+              });
+            }}
+          />
         ) : (
           <ScrollX label={t('learners.title')}>
             <table className="fd-table l13-table">

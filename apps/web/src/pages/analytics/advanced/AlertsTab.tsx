@@ -19,6 +19,7 @@ import { useToast } from '../../../components/Toast';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { Loading } from '../../../components/guards';
 import type { Segment } from './SegmentsTab';
+import { Empty } from '@flowdsiml/ui';
 
 export type Alert = Tables<'alerts'>;
 export const TRIGGERS = [
@@ -112,10 +113,12 @@ export function AlertsTab({
         )}
       </div>
       {alerts.length === 0 && (
-        <div className="empty" role="status">
-          <BellRing aria-hidden="true" />
-          <p className="muted">{t('analytics.adv.al.empty')}</p>
-        </div>
+        <Empty
+          live
+          icon={<BellRing />}
+          title={t('analytics.adv.al.emptyTitle')}
+          body={t('analytics.adv.al.empty')}
+        />
       )}
       <ul className="l19-alerts">
         {alerts.map((a) => {

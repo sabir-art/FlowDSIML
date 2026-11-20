@@ -8,7 +8,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toCsv } from '@flowdsiml/core';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { Alert, Button } from '@flowdsiml/ui';
+import { Alert, Button, Empty } from '@flowdsiml/ui';
+import { NoMatch } from '../../components/empty/NoMatch';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { downloadText } from '../../lib/download';
@@ -90,23 +91,24 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
         <span className="fd-muted">{t('leads.count', { count: leads.length })}</span>
       </div>
       {leads.length === 0 && q.trim() ? (
-        <p className="fd-muted">{t('leads.noMatch')}</p>
+        <NoMatch what="lead" query={q} filters={0} />
       ) : leads.length === 0 ? (
-        <div className="empty-state">
-          <span className="empty-state__icon" aria-hidden="true">
-            <Inbox size={24} />
-          </span>
-          <p className="empty-state__title">{t('leads.empty')}</p>
-          <p className="fd-muted">{t('leads.emptyHint')}</p>
-          {can('demo.edit') && (
-            <Link className="fd-btn fd-btn--sm" to={demoId ? `/demos/${demoId}/edit` : '/'}>
-              <span className="fd-btn__icon" aria-hidden="true">
-                <Plus />
-              </span>
-              {t('leads.addForm')}
-            </Link>
-          )}
-        </div>
+        <Empty
+          level={3}
+          icon={<Inbox />}
+          title={t('leads.empty')}
+          body={t('leads.emptyHint')}
+          action={
+            can('demo.edit') ? (
+              <Link className="fd-btn fd-btn--primary" to={demoId ? `/demos/${demoId}/edit` : '/'}>
+                <span className="fd-btn__icon" aria-hidden="true">
+                  <Plus />
+                </span>
+                {t('leads.addForm')}
+              </Link>
+            ) : undefined
+          }
+        />
       ) : (
         <ScrollX label={t('leads.title')}>
           <table className="fd-table">

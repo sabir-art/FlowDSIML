@@ -48,6 +48,7 @@ import {
   type Webhook,
 } from './webhooks';
 import './integrations.css';
+import { Empty } from '@flowdsiml/ui';
 
 export function IntegrationsPage() {
   const { t } = useTranslation();
@@ -134,17 +135,18 @@ export function IntegrationsPage() {
             )}
           </div>
           {hooks === null ? null : hooks.length === 0 ? (
-            <div className="empty" role="status">
-              <span className="int-lg int-lg--big" aria-hidden="true">
-                <WebhookIcon />
-              </span>
-              <h3 className="t-h3">{t('integrations.emptyTitle')}</h3>
-              <p className="muted">{t('integrations.emptyBody')}</p>
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => setEditing('new')}>
-                <Plus aria-hidden="true" />
-                {t('integrations.add')}
-              </button>
-            </div>
+            <Empty
+              level={3}
+              icon={<WebhookIcon />}
+              title={t('integrations.emptyTitle')}
+              body={t('integrations.emptyBody')}
+              action={
+                <button type="button" className="fd-btn fd-btn--primary" onClick={() => setEditing('new')}>
+                  <Plus aria-hidden="true" />
+                  {t('integrations.add')}
+                </button>
+              }
+            />
           ) : (
             <div className="table-wrap">
               <table className="table">

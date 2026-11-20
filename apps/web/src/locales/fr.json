@@ -2226,7 +2226,8 @@
         "choiceTitle": "Menu de choix · étape {{n}} « {{title}} »",
         "visitors_one": "{{count}} visiteur",
         "visitors_other": "{{count}} visiteurs",
-        "after": "Complétion après le choix : {{values}}."
+        "after": "Complétion après le choix : {{values}}.",
+        "emptyTitle": "Aucun sondage ni test pour l’instant"
       },
       "seg": {
         "filters": "Filtres",
@@ -2381,7 +2382,8 @@
         "create": "Créer l’alerte",
         "deleteTitle": "Supprimer l’alerte ?",
         "deleteBody": "Vous ne serez plus prévenu pour ce déclencheur.",
-        "chWebhookLabel": "Webhook"
+        "chWebhookLabel": "Webhook",
+        "emptyTitle": "Créez votre première alerte"
       },
       "filtersNotApplied": "Les filtres ne s’appliquent pas encore à cet onglet."
     },
@@ -2434,7 +2436,6 @@
     "emptyHint": "Ajoutez un formulaire à une démo pour collecter des leads.",
     "addForm": "Ajouter un formulaire",
     "noExport": "Aucun lead à exporter",
-    "noMatch": "Aucun lead ne correspond à cette recherche.",
     "email": "Email",
     "company": "Entreprise",
     "collected": "Collecté",
@@ -2465,11 +2466,6 @@
     "search": "Rechercher une démo",
     "status": "Statut",
     "allStatuses": "Tous les statuts",
-    "emptyTitle": "Aucune démo pour l’instant",
-    "emptyBody": "Ouvrez votre logiciel et cliquez sur « Démarrer la capture » dans l’extension, ou créez une démo ici.",
-    "emptyBodyViewer": "Les démos de l’espace apparaîtront ici.",
-    "statsLater": "Les statistiques apparaîtront après la première publication.",
-    "noMatch": "Aucune démo ne correspond.",
     "duplicate": "Dupliquer",
     "moveTo": "Déplacer vers…",
     "delete": "Supprimer {{title}}",
@@ -2504,8 +2500,6 @@
     "copyLink": "Copier le lien",
     "archive": "Archiver",
     "deleteDemo": "Supprimer la démo",
-    "emptyFolderTitle": "Ce dossier est vide",
-    "emptyFolderBody": "Déplacez des démos ici depuis leur menu « … », ou créez-en une nouvelle directement dans ce dossier.",
     "view": "Affichage",
     "viewGrid": "Grille",
     "viewList": "Liste",
@@ -2537,7 +2531,21 @@
     "folderLabel": "Dossier",
     "sortLabel": "Tri",
     "resultCount_one": "{{count}} démo",
-    "resultCount_other": "{{count}} démos"
+    "resultCount_other": "{{count}} démos",
+    "empty": {
+      "title": "Créez votre première démo",
+      "titleViewer": "Aucune démo pour l’instant",
+      "body": "Ouvrez votre logiciel métier et lancez une capture : chaque clic devient une étape, avec sa bulle d’explication.",
+      "bodyViewer": "Les démos de l’espace apparaîtront ici.",
+      "extension": "Capturer avec l’extension",
+      "images": "Partir d’images",
+      "template": "Partir d’un modèle",
+      "archivedTitle": "Aucune démo archivée",
+      "archivedBody": "Archivez une démo depuis son menu « … » pour la retirer des listes sans la supprimer.",
+      "folderTitle": "Rangez vos premières démos ici",
+      "folderBody": "Ce dossier est vide. Glissez une démo depuis la liste, ou créez-en une directement dans « {{folder}} ».",
+      "folderAction": "Nouvelle démo dans ce dossier"
+    }
   },
   "a11y": {
     "skip": "Aller au contenu"
@@ -2706,7 +2714,6 @@
     "demos_one": "{{n}} démo",
     "demos_other": "{{n}} démos",
     "unused": "Aucune démo",
-    "empty": "Aucune variable pour l’instant. Créez-en une pour personnaliser vos démos.",
     "create": "Créer la variable",
     "created": "Variable « {{name}} » créée",
     "intro": "Des mots que vous définissez une fois, puis insérez dans toutes les démos. Elles s’ajoutent aux variables prédéfinies (visiteur, entreprise, démo, date).",
@@ -2730,7 +2737,9 @@
     "editTitle": "Modifier la variable",
     "saved": "Variable « {{name}} » enregistrée",
     "required": "Le nom et l’exemple sont obligatoires.",
-    "keyForCsv": "Nom de colonne pour un fichier CSV :"
+    "keyForCsv": "Nom de colonne pour un fichier CSV :",
+    "emptyTitle": "Créez votre première variable",
+    "emptyBody": "Un mot défini une fois, puis inséré dans toutes les démos : le nom du logiciel, un lien…"
   },
   "access": {
     "who": "Qui peut voir la démo ?",
@@ -2986,7 +2995,6 @@
       "noPathHint": "Une formation regroupe des démos à suivre dans l'ordre. Créez-en une pour suivre la progression des apprenants identifiés.",
       "none": "Aucun apprenant identifié",
       "noneHint": "Un apprenant apparaît dès qu'il remplit le formulaire d'une démo ou ouvre son lien personnalisé.",
-      "noMatch": "Aucun apprenant ne correspond à ces filtres.",
       "askAdmin": "Seuls les propriétaires et admins de l’espace peuvent créer des formations."
     },
     "fo": {
@@ -4024,7 +4032,7 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "noMatch": "Aucun terme ne correspond à « {{q}} ».",
-    "emptyTitle": "Aucun terme pour l’instant",
+    "emptyTitle": "Ajoutez votre premier terme",
     "emptyBody": "Ajoutez les mots qui changent avec le nouvel outil : l’ancien terme, le nouveau et une définition courte. Vous pouvez aussi importer un fichier CSV (colonnes : nouveau, ancien, definition, formes).",
     "underline": "Souligner les termes dans le lecteur",
     "underlineHelp": "Pour toutes les démos de l’espace. Chaque démo peut le désactiver dans ses Réglages.",
@@ -4106,7 +4114,6 @@
     "inUse_one": "Ce fichier est utilisé dans {{count}} démo. Cet emplacement restera vide.",
     "inUse_other": "Ce fichier est utilisé dans {{count}} démos. Ces emplacements resteront vides.",
     "tooBig": "Fichier trop lourd : 5 Mo au plus.",
-    "full": "Médiathèque pleine : supprimez des fichiers inutilisés.",
     "badType": "Format non accepté : PNG, JPG, SVG ou WOFF2.",
     "svgRejected": "Ce SVG contient des éléments refusés (script, entité, lien externe).",
     "error": "L’import n’a pas abouti. Réessayez.",
@@ -5032,5 +5039,29 @@
     "breadcrumb": "Fil d’Ariane",
     "author": "Créé par",
     "me": "Moi"
+  },
+  "empty": {
+    "searchBody_zero": "Vérifiez l’orthographe, ou essayez un autre mot.",
+    "searchBody_one": "Vérifiez l’orthographe, ou retirez un filtre ({{count}} filtre actif).",
+    "searchBody_other": "Vérifiez l’orthographe, ou retirez un filtre ({{count}} filtres actifs).",
+    "no": {
+      "demo": "Aucune démo ne correspond à ces filtres",
+      "demoQuery": "Aucune démo ne correspond à « {{q}} »",
+      "learner": "Aucun apprenant ne correspond à ces filtres",
+      "learnerQuery": "Aucun apprenant ne correspond à « {{q}} »",
+      "lead": "Aucun lead ne correspond à ces filtres",
+      "leadQuery": "Aucun lead ne correspond à « {{q}} »",
+      "session": "Aucune session ne correspond à ces filtres",
+      "sessionQuery": "Aucune session ne correspond à « {{q}} »"
+    },
+    "analyticsTitle": "Rien à analyser pour l’instant",
+    "analyticsBody": "Les données apparaissent dès les premières visites sur la période choisie."
+  },
+  "quota": {
+    "title": "Limite atteinte",
+    "seeUsage": "Voir l’utilisation",
+    "renews": "Disponible à nouveau le {{date}}.",
+    "near": "Bientôt atteinte : {{used}} sur {{total}}.",
+    "storage": "Stockage : {{used}} sur {{total}}"
   }
 }

@@ -28,6 +28,7 @@ import { avatarTone } from '../../lib/avatarTone';
 import { useNotifications, type NotificationItem } from './useNotifications';
 import { NOTIFICATION_KINDS, badge, bodyParts, grouped, notificationHref } from './notifications';
 import './notifications.css';
+import { Empty } from '@flowdsiml/ui';
 
 type Filter = 'all' | 'mention' | 'unread';
 const FILTERS: Filter[] = ['all', 'mention', 'unread'];
@@ -206,13 +207,15 @@ export function NotificationBell() {
                   aria-labelledby={`${id}-tab-${filter}`}
                 >
                   {n.loading ? null : shown.length === 0 ? (
-                    <div className="nb-empty" role="status">
-                      <span className="fd-icon-chip">
-                        <Bell aria-hidden="true" />
-                      </span>
-                      <b>{t('notifications.emptyTitle')}</b>
-                      <p>{t(filter === 'all' ? 'notifications.emptyBody' : 'notifications.emptyFilter')}</p>
-                    </div>
+                    <Empty
+                      variant="compact"
+                      level={3}
+                      live
+                      className="nb-empty"
+                      icon={<Bell />}
+                      title={t('notifications.emptyTitle')}
+                      body={t(filter === 'all' ? 'notifications.emptyBody' : 'notifications.emptyFilter')}
+                    />
                   ) : (
                     grouped(shown).map((g) => (
                       <section key={g.group} aria-labelledby={`${id}-g-${g.group}`}>

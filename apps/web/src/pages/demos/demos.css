@@ -220,41 +220,6 @@
     color: var(--fd-orange-200);
   }
 }
-/* DSH-09 : état vide d'un dossier (illustration de la maquette, teintes DSI) */
-.empty-folder {
-  max-width: 420px;
-  margin: var(--fd-space-6) auto;
-  padding: var(--fd-space-10, 40px) var(--fd-space-4);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--fd-space-3);
-  text-align: center;
-}
-.empty-folder h3 {
-  margin: 0;
-  font-size: 1.125rem;
-}
-.empty-folder p {
-  margin: 0;
-}
-.empty-folder .illu {
-  width: 140px;
-  height: 100px;
-}
-.empty-folder .illu-bg {
-  fill: var(--fd-framboise-50);
-  stroke: var(--fd-framboise-200);
-}
-.empty-folder .illu-path {
-  stroke: var(--fd-framboise-300, #e8789f);
-}
-.empty-folder .illu-dot {
-  fill: var(--fd-framboise-300, #e8789f);
-}
-.empty-folder .illu-hot {
-  fill: var(--fd-orange-400, #f6a623);
-}
 /* DSH-02 : vue liste */
 .demo-table-wrap {
   padding: 0;
@@ -891,33 +856,6 @@
   width: 100%;
 }
 
-/* REV-05 : état vide réduit, ligne des statistiques à venir */
-.demos-empty {
-  display: grid;
-  justify-items: start;
-  gap: 12px;
-}
-.demos-empty p {
-  margin: 0;
-}
-/* REV-05 + L32 : message à la place des indicateurs, à la hauteur exacte de leur rangée */
-.stats-later-row {
-  position: relative;
-}
-.kpi-short--ghost {
-  visibility: hidden;
-}
-.stats-later-row .stats-later {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  margin: 0;
-  text-align: center;
-}
-.stats-later p {
-  margin: 0;
-}
 /* REV-08 : le quiz du modèle, après les étapes */
 .tpl-quiz {
   margin: 4px 0 0;
@@ -1108,4 +1046,40 @@
 }
 .demo-card[draggable='true'] {
   cursor: grab;
+}
+
+/* L48-B §4 : trois tuiles de départ dans l'état vide (640 px au plus, une colonne sur mobile) */
+.demos-start {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+  margin-top: 12px;
+}
+.demos-start__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  font: 600 14px var(--fd-font-sans);
+  cursor: pointer;
+}
+.demos-start__tile:hover {
+  background: var(--fd-color-surface-hover);
+}
+.demos-start__tile svg {
+  width: 24px;
+  height: 24px;
+  color: var(--fd-color-primary);
+}
+@media (max-width: 639px) {
+  .demos-start {
+    grid-template-columns: 1fr;
+  }
 }

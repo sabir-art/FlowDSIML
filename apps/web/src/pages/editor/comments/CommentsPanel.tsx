@@ -26,7 +26,7 @@ import {
   Trash2,
   WifiOff,
 } from 'lucide-react';
-import { Button, Composer, Switch } from '@flowdsiml/ui';
+import { Button, Composer, Empty, Switch } from '@flowdsiml/ui';
 import { useAuth } from '../../../auth/AuthProvider';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useConfirm } from '../../../components/ConfirmDialog';
@@ -519,13 +519,13 @@ export function CommentsPanel({
               ))}
             </div>
           ) : forStep.length === 0 ? (
-            <div className="cm-state">
-              <span className="fd-icon-chip" aria-hidden="true">
-                <MessageSquare />
-              </span>
-              <strong>{t('editor.comments.emptyTitle')}</strong>
-              <p>{t('editor.comments.emptyBody')}</p>
-            </div>
+            <Empty
+              variant="compact"
+              level={3}
+              icon={<MessageSquare />}
+              title={t('editor.comments.emptyTitle')}
+              body={t('editor.comments.emptyBody')}
+            />
           ) : visible.length === 0 ? (
             <div className="cm-state">
               <span className="fd-icon-chip" aria-hidden="true">

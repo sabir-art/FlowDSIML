@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type DragEvent,
   type FormEvent,
@@ -21,10 +22,12 @@ import {
   Copy,
   Download,
   Folder,
+  Image,
   FolderInput,
   FolderOpen,
   FolderPlus,
   Layers,
+  MonitorPlay,
   Lock,
   LayoutGrid,
   Link2,
@@ -32,6 +35,7 @@ import {
   Pencil,
   Plus,
   Presentation,
+  Puzzle,
   Search,
   Send,
   Share2,
@@ -41,7 +45,9 @@ import {
   Users,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { Alert, Button, Card, Select } from '@flowdsiml/ui';
+import { Alert, Button, Empty, Select } from '@flowdsiml/ui';
+import { NoMatch } from '../../components/empty/NoMatch';
+import { ExtensionDialog } from '../../components/ExtensionDialog';
 import { completionRate, countTrend, rateTrend } from '@flowdsiml/core';
 import { TrendBadge } from '../../components/kpi/KpiTabs';
 import { supabase } from '../../lib/supabase';
@@ -50,7 +56,7 @@ import { formatDateTime, formatNumber, formatRelativeShort } from '../../lib/for
 import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { LoadError, LoadStatus, SlowLine, useMainBusy, useSkeleton } from '../../components/Skeleton';
-import { DemosSkeleton, KpiSkeletonRow } from './DemosSkeleton';
+import { DemosSkeleton } from './DemosSkeleton';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
@@ -105,7 +111,7 @@ export function DemosPage() {
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { current, can } = useWorkspace();
   const ws = current!;
   const [demos, setDemos] = useState<Demo[] | null>(null);
@@ -175,6 +181,8 @@ export function DemosPage() {
   };
   const showCol = wide && !colHidden;
   const [newFolderParent, setNewFolderParent] = useState<string | null>(null);
+  const [extension, setExtension] = useState(false);
+  const imagesInput = useRef<HTMLInputElement>(null);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<Sort>('updated');
@@ -370,6 +378,24 @@ export function DemosPage() {
     }
     void moveDemo(demoId, target);
   };
+
+  /** REV-06 : une démo à partir d'images (une étape par image), depuis « Nouvelle démo » ou la tuile. */
+  async function importImages(files: File[], folderId: string | null) {
+    const id = await run(async () =>
+      createDemoFromImages({
+        workspaceId: ws.id,
+        userId: user!.id,
+        folderId,
+        title: t('demos.untitled'),
+        files,
+      }),
+    );
+    if (!id) return;
+    setNewOpen(false);
+    toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
+    // L38-8 : l'éditeur s'ouvre en mode guidé (outil Hotspot et aide)
+    navigate(`/demos/${id}/edit?guide=1`);
+  }
 
   async function createDemo(folderId: string | null = folder !== 'all' && folder !== 'none' ? folder : null) {
     const d = await run(async () =>
@@ -625,16 +651,7 @@ export function DemosPage() {
         {pageHead(false)}
         {error && <Alert kind="error">{error}</Alert>}
 
-        {/* REV-05 : pas d'indicateurs à zéro tant qu'aucune démo n'est publiée */}
-        {/* L32 : même hauteur que la rangée d'indicateurs (gabarit invisible), aucun décalage après le squelette */}
-        {kpis && !anyPublished && (
-          <div className="stats-later-row">
-            <KpiSkeletonRow hidden />
-            <div className="fd-card stats-later">
-              <p className="fd-muted">{t('demos.statsLater')}</p>
-            </div>
-          </div>
-        )}
+        {/* L48-B §4 : indicateurs masqués tant qu'aucune démo n'est publiée */}
         {kpis && anyPublished && (
           <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
             {(
@@ -693,6 +710,7 @@ export function DemosPage() {
           onCapture={openNew}
           latestDemoId={demos[0]?.id ?? null}
           publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
+          collapsedByDefault={demos.length === 0}
         />
 
         <section aria-labelledby="demos-list-title" className="demos-section">
@@ -700,262 +718,317 @@ export function DemosPage() {
             {t('demos.allDemos')}
           </h2>
           {/* L40 : Statut, Dossier, Étiquettes et Réinitialiser à gauche ; tri et affichage à droite */}
-          <ListToolbar
-            className="list-toolbar--cq"
-            activeCount={
-              (status !== 'all' ? 1 : 0) +
-              (scope !== 'all' && !wide ? 1 : 0) +
-              (author !== 'all' ? 1 : 0) +
-              (tagFilter.length ? 1 : 0)
-            }
-            onReset={() => {
-              setStatus('all');
-              if (!wide) setFolder('all');
-              setAuthor('all');
-              setTagFilter([]);
-            }}
-            status={t('demos.resultCount', { count: visible.length })}
-            lead={
-              <>
-                {wide && colHidden && (
-                  <button type="button" className="fd-btn fd-filter" onClick={() => hideCol(false)}>
-                    <Folder aria-hidden="true" />
-                    {t('folders.title')}
-                  </button>
-                )}
-                <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
-                  {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
-                    <button key={k} type="button" aria-pressed={status === k} onClick={() => setStatus(k)}>
-                      {t(`demos.filter_${k}`)} · {counts[k]}
+          {/* L48-B §4 : pas de barre de liste tant qu'il n'y a aucune démo */}
+          {demos.length > 0 && (
+            <ListToolbar
+              className="list-toolbar--cq"
+              activeCount={
+                (status !== 'all' ? 1 : 0) +
+                (scope !== 'all' && !wide ? 1 : 0) +
+                (author !== 'all' ? 1 : 0) +
+                (tagFilter.length ? 1 : 0)
+              }
+              onReset={() => {
+                setStatus('all');
+                if (!wide) setFolder('all');
+                setAuthor('all');
+                setTagFilter([]);
+              }}
+              status={t('demos.resultCount', { count: visible.length })}
+              lead={
+                <>
+                  {wide && colHidden && (
+                    <button type="button" className="fd-btn fd-filter" onClick={() => hideCol(false)}>
+                      <Folder aria-hidden="true" />
+                      {t('folders.title')}
                     </button>
-                  ))}
-                </div>
-              </>
-            }
-            filters={
-              <>
-                {!wide && (
+                  )}
+                  <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
+                    {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
+                      <button key={k} type="button" aria-pressed={status === k} onClick={() => setStatus(k)}>
+                        {t(`demos.filter_${k}`)} · {counts[k]}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              }
+              filters={
+                <>
+                  {!wide && (
+                    <FilterMenu
+                      icon={<Folder />}
+                      label={t('demos.folderLabel')}
+                      value={
+                        folder === 'all'
+                          ? t('toolbar.all')
+                          : folder === 'none'
+                            ? t('demos.noFolder')
+                            : (folders.find((f) => f.id === folder)?.name ?? t('toolbar.all'))
+                      }
+                      active={folder !== 'all'}
+                      items={[
+                        {
+                          label: `${t('demos.allFolders')} · ${inFolder('all')}`,
+                          icon: scope === 'all' ? <Check /> : <Layers />,
+                          onSelect: () => setFolder('all'),
+                        },
+                        {
+                          label: `${t('folders.mine')} · ${inFolder('mine')}`,
+                          icon: scope === 'mine' ? <Check /> : <User />,
+                          onSelect: () => setFolder('mine'),
+                        },
+                        {
+                          label: `${t('demos.noFolder')} · ${inFolder('none')}`,
+                          icon: folder === 'none' ? <Check /> : <FolderOpen />,
+                          onSelect: () => setFolder('none'),
+                        },
+                        ...(folders.length ? (['separator'] as const) : []),
+                        ...folders.map((f) => ({
+                          label: `${f.name} · ${inFolder(f.id)}`,
+                          icon: folder === f.id ? <Check /> : <Folder />,
+                          // L27-09 : dossier restreint (cadenas, nombre de membres qui le voient)
+                          end: f.restricted ? (
+                            <span
+                              role="img"
+                              aria-label={t('folderAccess.restricted')}
+                              title={t('folderAccess.visibleBy', {
+                                count: memberCount - (hidden[f.id] ?? 0),
+                              })}
+                            >
+                              <Lock size={14} aria-hidden="true" />
+                            </span>
+                          ) : undefined,
+                          onSelect: () => setFolder(f.id),
+                        })),
+                        'separator',
+                        {
+                          label: `${t('folders.archived')} · ${inFolder('archived')}`,
+                          icon: scope === 'archived' ? <Check /> : <Archive />,
+                          onSelect: () => setFolder('archived'),
+                        },
+                        ...(editable
+                          ? ([
+                              'separator',
+                              {
+                                label: t('demos.newFolder'),
+                                icon: <FolderPlus />,
+                                onSelect: () => {
+                                  setNewFolderParent(null);
+                                  setNewFolder('');
+                                },
+                              },
+                              ...(current && folder !== 'all' && folder !== 'none'
+                                ? [
+                                    {
+                                      label: t('demos.renameFolder', {
+                                        name: folders.find((f) => f.id === folder)?.name ?? '',
+                                      }),
+                                      icon: <Pencil />,
+                                      onSelect: () => {
+                                        const f = folders.find((x) => x.id === folder);
+                                        if (f) setRenaming({ id: f.id, name: f.name });
+                                      },
+                                    },
+                                    ...(can('workspace.settings')
+                                      ? [
+                                          {
+                                            label: t('folderAccess.menu'),
+                                            icon: <Lock />,
+                                            onSelect: () =>
+                                              setFolderAccess(folders.find((x) => x.id === folder) ?? null),
+                                          },
+                                        ]
+                                      : []),
+                                    {
+                                      label: t('demos.deleteFolderShort'),
+                                      icon: <Trash2 />,
+                                      danger: true,
+                                      onSelect: () =>
+                                        setFolderToDelete(folders.find((x) => x.id === folder) ?? null),
+                                    },
+                                  ]
+                                : []),
+                            ] as Array<MenuItem | 'separator'>)
+                          : []),
+                      ]}
+                    />
+                  )}
                   <FilterMenu
-                    icon={<Folder />}
-                    label={t('demos.folderLabel')}
+                    icon={<Users />}
+                    label={t('folders.author')}
                     value={
-                      folder === 'all'
+                      author === 'all'
                         ? t('toolbar.all')
-                        : folder === 'none'
-                          ? t('demos.noFolder')
-                          : (folders.find((f) => f.id === folder)?.name ?? t('toolbar.all'))
+                        : author === 'me'
+                          ? t('folders.me')
+                          : (people.find((p) => p.user_id === author)?.full_name ?? t('toolbar.all'))
                     }
-                    active={folder !== 'all'}
+                    active={author !== 'all'}
                     items={[
                       {
-                        label: `${t('demos.allFolders')} · ${inFolder('all')}`,
-                        icon: scope === 'all' ? <Check /> : <Layers />,
-                        onSelect: () => setFolder('all'),
+                        label: t('toolbar.all'),
+                        icon: author === 'all' ? <Check /> : <span />,
+                        onSelect: () => setAuthor('all'),
                       },
                       {
-                        label: `${t('folders.mine')} · ${inFolder('mine')}`,
-                        icon: scope === 'mine' ? <Check /> : <User />,
-                        onSelect: () => setFolder('mine'),
+                        label: t('folders.me'),
+                        icon: author === 'me' ? <Check /> : <span />,
+                        onSelect: () => setAuthor('me'),
                       },
-                      {
-                        label: `${t('demos.noFolder')} · ${inFolder('none')}`,
-                        icon: folder === 'none' ? <Check /> : <FolderOpen />,
-                        onSelect: () => setFolder('none'),
-                      },
-                      ...(folders.length ? (['separator'] as const) : []),
-                      ...folders.map((f) => ({
-                        label: `${f.name} · ${inFolder(f.id)}`,
-                        icon: folder === f.id ? <Check /> : <Folder />,
-                        // L27-09 : dossier restreint (cadenas, nombre de membres qui le voient)
-                        end: f.restricted ? (
-                          <span
-                            role="img"
-                            aria-label={t('folderAccess.restricted')}
-                            title={t('folderAccess.visibleBy', { count: memberCount - (hidden[f.id] ?? 0) })}
-                          >
-                            <Lock size={14} aria-hidden="true" />
-                          </span>
-                        ) : undefined,
-                        onSelect: () => setFolder(f.id),
-                      })),
-                      'separator',
-                      {
-                        label: `${t('folders.archived')} · ${inFolder('archived')}`,
-                        icon: scope === 'archived' ? <Check /> : <Archive />,
-                        onSelect: () => setFolder('archived'),
-                      },
-                      ...(editable
-                        ? ([
-                            'separator',
-                            {
-                              label: t('demos.newFolder'),
-                              icon: <FolderPlus />,
-                              onSelect: () => {
-                                setNewFolderParent(null);
-                                setNewFolder('');
-                              },
-                            },
-                            ...(current && folder !== 'all' && folder !== 'none'
-                              ? [
-                                  {
-                                    label: t('demos.renameFolder', {
-                                      name: folders.find((f) => f.id === folder)?.name ?? '',
-                                    }),
-                                    icon: <Pencil />,
-                                    onSelect: () => {
-                                      const f = folders.find((x) => x.id === folder);
-                                      if (f) setRenaming({ id: f.id, name: f.name });
-                                    },
-                                  },
-                                  ...(can('workspace.settings')
-                                    ? [
-                                        {
-                                          label: t('folderAccess.menu'),
-                                          icon: <Lock />,
-                                          onSelect: () =>
-                                            setFolderAccess(folders.find((x) => x.id === folder) ?? null),
-                                        },
-                                      ]
-                                    : []),
-                                  {
-                                    label: t('demos.deleteFolderShort'),
-                                    icon: <Trash2 />,
-                                    danger: true,
-                                    onSelect: () =>
-                                      setFolderToDelete(folders.find((x) => x.id === folder) ?? null),
-                                  },
-                                ]
-                              : []),
-                          ] as Array<MenuItem | 'separator'>)
-                        : []),
+                      ...(people.some((p) => p.user_id !== user?.id) ? (['separator'] as const) : []),
+                      ...people
+                        .filter((p) => p.user_id !== user?.id)
+                        .map((p) => ({
+                          label: p.full_name || p.email,
+                          icon: author === p.user_id ? <Check /> : <span />,
+                          onSelect: () => setAuthor(p.user_id),
+                        })),
                     ]}
                   />
-                )}
-                <FilterMenu
-                  icon={<Users />}
-                  label={t('folders.author')}
-                  value={
-                    author === 'all'
-                      ? t('toolbar.all')
-                      : author === 'me'
-                        ? t('folders.me')
-                        : (people.find((p) => p.user_id === author)?.full_name ?? t('toolbar.all'))
-                  }
-                  active={author !== 'all'}
-                  items={[
-                    {
-                      label: t('toolbar.all'),
-                      icon: author === 'all' ? <Check /> : <span />,
-                      onSelect: () => setAuthor('all'),
-                    },
-                    {
-                      label: t('folders.me'),
-                      icon: author === 'me' ? <Check /> : <span />,
-                      onSelect: () => setAuthor('me'),
-                    },
-                    ...(people.some((p) => p.user_id !== user?.id) ? (['separator'] as const) : []),
-                    ...people
-                      .filter((p) => p.user_id !== user?.id)
-                      .map((p) => ({
-                        label: p.full_name || p.email,
-                        icon: author === p.user_id ? <Check /> : <span />,
-                        onSelect: () => setAuthor(p.user_id),
-                      })),
-                  ]}
-                />
-                <TagFilter
-                  store={tagStore}
-                  selected={tagFilter}
-                  setSelected={setTagFilter}
-                  mode={tagMode}
-                  setMode={setTagMode}
-                  onManage={editable ? () => setManagingTags(true) : undefined}
-                />
-              </>
-            }
-            end={
-              <>
-                <FilterMenu
-                  sort
-                  align="end"
-                  icon={<ArrowUpDown />}
-                  label={t('demos.sortLabel')}
-                  value={sortLabels[sort]}
-                  items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
-                    label: sortLabels[k],
-                    icon: sort === k ? <Check /> : <span />,
-                    onSelect: () => setSort(k),
-                  }))}
-                />
-                <div
-                  className="fd-segmented fd-segmented--icons"
-                  role="radiogroup"
-                  aria-label={t('demos.view')}
-                >
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={view === 'grid'}
-                    aria-label={t('demos.viewGrid')}
-                    title={t('demos.viewGrid')}
-                    onClick={() => chooseView('grid')}
+                  <TagFilter
+                    store={tagStore}
+                    selected={tagFilter}
+                    setSelected={setTagFilter}
+                    mode={tagMode}
+                    setMode={setTagMode}
+                    onManage={editable ? () => setManagingTags(true) : undefined}
+                  />
+                </>
+              }
+              end={
+                <>
+                  <FilterMenu
+                    sort
+                    align="end"
+                    icon={<ArrowUpDown />}
+                    label={t('demos.sortLabel')}
+                    value={sortLabels[sort]}
+                    items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
+                      label: sortLabels[k],
+                      icon: sort === k ? <Check /> : <span />,
+                      onSelect: () => setSort(k),
+                    }))}
+                  />
+                  <div
+                    className="fd-segmented fd-segmented--icons"
+                    role="radiogroup"
+                    aria-label={t('demos.view')}
                   >
-                    <LayoutGrid aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={view === 'list'}
-                    aria-label={t('demos.viewList')}
-                    title={t('demos.viewList')}
-                    onClick={() => chooseView('list')}
-                  >
-                    <List aria-hidden="true" />
-                  </button>
-                </div>
-              </>
-            }
-          />
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={view === 'grid'}
+                      aria-label={t('demos.viewGrid')}
+                      title={t('demos.viewGrid')}
+                      onClick={() => chooseView('grid')}
+                    >
+                      <LayoutGrid aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={view === 'list'}
+                      aria-label={t('demos.viewList')}
+                      title={t('demos.viewList')}
+                      onClick={() => chooseView('list')}
+                    >
+                      <List aria-hidden="true" />
+                    </button>
+                  </div>
+                </>
+              }
+            />
+          )}
 
           {demos.length === 0 ? (
-            // REV-05 : une phrase et « Nouvelle démo » ; les étapes sont dans la prise en main (L26-01)
-            <Card className="demos-empty">
-              <h2 className="card-title">{t('demos.emptyTitle')}</h2>
-              <p className="fd-muted">{editable ? t('demos.emptyBody') : t('demos.emptyBodyViewer')}</p>
+            // L48-B §4 : état vide avec trois tuiles de départ
+            <Empty
+              icon={<MonitorPlay />}
+              title={editable ? t('demos.empty.title') : t('demos.empty.titleViewer')}
+              body={editable ? t('demos.empty.body') : t('demos.empty.bodyViewer')}
+              action={
+                editable ? (
+                  <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                    {t('demos.new')}
+                  </Button>
+                ) : undefined
+              }
+            >
               {editable && (
-                <Button variant="primary" icon={<Plus />} onClick={openNew}>
-                  {t('demos.new')}
-                </Button>
+                <div className="demos-start">
+                  <button
+                    type="button"
+                    className="demos-start__tile"
+                    onClick={() => (profile?.extension_seen_at ? openNew() : setExtension(true))}
+                  >
+                    <Puzzle aria-hidden="true" />
+                    {t('demos.empty.extension')}
+                  </button>
+                  <button
+                    type="button"
+                    className="demos-start__tile"
+                    onClick={() => imagesInput.current?.click()}
+                  >
+                    <Image aria-hidden="true" />
+                    {t('demos.empty.images')}
+                  </button>
+                  <button type="button" className="demos-start__tile" onClick={() => setTplFolder(null)}>
+                    <Copy aria-hidden="true" />
+                    {t('demos.empty.template')}
+                  </button>
+                  <input
+                    ref={imagesInput}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    multiple
+                    hidden
+                    aria-label={t('demos.empty.images')}
+                    onChange={(e) => {
+                      const files = [...(e.target.files ?? [])];
+                      e.target.value = '';
+                      if (files.length) void importImages(files, null);
+                    }}
+                  />
+                </div>
               )}
-            </Card>
+            </Empty>
+          ) : visible.length === 0 && inView.length === 0 && scope === 'archived' ? (
+            <Empty
+              icon={<Archive />}
+              title={t('demos.empty.archivedTitle')}
+              body={t('demos.empty.archivedBody')}
+            />
           ) : visible.length === 0 && inView.length === 0 && folder !== 'all' ? (
-            // DSH-09 : dossier vide (carte de la maquette)
-            <div className="fd-card empty-folder">
-              <svg className="illu" viewBox="0 0 140 100" aria-hidden="true">
-                <rect x="10" y="14" width="120" height="76" rx="10" className="illu-bg" />
-                <path
-                  d="M28 70c14 0 18-22 34-22s20-18 36-18"
-                  fill="none"
-                  className="illu-path"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeDasharray="2 7"
-                />
-                <circle cx="28" cy="70" r="6" className="illu-dot" />
-                <circle cx="62" cy="48" r="6" className="illu-dot" />
-                <circle cx="98" cy="30" r="9" className="illu-hot" />
-                <circle cx="98" cy="30" r="3.5" fill="#fff" />
-              </svg>
-              <h3>{t('demos.emptyFolderTitle')}</h3>
-              <p className="fd-muted">{t('demos.emptyFolderBody')}</p>
-              {editable && (
-                <Button variant="primary" icon={<Plus />} onClick={openNew}>
-                  {t('demos.new')}
-                </Button>
-              )}
-            </div>
+            <Empty
+              icon={<FolderOpen />}
+              title={t('demos.empty.folderTitle')}
+              body={t('demos.empty.folderBody', { folder: scopeName ?? '' })}
+              action={
+                editable ? (
+                  <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                    {t('demos.empty.folderAction')}
+                  </Button>
+                ) : undefined
+              }
+            />
           ) : visible.length === 0 ? (
-            <p className="fd-muted">{t('demos.noMatch')}</p>
+            <NoMatch
+              what="demo"
+              query={q}
+              filters={
+                (status !== 'all' ? 1 : 0) +
+                (author !== 'all' ? 1 : 0) +
+                (tagFilter.length ? 1 : 0) +
+                (scope !== 'all' && !wide ? 1 : 0)
+              }
+              onReset={() => {
+                setQ('');
+                setStatus('all');
+                setAuthor('all');
+                setTagFilter([]);
+                if (!wide) setFolder('all');
+              }}
+            />
           ) : view === 'list' ? (
             <div className="fd-card demo-table-wrap">
               <table className="demo-table">
@@ -1140,22 +1213,7 @@ export function DemosPage() {
                 setNewOpen(false);
                 await createDemo(f);
               }}
-              onImport={async (files, f) => {
-                const id = await run(async () =>
-                  createDemoFromImages({
-                    workspaceId: ws.id,
-                    userId: user!.id,
-                    folderId: f,
-                    title: t('demos.untitled'),
-                    files,
-                  }),
-                );
-                if (!id) return;
-                setNewOpen(false);
-                toast(t('editor.importWarnMany', { count: files.length }), undefined, { tone: 'warning' });
-                // L38-8 : l'éditeur s'ouvre en mode guidé (outil Hotspot et aide)
-                navigate(`/demos/${id}/edit?guide=1`);
-              }}
+              onImport={importImages}
               ws={ws.id}
               onGenerate={(f) => {
                 setNewOpen(false);
@@ -1256,6 +1314,7 @@ export function DemosPage() {
             />
           </Suspense>
         )}
+        {extension && <ExtensionDialog onClose={() => setExtension(false)} />}
         <ConfirmDialog
           open={!!pendingMove}
           title={t('demos.moveTo')}

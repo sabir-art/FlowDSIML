@@ -14,6 +14,8 @@ import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Menu } from '../../components/Menu';
 import '../editor/vars/vars.css';
+import { Empty } from '@flowdsiml/ui';
+import { Braces } from 'lucide-react';
 
 type Row = Tables<'variables'>;
 
@@ -91,7 +93,20 @@ export function VariablesSettings() {
           )}
         </div>
         {vars && vars.length === 0 ? (
-          <p className="muted st-vars-empty">{t('vars.empty')}</p>
+          <Empty
+            level={3}
+            icon={<Braces />}
+            title={t('vars.emptyTitle')}
+            body={t('vars.emptyBody')}
+            action={
+              editable ? (
+                <button type="button" className="fd-btn fd-btn--primary" onClick={() => setEditing('new')}>
+                  <Plus aria-hidden="true" />
+                  {t('vars.new')}
+                </button>
+              ) : undefined
+            }
+          />
         ) : (
           <div className="table-wrap">
             <table className="table st-vars-table">

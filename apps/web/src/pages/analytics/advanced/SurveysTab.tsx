@@ -6,6 +6,8 @@ import { supabase } from '../../../lib/supabase';
 import { formatDate, formatNumber } from '../../../lib/format';
 import { Loading } from '../../../components/guards';
 import { abOutcome, type AbCounts } from '../../editor/ab/abResult';
+import { Empty } from '@flowdsiml/ui';
+import { ListChecks } from 'lucide-react';
 
 export interface SurveyQuestion {
   id: string;
@@ -120,11 +122,12 @@ export function SurveysTab({
     <div className="l19">
       {picker}
       {empty && (
-        <div className="card">
-          <div className="empty" role="status">
-            <p className="muted">{t('analytics.adv.tests.empty')}</p>
-          </div>
-        </div>
+        <Empty
+          live
+          icon={<ListChecks />}
+          title={t('analytics.adv.tests.emptyTitle')}
+          body={t('analytics.adv.tests.empty')}
+        />
       )}
       <div className="l19-grid">
         {res.ab.map((x) => (

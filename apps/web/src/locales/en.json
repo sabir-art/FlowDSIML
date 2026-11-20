@@ -2226,7 +2226,8 @@
         "choiceTitle": "Choice menu · step {{n}} “{{title}}”",
         "visitors_one": "{{count}} visitor",
         "visitors_other": "{{count}} visitors",
-        "after": "Completion after the choice: {{values}}."
+        "after": "Completion after the choice: {{values}}.",
+        "emptyTitle": "No surveys or tests yet"
       },
       "seg": {
         "filters": "Filters",
@@ -2381,7 +2382,8 @@
         "create": "Create alert",
         "deleteTitle": "Delete this alert?",
         "deleteBody": "You will no longer be notified for this trigger.",
-        "chWebhookLabel": "Webhook"
+        "chWebhookLabel": "Webhook",
+        "emptyTitle": "Create your first alert"
       },
       "filtersNotApplied": "Filters do not apply to this tab yet."
     },
@@ -2434,7 +2436,6 @@
     "emptyHint": "Add a form to a demo to collect leads.",
     "addForm": "Add a form",
     "noExport": "No leads to export",
-    "noMatch": "No leads match this search.",
     "email": "Email",
     "company": "Company",
     "collected": "Collected",
@@ -2465,11 +2466,6 @@
     "search": "Search demos",
     "status": "Status",
     "allStatuses": "All statuses",
-    "emptyTitle": "No demos yet",
-    "emptyBody": "Open your software and click “Start capture” in the extension, or create a demo here.",
-    "emptyBodyViewer": "The workspace’s demos will appear here.",
-    "statsLater": "Statistics will appear after the first publication.",
-    "noMatch": "No matching demo.",
     "duplicate": "Duplicate",
     "moveTo": "Move to…",
     "delete": "Delete {{title}}",
@@ -2504,8 +2500,6 @@
     "copyLink": "Copy link",
     "archive": "Archive",
     "deleteDemo": "Delete demo",
-    "emptyFolderTitle": "This folder is empty",
-    "emptyFolderBody": "Move demos here from their “…” menu, or create a new one directly in this folder.",
     "view": "View",
     "viewGrid": "Grid",
     "viewList": "List",
@@ -2537,7 +2531,21 @@
     "folderLabel": "Folder",
     "sortLabel": "Sort",
     "resultCount_one": "{{count}} demo",
-    "resultCount_other": "{{count}} demos"
+    "resultCount_other": "{{count}} demos",
+    "empty": {
+      "title": "Create your first demo",
+      "titleViewer": "No demos yet",
+      "body": "Open your business software and start a capture: each click becomes a step, with its explanation bubble.",
+      "bodyViewer": "The workspace demos will appear here.",
+      "extension": "Capture with the extension",
+      "images": "Start from images",
+      "template": "Start from a template",
+      "archivedTitle": "No archived demos",
+      "archivedBody": "Archive a demo from its “…” menu to remove it from lists without deleting it.",
+      "folderTitle": "Put your first demos here",
+      "folderBody": "This folder is empty. Drag a demo from the list, or create one directly in “{{folder}}”.",
+      "folderAction": "New demo in this folder"
+    }
   },
   "a11y": {
     "skip": "Skip to content"
@@ -2706,7 +2714,6 @@
     "demos_one": "{{n}} demo",
     "demos_other": "{{n}} demos",
     "unused": "No demo",
-    "empty": "No variables yet. Create one to personalise your demos.",
     "create": "Create variable",
     "created": "Variable “{{name}}” created",
     "intro": "Words you define once, then insert in every demo. They add to the predefined variables (visitor, company, demo, date).",
@@ -2730,7 +2737,9 @@
     "editTitle": "Edit variable",
     "saved": "Variable “{{name}}” saved",
     "required": "Name and example are required.",
-    "keyForCsv": "Column name for a CSV file:"
+    "keyForCsv": "Column name for a CSV file:",
+    "emptyTitle": "Create your first variable",
+    "emptyBody": "A word defined once, then inserted in every demo: the software name, a link…"
   },
   "access": {
     "who": "Who can see the demo?",
@@ -2986,7 +2995,6 @@
       "noPathHint": "A course groups demos to follow in order. Create one to track identified learners.",
       "none": "No identified learner",
       "noneHint": "A learner appears as soon as they fill a demo form or open their personal link.",
-      "noMatch": "No learner matches these filters.",
       "askAdmin": "Only workspace owners and admins can create courses."
     },
     "fo": {
@@ -4024,7 +4032,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "noMatch": "No term matches “{{q}}”.",
-    "emptyTitle": "No terms yet",
+    "emptyTitle": "Add your first term",
     "emptyBody": "Add the words that change with the new tool: the former term, the new one and a short definition. You can also import a CSV file (columns: nouveau, ancien, definition, formes).",
     "underline": "Underline terms in the player",
     "underlineHelp": "For every demo in the workspace. Each demo can turn it off in its Settings.",
@@ -4106,7 +4114,6 @@
     "inUse_one": "This file is used in {{count}} demo. That spot will be left empty.",
     "inUse_other": "This file is used in {{count}} demos. Those spots will be left empty.",
     "tooBig": "File too large: 5 MB at most.",
-    "full": "Media library full: delete unused files.",
     "badType": "Format not accepted: PNG, JPG, SVG or WOFF2.",
     "svgRejected": "This SVG contains rejected content (script, entity, external link).",
     "error": "The import failed. Try again.",
@@ -5032,5 +5039,29 @@
     "breadcrumb": "Breadcrumb",
     "author": "Created by",
     "me": "Me"
+  },
+  "empty": {
+    "searchBody_zero": "Check the spelling, or try another word.",
+    "searchBody_one": "Check the spelling, or remove a filter ({{count}} active filter).",
+    "searchBody_other": "Check the spelling, or remove a filter ({{count}} active filters).",
+    "no": {
+      "demo": "No demo matches these filters",
+      "demoQuery": "No demo matches “{{q}}”",
+      "learner": "No learner matches these filters",
+      "learnerQuery": "No learner matches “{{q}}”",
+      "lead": "No lead matches these filters",
+      "leadQuery": "No lead matches “{{q}}”",
+      "session": "No session matches these filters",
+      "sessionQuery": "No session matches “{{q}}”"
+    },
+    "analyticsTitle": "Nothing to analyse yet",
+    "analyticsBody": "Data appears with the first visits in the chosen period."
+  },
+  "quota": {
+    "title": "Limit reached",
+    "seeUsage": "See usage",
+    "renews": "Available again on {{date}}.",
+    "near": "Almost reached: {{used}} of {{total}}.",
+    "storage": "Storage: {{used}} of {{total}}"
   }
 }

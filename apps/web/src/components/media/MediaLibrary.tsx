@@ -5,6 +5,8 @@ import type { Tables } from '@flowdsiml/supabase-types';
 import { foldText } from '@flowdsiml/core';
 import { supabase } from '../../lib/supabase';
 import { useConfirm } from '../ConfirmDialog';
+import { Link } from 'react-router-dom';
+import { QuotaDialog } from '../QuotaDialog';
 import './media.css';
 
 export type MediaFile = Tables<'media_files'>;
@@ -58,6 +60,8 @@ export function MediaLibrary({
   const [sel, setSel] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // L48-B §5 : quota atteint (dialogue) ; à partir de 80 %, alerte discrète
+  const [full, setFull] = useState(false);
   const [drag, setDrag] = useState(false);
 
   useEffect(() => {
@@ -73,12 +77,14 @@ export function MediaLibrary({
         .eq('workspace_id', wsId)
         .order('created_at', { ascending: false }),
       supabase.rpc('media_usage', { p_ws: wsId }),
-      supabase.rpc('media_used', { p_ws: wsId }),
+      // L48-B : stockage de l'espace (médiathèque, vidéos, voix off), comme le quota côté serveur
+      supabase.rpc('workspace_usage', { p_workspace: wsId }),
     ]);
     setFiles(f.data ?? []);
     const list = Array.isArray(u.data) ? (u.data as Array<{ id: string; demos: number }>) : [];
     setUsage(Object.fromEntries(list.map((x) => [x.id, x.demos])));
-    setUsed(Number(s.data ?? 0));
+    const st = (s.data as { storage?: { media: number; videos: number; voices: number } } | null)?.storage;
+    setUsed(st ? st.media + st.videos + st.voices : 0);
   }, [wsId]);
   useEffect(() => {
     void load();
@@ -99,7 +105,7 @@ export function MediaLibrary({
     if (!file) return;
     setErr(null);
     if (file.size > MAX_BYTES) return setErr(t('media.tooBig'));
-    if (used + file.size > MEDIA_QUOTA) return setErr(t('media.full'));
+    if (used + file.size > MEDIA_QUOTA) return setFull(true);
     const font = /\.woff2$/i.test(file.name) || file.type === 'font/woff2';
     const fd = new FormData();
     fd.append('file', file);
@@ -117,7 +123,7 @@ export function MediaLibrary({
       const code = await readCode(error);
       return setErr(
         code === 'MEDIA_QUOTA'
-          ? t('media.full')
+          ? (setFull(true), null)
           : code === 'TOO_BIG'
             ? t('media.tooBig')
             : code === 'BAD_TYPE'
@@ -185,6 +191,29 @@ export function MediaLibrary({
           <div className="alert alert-danger" role="alert">
             {err}
           </div>
+        )}
+        {used / MEDIA_QUOTA >= 0.8 && (
+          <div className="alert alert-warning md-near" role="note">
+            <TriangleAlert aria-hidden="true" />
+            <span>
+              {t('quota.near', {
+                used: sizeLabel(used, i18n.language),
+                total: sizeLabel(MEDIA_QUOTA, i18n.language),
+              })}{' '}
+              <Link to="/settings/usage">{t('quota.seeUsage')}</Link>
+            </span>
+          </div>
+        )}
+        {full && (
+          <QuotaDialog
+            title={t('quota.title')}
+            body={t('usage.blocked.storage')}
+            figures={t('quota.storage', {
+              used: sizeLabel(used, i18n.language),
+              total: sizeLabel(MEDIA_QUOTA, i18n.language),
+            })}
+            onClose={() => setFull(false)}
+          />
         )}
         {/* L18-04 : recherche et filtre toujours présents (inactifs quand la médiathèque est vide) */}
         {/* L40 : barre de liste (recherche puis filtre de type, 40 px) */}

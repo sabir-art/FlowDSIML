@@ -23,6 +23,8 @@ import {
   type ImportPreview,
 } from './glossaryCsv';
 import './glossary.css';
+import { Empty } from '@flowdsiml/ui';
+import { BookA } from 'lucide-react';
 
 type Term = Tables<'glossary_terms'>;
 
@@ -123,16 +125,23 @@ export function GlossarySettings() {
         </div>
 
         {terms && terms.length === 0 ? (
-          <div className="card">
-            <div className="empty" role="status">
-              <h3 className="t-h3">{t('glossary.emptyTitle')}</h3>
-              <p className="muted">{t('glossary.emptyBody')}</p>
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => setEditing('new')}>
+          <Empty
+            icon={<BookA />}
+            title={t('glossary.emptyTitle')}
+            body={t('glossary.emptyBody')}
+            action={
+              <button type="button" className="fd-btn fd-btn--primary" onClick={() => setEditing('new')}>
                 <Plus aria-hidden="true" />
                 {t('glossary.add')}
               </button>
-            </div>
-          </div>
+            }
+            secondary={
+              <button type="button" className="fd-btn" onClick={() => setImporting(true)}>
+                <Upload aria-hidden="true" />
+                {t('glossary.import')}
+              </button>
+            }
+          />
         ) : (
           <>
             <div className="card">

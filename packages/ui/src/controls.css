@@ -324,3 +324,93 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* L48-B : état vide (fd-empty). page : carte centrée ; compact : ligne en pointillés ; search : neutre */
+.fd-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--fd-color-surface);
+  border: 1px solid var(--fd-color-border);
+  border-radius: 16px;
+}
+.fd-empty__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary);
+}
+.fd-empty__icon svg {
+  width: 32px;
+  height: 32px;
+}
+.fd-empty__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 440px;
+}
+.fd-empty__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.fd-empty__body {
+  margin: 0;
+  font-size: 14px;
+  color: var(--fd-color-text-muted);
+}
+.fd-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.fd-empty--search .fd-empty__icon {
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.fd-empty--compact {
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  text-align: left;
+  background: transparent;
+  border-style: dashed;
+  border-radius: 12px;
+}
+.fd-empty--compact .fd-empty__icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.fd-empty--compact .fd-empty__icon svg {
+  width: 20px;
+  height: 20px;
+}
+.fd-empty--compact .fd-empty__text {
+  flex: 1;
+  max-width: none;
+}
+.fd-empty--compact .fd-empty__title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.fd-empty--compact .fd-empty__body {
+  font-size: 13px;
+}
+.fd-empty--compact .fd-empty__actions {
+  margin: 0;
+}

@@ -11,6 +11,8 @@ import { completionRate, trendDirection, type Trend } from '@flowdsiml/core';
 import { formatDate, formatNumber } from '../../lib/format';
 import { Sk } from '../Skeleton';
 import './kpi.css';
+import { Empty } from '@flowdsiml/ui';
+import { ChartColumn } from 'lucide-react';
 
 /** L47-01 : 4 indicateurs (les visiteurs récurrents ont leur bloc ; les clics vont sous « Étape par étape »). */
 export type KpiKey = 'views' | 'visitors' | 'completion' | 'leads';
@@ -353,7 +355,13 @@ export function MetricTable({
     <section className="fd-card kpi-table">
       <h2 className="kpi-table__t">{title}</h2>
       {sorted.length === 0 ? (
-        <p className="fd-muted">{t('analytics.noData')}</p>
+        <Empty
+          variant="compact"
+          level={3}
+          icon={<ChartColumn />}
+          title={t('empty.analyticsTitle')}
+          body={t('empty.analyticsBody')}
+        />
       ) : (
         <>
           <table className="kpi-tbl">

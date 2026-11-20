@@ -69,11 +69,14 @@ export function OnboardingCard({
   onCapture,
   latestDemoId,
   publishedDemoId,
+  collapsedByDefault = false,
 }: {
   onb: Onboarding;
   onCapture: () => void;
   latestDemoId: string | null;
   publishedDemoId: string | null;
+  /** Repliée par défaut (page Démos sans démo). */
+  collapsedByDefault?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -84,9 +87,11 @@ export function OnboardingCard({
   const { state, setState } = onb;
   const [open, setOpen] = useState(() => {
     try {
-      return localStorage.getItem(`fd.onb.collapsed.${ws.id}`) !== '1';
+      const v = localStorage.getItem(`fd.onb.collapsed.${ws.id}`);
+      // L48-B §4 : repliée au-dessus de l'état vide tant que l'espace n'a aucune démo
+      return v === null ? !collapsedByDefault : v !== '1';
     } catch {
-      return true;
+      return !collapsedByDefault;
     }
   });
   const [tour, setTour] = useState<{ id: string; title: string } | null>(null);

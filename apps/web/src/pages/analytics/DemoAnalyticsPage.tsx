@@ -4,7 +4,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { completionRate, computeFunnel, countTrend, rateTrend, toCsv } from '@flowdsiml/core';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { Alert, Button, Card } from '@flowdsiml/ui';
+import { Alert, Button, Card, Empty } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { errorMessage } from '../../lib/errors';
 import { downloadText } from '../../lib/download';
@@ -26,6 +26,7 @@ import { Loading } from '../../components/guards';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { LeadsTable } from './LeadsTable';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
+import { ChartColumn } from 'lucide-react';
 
 interface Analytics {
   views: number;
@@ -264,7 +265,13 @@ export function DemoAnalyticsPage() {
               </Button>
             </div>
             {data.visitors === 0 ? (
-              <p className="fd-muted">{t('analytics.noData')}</p>
+              <Empty
+                variant="compact"
+                level={3}
+                icon={<ChartColumn />}
+                title={t('empty.analyticsTitle')}
+                body={t('empty.analyticsBody')}
+              />
             ) : (
               <Funnel
                 rows={funnel}

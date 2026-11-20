@@ -7,6 +7,7 @@ import { check, useAction } from '../../lib/useAction';
 import { formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { YesNo } from '../../components/YesNo';
+import { Empty } from '@flowdsiml/ui';
 
 interface LeadRow {
   id: string;
@@ -97,17 +98,20 @@ export function LeadsMkTable({
   if (!res) return null;
   if (res.total === 0)
     return (
-      <div className="card">
-        <div className="empty">
-          <Users aria-hidden="true" className="an-empty-ic" />
-          <h3>{t('leads.emptyTitle')}</h3>
-          <p className="muted">{t('leads.emptyBody')}</p>
-          <Link className="btn btn-primary" to={formDemo ? `/demos/${formDemo}/edit?tab=settings` : '/'}>
+      <Empty
+        icon={<Users />}
+        title={t('leads.emptyTitle')}
+        body={t('leads.emptyBody')}
+        action={
+          <Link
+            className="fd-btn fd-btn--primary"
+            to={formDemo ? `/demos/${formDemo}/edit?tab=settings` : '/'}
+          >
             <Plus aria-hidden="true" />
             {t('leads.addForm')}
           </Link>
-        </div>
-      </div>
+        }
+      />
     );
 
   const all = res.rows.length > 0 && res.rows.every((r) => selected.has(r.id));

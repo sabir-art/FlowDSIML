@@ -778,7 +778,15 @@ async function install(page, state = seed()) {
             demos: live.length,
             members: t.members.filter((m) => m.workspace_id === w.id).length,
             // L48-A §6 : octets par type (state.storageUsage pour un test, sinon rien)
-            storage: { media: 0, videos: 0, voices: 0, ...(state.storageUsage || {}), limit: 524288000 },
+            storage: {
+              media:
+                (state.mediaBaseUsed || 0) +
+                (t.media_files || []).reduce((n, x) => n + (x.size_bytes || 0), 0),
+              videos: 0,
+              voices: 0,
+              ...(state.storageUsage || {}),
+              limit: 524288000,
+            },
           });
         }
         case 'set_comment_resolved': {
@@ -1708,12 +1716,6 @@ async function install(page, state = seed()) {
           return json(route, 200, n);
         }
         // ===== L18 : médiathèque =====
-        case 'media_used':
-          return json(
-            route,
-            200,
-            (state.mediaBaseUsed || 0) + (t.media_files || []).reduce((n, x) => n + (x.size_bytes || 0), 0),
-          );
         case 'media_usage':
           return json(
             route,

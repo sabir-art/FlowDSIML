@@ -6,6 +6,8 @@ import { supabase } from '../../../lib/supabase';
 import { formatNumber, formatRelativeShort } from '../../../lib/format';
 import { initials } from '../../../lib/initials';
 import { Loading } from '../../../components/guards';
+import { Empty } from '@flowdsiml/ui';
+import { Radio } from 'lucide-react';
 
 interface LiveVisitor {
   key: string;
@@ -173,12 +175,13 @@ export function LiveTab({
         </div>
       </div>
       {data.visitors.length === 0 ? (
-        <div className="card l19-gap">
-          <div className="empty" role="status">
-            <h3 className="t-h3">{t('analytics.adv.live.emptyTitle')}</h3>
-            <p className="muted">{t('analytics.adv.live.emptyBody')}</p>
-          </div>
-        </div>
+        <Empty
+          live
+          className="l19-gap"
+          icon={<Radio />}
+          title={t('analytics.adv.live.emptyTitle')}
+          body={t('analytics.adv.live.emptyBody')}
+        />
       ) : (
         <div className="card l19-gap">
           <div className="card-head">
