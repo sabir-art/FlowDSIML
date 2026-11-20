@@ -6,3 +6,5 @@ packages/supabase-types/src/database.ts
 docs
 packages/ui/src/tokens.css
 packages/ui/src/tokens.ts
+# Gabarits d'e-mails Supabase Auth : HTML pour messageries, mis en forme à la main (copie de docs/ux/emails)
+supabase/templates
