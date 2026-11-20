@@ -1,6 +1,6 @@
 /**
  * L29-01 / L29-02 : snippets d'intégration (Partager > Intégrer, Diffuser > Intranet). « Où intégrer ? »
- * (HTML, WordPress, SharePoint, Moodle, Notion), consignes numérotées, limite, pop-up désactivé pour les
+ * (HTML, WordPress, SharePoint, Moodle, Notion, Confluence), consignes numérotées, limite, pop-up désactivé pour les
  * outils sans script, adresse personnalisée reprise, choix mémorisé. Données fictives.
  * Usage : SHOTS_DIR=… [THEME=dark] node e2e/snippets.e2e.cjs
  */
@@ -55,8 +55,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await where.waitFor();
   const names = await where.getByRole('radio').allInnerTexts();
   ok(
-    names.join() === 'HTML,WordPress,SharePoint,Moodle,Notion',
-    `cinq outils dans l’ordre (${names.join()})`,
+    names.join() === 'HTML,WordPress,SharePoint,Moodle,Notion,Confluence',
+    `six outils dans l’ordre (${names.join()})`,
   );
   ok(
     (await where.getByRole('radio', { name: 'HTML' }).getAttribute('aria-checked')) === 'true',
@@ -112,11 +112,22 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     /<iframe/.test(await panel.locator('pre').innerText()) && /paquet SCORM/.test(await panel.innerText()),
     'Moodle : iframe, limite SCORM',
   );
-  await where.getByRole('radio', { name: 'Notion' }).focus();
+  await where.getByRole('radio', { name: 'Confluence' }).focus();
   await page.keyboard.press('ArrowRight');
   ok(
     (await where.getByRole('radio', { name: 'HTML' }).getAttribute('aria-checked')) === 'true',
-    'flèches : Notion → HTML (boucle)',
+    'flèches : Confluence → HTML (boucle)',
+  );
+  // L35 (142) : Confluence, adresse seule pour la macro Iframe, consignes et limite
+  await where.getByRole('radio', { name: 'Confluence' }).click();
+  const conf = await panel.innerText();
+  ok(
+    /\/iframe/.test(conf) && /macro Iframe/.test(conf) && /Data Center/.test(conf),
+    'Confluence : consignes (macro Iframe) et limite (Data Center, hauteur)',
+  );
+  ok(
+    /^https:\/\/\S+#\/l\/prise-en-main-Ab3dE9$/.test(await panel.locator('pre').innerText()),
+    'Confluence : adresse seule',
   );
   await where.getByRole('radio', { name: 'Notion' }).click();
   await panel.getByRole('button', { name: 'Copier l’adresse' }).waitFor();

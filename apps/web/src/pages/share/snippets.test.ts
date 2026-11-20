@@ -10,12 +10,12 @@ import {
 } from './snippets';
 
 describe('snippets (L29-01/02)', () => {
-  it('cinq outils dans l’ordre de la spec', () => {
-    expect([...TARGETS]).toEqual(['html', 'wordpress', 'sharepoint', 'moodle', 'notion']);
+  it('six outils dans l’ordre de la spec (Confluence ajouté en L35)', () => {
+    expect([...TARGETS]).toEqual(['html', 'wordpress', 'sharepoint', 'moodle', 'notion', 'confluence']);
   });
-  it('SharePoint et Notion : adresse seule, pas de pop-up', () => {
-    expect(TARGETS.filter(addressOnly)).toEqual(['sharepoint', 'notion']);
-    expect(TARGETS.filter((t) => !popupAllowed(t))).toEqual(['sharepoint', 'notion']);
+  it('SharePoint, Notion et Confluence : adresse seule, pas de pop-up', () => {
+    expect(TARGETS.filter(addressOnly)).toEqual(['sharepoint', 'notion', 'confluence']);
+    expect(TARGETS.filter((t) => !popupAllowed(t))).toEqual(['sharepoint', 'notion', 'confluence']);
   });
   it('3 consignes au plus, une limite sauf pour HTML', () => {
     expect(Math.max(...Object.values(STEP_COUNT))).toBeLessThanOrEqual(3);

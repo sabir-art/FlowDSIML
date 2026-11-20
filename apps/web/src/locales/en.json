@@ -4122,6 +4122,7 @@
     "sharepoint": "SharePoint",
     "moodle": "Moodle",
     "notion": "Notion",
+    "confluence": "Confluence",
     "codeLabel": "Code to copy",
     "addressLabel": "Address to copy",
     "copyCode": "Copy code",
@@ -4142,10 +4143,14 @@
     "notion_1": "Type /embed.",
     "notion_2": "Paste the address.",
     "notion_3": "Adjust the block height.",
+    "confluence_1": "Edit the page and type /iframe.",
+    "confluence_2": "Paste the address into the Iframe macro.",
+    "confluence_3": "Set a height of at least 600 px, then publish.",
     "limit_wordpress": "Pop-up mode needs a theme that allows scripts.",
     "limit_sharepoint": "The {{host}} domain must be allowed by the SharePoint administrator (sites allowed for embedding). Pop-up mode not available.",
     "limit_moodle": "To track learner progress, prefer the SCORM package (Distribute > Training platform).",
     "limit_notion": "Pop-up mode not available.",
+    "limit_confluence": "The macro height does not adjust automatically. On Confluence Data Center, an administrator must enable the Iframe or HTML macro. Pop-up mode is not available.",
     "openScorm": "Open Distribute"
   },
   "ai": {
