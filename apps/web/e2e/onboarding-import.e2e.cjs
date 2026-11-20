@@ -1,6 +1,6 @@
 /**
- * REV-02/03/04/06 : onboarding (usages, nom de l'espace, titre sans anneau de focus, aide de l'extension,
- * import de captures, étape 3 reprise de la prise en main) et import d'images (Nouvelle démo, une étape
+ * L48-C : assistant de démarrage en 5 étapes (progression, prénom prérempli, espace créé à l'étape 2,
+ * usages et reprise après rechargement, détection de l'extension, première capture) et import d'images (Nouvelle démo, une étape
  * par image dans l'ordre des fichiers ; outil « Remplacer l'image » de l'éditeur). Données fictives.
  * Usage : SHOTS_DIR=… [THEME=dark] node e2e/onboarding-import.e2e.cjs
  */
@@ -47,24 +47,24 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     { name: 'ecran-2.png', mimeType: 'image/png', buffer: await img(300, 200) },
   ];
 
-  // ===== Étape 1 =====
+  // ===== L48-C : assistant en 5 étapes =====
   await page.goto(`${APP}/#/onboarding`);
-  await page.waitForSelector('#ws-name');
-  const body1 = await page.locator('.ob-card').innerText();
-  ok(!/Deux questions/.test(body1), 'plus de promesse de modèles');
+  const bar = page.getByRole('progressbar', { name: 'Progression' });
+  await bar.waitFor();
   ok(
-    (await page.getByLabel('Nom de l’espace').count()) === 1 &&
-      /En général, le nom de votre structure ou de votre service\./.test(body1),
-    '« Nom de l’espace » et son aide',
+    (await bar.getAttribute('aria-valuetext')) === 'Étape 1 sur 5' &&
+      (await bar.getAttribute('aria-valuemax')) === '5',
+    'étape 1 sur 5 (progressbar)',
   );
-  for (const u of ['Former les équipes', 'Documenter une procédure', 'Annoncer un changement de version'])
-    ok((await page.getByRole('radio', { name: new RegExp(u) }).count()) === 1, `usage « ${u} »`);
-  await shot('rev-02-onboarding-1');
-  await page.getByLabel('Nom de l’espace').fill('Service RH Acme');
-  await page.keyboard.press('Enter');
+  ok((await page.getByRole('button', { name: 'Retour' }).count()) === 0, 'pas de « Retour » à l’étape 1');
+  ok((await page.getByLabel('Prénom').inputValue()) === 'Alice', 'prénom prérempli depuis le profil');
+  await page.getByLabel('Fonction (facultatif)').selectOption('trainer');
+  ok(/Formateur ou formatrice/.test(await page.locator('.obx-preview').innerText()), 'aperçu : fonction');
+  await shot('l48c-1-profil');
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
 
-  // ===== Étape 2 =====
-  const h2 = page.getByRole('heading', { name: 'Installez l’extension de capture' });
+  // Étape 2 : espace (titre focalisé sans anneau)
+  const h2 = page.getByRole('heading', { name: 'Nommez votre espace' });
   await h2.waitFor();
   await page.waitForTimeout(100);
   const ring = await h2.evaluate((el) => {
@@ -72,44 +72,56 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     return document.activeElement === el && `${cs.outlineStyle}|${cs.boxShadow}`;
   });
   ok(ring === 'none|none', `titre focalisé sans anneau de focus (${ring})`);
-  const soon = await page.locator('.ob-ext-actions .badge').count();
-  ok(soon === 0, 'plus de badge « Bientôt » sur l’extension ni l’import');
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
+  ok((await page.locator('#obx-name-err').count()) === 1, 'nom obligatoire : message sous le champ');
+  await page.getByLabel('Nom de l’espace').fill('Service RH Acme');
   ok(
-    (await page.getByRole('button', { name: /Continuer sans l’extension/ }).count()) === 1,
-    'bouton « Continuer sans l’extension »',
+    /Service RH Acme/.test(await page.locator('.obx-preview').innerText()),
+    'aperçu : nom dans la barre latérale',
   );
-  await shot('rev-03-onboarding-2');
-  await page.getByRole('button', { name: 'Ajouter à Chrome' }).click();
-  await page
-    .locator('#help-drawer')
-    .getByText(/extension/i)
-    .first()
-    .waitFor();
-  ok(true, '« Ajouter à Chrome » ouvre l’article d’aide');
-  await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: /Continuer sans l’extension/ }).click();
+  await page.keyboard.press('Enter');
 
-  // ===== Étape 3 =====
-  await page.getByRole('heading', { name: 'Votre première démo vous attend' }).waitFor();
-  const card3 = page.locator('.ob-card');
-  await card3.getByText('Personnaliser l’espace').waitFor();
-  const body3 = await card3.innerText();
+  // Étape 3 : usages (plusieurs réponses) ; rechargement : reprise à la même étape
+  await page.getByRole('heading', { name: 'À quoi servira TutoClick ?' }).waitFor();
   ok(
-    /Personnaliser l’espace/.test(body3) &&
-      /Installer l’extension/.test(body3) &&
-      /Capturer une première démo/.test(body3),
-    'étapes reprises de la prise en main de l’espace',
+    t.workspaces.some((w) => w.name === 'Service RH Acme'),
+    'espace créé à la sortie de l’étape 2',
   );
-  ok(/Une étape par clic\./.test(body3) && !/5 à 10 clics/.test(body3), '« Une étape par clic. »');
+  await page.getByRole('checkbox', { name: /Former les conseillers/ }).check();
   ok(
-    (await card3.getByRole('button', { name: 'Aller à mes démos' }).count()) === 1,
-    'bouton « Aller à mes démos »',
+    (await page.locator('.obx-tpl').first().textContent()) === 'Accueil',
+    'aperçu : « Accueil » en premier pour « Former les conseillers »',
   );
-  await shot('rev-04-onboarding-3');
-  await card3.getByRole('button', { name: 'Démarrer' }).click();
+  await page.reload();
+  await page.getByRole('heading', { name: 'À quoi servira TutoClick ?' }).waitFor();
+  ok(
+    (await page.getByRole('checkbox', { name: /Former les conseillers/ }).isChecked()) &&
+      (await bar.getAttribute('aria-valuetext')) === 'Étape 3 sur 5',
+    'rechargement : même étape, réponses gardées',
+  );
+  await shot('l48c-3-usage');
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
+
+  // Étape 4 : extension, détection sans recharger
+  await page.getByRole('heading', { name: 'Installez l’extension' }).waitFor();
+  ok((await page.getByText('Extension détectée').count()) === 0, 'extension pas encore détectée');
+  t.profiles[0].extension_seen_at = new Date().toISOString();
+  await page.getByText('Extension détectée').waitFor({ timeout: 4000 });
+  ok(true, 'extension détectée en 2 s, sans recharger');
+  await shot('l48c-4-extension');
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
+
+  // Étape 5 : première capture
+  await page.getByRole('heading', { name: 'Lancez votre première capture' }).waitFor();
+  ok((await page.locator('.obx-lines li').count()) === 3, 'trois lignes numérotées');
+  await page.getByRole('button', { name: 'Ouvrir mon espace' }).click();
+  await page.waitForURL(/#\/$/);
+  ok(true, '« Ouvrir mon espace » mène à Démos');
+
+  // Nouvelle démo > Modèles : « Accueil » en premier
+  await page.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
   const nd = page.getByRole('dialog', { name: 'Nouvelle démo' });
   await nd.waitFor();
-  ok(true, '« Démarrer » ouvre « Nouvelle démo » sur le tableau de bord');
 
   // ===== Nouvelle démo > Importer des images =====
   const imp = nd.getByRole('button', { name: /Importer des images/ });
@@ -139,13 +151,35 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const warn = page.locator('.toast.toast--warning');
   ok((await warn.count()) === 1, 'avertissement en variante avertissement');
 
+  // ===== Nouvelle démo > Modèles : catégorie de l'usage déclaré en premier =====
+  await page.goto(`${APP}/#/?new=1`);
+  const nd2 = page.getByRole('dialog', { name: 'Nouvelle démo' });
+  await nd2.waitFor();
+  await nd2
+    .getByRole('button', { name: /Partir d’un modèle/ })
+    .first()
+    .click();
+  const cats = page.getByRole('navigation', { name: 'Catégories de modèles' });
+  await cats.waitFor();
+  const names = (await cats.getByRole('button').allTextContents()).map((x) =>
+    x.replace(/\s*\d+$/, '').trim(),
+  );
+  ok(
+    names[1] === 'Accueil' && names.length === 6,
+    `Modèles : « Accueil » en premier, aucune masquée (${names.join(', ')})`,
+  );
+  await page.keyboard.press('Escape');
+
   // ===== Onboarding > Importer des captures à la place =====
   await page.goto(`${APP}/#/onboarding`);
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
   await page.getByLabel('Nom de l’espace').fill('Agence Exemple');
   await page.keyboard.press('Enter');
-  await page.getByRole('heading', { name: 'Installez l’extension de capture' }).waitFor();
+  await page.getByRole('heading', { name: 'À quoi servira TutoClick ?' }).waitFor();
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
+  await page.getByRole('heading', { name: 'Installez l’extension' }).waitFor();
   const n = t.demos.length;
-  await page.locator('.ob-ext-actions input[type=file]').setInputFiles(files.slice(1));
+  await page.locator('.obx-links input[type=file]').setInputFiles(files.slice(1));
   await page.waitForURL(/\/edit\?guide=1$/);
   ok(t.demos.length === n + 1, 'onboarding : « Importer des captures à la place » crée une démo');
 
@@ -173,6 +207,31 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       .filter({ hasText: /^Image importée/ })
       .count()) >= 1,
     'avertissement d’import après remplacement',
+  );
+
+  // ===== L48-C : 390 px (sans aperçu ni défilement horizontal), « Nouvel espace » =====
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${APP}/#/onboarding`);
+  await page.getByRole('progressbar').waitFor();
+  ok(
+    (await page.locator('.obx-preview').count()) === 0 &&
+      !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)),
+    '390 px : pas d’aperçu, pas de défilement horizontal',
+  );
+  await page.evaluate(() => sessionStorage.clear());
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`${APP}/#/onboarding?nouvel=1`);
+  await page.getByRole('heading', { name: 'Nommez votre espace' }).waitFor();
+  ok(
+    (await page.getByRole('progressbar').count()) === 0,
+    'Nouvel espace : une seule étape, sans progression',
+  );
+  await page.getByLabel('Nom de l’espace').fill('Globex formation');
+  await page.getByRole('button', { name: 'Ouvrir mon espace' }).click();
+  await page.waitForURL(/#\/$/);
+  ok(
+    t.workspaces.some((w) => w.name === 'Globex formation'),
+    'Nouvel espace : espace créé, retour à Démos',
   );
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);

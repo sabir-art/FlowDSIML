@@ -19,10 +19,11 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../auth/AuthProvider';
 import { check, useAction } from '../../lib/useAction';
 import { Alert } from '@flowdsiml/ui';
 import {
-  CATEGORIES,
+  orderedCategories,
   chaptersOf,
   copyTemplateImages,
   summary,
@@ -60,6 +61,9 @@ export function TemplatesDialog({
   const grid = useRef<HTMLDivElement>(null);
   const [list, setList] = useState<Template[] | null>(null);
   const [cat, setCat] = useState<Cat>('all');
+  const { user } = useAuth();
+  const userMeta = (user?.user_metadata ?? {}) as { use_cases?: string[]; use_case?: string };
+  const uses = userMeta.use_cases ?? (userMeta.use_case ? [userMeta.use_case] : []);
   const [sel, setSel] = useState<string | null>(null);
   const [menu, setMenu] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
@@ -197,7 +201,8 @@ export function TemplatesDialog({
       {error && <Alert kind="error">{error}</Alert>}
       <div className="tpl-wrap">
         <nav className="tpl-cats" aria-label={t('templates.cats')}>
-          {(['all', ...CATEGORIES] as Cat[]).map((c) => (
+          {/* L48-C : les catégories des usages déclarés à l'accueil d'abord */}
+          {(['all', ...orderedCategories(uses)] as Cat[]).map((c) => (
             <button key={c} type="button" aria-pressed={cat === c} onClick={() => setCat(c)}>
               {t(`templates.cat.${c}`)} <span className="fd-muted">{count(c)}</span>
             </button>

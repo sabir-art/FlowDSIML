@@ -1,0 +1,390 @@
+/* L48-C : assistant de démarrage plein écran (spec docs/ux/specs/l48c-demarrage.md) */
+.obx {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--fd-color-bg);
+  color: var(--fd-color-text);
+}
+.obx-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+}
+.obx-top > :last-child {
+  justify-self: end;
+}
+.obx-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.obx-progress__bars {
+  display: flex;
+  gap: 6px;
+}
+.obx-progress__bars span {
+  width: 48px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fd-color-border);
+}
+.obx-progress__bars span.on {
+  background: var(--fd-color-text);
+}
+.obx-progress__label {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.obx-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  flex: 1;
+}
+.obx-main {
+  display: flex;
+  flex-direction: column;
+  padding: 0 48px 8vh 96px;
+}
+.obx-form {
+  width: 100%;
+  max-width: 480px;
+  margin-block: auto;
+}
+.obx-h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.obx-h1:focus {
+  outline: none;
+}
+.obx-sub {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: var(--fd-color-text-muted);
+}
+.obx-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 32px;
+}
+.obx-fields .fd-input {
+  height: 40px;
+}
+.obx-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+}
+.obx-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.obx-fieldset legend {
+  padding: 0;
+}
+.obx-uses {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 32px;
+}
+.obx-use {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 96px;
+  padding: 14px 40px 14px 14px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+  cursor: pointer;
+}
+.obx-use.is-on {
+  outline: 2px solid var(--fd-color-text);
+  outline-offset: -1px;
+}
+.obx-use input {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  margin: 0;
+}
+.obx-use svg {
+  width: 20px;
+  height: 20px;
+  color: var(--fd-color-text-muted);
+}
+.obx-use b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.obx-use span {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.obx-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.obx-lines li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.obx-num {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+}
+.obx-num svg {
+  width: 16px;
+  height: 16px;
+}
+.obx-line {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 4px;
+  font-size: 14px;
+}
+.obx-line .fd-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.obx-ok {
+  color: var(--fd-color-success);
+  font-size: 13px;
+  font-weight: 600;
+}
+.obx-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 24px 0 0;
+  font-size: 14px;
+}
+.obx-note {
+  margin: 32px 0 0;
+  font-size: 14px;
+}
+.obx-foot {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+/* Aperçu (décoratif) */
+.obx-preview {
+  display: grid;
+  place-items: center;
+  padding: 48px;
+  background: var(--fd-color-surface-sunken);
+}
+.obx-card {
+  border: 1px solid var(--fd-color-border);
+  border-radius: 16px;
+  background: var(--fd-color-surface);
+  box-shadow: 0 16px 48px rgb(8 10 14 / 0.12);
+}
+.obx-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 240px;
+  padding: 28px;
+}
+.obx-profile span:last-child {
+  color: var(--fd-color-text-muted);
+  font-size: 14px;
+}
+.obx-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  font-weight: 700;
+  font-size: 22px;
+}
+.obx-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 240px;
+  padding: 20px;
+}
+.obx-ws {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+}
+.obx-ws b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.obx-ws__logo {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+.obx-side__item {
+  padding: 6px 8px;
+  color: var(--fd-color-text-muted);
+  font-size: 14px;
+}
+.obx-tpls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 260px;
+}
+.obx-tpl {
+  padding: 18px 20px;
+  font-weight: 600;
+}
+.obx-browser {
+  display: flex;
+  flex-direction: column;
+  width: 340px;
+  padding: 12px;
+  gap: 8px;
+}
+.obx-browser__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.obx-browser__url {
+  flex: 1;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+}
+.obx-browser__bar svg,
+.obx-browser__menu svg {
+  width: 18px;
+  height: 18px;
+  color: var(--fd-color-text-muted);
+}
+.obx-browser__menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  align-self: flex-end;
+  gap: 24px;
+  padding: 10px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  font-size: 14px;
+  animation: obx-menu 3.4s ease-in-out infinite;
+}
+.obx-browser__menu span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.obx-browser__pinned {
+  border-radius: 50%;
+  animation: obx-pin 3.4s ease-in-out infinite;
+}
+@keyframes obx-menu {
+  0%,
+  10% {
+    transform: translateY(-6px) scale(0.97);
+  }
+  25%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes obx-pin {
+  0%,
+  40% {
+    box-shadow: none;
+  }
+  55%,
+  70% {
+    box-shadow: 0 0 0 4px var(--fd-color-primary-soft);
+    color: var(--fd-color-primary);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .obx-browser__menu,
+  .obx-browser__pinned {
+    animation: none;
+  }
+  .obx-browser__pinned {
+    box-shadow: 0 0 0 4px var(--fd-color-primary-soft);
+    color: var(--fd-color-primary);
+  }
+}
+.obx-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 260px;
+  padding: 16px;
+}
+.obx-panel__start {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary, #fff);
+  font-weight: 600;
+  text-align: center;
+}
+@media (max-width: 899px) {
+  .obx-cols {
+    grid-template-columns: 1fr;
+  }
+  .obx-main {
+    padding: 0 20px 8vh;
+  }
+  .obx-top {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 12px 20px;
+  }
+  .obx-progress__bars span {
+    width: 20px;
+  }
+}
+@media (max-width: 480px) {
+  .obx-uses {
+    grid-template-columns: 1fr;
+  }
+}

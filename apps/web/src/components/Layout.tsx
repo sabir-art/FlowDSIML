@@ -229,7 +229,11 @@ export function Layout() {
                     },
                   ]
                 : []),
-              { label: t('nav.newWorkspace'), icon: <Plus />, onSelect: () => navigate('/onboarding') },
+              {
+                label: t('nav.newWorkspace'),
+                icon: <Plus />,
+                onSelect: () => navigate('/onboarding?nouvel=1'),
+              },
               {
                 label: i18n.language === 'en' ? 'Français' : 'English',
                 icon: <Languages />,

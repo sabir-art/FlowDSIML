@@ -116,6 +116,9 @@ jobs:
       - name: États vides L48-B (page Démos neuve, recherche sans résultat)
         if: always()
         run: cd apps/web && node e2e/l48b-vides.e2e.cjs
+      - name: Assistant de démarrage L48-C (5 étapes, reprise, extension détectée, Nouvel espace)
+        if: always()
+        run: cd apps/web && node e2e/onboarding-import.e2e.cjs
       - name: Infobulles L44 (boutons à icône nommés, sans title ; clavier, Échap, bords du lecteur)
         if: always()
         run: cd apps/web && node e2e/infobulles.e2e.cjs

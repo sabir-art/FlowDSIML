@@ -81,7 +81,7 @@ export function WorkspaceSwitcher() {
             },
           })),
           'separator' as const,
-          { label: t('nav.newWorkspace'), icon: <Plus />, onSelect: () => navigate('/onboarding') },
+          { label: t('nav.newWorkspace'), icon: <Plus />, onSelect: () => navigate('/onboarding?nouvel=1') },
         ]}
       />
     </div>

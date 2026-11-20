@@ -8,6 +8,20 @@ import { supabase } from '../../lib/supabase';
 export type Template = Tables<'demo_templates'>;
 export type TemplateCategory = 'logiciel' | 'procedure' | 'reglementaire' | 'accueil';
 export const CATEGORIES: TemplateCategory[] = ['logiciel', 'procedure', 'reglementaire', 'accueil'];
+
+/** L48-C §2.3 : usages déclarés à l'accueil (user_metadata.use_cases). */
+export type UseCase = 'train' | 'youth' | 'document' | 'comms';
+const USE_CATEGORY: Record<UseCase, TemplateCategory> = {
+  train: 'accueil',
+  youth: 'procedure',
+  document: 'logiciel',
+  comms: 'logiciel',
+};
+/** Catégories de modèles, celles des usages déclarés d'abord (aucune n'est masquée). */
+export function orderedCategories(uses: readonly string[]): TemplateCategory[] {
+  const first = uses.flatMap((u) => (u in USE_CATEGORY ? [USE_CATEGORY[u as UseCase]] : []));
+  return [...new Set([...first, ...CATEGORIES])];
+}
 export type StepType = 'bulle' | 'saisie' | 'quiz' | 'popup' | 'fin' | 'texte';
 
 export interface TemplateStep {
