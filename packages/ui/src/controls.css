@@ -216,3 +216,111 @@
   flex: none;
   stroke-width: 1.75;
 }
+
+/* ---------- L40 : barre de liste (filtres à gauche, tri et affichage à droite), contrôles de 40 px ---------- */
+.fd-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fd-space-2) var(--fd-space-6);
+}
+.fd-toolbar__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fd-space-2);
+  min-width: 0;
+}
+.fd-toolbar__group--end {
+  margin-left: auto;
+}
+.fd-toolbar .fd-btn,
+.fd-toolbar .fd-input {
+  height: 40px;
+}
+.fd-toolbar .fd-segmented {
+  padding: 3px; /* 3 + 1 de bordure, deux fois, + 32 = 40 px */
+}
+.fd-toolbar .fd-segmented > button {
+  height: 32px;
+  padding: 0 var(--fd-space-3);
+}
+.fd-toolbar .fd-segmented--icons > button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  padding: 0;
+}
+.fd-toolbar .fd-segmented--icons svg {
+  width: 18px;
+  height: 18px;
+}
+.fd-toolbar__reset {
+  width: 40px;
+  padding: 0;
+  color: var(--fd-color-text-muted);
+}
+.fd-toolbar__reset svg {
+  width: 18px;
+  height: 18px;
+}
+.fd-toolbar__search {
+  position: relative;
+  width: 220px;
+}
+.fd-toolbar__search svg {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+  pointer-events: none;
+}
+.fd-toolbar__search .fd-input {
+  width: 100%;
+  padding-left: 38px;
+}
+
+/* Déclencheur de filtre « Libellé : valeur » (icône, valeur tronquée à 140 px, chevron) */
+.fd-filter {
+  gap: 6px;
+  padding: 0 var(--fd-space-3) 0 14px;
+}
+.fd-filter svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.fd-filter__label {
+  color: var(--fd-color-text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.fd-filter__value {
+  max-width: 140px;
+  overflow: hidden;
+  color: var(--fd-color-text);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.fd-filter__chev {
+  color: var(--fd-color-text-muted);
+}
+.fd-filter--active {
+  background: var(--fd-color-primary-soft);
+  border-color: color-mix(in srgb, var(--fd-color-primary) 35%, transparent);
+}
+.fd-filter--active .fd-filter__value {
+  color: var(--fd-color-primary-soft-text);
+}
+/* Filtre actif : libellé masqué visuellement, l'icône dit le type ; le nom accessible reste complet */
+.fd-filter--active .fd-filter__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

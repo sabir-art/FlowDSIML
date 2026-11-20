@@ -49,7 +49,11 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.locator('.tg-pop').getByRole('checkbox').first().check();
   await page.waitForTimeout(200);
   ok((await page.locator('.demo-card').count()) === 1, 'L12-07 : filtre « Au moins une »');
-  ok((await page.locator('.tg-count').textContent()).startsWith('1'), 'L12-07 : compteur du filtre actif');
+  ok(
+    (await page.locator('.tg-filter').getAttribute('class')).includes('fd-filter--active') &&
+      (await page.locator('.tg-filter .fd-filter__value').textContent()).length > 0,
+    'L12-07 / L40 : filtre actif (étiquette choisie en valeur)',
+  );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l12-tags-filter.png` });
   await page.getByRole('button', { name: 'Effacer' }).click();
   ok((await page.locator('.demo-card').count()) === 2, 'L12-07 : Effacer');

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { withRestLocale } from '../../i18n';
 import {
   Archive,
+  ArrowUpDown,
   ArrowUpRight,
   BarChart3,
   Check,
@@ -50,6 +51,7 @@ import { OnboardingCard, useOnboarding } from './OnboardingCard';
 import { loadHome, type Stats } from './home';
 import { useShareRules } from '../../lib/shareRules';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
 import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
 import { LazyNotificationBell } from '../../components/notifications/LazyNotificationBell';
@@ -550,139 +552,168 @@ export function DemosPage() {
       />
 
       <section aria-labelledby="demos-list-title" className="demos-section">
-        <div className="filter-bar">
-          <h2 id="demos-list-title">{t('demos.allDemos')}</h2>
-          <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
-            {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
-              <button key={k} type="button" aria-pressed={status === k} onClick={() => setStatus(k)}>
-                {t(`demos.filter_${k}`)} · {counts[k]}
-              </button>
-            ))}
-          </div>
-          <div className="filter-bar__end">
-            <Menu
-              label={t('demos.folders')}
-              trigger={{
-                icon: <Folder />,
-                text:
+        <h2 id="demos-list-title" className="demos-list-title">
+          {t('demos.allDemos')}
+        </h2>
+        {/* L40 : Statut, Dossier, Étiquettes et Réinitialiser à gauche ; tri et affichage à droite */}
+        <ListToolbar
+          activeCount={(status !== 'all' ? 1 : 0) + (folder !== 'all' ? 1 : 0) + (tagFilter.length ? 1 : 0)}
+          onReset={() => {
+            setStatus('all');
+            setFolder('all');
+            setTagFilter([]);
+          }}
+          status={t('demos.resultCount', { count: visible.length })}
+          lead={
+            <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
+              {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
+                <button key={k} type="button" aria-pressed={status === k} onClick={() => setStatus(k)}>
+                  {t(`demos.filter_${k}`)} · {counts[k]}
+                </button>
+              ))}
+            </div>
+          }
+          filters={
+            <>
+              <FilterMenu
+                icon={<Folder />}
+                label={t('demos.folderLabel')}
+                value={
                   folder === 'all'
-                    ? t('demos.folders')
+                    ? t('toolbar.all')
                     : folder === 'none'
                       ? t('demos.noFolder')
-                      : (folders.find((f) => f.id === folder)?.name ?? t('demos.folders')),
-                chevron: true,
-              }}
-              items={[
-                {
-                  label: `${t('demos.allFolders')} · ${demos.length}`,
-                  icon: folder === 'all' ? <Check /> : <Layers />,
-                  onSelect: () => setFolder('all'),
-                },
-                {
-                  label: `${t('demos.noFolder')} · ${inFolder('none')}`,
-                  icon: folder === 'none' ? <Check /> : <FolderOpen />,
-                  onSelect: () => setFolder('none'),
-                },
-                ...(folders.length ? (['separator'] as const) : []),
-                ...folders.map((f) => ({
-                  label: `${f.name} · ${inFolder(f.id)}`,
-                  icon: folder === f.id ? <Check /> : <Folder />,
-                  // L27-09 : dossier restreint (cadenas, nombre de membres qui le voient)
-                  end: f.restricted ? (
-                    <span
-                      role="img"
-                      aria-label={t('folderAccess.restricted')}
-                      title={t('folderAccess.visibleBy', { count: memberCount - (hidden[f.id] ?? 0) })}
-                    >
-                      <Lock size={14} aria-hidden="true" />
-                    </span>
-                  ) : undefined,
-                  onSelect: () => setFolder(f.id),
-                })),
-                ...(editable
-                  ? ([
-                      'separator',
-                      { label: t('demos.newFolder'), icon: <FolderPlus />, onSelect: () => setNewFolder('') },
-                      ...(current && folder !== 'all' && folder !== 'none'
-                        ? [
-                            {
-                              label: t('demos.renameFolder', {
-                                name: folders.find((f) => f.id === folder)?.name ?? '',
-                              }),
-                              icon: <Pencil />,
-                              onSelect: () => {
-                                const f = folders.find((x) => x.id === folder);
-                                if (f) setRenaming({ id: f.id, name: f.name });
+                      : (folders.find((f) => f.id === folder)?.name ?? t('toolbar.all'))
+                }
+                active={folder !== 'all'}
+                items={[
+                  {
+                    label: `${t('demos.allFolders')} · ${demos.length}`,
+                    icon: folder === 'all' ? <Check /> : <Layers />,
+                    onSelect: () => setFolder('all'),
+                  },
+                  {
+                    label: `${t('demos.noFolder')} · ${inFolder('none')}`,
+                    icon: folder === 'none' ? <Check /> : <FolderOpen />,
+                    onSelect: () => setFolder('none'),
+                  },
+                  ...(folders.length ? (['separator'] as const) : []),
+                  ...folders.map((f) => ({
+                    label: `${f.name} · ${inFolder(f.id)}`,
+                    icon: folder === f.id ? <Check /> : <Folder />,
+                    // L27-09 : dossier restreint (cadenas, nombre de membres qui le voient)
+                    end: f.restricted ? (
+                      <span
+                        role="img"
+                        aria-label={t('folderAccess.restricted')}
+                        title={t('folderAccess.visibleBy', { count: memberCount - (hidden[f.id] ?? 0) })}
+                      >
+                        <Lock size={14} aria-hidden="true" />
+                      </span>
+                    ) : undefined,
+                    onSelect: () => setFolder(f.id),
+                  })),
+                  ...(editable
+                    ? ([
+                        'separator',
+                        {
+                          label: t('demos.newFolder'),
+                          icon: <FolderPlus />,
+                          onSelect: () => setNewFolder(''),
+                        },
+                        ...(current && folder !== 'all' && folder !== 'none'
+                          ? [
+                              {
+                                label: t('demos.renameFolder', {
+                                  name: folders.find((f) => f.id === folder)?.name ?? '',
+                                }),
+                                icon: <Pencil />,
+                                onSelect: () => {
+                                  const f = folders.find((x) => x.id === folder);
+                                  if (f) setRenaming({ id: f.id, name: f.name });
+                                },
                               },
-                            },
-                            ...(can('workspace.settings')
-                              ? [
-                                  {
-                                    label: t('folderAccess.menu'),
-                                    icon: <Lock />,
-                                    disabled: !enterprise,
-                                    hint: enterprise ? undefined : t('rules.errPlan'),
-                                    end: enterprise ? undefined : (
-                                      <span className="fd-badge menu-soon">Enterprise</span>
-                                    ),
-                                    onSelect: () =>
-                                      setFolderAccess(folders.find((x) => x.id === folder) ?? null),
-                                  },
-                                ]
-                              : []),
-                            {
-                              label: t('demos.deleteFolderShort'),
-                              icon: <Trash2 />,
-                              danger: true,
-                              onSelect: () => setFolderToDelete(folders.find((x) => x.id === folder) ?? null),
-                            },
-                          ]
-                        : []),
-                    ] as Array<MenuItem | 'separator'>)
-                  : []),
-              ]}
-            />
-            <TagFilter
-              store={tagStore}
-              selected={tagFilter}
-              setSelected={setTagFilter}
-              mode={tagMode}
-              setMode={setTagMode}
-              onManage={editable ? () => setManagingTags(true) : undefined}
-            />
-            <div className="fd-segmented view-seg" role="radiogroup" aria-label={t('demos.view')}>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={view === 'grid'}
-                aria-label={t('demos.viewGrid')}
-                title={t('demos.viewGrid')}
-                onClick={() => chooseView('grid')}
+                              ...(can('workspace.settings')
+                                ? [
+                                    {
+                                      label: t('folderAccess.menu'),
+                                      icon: <Lock />,
+                                      disabled: !enterprise,
+                                      hint: enterprise ? undefined : t('rules.errPlan'),
+                                      end: enterprise ? undefined : (
+                                        <span className="fd-badge menu-soon">Enterprise</span>
+                                      ),
+                                      onSelect: () =>
+                                        setFolderAccess(folders.find((x) => x.id === folder) ?? null),
+                                    },
+                                  ]
+                                : []),
+                              {
+                                label: t('demos.deleteFolderShort'),
+                                icon: <Trash2 />,
+                                danger: true,
+                                onSelect: () =>
+                                  setFolderToDelete(folders.find((x) => x.id === folder) ?? null),
+                              },
+                            ]
+                          : []),
+                      ] as Array<MenuItem | 'separator'>)
+                    : []),
+                ]}
+              />
+              <TagFilter
+                store={tagStore}
+                selected={tagFilter}
+                setSelected={setTagFilter}
+                mode={tagMode}
+                setMode={setTagMode}
+                onManage={editable ? () => setManagingTags(true) : undefined}
+              />
+            </>
+          }
+          end={
+            <>
+              <FilterMenu
+                sort
+                align="end"
+                icon={<ArrowUpDown />}
+                label={t('demos.sortLabel')}
+                value={sortLabels[sort]}
+                items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
+                  label: sortLabels[k],
+                  icon: sort === k ? <Check /> : <span />,
+                  onSelect: () => setSort(k),
+                }))}
+              />
+              <div
+                className="fd-segmented fd-segmented--icons"
+                role="radiogroup"
+                aria-label={t('demos.view')}
               >
-                <LayoutGrid aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={view === 'list'}
-                aria-label={t('demos.viewList')}
-                title={t('demos.viewList')}
-                onClick={() => chooseView('list')}
-              >
-                <List aria-hidden="true" />
-              </button>
-            </div>
-            <Menu
-              label={t('demos.sort')}
-              trigger={{ text: sortLabels[sort], chevron: true }}
-              items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
-                label: sortLabels[k],
-                icon: sort === k ? <Check /> : <span />,
-                onSelect: () => setSort(k),
-              }))}
-            />
-          </div>
-        </div>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={view === 'grid'}
+                  aria-label={t('demos.viewGrid')}
+                  title={t('demos.viewGrid')}
+                  onClick={() => chooseView('grid')}
+                >
+                  <LayoutGrid aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={view === 'list'}
+                  aria-label={t('demos.viewList')}
+                  title={t('demos.viewList')}
+                  onClick={() => chooseView('list')}
+                >
+                  <List aria-hidden="true" />
+                </button>
+              </div>
+            </>
+          }
+        />
 
         {demos.length === 0 ? (
           // REV-05 : une phrase et « Nouvelle démo » ; les étapes sont dans la prise en main (L26-01)

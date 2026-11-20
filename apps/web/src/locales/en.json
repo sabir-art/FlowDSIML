@@ -2549,7 +2549,11 @@
       "demo": "Next step: create your first demo.",
       "publish": "Next step: publish your demo “{{title}}” to share it.",
       "share": "Next step: share your demo “{{title}}” to get your first views."
-    }
+    },
+    "folderLabel": "Folder",
+    "sortLabel": "Sort",
+    "resultCount_one": "{{count}} demo",
+    "resultCount_other": "{{count}} demos"
   },
   "a11y": {
     "skip": "Skip to content"
@@ -2867,8 +2871,6 @@
     "limits": "Up to {{ws}} tags per workspace, {{demo}} per demo.",
     "of": "Tags of {{title}}",
     "filterBy": "Filter by tags",
-    "activeCount_one": "{{count}} tag selected",
-    "activeCount_other": "{{count}} tags selected",
     "none": "No tags yet. Add some from a demo’s “…” menu.",
     "combine": "Combination",
     "any": "At least one",
@@ -2886,7 +2888,9 @@
     "remove": "Remove {{name}}",
     "add": "Add a tag",
     "addPlaceholder": "Add…",
-    "fieldHelp": "To organise and filter your demos (tool, audience, module). Up to {{demo}} tags per demo, {{ws}} per workspace."
+    "fieldHelp": "To organise and filter your demos (tool, audience, module). Up to {{demo}} tags per demo, {{ws}} per workspace.",
+    "countShort_one": "{{count}} tag",
+    "countShort_other": "{{count}} tags"
   },
   "learners": {
     "title": "Learners",
@@ -4574,5 +4578,14 @@
     "unavailableBody": "It may have been deleted, or you no longer have access.",
     "backToDemos": "Back to demos",
     "workspaceError": "Couldn’t load your workspace"
+  },
+  "toolbar": {
+    "filters": "Filters",
+    "sortView": "Sort and view",
+    "reset": "Reset filters",
+    "moreCount": "Filters · {{count}}",
+    "close": "Close",
+    "all": "All",
+    "allF": "All"
   }
 }
