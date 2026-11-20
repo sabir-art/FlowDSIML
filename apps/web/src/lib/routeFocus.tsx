@@ -4,7 +4,9 @@
  *   (chargement d'une démo, changement d'onglet) ;
  * - au changement d'écran (chemin), le focus passe sur le h1 de l'écran pour qu'un lecteur d'écran
  *   l'annonce. Les changements de filtre ou d'onglet (paramètres d'URL) ne déplacent pas le focus,
- *   le premier affichage non plus (le lien d'évitement reste le premier arrêt).
+ *   le premier affichage non plus (le lien d'évitement reste le premier arrêt) ;
+ * - L48-F : un lien peut viser un champ précis de l'écran (`state={{ focus: '<id>' }}`), qui prend
+ *   alors le focus à la place du h1 (ex. « Renseigner le lien du support »).
  */
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -31,7 +33,9 @@ if (typeof document !== 'undefined') {
 }
 
 export function RouteFocus() {
-  const { pathname } = useLocation();
+  const { pathname, state } = useLocation();
+  const target = (state as { focus?: unknown } | null)?.focus;
+  const targetId = typeof target === 'string' ? target : null;
   const first = useRef(true);
 
   // Titre : suit le h1 de l'écran tant que la page est ouverte
@@ -56,7 +60,9 @@ export function RouteFocus() {
     let tries = 0;
     let timer = 0;
     const tryFocus = () => {
-      const h = screenHeading();
+      const field = targetId ? document.getElementById(targetId) : null;
+      if (field) return field.focus();
+      const h = targetId ? null : screenHeading();
       if (h) {
         if (!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
         h.setAttribute('data-route-focus', '');
@@ -67,6 +73,7 @@ export function RouteFocus() {
     };
     timer = window.setTimeout(tryFocus, 0);
     return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return null;

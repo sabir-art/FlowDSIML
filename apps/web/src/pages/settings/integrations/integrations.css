@@ -6,9 +6,6 @@
 .l23-head p {
   margin: 4px 0 0;
 }
-.l23-back {
-  margin: -4px 0 8px -8px;
-}
 .l23-actions {
   gap: 8px;
 }
@@ -67,73 +64,6 @@
 .l23 .st.wait {
   background: var(--fd-color-warning-soft);
   color: var(--fd-color-warning);
-}
-.l23-soon {
-  margin-top: 16px;
-}
-.l23-soon > p {
-  margin: 4px 0 12px;
-}
-.int-grid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-.int-card {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  border-radius: var(--fd-radius-lg);
-  border: 1px solid var(--fd-color-border);
-  background: var(--fd-color-surface);
-}
-.int-card .hd {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.int-lg {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: var(--fd-color-surface-sunken);
-  color: var(--fd-color-text-muted);
-  flex: none;
-}
-.int-lg svg {
-  width: 18px;
-  height: 18px;
-}
-/* Logos de marque : tuile claire dans les deux thèmes, couleurs officielles inchangées */
-.int-lg--brand {
-  background: #fff;
-  box-shadow: inset 0 0 0 1px var(--fd-color-border);
-}
-.int-lg--brand img {
-  display: block;
-  width: 20px;
-  height: 20px;
-}
-.int-lg--big {
-  width: 48px;
-  height: 48px;
-}
-.int-card b {
-  font-size: 14px;
-}
-.int-card .badge {
-  margin-left: auto;
-}
-.int-card p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--fd-color-text-muted);
 }
 .l23-sec {
   grid-template-columns: 160px 1fr;
@@ -276,8 +206,148 @@
 }
 @media (max-width: 1100px) {
   .wh-detail,
-  .int-grid,
   .ev-list {
     grid-template-columns: 1fr;
+  }
+}
+
+/* L48-F (T4) : état d'un webhook en texte avec un point, sans badge */
+.wh-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.wh-state::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fd-color-text-muted);
+}
+.wh-state--ok::before {
+  background: var(--fd-color-success);
+}
+.wh-state--warn::before {
+  background: var(--fd-color-warning);
+}
+
+/* L48-F §1 : catalogue des intégrations (filtre segmenté, une carte, une liste) */
+.int-sub {
+  margin: 0 0 16px;
+}
+.int-filter {
+  margin-bottom: 16px;
+}
+.int-select {
+  display: none;
+}
+.int-card-list {
+  padding: 8px 24px;
+}
+.int-group + .int-group {
+  margin-top: 8px;
+}
+.int-group__t {
+  margin: 16px 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fd-color-text-muted);
+}
+.int-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.int-list > li + li {
+  border-top: 1px solid var(--fd-color-border);
+}
+.int-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 72px;
+  padding: 12px 0;
+  color: inherit;
+  text-decoration: none;
+}
+.int-row--link:hover .int-row__txt b {
+  text-decoration: underline;
+}
+.int-row__logo {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--fd-color-text-muted);
+}
+.int-row__logo img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.int-row__logo svg {
+  width: 20px;
+  height: 20px;
+}
+.int-row__txt {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.int-row__txt b {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fd-color-text);
+}
+.int-row__warn {
+  color: var(--fd-color-warning);
+}
+.int-row__state {
+  flex: none;
+}
+.int-soon {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.int-on {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.int-on > i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fd-color-success);
+}
+.int-on svg {
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.int-need {
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: var(--fd-color-text-muted);
+}
+@media (max-width: 767px) {
+  .int-seg {
+    display: none;
+  }
+  .int-select {
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .int-card-list {
+    padding: 4px 16px;
   }
 }

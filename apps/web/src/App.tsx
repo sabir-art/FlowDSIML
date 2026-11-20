@@ -76,6 +76,9 @@ const DemosPage = lazy(() => demosChunk().then((m) => ({ default: m.DemosPage })
 const IntegrationsPage = lazyRest(() =>
   import('./pages/settings/integrations/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage })),
 );
+const WebhooksPage = lazyRest(() =>
+  import('./pages/settings/integrations/WebhooksPage').then((m) => ({ default: m.WebhooksPage })),
+);
 const WebhookDetail = lazyRest(() =>
   import('./pages/settings/integrations/WebhookDetail').then((m) => ({ default: m.WebhookDetail })),
 );
@@ -268,6 +271,7 @@ export function App() {
                     <Route path="/settings/privacy" element={<PrivacySettings />} />
                     <Route path="/settings/ai" element={<AiSettings />} />
                     <Route path="/settings/integrations" element={<IntegrationsPage />} />
+                    <Route path="/settings/integrations/webhooks" element={<WebhooksPage />} />
                     <Route path="/settings/integrations/:id" element={<WebhookDetail />} />
                   </Route>
                   <Route path="*" element={<Navigate to="/" replace />} />

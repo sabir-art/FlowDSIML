@@ -3909,7 +3909,7 @@
     "backGeneral": "Back to General",
     "notFound": "This webhook does not exist or was deleted",
     "title": "Integrations",
-    "sub": "Send your demo events to your tools. Owners and admins only.",
+    "sub": "Send your demos’ events to your tools.",
     "webhooks": "Webhooks",
     "webhooksSub": "A signed HTTPS call for each chosen event.",
     "add": "Add a webhook",
@@ -3939,8 +3939,6 @@
     "failures_one": "{{count}} failure",
     "failures_other": "{{count}} failures",
     "disabled": "Disabled",
-    "otherTitle": "Other integrations",
-    "otherSub": "These connections are coming. Meanwhile, a webhook can feed most of these tools.",
     "soon_slack": "Slack",
     "soon_slack_body": "Receive new leads and comments in a channel.",
     "soon_zapier": "Zapier",
@@ -4023,7 +4021,28 @@
     "soon_keys": "API keys",
     "soon_keys_body": "Read analytics and drive demos from your scripts.",
     "soon_remote": "Player control",
-    "soon_remote_body": "Open, go to a step and listen to events from the host page."
+    "soon_remote_body": "Open, go to a step and listen to events from the host page.",
+    "category": "Category",
+    "cat": {
+      "all": "All",
+      "connected": "Connected",
+      "communication": "Communication",
+      "audience": "Audience measurement",
+      "automation": "Automation",
+      "crm": "User relations"
+    },
+    "connect": "Connect",
+    "activeCount_one": "{{count}} active",
+    "activeCount_other": "{{count}} active",
+    "pausedCount_one": "{{count}} paused after failures",
+    "pausedCount_other": "{{count}} paused after failures",
+    "noneConnected": "No active connection",
+    "needOther": "Need another connection?",
+    "askIt": "Ask your IT department",
+    "setSupport": "Set the support link",
+    "requestSubject": "Connection request",
+    "emailingWhy": "Meanwhile, a webhook can feed these tools.",
+    "useWebhook": "Use a webhook"
   },
   "glossary": {
     "title": "Glossary",
@@ -4159,7 +4178,6 @@
       "field": "Identity provider metadata URL",
       "why": "Requires a SAML-compatible hosting plan. Meanwhile: invitation links and allowed domains."
     },
-    "useWebhooks": "Use webhooks",
     "inviteMembers": "Invite members",
     "security": "Security",
     "securitySub": "Sign-in and access to the workspace."

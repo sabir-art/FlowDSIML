@@ -711,6 +711,8 @@ const APP_PAGES = [
   { name: 'Glossaire (vide)', route: '/#/settings/glossary' },
   { name: 'Glossaire', route: '/#/settings/glossary', seed: seedGlossary },
   { name: 'Intégrations', route: '/#/settings/integrations', seed: seedWebhooks },
+  { name: 'Intégrations (aucune)', route: '/#/settings/integrations?categorie=connectees' },
+  { name: 'Intégrations · webhooks', route: '/#/settings/integrations/webhooks', seed: seedWebhooks },
   // VB-03 : Sécurité (connexion unique « Bientôt » ; « Fonctions à venir » supprimée en L48-A)
   { name: 'Sécurité', route: '/#/settings/security' },
   { name: 'Confidentialité', route: '/#/settings/privacy' },
@@ -760,7 +762,7 @@ const APP_PAGES = [
   })),
   {
     name: 'Intégrations · ajout',
-    route: '/#/settings/integrations',
+    route: '/#/settings/integrations/webhooks',
     seed: seedWebhooks,
     open: (p) => p.getByRole('button', { name: 'Ajouter un webhook' }).first().click(),
   },

@@ -75,7 +75,14 @@ function currentEntry(path: string) {
  * fil d'Ariane « Paramètres > Groupe > Page » au-dessus du titre de la page (h1, le nom de la section).
  * Chaque section garde sa route (/settings/…) pour les liens directs.
  */
-export function SettingsShell({ children }: { children: ReactNode }) {
+export function SettingsShell({
+  children,
+  sub,
+}: {
+  children: ReactNode;
+  /** L48-F : sous-page d'une entrée (ex. Webhooks) : l'entrée devient un lien du fil, `title` est le h1. */
+  sub?: { title: string; trail?: Array<{ label: string; to: string }> };
+}) {
   const { t } = useTranslation();
   const { can } = useWorkspace();
   const { pathname } = useLocation();
@@ -95,15 +102,30 @@ export function SettingsShell({ children }: { children: ReactNode }) {
                     <ChevronRight size={14} aria-hidden="true" />
                     {t(`settings.grp.${here.group}`)}
                   </li>
-                  <li aria-current="page">
-                    <ChevronRight size={14} aria-hidden="true" />
-                    {t(here.entry.label)}
-                  </li>
+                  {sub ? (
+                    <>
+                      {[{ label: t(here.entry.label), to: here.entry.to! }, ...(sub.trail ?? [])].map((c) => (
+                        <li key={c.to}>
+                          <ChevronRight size={14} aria-hidden="true" />
+                          <Link to={c.to}>{c.label}</Link>
+                        </li>
+                      ))}
+                      <li aria-current="page">
+                        <ChevronRight size={14} aria-hidden="true" />
+                        {sub.title}
+                      </li>
+                    </>
+                  ) : (
+                    <li aria-current="page">
+                      <ChevronRight size={14} aria-hidden="true" />
+                      {t(here.entry.label)}
+                    </li>
+                  )}
                 </>
               )}
             </ol>
           </nav>
-          <h1 id="st-title">{here ? t(here.entry.label) : t('settings.title')}</h1>
+          <h1 id="st-title">{sub ? sub.title : here ? t(here.entry.label) : t('settings.title')}</h1>
         </div>
         <div className="page-head__actions">
           <NotificationBell />

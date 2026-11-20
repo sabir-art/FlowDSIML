@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, CircleAlert, Pause, RefreshCw, Send } from 'lucide-react';
+import { CircleAlert, Pause, RefreshCw, Send } from 'lucide-react';
 import { SettingsShell } from '../SettingsShell';
 import { supabase } from '../../../lib/supabase';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -31,7 +31,7 @@ import {
   type SendResult,
   type Webhook,
 } from './webhooks';
-import { SecretDialog, StateBadge, resultText } from './IntegrationsPage';
+import { SecretDialog, StateBadge, resultText } from './WebhooksPage';
 import './integrations.css';
 
 export function WebhookDetail() {
@@ -68,18 +68,20 @@ export function WebhookDetail() {
     });
   }, [hook?.created_by, current]);
 
+  // L48-F §2 : fil « Paramètres › … › Intégrations › Webhooks »
+  const crumb = { title: t('integrations.webhooks') };
   if (!can('integrations.manage') || hook === null)
     return (
-      <SettingsShell>
+      <SettingsShell sub={crumb}>
         <div className="empty" role="status">
           <h2 className="t-h3">{t(hook === null ? 'integrations.notFound' : 'integrations.noAccess')}</h2>
-          <Link className="btn btn-secondary btn-sm" to="/settings/integrations">
-            {t('integrations.title')}
+          <Link className="btn btn-secondary btn-sm" to="/settings/integrations/webhooks">
+            {t('integrations.webhooks')}
           </Link>
         </div>
       </SettingsShell>
     );
-  if (!hook) return <SettingsShell>{null}</SettingsShell>;
+  if (!hook) return <SettingsShell sub={crumb}>{null}</SettingsShell>;
 
   const shown = log.filter(
     (d) =>
@@ -122,12 +124,13 @@ export function WebhookDetail() {
   };
 
   return (
-    <SettingsShell>
+    <SettingsShell
+      sub={{
+        title: hostOf(hook.url),
+        trail: [{ label: t('integrations.webhooks'), to: '/settings/integrations/webhooks' }],
+      }}
+    >
       <section className="l23" aria-labelledby="wh-t">
-        <Link to="/settings/integrations" className="btn btn-ghost btn-sm l23-back">
-          <ArrowLeft aria-hidden="true" />
-          {t('integrations.title')}
-        </Link>
         <div className="row between wrap l23-head">
           <div>
             <h2 className="t-h2 wh-url wh-url--title" id="wh-t">
@@ -171,7 +174,7 @@ export function WebhookDetail() {
               items={[
                 {
                   label: t('integrations.edit'),
-                  onSelect: () => navigate('/settings/integrations', { state: { edit: hook.id } }),
+                  onSelect: () => navigate('/settings/integrations/webhooks', { state: { edit: hook.id } }),
                 },
                 {
                   label: t('integrations.delete'),
@@ -186,7 +189,7 @@ export function WebhookDetail() {
                       })
                     ) {
                       await deleteWebhook(hook.id);
-                      navigate('/settings/integrations');
+                      navigate('/settings/integrations/webhooks');
                     }
                   },
                 },

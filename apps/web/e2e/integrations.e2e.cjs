@@ -53,17 +53,18 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   const t = state.tables;
 
   // L23-02 : vide, onglet « Intégrations » pour un propriétaire
-  await page.goto(`${BASE}/#/settings/integrations`);
-  await page.waitForSelector('.l23 .empty');
+  // L48-F §2 : la liste des webhooks a sa page
+  await page.goto(`${BASE}/#/settings/integrations/webhooks`);
+  await page.waitForSelector('.l23 .fd-empty');
   ok(
-    (await page.getByRole('link', { name: 'Intégrations' }).count()) === 1,
+    (await page.locator('.snav').getByRole('link', { name: 'Intégrations' }).count()) === 1,
     'L23 : onglet Intégrations (propriétaire)',
   );
-  ok(/Aucun webhook/.test(await page.textContent('.l23 .empty')), 'L23-02 : état vide');
+  ok(/Aucun webhook/.test(await page.textContent('.l23 .fd-empty')), 'L23-02 : état vide');
   await shot('02-vide');
 
   // L23-03 : créer (erreur d'adresse, événements, rappel RGPD)
-  await page.locator('.l23 .empty').getByRole('button', { name: 'Ajouter un webhook' }).click();
+  await page.locator('.l23 .fd-empty').getByRole('button', { name: 'Ajouter un webhook' }).click();
   const dlg = page.getByRole('dialog', { name: 'Ajouter un webhook' });
   await dlg.waitFor();
   const url = dlg.getByLabel('Adresse de réception');
@@ -173,10 +174,6 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
     /En pause/.test(await page.locator('.l23 tbody tr').nth(1).textContent()) &&
       /6 échecs/.test(await page.locator('.l23 tbody tr').nth(1).textContent()),
     'L23-01 : « En pause » et « 6 échecs »',
-  );
-  ok(
-    (await page.locator('.int-card[aria-disabled="true"]').count()) === 8,
-    'L23-01 : 8 cartes « Bientôt » (dont Clés d’API et Pilotage) non cliquables',
   );
   ok(
     (await page.getByRole('button', { name: 'Actions pour hooks.acme.example' }).count()) === 1,

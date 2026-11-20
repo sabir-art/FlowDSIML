@@ -41,30 +41,26 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.goto(`${APP}/#/settings/ai`);
   await page.getByRole('heading', { level: 1, name: 'Assistance IA' }).waitFor();
   await noV2('Assistance IA');
+  // L48-F : lignes « Bientôt » de la liste des intégrations
   await page.goto(`${APP}/#/settings/integrations`);
-  await page.getByRole('heading', { name: 'Webhooks' }).waitFor();
-  const enrich = page.locator('.int-card', { hasText: 'Enrichissement des visiteurs' });
+  await page.locator('.int-list').first().waitFor();
+  const enrich = page.locator('.int-list > li', { hasText: 'Enrichissement des visiteurs' });
   ok(
-    (await enrich.count()) === 1 && /Bientôt/.test(await enrich.locator('.badge').innerText()),
+    (await enrich.count()) === 1 && /Bientôt/.test(await enrich.locator('.int-soon').innerText()),
     'Intégrations : enrichissement des visiteurs « Bientôt »',
   );
-  // Intégrations : carte e-mailing avec l'alternative
-  const mail = page.locator('.int-card', { hasText: 'Outils d' });
+  // Intégrations : ligne e-mailing avec l'alternative
+  const mail = page.locator('.int-list > li', { hasText: 'Outils d' });
   ok(
-    (await mail.count()) === 1 && /Bientôt/.test(await mail.locator('.badge').innerText()),
-    'Intégrations : carte e-mailing',
+    (await mail.count()) === 1 && (await mail.innerText()).includes('En attendant, un webhook'),
+    'Intégrations : ligne e-mailing « En attendant, un webhook… »',
   );
-  ok(
-    (await mail.locator('.soon-why').innerText()).includes('En attendant'),
-    'Intégrations : « En attendant : webhooks »',
-  );
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await mail.getByRole('button', { name: 'Utiliser les webhooks' }).click();
-  ok(await page.evaluate(() => document.activeElement?.id === 'webhooks'), 'lien vers les webhooks');
-  if (SHOTS) {
-    await mail.scrollIntoViewIfNeeded();
-    await page.locator('.l23-soon').screenshot({ path: `${SHOTS}/vb-02-integrations${sfx}.png` });
-  }
+  if (SHOTS)
+    await page.locator('.int-card-list').screenshot({ path: `${SHOTS}/vb-02-integrations${sfx}.png` });
+  await mail.getByRole('link', { name: 'Utiliser un webhook' }).click();
+  await page.waitForURL(/settings\/integrations\/webhooks/);
+  ok(true, 'lien vers les webhooks');
+  await page.goBack();
 
   // ===== VB-03 : Sécurité =====
   await page.getByRole('link', { name: 'Sécurité' }).click();

@@ -119,6 +119,9 @@ jobs:
       - name: Analytics L48-D (onglets, widgets, onglet Démos)
         if: always()
         run: cd apps/web && node e2e/l48d-analytics.e2e.cjs
+      - name: Intégrations L48-F (liste, connectées, demande à la DSI, page Webhooks)
+        if: always()
+        run: cd apps/web && node e2e/l48f-integrations.e2e.cjs
       - name: Assistant de démarrage L48-C (5 étapes, reprise, extension détectée, Nouvel espace)
         if: always()
         run: cd apps/web && node e2e/onboarding-import.e2e.cjs

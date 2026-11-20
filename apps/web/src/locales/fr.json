@@ -3909,7 +3909,7 @@
     "backGeneral": "Revenir à Général",
     "notFound": "Ce webhook n’existe pas ou a été supprimé",
     "title": "Intégrations",
-    "sub": "Envoyez les événements de vos démos vers vos outils. Réservé aux propriétaires et admins.",
+    "sub": "Envoyez les événements de vos démos vers vos outils.",
     "webhooks": "Webhooks",
     "webhooksSub": "Un appel HTTPS signé à chaque événement choisi.",
     "add": "Ajouter un webhook",
@@ -3939,8 +3939,6 @@
     "failures_one": "{{count}} échec",
     "failures_other": "{{count}} échecs",
     "disabled": "Désactivé",
-    "otherTitle": "Autres intégrations",
-    "otherSub": "Ces connexions arrivent. En attendant, un webhook peut alimenter la plupart de ces outils.",
     "soon_slack": "Slack",
     "soon_slack_body": "Recevoir les nouveaux leads et les commentaires dans un canal.",
     "soon_zapier": "Zapier",
@@ -4023,7 +4021,28 @@
     "soon_keys": "Clés d’API",
     "soon_keys_body": "Lisez les analytics et pilotez les démos depuis vos scripts.",
     "soon_remote": "Pilotage du player",
-    "soon_remote_body": "Ouvrir, aller à une étape, écouter les événements depuis la page hôte."
+    "soon_remote_body": "Ouvrir, aller à une étape, écouter les événements depuis la page hôte.",
+    "category": "Catégorie",
+    "cat": {
+      "all": "Toutes",
+      "connected": "Connectées",
+      "communication": "Communication",
+      "audience": "Mesure d'audience",
+      "automation": "Automatisation",
+      "crm": "Relation usagers"
+    },
+    "connect": "Connecter",
+    "activeCount_one": "{{count}} actif",
+    "activeCount_other": "{{count}} actifs",
+    "pausedCount_one": "{{count}} en pause après des échecs",
+    "pausedCount_other": "{{count}} en pause après des échecs",
+    "noneConnected": "Aucune connexion active",
+    "needOther": "Besoin d'une autre connexion ?",
+    "askIt": "Faire une demande à la DSI",
+    "setSupport": "Renseigner le lien du support",
+    "requestSubject": "Demande de connexion",
+    "emailingWhy": "En attendant, un webhook peut alimenter ces outils.",
+    "useWebhook": "Utiliser un webhook"
   },
   "glossary": {
     "title": "Glossaire",
@@ -4159,7 +4178,6 @@
       "field": "URL des métadonnées du fournisseur",
       "why": "Nécessite une offre d'hébergement compatible SAML. En attendant : lien d’invitation et domaines autorisés."
     },
-    "useWebhooks": "Utiliser les webhooks",
     "inviteMembers": "Inviter des membres",
     "security": "Sécurité",
     "securitySub": "Connexion et accès à l’espace."

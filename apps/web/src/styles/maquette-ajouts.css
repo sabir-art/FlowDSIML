@@ -2989,12 +2989,6 @@
   font-size: var(--fd-text-label-size, 13px);
   color: var(--fd-color-text-muted);
 }
-.mk .int-card .soon-why {
-  margin-top: 8px;
-}
-.mk .l23-soon-more {
-  margin: 12px 0 0;
-}
 
 /* L26-06 à 08 : visiteurs récurrents */
 /* L26-06 : six indicateurs sur une ligne en grand écran */
