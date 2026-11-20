@@ -38,7 +38,7 @@
   .a-ib { all: unset; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: var(--fd-color-text-muted); cursor: pointer; }
   .a-ib:hover { background: var(--fd-color-surface-sunken); }
   .a-dd { all: unset; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--fd-color-text-muted); cursor: pointer; }
-  .a-ln { display: grid; grid-template-columns: minmax(0, 1fr) minmax(80px, 1.2fr) 96px; gap: 16px; align-items: center; font-size: 14px; }
+  .a-ln { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: baseline; font-size: 14px; } .a-ln .b { grid-column: 1 / -1; grid-row: 2; }
   .a-ln .b { height: 6px; border-radius: 999px; background: var(--fd-color-surface-sunken); overflow: hidden; } .a-ln .b i { display: block; height: 100%; border-radius: 999px; background: var(--fd-color-text); }
   .a-ln .n { text-align: right; font-variant-numeric: tabular-nums; } .a-ln .n small { color: var(--fd-color-text-muted); font-size: 13px; }
   .a-ln.drop .n small { color: var(--fd-color-danger, #b4234b); font-weight: 600; }
@@ -69,7 +69,7 @@
   .u2-ph .k-tab .v { font-size: 22px; } .u2-ph .k-tab[aria-selected='true']::after { left: 18px; right: 18px; } .u2-ph .k-tab .d { display: none; }
   .u2-ph .k-chart { padding: 16px; } .u2-ph .k-leg { display: none; }
   .u2-ph .a-bar { flex-wrap: wrap; } .u2-ph .a-flt { padding: 0 14px; }
-  .u2-ph .a-w { padding: 20px; min-height: 0; } .u2-ph .a-ln { gap: 10px; }
+  .u2-ph .a-w { padding: 20px; min-height: 0; }
 </style>
 </head>
 <body>

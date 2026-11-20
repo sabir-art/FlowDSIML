@@ -55,6 +55,7 @@
 | **Nouveaux et récurrents** | 6 | 2 chiffres (nouveaux, récurrents) et une barre empilée en 2 tons de gris | `workspace_returning` |
 | **Appareils et navigateurs** | 6 | « Bientôt » en texte à droite du titre ; une phrase : « Le type d'appareil n'est pas encore enregistré. » | aucune (jamais masqué) |
 
+- **Ligne de widget** (Sources, Étape par étape) : nom à gauche et chiffre à droite sur une ligne, barre de 6 px sur toute la largeur dessous, 14 px entre deux lignes. Le nom ne se coupe pas, même dans une demi-largeur.
 - **En-tête de widget** :
   - titre en 15 px 600 ;
   - à droite, un bouton à icône `dots` (« Plus d'actions pour Sources »), qui ouvre un menu avec **Exporter en CSV**.
