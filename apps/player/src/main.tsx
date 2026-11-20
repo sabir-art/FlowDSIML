@@ -21,6 +21,7 @@ import { APP_ORIGIN } from './config';
 import { Player, type PresentState } from './Player';
 import { PasswordGate, StartScreen, SysScreen, type SysKind } from './Gate';
 import { PublicPage } from './PublicPage';
+import { fromCenterParams, type FromCenter } from './CenterNext';
 import '@flowdsiml/player-core/player-core.css';
 import './player.css';
 
@@ -49,6 +50,8 @@ type State =
       uiLocale?: 'fr' | 'en';
       /** L19b : lecteur affiché dans la page publique (statistiques « Page publique »). */
       channel?: 'page' | null;
+      /** L38-4 : module ouvert depuis le centre de formation. */
+      fromCenter?: FromCenter | null;
     };
 
 const inIframe = window.parent !== window;
@@ -208,6 +211,7 @@ function App() {
             preview,
             resume: resumable(resume) ? resume : undefined,
             clickToStart: q('start') === 'click' && !preview,
+            fromCenter: fromCenterParams(search),
             uiLocale: lang === 'fr' || lang === 'en' ? lang : undefined,
           });
       };
@@ -321,6 +325,7 @@ function App() {
       present={state.present}
       uiLocale={state.uiLocale}
       measureInfo={!state.preview && !state.present && state.visitMeasure !== false}
+      fromCenter={state.preview ? null : (state.fromCenter ?? null)}
       onLead={async (_form, data) => {
         if (state.preview) return;
         await submitLead({

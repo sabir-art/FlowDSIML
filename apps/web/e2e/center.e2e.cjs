@@ -49,7 +49,7 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       'L14-01 : carte « Ma formation en cours »',
     );
     ok(
-      (await me.getByRole('link').getAttribute('href')) === `#/d/${F('a2')}`,
+      (await me.getByRole('link').getAttribute('href')) === `#/d/${F('a2')}?c=ml-exemple&f=${F('f1')}`,
       'L14-01 : reprise sur le module en cours',
     );
     ok((await p.locator('.fc').count()) === 4, 'L14-01 : une carte par formation');
@@ -124,7 +124,7 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     );
     ok(
       (await p.locator('.fp-list li', { hasText: 'Rapport' }).getByRole('link').getAttribute('href')) ===
-        `#/d/${F('c3')}`,
+        `#/d/${F('c3')}?c=ml-exemple&f=${F('f3')}`,
       'L14-05 : « Commencer » ouvre le lecteur (écran mot de passe L11)',
     );
     await p.close();

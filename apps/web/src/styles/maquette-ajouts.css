@@ -1102,6 +1102,27 @@
 .mk .sh-empty {
   margin: 8px 0;
 }
+/* L38-1 : module d'une formation du centre, le lien du centre passe en premier */
+.mk .sh-center-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+}
+.mk .sh-center-note svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+.mk .sh-actions .btn-sm svg {
+  width: 14px;
+  height: 14px;
+}
 .mk .sh-row-h {
   text-align: left;
   font-weight: 600;

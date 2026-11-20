@@ -1989,7 +1989,12 @@
       "badgeOff": "Démo seule",
       "copyPage": "Copier l’adresse de la page {{name}}"
     },
-    "popupLabel": "Voir la démo"
+    "popupLabel": "Voir la démo",
+    "centerNotice": "Cette démo est le module {{position}} de « {{path}} » dans le centre de formation. Envoyez aux apprenants le lien du centre : il affiche leur progression, la reprise et leur attestation.",
+    "centerLink": "Lien du centre",
+    "centerLinkOf": "Copier le lien du centre de {{name}} (progression et attestation)",
+    "demoLinkOf": "Copier le lien de la démo seule de {{name}}",
+    "centerLinkCreated": "Lien créé. Le lien du centre (progression et attestation) est copié dans le presse-papiers."
   },
   "analytics": {
     "title": "Analytics",

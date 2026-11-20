@@ -89,6 +89,7 @@ import {
 import { fmt, strings, type Dict } from './i18n';
 import type { QuizResult, TrackerLike } from './api';
 import { LeadForm } from './LeadForm';
+import { CenterNext, type FromCenter } from './CenterNext';
 
 interface Props {
   manifest: Manifest;
@@ -107,6 +108,8 @@ interface Props {
   scoreQuiz?: (answers: Record<string, string[]>, attemptsUsed: number) => Promise<QuizResult>;
   /** L16 : langue de l'interface imposée (?lang=fr|en, widget, paquet). */
   uiLocale?: 'fr' | 'en';
+  /** L38-4 : module ouvert depuis le centre de formation (fin : module suivant, retour au centre). */
+  fromCenter?: FromCenter | null;
   /** L26-08 : bouton « Informations » (mesure des visites, refus) quand la mesure est active. */
   measureInfo?: boolean;
   onLead: (
@@ -159,6 +162,7 @@ export function Player({
   scoreQuiz,
   uiLocale,
   measureInfo = false,
+  fromCenter = null,
 }: Props) {
   // L18 : test A/B. Variante tirée une fois par visiteur (jamais en aperçu : variante A), bulle
   // testée remplacée pour B, et chaque événement marqué de la variante.
@@ -1005,13 +1009,18 @@ export function Player({
                     <ChevronRight {...ICON} size={16} />
                   </button>
                 ) : (
-                  <button
-                    class={`p-btn ${step.cta || !endText ? 'p-btn-ghost' : 'p-btn-secondary'}`}
-                    onClick={() => go(0)}
-                  >
-                    <RotateCcw {...ICON} size={16} />
-                    {t.restart}
-                  </button>
+                  <>
+                    {fromCenter && (
+                      <CenterNext from={fromCenter} demoId={m.demoId} done={completed.current} t={t} />
+                    )}
+                    <button
+                      class={`p-btn ${step.cta || !endText || fromCenter ? 'p-btn-ghost' : 'p-btn-secondary'}`}
+                      onClick={() => go(0)}
+                    >
+                      <RotateCcw {...ICON} size={16} />
+                      {t.restart}
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -1031,16 +1040,23 @@ export function Player({
               })}
             </p>
             <div class="p-card-acts p-card-acts--col">
+              {fromCenter && (
+                <CenterNext from={fromCenter} demoId={m.demoId} done={completed.current} t={t} />
+              )}
               {m.cta && (
-                <button class="p-btn p-btn-primary" onClick={() => onCta(m.cta!.url, m.cta!.label)} autoFocus>
+                <button
+                  class={`p-btn ${fromCenter ? 'p-btn-ghost' : 'p-btn-primary'}`}
+                  onClick={() => onCta(m.cta!.url, m.cta!.label)}
+                  autoFocus={!fromCenter}
+                >
                   {sub(m.cta.label)}
                   <ExternalLink {...ICON} size={16} />
                 </button>
               )}
               <button
-                class={`p-btn ${m.cta ? 'p-btn-ghost' : 'p-btn-secondary'}`}
+                class={`p-btn ${m.cta || fromCenter ? 'p-btn-ghost' : 'p-btn-secondary'}`}
                 onClick={() => go(0)}
-                autoFocus={!m.cta}
+                autoFocus={!m.cta && !fromCenter}
               >
                 <RotateCcw {...ICON} size={16} />
                 {t.restart}

@@ -1,4 +1,17 @@
-import { Copy, Download, Eye, Info, Mail, Play, Plus, Power, ShieldCheck, Trash2, X } from 'lucide-react';
+import {
+  Copy,
+  Download,
+  Eye,
+  GraduationCap,
+  Info,
+  Mail,
+  Play,
+  Plus,
+  Power,
+  ShieldCheck,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -34,6 +47,7 @@ import { TargetGuide, TargetPicker, useEmbedTarget } from './EmbedGuide';
 import { popupAllowed } from './snippets';
 import { popupCode } from './distribute';
 import { PLAYER_URL } from '../../lib/env';
+import { centerLinkUrl, centerModuleOf, type CenterModule } from './centerModule';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
@@ -71,6 +85,8 @@ export function SharePage() {
   const [signers, setSigners] = useState<Array<{ id: string; name: string }>>([]);
   const [dsRows, setDsRows] = useState<string[] | null>(null);
   const [origins, setOrigins] = useState('');
+  /** L38-1 : module d'une formation publiée dans le centre (le lien du centre passe alors en premier). */
+  const [centerModule, setCenterModule] = useState<CenterModule | null>(null);
   // RP-2 : la modale RGPD ouvre directement l'onglet Accès (?tab=access)
   const [tab, setTab] = useState<Tab>(() => {
     const q = params.get('tab');
@@ -116,6 +132,19 @@ export function SharePage() {
     ]);
     const list = l.data ?? [];
     setLinks(list);
+    const [center, paths, mods] = await Promise.all([
+      supabase
+        .from('training_centers')
+        .select('slug, published')
+        .eq('workspace_id', d.data.workspace_id)
+        .maybeSingle(),
+      supabase.from('paths').select('id, title').eq('workspace_id', d.data.workspace_id),
+      supabase
+        .from('path_modules')
+        .select('path_id, demo_id, position')
+        .eq('workspace_id', d.data.workspace_id),
+    ]);
+    setCenterModule(centerModuleOf(center.data, paths.data ?? [], mods.data ?? [], demoId));
     const ver = v.data as { published_at: string; public_ack: { by?: string; at?: string } | null } | null;
     setPublishedAt(ver?.published_at ?? null);
     const pa = ver?.public_ack;
@@ -491,6 +520,17 @@ export function SharePage() {
                     </button>
                   )}
                 </div>
+                {centerModule && (
+                  <p className="sh-center-note" role="note">
+                    <GraduationCap aria-hidden="true" />
+                    <span>
+                      {t('share.centerNotice', {
+                        position: centerModule.position,
+                        path: centerModule.pathTitle,
+                      })}
+                    </span>
+                  </p>
+                )}
                 {links.length === 0 ? (
                   <p className="muted sh-empty">{t('share.noLinks')}</p>
                 ) : (
@@ -580,10 +620,35 @@ export function SharePage() {
                               </td>
                               <td className="r">
                                 <div className="row sh-actions">
+                                  {centerModule && (
+                                    <button
+                                      type="button"
+                                      className="btn btn-secondary btn-sm"
+                                      aria-label={t('share.centerLinkOf', { name: l.name || '—' })}
+                                      title={t('share.centerLinkOf', { name: l.name || '—' })}
+                                      onClick={() =>
+                                        void navigator.clipboard
+                                          ?.writeText(centerLinkUrl(PLAYER_URL, centerModule.slug, l.token))
+                                          .then(() => run(async () => undefined, t('members.linkCopied')))
+                                      }
+                                    >
+                                      <GraduationCap aria-hidden="true" />
+                                      {t('share.centerLink')}
+                                    </button>
+                                  )}
                                   <button
                                     type="button"
                                     className="btn btn-ghost btn-sm btn-icon"
-                                    aria-label={t('share.copyLinkOf', { name: l.name || '—' })}
+                                    aria-label={
+                                      centerModule
+                                        ? t('share.demoLinkOf', { name: l.name || '—' })
+                                        : t('share.copyLinkOf', { name: l.name || '—' })
+                                    }
+                                    title={
+                                      centerModule
+                                        ? t('share.demoLinkOf', { name: l.name || '—' })
+                                        : undefined
+                                    }
                                     onClick={() =>
                                       void navigator.clipboard
                                         ?.writeText(shareLinkUrl(l.token))
@@ -708,43 +773,49 @@ export function SharePage() {
           }}
           onClose={() => setCreating(false)}
           onCreate={async (name, vars, days, pp) => {
-            await run(async () => {
-              const created = check(
-                await supabase
-                  .from('share_links')
-                  .insert({
-                    demo_id: demoId,
-                    workspace_id: demo.workspace_id,
-                    name,
-                    variables: vars,
-                    expires_at: days ? new Date(Date.now() + days * 86400_000).toISOString() : null,
-                    // L25-13 : page personnalisée (le code est tiré par la base)
-                    ...(pp.enabled && pubPage.enabled
-                      ? {
-                          page_enabled: true,
-                          page_title: pp.title.trim().slice(0, 90),
-                          page_message: pp.message.trim().slice(0, 400),
-                          signed_by: pp.signedBy || null,
-                          dataset_row: pp.datasetRow === '' ? null : Number(pp.datasetRow),
-                          cta_label: pp.ctaLabel.trim() || null,
-                          cta_url: pp.ctaUrl.trim() || null,
-                        }
-                      : {}),
-                  })
-                  .select('token, page_code')
-                  .single(),
-              );
-              // P10 : le lien créé est copié automatiquement (l'adresse de la page s'il y en a une)
-              await navigator.clipboard
-                ?.writeText(
-                  created.page_code
-                    ? personalPageUrl(demoId, created.page_code)
-                    : shareLinkUrl(created.token),
-                )
-                .catch(() => undefined);
-              setCreating(false);
-              await load();
-            }, t('share.linkCreatedCopied'));
+            await run(
+              async () => {
+                const created = check(
+                  await supabase
+                    .from('share_links')
+                    .insert({
+                      demo_id: demoId,
+                      workspace_id: demo.workspace_id,
+                      name,
+                      variables: vars,
+                      expires_at: days ? new Date(Date.now() + days * 86400_000).toISOString() : null,
+                      // L25-13 : page personnalisée (le code est tiré par la base)
+                      ...(pp.enabled && pubPage.enabled
+                        ? {
+                            page_enabled: true,
+                            page_title: pp.title.trim().slice(0, 90),
+                            page_message: pp.message.trim().slice(0, 400),
+                            signed_by: pp.signedBy || null,
+                            dataset_row: pp.datasetRow === '' ? null : Number(pp.datasetRow),
+                            cta_label: pp.ctaLabel.trim() || null,
+                            cta_url: pp.ctaUrl.trim() || null,
+                          }
+                        : {}),
+                    })
+                    .select('token, page_code')
+                    .single(),
+                );
+                // P10 : le lien créé est copié automatiquement : L38-1 celui du centre pour un module de
+                // formation, sinon l'adresse de la page s'il y en a une, sinon le lien de la démo
+                await navigator.clipboard
+                  ?.writeText(
+                    centerModule
+                      ? centerLinkUrl(PLAYER_URL, centerModule.slug, created.token)
+                      : created.page_code
+                        ? personalPageUrl(demoId, created.page_code)
+                        : shareLinkUrl(created.token),
+                  )
+                  .catch(() => undefined);
+                setCreating(false);
+                await load();
+              },
+              t(centerModule ? 'share.centerLinkCreated' : 'share.linkCreatedCopied'),
+            );
           }}
         />
       )}

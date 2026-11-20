@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-preact';
 import { centerLinkToken, issueCertificate, openCenter, type CenterGateInfo } from './api';
+import { centerModuleHref } from './CenterNext';
 import {
   currentPath,
   demoSections,
@@ -344,7 +345,7 @@ function Home({ t, data, views, route }: { t: Dict; data: CenterData; views: Pat
               <span style={{ width: `${(me.validated / Math.max(1, me.total)) * 100}%` }} />
             </span>
             {me.next && (
-              <a href={moduleHref(me.next.demoId)}>
+              <a href={centerModuleHref(me.next.demoId, { slug: route.slug, pathId: me.path.id })}>
                 {fmt(c, 'resume', { module: me.next.title })}
                 <ArrowRight aria-hidden="true" />
               </a>
@@ -867,7 +868,10 @@ function PathPage({
               {st.kind === 'lock' || st.kind === 'expired' ? (
                 <span />
               ) : (
-                <a class={`cta${st.kind === 'cur' ? '' : ' cta--sec'}`} href={moduleHref(m.demoId)}>
+                <a
+                  class={`cta${st.kind === 'cur' ? '' : ' cta--sec'}`}
+                  href={centerModuleHref(m.demoId, { slug: route.slug, pathId: p.id })}
+                >
                   {st.kind === 'ok' ? c.ctaReview : st.kind === 'cur' ? c.ctaResume : c.ctaStart}
                   <span class="sr-only"> {m.title}</span>
                   {st.kind === 'cur' && <ArrowRight aria-hidden="true" />}

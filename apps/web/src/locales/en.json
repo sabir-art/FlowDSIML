@@ -1989,7 +1989,12 @@
       "badgeOff": "Demo only",
       "copyPage": "Copy the page address {{name}}"
     },
-    "popupLabel": "View the demo"
+    "popupLabel": "View the demo",
+    "centerNotice": "This demo is module {{position}} of “{{path}}” in the training centre. Send learners the centre link: it shows their progress, lets them resume and gives their certificate.",
+    "centerLink": "Centre link",
+    "centerLinkOf": "Copy the centre link of {{name}} (progress and certificate)",
+    "demoLinkOf": "Copy the demo-only link of {{name}}",
+    "centerLinkCreated": "Link created. The centre link (progress and certificate) is copied to the clipboard."
   },
   "analytics": {
     "title": "Analytics",
