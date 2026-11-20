@@ -4,6 +4,7 @@ import { Award, BookOpen, CircleCheck, CircleX, RefreshCw, RotateCcw } from 'luc
 import { fmt, type Dict } from './i18n';
 import { isCorrect, isOpenQuestion, isPartial, scoreQuiz, shuffled } from './logic';
 import type { QuizResult } from './api';
+import { contrast } from './center';
 
 const ICON = { size: 18, strokeWidth: 2, 'aria-hidden': true } as const;
 
@@ -16,6 +17,28 @@ type Phase =
  * correction par texte et icône (jamais la couleur seule), explication en role=status,
  * résultat avec phrase de score lue au lecteur d'écran (l'anneau est décoratif).
  */
+const HEX6 = /^#[0-9a-f]{6}$/i;
+const rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const hex = (c: number[]) => `#${c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
+
+/**
+ * L42 §4 : couleurs de l'arc selon la carte (surface) et le texte du thème. La piste est le texte à 10 %
+ * sur la surface ; l'arc garde au moins 3:1 contre elle, sinon le texte à 70 % (même règle que les boutons).
+ */
+export function ringVars(primary: string, surface: string, text: string): Record<string, string> {
+  if (![primary, surface, text].every((c) => HEX6.test(c))) return {};
+  const s = rgb(surface);
+  const tx = rgb(text);
+  const track = hex(s.map((v, i) => v * 0.9 + tx[i]! * 0.1));
+  const darkCard = contrast(surface, '#000000') < contrast(surface, '#FFFFFF');
+  const fallback = hex(s.map((v, i) => v * 0.3 + tx[i]! * 0.7));
+  const brand = darkCard && primary.toUpperCase() === '#A3195B' ? '#CF86A9' : primary;
+  return {
+    '--p-ring-pass': contrast(brand, track) >= 3 ? brand : fallback,
+    '--p-ring-fail': darkCard ? '#A9B3BF' : '#5b6675',
+  };
+}
+
 export function Quiz({
   quiz,
   module,
@@ -99,43 +122,43 @@ export function Quiz({
       (quiz.attempts > 0 ? Math.max(0, quiz.attempts - used) : Number.POSITIVE_INFINITY);
     const canRetry = left > 0;
     const passed = result.passed;
-    const R = 70;
+    // L42 : anneau 168 px, rayon 74 ; encoche du seuil coupée dans la piste, arc arrondi par-dessus
+    const R = 74;
     const C = 2 * Math.PI * R;
-    const angle = (quiz.threshold / 100) * 2 * Math.PI - Math.PI / 2;
+    const t = (quiz.threshold / 100) * C;
+    const arc = (result.score / 100) * C;
     return (
       <section class="p-quiz fd-player-scope" aria-label={fmt(q, 'region', { module: sub(module) })}>
         <div class="p-quiz-card p-quiz-result">
           {!survey && (
-            <svg
-              class={`p-ring${passed ? ' is-pass' : ''}`}
-              viewBox="0 0 180 180"
-              width="160"
-              height="160"
-              aria-hidden="true"
-            >
-              <circle cx="90" cy="90" r={R} class="p-ring__track" />
-              <circle
-                cx="90"
-                cy="90"
-                r={R}
-                class="p-ring__arc"
-                style={{ strokeDasharray: `${(result.score / 100) * C} ${C}` }}
-                transform="rotate(-90 90 90)"
-              />
-              <line
-                class="p-ring__threshold"
-                x1={90 + (R - 14) * Math.cos(angle)}
-                y1={90 + (R - 14) * Math.sin(angle)}
-                x2={90 + (R + 14) * Math.cos(angle)}
-                y2={90 + (R + 14) * Math.sin(angle)}
-              />
-              <text x="90" y="92" class="p-ring__score">
-                {fmt(q, 'scoreRing', { score: result.score })}
-              </text>
-              <text x="90" y="116" class="p-ring__label">
-                {fmt(q, 'scoreThreshold', { value: quiz.threshold })}
-              </text>
-            </svg>
+            <div class={`p-ring${passed ? ' is-pass' : ''}`}>
+              <svg viewBox="0 0 168 168" aria-hidden="true">
+                <circle
+                  cx="84"
+                  cy="84"
+                  r={R}
+                  class="p-ring__track"
+                  stroke-dasharray={
+                    quiz.threshold > 0 && quiz.threshold < 100 ? `${t - 3} 6 ${C}` : undefined
+                  }
+                />
+                {result.score > 0 && (
+                  <circle
+                    cx="84"
+                    cy="84"
+                    r={R}
+                    class="p-ring__arc"
+                    style={{ strokeDasharray: `${arc} ${C}` }}
+                  />
+                )}
+              </svg>
+              <p class="p-ring__score">
+                <span class="sr-only">{q.scoreLead} </span>
+                {result.score}
+                <span class="p-ring__pct">{q.scorePct}</span>
+              </p>
+              <p class="p-ring__threshold-text">{fmt(q, 'scoreThreshold', { value: quiz.threshold })}</p>
+            </div>
           )}
           {!survey && (
             <span class={`p-quiz-badge ${passed ? 'is-pass' : 'is-fail'}`}>

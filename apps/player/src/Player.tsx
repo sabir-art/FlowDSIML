@@ -68,7 +68,7 @@ import { VideoStep } from './VideoStep';
 import { HtmlStep } from './HtmlStep';
 import { InfoDialog } from './InfoDialog';
 import { GlossaryDrawer, GlossaryTip } from './Glossary';
-import { Quiz } from './Quiz';
+import { Quiz, ringVars } from './Quiz';
 import { submitQuizAttempt } from './api';
 import {
   beaconCenter,
@@ -601,6 +601,7 @@ export function Player({
     ...(dark ? DARK : {}),
     // Cadre sombre : appel de l'en-tête et progression en prune clair, si la couleur principale est celle par défaut
     ...(dark && theme.primary === DEFAULT_THEME.primary ? { '--p-chrome-primary': '#CF86A9' } : {}),
+    ...ringVars(theme.primary, theme.surface, theme.text),
   };
 
   const chapterOf = (s: Step) => m.chapters.find((c) => c.id === s.chapterId);
