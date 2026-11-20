@@ -54,4 +54,9 @@ describe('L22-05 : centre de notifications', () => {
       '/analytics?tab=alerts',
     );
   });
+  it('un webhook en pause mène aux intégrations', () => {
+    expect(notificationHref({ kind: 'webhook_paused', demo_id: null, step_id: null, comment_id: null })).toBe(
+      '/settings/integrations',
+    );
+  });
 });

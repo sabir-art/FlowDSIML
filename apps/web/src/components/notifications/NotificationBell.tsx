@@ -11,6 +11,7 @@ import {
   AtSign,
   Bell,
   BellRing,
+  Webhook,
   CheckCheck,
   CheckCircle2,
   CornerDownRight,
@@ -37,6 +38,7 @@ const KIND_ICON = {
   comment: MessageSquare,
   resolved: CheckCircle2,
   alert: BellRing,
+  webhook_paused: Webhook,
 };
 
 export function NotificationBell() {
@@ -369,7 +371,8 @@ function Row({
 }) {
   const { t } = useTranslation();
   const Icon = KIND_ICON[x.kind];
-  if (x.kind === 'alert') return <AlertRow item={x} icon={Icon} onOpen={onOpen} />;
+  if (x.kind === 'alert' || x.kind === 'webhook_paused')
+    return <AlertRow item={x} icon={Icon} onOpen={onOpen} />;
   const actor = x.actorName || t('notifications.someone');
   const step = x.stepNumber ?? '?';
   const quote = (x.kind === 'mention' || x.kind === 'reply') && x.body;
@@ -441,12 +444,16 @@ function AlertRow({
 }) {
   const { t } = useTranslation();
   const d = x.data ?? {};
-  const text = t(`notifications.alert_${d.trigger ?? 'lead'}`, {
-    count: d.count ?? 0,
-    value: d.value ?? '?',
-    threshold: d.threshold ?? '?',
-    demo: x.demoTitle || t('notifications.allDemos'),
-  });
+  // L29 : webhook en pause automatique après 6 échecs (propriétaires et admins)
+  const text =
+    x.kind === 'webhook_paused'
+      ? t('notifications.webhookPaused', { name: d.name || d.host || '?', host: d.host || '?' })
+      : t(`notifications.alert_${d.trigger ?? 'lead'}`, {
+          count: d.count ?? 0,
+          value: d.value ?? '?',
+          threshold: d.threshold ?? '?',
+          demo: x.demoTitle || t('notifications.allDemos'),
+        });
   const digest = d.digest ? t(`notifications.digest_${d.digest}`) : null;
   return (
     <li className={x.read_at ? undefined : 'unread'}>
@@ -467,7 +474,11 @@ function AlertRow({
       <Link
         className="nb-cover"
         to={notificationHref(x)}
-        aria-label={t('notifications.open_alert', { text })}
+        aria-label={
+          x.kind === 'webhook_paused'
+            ? t('notifications.open_webhook', { text })
+            : t('notifications.open_alert', { text })
+        }
         onClick={onOpen}
       />
     </li>

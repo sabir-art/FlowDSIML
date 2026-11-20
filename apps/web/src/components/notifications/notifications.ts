@@ -3,7 +3,9 @@
  * Les notifications ne portent que des références ; le texte vient de step_comments (RLS).
  */
 
-export type NotificationKind = 'mention' | 'comment' | 'reply' | 'resolved' | 'alert';
+export type NotificationKind = 'mention' | 'comment' | 'reply' | 'resolved' | 'alert' | 'webhook_paused';
+/** Notifications système (sans fil de commentaires) : toujours envoyées, pas de réglage. */
+export const isSystemKind = (k: NotificationKind) => k === 'alert' || k === 'webhook_paused';
 export const NOTIFICATION_KINDS: NotificationKind[] = ['mention', 'reply', 'comment', 'resolved', 'alert'];
 
 /** L19 : contenu d'une alerte (aucune donnée personnelle). */
@@ -13,6 +15,10 @@ export interface AlertData {
   value?: number | null;
   threshold?: number | null;
   digest?: 'daily' | 'weekly';
+  /** L29 : webhook en pause (hôte et nom du webhook). */
+  webhookId?: string;
+  host?: string;
+  name?: string;
 }
 
 export interface NotificationRow {
@@ -87,4 +93,6 @@ export function readPrefs(raw: unknown): NotificationPrefs {
 export const notificationHref = (n: Pick<NotificationRow, 'kind' | 'demo_id' | 'step_id' | 'comment_id'>) =>
   n.kind === 'alert'
     ? '/analytics?tab=alerts'
-    : `/demos/${n.demo_id}/edit?step=${n.step_id}${n.comment_id ? `&comment=${n.comment_id}` : ''}`;
+    : n.kind === 'webhook_paused'
+      ? '/settings/integrations'
+      : `/demos/${n.demo_id}/edit?step=${n.step_id}${n.comment_id ? `&comment=${n.comment_id}` : ''}`;

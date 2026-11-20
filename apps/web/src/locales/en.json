@@ -3697,7 +3697,9 @@
     "alert_structure_below_goal": "A structure is at {{value}}% trained, below the {{threshold}}% goal",
     "digest_daily": "Daily digest",
     "digest_weekly": "Weekly digest",
-    "open_alert": "View alerts: {{text}}"
+    "open_alert": "View alerts: {{text}}",
+    "webhookPaused": "The “{{name}}” webhook is paused after 6 failed deliveries ({{host}}).",
+    "open_webhook": "Open integrations: {{text}}"
   },
   "presence": {
     "someone": "A member",

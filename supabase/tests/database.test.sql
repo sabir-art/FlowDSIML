@@ -2,7 +2,7 @@
 -- Exécution : `supabase test db` (Docker) ou supabase/tests/local/run.sh (Postgres nu).
 begin;
 set search_path = public, extensions;
-select plan(42);
+select plan(44);
 
 -- Utilisateurs de test
 insert into auth.users (id, email) values
@@ -129,6 +129,21 @@ select is(public.track_events(jsonb_build_object(
 select isnt(public.submit_lead('00000000-0000-0000-0000-0000000000d1', (select (r ->> 'versionId')::uuid from pub),
   'Prospect@Globex.com', '{"company":"Globex"}', true, 'visitor-0001', 'tok123'), null, 'lead enregistré (plan Pro)');
 reset role;
+
+-- Revue de sécurité R3 : plafond de 300 leads par heure et par démo, quel que soit le visiteur déclaré
+insert into public.leads (workspace_id, demo_id, version_id, visitor_id, email, fields, consent)
+select d.workspace_id, d.id, (select (r ->> 'versionId')::uuid from pub), 'flood-' || g, 'x' || g || '@example.com', '{}', false
+  from public.demos d, generate_series(1, 300) g where d.id = '00000000-0000-0000-0000-0000000000d1';
+set local role anon;
+select throws_ok($$ select public.submit_lead('00000000-0000-0000-0000-0000000000d1', (select (r ->> 'versionId')::uuid from pub),
+  'nouveau@example.com', '{}', true, 'visiteur-neuf-01', null) $$, 'P0001', 'RATE_LIMITED', 'plafond par démo atteint : refusé');
+reset role;
+delete from public.leads where visitor_id like 'flood-%';
+-- Revue de sécurité R5 : aucune fonction de déclencheur exécutable par anon ou authenticated
+select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+            where n.nspname = 'public' and p.prorettype = 'trigger'::regtype
+              and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))),
+  0, 'fonctions de déclencheur : pas de droit d’exécution pour anon ni authenticated');
 
 select pg_temp.login('00000000-0000-0000-0000-00000000000a', 'alice@example.com');
 select is((select (public.demo_analytics('00000000-0000-0000-0000-0000000000d1') ->> 'completions')::int), 1, 'analytics : 1 complétion');

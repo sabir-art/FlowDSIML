@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import {
+  isSystemKind,
   readPrefs,
   type NotificationKind,
   type NotificationPrefs,
@@ -79,14 +80,14 @@ export function useNotifications() {
       rows
         // L28-06 : commentaire supprimé (comment_id vide) : la notification reste. Accès perdu au fil :
         // elle disparaît. Une alerte ne porte pas de fil : elle reste.
-        .filter((r) => r.kind === 'alert' || !r.comment_id || cm.has(r.comment_id))
+        .filter((r) => isSystemKind(r.kind) || !r.comment_id || cm.has(r.comment_id))
         .map((r) => ({
           ...r,
           actorName: (r.actor_id && names.get(r.actor_id)) || '',
           demoTitle: (r.demo_id && dm.get(r.demo_id)?.title) || '',
           stepNumber: r.step_id && sm.has(r.step_id) ? sm.get(r.step_id)!.position + 1 : null,
           body: (r.comment_id && cm.get(r.comment_id)?.body) || null,
-          deleted: r.kind !== 'alert' && !r.comment_id,
+          deleted: !isSystemKind(r.kind) && !r.comment_id,
         })),
     );
     setLoading(false);

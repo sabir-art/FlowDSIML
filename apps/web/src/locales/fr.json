@@ -3697,7 +3697,9 @@
     "alert_structure_below_goal": "Une structure est à {{value}} % de personnes formées, sous l’objectif de {{threshold}} %",
     "digest_daily": "Résumé quotidien",
     "digest_weekly": "Résumé hebdomadaire",
-    "open_alert": "Voir les alertes : {{text}}"
+    "open_alert": "Voir les alertes : {{text}}",
+    "webhookPaused": "Le webhook « {{name}} » est en pause après 6 échecs d’envoi ({{host}}).",
+    "open_webhook": "Ouvrir les intégrations : {{text}}"
   },
   "presence": {
     "someone": "Un membre",
