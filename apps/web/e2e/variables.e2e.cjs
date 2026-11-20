@@ -135,7 +135,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
     'repli dans l’infobulle de la pastille',
   );
   ok(
-    (await new AxeBuilder({ page: p }).include('.panel').withTags(TAGS).analyze()).violations.length === 0,
+    (await new AxeBuilder({ page: p }).include('.ed-tool').withTags(TAGS).analyze()).violations.length === 0,
     'axe : panneau sans violation',
   );
 

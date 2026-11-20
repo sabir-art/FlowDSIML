@@ -189,6 +189,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // ===== Éditeur : « Remplacer l'image » =====
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
+  // L48-E : outil « Image » du rail
+  await page.locator('.ed-rail [data-tool="image"][aria-pressed="false"]').click();
   const rep = page.getByRole('button', { name: 'Remplacer l’image', exact: true });
   ok((await rep.getAttribute('aria-disabled')) === null && (await rep.isEnabled()), 'outil image actif');
   const sel = t.steps

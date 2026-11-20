@@ -27,12 +27,14 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // Formulaire de lead sur l'étape 2 + publication
   await app.goto(`${APP}/#/demos/${DEMO}/edit`);
   await app.waitForSelector('.canvas-frame img');
-  await app.getByRole('tab', { name: 'Réglages' }).click();
+  // L48-E : réglages de la démo dans le rail d'outils
+  await app.locator('.ed-rail [data-tool="settings"][aria-pressed="false"]').click();
   await app.getByRole('button', { name: 'Créer le formulaire' }).click();
   await app.waitForSelector('#f-title');
   // EDT-08 : le formulaire est placé dans le rail, avant l'étape 2
   ok((await app.locator('.rail-list .step--form').count()) === 1, 'formulaire affiché dans le rail');
   await app.locator('.rail-list .step:not(.step--form)').nth(1).click();
+  await app.locator('.ed-rail [data-tool="step"][aria-pressed="false"]').click().catch(() => {});
   await app.selectOption('#st-gate', { index: 1 });
   await app.waitForTimeout(900);
   app.on('dialog', (d) => {
