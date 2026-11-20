@@ -636,3 +636,40 @@ input[type='radio'] {
     scroll-behavior: auto !important;
   }
 }
+
+/* L45 (E3, E17) : une légende est alignée sur les champs qu'elle titre (pas de retrait du navigateur) */
+legend {
+  padding-inline: 0;
+}
+
+/* L45 (composants §15.4 bis) : pile verticale dont l'écart dit la relation entre ses blocs ;
+   les enfants n'ont pas de marge propre, l'écart est porté par la pile seule. */
+.fd-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--fd-gap-field);
+  min-width: 0;
+}
+.fd-stack > * {
+  margin-block: 0 !important;
+}
+.fd-stack--label {
+  gap: var(--fd-gap-label);
+}
+.fd-stack--help {
+  gap: var(--fd-gap-help);
+}
+.fd-stack--option {
+  gap: var(--fd-gap-option);
+}
+.fd-stack--action {
+  gap: var(--fd-gap-action);
+}
+.fd-stack--group {
+  gap: var(--fd-gap-group);
+}
+/* Bouton ou lien d'action : sa largeur, pas celle de la pile */
+.fd-stack > :is(button, a, .fd-btn, .btn) {
+  align-self: flex-start;
+}

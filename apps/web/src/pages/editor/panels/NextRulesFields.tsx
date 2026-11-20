@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Route, Trash2, TriangleAlert } from 'lucide-react';
+import { Plus, Trash2, TriangleAlert } from 'lucide-react';
 import type { ChoiceAction, RuleCond } from '@flowdsiml/manifest';
 import { Button, Select } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
@@ -138,15 +138,11 @@ export function NextRulesFields({
   }
 
   return (
-    <section className="panel-group stack rules-sec" aria-labelledby={`nr-${step.id}`}>
-      <div className="fd-card__head" style={{ margin: 0 }}>
-        <span className="fd-icon-chip" aria-hidden="true">
-          <Route />
-        </span>
-        <h2 className="fd-card__title" id={`nr-${step.id}`}>
-          {t('editor.rules.title')}
-        </h2>
-      </div>
+    <section className="sec panel-group rules-sec" aria-labelledby={`nr-${step.id}`}>
+      {/* L45 (E9) : même titre de section que les autres sections du panneau */}
+      <h2 className="sec-title" id={`nr-${step.id}`}>
+        {t('editor.rules.title')}
+      </h2>
       <p className="fd-help" style={{ margin: 0 }}>
         {t('editor.rules.intro')}
       </p>

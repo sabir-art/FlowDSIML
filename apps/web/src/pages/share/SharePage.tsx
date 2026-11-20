@@ -973,40 +973,53 @@ function EmbedPanel({
         : `<iframe src="${url}" title="${safe}" width="960" height="644" loading="lazy" allow="fullscreen; clipboard-write" style="border:0;border-radius:12px"></iframe>`;
   return (
     <>
-      <TargetPicker value={target} onChange={setTarget} />
-      <div className="segmented" role="radiogroup" aria-label={t('share.embedFormat')}>
-        <button
-          type="button"
-          role="radio"
-          aria-checked={mode === 'responsive'}
-          onClick={() => setFormat('responsive')}
-        >
-          {t('share.responsive')}
-        </button>
-        <button type="button" role="radio" aria-checked={mode === 'fixed'} onClick={() => setFormat('fixed')}>
-          {t('share.fixed')}
-        </button>
-        {/* L29-02 : jamais masqué ; désactivé pour un outil sans script, la limite sert d'aide */}
-        <button
-          type="button"
-          role="radio"
-          aria-checked={mode === 'popup'}
-          aria-disabled={popupOff || undefined}
-          aria-describedby={popupOff ? limitId : undefined}
-          onClick={() => !popupOff && setFormat('popup')}
-        >
-          {t('share.popup')}
-        </button>
+      {/* L45 (E13) : trois groupes à 24 px ; le mode d'intégration a son libellé */}
+      <div className="fd-stack fd-stack--group">
+        <TargetPicker value={target} onChange={setTarget} />
+        <div className="fd-stack fd-stack--label sh-embed-mode">
+          <span className="t-label" id="sh-embed-mode-l">
+            {t('share.embedFormat')}
+          </span>
+          <div className="segmented" role="radiogroup" aria-labelledby="sh-embed-mode-l">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={mode === 'responsive'}
+              onClick={() => setFormat('responsive')}
+            >
+              {t('share.responsive')}
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={mode === 'fixed'}
+              onClick={() => setFormat('fixed')}
+            >
+              {t('share.fixed')}
+            </button>
+            {/* L29-02 : jamais masqué ; désactivé pour un outil sans script, la limite sert d'aide */}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={mode === 'popup'}
+              aria-disabled={popupOff || undefined}
+              aria-describedby={popupOff ? limitId : undefined}
+              onClick={() => !popupOff && setFormat('popup')}
+            >
+              {t('share.popup')}
+            </button>
+          </div>
+        </div>
+        <TargetGuide
+          target={target}
+          code={code}
+          address={url}
+          published={published}
+          limitId={limitId}
+          playerHost={new URL(url).host}
+          onScorm={() => navigate(`/demos/${demoId}/distribute`)}
+        />
       </div>
-      <TargetGuide
-        target={target}
-        code={code}
-        address={url}
-        published={published}
-        limitId={limitId}
-        playerHost={new URL(url).host}
-        onScorm={() => navigate(`/demos/${demoId}/distribute`)}
-      />
       <hr className="divider sh-hr" />
       <div className="setting">
         <span className="t-label">{t('share.hideBranding')}</span>
@@ -1038,14 +1051,15 @@ function EmbedPanel({
           value={origins}
           onChange={(e) => setOrigins(e.target.value)}
         />
-        <span className="help">{t('share.allowedOriginsHint')}</span>
-        {editable && (
-          <div>
+        {/* L45 (E14) : aide → « Enregistrer » à 12 px */}
+        <div className="fd-stack fd-stack--action">
+          <span className="help">{t('share.allowedOriginsHint')}</span>
+          {editable && (
             <button type="button" className="btn btn-secondary btn-sm sh-save" onClick={onSaveOrigins}>
               {t('common.save')}
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="alert sh-note">
         <Info aria-hidden="true" />

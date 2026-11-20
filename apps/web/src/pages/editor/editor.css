@@ -1593,8 +1593,10 @@
 }
 .mk .notes-sec .sec-title {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 .mk .notes-sec .sec-title svg {
   width: 14px;
@@ -1603,6 +1605,7 @@
 }
 .mk .notes-sec .lock {
   display: inline-flex;
+  flex: none;
   align-items: center;
   gap: 4px;
   margin-left: auto;
@@ -2960,17 +2963,34 @@
   margin: 4px 0 10px;
 }
 
-/* L28-04 : format des écrans (onglet Réglages) */
-.fmt-sec .fmt-group {
+/* L28-04 : format des écrans (onglet Réglages) ; L45 : un groupe par réglage (E1 à E3) */
+.mk .sec.fmt-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-gap-group);
+}
+.mk .fmt-sec > * {
+  margin: 0;
+}
+.mk .fmt-sec > .sec-title {
+  margin-bottom: calc(var(--fd-gap-title) - var(--fd-gap-group));
+}
+.mk .fmt-sec .fmt-group {
   border: 0;
   padding: 0;
-  margin: 10px 0 0;
+  margin: 0;
   min-width: 0;
 }
-.fmt-sec .fmt-radios {
+.mk .fmt-sec .fmt-group legend {
+  padding: 0;
+}
+.mk .fmt-sec .fmt-radios {
   display: grid;
-  gap: 6px;
-  margin-top: 6px;
+  gap: var(--fd-gap-option);
+  margin-top: var(--fd-gap-label);
+}
+.mk .fmt-sec .field {
+  margin: 0;
 }
 .fmt-sec .fmt-radios .check {
   align-items: flex-start;
@@ -2982,7 +3002,7 @@
 .fmt-sec .fmt-custom {
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: var(--fd-gap-field);
 }
 .fmt-sec .fmt-custom .field {
   width: 110px;
@@ -2992,7 +3012,7 @@
   flex-basis: 100%;
 }
 .fmt-preview {
-  margin-top: 12px;
+  margin: 0;
 }
 .fmt-thumbs {
   display: grid;
@@ -3104,4 +3124,20 @@
 }
 .guide-bar .grow {
   flex: 1;
+}
+
+/* L45 : lignes d'interrupteur dans une pile : l'écart vient de la pile, sans filet ni marge */
+.mk .fd-stack .setting {
+  padding-block: 0;
+  border-top: 0;
+}
+.mk .fd-stack .field + .field {
+  margin-top: 0;
+}
+/* L45 (E9) : « Suite de l'étape » avec le titre de section commun ; l'écart vient du groupe */
+.mk .rules-sec > .sec-title {
+  margin: 0;
+}
+.mk .rules-sec {
+  gap: var(--fd-gap-title);
 }

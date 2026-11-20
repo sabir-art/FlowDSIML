@@ -48,8 +48,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const d = p.locator('dialog.x15-dialog[open]');
   await d.waitFor();
   const radios = await d
-    .getByRole('radiogroup', { name: /Format/ })
-    .getByRole('radio')
+    .getByRole('group', { name: /Format/ })
+    .locator('label.exp-format')
     .allInnerTexts();
   ok(/Version accessible \(HTML\)/.test(radios[2] || ''), 'troisième format : « Version accessible (HTML) »');
   await d.getByRole('radio', { name: /Version accessible/ }).click();

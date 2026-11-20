@@ -141,7 +141,9 @@
 .ai-disabled-wrap {
   position: relative;
   display: inline-flex;
-  flex-wrap: wrap;
+  /* L45 (E8) : « Ouvrir le réglage » suit le bouton, sur la même ligne */
+  flex-wrap: nowrap;
+  white-space: nowrap;
   gap: 8px;
   align-items: center;
 }

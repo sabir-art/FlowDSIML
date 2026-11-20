@@ -1061,7 +1061,8 @@
   flex: none;
 }
 .mk .sh-addr-actions {
-  margin-top: 8px;
+  /* L45 (E15) : aide → « Enregistrer l'adresse » à 12 px (le champ porte déjà 6 px d'écart) */
+  margin-top: calc(var(--fd-gap-action) - var(--fd-gap-label));
 }
 .mk .sh-addr-ro {
   margin: 4px 0 0;
@@ -3458,6 +3459,8 @@
 .mk .st-mydata-act {
   align-items: center;
   gap: 12px;
+  /* L45 (E16) : texte → son bouton à 12 px */
+  margin-top: var(--fd-gap-action);
 }
 .mk .st-mydata-bar {
   height: 4px;
@@ -3502,8 +3505,10 @@
 .snip-where {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
+  gap: var(--fd-gap-label);
+}
+.snip-where + .dif-two {
+  margin-top: var(--fd-gap-group);
 }
 .snip-where .segmented {
   flex-wrap: wrap;
@@ -3512,7 +3517,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 4px;
 }
 .snip-steps {
   margin: 0;
