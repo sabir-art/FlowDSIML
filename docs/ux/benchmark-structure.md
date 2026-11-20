@@ -56,12 +56,11 @@ Ordre de livraison au dev, **après L41** : L48-A, L48-B, L48-C, L48-D (avec L47
   - Membres et Plans restent seulement dans les Paramètres.
 - « Workspace » devient **« Espace »** partout.
 - **Colonne Dossiers** (page Démos, 240 px, repliable) :
-  - entrées : Toutes les démos, Mes démos, Partagées avec moi, puis les dossiers de l'espace (arborescence à un niveau), puis Archivées ;
+  - entrées : Toutes les démos, Mes démos (créées par moi), puis les dossiers de l'espace (arborescence, `parent_id` existe), puis Archivées (statut `archived` existant). Pas d'entrée « Partagées avec moi » : la notion n'existe pas dans TutoClick, où tout est partagé dans l'espace, avec des dossiers à accès restreint ;
   - un compteur par entrée, et « + Nouveau dossier » ;
   - glisser une démo sur un dossier pour l'y ranger ;
   - le filtre « Dossier » de la barre L40 est retiré, puisque la colonne le remplace ;
   - sous 1 024 px, la colonne devient un menu « Dossier » dans la barre (comportement L40 actuel).
-- **Archivées** : à vérifier côté données. Aujourd'hui, `deleted_at` sert à la corbeille. Si l'archivage n'existe pas, l'entrée porte le badge « Bientôt ».
 
 ## 2. Paramètres (rang 2)
 
