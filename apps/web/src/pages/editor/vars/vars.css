@@ -147,7 +147,8 @@
 /* Popovers (portail, position fixe) */
 .var-pop {
   position: fixed;
-  z-index: 1000;
+  /* L46B-01 : au-dessus des boîtes de dialogue (fond et contenu) */
+  z-index: calc(var(--fd-z-overlay, 1100) + 10);
   max-height: 480px;
   overflow: auto;
   display: flex;
@@ -171,6 +172,8 @@
 .var-cat__search {
   width: 100%;
   height: 40px;
+  /* L46-01 : le conteneur en colonne ne doit pas le rétrécir */
+  flex: none;
 }
 .var-cat__list {
   list-style: none;

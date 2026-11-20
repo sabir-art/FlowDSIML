@@ -871,10 +871,18 @@ async function install(page, state = seed()) {
             cta: Math.round(v * 0.05),
             leads: Math.round(v * 0.0266),
           });
-          const daily = Array.from({ length: days }, (_, i) => ({
-            day: new Date(end - (days - 1 - i) * 86400000).toISOString().slice(0, 10),
-            ...row(Math.round((views / days) * (0.7 + 0.6 * Math.abs(Math.sin(i / 3))))),
-          }));
+          // Leads par jour : fractions cumulées (un arrondi jour par jour donnerait 0 partout)
+          let acc = 0;
+          const daily = Array.from({ length: days }, (_, i) => {
+            const v = Math.round((views / days) * (0.7 + 0.6 * Math.abs(Math.sin(i / 3))));
+            const before = Math.round(acc);
+            acc += v * 0.0266;
+            return {
+              day: new Date(end - (days - 1 - i) * 86400000).toISOString().slice(0, 10),
+              ...row(v),
+              leads: Math.round(acc) - before,
+            };
+          });
           const weights = pubs.map((_, i) => 1 / (i + 1));
           const total = weights.reduce((x, y) => x + y, 0) || 1;
           return json(route, 200, {

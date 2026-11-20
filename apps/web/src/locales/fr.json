@@ -4784,7 +4784,6 @@
       "noWatch": "Aucun article n’a encore assez de réponses (5 au moins).",
       "noComments_one": "{{no}} Non, {{count}} commentaire",
       "noComments_other": "{{no}} Non, {{count}} commentaires",
-      "seeFeedback": "Voir les retours",
       "activity": "Activité de l’équipe",
       "noActivity": "Aucune action pour l’instant."
     },
@@ -4792,7 +4791,7 @@
       "view": "Affichage",
       "articles": "Articles",
       "comments": "Commentaires",
-      "space": "Espace :",
+      "space": "Espace",
       "all": "Tous",
       "period": "Période",
       "p30": "30 j",

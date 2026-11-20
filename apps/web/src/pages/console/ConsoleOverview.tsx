@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { formatDateTime, formatNumber } from '../../lib/format';
 import { initials } from '../../lib/initials';
@@ -111,24 +112,25 @@ export function Overview() {
                 const sat = Math.round(satisfaction(r) * 100);
                 return (
                   <li key={r.article}>
-                    <div className="console-watch__t">
-                      <b>{articleTitle(r.article)}</b>
-                      <span className="fd-muted">
-                        {articleSection(r.article)} ·{' '}
-                        {t('console.ov.noComments', { no: r.no, count: r.comments })}
-                      </span>
-                    </div>
-                    <span className="console-watch__sat">
-                      <span className="console-bar" aria-hidden="true">
-                        <span style={{ width: `${sat}%` }} />
-                      </span>
-                      {sat} %
-                    </span>
+                    {/* L41-02 K2 : ligne entière cliquable, chevron à droite */}
                     <Link
-                      className="fd-btn fd-btn--sm"
+                      className="console-watch__row"
                       to={`/console/retours?vue=commentaires&article=${r.article}`}
                     >
-                      {t('console.ov.seeFeedback')}
+                      <span className="console-watch__t">
+                        <b>{articleTitle(r.article)}</b>
+                        <span className="fd-muted">
+                          {articleSection(r.article)} ·{' '}
+                          {t('console.ov.noComments', { no: r.no, count: r.comments })}
+                        </span>
+                      </span>
+                      <span className="console-watch__sat">
+                        <span className="console-bar" aria-hidden="true">
+                          <span style={{ width: `${sat}%` }} />
+                        </span>
+                        {sat} %
+                      </span>
+                      <ChevronRight className="console-watch__chev" aria-hidden="true" />
                     </Link>
                   </li>
                 );

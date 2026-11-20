@@ -384,7 +384,7 @@ function ItemDrawer({
           </div>
           <fieldset className="field">
             <legend>{t('console.bl.status')}</legend>
-            <div className="segmented console-status-group">
+            <div className="fd-segmented console-status-group">
               {STATUSES.map((s) => (
                 <WriteButton
                   key={s}

@@ -27,6 +27,9 @@ export const markHelpSeen = () => {
   }
 };
 
+const GAP = 8;
+const EDGE = 8;
+
 /** Popover en position fixe sous l'ancre (au-dessus si la place manque), jamais hors de l'écran. */
 function Pop({
   anchor,
@@ -44,17 +47,31 @@ function Pop({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const portalTarget = useRef<HTMLElement>(
+    (document.activeElement?.closest('dialog[open]') as HTMLElement | null) ?? document.body,
+  );
+  const [pos, setPos] = useState<{ left: number; top: number; maxHeight?: number } | null>(null);
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
+    const vw = document.documentElement.clientWidth;
+    const vh = document.documentElement.clientHeight;
     const p = place(
       { left: anchor.left, top: anchor.top, width: anchor.width, height: anchor.height },
       { width: el.offsetWidth, height: el.offsetHeight },
-      { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight },
+      { width: vw, height: vh },
       'bottom',
     );
-    setPos({ left: p.left, top: p.top });
+    // Bord gauche aligné sur l'ancre (curseur ou bouton), dans l'écran
+    const left = Math.max(EDGE, Math.min(anchor.left, vw - el.offsetWidth - EDGE));
+    // L46B-01 : sans place entière ni dessous ni dessus, le popover reste accroché à l'ancre, du côté
+    // le plus grand, et sa hauteur se limite à la place disponible (jamais recalé en haut de l'écran)
+    const h = el.offsetHeight;
+    const below = vh - anchor.bottom - GAP - EDGE;
+    const above = anchor.top - GAP - EDGE;
+    if (h <= below || h <= above) return setPos({ left, top: p.top });
+    if (below >= above) setPos({ left, top: anchor.bottom + GAP, maxHeight: below });
+    else setPos({ left, top: EDGE, maxHeight: above });
   }, [anchor]);
   useEffect(() => {
     const down = (e: PointerEvent) => {
@@ -69,7 +86,7 @@ function Pop({
       role="dialog"
       aria-label={label}
       className={`mk var-pop ${className ?? ''}`}
-      style={{ width, left: pos?.left ?? -9999, top: pos?.top ?? -9999 }}
+      style={{ width, left: pos?.left ?? -9999, top: pos?.top ?? -9999, maxHeight: pos?.maxHeight }}
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           e.stopPropagation();
@@ -80,7 +97,8 @@ function Pop({
     >
       {children}
     </div>,
-    document.body,
+    // Dans un <dialog> modal (couche supérieure), le popover y est rendu pour rester au-dessus
+    portalTarget.current,
   );
 }
 

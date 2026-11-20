@@ -6,7 +6,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { Archive, CircleDot, Download, Link2, Plus, Trash2 } from 'lucide-react';
+import { Archive, Building2, Check, CircleDot, Download, Link2, Plus, Trash2 } from 'lucide-react';
+import { FilterMenu } from '../../components/toolbar/ListToolbar';
 import { supabase } from '../../lib/supabase';
 import { formatDate, formatNumber } from '../../lib/format';
 import { useToast } from '../../components/Toast';
@@ -57,7 +58,7 @@ export function Feedback() {
     <div className="console-stack">
       <h1 className="sr-only">{t('console.tabs.feedback')}</h1>
       <div className="console-bar-row">
-        <div className="segmented" role="group" aria-label={t('console.fb.view')}>
+        <div className="fd-segmented" role="group" aria-label={t('console.fb.view')}>
           <button type="button" aria-pressed={view === 'articles'} onClick={() => set('vue', null)}>
             {t('console.fb.articles')}
           </button>
@@ -65,23 +66,27 @@ export function Feedback() {
             {t('console.fb.comments')}
           </button>
         </div>
-        <label className="console-filter">
-          <span>{t('console.fb.space')}</span>
-          <select className="input input-sm" value={ws} onChange={(e) => setWs(e.target.value)}>
-            <option value="">{t('console.fb.all')}</option>
-            {workspaces.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        {/* L41-02 K4 : filtre « Espace : Tous » comme les barres de liste (L40) */}
+        <FilterMenu
+          icon={<Building2 />}
+          label={t('console.fb.space')}
+          value={workspaces.find((w) => w.id === ws)?.name ?? t('console.fb.all')}
+          active={!!ws}
+          items={[
+            { label: t('console.fb.all'), icon: ws ? <span /> : <Check />, onSelect: () => setWs('') },
+            ...workspaces.map((w) => ({
+              label: w.name,
+              icon: ws === w.id ? <Check /> : <span />,
+              onSelect: () => setWs(w.id),
+            })),
+          ]}
+        />
         {article && (
           <button type="button" className="fd-btn fd-btn--sm" onClick={() => set('article', null)}>
             {t('console.fb.articleFilter', { title: articleTitle(article) })} ×
           </button>
         )}
-        <div className="segmented console-bar-row__end" role="group" aria-label={t('console.fb.period')}>
+        <div className="fd-segmented console-bar-row__end" role="group" aria-label={t('console.fb.period')}>
           {PERIODS.map((p) => (
             <button key={p} type="button" aria-pressed={days === p} onClick={() => setDays(p)}>
               {t(`console.fb.p${p}`)}
@@ -194,8 +199,8 @@ function Articles({ days, ws, onOpen }: { days: number; ws: string; onOpen: (a: 
                       <span className="console-bar" aria-hidden="true">
                         <span style={{ width: `${sat}%` }} />
                       </span>
-                      {sat} %
-                      {r.yes + r.no < MIN_ANSWERS && <span className="badge">{t('console.fb.few')}</span>}
+                      {sat} %{/* L41-02 K5 : en texte, pas en pastille */}
+                      {r.yes + r.no < MIN_ANSWERS && <span className="fd-muted">{t('console.fb.few')}</span>}
                     </span>
                   </td>
                   <td className="r t-num">{formatNumber(r.comments)}</td>

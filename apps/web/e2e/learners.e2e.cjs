@@ -95,6 +95,18 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await page.keyboard.type(' {');
   const cat = page.getByRole('dialog', { name: 'Variables' });
   await cat.waitFor();
+  // L46B-01 : catalogue au-dessus du dialogue, accroché au champ Message
+  await page.waitForTimeout(200);
+  const place = await page.evaluate(() => {
+    const r = document.querySelector('.var-pop').getBoundingClientRect();
+    const f = document.querySelector('#rm-body').getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + 20, r.top + 20);
+    return {
+      onTop: !!hit?.closest('.var-pop'),
+      near: r.bottom <= f.bottom + 2 && r.left >= f.left - 2 && r.left <= f.right,
+    };
+  });
+  ok(place.onTop && place.near, 'L46B-01 : catalogue au-dessus du dialogue, accroché au champ');
   const perPerson = cat.getByRole('option', { name: /Prénom de l’apprenant/ });
   ok(
     (await perPerson.getAttribute('aria-disabled')) === 'true',

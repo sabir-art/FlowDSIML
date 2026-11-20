@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { BrandMark } from '../../components/BrandMark';
 import { Loading } from '../../components/guards';
@@ -85,10 +85,6 @@ function ConsoleFrame() {
           <b>{t('console.entry')}</b>
           <span>{t('console.sub')}</span>
         </div>
-        <span className={`badge ${role === 'admin' ? 'badge-primary' : ''}`}>
-          <ShieldCheck aria-hidden="true" />
-          {t(role === 'admin' ? 'console.role.admin' : 'console.role.read_only')}
-        </span>
         <Link className="fd-btn fd-btn--sm" to="/">
           <ArrowLeft aria-hidden="true" />
           {t('console.back')}

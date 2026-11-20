@@ -101,9 +101,15 @@ export function NewsTab() {
           {t('console.nw.preview')}
         </button>
       </div>
-      {list.length === 0 && <p className="fd-card console-empty">{t('console.nw.none')}</p>}
-      {section(t('console.nw.published', { count: published.length }), published)}
-      {section(t('console.nw.drafts', { count: drafts.length }), drafts)}
+      {/* L41-02 K6 : un seul état vide quand il n'y a encore aucune nouveauté */}
+      {list.length === 0 ? (
+        <p className="fd-card console-empty">{t('console.nw.none')}</p>
+      ) : (
+        <>
+          {section(t('console.nw.published', { count: published.length }), published)}
+          {section(t('console.nw.drafts', { count: drafts.length }), drafts)}
+        </>
+      )}
       {editing && (
         <NewsEditor
           news={editing === 'new' ? null : editing}

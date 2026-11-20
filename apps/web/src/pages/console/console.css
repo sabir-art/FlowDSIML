@@ -166,12 +166,27 @@
   list-style: none;
 }
 .console-watch li {
+  border-top: 1px solid var(--fd-color-border);
+}
+/* L41-02 K2 : la ligne entière est le lien, chevron à droite */
+.console-watch__row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--fd-color-border);
+  margin: 0 -8px;
+  padding: 12px 8px 0;
+  border-radius: var(--fd-radius-md);
+  color: inherit;
+  text-decoration: none;
+}
+.console-watch__row:hover {
+  background: var(--fd-color-surface-hover);
+}
+.console-watch__chev {
+  width: 18px;
+  height: 18px;
+  color: var(--fd-color-text-muted);
 }
 .console-watch__t {
   display: flex;
