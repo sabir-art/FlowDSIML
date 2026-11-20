@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variables partout (lot L46-bis) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
+<style>
+  /* L46-bis, composants §17. Spec : docs/ux/specs/l46bis-variables-partout.md. Données fictives. */
+  .vp { width: 360px; background: var(--fd-color-surface); color: var(--fd-color-text); border-radius: 20px; box-shadow: 0 1px 2px rgb(8 10 14 / .06), 0 8px 32px rgb(8 10 14 / .08); overflow: hidden; align-self: flex-start; }
+  .vp > header { display: flex; align-items: center; height: 56px; padding: 0 24px; border-bottom: 1px solid var(--fd-color-border); } .vp > header h3 { margin: 0; font-size: 17px; font-weight: 600; }
+  .vp-b { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 20px; }
+  .vf { display: flex; flex-direction: column; gap: 6px; } .vf > b { font-size: 13px; font-weight: 600; } .vf > small { font-size: 13px; color: var(--fd-color-text-muted); }
+  .one { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); font-size: 14px; line-height: 1.6; box-sizing: border-box; }
+  .one > span:first-child { flex: 1; min-width: 0; padding: 7px 0; } .one .add { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--fd-color-primary); }
+  .one.f { border-color: var(--fd-color-primary); box-shadow: var(--fd-shadow-focus); }
+  .rich { border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); border-radius: 12px; } .rich .t { display: flex; gap: 2px; padding: 4px; border-bottom: 1px solid var(--fd-color-border); color: var(--fd-color-text-muted); } .rich .t span { display: grid; place-items: center; width: 30px; height: 30px; }
+  .rich .t .add { margin-left: auto; width: auto; display: inline-flex; gap: 4px; padding: 0 8px; font-size: 13px; font-weight: 600; color: var(--fd-color-primary); }
+  .rich .b { padding: 10px 12px; font-size: 14px; line-height: 24px; min-height: 48px; }
+  .pill { display: inline-flex; align-items: center; height: 22px; padding: 0 7px; border-radius: 6px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-weight: 600; font-size: 13px; vertical-align: 1px; white-space: nowrap; }
+  .prv { display: flex; flex-direction: column; gap: 8px; }
+  .tipx { margin-top: 4px; padding: 8px 10px; border-radius: 8px; background: #16181d; color: #fff; font-size: 12px; align-self: flex-start; }
+  .end { width: 420px; height: 330px; border-radius: 20px; background: var(--fd-color-surface-sunken); display: grid; place-items: center; align-self: flex-start; }
+  .end .card { width: 340px; padding: 28px; border-radius: 18px; background: #fff; color: #0b0d10; box-shadow: 0 16px 48px rgb(8 10 14 / .14); text-align: center; display: flex; flex-direction: column; gap: 10px; }
+  .end .card b { font-size: 22px; } .end .card p { margin: 0; font-size: 15px; color: #4a5562; line-height: 1.5; } .end .card span.bt { align-self: center; margin-top: 8px; padding: 10px 20px; border-radius: 999px; background: #a3195b; color: #fff; font-size: 14px; font-weight: 600; }
+  .end small.m { font-size: 12px; color: var(--fd-color-text-muted); }
+  .dlg { width: 560px; background: var(--fd-color-surface); color: var(--fd-color-text); border-radius: 20px; box-shadow: 0 24px 64px rgb(8 10 14 / .18); padding: 24px; display: flex; flex-direction: column; gap: 18px; position: relative; align-self: flex-start; }
+  .dlg h2 { margin: 0; font-size: 20px; } .dlg > p { margin: -8px 0 0; font-size: 14px; color: var(--fd-color-text-muted); }
+  .dlg .plain { border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 24px; min-height: 120px; }
+  .dlg .plain .add { float: right; font-size: 13px; font-weight: 600; color: var(--fd-color-primary); }
+  .dlg .chk { display: flex; gap: 8px; align-items: center; font-size: 14px; } .dlg .chk input { accent-color: var(--fd-color-text); width: 16px; height: 16px; }
+  .dlg .f { display: flex; justify-content: flex-end; gap: 8px; }
+  .cat { width: 420px; align-self: flex-start; background: var(--fd-color-surface); border-radius: 16px; box-shadow: 0 16px 48px rgb(8 10 14 / .2); padding: 8px; z-index: 2; }
+  .cat h4 { margin: 8px 10px 4px; font-size: 12px; font-weight: 600; color: var(--fd-color-text-muted); }
+  .co { display: flex; align-items: baseline; gap: 12px; padding: 9px 10px; border-radius: 10px; font-size: 14px; } .co span { flex: 1; } .co em { font-style: normal; font-size: 13px; color: var(--fd-color-text-muted); }
+  .co.act { background: var(--fd-color-surface-sunken); }
+  .co.off span { color: var(--fd-color-text-muted); } .co.off small { display: block; font-size: 12px; color: var(--fd-color-text-muted); margin-top: 2px; }
+  .cat .fd-input { width: 100%; box-sizing: border-box; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<main class="u2">
+  <header class="u2-head"><div><small>Lot L46-bis</small><h1>Variables dans tous les textes du visiteur</h1><p>Le même champ qu’au lot L46, en deux variantes : texte riche ou une ligne. Partout, « + Variable » au même endroit, et une pastille qui montre le nom seul.</p></div></header>
+  <section class="u2-sec"><h2>Écran de fin, et ce que lit le visiteur</h2><p>À gauche, le panneau de l’étape ; à droite, l’aperçu avec un exemple, puis sans valeur connue.</p><div class="u2-row" id="a1"></div></section>
+  <section class="u2-sec"><h2>Bouton d’action, pop-up, formulaire, checklist</h2><p>« + Variable » sur la ligne de chaque champ ; aucun bouton en plus.</p><div class="u2-row" id="a2" style="align-items:flex-start"></div></section>
+  <section class="u2-sec"><h2>Relance des apprenants</h2><p>Un seul e-mail part à tous en copie cachée : les variables propres à chaque personne restent visibles, mais désactivées, avec leur raison.</p><div class="u2-row" id="a3" style="align-items:flex-start"></div></section>
+  <section class="u2-sec"><h2>En sombre</h2><div class="u2-row" id="a4" style="align-items:flex-start"></div></section>
+</main>
+<script>
+  const { I } = U2;
+  const P = (t) => `<span class="pill">${t}</span>`;
+  const one = (txt, f) => `<div class="one${f ? ' f' : ''}"><span>${txt}</span><span class="add">${I('plus', 14)}Variable</span></div>`;
+  const rich = (txt) => `<div class="rich"><div class="t"><span>${I('bold', 16)}</span><span>${I('italic', 16)}</span><span>${I('ext', 16)}</span><span class="add">${I('plus', 14)}Variable</span></div><div class="b">${txt}</div></div>`;
+  const F = (lab, ctl, help = '') => `<div class="vf"><b>${lab}</b>${ctl}${help ? `<small>${help}</small>` : ''}</div>`;
+  const panel = (title, body, dark) => `<section class="vp"${dark ? ' data-theme="dark"' : ''}><header><h3>${title}</h3></header><div class="vp-b">${body}</div></section>`;
+  const endPanel = (dark) => panel('Écran de fin', F('Titre', one(`Merci ${P('Prénom du visiteur')} !`)) + F('Texte', rich(`Vous savez maintenant créer une opportunité dans ${P('Nom du logiciel')}.`)) + F('Bouton', one(`Retour à ${P('Nom de l’espace')}`)), dark);
+  const card = (name, label) => `<div class="prv"><div class="end"><div class="card"><b>Merci${name ? ' ' + name : ''} !</b><p>Vous savez maintenant créer une opportunité dans ExampleCRM.</p><span class="bt">Retour à Acme Formation</span></div></div><small class="m" style="font-size:13px;color:var(--fd-color-text-muted)">${label}</small></div>`;
+  document.getElementById('a1').innerHTML = endPanel() + card('Camille', 'Aperçu « Exemples » : Camille') + card('', 'Aperçu « Valeurs de repli » : prénom inconnu, repli vide, sans espace double');
+  const cta = panel('Bouton d’action', F('Libellé', one(`Je m’inscris, ${P('Prénom du visiteur')}`)) + `<div class="vf"><b>Adresse du lien</b>${one(`intranet.example/inscription?prenom=${P('Prénom du visiteur')}`, true)}<span class="tipx">Ajoutée à l’adresse, encodée</span></div>`);
+  const pop = panel('Étape pop-up', F('Titre', one(`${P('Prénom du visiteur')}, une minute`)) + F('Texte', rich(`Avant de continuer, vérifiez que vous êtes connecté à ${P('Nom du logiciel')}.`)) + F('Bouton', one('C’est fait'), 'Vide : « Suivant ».'));
+  const form = panel('Formulaire', F('Titre', one('Restons en contact')) + F('Introduction', rich(`Recevez la suite du parcours ${P('Titre de la démo')}.`)) + F('Message de remerciement', rich(`Merci ${P('Prénom du visiteur')}, c’est noté.`), 'Le prénom saisi dans le formulaire est repris ici.'));
+  const chk = panel('Checklist', F('Titre', one(`Votre parcours, ${P('Prénom du visiteur')}`)) + F('Éléments', `<div style="display:flex;flex-direction:column;gap:8px">${one('Se connecter')}${one(`Ouvrir ${P('Nom du logiciel')}`)}${one('Créer une opportunité')}</div>`, 'Un élément par chapitre.'));
+  document.getElementById('a2').innerHTML = cta + pop + form + chk;
+  const co = (t, ex, cls = '', why = '') => `<div class="co ${cls}"${cls.includes('off') ? ' aria-disabled="true"' : ''}><span>${t}${why ? `<small>${why}</small>` : ''}</span><em>${ex}</em></div>`;
+  const dlg = (dark) => `<div class="dlg" role="dialog" aria-labelledby="rl${dark ? 'd' : ''}"${dark ? ' data-theme="dark"' : ''}><h2 id="rl${dark ? 'd' : ''}">Préparer la relance</h2><p>3 apprenants, en copie cachée. Votre messagerie s’ouvre ensuite.</p>
+    ${F('Objet', one('Votre formation vous attend'))}
+    <div class="vf"><b>Message</b><div class="plain"><span class="add">+ Variable</span>Bonjour,<br>Vous n’avez pas terminé votre formation chez ${P('Nom de l’espace')}. Vous pouvez la reprendre là où vous l’aviez laissée depuis votre lien personnel.<br>Bonne journée</div></div>
+    
+    <label class="chk"><input type="checkbox" checked>Enregistrer comme message par défaut de l’espace</label>
+    <div class="f"><button class="fd-btn fd-btn--ghost" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button">${I('ext', 16)}Ouvrir dans ma messagerie</button></div></div>`;
+  document.getElementById('a3').innerHTML = dlg(false) + `<div><p style="margin:0 0 8px;font-size:13px;color:var(--fd-color-text-muted)">Catalogue ouvert depuis « + Variable » du message</p><div class="cat" role="listbox" aria-label="Insérer une variable"><input class="fd-input" placeholder="Rechercher une variable"><h4>Votre espace</h4>${co('Nom de l’espace', 'Acme Formation', 'act')}${co('Nom du logiciel', 'ExampleCRM')}<h4>Date</h4>${co('Date du jour', '20 novembre 2026')}<h4>Apprenant</h4>${co('Prénom de l’apprenant', 'Bientôt', 'off', 'Un seul e-mail part à tous en copie cachée : pas de valeur par personne.')}${co('Lien personnel', 'Bientôt', 'off', 'Même raison.')}</div></div>`;
+  document.getElementById('a4').innerHTML = endPanel(true) + dlg(true) + panel('Bouton d’action', F('Libellé', one(`Je m’inscris, ${P('Prénom du visiteur')}`)) + F('Adresse du lien', one(`intranet.example/inscription?prenom=${P('Prénom du visiteur')}`)), true);
+</script>
+</body>
+</html>
