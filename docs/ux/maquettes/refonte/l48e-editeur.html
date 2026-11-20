@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Éditeur (lot L48-E) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
+<style>
+  /* L48-E, composants §17. Spec : docs/ux/specs/l48e-editeur.md. Données fictives. */
+  .ed { display: grid; grid-template-rows: 56px minmax(0, 1fr); height: 860px; border-radius: 20px; overflow: hidden; background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: 0 1px 2px rgb(8 10 14 / .06), 0 8px 32px rgb(8 10 14 / .08); position: relative; }
+  .ed-h { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 0 16px; border-bottom: 1px solid var(--fd-color-border); }
+  .ed-h .l { display: flex; align-items: center; gap: 12px; min-width: 0; } .ed-h .l b { font-size: 15px; font-weight: 600; white-space: nowrap; }
+  .ed-st { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fd-color-text-muted); white-space: nowrap; }
+  .ed-st .np { display: inline-flex; align-items: center; gap: 6px; color: var(--fd-color-warning, #8a5300); } .ed-st .np i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .ed-h .c { display: flex; align-items: center; gap: 4px; } .ed-h .r { display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
+  .ib { all: unset; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; color: var(--fd-color-text-muted); cursor: pointer; position: relative; }
+  .ib:hover { background: var(--fd-color-surface-sunken); }
+  .ib[aria-pressed='true'] { background: var(--fd-color-surface-sunken); color: var(--fd-color-text); }
+  .ib[aria-disabled='true'] { opacity: .4; }
+  .ib .dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--fd-color-primary); box-shadow: 0 0 0 2px var(--fd-color-surface); }
+  .ed-b { display: grid; grid-template-columns: 248px minmax(0, 1fr) auto 56px; min-height: 0; }
+  .ed-steps { border-right: 1px solid var(--fd-color-border); padding: 16px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .ed-steps h4 { margin: 0 4px 6px; font-size: 13px; font-weight: 600; color: var(--fd-color-text-muted); }
+  .ed-si { display: grid; grid-template-columns: 16px 88px 1fr; gap: 10px; align-items: center; padding: 8px; border-radius: 12px; font-size: 14px; }
+  .ed-si.cur { background: var(--fd-color-surface-sunken); font-weight: 600; } .ed-si > span:first-child { font-size: 12px; color: var(--fd-color-text-muted); }
+  .ed-th { height: 54px; border-radius: 8px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); display: flex; flex-direction: column; gap: 5px; justify-content: center; padding: 0 8px; box-sizing: border-box; }
+  .ed-th i { display: block; height: 4px; border-radius: 99px; background: var(--fd-color-border); }
+  .ed-steps .add { margin-top: auto; }
+  .ed-cv { position: relative; background: var(--fd-color-surface-sunken); display: grid; place-items: center; padding: 40px; min-width: 0; }
+  .ed-cv .fit { position: absolute; top: 14px; right: 16px; }
+  .ed-shot { position: relative; width: 100%; max-width: 760px; aspect-ratio: 16 / 10; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgb(8 10 14 / .1); overflow: hidden; display: grid; grid-template-columns: 22% 1fr; grid-template-rows: 40px 1fr; color: #1a1d21; }
+  .ed-shot .s-top { grid-column: 1 / -1; background: #1f2a37; color: #fff; display: flex; align-items: center; padding: 0 16px; font-size: 12px; font-weight: 700; }
+  .ed-shot .s-nav { border-right: 1px solid #e6e9ee; padding: 14px; display: flex; flex-direction: column; gap: 12px; } .ed-shot .s-nav i { display: block; height: 6px; border-radius: 9px; background: #e6e9ee; }
+  .ed-shot .s-pg { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; } .ed-shot .s-pg b { font-size: 20px; }
+  .ed-shot .s-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; } .ed-shot .s-cards span { height: 52px; border-radius: 8px; background: #f2f4f7; }
+  .ed-shot .s-btn { align-self: flex-start; padding: 7px 12px; border-radius: 6px; background: #3b4cca; color: #fff; font-size: 12px; font-weight: 600; outline: 2px dashed #a3195b; outline-offset: 3px; }
+  .ed-hs { position: absolute; left: 42%; top: 54%; width: 16px; height: 16px; border-radius: 50%; background: var(--fd-color-primary, #a3195b); box-shadow: 0 0 0 4px rgb(163 25 91 / .25); }
+  .ed-bub { position: absolute; left: 34%; top: 63%; width: 280px; padding: 14px 16px; border-radius: 14px; background: #fff; color: #080808; box-shadow: 0 8px 24px rgb(8 10 14 / .18); font-size: 14px; line-height: 1.45; }
+  .ed-bub small { display: block; font-size: 12px; color: #5b6472; margin-bottom: 4px; } .ed-bub b { display: block; margin-bottom: 2px; }
+  .ed-bub .pill { display: inline-flex; padding: 0 6px; border-radius: 6px; background: #f6e3ec; color: #7a1144; font-weight: 600; }
+  .ed-bub .nx { display: flex; justify-content: flex-end; margin-top: 10px; } .ed-bub .nx span { padding: 6px 14px; border-radius: 999px; background: #a3195b; color: #fff; font-size: 13px; font-weight: 600; }
+  .ed-p { width: 360px; border-left: 1px solid var(--fd-color-border); display: flex; flex-direction: column; min-height: 0; }
+  .ed-p.w400 { width: 400px; }
+  .ed-p > header { display: flex; align-items: center; height: 56px; padding: 0 12px 0 24px; border-bottom: 1px solid var(--fd-color-border); flex: none; } .ed-p > header h3 { margin: 0; flex: 1; font-size: 17px; font-weight: 600; }
+  .ed-p .sub { margin: -6px 0 0; padding: 0 24px 12px; font-size: 13px; color: var(--fd-color-text-muted); border-bottom: 1px solid var(--fd-color-border); }
+  .ed-pb { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; overflow: auto; flex: 1; }
+  .ed-sec { display: flex; flex-direction: column; gap: 8px; } .ed-sec + .ed-sec { padding-top: 20px; border-top: 1px solid var(--fd-color-border); }
+  .ed-sec h4 { margin: 0; font-size: 13px; font-weight: 600; } .ed-sec .fd-input { width: 100%; box-sizing: border-box; } .ed-sec small { font-size: 13px; color: var(--fd-color-text-muted); }
+  .ed-rte { border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); border-radius: 12px; } .ed-rte .t { display: flex; gap: 2px; padding: 4px; border-bottom: 1px solid var(--fd-color-border); color: var(--fd-color-text-muted); } .ed-rte .t span { display: grid; place-items: center; width: 30px; height: 30px; }
+  .ed-rte .t .add { margin-left: auto; width: auto; display: inline-flex; gap: 4px; padding: 0 8px; font-size: 13px; font-weight: 600; color: var(--fd-color-primary); }
+  .ed-rte .b { padding: 10px 12px; font-size: 14px; line-height: 24px; } .ed-rte .pill { display: inline-flex; height: 22px; align-items: center; padding: 0 7px; border-radius: 6px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); font-weight: 600; font-size: 13px; }
+  .ed-seg { display: flex; } .ed-seg .fd-segmented { width: 100%; } .ed-seg .fd-segmented button { flex: 1; }
+  .ed-del { all: unset; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--fd-color-danger, #b4234b); padding: 8px 0; }
+  .ed-rail { border-left: 1px solid var(--fd-color-border); display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0; }
+  .ed-rail hr { width: 24px; border: 0; border-top: 1px solid var(--fd-color-border); margin: 6px 0; }
+  .ed-rail .end { margin-top: auto; }
+  .ed-tip { position: absolute; right: 64px; padding: 6px 10px; border-radius: 8px; background: #16181d; color: #fff; font-size: 13px; white-space: nowrap; } .ed-tip kbd { font: inherit; opacity: .7; margin-left: 8px; }
+  .ed-menu { position: absolute; top: 52px; right: 196px; width: 280px; padding: 8px; border-radius: 16px; background: var(--fd-color-surface); box-shadow: 0 16px 48px rgb(8 10 14 / .18); z-index: 3; }
+  .ed-mi { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 12px; border-radius: 10px; font-size: 14px; } .ed-mi span { flex: 1; } .ed-mi small { font-size: 13px; color: var(--fd-color-text-muted); } .ed-mi svg { color: var(--fd-color-text-muted); }
+  .ed-mi.h { background: var(--fd-color-surface-sunken); } .ed-ms { height: 1px; margin: 6px 4px; background: var(--fd-color-border); }
+  .cm { display: flex; flex-direction: column; gap: 4px; padding: 14px 0; } .cm + .cm { border-top: 1px solid var(--fd-color-border); }
+  .cm p { margin: 0; font-size: 14px; line-height: 1.5; } .cm small { font-size: 13px; color: var(--fd-color-text-muted); } .cm .re { padding-left: 16px; margin-top: 8px; }
+  .cmp { margin: 0 24px 20px; border: 1px solid var(--fd-color-border-strong, var(--fd-color-border)); border-radius: 16px; } .cmp .tx { padding: 12px 14px; font-size: 14px; color: var(--fd-color-text-muted); min-height: 44px; }
+  .cmp .bar { display: flex; align-items: center; padding: 6px 8px; } .cmp .bar .sp { flex: 1; } .cmp .bar .ib { width: 32px; height: 32px; }
+  .bl { position: absolute; inset: 0; z-index: 4; display: grid; grid-template-rows: 64px minmax(0, 1fr); background: var(--fd-color-surface); }
+  .bl > header { display: flex; align-items: center; gap: 12px; padding: 0 24px; border-bottom: 1px solid var(--fd-color-border); } .bl > header h2 { margin: 0; flex: 1; font-size: 17px; }
+  .bl-b { display: grid; grid-template-columns: minmax(0, 1fr) 300px; min-height: 0; }
+  .bl-cv { position: relative; background: var(--fd-color-surface-sunken); display: grid; place-items: center; padding: 48px; }
+  .bl-z { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: var(--fd-color-surface); box-shadow: 0 4px 16px rgb(8 10 14 / .1); font-size: 13px; } .bl-z .ib { width: 36px; height: 36px; border-radius: 50%; } .bl-z span { padding: 0 8px; font-variant-numeric: tabular-nums; }
+  .bz { position: absolute; border: 2px solid var(--fd-color-text, #111); border-radius: 6px; backdrop-filter: blur(6px); background: rgb(255 255 255 / .35); }
+  .bz.sel { box-shadow: 0 0 0 4px rgb(163 25 91 / .3); border-color: #a3195b; }
+  .bl-side { border-left: 1px solid var(--fd-color-border); padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+  .bl-zone { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 10px; border-radius: 10px; font-size: 14px; } .bl-zone span { flex: 1; } .bl-zone.sel { background: var(--fd-color-surface-sunken); font-weight: 600; }
+  .bl-zone button { all: unset; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--fd-color-text-muted); }
+</style>
+</head>
+<body>
+<main class="u2">
+  <header class="u2-head"><div><small>Lot L48-E</small><h1>Éditeur</h1><p>Les outils sont rangés dans un rail à droite, et un seul panneau s’ouvre à la fois. Dans l’en-tête, une seule action principale : Publier. Le canevas garde toute sa hauteur.</p></div></header>
+  <div id="a1"></div>
+  <section class="u2-sec"><h2>Commentaires dans le rail, et le menu « Plus »</h2><p>Les commentaires ne recouvrent plus le canevas. Présenter, Exporter et Traduire passent dans « Plus ».</p><div id="a2"></div></section>
+  <section class="u2-sec"><h2>Flou, en plein écran</h2><p>On dessine les zones sur la capture agrandie, puis « Appliquer le flou » ramène à l’éditeur.</p><div id="a3"></div></section>
+  <section class="u2-sec"><h2>Panneau fermé, en sombre</h2><p>Un clic sur l’outil actif ferme le panneau : le canevas s’élargit.</p><div id="a4"></div></section>
+</main>
+<script>
+  const { I, pair } = U2;
+  const SYM = '../../brand-tutoclic/production/symbole-tutoclick.svg';
+  const RAIL = [[['type', 'Étape', 1], ['pointer', 'Bouton d’action', 2], ['target', 'Points d’intérêt', 3], ['mic', 'Voix off', 4], ['branch', 'Suite du parcours', 5]], [['droplet', 'Flou', 6], ['zoom', 'Zoom', 7], ['crop', 'Recadrage', 8], ['img', 'Image', 9]], [['palette', 'Design']], [['msg', 'Commentaires'], ['spark', 'Assistant']]];
+  const rail = (act, tip) => `<div class="ed-rail" role="toolbar" aria-orientation="vertical" aria-label="Outils de l’étape">${RAIL.map((g, gi) => `${gi ? '<hr>' : ''}<div role="group" style="display:flex;flex-direction:column;gap:4px">${g.map(([ic, n, k]) => `<button class="ib" type="button" aria-label="${n}" aria-pressed="${n === act}">${I(ic, 20)}${n === 'Commentaires' ? '<i class="dot" aria-hidden="true"></i>' : ''}</button>`).join('')}</div>`).join('')}<button class="ib end" type="button" aria-label="Réglages" aria-pressed="${act === 'Réglages'}">${I('gear', 20)}</button></div>`;
+  const head = (np = true) => `<header class="ed-h"><div class="l"><button class="ib" type="button" aria-label="Retour aux démos">${I('left', 20)}</button><b>Créer un rapport en 2 minutes</b><span class="ed-st">Enregistré${np ? '<span aria-hidden="true">·</span><span class="np"><i></i>Non publié</span>' : ''}</span></div>
+    <div class="c"><button class="ib" type="button" aria-label="Annuler">${I('undo', 18)}</button><button class="ib" type="button" aria-label="Rétablir" aria-disabled="true">${I('redo', 18)}</button><span class="fd-segmented" role="group" aria-label="Mode" style="margin-left:8px"><button type="button" aria-pressed="true">Édition</button><button type="button" aria-pressed="false">Aperçu</button></span></div>
+    <div class="r"><button class="ib" type="button" aria-label="Plus d’actions" aria-haspopup="menu">${I('dots', 20)}</button><button class="fd-btn" type="button">Partager</button><button class="fd-btn fd-btn--primary" type="button">Publier</button></div></header>`;
+  const steps = `<nav class="ed-steps" aria-label="Étapes"><h4>Étapes · 3</h4>${[['Écran 1', 1], ['Écran 2'], ['Merci !']].map(([n, c], i) => `<div class="ed-si${c ? ' cur' : ''}"><span>${i + 1}</span><span class="ed-th"><i style="width:70%"></i><i style="width:45%"></i></span><span>${n}</span></div>`).join('')}<button class="fd-btn add" type="button">${I('plus')}Ajouter une étape</button></nav>`;
+  const shot = `<div class="ed-shot" aria-label="Capture de l’étape 1"><div class="s-top">ExampleCRM</div><div class="s-nav"><i style="width:80%"></i><i style="width:60%"></i><i style="width:70%"></i><i style="width:50%"></i></div><div class="s-pg"><b>Opportunités</b><div class="s-cards"><span></span><span></span><span></span></div><span class="s-btn">+ Nouvelle opportunité</span></div><span class="ed-hs" aria-hidden="true"></span><div class="ed-bub"><small>1 / 3</small><b>Créez une opportunité</b>Bienvenue <span class="pill">Prénom du visiteur</span> : cliquez sur « Nouvelle opportunité ».<div class="nx"><span>Suivant</span></div></div></div>`;
+  const canvas = `<div class="ed-cv"><button class="fd-btn fd-btn--sm fit" type="button">Ajuster${I('down', 14)}</button>${shot}</div>`;
+  const pStep = `<aside class="ed-p" aria-labelledby="ps"><header><h3 id="ps" tabindex="-1">Étape</h3><button class="ib" type="button" aria-label="Fermer le panneau">${I('x', 18)}</button></header><div class="ed-pb">
+    <div class="ed-sec"><h4>Titre de l’étape</h4><input class="fd-input" value="Écran 1"><small>Capturé sur app.example.com</small></div>
+    <div class="ed-sec"><h4>Texte de la bulle</h4><div class="ed-rte"><div class="t"><span>${I('bold', 16)}</span><span>${I('italic', 16)}</span><span class="add">${I('plus', 14)}Variable</span></div><div class="b">Bienvenue <span class="pill">Prénom du visiteur</span> : cliquez sur « Nouvelle opportunité ».</div></div></div>
+    <div class="ed-sec"><h4>Texte alternatif</h4><input class="fd-input" placeholder="Capture d’écran : Écran 1."><small>Ce que montre l’écran, en une phrase.</small></div>
+    <div class="ed-sec"><h4>Animation de l’étape</h4><div class="ed-seg"><span class="fd-segmented" role="group" aria-label="Animation"><button type="button" aria-pressed="true">Aucune</button><button type="button" aria-pressed="false">Saisie</button><button type="button" aria-pressed="false">Défilement</button></span></div></div>
+    <div class="ed-sec"><button class="ed-del" type="button">Supprimer l’étape</button></div></div></aside>`;
+  const ed = (panel, act, extra = '', o = {}) => `<div class="ed"${o.dark ? ' data-theme="dark"' : ''}>${head()}<div class="ed-b">${steps}${canvas}${panel}${rail(act)}</div>${extra}</div>`;
+  const tip = `<span class="ed-tip" style="top:204px">Points d’intérêt<kbd>Alt 3</kbd></span>`;
+  document.getElementById('a1').outerHTML = pair('Étape sélectionnée : rail et panneau « Étape »', ed(pStep, 'Étape', tip), 'img/avant/l48e-editeur.png', 'Éditeur actuel : panneau à 3 onglets, barre flottante, commentaires en bas, 9 boutons dans l’en-tête', 'Les 13 outils du rail remplacent les onglets, la barre flottante et le tiroir. L’infobulle (L44) donne le nom et le raccourci.');
+  const cm = (who, when, txt, re) => `<div class="cm"><small><b style="color:var(--fd-color-text)">${who}</b> · ${when}</small><p>${txt}</p>${re ? `<div class="re"><small><b style="color:var(--fd-color-text)">${re[0]}</b> · ${re[1]}</small><p>${re[2]}</p></div>` : ''}</div>`;
+  const pCom = `<aside class="ed-p w400" aria-labelledby="pc"><header><h3 id="pc" tabindex="-1">Commentaires</h3><button class="ib" type="button" aria-label="Fermer le panneau">${I('x', 18)}</button></header><p class="sub" style="padding-top:12px;margin:0">Interne à l’équipe · jamais publié</p><div class="ed-pb" style="gap:0;padding-top:4px">${cm('Alex Martin', 'il y a 2 h', '@Camille le bouton a changé de nom dans la dernière version : « Créer une opportunité ».', ['Camille Dupont', 'il y a 1 h', 'Bien vu, je recapture l’écran demain.'])}${cm('Sam Leroy', 'hier', 'La bulle cache le total des opportunités, on peut la décaler vers la droite ?')}</div>
+    <div class="cmp"><div class="tx">Écrire un commentaire, @ pour mentionner</div><div class="bar"><button class="ib" type="button" aria-label="Mentionner">${I('at', 18)}</button><span class="sp"></span><button class="ib" type="button" aria-label="Envoyer" aria-disabled="true">${I('send', 18)}</button></div></div></aside>`;
+  const menu = `<div class="ed-menu" role="menu" aria-label="Plus d’actions">${[['Présenter'], ['Diffuser'], ['Exporter'], ['Traduire'], ['Rédiger avec l’IA'], ['Quiz', '1 question'], ['Rechercher et remplacer', 'Ctrl F']].map(([n, s], i) => `<div class="ed-mi${i === 0 ? ' h' : ''}" role="menuitem"><span>${n}</span>${s ? `<small>${s}</small>` : ''}</div>`).join('')}<div class="ed-ms"></div><div class="ed-mi" role="menuitem"><span>Raccourcis clavier</span><small>?</small></div><div class="ed-mi" role="menuitem"><span>Aide</span><small>F1</small></div><div class="ed-ms"></div><div class="ed-mi" role="menuitem" aria-disabled="true"><span style="color:var(--fd-color-text-muted)">Versions</span><small>Bientôt</small></div></div>`;
+  document.getElementById('a2').innerHTML = ed(pCom, 'Commentaires') + `<div class="u2-row" style="margin-top:24px;align-items:flex-start"><div><p style="margin:0 0 8px;font-size:13px;color:var(--fd-color-text-muted)">Menu « Plus » de l’en-tête</p>${menu.replace('class="ed-menu"', 'class="ed-menu" style="position:static"')}</div></div>`;
+  const blur = `<div class="ed"><div class="bl" role="dialog" aria-modal="true" aria-labelledby="blt"><header><h2 id="blt">Flouter des zones</h2><button class="fd-btn fd-btn--ghost" type="button">Annuler</button><button class="fd-btn fd-btn--primary" type="button">Appliquer le flou</button></header><div class="bl-b"><div class="bl-cv">${shot.replace('<span class="ed-hs" aria-hidden="true"></span>', '<span class="bz sel" style="left:62%;top:28%;width:26%;height:12%"></span><span class="bz" style="left:26%;top:2%;width:12%;height:5%"></span>').replace(/<div class="ed-bub">[\s\S]*?<\/div><\/div><\/div>$/, '</div>')}<div class="bl-z"><button class="ib" type="button" aria-label="Zoom arrière">${I('minus', 18)}</button><span>125 %</span><button class="ib" type="button" aria-label="Zoom avant">${I('plus', 18)}</button><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Ajuster</button></div></div>
+    <aside class="bl-side"><div class="ed-sec"><h4>Zones (2)</h4><div class="bl-zone sel"><span>Zone 1 · montants</span><button type="button">Retirer</button></div><div class="bl-zone"><span>Zone 2 · en-tête</span><button type="button">Retirer</button></div><small>Glissez sur la capture pour ajouter une zone.</small></div>
+    <div class="ed-sec"><h4>Style de masquage</h4><div class="ed-seg"><span class="fd-segmented" role="group" aria-label="Style de masquage"><button type="button" aria-pressed="true">Flou</button><button type="button" aria-pressed="false">Pixels</button><button type="button" aria-pressed="false">Aplat</button></span></div></div>
+    <div class="ed-sec"><h4>Intensité</h4><input type="range" min="2" max="20" value="10" aria-label="Intensité du flou" style="width:100%;accent-color:var(--fd-color-text)"></div>
+    <div class="ed-sec"><h4>Appliquer à</h4><label style="display:flex;gap:8px;font-size:14px"><input type="radio" name="blap" checked>Cette étape seulement</label><label style="display:flex;gap:8px;font-size:14px"><input type="radio" name="blap">Toutes les étapes</label></div></aside></div></div></div>`;
+  document.getElementById('a3').innerHTML = blur;
+  document.getElementById('a4').innerHTML = ed('', '', '', { dark: true }).replace('<div class="ed-b">', '<div class="ed-b" style="grid-template-columns:248px minmax(0,1fr) 56px">');
+</script>
+</body>
+</html>

@@ -40,7 +40,7 @@
 
 ### L43, Composeur (`l43-composeur.html`)
 - Composeur inchangé (révision 2).
-- **Proposition, à arbitrer avec L48-E** : les commentaires de l'éditeur passent du tiroir du bas (qui écrase le canevas) à un **panneau latéral** de 400 px, comme l'assistant. Aucun changement fonctionnel.
+- **Arbitré dans L48-E** (`l48e-editeur.md` §5) : les commentaires de l'éditeur passent du tiroir du bas, qui écrasait le canevas, à un **panneau latéral** de 400 px ouvert depuis le rail, comme l'assistant. Aucun changement fonctionnel.
 
 ### L44, Infobulles (`l44-infobulles.html`), livré (f62c292) et conforme
 - Aucun delta : rendu vérifié en clair et en sombre, e2e à 0 écart sur 849 boutons.
