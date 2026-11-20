@@ -7,9 +7,16 @@ import {
   pageFor,
   searchArticles,
   termsOf,
+  visibleArticles,
 } from './articles';
 
 describe('articles d’aide (L26-03)', () => {
+  it('L41 : l’article de la console est réservé aux comptes qui ont un rôle dans la console', () => {
+    expect(articleBySlug('console-proprietaire')?.audience).toBe('console');
+    expect(visibleArticles(false).some((a) => a.audience === 'console')).toBe(false);
+    expect(visibleArticles(true).some((a) => a.slug === 'console-proprietaire')).toBe(true);
+    expect(searchArticles('console proprietaire', visibleArticles(false))).toEqual([]);
+  });
   it('chaque page a 2 à 4 articles existants', () => {
     for (const [page, slugs] of Object.entries(PAGE_ARTICLES)) {
       expect(slugs.length, page).toBeGreaterThanOrEqual(2);
@@ -27,12 +34,12 @@ describe('articles d’aide (L26-03)', () => {
     }
   });
   it('recherche insensible aux accents et à la casse, titre d’abord', () => {
-    const r = searchArticles('SCORM');
+    const r = searchArticles('SCORM', ARTICLES);
     expect(r[0]!.slug).toMatch(/scorm/);
     expect(r.length).toBeGreaterThanOrEqual(2);
-    expect(searchArticles('donnees personnelles').map((a) => a.slug)).toContain('flouter-donnees');
-    expect(searchArticles('xyzzy')).toEqual([]);
-    expect(searchArticles(' ')).toEqual([]);
+    expect(searchArticles('donnees personnelles', ARTICLES).map((a) => a.slug)).toContain('flouter-donnees');
+    expect(searchArticles('xyzzy', ARTICLES)).toEqual([]);
+    expect(searchArticles(' ', ARTICLES)).toEqual([]);
   });
   it('surligne les termes trouvés en gardant les accents', () => {
     const seg = highlight('Données personnelles', termsOf('donnees'));

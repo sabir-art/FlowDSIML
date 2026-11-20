@@ -35,12 +35,18 @@ describe('visites guidées statiques (L26 §3.3-3.4)', () => {
 
 describe('articles d’aide connus en base', () => {
   it('help_articles (migration) liste exactement les articles livrés', () => {
-    const sql = readFileSync(
-      resolve(__dirname, '../../../../supabase/migrations/20261121120000_modeles_images_aide.sql'),
-      'utf8',
-    );
-    const block = /insert into public\.help_articles \(slug\) values([\s\S]*?)on conflict/.exec(sql)![1]!;
-    const slugs = [...block.matchAll(/'([a-z0-9-]+)'/g)].map((x) => x[1]).sort();
+    // Toutes les migrations : les articles ajoutés après la liste initiale (L41) sont pris en compte
+    const dir = resolve(__dirname, '../../../../supabase/migrations');
+    const sql = readdirSync(dir)
+      .filter((f) => f.endsWith('.sql'))
+      .map((f) => readFileSync(join(dir, f), 'utf8'))
+      .join('\n');
+    const blocks = [
+      ...sql.matchAll(/insert into public\.help_articles \(slug\) values([\s\S]*?)on conflict/g),
+    ].map((m) => m[1]!);
+    const slugs = [
+      ...new Set(blocks.flatMap((b) => [...b.matchAll(/'([a-z0-9-]+)'/g)].map((x) => x[1]))),
+    ].sort();
     expect(slugs).toEqual(ARTICLES.map((a) => a.slug).sort());
     expect(readdirSync(resolve(__dirname, '../aide')).length).toBe(ARTICLES.length);
   });

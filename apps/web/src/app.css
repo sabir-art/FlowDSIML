@@ -1779,3 +1779,23 @@
   text-underline-offset: 2px;
   cursor: pointer;
 }
+
+/* L41 : point de nouveauté (avatar du pied de la barre latérale et entrée « Nouveautés ») */
+.user-block .avatar {
+  position: relative;
+}
+.news-dot {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fd-color-primary);
+  box-shadow: 0 0 0 2px var(--fd-color-surface);
+}
+.news-dot--inline {
+  position: static;
+  display: inline-block;
+  box-shadow: none;
+}

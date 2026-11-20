@@ -1,4 +1,4 @@
--- Tests pgTAP : L26-02 / L26-03 (compteur anonyme des articles).
+-- Tests pgTAP : L26-02 / L26-03 aide, reprise L41 (vote par article et par personne).
 begin;
 set search_path = public, extensions;
 select plan(6);
@@ -12,15 +12,16 @@ begin
 end $$;
 
 select pg_temp.login('00000000-0000-0000-0000-0000000050a1');
-select lives_ok($$ select public.help_feedback('exporter-scorm', true) $$, 'réponse « Oui » enregistrée');
-select public.help_feedback('exporter-scorm', true);
-select public.help_feedback('exporter-scorm', false);
-select throws_ok($$ select public.help_feedback('../secret', true) $$, 'P0001', 'ARTICLE_INVALID', 'clé d’article contrôlée');
-select throws_ok($$ select public.help_feedback('article-invente', true) $$, 'P0001', 'ARTICLE_INVALID', 'articles connus seulement');
-select throws_ok($$ select * from public.help_feedback $$, '42501', null, 'compteurs non lisibles par les utilisateurs');
+create temp table ctx as select (public.create_workspace('Aide')).id as ws;
+grant all on ctx to authenticated;
+select lives_ok($$ select public.help_vote('exporter-scorm', true, 'distribute', (select ws from ctx)) $$, 'réponse « Oui » enregistrée');
+select throws_ok($$ select public.help_vote('../secret', true, '', (select ws from ctx)) $$, 'P0001', 'ARTICLE_INVALID', 'clé d’article contrôlée');
+select throws_ok($$ select public.help_vote('article-invente', true, '', (select ws from ctx)) $$, 'P0001', 'ARTICLE_INVALID', 'articles connus seulement');
+select throws_ok($$ select * from public.help_feedback $$, '42501', null, 'ancien compteur non lisible par les utilisateurs');
+select throws_ok($$ select * from public.help_feedback_entries $$, '42501', null, 'réponses non lisibles par les utilisateurs');
 reset role;
-select is((select yes from public.help_feedback where article = 'exporter-scorm'), 2, 'compteur Oui');
-select is((select no from public.help_feedback where article = 'exporter-scorm'), 1, 'compteur Non (anonyme)');
+select ok(not exists (select 1 from pg_proc where proname = 'help_feedback' and pronamespace = 'public'::regnamespace),
+  'ancienne RPC du compteur retirée (remplacée par help_vote)');
 
 select * from finish();
 rollback;

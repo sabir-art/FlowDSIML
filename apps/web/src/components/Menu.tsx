@@ -28,6 +28,8 @@ export interface MenuItem {
    * (aria-disabled) et l'explication est reliée par aria-describedby et affichée en infobulle.
    */
   hint?: string;
+  /** L41 : groupe nommé (ex. « Équipe TutoClick ») : intitulé au-dessus de l'élément, role="group". */
+  group?: string;
 }
 
 /** Au-delà de ce nombre d'éléments, le menu s'affiche en feuille du bas sous 480 px (§15.7). */
@@ -226,36 +228,50 @@ export function Menu({
                   </span>
                 </div>
               ) : (
-                <button
-                  key={it.label}
-                  type="button"
-                  role="menuitem"
-                  className={`menu-item${it.danger ? ' menu-item--danger' : ''}`}
-                  disabled={it.disabled && !it.hint}
-                  aria-disabled={it.disabled && it.hint ? 'true' : undefined}
-                  aria-describedby={it.disabled && it.hint ? `${id}-h${i}` : undefined}
-                  title={it.disabled && it.hint ? it.hint : undefined}
-                  aria-current={it.current ? 'true' : undefined}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (it.disabled) return;
-                    close(true);
-                    it.onSelect();
-                  }}
-                >
-                  {it.icon && (
-                    <span className="menu-item__icon" aria-hidden="true">
-                      {it.icon}
-                    </span>
-                  )}
-                  {it.label}
-                  {it.end && <span className="menu-item__end">{it.end}</span>}
-                  {it.disabled && it.hint && (
-                    <span id={`${id}-h${i}`} className="sr-only">
-                      {it.hint}
-                    </span>
-                  )}
-                </button>
+                (() => {
+                  const item = (
+                    <button
+                      key={it.label}
+                      type="button"
+                      role="menuitem"
+                      className={`menu-item${it.danger ? ' menu-item--danger' : ''}`}
+                      disabled={it.disabled && !it.hint}
+                      aria-disabled={it.disabled && it.hint ? 'true' : undefined}
+                      aria-describedby={it.disabled && it.hint ? `${id}-h${i}` : undefined}
+                      title={it.disabled && it.hint ? it.hint : undefined}
+                      aria-current={it.current ? 'true' : undefined}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (it.disabled) return;
+                        close(true);
+                        it.onSelect();
+                      }}
+                    >
+                      {it.icon && (
+                        <span className="menu-item__icon" aria-hidden="true">
+                          {it.icon}
+                        </span>
+                      )}
+                      {it.label}
+                      {it.end && <span className="menu-item__end">{it.end}</span>}
+                      {it.disabled && it.hint && (
+                        <span id={`${id}-h${i}`} className="sr-only">
+                          {it.hint}
+                        </span>
+                      )}
+                    </button>
+                  );
+                  return it.group ? (
+                    <div key={it.label} role="group" aria-label={it.group} className="menu-group">
+                      <span className="menu-radios__label" aria-hidden="true">
+                        {it.group}
+                      </span>
+                      {item}
+                    </div>
+                  ) : (
+                    item
+                  );
+                })()
               ),
             )}
           </div>,

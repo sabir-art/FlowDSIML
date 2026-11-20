@@ -2320,6 +2320,41 @@ export type Database = {
     };
     Functions: {
       accept_invitation: { Args: { p_token: string }; Returns: string };
+      console_add_owner: { Args: { p_email: string; p_role: string }; Returns: string };
+      console_articles: { Args: { p_days?: number; p_workspace?: string | null }; Returns: Json };
+      console_audit_list: { Args: { p_limit?: number }; Returns: Json };
+      console_comments: { Args: { p_article?: string | null; p_days?: number; p_workspace?: string | null }; Returns: Json };
+      console_create_item: {
+        Args: { p_article?: string | null; p_comments?: string[]; p_github_url?: string | null; p_priority?: string; p_title: string };
+        Returns: string;
+      };
+      console_delete_comment: { Args: { p_comment: string }; Returns: undefined };
+      console_item: { Args: { p_id: string }; Returns: Json };
+      console_items: { Args: never; Returns: Json };
+      console_link_comments: { Args: { p_comments: string[]; p_item: string }; Returns: number };
+      console_log_event: { Args: { p_action: string; p_label?: string }; Returns: undefined };
+      console_me: { Args: never; Returns: string | null };
+      console_news: { Args: never; Returns: Json };
+      console_overview: { Args: { p_days?: number }; Returns: Json };
+      console_remove_owner: { Args: { p_user: string }; Returns: undefined };
+      console_save_news: {
+        Args: { p_article: string | null; p_body: string; p_id: string | null; p_item: string | null; p_publish: boolean; p_title: string };
+        Returns: string;
+      };
+      console_set_comments: { Args: { p_comments: string[]; p_status: string }; Returns: undefined };
+      console_set_owner_role: { Args: { p_role: string; p_user: string }; Returns: undefined };
+      console_team: { Args: never; Returns: Json };
+      console_update_item: { Args: { p_id: string; p_patch: Json }; Returns: undefined };
+      console_withdraw_news: { Args: { p_id: string }; Returns: undefined };
+      console_workspaces: { Args: never; Returns: Json };
+      help_comment: { Args: { p_entry: string; p_text: string }; Returns: undefined };
+      help_vote: { Args: { p_article: string; p_helpful: boolean; p_page: string; p_workspace: string }; Returns: string };
+      is_platform_admin: { Args: never; Returns: boolean };
+      is_platform_owner: { Args: never; Returns: boolean };
+      list_product_news: { Args: never; Returns: Json };
+      my_help_vote: { Args: { p_article: string; p_workspace: string }; Returns: Json };
+      news_mark_seen: { Args: never; Returns: undefined };
+      news_unseen_count: { Args: never; Returns: number };
       analytics_series: {
         Args: {
           p_demo?: string | null;
@@ -2489,7 +2524,6 @@ export type Database = {
         Returns: Json;
       };
       template_set_images: { Args: { p_template: string; p_map: Json }; Returns: undefined };
-      help_feedback: { Args: { p_article: string; p_helpful: boolean }; Returns: undefined };
       save_demo_as_template: {
         Args: {
           p_demo: string;

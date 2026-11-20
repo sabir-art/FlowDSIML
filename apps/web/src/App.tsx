@@ -33,6 +33,10 @@ const CenterSettings = lazyRest(() =>
 const LearnersPage = lazyRest(() =>
   import('./pages/learners/LearnersPage').then((m) => ({ default: m.LearnersPage })),
 );
+const ConsolePage = lazyRest(() =>
+  import('./pages/console/ConsolePage').then((m) => ({ default: m.ConsolePage })),
+);
+const NewsPage = lazyRest(() => import('./pages/console/NewsPage').then((m) => ({ default: m.NewsPage })));
 const Onboarding = lazyRest(() => import('./pages/Onboarding').then((m) => ({ default: m.Onboarding })));
 const AcceptInvite = lazyRest(() =>
   import('./pages/AcceptInvite').then((m) => ({ default: m.AcceptInvite })),
@@ -214,6 +218,14 @@ export function App() {
                     }
                   />
                   <Route
+                    path="/console/*"
+                    element={
+                      <RequireAuth>
+                        <ConsolePage />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
                     path="/demos/:demoId/edit"
                     element={
                       <RequireAuth>
@@ -237,6 +249,7 @@ export function App() {
                     <Route path="/demos/:demoId/distribute" element={<DistributeRoute />} />
                     <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
                     <Route path="/analytics" element={<AnalyticsPage />} />
+                    <Route path="/nouveautes" element={<NewsPage />} />
                     <Route path="/learners" element={<LearnersPage />} />
                     <Route path="/center" element={<CenterSettings />} />
                     <Route path="/leads" element={<Navigate to="/analytics?tab=leads" replace />} />

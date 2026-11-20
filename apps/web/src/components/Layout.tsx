@@ -13,9 +13,11 @@ import {
   Languages,
   LayoutGrid,
   LogOut,
+  Megaphone,
   Menu as MenuIcon,
   Plus,
   Settings,
+  ShieldCheck,
   UserRound,
   Users,
   X,
@@ -25,6 +27,7 @@ import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { setLocale } from '../i18n';
 import { supabase } from '../lib/supabase';
 import { Menu } from './Menu';
+import { useNewsUnseen, usePlatformRole } from '../pages/console/platform';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { THEME_OPTIONS, chooseTheme } from './ThemeSwitcher';
 import { useTheme, type ThemePref } from '../lib/theme';
@@ -37,6 +40,9 @@ export function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut, user, profile } = useAuth();
+  // L41 : point de nouveauté et entrée « Console propriétaire » (équipe TutoClick seulement)
+  const unseen = useNewsUnseen();
+  const platformRole = usePlatformRole();
   const { current, can } = useWorkspace();
   const [open, setOpen] = useState(false);
 
@@ -207,16 +213,39 @@ export function Layout() {
         <div className="user-block">
           <span className="avatar avatar--brand" aria-hidden="true">
             {initials(profile?.full_name || user?.email || '?')}
+            {unseen > 0 && <span className="news-dot" />}
           </span>
           <span className="user-text">
             <strong>{profile?.full_name || user?.email}</strong>
             <span>{current ? t(`roles.${current.role}`) : user?.email}</span>
           </span>
           <Menu
-            label={t('nav.account')}
+            label={unseen ? t('nav.accountNews', { count: unseen }) : t('nav.account')}
             placement="top-start"
             items={[
               { label: t('nav.profile'), icon: <UserRound />, onSelect: () => navigate('/settings/profile') },
+              {
+                label: t('news.title'),
+                icon: <Megaphone />,
+                onSelect: () => navigate('/nouveautes'),
+                end:
+                  unseen > 0 ? (
+                    <>
+                      <span className="news-dot news-dot--inline" aria-hidden="true" />
+                      <span className="sr-only">{t('news.unseen', { count: unseen })}</span>
+                    </>
+                  ) : undefined,
+              },
+              ...(platformRole
+                ? [
+                    {
+                      label: t('console.entry'),
+                      icon: <ShieldCheck />,
+                      group: t('console.team'),
+                      onSelect: () => navigate('/console'),
+                    },
+                  ]
+                : []),
               { label: t('nav.newWorkspace'), icon: <Plus />, onSelect: () => navigate('/onboarding') },
               {
                 label: i18n.language === 'en' ? 'Français' : 'English',

@@ -125,6 +125,9 @@ jobs:
       - name: Indicateurs en onglets L47 (Analytics espace et démo, clavier, adresse)
         if: always()
         run: cd apps/web && node e2e/analytics.e2e.cjs
+      - name: Console propriétaire L41 (retours sur l'aide, accès, lecture seule, Nouveautés)
+        if: always()
+        run: cd apps/web && node e2e/console.e2e.cjs
       - name: Rapport
         if: always()
         uses: actions/upload-artifact@v4

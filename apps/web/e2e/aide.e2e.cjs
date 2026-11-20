@@ -138,7 +138,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await art.getByText('Merci pour votre réponse.').waitFor();
   ok(
     (state.helpFeedback || []).length === 1 && state.helpFeedback[0].p_helpful === true,
-    'compteur anonyme : « Oui » envoyé (sans texte)',
+    'L41 : vote « Oui » enregistré (sans texte)',
   );
   await art.getByRole('button', { name: 'Retour' }).click();
   await res.waitFor();

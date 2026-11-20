@@ -13,6 +13,8 @@ export interface Article {
   section: string;
   summary: string;
   body: string;
+  /** L41 / L51 : « console » = réservé aux comptes qui ont un rôle dans la Console propriétaire. */
+  audience: 'all' | 'console';
 }
 
 export function parseArticle(slug: string, raw: string): Article {
@@ -28,6 +30,7 @@ export function parseArticle(slug: string, raw: string): Article {
     section: meta.section ?? '',
     summary: meta.summary ?? '',
     body: (m?.[2] ?? raw).trim(),
+    audience: meta.audience === 'console' ? 'console' : 'all',
   };
 }
 
@@ -35,6 +38,9 @@ export const ARTICLES: Article[] = Object.entries(files)
   .map(([path, raw]) => parseArticle(path.replace(/^.*\/(.*)\.md$/, '$1'), raw))
   .sort((a, b) => a.title.localeCompare(b.title, 'fr'));
 export const articleBySlug = (slug: string) => ARTICLES.find((a) => a.slug === slug) ?? null;
+/** Articles visibles selon le compte : jamais ceux de la console pour un compte sans rôle dans la console. */
+export const visibleArticles = (console: boolean) =>
+  console ? ARTICLES : ARTICLES.filter((a) => a.audience === 'all');
 
 /** Pages de l'app et articles « Sur cette page » (2 à 4 par page). */
 export type HelpPage =
@@ -88,7 +94,7 @@ export const termsOf = (q: string) =>
     .filter((x) => x.length > 1);
 
 /** Articles qui contiennent tous les termes ; ceux qui les ont dans le titre d'abord. */
-export function searchArticles(q: string, list: Article[] = ARTICLES): Article[] {
+export function searchArticles(q: string, list: Article[]): Article[] {
   const terms = termsOf(q);
   if (!terms.length) return [];
   const scored = list.flatMap((a) => {

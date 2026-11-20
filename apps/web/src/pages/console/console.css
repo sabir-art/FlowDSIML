@@ -1,0 +1,446 @@
+/* L41 : Console propriétaire (équipe TutoClick) et page « Nouveautés » côté client. */
+.console {
+  min-height: 100vh;
+  background: var(--fd-color-bg, var(--fd-color-surface-sunken));
+}
+.console-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 72px;
+  padding: 0 24px;
+  background: var(--fd-color-surface);
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.console-head__t {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.console-head__t span {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.console-head .badge svg {
+  width: 14px;
+  height: 14px;
+}
+.console-tabs {
+  display: flex;
+  gap: 24px;
+  padding: 0 24px;
+  overflow-x: auto;
+  background: var(--fd-color-surface);
+  border-bottom: 1px solid var(--fd-color-border);
+  scrollbar-width: none;
+}
+.console .console-tab {
+  position: relative;
+  padding: 14px 0;
+  white-space: nowrap;
+  color: var(--fd-color-text-muted);
+  text-decoration: none;
+}
+.console .console-tab.active {
+  color: var(--fd-color-text);
+  font-weight: 600;
+}
+.console .console-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--fd-color-text);
+}
+.console-main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.console-ro {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+  border: 1px solid var(--fd-color-border);
+  color: var(--fd-color-text-muted);
+}
+.console-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.console-h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.console-h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+.console-sub {
+  display: block;
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
+}
+.console-note {
+  margin: 0;
+  font-size: 13px;
+}
+.console-empty,
+.console-error {
+  padding: 32px;
+  text-align: center;
+  color: var(--fd-color-text-muted);
+}
+.console-card-head,
+.console-bar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.console-card-head .console-h2 {
+  flex: 1;
+}
+.console-card-head > p {
+  flex: 1;
+  margin: 0;
+}
+.console-bar-row__end {
+  margin-left: auto;
+}
+.console-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+
+.console-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.console-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 20px;
+}
+.console-stat + .console-stat {
+  border-left: 1px solid var(--fd-color-border);
+}
+.console-stat__l,
+.console-stat__s {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.console-stat__v {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.console-two {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 24px;
+}
+.console-watch,
+.console-activity,
+.console-comments,
+.console-mini,
+.console-news,
+.console-link__list,
+.console-col__list,
+.console-rejected ul {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.console-watch li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.console-watch__t {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 180px;
+}
+.console-watch__sat {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.console-bar {
+  display: inline-block;
+  width: 80px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--fd-color-surface-sunken);
+  overflow: hidden;
+}
+.console-bar span {
+  display: block;
+  height: 100%;
+  background: var(--fd-color-primary);
+}
+.console-activity li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.console-activity__by {
+  display: block;
+  font-size: 13px;
+}
+
+.console-comment {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.console-comment__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.console-comment__text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.console-comment__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.console-comment__acts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+.console-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.console-status svg {
+  width: 14px;
+  height: 14px;
+}
+.console-link__opt {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.console-link__opt:hover {
+  background: var(--fd-color-surface-sunken);
+}
+.console-link__opt:focus-visible {
+  box-shadow: var(--fd-shadow-focus);
+}
+
+/* Backlog : colonnes sur fond sunken, cartes à bordure uniforme (jamais de barre de couleur, §15.6) */
+.console-cols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 16px;
+  overflow-x: auto;
+}
+.console-col {
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--fd-color-surface-sunken);
+}
+.console-col__t {
+  margin: 0;
+  font-size: 14px;
+}
+.console-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+}
+.console-card.is-fresh {
+  border-color: var(--fd-color-primary);
+}
+.console-card__open {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.console-card__open:focus-visible {
+  box-shadow: var(--fd-shadow-focus);
+}
+.console-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--fd-color-text-muted);
+}
+.console-card__art {
+  font-size: 12.5px;
+}
+.console-rejected summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.console-drawer-back {
+  justify-content: flex-end;
+}
+.console-drawer {
+  width: min(560px, 100vw);
+  height: 100vh;
+  max-height: 100vh;
+  margin: 0;
+  border-radius: 0;
+  overflow-y: auto;
+}
+.console-drawer .modal-head h2 {
+  flex: 1;
+}
+.console-status-group {
+  flex-wrap: wrap;
+}
+.console-quote {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+  white-space: pre-wrap;
+}
+.console-quote span {
+  display: block;
+  font-size: 12.5px;
+}
+.console-mini li p {
+  margin: 4px 0 0;
+}
+.console-news-editor {
+  width: min(960px, calc(100vw - 32px));
+}
+.console-news-editor__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+.console-news-editor__preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.console-preview {
+  width: min(760px, calc(100vw - 32px));
+}
+
+/* Page « Nouveautés » (client) : largeur de lecture 760 px */
+.news-page {
+  max-width: 760px;
+}
+.news-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.news-card__meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.news-card__t {
+  margin: 0;
+  font-size: 18px;
+}
+.news-card__b {
+  margin: 0;
+}
+.news-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px;
+  color: var(--fd-color-text-muted);
+}
+.news-empty svg {
+  width: 36px;
+  height: 36px;
+}
+
+@media (max-width: 1023px) {
+  .console-two,
+  .console-news-editor__body {
+    grid-template-columns: 1fr;
+  }
+  .console-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 16px;
+  }
+  .console-stat:nth-child(3) {
+    border-left: 0;
+  }
+}
+@media (max-width: 767px) {
+  .console-head {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+  .console-tabs,
+  .console-main {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .console-cols {
+    grid-template-columns: repeat(4, 80vw);
+    scroll-snap-type: x mandatory;
+  }
+  .console-col {
+    scroll-snap-align: start;
+  }
+  .console-stats {
+    grid-template-columns: 1fr;
+  }
+  .console-stat + .console-stat {
+    border-left: 0;
+  }
+}

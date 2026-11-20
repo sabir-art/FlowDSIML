@@ -14,12 +14,14 @@ import { Markdown } from './Markdown';
 import { TourDialog } from './TourDialog';
 import { PAGE_TOUR, loadTours } from './tours';
 import { Academy } from './Academy';
+import { usePlatformRole } from '../pages/console/platform';
 import {
   PAGE_ARTICLES,
   articleBySlug,
   highlight,
   pageFor,
   searchArticles,
+  visibleArticles,
   termsOf,
   type Article,
 } from './articles';
@@ -72,9 +74,11 @@ export function HelpDrawer({
   };
   const page = pageFor(pathname, editorTab);
   const [q, setQ] = useState('');
-  const [article, setArticle] = useState<Article | null>(() =>
-    initialArticle ? articleBySlug(initialArticle) : null,
-  );
+  const [article, setArticle] = useState<Article | null>(() => {
+    // Ouverture directe : jamais un article réservé à la console (le rôle n'est pas encore connu)
+    const a = initialArticle ? articleBySlug(initialArticle) : null;
+    return a?.audience === 'all' ? a : null;
+  });
   const [tour, setTour] = useState<{ id: string; title: string } | null>(null);
   const [touring, setTouring] = useState(false);
   const [keys, setKeys] = useState(false);
@@ -121,7 +125,12 @@ export function HelpDrawer({
   }, [contactHref, ws.id]);
 
   const terms = useMemo(() => termsOf(q), [q]);
-  const results = useMemo(() => (terms.length ? searchArticles(q) : null), [q, terms.length]);
+  // L41 : l'article de la console n'apparaît qu'aux comptes qui ont un rôle dans la console
+  const consoleRole = usePlatformRole();
+  const results = useMemo(
+    () => (terms.length ? searchArticles(q, visibleArticles(!!consoleRole)) : null),
+    [q, terms.length, consoleRole],
+  );
   const onPage = (page ? PAGE_ARTICLES[page] : []).flatMap((s) => {
     const a = articleBySlug(s);
     return a ? [a] : [];
@@ -206,7 +215,7 @@ export function HelpDrawer({
             <p className="help-section">{article.section}</p>
             <h2 id="help-art-title">{article.title}</h2>
             <Markdown source={article.body} />
-            <Feedback slug={article.slug} />
+            <Feedback slug={article.slug} page={page ?? ''} wsId={current?.id} />
           </article>
         ) : (
           <>
@@ -293,37 +302,161 @@ export function HelpDrawer({
   );
 }
 
-/** « Cet article vous a aidé ? » : compteur anonyme, une réponse par article et par navigateur. */
-function Feedback({ slug }: { slug: string }) {
+/** Donnée personnelle (L41 §2) : adresse e-mail ou numéro de 9 chiffres ou plus (espaces et points ignorés). */
+export const hasPersonalData = (v: string) =>
+  /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(v) || /\d{9,}/.test(v.replace(/[\s.]/g, ''));
+
+type FbState =
+  | { k: 'loading' }
+  | { k: 'ask' }
+  | { k: 'thanks' }
+  | { k: 'answered'; helpful: boolean }
+  | { k: 'comment'; id: string }
+  | { k: 'sent' };
+
+/**
+ * « Cet article vous a aidé ? » (L41 §2) : une réponse par article et par personne dans l'espace.
+ * Après « Non », un commentaire facultatif (500 caractères, sans donnée personnelle) part à l'équipe
+ * TutoClick, sans le nom de la personne.
+ */
+function Feedback({ slug, page, wsId }: { slug: string; page: string; wsId: string | undefined }) {
   const { t } = useTranslation();
-  const key = `fd.help.fb.${slug}`;
-  const [done, setDone] = useState(() => {
-    try {
-      return localStorage.getItem(key) !== null;
-    } catch {
-      return false;
-    }
-  });
-  const answer = (helpful: boolean) => {
-    setDone(true);
-    try {
-      localStorage.setItem(key, helpful ? '1' : '0');
-    } catch {
-      /* stockage indisponible : la réponse est tout de même comptée */
-    }
-    void supabase.rpc('help_feedback', { p_article: slug, p_helpful: helpful }).then(() => undefined);
+  const [st, setSt] = useState<FbState>({ k: 'loading' });
+  const [text, setText] = useState('');
+  const [err, setErr] = useState<'pii' | 'send' | null>(null);
+  const [busy, setBusy] = useState(false);
+  const field = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (!wsId) return setSt({ k: 'ask' });
+    let alive = true;
+    void supabase.rpc('my_help_vote', { p_article: slug, p_workspace: wsId }).then(({ data }) => {
+      if (!alive) return;
+      const r = data as { helpful: boolean } | null;
+      setSt(r ? { k: 'answered', helpful: r.helpful } : { k: 'ask' });
+    });
+    return () => {
+      alive = false;
+    };
+  }, [slug, wsId]);
+  useEffect(() => {
+    if (st.k === 'comment') field.current?.focus();
+  }, [st.k]);
+
+  const answer = async (helpful: boolean) => {
+    if (!wsId) return;
+    // Le vote est enregistré tout de suite ; le commentaire reste facultatif
+    const { data, error } = await supabase.rpc('help_vote', {
+      p_article: slug,
+      p_helpful: helpful,
+      p_page: page,
+      p_workspace: wsId,
+    });
+    setText('');
+    setErr(null);
+    setSt(!error && !helpful && data ? { k: 'comment', id: data as string } : { k: 'thanks' });
   };
+  const send = async (id: string) => {
+    if (hasPersonalData(text)) return setErr('pii');
+    setBusy(true);
+    const { error } = await supabase.rpc('help_comment', { p_entry: id, p_text: text.trim() });
+    setBusy(false);
+    if (error) return setErr(/PERSONAL_DATA/.test(error.message) ? 'pii' : 'send');
+    setErr(null);
+    setSt({ k: 'sent' });
+  };
+
+  if (st.k === 'loading') return <div className="help-fb" aria-hidden="true" />;
+  if (st.k === 'comment')
+    return (
+      <form
+        className="help-fb help-fb--comment fd-stack fd-stack--label"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void send(st.id);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.stopPropagation();
+            setSt({ k: 'thanks' });
+          }
+        }}
+      >
+        <p role="status">{t('help.fb.thanksShort')}</p>
+        <label htmlFor="help-fb-text" className="label">
+          {t('help.fb.question')}
+        </label>
+        <textarea
+          ref={field}
+          id="help-fb-text"
+          className="fd-input input"
+          rows={3}
+          maxLength={500}
+          value={text}
+          aria-describedby="help-fb-help help-fb-count"
+          aria-invalid={err === 'pii' || undefined}
+          onChange={(e) => {
+            setText(e.target.value);
+            if (err === 'pii') setErr(null);
+          }}
+        />
+        <span className="help help-fb__count" id="help-fb-count">
+          {t('help.fb.count', { n: text.length })}
+        </span>
+        <span className="help" id="help-fb-help">
+          {t('help.fb.privacy')}
+        </span>
+        {err === 'pii' && (
+          <p className="help-fb__err" role="alert">
+            {t('help.fb.pii')}
+          </p>
+        )}
+        {err === 'send' && (
+          <p className="help-fb__err" role="alert">
+            {t('help.fb.error')}{' '}
+            <button type="submit" className="fd-link">
+              {t('help.fb.retry')}
+            </button>
+          </p>
+        )}
+        <div className="help-fb__acts">
+          <button type="submit" className="fd-btn fd-btn--primary" disabled={!text.trim() || busy}>
+            {t('help.fb.send')}
+          </button>
+          <button type="button" className="fd-btn fd-btn--ghost" onClick={() => setSt({ k: 'thanks' })}>
+            {t('help.fb.skip')}
+          </button>
+        </div>
+      </form>
+    );
   return (
     <div className="help-fb" role="group" aria-labelledby="help-fb-q">
-      {done ? (
-        <p role="status">{t('help.thanks')}</p>
-      ) : (
+      {st.k === 'thanks' && <p role="status">{t('help.thanks')}</p>}
+      {st.k === 'sent' && <p role="status">{t('help.fb.sent')}</p>}
+      {st.k === 'answered' && (
+        <p>
+          {t(st.helpful ? 'help.fb.answeredYes' : 'help.fb.answeredNo')}{' '}
+          <button type="button" className="fd-link" onClick={() => setSt({ k: 'ask' })}>
+            {t('help.fb.change')}
+          </button>
+        </p>
+      )}
+      {st.k === 'ask' && (
         <>
           <span id="help-fb-q">{t('help.helpful')}</span>
-          <button type="button" className="fd-btn fd-btn--sm" onClick={() => answer(true)}>
+          <button
+            type="button"
+            className="fd-btn fd-btn--sm"
+            onClick={() => void answer(true)}
+            disabled={!wsId}
+          >
             {t('common.yes')}
           </button>
-          <button type="button" className="fd-btn fd-btn--sm" onClick={() => answer(false)}>
+          <button
+            type="button"
+            className="fd-btn fd-btn--sm"
+            onClick={() => void answer(false)}
+            disabled={!wsId}
+          >
             {t('common.no')}
           </button>
         </>

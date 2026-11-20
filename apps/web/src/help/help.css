@@ -191,6 +191,25 @@
   margin: 0;
   color: var(--fd-color-text-muted);
 }
+.help-fb--comment {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.help-fb__count {
+  align-self: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+.help-fb .help-fb__err {
+  color: var(--fd-color-danger);
+}
+.help-fb__acts {
+  display: flex;
+  gap: 8px;
+}
+.help-fb__acts .fd-btn {
+  min-height: 40px;
+}
 /* Visite guidée : lecteur en modale (960 px) */
 .help-tour-dialog {
   width: min(960px, calc(100vw - 32px));

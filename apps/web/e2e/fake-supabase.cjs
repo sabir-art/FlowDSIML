@@ -693,6 +693,7 @@ async function install(page, state = seed()) {
         (k, desc = false) =>
         (x, y) =>
           (x[k] > y[k] ? 1 : x[k] < y[k] ? -1 : 0) * (desc ? -1 : 1);
+      if (fn.startsWith('console_') && fn !== 'console_me') return consoleRpc(state, fn, a, route, json);
       switch (fn) {
         // L32 : lectures de démarrage regroupées (mêmes données que les lectures séparées)
         case 'dashboard_home': {
@@ -1149,10 +1150,46 @@ async function install(page, state = seed()) {
             hiddenAt: pref?.hidden_at ?? null,
           });
         }
-        case 'help_feedback': {
-          state.helpFeedback = [...(state.helpFeedback || []), a];
+        // L41 : vote et commentaire sur l'aide, Nouveautés, Console propriétaire (état en mémoire)
+        case 'help_vote': {
+          const id = crypto.randomUUID();
+          state.helpFeedback = [
+            ...(state.helpFeedback || []).filter((x) => x.p_article !== a.p_article),
+            { id, ...a },
+          ];
+          return json(route, 200, id);
+        }
+        case 'help_comment': {
+          if (/@|\d{9,}/.test(String(a.p_text).replace(/[\s.]/g, '')))
+            return json(route, 400, { message: 'PERSONAL_DATA', code: 'P0001' });
+          state.helpComments = [...(state.helpComments || []), a];
           return json(route, 200, null);
         }
+        case 'my_help_vote': {
+          const v = (state.helpFeedback || []).find((x) => x.p_article === a.p_article);
+          return json(route, 200, v ? { id: v.id, helpful: v.p_helpful, commented: false } : null);
+        }
+        case 'list_product_news':
+          return json(
+            route,
+            200,
+            (state.news || [])
+              .filter((n) => n.state === 'published')
+              .map((n) => ({ ...n, unread: !state.newsSeenAt || n.publishedAt > state.newsSeenAt })),
+          );
+        case 'news_unseen_count':
+          return json(
+            route,
+            200,
+            (state.news || []).filter(
+              (n) => n.state === 'published' && (!state.newsSeenAt || n.publishedAt > state.newsSeenAt),
+            ).length,
+          );
+        case 'news_mark_seen':
+          state.newsSeenAt = new Date().toISOString();
+          return json(route, 200, null);
+        case 'console_me':
+          return json(route, 200, state.platformRole ?? null);
         case 'create_demo_from_template': {
           const tpl = t.demo_templates.find(
             (x) => x.id === a.p_template && (x.workspace_id === null || x.workspace_id === a.p_ws),
@@ -2417,6 +2454,244 @@ function defaults(table, r) {
     };
   if (table === 'chapters') return { title: '' };
   return {};
+}
+
+/**
+ * L41 : Console propriétaire simulée. Données fictives de 2 espaces (Acme, Globex) ; aucun auteur n'est
+ * jamais renvoyé. Lecture : state.platformRole non nul ; écriture : 'admin'.
+ */
+function consoleRpc(state, fn, a, route, json) {
+  const role = state.platformRole ?? null;
+  const denied = () => json(route, 403, { message: 'NOT_FOUND', code: '42501' });
+  if (!role) return denied();
+  const writes = /^console_(create|update|link|set|delete|save|withdraw|add|remove)/.test(fn);
+  if (writes && role !== 'admin') return denied();
+  const c = (state.console ??= {
+    comments: [
+      {
+        id: 'cm1',
+        article: 'membres-roles',
+        page: 'settings',
+        workspace: 'Acme',
+        at: new Date().toISOString(),
+        text: 'Je ne trouve pas comment changer le rôle d’un membre.',
+        status: 'new',
+        itemId: null,
+        itemTitle: null,
+      },
+      {
+        id: 'cm2',
+        article: 'membres-roles',
+        page: 'settings',
+        workspace: 'Globex',
+        at: new Date().toISOString(),
+        text: 'La différence entre éditeur et lecteur n’est pas claire.',
+        status: 'new',
+        itemId: null,
+        itemTitle: null,
+      },
+      {
+        id: 'cm3',
+        article: 'exporter-scorm',
+        page: 'distribute',
+        workspace: 'Acme',
+        at: new Date().toISOString(),
+        text: 'Quelle version de SCORM choisir ?',
+        status: 'new',
+        itemId: null,
+        itemTitle: null,
+      },
+    ],
+    articles: [
+      { article: 'membres-roles', yes: 3, no: 7, comments: 2, items: 0 },
+      { article: 'exporter-scorm', yes: 9, no: 3, comments: 1, items: 0 },
+      { article: 'partager-lien', yes: 0, no: 1, comments: 0, items: 0 },
+    ],
+    items: [],
+    audit: [],
+    team: [
+      {
+        userId: 'u-owner',
+        email: 'alice@tutoclick.example',
+        name: 'Alice',
+        role: 'admin',
+        me: true,
+        lastActivity: null,
+      },
+      {
+        userId: 'u-ro',
+        email: 'bruno@tutoclick.example',
+        name: 'Bruno',
+        role: 'read_only',
+        me: false,
+        lastActivity: null,
+      },
+    ],
+  });
+  state.news ??= [];
+  const log = (action, label) =>
+    c.audit.unshift({
+      id: c.audit.length + 1,
+      at: new Date().toISOString(),
+      actor: 'Alice',
+      actorId: 'u-owner',
+      action,
+      objectType: '',
+      label,
+    });
+  const ok = (body = null) => json(route, 200, body);
+  const itemOut = (i) => ({
+    ...i,
+    feedback: c.comments.filter((x) => x.itemId === i.id).length,
+    announced: state.news.some((n) => n.itemId === i.id && n.state === 'published'),
+  });
+  switch (fn) {
+    case 'console_overview': {
+      const yes = c.articles.reduce((n, x) => n + x.yes, 0);
+      const no = c.articles.reduce((n, x) => n + x.no, 0);
+      return ok({
+        yes,
+        no,
+        articles: c.articles.length,
+        newComments: c.comments.filter((x) => x.status === 'new').length,
+        triage: c.items.filter((i) => i.status === 'triage').length,
+        activity: c.audit.slice(0, 4).map((x) => ({ ...x, actorEmail: '' })),
+      });
+    }
+    case 'console_workspaces':
+      return ok([
+        { id: 'w-acme', name: 'Acme' },
+        { id: 'w-globex', name: 'Globex' },
+      ]);
+    case 'console_articles':
+      return ok(c.articles);
+    case 'console_comments':
+      return ok(c.comments.filter((x) => !a.p_article || x.article === a.p_article));
+    case 'console_items':
+      return ok(c.items.map(itemOut));
+    case 'console_item': {
+      const i = c.items.find((x) => x.id === a.p_id);
+      return ok(
+        i
+          ? {
+              ...itemOut(i),
+              announcedAt: null,
+              feedback: c.comments.filter((x) => x.itemId === i.id),
+              history: i.history,
+            }
+          : null,
+      );
+    }
+    case 'console_news':
+      return ok(
+        state.news.map((n) => ({ ...n, itemTitle: c.items.find((i) => i.id === n.itemId)?.title ?? null })),
+      );
+    case 'console_team':
+      return ok(c.team);
+    case 'console_audit_list':
+      return ok(c.audit);
+    case 'console_log_event':
+      log(a.p_action, a.p_label || '');
+      return ok();
+    case 'console_create_item': {
+      const id = `it-${c.items.length + 1}`;
+      const now = new Date().toISOString();
+      c.items.push({
+        id,
+        title: a.p_title,
+        status: 'triage',
+        priority: a.p_priority,
+        article: a.p_article,
+        githubUrl: a.p_github_url,
+        rejectReason: null,
+        note: '',
+        createdAt: now,
+        updatedAt: now,
+        history: [{ status: 'triage', at: now, actor: 'Alice' }],
+      });
+      for (const cm of c.comments)
+        if ((a.p_comments || []).includes(cm.id))
+          Object.assign(cm, { status: 'linked', itemId: id, itemTitle: a.p_title });
+      log('item.create', a.p_title);
+      return ok(id);
+    }
+    case 'console_update_item': {
+      const i = c.items.find((x) => x.id === a.p_id);
+      const p = a.p_patch || {};
+      if (p.status === 'rejected' && !(p.rejectReason || i.rejectReason))
+        return json(route, 400, { message: 'REJECT_REASON', code: 'P0001' });
+      if (p.status && p.status !== i.status) {
+        i.history.push({ status: p.status, at: new Date().toISOString(), actor: 'Alice' });
+        log(`item.status.${p.status}`, i.title);
+      }
+      Object.assign(i, p, { updatedAt: new Date().toISOString() });
+      return ok();
+    }
+    case 'console_link_comments': {
+      const i = c.items.find((x) => x.id === a.p_item);
+      for (const cm of c.comments)
+        if (a.p_comments.includes(cm.id))
+          Object.assign(cm, { status: 'linked', itemId: i.id, itemTitle: i.title });
+      log('feedback.link', i.title);
+      return ok(c.comments.filter((x) => x.itemId === i.id).length);
+    }
+    case 'console_set_comments':
+      for (const cm of c.comments)
+        if (a.p_comments.includes(cm.id))
+          Object.assign(cm, { status: a.p_status, itemId: null, itemTitle: null });
+      log(a.p_status === 'new' ? 'feedback.reopen' : 'feedback.archive', `${a.p_comments.length}`);
+      return ok();
+    case 'console_delete_comment':
+      c.comments = c.comments.filter((x) => x.id !== a.p_comment);
+      log('feedback.delete', '');
+      return ok();
+    case 'console_save_news': {
+      const now = new Date().toISOString();
+      let n = state.news.find((x) => x.id === a.p_id);
+      if (!n) state.news.push((n = { id: `nw-${state.news.length + 1}`, state: 'draft', publishedAt: null }));
+      Object.assign(n, {
+        title: a.p_title,
+        body: a.p_body,
+        article: a.p_article,
+        itemId: a.p_item,
+        updatedAt: now,
+      });
+      if (a.p_publish) Object.assign(n, { state: 'published', publishedAt: now });
+      log(a.p_publish ? 'news.publish' : 'news.draft', a.p_title);
+      return ok(n.id);
+    }
+    case 'console_withdraw_news': {
+      const n = state.news.find((x) => x.id === a.p_id);
+      n.state = 'withdrawn';
+      log('news.withdraw', n.title);
+      return ok();
+    }
+    case 'console_add_owner':
+      if (!/@tutoclick\.example$/.test(a.p_email)) return ok('introuvable');
+      c.team.push({
+        userId: `u-${c.team.length + 1}`,
+        email: a.p_email,
+        name: '',
+        role: a.p_role,
+        me: false,
+        lastActivity: null,
+      });
+      log('owner.add', a.p_email);
+      return ok('ok');
+    case 'console_set_owner_role': {
+      const o = c.team.find((x) => x.userId === a.p_user);
+      if (o.me) return json(route, 403, { message: 'OWN_ROLE', code: '42501' });
+      o.role = a.p_role;
+      log('owner.role', o.email);
+      return ok();
+    }
+    case 'console_remove_owner':
+      c.team = c.team.filter((x) => x.userId !== a.p_user);
+      log('owner.remove', a.p_user);
+      return ok();
+    default:
+      return json(route, 404, { message: `RPC inconnue : ${fn}` });
+  }
 }
 
 module.exports = { install, seed, HOST, PUBLIC_PLAYER };
