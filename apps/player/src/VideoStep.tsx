@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Step } from '@flowdsiml/manifest';
-import { Captions, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-preact';
+import { Captions, Maximize, Pause, Play, RotateCw, Volume2, VolumeX, VideoOff } from 'lucide-preact';
 import { fmt, type Dict } from './i18n';
 import {
   captionAt,
@@ -53,7 +53,18 @@ export function VideoStep({
   const [cc, setCc] = useState(v.captionsDefault || v.hasVoice);
   const [paused, setPaused] = useState<number | null>(null);
   const [ended, setEnded] = useState(false);
+  // L36 : vidéo absente (supprimée, réseau coupé) : message, nouvel essai, et l'étape suivante reste accessible
+  const [failed, setFailed] = useState(false);
   const shown = useRef(new Set<string>());
+  const reload = () => {
+    setFailed(false);
+    ref.current?.load();
+  };
+  useEffect(() => {
+    if (!failed) return;
+    addEventListener('online', reload);
+    return () => removeEventListener('online', reload);
+  }, [failed]);
 
   useEffect(() => {
     if (paused !== null) bubble.current?.focus();
@@ -138,6 +149,10 @@ export function VideoStep({
           onTimeUpdate={onTime}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
+          onError={() => {
+            setPlaying(false);
+            setFailed(true);
+          }}
           onEnded={() => {
             setPlaying(false);
             setEnded(true);
@@ -177,7 +192,22 @@ export function VideoStep({
             </button>
           </div>
         )}
-        {ended && (
+        {failed && (
+          <div class="p-video__end p-video__error" role="alert">
+            <VideoOff {...ICON} />
+            <p>{vt.error}</p>
+            <div class="p-video__error-act">
+              <button type="button" class="p-btn p-btn-secondary" onClick={reload}>
+                <RotateCw size={16} aria-hidden="true" />
+                {t.retry}
+              </button>
+              <button type="button" class="p-btn p-btn-primary" onClick={onNext}>
+                {nextLabel}
+              </button>
+            </div>
+          </div>
+        )}
+        {ended && !failed && (
           <div class="p-video__end">
             <button type="button" class="p-btn p-btn-primary" onClick={onNext} autoFocus>
               {nextLabel}

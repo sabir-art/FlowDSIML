@@ -9,8 +9,20 @@ const rpcHeaders = () => ({
   authorization: `Bearer ${SUPABASE_ANON_KEY}`,
 });
 
+/** L36 : réseau coupé, trop lent (délai dépassé) ou serveur indisponible (5xx) : on peut réessayer. */
+export class NetworkError extends Error {}
+
+/** L36 : délai maximal d'une requête du lecteur, au-delà l'écran « Connexion impossible » propose de réessayer. */
+const TIMEOUT_MS = 20_000;
+
+async function send(url: string, init: RequestInit): Promise<Response> {
+  const res = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) }).catch(() => null);
+  if (!res || res.status >= 500) throw new NetworkError(url);
+  return res;
+}
+
 async function rpc<T>(fn: string, args: Record<string, unknown>, keepalive = false): Promise<T> {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+  const res = await send(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
     method: 'POST',
     headers: rpcHeaders(),
     body: JSON.stringify(args),
@@ -31,6 +43,7 @@ export type GateInfo = {
     | 'password_required'
     | 'password_wrong'
     | 'locked'
+    | 'network'
     | 'error';
   title?: string;
   workspace?: string;
@@ -57,12 +70,13 @@ export async function openDemo(demoId: string, password?: string): Promise<GateI
   } catch {
     /* stockage indisponible */
   }
-  const res = await fetch(OPEN_URL, {
+  const res = await send(OPEN_URL, {
     method: 'POST',
     headers: rpcHeaders(),
     body: JSON.stringify({ demoId, password: password || undefined, grant: grant || undefined }),
   }).catch(() => null);
-  if (!res || (!res.ok && res.status !== 429)) return { status: 'error' };
+  if (!res) return { status: 'network' };
+  if (!res.ok && res.status !== 429) return { status: 'error' };
   const body = (await res.json().catch(() => null)) as (GateInfo & { manifest?: unknown }) | null;
   if (!body) return { status: 'error' };
   if (res.status === 429) return { status: 'locked', retryIn: 60 };

@@ -4,6 +4,7 @@ import { manifestSchema, type Manifest } from '@flowdsiml/manifest';
 import { variablesFromSearch, type VariableValues } from '@flowdsiml/core';
 import {
   learnerResume,
+  NetworkError,
   openDemo,
   resolveAddress,
   resolveLink,
@@ -18,14 +19,14 @@ import { embedAllowed, parseRoute } from './logic';
 import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
 import { Player, type PresentState } from './Player';
-import { PasswordGate, StartScreen, SysScreen } from './Gate';
+import { PasswordGate, StartScreen, SysScreen, type SysKind } from './Gate';
 import { PublicPage } from './PublicPage';
 import '@flowdsiml/player-core/player-core.css';
 import './player.css';
 
 type State =
   | { status: 'loading' }
-  | { status: 'error'; kind: 'notFound' | 'expired' | 'blocked'; locale: string; info?: GateInfo }
+  | { status: 'error'; kind: SysKind; locale: string; info?: GateInfo }
   | { status: 'gate'; demoId: string; info: GateInfo; open: (r: GateInfo) => void }
   | {
       status: 'ready';
@@ -71,15 +72,36 @@ const parentOrigin = (() => {
   }
 })();
 
+const NETWORK = Symbol('network');
+
+/** L36 : après quelques secondes sans réponse, on dit que la connexion est lente (le chargement continue). */
+function Loading({ text, slow }: { text: string; slow: string }) {
+  const [late, setLate] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setLate(true), 5000);
+    return () => clearTimeout(id);
+  }, []);
+  return (
+    <div class="p-center" role="status">
+      <p>{text}</p>
+      {late && <p class="p-sub">{slow}</p>}
+    </div>
+  );
+}
+
 function App() {
   const [state, setState] = useState<State>({ status: 'loading' });
+  // L36 : chaque « Réessayer » (ou le retour du réseau) relance l'ouverture de la démo
+  const [attempt, setAttempt] = useState(0);
   const t = strings(navigator.language.startsWith('en') ? 'en' : 'fr');
 
   useEffect(() => {
     const route = parseRoute(location.hash);
     let cancelled = false;
-    const fail = (kind: 'notFound' | 'expired' | 'blocked', locale = navigator.language, info?: GateInfo) =>
+    const fail = (kind: SysKind, locale = navigator.language, info?: GateInfo) =>
       !cancelled && setState({ status: 'error', kind, locale, info });
+    // L36 : une adresse ou un lien qui n'a pas pu être vérifié (réseau) n'est pas pour autant inconnu
+    const unreachable = (e: unknown) => (e instanceof NetworkError ? NETWORK : null);
 
     async function boot() {
       if (route.kind === 'preview') {
@@ -130,12 +152,14 @@ function App() {
         demoId = route.id;
         search = route.search;
       } else if (route.kind === 'address') {
-        const id = await resolveAddress(route.address).catch(() => null);
+        const id = await resolveAddress(route.address).catch(unreachable);
+        if (id === NETWORK) return fail('network');
         if (!id) return fail('notFound');
         demoId = id;
         search = route.search;
       } else if (route.kind === 'link') {
-        const link = await resolveLink(route.token).catch(() => null);
+        const link = await resolveLink(route.token).catch(unreachable);
+        if (link === NETWORK) return fail('network');
         if (!link) return fail('expired');
         demoId = link.demoId;
         linkVars = link.variables ?? {};
@@ -188,6 +212,7 @@ function App() {
           });
       };
       if (gate.status === 'ok') return void start(gate);
+      if (gate.status === 'network') return fail('network');
       if (gate.status === 'expired' || gate.status === 'unavailable')
         return fail('expired', navigator.language, gate);
       if (
@@ -205,7 +230,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
   // L11 : les URL d'images signées valent 1 h ; on les renouvelle avant (sessions longues), sans
   // recharger la démo (les adresses sont remplacées sur place, l'étape en cours ne bouge pas).
@@ -244,9 +269,19 @@ function App() {
     [state.status === 'ready' ? state.manifest : null],
   );
 
-  if (state.status === 'loading') return <div class="p-center">{t.loading}</div>;
+  if (state.status === 'loading') return <Loading text={t.loading} slow={t.slow} />;
   if (state.status === 'error')
-    return <SysScreen kind={state.kind} locale={state.locale} info={state.info} />;
+    return (
+      <SysScreen
+        kind={state.kind}
+        locale={state.locale}
+        info={state.info}
+        onRetry={() => {
+          setState({ status: 'loading' });
+          setAttempt((n) => n + 1);
+        }}
+      />
+    );
   if (state.status === 'gate')
     return (
       <PasswordGate demoId={state.demoId} locale={navigator.language} info={state.info} onOpen={state.open} />

@@ -140,3 +140,7 @@ jobs:
         run: |
           cd apps/web && node e2e/publish-player.e2e.cjs | tee /tmp/e2e.log
           ! grep -q '^NOT OK' /tmp/e2e.log
+      - name: Robustesse du lecteur (réseau coupé ou lent, démo supprimée, vidéo absente, 200 étapes)
+        run: |
+          cd apps/web && node e2e/player-robustesse.e2e.cjs | tee /tmp/e2e-robustesse.log
+          ! grep -q '^NOT OK' /tmp/e2e-robustesse.log

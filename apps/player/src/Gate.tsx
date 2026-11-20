@@ -1,6 +1,18 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { ArrowRight, Ban, Clock, ExternalLink, Eye, EyeOff, Key, Play, SearchX } from 'lucide-preact';
+import {
+  ArrowRight,
+  Ban,
+  Clock,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Key,
+  Play,
+  RotateCw,
+  SearchX,
+  WifiOff,
+} from 'lucide-preact';
 import { openDemo, type GateInfo } from './api';
 import { fmt, strings, type Dict } from './i18n';
 import { initials } from './Player';
@@ -46,10 +58,23 @@ export function SysFrame({
   );
 }
 
-type SysKind = 'notFound' | 'expired' | 'blocked';
+export type SysKind = 'notFound' | 'expired' | 'blocked' | 'network';
 
-/** Écran système : démo introuvable, lien expiré (L11-12 : date, workspace, site), intégration refusée. */
-export function SysScreen({ kind, locale, info }: { kind: SysKind; locale: string; info?: GateInfo }) {
+/**
+ * Écran système : démo introuvable, lien expiré (L11-12 : date, workspace, site), intégration refusée,
+ * L36 : connexion impossible (bouton Réessayer, nouvel essai automatique au retour du réseau).
+ */
+export function SysScreen({
+  kind,
+  locale,
+  info,
+  onRetry,
+}: {
+  kind: SysKind;
+  locale: string;
+  info?: GateInfo;
+  onRetry?: () => void;
+}) {
   const t = strings(locale.startsWith('en') ? 'en' : 'fr');
   const g = t.gate as unknown as Record<string, string>;
   const date = info?.expiredAt
@@ -70,7 +95,14 @@ export function SysScreen({ kind, locale, info }: { kind: SysKind; locale: strin
         : t.expired,
     },
     blocked: { Icon: Ban, title: t.blockedTitle, text: t.embedBlocked },
+    network: { Icon: WifiOff, title: t.networkTitle, text: t.network },
   }[kind];
+  const retry = kind === 'network' ? onRetry : undefined;
+  useEffect(() => {
+    if (!retry) return;
+    addEventListener('online', retry);
+    return () => removeEventListener('online', retry);
+  }, [retry]);
   const site = kind === 'expired' && info?.website ? info.website : null;
   return (
     <SysFrame t={t} info={info} label={view.title}>
@@ -80,6 +112,12 @@ export function SysScreen({ kind, locale, info }: { kind: SysKind; locale: strin
         </span>
         <h1>{view.title}</h1>
         <p class="p-sub">{view.text}</p>
+        {retry && (
+          <button type="button" class="p-btn p-btn-primary p-sys-act" onClick={retry}>
+            <RotateCw size={16} aria-hidden="true" />
+            {t.retry}
+          </button>
+        )}
         {site && (
           <a class="p-btn p-btn-secondary p-sys-act" href={site} target="_blank" rel="noopener noreferrer">
             <ExternalLink size={16} aria-hidden="true" />
@@ -132,7 +170,8 @@ export function PasswordGate({
   }, [wait]);
 
   const locked = wait > 0;
-  const wrong = state.status === 'password_wrong' || state.status === 'error';
+  const failed = state.status === 'error' || state.status === 'network';
+  const wrong = state.status === 'password_wrong' || failed;
   const submit = async (e: Event) => {
     e.preventDefault();
     if (!value || busy || locked) return;
@@ -198,7 +237,7 @@ export function PasswordGate({
           </div>
           {wrong && !locked && (
             <span class="p-gate-err" id="p-gate-err" role="alert">
-              {state.status === 'error' ? g.error : g.wrong}
+              {failed ? g.error : g.wrong}
             </span>
           )}
         </div>

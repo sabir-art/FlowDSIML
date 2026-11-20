@@ -871,6 +871,21 @@ const PLAYER_PAGES = [
     path: '/d/0b5c1f0e-0000-4000-8000-000000000001',
     gate: { status: 'expired' },
   },
+  // L36 : robustesse (réseau coupé, capture et vidéo introuvables)
+  { name: 'Lecteur · connexion impossible', path: '/d/0b5c1f0e-0000-4000-8000-000000000001', offline: true },
+  {
+    name: 'Lecteur · capture introuvable',
+    path: '/d/0b5c1f0e-0000-4000-8000-000000000001',
+    missingAssets: true,
+    open: (p) => p.locator('.p-img-missing').waitFor(),
+  },
+  {
+    name: 'Lecteur · vidéo introuvable',
+    path: '/d/0b5c1f0e-0000-4000-8000-000000000001',
+    missingAssets: true,
+    video: true,
+    open: (p) => p.locator('.p-video__error').waitFor(),
+  },
   { name: 'Centre · accueil', path: '/c/ml-exemple?l=jeton-alex-0001', center: () => centerFixture() },
   {
     name: 'Centre · visiteur anonyme',
@@ -933,7 +948,23 @@ async function appPage(b, s, theme) {
 }
 
 async function playerPage(b, s, theme) {
-  const manifest = require('./player-maquette.cjs');
+  const base = require('./player-maquette.cjs');
+  const manifest = s.video
+    ? {
+        ...base,
+        forms: [],
+        steps: [
+          {
+            id: 'v1',
+            kind: 'video',
+            title: 'Saisie de la fiche',
+            chapterId: 'c1',
+            video: { url: 'assets/v.webm', durationMs: 12000, cuts: [], pauses: [], captions: [] },
+          },
+          ...base.steps.slice(1, 2),
+        ],
+      }
+    : base;
   const ctx = await b.newContext({
     viewport: { width: 1440, height: 900 },
     locale: 'fr-FR',
@@ -945,13 +976,21 @@ async function playerPage(b, s, theme) {
       ? r.fulfill({ status: 204, headers: cors })
       : r.fulfill({ contentType: 'application/json', body: JSON.stringify(body), headers: cors });
   await p.route('**/functions/v1/**', (r) => json(r, {}));
-  await p.route('**/functions/v1/open-demo', (r) => json(r, s.gate ?? { status: 'ok', manifest }));
+  await p.route('**/functions/v1/open-demo', (r) =>
+    s.offline ? r.abort('internetdisconnected') : json(r, s.gate ?? { status: 'ok', manifest }),
+  );
   await p.route('**/functions/v1/open-center', (r) => json(r, s.center ? s.center() : {}));
   await p.route('**/rest/v1/rpc/**', (r) =>
     json(r, s.publicPage && r.request().url().includes('/rpc/public_page') ? s.publicPage : null),
   );
   await p.route('**/assets/**', (r) =>
-    r.fulfill({ contentType: 'image/png', body: fs.readFileSync(`${__dirname}/fixture.png`), headers: cors }),
+    s.missingAssets
+      ? r.fulfill({ status: 404, body: '', headers: cors })
+      : r.fulfill({
+          contentType: 'image/png',
+          body: fs.readFileSync(`${__dirname}/fixture.png`),
+          headers: cors,
+        }),
   );
   await p.goto(`${PLAYER}/#${s.path}`);
   await p.waitForTimeout(1500);

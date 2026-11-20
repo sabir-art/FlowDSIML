@@ -64,6 +64,18 @@ Le détail est dans docs/tech/dettes.md. Les points encore ouverts :
 6. **Hors périmètre convenu** : connexion aux CRM (OAuth), enrichissement des contacts, SSO, domaines
    personnalisés par client, images générées par IA.
 
+## Robustesse du lecteur public (L36)
+
+Test : apps/web/e2e/player-robustesse.e2e.cjs, en intégration continue.
+
+| Cas | Comportement |
+|---|---|
+| Réseau coupé ou serveur indisponible à l'ouverture | Écran « Connexion impossible » avec « Réessayer », au lieu de « Démo introuvable ». Nouvel essai automatique quand le navigateur retrouve le réseau. |
+| Réseau lent | « La connexion est lente, le chargement continue… » après 5 s. Sans réponse au bout de 20 s, écran « Connexion impossible ». |
+| Démo supprimée pendant la lecture | Les captures déjà chargées restent. Une capture absente laisse un message et « Réessayer » ; points chauds et navigation restent utilisables. Les statistiques refusées ne bloquent rien. |
+| Vidéo absente | « La vidéo n'a pas pu être chargée. », avec « Réessayer » et « Suivant ». |
+| Démo de 200 étapes | Ouverture en moins de 0,5 s, environ 80 éléments dans la page, environ 6 ms par étape au clavier, progression juste, sans défilement horizontal (ordinateur et téléphone). |
+
 ## Performance et accessibilité (Lighthouse, mobile)
 
 Builds de production, audit mobile avec ralentissement simulé du réseau et du processeur, données fictives

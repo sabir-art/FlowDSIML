@@ -38,6 +38,8 @@ import {
   Minimize2,
   Notebook,
   RotateCcw,
+  RotateCw,
+  ImageOff,
   Captions,
   Volume2,
 } from 'lucide-preact';
@@ -916,6 +918,7 @@ export function Player({
               alt={shotAlt}
               tap={mobile ? t.mobile.tap : undefined}
               tapHere={t.mobile.tapHere}
+              missing={{ text: t.imgMissing, retry: t.retry }}
             />
           </TabWindow>
         ) : (
@@ -1230,8 +1233,11 @@ function ImageStep({
   alt = '',
   tap,
   tapHere,
+  missing,
 }: {
   step: Step;
+  /** L36 : capture introuvable (démo supprimée, réseau coupé) : message et bouton Réessayer. */
+  missing?: { text: string; retry: string };
   /** F7 : verbe « Touchez » des démos mobiles (sinon le titre seul). */
   tap?: string;
   tapHere?: string;
@@ -1247,6 +1253,19 @@ function ImageStep({
   dimmed?: boolean;
 }) {
   const img = step.image!;
+  // L36 : une capture qui ne charge pas laisse un message à sa place ; nouvel essai au clic ou au retour du
+  // réseau (l'adresse a pu être renouvelée entre-temps). Pastilles et navigation restent utilisables.
+  const [broken, setBroken] = useState(false);
+  const [tries, setTries] = useState(0);
+  useEffect(() => {
+    if (!broken) return;
+    const again = () => {
+      setBroken(false);
+      setTries((n) => n + 1);
+    };
+    addEventListener('online', again);
+    return () => removeEventListener('online', again);
+  }, [broken]);
   const zoom = step.zoom ?? carry;
   // Zoom repris de l'étape précédente, ou transition « Directe » : pas d'animation d'entrée
   const [zoomed, setZoomed] = useState(!step.zoom && !!carry);
@@ -1315,7 +1334,35 @@ function ImageStep({
         class={`p-zoom${zoom?.transition === 'instant' ? ' is-instant' : ''}`}
         style={{ transform, transformOrigin: origin }}
       >
-        <img class="p-img" src={img.url} alt={alt} draggable={false} style={cropImageStyle(crop)} />
+        {broken ? (
+          <div class="p-img-missing" role="status">
+            <ImageOff size={22} aria-hidden="true" />
+            {missing && <p>{missing.text}</p>}
+            {missing && (
+              <button
+                type="button"
+                class="p-btn p-btn-secondary"
+                onClick={() => {
+                  setBroken(false);
+                  setTries((n) => n + 1);
+                }}
+              >
+                <RotateCw size={16} aria-hidden="true" />
+                {missing.retry}
+              </button>
+            )}
+          </div>
+        ) : (
+          <img
+            key={tries}
+            class="p-img"
+            src={img.url}
+            alt={alt}
+            draggable={false}
+            style={cropImageStyle(crop)}
+            onError={() => setBroken(true)}
+          />
+        )}
         {scroll && fp && playing && (
           <div class="p-scroll" aria-hidden="true">
             <img

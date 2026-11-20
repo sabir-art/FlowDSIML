@@ -75,6 +75,11 @@ const dict = {
     expired:
       'Ce lien a expiré ou a été désactivé. Contactez l’organisation qui vous l’a transmis pour en recevoir un nouveau.',
     notFoundTitle: 'Démo introuvable',
+    networkTitle: 'Connexion impossible',
+    network: 'La démo n’a pas pu être chargée. Vérifiez votre connexion à Internet, puis réessayez.',
+    retry: 'Réessayer',
+    slow: 'La connexion est lente, le chargement continue…',
+    imgMissing: 'Cette image n’a pas pu être chargée.',
     blockedTitle: 'Intégration non autorisée',
     menu: 'Menu',
     privacy: 'Politique de confidentialité',
@@ -291,6 +296,7 @@ const dict = {
       pauseOf: 'Pause {{n}} sur {{total}}',
       continue: 'Continuer',
       noSound: 'Pas de son',
+      error: 'La vidéo n’a pas pu être chargée.',
     },
     voice: {
       label: 'Voix off',
@@ -435,6 +441,11 @@ const dict = {
     expired:
       'This link has expired or was disabled. Contact the organization that sent it to you for a new one.',
     notFoundTitle: 'Demo not found',
+    networkTitle: 'Unable to connect',
+    network: 'The demo could not be loaded. Check your Internet connection, then try again.',
+    retry: 'Try again',
+    slow: 'The connection is slow, still loading…',
+    imgMissing: 'This image could not be loaded.',
     blockedTitle: 'Embedding not allowed',
     menu: 'Menu',
     privacy: 'Privacy policy',
@@ -644,6 +655,7 @@ const dict = {
       pauseOf: 'Pause {{n}} of {{total}}',
       continue: 'Continue',
       noSound: 'No sound',
+      error: 'The video could not be loaded.',
     },
     voice: {
       label: 'Voice-over',
