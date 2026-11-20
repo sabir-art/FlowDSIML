@@ -25,6 +25,8 @@ export default defineConfig({
           if (/[\\/]react-router/.test(id)) return 'vendor-router';
           if (/[\\/]@supabase[\\/]/.test(id)) return 'vendor-supabase';
           if (/[\\/](i18next|react-i18next)[\\/]/.test(id)) return 'vendor-i18n';
+          // L31 : icônes Lucide regroupées (sinon un petit fichier par icône, autant d'allers-retours réseau)
+          if (/[\\/]lucide-react[\\/]/.test(id)) return 'vendor-icons';
           return undefined;
         },
       },
