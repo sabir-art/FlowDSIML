@@ -182,3 +182,19 @@ Impact :
 3. Les n° 5, 8 et 9 : qualité du contenu publié.
 4. Les n° 6, 7, 10, 11 et 12.
 5. Les n° 13 à 15, au passage.
+
+## Suivi des corrections (20 novembre 2026)
+
+Les 15 frictions ont été traitées par le dev en 5 paquets. J'ai validé chacune en local (tests e2e du dev et captures au bureau et à 390 px). Elles sont toutes en « à valider par le client » dans l'outil de suivi (FOR-01 à FOR-15).
+
+| Paquet | Commit (`claude/dev-mvp`) | Frictions | Points mineurs relevés |
+|---|---|---|---|
+| 1 | 3c5fd90 | n° 1, 4 | Texte souligné dans les boutons-liens de la carte de fin ; « Recommencer » trop visible |
+| 2 | a10c790 | n° 2, 3 | Indicateurs d'Apprenants insensibles au filtre Groupe (prioritaire) ; champ fichier natif non traduit ; colonnes étroites ; groupe mêlé aux variables ; boutons d'en-tête empilés |
+| 3 | 1b2c82d | n° 5, 8, 9 | Pas d'action « Renommer » sur le titre par défaut ; phrase manquante dans la barre d'aide après la bulle |
+| 4 | 7af2f2b | n° 6, 7, 10, 11, 12 | Sélecteurs natifs du bloc Formation ; bouton « Supprimer » de la voix off isolé |
+| 5 | ca3d0c4 | n° 13, 14, 15 | Aucun |
+
+Pour la n° 15, le dev a choisi le bouton en icône seule (nom accessible et infobulle) plutôt que le bouton en pleine largeur sous le titre, pour ne pas ajouter de ligne à l'en-tête mobile. Ce choix est conforme à la correction proposée.
+
+Les points mineurs sont à corriger au passage. Ils figurent dans les lignes FOR du tracker.
