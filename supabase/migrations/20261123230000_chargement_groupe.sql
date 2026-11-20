@@ -4,11 +4,12 @@
 -- (has_role viewer sur l'espace, dossiers restreints exclus via my_hidden_folders / my_hidden_demos,
 -- demo_visible pour une démo), et réutilisation des RPC existantes (workspace_overview, workspace_kpis,
 -- folder_hidden_count) qui gardent leurs propres contrôles. Alias préfixés x_ : to_jsonb(alias) ne doit
--- jamais désigner une colonne (hotspots a une colonne « h »). Lecture seule (stable), exécutable par authenticated.
+-- jamais désigner une colonne (hotspots a une colonne « h »). Exécutable par authenticated.
 
 -- Tableau de bord des démos (DemosPage) : liste, dossiers, statistiques et repères des cartes.
+-- Non « stable » : workspace_onboarding enregistre la fin de la prise en main quand toutes les étapes sont faites.
 create or replace function public.dashboard_home(p_ws uuid)
-returns jsonb language plpgsql stable security definer set search_path = '' as $$
+returns jsonb language plpgsql security definer set search_path = '' as $$
 declare
   v_hidden uuid[];
   v_ids uuid[];
@@ -50,7 +51,10 @@ begin
     'shareRulesPlan', coalesce((select (p.limits ->> 'share_rules')::boolean
                                   from public.workspaces w join public.plans p on p.code = w.plan_code
                                  where w.id = p_ws), false),
-    'memberCount', (select count(*) from public.members m where m.workspace_id = p_ws)
+    'memberCount', (select count(*) from public.members m where m.workspace_id = p_ws),
+    -- L32 (squelettes) : état de la prise en main, pour réserver sa carte seulement si elle sera affichée
+    -- (éditeurs et plus, comme workspace_onboarding ; null pour un lecteur)
+    'onboarding', case when public.has_role(p_ws, 'editor') then public.workspace_onboarding(p_ws) end
   );
 end $$;
 revoke all on function public.dashboard_home(uuid) from public, anon;

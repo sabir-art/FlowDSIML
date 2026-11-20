@@ -2,7 +2,7 @@
 -- données que les lectures directes (politiques), excluent les dossiers restreints et refusent un non-membre.
 begin;
 set search_path = public, extensions;
-select plan(20);
+select plan(21);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000090a1', 'admin-groupe@example.com'),
@@ -61,6 +61,7 @@ select ok((select j -> 'publishedAt' ? '00000000-0000-0000-0000-0000000090d2' fr
 select ok((select (j ->> 'shareRulesPlan')::boolean from h1), 'plan Enterprise : règles de partage disponibles');
 select is((select (j ->> 'memberCount')::int from h1), 2, 'nombre de membres');
 select ok((select j -> 'kpis' -> 'cur' ? 'views' and j -> 'kpis' -> 'prev' ? 'views' from h1), 'indicateurs des deux périodes');
+select ok((select j -> 'onboarding' -> 'steps' ? 'publish' from h1), 'état de la prise en main (squelettes L32)');
 
 create temp table e1 as select public.editor_load('00000000-0000-0000-0000-0000000090d2') as j;
 select is((select j -> 'demo' ->> 'title' from e1), 'Accueil', 'éditeur : la démo');
