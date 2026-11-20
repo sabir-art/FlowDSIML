@@ -2941,7 +2941,6 @@
       "not_started": "Not started"
     },
     "filters": {
-      "label": "Filters",
       "path": "Course",
       "status": "Status",
       "structure": "Structure",
@@ -2949,9 +2948,8 @@
       "moduleValue": "{{title}} (not validated)",
       "all": "All",
       "allF": "All",
-      "change": "Change the {{label}} filter",
-      "clear": "Remove the {{label}} filter",
-      "group": "Group"
+      "group": "Group",
+      "allModules": "All modules"
     },
     "kpi": {
       "doneFoot": "{{pct}} of learners",

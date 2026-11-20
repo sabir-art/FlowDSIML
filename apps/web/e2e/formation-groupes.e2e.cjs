@@ -259,7 +259,7 @@ const GROUP = 'Session du 12 novembre';
   state.learnerDetail = f.detail;
   await page.goto(`${APP}/#/learners`);
   await page.waitForSelector('.l13-table');
-  await page.getByRole('button', { name: 'Changer le filtre Groupe' }).click();
+  await page.getByRole('button', { name: /^Groupe\s*:/ }).click();
   await page.getByRole('menuitem', { name: GROUP }).click();
   await page.waitForTimeout(300);
   ok((await page.locator('.l13-table tbody tr').count()) === 2, 'n° 3 : filtre « Groupe » dans Apprenants');
