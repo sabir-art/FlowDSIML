@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics (lot L48-D) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
+<style>
+  /* L48-D, composants §17. Spec : docs/ux/specs/l48d-analytics.md. Données fictives. */
+  .a-tabs { display: flex; gap: 28px; border-bottom: 1px solid var(--fd-color-border); }
+  .a-tab { all: unset; position: relative; display: inline-flex; align-items: center; gap: 4px; padding: 0 0 14px; font-size: 15px; color: var(--fd-color-text-muted); cursor: pointer; white-space: nowrap; }
+  .a-tab[aria-selected='true'] { color: var(--fd-color-text); font-weight: 600; }
+  .a-tab[aria-selected='true']::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--fd-color-text); }
+  .a-bar { display: flex; align-items: center; gap: 8px; }
+  .a-flt { all: unset; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 999px; background: var(--fd-color-surface); font-size: 14px; color: var(--fd-color-text); cursor: pointer; }
+  .a-flt span { color: var(--fd-color-text-muted); }
+  .a-bar .end { margin-left: auto; }
+  .k-card { background: var(--fd-color-surface); border-radius: 20px; overflow: hidden; }
+  .k-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--fd-color-border); }
+  .k-tab { all: unset; box-sizing: border-box; position: relative; display: flex; flex-direction: column; gap: 6px; padding: 22px 28px 20px; cursor: pointer; }
+  .k-tab + .k-tab { border-left: 1px solid var(--fd-color-border); }
+  .k-tab .l { font-size: 13px; color: var(--fd-color-text-muted); }
+  .k-tab .v { font-size: 28px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--fd-color-text-muted); }
+  .k-tab .d { font-size: 13px; color: var(--fd-color-text-muted); }
+  .k-tab[aria-selected='true'] .l, .k-tab[aria-selected='true'] .v { color: var(--fd-color-text); }
+  .k-tab[aria-selected='true']::after { content: ''; position: absolute; left: 28px; right: 28px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--fd-color-text); }
+  .k-chart { padding: 20px 28px 24px; display: flex; flex-direction: column; gap: 12px; }
+  .k-chart header { display: flex; align-items: baseline; gap: 16px; } .k-chart h3 { margin: 0; font-size: 15px; flex: 1; }
+  .k-leg { font-size: 13px; color: var(--fd-color-text-muted); display: flex; gap: 16px; } .k-leg i { display: inline-block; width: 14px; border-top: 2px solid var(--fd-color-primary); vertical-align: middle; margin-right: 6px; } .k-leg i.p { border-top: 2px dashed var(--fd-color-text-muted); }
+  .k-svg { width: 100%; display: block; }
+  .a-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; }
+  .a-w { grid-column: span 6; background: var(--fd-color-surface); border-radius: 20px; padding: 24px; min-height: 220px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
+  .a-w header { display: flex; align-items: center; gap: 8px; min-height: 32px; } .a-w h3 { margin: 0; font-size: 15px; font-weight: 600; flex: 1; }
+  .a-w .soon { font-size: 13px; color: var(--fd-color-text-muted); }
+  .a-ib { all: unset; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: var(--fd-color-text-muted); cursor: pointer; }
+  .a-ib:hover { background: var(--fd-color-surface-sunken); }
+  .a-dd { all: unset; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--fd-color-text-muted); cursor: pointer; }
+  .a-ln { display: grid; grid-template-columns: minmax(0, 1fr) minmax(80px, 1.2fr) 96px; gap: 16px; align-items: center; font-size: 14px; }
+  .a-ln .b { height: 6px; border-radius: 999px; background: var(--fd-color-surface-sunken); overflow: hidden; } .a-ln .b i { display: block; height: 100%; border-radius: 999px; background: var(--fd-color-text); }
+  .a-ln .n { text-align: right; font-variant-numeric: tabular-nums; } .a-ln .n small { color: var(--fd-color-text-muted); font-size: 13px; }
+  .a-ln.drop .n small { color: var(--fd-color-danger, #b4234b); font-weight: 600; }
+  .a-foot { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--fd-color-border); font-size: 13px; color: var(--fd-color-text-muted); }
+  .a-two { display: flex; gap: 40px; } .a-two b { display: block; font-size: 28px; font-variant-numeric: tabular-nums; } .a-two span { font-size: 13px; color: var(--fd-color-text-muted); }
+  .a-stack { display: flex; height: 10px; border-radius: 999px; overflow: hidden; gap: 2px; } .a-stack i:first-child { background: var(--fd-color-text); } .a-stack i:last-child { background: var(--fd-color-text-muted); opacity: .45; }
+  .a-p { margin: 0; font-size: 14px; color: var(--fd-color-text-muted); }
+  .a-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; font-size: 14px; color: var(--fd-color-text-muted); }
+  .a-link { all: unset; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--fd-color-primary); }
+  .a-tbl { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .a-tbl th { text-align: left; font-size: 13px; font-weight: 500; color: var(--fd-color-text-muted); padding: 0 0 12px; }
+  .a-tbl th.r, .a-tbl td.r { text-align: right; font-variant-numeric: tabular-nums; }
+  .a-tbl th.on { color: var(--fd-color-text); font-weight: 600; } .a-tbl th.on svg { vertical-align: -2px; margin-left: 4px; }
+  .a-tbl td { height: 64px; border-top: 1px solid var(--fd-color-border); } .a-tbl td small { display: block; font-size: 13px; color: var(--fd-color-text-muted); }
+  .a-tbl td.on { font-weight: 600; } .a-tbl td.m { color: var(--fd-color-text-muted); }
+  .a-tbl td.ch { width: 40px; text-align: right; color: var(--fd-color-text-muted); } .a-tbl td.ch svg { vertical-align: middle; }
+  .a-tbl tr.h td { background: var(--fd-color-surface-sunken); } .a-tbl tr.h td:first-child { border-radius: 12px 0 0 12px; } .a-tbl tr.h td:last-child { border-radius: 0 12px 12px 0; }
+  .a-tbl td:first-child { padding-left: 12px; } .a-tbl th:first-child { padding-left: 12px; } .a-tbl td.ch { padding-right: 12px; }
+  .a-menu { width: 320px; background: var(--fd-color-surface); border-radius: 16px; box-shadow: 0 16px 48px rgb(8 10 14 / .16); padding: 8px; display: flex; flex-direction: column; }
+  .a-menu .fd-input { width: 100%; margin-bottom: 6px; }
+  .a-mi { all: unset; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; border-radius: 10px; font-size: 14px; cursor: pointer; }
+  .a-mi span { flex: 1; } .a-mi small { font-size: 13px; color: var(--fd-color-text-muted); } .a-mi.act { background: var(--fd-color-surface-sunken); font-weight: 600; }
+  .a-mi mark { background: none; color: inherit; font-weight: 700; }
+  .a-sep { height: 1px; margin: 6px 4px; background: var(--fd-color-border); }
+  .a-cap { font-size: 13px; color: var(--fd-color-text-muted); margin: 0 0 8px; }
+  .u2-ph .a-tabs { gap: 22px; overflow-x: auto; scrollbar-width: none; }
+  .u2-ph .k-tabs { grid-template-columns: 1fr 1fr; } .u2-ph .k-tab { padding: 16px 18px; } .u2-ph .k-tab:nth-child(3) { border-left: 0; } .u2-ph .k-tab:nth-child(n+3) { border-top: 1px solid var(--fd-color-border); }
+  .u2-ph .k-tab .v { font-size: 22px; } .u2-ph .k-tab[aria-selected='true']::after { left: 18px; right: 18px; } .u2-ph .k-tab .d { display: none; }
+  .u2-ph .k-chart { padding: 16px; } .u2-ph .k-leg { display: none; }
+  .u2-ph .a-bar { flex-wrap: wrap; } .u2-ph .a-flt { padding: 0 14px; }
+  .u2-ph .a-w { padding: 20px; min-height: 0; } .u2-ph .a-ln { gap: 10px; }
+</style>
+</head>
+<body>
+<main class="u2">
+  <header class="u2-head"><div><small>Lot L48-D · avec L47</small><h1>Analytics</h1><p>Quatre onglets, quatre indicateurs, une grille de widgets qui ont chacun leur état vide. Le reste est rangé dans « Plus ».</p></div></header>
+  <div id="a1"></div>
+  <div id="a2"></div>
+  <section class="u2-sec"><h2>Menus et états</h2><p>Recherche dans le menu Démo au-delà de 10 démos, menu « Plus », widget sans données.</p><div class="u2-row" id="a3" style="align-items:flex-start"></div></section>
+  <section class="u2-sec"><h2>En sombre et sur mobile</h2><div class="u2-row" id="a4" style="align-items:flex-start"></div></section>
+</main>
+<script>
+  const { I, app, pair } = U2;
+  const KPI = [
+    { k: 'views', l: 'Vues', v: '4 812', d: '+12 % vs 30 j précédents', t: 'Vues par jour', s: [120, 140, 132, 160, 151, 170, 182, 165, 190, 204, 198, 215, 230, 221] },
+    { k: 'visitors', l: 'Visiteurs', v: '2 960', d: '+8 % vs 30 j précédents', t: 'Visiteurs par jour', s: [80, 90, 86, 100, 96, 108, 112, 104, 118, 124, 120, 130, 138, 132] },
+    { k: 'completion', l: 'Taux de complétion', v: '64 %', d: '+5 pts vs 30 j précédents', t: 'Taux de complétion par jour', s: [58, 60, 59, 61, 62, 60, 63, 64, 62, 65, 66, 64, 67, 66] },
+    { k: 'leads', l: 'Leads', v: '14', d: '+11 vs 3 les 30 j précédents', t: 'Leads par jour', s: [0, 1, 0, 2, 1, 0, 1, 2, 0, 1, 3, 1, 1, 1] }
+  ];
+  const chart = (s, h) => {
+    const W = 1000, H = h, max = Math.max(...s, 1) * 1.2, n = s.length;
+    const pt = (v, i) => `${(i / (n - 1) * (W - 8)).toFixed(1)},${(8 + (H - 16) * (1 - v / max)).toFixed(1)}`;
+    const prev = s.map((v, i) => v * (0.82 + 0.06 * Math.sin(i)));
+    const grid = [0, .5, 1].map((f) => { const y = (8 + (H - 16) * (1 - f)).toFixed(1); return `<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--fd-color-border)" vector-effect="non-scaling-stroke"/>`; }).join('');
+    return `<svg class="k-svg" style="height:${h}px" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Courbe sur 14 jours, comparée à la période précédente">${grid}<polyline points="${prev.map(pt).join(' ')}" fill="none" stroke="var(--fd-color-text-muted)" stroke-width="1.5" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/><polyline points="${s.map(pt).join(' ')}" fill="none" stroke="var(--fd-color-primary)" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--fd-color-text-muted)"><span>7 nov.</span><span>20 nov.</span></div>`;
+  };
+  const ktabs = (act, pre) => `<div class="k-tabs" role="tablist" aria-label="Indicateur affiché">${KPI.map((x) => `<button class="k-tab" type="button" role="tab" id="${pre}-${x.k}" aria-selected="${x.k === act}" aria-controls="${pre}-p" tabindex="${x.k === act ? 0 : -1}"><span class="l">${x.l}</span><span class="v">${x.v}</span><span class="d">${x.d}</span></button>`).join('')}</div>`;
+  const kcard = (act, pre, h = 200) => { const m = KPI.find((x) => x.k === act); return `<section class="k-card">${ktabs(act, pre)}<div class="k-chart" role="tabpanel" id="${pre}-p" aria-labelledby="${pre}-${act}"><header><h3>${m.t}</h3><span class="k-leg"><span><i></i>30 derniers jours</span><span><i class="p"></i>Période précédente</span></span></header>${chart(m.s, h)}</div></section>`; };
+  const TABS = ['Vue d’ensemble', 'Démos', 'Sessions', 'Leads'];
+  const atabs = (cur, more = 'Plus') => `<div class="a-tabs" role="tablist" aria-label="Sections d’Analytics">${TABS.map((t, i) => `<button class="a-tab" type="button" role="tab" aria-selected="${i === cur}" tabindex="${i === cur ? 0 : -1}">${t}</button>`).join('')}<button class="a-tab" type="button" aria-haspopup="menu" aria-expanded="false" aria-selected="${cur === 4}">${more}${I('down', 16)}</button></div>`;
+  const abar = (mob) => `<div class="a-bar"><button class="a-flt" type="button"><span>Démo :</span>Toutes${I('down', 16)}</button><button class="a-flt" type="button"><span>Source :</span>Toutes${I('down', 16)}</button>${mob ? '' : '<span class="end"></span>'}<span class="fd-segmented" role="group" aria-label="Période"><button type="button" aria-pressed="false">7 j</button><button type="button" aria-pressed="true">30 j</button><button type="button" aria-pressed="false">90 j</button></span><button class="fd-btn" type="button">${I('download')}Exporter</button></div>`;
+  const whead = (t, menu = true, extra = '') => `<header><h3>${t}</h3>${extra}${menu ? `<button class="a-ib" type="button" aria-label="Plus d’actions pour ${t}" aria-haspopup="menu">${I('dots', 18)}</button>` : ''}</header>`;
+  const ln = (n, p, v, cls = '') => `<div class="a-ln ${cls}"><span>${n}</span><span class="b" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}" aria-label="${n} : ${p} %"><i style="width:${p}%"></i></span><span class="n">${v}</span></div>`;
+  const wSources = `<section class="a-w">${whead('Sources')}${ln('Lien partagé', 52, '2 502 <small>52 %</small>')}${ln('Intégration', 27, '1 299 <small>27 %</small>')}${ln('Lien direct', 15, '722 <small>15 %</small>')}${ln('Page publique', 6, '289 <small>6 %</small>')}</section>`;
+  const wSteps = `<section class="a-w">${whead('Étape par étape', true, `<button class="a-dd" type="button" aria-haspopup="menu">Créer un rapport${I('down', 14)}</button>`)}${ln('1. Ouvrir Rapports', 100, '880')}${ln('2. Nouveau rapport', 92, '810')}${ln('3. Choisir les champs', 61, '537 <small>−34 %</small>', 'drop')}${ln('4. Enregistrer', 58, '510')}<p class="a-foot">Bouton de fin : 42 clics</p></section>`;
+  const wRet = `<section class="a-w">${whead('Nouveaux et récurrents')}<div class="a-two"><div><b>2 214</b><span>Nouveaux</span></div><div><b>746</b><span>Récurrents</span></div></div><div class="a-stack" role="img" aria-label="75 % de nouveaux, 25 % de récurrents"><i style="width:75%"></i><i style="width:25%"></i></div><p class="a-p">Un visiteur récurrent revient en moyenne 2,4 fois sur la période.</p></section>`;
+  const wDev = `<section class="a-w">${whead('Appareils et navigateurs', false, '<span class="soon">Bientôt</span>')}<p class="a-p">Le type d’appareil n’est pas encore enregistré.</p></section>`;
+  const head = `<div class="u2-top"><div style="flex:1"><h1>Analytics</h1></div></div>`;
+  const overview = `${head}${atabs(0)}${abar()}${kcard('views', 'a')}<div class="a-grid">${wSources}${wSteps}${wRet}${wDev}</div>`;
+  document.getElementById('a1').outerHTML = pair('Vue d’ensemble', app('analytics', overview), 'img/avant/l47-analytics.png', 'Analytics actuel : 7 onglets, 6 cartes, blocs de tailles différentes', 'Quatre onglets et « Plus » ; quatre indicateurs dans la carte du graphique ; quatre widgets de même taille. « Clics sur le bouton d’action » passe en pied de « Étape par étape ».');
+  const ROWS = [['Créer un rapport', 'Procédures', '1 420', '880', '71 %', '6'], ['Configurer un tableau de bord', 'Prise en main', '1 105', '702', '66 %', '3'], ['Importer des contacts', 'Procédures', '982', '611', '58 %', '4'], ['Partager un dossier', 'Prise en main', '705', '434', '62 %', '1'], ['Accueil d’un nouvel agent', 'Accueil', '600', '333', '74 %', '0'], ['Archiver une fiche', 'Procédures', '—', '—', '—', '—']];
+  const demosTab = `${head}${atabs(1)}${abar()}<section class="u2-card" style="padding:16px 16px 8px"><table class="a-tbl"><thead><tr><th>Démo</th><th class="r">Vues</th><th class="r">Visiteurs</th><th class="r on" aria-sort="descending">Complétion${I('sort', 14)}</th><th class="r">Leads</th><th></th></tr></thead><tbody>${[...ROWS].sort((a, b) => (parseInt(b[4]) || -1) - (parseInt(a[4]) || -1)).map((r, i) => `<tr${i === 1 ? ' class="h"' : ''}><td>${r[0]}<small>${r[1]}</small></td>${r.slice(2).map((c, j) => `<td class="r${j === 2 ? ' on' : ''}${c === '—' ? ' m' : ''}">${c}</td>`).join('')}<td class="ch">${I('right', 18)}</td></tr>`).join('')}</tbody></table></section>`;
+  document.getElementById('a2').outerHTML = pair('Onglet Démos : une ligne par démo', app('analytics', demosTab, { h: 760 }), 'img/avant/l47-analytics.png', 'Aujourd’hui : pas de vue par démo dans Analytics', 'Trié ici par complétion (clic sur l’en-tête) ; la ligne entière ouvre l’Analytics de la démo. Une démo sans vue reste listée, avec des tirets.', 'Avant (pas d’onglet Démos)');
+  const mi = (t, act, small = '') => `<button class="a-mi${act ? ' act' : ''}" type="button" role="menuitemradio" aria-checked="${!!act}"><span>${t}</span>${small}${act ? I('check', 16) : ''}</button>`;
+  const demoMenu = `<div><p class="a-cap">Menu Démo, 12 démos</p><div class="a-menu" role="menu" aria-label="Démo"><input class="fd-input" placeholder="Rechercher une démo" value="rap" aria-label="Rechercher une démo">${mi('Toutes les démos', 1)}<div class="a-sep"></div>${mi('Créer un <mark>rap</mark>port')}${mi('Exporter un <mark>rap</mark>port')}${mi('Planifier un <mark>rap</mark>port')}</div></div>`;
+  const moreMenu = `<div><p class="a-cap">Menu « Plus »</p><div class="a-menu" role="menu" aria-label="Plus" style="width:260px">${['Temps réel', 'Sondages et tests', 'Segments', 'Alertes'].map((t) => `<button class="a-mi" type="button" role="menuitem"><span>${t}</span></button>`).join('')}<div class="a-sep"></div><button class="a-mi" type="button" role="menuitem"><span>Mesure des visites</span></button><button class="a-mi" type="button" role="menuitem" aria-disabled="true"><span>Dates personnalisées</span><small>Bientôt</small></button></div></div>`;
+  const emptyW = `<div style="width:520px"><p class="a-cap">Widget sans données sur 7 jours</p><section class="a-w" style="min-height:260px">${whead('Sources')}<div class="a-empty" role="status">${I('chart', 32)}<span>Pas encore de données sur cette période</span><button class="a-link" type="button">Élargir à 90 jours</button></div></section></div>`;
+  document.getElementById('a3').innerHTML = demoMenu + moreMenu + emptyW;
+  document.getElementById('a4').innerHTML = `<div style="flex:1;min-width:960px">${app('analytics', `${head}${atabs(4, 'Segments')}${kcard('completion', 'd', 160)}<div class="a-grid">${wSteps}${wRet}</div>`, { theme: 'dark' })}</div>
+    <div class="u2-ph"><h1 style="margin:0;font-size:24px">Analytics</h1>${atabs(0)}${abar(true)}${kcard('visitors', 'm', 140)}${wSources}</div>`;
+</script>
+</body>
+</html>
