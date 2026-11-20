@@ -20,7 +20,7 @@ import { usePlan } from '../../lib/plan';
 import { PlanFormsWarning } from '../../components/PlanFormsWarning';
 import { AccessPanel, AccessSummary, useDemoAccess } from './AccessPanel';
 import { useShareRules } from '../../lib/shareRules';
-import { CopyButton, highlightHtml } from './codeBlock';
+import { CopyButton } from './codeBlock';
 import { PublicPagePanel } from './PublicPagePanel';
 import {
   PersonalPageFields,
