@@ -59,7 +59,7 @@
 - **Par défaut** : Démo par captures, ou le dernier type choisi par l'utilisateur.
 - **Pied** : « Étape suivante : la source (extension, images, modèle…) », Annuler, Continuer.
 
-**Étape 2 sur 2, « Source »** : titre « Nouvelle démo par captures », « Nouvelle démo HTML » ou « Nouveau Sandbox », avec le badge du type. On y retrouve le nom, le dossier et les sources **filtrées par type** :
+**Étape 2 sur 2, « Source »** : titre « Nouvelle démo par captures », « Nouvelle démo HTML » ou « Nouveau Sandbox », avec le badge du type. On y retrouve le dossier et les sources **filtrées par type** (corrigé le 20 novembre : il n'y a pas de champ Nom à cette étape, ni avant L48-G ; la démo se nomme dans l'éditeur) :
 
 | Source | Captures | HTML | Sandbox |
 |---|---|---|---|
@@ -102,7 +102,7 @@ Ce qui existe est conservé : liaison automatique, plan, page de départ, « À 
   - compteur dans l'en-tête ;
   - phrase : « Ces liens mènent à des pages que vous n'avez pas capturées. Au clic, le visiteur voit « Cette partie n'est pas disponible dans la démo ». » (selon le réglage du clic non relié) ;
   - pour chaque lien : texte du lien, page d'origine → adresse, puis trois actions :
-    - **Capturer cette page** : ouvre l'extension sur l'adresse en mode HTML, rattachée à ce Sandbox ;
+    - **Capturer cette page** : ouvre l'extension sur l'adresse en mode HTML, rattachée à ce Sandbox. **Tant que l'app ne peut pas envoyer de message à l'extension** (`externally_connectable`, décision en attente), l'action est désactivée avec « Bientôt » en texte ; à côté, un lien « Ouvrir la page » ouvre l'adresse dans un nouvel onglet ;
     - **Relier à une page** : choix d'une page existante, qui crée un lien `op: 'link'` ;
     - **Laisser le message** : le lien est marqué comme volontaire et sort de la liste ; il reste visible dans « Afficher les liens laissés ».
 - **Publication** : si des liens sans page restent non traités, la publication n'est pas bloquée. La liste de contrôle avant publication affiche « 2 liens mènent à des pages non capturées » avec « Voir le plan ».
