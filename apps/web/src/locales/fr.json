@@ -4341,6 +4341,21 @@
       "openDataset": "Ouvrir le jeu de données",
       "summary": "{{type}} · libellés : {{label}} · valeurs : {{value}}",
       "count": "nombre de lignes"
+    },
+    "assistant": {
+      "open": "Assistant",
+      "title": "Assistant",
+      "name": "Assistant",
+      "you": "Vous",
+      "context": "Démo : {{title}} · Étape {{n}}",
+      "placeholder": "Demandez une modification ou une explication",
+      "send": "Envoyer",
+      "busy": "Réponse en cours…",
+      "s1": "Rendre l’étape plus claire",
+      "s2": "Proposer un titre de chapitre",
+      "s3": "Vérifier la cohérence des textes",
+      "ignored": "Proposition ignorée.",
+      "cleared": "La conversation est effacée à la fermeture."
     }
   }
 }

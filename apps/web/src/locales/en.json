@@ -4341,6 +4341,21 @@
       "openDataset": "Open the dataset",
       "summary": "{{type}} · labels: {{label}} · values: {{value}}",
       "count": "number of rows"
+    },
+    "assistant": {
+      "open": "Assistant",
+      "title": "Assistant",
+      "name": "Assistant",
+      "you": "You",
+      "context": "Demo: {{title}} · Step {{n}}",
+      "placeholder": "Ask for a change or an explanation",
+      "send": "Send",
+      "busy": "Answering…",
+      "s1": "Make the step clearer",
+      "s2": "Suggest a chapter title",
+      "s3": "Check text consistency",
+      "ignored": "Proposal dismissed.",
+      "cleared": "The conversation is cleared when the panel closes."
     }
   }
 }

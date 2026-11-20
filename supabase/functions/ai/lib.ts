@@ -220,7 +220,10 @@ export function parseRequest(body: Record<string, unknown>): Request {
       const msgs = Array.isArray(input.messages) ? input.messages.slice(-20) : [];
       if (msgs.length === 0) throw new AiError('MISSING_MESSAGES');
       payload = {
-        context: r(str(input.context, 6000, 'CONTEXT', false)),
+        // Textes de la démo seulement (titres, bulles), chacun avec son id ; étape en cours
+        items: Array.isArray(input.items) && input.items.length ? ri(items(input.items, 100, 2000)) : [],
+        step: Number(input.step) | 0,
+        title: r(str(input.title, 200, 'TITLE', false)),
         messages: msgs.map((m) => {
           const o = (m ?? {}) as Record<string, unknown>;
           const role = o.role === 'assistant' ? 'assistant' : 'user';
@@ -403,15 +406,16 @@ export function buildPrompt(req: Request): Prompt {
       return {
         model: SONNET,
         system:
-          `${BASE} Tu es l'assistant de l'éditeur de démos. Réponds de façon brève et concrète sur la démo en cours et sur l'usage de TutoClick. ` +
-          `Tu ne modifies rien toi-même : propose, la personne applique. ${inLang}` +
-          (p.context ? `\n\nDémo en cours :\n${p.context}` : ''),
+          `${BASE} Tu es l'assistant de l'éditeur de démos TutoClick. Réponds de façon brève et concrète, sur cette démo seulement. ` +
+          "Tu ne modifies rien toi-même : si une modification est utile, mets-la dans changes (id d'un élément fourni, texte complet de remplacement) ; la personne l'appliquera ou non. " +
+          `Pour une simple explication, changes est vide. ${inLang}` +
+          `\n\nDémo : ${p.title || '(sans titre)'} · étape en cours : ${p.step || '-'}\nTextes (id, texte) : ${JSON.stringify(p.items)}`,
         messages: (p.messages as Array<{ role: 'user' | 'assistant'; text: string }>).map((m) => ({
           role: m.role,
           content: m.text,
         })),
-        schema: null,
-        maxTokens: 2000,
+        schema: obj({ text: S, changes: ITEMS }),
+        maxTokens: 3000,
       };
   }
 }
@@ -490,8 +494,12 @@ export function checkOutput(task: Task, out: any, payload: Record<string, any>):
         aggregate,
       };
     }
-    case 'assistant':
+    case 'assistant': {
       if (!isStr(out?.text) || !out.text.trim()) throw new AiError('EMPTY', 502);
-      return { text: out.text.trim() };
+      const changes = Array.isArray(out.changes)
+        ? out.changes.filter((c: Item) => ids.has(c?.id) && isStr(c.text)).slice(0, 10)
+        : [];
+      return { text: out.text.trim(), changes };
+    }
   }
 }

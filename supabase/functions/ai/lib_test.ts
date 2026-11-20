@@ -70,7 +70,7 @@ Deno.test('buildPrompt : modèles par tâche, langue de la démo', () => {
   const a = buildPrompt(
     parseRequest({ task: 'assistant', input: { messages: [{ role: 'user', text: 'Combien d’étapes ?' }] } }),
   );
-  assertEquals(a.schema, null);
+  assert(a.schema !== null);
 });
 
 Deno.test('checkOutput : ids inconnus écartés, jeu de données sans valeur réaliste', () => {
@@ -162,4 +162,26 @@ Deno.test('chart : colonnes du jeu de données seulement, agrégation bornée', 
     AiError,
   );
   assertThrows(() => parseRequest({ task: 'chart', input: { description: 'x' } }), AiError, 'BAD_COLUMNS');
+});
+
+Deno.test('assistant : modifications limitées aux éléments fournis', () => {
+  const payload = parseRequest({
+    task: 'assistant',
+    input: {
+      items: [{ id: 'h:1:body', text: 'Cliquez ici' }],
+      messages: [{ role: 'user', text: 'Plus clair ?' }],
+    },
+  }).payload;
+  const out = checkOutput(
+    'assistant',
+    {
+      text: 'Voici une version.',
+      changes: [
+        { id: 'h:1:body', text: 'Cliquez sur Ajouter.' },
+        { id: 'autre', text: 'x' },
+      ],
+    },
+    payload,
+  ) as { changes: unknown[] };
+  assertEquals(out.changes.length, 1);
 });

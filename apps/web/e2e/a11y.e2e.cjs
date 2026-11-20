@@ -446,6 +446,42 @@ const APP_PAGES = [
     },
   },
   {
+    name: 'Éditeur · Assistant',
+    route: `/#/demos/${DEMO}/edit`,
+    seed: (d) => {
+      d.ai = {
+        enabled: true,
+        features: {
+          write: true,
+          translate: true,
+          suggest: true,
+          generate: true,
+          dataset: true,
+          chart: true,
+          assistant: true,
+        },
+        used: 1,
+        quota: 500,
+        userToday: 0,
+        userDailyRequests: 30,
+        workspaceQuotaReached: false,
+        userQuotaReached: false,
+        renewsOn: '2026-12-01',
+        canEdit: true,
+        canManage: true,
+      };
+      d.aiReply = () => ({
+        text: 'Je propose une bulle plus directe.',
+        changes: [{ id: 'h:h1:body', text: 'Cliquez sur Ajouter.' }],
+      });
+    },
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Assistant' }).click();
+      await p.getByRole('button', { name: 'Rendre l’étape plus claire' }).click();
+      await p.getByRole('button', { name: 'Appliquer' }).waitFor();
+    },
+  },
+  {
     name: 'Éditeur · test A/B',
     route: `/#/demos/${DEMO}/edit`,
     open: async (p) => {

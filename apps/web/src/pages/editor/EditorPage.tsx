@@ -27,7 +27,9 @@ import {
   ZoomIn,
   Languages,
   Lightbulb,
+  MessageSquareText,
 } from 'lucide-react';
+import { AssistantPanel } from '../../components/ai/AssistantPanel';
 import { SuggestionsPanel } from '../../components/ai/SuggestionsPanel';
 import { TranslateDialog } from '../../components/ai/TranslateDialog';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -215,6 +217,7 @@ export function EditorPage() {
   // L16 : « Diffuser » (menu « … », aussi ouvert par #/demos/:id/distribute → ?distribute=1)
   const [translating, setTranslating] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
+  const [assisting, setAssisting] = useState(false);
   const [distributing, setDistributing] = useState(() => params.get('distribute') === '1');
   // L22-02 : « Présenter » (aussi ouvert depuis le menu d'une démo par ?present=1)
   // L22-05 : lien d'une notification (?step=…&comment=…) → étape choisie une fois chargée
@@ -485,6 +488,14 @@ export function EditorPage() {
           }}
         />
       )}
+      {assisting && ws && can('demo.edit') && (
+        <AssistantPanel
+          editor={editor}
+          ws={ws.id}
+          stepIndex={Math.min(index, Math.max(0, editor.steps.length - 1))}
+          onClose={() => setAssisting(false)}
+        />
+      )}
       {suggesting && ws && can('demo.edit') && (
         <SuggestionsPanel
           editor={editor}
@@ -595,6 +606,22 @@ export function EditorPage() {
             {t('editor.preview')}
           </button>
         </div>
+        {/* L30-08 : Assistant (panneau latéral, conversation effacée à la fermeture) */}
+        {can('demo.edit') && ws && (
+          <button
+            type="button"
+            className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+            aria-label={t('ai.assistant.open')}
+            title={t('ai.assistant.open')}
+            aria-expanded={assisting}
+            onClick={() => {
+              setSuggesting(false);
+              setAssisting((v) => !v);
+            }}
+          >
+            <MessageSquareText aria-hidden="true" />
+          </button>
+        )}
         {/* L30-04 : Suggestions, à côté de l'aide */}
         {can('demo.edit') && ws && (
           <button
@@ -603,7 +630,10 @@ export function EditorPage() {
             aria-label={t('ai.suggest.open_btn')}
             title={t('ai.suggest.open_btn')}
             aria-expanded={suggesting}
-            onClick={() => setSuggesting((v) => !v)}
+            onClick={() => {
+              setAssisting(false);
+              setSuggesting((v) => !v);
+            }}
           >
             <Lightbulb aria-hidden="true" />
           </button>

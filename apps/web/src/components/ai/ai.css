@@ -396,3 +396,41 @@
 .ai-chart-val {
   font-variant-numeric: tabular-nums;
 }
+/* L30-08 : Assistant */
+.ai-as-context {
+  margin: 0;
+}
+.ai-as-log {
+  flex: 1;
+}
+.ai-as-starters {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.ai-as-msg {
+  display: grid;
+  gap: 6px;
+}
+.ai-as-msg.is-user {
+  justify-self: end;
+  max-width: 90%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken, var(--fd-color-border));
+}
+.ai-as-author {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.ai-as-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.ai-as-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
