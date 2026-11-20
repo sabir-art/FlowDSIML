@@ -102,3 +102,39 @@ jobs:
           name: a11y-report
           path: /tmp/a11y-report.json
           if-no-files-found: ignore
+
+  # Publication de bout en bout (éditeur, RGPD, publish_demo, copies, lecteur) : cassée sans signal
+  # en 5358f08. Prévu pour bloquer le déploiement une fois deploy.yml relié à la CI.
+  e2e:
+    name: E2E publication (éditeur → lecteur)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Navigateur Chromium (Playwright)
+        run: pnpm --filter @flowdsiml/web exec playwright install --with-deps chromium
+      - name: App web et lecteur (serveurs de dev, faux Supabase dans les tests)
+        env:
+          VITE_SUPABASE_ANON_KEY: test
+          # Hôtes fictifs : le faux Supabase et l'adresse publique du lecteur sont servis par les tests
+          VITE_SUPABASE_URL: https://api.tutoclick.example
+          VITE_PLAYER_URL: https://demos.tutoclick.example
+          VITE_APP_ORIGIN: https://tutoclick.example
+          VITE_REMOTE_ORIGIN: https://tutoclick.example
+        run: |
+          (cd apps/web && nohup pnpm exec vite --port 5173 --strictPort > /tmp/web.log 2>&1 &)
+          (cd apps/player && nohup pnpm exec vite --port 5174 --strictPort > /tmp/player.log 2>&1 &)
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:5173/ >/dev/null && curl -sf http://localhost:5174/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/web.log /tmp/player.log; exit 1
+      - name: Publication puis lecture (publish-player)
+        run: |
+          cd apps/web && node e2e/publish-player.e2e.cjs | tee /tmp/e2e.log
+          ! grep -q '^NOT OK' /tmp/e2e.log
