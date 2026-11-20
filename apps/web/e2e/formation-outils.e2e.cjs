@@ -58,6 +58,20 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       return !!(v && body && body.compareDocumentPosition(v) & Node.DOCUMENT_POSITION_FOLLOWING);
     });
     ok(order, 'n° 10 : placée après le texte de la bulle');
+    // Retour Lead UX : « Supprimer » en bouton aligné avec « Réenregistrer » et « Remplacer »
+    const row = await voice
+      .locator('.voice-actions > .btn')
+      .evaluateAll((els) =>
+        els.map((e) => [
+          e.getAttribute('aria-label') || e.textContent.trim(),
+          Math.round(e.getBoundingClientRect().top),
+        ]),
+      );
+    ok(
+      row.map((r) => r[0]).join('|') === 'Réenregistrer|Remplacer|Supprimer la voix off' &&
+        new Set(row.map((r) => r[1])).size === 1,
+      `Lead UX : Réenregistrer, Remplacer, Supprimer alignés (${JSON.stringify(row)})`,
+    );
     await voice.getByRole('button', { name: 'Étape suivante' }).click();
     await page.waitForTimeout(300);
     ok(

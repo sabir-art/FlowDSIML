@@ -1623,7 +1623,8 @@
       "uploadError": "The voice-over could not be saved. Try again.",
       "railIcon": "Voice-over",
       "railIconAi": "AI-generated voice-over",
-      "nextStep": "Next step"
+      "nextStep": "Next step",
+      "removeLabel": "Delete the voice-over"
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
@@ -1656,14 +1657,19 @@
         "untitled": "no title",
         "noBubble": "no bubble",
         "emptyBubble": "empty bubble"
-      }
+      },
+      "rename": "Rename"
     },
     "guide": {
       "place": "Click the screen where the learner must click, then write the instruction.",
       "write": "Write the bubble instruction in the right-hand panel.",
       "next": "Next step without a bubble",
       "done": "Every step has a bubble. Review them, then publish.",
-      "hide": "Hide help"
+      "hide": "Hide help",
+      "ready_one": "Step {{n}} bubble ready. {{count}} step left without a bubble.",
+      "ready_other": "Step {{n}} bubble ready. {{count}} steps left without a bubble.",
+      "left_one": "{{count}} step left without a bubble.",
+      "left_other": "{{count}} steps left without a bubble."
     },
     "addHotspot": "Add a hotspot",
     "railQuizAdd": "Add a quiz",
@@ -2061,7 +2067,9 @@
       "export": "Export the links (CSV)",
       "exportAll": "Export the links (CSV)",
       "exportFile": "learner-links.csv",
-      "demoLink": "Demo link"
+      "demoLink": "Demo link",
+      "choose": "Choose a file",
+      "noFile": "No file chosen"
     },
     "training": {
       "title": "Training",
@@ -3174,7 +3182,8 @@
       "exhausted": "No attempts left.",
       "left_one": "{{count}} attempt left",
       "left_other": "{{count}} attempts left"
-    }
+    },
+    "groupScope": "Group: {{group}}"
   },
   "center": {
     "title": "Training center",

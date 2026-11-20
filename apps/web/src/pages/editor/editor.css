@@ -2938,8 +2938,15 @@
 
 /* L28-02 : section « Voix off » de l'onglet Étape */
 .voice-sec .voice-actions {
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 8px;
+}
+/* Réenregistrer, Remplacer et Supprimer tiennent sur une ligne dans le panneau de droite */
+.voice-sec .voice-actions .btn-sm:not(.btn-icon) {
+  padding-inline: 8px;
+}
+.voice-sec .voice-del {
+  color: var(--fd-color-danger);
 }
 .voice-rec {
   display: flex;

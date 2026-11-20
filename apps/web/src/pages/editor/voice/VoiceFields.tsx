@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Mic, Pause, Play, Square, Upload } from 'lucide-react';
+import { ArrowRight, Mic, Pause, Play, Square, Trash2, Upload } from 'lucide-react';
 import { AiCaptions, AiVoice, TranscriptPreview } from '../../../components/ai/AiAudio';
 import { useToast } from '../../../components/Toast';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -296,17 +296,20 @@ export function VoiceFields({
                 <Upload aria-hidden="true" />
                 {t('editor.voice.replace')}
               </button>
-              {aiVoice}
+              {/* L38 : « Supprimer » en bouton ghost (icône) aligné avec Réenregistrer et Remplacer */}
               <button
                 type="button"
-                className="btn btn-ghost btn-sm voice-del"
+                className="btn btn-ghost btn-sm btn-icon voice-del"
+                aria-label={t('editor.voice.removeLabel')}
+                title={t('editor.voice.removeLabel')}
                 disabled={busy}
                 onClick={() => void remove()}
               >
-                {t('editor.voice.remove')}
+                <Trash2 aria-hidden="true" />
               </button>
             </div>
           )}
+          {!readOnly && aiVoice}
           <label className="check voice-auto">
             <input
               type="checkbox"

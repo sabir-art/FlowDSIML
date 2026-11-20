@@ -1016,7 +1016,11 @@ export function Player({
                       <CenterNext from={fromCenter} demoId={m.demoId} done={completed.current} t={t} />
                     )}
                     <button
-                      class={`p-btn ${step.cta || !endText || fromCenter ? 'p-btn-ghost' : 'p-btn-secondary'}`}
+                      class={
+                        fromCenter
+                          ? 'p-link p-link--muted'
+                          : `p-btn ${step.cta || !endText ? 'p-btn-ghost' : 'p-btn-secondary'}`
+                      }
                       onClick={() => go(0)}
                     >
                       <RotateCcw {...ICON} size={16} />
@@ -1056,7 +1060,9 @@ export function Player({
                 </button>
               )}
               <button
-                class={`p-btn ${m.cta || fromCenter ? 'p-btn-ghost' : 'p-btn-secondary'}`}
+                class={
+                  fromCenter ? 'p-link p-link--muted' : `p-btn ${m.cta ? 'p-btn-ghost' : 'p-btn-secondary'}`
+                }
                 onClick={() => go(0)}
                 autoFocus={!m.cta && !fromCenter}
               >

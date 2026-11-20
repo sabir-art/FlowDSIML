@@ -211,6 +211,17 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       (await p.getByRole('link', { name: 'Retour au centre' }).getAttribute('href')) === '#/c/ml-exemple',
       'n° 4 : « Retour au centre »',
     );
+    // Retour Lead UX : boutons-liens jamais soulignés, « Recommencer » en lien texte discret de 14 px
+    const deco = await p
+      .locator('.p-end a.p-btn')
+      .evaluateAll((els) => els.map((e) => getComputedStyle(e).textDecorationLine));
+    ok(
+      deco.length >= 2 && deco.every((d) => d === 'none'),
+      `Lead UX : liens-boutons non soulignés (${deco})`,
+    );
+    const again = p.locator('.p-end').getByRole('button', { name: 'Recommencer' });
+    const st = await again.evaluate((e) => ({ cls: e.className, size: getComputedStyle(e).fontSize }));
+    ok(st.cls.includes('p-link--muted') && st.size === '14px', `Lead UX : « Recommencer » en lien de 14 px`);
     ok(
       opened[0]?.slug === 'ml-exemple' && opened[0]?.linkToken === 'jeton-alex-0001',
       'n° 4 : le centre est interrogé avec le jeton personnel gardé en session',

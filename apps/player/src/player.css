@@ -442,6 +442,27 @@ body {
 .p-btn {
   border-radius: var(--p-btn-radius, 999px);
 }
+/* Lien présenté en bouton (« Module suivant », « Retour au centre ») : jamais souligné */
+a.p-btn,
+a.p-btn:hover {
+  text-decoration: none;
+}
+/* Action secondaire discrète (« Recommencer » après un module du centre) : lien texte atténué */
+.p-link.p-link--muted {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--p-text) 72%, transparent);
+  text-decoration: none;
+}
+.p-link.p-link--muted:hover {
+  color: var(--p-text);
+  text-decoration: underline;
+}
 .p-progress {
   height: 8px;
   border-radius: 999px;

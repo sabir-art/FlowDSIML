@@ -78,12 +78,32 @@ const GROUP = 'Session du 12 novembre';
   await page.goto(`${APP}/#/demos/${DEMO}/share?tab=perso`);
   await page.locator('table.sh-links').waitFor();
   ok(
-    (await page.locator('table.sh-links .sh-cohort').first().textContent()) === 'Session du 5 novembre',
+    (await page.locator('table.sh-links .sh-cohort-cell').first().textContent()) === 'Session du 5 novembre',
     'n° 3 : groupe affiché sur la ligne du lien',
+  );
+  // Retour Lead UX : colonne « Groupe » propre ; les 3 actions de l'en-tête sur une ligne, à droite de l'aide
+  ok(
+    (await page.locator('table.sh-links thead th').allTextContents()).includes('Groupe'),
+    'Lead UX : colonne « Groupe » dans la liste des liens',
+  );
+  const acts = await page
+    .locator('.sh-perso-acts > .btn')
+    .evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
+  const helpBox = await page.locator('.sh-perso-head > p').boundingBox();
+  const actsBox = await page.locator('.sh-perso-acts').boundingBox();
+  ok(
+    acts.length === 3 && new Set(acts).size === 1 && actsBox.x >= helpBox.x + helpBox.width,
+    'Lead UX : Exporter, Importer et Nouveau lien sur une ligne, à droite de l’aide',
   );
   await page.getByRole('button', { name: 'Importer une liste (CSV)' }).click();
   const dlg = page.getByRole('dialog', { name: 'Importer une liste d’apprenants' });
   await dlg.waitFor();
+  ok(
+    (await dlg.getByRole('button', { name: /Choisir un fichier/ }).isVisible()) &&
+      !(await dlg.locator('input[type=file]').isVisible()) &&
+      (await dlg.locator('.sh-file-name').textContent()) === 'Aucun fichier choisi',
+    'Lead UX : bouton « Choisir un fichier » (champ natif masqué)',
+  );
   // Modèle
   const [tpl] = await Promise.all([
     page.waitForEvent('download'),
@@ -107,6 +127,24 @@ const GROUP = 'Session du 12 novembre';
     .setInputFiles({ name: 'groupe.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await dlg.getByLabel(/^Groupe/).fill(GROUP);
   await dlg.locator('.sh-import-preview table').waitFor();
+  ok((await dlg.locator('.sh-file-name').textContent()) === 'groupe.csv', 'Lead UX : nom du fichier affiché');
+  const cellCss = await dlg
+    .locator('.sh-import-preview tbody tr')
+    .first()
+    .evaluate((tr) => {
+      const [, , email, group] = tr.querySelectorAll('td');
+      return {
+        group: getComputedStyle(group).whiteSpace,
+        email: getComputedStyle(email).textOverflow,
+        title: email.getAttribute('title'),
+      };
+    });
+  ok(
+    cellCss.group === 'nowrap' &&
+      cellCss.email === 'ellipsis' &&
+      cellCss.title === 'camille@structure.example',
+    'Lead UX : groupe sur une ligne, e-mail tronqué avec infobulle',
+  );
   const status = await dlg.locator('.sh-import-preview [role=status]').textContent();
   ok(
     status.includes('2 liens prêts à être créés.') &&
@@ -225,6 +263,15 @@ const GROUP = 'Session du 12 novembre';
   await page.getByRole('menuitem', { name: GROUP }).click();
   await page.waitForTimeout(300);
   ok((await page.locator('.l13-table tbody tr').count()) === 2, 'n° 3 : filtre « Groupe » dans Apprenants');
+  // Retour Lead UX : indicateurs calculés sur le groupe, groupe nommé sous le titre
+  const kpiSum = (await page.locator('.kpis').first().locator('.fd-kpi__value').allTextContents())
+    .slice(0, 3)
+    .reduce((a, x) => a + Number(x), 0);
+  ok(kpiSum <= 2, `Lead UX : indicateurs limités au groupe (${kpiSum} apprenants comptés)`);
+  ok(
+    (await page.locator('.l13-scope').textContent()) === `Groupe\u202f: ${GROUP}`,
+    'Lead UX : groupe nommé sous le titre',
+  );
   ok(page.url().includes('groupe='), 'n° 3 : filtre gardé dans l’adresse');
   await page.getByRole('button', { name: 'Exporter CSV' }).click();
   const ex = page.getByRole('dialog', { name: 'Exporter en CSV' });

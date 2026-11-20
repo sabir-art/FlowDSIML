@@ -1623,7 +1623,8 @@
       "uploadError": "La voix off n’a pas pu être enregistrée. Réessayez.",
       "railIcon": "Voix off",
       "railIconAi": "Voix off générée par l’IA",
-      "nextStep": "Étape suivante"
+      "nextStep": "Étape suivante",
+      "removeLabel": "Supprimer la voix off"
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
@@ -1656,14 +1657,19 @@
         "untitled": "sans titre",
         "noBubble": "aucune bulle",
         "emptyBubble": "bulle vide"
-      }
+      },
+      "rename": "Renommer"
     },
     "guide": {
       "place": "Cliquez sur l’écran à l’endroit où l’apprenant doit cliquer, puis écrivez la consigne.",
       "write": "Écrivez la consigne de la bulle dans le panneau de droite.",
       "next": "Étape suivante sans bulle",
       "done": "Toutes les étapes ont une bulle. Relisez-les, puis publiez.",
-      "hide": "Masquer l’aide"
+      "hide": "Masquer l’aide",
+      "ready_one": "Bulle de l’étape {{n}} prête. Il reste {{count}} étape sans bulle.",
+      "ready_other": "Bulle de l’étape {{n}} prête. Il reste {{count}} étapes sans bulle.",
+      "left_one": "Il reste {{count}} étape sans bulle.",
+      "left_other": "Il reste {{count}} étapes sans bulle."
     },
     "addHotspot": "Ajouter un hotspot",
     "railQuizAdd": "Ajouter un quiz",
@@ -2061,7 +2067,9 @@
       "export": "Exporter les liens (CSV)",
       "exportAll": "Exporter les liens (CSV)",
       "exportFile": "liens-apprenants.csv",
-      "demoLink": "Lien de la démo"
+      "demoLink": "Lien de la démo",
+      "choose": "Choisir un fichier",
+      "noFile": "Aucun fichier choisi"
     },
     "training": {
       "title": "Formation",
@@ -3174,7 +3182,8 @@
       "exhausted": "Tentatives épuisées.",
       "left_one": "{{count}} tentative restante",
       "left_other": "{{count}} tentatives restantes"
-    }
+    },
+    "groupScope": "Groupe : {{group}}"
   },
   "center": {
     "title": "Centre de formation",

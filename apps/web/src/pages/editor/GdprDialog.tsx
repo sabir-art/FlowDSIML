@@ -70,6 +70,7 @@ export function GdprDialog({
   dataset = null,
   todo = [],
   onQuiz,
+  onRename,
 }: {
   open: boolean;
   steps: (Pick<StepRow, 'blurs' | 'element_meta'> &
@@ -89,6 +90,8 @@ export function GdprDialog({
   todo?: TodoItem[];
   /** Ouvre la page Quiz (ligne « quiz sans question »). */
   onQuiz?: () => void;
+  /** Titre par défaut : renommer la démo (focus sur son titre). */
+  onRename?: () => void;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
@@ -166,6 +169,10 @@ export function GdprDialog({
                       ) : line.kinds[0] === 'quizEmpty' && onQuiz ? (
                         <button type="button" className="mk-link-inline" onClick={onQuiz}>
                           {t('editor.todo.see')}
+                        </button>
+                      ) : line.kinds[0] === 'demoTitle' && onRename ? (
+                        <button type="button" className="mk-link-inline" onClick={onRename}>
+                          {t('editor.todo.rename')}
                         </button>
                       ) : null}
                     </li>

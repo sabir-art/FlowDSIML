@@ -410,6 +410,13 @@ export function LearnersPage() {
               })}
             </p>
           )}
+          {d && filters.group && (
+            <p className="page-head__sub l13-scope">
+              {t('learners.groupScope', {
+                group: filters.group === 'none' ? t('learners.noGroup') : filters.group,
+              })}
+            </p>
+          )}
         </div>
         {d && (
           <div className="page-head__actions">
@@ -554,7 +561,8 @@ function ListView(props: {
     const id = setTimeout(() => q !== f.q && setParam({ q: q.trim() ? q : null }), 250);
     return () => clearTimeout(id);
   }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
-  const k = kpis(rows, data.paths);
+  // Indicateurs : suivent la portée (formation, structure, groupe), pas le statut ni la recherche
+  const k = kpis(applyFilters(rows, { ...f, status: '', q: '', module: '' }), data.paths);
   const sorted = sortRows(filtered, props.sort, props.asc);
   const pages = Math.max(1, Math.ceil(sorted.length / PAGE));
   const page = Math.min(props.page, pages);

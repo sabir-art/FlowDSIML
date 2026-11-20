@@ -31,6 +31,7 @@ export function GuideBar({
     (s, i) => i !== index && s.kind === 'image' && bubbles(s.id).length === 0,
   );
   const image = step.kind === 'image';
+  const left = editor.steps.filter((s) => s.kind === 'image' && bubbles(s.id).length === 0).length;
   const msg =
     image && mine.length === 0
       ? t('editor.guide.place')
@@ -38,7 +39,9 @@ export function GuideBar({
         ? t('editor.guide.write')
         : nextIdx < 0
           ? t('editor.guide.done')
-          : null;
+          : image
+            ? t('editor.guide.ready', { n: index + 1, count: left })
+            : t('editor.guide.left', { count: left });
   const showNext = (!image || filled) && nextIdx >= 0;
   return (
     <div className="guide-bar" role="status">
