@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>États vides (lot L48-B) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* L48-B : composant d'état vide commun (page, compact, recherche), page Démos vide, badge d'offre et « Bientôt ». Données fictives. Spec : docs/ux/specs/l48b-etats-vides.md */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  body { background: var(--fd-color-bg); }
+  .e48 { max-width: 1320px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 32px; color: var(--fd-color-text); font-family: var(--fd-font-sans); }
+  .e48 h1 { margin: 0; font-size: 28px; } .e48 > p { margin: 0; max-width: 920px; color: var(--fd-color-text-muted); }
+  .e48-blk { display: flex; flex-direction: column; gap: 16px; } .e48-blk > h2 { margin: 0; font-size: 20px; }
+  .e48-lab { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+  .e48-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; align-items: start; }
+  .e48-scene { padding: 24px; border-radius: 20px; background: var(--fd-color-bg); border: 1px solid var(--fd-color-border); color: var(--fd-color-text); }
+  .e48-ico { width: 18px; height: 18px; flex: none; }
+
+  /* ===== fd-empty ===== */
+  .fd-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 48px 24px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); }
+  .fd-empty__pic { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary); margin-bottom: 8px; }
+  .fd-empty__pic svg { width: 32px; height: 32px; }
+  .fd-empty__t { margin: 0; font-size: 18px; font-weight: 700; }
+  .fd-empty__b { margin: 6px 0 0; max-width: 440px; font-size: 14px; line-height: 1.5; color: var(--fd-color-text-muted); }
+  .fd-empty__a { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+  .fd-empty--compact { flex-direction: row; text-align: left; align-items: center; gap: 12px; padding: 20px; border: 1px dashed var(--fd-color-border); background: transparent; }
+  .fd-empty--compact .fd-empty__pic { width: 40px; height: 40px; border-radius: 12px; margin: 0; flex: none; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+  .fd-empty--compact .fd-empty__pic svg { width: 20px; height: 20px; }
+  .fd-empty--compact .fd-empty__t { font-size: 14px; } .fd-empty--compact .fd-empty__b { font-size: 13px; }
+  .fd-empty--compact .fd-empty__a { margin: 0 0 0 auto; }
+  .fd-empty--search .fd-empty__pic { background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+  .fd-empty--bare { border: 0; background: transparent; padding: 32px 16px; }
+
+  /* Badges */
+  .e48-soon { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; border: 1px solid var(--fd-color-border); font-size: 11px; font-weight: 700; color: var(--fd-color-text-muted); }
+  .e48-plan { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 8px; border-radius: 999px; background: color-mix(in srgb, var(--fd-color-hero) 30%, var(--fd-color-surface)); color: var(--fd-color-text); font-size: 11px; font-weight: 700; }
+  .e48-plan svg { width: 12px; height: 12px; }
+  .e48-btnrow { display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); }
+  .e48-btnrow .fd-btn { justify-content: flex-start; gap: 8px; } .e48-btnrow .fd-btn .e48-plan, .e48-btnrow .fd-btn .e48-soon { margin-left: 8px; }
+  .e48-btnrow p { margin: 0; font-size: 13px; color: var(--fd-color-text-muted); }
+
+  /* Page Démos vide */
+  .e48-page { display: flex; flex-direction: column; gap: 20px; padding: 28px; border-radius: 16px; border: 1px solid var(--fd-color-border); background: var(--fd-color-bg); }
+  .e48-hd { display: flex; align-items: center; gap: 12px; } .e48-hd h3 { margin: 0; font-size: 28px; flex: 1; } .e48-hd p { margin: 2px 0 0; font-size: 14px; color: var(--fd-color-text-muted); }
+  .e48-check { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); font-size: 14px; }
+  .e48-check b { flex: 1; } .e48-bar { width: 140px; height: 6px; border-radius: 999px; background: var(--fd-color-surface-sunken); overflow: hidden; } .e48-bar i { display: block; width: 28%; height: 100%; background: var(--fd-color-primary); }
+  .e48-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 8px; width: 100%; max-width: 640px; }
+  .e48-tile { cursor: pointer; display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 12px; border: 1px solid var(--fd-color-border); background: var(--fd-color-bg); text-align: left; font-size: 13px; color: var(--fd-color-text-muted); }
+  .e48-tile b { font-size: 14px; color: var(--fd-color-text); } .e48-tile svg { width: 18px; height: 18px; color: var(--fd-color-primary); }
+  .e48-w { padding: 20px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); display: flex; flex-direction: column; gap: 12px; }
+  .e48-w h4 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; } .e48-w h4 .e48-soon { margin-left: auto; }
+  .e48-ph { width: 390px; padding: 16px; border-radius: 28px; border: 1px solid var(--fd-color-border); background: var(--fd-color-bg); display: flex; flex-direction: column; gap: 16px; color: var(--fd-color-text); }
+  .e48-ph .e48-tiles { grid-template-columns: 1fr; }
+  .e48-duo { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+  .e48-notes { margin: 0; padding-left: 20px; color: var(--fd-color-text-muted); display: grid; gap: 6px; font-size: 14px; max-width: 920px; }
+</style>
+</head>
+<body>
+<main class="e48">
+  <h1>L48-B : états vides</h1>
+  <p>Un seul composant, <code>fd-empty</code>, en trois variantes : page (pictogramme de l'objet, « Créez votre premier… », une phrase, une action), compacte (widget, panneau) et recherche sans résultat. La page Démos vide ne montre plus de grand bloc de statistiques vide. Une fonction hors offre porte un badge d'offre ; une fonction qui n'existe pas encore garde « Bientôt ». Données fictives.</p>
+
+  <section class="e48-blk" aria-labelledby="b1"><h2 id="b1">1. Les trois variantes</h2><div class="e48-grid" data-slot="variants"></div></section>
+  <section class="e48-blk" aria-labelledby="b2"><h2 id="b2">2. Page Démos vide (premier usage)</h2><div data-slot="demos"></div></section>
+  <section class="e48-blk" aria-labelledby="b3"><h2 id="b3">3. Widgets d'Analytics sans données, et offre ou « Bientôt »</h2><div class="e48-grid" data-slot="widgets"></div></section>
+  <section class="e48-blk" aria-labelledby="b4"><h2 id="b4">4. En sombre et sur mobile</h2><div class="e48-duo" data-slot="dark"></div></section>
+  <section class="e48-blk" aria-labelledby="b5"><h2 id="b5">Règles</h2>
+    <ul class="e48-notes">
+      <li>Titre à l'action : « Créez votre première démo », « Ajoutez votre premier terme ». Jamais « Aucun … » seul en titre de page : le constat passe dans la phrase.</li>
+      <li>Une phrase d'explication, une action principale, au plus une action secondaire (« Voir un exemple », « Lire le guide »). Sans droit d'édition : pas de bouton, phrase adaptée.</li>
+      <li>Pictogramme : icône Lucide de l'objet (32 px dans une pastille de 64 px). Pas d'illustration externe.</li>
+      <li>Badge d'offre (« Pro », « Business ») : la fonction existe mais l'offre de l'espace ne l'inclut pas ; bouton visible, clic vers « Offre et limites ». « Bientôt » : la fonction n'existe pas encore. Jamais l'un pour l'autre.</li>
+    </ul>
+  </section>
+</main>
+<script>
+  const P = {
+    monitor: '<rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/>',
+    folder: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    chart: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    route: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+    phone: '<rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/>',
+    plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+    puzzle: '<path d="M19.44 7.85c-.47.47-1.1.72-1.73.72H16a1 1 0 0 1-1-1V5.3c0-.64.25-1.27.72-1.73a2.5 2.5 0 1 0-3.44 0c.47.46.72 1.09.72 1.73v1.27a1 1 0 0 1-1 1H8.3c-.64 0-1.27-.25-1.73-.72a2.5 2.5 0 1 0 0 3.44c.46-.47 1.09-.72 1.73-.72H10a1 1 0 0 1 1 1v1.71c0 .64-.25 1.27-.72 1.73a2.5 2.5 0 1 0 3.44 0c-.47-.46-.72-1.09-.72-1.73V12.3a1 1 0 0 1 1-1h1.71c.64 0 1.27.25 1.73.72a2.5 2.5 0 1 0 0-3.44"/>',
+    image: '<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/>',
+    copy: '<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+    form: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 13H8M16 17H8M16 13h-2"/>',
+    gem: '<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
+    calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>'
+  };
+  const I = (n) => `<svg class="e48-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${P[n]}</svg>`;
+  const empty = ({ v = '', icon, t, b, a = '', h = 'h3' }) => `<div class="fd-empty${v ? ' fd-empty--' + v : ''}" role="status"><span class="fd-empty__pic" aria-hidden="true">${I(icon)}</span><div>${`<${h} class="fd-empty__t">${t}</${h}>`}<p class="fd-empty__b">${b}</p></div>${a ? `<div class="fd-empty__a">${a}</div>` : ''}</div>`;
+  const lab = (l, h) => `<div><span class="e48-lab">${l}</span>${h}</div>`;
+  document.querySelector('[data-slot="variants"]').innerHTML =
+    lab('Page : dossier vide', empty({ icon: 'folder', t: 'Rangez vos premières démos ici', b: 'Ce dossier est vide. Glissez une démo depuis la liste, ou créez-en une directement dans « Procédures ».', a: `<button class="fd-btn fd-btn--primary" type="button">${I('plus')}Nouvelle démo dans ce dossier</button>` })) +
+    lab('Recherche sans résultat', empty({ v: 'search', icon: 'search', t: 'Aucune démo ne correspond à « fiche usager »', b: 'Vérifiez l’orthographe, ou retirez un filtre (2 filtres actifs).', a: '<button class="fd-btn" type="button">Réinitialiser les filtres</button>' })) +
+    lab('Compacte : panneau ou widget', `<div class="e48-w"><h4>Parcours de formation</h4>${empty({ v: 'compact', icon: 'route', t: 'Créez votre premier parcours', b: 'Enchaînez plusieurs démos dans un ordre à suivre.', a: `<button class="fd-btn fd-btn--sm" type="button">${I('plus')}Créer</button>` })}</div>`);
+  const tiles = `<div class="e48-tiles"><button type="button" class="e48-tile" style="font:inherit">${I('puzzle')}<b>Capturer avec l’extension</b>Un clic, une étape.</button><button type="button" class="e48-tile" style="font:inherit">${I('image')}<b>Partir d’images</b>Des captures déjà faites.</button><button type="button" class="e48-tile" style="font:inherit">${I('copy')}<b>Partir d’un modèle</b>« Prise en main », « Procédure ».</button></div>`;
+  const demosPage = () => `<div class="e48-page"><div class="e48-hd"><div style="flex:1"><h3>Démos</h3><p>Vos parcours interactifs, prêts à partager.</p></div><button class="fd-btn fd-btn--primary fd-btn--lg" type="button">${I('plus')}Nouvelle démo</button></div>
+    <div class="e48-check"><b>Prise en main de votre espace · 2 étapes sur 7</b><span class="e48-bar" aria-hidden="true"><i></i></span><button class="fd-btn fd-btn--ghost fd-btn--sm" type="button">Afficher</button></div>
+    ${empty({ icon: 'monitor', h: 'h2', t: 'Créez votre première démo', b: 'Ouvrez votre logiciel métier et lancez une capture : chaque clic devient une étape, avec sa bulle d’explication.', a: `<button class="fd-btn fd-btn--primary" type="button">${I('plus')}Nouvelle démo</button><button class="fd-btn" type="button">Voir un exemple</button>` }).replace('</div></div>', `</div>${tiles}</div>`)}</div>`;
+  document.querySelector('[data-slot="demos"]').innerHTML = demosPage();
+  document.querySelector('[data-slot="widgets"]').innerHTML =
+    lab('Widget sans données sur la période', `<div class="e48-w"><h4>${I('chart')}Étape par étape</h4>${empty({ v: 'compact', icon: 'chart', t: 'Rien à analyser pour l’instant', b: 'Les étapes apparaissent dès les premières visites sur la période choisie.' })}</div>`) +
+    lab('Widget d’une fonction à venir', `<div class="e48-w"><h4>${I('phone')}Appareils et navigateurs<span class="e48-soon">Bientôt</span></h4>${empty({ v: 'compact', icon: 'phone', t: 'Bientôt disponible', b: 'Le type d’appareil n’est pas encore enregistré avec les visites.' })}</div>`) +
+    lab('Offre ou « Bientôt » sur un bouton', `<div class="e48-btnrow"><button class="fd-btn" type="button">${I('form')}Ajouter un formulaire de lead<span class="e48-plan">${I('gem')}Pro</span></button><p>Existe, non inclus dans l’offre Gratuit : le bouton reste actif et ouvre « Offre et limites » (« Demander l’accès à la DSI »).</p><button class="fd-btn" type="button" aria-disabled="true" style="opacity:.6">${I('calendar')}Choisir des dates<span class="e48-soon">Bientôt</span></button><p>N’existe pas encore : visible, désactivé (aria-disabled), infobulle « Bientôt disponible ».</p></div>`);
+  document.querySelector('[data-slot="dark"]').innerHTML =
+    `<div style="flex:1;min-width:640px">${lab('Sombre', `<div class="e48-scene" data-theme="dark">${demosPage()}</div>`)}</div>` +
+    lab('Mobile (390 px)', `<div class="e48-ph">${empty({ icon: 'book', t: 'Ajoutez votre premier terme', b: 'L’ancien mot, le nouveau et une définition courte : ils seront expliqués dans les démos.', a: `<button class="fd-btn fd-btn--primary" type="button">${I('plus')}Ajouter un terme</button><button class="fd-btn" type="button">Importer un CSV</button>` })}${empty({ v: 'compact', icon: 'chart', t: 'Rien à analyser pour l’instant', b: 'Revenez après les premières visites.' })}</div>`);
+</script>
+</body>
+</html>
