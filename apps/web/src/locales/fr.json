@@ -4315,6 +4315,21 @@
       "createError": "La démo n’a pas pu être créée. Réessayez.",
       "gdpr_one": "Textes générés par IA dans 1 étape, à relire",
       "gdpr_other": "Textes générés par IA dans {{count}} étapes, à relire"
+    },
+    "dataset": {
+      "open": "Générer des données fictives",
+      "title": "Générer des données fictives",
+      "columns": "Décrivez les colonnes",
+      "placeholder": "structure, nombre de jeunes suivis, taux d’entrée en formation",
+      "rows": "Nombre de lignes",
+      "generate": "Générer",
+      "busy": "Génération des données en cours…",
+      "count": "{{count}} lignes, {{cols}} colonnes (10 premières affichées)",
+      "caption": "Aperçu du jeu de données généré",
+      "invented": "Données inventées : aucun nom ni identifiant de personne.",
+      "use": "Utiliser ce jeu de données",
+      "personal": "Un jeu de données ne doit contenir ni nom, ni e-mail, ni identifiant de personne.",
+      "name": "Données fictives"
     }
   }
 }

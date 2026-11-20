@@ -355,3 +355,17 @@
 .ai-gen-ok {
   margin-left: 6px;
 }
+/* L30-06 : données fictives */
+.ai-dataset h3 {
+  margin: 0;
+  font-size: 14px;
+}
+.ds-start {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ai-ds-table td,
+.ai-ds-table th {
+  font-size: 13px;
+}

@@ -4315,6 +4315,21 @@
       "createError": "The demo could not be created. Try again.",
       "gdpr_one": "AI-generated texts in 1 step, to review",
       "gdpr_other": "AI-generated texts in {{count}} steps, to review"
+    },
+    "dataset": {
+      "open": "Generate sample data",
+      "title": "Generate sample data",
+      "columns": "Describe the columns",
+      "placeholder": "team, number of young people followed, training entry rate",
+      "rows": "Number of rows",
+      "generate": "Generate",
+      "busy": "Generating the data…",
+      "count": "{{count}} rows, {{cols}} columns (first 10 shown)",
+      "caption": "Preview of the generated dataset",
+      "invented": "Invented data: no person’s name or identifier.",
+      "use": "Use this dataset",
+      "personal": "A dataset must not contain any name, email or person identifier.",
+      "name": "Sample data"
     }
   }
 }

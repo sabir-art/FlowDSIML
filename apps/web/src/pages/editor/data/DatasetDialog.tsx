@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Database, Info, TriangleAlert, Upload, X } from 'lucide-react';
+import { Database, Info, TriangleAlert, Upload, WandSparkles, X } from 'lucide-react';
 import { readDataset, type CsvEncoding, type CsvSeparator, type DatasetError } from '@flowdsiml/core';
 import type { DatasetBinding } from '@flowdsiml/manifest';
 import { Button } from '@flowdsiml/ui';
@@ -8,6 +8,9 @@ import type { DemoEditor } from '../useDemoEditor';
 import { asOps, htmlSelection, shortTrail } from '../html/htmlModel';
 import { DATASET_OPEN } from '../html/ChartFields';
 import { removeDataset, saveDataset, useDataset } from './datasetStore';
+import { AiDataset } from '../../../components/ai/AiDataset';
+import { asSettings } from '../types';
+import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
 
@@ -52,6 +55,9 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
   const [rowMode, setRowMode] = useState<'link' | 'first'>('first');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // L30-06 : génération de données fictives (Assistance IA)
+  const [generating, setGenerating] = useState(false);
+  const { current: ws } = useWorkspace();
 
   useEffect(() => {
     const on = (e: Event) => {
@@ -241,14 +247,47 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
                   : t('editor.dataset.fileSaved', { rows: draft.rows.length, cols: draft.columns.length })}
               </span>
             </div>
-            <Button size="sm" disabled={readOnly} onClick={() => file.current?.click()}>
-              {t('editor.dataset.replace')}
-            </Button>
+            <div className="ds-start">
+              <Button size="sm" disabled={readOnly} onClick={() => file.current?.click()}>
+                {t('editor.dataset.replace')}
+              </Button>
+              {ws && !readOnly && !generating && (
+                <Button size="sm" icon={<WandSparkles />} onClick={() => setGenerating(true)}>
+                  {t('ai.dataset.open')}
+                </Button>
+              )}
+            </div>
           </div>
         ) : (
-          <Button icon={<Upload />} disabled={readOnly} onClick={() => file.current?.click()}>
-            {t('editor.dataset.import')}
-          </Button>
+          <div className="ds-start">
+            <Button icon={<Upload />} disabled={readOnly} onClick={() => file.current?.click()}>
+              {t('editor.dataset.import')}
+            </Button>
+            {ws && !readOnly && !generating && (
+              <Button icon={<WandSparkles />} onClick={() => setGenerating(true)}>
+                {t('ai.dataset.open')}
+              </Button>
+            )}
+          </div>
+        )}
+        {generating && ws && (
+          <AiDataset
+            ws={ws.id}
+            lang={asSettings(editor.demo!.settings).locale ?? 'fr'}
+            onCancel={() => setGenerating(false)}
+            onUse={(d) => {
+              setGenerating(false);
+              setError(null);
+              setDraft({
+                name: t('ai.dataset.name'),
+                columns: d.columns,
+                rows: d.rows,
+                separator: null,
+                encoding: null,
+              });
+              setBinds({});
+            }}
+          />
         )}
         {error && (
           <div className="fd-alert fd-alert--danger" role="alert">
