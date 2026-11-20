@@ -39,7 +39,7 @@
 | | **Image** (`image`) | Image | Remplacer la capture |
 | Apparence | **Design** (`palette`) | Design | `ThemePanel` |
 | Collaborer | **Commentaires** (`message-square`) | Commentaires, 400 px (§5) | `CommentsPanel` ; un point `primary` de 8 px si un commentaire est non lu |
-| | **Assistant** (`sparkles`) | Assistant, 400 px (L43) | Suggestions (ampoule actuelle de l'en-tête) |
+| | **Assistant** (`sparkles`) | Assistant existant, en surimpression | Les Suggestions (ampoule) passent dans le menu Plus (corrigé le 20 novembre) |
 | Bas du rail | **Réglages** (`settings`) | Réglages de la démo | `SettingsTab`, dont les notes du présentateur |
 
 - Les outils sans objet pour l'étape ne sont pas masqués. Ils sont désactivés (`aria-disabled`), avec la raison dans l'infobulle. Exemples :
@@ -83,7 +83,7 @@
   - retour ;
   - titre (15 px 600, modifiable au clic, comme aujourd'hui) ;
   - **état en texte**, sans pastille : « Enregistré » ou « Enregistrement… », puis « · Non publié » s'il y a des modifications non publiées. 13 px `text-muted` ; « Non publié » en `warning` avec un point de 8 px.
-- **Au centre** : Annuler et Rétablir (boutons à icône), puis le segmenté Édition et Aperçu.
+- **À droite de l'état, avant le segmenté** : Annuler et Rétablir (boutons à icône), puis le segmenté Édition et Aperçu. (Corrigé le 20 novembre : ils sont placés près du segmenté plutôt qu'au centre, pour réduire la distance avec les autres commandes, d'après la loi de Fitts.)
 - **À droite** :
   - **Plus** (`dots`), qui ouvre un menu :
     - Présenter ; Diffuser ; Exporter ; Traduire ; Rédiger avec l'IA ; Quiz ; Rechercher et remplacer ;
