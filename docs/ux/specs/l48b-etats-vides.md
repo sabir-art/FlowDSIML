@@ -85,7 +85,7 @@ Deux situations à ne jamais confondre :
 | La fonction **n'existe pas encore** | Badge « Bientôt » (règle actuelle) | Visible, `aria-disabled="true"`, infobulle « Bientôt disponible » (L44). Jamais masquée. |
 
 - **Quota proche** (80 % ou plus) : une alerte discrète `warning` dans le panneau concerné (médiathèque, assistant IA), « Bientôt atteinte : 412 sur 500 requêtes ce mois-ci », avec le lien « Voir l'utilisation ».
-- `PlanFormsWarning` (formulaire non publié en offre Gratuit) **disparaît** : le formulaire de lead est disponible pour tous les espaces. Le gate `lead_forms` du plan doit être ouvert côté serveur (dev, à confirmer avec le chef de projet).
+- **Confirmé par le chef de projet (20 novembre)** : il n'y a plus d'offres, et **toutes les fonctions sont ouvertes à tous les espaces**. Cela inclut le formulaire de lead, dont la mention RGPD reste obligatoire. `PlanFormsWarning` disparaît.
 - Les chiffres et dates viennent de l'état lu par l'interface (quotas) ; ils ne sont jamais écrits en dur.
 
 ## 6. Recette

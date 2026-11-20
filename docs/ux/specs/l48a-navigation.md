@@ -134,6 +134,8 @@ Elle remplace le filtre « Dossier » de la barre de liste (L40) au-dessus de 1 
   - Le texte de la pastille porte l'état, pas seulement la couleur.
 - **Sans limite** : « Sans limite », sans jauge.
 - **Accessibilité** : chaque jauge a `aria-valuenow`, `aria-valuemin`, `aria-valuemax` et un nom « {carte} : {n} % utilisés ».
+- **Fonctions ouvertes à tous** (confirmé par le chef de projet, 20 novembre) : plus aucune fonction n'est réservée à une offre. Le dev retire les gates d'offre dans ce paquet : `lead_forms`, `share_rules`, `remove_branding` et tout autre test sur `plan_code` qui masque ou bloque une fonction, côté interface comme côté serveur (politiques, RPC). Le formulaire de lead garde sa mention RGPD obligatoire.
+- **Seules limites restantes** : les quotas techniques (IA, voix, stockage, membres, démos publiées) et les plafonds anti-abus (fréquence des envois, taille des fichiers). Les plafonds anti-abus ne sont pas affichés dans « Utilisation » ; en cas de blocage, le message dit pourquoi et quand réessayer.
 - **Ailleurs dans l'app** : les messages de limite (médiathèque pleine, quota IA atteint, limite de démos publiées) renvoient vers cette page et vers « Demander plus à la DSI ». Plus aucun « Voir les plans » ni « Changer de plan ».
 
 ## 7. Recette
@@ -150,5 +152,6 @@ Elle remplace le filtre « Dossier » de la barre de liste (L40) au-dessus de 1 
 - Barre de liste : Créé par, Date de création. Le Tri passe en icône quand la colonne est ouverte, et reste une seule ligne à 1 440 px (mesure L40).
 - Paramètres : 5 groupes, fil d'Ariane sur chaque page, `/settings/soon` redirigé, badges « Bientôt » à leur place.
 - Support : « Contacter la DSI » absent sans lien configuré, présent après saisie.
+- Fonctions ouvertes : un espace dont `plan_code` vaut `free` publie un formulaire de lead et des règles de partage, sans avertissement ni blocage.
 - Utilisation : aucun prix, aucun nom d'offre, aucun bouton de paiement (recherche de « €», « plan », « facturation » dans `fr.json`) ; jauges à 50, 80 et 100 % ; `/settings/plans` redirige.
 - e2e : `l40-barres`, `dashboard`, `settings`, `navigation` mis à jour (sélecteurs de la barre latérale).
