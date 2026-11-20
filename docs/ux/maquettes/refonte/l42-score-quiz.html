@@ -27,15 +27,18 @@
   /* ===== Composant proposé : carte de résultat du lecteur (p-quiz-result) ===== */
   .qr { background: var(--fd-color-surface); color: var(--fd-color-text); border-radius: 24px; box-shadow: var(--fd-shadow-md); padding: 28px 24px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0; }
   /* Bloc score : chiffre, barre fine, seuil en texte. Pas de cercle, pas de marqueur. */
-  .qs { width: min(300px, 100%); display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .qs__num { margin: 0; font-size: 52px; line-height: 1; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-  .qs__num small { font-size: .55em; font-weight: 700; margin-left: .08em; }
-  .qs__bar { width: 100%; height: 8px; border-radius: 999px; background: color-mix(in srgb, var(--fd-color-text) 12%, transparent); overflow: hidden; }
-  .qs__bar > i { display: block; height: 100%; border-radius: 999px; background: #5b6675; }
-  .is-pass .qs__bar > i { background: var(--fd-color-primary); }
+  /* Anneau propre : piste et arc de 12 px, bouts arrondis, seuil = encoche dans la piste (pas de trait), seuil écrit dessous. */
+  .qs { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .qs__ring { position: relative; width: 168px; height: 168px; }
+  .qs__ring svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .qs__track { fill: none; stroke: color-mix(in srgb, var(--fd-color-text) 10%, transparent); stroke-width: 12; stroke-linecap: butt; }
+  .qs__arc { fill: none; stroke: #5b6675; stroke-width: 12; stroke-linecap: round; }
+  .is-pass .qs__arc { stroke: var(--fd-color-primary); }
+  [data-theme='dark'] .qs__arc { stroke: #A9B3BF; }
+  [data-theme='dark'] .is-pass .qs__arc { stroke: var(--fd-color-primary); }
+  .qs__num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; margin: 0; font-size: 44px; line-height: 1; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .qs__num small { font-size: .5em; font-weight: 700; margin: .35em 0 0 .08em; }
   .qs__meta { margin: 0; font-size: 14px; color: var(--fd-color-text-muted); }
-  [data-theme='dark'] .qs__bar > i { background: #A9B3BF; }
-  [data-theme='dark'] .is-pass .qs__bar > i { background: var(--fd-color-primary); }
   /* Reste de la carte : inchangé (badge, titre, phrase de score, récapitulatif, boutons) */
   .qb { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; }
   .qb svg { width: 16px; height: 16px; }
@@ -51,10 +54,11 @@
   [data-theme='dark'] .ok { color: #9fd36a; } [data-theme='dark'] .ko { color: #f08aa6; }
   .acts { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; }
   .lnk { margin-top: 10px; font-weight: 600; color: var(--fd-color-primary); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; }
-  .phone { width: 390px; padding: 16px; border-radius: 28px; background: var(--fd-color-bg); border: 1px solid var(--fd-color-border); }
-  .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
-  .phone .qr { padding: 24px 16px 20px; }
-  .phone .qs__num { font-size: 48px; }
+  .mob { width: 390px; padding: 16px; border-radius: 28px; background: var(--fd-color-bg); border: 1px solid var(--fd-color-border); }
+  .mobs { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+  .mob .qr { padding: 24px 16px 20px; }
+  .mob .qs__ring { width: 144px; height: 144px; }
+  .mob .qs__num { font-size: 38px; }
   .notes { margin: 0; padding-left: 20px; color: var(--fd-color-text-muted); display: grid; gap: 6px; font-size: 14px; max-width: 900px; }
   @media (max-width: 1100px) { .row { grid-template-columns: 1fr; } }
 </style>
@@ -62,7 +66,7 @@
 <body>
 <main class="l42">
   <h1>L42 : score du quiz</h1>
-  <p>Le cercle et son trait noir de seuil sont remplacés par un grand score en chiffres, une barre horizontale fine sans marqueur, puis le seuil écrit en texte. Le badge, le titre et la phrase de score ne changent pas : la réussite ne dépend jamais de la couleur. Données fictives.</p>
+  <p>Le cercle est conservé mais redessiné : piste et arc de même épaisseur, bouts arrondis, seuil marqué par une simple encoche dans la piste (plus de trait noir) et écrit en texte sous le cercle. Le badge, le titre et la phrase de score ne changent pas : la réussite ne dépend jamais de la couleur. Données fictives.</p>
 
   <section class="sec" aria-labelledby="s0">
     <h2 id="s0">Avant</h2>
@@ -76,8 +80,7 @@
   <template id="tpl-pass">
     <article class="qr is-pass" aria-labelledby="__ID__">
       <div class="qs">
-        <p class="qs__num"><span class="sr-only">Votre score : </span>85<small>&#8239;%</small></p>
-        <div class="qs__bar" aria-hidden="true"><i style="width:85%"></i></div>
+        <div class="qs__ring" data-score="85" data-th="70"><svg viewBox="0 0 168 168" aria-hidden="true" focusable="false"></svg><p class="qs__num"><span class="sr-only">Votre score : </span>85<small>&#8239;%</small></p></div>
         <p class="qs__meta">Seuil de validation&#8239;: 70&#8239;%</p>
       </div>
       <span class="qb is-pass"><i data-icon="award"></i>Module validé</span>
@@ -91,8 +94,7 @@
   <template id="tpl-fail">
     <article class="qr" aria-labelledby="__ID__">
       <div class="qs">
-        <p class="qs__num"><span class="sr-only">Votre score : </span>55<small>&#8239;%</small></p>
-        <div class="qs__bar" aria-hidden="true"><i style="width:55%"></i></div>
+        <div class="qs__ring" data-score="55" data-th="70"><svg viewBox="0 0 168 168" aria-hidden="true" focusable="false"></svg><p class="qs__num"><span class="sr-only">Votre score : </span>55<small>&#8239;%</small></p></div>
         <p class="qs__meta">Seuil de validation&#8239;: 70&#8239;%</p>
       </div>
       <span class="qb is-fail"><i data-icon="refresh"></i>Pas encore validé</span>
@@ -105,8 +107,7 @@
   <template id="tpl-zero">
     <article class="qr" aria-labelledby="__ID__">
       <div class="qs">
-        <p class="qs__num"><span class="sr-only">Votre score : </span>0<small>&#8239;%</small></p>
-        <div class="qs__bar" aria-hidden="true"><i style="width:0"></i></div>
+        <div class="qs__ring" data-score="0" data-th="70"><svg viewBox="0 0 168 168" aria-hidden="true" focusable="false"></svg><p class="qs__num"><span class="sr-only">Votre score : </span>0<small>&#8239;%</small></p></div>
         <p class="qs__meta">Seuil de validation&#8239;: 70&#8239;%</p>
       </div>
       <span class="qb is-fail"><i data-icon="refresh"></i>Pas encore validé</span>
@@ -127,17 +128,18 @@
   </section>
   <section class="sec" aria-labelledby="s3">
     <h2 id="s3">Après, sur mobile (390 px)</h2>
-    <div class="phones" data-slot="mobile"></div>
+    <div class="mobs" data-slot="mobile"></div>
   </section>
 
   <section class="sec" aria-labelledby="s4">
     <h2 id="s4">Règles</h2>
     <ul class="notes">
-      <li>Le chiffre du score est toujours de la couleur du texte. La couleur de la barre ne fait que doubler le badge : prune si validé, ardoise sinon.</li>
-      <li>La barre n'a ni repère, ni graduation, ni trait. Le seuil n'existe qu'en texte : « Seuil de validation : 70 % ».</li>
-      <li>La barre est masquée aux lecteurs d'écran. Le chiffre est lu « Votre score : 85 % », puis le seuil, le badge, le titre et la phrase de score (zone d'état).</li>
-      <li>À 0 %, seule la piste de la barre est visible. Le chiffre « 0 % » reste en grand ; on n'affiche jamais « — ».</li>
-      <li>Sans animation de remplissage avec la réduction des animations ; sinon, un remplissage de 600 ms.</li>
+      <li>Anneau de 168 px (144 px sous 480 px) : piste et arc de 12 px, arc aux bouts arrondis, départ en haut, sens horaire. Aucun trait, aucune ombre, aucun dégradé.</li>
+      <li>Seuil : une encoche de 6 px <b>découpée dans la piste</b>, de la couleur du fond de la carte. Elle n'est visible que tant que le score ne l'a pas atteinte, car l'arc passe par-dessus. Le seuil est toujours écrit dessous : « Seuil de validation : 70 % ».</li>
+      <li>Le chiffre est toujours de la couleur du texte ; l'arc est prune si validé, ardoise sinon. Le résultat est porté par le badge et le titre, jamais par la couleur seule.</li>
+      <li>0 % : aucun arc (pas de point dû au bout arrondi). 100 % : cercle plein.</li>
+      <li>L'anneau est masqué aux lecteurs d'écran ; le chiffre est lu « Votre score : 85 % », puis le seuil.</li>
+      <li>Arc animé de 0 au score en 600 ms ; aucune animation avec la réduction des animations.</li>
     </ul>
   </section>
 </main>
@@ -147,10 +149,17 @@
     ['pass', 'fail', 'zero'].forEach((k, n) => {
       const html = document.getElementById('tpl-' + k).innerHTML.replace(/__ID__/g, `${slot}-${k}`);
       const label = ['Validé (85 %)', 'Non validé (55 %)', '0 %'][n];
-      el.insertAdjacentHTML('beforeend', wrap ? `<div class="phone"><span class="lab">${label}</span>${html}</div>` : `<div><span class="lab" style="display:block;margin-bottom:10px">${label}</span>${html}</div>`);
+      el.insertAdjacentHTML('beforeend', wrap ? `<div class="mob"><span class="lab">${label}</span>${html}</div>` : `<div><span class="lab" style="display:block;margin-bottom:10px">${label}</span>${html}</div>`);
     });
   };
   fill('light'); fill('dark'); fill('mobile', true);
+  document.querySelectorAll('.qs__ring').forEach((el) => {
+    const score = +el.dataset.score, th = +el.dataset.th, R = 74, C = 2 * Math.PI * R, G = 6;
+    const t = (th / 100) * C;
+    const track = `<circle class="qs__track" cx="84" cy="84" r="${R}" stroke-dasharray="${t - G / 2} ${G} ${C}" />`;
+    const arc = score > 0 ? `<circle class="qs__arc" cx="84" cy="84" r="${R}" stroke-dasharray="${score >= 100 ? C : (score / 100) * C} ${C}" />` : '';
+    el.querySelector('svg').innerHTML = track + arc;
+  });
 </script>
 </body>
 </html>
