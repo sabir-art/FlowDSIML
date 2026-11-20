@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intégrations (lot L48-F) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<link rel="stylesheet" href="ui2.css">
+<script src="ui2.js"></script>
+<style>
+  /* L48-F, composants §17. Spec : docs/ux/specs/l48f-integrations.md. Données fictives ; logos officiels copiés de apps/web/src/assets/brands (img/brands/CREDITS.md). */
+  .q-wrap { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; }
+  .q-snav { display: flex; flex-direction: column; gap: 2px; padding-top: 4px; }
+  .q-snav b { margin: 16px 12px 6px; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--fd-color-text-muted); } .q-snav b:first-child { margin-top: 0; }
+  .q-snav a { display: flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; font-size: 14px; color: var(--fd-color-text); text-decoration: none; }
+  .q-snav a[aria-current] { background: var(--fd-color-surface); font-weight: 600; }
+  .i-main { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+  .i-card { background: var(--fd-color-surface); border-radius: 20px; padding: 8px 28px; }
+  .i-grp { margin: 20px 0 4px; font-size: 12px; font-weight: 600; color: var(--fd-color-text-muted); }
+  .i-row { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 16px; align-items: center; min-height: 72px; padding: 12px 0; border-top: 1px solid var(--fd-color-border); text-decoration: none; color: inherit; box-sizing: border-box; }
+  .i-grp + .i-row { border-top: 0; }
+  .i-lg { display: grid; place-items: center; width: 32px; height: 32px; color: var(--fd-color-text-muted); } .i-lg img { width: 28px; height: 28px; }
+  .i-row b { display: block; font-size: 15px; font-weight: 600; } .i-row span.t small { display: block; margin-top: 2px; font-size: 13px; color: var(--fd-color-text-muted); line-height: 1.4; }
+  .i-row .st { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; } .i-row .st svg { color: var(--fd-color-text-muted); }
+  .i-row .soon { font-size: 13px; color: var(--fd-color-text-muted); }
+  .i-row[aria-disabled='true'] b { color: var(--fd-color-text-muted); font-weight: 500; }
+  /* Logos de marque jamais recolorés ni estompés (img/brands/CREDITS.md) */
+  .i-row.lnk { margin: 0 -12px; padding: 12px; border-radius: 12px; } .i-row.lnk.h { background: var(--fd-color-surface-sunken); }
+  .i-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--fd-color-success, #1c7a4a); }
+  .i-warn { color: var(--fd-color-warning, #8a5300) !important; }
+  .i-a { all: unset; cursor: pointer; font-weight: 600; color: var(--fd-color-primary); }
+  .i-need { margin: 0; font-size: 14px; color: var(--fd-color-text-muted); }
+  .i-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 0; font-size: 14px; color: var(--fd-color-text-muted); }
+  .w-tbl { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .w-tbl th { text-align: left; font-size: 13px; font-weight: 500; color: var(--fd-color-text-muted); padding: 0 16px 12px 0; }
+  .w-tbl td { height: 64px; padding-right: 16px; border-top: 1px solid var(--fd-color-border); } .w-tbl td small { display: block; font-size: 13px; color: var(--fd-color-text-muted); }
+  .w-st { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+  .w-st i { width: 8px; height: 8px; border-radius: 50%; background: var(--fd-color-success, #1c7a4a); } .w-st.p i { background: var(--fd-color-warning, #b26b00); }
+  .u2-ph .i-card { padding: 4px 18px; }
+</style>
+</head>
+<body>
+<main class="u2">
+  <header class="u2-head"><div><small>Lot L48-F</small><h1>Intégrations</h1><p>Une liste par catégorie, l’état à droite de chaque ligne. Une seule connexion est disponible aujourd’hui, les webhooks : elle est en tête, les autres disent « Bientôt » sans s’effacer.</p></div></header>
+  <div id="a1"></div>
+  <section class="u2-sec"><h2>Une catégorie, les connexions actives, la page Webhooks</h2><div class="u2-row" id="a2" style="align-items:flex-start"></div></section>
+  <section class="u2-sec"><h2>En sombre et sur mobile</h2><div class="u2-row" id="a3" style="align-items:flex-start"></div></section>
+</main>
+<script>
+  const { I, app, pair } = U2;
+  const B = 'img/brands/';
+  const ROW = {
+    hooks: { n: 'Webhooks', d: 'Un appel HTTPS signé à chaque événement choisi.', ic: 'braces', live: true },
+    zapier: { n: 'Zapier', d: 'Relier TutoClick à vos autres applications, sans code.', lg: 'zapier.svg' },
+    keys: { n: 'Clés d’API', d: 'Lisez les analytics et pilotez les démos depuis vos scripts.', ic: 'code' },
+    remote: { n: 'Pilotage du player', d: 'Ouvrir, aller à une étape, écouter les événements depuis la page hôte.', ic: 'route' },
+    slack: { n: 'Slack', d: 'Recevoir les nouveaux leads et les commentaires dans un canal.', lg: 'slack.svg' },
+    teams: { n: 'Microsoft Teams', d: 'Notifications de leads et de commentaires dans une équipe.', lg: 'microsoft-teams.svg' },
+    mail: { n: 'Outils d’e-mailing', d: 'Ajouter les leads à une liste ou déclencher un scénario d’e-mails.', ic: 'at', extra: ' En attendant, un webhook peut alimenter ces outils : <button class="i-a" type="button">Utiliser un webhook</button>' },
+    ga: { n: 'Google Analytics', d: 'Envoyer les événements du lecteur à votre propriété GA4.', lg: 'google-analytics.svg' },
+    matomo: { n: 'Matomo', d: 'Mesure d’audience hébergée par votre organisation.', lg: 'matomo.svg' },
+    crm: { n: 'CRM', d: 'Synchroniser les leads avec votre outil de relation usagers.', ic: 'users' }
+  };
+  const CATS = [['Automatisation', ['hooks', 'zapier', 'keys', 'remote']], ['Communication', ['slack', 'teams', 'mail']], ['Mesure d’audience', ['ga', 'matomo']], ['Relation usagers', ['crm']]];
+  const row = (k, o = {}) => {
+    const r = ROW[k], lg = `<span class="i-lg" aria-hidden="true">${r.lg ? `<img src="${B}${r.lg}" alt="">` : I(r.ic, 20)}</span>`;
+    if (r.live && o.n) return `<a class="i-row lnk${o.h ? ' h' : ''}" href="#">${lg}<span class="t"><b>${r.n}</b><small>${r.d}${o.p ? '<br><span class="i-warn">1 en pause après des échecs</span>' : ''}</small></span><span class="st"><i class="i-dot" aria-hidden="true"></i>${o.n} actifs${I('right', 18)}</span></a>`;
+    if (r.live) return `<div class="i-row">${lg}<span class="t"><b>${r.n}</b><small>${r.d}</small></span><button class="fd-btn" type="button">Connecter</button></div>`;
+    return `<div class="i-row" aria-disabled="true">${lg}<span class="t"><b>${r.n}</b><small>${r.d}${r.extra || ''}</small></span><span class="soon">Bientôt</span></div>`;
+  };
+  const SEG = ['Toutes', 'Connectées', 'Communication', 'Mesure d’audience', 'Automatisation', 'Relation usagers'];
+  const seg = (cur) => `<span class="fd-segmented" role="group" aria-label="Catégorie">${SEG.map((s, i) => `<button type="button" aria-pressed="${i === cur}">${s}</button>`).join('')}</span>`;
+  const snav = `<nav class="q-snav" aria-label="Sections des paramètres"><b>Espace</b><a href="#">Général</a><a href="#">Équipe</a><a href="#">Utilisation</a><a href="#">Sécurité</a><a href="#" aria-current="page">Intégrations</a><a href="#">Confidentialité</a><b>Marque</b><a href="#">Thème et couleurs</a><a href="#">Page publique</a><b>Contenu</b><a href="#">Variables</a><a href="#">Glossaire</a></nav>`;
+  const itop = (t, sub, crumb = 'Paramètres › Espace', btn = '') => `<div class="u2-top"><div style="flex:1"><p class="u2-crumb">${crumb}</p><h1>${t}</h1>${sub ? `<p>${sub}</p>` : ''}</div>${btn}</div>`;
+  const need = `<p class="i-need">Besoin d’une autre connexion ? <a class="i-a" href="#">Faire une demande à la DSI</a></p>`;
+  const all = (o) => `<div class="i-card">${CATS.map(([c, ks]) => `<h3 class="i-grp">${c}</h3>${ks.map((k) => row(k, k === 'hooks' ? o : {})).join('')}`).join('')}</div>`;
+  const page = (body) => `<div class="q-wrap">${snav}<div class="i-main">${body}</div></div>`;
+  const main = page(`${itop('Intégrations', 'Envoyez les événements de vos démos vers vos outils.')}${seg(0)}${all({ n: 2, p: 1, h: 1 })}${need}`);
+  document.getElementById('a1').outerHTML = pair('Paramètres › Intégrations', app('settings', main), 'img/avant/l48f-integrations.png', 'Intégrations actuelles : tableau des webhooks, puis une grille de cartes « Bientôt »', 'Webhooks est une ligne parmi les autres, en tête d’« Automatisation » ; « 2 actifs » mène à sa page. Plus de badge « Bientôt » sur chaque carte : un mot gris à droite.');
+  const narrow = (inner) => `<div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:20px">${inner}</div>`;
+  const comm = narrow(`${seg(2)}<div class="i-card">${['slack', 'teams', 'mail'].map((k) => row(k)).join('')}</div>`);
+  const conn = narrow(`${seg(1)}<div class="i-card"><div class="i-empty" role="status">${I('unlink', 32)}<span>Aucune connexion active</span><button class="i-a" type="button">Ajouter un webhook</button></div></div><p class="i-need">Besoin d’une autre connexion ? <a class="i-a" href="#">Renseigner le lien du support</a></p>`);
+  const hooks = `<div style="flex:1;min-width:900px">${app('settings', `${itop('Webhooks', 'Un appel HTTPS signé à chaque événement choisi.', 'Paramètres › Intégrations', `<button class="fd-btn fd-btn--primary" type="button">${I('plus')}Ajouter un webhook</button>`)}<section class="u2-card"><table class="w-tbl"><thead><tr><th>Adresse</th><th>Événements</th><th>État</th><th>Dernier envoi</th><th></th></tr></thead><tbody>
+    <tr><td>Tableur des leads<small>hooks.example.com/leads</small></td><td>Lead reçu</td><td><span class="w-st"><i></i>Actif</span></td><td>il y a 2 h</td><td style="text-align:right">${I('dots', 18)}</td></tr>
+    <tr><td>Suivi formation<small>automate.example.org/tc</small></td><td>Module validé, démo terminée</td><td><span class="w-st"><i></i>Actif</span></td><td>hier</td><td style="text-align:right">${I('dots', 18)}</td></tr>
+    <tr><td>Ancien CRM<small>crm.example.net/in</small></td><td>Lead reçu</td><td><span class="w-st p"><i></i>En pause<small>5 échecs</small></span></td><td>18 nov.</td><td style="text-align:right">${I('dots', 18)}</td></tr></tbody></table></section>`, { h: 520 })}</div>`;
+  document.getElementById('a2').innerHTML = comm + conn + hooks;
+  const mob = `<div class="u2-ph"><div><p class="u2-crumb">Paramètres › Espace</p><h1 style="margin:0;font-size:24px">Intégrations</h1></div><label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600">Catégorie<select class="fd-input"><option>Automatisation</option></select></label><div class="i-card">${['hooks', 'zapier', 'keys', 'remote'].map((k) => row(k)).join('')}</div>${need}</div>`;
+  document.getElementById('a3').innerHTML = `<div style="width:100%">${app('settings', page(`${itop('Intégrations', 'Envoyez les événements de vos démos vers vos outils.')}${seg(4)}<div class="i-card">${['hooks', 'zapier', 'keys', 'remote'].map((k) => row(k, k === 'hooks' ? { n: 2 } : {})).join('')}</div>${need}`), { theme: 'dark' })}</div>${mob}`;
+</script>
+</body>
+</html>
