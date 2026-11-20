@@ -11,7 +11,7 @@ describe('gdprSummary', () => {
       { blurs: [], element_meta: { pii: [{ blurred: false }, { blurred: true }] } },
       { blurs: [], element_meta: {} },
     ]);
-    expect(s).toEqual({ blurred: 4, pending: 1, pendingSteps: [2], imported: 0 });
+    expect(s).toEqual({ blurred: 4, pending: 1, pendingSteps: [2], imported: 0, aiText: 0 });
   });
   it('compte les images importées des étapes Avant / Après (non vérifiées)', () => {
     const s = gdprSummary([
