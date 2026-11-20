@@ -1,4 +1,4 @@
-# L48-B : états vides, et offre ou « Bientôt »
+# L48-B : états vides, et limite atteinte ou « Bientôt »
 
 > Paquet B du benchmark de structure (`docs/ux/benchmark-structure.md` §3). **À réaliser après L48-A.**
 > Maquette : `docs/ux/maquettes/refonte/l48b-etats-vides.html`. Captures : `img/l48b-variantes.png`, `img/l48b-demos-vide.png`, `img/l48b-widgets-offre.png` et `img/l48b-sombre-mobile.png`.
@@ -14,7 +14,7 @@
   - Glossaire, Notifications, Commentaires ;
   - le reste en texte seul : Analytics « Pas encore de données sur la période. », Variables, Temps réel, Alertes, Sondages.
 - **Page Démos sans démo publiée** : un grand bloc blanc « Les statistiques apparaîtront après la première publication. » à la place des 4 cartes KPI, puis la checklist dépliée, puis l'état vide de la liste, en bas de page.
-- **Fonctions hors offre** : le formulaire de lead (offre Gratuit) affiche une alerte dans l'éditeur ; il n'y a pas de repère sur les boutons.
+- **Fonctions hors offre** : le formulaire de lead (offre Gratuit) affiche une alerte dans l'éditeur. Après la décision L48-00, il n'y a plus d'offre à choisir (§5).
 
 ## 2. Composant `fd-empty` (packages/ui)
 
@@ -54,7 +54,7 @@
 | Parcours de formation | page | Créez votre premier parcours | Enchaînez plusieurs démos dans un ordre à suivre, et suivez la progression des apprenants. | Créer un parcours |
 | Apprenants | page | (texte actuel, structure `fd-empty`) | (texte actuel) | (actuelle) |
 | Analytics, chaque widget | compact | Rien à analyser pour l'instant | Les {données} apparaissent dès les premières visites sur la période choisie. | aucune |
-| Leads | page | Collectez vos premiers leads | Ajoutez un formulaire à une démo, ou partagez des liens personnalisés pour identifier vos visiteurs. | Ajouter un formulaire (badge d'offre si non inclus, §5) |
+| Leads | page | Collectez vos premiers leads | Ajoutez un formulaire à une démo, ou partagez des liens personnalisés pour identifier vos visiteurs. | Ajouter un formulaire |
 | Variables (L46) | page | Créez votre première variable | Un mot défini une fois, puis inséré dans toutes les démos : le nom du logiciel, un lien… | Nouvelle variable |
 | Glossaire | page | Ajoutez votre premier terme | (texte actuel) | Ajouter un terme ; Importer un CSV |
 | Étiquettes (L48-A) | page | Créez votre première étiquette | Les étiquettes classent les démos par thème, public ou logiciel. | Nouvelle étiquette |
@@ -73,18 +73,20 @@
   - « Partir d'un modèle » (`copy`) : ouvre la galerie de modèles de « Nouvelle démo », filtrée selon l'usage choisi à l'accueil (L48-C).
 - La barre de liste (L40) est masquée tant qu'il n'y a aucune démo.
 
-## 5. Offre ou « Bientôt »
+## 5. Limite atteinte ou « Bientôt »
+
+> Révisé après la décision du client (L48-00) : outil interne sans offre à choisir. Il n'y a donc **pas de badge d'offre**. Toutes les fonctions sont disponibles pour tous les espaces ; seuls les **quotas** limitent (L48-A §6).
 
 Deux situations à ne jamais confondre :
 
 | Situation | Repère | Comportement |
 |---|---|---|
-| La fonction **existe**, mais l'offre de l'espace ne l'inclut pas (ex. formulaire de lead en offre Gratuit, au-delà de la limite de démos publiées) | Badge d'offre à droite du libellé du bouton : icône `gem` de 12 px et nom de l'offre minimale (« Pro », « Business »), fond `hero` à 30 %, 11 px graisse 700 | Le bouton reste **actif**. Le clic ouvre un dialogue : « Disponible avec l'offre Pro. Votre espace est en offre Gratuit. », avec « Voir l'offre et les limites » et « Demander l'accès à la DSI » (lien de support de L48-A §5). On peut préparer la fonction (comportement actuel du formulaire), mais elle n'est pas publiée. |
+| La fonction **existe**, mais un **quota** de l'espace est atteint (stockage plein, requêtes IA du mois épuisées, limite de démos publiées) | Le bouton reste visible et actif. Au clic : dialogue « Limite atteinte », avec la conséquence et les chiffres (« Stockage : 500 Mo sur 500 Mo ») | Actions du dialogue : « Voir l'utilisation » (L48-A §6) et « Demander plus à la DSI » (lien de support). Pour un quota mensuel : « Disponible à nouveau le 1er {mois} ». |
 | La fonction **n'existe pas encore** | Badge « Bientôt » (règle actuelle) | Visible, `aria-disabled="true"`, infobulle « Bientôt disponible » (L44). Jamais masquée. |
 
-- Le nom de l'offre vient de `plans.code` (`free`, `pro`, `business`) et de ses limites (`lead_forms`, `published_demos`, `remove_branding`…). Il n'est jamais écrit en dur.
-- **Nom accessible** du bouton : « Ajouter un formulaire de lead, offre Pro requise ».
-- L'alerte actuelle `PlanFormsWarning` est conservée dans l'éditeur, où elle explique pourquoi le formulaire ne sera pas publié.
+- **Quota proche** (80 % ou plus) : une alerte discrète `warning` dans le panneau concerné (médiathèque, assistant IA), « Bientôt atteinte : 412 sur 500 requêtes ce mois-ci », avec le lien « Voir l'utilisation ».
+- `PlanFormsWarning` (formulaire non publié en offre Gratuit) **disparaît** : le formulaire de lead est disponible pour tous les espaces. Le gate `lead_forms` du plan doit être ouvert côté serveur (dev, à confirmer avec le chef de projet).
+- Les chiffres et dates viennent de l'état lu par l'interface (quotas) ; ils ne sont jamais écrits en dur.
 
 ## 6. Recette
 
@@ -95,8 +97,5 @@ Deux situations à ne jamais confondre :
   - état vide avec les 3 tuiles ;
   - chaque tuile ouvre le bon parcours.
 - Recherche « zzz » dans Démos avec 2 filtres actifs : variante `search`, et « Réinitialiser les filtres » remet tout. L'annonce `role="status"` est lue.
-- Offre Gratuit :
-  - « Ajouter un formulaire de lead » porte le badge « Pro » ;
-  - le dialogue s'ouvre ;
-  - aucune fonction hors offre n'est masquée.
+- Quota atteint (stockage plein, simulé) : l'ajout d'un fichier ouvre « Limite atteinte » avec les chiffres et « Demander plus à la DSI » ; aucun badge d'offre nulle part.
 - Fonction à venir : badge « Bientôt », `aria-disabled`, infobulle.

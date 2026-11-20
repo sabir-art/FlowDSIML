@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="refonte.css">
 <script src="refonte.js" defer></script>
 <style>
-  /* L48-B : composant d'état vide commun (page, compact, recherche), page Démos vide, badge d'offre et « Bientôt ». Données fictives. Spec : docs/ux/specs/l48b-etats-vides.md */
+  /* L48-B : composant d'état vide commun (page, compact, recherche), page Démos vide, limite atteinte et « Bientôt ». Données fictives. Spec : docs/ux/specs/l48b-etats-vides.md */
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   body { background: var(--fd-color-bg); }
   .e48 { max-width: 1320px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 32px; color: var(--fd-color-text); font-family: var(--fd-font-sans); }
@@ -61,18 +61,18 @@
 <body>
 <main class="e48">
   <h1>L48-B : états vides</h1>
-  <p>Un seul composant, <code>fd-empty</code>, en trois variantes : page (pictogramme de l'objet, « Créez votre premier… », une phrase, une action), compacte (widget, panneau) et recherche sans résultat. La page Démos vide ne montre plus de grand bloc de statistiques vide. Une fonction hors offre porte un badge d'offre ; une fonction qui n'existe pas encore garde « Bientôt ». Données fictives.</p>
+  <p>Un seul composant, <code>fd-empty</code>, en trois variantes : page (pictogramme de l'objet, « Créez votre premier… », une phrase, une action), compacte (widget, panneau) et recherche sans résultat. La page Démos vide ne montre plus de grand bloc de statistiques vide. Un quota atteint ouvre « Limite atteinte » avec « Demander plus à la DSI » (pas d'offre à choisir dans cet outil interne) ; une fonction qui n'existe pas encore garde « Bientôt ». Données fictives.</p>
 
   <section class="e48-blk" aria-labelledby="b1"><h2 id="b1">1. Les trois variantes</h2><div class="e48-grid" data-slot="variants"></div></section>
   <section class="e48-blk" aria-labelledby="b2"><h2 id="b2">2. Page Démos vide (premier usage)</h2><div data-slot="demos"></div></section>
-  <section class="e48-blk" aria-labelledby="b3"><h2 id="b3">3. Widgets d'Analytics sans données, et offre ou « Bientôt »</h2><div class="e48-grid" data-slot="widgets"></div></section>
+  <section class="e48-blk" aria-labelledby="b3"><h2 id="b3">3. Widgets d'Analytics sans données, et limite atteinte ou « Bientôt »</h2><div class="e48-grid" data-slot="widgets"></div></section>
   <section class="e48-blk" aria-labelledby="b4"><h2 id="b4">4. En sombre et sur mobile</h2><div class="e48-duo" data-slot="dark"></div></section>
   <section class="e48-blk" aria-labelledby="b5"><h2 id="b5">Règles</h2>
     <ul class="e48-notes">
       <li>Titre à l'action : « Créez votre première démo », « Ajoutez votre premier terme ». Jamais « Aucun … » seul en titre de page : le constat passe dans la phrase.</li>
       <li>Une phrase d'explication, une action principale, au plus une action secondaire (« Voir un exemple », « Lire le guide »). Sans droit d'édition : pas de bouton, phrase adaptée.</li>
       <li>Pictogramme : icône Lucide de l'objet (32 px dans une pastille de 64 px). Pas d'illustration externe.</li>
-      <li>Badge d'offre (« Pro », « Business ») : la fonction existe mais l'offre de l'espace ne l'inclut pas ; bouton visible, clic vers « Offre et limites ». « Bientôt » : la fonction n'existe pas encore. Jamais l'un pour l'autre.</li>
+      <li>Limite atteinte : la fonction existe mais un quota de l'espace est épuisé ; bouton visible et actif, dialogue avec les chiffres, « Voir l'utilisation » et « Demander plus à la DSI ». « Bientôt » : la fonction n'existe pas encore. Jamais l'un pour l'autre.</li>
     </ul>
   </section>
 </main>
@@ -89,6 +89,7 @@
     image: '<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/>',
     copy: '<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
     form: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 13H8M16 17H8M16 13h-2"/>',
+    disk: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
     gem: '<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
     calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
     book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>'
@@ -108,7 +109,7 @@
   document.querySelector('[data-slot="widgets"]').innerHTML =
     lab('Widget sans données sur la période', `<div class="e48-w"><h4>${I('chart')}Étape par étape</h4>${empty({ v: 'compact', icon: 'chart', t: 'Rien à analyser pour l’instant', b: 'Les étapes apparaissent dès les premières visites sur la période choisie.' })}</div>`) +
     lab('Widget d’une fonction à venir', `<div class="e48-w"><h4>${I('phone')}Appareils et navigateurs<span class="e48-soon">Bientôt</span></h4>${empty({ v: 'compact', icon: 'phone', t: 'Bientôt disponible', b: 'Le type d’appareil n’est pas encore enregistré avec les visites.' })}</div>`) +
-    lab('Offre ou « Bientôt » sur un bouton', `<div class="e48-btnrow"><button class="fd-btn" type="button">${I('form')}Ajouter un formulaire de lead<span class="e48-plan">${I('gem')}Pro</span></button><p>Existe, non inclus dans l’offre Gratuit : le bouton reste actif et ouvre « Offre et limites » (« Demander l’accès à la DSI »).</p><button class="fd-btn" type="button" aria-disabled="true" style="opacity:.6">${I('calendar')}Choisir des dates<span class="e48-soon">Bientôt</span></button><p>N’existe pas encore : visible, désactivé (aria-disabled), infobulle « Bientôt disponible ».</p></div>`);
+    lab('Limite atteinte ou « Bientôt »', `<div class="e48-btnrow"><div role="dialog" aria-labelledby="lim-t" style="padding:16px;border-radius:14px;border:1px solid var(--fd-color-border);box-shadow:var(--fd-shadow-md);display:flex;flex-direction:column;gap:10px"><b id="lim-t" style="display:flex;align-items:center;gap:8px">${I('disk')}Limite atteinte : stockage</b><p style="color:var(--fd-color-text)">500 Mo sur 500 Mo utilisés. Supprimez des fichiers inutilisés de la médiathèque, ou demandez plus à la DSI.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fd-btn fd-btn--sm" type="button">Voir l’utilisation</button><button class="fd-btn fd-btn--primary fd-btn--sm" type="button">Demander plus à la DSI</button></div></div><p>Clic sur « Ajouter un fichier » quand le stockage est plein : le bouton reste actif, le dialogue explique.</p><button class="fd-btn" type="button" aria-disabled="true" style="opacity:.6">${I('calendar')}Choisir des dates<span class="e48-soon">Bientôt</span></button><p>N’existe pas encore : visible, désactivé (aria-disabled), infobulle « Bientôt disponible ».</p></div>`);
   document.querySelector('[data-slot="dark"]').innerHTML =
     `<div style="flex:1;min-width:640px">${lab('Sombre', `<div class="e48-scene" data-theme="dark">${demosPage()}</div>`)}</div>` +
     lab('Mobile (390 px)', `<div class="e48-ph">${empty({ icon: 'book', t: 'Ajoutez votre premier terme', b: 'L’ancien mot, le nouveau et une définition courte : ils seront expliqués dans les démos.', a: `<button class="fd-btn fd-btn--primary" type="button">${I('plus')}Ajouter un terme</button><button class="fd-btn" type="button">Importer un CSV</button>` })}${empty({ v: 'compact', icon: 'chart', t: 'Rien à analyser pour l’instant', b: 'Revenez après les premières visites.' })}</div>`);

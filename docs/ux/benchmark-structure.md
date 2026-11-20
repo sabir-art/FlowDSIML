@@ -87,17 +87,13 @@ Ordre de livraison au dev, **après L41** : L48-A, L48-B, L48-C, L48-D (avec L47
 
 **Recommandation (L48-A).**
 - **Quatre groupes** :
-  - **Espace** : Général, Équipe (aujourd'hui Membres), Offre et limites, Sécurité, Confidentialité ;
+  - **Espace** : Général, Équipe (aujourd'hui Membres), Utilisation, Sécurité, Confidentialité ;
   - **Marque** : Thème et couleurs, Page publique, Domaine (Bientôt) ;
   - **Contenu** : Variables (L46), Glossaire, Étiquettes, Assistance IA ;
   - **Connexions** : Intégrations, Clés d'accès (Bientôt) ;
   - **Mon compte** : Profil, Notifications.
 - **Fil d'Ariane** au-dessus du titre de page : « Paramètres > Espace > Équipe ».
-- **« Plans et facturation »** devient **« Offre et limites »** :
-  - offre actuelle et utilisation (démos, membres, stockage) ;
-  - « Demander plus » vers la DSI ;
-  - **aucun prix ni paiement**.
-  - **Décision client à confirmer** : retrait des prix (ligne `bloque_client`).
+- **« Plans et facturation »** devient **« Utilisation »** : quotas et consommation (IA, voix, stockage, membres, démos publiées), sans montant ni choix d'offre, et « Demander plus à la DSI ». **Décision du client du 20 novembre** (L48-00) : outil interne, environ 100 personnes, sans paiement. Spec : L48-A §6.
 - **« Fonctions à venir »** est supprimée : chaque fonction à venir apparaît **à sa place** avec le badge « Bientôt » (règle existante), par exemple Domaine dans Marque.
 - **Notifications** : la cloche existe, mais il n'y a pas de page de préférences. La page est créée avec le badge « Bientôt » si les préférences ne sont pas encore stockées.
 
@@ -123,9 +119,9 @@ Ordre de livraison au dev, **après L41** : L48-A, L48-B, L48-C, L48-D (avec L47
 - **Page Démos vide** :
   - les KPI sont masqués, et non remplacés par une carte (ils reviennent dès la première publication) ;
   - l'état vide se place au centre de la liste.
-- **Offre et Bientôt** :
+- **Limite atteinte ou Bientôt** (révisé après L48-00 : pas d'offre à choisir, donc pas de badge d'offre) :
   - **« Bientôt »** : la fonction n'existe pas encore (règle inchangée) ;
-  - **badge d'offre** (« Offre Business ») : la fonction existe, mais l'offre de l'espace ne l'inclut pas. Le bouton reste visible, et un clic ouvre « Offre et limites » avec « Demander l'accès à la DSI » ;
+  - **quota atteint** : bouton visible et actif, dialogue « Limite atteinte » avec « Voir l'utilisation » et « Demander plus à la DSI » ;
   - jamais l'un pour l'autre.
 
 ## 4. Accueil, assistant de démarrage (rang 4)
@@ -295,4 +291,4 @@ Ordre de livraison au dev, **après L41** : L48-A, L48-B, L48-C, L48-D (avec L47
 
 1. **L48-A** (navigation, Paramètres, support, barres) : spec et maquette, puis envoi au dev **après L41**.
 2. Puis L48-B, L48-C, L48-D (avec L47), L48-F et L48-E, dans cet ordre, une spec et une maquette par paquet.
-3. **Décision client** : retrait des prix de « Plans et facturation » (`bloque_client` dans le tracker).
+3. **Décision du client prise** (L48-00) : « Plans et facturation » devient « Utilisation », sans prix (L48-A §6).

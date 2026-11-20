@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Utilisation de l'espace (lot L48-A) — TutoClick</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="refonte.css">
+<script src="refonte.js" defer></script>
+<style>
+  /* L48-A §6 : « Plans et facturation » devient « Utilisation » : quotas et consommation, sans montant ni choix d'offre. Données fictives. Spec : docs/ux/specs/l48a-navigation.md §6 */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  body { background: var(--fd-color-bg); }
+  .u48 { max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 32px; color: var(--fd-color-text); font-family: var(--fd-font-sans); }
+  .u48 h1 { margin: 0; font-size: 28px; } .u48 > p { margin: 0; max-width: 900px; color: var(--fd-color-text-muted); }
+  .u48-blk { display: flex; flex-direction: column; gap: 16px; } .u48-blk > h2 { margin: 0; font-size: 20px; }
+  .u48-scene { padding: 28px; border-radius: 20px; background: var(--fd-color-bg); border: 1px solid var(--fd-color-border); color: var(--fd-color-text); display: flex; flex-direction: column; gap: 20px; }
+  .u48-ico { width: 18px; height: 18px; flex: none; }
+  .u48-crumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fd-color-text-muted); margin: 0; padding: 0; list-style: none; }
+  .u48-crumb li[aria-current] { color: var(--fd-color-text); font-weight: 600; } .u48-crumb .u48-ico { width: 14px; height: 14px; }
+  .u48-hd { display: flex; align-items: flex-end; gap: 12px; } .u48-hd h3 { margin: 6px 0 0; font-size: 28px; } .u48-hd p { margin: 4px 0 0; font-size: 14px; color: var(--fd-color-text-muted); } .u48-hd > div { flex: 1; }
+  .u48-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .u48-q { padding: 20px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); display: flex; flex-direction: column; gap: 10px; }
+  .u48-q__h { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+  .u48-q__h .chip { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--fd-color-surface-sunken); }
+  .u48-q__h .st { margin-left: auto; }
+  .u48-q__v { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; } .u48-q__v small { font-size: 15px; font-weight: 500; color: var(--fd-color-text-muted); }
+  .u48-gauge { height: 8px; border-radius: 999px; background: var(--fd-color-surface-sunken); overflow: hidden; } .u48-gauge i { display: block; height: 100%; border-radius: 999px; background: var(--fd-color-text); }
+  .u48-q.warn .u48-gauge i { background: var(--fd-color-warning, #b26b00); } .u48-q.full .u48-gauge i { background: var(--fd-color-danger, #b4234b); }
+  .u48-q__f { font-size: 13px; color: var(--fd-color-text-muted); line-height: 1.45; }
+  .u48-q__f a { color: var(--fd-color-primary); font-weight: 600; }
+  .u48-st { white-space: nowrap; flex: none; display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .u48-st svg { width: 13px; height: 13px; }
+  .u48-st.warn { background: color-mix(in srgb, var(--fd-color-warning, #b26b00) 14%, var(--fd-color-surface)); color: var(--fd-color-text); }
+  .u48-st.full { background: color-mix(in srgb, var(--fd-color-danger, #b4234b) 14%, var(--fd-color-surface)); color: var(--fd-color-text); }
+  .u48-split { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 13px; } .u48-split span:nth-child(even) { text-align: right; font-variant-numeric: tabular-nums; color: var(--fd-color-text-muted); }
+  .u48-info { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 14px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); font-size: 14px; }
+  .u48-info b { display: block; margin-bottom: 2px; } .u48-info span { color: var(--fd-color-text-muted); } .u48-info .fd-btn { margin-left: auto; flex: none; }
+  .u48-ph { width: 390px; padding: 16px; border-radius: 28px; border: 1px solid var(--fd-color-border); background: var(--fd-color-bg); display: flex; flex-direction: column; gap: 12px; color: var(--fd-color-text); }
+  .u48-ph .u48-grid { grid-template-columns: 1fr; }
+  .u48-ph .u48-info { flex-wrap: wrap; } .u48-ph .u48-info .fd-btn { margin-left: 0; }
+  .u48-duo { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .u48-notes { margin: 0; padding-left: 20px; color: var(--fd-color-text-muted); display: grid; gap: 6px; font-size: 14px; max-width: 900px; }
+</style>
+</head>
+<body>
+<main class="u48">
+  <h1>L48-A : page « Utilisation »</h1>
+  <p>Outil interne de la DSI, sans paiement : « Plans et facturation » devient « Utilisation ». Plus de prix, de factures ni de choix d'offre. Les quotas et la consommation de l'espace restent affichés clairement, avec « Demander plus à la DSI » quand une limite approche. Données fictives.</p>
+  <section class="u48-blk" aria-labelledby="u1"><h2 id="u1">1. Paramètres > Espace > Utilisation</h2><div class="u48-scene" data-slot="l"></div></section>
+  <section class="u48-blk" aria-labelledby="u2"><h2 id="u2">2. En sombre et sur mobile</h2><div class="u48-duo" data-slot="d"></div></section>
+  <section class="u48-blk" aria-labelledby="u3"><h2 id="u3">Règles</h2>
+    <ul class="u48-notes">
+      <li>Jamais de montant, de nom d'offre à acheter ni de bouton de paiement.</li>
+      <li>Jauge : texte noir sous 80 % ; « Bientôt atteinte » (orange) à partir de 80 % ; « Limite atteinte » (rouge) à 100 %. Le texte porte l'état, pas seulement la couleur.</li>
+      <li>Quotas mensuels (IA, voix) : date de remise à zéro écrite. Quota sans limite : « Sans limite », sans jauge.</li>
+      <li>« Demander plus à la DSI » : lien de support de l'espace (L48-A §5), avec le quota concerné prérempli dans l'objet.</li>
+    </ul>
+  </section>
+</main>
+<script>
+  const P = {
+    right: '<path d="m9 18 6-6-6-6"/>',
+    wand: '<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/>',
+    mic: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
+    disk: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    send: '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    life: '<circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/>'
+  };
+  const I = (n) => `<svg class="u48-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${P[n]}</svg>`;
+  const q = ({ i, t, v, of, pct, foot, st, split }) => `<section class="u48-q${st ? ' ' + st : ''}" aria-label="${t}"><div class="u48-q__h"><span class="chip">${I(i)}</span>${t}${st ? `<span class="u48-st ${st} st">${I('alert')}${st === 'full' ? 'Limite atteinte' : 'Bientôt atteinte'}</span>` : ''}</div>
+    <div class="u48-q__v">${v} <small>${of}</small></div>${pct !== undefined ? `<div class="u48-gauge" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="${t} : ${pct} % utilisés"><i style="width:${pct}%"></i></div>` : ''}${split || ''}<p class="u48-q__f" style="margin:0">${foot}</p></section>`;
+  const page = () => `<div class="u48-hd"><div><ol class="u48-crumb" aria-label="Fil d’Ariane"><li>Paramètres</li><li aria-hidden="true">${I('right')}</li><li>Espace</li><li aria-hidden="true">${I('right')}</li><li aria-current="page">Utilisation</li></ol><h3>Utilisation</h3><p>Ce que consomme l’espace Acme Formation, et ses limites. Aucun paiement : pour aller au-delà, faites une demande à la DSI.</p></div></div>
+    <div class="u48-info">${I('life')}<div><b>Une limite vous gêne ?</b><span>La DSI peut relever un quota pour votre espace.</span></div><button class="fd-btn" type="button">${I('send')}Demander plus à la DSI</button></div>
+    <div class="u48-grid">
+      ${q({ i: 'wand', t: 'Assistance IA', v: '412', of: '/ 500 requêtes ce mois-ci', pct: 82, st: 'warn', foot: 'Traduire, Rédiger, Assistant. Remise à zéro le 1<sup>er</sup> décembre. <a href="#">Demander plus</a>' })}
+      ${q({ i: 'mic', t: 'Voix off et sous-titres', v: '18 min', of: '/ 60 min ce mois-ci', pct: 30, foot: 'Durée d’audio générée. Remise à zéro le 1<sup>er</sup> décembre.' })}
+      ${q({ i: 'disk', t: 'Stockage', v: '500 Mo', of: '/ 500 Mo', pct: 100, st: 'full', split: '<div class="u48-split"><span>Médiathèque</span><span>312 Mo</span><span>Vidéos</span><span>164 Mo</span><span>Voix off</span><span>24 Mo</span></div>', foot: 'Ajout de fichiers bloqué. Supprimez des fichiers inutilisés dans la médiathèque, ou <a href="#">demandez plus</a>.' })}
+      ${q({ i: 'users', t: 'Membres', v: '18', of: '/ 25', pct: 72, foot: 'Propriétaires, admins, éditeurs et lecteurs. Les apprenants ne comptent pas.' })}
+      ${q({ i: 'send', t: 'Démos publiées', v: '24', of: 'Sans limite', foot: 'Les brouillons ne comptent pas.' })}
+      ${q({ i: 'clock', t: 'Conservation des statistiques', v: '24 mois', of: '', foot: 'Les visites plus anciennes sont supprimées automatiquement.' })}
+    </div>`;
+  document.querySelector('[data-slot="l"]').innerHTML = page();
+  document.querySelector('[data-slot="d"]').innerHTML = `<div style="width:100%"><div class="u48-scene" data-theme="dark">${page()}</div></div><div class="u48-ph">${page()}</div><div class="u48-ph" data-theme="dark">${page()}</div>`;
+</script>
+</body>
+</html>

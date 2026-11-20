@@ -1,7 +1,7 @@
 # L48-A : navigation, colonne Dossiers, Paramètres groupés, support
 
 > Paquet A du benchmark de structure (`docs/ux/benchmark-structure.md`, §1, §2, §8 et §9). **À réaliser après L41.**
-> Maquette : `docs/ux/maquettes/refonte/l48a-navigation.html`. Captures : `img/l48a-demos.png`, `img/l48a-parametres.png`, `img/l48a-sombre.png` et `img/l48a-mobile.png`.
+> Maquettes : `docs/ux/maquettes/refonte/l48a-navigation.html` et `l48a-utilisation.html`. Captures : `img/l48a-demos.png`, `img/l48a-parametres.png`, `img/l48a-sombre.png`, `img/l48a-mobile.png`, `img/l48a-utilisation.png` et `img/l48a-utilisation-sombre-mobile.png`.
 > Données fictives.
 
 ## 1. Barre latérale (`components/Layout.tsx`)
@@ -79,7 +79,7 @@ Elle remplace le filtre « Dossier » de la barre de liste (L40) au-dessus de 1 
 
 | Groupe | Entrées (route) |
 |---|---|
-| Espace | Général (`/settings/workspace`), Équipe (`/settings/members`), Offre et limites (`/settings/plans`), Sécurité, Confidentialité |
+| Espace | Général (`/settings/workspace`), Équipe (`/settings/members`), Utilisation (`/settings/usage`, §6), Sécurité, Confidentialité |
 | Marque | Thème et couleurs (`/settings/brand`), Page publique (section de Marque, à sa propre route `/settings/brand/page`), Domaine (Bientôt) |
 | Contenu | Variables (L46), Glossaire, Étiquettes (nouvelle page : liste, renommer, fusionner, supprimer ; à défaut, Bientôt), Assistance IA |
 | Connexions | Intégrations (L48-F), Clés d'accès (Bientôt) |
@@ -87,9 +87,7 @@ Elle remplace le filtre « Dossier » de la barre de liste (L40) au-dessus de 1 
 
 - **« Fonctions à venir »** (`/settings/soon`) est **supprimée**. Chaque fonction qu'elle liste apparaît à sa place logique avec le badge « Bientôt » (règle existante : jamais masquée). La route redirige vers `/settings/workspace`.
 - **« Membres »** devient **« Équipe »**.
-- **« Plans et facturation »** devient **« Offre et limites »** :
-  - offre actuelle, utilisation, « Demander plus à la DSI » ;
-  - le retrait des prix attend la décision du client (tracker L48-00). En attendant, seul le libellé change.
+- **« Plans et facturation »** devient **« Utilisation »** (§6), décision du client du 20 novembre (L48-00).
 - **Fil d'Ariane** au-dessus du titre de chaque page : « Paramètres > {Groupe} > {Page} ». Le groupe n'est pas cliquable (pas de page de groupe) ; Paramètres mène à Général.
   - Balisage : `nav aria-label="Fil d'Ariane"` > `ol`, page courante en `aria-current="page"`, séparateurs `chevron-right` en `aria-hidden`.
   - Le fil remplace le grand titre « Paramètres » de l'en-tête actuel. Le titre de la page (h1) est le nom de la section.
@@ -104,7 +102,41 @@ Elle remplace le filtre « Dossier » de la barre de liste (L40) au-dessus de 1 
   - masqué tant que le champ est vide.
   - Pas de nouveau service : simple lien `mailto:` ou URL.
 
-## 6. Recette
+## 6. Utilisation (remplace « Plans et facturation »)
+
+> Décision du client (20 novembre, L48-00) : outil interne de la DSI, environ 100 personnes, **sans paiement**.
+> On retire les prix, les factures et les choix d'offre. Les quotas et la consommation restent affichés clairement.
+
+- **Route** : `/settings/usage`. `/settings/plans` redirige vers cette page.
+- **Retirés** :
+  - prix mensuels et annuels, période de facturation, « Recommandé pour vous », « Choisir un plan », « Paiement en ligne bientôt disponible » ;
+  - nom d'offre affiché comme produit (« Plan Business ») : le sélecteur d'espace affiche « Espace · n membres » (L48-A §1).
+  - Les limites restent stockées dans `plans.limits` côté serveur ; seule l'interface change.
+- **En-tête** :
+  - fil d'Ariane « Paramètres > Espace > Utilisation », titre « Utilisation » ;
+  - phrase : « Ce que consomme l'espace {nom}, et ses limites. Aucun paiement : pour aller au-delà, faites une demande à la DSI. »
+- **Encart** : « Une limite vous gêne ? La DSI peut relever un quota pour votre espace. » et le bouton « Demander plus à la DSI ». Le bouton ouvre le lien de support (§5) avec l'objet prérempli « Demande de quota : {espace} ». Sans lien configuré, l'encart est masqué.
+- **Cartes de quota** (grille de 3 colonnes, une seule sur mobile), chacune avec une icône, un titre, la valeur « n / limite », une jauge `role="meter"` et une ligne d'explication :
+
+| Carte | Valeur | Source | Note |
+|---|---|---|---|
+| Assistance IA | requêtes ce mois-ci / quota mensuel | `ai_usage`, `limits.ai_monthly_requests` (via l'état lu par l'interface) | « Remise à zéro le 1er {mois} » |
+| Voix off et sous-titres | minutes d'audio ce mois-ci / quota | `ai_usage.audio_seconds`, `limits.ai_monthly_audio_seconds` | idem |
+| Stockage | Mo utilisés / 500 Mo | tailles réelles de `storage.objects` (médiathèque, vidéos, voix off) | détail par type sous la jauge |
+| Membres | membres / limite | `members`, `limits.members` | « Les apprenants ne comptent pas. » |
+| Démos publiées | publiées / limite, ou « Sans limite » | `limits.published_demos` (null = sans limite) | « Les brouillons ne comptent pas. » |
+| Conservation des statistiques | durée (mois) | `limits.analytics_retention_days` | pas de jauge |
+
+- **États** :
+  - sous 80 %, jauge `text` ;
+  - à partir de 80 %, pastille « Bientôt atteinte » (icône `triangle-alert`, fond `warning` à 14 %) et jauge `warning` ;
+  - à 100 %, pastille « Limite atteinte » et jauge `danger`, avec la conséquence écrite (« Ajout de fichiers bloqué… ») et « Demander plus ».
+  - Le texte de la pastille porte l'état, pas seulement la couleur.
+- **Sans limite** : « Sans limite », sans jauge.
+- **Accessibilité** : chaque jauge a `aria-valuenow`, `aria-valuemin`, `aria-valuemax` et un nom « {carte} : {n} % utilisés ».
+- **Ailleurs dans l'app** : les messages de limite (médiathèque pleine, quota IA atteint, limite de démos publiées) renvoient vers cette page et vers « Demander plus à la DSI ». Plus aucun « Voir les plans » ni « Changer de plan ».
+
+## 7. Recette
 
 - Barre latérale à 1 440 px, 1 024 px (tiroir) et 390 px, en clair et en sombre. Aucune entrée « Leads », « Membres » ou « Plans ». Aucun « Workspace » visible (recherche dans `fr.json`).
 - Colonne Dossiers :
@@ -118,4 +150,5 @@ Elle remplace le filtre « Dossier » de la barre de liste (L40) au-dessus de 1 
 - Barre de liste : Créé par, Date de création. Le Tri passe en icône quand la colonne est ouverte, et reste une seule ligne à 1 440 px (mesure L40).
 - Paramètres : 5 groupes, fil d'Ariane sur chaque page, `/settings/soon` redirigé, badges « Bientôt » à leur place.
 - Support : « Contacter la DSI » absent sans lien configuré, présent après saisie.
+- Utilisation : aucun prix, aucun nom d'offre, aucun bouton de paiement (recherche de « €», « plan », « facturation » dans `fr.json`) ; jauges à 50, 80 et 100 % ; `/settings/plans` redirige.
 - e2e : `l40-barres`, `dashboard`, `settings`, `navigation` mis à jour (sélecteurs de la barre latérale).
