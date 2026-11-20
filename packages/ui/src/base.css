@@ -1,6 +1,7 @@
 /* FlowDSIML — styles de base et composants CSS (spécifications : docs/ux/composants.md). */
 /* Polices : chargées par index.html (préconnexion, sans bloquer le premier rendu), voir tokens.css */
 @import './tokens.css';
+@import './select.css';
 
 *,
 *::before,
@@ -194,47 +195,6 @@ a {
   padding-inline: 10px;
   border-radius: var(--fd-radius-sm);
   font-size: var(--fd-text-label-size);
-}
-/* Select : chevron SVG personnalisé à 12 px du bord, padding-right 36 px */
-.fd-select {
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 36px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234F5966' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px 16px;
-  cursor: pointer;
-  text-overflow: ellipsis;
-}
-.fd-select--sm {
-  padding-right: 32px;
-  background-position: right 10px center;
-  background-size: 14px 14px;
-}
-/* Garde-fou : le chevron ne doit jamais toucher le texte, même si un style local
-   (classe d'écran ou style inline) redéfinit le padding. */
-select.fd-select:not([multiple]):not([size]) {
-  padding-right: 36px !important;
-}
-select.fd-select.fd-select--sm:not([multiple]):not([size]) {
-  padding-right: 32px !important;
-}
-/* Composant Select de packages/ui (chevron Lucide dessiné dans .fd-select-wrap) :
-   pas de second chevron en image de fond. */
-.fd-select-wrap > .fd-select {
-  background-image: none !important;
-}
-.fd-select::-ms-expand {
-  display: none;
-}
-[data-theme='dark'] .fd-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A9B3BF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']):not([data-theme='dark']) .fd-select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A9B3BF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  }
 }
 .fd-select[multiple],
 .fd-select[size] {

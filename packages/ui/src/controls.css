@@ -9,12 +9,7 @@
   width: auto;
 }
 .fd-select-wrap > .fd-select {
-  appearance: none;
-  -webkit-appearance: none;
   width: 100%;
-  padding-right: calc(var(--fd-space-3, 12px) + 24px);
-  text-overflow: ellipsis;
-  cursor: pointer;
 }
 .fd-select-wrap__chevron {
   position: absolute;

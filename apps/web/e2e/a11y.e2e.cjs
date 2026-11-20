@@ -916,7 +916,7 @@ async function audit(page, exclude) {
   }));
 }
 
-async function appPage(b, s, theme) {
+async function appPage(b, s, theme, check) {
   const ctx = await b.newContext({
     viewport: s.viewport ?? { width: 1440, height: 900 },
     locale: 'fr-FR',
@@ -942,12 +942,12 @@ async function appPage(b, s, theme) {
     );
   if (s.open) await s.open(p);
   await p.waitForTimeout(300);
-  const v = await audit(p, s.exclude);
+  const v = await (check ? check(p, s) : audit(p, s.exclude));
   await ctx.close();
   return v;
 }
 
-async function playerPage(b, s, theme) {
+async function playerPage(b, s, theme, check) {
   const base = require('./player-maquette.cjs');
   const manifest = s.video
     ? {
@@ -995,44 +995,48 @@ async function playerPage(b, s, theme) {
   await p.goto(`${PLAYER}/#${s.path}`);
   await p.waitForTimeout(1500);
   if (s.open) await s.open(p);
-  const v = await audit(p);
+  const v = await (check ? check(p, s) : audit(p));
   await ctx.close();
   return v;
 }
 
-(async () => {
-  const args = process.argv.slice(2);
-  const ri = args.indexOf('--report');
-  const reportFile = ri >= 0 ? args.splice(ri, 2)[1] : null;
-  const only = args;
-  const b = await chromium.launch();
-  const report = [];
-  let blocking = 0;
-  const pages = [
-    ...APP_PAGES.map((s) => ({ ...s, kind: 'app' })),
-    ...PLAYER_PAGES.map((s) => ({ ...s, kind: 'player' })),
-  ].filter((s) => !only.length || only.some((o) => s.name.toLowerCase().includes(o.toLowerCase())));
-  for (const s of pages)
-    for (const theme of ['light', 'dark']) {
-      let v;
-      try {
-        v = s.kind === 'app' ? await appPage(b, s, theme) : await playerPage(b, s, theme);
-      } catch (e) {
-        console.log(`NOT OK - ${s.name} (${theme}) : audit impossible (${e.message.split('\n')[0]})`);
-        process.exitCode = 1;
-        continue;
+// L38 : pages et ouverture réutilisées par chevrons.e2e.cjs (mesure des chevrons)
+module.exports = { APP_PAGES, PLAYER_PAGES, appPage, playerPage };
+
+if (require.main === module)
+  (async () => {
+    const args = process.argv.slice(2);
+    const ri = args.indexOf('--report');
+    const reportFile = ri >= 0 ? args.splice(ri, 2)[1] : null;
+    const only = args;
+    const b = await chromium.launch();
+    const report = [];
+    let blocking = 0;
+    const pages = [
+      ...APP_PAGES.map((s) => ({ ...s, kind: 'app' })),
+      ...PLAYER_PAGES.map((s) => ({ ...s, kind: 'player' })),
+    ].filter((s) => !only.length || only.some((o) => s.name.toLowerCase().includes(o.toLowerCase())));
+    for (const s of pages)
+      for (const theme of ['light', 'dark']) {
+        let v;
+        try {
+          v = s.kind === 'app' ? await appPage(b, s, theme) : await playerPage(b, s, theme);
+        } catch (e) {
+          console.log(`NOT OK - ${s.name} (${theme}) : audit impossible (${e.message.split('\n')[0]})`);
+          process.exitCode = 1;
+          continue;
+        }
+        const bad = v.filter((x) => BLOCKING.has(x.impact));
+        blocking += bad.length;
+        report.push({ page: s.name, theme, violations: v });
+        console.log(
+          `${bad.length ? 'NOT OK' : 'ok'} - ${s.name} (${theme})` +
+            (v.length ? ` : ${v.map((x) => `${x.id}[${x.impact}]×${x.nodes}`).join(', ')}` : ''),
+        );
+        for (const x of bad) console.log(`    ${x.id} : ${x.help} → ${x.targets.join(' | ')}`);
       }
-      const bad = v.filter((x) => BLOCKING.has(x.impact));
-      blocking += bad.length;
-      report.push({ page: s.name, theme, violations: v });
-      console.log(
-        `${bad.length ? 'NOT OK' : 'ok'} - ${s.name} (${theme})` +
-          (v.length ? ` : ${v.map((x) => `${x.id}[${x.impact}]×${x.nodes}`).join(', ')}` : ''),
-      );
-      for (const x of bad) console.log(`    ${x.id} : ${x.help} → ${x.targets.join(' | ')}`);
-    }
-  await b.close();
-  if (reportFile) fs.writeFileSync(reportFile, JSON.stringify(report, null, 2));
-  console.log(`\n${blocking} violation(s) serious/critical sur ${pages.length} pages × 2 thèmes`);
-  if (blocking) process.exitCode = 1;
-})();
+    await b.close();
+    if (reportFile) fs.writeFileSync(reportFile, JSON.stringify(report, null, 2));
+    console.log(`\n${blocking} violation(s) serious/critical sur ${pages.length} pages × 2 thèmes`);
+    if (blocking) process.exitCode = 1;
+  })();

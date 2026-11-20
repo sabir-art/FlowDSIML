@@ -1,4 +1,5 @@
 import '@flowdsiml/ui/tokens.css';
+import '@flowdsiml/ui/select.css';
 import './style.css';
 import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
