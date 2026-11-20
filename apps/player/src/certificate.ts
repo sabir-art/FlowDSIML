@@ -1,5 +1,5 @@
 /**
- * L15-07 : attestation de suivi, créée dans le navigateur (jsPDF, chargé à la demande) à partir de la
+ * L15-07 : attestation de suivi, créée dans le navigateur (PDF balisé, L35 ; chargé à la demande) à partir de la
  * réponse de issue_certificate. Rien n'est inventé : date de validation renvoyée par le serveur.
  */
 import { fileName } from '@flowdsiml/exports/model';
@@ -41,9 +41,9 @@ export async function downloadCertificate(
   lang: string,
   logoUrl: string | null,
 ) {
-  const pdf = await import('@flowdsiml/exports/pdf');
+  const pdf = await import('@flowdsiml/exports/pdf-tagged');
   const fonts = await pdf.loadFonts();
-  const measure = pdf.jsMeasure(pdf.createDoc(fonts));
+  const measure = pdf.measureFor(fonts);
   const page = planCertificate(
     {
       workspace: info.workspace,

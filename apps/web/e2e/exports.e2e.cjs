@@ -109,6 +109,16 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       pdf.includes('/Lang (fr-FR)') && /\/DisplayDocTitle true/.test(pdf),
       'L15-04 : langue et titre du document',
     );
+    // L35 : PDF balisé (structure, titres, figures avec texte alternatif, marqué PDF/UA)
+    ok(
+      /\/StructTreeRoot/.test(pdf) && /\/Marked true/.test(pdf) && /\/S \/H1/.test(pdf),
+      'L35 : PDF balisé (arbre de structure, titre de niveau 1)',
+    );
+    ok(
+      (pdf.match(/\/S \/Figure/g) ?? []).length >= 7 && (pdf.match(/\/Alt [<(]/g) ?? []).length >= 7,
+      'L35 : captures en figures avec texte alternatif',
+    );
+    ok(/pdfuaid:part/.test(pdf), 'L35 : identifiant PDF/UA dans les métadonnées');
     await p.waitForSelector('text=PDF prêt');
     ok(
       /8 pages · [\d,]+\s(Ko|Mo) · A4 portrait/.test(await p.locator('.exp-file small').textContent()),

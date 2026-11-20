@@ -245,6 +245,10 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       .toString('latin1');
     ok(dl.suggestedFilename() === 'attestation-agenda-partage.pdf', 'L15-07 : nom du fichier');
     ok(
+      /\/StructTreeRoot/.test(pdf) && /\/S \/H1/.test(pdf) && /pdfuaid:part/.test(pdf),
+      'L35 : attestation balisée (structure, titre, PDF/UA)',
+    );
+    ok(
       pdf.startsWith('%PDF-') && /\/Count 1/.test(pdf) && pdf.includes('/Lang (fr-FR)'),
       'L15-07 : PDF d’une page, en français',
     );

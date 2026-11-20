@@ -6,31 +6,25 @@ Ce fichier recense les bibliothèques et les ressources tierces ajoutées pour l
 
 | Composant                                                                                       | Version | Licence                                                      | Usage                                                                      |
 | ----------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| [jsPDF](https://github.com/parallax/jsPDF)                                                      | 4.2.1   | MIT                                                          | Création des PDF (démo, attestation) dans le navigateur                    |
+| [PDFKit](https://github.com/foliojs/pdfkit)                                                     | 0.17.2  | MIT                                                          | PDF balisés (démo, attestation) créés dans le navigateur (L35)             |
 | [gifenc](https://github.com/mattdesl/gifenc)                                                    | 1.0.3   | MIT                                                          | Encodage des GIF animés dans le navigateur                                 |
 | [fflate](https://github.com/101arrowz/fflate)                                                   | 0.8.3   | MIT                                                          | Paquets SCORM (zip) assemblés dans le navigateur (L16)                     |
 | [mp4-muxer](https://github.com/Vanilagy/mp4-muxer)                                              | 5.2.2   | MIT                                                          | Vidéos MP4 (H.264, son AAC ou Opus) assemblées dans le navigateur (L25-11) |
 | [uqr](https://github.com/unjs/uqr)                                                              | 0.1.2   | MIT                                                          | QR code de la télécommande du mode présentateur, rendu en SVG (L26-10)     |
 | [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) (TTF Regular, Bold, ExtraBold) | 2.071   | SIL Open Font License 1.1 (`packages/exports/fonts/OFL.txt`) | Police embarquée dans les PDF                                              |
 
-### Dépendances de jsPDF
+### Dépendances de PDFKit
 
-Installées avec jsPDF. Seules `fflate`, `fast-png` et `@babel/runtime` servent au rendu utilisé ici. Les autres sont des dépendances facultatives de jsPDF (rendu HTML et SVG), que TutoClick n'appelle pas : elles restent dans des fichiers séparés, jamais chargés.
+Incluses dans la version autonome de PDFKit (`pdfkit.standalone.js`), chargée seulement à l'export d'un PDF.
 
-| Composant                                                    | Version | Licence                                              |
-| ------------------------------------------------------------ | ------- | ---------------------------------------------------- |
-| fflate                                                       | 0.8.3   | MIT                                                  |
-| fast-png                                                     | 6.4.0   | MIT                                                  |
-| iobuffer                                                     | 5.4.0   | MIT                                                  |
-| pako                                                         | 2.2.0   | MIT et Zlib                                          |
-| @babel/runtime                                               | 7.28    | MIT                                                  |
-| html2canvas                                                  | 1.4.1   | MIT                                                  |
-| css-line-break, text-segmentation, utrie, base64-arraybuffer | —       | MIT                                                  |
-| canvg                                                        | 3.0.11  | MIT                                                  |
-| rgbcolor                                                     | 1.0.1   | MIT                                                  |
-| stackblur-canvas, svg-pathdata, raf, performance-now         | —       | MIT                                                  |
-| core-js, regenerator-runtime                                 | —       | MIT                                                  |
-| DOMPurify                                                    | 3.4     | MPL-2.0 ou Apache-2.0, au choix (Apache-2.0 retenue) |
+| Composant                                                                                      | Version | Licence     |
+| ---------------------------------------------------------------------------------------------- | ------- | ----------- |
+| fontkit (avec restructure, unicode-properties, unicode-trie, dfa, tiny-inflate, brotli, clone) | 2.0.4   | MIT         |
+| linebreak                                                                                      | 1.1.0   | MIT         |
+| png-js                                                                                         | 1.1.0   | MIT         |
+| jpeg-exif                                                                                      | 1.1.4   | MIT         |
+| crypto-js                                                                                      | 4.2.0   | MIT         |
+| pako, buffer, events, readable-stream (portages navigateur de Node)                            | —       | MIT et Zlib |
 
 ## Vidéo et capture HTML (F7, A8)
 

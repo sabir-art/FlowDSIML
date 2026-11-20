@@ -1,36 +1,34 @@
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { pdfkitMeasure, renderTaggedPdf, type PdfKitCtor, type TaggedFontFiles } from './pdfTagged';
 import { describe, expect, it } from 'vitest';
 import { parseManifest } from '@flowdsiml/manifest';
 import {
   DEFAULT_PDF,
   GifWriter,
-  bytesToBinary,
   contrastRatio,
-  createDoc,
   fileName,
   formatSize,
   gifDuration,
   initialsOf,
-  jsMeasure,
   onColor,
   planCertificate,
   planDemoPdf,
   planGif,
-  renderPdf,
   stepsFromManifest,
   type ExportDemo,
-  type FontFiles,
   type Page,
 } from './index';
 
-const font = (f: string) =>
-  bytesToBinary(new Uint8Array(readFileSync(new URL(`../fonts/${f}`, import.meta.url))));
-const fonts: FontFiles = {
+// L35 : moteur PDF balisé (PDFKit) pour la mesure et le rendu
+const PDFDocument = createRequire(import.meta.url)('pdfkit') as PdfKitCtor;
+const font = (f: string) => new Uint8Array(readFileSync(new URL(`../fonts/${f}`, import.meta.url)));
+const fonts: TaggedFontFiles = {
   regular: font('PlusJakartaSans-Regular.ttf'),
   bold: font('PlusJakartaSans-Bold.ttf'),
   extrabold: font('PlusJakartaSans-ExtraBold.ttf'),
 };
-const measure = jsMeasure(createDoc(fonts));
+const measure = pdfkitMeasure(PDFDocument, fonts);
 
 const demo = (n: number, o: Partial<ExportDemo> = {}): ExportDemo => ({
   title: 'Créer une fiche usager',
@@ -203,12 +201,13 @@ describe('rendu', () => {
   it('PDF valide avec le titre et la langue du document', async () => {
     const pages = planDemoPdf(demo(2), DEFAULT_PDF, measure);
     const seen: number[] = [];
-    const buf = await renderPdf(pages, {
+    const buf = await renderTaggedPdf(PDFDocument, pages, {
       fonts,
       orientation: 'portrait',
       title: 'Créer une fiche usager',
       lang: 'fr-FR',
       author: 'Mission Locale Exemple',
+      compress: false,
       onProgress: (p) => seen.push(p),
     });
     const head = new TextDecoder('latin1').decode(new Uint8Array(buf));
@@ -221,7 +220,7 @@ describe('rendu', () => {
     const ac = new AbortController();
     ac.abort();
     await expect(
-      renderPdf(planDemoPdf(demo(1), DEFAULT_PDF, measure), {
+      renderTaggedPdf(PDFDocument, planDemoPdf(demo(1), DEFAULT_PDF, measure), {
         fonts,
         orientation: 'portrait',
         title: 't',

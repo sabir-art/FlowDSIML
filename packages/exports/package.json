@@ -10,9 +10,9 @@
     "./model": "./src/model.ts",
     "./layout": "./src/layout.ts",
     "./gif": "./src/gif.ts",
-    "./pdf": "./src/pdf.ts",
     "./mp4": "./src/mp4.ts",
-    "./accessible": "./src/accessible.ts"
+    "./accessible": "./src/accessible.ts",
+    "./pdf-tagged": "./src/pdfTaggedBrowser.ts"
   },
   "scripts": {
     "lint": "eslint src",
@@ -27,7 +27,7 @@
     "@flowdsiml/core": "workspace:*",
     "@flowdsiml/manifest": "workspace:*",
     "gifenc": "1.0.3",
-    "jspdf": "4.2.1",
-    "mp4-muxer": "5.2.2"
+    "mp4-muxer": "5.2.2",
+    "pdfkit": "0.17.2"
   }
 }

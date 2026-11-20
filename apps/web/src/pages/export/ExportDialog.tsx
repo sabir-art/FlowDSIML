@@ -41,7 +41,7 @@ import {
   planGif,
   type GifOptions,
 } from '@flowdsiml/exports/gif';
-import type { FontFiles } from '@flowdsiml/exports/pdf';
+import type { FontFiles } from '@flowdsiml/exports/pdf-tagged';
 import {
   MP4_FORMATS,
   MP4_MAX_SECONDS,
@@ -157,13 +157,13 @@ export function ExportDialog({
         }
       })
       .catch(() => alive && setFailed(true));
-    // Polices et mesure jsPDF : le même moteur sert à l'aperçu et au fichier
-    void import('@flowdsiml/exports/pdf')
+    // L35 : polices et mesure du moteur PDF balisé (PDFKit) : le même sert à l'aperçu et au fichier
+    void import('@flowdsiml/exports/pdf-tagged')
       .then(async (m) => {
         const f = await m.loadFonts();
         if (!alive) return;
         setFonts(f);
-        setMeasure(m.jsMeasure(m.createDoc(f)));
+        setMeasure(m.measureFor(f));
       })
       .catch(() => alive && setFailed(true));
     return () => {
@@ -213,7 +213,7 @@ export function ExportDialog({
     const used = opts.images ? demo.steps.map((s, i) => (s.imageUrl ? i : -1)).filter((i) => i >= 0) : [];
     setPhase({ kind: 'running', fmt: 'pdf', stage: 0, pct: 0, n: 0, total: layout.length });
     try {
-      const { renderPdf } = await import('@flowdsiml/exports/pdf');
+      const { renderPdf } = await import('@flowdsiml/exports/pdf-tagged');
       const imgs = new Map<number, Awaited<ReturnType<typeof toPdfImage>>>();
       for (const [k, i] of used.entries()) {
         try {

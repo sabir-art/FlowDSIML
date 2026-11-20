@@ -2,7 +2,7 @@
 
 Ce rapport présente l'état de l'accessibilité de TutoClick avant et après le lot L24, ainsi que les contrôles automatisés qui empêchent les régressions. Le référentiel est le RGAA 4.1, qui reprend les critères WCAG 2.1 de niveaux A et AA.
 
-> Périmètre : l'app web (éditeur, tableau de bord, partage, analytics, apprenants, réglages), le lecteur de démo et le centre de formation public. Le PDF balisé reste une dette connue (voir § 5).
+> Périmètre : l'app web (éditeur, tableau de bord, partage, analytics, apprenants, réglages), le lecteur de démo et le centre de formation public. Les PDF exportés sont balisés depuis L35 (§ 8).
 
 ## 1. Méthode
 
@@ -57,7 +57,7 @@ Détail des violations corrigées (un même problème compte une fois par page e
 
 ## 3 bis. Audit manuel de la Lead UX (A11Y-01 à 14)
 
-L'audit manuel (`docs/ux/a11y/audit-rgaa-l24.md`, sur 821e4b4) a relevé 14 écarts. Ils sont corrigés et vérifiés par `a11y-clavier.e2e.cjs`, sauf A11Y-10, qui reste une dette connue.
+L'audit manuel (`docs/ux/a11y/audit-rgaa-l24.md`, sur 821e4b4) a relevé 14 écarts. Ils sont corrigés et vérifiés par `a11y-clavier.e2e.cjs`. A11Y-10 (PDF non balisés) est corrigé en L35 (§ 8).
 
 | Code | Gravité | Correction | Contrôle automatique |
 |---|---|---|---|
@@ -70,7 +70,7 @@ L'audit manuel (`docs/ux/a11y/audit-rgaa-l24.md`, sur 821e4b4) a relevé 14 éca
 | A11Y-07 | Mineur | Partager : les titres des cartes passent en h2. Formation du centre : un h2 « Modules », visuellement masqué, précède la liste. | audit axe |
 | A11Y-08 | Mineur | Le titre de la fenêtre de confirmation a un identifiant unique (`useId`). | Aucun identifiant en double sur 6 pages |
 | A11Y-09 | Mineur | `aria-controls` n'est posé que si la cible est montée : menu ouvert, popover d'étiquettes, onglet actif, panneau des commentaires. | Aucune référence ARIA cassée sur 6 pages |
-| A11Y-10 | Majeur | **Dette connue** : PDF exportés non balisés (jsPDF). À mentionner dans la déclaration. | — |
+| A11Y-10 | Majeur | Corrigé en L35 : PDF balisés (PDFKit), voir § 8. | `exports.e2e.cjs`, `center.e2e.cjs`, test `pdfTagged.test.ts` |
 | A11Y-11 à 13 | Mineur / Majeur | Jetons de la Lead UX repris. Les champs de recherche (tableau de bord, centre) ont un contour à 3:1 au moins. Le focus du centre et du lecteur n'est plus codé en dur. | audit axe, focus visible |
 | A11Y-14 | Mineur | Les valeurs sont déjà écrites dans l'entonnoir, les apprenants, le donut et l'export. Pour les barres denses de 90 jours, dont les valeurs n'apparaissent qu'au survol, un liseré foncé est ajouté (les valeurs restent dans la table pour lecteur d'écran). | — |
 
@@ -83,7 +83,7 @@ Autre amélioration demandée par le chef : sur l'attestation (L15-07), le centr
 
 ## 5. Limites et suites
 
-- **PDF balisé (exports L15)** : jsPDF ne produit ni la structure de titres ni les textes alternatifs des captures. C'est une dette connue, à reprendre si l'on change de moteur PDF.
+- **PDF balisé (exports L15)** : corrigé en L35 (§ 8).
 - **Ce que l'automatisation ne couvre pas** : il manque un audit RGAA complet par une personne qualifiée, avec lecteurs d'écran réels (NVDA, VoiceOver) et grille officielle. Ce rapport ne vaut pas déclaration de conformité. Le statut affiché dans le pied du centre reste celui que choisit l'administrateur (« non évalué » par défaut).
 - **Contenus créés par les clients** : les contrastes et les textes des démos (couleurs de marque, bulles) dépendent de leurs auteurs. L'éditeur contrôle déjà le contraste de la couleur de marque (4,5:1).
 
@@ -159,6 +159,37 @@ sont vérifiés en plus).
 
 ### 7.4 Limites
 
-- Le PDF balisé (A11Y-10) reste une dette connue.
 - Aucun test avec lecteurs d'écran réels (NVDA, VoiceOver) dans ce lot : ce rapport ne vaut pas
   déclaration de conformité.
+
+## 8. PDF accessibles (lot L35)
+
+jsPDF ne sait pas produire de PDF balisé. PDFKit (MIT) le permet : il remplace jsPDF pour les deux PDF de
+l'app, le mode d'emploi d'une démo (export) et l'attestation de suivi (centre de formation). La mise en
+page ne change pas : les deux moteurs dessinent le même plan de pages (`packages/exports/src/layout.ts`).
+
+| Exigence | Réalisation |
+|---|---|
+| Balisage | `MarkInfo /Marked true`, arbre de structure `Document > Sect` (une section par page) |
+| Titres | `H1` (titre de la démo ou de l'attestation), `H2`, `H3` (une étape), puis `P` |
+| Ordre de lecture | Ordre des blocs du plan de page, qui suit l'ordre visuel |
+| Texte alternatif des captures | Élément `Figure` avec `Alt` (« Capture de l'étape n : titre ») |
+| Décor | Fonds, filets, pastilles numérotées, logo, en-tête et pied de page répétés : contenu `Artifact`, ignoré par les lecteurs d'écran |
+| Langue | `Lang` du document (langue de la démo, sinon de l'interface) |
+| Titre | `Title` et `DisplayDocTitle` : le lecteur PDF affiche le titre, pas le nom du fichier |
+| Norme | Identifiant PDF/UA-1 (`pdfuaid:part`) dans les métadonnées XMP ; polices embarquées avec table Unicode |
+
+Vérifications :
+- `packages/exports/src/pdfTagged.test.ts` : structure, titres, 5 figures avec alternative, décor, langue,
+  identifiant PDF/UA ;
+- `exports.e2e.cjs` et `center.e2e.cjs` : mêmes contrôles sur les fichiers réellement téléchargés ;
+- inspection de l'arbre de structure d'un PDF d'exemple (pikepdf) et comparaison visuelle avec l'ancien
+  rendu (identique, à 0,3 mm près pour la position verticale du texte).
+
+Limites :
+- aucun validateur PDF/UA complet (PAC, veraPDF) n'a été passé : l'identifiant PDF/UA déclare l'intention,
+  pas une conformité certifiée ;
+- le code PDF chargé à l'ouverture de l'export pèse 412 Ko compressés au lieu d'environ 125 Ko : il reste
+  hors du premier affichage ;
+- la déclaration d'accessibilité et l'audit de la Lead UX (`docs/ux/a11y/`) restent à mettre à jour par
+  elle (critère 13.3).

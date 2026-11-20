@@ -1,6 +1,6 @@
 /**
  * Aperçu d'une page PDF : le plan de blocs (millimètres) dessiné en SVG. Mêmes positions, mêmes
- * retours à la ligne que le fichier (mesurés avec la police embarquée par jsPDF).
+ * retours à la ligne que le fichier (mesurés avec la police embarquée par le moteur PDF, PDFKit).
  */
 import { onColor, type Page } from '@flowdsiml/exports/layout';
 import type { ExportDemo } from '@flowdsiml/exports/model';
