@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
 
   const text = await req.text();
   if (text.length > MAX_BODY) return json(413, { error: 'too_large' });
-  let body: { demoId?: unknown; password?: unknown; grant?: unknown };
+  let body: { demoId?: unknown; password?: unknown; grant?: unknown; accessToken?: unknown };
   try {
     body = JSON.parse(text);
   } catch {
@@ -129,11 +129,24 @@ Deno.serve(async (req) => {
   const password = typeof body.password === 'string' ? body.password.slice(0, 200) : null;
   const grant = typeof body.grant === 'string' ? body.grant.slice(0, 100) : null;
 
+  // L39 : retour d'un lien d'accès (invitation, domaine). Le jeton Supabase prouve l'adresse ; il n'est
+  // utilisé qu'ici, puis révoqué : le lecteur ne garde que l'accès (grant) rendu par demo_gate.
+  let email: string | null = null;
+  const accessToken =
+    typeof body.accessToken === 'string' && body.accessToken.length <= 4096 ? body.accessToken : null;
+  if (accessToken) {
+    const { data } = await supabase.auth.getUser(accessToken);
+    if (data.user?.email && data.user.email_confirmed_at) email = data.user.email.toLowerCase();
+    // Session de ce seul lien (scope local) : les autres sessions du compte ne sont pas touchées
+    await supabase.auth.admin.signOut(accessToken, 'local').catch(() => undefined);
+  }
+
   const { data: gate, error } = await supabase.rpc('demo_gate', {
     p_demo: demoId,
     p_password: password,
     p_grant: grant,
     p_client: await clientKey(ip, demoId),
+    p_email: email,
   });
   if (error || !gate) return json(500, { error: 'gate_failed' });
   if (gate.status !== 'ok') {

@@ -61,8 +61,8 @@ select throws_ok($$ select public.share_rules_preview((select ws from ctx), arra
 select pg_temp.login('00000000-0000-0000-0000-0000000070a1');
 select throws_ok($$ select public.set_share_rules((select ws from ctx), array[]::text[], null, 'editor', true) $$,
   'P0001', 'RULE_MODES_EMPTY', 'au moins un mode');
-select throws_ok($$ select public.set_share_rules((select ws from ctx), array['invite'], null, 'editor', true) $$,
-  'P0001', 'NOT_AVAILABLE', 'invitation : « Bientôt »');
+select throws_ok($$ select public.set_share_rules((select ws from ctx), array['sso'], null, 'editor', true) $$,
+  'P0001', 'NOT_AVAILABLE', 'mode inconnu refusé (L39 : invitation et domaine autorisables)');
 
 -- L27-07 : liens non conformes (lien public interdit, durée de 30 jours)
 select is((public.share_rules_preview((select ws from ctx), array['password'], null) ->> 'count')::int, 2,

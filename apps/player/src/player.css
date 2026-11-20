@@ -1486,6 +1486,19 @@ a.p-btn:hover {
   background: #fff4e5;
   color: #9a4d00;
 }
+.p-sys-chip--ok {
+  background: #e7f6ec;
+  color: #1d6b38;
+}
+@media (prefers-color-scheme: dark) {
+  .p-sys-chip--ok {
+    background: rgb(46 160 90 / 0.18);
+    color: #8fd6a8;
+  }
+}
+.p-gate > .p-link--muted {
+  margin-top: 4px;
+}
 .p-sys-act {
   display: inline-flex;
   align-items: center;

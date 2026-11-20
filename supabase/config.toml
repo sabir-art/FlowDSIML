@@ -425,6 +425,12 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
+# L39 : liens d'accès aux démos « Sur invitation » et « Par domaine e-mail » (envoi par Supabase Auth).
+# Demandes des visiteurs anonymes ; les actions d'équipe vérifient le JWT dans la fonction.
+[functions.access-email]
+enabled = true
+verify_jwt = false
+
 # L14 : centre de formation public (visiteurs anonymes, accès décidé par center_open)
 [functions.open-center]
 enabled = true

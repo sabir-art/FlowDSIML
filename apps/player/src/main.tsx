@@ -6,6 +6,7 @@ import {
   learnerResume,
   NetworkError,
   openDemo,
+  takeAccessReturn,
   resolveAddress,
   resolveLink,
   submitLead,
@@ -19,7 +20,7 @@ import { embedAllowed, parseRoute } from './logic';
 import { strings } from './i18n';
 import { APP_ORIGIN } from './config';
 import { Player, type PresentState } from './Player';
-import { PasswordGate, StartScreen, SysScreen, type SysKind } from './Gate';
+import { EmailGate, PasswordGate, StartScreen, SysScreen, type SysKind } from './Gate';
 import { PublicPage } from './PublicPage';
 import { fromCenterParams, type FromCenter } from './CenterNext';
 import '@flowdsiml/player-core/player-core.css';
@@ -99,6 +100,8 @@ function App() {
   const t = strings(navigator.language.startsWith('en') ? 'en' : 'fr');
 
   useEffect(() => {
+    // L39 : retour d'un lien d'accès : jeton lu une fois, adresse réécrite aussitôt (#/d/<démo>)
+    const back = takeAccessReturn(location, history);
     const route = parseRoute(location.hash);
     let cancelled = false;
     const fail = (kind: SysKind, locale = navigator.language, info?: GateInfo) =>
@@ -175,7 +178,10 @@ function App() {
       // L13 : reprise d'un apprenant identifié par son lien personnalisé (en parallèle de l'ouverture)
       const resumeP = linkToken ? learnerResume(linkToken, demoId).catch(() => null) : Promise.resolve(null);
       // L11 : l'accès est décidé côté serveur (open-demo), qui sert le manifeste et des images signées
-      const gate = await openDemo(demoId);
+      const opened = await openDemo(demoId, undefined, back?.token ?? undefined);
+      // Lien d'accès périmé ou déjà utilisé : écran « Ce lien d'accès a expiré »
+      const gate: GateInfo =
+        back && opened.status === 'email_required' ? { ...opened, status: 'link_expired' } : opened;
       const start = async (r: GateInfo) => {
         const manifest = r.manifest;
         if (!manifest) return fail('notFound');
@@ -222,7 +228,10 @@ function App() {
       if (
         gate.status === 'password_required' ||
         gate.status === 'password_wrong' ||
-        gate.status === 'locked'
+        gate.status === 'locked' ||
+        gate.status === 'email_required' ||
+        gate.status === 'email_not_allowed' ||
+        gate.status === 'link_expired'
       ) {
         if (gate.title) document.title = gate.title;
         if (!cancelled) setState({ status: 'gate', demoId, info: gate, open: (r) => void start(r) });
@@ -287,7 +296,9 @@ function App() {
       />
     );
   if (state.status === 'gate')
-    return (
+    return state.info.mode ? (
+      <EmailGate demoId={state.demoId} locale={navigator.language} info={state.info} />
+    ) : (
       <PasswordGate demoId={state.demoId} locale={navigator.language} info={state.info} onOpen={state.open} />
     );
   const m = state.manifest;

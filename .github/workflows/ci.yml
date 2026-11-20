@@ -29,11 +29,11 @@ jobs:
       - name: Scripts d'exploitation (tests)
         run: node --test scripts/*.test.mjs
       - run: pnpm turbo run lint typecheck test build
-      - name: Edge Functions (deno check de toutes les fonctions + tests du dispatch des webhooks, de la médiathèque, de html-ingest et de l'Assistance IA)
+      - name: Edge Functions (deno check de toutes les fonctions + tests du dispatch des webhooks, de la médiathèque, de html-ingest, de l'Assistance IA et d'access-email)
         working-directory: supabase/functions
         run: |
           npx -y deno@2.5.6 check --no-lock */index.ts
-          npx -y deno@2.5.6 test --no-lock --allow-net=127.0.0.1 webhooks-dispatch/ media/ ai/
+          npx -y deno@2.5.6 test --no-lock --allow-net=127.0.0.1 webhooks-dispatch/ media/ ai/ access-email/
           npx -y deno@2.5.6 test --no-lock --allow-env html-ingest/
 
   secrets:
@@ -154,3 +154,7 @@ jobs:
         run: |
           cd apps/web && node e2e/player-robustesse.e2e.cjs | tee /tmp/e2e-robustesse.log
           ! grep -q '^NOT OK' /tmp/e2e-robustesse.log
+      - name: Accès sur invitation et par domaine e-mail (L39, aucun envoi réel)
+        run: |
+          cd apps/web && node e2e/acces-email.e2e.cjs | tee /tmp/e2e-acces.log
+          ! grep -q '^NOT OK' /tmp/e2e-acces.log

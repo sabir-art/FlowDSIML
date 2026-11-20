@@ -91,9 +91,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const save = card.getByRole('button', { name: 'Enregistrer les règles' });
   ok(await save.isDisabled(), 'Enregistrer inactif sans changement');
   ok(
-    (await card.getByRole('checkbox', { name: /Sur invitation/ }).getAttribute('aria-disabled')) === 'true' &&
-      /Bientôt/.test(await card.locator('.check.is-soon').first().innerText()),
-    'Invitation et Domaine e-mail : « Bientôt »',
+    (await card.getByRole('checkbox', { name: /Sur invitation/ }).isChecked()) &&
+      (await card.locator('.check.is-soon').count()) === 0,
+    'L39 : Invitation et Domaine e-mail autorisables (plus de « Bientôt »)',
   );
   ok((await card.locator('fieldset legend').count()) >= 2, 'groupes en fieldset / legend');
   await card.getByRole('checkbox', { name: 'Toute personne avec le lien' }).uncheck();

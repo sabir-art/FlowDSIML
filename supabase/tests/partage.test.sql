@@ -47,7 +47,7 @@ select throws_ok($$ select public.set_demo_password('00000000-0000-0000-0000-000
 select throws_ok($$ select public.set_demo_access('00000000-0000-0000-0000-0000000000f9', 'password', false, null) $$,
   'P0001', 'PASSWORD_REQUIRED', 'mode mot de passe sans mot de passe refusé');
 select throws_ok($$ select public.set_demo_access('00000000-0000-0000-0000-0000000000f9', 'invite', false, null) $$,
-  'P0001', 'NOT_AVAILABLE', 'invitation : pas encore disponible');
+  'P0001', 'INVITES_REQUIRED', 'invitation (L39) : au moins un invité');
 select lives_ok($$ select public.set_demo_password('00000000-0000-0000-0000-0000000000f9', 'parcours-2026') $$,
   'mot de passe enregistré');
 select is((select mode from public.demo_access where demo_id = '00000000-0000-0000-0000-0000000000f9'), 'password',

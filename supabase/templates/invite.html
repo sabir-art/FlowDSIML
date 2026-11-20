@@ -8,7 +8,7 @@
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark">
-<title>Invitation à rejoindre un espace TutoClick</title>
+<title>{{ if .Data.demo_title }}Une démo vous est partagée{{ else }}Invitation à rejoindre un espace TutoClick{{ end }}</title>
 <!--[if mso]>
 <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
 <![endif]-->
@@ -39,36 +39,36 @@
 </style>
 </head>
 <body class="em-bg" style="margin:0;padding:0;background-color:#EEF2F6;">
-<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">Une invitation vous attend sur TutoClick.&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">{{ if .Data.demo_title }}Votre lien pour voir la démo «&nbsp;{{ .Data.demo_title }}&nbsp;».{{ else }}Une invitation vous attend sur TutoClick.{{ end }}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
 <table role="presentation" class="em-bg" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#EEF2F6;">
 <tr><td align="center" style="padding:32px 16px;">
 <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
 <table role="presentation" class="em-wrap" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
   <tr><td class="em-card em-pad" style="background-color:#FFFFFF;border:1px solid #E2E8EF;border-radius:16px;padding:32px 40px 32px 40px;">
     <a href="{{ .SiteURL }}" style="display:block;margin:0 0 24px -8px;text-decoration:none;"><img src="https://sabir-art.github.io/FlowDSIML/email/logo-tutoclick.png" width="176" height="62" alt="TutoClick" style="display:block;width:176px;height:62px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:20px;font-weight:bold;color:#A3195B;"></a>
-    <h1 class="em-text" style="margin:0 0 24px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:24px;line-height:32px;font-weight:700;color:#080808;">Rejoignez votre espace TutoClick</h1>
+    <h1 class="em-text" style="margin:0 0 24px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:24px;line-height:32px;font-weight:700;color:#080808;">{{ if .Data.demo_title }}Une démo vous est partagée{{ else }}Rejoignez votre espace TutoClick{{ end }}</h1>
     <p class="em-text" style="margin:0 0 16px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:16px;line-height:24px;color:#080808;">Bonjour,</p>
-    <p class="em-text" style="margin:0 0 16px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:16px;line-height:24px;color:#080808;">Une invitation vous attend pour rejoindre {{ if .Data.workspace_name }}l’espace «&nbsp;{{ .Data.workspace_name }}&nbsp;»{{ else }}un espace{{ end }} sur TutoClick, l’outil de démos et de tutoriels interactifs.</p>
-    <p class="em-text" style="margin:0 0 16px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:16px;line-height:24px;color:#080808;">Acceptez l’invitation pour créer votre compte avec l’adresse <strong>{{ .Email }}</strong>&nbsp;:</p>
+    <p class="em-text" style="margin:0 0 16px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:16px;line-height:24px;color:#080808;">{{ if .Data.demo_title }}{{ if .Data.workspace_name }}{{ .Data.workspace_name }} vous invite{{ else }}Vous êtes invité{{ end }} à voir la démo «&nbsp;{{ .Data.demo_title }}&nbsp;» sur TutoClick, l’outil de démos et de tutoriels interactifs.{{ else }}Une invitation vous attend pour rejoindre {{ if .Data.workspace_name }}l’espace «&nbsp;{{ .Data.workspace_name }}&nbsp;»{{ else }}un espace{{ end }} sur TutoClick, l’outil de démos et de tutoriels interactifs.{{ end }}</p>
+    <p class="em-text" style="margin:0 0 16px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:16px;line-height:24px;color:#080808;">{{ if .Data.demo_title }}Ce lien personnel ouvre la démo pour l’adresse <strong>{{ .Email }}</strong>&nbsp;:{{ else }}Acceptez l’invitation pour créer votre compte avec l’adresse <strong>{{ .Email }}</strong>&nbsp;:{{ end }}</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;">
       <tr><td class="em-btn" align="center" bgcolor="#A3195B" style="border-radius:10px;background-color:#A3195B;">
         <!--[if mso]>
         <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ .ConfirmationURL }}" style="height:48px;v-text-anchor:middle;width:258px;" arcsize="21%" stroke="f" fillcolor="#A3195B">
-        <w:anchorlock/><center style="color:#FFFFFF;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Accepter l’invitation</center>
+        <w:anchorlock/><center style="color:#FFFFFF;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">{{ if .Data.demo_title }}Voir la démo{{ else }}Accepter l’invitation{{ end }}</center>
         </v:roundrect>
         <![endif]-->
-        <!--[if !mso]><!-- --><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 28px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:16px;line-height:20px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:10px;background-color:#A3195B;">Accepter l’invitation</a><!--<![endif]-->
+        <!--[if !mso]><!-- --><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 28px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:16px;line-height:20px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:10px;background-color:#A3195B;">{{ if .Data.demo_title }}Voir la démo{{ else }}Accepter l’invitation{{ end }}</a><!--<![endif]-->
       </td></tr>
     </table>
     <p class="em-muted" style="margin:0 0 8px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:14px;line-height:20px;color:#4F5966;">Si le bouton ne fonctionne pas, copiez ce lien dans la barre d’adresse de votre navigateur&nbsp;:</p>
     <p style="margin:0 0 24px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:14px;line-height:20px;word-break:break-all;"><a class="em-link" href="{{ .ConfirmationURL }}" style="color:#A3195B;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
     <p class="em-muted" style="margin:0 0 16px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:14px;line-height:20px;color:#4F5966;">Ce lien est valable 1 heure et ne fonctionne qu’une seule fois.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="em-rule" style="border-top:1px solid #E2E8EF;padding-top:16px;">
-      <p class="em-muted" style="margin:0;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:14px;line-height:20px;color:#4F5966;">Cette invitation ne vous concerne pas&nbsp;? Ignorez cet e-mail&nbsp;: aucun compte n’est créé sans votre accord.</p>
+      <p class="em-muted" style="margin:0;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:14px;line-height:20px;color:#4F5966;">{{ if .Data.demo_title }}Ce message ne vous concerne pas&nbsp;? Ignorez-le&nbsp;: sans clic sur le lien, rien n’est ouvert.{{ else }}Cette invitation ne vous concerne pas&nbsp;? Ignorez cet e-mail&nbsp;: aucun compte n’est créé sans votre accord.{{ end }}</p>
     </td></tr></table>
   </td></tr>
   <tr><td class="em-pad" style="padding:24px 40px 0 40px;">
-    <p class="em-muted" style="margin:0 0 8px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:12px;line-height:18px;color:#4F5966;">Vous recevez cet e-mail parce qu’un administrateur d’un espace TutoClick a invité l’adresse {{ .Email }}.</p>
+    <p class="em-muted" style="margin:0 0 8px;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:12px;line-height:18px;color:#4F5966;">{{ if .Data.demo_title }}Vous recevez cet e-mail parce que l’accès à une démo TutoClick a été demandé pour l’adresse {{ .Email }}.{{ else }}Vous recevez cet e-mail parce qu’un administrateur d’un espace TutoClick a invité l’adresse {{ .Email }}.{{ end }}</p>
     <p class="em-muted" style="margin:0;font-family:'Segoe UI', Arial, Helvetica, sans-serif;font-size:12px;line-height:18px;color:#4F5966;">TutoClick · DSI des Missions Locales · <a class="em-link" href="{{ .SiteURL }}" style="color:#A3195B;text-decoration:underline;">{{ .SiteURL }}</a></p>
   </td></tr>
 </table>

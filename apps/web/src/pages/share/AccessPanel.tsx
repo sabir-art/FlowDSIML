@@ -9,10 +9,11 @@ import { formatRelativeShort } from '../../lib/format';
 import { useToast } from '../../components/Toast';
 import { useShareRules } from '../../lib/shareRules';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
+import { DomainConfig, InviteConfig } from './AccessEmail';
 
 type Access = Pick<
   Tables<'demo_access'>,
-  'mode' | 'ask_email' | 'expires_at' | 'password_changed_at' | 'updated_at'
+  'mode' | 'ask_email' | 'expires_at' | 'password_changed_at' | 'updated_at' | 'domains'
 >;
 type Mode = 'link' | 'password' | 'invite' | 'domain' | 'token';
 const DEFAULT: Access = {
@@ -21,6 +22,7 @@ const DEFAULT: Access = {
   expires_at: null,
   password_changed_at: null,
   updated_at: '',
+  domains: [],
 };
 const TZ = 'Europe/Paris';
 
@@ -78,10 +80,10 @@ export function useDemoAccess(demoId: string) {
   const load = useCallback(async () => {
     const { data } = await supabase
       .from('demo_access')
-      .select('mode, ask_email, expires_at, password_changed_at, updated_at')
+      .select('mode, ask_email, expires_at, password_changed_at, updated_at, domains')
       .eq('demo_id', demoId)
       .maybeSingle();
-    setAccess(data ?? DEFAULT);
+    setAccess(data ? { ...data, domains: data.domains ?? [] } : DEFAULT);
   }, [demoId]);
   useEffect(() => {
     void load();
@@ -94,7 +96,11 @@ export function useDemoAccess(demoId: string) {
         ? t('access.pwTooShort')
         : /PASSWORD_REQUIRED/.test(msg)
           ? t('access.pwRequired')
-          : t('errors.generic', { message: msg }),
+          : /INVITES_REQUIRED/.test(msg)
+            ? t('access.inv.required')
+            : /DOMAINS_REQUIRED/.test(msg)
+              ? t('access.dom.required')
+              : t('errors.generic', { message: msg }),
     );
   };
   const setRule = async (patch: Partial<Pick<Access, 'mode' | 'expires_at'>>, done: string) => {
@@ -129,7 +135,7 @@ export function useDemoAccess(demoId: string) {
       return false;
     }
   };
-  return { access, error, setRule, setPassword };
+  return { access, error, setRule, setPassword, reload: load };
 }
 
 type AccessState = ReturnType<typeof useDemoAccess>;
@@ -142,8 +148,8 @@ function generatePassword(): string {
 }
 
 /**
- * L11-01 à 05 : onglet Accès. « Qui peut voir la démo ? » en cartes radio (lien, mot de passe ; invitation
- * et domaine e-mail en Bientôt : ils exigent l'envoi d'e-mails), date d'expiration à l'heure de Paris.
+ * L11-01 à 05 : onglet Accès. « Qui peut voir la démo ? » en cartes radio (lien, mot de passe, invitation,
+ * domaine e-mail : L39), date d'expiration à l'heure de Paris.
  * Règles appliquées côté serveur (open-demo), sans republier.
  */
 export function AccessPanel({
@@ -156,14 +162,23 @@ export function AccessPanel({
   editable: boolean;
 }) {
   const { t } = useTranslation();
-  const { access, error, setRule, setPassword } = state;
+  const { access, error, setRule, setPassword, reload } = state;
   // L27-08 : règles de partage de l'espace (mode interdit visible mais désactivé, durée maximale)
   const { current, can } = useWorkspace();
   const rules = useShareRules(current?.id);
-  const forbidden = (m: Mode) => (m === 'link' || m === 'password') && !rules.modes.includes(m);
+  const forbidden = (m: Mode) => m !== 'token' && !rules.modes.includes(m);
   const maxDays = rules.max_link_days;
   const maxDate = maxDays ? new Date(Date.now() + maxDays * 86_400_000) : null;
   const [choice, setChoice] = useState<Mode>(access.mode as Mode);
+  // L39 : nombre d'invités (le mode « Sur invitation » en exige au moins un)
+  const [invites, setInvites] = useState(0);
+  useEffect(() => {
+    void supabase
+      .from('demo_access_invites')
+      .select('email', { count: 'exact', head: true })
+      .eq('demo_id', demoId)
+      .then(({ count }) => setInvites(count ?? 0));
+  }, [demoId]);
   const [pw, setPw] = useState('');
   const [show, setShow] = useState(false);
   const exp = access.expires_at ? isoToParis(access.expires_at) : null;
@@ -185,8 +200,8 @@ export function AccessPanel({
   const modes: Array<{ id: Mode; icon: ReactNode; available: boolean }> = [
     { id: 'link', icon: <Globe aria-hidden="true" />, available: true },
     { id: 'password', icon: <Key aria-hidden="true" />, available: true },
-    { id: 'invite', icon: <Mail aria-hidden="true" />, available: false },
-    { id: 'domain', icon: <Building2 aria-hidden="true" />, available: false },
+    { id: 'invite', icon: <Mail aria-hidden="true" />, available: true },
+    { id: 'domain', icon: <Building2 aria-hidden="true" />, available: true },
     // A1-11 (bloque_client) : jeton signé par le site du client, visible et désactivé
     { id: 'token', icon: <KeyRound aria-hidden="true" />, available: false },
   ];
@@ -198,6 +213,11 @@ export function AccessPanel({
     // Mot de passe déjà défini : le mode s'applique tout de suite ; sinon, à l'enregistrement du mot de passe
     if (m === 'password' && access.mode !== 'password' && access.password_changed_at)
       void setRule({ mode: 'password' }, t('access.savedPassword'));
+    // L39 : invitation et domaine s'appliquent dès qu'il y a un invité ou un domaine
+    if (m === 'invite' && access.mode !== 'invite' && invites > 0)
+      void setRule({ mode: 'invite' }, t('access.savedInvite'));
+    if (m === 'domain' && access.mode !== 'domain' && access.domains.length)
+      void setRule({ mode: 'domain' }, t('access.savedDomain'));
   };
   // Cartes radio au clavier : flèches entre les modes disponibles
   const onKey = (e: KeyboardEvent<HTMLFieldSetElement>) => {
@@ -272,6 +292,29 @@ export function AccessPanel({
               <Link className="mk-link l11-rule-link" to="/settings/security">
                 {t('rules.seeRules')}
               </Link>
+            )}
+            {m.id === 'invite' && choice === 'invite' && (
+              <InviteConfig
+                demoId={demoId}
+                editable={editable}
+                canSend={can('members.manage')}
+                onFirst={() => {
+                  setInvites(1);
+                  if (access.mode !== 'invite') void setRule({ mode: 'invite' }, t('access.savedInvite'));
+                }}
+              />
+            )}
+            {m.id === 'domain' && choice === 'domain' && (
+              <DomainConfig
+                demoId={demoId}
+                domains={access.domains}
+                editable={editable}
+                onSaved={(next) => {
+                  if (next.length && access.mode !== 'domain')
+                    void setRule({ mode: 'domain' }, t('access.savedDomain'));
+                  else void reload();
+                }}
+              />
             )}
             {m.id === 'password' && choice === 'password' && (
               <div className="l11-cfg">
@@ -474,14 +517,24 @@ export function AccessSummary({ state, url }: { state: AccessState; url: string 
       <h2 className="t-label">{t('access.summary')}</h2>
       <div className="l11-sum__line">
         <span className="l11-ic">
-          {access.mode === 'password' ? <Key aria-hidden="true" /> : <Globe aria-hidden="true" />}
+          {access.mode === 'password' ? (
+            <Key aria-hidden="true" />
+          ) : access.mode === 'invite' ? (
+            <Mail aria-hidden="true" />
+          ) : access.mode === 'domain' ? (
+            <Building2 aria-hidden="true" />
+          ) : (
+            <Globe aria-hidden="true" />
+          )}
         </span>
         <span>
           <b>{t(`access.mode.${access.mode}`)}</b>
           <span className="t-caption muted">
             {access.mode === 'password' && access.password_changed_at
               ? t('access.pwChangedCap', { when: formatRelativeShort(access.password_changed_at) })
-              : t(`access.modeHelp.${access.mode}`)}
+              : access.mode === 'domain' && access.domains.length
+                ? access.domains.map((d) => `@${d}`).join(', ')
+                : t(`access.modeHelp.${access.mode}`)}
           </span>
         </span>
       </div>

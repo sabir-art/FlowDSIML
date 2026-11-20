@@ -19,7 +19,7 @@ TutoClick tient deux rôles, et le registre a deux parties :
 | Représentant légal | [Nom, fonction] |
 | Délégué à la protection des données | [Nom ou « non désigné »], [adresse de contact dédiée] |
 | Date de création du registre | 2026-11-19 |
-| Dernière mise à jour | 2026-11-19 (lot L28) |
+| Dernière mise à jour | 2026-11-20 (lot L39 : accès aux démos par invitation ou domaine e-mail) |
 
 ## Hébergement et sous-traitants ultérieurs
 
@@ -137,6 +137,17 @@ TutoClick traite sur instruction documentée (DPA).
 | Sous-traitant ultérieur | Anthropic (États-Unis) ; ElevenLabs pour la voix de synthèse et les sous-titres automatiques |
 
 ---
+
+### B7. Accès aux démos sur invitation ou par domaine e-mail (L39)
+
+| Rubrique | Contenu |
+|---|---|
+| Finalité | Réserver une démo aux adresses invitées par l'espace, ou aux adresses d'un domaine e-mail autorisé, en vérifiant l'adresse du visiteur par un lien envoyé par e-mail |
+| Personnes concernées | Personnes invitées et visiteurs qui demandent un lien d'accès |
+| Données | Adresse e-mail invitée (liste par démo, date d'invitation, du dernier envoi et de la première ouverture) ; compte d'authentification « visiteur » créé à l'envoi du premier lien (adresse e-mail, dates de création et de connexion, marqueur « visiteur », titre de la démo et nom de l'espace, utilisés seulement dans le texte de l'e-mail) ; accès accordé (empreinte du jeton, adresse, date d'expiration) ; traces d'envoi pour les plafonds (empreinte SHA-256 de l'adresse, empreinte salée de l'adresse IP et de la démo, date) |
+| Destinataires | Éditeurs et administrateurs de l'espace (liste des invités et leur statut) ; Supabase (envoi des e-mails d'authentification par le SMTP de l'espace TutoClick) |
+| Durée de conservation | Invités : jusqu'au retrait par l'espace ou la suppression de la démo ; accès accordé : 7 jours ; lien d'accès : 1 heure, utilisable une fois ; traces d'envoi : 7 jours ; compte visiteur : supprimé après 90 jours sans connexion ni accès actif, s'il n'est membre d'aucun espace (tâche planifiée quotidienne) |
+| Mesures propres au produit | Réponse identique que l'adresse soit invitée ou non (pas de fuite de la liste) ; plafonds d'envoi par heure (20 au total, 10 par espace, 1 par adresse toutes les 10 minutes, 3 par client pour les demandes anonymes) ; jeton d'authentification lu une seule fois par le lecteur, effacé de l'adresse et révoqué aussitôt, jamais stocké ; retrait d'un invité ou d'un domaine révoquant l'accès |
 
 ## Droits des personnes
 
