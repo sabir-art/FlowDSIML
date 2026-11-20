@@ -166,10 +166,13 @@ const manifest = {
   await page.locator('.p-ba-card').getByRole('button', { name: 'Suivant' }).click();
   const range = page.getByRole('slider', { name: 'Curseur de comparaison Avant / Maintenant' });
   await range.waitFor();
-  ok((await range.getAttribute('aria-valuetext')) === '50 % Avant visible', 'L17-04 : valeur annoncée');
+  ok((await range.getAttribute('aria-valuetext')) === '50\u202f% Avant visible', 'L17-04 : valeur annoncée');
   await range.focus();
   await page.keyboard.press('ArrowRight');
-  ok((await range.getAttribute('aria-valuetext')) === '55 % Avant visible', 'L17-04 : pas de 5 % au clavier');
+  ok(
+    (await range.getAttribute('aria-valuetext')) === '55\u202f% Avant visible',
+    'L17-04 : pas de 5 % au clavier',
+  );
   ok(
     (await page.locator('.p-ba-layer.is-old').getAttribute('style')).includes('inset(0px 45% 0px 0px)') ||
       (await page.locator('.p-ba-layer.is-old').getAttribute('style')).includes('inset(0 45% 0 0)'),

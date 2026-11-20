@@ -195,18 +195,18 @@ export function Quiz({
             </ol>
           )}
           {!passed && !canRetry && <p class="p-quiz-note">{q.noAttemptsLeft}</p>}
-          <div class="p-actions">
+          <div class={`p-actions${passed ? ' p-actions--pass' : ''}`}>
             {passed ? (
               <>
-                {canRetry && !survey && (
-                  <button type="button" class="p-btn p-btn-ghost" onClick={restart}>
-                    <RotateCcw {...ICON} size={16} />
-                    {q.retake}
-                  </button>
-                )}
                 <button type="button" class="p-btn p-btn-primary" onClick={() => onFinish(true)}>
                   {q.finish}
                 </button>
+                {/* L38-14 : après une réussite, repasser le quiz n'est qu'un lien secondaire */}
+                {canRetry && !survey && (
+                  <button type="button" class="p-link p-quiz-retake" onClick={restart}>
+                    {q.retake}
+                  </button>
+                )}
               </>
             ) : (
               <>

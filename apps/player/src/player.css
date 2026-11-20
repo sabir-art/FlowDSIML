@@ -965,6 +965,15 @@ body {
   justify-content: center;
   margin-top: 20px;
 }
+/* L38-14 : « Repasser le quiz » sous « Terminer », en lien */
+.p-quiz-result .p-actions--pass {
+  flex-direction: column;
+  align-items: center;
+}
+.p-quiz-retake {
+  margin-top: 4px;
+  font-weight: 600;
+}
 .p-review-bar {
   position: absolute;
   top: 12px;
@@ -2836,4 +2845,29 @@ h1.p-title {
 .is-dark .p-controls .p-cc[aria-pressed='true'] {
   color: var(--p-chrome-text);
   background: rgb(255 255 255 / 0.16);
+}
+
+/* L38-15 : sous 480 px, le bouton d'action de l'en-tête se réduit à son icône ; le libellé reste lu
+   (texte masqué visuellement) et s'affiche en infobulle. */
+@media (max-width: 479px) {
+  .p-top-acts {
+    max-width: none;
+    flex: none;
+  }
+  .p-top-cta {
+    min-width: 40px;
+    padding-inline: 10px;
+  }
+  .p-top-cta-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .p-top-cta .p-top-cta-icon {
+    display: inline-flex;
+  }
 }

@@ -47,17 +47,19 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.waitForSelector('.canvas-frame img');
   await page.locator('.canvas-hotspot').first().click();
   await page.waitForSelector('#hs-body');
-  const entry = page.locator('.ai-entry');
+  // L38-10 : la voix off (sous la bulle) a aussi son entrée IA ; « Rédiger » vient en premier
+  const entry = page.locator('.ai-entry').first();
   await entry.waitFor();
   ok((await entry.getAttribute('aria-disabled')) === 'true', 'L30-09 : entrée désactivée (aria-disabled)');
   ok(
     /Assistance IA désactivée dans cet espace\. Un administrateur peut l’activer dans Paramètres > Assistance IA\./.test(
-      (await page.locator('.ai-tip').textContent()) || '',
+      (await page.locator('.ai-tip').first().textContent()) || '',
     ),
     'L30-09 : infobulle de la règle 4',
   );
   ok(
-    (await page.getByRole('link', { name: 'Ouvrir le réglage' }).count()) === 1,
+    // L38-10 : un lien pour « Rédiger », un pour la voix off sous la bulle
+    (await page.getByRole('link', { name: 'Ouvrir le réglage' }).count()) >= 1,
     'Admin : lien vers le réglage',
   );
   await entry.click({ force: true });
