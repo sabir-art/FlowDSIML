@@ -1647,7 +1647,7 @@ body:has(.mock-state) .ed {
 .stepblk { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; }
 .stepblk .num { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #080808; color: #FFFFFF; font-weight: 800; font-size: 11px; }
 .stepblk p { margin: 3px 0 0; font-size: 11px; }
-.keep { padding: 10px 12px; border-radius: 8px; background: #F4F9E8; border-left: 3px solid #95C11F; font-size: 10.5px; }
+.keep { padding: 10px 12px; border-radius: 8px; background: #F4F9E8; border: 1px solid #D5E6A6; font-size: 10.5px; }
 .keep b { display: block; margin-bottom: 2px; }
 .qa { display: grid; gap: 8px; font-size: 10.5px; }
 .qa li { margin-bottom: 4px; }
@@ -1785,7 +1785,7 @@ body:has(.mock-state) .ed {
 .slack-prev { padding: 14px 16px; border-radius: 10px; background: #FFFFFF; color: #1D1C1D; box-shadow: var(--fd-shadow-sm); font: 400 14px/1.45 var(--fd-font-sans); display: grid; grid-template-columns: 36px 1fr; gap: 10px; }
 .slack-prev .ava { width: 36px; height: 36px; border-radius: 8px; background: #F3F5F8; display: grid; place-items: center; }
 .slack-prev .ava img { width: 22px; }
-.slack-prev .att { margin-top: 6px; padding-left: 10px; border-left: 4px solid #A3195B; }
+.slack-prev .att { margin-top: 6px; padding: 8px 10px; border: 1px solid #DDDDDD; border-radius: 6px; }
 @media (max-width: 1100px) { .wh-grid { grid-template-columns: minmax(0, 1fr); } }
 .newkey svg { width: 18px; height: 18px; vertical-align: -3px; }
 .wh-grid .fd-table td, [data-pane='keys'] .fd-table td { white-space: nowrap; }
@@ -1810,7 +1810,7 @@ body:has(.mock-state) .ed {
 .nlist li.unread { background: var(--fd-color-primary-soft); }
 .nlist li .dot { width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--fd-color-primary); }
 .nlist small { display: block; color: var(--fd-color-text-muted); font-size: var(--fd-text-caption-size); margin-top: 2px; }
-.nlist .q { display: block; margin-top: 4px; padding: 6px 10px; border-radius: 8px; background: var(--fd-color-surface); border-left: 3px solid var(--fd-color-primary); font-size: var(--fd-text-label-size); }
+.nlist .q { display: block; margin-top: 4px; padding: 6px 10px; border-radius: 8px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); font-size: var(--fd-text-label-size); }
 .nlist .avatar { width: 36px; height: 36px; font-size: 0.6875rem; }
 .ngroup { margin: 6px 0 2px; font-size: var(--fd-text-caption-size); font-weight: 700; color: var(--fd-color-text-muted); text-transform: uppercase; letter-spacing: .04em; }
 .mention-box { position: relative; max-width: 720px; }

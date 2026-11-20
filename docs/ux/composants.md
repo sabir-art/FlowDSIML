@@ -401,6 +401,9 @@ Exception unique : 6 px (libellé → champ, gap des boutons `sm`). **Interdits*
 
 ### 15.6 Motifs proscrits (« effet IA générique »)
 
+> **Règle client absolue (20 nov.) : jamais de barre de couleur sur le bord gauche d'un bloc.** Elle vaut pour les toasts, les cartes, les notes, les citations, les alertes, les bandeaux, les encadrés, les éléments actifs (navigation, étape, ligne) et les e-mails, quels que soient l'épaisseur (1 px compris) et le moyen : `border-left`, `border-inline-start`, `box-shadow: inset`, `::before` ou `::after`, image de fond. Un bloc a une bordure **uniforme** sur tout son pourtour, ou pas de bordure.
+> Seules exceptions, qui ne sont pas des barres d'accent : le filet neutre de séparation entre deux panneaux juxtaposés (`border`, 1 px, sur toute la hauteur) et l'axe gris d'une frise chronologique ou du rail des étapes, qui relie des points.
+
 > Retour client du 17 nov. : le bloc arrondi avec une **barre de couleur épaisse sur le bord gauche** est jugé « trop slop IA ». Plus largement, tout ornement qui ne porte pas d'information est proscrit. Chaque motif ci-dessous est un **défaut de recette** ; l'alternative est obligatoire.
 
 | # | Motif proscrit | Pourquoi | Alternative sobre (à utiliser) |
@@ -420,7 +423,7 @@ Exception unique : 6 px (libellé → champ, gap des boutons `sm`). **Interdits*
 | M13 | **Animations décoratives** (rebonds, flottement, confettis, gradients animés) | Distrait, ignore `prefers-reduced-motion` | Transitions d'état uniquement (`duration-fast/base`), pulsation du hotspot seulement. |
 | M14 | **Arrondis excessifs** (`radius` ≥ 20 px) sur des cartes et champs d'interface | Aspect « jouet » | Échelle `radius` : 6–8 px pour les contrôles, 12 px cartes/menus, 16 px modales et bulles du player. |
 
-**Contrôle automatique conseillé (CI)** : refuser dans `apps/**/*.css` et `packages/ui/**/*.css` : `border-left: [2-9]px`, `border-inline-start: [2-9]px`, `background-clip: text`, `linear-gradient(` hors `.skeleton`/masques, `backdrop-filter` hors classes de floutage ; et dans les `.tsx`/`.json` : les emojis (plage Unicode U+1F300–U+1FAFF, U+2728).
+**Contrôle automatique conseillé (CI)** : refuser dans `apps/**/*.css`, `packages/ui/**/*.css` et `docs/ux/maquettes/**` : tout `border-left` ou `border-inline-start` coloré (hors `border-left: 1px solid var(--fd-color-border)` entre deux panneaux), `box-shadow: inset <n>px 0`, un `::before`/`::after` de 1 à 6 px de large collé au bord gauche, `background-clip: text`, `linear-gradient(` hors `.skeleton`/masques, `backdrop-filter` hors classes de floutage ; et dans les `.tsx`/`.json` : les emojis (plage Unicode U+1F300–U+1FAFF, U+2728).
 
 ### 15.7 Overlays : toujours dans un portail, jamais coupés (règle obligatoire)
 

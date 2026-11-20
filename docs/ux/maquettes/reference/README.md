@@ -14,7 +14,8 @@ Règle D13 : la structure, les éléments, les textes et les données de démo n
 | Carte « Plan actuel » (bordure et étiquette sarcelle) | Bleu DSI |
 | Jauges par métrique (sarcelle pour les membres, jaune pour les crédits) | Bleu (membres), orange (crédits), vert (réussite) |
 | Pilule « −20 % » verte | Vert DSI |
-| Indicateur de page active dans la barre latérale, liseré des toasts, option « Fond dégradé » de l'éditeur | Rétablis (ils avaient été retirés le 17 nov., commit 09f17cd) |
+| Option « Fond dégradé » de l'éditeur | Rétablie (elle avait été retirée le 17 nov., commit 09f17cd) |
+| Indicateur de page active en barre à gauche, liseré gauche des toasts | **Retirés** (règle client absolue, `composants.md` §15.6) : page active par le fond et la graisse ; toasts avec une bordure fine uniforme et une icône d'état |
 
 Les emojis restent retirés : le client ne veut pas de caractères utilisés comme icônes.
 

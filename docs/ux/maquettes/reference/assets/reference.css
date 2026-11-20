@@ -94,8 +94,8 @@
 
 /* ---- Effets d'origine retirés le 17 nov. (commit 09f17cd), rétablis ---- */
 .nav a { position: relative; }
-.nav a[aria-current="page"]::before { content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--fd-color-primary); }
-.toast { border-left: 3px solid var(--fd-color-success); }
+/* Règle client absolue : aucune barre de couleur sur le bord gauche d'un bloc (composants.md §15.6, M1 et M2).
+   Page active : fond et graisse (mockup.css) ; toasts : bordure fine uniforme et icône d'état. */
 
 /* ---- Sommaire : pastilles d'icône colorées d'origine ---- */
 .screen .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); display: grid; place-items: center; margin-bottom: 6px; }

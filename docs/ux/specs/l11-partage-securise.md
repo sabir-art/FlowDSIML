@@ -36,7 +36,7 @@ La structure reprend l'onglet validé (PRT-04) : rangées de réglages, puis « 
   3. Sur invitation (enveloppe) ;
   4. Par domaine e-mail (immeuble).
 
-  La carte choisie prend une bordure prune et le fond `primary-soft`, avec sa pastille d'icône en blanc. Sa configuration s'ouvre juste dessous, en retrait de 30 px, dans un bloc `surface-sunken` avec un liseré prune de 3 px à gauche.
+  La carte choisie prend une bordure prune et le fond `primary-soft`, avec sa pastille d'icône en blanc. Sa configuration s'ouvre juste dessous, en retrait de 30 px, dans un bloc `surface-sunken` avec une bordure fine `border` de 1 px sur tout le pourtour (jamais de barre de couleur à gauche, `composants.md` §15.6).
 - **Mot de passe** :
   - champ masqué avec bouton « Afficher » (`aria-pressed`) et bouton « Générer » (toast « Nouveau mot de passe généré ») ;
   - aide : « 8 caractères minimum. Le changer oblige les visiteurs à saisir le nouveau. » ;
