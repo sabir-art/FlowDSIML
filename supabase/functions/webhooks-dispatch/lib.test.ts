@@ -129,3 +129,19 @@ Deno.test('comparaison du secret partagé', () => {
   assert(!safeEqual('Bearer abc', 'Bearer abd'));
   assert(!safeEqual('Bearer ab', 'Bearer abc'));
 });
+
+Deno.test('L37 : envoi vers l’IP contrôlée, sans seconde résolution du nom', async () => {
+  let resolved = 0;
+  let pinned = '';
+  const r = await deliver(d, {
+    // Un DNS hostile répondrait 10.0.0.5 à une seconde question : elle n'est jamais posée
+    resolve: () => Promise.resolve(resolved++ === 0 ? ['93.184.215.14'] : ['10.0.0.5']),
+    fetch: (_u, _i, ip) => {
+      pinned = ip;
+      return Promise.resolve(new Response('ok'));
+    },
+  });
+  assertEquals(r.error, null);
+  assertEquals(resolved, 1);
+  assertEquals(pinned, '93.184.215.14');
+});

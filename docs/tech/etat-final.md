@@ -42,13 +42,21 @@ Synthèse pour le client. Le suivi écran par écran est dans le tableau de suiv
 
 ## Dettes techniques
 
-Le détail est dans docs/tech/dettes.md. Les points encore ouverts :
+Le détail est dans docs/tech/dettes.md. L37 a réglé les deux dernières dettes qui ne dépendaient pas du
+client :
 
-- Purge automatique des vidéos inutilisées : elle démarre dès que les deux secrets de l'envoi planifié sont
-  créés dans Supabase Vault. En attendant, ces vidéos comptent dans le quota de stockage.
-- Cache du CDN pour des démos publiées avant le passage au stockage privé : une seule démo fictive concernée.
-- En-tête d'adresse IP utilisé par la fonction d'ouverture des démos : à confirmer dans les journaux.
-- Webhooks : contrôle de l'adresse cible et envoi résolus séparément (risque faible, limites en place).
+- webhooks : l'envoi part vers l'adresse IP contrôlée, et TLS est vérifié pour le nom de l'URL ;
+- cache du CDN pour les démos publiées avant le passage au stockage privé : un script réécrit ces
+  fichiers et vide ainsi le cache. Il reste à le lancer une fois en production.
+
+Points encore ouverts, tous en attente du client :
+
+- purge automatique des vidéos inutilisées : elle démarre dès que les deux secrets de l'envoi planifié
+  sont créés dans Supabase Vault. En attendant, ces vidéos comptent dans le quota de stockage ;
+- en-tête d'adresse IP utilisé par la fonction d'ouverture des démos : à confirmer dans les journaux de
+  production ;
+- aperçu Open Graph : attend un domaine personnalisé ;
+- exports produits dans le navigateur (voir « Limites connues »).
 
 ## Décisions client en attente
 

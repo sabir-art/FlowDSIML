@@ -1,5 +1,6 @@
 // L23 : logique pure de l'envoi des webhooks (signature, contrôle des adresses, envoi d'un événement).
-// Les dépendances réseau (résolution DNS, fetch) sont injectées : tout se teste sans réseau.
+// Les dépendances réseau (résolution DNS, envoi vers l'IP contrôlée) sont injectées : tout se teste sans
+// réseau.
 
 export const TIMEOUT_MS = 10_000;
 export const MAX_RESPONSE = 2048;
@@ -105,7 +106,8 @@ export function checkUrl(raw: string): URL | null {
 }
 
 export type Resolver = (host: string) => Promise<string[]>;
-export type Fetcher = (url: string, init: RequestInit) => Promise<Response>;
+/** Envoi vers l'IP contrôlée (troisième argument), sans nouvelle résolution du nom (pinned.ts). */
+export type Fetcher = (url: string, init: RequestInit, ip: string) => Promise<Response>;
 
 export interface Delivery {
   id: string;
@@ -143,33 +145,37 @@ export async function deliver(
   });
   const url = checkUrl(d.url);
   if (!url) return fail('URL refusée');
-  if (!v4(url.hostname)) {
-    let ips: string[];
-    try {
-      ips = await deps.resolve(url.hostname);
-    } catch {
-      return fail('Résolution DNS impossible');
-    }
-    if (!ips.length) return fail('Résolution DNS impossible');
-    if (ips.some(isPrivateIp)) return fail('Adresse privée ou réservée refusée');
+  // checkUrl refuse les IP littérales : le nom est toujours résolu, puis l'envoi part vers une adresse
+  // contrôlée (L37 : plus de seconde résolution entre le contrôle et la connexion)
+  let ips: string[];
+  try {
+    ips = await deps.resolve(url.hostname);
+  } catch {
+    return fail('Résolution DNS impossible');
   }
+  if (!ips.length) return fail('Résolution DNS impossible');
+  if (ips.some(isPrivateIp)) return fail('Adresse privée ou réservée refusée');
   const t = Math.floor(now() / 1000);
   let res: Response;
   try {
-    res = await deps.fetch(url.toString(), {
-      method: 'POST',
-      redirect: 'manual',
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-      headers: {
-        'content-type': 'application/json',
-        'user-agent': USER_AGENT,
-        'tutoclick-signature': await signatureHeader(d.secrets, t, d.body),
-        'tutoclick-event': d.event_type,
-        'tutoclick-event-id': d.event_id,
-        'tutoclick-delivery': d.id,
+    res = await deps.fetch(
+      url.toString(),
+      {
+        method: 'POST',
+        redirect: 'manual',
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+        headers: {
+          'content-type': 'application/json',
+          'user-agent': USER_AGENT,
+          'tutoclick-signature': await signatureHeader(d.secrets, t, d.body),
+          'tutoclick-event': d.event_type,
+          'tutoclick-event-id': d.event_id,
+          'tutoclick-delivery': d.id,
+        },
+        body: d.body,
       },
-      body: d.body,
-    });
+      ips[0]!,
+    );
   } catch (e) {
     return fail(
       e instanceof Error && e.name === 'TimeoutError' ? 'Délai de 10 s dépassé' : 'Envoi impossible',

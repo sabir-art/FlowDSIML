@@ -6,11 +6,12 @@
 //    que si elle est en attente et que l'utilisateur est admin de son workspace (sinon : même réponse
 //    qu'une livraison inexistante) ; 10 envois immédiats par minute et par utilisateur au plus.
 // Même sécurité réseau dans les deux modes (lib.ts) : DNS puis refus des IP privées, pas de redirection,
-// 10 s, réponse tronquée à 2 Ko. Le résultat est enregistré par webhook_record_result.
+// 10 s, réponse tronquée à 2 Ko ; L37 : connexion à l'IP contrôlée, TLS vérifié pour le nom (pinned.ts). Le résultat est enregistré par webhook_record_result.
 // Déployée sans vérification JWT par la plateforme : chaque mode vérifie lui-même son accès.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { deliver, safeEqual, type Delivery } from './lib.ts';
+import { pinnedFetch } from './pinned.ts';
 
 const BATCH = 25;
 const CONCURRENCY = 5;
@@ -34,8 +35,10 @@ async function resolve(host: string): Promise<string[]> {
   return [...a, ...aaaa];
 }
 
+const send = pinnedFetch();
+
 async function sendOne(d: Delivery) {
-  const r = await deliver(d, { resolve, fetch });
+  const r = await deliver(d, { resolve, fetch: send });
   const { data: outcome } = await supabase.rpc('webhook_record_result', {
     p_id: d.id,
     p_status: r.status,

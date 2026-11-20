@@ -24,12 +24,14 @@ jobs:
       - run: pnpm format:check
       - name: Appels RPC des Edge Functions conformes aux signatures des migrations
         run: pnpm check:rpc
+      - name: Scripts d'exploitation (tests)
+        run: node --test scripts/*.test.mjs
       - run: pnpm turbo run lint typecheck test build
       - name: Edge Functions (deno check de toutes les fonctions + tests du dispatch des webhooks, de la médiathèque, de html-ingest et de l'Assistance IA)
         working-directory: supabase/functions
         run: |
           npx -y deno@2.5.6 check --no-lock */index.ts
-          npx -y deno@2.5.6 test --no-lock webhooks-dispatch/ media/ ai/
+          npx -y deno@2.5.6 test --no-lock --allow-net=127.0.0.1 webhooks-dispatch/ media/ ai/
           npx -y deno@2.5.6 test --no-lock --allow-env html-ingest/
 
   secrets:
