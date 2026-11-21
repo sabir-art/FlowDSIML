@@ -93,6 +93,12 @@
   - sarcelle : 200 `#9ED9D3`, 400 `#2BA79C` ;
   - violet : 200 `#CDBDF0`, 400 `#8A6AD6`.
 - Contrastes calculés avec la formule WCAG 2.x, texte sur fond de l'étiquette. Ils valent pour le texte de 13 px 600 des étiquettes, au seuil de 4,5:1.
+- **Taille de l'étiquette** (tranché le 21 novembre) : partout (`.tg`, cartes, listes, page Étiquettes), hauteur **24 px**, texte **13 px 600**, padding horizontal de 8 px, rayon plein. L'ancienne taille (22 px, 11,5 px) passait sous le corps de texte secondaire de §17.2, et les contrastes ci-dessus sont calculés pour 13 px.
+- **Pastilles de la fenêtre Couleur** :
+  - en clair, la teinte du texte de l'étiquette (700, `#8F5300` pour l'orange), avec une coche blanche ;
+  - en sombre, les teintes 400, avec une coche foncée ;
+  - la pastille choisie a un anneau de 2 px `text` et la coche.
+- **Pas d'infobulle sur les pastilles** : leur nom est déjà écrit sous la grille et donné par `aria-label`. Un seul Échap ferme la fenêtre et rend le focus au bouton « Plus d'actions ».
 - **Schéma** : seul changement, la contrainte `tags.color` accepte les 8 clés (`slate`, `teal` et `violet` en plus). C'est une migration courte : aucune donnée ne change.
 - L'**orange** a le texte `#8F5300` depuis 153f991. Il reste à remplacer la valeur écrite en dur dans `app.css` par le jeton `--fd-tag-orange-text`.
 
