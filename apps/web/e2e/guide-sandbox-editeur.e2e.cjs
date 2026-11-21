@@ -8,6 +8,7 @@
 const { chromium } = require('playwright');
 const { AxeBuilder } = require('@axe-core/playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const ID = (n) => `0b5c1f0e-0000-4000-8000-0000000000f${n}`;
@@ -55,6 +56,28 @@ const U = 'https://logiciel.acme.example';
       html_meta: { title, url, viewport: { w: 1280, h: 720 }, links: [] },
     });
   }
+  // Bulle de la page Agenda dont l'élément n'existe plus (page recapturée) : à replacer
+  const LOST = '0b5c1f0e-0000-4000-8000-0000000000a9';
+  state.tables.hotspots.push({
+    ...(state.tables.hotspots[0] ?? {}),
+    id: LOST,
+    step_id: ID(2),
+    demo_id: DEMO,
+    workspace_id: ws,
+    x: 0.1,
+    y: 0.2,
+    w: 0.2,
+    h: 0.1,
+    title: 'Ancienne bulle',
+    body: '',
+    placement: 'auto',
+    action: { type: 'next' },
+    cta: null,
+    pulse: true,
+    style: 'beacon',
+    position: 0,
+    sel: '#absent',
+  });
   await install(p, state);
   await p.goto(`${APP}/#/demos/${DEMO}/edit`);
   const frame = p.frameLocator('.html-stage iframe');
@@ -126,7 +149,7 @@ const U = 'https://logiciel.acme.example';
   await p.locator('.sp-panel', { hasText: 'Bulle du guide · étape 2' }).waitFor();
   await p.getByLabel('Titre (facultatif)').fill('Ouvrez l’agenda');
   await settle();
-  const hs = state.tables.hotspots.filter((h) => h.demo_id === DEMO);
+  const hs = state.tables.hotspots.filter((h) => h.demo_id === DEMO && h.id !== LOST);
   ok(
     hs.length === 2 && hs.some((h) => /p\.kpi$/.test(h.sel ?? '')) && hs.every((h) => h.w > 0 && h.h > 0),
     `bulles enregistrées avec sélecteur et rect de secours (${JSON.stringify(hs.map((h) => [h.sel, h.w, h.h]))})`,
@@ -218,6 +241,31 @@ const U = 'https://logiciel.acme.example';
   await p.waitForFunction(() => document.querySelectorAll('.sb-guide__row').length === 1);
   await settle();
   ok(saved().guideSteps.length === 1, 'Retirer du guide : étape retirée');
+
+  // ===== Élément introuvable : « Replacer la bulle » =====
+  await view('Page');
+  await p
+    .locator('.step-list, [role="listbox"]')
+    .first()
+    .waitFor()
+    .catch(() => {});
+  await p.getByText('Agenda', { exact: true }).first().click();
+  await frame.locator('h1', { hasText: 'Agenda' }).waitFor();
+  const tool = await openTool(p, 'hotspots');
+  await tool.getByRole('button', { name: /Ancienne bulle/ }).click();
+  const lost = p.locator('.sp-panel .alert', { hasText: 'Élément introuvable sur la page' });
+  await lost.waitFor();
+  ok(
+    (await lost.innerText()).includes('la bulle s’affiche à sa position d’origine. Replacez-la.'),
+    'élément introuvable : message de la spec',
+  );
+  await frame.locator('h1').click();
+  await p.locator('.eltb').waitFor();
+  await lost.getByRole('button', { name: 'Replacer la bulle' }).click();
+  await lost.waitFor({ state: 'detached' });
+  await settle();
+  const moved = state.tables.hotspots.find((h) => h.id === LOST);
+  ok(/h1$/.test(moved.sel) && moved.y < 0.2, `« Replacer la bulle » : nouvel élément et rect (${moved.sel})`);
 
   ok(errors.length === 0, `aucune erreur de page (${errors.join(' | ')})`);
   await b.close();

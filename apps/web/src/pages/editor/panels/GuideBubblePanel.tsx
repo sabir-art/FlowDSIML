@@ -1,4 +1,5 @@
-import { ChevronLeft, Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
+import { AlertTriangle, ChevronLeft, Crosshair, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Json } from '@flowdsiml/supabase-types';
 import type { DemoEditor } from '../useDemoEditor';
@@ -7,7 +8,8 @@ import { VarTextField } from '../vars/VarTextField';
 import { useVarCatalog } from '../../../lib/varCatalog';
 import { sandboxOf } from '../draftManifest';
 import { ignoredOf } from '../html/sandboxGraph';
-import { GUIDE_MAX, type GuideStepRef } from '../html/sandboxGuide';
+import { fallbackRect, GUIDE_MAX, type GuideStepRef } from '../html/sandboxGuide';
+import { frameSend, setHtmlEdit, useHtmlEdit } from '../html/htmlModel';
 
 const PLACEMENTS = ['auto', 'top', 'bottom', 'left', 'right'] as const;
 
@@ -38,6 +40,21 @@ export function GuideBubblePanel({
       sandbox: { ...sb, ignoredLinks: ignoredOf(demo.sandbox), guideSteps } as unknown as Json,
     });
   const advance = at >= 0 ? sb.guideSteps[at]!.advance : 'click';
+  // Élément visé : vérifié dans la page (sélecteur unique) ; introuvable ou ambigu → « Replacer la bulle »
+  const ed = useHtmlEdit(hotspot.step_id);
+  useEffect(() => {
+    if (!hotspot.sel) return;
+    setHtmlEdit({ probe: { sel: hotspot.sel, ok: null } });
+    frameSend.current?.({ t: 'probe', sel: hotspot.sel });
+  }, [hotspot.sel]);
+  const lost = !hotspot.sel || (ed.probe?.sel === hotspot.sel && ed.probe.ok === false);
+  function replace() {
+    const el = ed.selected;
+    const step = editor.steps.find((s) => s.id === hotspot.step_id);
+    if (!el || !step) return;
+    const vp = (step.html_meta as { viewport?: { w: number; h: number } } | null)?.viewport;
+    set({ sel: el.sel, ...fallbackRect(el.rect, vp?.w ?? 1280, vp?.h ?? 800) });
+  }
   return (
     <div className="sp-panel">
       <div className="hs-head">
@@ -86,10 +103,32 @@ export function GuideBubblePanel({
           disabled={readOnly}
           onChange={(v) => set({ body: v })}
         />
-        {hotspot.sel && (
+        {hotspot.sel && !lost && (
           <p className="help">
             {t('editor.sandbox.guideElement')} <code>{hotspot.sel}</code>
           </p>
+        )}
+        {lost && (
+          <div className="alert alert-warning" role="status">
+            <AlertTriangle size={16} aria-hidden="true" />
+            <div>
+              <p>{t('editor.sandbox.guideNotFound')}</p>
+              {!readOnly && (
+                <>
+                  <p className="help">{t('editor.sandbox.guideReplaceHelp')}</p>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    aria-disabled={!ed.selected || undefined}
+                    onClick={replace}
+                  >
+                    <Crosshair size={16} aria-hidden="true" />
+                    {t('editor.sandbox.guideReplace')}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
         )}
       </div>
       <div className="sec">

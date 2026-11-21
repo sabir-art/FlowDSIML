@@ -17,7 +17,7 @@ import type { Selection, StepRow } from '../types';
 import { sandboxOf } from '../draftManifest';
 import { ignoredOf } from './sandboxGraph';
 import { fallbackRect, GUIDE_MAX } from './sandboxGuide';
-import { asOps, frameSend, opOn, removeOp, setHtmlEdit, upsertOp, useHtmlEdit } from './htmlModel';
+import { asOps, frameSend, htmlProbe, opOn, removeOp, setHtmlEdit, upsertOp, useHtmlEdit } from './htmlModel';
 import './html.css';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
@@ -119,6 +119,12 @@ export function HtmlCanvas({
       if (m.t === 'ready') {
         ready.current = true;
         post({ fd: 1, t: 'init', mode: 'editor', ops: frameOps });
+        // A8 : vérification d'une bulle demandée avant que la page soit prête
+        const pending = htmlProbe();
+        if (pending && pending.ok === null) post({ fd: 1, t: 'probe', sel: pending.sel });
+      } else if (m.t === 'probe') {
+        const pending = htmlProbe();
+        if (pending) setHtmlEdit({ probe: { ...pending, ok: m.ok } });
       } else if (m.t === 'applied') setHtmlEdit({ notFound: m.notFound });
       else if (m.t === 'select') {
         setMenu(null);

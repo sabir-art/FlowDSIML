@@ -1390,7 +1390,10 @@
       "guideNotInGuide": "Cette bulle n’est pas dans le guide.",
       "guideAddBack": "Ajouter au guide",
       "guideListTitle": "Bulles du guide sur cette page",
-      "guideListHelp": "Sélectionnez un élément de la page, puis « Bulle du guide » dans sa barre d’actions."
+      "guideListHelp": "Sélectionnez un élément de la page, puis « Bulle du guide » dans sa barre d’actions.",
+      "guideNotFound": "Élément introuvable sur la page : la bulle s’affiche à sa position d’origine. Replacez-la.",
+      "guideReplace": "Replacer la bulle",
+      "guideReplaceHelp": "Sélectionnez l’élément dans la page, puis « Replacer la bulle »."
     },
     "importUnverified": "Cette image n’est pas vérifiée automatiquement : floutez les données personnelles avant de publier.",
     "noFormShort": "Aucun formulaire",

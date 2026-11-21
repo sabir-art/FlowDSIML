@@ -67,7 +67,9 @@ export type ToFrame =
    * sinon le rect (0..1 de la fenêtre capturée, au défilement 0) sert de secours.
    */
   | { fd: 1; t: 'target'; sel: string | null; rect: { x: number; y: number; w: number; h: number } | null }
-  | { fd: 1; t: 'target'; clear: true };
+  | { fd: 1; t: 'target'; clear: true }
+  /** A8 guide, éditeur : vérifie le sélecteur d'une bulle et sélectionne l'élément s'il est unique. */
+  | { fd: 1; t: 'probe'; sel: string };
 
 export interface Selected {
   sel: string;
@@ -101,7 +103,9 @@ export type FromFrame =
   /** A8 guide : position de l'élément visé, en px de la fenêtre de la page ; found : sélecteur trouvé. */
   | { fd: 1; t: 'target'; rect: { x: number; y: number; w: number; h: number }; found: boolean }
   /** A8 guide : clic du visiteur dans la zone visée. */
-  | { fd: 1; t: 'hit' };
+  | { fd: 1; t: 'hit' }
+  /** A8 guide, éditeur : le sélecteur d'une bulle désigne-t-il un seul élément de la page ? */
+  | { fd: 1; t: 'probe'; ok: boolean };
 
 const STEP_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const num = (v: unknown) => typeof v === 'number' && Number.isFinite(v);
@@ -158,6 +162,8 @@ export function parseFromFrame(data: unknown): FromFrame | null {
     }
     case 'hit':
       return { fd: 1, t: 'hit' };
+    case 'probe':
+      return { fd: 1, t: 'probe', ok: m.ok === true };
     case 'key':
       return m.key === 'edit' || m.key === 'hide' ? { fd: 1, t: 'key', key: m.key } : null;
     case 'multi': {
@@ -706,6 +712,11 @@ export const FRAME_RUNTIME = `(function () {
           te.scrollIntoView({ block: 'center', inline: 'nearest' });
       }
       postTarget();
+    } else if (m.t === 'probe' && mode === 'editor') {
+      var ps = typeof m.sel === 'string' ? m.sel.slice(0, 500) : '';
+      var found = !!ps && unique(ps);
+      if (found) select(q(ps));
+      post({ t: 'probe', ok: found });
     } else if (m.t === 'up' && mode === 'editor' && typeof m.n === 'number') {
       var c = current();
       for (var k = 0; c && k < m.n && c.parentElement && c.parentElement !== document.documentElement; k++) c = c.parentElement;

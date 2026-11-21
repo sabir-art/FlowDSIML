@@ -1390,7 +1390,10 @@
       "guideNotInGuide": "This bubble is not in the guide.",
       "guideAddBack": "Add to the guide",
       "guideListTitle": "Guide bubbles on this page",
-      "guideListHelp": "Select an element on the page, then “Guide bubble” in its action bar."
+      "guideListHelp": "Select an element on the page, then “Guide bubble” in its action bar.",
+      "guideNotFound": "Element not found on the page: the bubble shows at its original position. Place it again.",
+      "guideReplace": "Place the bubble again",
+      "guideReplaceHelp": "Select the element on the page, then “Place the bubble again”."
     },
     "importUnverified": "This image is not checked automatically: blur personal data before publishing.",
     "noFormShort": "No form",

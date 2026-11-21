@@ -28,6 +28,8 @@ interface HtmlEditState {
   multi: MultiEl[];
   /** L28-05 : sélecteur de l'image à remplacer (médiathèque ouverte), depuis la barre ou le panneau. */
   library: string | null;
+  /** A8 guide : sélecteur d'une bulle vérifié dans la page (ok : null tant que la page n'a pas répondu). */
+  probe: { sel: string; ok: boolean | null } | null;
 }
 let state: HtmlEditState = {
   stepId: null,
@@ -37,6 +39,7 @@ let state: HtmlEditState = {
   scope: 'step',
   multi: [],
   library: null,
+  probe: null,
 };
 const subs = new Set<() => void>();
 export function setHtmlEdit(patch: Partial<HtmlEditState>) {
@@ -52,13 +55,24 @@ export function useHtmlEdit(stepId: string): HtmlEditState {
     () => state,
   );
   if (s.stepId !== stepId) {
-    state = { stepId, selected: null, notFound: [], focusText: 0, scope: s.scope, multi: [], library: null };
+    state = {
+      stepId,
+      selected: null,
+      notFound: [],
+      focusText: 0,
+      scope: s.scope,
+      multi: [],
+      library: null,
+      probe: null,
+    };
     return state;
   }
   return s;
 }
 /** L25-09 : élément sélectionné dans le canevas HTML (cible proposée par « Relier les colonnes »). */
 export const htmlSelection = () => ({ stepId: state.stepId, selected: state.selected });
+/** A8 : vérification de sélecteur en attente (renvoyée à la page dès qu'elle est prête). */
+export const htmlProbe = () => state.probe;
 
 /** Envoi vers la page de l'éditeur (canevas monté). */
 export const frameSend: {
@@ -66,6 +80,7 @@ export const frameSend: {
     | ((
         m:
           | { t: 'select'; sel: string | null }
+          | { t: 'probe'; sel: string }
           | { t: 'up'; n: number }
           | { t: 'similar' }
           | { t: 'multi-clear' },
