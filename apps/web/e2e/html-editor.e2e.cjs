@@ -173,7 +173,8 @@ const page = (h1) => `<!doctype html><html><head><meta charset="utf-8"><title>${
   );
 
   // Clavier : Tab (élément suivant), Échap (parent)
-  await frame.locator('h1').click();
+  // Coin gauche du titre : la barre d'actions de l'élément précédent peut en recouvrir le centre
+  await frame.locator('h1').click({ position: { x: 6, y: 6 } });
   await frame.locator('body').press('Escape');
   await p.waitForTimeout(200);
   ok((await p.getByText('Élément · main').count()) === 1, 'Échap : élément parent');

@@ -126,12 +126,19 @@ const pages = [
   );
   ok(
     await p.evaluate(() => {
-      const box = document.querySelector('.sb-scroll').getBoundingClientRect();
-      return [...document.querySelectorAll('.sbnode')].every(
-        (c) => c.getBoundingClientRect().right <= box.right - 4,
+      // Le plan défile dans sa zone quand il dépasse (RGAA 7.3) : la marge se mesure au bord du plan
+      const map = document.querySelector('.sbmap').getBoundingClientRect();
+      const scroll = document.querySelector('.sb-scroll');
+      const fits =
+        scroll.scrollWidth <= scroll.clientWidth || getComputedStyle(scroll).overflowX !== 'visible';
+      return (
+        fits &&
+        [...document.querySelectorAll('.sbnode')].every(
+          (c) => c.getBoundingClientRect().right <= map.right - 4,
+        )
       );
     }),
-    'aucune carte ne touche le bord du plan',
+    'aucune carte ne touche le bord du plan (zone défilante si le plan dépasse)',
   );
   ok(
     (await p.locator('#sb-guide').getAttribute('aria-disabled')) === 'true',

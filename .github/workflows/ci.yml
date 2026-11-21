@@ -149,6 +149,12 @@ jobs:
       - name: Google Safe Browsing L49 (lien signalé bloqué, vérification indisponible, nouvelle vérification à la publication, lecteur)
         if: always()
         run: cd apps/web && node e2e/l49-safebrowsing.e2e.cjs
+      - name: Éditeur de page HTML (sélection souris et clavier, actions, liens, annulation)
+        if: always()
+        run: cd apps/web && node e2e/html-editor.e2e.cjs
+      - name: Plan du Sandbox (liaisons, pages clés, clic non relié)
+        if: always()
+        run: cd apps/web && node e2e/html-sandbox.e2e.cjs
       - name: Éditeur L48-E (rail d'outils, panneau, flou en modale)
         if: always()
         run: cd apps/web && node e2e/l48e-editeur.e2e.cjs
