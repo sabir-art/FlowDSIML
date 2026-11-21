@@ -38,7 +38,9 @@ const N = ' ';
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
-  const panel = page.locator('.panel');
+  // L48-E : le test A/B est dans l'outil « Étape » du rail
+  const panel = page.locator('[data-tool-panel="step"]');
+  if ((await panel.count()) === 0) await page.locator('[data-tool="step"]').first().click();
   const create = panel.getByRole('button', { name: 'Créer une variante B' });
   await create.scrollIntoViewIfNeeded();
   await shot('l18-01-ab-creer');
@@ -100,10 +102,10 @@ const N = ' ';
   // cohérente avec 206 visiteurs de chaque côté
   ok(
     (await panel
-      .locator('.ab-badge, .ab-sec .badge')
+      .locator('.ab-sec .fd-status')
       .first()
       .evaluate((el) => parseFloat(getComputedStyle(el).fontSize))) >= 12,
-    'badge « En cours » à la taille standard',
+    'état « En cours » en texte (L50 X4), à la taille standard',
   );
   await panel
     .locator('.ab-sec .sec-title')
