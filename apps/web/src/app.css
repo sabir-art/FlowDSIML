@@ -1672,8 +1672,10 @@
   overflow: auto;
 }
 .tg-create {
+  /* L52 : action « Créer », puis la rangée de pastilles alignée à gauche, 8 px dessous */
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
   border-top: 1px solid var(--fd-color-border);
   padding-top: 6px;
@@ -1698,7 +1700,10 @@
 .tg-colors {
   display: inline-flex;
   gap: 6px;
-  margin-left: auto;
+}
+/* Sous « Créer « … » » : même retrait que le bouton (6 px) */
+.tg-create .tg-colors {
+  margin-left: 6px;
 }
 .tg-colors .sw {
   width: 18px;

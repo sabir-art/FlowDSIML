@@ -2934,7 +2934,6 @@
       "teal": "Teal",
       "violet": "Violet"
     },
-    "limits": "Up to {{ws}} tags per workspace, {{demo}} per demo.",
     "of": "Tags of {{title}}",
     "filterBy": "Filter by tags",
     "none": "No tags yet. Add some from a demo’s “…” menu.",
@@ -2993,7 +2992,8 @@
     "merged_other": "“{{from}}” merged into “{{to}}” ({{count}} demos)",
     "mergeInstead": "Merge with “{{name}}”",
     "mergeNone": "No other tag",
-    "addOnCard": "+ Tag"
+    "addOnCard": "+ Tag",
+    "searchOrCreateShort": "Search or create"
   },
   "learners": {
     "title": "Learners",

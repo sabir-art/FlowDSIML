@@ -1154,7 +1154,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                         </td>
                         <td className="fd-muted">{folders.find((f) => f.id === d.folder_id)?.name ?? '—'}</td>
                         <td className="r num">{formatNumber(s?.views ?? 0)}</td>
-                        <td className="r">
+                        <td className="r nowrap">
                           <span className="dt-rate">
                             <span className="dt-bar" aria-hidden="true">
                               <span style={{ width: `${rate}%` }} />
@@ -1162,7 +1162,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                             <span className="num">{rate} %</span>
                           </span>
                         </td>
-                        <td className="fd-muted">
+                        <td className="fd-muted nowrap">
                           <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
                             {formatRelativeShort(d.updated_at)}
                           </time>

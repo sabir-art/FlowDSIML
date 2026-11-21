@@ -2934,7 +2934,6 @@
       "teal": "Sarcelle",
       "violet": "Violet"
     },
-    "limits": "{{ws}} étiquettes au plus par espace, {{demo}} par démo.",
     "of": "Étiquettes de {{title}}",
     "filterBy": "Filtrer par étiquettes",
     "none": "Aucune étiquette pour l’instant. Ajoutez-en depuis le menu « … » d’une démo.",
@@ -2993,7 +2992,8 @@
     "merged_other": "« {{from}} » fusionnée dans « {{to}} » ({{count}} démos)",
     "mergeInstead": "Fusionner avec « {{name}} »",
     "mergeNone": "Aucune autre étiquette",
-    "addOnCard": "+ Étiquette"
+    "addOnCard": "+ Étiquette",
+    "searchOrCreateShort": "Chercher ou créer"
   },
   "learners": {
     "title": "Apprenants",

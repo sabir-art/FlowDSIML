@@ -239,7 +239,8 @@ export function TagPicker({
           type="search"
           value={q}
           maxLength={32}
-          placeholder={t('tags.searchOrCreate')}
+          // Texte visible court (280 px) ; le nom accessible le contient et le précise
+          placeholder={t('tags.searchOrCreateShort')}
           aria-label={t('tags.searchOrCreate')}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => {
@@ -285,12 +286,13 @@ export function TagPicker({
           {store.error}
         </p>
       )}
+      {/* Raison de la limite, seulement quand elle s'applique */}
       {demoFull ? (
         <p id={`tg-full-${demoId}`} className="fd-help tg-help">
           {t('tags.demoLimit', { n: DEMO_TAG_LIMIT })}
         </p>
       ) : (
-        <p className="fd-help tg-help">{t('tags.limits', { ws: TAG_LIMIT, demo: DEMO_TAG_LIMIT })}</p>
+        wsFull && needle && !exact && <p className="fd-help tg-help">{t('tags.wsLimit', { n: TAG_LIMIT })}</p>
       )}
       {manage && (
         <Link className="tg-manage-link" to="/settings/tags">

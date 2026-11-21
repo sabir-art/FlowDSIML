@@ -225,6 +225,10 @@
   padding: 0;
   overflow-x: auto;
 }
+.demo-table td.nowrap {
+  /* Complétion et Modifiée sur une ligne (les étiquettes passent à la ligne dans la colonne Nom) */
+  white-space: nowrap;
+}
 .demo-table {
   width: 100%;
   border-collapse: collapse;
