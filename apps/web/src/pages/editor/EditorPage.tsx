@@ -48,7 +48,7 @@ import { CropCanvas, CropPanel, cropDraftFor, type CropDraft } from './capture/C
 import { StepList } from './StepList';
 import { useStepComments } from './comments/useStepComments';
 import { CommentsDock, readDock, storeDock, type DockState } from './comments/CommentsDock';
-import { useDockFit } from './comments/useDockFit';
+import { useDockFit, useScrollable } from './comments/useDockFit';
 import { useAuth } from '../../auth/AuthProvider';
 import { StepPanel } from './panels/StepPanel';
 import { AbCanvasSwitch, asVariantB, useAbTest } from './ab/AbTest';
@@ -344,6 +344,7 @@ export function EditorPage() {
   const [frameEl, setFrameEl] = useState<HTMLElement | null>(null);
   const stageInner = useRef<HTMLDivElement>(null);
   useDockFit(stageInner, dock.open, zoom === 'fit', [dock.height, step?.id, selection, step?.kind]);
+  const stageScrolls = useScrollable(stageInner, [step?.id, dock.open, dock.height, zoom]);
   useEffect(() => {
     setFrameEl(document.querySelector<HTMLElement>('.canvas-frame'));
   }, [step?.id, rawEditor.loading, narrow]);
@@ -1046,7 +1047,7 @@ export function EditorPage() {
             <RemoteCursors store={presence.store} stepId={step?.id ?? null} names={names} frame={frameEl} />
           )}
           <div className="stage-main">
-            <div className="stage-inner" ref={stageInner}>
+            <div className="stage-inner" ref={stageInner} tabIndex={stageScrolls ? 0 : undefined}>
               {step && ab.test?.step_id === step.id && <AbCanvasSwitch ab={ab} />}
               {sandbox && planView ? (
                 <SandboxPlan

@@ -1,18 +1,18 @@
 /**
  * Retours client 21/11 §1 : commentaires dans un panneau sous le canevas (comme des notes de
- * présentateur), qui n'en réduit jamais la largeur. Replié : barre de 40 px ; déplié : 240 px par
- * défaut, de 160 px à 50 % de la colonne, poignée en role=separator. État par utilisateur dans
+ * présentateur), qui n'en réduit jamais la largeur. Replié : barre de 40 px ; déplié : 320 px par
+ * défaut, de 200 px à 50 % de la fenêtre (arbitrage UX 37f2d68), poignée en role=separator. État par utilisateur dans
  * localStorage (fd.comments.dock), Alt + C ouvre et ferme (géré par l'éditeur).
  */
-import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, Lock, MessageSquare } from 'lucide-react';
 import { CommentsPanel, readSeen } from './CommentsPanel';
 import type { StepCommentsApi } from './useStepComments';
 
 const KEY = 'fd.comments.dock';
-export const DOCK_MIN = 160;
-const DOCK_DEFAULT = 240;
+export const DOCK_MIN = 200;
+const DOCK_DEFAULT = 320;
 const STEP = 16;
 
 export interface DockState {
@@ -72,16 +72,13 @@ export function CommentsDock({
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
-  // 50 % de la colonne du canevas au plus (mesurée en continu)
-  const [max, setMax] = useState(DOCK_MIN * 2);
-  useLayoutEffect(() => {
-    const col = ref.current?.parentElement;
-    if (!col) return;
-    const update = () => setMax(Math.max(DOCK_MIN, Math.floor(col.clientHeight / 2)));
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(col);
-    return () => ro.disconnect();
+  // 50 % de la fenêtre au plus (suivi au redimensionnement)
+  const maxFor = () => Math.max(DOCK_MIN, Math.floor(window.innerHeight / 2));
+  const [max, setMax] = useState(maxFor);
+  useEffect(() => {
+    const update = () => setMax(maxFor());
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
   }, []);
   const h = Math.min(Math.max(height, DOCK_MIN), max);
 
@@ -191,7 +188,25 @@ export function CommentsDock({
         </span>
         <span className="cm-dock__step">{t('editor.stepN', { n: stepIndex + 1 })}</span>
       </div>
-      <div id="cm-dock-body" className="cm-dock__body" hidden={!open}>
+      <div
+        id="cm-dock-body"
+        className="cm-dock__body"
+        hidden={!open}
+        // Échap dans le champ vide (liste des mentions fermée) referme le panneau, Mac compris
+        onKeyDown={(e) => {
+          const el = e.target as HTMLElement;
+          if (
+            e.key === 'Escape' &&
+            el instanceof HTMLTextAreaElement &&
+            el.closest('.cm-compose') &&
+            el.value === '' &&
+            el.getAttribute('aria-expanded') !== 'true'
+          ) {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+      >
         {/* Monté seulement déplié : l'ouverture marque les commentaires comme lus */}
         {open && (
           <CommentsPanel

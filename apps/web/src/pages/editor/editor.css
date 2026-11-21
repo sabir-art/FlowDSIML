@@ -3621,3 +3621,13 @@
 .mk .cm-dock .fd-empty__icon {
   display: none;
 }
+.mk .cm-dock.is-open .cm-dock__bar {
+  border-bottom: 1px solid var(--fd-color-border);
+}
+/* Liste : dans la largeur du panneau (sans marge négative rognée par .cm-scroll), 8 px sous la barre */
+.mk .cm-dock .cm-list {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: var(--fd-space-2) 0 0;
+}

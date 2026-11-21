@@ -2,8 +2,9 @@
  * Retours client 21/11 §1 : les commentaires dans un panneau sous le canevas (spec
  * docs/ux/specs/retours-client-21-11.md §1). Faux Supabase, données fictives.
  *  - replié : barre de 40 px, « Commentaires », badge, chevron, « Étape n » ; plus d'outil dans le rail ;
- *  - déplié : 240 px par défaut, largeur du canevas inchangée, canevas recadré (« Ajuster ») ;
- *  - poignée role=separator : flèches de 16 px, Début et Fin (160 px, 50 % de la colonne) ;
+ *  - déplié : 320 px par défaut, largeur du canevas inchangée, canevas recadré (« Ajuster ») ;
+ *  - poignée role=separator : flèches de 16 px, Début et Fin (200 px, 50 % de la fenêtre) ; arbitrage UX 37f2d68 ;
+ *  - barre filetée en bas, liste dans la largeur du panneau, 8 px sous la barre ; Échap dans le champ vide ferme ;
  *  - badge : rien sans commentaire ouvert, surface-sunken si tout est lu, primary si un non lu, « 99+ » ;
  *  - état retenu (fd.comments.dock), sauf ouverture par un lien ; Alt + C ; focus ; mouvement réduit ;
  *  - zoom 100 % : le hotspot sélectionné et sa bulle restent à 16 px au moins du panneau ;
@@ -101,7 +102,7 @@ const badge = (p) =>
     await toggle.click();
     await p.waitForTimeout(400);
     const dock = await box(p, '.cm-dock');
-    ok(Math.round(dock.height) === 240, `déplié : 240 px par défaut (${dock.height})`);
+    ok(Math.round(dock.height) === 320, `déplié : 320 px par défaut (${dock.height})`);
     ok(Math.abs((await box(p, '.stage')).width - stage0.width) < 1, 'la largeur du canevas ne change pas');
     const frame1 = await box(p, '.stage-inner > .frame');
     ok(
@@ -120,6 +121,25 @@ const badge = (p) =>
       (await p.locator('.cm-dock').evaluate((el) => el.scrollWidth - el.clientWidth)) <= 1,
       'aucun débordement horizontal (§18.7)',
     );
+    // Recette UX : filet sous la barre, liste dans la largeur du panneau, 8 px sous la barre
+    const sep = await p.evaluate(() => {
+      const bar = document.querySelector('.cm-dock__bar');
+      const list = document.querySelector('.cm-dock .cm-list');
+      const scroll = document.querySelector('.cm-dock .cm-scroll');
+      const l = list.getBoundingClientRect();
+      const sc = scroll.getBoundingClientRect();
+      return {
+        border: getComputedStyle(bar).borderBottomWidth,
+        pad: getComputedStyle(list).paddingTop,
+        inside: l.left >= sc.left - 0.5 && l.right <= sc.right + 0.5,
+        over: list.scrollWidth - list.clientWidth,
+      };
+    });
+    ok(
+      sep.border === '1px' && sep.pad === '8px',
+      `filet de 1 px sous la barre, liste à 8 px (${sep.border}, ${sep.pad})`,
+    );
+    ok(sep.inside && sep.over <= 1, 'liste dans la largeur du panneau (rien de rogné à droite)');
 
     // Poignée au clavier
     const handle = p.locator('.cm-dock__handle');
@@ -131,26 +151,26 @@ const badge = (p) =>
         min: Number(el.getAttribute('aria-valuemin')),
         max: Number(el.getAttribute('aria-valuemax')),
         h: el.parentElement.getBoundingClientRect().height,
-        col: el.closest('.stage').clientHeight,
+        col: window.innerHeight,
       }));
     const a0 = await attrs();
     ok(
-      a0.role === 'separator' && a0.o === 'horizontal' && a0.now === 240 && a0.min === 160,
-      'poignée : separator horizontal, valuenow 240, valuemin 160',
+      a0.role === 'separator' && a0.o === 'horizontal' && a0.now === 320 && a0.min === 200,
+      'poignée : separator horizontal, valuenow 320, valuemin 200',
     );
-    ok(a0.max === Math.floor(a0.col / 2), `valuemax = 50 % de la colonne (${a0.max} / ${a0.col})`);
+    ok(a0.max === Math.floor(a0.col / 2), `valuemax = 50 % de la fenêtre (${a0.max} / ${a0.col})`);
     await handle.focus();
     await p.keyboard.press('ArrowUp');
-    ok((await attrs()).now === 256, 'flèche haut : +16 px');
+    ok((await attrs()).now === 336, 'flèche haut : +16 px');
     await p.keyboard.press('ArrowDown');
     await p.keyboard.press('ArrowDown');
-    ok((await attrs()).now === 224, 'flèche bas : -16 px');
+    ok((await attrs()).now === 304, 'flèche bas : -16 px');
     await p.keyboard.press('Home');
-    ok((await attrs()).now === 160, 'Début : 160 px');
+    ok((await attrs()).now === 200, 'Début : 200 px');
     await p.keyboard.press('End');
     await p.waitForTimeout(300);
     const aEnd = await attrs();
-    ok(aEnd.now === aEnd.max && Math.abs(aEnd.h - aEnd.max) < 1, `Fin : 50 % de la colonne (${aEnd.h} px)`);
+    ok(aEnd.now === aEnd.max && Math.abs(aEnd.h - aEnd.max) < 1, `Fin : 50 % de la fenêtre (${aEnd.h} px)`);
     // Glisser
     const hb = await handle.boundingBox();
     await p.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2);
@@ -170,6 +190,24 @@ const badge = (p) =>
       'après rechargement : déplié, même hauteur',
     );
 
+    // Échap dans le champ vide ferme, focus rendu au bouton (Mac compris : pas de raccourci Option)
+    await p.locator('.cm-compose textarea').focus();
+    await p.keyboard.press('Escape');
+    await p.waitForTimeout(300);
+    ok(
+      (await toggle.getAttribute('aria-expanded')) === 'false' &&
+        (await p.evaluate(() => document.activeElement?.classList.contains('cm-dock__toggle'))),
+      'Échap dans le champ vide ferme, focus sur le bouton',
+    );
+    await toggle.click();
+    await p.locator('.cm-dock.is-open .cm').waitFor();
+    await p.locator('.cm-compose textarea').fill('Brouillon');
+    await p.keyboard.press('Escape');
+    ok(
+      (await toggle.getAttribute('aria-expanded')) === 'true',
+      'Échap avec un brouillon : le panneau reste ouvert',
+    );
+    await p.locator('.cm-compose textarea').fill('');
     // Alt + C ferme (depuis le champ), focus rendu au bouton
     await p.locator('.cm-compose textarea').focus();
     await p.keyboard.press('Alt+KeyC');

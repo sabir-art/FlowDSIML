@@ -33,8 +33,6 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.addInitScript(
     (seenAt) => {
       localStorage.setItem('fd.editor.comments.seen', JSON.stringify({ s1: seenAt }));
-      // Panneau Commentaires à 320 px : à 240 px (défaut), la pilule et un commentaire ne tiennent pas ensemble
-      localStorage.setItem('fd.comments.dock', JSON.stringify({ open: false, height: 320 }));
     },
     at(6) + '',
   );
