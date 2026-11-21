@@ -5,7 +5,7 @@ import './style.css';
 import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
 import { APP_URL, DEBUGGER } from '@/lib/config';
-import { APP_NAME } from '@flowdsiml/core';
+import { APP_NAME, htmlCaptureVerdict, parseHtmlCapture } from '@flowdsiml/core';
 import { installTooltips } from '@flowdsiml/ui/tooltip';
 import type { CaptureMode, FillTarget, PopupRequest, RecordingStatus } from '@/lib/messages';
 import { lang, stepsCaptured, strings } from '@/lib/i18n';
@@ -221,7 +221,47 @@ function syncFill() {
   const filling = !!$<HTMLSelectElement>('fill').value && mode() === 'clicks';
   show('title-field', !filling);
 }
-$<HTMLSelectElement>('workspace').addEventListener('change', () => void loadFills());
+$<HTMLSelectElement>('workspace').addEventListener('change', () => {
+  void loadFills();
+  void syncHtmlRule();
+});
+
+/**
+ * L49 §2.1 : réglage « Captures HTML » de l'espace. Hors réglage, « Capture HTML » reste visible et
+ * désactivée avec la raison ; la capture d'écran reste proposée. Le serveur refuse de toute façon.
+ */
+async function syncHtmlRule() {
+  const ws = $<HTMLSelectElement>('workspace').value;
+  const html = document.querySelector<HTMLInputElement>('input[name="mode"][value="html"]')!;
+  const card = html.closest('label')!;
+  const [{ data }, [tab]] = await Promise.all([
+    ws
+      ? supabase.from('workspaces').select('settings').eq('id', ws).maybeSingle()
+      : Promise.resolve({ data: null }),
+    browser.tabs.query({ active: true, currentWindow: true }),
+  ]);
+  const rule = parseHtmlCapture((data?.settings as Record<string, unknown> | null)?.htmlCapture);
+  let host = '';
+  try {
+    const u = new URL(tab?.url ?? '');
+    if (u.protocol === 'http:' || u.protocol === 'https:') host = u.hostname;
+  } catch {
+    /* onglet sans adresse : seul le mode « désactivées » s'applique ici */
+  }
+  const v = rule.mode === 'disabled' || host ? htmlCaptureVerdict(rule, host) : 'ok';
+  html.disabled = v !== 'ok';
+  card.classList.toggle('is-soon', v !== 'ok');
+  $('html-help').textContent =
+    v === 'disabled'
+      ? strings.htmlBlockedDisabled
+      : v === 'domain'
+        ? strings.htmlBlockedDomain.replace('{{domain}}', host)
+        : strings.typeHtmlHelp;
+  if (v !== 'ok' && html.checked) {
+    document.querySelector<HTMLInputElement>('input[name="mode"][value="clicks"]')!.checked = true;
+    syncMode();
+  }
+}
 $<HTMLSelectElement>('fill').addEventListener('change', syncFill);
 
 async function render() {
@@ -263,7 +303,7 @@ async function render() {
   show('login', false);
   show('setup', true);
   await loadWorkspaces();
-  await loadFills();
+  await Promise.all([loadFills(), syncHtmlRule()]);
 }
 
 $<HTMLAnchorElement>('signup-link').href = `${APP_URL.replace(/\/$/, '')}/#/signup`;

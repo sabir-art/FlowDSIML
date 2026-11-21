@@ -226,3 +226,72 @@ h2 {
     color: #f97066;
   }
 }
+
+/* L49 §3 : rapport d'analyse de sécurité (statut en point de 8 px et texte, sans badge ni fond) */
+.sec {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 24px;
+}
+.sec h2 {
+  margin: 0;
+}
+.sec p {
+  margin: 0;
+}
+.sec-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.dot.is-safe {
+  background: var(--fd-color-success);
+}
+.dot.is-removed {
+  background: var(--fd-color-warning);
+}
+.dot.is-partial {
+  background: var(--fd-color-text-muted);
+}
+.sec-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  max-width: 420px;
+}
+.sec-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  font-size: 13px;
+}
+.sec-list .num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.link {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fd-color-link, var(--fd-color-primary));
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.sec-status .link {
+  margin-left: auto;
+}
+.small {
+  font-size: 12px;
+}

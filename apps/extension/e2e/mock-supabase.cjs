@@ -1,6 +1,7 @@
 // Faux Supabase minimal : enregistre les requêtes et répond juste assez pour l'extension.
 const http = require('http');
 const log = [];
+let htmlCapture = { mode: 'allowed', domains: [] };
 let tusOffset = 0;
 const user = {
   id: '00000000-0000-0000-0000-0000000000aa',
@@ -38,6 +39,13 @@ http
       if (req.method === 'OPTIONS') return res.writeHead(204, cors).end();
       const send = (code, obj) => res.writeHead(code, cors).end(JSON.stringify(obj));
       if (req.url === '/__log') return send(200, log);
+      // L49 : réglage « Captures HTML » de l'espace, modifiable par le test
+      if (req.url === '/__html-capture') {
+        htmlCapture = JSON.parse(buf.toString() || '{}');
+        return send(200, htmlCapture);
+      }
+      if (req.url.startsWith('/rest/v1/workspaces') && req.method === 'GET')
+        return send(200, { settings: { htmlCapture } });
       if (req.url.startsWith('/auth/v1/token')) return send(200, session);
       if (req.url.startsWith('/auth/v1/user')) return send(200, user);
       if (req.url.startsWith('/rest/v1/members'))

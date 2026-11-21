@@ -6,6 +6,13 @@ import { strings } from '@/lib/i18n';
 import { htmlStore, type PendingHtmlPage } from '@/lib/htmlStore';
 import { sendHtml, type HtmlDemoKind } from '@/lib/htmlUpload';
 import { supabase } from '@/lib/supabase';
+import {
+  HTML_SECURITY_KEYS,
+  activeRemoved,
+  htmlSecurityStatus,
+  sumHtmlSecurity,
+  type HtmlSecurityReport,
+} from '@flowdsiml/core';
 
 /**
  * A8 : vérification de la capture HTML. Aperçus en iframe sandbox vide (aucun script, origine
@@ -18,6 +25,49 @@ for (const el of document.querySelectorAll<HTMLElement>('[data-i18n]'))
 document.title = s.hrTitle;
 const fmt = (t: string, v: Record<string, string | number>) =>
   t.replace(/\{\{(\w+)\}\}/g, (_m, k: string) => String(v[k] ?? ''));
+
+/** L49 §3 : liste des compteurs (une ligne par compteur, chiffre à droite ; « autres » s'il dépasse 0). */
+function counters(r: HtmlSecurityReport, id: string): HTMLUListElement {
+  const ul = document.createElement('ul');
+  ul.className = 'sec-list';
+  ul.id = id;
+  ul.hidden = true;
+  ul.setAttribute('aria-label', s.secGroup);
+  for (const k of HTML_SECURITY_KEYS) {
+    if (k === 'other' && !r.other) continue;
+    const li = document.createElement('li');
+    const label = document.createElement('span');
+    label.textContent = s[`sec_${k}` as keyof typeof s];
+    const n = document.createElement('span');
+    n.className = 'num';
+    n.textContent = String(r[k] ?? 0);
+    li.append(label, n);
+    ul.append(li);
+  }
+  return ul;
+}
+
+/** Statut écrit avec un point de 8 px (jamais la couleur seule). */
+function status(r: HtmlSecurityReport): HTMLElement {
+  const st = htmlSecurityStatus(r);
+  const p = document.createElement('p');
+  p.className = 'sec-status';
+  const dot = document.createElement('span');
+  dot.className = `dot is-${st}`;
+  dot.setAttribute('aria-hidden', 'true');
+  const b = document.createElement('strong');
+  b.textContent = st === 'removed' ? s.secRemoved : s.secSafe;
+  p.append(dot, b);
+  return p;
+}
+
+function toggle(btn: HTMLButtonElement, list: HTMLElement) {
+  btn.setAttribute('aria-controls', list.id);
+  btn.addEventListener('click', () => {
+    list.hidden = !list.hidden;
+    btn.setAttribute('aria-expanded', String(!list.hidden));
+  });
+}
 
 function alert(msg: string | null) {
   $('alert').textContent = msg ?? '';
@@ -55,6 +105,20 @@ function card(p: PendingHtmlPage, i: number): HTMLLIElement {
     el.textContent = text;
     meta.append(el);
   }
+  // L49 §3 : statut de la page ; « Détail » déplie ses compteurs
+  if (p.security) {
+    const st = status(p.security);
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'link';
+    more.textContent = s.secDetail;
+    more.setAttribute('aria-label', fmt(s.secDetailPage, { n: i + 1 }));
+    more.setAttribute('aria-expanded', 'false');
+    st.append(more);
+    const list = counters(p.security, `sec-p${i}`);
+    toggle(more, list);
+    meta.append(st, list);
+  }
   li.append(frame, meta);
   return li;
 }
@@ -70,6 +134,24 @@ async function main() {
     return;
   }
   $('pages').replaceChildren(...pages.map(card));
+  // L49 §3 : rapport cumulé (somme des pages) en tête
+  const reports = pages.flatMap((p) => (p.security ? [p.security] : []));
+  if (reports.length) {
+    const total = sumHtmlSecurity(reports);
+    const st = htmlSecurityStatus(total);
+    $('sec-dot').className = `dot is-${st}`;
+    $('sec-st').textContent = st === 'removed' ? s.secRemoved : s.secSafe;
+    $('sec-sum').textContent = `${fmt(reports.length === 1 ? s.secSummary_one : s.secSummary_other, {
+      pages: reports.length,
+      removed: activeRemoved(total),
+    })}. ${st === 'removed' ? s.secRemovedBody : s.secSafeBody}`;
+    const list = counters(total, 'sec-list');
+    $('sec-list').replaceWith(list);
+    toggle($<HTMLButtonElement>('sec-more'), list);
+    $('sec').hidden = false;
+  }
+  const sendable = pages.filter((p) => !p.tooBig).length;
+  send.textContent = fmt(sendable === 1 ? s.hrSendN_one : s.hrSendN_other, { n: sendable });
   // L48-G §3 : type choisi dans « Nouvelle démo » (métadonnées du compte), prérempli et modifiable ;
   // à défaut, Sandbox proposé d'office quand les pages sont reliées entre elles
   const chosen = await supabase.auth

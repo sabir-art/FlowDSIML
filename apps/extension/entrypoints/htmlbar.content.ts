@@ -41,7 +41,14 @@ export default defineContentScript({
           border-radius:10px;background:#141311;color:#fff;font:500 13px system-ui,sans-serif}
         .toast.err{background:#7a1f12}
         [hidden]{display:none!important}
+        .notice{position:absolute;bottom:96px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:flex-start;
+          width:max-content;max-width:min(440px,calc(100vw - 32px));padding:10px 14px;border-radius:10px;background:#141311;
+          color:#d6d3d1;font:400 13px/1.4 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+        .notice svg{flex:none;margin-top:1px}
       </style>
+      <p class="notice" role="note" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>${s.htmlNotice}</span></p>
       <div class="toast" role="status" hidden></div>
       <div class="bar" role="toolbar" aria-label="${s.htmlBar}">
         <span class="dot" aria-hidden="true"></span>
@@ -64,6 +71,9 @@ export default defineContentScript({
       toast.hidden = false;
       setTimeout(() => (toast.hidden = true), 3000);
     }
+
+    // L49 §6 : mention d'autorisation au lancement (avant la première page), lisible 10 s
+    const notice = $<HTMLParagraphElement>('.notice');
 
     let busy = false;
     async function capture() {
@@ -121,6 +131,10 @@ export default defineContentScript({
     // Au chargement : capture si la page suit un clic (ou au démarrage)
     void send<{ capture: boolean; pages: number }>({ type: 'fd:html-ready' }).then((r) => {
       setCount(r?.pages ?? 0);
+      if ((r?.pages ?? 0) === 0) {
+        notice.hidden = false;
+        setTimeout(() => (notice.hidden = true), 10000);
+      }
       if (r?.capture) setTimeout(() => void capture(), 600);
     });
   },

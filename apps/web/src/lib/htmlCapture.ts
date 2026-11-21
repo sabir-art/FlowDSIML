@@ -4,7 +4,10 @@
  * La base et html-ingest appliquent la règle ; l'interface la reflète (types désactivés, raison de l'admin).
  */
 import { useEffect, useState } from 'react';
+import { hostAllowed, parseHtmlCapture as parse } from '@flowdsiml/core';
 import { supabase } from './supabase';
+
+export { hostAllowed };
 
 export type HtmlCaptureMode = 'allowed' | 'domains' | 'disabled';
 export interface HtmlCapture {
@@ -18,18 +21,6 @@ export const MAX_DOMAINS = 50;
 const DOMAIN = /^(\*\.)?([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
 export const normalizeDomain = (s: string) => s.trim().toLowerCase();
 export const domainOk = (s: string) => s.length <= 253 && DOMAIN.test(s);
-
-/** Même règle que public.html_capture_host_in : égalité, ou sous-domaine pour « *.x » (pas x lui-même). */
-export function hostAllowed(host: string, domains: string[]): boolean {
-  const h = host.toLowerCase();
-  return domains.some((d) => h === d || (d.startsWith('*.') && h.endsWith(d.slice(1)) && h !== d.slice(2)));
-}
-
-function parse(v: unknown): HtmlCapture {
-  const o = (v ?? {}) as Partial<HtmlCapture>;
-  const mode = o.mode === 'domains' || o.mode === 'disabled' ? o.mode : 'allowed';
-  return { mode, domains: Array.isArray(o.domains) ? o.domains.filter((d) => typeof d === 'string') : [] };
-}
 
 const cache = new Map<string, Promise<HtmlCapture>>();
 const EVENT = 'fd:html-capture';

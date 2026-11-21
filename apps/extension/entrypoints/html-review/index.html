@@ -26,6 +26,23 @@
             ><b data-i18n="hrSandbox"></b><small data-i18n="hrSandboxHelp"></small></span
         ></label>
       </fieldset>
+      <section id="sec" class="sec" role="group" aria-labelledby="sec-h" hidden>
+        <h2 id="sec-h" data-i18n="secGroup"></h2>
+        <p class="sec-status">
+          <span id="sec-dot" class="dot" aria-hidden="true"></span><strong id="sec-st"></strong>
+        </p>
+        <p id="sec-sum" class="muted"></p>
+        <button
+          id="sec-more"
+          type="button"
+          class="link"
+          aria-expanded="false"
+          aria-controls="sec-list"
+          data-i18n="secDetail"
+        ></button>
+        <ul id="sec-list" class="sec-list" hidden></ul>
+        <p class="muted small" data-i18n="secServerNote"></p>
+      </section>
       <section aria-labelledby="pages-h">
         <h2 id="pages-h" data-i18n="hrPages"></h2>
         <ol id="pages" class="pages"></ol>

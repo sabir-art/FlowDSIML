@@ -35,6 +35,39 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await popup.fill('#password', 'x');
   await popup.click('#login button[type=submit]');
   await popup.waitForSelector('#setup:not([hidden])');
+  // L49 §2.1 : réglage de l'espace ; « Capture HTML » visible, désactivée, avec la raison
+  const rule = (r) =>
+    fetch('http://localhost:54400/__html-capture', { method: 'POST', body: JSON.stringify(r) });
+  const htmlCard = async () => {
+    // L'onglet actif est la page à capturer (le popup est ouvert ici dans un onglet en arrière-plan)
+    await page.bringToFront();
+    await popup.reload();
+    await popup.waitForSelector('#setup:not([hidden])');
+    await popup.waitForTimeout(400);
+    return {
+      disabled: await popup.isDisabled('input[name="mode"][value="html"]'),
+      help: await popup.textContent('#html-help'),
+    };
+  };
+  await rule({ mode: 'disabled', domains: [] });
+  let hc = await htmlCard();
+  ok(
+    hc.disabled && hc.help === 'Les captures HTML sont désactivées dans votre espace.',
+    'L49 : désactivées, raison',
+  );
+  await rule({ mode: 'domains', domains: ['app.example.com'] });
+  hc = await htmlCard();
+  ok(
+    hc.disabled && hc.help.startsWith('Non autorisée sur ce site\u202f: localhost n’est pas dans la liste'),
+    `L49 : domaine hors liste, raison (${hc.help})`,
+  );
+  ok(
+    !(await popup.isDisabled('input[name="mode"][value="clicks"]')),
+    'L49 : capture d’écran toujours proposée',
+  );
+  await rule({ mode: 'allowed', domains: [] });
+  hc = await htmlCard();
+  ok(!hc.disabled, 'L49 : autorisées, carte active');
   await popup.click('.type-card:has(input[value=html])');
   ok((await popup.$$('.type-card')).length === 4, 'quatrième carte « Capture HTML »');
   ok(await popup.isVisible('#opt-html'), 'aide de la capture HTML');
@@ -73,6 +106,15 @@ const WS = '11111111-1111-1111-1111-111111111111';
     };
   });
   ok(bar.label === 'Capture HTML en cours' && bar.n === '1 page', `barre de capture HTML (${bar.n})`);
+  const notice = await page.evaluate(() => {
+    const host = [...document.querySelectorAll('[data-fd-ui]')].find((e) => e.shadowRoot);
+    const n = host?.shadowRoot.querySelector('.notice');
+    return n && !n.hidden ? n.textContent.trim() : null;
+  });
+  ok(
+    notice?.startsWith('Capturez uniquement des logiciels que vous êtes autorisé à reproduire.'),
+    'L49 §6 : mention d’autorisation au lancement',
+  );
   await page.click('a[href="/page2"]');
   await page.waitForURL(/page2/);
   ok(await waitSteps(2), 'page suivante capturée après le clic');
@@ -134,6 +176,22 @@ const WS = '11111111-1111-1111-1111-111111111111';
     ),
     'aperçu fidèle',
   );
+  // L49 §3 : rapport cumulé, statut par page, « Envoyer 3 pages »
+  const sec = review.getByRole('group', { name: 'Analyse de sécurité' });
+  ok(await sec.isVisible(), 'L49 : rapport cumulé en tête');
+  ok(
+    /^(Page sûre|Éléments retirés)$/.test(await sec.locator('.sec-status strong').textContent()) &&
+      /^3 pages nettoyées\u202f: \d+ éléments actifs retirés\./.test(await review.textContent('#sec-sum')),
+    `L49 : statut et résumé (${await review.textContent('#sec-sum')})`,
+  );
+  await sec.getByRole('button', { name: 'Détail' }).click();
+  ok(
+    (await sec.getByRole('list').locator('li').count()) >= 6 &&
+      (await sec.getByRole('button', { name: 'Détail' }).getAttribute('aria-expanded')) === 'true',
+    'L49 : « Détail » déplie les compteurs',
+  );
+  ok((await review.locator('#pages .sec-status').count()) === 3, 'L49 : statut de chaque page');
+  ok((await review.textContent('#send')) === 'Envoyer 3 pages', '« Envoyer 3 pages »');
   await shot(review, 'l20-00-verification', true);
   await review.click('input[value=sandbox]');
   await review.click('#send');

@@ -181,6 +181,32 @@ const fr = {
   hrDelete: 'Supprimer la capture',
   hrConfirmDelete: 'Supprimer la capture\u202f? Les pages seront effacées de ce navigateur.',
   hrNone: 'Aucune page à vérifier.',
+  // L49 : réglage « Captures HTML », mention d'autorisation, rapport d'analyse
+  htmlBlockedDomain:
+    'Non autorisée sur ce site\u202f: {{domain}} n’est pas dans la liste des domaines de votre espace. Utilisez la capture d’écran, ou demandez à un admin.',
+  htmlBlockedDisabled: 'Les captures HTML sont désactivées dans votre espace.',
+  htmlNotice:
+    'Capturez uniquement des logiciels que vous êtes autorisé à reproduire. Certaines structures interdisent la copie HTML de leurs écrans\u202f: utilisez alors des captures d’écran.',
+  secGroup: 'Analyse de sécurité',
+  secSafe: 'Page sûre',
+  secRemoved: 'Éléments retirés',
+  secSafeBody: 'Rien d’actif à retirer sur cette page.',
+  secRemovedBody:
+    'Tout ce qui pouvait s’exécuter ou envoyer des données a été retiré. La page est publiable.',
+  secSummary_one: '1 page nettoyée\u202f: {{removed}} éléments actifs retirés',
+  secSummary_other: '{{pages}} pages nettoyées\u202f: {{removed}} éléments actifs retirés',
+  secDetail: 'Détail',
+  secDetailPage: 'Détail de la page {{n}}',
+  secServerNote: 'Les liens sont vérifiés par Google Safe Browsing à l’envoi.',
+  sec_scripts: 'Scripts retirés',
+  sec_handlers: 'Actions au clic retirées',
+  sec_frames: 'Cadres intégrés retirés',
+  sec_forms: 'Formulaires neutralisés',
+  sec_externalLinks: 'Liens externes désactivés',
+  sec_piiReplaced: 'Données personnelles remplacées',
+  sec_other: 'Autres éléments retirés',
+  hrSendN_one: 'Envoyer 1 page',
+  hrSendN_other: 'Envoyer {{n}} pages',
 };
 const en: typeof fr = {
   subtitle: 'Capture',
@@ -353,6 +379,30 @@ const en: typeof fr = {
   hrDelete: 'Delete the capture',
   hrConfirmDelete: 'Delete the capture? The pages will be erased from this browser.',
   hrNone: 'No page to check.',
+  htmlBlockedDomain:
+    'Not allowed on this site: {{domain}} is not in your workspace’s list of domains. Use the screenshot capture, or ask an admin.',
+  htmlBlockedDisabled: 'HTML captures are disabled in your workspace.',
+  htmlNotice:
+    'Only capture software you are allowed to reproduce. Some organisations forbid HTML copies of their screens: use screenshots instead.',
+  secGroup: 'Security scan',
+  secSafe: 'Safe page',
+  secRemoved: 'Elements removed',
+  secSafeBody: 'Nothing active to remove on this page.',
+  secRemovedBody: 'Everything that could run or send data has been removed. The page can be published.',
+  secSummary_one: '1 page cleaned: {{removed}} active elements removed',
+  secSummary_other: '{{pages}} pages cleaned: {{removed}} active elements removed',
+  secDetail: 'Details',
+  secDetailPage: 'Details of page {{n}}',
+  secServerNote: 'Links are checked by Google Safe Browsing when sent.',
+  sec_scripts: 'Scripts removed',
+  sec_handlers: 'Click actions removed',
+  sec_frames: 'Embedded frames removed',
+  sec_forms: 'Forms neutralised',
+  sec_externalLinks: 'External links disabled',
+  sec_piiReplaced: 'Personal data items replaced',
+  sec_other: 'Other elements removed',
+  hrSendN_one: 'Send 1 page',
+  hrSendN_other: 'Send {{n}} pages',
 };
 
 export type Strings = typeof fr;
