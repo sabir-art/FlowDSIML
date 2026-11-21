@@ -8,7 +8,7 @@
  * « Nouveau dossier » et « Archivées » restent en bas. De 1 024 à 1 279 px, la colonne dépliée s'ouvre en
  * tiroir de 280 px par-dessus le contenu (overlay).
  */
-import { useEffect, useRef, useState, type DragEvent, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type DragEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Archive,
@@ -76,7 +76,7 @@ export function FolderColumn({
   const children = (parent: string | null) =>
     folders
       .filter((f) => (f.parent_id ?? null) === parent)
-      .sort((a, b) => a.name.localeCompare(b.name, i18n.language));
+      .sort((a, b) => a.name.localeCompare(b.name, i18n.language, { numeric: true, sensitivity: 'base' }));
 
   const entry = (s: Scope, icon: ReactNode, label: string, extra?: ReactNode) => (
     <li>
@@ -198,12 +198,21 @@ export function FolderColumn({
   // Tiroir : Échap et un clic dehors le ferment (le focus revient au bouton de bascule)
   const nav = useRef<HTMLElement>(null);
   const drawer = overlay && !collapsed;
+  // Le bouton de bascule est remonté (tiroir → rail) : focus rendu après le rendu du rail, pas avant
+  const switchRef = useRef<HTMLButtonElement>(null);
+  const refocus = useRef(false);
+  useLayoutEffect(() => {
+    if (collapsed && refocus.current) {
+      refocus.current = false;
+      switchRef.current?.focus();
+    }
+  }, [collapsed]);
   useEffect(() => {
     if (!drawer) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
+      refocus.current = true;
       onToggle();
-      requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.fcol__switch')?.focus());
     };
     const onDown = (e: MouseEvent) => {
       const target = e.target as Element;
@@ -219,6 +228,7 @@ export function FolderColumn({
 
   const toggle = (
     <button
+      ref={switchRef}
       type="button"
       className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm fcol__switch"
       aria-label={t(collapsed ? 'folders.showColumn' : 'folders.hide')}

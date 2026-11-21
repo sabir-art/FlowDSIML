@@ -17,8 +17,7 @@ const ok = (c, l) => {
 function seed() {
   const s = seedMaquette();
   const base = s.tables.folders[0];
-  for (let i = 1; i <= 27; i++)
-    s.tables.folders.push({ ...base, id: `f-extra-${i}`, name: `Dossier ${String(i).padStart(2, '0')}` });
+  for (let i = 1; i <= 27; i++) s.tables.folders.push({ ...base, id: `f-extra-${i}`, name: `Dossier ${i}` });
   return s;
 }
 
@@ -52,11 +51,40 @@ function seed() {
           drawer.width === 280 && (await page.locator('.demos-main').boundingBox()).x === left,
           `${tag} : tiroir de 280 px par-dessus, le contenu ne bouge pas`,
         );
+        // Recette UX : le tiroir passe au-dessus de tout le contenu (indicateurs, recherche, cloche)
+        const covered = await page.evaluate(() => {
+          const r = document.querySelector('.fcol--drawer').getBoundingClientRect();
+          const out = [];
+          for (let y = 8; y < r.bottom; y += 24)
+            for (const x of [r.left + 60, r.left + 140, r.right - 8]) {
+              const e = document.elementFromPoint(x, y);
+              if (e && !e.closest('.fcol--drawer'))
+                out.push(`${e.tagName.toLowerCase()}.${e.className} (${x}, ${y})`);
+            }
+          return out;
+        });
+        ok(
+          covered.length === 0,
+          `${tag} : tiroir au-dessus du contenu${covered.length ? ` (${covered.slice(0, 3).join(' ; ')})` : ''}`,
+        );
         await page.keyboard.press('Escape');
         ok((await page.locator('.fcol--drawer').count()) === 0, `${tag} : Échap ferme le tiroir`);
+        await page.waitForTimeout(100);
+        const focused = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
+        ok(
+          focused === 'Afficher les dossiers',
+          `${tag} : focus rendu à « Afficher les dossiers » (${focused})`,
+        );
         await page.close();
         continue;
       }
+      // Recette UX : tri naturel (Dossier 2 avant Dossier 10)
+      const names = await page.locator('.fcol__row').allInnerTexts();
+      const n = (x) => names.findIndex((t) => t.split('\n')[0].trim() === x);
+      ok(
+        n('Dossier 2') >= 0 && n('Dossier 2') < n('Dossier 10'),
+        `${tag} : tri naturel (Dossier 2 avant Dossier 10)`,
+      );
       const col = await page.locator('.fcol').boundingBox();
       ok(
         col.y === 0 && col.y + col.height === 900,

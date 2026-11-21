@@ -978,6 +978,8 @@ button.nd-src:focus-visible {
   align-self: flex-start;
   height: 100dvh;
   margin: 0 var(--fd-space-8) 0 calc(-1 * var(--fd-space-8));
+  /* sticky crée un contexte d'empilement : le z-index du tiroir n'a d'effet qu'ici, au-dessus du contenu */
+  z-index: var(--fd-z-sticky);
 }
 .fcol-slot--rail {
   width: 48px;
@@ -1022,7 +1024,6 @@ button.nd-src:focus-visible {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 30;
   width: 280px;
   box-shadow: var(--fd-shadow-lg);
 }
