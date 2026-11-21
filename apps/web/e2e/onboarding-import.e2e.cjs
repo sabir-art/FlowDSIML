@@ -193,7 +193,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok((await warn.count()) === 1, 'avertissement en variante avertissement');
 
   // ===== Nouvelle démo > Modèles : catégorie de l'usage déclaré en premier =====
+  // Sous charge (CI), ne pas quitter l'éditeur pendant qu'il se charge encore après l'import :
+  // attendre l'état réel (image de l'étape affichée), puis que Démos ait lu ?new=1 (adresse nettoyée)
+  await page.waitForSelector('.canvas-frame img');
   await page.goto(`${APP}/#/?new=1`);
+  await page.waitForURL((u) => u.hash === '#/');
   const nd2 = page.getByRole('dialog', { name: 'Nouvelle démo' });
   await nd2.waitFor();
   await nd2.getByRole('button', { name: 'Continuer', exact: true }).click();
