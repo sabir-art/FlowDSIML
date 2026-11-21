@@ -48,13 +48,20 @@ export function UsagePage() {
   const { current, can } = useWorkspace();
   const [usage, setUsage] = useState<Usage | null>(null);
   const { status: ai } = useAiStatus(current?.id);
+  // E-mails P1 (spec §2) : budget d'envoi commun de l'app, lu par les admins
+  const [emails, setEmails] = useState<{ sent: number; cap: number } | null>(null);
+  const admin = can('members.invite');
 
   useEffect(() => {
     if (!current) return;
     void supabase
       .rpc('workspace_usage', { p_workspace: current.id })
       .then(({ data }) => setUsage(data as unknown as Usage));
-  }, [current]);
+    if (admin)
+      void supabase
+        .rpc('email_budget_today', { p_workspace: current.id })
+        .then(({ data }) => setEmails(data as { sent: number; cap: number } | null));
+  }, [current, admin]);
 
   if (!current || !usage) return <Loading />;
   const ask = supportHref(current.settings, t('usage.askSubject', { workspace: current.name }));
@@ -209,6 +216,9 @@ export function UsagePage() {
             );
           })}
         </ul>
+        {emails && (
+          <p className="us-emails">{t('usage.emailsToday', { n: num(emails.sent), cap: num(emails.cap) })}</p>
+        )}
       </section>
     </SettingsShell>
   );

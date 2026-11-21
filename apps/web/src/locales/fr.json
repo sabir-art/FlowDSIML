@@ -281,7 +281,13 @@
     "seatsUsed_other": "{{count}} sièges seront utilisés. Il en restera {{left}} sur les {{limit}} de l’espace.",
     "seatsUsedUnlimited_one": "{{count}} siège sera utilisé (membres sans limite).",
     "seatsUsedUnlimited_other": "{{count}} sièges seront utilisés (membres sans limite).",
-    "sendInvites": "Créer les invitations",
+    "sendInvites": "Envoyer les invitations",
+    "createInvites": "Créer les invitations",
+    "sendByEmail": "Envoyer l’invitation par e-mail",
+    "sent_one": "1 invitation envoyée.",
+    "sent_other": "{{count}} invitations envoyées.",
+    "rateLimit": "20 invitations par heure au plus. Vous pourrez en envoyer d’autres à {{time}}. Les liens restent disponibles.",
+    "emailFailed": "L’e-mail n’a pas pu partir. Copiez le lien et envoyez-le vous-même.",
     "resend": "Renvoyer l’invitation",
     "removeLoses": "{{name}} perdra l’accès à l’espace et à ses démos.",
     "removeDemos_one": "Sa démo reste dans l’espace.",
@@ -289,8 +295,7 @@
     "removeNoDemos": "Les démos de l’espace ne sont pas modifiées.",
     "roleLabel": "Rôle",
     "resultCount_one": "{{count}} membre ou invitation",
-    "resultCount_other": "{{count}} membres ou invitations",
-    "inviteEmailSoon": "Envoi par e-mail"
+    "resultCount_other": "{{count}} membres ou invitations"
   },
   "workspace": {
     "title": "Paramètres de l’espace",
@@ -3933,6 +3938,11 @@
     }
   },
   "notifications": {
+    "k_invite": "{{actor}} vous invite à rejoindre « {{workspace}} »",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "inviteAccepted": "Invitation acceptée.",
+    "inviteDeclined": "Invitation refusée.",
     "bell_one": "Notifications, {{count}} non lue",
     "bell_other": "Notifications, {{count}} non lues",
     "bellNone": "Notifications, aucune non lue",
@@ -5142,6 +5152,7 @@
     "unseen_other": "{{count}} nouveautés"
   },
   "usage": {
+    "emailsToday": "E-mails envoyés aujourd’hui : {{n}} sur {{cap}}",
     "sub": "Ce que consomme l’espace {{workspace}}, et ses limites. Aucun paiement : pour aller au-delà, faites une demande à la DSI.",
     "ask": "Demander plus à la DSI",
     "askMore": "Demander plus",

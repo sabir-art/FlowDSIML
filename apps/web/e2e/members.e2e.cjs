@@ -55,6 +55,8 @@ const SHOTS = process.env.SHOTS_DIR;
 
   await page.getByRole('button', { name: 'Inviter des membres' }).click();
   await page.waitForSelector('[role=dialog]');
+  // E-mails P1 : case décochée, l'invitation reste un lien à transmettre (couvert par invitations-email.e2e)
+  await page.getByLabel('Envoyer l’invitation par e-mail').uncheck();
   await page.fill('#inv-email', 'pas-un-email');
   await page.getByRole('button', { name: 'Créer les invitations' }).click();
   ok((await page.locator('#inv-email-error').count()) === 1, 'adresse invalide signalée');

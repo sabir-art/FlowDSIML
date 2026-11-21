@@ -3,7 +3,7 @@
  * Panneau non modal (role=dialog) : Échap ou clic à l'extérieur le ferme, le focus revient à la cloche.
  */
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { HelpButton } from '../../help/HelpButton';
 import {
@@ -18,8 +18,12 @@ import {
   BellOff,
   MessageSquare,
   Settings,
+  UserPlus,
   X,
 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { errorMessage } from '../../lib/errors';
+import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { initials } from '../../lib/initials';
 import { Menu } from '../Menu';
 import { useToast } from '../Toast';
@@ -40,6 +44,7 @@ const KIND_ICON = {
   resolved: CheckCircle2,
   alert: BellRing,
   webhook_paused: Webhook,
+  invite: UserPlus,
 };
 
 export function NotificationBell() {
@@ -226,6 +231,10 @@ export function NotificationBell() {
                           {g.rows.map((x) => (
                             <Row
                               key={x.id}
+                              onAnswered={() => {
+                                void n.reload();
+                              }}
+                              onJoined={() => close(false)}
                               item={x}
                               muted={!!x.demo_id && mutedIds.has(x.demo_id)}
                               onMute={async () => {
@@ -366,14 +375,19 @@ function Row({
   onOpen,
   muted,
   onMute,
+  onAnswered,
+  onJoined,
 }: {
   item: NotificationItem;
   onOpen: () => void;
   muted: boolean;
   onMute: () => void;
+  onAnswered: () => void;
+  onJoined: () => void;
 }) {
   const { t } = useTranslation();
   const Icon = KIND_ICON[x.kind];
+  if (x.kind === 'invite') return <InviteRow item={x} onAnswered={onAnswered} onJoined={onJoined} />;
   if (x.kind === 'alert' || x.kind === 'webhook_paused')
     return <AlertRow item={x} icon={Icon} onOpen={onOpen} />;
   const actor = x.actorName || t('notifications.someone');
@@ -484,6 +498,95 @@ function AlertRow({
         }
         onClick={onOpen}
       />
+    </li>
+  );
+}
+
+/**
+ * E-mails P1 (spec §4.2) : invitation reçue par un compte existant, à la place de l'e-mail. Accepter
+ * rejoint l'espace (comme le lien), Refuser supprime l'invitation ; la réponse reste affichée.
+ */
+function InviteRow({
+  item: x,
+  onAnswered,
+  onJoined,
+}: {
+  item: NotificationItem;
+  onAnswered: () => void;
+  onJoined: () => void;
+}) {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const navigate = useNavigate();
+  const { reload, select } = useWorkspace();
+  const [busy, setBusy] = useState(false);
+  const d = x.data ?? {};
+  const actor = d.actor || x.actorName || t('notifications.someone');
+  const [before, after = ''] = t('notifications.k_invite', {
+    actor: MARK,
+    workspace: d.workspace ?? '',
+  }).split(MARK);
+  async function answer(accept: boolean) {
+    if (!d.invitation) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc('answer_invitation', {
+      p_invitation: d.invitation,
+      p_accept: accept,
+    });
+    setBusy(false);
+    if (error) {
+      toast(errorMessage(t, error));
+      return;
+    }
+    onAnswered();
+    if (accept && data) {
+      await reload();
+      select(data);
+      onJoined();
+      navigate('/', { replace: true });
+    }
+  }
+  return (
+    <li className={x.read_at ? undefined : 'unread'}>
+      <span className={`nb-avatar nb-avatar--${avatarTone(x.actor_id ?? x.id)}`} aria-hidden="true">
+        {initials(actor)}
+      </span>
+      <span className="nb-text">
+        {before}
+        <b>{actor}</b>
+        {after}
+        {d.answer ? (
+          <span className="nb-q">
+            {t(d.answer === 'accepted' ? 'notifications.inviteAccepted' : 'notifications.inviteDeclined')}
+          </span>
+        ) : (
+          <span className="nb-actions">
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              disabled={busy}
+              onClick={() => void answer(false)}
+            >
+              {t('notifications.decline')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              disabled={busy}
+              onClick={() => void answer(true)}
+            >
+              {t('notifications.accept')}
+            </button>
+          </span>
+        )}
+        <small>
+          <UserPlus aria-hidden="true" />
+          {formatRelativeShort(x.created_at)}
+        </small>
+      </span>
+      <span className={x.read_at ? undefined : 'nb-dot'}>
+        {!x.read_at && <span className="sr-only">{t('notifications.unread')}</span>}
+      </span>
     </li>
   );
 }

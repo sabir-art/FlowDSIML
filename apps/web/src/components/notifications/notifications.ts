@@ -3,9 +3,11 @@
  * Les notifications ne portent que des références ; le texte vient de step_comments (RLS).
  */
 
-export type NotificationKind = 'mention' | 'comment' | 'reply' | 'resolved' | 'alert' | 'webhook_paused';
+export type NotificationKind =
+  'mention' | 'comment' | 'reply' | 'resolved' | 'alert' | 'webhook_paused' | 'invite';
 /** Notifications système (sans fil de commentaires) : toujours envoyées, pas de réglage. */
-export const isSystemKind = (k: NotificationKind) => k === 'alert' || k === 'webhook_paused';
+export const isSystemKind = (k: NotificationKind) =>
+  k === 'alert' || k === 'webhook_paused' || k === 'invite';
 export const NOTIFICATION_KINDS: NotificationKind[] = ['mention', 'reply', 'comment', 'resolved', 'alert'];
 
 /** L19 : contenu d'une alerte (aucune donnée personnelle). */
@@ -19,6 +21,11 @@ export interface AlertData {
   webhookId?: string;
   host?: string;
   name?: string;
+  /** E-mails P1 : invitation à rejoindre un espace (compte existant), et la réponse donnée. */
+  invitation?: string;
+  workspace?: string;
+  actor?: string | null;
+  answer?: 'accepted' | 'declined';
 }
 
 export interface NotificationRow {

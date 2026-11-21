@@ -281,7 +281,13 @@
     "seatsUsed_other": "{{count}} seats will be used. {{left}} of the workspace’s {{limit}} will remain.",
     "seatsUsedUnlimited_one": "{{count}} seat will be used (no member limit).",
     "seatsUsedUnlimited_other": "{{count}} seats will be used (no member limit).",
-    "sendInvites": "Create the invitations",
+    "sendInvites": "Send the invitations",
+    "createInvites": "Create the invitations",
+    "sendByEmail": "Send the invitation by email",
+    "sent_one": "1 invitation sent.",
+    "sent_other": "{{count}} invitations sent.",
+    "rateLimit": "20 invitations per hour at most. You can send more at {{time}}. The links remain available.",
+    "emailFailed": "The email could not be sent. Copy the link and send it yourself.",
     "resend": "Resend invitation",
     "removeLoses": "{{name}} will lose access to the workspace and its demos.",
     "removeDemos_one": "Their demo stays in the workspace.",
@@ -289,8 +295,7 @@
     "removeNoDemos": "The workspace demos are not changed.",
     "roleLabel": "Role",
     "resultCount_one": "{{count}} member or invitation",
-    "resultCount_other": "{{count}} members or invitations",
-    "inviteEmailSoon": "Send by email"
+    "resultCount_other": "{{count}} members or invitations"
   },
   "workspace": {
     "title": "Workspace settings",
@@ -3933,6 +3938,11 @@
     }
   },
   "notifications": {
+    "k_invite": "{{actor}} invites you to join “{{workspace}}”",
+    "accept": "Accept",
+    "decline": "Decline",
+    "inviteAccepted": "Invitation accepted.",
+    "inviteDeclined": "Invitation declined.",
     "bell_one": "Notifications, {{count}} unread",
     "bell_other": "Notifications, {{count}} unread",
     "bellNone": "Notifications, none unread",
@@ -5142,6 +5152,7 @@
     "unseen_other": "{{count}} new items"
   },
   "usage": {
+    "emailsToday": "Emails sent today: {{n}} of {{cap}}",
     "sub": "What the {{workspace}} workspace uses, and its limits. No payment: to go further, ask IT.",
     "ask": "Ask IT for more",
     "askMore": "Ask for more",

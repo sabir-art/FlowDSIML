@@ -460,3 +460,8 @@ verify_jwt = true
 [functions.html-recheck]
 enabled = true
 verify_jwt = true
+
+# E-mails P1 : invitations d'équipe par Supabase Auth (gabarit invite), JWT vérifié par la plateforme et par la fonction.
+[functions.invite-email]
+enabled = true
+verify_jwt = true

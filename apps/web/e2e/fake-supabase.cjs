@@ -514,6 +514,41 @@ async function install(page, state = seed()) {
         });
       return json(route, 400, { error: 'bad_action' });
     }
+    // E-mails P1 : invitations d'équipe. Aucun envoi réel : faux transport (state.inviteEmails) ;
+    // state.inviteTransport = 'fail' simule l'échec, state.existingAccounts les comptes déjà utilisés
+    // (notification), state.emailBudget le compteur du jour (150 au plus).
+    if (p.startsWith('/functions/v1/invite-email')) {
+      const b = JSON.parse(req.postData() || '{}');
+      state.inviteEmails = state.inviteEmails || [];
+      const results = (b.invitations || []).map((id) => {
+        const inv = state.tables.invitations.find((i) => i.id === id);
+        if (!inv) return { id, status: 'not_found' };
+        if (inv.sent_at) return { id, status: 'sent_before' };
+        const hour = state.tables.invitations.filter(
+          (i) => i.sent_at && Date.parse(i.sent_at) > Date.now() - 3600_000,
+        ).length;
+        if (hour >= 20) return { id, status: 'rate_limit' };
+        if ((state.existingAccounts || []).includes(inv.email)) {
+          inv.sent_at = new Date().toISOString();
+          return { id, status: 'notified' };
+        }
+        if ((state.emailBudget ?? 0) >= 150) return { id, status: 'budget' };
+        if (state.inviteTransport === 'fail') return { id, status: 'failed' };
+        state.emailBudget = (state.emailBudget ?? 0) + 1;
+        inv.sent_at = new Date().toISOString();
+        state.inviteEmails.push({
+          email: inv.email,
+          redirectTo: `${b.appUrl}?next=${encodeURIComponent(`/invite/${inv.token}`)}`,
+          data: {
+            workspace_name: state.tables.workspaces.find((w) => w.id === inv.workspace_id)?.name ?? '',
+            inviter_name: state.tables.profiles.find((x) => x.id === state.user.id)?.full_name ?? '',
+            demo_title: '',
+          },
+        });
+        return { id, status: 'sent' };
+      });
+      return json(route, 200, { results });
+    }
     // L49 §4.1 : nouvelle vérification Safe Browsing à la publication. state.flaggedUrls : adresses
     // signalées (simulées, aucun appel réel) ; comme le serveur, retire les autorisations concernées.
     if (p.startsWith('/functions/v1/html-recheck')) {
@@ -2210,6 +2245,39 @@ async function install(page, state = seed()) {
           (t.webhook_deliveries ||= []).push(d);
           return json(route, 200, d.id);
         }
+        // ===== E-mails P1 =====
+        case 'invite_quota': {
+          const sent = t.invitations.filter(
+            (i) => i.sent_at && Date.parse(i.sent_at) > Date.now() - 3600_000,
+          );
+          const first = sent.map((i) => Date.parse(i.sent_at)).sort()[0];
+          return json(route, 200, {
+            left: Math.max(20 - sent.length, 0),
+            next_at: sent.length >= 20 ? new Date(first + 3600_000).toISOString() : null,
+          });
+        }
+        case 'email_budget_today':
+          return json(route, 200, { sent: state.emailBudget ?? 0, cap: 150 });
+        case 'answer_invitation': {
+          const n = (t.notifications || []).find(
+            (x) => x.kind === 'invite' && x.data?.invitation === a.p_invitation,
+          );
+          if (!n) return json(route, 400, { message: 'INVITATION_NOT_FOUND' });
+          n.read_at = n.read_at || new Date().toISOString();
+          n.data = { ...n.data, answer: a.p_accept ? 'accepted' : 'declined' };
+          (state.invitationAnswers ||= []).push({ id: a.p_invitation, accept: a.p_accept });
+          if (
+            a.p_accept &&
+            !t.members.some((m) => m.workspace_id === n.workspace_id && m.user_id === state.user.id)
+          )
+            t.members.push({
+              workspace_id: n.workspace_id,
+              user_id: state.user.id,
+              role: 'viewer',
+              created_at: new Date().toISOString(),
+            });
+          return json(route, 200, a.p_accept ? n.workspace_id : null);
+        }
         case 'resolve_share_link': {
           const l = t.share_links.find((x) => x.token === a.p_token && x.is_active);
           return json(route, 200, l ? { demoId: l.demo_id, linkId: l.id, variables: l.variables } : null);
@@ -2492,6 +2560,7 @@ function parseUpload(buf, contentType) {
 }
 
 function defaults(table, r) {
+  if (table === 'invitations') return { token: crypto.randomUUID(), sent_at: null, accepted_at: null };
   if (table === 'themes')
     return { is_default: false, builtin_key: null, created_by: currentUserId, tokens: {} };
   if (table === 'demos')

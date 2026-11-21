@@ -3104,3 +3104,9 @@
     margin-left: auto;
   }
 }
+/* E-mails P1 : « E-mails envoyés aujourd'hui : n sur 150 », 14 px, sans jauge */
+.mk .us-emails {
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: var(--fd-color-text-muted);
+}
