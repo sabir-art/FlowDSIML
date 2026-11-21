@@ -288,6 +288,30 @@
 - Aucune entrée « Domaine ».
 - §18.6 et §18.7 contrôlés, à 1440, 1024 et 390 px.
 
+### 11.8 Équipe (retour client du 21/11, avec MODAL-01)
+
+> Maquette : `maquettes/refonte/modales-composants.html`, vue « Équipe + invitation ». Captures dans `img/modales-composants/equipe-{clair,sombre}.png`.
+
+- **En-tête de section** : à gauche, « Membres » et le sous-titre (« {n} membres sur {max}. Les invitations expirent au bout de 14 jours. »). À droite, sur la même ligne :
+  - la recherche (260 px), avec l'indice `⌘K` (ou `Ctrl K`) à droite du champ ;
+  - le bouton primaire « Inviter » (`UserPlus`).
+- **Tableau sans carte**, posé sur le fond blanc (NAV-02) :
+  - colonnes Nom, E-mail, Rôle, Statut, puis une colonne d'actions dont le titre est masqué visuellement (« Actions ») ;
+  - en-têtes en 12 px 500 `text-muted`, filet de 1 px dessous ;
+  - lignes de **56 px**, séparées par un filet ;
+  - Nom : avatar de 32 px (photo ou initiale, §4), puis le nom en 600, et « Vous » en `text-muted` pour soi ;
+  - E-mail en `text-muted` ;
+  - Rôle en texte simple (le changement de rôle passe par le menu « ⋯ ») ;
+  - Statut en pastille grise de 24 px, « Actif » ou « Invité » (fond `#EEF0F3` en clair, `#252B33` en sombre, texte `text-muted` à 6,2:1 et 6,7:1) ;
+  - dernière colonne : bouton « ⋯ » de 32 px, avec un menu COMP-01 (Modifier le rôle, Copier le lien d'invitation, Renvoyer l'invitation, Retirer de l'espace).
+- **« Ce que chaque rôle peut faire »** quitte la page. Le tableau des droits s'ouvre dans un **popover d'information** (bouton `CircleQuestionMark` de 20 px à côté de l'en-tête « Rôle », et à côté du champ Rôle de la modale). Popover de 360 px, fermé par Échap ou au clic à l'extérieur, `aria-expanded` sur le bouton.
+- **Modale « Inviter des membres »** (MODAL-01, `composants.md` §19) :
+  - champ « Adresses e-mail » à **puces** dans un champ unique de 40 px qui grandit. Une puce se crée avec Entrée, la virgule, l'espace ou au collage d'une liste. Une adresse invalide devient une puce rouge, avec le message sous le champ ;
+  - « Rôle » dans un Select COMP-01 : Lecteur, Éditeur, Admin, chacun avec une description grise d'une ligne. Propriétaire n'est pas proposé à l'invitation ;
+  - **plus de case « Envoyer l'invitation par e-mail »** (décision du chef) ;
+  - pied : Annuler, puis « Envoyer {n} invitations » ;
+  - **confirmation** dans la même modale : tuile `MailCheck`, titre « Invitations envoyées », une phrase, puis une ligne par adresse avec le lien et « Copier le lien ». Pied : « Terminé ».
+
 ## 12. Recette (captures réelles en clair et en sombre)
 
 | # | Contrôle | Mesure attendue |

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modales et composants maison</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&display=swap">
+<link rel="stylesheet" href="../../../../packages/ui/src/base.css">
+<style>
+/* MODAL-01, Équipe (§11.8) et COMP-01. Jetons --fd-* et jetons NAV-02 (nav-bg, content-bg). Données fictives (Acme, example.com). */
+:root { --nav-bg: #F7F7F8; --nav-active: #E9EBEE; --content-bg: #FFFFFF; --field: #8A94A2; --pill: #EEF0F3; --foot: #F7F7F8; }
+[data-theme='dark'] { --nav-bg: #101317; --nav-active: #252B33; --content-bg: #15191F; --field: #5E6978; --pill: #252B33; --foot: #101317; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--content-bg); color: var(--fd-color-text); font: 400 14px/1.5 var(--fd-font-sans); }
+svg.lucide { flex: none; }
+.bar { position: sticky; top: 0; z-index: 20; display: flex; gap: 16px; align-items: center; padding: 12px 24px; background: var(--fd-color-surface); border-bottom: 1px solid var(--fd-color-border); }
+.seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--fd-color-surface-sunken); }
+.seg button { height: 30px; padding: 0 14px; border: 0; border-radius: 999px; background: none; color: var(--fd-color-text-muted); font: 600 13px var(--fd-font-sans); cursor: pointer; }
+.seg button[aria-pressed='true'] { background: var(--fd-color-surface); color: var(--fd-color-text); }
+[hidden] { display: none !important; }
+.muted { color: var(--fd-color-text-muted); }
+
+/* ---------- Boutons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; font: 600 14px var(--fd-font-sans); border: 1px solid transparent; cursor: pointer; white-space: nowrap; }
+.btn-p { background: var(--fd-color-primary); color: var(--fd-color-on-primary); }
+.btn-p[aria-disabled='true'] { background: var(--fd-prune-200, #E3A9C4); color: var(--fd-prune-900, #480F2A); cursor: not-allowed; } /* 7,8:1 */
+[data-theme='dark'] .btn-p[aria-disabled='true'] { background: var(--fd-prune-800, #67123B); color: var(--fd-prune-100, #F3D3E2); } /* 8,8:1 */
+.btn-s { background: var(--fd-color-surface); color: var(--fd-color-text); border-color: var(--field); }
+.btn-g { background: none; color: var(--fd-color-text); }
+.icon-btn { display: inline-grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 8px; background: none; color: var(--fd-color-text-muted); cursor: pointer; }
+
+/* ---------- Champs ---------- */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label, .lbl { font: 500 14px var(--fd-font-sans); color: var(--fd-color-text-muted); display: flex; align-items: center; gap: 6px; }
+.inp { height: 40px; width: 100%; padding: 0 12px; border: 1px solid var(--field); border-radius: 10px; background: var(--fd-color-surface); color: var(--fd-color-text); font: 400 14px var(--fd-font-sans); display: flex; align-items: center; gap: 8px; }
+.inp.ph { color: var(--fd-color-text-subtle); }
+.inp.err { border-color: var(--fd-color-danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fd-color-danger) 15%, transparent); }
+.err-msg { font-size: 13px; color: var(--fd-color-danger); display: flex; gap: 6px; align-items: center; }
+.trigger { justify-content: space-between; cursor: pointer; }
+.trigger[aria-expanded='true'] { border-color: var(--fd-color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fd-color-primary) 18%, transparent); }
+.chips { height: auto; min-height: 40px; padding: 5px 8px; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 4px 0 10px; border-radius: 999px; background: var(--pill); font-size: 13px; }
+.chip.bad { background: color-mix(in srgb, var(--fd-color-danger) 12%, transparent); color: var(--fd-color-danger); }
+.chip button { display: grid; place-items: center; width: 20px; height: 20px; border: 0; border-radius: 50%; background: none; color: inherit; cursor: pointer; }
+.chips .typing { flex: 1; min-width: 120px; color: var(--fd-color-text-subtle); font-size: 14px; padding-left: 4px; }
+
+/* ---------- Popover (Select, menus, date, couleur) ---------- */
+.pop { position: absolute; z-index: 10; min-width: 100%; padding: 4px; border-radius: 10px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-md); }
+.pop .search { margin: 4px 4px 6px; height: 36px; width: auto; justify-content: flex-start; }
+.grp { padding: 8px 10px 4px; font: 600 11px var(--fd-font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+.opt { display: grid; grid-template-columns: 1fr 16px; gap: 2px 8px; align-items: center; min-height: 36px; padding: 7px 10px; border-radius: 8px; cursor: pointer; }
+.opt small { grid-column: 1; font-size: 12px; color: var(--fd-color-text-muted); line-height: 1.35; }
+.opt .ck { grid-row: 1; grid-column: 2; color: var(--fd-color-primary); }
+.opt.active { background: var(--nav-active); }
+.opt[aria-selected='true'] { font-weight: 600; }
+.opt[aria-disabled='true'] { color: var(--fd-color-text-subtle); cursor: not-allowed; }
+.menu .opt { grid-template-columns: 16px 1fr auto; }
+.menu .opt.danger { color: var(--fd-color-danger); }
+.menu kbd { font: 500 12px var(--fd-font-sans); color: var(--fd-color-text-muted); background: var(--fd-color-surface-sunken); border-radius: 4px; padding: 0 4px; }
+.sep { height: 1px; background: var(--fd-color-border); margin: 4px 0; }
+
+/* ---------- MODAL-01 ---------- */
+.scrim { position: absolute; inset: 0; background: rgb(8 10 14 / .45); display: grid; place-items: center; }
+.modal { width: 400px; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-lg); overflow: visible; position: relative; }
+.m-head { display: flex; align-items: center; gap: 12px; padding: 16px 16px 16px 24px; border-bottom: 1px solid var(--fd-color-border); }
+.tile { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); color: var(--fd-color-text); }
+.m-head h2 { flex: 1; margin: 0; font: 500 18px var(--fd-font-sans); }
+.m-body { padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+.m-foot { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px; border-top: 1px solid var(--fd-color-border); background: var(--foot); border-radius: 0 0 16px 16px; }
+.ok-box { display: flex; flex-direction: column; gap: 12px; }
+.link-row { display: flex; gap: 8px; }
+.link-row .inp { font-size: 13px; color: var(--fd-color-text-muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* ---------- Page Équipe (NAV-02 + §11.8) ---------- */
+.shell { position: relative; display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 860px; }
+.snav { background: var(--nav-bg); border-right: 1px solid var(--fd-color-border); padding: 72px 12px 24px; display: flex; flex-direction: column; gap: 2px; }
+.snav h3 { margin: 24px 0 6px 10px; font: 600 11px var(--fd-font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+.snav h3:first-child { margin-top: 0; }
+.snav a { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: 8px; color: var(--fd-color-text-muted); text-decoration: none; font-weight: 500; }
+.snav a.on { background: var(--nav-active); color: var(--fd-color-text); font-weight: 600; }
+.crumb { display: flex; align-items: center; gap: 6px; height: 56px; padding: 0 32px; border-bottom: 1px solid var(--fd-color-border); }
+.crumb a { color: var(--fd-color-text); text-decoration: none; font-weight: 500; }
+.crumb h1 { margin: 0; font: 500 14px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+.page { max-width: 960px; margin: 0 auto; padding: 32px; }
+.ph { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--fd-color-border); }
+.ph h2 { margin: 0; font: 600 16px var(--fd-font-sans); }
+.ph p { margin: 4px 0 0; color: var(--fd-color-text-muted); font-size: 13px; }
+.ph .acts { display: flex; gap: 12px; align-items: center; }
+.ph .inp { width: 260px; white-space: nowrap; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ph kbd { margin-left: auto; font: 500 12px var(--fd-font-sans); color: var(--fd-color-text-muted); border: 1px solid var(--fd-color-border); border-radius: 4px; padding: 0 4px; }
+table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+th { text-align: left; font: 500 12px var(--fd-font-sans); color: var(--fd-color-text-muted); padding: 10px 12px; border-bottom: 1px solid var(--fd-color-border); }
+td { height: 56px; padding: 0 12px; border-bottom: 1px solid var(--fd-color-border); font-size: 14px; }
+td.who { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.av { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--fd-prune-100, #F3D3E2); color: var(--fd-prune-700, #85164B); font: 700 13px var(--fd-font-sans); }
+[data-theme='dark'] .av { background: #3A1527; color: #E3A9C4; }
+.pill { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--pill); color: var(--fd-color-text-muted); font: 500 12px var(--fd-font-sans); }
+.roles-help { position: relative; }
+.info-pop { position: absolute; top: 30px; left: -8px; width: 360px; padding: 14px 16px; z-index: 12; }
+.info-pop table { margin: 0; } .info-pop td, .info-pop th { height: auto; padding: 6px 4px; font-size: 12px; }
+
+/* ---------- Galerie COMP-01 ---------- */
+.gal { padding: 32px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; max-width: 1200px; }
+.cell.tall { min-height: 500px; }
+.cell { border: 1px solid var(--fd-color-border); border-radius: 16px; padding: 20px; min-height: 280px; position: relative; }
+.cell h3 { margin: 0 0 16px; font: 600 14px var(--fd-font-sans); }
+.cal { padding: 12px; width: 280px; }
+.cal-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 600; }
+.cal-g { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 13px; }
+.cal-g .d { height: 34px; display: grid; place-items: center; border-radius: 8px; }
+.cal-g .wd { font-size: 11px; color: var(--fd-color-text-muted); height: 24px; }
+.cal-g .o { color: var(--fd-color-text-subtle); }
+.cal-g .t { box-shadow: inset 0 0 0 1px var(--field); }
+.cal-g .s { background: var(--fd-color-primary); color: var(--fd-color-on-primary); font-weight: 600; }
+.sw { display: inline-block; width: 24px; height: 24px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12); }
+.swatches { display: grid; grid-template-columns: repeat(8, 24px); gap: 8px; }
+.swatches .sel { box-shadow: 0 0 0 2px var(--fd-color-surface), 0 0 0 4px var(--fd-color-text); }
+.drop { border: 1.5px dashed var(--field); border-radius: 12px; padding: 24px; display: grid; place-items: center; gap: 8px; text-align: center; color: var(--fd-color-text-muted); font-size: 13px; }
+.drop.over { border-color: var(--fd-color-primary); background: color-mix(in srgb, var(--fd-color-primary) 6%, transparent); }
+.range { position: relative; height: 24px; }
+.range .tr { position: absolute; left: 0; right: 0; top: 10px; height: 4px; border-radius: 2px; background: var(--fd-color-border); }
+.range .fi { position: absolute; left: 0; width: 60%; top: 10px; height: 4px; border-radius: 2px; background: var(--fd-color-primary); }
+.range .th { position: absolute; left: calc(60% - 10px); top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--fd-color-surface); border: 2px solid var(--fd-color-primary); box-shadow: 0 1px 3px rgb(0 0 0 / .2); }
+.checks { display: grid; gap: 14px; }
+.cb { display: flex; align-items: center; gap: 10px; }
+.box { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--field); color: var(--fd-color-on-primary); }
+.box.on { background: var(--fd-color-primary); border-color: var(--fd-color-primary); }
+.rad { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--field); display: grid; place-items: center; }
+.rad.on { border-color: var(--fd-color-primary); } .rad.on::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--fd-color-primary); }
+.swi { width: 36px; height: 20px; border-radius: 999px; background: var(--field); position: relative; }
+.swi::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+.swi.on { background: var(--fd-color-primary); } .swi.on::after { left: 18px; }
+[data-theme='dark'] .swi.on::after { background: #080808; }
+.focus { outline: 2px solid var(--fd-color-focus); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="bar"><b>Modales et composants maison</b>
+  <span class="seg" data-k="vue"><button data-v="equipe">Équipe + invitation</button><button data-v="etats">États de la modale</button><button data-v="comp">Composants (COMP-01)</button></span>
+  <span class="seg" data-k="theme"><button data-v="light">Clair</button><button data-v="dark">Sombre</button></span>
+</div>
+
+<!-- ===== Équipe + modale d'invitation (sélecteur de rôle ouvert) ===== -->
+<div class="shell" data-vue="equipe">
+  <nav class="snav" aria-label="Paramètres">
+    <h3>Espace</h3>
+    <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building2 lucide-building-2" aria-hidden="true"><path d="M10 12h4"></path><path d="M10 8h4"></path><path d="M14 21v-3a2 2 0 0 0-4 0v3"></path><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"></path><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"></path></svg>Général</a><a class="on" href="#" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg>Équipe</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gauge" aria-hidden="true"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg>Utilisation</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Sécurité</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-lock" aria-hidden="true"><path d="M4 9.8V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M9 17v-2a2 2 0 0 0-4 0v2"></path><rect width="8" height="5" x="3" y="17" rx="1"></rect></svg>Confidentialité</a>
+    <h3>Marque</h3><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette" aria-hidden="true"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"></path><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>Thème et couleurs</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Page publique</a>
+  </nav>
+  <main>
+    <div class="crumb"><a href="#">Espace</a><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg><h1 aria-current="page">Équipe</h1></div>
+    <div class="page">
+      <div class="ph">
+        <div><h2>Membres</h2><p>4 membres sur 5. Les invitations expirent au bout de 14 jours.</p></div>
+        <div class="acts"><div class="inp ph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>Rechercher un membre<kbd>⌘K</kbd></div><button class="btn btn-p"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" x2="19" y1="8" y2="14"></line><line x1="22" x2="16" y1="11" y2="11"></line></svg>Inviter</button></div>
+      </div>
+      <table>
+        <thead><tr><th>Nom</th><th>E-mail</th><th><span class="roles-help lbl" style="font-size:12px">Rôle <button class="icon-btn" aria-label="Ce que chaque rôle peut faire" style="width:20px;height:20px"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-question-mark" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></button></span></th><th>Statut</th><th style="width:48px"><span class="sr-only">Actions</span></th></tr></thead>
+        <tbody>
+          <tr><td class="who"><span class="av">A</span>Alice Exemple <span class="muted" style="font-weight:400">Vous</span></td><td class="muted">alice@example.com</td><td>Propriétaire</td><td><span class="pill">Actif</span></td><td><button class="icon-btn" aria-label="Actions pour Alice"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></td></tr>
+          <tr><td class="who"><span class="av">B</span>Bob Martin</td><td class="muted">bob@example.com</td><td>Éditeur</td><td><span class="pill">Actif</span></td><td><button class="icon-btn" aria-label="Actions pour Bob"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></td></tr>
+          <tr><td class="who"><span class="av">C</span>Camille Durand</td><td class="muted">camille@example.com</td><td>Lecteur</td><td><span class="pill">Actif</span></td><td><button class="icon-btn" aria-label="Actions pour Camille"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></td></tr>
+          <tr><td class="who"><span class="av">D</span><span class="muted" style="font-weight:500">dominique@example.com</span></td><td class="muted">dominique@example.com</td><td>Éditeur</td><td><span class="pill">Invité</span></td><td><button class="icon-btn" aria-label="Actions pour l'invitation"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <div class="scrim">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+      <div class="m-head"><span class="tile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" x2="19" y1="8" y2="14"></line><line x1="22" x2="16" y1="11" y2="11"></line></svg></span><h2 id="mt">Inviter des membres</h2><button class="icon-btn" aria-label="Fermer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+      <div class="m-body">
+        <div class="field"><label>Adresses e-mail</label>
+          <div class="inp chips"><span class="chip">bob@example.com<button aria-label="Retirer bob@example.com"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></span><span class="chip">eve@example.com<button aria-label="Retirer eve@example.com"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></span><span class="typing">Ajouter une adresse…</span></div></div>
+        <div class="field" style="position:relative"><label>Rôle</label>
+          <div class="inp trigger" role="combobox" aria-expanded="true" aria-controls="roles">Éditeur<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div>
+          <div class="pop" id="roles" role="listbox" style="top:72px">
+            <div class="opt" role="option" aria-selected="false">Lecteur<small>Consulte les démos et les analytics.</small></div>
+            <div class="opt active" role="option" aria-selected="true">Éditeur<span class="ck"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><small>Crée, modifie et publie des démos.</small></div>
+            <div class="opt" role="option" aria-selected="false">Admin<small>Gère aussi les membres et l'espace.</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="m-foot"><button class="btn btn-s">Annuler</button><button class="btn btn-p">Envoyer 2 invitations</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== États de la modale ===== -->
+<div data-vue="etats" style="display:grid;grid-template-columns:repeat(3,400px);gap:32px;padding:32px;align-items:start">
+  <div class="modal">
+    <div class="m-head"><span class="tile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-plus" aria-hidden="true"><path d="M12 10v6"></path><path d="M9 13h6"></path><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg></span><h2>Nouveau dossier</h2><button class="icon-btn" aria-label="Fermer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+    <div class="m-body"><div class="field"><label for="n1">Nom du dossier</label><div class="inp err" id="n1"></div><div class="err-msg">Le nom est obligatoire.</div></div>
+      <div class="field"><label>Visibilité</label><div class="inp trigger">Tout l'espace<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div></div></div>
+    <div class="m-foot"><button class="btn btn-s">Annuler</button><button class="btn btn-p" aria-disabled="true">Créer le dossier</button></div>
+  </div>
+  <div class="modal">
+    <div class="m-head"><span class="tile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail-check" aria-hidden="true"><path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"></path><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path><path d="m16 19 2 2 4-4"></path></svg></span><h2>Invitations envoyées</h2><button class="icon-btn" aria-label="Fermer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+    <div class="m-body"><div class="ok-box"><p style="margin:0">2 invitations envoyées. Si l'e-mail n'arrive pas, transmettez le lien vous-même.</p>
+      <div class="field"><label>bob@example.com</label><div class="link-row"><div class="inp">https://tutoclick.example/invitation/…</div><button class="btn btn-s"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>Copier le lien</button></div></div>
+      <div class="field"><label>eve@example.com</label><div class="link-row"><div class="inp">https://tutoclick.example/invitation/…</div><button class="btn btn-s"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>Copier le lien</button></div></div></div></div>
+    <div class="m-foot"><button class="btn btn-p">Terminé</button></div>
+  </div>
+  <div class="modal">
+    <div class="m-head"><span class="tile" style="color:var(--fd-color-danger)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 lucide-trash-2" aria-hidden="true"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span><h2>Retirer Bob Martin ?</h2><button class="icon-btn" aria-label="Fermer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+    <div class="m-body"><p style="margin:0" class="muted">Bob perd l'accès à l'espace. Ses démos restent dans l'espace.</p></div>
+    <div class="m-foot"><button class="btn btn-s">Annuler</button><button class="btn btn-p" style="background:var(--fd-color-danger)">Retirer</button></div>
+  </div>
+</div>
+
+<!-- ===== Galerie COMP-01 ===== -->
+<div class="gal" data-vue="comp">
+  <div class="cell tall"><h3>Select, ouvert, avec recherche et groupes</h3>
+    <div class="field" style="position:relative"><label>Démo</label><div class="inp trigger" aria-expanded="true">Démo CRM<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div>
+      <div class="pop" style="top:72px" role="listbox"><div class="inp search ph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>Rechercher…</div>
+        <div class="grp">Publiées</div><div class="opt active" aria-selected="true">Démo CRM<span class="ck"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span></div><div class="opt">Créer un rendez-vous</div>
+        <div class="grp">Brouillons</div><div class="opt">Saisir une fiche</div><div class="opt" aria-disabled="true">Démo archivée</div></div></div></div>
+  <div class="cell"><h3>Multi-sélection à puces</h3>
+    <div class="field"><label>Étiquettes</label><div class="inp chips"><span class="chip">Accueil<button aria-label="Retirer Accueil"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></span><span class="chip">RH<button aria-label="Retirer RH"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></span><span class="typing">Ajouter…</span></div></div>
+    <div class="field" style="margin-top:20px"><label>Adresses</label><div class="inp chips err"><span class="chip">eve@example.com<button aria-label="Retirer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></span><span class="chip bad">bob@exa<button aria-label="Retirer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></span></div><div class="err-msg">« bob@exa » n'est pas une adresse valide.</div></div></div>
+  <div class="cell"><h3>Menu « ⋯ »</h3>
+    <div style="position:relative;display:flex;justify-content:flex-end"><button class="icon-btn focus" aria-expanded="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+      <div class="pop menu" style="top:40px;right:0;min-width:220px"><div class="opt"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>Modifier le rôle<span></span></div><div class="opt active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>Copier le lien<kbd>⌘C</kbd></div><div class="sep"></div><div class="opt danger"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 lucide-trash-2" aria-hidden="true"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>Retirer de l'espace<span></span></div></div></div></div>
+  <div class="cell tall"><h3>Date</h3>
+    <div class="field" style="position:relative"><label>Expiration du lien</label><div class="inp trigger" aria-expanded="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg><span style="flex:1">21 déc. 2026</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div>
+      <div class="pop cal" style="top:72px"><div class="cal-h"><button class="icon-btn" aria-label="Mois précédent"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>décembre 2026<button class="icon-btn" aria-label="Mois suivant"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button></div>
+        <div class="cal-g"><span class="d wd">lu</span><span class="d wd">ma</span><span class="d wd">me</span><span class="d wd">je</span><span class="d wd">ve</span><span class="d wd">sa</span><span class="d wd">di</span><span class="d o">30</span><span class="d t">1</span><span class="d">2</span><span class="d">3</span><span class="d">4</span><span class="d">5</span><span class="d">6</span><span class="d">7</span><span class="d">8</span><span class="d">9</span><span class="d">10</span><span class="d">11</span><span class="d">12</span><span class="d">13</span><span class="d">14</span><span class="d">15</span><span class="d">16</span><span class="d">17</span><span class="d">18</span><span class="d">19</span><span class="d">20</span><span class="d s">21</span><span class="d">22</span><span class="d">23</span><span class="d">24</span><span class="d">25</span><span class="d">26</span><span class="d">27</span><span class="d">28</span><span class="d">29</span><span class="d">30</span><span class="d">31</span><span class="d o">1</span><span class="d o">2</span><span class="d o">3</span></div></div></div></div>
+  <div class="cell"><h3>Couleur</h3>
+    <div class="field"><label>Couleur principale</label><div class="swatches"><span class="sw sel" style="background:#A3195B"></span><span class="sw" style="background:#D60B52"></span><span class="sw" style="background:#85164B"></span><span class="sw" style="background:#2B95D2"></span><span class="sw" style="background:#95C020"></span><span class="sw" style="background:#F19103"></span><span class="sw" style="background:#1A1F26"></span><span class="sw" style="background:#FFFFFF"></span></div>
+      <div class="inp" style="margin-top:12px;width:180px"><span class="sw" style="width:20px;height:20px;background:#A3195B"></span>#A3195B</div><span class="muted" style="font-size:12px">Texte blanc sur cette couleur : 7,4:1</span></div></div>
+  <div class="cell"><h3>Fichier</h3>
+    <div class="drop over"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-up" aria-hidden="true"><path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"></path><path d="m14 19.5 3-3 3 3"></path><path d="M17 22v-5.5"></path><circle cx="9" cy="9" r="2"></circle></svg><div><b style="color:var(--fd-color-text)">Déposez une image</b> ou <button class="btn btn-s" style="height:32px;padding:0 12px">Choisir un fichier</button></div><span>PNG, JPG ou WebP, 2 Mo au plus.</span></div></div>
+  <div class="cell"><h3>Curseur</h3>
+    <div class="field"><label>Zoom <span style="margin-left:auto;color:var(--fd-color-text)">160 %</span></label><div class="range" role="slider" aria-valuenow="160"><span class="tr"></span><span class="fi"></span><span class="th focus"></span></div></div></div>
+  <div class="cell"><h3>Cases, radios, interrupteurs</h3>
+    <div class="checks"><span class="cb"><span class="box on"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>Afficher le compteur d'étapes</span><span class="cb"><span class="box"></span>Masquer le logo</span>
+      <span class="cb"><span class="rad on"></span>Tout l'espace</span><span class="cb"><span class="rad"></span>Moi seulement</span>
+      <span class="cb"><span class="swi on"></span>Accès public</span><span class="cb"><span class="swi"></span>Mot de passe</span></div></div>
+  <div class="cell tall"><h3>Heure</h3>
+    <div class="field" style="position:relative"><label>Heure d'envoi</label><div class="inp trigger" aria-expanded="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span style="flex:1">09:30</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div>
+      <div class="pop" style="top:72px;max-height:180px;overflow:hidden"><div class="opt">09:00</div><div class="opt active" aria-selected="true">09:30<span class="ck"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span></div><div class="opt">10:00</div><div class="opt">10:30</div></div></div></div>
+</div>
+
+<script>
+const st = Object.assign({ vue: 'equipe', theme: 'light' }, Object.fromEntries(new URLSearchParams(location.search)));
+function render() {
+  document.documentElement.dataset.theme = st.theme;
+  document.querySelectorAll('[data-vue]').forEach((e) => (e.hidden = e.dataset.vue !== st.vue));
+  document.querySelectorAll('.seg[data-k]').forEach((s) => s.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(st[s.dataset.k] === b.dataset.v))));
+}
+document.querySelectorAll('.seg[data-k]').forEach((s) => s.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { st[s.dataset.k] = b.dataset.v; render(); } }));
+render();
+</script>
+</body>
+</html>

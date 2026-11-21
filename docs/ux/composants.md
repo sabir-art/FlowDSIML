@@ -806,3 +806,42 @@ Le client trouve les espacements négligés. Règle vérifiée automatiquement (
 - **Causes à traiter à la source** : enfant en `width: 100%` avec une marge ou une bordure (utiliser `box-sizing: border-box`) ; texte long sans `overflow-wrap: anywhere` (adresses, sélecteurs CSS, URL) ; `min-width` implicite des enfants flex (mettre `min-width: 0`) ; marges négatives.
 - `overflow-x: hidden` ne remplace pas la correction : il masque le débordement au trackpad mais coupe le contenu.
 - **Recette** : dans chaque panneau touché par un lot, je fais un geste horizontal au trackpad (molette horizontale) et à la molette avec Maj. Le contenu ne doit pas bouger, et `scrollLeft` reste à 0.
+
+## 19. MODAL-01 : une seule forme de modale (retour client du 21/11)
+
+> Le client veut des modales « minimalistes et modernes ». La règle s'applique à **toutes** les modales de l'app (création, confirmation, suppression, invitation, réglages). Maquette : `maquettes/refonte/modales-composants.html`, vues « Équipe + invitation » et « États de la modale ». Captures dans `img/modales-composants/`.
+
+### 19.1 Gabarit
+
+- **Largeur** : 400 px par défaut, 560 px pour une modale à deux colonnes ou à tableau, 720 px pour Partager (P1-3). Plein écran sous 480 px. Rayon de 16 px, filet de 1 px `border`, ombre `--fd-shadow-lg`, voile `rgb(8 10 14 / .45)`.
+- **En-tête**, padding de 16 px 16 px 16 px 24px, filet de 1 px dessous :
+  - **tuile d'icône** de 40 px : fond `surface`, filet de 1 px `border`, rayon de 10 px, icône Lucide de 18 px en `text` (en `danger` pour une suppression). Cette taille déroge à ICON-01 pour la seule tuile ;
+  - titre en 18 px 500, sur une ligne ;
+  - bouton Fermer (`X`, 32 px, `aria-label="Fermer"`) à droite.
+- **Corps** : padding de 24 px, `gap` de **24 px** entre les champs ou les blocs.
+  - Libellé au-dessus du champ, en 14 px 500 `text-muted`, 6 px au-dessus du champ.
+  - Champ de 40 px, bordure `--fd-color-border-field`.
+  - **Pas de texte long** : une phrase au plus avant les champs. Le détail va dans un popover d'information ou dans l'aide en ligne.
+- **Erreur en ligne** : la bordure du champ passe en `danger`, avec un halo de 3 px à 15 %. Le message est en 13 px `danger`, **directement sous le champ** (6 px), sans encadré. Il est relié au champ par `aria-describedby`, et le champ porte `aria-invalid="true"`.
+- **Pied** :
+  - filet de 1 px au-dessus, fond **`--fd-color-nav-bg`** (#F7F7F8 en clair, #101317 en sombre), padding de 16 × 24 px ;
+  - boutons **alignés à droite** : Annuler (contour), puis l'action principale. Pour une suppression, l'action principale prend `danger`.
+- **Action principale indisponible** : `aria-disabled="true"`, jamais `disabled` seul. Elle reste focalisable, et un clic affiche les erreurs.
+  - Elle reste **lisible** : fond `prune-200` et texte `prune-900` en clair (7,8:1), fond `prune-800` et texte `prune-100` en sombre (8,8:1).
+  - Un bouton pâle aux lettres illisibles est interdit.
+- **Comportement** : focus sur le premier champ à l'ouverture (sur Annuler pour une confirmation). Le focus reste piégé dans la modale. Échap ferme, et le focus revient au déclencheur. Animation MOTION-01 (200 ms). `role="dialog"`, `aria-modal="true"`, `aria-labelledby` sur le titre.
+
+### 19.2 Confirmation après action
+
+- Elle s'affiche dans la même modale, avec une nouvelle tuile (par exemple `MailCheck`) et un nouveau titre. Le pied n'a qu'un bouton primaire, « Terminé ».
+- Les actions de secours, comme « Copier le lien », sont dans le corps, en boutons secondaires de 40 px.
+
+### 19.3 Recette
+
+- Sur chaque modale de l'app :
+  - mesures (largeur, en-tête, tuile de 40 px, padding de 24 px, gap de 24 px, pied teinté avec ses boutons à droite) ;
+  - en clair et en sombre ;
+  - erreur en ligne et action indisponible lisible ;
+  - focus et Échap.
+- La liste des modales et leur passage à MODAL-01 sont dans la livraison du dev.
+
