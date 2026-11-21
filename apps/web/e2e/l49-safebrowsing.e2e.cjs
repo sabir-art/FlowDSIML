@@ -124,7 +124,7 @@ const links = [
   await sec.getByRole('button', { name: 'Détail' }).click();
   ok(
     (await sec.locator('.hsec-list li').last().innerText()).replace(/\s+/g, ' ') ===
-      'lien dangereux bloqué (vérifié par Google Safe Browsing) 1',
+      'Lien dangereux bloqué (vérifié par Google Safe Browsing) 1',
     'rapport : lien dangereux bloqué (Google Safe Browsing)',
   );
 

@@ -6,6 +6,8 @@
  * serveur (supabase/functions/html-ingest/security.ts : mêmes chiffres sur la même page). Compteurs
  * déclaratifs côté extension ; garantie = assainissement serveur.
  */
+import { getDomain } from 'tldts';
+
 const SCRIPTS = 'script,noscript';
 const FRAMES = 'iframe,frame,frameset,object,embed,applet';
 const OTHER = 'base,template,portal,meta[http-equiv],link';
@@ -70,11 +72,14 @@ export function sanitizeCss(css: string): string {
 }
 
 /**
- * Domaine de rattachement (deux derniers niveaux) : les sous-domaines d'un même domaine sont internes
- * (L49 §4). Approximation sans liste des suffixes publics, identique côté serveur.
+ * Domaine de rattachement selon la liste des suffixes publics (tldts, MIT) : les sous-domaines d'un même
+ * domaine sont internes (L49 §4), mais deux sites sous un suffixe à deux niveaux restent distincts
+ * (travail-emploi.gouv.fr ≠ service-public.gouv.fr). Même règle côté serveur. Adresse IP ou nom local :
+ * le nom complet.
  */
 export function siteOf(host: string): string {
-  return host.toLowerCase().replace(/\.$/, '').split('.').slice(-2).join('.');
+  const h = host.toLowerCase().replace(/\.$/, '');
+  return getDomain(h, { allowPrivateDomains: true }) ?? h;
 }
 
 /** Lien http(s) vers un autre domaine que celui de la page (L49 §4). */

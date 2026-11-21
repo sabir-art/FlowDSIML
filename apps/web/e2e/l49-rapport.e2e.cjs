@@ -88,9 +88,9 @@ const page = (h1) =>
     .evaluateAll((li) => li.map((x) => [x.children[0].textContent, x.children[1].textContent]));
   ok(rows.length === 6, `6 compteurs (« autres » masqué à 0) : ${rows.length}`);
   ok(
-    rows.some(([l, n]) => l === 'liens externes désactivés' && n === '2') &&
-      rows.some(([l, n]) => l === 'donnée personnelle remplacée' && n === '1') &&
-      rows.some(([l, n]) => l === 'script retiré' && n === '0'),
+    rows.some(([l, n]) => l === 'Liens externes désactivés' && n === '2') &&
+      rows.some(([l, n]) => l === 'Donnée personnelle remplacée' && n === '1') &&
+      rows.some(([l, n]) => l === 'Script retiré' && n === '0'),
     'libellés accordés au nombre, chiffre à part',
   );
   const num = await sec
@@ -125,7 +125,7 @@ const page = (h1) =>
   ok(
     (await sec.locator('.hsec-list li').count()) === 7 &&
       (await sec.locator('.hsec-list li').last().innerText()).replace(/\s+/g, ' ') ===
-        'autres éléments retirés 4',
+        'Autres éléments retirés 4',
     '« autres éléments retirés » affiché quand il est différent de 0',
   );
 

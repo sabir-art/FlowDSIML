@@ -51,3 +51,18 @@ describe('gdprSummary', () => {
     expect(s.imported).toBe(1);
   });
 });
+
+describe('L49 : ligne du bilan (pages analysées)', async () => {
+  const i18next = (await import('i18next')).default.createInstance();
+  const fr = (await import('../../locales/fr.json')).default;
+  await i18next.init({ lng: 'fr', resources: { fr: { translation: fr } } });
+  const { securityLine } = await import('./GdprDialog');
+  const line = (...s: Array<'safe' | 'removed' | 'partial'>) => securityLine(i18next.t, s);
+  it('morceaux accordés, morceau nul omis, une seule page sans chiffre répété', () => {
+    expect(line('safe', 'safe', 'removed')).toBe('3 pages analysées : 2 sûres, 1 avec éléments retirés');
+    expect(line('safe', 'removed', 'removed')).toBe('3 pages analysées : 1 sûre, 2 avec éléments retirés');
+    expect(line('safe', 'safe')).toBe('2 pages analysées : 2 sûres');
+    expect(line('safe')).toBe('1 page analysée : sûre');
+    expect(line('removed')).toBe('1 page analysée : avec éléments retirés');
+  });
+});

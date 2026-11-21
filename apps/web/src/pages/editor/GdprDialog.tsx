@@ -12,10 +12,30 @@ import {
 import { useEffect, useId, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
-import { htmlSecurityStatus } from '@flowdsiml/core';
+import { type HtmlSecurityStatus, htmlSecurityStatus } from '@flowdsiml/core';
+import type { TFunction } from 'i18next';
 import { stepSecurity } from './html/HtmlSecurity';
 import { asBeforeAfter, type StepRow } from './types';
 import { todoLines, type TodoItem } from './publishTodo';
+
+/**
+ * L49 §3 : « 3 pages analysées : 2 sûres, 1 avec éléments retirés » ; chaque morceau a son pluriel et
+ * un morceau nul est omis ; une seule page : « 1 page analysée : sûre » (sans chiffre répété).
+ */
+export function securityLine(t: TFunction, statuses: HtmlSecurityStatus[]): string {
+  const safe = statuses.filter((x) => x === 'safe').length;
+  const removed = statuses.filter((x) => x === 'removed').length;
+  const total = t('htmlSecurity.checklistTotal', { count: statuses.length });
+  if (statuses.length === 1)
+    return safe || removed
+      ? `${total} : ${t(safe ? 'htmlSecurity.checklistSafeOnly' : 'htmlSecurity.checklistRemovedOnly')}`
+      : total;
+  const parts = [
+    safe ? t('htmlSecurity.checklistSafe', { count: safe }) : '',
+    removed ? t('htmlSecurity.checklistRemoved', { count: removed }) : '',
+  ].filter(Boolean);
+  return parts.length ? `${total} : ${parts.join(', ')}` : total;
+}
 
 /** Bilan RGPD d'une démo (même calcul que publish_demo côté serveur). Pur, testé. */
 export function gdprSummary(
@@ -246,11 +266,7 @@ export function GdprDialog({
               {scanned.length > 0 && (
                 <li>
                   <ShieldCheck aria-hidden="true" />
-                  {t('htmlSecurity.checklist', {
-                    count: scanned.length,
-                    safe: scanned.filter((x) => x === 'safe').length,
-                    removed: scanned.filter((x) => x === 'removed').length,
-                  })}
+                  {securityLine(t, scanned)}
                 </li>
               )}
               <li>

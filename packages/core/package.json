@@ -17,5 +17,8 @@
     "jsdom": "^26.1.0",
     "typescript": "~5.9.3",
     "vitest": "^3.2.7"
+  },
+  "dependencies": {
+    "tldts": "7.4.19"
   }
 }

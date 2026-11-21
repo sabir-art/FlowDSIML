@@ -1,6 +1,14 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { activeRemoved, htmlSecurityStatus, sanitizeCss, sanitizeDom, sumHtmlSecurity } from './htmlSanitize';
+import {
+  activeRemoved,
+  htmlSecurityStatus,
+  isExternalLink,
+  sanitizeCss,
+  sanitizeDom,
+  siteOf,
+  sumHtmlSecurity,
+} from './htmlSanitize';
 
 describe('sanitizeDom', () => {
   it('retire scripts, cadres, gestionnaires, URL dangereuses et saisies', () => {
@@ -82,5 +90,19 @@ describe('L49 : statut du rapport', () => {
     ]);
     expect(activeRemoved(s)).toBe(6);
     expect(s.dangerousLinks).toBe(1);
+  });
+});
+
+describe('L49 : domaine de rattachement (suffixes publics)', () => {
+  it('gouv.fr : deux ministères sont deux sites ; sous-domaine du même site interne', () => {
+    expect(siteOf('travail-emploi.gouv.fr')).toBe('travail-emploi.gouv.fr');
+    expect(isExternalLink('https://www.service-public.gouv.fr/', 'https://travail-emploi.gouv.fr/a')).toBe(
+      true,
+    );
+    expect(isExternalLink('https://aide.travail-emploi.gouv.fr/x', 'https://travail-emploi.gouv.fr/a')).toBe(
+      false,
+    );
+    expect(isExternalLink('https://autre.co.uk/', 'https://acme.co.uk/')).toBe(true);
+    expect(isExternalLink('https://docs.globex.example/', 'https://app.acme.example/')).toBe(true);
   });
 });

@@ -2,6 +2,7 @@
 // Mêmes règles que sanitizeDom (packages/core/src/htmlSanitize.ts) : mêmes chiffres sur la même page.
 // Arbre HTML de htmlparser2 (MIT, déjà utilisé par sanitize-html).
 import { parseDocument } from 'npm:htmlparser2@8.0.2';
+import { getDomain } from 'npm:tldts@7.4.19';
 
 export const SECURITY_KEYS = [
   'scripts',
@@ -44,7 +45,11 @@ const empty = (): SecurityCounts => ({
   other: 0,
 });
 const cssHits = (css: string) => css.match(CSS_HITS)?.length ?? 0;
-const siteOf = (host: string) => host.toLowerCase().replace(/\.$/, '').split('.').slice(-2).join('.');
+// Liste des suffixes publics (tldts, MIT), même règle que siteOf du cœur (packages/core/src/htmlSanitize.ts)
+const siteOf = (host: string) => {
+  const h = host.toLowerCase().replace(/\.$/, '');
+  return getDomain(h, { allowPrivateDomains: true }) ?? h;
+};
 
 /** Lien http(s) vers un autre domaine que celui de la page (L49 §4 ; même règle que isExternalLink du cœur). */
 export function isExternal(href: string, pageUrl: string | null): boolean {

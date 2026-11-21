@@ -85,6 +85,18 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Aide</titl
   const sw = ed.getByRole('switch', { name: 'Autoriser le lien Votre banque en ligne' });
   ok((await sw.count()) === 1 && !(await sw.isChecked()), 'interrupteur nommé, désactivé par défaut');
   ok((await items.nth(0).innerText()).includes('Désactivé'), 'libellé « Désactivé »');
+  const st = await items
+    .nth(0)
+    .locator('.fd-switch__text')
+    .evaluate((el) => [getComputedStyle(el).fontSize, getComputedStyle(el).color]);
+  const nameColor = await items
+    .nth(0)
+    .locator('b')
+    .evaluate((el) => getComputedStyle(el).color);
+  ok(
+    st[0] === '13px' && st[1] !== nameColor,
+    `R2 : état en 13 px text-muted, sous le nom du lien (${st.join()})`,
+  );
   ok(
     (await items.nth(1).innerText()).includes('Adresse non sécurisée') &&
       (await items.nth(1).getByRole('switch').count()) === 0,
@@ -170,7 +182,11 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Aide</titl
     r.fulfill({ contentType: 'text/html', headers: cors, body: PAGE }),
   );
   await p.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, headers: cors, body: '{}' }));
-  p.on('request', (r) => r.method() === 'POST' && posted.push(r.url()));
+  // Mesure d'audience du lecteur exclue : seul un envoi du formulaire capturé compterait
+  p.on(
+    'request',
+    (r) => r.method() === 'POST' && !r.url().includes('/functions/v1/track') && posted.push(r.url()),
+  );
   await p.goto(`${PLAYER}/#/d/${D}`);
   const frame = p.frameLocator('.p-html-frame iframe');
   await frame.locator('h1').waitFor();

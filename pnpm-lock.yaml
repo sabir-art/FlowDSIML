@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  tldts>tldts-core: 7.4.19
+
 importers:
 
   .:
@@ -223,6 +226,10 @@ importers:
         version: 3.2.7(@types/node@26.6.6)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.33.0)
 
   packages/core:
+    dependencies:
+      tldts:
+        specifier: 7.4.19
+        version: 7.4.19
     devDependencies:
       jsdom:
         specifier: ^26.1.0
@@ -3353,11 +3360,15 @@ packages:
   tippy.js@6.3.7:
     resolution: {integrity: sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==}
 
-  tldts-core@6.1.86:
-    resolution: {integrity: sha512-Je6p7pkk+KMzMv2XXKmAE3McmolOQFdxkKw0R8EYNr7sELW46JqnNeTX8ybPiQgvg1ymCoF8LXs5fzFaZvJPTA==}
+  tldts-core@7.4.19:
+    resolution: {integrity: sha512-goNXV6Ho9TIOfpJZanTd6CKG5DyYgYAL+k+22T0SLh8l6+KHIfBUPFuePuSZv05UttIaaLmI9tb7TmGIdK5AkQ==}
 
   tldts@6.1.86:
     resolution: {integrity: sha512-WMi/OQ2axVTf/ykqCQgXiIct+mSQDFdH2fkwhPwgEwvJ1kSzZRiinb0zF2Xb8u4+OqPChmyI6MEu4EezNJz+FQ==}
+    hasBin: true
+
+  tldts@7.4.19:
+    resolution: {integrity: sha512-48dH6aSpQnpbzDUc4vIQZ1VjB8tkK+e8c1yx05/SZK+rkssgjEOlxDd/yU8/a4vGYQ9vRgJr9dwMq9TJ0b3X2Q==}
     hasBin: true
 
   tmp@0.2.5:
@@ -6701,11 +6712,15 @@ snapshots:
     dependencies:
       '@popperjs/core': 2.11.8
 
-  tldts-core@6.1.86: {}
+  tldts-core@7.4.19: {}
 
   tldts@6.1.86:
     dependencies:
-      tldts-core: 6.1.86
+      tldts-core: 7.4.19
+
+  tldts@7.4.19:
+    dependencies:
+      tldts-core: 7.4.19
 
   tmp@0.2.5: {}
 

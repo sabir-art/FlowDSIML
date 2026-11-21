@@ -203,3 +203,11 @@ Deno.test('lien signalé : bloqué (jamais autorisable), interne ou externe ; im
   assertMatch(out, /href="https:\/\/app\.example\.com\/x"/);
   assert(!/<img[^>]*src=/.test(out), out);
 });
+
+// L49 : suffixes publics (tldts), même règle que le cœur
+import { isExternal } from './security.ts';
+Deno.test('gouv.fr : deux ministères sont deux sites', () => {
+  assert(isExternal('https://www.service-public.gouv.fr/', 'https://travail-emploi.gouv.fr/a'));
+  assert(!isExternal('https://aide.travail-emploi.gouv.fr/x', 'https://travail-emploi.gouv.fr/a'));
+  assert(isExternal('https://autre.co.uk/', 'https://acme.co.uk/'));
+});
