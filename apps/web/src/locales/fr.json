@@ -5228,6 +5228,7 @@
     }
   },
   "sandboxPage": {
+    "confirmDeleteFolder": "Les Sandbox qu’il contient ne sont pas supprimés : ils passent dans « Sans dossier ».",
     "title": "Sandbox",
     "subtitle": "Des pages reliées, à explorer librement.",
     "new": "Nouveau Sandbox",

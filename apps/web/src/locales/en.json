@@ -5228,6 +5228,7 @@
     }
   },
   "sandboxPage": {
+    "confirmDeleteFolder": "Sandboxes inside are kept and moved to “No folder”.",
     "title": "Sandbox",
     "subtitle": "Linked HTML pages to explore freely.",
     "new": "New Sandbox",

@@ -6,6 +6,8 @@
  * Un bouton est « natif » si l'un de ces critères est vrai (styles calculés) :
  *  - il affiche du texte et sa police n'est pas celle de son parent (un <button> sans style ne l'hérite pas : Arial
  *    ou system-ui). Le parent plutôt que <body> : une page publique peut avoir la police de sa marque ;
+ *  - il affiche du texte dans une police par défaut du navigateur (Arial, system-ui…) alors que la page en a une
+ *    autre : le cas où le parent est lui-même sans style (L48-02, le critère précédent ne le voyait pas) ;
  *  - sa bordure est en relief (outset ou inset) ;
  *  - son fond est celui du navigateur : rgb(239, 239, 239) en clair, rgb(107, 107, 107) en sombre (Chromium).
  * Éléments vérifiés : button, [role="button"], input[type=button|submit|reset], visibles (taille non nulle).
@@ -58,6 +60,9 @@ const DIALOGS = [
 /** Dans la page : boutons visibles dont le rendu reste celui du navigateur. */
 function natives() {
   const first = (el) => getComputedStyle(el).fontFamily.split(',')[0].trim();
+  const UA_FONT =
+    /^["']?(arial|helvetica|system-ui|-apple-system|sans-serif|serif|times new roman|times)["']?$/i;
+  const pageFont = first(document.body);
   const UA_BG = ['rgb(239, 239, 239)', 'rgb(107, 107, 107)'];
   const sel = 'button, [role="button"], input[type=button], input[type=submit], input[type=reset]';
   const out = [];
@@ -68,8 +73,10 @@ function natives() {
     const why = [];
     // La police ne compte que si le bouton affiche du texte (un bouton à icône seule n'en montre pas)
     const parent = el.parentElement || document.body;
-    if ((el.innerText || el.value || '').trim() && first(el) !== first(parent))
-      why.push(`police ${cs.fontFamily.split(',')[0]}`);
+    const text = (el.innerText || el.value || '').trim();
+    if (text && first(el) !== first(parent)) why.push(`police ${cs.fontFamily.split(',')[0]}`);
+    else if (text && UA_FONT.test(first(el)) && !UA_FONT.test(pageFont))
+      why.push(`police du navigateur ${cs.fontFamily.split(',')[0]}`);
     if (/outset|inset/.test(cs.borderTopStyle)) why.push(`bordure ${cs.borderTopStyle}`);
     if (UA_BG.includes(cs.backgroundColor)) why.push(`fond ${cs.backgroundColor}`);
     if (!why.length) continue;

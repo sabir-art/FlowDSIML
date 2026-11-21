@@ -1375,7 +1375,9 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
         <ConfirmDialog
           open={!!folderToDelete}
           title={t('demos.deleteFolder', { name: folderToDelete?.name ?? '' })}
-          body={t('demos.confirmDeleteFolder', { name: folderToDelete?.name ?? '' })}
+          body={t(sandbox ? 'sandboxPage.confirmDeleteFolder' : 'demos.confirmDeleteFolder', {
+            name: folderToDelete?.name ?? '',
+          })}
           confirmLabel={t('common.delete')}
           danger
           onClose={() => setFolderToDelete(null)}
