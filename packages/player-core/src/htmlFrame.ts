@@ -635,7 +635,9 @@ export const FRAME_RUNTIME = `(function () {
       return;
     }
     // A8 guide : avant les liens, le guide avance ; la navigation se fait ensuite comme d'habitude
-    if (target && inTarget(e)) post({ t: 'hit' });
+    // Un clic qui fait avancer le guide n'affiche pas « non disponible »
+    var hit = !!target && inTarget(e);
+    if (hit) post({ t: 'hit' });
     var linked = t.closest('[data-fd-link]');
     var ext = t.closest('[data-tc-ext]');
     var actionable = t.closest('a,button,[role=button],[role=link],[role=tab],[role=menuitem],input[type=submit],summary');
@@ -644,8 +646,8 @@ export const FRAME_RUNTIME = `(function () {
     // L49 §4 : lien externe autorisé (le lecteur demande confirmation) ou désactivé
     else if (ext && ext.hasAttribute('data-fd-ext')) post({ t: 'ext', id: ext.getAttribute('data-fd-ext') });
     // L49 §4.1 : lien signalé par Safe Browsing (data-tc-ext="blocked") : rien ne se passe
-    else if (ext) { if (ext.getAttribute('data-tc-ext') === 'off' && unlinked !== 'none') post({ t: 'unlinked', ext: true }); }
-    else if (actionable && unlinked !== 'none') post({ t: 'unlinked' });
+    else if (ext) { if (ext.getAttribute('data-tc-ext') === 'off' && unlinked !== 'none' && !hit) post({ t: 'unlinked', ext: true }); }
+    else if (actionable && unlinked !== 'none' && !hit) post({ t: 'unlinked' });
   }, true);
   document.addEventListener('submit', function (e) { e.preventDefault(); }, true);
   // A8 guide : la zone visée suit le défilement et la taille de la page

@@ -61,6 +61,17 @@ describe('htmlFrame', () => {
     expect(parseFromFrame({ fd: 1, t: 'select', el: { sel: 'b' } })).toBeNull();
     expect(parseFromFrame({ fd: 1, t: 'key', key: 'exec' })).toBeNull();
   });
+  it('A8 guide : un sélecteur reçu n’est jamais évalué autrement que par querySelector', () => {
+    // Borné à 500 caractères, cherché par querySelector sous try (un sélecteur invalide ou hostile
+    // échoue sans rien exécuter ; cas réel vérifié dans e2e/guide-sandbox.e2e.cjs)
+    expect(FRAME_RUNTIME).toContain('m.sel.slice(0, 500)');
+    expect(FRAME_RUNTIME).toMatch(
+      /function q\(sel\) \{ try \{ return document\.querySelector\(sel\); \} catch/,
+    );
+    expect(FRAME_RUNTIME).toMatch(
+      /function unique\(sel\) \{ try \{ return document\.querySelectorAll\(sel\)\.length === 1; \} catch/,
+    );
+  });
   it('A8 guide : position de la zone visée et clic, format strict', () => {
     expect(parseFromFrame({ fd: 1, t: 'target', rect: { x: 10, y: 20, w: 30, h: 40 }, found: true })).toEqual(
       {

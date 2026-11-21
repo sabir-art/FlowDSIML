@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { createPortal } from 'preact/compat';
 import { ChevronRight, Route } from 'lucide-preact';
+import type { ComponentChildren } from 'preact';
 import type { Rect } from '@flowdsiml/manifest';
 import { beaconCenter, tipClass } from '@flowdsiml/player-core';
 import { fmt, type Dict } from './i18n';
@@ -50,7 +52,35 @@ export function GuideBubble({
   const g = t.guide;
   const h = point?.hotspot;
   const anchored = !!(h && box) && !sheet;
-  const top = sheet && !!box && box.y > 2 / 3;
+  // La feuille du bas sort du cadre de la page (racine du lecteur) : elle ne le recouvre pas
+  const root = typeof document !== 'undefined' ? document.querySelector('.p-root') : null;
+  const wrap = (node: ComponentChildren) => (sheet && root ? createPortal(node as never, root) : node);
+  // Petit écran : feuille collée en bas de la fenêtre, au-dessus de la barre du lecteur ; en haut seulement
+  // si l'élément visé est dans le tiers bas de l'écran (spec §4.5)
+  const anchor = useRef<HTMLSpanElement>(null);
+  const [place, setPlace] = useState<{ top: boolean; bottom: number; topPx: number } | null>(null);
+  useLayoutEffect(() => {
+    if (!sheet) return;
+    const measure = () => {
+      const fr = anchor.current?.parentElement?.getBoundingClientRect();
+      const bar = document.querySelector('.p-controls')?.getBoundingClientRect();
+      const head = document.querySelector('.p-top')?.getBoundingClientRect();
+      const elY = fr && box ? fr.top + (box.y + box.h / 2) * fr.height : 0;
+      setPlace({
+        top: !!box && elY > (window.innerHeight * 2) / 3,
+        bottom: bar && bar.height ? window.innerHeight - bar.top + 8 : 8,
+        topPx: head ? head.bottom + 8 : 8,
+      });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, true);
+    return () => {
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, true);
+    };
+  }, [sheet, box?.x, box?.y, box?.w, box?.h]);
+  const top = sheet && !!place?.top;
   const cls = sheet
     ? `p-gd p-gd--sheet${top ? ' p-gd--top' : ''}`
     : anchored
@@ -58,65 +88,76 @@ export function GuideBubble({
       : 'p-gd p-gd--center';
   return (
     <>
-      {anchored && <div class="p-gd-ring" style={ring(box!)} aria-hidden="true" />}
-      <div
-        class={cls}
-        style={anchored ? beaconCenter(box!) : undefined}
-        role="dialog"
-        aria-modal="false"
-        aria-labelledby="p-gd-t"
-      >
-        {done ? (
-          <>
-            <p id="p-gd-t" class="p-gd-body">
-              {g.done}
-            </p>
-            <div class="p-actions">
-              <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={onClose}>
-                {g.close}
-              </button>
-            </div>
-          </>
-        ) : startsOn ? (
-          <>
-            <p id="p-gd-t" class="p-gd-body">
-              {fmt(g as unknown as Record<string, string>, 'startsOn', { page: startsOn })}
-            </p>
-            <div class="p-actions">
-              <button type="button" class="p-btn p-btn-link p-btn-sm" onClick={onSkip}>
-                {g.skip}
-              </button>
-              <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={onGo}>
-                {g.goThere}
-              </button>
-            </div>
-          </>
-        ) : (
-          h && (
+      {h && box && <div class="p-gd-ring" style={ring(box)} aria-hidden="true" />}
+      {sheet && <span ref={anchor} hidden />}
+      {wrap(
+        <div
+          class={cls}
+          style={
+            anchored
+              ? beaconCenter(box!)
+              : sheet && place
+                ? top
+                  ? { top: `${place.topPx}px` }
+                  : { bottom: `${place.bottom}px` }
+                : undefined
+          }
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby="p-gd-t"
+        >
+          {done ? (
             <>
-              <div id="p-gd-t" class="p-tip-title">
-                {sub(h.title) || fmt(g as unknown as Record<string, string>, 'step', { k: k + 1, n })}
-              </div>
-              {h.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(h.body) }} />}
+              <p id="p-gd-t" class="p-gd-body">
+                {g.done}
+              </p>
               <div class="p-actions">
-                <span class="p-gd-count">
-                  {fmt(g as unknown as Record<string, string>, 'step', { k: k + 1, n })}
-                </span>
+                <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={onClose}>
+                  {g.close}
+                </button>
+              </div>
+            </>
+          ) : startsOn ? (
+            <>
+              <p id="p-gd-t" class="p-gd-body">
+                {fmt(g as unknown as Record<string, string>, 'startsOn', { page: startsOn })}
+              </p>
+              <div class="p-actions">
                 <button type="button" class="p-btn p-btn-link p-btn-sm" onClick={onSkip}>
                   {g.skip}
                 </button>
-                {/* « Suivant » pour une étape sans geste ; au clic, équivalent clavier sans zone visée */}
-                {(point!.advance === 'next' || !found) && (
-                  <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={onNext}>
-                    {g.next}
-                    <ChevronRight {...ICON} size={14} />
-                  </button>
-                )}
+                <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={onGo}>
+                  {g.goThere}
+                </button>
               </div>
             </>
-          )
-        )}
-      </div>
+          ) : (
+            h && (
+              <>
+                <div id="p-gd-t" class="p-tip-title">
+                  {sub(h.title) || fmt(g as unknown as Record<string, string>, 'step', { k: k + 1, n })}
+                </div>
+                {h.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(h.body) }} />}
+                <div class="p-actions">
+                  <span class="p-gd-count">
+                    {fmt(g as unknown as Record<string, string>, 'step', { k: k + 1, n })}
+                  </span>
+                  <button type="button" class="p-btn p-btn-link p-btn-sm" onClick={onSkip}>
+                    {g.skip}
+                  </button>
+                  {/* « Suivant » pour une étape sans geste ; au clic, équivalent clavier sans zone visée */}
+                  {(point!.advance === 'next' || !found) && (
+                    <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={onNext}>
+                      {g.next}
+                      <ChevronRight {...ICON} size={14} />
+                    </button>
+                  )}
+                </div>
+              </>
+            )
+          )}
+        </div>,
+      )}
     </>
   );
 }

@@ -3031,8 +3031,12 @@ h1.p-title {
   line-height: 1.5;
 }
 .p-gd--sheet {
+  position: fixed;
+  z-index: 40;
   bottom: 8px;
   width: calc(100% - 16px);
+  max-height: 45vh;
+  overflow: auto;
 }
 .p-gd--sheet.p-gd--top {
   bottom: auto;

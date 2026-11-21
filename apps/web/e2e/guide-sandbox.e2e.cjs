@@ -27,7 +27,11 @@ const pages = {
     'Agenda',
     '<h1>Agenda</h1><p>Mardi : atelier CV</p><button id="new">Nouveau rendez-vous</button>',
   ),
-  'g3.html': page('Statistiques', '<h1>Statistiques</h1>'),
+  // Recette 11 : page plus haute que la fenêtre, élément visé tout en bas
+  'g3.html': page(
+    'Statistiques',
+    '<h1>Statistiques</h1><div style="height:1600px"></div><button id="bas">Exporter le rapport</button>',
+  ),
 };
 const hs = (id, title, sel, rect = { x: 0.02, y: 0.1, w: 0.2, h: 0.1 }) => ({
   id,
@@ -72,7 +76,21 @@ const steps = [
     hs('h3', 'La semaine', null, { x: 0.02, y: 0.12, w: 0.3, h: 0.1 }),
     hs('h4', 'Créez un rendez-vous', '#new'),
   ]),
-  step(S3, 'g3.html', 'Statistiques', []),
+  step(S3, 'g3.html', 'Statistiques', [
+    hs('h5', 'Exportez le rapport', '#bas'),
+    // Sélecteur hostile : il n'est jamais évalué autrement que par querySelector (aucun HTML injecté)
+    hs(
+      'h6',
+      'Sélecteur hostile',
+      "img[src=x]\"><img src=x onerror=\"parent.postMessage({fd:1,t:'go'},'*')\">",
+      {
+        x: 0.4,
+        y: 0.3,
+        w: 0.2,
+        h: 0.1,
+      },
+    ),
+  ]),
 ];
 const base = (id, guideSteps) => ({
   schemaVersion: 1,
@@ -89,6 +107,7 @@ const base = (id, guideSteps) => ({
 });
 const MAIN = '0b5c1f0e-0000-4000-8000-0000000000f1';
 const LATE = '0b5c1f0e-0000-4000-8000-0000000000f2';
+const TALL = '0b5c1f0e-0000-4000-8000-0000000000f3';
 const manifests = {
   [MAIN]: base(MAIN, [
     { page: S1, hotspot: 'h1', advance: 'next' },
@@ -100,6 +119,10 @@ const manifests = {
   ]),
   // Le guide commence sur la page Agenda
   [LATE]: base(LATE, [{ page: S2, hotspot: 'h3', advance: 'next' }]),
+  [TALL]: base(TALL, [
+    { page: S3, hotspot: 'h5', advance: 'next' },
+    { page: S3, hotspot: 'h6', advance: 'next' },
+  ]),
 };
 
 (async () => {
@@ -239,6 +262,11 @@ const manifests = {
   await p.waitForFunction(() => /Étape 4 sur 4/.test(document.querySelector('.p-gd')?.textContent ?? ''));
   await frame(p).locator('#new').click();
   await p.waitForFunction(() => /Guide terminé/.test(document.querySelector('.p-gd')?.textContent ?? ''));
+  await p.waitForTimeout(300);
+  ok(
+    (await p.locator('.p-html-toast').innerText()).trim() === '',
+    'clic qui fait avancer le guide (élément non relié) : pas de « non disponible »',
+  );
   ok(
     (await bubble(p).innerText()).includes('Guide terminé. Continuez à explorer librement.'),
     'recette 6 : bulle de fin',
@@ -277,6 +305,22 @@ const manifests = {
   const m = await open(MAIN, { width: 390, height: 844 });
   await bubble(m).waitFor();
   ok(/p-gd--sheet/.test((await bubble(m).getAttribute('class')) ?? ''), '390 px : bulle en feuille du bas');
+  {
+    // Feuille collée en bas de la fenêtre, au-dessus de la barre du lecteur, sans couvrir l'élément visé
+    await m.waitForTimeout(300);
+    const sh = await bubble(m).boundingBox();
+    const el = await frame(m).locator('div.kpi').boundingBox();
+    const bar = await m.locator('.p-controls').boundingBox();
+    const vh = 844;
+    ok(
+      sh && sh.y + sh.height > vh * 0.6 && (!bar || sh.y + sh.height <= bar.y + 1),
+      `390 px : feuille en bas de la fenêtre, au-dessus de la barre (${sh && Math.round(sh.y)}–${sh && Math.round(sh.y + sh.height)}, barre ${bar && Math.round(bar.y)})`,
+    );
+    ok(
+      sh && el && (el.y + el.height <= sh.y || el.y >= sh.y + sh.height),
+      '390 px : la feuille ne couvre pas l’élément visé',
+    );
+  }
   ok(/Guide 1\/4/.test(await pill(m).innerText()), '390 px : pastille « Guide 1/4 »');
   ok(
     await m.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
@@ -295,6 +339,53 @@ const manifests = {
   await onPage(l, 'Agenda');
   await l.waitForFunction(() => /La semaine/.test(document.querySelector('.p-gd')?.textContent ?? ''));
   ok(true, '« Y aller » : page Agenda, bulle 1');
+
+  // ===== Recette 11 : élément en bas d'une page plus haute que la fenêtre ; sélecteur hostile =====
+  const tl = await open(TALL, { width: 1440, height: 900 });
+  await bubble(tl).waitFor();
+  await bubble(tl).getByRole('button', { name: 'Y aller' }).click();
+  await onPage(tl, 'Statistiques');
+  await tl.waitForFunction(() =>
+    /Exportez le rapport/.test(document.querySelector('.p-gd')?.textContent ?? ''),
+  );
+  await tl.locator('.p-gd-ring').waitFor();
+  {
+    const ring = await tl.locator('.p-gd-ring').boundingBox();
+    const btn = await frame(tl).locator('#bas').boundingBox();
+    const box = await tl.locator('.p-html-frame').boundingBox();
+    ok(
+      ring &&
+        btn &&
+        box &&
+        Math.abs(ring.y - btn.y) < 3 &&
+        btn.y >= box.y &&
+        btn.y + btn.height <= box.y + box.height,
+      'recette 11 : élément du bas ramené dans la vue, la zone le suit',
+    );
+  }
+  await frame(tl)
+    .locator('body')
+    .evaluate(() => window.scrollTo(0, 0));
+  await tl.waitForTimeout(300);
+  {
+    const ring = await tl.locator('.p-gd-ring').boundingBox();
+    const btn = await frame(tl).locator('#bas').boundingBox();
+    ok(ring && btn && Math.abs(ring.y - btn.y) < 3, 'recette 11 : la zone suit le défilement de la page');
+  }
+  await bubble(tl).getByRole('button', { name: 'Suivant' }).click();
+  await tl.waitForFunction(() =>
+    /Sélecteur hostile/.test(document.querySelector('.p-gd')?.textContent ?? ''),
+  );
+  await tl.waitForTimeout(400);
+  ok(
+    (await frame(tl).locator('img').count()) === 0 &&
+      (await bubble(tl).getByRole('button', { name: 'Suivant' }).count()) === 1,
+    'sélecteur hostile : rien d’injecté, bulle sur le rect de secours avec « Suivant »',
+  );
+  ok(
+    (await tl.locator('iframe').getAttribute('title'))?.includes('Statistiques'),
+    'sélecteur hostile : aucune navigation',
+  );
 
   // ===== Événements =====
   await l.waitForTimeout(2600); // envoi par lots (2 s)
