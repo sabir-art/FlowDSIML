@@ -3112,3 +3112,10 @@
   font-size: 14px;
   color: var(--fd-color-text-muted);
 }
+/* E-mails P2 : page de désinscription, 8 px sous le titre, 24 px avant le bouton */
+.mk .unsub-msg {
+  margin: 8px 0 24px;
+}
+.mk .unsub-msg p {
+  margin: 0;
+}

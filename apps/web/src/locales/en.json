@@ -5389,8 +5389,8 @@
   },
   "unsubscribe": {
     "title": "Email notifications",
-    "done": "You will no longer receive notifications by email. You can turn them back on in Settings › Notifications.",
-    "invalid": "This link is no longer valid. You can turn off emails in the TutoClick notification preferences.",
+    "done": "You will no longer receive notifications by email. To turn them back on, open TutoClick, click the notification bell, then “Preferences”.",
+    "invalid": "This link is no longer valid. To turn off emails, open TutoClick, click the notification bell, then “Preferences”.",
     "open": "Open TutoClick"
   }
 }

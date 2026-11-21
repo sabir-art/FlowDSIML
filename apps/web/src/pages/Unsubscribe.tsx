@@ -23,7 +23,10 @@ export function Unsubscribe() {
   if (ok === null) return <Loading />;
   return (
     <AuthLayout title={t('unsubscribe.title')}>
-      {ok ? <p>{t('unsubscribe.done')}</p> : <Alert kind="error">{t('unsubscribe.invalid')}</Alert>}
+      {/* Retour UX : 8 px sous le titre, 24 px avant le bouton (comme les autres écrans d'authentification) */}
+      <div className="unsub-msg">
+        {ok ? <p>{t('unsubscribe.done')}</p> : <Alert kind="error">{t('unsubscribe.invalid')}</Alert>}
+      </div>
       <Link className="fd-btn" to="/">
         {t('unsubscribe.open')}
       </Link>

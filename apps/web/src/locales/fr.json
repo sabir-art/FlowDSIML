@@ -5389,8 +5389,8 @@
   },
   "unsubscribe": {
     "title": "Notifications par e-mail",
-    "done": "Vous ne recevrez plus de notifications par e-mail. Vous pouvez les réactiver dans Paramètres › Notifications.",
-    "invalid": "Ce lien n’est plus valable. Vous pouvez couper les e-mails dans les préférences des notifications de TutoClick.",
+    "done": "Vous ne recevrez plus de notifications par e-mail. Pour les réactiver, ouvrez TutoClick, cliquez sur la cloche des notifications, puis sur « Préférences ».",
+    "invalid": "Ce lien n’est plus valable. Pour couper les e-mails, ouvrez TutoClick, cliquez sur la cloche des notifications, puis sur « Préférences ».",
     "open": "Ouvrir TutoClick"
   }
 }

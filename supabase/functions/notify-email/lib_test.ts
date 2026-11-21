@@ -112,7 +112,15 @@ Deno.test('recette 5 : un seul e-mail groupé, objet, lignes, bouton et pied de 
   assertStringIncludes(m.html, 'Ouvrir les notifications');
   assertStringIncludes(m.html, 'Vous recevez cet e-mail parce que vous avez activé');
   assertStringIncludes(m.html, `href="https://app.tutoclick.example/#/unsubscribe/${TOK}"`);
-  assert(!/<img/i.test(m.html), 'aucun pixel de suivi');
+  // Une seule image : le logo des gabarits d'authentification ; aucun pixel de suivi
+  const imgs = [...m.html.matchAll(/<img [^>]*>/gi)].map((x) => x[0]);
+  assert(
+    imgs.length === 1 && imgs[0]!.includes('logo-tutoclick.png') && imgs[0]!.includes('alt="TutoClick"'),
+    'logo seul, aucun pixel de suivi',
+  );
+  assertStringIncludes(m.html, '[data-ogsc] .em-text');
+  assertStringIncludes(m.html, '[data-ogsb] .em-bg');
+  assert(!/font-size:12px/.test(m.html), 'bas de page en 14 px');
   const links = [...m.html.matchAll(/href="([^"]+)"/g)].map((x) => x[1]!);
   assert(
     links.every((h) => h.startsWith('https://app.tutoclick.example/')),

@@ -46,6 +46,8 @@ async function prefsOf(page) {
       (await sw.isDisabled()) && /Bientôt/.test(await prefs.innerText()),
       'sans BREVO_API_KEY : « Bientôt », désactivée',
     );
+    // Règle X4 : « Bientôt » en texte gris, sans point d'état (aussi pour « Résumé quotidien »)
+    ok((await prefs.locator('.fd-status').count()) === 0, '« Bientôt » sans point d’état');
     await page.close();
   }
 
@@ -97,10 +99,18 @@ async function prefsOf(page) {
     await page.getByText('Vous ne recevrez plus de notifications par e-mail.').waitFor();
     ok(
       (await page.locator('main, body').first().innerText()).includes(
-        'Vous ne recevrez plus de notifications par e-mail. Vous pouvez les réactiver dans Paramètres › Notifications.',
+        'Vous ne recevrez plus de notifications par e-mail. Pour les réactiver, ouvrez TutoClick, cliquez sur la cloche des notifications, puis sur « Préférences ».',
       ) && state.tables.notification_settings[0].email === false,
       'désinscription : option désactivée, confirmation affichée',
     );
+    // Retour UX : 8 px sous le titre, 24 px entre le texte et le bouton
+    const gaps = await page.evaluate(() => {
+      const h = document.querySelector('.auth-form h1').getBoundingClientRect();
+      const p = document.querySelector('.unsub-msg p').getBoundingClientRect();
+      const btn = document.querySelector('.auth-form a.fd-btn').getBoundingClientRect();
+      return [Math.round(p.top - h.bottom), Math.round(btn.top - p.bottom)];
+    });
+    ok(gaps[0] === 8 && gaps[1] === 24, `espacements titre-texte et texte-bouton (${gaps.join(', ')} px)`);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-07-desinscription.png` });
     await page.goto(`${APP}/#/unsubscribe/${'b'.repeat(48)}`);
     await page.getByText('Ce lien n’est plus valable.', { exact: false }).waitFor();

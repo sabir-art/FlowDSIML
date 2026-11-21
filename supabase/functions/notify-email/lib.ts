@@ -1,4 +1,4 @@
-// E-mails P2 (spec emails-notifications-invitations §3) : logique de l'Edge Function notify-email, sans
+// E-mails P2 (spec emails-notifications-invitations §3, charte docs/ux/emails/README.md) : logique de l'Edge Function notify-email, sans
 // dépendance au réseau ni à Deno (testée avec des doubles et un faux serveur Brevo : aucun envoi réel).
 //  - status      : l'app sait si l'option est disponible (clé, expéditeur et adresse de l'app présents) ;
 //  - run         : tâche planifiée (secret partagé), un résumé par personne due, API HTTP de Brevo ;
@@ -87,6 +87,8 @@ const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 const FONT = "font-family:'Segoe UI', Arial, Helvetica, sans-serif;";
+/** Même logo que les 4 gabarits d'authentification (supabase/templates). */
+const LOGO = 'https://sabir-art.github.io/FlowDSIML/email/logo-tutoclick.png';
 
 /** E-mail du résumé (charte des gabarits : tableaux, 600 px, une colonne, bouton #A3195B, mode sombre). */
 export function renderDigest(c: Claim, cfg: Config): Mail {
@@ -116,6 +118,11 @@ export function renderDigest(c: Claim, cfg: Config): Mail {
     .em-text { color: #F3F5F8 !important; } .em-muted { color: #A9B3BF !important; } .em-rule { border-color: #272E37 !important; }
     .em-link { color: #CF86A9 !important; }
   }
+  [data-ogsc] .em-text { color: #F3F5F8 !important; }
+  [data-ogsc] .em-muted { color: #A9B3BF !important; }
+  [data-ogsc] .em-link { color: #CF86A9 !important; }
+  [data-ogsb] .em-bg { background-color: #0B0D10 !important; }
+  [data-ogsb] .em-card { background-color: #15191F !important; }
 </style></head>
 <body class="em-bg" style="margin:0;padding:0;background-color:#EEF2F6;">
 <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${esc(texts[0] ?? '')}</div>
@@ -123,6 +130,7 @@ export function renderDigest(c: Claim, cfg: Config): Mail {
 <tr><td align="center" style="padding:32px 16px;">
 <table role="presentation" class="em-wrap" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
   <tr><td class="em-card em-pad" style="background-color:#FFFFFF;border:1px solid #E2E8EF;border-radius:16px;padding:32px 40px;">
+    <a href="${esc(app)}" style="display:block;margin:0 0 24px -8px;text-decoration:none;"><img src="${LOGO}" width="176" height="62" alt="TutoClick" style="display:block;width:176px;height:62px;${FONT}font-size:20px;font-weight:bold;color:#A3195B;"></a>
     <h1 class="em-text" style="margin:0 0 16px;${FONT}font-size:24px;line-height:32px;font-weight:700;color:#080808;">${esc(subject)}</h1>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
     ${more ? `<p class="em-muted" style="margin:12px 0 0;${FONT}font-size:14px;line-height:20px;color:#4F5966;">${esc(more)}</p>` : ''}
@@ -133,8 +141,8 @@ export function renderDigest(c: Claim, cfg: Config): Mail {
     </table>
   </td></tr>
   <tr><td class="em-pad" style="padding:24px 40px 0;">
-    <p class="em-muted" style="margin:0 0 8px;${FONT}font-size:12px;line-height:18px;color:#4F5966;">${esc(FR['email.digest.why']!)}</p>
-    <p style="margin:0;${FONT}font-size:12px;line-height:18px;"><a class="em-link" href="${esc(unsubPage)}" style="color:#A3195B;text-decoration:underline;">${esc(FR['email.digest.unsubscribe']!)}</a></p>
+    <p class="em-muted" style="margin:0 0 8px;${FONT}font-size:14px;line-height:20px;color:#4F5966;">${esc(FR['email.digest.why']!)}</p>
+    <p style="margin:0;${FONT}font-size:14px;line-height:20px;"><a class="em-link" href="${esc(unsubPage)}" style="color:#A3195B;text-decoration:underline;">${esc(FR['email.digest.unsubscribe']!)}</a></p>
   </td></tr>
 </table>
 </td></tr></table>
