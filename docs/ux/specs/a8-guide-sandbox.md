@@ -18,10 +18,13 @@
 
 ## 2. Modèle (reprise de l'existant)
 
-- **Bulles** : ce sont les hotspots F1 des pages HTML (`step.hotspots`), avec le même schéma et le même éditeur que les étapes HTML d'une démo guidée :
-  - titre, texte, placement ;
-  - style Walkthrough ou Spotlight ;
-  - même ancrage.
+- **Bulles** : ce sont des hotspots F1 posés sur les pages HTML (`step.hotspots`), avec le même éditeur de bulle (titre, texte, placement, style Walkthrough ou Spotlight).
+- **Ancrage** (décidé le 21 novembre, avec le dev) : sur une page HTML, la bulle vise un **élément**, et non une zone de l'image.
+  - Le schéma d'un hotspot gagne un champ facultatif `sel?: string`. Il n'a aucun effet sur les captures d'image, qui gardent leur rect.
+  - `sel` est un sélecteur unique, pris avec le même sélecteur d'élément que l'éditeur HTML. Le rect du hotspot sert de **position de secours**, relative à la fenêtre capturée, au défilement 0.
+  - Au début de l'étape, le lecteur demande l'élément au script de la page (`postMessage`, `t: 'locate'`). Le script le fait défiler dans la vue si besoin, puis renvoie son rect à chaque défilement ou redimensionnement. La bulle et la pastille suivent ce rect, mis à l'échelle. C'est le même principe que pour les liens et les opérations d'édition.
+  - En mode `click`, le script signale le clic sur l'élément ciblé (`t: 'hit'`). Aucun autre clic ne remonte vers le lecteur.
+  - Élément introuvable, ou sélecteur devenu ambigu après une recapture : la bulle se pose sur le rect de secours, et l'éditeur le signale (§3.3).
 - **Ordre du guide** : il est ajouté aux réglages du Sandbox.
 
 ```ts
@@ -58,7 +61,7 @@ sandboxSchema = z.object({
 - On réordonne la liste par glisser-déposer, ou au clavier avec Monter et Descendre.
 - Sous la liste, « Ajouter une étape » (bouton secondaire, icône `plus`) :
   - il ouvre la page courante du plan en mode Étape (vue Page) ;
-  - l'auteur dessine la zone, comme pour une étape HTML guidée, et la bulle s'ouvre dans le panneau ;
+  - l'auteur **choisit un élément** de la page avec le sélecteur d'élément de l'éditeur HTML (survol encadré, clic). La bulle s'ouvre dans le panneau, et le rect de secours est enregistré en même temps ;
   - à l'enregistrement, l'étape s'ajoute **à la fin** du guide.
 - Liste vide : « Aucune étape. Ouvrez une page, puis « Ajouter une étape » pour placer la première bulle. »
 - Limite : à 30 étapes, « Ajouter une étape » est désactivé, avec « 30 étapes au plus ».
@@ -66,6 +69,7 @@ sandboxSchema = z.object({
 ### 3.3 Repères dans le plan
 - Sur chaque carte de page qui porte des étapes du guide : « Guide : 1, 3 », en 13 px `text-muted`, sous « n liens ». Pas de badge.
 - Une étape orpheline (page ou bulle supprimée) apparaît dans la liste avec l'icône `alert-triangle` et « Bulle introuvable : retirez-la ou replacez-la. » Les actions Retirer et Modifier sont disponibles.
+- Une étape dont l'élément n'est plus trouvé sur la page, ou plus de façon unique, porte la même icône et « Élément introuvable sur la page : la bulle s'affiche à sa position d'origine. Replacez-la. ». L'action « Replacer la bulle » rouvre le sélecteur d'élément sur la page.
 - Liste de contrôle avant publication : avec le guide activé mais vide, « Guide activé sans étape » (non bloquant, avec le lien « Ajouter une étape »).
 
 ### 3.4 Aperçu
@@ -132,6 +136,8 @@ sandboxSchema = z.object({
 | `editor.sandbox.guideOnClick` | Au clic |
 | `editor.sandbox.guideOnNext` | Bouton Suivant |
 | `editor.sandbox.guideOrphan` | Bulle introuvable : retirez-la ou replacez-la. |
+| `editor.sandbox.guideLost` | Élément introuvable sur la page : la bulle s'affiche à sa position d'origine. Replacez-la. |
+| `editor.sandbox.guideReplace` | Replacer la bulle |
 | `editor.sandbox.guideOnPages` | Guide : {{list}} |
 | `checklist.guideEmpty` | Guide activé sans étape |
 | `player.guide.step` | Étape {{k}} sur {{n}} |
@@ -154,7 +160,7 @@ sandboxSchema = z.object({
 
 | Paquet | Contenu | Recette |
 |---|---|---|
-| **P1, modèle et lecteur** | `guideSteps` dans `sandboxSchema` ; bulle, pastille, pause, reprise, fin ; sessionStorage ; petit écran ; événements | recette 1 à 6, 9 |
+| **P1, modèle et lecteur** | `guideSteps` dans `sandboxSchema` ; bulle, pastille, pause, reprise, fin ; sessionStorage ; petit écran ; événements | recette 1 à 6, 9, 11 |
 | **P2, éditeur** | interrupteur, liste, ajout depuis la vue Page, ordre, orphelines, repères du plan, liste de contrôle | recette 7, 8 |
 | **P3, analytics** | ligne « Guide : x % terminé · y % ignoré » | recette 10 |
 
@@ -166,7 +172,8 @@ sandboxSchema = z.object({
 4. Le visiteur va sur une page hors chemin : la bulle disparaît, la pastille dit « Guide en pause · Revenir à l'étape 3 », et un clic y ramène avec la bulle.
 5. « Explorer sans guide » : aucune bulle, la pastille dit « Reprendre le guide » et la reprise repart à l'étape courante.
 6. Après la dernière étape : bulle « Guide terminé… », puis plus de pastille. La complétion reste celle des pages clés.
-7. Éditeur : activer le guide, ajouter 2 étapes depuis la vue Page, les inverser au clavier (Monter), puis supprimer une bulle sur sa page : l'étape devient orpheline, avec le message.
+7. Éditeur : activer le guide, ajouter 2 étapes en choisissant des éléments dans la vue Page, puis les inverser au clavier (Monter). Supprimer une bulle sur sa page : l'étape devient orpheline, avec le message. Recapturer la page sans l'élément visé : « Élément introuvable sur la page… », et le lecteur pose la bulle à sa position de secours.
+11. Page plus haute que la fenêtre, avec un élément visé en bas : au début de l'étape, la page défile jusqu'à lui à l'intérieur du cadre, et la bulle le suit au défilement et au redimensionnement.
 8. Plan : « Guide : 1, 3 » sur les cartes concernées. Guide activé et vide : une ligne non bloquante dans la liste de contrôle.
 9. Accessibilité : le focus n'est pas volé, Échap met en pause, la pastille est nommée, `aria-live` annonce l'étape. axe sans violation grave. `boutons-natifs.e2e.cjs` passe sur le lecteur avec le guide ouvert.
 10. Analytics : `guide_step`, `guide_done` et `guide_skip` sont enregistrés ; la ligne du Sandbox affiche les deux pourcentages.
