@@ -260,3 +260,13 @@
   height: 16px;
   color: var(--fd-color-text-muted);
 }
+/* E-mails P1 : Accepter (bouton) puis Refuser (lien discret), sous le texte */
+.nb-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+.nb-decline {
+  color: var(--fd-color-text-muted);
+}

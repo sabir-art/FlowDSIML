@@ -31,6 +31,17 @@ export interface MutedDemo {
 
 const DAYS = 30;
 
+/**
+ * E-mails P2 : le résumé par e-mail n'est proposé que si notify-email a sa clé Brevo (sinon « Bientôt »).
+ * Lu une fois par session ; en cas d'erreur, l'option reste « Bientôt ».
+ */
+let emailStatus: Promise<boolean> | null = null;
+export const emailDigestAvailable = () =>
+  (emailStatus ??= supabase.functions
+    .invoke<{ available: boolean }>('notify-email', { body: { action: 'status' } })
+    .then(({ data, error }) => !error && data?.available === true)
+    .catch(() => false));
+
 export function useNotifications() {
   const { user } = useAuth();
   const { current } = useWorkspace();
@@ -45,14 +56,28 @@ export function useNotifications() {
     if (!ws || !me) return;
     const mine = ++seq.current;
     const since = new Date(Date.now() - DAYS * 86400_000).toISOString();
-    const { data } = await supabase
-      .from('notifications')
-      .select('id, kind, demo_id, step_id, comment_id, alert_id, data, actor_id, created_at, read_at')
-      .eq('workspace_id', ws)
-      .gte('created_at', since)
-      .order('created_at', { ascending: false })
-      .limit(100);
-    const rows = (data ?? []) as NotificationRow[];
+    const cols = 'id, kind, demo_id, step_id, comment_id, alert_id, data, actor_id, created_at, read_at';
+    // E-mails P1 : une invitation vient d'un autre espace (la personne n'en est pas encore membre)
+    const [inWs, invites] = await Promise.all([
+      supabase
+        .from('notifications')
+        .select(cols)
+        .eq('workspace_id', ws)
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
+        .limit(100),
+      supabase
+        .from('notifications')
+        .select(cols)
+        .eq('kind', 'invite')
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
+        .limit(20),
+    ]);
+    const seen = new Set<string>();
+    const rows = ([...(inWs.data ?? []), ...(invites.data ?? [])] as NotificationRow[])
+      .filter((r) => !seen.has(r.id) && !!seen.add(r.id))
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
     const uniq = (k: 'demo_id' | 'step_id' | 'comment_id') => [
       ...new Set(rows.map((r) => r[k]).filter((v): v is string => !!v)),
     ];
@@ -113,16 +138,39 @@ export function useNotifications() {
 
   // Préférences : table à part, lisible par son seul propriétaire (RLS)
   const hasRow = useRef(false);
+  const [email, setEmailState] = useState(false);
+  const [emailAvailable, setEmailAvailable] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void emailDigestAvailable().then((ok) => live && setEmailAvailable(ok));
+    return () => {
+      live = false;
+    };
+  }, []);
+  const setEmail = useCallback(
+    async (on: boolean) => {
+      if (!me) return false;
+      setEmailState(on);
+      const { error } = hasRow.current
+        ? await supabase.from('notification_settings').update({ email: on }).eq('user_id', me)
+        : await supabase.from('notification_settings').insert({ user_id: me, email: on });
+      if (!error) hasRow.current = true;
+      else setEmailState(!on);
+      return !error;
+    },
+    [me],
+  );
   useEffect(() => {
     if (!me) return;
     void supabase
       .from('notification_settings')
-      .select('prefs')
+      .select('prefs, email')
       .eq('user_id', me)
       .maybeSingle()
       .then(({ data }) => {
         hasRow.current = !!data;
         setPrefsState(readPrefs(data?.prefs));
+        setEmailState(!!data?.email);
       });
   }, [me]);
 
@@ -186,5 +234,19 @@ export function useNotifications() {
   );
 
   const unread = items.filter((n) => !n.read_at).length;
-  return { items, loading, unread, markRead, prefs, setPref, reload, muted, mute, unmute };
+  return {
+    items,
+    loading,
+    unread,
+    markRead,
+    prefs,
+    setPref,
+    reload,
+    muted,
+    mute,
+    unmute,
+    email,
+    emailAvailable,
+    setEmail,
+  };
 }

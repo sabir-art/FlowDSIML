@@ -460,3 +460,14 @@ verify_jwt = true
 [functions.html-recheck]
 enabled = true
 verify_jwt = true
+
+# E-mails P1 : invitations d'équipe par Supabase Auth (gabarit invite), JWT vérifié par la plateforme et par la fonction.
+[functions.invite-email]
+enabled = true
+verify_jwt = true
+
+# E-mails P2 : résumé des notifications (API Brevo). Sans JWT : la désinscription à un clic vient d'un
+# client de messagerie ; la tâche planifiée s'authentifie par le secret partagé des tâches.
+[functions.notify-email]
+enabled = true
+verify_jwt = false

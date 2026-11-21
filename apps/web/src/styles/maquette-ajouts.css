@@ -590,7 +590,9 @@
   vertical-align: -3px;
 }
 .mk .st-seats {
-  margin-top: 20px;
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
 }
 .mk .st-links {
   list-style: none;
@@ -3103,4 +3105,17 @@
     width: auto;
     margin-left: auto;
   }
+}
+/* E-mails P1 : « E-mails envoyés aujourd'hui : n sur 150 », 14 px, sans jauge */
+.mk .us-emails {
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: var(--fd-color-text-muted);
+}
+/* E-mails P2 : page de désinscription, 8 px sous le titre, 24 px avant le bouton */
+.mk .unsub-msg {
+  margin: 8px 0 24px;
+}
+.mk .unsub-msg p {
+  margin: 0;
 }

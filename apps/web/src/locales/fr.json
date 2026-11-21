@@ -175,6 +175,7 @@
     "seeSample": "Voir une démo d’exemple"
   },
   "invite": {
+    "pendingTitle": "Invitations en attente",
     "title": "Invitation",
     "body": "Vous êtes invité·e à rejoindre « {{workspace}} » en tant que {{role}}.",
     "loginFirst": "Connectez-vous ou créez un compte avec l'adresse {{email}} pour accepter.",
@@ -209,6 +210,7 @@
   },
   "profile": {
     "title": "Mon profil",
+    "passwordHint": "Vous pouvez définir un mot de passe pour vous connecter sans lien envoyé par e-mail.",
     "changePassword": "Changer de mot de passe",
     "passwordUpdated": "Mot de passe mis à jour.",
     "emailHint": "Contactez le support pour changer d'e-mail.",
@@ -277,11 +279,15 @@
       "admin": "Admin : gère aussi les membres et l’espace",
       "owner": "Propriétaire : tous les droits"
     },
-    "seatsUsed_one": "{{count}} siège sera utilisé. Il en restera {{left}} sur les {{limit}} de l’espace.",
-    "seatsUsed_other": "{{count}} sièges seront utilisés. Il en restera {{left}} sur les {{limit}} de l’espace.",
-    "seatsUsedUnlimited_one": "{{count}} siège sera utilisé (membres sans limite).",
-    "seatsUsedUnlimited_other": "{{count}} sièges seront utilisés (membres sans limite).",
-    "sendInvites": "Créer les invitations",
+    "membersMore_one": "{{count}} membre en plus sur {{limit}}.",
+    "membersMore_other": "{{count}} membres en plus sur {{limit}}.",
+    "sendInvites": "Envoyer les invitations",
+    "createInvites": "Créer les invitations",
+    "sendByEmail": "Envoyer l’invitation par e-mail",
+    "sent_one": "1 invitation envoyée.",
+    "sent_other": "{{count}} invitations envoyées.",
+    "rateLimit": "20 invitations par heure au plus. Vous pourrez en envoyer d’autres à {{time}}. Les liens restent disponibles.",
+    "emailFailed": "L’e-mail n’a pas pu partir. Copiez le lien et envoyez-le vous-même.",
     "resend": "Renvoyer l’invitation",
     "removeLoses": "{{name}} perdra l’accès à l’espace et à ses démos.",
     "removeDemos_one": "Sa démo reste dans l’espace.",
@@ -289,8 +295,7 @@
     "removeNoDemos": "Les démos de l’espace ne sont pas modifiées.",
     "roleLabel": "Rôle",
     "resultCount_one": "{{count}} membre ou invitation",
-    "resultCount_other": "{{count}} membres ou invitations",
-    "inviteEmailSoon": "Envoi par e-mail"
+    "resultCount_other": "{{count}} membres ou invitations"
   },
   "workspace": {
     "title": "Paramètres de l’espace",
@@ -3933,6 +3938,11 @@
     }
   },
   "notifications": {
+    "k_invite": "{{actor}} vous invite à rejoindre « {{workspace}} »",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "inviteAccepted": "Invitation acceptée.",
+    "inviteDeclined": "Invitation refusée.",
     "bell_one": "Notifications, {{count}} non lue",
     "bell_other": "Notifications, {{count}} non lues",
     "bellNone": "Notifications, aucune non lue",
@@ -3970,6 +3980,7 @@
     "p_comment": "On commente une démo que j’ai créée",
     "p_resolved": "On résout mon commentaire",
     "p_email": "Recevoir aussi par e-mail",
+    "p_emailHelp": "Un e-mail au plus par heure, qui regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail.",
     "unread": "Non lue",
     "someone": "Un membre",
     "k_mention": "{{actor}} vous a mentionné·e dans « {{demo}} » · étape {{step}}",
@@ -5142,6 +5153,7 @@
     "unseen_other": "{{count}} nouveautés"
   },
   "usage": {
+    "emailsToday": "E-mails envoyés aujourd’hui : {{n}} sur {{cap}}",
     "sub": "Ce que consomme l’espace {{workspace}}, et ses limites. Aucun paiement : pour aller au-delà, faites une demande à la DSI.",
     "ask": "Demander plus à la DSI",
     "askMore": "Demander plus",
@@ -5363,5 +5375,22 @@
     "blocked": "Bloqué, site signalé",
     "gsbRetry": "Vérification Google indisponible, réessayez plus tard",
     "blockedLater": "Le lien {{text}} mène à un site signalé : il a été bloqué."
+  },
+  "email": {
+    "digest": {
+      "subject_one": "1 nouvelle notification dans TutoClick",
+      "subject_other": "{{count}} nouvelles notifications dans TutoClick",
+      "more_one": "Et 1 autre dans TutoClick",
+      "more_other": "Et {{count}} autres dans TutoClick",
+      "open": "Ouvrir les notifications",
+      "why": "Vous recevez cet e-mail parce que vous avez activé les notifications par e-mail dans TutoClick.",
+      "unsubscribe": "Ne plus recevoir ces e-mails"
+    }
+  },
+  "unsubscribe": {
+    "title": "Notifications par e-mail",
+    "done": "Vous ne recevrez plus de notifications par e-mail. Pour les réactiver, ouvrez TutoClick, cliquez sur la cloche des notifications, puis sur « Préférences ».",
+    "invalid": "Ce lien n’est plus valable. Pour couper les e-mails, ouvrez TutoClick, cliquez sur la cloche des notifications, puis sur « Préférences ».",
+    "open": "Ouvrir TutoClick"
   }
 }

@@ -55,11 +55,23 @@ const SHOTS = process.env.SHOTS_DIR;
 
   await page.getByRole('button', { name: 'Inviter des membres' }).click();
   await page.waitForSelector('[role=dialog]');
+  // E-mails P1 : case décochée, l'invitation reste un lien à transmettre (couvert par invitations-email.e2e)
+  await page.getByLabel('Envoyer l’invitation par e-mail').uncheck();
   await page.fill('#inv-email', 'pas-un-email');
   await page.getByRole('button', { name: 'Créer les invitations' }).click();
   ok((await page.locator('#inv-email-error').count()) === 1, 'adresse invalide signalée');
   await page.fill('#inv-email', 'sarah@acme.example, leo@acme.example');
-  ok((await page.locator('.st-seats').textContent()).includes('2 sièges'), 'sièges utilisés annoncés');
+  // Retour UX : sans vocabulaire d'abonnement ; « n membres en plus sur {limite} » s'il y a une limite
+  {
+    const seats = page.locator('.st-seats');
+    const limited = (await seats.count()) === 1;
+    ok(
+      limited
+        ? /^2 membres en plus sur \d+\.$/.test(await seats.textContent())
+        : !/siège/.test(await page.locator('[role=dialog]').innerText()),
+      `membres ajoutés annoncés sans « sièges » (${limited ? await seats.textContent() : 'sans limite'})`,
+    );
+  }
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/PRM-04-invitation.png` });
   await page.getByRole('button', { name: 'Créer les invitations' }).click();
   await page.waitForSelector('text=Copier le lien');

@@ -152,6 +152,8 @@ export function Profile() {
         <div className="form-sec">
           <div className="intro">
             <h2 className="t-h3">{t('profile.changePassword')}</h2>
+            {/* E-mails P1 : un compte créé par invitation se connecte par lien magique, sans mot de passe */}
+            <p className="help">{t('profile.passwordHint')}</p>
           </div>
           <div>
             <div className="field">
