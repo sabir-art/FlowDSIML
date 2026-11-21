@@ -5,7 +5,7 @@ import {
   filterPaths,
   highlight,
   pathView,
-  tagCounts,
+  pathTags,
   themeVars,
   type CenterModule,
   type CenterPath,
@@ -109,9 +109,9 @@ describe('centre de formation', () => {
     expect(filterPaths(q, 'rendez', '').map((x) => x.id)).toEqual(['agenda']);
     expect(filterPaths(q, 'partage', 'Bureautique').map((x) => x.id)).toEqual(['agenda']);
     expect(filterPaths(q, '', 'Logiciel métier').map((x) => x.id)).toEqual(['p']);
-    expect(tagCounts(q)).toEqual([
-      { name: 'Bureautique', color: 'orange', count: 1 },
-      { name: 'Logiciel métier', color: 'blue', count: 1 },
+    expect(pathTags(q)).toEqual([
+      { name: 'Bureautique', color: 'orange' },
+      { name: 'Logiciel métier', color: 'blue' },
     ]);
   });
 

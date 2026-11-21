@@ -153,15 +153,10 @@ export function filterPaths(paths: CenterPath[], q: string, tag: string): Center
   return paths.filter((p) => (!tag || p.tags.some((t) => t.name === tag)) && matches(p, q));
 }
 
-/** Étiquettes utilisées par au moins une formation visible, avec leur nombre de formations. */
-export function tagCounts(paths: CenterPath[]): Array<{ name: string; color: string; count: number }> {
-  const m = new Map<string, { name: string; color: string; count: number }>();
-  for (const p of paths)
-    for (const t of p.tags) {
-      const x = m.get(t.name) ?? { ...t, count: 0 };
-      x.count++;
-      m.set(t.name, x);
-    }
+/** Étiquettes utilisées par au moins une formation visible, par ordre alphabétique. */
+export function pathTags(paths: CenterPath[]): Array<{ name: string; color: string }> {
+  const m = new Map<string, { name: string; color: string }>();
+  for (const p of paths) for (const t of p.tags) if (!m.has(t.name)) m.set(t.name, t);
   return [...m.values()].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
 }
 

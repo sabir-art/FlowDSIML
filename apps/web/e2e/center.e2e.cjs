@@ -147,6 +147,35 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     await p.close();
   }
 
+  // MOB-01 recette 1 et 2 (390 × 844) : titre sur 2 lignes, filtres sur une ligne, 2 cartes avant 1 200 px
+  {
+    const { p } = await center('?l=jeton-alex-0001', {}, null, { width: 390, height: 844 });
+    await p.waitForSelector('.fc');
+    const m = await p.evaluate(() => {
+      const h1 = document.querySelector('.ctr-hero h1');
+      const lh = parseFloat(getComputedStyle(h1).lineHeight);
+      const tops = [...document.querySelectorAll('.ctr-tags button')].map((b) => b.offsetTop);
+      return {
+        size: getComputedStyle(h1).fontSize,
+        lines: Math.round(h1.getBoundingClientRect().height / lh),
+        oneLine: new Set(tops).size === 1,
+        counters: document.querySelectorAll('.ctr-tags .n').length,
+        pageW: document.documentElement.scrollWidth,
+        second: Math.round(document.querySelectorAll('.fc')[1].getBoundingClientRect().bottom + scrollY),
+      };
+    });
+    ok(
+      m.size === '28px' &&
+        m.lines <= 2 &&
+        m.oneLine &&
+        m.counters === 0 &&
+        m.pageW === 390 &&
+        m.second <= 1200,
+      `M1/M3 : titre de 28 px sur 2 lignes, filtres sur une ligne sans compteurs, pas de défilement horizontal (${JSON.stringify(m)})`,
+    );
+    await p.close();
+  }
+
   // MOB-01 M4 : l'état des modules (étape, verrou) est sur la page de la formation
   {
     const { p } = await center(`/f/${F('f1')}?l=jeton-alex-0001`);

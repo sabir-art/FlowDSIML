@@ -23,7 +23,7 @@ import {
   filterPaths,
   highlight,
   pathView,
-  tagCounts,
+  pathTags,
   themeVars,
   DEFAULT_BRAND,
   type CenterData,
@@ -291,7 +291,7 @@ function Home({ t, data, views, route }: { t: Dict; data: CenterData; views: Pat
   };
   const shown = filterPaths(data.paths, q, tag);
   const shownViews = views.filter((v) => shown.includes(v.path));
-  const tags = tagCounts(data.paths);
+  const tags = pathTags(data.paths);
   const me = currentPath(views);
   const filtering = !!(q || tag);
   const totalModules = data.paths.reduce((s, p) => s + p.modules.length, 0);
@@ -370,7 +370,7 @@ function Home({ t, data, views, route }: { t: Dict; data: CenterData; views: Pat
       {tags.length > 0 && (
         <div class="ctr-tags" role="group" aria-label={c.tagsLabel}>
           <button type="button" aria-pressed={!tag} onClick={() => go({ tag: '' })}>
-            {c.all} <span class="n">{data.paths.length}</span>
+            {c.all}
           </button>
           {tags.map((x) => (
             <button
@@ -380,7 +380,7 @@ function Home({ t, data, views, route }: { t: Dict; data: CenterData; views: Pat
               onClick={() => go({ tag: tag === x.name ? '' : x.name })}
             >
               <span class={`dot dot--${tagCls(x.color)}`} aria-hidden="true" />
-              {x.name} <span class="n">{x.count}</span>
+              {x.name}
             </button>
           ))}
         </div>
@@ -500,7 +500,7 @@ function DemoHome({ t, data, route }: { t: Dict; data: CenterData; route: Route 
       {tags.length > 0 && (
         <div class="ctr-tags" role="group" aria-label={c.demoFilterLabel}>
           <button type="button" aria-pressed={!tag} onClick={() => go({ tag: '' })}>
-            {c.all} <span class="n">{demos.length}</span>
+            {c.all}
           </button>
           {tags.map((x) => (
             <button
@@ -510,7 +510,7 @@ function DemoHome({ t, data, route }: { t: Dict; data: CenterData; route: Route 
               onClick={() => go({ tag: tag === x.name ? '' : x.name })}
             >
               <span class={`dot dot--${tagCls(x.color)}`} aria-hidden="true" />
-              {x.name} <span class="n">{x.count}</span>
+              {x.name}
             </button>
           ))}
         </div>

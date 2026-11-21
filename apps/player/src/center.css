@@ -231,12 +231,21 @@
   font-size: 16px;
 }
 /* Filtres par étiquettes (L12-07) */
+/* MOB-01 M3 : une seule ligne qui défile horizontalement (sans barre visible), sans compteurs */
 .ctr-tags {
   margin-top: -4px;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Laisse l'anneau de focus visible malgré le défilement */
+  padding: 4px;
+  margin-inline: -4px;
+}
+.ctr-tags::-webkit-scrollbar {
+  display: none;
 }
 .ctr-tags button {
   display: inline-flex;
@@ -250,20 +259,13 @@
   font: 600 14px var(--fd-font-sans);
   color: var(--c-text);
   cursor: pointer;
-}
-.ctr-tags button .n {
-  font-weight: 500;
-  color: var(--c-muted);
-  font-variant-numeric: tabular-nums;
+  flex: none;
+  white-space: nowrap;
 }
 .ctr-tags button[aria-pressed='true'] {
   background: var(--c-text);
   border-color: var(--c-text);
   color: var(--c-bg);
-}
-.ctr-tags button[aria-pressed='true'] .n {
-  color: inherit;
-  opacity: 0.75;
 }
 .dot {
   width: 8px;
@@ -770,6 +772,14 @@
   }
   .fp-done {
     grid-template-columns: 1fr;
+  }
+  /* MOB-01 M1 : titre du centre en 28 px 700, sous-titre en 15 px */
+  .ctr-hero h1 {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .ctr-hero p {
+    font-size: 15px;
   }
 }
 
