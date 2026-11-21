@@ -72,7 +72,8 @@
 | `other` | {n} autre(s) élément(s) retiré(s) | `base`, `link`, `meta http-equiv`, `srcdoc`, CSS dangereux (affiché seulement s'il est différent de 0) |
 | `dangerousLinks` | Liens dangereux bloqués : {n} (vérifiés par Google Safe Browsing) | liens de la page signalés par Google Safe Browsing (§4.1) ; ligne toujours affichée, même à 0 |
 
-- **Vérification indisponible** : si Google Safe Browsing n'a pas répondu (clé absente, quota atteint, délai dépassé), la ligne devient « Vérification Google indisponible », avec l'icône `circle-alert` et la date de la dernière tentative. Le serveur refait la vérification à la publication.
+- **Cas nominal** : la vérification répond, la ligne affiche le nombre de liens dangereux, même à 0.
+- **Vérification indisponible** (exception : panne de l'API, quota dépassé ou délai de 5 s dépassé ; la clé est configurée en production) : si Google Safe Browsing n'a pas répondu, la ligne devient « Vérification Google indisponible », avec l'icône `circle-alert` et la date de la dernière tentative. Le serveur refait la vérification à la publication.
 - **Statut** (delta L49 : un point de 8 px et un texte, **sans badge ni fond coloré**) :
   - **« Page sûre »** (point `success`) si `scripts`, `handlers`, `frames`, `forms`, `other` et `dangerousLinks` valent 0 ;
   - sinon **« Éléments retirés »** (point `warning`) ;
@@ -153,7 +154,7 @@
 - **Lecteur** : un lien externe non autorisé ne fait rien ; un formulaire capturé ne s'envoie jamais (test de `submit`).
 - **Google Safe Browsing** :
   - avec l'adresse de test officielle de Safe Browsing, le lien est bloqué, porte le badge « Bloqué, site signalé », ne peut pas être autorisé, et le rapport compte 1 lien dangereux ;
-  - clé absente : « Vérification Google indisponible » ;
+  - API simulée en panne ou quota dépassé (réponse 429 ou 5xx) : « Vérification Google indisponible », et la nouvelle vérification à la publication passe ;
   - aucune adresse complète dans les journaux du serveur.
 - Clair, sombre, 390 px (réglage et rapport).
 - **Bases (§18)** : `boutons-natifs.e2e.cjs` passe sur Paramètres › Sécurité, l'éditeur (page HTML) et le dialogue « Vous quittez la démo » ; corps des dialogues avec 16 px au moins entre les blocs ; captures réelles en clair et en sombre regardées pour chaque écran touché.
@@ -165,7 +166,7 @@
 | **P1, réglage et refus** | §2 en entier : RPC `set_html_capture`, journal, ligne de réglage dans Sécurité, refus 403 dans `html-ingest`, types désactivés à la création, « Capturer cette page » avec la raison, mention aux 3 endroits de l'app (§6) | rien | pgTAP de la RPC (rôles, domaines invalides, journal) ; tests Deno de `html-ingest` (403 et en-tête trafiqué) ; e2e `l49-reglage` |
 | **P2, rapport** | §3 : compteurs dans `sanitizeDom` et `sanitizePage` (même liste, mêmes noms), `html_meta.security`, section « Sécurité de la page », ligne de la liste de contrôle avant publication | P1 | tests unitaires des compteurs sur la page de `lib.test.ts` (chiffres identiques des deux côtés) ; e2e `l49-rapport` |
 | **P3, liens externes** | §4 sans Safe Browsing et §5 : `data-tc-href` et `data-tc-ext`, liste avec interrupteurs, `extlink` dans `html_ops`, dialogue « Vous quittez la démo » dans le lecteur | P2 | e2e éditeur (autoriser, `http:` refusé) et lecteur (dialogue, domaine réel, `noopener`) |
-| **P4, Safe Browsing** | §4.1 : vérification à la réception et à la publication, compteur `dangerousLinks`, « Bloqué, site signalé », état « Vérification Google indisponible » | P3 et **la clé Google du client** (secret serveur). Sans la clé, P4 se livre avec l'état « indisponible » seul, qui est le comportement exact sans clé. | adresse de test officielle de Safe Browsing ; journaux sans adresse complète |
+| **P4, Safe Browsing** | §4.1 : vérification à la réception et à la publication, compteur `dangerousLinks`, « Bloqué, site signalé », état « Vérification Google indisponible » | P3. La clé existe : le secret de l'Edge Function `GOOGLE_SAFE_BROWSING_API_KEY` est configuré en production (confirmé par le chef le 21 novembre). On livre donc le **cas nominal** : vérification à chaque réception et à chaque publication. | adresse de test officielle de Safe Browsing ; journaux sans adresse complète |
 | **Extension** | §2.1 (bouton HTML désactivé avec la raison), rapport cumulé et par page (§3), mention au lancement (§6) | P1, P2 | e2e de l'extension (mode HTML) |
 
 ## 9. Textes (i18n, nouvelles clés)
