@@ -342,6 +342,9 @@ export function Layout() {
                     </>
                   ) : undefined,
               },
+              // Groupes séparés par un filet (COMP-01, menus) : compte | équipe TutoClick | espace et
+              // préférences | déconnexion
+              'separator',
               ...(platformRole
                 ? [
                     {
@@ -350,6 +353,7 @@ export function Layout() {
                       group: t('console.team'),
                       onSelect: () => navigate('/console'),
                     },
+                    'separator' as const,
                   ]
                 : []),
               {

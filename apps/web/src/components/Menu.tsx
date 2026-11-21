@@ -302,17 +302,31 @@ export function Menu({
                     </button>
                   );
                   return it.group ? (
-                    <div key={it.label} role="group" aria-label={it.group} className="menu-group">
-                      {/* Intitulé une seule fois pour des éléments consécutifs du même groupe */}
+                    <div
+                      key={it.label}
+                      role="group"
+                      aria-labelledby={`${id}-g${(() => {
+                        let j = i;
+                        while (j > 0) {
+                          const p = shown[j - 1];
+                          if (!p || typeof p === 'string' || 'radios' in p || p.group !== it.group) break;
+                          j--;
+                        }
+                        return j;
+                      })()}`}
+                      className="menu-group"
+                    >
+                      {/* Intitulé (12 px, majuscules) une seule fois pour des éléments consécutifs du même
+                          groupe ; non focalisable, les flèches le sautent */}
                       {(() => {
                         const prev = shown[i - 1];
                         return (
                           !prev || typeof prev === 'string' || 'radios' in prev || prev.group !== it.group
                         );
                       })() && (
-                        <span className="menu-radios__label" aria-hidden="true">
+                        <div className="menu-group__label" id={`${id}-g${i}`} role="presentation">
                           {it.group}
-                        </span>
+                        </div>
                       )}
                       {item}
                     </div>
