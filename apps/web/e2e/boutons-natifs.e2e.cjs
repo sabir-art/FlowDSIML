@@ -57,7 +57,7 @@ const DIALOGS = [
   },
 ];
 
-/** Dans la page : boutons visibles dont le rendu reste celui du navigateur. */
+/** Dans la page : boutons et groupes de champs visibles dont le rendu reste celui du navigateur. */
 function natives() {
   const first = (el) => getComputedStyle(el).fontFamily.split(',')[0].trim();
   const UA_FONT =
@@ -85,6 +85,18 @@ function natives() {
       .replace(/\s+/g, ' ')
       .slice(0, 50);
     out.push({ name, cls: String(el.className || '(aucune classe)'), why: why.join(', ') });
+  }
+  // Groupe de champs au cadre natif (bordure en relief « groove », légende posée sur le cadre)
+  for (const el of document.querySelectorAll('fieldset')) {
+    const r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    if (r.width === 0 || r.height === 0 || cs.visibility === 'hidden') continue;
+    if (cs.borderTopStyle === 'groove')
+      out.push({
+        name: (el.querySelector('legend')?.innerText || 'fieldset').trim().slice(0, 50),
+        cls: String(el.className || '(aucune classe)'),
+        why: 'fieldset au cadre natif (groove)',
+      });
   }
   return out;
 }

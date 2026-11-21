@@ -74,6 +74,9 @@ export const htmlSelection = () => ({ stepId: state.stepId, selected: state.sele
 /** A8 : vérification de sélecteur en attente (renvoyée à la page dès qu'elle est prête). */
 export const htmlProbe = () => state.probe;
 
+/** A8 : fermeture du toast de consigne « Sélectionnez un élément… » (dès qu'une bulle est ajoutée). */
+export const guideHint: { close: (() => void) | null } = { close: null };
+
 /** Envoi vers la page de l'éditeur (canevas monté). */
 export const frameSend: {
   current:

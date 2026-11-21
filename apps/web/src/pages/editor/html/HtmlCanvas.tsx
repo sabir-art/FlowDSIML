@@ -17,7 +17,17 @@ import type { Selection, StepRow } from '../types';
 import { sandboxOf } from '../draftManifest';
 import { ignoredOf } from './sandboxGraph';
 import { fallbackRect, GUIDE_MAX } from './sandboxGuide';
-import { asOps, frameSend, htmlProbe, opOn, removeOp, setHtmlEdit, upsertOp, useHtmlEdit } from './htmlModel';
+import {
+  asOps,
+  frameSend,
+  guideHint,
+  htmlProbe,
+  opOn,
+  removeOp,
+  setHtmlEdit,
+  upsertOp,
+  useHtmlEdit,
+} from './htmlModel';
 import './html.css';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
@@ -194,6 +204,8 @@ export function HtmlCanvas({
     editor.updateDemo({
       sandbox: { ...guide, ignoredLinks: ignoredOf(demo.sandbox), guideSteps } as unknown as Json,
     });
+    guideHint.close?.();
+    guideHint.close = null;
     toast(t('editor.sandbox.guideAdded', { n: guideSteps.length }));
     setSelection?.({ kind: 'hotspot', id: h.id });
   }

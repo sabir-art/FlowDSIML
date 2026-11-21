@@ -17,7 +17,7 @@ import { sandboxOf } from '../draftManifest';
 import { deadLinks, ignoredOf, sandboxGraph, type DeadLink, type SbNode } from './sandboxGraph';
 import { guideOnPages, guideRows, type GuideRow, type GuideStepRef } from './sandboxGuide';
 import { GuideList } from './GuideList';
-import { upsertOp } from './htmlModel';
+import { guideHint, upsertOp } from './htmlModel';
 import { Menu } from '../../../components/Menu';
 import { useHtmlCapture } from '../../../lib/htmlCapture';
 import { Status } from '@flowdsiml/ui';
@@ -192,7 +192,7 @@ export function SandboxPlan({
     // L'ajout se fait sur une page : la dernière page du guide, sinon la page de départ
     const last = [...gRows].reverse().find((r) => !r.orphan)?.page;
     open(last ?? sb.start ?? pages[0]?.id ?? '');
-    toast(t('editor.sandbox.guideAddHint'));
+    guideHint.close = toast(t('editor.sandbox.guideAddHint'));
   }
   const leave = (d: DeadLink) =>
     save({ ignoredLinks: [...ignoredOf(demo.sandbox), { url: d.url, from: d.from }] });

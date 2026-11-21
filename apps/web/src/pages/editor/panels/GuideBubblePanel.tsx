@@ -150,30 +150,35 @@ export function GuideBubblePanel({
         </select>
       </div>
       {at >= 0 ? (
-        <fieldset className="sec">
-          <legend className="sec-title">{t('editor.sandbox.guideAdvance')}</legend>
-          {(['click', 'next'] as const).map((a) => (
-            <label key={a} className="check">
-              <input
-                type="radio"
-                name="gd-advance"
-                checked={advance === a}
-                disabled={readOnly}
-                onChange={() => saveGuide(sb.guideSteps.map((g, k) => (k === at ? { ...g, advance: a } : g)))}
-              />
-              {t(a === 'click' ? 'editor.sandbox.guideAdvClick' : 'editor.sandbox.guideAdvNext')}
-            </label>
-          ))}
+        <div className="sec">
+          <fieldset className="gd-advance">
+            <legend className="sec-title">{t('editor.sandbox.guideAdvance')}</legend>
+            {(['click', 'next'] as const).map((a) => (
+              <label key={a} className="check">
+                <input
+                  type="radio"
+                  name="gd-advance"
+                  checked={advance === a}
+                  disabled={readOnly}
+                  onChange={() =>
+                    saveGuide(sb.guideSteps.map((g, k) => (k === at ? { ...g, advance: a } : g)))
+                  }
+                />
+                {t(a === 'click' ? 'editor.sandbox.guideAdvClick' : 'editor.sandbox.guideAdvNext')}
+              </label>
+            ))}
+          </fieldset>
+          {/* §18.2 : action hors du groupe de choix, 16 px dessous */}
           {!readOnly && (
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
+              className="btn btn-secondary btn-sm gd-remove"
               onClick={() => saveGuide(sb.guideSteps.filter((_, k) => k !== at))}
             >
               {t('editor.sandbox.guideRemove')}
             </button>
           )}
-        </fieldset>
+        </div>
       ) : (
         <div className="sec">
           <p className="help">{t('editor.sandbox.guideNotInGuide')}</p>

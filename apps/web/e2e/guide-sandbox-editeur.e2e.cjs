@@ -143,6 +143,35 @@ const U = 'https://logiciel.acme.example';
   const panel = p.locator('.sp-panel', { hasText: 'Bulle du guide · étape 1' });
   await panel.waitFor();
   ok(true, 'recette 7 : bulle 1 posée sur un élément, son panneau s’ouvre');
+  ok(
+    (await p
+      .getByText('Sélectionnez un élément de la page, puis « Bulle du guide »', { exact: false })
+      .count()) === 0,
+    'toast de consigne fermé dès que la bulle est ajoutée',
+  );
+  {
+    const fs = await panel.locator('fieldset.gd-advance').evaluate((el) => {
+      const c = getComputedStyle(el);
+      return { b: c.borderTopStyle, p: c.paddingTop, btn: !!el.querySelector('button') };
+    });
+    const lg = await panel
+      .locator('fieldset.gd-advance legend')
+      .evaluate((el) => getComputedStyle(el).fontSize);
+    const title = await panel
+      .locator('.sec-title')
+      .first()
+      .evaluate((el) => getComputedStyle(el).fontSize);
+    ok(
+      fs.b === 'none' && fs.p === '0px' && !fs.btn && lg === title,
+      `avance : groupe sans cadre natif, légende comme les titres (${lg}), « Retirer du guide » hors du groupe`,
+    );
+    const gap = await panel.evaluate((el) => {
+      const f = el.querySelector('fieldset.gd-advance').getBoundingClientRect();
+      const b = el.querySelector('.gd-remove').getBoundingClientRect();
+      return Math.round(b.top - f.bottom);
+    });
+    ok(gap === 16, `« Retirer du guide » 16 px sous le groupe (${gap} px)`);
+  }
   await panel.getByLabel('Titre (facultatif)').fill('Vos rendez-vous');
   ok((await panel.innerText()).includes('p.kpi'), 'panneau : élément visé (sélecteur)');
   await addOn('#menu > a:nth-of-type(2)');

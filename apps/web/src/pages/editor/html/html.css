@@ -547,3 +547,12 @@
   flex: none;
   color: var(--fd-color-warning);
 }
+
+/* A8 : panneau de la bulle du guide (choix de l'avance, action dessous) */
+.gd-advance {
+  display: grid;
+  gap: 6px;
+}
+.gd-remove {
+  margin-top: 16px;
+}

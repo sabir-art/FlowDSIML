@@ -15,7 +15,10 @@ export type ToastAction = {
 /** REV-07 : variante « avertissement » (icône et couleur d'alerte, affichée plus longtemps). */
 export type ToastOptions = { tone?: 'warning' };
 type Toast = { id: number; text: string; action?: ToastAction; tone?: 'warning' };
-const Ctx = createContext<(text: string, action?: ToastAction, opts?: ToastOptions) => void>(() => {});
+/** Affiche un toast ; renvoie de quoi le fermer avant son délai (consigne devenue inutile, A8). */
+const Ctx = createContext<(text: string, action?: ToastAction, opts?: ToastOptions) => () => void>(
+  () => () => {},
+);
 
 /** Durée d'affichage d'un toast (maquette : 5 s). */
 const DURATION = 5000;
@@ -38,6 +41,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           () => close(id),
           action?.durationMs ?? (opts?.tone === 'warning' ? 8000 : DURATION),
         );
+      return () => close(id);
     },
     [close],
   );
