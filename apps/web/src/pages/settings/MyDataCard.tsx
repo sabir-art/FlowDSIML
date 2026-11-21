@@ -90,6 +90,13 @@ export function MyDataCard() {
         'LISEZMOI.txt': strToU8(t('myData.readme', { date: new Date().toLocaleString(i18n.language) })),
       };
       for (const [k, f] of FILES) files[f] = strToU8(JSON.stringify(d[k] ?? null, null, 2));
+      // Photo de profil (bucket avatars, dossier de la personne) : jointe telle quelle
+      if (user)
+        for (const path of await listAll('avatars', user.id, 1)) {
+          const { data: blob } = await supabase.storage.from('avatars').download(path);
+          if (blob)
+            files[`photo-de-profil.${path.split('.').pop()}`] = new Uint8Array(await blob.arrayBuffer());
+        }
       const zip = zipSync(files, { level: 6 });
       const name = `mes-donnees-${new Date().toISOString().slice(0, 10)}.zip`;
       const url = URL.createObjectURL(new Blob([zip], { type: 'application/zip' }));
@@ -146,6 +153,11 @@ export function MyDataCard() {
             if (r.error) orphans.push(...part.map((path) => ({ bucket: b, path })));
           }
         }
+      }
+      // Photo de profil effacée d'abord ; un reste éventuel est inscrit pour la purge par la base
+      if (user) {
+        const mine = await listAll('avatars', user.id, 1);
+        if (mine.length) await supabase.storage.from('avatars').remove(mine);
       }
       const { error } = await supabase.rpc('delete_my_account', {
         p_email: email.trim(),
