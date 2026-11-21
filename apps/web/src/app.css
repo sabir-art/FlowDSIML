@@ -1516,8 +1516,7 @@
 }
 .tg--orange {
   background: var(--fd-orange-50);
-  /* L52-01 : 5,76:1 sur le fond orange clair (la teinte 700 ne donnait que 4,37:1) */
-  color: #8f5300;
+  color: var(--fd-tag-orange-text);
 }
 .tg--raspberry {
   background: var(--fd-framboise-50);
@@ -1526,6 +1525,18 @@
 .tg--plum {
   background: var(--fd-prune-50);
   color: var(--fd-prune-700);
+}
+.tg--slate {
+  background: var(--fd-ardoise-50);
+  color: var(--fd-ardoise-700);
+}
+.tg--teal {
+  background: var(--fd-sarcelle-50);
+  color: var(--fd-sarcelle-700);
+}
+.tg--violet {
+  background: var(--fd-violet-50);
+  color: var(--fd-violet-700);
 }
 :root[data-theme='dark'] .tg--blue {
   background: color-mix(in srgb, var(--fd-bleu-400) 18%, transparent);
@@ -1546,6 +1557,18 @@
 :root[data-theme='dark'] .tg--plum {
   background: color-mix(in srgb, var(--fd-prune-400) 22%, transparent);
   color: var(--fd-prune-200);
+}
+:root[data-theme='dark'] .tg--slate {
+  background: color-mix(in srgb, var(--fd-ardoise-400) 18%, transparent);
+  color: var(--fd-ardoise-200);
+}
+:root[data-theme='dark'] .tg--teal {
+  background: color-mix(in srgb, var(--fd-sarcelle-400) 18%, transparent);
+  color: var(--fd-sarcelle-200);
+}
+:root[data-theme='dark'] .tg--violet {
+  background: color-mix(in srgb, var(--fd-violet-400) 18%, transparent);
+  color: var(--fd-violet-200);
 }
 .tg-anchor {
   position: relative;
@@ -1699,6 +1722,15 @@
 }
 .sw--raspberry {
   background: var(--fd-framboise-400);
+}
+.sw--slate {
+  background: var(--fd-ardoise-400);
+}
+.sw--teal {
+  background: var(--fd-sarcelle-400);
+}
+.sw--violet {
+  background: var(--fd-violet-400);
 }
 .sw--plum {
   background: var(--fd-prune-400);

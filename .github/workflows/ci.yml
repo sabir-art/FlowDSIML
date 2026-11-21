@@ -146,6 +146,9 @@ jobs:
       - name: Liens externes L49 (désactivés par défaut, autorisation https, « Vous quittez la démo », formulaire jamais envoyé)
         if: always()
         run: cd apps/web && node e2e/l49-liens.e2e.cjs
+      - name: Étiquettes L52 (8 couleurs, contrastes en clair et en sombre)
+        if: always()
+        run: cd apps/web && node e2e/l52-etiquettes.e2e.cjs
       - name: Google Safe Browsing L49 (lien signalé bloqué, vérification indisponible, nouvelle vérification à la publication, lecteur)
         if: always()
         run: cd apps/web && node e2e/l49-safebrowsing.e2e.cjs

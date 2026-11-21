@@ -11,7 +11,16 @@ import { useToast } from './Toast';
 export type TagRow = Tables<'tags'>;
 export type DemoTagRow = Tables<'demo_tags'>;
 /** Palette DSI (règle D13) : une couleur par catégorie. */
-export const TAG_COLORS = ['blue', 'green', 'orange', 'raspberry', 'plum'] as const;
+export const TAG_COLORS = [
+  'blue',
+  'green',
+  'orange',
+  'raspberry',
+  'plum',
+  'slate',
+  'teal',
+  'violet',
+] as const;
 export type TagColor = (typeof TAG_COLORS)[number];
 export const TAG_LIMIT = 20;
 export const DEMO_TAG_LIMIT = 5;
@@ -116,7 +125,7 @@ export function useWorkspaceTags(wsId: string | undefined) {
 }
 export type WorkspaceTags = ReturnType<typeof useWorkspaceTags>;
 
-/** Choix de couleur parmi les 5 de la palette (pastilles nommées). */
+/** Choix de couleur parmi les 8 de la palette (pastilles nommées). */
 function ColorPicker({ value, onChange }: { value: TagColor; onChange: (c: TagColor) => void }) {
   const { t } = useTranslation();
   return (

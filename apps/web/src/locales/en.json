@@ -2929,7 +2929,10 @@
       "green": "Green",
       "orange": "Orange",
       "raspberry": "Raspberry",
-      "plum": "Plum"
+      "plum": "Plum",
+      "slate": "Slate",
+      "teal": "Teal",
+      "violet": "Violet"
     },
     "limits": "Up to {{ws}} tags per workspace, {{demo}} per demo.",
     "of": "Tags of {{title}}",

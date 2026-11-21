@@ -2929,7 +2929,10 @@
       "green": "Vert",
       "orange": "Orange",
       "raspberry": "Framboise",
-      "plum": "Prune"
+      "plum": "Prune",
+      "slate": "Ardoise",
+      "teal": "Sarcelle",
+      "violet": "Violet"
     },
     "limits": "{{ws}} étiquettes au plus par espace, {{demo}} par démo.",
     "of": "Étiquettes de {{title}}",
