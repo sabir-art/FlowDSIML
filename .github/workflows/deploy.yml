@@ -52,16 +52,16 @@ jobs:
       - name: Edge Functions
         run: supabase functions deploy --remote="$SUPABASE_PROJECT_REF" --use-api --yes
 
-  pages:
-    name: Front (GitHub Pages)
+  # Front en deux jobs (build puis publication) : l'artefact est finalisé avant que deploy-pages le
+  # cherche. Dans un seul job, deploy-pages ne le trouvait parfois pas (« No artifacts named
+  # github-pages », 3 échecs le 21/11 sur un run déclenché par workflow_run).
+  pages-build:
+    name: Front (build)
     needs: [supabase]
     if: ${{ always() && (needs.supabase.result == 'success' || needs.supabase.result == 'skipped') && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') }}
     runs-on: ubuntu-24.04
-    environment: github-pages
     permissions:
       contents: read
-      pages: write
-      id-token: write
     env:
       # Site de projet : https://<owner>.github.io/<repo>/  (surchargeable par un domaine perso)
       SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
@@ -91,5 +91,24 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
+  pages:
+    name: Front (GitHub Pages)
+    needs: [pages-build]
+    if: ${{ always() && needs.pages-build.result == 'success' }}
+    runs-on: ubuntu-24.04
+    environment: github-pages
+    permissions:
+      pages: write
+      id-token: write
+    steps:
       - id: deployment
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      # Nouvelle tentative unique si l'API des artefacts ou Pages a eu un raté passager
+      - name: Attente avant nouvelle tentative
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 30
+      - id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4

@@ -75,16 +75,24 @@ export function Login() {
         </div>
       )}
       <div className="oauth">
-        {/* Connexion Google : prévue (V2), visible mais inactive */}
+        {/* Connexion avec Google (OAuth, flux PKCE) : retour sur l'app avec ?code=, comme le lien magique */}
         <button
           type="button"
           className="btn btn-secondary btn-lg btn-block"
-          aria-disabled="true"
-          aria-describedby="oauth-soon"
+          disabled={busy}
+          onClick={() =>
+            void run(async () =>
+              check(
+                await supabase.auth.signInWithOAuth({
+                  provider: 'google',
+                  options: { redirectTo: authRedirect(redirect) },
+                }),
+              ),
+            )
+          }
         >
           <GoogleMark />
           {t('auth.google')}
-          <span className="soon-text">{t('shell.soon')}</span>
         </button>
       </div>
       <div className="or">{t('auth.orEmail')}</div>

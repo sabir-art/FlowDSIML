@@ -120,7 +120,8 @@
     "step2Title": "Guide",
     "step2Body": "Add bubbles, blur personal data, adapt texts with variables.",
     "step3Title": "Distribute",
-    "step3Body": "One demo per procedure: a link, a SCORM package or the intranet."
+    "step3Body": "One demo per procedure: a link, a SCORM package or the intranet.",
+    "googleConsent": "By continuing with Google, you accept the <terms>terms of use</terms> and the <privacy>privacy policy</privacy>."
   },
   "onboarding": {
     "progress": "Progress",
@@ -2732,8 +2733,8 @@
   "legal": {
     "terms": "Terms of use",
     "privacy": "Privacy policy",
-    "soon": "This page is being written.",
-    "back": "Back to home"
+    "back": "Back to home",
+    "other": "Other documents"
   },
   "settings": {
     "title": "Settings",

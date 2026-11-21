@@ -106,17 +106,34 @@ export function Signup() {
       ) : (
         <>
           <div className="oauth oauth--signup">
-            {/* Inscription Google : prévue (V2), visible mais inactive */}
+            {/* Connexion avec Google (OAuth, flux PKCE) : retour sur l'app avec ?code=, comme le lien magique */}
             <button
               type="button"
               className="btn btn-secondary btn-lg btn-block"
-              aria-disabled="true"
-              aria-describedby="oauth-soon"
+              disabled={busy}
+              onClick={() =>
+                void run(async () =>
+                  check(
+                    await supabase.auth.signInWithOAuth({
+                      provider: 'google',
+                      options: { redirectTo: authRedirect(redirect) },
+                    }),
+                  ),
+                )
+              }
             >
               <GoogleMark />
               {t('auth.googleSignup')}
-              <span className="soon-text">{t('shell.soon')}</span>
             </button>
+            <p className="help">
+              <Trans
+                i18nKey="auth.googleConsent"
+                components={{
+                  terms: <a href="#/legal/terms" target="_blank" rel="noopener" />,
+                  privacy: <a href="#/legal/privacy" target="_blank" rel="noopener" />,
+                }}
+              />
+            </p>
           </div>
           <div className="or">{t('auth.orEmail')}</div>
           {error && (
@@ -205,7 +222,7 @@ export function Signup() {
                 }}
                 {...fieldA11y('consent', errors)}
               />
-              {/* Pages légales pas encore rédigées : liens vers une page « Bientôt », ouverts dans un nouvel onglet */}
+              {/* Pages légales ouvertes dans un nouvel onglet */}
               <span className="muted">
                 <Trans
                   i18nKey="auth.consent"
