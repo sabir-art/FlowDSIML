@@ -45,7 +45,7 @@
   - page de départ ;
   - **liaison automatique** des liens identiques (même `href` ou même libellé dans le menu → même page) ;
   - **clic sur un élément non relié** : message « Cette partie n'est pas disponible dans la démo » (toast du player, par défaut), ne rien faire, ou mettre en évidence les zones cliquables ;
-  - **guide optionnel** : des étapes F1 (bulles, Spotlight) par-dessus la navigation libre, que le visiteur peut ignorer ;
+  - **guide optionnel** : des étapes F1 (bulles, Spotlight) par-dessus la navigation libre, que le visiteur peut ignorer (détail : `a8-guide-sandbox.md`) ;
   - « Ajouter une page (capture HTML) ».
 - Les analytics (A4) comptent les pages vues et les chemins. La complétion devient « a vu les n pages clés » (réglable).
 
