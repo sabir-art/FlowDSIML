@@ -763,6 +763,35 @@ async function install(page, state = seed()) {
         }
         case 'ai_status':
           return json(route, 200, aiState(state));
+        // L49 P1 : même validation que la RPC (rôle, mode, domaines), réglage dans workspaces.settings
+        case 'set_html_capture': {
+          const ws = t.workspaces.find((w) => w.id === a.p_ws);
+          const me = state.user?.id ?? (t.members.find((m) => m.workspace_id === a.p_ws) || {}).user_id;
+          const role = (t.members.find((m) => m.workspace_id === a.p_ws && m.user_id === me) || {}).role;
+          if (!ws || !['admin', 'owner'].includes(role))
+            return json(route, 403, { code: '42501', message: 'FORBIDDEN' });
+          if (!['allowed', 'domains', 'disabled'].includes(a.p_mode))
+            return json(route, 400, { code: '22023', message: 'INVALID_MODE' });
+          const domains = [
+            ...new Set((a.p_domains || []).map((d) => String(d).trim().toLowerCase()).filter(Boolean)),
+          ];
+          const ok = /^(\*\.)?([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
+          if (domains.length > 50)
+            return json(route, 400, { code: '22023', message: 'HTML_CAPTURE_DOMAIN_MAX' });
+          if (domains.some((d) => !ok.test(d)))
+            return json(route, 400, { code: '22023', message: 'HTML_CAPTURE_DOMAIN_INVALID' });
+          if (a.p_mode === 'domains' && !domains.length)
+            return json(route, 400, { code: '22023', message: 'HTML_CAPTURE_DOMAIN_REQUIRED' });
+          const old = ws.settings?.htmlCapture ?? { mode: 'allowed', domains: [] };
+          ws.settings = { ...(ws.settings || {}), htmlCapture: { mode: a.p_mode, domains } };
+          if (!t.audit_log) t.audit_log = [];
+          t.audit_log.push({
+            workspace_id: a.p_ws,
+            action: 'settings.html_capture',
+            meta: { old, new: ws.settings.htmlCapture },
+          });
+          return json(route, 200, ws.settings.htmlCapture);
+        }
         case 'set_ai_settings': {
           const ai = aiState(state);
           ai.enabled = a.p_enabled;

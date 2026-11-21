@@ -55,7 +55,7 @@ export type HelpPage =
   | 'center'
   | 'settings';
 export const PAGE_ARTICLES: Record<HelpPage, string[]> = {
-  demos: ['creer-demo-extension', 'ranger-demos', 'partir-modele'],
+  demos: ['creer-demo-extension', 'capturer-html', 'ranger-demos', 'partir-modele'],
   'editor-step': ['modifier-etape', 'animations-etape', 'flouter-donnees'],
   'editor-design': ['style-demo', 'accessibilite-demos'],
   'editor-settings': ['reglages-demo', 'accessibilite-demos'],

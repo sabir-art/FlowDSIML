@@ -12,6 +12,8 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
 import { TypeBadge } from '../../components/TypeBadge';
 import { EXTENSION_URL } from '../../lib/env';
+import { useHtmlCapture } from '../../lib/htmlCapture';
+import { HtmlCaptureNotice } from '../../components/HtmlCaptureNotice';
 
 /**
  * DSH-06, L48-G §3 : « Nouvelle démo » en deux étapes.
@@ -61,6 +63,14 @@ export function NewDemoDialog({
   const remembered: ContentType = CONTENT_TYPES.includes(last as ContentType)
     ? (last as ContentType)
     : 'captures';
+  // L49 P1 : captures HTML désactivées par un admin : Démo HTML et Sandbox visibles, désactivés, avec la raison
+  const htmlCapture = useHtmlCapture(open ? ws : undefined);
+  const htmlOff = htmlCapture.mode === 'disabled';
+  const usable = (k: ContentType) => !htmlOff || k === 'captures';
+  const firstType = (): ContentType => {
+    const want = initialType ?? remembered;
+    return usable(want) ? want : 'captures';
+  };
   const [type, setType] = useState<ContentType>(initialType ?? remembered);
   const [step, setStep] = useState<1 | 2>(initialType ? 2 : 1);
   const [folder, setFolder] = useState<string>(defaultFolder ?? '');
@@ -76,8 +86,8 @@ export function NewDemoDialog({
     if (!d) return;
     if (open && !d.open) {
       setFolder(defaultFolder ?? '');
-      setType(initialType ?? remembered);
-      setStep(initialType ? 2 : 1);
+      setType(firstType());
+      setStep(initialType && usable(initialType) ? 2 : 1);
       d.showModal();
     } else if (!open && d.open) d.close();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- à l'ouverture seulement
@@ -91,9 +101,10 @@ export function NewDemoDialog({
   const onCardKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if (!['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].includes(e.key)) return;
     e.preventDefault();
-    const i = CONTENT_TYPES.indexOf(type);
+    const list = CONTENT_TYPES.filter(usable);
+    const i = list.indexOf(type);
     const fwd = e.key === 'ArrowRight' || e.key === 'ArrowDown';
-    const n = CONTENT_TYPES[(i + (fwd ? 1 : CONTENT_TYPES.length - 1)) % CONTENT_TYPES.length]!;
+    const n = list[(i + (fwd ? 1 : list.length - 1)) % list.length]!;
     setType(n);
     cards.current?.querySelector<HTMLInputElement>(`input[value="${n}"]`)?.focus();
   };
@@ -126,12 +137,17 @@ export function NewDemoDialog({
             <legend className="nd-legend">{t('ctype.question')}</legend>
             <div ref={cards} className="nd-types__grid">
               {CONTENT_TYPES.map((k) => (
-                <label key={k} className={`nd-type${type === k ? ' is-selected' : ''}`}>
+                <label
+                  key={k}
+                  className={`nd-type${type === k ? ' is-selected' : ''}${usable(k) ? '' : ' is-off'}`}
+                >
                   <input
                     type="radio"
                     name="nd-type"
                     value={k}
                     checked={type === k}
+                    disabled={!usable(k)}
+                    aria-describedby={usable(k) ? undefined : `nd-off-${k}`}
                     onChange={() => setType(k)}
                     onKeyDown={onCardKey}
                   />
@@ -139,6 +155,11 @@ export function NewDemoDialog({
                   <span className="nd-type__txt">
                     <b>{t(`ctype.name.${k}`)}</b>
                     <span>{t(`ctype.line.${k}`)}</span>
+                    {!usable(k) && (
+                      <span className="nd-type__off" id={`nd-off-${k}`}>
+                        {t('htmlCapture.blockedByAdmin')}
+                      </span>
+                    )}
                   </span>
                 </label>
               ))}
@@ -269,6 +290,8 @@ export function NewDemoDialog({
               </li>
             )}
           </ul>
+          {/* L49 §6 : mention d'autorisation pour les types HTML et Sandbox */}
+          {type !== 'captures' && <HtmlCaptureNotice className="nd-notice" />}
           <label className="fd-field nd-folder">
             <span className="fd-label">{t('demos.colFolder')}</span>
             <select className="fd-input" value={folder} onChange={(e) => setFolder(e.target.value)}>

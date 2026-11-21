@@ -5204,5 +5204,29 @@
     "pages_other": "{{count}} pages",
     "mine": "Mes Sandbox",
     "search": "Rechercher un Sandbox"
+  },
+  "htmlCapture": {
+    "title": "Captures HTML",
+    "help": "Une capture HTML copie la structure des pages (démo HTML, Sandbox). Une capture d’écran ne copie qu’une image.",
+    "legend": "Autoriser les captures HTML",
+    "allowed": "Autorisées",
+    "allowedHelp": "Sur tous les sites. Chaque page est analysée et nettoyée.",
+    "domains": "Seulement sur ces domaines",
+    "domainsHelp": "Ailleurs, l’extension propose les captures d’écran uniquement.",
+    "disabled": "Désactivées",
+    "disabledHelp": "Captures d’écran uniquement. Les démos HTML et les Sandbox existants restent lisibles, sans nouvelle page.",
+    "domainLabel": "Ajouter un domaine",
+    "domainInvalid": "Saisissez un nom de domaine, sans « https:// » ni chemin (exemple : app.example.com).",
+    "domainMax": "50 domaines au plus.",
+    "domainRequired": "Ajoutez au moins un domaine.",
+    "domainsList": "Domaines autorisés",
+    "add": "Ajouter",
+    "removeDomain": "Retirer {{domain}}",
+    "applied": "Appliqué par l’app, l’extension et le serveur.",
+    "readOnly": "Modifiable par un admin",
+    "blockedByAdmin": "Désactivé par un admin (Sécurité > Captures HTML)",
+    "blockedDomain": "Ce site n’est pas dans la liste des domaines autorisés de votre espace (Sécurité > Captures HTML).",
+    "notice": "Capturez uniquement des logiciels que vous êtes autorisé à reproduire. Certaines structures interdisent la copie HTML de leurs écrans : utilisez alors des captures d’écran.",
+    "saved": "Réglage des captures HTML enregistré."
   }
 }

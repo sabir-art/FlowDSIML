@@ -5204,5 +5204,29 @@
     "pages_other": "{{count}} pages",
     "mine": "My Sandboxes",
     "search": "Search a Sandbox"
+  },
+  "htmlCapture": {
+    "title": "HTML captures",
+    "help": "An HTML capture copies the structure of pages (HTML demo, Sandbox). A screenshot only copies an image.",
+    "legend": "Allow HTML captures",
+    "allowed": "Allowed",
+    "allowedHelp": "On all sites. Each page is analysed and cleaned.",
+    "domains": "Only on these domains",
+    "domainsHelp": "Elsewhere, the extension only offers screenshots.",
+    "disabled": "Disabled",
+    "disabledHelp": "Screenshots only. Existing HTML demos and Sandboxes stay readable, with no new page.",
+    "domainLabel": "Add a domain",
+    "domainInvalid": "Enter a domain name, without “https://” or a path (example: app.example.com).",
+    "domainMax": "50 domains at most.",
+    "domainRequired": "Add at least one domain.",
+    "domainsList": "Allowed domains",
+    "add": "Add",
+    "removeDomain": "Remove {{domain}}",
+    "applied": "Applied by the app, the extension and the server.",
+    "readOnly": "Editable by an admin",
+    "blockedByAdmin": "Disabled by an admin (Security > HTML captures)",
+    "blockedDomain": "This site is not in your workspace’s list of allowed domains (Security > HTML captures).",
+    "notice": "Only capture software you are allowed to reproduce. Some organisations forbid HTML copies of their screens: use screenshots instead.",
+    "saved": "HTML capture setting saved."
   }
 }

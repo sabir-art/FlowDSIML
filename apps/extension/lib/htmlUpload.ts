@@ -11,7 +11,13 @@ import type { PendingHtmlPage } from './htmlStore';
  */
 export type HtmlDemoKind = 'guided' | 'sandbox';
 
-async function ingest(token: string, workspaceId: string, demoId: string, html: string): Promise<string> {
+async function ingest(
+  token: string,
+  workspaceId: string,
+  demoId: string,
+  html: string,
+  url: string,
+): Promise<string> {
   const res = await fetch(`${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/html-ingest`, {
     method: 'POST',
     headers: {
@@ -19,7 +25,8 @@ async function ingest(token: string, workspaceId: string, demoId: string, html: 
       apikey: SUPABASE_ANON_KEY,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ workspaceId, demoId, html }),
+    // L49 : l'adresse de la page (celle de html_meta.url) sert au réglage « Captures HTML » de l'espace
+    body: JSON.stringify({ workspaceId, demoId, html, url }),
   });
   const body = (await res.json().catch(() => ({}))) as { path?: string; error?: string };
   if (!res.ok || !body.path) throw new Error(body.error ?? `HTTP ${res.status}`);
@@ -53,7 +60,7 @@ export async function sendHtml(
   if (demo.error) throw demo.error;
   const demoId = demo.data.id;
   for (const [i, p] of ordered.entries()) {
-    const path = await ingest(s.session.access_token, target.workspaceId, demoId, p.html);
+    const path = await ingest(s.session.access_token, target.workspaceId, demoId, p.html, p.url);
     const ops: HtmlOp[] = [];
     const next = stepIds[i + 1];
     if (p.clickSel && next)

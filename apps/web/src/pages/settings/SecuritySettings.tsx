@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
+import { HtmlCaptureCard } from './security/HtmlCaptureCard';
 import { ShareRulesCard } from './security/ShareRulesCard';
 import { SettingsShell } from './SettingsShell';
 import { SoonCard } from '../../components/soon/SoonCard';
@@ -35,6 +36,8 @@ export function SecuritySettings() {
     <SettingsShell>
       <section className="soon-page" aria-labelledby="st-title">
         <p className="muted">{t('soon.securitySub')}</p>
+        {/* L49 P1 : captures HTML en première section, puis les règles de partage (L27-06) et la connexion unique */}
+        <HtmlCaptureCard />
         {/* L27-06 : règles de partage, au-dessus de la connexion unique (« Bientôt », VB-03) */}
         <ShareRulesCard />
         <SsoCard headingLevel={3} />

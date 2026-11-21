@@ -17,6 +17,7 @@ import { sandboxOf } from '../draftManifest';
 import { deadLinks, ignoredOf, sandboxGraph, type DeadLink, type SbNode } from './sandboxGraph';
 import { upsertOp } from './htmlModel';
 import { Menu } from '../../../components/Menu';
+import { useHtmlCapture } from '../../../lib/htmlCapture';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
 
@@ -61,6 +62,7 @@ export function SandboxPlan({
 }) {
   const { t } = useTranslation();
   const demo = editor.demo!;
+  const htmlOff = useHtmlCapture(demo.workspace_id).mode === 'disabled';
   const pages = editor.steps.filter((s) => s.kind === 'html');
   const sb = sandboxOf(demo.sandbox, pages);
   const { nodes } = useMemo(() => sandboxGraph(editor.steps, demo.sandbox), [editor.steps, demo.sandbox]);
@@ -256,9 +258,16 @@ export function SandboxPlan({
                 {t('editor.sandbox.deadTitle')} <span className="sb-deadpanel__n">({dead.length})</span>
               </h3>
               {dead.length > 0 && <p className="help">{t(`editor.sandbox.deadHelp.${sb.unlinked}`)}</p>}
-              <span id="sb-dead-soon" className="sr-only">
-                {t('editor.sandbox.deadCaptureSoon')}
-              </span>
+              {/* L49 P1 : captures HTML désactivées par un admin : la raison la plus forte, à la place de « Bientôt » */}
+              {htmlOff ? (
+                <p id="sb-dead-soon" className="help">
+                  {t('htmlCapture.blockedByAdmin')}
+                </p>
+              ) : (
+                <span id="sb-dead-soon" className="sr-only">
+                  {t('editor.sandbox.deadCaptureSoon')}
+                </span>
+              )}
               <ul className="sb-deadlist">
                 {dead.map((d) => (
                   <li key={`${d.from} ${d.url}`}>
@@ -277,7 +286,7 @@ export function SandboxPlan({
                         >
                           <Camera {...ICON} />
                           {t('editor.sandbox.deadCapture')}
-                          <span className="sb-deadlist__soon">{t('shell.soon')}</span>
+                          {!htmlOff && <span className="sb-deadlist__soon">{t('shell.soon')}</span>}
                         </button>
                         <a className="link-button" href={d.url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink {...ICON} />

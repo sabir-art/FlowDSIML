@@ -2512,6 +2512,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      set_html_capture: {
+        Args: { p_ws: string; p_mode: string; p_domains?: string[] };
+        Returns: Json;
+      };
       set_share_rules: {
         Args: {
           p_ws: string;

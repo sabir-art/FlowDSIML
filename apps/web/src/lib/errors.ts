@@ -33,6 +33,12 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/ADDRESS_FORMAT/, 'share.address.invalid'],
     [/ADDRESS_RESERVED/, 'share.address.reserved'],
     [/ADDRESS_RETRY/, 'share.address.retry'],
+    // L49 : réglage « Captures HTML »
+    [/HTML_CAPTURE_DOMAIN_INVALID/, 'htmlCapture.domainInvalid'],
+    [/HTML_CAPTURE_DOMAIN_MAX/, 'htmlCapture.domainMax'],
+    [/HTML_CAPTURE_DOMAIN_REQUIRED/, 'htmlCapture.domainRequired'],
+    [/HTML_CAPTURE_DISABLED/, 'htmlCapture.blockedByAdmin'],
+    [/HTML_CAPTURE_DOMAIN\b/, 'htmlCapture.blockedDomain'],
     // L27 : règles de partage de l'espace
     [/RULE_MODE\b/, 'rules.errMode'],
     [/RULE_PUBLISH/, 'rules.errPublish'],

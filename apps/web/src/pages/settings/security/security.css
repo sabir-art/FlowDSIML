@@ -105,3 +105,74 @@
   gap: 12px;
   cursor: pointer;
 }
+
+/* L49 P1 : réglage « Captures HTML » (radios simples, pastilles de domaines, mention sans encadré) */
+.hc-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hc-mode {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  cursor: pointer;
+}
+.hc-mode input {
+  margin-top: 3px;
+  flex: none;
+}
+.hc-mode span {
+  display: grid;
+  gap: 2px;
+}
+.hc-mode small {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.hc-domains {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 26px;
+}
+.hc-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.hc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 28px;
+  padding: 0 2px 0 10px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+  font-size: 13px;
+}
+.hc-add {
+  gap: 8px;
+}
+.hc-add .input {
+  flex: 1;
+  min-width: 0;
+}
+.hc-ro,
+.hc-applied {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.hc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hc-foot .hc-applied {
+  margin: 0;
+}

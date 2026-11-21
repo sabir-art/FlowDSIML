@@ -51,3 +51,63 @@ Deno.test('CSS sans @import ni exécution', () => {
     ' a{;color:red} b{background:url()}',
   );
 });
+
+// ===== L49 P1 : réglage « Captures HTML » =====
+import { captureVerdict, pageHost } from './lib.ts';
+
+// Même règle que public.html_capture_allows (mode domaines : app.example.com et *.outils.example)
+const rule = (mode: 'allowed' | 'domains' | 'disabled') => (host: string) =>
+  Promise.resolve(
+    mode === 'disabled'
+      ? 'HTML_CAPTURE_DISABLED'
+      : mode === 'domains' &&
+          !(host === 'app.example.com' || (host.endsWith('.outils.example') && host !== 'outils.example'))
+        ? 'HTML_CAPTURE_DOMAIN'
+        : 'ok',
+  );
+
+Deno.test('L49 : désactivées, toute page est refusée', async () => {
+  assertEquals(await captureVerdict('https://app.example.com/a', rule('disabled')), 'HTML_CAPTURE_DISABLED');
+});
+
+Deno.test('L49 : domaines, hors liste refusé, dans la liste accepté', async () => {
+  assertEquals(
+    await captureVerdict('https://crm.partenaire.example/x', rule('domains')),
+    'HTML_CAPTURE_DOMAIN',
+  );
+  assertEquals(await captureVerdict('https://app.example.com/x?y=1', rule('domains')), 'ok');
+  assertEquals(await captureVerdict('https://a.outils.example/', rule('domains')), 'ok');
+});
+
+Deno.test('L49 : seule l’adresse de la page compte, jamais un en-tête trafiqué', async () => {
+  // La requête porte des en-têtes qui prétendent venir d'un domaine autorisé : ils ne sont jamais lus
+  const req = new Request('https://fonction.example/html-ingest', {
+    method: 'POST',
+    headers: {
+      origin: 'https://app.example.com',
+      referer: 'https://app.example.com/page',
+      'x-forwarded-host': 'app.example.com',
+      host: 'app.example.com',
+    },
+  });
+  assertEquals(req.headers.get('origin'), 'https://app.example.com');
+  assertEquals(
+    await captureVerdict('https://crm.partenaire.example/x', rule('domains')),
+    'HTML_CAPTURE_DOMAIN',
+  );
+  // Hôte trompeur dans l'adresse : l'hôte réel est lu par l'analyseur d'URL
+  assertEquals(pageHost('https://app.example.com@crm.partenaire.example/'), 'crm.partenaire.example');
+  assertEquals(pageHost('https://APP.Example.com/'), 'app.example.com');
+});
+
+Deno.test('L49 : adresse absente ou non http(s) refusée', async () => {
+  for (const u of [
+    undefined,
+    '',
+    'javascript:alert(1)',
+    'file:///etc/passwd',
+    'pas une url',
+    'x'.repeat(2001),
+  ])
+    assertEquals(await captureVerdict(u, rule('allowed')), 'BAD_URL');
+});

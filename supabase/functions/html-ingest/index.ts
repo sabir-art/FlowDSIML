@@ -2,10 +2,13 @@
 //  * POST JSON { workspaceId, demoId, html } : utilisateur éditeur ou plus du workspace, démo du
 //    workspace ; 10 Mo au plus, refusé avant la lecture du corps (Content-Length) puis pendant la
 //    lecture ; second assainissement (lib.ts) ; dépôt sous <ws>/<démo>/<uuid>.html ; renvoie { path }.
+//  * L49 P1 : { url } = adresse de la page (enregistrée ensuite dans html_meta.url). Réglage « Captures
+//    HTML » de l'espace : 403 HTML_CAPTURE_DISABLED ou HTML_CAPTURE_DOMAIN ; l'hôte vient de cette adresse,
+//    jamais d'un en-tête. Un déclencheur sur steps applique la même règle à l'adresse enregistrée.
 // JWT vérifié par la plateforme (config.toml : verify_jwt = true), puis ici l'utilisateur et son rôle.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
-import { MAX_BYTES, inert, sanitizePage } from './lib.ts';
+import { MAX_BYTES, captureVerdict, inert, sanitizePage } from './lib.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const RANK: Record<string, number> = { viewer: 1, editor: 2, admin: 3, owner: 4 };
@@ -73,7 +76,7 @@ Deno.serve(async (req) => {
   if (declared > MAX_BODY) return json(413, { error: 'TOO_BIG' });
   const raw = await readCapped(req);
   if (raw === null) return json(413, { error: 'TOO_BIG' });
-  let body: { workspaceId?: unknown; demoId?: unknown; html?: unknown };
+  let body: { workspaceId?: unknown; demoId?: unknown; html?: unknown; url?: unknown };
   try {
     body = JSON.parse(raw);
   } catch {
@@ -93,6 +96,13 @@ Deno.serve(async (req) => {
     .is('deleted_at', null)
     .maybeSingle();
   if (!d) return json(404, { error: 'DEMO_NOT_FOUND' });
+  const verdict = await captureVerdict(body.url, async (host) => {
+    const r = await admin.rpc('html_capture_allows', { p_ws: ws, p_host: host });
+    // En cas d'erreur de lecture du réglage : refus (jamais d'acceptation par défaut)
+    return r.error ? 'HTML_CAPTURE_DISABLED' : String(r.data);
+  });
+  if (verdict === 'BAD_URL') return json(400, { error: 'BAD_REQUEST' });
+  if (verdict !== 'ok') return json(403, { error: verdict });
 
   const page = sanitizePage(body.html);
   if (!inert(page)) return json(422, { error: 'NOT_INERT' });

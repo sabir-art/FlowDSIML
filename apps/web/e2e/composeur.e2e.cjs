@@ -258,6 +258,8 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
       canManage: true,
     };
     s.aiReply = () => ({ text: 'Je propose une bulle plus directe.', changes: [] });
+    // Réponse retardée : l'état « réponse en cours » (bouton Arrêter) doit être observable, même sous charge
+    s.aiDelay = 1500;
     const p = await open(s);
     await p.getByRole('button', { name: 'Assistant' }).click();
     const panel = p.getByRole('dialog', { name: 'Assistant' });

@@ -1239,3 +1239,18 @@ button.nd-src:focus-visible {
   font-size: 13px;
   color: var(--fd-color-text-muted);
 }
+
+/* L49 P1 : type HTML ou Sandbox désactivé par un admin (visible, avec la raison) */
+.nd-type.is-off {
+  cursor: not-allowed;
+}
+.nd-type.is-off .nd-art {
+  opacity: 0.55;
+}
+.nd-type__off {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.nd-notice {
+  margin-top: var(--fd-space-3);
+}

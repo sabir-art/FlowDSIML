@@ -104,3 +104,36 @@ export function sanitizePage(html: string): string {
 export function inert(html: string): boolean {
   return !/<\s*(script|iframe|object|embed|base|meta\s+http-equiv)\b|\son\w+\s*=|javascript:/i.test(html);
 }
+
+// ===== L49 P1 : réglage « Captures HTML » de l'espace =====
+export type CaptureVerdict = 'ok' | 'HTML_CAPTURE_DISABLED' | 'HTML_CAPTURE_DOMAIN' | 'BAD_URL';
+
+/**
+ * Hôte de la page capturée, lu dans son adresse (celle enregistrée ensuite dans steps.html_meta.url) :
+ * jamais dans un en-tête (Origin, Referer, X-Forwarded-Host…) ni une autre valeur. null si l'adresse
+ * n'est pas une URL http(s).
+ */
+export function pageHost(url: unknown): string | null {
+  if (typeof url !== 'string' || url.length > 2000) return null;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' || u.protocol === 'http:' ? u.hostname.toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Verdict pour cette page ; `allows` interroge la base (RPC html_capture_allows, service_role). */
+export async function captureVerdict(
+  url: unknown,
+  allows: (host: string) => Promise<string>,
+): Promise<CaptureVerdict> {
+  const host = pageHost(url);
+  if (!host) return 'BAD_URL';
+  const v = await allows(host);
+  return v === 'HTML_CAPTURE_DISABLED' || v === 'HTML_CAPTURE_DOMAIN'
+    ? v
+    : v === 'ok'
+      ? 'ok'
+      : 'HTML_CAPTURE_DISABLED';
+}
