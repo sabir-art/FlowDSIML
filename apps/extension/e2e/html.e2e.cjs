@@ -181,7 +181,10 @@ const WS = '11111111-1111-1111-1111-111111111111';
   ok(await sec.isVisible(), 'L49 : rapport cumulé en tête');
   ok(
     /^(Page sûre|Éléments retirés)$/.test(await sec.locator('.sec-status strong').textContent()) &&
-      /^3 pages nettoyées\u202f: \d+ éléments actifs retirés\./.test(await review.textContent('#sec-sum')),
+      /^3 pages nettoyées\u202f: \d+ éléments actifs retirés\. .*(Les pages sont publiables\.|Rien d’actif à retirer sur ces pages\.)$/.test(
+        await review.textContent('#sec-sum'),
+      ) &&
+      (await sec.locator('.sec-status').getByRole('button', { name: 'Détail' }).count()) === 1,
     `L49 : statut et résumé (${await review.textContent('#sec-sum')})`,
   );
   await sec.getByRole('button', { name: 'Détail' }).click();

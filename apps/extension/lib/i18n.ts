@@ -191,6 +191,9 @@ const fr = {
   secSafe: 'Page sûre',
   secRemoved: 'Éléments retirés',
   secSafeBody: 'Rien d’actif à retirer sur cette page.',
+  secSafeBodyMany: 'Rien d’actif à retirer sur ces pages.',
+  secRemovedBodyMany:
+    'Tout ce qui pouvait s’exécuter ou envoyer des données a été retiré. Les pages sont publiables.',
   secRemovedBody:
     'Tout ce qui pouvait s’exécuter ou envoyer des données a été retiré. La page est publiable.',
   secSummary_one: '1 page nettoyée\u202f: {{removed}} éléments actifs retirés',
@@ -389,6 +392,8 @@ const en: typeof fr = {
   secRemoved: 'Elements removed',
   secSafeBody: 'Nothing active to remove on this page.',
   secRemovedBody: 'Everything that could run or send data has been removed. The page can be published.',
+  secRemovedBodyMany: 'Everything that could run or send data has been removed. The pages can be published.',
+  secSafeBodyMany: 'Nothing active to remove on these pages.',
   secSummary_one: '1 page cleaned: {{removed}} active elements removed',
   secSummary_other: '{{pages}} pages cleaned: {{removed}} active elements removed',
   secDetail: 'Details',

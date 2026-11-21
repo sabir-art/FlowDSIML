@@ -144,7 +144,15 @@ async function main() {
     $('sec-sum').textContent = `${fmt(reports.length === 1 ? s.secSummary_one : s.secSummary_other, {
       pages: reports.length,
       removed: activeRemoved(total),
-    })}. ${st === 'removed' ? s.secRemovedBody : s.secSafeBody}`;
+    })}. ${
+      reports.length === 1
+        ? st === 'removed'
+          ? s.secRemovedBody
+          : s.secSafeBody
+        : st === 'removed'
+          ? s.secRemovedBodyMany
+          : s.secSafeBodyMany
+    }`;
     const list = counters(total, 'sec-list');
     $('sec-list').replaceWith(list);
     toggle($<HTMLButtonElement>('sec-more'), list);
