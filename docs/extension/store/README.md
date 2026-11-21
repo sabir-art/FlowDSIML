@@ -57,4 +57,4 @@ Attendu : `"name": "TutoClick Capture"`, pas de `debugger` dans `permissions`, p
 ## 5. Avant l’envoi : à confirmer
 
 - [ ] Le DPO confirme les données déclarées (`fiche.md` §3) et la politique de confidentialité, dont la région d’hébergement (Union européenne).
-- [ ] La capture 1 montre « Espace » et « Format mobile » en « Bientôt » dans le popup (le Lead UX la reprend).
+- [x] La capture 1 montre « Espace » et « Format mobile » en « Bientôt » dans le popup (reprise par le Lead UX).

@@ -24,7 +24,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @flowdsiml/extension zip
+      # Mêmes contrôles que pour une archive construite en local (adresses https, clé anon)
+      - run: pnpm --filter @flowdsiml/extension zip:prod
       - uses: actions/upload-artifact@v4
         with:
           name: flowdsiml-extension
