@@ -2733,8 +2733,8 @@
   "legal": {
     "terms": "Conditions d’utilisation",
     "privacy": "Politique de confidentialité",
-    "soon": "Cette page est en cours de rédaction.",
-    "back": "Retour à l’accueil"
+    "back": "Retour à l’accueil",
+    "other": "Autres documents"
   },
   "settings": {
     "title": "Paramètres",

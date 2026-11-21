@@ -239,12 +239,6 @@
 .mk .segmented button + button {
   border-left: 0;
 }
-.mk .legal-soon {
-  margin-top: 16px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
 
 .mk a.btn {
   text-decoration: none;

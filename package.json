@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "pnpm check:workflows && turbo run lint",
+    "lint": "pnpm check:workflows && node scripts/build-legal.mjs --check && turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write .",
@@ -18,7 +18,8 @@
     "check:rpc": "node scripts/check-rpc-signatures.mjs",
     "db:types": "supabase gen types typescript --project-id \"${SUPABASE_PROJECT_REF:?variable SUPABASE_PROJECT_REF manquante}\" --schema public > packages/supabase-types/src/database.ts",
     "db:types:local": "supabase gen types typescript --local --schema public > packages/supabase-types/src/database.ts",
-    "check:workflows": "node scripts/check-workflows.mjs"
+    "check:workflows": "node scripts/check-workflows.mjs",
+    "build:legal": "node scripts/build-legal.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

@@ -15,7 +15,7 @@ import { Loading, RequireAuth, RequireWorkspace } from './components/guards';
 import { Layout } from './components/Layout';
 import { Login } from './pages/auth/Login';
 import { Signup } from './pages/auth/Signup';
-import { LegalSoon } from './pages/auth/LegalSoon';
+import { LegalPage } from './pages/auth/LegalPage';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
 import { ResetPassword } from './pages/auth/ResetPassword';
 
@@ -182,7 +182,7 @@ export function App() {
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
-                  <Route path="/legal/:doc" element={<LegalSoon />} />
+                  <Route path="/legal/:doc" element={<LegalPage />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/invite/:token" element={<AcceptInvite />} />

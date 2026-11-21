@@ -2733,8 +2733,8 @@
   "legal": {
     "terms": "Terms of use",
     "privacy": "Privacy policy",
-    "soon": "This page is being written.",
-    "back": "Back to home"
+    "back": "Back to home",
+    "other": "Other documents"
   },
   "settings": {
     "title": "Settings",
