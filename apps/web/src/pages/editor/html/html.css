@@ -494,9 +494,10 @@
   color: var(--fd-color-text-muted);
   font-size: 13px;
 }
+/* §18.6 : 12 px entre la liste et son action (« Ajouter une étape »), 4 px entre les lignes */
 .sb-guide {
   display: grid;
-  gap: 8px;
+  gap: 12px;
 }
 .sb-guide__list {
   list-style: none;

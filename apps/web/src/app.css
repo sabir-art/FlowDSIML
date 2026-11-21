@@ -1899,3 +1899,29 @@ button.fd-nav__item:hover {
   height: 16px;
   margin-top: 2px;
 }
+
+/* Bug client du 21/11 : un panneau ne défile jamais horizontalement (balayage du trackpad). Garde-fou
+   sur les panneaux latéraux, tiroirs, modales et listes défilantes ; la cause d'un débordement se corrige
+   à la source (e2e defilement-horizontal). Ni le canevas de l'éditeur ni les tableaux, qui défilent en
+   largeur par conception, ne sont concernés. */
+:root .sidebar,
+:root .menu-list,
+:root .tg-list,
+:root .list-sheet,
+:root .md-body,
+:root .nb-body,
+:root .help-body,
+:root .editor-right,
+:root .cm-list,
+:root .cm-scroll > .cm-state,
+:root .ba-pick-list,
+:root .blurm-side,
+:root .fa-list,
+:root .fcol,
+:root .mk .rail-list,
+:root .mk .find ul,
+:root .mk .modal-body,
+:root .mk .ed-tool__body {
+  overflow-x: clip;
+  overscroll-behavior-x: contain;
+}
