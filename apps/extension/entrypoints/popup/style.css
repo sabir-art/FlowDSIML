@@ -483,10 +483,19 @@ fieldset.inline legend {
 .type-card.is-soon i {
   color: var(--fd-color-text-muted);
 }
+/* « Bientôt » sur la ligne du nom, à droite, avant l'indicateur radio */
+.type-card.is-soon > span {
+  flex: 1;
+  min-width: 0;
+}
+.type-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
 .type-soon {
   margin-left: auto;
   font-style: normal;
   font-size: 12px;
   color: var(--fd-color-text-muted);
-  align-self: center;
 }

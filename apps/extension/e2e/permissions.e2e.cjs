@@ -62,6 +62,16 @@ const ok = (c, m) => {
         'Pas encore disponible dans cette version de l’extension.',
     'Format mobile : visible, désactivé, « Bientôt »',
   );
+  // « Bientôt » sur la ligne du nom, à droite ; l'aide prend toute la largeur du texte (2 lignes au plus)
+  const [nameBox, soonBox, helpBox] = await Promise.all(
+    ['.type-name b', '#mobile-soon', '#mobile-help'].map((s) => popup.locator(s).first().boundingBox()),
+  );
+  ok(
+    Math.abs(soonBox.y + soonBox.height - (nameBox.y + nameBox.height)) <= 3 &&
+      soonBox.x > nameBox.x + nameBox.width &&
+      helpBox.height < 40,
+    `« Bientôt » sur la ligne du nom, aide sur 2 lignes au plus (${Math.round(helpBox.height)} px)`,
+  );
   await popup.check('input[name="mode"][value="clicks"]');
   ok(
     (await popup.locator('#opt-full').innerText()) ===
