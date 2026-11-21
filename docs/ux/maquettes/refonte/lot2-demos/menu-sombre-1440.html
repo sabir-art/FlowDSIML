@@ -146,11 +146,14 @@ td.act, th.act { width: 48px; text-align: right; }
 .obh > div:nth-child(2) { flex: 1; }
 .obh .bar { width: 160px; height: 6px; border-radius: 3px; background: var(--pill); } .obh .bar span { display: block; height: 100%; border-radius: 3px; background: var(--fd-color-primary); }
 .obg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; padding: 0 20px 12px; }
-.obi { display: grid; grid-template-columns: 20px 1fr auto; gap: 12px; align-items: center; min-height: 56px; padding: 8px 12px; border-radius: 10px; }
+.obi { display: grid; grid-template-columns: 20px 1fr 128px; gap: 12px; align-items: center; min-height: 56px; padding: 8px 12px; border-radius: 10px; }
 .obi b { display: block; font: 600 14px var(--fd-font-sans); } .obi span:not(.ck) { display: block; font-size: 12px; color: var(--fd-color-text-muted); }
 .obi .ck { color: var(--fd-color-text-muted); } .obi.done .ck { color: var(--fd-color-success, #557014); } .obi.done b { text-decoration: line-through; color: var(--fd-color-text-muted); font-weight: 500; }
 .obi.next { background: var(--tint); }
-.obi .btn-p { height: 32px; padding: 0 14px; }
+.obi > :last-child:not(div) { justify-self: start; }
+.btn.sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.obi .soon { font-size: 13px; }
+.obf .btn.sm { margin-right: 12px; }
 .obf { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-top: 1px solid var(--fd-color-border); font-size: 12px; color: var(--fd-color-text-muted); }
 .mob .obg { grid-template-columns: 1fr; padding: 0 12px 12px; } .mob .obh .bar { display: none; } .mob .obf span:nth-child(2) { display: none; }
 .sec2 { margin-top: 32px; }
