@@ -8,7 +8,30 @@ const fr = {
   signIn: 'Se connecter',
   noAccount: 'Pas de compte ?',
   signUp: 'Créer un compte',
-  workspace: 'Workspace',
+  workspace: 'Espace',
+  // EXT-STORE (docs/ux/store/README.md §6.4) : autorisations facultatives, demandées au démarrage
+  dbgTitle: 'Une autorisation de Chrome est nécessaire',
+  dbgWhyMobile:
+    'Pour afficher la page en taille téléphone ou tablette, TutoClick utilise l’outil de débogage de Chrome sur l’onglet capturé.',
+  dbgWhySize:
+    'Pour mettre l’onglet à la taille choisie, TutoClick utilise l’outil de débogage de Chrome sur l’onglet capturé.',
+  dbgWhyFull:
+    'Pour garder la page entière à chaque capture (défilement animé dans l’éditeur), TutoClick utilise l’outil de débogage de Chrome sur l’onglet capturé.',
+  dbgWhySites:
+    'Pour continuer la capture quand vous changez de page ou ouvrez un onglet depuis la page capturée, TutoClick doit pouvoir accéder aux pages que vous parcourez.',
+  dbgWhat1: 'Seulement pendant l’enregistrement, et seulement sur les onglets capturés.',
+  dbgWhat2:
+    'Il sert à régler la taille d’affichage et à prendre les captures. À la fin, l’onglet reprend son état normal.',
+  dbgWhat3: 'Pendant la capture, Chrome affiche un bandeau qui signale le débogage : c’est normal.',
+  dbgWhatSites: 'Rien n’est lu en dehors d’un enregistrement, et rien n’est envoyé avant votre vérification.',
+  dbgAllow: 'Autoriser',
+  dbgLater: 'Pas maintenant',
+  dbgRevoke: 'Vous pouvez retirer cette autorisation à tout moment dans les détails de l’extension.',
+  dbgDeniedMobile: 'Format mobile indisponible sans cette autorisation.',
+  dbgDeniedSize: 'La capture garde la taille actuelle de l’onglet.',
+  dbgDeniedFull: 'Les captures gardent seulement la partie visible de la page.',
+  dbgDeniedSites: 'La capture reste sur la page ouverte au démarrage.',
+  dbgAllowFull: 'Autoriser la page entière',
   demoTitle: 'Titre de la démo',
   demoTitlePlaceholder: 'Ex. : Créer un projet',
   start: 'Démarrer la capture',
@@ -26,7 +49,7 @@ const fr = {
   notLoggedIn: `Connectez-vous à ${APP_NAME} pour capturer.`,
   protectedPage: 'Cette page ne peut pas être capturée (page système du navigateur).',
   badCredentials: 'Email ou mot de passe incorrect.',
-  noWorkspace: "Aucun workspace où vous êtes éditeur. Créez-en un dans l'application.",
+  noWorkspace: "Aucun espace où vous êtes éditeur. Créez-en un dans l'application.",
   // F7 : capture vidéo et mobile
   captureType: 'Type de capture',
   typeClicks: 'Captures à chaque clic',
@@ -160,6 +183,27 @@ const en: typeof fr = {
   noAccount: 'No account?',
   signUp: 'Create an account',
   workspace: 'Workspace',
+  dbgTitle: 'Chrome needs your permission',
+  dbgWhyMobile:
+    'To show the page at phone or tablet size, TutoClick uses Chrome’s debugging tool on the captured tab.',
+  dbgWhySize:
+    'To set the tab to the chosen size, TutoClick uses Chrome’s debugging tool on the captured tab.',
+  dbgWhyFull:
+    'To keep the whole page at each capture (animated scrolling in the editor), TutoClick uses Chrome’s debugging tool on the captured tab.',
+  dbgWhySites:
+    'To keep capturing when you change page or open a tab from the captured page, TutoClick needs access to the pages you browse.',
+  dbgWhat1: 'Only while recording, and only on captured tabs.',
+  dbgWhat2: 'It sets the display size and takes the captures. At the end, the tab goes back to normal.',
+  dbgWhat3: 'While capturing, Chrome shows a debugging banner: this is expected.',
+  dbgWhatSites: 'Nothing is read outside a recording, and nothing is sent before you review it.',
+  dbgAllow: 'Allow',
+  dbgLater: 'Not now',
+  dbgRevoke: 'You can remove this permission at any time in the extension details.',
+  dbgDeniedMobile: 'Mobile format is unavailable without this permission.',
+  dbgDeniedSize: 'The capture keeps the current tab size.',
+  dbgDeniedFull: 'Captures keep only the visible part of the page.',
+  dbgDeniedSites: 'The capture stays on the page open at start.',
+  dbgAllowFull: 'Allow the whole page',
   demoTitle: 'Demo title',
   demoTitlePlaceholder: 'E.g. Create a project',
   start: 'Start capture',

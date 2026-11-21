@@ -27,6 +27,13 @@ import {
 } from 'lucide';
 import { viewportFor, type DeviceKey } from '@/lib/video';
 import { tabSize, type TabSizeKey } from '@/lib/fullpage';
+import {
+  ALL_SITES,
+  FULL_LATER_KEY,
+  permissionNeed,
+  startsWithout,
+  type PermissionNeed,
+} from '@/lib/permissions';
 
 document.documentElement.lang = lang;
 document.title = APP_NAME;
@@ -273,9 +280,116 @@ $('logout').addEventListener('click', async (e) => {
   await render();
 });
 
+// ===== EXT-STORE §6 : autorisations facultatives (debugger, accès aux sites), demandées au démarrage =====
+let need: PermissionNeed = { debugger: null, sites: false };
+const sizeKey = () => $<HTMLSelectElement>('tabsize').value;
+async function currentNeed(): Promise<PermissionNeed> {
+  const [hasDebugger, hasSites, later] = await Promise.all([
+    browser.permissions.contains({ permissions: ['debugger'] }),
+    browser.permissions.contains({ origins: [ALL_SITES] }),
+    browser.storage.local.get(FULL_LATER_KEY),
+  ]);
+  return permissionNeed({
+    mode: mode(),
+    size: sizeKey(),
+    hasDebugger,
+    hasSites,
+    fullLater: !!later[FULL_LATER_KEY],
+  });
+}
+function denied(text: string | null, again: string | null = null) {
+  show('perm-denied', !!text);
+  $('perm-denied-text').textContent = text ?? '';
+  show('perm-again', !!again);
+  $('perm-again').textContent = again ?? '';
+}
+function showPanel(n: PermissionNeed) {
+  const why = n.debugger
+    ? strings[n.debugger === 'mobile' ? 'dbgWhyMobile' : n.debugger === 'size' ? 'dbgWhySize' : 'dbgWhyFull']
+    : '';
+  $('perm-why').textContent = [why, n.sites ? strings.dbgWhySites : ''].filter(Boolean).join(' ');
+  const lines = [
+    ...(n.debugger ? [strings.dbgWhat1, strings.dbgWhat2, strings.dbgWhat3] : []),
+    ...(n.sites ? [strings.dbgWhatSites] : []),
+  ];
+  $('perm-what').replaceChildren(
+    ...lines.map((l) => Object.assign(document.createElement('li'), { textContent: l })),
+  );
+  show('perm', true);
+  show('start', false);
+  $<HTMLButtonElement>('perm-allow').focus();
+}
+function hidePanel() {
+  show('perm', false);
+  show('start', true);
+}
+/** Après la réponse (fenêtre de Chrome ou « Pas maintenant ») : démarre, ou explique pourquoi pas. */
+async function afterAnswer(n: PermissionNeed) {
+  hidePanel();
+  const [hasDebugger, hasSites] = await Promise.all([
+    browser.permissions.contains({ permissions: ['debugger'] }),
+    browser.permissions.contains({ origins: [ALL_SITES] }),
+  ]);
+  if (n.debugger && !hasDebugger) {
+    if (!startsWithout(n.debugger)) return denied(strings.dbgDeniedMobile, strings.dbgAllow);
+    if (n.debugger === 'full') await browser.storage.local.set({ [FULL_LATER_KEY]: true });
+    denied(
+      n.debugger === 'size' ? strings.dbgDeniedSize : strings.dbgDeniedFull,
+      n.debugger === 'full' ? strings.dbgAllowFull : null,
+    );
+  } else if (n.sites && !hasSites) denied(strings.dbgDeniedSites);
+  else denied(null);
+  await startCapture(hasDebugger);
+}
+// La demande doit partir du clic (geste de l'utilisateur) : aucun appel asynchrone avant elle
+$('perm-allow').addEventListener('click', () => {
+  const n = need;
+  void browser.permissions
+    .request({ permissions: n.debugger ? ['debugger'] : [], origins: n.sites ? [ALL_SITES] : [] })
+    .catch(() => false)
+    .then(() => afterAnswer(n));
+});
+$('perm-later').addEventListener('click', () => void afterAnswer(need));
+/** Sous le type : « Format mobile » ou page entière déjà refusés (le choix de la personne reste intact). */
+async function refreshDenied() {
+  const n = await currentNeed();
+  const later = !!(await browser.storage.local.get(FULL_LATER_KEY))[FULL_LATER_KEY];
+  const hasDebugger = await browser.permissions.contains({ permissions: ['debugger'] });
+  if (mode() === 'clicks' && later && !hasDebugger) denied(strings.dbgDeniedFull, strings.dbgAllowFull);
+  else if (!n.debugger) denied(null);
+}
+for (const r of document.querySelectorAll<HTMLInputElement>('input[name="mode"]'))
+  r.addEventListener('change', () => void refreshDenied());
+void refreshDenied();
+// « Autoriser » (Format mobile refusé) ou « Autoriser la page entière » : relance la demande
+$('perm-again').addEventListener('click', () => {
+  void browser.permissions
+    .request({ permissions: ['debugger'] })
+    .catch(() => false)
+    .then(async (ok) => {
+      if (!ok) return;
+      await browser.storage.local.remove(FULL_LATER_KEY);
+      denied(null);
+    });
+});
+
 $('start').addEventListener('click', async () => {
   const btn = $<HTMLButtonElement>('start');
   btn.disabled = true;
+  error(null);
+  try {
+    need = await currentNeed();
+    if (need.debugger || need.sites) return showPanel(need);
+    await startCapture(true);
+  } catch (err) {
+    error((err as Error).message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/** Démarre la capture ; sans `debugger`, la taille d'onglet reste celle de l'onglet (README §6.3). */
+async function startCapture(hasDebugger: boolean) {
   error(null);
   try {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
@@ -307,7 +421,7 @@ $('start').addEventListener('click', async () => {
       fill:
         m === 'clicks' ? (fills.find((f) => f.demoId === $<HTMLSelectElement>('fill').value) ?? null) : null,
       size:
-        m === 'clicks' || m === 'html'
+        (m === 'clicks' || m === 'html') && hasDebugger
           ? tabSize($<HTMLSelectElement>('tabsize').value as TabSizeKey, {
               w: +$<HTMLInputElement>('dw').value,
               h: +$<HTMLInputElement>('dh').value,
@@ -317,10 +431,8 @@ $('start').addEventListener('click', async () => {
     await render();
   } catch (err) {
     error((err as Error).message);
-  } finally {
-    btn.disabled = false;
   }
-});
+}
 
 $('pause').addEventListener('click', async () => {
   await send({ type: 'fd:pause' });

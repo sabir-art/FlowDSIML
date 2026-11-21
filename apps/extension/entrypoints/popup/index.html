@@ -100,6 +100,11 @@
           ></label>
         </div>
         <p id="opt-full" class="muted small opts" data-i18n="fullPageHelp"></p>
+        <!-- EXT-STORE §6.3 : autorisation refusée (texte sous le type, lien pour la redemander) -->
+        <p id="perm-denied" class="small perm-denied" aria-live="polite" hidden>
+          <span id="perm-denied-text"></span>
+          <button type="button" id="perm-again" class="link-button"></button>
+        </p>
         <div id="opt-video" class="opts" hidden>
           <label class="check"><input type="checkbox" id="mic" /><span data-i18n="optMic"></span></label>
           <label class="check"
@@ -139,6 +144,15 @@
           </fieldset>
           <p class="muted small" data-i18n="mobileHelp"></p>
         </div>
+        <!-- EXT-STORE §6.2 : encart d'explication avant la fenêtre d'autorisation de Chrome -->
+        <section id="perm" class="perm" aria-labelledby="perm-t" hidden>
+          <h2 id="perm-t" data-i18n="dbgTitle"></h2>
+          <p id="perm-why"></p>
+          <ul id="perm-what" class="muted"></ul>
+          <button type="button" id="perm-allow" class="btn btn-primary" data-i18n="dbgAllow"></button>
+          <button type="button" id="perm-later" class="link-button" data-i18n="dbgLater"></button>
+          <p class="perm-foot muted" data-i18n="dbgRevoke"></p>
+        </section>
         <button id="start" class="btn btn-accent">
           <!-- L21-01 : icône selon le type de capture (smartphone pour le format mobile) -->
           <span class="start-ico" data-for="clicks"><i data-lucide="mouse-pointer-click"></i></span

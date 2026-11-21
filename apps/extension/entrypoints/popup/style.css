@@ -1,3 +1,7 @@
+/* Un display de classe (flex, inline-flex) ne doit jamais l'emporter sur l'attribut hidden */
+[hidden] {
+  display: none !important;
+}
 body {
   width: 300px;
   margin: 0;
@@ -420,4 +424,53 @@ fieldset.inline legend {
   .check input[type='radio'] {
     border-color: #9aa3ad;
   }
+}
+
+/* EXT-STORE §6 : encart d'autorisation (16 px entre les blocs, §18.2) et texte de refus */
+.perm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-md, 8px);
+}
+.perm > * {
+  margin: 0;
+}
+
+.perm h2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.perm ul {
+  padding-left: 18px;
+  font-size: 13px;
+  display: grid;
+  gap: 4px;
+}
+.perm .btn {
+  margin-top: 0;
+}
+.perm .link-button {
+  align-self: center;
+}
+.perm-foot {
+  font-size: 12px;
+}
+.perm-denied {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text);
+}
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--fd-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
 }
