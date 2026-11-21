@@ -86,7 +86,7 @@ sandboxSchema = z.object({
 ### 4.2 Pendant le guide
 - Une seule bulle à la fois, celle de l'étape courante, quand le visiteur est sur sa page.
 - Au clic dans la zone (`click`), ou sur « Suivant » (`next`), le guide avance.
-- Dans la barre du lecteur, une pastille « Guide · {k}/{n} » (icône `route`) ouvre un petit menu :
+- Dans l'en-tête du lecteur, à gauche du bouton d'information, une pastille « Guide · {k}/{n} » (icône `route`) ouvre un petit menu (choix du dev accepté le 21 novembre : elle y est plus visible que dans la barre du bas) :
   - « Reprendre à l'étape {k} » ;
   - « Recommencer le guide » ;
   - « Quitter le guide ».
@@ -105,13 +105,15 @@ sandboxSchema = z.object({
 
 ### 4.5 Petit écran (390 px)
 - La bulle passe en feuille du bas, comme les étapes guidées (F7, L21-06), et remonte en haut si la zone est dans le tiers bas de l'écran.
-- La pastille reste dans la barre du lecteur, avec le texte court « Guide {k}/{n} ».
+- La pastille reste dans l'en-tête, avec le texte court « Guide {k}/{n} ».
+- La feuille est collée **en bas de la fenêtre**, au-dessus de la barre du lecteur. Elle ne recouvre jamais l'élément visé, et ne se pose jamais sur le cadre de la page.
 
 ## 5. Accessibilité
 
 - La bulle est `role="dialog"` **non modal** (`aria-modal="false"`), nommée par son titre. Le focus n'est pas volé à l'ouverture : le texte de la bulle est annoncé par une région `aria-live="polite"` (« Étape 2 sur 6 du guide : … »).
 - Échap ferme la bulle et met le guide en pause. Le focus revient sur la pastille.
 - La pastille est un `button` avec `aria-haspopup="menu"` et un nom complet (« Guide, étape 2 sur 6 »).
+- Un clic sur l'élément visé par l'étape courante n'affiche jamais le message « Cette partie n'est pas disponible dans la démo », même si l'élément n'est relié à aucune page.
 - En mode `click`, la zone a un équivalent clavier : le lien ou le bouton réel de la page, ou, à défaut, « Suivant » dans la bulle.
 - `prefers-reduced-motion` : pas d'animation de pastille ni de glissement de la bulle.
 
