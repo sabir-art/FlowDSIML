@@ -2429,9 +2429,10 @@ async function install(page, state = seed()) {
         headers: { 'access-control-allow-origin': '*' },
       });
     }
-    // A8 : pages HTML (bucket html, URL signées) : contenu tenu dans state.htmlPages (chemin → HTML)
-    if (/^\/storage\/v1\/object\/sign\/html\//.test(p)) {
-      const key = decodeURIComponent(p.slice('/storage/v1/object/sign/html/'.length));
+    // A8 : pages HTML (bucket html, URL signées ; L30-05 : téléchargement direct) : contenu tenu
+    // dans state.htmlPages (chemin → HTML)
+    if (/^\/storage\/v1\/object\/(sign\/)?html\//.test(p)) {
+      const key = decodeURIComponent(p.replace(/^\/storage\/v1\/object\/(sign\/)?html\//, ''));
       const html = (state.htmlPages || {})[key];
       return route.fulfill({
         status: html ? 200 : 404,

@@ -1299,7 +1299,8 @@
       "modImage": "Image replaced",
       "modMask": "Image hidden",
       "undo_mask": "Undo hiding the image of {{sel}}",
-      "guideBubble": "Guide bubble"
+      "guideBubble": "Guide bubble",
+      "bubbles": "Step bubble"
     },
     "sandbox": {
       "planTitle": "Sandbox · {{title}}",
@@ -4564,7 +4565,6 @@
       "source": "Source",
       "fromText": "Text outline",
       "fromHtml": "HTML capture",
-      "fromHtmlSoon": "From an HTML capture: coming soon.",
       "planLabel": "Describe the procedure, one step per line",
       "planPlaceholder": "Open the Users menu\nClick Add\nFill in the identity…",
       "withQuiz": "With a 3-question quiz",
@@ -4586,7 +4586,10 @@
       "created": "Demo created. Check each step before publishing.",
       "createError": "The demo could not be created. Try again.",
       "gdpr_one": "AI-generated texts in 1 step, to review",
-      "gdpr_other": "AI-generated texts in {{count}} steps, to review"
+      "gdpr_other": "AI-generated texts in {{count}} steps, to review",
+      "htmlLabel": "Captured page",
+      "htmlHelp": "Only the page text is sent to the AI, without blurred areas or detected personal data. Bubbles are placed on the elements found: check them.",
+      "noHtml": "No captured HTML page in this workspace. Capture a page with the extension, then come back here."
     },
     "dataset": {
       "open": "Generate sample data",

@@ -44,8 +44,10 @@ export function GuideBubble({
   sheet: boolean;
   startsOn: string | null;
   done: boolean;
-  onNext: () => void;
-  onSkip: () => void;
+  /** Absent (démo guidée HTML) : la barre de l'étape porte déjà « Suivant ». */
+  onNext?: () => void;
+  /** Absent (démo guidée HTML) : pas de « Explorer sans guide ». */
+  onSkip?: () => void;
   onGo: () => void;
   onClose: () => void;
 }) {
@@ -142,11 +144,13 @@ export function GuideBubble({
                   <span class="p-gd-count">
                     {fmt(g as unknown as Record<string, string>, 'step', { k: k + 1, n })}
                   </span>
-                  <button type="button" class="p-btn p-btn-link p-btn-sm" onClick={onSkip}>
-                    {g.skip}
-                  </button>
+                  {onSkip && (
+                    <button type="button" class="p-btn p-btn-link p-btn-sm" onClick={onSkip}>
+                      {g.skip}
+                    </button>
+                  )}
                   {/* « Suivant » pour une étape sans geste ; au clic, équivalent clavier sans zone visée */}
-                  {(point!.advance === 'next' || !found) && (
+                  {onNext && (point!.advance === 'next' || !found) && (
                     <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={onNext}>
                       {g.next}
                       <ChevronRight {...ICON} size={14} />

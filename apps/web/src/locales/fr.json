@@ -1299,7 +1299,8 @@
       "modImage": "Image remplacée",
       "modMask": "Image masquée",
       "undo_mask": "Annuler le masquage de l’image de {{sel}}",
-      "guideBubble": "Bulle du guide"
+      "guideBubble": "Bulle du guide",
+      "bubbles": "Bulle de l’étape"
     },
     "sandbox": {
       "planTitle": "Sandbox · {{title}}",
@@ -4564,7 +4565,6 @@
       "source": "Source",
       "fromText": "Plan texte",
       "fromHtml": "Capture HTML",
-      "fromHtmlSoon": "À partir d’une capture HTML : prochainement.",
       "planLabel": "Décrivez la procédure, une étape par ligne",
       "planPlaceholder": "Ouvrir le menu Usagers\nCliquer sur Ajouter\nRenseigner l’identité…",
       "withQuiz": "Avec un quiz de 3 questions",
@@ -4586,7 +4586,10 @@
       "created": "Démo créée. Vérifiez chaque étape avant de publier.",
       "createError": "La démo n’a pas pu être créée. Réessayez.",
       "gdpr_one": "Textes générés par IA dans 1 étape, à relire",
-      "gdpr_other": "Textes générés par IA dans {{count}} étapes, à relire"
+      "gdpr_other": "Textes générés par IA dans {{count}} étapes, à relire",
+      "htmlLabel": "Page capturée",
+      "htmlHelp": "Seul le texte de la page part vers l’IA, sans les zones floutées ni les données personnelles détectées. Les bulles sont posées sur les éléments trouvés : vérifiez-les.",
+      "noHtml": "Aucune page HTML capturée dans cet espace. Capturez une page avec l’extension, puis revenez ici."
     },
     "dataset": {
       "open": "Générer des données fictives",

@@ -43,7 +43,9 @@ export function HotspotsTool({
     return (
       <div className="sp-panel">
         <div className="sec">
-          <div className="sec-title">{t('editor.sandbox.guideListTitle')}</div>
+          <div className="sec-title">
+            {editor.demo?.kind === 'sandbox' ? t('editor.sandbox.guideListTitle') : t('editor.html.bubbles')}
+          </div>
           {hotspots.map((h, i) => (
             <button
               key={h.id}
@@ -57,7 +59,9 @@ export function HotspotsTool({
               </span>
             </button>
           ))}
-          {!readOnly && <p className="help">{t('editor.sandbox.guideListHelp')}</p>}
+          {!readOnly && editor.demo?.kind === 'sandbox' && (
+            <p className="help">{t('editor.sandbox.guideListHelp')}</p>
+          )}
         </div>
       </div>
     );

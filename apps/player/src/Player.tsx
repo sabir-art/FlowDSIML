@@ -492,6 +492,12 @@ export function Player({
   }, [gs]);
   const shownSteps = useRef(new Set<number>());
   const gBubble = gv.kind === 'guide' ? gv.bubble : null;
+  // L30-05 : démo guidée, étape HTML : sa première bulle, posée sur l'élément visé (même ancrage)
+  const htmlBubble =
+    !sandbox && step.kind === 'html' && step.hotspots[0]
+      ? { page: step.id, advance: 'click' as const, hotspot: step.hotspots[0] }
+      : null;
+  const point = gBubble ?? htmlBubble;
   useEffect(() => {
     if (gBubble && !shownSteps.current.has(gs.k)) {
       shownSteps.current.add(gs.k);
@@ -1005,19 +1011,23 @@ export function Player({
               onNext={last ? (m.quiz ? openQuiz : finish) : next}
               onGo={goStep}
               target={
-                gBubble
+                point
                   ? {
-                      sel: gBubble.hotspot.sel,
+                      sel: point.hotspot.sel,
                       rect: {
-                        x: gBubble.hotspot.x,
-                        y: gBubble.hotspot.y,
-                        w: gBubble.hotspot.w,
-                        h: gBubble.hotspot.h,
+                        x: point.hotspot.x,
+                        y: point.hotspot.y,
+                        w: point.hotspot.w,
+                        h: point.hotspot.h,
                       },
                     }
                   : null
               }
-              onHit={() => gBubble?.advance === 'click' && guideNext()}
+              onHit={() => {
+                if (gBubble?.advance === 'click') guideNext();
+                // L30-05 : démo guidée, clic sur l'élément visé : étape suivante
+                else if (htmlBubble) (last ? (m.quiz ? openQuiz : finish) : next)();
+              }}
               overlay={
                 gv.kind === 'guide' && (gv.bubble || gv.startsOn || gv.done)
                   ? (box, found) => (
@@ -1043,7 +1053,25 @@ export function Player({
                         }}
                       />
                     )
-                  : undefined
+                  : htmlBubble
+                    ? (box, found) => (
+                        <GuideBubble
+                          t={t}
+                          sub={sub}
+                          html={html}
+                          point={htmlBubble}
+                          box={box}
+                          found={found}
+                          k={index}
+                          n={m.steps.length}
+                          sheet={compact}
+                          startsOn={null}
+                          done={false}
+                          onGo={() => undefined}
+                          onClose={() => undefined}
+                        />
+                      )
+                    : undefined
               }
               status={
                 sandbox && keyPages.length > 0

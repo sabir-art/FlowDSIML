@@ -53,6 +53,8 @@ const step = (id, file, title, extra = {}) => ({
 });
 const SAND = '0b5c1f0e-0000-4000-8000-0000000000d1';
 const GUID = '0b5c1f0e-0000-4000-8000-0000000000d2';
+// L30-05 : démo guidée générée depuis une capture HTML (bulle posée sur l'élément visé)
+const GENR = '0b5c1f0e-0000-4000-8000-0000000000d3';
 const manifests = {
   [SAND]: base(SAND, {
     kind: 'sandbox',
@@ -74,6 +76,31 @@ const manifests = {
       }),
       step(S2, 'p2.html', 'Agenda', { links: [{ sel: '#menu > a:nth-of-type(1)', step: S1 }] }),
       step(S3, 'p3.html', 'Statistiques'),
+    ],
+  }),
+  [GENR]: base(GENR, {
+    steps: [
+      {
+        ...step(S1, 'p1.html', 'Exporter'),
+        hotspots: [
+          {
+            id: 'h1',
+            x: 0.45,
+            y: 0.45,
+            w: 0.1,
+            h: 0.06,
+            title: 'Exportez le tableau',
+            body: 'Cliquez sur Exporter.',
+            placement: 'auto',
+            action: { type: 'next' },
+            cta: null,
+            pulse: true,
+            style: 'beacon',
+            sel: '#export',
+          },
+        ],
+      },
+      step(S2, 'p2.html', 'L’agenda'),
     ],
   }),
   [GUID]: base(GUID, {
@@ -216,6 +243,28 @@ const manifests = {
   await g.getByRole('button', { name: 'Suivant', exact: true }).click();
   await g.frameLocator('.p-html-frame iframe').locator('h1', { hasText: 'Agenda' }).waitFor();
   ok(true, 'Suivant mène à la page 2');
+  // L30-05 : étape HTML d'une démo guidée avec bulle : posée sur l'élément, clic sur l'élément → suite
+  const gn = await open(GENR, { width: 1024, height: 800 });
+  const gb = gn.locator('.p-gd[role="dialog"]');
+  await gb.waitFor();
+  ok(
+    /Exportez le tableau/.test(await gb.innerText()) &&
+      /Étape 1 sur 2/.test(await gb.innerText()) &&
+      !/Explorer sans guide/.test(await gb.innerText()),
+    'démo guidée HTML : bulle de l’étape, sans « Explorer sans guide »',
+  );
+  await gn.locator('.p-gd-ring').waitFor();
+  {
+    const ring = await gn.locator('.p-gd-ring').boundingBox();
+    const btn = await gn.frameLocator('.p-html-frame iframe').locator('#export').boundingBox();
+    ok(
+      ring && btn && Math.abs(ring.x - btn.x) < 3 && Math.abs(ring.y - btn.y) < 3,
+      'bulle ancrée sur l’élément visé',
+    );
+  }
+  await gn.frameLocator('.p-html-frame iframe').locator('#export').click();
+  await gn.frameLocator('.p-html-frame iframe').locator('h1', { hasText: 'Agenda' }).waitFor();
+  ok((await gb.count()) === 0, 'clic sur l’élément visé : étape suivante');
   // Mobile : mise à l'échelle sans défilement horizontal
   const m = await open(GUID, { width: 390, height: 844 });
   await m.waitForSelector('.p-html-frame iframe');

@@ -32,6 +32,8 @@ export function GuideBubblePanel({
   const { t } = useTranslation();
   const catalog = useVarCatalog(editor.variables);
   const demo = editor.demo!;
+  // L30-05 : bulle d'une étape HTML de démo guidée (pas de guide du Sandbox)
+  const isSandbox = demo.kind === 'sandbox';
   const sb = sandboxOf(demo.sandbox, editor.steps);
   const at = sb.guideSteps.findIndex((g) => g.hotspot === hotspot.id);
   const set = (patch: Partial<HotspotRow>) => editor.updateHotspot(hotspot.id, patch);
@@ -63,7 +65,11 @@ export function GuideBubblePanel({
           {t('editor.backToStep')}
         </button>
         <span className="t-label">
-          {at >= 0 ? t('editor.sandbox.guideBubbleN', { n: at + 1 }) : t('editor.html.guideBubble')}
+          {!isSandbox
+            ? t('editor.hotspotSettings')
+            : at >= 0
+              ? t('editor.sandbox.guideBubbleN', { n: at + 1 })
+              : t('editor.html.guideBubble')}
         </span>
         {!readOnly && (
           <button
@@ -149,7 +155,7 @@ export function GuideBubblePanel({
           ))}
         </select>
       </div>
-      {at >= 0 ? (
+      {!isSandbox ? null : at >= 0 ? (
         <div className="sec">
           <fieldset className="gd-advance">
             <legend className="sec-title">{t('editor.sandbox.guideAdvance')}</legend>

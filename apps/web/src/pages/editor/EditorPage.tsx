@@ -525,9 +525,14 @@ export function EditorPage() {
     ? {
         cta: step.kind === 'before_after' || step.kind === 'video' ? t('editor.rail.why.cta') : undefined,
         // A8 : sur une page de Sandbox avec guide, les points sont les bulles du guide
+        // A8 / L30-05 : sur une page HTML, les points sont les bulles posées sur un élément (guide du
+        // Sandbox activé, ou étape de démo guidée qui porte déjà une bulle, générée depuis une capture HTML)
         hotspots:
           step.kind === 'image' ||
-          (step.kind === 'html' && sandbox && sandboxOf(editor.demo!.sandbox, editor.steps).guide)
+          (step.kind === 'html' &&
+            (sandbox
+              ? sandboxOf(editor.demo!.sandbox, editor.steps).guide
+              : editor.hotspots.some((h) => h.step_id === step.id)))
             ? undefined
             : capOnly,
         next: asStepOptions(step.options).choices.length ? t('editor.rail.why.next') : undefined,

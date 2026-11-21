@@ -6,12 +6,14 @@ import { supabase } from '../../lib/supabase';
 import { useToast } from '../Toast';
 import { AiRequestError, aiBlock, callAi, useAiStatus } from '../../lib/ai';
 import { useBlockText } from './AiWrite';
+import { preparePage, type PageElement } from '../../lib/htmlText';
 import './ai.css';
-import { Status } from '@flowdsiml/ui';
 
 export interface GenStep {
   title: string;
   text: string;
+  /** Capture HTML : numéro de l'élément visé dans la liste envoyée (null : aucun). */
+  target?: number | null;
 }
 export interface GenChapter {
   title: string;
@@ -28,6 +30,15 @@ export interface GenPlan {
 }
 
 export const PLAN_MAX = 4000;
+
+/** Page HTML capturée choisie comme source (étape existante du workspace). */
+export interface HtmlSource {
+  stepId: string;
+  label: string;
+  path: string;
+  ops: unknown;
+  meta: unknown;
+}
 export const stepCount = (p: GenPlan) => p.chapters.reduce((n, c) => n + c.steps.length, 0);
 
 /**
@@ -40,6 +51,8 @@ export async function createGeneratedDemo(opts: {
   folderId: string | null;
   lang: string;
   plan: GenPlan;
+  /** L30-05 : capture HTML source ; chaque étape reprend la page, sa bulle est posée sur l'élément visé. */
+  html?: { source: HtmlSource; elements: PageElement[] };
 }): Promise<string> {
   const { ws, plan } = opts;
   const { data: demo, error } = await supabase
@@ -79,11 +92,19 @@ export async function createGeneratedDemo(opts: {
         workspace_id: ws,
         position: pos++,
         chapter_id: ci >= 0 ? chapters[ci]!.id : null,
-        kind: 'image',
         title: s.title.slice(0, 200),
-        to_capture: true,
         options: { aiText: true },
+        ...(opts.html
+          ? {
+              kind: 'html',
+              to_capture: false,
+              html_path: opts.html.source.path,
+              html_ops: opts.html.source.ops,
+              html_meta: opts.html.source.meta,
+            }
+          : { kind: 'image', to_capture: true }),
       });
+      const el = opts.html && s.target != null ? opts.html.elements[s.target] : undefined;
       hotspots.push({
         step_id: id,
         demo_id: demo.id,
@@ -95,6 +116,8 @@ export async function createGeneratedDemo(opts: {
         title: s.title.slice(0, 200),
         body: s.text.slice(0, 4000),
         position: 0,
+        // Capture HTML : bulle posée sur l'élément trouvé, à vérifier (rect de secours au centre)
+        ...(el ? { sel: el.sel } : {}),
       });
     }
   }
@@ -141,6 +164,10 @@ export function GenerateDialog({
   const { status } = useAiStatus(ws);
   const ref = useRef<HTMLDialogElement>(null);
   const [text, setText] = useState('');
+  const [source, setSource] = useState<'text' | 'html'>('text');
+  const [pages, setPages] = useState<HtmlSource[] | null>(null);
+  const [pageId, setPageId] = useState('');
+  const [prepared, setPrepared] = useState<{ source: HtmlSource; elements: PageElement[] } | null>(null);
   const [withQuiz, setWithQuiz] = useState(false);
   const [phase, setPhase] = useState<'input' | 'busy' | 'ready' | 'error' | 'blocked' | 'saving'>('input');
   const [message, setMessage] = useState('');
@@ -151,6 +178,36 @@ export function GenerateDialog({
     ref.current?.showModal();
     return () => ctrl.current?.abort();
   }, []);
+
+  // L30-05 : pages HTML capturées de l'espace (démos non supprimées), chargées à l'ouverture de l'onglet
+  useEffect(() => {
+    if (source !== 'html' || pages) return;
+    void (async () => {
+      const [st, dm] = await Promise.all([
+        supabase
+          .from('steps')
+          .select('id, title, demo_id, html_path, html_ops, html_meta')
+          .eq('workspace_id', ws)
+          .eq('kind', 'html')
+          .not('html_path', 'is', null)
+          .order('position')
+          .limit(200),
+        supabase.from('demos').select('id, title').eq('workspace_id', ws).is('deleted_at', null),
+      ]);
+      const titles = new Map((dm.data ?? []).map((d) => [d.id, d.title]));
+      const list = (st.data ?? [])
+        .filter((x) => titles.has(x.demo_id) && x.html_path)
+        .map((x) => ({
+          stepId: x.id,
+          label: `${titles.get(x.demo_id)} › ${x.title || t('editor.untitled')}`,
+          path: x.html_path!,
+          ops: x.html_ops,
+          meta: x.html_meta,
+        }));
+      setPages(list);
+      setPageId((v) => v || list[0]?.stepId || '');
+    })();
+  }, [source, pages, ws, t]);
 
   const generate = async () => {
     const b = aiBlock(status, 'generate');
@@ -163,7 +220,25 @@ export function GenerateDialog({
     ctrl.current = c;
     setPhase('busy');
     try {
-      const r = await callAi<GenPlan>(ws, 'generate', lang, { plan: text, withQuiz }, c.signal);
+      let input: Record<string, unknown> = { plan: text, withQuiz };
+      if (source === 'html') {
+        // La page est lue ici : seuls le texte après floutage et les libellés numérotés sont envoyés
+        const src = pages?.find((x) => x.stepId === pageId);
+        if (!src) return setPhase('input');
+        const file = await supabase.storage.from('html').download(src.path);
+        if (file.error || !file.data) throw file.error ?? new Error('html');
+        const page = preparePage(await file.data.text(), Array.isArray(src.ops) ? src.ops : []);
+        setPrepared({ source: src, elements: page.elements });
+        input = {
+          page: {
+            title: page.title,
+            text: page.text,
+            elements: page.elements.map(({ i, label }) => ({ i, label })),
+          },
+          withQuiz,
+        };
+      }
+      const r = await callAi<GenPlan>(ws, 'generate', lang, input, c.signal);
       setPlan(r);
       setPhase('ready');
     } catch (e) {
@@ -180,7 +255,14 @@ export function GenerateDialog({
     if (!plan) return;
     setPhase('saving');
     try {
-      const id = await createGeneratedDemo({ ws, userId, folderId, lang, plan });
+      const id = await createGeneratedDemo({
+        ws,
+        userId,
+        folderId,
+        lang,
+        plan,
+        ...(source === 'html' && prepared ? { html: prepared } : {}),
+      });
       onClose();
       toast(t('ai.generate.created'));
       navigate(`/demos/${id}/edit`);
@@ -243,43 +325,69 @@ export function GenerateDialog({
         {!editing && (
           <>
             <div className="tabs ai-gen-tabs" role="tablist" aria-label={t('ai.generate.source')}>
-              <button
-                type="button"
-                role="tab"
-                aria-selected="true"
-                id="ai-gen-tab-text"
-                aria-controls="ai-gen-panel"
-              >
-                {t('ai.generate.fromText')}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected="false"
-                aria-disabled="true"
-                tabIndex={-1}
-                title={t('ai.generate.fromHtmlSoon')}
-              >
-                {t('ai.generate.fromHtml')} <Status size="sm">{t('shell.soon')}</Status>
-              </button>
-            </div>
-            <div role="tabpanel" id="ai-gen-panel" aria-labelledby="ai-gen-tab-text" className="stack">
-              <label className="fd-field">
-                <span className="fd-label">{t('ai.generate.planLabel')}</span>
-                <textarea
-                  className="fd-input ai-gen-plan"
-                  rows={8}
-                  maxLength={PLAN_MAX}
-                  placeholder={t('ai.generate.planPlaceholder')}
-                  value={text}
+              {(['text', 'html'] as const).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  role="tab"
+                  aria-selected={source === k}
+                  tabIndex={source === k ? 0 : -1}
+                  id={`ai-gen-tab-${k}`}
+                  aria-controls="ai-gen-panel"
                   disabled={phase === 'busy'}
-                  aria-describedby="ai-gen-count"
-                  onChange={(e) => setText(e.target.value)}
-                />
-                <span className="fd-help" id="ai-gen-count">
-                  {t('editor.chars', { n: text.length, max: PLAN_MAX })}
-                </span>
-              </label>
+                  onClick={() => setSource(k)}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                    const next = k === 'text' ? 'html' : 'text';
+                    setSource(next);
+                    document.getElementById(`ai-gen-tab-${next}`)?.focus();
+                  }}
+                >
+                  {t(k === 'text' ? 'ai.generate.fromText' : 'ai.generate.fromHtml')}
+                </button>
+              ))}
+            </div>
+            <div role="tabpanel" id="ai-gen-panel" aria-labelledby={`ai-gen-tab-${source}`} className="stack">
+              {source === 'text' ? (
+                <label className="fd-field">
+                  <span className="fd-label">{t('ai.generate.planLabel')}</span>
+                  <textarea
+                    className="fd-input ai-gen-plan"
+                    rows={8}
+                    maxLength={PLAN_MAX}
+                    placeholder={t('ai.generate.planPlaceholder')}
+                    value={text}
+                    disabled={phase === 'busy'}
+                    aria-describedby="ai-gen-count"
+                    onChange={(e) => setText(e.target.value)}
+                  />
+                  <span className="fd-help" id="ai-gen-count">
+                    {t('editor.chars', { n: text.length, max: PLAN_MAX })}
+                  </span>
+                </label>
+              ) : pages && !pages.length ? (
+                <p className="fd-help">{t('ai.generate.noHtml')}</p>
+              ) : (
+                <label className="fd-field">
+                  <span className="fd-label">{t('ai.generate.htmlLabel')}</span>
+                  <select
+                    className="fd-input"
+                    value={pageId}
+                    disabled={phase === 'busy' || !pages}
+                    aria-describedby="ai-gen-html-help"
+                    onChange={(e) => setPageId(e.target.value)}
+                  >
+                    {(pages ?? []).map((x) => (
+                      <option key={x.stepId} value={x.stepId}>
+                        {x.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="fd-help" id="ai-gen-html-help">
+                    {t('ai.generate.htmlHelp')}
+                  </span>
+                </label>
+              )}
               <label className="fd-check">
                 <input
                   type="checkbox"
@@ -454,7 +562,7 @@ export function GenerateDialog({
           <button
             type="button"
             className="fd-btn fd-btn--primary"
-            disabled={phase === 'busy' || !text.trim()}
+            disabled={phase === 'busy' || (source === 'text' ? !text.trim() : !pageId)}
             onClick={() => void generate()}
           >
             {phase === 'error' ? t('ai.retry') : t('ai.generate.go')}
