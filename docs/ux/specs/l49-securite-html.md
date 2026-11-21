@@ -57,9 +57,10 @@
 
 - **Production** :
   - `sanitizeDom` (extension) et `sanitizePage` (serveur) **renvoient des compteurs**, en plus du HTML assaini ;
-  - le serveur recalcule et enregistre **ses** compteurs dans `steps.html_meta.security` : `{ scripts, handlers, frames, forms, externalLinks, dangerousLinks, piiReplaced, other, safeBrowsing: 'ok' | 'unavailable', analyzedAt }` ;
-  - l'extension affiche les siens avant l'envoi ; l'éditeur affiche ceux du serveur ;
-  - aucun chiffre n'est estimé.
+  - **Compteurs déclaratifs côté extension ; garantie = assainissement serveur.** (Arbitrage du chef, 21 novembre.) Pour chaque compteur, le serveur enregistre le plus grand des deux chiffres, le sien et celui que l'extension envoie. Ces chiffres sont informatifs : la protection repose sur le nettoyage fait par le serveur, jamais sur les compteurs.
+  - le serveur enregistre ces compteurs dans `steps.html_meta.security` : `{ scripts, handlers, frames, forms, externalLinks, dangerousLinks, piiReplaced, other, safeBrowsing: 'ok' | 'unavailable', analyzedAt }` ;
+  - l'extension affiche les siens avant l'envoi ; l'éditeur affiche ceux qui sont enregistrés ;
+  - aucun chiffre n'est estimé : chacun vient d'un comptage réel, du serveur ou de l'extension.
 
 | Compteur | Libellé (accord en nombre) | Contenu |
 |---|---|---|
