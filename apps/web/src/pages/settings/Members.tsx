@@ -247,11 +247,7 @@ export function Members() {
                             </span>
                             <div>
                               <b>{m.full_name || m.email}</b>
-                              {me && (
-                                <Status size="sm" className="st-you">
-                                  {t('members.you')}
-                                </Status>
-                              )}
+                              {me && <span className="st-you">{t('members.you')}</span>}
                               {m.full_name && <div className="t-caption subtle">{m.email}</div>}
                             </div>
                           </div>

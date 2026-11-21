@@ -564,8 +564,11 @@
   padding: 12px 16px;
   border-bottom: 1px solid var(--fd-color-border);
 }
+/* « Vous » n'est pas un état : simple mention grise, sans point (revue UX X4) */
 .mk .st-you {
   margin-left: 6px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
 }
 .mk .st-pending-av {
   background: var(--fd-stone-100);
