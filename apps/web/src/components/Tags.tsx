@@ -116,6 +116,15 @@ export function useWorkspaceTags(wsId: string | undefined) {
       guard(async () => {
         check(await supabase.from('tags').update(patch).eq('id', id));
       }),
+    /** L52 §2.4 : fusion (RPC merge_tags, transactionnelle) ; renvoie le nombre de démos de `from`. */
+    async merge(from: TagRow, to: TagRow) {
+      let count = 0;
+      const ok = await guard(async () => {
+        count = check(await supabase.rpc('merge_tags', { p_from: from.id, p_to: to.id })) ?? 0;
+      });
+      if (ok) toast(t('tags.merged', { from: from.name, to: to.name, count }));
+      return ok;
+    },
     remove: (id: string) =>
       guard(async () => {
         check(await supabase.from('tags').delete().eq('id', id));

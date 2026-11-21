@@ -2981,7 +2981,18 @@
     "tableLabel": "Workspace tags",
     "sortBy": "Sort by {{col}}",
     "demosOf_one": "{{count}} demo with the tag {{name}}",
-    "demosOf_other": "{{count}} demos with the tag {{name}}"
+    "demosOf_other": "{{count}} demos with the tag {{name}}",
+    "merge": "Merge with…",
+    "mergeTitle": "Merge “{{name}}”",
+    "mergeBody_one": "The demo tagged “{{name}}” gets the chosen tag. “{{name}}” is then deleted.",
+    "mergeBody_other": "The {{count}} demos tagged “{{name}}” get the chosen tag. “{{name}}” is then deleted.",
+    "mergeBodyNone": "No demo uses “{{name}}”. It is deleted.",
+    "mergeWith": "With",
+    "mergeAction": "Merge",
+    "merged_one": "“{{from}}” merged into “{{to}}” ({{count}} demo)",
+    "merged_other": "“{{from}}” merged into “{{to}}” ({{count}} demos)",
+    "mergeInstead": "Merge with “{{name}}”",
+    "mergeNone": "No other tag"
   },
   "learners": {
     "title": "Learners",

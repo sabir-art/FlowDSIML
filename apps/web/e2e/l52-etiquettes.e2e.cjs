@@ -6,6 +6,8 @@
  *    (?etiquettes=), tri par nombre de démos ; suppression confirmée (les démos restent) ; couleur Sarcelle (anneau,
  *    coche, flèches) ; lecteur sans bouton ni menu ; clavier (menu, renommage Entrée et Échap) ; création, nom pris ;
  *    état vide.
+ *  - P3 (recette 2, 3) : nom déjà pris → « Fusionner avec « Outil CRM » » ouvre la fusion ; fusion de « Outil métier »
+ *    (7 démos) dans « Outil CRM » : toutes l'ont, « Outil métier » a disparu, aucune démo au-delà de 5, toast.
  * Usage : node e2e/l52-etiquettes.e2e.cjs
  */
 const { chromium } = require('playwright');
@@ -337,6 +339,65 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
       `étiquette créée, couleur proposée : la seule libre (${created?.color})`,
     );
     ok((await page.locator('.tgs-quota').innerText()) === '9 sur 20', 'compteur mis à jour (9 sur 20)');
+    await page.context().close();
+  }
+
+  // Recette 2 et 3 : nom déjà pris, puis fusion
+  {
+    const { page, state } = await openPage(pageSeed());
+    await page.locator('.tgs-row .tg').first().waitFor();
+    await page.getByRole('button', { name: 'Plus d’actions pour Outil métier' }).click();
+    await page.getByRole('menuitem', { name: 'Renommer' }).click();
+    const field = page.getByRole('textbox', { name: 'Renommer Outil métier' });
+    await field.fill('outil crm');
+    await page.keyboard.press('Enter');
+    const link = page.getByRole('button', { name: 'Fusionner avec « Outil CRM »' });
+    ok((await link.count()) === 1, 'recette 2 : « Fusionner avec « Outil CRM » » sous le message');
+    await link.click();
+    const dlg = page.getByRole('dialog', { name: 'Fusionner « Outil métier »' });
+    await dlg.waitFor();
+    ok(
+      (await dlg.getByRole('radio', { name: /Outil CRM/ }).isChecked()) &&
+        /Les 7 démos de « Outil métier » reçoivent l’étiquette choisie\. « Outil métier » est ensuite supprimée\./.test(
+          await dlg.innerText(),
+        ),
+      'recette 2 : la fusion s’ouvre, « Outil CRM » choisie, phrase avec 7 démos',
+    );
+    ok(
+      state.tables.tags.some((x) => x.name === 'Outil métier'),
+      'nom inchangé tant que la fusion n’est pas faite',
+    );
+    const crm = state.tables.tags.find((x) => x.name === 'Outil CRM').id;
+    const met = state.tables.tags.find((x) => x.name === 'Outil métier').id;
+    const before = new Set(state.tables.demo_tags.filter((x) => x.tag_id === met).map((x) => x.demo_id));
+    await dlg.getByRole('button', { name: 'Fusionner' }).click();
+    await page.waitForTimeout(500);
+    ok(
+      !state.tables.tags.some((x) => x.id === met) &&
+        [...before].every((d) => state.tables.demo_tags.some((x) => x.demo_id === d && x.tag_id === crm)),
+      'recette 3 : les 7 démos ont « Outil CRM », « Outil métier » a disparu',
+    );
+    const perDemo = {};
+    for (const x of state.tables.demo_tags) perDemo[x.demo_id] = (perDemo[x.demo_id] || 0) + 1;
+    ok(Math.max(...Object.values(perDemo)) <= 5, 'aucune démo au-delà de 5 étiquettes');
+    ok(
+      /« Outil métier » fusionnée dans « Outil CRM » \(7 démos\)/.test(
+        await page.locator('.mk-toasts').innerText(),
+      ),
+      'toast avec le compte',
+    );
+    ok(!(await names(page)).includes('Outil métier'), 'ligne retirée de la liste');
+    // Menu « Fusionner avec… » : choix dans la liste (pastille et nombre de démos)
+    await page.getByRole('button', { name: 'Plus d’actions pour Pilotage' }).click();
+    await page.getByRole('menuitem', { name: 'Fusionner avec…' }).click();
+    const d2 = page.getByRole('dialog', { name: 'Fusionner « Pilotage »' });
+    await d2.waitFor();
+    ok(
+      (await d2.getByRole('radio').count()) === 6 &&
+        (await d2.locator('.tgs-merge__o', { hasText: 'Logiciel métier' }).innerText()).includes('12 démos'),
+      'liste des autres étiquettes avec leur nombre de démos',
+    );
+    await d2.getByRole('button', { name: 'Annuler' }).click();
     await page.context().close();
   }
 

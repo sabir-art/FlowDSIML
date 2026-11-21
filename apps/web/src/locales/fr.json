@@ -2981,7 +2981,18 @@
     "tableLabel": "Étiquettes de l’espace",
     "sortBy": "Trier par {{col}}",
     "demosOf_one": "{{count}} démo avec l’étiquette {{name}}",
-    "demosOf_other": "{{count}} démos avec l’étiquette {{name}}"
+    "demosOf_other": "{{count}} démos avec l’étiquette {{name}}",
+    "merge": "Fusionner avec…",
+    "mergeTitle": "Fusionner « {{name}} »",
+    "mergeBody_one": "La démo de « {{name}} » reçoit l’étiquette choisie. « {{name}} » est ensuite supprimée.",
+    "mergeBody_other": "Les {{count}} démos de « {{name}} » reçoivent l’étiquette choisie. « {{name}} » est ensuite supprimée.",
+    "mergeBodyNone": "Aucune démo ne porte « {{name}} ». Elle est supprimée.",
+    "mergeWith": "Avec",
+    "mergeAction": "Fusionner",
+    "merged_one": "« {{from}} » fusionnée dans « {{to}} » ({{count}} démo)",
+    "merged_other": "« {{from}} » fusionnée dans « {{to}} » ({{count}} démos)",
+    "mergeInstead": "Fusionner avec « {{name}} »",
+    "mergeNone": "Aucune autre étiquette"
   },
   "learners": {
     "title": "Apprenants",

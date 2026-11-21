@@ -156,3 +156,48 @@
     gap: 8px;
   }
 }
+.mk .tgs-err .link-button {
+  margin-left: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+/* §2.4 : « Avec » : autres étiquettes, pastille et nombre de démos (liste de choix dans la modale) */
+.tgs-merge {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 16px 0 0;
+  padding: 0;
+  border: 0;
+  max-height: 260px;
+  overflow: auto;
+}
+.tgs-merge legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.tgs-merge__o {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.tgs-merge__o:hover {
+  background: color-mix(in srgb, var(--fd-color-text) 6%, transparent);
+}
+.tgs-merge__o input {
+  accent-color: var(--fd-color-text);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+.tgs-merge__n {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}

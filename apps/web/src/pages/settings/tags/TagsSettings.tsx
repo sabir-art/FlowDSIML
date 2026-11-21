@@ -7,7 +7,7 @@ import { SettingsShell } from '../SettingsShell';
 import { supabase } from '../../../lib/supabase';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { Menu } from '../../../components/Menu';
-import { useConfirm } from '../../../components/ConfirmDialog';
+import { ConfirmDialog, useConfirm } from '../../../components/ConfirmDialog';
 import {
   TAG_COLORS,
   TAG_LIMIT,
@@ -53,6 +53,8 @@ export function TagsSettings() {
   const [creating, setCreating] = useState(false);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [coloring, setColoring] = useState<string | null>(null);
+  /** §2.4 : fusion en cours (étiquette fusionnée, étiquette choisie). */
+  const [merging, setMerging] = useState<{ from: TagRow; to: string } | null>(null);
   const limitId = useId();
 
   // Démos non supprimées : le compte de chaque ligne est celui que montre Démos filtré
@@ -202,6 +204,10 @@ export function TagsSettings() {
                             }
                             setRenaming(null);
                           }}
+                          onMerge={(other) => {
+                            setRenaming(null);
+                            setMerging({ from: tag, to: other.id });
+                          }}
                         />
                       ) : (
                         <TagChip tag={tag} />
@@ -233,6 +239,13 @@ export function TagsSettings() {
                               },
                             },
                             { label: t('tags.colorAction'), onSelect: () => setColoring(tag.id) },
+                            {
+                              label: t('tags.merge'),
+                              disabled: store.tags.length < 2,
+                              hint: store.tags.length < 2 ? t('tags.mergeNone') : undefined,
+                              onSelect: () =>
+                                setMerging({ from: tag, to: rows.find((x) => x.id !== tag.id)!.id }),
+                            },
                             'separator',
                             { label: t('tags.deleteAction'), danger: true, onSelect: () => void remove(tag) },
                           ]}
@@ -254,6 +267,46 @@ export function TagsSettings() {
         )}
       </section>
       {confirmDialog}
+      {merging && (
+        <ConfirmDialog
+          open
+          title={t('tags.mergeTitle', { name: merging.from.name })}
+          body={
+            <>
+              <p>
+                {count(merging.from.id)
+                  ? t('tags.mergeBody', { count: count(merging.from.id), name: merging.from.name })
+                  : t('tags.mergeBodyNone', { name: merging.from.name })}
+              </p>
+              <fieldset className="tgs-merge">
+                <legend>{t('tags.mergeWith')}</legend>
+                {rows
+                  .filter((x) => x.id !== merging.from.id)
+                  .map((x) => (
+                    <label key={x.id} className="tgs-merge__o">
+                      <input
+                        type="radio"
+                        name="tgs-merge"
+                        checked={merging.to === x.id}
+                        onChange={() => setMerging({ ...merging, to: x.id })}
+                      />
+                      <TagChip tag={x} />
+                      <span className="tgs-merge__n">
+                        {count(x.id) ? t('tags.demos', { count: count(x.id) }) : t('tags.noDemo')}
+                      </span>
+                    </label>
+                  ))}
+              </fieldset>
+            </>
+          }
+          confirmLabel={t('tags.mergeAction')}
+          onConfirm={async () => {
+            const to = store.tags.find((x) => x.id === merging.to);
+            if (to) await store.merge(merging.from, to);
+          }}
+          onClose={() => setMerging(null)}
+        />
+      )}
     </SettingsShell>
   );
 }
@@ -320,10 +373,13 @@ function RenameField({
   tag,
   tags,
   onDone,
+  onMerge,
 }: {
   tag: TagRow;
   tags: TagRow[];
   onDone: (name: string | null) => Promise<void>;
+  /** Nom déjà pris : fusionner avec l'étiquette qui le porte (§2.2). */
+  onMerge: (other: TagRow) => void;
 }) {
   const { t } = useTranslation();
   const [value, setValue] = useState(tag.name);
@@ -367,8 +423,22 @@ function RenameField({
         <span className="tgs-hint">{t('tags.enterToSave')}</span>
       </span>
       {dup && (
-        <span id={errId} className="tgs-err" role="alert">
-          {t('tags.duplicate')}
+        <span className="tgs-err">
+          <span id={errId} role="alert">
+            {t('tags.duplicate')}
+          </span>
+          <button
+            type="button"
+            className="link-button"
+            // Avant la perte du focus du champ (qui validerait le renommage)
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              cancelled.current = true;
+              onMerge(dup);
+            }}
+          >
+            {t('tags.mergeInstead', { name: dup.name })}
+          </button>
         </span>
       )}
     </span>

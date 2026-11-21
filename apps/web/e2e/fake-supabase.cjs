@@ -727,6 +727,20 @@ async function install(page, state = seed()) {
       if (fn.startsWith('console_') && fn !== 'console_me') return consoleRpc(state, fn, a, route, json);
       switch (fn) {
         // L32 : lectures de démarrage regroupées (mêmes données que les lectures séparées)
+        case 'merge_tags': {
+          // L52 P3 : même logique que la RPC (retrait de p_from puis ajout de p_to sans doublon)
+          const from = (t.tags || []).find((x) => x.id === a.p_from);
+          const to = (t.tags || []).find((x) => x.id === a.p_to);
+          if (!from || !to || from.workspace_id !== to.workspace_id || from.id === to.id)
+            return json(route, 400, { code: 'P0001', message: 'TAG_WORKSPACE' });
+          const demos = (t.demo_tags || []).filter((x) => x.tag_id === from.id).map((x) => x.demo_id);
+          t.demo_tags = (t.demo_tags || []).filter((x) => x.tag_id !== from.id);
+          for (const d of demos)
+            if (!t.demo_tags.some((x) => x.demo_id === d && x.tag_id === to.id))
+              t.demo_tags.push({ demo_id: d, tag_id: to.id, workspace_id: to.workspace_id });
+          t.tags = t.tags.filter((x) => x.id !== from.id);
+          return json(route, 200, demos.length);
+        }
         case 'demo_step_counts': {
           // L48-G : étapes et étapes HTML par démo de l'espace (filtre Démo d'Analytics, Parcours)
           const ids = new Set(
