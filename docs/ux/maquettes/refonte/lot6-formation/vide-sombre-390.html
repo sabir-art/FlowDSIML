@@ -379,6 +379,12 @@ tr.sel td { background: var(--tint); }
 .ac .ml { border: 0; border-radius: 0; background: none; margin: 0 -24px -24px; } .ac .ml li { padding-left: 24px; padding-right: 24px; }
 .mob .ac .ml { margin: 0 -16px -16px; } .mob .ac .ml li { padding-left: 16px; padding-right: 16px; }
 .ac.tb0 .ml { margin-bottom: -8px; }
+/* Retour du chef : aide de carte en popover (NAV-03, pas de lien isolé) */
+.hlp { position: relative; }
+.ib.open { background: var(--nav-active); color: var(--fd-color-text); }
+.pop.hpop { top: 40px; right: -40px; width: 320px; padding: 14px 16px; display: grid; gap: 8px; font-size: 13px; z-index: 6; }
+.hpop p { margin: 0; color: var(--fd-color-text); } .hpop p.mu { color: var(--fd-color-text-muted); }
+.mob .pop.hpop { right: -44px; width: min(320px, calc(100vw - 32px)); }
 /* Lot 6 : Apprenants et Parcours */
 :root { --st-done: #557014; --st-active: #2A78D6; --st-stale: #A15C00; --st-quiz: #C42B1C; }
 [data-theme='dark'] { --st-done: #9BC24A; --st-active: #3987E5; --st-stale: #E3A23B; --st-quiz: #F97066; }
@@ -507,6 +513,19 @@ tr.sel td { background: var(--tint); }
 .cf.lgd { flex-wrap: nowrap; align-items: flex-start; } .cf.lgd svg { flex: none; margin-top: 3px; }
 .dacts { flex-wrap: nowrap; } .dacts .btn { padding: 0 12px; }
 .mob .dacts { flex-wrap: wrap; }
+/* Retour du chef (lot 6) : aides en popover, pas de paragraphe isolé */
+.thh { display: inline-flex; align-items: center; gap: 4px; }
+.ib.xs { width: 24px; height: 24px; border-radius: 6px; color: var(--fd-color-text-muted); }
+.pop.hpop.st { top: 32px; left: -120px; right: auto; width: 320px; text-transform: none; font-weight: 400; }
+.hpop.st p { display: grid; grid-template-columns: 132px 1fr; gap: 8px; align-items: start; color: var(--fd-color-text-muted); }
+.mob .pop.hpop.st { left: auto; right: 0; top: 46px; width: min(340px, calc(100vw - 32px)); }
+.mob .hpop.st p { grid-template-columns: 1fr; gap: 2px; }
+.fb .hlp .ib.bd { width: 40px; height: 40px; }
+.h3i { display: flex; align-items: center; gap: 4px; }
+.insight { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; padding: 10px 12px 10px 14px; border-radius: 12px; background: var(--fd-color-surface-sunken); font-size: 13px; }
+.insight > svg { color: var(--st-stale); flex: none; } .insight span { flex: 1; min-width: 180px; }
+.qs { display: flex; gap: 32px; margin: 16px 0 0; } .qs div { display: grid; gap: 2px; } .qs dt { font-size: 12px; color: var(--fd-color-text-muted); } .qs dd { margin: 0; font: 700 20px var(--fd-font-sans); }
+.fld > .help { font-size: 12px; color: var(--fd-color-text-muted); }
 </style></head><body class="mob">
 <div class="mbar"><button class="ib" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu" aria-hidden="true"><path d="M4 5h16"></path><path d="M4 12h16"></path><path d="M4 19h16"></path></svg></button><img src="../../../brand-tutoclic/production/symbole-tutoclick.svg" alt="TutoClick" width="32" height="32"><span class="grow"></span></div>
 <div class="shell two"><main><header class="ph"><h1>Apprenants</h1><span class="sp"></span><button class="ib" aria-label="Gérer les formations"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-route" aria-hidden="true"><circle cx="6" cy="19" r="3"></circle><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path><circle cx="18" cy="5" r="3"></circle></svg></button><button class="ib" aria-label="Exporter CSV"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download" aria-hidden="true"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg></button></header><div class="wrap an"><section class="ac"><div class="empty big"><span class="et"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-graduation-cap" aria-hidden="true"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"></path><path d="M22 10v6"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path></svg></span><h3>Aucune formation pour l’instant</h3><p>Une formation regroupe des démos à suivre dans l’ordre. Créez-en une pour suivre la progression des apprenants identifiés.</p><div class="ea"><button class="btn btn-p"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Créer une formation</button></div></div></section></div></main></div></body></html>

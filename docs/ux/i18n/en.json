@@ -679,7 +679,7 @@
       "tags": {
         "title": "Demo tags",
         "add": "Add a tag",
-        "help": "Tags filter the dashboard and the Demo Center. Press Enter to create a tag.",
+        "help": "Tags filter the dashboard and the demo catalog. Press Enter to create a tag.",
         "workspace": "Workspace tags",
         "remove": "Remove {{tag}}",
         "filter": "Filter by tag"
@@ -2204,7 +2204,7 @@
       "addPage": "Add a page (HTML capture)"
     },
     "center": {
-      "title": "Demo Center",
+      "title": "Demo catalog",
       "heading": "{{workspace}} demos",
       "contact": "Contact us",
       "search": "Search a demo…",
@@ -2218,7 +2218,7 @@
       "footer": "{{workspace}} · public demos",
       "mode": "Center type",
       "modeTraining": "Training center (learners, progress)",
-      "modeDemo": "Demo Center (public, no account)"
+      "modeDemo": "Demo catalog (public, no account)"
     }
   },
   "soon": {

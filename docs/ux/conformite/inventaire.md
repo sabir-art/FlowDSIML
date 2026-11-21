@@ -288,7 +288,7 @@
 |---|---|---|---|---|
 | A8-01 | Capture HTML : Éditeur HTML | `refonte/a8-html.html?view=html` | vue de la maquette | — |
 | A8-02 | Capture HTML : Sandbox | `refonte/a8-html.html?view=sandbox` | vue de la maquette | — |
-| A8-03 | Capture HTML : Demo Center | `refonte/a8-html.html?view=center` | vue de la maquette | — |
+| A8-03 | Capture HTML : Catalogue de démos | `refonte/a8-html.html?view=center` | vue de la maquette | — |
 
 ### Vague B (Bientôt disponible)
 

@@ -1,9 +1,9 @@
-# L20 : capture HTML, éditeur d'éléments, Sandbox, Demo Center (A8)
+# L20 : capture HTML, éditeur d'éléments, Sandbox, Catalogue de démos (A8)
 
 > **Maquettes** :
 > - `reference/editeur-html.html` : étape HTML dans l'éditeur (structure de référence) ;
 > - `refonte/a8-html.html?view=sandbox` : plan du Sandbox ;
-> - `refonte/a8-html.html?view=center` : Demo Center, à corriger selon le §5.
+> - `refonte/a8-html.html?view=center` : Catalogue de démos, à corriger selon le §5.
 >
 > **Base** : `specs/a8-html.md`, qui reste la référence détaillée (assainissement, sécurité, opérations). Cette spec fixe les états, les écarts et les corrections.
 >
@@ -15,7 +15,7 @@
 |---|---|---|---|
 | L20-01 | Éditeur : étape HTML, élément sélectionné, barre d'actions, modifications | `reference/editeur-html.html` | A8-01 |
 | L20-02 | Sandbox : plan des pages, page à relier, réglages | `refonte/a8-html.html?view=sandbox` | A8-02 |
-| L20-03 | Demo Center (variante du centre de formation L14) | `refonte/a8-html.html?view=center` + §5 | A8-03 |
+| L20-03 | Catalogue de démos (variante du centre de formation L14) | `refonte/a8-html.html?view=center` + §5 | A8-03 |
 
 ## 2. Capture HTML (extension)
 
@@ -78,9 +78,9 @@ Tout est conforme à A8 §3. Points à vérifier :
   - « Ajouter une page (capture HTML) ».
 - **Complétion** : « a vu les n pages clés ». Les pages clés sont choisies dans le panneau (cases à cocher par page) ; par défaut, toutes les pages reliées.
 
-## 5. Demo Center (L20-03)
+## 5. Catalogue de démos (L20-03)
 
-- **Même composant que le centre de formation (L14)**, avec le réglage « Type de centre » : Centre de formation / Demo Center. Les différences sont celles d'A8 §4 : pas de compte ni de progression, CTA « Nous contacter », cartes avec le type et les étiquettes, filtres par étiquette.
+- **Même composant que le centre de formation (L14)**, avec le réglage « Type de centre » : Centre de formation / Catalogue de démos. Les différences sont celles d'A8 §4 : pas de compte ni de progression, CTA « Nous contacter », cartes avec le type et les étiquettes, filtres par étiquette.
 - **Corrections à apporter à la maquette `a8-html.html?view=center`**, pour respecter les règles en vigueur :
   - **pas de durée** sur les cartes (« · 3 min ») ni dans le titre (« en 3 minutes ») tant qu'elle n'est pas mesurée. Les cartes affichent « Démo guidée · n étapes » ou « Sandbox · n pages » ;
   - **mention d'accessibilité** du pied de page : celle réglée par le workspace (L14-08), **« non conforme » par défaut**, jamais « conforme partiellement » sans audit (voir `a11y/declaration-accessibilite.md`) ;

@@ -679,7 +679,7 @@
       "tags": {
         "title": "Tags de la démo",
         "add": "Ajouter un tag",
-        "help": "Les tags filtrent le tableau de bord et le Demo Center. Entrée pour créer un tag.",
+        "help": "Les tags filtrent le tableau de bord et le Catalogue de démos. Entrée pour créer un tag.",
         "workspace": "Tags du workspace",
         "remove": "Retirer {{tag}}",
         "filter": "Filtrer par tag"
@@ -2204,7 +2204,7 @@
       "addPage": "Ajouter une page (capture HTML)"
     },
     "center": {
-      "title": "Demo Center",
+      "title": "Catalogue de démos",
       "heading": "Démos de {{workspace}}",
       "contact": "Nous contacter",
       "search": "Rechercher une démo…",
@@ -2218,7 +2218,7 @@
       "footer": "{{workspace}} · démos publiques",
       "mode": "Type de centre",
       "modeTraining": "Centre de formation (apprenants, progression)",
-      "modeDemo": "Demo Center (public, sans compte)"
+      "modeDemo": "Catalogue de démos (public, sans compte)"
     }
   },
   "soon": {

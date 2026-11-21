@@ -1,6 +1,6 @@
-# Spec A8 : éditeur HTML, Sandbox, Demo Center
+# Spec A8 : éditeur HTML, Sandbox, Catalogue de démos
 
-> Lot A8 de la parité (Products, Personalize) : démos fondées sur une **capture HTML** (copie assainie du DOM), éditées élément par élément. Le **Sandbox** relie plusieurs pages HTML pour une navigation libre. Le **Demo Center** est le hub public des démos et **réutilise F4** (centre de formation) dans une variante sans compte ni progression.
+> Lot A8 de la parité (Products, Personalize) : démos fondées sur une **capture HTML** (copie assainie du DOM), éditées élément par élément. Le **Sandbox** relie plusieurs pages HTML pour une navigation libre. Le **Catalogue de démos** est le hub public des démos et **réutilise F4** (centre de formation) dans une variante sans compte ni progression.
 >
 > Maquette : `docs/ux/maquettes/refonte/a8-html.html`, avec `?view=html|sandbox|center` et `&theme=dark` (seulement pour l'interface d'édition).
 > Microcopie FR/EN (62 clés) : `html.*`.
@@ -49,12 +49,12 @@
   - « Ajouter une page (capture HTML) ».
 - Les analytics (A4) comptent les pages vues et les chemins. La complétion devient « a vu les n pages clés » (réglable).
 
-## 4. Demo Center (variante de F4)
+## 4. Catalogue de démos (variante de F4)
 
 - **Même composant que le centre de formation (F4)**. Un réglage « Type de centre » choisit entre :
   - Centre de formation : apprenants, progression, parcours, attestation ;
-  - **Demo Center** : public, sans compte, sans progression.
-- **Différences du Demo Center** :
+  - **Catalogue de démos** : public, sans compte, sans progression.
+- **Différences du Catalogue de démos** :
   - en-tête : marque du workspace et CTA « Nous contacter » (pilule noire, lien ou formulaire de lead) ;
   - pas de carte « Mon parcours » ni de badges d'état ou de barres de progression ;
   - cartes de démo : type (« Démo guidée · n min », « Sandbox · n pages ») et **tags** (A2 §8) ;
@@ -81,5 +81,5 @@
   - masquage, lien vers une étape, annulation ;
   - nouvelle capture avec un élément disparu (`notFound`).
 - **Sandbox** : navigation libre, liaison automatique, message « non disponible », page orpheline signalée.
-- **Demo Center** : bascule depuis le centre de formation ; pas de progression ; CTA.
-- Contrôles communs : 1 440, 1 024 et 390 px (player et Demo Center), en clair et en sombre (éditeur) ; clavier et lecteur d'écran.
+- **Catalogue de démos** : bascule depuis le centre de formation ; pas de progression ; CTA.
+- Contrôles communs : 1 440, 1 024 et 390 px (player et Catalogue de démos), en clair et en sombre (éditeur) ; clavier et lecteur d'écran.

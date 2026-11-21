@@ -1,6 +1,6 @@
 # Spec F4 : centre de formation
 
-> Le centre de formation est le hub où l'apprenant trouve ses parcours et ses modules, suit sa progression et reprend là où il s'était arrêté. Il remplace le « Demo Center » (A8) dans une logique de formation. Le vocabulaire reste générique.
+> Le centre de formation est le hub où l'apprenant trouve ses parcours et ses modules, suit sa progression et reprend là où il s'était arrêté. Il remplace le « Catalogue de démos » (A8) dans une logique de formation. Le vocabulaire reste générique.
 >
 > Maquette : `docs/ux/maquettes/refonte/f4-centre.html`, avec `?view=hub|path|config` et `&theme=dark` (le thème ne change que la vue Configuration).
 > Microcopie FR/EN (72 clés) : `trainingCenter.*`.

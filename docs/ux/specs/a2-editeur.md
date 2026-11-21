@@ -86,7 +86,7 @@
 
 - Réglages de la démo → « Tags de la démo » : champ à puces (comme A1), création à la volée avec Entrée. Liste « Tags du workspace » cliquable pour ajouter.
 - Couleur de tag auto-attribuée parmi `chart-1` à `chart-5` (pastille de 8 px, fond à 14 %). Le texte reste `text`, donc le contraste est garanti.
-- Tableau de bord : filtre « Tags » (menu pilule à cases multiples) à côté des dossiers. Les tags figurent sur la carte de démo (2 au maximum, puis « +n »). Les mêmes filtres servent au Demo Center (A8).
+- Tableau de bord : filtre « Tags » (menu pilule à cases multiples) à côté des dossiers. Les tags figurent sur la carte de démo (2 au maximum, puis « +n »). Les mêmes filtres servent au Catalogue de démos (A8).
 
 ## 9. Rechercher et remplacer
 

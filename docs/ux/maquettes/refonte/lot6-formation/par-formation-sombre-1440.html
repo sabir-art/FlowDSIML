@@ -379,6 +379,12 @@ tr.sel td { background: var(--tint); }
 .ac .ml { border: 0; border-radius: 0; background: none; margin: 0 -24px -24px; } .ac .ml li { padding-left: 24px; padding-right: 24px; }
 .mob .ac .ml { margin: 0 -16px -16px; } .mob .ac .ml li { padding-left: 16px; padding-right: 16px; }
 .ac.tb0 .ml { margin-bottom: -8px; }
+/* Retour du chef : aide de carte en popover (NAV-03, pas de lien isolé) */
+.hlp { position: relative; }
+.ib.open { background: var(--nav-active); color: var(--fd-color-text); }
+.pop.hpop { top: 40px; right: -40px; width: 320px; padding: 14px 16px; display: grid; gap: 8px; font-size: 13px; z-index: 6; }
+.hpop p { margin: 0; color: var(--fd-color-text); } .hpop p.mu { color: var(--fd-color-text-muted); }
+.mob .pop.hpop { right: -44px; width: min(320px, calc(100vw - 32px)); }
 /* Lot 6 : Apprenants et Parcours */
 :root { --st-done: #557014; --st-active: #2A78D6; --st-stale: #A15C00; --st-quiz: #C42B1C; }
 [data-theme='dark'] { --st-done: #9BC24A; --st-active: #3987E5; --st-stale: #E3A23B; --st-quiz: #F97066; }
@@ -507,6 +513,19 @@ tr.sel td { background: var(--tint); }
 .cf.lgd { flex-wrap: nowrap; align-items: flex-start; } .cf.lgd svg { flex: none; margin-top: 3px; }
 .dacts { flex-wrap: nowrap; } .dacts .btn { padding: 0 12px; }
 .mob .dacts { flex-wrap: wrap; }
+/* Retour du chef (lot 6) : aides en popover, pas de paragraphe isolé */
+.thh { display: inline-flex; align-items: center; gap: 4px; }
+.ib.xs { width: 24px; height: 24px; border-radius: 6px; color: var(--fd-color-text-muted); }
+.pop.hpop.st { top: 32px; left: -120px; right: auto; width: 320px; text-transform: none; font-weight: 400; }
+.hpop.st p { display: grid; grid-template-columns: 132px 1fr; gap: 8px; align-items: start; color: var(--fd-color-text-muted); }
+.mob .pop.hpop.st { left: auto; right: 0; top: 46px; width: min(340px, calc(100vw - 32px)); }
+.mob .hpop.st p { grid-template-columns: 1fr; gap: 2px; }
+.fb .hlp .ib.bd { width: 40px; height: 40px; }
+.h3i { display: flex; align-items: center; gap: 4px; }
+.insight { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; padding: 10px 12px 10px 14px; border-radius: 12px; background: var(--fd-color-surface-sunken); font-size: 13px; }
+.insight > svg { color: var(--st-stale); flex: none; } .insight span { flex: 1; min-width: 180px; }
+.qs { display: flex; gap: 32px; margin: 16px 0 0; } .qs div { display: grid; gap: 2px; } .qs dt { font-size: 12px; color: var(--fd-color-text-muted); } .qs dd { margin: 0; font: 700 20px var(--fd-font-sans); }
+.fld > .help { font-size: 12px; color: var(--fd-color-text-muted); }
 </style></head><body class="">
 
 <div class="shell two"><nav class="side" aria-label="Navigation principale"><img class="logo l" src="../../../brand-tutoclic/production/logo-tutoclick.svg" alt="TutoClick, porté par la DSIML"><img class="logo d" src="../../../brand-tutoclic/production/logo-tutoclick-sombre.svg" alt="TutoClick, porté par la DSIML">
@@ -518,5 +537,5 @@ tr.sel td { background: var(--tint); }
     <div class="spl" role="img" aria-label="47 % terminé, 28 % en cours, 17 % à relancer, 8 % quiz non validé"><span class="done" style="flex:47"></span><span class="active" style="flex:28"></span><span class="stale" style="flex:17"></span><span class="quiz" style="flex:8"></span></div>
     <ul class="sleg"><li><span class="lst done"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>Terminé</span><b>17</b><span class="mu">47 %</span></li><li><span class="lst active"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-dot" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="1"></circle></svg>En cours</span><b>10</b><span class="mu">28 %</span></li><li><span class="lst stale"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>À relancer</span><b>6</b><span class="mu">17 %</span></li><li><span class="lst quiz"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Quiz non validé</span><b>3</b><span class="mu">8 %</span></li></ul></section>
   <section class="ac"><div class="ach"><h2>Avancement par module</h2></div><ol class="fun"><li><span class="fn">1</span><a class="fl" href="#">Accueillir un jeune</a><span class="bt"><span style="width:100%"></span></span><b>36</b><span class="fd"><span class="mu">—</span></span></li><li><span class="fn">2</span><a class="fl" href="#">Créer le dossier</a><span class="bt"><span style="width:81%"></span></span><b>29</b><span class="fd"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-down" aria-hidden="true"><path d="M16 17h6v-6"></path><path d="m22 17-8.5-8.5-5 5L2 7"></path></svg>−19 pts</span></li><li><span class="fn">3</span><a class="fl" href="#">Orienter vers un atelier</a><span class="bt"><span style="width:47%"></span></span><b>17</b><span class="fd"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-down" aria-hidden="true"><path d="M16 17h6v-6"></path><path d="m22 17-8.5-8.5-5 5L2 7"></path></svg>−34 pts</span></li></ol>
-    <p class="cf warn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>Le plus gros décrochage est entre les modules 2 et 3 (−34 points). <a href="#">Voir les 12 apprenants concernés</a></p>
-    <p class="cf">Réussite au quiz : 89 %, dont 71 % au premier essai.</p></section></div></div></div></main></div></body></html>
+    <div class="insight"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>Le plus gros décrochage est entre les modules 2 et 3 (−34 points).</span><button class="btn btn-s sm">Voir les 12 apprenants</button></div>
+    <dl class="qs"><div><dt>Réussite au quiz</dt><dd>89 %</dd></div><div><dt>Au premier essai</dt><dd>71 %</dd></div></dl></section></div></div></div></main></div></body></html>
