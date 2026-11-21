@@ -8,7 +8,7 @@
 > Référentiel :
 > - `composants.md` §16 et §17 ;
 > - deltas T1 à T9 (`specs/ui-deltas-l41-l49.md`) ;
-> - lots L48 et MOB-01 déjà spécifiés.
+> - lots L48 et MOB-01 déjà spécifiés (MOB-01 : `specs/mob-apprenant.md`, M1 à M9).
 >
 > **Impact** :
 > - **A** : gêne l'action principale ou casse la cohérence d'ensemble ;
