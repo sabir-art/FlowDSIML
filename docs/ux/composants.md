@@ -645,11 +645,16 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
   - **24 px** entre le dernier élément d'un groupe et le titre du groupe suivant, mais pas au-dessus du premier groupe ;
   - **6 px** entre un titre de groupe et son premier élément.
   - Le titre est donc 4 fois plus près de son groupe que du groupe précédent.
-- **États** :
-  - **survol** : fond `surface-sunken` (en sombre, `surface-raised`) et texte `text`. Ni changement de graisse, ni soulignement ;
-  - **actif** : fond `surface`, graisse 600, ombre `0 1px 2px rgb(8 10 14 / .08)` et `aria-current="page"`. L'état actif se distingue du survol par la graisse et l'ombre, et pas par la seule couleur ;
+- **États** (corrigé le 21 novembre : avec `surface-sunken` ou `surface-raised`, le survol ressemblait à l'actif en clair, et en sombre il était même plus clair que lui) :
+  - **repos** : fond transparent, texte `text`, graisse 500 ;
+  - **survol** : fond `color-mix(in srgb, var(--fd-color-text) 6%, transparent)`, c'est-à-dire un voile neutre qui fonce en clair et éclaircit en sombre. Le texte et la graisse ne changent pas, il n'y a pas de soulignement ;
+  - **actif** : graisse **600**, `aria-current="page"`, et le seul élément avec un fond plein :
+    - en clair, fond `surface` et ombre `0 1px 2px rgb(8 10 14 / .08)` ;
+    - en sombre, fond `surface-raised` et bordure de 1 px `border`, sans ombre (§17.4 : bordure ou ombre, pas les deux ; une ombre ne se voit pas sur fond sombre).
+  - L'actif se distingue du survol par **trois signaux** : la graisse, le fond plein et l'ombre ou la bordure. Jamais par la couleur seule ;
   - **focus clavier** : anneau `focus` de 2 px (`:focus-visible`), en plus de l'état ;
   - **« Bientôt »** : la mention, en 13 px `text-muted`, est alignée à droite. L'élément reste cliquable vers la page « Bientôt » (L48-A).
+- **Contrôle du survol** : on capture l'élément actif et un élément survolé côte à côte, en clair et en sombre. Les deux doivent se distinguer sans hésiter ; l'actif est le seul en graisse 600.
 - **Mesure** :
   - écart entre éléments du même groupe : 2 px ;
   - écart entre un groupe et le titre suivant : 24 px ;
