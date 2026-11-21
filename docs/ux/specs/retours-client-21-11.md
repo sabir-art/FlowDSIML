@@ -274,7 +274,7 @@
 - **Barre fixe** (`position: sticky; top: 0`) de **56 px**, sur `content-bg`, avec un filet de 1 px `border` en bas et un padding horizontal de 32 px.
 - **Contenu** : le parent (« Espace », « Marque », « Contenu », « Mon compte ») en 14 px 500 `--fd-color-text`, cliquable vers la première page du groupe. Puis un chevron `ChevronRight` de 16 px en `text-muted`, 6 px de chaque côté. Puis la page courante en 14 px 500 `text-muted`.
 - **Balisage** : `<nav aria-label="Fil d'Ariane">` pour le parent, puis la page courante en `<h1 aria-current="page">`. La page garde ainsi un H1 unique, à la taille du fil d'Ariane. Le grand H1 de 32 px et la phrase de description disparaissent.
-- La première section porte le titre et le sous-titre à gauche, et les actions de la page (Annuler, Enregistrer) à droite (§11.2).
+- **Révisé par NAV-03 (21/11)** : les actions de la page (Annuler, Enregistrer, Inviter, Nouvelle…) sont dans la barre fixe, à droite (`comp-01-composants.md` §12.1). Les actions propres à une section restent dans l'en-tête de la section. Maquettes de référence : `maquettes/refonte/lot1-parametres/`.
 
 #### 11.7.4 Recette NAV-02
 
