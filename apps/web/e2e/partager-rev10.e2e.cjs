@@ -5,6 +5,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { seedExport } = require('./export-data.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -30,9 +31,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   };
   const state = seed();
   const t = state.tables;
-  const d = t.demos.find((x) => x.id === DEMO);
-  d.status = 'published';
-  d.current_version_id = d.current_version_id || 'v-1';
+  // Version publiée réelle (manifeste) : sans elle, l'export bascule sur « La démo publiée n'a pas pu être
+  // chargée » et le bouton radio disparaît (échec intermittent du 21/11)
+  seedExport(state);
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/share`);
   await page.locator('#sh-slug').waitFor();
@@ -51,9 +52,24 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await page.locator('#sh-panel-link').screenshot({ path: `${SHOTS}/rev-10-partager${sfx}.png` });
   }
   await gif.click();
-  const gifRadio = page.getByRole('radio', { name: /GIF animé/ });
-  await gifRadio.waitFor();
-  ok(await gifRadio.isChecked(), '« GIF / vidéo » ouvre l’export sur le GIF');
+  // État final de l'export : démo chargée (aperçu prêt), GIF coché ; pas d'écran d'erreur
+  const loaded = await page
+    .waitForFunction(
+      () => {
+        const d = document.querySelector('dialog.x15-dialog[open]');
+        if (!d || d.classList.contains('x15-small')) return d ? 'erreur' : false;
+        const r = d.querySelector('input[type="radio"][value="gif"]');
+        return r && !r.disabled && d.querySelector('.exp-preview, canvas, img')
+          ? r.checked
+            ? 'gif'
+            : 'autre'
+          : false;
+      },
+      null,
+      { timeout: 30000 },
+    )
+    .then((h) => h.jsonValue());
+  ok(loaded === 'gif', `« GIF / vidéo » ouvre l’export sur le GIF (${loaded})`);
   await page.keyboard.press('Escape');
 
   // Sans variable dans les textes : pas d'exemple inventé
