@@ -161,6 +161,37 @@ jobs:
       - name: 'Test A/B dans l’éditeur (création, résultats, arrêt)'
         if: always()
         run: cd apps/web && node e2e/ab-editor.e2e.cjs
+      # Liste courte par risque (partage, export, formation, lecteur, aide) ; le reste : e2e-complet.yml
+      - name: 'Partage : règles de l’espace (mot de passe, expiration, exports)'
+        if: always()
+        run: cd apps/web && node e2e/regles-partage.e2e.cjs
+      - name: 'Partage : accès aux dossiers'
+        if: always()
+        run: cd apps/web && node e2e/acces-dossiers.e2e.cjs
+      - name: 'Partage : lien, intégration et options (REV-10)'
+        if: always()
+        run: cd apps/web && node e2e/partager-rev10.e2e.cjs
+      - name: 'Diffuser : SCORM, LMS, intranet, où elle est diffusée'
+        if: always()
+        run: cd apps/web && node e2e/distribute.e2e.cjs
+      - name: 'Exports : PDF, GIF et version accessible'
+        if: always()
+        run: cd apps/web && node e2e/exports.e2e.cjs
+      - name: 'Centre de formation : accueil, filtres, cartes, page d’une formation'
+        if: always()
+        run: cd apps/web && node e2e/center.e2e.cjs
+      - name: 'Parcours de formation dans le lecteur'
+        if: always()
+        run: cd apps/web && node e2e/parcours.e2e.cjs
+      - name: 'Quiz dans le lecteur (questions, correction, résultat)'
+        if: always()
+        run: cd apps/web && node e2e/quiz-player.e2e.cjs
+      - name: 'Lecteur : navigation, clavier, fin de démo'
+        if: always()
+        run: cd apps/web && node e2e/player-ux.e2e.cjs
+      - name: 'Aide intégrée (tiroir, recherche, articles de la page)'
+        if: always()
+        run: cd apps/web && node e2e/aide.e2e.cjs
       - name: Google Safe Browsing L49 (lien signalé bloqué, vérification indisponible, nouvelle vérification à la publication, lecteur)
         if: always()
         run: cd apps/web && node e2e/l49-safebrowsing.e2e.cjs

@@ -386,7 +386,15 @@ function seedDistribute(s, { published = true } = {}) {
   ok(/\/demos\/.*\/edit\?distribute=1/.test(page.url()), 'Adresse directe : modale au-dessus de l’éditeur');
   ok((await tab('SCORM').getAttribute('aria-selected')) === 'true', 'Onglet mémorisé (SCORM)');
   // Le paquet 2004 généré plus haut reste disponible à la réouverture : on revient aux réglages
-  ok((await dlg.locator('.dif-file').count()) === 1, 'Réouverture : le paquet prêt reste disponible');
+  // Le paquet est restauré juste après l'ouverture : attendre plutôt que compter tout de suite
+  ok(
+    await dlg
+      .locator('.dif-file')
+      .waitFor({ timeout: 5000 })
+      .then(async () => (await dlg.locator('.dif-file').count()) === 1)
+      .catch(() => false),
+    'Réouverture : le paquet prêt reste disponible',
+  );
   await dlg.getByRole('button', { name: 'Modifier les réglages' }).click();
   await page.route('**/object/sign/published/**/assets/st-2.webp*', (r) =>
     r.fulfill({ status: 404, body: 'x' }),
