@@ -405,7 +405,7 @@ Enterprise : SSO SAML/OIDC, SCIM, journaux d'audit exposés, résidence des donn
 
 ## Révision : stack GitHub + Supabase
 
-> Décision client (17/11/2026) : on n'utilise **que GitHub et Supabase**. Projet Supabase existant : ref `ffzlhlxfratcbitkuvli`, URL `https://ffzlhlxfratcbitkuvli.supabase.co`. La ref et l'URL sont des identifiants publics. Les clés ne figurent **jamais** dans ce document ni dans le dépôt.
+> Décision client (17/11/2026) : on n'utilise **que GitHub et Supabase**. Projet Supabase existant : ref `<project-ref>`, URL `https://<project-ref>.supabase.co`. La ref et l'URL sont des identifiants publics. Les clés ne figurent **jamais** dans ce document ni dans le dépôt.
 >
 > Les limites et quotas Supabase et GitHub cités ci-dessous viennent de leur documentation publique telle que je la connais. Il faut **les revérifier** sur la page des prix et la documentation au moment de dimensionner, car ils changent souvent.
 
@@ -562,7 +562,7 @@ Un second projet Supabase « staging » serait préférable pour tester les migr
 |---|---|---|
 | `SUPABASE_ACCESS_TOKEN` | secret | Jeton personnel Supabase pour la CLI (`link`, `db push`, `functions deploy`) |
 | `SUPABASE_DB_PASSWORD` | secret | Mot de passe Postgres, requis par `db push` |
-| `SUPABASE_PROJECT_REF` | variable (non secrète) | `ffzlhlxfratcbitkuvli` |
+| `SUPABASE_PROJECT_REF` | variable (non secrète) | `<project-ref>` |
 | `VITE_SUPABASE_URL` | variable | URL du projet, injectée dans le build |
 | `VITE_SUPABASE_ANON_KEY` | variable (publique par conception) | Clé anon/publishable injectée dans le front ; la sécurité repose sur RLS |
 | `SMTP_*` (host, port, user, pass, from) | secrets | Configurés dans Supabase Auth (tableau de bord) ; reportés en secrets si `send-email` les utilise |
@@ -603,7 +603,7 @@ Règles :
   3. Projet **staging** séparé ou tests uniquement en local.
   4. Fournisseur **SMTP**.
   5. Dépôt public ou privé : avec un dépôt privé, Pages demande un plan GitHub payant.
-- **Accès nécessaires** : rôle *Developer* ou *Admin* sur le projet Supabase `ffzlhlxfratcbitkuvli` (pour générer `SUPABASE_ACCESS_TOKEN` et connaître le mot de passe de la base) ; droits admin sur le dépôt GitHub (secrets, environnements, activation de Pages en mode « GitHub Actions »).
+- **Accès nécessaires** : rôle *Developer* ou *Admin* sur le projet Supabase `<project-ref>` (pour générer `SUPABASE_ACCESS_TOKEN` et connaître le mot de passe de la base) ; droits admin sur le dépôt GitHub (secrets, environnements, activation de Pages en mode « GitHub Actions »).
 
 ### R.9 ADR révisés
 
