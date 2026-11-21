@@ -1,5 +1,6 @@
 import { avatarTone } from '../../../lib/avatarTone';
 import { bodyParts, serialize, toDraft, type Mention } from '../../../lib/mentions';
+import { AvatarPhoto } from '../../../components/AvatarPhoto';
 import { MentionInput } from './MentionInput';
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -92,6 +93,7 @@ function Avatar({ id, label }: { id: string; label: string }) {
   return (
     <span className={`cm-avatar cm-avatar--${avatarTone(id)}`} aria-hidden="true">
       {initials(label)}
+      <AvatarPhoto userId={id} />
     </span>
   );
 }

@@ -3,6 +3,7 @@
  * Panneau non modal (role=dialog) : Échap ou clic à l'extérieur le ferme, le focus revient à la cloche.
  */
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { AvatarPhoto } from '../AvatarPhoto';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { HelpButton } from '../../help/HelpButton';
@@ -436,6 +437,7 @@ function Row({
     <li className={x.read_at ? undefined : 'unread'}>
       <span className={`nb-avatar nb-avatar--${avatarTone(x.actor_id ?? x.id)}`} aria-hidden="true">
         {initials(actor)}
+        <AvatarPhoto userId={x.actor_id} />
       </span>
       <span className="nb-text">
         {before}
@@ -582,6 +584,7 @@ function InviteRow({
     <li className={x.read_at ? undefined : 'unread'}>
       <span className={`nb-avatar nb-avatar--${avatarTone(x.actor_id ?? x.id)}`} aria-hidden="true">
         {initials(actor)}
+        <AvatarPhoto userId={x.actor_id} />
       </span>
       <span className="nb-text">
         {before}

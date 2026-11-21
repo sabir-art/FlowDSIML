@@ -223,7 +223,24 @@
     "uiLanguage": "Langue de l’interface",
     "appearance": "Apparence",
     "notifLead": "E-mail quand un lead est collecté",
-    "notifWeekly": "Résumé hebdomadaire des vues"
+    "notifWeekly": "Résumé hebdomadaire des vues",
+    "photo": {
+      "label": "Photo",
+      "choose": "Choisir une photo",
+      "remove": "Retirer",
+      "help": "JPG, PNG ou WebP, 2 Mo au plus.",
+      "badType": "Ce fichier n’est pas une image JPG, PNG ou WebP.",
+      "tooBig": "Cette image dépasse 2 Mo.",
+      "failed": "La photo n’a pas pu être enregistrée. Réessayez.",
+      "saved": "Photo enregistrée",
+      "removed": "Photo retirée",
+      "cropTitle": "Recadrer la photo",
+      "cropArea": "Zone de recadrage",
+      "cropHelp": "Faites glisser l’image, ou utilisez les flèches du clavier, pour la placer dans le carré.",
+      "preview": "Aperçu",
+      "zoom": "Zoom",
+      "save": "Enregistrer la photo"
+    }
   },
   "members": {
     "title": "Membres",

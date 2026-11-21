@@ -2024,3 +2024,95 @@ button.fd-nav__item:hover {
     transition: none;
   }
 }
+
+/* Retours client 21/11 §4.4 : photo de profil par-dessus l'initiale (qui reste dessous en secours) */
+:is(.avatar, .cm-avatar, .nb-avatar, .obx-avatar):has(> .av-photo) {
+  position: relative;
+}
+.av-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Retours client 21/11 §4.1 et §4.2 : ligne « Photo » du profil et recadrage */
+.pf-photo__row {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-4);
+}
+.pf-photo .avatar.pf-photo__avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 22px;
+}
+.pf-photo__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-4);
+}
+.pf-photo__remove {
+  color: var(--fd-color-danger);
+}
+.pf-photo__error {
+  margin: var(--fd-space-1) 0 0;
+  color: var(--fd-color-danger);
+  font-size: 13px;
+}
+.pf-photo .help {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.pf-crop__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fd-space-5);
+  flex-wrap: wrap;
+}
+.pf-crop__box,
+.pf-crop__preview {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  background: var(--fd-color-surface-sunken);
+}
+.pf-crop__box {
+  max-width: 100%;
+  border-radius: var(--fd-radius-md);
+  cursor: grab;
+  touch-action: none;
+}
+.pf-crop__box:active {
+  cursor: grabbing;
+}
+.pf-crop__box:focus-visible {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: 2px;
+}
+.pf-crop__preview {
+  display: block;
+  border-radius: 50%;
+}
+.pf-crop .pf-crop__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Taille posée en ligne (zoom) : pas de réduction par les règles générales des images */
+  max-width: none;
+  max-height: none;
+  transform-origin: 0 0;
+  user-select: none;
+  pointer-events: none;
+}
+.pf-crop__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fd-space-2);
+}
+.pf-crop__zoom input[type='range'] {
+  width: 100%;
+}

@@ -140,6 +140,9 @@ jobs:
       - name: Barre latérale repliable en rail (retour client 6)
         if: always()
         run: cd apps/web && node e2e/barre-laterale-rail.e2e.cjs
+      - name: Photo de profil (retour client 4)
+        if: always()
+        run: cd apps/web && node e2e/photo-profil.e2e.cjs
       - name: États vides L48-B (page Démos neuve, recherche sans résultat)
         if: always()
         run: cd apps/web && node e2e/l48b-vides.e2e.cjs

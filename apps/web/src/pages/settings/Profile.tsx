@@ -8,6 +8,7 @@ import { setLocale } from '../../i18n';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { useToast } from '../../components/Toast';
 import { MyDataCard } from './MyDataCard';
+import { ProfilePhoto } from './ProfilePhoto';
 
 /**
  * Paramètres › Mon profil (PRM-09), mise en page de la maquette : une carte à sections en deux colonnes
@@ -66,6 +67,8 @@ export function Profile() {
             <h2 className="t-h3">{t('profile.section')}</h2>
           </div>
           <div>
+            {/* Retours client 21/11 §4.1 : ligne « Photo » en tête de la carte, avant « Nom » */}
+            <ProfilePhoto />
             <div className="field">
               <label htmlFor="fn">{t('profile.name')}</label>
               <input

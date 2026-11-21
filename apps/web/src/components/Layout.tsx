@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useMediaQuery } from '../lib/useMediaQuery';
+import { AvatarPhoto } from './AvatarPhoto';
 import { BrandMark } from './BrandMark';
 import symbol from '../assets/symbole-tutoclick.svg';
 import { APP_NAME } from '@flowdsiml/core';
@@ -310,6 +311,7 @@ export function Layout() {
         <div className="user-block">
           <span className="avatar avatar--brand" aria-hidden="true">
             {initials(profile?.full_name || user?.email || '?')}
+            <AvatarPhoto userId={user?.id} />
             {unseen > 0 && <span className="news-dot" />}
           </span>
           <span className="user-text">
