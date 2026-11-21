@@ -66,6 +66,15 @@ const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
     const kpis = await page.$$eval('.l13 .kpis .fd-card', (els) =>
       els.map((e) => getComputedStyle(e).backgroundColor),
     );
+    // X1 : barres de progression en `text`, validées ou non
+    const text = await cssColor(page, '--fd-color-text');
+    const fills = await page.$$eval('.lp .fd-bar__fill', (els) =>
+      els.map((e) => getComputedStyle(e).backgroundColor),
+    );
+    ok(
+      fills.length > 0 && fills.every((c) => c === text),
+      `${theme} : X1, progression des apprenants en text (${[...new Set(fills)].join(', ')})`,
+    );
     ok(
       kpis.length >= 4 && kpis.every((c) => c === surface),
       `${theme} : X3, cartes d’Apprenants en surface, sans aplat (${[...new Set(kpis)].join(', ')})`,

@@ -607,8 +607,7 @@ input[type='radio'] {
   color: var(--fd-color-trend-down);
 }
 
-/* Barres de graphique arrondies sur fond de barre pâle. La valeur est toujours écrite en
-   texte (l'orange seul n'atteint pas 3:1 sur blanc : l'information ne repose pas sur la couleur). */
+/* Barres de progression arrondies sur fond de barre pâle. La valeur est toujours écrite en texte. */
 .fd-bar {
   position: relative;
   border-radius: var(--fd-radius-full);
@@ -616,10 +615,11 @@ input[type='radio'] {
   overflow: hidden;
 }
 .fd-bar__fill {
+  /* Audit L50 X1 : une seule couleur de progression dans l'app, celle du texte */
   position: absolute;
   inset: auto 0 0 0;
   border-radius: var(--fd-radius-full);
-  background: var(--fd-color-chart-1);
+  background: var(--fd-color-text);
 }
 .fd-bar--h .fd-bar__fill {
   inset: 0 auto 0 0;

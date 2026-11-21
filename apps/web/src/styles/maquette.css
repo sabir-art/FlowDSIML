@@ -832,9 +832,10 @@
   overflow: hidden;
 }
 .mk .progress > span {
+  /* Audit L50 X1 : progression en `text` */
   display: block;
   height: 100%;
-  background: var(--fd-color-primary);
+  background: var(--fd-color-text);
   border-radius: inherit;
 }
 .mk .progress.warn > span {

@@ -463,14 +463,13 @@ a.p-btn:hover {
   color: var(--p-text);
   text-decoration: underline;
 }
+/* Audit L50 X1 : progression à la couleur du thème (base .p-progress), hauteur 8 px */
 .p-progress {
   height: 8px;
   border-radius: 999px;
-  background: #fde9cc;
 }
 .p-progress > div {
   border-radius: 999px;
-  background: #f39200;
 }
 
 /* ---------- F1 : parcours guidés ---------- */

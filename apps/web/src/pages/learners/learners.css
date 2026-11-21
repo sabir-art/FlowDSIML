@@ -73,9 +73,6 @@
   font-size: var(--fd-text-caption-size);
   color: var(--fd-color-text-muted);
 }
-.lp--done .fd-bar__fill {
-  background: var(--fd-color-hero);
-}
 .lp {
   display: grid;
   grid-template-columns: minmax(80px, 1fr) 44px;

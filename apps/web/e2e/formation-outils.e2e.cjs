@@ -243,9 +243,11 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         (await r0.locator('.l13-quizleft').textContent()) === '1 tentative restante',
       'n° 12 : « Quiz non validé », 1 tentative restante',
     );
+    // Audit L50 X1 : même couleur de progression, validé ou non (le statut le dit en texte)
     ok(
-      (await r0.locator('.lp--done').count()) === 0,
-      'n° 12 : barre de progression non verte tant que ce n’est pas validé',
+      (await r0.locator('.lp .fd-bar__fill').evaluate((el) => getComputedStyle(el).backgroundColor)) ===
+        (await page.evaluate(() => getComputedStyle(document.body).color)),
+      'n° 12 : barre de progression en couleur de texte',
     );
     const r1 = row(L[1].name);
     ok(

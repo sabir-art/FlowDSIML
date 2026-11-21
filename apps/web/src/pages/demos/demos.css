@@ -297,9 +297,10 @@
   overflow: hidden;
 }
 .dt-bar > span {
+  /* Audit L50 X1 : progression en `text` */
   display: block;
   height: 100%;
-  background: var(--fd-color-primary);
+  background: var(--fd-color-text);
   border-radius: inherit;
 }
 /* DSH-06 : modale « Nouvelle démo » */

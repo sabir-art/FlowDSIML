@@ -94,11 +94,11 @@ export function StatusBadge({ status, children }: { status: LearnerStatus; child
   );
 }
 
-/** L38-12 : barre verte seulement quand la formation est validée. */
-function ProgressBar({ value, done = false }: { value: number; done?: boolean }) {
+/** Barre de progression d'un apprenant (audit L50 X1 : même couleur, validé ou non ; le statut le dit). */
+function ProgressBar({ value }: { value: number }) {
   const { t } = useTranslation();
   return (
-    <span className={`lp${done ? ' lp--done' : ''}`}>
+    <span className="lp">
       <span
         className="fd-bar fd-bar--h"
         role="img"
@@ -936,10 +936,7 @@ function ListView(props: {
                         </span>
                       </td>
                       <td>
-                        <ProgressBar
-                          value={scope ? scope.pct : r.pct}
-                          done={scope ? scope.done : r.status === 'done'}
-                        />
+                        <ProgressBar value={scope ? scope.pct : r.pct} />
                       </td>
                       <td className="num">{r.best === null ? '—' : `${r.best}${NNBSP}%`}</td>
                       <td>
