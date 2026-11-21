@@ -118,6 +118,8 @@ const seed = () => {
   // ===== Glisser-déposer avec « Annuler » =====
   const demo = t.demos[0];
   const before = demo.folder_id;
+  // La liste « Toutes les démos » doit être rendue avant le glisser (pas d'attente fixe : instable sous charge)
+  await page.locator('.demo-card[draggable="true"]', { hasText: demo.title }).first().waitFor();
   // Événements de glisser du navigateur (dragTo de Playwright ne démarre pas le glisser natif ici)
   await page.evaluate(
     ([title, target]) => {
