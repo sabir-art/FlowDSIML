@@ -269,7 +269,9 @@
 .mk .an-demos__name:hover {
   text-decoration: underline;
 }
-.mk .an-demos__folder {
+.mk .an-demos__folder,
+/* A8 : ligne du guide d'un Sandbox, sous la démo */
+.mk .an-demos__guide {
   display: block;
   font-size: 13px;
   color: var(--fd-color-text-muted);

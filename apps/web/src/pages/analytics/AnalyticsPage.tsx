@@ -136,7 +136,9 @@ export function AnalyticsPage() {
   );
   const segKey = JSON.stringify(pSegment);
   const [segInitial, setSegInitial] = useState<SegmentDef | null>(null);
-  const [demos, setDemos] = useState<Array<{ id: string; title: string; folder: string | null }>>([]);
+  const [demos, setDemos] = useState<
+    Array<{ id: string; title: string; folder: string | null; sandbox: boolean }>
+  >([]);
   /** L48-G : type de contenu de chaque démo, en badge dans le filtre Démo. */
   const [types, setTypes] = useState<Record<string, ContentType>>({});
   const [data, setData] = useState<WsAnalytics | null>(null);
@@ -166,6 +168,7 @@ export function AnalyticsPage() {
           id: x.id,
           title: x.title,
           folder: x.folder_id ? (names.get(x.folder_id) ?? null) : null,
+          sandbox: x.kind === 'sandbox',
         })),
       );
     });

@@ -19,6 +19,10 @@ export interface DemoRowData {
   visitors: number;
   completions: number;
   leads: number;
+  /** A8 : sessions qui ont vu le guide du Sandbox, l'ont terminé, l'ont quitté sans le terminer. */
+  guideStarted?: number;
+  guideDone?: number;
+  guideSkipped?: number;
 }
 const PAGE = 25;
 
@@ -27,7 +31,7 @@ export function DemosTab({
   rows,
   canLeads,
 }: {
-  demos: Array<{ id: string; title: string; folder: string | null }>;
+  demos: Array<{ id: string; title: string; folder: string | null; sandbox?: boolean }>;
   rows: DemoRowData[];
   canLeads: boolean;
 }) {
@@ -62,6 +66,13 @@ export function DemosTab({
     setLimit(PAGE);
   };
   const label = (c: Col) => t(`kpi.col.${c}`);
+  // A8 : ligne du guide d'un Sandbox (pourcentages des sessions qui l'ont vu)
+  const pct = (n = 0, of = 0) => (of ? Math.round((n / of) * 100) : 0);
+  const guideLine = (r: DemoRowData) =>
+    t('analytics.guideLine', {
+      done: pct(r.guideDone, r.guideStarted),
+      skip: pct(r.guideSkipped, r.guideStarted),
+    });
   return (
     <div className="fd-card an-demos">
       <div className="an-demos__sort">
@@ -108,6 +119,9 @@ export function DemosTab({
                   {d.title}
                 </Link>
                 {d.folder && <span className="an-demos__folder">{d.folder}</span>}
+                {d.sandbox && (byId.get(d.id)?.guideStarted ?? 0) > 0 && (
+                  <span className="an-demos__guide">{guideLine(byId.get(d.id)!)}</span>
+                )}
               </td>
               {cols.map((c) => (
                 <td key={c} className={`r num${c === sort.col ? '' : ' an-demos__opt'}`}>

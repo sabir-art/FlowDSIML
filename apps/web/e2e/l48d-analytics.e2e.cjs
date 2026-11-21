@@ -58,6 +58,8 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
         title,
       }),
     );
+    // A8 : « Planifier » est un Sandbox avec guide (ligne « Guide : x % terminé · y % ignoré »)
+    s.tables.demos.find((d) => d.title === 'Planifier').kind = 'sandbox';
     // L48-G : « Exporter » est une démo HTML (type dans le menu Démo)
     const exp = '0b5c1f0e-0000-4000-8000-000000000103';
     for (const position of [0, 1])
@@ -178,6 +180,14 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await head('Complétion').getByRole('button').click();
   ok((await head('Complétion').getAttribute('aria-sort')) === 'ascending', 'second clic : croissant');
   ok((await p.locator('.an-demos__t tbody tr').count()) === 12, '12 démos');
+  ok(
+    (await p
+      .locator('.an-demos__t tbody tr', { hasText: 'Planifier' })
+      .locator('.an-demos__guide')
+      .innerText()) === 'Guide : 60 % terminé · 25 % ignoré',
+    'recette 10 : ligne du guide sous le Sandbox',
+  );
+  ok((await p.locator('.an-demos__guide').count()) === 1, 'ligne du guide : Sandbox seulement');
   await axe(p, 'onglet Démos');
   await p.locator('.an-demos__t tbody tr').first().locator('td.num').first().click();
   await p.waitForURL(/\/demos\/[^/]+\/analytics/);

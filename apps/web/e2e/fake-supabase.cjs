@@ -1001,7 +1001,12 @@ async function install(page, state = seed()) {
           const total = weights.reduce((x, y) => x + y, 0) || 1;
           return json(route, 200, {
             daily,
-            byDemo: pubs.map((d, i) => ({ demo_id: d.id, ...row(Math.round((views * weights[i]) / total)) })),
+            byDemo: pubs.map((d, i) => ({
+              demo_id: d.id,
+              ...row(Math.round((views * weights[i]) / total)),
+              // A8 : guide du Sandbox (sessions qui l'ont vu, terminé, quitté sans le terminer)
+              ...(d.kind === 'sandbox' ? { guideStarted: 20, guideDone: 12, guideSkipped: 5 } : {}),
+            })),
             bySource: [
               { source: 'embed', ...row(Math.round(views * 0.6)) },
               { source: 'link', ...row(Math.round(views * 0.21)) },

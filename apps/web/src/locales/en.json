@@ -2526,7 +2526,8 @@
     "ctaFooter": "End button: {{n}} clicks",
     "sortBy": "Sort by",
     "openDemo": "Open analytics",
-    "showMore": "Show more"
+    "showMore": "Show more",
+    "guideLine": "Guide: {{done}}% completed · {{skip}}% skipped"
   },
   "leads": {
     "title": "Leads",
