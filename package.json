@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "turbo run lint",
+    "lint": "pnpm check:workflows && turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write .",
@@ -17,13 +17,15 @@
     "db:test:local": "bash supabase/tests/local/run.sh",
     "check:rpc": "node scripts/check-rpc-signatures.mjs",
     "db:types": "supabase gen types typescript --project-id \"${SUPABASE_PROJECT_REF:?variable SUPABASE_PROJECT_REF manquante}\" --schema public > packages/supabase-types/src/database.ts",
-    "db:types:local": "supabase gen types typescript --local --schema public > packages/supabase-types/src/database.ts"
+    "db:types:local": "supabase gen types typescript --local --schema public > packages/supabase-types/src/database.ts",
+    "check:workflows": "node scripts/check-workflows.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.5.0",
+    "js-yaml": "4.3.2",
     "prettier": "^3.10.1",
     "turbo": "^2.11.11",
     "typescript": "~5.9.3",
