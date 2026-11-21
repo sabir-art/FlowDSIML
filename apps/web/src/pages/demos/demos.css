@@ -1176,6 +1176,13 @@ button.nd-src:focus-visible {
 }
 
 /* L48-B : « Voir un exemple » désactivé (pas encore de démo d'exemple), « Bientôt » en texte */
+/* L48-B : « Voir un exemple · Bientôt » centré sur la hauteur du bouton principal */
+.demos-example {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+}
 .demos-example .link-button[aria-disabled='true'] {
   color: var(--fd-color-text-muted);
   text-decoration: none;
