@@ -177,6 +177,8 @@ const geo = (p) =>
 
   // Clavier : le focus déplie ; Échap replie et rend le focus à l'élément actif
   await p.locator('main h1').click();
+  // Focus clavier (une touche d'abord, comme en arrivant par Tab) : seul le focus clavier déplie
+  await p.keyboard.press('Shift');
   await p.locator('.fd-nav__item').first().focus();
   await p.waitForTimeout(100);
   ok((await geo(p)).exp === 'true', 'focus dans le rail : déplié');
@@ -193,6 +195,20 @@ const geo = (p) =>
   ok((await geo(p)).exp === 'true', 'nouveau déplacement du focus : déplié de nouveau');
   ok(p.errors.length === 0, `aucune erreur JS (${p.errors.join(' | ')})`);
   await p.context().close();
+
+  // ===== Clic souris sur « Mon compte » dans le rail, sur une page neuve : le menu s'ouvre =====
+  // (le focus donné par le clic dépliait la barre avant le relâchement ; le bouton changeait de place et
+  // le clic tombait sur la barre)
+  {
+    const q = await open(b, 1280);
+    await q.getByRole('button', { name: 'Mon compte' }).click();
+    await q.waitForTimeout(400);
+    ok(
+      (await q.getByRole('menuitemradio', { name: 'Sombre' }).count()) === 1,
+      'rail : clic sur « Mon compte », menu ouvert',
+    );
+    await q.context().close();
+  }
 
   // ===== Préférence « rail » à 1 440 px, puis < 1 024 px inchangé =====
   {

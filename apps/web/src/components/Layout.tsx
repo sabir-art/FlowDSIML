@@ -113,8 +113,11 @@ export function Layout() {
             if (!sidebar.current?.contains(el) || !el?.matches(':focus-visible')) setExpanded(false);
           }, HOVER_OUT);
         },
-        onFocus: () => {
-          if (justEscaped()) return;
+        onFocus: (e: FocusEvent<HTMLElement>) => {
+          // Focus clavier seulement : un clic donne aussi le focus, et déplier à cet instant déplacerait
+          // l'élément sous le pointeur avant le relâchement (le clic tomberait à côté, ex. « Mon compte ») ;
+          // à la souris, c'est le survol qui déplie
+          if (justEscaped() || !(e.target as HTMLElement).matches(':focus-visible')) return;
           window.clearTimeout(hoverTimer.current);
           setExpanded(true);
         },
