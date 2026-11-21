@@ -398,8 +398,8 @@ dialog.l19-filter {
 .mk .l19-form .field {
   margin: 0;
 }
-/* §15.4 bis : 20 px de champ à champ, y compris quand un champ est dans un bloc (deux colonnes) */
-.mk .l19-form > :is(.field, div) + :is(.field, div) {
+/* §15.4 bis : 20 px de champ à champ, y compris pour un bloc à deux colonnes ou un groupe (fieldset) */
+.mk .l19-form > :is(.field, div, fieldset) + :is(.field, div, fieldset) {
   margin-top: 4px;
 }
 .mk .l19-2col {
