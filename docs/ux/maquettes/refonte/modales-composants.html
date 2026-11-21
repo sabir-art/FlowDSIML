@@ -134,11 +134,30 @@ td.who { display: flex; align-items: center; gap: 12px; font-weight: 600; }
 .swi.on { background: var(--fd-color-primary); } .swi.on::after { left: 18px; }
 [data-theme='dark'] .swi.on::after { background: #080808; }
 .focus { outline: 2px solid var(--fd-color-focus); outline-offset: 2px; }
+
+/* ---------- FIELD-01 ---------- */
+:root { --field-hover: #5E6978; --halo: color-mix(in srgb, var(--fd-color-primary) 20%, transparent); --halo-d: color-mix(in srgb, var(--fd-color-danger) 20%, transparent); }
+[data-theme='dark'] { --field-hover: #7A8494; }
+.f-grid { padding: 32px; display: grid; grid-template-columns: repeat(4, minmax(0, 260px)); gap: 28px 32px; }
+.f-grid .field > span.st { font: 600 12px var(--fd-font-sans); color: var(--fd-color-text); }
+.s-hover { border-color: var(--field-hover); }
+.s-focus { border-color: var(--fd-color-primary); box-shadow: inset 0 0 0 1px var(--fd-color-primary), 0 0 0 3px var(--halo); }
+.s-auto { background: var(--fd-color-surface); }
+.s-err { border-color: var(--fd-color-danger); }
+.s-err.s-focus { box-shadow: inset 0 0 0 1px var(--fd-color-danger), 0 0 0 3px var(--halo-d); }
+.s-dis { background: var(--fd-color-surface-sunken); border-color: var(--fd-color-border); color: var(--fd-color-text-muted); }
+.s-ro { background: var(--fd-color-surface-sunken); }
+.pre { padding: 0; overflow: hidden; } .pre span.p { padding: 0 10px; height: 100%; display: flex; align-items: center; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); font-size: 13px; border-right: 1px solid var(--fd-color-border); }
+.pre span.v { padding: 0 12px; }
+.old { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #1f7fb6; }
+[data-theme='dark'] .old { box-shadow: 0 0 0 2px #0b0d10, 0 0 0 4px #51abdd; }
+.kf { outline: 2px solid var(--fd-color-primary); outline-offset: 2px; }
+.tabs { display: flex; gap: 4px; } .tab { padding: 6px 10px; border-radius: 8px; font-weight: 500; }
 </style>
 </head>
 <body>
 <div class="bar"><b>Modales et composants maison</b>
-  <span class="seg" data-k="vue"><button data-v="equipe">Équipe + invitation</button><button data-v="etats">États de la modale</button><button data-v="comp">Composants (COMP-01)</button></span>
+  <span class="seg" data-k="vue"><button data-v="equipe">Équipe + invitation</button><button data-v="etats">États de la modale</button><button data-v="comp">Composants (COMP-01)</button><button data-v="champs">Champs (FIELD-01)</button></span>
   <span class="seg" data-k="theme"><button data-v="light">Clair</button><button data-v="dark">Sombre</button></span>
 </div>
 
@@ -242,6 +261,15 @@ td.who { display: flex; align-items: center; gap: 12px; font-weight: 600; }
       <div class="pop" style="top:72px;max-height:180px;overflow:hidden"><div class="opt">09:00</div><div class="opt active" aria-selected="true">09:30<span class="ck"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span></div><div class="opt">10:00</div><div class="opt">10:30</div></div></div></div>
 </div>
 
+
+<div data-vue="champs">
+<div class="f-grid">
+<div class="field"><span class="st">Repos</span><div class="inp "><span class="muted" style="color:var(--fd-color-text-subtle)">Nom de l'espace</span></div></div><div class="field"><span class="st">Survol</span><div class="inp s-hover">Acme</div></div><div class="field"><span class="st">Focus (souris et clavier)</span><div class="inp s-focus">Acme</div></div><div class="field"><span class="st">Rempli</span><div class="inp ">Acme Formation</div></div><div class="field"><span class="st">Rempli par le navigateur</span><div class="inp s-auto">alice@example.com</div></div><div class="field"><span class="st">Invalide</span><div class="inp s-err"></div><div class="err-msg">Le nom est obligatoire.</div></div><div class="field"><span class="st">Invalide, au focus</span><div class="inp s-err s-focus"></div><div class="err-msg">Le nom est obligatoire.</div></div><div class="field"><span class="st">Désactivé</span><div class="inp s-dis">Europe/Paris</div></div><div class="field"><span class="st">Lecture seule</span><div class="inp s-ro">alice@example.com</div></div><div class="field"><span class="st">Préfixe, focus sur le groupe</span><div class="inp pre s-focus"><span class="p">tutoclick/</span><span class="v">acme</span></div></div><div class="field"><span class="st">Select, focus</span><div class="inp trigger s-focus">Éditeur<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="field"><span class="st">Recherche, focus</span><div class="inp s-focus"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg><span style="color:var(--fd-color-text-subtle)">Rechercher…</span></div></div>
+  <div class="field"><span class="st">Avant (à retirer) : second contour bleu</span><div class="inp old">Acme</div></div>
+  <div class="field"><span class="st">Bouton primaire, focus clavier</span><div><button class="btn btn-p kf">Enregistrer</button></div></div>
+  <div class="field"><span class="st">Bouton secondaire, focus clavier</span><div><button class="btn btn-s kf">Annuler</button></div></div>
+  <div class="field"><span class="st">Onglet et lien, focus clavier</span><div class="tabs"><span class="tab kf">Vue d'ensemble</span><span class="tab">Démos</span></div><a href="#" class="kf" style="color:var(--fd-color-primary);width:max-content;border-radius:4px">Mot de passe oublié ?</a></div>
+</div></div>
 <script>
 const st = Object.assign({ vue: 'equipe', theme: 'light' }, Object.fromEntries(new URLSearchParams(location.search)));
 function render() {
