@@ -87,14 +87,17 @@ ${block('.fd-player-scope', [...themed('light'), ['color-scheme', 'light']])}
 `;
 
 const out = join(here, 'tokens.css');
+// Sortie formatée comme le reste du dépôt (.prettierrc.json) : --check et format:check s'accordent
+const { format, resolveConfig } = await import('prettier');
+const formatted = await format(css, { ...(await resolveConfig(out)), filepath: out });
 if (process.argv.includes('--check')) {
   const current = readFileSync(out, 'utf8');
-  if (current !== css) {
+  if (current !== formatted) {
     console.error('tokens.css est désynchronisé de tokens.ts : lancer node packages/ui/src/tokens.build.mjs');
     process.exit(1);
   }
   console.log('tokens.css à jour.');
 } else {
-  writeFileSync(out, css);
-  console.log(`tokens.css généré (${css.split('\n').length} lignes).`);
+  writeFileSync(out, formatted);
+  console.log(`tokens.css généré (${formatted.split('\n').length} lignes).`);
 }

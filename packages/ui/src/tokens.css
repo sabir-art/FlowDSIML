@@ -63,7 +63,6 @@
   --fd-orange-800: #855104;
   --fd-orange-900: #603c05;
   --fd-orange-950: #3c2606;
-  /* L52 : deux teintes de plus pour les étiquettes (50, 200, 400, 700) */
   --fd-sarcelle-50: #eaf6f5;
   --fd-sarcelle-200: #9ed9d3;
   --fd-sarcelle-400: #2ba79c;
@@ -72,7 +71,6 @@
   --fd-violet-200: #cdbdf0;
   --fd-violet-400: #8a6ad6;
   --fd-violet-700: #5a3a9c;
-  /* L52 : texte de l'étiquette orange (5,76:1 sur orange-50 ; orange-700 ne donnait que 4,37:1) */
   --fd-tag-orange-text: #8f5300;
   --fd-ardoise-0: #ffffff;
   --fd-ardoise-50: #f6f8fa;

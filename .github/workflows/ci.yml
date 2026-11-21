@@ -22,6 +22,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
+      - name: tokens.css généré depuis tokens.ts (source unique du design system)
+        run: node packages/ui/src/tokens.build.mjs --check
       - name: Appels RPC des Edge Functions conformes aux signatures des migrations
         run: pnpm check:rpc
       - name: Aucune barre de couleur à gauche des blocs

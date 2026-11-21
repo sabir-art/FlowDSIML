@@ -86,6 +86,11 @@ export const palette = {
     900: '#603C05',
     950: '#3C2606',
   },
+  // L52 : deux teintes de plus pour les étiquettes (50, 200, 400, 700)
+  sarcelle: { 50: '#EAF6F5', 200: '#9ED9D3', 400: '#2BA79C', 700: '#0B6660' },
+  violet: { 50: '#F3F0FB', 200: '#CDBDF0', 400: '#8A6AD6', 700: '#5A3A9C' },
+  // L52 : texte de l'étiquette orange (5,76:1 sur orange-50 ; orange-700 ne donnait que 4,37:1)
+  tag: { 'orange-text': '#8F5300' },
   // Neutres froids (gris-bleuté), accordés au fond #EEF2F6 de la référence de style.
   ardoise: {
     0: '#FFFFFF',
