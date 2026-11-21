@@ -1,0 +1,238 @@
+<!doctype html><html lang="fr" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Démos · nouvelle</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&display=swap">
+<link rel="stylesheet" href="../../../../../packages/ui/src/base.css"><style>/* Lot 1 des maquettes : Paramètres. NAV-02, NAV-03 (PageHeader), COMP-01, FIELD-01, MODAL-01. Données fictives (Acme, example.com). */
+:root { --nav-bg: #F7F7F8; --nav-hover: #F0F1F3; --nav-active: #E9EBEE; --content-bg: #FFFFFF; --field: #8A94A2; --field-h: #5E6978; --pill: #EEF0F3; --danger: #C42B1C; --tint: #FBF0F5; }
+[data-theme='dark'] { --nav-bg: #101317; --nav-hover: #1A1F26; --nav-active: #252B33; --content-bg: #15191F; --field: #5E6978; --field-h: #7A8494; --pill: #252B33; --danger: #F97066; --tint: #2A1A23; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--content-bg); color: var(--fd-color-text); font: 400 14px/1.5 var(--fd-font-sans); }
+svg.lucide { flex: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.shell { display: grid; grid-template-columns: 256px 232px minmax(0, 1fr); min-height: 100vh; }
+.mob .shell { display: block; }
+/* Barre latérale (NAV-02, LOGO-01) */
+.side { background: var(--nav-bg); border-right: 1px solid var(--fd-color-border); padding: 16px; display: flex; flex-direction: column; gap: 2px; }
+.logo { width: 224px; height: auto; margin: 0 0 16px; } .logo.d { display: none; }
+[data-theme='dark'] .logo.l { display: none; } [data-theme='dark'] .logo.d { display: block; }
+.ws { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 10px; margin-bottom: 12px; border: 1px solid var(--fd-color-border); border-radius: 10px; background: var(--content-bg); color: var(--fd-color-text); text-align: left; font: inherit; }
+.ws span:nth-child(2) { flex: 1; line-height: 1.25; } .ws small, .me small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+.side a { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 12px; border-radius: 8px; color: var(--fd-color-text-muted); text-decoration: none; font-weight: 500; }
+.side a.on, .snav a.on { background: var(--nav-active); color: var(--fd-color-text); font-weight: 600; }
+.side h3, .snav h3 { margin: 24px 0 6px 12px; font: 600 11px var(--fd-font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+.snav h3:first-child { margin-top: 0; }
+.grow { flex: 1; }
+.me { display: flex; align-items: center; gap: 10px; padding: 10px; margin-top: 8px; border-top: 1px solid var(--fd-color-border); line-height: 1.25; }
+.me span:nth-child(2) { flex: 1; }
+.snav { background: var(--nav-bg); border-right: 1px solid var(--fd-color-border); padding: 72px 12px 24px; display: flex; flex-direction: column; gap: 2px; }
+.snav a { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: 8px; color: var(--fd-color-text-muted); text-decoration: none; font-weight: 500; }
+.snav a span:nth-child(2) { flex: 1; }
+.soon { font: 400 13px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+/* Barre mobile */
+.mbar { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--fd-color-border); background: var(--nav-bg); }
+/* PageHeader (NAV-03) */
+main { min-width: 0; }
+.ph { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 32px; background: var(--content-bg); border-bottom: 1px solid var(--fd-color-border); }
+.mob .ph { padding: 0 16px; }
+.ph ol { display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.ph li { display: flex; align-items: center; gap: 2px; color: var(--fd-color-text-subtle); }
+.ph li a { display: inline-flex; align-items: center; height: 28px; padding: 0 6px; border-radius: 6px; color: var(--fd-color-text-muted); text-decoration: none; font-weight: 500; }
+.ph h1 { margin: 0; padding: 0 6px; font: 500 14px var(--fd-font-sans); color: var(--fd-color-text); }
+.mob .ph h1 { padding: 0; font-weight: 600; }
+.ph .sp { flex: 1; }
+.back { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px 0 6px; border: 0; border-radius: 8px; background: none; color: var(--fd-color-text-muted); font: 500 14px var(--fd-font-sans); }
+.back.ico { width: 32px; padding: 0; justify-content: center; }
+/* Contenu */
+.wrap { max-width: 880px; margin: 0 auto; padding: 32px 32px 64px; }
+.mob .wrap { padding: 20px 16px 48px; }
+.sec + .sec { margin-top: 32px; }
+.sec-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--fd-color-border); }
+.sec-h h2 { margin: 0; font: 600 16px var(--fd-font-sans); }
+.sec-h p { margin: 4px 0 0; font-size: 13px; color: var(--fd-color-text-muted); max-width: 60ch; }
+.sec-h .acts { display: flex; gap: 8px; align-items: center; flex: none; }
+.mob .sec-h { flex-direction: column; } .mob .sec-h .acts { flex-wrap: wrap; }
+.row { display: grid; grid-template-columns: 40% minmax(0, 1fr); gap: 24px; padding: 20px 0; align-items: start; }
+.row + .row { border-top: 1px solid var(--fd-color-border); }
+.row.inl { align-items: center; } .row.inl .ctl { align-items: flex-end; }
+.mob .row { grid-template-columns: 1fr; gap: 8px; } .mob .row.inl { grid-template-columns: 1fr auto; } .mob .row.inl .ctl { align-items: flex-end; }
+.lab { font: 600 14px var(--fd-font-sans); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.help { display: block; margin-top: 4px; font-size: 13px; color: var(--fd-color-text-muted); max-width: 46ch; }
+.ctl { display: flex; flex-direction: column; gap: 8px; max-width: 420px; }
+.ctl.wide { max-width: none; }
+.inp { display: flex; align-items: center; gap: 8px; height: 40px; width: 100%; padding: 0 12px; border: 1px solid var(--field); border-radius: 10px; background: var(--fd-color-surface); color: var(--fd-color-text); overflow: hidden; }
+.inp.short { max-width: 240px; } .inp.ph .v { color: var(--fd-color-text-subtle); }
+.inp.dis { background: var(--fd-color-surface-sunken); border-color: var(--fd-color-border); color: var(--fd-color-text-muted); }
+.inp .pre { margin-left: -12px; height: 100%; display: flex; align-items: center; padding: 0 10px; background: var(--fd-color-surface-sunken); border-right: 1px solid var(--fd-color-border); color: var(--fd-color-text-muted); font-size: 13px; }
+.inp.trig { justify-content: space-between; } .inp .v { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mob .two { grid-template-columns: 1fr; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 999px; font: 600 14px var(--fd-font-sans); border: 1px solid transparent; white-space: nowrap; }
+.ph .btn { height: 36px; padding: 0 14px; }
+.btn-p { background: var(--fd-color-primary); color: var(--fd-color-on-primary); }
+.btn-s { background: var(--fd-color-surface); color: var(--fd-color-text); border-color: var(--field); }
+.btn-g { background: none; color: var(--fd-color-text); height: 32px; padding: 0 8px; }
+.btn-d { background: var(--fd-color-surface); color: var(--danger); border-color: var(--danger); }
+.sec .btn-s { height: 36px; }
+.ib { display: inline-grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 8px; background: none; color: var(--fd-color-text-muted); }
+.ib.sm { width: 20px; height: 20px; vertical-align: middle; }
+.sw { width: 36px; height: 20px; border-radius: 999px; background: var(--field); position: relative; flex: none; display: inline-block; }
+.sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+.sw.on { background: var(--fd-color-primary); } .sw.on::after { left: 18px; }
+[data-theme='dark'] .sw.on::after { background: #080808; }
+.sw.dis { opacity: .5; }
+.opt-r, .opt-c { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; }
+.opt-r .help { margin-top: 0; }
+.rad { width: 18px; height: 18px; margin-top: 2px; border-radius: 50%; border: 1.5px solid var(--field); display: grid; place-items: center; flex: none; }
+.rad.on { border-color: var(--fd-color-primary); } .rad.on::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--fd-color-primary); }
+.box { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--field); color: var(--fd-color-on-primary); flex: none; margin-top: 2px; }
+.box.on { background: var(--fd-color-primary); border-color: var(--fd-color-primary); }
+.av { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--fd-prune-100, #F3D3E2); color: var(--fd-prune-700, #85164B); font: 700 13px var(--fd-font-sans); flex: none; }
+.av.sm { width: 28px; height: 28px; border-radius: 8px; } .av.sq { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; } .av.lg { width: 64px; height: 64px; font-size: 22px; }
+[data-theme='dark'] .av { background: #3A1527; color: #E3A9C4; }
+.lr { display: flex; align-items: center; gap: 16px; }
+.danger { margin-top: 32px; padding: 20px 24px; border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.danger h2 { margin: 0; font: 600 16px var(--fd-font-sans); color: var(--danger); }
+.danger p { margin: 4px 0 0; font-size: 13px; color: var(--fd-color-text-muted); }
+.mob .danger { flex-direction: column; align-items: flex-start; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font: 500 12px var(--fd-font-sans); color: var(--fd-color-text-muted); padding: 12px; border-bottom: 1px solid var(--fd-color-border); }
+td { height: 56px; padding: 0 12px; border-bottom: 1px solid var(--fd-color-border); }
+td.act, th.act { width: 48px; text-align: right; }
+.who { display: flex; align-items: center; gap: 12px; font-weight: 600; } .mu { color: var(--fd-color-text-muted); font-weight: 400; }
+.pill { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--pill); color: var(--fd-color-text-muted); font: 500 12px var(--fd-font-sans); }
+.mob table thead { display: none; } .mob td:nth-child(2), .mob td:nth-child(3) { display: none; } .mob td { padding: 0 6px; }
+.search { display: flex; align-items: center; gap: 8px; width: 260px; height: 36px; padding: 0 10px; border: 1px solid var(--field); border-radius: 10px; color: var(--fd-color-text-subtle); }
+.search span { flex: 1; } .search kbd { font: 500 12px var(--fd-font-sans); color: var(--fd-color-text-muted); border: 1px solid var(--fd-color-border); border-radius: 4px; padding: 0 4px; }
+.mob .search { width: 100%; }
+.empty { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 48px 24px; }
+.empty .et { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+.empty h3 { margin: 4px 0 0; font: 600 15px var(--fd-font-sans); } .empty p { margin: 0; color: var(--fd-color-text-muted); font-size: 13px; max-width: 46ch; } .empty .ea { margin-top: 8px; }
+.meter { height: 8px; border-radius: 4px; background: var(--pill); overflow: hidden; } .meter span { display: block; height: 100%; background: var(--fd-color-primary); border-radius: 4px; }
+.drop { display: grid; justify-items: center; gap: 8px; padding: 24px; border: 1.5px dashed var(--field); border-radius: 12px; color: var(--fd-color-text-muted); text-align: center; }
+.drop b { color: var(--fd-color-text); } .drop .btn-s { height: 32px; padding: 0 12px; margin-left: 4px; }
+.colr { display: flex; gap: 10px; align-items: center; } .swc { width: 40px; height: 40px; border-radius: 10px; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .1); flex: none; }
+.styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding-top: 20px; }
+.mob .styles { grid-template-columns: 1fr 1fr; }
+.stc { border: 1px solid var(--fd-color-border); border-radius: 12px; overflow: hidden; display: grid; grid-template-columns: 1fr auto; }
+.sth { grid-column: 1 / -1; height: 56px; } .stm { padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; } .stm .pill { align-self: flex-start; } .stc .ib { margin: 6px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 999px; background: var(--fd-color-surface-sunken); margin-bottom: 24px; }
+.seg button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: none; color: var(--fd-color-text-muted); font: 500 13px var(--fd-font-sans); }
+.seg button.on { background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: 0 1px 2px rgb(8 10 14 / .08); }
+.seg.sm { margin: 0; }
+.cards { display: grid; gap: 12px; padding-top: 20px; }
+.ic { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: 14px 16px; border: 1px solid var(--fd-color-border); border-radius: 12px; }
+.ic .help { margin: 0; }
+.tile { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--fd-color-border); }
+.note { margin-top: 24px; color: var(--fd-color-text-muted); font-size: 13px; } .note a { color: var(--fd-color-primary); }
+.banner { display: flex; gap: 10px; align-items: center; padding: 12px 16px; margin-bottom: 24px; border: 1px solid var(--fd-color-border); border-radius: 12px; background: var(--fd-color-surface-sunken); font-size: 13px; }
+/* Lot 2 : Démos et Dossiers */
+.wrap.wide { max-width: 1200px; }
+.ph .pt { padding: 0; font: 600 16px var(--fd-font-sans); }
+.ph .search { width: 280px; }
+.fold { padding-top: 12px; }
+.fold .fh { display: flex; align-items: center; gap: 6px; height: 44px; margin-bottom: 8px; }
+.fold .fh b { flex: 1; font: 600 14px var(--fd-font-sans); }
+.fold .n { margin-left: auto; font-size: 12px; color: var(--fd-color-text-muted); }
+.fold a span:nth-child(2) { flex: 1; }
+.addf { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; margin-top: 4px; border: 0; border-radius: 8px; background: none; color: var(--fd-color-text-muted); font: 500 14px var(--fd-font-sans); }
+.fold { display: flex; flex-direction: column; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--fd-color-border); border-radius: 16px; overflow: hidden; }
+.kpi { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; color: inherit; text-decoration: none; }
+.kpi + .kpi { border-left: 1px solid var(--fd-color-border); }
+.kpi .kl { font-size: 13px; color: var(--fd-color-text-muted); } .kpi b { font: 700 26px var(--fd-font-sans); letter-spacing: -.01em; }
+.kpi .kd { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--fd-color-success, #557014); }
+.mob .kpis { grid-template-columns: 1fr 1fr; } .mob .kpi:nth-child(3) { border-left: 0; } .mob .kpi:nth-child(n+3) { border-top: 1px solid var(--fd-color-border); }
+.obc { margin-top: 24px; border: 1px solid var(--fd-color-border); border-radius: 16px; }
+.obh { display: flex; align-items: center; gap: 12px; padding: 16px 20px; }
+.obh h2 { margin: 0; font: 600 15px var(--fd-font-sans); } .obh p { margin: 2px 0 0; font-size: 13px; color: var(--fd-color-text-muted); }
+.obh > div:nth-child(2) { flex: 1; }
+.obh .bar { width: 160px; height: 6px; border-radius: 3px; background: var(--pill); } .obh .bar span { display: block; height: 100%; border-radius: 3px; background: var(--fd-color-primary); }
+.obg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; padding: 0 20px 12px; }
+.obi { display: grid; grid-template-columns: 20px 1fr auto; gap: 12px; align-items: center; min-height: 56px; padding: 8px 12px; border-radius: 10px; }
+.obi b { display: block; font: 600 14px var(--fd-font-sans); } .obi span:not(.ck) { display: block; font-size: 12px; color: var(--fd-color-text-muted); }
+.obi .ck { color: var(--fd-color-text-muted); } .obi.done .ck { color: var(--fd-color-success, #557014); } .obi.done b { text-decoration: line-through; color: var(--fd-color-text-muted); font-weight: 500; }
+.obi.next { background: var(--tint); }
+.obi .btn-p { height: 32px; padding: 0 14px; }
+.obf { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-top: 1px solid var(--fd-color-border); font-size: 12px; color: var(--fd-color-text-muted); }
+.mob .obg { grid-template-columns: 1fr; padding: 0 12px 12px; } .mob .obh .bar { display: none; } .mob .obf span:nth-child(2) { display: none; }
+.sec2 { margin-top: 32px; }
+.sh { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; } .sh h2 { margin: 0; font: 600 16px var(--fd-font-sans); } .sh .mu { font-size: 13px; }
+.tb { display: flex; flex-wrap: wrap; row-gap: 8px; align-items: center; gap: 8px; margin-bottom: 20px; }
+.tb .seg { margin: 0; }
+.seg.ico button { width: 32px; padding: 0; justify-content: center; }
+.fsel { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; white-space: nowrap; border: 1px solid var(--field); border-radius: 10px; background: var(--fd-color-surface); color: var(--fd-color-text-muted); font: 500 13px var(--fd-font-sans); }
+.fsel b { color: var(--fd-color-text); font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; }
+.mob .grid { grid-template-columns: 1fr; gap: 16px; }
+.dc { position: relative; border: 1px solid var(--fd-color-border); border-radius: 16px; background: var(--fd-color-surface); }
+.th { position: relative; aspect-ratio: 16 / 10; border-radius: 15px 15px 0 0; background: var(--fd-color-surface-sunken); border-bottom: 1px solid var(--fd-color-border); overflow: hidden; }
+.thw { position: absolute; inset: 14% 10% 0 10%; border-radius: 8px 8px 0 0; background: var(--fd-color-surface); box-shadow: 0 4px 12px rgb(8 10 14 / .08); display: grid; grid-template-columns: 26% 1fr; grid-template-rows: 14px repeat(2, 10px); gap: 8px 10px; padding: 10px; }
+.thw i { grid-column: 1; height: 6px; border-radius: 3px; background: var(--pill); } .thw b { grid-column: 2; height: 8px; border-radius: 4px; background: var(--pill); }
+.thw b:first-of-type { grid-row: 1; width: 60%; background: var(--field); opacity: .5; }
+.th-crm .thw { grid-template-columns: 26% 1fr; } .th-rdv .thw { background: var(--fd-color-surface); } .th-fiche .thw { grid-template-columns: 1fr; } .th-fiche .thw i { grid-column: 1; }
+.th .hs { position: absolute; left: 62%; top: 44%; width: 12px; height: 12px; border-radius: 50%; background: var(--fd-color-primary); box-shadow: 0 0 0 2px #fff; }
+.badge { position: absolute; top: 10px; left: 10px; display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border-radius: 999px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); font: 500 12px var(--fd-font-sans); color: var(--fd-color-text); }
+.dcb { padding: 12px 16px 14px; display: grid; gap: 6px; }
+.dct { display: flex; align-items: center; gap: 8px; } .dct h3 { flex: 1; margin: 0; font: 600 15px var(--fd-font-sans); } .dct h3 a { color: inherit; text-decoration: none; }
+.dct .ib { margin-right: -8px; } .dct .ib.open { background: var(--nav-active); color: var(--fd-color-text); }
+.dcm { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+.st { display: inline-flex; align-items: center; gap: 6px; font: 500 12px var(--fd-font-sans); } .st .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--fd-color-text-subtle); }
+.st.pub .dot { background: var(--fd-color-success, #557014); }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; min-height: 24px; }
+.tag-add { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border: 1px dashed var(--field); border-radius: 999px; background: none; color: var(--fd-color-text-muted); font: 500 12px var(--fd-font-sans); }
+.pop { position: absolute; z-index: 5; padding: 4px; border-radius: 10px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-md); }
+.dcb { position: relative; }
+.pop.menu { top: 44px; right: 8px; width: 240px; }
+.fsel.ico { width: 36px; padding: 0; justify-content: center; }
+.pop .o { display: grid; grid-template-columns: 16px 1fr auto; gap: 10px; align-items: center; height: 36px; padding: 0 10px; border-radius: 8px; font-size: 14px; }
+.pop .o:first-child { background: var(--nav-active); } .pop .o.dg { color: var(--danger); }
+.pop kbd { font: 500 12px var(--fd-font-sans); color: var(--fd-color-text-muted); background: var(--fd-color-surface-sunken); border-radius: 4px; padding: 0 4px; }
+.pop .sep { height: 1px; margin: 4px 0; background: var(--fd-color-border); }
+.mini { width: 40px; height: 26px; border-radius: 6px; background: var(--fd-color-surface-sunken); border: 1px solid var(--fd-color-border); flex: none; }
+.ti { display: inline-flex; align-items: center; gap: 6px; }
+td a { color: var(--fd-color-text); text-decoration: none; font-weight: 600; }
+.empty.big { padding: 96px 24px; }
+.empty .ea { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+/* Modale MODAL-01 */
+.scrim { position: fixed; inset: 0; z-index: 20; background: rgb(8 10 14 / .45); display: grid; place-items: center; padding: 16px; }
+.modal { width: 400px; max-width: 100%; border-radius: 16px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-lg); }
+.modal.md { width: 560px; }
+.mh { display: flex; align-items: center; gap: 12px; padding: 16px 16px 16px 24px; border-bottom: 1px solid var(--fd-color-border); }
+.mh .mt { flex: 1; display: grid; } .mh h2 { margin: 0; font: 500 18px var(--fd-font-sans); } .mh .mu { font-size: 13px; }
+.mb { padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+.mb fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 12px; } .mb legend { margin-bottom: 6px; font: 500 14px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+.choice { display: grid; grid-template-columns: 40px 1fr 18px; gap: 14px; align-items: center; padding: 14px 16px; border: 1px solid var(--field); border-radius: 12px; }
+.choice b { display: block; } .choice .mu { display: block; font-size: 13px; }
+.choice.on { border-color: var(--fd-color-primary); box-shadow: inset 0 0 0 1px var(--fd-color-primary); background: var(--tint); }
+.mf { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 24px; border-top: 1px solid var(--fd-color-border); background: var(--nav-bg); border-radius: 0 0 16px 16px; }
+.mf .sm { font-size: 12px; }
+.mob .mf .sm { display: none; }
+.mob .scrim { place-items: end center; padding: 0; } .mob .modal.md { width: 100%; border-radius: 16px 16px 0 0; } .mob .mf { border-radius: 0; }
+</style></head><body class="">
+
+<div class="shell"><nav class="side" aria-label="Navigation principale"><img class="logo l" src="../../../brand-tutoclic/production/logo-tutoclick.svg" alt="TutoClick, porté par la DSIML"><img class="logo d" src="../../../brand-tutoclic/production/logo-tutoclick-sombre.svg" alt="TutoClick, porté par la DSIML">
+  <button class="ws"><span class="av sm">A</span><span><b>Acme</b><small>Espace · 4 membres</small></span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-up-down" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+  <a href="#" class="on" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>Démos</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></svg>Sandbox</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-route" aria-hidden="true"><circle cx="6" cy="19" r="3"></circle><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path><circle cx="18" cy="5" r="3"></circle></svg>Parcours de formation</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-column" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>Analytics</a><h3>Formation</h3><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-graduation-cap" aria-hidden="true"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"></path><path d="M22 10v6"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path></svg>Apprenants</a>
+  <span class="grow"></span><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-puzzle" aria-hidden="true"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"></path></svg>Extension</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-question-mark" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Centre d'aide</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>Paramètres</a>
+  <div class="me"><span class="av">A</span><span><b>Alice Exemple</b><small>Propriétaire</small></span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></div></nav><nav class="snav fold" aria-label="Dossiers"><div class="fh"><button class="ib" aria-label="Masquer les dossiers" aria-pressed="true"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panneau" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="4"/><path d="M9.5 3v18"/><path d="M6.25 8h.01M6.25 12h.01M6.25 16h.01"/></svg></button><b>Dossiers</b><button class="ib" aria-label="Nouveau dossier"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></button></div>
+  <a href="#" class="on" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"></path><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path></svg><span>Toutes les démos</span><span class="n">4</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Mes démos</span><span class="n">3</span></a>
+  <h3>Dossiers de l'espace</h3>
+  <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg><span>Formation accueil</span><span class="n">3</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg><span>Ressources humaines</span><span class="n">1</span></a>
+  <button class="addf"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-plus" aria-hidden="true"><path d="M12 10v6"></path><path d="M9 13h6"></path><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>Nouveau dossier</button><span class="grow"></span>
+  <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-archive" aria-hidden="true"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg><span>Archivées</span><span class="n">0</span></a></nav><main><header class="ph"><h1 class="pt">Démos</h1><span class="sp"></span><div class="search"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg><span>Rechercher une démo</span><kbd>⌘K</kbd></div><button class="btn btn-p"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Nouvelle démo</button></header><div class="wrap wide"><section class="sec2"><div class="grid"><article class="dc"><div class="th th-crm"><div class="thw"><i></i><i></i><i></i><b></b><b></b></div></div><span class="badge"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>Captures</span>
+  <div class="dcb"><div class="dct"><h3><a href="#">Démo CRM</a></h3><button class="ib" aria-label="Actions pour Démo CRM" aria-haspopup="menu" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></div>
+  <div class="dcm"><span class="st dra"><span class="dot"></span>Brouillon</span><span class="mu">3 étapes · modifiée il y a 2 h</span></div>
+  <div class="tags"><span class="pill">Accueil</span><button class="tag-add"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Étiquette</button></div>
+  </div></article><article class="dc"><div class="th th-ob"><div class="thw"><i></i><i></i><i></i><b></b><b></b></div><span class="hs"></span></div><span class="badge"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>Captures</span>
+  <div class="dcb"><div class="dct"><h3><a href="#">Onboarding</a></h3><button class="ib" aria-label="Actions pour Onboarding" aria-haspopup="menu" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></div>
+  <div class="dcm"><span class="st pub"><span class="dot"></span>Publiée</span><span class="mu">120 vues · 1 lead</span></div>
+  <div class="tags"><button class="tag-add"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Étiquette</button></div>
+  </div></article><article class="dc"><div class="th th-rdv"><div class="thw"><i></i><i></i><i></i><b></b><b></b></div><span class="hs"></span></div><span class="badge"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-code" aria-hidden="true"><path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path></svg>HTML</span>
+  <div class="dcb"><div class="dct"><h3><a href="#">Créer un rendez-vous</a></h3><button class="ib" aria-label="Actions pour Créer un rendez-vous" aria-haspopup="menu" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></div>
+  <div class="dcm"><span class="st pub"><span class="dot"></span>Publiée</span><span class="mu">48 vues · 6 étapes</span></div>
+  <div class="tags"><span class="pill">Accueil</span><span class="pill">RH</span><button class="tag-add"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Étiquette</button></div>
+  </div></article><article class="dc"><div class="th th-fiche"><div class="thw"><i></i><i></i><i></i><b></b><b></b></div></div><span class="badge"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></svg>Sandbox</span>
+  <div class="dcb"><div class="dct"><h3><a href="#">Saisir une fiche</a></h3><button class="ib" aria-label="Actions pour Saisir une fiche" aria-haspopup="menu" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></div>
+  <div class="dcm"><span class="st dra"><span class="dot"></span>Brouillon</span><span class="mu">4 pages · modifiée hier</span></div>
+  <div class="tags"><button class="tag-add"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Étiquette</button></div>
+  </div></article></div></section></div></main></div><div class="scrim"><div class="modal md" role="dialog" aria-modal="true" aria-labelledby="nd"><div class="mh"><span class="tile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span><div class="mt"><h2 id="nd">Nouvelle démo</h2><span class="mu">Étape 1 sur 2 · Type de contenu</span></div><button class="ib" aria-label="Fermer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+      <div class="mb"><fieldset><legend>Que voulez-vous créer ?</legend><label class="choice on"><span class="tile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg></span><span><b>Démo par captures</b><span class="mu">Un parcours guidé, une capture par étape, avec une bulle à chaque clic.</span></span><span class="rad on"></span></label><label class="choice"><span class="tile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-code" aria-hidden="true"><path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path></svg></span><span><b>Démo HTML</b><span class="mu">De vraies pages HTML : textes et données modifiables, nettes sur tous les écrans.</span></span><span class="rad"></span></label><label class="choice"><span class="tile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></svg></span><span><b>Sandbox</b><span class="mu">Des pages reliées : le visiteur explore librement, sans étapes imposées.</span></span><span class="rad"></span></label></fieldset></div>
+      <div class="mf"><span class="mu sm">Ensuite : la source (extension, images, modèle…)</span><span class="grow"></span><button class="btn btn-s">Annuler</button><button class="btn btn-p">Continuer</button></div></div></div></body></html>
