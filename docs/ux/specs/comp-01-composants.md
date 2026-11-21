@@ -244,3 +244,125 @@ Pour chaque champ visible de `APP_PAGES` (input, textarea, combobox, champ à pu
    - lien : `text-decoration-thickness` de 2 px et fond `tint` ;
    - au clic souris, aucun de ces indicateurs.
 6. **Grep statique** : plus aucune occurrence de `--fd-shadow-focus`, `#1f7fb6`, `#51abdd`, ni de l'ancien danger `#d60b52` ou `#f07ca2`, dans `packages/ui` et `apps/*/src`.
+
+## 12. NAV-03 : composants de navigation (directive du client, 21/11)
+
+> **Directive du client, valable pour toute l'app** : rien ne doit être « posé à l'ancienne ». Il donne deux exemples. Le fil d'Ariane « Paramètres > Espace > Équipe », en liens soulignés suivis de texte brut, avec un grand H1 qui le répète. Et les liens « Retour » en texte nu (pages légales, invitation, éditeur, partage…).
+>
+> **Méthode réaffirmée** : aucun écran n'est codé sans sa maquette, et le dev la reproduit **à l'identique** (structure, espacements, composants, textes). La recette UX compare la maquette et l'app en superposant les captures, et tout écart vaut « à reprendre ».
+
+Tous ces composants vivent dans `packages/ui`.
+
+### 12.1 PageHeader
+
+- **Barre fixe** (`position: sticky; top: 0`) de **56 px**, sur `--fd-color-content-bg`, avec un filet de 1 px `border` en bas et un padding de 0 × 32 px (16 px sous 768 px).
+- **À gauche**, dans cet ordre : un `BackButton` s'il y en a un (§12.3), puis le `Breadcrumb` (§12.2), ou le titre de la page quand il n'y a pas de parent.
+- **À droite** : les actions de la page (32 à 40 px), avec un gap de 8 px. Un bouton primaire au plus.
+- **Le titre n'apparaît qu'une fois.** Le dernier élément du fil d'Ariane, ou le titre de la barre, est le `<h1>` de la page, en 14 px 500. **Plus jamais de grand H1** sous un fil d'Ariane qui dit la même chose.
+- **Pages sans parent**, comme Démos, Analytics, Apprenants ou Sandbox (premières pages de navigation) :
+  - le PageHeader porte le titre en 14 px 600, et les actions de la page ;
+  - sous la barre, un **PageTitle** facultatif (§12.4) seulement si la page a besoin d'une phrase d'introduction.
+
+### 12.2 Breadcrumb
+
+- `<nav aria-label="Fil d'Ariane"><ol>`.
+- **Éléments parents** : boutons ou liens en 14 px 500 `text-muted`, **sans soulignement**, hauteur de 28 px, padding de 0 × 6 px, rayon de 6 px.
+  - Au survol : texte `text` et fond `nav-hover`.
+  - Au focus clavier : FIELD-01 §11.4 (trait prune intérieur de 2 px).
+- **Séparateur** : `ChevronRight` de 14 px en `text-subtle`, `aria-hidden`, 2 px d'écart.
+- **Élément courant** : 14 px 500 `text`, `aria-current="page"`, sans lien. C'est le `<h1>`.
+- **Chemin long** (plus de 3 niveaux, ou largeur insuffisante) : on garde le premier et les deux derniers niveaux. Au milieu, un bouton « … » ouvre un menu COMP-01 avec les niveaux masqués. Un libellé trop long est tronqué par une ellipse, et le libellé complet est donné par `title`.
+- **Sous 768 px** : seul le parent direct reste, sous la forme d'un BackButton « ‹ Parent ». L'élément courant passe en titre de la barre.
+
+### 12.3 BackButton
+
+- **Bouton ghost** de 32 px de haut, padding de 0 × 10 px, rayon de 8 px. Icône `ChevronLeft` de 16 px, puis un **libellé court** : la destination (« Démos », « Paramètres », « Connexion », « Notifications »). Jamais « Retour » seul.
+- **Couleurs** : texte `text-muted`. Au survol : texte `text` et fond `nav-hover`. Au focus : FIELD-01 §11.4.
+- **Placé dans le PageHeader**, ou en tête d'un panneau ou d'un tiroir, dans son en-tête. **Jamais un lien texte nu.**
+- **Nom accessible** : « Retour à {destination} » (`aria-label`), et le libellé visible reste court.
+
+### 12.4 PageTitle et titres de section
+
+- **PageTitle**, seulement s'il apporte une phrase utile : titre en 24 px 700 et sous-titre en 14 px `text-muted`. 32 px sous le PageHeader, 24 px avant le contenu.
+- **Titre de section** : 16 px 600 et sous-titre en 13 px `text-muted`, avec l'action de la section à droite, puis un filet de 1 px. 16 px sous le texte, 32 px entre deux sections (§11.2 des retours client).
+- Plus de titres en 32 px 800 dans l'app, sauf sur les pages d'authentification.
+
+### 12.5 Liens dans le texte
+
+- Un lien souligné n'existe que **dans une phrase** (« Contactez le support », « En savoir plus »). Dans ce cas : soulignement de 1 px, prune, et focus FIELD-01 (soulignement de 2 px et fond teinté).
+- **Toute navigation hors phrase** (retour, aller à, ouvrir) prend un BackButton, un bouton ghost ou un bouton secondaire.
+
+### 12.6 Inventaire des pages (app et lecteur)
+
+| Route | PageHeader cible |
+|---|---|
+| `/demos` | titre « Démos » ; actions : recherche, Nouvelle démo. Dossier ouvert : Breadcrumb « Démos › {dossier} » (remplace `.demos-crumb`) |
+| `/sandbox` | titre « Sandbox » ; action : Nouveau sandbox |
+| `/demos/:id/edit` | en-tête de l'éditeur (P2-2) : BackButton « Démos », titre modifiable, onglets au centre, actions à droite |
+| `/demos/:id/quiz` | BackButton « Éditeur », titre « Quiz », action Enregistrer |
+| `/demos/:id/share` | devient la modale Partager (P1-3), plus de page |
+| `/demos/:id/distribute` | modale Diffuser (MODAL-01), plus de page |
+| `/demos/:id/analytics` | Breadcrumb « Analytics › {démo} » ; actions : période, Éditeur (bouton secondaire, remplace le lien `share.backToEditor`), Exporter |
+| `/demos/:id/present` et `/present/:id/screen` | barre du présentateur : BackButton « Éditeur », titre de la démo |
+| `/analytics` | titre « Analytics » ; onglets sous la barre ; actions : période, Exporter |
+| `/leads` | titre « Leads » ; action : Exporter |
+| `/learners` | titre « Apprenants » ; actions : Importer, Ajouter |
+| `/center` | titre « Centre de formation » |
+| `/settings/*` (16 routes) | Breadcrumb « {Groupe} › {Page} » (le groupe est cliquable : Espace, Marque, Contenu, Connexions, Mon compte). Plus de « Paramètres » en tête : la colonne des Paramètres le dit déjà. Actions de la page à droite (NAV-02 §11.7.3) |
+| `/settings/integrations/:id`, `/settings/integrations/webhooks` | Breadcrumb « Connexions › Intégrations › {nom} ». Remplace le lien `integrations.backGeneral` |
+| `/settings/brand/page` | Breadcrumb « Marque › Page publique » |
+| `/onboarding` | barre de l'onboarding : logo, progression, « Passer ». BackButton « Étape précédente » à partir de l'étape 2 (remplace `onboarding.back`) |
+| `/nouveautes` | titre « Nouveautés » |
+| `/console/*` | titre « Console » et onglets ; BackButton « App » (remplace `console.back`) |
+| `/login`, `/signup`, `/forgot-password`, `/reset-password` | pages d'authentification : logo (LOGO-01). Mot de passe oublié : BackButton « Connexion » en haut du formulaire (remplace `auth.backToLogin`) |
+| `/invite/:token` | page d'invitation : logo, puis BackButton « Connexion » si on refuse l'invitation |
+| `/legal/:doc` et `/legal/*.html` | PageHeader : logo compact à gauche, BackButton « TutoClick » (remplace `legal.back`), titre du document. Sommaire à gauche à partir de 1024 px |
+| `/unsubscribe/:token`, `/t` | page simple : logo, puis un bouton secondaire « Ouvrir TutoClick » |
+| **Lecteur** `/d/:id` | barre du lecteur inchangée (pas de navigation d'app). Écrans d'accès : bouton secondaire, sans lien nu |
+
+### 12.7 Liens texte servant à naviguer, et leur remplacement
+
+| Fichier (`apps/web/src/…`) | Lien actuel | Remplacement |
+|---|---|---|
+| `pages/settings/SettingsShell.tsx` (l. 95) | fil d'Ariane `.st-crumb` souligné, avec un grand H1 dessous | PageHeader + Breadcrumb (§12.1 et §12.2), sans grand H1 |
+| `pages/demos/DemosPage.tsx` (l. 524) | `.demos-crumb` | Breadcrumb |
+| `pages/editor/EditorPage.tsx` (l. 748), `EditorSkeleton.tsx` (l. 62), écran de chargement (l. 500) | « Retour aux démos » | BackButton « Démos » |
+| `pages/editor/quiz/QuizEditorPage.tsx` (l. 58 et 84) | « Retour » | BackButton « Éditeur » |
+| `pages/analytics/DemoAnalyticsPage.tsx` (l. 195 et 215) | « Retour », « Éditeur » | Breadcrumb, et bouton secondaire « Éditeur » dans les actions |
+| `pages/share/SharePage.tsx` | « Éditeur » (`share.backToEditor`) | disparaît avec la modale Partager |
+| `pages/auth/ForgotPassword.tsx` (l. 47) | « Retour à la connexion » | BackButton « Connexion » |
+| `pages/auth/LegalSoon.tsx` (l. 16) et pages légales | « Retour » | BackButton « TutoClick » dans le PageHeader |
+| `pages/Onboarding.tsx` (l. 518) | « Retour » | BackButton « Étape précédente » |
+| `pages/console/ConsolePage.tsx` (l. 90) | « Retour à l'app » | BackButton « App » |
+| `pages/settings/integrations/IntegrationsPage.tsx` (l. 95), `WebhooksPage.tsx` (l. 77) | « Retour » vers les intégrations | Breadcrumb |
+| `components/notifications/NotificationBell.tsx` (l. 290) | « Retour aux notifications » | BackButton « Notifications » dans l'en-tête du tiroir |
+| `help/HelpDrawer.tsx` (l. 200) | « Retour » | BackButton « Aide » dans l'en-tête du tiroir |
+| `pages/editor/panels/*Panel.tsx` (Hotspot, Blur, Form, GuideBubble) | « Étape » (`editor.backToStep`) | BackButton « Étape » dans l'en-tête du panneau |
+| `pages/demos/NewDemoDialog.tsx` (l. 316) | « Retour » (étape précédente de la modale) | bouton secondaire « Précédent » dans le pied MODAL-01 |
+| Page d'invitation (`/invite/:token`) | lien « Retour » | BackButton « Connexion » |
+
+Le dev complète la liste avec tout `<a>` ou `<Link>` hors d'une phrase qui sert à revenir en arrière.
+
+### 12.8 e2e `navigation.e2e.cjs`
+
+1. **Chaque route** de `APP_PAGES` :
+   - un seul `<h1>` ;
+   - s'il y a un `nav[aria-label="Fil d'Ariane"]`, son dernier élément porte `aria-current="page"` et **est** le `<h1>` (ou le contient) ;
+   - aucun autre texte de titre identique en 24 px ou plus sur la page.
+2. **PageHeader** : un `.fd-page-header` fixe de 56 px, avec un filet en bas.
+3. **Aucun lien de navigation nu** : tout `<a>` ou `[role=link]` hors d'un `p`, `li` de texte ou `td`, dont le texte commence par « Retour » ou vaut un nom de page, est un échec. Ces éléments doivent être des `.fd-back` ou des boutons.
+4. **Breadcrumb** : `text-decoration-line` vaut `none` sur les éléments parents, et un `ChevronRight` de 14 px sert de séparateur.
+5. **À 390 px** : le Breadcrumb est réduit à un BackButton « ‹ Parent ».
+
+### 12.9 Maquettes écran par écran (ordre des lots)
+
+Chaque écran a sa maquette, dans le nouveau système (NAV-02, COMP-01, FIELD-01, MODAL-01 et PageHeader), en clair et en sombre, à 1440 et 390 px. Le chef la valide **avant** le dev. Ordre des lots :
+
+1. Paramètres (toutes les pages)
+2. Démos et Dossiers
+3. Éditeur
+4. Partager et Diffuser
+5. Analytics
+6. Apprenants et Parcours
+7. Pages d'authentification et pages légales
+8. Lecteur
