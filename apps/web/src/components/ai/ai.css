@@ -406,12 +406,28 @@
 .ai-chart-val {
   font-variant-numeric: tabular-nums;
 }
-/* L30-08 : Assistant */
+/* L30-08 : Assistant, dans l'emplacement des panneaux de l'éditeur (retour client P1 du 21/11) :
+   seul l'historique défile, suggestions et champ de saisie restent collés en bas */
+.mk .ed-tool[data-tool-panel='assistant'] .ed-tool__body {
+  display: flex;
+  overflow: hidden;
+}
+.ai-assistant {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
 .ai-as-context {
   margin: 0;
 }
 .ai-as-log {
   flex: 1;
+  min-height: 0;
+}
+.ai-as-form {
+  flex: none;
 }
 .ai-as-starters {
   display: grid;
@@ -437,9 +453,6 @@
 .ai-as-text {
   margin: 0;
   white-space: pre-wrap;
-}
-.ai-as-form {
-  margin-top: 8px;
 }
 .ai-as-cleared {
   margin-top: -4px;

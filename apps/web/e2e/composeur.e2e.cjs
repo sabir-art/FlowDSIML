@@ -266,7 +266,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
     s.aiDelay = 1500;
     const p = await open(s);
     await p.getByRole('button', { name: 'Assistant' }).click();
-    const panel = p.getByRole('dialog', { name: 'Assistant' });
+    const panel = p.locator('[data-tool-panel="assistant"]');
     const field = panel.getByLabel('Message à l’assistant');
     ok(
       (await field.getAttribute('placeholder')) === 'Posez une question sur cette démo…',

@@ -229,8 +229,14 @@ export function EditorPage() {
       } catch {
         /* préférence non gardée */
       }
-    // Le titre du panneau prend le focus à l'ouverture
-    if (p) requestAnimationFrame(() => document.getElementById('ed-tool-title')?.focus());
+    // Le titre du panneau prend le focus à l'ouverture ; l'Assistant donne le focus à son champ (L30-08)
+    if (p)
+      requestAnimationFrame(() =>
+        (p === 'assistant'
+          ? document.querySelector<HTMLElement>('[data-tool-panel="assistant"] textarea')
+          : document.getElementById('ed-tool-title')
+        )?.focus(),
+      );
   };
   const panelRef = useRef(panel);
   panelRef.current = panel;
@@ -262,7 +268,6 @@ export function EditorPage() {
   // L16 : « Diffuser » (menu « … », aussi ouvert par #/demos/:id/distribute → ?distribute=1)
   const [translating, setTranslating] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
-  const [assisting, setAssisting] = useState(false);
   const [distributing, setDistributing] = useState(() => params.get('distribute') === '1');
   // L22-02 : « Présenter » (aussi ouvert depuis le menu d'une démo par ?present=1)
   // L22-05 : lien d'une notification (?step=…&comment=…) → étape choisie une fois chargée
@@ -593,11 +598,8 @@ export function EditorPage() {
     );
   }
   function toggleTool(id: ToolId) {
-    if (id === 'assistant') {
-      setSuggesting(false);
-      setAssisting((v) => !v);
-      return;
-    }
+    // Retour client P1 du 21/11 : l'Assistant s'ouvre dans l'emplacement des panneaux, comme les autres
+    if (id === 'assistant') setSuggesting(false);
     if (id === 'blur') return setBlurOpen({});
     if (id === panel && !selectedForm) return closePanel();
     if (selectedForm || panel === 'crop' || panel === 'hotspots') setSelection({ kind: 'step' });
@@ -623,6 +625,15 @@ export function EditorPage() {
         />
       );
     if (panel === 'design') return <ThemePanel editor={editor} readOnly={readOnly} />;
+    if (panel === 'assistant')
+      return ws && can('demo.edit') ? (
+        <AssistantPanel
+          editor={editor}
+          ws={ws.id}
+          stepIndex={Math.min(index, Math.max(0, editor.steps.length - 1))}
+          onClose={closePanel}
+        />
+      ) : null;
     if (panel === 'settings')
       return (
         <SettingsTab
@@ -700,14 +711,6 @@ export function EditorPage() {
             setSavingTpl(false);
             toast(t('templates.save.done'));
           }}
-        />
-      )}
-      {assisting && ws && can('demo.edit') && (
-        <AssistantPanel
-          editor={editor}
-          ws={ws.id}
-          stepIndex={Math.min(index, Math.max(0, editor.steps.length - 1))}
-          onClose={() => setAssisting(false)}
         />
       )}
       {suggesting && ws && can('demo.edit') && (
@@ -871,7 +874,7 @@ export function EditorPage() {
                     label: t('ai.suggest.open_btn'),
                     icon: <Lightbulb />,
                     onSelect: () => {
-                      setAssisting(false);
+                      if (panel === 'assistant') setPanelState(null);
                       setSuggesting(true);
                     },
                   },
@@ -1153,7 +1156,7 @@ export function EditorPage() {
           />
         </section>
         {/* L48-E §3 : panneau de l'outil actif (un seul à la fois), puis le rail d'outils */}
-        {(selectedForm || (panel && panel !== 'blur' && panel !== 'assistant')) && (
+        {(selectedForm || (panel && panel !== 'blur')) && (
           <ToolPanel
             id={selectedForm ? 'form' : panel!}
             title={selectedForm ? t('editor.leadForm') : t(`editor.rail.${panel}`)}
@@ -1163,7 +1166,7 @@ export function EditorPage() {
           </ToolPanel>
         )}
         <EditorRail
-          active={assisting ? 'assistant' : selectedForm ? null : panel}
+          active={selectedForm ? null : panel}
           onToggle={toggleTool}
           disabled={why}
           hidden={can('demo.edit') ? [] : ['assistant']}

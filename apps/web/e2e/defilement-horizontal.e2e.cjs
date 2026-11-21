@@ -124,7 +124,7 @@ async function editorTools(p) {
         await p.click(`.ed-rail button[data-tool="${tool}"]`);
         await p.waitForTimeout(400);
         report(`Éditeur · outil ${tool} (1440 px)`, await p.evaluate(overflows));
-        // Outils en surimpression (Flouter, Assistant) : mesurés ouverts, puis refermés pour atteindre le rail
+        // Panneaux et modale (Flouter) : mesurés ouverts, puis refermés pour atteindre le rail
         await p.keyboard.press('Escape');
         await p.waitForTimeout(200);
       }

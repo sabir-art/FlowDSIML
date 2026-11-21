@@ -9,7 +9,7 @@
 const { chromium } = require('playwright');
 const { AxeBuilder } = require('@axe-core/playwright');
 const { install, seed } = require('./fake-supabase.cjs');
-const { openComments } = require('./editor-rail.cjs');
+const { openComments, openTool } = require('./editor-rail.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -97,6 +97,78 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     JSON.parse(await p.evaluate(() => JSON.stringify(localStorage.getItem('fd.editor.tool')))) === 'hotspots',
     'outil gardé (fd.editor.tool)',
   );
+
+  // ===== Retour client P1 du 21/11 : chaque outil du rail s'ouvre dans le même emplacement =====
+  // (même rectangle, même en-tête, remplace l'outil actif, bouton actif) ; seul Flouter est une modale.
+  {
+    const rects = {};
+    for (const tool of ['step', 'design', 'assistant', 'settings', 'hotspots']) {
+      const panel = await openTool(p, tool);
+      await p.waitForTimeout(150);
+      rects[tool] = await panel.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return {
+          x: Math.round(r.x),
+          y: Math.round(r.y),
+          w: Math.round(r.width),
+          h: Math.round(r.height),
+          pos: getComputedStyle(el).position,
+          title: el.querySelector('#ed-tool-title')?.textContent,
+          close: !!el.querySelector('.ed-tool__head button[aria-label]'),
+          panels: document.querySelectorAll('.ed-tool').length,
+          overlays: document.querySelectorAll('.ai-suggest, .ai-assistant[role="dialog"]').length,
+        };
+      });
+    }
+    const ref = rects.step;
+    const same = (r) => r.x === ref.x && r.y === ref.y && r.w === ref.w && r.h === ref.h;
+    ok(
+      same(rects.assistant) && same(rects.design) && same(rects.settings) && same(rects.hotspots),
+      `Assistant au même rectangle que les autres panneaux (${JSON.stringify(rects.assistant)} / ${JSON.stringify(ref)})`,
+    );
+    ok(
+      rects.assistant.title === 'Assistant' &&
+        rects.assistant.close &&
+        rects.assistant.panels === 1 &&
+        rects.assistant.overlays === 0 &&
+        rects.assistant.pos !== 'fixed',
+      'Assistant : en-tête (titre + ×), remplace l’outil actif, aucune surimpression',
+    );
+    const asst = await openTool(p, 'assistant');
+    ok(
+      (await rail.locator('[data-tool="assistant"]').getAttribute('aria-pressed')) === 'true',
+      'Assistant : bouton du rail actif',
+    );
+    // Suggestions et champ collés en bas du panneau
+    const bottom = await asst.evaluate((el) => {
+      const panel = el.getBoundingClientRect();
+      const form = el.querySelector('.ai-as-form').getBoundingClientRect();
+      const st = el.querySelector('.ai-as-starters').getBoundingClientRect();
+      return { gap: Math.round(panel.bottom - form.bottom), above: st.bottom <= form.top };
+    });
+    ok(
+      bottom.gap <= 24 && bottom.above,
+      `champ collé en bas, suggestions juste au-dessus (${bottom.gap} px)`,
+    );
+    await asst.getByLabel('Message à l’assistant').fill('Bonjour');
+    await asst.getByLabel('Message à l’assistant').press('Escape');
+    ok((await p.locator('[data-tool-panel="assistant"]').count()) === 0, 'Échap depuis le champ : fermé');
+    await openTool(p, 'assistant');
+    ok(
+      (await p.locator('[data-tool-panel="assistant"] .ai-as-msg').count()) === 0 &&
+        (await p.locator('[data-tool-panel="assistant"] textarea').inputValue()) === '',
+      'à la réouverture, conversation effacée',
+    );
+    await rail.locator('[data-tool="blur"]').click();
+    await p.locator('dialog[open]').waitFor();
+    ok(
+      (await p.locator('dialog[open]').count()) === 1 && (await p.locator('.ed-tool').count()) <= 1,
+      'Flouter reste une modale',
+    );
+    await p.keyboard.press('Escape');
+    await p.waitForTimeout(200);
+    await openTool(p, 'hotspots');
+  }
 
   {
     const act = rail.locator('.ed-rail__btn.is-active').first();

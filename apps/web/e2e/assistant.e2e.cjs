@@ -61,7 +61,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
   await page.getByRole('button', { name: 'Assistant' }).click();
-  const panel = page.getByRole('dialog', { name: 'Assistant' });
+  const panel = page.locator('[data-tool-panel="assistant"]');
   await panel.waitFor();
   ok(
     /Démo\s?: Démo CRM · Étape 1/.test(await panel.locator('.ai-as-context').textContent()),
