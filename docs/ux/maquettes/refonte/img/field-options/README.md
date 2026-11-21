@@ -6,6 +6,8 @@
 >
 > Captures à 1440 px, une par option et par thème : `option-{a,b,c,d}-{clair,sombre}.png`. Sources HTML : `src/option-*.html`.
 >
+> Les options A et B ajoutent une **variante teintée** (§2 bis), à la demande du client.
+>
 > Chaque option montre :
 > - la modale « Inviter des membres » (MODAL-01), avec un champ au focus et un champ en erreur ;
 > - les 8 états d'un champ ;
@@ -56,6 +58,23 @@ Contraste de l'indicateur de focus (1.4.11) mesuré contre le fond, puis contre 
 | **D · Neutre, marque sur le primaire** | bordure gris foncé + halo gris de 3 px à 25 % | anneau gris de 3 px | 5,6:1 ; 1,8:1 | 8,3:1 ; 2,6:1 | très calme ; le focus sur les boutons se voit peu |
 
 Toutes les options respectent **2.4.7** (focus visible) et **1.4.11** (le trait de focus fait plus de 3:1 contre le fond). Seule C dépasse aussi 3:1 entre l'état de repos et l'état de focus. C'est l'exigence de **2.4.13** (AAA), que le RGAA ne demande pas.
+
+### 2 bis. Variante teintée (demande du client, options A et B)
+
+Dans la capture qu'il a fournie, le client aime le champ rempli **au fond bleu très clair** avec une bordure de couleur au focus. C'est très probablement le style de remplissage automatique de Chrome, gardé tel quel dans l'outil de référence. Plutôt que de neutraliser ce style vers la couleur `surface`, les options **A** et **B** montrent deux états de plus :
+
+- **Rempli par le navigateur, variante teintée** : fond **prune-50** (#FBF0F5 en clair ; #2A1A23 en sombre, soit prune-300 à environ 10 % sur `surface`), avec une bordure prune ;
+- **Focus, variante teintée** : le même fond, avec la bordure et le halo de l'option.
+
+| Mesure | Clair | Sombre |
+|---|---|---|
+| Texte sur le fond teinté | 18,0:1 | 15,1:1 |
+| Texte secondaire sur le fond teinté | 6,4:1 | 7,8:1 |
+| Bordure prune sur le fond teinté | 6,6:1 | 6,0:1 |
+
+- **Pas de confusion avec l'erreur** : l'erreur garde un fond blanc (`surface`), une bordure **rouge franc** et un message avec icône. On n'utilise jamais de fond rose ou rouge pâle.
+- La teinte est très légère (1,11:1 contre le blanc). Elle ne porte donc aucune information à elle seule : c'est un agrément visuel, et l'état reste signalé par la bordure.
+- **Recommandation** : si le client la retient, l'appliquer au **remplissage automatique** (`:-webkit-autofill`, avec `box-shadow: inset 0 0 0 1000px var(--fd-color-tint)`), et **pas** au focus ordinaire. Teinter tout champ au focus ferait ressembler chaque formulaire à un formulaire pré-rempli.
 
 ## 3. Recommandation UX : option **B**, avec deux ajustements
 
