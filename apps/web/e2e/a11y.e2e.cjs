@@ -475,6 +475,18 @@ const APP_PAGES = [
       await p.getByRole('button', { name: 'Créer la démo' }).waitFor();
     },
   },
+  // Retour client 21/11 : panneau Assistant à vide (puces de suggestion et composeur collés en bas)
+  {
+    name: 'Éditeur · Assistant à vide',
+    route: `/#/demos/${DEMO}/edit`,
+    seed: (d) => {
+      d.ai = { enabled: true, features: { assistant: true }, used: 1, quota: 500, canEdit: true };
+    },
+    open: async (p) => {
+      await p.getByRole('button', { name: 'Assistant' }).click();
+      await p.locator('[data-tool-panel="assistant"] .ai-as-starters').waitFor();
+    },
+  },
   {
     name: 'Éditeur · Assistant',
     route: `/#/demos/${DEMO}/edit`,

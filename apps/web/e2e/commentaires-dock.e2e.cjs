@@ -117,6 +117,24 @@ const badge = (p) =>
     ok(scrolled === 0, `la page ne défile pas à l’ouverture (main.scrollTop = ${scrolled})`);
     const field = await box(p, '.cm-compose');
     ok(field.y + field.height <= dock.y + dock.height + 1, 'champ de saisie collé en bas du panneau');
+    // §18.6 (retour client 21/11) : 16 px autour du composeur (bas, gauche, droite, filet au-dessus)
+    const pad = await p.evaluate(() => {
+      const d = document.querySelector('.cm-dock').getBoundingClientRect();
+      const c = document.querySelector('.cm-dock .cm-compose .fd-composer').getBoundingClientRect();
+      const cmp = document.querySelector('.cm-dock .cm-compose');
+      // sous le filet du haut
+      const top = cmp.getBoundingClientRect().top + cmp.clientTop;
+      return {
+        bottom: Math.round(d.bottom - c.bottom),
+        left: Math.round(c.left - d.left),
+        right: Math.round(d.right - c.right),
+        top: Math.round(c.top - top),
+      };
+    });
+    ok(
+      pad.bottom === 16 && pad.left === 16 && pad.right === 16 && pad.top === 16,
+      `16 px autour du composeur (${JSON.stringify(pad)})`,
+    );
     ok(
       (await p.locator('.cm-dock').evaluate((el) => el.scrollWidth - el.clientWidth)) <= 1,
       'aucun débordement horizontal (§18.7)',

@@ -140,15 +140,29 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       'Assistant : bouton du rail actif',
     );
     // Suggestions et champ collés en bas du panneau
-    const bottom = await asst.evaluate((el) => {
+    // §18.6 (retour client 21/11) : 16 px autour du composeur, 8 px entre les puces, 16 px avant le champ,
+    // puces sur la marge de 16 px du panneau
+    const sp = await asst.evaluate((el) => {
       const panel = el.getBoundingClientRect();
-      const form = el.querySelector('.ai-as-form').getBoundingClientRect();
-      const st = el.querySelector('.ai-as-starters').getBoundingClientRect();
-      return { gap: Math.round(panel.bottom - form.bottom), above: st.bottom <= form.top };
+      const form = el.querySelector('.ai-as-form .fd-composer').getBoundingClientRect();
+      const chips = [...el.querySelectorAll('.ai-as-starters button')].map((x) => x.getBoundingClientRect());
+      return {
+        bottom: Math.round(panel.bottom - form.bottom),
+        // depuis l'intérieur du filet de gauche du panneau
+        left: Math.round(form.left - panel.left - el.clientLeft),
+        right: Math.round(panel.right - form.right),
+        between: chips.slice(1).map((c, i) => Math.round(c.top - chips[i].bottom)),
+        toField: Math.round(form.top - chips.at(-1).bottom),
+        chipLeft: Math.round(chips[0].left - panel.left - el.clientLeft),
+      };
     });
     ok(
-      bottom.gap <= 24 && bottom.above,
-      `champ collé en bas, suggestions juste au-dessus (${bottom.gap} px)`,
+      sp.bottom === 16 && sp.left === 16 && sp.right === 16,
+      `composeur à 16 px du bas et des côtés (${JSON.stringify(sp)})`,
+    );
+    ok(
+      sp.between.every((g) => g === 8) && sp.toField === 16 && sp.chipLeft === 16,
+      'puces : 8 px entre elles, 16 px avant le champ, marge de 16 px',
     );
     await asst.getByLabel('Message à l’assistant').fill('Bonjour');
     await asst.getByLabel('Message à l’assistant').press('Escape');

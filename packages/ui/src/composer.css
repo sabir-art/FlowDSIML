@@ -13,15 +13,19 @@
     border-color 120ms,
     box-shadow 120ms;
 }
-.fd-composer:focus-within {
-  /* L50 X2 : halo seul */
-  box-shadow: var(--fd-shadow-focus);
+.fd-composer:has(.fd-composer__input:focus) {
+  /* FIELD-01 (comp-01-composants.md §11) : un seul indicateur, la bordure du cadre passe en prune
+     sur 2 px (1 px + 1 px intérieur), sans outline ni ombre extérieure. Porté par le champ seulement :
+     le bouton d'envoi garde son propre focus clavier, le cadre ne s'allume pas en plus. */
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
 }
 .fd-composer.is-error {
   border-color: var(--fd-color-danger);
 }
-.fd-composer.is-error:focus-within {
-  box-shadow: var(--fd-shadow-focus-danger);
+.fd-composer.is-error:has(.fd-composer__input:focus) {
+  border-color: var(--fd-color-danger);
+  box-shadow: inset 0 0 0 1px var(--fd-color-danger);
 }
 .fd-composer.is-disabled {
   background: var(--fd-color-surface-sunken);

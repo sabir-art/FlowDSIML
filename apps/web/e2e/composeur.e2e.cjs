@@ -272,7 +272,46 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
       (await field.getAttribute('placeholder')) === 'Posez une question sur cette démo…',
       'assistant : placeholder',
     );
+    // FIELD-01 (retour client 21/11) : un seul indicateur au focus, la bordure du cadre en prune sur 2 px
+    // (1 px + 1 px intérieur), sans outline ni ombre extérieure, sur le cadre comme sur le champ
+    const ring = () =>
+      panel.locator('.fd-composer').evaluate((el) => {
+        const cs = getComputedStyle(el);
+        const ta = getComputedStyle(el.querySelector('textarea'));
+        const primary = getComputedStyle(document.body).getPropertyValue('--fd-color-primary').trim();
+        const probe = document.createElement('i');
+        probe.style.color = primary;
+        document.body.append(probe);
+        const rgb = getComputedStyle(probe).color;
+        probe.remove();
+        return {
+          border: cs.borderTopColor === rgb && cs.borderTopWidth === '1px',
+          shadow: cs.boxShadow,
+          inset:
+            cs.boxShadow.split(/,(?![^(]*\))/).length === 1 &&
+            /inset/.test(cs.boxShadow) &&
+            cs.boxShadow.includes(rgb),
+          outline: cs.outlineStyle,
+          taOutline: ta.outlineStyle,
+          taShadow: ta.boxShadow,
+        };
+      });
+    await field.focus();
+    await p.waitForTimeout(200);
+    let r = await ring();
+    ok(
+      r.border && r.inset && r.outline === 'none' && r.taOutline === 'none' && r.taShadow === 'none',
+      `composeur au focus : un seul indicateur, bordure prune de 2 px (${JSON.stringify(r)})`,
+    );
     await field.fill('Rends l’étape plus claire');
+    await p.keyboard.press('Tab');
+    await p.waitForTimeout(200);
+    r = await ring();
+    ok(
+      !r.border && r.shadow === 'none',
+      `bouton d’envoi au clavier : le cadre ne s’allume pas en plus (${r.shadow})`,
+    );
+    await field.focus();
     await field.press('Enter');
     const stop = panel.getByRole('button', { name: 'Arrêter la réponse' });
     await stop.waitFor();
