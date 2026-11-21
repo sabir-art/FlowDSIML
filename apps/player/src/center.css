@@ -154,10 +154,12 @@
   cursor: pointer;
 }
 .ctr-me {
+  /* Audit L50 X3 : carte en surface (pas d'aplat), barre et bouton aux couleurs du thème */
   padding: 20px;
   border-radius: 24px;
-  background: #95c11f;
-  color: #080808;
+  background: var(--c-surface);
+  box-shadow: inset 0 0 0 1px var(--c-border);
+  color: var(--c-text);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -172,16 +174,16 @@
   line-height: 1;
 }
 .ctr-me .track {
-  height: 10px;
-  border-radius: 5px;
-  background: rgba(8, 8, 8, 0.15);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--c-sunken);
   overflow: hidden;
 }
 .ctr-me .track span {
   display: block;
   height: 100%;
-  background: #080808;
-  border-radius: 5px;
+  background: var(--brand);
+  border-radius: 3px;
 }
 .ctr-me a {
   align-self: flex-start;
@@ -191,8 +193,8 @@
   height: 44px;
   padding: 0 20px;
   border-radius: 999px;
-  background: #080808;
-  color: #ffffff;
+  background: var(--brand);
+  color: var(--brand-on);
   font-weight: 700;
   text-decoration: none;
   font-size: 14px;
@@ -700,8 +702,9 @@
   align-items: center;
   padding: 20px 22px;
   border-radius: 22px;
-  background: #95c11f;
-  color: #080808;
+  background: var(--c-surface);
+  box-shadow: inset 0 0 0 1px var(--c-border);
+  color: var(--c-text);
 }
 .fp-done .ic {
   width: 56px;
@@ -709,7 +712,7 @@
   border-radius: 16px;
   display: grid;
   place-items: center;
-  background: rgba(8, 8, 8, 0.12);
+  background: var(--c-sunken);
 }
 .fp-done .ic svg {
   width: 28px;
@@ -725,8 +728,8 @@
   font-size: 15px;
 }
 .fp-done .cta {
-  background: #080808;
-  color: #ffffff;
+  background: var(--brand);
+  color: var(--brand-on);
   height: 44px;
 }
 .fp-list {
@@ -873,8 +876,6 @@
 .ctr-hero--one {
   grid-template-columns: minmax(0, 1fr);
 }
-.ctr-me,
-.fp-done,
 .hb.ok {
   background: var(--accent);
 }

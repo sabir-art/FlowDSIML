@@ -1544,7 +1544,7 @@
   background: var(--fd-color-surface);
 }
 .mk .rte:focus-within {
-  border-color: var(--fd-color-primary);
+  /* L50 X2 : halo seul */
   box-shadow: var(--fd-shadow-focus);
 }
 .mk .rte-tools {

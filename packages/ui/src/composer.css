@@ -14,7 +14,7 @@
     box-shadow 120ms;
 }
 .fd-composer:focus-within {
-  border-color: var(--fd-color-primary);
+  /* L50 X2 : halo seul */
   box-shadow: var(--fd-shadow-focus);
 }
 .fd-composer.is-error {

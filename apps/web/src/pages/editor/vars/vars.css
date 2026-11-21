@@ -8,7 +8,7 @@
     box-shadow 120ms;
 }
 .var-rte:focus-within {
-  border-color: var(--fd-color-primary);
+  /* L50 X2 : halo seul */
   box-shadow: var(--fd-shadow-focus);
 }
 .var-rte.is-disabled {

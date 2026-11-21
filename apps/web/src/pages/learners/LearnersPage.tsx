@@ -752,7 +752,7 @@ function ListView(props: {
       />
 
       <div className="kpis">
-        <article className="fd-card fd-card--hero fd-kpi">
+        <article className="fd-card fd-kpi">
           <div className="fd-card__head">
             <span className="fd-icon-chip">
               <Award {...ICON} />
@@ -1117,7 +1117,7 @@ function FormationView({
       </div>
 
       <div className="kpis">
-        <article className="fd-card fd-card--hero fd-kpi">
+        <article className="fd-card fd-kpi">
           <div className="fd-card__head">
             <span className="fd-icon-chip">
               <Award {...ICON} />

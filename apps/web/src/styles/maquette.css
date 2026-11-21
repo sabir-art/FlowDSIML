@@ -326,7 +326,11 @@
 .mk .select:focus,
 .mk .textarea:focus {
   outline: none;
-  border-color: var(--fd-color-primary);
+}
+/* L50 X2 : un seul indicateur, le halo, au clavier ; la bordure reste border-strong */
+.mk .input:focus-visible,
+.mk .select:focus-visible,
+.mk .textarea:focus-visible {
   box-shadow: var(--fd-shadow-focus);
 }
 .mk .input::placeholder,

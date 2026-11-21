@@ -226,11 +226,15 @@ a {
 .fd-textarea:hover {
   border-color: var(--fd-color-text-subtle);
 }
-/* L50 X2 : un seul indicateur de focus, le halo (pas de bordure primary en plus) */
+/* L50 X2 : un seul indicateur de focus, le halo, au clavier (la bordure reste border-strong) */
 .fd-input:focus,
 .fd-select:focus,
 .fd-textarea:focus {
   outline: none;
+}
+.fd-input:focus-visible,
+.fd-select:focus-visible,
+.fd-textarea:focus-visible {
   box-shadow: var(--fd-shadow-focus);
 }
 .fd-input::placeholder,
@@ -243,9 +247,9 @@ a {
 .fd-textarea[aria-invalid='true'] {
   border-color: var(--fd-color-danger);
 }
-.fd-input[aria-invalid='true']:focus,
-.fd-select[aria-invalid='true']:focus,
-.fd-textarea[aria-invalid='true']:focus {
+.fd-input[aria-invalid='true']:focus-visible,
+.fd-select[aria-invalid='true']:focus-visible,
+.fd-textarea[aria-invalid='true']:focus-visible {
   box-shadow: var(--fd-shadow-focus-danger);
 }
 .fd-input:disabled,
@@ -577,21 +581,6 @@ input[type='radio'] {
   font-size: var(--fd-text-caption-size);
   color: var(--fd-color-text-muted);
 }
-.fd-card--hero {
-  background: var(--fd-color-hero);
-  color: var(--fd-color-on-hero);
-  border-color: transparent;
-  box-shadow: none;
-}
-.fd-card--hero .fd-kpi__label,
-.fd-card--hero .fd-kpi__foot,
-.fd-card--hero .fd-kpi__value {
-  color: var(--fd-color-on-hero);
-}
-.fd-card--hero .fd-icon-chip {
-  background: rgba(8, 8, 8, 0.1);
-  color: var(--fd-color-on-hero);
-}
 
 /* Badge de variation en pilule : vert si hausse, framboise si baisse (icône TrendingUp / TrendingDown) */
 .fd-trend {
@@ -616,10 +605,6 @@ input[type='radio'] {
 .fd-trend--down {
   background: var(--fd-color-trend-down-soft);
   color: var(--fd-color-trend-down);
-}
-.fd-card--hero .fd-trend {
-  background: var(--fd-color-on-hero);
-  color: var(--fd-color-hero);
 }
 
 /* Barres de graphique arrondies sur fond de barre pâle. La valeur est toujours écrite en

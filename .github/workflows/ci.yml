@@ -149,6 +149,9 @@ jobs:
       - name: 'Étiquettes L52 (8 couleurs et contrastes, page Paramètres › Étiquettes, fusion, lecture seule, clavier, « + Étiquette » et sélecteur sur la carte)'
         if: always()
         run: cd apps/web && node e2e/l52-etiquettes.e2e.cjs
+      - name: 'Audit L50, écarts transverses (focus des champs, cartes sans aplat)'
+        if: always()
+        run: cd apps/web && node e2e/l50-transverses.e2e.cjs
       - name: Google Safe Browsing L49 (lien signalé bloqué, vérification indisponible, nouvelle vérification à la publication, lecteur)
         if: always()
         run: cd apps/web && node e2e/l49-safebrowsing.e2e.cjs

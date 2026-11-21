@@ -13,10 +13,6 @@
 .sk--round {
   border-radius: 999px;
 }
-/* Carte « héros » : variante claire des blocs sur son fond coloré */
-.fd-card--hero .sk {
-  background: color-mix(in srgb, currentColor 22%, transparent);
-}
 @keyframes sk-beat {
   0%,
   100% {
