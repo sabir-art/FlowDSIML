@@ -29,7 +29,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   const t = state.tables;
   await install(page, state);
   await page.goto(`${APP}/#/`);
-  await page.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+  await page.getByRole('button', { name: 'Nouvelle démo' }).first().click();
   // L48-G : étape 1 (type de contenu), puis la source
   await page.getByRole('button', { name: 'Continuer', exact: true }).click();
   const nd = page.getByRole('dialog', { name: 'Nouvelle démo' });

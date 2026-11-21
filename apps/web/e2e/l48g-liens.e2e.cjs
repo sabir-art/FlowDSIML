@@ -217,6 +217,28 @@ const pages = [
   await map.waitFor();
   ok(true, '« Voir le plan » ouvre le plan');
 
+  // ===== Page Sandbox : colonne et compteur sur la carte =====
+  await p.waitForTimeout(1300);
+  await p.goto(`${APP}/#/sandbox`);
+  const dead = p.locator('.demo-card .sb-dead-count').first();
+  await dead.waitFor();
+  ok(
+    (await dead.innerText()) === '2 liens sans page' &&
+      (await dead.evaluate((el) => getComputedStyle(el).color)) !==
+        (await p
+          .locator('.demo-card .demo-meta')
+          .first()
+          .evaluate((el) => getComputedStyle(el).color)),
+    `carte : « 2 liens sans page » en danger (${await dead.innerText()})`,
+  );
+  const col = p.getByRole('navigation', { name: 'Dossiers' });
+  if (await col.count())
+    ok(
+      (await col.getByRole('link', { name: /^Tous les Sandbox/ }).count()) === 1 &&
+        (await col.getByRole('link', { name: /^Mes Sandbox/ }).count()) === 1,
+      'colonne : « Tous les Sandbox », « Mes Sandbox »',
+    );
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' / ')}` : ''}`);
   await b.close();
 })();

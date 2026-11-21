@@ -40,6 +40,7 @@ export function FolderColumn({
   onAccess,
   onDelete,
   onDropDemo,
+  sandbox = false,
 }: {
   folders: FolderRow[];
   scope: Scope;
@@ -55,6 +56,8 @@ export function FolderColumn({
   onAccess: (f: FolderRow) => void;
   onDelete: (f: FolderRow) => void;
   onDropDemo: (demoId: string, folderId: string) => void;
+  /** L48-G : page Sandbox (« Tous les Sandbox », « Mes Sandbox »). */
+  sandbox?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -205,8 +208,8 @@ export function FolderColumn({
         </button>
       </div>
       <ul className="fcol__list" role="list">
-        {entry('all', <Layers aria-hidden="true" />, t('folders.all'))}
-        {entry('mine', <User aria-hidden="true" />, t('folders.mine'))}
+        {entry('all', <Layers aria-hidden="true" />, t(sandbox ? 'sandboxPage.all' : 'folders.all'))}
+        {entry('mine', <User aria-hidden="true" />, t(sandbox ? 'sandboxPage.mine' : 'folders.mine'))}
       </ul>
       <hr className="fcol__sep" />
       <p className="fcol__section">{t('folders.space')}</p>

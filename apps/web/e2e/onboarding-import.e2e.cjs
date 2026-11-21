@@ -119,7 +119,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(true, '« Ouvrir mon espace » mène à Démos');
 
   // Nouvelle démo > Modèles : « Accueil » en premier
-  await page.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+  await page.getByRole('button', { name: 'Nouvelle démo' }).first().click();
   const nd = page.getByRole('dialog', { name: 'Nouvelle démo' });
   await nd.waitFor();
   // L48-G : étape 1 (type de contenu), puis la source

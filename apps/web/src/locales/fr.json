@@ -2607,14 +2607,12 @@
       "titleViewer": "Aucune démo pour l’instant",
       "body": "Ouvrez votre logiciel métier et lancez une capture : chaque clic devient une étape, avec sa bulle d’explication.",
       "bodyViewer": "Les démos de l’espace apparaîtront ici.",
-      "extension": "Capturer avec l’extension",
-      "images": "Partir d’images",
-      "template": "Partir d’un modèle",
       "archivedTitle": "Aucune démo archivée",
       "archivedBody": "Archivez une démo depuis son menu « … » pour la retirer des listes sans la supprimer.",
       "folderTitle": "Rangez vos premières démos ici",
       "folderBody": "Ce dossier est vide. Glissez une démo depuis la liste, ou créez-en une directement dans « {{folder}} ».",
-      "folderAction": "Nouvelle démo dans ce dossier"
+      "folderAction": "Nouvelle démo dans ce dossier",
+      "example": "Voir un exemple"
     }
   },
   "a11y": {
@@ -5203,7 +5201,9 @@
     "pages_one": "{{count}} page",
     "pages_other": "{{count}} pages",
     "mine": "Mes Sandbox",
-    "search": "Rechercher un Sandbox"
+    "search": "Rechercher un Sandbox",
+    "deadLinks_one": "{{count}} lien sans page",
+    "deadLinks_other": "{{count}} liens sans page"
   },
   "htmlCapture": {
     "title": "Captures HTML",

@@ -140,7 +140,7 @@ const SHOTS = process.env.SHOTS_DIR;
     'DSH-04 : tri « Date de création »',
   );
   await d2.keyboard.press('Escape');
-  await d2.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+  await d2.getByRole('button', { name: 'Nouvelle démo' }).first().click();
   // L48-G : étape 1 (type de contenu), puis la source
   await d2.getByRole('button', { name: 'Continuer', exact: true }).click();
   await d2.waitForSelector('dialog.new-demo-dialog[open]');

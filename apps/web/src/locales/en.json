@@ -2607,14 +2607,12 @@
       "titleViewer": "No demos yet",
       "body": "Open your business software and start a capture: each click becomes a step, with its explanation bubble.",
       "bodyViewer": "The workspace demos will appear here.",
-      "extension": "Capture with the extension",
-      "images": "Start from images",
-      "template": "Start from a template",
       "archivedTitle": "No archived demos",
       "archivedBody": "Archive a demo from its “…” menu to remove it from lists without deleting it.",
       "folderTitle": "Put your first demos here",
       "folderBody": "This folder is empty. Drag a demo from the list, or create one directly in “{{folder}}”.",
-      "folderAction": "New demo in this folder"
+      "folderAction": "New demo in this folder",
+      "example": "See an example"
     }
   },
   "a11y": {
@@ -5203,7 +5201,9 @@
     "pages_one": "{{count}} page",
     "pages_other": "{{count}} pages",
     "mine": "My Sandboxes",
-    "search": "Search a Sandbox"
+    "search": "Search a Sandbox",
+    "deadLinks_one": "{{count}} link without a page",
+    "deadLinks_other": "{{count}} links without a page"
   },
   "htmlCapture": {
     "title": "HTML captures",

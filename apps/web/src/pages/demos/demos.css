@@ -1197,40 +1197,11 @@ button.nd-src:focus-visible {
   cursor: grab;
 }
 
-/* L48-B §4 : trois tuiles de départ dans l'état vide (640 px au plus, une colonne sur mobile) */
-.demos-start {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  width: 100%;
-  max-width: 640px;
-  margin-top: 12px;
-}
-.demos-start__tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 12px;
-  border: 1px solid var(--fd-color-border);
-  border-radius: 12px;
-  background: var(--fd-color-surface);
-  color: var(--fd-color-text);
-  font: 600 14px var(--fd-font-sans);
-  cursor: pointer;
-}
-.demos-start__tile:hover {
-  background: var(--fd-color-surface-hover);
-}
-.demos-start__tile svg {
-  width: 24px;
-  height: 24px;
-  color: var(--fd-color-primary);
-}
-@media (max-width: 639px) {
-  .demos-start {
-    grid-template-columns: 1fr;
-  }
+/* L48-B : « Voir un exemple » désactivé (pas encore de démo d'exemple), « Bientôt » en texte */
+.demos-example .link-button[aria-disabled='true'] {
+  color: var(--fd-color-text-muted);
+  text-decoration: none;
+  cursor: default;
 }
 
 /* §18.4 : étape de la prise en main pas encore disponible (texte, pas de bouton) */
@@ -1253,4 +1224,10 @@ button.nd-src:focus-visible {
 }
 .nd-notice {
   margin-top: var(--fd-space-3);
+}
+
+/* L48-G : liens sans page d'un Sandbox, sur sa carte */
+.sb-dead-count {
+  color: var(--fd-color-danger);
+  font-weight: 600;
 }

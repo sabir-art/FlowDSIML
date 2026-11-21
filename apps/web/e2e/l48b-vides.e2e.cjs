@@ -1,7 +1,7 @@
 /**
  * Recette L48-B (spec docs/ux/specs/l48b-etats-vides.md §4 et §6). Données fictives.
- *  - espace neuf : pas d'indicateurs, prise en main repliée, état vide avec 3 tuiles, pas de barre ;
- *  - tuiles : Extension (modale), Partir d'un modèle (galerie) ;
+ *  - espace neuf : pas d'indicateurs, prise en main repliée, pas de barre ; état vide avec une seule action
+ *    principale (« Nouvelle démo » au centre, pas dans l'en-tête), sans tuiles, « Voir un exemple » désactivé ;
  *  - recherche « zzz » avec 2 filtres : variante search annoncée, « Réinitialiser les filtres ».
  * Usage : node e2e/l48b-vides.e2e.cjs
  */
@@ -44,22 +44,21 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     (await empty.getByRole('heading', { level: 2 }).textContent()) === 'Créez votre première démo',
     'titre « Créez votre première démo »',
   );
+  ok((await empty.locator('.demos-start__tile, .demos-start').count()) === 0, 'B1 : pas de tuiles de départ');
   ok(
-    (await empty.locator('.demos-start__tile').allTextContents()).join('|') ===
-      'Capturer avec l’extension|Partir d’images|Partir d’un modèle',
-    'trois tuiles de départ',
+    (await p.getByRole('button', { name: 'Nouvelle démo' }).count()) === 1 &&
+      (await empty.getByRole('button', { name: 'Nouvelle démo' }).count()) === 1,
+    'B2 : une seule action principale, au centre (pas dans l’en-tête)',
   );
-  await empty.getByRole('button', { name: 'Capturer avec l’extension' }).click();
-  await p.getByRole('dialog', { name: /^Extension TutoClick/ }).waitFor();
-  ok(true, 'tuile Extension : modale Extension (non publiée, §18.4 « Bientôt disponible »)');
-  await p.keyboard.press('Escape');
-  await empty.getByRole('button', { name: 'Partir d’un modèle' }).click();
-  await p
-    .locator('dialog[open]')
-    .filter({ hasText: /modèle/i })
-    .first()
-    .waitFor();
-  ok(true, 'tuile Modèle : galerie de modèles');
+  const example = empty.getByRole('link', { name: 'Voir un exemple' });
+  ok(
+    (await example.getAttribute('aria-disabled')) === 'true' &&
+      (await empty.locator('.demos-example .soon-text').textContent()) === 'Bientôt',
+    'B3 : « Voir un exemple » en lien désactivé, « Bientôt » en texte',
+  );
+  await empty.getByRole('button', { name: 'Nouvelle démo' }).click();
+  await p.locator('dialog[open]').first().waitFor();
+  ok(true, '« Nouvelle démo » ouvre la création');
   await p.keyboard.press('Escape');
   const axe = await new AxeBuilder({ page: p }).analyze();
   const bad = axe.violations.filter((v) => ['serious', 'critical'].includes(v.impact));

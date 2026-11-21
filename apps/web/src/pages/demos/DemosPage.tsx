@@ -4,7 +4,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type DragEvent,
   type FormEvent,
@@ -22,7 +21,6 @@ import {
   Copy,
   Download,
   Folder,
-  Image,
   FolderInput,
   FolderOpen,
   FolderPlus,
@@ -35,7 +33,6 @@ import {
   Pencil,
   Plus,
   Presentation,
-  Puzzle,
   Search,
   Send,
   Share2,
@@ -54,6 +51,7 @@ import { completionRate, contentType, countTrend, rateTrend, type ContentType } 
 import { TypeBadge } from '../../components/TypeBadge';
 import { TrendBadge } from '../../components/kpi/KpiTabs';
 import { supabase } from '../../lib/supabase';
+import type { StepRow } from '../editor/types';
 import { check, useAction } from '../../lib/useAction';
 import { formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useAuth } from '../../auth/AuthProvider';
@@ -120,7 +118,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { current, can } = useWorkspace();
   const ws = current!;
   const [demos, setDemos] = useState<Demo[] | null>(null);
@@ -134,6 +132,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [covers, setCovers] = useState<Record<string, string>>({});
   const [stepCounts, setStepCounts] = useState<Record<string, number>>({});
+  /** L48-G : liens sans page de chaque Sandbox (même calcul que le plan, deadLinks). */
+  const [deadCounts, setDeadCounts] = useState<Record<string, number>>({});
   const [htmlCounts, setHtmlCounts] = useState<Record<string, number>>({});
   /** L48-G §2 : type de contenu d'une démo de la liste. */
   const typeOf = (d: Demo): ContentType =>
@@ -196,7 +196,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const showCol = wide && !colHidden;
   const [newFolderParent, setNewFolderParent] = useState<string | null>(null);
   const [extension, setExtension] = useState(false);
-  const imagesInput = useRef<HTMLInputElement>(null);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<Sort>('updated');
@@ -261,7 +260,27 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     setHtmlCounts(h.htmlCounts);
     setPublishedAt(h.publishedAt);
     // L48-G §4 : Démos sans les Sandbox ; Sandbox seulement les Sandbox
-    setDemos(h.demos.filter((d) => (d.kind === 'sandbox') === sandbox));
+    const list = h.demos.filter((d) => (d.kind === 'sandbox') === sandbox);
+    setDemos(list);
+    if (sandbox && list.length)
+      void supabase
+        .from('steps')
+        .select('id, demo_id, kind, html_meta, html_ops')
+        .in(
+          'demo_id',
+          list.map((d) => d.id),
+        )
+        .eq('kind', 'html')
+        .then(async ({ data }) => {
+          // Calcul du plan chargé à la demande (page Sandbox seulement)
+          const { deadLinks } = await import('../editor/html/sandboxGraph');
+          const by = new Map<string, StepRow[]>();
+          for (const r of (data ?? []) as unknown as StepRow[])
+            by.set(r.demo_id, [...(by.get(r.demo_id) ?? []), r]);
+          setDeadCounts(
+            Object.fromEntries(list.map((d) => [d.id, deadLinks(by.get(d.id) ?? [], d.sandbox).dead.length])),
+          );
+        });
     if (h.kpis.cur) setKpis({ cur: h.kpis.cur, prev: h.kpis.prev });
     else {
       // Repli sur la somme de workspace_overview si workspace_kpis manque
@@ -526,7 +545,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
               onChange={(e) => setQ(e.target.value)}
             />
           </label>
-          {editable && (
+          {/* L48-B : liste vide, une seule action principale (au centre de l'état vide) */}
+          {editable && !(demos && demos.length === 0) && (
             <Button variant="primary" size="lg" icon={<Plus />} onClick={openNew}>
               {sandbox ? t('sandboxPage.new') : t('demos.new')}
             </Button>
@@ -673,6 +693,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           onAccess={setFolderAccess}
           onDelete={setFolderToDelete}
           onDropDemo={requestMove}
+          sandbox={sandbox}
         />
       )}
       <div className="stack page-wide demos-main">
@@ -1006,7 +1027,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
               }
             />
           ) : demos.length === 0 ? (
-            // L48-B §4 : état vide avec trois tuiles de départ
+            // L48-B : une seule action au centre, « Nouvelle démo », et « Voir un exemple » (pas encore de
+            // démo d'exemple : lien désactivé, « Bientôt » en texte)
             <Empty
               icon={<MonitorPlay />}
               title={editable ? t('demos.empty.title') : t('demos.empty.titleViewer')}
@@ -1018,45 +1040,17 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                   </Button>
                 ) : undefined
               }
-            >
-              {editable && (
-                <div className="demos-start">
-                  <button
-                    type="button"
-                    className="demos-start__tile"
-                    onClick={() => (profile?.extension_seen_at ? openNew() : setExtension(true))}
-                  >
-                    <Puzzle aria-hidden="true" />
-                    {t('demos.empty.extension')}
-                  </button>
-                  <button
-                    type="button"
-                    className="demos-start__tile"
-                    onClick={() => imagesInput.current?.click()}
-                  >
-                    <Image aria-hidden="true" />
-                    {t('demos.empty.images')}
-                  </button>
-                  <button type="button" className="demos-start__tile" onClick={() => setTplFolder(null)}>
-                    <Copy aria-hidden="true" />
-                    {t('demos.empty.template')}
-                  </button>
-                  <input
-                    ref={imagesInput}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    multiple
-                    hidden
-                    aria-label={t('demos.empty.images')}
-                    onChange={(e) => {
-                      const files = [...(e.target.files ?? [])];
-                      e.target.value = '';
-                      if (files.length) void importImages(files, null);
-                    }}
-                  />
-                </div>
-              )}
-            </Empty>
+              secondary={
+                editable ? (
+                  <span className="demos-example">
+                    <span className="link-button" role="link" aria-disabled="true">
+                      {t('demos.empty.example')}
+                    </span>{' '}
+                    <span className="soon-text">{t('shell.soon')}</span>
+                  </span>
+                ) : undefined
+              }
+            />
           ) : visible.length === 0 && inView.length === 0 && scope === 'archived' ? (
             <Empty
               icon={<Archive />}
@@ -1226,6 +1220,14 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                         <span>
                           {/* L48-G §4 : un Sandbox dit toujours son nombre de pages */}
                           {sandbox && <>{t('sandboxPage.pages', { count: stepCounts[d.id] ?? 0 })} · </>}
+                          {sandbox && (deadCounts[d.id] ?? 0) > 0 && (
+                            <>
+                              <span className="sb-dead-count">
+                                {t('sandboxPage.deadLinks', { count: deadCounts[d.id] })}
+                              </span>{' '}
+                              ·{' '}
+                            </>
+                          )}
                           {d.status === 'published' ? (
                             <>
                               {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })} ·{' '}

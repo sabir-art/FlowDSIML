@@ -31,7 +31,7 @@ const DIALOGS = [
     name: 'Dialogue Nouvelle démo',
     route: '/#/',
     open: async (p) => {
-      await p.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+      await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
       await p.locator('dialog.new-demo-dialog[open]').waitFor();
     },
   },

@@ -101,7 +101,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
 
   // Autorisées sur des domaines : la mention à l'étape 2 des types HTML (L49 §6)
   await p.goto(`${APP}/#/`);
-  await p.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+  await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
   const nd = p.locator('dialog.new-demo-dialog[open]');
   await nd.waitFor();
   await nd.getByRole('radio', { name: /Démo HTML/ }).check();
@@ -120,7 +120,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await p.waitForFunction(() => document.querySelector('.hc-card .fd-btn--primary')?.disabled === true);
   ok(ws.settings.htmlCapture.mode === 'disabled', 'désactivées : enregistré');
   await p.goto(`${APP}/#/`);
-  await p.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+  await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
   await nd.waitFor();
   for (const name of ['Démo HTML', 'Sandbox']) {
     const r = nd.getByRole('radio', { name: new RegExp(name) });

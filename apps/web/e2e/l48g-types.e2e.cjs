@@ -74,7 +74,7 @@ function data() {
   const s = data();
   const p = await open(s);
   await p.locator('.demo-card').first().waitFor();
-  await p.locator('.page-head__actions').getByRole('button', { name: 'Nouvelle démo' }).click();
+  await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
   const nd = p.locator('dialog.new-demo-dialog[open]');
   await nd.waitFor();
   ok(
