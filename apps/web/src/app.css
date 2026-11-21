@@ -396,6 +396,13 @@
   color: var(--fd-color-text-muted);
   margin-bottom: var(--fd-space-4);
 }
+/* Retour client : au moins 16 px entre les blocs du corps de modale (composant commun) */
+.dialog-body > * {
+  margin-block: 0;
+}
+.dialog-body > * + * {
+  margin-block-start: var(--fd-space-4);
+}
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
@@ -1013,6 +1020,33 @@
   .funnel__loss {
     width: 52px;
   }
+}
+
+/* Bouton à l'allure de lien, disponible partout (pas seulement dans .mk ou l'éditeur HTML).
+   fd-link et btn-link : mêmes règles (classes utilisées sans définition jusqu'ici). */
+.link-btn,
+.fd-link,
+.btn-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fd-color-link, var(--fd-color-primary));
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-btn:disabled,
+.fd-link:disabled,
+.btn-link:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.link-btn:focus-visible,
+.fd-link:focus-visible,
+.btn-link:focus-visible {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* ---- Refonte DSI : en-tête de page, grilles ---- */
@@ -1806,6 +1840,17 @@ button.fd-nav__item:hover {
 }
 .ext-dialog .ext-steps li + li {
   margin-top: var(--fd-space-1);
+}
+.ext-dialog .ext-soon {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+}
+.ext-dialog .ext-soon svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--fd-color-text-muted);
 }
 .ext-dialog .ext-ok {
   display: flex;

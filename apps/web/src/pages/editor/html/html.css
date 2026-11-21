@@ -233,20 +233,6 @@
   gap: 8px;
   align-items: flex-start;
 }
-.link-btn {
-  border: 0;
-  padding: 0;
-  background: none;
-  color: var(--fd-color-link, var(--fd-color-primary));
-  font: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.link-btn:focus-visible {
-  outline: none;
-  box-shadow: var(--fd-shadow-focus);
-  border-radius: 2px;
-}
 .sb-settings {
   display: grid;
   /* L20-02 : colonnes assez larges pour que les selects ne coupent pas leur texte */

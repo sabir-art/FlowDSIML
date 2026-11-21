@@ -134,8 +134,11 @@ export function SettingsShell({
       <div className="settings">
         <nav className="snav" aria-label={t('settings.sections')}>
           {GROUPS.map((g) => (
-            <div key={g.key} className="snav-grp">
-              <span className="grp">{t(`settings.grp.${g.key}`)}</span>
+            // Retour client : intitulé de groupe = étiquette non cliquable qui nomme le groupe
+            <div key={g.key} className="snav-grp" role="group" aria-labelledby={`snav-g-${g.key}`}>
+              <span id={`snav-g-${g.key}`} className="grp">
+                {t(`settings.grp.${g.key}`)}
+              </span>
               {g.entries
                 .filter((e) => !e.perm || can(e.perm))
                 .map((e) =>

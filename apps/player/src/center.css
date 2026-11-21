@@ -563,6 +563,10 @@
   gap: 8px;
   height: 40px;
   padding: 0 18px;
+  /* <button class="cta"> : pas de bordure ni de police natives */
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
   border-radius: 999px;
   background: var(--brand);
   color: var(--brand-on);

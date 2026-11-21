@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CircleCheck, ExternalLink } from 'lucide-react';
+import { BookOpen, CircleCheck, Clock, ExternalLink } from 'lucide-react';
+import { Button } from '@flowdsiml/ui';
 import { useAuth } from '../auth/AuthProvider';
 import { useHelp } from '../help/HelpProvider';
 import { EXTENSION_URL } from '../lib/env';
@@ -10,7 +11,8 @@ import { formatDate } from '../lib/format';
 /**
  * L48-A §1 : utilitaire « Extension » de la barre latérale. Pas encore détectée (l'extension n'a jamais
  * appelé extension_seen pour ce compte) : « Installer l'extension », lien vers la boutique et les étapes
- * de l'accueil. Détectée : la date de détection et « Lancer une capture ».
+ * de l'accueil ; pas encore publiée (VITE_EXTENSION_URL vide) : « Bientôt disponible », sans étapes.
+ * Détectée : la date de détection et « Lancer une capture ».
  */
 export function ExtensionDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
@@ -39,22 +41,37 @@ export function ExtensionDialog({ onClose }: { onClose: () => void }) {
           </p>
         ) : (
           <>
-            <p>{t('extension.intro')}</p>
-            <ol className="ext-steps">
-              <li>{t('extension.step1')}</li>
-              <li>{t('extension.step2')}</li>
-              <li>{t('extension.step3')}</li>
-            </ol>
-            <button
-              type="button"
-              className="link-btn"
-              onClick={() => {
-                ref.current?.close();
-                help?.openArticle('creer-demo-extension');
-              }}
-            >
-              {t('extension.article')}
-            </button>
+            {EXTENSION_URL ? (
+              <>
+                <p>{t('extension.intro')}</p>
+                <ol className="ext-steps">
+                  <li>{t('extension.step1')}</li>
+                  <li>{t('extension.step2')}</li>
+                  <li>{t('extension.step3')}</li>
+                </ol>
+              </>
+            ) : (
+              // Extension pas encore publiée (VITE_EXTENSION_URL vide) : pas d'étapes d'installation
+              <p className="ext-soon">
+                <Clock size={18} aria-hidden="true" />
+                <span>
+                  <strong>{t('extension.soonTitle')}</strong> {t('extension.soonBody')}
+                </span>
+              </p>
+            )}
+            <div>
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<BookOpen />}
+                onClick={() => {
+                  ref.current?.close();
+                  help?.openArticle('creer-demo-extension');
+                }}
+              >
+                {t('extension.article')}
+              </Button>
+            </div>
           </>
         )}
       </div>

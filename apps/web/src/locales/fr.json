@@ -5110,7 +5110,9 @@
     "article": "Voir l’article d’aide",
     "install": "Installer l’extension",
     "seenOn": "L’extension a été détectée sur votre compte le {{date}}.",
-    "capture": "Lancer une capture"
+    "capture": "Lancer une capture",
+    "soonTitle": "Bientôt disponible.",
+    "soonBody": "L’extension TutoClick n’est pas encore publiée. Vous pourrez l’installer ici dès sa sortie."
   },
   "folders": {
     "title": "Dossiers",

@@ -308,7 +308,7 @@
 .mk .snav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
   position: sticky;
   top: 24px;
 }
@@ -316,7 +316,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 36px;
+  height: 32px;
   padding: 0 10px;
   border-radius: var(--fd-radius-md);
   color: var(--fd-color-text-muted);
@@ -333,9 +333,14 @@
   color: var(--fd-color-text);
   font-weight: 600;
 }
-/* L48-A §4 : groupes (transparents pour la mise en page) et entrées « Bientôt » sans lien */
+/* L48-A §4, retour client : groupes serrés (2 px entre entrées), 24 px au-dessus de chaque intitulé */
 .mk .snav-grp {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mk .snav-grp + .snav-grp {
+  margin-top: 24px;
 }
 .mk .snav .snav-item--soon,
 .mk .snav .snav-item--soon:hover {
@@ -480,11 +485,12 @@
   height: 18px;
 }
 .mk .snav .grp {
-  font: 600 11px var(--fd-font-sans);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--fd-color-text-subtle);
-  padding: 14px 10px 4px;
+  /* Étiquette, pas une entrée : ni survol, ni pointeur, ni sélection */
+  font: 600 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+  padding: 0 10px 6px;
+  cursor: default;
+  user-select: none;
 }
 .mk .form-sec {
   display: grid;
@@ -513,6 +519,9 @@
   }
   .mk .snav .grp {
     display: none;
+  }
+  .mk .snav-grp {
+    display: contents;
   }
   .mk .form-sec {
     grid-template-columns: 1fr;
@@ -2815,19 +2824,6 @@
 .mk .sh-pp .help {
   margin: 0;
 }
-.mk .link-btn {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--fd-color-link, var(--fd-color-primary));
-  font: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.mk .link-btn:focus-visible {
-  outline: 2px solid var(--fd-color-focus, #1f7fb6);
-  outline-offset: 2px;
-}
 
 /* VB-01 à 03 : cartes « à venir » (vague B) : bordure pointillée, badge neutre, jamais d'accent */
 .mk .soon-page > .muted {
@@ -2945,7 +2941,7 @@
 }
 .mk .an-measure .modal-body {
   display: grid;
-  gap: 14px;
+  gap: var(--fd-space-4);
 }
 .mk .an-measure-gap {
   border: 0;
@@ -3073,4 +3069,16 @@
 .segmented [role='radio'][aria-disabled='true'] {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+/* Retour client : au moins 16 px entre les blocs du corps de modale (composant commun) */
+.mk .modal-body > * {
+  margin-block: 0;
+}
+.mk .modal-body > * + * {
+  margin-block-start: var(--fd-space-4);
+}
+/* Corps en grille : l'écart de 16 px suffit, sans marge en plus */
+.mk .an-measure .modal-body > * + * {
+  margin-block-start: 0;
 }

@@ -338,7 +338,7 @@ export function AiWrite({
                 </button>
                 <button
                   type="button"
-                  className="btn btn-link btn-sm"
+                  className="link-btn"
                   onClick={() => last && void run(last.action, last.tone, last.variant + 1)}
                 >
                   {t('ai.another')}

@@ -69,7 +69,16 @@ const MB = 1024 * 1024;
     await utils.getByRole('button', { name: 'Extension' }).click();
     const dlg = page.getByRole('dialog', { name: 'Installer l’extension' });
     await dlg.waitFor();
-    ok((await dlg.locator('.ext-steps li').count()) === 3, 'Extension non détectée : trois étapes');
+    // Pas de VITE_EXTENSION_URL dans les tests : extension non publiée
+    ok(
+      (await dlg.locator('.ext-steps li').count()) === 0 &&
+        (await dlg.innerText()).includes('Bientôt disponible'),
+      'Extension non publiée : « Bientôt disponible », sans étapes d’installation',
+    );
+    ok(
+      (await dlg.locator('button.fd-btn', { hasText: 'Voir l’article d’aide' }).count()) === 1,
+      '« Voir l’article d’aide » : bouton du design system',
+    );
     await page.keyboard.press('Escape');
     await dlg.waitFor({ state: 'hidden' });
     ok(
@@ -94,6 +103,47 @@ const MB = 1024 * 1024;
         `Paramètres actif sur ${r}`,
       );
     }
+    // Retour client : intitulés de groupe = étiquettes (non cliquables), 24 px au-dessus, entrées serrées
+    {
+      const g = await page.evaluate(() => {
+        const grps = [...document.querySelectorAll('.snav .snav-grp')];
+        const lab = grps[1].querySelector('.grp');
+        const items = [...grps[1].querySelectorAll('.snav-item')];
+        const r = (el) => el.getBoundingClientRect();
+        return {
+          tag: lab.tagName,
+          role: grps[1].getAttribute('role'),
+          named: grps[1].getAttribute('aria-labelledby') === lab.id,
+          cursor: getComputedStyle(lab).cursor,
+          above: Math.round(r(lab).top - r(grps[0]).bottom),
+          inner: items.length > 1 ? Math.round(r(items[1]).top - r(items[0]).bottom) : 0,
+        };
+      });
+      ok(
+        g.tag === 'SPAN' && g.role === 'group' && g.named && g.cursor === 'default',
+        'sous-navigation : intitulé de groupe en étiquette non cliquable qui nomme le groupe',
+      );
+      ok(
+        g.above >= 22 && g.above <= 26 && g.inner <= 4,
+        `sous-navigation : 24 px au-dessus de l’intitulé (${g.above}), entrées serrées (${g.inner})`,
+      );
+    }
+    // Retour client : au moins 16 px entre les blocs du corps de modale (Assistance IA)
+    await page.goto(`${APP}/#/settings/ai`);
+    await page.getByRole('switch', { name: 'Activer l’Assistance IA pour cet espace' }).click();
+    const ai = page.getByRole('dialog', { name: 'Activer l’Assistance IA ?' });
+    await ai.waitFor();
+    {
+      const gap = await ai.locator('.modal-body').evaluate((el) => {
+        const k = [...el.children].filter((c) => c.getBoundingClientRect().height > 0);
+        let min = Infinity;
+        for (let i = 1; i < k.length; i++)
+          min = Math.min(min, k[i].getBoundingClientRect().top - k[i - 1].getBoundingClientRect().bottom);
+        return Math.round(min);
+      });
+      ok(gap >= 16, `modale Assistance IA : ${gap} px entre l’information et la case (16 au moins)`);
+    }
+    await page.keyboard.press('Escape');
     await ctx.close();
   }
 

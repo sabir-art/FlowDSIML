@@ -364,10 +364,10 @@ export function Onboarding() {
           </ol>
         )}
         <p className="obx-links">
-          <button type="button" className="fd-link" disabled={busy} onClick={() => picker.current?.click()}>
+          <button type="button" className="link-btn" disabled={busy} onClick={() => picker.current?.click()}>
             {t('onboarding.importInstead')}
           </button>
-          <button type="button" className="fd-link" onClick={() => setIndex(index + 1)}>
+          <button type="button" className="link-btn" onClick={() => setIndex(index + 1)}>
             {t('onboarding.extSkip')}
           </button>
           <input
