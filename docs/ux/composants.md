@@ -601,7 +601,8 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
 - **Où** :
   - barre latérale dépliée, au survol ou épinglée : logo complet, 224 px de large (256 px moins 2 × 16 px) ;
   - rail replié et barre mobile : **icône seule** (32 px), jamais le logo complet ;
-  - connexion et inscription, accueil de l'onboarding : logo complet, **400 px de large au moins** ;
+  - connexion et inscription : logo complet, **400 px de large au moins** ; logo compact sous 480 px ;
+  - accueil de l'onboarding : logo complet de 400 px dans la barre du haut **à partir de 900 px**, logo compact en dessous (la barre de progression et « Passer » ne laissent pas 400 px). Arbitrage UX du 21/11 : on ne duplique pas le logo au-dessus du titre ;
   - en-tête des e-mails : PNG du logo complet, 400 px affichés (fichier en 800 px pour les écrans 2×) ;
   - pied du lecteur : logo complet seulement s'il dispose de 400 px, sinon logo compact.
 - **Mesure de la signature** : ses capitales font 10 unités sur les 803,5 du cadrage. Hauteur affichée = largeur du logo × 0,0124.
