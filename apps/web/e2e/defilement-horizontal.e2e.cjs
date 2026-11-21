@@ -69,8 +69,14 @@ async function editorTools(p) {
     for (const x of m) console.log(`    ${x.c} : +${x.over} px, cause ${x.why}`);
   };
   const check = (p) => p.evaluate(overflows);
-  for (const width of [1440, 390])
+  // WIDTHS=390 : une seule largeur (relance locale)
+  const widths = (process.env.WIDTHS || '1440,390').split(',').map(Number);
+  for (const width of widths)
     for (const s of pages) {
+      // Sous 1 024 px, l'éditeur passe en écran étroit (EditorNarrow) : ses panneaux d'outils n'existent pas
+      if (width === 390 && s.open && /\/edit\b/.test(s.route)) continue;
+      // Route déjà mesurée à sa propre largeur
+      if (width === 390 && s.viewport) continue;
       const page = { ...s, viewport: width === 390 ? { width: 390, height: 844 } : s.viewport };
       try {
         const m =
