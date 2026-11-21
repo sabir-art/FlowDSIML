@@ -33,7 +33,7 @@
 }
 .crumb-btn:focus-visible {
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .html-stage {
   position: relative;
@@ -105,8 +105,8 @@
   cursor: not-allowed;
 }
 .eltb > button:focus-visible {
-  outline: 3px solid #2897d5;
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .eltb-menu {
   position: absolute;
@@ -482,8 +482,8 @@
   }
 }
 .sb-scroll:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .sb-deadlist__actions .grow {
   flex: 1;

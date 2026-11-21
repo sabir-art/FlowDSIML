@@ -276,7 +276,7 @@
   background: var(--fd-color-surface-sunken);
 }
 .console-link__opt:focus-visible {
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 
 /* Backlog : colonnes sur fond sunken, cartes à bordure uniforme (jamais de barre de couleur, §15.6) */
@@ -320,7 +320,7 @@
   cursor: pointer;
 }
 .console-card__open:focus-visible {
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .console-card__meta {
   display: flex;

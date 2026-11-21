@@ -3,7 +3,20 @@ import { initials } from '../../lib/initials';
 import { AvatarPhoto } from '../../components/AvatarPhoto';
 export { initials };
 import { useConfirm } from '../../components/ConfirmDialog';
-import { Check, Copy, Info, LogOut, Mail, Plus, Search, Star, Trash2, UserCog, X } from 'lucide-react';
+import {
+  CircleAlert,
+  Check,
+  Copy,
+  Info,
+  LogOut,
+  Mail,
+  Plus,
+  Search,
+  Star,
+  Trash2,
+  UserCog,
+  X,
+} from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { assignableRoles, can as roleCan, ROLES, type Action, type Role } from '@flowdsiml/core';
@@ -630,6 +643,7 @@ function InviteDialog({
                 />
                 {err && (
                   <span className="error-msg" id="inv-email-error">
+                    <CircleAlert aria-hidden="true" />
                     {err}
                   </span>
                 )}

@@ -47,10 +47,27 @@ a {
   padding: 0;
   cursor: pointer;
 }
+/* FIELD-01 (comp-01-composants.md §11.4) : jamais d'outline, de décalage ni d'ombre extérieure.
+   Par défaut (navigation, options, cartes, onglets) : un trait prune intérieur de 2 px, au clavier. */
 :focus-visible {
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
-  border-radius: var(--fd-radius-sm);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+/* Lien de texte au clavier : soulignement prune de 2 px sur fond teinté, sans cadre. Les liens habillés
+   (navigation, cartes, boutons) gardent le trait intérieur de 2 px. */
+a:focus-visible:is(:not([class]), [class^='t-'], .link, .mk-link) {
+  box-shadow: none;
+  text-decoration: underline;
+  text-decoration-color: var(--fd-color-focus);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  background: var(--fd-color-tint);
+  border-radius: 4px;
+  padding: 0 2px;
+  margin: 0 -2px;
 }
 
 /* Boutons */
@@ -120,11 +137,22 @@ a {
   background: var(--fd-color-surface-hover);
   color: var(--fd-color-text);
 }
+/* FIELD-01 §11.4, au clavier seulement. Secondaire et fantôme : leur bordure passe en prune sur 2 px.
+   Primaire et destructif : fond assombri, bordure couleur de surface sur 2 px (rien à l'extérieur). */
 .fd-btn:focus-visible {
-  box-shadow: var(--fd-shadow-focus);
+  border-color: var(--fd-color-focus);
+  box-shadow: inset 0 0 0 1px var(--fd-color-focus);
+}
+.fd-btn--primary:focus-visible,
+.fd-btn--accent:focus-visible {
+  background: var(--fd-color-primary-focus);
+  border-color: var(--fd-color-surface);
+  box-shadow: inset 0 0 0 1px var(--fd-color-surface);
 }
 .fd-btn--danger:focus-visible {
-  box-shadow: var(--fd-shadow-focus-danger);
+  background: var(--fd-color-danger-focus);
+  border-color: var(--fd-color-surface);
+  box-shadow: inset 0 0 0 1px var(--fd-color-surface);
 }
 .fd-btn--sm {
   height: var(--fd-layout-control-height-sm);
@@ -221,21 +249,25 @@ a {
   line-height: var(--fd-text-body-line);
   resize: vertical;
 }
+.fd-input,
+.fd-select,
+.fd-textarea {
+  border-color: var(--fd-color-border-field);
+}
+/* FIELD-01 (§11.1) : une seule grille d'états pour tous les champs. Survol : border-field-hover.
+   Focus, souris et clavier : bordure prune + trait intérieur de 1 px (2 px, sans décaler la page),
+   jamais d'outline ni d'ombre extérieure, fond inchangé. Invalide : même principe en rouge. */
 .fd-input:hover,
 .fd-select:hover,
 .fd-textarea:hover {
-  border-color: var(--fd-color-text-subtle);
+  border-color: var(--fd-color-border-field-hover);
 }
-/* L50 X2 : un seul indicateur de focus, le halo, au clavier (la bordure reste border-strong) */
 .fd-input:focus,
 .fd-select:focus,
 .fd-textarea:focus {
   outline: none;
-}
-.fd-input:focus-visible,
-.fd-select:focus-visible,
-.fd-textarea:focus-visible {
-  box-shadow: var(--fd-shadow-focus);
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
 }
 .fd-input::placeholder,
 .fd-textarea::placeholder {
@@ -247,20 +279,44 @@ a {
 .fd-textarea[aria-invalid='true'] {
   border-color: var(--fd-color-danger);
 }
-.fd-input[aria-invalid='true']:focus-visible,
-.fd-select[aria-invalid='true']:focus-visible,
-.fd-textarea[aria-invalid='true']:focus-visible {
-  box-shadow: var(--fd-shadow-focus-danger);
+.fd-input[aria-invalid='true']:focus,
+.fd-select[aria-invalid='true']:focus,
+.fd-textarea[aria-invalid='true']:focus {
+  box-shadow: inset 0 0 0 1px var(--fd-color-danger);
 }
 .fd-input:disabled,
 .fd-select:disabled,
 .fd-textarea:disabled {
+  border-color: var(--fd-color-border);
   background-color: var(--fd-color-surface-sunken);
-  color: var(--fd-color-text-disabled);
+  color: var(--fd-color-text-muted);
   cursor: not-allowed;
 }
-.fd-input[readonly] {
+.fd-input[readonly],
+.fd-textarea[readonly] {
   background-color: var(--fd-color-surface-sunken);
+}
+/* §11.2 : remplissage automatique teinté aux couleurs de la marque (pas de jaune ni de bleu du navigateur) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--fd-color-text);
+  caret-color: var(--fd-color-text);
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1000px var(--fd-color-tint);
+  transition: background-color 600000s 0s;
+}
+input:-webkit-autofill:focus {
+  box-shadow:
+    inset 0 0 0 1px var(--fd-color-primary),
+    inset 0 0 0 1000px var(--fd-color-tint);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fd-input,
+  .fd-select,
+  .fd-textarea {
+    transition: none;
+  }
 }
 /* Fichier : bouton du sélecteur stylé comme un bouton secondaire */
 input[type='file'] {

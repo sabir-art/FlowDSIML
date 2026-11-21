@@ -6,12 +6,15 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--fd-color-border-strong);
+  border: 1px solid var(--fd-color-border-field);
   border-radius: 16px;
   background: var(--fd-color-surface);
   transition:
     border-color 120ms,
     box-shadow 120ms;
+}
+.fd-composer:hover {
+  border-color: var(--fd-color-border-field-hover);
 }
 .fd-composer:has(.fd-composer__input:focus) {
   /* FIELD-01 (comp-01-composants.md §11) : un seul indicateur, la bordure du cadre passe en prune

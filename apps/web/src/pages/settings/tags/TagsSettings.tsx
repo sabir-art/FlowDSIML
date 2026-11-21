@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowDown, ArrowUp, Plus, Tag as TagIcon } from 'lucide-react';
+import { CircleAlert, ArrowDown, ArrowUp, Plus, Tag as TagIcon } from 'lucide-react';
 import { Empty } from '@flowdsiml/ui';
 import { SettingsShell } from '../SettingsShell';
 import { supabase } from '../../../lib/supabase';
@@ -150,6 +150,7 @@ export function TagsSettings() {
         {!editable && <p className="tgs-ro">{t('tags.readOnly')}</p>}
         {store.error && (
           <p className="error-msg" role="alert">
+            <CircleAlert aria-hidden="true" />
             {store.error}
           </p>
         )}

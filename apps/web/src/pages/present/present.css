@@ -59,7 +59,7 @@
   height: 1px;
 }
 .lx-modes label:has(input:focus-visible) {
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .lx-modes small {
   color: var(--fd-color-text-muted);
@@ -268,10 +268,9 @@
   color: #080808;
 }
 .presenter button:not(dialog button):focus-visible {
+  /* FIELD-01 : vue présentateur toujours sombre, prune du thème sombre, trait intérieur */
   outline: none;
-  box-shadow:
-    0 0 0 2px #0b0d10,
-    0 0 0 4px #51abdd;
+  box-shadow: inset 0 0 0 2px #cf86a9;
 }
 .presenter svg {
   width: 16px;
@@ -593,6 +592,11 @@ html[data-remote] body {
   background: #0b0d10;
 }
 .rmp {
+  /* Toujours sombre : jetons de champ et de focus du thème sombre (FIELD-01) */
+  --fd-color-primary: #cf86a9;
+  --fd-color-focus: #cf86a9;
+  --fd-color-border-field: #5e6978;
+  --fd-color-border-field-hover: #7a8494;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -689,11 +693,19 @@ html[data-remote] body {
   opacity: 0.45;
   cursor: not-allowed;
 }
-.rmp button:focus-visible,
-.rmp input:focus-visible {
-  outline: 3px solid #ffffff;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 6px #2f5db8;
+/* FIELD-01 (§11.1, §11.4) : télécommande toujours sombre, prune du thème sombre (#CF86A9, 6,4:1) ;
+   trait intérieur, rien à l'extérieur */
+.rmp button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.rmp input:hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+.rmp input:focus {
+  outline: none;
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
 }
 .rmp .rmp-prev,
 .rmp .rmp-next {
@@ -746,7 +758,7 @@ html[data-remote] body {
 }
 .rmp input {
   padding: 0 14px;
-  border: 1px solid #3a434f;
+  border: 1px solid var(--fd-color-border-field);
   background: #15191f;
   color: #f3f5f8;
   font-size: 26px;

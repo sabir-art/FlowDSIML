@@ -53,10 +53,22 @@
 .url-f {
   display: flex;
   align-items: stretch;
-  border: 1px solid var(--fd-color-border-strong);
+  border: 1px solid var(--fd-color-border-field);
   border-radius: 12px;
   overflow: hidden;
   background: var(--fd-color-surface);
+}
+/* FIELD-01 §11.3 : le groupe porte la bordure et le focus ; l'input intérieur n'a ni bordure ni ombre */
+:is(.url-f, .col-f):hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+:is(.url-f, .col-f):focus-within {
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+:is(.url-f, .col-f) input:focus {
+  outline: none;
+  box-shadow: none;
 }
 .url-f span {
   display: flex;
@@ -127,7 +139,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid var(--fd-color-border-strong);
+  border: 1px solid var(--fd-color-border-field);
   border-radius: 12px;
   padding: 6px 10px 6px 6px;
   background: var(--fd-color-surface);
@@ -174,8 +186,8 @@
   height: 1px;
 }
 .presets label:has(input:focus-visible) {
-  outline: 2px solid var(--fd-color-focus, #1f7fb6);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .pv {
   height: 64px;
@@ -553,7 +565,7 @@
   cursor: pointer;
 }
 .logo-f label.fd-btn:focus-within {
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .vis li {
   cursor: grab;
@@ -623,7 +635,7 @@
 .kind14:has(input:focus-visible) {
   box-shadow:
     inset 0 0 0 2px var(--fd-color-primary),
-    var(--fd-shadow-focus);
+    inset 0 0 0 2px var(--fd-color-focus);
 }
 .kind14 input {
   margin-top: 3px;

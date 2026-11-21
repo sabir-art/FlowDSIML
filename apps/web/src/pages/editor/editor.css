@@ -281,7 +281,7 @@
 .canvas-hotspot:focus-visible,
 .canvas-blur:focus-visible {
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .panel-sections > * + * {
   border-top: 1px solid var(--fd-color-border);
@@ -363,7 +363,10 @@
 .canvas-hotspot.selected {
   border-style: solid;
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
+  /* Sélection (pas un focus) : liseré blanc puis trait prune, lisible sur toute capture */
+  box-shadow:
+    0 0 0 2px var(--fd-color-surface),
+    0 0 0 4px var(--fd-color-focus);
 }
 .canvas-hotspot-n {
   display: none;
@@ -1701,7 +1704,7 @@
 }
 .pr-stack:focus-visible {
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .cm-avatar.pr-av {
   position: relative;
@@ -1777,7 +1780,7 @@
 }
 .pr-pop li button:focus-visible {
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .pr-pop small {
   display: block;
@@ -2532,8 +2535,8 @@
   inset: -8px;
 }
 .crop-h:focus-visible {
-  outline: 3px solid #2897d5;
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .crop-h--nw {
   left: 0;
@@ -3151,8 +3154,8 @@
   cursor: not-allowed;
 }
 .mk .ed-rail__btn:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 
 .mk .ed-tool {
@@ -3183,8 +3186,8 @@
   outline: none;
 }
 .mk .ed-tool__head h2:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .mk .ed-tool__body {
   flex: 1;
@@ -3507,8 +3510,8 @@
   background: var(--fd-color-border-strong);
 }
 .mk .cm-dock__handle:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: -2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .mk .cm-dock__bar {
   flex: none;
@@ -3537,8 +3540,8 @@
   background: color-mix(in srgb, var(--fd-color-text) 6%, transparent);
 }
 .mk .cm-dock__toggle:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .mk .cm-dock__toggle svg {
   width: 16px;

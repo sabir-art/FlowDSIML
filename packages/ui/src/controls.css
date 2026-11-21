@@ -101,7 +101,7 @@
   transform: translateX(16px);
 }
 .fd-switch input:focus-visible + .fd-switch__track {
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .fd-switch input:disabled + .fd-switch__track,
 .fd-switch input[aria-disabled='true'] + .fd-switch__track {
@@ -179,7 +179,7 @@
   box-shadow: none;
 }
 .fd-segmented > button:focus-visible {
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 
 /* Onglets en pilules (panneau de l'éditeur, paramètres) */

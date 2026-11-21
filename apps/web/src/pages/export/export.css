@@ -85,7 +85,7 @@
   accent-color: var(--fd-color-primary);
 }
 .x15-dialog .exp-format:has(input:focus-visible) {
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .x15-dialog .exp-format input:focus-visible {
   box-shadow: none;
@@ -98,7 +98,7 @@
 .x15-dialog .exp-format.is-on:has(input:focus-visible) {
   box-shadow:
     inset 0 0 0 1px var(--fd-color-primary),
-    var(--fd-shadow-focus);
+    inset 0 0 0 2px var(--fd-color-focus);
 }
 .x15-dialog .exp-format.is-off {
   cursor: not-allowed;

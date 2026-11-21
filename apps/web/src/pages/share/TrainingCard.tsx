@@ -6,7 +6,7 @@
 import { useId, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { GraduationCap, PackageOpen } from 'lucide-react';
+import { CircleAlert, GraduationCap, PackageOpen } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
@@ -124,6 +124,7 @@ export function TrainingCard({
       )}
       {error && (
         <p className="error-msg" role="alert">
+          <CircleAlert aria-hidden="true" />
           {error}
         </p>
       )}

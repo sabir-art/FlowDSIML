@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, X } from 'lucide-react';
+import { CircleAlert, ShieldCheck, X } from 'lucide-react';
 import { Status } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -123,6 +123,7 @@ export function MeasureDialog({ onClose, onSaved }: { onClose: () => void; onSav
             {!editable && <p className="help">{t('analytics.ret.adminOnly')}</p>}
             {err && (
               <p className="error-msg" role="alert">
+                <CircleAlert aria-hidden="true" />
                 {t('analytics.ret.saveError')}
               </p>
             )}

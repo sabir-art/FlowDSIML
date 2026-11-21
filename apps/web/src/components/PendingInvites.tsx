@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { UserPlus } from 'lucide-react';
+import { CircleAlert, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { errorMessage } from '../lib/errors';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
@@ -52,6 +52,7 @@ export function PendingInvites() {
       </h2>
       {error && (
         <p className="error-msg" role="alert">
+          <CircleAlert aria-hidden="true" />
           {error}
         </p>
       )}

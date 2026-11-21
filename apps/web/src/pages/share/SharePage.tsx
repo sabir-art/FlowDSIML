@@ -1,4 +1,5 @@
 import {
+  CircleAlert,
   Copy,
   Download,
   Eye,
@@ -1193,6 +1194,7 @@ function NewLinkDialog({
             />
             {err.name && (
               <span className="error-msg" id="sh-ln-e">
+                <CircleAlert aria-hidden="true" />
                 {err.name}
               </span>
             )}
@@ -1237,7 +1239,12 @@ function NewLinkDialog({
                     onChange={(e) => setValues({ ...values, [v.key]: e.target.value })}
                     aria-invalid={err[v.key] ? true : undefined}
                   />
-                  {err[v.key] && <span className="error-msg">{err[v.key]}</span>}
+                  {err[v.key] && (
+                    <span className="error-msg">
+                      <CircleAlert aria-hidden="true" />
+                      {err[v.key]}
+                    </span>
+                  )}
                   {v.key === 'email' && <span className="help">{t('share.pp.emailHelp')}</span>}
                 </div>
               ))}

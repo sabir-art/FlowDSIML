@@ -7,7 +7,7 @@
  */
 import { useCallback, useEffect, useId, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Copy, Mail, Plus, Send, Trash2, X } from 'lucide-react';
+import { CircleAlert, Copy, Mail, Plus, Send, Trash2, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
 import { check } from '../../lib/useAction';
@@ -298,6 +298,7 @@ function InviteDialog({
             </span>
             {err && (
               <span className="error-msg" id={`${id}-err`} role="alert">
+                <CircleAlert aria-hidden="true" />
                 {err}
               </span>
             )}
@@ -412,6 +413,7 @@ export function DomainConfig({
         </div>
         {err && (
           <span className="error-msg" id="acc-dom-err" role="alert">
+            <CircleAlert aria-hidden="true" />
             {err}
           </span>
         )}

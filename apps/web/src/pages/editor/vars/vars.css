@@ -8,8 +8,9 @@
     box-shadow 120ms;
 }
 .var-rte:focus-within {
-  /* L50 X2 : halo seul */
-  box-shadow: var(--fd-shadow-focus);
+  /* FIELD-01 §11.3 : le groupe porte la bordure et le focus */
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
 }
 .var-rte.is-disabled {
   background: var(--fd-color-surface-sunken);

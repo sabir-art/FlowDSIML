@@ -70,8 +70,8 @@
   border-radius: var(--fd-radius-sm);
 }
 .mk .tgs-sort:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .mk .tgs-sort svg {
   width: 14px;

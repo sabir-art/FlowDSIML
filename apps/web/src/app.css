@@ -46,9 +46,15 @@
   opacity: 0.6;
 }
 .link-button:focus-visible {
+  /* FIELD-01 §11.4 : comme un lien, soulignement prune de 2 px sur fond teinté, sans cadre */
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
-  border-radius: 2px;
+  box-shadow: none;
+  text-decoration: underline;
+  text-decoration-color: var(--fd-color-focus);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  background: var(--fd-color-tint);
+  border-radius: 4px;
 }
 .tabs {
   display: flex;
@@ -251,7 +257,7 @@
 }
 .skip-link:focus {
   transform: none;
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .btn-danger-ghost {
   color: var(--fd-color-danger);
@@ -528,7 +534,7 @@
 }
 .segmented button:focus-visible {
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
   position: relative;
 }
 .segmented button {
@@ -1087,7 +1093,7 @@
 }
 .ws-switch:focus-visible {
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .ws-switch > svg {
   flex: none;
@@ -1579,8 +1585,8 @@
   cursor: pointer;
 }
 .tg-line:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 /* « + Étiquette » : lien de 13 px, visible au survol et au focus de la carte ou de la ligne de liste */
 .tg-add {
@@ -1957,8 +1963,8 @@ button.fd-nav__item:hover {
   cursor: grabbing;
 }
 .pf-crop__box:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .pf-crop__preview {
   display: block;

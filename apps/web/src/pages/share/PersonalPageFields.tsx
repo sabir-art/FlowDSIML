@@ -1,3 +1,4 @@
+import { CircleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { personalTitle } from '@flowdsiml/core';
 
@@ -186,6 +187,7 @@ export function PersonalPageFields({
               />
               {errors.ctaUrl && (
                 <span className="error-msg" id="sh-pp-url-e">
+                  <CircleAlert aria-hidden="true" />
                   {t('share.pp.httpsRequired')}
                 </span>
               )}

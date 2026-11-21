@@ -1,6 +1,6 @@
 import { FormatSection } from '../format/FormatSection';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
-import { Plus, Trash2, X } from 'lucide-react';
+import { CircleAlert, Plus, Trash2, X } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VarTextField } from '../vars/VarTextField';
@@ -461,6 +461,7 @@ function TagsField({ demoId, wsId, readOnly }: { demoId: string; wsId: string; r
       </div>
       {store.error && (
         <p className="error-msg" role="alert">
+          <CircleAlert aria-hidden="true" />
           {store.error}
         </p>
       )}

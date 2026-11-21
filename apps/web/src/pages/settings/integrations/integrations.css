@@ -128,7 +128,7 @@
 }
 .l23 tbody tr[tabindex]:focus-visible {
   outline: none;
-  box-shadow: inset var(--fd-shadow-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .l23 .tr-sel {
   background: var(--fd-color-surface-selected);

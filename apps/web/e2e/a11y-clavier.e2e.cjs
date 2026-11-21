@@ -86,7 +86,9 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         if (!el || el === document.body) return null;
         const cs = getComputedStyle(el);
         const outline = cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0;
-        const shadow = cs.boxShadow && cs.boxShadow !== 'none';
+        // FIELD-01 §11.4 : le lien de texte se signale par un soulignement de 2 px sur fond teinté
+        const shadow =
+          (cs.boxShadow && cs.boxShadow !== 'none') || parseFloat(cs.textDecorationThickness) >= 2;
         // Interrupteurs : l'indicateur est porté par la piste voisine
         const sib = el.nextElementSibling ? getComputedStyle(el.nextElementSibling) : null;
         // Champ dont le cadre parent porte l'indicateur (:focus-within)
@@ -168,7 +170,10 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       `A11Y-01 : titre « Démos · TutoClick » (${await p.title()})`,
     );
     await p.getByRole('link', { name: 'Analytics' }).first().click();
-    await p.waitForTimeout(800);
+    // Attente explicite (au plus 3 s) plutôt qu'un délai fixe, trop court sous charge
+    await p
+      .waitForFunction(() => document.activeElement?.tagName === 'H1', null, { timeout: 3000 })
+      .catch(() => {});
     const r = await p.evaluate(() => ({
       title: document.title,
       tag: document.activeElement?.tagName,

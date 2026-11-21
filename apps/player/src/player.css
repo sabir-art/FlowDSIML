@@ -41,6 +41,9 @@ body {
 }
 
 .p-root {
+  /* FIELD-01 (comp-01-composants.md §11.4) : focus clavier en prune (7,4:1 en clair, 6,4:1 en sombre),
+     trait intérieur de 2 px, sans outline ni ombre extérieure */
+  --p-focus: #a3195b;
   --p-shadow: 0 4px 8px rgb(31 29 26 / 6%), 0 18px 40px rgb(31 29 26 / 16%);
   height: 100%;
   display: flex;
@@ -100,9 +103,7 @@ body {
 }
 .p-root :focus-visible {
   outline: none;
-  box-shadow:
-    0 0 0 2px var(--p-surface),
-    0 0 0 4px var(--fd-color-focus, #1f7fb6);
+  box-shadow: inset 0 0 0 2px var(--p-focus);
 }
 .p-menu {
   position: absolute;
@@ -375,11 +376,12 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
 }
 .p-consent input:focus-visible {
-  outline: 2px solid var(--p-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--p-focus);
 }
 .p-error {
-  color: #d60b52;
+  /* FIELD-01 §11.5 : rouge d'erreur (5,7:1) */
+  color: #c42b1c;
   font-size: 13px;
 }
 
@@ -817,8 +819,7 @@ a.p-btn:hover {
 /* MOB-01 M6 : un seul indicateur. L'anneau de focus (clavier seulement) est porté par l'option,
    pas par le bouton radio ; après un clic, l'option choisie garde son seul contour de 2 px. */
 .p-quiz-option:has(:focus-visible) {
-  outline: 2px solid var(--fd-color-focus, #1f7fb6);
-  outline-offset: 2px;
+  box-shadow: inset 0 0 0 2px var(--p-focus);
 }
 .p-root .p-quiz-option input:focus-visible {
   box-shadow: none;
@@ -1182,9 +1183,7 @@ a.p-btn:hover {
 }
 /* L24 : la règle « box-shadow: none » des contrôles ne doit pas effacer l'indicateur de focus */
 .p-controls .p-icon-btn:focus-visible {
-  box-shadow:
-    0 0 0 2px var(--p-surface),
-    0 0 0 4px var(--fd-color-focus, #1f7fb6);
+  box-shadow: inset 0 0 0 2px var(--p-focus);
 }
 .p-controls .p-icon-btn:hover:not(:disabled) {
   background: color-mix(in srgb, var(--p-text) 10%, transparent);
@@ -1383,6 +1382,7 @@ a.p-btn:hover {
 /* PLY-01 : thème sombre (prefers-color-scheme, couleurs par défaut de la démo) */
 .p-root.is-dark {
   color-scheme: dark;
+  --p-focus: #cf86a9;
 }
 /* Surfaces de la démo restées claires : contrôles natifs (cases, boutons radio) en clair */
 .is-dark :is(.p-quiz-card, .p-form, .p-checklist-card, .p-text-step) {
@@ -2006,8 +2006,8 @@ h1.p-title {
   box-shadow: 0 0 0 3px var(--p-surface);
 }
 .p-ba-range:focus-visible {
-  outline: 3px solid var(--p-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--p-focus);
   border-radius: 6px;
 }
 .p-ba-seg {
@@ -2072,8 +2072,8 @@ h1.p-title {
   cursor: help;
 }
 .p-term:focus-visible {
-  outline: 2px solid var(--p-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--p-focus);
   border-radius: 2px;
 }
 .p-gloss-tip {
@@ -2278,8 +2278,8 @@ h1.p-title {
   cursor: pointer;
 }
 .p-quiz-nps__opt:focus-within {
-  outline: 2px solid var(--p-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--p-focus);
 }
 .p-quiz-nps__opt.is-selected {
   background: var(--p-primary);
@@ -2386,8 +2386,8 @@ h1.p-title {
   gap: 8px;
 }
 .p-video__bubble:focus-visible {
-  outline: 3px solid var(--p-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--p-focus);
 }
 .p-video__bubble h2 {
   margin: 0;
@@ -2458,8 +2458,8 @@ h1.p-title {
 }
 .p-video__btn:focus-visible,
 .p-video__sound:focus-visible {
-  outline: 3px solid var(--p-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--p-focus);
 }
 .p-video__time {
   font-variant-numeric: tabular-nums;
@@ -2940,8 +2940,8 @@ h1.p-title {
   white-space: nowrap;
 }
 .p-sound-btn:focus-visible {
-  outline: 2px solid var(--p-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--p-focus);
 }
 /* L28-03 : sous-titres actifs signalés sans la couleur de marque (contraste sûr en clair comme en
    sombre) : fond teinté et barre sous l'icône, dans la couleur du texte des contrôles. */

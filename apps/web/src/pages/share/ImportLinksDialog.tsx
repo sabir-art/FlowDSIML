@@ -5,7 +5,7 @@
  */
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, Upload, X } from 'lucide-react';
+import { CircleAlert, Download, Upload, X } from 'lucide-react';
 import { downloadText } from '../../lib/download';
 import { COHORT_MAX, previewImport, TEMPLATE, type ImportPreview, type ImportRow } from './linksCsv';
 import { Status } from '@flowdsiml/ui';
@@ -169,6 +169,7 @@ export function ImportLinksDialog({
               </div>
               {preview && preview.missing.length > 0 && (
                 <p className="error-msg" role="alert">
+                  <CircleAlert aria-hidden="true" />
                   {t('share.import.missing', {
                     file: fileName,
                     columns: preview.missing.map((m) => t(`share.import.col.${m}`)).join(', '),
