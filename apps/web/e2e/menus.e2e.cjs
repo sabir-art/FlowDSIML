@@ -87,6 +87,8 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
         await page.evaluate(() => !document.getElementById('sidebar').contains(document.activeElement)),
         `${w}px : tiroir fermé hors de l'ordre de tabulation`,
       );
+      // Après 30 Tab, le focus a pu revenir au lien d'évitement, affiché par-dessus le bouton menu
+      await page.evaluate(() => document.activeElement?.blur());
       await page.getByRole('button', { name: 'Ouvrir le menu' }).click();
       await page.waitForTimeout(300);
       for (let i = 0; i < 30; i++) await page.keyboard.press('Tab');

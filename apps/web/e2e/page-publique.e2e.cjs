@@ -72,7 +72,7 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
   ok((await page.getByText('Le lien doit commencer par https://.').count()) === 1, 'lien http refusé');
   await page.getByLabel('Lien du bouton').fill('https://www.acme.example/rdv');
   await page.getByRole('radio', { name: 'Sombre' }).click();
-  await page.getByRole('switch', { name: 'Proposer d’autres démos du workspace' }).check();
+  await page.getByRole('switch', { name: 'Proposer d’autres démos de l’espace' }).check();
   await page.getByRole('button', { name: 'Enregistrer' }).click();
   await page.getByText('Page publique enregistrée.').waitFor();
   const row = state.tables.demo_pages[0];

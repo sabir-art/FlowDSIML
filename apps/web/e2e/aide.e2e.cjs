@@ -5,6 +5,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { fromMore, openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -43,7 +44,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   ok((await page.getByRole('dialog').count()) === 0, 'tiroir non modal');
   const onPage = drawer.getByRole('region', { name: /Sur cette page · Démos/ });
-  ok((await onPage.locator('.help-link').count()) === 3, '« Sur cette page · Démos » : 3 articles');
+  // L49 : l'article « Capturer en HTML » s'ajoute aux trois d'origine
+  ok((await onPage.locator('.help-link').count()) === 4, '« Sur cette page · Démos » : 4 articles');
   ok(
     (await onPage.getByRole('button', { name: 'Visite guidée de cette page' }).count()) === 1,
     'visite guidée',
@@ -147,11 +149,13 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // ===== Éditeur : les articles suivent l'onglet =====
   await page.goto(`${BASE}/#/demos/${DEMO}/edit`);
-  await page.getByRole('button', { name: 'Aide', exact: true }).click();
+  // L48-E : l'outil « Étape » ouvert, l'aide dans le menu « Plus d'options »
+  await openTool(page, 'step');
+  await fromMore(page, 'Aide');
   await drawer.getByRole('region', { name: /Sur cette page · Éditeur · Étape/ }).waitFor();
   ok(true, 'éditeur : onglet Étape');
-  // Le tiroir non modal recouvre le panneau : changement d'onglet au clavier
-  await page.getByRole('tab', { name: 'Design' }).focus();
+  // Le tiroir non modal recouvre le panneau : changement d'outil au clavier
+  await page.locator('.ed-rail [data-tool="design"]').focus();
   await page.keyboard.press('Enter');
   await drawer.getByRole('region', { name: /Sur cette page · Éditeur · Design/ }).waitFor({ timeout: 3000 });
   ok(true, 'éditeur : les articles suivent l’onglet Design');

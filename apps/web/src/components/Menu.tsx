@@ -118,7 +118,8 @@ export function Menu({
     el.style.maxHeight = '';
     const pos = computePosition(
       anchor.getBoundingClientRect(),
-      { width: el.offsetWidth, height: el.scrollHeight },
+      // Hauteur du contenu plus les bordures (scrollHeight seul les ignore : 2 px de trop au bord)
+      { width: el.offsetWidth, height: el.scrollHeight + el.offsetHeight - el.clientHeight },
       preferred,
       vw,
       vh,
