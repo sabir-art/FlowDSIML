@@ -1358,6 +1358,7 @@
       "capStarted": "Capture HTML lancée dans un nouvel onglet : la page sera ajoutée à ce Sandbox après vérification.",
       "capOpened": "Page ouverte dans un nouvel onglet : cliquez sur l’extension TutoClick, puis « Démarrer la capture HTML ».",
       "capUnavailable": "L’extension TutoClick n’est pas disponible dans ce navigateur.",
+      "capUnavailableSoon": "L’extension TutoClick n’est pas disponible dans ce navigateur. Elle sera bientôt disponible.",
       "capInstall": "Installer l’extension",
       "capSignedOut": "Connectez-vous à l’extension TutoClick, puis recommencez.",
       "capBusy": "Une capture est déjà en cours dans l’extension. Terminez-la, puis recommencez.",

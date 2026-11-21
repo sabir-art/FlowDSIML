@@ -74,7 +74,7 @@ export function SandboxPlan({
     if (r.ok) return toast(t(r.started ? 'editor.sandbox.capStarted' : 'editor.sandbox.capOpened'));
     if (r.error === 'unavailable')
       return toast(
-        t('editor.sandbox.capUnavailable'),
+        t(EXTENSION_URL ? 'editor.sandbox.capUnavailable' : 'editor.sandbox.capUnavailableSoon'),
         EXTENSION_URL
           ? {
               label: t('editor.sandbox.capInstall'),

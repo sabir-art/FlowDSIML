@@ -1358,6 +1358,7 @@
       "capStarted": "HTML capture started in a new tab: the page will be added to this Sandbox after review.",
       "capOpened": "Page opened in a new tab: click the TutoClick extension, then “Start HTML capture”.",
       "capUnavailable": "The TutoClick extension is not available in this browser.",
+      "capUnavailableSoon": "The TutoClick extension is not available in this browser. It will be available soon.",
       "capInstall": "Install the extension",
       "capSignedOut": "Sign in to the TutoClick extension, then try again.",
       "capBusy": "A capture is already running in the extension. Finish it, then try again.",

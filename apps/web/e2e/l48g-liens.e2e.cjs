@@ -136,7 +136,9 @@ const pages = [
   await cap.click();
   ok(
     await p
-      .getByText('L’extension TutoClick n’est pas disponible dans ce navigateur.')
+      .getByText(
+        'L’extension TutoClick n’est pas disponible dans ce navigateur. Elle sera bientôt disponible.',
+      )
       .waitFor({ timeout: 3000 })
       .then(() => true)
       .catch(() => false),
