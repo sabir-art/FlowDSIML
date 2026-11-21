@@ -965,23 +965,15 @@ a.p-btn:hover {
     animation: none;
   }
 }
-.p-quiz-badge {
+/* MOB-01 M8 : « Module validé » en texte 14 px 600 `success`, icône award de 16 px (plus de pastille) */
+.p-quiz-pass {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 12px;
-  padding: 6px 14px;
-  border-radius: 999px;
+  margin: 12px 0 0;
   font-size: 14px;
-  font-weight: 700;
-}
-.p-quiz-badge.is-pass {
-  background: #95c11f;
-  color: #080808;
-}
-.p-quiz-badge.is-fail {
-  border: 1px solid color-mix(in srgb, var(--p-text) 30%, transparent);
-  color: var(--p-text);
+  font-weight: 600;
+  color: #2f6a06;
 }
 .p-quiz-recap {
   list-style: none;
@@ -1015,6 +1007,23 @@ a.p-btn:hover {
 .p-quiz-result .p-actions {
   justify-content: center;
   margin-top: 20px;
+}
+/* MOB-01 M7 : actions dans une barre collée en bas de la carte, toujours visible pendant le défilement */
+.p-quiz-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin: 20px calc(-1 * clamp(20px, 4vw, 32px)) calc(-1 * clamp(20px, 4vw, 32px));
+  padding: 12px clamp(20px, 4vw, 32px) clamp(16px, 3vw, 24px);
+  background: var(--p-surface);
+  border-top: 1px solid color-mix(in srgb, var(--p-text) 12%, transparent);
+  border-radius: 0 0 24px 24px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.p-quiz-review {
+  font-weight: 600;
 }
 /* L38-14 : « Repasser le quiz » sous « Terminer », en lien */
 .p-quiz-result .p-actions--pass {
@@ -1059,6 +1068,13 @@ a.p-btn:hover {
 /* F2-4 : en mobile, ombre courte (la grande ombre formait un aplat sous la carte) */
 .is-compact .p-quiz-card {
   box-shadow: 0 1px 3px rgb(8 8 8 / 0.12);
+}
+/* MOB-01 M6 / M7 : en mobile, la carte commence 12 px sous l'en-tête (pas centrée) ; la zone du quiz défile */
+.is-compact .p-quiz-wrap {
+  place-items: start center;
+}
+.is-compact .p-quiz {
+  padding: 12px 0 0;
 }
 
 /* ---------- PLY-01 : refonte du lecteur (maquette refonte/player.html, PY-1 à PY-7) ---------- */

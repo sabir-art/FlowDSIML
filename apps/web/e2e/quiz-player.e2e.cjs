@@ -87,7 +87,11 @@ const manifest = {
     if (!c) process.exitCode = 1;
   };
   const errors = [];
-  const page = await (await themedContext(b, { viewport: { width: 1280, height: 860 } })).newPage();
+  // MOB-01 : QUIZ_W=390 rejoue le parcours en mobile (390 × 844)
+  const W = Number(process.env.QUIZ_W || 1280);
+  const page = await (
+    await themedContext(b, { viewport: W <= 480 ? { width: W, height: 844 } : { width: W, height: 860 } })
+  ).newPage();
   page.on('pageerror', (e) => errors.push(e.message));
   const submits = [];
   const events = [];
@@ -219,9 +223,31 @@ const manifest = {
   await page.getByRole('button', { name: 'Valider ma réponse' }).click();
   await page.getByRole('button', { name: 'Voir mon résultat' }).click();
   await page.waitForSelector('.p-quiz-result');
+  // MOB-01 M7 (delta L42) : pas de badge, une ligne, actions dans une barre collée en bas de la carte
+  ok((await page.locator('.p-quiz-pass, .p-quiz-badge').count()) === 0, 'échec : pas de badge');
+  const bar = page.locator('.p-quiz-bar');
+  const retry = bar.getByRole('button', { name: 'Réessayer le quiz' });
   ok(
-    (await page.locator('.p-quiz-badge').textContent()) === 'Pas encore validé',
-    'échec : badge neutre « Pas encore validé »',
+    (await bar.locator('button').first().textContent()).includes('Réessayer le quiz') &&
+      (await retry.getAttribute('class')).includes('p-btn-primary') &&
+      (await bar.getByRole('button', { name: 'Revoir le module' }).getAttribute('class')).includes('p-link'),
+    'échec : « Réessayer le quiz » en principal, puis « Revoir le module » en lien',
+  );
+  const vis = await page.evaluate(() => {
+    const r = [...document.querySelectorAll('.p-quiz-bar button')]
+      .find((x) => /Réessayer/.test(x.textContent))
+      .getBoundingClientRect();
+    const ctrl = document.querySelector('.p-controls')?.getBoundingClientRect();
+    return {
+      bottom: Math.round(r.bottom),
+      top: Math.round(r.top),
+      ctrlTop: ctrl ? Math.round(ctrl.top) : null,
+      h: innerHeight,
+    };
+  });
+  ok(
+    vis.top >= 0 && vis.bottom <= (vis.ctrlTop ?? vis.h) && vis.bottom <= vis.h,
+    `M7 : « Réessayer le quiz » visible sans défiler, au-dessus de la barre du lecteur (${W} px, ${JSON.stringify(vis)})`,
   );
   // L42 : anneau redessiné (encoche du seuil dans la piste, seuil en texte, plus de trait noir)
   ok((await page.locator('.p-ring__threshold').count()) === 0, 'L42 : plus de trait du seuil');
@@ -244,8 +270,9 @@ const manifest = {
     'focus sur le titre du résultat',
   );
   ok(
-    (await page.getByRole('status').first().textContent()).includes('il vous reste 2 tentatives'),
-    'phrase de score avec tentatives restantes',
+    (await page.getByRole('status').first().textContent()) ===
+      '1 bonne réponse sur 3 · il vous reste 2 tentatives',
+    'M7 : une ligne « 1 bonne réponse sur 3 · il vous reste 2 tentatives »',
   );
   ok(
     submits.length === 1 && submits[0].answers.length === 3 && !!submits[0].visitorId,
@@ -271,8 +298,20 @@ const manifest = {
     }
     await page.getByRole('button', { name: n === 3 ? 'Voir mon résultat' : 'Question suivante' }).click();
   }
-  await page.waitForSelector('.p-quiz-badge.is-pass');
-  ok((await page.locator('.p-quiz-badge').textContent()) === 'Module validé', 'réussite : « Module validé »');
+  await page.waitForSelector('.p-quiz-pass');
+  ok(
+    (await page.locator('.p-quiz-pass').textContent()) === 'Module validé' &&
+      (await page.locator('.p-quiz-pass').evaluate((el) => {
+        const c = getComputedStyle(el);
+        return (
+          c.fontSize === '14px' &&
+          c.fontWeight === '600' &&
+          !!el.querySelector('svg') &&
+          c.backgroundColor === 'rgba(0, 0, 0, 0)'
+        );
+      })),
+    'M8 : réussite en texte 14 px 600 avec l’icône, sans pastille',
+  );
   ok((await page.locator('.p-quiz-result h2').textContent()).includes('Bravo'), 'titre de réussite');
   // F2-05 : tentatives restantes après réussite : « Repasser le quiz »
   ok(

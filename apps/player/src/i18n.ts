@@ -383,12 +383,10 @@ const dict = {
       passTitle: 'Bravo, vous avez validé «\u202f{{module}}\u202f»',
       scoreLine:
         'Score : {{correctText}} sur {{total}}, soit {{score}}\u202f%. Le seuil de réussite est de {{threshold}}\u202f%.',
-      failBadge: 'Pas encore validé',
       failTitle: "Encore un peu d'entraînement",
-      failLine_one:
-        'Score : {{correctText}} sur {{total}}, soit {{score}}\u202f%. Il faut {{threshold}}\u202f% pour valider le module. Revoyez les étapes liées aux erreurs, puis réessayez : il vous reste {{count}} tentative.',
-      failLine_other:
-        'Score : {{correctText}} sur {{total}}, soit {{score}}\u202f%. Il faut {{threshold}}\u202f% pour valider le module. Revoyez les étapes liées aux erreurs, puis réessayez : il vous reste {{count}} tentatives.',
+      failLine_one: '{{correctText}} sur {{total}} · il vous reste {{count}} tentative',
+      failLine_other: '{{correctText}} sur {{total}} · il vous reste {{count}} tentatives',
+      failLineNoCount: '{{correctText}} sur {{total}}',
       noAttemptsLeft:
         'Vous avez utilisé toutes vos tentatives. Votre formateur ou formatrice peut vous en accorder de nouvelles.',
       recapLabel: 'Détail des réponses',
@@ -775,12 +773,10 @@ const dict = {
       passBadge: 'Module completed',
       passTitle: 'Well done, you completed "{{module}}"',
       scoreLine: 'Score: {{correctText}} out of {{total}}, i.e. {{score}}%. The pass mark is {{threshold}}%.',
-      failBadge: 'Not completed yet',
       failTitle: 'A little more practice',
-      failLine_one:
-        'Score: {{correctText}} out of {{total}}, i.e. {{score}}%. You need {{threshold}}% to complete the module. Review the steps linked to your mistakes, then try again: {{count}} attempt left.',
-      failLine_other:
-        'Score: {{correctText}} out of {{total}}, i.e. {{score}}%. You need {{threshold}}% to complete the module. Review the steps linked to your mistakes, then try again: {{count}} attempts left.',
+      failLine_one: '{{correctText}} out of {{total}} · {{count}} attempt left',
+      failLine_other: '{{correctText}} out of {{total}} · {{count}} attempts left',
+      failLineNoCount: '{{correctText}} out of {{total}}',
       noAttemptsLeft: 'You have used all your attempts. Your trainer can grant you new ones.',
       recapLabel: 'Answer details',
       recapCorrect: 'Correct answer',

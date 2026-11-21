@@ -139,7 +139,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-0000000000e1';
     .click();
   const seeResult = page.getByRole('button', { name: 'Voir mon résultat' });
   if (await seeResult.count()) await seeResult.click();
-  await page.waitForSelector('.p-quiz-badge.is-pass');
+  await page.waitForSelector('.p-quiz-pass');
   const acts = page.locator('.p-quiz-result .p-actions');
   const finish = acts.getByRole('button', { name: 'Terminer' });
   const retake = acts.getByRole('button', { name: 'Repasser le quiz' });

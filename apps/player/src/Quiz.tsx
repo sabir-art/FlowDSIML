@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'preact/hooks';
 import type { Quiz as QuizT, QuizQuestion } from '@flowdsiml/manifest';
-import { Award, BookOpen, CircleCheck, CircleX, RefreshCw, RotateCcw } from 'lucide-preact';
+import { Award, CircleCheck, CircleX, RotateCcw } from 'lucide-preact';
 import { fmt, type Dict } from './i18n';
 import { isCorrect, isOpenQuestion, isPartial, scoreQuiz, shuffled } from './logic';
 import type { QuizResult } from './api';
@@ -160,11 +160,12 @@ export function Quiz({
               <p class="p-ring__threshold-text">{fmt(q, 'scoreThreshold', { value: quiz.threshold })}</p>
             </div>
           )}
-          {!survey && (
-            <span class={`p-quiz-badge ${passed ? 'is-pass' : 'is-fail'}`}>
-              {passed ? <Award {...ICON} size={16} /> : <RefreshCw {...ICON} size={16} />}
-              {passed ? q.passBadge : q.failBadge}
-            </span>
+          {/* MOB-01 M7 / M8 (delta L42) : pas de badge d'échec ; réussite en texte `success` avec l'icône award */}
+          {!survey && passed && (
+            <p class="p-quiz-pass">
+              <Award {...ICON} size={16} />
+              {q.passBadge}
+            </p>
           )}
           <h2 tabIndex={-1} ref={resultTitle}>
             {survey ? q.surveyTitle : passed ? fmt(q, 'passTitle', { module: sub(module) }) : q.failTitle}
@@ -179,19 +180,16 @@ export function Quiz({
                     score: result.score,
                     threshold: quiz.threshold,
                   })
-                : canRetry && Number.isFinite(left)
+                : // MOB-01 M7 : une ligne, « 1 bonne réponse sur 3 · il vous reste 2 tentatives »
+                  canRetry && Number.isFinite(left)
                   ? fmt(q, 'failLine', {
                       correctText: fmt(q, 'correctCount', { count: result.correct }),
                       total: result.total,
-                      score: result.score,
-                      threshold: quiz.threshold,
                       count: left,
                     })
-                  : fmt(q, 'scoreLine', {
+                  : fmt(q, 'failLineNoCount', {
                       correctText: fmt(q, 'correctCount', { count: result.correct }),
                       total: result.total,
-                      score: result.score,
-                      threshold: quiz.threshold,
                     })}
           </p>
           {phase.saveError && <p class="p-quiz-note">{q.sendError}</p>}
@@ -218,7 +216,7 @@ export function Quiz({
             </ol>
           )}
           {!passed && !canRetry && <p class="p-quiz-note">{q.noAttemptsLeft}</p>}
-          <div class={`p-actions${passed ? ' p-actions--pass' : ''}`}>
+          <div class={`p-actions p-quiz-bar${passed ? ' p-actions--pass' : ''}`}>
             {passed ? (
               <>
                 <button type="button" class="p-btn p-btn-primary" onClick={() => onFinish(true)}>
@@ -233,16 +231,16 @@ export function Quiz({
               </>
             ) : (
               <>
-                <button type="button" class="p-btn p-btn-ghost" onClick={onRestartModule}>
-                  <BookOpen {...ICON} size={16} />
-                  {q.reviewModule}
-                </button>
+                {/* MOB-01 M7 : barre collée en bas de la carte, « Réessayer » en principal puis le lien */}
                 {canRetry && (
                   <button type="button" class="p-btn p-btn-primary" onClick={restart}>
                     <RotateCcw {...ICON} size={16} />
                     {q.retry}
                   </button>
                 )}
+                <button type="button" class="p-link p-quiz-review" onClick={onRestartModule}>
+                  {q.reviewModule}
+                </button>
               </>
             )}
           </div>
