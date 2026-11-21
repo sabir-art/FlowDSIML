@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   ArrowRight,
   Award,
@@ -843,7 +843,9 @@ function CertificateButton({
   );
   const status = useRef<HTMLParagraphElement>(null);
   const clicked = useRef(false);
-  useEffect(() => {
+  // Synchrone au rendu (useLayoutEffect) : le focus ne reste jamais sur le bouton retiré, même sous
+  // charge (useEffect attend l'image suivante en Preact)
+  useLayoutEffect(() => {
     // Le focus ne bouge que si le bouton vient de disparaître sous les doigts du visiteur
     if (state === 'noName' && clicked.current) status.current?.focus();
   }, [state]);
