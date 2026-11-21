@@ -14,7 +14,7 @@ import { useId, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Manifest } from '@flowdsiml/manifest';
-import { Alert, Button, Field, Select, Status, Switch } from '@flowdsiml/ui';
+import { Alert, Button, Field, Select, Switch } from '@flowdsiml/ui';
 import { errorMessage } from '../../../lib/errors';
 import { Loading } from '../../../components/guards';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -325,7 +325,7 @@ function QuestionForm({
           {/* A2-04 : étoiles de 1 à 5, pas encore disponibles (gardées avec « Bientôt ») */}
           {(mode === 'survey' || isOpenType(type)) && (
             <button type="button" aria-pressed={false} disabled aria-disabled="true">
-              {t('editor.quiz.typeStars')} <Status size="sm">{t('shell.soon')}</Status>
+              {t('editor.quiz.typeStars')} <span className="soon-text">{t('shell.soon')}</span>
             </button>
           )}
         </div>

@@ -8,7 +8,6 @@ import { VarTextField } from '../vars/VarTextField';
 import { useVarCatalog } from '../../../lib/varCatalog';
 import type { DemoEditor } from '../useDemoEditor';
 import { asFields, type FormField, type FormRow } from '../types';
-import { Status } from '@flowdsiml/ui';
 
 const OPTIONAL: Array<Omit<FormField, 'label'> & { labelKey: string }> = [
   { key: 'full_name', type: 'text', required: false, labelKey: 'editor.fieldName' },
@@ -211,7 +210,7 @@ export function FormPanel({
           {['email', ...optional.map((f) => f.key)].map((k) => (
             <span key={k} className="chip-var">{`{{${k}}}`}</span>
           ))}{' '}
-          <Status size="sm">{t('shell.soon')}</Status>
+          <span className="soon-text">{t('shell.soon')}</span>
         </p>
       </div>
 
@@ -306,7 +305,7 @@ export function FormPanel({
         <div className="sec-title">{t('editor.form.sendTo')}</div>
         <div className="field">
           <label htmlFor="f-webhook">
-            {t('editor.form.webhook')} <Status size="sm">{t('shell.soon')}</Status>
+            {t('editor.form.webhook')} <span className="soon-text">{t('shell.soon')}</span>
           </label>
           <input
             id="f-webhook"

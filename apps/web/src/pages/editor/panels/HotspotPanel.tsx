@@ -21,7 +21,6 @@ import { CtaFields } from './CtaFields';
 import { AiBadge, AiWrite, isAiApplied } from '../../../components/ai/AiWrite';
 import { AiSpellAll } from '../../../components/ai/AiSpellAll';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
-import { Status } from '@flowdsiml/ui';
 
 type Side = 'top' | 'bottom' | 'left' | 'right';
 /** Grille 3 × 3 de la maquette : les côtés correspondent aux placements gérés par le player ;
@@ -133,7 +132,7 @@ export function HotspotPanel({
           <button type="button" role="radio" aria-checked={false} aria-disabled="true" disabled>
             <MessageSquare aria-hidden="true" />
             {t('editor.hs.typeFree')}
-            <Status size="sm">{t('shell.soon')}</Status>
+            <span className="soon-text">{t('shell.soon')}</span>
           </button>
         </div>
         <p className="help">

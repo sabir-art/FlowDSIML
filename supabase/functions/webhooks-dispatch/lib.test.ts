@@ -1,6 +1,15 @@
 // Tests unitaires du dispatch (deno test) : signature, refus d'IP privée après DNS, pas de redirection.
 import { assert, assertEquals, assertMatch } from 'jsr:@std/assert@1';
-import { checkUrl, deliver, isPrivateIp, safeEqual, sign, signatureHeader, type Delivery } from './lib.ts';
+import {
+  checkUrl,
+  deliver,
+  isPrivateIp,
+  purgeOrphans,
+  safeEqual,
+  sign,
+  signatureHeader,
+  type Delivery,
+} from './lib.ts';
 
 const d: Delivery = {
   id: 'd1',
@@ -144,4 +153,23 @@ Deno.test('L37 : envoi vers l’IP contrôlée, sans seconde résolution du nom'
   assertEquals(r.error, null);
   assertEquals(resolved, 1);
   assertEquals(pinned, '93.184.215.14');
+});
+
+Deno.test('purge des orphelins : par bucket, lots de 100, lot en erreur gardé', async () => {
+  const rows = [
+    ...Array.from({ length: 150 }, (_, i) => ({ id: i, bucket: 'captures', path: `ws/${i}.webp` })),
+    { id: 900, bucket: 'avatars', path: 'u/photo.webp' },
+  ];
+  const calls: string[] = [];
+  const r = await purgeOrphans(rows, (bucket, paths) => {
+    calls.push(`${bucket}:${paths.length}`);
+    // Le bucket avatars échoue (réseau) : ses lignes restent pour la nuit suivante
+    return Promise.resolve(
+      bucket === 'avatars' ? { removed: 0, ok: false } : { removed: paths.length - 1, ok: true },
+    );
+  });
+  assertEquals(calls, ['captures:100', 'captures:50', 'avatars:1']);
+  assertEquals(r.removed, 148);
+  assertEquals(r.done.length, 150);
+  assert(!r.done.includes(900));
 });

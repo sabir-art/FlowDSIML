@@ -8,7 +8,6 @@ import { setLocale } from '../../i18n';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { useToast } from '../../components/Toast';
 import { MyDataCard } from './MyDataCard';
-import { Status } from '@flowdsiml/ui';
 
 /**
  * Paramètres › Mon profil (PRM-09), mise en page de la maquette : une carte à sections en deux colonnes
@@ -24,7 +23,8 @@ export function Profile() {
   const [password, setPassword] = useState('');
   const info = useAction();
   const pwd = useAction();
-  const soon = <Status size="sm">{t('shell.soon')}</Status>;
+  // §18.4 (règle X4) : « Bientôt » en texte gris, sans point d'état
+  const soon = <span className="soon-text">{t('shell.soon')}</span>;
 
   const reset = () => {
     if (!profile) return;

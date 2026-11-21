@@ -340,7 +340,7 @@ export function AnalyticsPage() {
               icon: <Calendar />,
               disabled: true,
               hint: t('shell.soon'),
-              end: <Status size="sm">{t('shell.soon')}</Status>,
+              end: <span className="soon-text">{t('shell.soon')}</span>,
               onSelect: () => undefined,
             },
           ]}

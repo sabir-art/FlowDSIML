@@ -954,6 +954,7 @@ export type Database = {
       };
       profiles: {
         Row: {
+          avatar_path: string | null;
           avatar_url: string | null;
           created_at: string;
           extension_seen_at: string | null;
@@ -964,6 +965,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          avatar_path?: string | null;
           avatar_url?: string | null;
           created_at?: string;
           full_name?: string;
@@ -972,6 +974,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          avatar_path?: string | null;
           avatar_url?: string | null;
           created_at?: string;
           full_name?: string;
@@ -2335,6 +2338,7 @@ export type Database = {
       answer_invitation: { Args: { p_accept: boolean; p_invitation: string }; Returns: string | null };
       email_budget_today: { Args: { p_workspace: string }; Returns: Json };
       invite_quota: { Args: { p_workspace: string }; Returns: Json };
+      shares_workspace: { Args: { p_other: string }; Returns: boolean };
       my_invitations: {
         Args: never;
         Returns: Array<{ id: string; workspace_name: string; inviter_name: string | null; expires_at: string }>;

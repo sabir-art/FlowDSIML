@@ -267,6 +267,7 @@
   gap: 16px;
   margin-top: 8px;
 }
-.nb-decline {
+.nb-actions .nb-decline,
+.nb-actions .nb-decline:hover {
   color: var(--fd-color-text-muted);
 }

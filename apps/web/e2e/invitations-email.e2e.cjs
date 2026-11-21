@@ -222,6 +222,18 @@ async function invite(page, emails) {
         (await row.getByRole('button', { name: 'Refuser' }).getAttribute('class')).includes('link-button'),
       'Accepter en premier (bouton principal), Refuser en lien',
     );
+    const [declineColor, muted] = await row.getByRole('button', { name: 'Refuser' }).evaluate((el) => [
+      getComputedStyle(el).color,
+      (() => {
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--fd-color-text-muted)';
+        document.body.append(probe);
+        const c = getComputedStyle(probe).color;
+        probe.remove();
+        return c;
+      })(),
+    ]);
+    ok(declineColor === muted, `Refuser en couleur discrète (${declineColor})`);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-04-notification.png` });
     await row.getByRole('button', { name: 'Accepter' }).click();
     await page.waitForFunction(() => location.hash === '#/');

@@ -41,7 +41,6 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
 import type { DemoEditor } from './useDemoEditor';
-import { Status } from '@flowdsiml/ui';
 
 export function StepList({
   editor,
@@ -92,7 +91,7 @@ export function StepList({
       label: t('editor.add.capture'),
       icon: <MousePointerClick />,
       disabled: true,
-      end: <Status size="sm">{t('shell.soon')}</Status>,
+      end: <span className="soon-text">{t('shell.soon')}</span>,
       onSelect: () => {},
     },
     { label: t('editor.add.image'), icon: <ImagePlus />, onSelect: () => file.current?.click() },

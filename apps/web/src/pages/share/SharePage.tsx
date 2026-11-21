@@ -1014,7 +1014,7 @@ function EmbedPanel({
       <hr className="divider sh-hr" />
       <div className="setting">
         <span className="t-label">
-          {t('share.clickToStart')} <Status size="sm">{t('shell.soon')}</Status>
+          {t('share.clickToStart')} <span className="soon-text">{t('shell.soon')}</span>
         </span>
         <span className="switch">
           <input type="checkbox" disabled aria-label={t('share.clickToStart')} />

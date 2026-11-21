@@ -13,7 +13,6 @@ import {
 } from '../../lib/validation';
 import { useAuth } from '../../auth/AuthProvider';
 import { AuthLayout, GoogleMark, MkFieldError, StepsAside } from './AuthLayout';
-import { Status } from '@flowdsiml/ui';
 
 /** Inscription (INS-01), à l'identique de la maquette inscription.html. */
 export function Signup() {
@@ -116,9 +115,7 @@ export function Signup() {
             >
               <GoogleMark />
               {t('auth.googleSignup')}
-              <Status size="sm" id="oauth-soon">
-                {t('shell.soon')}
-              </Status>
+              <span className="soon-text">{t('shell.soon')}</span>
             </button>
           </div>
           <div className="or">{t('auth.orEmail')}</div>

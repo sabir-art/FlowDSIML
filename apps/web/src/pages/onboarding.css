@@ -433,6 +433,7 @@
   align-items: center;
   gap: 16px;
 }
-.pi-decline {
+.pi-actions .pi-decline,
+.pi-actions .pi-decline:hover {
   color: var(--fd-color-text-muted);
 }

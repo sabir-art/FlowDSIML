@@ -100,7 +100,7 @@ export function Members() {
   }, [load]);
 
   const roles = assignableRoles(myRole);
-  const soon = <Status size="sm">{t('shell.soon')}</Status>;
+  const soon = <span className="soon-text">{t('shell.soon')}</span>;
   const needle = q.trim().toLowerCase();
   const match = (name: string, email: string, role: WorkspaceRole) =>
     (!needle || name.toLowerCase().includes(needle) || email.toLowerCase().includes(needle)) &&

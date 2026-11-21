@@ -16,7 +16,6 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import '../../components/ai/ai.css';
-import { Status } from '@flowdsiml/ui';
 
 /** Fonctions à venir, listées sous les cases (§2) : toujours désactivées, badge « Bientôt ». */
 const SOON = [{ k: 'images', icon: <ImagePlus aria-hidden="true" /> }] as const;
@@ -203,9 +202,7 @@ export function AiSettings() {
                     <input type="checkbox" disabled aria-describedby={`ai-soon-${s.k}`} />
                     {s.icon}
                     {t(`ai.soon.${s.k}`)}
-                    <Status size="sm" id={`ai-soon-${s.k}`}>
-                      {t('shell.soon')}
-                    </Status>
+                    <span className="soon-text">{t('shell.soon')}</span>
                   </label>
                 ))}
               </fieldset>
