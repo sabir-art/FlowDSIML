@@ -152,6 +152,9 @@ jobs:
       - name: 'Audit L50, écarts transverses (focus des champs, cartes sans aplat)'
         if: always()
         run: cd apps/web && node e2e/l50-transverses.e2e.cjs
+      - name: 'Tableau de bord des démos (grille, liste, tris, mobile, modale « Nouvelle démo »)'
+        if: always()
+        run: cd apps/web && node e2e/dashboard.e2e.cjs
       - name: Google Safe Browsing L49 (lien signalé bloqué, vérification indisponible, nouvelle vérification à la publication, lecteur)
         if: always()
         run: cd apps/web && node e2e/l49-safebrowsing.e2e.cjs
