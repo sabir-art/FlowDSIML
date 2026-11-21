@@ -97,6 +97,8 @@ function visibleText(el: Element): string {
 
 /** Libellé de l'infobulle d'un élément (vide : pas d'infobulle). Reprend `title` des boutons à icône. */
 export function tipLabel(el: HTMLElement): string {
+  // Pas d'infobulle quand le nom est déjà visible à côté (ex. pastilles de couleur et leur légende)
+  if (el.hasAttribute('data-no-tip')) return '';
   if (el.dataset.tip) return el.dataset.tip;
   const text = visibleText(el);
   const title = el.getAttribute('title');

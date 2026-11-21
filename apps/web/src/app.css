@@ -1490,13 +1490,14 @@
   margin: 4px 0 0 44px;
 }
 .tg {
+  /* L52 §3 : 24 px, texte 13 px 600 (contrastes calculés pour cette taille), 8 px de chaque côté */
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 22px;
+  gap: 6px;
+  height: 24px;
   padding: 0 8px;
   border-radius: 999px;
-  font: 600 11.5px var(--fd-font-sans);
+  font: 600 13px var(--fd-font-sans);
   white-space: nowrap;
 }
 .tg::before {

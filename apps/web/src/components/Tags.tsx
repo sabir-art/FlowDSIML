@@ -180,6 +180,8 @@ export function TagColorPicker({
           type="button"
           role="radio"
           data-color={c}
+          // L52 §2.3 : nom dans aria-label et sous la grille, sans infobulle (un seul Échap ferme la fenêtre)
+          data-no-tip=""
           aria-checked={value === c}
           tabIndex={value === c ? 0 : -1}
           aria-label={t(`tags.colors.${c}`)}

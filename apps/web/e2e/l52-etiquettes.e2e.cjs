@@ -278,9 +278,9 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
       ).includes('tg--teal'),
       'aperçu de la ligne changé tout de suite',
     );
-    // Échap ferme d'abord l'infobulle de la pastille focalisée (WCAG 1.4.13), puis la fenêtre
+    // Pastilles sans infobulle (nom sous la grille) : un seul Échap ferme la fenêtre
+    ok((await page.locator('.fd-tip, [role="tooltip"]').count()) === 0, 'pastilles : pas d’infobulle');
     await page.keyboard.press('Escape');
-    if (await page.locator('.tgs-pop').count()) await page.keyboard.press('Escape');
     ok(
       (await page.locator('.tgs-pop').count()) === 0 &&
         (await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))) ===
