@@ -1000,6 +1000,9 @@ button.nd-src:focus-visible {
   gap: var(--fd-space-3);
   padding-right: 8px;
 }
+.fcol--rail .fcol__head {
+  margin-bottom: 0;
+}
 .fcol .fcol__switch {
   flex: none;
   width: 32px;

@@ -69,6 +69,21 @@ function seed() {
         );
         await page.keyboard.press('Escape');
         ok((await page.locator('.fcol--drawer').count()) === 0, `${tag} : Échap ferme le tiroir`);
+        // Recette UX (scénario exact) : clic souris, puis Échap aussitôt, sans placer le focus
+        await page.waitForTimeout(100);
+        await page.getByRole('button', { name: 'Afficher les dossiers' }).click();
+        const onOpen = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
+        ok(
+          onOpen === 'Masquer les dossiers',
+          `${tag} : à l’ouverture, focus sur « Masquer les dossiers » (${onOpen})`,
+        );
+        await page.waitForTimeout(800); // délai d'ouverture des infobulles dépassé, pointeur toujours dessus
+        ok(
+          (await page.locator('.fd-tooltip').count()) === 0,
+          `${tag} : pas d’infobulle sur le bouton cliqué`,
+        );
+        await page.keyboard.press('Escape');
+        ok((await page.locator('.fcol--drawer').count()) === 0, `${tag} : un seul Échap ferme le tiroir`);
         await page.waitForTimeout(100);
         const focused = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
         ok(
