@@ -30,3 +30,6 @@ jobs:
         with:
           name: flowdsiml-extension
           path: apps/extension/.output/*.zip
+          # .output est un dossier caché : upload-artifact@v4 l'ignore par défaut (artefact vide)
+          include-hidden-files: true
+          if-no-files-found: error
