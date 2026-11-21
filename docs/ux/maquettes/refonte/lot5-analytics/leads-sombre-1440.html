@@ -379,6 +379,12 @@ tr.sel td { background: var(--tint); }
 .ac .ml { border: 0; border-radius: 0; background: none; margin: 0 -24px -24px; } .ac .ml li { padding-left: 24px; padding-right: 24px; }
 .mob .ac .ml { margin: 0 -16px -16px; } .mob .ac .ml li { padding-left: 16px; padding-right: 16px; }
 .ac.tb0 .ml { margin-bottom: -8px; }
+/* Retour du chef : aide de carte en popover (NAV-03, pas de lien isolé) */
+.hlp { position: relative; }
+.ib.open { background: var(--nav-active); color: var(--fd-color-text); }
+.pop.hpop { top: 40px; right: -40px; width: 320px; padding: 14px 16px; display: grid; gap: 8px; font-size: 13px; z-index: 6; }
+.hpop p { margin: 0; color: var(--fd-color-text); } .hpop p.mu { color: var(--fd-color-text-muted); }
+.mob .pop.hpop { right: -44px; width: min(320px, calc(100vw - 32px)); }
 </style></head><body class="">
 
 <div class="shell two"><nav class="side" aria-label="Navigation principale"><img class="logo l" src="../../../brand-tutoclic/production/logo-tutoclick.svg" alt="TutoClick, porté par la DSIML"><img class="logo d" src="../../../brand-tutoclic/production/logo-tutoclick-sombre.svg" alt="TutoClick, porté par la DSIML">
