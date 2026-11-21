@@ -115,7 +115,10 @@ Deno.test('recette 5 : un seul e-mail groupé, objet, lignes, bouton et pied de 
   // Une seule image : le logo des gabarits d'authentification ; aucun pixel de suivi
   const imgs = [...m.html.matchAll(/<img [^>]*>/gi)].map((x) => x[0]);
   assert(
-    imgs.length === 1 && imgs[0]!.includes('logo-tutoclick.png') && imgs[0]!.includes('alt="TutoClick"'),
+    imgs.length === 1 &&
+      imgs[0]!.includes('logo-tutoclick.png') &&
+      imgs[0]!.includes('alt="TutoClick, porté par la DSIML"') &&
+      imgs[0]!.includes('width="400"'),
     'logo seul, aucun pixel de suivi',
   );
   assertStringIncludes(m.html, '[data-ogsc] .em-text');

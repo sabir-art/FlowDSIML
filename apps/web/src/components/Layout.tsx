@@ -231,8 +231,9 @@ export function Layout() {
         >
           {open ? <X {...ICON} /> : <MenuIcon {...ICON} />}
         </button>
+        {/* LOGO-01 : barre mobile, icône seule de 32 px */}
         <span className="brand">
-          <BrandMark size={32} />
+          <img src={symbol} alt={APP_NAME} width={32} height={32} className="brand__symbol" />
         </span>
       </header>
       <aside
@@ -264,7 +265,7 @@ export function Layout() {
           {collapsedRail ? (
             <img src={symbol} alt={APP_NAME} width={32} height={32} className="brand__symbol" />
           ) : (
-            <BrandMark size={44} subtitle={t('app.org')} />
+            <BrandMark full width={224} />
           )}
         </div>
         {/* CAD-02 : sélecteur de workspace toujours visible (maquette) */}

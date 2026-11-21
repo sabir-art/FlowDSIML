@@ -93,6 +93,10 @@
 .brand {
   padding: 0 var(--fd-space-2);
 }
+/* LOGO-01 : le logo complet inclut sa zone de protection (§16.3), pas de marge en plus ; 224 px */
+.brand:has(> .brand-mark--full) {
+  padding: 0;
+}
 .spacer {
   flex: 1;
 }
@@ -892,13 +896,6 @@
   :root:not([data-theme='light']) .brand-mark__logo--dark {
     display: block;
   }
-}
-.brand-mark__sub {
-  margin-top: 2px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--fd-color-text-subtle);
 }
 
 /* ---- Refonte DSI §3 : entonnoir ---- */
@@ -2153,4 +2150,25 @@ button.fd-nav__item:hover {
 }
 .mk .auth-form {
   gap: var(--fd-space-3);
+}
+
+/* LOGO-01 : logo complet de 400 px à la connexion (colonne élargie à 600 px pour le contenir),
+   logo compact sous 480 px */
+.mk .auth-form {
+  max-width: 600px;
+}
+.auth-mark--compact {
+  display: none;
+}
+.auth-mark--full img {
+  max-width: 100%;
+  height: auto;
+}
+@media (max-width: 479px) {
+  .auth-mark--full {
+    display: none;
+  }
+  .auth-mark--compact {
+    display: inline-flex;
+  }
 }

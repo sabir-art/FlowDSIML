@@ -1,7 +1,6 @@
 {
   "app": {
-    "name": "{{app}}",
-    "org": "DSI des Missions Locales"
+    "name": "{{app}}"
   },
   "common": {
     "loading": "Loading…",

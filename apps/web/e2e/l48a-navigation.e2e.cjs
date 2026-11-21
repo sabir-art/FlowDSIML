@@ -323,7 +323,7 @@ const MB = 1024 * 1024;
   ok(!values.some((v) => /workspace/i.test(v)), 'fr.json : aucun « Workspace » visible');
   ok(!values.some((v) => /€|facturation/i.test(v)), 'fr.json : aucun « € » ni « facturation »');
 
-  // ===== Audit L50 C2 (LOGO-01) : logo compact de 40 px sur la connexion, à toutes les largeurs =====
+  // ===== LOGO-01 (§16.5) : logo complet de 400 px sur la connexion, logo compact de 40 px sous 480 px =====
   for (const width of [1440, 390]) {
     const ctx = await b.newContext({ viewport: { width, height: 900 }, locale: 'fr-FR' });
     const page = await ctx.newPage();
@@ -332,16 +332,20 @@ const MB = 1024 * 1024;
     await page.goto(`${APP}/#/login`);
     const logo = page.locator('.auth-logo-link img:visible');
     await logo.first().waitFor();
-    // Logo compact : proportions 742 × 204 (le logo complet est plus haut et porte « Porté par la DSIML »)
     const info = await logo.evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
-        return { w: Math.round(r.width), h: Math.round(r.height) };
+        return { w: Math.round(r.width), h: Math.round(r.height), alt: el.getAttribute('alt') };
       }),
     );
     ok(
-      info.length === 1 && info[0].h === 40 && Math.abs(info[0].w - Math.round((40 * 742) / 204)) <= 1,
-      `connexion ${width} px : logo compact de 40 px (${JSON.stringify(info)})`,
+      width >= 480
+        ? info.length === 1 &&
+            info[0].w === 400 &&
+            Math.abs(info[0].h - (400 * 260) / 803.5) <= 1 &&
+            info[0].alt === 'TutoClick, porté par la DSIML'
+        : info.length === 1 && info[0].h === 40 && Math.abs(info[0].w - Math.round((40 * 742) / 204)) <= 1,
+      `connexion ${width} px : ${width >= 480 ? 'logo complet de 400 px' : 'logo compact de 40 px'} (${JSON.stringify(info)})`,
     );
     await ctx.close();
   }

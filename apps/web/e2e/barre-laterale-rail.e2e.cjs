@@ -59,6 +59,30 @@ const geo = (p) =>
     const p = await open(b, 1440);
     const g = await geo(p);
     ok(g.sb === 256 && g.main === 256 && g.pressed === 'true', `1 440 px : épinglée par défaut (${g.sb} px)`);
+    // LOGO-01 (§16.5) : logo complet de 224 px, sans sous-titre ; fichier sombre en thème sombre, sans filtre
+    const logo = () =>
+      p.evaluate(() =>
+        [...document.querySelectorAll('.sidebar .brand img')]
+          .filter((i) => i.offsetParent)
+          .map((i) => ({
+            w: Math.round(i.getBoundingClientRect().width),
+            alt: i.alt,
+            dark: /sombre/.test(i.getAttribute('src')),
+            filter: getComputedStyle(i).filter,
+          })),
+      );
+    let l = await logo();
+    ok(
+      l.length === 1 && l[0].w === 224 && l[0].alt === 'TutoClick, porté par la DSIML' && !l[0].dark,
+      `logo complet de 224 px (${JSON.stringify(l)})`,
+    );
+    ok((await p.locator('.sidebar .brand-mark__sub').count()) === 0, 'aucun sous-titre HTML sous le logo');
+    await p.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
+    l = await logo();
+    ok(
+      l.length === 1 && l[0].dark && l[0].filter === 'none',
+      'thème sombre : fichier sombre, aucun filtre CSS',
+    );
     await p.context().close();
   }
 
@@ -88,7 +112,7 @@ const geo = (p) =>
       .evaluate((el) => el.getBoundingClientRect().width)) <= 1,
     'libellés masqués visuellement',
   );
-  ok((await p.locator('.brand__symbol').count()) === 1, 'logo réduit à son icône');
+  ok((await p.locator('.sidebar .brand__symbol').count()) === 1, 'logo réduit à son icône');
   ok(g.over <= 1, 'aucun défilement horizontal');
 
   // Survol : 150 ms, par-dessus, sans pousser ; repli 300 ms après la sortie

@@ -151,8 +151,13 @@ export function AuthLayout({
             className={`auth-logo-link${compact ? ' auth-logo-link--compact' : ''}`}
             aria-label={t('auth.home', { app: APP_NAME })}
           >
-            {/* Audit L50 C2 : logo compact de 40 px (le logo complet est réservé aux grands formats) */}
-            <BrandMark size={40} />
+            {/* LOGO-01 (§16.5) : logo complet du client, 400 px ; logo compact sous 480 px de large */}
+            <span className="auth-mark auth-mark--full">
+              <BrandMark full width={400} />
+            </span>
+            <span className="auth-mark auth-mark--compact">
+              <BrandMark size={40} />
+            </span>
           </Link>
           <h1>{title}</h1>
           {subtitle && <p className="muted t-lg auth-sub">{subtitle}</p>}

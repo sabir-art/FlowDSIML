@@ -130,7 +130,7 @@ export function renderDigest(c: Claim, cfg: Config): Mail {
 <tr><td align="center" style="padding:32px 16px;">
 <table role="presentation" class="em-wrap" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
   <tr><td class="em-card em-pad" style="background-color:#FFFFFF;border:1px solid #E2E8EF;border-radius:16px;padding:32px 40px;">
-    <a href="${esc(app)}" style="display:block;margin:0 0 24px -8px;text-decoration:none;"><img src="${LOGO}" width="176" height="62" alt="TutoClick" style="display:block;width:176px;height:62px;${FONT}font-size:20px;font-weight:bold;color:#A3195B;"></a>
+    <a href="${esc(app)}" style="display:block;margin:0 0 24px;text-decoration:none;"><img src="${LOGO}" width="400" height="129" alt="TutoClick, porté par la DSIML" style="display:block;width:400px;max-width:100%;height:auto;${FONT}font-size:20px;font-weight:bold;color:#A3195B;"></a>
     <h1 class="em-text" style="margin:0 0 16px;${FONT}font-size:24px;line-height:32px;font-weight:700;color:#080808;">${esc(subject)}</h1>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
     ${more ? `<p class="em-muted" style="margin:12px 0 0;${FONT}font-size:14px;line-height:20px;color:#4F5966;">${esc(more)}</p>` : ''}

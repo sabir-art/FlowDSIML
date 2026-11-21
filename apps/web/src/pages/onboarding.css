@@ -16,6 +16,13 @@
 .obx-top > :last-child {
   justify-self: end;
 }
+.obx-logo {
+  display: flex;
+  min-width: 0;
+}
+.obx-logo--compact {
+  display: none;
+}
 .obx-progress {
   display: flex;
   flex-direction: column;
@@ -389,6 +396,13 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 8px;
     padding: 12px 20px;
+  }
+  /* LOGO-01 : la barre de progression ne laisse pas 400 px au logo complet */
+  .obx-logo--full {
+    display: none;
+  }
+  .obx-logo--compact {
+    display: flex;
   }
   .obx-progress__bars span {
     width: 20px;

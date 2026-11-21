@@ -466,7 +466,15 @@ export function Onboarding() {
   return (
     <div className="obx">
       <header className="obx-top">
-        <BrandMark size={32} />
+        {/* LOGO-01 : logo complet de 400 px ; icône compacte quand la barre est trop étroite */}
+        <span className="obx-logo" data-gap-exempt="">
+          <span className="obx-logo--full">
+            <BrandMark full width={400} />
+          </span>
+          <span className="obx-logo--compact">
+            <BrandMark size={32} />
+          </span>
+        </span>
         {total > 1 && (
           <div
             className="obx-progress"
