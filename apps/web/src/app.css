@@ -1927,3 +1927,192 @@ button.fd-nav__item:hover {
   overflow-x: clip;
   overscroll-behavior-x: contain;
 }
+
+/* ---- Retours client 21/11 §6 : barre latérale repliable en rail de 64 px (≥ 1 024 px) ---- */
+.sidebar__pin {
+  flex: none;
+  align-self: flex-start;
+  width: 32px;
+  height: 32px;
+  margin-bottom: calc(-1 * var(--fd-space-2));
+}
+.brand__symbol {
+  display: block;
+}
+@media (min-width: 1024px) {
+  .shell--rail {
+    grid-template-columns: var(--fd-layout-sidebar-width-collapsed, 64px) minmax(0, 1fr);
+  }
+  /* Le rail garde sa colonne de 64 px ; déplié, il passe par-dessus le contenu sans le pousser */
+  .shell--rail .sidebar {
+    z-index: calc(var(--fd-z-sticky) + 1);
+    width: var(--fd-layout-sidebar-width-collapsed, 64px);
+    /* Même marge haute qu'épinglée : le bouton d'épinglage ne bouge pas */
+    padding: var(--fd-space-6) 10px;
+    overflow-x: hidden;
+    transition: width var(--fd-motion-duration-fast, 120ms) var(--fd-motion-ease-standard, ease);
+  }
+  .shell--rail .sidebar[data-expanded='true'] {
+    width: var(--fd-layout-sidebar-width, 256px);
+    box-shadow: var(--fd-shadow-lg);
+  }
+  /* Bouton d'épinglage et icônes à la même abscisse, replié ou déplié (16 px du bord) */
+  .shell--rail .sidebar__pin,
+  .shell--rail .brand {
+    margin-left: 6px;
+    padding: 0;
+  }
+  .shell--rail .fd-nav__item {
+    flex: none;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .fd-nav__item {
+    width: 44px;
+  }
+  /* Replié : libellés masqués visuellement (noms accessibles gardés) */
+  .shell--rail .sidebar[data-expanded='false'] :is(.fd-nav__label, .ws-text, .user-text) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .fd-nav__section {
+    height: 1px;
+    margin: 11px 12px;
+    padding: 0;
+    overflow: hidden;
+    color: transparent;
+    background: var(--fd-color-border);
+  }
+  /* Espace : la pastille seule (32 px) */
+  .shell--rail .sidebar[data-expanded='false'] .ws-switch {
+    width: 44px;
+    justify-content: center;
+    padding: 6px;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .ws-switch > svg {
+    display: none;
+  }
+  /* Compte : l'avatar seul ; le bouton du menu le recouvre (cliquable, atteignable au clavier) */
+  .shell--rail .sidebar[data-expanded='false'] .user-block {
+    position: relative;
+    width: 44px;
+    justify-content: center;
+    padding: 6px;
+    background: none;
+    box-shadow: none;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .user-block .menu,
+  .shell--rail .sidebar[data-expanded='false'] .user-block .menu-trigger {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .user-block .menu-trigger {
+    border-radius: var(--fd-radius-full);
+  }
+  .shell--rail .sidebar[data-expanded='false'] .user-block .menu-trigger > * {
+    opacity: 0;
+  }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .shell--rail .sidebar {
+    transition: none;
+  }
+}
+
+/* Retours client 21/11 §4.4 : photo de profil par-dessus l'initiale (qui reste dessous en secours) */
+:is(.avatar, .cm-avatar, .nb-avatar, .obx-avatar):has(> .av-photo) {
+  position: relative;
+}
+.av-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Retours client 21/11 §4.1 et §4.2 : ligne « Photo » du profil et recadrage */
+.pf-photo__row {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-4);
+}
+.pf-photo .avatar.pf-photo__avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 22px;
+}
+.pf-photo__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-4);
+}
+.pf-photo__remove {
+  color: var(--fd-color-danger);
+}
+.pf-photo__error {
+  margin: var(--fd-space-1) 0 0;
+  color: var(--fd-color-danger);
+  font-size: 13px;
+}
+.pf-photo .help {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.pf-crop__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fd-space-5);
+  flex-wrap: wrap;
+}
+.pf-crop__box,
+.pf-crop__preview {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  background: var(--fd-color-surface-sunken);
+}
+.pf-crop__box {
+  max-width: 100%;
+  border-radius: var(--fd-radius-md);
+  cursor: grab;
+  touch-action: none;
+}
+.pf-crop__box:active {
+  cursor: grabbing;
+}
+.pf-crop__box:focus-visible {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: 2px;
+}
+.pf-crop__preview {
+  display: block;
+  border-radius: 50%;
+}
+.pf-crop .pf-crop__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Taille posée en ligne (zoom) : pas de réduction par les règles générales des images */
+  max-width: none;
+  max-height: none;
+  transform-origin: 0 0;
+  user-select: none;
+  pointer-events: none;
+}
+.pf-crop__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fd-space-2);
+}
+.pf-crop__zoom input[type='range'] {
+  width: 100%;
+}

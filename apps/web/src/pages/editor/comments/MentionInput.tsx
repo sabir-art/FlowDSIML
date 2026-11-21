@@ -14,6 +14,7 @@ import {
   type KeyboardEvent,
   type TextareaHTMLAttributes,
 } from 'react';
+import { AvatarPhoto } from '../../../components/AvatarPhoto';
 import { useTranslation } from 'react-i18next';
 import { initials } from '../../../lib/initials';
 import { avatarTone } from '../../../lib/avatarTone';
@@ -258,6 +259,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function Ment
                     aria-hidden="true"
                   >
                     {initials(m.full_name || m.email)}
+                    <AvatarPhoto userId={m.user_id} />
                   </span>
                   <span className="mi-ac__name">
                     <b>{m.full_name || m.email}</b>

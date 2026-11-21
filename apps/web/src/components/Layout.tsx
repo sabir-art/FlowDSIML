@@ -1,6 +1,16 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FocusEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { useMediaQuery } from '../lib/useMediaQuery';
+import { AvatarPhoto } from './AvatarPhoto';
 import { BrandMark } from './BrandMark';
+import symbol from '../assets/symbole-tutoclick.svg';
+import { APP_NAME } from '@flowdsiml/core';
 import { initials } from '../lib/initials';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +24,7 @@ import {
   LogOut,
   Megaphone,
   Menu as MenuIcon,
+  PanelLeft,
   Plus,
   Puzzle,
   Route,
@@ -36,6 +47,21 @@ import { useTheme, type ThemePref } from '../lib/theme';
 
 const ICON = { size: 18, strokeWidth: 1.75, 'aria-hidden': true } as const;
 
+/** Retours client 21/11 §6 : barre épinglée ou rail de 64 px, retenu par personne. */
+const SIDEBAR_KEY = 'fd.sidebar';
+function savedPinned(): boolean {
+  try {
+    const v = localStorage.getItem(SIDEBAR_KEY);
+    if (v === 'pinned' || v === 'rail') return v === 'pinned';
+  } catch {
+    /* stockage indisponible : valeur par défaut */
+  }
+  return window.matchMedia('(min-width: 1440px)').matches;
+}
+/** Délais du rail : dépli au survol, repli après la sortie du pointeur. */
+const HOVER_IN = 150;
+const HOVER_OUT = 300;
+
 export function Layout() {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
@@ -53,6 +79,65 @@ export function Layout() {
   const menuBtn = useRef<HTMLButtonElement>(null);
   const sidebar = useRef<HTMLElement>(null);
   const drawer = useMediaQuery('(max-width: 1023px)');
+  // §6 : rail (≥ 1 024 px, non épinglé), déplié par-dessus le contenu au survol ou au focus
+  const [pinned, setPinned] = useState(savedPinned);
+  const [expanded, setExpanded] = useState(false);
+  const rail = !drawer && !pinned;
+  const collapsedRail = rail && !expanded;
+  const hoverTimer = useRef(0);
+  /** Échap rend le focus à l'élément actif sans redéplier le rail (ce focus-là seulement). */
+  const escapedAt = useRef(0);
+  const justEscaped = () => performance.now() - escapedAt.current < 100;
+  const togglePin = () => {
+    const next = !pinned;
+    setPinned(next);
+    setExpanded(false);
+    try {
+      localStorage.setItem(SIDEBAR_KEY, next ? 'pinned' : 'rail');
+    } catch {
+      /* stockage indisponible : l'état vaut pour la session */
+    }
+  };
+  useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
+  const railEvents = rail
+    ? {
+        onMouseEnter: () => {
+          window.clearTimeout(hoverTimer.current);
+          hoverTimer.current = window.setTimeout(() => setExpanded(true), HOVER_IN);
+        },
+        onMouseLeave: () => {
+          window.clearTimeout(hoverTimer.current);
+          hoverTimer.current = window.setTimeout(() => {
+            // Le focus clavier dans la barre la garde dépliée (pas celui laissé par un clic)
+            const el = document.activeElement;
+            if (!sidebar.current?.contains(el) || !el?.matches(':focus-visible')) setExpanded(false);
+          }, HOVER_OUT);
+        },
+        onFocus: () => {
+          if (justEscaped()) return;
+          window.clearTimeout(hoverTimer.current);
+          setExpanded(true);
+        },
+        onBlur: (e: FocusEvent<HTMLElement>) => {
+          const to = e.relatedTarget as Node | null;
+          // Un menu ouvert depuis la barre (portail) la garde dépliée
+          if (to && (sidebar.current?.contains(to) || document.getElementById('fd-portal')?.contains(to)))
+            return;
+          if (!sidebar.current?.matches(':hover')) setExpanded(false);
+        },
+        onKeyDown: (e: ReactKeyboardEvent<HTMLElement>) => {
+          if (e.key !== 'Escape' || !expanded || document.querySelector('#fd-portal [role=menu]')) return;
+          e.preventDefault();
+          escapedAt.current = performance.now();
+          setExpanded(false);
+          // L'élément actif de la page, sinon le premier
+          (
+            sidebar.current?.querySelector<HTMLElement>('.fd-nav__item[aria-current="page"]') ??
+            sidebar.current?.querySelector<HTMLElement>('.fd-nav__item')
+          )?.focus();
+        },
+      }
+    : {};
 
   // Ferme le menu mobile à chaque navigation.
   useEffect(() => setOpen(false), [location.pathname]);
@@ -111,14 +196,16 @@ export function Layout() {
       to={to}
       className={`fd-nav__item${active ? ' active' : ''}`}
       aria-current={active ? 'page' : undefined}
+      // Rail replié : libellé masqué visuellement, montré en infobulle à droite
+      data-tip={collapsedRail ? label : undefined}
     >
       {icon}
-      {label}
+      <span className="fd-nav__label">{label}</span>
     </Link>
   );
 
   return (
-    <div className={`shell ${open ? 'nav-open' : ''}`}>
+    <div className={`shell${open ? ' nav-open' : ''}${rail ? ' shell--rail' : ''}`}>
       <a
         className="skip-link"
         href="#main"
@@ -154,9 +241,28 @@ export function Layout() {
         role={drawer ? 'dialog' : undefined}
         aria-modal={drawer && open ? true : undefined}
         aria-label={drawer ? t('nav.main') : undefined}
+        data-expanded={rail ? String(expanded) : undefined}
+        {...railEvents}
       >
+        {!drawer && (
+          // §6 : même place épinglée ou en rail ; nom stable, état dans aria-pressed (motif bouton bascule)
+          <button
+            type="button"
+            className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm sidebar__pin"
+            aria-label={t('nav.pinSidebar')}
+            aria-pressed={pinned}
+            data-tip={pinned ? t('nav.collapseSidebar') : t('nav.pinSidebar')}
+            onClick={togglePin}
+          >
+            <PanelLeft {...ICON} />
+          </button>
+        )}
         <div className="brand">
-          <BrandMark size={44} subtitle={t('app.org')} />
+          {collapsedRail ? (
+            <img src={symbol} alt={APP_NAME} width={32} height={32} className="brand__symbol" />
+          ) : (
+            <BrandMark size={44} subtitle={t('app.org')} />
+          )}
         </div>
         {/* CAD-02 : sélecteur de workspace toujours visible (maquette) */}
         <WorkspaceSwitcher />
@@ -174,19 +280,25 @@ export function Layout() {
         </nav>
         <div className="spacer" />
         <nav aria-label={t('nav.utilities')} className="fd-nav fd-nav--utils">
-          <button type="button" className="fd-nav__item" onClick={() => setExtension(true)}>
+          <button
+            type="button"
+            className="fd-nav__item"
+            data-tip={collapsedRail ? t('nav.extension') : undefined}
+            onClick={() => setExtension(true)}
+          >
             <Puzzle {...ICON} />
-            {t('nav.extension')}
+            <span className="fd-nav__label">{t('nav.extension')}</span>
           </button>
           {help && (
             <button
               type="button"
               className="fd-nav__item"
               aria-expanded={help.open}
+              data-tip={collapsedRail ? t('nav.helpCenter') : undefined}
               onClick={(e) => help.toggle(e.currentTarget)}
             >
               <CircleHelp {...ICON} />
-              {t('nav.helpCenter')}
+              <span className="fd-nav__label">{t('nav.helpCenter')}</span>
             </button>
           )}
           {item(
@@ -199,6 +311,7 @@ export function Layout() {
         <div className="user-block">
           <span className="avatar avatar--brand" aria-hidden="true">
             {initials(profile?.full_name || user?.email || '?')}
+            <AvatarPhoto userId={user?.id} />
             {unseen > 0 && <span className="news-dot" />}
           </span>
           <span className="user-text">

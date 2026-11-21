@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AvatarPhoto } from '../../components/AvatarPhoto';
 import { Info, Search, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
@@ -140,6 +141,7 @@ export function FolderAccessDialog({
                       />
                       <span className="avatar avatar-sm" aria-hidden="true">
                         {initials(name)}
+                        <AvatarPhoto userId={m.user_id} />
                       </span>
                       <span className="fa-name">{name}</span>
                       <span className="t-caption muted">{t(`roles.${m.role}`)}</span>

@@ -1,5 +1,6 @@
 import { formatDate } from '../../lib/format';
 import { initials } from '../../lib/initials';
+import { AvatarPhoto } from '../../components/AvatarPhoto';
 export { initials };
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Check, Copy, Info, LogOut, Mail, Plus, Search, Star, Trash2, UserCog, X } from 'lucide-react';
@@ -261,6 +262,7 @@ export function Members() {
                           <div className="row">
                             <span className="avatar" aria-hidden="true">
                               {initials(m.full_name || m.email)}
+                              <AvatarPhoto userId={m.user_id} />
                             </span>
                             <div>
                               <b>{m.full_name || m.email}</b>

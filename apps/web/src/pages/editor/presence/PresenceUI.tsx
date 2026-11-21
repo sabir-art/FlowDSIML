@@ -1,5 +1,6 @@
 /** L22-08 : pile d'avatars et panneau « Sur cette démo », bandeau même étape, avatars du rail, curseurs. */
 import { useEffect, useId, useRef, useState } from 'react';
+import { AvatarPhoto } from '../../../components/AvatarPhoto';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { initials } from '../../../lib/initials';
@@ -27,6 +28,7 @@ function Av({
       aria-hidden="true"
     >
       {initials(name)}
+      <AvatarPhoto userId={u} />
     </span>
   );
 }
