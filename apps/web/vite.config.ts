@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { APP_NAME } from '../../packages/core/src/brand';
+import { assertBuildEnv } from '../../packages/core/src/buildEnv';
 import { offlineRuntime } from './vite.offline';
 import { localeSplit } from './vite.locales';
 import { routePreload } from './vite.preload';
@@ -9,6 +10,12 @@ import { routePreload } from './vite.preload';
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   plugins: [
+    // Adresse et clé publique Supabase : obligatoires au build, sans valeur par défaut dans le code
+    {
+      name: 'require-env',
+      apply: 'build',
+      configResolved: (c) => assertBuildEnv(c.env, ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']),
+    },
     react(),
     // L16 : lecteur hors ligne des paquets SCORM (module virtuel)
     offlineRuntime(),

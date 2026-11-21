@@ -1,7 +1,6 @@
 const env = import.meta.env;
-export const SUPABASE_URL: string = (
-  env.VITE_SUPABASE_URL || 'https://ffzlhlxfratcbitkuvli.supabase.co'
-).replace(/\/$/, '');
+/** Variables obligatoires au build (vite.config.ts) : aucune valeur par défaut dans le code. */
+export const SUPABASE_URL: string = (env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
 export const SUPABASE_ANON_KEY: string = env.VITE_SUPABASE_ANON_KEY || '';
 /** Edge Function d'ingestion (sinon repli sur la RPC track_events). */
 export const TRACK_URL: string | null = env.VITE_TRACK_URL || `${SUPABASE_URL}/functions/v1/track`;

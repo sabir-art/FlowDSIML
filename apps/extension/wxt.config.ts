@@ -1,7 +1,18 @@
 import { defineConfig } from 'wxt';
 import { APP_NAME } from '../../packages/core/src/brand';
+import { assertBuildEnv } from '../../packages/core/src/buildEnv';
 
 export default defineConfig({
+  // Adresse et clé publique Supabase : obligatoires au build, sans valeur par défaut dans le code
+  vite: () => ({
+    plugins: [
+      {
+        name: 'require-env',
+        apply: 'build',
+        configResolved: (c) => assertBuildEnv(c.env, ['WXT_SUPABASE_URL', 'WXT_SUPABASE_ANON_KEY']),
+      },
+    ],
+  }),
   hooks: {
     // EXT-STORE : WXT recopie les « matches » des scripts injectés à la demande (registration: 'runtime')
     // dans host_permissions. Ils passent par scripting.executeScript, couvert par activeTab ou par l'accès

@@ -29,6 +29,12 @@ jobs:
       - name: Scripts d'exploitation (tests)
         run: node --test scripts/*.test.mjs
       - run: pnpm turbo run lint typecheck test build
+        # Variables obligatoires au build (aucune valeur par défaut dans le code) : valeurs fictives ici
+        env:
+          VITE_SUPABASE_URL: https://api.tutoclick.example
+          VITE_SUPABASE_ANON_KEY: test
+          WXT_SUPABASE_URL: https://api.tutoclick.example
+          WXT_SUPABASE_ANON_KEY: test
       - name: Edge Functions (deno check de toutes les fonctions + tests du dispatch des webhooks, de la médiathèque, de html-ingest, de l'Assistance IA et d'access-email)
         working-directory: supabase/functions
         run: |
