@@ -14,12 +14,18 @@
   - À gauche, un bouton « Commentaires », avec l'icône `message-square` de 16 px, le badge (§1.2) et le chevron `chevron-up`.
   - À droite, pour l'étape courante : « Étape {n} », en 13 px `text-muted`.
 - **Déplié** :
-  - le panneau fait par défaut **240 px** de haut, entre **160 px** au moins et **50 %** de la hauteur de la colonne du canevas au plus ;
+  - le panneau fait par défaut **320 px** de haut, entre **200 px** au moins et **50 %** de la hauteur de la colonne du canevas au plus. À 240 px, on ne voyait qu'un commentaire (barre de 40 px, saisie de 91 px) : 320 px en montrent 2 à 3 (arbitrage du 21 novembre) ;
   - une **poignée** de redimensionnement le borde en haut : 8 px de zone de saisie, avec un trait centré de 32 × 4 px `border-strong`, et `cursor: row-resize` ;
   - au clavier, la poignée est un `role="separator"` avec `aria-orientation="horizontal"`, `aria-valuenow`, `aria-valuemin` et `aria-valuemax`. Les flèches haut et bas changent la hauteur de 16 px ; Début et Fin vont au minimum et au maximum ;
   - l'en-tête de 40 px reste le même qu'en replié, avec le chevron `chevron-down`. Dessous, le contenu actuel du panneau défile à l'intérieur : liste, « Afficher les résolus », champ de saisie ;
   - le champ de saisie est collé en bas du panneau.
 - **Ne jamais masquer la bulle sélectionnée** : quand le panneau s'ouvre ou s'agrandit, le canevas réduit sa hauteur et se recadre (« Ajuster »). Si la bulle ou le hotspot sélectionné sortirait de la zone visible, la vue défile pour le garder à au moins 16 px du bord haut du panneau.
+
+### 1.1 bis Arbitrages sur la livraison 0e2c518 (21 novembre)
+- « Commentaires » **sort du rail d'outils** de l'éditeur, avec son point « non lu ». Le badge de la barre est la seule porte d'entrée (§1.2).
+- La mention « Interne à l'équipe, jamais publié. » passe dans la barre, avec le cadenas, à droite et avant « Étape n ». Elle est tronquée si la place manque ; le texte entier est dans `title` et dans l'`aria-describedby` du champ.
+- Le champ de saisie fait 4 lignes au plus dans le panneau.
+- Alt + C fonctionne aussi depuis le champ. Sur Mac, où Option + C tape « ç », **Échap dans un champ vide** referme le panneau et rend le focus au bouton « Commentaires ».
 
 ### 1.2 Badge
 - Le badge compte les **commentaires ouverts** (non résolus) de l'**étape courante**. C'est ce que montre le panneau déplié.
@@ -233,7 +239,7 @@
 | 1 | Éditeur à 1440 et 1280 px : les commentaires ne sont plus à droite ; la barre repliée fait 40 px de haut, sous le canevas | `getBoundingClientRect().height === 40` ; largeur du canevas inchangée entre replié et déplié |
 | 2 | Badge : 3 commentaires ouverts sur l'étape, dont 1 non lu → « 3 » sur fond `primary` ; tous lus → fond `surface-sunken` ; aucun → pas de badge | couleurs calculées |
 | 3 | Bouton : `aria-expanded` passe de `false` à `true` ; nom accessible « Commentaires, 3 ouverts, dont 1 non lus » | arbre d'accessibilité |
-| 4 | Poignée : glisser jusqu'à 400 px, puis Flèche bas × 2 → 368 px ; Début → 160 px ; Fin → 50 % de la colonne | `aria-valuenow` |
+| 4 | Poignée : 320 px par défaut ; glisser jusqu'à 400 px, puis Flèche bas × 2 → 368 px ; Début → 200 px ; Fin → 50 % de la colonne | `aria-valuenow` |
 | 5 | Bulle sélectionnée en bas du canevas : à l'ouverture du panneau, elle reste visible, à 16 px au moins du bord du panneau | rects |
 | 6 | Recharger la page : l'état (déplié, 368 px) est gardé ; ouvrir par un lien de mention : le panneau s'ouvre sur le commentaire | |
 | 7 | Démos et Sandbox, à 1440, 1280, 1024 et 390 px : la colonne va du haut au bas de la fenêtre, sans vide dessous ; la liste défile à l'intérieur avec 30 dossiers ; à 1024 px, rail de 48 px et tiroir par-dessus ; à 390 px, pas de colonne | `bottom === innerHeight - marge` |
