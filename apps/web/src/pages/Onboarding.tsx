@@ -196,9 +196,10 @@ export function Onboarding() {
     navigate(`/demos/${id}/edit?guide=1`, { replace: true });
   }
 
-  const title = (id: string, text: string) => (
+  const title = (id: string, text: string, after?: ReactNode) => (
     <h1 id={id} ref={heading} tabIndex={-1} className="obx-h1">
       {text}
+      {after}
     </h1>
   );
   const total = steps.length;
@@ -322,12 +323,15 @@ export function Onboarding() {
   } else if (step === 'ext') {
     body = (
       <>
-        {title('obx-t', t('onboarding.extTitle'))}
-        {/* §18.4 : extension pas encore publiée (et jamais détectée) : la phrase, puis continuer sans */}
+        {/* §18.4 : extension pas encore publiée (et jamais détectée) : « Bientôt disponible » sur la ligne
+            du titre, comme dans la modale Extension, la phrase, puis continuer sans */}
+        {title(
+          'obx-t',
+          t('onboarding.extTitle'),
+          !EXTENSION_URL && !extSeen ? <span className="obx-soon">{t('extension.soon')}</span> : null,
+        )}
         {!EXTENSION_URL && !extSeen ? (
-          <p className="obx-sub">
-            <span className="obx-soon">{t('extension.soon')}</span> {t('extension.soonBody')}
-          </p>
+          <p className="obx-sub">{t('extension.soonBody')}</p>
         ) : (
           <p className="obx-sub">{t('onboarding.extSubtitle')}</p>
         )}
@@ -341,7 +345,8 @@ export function Onboarding() {
               </span>
               <span className="obx-line">
                 {t('onboarding.ext1')}
-                {EXTENSION_URL ? (
+                {/* C3 : extension détectée, plus de bouton d'installation */}
+                {extSeen ? null : EXTENSION_URL ? (
                   <a className="fd-btn" href={EXTENSION_URL} target="_blank" rel="noopener noreferrer">
                     {t('onboarding.addToChrome')}
                     <ExternalLink aria-hidden="true" />

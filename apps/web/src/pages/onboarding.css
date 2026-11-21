@@ -60,8 +60,11 @@
   font-weight: 700;
   line-height: 1.25;
 }
-.obx-h1:focus {
+.obx-h1[tabindex]:focus,
+.obx-h1[tabindex]:focus-visible {
+  /* C4 : focus posé par le code au changement d'étape (lecteurs d'écran) ; titre non interactif, sans anneau */
   outline: none;
+  box-shadow: none;
 }
 .obx-sub {
   margin: 8px 0 0;
@@ -69,8 +72,10 @@
   color: var(--fd-color-text-muted);
 }
 .obx-soon {
-  font-weight: 600;
-  color: var(--fd-color-text);
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
 }
 .obx-fields {
   display: flex;

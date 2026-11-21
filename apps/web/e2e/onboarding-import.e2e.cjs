@@ -57,6 +57,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'étape 1 sur 5 (progressbar)',
   );
   ok((await page.getByRole('button', { name: 'Retour' }).count()) === 0, 'pas de « Retour » à l’étape 1');
+  // C4 : à l'ouverture, focus sur le titre, sans anneau (même hors clavier)
+  const ring1 = await page.locator('h1.obx-h1').evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return document.activeElement === el && `${cs.outlineStyle}|${cs.boxShadow}`;
+  });
+  ok(ring1 === 'none|none', `ouverture : titre focalisé sans anneau (${ring1})`);
   ok((await page.getByLabel('Prénom').inputValue()) === 'Alice', 'prénom prérempli depuis le profil');
   await page.getByLabel('Fonction (facultatif)').selectOption('trainer');
   ok(/Formateur ou formatrice/.test(await page.locator('.obx-preview').innerText()), 'aperçu : fonction');
@@ -105,9 +111,29 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // Étape 4 : extension, détection sans recharger
   await page.getByRole('heading', { name: 'Installez l’extension' }).waitFor();
   ok((await page.getByText('Extension détectée').count()) === 0, 'extension pas encore détectée');
+  // §18.4 : « Bientôt disponible » sur la ligne du titre, 13 px, texte atténué, non gras
+  const soon = await page.locator('h1.obx-h1 .obx-soon').evaluate((el) => {
+    const cs = getComputedStyle(el);
+    const muted = getComputedStyle(document.documentElement).getPropertyValue('--fd-color-text-muted').trim();
+    const probe = document.createElement('span');
+    probe.style.color = muted;
+    document.body.append(probe);
+    const ref = getComputedStyle(probe).color;
+    probe.remove();
+    return { txt: el.textContent, fs: cs.fontSize, fw: cs.fontWeight, muted: cs.color === ref };
+  });
+  ok(
+    soon.txt === 'Bientôt disponible' && soon.fs === '13px' && soon.fw === '400' && soon.muted,
+    `§18.4 : « Bientôt disponible » dans le titre, 13 px, atténué (${JSON.stringify(soon)})`,
+  );
   t.profiles[0].extension_seen_at = new Date().toISOString();
   await page.getByText('Extension détectée').waitFor({ timeout: 4000 });
   ok(true, 'extension détectée en 2 s, sans recharger');
+  ok(
+    (await page.getByRole('button', { name: 'Ajouter à Chrome' }).count()) === 0 &&
+      (await page.getByRole('link', { name: /Ajouter à Chrome/ }).count()) === 0,
+    'C3 : extension détectée, « Ajouter à Chrome » masqué',
+  );
   await shot('l48c-4-extension');
   await page.getByRole('button', { name: 'Continuer', exact: true }).click();
 
