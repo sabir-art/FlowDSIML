@@ -168,6 +168,23 @@
 > Principes tirés de captures fournies par le client comme **inspiration**. On ne copie rien : nos couleurs, notre typographie et nos composants. Aucune de ces captures n'est versionnée.
 > Ce modèle **remplace le §3** pour la forme des pages. La règle des 24 px reste pour les rares pages qui gardent plusieurs surfaces (Zone de danger, par exemple).
 
+### 11.0 Cible mesurable (priorité n° 1 du chef, avec le défilement horizontal)
+- **Maquette avant/après** : `docs/ux/maquettes/refonte/parametres-aere.html`, sur Général et Profil, avec le sélecteur Avant/Après et Clair/Sombre. Captures à 1440 px dans `img/parametres-aere/` (`avant-*` : app réelle sur c63b0e4 ; `apres-*` : maquette).
+- **Constat sur Général, à 1440 px** :
+  - champs de 542 px, beaucoup plus larges sur un grand écran, car ils prennent toute la colonne ;
+  - bordure #768294 ;
+  - aides sur toute la largeur ;
+  - « Bientôt » avec un point ;
+  - « Changer le logo » grisé et peu lisible.
+- **Cible** :
+  - contenu centré de **880 px** au plus ;
+  - rangées : libellé et aide à gauche sur **40 %** (aide limitée à 40 caractères de large), contrôle à droite sur **60 %**, **420 px au plus**, et **240 px** pour les données courtes (adresse personnalisée, fuseau horaire, langue) ;
+  - **padding vertical de 20 px** par rangée, filet de 1 px `border` entre les rangées ;
+  - champs de **40 px** de haut, police de 14 px, rayon de 10 px, **bordure `--fd-color-border-field`** (nouveau jeton). Il vaut #8A94A2 en clair (3,07:1 sur `surface`) et #5E6978 en sombre (3,16:1). C'est la bordure la plus claire qui garde le **3:1 exigé par le RGAA** (critère 3.3, WCAG 1.4.11) pour repérer un champ. Un filet clair comme `border` (#E2E8EF, 1,23:1) serait non conforme, d'où ce compromis ;
+  - en-tête de page : titre, sous-titre, puis **Annuler et Enregistrer à droite** ;
+  - **Zone de danger** encadrée à part, en bas.
+- Le jeton `--fd-color-border-field` est à ajouter dans `tokens.ts`, puis tokens.css est régénéré. Il sert à tous les champs de l'app, pas seulement dans les Paramètres.
+
 ### 11.1 Gabarit de page
 - Le contenu des Paramètres est **centré**, avec une largeur maximale de **880 px** et des marges latérales de 32 px (16 px sous 768 px).
 - En haut, l'en-tête de page : fil d'Ariane, titre H1, puis une phrase de description en 14 px `text-muted`. 32 px avant la première section.
@@ -181,7 +198,7 @@
 - Deux sections de la même surface sont séparées par un filet de 1 px `border`, avec **32 px** au-dessus et au-dessous.
 
 ### 11.3 Rangées
-- **Rangée de réglage** : libellé (14 px 600) et aide (13 px `text-muted`) à gauche, sur 40 % ; le contrôle à droite, sur 60 % (champ, interrupteur, segmenté, liste). Padding vertical de 16 px. Rangées séparées par un filet de 1 px `border`. Sous 768 px, le contrôle passe sous le libellé, à 8 px.
+- **Rangée de réglage** : libellé (14 px 600) et aide (13 px `text-muted`) à gauche, sur 40 % ; le contrôle à droite, sur 60 %, 420 px au plus (champ, interrupteur, segmenté, liste). Padding vertical de 20 px. Rangées séparées par un filet de 1 px `border`. Sous 768 px, le contrôle passe sous le libellé, à 8 px.
 - **Rangée de formulaire en 2 colonnes** quand deux champs vont ensemble : Prénom et Nom, Langue et Fuseau horaire, Nouveau mot de passe et Confirmation. Gap de 16 px entre les colonnes et 20 px entre deux lignes de champs (§15.4 bis). Une seule colonne sous 768 px.
 - « Bientôt » : texte de 13 px `text-muted` à droite du libellé, sans point. Le contrôle est désactivé (§18.4).
 
@@ -231,6 +248,6 @@
 | 16 | `espacements.e2e.cjs` passe sur toutes les routes, en clair et en sombre, à 1440 et 390 px | relevé joint |
 | 17 | Panneau « Points d'intérêt » et tous les panneaux de l'éditeur : geste horizontal au trackpad et molette avec Maj → aucun déplacement, `scrollLeft === 0` ; e2e global « aucun débordement horizontal » vert | mesure |
 | 18 | « Libre · Bientôt » et tous les « Bientôt » de l'éditeur : texte sans point | captures |
-| 19 | Paramètres, sur les 13 pages, à 1440, 1024 et 390 px : contenu centré de 880 px au plus ; une seule surface ; en-tête de section avec l'action à droite ; 32 px et un filet entre les sections ; rangées de 40 % et 60 % avec un padding de 16 px | rects |
+| 19 | Paramètres, sur les 13 pages, à 1440, 1024 et 390 px : contenu centré de 880 px au plus ; une seule surface ; en-tête de section avec l'action à droite ; 32 px et un filet entre les sections ; rangées de 40 % et 60 % avec un padding de 20 px ; champs de 420 px au plus (240 px pour les données courtes) et 40 px de haut ; bordure de champ rgb(138, 148, 162) en clair et rgb(94, 105, 120) en sombre | rects, styles calculés |
 | 20 | Profil : photo de 56 px en tête ; Prénom et Nom, Langue et Apparence, Mot de passe et Confirmation en 2 colonnes (une seule à 390 px) ; Zone de danger encadrée en dernier, 24 px sous la surface, sans aplat rouge | captures et mesures |
 | 21 | Tableaux (Variables, Glossaire, Étiquettes, Équipe) : recherche et ajout à droite de l'en-tête ; lignes de 56 px au moins | mesure |

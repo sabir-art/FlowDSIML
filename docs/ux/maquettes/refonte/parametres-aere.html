@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paramètres aérés · avant / après</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../../../packages/ui/src/base.css">
+<link rel="stylesheet" href="../../../../packages/ui/src/controls.css">
+<style>
+/* Maquette « Paramètres aérés » (retours client du 21/11, spec retours-client-21-11.md §11).
+   Uniquement des jetons --fd-*. Données fictives (Acme, example.com). */
+:root { --fd-color-border-field: #8A94A2; } /* 3,07:1 sur surface : WCAG 1.4.11 / RGAA 3.3 */
+[data-theme='dark'] { --fd-color-border-field: #5E6978; } /* 3,16:1 sur surface sombre */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fd-color-bg); color: var(--fd-color-text); font: 400 14px/1.5 var(--fd-font-sans); }
+.bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 12px 24px; background: var(--fd-color-surface); border-bottom: 1px solid var(--fd-color-border); }
+.bar b { font-size: 14px; margin-right: 8px; }
+.seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--fd-color-surface-sunken); }
+.seg button { height: 30px; padding: 0 14px; border: 0; border-radius: 999px; background: none; color: var(--fd-color-text-muted); font: 600 13px var(--fd-font-sans); cursor: pointer; }
+.seg button[aria-pressed='true'] { background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: 0 1px 2px rgb(8 10 14 / .08); }
+.avant { padding: 24px; }
+.avant img { display: block; max-width: 100%; border-radius: 12px; box-shadow: var(--fd-shadow-sm); }
+.avant p { margin: 0 0 12px; color: var(--fd-color-text-muted); }
+
+/* --- Gabarit (après) --- */
+.shell { display: grid; grid-template-columns: 248px 232px minmax(0, 1fr); min-height: 100vh; }
+.side { padding: 24px 16px; display: flex; flex-direction: column; gap: 4px; }
+.logo { display: flex; align-items: center; gap: 10px; font: 800 20px var(--fd-font-sans); margin-bottom: 24px; padding-left: 8px; }
+.logo i { width: 36px; height: 36px; border-radius: 10px; background: var(--fd-color-primary); }
+.side a { display: flex; align-items: center; height: 44px; padding: 0 16px; border-radius: 999px; color: var(--fd-color-text); text-decoration: none; font-weight: 500; }
+.side a.on { background: var(--fd-color-text); color: var(--fd-color-surface); }
+.snav { padding: 104px 16px 24px 8px; display: flex; flex-direction: column; gap: 2px; }
+.snav h3 { margin: 24px 0 6px 12px; font: 600 11px var(--fd-font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+.snav h3:first-child { margin-top: 0; }
+.snav a { display: flex; justify-content: space-between; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; color: var(--fd-color-text); text-decoration: none; font-weight: 500; }
+.snav a.on { background: var(--fd-color-surface); font-weight: 600; box-shadow: 0 1px 2px rgb(8 10 14 / .08); }
+[data-theme='dark'] .snav a.on { background: var(--fd-color-surface-raised, var(--fd-color-surface)); box-shadow: none; border: 1px solid var(--fd-color-border); }
+.soon { font: 400 13px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+main.page { padding: 24px 32px 64px; }
+.wrap { max-width: 880px; margin: 0 auto; }
+.crumb { font-size: 13px; color: var(--fd-color-text-muted); }
+.crumb a { color: inherit; }
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin: 8px 0 32px; }
+.head h1 { margin: 0; font: 800 32px/1.15 var(--fd-font-sans); letter-spacing: -.01em; }
+.head p { margin: 6px 0 0; color: var(--fd-color-text-muted); }
+.actions { display: flex; gap: 12px; flex: none; }
+.surface { background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); border-radius: var(--fd-radius-xl, 20px); padding: 8px 32px; }
+.sec { padding: 24px 0; }
+.sec + .sec { border-top: 1px solid var(--fd-color-border); }
+.sec-h { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 8px; }
+.sec-h h2 { margin: 0; font: 600 16px var(--fd-font-sans); }
+.sec-h p { margin: 4px 0 0; font-size: 13px; color: var(--fd-color-text-muted); max-width: 52ch; }
+.row { display: grid; grid-template-columns: 40% minmax(0, 1fr); gap: 24px; padding: 20px 0; align-items: start; }
+.row + .row { border-top: 1px solid var(--fd-color-border); }
+.lab { font: 600 14px var(--fd-font-sans); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.help { margin-top: 4px; font-size: 13px; color: var(--fd-color-text-muted); max-width: 40ch; }
+.ctl { display: flex; flex-direction: column; gap: 6px; max-width: 420px; }
+.ctl.short { max-width: 240px; }
+.inp, .sel { height: 40px; width: 100%; padding: 0 12px; border: 1px solid var(--fd-color-border-field); border-radius: 10px; background: var(--fd-color-surface); color: var(--fd-color-text); font: 400 14px var(--fd-font-sans); }
+.inp[readonly] { background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+.inp:disabled, .sel:disabled { opacity: .6; }
+.prefix { display: flex; align-items: center; height: 40px; border: 1px solid var(--fd-color-border-field); border-radius: 10px; overflow: hidden; }
+.prefix span { padding: 0 10px; height: 100%; display: flex; align-items: center; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); font-size: 13px; border-right: 1px solid var(--fd-color-border); }
+.prefix input { flex: 1; min-width: 0; height: 100%; border: 0; padding: 0 12px; background: var(--fd-color-surface); color: var(--fd-color-text); font: 400 14px var(--fd-font-sans); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font: 600 13px var(--fd-font-sans); }
+.logo-row { display: flex; align-items: center; gap: 16px; }
+.av { width: 56px; height: 56px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--fd-prune-100, #F3D3E2); color: var(--fd-prune-700, #85164B); font: 700 20px var(--fd-font-sans); }
+.av.sq { border-radius: 14px; }
+[data-theme='dark'] .av { background: #3A1527; color: #E3A9C4; }
+.btn { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; font: 600 14px var(--fd-font-sans); cursor: pointer; border: 1px solid transparent; }
+.btn-p { background: var(--fd-color-primary); color: var(--fd-color-on-primary, #fff); }
+.btn-s { background: var(--fd-color-surface); color: var(--fd-color-text); border-color: var(--fd-color-border-field); }
+.btn-d { background: var(--fd-color-surface); color: var(--fd-color-danger); border-color: var(--fd-color-danger); }
+.lnk-d { background: none; border: 0; color: var(--fd-color-danger); font: 600 14px var(--fd-font-sans); padding: 0; cursor: pointer; }
+.sw { width: 40px; height: 24px; border-radius: 999px; background: var(--fd-color-border-strong); position: relative; flex: none; }
+.sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--fd-color-surface); }
+.sw.dis { opacity: .5; }
+.ctl.inline { flex-direction: row; justify-content: flex-start; }
+.danger { margin-top: 24px; border: 1px solid color-mix(in srgb, var(--fd-color-danger) 30%, transparent); border-radius: var(--fd-radius-xl, 20px); padding: 24px 32px; display: flex; justify-content: space-between; align-items: center; gap: 24px; background: var(--fd-color-surface); }
+.danger h2 { margin: 0; font: 600 16px var(--fd-font-sans); color: var(--fd-color-danger); }
+.danger p { margin: 4px 0 0; font-size: 13px; color: var(--fd-color-text-muted); max-width: 56ch; }
+.note { margin: 32px auto 0; max-width: 880px; font-size: 13px; color: var(--fd-color-text-muted); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="bar" id="bar">
+  <b>Paramètres aérés</b>
+  <span class="seg" data-k="vue"><button data-v="avant">Avant</button><button data-v="apres">Après</button></span>
+  <span class="seg" data-k="page"><button data-v="general">Général</button><button data-v="profil">Profil</button></span>
+  <span class="seg" data-k="theme"><button data-v="light">Clair</button><button data-v="dark">Sombre</button></span>
+</div>
+
+<section class="avant" data-vue="avant">
+  <p>Captures réelles de l'app (dev-mvp c63b0e4, faux backend, données fictives), à 1440 px.</p>
+  <img data-avant alt="Avant">
+</section>
+
+<div class="shell" data-vue="apres">
+  <nav class="side" aria-label="Navigation principale">
+    <div class="logo"><i></i>TutoClick</div>
+    <a href="#">Démos</a><a href="#">Sandbox</a><a href="#">Parcours de formation</a><a href="#">Analytics</a><a href="#">Apprenants</a>
+    <span style="flex:1"></span>
+    <a href="#">Centre d'aide</a><a class="on" href="#">Paramètres</a>
+  </nav>
+  <nav class="snav" aria-label="Paramètres">
+    <h3>Espace</h3>
+    <a data-nav="general" href="#">Général</a><a href="#">Équipe</a><a href="#">Utilisation</a><a href="#">Sécurité</a><a href="#">Confidentialité</a>
+    <h3>Marque</h3>
+    <a href="#">Thème et couleurs</a><a href="#">Page publique</a><a href="#">Domaine <span class="soon">Bientôt</span></a>
+    <h3>Contenu</h3>
+    <a href="#">Variables</a><a href="#">Glossaire</a><a href="#">Étiquettes</a><a href="#">Assistance IA</a>
+    <h3>Mon compte</h3>
+    <a data-nav="profil" href="#">Profil</a><a href="#">Notifications <span class="soon">Bientôt</span></a>
+  </nav>
+
+  <main class="page">
+    <!-- ===== Général ===== -->
+    <div class="wrap" data-page="general">
+      <div class="crumb"><a href="#">Paramètres</a> › Espace › Général</div>
+      <div class="head">
+        <div><h1>Général</h1><p>Identité de l'espace, ce que voient vos visiteurs, langue et région.</p></div>
+        <div class="actions"><button class="btn btn-s">Annuler</button><button class="btn btn-p">Enregistrer</button></div>
+      </div>
+      <div class="surface">
+        <section class="sec">
+          <div class="sec-h"><div><h2>Identité</h2><p>Visible par les membres et dans les e-mails d'invitation.</p></div></div>
+          <div class="row"><div><div class="lab">Logo <span class="soon">Bientôt</span></div><div class="help">PNG ou SVG carré, 512 px au moins.</div></div>
+            <div class="ctl"><div class="logo-row"><div class="av sq">A</div><button class="btn btn-s" disabled style="opacity:.6">Changer le logo</button></div></div></div>
+          <div class="row"><div><div class="lab">Nom de l'espace</div></div><div class="ctl"><input class="inp" value="Acme"></div></div>
+          <div class="row"><div><div class="lab">Site web</div></div><div class="ctl"><input class="inp" placeholder="https://acme.example"></div></div>
+          <div class="row"><div><div class="lab">Adresse personnalisée</div><div class="help">Lettres minuscules, chiffres et tirets. La changer casse les anciens liens.</div></div>
+            <div class="ctl short"><div class="prefix"><span>tutoclick/</span><input value="acme"></div></div></div>
+        </section>
+        <section class="sec">
+          <div class="sec-h"><div><h2>Confidentialité et partage</h2><p>Ce que voient les visiteurs de vos démos publiées.</p></div></div>
+          <div class="row"><div><div class="lab">Politique de confidentialité</div><div class="help">Lien affiché sous les formulaires de vos démos, à la prochaine publication.</div></div><div class="ctl"><input class="inp" placeholder="https://acme.example/confidentialite"></div></div>
+          <div class="row"><div><div class="lab">Lien du support</div><div class="help">E-mail ou lien https du support de la DSI, proposé dans le panneau d'aide.</div></div><div class="ctl"><input class="inp" placeholder="support@acme.example"></div></div>
+          <div class="row"><div><div class="lab">Autoriser les liens publics</div><div class="help">Toute personne qui a le lien voit les démos publiées, sans connexion. Pour restreindre une démo : Partager › Accès.</div></div><div class="ctl inline"><span class="sw" role="img" aria-label="Désactivé"></span></div></div>
+        </section>
+        <section class="sec">
+          <div class="sec-h"><div><h2>Langue et région</h2></div></div>
+          <div class="row"><div><div class="lab">Langue des nouvelles démos <span class="soon">Bientôt</span></div></div><div class="ctl short"><select class="sel" disabled><option>Français</option></select></div></div>
+          <div class="row"><div><div class="lab">Fuseau horaire des analytics <span class="soon">Bientôt</span></div></div><div class="ctl short"><select class="sel" disabled><option>Europe/Paris</option></select></div></div>
+        </section>
+      </div>
+      <div class="danger">
+        <div><h2>Zone de danger</h2><p>Supprimer l'espace efface ses 2 démos, leurs statistiques et leurs leads. Les membres perdent l'accès. Action irréversible.</p></div>
+        <button class="btn btn-d">Supprimer l'espace</button>
+      </div>
+    </div>
+
+    <!-- ===== Profil ===== -->
+    <div class="wrap" data-page="profil">
+      <div class="crumb"><a href="#">Paramètres</a> › Mon compte › Profil</div>
+      <div class="head">
+        <div><h1>Profil</h1><p>Vos informations, vos préférences et votre mot de passe.</p></div>
+        <div class="actions"><button class="btn btn-s">Annuler</button><button class="btn btn-p">Enregistrer</button></div>
+      </div>
+      <div class="surface">
+        <section class="sec">
+          <div class="row" style="padding-top:8px"><div><div class="lab">Photo de profil</div><div class="help">JPG, PNG ou WebP, 2 Mo maximum.</div></div>
+            <div class="ctl"><div class="logo-row"><div class="av" aria-hidden="true">A</div><button class="btn btn-s">Changer la photo</button></div></div></div>
+        </section>
+        <section class="sec">
+          <div class="sec-h"><div><h2>Informations</h2></div></div>
+          <div class="two" style="margin-top:16px"><div class="field"><label>Prénom</label><input class="inp" value="Alice"></div><div class="field"><label>Nom</label><input class="inp" value="Exemple"></div></div>
+          <div class="field" style="margin-top:20px;max-width:420px"><label>E-mail</label><input class="inp" value="alice@example.com" readonly><span class="help">Contactez le support pour changer d'e-mail.</span></div>
+        </section>
+        <section class="sec">
+          <div class="sec-h"><div><h2>Préférences</h2></div></div>
+          <div class="two" style="margin-top:16px"><div class="field"><label>Langue de l'interface</label><select class="sel"><option>Français</option></select></div>
+            <div class="field"><label>Apparence</label><span class="seg" style="height:40px;align-items:center"><button>Système</button><button aria-pressed="true">Clair</button><button>Sombre</button></span></div></div>
+          <div class="row" style="margin-top:8px"><div><div class="lab">E-mail quand un lead est collecté <span class="soon">Bientôt</span></div></div><div class="ctl inline"><span class="sw dis" role="img" aria-label="Désactivé"></span></div></div>
+          <div class="row"><div><div class="lab">Résumé hebdomadaire des vues <span class="soon">Bientôt</span></div></div><div class="ctl inline"><span class="sw dis" role="img" aria-label="Désactivé"></span></div></div>
+        </section>
+        <section class="sec">
+          <div class="sec-h"><div><h2>Mot de passe</h2><p>Vous pouvez définir un mot de passe pour vous connecter sans lien envoyé par e-mail.</p></div><button class="btn btn-s">Mettre à jour</button></div>
+          <div class="two" style="margin-top:16px"><div class="field"><label>Nouveau mot de passe</label><input class="inp" type="password"><span class="help">8 caractères au moins.</span></div><div class="field"><label>Confirmation</label><input class="inp" type="password"></div></div>
+        </section>
+        <section class="sec">
+          <div class="sec-h"><div><h2>Mes données</h2><p>Un fichier .zip avec votre profil, vos espaces et rôles, vos commentaires, notifications et préférences. Les démos appartiennent à l'espace : elles ne sont pas incluses.</p></div><button class="btn btn-s">Télécharger (.zip)</button></div>
+        </section>
+      </div>
+      <div class="danger">
+        <div><h2>Zone de danger</h2><p>Supprimer votre compte efface vos données personnelles. Les démos restent dans leur espace. Action irréversible.</p></div>
+        <button class="btn btn-d">Supprimer mon compte</button>
+      </div>
+    </div>
+    <p class="note">Maquette : contenu centré de 880 px au plus, une surface par page, rangées 40/60 avec champ de 420 px au plus (240 px pour les données courtes), champs de 40 px, bordure de champ #8A94A2 en clair et #5E6978 en sombre (3:1 au moins, RGAA), « Bientôt » en texte sans point, Zone de danger encadrée à part.</p>
+  </main>
+</div>
+
+<script>
+const st = Object.assign({ vue: 'apres', page: 'general', theme: 'light' }, Object.fromEntries(new URLSearchParams(location.search)));
+function render() {
+  document.documentElement.dataset.theme = st.theme;
+  document.querySelectorAll('[data-vue]').forEach((e) => (e.hidden = e.dataset.vue !== st.vue));
+  document.querySelectorAll('[data-page]').forEach((e) => (e.hidden = e.dataset.page !== st.page));
+  document.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('on', a.dataset.nav === st.page));
+  document.querySelector('[data-avant]').src = `img/parametres-aere/avant-${st.page}-${st.theme === 'dark' ? 'sombre' : 'clair'}.png`;
+  document.querySelectorAll('.seg[data-k]').forEach((s) => s.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(st[s.dataset.k] === b.dataset.v))));
+}
+document.querySelectorAll('.seg[data-k]').forEach((s) => s.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { st[s.dataset.k] = b.dataset.v; render(); } }));
+render();
+</script>
+</body>
+</html>
