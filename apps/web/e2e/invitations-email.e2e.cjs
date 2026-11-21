@@ -37,28 +37,32 @@ async function invite(page, emails) {
     return page;
   };
 
-  // Recette 1 : deux adresses, case cochée par défaut, deux e-mails, toast
+  // Recette 1 (révisée le 21/11) : deux adresses, plus de case, l'e-mail part toujours ; confirmation
+  // dans la modale, « Invitation envoyée » et « Copier le lien » par adresse
   {
     const state = admin();
     const page = await open(state);
     await invite(page, 'marie@acme.example, paul@acme.example');
-    const box = page.getByLabel('Envoyer l’invitation par e-mail');
-    ok(await box.isChecked(), 'case « Envoyer l’invitation par e-mail » cochée par défaut');
+    ok(
+      (await page.getByLabel('Envoyer l’invitation par e-mail').count()) === 0 &&
+        (await page.locator('[role=dialog] input[type=checkbox]').count()) === 0,
+      'plus de case « Envoyer l’invitation par e-mail »',
+    );
     ok(
       (await page.getByRole('button', { name: 'Envoyer les invitations' }).count()) === 1,
       'bouton « Envoyer les invitations »',
     );
-    await box.uncheck();
-    ok(
-      (await page.getByRole('button', { name: 'Créer les invitations' }).count()) === 1 &&
-        (await page.getByText('Envoyez ce lien à la personne invitée.').count()) === 1,
-      'case décochée : « Créer les invitations » et l’aide du lien',
-    );
-    await box.check();
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-01-modale.png` });
     await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
     await page.getByText('2 invitations envoyées.').waitFor();
-    ok((await page.locator('[role=dialog].modal').count()) === 0, 'modale fermée après l’envoi');
+    ok(
+      (await page.locator('.inv-results li').count()) === 2 &&
+        (await page.locator('.inv-results__status.is-sent').count()) === 2 &&
+        (await page.getByRole('button', { name: 'Copier le lien de marie@acme.example' }).count()) === 1,
+      'confirmation dans la modale : « Invitation envoyée » et « Copier le lien » par adresse',
+    );
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-01-confirmation.png` });
+    await page.locator('[role=dialog] .modal-foot').getByRole('button', { name: 'Fermer' }).click();
     ok(state.tables.invitations.length === 2, 'deux invitations créées');
     const sent = state.inviteEmails || [];
     ok(
@@ -103,22 +107,23 @@ async function invite(page, emails) {
       });
     const page = await open(state);
     await invite(page, 'sarah@acme.example');
-    const box = page.getByLabel('Envoyer l’invitation par e-mail');
     await page.getByText(/20 invitations par heure au plus/).waitFor();
     const reason = await page.locator('#inv-limit').innerText();
-    ok((await box.isDisabled()) && !(await box.isChecked()), 'plafond atteint : case désactivée et décochée');
     ok(
       /^20 invitations par heure au plus\. Vous pourrez en envoyer d’autres à \d{2}:\d{2}\. Les liens restent disponibles\.$/.test(
         reason,
       ),
-      `raison écrite sous la case (${reason})`,
+      `plafond atteint : raison écrite avant l’envoi (${reason})`,
     );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-02-plafond.png` });
-    await page.getByRole('button', { name: 'Créer les invitations' }).click();
-    await page.getByRole('button', { name: 'Copier le lien' }).waitFor();
+    await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
+    await page.getByRole('button', { name: 'Copier le lien de sarah@acme.example' }).waitFor();
     ok(
-      state.tables.invitations.length === 21 && !(state.inviteEmails || []).length,
-      'invitation créée avec son lien, aucun e-mail',
+      state.tables.invitations.length === 21 &&
+        !(state.inviteEmails || []).length &&
+        (await page.locator('.inv-results__status').innerText()) === 'Plafond horaire atteint' &&
+        /^20 invitations par heure au plus/.test(await page.getByRole('alert').innerText()),
+      'invitation créée, aucun e-mail, « Plafond horaire atteint » et lien à copier',
     );
     await page.close();
   }
@@ -135,8 +140,9 @@ async function invite(page, emails) {
     await page.getByText('L’e-mail n’a pas pu partir. Copiez le lien et envoyez-le vous-même.').waitFor();
     ok(
       state.tables.invitations.length === 1 &&
-        (await page.getByRole('button', { name: 'Copier le lien' }).count()) === 1 &&
-        (await page.getByText('Envoyez ce lien à la personne invitée.').count()) === 1 &&
+        (await page.getByRole('button', { name: 'Copier le lien de marie@acme.example' }).count()) === 1 &&
+        (await page.locator('.inv-results__status').innerText()) ===
+          (extra.emailBudget ? 'Limite d’e-mails du jour atteinte' : 'E-mail non envoyé') &&
         !(state.inviteEmails || []).length,
       `${label} : invitation créée, message de repli et lien à copier`,
     );

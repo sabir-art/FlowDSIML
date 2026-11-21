@@ -777,6 +777,9 @@ async function install(page, state = seed()) {
           (x[k] > y[k] ? 1 : x[k] < y[k] ? -1 : 0) * (desc ? -1 : 1);
       if (fn.startsWith('console_') && fn !== 'console_me') return consoleRpc(state, fn, a, route, json);
       switch (fn) {
+        // Page d'invitation : invitation décrite par le test (state.invitation), sinon aucune
+        case 'get_invitation':
+          return json(route, 200, state.invitation ? [state.invitation] : []);
         // L32 : lectures de démarrage regroupées (mêmes données que les lectures séparées)
         case 'merge_tags': {
           // L52 P3 : même logique que la RPC (retrait de p_from puis ajout de p_to sans doublon)

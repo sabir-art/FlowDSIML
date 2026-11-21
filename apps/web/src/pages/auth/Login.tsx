@@ -116,6 +116,7 @@ export function Login() {
             className="input"
             type="email"
             autoComplete="email"
+            name="email"
             required
             value={email}
             onChange={(e) => {
@@ -140,6 +141,7 @@ export function Login() {
               className="input"
               type="password"
               autoComplete="current-password"
+              name="password"
               required
               value={password}
               onChange={(e) => {

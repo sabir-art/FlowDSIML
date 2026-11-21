@@ -13,11 +13,14 @@
 .mk *::after {
   box-sizing: border-box;
 }
-.mk a {
+/* Liens de texte seulement : un lien habillé en bouton (.fd-btn, .btn) garde la couleur de son
+   bouton. Sinon « .mk a » (0,1,1) l'emportait sur « .fd-btn--primary » (0,1,0) : texte prune sur
+   fond prune, invisible au repos (bug client de la page d'invitation). :where() garde la spécificité. */
+.mk a:where(:not(.fd-btn, .btn)) {
   color: var(--fd-color-primary);
   text-decoration: none;
 }
-.mk a:hover {
+.mk a:where(:not(.fd-btn, .btn)):hover {
   text-decoration: underline;
 }
 .mk :focus-visible {

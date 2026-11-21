@@ -208,6 +208,7 @@ export function RemotePhone() {
             id="rmp-code"
             inputMode="numeric"
             autoComplete="one-time-code"
+            name="code"
             pattern="[0-9]*"
             maxLength={8}
             value={code}

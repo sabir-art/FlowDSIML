@@ -18,6 +18,7 @@ import { Menu, type MenuItem } from '../../components/Menu';
 import { SettingsShell } from './SettingsShell';
 import { Status } from '@flowdsiml/ui';
 import { useToast } from '../../components/Toast';
+import { EmailChips, isEmail, splitEmails } from '../../components/EmailChips';
 
 interface MemberRow {
   user_id: string;
@@ -451,7 +452,13 @@ export function Members() {
   );
 }
 
-/** Modale « Inviter des membres » (PRM-04) : crée les invitations et donne leurs liens à transmettre. */
+/**
+ * Modale « Inviter des membres » (PRM-04). Retour client du 21/11 (emails-notifications-invitations.md
+ * §4) : plus de case « Envoyer l'invitation par e-mail », l'e-mail part toujours (invite-email : Brevo,
+ * ou repli Supabase). La confirmation reste dans la modale : pour chaque adresse, son état et
+ * « Copier le lien » (pour qui préfère l'envoyer par Teams ou Slack). Envoi en échec, budget du jour
+ * ou plafond horaire atteint : c'est écrit, et le lien reste à copier.
+ */
 function InviteDialog({
   roles,
   limit,
@@ -466,32 +473,25 @@ function InviteDialog({
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { current } = useWorkspace();
-  const [emails, setEmails] = useState('');
+  const [emails, setEmails] = useState<string[]>([]);
+  const [draft, setDraft] = useState('');
   const [role, setRole] = useState<WorkspaceRole>('editor');
   const [err, setErr] = useState<string | null>(null);
-  const [links, setLinks] = useState<Array<{ email: string; url: string }>>([]);
-  // E-mails P1 : case cochée par défaut ; repli (« L'e-mail n'a pas pu partir ») si un envoi échoue
-  const [byEmail, setByEmail] = useState(true);
-  const [failed, setFailed] = useState(false);
+  const [results, setResults] = useState<Array<{ email: string; url: string; status: SendStatus }>>([]);
   const [quota, setQuota] = useState<{ left: number; next_at: string | null } | null>(null);
   const toast = useToast();
   const { busy, error, run } = useAction();
   useEffect(() => {
-    void supabase.rpc('invite_quota', { p_workspace: current!.id }).then(({ data }) => {
-      const q = data as { left: number; next_at: string | null } | null;
-      setQuota(q);
-      if (q && q.left <= 0) setByEmail(false);
-    });
+    void supabase
+      .rpc('invite_quota', { p_workspace: current!.id })
+      .then(({ data }) => setQuota(data as { left: number; next_at: string | null } | null));
   }, [current]);
   const limited = !!quota && quota.left <= 0;
-  const list = [
-    ...new Set(
-      emails
-        .split(/[\s,;]+/)
-        .map((x) => x.trim().toLowerCase())
-        .filter(Boolean),
-    ),
-  ];
+  const nextAt = quota?.next_at
+    ? new Date(quota.next_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
+    : '';
+  // Le texte en cours compte aussi : rien de tapé n'est perdu à l'envoi
+  const list = [...new Set([...emails, ...splitEmails(draft)])];
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', onKey);
@@ -500,7 +500,7 @@ function InviteDialog({
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const invalid = list.filter((x) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));
+    const invalid = list.filter((x) => !isEmail(x));
     if (!list.length || invalid.length) {
       setErr(
         list.length ? t('members.invalidEmails', { list: invalid.join(', ') }) : t('validation.required'),
@@ -520,20 +520,23 @@ function InviteDialog({
       ),
     );
     if (!rows) return;
-    if (!byEmail) {
-      setLinks(rows.map((r) => ({ email: r.email, url: inviteUrl(r.token) })));
-      onDone();
-      return;
-    }
-    const status = await sendInvitations(rows.map((r) => r.id));
-    const ok = rows.filter((r) => delivered(status[r.id]));
-    const rest = rows.filter((r) => !delivered(status[r.id]));
+    // Plafond horaire atteint : rien ne part, les liens restent à copier
+    const status: Record<string, SendStatus> = limited
+      ? Object.fromEntries(rows.map((r) => [r.id, 'rate_limit' as SendStatus]))
+      : await sendInvitations(rows.map((r) => r.id));
     onDone();
-    if (ok.length) toast(t('members.sent', { count: ok.length }));
-    if (!rest.length) return onClose();
-    setFailed(true);
-    setLinks(rest.map((r) => ({ email: r.email, url: inviteUrl(r.token) })));
+    setResults(rows.map((r) => ({ email: r.email, url: inviteUrl(r.token), status: status[r.id]! })));
   }
+
+  const undelivered = results.filter((r) => !delivered(r.status));
+  const statusText = (s: SendStatus) =>
+    delivered(s)
+      ? t('members.inviteStatus.sent')
+      : s === 'rate_limit'
+        ? t('members.inviteStatus.rateLimit')
+        : s === 'budget'
+          ? t('members.inviteStatus.budget')
+          : t('members.inviteStatus.failed');
 
   return (
     <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -557,24 +560,40 @@ function InviteDialog({
           </button>
         </div>
         <div className="modal-body">
-          {links.length > 0 ? (
+          {results.length > 0 ? (
             <>
-              {failed ? (
+              {undelivered.length ? (
                 <div className="alert alert-warning" role="alert">
                   <Info aria-hidden="true" />
-                  <span>{t('members.emailFailed')}</span>
+                  <span>
+                    {undelivered.every((r) => r.status === 'rate_limit')
+                      ? t('members.rateLimit', { time: nextAt })
+                      : t('members.emailFailed')}
+                  </span>
                 </div>
               ) : (
-                <p>{t('members.invitesCreated', { count: links.length })}</p>
+                <p role="status">{t('members.sent', { count: results.length })}</p>
               )}
-              <ul className="st-links">
-                {links.map((l) => (
-                  <li key={l.url} className="row between">
-                    <span>{l.email}</span>
+              <ul className="st-links inv-results">
+                {results.map((r) => (
+                  <li key={r.url} className="row between">
+                    <span className="inv-results__who">
+                      <span className="inv-results__email">{r.email}</span>
+                      <span
+                        className={`inv-results__status${delivered(r.status) ? ' is-sent' : ' is-failed'}`}
+                      >
+                        {delivered(r.status) ? <Check aria-hidden="true" /> : <Info aria-hidden="true" />}
+                        {statusText(r.status)}
+                      </span>
+                    </span>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
-                      onClick={() => void navigator.clipboard.writeText(l.url)}
+                      aria-label={t('members.copyLinkFor', { email: r.email })}
+                      onClick={() => {
+                        void navigator.clipboard.writeText(r.url);
+                        toast(t('members.linkCopied'));
+                      }}
                     >
                       <Copy aria-hidden="true" />
                       {t('members.copyLink')}
@@ -582,7 +601,6 @@ function InviteDialog({
                   </li>
                 ))}
               </ul>
-              <p className="help">{t('members.inviteHint')}</p>
             </>
           ) : (
             <>
@@ -593,18 +611,22 @@ function InviteDialog({
               )}
               <div className="field">
                 <label htmlFor="inv-email">{t('members.emails')}</label>
-                <textarea
+                <EmailChips
                   id="inv-email"
-                  className="textarea"
                   autoFocus
-                  placeholder={t('members.emailsPlaceholder')}
-                  value={emails}
-                  onChange={(e) => {
-                    setEmails(e.target.value);
+                  values={emails}
+                  draft={draft}
+                  onChange={(v) => {
+                    setEmails(v);
                     setErr(null);
                   }}
-                  aria-invalid={err ? true : undefined}
-                  aria-describedby={err ? 'inv-email-error inv-help' : 'inv-help'}
+                  onDraft={(v) => {
+                    setDraft(v);
+                    setErr(null);
+                  }}
+                  placeholder={t('members.emailsPlaceholder')}
+                  invalid={!!err}
+                  describedBy={err ? 'inv-email-error inv-help' : 'inv-help'}
                 />
                 {err && (
                   <span className="error-msg" id="inv-email-error">
@@ -632,31 +654,11 @@ function InviteDialog({
                     ))}
                 </select>
               </div>
-              <div className="field">
-                <label className="check">
-                  <input
-                    type="checkbox"
-                    checked={byEmail}
-                    disabled={limited}
-                    aria-describedby={limited ? 'inv-limit' : undefined}
-                    onChange={(e) => setByEmail(e.target.checked)}
-                  />
-                  {t('members.sendByEmail')}
-                </label>
-                {limited && (
-                  <span className="help" id="inv-limit">
-                    {t('members.rateLimit', {
-                      time: quota.next_at
-                        ? new Date(quota.next_at).toLocaleTimeString(i18n.language, {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : '',
-                    })}
-                  </span>
-                )}
-                {!byEmail && !limited && <span className="help">{t('members.inviteHint')}</span>}
-              </div>
+              {limited && (
+                <p className="help" id="inv-limit">
+                  {t('members.rateLimit', { time: nextAt })}
+                </p>
+              )}
               {/* Retour UX : pas de vocabulaire d'abonnement ; rien sans limite de membres */}
               {list.length > 0 && limit !== null && (
                 <p className="st-seats">{t('members.membersMore', { count: list.length, limit })}</p>
@@ -665,7 +667,7 @@ function InviteDialog({
           )}
         </div>
         <div className="modal-foot">
-          {links.length > 0 ? (
+          {results.length > 0 ? (
             <button type="button" className="btn btn-primary" onClick={onClose}>
               {t('common.close')}
             </button>
@@ -675,7 +677,7 @@ function InviteDialog({
                 {t('common.cancel')}
               </button>
               <button type="submit" className="btn btn-primary" disabled={busy}>
-                {t(byEmail ? 'members.sendInvites' : 'members.createInvites')}
+                {t('members.sendInvites')}
               </button>
             </>
           )}

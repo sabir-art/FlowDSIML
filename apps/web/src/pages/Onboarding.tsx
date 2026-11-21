@@ -219,6 +219,7 @@ export function Onboarding() {
             <input
               className="fd-input"
               autoComplete="given-name"
+              name="given-name"
               maxLength={60}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}

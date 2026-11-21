@@ -65,6 +65,7 @@ export function LeadForm({
             </span>
             <input
               type={f.type}
+              name={f.key}
               required={f.required || f.type === 'email'}
               maxLength={200}
               autoComplete={

@@ -149,6 +149,7 @@ export function Signup() {
                 id="name"
                 className="input"
                 autoComplete="name"
+                name="name"
                 placeholder={t('auth.namePlaceholder')}
                 required
                 maxLength={120}
@@ -168,6 +169,7 @@ export function Signup() {
                 className="input"
                 type="email"
                 autoComplete="email"
+                name="email"
                 placeholder={t('auth.emailPlaceholder')}
                 required
                 value={email}
@@ -186,6 +188,7 @@ export function Signup() {
                 className="input"
                 type="password"
                 autoComplete="new-password"
+                name="new-password"
                 required
                 minLength={8}
                 value={password}

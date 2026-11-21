@@ -3147,3 +3147,107 @@
   flex-direction: column;
   gap: 4px;
 }
+
+/* Inviter des membres (retour client 21/11) : adresses en puces dans un seul champ de 40 px qui grandit.
+   Même cadre et même focus que les autres champs (FIELD-01 les fera évoluer ensemble). */
+.mk .email-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-height: var(--fd-layout-control-height-md);
+  padding: 4px var(--fd-space-2);
+  border: 1px solid var(--fd-color-border-strong);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface);
+  cursor: text;
+}
+.mk .email-chips:has(.email-chips__input:focus-visible) {
+  box-shadow: var(--fd-shadow-focus);
+}
+.mk .email-chips.is-invalid {
+  border-color: var(--fd-color-danger);
+}
+.mk .email-chips__input {
+  flex: 1 1 160px;
+  min-width: 0;
+  height: 30px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--fd-color-text);
+  font: inherit;
+  outline: none;
+}
+.mk .email-chips__input::placeholder {
+  color: var(--fd-color-text-subtle);
+}
+.mk .email-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  height: 26px;
+  padding: 0 2px 0 8px;
+  border-radius: var(--fd-radius-full);
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text);
+  font-size: 13px;
+}
+.mk .email-chip.is-invalid {
+  background: var(--fd-color-danger-soft);
+  color: var(--fd-color-danger);
+  text-decoration: underline wavy;
+}
+.mk .email-chip__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .email-chip__remove {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.mk .email-chip__remove:hover {
+  background: var(--fd-color-border);
+  color: var(--fd-color-text);
+}
+.mk .email-chip__remove svg {
+  width: 14px;
+  height: 14px;
+}
+/* Confirmation : adresse, puis son état (envoyée ou non) sous elle */
+.mk .inv-results__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mk .inv-results__email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mk .inv-results__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+.mk .inv-results__status svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+.mk .inv-results__status.is-sent {
+  color: var(--fd-color-success);
+}
+.mk .inv-results__status.is-failed {
+  color: var(--fd-color-warning);
+}

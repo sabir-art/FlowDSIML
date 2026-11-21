@@ -55,12 +55,53 @@ const SHOTS = process.env.SHOTS_DIR;
 
   await page.getByRole('button', { name: 'Inviter des membres' }).click();
   await page.waitForSelector('[role=dialog]');
-  // E-mails P1 : case décochée, l'invitation reste un lien à transmettre (couvert par invitations-email.e2e)
-  await page.getByLabel('Envoyer l’invitation par e-mail').uncheck();
-  await page.fill('#inv-email', 'pas-un-email');
-  await page.getByRole('button', { name: 'Créer les invitations' }).click();
+  // Retour client 21/11 : plus de case à cocher, adresses en puces dans un vrai champ e-mail
+  ok((await page.locator('[role=dialog] input[type=checkbox]').count()) === 0, 'aucune case à cocher');
+  const addr = page.locator('#inv-email');
+  ok(
+    (await addr.evaluate((el) => [el.type, el.name, el.autocomplete, el.inputMode, el.tagName].join('|'))) ===
+      'email|email|email|email|INPUT',
+    'champ <input type=email name=email autocomplete=email inputmode=email>',
+  );
+  ok(
+    (await page.getByLabel('Adresses e-mail').evaluate((el) => el.id)) === 'inv-email',
+    'libellé « Adresses e-mail » relié au champ',
+  );
+  await addr.fill('pas-un-email');
+  await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
   ok((await page.locator('#inv-email-error').count()) === 1, 'adresse invalide signalée');
-  await page.fill('#inv-email', 'sarah@acme.example, leo@acme.example');
+  ok(
+    (await addr.getAttribute('aria-invalid')) === 'true' &&
+      /inv-email-error/.test(await addr.getAttribute('aria-describedby')),
+    'champ invalide relié à son message',
+  );
+  ok(
+    (await addr.inputValue()) === 'pas-un-email' &&
+      (await addr.evaluate((el) => el === document.activeElement)),
+    'saisie invalide gardée dans le champ, qui reprend le focus',
+  );
+  await addr.fill('');
+  // Entrée, puis virgule : chaque adresse devient une puce
+  await addr.pressSequentially('sarah@acme.example');
+  await addr.press('Enter');
+  await addr.pressSequentially('leo@acme.example,');
+  ok(
+    (await page.locator('.email-chip__text').allTextContents()).join('|') ===
+      'sarah@acme.example|leo@acme.example' && (await addr.inputValue()) === '',
+    'Entrée et virgule : deux puces, champ vidé',
+  );
+  // Collage de plusieurs adresses : autant de puces (doublon ignoré)
+  await addr.evaluate((el) => {
+    const dt = new DataTransfer();
+    dt.setData('text', 'nora@acme.example; sarah@acme.example');
+    el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+  });
+  ok((await page.locator('.email-chip').count()) === 3, 'collage : une puce par nouvelle adresse');
+  await addr.press('Backspace');
+  ok(
+    (await page.locator('.email-chip').count()) === 2,
+    'Retour arrière sur le champ vide : dernière puce retirée',
+  );
   // Retour UX : sans vocabulaire d'abonnement ; « n membres en plus sur {limite} » s'il y a une limite
   {
     const seats = page.locator('.st-seats');
@@ -73,10 +114,16 @@ const SHOTS = process.env.SHOTS_DIR;
     );
   }
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/PRM-04-invitation.png` });
-  await page.getByRole('button', { name: 'Créer les invitations' }).click();
-  await page.waitForSelector('text=Copier le lien');
+  await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
+  await page.getByText('2 invitations envoyées.').first().waitFor();
   ok(state.tables.invitations.length === 3, 'deux invitations créées');
-  await page.getByRole('button', { name: 'Fermer' }).last().click();
+  ok(
+    (await page.locator('.inv-results__status.is-sent').allTextContents()).join('|') ===
+      'Invitation envoyée|Invitation envoyée' &&
+      (await page.getByRole('button', { name: /^Copier le lien de / }).count()) === 2,
+    'confirmation : « Invitation envoyée » et « Copier le lien » pour chaque adresse',
+  );
+  await page.locator('[role=dialog] .modal-foot').getByRole('button', { name: 'Fermer' }).click();
 
   await page.getByRole('button', { name: 'Actions pour Nina Roux' }).click();
   ok(

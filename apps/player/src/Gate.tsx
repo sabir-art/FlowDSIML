@@ -219,6 +219,7 @@ export function PasswordGate({
               class="p-input"
               type={show ? 'text' : 'password'}
               autocomplete="current-password"
+              name="password"
               autoFocus
               required
               disabled={locked}
@@ -411,6 +412,7 @@ export function EmailGate({ demoId, locale, info }: { demoId: string; locale: st
             class="p-input"
             type="email"
             autocomplete="email"
+            name="email"
             autoFocus
             required
             value={email}

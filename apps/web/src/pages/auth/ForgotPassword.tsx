@@ -34,6 +34,7 @@ export function ForgotPassword() {
             className="fd-input"
             type="email"
             autoComplete="email"
+            name="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}

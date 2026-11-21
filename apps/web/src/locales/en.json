@@ -248,7 +248,6 @@
     "role": "Role",
     "sendInvite": "Create invitation",
     "inviteCreated": "Invitation created. Send this link to the invitee:",
-    "inviteHint": "Send this link to the person you invite.",
     "pending": "Pending invitations",
     "copyLink": "Copy link",
     "revoke": "Revoke",
@@ -259,8 +258,6 @@
     "emails": "Email addresses",
     "emailsPlaceholder": "mary@acme.example, paul@acme.example",
     "invalidEmails": "Invalid addresses: {{list}}",
-    "invitesCreated_one": "Invitation created. Send this link:",
-    "invitesCreated_other": "{{count}} invitations created. Send each person their link:",
     "member": "Member",
     "countOf_one": "{{count}} member of {{limit}}.",
     "countOf_other": "{{count}} members of {{limit}}.",
@@ -301,8 +298,6 @@
     "membersMore_one": "{{count}} more member out of {{limit}}.",
     "membersMore_other": "{{count}} more members out of {{limit}}.",
     "sendInvites": "Send the invitations",
-    "createInvites": "Create the invitations",
-    "sendByEmail": "Send the invitation by email",
     "sent_one": "1 invitation sent.",
     "sent_other": "{{count}} invitations sent.",
     "rateLimit": "20 invitations per hour at most. You can send more at {{time}}. The links remain available.",
@@ -314,7 +309,15 @@
     "removeNoDemos": "The workspace demos are not changed.",
     "roleLabel": "Role",
     "resultCount_one": "{{count}} member or invitation",
-    "resultCount_other": "{{count}} members or invitations"
+    "resultCount_other": "{{count}} members or invitations",
+    "removeEmail": "Remove {{email}}",
+    "copyLinkFor": "Copy the link for {{email}}",
+    "inviteStatus": {
+      "sent": "Invitation sent",
+      "failed": "Email not sent",
+      "budget": "Daily email limit reached",
+      "rateLimit": "Hourly limit reached"
+    }
   },
   "workspace": {
     "title": "Workspace settings",

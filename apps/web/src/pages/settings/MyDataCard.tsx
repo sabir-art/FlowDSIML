@@ -301,6 +301,7 @@ export function MyDataCard() {
                       className="input"
                       type="email"
                       autoComplete="email"
+                      name="email"
                       value={email}
                       aria-describedby="md-email-h"
                       onChange={(e) => {
@@ -320,6 +321,7 @@ export function MyDataCard() {
                         className="input"
                         type="password"
                         autoComplete="current-password"
+                        name="password"
                         value={password}
                         onChange={(e) => {
                           setErr(null);

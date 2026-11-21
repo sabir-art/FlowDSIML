@@ -76,6 +76,7 @@ export function Profile() {
                 className="input"
                 maxLength={120}
                 autoComplete="name"
+                name="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
               />
@@ -84,6 +85,9 @@ export function Profile() {
               <label htmlFor="pf-email">{t('profile.email')}</label>
               <input
                 id="pf-email"
+                type="email"
+                name="email"
+                autoComplete="email"
                 className="input"
                 value={user?.email ?? ''}
                 readOnly
@@ -166,6 +170,7 @@ export function Profile() {
                 className="input"
                 type="password"
                 autoComplete="new-password"
+                name="new-password"
                 minLength={8}
                 required
                 value={password}

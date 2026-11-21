@@ -43,6 +43,7 @@ export function ResetPassword() {
             className="fd-input"
             type="password"
             autoComplete="new-password"
+            name="new-password"
             required
             minLength={8}
             value={password}
@@ -55,6 +56,7 @@ export function ResetPassword() {
             className="fd-input"
             type="password"
             autoComplete="new-password"
+            name="confirm-password"
             required
             minLength={8}
             value={confirm}

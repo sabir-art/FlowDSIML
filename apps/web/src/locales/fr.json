@@ -248,7 +248,6 @@
     "role": "Rôle",
     "sendInvite": "Créer l'invitation",
     "inviteCreated": "Invitation créée. Envoyez ce lien à la personne invitée :",
-    "inviteHint": "Envoyez ce lien à la personne invitée.",
     "pending": "Invitations en attente",
     "copyLink": "Copier le lien",
     "revoke": "Révoquer",
@@ -259,8 +258,6 @@
     "emails": "Adresses e-mail",
     "emailsPlaceholder": "marie@acme.example, paul@acme.example",
     "invalidEmails": "Adresses invalides : {{list}}",
-    "invitesCreated_one": "Invitation créée. Envoyez ce lien :",
-    "invitesCreated_other": "{{count}} invitations créées. Envoyez à chacun son lien :",
     "member": "Membre",
     "countOf_one": "{{count}} membre sur {{limit}}.",
     "countOf_other": "{{count}} membres sur {{limit}}.",
@@ -301,8 +298,6 @@
     "membersMore_one": "{{count}} membre en plus sur {{limit}}.",
     "membersMore_other": "{{count}} membres en plus sur {{limit}}.",
     "sendInvites": "Envoyer les invitations",
-    "createInvites": "Créer les invitations",
-    "sendByEmail": "Envoyer l’invitation par e-mail",
     "sent_one": "1 invitation envoyée.",
     "sent_other": "{{count}} invitations envoyées.",
     "rateLimit": "20 invitations par heure au plus. Vous pourrez en envoyer d’autres à {{time}}. Les liens restent disponibles.",
@@ -314,7 +309,15 @@
     "removeNoDemos": "Les démos de l’espace ne sont pas modifiées.",
     "roleLabel": "Rôle",
     "resultCount_one": "{{count}} membre ou invitation",
-    "resultCount_other": "{{count}} membres ou invitations"
+    "resultCount_other": "{{count}} membres ou invitations",
+    "removeEmail": "Retirer {{email}}",
+    "copyLinkFor": "Copier le lien de {{email}}",
+    "inviteStatus": {
+      "sent": "Invitation envoyée",
+      "failed": "E-mail non envoyé",
+      "budget": "Limite d’e-mails du jour atteinte",
+      "rateLimit": "Plafond horaire atteint"
+    }
   },
   "workspace": {
     "title": "Paramètres de l’espace",
