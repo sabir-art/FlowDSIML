@@ -434,7 +434,10 @@ export function EditorPage() {
         setTool((cur) => (cur === 'hotspot' ? 'select' : 'hotspot'));
         return;
       }
-      if ((e.target as HTMLElement)?.closest?.('[data-canvas-item], .cm, #fd-portal, .ed-rail')) return;
+      const target = e.target as HTMLElement;
+      if (target?.closest?.('.cm, #fd-portal, .ed-rail')) return;
+      // Flèches et Suppr d'un élément du canevas sont gérées par l'élément ; Échap reste global (L48-E §3)
+      if (target?.closest?.('[data-canvas-item]') && e.key !== 'Escape') return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight')
         setIndex((i) => Math.min(i + 1, editor.steps.length - 1));
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') setIndex((i) => Math.max(i - 1, 0));

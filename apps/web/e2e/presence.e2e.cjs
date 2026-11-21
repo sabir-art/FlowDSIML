@@ -4,6 +4,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -128,14 +129,14 @@ const SACHA = '0b5c1f0e-0000-4000-8000-0000000000b2';
 
   // Réglages : masquer les curseurs
   await page.locator('.rail-li').nth(0).locator('button.step').click();
-  await page.getByRole('tab', { name: 'Réglages' }).click();
+  await openTool(page, 'settings');
   await page.getByLabel('Afficher les curseurs').uncheck();
   ok(
     (await page.locator('.canvas-frame .rcursor').count()) === 0,
     'L22-08 : « Afficher les curseurs » masque les curseurs',
   );
   await page.getByLabel('Afficher les curseurs').check();
-  await page.getByRole('tab', { name: 'Étape' }).click();
+  await openTool(page, 'step');
 
   // Activité envoyée : focus sur le titre de l'étape
   await page.locator('#st-title').focus();

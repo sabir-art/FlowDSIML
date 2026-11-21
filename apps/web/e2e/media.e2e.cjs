@@ -8,6 +8,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -53,7 +54,7 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
-  await page.getByRole('tab', { name: 'Design' }).click();
+  await openTool(page, 'design');
   const open = page.getByRole('button', { name: 'Choisir dans la médiathèque' });
   await open.scrollIntoViewIfNeeded();
   await open.click();
@@ -186,7 +187,7 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   await install(qp, qs);
   await qp.goto(`${APP}/#/demos/${DEMO}/edit`);
   await qp.waitForSelector('.canvas-frame img');
-  await qp.getByRole('tab', { name: 'Design' }).click();
+  await openTool(qp, 'design');
   await qp.getByRole('button', { name: 'Choisir dans la médiathèque' }).click();
   const qd = qp.getByRole('dialog', { name: 'Médiathèque' });
   await qd.locator('.md-near').waitFor();

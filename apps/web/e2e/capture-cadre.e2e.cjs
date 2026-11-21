@@ -6,6 +6,7 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
@@ -40,7 +41,7 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
     (await page.locator('.browser .url.is-capture').textContent()) === 'app.example.com/',
     'adresse de la capture en gris (montrée seulement dans l’éditeur)',
   );
-  await page.getByRole('tab', { name: 'Design' }).click();
+  await openTool(page, 'design');
   const sec = page.locator('.fr-fields');
   await sec.scrollIntoViewIfNeeded();
   ok(
@@ -91,7 +92,7 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
   demo.device = 'mobile';
   await page.reload();
   await page.waitForSelector('.canvas-frame img');
-  await page.getByRole('tab', { name: 'Design' }).click();
+  await openTool(page, 'design');
   ok(
     (
       await page.getByRole('radiogroup', { name: 'Cadre du téléphone' }).getByRole('radio').allTextContents()

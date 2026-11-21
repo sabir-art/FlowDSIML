@@ -7,6 +7,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -71,7 +72,7 @@ const QID = (n) => `0b5c1f0e-0000-4000-8000-0000000000b${n}`;
   await page.waitForSelector('.canvas-frame img');
 
   // A2-01 : modes de lecture (onglet Design), puis panneau défilé jusqu'au cadre
-  await page.getByRole('tab', { name: 'Design' }).click();
+  await openTool(page, 'design');
   const spot = page.getByRole('button', { name: /Spotlight/ });
   await spot.scrollIntoViewIfNeeded();
   await spot.click();
@@ -88,7 +89,7 @@ const QID = (n) => `0b5c1f0e-0000-4000-8000-0000000000b${n}`;
   await shot('a2-01-cadre');
 
   // A2-03 : checklist avec chapitres (onglet Réglages) et aperçu sur le canevas
-  await page.getByRole('tab', { name: 'Réglages' }).click();
+  await openTool(page, 'settings');
   const cl = page.getByLabel('Afficher la checklist dans le player');
   await cl.scrollIntoViewIfNeeded();
   await cl.check();
@@ -98,7 +99,7 @@ const QID = (n) => `0b5c1f0e-0000-4000-8000-0000000000b${n}`;
   await shot('a2-03-checklist');
 
   // A2-02 : étape pop-up remplie (titre, texte, bouton)
-  await page.getByRole('tab', { name: 'Étape' }).click();
+  await openTool(page, 'step');
   await page.locator('.rail-foot').getByRole('button', { name: 'Ajouter une étape' }).click();
   await page.getByRole('menuitem', { name: 'Ajouter une pop-up' }).click();
   await page.waitForSelector('.canvas-popup');

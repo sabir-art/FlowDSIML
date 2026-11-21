@@ -5,6 +5,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -26,7 +27,7 @@ const N = ' ';
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
-  await page.getByRole('tab', { name: 'Design' }).click();
+  await openTool(page, 'design');
   const group = page.getByRole('group', { name: 'Choisir un style' });
   await group.waitFor();
   const theme = () => state.tables.demos.find((d) => d.id === DEMO).settings.theme || {};

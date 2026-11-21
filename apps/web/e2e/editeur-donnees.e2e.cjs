@@ -5,6 +5,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -220,7 +221,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     await p.locator('[data-step-index="0"]').click();
     await frame.locator('b.value').first().click();
     await p.waitForTimeout(300);
-    await p.getByRole('tab', { name: 'Réglages' }).click();
+    await openTool(p, 'settings');
     await p.getByRole('button', { name: 'Importer un fichier CSV' }).click();
     const dlg = p.locator('.ds-dialog');
     await dlg.waitFor();
@@ -289,7 +290,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       'bilan RGPD : jeu de données compté',
     );
     await gd.getByRole('button', { name: 'Annuler' }).click();
-    await p.getByRole('tab', { name: 'Étape' }).click();
+    await openTool(p, 'step');
 
     // Lecteur : la ligne du lien personnalisé remplace les valeurs de la capture
     const sel = row.bindings.find((b) => b.kind === 'element').sel;
@@ -377,6 +378,8 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
               .position,
       );
     await p.locator('[data-step-index="2"]').click();
+    // L48-E : « Suite de l'étape » est l'outil « Suite du parcours » du rail
+    await openTool(p, 'next');
     const sec = p.locator('.rules-sec');
     await sec.scrollIntoViewIfNeeded();
     ok(

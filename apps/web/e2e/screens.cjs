@@ -2,6 +2,7 @@
 const path = require('path');
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 // THEME=dark : mêmes captures en thème sombre, dans finition/sombre/
@@ -53,11 +54,11 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await shot(p, '04-demos-menu');
   await go(`/demos/${DEMO}/edit`, '.canvas-frame img');
   await shot(p, '05-editeur');
-  await p.getByRole('tab', { name: 'Design' }).click();
+  await openTool(p, 'design');
   await shot(p, '06-editeur-design');
-  await p.getByRole('tab', { name: 'Réglages' }).click();
+  await openTool(p, 'settings');
   await shot(p, '07-editeur-reglages');
-  await p.getByRole('tab', { name: 'Étape' }).click();
+  await openTool(p, 'step');
   await p.locator('.canvas-hotspot').first().click();
   await p.waitForSelector('#hs-title');
   await shot(p, '08-editeur-hotspot');

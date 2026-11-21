@@ -1,6 +1,7 @@
 /** Test e2e du panneau Commentaires de l'éditeur (faux Supabase). */
 const { chromium } = require('playwright');
 const { install } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -22,11 +23,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   };
 
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
+  // L48-E : les commentaires sont un outil du rail
+  await openTool(page, 'comments');
   await page.waitForSelector('.cm');
-  ok(
-    (await page.locator('.cm-state').textContent()).includes('Aucun commentaire sur cette étape'),
-    'état vide',
-  );
+  ok((await page.locator('.cm').textContent()).includes('Aucun commentaire sur cette étape'), 'état vide');
   ok(
     (await page.locator('#cm-title').textContent()) === 'Commentaires · Étape 1',
     'titre « Commentaires · Étape n »',
@@ -95,29 +95,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok((await page.locator('.cm-item').count()) === 0, 'les commentaires sont propres à chaque étape');
   await page.locator('.rail-list .step').first().click();
 
-  // Poignée : flèches du clavier, repli mémorisé
-  const handle = page.getByRole('separator', { name: 'Redimensionner le panneau Commentaires' });
-  const h0 = await page.locator('.cm').evaluate((el) => el.getBoundingClientRect().height);
-  await handle.focus();
-  await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('ArrowUp');
-  const h1 = await page.locator('.cm').evaluate((el) => el.getBoundingClientRect().height);
-  ok(h1 > h0, `poignée au clavier : panneau agrandi (${Math.round(h0)} → ${Math.round(h1)} px)`);
-  const box = await handle.boundingBox();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width / 2, box.y - 60, { steps: 4 });
-  await page.mouse.up();
-  const h2 = await page.locator('.cm').evaluate((el) => el.getBoundingClientRect().height);
-  ok(h2 > h1 + 40, 'poignée à la souris : glisser vers le haut agrandit');
-  await page.getByRole('button', { name: 'Replier les commentaires' }).click();
-  ok((await page.locator('.cm-list').count()) === 0, 'panneau replié');
-  await page.reload();
-  await page.waitForSelector('.cm');
-  ok((await page.locator('.cm--collapsed').count()) === 1, 'état replié mémorisé');
-  await page.getByRole('button', { name: /Afficher les commentaires/ }).click();
-  const h3 = await page.locator('.cm').evaluate((el) => el.getBoundingClientRect().height);
-  ok(Math.abs(h3 - h2) < 2, 'hauteur mémorisée');
+  // L48-E : l'ancien panneau du bas (poignée, repli) est remplacé par l'outil « Commentaires » du rail
 
   // Supprimer (modale de confirmation)
   await page.getByRole('button', { name: 'Actions sur votre commentaire' }).click();

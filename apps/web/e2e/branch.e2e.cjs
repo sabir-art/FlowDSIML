@@ -1,6 +1,7 @@
 /** L22-09 : règles de suite du menu de choix (une seule source, destinations recalculées, contrôles). */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -47,7 +48,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.keyboard.press('Escape');
 
   await page.locator('.rail-li').nth(2).locator('button.step').click();
-  await page.getByRole('tab', { name: 'Étape' }).click();
+  await openTool(page, 'step');
   const answers = page.getByLabel('Réponses (une par ligne, 6 au plus)');
   await answers.waitFor();
   ok((await answers.inputValue()) === 'A\nB', 'L22-09 : réponses une par ligne');
@@ -60,7 +61,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(
     /Boucle sans sortie/.test(
       await page
-        .locator('.panel [role="status"]')
+        .locator('[data-tool-panel] [role="status"]')
         .allTextContents()
         .then((x) => x.join(' ')),
     ),

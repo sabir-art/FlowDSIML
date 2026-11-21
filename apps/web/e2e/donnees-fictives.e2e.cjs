@@ -6,6 +6,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -56,7 +57,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
-  await page.getByRole('tab', { name: 'Réglages' }).click();
+  await openTool(page, 'settings');
   await page.getByRole('button', { name: 'Importer un fichier CSV' }).click();
   const dlg = page.locator('.ds-dialog');
   await dlg.waitFor();

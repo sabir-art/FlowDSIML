@@ -247,7 +247,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await pf.locator('.p-tip, .p-text-step').first().waitFor({ timeout: 10000 });
   ok(true, 'aperçu intégré : le player affiche la démo brouillon');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/editor-preview.png` });
-  await page.getByRole('button', { name: 'Fermer' }).click();
+  await page.locator('dialog.preview-dialog').getByRole('button', { name: 'Fermer' }).click();
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();

@@ -1,6 +1,7 @@
 /** Test e2e : la liste des commentaires s'ouvre sur le premier non lu (pilule « n plus anciens ↑ »). */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -42,12 +43,23 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
+  // L48-E : les commentaires sont un outil du rail
+  await openTool(page, 'comments');
   await page.waitForSelector('[data-comment="c7"]');
   await page.waitForTimeout(300);
   const list = page.locator('.cm-list');
   const top = await list.evaluate((el) => el.scrollTop);
-  const firstUnread = await page.locator('[data-comment="c7"]').evaluate((el) => el.offsetTop);
-  ok(top > 0 && Math.abs(top - (firstUnread - 8)) < 4, 'liste ouverte sur le premier non lu (remarque 8)');
+  // Le premier non lu est entièrement visible dans la liste (L48-E : panneau haut, la liste ne peut
+  // pas toujours le mettre tout en haut), les plus anciens sont au-dessus
+  const vis = await page.locator('[data-comment="c7"]').evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const l = el.closest('.cm-list').getBoundingClientRect();
+    return { inside: r.top >= l.top && r.bottom <= l.bottom, gap: Math.round(r.top - l.top) };
+  });
+  ok(
+    top > 0 && vis.inside,
+    `liste ouverte sur le premier non lu (remarque 8 visible, ${vis.gap} px du haut)`,
+  );
   ok((await page.locator('.cm-item--new').count()) === 3, 'les 3 non lus sont marqués « Nouveau »');
   const pill = page.locator('.cm-older');
   ok(

@@ -245,7 +245,8 @@ export function CommentsPanel({
     const item = list?.querySelector<HTMLElement>(`[data-comment="${visible[idx]!.id}"]`);
     if (list && item) {
       anchoredFor.current = { step: stepId, len: forStep.length };
-      item.scrollIntoView({ block: 'center' });
+      // Le premier non lu en haut de la liste, à 8 px (la pilule des plus anciens reste au-dessus)
+      list.scrollTop += item.getBoundingClientRect().top - list.getBoundingClientRect().top - 8;
     }
     if (idx > 0) setOlderAbove(idx);
   }, [stepId, api.loading, visible.length]); // eslint-disable-line react-hooks/exhaustive-deps
