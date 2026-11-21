@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { proposedColor } from './TagsSettings';
+import { proposedColor } from './Tags';
 
 describe('L52 §2.1 : couleur proposée', () => {
   it('première des 8 pas encore utilisée', () => {

@@ -2992,7 +2992,8 @@
     "merged_one": "“{{from}}” merged into “{{to}}” ({{count}} demo)",
     "merged_other": "“{{from}}” merged into “{{to}}” ({{count}} demos)",
     "mergeInstead": "Merge with “{{name}}”",
-    "mergeNone": "No other tag"
+    "mergeNone": "No other tag",
+    "addOnCard": "+ Tag"
   },
   "learners": {
     "title": "Learners",

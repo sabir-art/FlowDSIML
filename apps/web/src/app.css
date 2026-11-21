@@ -1797,19 +1797,53 @@
 .tg-err {
   margin: 0;
 }
-.tg-manage-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* L52 §2.6 : ligne d'étiquettes cliquable d'une carte (au-dessus du lien étendu de la carte) */
+.tg-card {
+  position: relative;
+  z-index: var(--fd-z-raised);
   display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
-.tg-manage-list li {
-  display: grid;
-  grid-template-columns: 1fr auto auto auto;
-  gap: 10px;
-  align-items: center;
+.tg-card.is-open {
+  z-index: 40;
+}
+.tg-line {
+  all: unset;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.tg-line:focus-visible {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: 2px;
+}
+/* « + Étiquette » : lien de 13 px, visible au survol et au focus de la carte ou de la ligne de liste */
+.tg-add {
+  font: 600 13px var(--fd-font-sans);
+  color: var(--fd-color-primary);
+  border-radius: var(--fd-radius-sm);
+}
+.tg-add:hover {
+  text-decoration: underline;
+}
+.demo-card:not(:hover, :focus-within) .tg-card--empty:not(.is-open),
+tr:not(:hover, :focus-within) .tg-card--empty:not(.is-open) {
+  opacity: 0;
+}
+.tg-card .tg-pop {
+  top: calc(100% + 6px);
+}
+.tg-manage-link {
+  align-self: flex-start;
+  padding: 4px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fd-color-primary);
+  text-decoration: none;
+}
+.tg-manage-link:hover {
+  text-decoration: underline;
 }
 .tg-field {
   display: flex;

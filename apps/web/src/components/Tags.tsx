@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { FilterContent } from './toolbar/ListToolbar';
-import { Check, Plus, Search, Settings, Tag as TagIcon, Trash2, X } from 'lucide-react';
+import { Check, Plus, Search, Settings, Tag as TagIcon, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../lib/supabase';
 import { check } from '../lib/useAction';
@@ -24,6 +25,14 @@ export const TAG_COLORS = [
 export type TagColor = (typeof TAG_COLORS)[number];
 export const TAG_LIMIT = 20;
 export const DEMO_TAG_LIMIT = 5;
+
+/** L52 §2.1 : première des 8 couleurs pas encore utilisée, sinon la moins utilisée. */
+export function proposedColor(tags: Array<Pick<TagRow, 'color'>>): TagColor {
+  const uses = new Map<TagColor, number>(TAG_COLORS.map((c) => [c, 0]));
+  for (const x of tags)
+    if (uses.has(x.color as TagColor)) uses.set(x.color as TagColor, uses.get(x.color as TagColor)! + 1);
+  return [...TAG_COLORS].sort((a, b) => uses.get(a)! - uses.get(b)!)[0]!;
+}
 
 /** Pastille d'étiquette : point et texte de sa couleur, fond clair de la même teinte. */
 export function TagChip({ tag }: { tag: Pick<TagRow, 'name' | 'color'> }) {
@@ -191,11 +200,24 @@ export function TagColorPicker({
 /**
  * Recherche ou création d'étiquette et liste à cocher pour une démo (menu de la carte, éditeur).
  */
-export function TagPicker({ demoId, store }: { demoId: string; store: WorkspaceTags }) {
+export function TagPicker({
+  demoId,
+  store,
+  manage = false,
+}: {
+  demoId: string;
+  store: WorkspaceTags;
+  /** L52 §2.6 : lien de pied « Gérer les étiquettes » vers Paramètres › Étiquettes. */
+  manage?: boolean;
+}) {
   const { t } = useTranslation();
   const [q, setQ] = useState('');
-  const [color, setColor] = useState<TagColor>('blue');
+  // L52 §2.1 : couleur proposée (première libre, sinon la moins utilisée)
+  const [color, setColor] = useState<TagColor>(() => proposedColor(store.tags));
   const mine = new Set(store.tagsOf(demoId).map((x) => x.id));
+  // Limites : 5 par démo (les autres cases désactivées), 20 par espace (« Créer » désactivé)
+  const demoFull = mine.size >= DEMO_TAG_LIMIT;
+  const wsFull = store.tags.length >= TAG_LIMIT;
   const needle = q.trim().toLowerCase();
   const list = store.tags.filter((x) => !needle || x.name.toLowerCase().includes(needle));
   const exact = store.tags.some((x) => x.name.trim().toLowerCase() === needle);
@@ -219,7 +241,7 @@ export function TagPicker({ demoId, store }: { demoId: string; store: WorkspaceT
           aria-label={t('tags.searchOrCreate')}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && needle && !exact) {
+            if (e.key === 'Enter' && needle && !exact && !wsFull && !demoFull) {
               e.preventDefault();
               void create();
             }
@@ -233,6 +255,8 @@ export function TagPicker({ demoId, store }: { demoId: string; store: WorkspaceT
             <input
               type="checkbox"
               checked={mine.has(x.id)}
+              disabled={demoFull && !mine.has(x.id)}
+              aria-describedby={demoFull && !mine.has(x.id) ? `tg-full-${demoId}` : undefined}
               onChange={(e) => void store.toggle(demoId, x.id, e.target.checked)}
             />
             <TagChip tag={x} />
@@ -241,7 +265,13 @@ export function TagPicker({ demoId, store }: { demoId: string; store: WorkspaceT
       </div>
       {needle && !exact && (
         <div className="tg-create">
-          <button type="button" className="tg-create__btn" onClick={() => void create()}>
+          <button
+            type="button"
+            className="tg-create__btn"
+            aria-disabled={wsFull || demoFull || undefined}
+            title={wsFull ? t('tags.wsLimit', { n: TAG_LIMIT }) : undefined}
+            onClick={() => !wsFull && !demoFull && void create()}
+          >
             <Plus aria-hidden="true" />
             {t('tags.create', { name: q.trim() })}
           </button>
@@ -253,7 +283,95 @@ export function TagPicker({ demoId, store }: { demoId: string; store: WorkspaceT
           {store.error}
         </p>
       )}
-      <p className="fd-help tg-help">{t('tags.limits', { ws: TAG_LIMIT, demo: DEMO_TAG_LIMIT })}</p>
+      {demoFull ? (
+        <p id={`tg-full-${demoId}`} className="fd-help tg-help">
+          {t('tags.demoLimit', { n: DEMO_TAG_LIMIT })}
+        </p>
+      ) : (
+        <p className="fd-help tg-help">{t('tags.limits', { ws: TAG_LIMIT, demo: DEMO_TAG_LIMIT })}</p>
+      )}
+      {manage && (
+        <Link className="tg-manage-link" to="/settings/tags">
+          {t('tags.manage')}
+        </Link>
+      )}
+    </div>
+  );
+}
+
+/**
+ * L52 §2.6 : ligne d'étiquettes d'une démo (carte, vue liste). Éditeurs : la ligne ouvre le sélecteur,
+ * accroché à elle ; sans étiquette, « + Étiquette » paraît au survol et au focus de la carte. Lecteurs :
+ * les pastilles seules.
+ */
+export function CardTags({
+  demo,
+  store,
+  editable,
+  list = false,
+}: {
+  demo: { id: string; title: string };
+  store: WorkspaceTags;
+  editable: boolean;
+  /** Vue liste : alignée sous le nom de la démo. */
+  list?: boolean;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const tags = store.tagsOf(demo.id);
+  const popId = `tg-card-${demo.id}`;
+  useEffect(() => {
+    if (!open) return;
+    store.setError(null);
+    const trigger = root.current?.querySelector<HTMLElement>('.tg-line');
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        trigger?.focus();
+      }
+    };
+    const onDown = (e: MouseEvent) => !root.current?.contains(e.target as Node) && setOpen(false);
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onDown);
+    };
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  const chips = tags.map((x) => <TagChip key={x.id} tag={x} />);
+  const cls = `tg-row${list ? ' tg-row--list' : ''}`;
+  if (!editable)
+    return tags.length ? (
+      <span className={cls} aria-label={t('tags.title')}>
+        {chips}
+      </span>
+    ) : null;
+  return (
+    <div
+      ref={root}
+      className={`${cls} tg-card${open ? ' is-open' : ''}${tags.length ? '' : ' tg-card--empty'}`}
+    >
+      <button
+        type="button"
+        className={tags.length ? 'tg-line' : 'tg-line tg-add'}
+        aria-label={tags.length ? t('tags.of', { title: demo.title }) : undefined}
+        aria-expanded={open}
+        aria-controls={open ? popId : undefined}
+        onClick={() => setOpen(!open)}
+      >
+        {tags.length ? chips : t('tags.addOnCard')}
+      </button>
+      {open && (
+        <div
+          id={popId}
+          className="tg-pop fd-card"
+          role="dialog"
+          aria-label={t('tags.of', { title: demo.title })}
+        >
+          <TagPicker demoId={demo.id} store={store} manage />
+        </div>
+      )}
     </div>
   );
 }
@@ -296,7 +414,7 @@ export function TagsDialog({
             </button>
           </div>
           <div className="modal-body">
-            <TagPicker demoId={demo.id} store={store} />
+            <TagPicker demoId={demo.id} store={store} manage />
           </div>
         </div>
       </div>
@@ -315,14 +433,15 @@ export function TagFilter({
   setSelected,
   mode,
   setMode,
-  onManage,
+  manage = false,
 }: {
   store: WorkspaceTags;
   selected: string[];
   setSelected: (ids: string[]) => void;
   mode: 'any' | 'all';
   setMode: (m: 'any' | 'all') => void;
-  onManage?: () => void;
+  /** L52 §2.6 : lien « Gérer les étiquettes » vers Paramètres › Étiquettes (éditeurs). */
+  manage?: boolean;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -420,92 +539,15 @@ export function TagFilter({
             <button type="button" className="fd-btn fd-btn--ghost fd-btn--sm" onClick={() => setSelected([])}>
               {t('tags.clear')}
             </button>
-            {onManage && (
-              <button
-                type="button"
-                className="fd-btn fd-btn--ghost fd-btn--sm"
-                onClick={() => {
-                  setOpen(false);
-                  onManage();
-                }}
-              >
+            {manage && (
+              <Link className="fd-btn fd-btn--ghost fd-btn--sm" to="/settings/tags">
                 <Settings aria-hidden="true" />
                 {t('tags.manage')}
-              </button>
+              </Link>
             )}
           </div>
         </div>
       )}
     </div>
-  );
-}
-
-/** « Gérer les étiquettes » : renommer, recolorer, supprimer. */
-export function ManageTagsDialog({ store, onClose }: { store: WorkspaceTags; onClose: () => void }) {
-  const { t } = useTranslation();
-  const [names, setNames] = useState<Record<string, string>>({});
-  useEffect(() => {
-    store.setError(null);
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]); // eslint-disable-line react-hooks/exhaustive-deps
-  return createPortal(
-    <div className="mk">
-      <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-        <div className="modal tg-manage" role="dialog" aria-modal="true" aria-labelledby="tg-m-t">
-          <div className="modal-head">
-            <h2 id="tg-m-t">{t('tags.manage')}</h2>
-            <button
-              type="button"
-              className="btn btn-ghost btn-icon btn-sm"
-              aria-label={t('common.close')}
-              onClick={onClose}
-            >
-              <X aria-hidden="true" />
-            </button>
-          </div>
-          <div className="modal-body">
-            {store.tags.length === 0 && <p className="muted">{t('tags.none')}</p>}
-            <ul className="tg-manage-list">
-              {store.tags.map((x) => (
-                <li key={x.id}>
-                  <input
-                    className="input input-sm"
-                    aria-label={t('tags.rename', { name: x.name })}
-                    maxLength={32}
-                    value={names[x.id] ?? x.name}
-                    onChange={(e) => setNames({ ...names, [x.id]: e.target.value })}
-                    onBlur={() => {
-                      const v = (names[x.id] ?? x.name).trim();
-                      if (v && v !== x.name) void store.update(x.id, { name: v });
-                    }}
-                  />
-                  <TagColorPicker
-                    value={x.color as TagColor}
-                    onChange={(c) => void store.update(x.id, { color: c })}
-                  />
-                  <small className="muted">{t('tags.demos', { count: store.countOf(x.id) })}</small>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-icon btn-sm"
-                    aria-label={t('tags.delete', { name: x.name })}
-                    onClick={() => void store.remove(x.id)}
-                  >
-                    <Trash2 aria-hidden="true" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {store.error && (
-              <p className="error-msg" role="alert">
-                {store.error}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body,
   );
 }

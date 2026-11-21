@@ -8,6 +8,8 @@
  *    état vide.
  *  - P3 (recette 2, 3) : nom déjà pris → « Fusionner avec « Outil CRM » » ouvre la fusion ; fusion de « Outil métier »
  *    (7 démos) dans « Outil CRM » : toutes l'ont, « Outil métier » a disparu, aucune démo au-delà de 5, toast.
+ *  - P4 (recette 6) : « + Étiquette » au survol et au focus de la carte (et de la ligne de liste) ; sélecteur accroché à
+ *    la ligne, créer « Nouvelle » (couleur proposée) : elle paraît sur la carte et dans la page ; limite de 5 ; lecteur.
  * Usage : node e2e/l52-etiquettes.e2e.cjs
  */
 const { chromium } = require('playwright');
@@ -398,6 +400,115 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
       'liste des autres étiquettes avec leur nombre de démos',
     );
     await d2.getByRole('button', { name: 'Annuler' }).click();
+    await page.context().close();
+  }
+
+  // Recette 6 : depuis la carte d'une démo
+  {
+    const s = seed();
+    const ws = s.tables.workspaces[0].id;
+    s.tables.tags = [
+      ['Accueil', 'teal'],
+      ['Nouveaux agents', 'green'],
+    ].map(([name, color], i) => ({
+      id: `0b5c1f0e-0000-4000-8000-0000000054${i}0`,
+      workspace_id: ws,
+      name,
+      color,
+      created_at: new Date().toISOString(),
+    }));
+    const [d1, d2] = s.tables.demos;
+    s.tables.demo_tags = [{ demo_id: d1.id, tag_id: s.tables.tags[0].id, workspace_id: ws }];
+    const { page, state } = await openPage(s, '/');
+    await page.waitForSelector('.demo-card');
+    const card2 = page.locator('.demo-card').filter({ hasText: d2.title });
+    const add = card2.getByRole('button', { name: '+ Étiquette' });
+    const opacity = () => add.evaluate((el) => getComputedStyle(el.closest('.tg-card')).opacity);
+    await page.mouse.move(0, 0);
+    ok((await opacity()) === '0', 'recette 6 : « + Étiquette » masqué au repos');
+    await card2.hover();
+    ok((await opacity()) === '1', '« + Étiquette » visible au survol de la carte');
+    await page.mouse.move(0, 0);
+    await add.focus();
+    ok((await opacity()) === '1', '« + Étiquette » visible au focus');
+    await page.keyboard.press('Enter');
+    const pop = card2.getByRole('dialog', { name: `Étiquettes de ${d2.title}` });
+    await pop.waitFor();
+    ok(
+      (await pop.getByRole('link', { name: 'Gérer les étiquettes' }).getAttribute('href')).endsWith(
+        '/settings/tags',
+      ),
+      'sélecteur accroché à la ligne, lien de pied « Gérer les étiquettes »',
+    );
+    await pop.getByRole('searchbox').fill('Nouvelle');
+    ok(
+      (await pop.getByRole('radio', { name: 'Bleu' }).getAttribute('aria-checked')) === 'true',
+      'couleur proposée : la première libre (Bleu)',
+    );
+    await pop.getByRole('button', { name: 'Créer « Nouvelle »' }).click();
+    await page.waitForTimeout(500);
+    const created = state.tables.tags.find((x) => x.name === 'Nouvelle');
+    ok(
+      !!created && state.tables.demo_tags.some((x) => x.demo_id === d2.id && x.tag_id === created.id),
+      'étiquette créée et posée sur la démo',
+    );
+    await page.keyboard.press('Escape');
+    ok((await card2.locator('.tg', { hasText: 'Nouvelle' }).count()) === 1, 'elle apparaît sur la carte');
+    // La carte a maintenant une étiquette : la ligne ouvre le sélecteur
+    ok(
+      (await card2.getByRole('button', { name: `Étiquettes de ${d2.title}` }).count()) === 1,
+      'ligne d’étiquettes cliquable (nom « Étiquettes de … »)',
+    );
+    await page.goto(`${APP}/#/settings/tags`);
+    await page.locator('.tgs-row .tg').first().waitFor();
+    ok((await names(page)).includes('Nouvelle'), 'elle apparaît dans la page Étiquettes');
+    // Vue liste : même ligne
+    await page.goto(`${APP}/#/`);
+    await page.waitForSelector('.demo-card');
+    await page.getByRole('radio', { name: 'Liste' }).click();
+    await page.waitForSelector('table');
+    ok(
+      (await page
+        .locator('tr')
+        .filter({ hasText: d1.title })
+        .getByRole('button', { name: `Étiquettes de ${d1.title}` })
+        .count()) === 1,
+      'vue liste : ligne d’étiquettes cliquable',
+    );
+    await page.context().close();
+  }
+  // Limite de 5 par démo : les autres cases désactivées, avec la raison
+  {
+    const five = Array.from({ length: 6 }, (_, i) => [`Étiquette ${i + 1}`, 'blue', 0]);
+    const s = pageSeed({ tags: five });
+    const d = s.tables.demos[0];
+    s.tables.demo_tags = s.tables.tags
+      .slice(0, 5)
+      .map((x) => ({ demo_id: d.id, tag_id: x.id, workspace_id: x.workspace_id }));
+    const { page } = await openPage(s, '/');
+    await page.waitForSelector('.demo-card');
+    await page
+      .getByRole('button', { name: `Étiquettes de ${d.title}` })
+      .first()
+      .click();
+    const pop = page.getByRole('dialog', { name: `Étiquettes de ${d.title}` }).first();
+    await pop.waitFor();
+    ok(
+      (await pop.getByRole('checkbox', { name: 'Étiquette 6' }).isDisabled()) &&
+        (await pop.getByText('5 étiquettes au plus par démo.').count()) === 1,
+      'à 5 étiquettes : les autres cases désactivées, « 5 étiquettes au plus par démo. »',
+    );
+    await page.context().close();
+  }
+  // Lecteur : pastilles seules, sans « + Étiquette »
+  {
+    const { page } = await openPage(pageSeed({ role: 'viewer' }), '/');
+    await page.waitForSelector('.demo-card .tg');
+    ok(
+      (await page.getByRole('button', { name: '+ Étiquette' }).count()) === 0 &&
+        (await page.locator('.demo-card .tg-line').count()) === 0,
+      'lecteur : pastilles seules, ni « + Étiquette » ni sélecteur',
+    );
     await page.context().close();
   }
 

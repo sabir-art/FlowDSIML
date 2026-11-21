@@ -2992,7 +2992,8 @@
     "merged_one": "« {{from}} » fusionnée dans « {{to}} » ({{count}} démo)",
     "merged_other": "« {{from}} » fusionnée dans « {{to}} » ({{count}} démos)",
     "mergeInstead": "Fusionner avec « {{name}} »",
-    "mergeNone": "Aucune autre étiquette"
+    "mergeNone": "Aucune autre étiquette",
+    "addOnCard": "+ Étiquette"
   },
   "learners": {
     "title": "Apprenants",

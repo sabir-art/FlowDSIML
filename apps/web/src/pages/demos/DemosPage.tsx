@@ -67,7 +67,7 @@ import { loadHome, type Stats } from './home';
 import { useShareRules } from '../../lib/shareRules';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
-import { ManageTagsDialog, TagChip, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
+import { CardTags, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
 import { DEMO_DRAG, FolderColumn, type Scope } from './FolderColumn';
 import { useMediaQuery } from '../../lib/useMediaQuery';
@@ -245,7 +245,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   };
   const [tagMode, setTagMode] = useState<'any' | 'all'>('any');
   const [tagging, setTagging] = useState<Demo | null>(null);
-  const [managingTags, setManagingTags] = useState(false);
   const { error, run } = useAction();
   const editable = can('demo.edit');
   const [kpis, setKpis] = useState<{ cur: Kpis; prev: Kpis | null } | null>(null);
@@ -975,7 +974,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                     setSelected={setTagFilter}
                     mode={tagMode}
                     setMode={setTagMode}
-                    onManage={editable ? () => setManagingTags(true) : undefined}
+                    manage={editable}
                   />
                 </>
               }
@@ -1136,13 +1135,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                             </span>
                             <Link to={`/demos/${d.id}/edit`}>{d.title}</Link>
                           </span>
-                          {tagStore.tagsOf(d.id).length > 0 && (
-                            <span className="tg-row tg-row--list" aria-label={t('tags.title')}>
-                              {tagStore.tagsOf(d.id).map((x) => (
-                                <TagChip key={x.id} tag={x} />
-                              ))}
-                            </span>
-                          )}
+                          <CardTags demo={d} store={tagStore} editable={editable} list />
                         </td>
                         {!sandbox && (
                           <td>
@@ -1253,13 +1246,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                           </time>
                         </span>
                       </div>
-                      {tagStore.tagsOf(d.id).length > 0 && (
-                        <div className="tg-row" aria-label={t('tags.title')}>
-                          {tagStore.tagsOf(d.id).map((x) => (
-                            <TagChip key={x.id} tag={x} />
-                          ))}
-                        </div>
-                      )}
+                      <CardTags demo={d} store={tagStore} editable={editable} />
                     </div>
                   </li>
                 );
@@ -1281,7 +1268,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
         </section>
 
         {tagging && <TagsDialog demo={tagging} store={tagStore} onClose={() => setTagging(null)} />}
-        {managingTags && <ManageTagsDialog store={tagStore} onClose={() => setManagingTags(false)} />}
         <Suspense fallback={null}>
           {/* L30-05 : démo générée depuis un plan texte (langue de l'interface) */}
           {generating && (

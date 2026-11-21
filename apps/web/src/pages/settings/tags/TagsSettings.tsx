@@ -9,8 +9,8 @@ import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { Menu } from '../../../components/Menu';
 import { ConfirmDialog, useConfirm } from '../../../components/ConfirmDialog';
 import {
-  TAG_COLORS,
   TAG_LIMIT,
+  proposedColor,
   TagChip,
   TagColorPicker,
   useWorkspaceTags,
@@ -21,14 +21,6 @@ import './tags.css';
 
 const NAME_MAX = 32;
 type Sort = { by: 'name' | 'demos'; dir: 'asc' | 'desc' };
-
-/** §2.1 : première des 8 couleurs pas encore utilisée, sinon la moins utilisée. */
-export function proposedColor(tags: Array<Pick<TagRow, 'color'>>): TagColor {
-  const uses = new Map<TagColor, number>(TAG_COLORS.map((c) => [c, 0]));
-  for (const x of tags)
-    if (uses.has(x.color as TagColor)) uses.set(x.color as TagColor, uses.get(x.color as TagColor)! + 1);
-  return [...TAG_COLORS].sort((a, b) => uses.get(a)! - uses.get(b)!)[0]!;
-}
 
 /** Nom déjà pris (sans tenir compte de la casse ni des espaces autour), hors l'étiquette elle-même. */
 const taken = (tags: TagRow[], name: string, self?: string) =>

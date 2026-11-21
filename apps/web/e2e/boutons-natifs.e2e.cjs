@@ -36,6 +36,16 @@ const DIALOGS = [
     },
   },
   {
+    // L52 §7 : Démos avec le sélecteur d'étiquettes ouvert depuis la carte
+    name: 'Démos · sélecteur d’étiquettes',
+    route: '/#/',
+    open: async (p) => {
+      await p.locator('.demo-card').first().hover();
+      await p.locator('.demo-card .tg-line').first().click();
+      await p.locator('.tg-card .tg-pop').waitFor();
+    },
+  },
+  {
     name: 'Dialogue Activer l’Assistance IA',
     route: '/#/settings/ai',
     open: async (p) => {

@@ -41,9 +41,9 @@ const SHOTS = process.env.SHOTS_DIR;
   ok((await page.locator('.demo-card .tg').count()) === 2, 'L12-07 : pastilles sous la ligne de méta');
 
   // Filtre « Étiquettes »
-  await page.getByRole('button', { name: /^Étiquettes/ }).click();
+  await page.locator('.tg-filter').click();
   ok(
-    (await page.getByRole('button', { name: /^Étiquettes/ }).getAttribute('aria-expanded')) === 'true',
+    (await page.locator('.tg-filter').getAttribute('aria-expanded')) === 'true',
     'L12-07 : filtre aria-expanded',
   );
   await page.locator('.tg-pop').getByRole('checkbox').first().check();
@@ -58,6 +58,13 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: 'Effacer' }).click();
   ok((await page.locator('.demo-card').count()) === 2, 'L12-07 : Effacer');
   await page.keyboard.press('Escape');
+  // L52 §2.6 : un seul endroit pour gérer les étiquettes (la fenêtre « Gérer » est remplacée par la page)
+  await page.locator('.tg-filter').click();
+  await page.locator('.tg-pop').getByRole('link', { name: 'Gérer les étiquettes' }).click();
+  await page.waitForSelector('.tgs-row .tg');
+  ok(page.url().includes('#/settings/tags'), 'L52 : « Gérer les étiquettes » mène à Paramètres › Étiquettes');
+  await page.goto(`${APP}/#/`);
+  await page.waitForSelector('.demo-card');
 
   // Éditeur › Réglages : champ à pastilles
   await page.goto(`${APP}/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit?tab=settings`);
