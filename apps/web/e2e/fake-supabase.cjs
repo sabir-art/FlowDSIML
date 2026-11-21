@@ -514,6 +514,20 @@ async function install(page, state = seed()) {
         });
       return json(route, 400, { error: 'bad_action' });
     }
+    // E-mails P2 : résumé par e-mail. state.brevoKey simule la présence de BREVO_API_KEY (option
+    // disponible) ; state.unsubTokens les jetons de désinscription valables. Aucun envoi réel.
+    if (p.startsWith('/functions/v1/notify-email')) {
+      const b = JSON.parse(req.postData() || '{}');
+      if (b.action === 'status') return json(route, 200, { available: !!state.brevoKey });
+      if (b.action === 'unsubscribe') {
+        const owner = (state.unsubTokens || {})[b.token];
+        if (!owner) return json(route, 200, { ok: false });
+        const row = (state.tables.notification_settings ||= []).find((x) => x.user_id === owner);
+        if (row) row.email = false;
+        return json(route, 200, { ok: true });
+      }
+      return json(route, 400, { error: 'bad_action' });
+    }
     // E-mails P1 : invitations d'équipe. Aucun envoi réel : faux transport (state.inviteEmails) ;
     // state.inviteTransport = 'fail' simule l'échec, state.existingAccounts les comptes déjà utilisés
     // (notification), state.emailBudget le compteur du jour (150 au plus).

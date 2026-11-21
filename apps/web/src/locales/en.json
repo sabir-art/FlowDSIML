@@ -3980,6 +3980,7 @@
     "p_comment": "Someone comments on a demo I created",
     "p_resolved": "Someone resolves my comment",
     "p_email": "Also send by email",
+    "p_emailHelp": "At most one email per hour, grouping your unread notifications. Unsubscribe link in every email.",
     "unread": "Unread",
     "someone": "A member",
     "k_mention": "{{actor}} mentioned you in “{{demo}}” · step {{step}}",
@@ -5374,5 +5375,22 @@
     "blocked": "Blocked, flagged site",
     "gsbRetry": "Google check unavailable, try again later",
     "blockedLater": "The link {{text}} leads to a flagged site: it has been blocked."
+  },
+  "email": {
+    "digest": {
+      "subject_one": "1 new notification in TutoClick",
+      "subject_other": "{{count}} new notifications in TutoClick",
+      "more_one": "And 1 more in TutoClick",
+      "more_other": "And {{count}} more in TutoClick",
+      "open": "Open notifications",
+      "why": "You are receiving this email because you turned on email notifications in TutoClick.",
+      "unsubscribe": "Stop receiving these emails"
+    }
+  },
+  "unsubscribe": {
+    "title": "Email notifications",
+    "done": "You will no longer receive notifications by email. You can turn them back on in Settings › Notifications.",
+    "invalid": "This link is no longer valid. You can turn off emails in the TutoClick notification preferences.",
+    "open": "Open TutoClick"
   }
 }

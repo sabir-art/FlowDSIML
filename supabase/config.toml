@@ -465,3 +465,9 @@ verify_jwt = true
 [functions.invite-email]
 enabled = true
 verify_jwt = true
+
+# E-mails P2 : résumé des notifications (API Brevo). Sans JWT : la désinscription à un clic vient d'un
+# client de messagerie ; la tâche planifiée s'authentifie par le secret partagé des tâches.
+[functions.notify-email]
+enabled = true
+verify_jwt = false

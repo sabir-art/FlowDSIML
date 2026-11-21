@@ -3,7 +3,7 @@
  * Panneau non modal (role=dialog) : Échap ou clic à l'extérieur le ferme, le focus revient à la cloche.
  */
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { HelpButton } from '../../help/HelpButton';
 import {
@@ -52,6 +52,18 @@ export function NotificationBell() {
   const id = useId();
   const n = useNotifications();
   const [open, setOpen] = useState(false);
+  // E-mails P2 : « Ouvrir les notifications » du résumé mène à #/?notifications=1, panneau ouvert. Le
+  // paramètre est retiré de l'adresse sans navigation (une navigation remonterait la page et le panneau).
+  const location = useLocation();
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get('notifications') !== '1') return;
+    setOpen(true);
+    window.history.replaceState(
+      window.history.state,
+      '',
+      window.location.href.replace(/[?&]notifications=1/, ''),
+    );
+  }, [location.search]);
   const [view, setView] = useState<'list' | 'prefs'>('list');
   const [filter, setFilter] = useState<Filter>('all');
   // Cloche placée à gauche (barre d'Analytics) : le panneau s'ouvre vers la droite, jamais sous la barre latérale
@@ -316,13 +328,33 @@ export function NotificationBell() {
                     </li>
                   ))}
                   <li>
-                    <label className="fd-switch is-soon">
-                      <span>
-                        {t('notifications.p_email')} <span className="soon-text">{t('shell.soon')}</span>
-                      </span>
-                      <input type="checkbox" role="switch" checked={false} disabled />
-                      <span className="fd-switch__track" aria-hidden="true" />
-                    </label>
+                    {/* E-mails P2 : résumé par e-mail, désactivé par défaut ; « Bientôt » sans clé Brevo */}
+                    {n.emailAvailable ? (
+                      <label className="fd-switch">
+                        <span>
+                          {t('notifications.p_email')}
+                          <span className="fd-help nb-pref-help" id={`${id}-email-h`}>
+                            {t('notifications.p_emailHelp')}
+                          </span>
+                        </span>
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          checked={n.email}
+                          aria-describedby={`${id}-email-h`}
+                          onChange={(e) => void n.setEmail(e.target.checked)}
+                        />
+                        <span className="fd-switch__track" aria-hidden="true" />
+                      </label>
+                    ) : (
+                      <label className="fd-switch is-soon">
+                        <span>
+                          {t('notifications.p_email')} <span className="soon-text">{t('shell.soon')}</span>
+                        </span>
+                        <input type="checkbox" role="switch" checked={false} disabled />
+                        <span className="fd-switch__track" aria-hidden="true" />
+                      </label>
+                    )}
                   </li>
                   <li>
                     <label className="fd-switch is-soon">

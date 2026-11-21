@@ -41,6 +41,7 @@ const Onboarding = lazyRest(() => import('./pages/Onboarding').then((m) => ({ de
 const AcceptInvite = lazyRest(() =>
   import('./pages/AcceptInvite').then((m) => ({ default: m.AcceptInvite })),
 );
+const Unsubscribe = lazyRest(() => import('./pages/Unsubscribe').then((m) => ({ default: m.Unsubscribe })));
 const Profile = lazyRest(() => import('./pages/settings/Profile').then((m) => ({ default: m.Profile })));
 const Members = lazyRest(() => import('./pages/settings/Members').then((m) => ({ default: m.Members })));
 const WorkspaceSettings = lazyRest(() =>
@@ -185,6 +186,8 @@ export function App() {
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/invite/:token" element={<AcceptInvite />} />
+                  {/* E-mails P2 : désinscription du résumé, sans connexion */}
+                  <Route path="/unsubscribe/:token" element={<Unsubscribe />} />
                   {/* L26-11 : télécommande du mode présentateur, sans compte */}
                   <Route path="/t" element={<RemotePhone />} />
                   <Route

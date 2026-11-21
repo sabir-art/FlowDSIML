@@ -1243,17 +1243,20 @@ export type Database = {
       };
       notification_settings: {
         Row: {
+          email: boolean;
           prefs: NonNullable<Json>;
           updated_at: string;
           user_id: string;
         };
         ComputedFields: never;
         Insert: {
+          email?: boolean;
           prefs?: NonNullable<Json>;
           updated_at?: string;
           user_id?: string;
         };
         Update: {
+          email?: boolean;
           prefs?: NonNullable<Json>;
           updated_at?: string;
           user_id?: string;
@@ -1268,6 +1271,7 @@ export type Database = {
           created_at: string;
           data: Json;
           demo_id: string | null;
+          emailed_at: string | null;
           id: string;
           kind: string;
           read_at: string | null;
@@ -1283,6 +1287,7 @@ export type Database = {
           created_at?: string;
           data?: Json;
           demo_id?: string | null;
+          emailed_at?: string | null;
           id?: string;
           kind: string;
           read_at?: string | null;
@@ -1297,6 +1302,7 @@ export type Database = {
           created_at?: string;
           data?: Json;
           demo_id?: string | null;
+          emailed_at?: string | null;
           id?: string;
           kind?: string;
           read_at?: string | null;

@@ -31,6 +31,17 @@ export interface MutedDemo {
 
 const DAYS = 30;
 
+/**
+ * E-mails P2 : le résumé par e-mail n'est proposé que si notify-email a sa clé Brevo (sinon « Bientôt »).
+ * Lu une fois par session ; en cas d'erreur, l'option reste « Bientôt ».
+ */
+let emailStatus: Promise<boolean> | null = null;
+export const emailDigestAvailable = () =>
+  (emailStatus ??= supabase.functions
+    .invoke<{ available: boolean }>('notify-email', { body: { action: 'status' } })
+    .then(({ data, error }) => !error && data?.available === true)
+    .catch(() => false));
+
 export function useNotifications() {
   const { user } = useAuth();
   const { current } = useWorkspace();
@@ -127,16 +138,39 @@ export function useNotifications() {
 
   // Préférences : table à part, lisible par son seul propriétaire (RLS)
   const hasRow = useRef(false);
+  const [email, setEmailState] = useState(false);
+  const [emailAvailable, setEmailAvailable] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void emailDigestAvailable().then((ok) => live && setEmailAvailable(ok));
+    return () => {
+      live = false;
+    };
+  }, []);
+  const setEmail = useCallback(
+    async (on: boolean) => {
+      if (!me) return false;
+      setEmailState(on);
+      const { error } = hasRow.current
+        ? await supabase.from('notification_settings').update({ email: on }).eq('user_id', me)
+        : await supabase.from('notification_settings').insert({ user_id: me, email: on });
+      if (!error) hasRow.current = true;
+      else setEmailState(!on);
+      return !error;
+    },
+    [me],
+  );
   useEffect(() => {
     if (!me) return;
     void supabase
       .from('notification_settings')
-      .select('prefs')
+      .select('prefs, email')
       .eq('user_id', me)
       .maybeSingle()
       .then(({ data }) => {
         hasRow.current = !!data;
         setPrefsState(readPrefs(data?.prefs));
+        setEmailState(!!data?.email);
       });
   }, [me]);
 
@@ -200,5 +234,19 @@ export function useNotifications() {
   );
 
   const unread = items.filter((n) => !n.read_at).length;
-  return { items, loading, unread, markRead, prefs, setPref, reload, muted, mute, unmute };
+  return {
+    items,
+    loading,
+    unread,
+    markRead,
+    prefs,
+    setPref,
+    reload,
+    muted,
+    mute,
+    unmute,
+    email,
+    emailAvailable,
+    setEmail,
+  };
 }

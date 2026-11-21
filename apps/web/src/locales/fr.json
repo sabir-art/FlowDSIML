@@ -3980,6 +3980,7 @@
     "p_comment": "On commente une démo que j’ai créée",
     "p_resolved": "On résout mon commentaire",
     "p_email": "Recevoir aussi par e-mail",
+    "p_emailHelp": "Un e-mail au plus par heure, qui regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail.",
     "unread": "Non lue",
     "someone": "Un membre",
     "k_mention": "{{actor}} vous a mentionné·e dans « {{demo}} » · étape {{step}}",
@@ -5374,5 +5375,22 @@
     "blocked": "Bloqué, site signalé",
     "gsbRetry": "Vérification Google indisponible, réessayez plus tard",
     "blockedLater": "Le lien {{text}} mène à un site signalé : il a été bloqué."
+  },
+  "email": {
+    "digest": {
+      "subject_one": "1 nouvelle notification dans TutoClick",
+      "subject_other": "{{count}} nouvelles notifications dans TutoClick",
+      "more_one": "Et 1 autre dans TutoClick",
+      "more_other": "Et {{count}} autres dans TutoClick",
+      "open": "Ouvrir les notifications",
+      "why": "Vous recevez cet e-mail parce que vous avez activé les notifications par e-mail dans TutoClick.",
+      "unsubscribe": "Ne plus recevoir ces e-mails"
+    }
+  },
+  "unsubscribe": {
+    "title": "Notifications par e-mail",
+    "done": "Vous ne recevrez plus de notifications par e-mail. Vous pouvez les réactiver dans Paramètres › Notifications.",
+    "invalid": "Ce lien n’est plus valable. Vous pouvez couper les e-mails dans les préférences des notifications de TutoClick.",
+    "open": "Ouvrir TutoClick"
   }
 }
