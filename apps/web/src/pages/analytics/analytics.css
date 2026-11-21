@@ -62,6 +62,8 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   margin-top: 24px;
+  /* L48-D D2 : chaque widget garde sa hauteur (pas de vide sous le plus court d'une ligne) */
+  align-items: start;
 }
 @media (min-width: 1100px) {
   .mk .an-grid {

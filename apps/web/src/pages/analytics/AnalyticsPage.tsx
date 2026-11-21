@@ -393,6 +393,21 @@ export function AnalyticsPage() {
                 })),
               ]}
             />
+            {FILTERED.includes(tab) && (
+              <FilterBar
+                def={segId ? null : filters}
+                segment={segment}
+                segments={segments}
+                demos={demos}
+                canEdit={canEdit}
+                onChange={(d) => patchParams({ f: d ? encodeDef(d) : null, seg: null })}
+                onSegment={(x) => patchParams({ seg: x?.id ?? null, f: null })}
+                onSave={() => {
+                  setSegInitial(filters);
+                  selectTab('segments');
+                }}
+              />
+            )}
           </>
         }
         end={
@@ -418,21 +433,10 @@ export function AnalyticsPage() {
         }
       />
 
-      {FILTERED.includes(tab) && (
-        <FilterBar
-          def={segId ? null : filters}
-          segment={segment}
-          segments={segments}
-          demos={demos}
-          canEdit={canEdit}
-          tooSmall={data.segmentVisitors != null && data.segmentVisitors < 5}
-          onChange={(d) => patchParams({ f: d ? encodeDef(d) : null, seg: null })}
-          onSegment={(x) => patchParams({ seg: x?.id ?? null, f: null })}
-          onSave={() => {
-            setSegInitial(filters);
-            selectTab('segments');
-          }}
-        />
+      {FILTERED.includes(tab) && data.segmentVisitors != null && data.segmentVisitors < 5 && (
+        <p className="help l19-small" role="status">
+          {t('analytics.adv.seg.tooSmall')}
+        </p>
       )}
       {/* L19-03 / L19-04 : ces onglets n'appliquent pas encore les filtres du haut : on le dit */}
       {(tab === 'tests' || tab === 'segments') && (

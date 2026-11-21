@@ -234,7 +234,8 @@
 }
 
 /* L48-F §1 : catalogue des intégrations (filtre segmenté, une carte, une liste) */
-.int-sub {
+/* L48-F F2 : 16 px entre la phrase et le segmenté, puis entre la carte et la ligne de demande */
+.mk .int-sub {
   margin: 0 0 16px;
 }
 .int-filter {
@@ -249,9 +250,11 @@
 .int-group + .int-group {
   margin-top: 8px;
 }
-.int-group__t {
+/* L48-F F1 : titre de groupe en 12 px 600 text-muted (plus fort que la règle des h2 de la coquille) */
+.mk .int-group__t {
   margin: 16px 0 4px;
   font-size: 12px;
+  line-height: 16px;
   font-weight: 600;
   color: var(--fd-color-text-muted);
 }
@@ -332,7 +335,7 @@
   height: 16px;
   color: var(--fd-color-text-muted);
 }
-.int-need {
+.mk .int-need {
   margin: 16px 0 0;
   font-size: 14px;
   color: var(--fd-color-text-muted);

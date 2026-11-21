@@ -3111,3 +3111,20 @@
 .mk .modal-body > :where(button, a, .fd-btn, .btn, .link-button, label.check) {
   align-self: flex-start;
 }
+
+/* L48-F F5 : Paramètres, téléphone et tablette : Aide et Notifications restent sur la ligne du titre
+   (la règle générale des en-têtes leur donne une ligne entière en dessous de 1 100 px) */
+@media (max-width: 1099px) {
+  .mk.st > .page-head {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+  }
+  .mk.st > .page-head > div:first-child {
+    min-width: 0;
+  }
+  .mk.st > .page-head .page-head__actions {
+    flex: none;
+    width: auto;
+    margin-left: auto;
+  }
+}

@@ -227,14 +227,11 @@
   margin-top: 6px;
 }
 /* Segments */
-.mk .l19-filterbar {
-  margin-bottom: 16px;
-}
-.mk .l19-filterbar .l19-cond {
+.mk .l19-cond {
   padding-right: 6px;
   cursor: default;
 }
-.mk .l19-filterbar .l19-cond button {
+.mk .l19-cond button {
   display: grid;
   place-items: center;
   width: 28px;
@@ -245,7 +242,7 @@
   color: var(--fd-color-primary-soft-text);
   cursor: pointer;
 }
-.mk .l19-filterbar .l19-cond button:hover {
+.mk .l19-cond button:hover {
   background: var(--fd-color-surface);
 }
 .mk .l19-seglinks {
