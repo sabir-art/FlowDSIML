@@ -6,7 +6,9 @@
 > - tables `tags` et `demo_tags` (migration `20261118100000_etiquettes.sql`) : 5 couleurs, 20 étiquettes au plus par espace, 5 par démo ;
 > - droits : lecture à partir du rôle Lecteur, écriture à partir du rôle Éditeur ;
 > - `components/Tags.tsx` : `TagChip`, `TagPicker`, `TagFilter`, `ManageTagsDialog` (renommer, supprimer) ;
-> - textes `tags.*`.
+> - textes `tags.*` ;
+> - vérifié le 21 novembre sur `main` = `d33d5a1` : `TAG_COLORS` vaut encore 5 couleurs dans `Tags.tsx`, et la contrainte `tags.color` aussi (`20261118100000_etiquettes.sql`). « Étiquettes » est en « Bientôt » dans `SettingsShell.tsx` (`settings.tags`). L'orange a déjà le texte `#8f5300`, écrit en dur dans `app.css` (153f991).
+> Le découpage en paquets est au §6, les contrôles de base au §7.
 
 ## 1. Page Paramètres › Contenu › Étiquettes (`/settings/tags`)
 
@@ -16,7 +18,7 @@
   - le bouton principal « Nouvelle étiquette », désactivé à 20, avec la raison en infobulle : « 20 étiquettes au plus par espace ».
 - **Une carte, une liste** (T4), une ligne par étiquette, hauteur 56 px, séparée par un filet :
   - à gauche, l'étiquette telle qu'elle apparaît sur les démos (`TagChip`) ;
-  - au milieu, « 12 démos » en 14 px `text-muted`. C'est un lien vers Démos filtré sur cette étiquette. Paramètre **nouveau** : Démos ne lit aujourd'hui que `?new=1` ; on y ajoute `?etiquettes=<id>`, qui préremplit le filtre Étiquettes (L40). « Aucune démo » quand il n'y en a pas, sans lien ;
+  - au milieu, « 12 démos » en 14 px `text-muted`. C'est un lien vers Démos filtré sur cette étiquette. Paramètre **nouveau** : Démos lit aujourd'hui `?new=1`, `?dossier=` et `?vue=` (L48-A) ; on y ajoute `?etiquettes=<id>` (plusieurs identifiants séparés par des virgules), qui préremplit le filtre Étiquettes (L40). Il se combine avec `?dossier=` et `?vue=`, et s'efface quand on vide le filtre. « Aucune démo » quand il n'y en a pas, sans lien ;
   - à droite, le bouton à icône `dots`, « Plus d'actions pour Outil CRM », qui ouvre le menu : **Renommer**, **Couleur**, **Fusionner avec…**, un filet, puis **Supprimer** (texte `danger`).
 - **Tri** : par nom (par défaut), ou par nombre de démos, avec deux en-têtes cliquables (« Nom », « Démos ») et `aria-sort`.
 - **Lecteur** (rôle sans écriture) : la même liste, sans bouton ni menu. Une ligne en tête : « Seuls les éditeurs peuvent modifier les étiquettes. »
@@ -80,7 +82,7 @@
 |---|---|---|---|---|---|
 | `blue` | Bleu | `--fd-bleu-50` | `--fd-bleu-700` | 5,40:1 | 8,07:1 |
 | `green` | Vert | `--fd-vert-50` | `--fd-vert-700` | 5,28:1 | 8,51:1 |
-| `orange` | Orange | `--fd-orange-50` | **`#8F5300`** (nouveau `--fd-orange-800`) | **5,76:1** (aujourd'hui 4,37:1 : sous le seuil AA) | 8,55:1 |
+| `orange` | Orange | `--fd-orange-50` | **`#8F5300`**, à déclarer en jeton `--fd-tag-orange-text` (corrigé le 21 novembre : `--fd-orange-800` existe déjà et vaut `#855104`, on n'y touche pas) | **5,76:1** (4,37:1 avant 153f991 : sous le seuil AA) | 8,55:1 |
 | `raspberry` | Framboise | `--fd-framboise-50` | `--fd-framboise-700` | 6,43:1 | 7,39:1 |
 | `plum` | Prune | `--fd-prune-50` | `--fd-prune-700` | 8,53:1 | 7,30:1 |
 | `slate` | Ardoise | `--fd-ardoise-50` | `--fd-ardoise-700` | 9,55:1 | 10,91:1 |
@@ -92,7 +94,7 @@
   - violet : 200 `#CDBDF0`, 400 `#8A6AD6`.
 - Contrastes calculés avec la formule WCAG 2.x, texte sur fond de l'étiquette. Ils valent pour le texte de 13 px 600 des étiquettes, au seuil de 4,5:1.
 - **Schéma** : seul changement, la contrainte `tags.color` accepte les 8 clés (`slate`, `teal` et `violet` en plus). C'est une migration courte : aucune donnée ne change.
-- L'**orange** passe au texte `#8F5300` partout où `.tg--orange` est utilisé. C'est une correction d'accessibilité, à faire même sans le reste de L52.
+- L'**orange** a le texte `#8F5300` depuis 153f991. Il reste à remplacer la valeur écrite en dur dans `app.css` par le jeton `--fd-tag-orange-text`.
 
 ## 4. Textes (i18n, nouvelles clés)
 
@@ -129,3 +131,19 @@
 7. Rôle Lecteur : liste visible, aucun bouton ni menu.
 8. Contrastes : les 8 étiquettes dépassent 4,5:1 en clair et en sombre (axe et calcul) ; « Orange » a le texte `#8F5300`.
 9. Clavier : menu « Plus d'actions » aux flèches ; pastilles de couleur aux flèches ; Entrée et Échap dans le renommage.
+
+## 6. Découpage pour le dev (après L49, à enchaîner dans l'ordre)
+
+| Paquet | Contenu | Tests |
+|---|---|---|
+| **P1, couleurs** | Migration courte (contrainte `tags.color` à 8 clés) ; `TAG_COLORS` à 8 ; classes `.tg--slate`, `.tg--teal`, `.tg--violet` en clair et en sombre ; jetons sarcelle et violet (50, 200, 400, 700) et `--fd-tag-orange-text` | pgTAP de la contrainte ; axe sur une carte avec les 8 étiquettes, en clair et en sombre |
+| **P2, page** | Route `/settings/tags` déclarée avant `/settings/soon`, entrée « Étiquettes » sans « Bientôt » ; liste, tri, compteur, lecture seule, état vide ; créer, renommer, couleur, supprimer ; `?etiquettes=` dans Démos | e2e `l52-etiquettes` (recette 1, 4, 5, 7, 9) |
+| **P3, fusion** | RPC `merge_tags` (transaction, même espace, rôle Éditeur, aucune démo au-delà de 5 étiquettes), boîte de fusion, lien depuis « Cette étiquette existe déjà » | pgTAP de `merge_tags` (droits, autre espace refusé, doublons) ; recette 2 et 3 |
+| **P4, carte** | « + Étiquette » au survol et au focus de la carte et de la ligne de liste ; `TagPicker` accroché à la ligne ; « Gérer les étiquettes » ; `ManageTagsDialog` retiré | recette 6 ; e2e `etiquettes` mis à jour |
+
+## 7. Bases (composants.md §18)
+
+- **Boutons** : la ligne en édition, les pastilles de couleur, « + Étiquette » et les en-têtes de tri sont des `fd-btn` ou des composants stylés. `boutons-natifs.e2e.cjs` passe sur `/settings/tags` et sur Démos avec le sélecteur ouvert.
+- **Dialogues** (Fusionner, Supprimer, Couleur) : au moins 16 px entre les blocs du corps, et 24 px avant le pied.
+- **Entrée de navigation** : « Étiquettes » suit §18.3 (survol, actif, `aria-current`) comme les autres éléments de Paramètres.
+- **Validation** : captures réelles en clair et en sombre de la page, de chaque dialogue, de l'état vide et de la lecture seule ; à 390 px pour la page.

@@ -1,11 +1,11 @@
 # L49 : sécurité des captures HTML
 
 > Préoccupation du client : certaines structures partenaires interdisent la reproduction HTML de leurs logiciels. Il craint aussi qu'une page capturée contienne du code malveillant ou serve à tromper un visiteur (hameçonnage).
-> **À réaliser après L48.**
+> **À réaliser après L48.** Spec mise à jour le 21 novembre sur `main` = `d33d5a1` : elle suit L48-E (éditeur à rail), L48-G (types et Sandbox), le delta UI de L49 (`ui-deltas-l41-l49.md`) et §18 de `composants.md`. Le découpage en paquets est au §8, les textes au §9.
 > Maquette : `docs/ux/maquettes/refonte/l49-securite-html.html`. Captures : `img/l49-reglage.png`, `img/l49-rapport-extension.png`, `img/l49-editeur-liens.png`, `img/l49-desactive.png` et `img/l49-sombre-mobile.png`.
 > Données fictives. Le dépôt est public : aucun nom de structure réelle dans l'interface, les textes ou les tests.
 
-## 1. Ce qui existe déjà (code de `claude/dev-mvp`, 0e86ab9)
+## 1. Ce qui existe déjà (code de `claude/dev-mvp`, 0e86ab9, vérifié sur d33d5a1)
 
 - **Assainissement double** :
   - dans l'extension, `sanitizeDom` et `sanitizeCss` de `packages/core/src/htmlSanitize.ts` ;
@@ -22,9 +22,10 @@
 
 ## 2. Réglage « Captures HTML » (Paramètres > Espace > Sécurité)
 
-- **Accès** : carte en tête de la page Sécurité (L48-A §4), modifiable par les **propriétaires et admins** (badge « Admins »). Les autres la voient en lecture seule.
+- **Accès** : première section de la page Sécurité (`pages/settings/SecuritySettings.tsx`, L48-A §4), modifiable par les **propriétaires et admins**. Les autres rôles voient les mêmes valeurs en lecture seule, avec « Modifiable par un admin » en 13 px `text-muted` (pas de badge « Admins », §17.4).
+- **Disposition (delta L49)** : une ligne de réglage (§17.3), avec le libellé et une ligne d'aide à gauche (40 %) et les **3 radios simples** à droite, l'un sous l'autre (pas de cartes). Les domaines sont des pastilles grises sous les radios. La mention (§6) est en texte gris, sans encadré.
 - **Texte** : « Une capture HTML copie la structure des pages (démo HTML, Sandbox). Une capture d'écran ne copie qu'une image. »
-- **Choix** (`fieldset` « Autoriser les captures HTML », radios en cartes) :
+- **Choix** (`fieldset` « Autoriser les captures HTML », radios simples avec une ligne d'aide chacun) :
 
 | Valeur | Libellé | Aide | Effet |
 |---|---|---|---|
@@ -37,18 +38,19 @@
   - correspondance exacte, ou par sous-domaine avec `*.` (qui ne couvre pas le domaine nu : `*.example.org` ne couvre pas `example.org`) ;
   - pastilles avec « Retirer » (nom accessible « Retirer app.example.com »).
 - **Mention** sous les choix : voir §6.
-- **Pied** : « Appliqué par l'app, l'extension et le serveur. » et « Enregistrer ».
-- **Journal** : chaque changement est noté dans le journal de l'espace (qui, quand, ancienne et nouvelle valeur).
-- **Données** : `workspaces.settings.htmlCapture = { mode: 'allowed' | 'domains' | 'disabled', domains: string[] }`, lisible par les membres et modifiable par les admins (RLS).
+- **Pied** : « Appliqué par l'app, l'extension et le serveur. » en 13 px `text-muted`, puis « Enregistrer » (principal, désactivé tant que rien n'a changé).
+- **Journal** : chaque changement est noté dans `public.audit_log` (qui, quand, ancienne et nouvelle valeur dans `meta`). La contrainte `audit_log.action` est élargie à `settings.html_capture`.
+- **Données** : `workspaces.settings.htmlCapture = { mode: 'allowed' | 'domains' | 'disabled', domains: string[] }`, lisible par les membres.
+- **Écriture** : nouvelle RPC `set_html_capture(p_ws uuid, p_mode text, p_domains text[])`, `security definer`. Elle vérifie le rôle admin ou propriétaire, valide les domaines (même règle que l'app) et écrit le journal, sur le modèle de `set_ai_settings` (`20261123200000_assistance_ia.sql`). L'app n'écrit jamais `settings.htmlCapture` directement.
 
 ### 2.1 Application du réglage
 
 | Où | `domains` (hors liste) ou `disabled` |
 |---|---|
-| **Serveur** (`html-ingest`) | Refuse la page : 403, avec le code `html_capture_disabled` ou `html_capture_domain`. Le domaine est lu dans l'adresse de la page (`html_meta.url`), jamais dans une valeur fournie à part. C'est la seule protection fiable. |
+| **Serveur** (`html-ingest`) | Refuse la page : 403, avec `{ error: 'HTML_CAPTURE_DISABLED' }` ou `{ error: 'HTML_CAPTURE_DOMAIN' }` (même format que les erreurs actuelles de la fonction). Le domaine est lu dans l'adresse de la page (`html_meta.url`), jamais dans une valeur fournie à part. C'est la seule protection fiable. |
 | **Extension** | Lit le réglage de l'espace avant d'afficher le mode HTML. Hors réglage, le bouton « Capture HTML » est **visible et désactivé**, avec la raison : « Non autorisée sur ce site : {domaine} n'est pas dans la liste des domaines de votre espace. Utilisez la capture d'écran, ou demandez à un admin. » (ou « Les captures HTML sont désactivées dans votre espace. »). La capture d'écran reste proposée. |
 | **App, création (L48-G)** | Avec `disabled`, les types « Démo HTML » et « Sandbox » restent visibles, désactivés, avec « Désactivé par un admin (Sécurité > Captures HTML) ». Avec `domains`, ils restent actifs : le contrôle se fait au moment de la capture. |
-| **App, éditeur** | Avec `disabled`, « Ajouter une page (capture HTML) » et « Capturer cette page » (L48-G §5) sont désactivés, avec la même raison. Les pages existantes restent modifiables (textes, liens, flou). |
+| **App, éditeur** | Avec `disabled`, « Capturer cette page » (L48-G §5) affiche la raison de l'admin à la place de « Bientôt ». C'est la raison la plus forte, et elle reste vraie même après l'arrivée du canal vers l'extension. Les pages existantes restent modifiables (textes, liens, flou). |
 | **Lecteur** | Aucun changement : les contenus déjà publiés restent lisibles. |
 
 ## 3. Rapport d'analyse de sécurité
@@ -68,20 +70,20 @@
 | `externalLinks` | {n} lien(s) externe(s) désactivé(s) | liens vers un autre domaine (§4) |
 | `piiReplaced` | {n} donnée(s) personnelle(s) remplacée(s) | remplacements « Xxxxxx » |
 | `other` | {n} autre(s) élément(s) retiré(s) | `base`, `link`, `meta http-equiv`, `srcdoc`, CSS dangereux (affiché seulement s'il est différent de 0) |
-
 | `dangerousLinks` | Liens dangereux bloqués : {n} (vérifiés par Google Safe Browsing) | liens de la page signalés par Google Safe Browsing (§4.1) ; ligne toujours affichée, même à 0 |
 
 - **Vérification indisponible** : si Google Safe Browsing n'a pas répondu (clé absente, quota atteint, délai dépassé), la ligne devient « Vérification Google indisponible », avec l'icône `circle-alert` et la date de la dernière tentative. Le serveur refait la vérification à la publication.
-- **Statut** :
-  - **« Page sûre »** (bouclier coché, fond `success` à 14 %) si `scripts`, `handlers`, `frames`, `forms`, `other` et `dangerousLinks` valent 0 ;
-  - sinon **« Éléments retirés »** (`triangle-alert`, fond `warning` à 16 %).
-  - si rien n'a été retiré mais que Google Safe Browsing n'a pas répondu : **« Vérification partielle »** (`circle-alert`, fond `surface-sunken`) au lieu de « Page sûre ».
+- **Statut** (delta L49 : un point de 8 px et un texte, **sans badge ni fond coloré**) :
+  - **« Page sûre »** (point `success`) si `scripts`, `handlers`, `frames`, `forms`, `other` et `dangerousLinks` valent 0 ;
+  - sinon **« Éléments retirés »** (point `warning`) ;
+  - si rien n'a été retiré mais que Google Safe Browsing n'a pas répondu : **« Vérification partielle »** (point `text-muted`) au lieu de « Page sûre ».
+- **Compte rendu en une phrase** (delta L49), puis le détail repliable : « 3 pages nettoyées : 18 éléments actifs retirés, 1 lien dangereux bloqué ». « Détail » déplie le tableau des compteurs ci-dessus (une ligne par compteur, chiffre aligné à droite, `tabular-nums`).
   - Phrase : « Rien d'actif à retirer sur cette page. » ou « Tout ce qui pouvait s'exécuter ou envoyer des données a été retiré. La page est publiable. »
   - Le statut est toujours écrit, jamais porté par la couleur seule.
   - Les deux statuts sont publiables : « Éléments retirés » informe, il ne bloque pas.
 - **Où** :
   - **Extension**, écran « Vérification de la capture HTML » : rapport cumulé en tête (somme des pages) ; statut par page dans la liste ; un clic sur une page déplie son détail ; puis « Envoyer {n} pages ».
-  - **Éditeur**, panneau Étape (page HTML) : section « Sécurité de la page », avec le rapport et la liste des liens externes (§4). Un badge discret « Éléments retirés » apparaît sur la vignette dans la liste des étapes.
+  - **Éditeur** (rail L48-E, outil **Étape**, page HTML) : une section « Sécurité de la page » en une ligne (statut, puis le lien « Détail » qui déplie les compteurs), puis la liste des liens externes (§4). Rien n'est ajouté sur la vignette de la colonne des étapes (§17.4).
   - **Liste de contrôle avant publication** : une ligne d'information « {n} pages analysées : {x} sûres, {y} avec éléments retirés », non bloquante.
 - **Accessibilité** : le rapport est un `role="group"` « Analyse de sécurité » ; les compteurs sont une liste ; les icônes sont `aria-hidden`.
 
@@ -110,8 +112,8 @@
 - **Ce qui est vérifié** : tous les liens de la page, internes et externes, ainsi que les adresses d'images et de styles conservées.
 - **Lien signalé** :
   - il est désactivé et **ne peut pas être autorisé** ;
-  - badge « Bloqué, site signalé » (icône `shield-alert`, fond `danger` à 14 %, texte écrit) à la place de l'interrupteur ;
-  - l'interrupteur est remplacé par ce texte, et non grisé ;
+  - « Bloqué, site signalé » en texte `danger` de 13 px 600 (icône `shield-alert` de 16 px), à la place de l'interrupteur : pas de badge ni de fond (delta L49) ;
+  - l'interrupteur est retiré, et non grisé ;
   - le lien est compté dans `dangerousLinks`.
 - **Côté visiteur** : un lien signalé ne fait rien. Aucune ouverture, même si un ancien réglage l'avait autorisé : la vérification de la publication l'emporte.
 - **Re-vérification** : à chaque publication. Si un lien déjà autorisé est signalé plus tard, son autorisation est retirée, et une alerte apparaît dans l'éditeur : « Le lien {texte} mène à un site signalé : il a été bloqué. »
@@ -130,10 +132,10 @@
 
 > **Capturez uniquement des logiciels que vous êtes autorisé à reproduire.** Certaines structures interdisent la copie HTML de leurs écrans : utilisez alors des captures d'écran.
 
-- Présentée en encart `note` (icône `info`, fond `surface-sunken`) :
+- Présentée en texte de 13 px `text-muted`, avec l'icône `info` de 16 px, **sans encadré ni fond** (delta L49) :
   - dans le réglage (§2) ;
   - au lancement d'une capture HTML dans l'extension (barre de capture, avant la première page) ;
-  - à l'étape 2 de « Nouvelle démo » pour les types HTML et Sandbox (L48-G) ;
+  - à l'étape 2 de « Nouvelle démo » pour les types HTML et Sandbox (L48-G), sous la liste des sources ;
   - dans l'article d'aide « Capturer en HTML ».
 - Pas de case à cocher : la mention informe, elle n'engage pas.
 
@@ -154,3 +156,53 @@
   - clé absente : « Vérification Google indisponible » ;
   - aucune adresse complète dans les journaux du serveur.
 - Clair, sombre, 390 px (réglage et rapport).
+- **Bases (§18)** : `boutons-natifs.e2e.cjs` passe sur Paramètres › Sécurité, l'éditeur (page HTML) et le dialogue « Vous quittez la démo » ; corps des dialogues avec 16 px au moins entre les blocs ; captures réelles en clair et en sombre regardées pour chaque écran touché.
+
+## 8. Découpage pour le dev (à enchaîner dans l'ordre)
+
+| Paquet | Contenu | Dépend de | e2e et tests |
+|---|---|---|---|
+| **P1, réglage et refus** | §2 en entier : RPC `set_html_capture`, journal, ligne de réglage dans Sécurité, refus 403 dans `html-ingest`, types désactivés à la création, « Capturer cette page » avec la raison, mention aux 3 endroits de l'app (§6) | rien | pgTAP de la RPC (rôles, domaines invalides, journal) ; tests Deno de `html-ingest` (403 et en-tête trafiqué) ; e2e `l49-reglage` |
+| **P2, rapport** | §3 : compteurs dans `sanitizeDom` et `sanitizePage` (même liste, mêmes noms), `html_meta.security`, section « Sécurité de la page », ligne de la liste de contrôle avant publication | P1 | tests unitaires des compteurs sur la page de `lib.test.ts` (chiffres identiques des deux côtés) ; e2e `l49-rapport` |
+| **P3, liens externes** | §4 sans Safe Browsing et §5 : `data-tc-href` et `data-tc-ext`, liste avec interrupteurs, `extlink` dans `html_ops`, dialogue « Vous quittez la démo » dans le lecteur | P2 | e2e éditeur (autoriser, `http:` refusé) et lecteur (dialogue, domaine réel, `noopener`) |
+| **P4, Safe Browsing** | §4.1 : vérification à la réception et à la publication, compteur `dangerousLinks`, « Bloqué, site signalé », état « Vérification Google indisponible » | P3 et **la clé Google du client** (secret serveur). Sans la clé, P4 se livre avec l'état « indisponible » seul, qui est le comportement exact sans clé. | adresse de test officielle de Safe Browsing ; journaux sans adresse complète |
+| **Extension** | §2.1 (bouton HTML désactivé avec la raison), rapport cumulé et par page (§3), mention au lancement (§6) | P1, P2 | e2e de l'extension (mode HTML) |
+
+## 9. Textes (i18n, nouvelles clés)
+
+| Clé | Texte |
+|---|---|
+| `htmlCapture.title` | Captures HTML |
+| `htmlCapture.help` | Une capture HTML copie la structure des pages (démo HTML, Sandbox). Une capture d'écran ne copie qu'une image. |
+| `htmlCapture.legend` | Autoriser les captures HTML |
+| `htmlCapture.allowed` / `allowedHelp` | Autorisées / Sur tous les sites. Chaque page est analysée et nettoyée. |
+| `htmlCapture.domains` / `domainsHelp` | Seulement sur ces domaines / Ailleurs, l'extension propose les captures d'écran uniquement. |
+| `htmlCapture.disabled` / `disabledHelp` | Désactivées / Captures d'écran uniquement. Les démos HTML et les Sandbox existants restent lisibles, sans nouvelle page. |
+| `htmlCapture.domainLabel` | Ajouter un domaine |
+| `htmlCapture.domainInvalid` | Saisissez un nom de domaine, sans « https:// » ni chemin (exemple : app.example.com). |
+| `htmlCapture.domainMax` | 50 domaines au plus. |
+| `htmlCapture.removeDomain` | Retirer {{domain}} |
+| `htmlCapture.applied` | Appliqué par l'app, l'extension et le serveur. |
+| `htmlCapture.readOnly` | Modifiable par un admin |
+| `htmlCapture.blockedByAdmin` | Désactivé par un admin (Sécurité > Captures HTML) |
+| `htmlCapture.notice` | Capturez uniquement des logiciels que vous êtes autorisé à reproduire. Certaines structures interdisent la copie HTML de leurs écrans : utilisez alors des captures d'écran. |
+| `htmlSecurity.title` | Sécurité de la page |
+| `htmlSecurity.safe` / `removed` / `partial` | Page sûre / Éléments retirés / Vérification partielle |
+| `htmlSecurity.safeBody` / `removedBody` | Rien d'actif à retirer sur cette page. / Tout ce qui pouvait s'exécuter ou envoyer des données a été retiré. La page est publiable. |
+| `htmlSecurity.summary` | {{pages}} pages nettoyées : {{removed}} éléments actifs retirés, {{dangerous}} liens dangereux bloqués |
+| `htmlSecurity.detail` | Détail |
+| `htmlSecurity.c.scripts` … `c.other` | les libellés du tableau du §3, au singulier et au pluriel (`_one`, `_other`) |
+| `htmlSecurity.dangerous` | Liens dangereux bloqués : {{count}} (vérifiés par Google Safe Browsing) |
+| `htmlSecurity.gsbUnavailable` | Vérification Google indisponible |
+| `htmlSecurity.checklist` | {{count}} pages analysées : {{safe}} sûres, {{removed}} avec éléments retirés |
+| `extLinks.title` | Liens externes · {{count}} |
+| `extLinks.allow` | Autoriser le lien {{text}} |
+| `extLinks.off` / `on` | Désactivé / Autorisé |
+| `extLinks.insecure` | Adresse non sécurisée |
+| `extLinks.blocked` | Bloqué, site signalé |
+| `extLinks.blockedLater` | Le lien {{text}} mène à un site signalé : il a été bloqué. |
+| `extLinks.gsbRetry` | Vérification Google indisponible, réessayez plus tard |
+| `extLinks.outside` | Ce lien mène hors de la démo. |
+| `player.leave.title` | Vous quittez la démo |
+| `player.leave.body` | Ce lien ouvre un site extérieur dans un nouvel onglet : |
+| `player.leave.stay` / `open` | Rester dans la démo / Ouvrir |
