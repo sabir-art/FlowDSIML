@@ -4286,7 +4286,10 @@
     "title": "Privacy",
     "sub": "What the workspace measures about your demo visitors.",
     "measureOn": "On: returning visitors are recognised, new visit after {{gap}}.",
-    "edit": "Edit"
+    "edit": "Edit",
+    "leadsTitle": "Lead retention",
+    "leadsRetention_one": "Leads are deleted after {{count}} day.",
+    "leadsRetention_other": "Leads are deleted after {{count}} days."
   },
   "rules": {
     "title": "Sharing rules",

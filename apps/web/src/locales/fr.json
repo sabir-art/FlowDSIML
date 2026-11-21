@@ -4286,7 +4286,10 @@
     "title": "Confidentialité",
     "sub": "Ce que l’espace mesure chez les visiteurs de vos démos.",
     "measureOn": "Activée : reconnaissance des visiteurs qui reviennent, nouvelle visite après {{gap}}.",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "leadsTitle": "Conservation des leads",
+    "leadsRetention_one": "Les leads sont supprimés après {{count}} jour.",
+    "leadsRetention_other": "Les leads sont supprimés après {{count}} jours."
   },
   "rules": {
     "title": "Règles de partage",
