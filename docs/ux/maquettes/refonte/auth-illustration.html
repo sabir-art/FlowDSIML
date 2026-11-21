@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Illustration de connexion · avant / après</title>
+<link rel="icon" href="../../brand-tutoclic/production/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&display=swap">
+<link rel="stylesheet" href="../../../../packages/ui/src/base.css">
+<style>
+/* Maquette AUTH-ILL (spec docs/ux/specs/auth-illustration.md). Couleurs de la marque uniquement :
+   prune, neutres, les quatre points de la DSIML. Aucun bleu d'interface. Données fictives (Acme). */
+:root {
+  --aside-bg: var(--fd-prune-900, #480F2A);
+  --aside-title: #FFFFFF;            /* 15,2:1 sur prune-900 */
+  --aside-sub: var(--fd-prune-100, #F3D3E2); /* 11,0:1 */
+  --win-nav: #F7F7F8; --win-nav-active: #E9EBEE; --win-bg: #FFFFFF; --win-line: #E2E8EF;
+  --win-ink: #C9CED6; --win-ink-strong: #8A94A2; --win-card: #F6F8FA;
+  --hs: var(--fd-prune-600, #A3195B);
+  --dot-1: #D50D52; --dot-2: #2B95D2; --dot-3: #95C020; --dot-4: #F19103;
+}
+[data-theme='dark'] {
+  --aside-bg: var(--fd-prune-950, #2A0C1A);  /* blanc : 18,3:1 ; prune-100 : 13,3:1 */
+  --win-nav: #101317; --win-nav-active: #252B33; --win-bg: #15191F; --win-line: #272E37;
+  --win-ink: #3A424D; --win-ink-strong: #6B7582; --win-card: #1B2027;
+  --hs: var(--fd-prune-300, #CF86A9);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fd-color-bg); color: var(--fd-color-text); font: 400 14px/1.5 var(--fd-font-sans); }
+.bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 12px 24px; background: var(--fd-color-surface); border-bottom: 1px solid var(--fd-color-border); }
+.bar b { margin-right: 8px; }
+.seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--fd-color-surface-sunken); }
+.seg button { height: 30px; padding: 0 14px; border: 0; border-radius: 999px; background: none; color: var(--fd-color-text-muted); font: 600 13px var(--fd-font-sans); cursor: pointer; }
+.seg button[aria-pressed='true'] { background: var(--fd-color-surface); color: var(--fd-color-text); }
+.avant { padding: 24px; }
+.avant img { display: block; max-width: 100%; border-radius: 12px; }
+.avant p { margin: 0 0 12px; color: var(--fd-color-text-muted); }
+[hidden] { display: none !important; }
+
+/* ---- Page (formulaire simplifié à gauche, identique à l'app) ---- */
+.auth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: calc(100vh - 55px); }
+.form { padding: 64px clamp(24px, 8vw, 110px); background: var(--fd-color-content-bg, var(--fd-color-bg)); }
+.form img { height: 28px; display: block; }
+.form .logo-d { display: none; }
+[data-theme='dark'] .form .logo-l { display: none; }
+[data-theme='dark'] .form .logo-d { display: block; }
+.form h1 { margin: 48px 0 8px; font: 800 28px/1.2 var(--fd-font-sans); }
+.form p.sub { margin: 0 0 32px; color: var(--fd-color-text-muted); }
+.form label { display: block; font: 600 13px var(--fd-font-sans); margin: 16px 0 6px; }
+.form .inp { height: 40px; width: 100%; max-width: 360px; border: 1px solid #8A94A2; border-radius: 10px; background: var(--fd-color-surface); }
+[data-theme='dark'] .form .inp { border-color: #5E6978; }
+.form .btn { margin-top: 24px; width: 100%; max-width: 360px; height: 40px; border: 0; border-radius: 999px; background: var(--fd-color-primary); color: var(--fd-color-on-primary); font: 600 14px var(--fd-font-sans); }
+
+/* ---- Panneau illustré ---- */
+.aside { position: relative; overflow: hidden; background: var(--aside-bg); display: flex; flex-direction: column; justify-content: space-between; gap: 48px; padding: 64px 56px; }
+.win { position: relative; width: 100%; max-width: 560px; aspect-ratio: 16 / 9; align-self: center; border-radius: 14px; overflow: hidden; background: var(--win-bg); box-shadow: 0 24px 48px rgb(0 0 0 / .32); display: grid; grid-template-columns: 26% 1fr; }
+.w-nav { background: var(--win-nav); border-right: 1px solid var(--win-line); padding: 14px 10px; display: flex; flex-direction: column; gap: 6px; }
+.w-logo { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.w-logo i { width: 16px; height: 16px; border-radius: 4px; background: var(--fd-prune-600, #A3195B); }
+.w-logo span { height: 6px; width: 46px; border-radius: 3px; background: var(--win-ink-strong); }
+.w-item { display: flex; align-items: center; gap: 6px; height: 18px; padding: 0 6px; border-radius: 5px; }
+.w-item i { width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid var(--win-ink-strong); }
+.w-item span { height: 5px; border-radius: 3px; background: var(--win-ink); flex: 1; max-width: 52px; }
+.w-item.on { background: var(--win-nav-active); }
+.w-item.on span { background: var(--win-ink-strong); }
+.w-main { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.w-head { display: flex; align-items: center; justify-content: space-between; }
+.w-title { height: 9px; width: 80px; border-radius: 4px; background: var(--win-ink-strong); }
+.w-new { position: relative; height: 18px; width: 74px; border-radius: 999px; background: var(--fd-prune-600, #A3195B); }
+.w-new::after { content: ''; position: absolute; inset: 7px 12px; border-radius: 3px; background: rgb(255 255 255 / .85); }
+.w-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.w-card { border: 1px solid var(--win-line); border-radius: 8px; overflow: hidden; background: var(--win-bg); }
+.w-thumb { aspect-ratio: 16 / 10; background: var(--win-card); position: relative; }
+.w-thumb::before { content: ''; position: absolute; inset: 18% 12% auto 12%; height: 22%; border-radius: 3px; background: var(--win-line); }
+.w-thumb::after { content: ''; position: absolute; left: 12%; right: 40%; top: 52%; height: 10%; border-radius: 3px; background: var(--win-line); }
+.w-meta { padding: 6px 8px 8px; display: grid; gap: 4px; }
+.w-meta span { height: 5px; border-radius: 3px; background: var(--win-ink); }
+.w-meta span:first-child { width: 70%; background: var(--win-ink-strong); }
+.w-meta span:last-child { width: 40%; }
+.w-rows { display: grid; gap: 7px; margin-top: 4px; }
+.w-rows span { height: 6px; border-radius: 3px; background: var(--win-line); }
+.w-rows span:nth-child(2n) { width: 82%; } .w-rows span:nth-child(3n) { width: 64%; }
+
+/* Hotspot et bulle : deux positions (étapes 1/6 et 2/6) */
+.hs { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--hs); box-shadow: 0 0 0 2px #FFFFFF; transition: left var(--fd-motion-duration-slow, 320ms) var(--fd-motion-ease-standard, ease), top var(--fd-motion-duration-slow, 320ms) var(--fd-motion-ease-standard, ease); }
+.hs::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--hs); opacity: .5; animation: pulse var(--fd-motion-duration-pulse, 1800ms) ease-out infinite; }
+@keyframes pulse { from { transform: scale(.6); opacity: .6; } to { transform: scale(1.6); opacity: 0; } }
+.tip { position: absolute; width: 196px; padding: 10px 12px; border-radius: 10px; background: #FFFFFF; color: #1A1F26; box-shadow: 0 10px 24px rgb(8 10 14 / .18); font-size: 11px; line-height: 1.4; transition: left var(--fd-motion-duration-slow, 320ms) var(--fd-motion-ease-standard, ease), top var(--fd-motion-duration-slow, 320ms) var(--fd-motion-ease-standard, ease), opacity 120ms; }
+.tip small { display: block; color: #4F5966; font-size: 10px; }
+.tip b { display: block; margin: 2px 0 3px; font-size: 12px; }
+.tip .go { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 999px; background: #A3195B; color: #FFFFFF; font-weight: 600; font-size: 10px; }
+.win[data-step='1'] .hs { left: 88%; top: 8.5%; }
+.win[data-step='1'] .tip { left: 52%; top: 15%; }
+.win[data-step='2'] .hs { left: 40%; top: 36%; }
+.win[data-step='2'] .tip { left: 44%; top: 42%; }
+.tip.fade { opacity: 0; }
+
+/* Accroche */
+.quote { max-width: 460px; }
+.quote h2 { margin: 0; color: var(--aside-title); font: 800 30px/1.2 var(--fd-font-sans); letter-spacing: -.01em; }
+.quote p { margin: 12px 0 0; color: var(--aside-sub); font-size: 16px; }
+.dots { display: flex; align-items: center; gap: 6px; margin-top: 20px; }
+.dots::before { content: ''; width: 56px; height: 2px; border-radius: 1px; background: var(--aside-sub); opacity: .6; margin-right: 6px; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; }
+.dots i:nth-child(1) { background: var(--dot-1); } .dots i:nth-child(2) { background: var(--dot-2); }
+.dots i:nth-child(3) { background: var(--dot-3); } .dots i:nth-child(4) { background: var(--dot-4); }
+
+/* Inscription : trois étapes sous la même fenêtre */
+.steps { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 14px; }
+.steps li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; color: var(--aside-sub); }
+.steps .n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: rgb(255 255 255 / .12); color: #FFFFFF; font-weight: 700; font-size: 13px; }
+.steps b { display: block; color: #FFFFFF; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hs, .tip { transition: none; }
+  .hs::after { animation: none; opacity: .35; transform: scale(1.2); }
+}
+@media (max-width: 899px) { .auth { grid-template-columns: 1fr; } .aside { display: none; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>Illustration de connexion</b>
+  <span class="seg" data-k="vue"><button data-v="avant">Avant</button><button data-v="apres">Après</button></span>
+  <span class="seg" data-k="page"><button data-v="connexion">Connexion</button><button data-v="inscription">Inscription</button></span>
+  <span class="seg" data-k="theme"><button data-v="light">Clair</button><button data-v="dark">Sombre</button></span>
+</div>
+
+<section class="avant" data-vue="avant">
+  <p>Captures réelles de l'app (dev-mvp fdbb6d3, faux backend), à 1440 px : fenêtre à barre latérale et boutons bleus.</p>
+  <img data-avant alt="Avant">
+</section>
+
+<div class="auth" data-vue="apres">
+  <div class="form">
+    <img class="logo-l" src="../../brand-tutoclic/production/logo-tutoclick.svg" alt="TutoClick, porté par la DSIML" style="height:auto;width:400px;max-width:100%">
+    <img class="logo-d" src="../../brand-tutoclic/production/logo-tutoclick-sombre.svg" alt="TutoClick, porté par la DSIML" style="height:auto;width:400px;max-width:100%">
+    <div data-page="connexion"><h1>Bon retour parmi nous</h1><p class="sub">Connectez-vous pour retrouver vos démos.</p>
+      <label>Adresse e-mail professionnelle</label><div class="inp"></div><label>Mot de passe</label><div class="inp"></div><button class="btn">Se connecter</button></div>
+    <div data-page="inscription"><h1>Créez votre compte</h1><p class="sub">Gratuit, sans carte bancaire.</p>
+      <label>Nom complet</label><div class="inp"></div><label>Adresse e-mail professionnelle</label><div class="inp"></div><label>Mot de passe</label><div class="inp"></div><button class="btn">Créer mon compte</button></div>
+  </div>
+
+  <aside class="aside" aria-hidden="true">
+    <div class="win" data-step="1">
+      <div class="w-nav">
+        <div class="w-logo"><i></i><span></span></div>
+        <div class="w-item on"><i></i><span></span></div><div class="w-item"><i></i><span></span></div><div class="w-item"><i></i><span></span></div><div class="w-item"><i></i><span></span></div><div class="w-item"><i></i><span></span></div>
+      </div>
+      <div class="w-main">
+        <div class="w-head"><span class="w-title"></span><span class="w-new"></span></div>
+        <div class="w-cards">
+          <div class="w-card"><div class="w-thumb"></div><div class="w-meta"><span></span><span></span></div></div>
+          <div class="w-card"><div class="w-thumb"></div><div class="w-meta"><span></span><span></span></div></div>
+          <div class="w-card"><div class="w-thumb"></div><div class="w-meta"><span></span><span></span></div></div>
+        </div>
+        <div class="w-rows"><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+      <span class="hs"></span>
+      <div class="tip"><small data-count>1 / 6</small><b data-t>Créez votre première démo</b><span data-b>Cliquez sur « Nouvelle démo », puis capturez la procédure.</span><br><span class="go">Suivant</span></div>
+    </div>
+    <div class="quote" data-page="connexion">
+      <h2>Montrez la procédure. Laissez‑la guider.</h2>
+      <p>Capturez un parcours, guidez-le, diffusez-le, et suivez qui l'a terminé.</p>
+      <div class="dots"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="quote" data-page="inscription">
+      <h2>Capturez · Guidez · Diffusez</h2>
+      <ol class="steps">
+        <li><span class="n">1</span><div><b>Capturez</b>Cliquez dans le logiciel, l'extension enregistre chaque écran.</div></li>
+        <li><span class="n">2</span><div><b>Guidez</b>Ajoutez des bulles, floutez les données personnelles.</div></li>
+        <li><span class="n">3</span><div><b>Diffusez</b>Un lien, un paquet SCORM ou l'intranet.</div></li>
+      </ol>
+      <div class="dots"><i></i><i></i><i></i><i></i></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const st = Object.assign({ vue: 'apres', page: 'connexion', theme: 'light', step: '' }, Object.fromEntries(new URLSearchParams(location.search)));
+const STEPS = {
+  1: ['1 / 6', 'Créez votre première démo', 'Cliquez sur « Nouvelle démo », puis capturez la procédure.'],
+  2: ['2 / 6', 'Ouvrez la démo Acme CRM', 'Ajoutez une bulle sur le bouton à cliquer.'],
+};
+const win = document.querySelector('.win');
+function setStep(n) {
+  const tip = win.querySelector('.tip');
+  win.dataset.step = n;
+  const [c, t, b] = STEPS[n];
+  tip.querySelector('[data-count]').textContent = c; tip.querySelector('[data-t]').textContent = t; tip.querySelector('[data-b]').textContent = b;
+}
+function render() {
+  document.documentElement.dataset.theme = st.theme;
+  document.querySelectorAll('[data-vue]').forEach((e) => (e.hidden = e.dataset.vue !== st.vue));
+  document.querySelectorAll('[data-page]').forEach((e) => (e.hidden = e.dataset.page !== st.page));
+  document.querySelector('[data-avant]').src = `img/auth-illustration/avant-${st.page}-${st.theme === 'dark' ? 'sombre' : 'clair'}.png`;
+  document.querySelectorAll('.seg[data-k]').forEach((s) => s.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(st[s.dataset.k] === b.dataset.v))));
+}
+document.querySelectorAll('.seg[data-k]').forEach((s) => s.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { st[s.dataset.k] = b.dataset.v; render(); } }));
+render();
+// Animation : la bulle avance de 1/6 à 2/6 toutes les 4 s, en pause au survol ; aucune en mouvement réduit
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (st.step) setStep(st.step);
+else if (!reduce) {
+  let n = 1, hover = false;
+  win.closest('.aside').addEventListener('pointerenter', () => (hover = true));
+  win.closest('.aside').addEventListener('pointerleave', () => (hover = false));
+  setInterval(() => {
+    if (hover || document.hidden) return;
+    const tip = win.querySelector('.tip');
+    tip.classList.add('fade');
+    setTimeout(() => { n = n === 1 ? 2 : 1; setStep(n); tip.classList.remove('fade'); }, 120);
+  }, 4000);
+}
+</script>
+</body>
+</html>

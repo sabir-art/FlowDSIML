@@ -71,9 +71,8 @@
 ## 4. Invitations d'équipe par e-mail
 
 ### 4.1 Modale « Inviter des membres » (Paramètres › Équipe)
-- Sous le champ des adresses, la case à cocher « Envoyer l'invitation par e-mail » est **cochée par défaut**.
-- Le bouton principal devient « Envoyer les invitations », ou « Créer les invitations » si la case est décochée.
-- Après l'envoi, un toast « {n} invitations envoyées. » La liste « Invitations en attente » garde « Copier le lien » pour chaque invitation. On peut toujours transmettre le lien soi-même.
+- **Décision du chef du 21/11 : la case « Envoyer l'invitation par e-mail » est retirée.** L'e-mail part toujours ; le bouton principal est « Envoyer les invitations ».
+- Après l'envoi, la confirmation dit « {n} invitations envoyées. » et propose **« Copier le lien »** en secours, pour chaque invitation créée. La liste « Invitations en attente » garde aussi « Copier le lien ». On peut toujours transmettre le lien soi-même.
 
 ### 4.2 Contenu de l'e-mail
 - On réutilise le gabarit `invite.html` de Supabase Auth (objet « Invitation à rejoindre un espace TutoClick »), avec deux variables passées en `data` : le nom de l'espace et le nom de l'invitant.
@@ -83,9 +82,9 @@
 - **Personne qui a déjà un compte TutoClick** (confirmé par le chef le 21 novembre) : Supabase Auth ne renvoie pas d'invitation à un compte existant. L'invitation apparaît alors dans **ses notifications de l'app** (« {invitant} vous invite à rejoindre « {espace} » »), avec Accepter et Refuser. Elle part aussi dans son résumé par e-mail, s'il est activé. Aucun autre e-mail.
 
 ### 4.3 Limites et repli
-- Plafond : **20 invitations par heure et par espace** (comptées à l'envoi). Au-delà, la case est désactivée et la raison est écrite dessous : « 20 invitations par heure au plus. Vous pourrez en envoyer d'autres à {heure}. Les liens restent disponibles. »
+- Plafond : **20 invitations par heure et par espace** (comptées à l'envoi). Au-delà, les invitations sont créées sans e-mail et la raison est écrite dans la confirmation : « 20 invitations par heure au plus. Vous pourrez en envoyer d'autres à {heure}. Les liens restent disponibles. »
 - Budget du jour atteint (§2), ou envoi en échec : l'invitation est **créée quand même**, et la modale affiche, au lieu du toast : « L'e-mail n'a pas pu partir. Copiez le lien et envoyez-le vous-même. », avec les liens à copier.
-- Le texte actuel `members.inviteHint` (« Envoyez ce lien à la personne invitée. ») ne s'affiche plus qu'avec la case décochée ou dans ce repli.
+- Le texte actuel `members.inviteHint` (« Envoyez ce lien à la personne invitée. ») ne s'affiche plus que dans ce repli.
 
 ## 5. Textes (fr)
 
@@ -100,7 +99,7 @@
 | `email.digest.why` | Vous recevez cet e-mail parce que vous avez activé les notifications par e-mail dans TutoClick. |
 | `email.digest.unsubscribe` | Ne plus recevoir ces e-mails |
 | `unsubscribe.done` | Vous ne recevrez plus de notifications par e-mail. Vous pouvez les réactiver dans Paramètres › Notifications. |
-| `members.sendByEmail` | Envoyer l'invitation par e-mail |
+| `members.sendByEmail` | (retiré le 21/11 : l'e-mail part toujours) |
 | `members.sendInvites` | Envoyer les invitations |
 | `members.createInvites` | Créer les invitations |
 | `members.sent_one` | 1 invitation envoyée. |
