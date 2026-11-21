@@ -305,6 +305,15 @@ body.pg-auth { background: var(--content-bg); }
 .draft > svg { flex: none; margin-top: 2px; color: var(--fd-color-text-muted); } .draft div { display: grid; gap: 2px; } .draft span { color: var(--fd-color-text-muted); }
 .aside { min-height: 100vh; }
 .gh { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: none; color: var(--fd-color-text); font: 600 14px var(--fd-font-sans); } .gh:hover { background: var(--nav-hover); }
+/* Retour du chef (lot 7) : BackButton ghost de 32 px, aligné sur la colonne du sommaire */
+.lgh { display: block; height: 64px; padding: 0 32px; }
+.lghi { display: grid; grid-template-columns: 240px minmax(0, 72ch); column-gap: 64px; justify-content: center; align-items: center; height: 100%; }
+.lghi .grow { display: none; } .lghi img { justify-self: end; }
+.bkb { display: inline-flex; align-items: center; gap: 4px; justify-self: start; height: 32px; padding: 0 10px 0 6px; border-radius: 8px; color: var(--fd-color-text); font: 500 14px var(--fd-font-sans); text-decoration: none; }
+.bkb:hover { background: var(--nav-hover); }
+.mob .lgh { padding: 0 16px; height: 56px; }
+.mob .lghi { grid-template-columns: auto 1fr; column-gap: 12px; }
+.inp.trig { text-align: left; justify-content: space-between; font: inherit; color: var(--fd-color-text); }
 </style></head><body class=" pg-auth"><div class="auth2"><main class="af"><div class="afi"><img class="lg-l full" src="../../../brand-tutoclic/production/logo-tutoclick.svg" alt="TutoClick, porté par la DSIML"><img class="lg-d full" src="../../../brand-tutoclic/production/logo-tutoclick-sombre.svg" alt="TutoClick, porté par la DSIML"><a href="#" class="backl"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>Retour à la connexion</a><h1>Mot de passe oublié</h1><p class="sub">Indiquez votre adresse : vous recevrez un lien pour en choisir un nouveau.</p>
     <div class="fd"><div class="fl"><label>Adresse e-mail professionnelle</label></div><div class="inp"><span class="v">camille.martin@example.com</span></div></div><button class="pbtn">Envoyer le lien</button><p class="lf"><a href="#">Confidentialité</a><span aria-hidden="true">·</span><a href="#">Conditions d’utilisation</a><span aria-hidden="true">·</span><a href="#">Accessibilité : non évaluée</a></p></div></main><aside class="aside" aria-hidden="true">
     <div class="win" data-step="1">
