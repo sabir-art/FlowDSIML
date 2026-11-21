@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { Copy, Droplet, EyeOff, ImageUp, Link2, MoreHorizontal, PenLine, Trash2 } from 'lucide-react';
+import { Copy, Droplet, EyeOff, ImageUp, Link2, MoreHorizontal, PenLine, Route, Trash2 } from 'lucide-react';
 import { MediaLibrary, mediaUrl } from '../../../components/media/MediaLibrary';
 import { useToast } from '../../../components/Toast';
 import {
@@ -12,7 +12,11 @@ import {
   type ToFrame,
 } from '@flowdsiml/player-core';
 import type { DemoEditor } from '../useDemoEditor';
-import type { StepRow } from '../types';
+import type { Json } from '@flowdsiml/supabase-types';
+import type { Selection, StepRow } from '../types';
+import { sandboxOf } from '../draftManifest';
+import { ignoredOf } from './sandboxGraph';
+import { fallbackRect, GUIDE_MAX } from './sandboxGuide';
 import { asOps, frameSend, opOn, removeOp, setHtmlEdit, upsertOp, useHtmlEdit } from './htmlModel';
 import './html.css';
 
@@ -28,10 +32,13 @@ export function HtmlCanvas({
   editor,
   step,
   readOnly,
+  setSelection,
 }: {
   editor: DemoEditor;
   step: StepRow;
   readOnly: boolean;
+  /** A8 : la bulle du guide ajoutée s'ouvre dans son panneau. */
+  setSelection?: (s: Selection) => void;
 }) {
   const { t } = useTranslation();
   const ed = useHtmlEdit(step.id);
@@ -167,6 +174,24 @@ export function HtmlCanvas({
     if (!stepId) return existing && removeOp(editor, step, existing.id);
     upsertOp(editor, step, { sel: sel.sel, op: 'link', value: stepId }, 'step');
   }
+  // A8 : guide du Sandbox. « Bulle du guide » pose une bulle sur l'élément sélectionné (sélecteur unique,
+  // rect de secours) et l'ajoute à la fin du guide
+  const demo = editor.demo;
+  const guide = demo?.kind === 'sandbox' ? sandboxOf(demo.sandbox, editor.steps) : null;
+  const guideFull = !!guide && guide.guideSteps.length >= GUIDE_MAX;
+  async function addBubble() {
+    const sel = ed.selected;
+    if (!sel || !guide || guideFull || !demo) return;
+    const h = await editor.addGuideBubble(step.id, sel.sel, fallbackRect(sel.rect, vw, vh));
+    if (!h) return;
+    const guideSteps = [...guide.guideSteps, { page: step.id, hotspot: h.id, advance: 'click' as const }];
+    editor.updateDemo({
+      sandbox: { ...guide, ignoredLinks: ignoredOf(demo.sandbox), guideSteps } as unknown as Json,
+    });
+    toast(t('editor.sandbox.guideAdded', { n: guideSteps.length }));
+    setSelection?.({ kind: 'hotspot', id: h.id });
+  }
+
   async function copySel() {
     if (!ed.selected) return;
     setMenu(null);
@@ -277,6 +302,17 @@ export function HtmlCanvas({
               <Link2 {...ICON} />
               {t('editor.html.link')}
             </button>
+            {guide?.guide && (
+              <button
+                type="button"
+                aria-disabled={guideFull || undefined}
+                title={guideFull ? t('editor.sandbox.guideMax') : undefined}
+                onClick={() => void addBubble()}
+              >
+                <Route {...ICON} />
+                {t('editor.html.guideBubble')}
+              </button>
+            )}
             <button
               type="button"
               aria-haspopup="menu"

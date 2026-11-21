@@ -16,6 +16,7 @@ import {
   asZoom,
 } from './types';
 import { asVideo } from './video/videoModel';
+import { guideStepsOf } from './html/sandboxGuide';
 import { questionErrors } from './quizValidation';
 
 /**
@@ -136,6 +137,8 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
           cta: asCta(h.cta),
           pulse: h.pulse,
           style: settings.mode === 'spotlight' ? 'spotlight' : h.style,
+          // A8 : bulle du guide ancrée sur un élément d'une page HTML
+          sel: h.sel ?? null,
         })),
     })),
     forms: ed.forms.map((f) => ({
@@ -225,5 +228,7 @@ export function sandboxOf(v: unknown, steps: StepRow[]) {
     keyPages: Array.isArray(o.keyPages)
       ? o.keyPages.filter((k): k is string => typeof k === 'string' && ids.has(k))
       : [],
+    // A8 : ordre du guide ; les étapes orphelines sont gardées pour être signalées dans le plan
+    guideSteps: guideStepsOf(o),
   };
 }

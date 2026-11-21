@@ -7,7 +7,9 @@ export type TodoItem =
   | { kind: 'demoTitle' }
   | { kind: 'untitled' | 'noBubble' | 'emptyBubble'; index: number }
   | { kind: 'quizEmpty' }
-  | { kind: 'deadLinks'; count: number };
+  | { kind: 'deadLinks'; count: number }
+  /** A8 : guide du Sandbox activé sans étape. */
+  | { kind: 'guideEmpty' };
 
 const plain = (html: string | null | undefined) =>
   (html ?? '')
@@ -25,6 +27,8 @@ export function publishTodo(input: {
   questions: number;
   /** L48-G : liens sans page non traités (Sandbox). */
   deadLinks?: number;
+  /** A8 : guide du Sandbox activé sans étape valide. */
+  guideEmpty?: boolean;
 }): TodoItem[] {
   const out: TodoItem[] = [];
   const title = input.title.trim();
@@ -38,6 +42,7 @@ export function publishTodo(input: {
   });
   if (input.quizOpened && input.questions === 0) out.push({ kind: 'quizEmpty' });
   if (input.deadLinks) out.push({ kind: 'deadLinks', count: input.deadLinks });
+  if (input.guideEmpty) out.push({ kind: 'guideEmpty' });
   return out;
 }
 

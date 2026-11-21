@@ -553,6 +553,30 @@ export function useDemoEditor(demoId: string) {
           return data;
         }),
 
+      /**
+       * A8 : bulle du guide du Sandbox posée sur un élément d'une page HTML (sélecteur unique, rect de
+       * secours), ajoutée à la fin du guide.
+       */
+      addGuideBubble: (stepId: string, sel: string, rect: { x: number; y: number; w: number; h: number }) =>
+        run(async () => {
+          const { data, error } = await supabase
+            .from('hotspots')
+            .insert({
+              step_id: stepId,
+              demo_id: demoId,
+              workspace_id: demo!.workspace_id,
+              ...rect,
+              sel,
+              title: '',
+              position: hotspots.filter((h) => h.step_id === stepId).length,
+            })
+            .select()
+            .single();
+          if (error) throw error;
+          setHotspots((l) => [...l, data]);
+          return data;
+        }),
+
       deleteHotspot: (id: string) =>
         run(async () => {
           const { error } = await supabase.from('hotspots').delete().eq('id', id);

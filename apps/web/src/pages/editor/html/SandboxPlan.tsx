@@ -15,6 +15,8 @@ import type { Json } from '@flowdsiml/supabase-types';
 import type { DemoEditor } from '../useDemoEditor';
 import { sandboxOf } from '../draftManifest';
 import { deadLinks, ignoredOf, sandboxGraph, type DeadLink, type SbNode } from './sandboxGraph';
+import { guideOnPages, guideRows, type GuideRow, type GuideStepRef } from './sandboxGuide';
+import { GuideList } from './GuideList';
 import { upsertOp } from './htmlModel';
 import { Menu } from '../../../components/Menu';
 import { useHtmlCapture } from '../../../lib/htmlCapture';
@@ -58,11 +60,14 @@ export function SandboxPlan({
   editor,
   readOnly,
   onOpen,
+  onEditBubble,
 }: {
   editor: DemoEditor;
   readOnly: boolean;
   /** Ouvre une page dans l'éditeur (index d'étape). */
   onOpen: (index: number) => void;
+  /** A8 : ouvre une page sur une bulle du guide (panneau de la bulle). */
+  onEditBubble: (index: number, hotspotId: string) => void;
 }) {
   const { t } = useTranslation();
   const demo = editor.demo!;
@@ -172,6 +177,23 @@ export function SandboxPlan({
       sandbox: { ...sb, ignoredLinks: ignoredOf(demo.sandbox), ...patch } as unknown as Json,
     });
   }
+  // A8 : guide optionnel (étapes dans l'ordre, orphelines signalées, repères sur les cartes)
+  const gRows = guideRows(editor.steps, editor.hotspots, sb.guideSteps);
+  const gOnPage = guideOnPages(gRows);
+  const saveGuide = (list: GuideStepRef[]) => save({ guideSteps: list });
+  const editBubble = (r: GuideRow) =>
+    r.orphan
+      ? open(r.page)
+      : onEditBubble(
+          editor.steps.findIndex((s) => s.id === r.page),
+          r.hotspot,
+        );
+  function addGuideStep() {
+    // L'ajout se fait sur une page : la dernière page du guide, sinon la page de départ
+    const last = [...gRows].reverse().find((r) => !r.orphan)?.page;
+    open(last ?? sb.start ?? pages[0]?.id ?? '');
+    toast(t('editor.sandbox.guideAddHint'));
+  }
   const leave = (d: DeadLink) =>
     save({ ignoredLinks: [...ignoredOf(demo.sandbox), { url: d.url, from: d.from }] });
   const restore = (d: DeadLink) =>
@@ -268,6 +290,11 @@ export function SandboxPlan({
                           : t('editor.sandbox.links', { count: n.to.length })
                         : t('editor.sandbox.noLinkedPage')}
                     </small>
+                    {sb.guide && gOnPage.has(n.id) && (
+                      <small className="sb-guide-on">
+                        {t('editor.sandbox.guideOnPages', { list: gOnPage.get(n.id)!.join(', ') })}
+                      </small>
+                    )}
                     {deadBy(n.id) > 0 && (
                       <small className="sb-dead">
                         {t('editor.sandbox.deadCount', { count: deadBy(n.id) })}
@@ -454,15 +481,36 @@ export function SandboxPlan({
             <option value="highlight">{t('editor.sandbox.unlinkedHighlight')}</option>
           </select>
         </div>
-        <div className="setting is-soon">
-          <label className="t-label" htmlFor="sb-guide">
-            {t('editor.sandbox.guide')} <Status size="sm">{t('editor.sandbox.soon')}</Status>
-          </label>
-          <span className="switch">
-            <input id="sb-guide" type="checkbox" checked={false} disabled aria-disabled="true" readOnly />
-            <span />
-          </span>
+        <div>
+          <div className="setting">
+            <label className="t-label" htmlFor="sb-guide">
+              {t('editor.sandbox.guide')}
+            </label>
+            <span className="switch">
+              <input
+                id="sb-guide"
+                type="checkbox"
+                checked={sb.guide}
+                disabled={readOnly}
+                aria-describedby="sb-guide-help"
+                onChange={(e) => save({ guide: e.target.checked })}
+              />
+              <span />
+            </span>
+          </div>
+          <p id="sb-guide-help" className="help">
+            {t('editor.sandbox.guideHelp')}
+          </p>
         </div>
+        {sb.guide && (
+          <GuideList
+            rows={gRows}
+            readOnly={readOnly}
+            onChange={saveGuide}
+            onEdit={editBubble}
+            onAdd={addGuideStep}
+          />
+        )}
         <button type="button" className="btn btn-secondary btn-sm" disabled>
           <Plus {...ICON} />
           {t('editor.sandbox.addPage')} <Status size="sm">{t('editor.sandbox.soon')}</Status>

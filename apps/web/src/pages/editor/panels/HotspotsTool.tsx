@@ -3,6 +3,7 @@ import { Target } from 'lucide-react';
 import type { DemoEditor } from '../useDemoEditor';
 import type { Selection, StepRow } from '../types';
 import { HotspotPanel } from './HotspotPanel';
+import { GuideBubblePanel } from './GuideBubblePanel';
 
 /**
  * L48-E §2 : outil « Points d'intérêt ». Un point choisi (clic sur le canevas ou dans la liste) :
@@ -27,11 +28,39 @@ export function HotspotsTool({
   const { t } = useTranslation();
   const hotspot =
     selection.kind === 'hotspot' ? editor.hotspots.find((h) => h.id === selection.id) : undefined;
+  // A8 : sur une page de Sandbox, les points sont les bulles du guide (posées sur un élément de la page)
+  const html = step.kind === 'html';
   if (hotspot)
-    return <HotspotPanel editor={editor} hotspot={hotspot} readOnly={readOnly} setSelection={setSelection} />;
+    return html ? (
+      <GuideBubblePanel editor={editor} hotspot={hotspot} readOnly={readOnly} setSelection={setSelection} />
+    ) : (
+      <HotspotPanel editor={editor} hotspot={hotspot} readOnly={readOnly} setSelection={setSelection} />
+    );
   const hotspots = editor.hotspots
     .filter((h) => h.step_id === step.id)
     .sort((a, b) => a.position - b.position);
+  if (html)
+    return (
+      <div className="sp-panel">
+        <div className="sec">
+          <div className="sec-title">{t('editor.sandbox.guideListTitle')}</div>
+          {hotspots.map((h, i) => (
+            <button
+              key={h.id}
+              type="button"
+              className="field-row sp-item"
+              onClick={() => setSelection({ kind: 'hotspot', id: h.id })}
+            >
+              <Target aria-hidden="true" />
+              <span className="grow">
+                {i + 1}. {h.title || t('editor.sandbox.guideNoTitle')}
+              </span>
+            </button>
+          ))}
+          {!readOnly && <p className="help">{t('editor.sandbox.guideListHelp')}</p>}
+        </div>
+      </div>
+    );
   return (
     <div className="sp-panel">
       <div className="sec">

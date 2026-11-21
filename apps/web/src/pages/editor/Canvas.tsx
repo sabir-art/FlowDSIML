@@ -293,7 +293,8 @@ export function Canvas({
   if (step.kind === 'video') return <VideoCanvas editor={editor} step={step} readOnly={readOnly} />;
 
   // A8 (L20-01) : étape HTML (éditeur d'éléments, sans outils de capture)
-  if (step.kind === 'html') return <HtmlCanvas editor={editor} step={step} readOnly={readOnly} />;
+  if (step.kind === 'html')
+    return <HtmlCanvas editor={editor} step={step} readOnly={readOnly} setSelection={setSelection} />;
 
   // L26-04 : étape « À capturer » (modèle) : cadre pointillé, titre et « Capturer cette étape »
   if (step.kind === 'image' && !step.image_path && step.to_capture)

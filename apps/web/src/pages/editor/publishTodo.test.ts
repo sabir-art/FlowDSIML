@@ -48,6 +48,10 @@ describe('publishTodo', () => {
     expect(publishTodo({ ...base, quizOpened: true })).toEqual([{ kind: 'quizEmpty' }]);
     expect(publishTodo({ ...base, quizOpened: true, questions: 2 })).toEqual([]);
   });
+  it('A8 : guide du Sandbox activé sans étape (non bloquant)', () => {
+    expect(publishTodo({ ...base, guideEmpty: true })).toEqual([{ kind: 'guideEmpty' }]);
+    expect(publishTodo({ ...base, guideEmpty: false })).toEqual([]);
+  });
   it('lignes regroupées par étape, titre de la démo en premier, quiz en dernier', () => {
     expect(
       todoLines([

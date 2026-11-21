@@ -15,6 +15,8 @@ import type { DemoEditor } from './useDemoEditor';
 import { GdprDialog, type GdprAck } from './GdprDialog';
 import { publishTodo } from './publishTodo';
 import { deadLinks } from './html/sandboxGraph';
+import { guideRows, guideStepsOf } from './html/sandboxGuide';
+import { sandboxOf } from './draftManifest';
 import { firstInvalid } from './quizValidation';
 import { asAnswers, asSettings } from './types';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -69,6 +71,10 @@ export function PublishButton({
         questions: editor.questions.length,
         deadLinks:
           editor.demo?.kind === 'sandbox' ? deadLinks(editor.steps, editor.demo.sandbox).dead.length : 0,
+        guideEmpty:
+          editor.demo?.kind === 'sandbox' &&
+          sandboxOf(editor.demo.sandbox, editor.steps).guide &&
+          !guideRows(editor.steps, editor.hotspots, guideStepsOf(editor.demo.sandbox)).some((r) => !r.orphan),
       }),
     [
       editor.demo?.title,

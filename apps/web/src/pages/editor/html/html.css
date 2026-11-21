@@ -488,3 +488,62 @@
 .sb-deadlist__actions .grow {
   flex: 1;
 }
+
+/* A8 : guide optionnel du Sandbox (liste des étapes, repère des cartes) */
+.sbnode .sb-guide-on {
+  color: var(--fd-color-text-muted);
+  font-size: 13px;
+}
+.sb-guide {
+  display: grid;
+  gap: 8px;
+}
+.sb-guide__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.sb-guide__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-sm, 8px);
+  background: var(--fd-color-surface);
+}
+.sb-guide__row.is-drag {
+  opacity: 0.6;
+}
+.sb-guide__row.is-orphan {
+  border-color: var(--fd-color-warning);
+}
+.sb-guide__n {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.sb-guide__body {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+}
+.sb-guide__title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-guide__meta {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.sb-guide__warn {
+  flex: none;
+  color: var(--fd-color-warning);
+}

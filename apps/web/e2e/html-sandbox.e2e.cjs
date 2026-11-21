@@ -140,9 +140,10 @@ const pages = [
     }),
     'aucune carte ne touche le bord du plan (zone défilante si le plan dépasse)',
   );
+  // A8 : le guide optionnel n'est plus « Bientôt » : interrupteur actif, désactivé par défaut
   ok(
-    (await p.locator('#sb-guide').getAttribute('aria-disabled')) === 'true',
-    'guide optionnel : aria-disabled',
+    !(await p.locator('#sb-guide').isDisabled()) && !(await p.locator('#sb-guide').isChecked()),
+    'guide optionnel : interrupteur actif, désactivé par défaut',
   );
   ok(
     (await p.getByRole('alert').filter({ hasText: 'n’est reliée à aucune page' }).innerText()).includes(
@@ -181,7 +182,11 @@ const pages = [
   await p.waitForTimeout(1400);
   ok(demo.sandbox.autoLink === false, 'liaison automatique désactivée');
   ok((await p.locator('.sbnode.warn').count()) >= 3, 'sans liaison automatique : plus de pages à relier');
-  ok(await p.getByLabel(/Ajouter un guide optionnel/).isDisabled(), 'guide optionnel : « Bientôt »');
+  ok(
+    (await p.getByLabel('Guide optionnel', { exact: true }).isEnabled()) &&
+      !(await p.locator('.sb-settings').innerText()).includes('Ajouter un guide optionnel'),
+    'guide optionnel : « Guide optionnel », sans « Bientôt »',
+  );
   ok(
     await p.getByRole('button', { name: /Ajouter une page/ }).isDisabled(),
     'ajouter une page : « Bientôt »',

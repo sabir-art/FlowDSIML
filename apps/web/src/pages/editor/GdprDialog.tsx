@@ -201,6 +201,10 @@ export function GdprDialog({
                         <button type="button" className="mk-link-inline" onClick={onQuiz}>
                           {t('editor.todo.see')}
                         </button>
+                      ) : line.kinds[0] === 'guideEmpty' && onPlan ? (
+                        <button type="button" className="mk-link-inline" onClick={onPlan}>
+                          {t('editor.sandbox.guideAdd')}
+                        </button>
                       ) : line.kinds[0] === 'deadLinks' && onPlan ? (
                         <button type="button" className="mk-link-inline" onClick={onPlan}>
                           {t('editor.todo.seePlan')}

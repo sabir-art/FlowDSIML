@@ -55,7 +55,7 @@ import { fontFaceCss } from '@flowdsiml/player-core';
 import { themeSchema } from '@flowdsiml/manifest';
 import { asSettings, asStepOptions } from './types';
 import { ThemePanel } from './panels/ThemePanel';
-import { buildDraftManifest } from './draftManifest';
+import { buildDraftManifest, sandboxOf } from './draftManifest';
 import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
 import { useShareRules } from '../../lib/shareRules';
@@ -524,7 +524,12 @@ export function EditorPage() {
   const why: Partial<Record<ToolId, string>> = step
     ? {
         cta: step.kind === 'before_after' || step.kind === 'video' ? t('editor.rail.why.cta') : undefined,
-        hotspots: step.kind !== 'image' ? capOnly : undefined,
+        // A8 : sur une page de Sandbox avec guide, les points sont les bulles du guide
+        hotspots:
+          step.kind === 'image' ||
+          (step.kind === 'html' && sandbox && sandboxOf(editor.demo!.sandbox, editor.steps).guide)
+            ? undefined
+            : capOnly,
         next: asStepOptions(step.options).choices.length ? t('editor.rail.why.next') : undefined,
         blur: step.kind !== 'image' ? capOnly : undefined,
         zoom:
@@ -1050,6 +1055,11 @@ export function EditorPage() {
                   onOpen={(i) => {
                     if (i >= 0) setIndex(i);
                     setSelection({ kind: 'step' });
+                    setPlanView(false);
+                  }}
+                  onEditBubble={(i, id) => {
+                    if (i >= 0) setIndex(i);
+                    setSelection({ kind: 'hotspot', id });
                     setPlanView(false);
                   }}
                 />
