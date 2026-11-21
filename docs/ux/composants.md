@@ -612,11 +612,11 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
   | 400 px | 5,0 px | oui, minimum |
   | 480 px | 6,0 px | oui, confortable |
 
-- **Exception de la barre latérale** : à 224 px, la signature n'est pas lisible. Elle est acceptée comme élément du logotype : WCAG 1.4.3 exempte les logotypes du contraste minimal, et le nom accessible porte le texte. On ne grossit pas la barre et on n'ajoute pas de texte HTML pour compenser.
+- **Exception de la barre latérale** : à 224 px, la signature n'est pas lisible. Elle est acceptée comme élément du logotype : WCAG 1.4.3 exempte les logotypes du contraste minimal, et le nom accessible porte le texte. On ne grossit pas la barre et on n'ajoute pas de texte HTML pour compenser (**décision du chef du 21/11**).
 - **Thème sombre** : fichier `logo-tutoclick-sombre.svg` existant (§16.2), jamais un filtre CSS. Contrastes mesurés sur `#14161B` :
   - « Click » `#F3F5F8` : 16,6:1 ;
   - signature `#C9D1DA` : 11,7:1 ;
-  - « Tuto » et trait en `#CF86A9` : 6,6:1. Garder « Tuto » en `#A3195B` sur ce fond ne donnerait que 2,5:1, sous le seuil de 3:1 des grands textes. La variante sombre éclaircit donc aussi « Tuto » et le trait, et pas seulement « Click » et la signature. Cet arbitrage est à confirmer avec le client.
+  - « Tuto » et trait en `#CF86A9` : 6,6:1. Garder « Tuto » en `#A3195B` sur ce fond ne donnerait que 2,5:1, sous le seuil de 3:1 des grands textes. La variante sombre éclaircit donc aussi « Tuto » et le trait, et pas seulement « Click » et la signature (**décision du chef du 21/11** : l'accessibilité prime ; le client est informé).
   - Clair : signature `#123A49` sur blanc, 12,0:1.
 - **Recette** : pour chaque emplacement, largeur affichée du `<img>` (224 px dans la barre latérale, 400 px ou plus ailleurs), `alt` exact, fichier sombre chargé en thème sombre (pas de filtre), zone de protection de §16.3, et icône seule dans le rail et sur mobile.
 
