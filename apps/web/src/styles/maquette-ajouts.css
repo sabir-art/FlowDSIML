@@ -306,20 +306,25 @@
   align-items: start;
 }
 .mk .snav {
-  /* §18.3 : navigation groupée. Survol : surface-sunken (surface-raised en sombre) */
-  --snav-hover: var(--fd-color-surface-sunken);
+  /* §18.3 : navigation groupée. Survol : voile neutre (fonce en clair, éclaircit en sombre) */
+  --snav-hover: color-mix(in srgb, var(--fd-color-text) 6%, transparent);
+  --snav-active-bg: var(--fd-color-surface);
+  --snav-active-edge: 0 1px 2px rgb(8 10 14 / 0.08);
   display: flex;
   flex-direction: column;
   gap: 0;
   position: sticky;
   top: 24px;
 }
+/* Sombre : actif en surface-raised, bordure de 1 px (ombre interne, sans décalage), pas d'ombre portée */
 [data-theme='dark'] .mk .snav {
-  --snav-hover: var(--fd-color-surface-raised);
+  --snav-active-bg: var(--fd-color-surface-raised);
+  --snav-active-edge: inset 0 0 0 1px var(--fd-color-border);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .mk .snav {
-    --snav-hover: var(--fd-color-surface-raised);
+    --snav-active-bg: var(--fd-color-surface-raised);
+    --snav-active-edge: inset 0 0 0 1px var(--fd-color-border);
   }
 }
 .mk .snav .snav-item {
@@ -340,11 +345,11 @@
   text-decoration: none;
 }
 .mk .snav .snav-item.is-active {
-  /* L48-01 (T5), §18.3 : fond surface, graisse 600, ombre légère (pas la seule couleur) */
-  background: var(--fd-color-surface);
+  /* §18.3 : seul élément à fond plein ; graisse 600 et ombre (bordure en sombre), jamais la couleur seule */
+  background: var(--snav-active-bg);
   color: var(--fd-color-text);
   font-weight: 600;
-  box-shadow: 0 1px 2px rgb(8 10 14 / 0.08);
+  box-shadow: var(--snav-active-edge);
 }
 .mk .snav .snav-item:focus-visible {
   outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));

@@ -126,9 +126,22 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     soon.txt === 'Bientôt disponible' && soon.fs === '13px' && soon.fw === '400' && soon.muted,
     `§18.4 : « Bientôt disponible » dans le titre, 13 px, atténué (${JSON.stringify(soon)})`,
   );
+  // Retours UX 5fbb31d : nom accessible du titre avec une espace ; pas de navigateurs tant qu'on ne peut pas installer
+  ok(
+    (await page.getByRole('heading', { name: 'Installez l’extension Bientôt disponible' }).count()) === 1,
+    'titre « Installez l’extension Bientôt disponible » (espace dans le nom accessible)',
+  );
+  ok(
+    (await page.getByText('Chrome, Edge, Brave et Arc').count()) === 0,
+    'état « Bientôt » : pas de liste de navigateurs',
+  );
   t.profiles[0].extension_seen_at = new Date().toISOString();
   await page.getByText('Extension détectée').waitFor({ timeout: 4000 });
   ok(true, 'extension détectée en 2 s, sans recharger');
+  ok(
+    (await page.getByText('Chrome, Edge, Brave et Arc').count()) === 1,
+    'extension détectée : navigateurs affichés',
+  );
   ok(
     (await page.getByRole('button', { name: 'Ajouter à Chrome' }).count()) === 0 &&
       (await page.getByRole('link', { name: /Ajouter à Chrome/ }).count()) === 0,

@@ -226,6 +226,31 @@ const MB = 1024 * 1024;
       return r;
     });
     ok(active.ok && active.w === '600', 'Paramètres : entrée active surface, texte, 600');
+    // §18.3 (d6eff17) : survol en voile neutre, distinct de l'actif (fond plein + ombre)
+    const other = page.locator('.snav .snav-item:not(.is-active)').first();
+    await other.hover();
+    const pair = await page.evaluate(() => {
+      const hov = document.querySelector('.snav .snav-item:not(.is-active):hover');
+      const act = document.querySelector('.snav .is-active');
+      const h = getComputedStyle(hov);
+      const a = getComputedStyle(act);
+      return {
+        hbg: h.backgroundColor,
+        abg: a.backgroundColor,
+        hw: h.fontWeight,
+        hsh: h.boxShadow,
+        ash: a.boxShadow,
+      };
+    });
+    ok(
+      pair.hbg !== pair.abg &&
+        /rgba?\(.*0\.06\)|color\(srgb .* \/ 0\.06\)/.test(pair.hbg) &&
+        pair.hw === '500' &&
+        pair.hsh === 'none' &&
+        pair.ash !== 'none',
+      `Paramètres : survol (voile 6 %, 500, sans ombre) distinct de l'actif (${JSON.stringify(pair)})`,
+    );
+    await page.mouse.move(0, 0);
     const storage = page.locator('.us-row', { hasText: 'Stockage' });
     ok(
       (await storage.getByRole('meter').getAttribute('aria-valuenow')) === '100' &&

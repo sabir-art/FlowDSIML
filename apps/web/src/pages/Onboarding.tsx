@@ -328,7 +328,12 @@ export function Onboarding() {
         {title(
           'obx-t',
           t('onboarding.extTitle'),
-          !EXTENSION_URL && !extSeen ? <span className="obx-soon">{t('extension.soon')}</span> : null,
+          !EXTENSION_URL && !extSeen ? (
+            <>
+              {' '}
+              <span className="obx-soon">{t('extension.soon')}</span>
+            </>
+          ) : null,
         )}
         {!EXTENSION_URL && !extSeen ? (
           <p className="obx-sub">{t('extension.soonBody')}</p>
@@ -401,7 +406,8 @@ export function Onboarding() {
             }}
           />
         </p>
-        <p className="obx-foot">{t('onboarding.browsersShort')}</p>
+        {/* Navigateurs pris en charge : seulement quand l'extension peut s'installer */}
+        {(EXTENSION_URL || extSeen) && <p className="obx-foot">{t('onboarding.browsersShort')}</p>}
       </>
     );
     preview = (
