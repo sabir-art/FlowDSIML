@@ -845,3 +845,86 @@ Le client trouve les espacements négligés. Règle vérifiée automatiquement (
   - focus et Échap.
 - La liste des modales et leur passage à MODAL-01 sont dans la livraison du dev.
 
+
+### 19.4 Périmètre : partout (confirmation du client, 21/11)
+
+> Le client valide la structure en trois parties : **en-tête séparé** (tuile d'icône, titre, ×) avec un filet, **corps**, **pied gris clair** avec les boutons. Il la veut **partout** : chaque confirmation, chaque modale, les tiroirs et les popovers d'action. Inventaire relevé dans `apps/web/src` (dev-mvp fdbb6d3) : 30 fichiers avec `<dialog>` et 29 avec `role="dialog"`. Le dev complète la liste s'il en trouve d'autres, et le test e2e la tient à jour.
+
+**Composant unique** : `Modal` dans `packages/ui`, avec les props `icon`, `title`, `size` (`sm` = 400 px, `md` = 560 px, `lg` = 720 px, `xl` = 960 px), `footer` et `tone` (`default` ou `danger`). Ses parties ont des classes stables, utilisées par l'e2e :
+- `.fd-modal` : la racine `<dialog>` ;
+- `.fd-modal__head` : l'en-tête ;
+- `.fd-modal__body` : le corps ;
+- `.fd-modal__foot` : le pied.
+
+| Fenêtre | Fichier (`apps/web/src/…`) | Cible |
+|---|---|---|
+| Confirmations (supprimer, archiver, retirer, dépublier, quitter sans enregistrer…) | `components/ConfirmDialog.tsx` | `sm`. Tuile `Trash2`, `Archive`… et `tone="danger"` si destructif. Focus sur Annuler, primaire à droite |
+| Nouvelle démo | `pages/demos/NewDemoDialog.tsx` | `md` |
+| Partir d'un modèle | `pages/demos/TemplatesDialog.tsx` | `xl` (grille), pied avec « Utiliser ce modèle » |
+| Accès au dossier | `pages/demos/FolderAccessDialog.tsx` | `md` |
+| Partager | `pages/share/SharePage.tsx`, qui devient une modale (P1-3) | `lg`, navigation à gauche. Sans pied : chaque volet enregistre seul (P1-3 §3.1). En-tête MODAL-01 avec l'interrupteur « Accès public » |
+| Diffuser | `pages/share/DistributeDialog.tsx` | `lg` |
+| Importer des liens | `pages/share/ImportLinksDialog.tsx` | `md` |
+| Accès par e-mail (invités) | `pages/share/AccessEmail.tsx` | `md` |
+| Exporter (PDF, GIF, vidéo, HTML, SCORM) | `pages/export/ExportDialog.tsx` | `md` |
+| Générer avec l'IA | `components/ai/GenerateDialog.tsx` | `md`, puis la modale « Améliorer avec l'IA » en 3 onglets (P2-1) |
+| Traduire la démo | `components/ai/TranslateDialog.tsx` | intégrée à P2-1 ; d'ici là, `sm` |
+| Correction de toute la démo | `components/ai/AiSpellAll.tsx` | `md` |
+| Voix de synthèse | `components/ai/AiAudio.tsx` | `sm` |
+| Contrôle RGPD avant l'IA | `pages/editor/GdprDialog.tsx` | `md` |
+| Flouter des zones | `pages/editor/BlurModal.tsx` | `lg` (capture), pied Annuler et Appliquer |
+| Appliquer le style à toutes les étapes | `pages/editor/ApplyStyleDialog.tsx` | `sm` |
+| Enregistrer comme modèle | `pages/editor/SaveTemplateDialog.tsx` | `sm` |
+| Jeu de données fictif | `pages/editor/data/DatasetDialog.tsx` | `md` |
+| Avant / Après, choix des captures | `pages/editor/BeforeAfterEditor.tsx` | `lg` |
+| Styles de la démo | `pages/editor/styles/StylesSection.tsx` | `md` |
+| Vidéo d'étape | `pages/editor/video/VideoFields.tsx` | `md` |
+| Test A/B | `pages/editor/ab/AbTest.tsx` | `md` |
+| Raccourcis clavier | `pages/editor/ShortcutsDialog.tsx` | `md`, pied avec « Fermer » seul |
+| Médiathèque | `components/media/MediaLibrary.tsx` | `xl`, pied avec « Insérer » |
+| Extension | `components/ExtensionDialog.tsx` | `sm` |
+| Quota atteint | `components/QuotaDialog.tsx` | `sm` |
+| Visite guidée de l'aide | `help/TourDialog.tsx` | `sm`, pied avec Précédent et Suivant |
+| Membres : inviter, changer de rôle | `pages/settings/Members.tsx` | `sm` (§11.8) |
+| Recadrer la photo | `pages/settings/ProfilePhoto.tsx` | `sm` (déjà conforme sur le pied) |
+| Mes données : effacer le compte | `pages/settings/MyDataCard.tsx` | `sm`, `danger` |
+| Style de marque | `pages/settings/brand/StyleDialog.tsx` | `md` |
+| Règles de partage | `pages/settings/security/ShareRulesCard.tsx` | `md` |
+| Glossaire, Étiquettes, IA, Webhooks : ajout et modification | `GlossarySettings.tsx`, `tags/TagsSettings.tsx`, `AiSettings.tsx`, `integrations/WebhooksPage.tsx` | `sm` |
+| Parcours, Relance des apprenants | `pages/learners/PathsDialog.tsx`, `ReminderDialog.tsx` | `md` |
+| Alertes, Segments, Filtres d'analytics | `pages/analytics/advanced/AlertsTab.tsx`, `SegmentsTab.tsx`, `segmentUi.tsx` | `md` |
+| Console (équipe, nouveautés, retours, backlog) | `pages/console/*.tsx` | `sm` ou `md` |
+| Présentateur, télécommande | `pages/present/PresentDialog.tsx`, `RemoteDialogs.tsx` | `md` |
+
+**Tiroirs** (panneau latéral, même structure verticale) :
+- **Tiroirs concernés** : Filtres de la liste (`components/toolbar/ListToolbar.tsx`), Sondages d'analytics (`SurveysTab.tsx`), Aide (`help/HelpDrawer.tsx`), Notifications (`NotificationBell.tsx`), Backlog de la console.
+- **En-tête** de 64 px, avec tuile, titre, × et un filet dessous.
+- **Corps** qui défile seul.
+- **Pied** teinté, seulement s'il y a des actions (Filtres : « Réinitialiser » à gauche, « Appliquer » à droite). Sans actions, pas de pied (Aide, Notifications).
+
+**Popovers d'action** (Étiquettes `Tags.tsx`, variables `VarPopovers.tsx`, présence `PresenceUI.tsx`, suggestions et Assistant de l'IA) :
+- popover COMP-01 avec un en-tête compact : 44 px, titre de 14 px 600 et ×, sans tuile, filet dessous ;
+- pied teinté avec les boutons à droite, s'il y a une validation.
+
+**Exceptions**, avec une structure adaptée :
+- **Aperçu de la démo** (`PreviewDialog.tsx`) est en plein écran : en-tête MODAL-01 sans tuile, sans pied.
+- **Recadrage de l'image** dans l'éditeur : il reste un outil du panneau, ce n'est pas une modale.
+
+### 19.5 e2e `modales.e2e.cjs`
+
+Pour chaque fenêtre de l'inventaire, ouverte par son déclencheur, en clair et en sombre, à 1440 et 390 px :
+
+1. **Structure** : la racine porte `.fd-modal` (ou `.fd-drawer`, ou `.fd-popover`) et contient, dans cet ordre, `__head`, `__body`, puis `__foot` s'il y a des actions.
+2. **En-tête** :
+   - `border-bottom` de 1 px de la couleur `border` ;
+   - tuile de 40 px, sauf pour les popovers et l'aperçu ;
+   - titre relié par `aria-labelledby` ;
+   - bouton dont le nom accessible est « Fermer ».
+3. **Pied** :
+   - `border-top` de 1 px ;
+   - `background-color` égale à `--fd-color-nav-bg` ;
+   - `justify-content: flex-end` ;
+   - le bouton primaire (ou `danger`) est le **dernier** bouton, à moins de 24 px du bord droit (padding de 24 px).
+4. **Corps** : padding de 24 px (16 px pour un popover), gap de 24 px entre les champs.
+5. Focus à l'ouverture, Échap, et focus rendu au déclencheur.
+6. **Liste des fenêtres** : le test parcourt le DOM après chaque ouverture et **échoue** sur toute `<dialog>` ou tout `role="dialog"` sans `.fd-modal`, `.fd-drawer` ou `.fd-popover`. Une nouvelle fenêtre ne peut donc pas échapper à la règle.
