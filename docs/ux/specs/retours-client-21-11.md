@@ -192,17 +192,18 @@
   - **Zone de danger** encadrée à part, en bas.
 - Le jeton `--fd-color-border-field` est à ajouter dans `tokens.ts`, puis tokens.css est régénéré. Il sert à tous les champs de l'app, pas seulement dans les Paramètres.
 
-### 11.1 Gabarit de page
-- Le contenu des Paramètres est **centré**, avec une largeur maximale de **880 px** et des marges latérales de 32 px (16 px sous 768 px).
-- En haut, l'en-tête de page : fil d'Ariane, titre H1, puis une phrase de description en 14 px `text-muted`. 32 px avant la première section.
-- **Une seule surface** `surface` par page (rayon `--fd-radius-xl`, filet de 1 px `border`, padding de 24 px, 32 px à partir de 1280 px), qui contient toutes les sections. Plus de pile de cartes.
+### 11.1 Gabarit de page (révisé par NAV-02, §11.7)
+- **Barre de fil d'Ariane** fixe en haut du contenu (§11.7.3). Elle remplace le grand titre H1 et la phrase de description.
+- Le contenu des Paramètres est **centré**, avec une largeur maximale de **880 px**, 32 px de marge en haut et des marges latérales de 32 px (16 px sous 768 px).
+- **Plus de carte** : les sections sont posées directement sur le fond blanc du contenu (`--fd-color-content-bg`), séparées par des filets. Seule la Zone de danger garde un encadré (§11.5).
+- « Annuler » et « Enregistrer » passent dans l'en-tête de la **première section** de la page, à droite (§11.2).
 
 ### 11.2 Section
 - **En-tête de section** :
   - à gauche, le titre (16 px 600) et le sous-titre (14 px `text-muted`, une ou deux lignes) ;
   - à droite, l'action principale de la section quand il y en a une (« Enregistrer », « Inviter des membres », « Nouvelle variable »), alignée en haut ;
   - 24 px entre l'en-tête et la première rangée.
-- Deux sections de la même surface sont séparées par un filet de 1 px `border`, avec **32 px** au-dessus et au-dessous.
+- L'en-tête de section est souligné par un filet de 1 px `border`, 16 px sous le texte. Deux sections sont séparées par **32 px**.
 
 ### 11.3 Rangées
 - **Rangée de réglage** : libellé (14 px 600) et aide (13 px `text-muted`) à gauche, sur 40 % ; le contrôle à droite, sur 60 %, 420 px au plus (champ, interrupteur, segmenté, liste). Padding vertical de 20 px. Rangées séparées par un filet de 1 px `border`. Sous 768 px, le contrôle passe sous le libellé, à 8 px.
@@ -232,6 +233,60 @@
 - Le gabarit s'applique aux 13 pages : Général, Équipe, Utilisation, Sécurité, Confidentialité, Thème et couleurs, Page publique, Variables, Glossaire, Étiquettes, Assistance IA, Intégrations, Profil.
 - Chaque page est découpée en sections selon son contenu actuel. Le dev propose le découpage, page par page, dans sa livraison.
 - Ordre de livraison : **Profil** en premier (avec la photo, §4), puis Général, Équipe et Variables, puis le reste.
+
+### 11.7 NAV-02 : surfaces, navigation secondaire et en-tête (retour client du 21/11, P1)
+
+> Retour client, à partir de captures d'un outil de référence (non versionnées) : chez nous, la barre latérale et le contenu partagent le même gris, et la colonne du milieu est blanche. C'est l'inverse de ce qu'attend le client, qui juge cela « pas moderne ». La pastille active blanche avec ombre, et la pastille noire de « Démos », sont « trop voyantes ».
+> Maquette : `maquettes/refonte/parametres-aere.html` (Avant / Après, Clair / Sombre). Captures à 1440 px dans `img/parametres-aere/` : `avant-*` sur l'app réelle (172daf6), `apres-*` sur la maquette.
+
+#### 11.7.1 Surfaces
+
+| Jeton (nouveau, dans `tokens.ts`) | Clair | Sombre | Rôle |
+|---|---|---|---|
+| `--fd-color-nav-bg` | `#F7F7F8` | `#101317` | Fond commun de la barre latérale, de la colonne Dossiers, de la navigation des Paramètres et de celle d'Analytics s'il y en a une |
+| `--fd-color-nav-hover` | `#F0F1F3` | `#1A1F26` | Survol d'un élément de navigation |
+| `--fd-color-nav-active` | `#E9EBEE` | `#252B33` | Élément actif |
+| `--fd-color-content-bg` | `#FFFFFF` | `#15191F` | Fond de la zone de contenu, dans toute l'app |
+
+- Les colonnes de gauche sont séparées entre elles, et du contenu, par un **filet de 1 px `--fd-color-border`**. C'est un séparateur décoratif, non soumis au 3:1. `--fd-color-border-field` reste réservé aux champs (§11.0).
+- **Contenu blanc dans toute l'app**, pas seulement dans les Paramètres. Les cartes posées sur le contenu (Démos, Analytics) gardent leur filet de 1 px et perdent leur ombre au repos.
+- Le rail replié (§6) et le tiroir Dossiers (§7) prennent aussi `--fd-color-nav-bg`. La barre dépliée au survol garde son ombre `lg`, puisqu'elle passe par-dessus le contenu.
+
+#### 11.7.2 Éléments de navigation (barre latérale et navigation secondaire)
+
+- **Barre latérale** : éléments de 40 px de haut, padding de 0 × 12 px, rayon de 8 px, icône de 20 px (ICON-01), 12 px entre l'icône et le libellé, texte de 14 px en 500.
+- **Navigation secondaire** (Paramètres, Dossiers) : éléments de 34 px, padding de 0 × 10 px, rayon de 8 px, **icône Lucide de 16 px** (ICON-01), 10 px entre l'icône et le libellé, texte de 14 px en 500.
+- **Couleurs** :
+  - repos : `--fd-color-text-muted`, soit 6,6:1 sur `nav-bg` en clair et 8,8:1 en sombre ;
+  - survol : fond `nav-hover`, texte `--fd-color-text` ;
+  - **actif** : fond `nav-active`, texte `--fd-color-text` **en 600**, `aria-current="page"`. Le texte est à 16,8:1 en clair et 13,1:1 en sombre. Ni blanc, ni ombre, ni bordure.
+  - Le fond actif ne se distingue que faiblement du fond de la colonne (1,12:1). L'état est donc porté aussi par la graisse (600 contre 500) et par le passage du gris au noir. Il ne repose pas sur la couleur seule (WCAG 1.4.1).
+- **La pastille noire de « Démos » disparaît** : la barre latérale suit la même règle que la navigation secondaire.
+- **Focus clavier** : anneau de 2 px `--fd-color-focus`, décalé de 2 px, identique partout.
+- **Titres de groupe** (ESPACE, MARQUE, CONTENU, MON COMPTE, FORMATION) : 11 px en 600, capitales, interlettrage de 0,06 em, `--fd-color-text-muted`. **24 px au-dessus** (sauf le premier) et 6 px au-dessous. Ce sont des `<h3>` ou des `role="presentation"` avec `aria-labelledby` sur le groupe.
+- **Icônes de la navigation des Paramètres** (16 px) : Général `Building2`, Équipe `Users`, Utilisation `Gauge`, Sécurité `ShieldCheck`, Confidentialité `FileLock2`, Thème et couleurs `Palette`, Page publique `Globe`, Variables `Braces`, Glossaire `BookA`, Étiquettes `Tag`, Assistance IA `Sparkles`, Intégrations `Plug`, Clés d'accès `KeyRound`, Profil `CircleUser`, Notifications `Bell`. Ces icônes rejoignent la table d'ICON-01.
+- **Entrées** :
+  - « Domaine » est **retiré** (décision du chef du 21/11 : le domaine personnalisé est hors périmètre, on ne promet pas « Bientôt ») ;
+  - « Clés d'accès » garde « Bientôt » tant que l'API est différée (A5-04 et A5-06).
+
+#### 11.7.3 En-tête des pages de Paramètres
+
+- **Barre fixe** (`position: sticky; top: 0`) de **56 px**, sur `content-bg`, avec un filet de 1 px `border` en bas et un padding horizontal de 32 px.
+- **Contenu** : le parent (« Espace », « Marque », « Contenu », « Mon compte ») en 14 px 500 `--fd-color-text`, cliquable vers la première page du groupe. Puis un chevron `ChevronRight` de 16 px en `text-muted`, 6 px de chaque côté. Puis la page courante en 14 px 500 `text-muted`.
+- **Balisage** : `<nav aria-label="Fil d'Ariane">` pour le parent, puis la page courante en `<h1 aria-current="page">`. La page garde ainsi un H1 unique, à la taille du fil d'Ariane. Le grand H1 de 32 px et la phrase de description disparaissent.
+- La première section porte le titre et le sous-titre à gauche, et les actions de la page (Annuler, Enregistrer) à droite (§11.2).
+
+#### 11.7.4 Recette NAV-02
+
+- Couleurs calculées dans les deux thèmes :
+  - `nav-bg` sur `.sidebar`, la colonne Dossiers et la navigation des Paramètres ;
+  - `content-bg` sur `main` ;
+  - filets de 1 px entre les colonnes.
+- Élément actif : fond `nav-active`, texte `text` en 600, `aria-current="page"`, ni `box-shadow` ni bordure. Les contrastes du §11.7.2 sont mesurés.
+- Titres de groupe : 24 px au-dessus, mesurés.
+- Barre de fil d'Ariane : 56 px, fixe au défilement, H1 unique par page.
+- Aucune entrée « Domaine ».
+- §18.6 et §18.7 contrôlés, à 1440, 1024 et 390 px.
 
 ## 12. Recette (captures réelles en clair et en sombre)
 
