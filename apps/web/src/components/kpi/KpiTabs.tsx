@@ -157,6 +157,8 @@ export function KpiTabs({
       <div
         ref={list}
         className="kpi-tabs"
+        // §18.7 : rangée d'onglets qui défile en largeur sur mobile (voulu)
+        data-scroll-x=""
         role="tablist"
         aria-label={t('kpi.tablist')}
         style={{ ['--kpi-n' as string]: items.length }}

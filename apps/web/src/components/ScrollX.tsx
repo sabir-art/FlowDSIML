@@ -24,6 +24,8 @@ export function ScrollX({ children, label }: { children: ReactNode; label?: stri
   return (
     <div
       ref={ref}
+      // §18.7 : tableau large, défilement horizontal voulu
+      data-scroll-x=""
       className={`table-scroll${edges.start ? ' has-more-start' : ''}${edges.end ? ' has-more-end' : ''}`}
       // Zone défilante focalisable au clavier quand elle déborde
       tabIndex={edges.start || edges.end ? 0 : undefined}

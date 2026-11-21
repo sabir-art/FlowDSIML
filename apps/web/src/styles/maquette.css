@@ -581,6 +581,8 @@
 }
 .mk .table-wrap {
   overflow-x: auto;
+  /* §18.7 : bloc conteneur des .sr-only (absolus) des cellules, sinon ils sortent du défilement et élargissent la page */
+  position: relative;
 }
 .mk table.table {
   width: 100%;
