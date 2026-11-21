@@ -352,6 +352,13 @@ body.sh-bg.mob { overflow: visible; min-height: 844px; }
 .mob .srow:has(.rc > .sw) .rc { grid-column: 3; grid-row: 1; }
 .mt .mu { align-items: baseline; }  .mt .mu > :not(.st) { line-height: 20px; }
 .mob .modal .seg:not(.sm) { display: grid; grid-template-columns: 1fr 1fr; width: 100%; } .mob .modal .seg:not(.sm) button { justify-content: center; }
+/* Retour du chef (lot 4) : 16 px sous un champ déplié, boutons de 36 px, libellés sur une ligne */
+.srow { padding: 12px 0; }
+.srow:has(.rsub) { padding-bottom: 16px; } .rsub { margin-top: 4px; }
+.mob .srow { padding-bottom: 16px; }
+.rc .btn { height: 36px; }
+.srow { flex-shrink: 0; }
+.rsub .code { width: 100%; }
 </style></head><body class="sh-bg mob"><h1 class="sr">Éditeur · Démo CRM</h1>
 <img class="bgimg" src="../lot3-editeur/img/edition-sombre-390.png" alt=""><div class="scrim"><div class="modal share" role="dialog" aria-modal="true" aria-labelledby="ds"><div class="mh"><span class="tile"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></span><div class="mt"><h2 id="ds">Diffuser « Démo CRM »</h2><span class="mu"><span class="st pub"><span class="dot"></span>Publiée</span></span></div><button class="ib" aria-label="Fermer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
    <div class="dsb"><div class="seg"><button>SCORM</button><button class="on">Intranet</button><button>E-mail</button><button>Où elle est diffusée · 2</button></div>
