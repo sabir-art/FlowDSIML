@@ -10,7 +10,6 @@ import { CircleCheck, Circle, GraduationCap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { TourDialog } from './TourDialog';
 import { MODULE_TOUR, loadTours, type TourEntry } from './tours';
-import { Status } from '@flowdsiml/ui';
 
 export const MODULES = ['capturer', 'modifier', 'flouter', 'publier', 'diffuser', 'statistiques'] as const;
 export type Module = (typeof MODULES)[number];
@@ -81,9 +80,7 @@ export function Academy() {
                 {ok && <span className="sr-only"> · {t('learn.done')}</span>}
               </span>
               {!tr ? (
-                <Status size="sm" className="help-soon academy-act">
-                  {t('shell.soon')}
-                </Status>
+                <span className="soon-text">{t('shell.soon')}</span>
               ) : ok || m === next ? (
                 <button
                   type="button"

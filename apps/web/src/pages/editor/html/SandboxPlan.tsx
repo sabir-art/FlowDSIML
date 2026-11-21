@@ -513,7 +513,7 @@ export function SandboxPlan({
         )}
         <button type="button" className="btn btn-secondary btn-sm" disabled>
           <Plus {...ICON} />
-          {t('editor.sandbox.addPage')} <Status size="sm">{t('editor.sandbox.soon')}</Status>
+          {t('editor.sandbox.addPage')} <span className="soon-text">{t('editor.sandbox.soon')}</span>
         </button>
         <fieldset className="sb-keys">
           <legend>{t('editor.sandbox.keyPages')}</legend>

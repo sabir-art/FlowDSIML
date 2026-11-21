@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutGrid } from 'lucide-react';
 import { ctaValid, type CenterDraft } from './centerDraft';
-import { Status } from '@flowdsiml/ui';
 
 const ICON = { size: 18, 'aria-hidden': true } as const;
 
@@ -127,7 +126,7 @@ export function DemoCenterCard({
               </span>
             </div>
             <p className="fd-help">
-              {t('center.demo.ctaForm')} <Status size="sm">{t('center.demo.soon')}</Status>
+              {t('center.demo.ctaForm')} <span className="soon-text">{t('center.demo.soon')}</span>
             </p>
           </fieldset>
         </>

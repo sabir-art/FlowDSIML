@@ -3119,3 +3119,16 @@
 .mk .unsub-msg p {
   margin: 0;
 }
+/* Retours client 21/11 §3 : un seul espacement de 24 px entre les blocs des Paramètres (description, cartes,
+   tableaux), posé par le conteneur de la page ou par son enveloppe unique ; aucun bloc n'a de marge propre */
+.mk.st .st-body,
+.mk.st .st-body > :is(section, div):not(.card):only-of-type {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.mk.st .st-body > *,
+.mk.st .st-body > :is(section, div):not(.card):only-of-type > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}

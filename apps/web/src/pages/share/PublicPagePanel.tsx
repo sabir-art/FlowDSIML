@@ -6,7 +6,6 @@ import { supabase } from '../../lib/supabase';
 import { publicPageUrl } from '../../lib/embed';
 import { useToast } from '../../components/Toast';
 import { CopyButton } from './codeBlock';
-import { Status } from '@flowdsiml/ui';
 
 type Page = Tables<'demo_pages'>;
 type Style = 'demo' | 'light' | 'dark';
@@ -296,7 +295,7 @@ export function PublicPagePanel({
             </div>
             {/* L19b-01 : badge « Bientôt » standard */}
             <p className="help">
-              {t('share.page.ogSoonText')} <Status size="sm">{t('shell.soon')}</Status>
+              {t('share.page.ogSoonText')} <span className="soon-text">{t('shell.soon')}</span>
             </p>
           </fieldset>
           <div className="row sh-page-actions">

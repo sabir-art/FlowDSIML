@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Status } from '@flowdsiml/ui';
 
 /**
  * Vague B : carte « à venir » (docs/ux/specs/vague-b.md §1). Bordure pointillée, badge « Bientôt
@@ -37,9 +36,8 @@ export function SoonCard({
         <H className="soon-title" id={`${id}-t`}>
           {t(`soon.${k}.title`)}
         </H>
-        <Status size="sm" className="soon-badge">
-          {t('soon.badge')}
-        </Status>
+        {/* Retours client 21/11 §5 : « Bientôt » en texte gris, sans pastille ni point */}
+        <span className="soon-text soon-badge">{t('soon.badge')}</span>
       </div>
       <p className="soon-body">{t(`soon.${k}.body`)}</p>
       {Array.isArray(items) && (

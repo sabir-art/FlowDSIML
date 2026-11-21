@@ -190,3 +190,36 @@ export async function deliver(
     error: res.ok ? null : `HTTP ${res.status}`,
   };
 }
+
+export interface Orphan {
+  id: number;
+  bucket: string;
+  path: string;
+}
+
+/**
+ * Purge de storage_orphans : retire les fichiers par l'API Storage, par lots de 100 et par bucket. Un
+ * lot réussi (fichiers retirés ou déjà absents) est marqué traité ; un lot en erreur reste pour la nuit
+ * suivante. Renvoie le nombre de fichiers retirés et la liste des lignes traitées.
+ */
+export async function purgeOrphans(
+  rows: Orphan[],
+  remove: (bucket: string, paths: string[]) => Promise<{ removed: number; ok: boolean }>,
+): Promise<{ removed: number; done: number[] }> {
+  const byBucket = new Map<string, Orphan[]>();
+  for (const r of rows) byBucket.set(r.bucket, [...(byBucket.get(r.bucket) ?? []), r]);
+  let removed = 0;
+  const done: number[] = [];
+  for (const [bucket, list] of byBucket)
+    for (let i = 0; i < list.length; i += 100) {
+      const part = list.slice(i, i + 100);
+      const r = await remove(
+        bucket,
+        part.map((o) => o.path),
+      );
+      if (!r.ok) continue;
+      removed += r.removed;
+      done.push(...part.map((o) => o.id));
+    }
+  return { removed, done };
+}

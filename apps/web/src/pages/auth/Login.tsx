@@ -7,7 +7,6 @@ import { check, useAction } from '../../lib/useAction';
 import { fieldA11y, focusFirstError, validateForm, type FieldErrors } from '../../lib/validation';
 import { useAuth } from '../../auth/AuthProvider';
 import { AuthLayout, GoogleMark, MkFieldError } from './AuthLayout';
-import { Status } from '@flowdsiml/ui';
 
 /** Connexion (CNX-01), à l'identique de la maquette connexion.html. */
 export function Login() {
@@ -85,9 +84,7 @@ export function Login() {
         >
           <GoogleMark />
           {t('auth.google')}
-          <Status size="sm" id="oauth-soon">
-            {t('shell.soon')}
-          </Status>
+          <span className="soon-text">{t('shell.soon')}</span>
         </button>
       </div>
       <div className="or">{t('auth.orEmail')}</div>

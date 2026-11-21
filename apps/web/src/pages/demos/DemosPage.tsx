@@ -650,7 +650,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
             label: t('demos.archive'),
             icon: <Archive />,
             disabled: true,
-            end: <Status size="sm">{t('shell.soon')}</Status>,
+            end: <span className="soon-text">{t('shell.soon')}</span>,
             onSelect: () => {},
           },
           'separator',

@@ -15,7 +15,6 @@ import { VideoFields } from '../video/VideoFields';
 import { HtmlFields } from '../html/HtmlFields';
 import { CaptureTabFields } from '../capture/CaptureFields';
 import { AnimationFields } from '../capture/AnimationFields';
-import { Status } from '@flowdsiml/ui';
 
 export function StepPanel({
   editor,
@@ -59,7 +58,7 @@ export function StepPanel({
 
   const last = index === editor.steps.length - 1;
   const textTitle = last ? t('editor.end.title') : t('editor.end.textTitle');
-  const soon = <Status size="sm">{t('shell.soon')}</Status>;
+  const soon = <span className="soon-text">{t('shell.soon')}</span>;
 
   return (
     <div className="sp-panel">

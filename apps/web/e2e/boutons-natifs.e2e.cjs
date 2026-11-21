@@ -98,6 +98,15 @@ function natives() {
         why: 'fieldset au cadre natif (groove)',
       });
   }
+  // Retours client 21/11 §5 (règle X4) : « Bientôt » en texte gris, jamais en pastille d'état à point
+  for (const el of document.querySelectorAll('.fd-status')) {
+    if (/Bientôt|Coming soon/i.test(el.textContent || ''))
+      out.push({
+        name: el.textContent.trim().slice(0, 50),
+        cls: String(el.className),
+        why: '« Bientôt » avec un point d’état',
+      });
+  }
   return out;
 }
 

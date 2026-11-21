@@ -10,7 +10,7 @@
 // Déployée sans vérification JWT par la plateforme : chaque mode vérifie lui-même son accès.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
-import { deliver, safeEqual, type Delivery } from './lib.ts';
+import { deliver, purgeOrphans, safeEqual, type Delivery, type Orphan } from './lib.ts';
 import { pinnedFetch } from './pinned.ts';
 
 const BATCH = 25;
@@ -78,6 +78,19 @@ async function purgeVideos() {
   return json(200, { removed });
 }
 
+/** Purge nocturne de storage_orphans (comptes et espaces supprimés, photos de profil), lots bornés. */
+async function purgeStorageOrphans() {
+  const { data, error } = await supabase.rpc('storage_orphans_claim', { p_limit: 500 });
+  if (error) return json(500, { error: 'orphans' });
+  const r = await purgeOrphans((data ?? []) as Orphan[], async (bucket, paths) => {
+    const { data: gone, error: e } = await supabase.storage.from(bucket).remove(paths);
+    return { removed: gone?.length ?? 0, ok: !e };
+  });
+  if (r.done.length) await supabase.rpc('storage_orphans_done', { p_ids: r.done });
+  console.log(`purge_orphans : ${r.removed} fichier(s) retiré(s), ${r.done.length} ligne(s) traitée(s)`);
+  return json(200, { removed: r.removed, done: r.done.length });
+}
+
 async function immediate(req: Request, token: string) {
   const { data: u } = await supabase.auth.getUser(token);
   if (!u.user) return json(401, { error: 'auth' });
@@ -104,6 +117,7 @@ Deno.serve(async (req) => {
     // L25 : purge planifiée des vidéos orphelines (même secret, appel distinct de pg_cron)
     const body = (await req.json().catch(() => null)) as { task?: unknown } | null;
     if (body?.task === 'purge_videos') return purgeVideos();
+    if (body?.task === 'purge_orphans') return purgeStorageOrphans();
     return scheduled();
   }
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
