@@ -21,6 +21,8 @@ const CLICKABLE =
   'a[href], button, input[type=button], input[type=submit], select, [role=button], [role=link], [role=tab], [role=menuitem]';
 
 const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
+const BLOCKS =
+  'h1, h2, h3, h4, h5, h6, p, li, td, th, div, section, article, header, footer, nav, dt, dd, br';
 
 /**
  * Règle 3 (L30) : adresses e-mail et numéros de téléphone (France et international) remplacés avant
@@ -28,7 +30,7 @@ const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
  */
 const EMAIL = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
 const PHONE =
-  /(?:\+\d{1,3}[\s.-]?(?:\(0\)[\s.-]?)?|\b0)\d(?:[\s.-]?\d{2}){4}\b|\+\d{1,3}(?:[\s.-]?\d{2,4}){2,5}\b/g;
+  /(?:\+\d{1,3}[\s.-]?(?:\(0\)[\s.-]?)?|\(0\)[\s.-]?|\b0)\d(?:[\s.-]?\d{2}){4}\b|\+\d{1,3}(?:[\s.-]?\d{2,4}){2,5}\b/g;
 export const maskPersonal = (s: string) => s.replace(EMAIL, '[e-mail]').replace(PHONE, '[téléphone]');
 
 /** Sélecteur unique d'un élément dans son document (id sûr, sinon chemin nth-of-type depuis body). */
@@ -107,6 +109,8 @@ export function preparePage(
     if (!label || elements.some((e) => e.label === label)) continue;
     elements.push({ i: elements.length, label, sel });
   }
+  // Un saut de ligne après chaque bloc : « Camille Exemple » et « Tél. » ne sont pas collés
+  body?.querySelectorAll(BLOCKS).forEach((n) => n.after(doc.createTextNode('\n')));
   const text = maskPersonal(clean(body?.textContent ?? '')).slice(0, PAGE_TEXT_MAX);
   return { title, text, elements };
 }

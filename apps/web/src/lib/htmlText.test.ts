@@ -93,4 +93,13 @@ describe('L30-05 : capture HTML préparée pour l’IA', () => {
     expect(p.title).toBe('Contact [e-mail]');
     expect(p.elements.map((e) => e.label)).toEqual(['[e-mail]', 'Appeler [téléphone]']);
   });
+
+  it('« (0) » sans indicatif masqué ; blocs séparés dans le texte envoyé', () => {
+    const p = preparePage(
+      '<body><h1>Camille Exemple</h1><p>Tél. : (0)6 12 34 56 78</p><ul><li>Un</li><li>Deux</li></ul></body>',
+      [],
+    );
+    expect(p.text).not.toContain('12 34');
+    expect(p.text).toBe('Camille Exemple Tél. : [téléphone] Un Deux');
+  });
 });
