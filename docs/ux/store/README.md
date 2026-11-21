@@ -37,14 +37,18 @@
 > TutoClick Capture enregistre votre parcours dans un logiciel web et en fait une démo interactive, prête à partager.
 >
 > Comment ça marche
-> 1. Ouvrez votre logiciel et choisissez le type de capture : captures à chaque clic, page HTML, vidéo de l'onglet ou format mobile.
+> 1. Ouvrez votre logiciel et choisissez le type de capture : captures à chaque clic, page HTML ou vidéo de l'onglet.
 > 2. Faites votre parcours. Chaque clic devient une étape, avec sa bulle d'explication.
 > 3. Vérifiez la capture : les données personnelles repérées sont floutées avant l'envoi. La détection se fait dans votre navigateur, et rien n'est envoyé avant votre validation.
 > 4. Retouchez la démo dans TutoClick, puis partagez-la par lien, dans votre intranet ou en paquet SCORM.
 >
+> Limites connues de cette version
+> - Le format mobile (page en taille téléphone ou tablette) et la capture de la page entière arriveront dans une prochaine version.
+> - La taille de l'onglet choisie s'obtient en redimensionnant la fenêtre : elle peut différer de quelques pixels de la taille demandée.
+>
 > L'extension a besoin d'un compte TutoClick. Elle ne capture que pendant l'enregistrement, sur l'onglet choisi et, si vous l'activez, sur les onglets ouverts depuis lui.
 
-- Chaque phrase correspond à une fonction présente sur `d33d5a1` : les 4 types de capture du popup, la vérification des données personnelles avant l'envoi (écran `review`), le partage par lien, l'intégration et le paquet SCORM.
+- Chaque phrase correspond à une fonction de la version de la boutique (option B, §6.0) : 3 types de capture disponibles, la vérification des données personnelles avant l'envoi (écran `review`), le partage par lien, l'intégration et le paquet SCORM.
 - Pas de superlatif, pas d'emoji, pas de nom de structure réelle.
 
 ## 3. Confidentialité et permissions (onglet « Pratiques de confidentialité »)
@@ -57,10 +61,10 @@
 | `scripting` | Afficher la barre d'enregistrement dans la page capturée. | `background.ts` (`recorder.js`, `htmlbar.js`, `videobar.js`) |
 | `storage` | Garder la session de connexion et la capture en cours jusqu'à l'envoi. | `lib/supabase.ts`, écrans de vérification |
 | `tabCapture`, `offscreen` | Enregistrer la vidéo de l'onglet (type « Vidéo de l'onglet »). | `popup`, `background.ts`, `offscreen` |
-| `debugger` (obligatoire si on la garde : Chrome ne l'accepte pas en facultative, voir §6.0) | Pendant l'enregistrement et sur les onglets capturés seulement : afficher la page en taille téléphone ou tablette (« Format mobile »), mettre l'onglet à la taille choisie, et garder la page entière à chaque capture pour animer le défilement. | `background.ts` : `Emulation.setDeviceMetricsOverride`, `Page.captureScreenshot` (`captureBeyondViewport`) |
+| `windows` (si le dev l'ajoute pour la taille de l'onglet) | Mettre la fenêtre à la taille choisie pendant l'enregistrement, puis lui rendre sa taille. | `chrome.windows.update` (option B) |
 | Accès aux sites (`<all_urls>`) | Capturer le logiciel web choisi par l'utilisateur, quelle que soit son adresse. | `host_permissions` |
 
-**`debugger` ne peut pas être facultative** : correction du 21 novembre, signalée par le dev et vérifiée dans la [référence chrome.permissions](https://developer.chrome.com/docs/extensions/reference/api/permissions), qui la range parmi les permissions jamais facultatives. Elle sert à 3 fonctions : le « Format mobile », la taille d'onglet imposée et la page entière en « Captures à chaque clic ». Sans elle, la capture à chaque clic marche quand même, en gardant seulement la partie visible de la page (`captureVisibleTab`). Arbitrage : §6.0.
+**`debugger` n'est pas dans la version de la boutique** (décision du chef, option B, §6.0). Elle ne peut pas être facultative. Note : `chrome.windows.update` ne demande pas de permission particulière ; la ligne `windows` ci-dessus ne sert que si le build en déclare une.
 
 **Données déclarées** (à confirmer par le dev et le DPO avant l'envoi) :
 - informations d'authentification (adresse e-mail du compte TutoClick) ;
@@ -80,27 +84,18 @@
 
 ## 6. Autorisations demandées à l'usage
 
-### 6.0 `debugger` : ma spec du §6 d'origine était infaisable, arbitrage demandé au chef
-Chrome refuse `debugger` dans `optional_permissions` : on ne peut pas la demander au moment de l'usage. Il reste deux options.
+### 6.0 `debugger` : option B retenue (décision du chef, 21 novembre)
+Chrome refuse `debugger` dans `optional_permissions`. Le chef a retenu l'**option B** : `debugger` est retirée de la version publiée sur la boutique.
 
-| Option | Effet sur l'utilisateur | Effet sur la fiche |
+| Fonction | Dans la version de la boutique | Texte |
 |---|---|---|
-| **A. Garder `debugger` obligatoire** | Les 3 fonctions marchent comme aujourd'hui. À l'installation, Chrome affiche un avertissement fort sur l'accès au débogueur et à la lecture des données des sites. | Justification du §3 à saisir. Revue de Google plus attentive. |
-| **B. Retirer `debugger` du build de la boutique** (proposition du dev) | « Format mobile » et « Taille de l'onglet » passent en « Bientôt », visibles et désactivés, pas masqués. « Captures à chaque clic » garde seulement la partie visible : le défilement animé dans l'éditeur n'est plus possible pour ces captures. | Plus d'avertissement fort, revue plus simple. |
+| **Format mobile** | « Bientôt » : visible et désactivé, jamais masqué | « Bientôt » en texte gris à droite ; aide de 13 px : « Pas encore disponible dans cette version de l'extension. » |
+| **Page entière** (« Captures à chaque clic ») | « Bientôt » : chaque capture garde la partie visible (`captureVisibleTab`) | `fullPageHelp` devient « Chaque clic donne une capture de la partie visible de la page. », puis une ligne « Page entière · Bientôt » (texte gris) |
+| **Taille de l'onglet** | **Disponible**, par `chrome.windows.update` (moins précis : on redimensionne la fenêtre, pas la zone d'affichage) | Aide sous le menu : « La fenêtre est redimensionnée le temps de la capture : la page peut différer de quelques pixels de la taille choisie. » Elle remplace l'aide actuelle. |
 
-**Ma recommandation : B pour la première publication.**
-- L'extension est « Non répertoriée » et sert à des agents qui l'installent sur le poste de travail. Un avertissement « lire et modifier les données de tous les sites, débogueur » risque de bloquer l'installation (refus des agents, ou de la politique du poste), au moment même où l'on veut qu'ils l'adoptent.
-- Le cœur du service ne dépend pas de `debugger` : captures à chaque clic, capture HTML, vidéo de l'onglet et vérification des données personnelles.
-- On rouvrira « Format mobile » et la page entière dans une version 2 de l'extension, si les agents les demandent. Elle portera l'avertissement, expliqué dans l'article d'aide.
-
-**Textes en option B** :
-- sous « Format mobile » et « Taille de l'onglet » : « Bientôt » en texte gris à droite, et une aide de 13 px : « Pas encore disponible dans la version de la boutique. » ;
-- l'aide de « Captures à chaque clic » ne promet plus la page entière. Elle devient « Chaque clic donne une capture de la partie visible de la page. » à la place de `fullPageHelp` ;
-- la fiche (§2) ne cite plus le « format mobile » : la liste de l'étape 1 devient « captures à chaque clic, page HTML ou vidéo de l'onglet ».
-
-**Si le chef choisit A** : aucun encart n'est utile pour `debugger`. On ajoute une ligne à l'article d'aide « Installer l'extension » pour expliquer l'avertissement de Chrome.
-
-Les §6.1 à §6.5 ci-dessous gardent l'encart pour une **autorisation réellement facultative** : l'accès aux sites (§6.6). Leurs textes `debugger` ne s'appliquent pas, quelle que soit l'option.
+- Fiche (§2) : le format mobile n'est plus cité dans les étapes. La description détaillée a une partie « Limites connues de cette version ».
+- Capture 1 de la fiche : à reprendre avec ce popup (« Espace », « Format mobile » en « Bientôt »).
+- Si `debugger` revient dans une version 2, Chrome affichera un avertissement fort à l'installation : il faudra le dire dans l'article d'aide « Installer l'extension ».
 
 ### 6.0 bis Ancienne spec (sans effet pour `debugger`)
 
