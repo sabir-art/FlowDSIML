@@ -102,4 +102,9 @@ describe('L30-05 : capture HTML préparée pour l’IA', () => {
     expect(p.text).not.toContain('12 34');
     expect(p.text).toBe('Camille Exemple Tél. : [téléphone] Un Deux');
   });
+
+  it('éléments en ligne côte à côte séparés (bouton puis lien)', () => {
+    const p = preparePage('<body><button>Écrire</button><a href="/c">Contact</a></body>', []);
+    expect(p.text).toBe('Écrire Contact');
+  });
 });

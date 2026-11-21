@@ -22,7 +22,7 @@ const CLICKABLE =
 
 const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
 const BLOCKS =
-  'h1, h2, h3, h4, h5, h6, p, li, td, th, div, section, article, header, footer, nav, dt, dd, br';
+  'h1, h2, h3, h4, h5, h6, p, li, td, th, div, section, article, header, footer, nav, dt, dd, br, button, a';
 
 /**
  * Règle 3 (L30) : adresses e-mail et numéros de téléphone (France et international) remplacés avant
