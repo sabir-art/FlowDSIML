@@ -274,10 +274,16 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
         (await p.locator('.fp-cert-help a').getAttribute('href')) === 'mailto:aide@mission-locale.example',
       'L15-07 : sans nom, l’aide remplace le bouton (avec « Besoin d’aide ? »)',
     );
-    ok(
-      await p.evaluate(() => document.activeElement?.getAttribute('role') === 'status'),
-      'L15-07 : le focus passe sur l’aide quand le bouton disparaît',
-    );
+    // État réel du focus attendu (pas de délai fixe) : il doit arriver sur la zone d'état
+    const focused = await p
+      .waitForFunction(() => document.activeElement?.getAttribute('role') === 'status', null, {
+        timeout: 5000,
+      })
+      .then(
+        () => true,
+        () => false,
+      );
+    ok(focused, 'L15-07 : le focus passe sur l’aide quand le bouton disparaît');
     await p.reload();
     await p.waitForSelector('.fp-done button');
     reply = {
@@ -399,8 +405,15 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     await p.goto(`${APP}/#/`);
     await p.getByRole('link', { name: 'Parcours de formation' }).click();
     await p.waitForSelector('.cfg14');
+    // Statut rempli après le chargement des réglages : on attend le texte, sans délai fixe
     ok(
-      (await p.locator('.page-head__sub').textContent()).includes('1 modification non publiée'),
+      await p
+        .locator('.page-head__sub', { hasText: '1 modification non publiée' })
+        .waitFor({ timeout: 5000 })
+        .then(
+          () => true,
+          () => false,
+        ),
       'L14-08 : statut publié et modifications en attente',
     );
     await p.getByLabel('Adresse de la page').fill('deja-prise');
