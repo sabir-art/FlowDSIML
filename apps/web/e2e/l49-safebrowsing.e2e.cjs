@@ -124,8 +124,15 @@ const links = [
   await sec.getByRole('button', { name: 'Détail' }).click();
   ok(
     (await sec.locator('.hsec-list li').last().innerText()).replace(/\s+/g, ' ') ===
-      'Lien dangereux bloqué (vérifié par Google Safe Browsing) 1',
+      'Lien dangereux bloqué 1',
     'rapport : lien dangereux bloqué (Google Safe Browsing)',
+  );
+  const note = await sec
+    .locator('.hsec-note')
+    .evaluate((el) => [el.textContent, getComputedStyle(el).fontSize]);
+  ok(
+    note.join() === 'Vérifié par Google Safe Browsing,12px',
+    `R3 : source sous la liste, 12 px (${note.join()})`,
   );
 
   // Vérification indisponible

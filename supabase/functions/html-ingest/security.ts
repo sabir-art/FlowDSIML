@@ -3,6 +3,9 @@
 // Arbre HTML de htmlparser2 (MIT, déjà utilisé par sanitize-html).
 import { parseDocument } from 'npm:htmlparser2@8.0.2';
 import { getDomain } from 'npm:tldts@7.4.19';
+// Épingle la dépendance de tldts (sinon la dernière 7.x publiée serait prise sans relecture) : une version
+// déjà demandée dans le graphe est réutilisée par Deno pour la plage ^7.4.19 de tldts (vérifié par deno info).
+import 'npm:tldts-core@7.4.19';
 
 export const SECURITY_KEYS = [
   'scripts',

@@ -5255,8 +5255,8 @@
       "other_one": "Autre élément retiré",
       "other_other": "Autres éléments retirés"
     },
-    "dangerous_one": "Lien dangereux bloqué (vérifié par Google Safe Browsing)",
-    "dangerous_other": "Liens dangereux bloqués (vérifiés par Google Safe Browsing)",
+    "dangerous_one": "Lien dangereux bloqué",
+    "dangerous_other": "Liens dangereux bloqués",
     "gsbUnavailable": "Vérification Google indisponible",
     "gsbLast": "Dernière tentative : {{date}}",
     "checklistTotal_one": "1 page analysée",
@@ -5265,7 +5265,8 @@
     "checklistSafe_other": "{{count}} sûres",
     "checklistRemoved": "{{count}} avec éléments retirés",
     "checklistSafeOnly": "sûre",
-    "checklistRemovedOnly": "avec éléments retirés"
+    "checklistRemovedOnly": "avec éléments retirés",
+    "gsbNote": "Vérifié par Google Safe Browsing"
   },
   "extLinks": {
     "title": "Liens externes · {{count}}",

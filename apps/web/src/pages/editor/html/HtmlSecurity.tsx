@@ -78,6 +78,7 @@ export function HtmlSecurity({ step }: { step: StepRow }) {
               )
             )}
           </ul>
+          {open && r.safeBrowsing === 'ok' && <p className="hsec-note">{t('htmlSecurity.gsbNote')}</p>}
         </>
       )}
     </div>

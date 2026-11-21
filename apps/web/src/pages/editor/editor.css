@@ -3479,3 +3479,9 @@
   font-size: 13px;
   color: var(--fd-color-text-muted);
 }
+/* Retour UX R3 : source de la vérification sous la liste des compteurs */
+.hsec .hsec-note {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}

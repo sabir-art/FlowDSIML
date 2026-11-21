@@ -5255,8 +5255,8 @@
       "other_one": "Other element removed",
       "other_other": "Other elements removed"
     },
-    "dangerous_one": "Dangerous link blocked (checked by Google Safe Browsing)",
-    "dangerous_other": "Dangerous links blocked (checked by Google Safe Browsing)",
+    "dangerous_one": "Dangerous link blocked",
+    "dangerous_other": "Dangerous links blocked",
     "gsbUnavailable": "Google check unavailable",
     "gsbLast": "Last attempt: {{date}}",
     "checklistTotal_one": "1 page scanned",
@@ -5265,7 +5265,8 @@
     "checklistSafe_other": "{{count}} safe",
     "checklistRemoved": "{{count}} with elements removed",
     "checklistSafeOnly": "safe",
-    "checklistRemovedOnly": "with elements removed"
+    "checklistRemovedOnly": "with elements removed",
+    "gsbNote": "Checked by Google Safe Browsing"
   },
   "extLinks": {
     "title": "External links · {{count}}",
