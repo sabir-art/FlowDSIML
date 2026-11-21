@@ -566,7 +566,13 @@
       "composeLabel": "New comment",
       "saveSubmit": "Save",
       "enterKey": "Enter",
-      "counter": "{{count}} / {{max}}"
+      "counter": "{{count}} / {{max}}",
+      "dockNone": "Comments, none open",
+      "dockOpen_one": "Comments, {{count}} open",
+      "dockOpen_other": "Comments, {{count}} open",
+      "dockUnread_one": "Comments, {{count}} open, {{unread}} unread",
+      "dockUnread_other": "Comments, {{count}} open, {{unread}} unread",
+      "dockResize": "Comments panel height"
     },
     "autoplay": "Autoplay",
     "autoplayHelp": "Advances on its own; stops on a form, a choice menu or the last step.",
@@ -891,7 +897,6 @@
       "crop": "Crop",
       "image": "Image",
       "design": "Design",
-      "comments": "Comments",
       "assistant": "Assistant",
       "settings": "Demo settings",
       "group": {
@@ -1016,7 +1021,8 @@
       "space": "Space",
       "del": "Del",
       "esc": "Esc",
-      "help": "Single-letter shortcuts (H, B, ?) are disabled while typing."
+      "help": "Single-letter shortcuts (H, B, ?) are disabled while typing.",
+      "comments": "Open or close comments"
     },
     "maskTag": "Mask",
     "zoomLevel": "Level",

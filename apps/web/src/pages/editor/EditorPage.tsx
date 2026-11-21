@@ -46,8 +46,9 @@ import { BrowserBar } from './capture/BrowserBar';
 import { demoFrame } from './capture/FrameFields';
 import { CropCanvas, CropPanel, cropDraftFor, type CropDraft } from './capture/Crop';
 import { StepList } from './StepList';
-import { CommentsPanel } from './comments/CommentsPanel';
 import { useStepComments } from './comments/useStepComments';
+import { CommentsDock, readDock, storeDock, type DockState } from './comments/CommentsDock';
+import { useDockFit, useScrollable } from './comments/useDockFit';
 import { useAuth } from '../../auth/AuthProvider';
 import { StepPanel } from './panels/StepPanel';
 import { AbCanvasSwitch, asVariantB, useAbTest } from './ab/AbTest';
@@ -203,15 +204,23 @@ export function EditorPage() {
   /** Outils du rail visibles (Assistant : éditeurs), dans l'ordre (raccourcis Alt + 1 à 9). */
   const railOrder = TOOL_ORDER.filter((x) => x !== 'assistant' || can('demo.edit'));
   const [params] = useSearchParams();
-  // L48-E §3 : outil du rail ouvert (un seul panneau) ; ANA-09 : ?tab=settings ouvre les Réglages,
-  // L48-E §5 : ?outil=commentaires (lien d'une notification) ouvre les Commentaires
+  // L48-E §3 : outil du rail ouvert (un seul panneau) ; ANA-09 : ?tab=settings ouvre les Réglages
   const [panel, setPanelState] = useState<ToolId | null>(() =>
-    params.get('tab') === 'settings'
-      ? 'settings'
-      : params.get('outil') === 'commentaires' || params.get('comment')
-        ? 'comments'
-        : savedTool(),
+    params.get('tab') === 'settings' ? 'settings' : savedTool(),
   );
+  // Retours client 21/11 §1 : panneau Commentaires sous le canevas. Un lien vers un commentaire
+  // (?outil=commentaires, ?comment=) l'ouvre sans changer l'état retenu.
+  const [dock, setDockState] = useState<DockState>(() => {
+    const d = readDock();
+    return params.get('outil') === 'commentaires' || params.get('comment') ? { ...d, open: true } : d;
+  });
+  const setDock = (next: (d: DockState) => DockState) =>
+    setDockState((d) => {
+      const n = next(d);
+      storeDock(n);
+      return n;
+    });
+  const toggleDock = () => setDock((d) => ({ ...d, open: !d.open }));
   const setPanel = (p: ToolId | null) => {
     setPanelState(p);
     if (p && p !== 'blur' && p !== 'assistant')
@@ -333,6 +342,9 @@ export function EditorPage() {
     };
   }, [presence]);
   const [frameEl, setFrameEl] = useState<HTMLElement | null>(null);
+  const stageInner = useRef<HTMLDivElement>(null);
+  useDockFit(stageInner, dock.open, zoom === 'fit', [dock.height, step?.id, selection, step?.kind]);
+  const stageScrolls = useScrollable(stageInner, [step?.id, dock.open, dock.height, zoom]);
   useEffect(() => {
     setFrameEl(document.querySelector<HTMLElement>('.canvas-frame'));
   }, [step?.id, rawEditor.loading, narrow]);
@@ -383,8 +395,19 @@ export function EditorPage() {
         return;
       }
       const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      if ((e.target as HTMLElement)?.isContentEditable) return;
+      const typing =
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        !!(e.target as HTMLElement)?.isContentEditable;
+      // §1 du 21/11 : Alt + C ouvre ou ferme les Commentaires, aussi depuis leur champ de saisie
+      // (sauf sur Mac, où Option + C tape « ç »)
+      if (e.altKey && !mod && !e.shiftKey && e.code === 'KeyC' && !(isMac && typing)) {
+        e.preventDefault();
+        toggleDock();
+        return;
+      }
+      if (typing) return;
       // Ctrl Entrée : aperçu (hors saisie, où il sert à envoyer un commentaire)
       if (mod && e.key === 'Enter') {
         e.preventDefault();
@@ -559,23 +582,6 @@ export function EditorPage() {
         crop: noStep,
         image: noStep,
       };
-  // Point « non lu » des Commentaires : commentaire d'un autre membre sur l'étape, après la dernière visite
-  const unread = (() => {
-    if (!step || !user) return false;
-    let seen = 0;
-    try {
-      const map = JSON.parse(localStorage.getItem('fd.editor.comments.seen') ?? '{}') as Record<
-        string,
-        string
-      >;
-      seen = Date.parse(map[step.id] ?? '') || 0;
-    } catch {
-      /* stockage indisponible */
-    }
-    return comments.comments.some(
-      (c) => c.step_id === step.id && c.author_id !== user.id && Date.parse(c.created_at) > seen,
-    );
-  })();
   function closePanel() {
     if (selectedForm) return setSelection({ kind: 'step' });
     const id = panel;
@@ -628,16 +634,6 @@ export function EditorPage() {
             setSelection({ kind: 'form', id });
             setIndex(i);
           }}
-        />
-      );
-    if (panel === 'comments')
-      return (
-        <CommentsPanel
-          stepId={step?.id ?? null}
-          stepIndex={safeIndex}
-          api={comments}
-          focusComment={focusComment}
-          variant="side"
         />
       );
     if (!step || !panel) return <p className="help">{t('editor.empty')}</p>;
@@ -1051,7 +1047,7 @@ export function EditorPage() {
             <RemoteCursors store={presence.store} stepId={step?.id ?? null} names={names} frame={frameEl} />
           )}
           <div className="stage-main">
-            <div className="stage-inner">
+            <div className="stage-inner" ref={stageInner} tabIndex={stageScrolls ? 0 : undefined}>
               {step && ab.test?.step_id === step.id && <AbCanvasSwitch ab={ab} />}
               {sandbox && planView ? (
                 <SandboxPlan
@@ -1144,13 +1140,23 @@ export function EditorPage() {
               {tool !== 'select' && <p className="muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
             </div>
           </div>
+          <CommentsDock
+            stepId={step?.id ?? null}
+            stepIndex={safeIndex}
+            api={comments}
+            myId={user?.id}
+            focusComment={focusComment}
+            open={dock.open}
+            height={dock.height}
+            onToggle={toggleDock}
+            onHeight={(height) => setDock((d) => ({ ...d, height }))}
+          />
         </section>
         {/* L48-E §3 : panneau de l'outil actif (un seul à la fois), puis le rail d'outils */}
         {(selectedForm || (panel && panel !== 'blur' && panel !== 'assistant')) && (
           <ToolPanel
             id={selectedForm ? 'form' : panel!}
             title={selectedForm ? t('editor.leadForm') : t(`editor.rail.${panel}`)}
-            wide={!selectedForm && panel === 'comments'}
             onClose={closePanel}
           >
             {panelBody()}
@@ -1160,7 +1166,6 @@ export function EditorPage() {
           active={assisting ? 'assistant' : selectedForm ? null : panel}
           onToggle={toggleTool}
           disabled={why}
-          dot={{ comments: unread && panel !== 'comments' }}
           hidden={can('demo.edit') ? [] : ['assistant']}
         />
         {blurOpen && step && step.kind === 'image' && (

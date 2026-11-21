@@ -41,6 +41,8 @@ export function ShortcutsDialog({ onClose }: { onClose: () => void }) {
         [t('editor.keys.redo'), k(ctrl, t('editor.keys.shift'), 'Z')],
         [t('editor.keys.find'), k(ctrl, 'F')],
         [t('editor.keys.preview'), k(ctrl, t('editor.keys.enter'))],
+        // Retours client 21/11 §1 : panneau Commentaires sous le canevas
+        [t('editor.keys.comments'), k(isMac ? '⌥' : 'Alt', 'C')],
       ],
     },
     {

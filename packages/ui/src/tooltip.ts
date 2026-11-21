@@ -137,6 +137,8 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
   let bubble: HTMLDivElement | null = null;
   let anchor: HTMLElement | null = null;
   let openTimer = 0;
+  /** Élément cliqué : pas d'infobulle au survol tant que le pointeur ne l'a pas quitté. */
+  let pressed: HTMLElement | null = null;
   let closeTimer = 0;
   let pressTimer = 0;
   let lastClosed = 0;
@@ -247,7 +249,7 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
     const el = targetOf(e);
     if (!el) return;
     if (el === anchor) return win.clearTimeout(closeTimer);
-    if (!tipLabel(el)) return;
+    if (el === pressed || !tipLabel(el)) return;
     win.clearTimeout(openTimer);
     const warm = bubble !== null || Date.now() - lastClosed < WARM_MS;
     if (warm) open(el);
@@ -258,6 +260,7 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
     if (!el) return;
     const to = e.relatedTarget as Node | null;
     if (to && el.contains(to)) return;
+    if (el === pressed) pressed = null;
     win.clearTimeout(openTimer);
     if (el === anchor) scheduleClose();
   };
@@ -278,6 +281,11 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
     }
   };
   const onDown = (e: PointerEvent) => {
+    // Un clic annule l'ouverture en attente et tient l'infobulle du bouton cliqué fermée jusqu'à ce que
+    // le pointeur le quitte : sinon elle réapparaît (le bouton change de libellé ou de place) et absorbe
+    // le premier Échap (ex. tiroir Dossiers, retours client 21/11 §2)
+    win.clearTimeout(openTimer);
+    if (e.pointerType !== 'touch') pressed = targetOf(e);
     if (bubble && targetOf(e) === anchor) close();
     if (e.pointerType !== 'touch') return;
     const el = targetOf(e);

@@ -28,7 +28,7 @@ const MAX_LEN = 500;
 const NEW_MS = 4000;
 /** Dernière lecture des commentaires, par étape (ouverture sur le premier non lu). */
 const SEEN_KEY = 'fd.editor.comments.seen';
-function readSeen(): Record<string, string> {
+export function readSeen(): Record<string, string> {
   try {
     return JSON.parse(read(SEEN_KEY) ?? '{}') as Record<string, string>;
   } catch {
@@ -98,7 +98,7 @@ function Avatar({ id, label }: { id: string; label: string }) {
 
 /**
  * Panneau « Commentaires » de l'éditeur (docs/ux/commentaires.md) : commentaires internes de
- * l'étape courante, jamais publiés. `variant="panel"` : sous le canevas, poignée et repli ;
+ * l'étape courante, jamais publiés. `variant="dock"` : sous le canevas (CommentsDock) ;
  * `variant="mobile"` : écran étroit, pleine hauteur, sans poignée.
  */
 export function CommentsPanel({
@@ -106,7 +106,7 @@ export function CommentsPanel({
   stepIndex,
   api,
   canComment = true,
-  variant = 'side',
+  variant = 'dock',
   header,
   focusComment,
 }: {
@@ -115,8 +115,8 @@ export function CommentsPanel({
   api: StepCommentsApi;
   /** Tout membre peut commenter (viewer compris, décision du chef d'équipe). */
   canComment?: boolean;
-  /** L48-E §5 : « side » : panneau du rail de l'éditeur (400 px) ; « mobile » : écran étroit. */
-  variant?: 'side' | 'mobile';
+  /** « dock » : panneau sous le canevas (retours client 21/11 §1) ; « mobile » : écran étroit. */
+  variant?: 'dock' | 'mobile';
   /** Contenu inséré sous l'en-tête (sélecteur d'étape en mobile). */
   header?: ReactNode;
   /** L22-05 : commentaire à montrer (lien d'une notification) : panneau déplié, fil visible. */
@@ -127,7 +127,7 @@ export function CommentsPanel({
   const { current } = useWorkspace();
   const [dialog, ask] = useConfirm();
   const mobile = variant === 'mobile';
-  const side = variant === 'side';
+  const dock = variant === 'dock';
   const isAdmin = current?.role === 'owner' || current?.role === 'admin';
   const isEditor = isAdmin || current?.role === 'editor';
 
@@ -320,36 +320,25 @@ export function CommentsPanel({
   );
 
   return (
-    <section
-      ref={sectionRef}
-      id="cm-panel"
-      className={`cm${variant === 'mobile' ? ' cm--mobile' : variant === 'side' ? ' cm--side' : ''}`}
-      aria-labelledby="cm-title"
-    >
+    <section ref={sectionRef} id="cm-panel" className={`cm cm--${variant}`} aria-labelledby="cm-title">
       {dialog}
       <div className="cm-card">
         <header className="cm-head">
-          {!side && (
+          {!dock && (
             <span className="fd-icon-chip" aria-hidden="true">
               <MessageSquare />
             </span>
           )}
           <div className="cm-head__titles">
             <div className="cm-head__line">
-              {/* L48-E (E5) : dans le panneau d'outil, l'en-tête « Commentaires » suffit ; titre gardé pour les lecteurs d'écran */}
-              <h2 id="cm-title" className={side ? 'sr-only' : 'fd-card__title'}>
+              {/* Dock : la barre porte « Commentaires », l'étape et le badge (seul indicateur) ; titre gardé pour les lecteurs d'écran */}
+              <h2 id="cm-title" className={dock ? 'sr-only' : 'fd-card__title'}>
                 {t('editor.comments.titleStep', { n: stepIndex + 1 })}
               </h2>
-              {badge}
+              {!dock && badge}
             </div>
-            {side ? (
-              <p className="cm-sub">
-                {t('editor.stepN', { n: stepIndex + 1 })} ·{' '}
-                <span id="cm-private">{t('editor.comments.private')}</span>
-              </p>
-            ) : (
-              privateNote
-            )}
+            {/* Dock : la mention « interne » est dans la barre du panneau (CommentsDock) */}
+            {!dock && privateNote}
             {!api.online && (
               <span className="cm-offline" role="status">
                 <WifiOff aria-hidden="true" />
@@ -560,7 +549,8 @@ export function CommentsPanel({
           <div className="cm-compose">
             <Composer
               label={t('editor.comments.composeLabel')}
-              maxLines={8}
+              // Dock : 4 lignes au plus, la barre d'actions reste dans le panneau même bas
+              maxLines={dock ? 4 : 8}
               placeholder={
                 !stepId
                   ? t('editor.comments.placeholderNoStep')

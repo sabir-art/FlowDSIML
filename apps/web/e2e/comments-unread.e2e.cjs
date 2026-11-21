@@ -1,18 +1,13 @@
 /** Test e2e : la liste des commentaires s'ouvre sur le premier non lu (pilule « n plus anciens ↑ »). */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
-const { openTool } = require('./editor-rail.cjs');
+const { openComments } = require('./editor-rail.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
 (async () => {
   const b = await chromium.launch();
   const page = await b.newPage({ viewport: { width: 1440, height: 900 } });
-  // Panneau Commentaires replié par défaut depuis la conformité EDT-01 : on l'ouvre pour ces tests
-  await page.addInitScript(() => {
-    if (localStorage.getItem('fd.editor.comments.collapsed') === null)
-      localStorage.setItem('fd.editor.comments.collapsed', '0');
-  });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const ok = (c, l) => {
@@ -43,8 +38,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
-  // L48-E : les commentaires sont un outil du rail
-  await openTool(page, 'comments');
+  // Retours client 21/11 §1 : panneau Commentaires sous le canevas
+  await openComments(page);
   await page.waitForSelector('[data-comment="c7"]');
   await page.waitForTimeout(300);
   const list = page.locator('.cm-list');
@@ -54,11 +49,16 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const vis = await page.locator('[data-comment="c7"]').evaluate((el) => {
     const r = el.getBoundingClientRect();
     const l = el.closest('.cm-list').getBoundingClientRect();
-    return { inside: r.top >= l.top && r.bottom <= l.bottom, gap: Math.round(r.top - l.top) };
+    return {
+      inside: r.top >= l.top && r.bottom <= l.bottom,
+      gap: Math.round(r.top - l.top),
+      lh: Math.round(l.height),
+      ih: Math.round(r.height),
+    };
   });
   ok(
     top > 0 && vis.inside,
-    `liste ouverte sur le premier non lu (remarque 8 visible, ${vis.gap} px du haut)`,
+    `liste ouverte sur le premier non lu (remarque 8 visible, ${vis.gap} px du haut, liste ${vis.lh} px, élément ${vis.ih} px)`,
   );
   ok((await page.locator('.cm-item--new').count()) === 3, 'les 3 non lus sont marqués « Nouveau »');
   const pill = page.locator('.cm-older');

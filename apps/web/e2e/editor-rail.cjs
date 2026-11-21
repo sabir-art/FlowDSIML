@@ -3,7 +3,7 @@
  * (« Étape », « Design », « Réglages »…) sont devenus des outils du rail.
  * openTool(page, 'design') ouvre l'outil s'il ne l'est pas déjà (un clic sur l'outil ouvert le ferme)
  * et renvoie le panneau. Outils : step, cta, hotspots, voice, next, blur, zoom, crop, image, design,
- * comments, assistant, settings.
+ * assistant, settings. Les Commentaires sont dans le panneau sous le canevas : openComments(page).
  */
 async function openTool(page, tool, timeout = 15000) {
   // L'état réel est aria-pressed du bouton du rail. Le panneau mémorisé peut s'ouvrir après le
@@ -34,4 +34,13 @@ async function fromMore(page, label) {
   await page.getByRole('menuitem', { name: label }).click();
 }
 
-module.exports = { openTool, fromMore };
+/** Retours client 21/11 §1 : déplie le panneau Commentaires sous le canevas (s'il est replié). */
+async function openComments(page, timeout = 15000) {
+  const toggle = page.locator('.cm-dock__toggle');
+  await toggle.waitFor({ timeout });
+  if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
+  await page.locator('.cm-dock .cm').waitFor({ timeout });
+  return page.locator('.cm-dock');
+}
+
+module.exports = { openTool, openComments, fromMore };

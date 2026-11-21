@@ -2,13 +2,14 @@
  * Recette L48-E (spec docs/ux/specs/l48e-editeur.md §8). Données fictives, faux Supabase.
  *  - rail d'outils (groupes, flèches, Alt + 3, Échap), un seul panneau, fermeture par l'outil actif ;
  *  - point d'intérêt du canevas → « Points d'intérêt » ; flou en modale (Annuler confirmé, Appliquer) ;
- *  - commentaires en panneau de 400 px (canevas pleine hauteur) ; en-tête (un seul primaire, menu Plus) ;
+ *  - commentaires sous le canevas (21/11 §1, largeur du canevas gardée) ; en-tête (un seul primaire, menu Plus) ;
  *  - étape HTML : Zoom et Recadrage désactivés avec la raison ; outil gardé (fd.editor.tool) ; axe.
  * Usage : node e2e/l48e-editeur.e2e.cjs
  */
 const { chromium } = require('playwright');
 const { AxeBuilder } = require('@axe-core/playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openComments } = require('./editor-rail.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -55,7 +56,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // ===== Rail =====
   ok((await rail.getAttribute('aria-orientation')) === 'vertical', 'rail vertical');
   ok((await rail.getByRole('group').count()) === 5, 'groupes : Contenu, Écran, Apparence, Collaborer, Démo');
-  ok((await rail.locator('button[data-tool]').count()) === 13, '13 outils');
+  // Retours client 21/11 §1 : Commentaires sortis du rail (panneau sous le canevas)
+  ok((await rail.locator('button[data-tool]').count()) === 12, '12 outils');
   ok((await p.locator('.ed-tool').count()) === 1, 'un panneau ouvert (Étape par défaut)');
   ok((await p.locator('#ed-tool-title').innerText()) === 'Étape', 'panneau « Étape »');
   ok((await p.locator('.stage-head + * .floatbar, .floatbar').count()) === 0, 'plus de barre flottante');
@@ -161,31 +163,17 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'Appliquer : zone enregistrée',
   );
 
-  // ===== Commentaires =====
-  const h0 = (await p.locator('.stage').boundingBox()).height;
-  await rail.locator('[data-tool="comments"]').click();
-  await p.locator('.ed-tool .cm').waitFor();
-  ok(Math.round((await p.locator('.ed-tool').boundingBox()).width) === 400, 'panneau Commentaires de 400 px');
-  ok(Math.abs((await p.locator('.stage').boundingBox()).height - h0) < 2, 'le canevas garde sa hauteur');
-  ok((await p.locator('.ed-tool .fd-composer').count()) === 1, 'composeur dans le panneau');
+  // ===== Commentaires : panneau sous le canevas (retours client 21/11 §1) =====
+  ok((await rail.locator('[data-tool="comments"]').count()) === 0, 'Commentaires hors du rail');
+  const stageW = (await p.locator('.stage').boundingBox()).width;
+  await openComments(p);
+  ok(Math.abs((await p.locator('.stage').boundingBox()).width - stageW) < 2, 'le canevas garde sa largeur');
+  ok((await p.locator('.cm-dock .fd-composer').count()) === 1, 'composeur dans le panneau');
   ok(
-    (await p.locator('.ed-tool .cm .fd-card__title, .ed-tool .cm .fd-icon-chip').count()) === 0 &&
-      /^Étape 1 · Interne à l’équipe/.test(await p.locator('.ed-tool .cm-sub').innerText()),
-    'E5 : en-tête seul, « Étape 1 · Interne à l’équipe… » dessous',
+    (await p.locator('.cm-dock .cm .fd-card__title, .cm-dock .cm .fd-icon-chip').count()) === 0 &&
+      /Interne à l’équipe/.test(await p.locator('.cm-dock__private').innerText()),
+    'E5 : en-tête seul, « Interne à l’équipe… » dans la barre',
   );
-  {
-    const empty = p.locator('.ed-tool .fd-empty');
-    if (await empty.count()) {
-      const st = await empty.evaluate((el) => ({
-        b: getComputedStyle(el).borderTopStyle,
-        bg: getComputedStyle(el.querySelector('.fd-empty__icon')).backgroundColor,
-      }));
-      ok(
-        st.b === 'none' && st.bg === 'rgba(0, 0, 0, 0)',
-        `E6 : état vide sans cadre ni pastille (${st.b} ${st.bg})`,
-      );
-    }
-  }
 
   // ===== En-tête =====
   ok(
@@ -222,7 +210,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
 
   // ===== axe =====
-  for (const tool of ['step', 'comments', 'settings']) {
+  for (const tool of ['step', 'settings']) {
     if ((await p.locator(`[data-tool-panel="${tool}"]`).count()) === 0)
       await rail.locator(`[data-tool="${tool}"]`).click();
     await p.waitForTimeout(300);
@@ -234,7 +222,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // ===== Lien d'une notification : ?outil=commentaires =====
   await p.goto(`${APP}/#/demos/${DEMO}/edit?outil=commentaires`);
   await p.reload();
-  await p.locator('[data-tool-panel="comments"]').waitFor();
+  await p.locator('.cm-dock.is-open .cm').waitFor();
   ok(true, '?outil=commentaires ouvre le panneau Commentaires');
 
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' / ')}` : ''}`);

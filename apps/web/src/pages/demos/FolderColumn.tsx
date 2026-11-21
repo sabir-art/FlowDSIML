@@ -8,7 +8,7 @@
  * « Nouveau dossier » et « Archivées » restent en bas. De 1 024 à 1 279 px, la colonne dépliée s'ouvre en
  * tiroir de 280 px par-dessus le contenu (overlay).
  */
-import { useEffect, useRef, useState, type DragEvent, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type DragEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Archive,
@@ -76,7 +76,7 @@ export function FolderColumn({
   const children = (parent: string | null) =>
     folders
       .filter((f) => (f.parent_id ?? null) === parent)
-      .sort((a, b) => a.name.localeCompare(b.name, i18n.language));
+      .sort((a, b) => a.name.localeCompare(b.name, i18n.language, { numeric: true, sensitivity: 'base' }));
 
   const entry = (s: Scope, icon: ReactNode, label: string, extra?: ReactNode) => (
     <li>
@@ -198,12 +198,20 @@ export function FolderColumn({
   // Tiroir : Échap et un clic dehors le ferment (le focus revient au bouton de bascule)
   const nav = useRef<HTMLElement>(null);
   const drawer = overlay && !collapsed;
+  // Tiroir : à l'ouverture, focus sur « Masquer les dossiers » ; fermé par Échap, focus sur « Afficher
+  // les dossiers » (même bouton, jamais remonté). Explicite : Safari ne donne pas le focus au clic.
+  const switchRef = useRef<HTMLButtonElement>(null);
+  const refocus = useRef(false);
+  useLayoutEffect(() => {
+    if (drawer || refocus.current) switchRef.current?.focus();
+    refocus.current = false;
+  }, [drawer]);
   useEffect(() => {
     if (!drawer) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
+      refocus.current = true;
       onToggle();
-      requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.fcol__switch')?.focus());
     };
     const onDown = (e: MouseEvent) => {
       const target = e.target as Element;
@@ -219,6 +227,7 @@ export function FolderColumn({
 
   const toggle = (
     <button
+      ref={switchRef}
       type="button"
       className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm fcol__switch"
       aria-label={t(collapsed ? 'folders.showColumn' : 'folders.hide')}
@@ -229,22 +238,18 @@ export function FolderColumn({
       {collapsed ? <PanelLeftOpen aria-hidden="true" /> : <PanelLeftClose aria-hidden="true" />}
     </button>
   );
-  if (collapsed)
-    return (
-      <nav className="fcol fcol--rail" aria-label={t('folders.title')}>
-        {toggle}
-        <span className="fcol__railcount" title={t('folders.title')}>
-          <Folder aria-hidden="true" />
-          <span>{folders.length}</span>
-        </span>
-      </nav>
-    );
+  // Un seul arbre pour le rail et la colonne : le bouton de bascule n'est jamais remonté (il garde le
+  // focus au clic, et aucune nouvelle infobulle n'apparaît sous le pointeur pour absorber Échap)
   return (
-    <nav ref={nav} className={`fcol${drawer ? ' fcol--drawer' : ''}`} aria-label={t('folders.title')}>
+    <nav
+      ref={nav}
+      className={collapsed ? 'fcol fcol--rail' : `fcol${drawer ? ' fcol--drawer' : ''}`}
+      aria-label={t('folders.title')}
+    >
       <div className="fcol__head">
         {toggle}
-        <h2 className="fcol__title">{t('folders.title')}</h2>
-        {editable && (
+        {!collapsed && <h2 className="fcol__title">{t('folders.title')}</h2>}
+        {!collapsed && editable && (
           <button
             type="button"
             className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
@@ -255,28 +260,37 @@ export function FolderColumn({
           </button>
         )}
       </div>
-      {/* La liste défile seule ; le bas de colonne reste visible */}
-      <div className="fcol__scroll">
-        <ul className="fcol__list" role="list">
-          {entry('all', <Layers aria-hidden="true" />, t(sandbox ? 'sandboxPage.all' : 'folders.all'))}
-          {entry('mine', <User aria-hidden="true" />, t(sandbox ? 'sandboxPage.mine' : 'folders.mine'))}
-        </ul>
-        <hr className="fcol__sep" />
-        <p className="fcol__section">{t('folders.space')}</p>
-        {tree(null, 0)}
-      </div>
-      <div className="fcol__foot">
-        {editable && (
-          <button type="button" className="fcol__new" onClick={() => onNew(null)}>
-            <FolderPlus aria-hidden="true" />
-            {t('demos.newFolder')}
-          </button>
-        )}
-        <hr className="fcol__sep" />
-        <ul className="fcol__list" role="list">
-          {entry('archived', <Archive aria-hidden="true" />, t('folders.archived'))}
-        </ul>
-      </div>
+      {collapsed ? (
+        <span className="fcol__railcount" title={t('folders.title')}>
+          <Folder aria-hidden="true" />
+          <span>{folders.length}</span>
+        </span>
+      ) : (
+        <>
+          {/* La liste défile seule ; le bas de colonne reste visible */}
+          <div className="fcol__scroll">
+            <ul className="fcol__list" role="list">
+              {entry('all', <Layers aria-hidden="true" />, t(sandbox ? 'sandboxPage.all' : 'folders.all'))}
+              {entry('mine', <User aria-hidden="true" />, t(sandbox ? 'sandboxPage.mine' : 'folders.mine'))}
+            </ul>
+            <hr className="fcol__sep" />
+            <p className="fcol__section">{t('folders.space')}</p>
+            {tree(null, 0)}
+          </div>
+          <div className="fcol__foot">
+            {editable && (
+              <button type="button" className="fcol__new" onClick={() => onNew(null)}>
+                <FolderPlus aria-hidden="true" />
+                {t('demos.newFolder')}
+              </button>
+            )}
+            <hr className="fcol__sep" />
+            <ul className="fcol__list" role="list">
+              {entry('archived', <Archive aria-hidden="true" />, t('folders.archived'))}
+            </ul>
+          </div>
+        </>
+      )}
     </nav>
   );
 }
