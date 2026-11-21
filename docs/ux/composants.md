@@ -284,7 +284,7 @@ Il apparaît sous un sélecteur de couleur quand le ratio est inférieur à 4,5:
 ### 15.1 Icônes
 
 - **Bibliothèque unique : [`lucide-react`](https://lucide.dev)** (licence ISC). Aucune autre source (emoji, caractères Unicode, SVG copiés d'ailleurs). Dans le player (Preact) : `lucide-preact`. Dans la popup de l'extension (vanilla) : `lucide` (ou les SVG Lucide inlinés).
-- **Tailles** : **16 px** (boutons `sm`, champs, tableaux, menus), **20 px** (boutons `md`/`lg`, navigation), 24 px (états vides uniquement). Toujours `strokeWidth={1.75}`, couleur `currentColor`.
+- **Tailles et trait** : voir **ICON-01** (§15.1 bis), qui remplace l'ancienne règle `strokeWidth={1.75}` partout. Couleur `currentColor`.
 - **Import** : `import { Plus } from 'lucide-react'` puis `<Plus size={16} strokeWidth={1.75} aria-hidden />`. Recommandé : un composant `<Icon as={Plus} size="sm|md" />` dans `packages/ui` qui fixe taille et trait.
 - **Accessibilité** : icône décorative → `aria-hidden`. Bouton icône seule → `aria-label` + infobulle (§1.2).
 - **Interdits** : les caractères `+`, `×`, `✕`, `✖`, `▾`, `▸`, `▶`, `←`, `→`, `✓`, `●`, `⋯`, `📁` (et tout emoji) **utilisés comme icônes**. Un libellé ne commence jamais par « + » : on écrit « Ajouter une étape » avec l'icône `Plus`.
@@ -298,7 +298,7 @@ Il apparaît sous un sélecteur de couleur quand le ratio est inférieur à 4,5:
 | Modifier / ouvrir dans l'éditeur | `Pencil` | | Dépublier | `GlobeLock` |
 | Nouvelle démo | `Plus` (+ libellé) | | Retirer / révoquer (membre, invitation) | `UserMinus` / `Ban` |
 | Écran texte (étape texte) | `Type` | | Fermer, effacer un champ | `X` |
-| Image (importer) | `ImagePlus` | | Dupliquer | `Copy` |
+| Image (importer) | `ImagePlus` | | Dupliquer | `CopyPlus` (ICON-01) |
 | Capturer (extension) | `ScreenShare` | | Copier un lien / du code | `Link` / `ClipboardCopy` |
 | Démarrer l'enregistrement | `Circle` plein (`fill="currentColor"`) | | Copié (confirmation) | `Check` |
 | Pause / reprendre | `Pause` / `Play` | | Partager | `Share2` |
@@ -332,6 +332,65 @@ Il apparaît sous un sélecteur de couleur quand le ratio est inférieur à 4,5:
 | Démo (lecture) | `PlayCircle` | | Démo centers | `LayoutGrid` |
 
 Une action absente de cette table : choisir l'icône Lucide la plus littérale, l'ajouter ici (PR sur `docs/ux/composants.md`).
+
+### 15.1 bis ICON-01 : un seul style d'icône (retour client du 21/11)
+
+> Retour client : les icônes doivent être « belles et minimalistes », avec un trait franc et sans flèches inutiles. L'audit de l'app (3 033 icônes rendues sur toutes les pages, en clair) relève **deux épaisseurs** de trait (2 et 1,75, 37 icônes utilisées avec les deux), **six tailles** (12, 13, 14, 16, 18 et 20 px), des **variantes à flèche** pour plier et déplier (`PanelLeftClose` / `PanelLeftOpen`), et des **doublons** pour un même concept (`Sparkles` / `WandSparkles`, `Settings` / `Settings2`, `Key` / `KeyRound`, `Shield` / `ShieldCheck`, `ImagePlus` / `ImageUp`, `Package` / `PackageOpen`, `Bell` / `BellRing`).
+
+**1. Source** : Lucide uniquement (`lucide-react` 0.577, `lucide-preact` dans le lecteur), plus **une** icône maison, « panneau » (point 4). Aucune autre.
+
+**2. Trois tailles, un trait rendu fixe par taille.** Le trait est réglé pour que l'icône ait le même poids optique partout :
+
+| Taille | Où | `stroke-width` (grille de 24) | Trait rendu |
+|---|---|---|---|
+| **20 px** | barres : barre latérale et rail, rail d'outils de l'éditeur, barre du haut, onglets de navigation, boutons `md`/`lg` | **2,1** | 1,75 px |
+| **16 px** | boutons compacts (`sm`), menus, champs, tableaux, puces, badges, chevrons | **2,25** | 1,5 px |
+| **24 px** | états vides et tuiles d'illustration uniquement | **1,75** | 1,75 px |
+
+- Toute autre taille (12, 13, 14, 18 px…) est interdite. Un texte de 13 px prend une icône de 16 px.
+- **Mise en œuvre** : un seul endroit, `packages/ui` (composant `<Icon as={…} size="sm|md|lg" />` ou règles CSS `svg.lucide[width="16"]`, `[width="20"]`, `[width="24"]`). Plus aucun `strokeWidth` local dans les composants et plus aucun `stroke-width` dans les CSS de page.
+
+**3. Une icône fixe pour plier et déplier.** Pas de variante à flèche (`PanelLeftClose`/`Open`, `ChevronsLeft`/`Right`, `FolderOpen` pour « ouvert », `ArrowLeftToLine`…). L'icône ne change pas. L'état est porté par `aria-pressed` (épingler, afficher un panneau) ou `aria-expanded` (déplier une section), et le libellé de l'infobulle dit l'action. Seul le chevron d'une section repliable (`ChevronDown`) peut **tourner** de 180° (transition de 150 ms, désactivée en mouvement réduit).
+
+**4. Icône maison « panneau »** pour **toutes** les bascules de colonne : barre latérale, colonne Dossiers, panneaux de l'éditeur. Elle est dessinée sur la grille Lucide (24 × 24, trait de la taille, bouts et angles arrondis) :
+
+```svg
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="3" width="18" height="18" rx="4"/>
+  <path d="M9.5 3v18"/>
+  <path d="M6.25 8h.01M6.25 12h.01M6.25 16h.01"/>
+</svg>
+```
+
+Un rectangle aux grands arrondis (rx 4 au lieu de 2), une colonne de gauche avec trois points, sans flèche. Panneau de droite : symétrie horizontale (`transform: scaleX(-1)`). Panneau du bas (commentaires) : rotation de -90°. Classe `lucide lucide-panneau`, pour que l'e2e la contrôle comme les autres.
+
+**5. Une icône par concept, partout la même.** Cette table complète celle du §15.1 et **prime sur elle** en cas de désaccord (par exemple, Dupliquer passe de `Copy` à `CopyPlus`). `BarChart3` et `CircleHelp` sont d'anciens alias de `ChartColumn` et de `CircleQuestionMark` : même dessin.
+
+| Concept | Icône | Concept | Icône |
+|---|---|---|---|
+| Démos | `LayoutGrid` | Partager | `Share2` |
+| Sandbox | `Map` | Exporter, télécharger | `Download` |
+| Parcours de formation | `Route` | Importer | `Upload` |
+| Suite du parcours, embranchement, variante A/B | `GitBranch` | Commentaires | `MessageSquare` |
+| Analytics | `ChartColumn` | Dupliquer | `CopyPlus` |
+| Apprenants | `GraduationCap` | Copier | `Copy` |
+| Paramètres | `Settings` (jamais `Settings2`) | Coller / couper | `ClipboardPaste` / `Scissors` |
+| Aide, centre d'aide | `CircleQuestionMark` | Remplacer (capture) | `Replace` |
+| Extension | `Puzzle` | Masquer une étape | `EyeOff` |
+| Notifications | `Bell` (jamais `BellRing`) | Supprimer | `Trash2` |
+| IA, assistant, génération | `Sparkles` (jamais `WandSparkles`) | Plus d'actions | `Ellipsis` |
+| Clé d'accès | `KeyRound` (jamais `Key`) | Sécurité | `ShieldCheck` (jamais `Shield`) |
+| Ajouter une image | `ImagePlus` | Remplacer l'image | `ImageUp` |
+| Paquet SCORM | `Package` | Bascule de colonne | `panneau` (maison) |
+| Toutes les démos | `Layers` | Mes démos | `User` |
+
+**6. Recette et e2e** (`icones.e2e.cjs`, sur toutes les pages de `APP_PAGES` et `PLAYER_PAGES`, en clair et en sombre) :
+- chaque `svg.lucide` visible mesure 16, 20 ou 24 px ;
+- son `stroke-width` calculé est celui de sa taille (2,25, 2,1 ou 1,75, à 0,01 près) ;
+- aucune classe `lucide-panel-left-close`, `-open`, `lucide-chevrons-left`, `-right`, `lucide-settings-2`, `lucide-wand-sparkles`, `lucide-bell-ring`, `lucide-key` (seule), `lucide-shield` (seule) ;
+- toutes les bascules de colonne (`aria-pressed` sur un bouton qui contrôle un panneau) contiennent `lucide-panneau`.
+
+Planche avant/après, en clair et en sombre : `maquettes/refonte/icones-icon-01.html` et `img/icones-icon-01/`.
 
 ### 15.2 Champs : spécifications exactes
 
