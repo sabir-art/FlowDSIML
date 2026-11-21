@@ -1,3 +1,5 @@
 # Faux positifs vérifiés à la main (empreinte exacte : commit, fichier, règle, ligne).
 # Jeton de lien factice « abcdef123456 » dans un test de routage du lecteur.
 64815f14132007e4b1bd22b27089f890e44f47e5:apps/player/src/logic.test.ts:generic-api-key:50
+# Clé Brevo factice « xkeysib-faux-0123456789 » dans le test de notify-email.
+a54e23cdd083fd48c13e3d098aafb4e0131da66e:supabase/functions/notify-email/lib_test.ts:generic-api-key:14
