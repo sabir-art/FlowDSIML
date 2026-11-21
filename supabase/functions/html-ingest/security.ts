@@ -104,6 +104,8 @@ export function countSecurity(html: string, pageUrl: string | null): SecurityCou
 }
 
 /**
+ * Compteurs déclaratifs côté extension ; garantie = assainissement serveur (sanitizePage puis inert, dans
+ * index.ts). Les compteurs ne sont qu'informatifs (décision du chef, 21 novembre).
  * Compteurs enregistrés : pour chaque compteur, le plus grand entre celui du serveur (sur la page reçue,
  * déjà nettoyée par l'extension) et celui déclaré par l'extension (sur la page d'origine). Le serveur ne
  * peut pas sous-estimer ce qu'il retire lui-même ; une valeur déclarée illisible compte pour 0.

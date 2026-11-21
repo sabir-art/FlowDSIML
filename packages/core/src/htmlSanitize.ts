@@ -2,8 +2,9 @@
  * A8 : assainissement d'une capture HTML (côté extension ; le serveur assainit à nouveau). Retire
  * tout ce qui peut exécuter du code, charger un contenu tiers ou garder une saisie : scripts,
  * cadres, objets, gestionnaires on*, URL javascript:, valeurs des champs. Le résultat est inerte.
- * L49 §3 : renvoie aussi les compteurs du rapport d'analyse (mêmes règles que sanitizePage côté serveur,
- * supabase/functions/html-ingest/lib.ts : mêmes chiffres sur la même page).
+ * L49 §3 : renvoie aussi les compteurs du rapport d'analyse, avec les mêmes règles que countSecurity côté
+ * serveur (supabase/functions/html-ingest/security.ts : mêmes chiffres sur la même page). Compteurs
+ * déclaratifs côté extension ; garantie = assainissement serveur.
  */
 const SCRIPTS = 'script,noscript';
 const FRAMES = 'iframe,frame,frameset,object,embed,applet';
