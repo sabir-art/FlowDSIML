@@ -1,6 +1,7 @@
 import { mediaPublicUrl } from './config';
+import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import type { SandboxSettings, Step } from '@flowdsiml/manifest';
+import type { Rect, SandboxSettings, Step } from '@flowdsiml/manifest';
 import {
   FRAME_SANDBOX,
   buildSrcdoc,
@@ -29,6 +30,9 @@ export function HtmlStep({
   onNext,
   onGo,
   status,
+  target = null,
+  onHit,
+  overlay,
 }: {
   step: Step;
   t: Dict;
@@ -40,6 +44,15 @@ export function HtmlStep({
   onGo: (stepId: string) => void;
   /** Sandbox : « n pages clés vues sur N ». */
   status?: string;
+  /** A8 guide : zone visée par la bulle courante (sélecteur unique, sinon rect de secours). */
+  target?: { sel: string | null; rect: Rect } | null;
+  /** A8 guide : clic du visiteur dans la zone visée. */
+  onHit?: () => void;
+  /**
+   * A8 guide : calque posé sur la page, avec la zone visée en fractions du cadre (null : pas encore
+   * située) et found (false : sélecteur introuvable, la zone est le rect de secours).
+   */
+  overlay?: (box: Rect | null, found: boolean) => ComponentChildren;
 }) {
   const h = step.html!;
   const ht = t.html;
@@ -51,6 +64,9 @@ export function HtmlStep({
   /** L49 §4 : lien externe autorisé en attente de confirmation (adresse de l'opération). */
   const [leave, setLeave] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
+  const [ready, setReady] = useState(false);
+  /** A8 guide : zone visée, en px de la page (avant mise à l'échelle) ; found : élément trouvé. */
+  const [spot, setSpot] = useState<{ rect: Rect; found: boolean } | null>(null);
   const [boxW, setBoxW] = useState(0);
   const vw = h.viewport?.w ?? 1280;
   const vh = h.viewport?.h ?? 800;
@@ -58,6 +74,7 @@ export function HtmlStep({
   useEffect(() => {
     let alive = true;
     setDoc(null);
+    setReady(false);
     setFailed(false);
     fetch(h.url)
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
@@ -125,7 +142,10 @@ export function HtmlStep({
         };
         // Origine opaque : seule la cible « * » est possible ; aucun secret n'est transmis
         win.postMessage(init, '*');
-      } else if (m.t === 'go') onGo(m.step);
+        setReady(true);
+      } else if (m.t === 'target') setSpot({ rect: m.rect, found: m.found });
+      else if (m.t === 'hit') onHit?.();
+      else if (m.t === 'go') onGo(m.step);
       else if (m.t === 'unlinked') {
         setToast(m.ext ? ht.outside : ht.unavailable);
         window.setTimeout(() => setToast(null), 3000);
@@ -137,7 +157,19 @@ export function HtmlStep({
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [ops, sandbox, h.links, onGo, ht]);
+  }, [ops, sandbox, h.links, onGo, ht, onHit]);
+
+  // A8 guide : la page suit la zone visée et renvoie sa position (défilement, taille)
+  const targetKey = target ? JSON.stringify(target) : '';
+  useEffect(() => {
+    const win = frame.current?.contentWindow;
+    setSpot(null);
+    if (!win || !ready) return;
+    const msg: ToFrame = target
+      ? { fd: 1, t: 'target', sel: target.sel, rect: target.rect }
+      : { fd: 1, t: 'target', clear: true };
+    win.postMessage(msg, '*');
+  }, [ready, targetKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const title = h.title || step.title || '';
   return (
@@ -162,6 +194,17 @@ export function HtmlStep({
           <p class="p-html-state" role={failed ? 'alert' : 'status'}>
             {failed ? ht.error : ht.loading}
           </p>
+        )}
+        {overlay?.(
+          spot && boxW > 0
+            ? {
+                x: (spot.rect.x * scale) / boxW,
+                y: spot.rect.y / vh,
+                w: (spot.rect.w * scale) / boxW,
+                h: spot.rect.h / vh,
+              }
+            : null,
+          spot?.found ?? true,
         )}
         <div class="p-html-toast" role="status" aria-live="polite">
           {toast ?? ''}

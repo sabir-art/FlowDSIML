@@ -2651,6 +2651,10 @@ h1.p-title {
   color: var(--p-muted, #57534e);
   font-size: 14px;
 }
+/* Sombre : le repère est posé sur le fond du lecteur, pas sur une surface claire */
+.is-dark .p-html-key {
+  color: color-mix(in srgb, var(--p-chrome-text) 78%, transparent);
+}
 
 /* ===== L25-06 : barre d'onglets au-dessus de la capture ===== */
 .p-win {
@@ -2996,4 +3000,84 @@ h1.p-title {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 24px;
+}
+
+/* A8 : guide optionnel du Sandbox (bulle non modale, anneau de la zone, pastille et menu) */
+.p-gd {
+  z-index: 12;
+}
+.p-gd-ring {
+  position: absolute;
+  z-index: 11;
+  pointer-events: none;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 2px var(--p-primary),
+    0 0 0 6px color-mix(in srgb, var(--p-primary) 22%, transparent);
+}
+.p-gd--center,
+.p-gd--sheet {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(340px, calc(100% - 24px));
+  background: var(--p-surface);
+  color: var(--p-text);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: var(--p-shadow);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.p-gd--sheet {
+  bottom: 8px;
+  width: calc(100% - 16px);
+}
+.p-gd--sheet.p-gd--top {
+  bottom: auto;
+  top: 8px;
+}
+.p-gd-body {
+  margin: 0 0 4px;
+}
+.p-gd-count {
+  font-size: 13px;
+  color: var(--p-muted, color-mix(in srgb, currentColor 65%, transparent));
+  margin-right: auto;
+  font-variant-numeric: tabular-nums;
+}
+.p-gd .p-btn-link {
+  background: none;
+  border-color: transparent;
+  color: var(--p-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding-inline: 4px;
+}
+.p-gd-pillwrap {
+  position: relative;
+}
+.p-gd-pill {
+  white-space: nowrap;
+}
+.p-gd-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  background: var(--p-surface);
+  color: var(--p-text);
+  border-radius: 12px;
+  box-shadow: var(--p-shadow);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-gd {
+    transition: none;
+    animation: none;
+  }
 }

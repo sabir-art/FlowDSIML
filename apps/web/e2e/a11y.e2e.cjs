@@ -875,8 +875,63 @@ const APP_PAGES = [
 ];
 
 /** Pages du lecteur et du centre (réponses des fonctions simulées). */
+const GUIDE_PAGE = '0b5c1f0e-0000-4000-8000-0000000000e1';
 const PLAYER_PAGES = [
   { name: 'Lecteur · démo', path: '/d/0b5c1f0e-0000-4000-8000-000000000001' },
+  // A8 : Sandbox avec le guide optionnel ouvert (bulle non modale, pastille dans la barre)
+  {
+    name: 'Lecteur · Sandbox, guide ouvert',
+    path: '/d/0b5c1f0e-0000-4000-8000-0000000000f1',
+    html: '<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Accueil</title></head><body><main><h1>Tableau de bord</h1><p class="kpi">Rendez-vous : 48</p></main></body></html>',
+    manifest: {
+      schemaVersion: 1,
+      demoId: '0b5c1f0e-0000-4000-8000-0000000000f1',
+      versionId: '0b5c1f0e-0000-4000-8000-0000000000ef',
+      workspaceId: 'w',
+      title: 'Créer un rendez-vous',
+      locale: 'fr',
+      publishedAt: '2026-11-21T10:00:00Z',
+      theme: {},
+      kind: 'sandbox',
+      sandbox: {
+        start: GUIDE_PAGE,
+        autoLink: true,
+        unlinked: 'toast',
+        guide: true,
+        keyPages: [],
+        guideSteps: [{ page: GUIDE_PAGE, hotspot: 'h1', advance: 'next' }],
+      },
+      steps: [
+        {
+          id: GUIDE_PAGE,
+          kind: 'html',
+          title: 'Accueil',
+          hotspots: [
+            {
+              id: 'h1',
+              x: 0.02,
+              y: 0.1,
+              w: 0.2,
+              h: 0.1,
+              title: 'Vos rendez-vous',
+              body: 'Le nombre de rendez-vous de la semaine.',
+              sel: 'p.kpi',
+            },
+          ],
+          html: {
+            url: 'assets/g1.html',
+            title: 'Accueil',
+            viewport: { w: 1280, h: 720 },
+            ops: [],
+            links: [],
+          },
+        },
+      ],
+    },
+    open: async (p) => {
+      await p.locator('.p-gd[role="dialog"]').waitFor();
+    },
+  },
   {
     // L34 : fenêtre du formulaire de contact (étape 3 de la démo de test)
     name: 'Lecteur · formulaire de contact',
@@ -999,22 +1054,24 @@ async function appPage(b, s, theme, check) {
 
 async function playerPage(b, s, theme, check) {
   const base = require('./player-maquette.cjs');
-  const manifest = s.video
-    ? {
-        ...base,
-        forms: [],
-        steps: [
-          {
-            id: 'v1',
-            kind: 'video',
-            title: 'Saisie de la fiche',
-            chapterId: 'c1',
-            video: { url: 'assets/v.webm', durationMs: 12000, cuts: [], pauses: [], captions: [] },
-          },
-          ...base.steps.slice(1, 2),
-        ],
-      }
-    : base;
+  const manifest = s.manifest
+    ? s.manifest
+    : s.video
+      ? {
+          ...base,
+          forms: [],
+          steps: [
+            {
+              id: 'v1',
+              kind: 'video',
+              title: 'Saisie de la fiche',
+              chapterId: 'c1',
+              video: { url: 'assets/v.webm', durationMs: 12000, cuts: [], pauses: [], captions: [] },
+            },
+            ...base.steps.slice(1, 2),
+          ],
+        }
+      : base;
   const ctx = await b.newContext({
     viewport: { width: 1440, height: 900 },
     locale: 'fr-FR',
@@ -1034,13 +1091,15 @@ async function playerPage(b, s, theme, check) {
     json(r, s.publicPage && r.request().url().includes('/rpc/public_page') ? s.publicPage : null),
   );
   await p.route('**/assets/**', (r) =>
-    s.missingAssets
-      ? r.fulfill({ status: 404, body: '', headers: cors })
-      : r.fulfill({
-          contentType: 'image/png',
-          body: fs.readFileSync(`${__dirname}/fixture.png`),
-          headers: cors,
-        }),
+    s.html && r.request().url().endsWith('.html')
+      ? r.fulfill({ contentType: 'text/html', body: s.html, headers: cors })
+      : s.missingAssets
+        ? r.fulfill({ status: 404, body: '', headers: cors })
+        : r.fulfill({
+            contentType: 'image/png',
+            body: fs.readFileSync(`${__dirname}/fixture.png`),
+            headers: cors,
+          }),
   );
   await p.goto(`${PLAYER}/#${s.path}`);
   await p.waitForTimeout(1500);

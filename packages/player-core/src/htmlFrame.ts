@@ -61,7 +61,13 @@ export type ToFrame =
   | { fd: 1; t: 'similar' }
   | { fd: 1; t: 'multi-clear' }
   /** Éditeur : sélectionne le n-ième parent de l'élément sélectionné (fil du sélecteur). */
-  | { fd: 1; t: 'up'; n: number };
+  | { fd: 1; t: 'up'; n: number }
+  /**
+   * A8 guide du Sandbox : zone visée par la bulle courante (null : aucune). Le sélecteur unique prime ;
+   * sinon le rect (0..1 de la fenêtre capturée, au défilement 0) sert de secours.
+   */
+  | { fd: 1; t: 'target'; sel: string | null; rect: { x: number; y: number; w: number; h: number } | null }
+  | { fd: 1; t: 'target'; clear: true };
 
 export interface Selected {
   sel: string;
@@ -91,7 +97,11 @@ export type FromFrame =
   | { fd: 1; t: 'select'; el: Selected | null }
   | { fd: 1; t: 'multi'; els: MultiEl[] }
   | { fd: 1; t: 'key'; key: 'edit' | 'hide' }
-  | { fd: 1; t: 'scroll' };
+  | { fd: 1; t: 'scroll' }
+  /** A8 guide : position de l'élément visé, en px de la fenêtre de la page ; found : sélecteur trouvé. */
+  | { fd: 1; t: 'target'; rect: { x: number; y: number; w: number; h: number }; found: boolean }
+  /** A8 guide : clic du visiteur dans la zone visée. */
+  | { fd: 1; t: 'hit' };
 
 const STEP_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const num = (v: unknown) => typeof v === 'number' && Number.isFinite(v);
@@ -136,6 +146,18 @@ export function parseFromFrame(data: unknown): FromFrame | null {
         : null;
     case 'scroll':
       return { fd: 1, t: 'scroll' };
+    case 'target': {
+      const r = m.rect as Record<string, unknown> | undefined;
+      if (!r || !num(r.x) || !num(r.y) || !num(r.w) || !num(r.h) || typeof m.found !== 'boolean') return null;
+      return {
+        fd: 1,
+        t: 'target',
+        rect: { x: r.x as number, y: r.y as number, w: r.w as number, h: r.h as number },
+        found: m.found,
+      };
+    }
+    case 'hit':
+      return { fd: 1, t: 'hit' };
     case 'key':
       return m.key === 'edit' || m.key === 'hide' ? { fd: 1, t: 'key', key: m.key } : null;
     case 'multi': {
@@ -213,6 +235,7 @@ export const FRAME_RUNTIME = `(function () {
   var hoverBox = null, selBox = null, selTag = null;
   var BLUE = '#2897D5';
   var multi = [], multiBoxes = [];
+  var target = null;
   var HEXRE = /^#[0-9A-Fa-f]{6}$/;
   var SVGNS = 'http://www.w3.org/2000/svg';
   function post(m) { m.fd = 1; parentWin.postMessage(m, '*'); }
@@ -611,6 +634,8 @@ export const FRAME_RUNTIME = `(function () {
       select(t === document.body ? null : t);
       return;
     }
+    // A8 guide : avant les liens, le guide avance ; la navigation se fait ensuite comme d'habitude
+    if (target && inTarget(e)) post({ t: 'hit' });
     var linked = t.closest('[data-fd-link]');
     var ext = t.closest('[data-tc-ext]');
     var actionable = t.closest('a,button,[role=button],[role=link],[role=tab],[role=menuitem],input[type=submit],summary');
@@ -623,6 +648,25 @@ export const FRAME_RUNTIME = `(function () {
     else if (actionable && unlinked !== 'none') post({ t: 'unlinked' });
   }, true);
   document.addEventListener('submit', function (e) { e.preventDefault(); }, true);
+  // A8 guide : la zone visée suit le défilement et la taille de la page
+  function targetEl() { return target && target.sel && unique(target.sel) ? q(target.sel) : null; }
+  function targetBox() {
+    var el = targetEl();
+    if (el) { var b = el.getBoundingClientRect(); return { r: { x: b.left, y: b.top, w: b.width, h: b.height }, found: true }; }
+    if (!target || !target.rect) return null;
+    var W = document.documentElement.clientWidth, H = innerHeight, k = target.rect;
+    return { r: { x: k.x * W - scrollX, y: k.y * H - scrollY, w: k.w * W, h: k.h * H }, found: false };
+  }
+  function postTarget() { var t = mode === 'player' && targetBox(); if (t) post({ t: 'target', rect: t.r, found: t.found }); }
+  function inTarget(e) {
+    var el = targetEl();
+    if (el) return el.contains(e.target);
+    var t = targetBox();
+    return !!t && e.clientX >= t.r.x && e.clientX <= t.r.x + t.r.w && e.clientY >= t.r.y && e.clientY <= t.r.y + t.r.h;
+  }
+  addEventListener('scroll', function () { if (target) postTarget(); }, { passive: true });
+  addEventListener('resize', function () { if (target) postTarget(); });
+
   addEventListener('message', function (e) {
     if (e.source !== parentWin) return;
     var m = e.data;
@@ -650,6 +694,16 @@ export const FRAME_RUNTIME = `(function () {
     } else if (m.t === 'multi-clear' && mode === 'editor') {
       var keep = multi.length ? q(multi[0]) : null;
       multi = []; postMulti(); select(keep);
+    } else if (m.t === 'target' && mode === 'player') {
+      var okRect = m.rect && ['x', 'y', 'w', 'h'].every(function (k) { return typeof m.rect[k] === 'number' && isFinite(m.rect[k]); });
+      target = m.clear || (!m.sel && !okRect) ? null : { sel: typeof m.sel === 'string' ? m.sel.slice(0, 500) : null, rect: okRect ? m.rect : null };
+      var te = targetEl();
+      if (te) {
+        var tb = te.getBoundingClientRect();
+        if (tb.top < 0 || tb.bottom > innerHeight || tb.left < 0 || tb.right > document.documentElement.clientWidth)
+          te.scrollIntoView({ block: 'center', inline: 'nearest' });
+      }
+      postTarget();
     } else if (m.t === 'up' && mode === 'editor' && typeof m.n === 'number') {
       var c = current();
       for (var k = 0; c && k < m.n && c.parentElement && c.parentElement !== document.documentElement; k++) c = c.parentElement;

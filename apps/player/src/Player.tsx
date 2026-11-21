@@ -69,6 +69,8 @@ import { Checklist } from './Checklist';
 import { BeforeAfterStep } from './BeforeAfter';
 import { VideoStep } from './VideoStep';
 import { HtmlStep } from './HtmlStep';
+import { GuideBubble, GuidePill } from './SandboxGuide';
+import { advance, GUIDE_START, guideKey, guidePath, guideView, readGuide, type GuideState } from './guide';
 import { InfoDialog } from './InfoDialog';
 import { GlossaryDrawer, GlossaryTip } from './Glossary';
 import { Quiz, ringVars } from './Quiz';
@@ -462,6 +464,72 @@ export function Player({
     go(i);
   }
 
+  // ===== A8 : guide optionnel du Sandbox (bulles par-dessus les pages, état gardé pour la session) =====
+  const guide = useMemo(() => guidePath(m), [m]);
+  const gn = guide.length;
+  const [gs, setGsRaw] = useState<GuideState>(() => {
+    try {
+      return readGuide(sessionStorage.getItem(guideKey(m.demoId)), gn);
+    } catch {
+      return GUIDE_START;
+    }
+  });
+  const setGs = (v: GuideState) => {
+    setGsRaw(v);
+    try {
+      sessionStorage.setItem(guideKey(m.demoId), JSON.stringify(v));
+    } catch {
+      /* stockage indisponible : l'état vit le temps de la page */
+    }
+  };
+  const gv = guideView(gs, guide, step.id, sandbox?.start ?? null);
+  const pillRef = useRef<HTMLButtonElement>(null);
+  // La pastille change de forme avec l'état : le focus lui est rendu après le rendu
+  const focusPill = useRef(false);
+  useEffect(() => {
+    if (focusPill.current) pillRef.current?.focus();
+    focusPill.current = false;
+  }, [gs]);
+  const shownSteps = useRef(new Set<number>());
+  const gBubble = gv.kind === 'guide' ? gv.bubble : null;
+  useEffect(() => {
+    if (gBubble && !shownSteps.current.has(gs.k)) {
+      shownSteps.current.add(gs.k);
+      tracker.track('guide_step', { stepId: step.id, stepIndex: index, props: { index: gs.k } });
+    }
+  }, [gBubble, gs.k]); // eslint-disable-line react-hooks/exhaustive-deps
+  /** Aller à une page du guide, sans compter un clic de lien. */
+  const goGuidePage = (id: string) => {
+    const i = m.steps.findIndex((s) => s.id === id);
+    if (i >= 0 && i !== index) go(i);
+  };
+  const guideNext = () => {
+    const v = advance(gs, gn);
+    setGs(v);
+    if (v.mode === 'done') tracker.track('guide_done', { stepId: step.id, stepIndex: index });
+  };
+  const guideSkip = (at: 'skip' | 'quit') => {
+    setGs({ ...gs, mode: 'off' });
+    tracker.track('guide_skip', { stepId: step.id, stepIndex: index, props: { at } });
+    focusPill.current = true;
+  };
+  const guideBack = () => {
+    setGs({ k: gs.k, mode: 'on' });
+    goGuidePage(guide[gs.k]!.page);
+  };
+  // Échap ferme la bulle et met le guide en pause ; le focus revient sur la pastille
+  const gOpen = gv.kind === 'guide' && (!!gv.bubble || !!gv.startsOn);
+  useEffect(() => {
+    if (!gOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      focusPill.current = true;
+      setGs({ k: gs.k, mode: 'hold' });
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [gOpen, gs.k]); // eslint-disable-line react-hooks/exhaustive-deps
+
   function openQuiz() {
     markSeen(index); // fin du parcours : la dernière étape compte comme vue
     setQuizOpened(true);
@@ -653,7 +721,7 @@ export function Player({
   const activeTitle = tabs.tabs.find((x) => x.n === tabs.active)?.title ?? '';
 
   // L24 : annonce de l'étape aux lecteurs d'écran (zone toujours présente, texte mis à jour)
-  const h0 = step.hotspots[0];
+  const h0 = sandbox ? undefined : step.hotspots[0];
   const announce =
     view === 'quiz' || gateForm
       ? ''
@@ -685,6 +753,18 @@ export function Player({
       <p class="sr-only" aria-live="polite" aria-atomic="true">
         {announce}
       </p>
+      {/* A8 : annonce de l'étape du guide (la bulle ne prend pas le focus) */}
+      <p class="sr-only" aria-live="polite" aria-atomic="true">
+        {gBubble
+          ? fmt(t.guide as unknown as Record<string, string>, 'live', {
+              k: gs.k + 1,
+              n: gn,
+              title: richTextToPlain(sub(gBubble.hotspot.title || gBubble.hotspot.body)),
+            })
+          : gv.kind === 'guide' && gv.done
+            ? t.guide.done
+            : ''}
+      </p>
       {preview && !present && <div class="p-preview">{t.preview}</div>}
       <header class="p-top" inert={!!gateForm}>
         {/* PY-1 : pastille du workspace (logo, sinon initiales), titre, méta */}
@@ -711,6 +791,22 @@ export function Player({
           </div>
         </div>
         <div class="p-top-acts">
+          {gv.kind === 'guide' && (
+            <GuidePill
+              t={t}
+              view={gv}
+              k={gs.k}
+              n={gn}
+              short={compact}
+              btnRef={pillRef}
+              onBack={guideBack}
+              onRestart={() => {
+                setGs(GUIDE_START);
+                goGuidePage(guide[0]!.page);
+              }}
+              onQuit={() => guideSkip('quit')}
+            />
+          )}
           {m.checklist && items.length > 0 && !compact && checklistDocked && (
             <Checklist
               title={m.checklist.title}
@@ -908,6 +1004,47 @@ export function Player({
               nextLabel={last ? (m.quiz ? t.quiz.start : t.finish) : t.next}
               onNext={last ? (m.quiz ? openQuiz : finish) : next}
               onGo={goStep}
+              target={
+                gBubble
+                  ? {
+                      sel: gBubble.hotspot.sel,
+                      rect: {
+                        x: gBubble.hotspot.x,
+                        y: gBubble.hotspot.y,
+                        w: gBubble.hotspot.w,
+                        h: gBubble.hotspot.h,
+                      },
+                    }
+                  : null
+              }
+              onHit={() => gBubble?.advance === 'click' && guideNext()}
+              overlay={
+                gv.kind === 'guide' && (gv.bubble || gv.startsOn || gv.done)
+                  ? (box, found) => (
+                      <GuideBubble
+                        t={t}
+                        sub={sub}
+                        html={html}
+                        point={gv.bubble}
+                        box={gv.bubble ? box : null}
+                        found={found}
+                        k={gs.k}
+                        n={gn}
+                        sheet={compact}
+                        startsOn={
+                          gv.startsOn ? sub(m.steps.find((s) => s.id === gv.startsOn)?.title ?? '') : null
+                        }
+                        done={gv.done}
+                        onNext={guideNext}
+                        onSkip={() => guideSkip('skip')}
+                        onGo={() => goGuidePage(guide[0]!.page)}
+                        onClose={() => {
+                          setGs({ k: gs.k, mode: 'closed' });
+                        }}
+                      />
+                    )
+                  : undefined
+              }
               status={
                 sandbox && keyPages.length > 0
                   ? fmt(t.html as unknown as Record<string, string>, 'keyPages', {

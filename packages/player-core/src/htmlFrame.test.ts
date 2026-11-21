@@ -61,6 +61,24 @@ describe('htmlFrame', () => {
     expect(parseFromFrame({ fd: 1, t: 'select', el: { sel: 'b' } })).toBeNull();
     expect(parseFromFrame({ fd: 1, t: 'key', key: 'exec' })).toBeNull();
   });
+  it('A8 guide : position de la zone visée et clic, format strict', () => {
+    expect(parseFromFrame({ fd: 1, t: 'target', rect: { x: 10, y: 20, w: 30, h: 40 }, found: true })).toEqual(
+      {
+        fd: 1,
+        t: 'target',
+        rect: { x: 10, y: 20, w: 30, h: 40 },
+        found: true,
+      },
+    );
+    expect(
+      parseFromFrame({ fd: 1, t: 'target', rect: { x: 'a', y: 0, w: 1, h: 1 }, found: true }),
+    ).toBeNull();
+    expect(parseFromFrame({ fd: 1, t: 'target', rect: { x: 0, y: 0, w: 1, h: 1 } })).toBeNull();
+    expect(
+      parseFromFrame({ fd: 1, t: 'target', rect: { x: Infinity, y: 0, w: 1, h: 1 }, found: false }),
+    ).toBeNull();
+    expect(parseFromFrame({ fd: 1, t: 'hit', step: 'x' })).toEqual({ fd: 1, t: 'hit' });
+  });
   it('L25-07/08 : sélection multiple et graphique reconnu, format strict', () => {
     const el = { sel: 'b.value', short: 'b.value', bg: '#FFFFFF', color: '#111827' };
     expect(parseFromFrame({ fd: 1, t: 'multi', els: [el, el] })).toEqual({
