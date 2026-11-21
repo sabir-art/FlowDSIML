@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Fiche Chrome Web Store</title>
+<!-- Visuels de la fiche Chrome Web Store de l'extension TutoClick (EXT-STORE).
+     Chaque section .shot est rendue en PNG à sa taille exacte par render.cjs.
+     Données fictives uniquement (espace Acme, ExampleCRM, adresses en example). -->
+<style>
+@font-face { font-family: 'Jakarta'; src: url('src/plus-jakarta-sans-fr-wght.woff2') format('woff2'); font-weight: 200 800; }
+:root { --bg: #F6F8FA; --encre: #1A1A1A; --muted: #4F5966; --border: #DDE2E8; }
+* { box-sizing: border-box; margin: 0; }
+body { background: #ccc; font-family: 'Jakarta', system-ui, sans-serif; display: flex; flex-direction: column; gap: 24px; padding: 24px; }
+.shot { position: relative; width: 1280px; height: 800px; overflow: hidden; background: var(--bg); flex: none; }
+.head { position: absolute; left: 64px; top: 52px; right: 64px; display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; }
+.head h1 { font-size: 40px; line-height: 48px; font-weight: 700; color: var(--encre); letter-spacing: -0.01em; max-width: 880px; }
+.head p { margin-top: 12px; font-size: 20px; line-height: 28px; color: var(--muted); max-width: 860px; }
+.head img.logo { height: 36px; width: auto; flex: none; margin-top: 6px; }
+.frame { position: absolute; left: 64px; right: 64px; top: 224px; bottom: -1px; border: 1px solid var(--border); border-bottom: 0; border-radius: 12px 12px 0 0; overflow: hidden; background: #fff; }
+.frame img { display: block; width: 100%; height: auto; }
+/* 1 : page en cours de capture et popup */
+.s1 .frame { right: 360px; }
+.s1 .pop { position: absolute; right: 64px; top: 224px; width: 300px; border: 1px solid var(--border); border-radius: 12px 12px 0 0; border-bottom: 0; overflow: hidden; background: #fff; bottom: -1px; }
+.s1 .pop img { width: 100%; display: block; }
+/* 5 : la boîte de dialogue a déjà son cadre : pas de second cadre autour (§17.4) */
+.s5 .frame { left: 168px; right: 168px; top: 232px; bottom: auto; border: 0; background: transparent; border-radius: 16px; }
+/* vignette 440 × 280 */
+.tile { width: 440px; height: 280px; background: var(--bg); display: flex; align-items: center; justify-content: center; flex: none; }
+.tile img { height: 72px; width: auto; }
+/* icône de la boutique : 96 px d'image dans 128 px transparents */
+.icon { width: 128px; height: 128px; background: transparent; display: flex; align-items: center; justify-content: center; flex: none; }
+.icon img { width: 96px; height: 96px; }
+</style>
+</head>
+<body>
+<section class="shot s1" id="capture-1">
+  <div class="head"><div><h1>Créez une démo en parcourant votre logiciel</h1><p>Choisissez le type de capture, puis cliquez : chaque clic devient une étape.</p></div><img class="logo" src="src/logo-tutoclick-compact.svg" alt="TutoClick"></div>
+  <div class="frame"><img src="src/s1-page.png" alt=""></div>
+  <div class="pop"><img src="src/s1-popup.png" alt=""></div>
+</section>
+<section class="shot s2" id="capture-2">
+  <div class="head"><div><h1>Chaque clic devient une étape, avec sa bulle</h1><p>Retouchez les textes, ajoutez des variables et une voix off dans l'éditeur.</p></div><img class="logo" src="src/logo-tutoclick-compact.svg" alt="TutoClick"></div>
+  <div class="frame"><img src="src/s2-editeur.png" alt=""></div>
+</section>
+<section class="shot s3" id="capture-3">
+  <div class="head"><div><h1>Données personnelles floutées avant l'envoi</h1><p>La détection se fait dans votre navigateur : rien n'est envoyé avant votre validation.</p></div><img class="logo" src="src/logo-tutoclick-compact.svg" alt="TutoClick"></div>
+  <div class="frame"><img src="src/s3-verification.png" alt=""></div>
+</section>
+<section class="shot s4" id="capture-4">
+  <div class="head"><div><h1>Partagez une démo que l'on suit à son rythme</h1><p>Par lien, dans votre intranet ou en paquet SCORM pour votre plateforme de formation.</p></div><img class="logo" src="src/logo-tutoclick-compact.svg" alt="TutoClick"></div>
+  <div class="frame"><img src="src/s4-apercu.png" alt=""></div>
+</section>
+<section class="shot s5" id="capture-5">
+  <div class="head"><div><h1>Captures d'écran, pages HTML ou Sandbox</h1><p>Pages HTML : textes modifiables sans recapturer. Sandbox : le visiteur explore librement.</p></div><img class="logo" src="src/logo-tutoclick-compact.svg" alt="TutoClick"></div>
+  <div class="frame"><img src="src/s5-types.png" alt=""></div>
+</section>
+<section class="tile" id="vignette"><img src="src/logo-tutoclick-compact.svg" alt="TutoClick"></section>
+<section class="icon" id="icone"><img src="src/symbole-tutoclick.svg" alt="TutoClick"></section>
+</body>
+</html>

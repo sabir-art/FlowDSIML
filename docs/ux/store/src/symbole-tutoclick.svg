@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" role="img" aria-label="TutoClick" viewBox="28 28 204 204">
+  <defs>
+    <style>
+      .st0 {
+        fill: #2b95d2;
+      }
+
+      .st1 {
+        stroke: #fff;
+      }
+
+      .st1, .st2 {
+        fill: none;
+        stroke-miterlimit: 10;
+        stroke-width: 5px;
+      }
+
+      .st3 {
+        fill: #95c020;
+      }
+
+      .st4 {
+        fill: #a3195b;
+      }
+
+      .st5 {
+        isolation: isolate;
+      }
+
+      .st6 {
+        fill: #fff;
+      }
+
+      .st7 {
+        fill: #d50d52;
+      }
+
+      .st8 {
+        fill: #f19103;
+      }
+
+      .st9 {
+        fill: #123a49;
+      }
+
+      .st2 {
+        stroke: #a3195b;
+      }
+
+      .st11 {
+        fill: #a3195b;
+      }
+
+      .st10 {
+        fill: #1a1a1a;
+      }
+    </style>
+  </defs>
+  <path class="st11" d="M170,28h-80c-34.2,0-62,27.8-62,62v80c0,34.2,27.8,62,62,62h80c34.2,0,62-27.8,62-62v-80c0-34.2-27.8-62-62-62Z"/>
+  <path class="st6" d="M134,151.4l17.5,32c3,5.5.9,12.4-4.7,15.2h0c-5.4,2.7-12,.5-14.7-4.8l-17-33.3-23.9,22.3c-2.7,2.5-7.1.6-7.1-3.1v-95.4c0-3.5,4.1-5.5,6.9-3.3l77.1,62.2c3.1,2.5,1.4,7.4-2.6,7.5l-31.5.7Z"/>
+  <circle class="st1" cx="170.5" cy="85.1" r="10.5"/><circle class="st6" cx="170.5" cy="85.1" r="2.8"/><circle class="st1" cx="170.5" cy="85.1" r="21.4"/>
+</svg>
