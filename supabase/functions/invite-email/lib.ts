@@ -7,7 +7,7 @@
 // Droits, plafond horaire (20 par espace) et budget du jour (150) sont décidés en base
 // (invite_send_reserve) ; un envoi en échec est rendu (invite_send_undo).
 
-export type Status = 'sent' | 'notified' | 'failed' | 'rate_limit' | 'budget' | 'sent_before' | 'not_found';
+export type Status = 'sent' | 'failed' | 'rate_limit' | 'budget' | 'sent_before' | 'not_found';
 export type Reserve =
   | {
       ok: true;
@@ -76,8 +76,9 @@ export async function handle(body: Record<string, unknown>, jwt: string, deps: D
       results.push({ id, status: r.reason === 'sent' ? 'sent_before' : r.reason });
       continue;
     }
+    // Confidentialité : même réponse qu'un e-mail, l'admin ne sait pas si l'adresse a un compte
     if (r.mode === 'notify') {
-      results.push({ id, status: 'notified' });
+      results.push({ id, status: 'sent' });
       continue;
     }
     const meta: Meta = {

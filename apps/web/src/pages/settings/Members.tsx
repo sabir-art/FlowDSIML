@@ -29,11 +29,11 @@ export function inviteUrl(token: string) {
   return `${APP_URL}#/invite/${token}`;
 }
 
-type SendStatus = 'sent' | 'notified' | 'failed' | 'rate_limit' | 'budget' | 'sent_before' | 'not_found';
+type SendStatus = 'sent' | 'failed' | 'rate_limit' | 'budget' | 'sent_before' | 'not_found';
 
 /**
  * E-mails P1 : envoi des invitations créées (fonction invite-email). Nouvelle adresse : e-mail Supabase
- * Auth ; compte existant : notification dans l'app. Réseau en échec : toutes en échec (repli sur le lien).
+ * Auth ; compte existant : notification dans l'app, avec la même réponse (l'admin ne sait pas lequel). Réseau en échec : toutes en échec (repli sur le lien).
  */
 async function sendInvitations(ids: string[]): Promise<Record<string, SendStatus>> {
   const { data, error } = await supabase.functions.invoke<{
@@ -43,7 +43,7 @@ async function sendInvitations(ids: string[]): Promise<Record<string, SendStatus
   if (!error) for (const r of data?.results ?? []) by[r.id] = r.status;
   return by;
 }
-const delivered = (s: SendStatus | undefined) => s === 'sent' || s === 'notified';
+const delivered = (s: SendStatus | undefined) => s === 'sent';
 
 /** Rôles du plus élevé au plus faible, comme le tableau des permissions de la maquette. */
 const ROLE_ORDER = [...ROLES].reverse() as Role[];

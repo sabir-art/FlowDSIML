@@ -1,7 +1,7 @@
 -- Tests pgTAP : e-mails P1, budget commun, plafond horaire, notification « invite », Accepter et Refuser.
 begin;
 set search_path = public, extensions;
-select plan(20);
+select plan(21);
 
 insert into auth.users (id, email, last_sign_in_at) values
   ('00000000-0000-0000-0000-0000000300a1', 'olga-inv@acme.example', now()),
@@ -53,7 +53,8 @@ select is(public.invite_send_reserve('00000000-0000-0000-0000-0000000300b2', '00
   '{"ok": true, "mode": "notify"}'::jsonb, 'compte existant : notification');
 select is((select data - 'invitation' from public.notifications where kind = 'invite'),
   '{"actor": "Olga Exemple", "workspace": "Acme"}'::jsonb, 'notification : espace et invitant');
-select is((select sent from private.email_budget where day = private.email_day()), 1, 'notification : pas de budget');
+select is((select sent from private.email_budget where day = private.email_day()), 2,
+  'notification : budget pris comme un e-mail (l''admin ne peut pas distinguer)');
 
 -- La personne invitée lit sa notification sans être membre, et elle seule
 select pg_temp.login('00000000-0000-0000-0000-0000000300a3', 'paul-inv@acme.example');
@@ -90,6 +91,12 @@ update private.email_budget set sent = 150 where day = private.email_day();
 update public.invitations set sent_at = now() - interval '2 hours' where sent_at is not null;
 select is(public.invite_send_reserve('00000000-0000-0000-0000-0000000300b3', '00000000-0000-0000-0000-0000000300a1') ->> 'reason',
   'budget', '150 envois : plus d''invitation par e-mail');
+insert into public.invitations (id, workspace_id, email, role, invited_by) values
+  ('00000000-0000-0000-0000-0000000300b5', (select ws from ctx), 'olga-inv@acme.example', 'viewer', '00000000-0000-0000-0000-0000000300a2');
+update public.members set role = 'admin'
+ where workspace_id = (select ws from ctx) and user_id = '00000000-0000-0000-0000-0000000300a3';
+select is(public.invite_send_reserve('00000000-0000-0000-0000-0000000300b5', '00000000-0000-0000-0000-0000000300a3') ->> 'reason',
+  'budget', '150 envois : compte existant refusé pareil (rien ne révèle le compte)');
 
 select * from finish();
 rollback;

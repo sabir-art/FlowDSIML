@@ -164,10 +164,20 @@ async function invite(page, emails) {
   {
     const state = admin({ existingAccounts: ['paul@acme.example'] });
     const page = await open(state);
-    await invite(page, 'paul@acme.example');
+    await invite(page, 'paul@acme.example, marie@acme.example');
+    const reply = page.waitForResponse((r) => r.url().includes('/functions/v1/invite-email'));
     await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
-    await page.getByText('1 invitation envoyée.').waitFor();
-    ok(!(state.inviteEmails || []).length, 'compte existant : aucun e-mail d’invitation');
+    const body = await (await reply).json();
+    await page.getByText('2 invitations envoyées.').waitFor();
+    ok(
+      (state.inviteEmails || []).map((e) => e.email).join(',') === 'marie@acme.example',
+      'compte existant : aucun e-mail d’invitation (seule la nouvelle adresse en reçoit un)',
+    );
+    // Confidentialité : même réponse, même message et même budget, l'admin ne sait pas qui a un compte
+    ok(
+      body.results.every((r) => r.status === 'sent') && state.emailBudget === 2,
+      'compte existant et nouvelle adresse : réponse « sent » identique, budget compté pareil',
+    );
     await page.close();
   }
   {

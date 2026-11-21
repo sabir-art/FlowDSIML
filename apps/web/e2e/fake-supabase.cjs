@@ -528,11 +528,13 @@ async function install(page, state = seed()) {
           (i) => i.sent_at && Date.parse(i.sent_at) > Date.now() - 3600_000,
         ).length;
         if (hour >= 20) return { id, status: 'rate_limit' };
-        if ((state.existingAccounts || []).includes(inv.email)) {
-          inv.sent_at = new Date().toISOString();
-          return { id, status: 'notified' };
-        }
+        // Comme la base : budget pris avant de savoir s'il y a un compte, même réponse dans les deux cas
         if ((state.emailBudget ?? 0) >= 150) return { id, status: 'budget' };
+        if ((state.existingAccounts || []).includes(inv.email)) {
+          state.emailBudget = (state.emailBudget ?? 0) + 1;
+          inv.sent_at = new Date().toISOString();
+          return { id, status: 'sent' };
+        }
         if (state.inviteTransport === 'fail') return { id, status: 'failed' };
         state.emailBudget = (state.emailBudget ?? 0) + 1;
         inv.sent_at = new Date().toISOString();

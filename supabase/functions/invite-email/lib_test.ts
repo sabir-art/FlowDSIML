@@ -79,25 +79,28 @@ Deno.test("recette 3 : envoi en échec, l'envoi est rendu au budget", async () =
   assertEquals(calls.at(-1), `undo:${ID(1)}`);
 });
 
-Deno.test('recettes 2, 4 et 8 : plafond, compte existant, budget, sans e-mail', async () => {
-  const by: Record<string, Reserve> = {
-    [ID(1)]: { ok: true, mode: 'notify' },
-    [ID(2)]: { ok: false, reason: 'rate_limit' },
-    [ID(3)]: { ok: false, reason: 'budget' },
-    [ID(4)]: { ok: false, reason: 'sent' },
-  };
-  const { deps, calls } = fake((id) => by[id]!);
-  const r = await handle({ invitations: [ID(1), ID(2), ID(3), ID(4)], appUrl: APP }, 'jwt-admin', deps);
-  assertEquals(r.body, {
-    results: [
-      { id: ID(1), status: 'notified' },
-      { id: ID(2), status: 'rate_limit' },
-      { id: ID(3), status: 'budget' },
-      { id: ID(4), status: 'sent_before' },
-    ],
-  });
-  assertEquals(calls, []);
-});
+Deno.test(
+  'recettes 2, 4 et 8 : plafond, compte existant (réponse « sent » comme un e-mail), budget',
+  async () => {
+    const by: Record<string, Reserve> = {
+      [ID(1)]: { ok: true, mode: 'notify' },
+      [ID(2)]: { ok: false, reason: 'rate_limit' },
+      [ID(3)]: { ok: false, reason: 'budget' },
+      [ID(4)]: { ok: false, reason: 'sent' },
+    };
+    const { deps, calls } = fake((id) => by[id]!);
+    const r = await handle({ invitations: [ID(1), ID(2), ID(3), ID(4)], appUrl: APP }, 'jwt-admin', deps);
+    assertEquals(r.body, {
+      results: [
+        { id: ID(1), status: 'sent' },
+        { id: ID(2), status: 'rate_limit' },
+        { id: ID(3), status: 'budget' },
+        { id: ID(4), status: 'sent_before' },
+      ],
+    });
+    assertEquals(calls, []);
+  },
+);
 
 Deno.test("pas admin de l'espace : 403", async () => {
   const { deps, calls } = fake(() => ({ ok: false, reason: 'forbidden' }));
