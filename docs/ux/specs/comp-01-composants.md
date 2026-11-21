@@ -189,18 +189,24 @@ Dans un groupe (§11.3), c'est le groupe qui prend le fond teinté et la bordure
 - **Le groupe porte la bordure et le focus**, avec `:focus-within`. L'`<input>` intérieur n'a ni bordure, ni ombre, ni outline.
 - Un bouton intégré (« + Variable », effacer) garde son propre focus clavier (§11.4).
 
-### 11.4 Boutons, liens, onglets et éléments de navigation : un seul trait de 2 px, collé
+### 11.4 Boutons, liens, onglets et éléments de navigation : aucun contour ajouté (révision du 21/11)
 
-- **Au clavier seulement** (`:focus-visible`). Au clic souris, rien n'apparaît.
-- **Bouton secondaire, ghost, lien, onglet, élément de navigation, option de liste** :
-  - `outline: 2px solid var(--fd-color-focus)` et **`outline-offset: 0`** : un seul trait, collé, qui suit le rayon ;
-  - prune sur blanc : 7,4:1 ;
-  - pour un lien en texte, `border-radius: 4px` pendant le focus.
-- **Bouton primaire (fond prune)** :
-  - `outline: none` et **`box-shadow: inset 0 0 0 2px var(--fd-color-surface)`** : un trait blanc intérieur de 2 px (blanc sur prune : 7,4:1 ; en sombre, `surface` #15191F sur #CF86A9 : 6,4:1) ;
-  - **rien à l'extérieur** du bouton.
-- **Bouton destructif** (fond `danger`) : même règle que le primaire, avec un trait intérieur `surface`.
-- **Interdits** : `outline-offset` positif, double anneau, halo.
+- **Au clavier seulement** (`:focus-visible`). Au clic souris, rien n'apparaît. **Jamais d'`outline`, de décalage ni d'ombre extérieure.**
+- **Bouton secondaire et onglet** : c'est **leur propre bordure** qui passe en prune, sur 2 px (`border-color: primary` + `box-shadow: inset 0 0 0 1px primary`). Rien n'est ajouté à l'extérieur. Un onglet sans bordure au repos garde une bordure transparente de 1 px, pour ne pas bouger au focus.
+  - Indicateur : prune sur blanc à 7,4:1 ; contre la bordure grise au repos, 2,4:1.
+- **Bouton primaire** (fond prune), proposition retenue par l'UX :
+  - le fond **s'assombrit** (`prune-800` #67123B en clair, `prune-200` #E3A9C4 en sombre) ;
+  - **et** un trait blanc intérieur de 2 px (`border-color: surface` + `inset 0 0 0 1px surface`) ;
+  - la pastille garde sa forme, sans rien à l'extérieur ;
+  - indicateur : trait blanc sur le fond assombri à 12,2:1 ; écart entre les fonds 1,65:1, renforcé par le trait.
+  - Variante demandée par le chef, **trait blanc intérieur seul** sur le fond prune d'origine : conforme sur le papier (7,4:1), mais sur un fond de page blanc, le trait se confond avec la page. On croit voir le bouton rétrécir de 2 px, et le focus est **à peine perceptible** (captures `champs-*.png`, cellule « Bouton primaire »). Elle est déconseillée au regard de 2.4.7.
+- **Bouton destructif** : même règle que le primaire, avec un fond assombri en rouge (#9A2216 en clair).
+- **Lien** :
+  - soulignement prune de **2 px** (`text-decoration-thickness: 2px`, `text-underline-offset: 3px`) ;
+  - fond `--fd-color-tint` (#FBF0F5 en clair, #2A1A23 en sombre), avec un rayon de 4 px et un padding de 0 × 2 px ;
+  - aucun cadre ;
+  - lien prune sur le fond teinté : 6,6:1 en clair, 6,0:1 en sombre.
+- **Éléments de navigation et options de liste** (fond `nav-active` au survol) : même principe que l'onglet, avec un trait prune intérieur de 2 px.
 
 ### 11.5 Jetons
 
