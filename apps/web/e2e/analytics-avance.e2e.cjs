@@ -314,6 +314,11 @@ const live = (n) => ({
   ok((await dlg.getByText('hooks.acme.example').count()) === 1, 'webhook abonné : domaine affiché');
   ok(await dlg.getByRole('checkbox', { name: /E-mail/ }).isDisabled(), 'e-mail « Bientôt »');
   ok(await dlg.getByRole('checkbox', { name: /Slack/ }).isDisabled(), 'Slack « Bientôt »');
+  ok(
+    (await dlg.locator('.is-soon .badge').count()) === 0 &&
+      (await dlg.locator('.is-soon .soon-text').count()) === 2,
+    '§17.4 : « Bientôt » en texte gris, sans pastille',
+  );
   await dlg.getByLabel('Démo').selectOption(DEMO);
   await dlg.getByRole('checkbox', { name: /Webhook/ }).check();
   await dlg.getByRole('radio', { name: 'Résumé quotidien (9 h)' }).click();

@@ -432,11 +432,11 @@ function AlertDialog({
               )}
               <label className="check is-soon" aria-disabled="true">
                 <input type="checkbox" disabled />
-                {t('analytics.adv.al.email')} <span className="badge">{t('shell.soon')}</span>
+                {t('analytics.adv.al.email')} <span className="soon-text">{t('shell.soon')}</span>
               </label>
               <label className="check is-soon" aria-disabled="true">
                 <input type="checkbox" disabled />
-                {t('analytics.adv.al.slack')} <span className="badge">{t('shell.soon')}</span>
+                {t('analytics.adv.al.slack')} <span className="soon-text">{t('shell.soon')}</span>
               </label>
             </div>
           </fieldset>
