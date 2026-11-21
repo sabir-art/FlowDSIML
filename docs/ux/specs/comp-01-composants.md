@@ -134,76 +134,83 @@ Tous les composants vivent dans `packages/ui`. Leur popover est le même pour to
 - Contrastes : texte des options à 4,5:1, état sélectionné non porté par la seule couleur (coche, graisse).
 - Défilement horizontal (§18.7) et espacements (§18.6) sur les pages migrées.
 
-## 11. FIELD-01 : une seule grille d'états pour tous les champs (retour client du 21/11)
+## 11. FIELD-01 : une seule grille d'états pour tous les champs (décision du client, 21/11)
 
-> Retour client : au focus, nos champs prennent un **second contour bleu, extérieur**, décalé de la bordure grise (`--fd-shadow-focus`, `base.css` l. 50 et 235), d'une autre forme et d'une couleur hors marque. La cible : c'est la **bordure du champ elle-même** qui change de couleur, avec un halo léger qui épouse le même rayon.
+> **Décision du client** : **aucun double contour, nulle part**. C'est l'option B du comparatif (`maquettes/refonte/img/field-options/README.md`), **sans halo**. La première version (trait de 2 px plus un halo de 3 px) est abandonnée.
 >
 > **Portée** : input, textarea, déclencheur de Select, champ à puces, date et heure, couleur, recherche, champs à préfixe ou suffixe, dans `packages/ui`, en clair et en sombre.
 >
 > **Maquette** : vue « Champs (FIELD-01) » de `maquettes/refonte/modales-composants.html`. Captures dans `img/modales-composants/champs-{clair,sombre}.png`.
 
-### 11.1 Grille d'états
+### 11.1 Grille d'états des champs
 
-| État | Bordure (1 px) | Ombre (`box-shadow`) | Fond et texte |
+| État | Bordure | `box-shadow` | Fond et texte |
 |---|---|---|---|
-| Repos | `--fd-color-border-field` (#8A94A2 en clair, 3,07:1 ; #5E6978 en sombre, 3,16:1) | aucune | `surface`, `text` ; invite en `text-subtle` |
-| Survol | `--fd-color-border-field-hover` : **#5E6978** en clair (5,6:1), **#7A8494** en sombre (4,7:1) | aucune | inchangé |
-| **Focus** (souris **et** clavier) | `--fd-color-primary` : #A3195B en clair (7,4:1 sur blanc), #CF86A9 en sombre (6,4:1) | `inset 0 0 0 1px primary` (le trait fait 2 px sans décaler la mise en page), **puis** `0 0 0 3px` primary à **20 %** (halo) | inchangé |
-| Rempli | comme au repos | aucune | **aucune teinte** (ni bleu, ni jaune) |
-| Rempli par le navigateur | comme au repos | voir §11.2 | `surface` et `text` imposés |
-| Invalide | `--fd-color-danger` (#D60B52, 5,2:1 ; #F07CA2, 6,8:1) | au focus : `inset 0 0 0 1px danger` et halo `danger` à 20 % | message de 13 px `danger` juste sous le champ (MODAL-01), avec `aria-invalid` |
-| Désactivé | `--fd-color-border` | aucune | fond `surface-sunken`, texte `text-muted` (lisible, 4,5:1 au moins), `cursor: not-allowed` |
-| Lecture seule | `--fd-color-border-field` | focus comme ci-dessus (le champ reste focalisable et sélectionnable) | fond `surface-sunken`, texte `text` |
+| Repos | 1 px `--fd-color-border-field` (#8A94A2 en clair, 3,07:1 ; #5E6978 en sombre, 3,16:1) | aucune | `surface`, `text` ; invite en `text-subtle` |
+| Survol | 1 px `--fd-color-border-field-hover` (#5E6978 en clair, 5,6:1 ; #7A8494 en sombre, 4,7:1) | aucune | inchangé |
+| **Focus** (souris **et** clavier) | 1 px `--fd-color-primary` (#A3195B en clair, 7,4:1 ; #CF86A9 en sombre, 6,4:1) | **`inset 0 0 0 1px var(--fd-color-primary)`** : un trait de 2 px, sans décaler la mise en page | inchangé (**pas de teinte au focus**) |
+| Rempli | comme au repos | aucune | aucune teinte |
+| **Rempli par le navigateur** | 1 px `primary` | `inset 0 0 0 1000px var(--fd-color-tint)` (fond, voir §11.2) | fond **`--fd-color-tint`** : #FBF0F5 (prune-50) en clair, #2A1A23 en sombre ; texte `text` (18,0:1 et 15,1:1) |
+| Invalide | 1 px **`--fd-color-danger`** (nouveau rouge : #C42B1C en clair, 5,7:1 ; #F97066 en sombre, 6,3:1) | aucune | fond `surface`. Message de 13 px `danger` **avec l'icône `CircleAlert`** de 16 px, 6 px sous le champ. `aria-invalid="true"` et `aria-describedby` |
+| Invalide, au focus | 1 px `danger` | `inset 0 0 0 1px var(--fd-color-danger)` | comme ci-dessus |
+| Désactivé | 1 px `--fd-color-border` | aucune | fond `surface-sunken`, texte `text-muted` (lisible, 4,5:1 au moins) |
+| Lecture seule | 1 px `border-field` | focus comme ci-dessus | fond `surface-sunken`, texte `text` |
 
-- **Rayon** : celui du champ (10 px). Le halo le suit, **sans `outline` ni `outline-offset`**, et **aucun second contour**.
-- **Indicateur de focus** (WCAG 2.4.7, 1.4.11 et 2.4.11) :
-  - c'est d'abord le **trait de 2 px en prune**, qui atteint 3:1 au moins sur le fond (7,4:1 et 6,4:1) ;
-  - le halo n'est qu'un renfort, il n'est **pas** le seul indicateur ;
-  - la différence entre repos et focus passe aussi par l'épaisseur (1 px puis 2 px), pas seulement par la couleur.
-- **Transition** : `border-color` et `box-shadow` en `--fd-motion-duration-fast` (120 ms). Instantané en mouvement réduit. C'est une exception admise à MOTION-01 : `box-shadow` sur un champ ne déclenche pas de remise en page.
+- **Interdits sur les champs** :
+  - tout `outline`, à tous les états (`outline: none`) ;
+  - tout `box-shadow` **extérieur** (halo, anneau, double contour, décalage) ;
+  - tout fond rose ou rouge pâle (en erreur, le fond reste `surface`).
+- **Indicateur de focus** (WCAG 2.4.7 et 1.4.11) : le trait prune de 2 px, à 7,4:1 contre le fond en clair et 6,4:1 en sombre. L'épaisseur passe de 1 à 2 px et la couleur change, donc la couleur n'est pas le seul indice.
+- **Transition** : `border-color` et `box-shadow` en `--fd-motion-duration-fast` (120 ms). Instantané en mouvement réduit.
 
 ### 11.2 Remplissage automatique du navigateur
 
-On neutralise le jaune de Chrome et le bleu de Safari :
+On ne neutralise **pas** le remplissage automatique vers `surface` : on le teinte aux couleurs de la marque.
 
 ```css
 .fd-field input:-webkit-autofill,
-.fd-field input:-webkit-autofill:hover {
+.fd-field input:-webkit-autofill:hover,
+.fd-field input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--fd-color-text);
   caret-color: var(--fd-color-text);
-  box-shadow: inset 0 0 0 1000px var(--fd-color-surface);
-  transition: background-color 600000s 0s; /* le fond du navigateur ne s'affiche jamais */
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1000px var(--fd-color-tint);
+  transition: background-color 600000s 0s; /* le fond jaune ou bleu du navigateur ne s'affiche jamais */
 }
 .fd-field input:-webkit-autofill:focus {
-  box-shadow: inset 0 0 0 1px var(--fd-color-primary), inset 0 0 0 1000px var(--fd-color-surface),
-    0 0 0 3px color-mix(in srgb, var(--fd-color-primary) 20%, transparent);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary), inset 0 0 0 1000px var(--fd-color-tint);
 }
 ```
 
-L'ordre compte : le trait de focus est listé **avant** l'aplat de 1 000 px, pour rester visible.
+Dans un groupe (§11.3), c'est le groupe qui prend le fond teinté et la bordure prune, avec `:has(input:-webkit-autofill)`.
 
 ### 11.3 Champs composés (préfixe, suffixe, icône, puces, bouton intégré)
 
-- **Le groupe porte la bordure et le focus**, avec `:focus-within`. L'`<input>` intérieur n'a ni bordure ni ombre (`border: 0; box-shadow: none; outline: none`).
-- Préfixe ou suffixe (« tutoclick/ », « % »), icône de recherche, puces, bouton « + Variable » : ils sont tous dans le groupe, et c'est le groupe qui s'éclaire en entier.
-- Un bouton intégré garde son propre focus (§11.4) quand on l'atteint par Tab.
+- **Le groupe porte la bordure et le focus**, avec `:focus-within`. L'`<input>` intérieur n'a ni bordure, ni ombre, ni outline.
+- Un bouton intégré (« + Variable », effacer) garde son propre focus clavier (§11.4).
 
-### 11.4 Focus des liens, boutons, onglets et éléments de navigation
+### 11.4 Boutons, liens, onglets et éléments de navigation : un seul trait de 2 px, collé
 
-- **Même langage partout**, mais avec un écart, car ces éléments n'ont pas de bordure de champ :
-  - `outline: 2px solid var(--fd-color-focus)` et `outline-offset: 2px`. Le contour suit le rayon de l'élément (Chrome, Firefox, Safari 16.4 et suivants) ;
-  - `--fd-color-focus` passe du bleu (#1F7FB6 et #51ABDD) à la **prune** : #A3195B en clair, #CF86A9 en sombre ;
-  - le bouton primaire prune garde un contour net : le contour, séparé du bouton par 2 px du fond, fait 7,4:1 sur blanc.
-- `--fd-shadow-focus` (double anneau bleu) est **supprimé**. Sa dernière utilisation est retirée de `base.css` (l. 50 et 235) et des CSS de page.
-- **Au clavier seulement** (`:focus-visible`) pour les boutons, liens et onglets. **Au clavier et à la souris** (`:focus`) pour les champs, puisqu'on y saisit du texte.
-- **Éléments dans une liste à fond** (navigation NAV-02, options de Select) : `outline-offset: -2px` (contour intérieur), pour ne pas déborder sur l'élément voisin.
+- **Au clavier seulement** (`:focus-visible`). Au clic souris, rien n'apparaît.
+- **Bouton secondaire, ghost, lien, onglet, élément de navigation, option de liste** :
+  - `outline: 2px solid var(--fd-color-focus)` et **`outline-offset: 0`** : un seul trait, collé, qui suit le rayon ;
+  - prune sur blanc : 7,4:1 ;
+  - pour un lien en texte, `border-radius: 4px` pendant le focus.
+- **Bouton primaire (fond prune)** :
+  - `outline: none` et **`box-shadow: inset 0 0 0 2px var(--fd-color-surface)`** : un trait blanc intérieur de 2 px (blanc sur prune : 7,4:1 ; en sombre, `surface` #15191F sur #CF86A9 : 6,4:1) ;
+  - **rien à l'extérieur** du bouton.
+- **Bouton destructif** (fond `danger`) : même règle que le primaire, avec un trait intérieur `surface`.
+- **Interdits** : `outline-offset` positif, double anneau, halo.
 
 ### 11.5 Jetons
 
-- **Nouveau** : `--fd-color-border-field-hover` (#5E6978 en clair, #7A8494 en sombre).
-- **Nouveau** : `--fd-focus-halo` = `color-mix(in srgb, var(--fd-color-primary) 20%, transparent)`, et `--fd-focus-halo-danger`, sur le même principe.
-- **Modifié** : `--fd-color-focus` passe à la prune (#A3195B en clair, #CF86A9 en sombre).
-- **Retiré** : `--fd-shadow-focus` et `--fd-shadow-focus-danger`.
+- **Nouveaux** :
+  - `--fd-color-border-field-hover` : #5E6978 en clair, #7A8494 en sombre ;
+  - `--fd-color-tint` : #FBF0F5 en clair, #2A1A23 en sombre.
+- **Modifiés** :
+  - `--fd-color-focus` passe du bleu à la prune : #A3195B en clair, #CF86A9 en sombre ;
+  - **`--fd-color-danger`** passe à **#C42B1C** en clair et **#F97066** en sombre, **dans toute l'app**, boutons destructifs compris (texte blanc sur #C42B1C : 5,7:1). On met aussi à jour les dérivés (`danger-soft`, bordures d'alerte, `--fd-shadow-focus-danger` qui est supprimé).
+- **Retirés** : `--fd-shadow-focus` et `--fd-shadow-focus-danger`, avec leurs utilisations dans `base.css` (l. 50 et 235) et dans les CSS de page.
 
 ### 11.6 e2e `champs-focus.e2e.cjs`
 
@@ -211,14 +218,21 @@ Pour chaque champ visible de `APP_PAGES` (input, textarea, combobox, champ à pu
 
 1. **Focus clavier, puis souris** :
    - l'élément qui porte la bordure (le champ, ou le groupe en `:focus-within`) a une `border-color` égale à `--fd-color-primary` ;
-   - son `outline-style` vaut `none` (ou `outline-width` vaut 0) ;
-   - son `box-shadow` ne contient **qu'un seul** anneau extérieur, d'étalement 3 px, avec une couleur prune à 20 %, plus l'anneau `inset` de 1 px ;
-   - aucun ancêtre direct (parent ou grand-parent) ne porte d'`outline` ni de `box-shadow` de focus ;
-   - l'`<input>` intérieur d'un groupe n'a ni bordure ni ombre.
+   - son `box-shadow` contient **uniquement** l'anneau `inset` de 1 px prune, et **aucune ombre extérieure** ;
+   - son `outline-style` vaut `none` ;
+   - aucun ancêtre jusqu'au formulaire ne porte d'`outline` ni de `box-shadow` de focus ;
+   - l'`<input>` intérieur d'un groupe n'a ni bordure, ni ombre, ni outline ;
+   - le fond ne change pas au focus.
 2. **Repos** : bordure `border-field`, sans ombre. **Survol** : bordure `border-field-hover`.
-3. **Invalide** : `aria-invalid="true"` avec une bordure `danger`, et le message relié par `aria-describedby`.
+3. **Invalide** :
+   - `aria-invalid="true"` avec une bordure `danger` (#C42B1C ou #F97066) ;
+   - message relié par `aria-describedby`, qui contient un `svg.lucide-circle-alert` ;
+   - fond égal à `surface`.
 4. **Remplissage automatique** :
-   - la feuille de styles contient une règle `:-webkit-autofill` avec `-webkit-text-fill-color` et un `box-shadow` inset de la couleur `surface` (contrôle statique) ;
-   - un formulaire de connexion est rempli par l'API d'autofill de Chromium dans le test de connexion, quand elle est disponible, puis la couleur de fond calculée est comparée à `surface`.
-5. **Boutons, liens et onglets** au clavier : `outline-color` égale à `--fd-color-focus` (prune), `outline-offset` de 2 px (ou -2 px dans une liste), et plus aucun `box-shadow` bleu.
-6. Grep statique : plus aucune occurrence de `--fd-shadow-focus` ni de `#1f7fb6` / `#51abdd` dans `packages/ui` et `apps/*/src`.
+   - la feuille de styles contient la règle `:-webkit-autofill` avec un `box-shadow` inset de la couleur `--fd-color-tint`, et une bordure `primary` (contrôle statique) ;
+   - sur la connexion, un champ rempli par l'autofill de Chromium (quand l'API est disponible) a un fond calculé égal à `tint`.
+5. **Boutons, liens et onglets** au clavier (`Tab`) :
+   - un seul indicateur : `outline` de 2 px prune avec `outline-offset` de 0, **ou** (bouton primaire ou destructif) `box-shadow: inset 0 0 0 2px` en `surface`, sans `outline` ;
+   - aucune ombre extérieure ;
+   - au clic souris, aucun indicateur.
+6. **Grep statique** : plus aucune occurrence de `--fd-shadow-focus`, `#1f7fb6`, `#51abdd`, ni de l'ancien danger `#d60b52` ou `#f07ca2`, dans `packages/ui` et `apps/*/src`.
