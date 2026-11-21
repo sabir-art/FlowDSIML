@@ -323,6 +323,29 @@ const MB = 1024 * 1024;
   ok(!values.some((v) => /workspace/i.test(v)), 'fr.json : aucun « Workspace » visible');
   ok(!values.some((v) => /€|facturation/i.test(v)), 'fr.json : aucun « € » ni « facturation »');
 
+  // ===== Audit L50 C2 (LOGO-01) : logo compact de 40 px sur la connexion, à toutes les largeurs =====
+  for (const width of [1440, 390]) {
+    const ctx = await b.newContext({ viewport: { width, height: 900 }, locale: 'fr-FR' });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, { ...seedMaquette(), signedOut: true });
+    await page.goto(`${APP}/#/login`);
+    const logo = page.locator('.auth-logo-link img:visible');
+    await logo.first().waitFor();
+    // Logo compact : proportions 742 × 204 (le logo complet est plus haut et porte « Porté par la DSIML »)
+    const info = await logo.evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { w: Math.round(r.width), h: Math.round(r.height) };
+      }),
+    );
+    ok(
+      info.length === 1 && info[0].h === 40 && Math.abs(info[0].w - Math.round((40 * 742) / 204)) <= 1,
+      `connexion ${width} px : logo compact de 40 px (${JSON.stringify(info)})`,
+    );
+    await ctx.close();
+  }
+
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })().catch((e) => {

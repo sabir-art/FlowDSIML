@@ -957,32 +957,6 @@
     display: block;
   }
 }
-/* LOGO-01 : logo complet à partir de 480 px de large, compact en dessous (jamais les deux) */
-.brand-mark--full .brand-mark__wide {
-  display: none !important;
-}
-@media (min-width: 480px) {
-  .brand-mark--full .brand-mark__compact {
-    display: none !important;
-  }
-  .brand-mark--full .brand-mark__wide.brand-mark__logo--light {
-    display: block !important;
-  }
-  :root[data-theme='dark'] .brand-mark--full .brand-mark__wide.brand-mark__logo--light {
-    display: none !important;
-  }
-  :root[data-theme='dark'] .brand-mark--full .brand-mark__wide.brand-mark__logo--dark {
-    display: block !important;
-  }
-}
-@media (min-width: 480px) and (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .brand-mark--full .brand-mark__wide.brand-mark__logo--light {
-    display: none !important;
-  }
-  :root:not([data-theme='light']) .brand-mark--full .brand-mark__wide.brand-mark__logo--dark {
-    display: block !important;
-  }
-}
 .brand-mark__sub {
   margin-top: 2px;
   font-size: 0.6875rem;
