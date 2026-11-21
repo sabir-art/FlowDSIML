@@ -1,7 +1,7 @@
 # Retours client du 21 novembre (prioritaires)
 
 > Relevé sur `claude/dev-mvp` (c63b0e4), en clair et en sombre, avec le faux backend et des données fictives (Acme, `@example.com`).
-> Règles : `composants.md` §15, §17 et §18. Chaque point a une recette mesurable (§11).
+> Règles : `composants.md` §15, §17 et §18. Chaque point a une recette mesurable (§12).
 
 ## 1. Éditeur : les commentaires dans un panneau en bas du canevas
 
@@ -60,7 +60,7 @@
 | < 1024 px (tablette et mobile) | Pas de colonne. Le filtre « Dossier » s'affiche dans la barre de liste (comportement actuel). |
 - Le choix de l'utilisateur (repliée ou dépliée) est gardé, comme aujourd'hui, mais seulement pour la largeur ≥ 1280 px.
 
-## 3. Paramètres : un seul espacement entre les cartes
+## 3. Paramètres : un seul espacement entre les cartes (forme remplacée par le §11)
 
 **Constat (mesures à 1440 px).**
 - Profil : 16 px entre « Profil » et « Changer de mot de passe », puis **0 px** entre « Changer de mot de passe » et « Mes données ».
@@ -163,7 +163,53 @@
 - e2e global : aucun conteneur sans `data-scroll-x` ne dépasse en largeur, sur toutes les routes et dans tous les panneaux de l'éditeur.
 - Dans la même capture, « Libre · Bientôt » a encore un point : à passer en texte, sans point (§5).
 
-## 11. Recette (captures réelles en clair et en sombre)
+## 11. Paramètres : une mise en page commune, aérée (référence fournie par le client)
+
+> Principes tirés de captures fournies par le client comme **inspiration**. On ne copie rien : nos couleurs, notre typographie et nos composants. Aucune de ces captures n'est versionnée.
+> Ce modèle **remplace le §3** pour la forme des pages. La règle des 24 px reste pour les rares pages qui gardent plusieurs surfaces (Zone de danger, par exemple).
+
+### 11.1 Gabarit de page
+- Le contenu des Paramètres est **centré**, avec une largeur maximale de **880 px** et des marges latérales de 32 px (16 px sous 768 px).
+- En haut, l'en-tête de page : fil d'Ariane, titre H1, puis une phrase de description en 14 px `text-muted`. 32 px avant la première section.
+- **Une seule surface** `surface` par page (rayon `--fd-radius-xl`, filet de 1 px `border`, padding de 24 px, 32 px à partir de 1280 px), qui contient toutes les sections. Plus de pile de cartes.
+
+### 11.2 Section
+- **En-tête de section** :
+  - à gauche, le titre (16 px 600) et le sous-titre (14 px `text-muted`, une ou deux lignes) ;
+  - à droite, l'action principale de la section quand il y en a une (« Enregistrer », « Inviter des membres », « Nouvelle variable »), alignée en haut ;
+  - 24 px entre l'en-tête et la première rangée.
+- Deux sections de la même surface sont séparées par un filet de 1 px `border`, avec **32 px** au-dessus et au-dessous.
+
+### 11.3 Rangées
+- **Rangée de réglage** : libellé (14 px 600) et aide (13 px `text-muted`) à gauche, sur 40 % ; le contrôle à droite, sur 60 % (champ, interrupteur, segmenté, liste). Padding vertical de 16 px. Rangées séparées par un filet de 1 px `border`. Sous 768 px, le contrôle passe sous le libellé, à 8 px.
+- **Rangée de formulaire en 2 colonnes** quand deux champs vont ensemble : Prénom et Nom, Langue et Fuseau horaire, Nouveau mot de passe et Confirmation. Gap de 16 px entre les colonnes et 20 px entre deux lignes de champs (§15.4 bis). Une seule colonne sous 768 px.
+- « Bientôt » : texte de 13 px `text-muted` à droite du libellé, sans point. Le contrôle est désactivé (§18.4).
+
+### 11.4 Tableaux (Variables, Glossaire, Étiquettes, Équipe)
+- En-tête de section avec, à droite, la recherche (240 px) puis le bouton d'ajout.
+- Lignes de 56 px au moins, padding horizontal de 16 px, séparées par un filet. En-tête de colonnes en 12 px 600 `text-muted`.
+- L'état vide est dans la surface, centré, sans pastille (L48-B).
+
+### 11.5 Profil
+1. **Photo de profil**, en tête : vignette ronde de **56 px** (photo ou initiale), titre « Photo de profil », aide « JPG, PNG ou WebP, 2 Mo maximum. », puis à droite « Changer la photo » (secondaire) et « Retirer » (lien `danger`, seulement s'il y a une photo). Le recadrage et le stockage suivent le §4.
+2. **Informations** : Prénom et Nom en 2 colonnes ; E-mail en lecture seule, avec l'aide « Contactez le support pour changer d'e-mail. ».
+3. **Préférences** : Langue et Apparence en 2 colonnes, puis les rangées de notifications (« Bientôt » sans point).
+4. **Mot de passe** : Nouveau mot de passe et Confirmation en 2 colonnes, avec l'aide actuelle ; « Mettre à jour le mot de passe » à droite.
+5. **Mes données** : la phrase et « Télécharger mes données (.zip) ».
+6. **Zone de danger**, en dernier, dans un **encadré séparé** sous la surface, à 24 px :
+   - filet de 1 px `danger` à 30 % d'opacité, fond `surface` ;
+   - titre « Zone de danger » en 16 px 600 `danger` ;
+   - la phrase d'explication en 14 px `text-muted` ;
+   - à droite, « Supprimer mon compte » en bouton `danger` ;
+   - aucun aplat rouge.
+- Un seul « Enregistrer », dans l'en-tête de la page, pour Informations et Préférences. Le mot de passe garde son propre bouton.
+
+### 11.6 Pages concernées
+- Le gabarit s'applique aux 13 pages : Général, Équipe, Utilisation, Sécurité, Confidentialité, Thème et couleurs, Page publique, Variables, Glossaire, Étiquettes, Assistance IA, Intégrations, Profil.
+- Chaque page est découpée en sections selon son contenu actuel. Le dev propose le découpage, page par page, dans sa livraison.
+- Ordre de livraison : **Profil** en premier (avec la photo, §4), puis Général, Équipe et Variables, puis le reste.
+
+## 12. Recette (captures réelles en clair et en sombre)
 
 | # | Contrôle | Mesure attendue |
 |---|---|---|
@@ -185,3 +231,6 @@
 | 16 | `espacements.e2e.cjs` passe sur toutes les routes, en clair et en sombre, à 1440 et 390 px | relevé joint |
 | 17 | Panneau « Points d'intérêt » et tous les panneaux de l'éditeur : geste horizontal au trackpad et molette avec Maj → aucun déplacement, `scrollLeft === 0` ; e2e global « aucun débordement horizontal » vert | mesure |
 | 18 | « Libre · Bientôt » et tous les « Bientôt » de l'éditeur : texte sans point | captures |
+| 19 | Paramètres, sur les 13 pages, à 1440, 1024 et 390 px : contenu centré de 880 px au plus ; une seule surface ; en-tête de section avec l'action à droite ; 32 px et un filet entre les sections ; rangées de 40 % et 60 % avec un padding de 16 px | rects |
+| 20 | Profil : photo de 56 px en tête ; Prénom et Nom, Langue et Apparence, Mot de passe et Confirmation en 2 colonnes (une seule à 390 px) ; Zone de danger encadrée en dernier, 24 px sous la surface, sans aplat rouge | captures et mesures |
+| 21 | Tableaux (Variables, Glossaire, Étiquettes, Équipe) : recherche et ajout à droite de l'en-tête ; lignes de 56 px au moins | mesure |
