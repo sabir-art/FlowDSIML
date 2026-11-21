@@ -121,7 +121,7 @@
 ## 6. Barre latérale principale repliable en rail d'icônes
 
 - **Replié** : un rail de **64 px**.
-  - En haut, le logo réduit à son icône (32 px), puis les icônes de navigation (20 px dans des cibles de 44 × 44 px, centrées). L'élément actif garde son fond (§18.3).
+  - En haut, le logo réduit à son icône (32 px). Dépliée, au survol ou épinglée, la barre affiche le logo complet du client à 224 px (`composants.md` §16.5, LOGO-01) ; plus de sous-titre en texte HTML. Puis viennent les icônes de navigation (20 px dans des cibles de 44 × 44 px, centrées). L'élément actif garde son fond (§18.3).
   - En bas : Extension, Centre d'aide, Paramètres, puis l'avatar (32 px, photo ou initiale, §4).
   - Le sélecteur d'espace devient la pastille de l'espace (32 px).
   - Pas de texte.

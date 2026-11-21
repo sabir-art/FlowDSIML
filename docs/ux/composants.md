@@ -499,9 +499,9 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
 
 | Version | Contenu | Où | Taille minimale |
 |---|---|---|---|
-| **Complète** (`logo-tutoclick.svg`, `-sombre.svg`) | Icône, « TutoClick », trait, signature « Porté par la DSIML », cinq points | Page de connexion et d'inscription (à partir de 480 px de large), documents, supports imprimés | 480 px de large |
+| **Complète** (`logo-tutoclick.svg`, `-sombre.svg`) | Icône, « TutoClick », trait, signature « Porté par la DSIML », cinq points | **Barre latérale dépliée** (décision client du 21/11, LOGO-01), page de connexion et d'inscription, accueil de l'onboarding, en-tête des e-mails, documents, supports imprimés | 224 px dans la barre latérale (exception, §16.5) ; 400 px ailleurs |
 | **Compacte** (`logo-tutoclick-compact.svg`, `-compact-sombre.svg`) | Icône, « TutoClick », trait, sans la signature | Barre latérale (40 px de haut), en-tête de l'extension (32 px), e-mails, connexion sous 480 px | 28 px de haut |
-| **Icône seule** (`symbole-tutoclick.svg`) | Carré magenta, curseur et cible | Barre du haut de l'éditeur (32 px), avatar d'app, écran de chargement, tiroir mobile replié | 24 px |
+| **Icône seule** (`symbole-tutoclick.svg`) | Carré magenta, curseur et cible | **Rail replié de la barre latérale (32 px)**, barre mobile, barre du haut de l'éditeur (32 px), avatar d'app, écran de chargement | 24 px |
 | **Icône petite** (`symbole-tutoclick-petit.svg`) | Carré et curseur, sans la cible | Favicon, icônes de 16 à 23 px | 16 px |
 | **Mono** (`-mono-noir.svg`, `-mono-blanc.svg`) | Une couleur, curseur et cible évidés | Fond photo ou couleur vive (panneau de marque de la connexion), impression | comme la version d'origine |
 
@@ -525,7 +525,8 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
 
 - `<img src="…" alt="TutoClick">`, avec `height` fixé et `width: auto`. Le logo n'est jamais recomposé en texte HTML.
 - Si le logo est un lien vers l'accueil, l'`alt` reste « TutoClick » : le lien porte `aria-label="TutoClick, accueil"`.
-- « DSI des Missions Locales » reste possible **à côté** du logo compact, en texte HTML (11 px, 600, `text-subtle`), avec la zone de protection entre les deux. Jamais à côté du logo complet, qui a déjà sa signature.
+- Le logo complet a pour `alt` « TutoClick, porté par la DSIML » : la signature est ainsi lue par les lecteurs d'écran, même là où elle est trop petite pour l'œil.
+- **Plus de sous-titre en texte HTML** sous le logo (« DSI des Missions Locales » est retiré, décision client du 21/11) : la signature vient uniquement du SVG du client, intégré tel quel.
 - **Interdits** :
   - recolorer ;
   - étirer ;
@@ -533,6 +534,32 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
   - poser la version couleur sur du magenta, du prune ou du framboise ;
   - utiliser l'icône petite au-dessus de 23 px ou l'icône complète en dessous de 24 px.
 - **Contrôle CI suggéré** : aucun fichier de l'ancien logo (dégradé `#A52B60`) dans `apps/*/public` et `packages/*` ; tous les `<img>` du logo ont `alt="TutoClick"`.
+
+### 16.5 LOGO-01 : logo complet et lisibilité de la signature (21/11)
+
+> Décision client : le logo complet, **tel quel** (SVG du client, signature « PORTÉ PAR LA DSIML » et cinq points compris), remplace le logo compact suivi de « DSI des Missions Locales ». Il n'est jamais recomposé en HTML.
+
+- **Où** :
+  - barre latérale dépliée, au survol ou épinglée : logo complet, 224 px de large (256 px moins 2 × 16 px) ;
+  - rail replié et barre mobile : **icône seule** (32 px), jamais le logo complet ;
+  - connexion et inscription, accueil de l'onboarding : logo complet, **400 px de large au moins** ;
+  - en-tête des e-mails : PNG du logo complet, 400 px affichés (fichier en 800 px pour les écrans 2×) ;
+  - pied du lecteur : logo complet seulement s'il dispose de 400 px, sinon logo compact.
+- **Mesure de la signature** : ses capitales font 10 unités sur les 803,5 du cadrage. Hauteur affichée = largeur du logo × 0,0124.
+
+  | Largeur du logo | Capitales de la signature | Lisible ? |
+  |---|---|---|
+  | 224 px (barre latérale) | 2,8 px | non : élément graphique, l'information passe par l'`alt` |
+  | 400 px | 5,0 px | oui, minimum |
+  | 480 px | 6,0 px | oui, confortable |
+
+- **Exception de la barre latérale** : à 224 px, la signature n'est pas lisible. Elle est acceptée comme élément du logotype : WCAG 1.4.3 exempte les logotypes du contraste minimal, et le nom accessible porte le texte. On ne grossit pas la barre et on n'ajoute pas de texte HTML pour compenser.
+- **Thème sombre** : fichier `logo-tutoclick-sombre.svg` existant (§16.2), jamais un filtre CSS. Contrastes mesurés sur `#14161B` :
+  - « Click » `#F3F5F8` : 16,6:1 ;
+  - signature `#C9D1DA` : 11,7:1 ;
+  - « Tuto » et trait en `#CF86A9` : 6,6:1. Garder « Tuto » en `#A3195B` sur ce fond ne donnerait que 2,5:1, sous le seuil de 3:1 des grands textes. La variante sombre éclaircit donc aussi « Tuto » et le trait, et pas seulement « Click » et la signature. Cet arbitrage est à confirmer avec le client.
+  - Clair : signature `#123A49` sur blanc, 12,0:1.
+- **Recette** : pour chaque emplacement, largeur affichée du `<img>` (224 px dans la barre latérale, 400 px ou plus ailleurs), `alt` exact, fichier sombre chargé en thème sombre (pas de filtre), zone de protection de §16.3, et icône seule dans le rail et sur mobile.
 
 ## 17. Qualité visuelle (UI) : règles mesurables
 
