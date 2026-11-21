@@ -68,6 +68,10 @@
   font-size: 15px;
   color: var(--fd-color-text-muted);
 }
+.obx-soon {
+  font-weight: 600;
+  color: var(--fd-color-text);
+}
 .obx-fields {
   display: flex;
   flex-direction: column;

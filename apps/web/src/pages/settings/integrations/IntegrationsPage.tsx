@@ -236,7 +236,7 @@ export function IntegrationsPage() {
                 icon={<Unlink />}
                 title={t('integrations.noneConnected')}
                 action={
-                  <button type="button" className="link-btn" onClick={() => setAdding(true)}>
+                  <button type="button" className="link-button" onClick={() => setAdding(true)}>
                     {t('integrations.add')}
                   </button>
                 }

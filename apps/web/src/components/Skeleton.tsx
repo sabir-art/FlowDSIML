@@ -107,7 +107,7 @@ export function SlowLine({ onRetry }: { onRetry: () => void }) {
   return (
     <p className="sk-slow">
       {t('loading.slow')}{' '}
-      <button type="button" className="fd-link sk-link" onClick={onRetry}>
+      <button type="button" className="link-button sk-link" onClick={onRetry}>
         {t('loading.retry')}
       </button>
     </p>

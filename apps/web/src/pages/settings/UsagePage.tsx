@@ -202,7 +202,7 @@ export function UsagePage() {
                 </span>
                 {state === 'full' && (
                   <p className="us-blocked">
-                    {r.blocked} {askButton('link-btn', t('usage.askMore'))}
+                    {r.blocked} {askButton('link-button', t('usage.askMore'))}
                   </p>
                 )}
               </li>

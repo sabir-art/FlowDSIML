@@ -323,8 +323,15 @@ export function Onboarding() {
     body = (
       <>
         {title('obx-t', t('onboarding.extTitle'))}
-        <p className="obx-sub">{t('onboarding.extSubtitle')}</p>
-        {narrow ? (
+        {/* §18.4 : extension pas encore publiée (et jamais détectée) : la phrase, puis continuer sans */}
+        {!EXTENSION_URL && !extSeen ? (
+          <p className="obx-sub">
+            <span className="obx-soon">{t('extension.soon')}</span> {t('extension.soonBody')}
+          </p>
+        ) : (
+          <p className="obx-sub">{t('onboarding.extSubtitle')}</p>
+        )}
+        {!EXTENSION_URL && !extSeen ? null : narrow ? (
           <p className="obx-note">{t('onboarding.extDesktop')}</p>
         ) : (
           <ol className="obx-lines">
@@ -364,10 +371,15 @@ export function Onboarding() {
           </ol>
         )}
         <p className="obx-links">
-          <button type="button" className="link-btn" disabled={busy} onClick={() => picker.current?.click()}>
+          <button
+            type="button"
+            className="link-button"
+            disabled={busy}
+            onClick={() => picker.current?.click()}
+          >
             {t('onboarding.importInstead')}
           </button>
-          <button type="button" className="link-btn" onClick={() => setIndex(index + 1)}>
+          <button type="button" className="link-button" onClick={() => setIndex(index + 1)}>
             {t('onboarding.extSkip')}
           </button>
           <input
@@ -423,7 +435,7 @@ export function Onboarding() {
         </ol>
         <p className="obx-links">
           {/* Pas encore de démo d'exemple fournie avec un nouvel espace */}
-          <span className="fd-link" aria-disabled="true" data-tip={t('soon.badge')}>
+          <span className="link-button" aria-disabled="true" data-tip={t('soon.badge')}>
             {t('onboarding.seeSample')} · {t('shell.soon')}
           </span>
         </p>

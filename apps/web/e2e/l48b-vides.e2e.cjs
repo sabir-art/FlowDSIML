@@ -50,8 +50,8 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     'trois tuiles de départ',
   );
   await empty.getByRole('button', { name: 'Capturer avec l’extension' }).click();
-  await p.getByRole('dialog', { name: 'Installer l’extension' }).waitFor();
-  ok(true, 'tuile Extension : modale Extension (non détectée)');
+  await p.getByRole('dialog', { name: /^Extension TutoClick/ }).waitFor();
+  ok(true, 'tuile Extension : modale Extension (non publiée, §18.4 « Bientôt disponible »)');
   await p.keyboard.press('Escape');
   await empty.getByRole('button', { name: 'Partir d’un modèle' }).click();
   await p

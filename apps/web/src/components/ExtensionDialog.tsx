@@ -1,8 +1,7 @@
 import { useEffect, useId, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, CircleCheck, Clock, ExternalLink } from 'lucide-react';
-import { Button } from '@flowdsiml/ui';
+import { CircleCheck, ExternalLink } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
 import { useHelp } from '../help/HelpProvider';
 import { EXTENSION_URL } from '../lib/env';
@@ -11,7 +10,8 @@ import { formatDate } from '../lib/format';
 /**
  * L48-A §1 : utilitaire « Extension » de la barre latérale. Pas encore détectée (l'extension n'a jamais
  * appelé extension_seen pour ce compte) : « Installer l'extension », lien vers la boutique et les étapes
- * de l'accueil ; pas encore publiée (VITE_EXTENSION_URL vide) : « Bientôt disponible », sans étapes.
+ * de l'accueil ; pas encore publiée (VITE_EXTENSION_URL vide, §18.4) : « Extension TutoClick ·
+ * Bientôt disponible », une phrase et « Fermer » seul.
  * Détectée : la date de détection et « Lancer une capture ».
  */
 export function ExtensionDialog({ onClose }: { onClose: () => void }) {
@@ -28,10 +28,21 @@ export function ExtensionDialog({ onClose }: { onClose: () => void }) {
     if (d && !d.open) d.showModal();
   }, []);
 
+  // §18.4 : extension pas encore publiée et jamais détectée : « Bientôt disponible », « Fermer » seul
+  const soon = !seen && !EXTENSION_URL;
+
   return (
     <dialog ref={ref} className="dialog ext-dialog" onClose={onClose} aria-labelledby={titleId}>
       <div className="dialog-head">
-        <h2 id={titleId}>{t(seen ? 'extension.readyTitle' : 'extension.installTitle')}</h2>
+        <h2 id={titleId}>
+          {soon ? (
+            <>
+              {t('extension.soonTitle')} <span className="ext-soon">{t('extension.soon')}</span>
+            </>
+          ) : (
+            t(seen ? 'extension.readyTitle' : 'extension.installTitle')
+          )}
+        </h2>
       </div>
       <div className="dialog-body">
         {seen ? (
@@ -39,39 +50,26 @@ export function ExtensionDialog({ onClose }: { onClose: () => void }) {
             <CircleCheck size={18} aria-hidden="true" />
             {t('extension.seenOn', { date: formatDate(seen) })}
           </p>
+        ) : soon ? (
+          <p>{t('extension.soonBody')}</p>
         ) : (
           <>
-            {EXTENSION_URL ? (
-              <>
-                <p>{t('extension.intro')}</p>
-                <ol className="ext-steps">
-                  <li>{t('extension.step1')}</li>
-                  <li>{t('extension.step2')}</li>
-                  <li>{t('extension.step3')}</li>
-                </ol>
-              </>
-            ) : (
-              // Extension pas encore publiée (VITE_EXTENSION_URL vide) : pas d'étapes d'installation
-              <p className="ext-soon">
-                <Clock size={18} aria-hidden="true" />
-                <span>
-                  <strong>{t('extension.soonTitle')}</strong> {t('extension.soonBody')}
-                </span>
-              </p>
-            )}
-            <div>
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={<BookOpen />}
-                onClick={() => {
-                  ref.current?.close();
-                  help?.openArticle('creer-demo-extension');
-                }}
-              >
-                {t('extension.article')}
-              </Button>
-            </div>
+            <p>{t('extension.intro')}</p>
+            <ol className="ext-steps">
+              <li>{t('extension.step1')}</li>
+              <li>{t('extension.step2')}</li>
+              <li>{t('extension.step3')}</li>
+            </ol>
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => {
+                ref.current?.close();
+                help?.openArticle('creer-demo-extension');
+              }}
+            >
+              {t('extension.article')}
+            </button>
           </>
         )}
       </div>
@@ -91,7 +89,7 @@ export function ExtensionDialog({ onClose }: { onClose: () => void }) {
             {t('extension.capture')}
           </button>
         ) : (
-          EXTENSION_URL && (
+          !soon && (
             <a
               className="fd-btn fd-btn--primary"
               href={EXTENSION_URL}

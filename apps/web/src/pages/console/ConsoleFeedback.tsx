@@ -187,7 +187,7 @@ function Articles({ days, ws, onOpen }: { days: number; ws: string; onOpen: (a: 
               return (
                 <tr key={r.article}>
                   <th scope="row">
-                    <button type="button" className="fd-link" onClick={() => onOpen(r.article)}>
+                    <button type="button" className="link-button" onClick={() => onOpen(r.article)}>
                       {articleTitle(r.article)}
                     </button>
                     <small className="console-sub">{articleSection(r.article)}</small>

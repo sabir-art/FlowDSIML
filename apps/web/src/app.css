@@ -40,6 +40,11 @@
 .link-button:hover {
   color: var(--fd-color-primary-hover);
 }
+.link-button:disabled,
+.link-button[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 .link-button:focus-visible {
   outline: none;
   box-shadow: var(--fd-shadow-focus);
@@ -393,21 +398,25 @@
   font-size: var(--fd-font-lg);
 }
 .dialog-body {
+  /* §18.2 : colonne, 16 px entre les blocs, enfants sans marge ; 24 px avant le pied (dialog-actions) */
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-4);
   color: var(--fd-color-text-muted);
-  margin-bottom: var(--fd-space-4);
+  margin-bottom: 0;
 }
-/* Retour client : au moins 16 px entre les blocs du corps de modale (composant commun) */
 .dialog-body > * {
-  margin-block: 0;
+  margin: 0;
 }
-.dialog-body > * + * {
-  margin-block-start: var(--fd-space-4);
+/* Boutons et liens directs : largeur naturelle (la colonne flex les étirerait) */
+.dialog-body > :where(button, a, .fd-btn, .btn, .link-button, label.check) {
+  align-self: flex-start;
 }
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--fd-space-2);
-  margin-top: var(--fd-space-4);
+  margin-top: var(--fd-space-6);
 }
 .spin {
   animation: spin 1s linear infinite;
@@ -1020,33 +1029,6 @@
   .funnel__loss {
     width: 52px;
   }
-}
-
-/* Bouton à l'allure de lien, disponible partout (pas seulement dans .mk ou l'éditeur HTML).
-   fd-link et btn-link : mêmes règles (classes utilisées sans définition jusqu'ici). */
-.link-btn,
-.fd-link,
-.btn-link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--fd-color-link, var(--fd-color-primary));
-  font: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.link-btn:disabled,
-.fd-link:disabled,
-.btn-link:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-.link-btn:focus-visible,
-.fd-link:focus-visible,
-.btn-link:focus-visible {
-  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
-  outline-offset: 2px;
-  border-radius: 2px;
 }
 
 /* ---- Refonte DSI : en-tête de page, grilles ---- */
@@ -1842,14 +1824,11 @@ button.fd-nav__item:hover {
   margin-top: var(--fd-space-1);
 }
 .ext-dialog .ext-soon {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  margin: 0;
-}
-.ext-dialog .ext-soon svg {
-  flex: none;
-  margin-top: 2px;
+  margin-left: 6px;
+  font-family: var(--fd-font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
   color: var(--fd-color-text-muted);
 }
 .ext-dialog .ext-ok {

@@ -404,7 +404,7 @@ export function MetricTable({
             ))}
           </ul>
           {more && rows.length > 10 && (
-            <Link className="fd-link kpi-table__more" to={more.to}>
+            <Link className="link-button kpi-table__more" to={more.to}>
               {more.label}
               <ArrowRight aria-hidden="true" />
             </Link>

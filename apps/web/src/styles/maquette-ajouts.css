@@ -306,34 +306,51 @@
   align-items: start;
 }
 .mk .snav {
+  /* §18.3 : navigation groupée. Survol : surface-sunken (surface-raised en sombre) */
+  --snav-hover: var(--fd-color-surface-sunken);
   display: flex;
   flex-direction: column;
   gap: 0;
   position: sticky;
   top: 24px;
 }
+[data-theme='dark'] .mk .snav {
+  --snav-hover: var(--fd-color-surface-raised);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .mk .snav {
+    --snav-hover: var(--fd-color-surface-raised);
+  }
+}
 .mk .snav .snav-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 32px;
-  padding: 0 10px;
+  height: 36px;
+  padding: 0 12px;
   border-radius: var(--fd-radius-md);
-  color: var(--fd-color-text-muted);
+  color: var(--fd-color-text);
+  font-size: 14px;
   font-weight: 500;
   text-decoration: none;
 }
 .mk .snav .snav-item:hover {
-  background: var(--fd-color-surface-hover);
+  background: var(--snav-hover);
+  color: var(--fd-color-text);
   text-decoration: none;
 }
 .mk .snav .snav-item.is-active {
-  /* L48-01 (T5) : fond surface, texte courant, graisse 600 */
+  /* L48-01 (T5), §18.3 : fond surface, graisse 600, ombre légère (pas la seule couleur) */
   background: var(--fd-color-surface);
   color: var(--fd-color-text);
   font-weight: 600;
+  box-shadow: 0 1px 2px rgb(8 10 14 / 0.08);
 }
-/* L48-A §4, retour client : groupes serrés (2 px entre entrées), 24 px au-dessus de chaque intitulé */
+.mk .snav .snav-item:focus-visible {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: 0;
+}
+/* Groupes : 2 px entre éléments, 24 px avant le titre suivant (pas au-dessus du premier) */
 .mk .snav-grp {
   display: flex;
   flex-direction: column;
@@ -350,8 +367,9 @@
 .mk .snav .snav-item--soon em {
   margin-left: auto;
   font-style: normal;
-  font-size: 12px;
-  color: var(--fd-color-text-subtle);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
 }
 .mk .st-crumb ol {
   display: flex;
@@ -485,10 +503,13 @@
   height: 18px;
 }
 .mk .snav .grp {
-  /* Étiquette, pas une entrée : ni survol, ni pointeur, ni sélection */
-  font: 600 12px var(--fd-font-sans);
+  /* Étiquette, pas un lien : boîte serrée, 6 px jusqu'au premier élément (4 + écart de 2) */
+  margin: 0 0 4px;
+  padding: 0 12px;
+  font: 600 11px / 16px var(--fd-font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--fd-color-text-muted);
-  padding: 0 10px 6px;
   cursor: default;
   user-select: none;
 }
@@ -2941,7 +2962,6 @@
 }
 .mk .an-measure .modal-body {
   display: grid;
-  gap: var(--fd-space-4);
 }
 .mk .an-measure-gap {
   border: 0;
@@ -3071,14 +3091,16 @@
   cursor: not-allowed;
 }
 
-/* Retour client : au moins 16 px entre les blocs du corps de modale (composant commun) */
+/* §18.2 : corps de modale en colonne, 16 px entre les blocs, enfants sans marge */
+.mk .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-4);
+}
 .mk .modal-body > * {
-  margin-block: 0;
+  margin: 0;
 }
-.mk .modal-body > * + * {
-  margin-block-start: var(--fd-space-4);
-}
-/* Corps en grille : l'écart de 16 px suffit, sans marge en plus */
-.mk .an-measure .modal-body > * + * {
-  margin-block-start: 0;
+/* Boutons et liens directs : largeur naturelle (la colonne flex les étirerait) */
+.mk .modal-body > :where(button, a, .fd-btn, .btn, .link-button, label.check) {
+  align-self: flex-start;
 }

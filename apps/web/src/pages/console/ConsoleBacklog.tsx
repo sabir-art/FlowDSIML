@@ -151,7 +151,7 @@ export function Backlog() {
               <li key={it.id}>
                 <button
                   type="button"
-                  className="fd-link"
+                  className="link-button"
                   onClick={() => navigate(`/console/backlog/${it.id}`)}
                 >
                   {it.title}
@@ -452,7 +452,7 @@ function ItemDrawer({
               {ghErr ? t('console.bl.ticketInvalid') : t('console.bl.ticketHelp')}
             </span>
             {n && !ghErr && (
-              <a className="fd-link" href={d.githubUrl!} target="_blank" rel="noopener noreferrer">
+              <a className="link-button" href={d.githubUrl!} target="_blank" rel="noopener noreferrer">
                 {t('console.bl.openTicket', { n })}
                 <ExternalLink aria-hidden="true" />
               </a>

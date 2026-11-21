@@ -279,7 +279,7 @@ export function SandboxPlan({
                           {t('editor.sandbox.deadCapture')}
                           <span className="sb-deadlist__soon">{t('shell.soon')}</span>
                         </button>
-                        <a className="link-btn" href={d.url} target="_blank" rel="noopener noreferrer">
+                        <a className="link-button" href={d.url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink {...ICON} />
                           {t('editor.sandbox.deadOpen')}
                         </a>
@@ -312,7 +312,7 @@ export function SandboxPlan({
                 <>
                   <button
                     type="button"
-                    className="link-btn"
+                    className="link-button"
                     aria-expanded={showIgnored}
                     onClick={() => setShowIgnored(!showIgnored)}
                   >
@@ -327,7 +327,7 @@ export function SandboxPlan({
                             {title(d.from)} → {d.url.replace(/^https?:\/\//, '')}
                           </span>
                           {!readOnly && (
-                            <button type="button" className="link-btn" onClick={() => restore(d)}>
+                            <button type="button" className="link-button" onClick={() => restore(d)}>
                               {t('editor.sandbox.deadRestore')}
                             </button>
                           )}
@@ -345,7 +345,7 @@ export function SandboxPlan({
             <AlertTriangle {...ICON} />
             <div>
               {t('editor.sandbox.orphanAlert', { page: n.title })}{' '}
-              <button type="button" className="link-btn" onClick={() => open(sb.start ?? n.id)}>
+              <button type="button" className="link-button" onClick={() => open(sb.start ?? n.id)}>
                 {t('editor.sandbox.linkFromMenu')}
               </button>
             </div>
@@ -450,7 +450,7 @@ export function SandboxPlan({
               <li key={n.id}>
                 <button
                   type="button"
-                  className="link-btn"
+                  className="link-button"
                   aria-label={t('editor.sandbox.open', { page: n.title })}
                   onClick={() => open(n.id)}
                 >

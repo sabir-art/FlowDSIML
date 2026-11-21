@@ -391,7 +391,7 @@ function Feedback({ slug, page, wsId }: { slug: string; page: string; wsId: stri
         {err === 'send' && (
           <p className="help-fb__err" role="alert">
             {t('help.fb.error')}{' '}
-            <button type="submit" className="fd-link">
+            <button type="submit" className="link-button">
               {t('help.fb.retry')}
             </button>
           </p>
@@ -413,7 +413,7 @@ function Feedback({ slug, page, wsId }: { slug: string; page: string; wsId: stri
       {st.k === 'answered' && (
         <p>
           {t(st.helpful ? 'help.fb.answeredYes' : 'help.fb.answeredNo')}{' '}
-          <button type="button" className="fd-link" onClick={() => setSt({ k: 'ask' })}>
+          <button type="button" className="link-button" onClick={() => setSt({ k: 'ask' })}>
             {t('help.fb.change')}
           </button>
         </p>

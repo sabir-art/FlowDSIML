@@ -14,6 +14,7 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useHelp } from '../../help/HelpProvider';
 import { TourDialog } from '../../help/TourDialog';
 import { MODULE_TOUR, loadTours } from '../../help/tours';
+import { EXTENSION_URL } from '../../lib/env';
 
 const STEPS = ['brand', 'extension', 'capture', 'pii', 'publish', 'invite', 'distribute'] as const;
 type Step = (typeof STEPS)[number];
@@ -227,6 +228,9 @@ export function OnboardingCard({
                   </span>
                   {ok ? (
                     <span className="sr-only">{t('onb.done')}</span>
+                  ) : s === 'extension' && !EXTENSION_URL ? (
+                    // §18.4 : extension pas encore publiée : « Bientôt » en texte à la place de « Installer »
+                    <span className="onb-soon">{t('shell.soon')}</span>
                   ) : (
                     <button
                       type="button"

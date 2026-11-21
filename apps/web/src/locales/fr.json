@@ -5111,8 +5111,9 @@
     "install": "Installer l’extension",
     "seenOn": "L’extension a été détectée sur votre compte le {{date}}.",
     "capture": "Lancer une capture",
-    "soonTitle": "Bientôt disponible.",
-    "soonBody": "L’extension TutoClick n’est pas encore publiée. Vous pourrez l’installer ici dès sa sortie."
+    "soonTitle": "Extension TutoClick",
+    "soonBody": "L’extension créera une démo à partir de vos clics dans votre logiciel : chaque clic deviendra une étape.",
+    "soon": "Bientôt disponible"
   },
   "folders": {
     "title": "Dossiers",

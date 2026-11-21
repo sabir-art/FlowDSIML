@@ -1151,6 +1151,7 @@ button.nd-src:focus-visible {
 .fcol__new {
   border: 0;
   background: none;
+  font: inherit;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1224,4 +1225,11 @@ button.nd-src:focus-visible {
   .demos-start {
     grid-template-columns: 1fr;
   }
+}
+
+/* §18.4 : étape de la prise en main pas encore disponible (texte, pas de bouton) */
+.onb-soon {
+  flex: none;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
 }

@@ -69,7 +69,7 @@ function Widget({
           <span aria-hidden="true">{icon}</span>
           <p>{t('analytics.emptyPeriod')}</p>
           {days < 90 && (
-            <button type="button" className="link-btn" onClick={onWiden}>
+            <button type="button" className="link-button" onClick={onWiden}>
               {t('analytics.widen')}
             </button>
           )}
@@ -253,7 +253,7 @@ export function ReturningWidget({ ret, onHow, ...c }: Common & { ret: Returning 
       ) : !on ? (
         <p className="an-w__off">
           {t('analytics.ret.offBody')}{' '}
-          <button type="button" className="link-btn" onClick={onHow}>
+          <button type="button" className="link-button" onClick={onHow}>
             {t('analytics.ret.how')}
           </button>
         </p>
@@ -276,7 +276,7 @@ export function ReturningWidget({ ret, onHow, ...c }: Common & { ret: Returning 
             {t('analytics.ret.definition', {
               gap: ret.gapMinutes === 1440 ? t('analytics.ret.gap24h') : t('analytics.ret.gap30'),
             })}{' '}
-            <button type="button" className="link-btn" onClick={onHow}>
+            <button type="button" className="link-button" onClick={onHow}>
               {t('analytics.ret.how')}
             </button>
           </p>

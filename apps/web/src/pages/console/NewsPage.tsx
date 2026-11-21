@@ -55,7 +55,7 @@ export function NewsPage() {
           <h2 className="news-card__t">{n.title}</h2>
           <p className="news-card__b">{n.body}</p>
           {n.article && (
-            <button type="button" className="fd-link" onClick={() => help?.openArticle(n.article!)}>
+            <button type="button" className="link-button" onClick={() => help?.openArticle(n.article!)}>
               {t('news.readArticle', { title: articleBySlug(n.article)?.title ?? n.article })}
             </button>
           )}

@@ -5111,8 +5111,9 @@
     "install": "Install the extension",
     "seenOn": "The extension was detected on your account on {{date}}.",
     "capture": "Start a capture",
-    "soonTitle": "Coming soon.",
-    "soonBody": "The TutoClick extension is not published yet. You will be able to install it here as soon as it is out."
+    "soonTitle": "TutoClick extension",
+    "soonBody": "The extension will create a demo from your clicks in your software: each click will become a step.",
+    "soon": "Coming soon"
   },
   "folders": {
     "title": "Folders",

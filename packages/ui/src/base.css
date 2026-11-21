@@ -37,6 +37,16 @@ h1 {
 a {
   color: var(--fd-color-primary);
 }
+/* §18.1 : base de secours, spécificité nulle. Un bouton oublié n'a jamais l'allure native (gris en relief,
+   Arial) ; il garde sa classe du design system, et le contrôle e2e boutons-natifs vérifie toujours. */
+:where(button) {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
 :focus-visible {
   outline: none;
   box-shadow: var(--fd-shadow-focus);

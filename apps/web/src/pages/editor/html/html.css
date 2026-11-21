@@ -467,7 +467,7 @@
   gap: 6px 14px;
   align-items: center;
 }
-.sb-deadlist__actions .link-btn {
+.sb-deadlist__actions .link-button {
   display: inline-flex;
   align-items: center;
   gap: 4px;

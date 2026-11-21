@@ -123,8 +123,8 @@ function data() {
     'Sandbox : ni images, ni IA, ni démo vide',
   );
   ok(
-    (await nd.locator('.nd-src.is-soon[aria-disabled="true"]', { hasText: 'Bientôt' }).count()) === 1 &&
-      (await nd.locator('.nd-src.is-soon .fd-badge').count()) === 0,
+    (await nd.locator('.nd-src.is-soon[aria-disabled="true"]', { hasText: 'Partir d’un modèle' }).count()) ===
+      1 && (await nd.locator('.nd-src.is-soon .fd-badge').count()) === 0,
     'Sandbox : modèle « Bientôt »',
   );
   await p.waitForTimeout(200);
@@ -147,17 +147,16 @@ function data() {
     'Captures : images et modèle',
   );
   ok(
-    (await nd.locator('.nd-sources .nd-src__go').count()) === 4 &&
+    (await nd.locator('.nd-sources .nd-src__go').count()) === 3 &&
       (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
     'écart 2 : sources en liste avec chevron, Retour et Annuler',
   );
-  await nd.getByRole('button', { name: /Capturer avec l’extension/ }).click();
-  await p
-    .locator('dialog[open]')
-    .filter({ hasText: /extension/i })
-    .first()
-    .waitFor();
-  ok(!(await nd.isVisible()), 'écart 2 : la ligne Extension ouvre la fenêtre de l’extension');
+  // §18.4 : extension non publiée (pas de VITE_EXTENSION_URL en test) : source visible, désactivée, « Bientôt »
+  const ext = nd.locator('.nd-src.is-soon[aria-disabled="true"]', { hasText: 'Capturer avec l’extension' });
+  ok(
+    (await ext.innerText()).includes('Bientôt'),
+    '§18.4 : « Capturer avec l’extension » désactivée, « Bientôt »',
+  );
   await p.keyboard.press('Escape');
 
   // ===== Navigation, filtre Type et badges =====

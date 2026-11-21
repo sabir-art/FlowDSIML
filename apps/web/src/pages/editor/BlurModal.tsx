@@ -180,7 +180,7 @@ export function BlurModal({
                 {!readOnly && (
                   <button
                     type="button"
-                    className="link-btn"
+                    className="link-button"
                     aria-label={t('editor.blurModal.removeN', { n: i + 1 })}
                     onClick={() => {
                       editor.updateStep(live.id, {

@@ -434,7 +434,7 @@ export function AiVoice({
             <button type="button" className="btn btn-ghost btn-sm" onClick={close}>
               {t('ai.ignore')}
             </button>
-            <button type="button" className="btn btn-link btn-sm" onClick={() => void run()}>
+            <button type="button" className="link-button" onClick={() => void run()}>
               {t('ai.voice.again')}
             </button>
           </>

@@ -82,7 +82,7 @@ export function PersonalPageFields({
       {off ? (
         <p className="help" id="sh-pp-off">
           {t('share.pp.off')}{' '}
-          <button type="button" className="link-btn" onClick={onEnablePublicPage}>
+          <button type="button" className="link-button" onClick={onEnablePublicPage}>
             {t('share.pp.enablePublic')}
           </button>
         </p>

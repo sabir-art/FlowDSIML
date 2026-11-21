@@ -67,17 +67,26 @@ const MB = 1024 * 1024;
 
     // Extension : non détectée
     await utils.getByRole('button', { name: 'Extension' }).click();
-    const dlg = page.getByRole('dialog', { name: 'Installer l’extension' });
+    // §18.4 : pas de VITE_EXTENSION_URL dans les tests, extension jamais détectée : « Bientôt disponible »
+    const dlg = page.getByRole('dialog', { name: /^Extension TutoClick/ });
     await dlg.waitFor();
-    // Pas de VITE_EXTENSION_URL dans les tests : extension non publiée
+    {
+      const soon = await dlg.locator('h2 .ext-soon').evaluate((el) => ({
+        txt: el.textContent,
+        fs: getComputedStyle(el).fontSize,
+      }));
+      ok(
+        soon.txt === 'Bientôt disponible' && soon.fs === '13px',
+        '§18.4 : titre « Extension TutoClick », « Bientôt disponible » en 13 px',
+      );
+    }
     ok(
-      (await dlg.locator('.ext-steps li').count()) === 0 &&
-        (await dlg.innerText()).includes('Bientôt disponible'),
-      'Extension non publiée : « Bientôt disponible », sans étapes d’installation',
-    );
-    ok(
-      (await dlg.locator('button.fd-btn', { hasText: 'Voir l’article d’aide' }).count()) === 1,
-      '« Voir l’article d’aide » : bouton du design system',
+      (await dlg.locator('.dialog-body > *').count()) === 1 &&
+        (await dlg.locator('.ext-steps, .link-button').count()) === 0 &&
+        JSON.stringify(await dlg.locator('.dialog-actions').getByRole('button').allInnerTexts()) ===
+          JSON.stringify(['Fermer']) &&
+        (await dlg.locator('.dialog-actions a').count()) === 0,
+      '§18.4 : une phrase, ni étapes ni lien d’aide, « Fermer » seul',
     );
     await page.keyboard.press('Escape');
     await dlg.waitFor({ state: 'hidden' });
@@ -110,7 +119,15 @@ const MB = 1024 * 1024;
         const lab = grps[1].querySelector('.grp');
         const items = [...grps[1].querySelectorAll('.snav-item')];
         const r = (el) => el.getBoundingClientRect();
+        const ls = getComputedStyle(lab);
         return {
+          fs: ls.fontSize,
+          tt: ls.textTransform,
+          lh: ls.lineHeight,
+          toFirst: Math.round(r(items[0]).top - r(lab).bottom),
+          itemColor: getComputedStyle(items[0]).color,
+          text: getComputedStyle(document.body).color,
+          firstTop: Math.round(r(grps[0]).top - r(grps[0].parentElement).top),
           tag: lab.tagName,
           role: grps[1].getAttribute('role'),
           named: grps[1].getAttribute('aria-labelledby') === lab.id,
@@ -120,13 +137,18 @@ const MB = 1024 * 1024;
         };
       });
       ok(
-        g.tag === 'SPAN' && g.role === 'group' && g.named && g.cursor === 'default',
-        'sous-navigation : intitulé de groupe en étiquette non cliquable qui nomme le groupe',
+        g.tag === 'P' && g.role === 'group' && g.named && g.cursor === 'default',
+        '§18.3 : titre de groupe (p) qui nomme le groupe, sans pointeur',
       );
       ok(
-        g.above >= 22 && g.above <= 26 && g.inner <= 4,
-        `sous-navigation : 24 px au-dessus de l’intitulé (${g.above}), entrées serrées (${g.inner})`,
+        g.fs === '11px' && g.tt === 'uppercase' && g.lh === '16px',
+        `§18.3 : titre 11 px en capitales, boîte de 16 px (${g.fs} ${g.tt} ${g.lh})`,
       );
+      ok(
+        g.above === 24 && g.toFirst === 6 && g.inner === 2 && g.firstTop === 0,
+        `§18.3 : 24 px avant le titre (${g.above}), 6 px jusqu'au premier élément (${g.toFirst}), 2 px entre éléments (${g.inner}), rien au-dessus du premier groupe (${g.firstTop})`,
+      );
+      ok(g.itemColor === g.text, `§18.3 : éléments en couleur text (${g.itemColor})`);
     }
     // Retour client : au moins 16 px entre les blocs du corps de modale (Assistance IA)
     await page.goto(`${APP}/#/settings/ai`);
@@ -141,7 +163,7 @@ const MB = 1024 * 1024;
           min = Math.min(min, k[i].getBoundingClientRect().top - k[i - 1].getBoundingClientRect().bottom);
         return Math.round(min);
       });
-      ok(gap >= 16, `modale Assistance IA : ${gap} px entre l’information et la case (16 au moins)`);
+      ok(gap >= 16, `§18.2 : modale Assistance IA, ${gap} px entre l’information et la case (16 au moins)`);
     }
     await page.keyboard.press('Escape');
     await ctx.close();

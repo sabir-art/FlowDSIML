@@ -158,7 +158,9 @@ function NewsPreview({ title, body, article }: { title: string; body: string; ar
       </p>
       <h3 className="news-card__t">{title || '…'}</h3>
       <p className="news-card__b">{body || '…'}</p>
-      {article && <span className="fd-link">{t('news.readArticle', { title: articleTitle(article) })}</span>}
+      {article && (
+        <span className="link-button">{t('news.readArticle', { title: articleTitle(article) })}</span>
+      )}
     </article>
   );
 }

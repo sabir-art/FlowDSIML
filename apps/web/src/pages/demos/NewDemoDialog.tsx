@@ -11,6 +11,7 @@ import { IMAGE_ACCEPT } from './importImages';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
 import { TypeBadge } from '../../components/TypeBadge';
+import { EXTENSION_URL } from '../../lib/env';
 
 /**
  * DSH-06, L48-G §3 : « Nouvelle démo » en deux étapes.
@@ -51,7 +52,8 @@ export function NewDemoDialog({
   initialType?: ContentType;
 }) {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const extSoon = !EXTENSION_URL && !profile?.extension_seen_at;
   const ref = useRef<HTMLDialogElement>(null);
   const picker = useRef<HTMLInputElement>(null);
   const cards = useRef<HTMLDivElement>(null);
@@ -157,16 +159,28 @@ export function NewDemoDialog({
         <>
           <ul className="nd-sources" aria-label={t('ctype.step2')}>
             <li>
-              <button type="button" className="nd-src" onClick={onExtension}>
-                <Puzzle aria-hidden="true" />
-                <span className="nd-src__txt">
-                  <b>{t('demos.newExtension')}</b>
-                  <span>
-                    {type === 'captures' ? t('demos.newExtensionBody') : t(`ctype.extensionBody.${type}`)}
+              {extSoon ? (
+                // §18.4 : extension pas encore publiée : source visible, désactivée, « Bientôt »
+                <div className="nd-src is-soon" aria-disabled="true">
+                  <Puzzle aria-hidden="true" />
+                  <span className="nd-src__txt">
+                    <b>{t('demos.newExtension')}</b>
+                    <span>{t('extension.soonBody')}</span>
                   </span>
-                </span>
-                <ChevronRight className="nd-src__go" aria-hidden="true" />
-              </button>
+                  <span className="nd-src__soon">{t('shell.soon')}</span>
+                </div>
+              ) : (
+                <button type="button" className="nd-src" onClick={onExtension}>
+                  <Puzzle aria-hidden="true" />
+                  <span className="nd-src__txt">
+                    <b>{t('demos.newExtension')}</b>
+                    <span>
+                      {type === 'captures' ? t('demos.newExtensionBody') : t(`ctype.extensionBody.${type}`)}
+                    </span>
+                  </span>
+                  <ChevronRight className="nd-src__go" aria-hidden="true" />
+                </button>
+              )}
             </li>
             {type === 'captures' && (
               <li>
