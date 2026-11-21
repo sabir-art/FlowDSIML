@@ -167,7 +167,8 @@ export function EditorPage() {
     window.addEventListener('fd:pick-field', on);
     return () => window.removeEventListener('fd:pick-field', on);
   }, []);
-  // L38-10 : « Étape suivante » de la voix off : étape suivante, sur sa première bulle s'il y en a une
+  // L38-10 : « Étape suivante » de la voix off : étape suivante, sur sa première bulle s'il y en a une ;
+  // sans bulle, l'outil « Voix off » de l'étape, pour enchaîner les enregistrements
   useEffect(() => {
     const on = () => {
       const i = Math.min(index + 1, editor.steps.length - 1);
@@ -177,7 +178,11 @@ export function EditorPage() {
       const first = editor.hotspots
         .filter((h) => h.step_id === next.id)
         .sort((a, b) => a.position - b.position)[0];
-      setSelection(first ? { kind: 'hotspot', id: first.id } : { kind: 'step' });
+      if (first) setSelection({ kind: 'hotspot', id: first.id });
+      else {
+        setSelection({ kind: 'step' });
+        setPanel('voice');
+      }
     };
     window.addEventListener('fd:next-step', on);
     return () => window.removeEventListener('fd:next-step', on);
@@ -338,12 +343,17 @@ export function EditorPage() {
     : undefined;
   const stepIndexOf = (id: string | null) => editor.steps.findIndex((st) => st.id === id);
 
-  // Changement d'étape → sélection de l'étape.
-  // (sauf le formulaire de lead, qui se sélectionne en même temps que l'étape qu'il précède)
+  // Changement d'étape → sélection de l'étape. Sauf le formulaire de lead, qui se sélectionne en même
+  // temps que l'étape qu'il précède, et une bulle de la nouvelle étape (« Étape suivante » de la voix
+  // off ouvre l'étape sur sa première bulle, L38-10).
   useEffect(
     () =>
       setSelection((s) =>
-        s.kind === 'form' && editor.steps[index]?.gate_form_id === s.id ? s : { kind: 'step' },
+        (s.kind === 'form' && editor.steps[index]?.gate_form_id === s.id) ||
+        (s.kind === 'hotspot' &&
+          editor.hotspots.find((h) => h.id === s.id)?.step_id === editor.steps[index]?.id)
+          ? s
+          : { kind: 'step' },
       ),
     [index], // eslint-disable-line react-hooks/exhaustive-deps
   );

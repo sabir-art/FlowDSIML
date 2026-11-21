@@ -155,6 +155,9 @@ jobs:
       - name: 'Tableau de bord des démos (grille, liste, tris, mobile, modale « Nouvelle démo »)'
         if: always()
         run: cd apps/web && node e2e/dashboard.e2e.cjs
+      - name: 'Formation et outils (voix off enchaînée, quiz, SCORM, lecteur sous 640 px)'
+        if: always()
+        run: cd apps/web && node e2e/formation-outils.e2e.cjs
       - name: Google Safe Browsing L49 (lien signalé bloqué, vérification indisponible, nouvelle vérification à la publication, lecteur)
         if: always()
         run: cd apps/web && node e2e/l49-safebrowsing.e2e.cjs
