@@ -599,3 +599,93 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
 - Chaque maquette ouvre sur l'**après**, à la taille réelle, dans le cadre de l'app (barre latérale incluse quand c'est pertinent), avec un sélecteur **Après / Avant** (capture de l'app actuelle).
 - Viennent ensuite les états utiles (3 au plus), puis le sombre et le mobile.
 - Les annotations restent hors de l'écran dessiné, en une ligne chacune : le détail est dans la spec.
+
+## 18. Bases vérifiables (retour client du 21 novembre)
+
+> Trois défauts sont arrivés en production (c9e5925) : un bouton natif du navigateur dans « Installer l'extension », une case collée à son bloc dans « Activer l'Assistance IA ? », et des groupes de la sous-navigation des Paramètres qu'on ne distingue pas de leurs éléments. Soit la spec n'était pas assez précise, soit le code ne l'a pas suivie. Dans les deux cas, ma validation aurait dû les voir. Chaque règle ci-dessous se mesure dans le navigateur, sur des styles calculés. Un écart est un défaut bloquant.
+
+### 18.1 Aucun bouton natif
+- **Règle** : tout élément cliquable visible (`button`, `[role="button"]`, `input[type=button|submit|reset]`) utilise une classe du design system :
+  - `fd-btn` avec sa variante : principale `fd-btn--primary`, secondaire (sans modificateur, contour), `fd-btn--ghost`, `fd-btn--danger` ;
+  - ou un composant qui définit lui-même police, couleur, fond, bordure et focus : élément de navigation, segmenté, onglet, rail, carte cliquable ;
+  - ou le lien d'action `.link-button` de `app.css` : texte `primary` souligné, police héritée, sans fond ni bordure.
+- **Interdit** : un `<button>` sans classe, ou avec une classe qui n'est définie dans aucune feuille chargée sur l'écran. C'était le cas de `link-btn` dans `ExtensionDialog.tsx` : la classe existe seulement sous `.mk` et dans l'éditeur HTML, alors que `.link-button` existe dans `app.css`.
+- **Mesure** (styles calculés), un bouton est natif si au moins un critère est vrai :
+  - le bouton affiche du texte et sa police n'est pas celle de `<body>` (Plus Jakarta Sans) : le navigateur met Arial ou system-ui sur un `<button>` sans style ;
+  - `border-style` vaut `outset` ou `inset` ;
+  - `background-color` vaut `rgb(239, 239, 239)` en clair, ou `rgb(107, 107, 107)` en sombre (valeurs de Chromium).
+- **Base de secours** dans `base.css`, pour qu'un oubli ne se voie jamais comme un bouton gris en relief :
+  ```css
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  ```
+  Cette base ne remplace pas la règle : un bouton doit garder sa classe du design system, et le contrôle CI continue de vérifier.
+- **Contrôle CI** : `docs/ux/ci/boutons-natifs.e2e.cjs`, à copier dans `apps/web/e2e/`. Il parcourt toutes les routes de l'app et les dialogues qui ont déjà eu le défaut, en clair et en sombre, et échoue au premier bouton natif. Sur dev-mvp (d33d5a1), il en trouve deux :
+  - « Voir l'article d'aide » (`.link-btn`) dans « Installer l'extension » : police Arial, bordure `outset`, fond gris ;
+  - « Nouveau dossier » (`.fcol__new`) dans la colonne Dossiers de Démos et de Sandbox : police Arial.
+- **Pour aller plus loin, en option** : une règle ESLint (`react/forbid-elements` ou une règle locale) qui refuse un `<button>` JSX sans `className`.
+
+### 18.2 Corps de modale : un écart entre chaque bloc
+- **Règle** : le corps d'une modale (`.dialog-body`, `.modal-body`) est une colonne flex avec `gap: 16px` (`--fd-gap-title`) au moins. Les enfants directs ont `margin: 0`. Cela vaut **partout**, pour les deux systèmes de modale actuels (`.dialog` et `.mk .modal`), et pour tous les blocs : texte, encadré d'information, liste, champ, case à cocher, lien d'action.
+- **Écarts plus grands** (§15.4 bis) :
+  - 24 px entre deux groupes distincts (un formulaire, puis une case de consentement indépendante) ;
+  - 24 px entre le dernier bloc du corps et le pied (filet compris).
+- **Mesure** : pour deux enfants visibles consécutifs du corps, `next.top - prev.bottom` doit valoir 16 px au moins. Dans « Activer l'Assistance IA ? », l'écart entre l'encadré (`.ai-notice`) et « J'ai lu ces informations » (`.check`) vaut aujourd'hui **0 px** : c'est un défaut.
+- **Case de consentement** : elle est un bloc à part. Il y a 16 px au-dessus, la case de 18 px est alignée sur la première ligne du libellé, et le libellé est en 14 px `text`.
+
+### 18.3 Navigation groupée (sous-navigation des Paramètres, et toute liste à groupes)
+- **Titre de groupe** : c'est une étiquette, pas un lien.
+  - Texte de 11 px, graisse 600, en capitales, `letter-spacing: .06em`, couleur `text-muted` (4,5:1 au moins sur le fond).
+  - Padding horizontal identique aux éléments (12 px), pour que tout s'aligne à gauche. Boîte serrée : `line-height: 16px`, aucun padding vertical. L'écart vient de la marge (ou du `gap`), pour qu'on puisse le mesurer.
+  - Ni survol, ni `cursor: pointer`, ni focus. Balisage : `<h3>` (ou `<p id>`) et `aria-labelledby` sur la liste du groupe.
+- **Éléments** :
+  - hauteur 36 px, padding horizontal 12 px, rayon `md` ;
+  - texte de 14 px 500, couleur `text` : ils sont donc plus foncés et plus grands que le titre de groupe ;
+  - **écart de 2 px** entre deux éléments d'un même groupe.
+- **Espacements (loi de proximité)** :
+  - **24 px** entre le dernier élément d'un groupe et le titre du groupe suivant, mais pas au-dessus du premier groupe ;
+  - **6 px** entre un titre de groupe et son premier élément.
+  - Le titre est donc 4 fois plus près de son groupe que du groupe précédent.
+- **États** :
+  - **survol** : fond `surface-sunken` (en sombre, `surface-raised`) et texte `text`. Ni changement de graisse, ni soulignement ;
+  - **actif** : fond `surface`, graisse 600, ombre `0 1px 2px rgb(8 10 14 / .08)` et `aria-current="page"`. L'état actif se distingue du survol par la graisse et l'ombre, et pas par la seule couleur ;
+  - **focus clavier** : anneau `focus` de 2 px (`:focus-visible`), en plus de l'état ;
+  - **« Bientôt »** : la mention, en 13 px `text-muted`, est alignée à droite. L'élément reste cliquable vers la page « Bientôt » (L48-A).
+- **Mesure** :
+  - écart entre éléments du même groupe : 2 px ;
+  - écart entre un groupe et le titre suivant : 24 px ;
+  - écart entre un titre et son premier élément : 6 px ;
+  - titre : `font-size: 11px`, `text-transform: uppercase`, `cursor: default` ;
+  - élément actif : `font-weight: 600` et `aria-current="page"`.
+  - Mesuré sur dev-mvp (d33d5a1), `nav.snav` :
+    - les éléments font bien 36 px et sont espacés de 2 px, ce qui est conforme ;
+    - le titre de groupe (`span.grp`) est une boîte de 31 px de haut, collée à 2 px de l'élément précédent : il n'y a qu'environ 15 px de vide au-dessus de son texte, contre 24 attendus ;
+    - les éléments sont en `rgb(79, 89, 102)`, presque la même couleur que les titres (`rgb(95, 107, 120)`) : ils doivent passer en `text`.
+    - Ce sont des défauts.
+
+### 18.4 Fonction qui n'est pas encore publiée : l'extension
+- **Condition** : `VITE_EXTENSION_URL` est vide et l'extension n'a jamais été détectée pour ce compte (`profiles.extension_seen_at` nul).
+- **Modale « Extension TutoClick »**, état « Bientôt disponible » :
+  - titre « Extension TutoClick », suivi de « Bientôt disponible » en 13 px `text-muted` sur la même ligne ;
+  - une seule phrase : « L'extension créera une démo à partir de vos clics dans votre logiciel : chaque clic deviendra une étape. » ;
+  - aucune étape d'installation, aucun lien vers l'article d'aide, aucun bouton d'action ;
+  - pied : « Fermer » seul (`fd-btn`, secondaire).
+- **Partout ailleurs où l'installation est proposée**, le même état s'applique :
+  - l'étape « Installer l'extension » de la checklist : « Bientôt » en texte à la place du bouton « Installer » ;
+  - l'étape Extension de l'accueil (L48-C) : la phrase ci-dessus, puis « Continuer sans l'extension » ;
+  - la source « Capturer avec l'extension » de « Nouvelle démo » : désactivée, avec « Bientôt ».
+  - Rien n'est masqué (règle « Bientôt »).
+- **Quand l'URL est définie** : on affiche le titre « Installer l'extension », l'introduction et les 3 étapes, puis le lien « Voir l'article d'aide » en `.link-button`. Le pied contient « Fermer » (secondaire) et « Installer l'extension » (principal, lien externe).
+- **Extension détectée** : rien ne change, avec « Extension installée » et « Lancer une capture ».
+- **Textes (i18n, nouvelles clés)** :
+  - `extension.soonTitle` : « Extension TutoClick » ;
+  - `extension.soon` : « Bientôt disponible » ;
+  - `extension.soonBody` : « L'extension créera une démo à partir de vos clics dans votre logiciel : chaque clic deviendra une étape. »
+
+### 18.5 Validation UX : captures réelles, clair et sombre
+- Je ne valide jamais un écran d'après le code ou la seule maquette. Pour chaque écran touché par un lot :
+  1. je prends des captures **réelles** de l'app de dev-mvp (faux backend, données fictives) en **clair et en sombre**, à 1440 px, et à 390 px si l'écran existe sur mobile ;
+  2. j'ouvre aussi **chaque dialogue, menu et état** que le lot touche : état vide, « Bientôt », erreur, chargement ;
+  3. je compare chaque capture à la maquette et aux règles §15 à §18, en mesurant les écarts annoncés ici (styles calculés) ;
+  4. je lance `boutons-natifs.e2e.cjs` et le contrôle des espacements (§15.4 bis) ;
+  5. les captures vont sur le tracker. Un écran n'est « conforme » que si les captures en clair et en sombre ont été regardées.
+- Un défaut visible sur une capture que je n'ai pas prise reste un défaut de validation : la recette doit dire quelles captures ont été regardées.
