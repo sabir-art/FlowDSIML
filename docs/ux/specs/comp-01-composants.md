@@ -194,7 +194,7 @@ Dans un groupe (§11.3), c'est le groupe qui prend le fond teinté et la bordure
 - **Au clavier seulement** (`:focus-visible`). Au clic souris, rien n'apparaît. **Jamais d'`outline`, de décalage ni d'ombre extérieure.**
 - **Bouton secondaire et onglet** : c'est **leur propre bordure** qui passe en prune, sur 2 px (`border-color: primary` + `box-shadow: inset 0 0 0 1px primary`). Rien n'est ajouté à l'extérieur. Un onglet sans bordure au repos garde une bordure transparente de 1 px, pour ne pas bouger au focus.
   - Indicateur : prune sur blanc à 7,4:1 ; contre la bordure grise au repos, 2,4:1.
-- **Bouton primaire** (fond prune), proposition retenue par l'UX :
+- **Bouton primaire** (fond prune), **décision du chef du 21/11** :
   - le fond **s'assombrit** (`prune-800` #67123B en clair, `prune-200` #E3A9C4 en sombre) ;
   - **et** un trait blanc intérieur de 2 px (`border-color: surface` + `inset 0 0 0 1px surface`) ;
   - la pastille garde sa forme, sans rien à l'extérieur ;
@@ -238,7 +238,9 @@ Pour chaque champ visible de `APP_PAGES` (input, textarea, combobox, champ à pu
    - la feuille de styles contient la règle `:-webkit-autofill` avec un `box-shadow` inset de la couleur `--fd-color-tint`, et une bordure `primary` (contrôle statique) ;
    - sur la connexion, un champ rempli par l'autofill de Chromium (quand l'API est disponible) a un fond calculé égal à `tint`.
 5. **Boutons, liens et onglets** au clavier (`Tab`) :
-   - un seul indicateur : `outline` de 2 px prune avec `outline-offset` de 0, **ou** (bouton primaire ou destructif) `box-shadow: inset 0 0 0 2px` en `surface`, sans `outline` ;
-   - aucune ombre extérieure ;
-   - au clic souris, aucun indicateur.
+   - `outline-style` vaut `none` et il n'y a aucune ombre extérieure ;
+   - secondaire et onglet : `border-color` prune et `box-shadow: inset 0 0 0 1px` prune ;
+   - primaire et destructif : fond assombri (`prune-800` / `prune-200`, ou #9A2216), `border-color` `surface` et `inset 0 0 0 1px` `surface` ;
+   - lien : `text-decoration-thickness` de 2 px et fond `tint` ;
+   - au clic souris, aucun de ces indicateurs.
 6. **Grep statique** : plus aucune occurrence de `--fd-shadow-focus`, `#1f7fb6`, `#51abdd`, ni de l'ancien danger `#d60b52` ou `#f07ca2`, dans `packages/ui` et `apps/*/src`.
