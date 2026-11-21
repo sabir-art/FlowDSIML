@@ -12,6 +12,8 @@ const { chromium } = require('playwright');
 const { APP_PAGES, PLAYER_PAGES, appPage, playerPage } = require('./a11y.e2e.cjs');
 
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
+/** Routes dont l'ouverture passe par la colonne Dossiers, absente sous 1 024 px. */
+const DESKTOP_ONLY = new Set(['Démos · accès au dossier']);
 
 /** Dans la page : conteneurs défilants plus larges que leur zone visible. */
 function overflows() {
@@ -69,8 +71,20 @@ async function editorTools(p) {
     for (const x of m) console.log(`    ${x.c} : +${x.over} px, cause ${x.why}`);
   };
   const check = (p) => p.evaluate(overflows);
-  for (const width of [1440, 390])
+  // WIDTHS=390 : une seule largeur (relance locale)
+  const widths = (process.env.WIDTHS || '1440,390').split(',').map(Number);
+  for (const width of widths)
     for (const s of pages) {
+      // Sous 1 024 px, l'éditeur et ses sous-routes (Diffuser) passent en écran étroit (EditorNarrow) : leurs
+      // panneaux et modales n'existent pas. La colonne Dossiers non plus (DESKTOP_ONLY).
+      if (
+        width === 390 &&
+        s.open &&
+        (/\/demos\/[^/]+\/(edit|distribute)\b/.test(s.route) || DESKTOP_ONLY.has(s.name))
+      )
+        continue;
+      // Route déjà mesurée à sa propre largeur
+      if (width === 390 && s.viewport) continue;
       const page = { ...s, viewport: width === 390 ? { width: 390, height: 844 } : s.viewport };
       try {
         const m =
@@ -110,6 +124,9 @@ async function editorTools(p) {
         await p.click(`.ed-rail button[data-tool="${tool}"]`);
         await p.waitForTimeout(400);
         report(`Éditeur · outil ${tool} (1440 px)`, await p.evaluate(overflows));
+        // Outils en surimpression (Flouter, Assistant) : mesurés ouverts, puis refermés pour atteindre le rail
+        await p.keyboard.press('Escape');
+        await p.waitForTimeout(200);
       }
       return [];
     });

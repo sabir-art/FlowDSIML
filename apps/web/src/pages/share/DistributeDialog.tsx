@@ -413,7 +413,7 @@ export function DistributeDialog({
         </button>
       </div>
       <div className="modal-body">
-        <div className="tabs" role="tablist" aria-label={t('distribute.channel')}>
+        <div className="tabs" role="tablist" aria-label={t('distribute.channel')} data-scroll-x="">
           {TABS.map((x, i) => (
             <button
               key={x.id}

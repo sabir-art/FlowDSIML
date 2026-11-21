@@ -133,7 +133,8 @@ export function SettingsShell({
         </div>
       </div>
       <div className="settings">
-        <nav className="snav" aria-label={t('settings.sections')}>
+        {/* §18.7 : sur mobile, les sections défilent en largeur (voulu) */}
+        <nav className="snav" aria-label={t('settings.sections')} data-scroll-x="">
           {GROUPS.map((g) => (
             // Retour client : intitulé de groupe = étiquette non cliquable qui nomme le groupe
             <div key={g.key} className="snav-grp" role="group" aria-labelledby={`snav-g-${g.key}`}>

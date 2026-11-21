@@ -533,7 +533,8 @@
 }
 @media (max-width: 900px) {
   .mk .settings {
-    grid-template-columns: 1fr;
+    /* §18.7 : minmax(0, …) sinon la piste prend la largeur min-content de la nav en ligne */
+    grid-template-columns: minmax(0, 1fr);
   }
   .mk .snav {
     position: static;

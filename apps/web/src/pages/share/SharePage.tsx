@@ -353,7 +353,7 @@ export function SharePage() {
       <div className="share-layout">
         <div className="card">
           <div className="sh-tabs-wrap">
-            <div className="tabs" role="tablist" aria-label={t('share.mode')}>
+            <div className="tabs" role="tablist" aria-label={t('share.mode')} data-scroll-x="">
               {tabs.map(({ id }) => (
                 <button
                   key={id}

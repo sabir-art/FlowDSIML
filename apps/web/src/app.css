@@ -175,7 +175,9 @@
 }
 .main {
   padding: var(--fd-space-6) var(--fd-space-8) var(--fd-space-12);
-  overflow-x: hidden;
+  /* clip et non hidden : hidden ferait de main un conteneur de défilement, et la colonne Dossiers,
+     collante, suivrait main au lieu de la fenêtre (retours client 21/11 §2) */
+  overflow-x: clip;
   min-width: 0;
 }
 .page-head {

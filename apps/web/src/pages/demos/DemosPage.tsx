@@ -193,7 +193,16 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
       /* préférence non gardée */
     }
   };
-  const showCol = wide && !colHidden;
+  // Retours client 21/11 §2 : ≥ 1 280 px, colonne ou rail selon le choix gardé ; 1 024 à 1 279 px, rail
+  // par défaut et tiroir de 280 px par-dessus le contenu (choix non gardé)
+  const xl = useMediaQuery('(min-width: 1280px)');
+  const [drawer, setDrawer] = useState(false);
+  const colCollapsed = xl ? colHidden : !drawer;
+  const toggleCol = useCallback(() => {
+    if (xl) hideCol(!colHidden);
+    else setDrawer((o) => !o);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- hideCol ne change qu'avec colKey
+  }, [xl, colHidden]);
   const [newFolderParent, setNewFolderParent] = useState<string | null>(null);
   const [extension, setExtension] = useState(false);
   const [q, setQ] = useState('');
@@ -689,25 +698,32 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   };
   return (
     <div className="demos-layout">
-      {showCol && (
-        <FolderColumn
-          folders={folders}
-          scope={scope}
-          count={colCount}
-          editable={editable}
-          canManageAccess={can('workspace.settings')}
-          onSelect={setFolder}
-          onHide={() => hideCol(true)}
-          onNew={(parent) => {
-            setNewFolderParent(parent);
-            setNewFolder('');
-          }}
-          onRename={(f) => setRenaming({ id: f.id, name: f.name })}
-          onAccess={setFolderAccess}
-          onDelete={setFolderToDelete}
-          onDropDemo={requestMove}
-          sandbox={sandbox}
-        />
+      {wide && (
+        <div className={`fcol-slot${colCollapsed || !xl ? ' fcol-slot--rail' : ''}`}>
+          <FolderColumn
+            folders={folders}
+            scope={scope}
+            count={colCount}
+            editable={editable}
+            canManageAccess={can('workspace.settings')}
+            onSelect={(s) => {
+              setFolder(s);
+              if (!xl) setDrawer(false);
+            }}
+            collapsed={colCollapsed}
+            overlay={!xl}
+            onToggle={toggleCol}
+            onNew={(parent) => {
+              setNewFolderParent(parent);
+              setNewFolder('');
+            }}
+            onRename={(f) => setRenaming({ id: f.id, name: f.name })}
+            onAccess={setFolderAccess}
+            onDelete={setFolderToDelete}
+            onDropDemo={requestMove}
+            sandbox={sandbox}
+          />
+        </div>
       )}
       <div className="stack page-wide demos-main">
         <Suspense fallback={null}>
@@ -808,12 +824,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
               status={t('demos.resultCount', { count: visible.length })}
               lead={
                 <>
-                  {wide && colHidden && (
-                    <button type="button" className="fd-btn fd-filter" onClick={() => hideCol(false)}>
-                      <Folder aria-hidden="true" />
-                      {t('folders.title')}
-                    </button>
-                  )}
                   <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
                     {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
                       <button key={k} type="button" aria-pressed={status === k} onClick={() => setStatus(k)}>

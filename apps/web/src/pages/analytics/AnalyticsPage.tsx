@@ -284,7 +284,8 @@ export function AnalyticsPage() {
       </div>
 
       {/* L48-D §1 : 4 onglets au premier niveau, puis « Plus » (menu), qui prend le nom de l'onglet ouvert */}
-      <div className="an-tabrow">
+      {/* §18.7 : rangée d'onglets, défilement horizontal voulu sur mobile */}
+      <div className="an-tabrow" data-scroll-x="">
         <div className="an-tabs2" role="tablist" aria-label={t('analytics.views_label')}>
           {primary.map((k) => (
             <button
