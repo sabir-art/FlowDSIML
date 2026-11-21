@@ -392,7 +392,8 @@ dialog.l19-filter {
   width: min(640px, calc(100vw - 32px));
 }
 .mk .l19-form {
-  gap: 14px;
+  /* §18.2 : 16 px entre les blocs, 20 d'un champ au suivant (règle commune du corps de modale) */
+  gap: var(--fd-space-4);
 }
 .mk .l19-form .field {
   margin: 0;

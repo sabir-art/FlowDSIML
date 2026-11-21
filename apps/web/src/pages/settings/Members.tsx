@@ -529,7 +529,12 @@ function InviteDialog({
                   </li>
                 ))}
               </ul>
-              <p className="help">{t('members.inviteHint')}</p>
+              <p className="help">
+                {t('members.inviteHint')}{' '}
+                <span className="soon-text">
+                  {t('members.inviteEmailSoon')} · {t('shell.soon')}
+                </span>
+              </p>
             </>
           ) : (
             <>

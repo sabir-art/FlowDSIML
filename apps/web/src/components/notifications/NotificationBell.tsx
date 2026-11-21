@@ -309,7 +309,7 @@ export function NotificationBell() {
                   <li>
                     <label className="fd-switch is-soon">
                       <span>
-                        {t('notifications.p_email')} <span className="fd-badge">{t('shell.soon')}</span>
+                        {t('notifications.p_email')} <span className="soon-text">{t('shell.soon')}</span>
                       </span>
                       <input type="checkbox" role="switch" checked={false} disabled />
                       <span className="fd-switch__track" aria-hidden="true" />

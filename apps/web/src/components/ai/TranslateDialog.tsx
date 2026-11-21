@@ -228,7 +228,7 @@ export function TranslateDialog({
                     ))}
                   </select>
                 </div>
-                <p className="t-caption muted">{t('ai.translate.copyHelp')}</p>
+                <p className="help">{t('ai.translate.copyHelp')}</p>
               </>
             )}
             {phase === 'busy' && (

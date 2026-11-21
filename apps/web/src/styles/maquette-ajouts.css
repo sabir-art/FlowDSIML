@@ -3100,6 +3100,13 @@
 .mk .modal-body > * {
   margin: 0;
 }
+/* §15.4 bis : 20 px d'un champ au suivant ; une aide reste à 6 px du bloc qu'elle explique */
+.mk .modal-body > .field + .field {
+  margin-top: 4px;
+}
+.mk .modal-body > * + .help {
+  margin-top: -10px;
+}
 /* Boutons et liens directs : largeur naturelle (la colonne flex les étirerait) */
 .mk .modal-body > :where(button, a, .fd-btn, .btn, .link-button, label.check) {
   align-self: flex-start;

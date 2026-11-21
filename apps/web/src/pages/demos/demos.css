@@ -1140,13 +1140,19 @@ button.nd-src:focus-visible {
   border: 0;
   border-top: 1px solid var(--fd-color-border);
 }
+/* 24 px du dernier élément au titre de groupe, filet compris (12 + 1 + 11) */
+.fcol__sep:has(+ .fcol__section) {
+  margin-bottom: 11px;
+}
 .fcol__section {
-  margin: 0 8px 4px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  /* §18.3 : titre de groupe commun ; l'écart au-dessus est mesuré à 24 px (filet compris) */
+  margin: 0 8px 6px;
+  padding: 0;
+  font: 600 11px / 16px var(--fd-font-sans);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--fd-color-text-muted);
+  cursor: default;
 }
 .fcol__new {
   border: 0;

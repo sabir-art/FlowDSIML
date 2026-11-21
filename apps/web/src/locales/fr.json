@@ -227,7 +227,7 @@
     "role": "Rôle",
     "sendInvite": "Créer l'invitation",
     "inviteCreated": "Invitation créée. Envoyez ce lien à la personne invitée :",
-    "inviteHint": "L'envoi automatique d'emails d'invitation nécessite un SMTP personnalisé (avant la bêta). En attendant, copiez le lien.",
+    "inviteHint": "Envoyez ce lien à la personne invitée.",
     "pending": "Invitations en attente",
     "copyLink": "Copier le lien",
     "revoke": "Révoquer",
@@ -289,7 +289,8 @@
     "removeNoDemos": "Les démos de l’espace ne sont pas modifiées.",
     "roleLabel": "Rôle",
     "resultCount_one": "{{count}} membre ou invitation",
-    "resultCount_other": "{{count}} membres ou invitations"
+    "resultCount_other": "{{count}} membres ou invitations",
+    "inviteEmailSoon": "Envoi par e-mail"
   },
   "workspace": {
     "title": "Paramètres de l’espace",
@@ -1996,7 +1997,7 @@
     "configure": "Configurer",
     "socialPreview": "Aperçu sur les réseaux",
     "interactiveDemo": "Démo interactive",
-    "ogHelp": "Image générée automatiquement à la publication.",
+    "ogHelp": "Une image d’aperçu générée à la publication.",
     "thisWeek": "Cette semaine",
     "seeAnalytics": "Voir les analytics",
     "launch": "Lancer la démo",

@@ -795,7 +795,7 @@ export function SharePage() {
               </div>
             </div>
             <p className="help sh-help">
-              {t('share.ogHelp')} <span className="badge">{t('shell.soon')}</span>
+              <span className="soon-text">{t('shell.soon')}</span> · {t('share.ogHelp')}
             </p>
           </div>
           <div className="card card-pad">

@@ -227,7 +227,7 @@
     "role": "Role",
     "sendInvite": "Create invitation",
     "inviteCreated": "Invitation created. Send this link to the invitee:",
-    "inviteHint": "Automatic invitation emails require a custom SMTP server (before beta). Meanwhile, copy the link.",
+    "inviteHint": "Send this link to the person you invite.",
     "pending": "Pending invitations",
     "copyLink": "Copy link",
     "revoke": "Revoke",
@@ -289,7 +289,8 @@
     "removeNoDemos": "The workspace demos are not changed.",
     "roleLabel": "Role",
     "resultCount_one": "{{count}} member or invitation",
-    "resultCount_other": "{{count}} members or invitations"
+    "resultCount_other": "{{count}} members or invitations",
+    "inviteEmailSoon": "Send by email"
   },
   "workspace": {
     "title": "Workspace settings",
@@ -1996,7 +1997,7 @@
     "configure": "Configure",
     "socialPreview": "Social preview",
     "interactiveDemo": "Interactive demo",
-    "ogHelp": "Image generated automatically on publish.",
+    "ogHelp": "A preview image generated at publication.",
     "thisWeek": "This week",
     "seeAnalytics": "See analytics",
     "launch": "Launch the demo",
