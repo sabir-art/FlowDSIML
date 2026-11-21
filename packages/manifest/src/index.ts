@@ -58,6 +58,8 @@ export const hotspotSchema = rectSchema.extend({
   pulse: z.boolean().default(true),
   /** F1 : « beacon » = Walkthrough (pastille + bulle) ; « spotlight » = zone éclairée, reste assombri. */
   style: z.enum(['beacon', 'spotlight']).default('beacon').catch('beacon'),
+  /** A8 guide du Sandbox : sélecteur unique de l'élément visé sur une page HTML ; le rect sert de secours. */
+  sel: z.string().max(500).nullable().default(null).catch(null),
 });
 export type Hotspot = z.infer<typeof hotspotSchema>;
 
@@ -407,7 +409,20 @@ export const sandboxSchema = z.object({
   unlinked: z.enum(['toast', 'none', 'highlight']).default('toast').catch('toast'),
   guide: z.boolean().default(false),
   keyPages: z.array(z.string()).max(200).default([]),
+  /** A8 : ordre du guide optionnel, une bulle (hotspot d'une page HTML) par étape. */
+  guideSteps: z
+    .array(
+      z.object({
+        page: z.string().max(40),
+        hotspot: z.string().max(40),
+        advance: z.enum(['click', 'next']).default('click').catch('click'),
+      }),
+    )
+    .max(30)
+    .default([])
+    .catch([]),
 });
+export type GuideStep = SandboxSettings['guideSteps'][number];
 export type SandboxSettings = z.infer<typeof sandboxSchema>;
 
 /** L28 035 : voix off d'une étape (piste publiée, sous-titres, lancement à l'arrivée sur l'étape). */
@@ -681,6 +696,10 @@ export const eventTypeSchema = z.enum([
   'form_view',
   'form_submit',
   'demo_complete',
+  // A8 : guide optionnel du Sandbox
+  'guide_step',
+  'guide_done',
+  'guide_skip',
 ]);
 export type EventType = z.infer<typeof eventTypeSchema>;
 

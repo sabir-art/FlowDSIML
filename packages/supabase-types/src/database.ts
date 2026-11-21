@@ -706,6 +706,7 @@ export type Database = {
           placement: string;
           position: number;
           pulse: boolean;
+          sel: string | null;
           step_id: string;
           title: string;
           updated_at: string;
@@ -727,6 +728,7 @@ export type Database = {
           placement?: string;
           position?: number;
           pulse?: boolean;
+          sel?: string | null;
           step_id: string;
           title?: string;
           updated_at?: string;
@@ -747,6 +749,7 @@ export type Database = {
           placement?: string;
           position?: number;
           pulse?: boolean;
+          sel?: string | null;
           step_id?: string;
           title?: string;
           updated_at?: string;
