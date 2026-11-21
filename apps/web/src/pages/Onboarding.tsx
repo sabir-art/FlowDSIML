@@ -25,6 +25,7 @@ import { useToast } from '../components/Toast';
 import { createDemoFromImages, IMAGE_ACCEPT } from './demos/importImages';
 import { orderedCategories, type UseCase } from './demos/templates';
 import './onboarding.css';
+import { PendingInvites } from '../components/PendingInvites';
 
 type StepId = 'profile' | 'space' | 'use' | 'ext' | 'capture';
 const FULL: StepId[] = ['profile', 'space', 'use', 'ext', 'capture'];
@@ -490,6 +491,7 @@ export function Onboarding() {
       </header>
       <div className="obx-cols">
         <main className="obx-main" id="main">
+          {!newSpace && <PendingInvites />}
           <form className="obx-form" onSubmit={(e) => void next(e)} noValidate aria-labelledby="obx-t">
             {error && (
               <div className="alert alert-danger" role="alert">

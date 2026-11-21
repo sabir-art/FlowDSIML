@@ -213,6 +213,15 @@ async function invite(page, emails) {
         (await row.getByRole('button', { name: 'Refuser' }).count()) === 1,
       'Accepter et Refuser',
     );
+    // Retour UX : « Accepter » d'abord (petit bouton principal), puis « Refuser » en lien discret
+    ok(
+      (await row.locator('.nb-actions button').allTextContents()).join('|') === 'Accepter|Refuser' &&
+        (await row.getByRole('button', { name: 'Accepter' }).getAttribute('class')).includes(
+          'fd-btn--primary',
+        ) &&
+        (await row.getByRole('button', { name: 'Refuser' }).getAttribute('class')).includes('link-button'),
+      'Accepter en premier (bouton principal), Refuser en lien',
+    );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-04-notification.png` });
     await row.getByRole('button', { name: 'Accepter' }).click();
     await page.waitForFunction(() => location.hash === '#/');
@@ -221,6 +230,43 @@ async function invite(page, emails) {
       JSON.stringify(state.invitationAnswers) === '[{"id":"inv-paul","accept":true}]' &&
         state.tables.members.some((m) => m.workspace_id === 'ws-acme' && m.user_id === state.user.id),
       'Accepter : espace rejoint',
+    );
+    await page.close();
+  }
+
+  // Bouton de l'e-mail expiré (1 h) : la personne se connecte avec l'adresse invitée, son compte n'a pas
+  // d'espace, la prise en main montre l'invitation en attente
+  {
+    const state = seed();
+    state.tables.members = [];
+    state.tables.workspaces.push({ ...state.tables.workspaces[0], id: 'ws-acme', name: 'Acme' });
+    state.tables.profiles.push({ id: 'u-olga', full_name: 'Olga Exemple' });
+    state.tables.invitations.push({
+      id: 'inv-alice',
+      workspace_id: 'ws-acme',
+      email: state.user.email,
+      role: 'editor',
+      token: 'tok-alice',
+      invited_by: 'u-olga',
+      accepted_at: null,
+      sent_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 14 * 86400_000).toISOString(),
+    });
+    const page = await open(state);
+    await page.goto(`${APP}/#/`);
+    const box = page.getByRole('region', { name: 'Invitations en attente' });
+    await box.waitFor();
+    ok(
+      (await box.innerText()).replace(/\s+/g, ' ').includes('Olga Exemple vous invite à rejoindre « Acme »'),
+      'prise en main : invitation en attente retrouvée après connexion',
+    );
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-06-prise-en-main.png` });
+    await box.getByRole('button', { name: 'Accepter' }).click();
+    await page.waitForFunction(() => !location.hash.includes('onboarding'));
+    ok(
+      state.tables.members.some((m) => m.workspace_id === 'ws-acme' && m.user_id === state.user.id),
+      'prise en main : Accepter rejoint l’espace',
     );
     await page.close();
   }

@@ -175,6 +175,7 @@
     "seeSample": "Voir une démo d’exemple"
   },
   "invite": {
+    "pendingTitle": "Invitations en attente",
     "title": "Invitation",
     "body": "Vous êtes invité·e à rejoindre « {{workspace}} » en tant que {{role}}.",
     "loginFirst": "Connectez-vous ou créez un compte avec l'adresse {{email}} pour accepter.",
@@ -209,6 +210,7 @@
   },
   "profile": {
     "title": "Mon profil",
+    "passwordHint": "Vous pouvez définir un mot de passe pour vous connecter sans lien envoyé par e-mail.",
     "changePassword": "Changer de mot de passe",
     "passwordUpdated": "Mot de passe mis à jour.",
     "emailHint": "Contactez le support pour changer d'e-mail.",
@@ -277,10 +279,8 @@
       "admin": "Admin : gère aussi les membres et l’espace",
       "owner": "Propriétaire : tous les droits"
     },
-    "seatsUsed_one": "{{count}} siège sera utilisé. Il en restera {{left}} sur les {{limit}} de l’espace.",
-    "seatsUsed_other": "{{count}} sièges seront utilisés. Il en restera {{left}} sur les {{limit}} de l’espace.",
-    "seatsUsedUnlimited_one": "{{count}} siège sera utilisé (membres sans limite).",
-    "seatsUsedUnlimited_other": "{{count}} sièges seront utilisés (membres sans limite).",
+    "membersMore_one": "{{count}} membre en plus sur {{limit}}.",
+    "membersMore_other": "{{count}} membres en plus sur {{limit}}.",
     "sendInvites": "Envoyer les invitations",
     "createInvites": "Créer les invitations",
     "sendByEmail": "Envoyer l’invitation par e-mail",

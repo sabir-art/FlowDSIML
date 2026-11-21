@@ -260,9 +260,13 @@
   height: 16px;
   color: var(--fd-color-text-muted);
 }
-/* E-mails P1 : Accepter et Refuser une invitation, sous le texte */
+/* E-mails P1 : Accepter (bouton) puis Refuser (lien discret), sous le texte */
 .nb-actions {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 16px;
   margin-top: 8px;
+}
+.nb-decline {
+  color: var(--fd-color-text-muted);
 }

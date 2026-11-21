@@ -441,7 +441,6 @@ export function Members() {
         <InviteDialog
           roles={roles}
           limit={limit ?? null}
-          used={members.length + invites.length}
           onClose={() => setInviting(false)}
           onDone={() => void load()}
         />
@@ -454,13 +453,11 @@ export function Members() {
 function InviteDialog({
   roles,
   limit,
-  used,
   onClose,
   onDone,
 }: {
   roles: Role[];
   limit: number | null;
-  used: number;
   onClose: () => void;
   onDone: () => void;
 }) {
@@ -536,7 +533,6 @@ function InviteDialog({
     setLinks(rest.map((r) => ({ email: r.email, url: inviteUrl(r.token) })));
   }
 
-  const left = limit === null ? null : limit - used - list.length;
   return (
     <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <form
@@ -659,15 +655,9 @@ function InviteDialog({
                 )}
                 {!byEmail && !limited && <span className="help">{t('members.inviteHint')}</span>}
               </div>
-              {list.length > 0 && (
-                <div className="alert st-seats">
-                  <Info aria-hidden="true" />
-                  <span>
-                    {left === null
-                      ? t('members.seatsUsedUnlimited', { count: list.length })
-                      : t('members.seatsUsed', { count: list.length, left: Math.max(0, left), limit })}
-                  </span>
-                </div>
+              {/* Retour UX : pas de vocabulaire d'abonnement ; rien sans limite de membres */}
+              {list.length > 0 && limit !== null && (
+                <p className="st-seats">{t('members.membersMore', { count: list.length, limit })}</p>
               )}
             </>
           )}

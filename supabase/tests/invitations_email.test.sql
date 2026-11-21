@@ -1,7 +1,7 @@
 -- Tests pgTAP : e-mails P1, budget commun, plafond horaire, notification « invite », Accepter et Refuser.
 begin;
 set search_path = public, extensions;
-select plan(21);
+select plan(23);
 
 insert into auth.users (id, email, last_sign_in_at) values
   ('00000000-0000-0000-0000-0000000300a1', 'olga-inv@acme.example', now()),
@@ -61,7 +61,10 @@ select pg_temp.login('00000000-0000-0000-0000-0000000300a3', 'paul-inv@acme.exam
 select is((select count(*)::int from public.notifications where kind = 'invite'), 1, 'invitée : voit son invitation');
 select throws_ok($$ select public.answer_invitation('00000000-0000-0000-0000-0000000300b1', true) $$,
   'INVITATION_EMAIL_MISMATCH', 'pas la réponse à l''invitation d''une autre adresse');
+select is((select array_agg(workspace_name || '|' || coalesce(inviter_name, '')) from public.my_invitations()),
+  array['Acme|Olga Exemple'], 'prise en main : ses invitations en attente, sans jeton');
 select is(public.answer_invitation('00000000-0000-0000-0000-0000000300b2', true), (select ws from ctx), 'Accepter : espace rejoint');
+select is((select count(*)::int from public.my_invitations()), 0, 'acceptée : plus en attente');
 select is((select data ->> 'answer' from public.notifications where kind = 'invite'), 'accepted', 'notification : acceptée');
 select isnt((select read_at from public.notifications where kind = 'invite'), null, 'notification : lue');
 select pg_temp.login('00000000-0000-0000-0000-0000000300a2');

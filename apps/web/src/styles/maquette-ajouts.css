@@ -590,7 +590,9 @@
   vertical-align: -3px;
 }
 .mk .st-seats {
-  margin-top: 20px;
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
 }
 .mk .st-links {
   list-style: none;

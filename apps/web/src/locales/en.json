@@ -175,6 +175,7 @@
     "seeSample": "See a sample demo"
   },
   "invite": {
+    "pendingTitle": "Pending invitations",
     "title": "Invitation",
     "body": "You have been invited to join “{{workspace}}” as {{role}}.",
     "loginFirst": "Sign in or create an account with {{email}} to accept.",
@@ -209,6 +210,7 @@
   },
   "profile": {
     "title": "My profile",
+    "passwordHint": "You can set a password to sign in without an emailed link.",
     "changePassword": "Change password",
     "passwordUpdated": "Password updated.",
     "emailHint": "Contact support to change your email.",
@@ -277,10 +279,8 @@
       "admin": "Admin: also manages members and the workspace",
       "owner": "Owner: all rights"
     },
-    "seatsUsed_one": "{{count}} seat will be used. {{left}} of the workspace’s {{limit}} will remain.",
-    "seatsUsed_other": "{{count}} seats will be used. {{left}} of the workspace’s {{limit}} will remain.",
-    "seatsUsedUnlimited_one": "{{count}} seat will be used (no member limit).",
-    "seatsUsedUnlimited_other": "{{count}} seats will be used (no member limit).",
+    "membersMore_one": "{{count}} more member out of {{limit}}.",
+    "membersMore_other": "{{count}} more members out of {{limit}}.",
     "sendInvites": "Send the invitations",
     "createInvites": "Create the invitations",
     "sendByEmail": "Send the invitation by email",

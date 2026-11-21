@@ -2335,6 +2335,10 @@ export type Database = {
       answer_invitation: { Args: { p_accept: boolean; p_invitation: string }; Returns: string | null };
       email_budget_today: { Args: { p_workspace: string }; Returns: Json };
       invite_quota: { Args: { p_workspace: string }; Returns: Json };
+      my_invitations: {
+        Args: never;
+        Returns: Array<{ id: string; workspace_name: string; inviter_name: string | null; expires_at: string }>;
+      };
       console_add_owner: { Args: { p_email: string; p_role: string }; Returns: string };
       console_articles: { Args: { p_days?: number; p_workspace?: string | null }; Returns: Json };
       console_audit_list: { Args: { p_limit?: number }; Returns: Json };

@@ -595,19 +595,19 @@ function InviteRow({
           <span className="nb-actions">
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
-              disabled={busy}
-              onClick={() => void answer(false)}
-            >
-              {t('notifications.decline')}
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
+              className="fd-btn fd-btn--primary fd-btn--sm"
               disabled={busy}
               onClick={() => void answer(true)}
             >
               {t('notifications.accept')}
+            </button>
+            <button
+              type="button"
+              className="link-button nb-decline"
+              disabled={busy}
+              onClick={() => void answer(false)}
+            >
+              {t('notifications.decline')}
             </button>
           </span>
         )}

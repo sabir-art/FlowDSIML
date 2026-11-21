@@ -2274,25 +2274,42 @@ async function install(page, state = seed()) {
         }
         case 'email_budget_today':
           return json(route, 200, { sent: state.emailBudget ?? 0, cap: 150 });
+        case 'my_invitations':
+          return json(
+            route,
+            200,
+            t.invitations
+              .filter((i) => i.email === state.user.email && !i.accepted_at)
+              .map((i) => ({
+                id: i.id,
+                workspace_name: t.workspaces.find((w) => w.id === i.workspace_id)?.name ?? '',
+                inviter_name: t.profiles.find((x) => x.id === i.invited_by)?.full_name ?? null,
+                expires_at: i.expires_at,
+              })),
+          );
         case 'answer_invitation': {
+          // Depuis la notification (compte existant) ou la prise en main (invitation en attente)
           const n = (t.notifications || []).find(
             (x) => x.kind === 'invite' && x.data?.invitation === a.p_invitation,
           );
-          if (!n) return json(route, 400, { message: 'INVITATION_NOT_FOUND' });
-          n.read_at = n.read_at || new Date().toISOString();
-          n.data = { ...n.data, answer: a.p_accept ? 'accepted' : 'declined' };
+          const inv = t.invitations.find((i) => i.id === a.p_invitation);
+          if (!n && !inv) return json(route, 400, { message: 'INVITATION_NOT_FOUND' });
+          if (n) {
+            n.read_at = n.read_at || new Date().toISOString();
+            n.data = { ...n.data, answer: a.p_accept ? 'accepted' : 'declined' };
+          }
+          if (inv && a.p_accept) inv.accepted_at = new Date().toISOString();
+          if (inv && !a.p_accept) t.invitations = t.invitations.filter((i) => i !== inv);
+          const wsOf = n?.workspace_id ?? inv?.workspace_id;
           (state.invitationAnswers ||= []).push({ id: a.p_invitation, accept: a.p_accept });
-          if (
-            a.p_accept &&
-            !t.members.some((m) => m.workspace_id === n.workspace_id && m.user_id === state.user.id)
-          )
+          if (a.p_accept && !t.members.some((m) => m.workspace_id === wsOf && m.user_id === state.user.id))
             t.members.push({
-              workspace_id: n.workspace_id,
+              workspace_id: wsOf,
               user_id: state.user.id,
               role: 'viewer',
               created_at: new Date().toISOString(),
             });
-          return json(route, 200, a.p_accept ? n.workspace_id : null);
+          return json(route, 200, a.p_accept ? wsOf : null);
         }
         case 'resolve_share_link': {
           const l = t.share_links.find((x) => x.token === a.p_token && x.is_active);
