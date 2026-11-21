@@ -386,11 +386,11 @@
   flex-direction: column;
   gap: 20px;
 }
+/* Audit L50 X5 : titre de section en casse normale */
 .l13-drawer h3 {
   margin: 0 0 10px;
   font-size: 12px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 600;
   color: var(--fd-color-text-muted);
 }
 .l13-structure {

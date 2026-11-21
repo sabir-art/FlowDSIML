@@ -7,7 +7,7 @@ describe('errorMessage', () => {
     await i18n.changeLanguage('fr');
     expect(errorMessage(i18n.t, { message: 'PLAN_LIMIT:members' })).toContain('Limite de membres');
     expect(errorMessage(i18n.t, new Error('Invalid login credentials'))).toBe(
-      'Email ou mot de passe incorrect. Vérifiez vos informations et réessayez.',
+      'E-mail ou mot de passe incorrect. Vérifiez vos informations et réessayez.',
     );
   });
   it('a une traduction anglaise', async () => {

@@ -1316,10 +1316,9 @@
   width: 12px;
   height: 12px;
 }
+/* Audit L50 X5 : titre de section en casse normale */
 .mk .rail-chapter {
-  font: 600 11px var(--fd-font-sans);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font: 600 12px var(--fd-font-sans);
   color: var(--fd-color-text-subtle);
   padding: 10px 8px 4px;
 }
@@ -1480,11 +1479,10 @@
   border-top: 0;
   padding-top: 4px;
 }
+/* Audit L50 X5 : titre de section (L48-E §3 : 13 px 600) en casse normale */
 .mk .sec-title {
-  font: 600 12px var(--fd-font-sans);
+  font: 600 13px var(--fd-font-sans);
   color: var(--fd-color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
@@ -2595,10 +2593,9 @@
   grid-template-columns: 1fr 1fr;
   gap: 20px 28px;
 }
+/* Audit L50 X5 : titre de section en casse normale */
 .mk .kb-grid h3 {
   font: 600 12px var(--fd-font-sans);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   color: var(--fd-color-text-subtle);
   margin: 0 0 8px;
 }

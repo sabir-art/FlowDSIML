@@ -3,7 +3,7 @@ import { APP_NAME } from '@flowdsiml/core';
 
 const fr = {
   subtitle: 'Capture',
-  email: 'Email',
+  email: 'E-mail',
   password: 'Mot de passe',
   signIn: 'Se connecter',
   noAccount: 'Pas de compte ?',
@@ -48,7 +48,7 @@ const fr = {
   stepsCaptured_other: '{{count}} étapes capturées',
   notLoggedIn: `Connectez-vous à ${APP_NAME} pour capturer.`,
   protectedPage: 'Cette page ne peut pas être capturée (page système du navigateur).',
-  badCredentials: 'Email ou mot de passe incorrect.',
+  badCredentials: 'E-mail ou mot de passe incorrect.',
   noWorkspace: "Aucun espace où vous êtes éditeur. Créez-en un dans l'application.",
   // F7 : capture vidéo et mobile
   captureType: 'Type de capture',

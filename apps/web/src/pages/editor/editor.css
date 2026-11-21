@@ -91,10 +91,10 @@
   border-style: dashed;
   border-color: var(--fd-color-primary);
 }
+/* Audit L50 X5 : titre de section en casse normale */
 .steplist-chapter {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--fd-color-text-muted);
   padding: 6px 4px 2px;
 }
@@ -1871,13 +1871,12 @@
 }
 
 /* L22-09 : règles de suite (maquette editeur-collab.html ?etat=regles) */
+/* Audit L50 X5 : titre de section en casse normale */
 .br-sub {
   margin: 4px 0 0;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--fd-color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 .br-rule {
   display: grid;
@@ -1900,9 +1899,8 @@
 .br-row > b {
   grid-column: 1 / -1;
   font-size: 12px;
+  font-weight: 600;
   color: var(--fd-color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 .br-dest {
   display: grid;

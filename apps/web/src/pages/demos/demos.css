@@ -719,12 +719,11 @@ button.nd-src:focus-visible {
   font-size: var(--fd-text-caption-size);
   color: var(--fd-color-text-muted);
 }
+/* Audit L50 X5 : titre de section en casse normale */
 .tpl-chap {
   margin-top: 6px;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 600;
   color: var(--fd-color-text-muted);
 }
 .tpl-prev ol {

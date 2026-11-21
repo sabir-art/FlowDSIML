@@ -68,12 +68,11 @@
   gap: 2px;
 }
 .help-sec h3,
+/* Audit L50 X5 : titre de section en casse normale */
 .help-results h3 {
   margin: 0 0 8px;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 600;
   color: var(--fd-color-text-muted);
 }
 .help-link {
@@ -145,12 +144,11 @@
 .help-back {
   align-self: flex-start;
 }
+/* Audit L50 X5 : titre de section en casse normale */
 .help-section {
   margin: 0;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 600;
   color: var(--fd-color-text-muted);
 }
 .help-article h2 {

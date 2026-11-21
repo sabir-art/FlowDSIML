@@ -639,9 +639,8 @@ html[data-remote] body {
 .rmp-notes h2 {
   margin: 0 0 8px;
   font-size: 13px;
+  font-weight: 600;
   color: #b7c0ca;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 .rmp-notes ul {
   margin: 0;

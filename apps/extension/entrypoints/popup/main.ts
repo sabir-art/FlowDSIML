@@ -321,10 +321,7 @@ $('login').addEventListener('submit', async (e) => {
     email: $<HTMLInputElement>('email').value,
     password: $<HTMLInputElement>('password').value,
   });
-  if (err)
-    return error(
-      err.message === 'Invalid login credentials' ? 'Email ou mot de passe incorrect.' : err.message,
-    );
+  if (err) return error(err.message === 'Invalid login credentials' ? strings.badCredentials : err.message);
   await render();
 });
 

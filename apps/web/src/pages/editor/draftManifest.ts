@@ -145,7 +145,7 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
       submitLabel: f.submit_label,
       fields: asFields(f.fields).length
         ? asFields(f.fields)
-        : [{ key: 'email', label: 'Email', type: 'email', required: true }],
+        : [{ key: 'email', label: 'E-mail', type: 'email', required: true }],
       consentText: f.consent_text,
       skippable: f.skippable,
     })),
