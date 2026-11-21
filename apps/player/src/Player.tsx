@@ -30,6 +30,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  Expand,
   ExternalLink,
   Globe,
   Info,
@@ -230,6 +231,16 @@ export function Player({
   const completed = useRef(false);
   const touchX = useRef<number | null>(null);
   const step = m.steps[index]!;
+  // L38-11 / MOB-01 M5 : cadrage automatique sur petit écran ; « Voir tout l'écran » sous la capture
+  const autoZoom =
+    narrow &&
+    !mobile &&
+    step.kind === 'image' &&
+    !step.zoom &&
+    !(index > 0 && m.steps[index - 1]?.zoom?.keep) &&
+    step.hotspots.length > 0;
+  const [fullShot, setFullShot] = useState(false);
+  useEffect(() => setFullShot(false), [index]);
   // L28-03 : voix off. Son coupé au départ (règle des navigateurs) ; « Activer le son » vaut pour la session
   const [soundOn, setSoundOn] = useState(() => {
     try {
@@ -908,31 +919,39 @@ export function Player({
             />
           </>
         ) : step.kind === 'image' && step.image ? (
-          <TabWindow
-            tabs={tabs}
-            changed={newTab}
-            frame={mobile ? { ...DEFAULT_FRAME, style: 'none' } : theme.frame}
-            title={m.title}
-            ratio={(() => {
-              const c = croppedSize(step.image, asCrop(step.options.crop));
-              return c.width / c.height;
-            })()}
-          >
-            <ImageStep
-              key={step.id}
-              step={step}
-              sub={sub}
-              onHotspot={onHotspot}
-              onCta={onCta}
-              tip={!compact && !gateForm && !ended ? tipProps : undefined}
-              carry={index > 0 && m.steps[index - 1]?.zoom?.keep ? m.steps[index - 1]!.zoom : null}
-              alt={shotAlt}
-              tap={mobile ? t.mobile.tap : undefined}
-              tapHere={t.mobile.tapHere}
-              missing={{ text: t.imgMissing, retry: t.retry }}
-              autoZoom={narrow && !mobile ? { full: t.seeFullScreen, zoom: t.zoomOnSpot } : null}
-            />
-          </TabWindow>
+          <>
+            <TabWindow
+              tabs={tabs}
+              changed={newTab}
+              frame={mobile ? { ...DEFAULT_FRAME, style: 'none' } : theme.frame}
+              title={m.title}
+              ratio={(() => {
+                const c = croppedSize(step.image, asCrop(step.options.crop));
+                return c.width / c.height;
+              })()}
+            >
+              <ImageStep
+                key={step.id}
+                step={step}
+                sub={sub}
+                onHotspot={onHotspot}
+                onCta={onCta}
+                tip={!compact && !gateForm && !ended ? tipProps : undefined}
+                carry={index > 0 && m.steps[index - 1]?.zoom?.keep ? m.steps[index - 1]!.zoom : null}
+                alt={shotAlt}
+                tap={mobile ? t.mobile.tap : undefined}
+                tapHere={t.mobile.tapHere}
+                missing={{ text: t.imgMissing, retry: t.retry }}
+                autoZoom={autoZoom && !fullShot}
+              />
+            </TabWindow>
+            {autoZoom && (
+              <button type="button" class="p-autozoom" onClick={() => setFullShot((f) => !f)}>
+                {fullShot ? <ZoomIn {...ICON} size={16} /> : <Expand {...ICON} size={16} />}
+                {fullShot ? t.zoomOnSpot : t.seeFullScreen}
+              </button>
+            )}
+          </>
         ) : (
           <>
             {popup && backdrop !== null && (
@@ -1268,8 +1287,8 @@ function ImageStep({
   autoZoom,
 }: {
   step: Step;
-  /** L38-11 : cadrage automatique autour du hotspot (petit écran), libellés du bouton. */
-  autoZoom?: { full: string; zoom: string } | null;
+  /** L38-11 : cadrage automatique autour du hotspot (petit écran) ; la bascule est sous la capture. */
+  autoZoom?: boolean;
   /** L36 : capture introuvable (démo supprimée, réseau coupé) : message et bouton Réessayer. */
   missing?: { text: string; retry: string };
   /** F7 : verbe « Touchez » des démos mobiles (sinon le titre seul). */
@@ -1301,14 +1320,13 @@ function ImageStep({
     return () => removeEventListener('online', again);
   }, [broken]);
   // L38-11 : sur petit écran, sans zoom réglé par l'auteur, la zone du premier hotspot est agrandie
-  // (×2) pour que les libellés du logiciel restent lisibles ; « Voir tout l'écran » revient à la capture
-  // entière. Sans animation si l'utilisateur réduit les animations.
-  const [full, setFull] = useState(false);
+  // (×2) pour que les libellés du logiciel restent lisibles ; « Voir tout l'écran » (sous la capture,
+  // MOB-01 M5) revient à la capture entière. Sans animation si l'utilisateur réduit les animations.
   const reducedMotion = useMedia('(prefers-reduced-motion: reduce)');
   const h0 = step.hotspots[0];
   const auto = useMemo(
     () =>
-      autoZoom && !step.zoom && !carry && h0 && !full
+      autoZoom && !step.zoom && !carry && h0
         ? {
             x: h0.x + h0.w / 2,
             y: h0.y + h0.h / 2,
@@ -1317,7 +1335,7 @@ function ImageStep({
             keep: false,
           }
         : null,
-    [autoZoom, step.zoom, carry, h0, full, reducedMotion],
+    [autoZoom, step.zoom, carry, h0, reducedMotion],
   );
   const zoom = step.zoom ?? carry ?? auto;
   // Zoom repris de l'étape précédente, ou transition « Directe » : pas d'animation d'entrée
@@ -1383,12 +1401,6 @@ function ImageStep({
       class={`p-stage${dimmed ? ' is-backdrop' : ''}`}
       style={{ '--ratio': String(shown.width / shown.height) }}
     >
-      {autoZoom && !step.zoom && !carry && h0 && (
-        <button type="button" class="p-autozoom" onClick={() => setFull((f) => !f)}>
-          {full ? <ZoomIn {...ICON} size={16} /> : <Maximize2 {...ICON} size={16} />}
-          {full ? autoZoom.zoom : autoZoom.full}
-        </button>
-      )}
       <div
         class={`p-zoom${zoom?.transition === 'instant' ? ' is-instant' : ''}`}
         style={{ transform, transformOrigin: origin }}

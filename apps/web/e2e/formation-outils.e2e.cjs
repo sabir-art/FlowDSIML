@@ -174,6 +174,24 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     if (reduced) ok(z.instant, 'n° 11 : sans animation si l’utilisateur réduit les animations');
     const btn = p.getByRole('button', { name: 'Voir tout l’écran' });
     ok(await btn.isVisible(), 'n° 11 : bouton « Voir tout l’écran »');
+    // MOB-01 M5 : capture 12 px sous l'en-tête ; le lien est sous la capture, à droite, sans la recouvrir
+    const m5 = await p.evaluate(() => {
+      const r = (q) => document.querySelector(q).getBoundingClientRect();
+      const top = r('.p-top');
+      const shot = document.querySelector('.p-win') ? r('.p-win') : r('.p-stage');
+      const b = r('.p-autozoom');
+      const wrap = r('.p-stage-wrap');
+      return {
+        gap: Math.round(shot.top - top.bottom),
+        below: b.top >= shot.bottom,
+        right: Math.round(wrap.right - b.right),
+        size: getComputedStyle(document.querySelector('.p-autozoom')).fontSize,
+      };
+    });
+    ok(
+      m5.gap >= 10 && m5.gap <= 16 && m5.below && m5.right <= 20 && m5.size === '14px',
+      `M5 : capture en haut (12 px), « Voir tout l’écran » en lien de 14 px sous la capture (${JSON.stringify(m5)})`,
+    );
     await btn.click();
     ok((await zoom()).t === 'none', 'n° 11 : « Voir tout l’écran » montre la capture entière');
     ok(

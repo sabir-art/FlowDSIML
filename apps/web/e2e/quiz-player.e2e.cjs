@@ -177,6 +177,28 @@ const manifest = {
   await page.keyboard.press('ArrowDown');
   await page.waitForTimeout(200);
   ok(await page.getByLabel('Dans les paramètres').isChecked(), 'réponse cochée au clavier');
+  // MOB-01 M6 : un seul indicateur. Au clavier, l'anneau de focus ; après un clic, le seul contour de 2 px
+  const rings = () =>
+    page.evaluate(() => {
+      const o = document.querySelector('.p-quiz-option.is-selected');
+      const cs = getComputedStyle(o);
+      return {
+        outline: cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0,
+        input: getComputedStyle(o.querySelector('input')).boxShadow,
+        border: cs.borderTopWidth,
+      };
+    });
+  const kb = await rings();
+  ok(
+    kb.outline && kb.input === 'none' && kb.border === '2px',
+    `M6 : au clavier, un seul anneau (${JSON.stringify(kb)})`,
+  );
+  await page.locator('.p-quiz-option', { hasText: 'Dans les paramètres' }).click();
+  const ms = await rings();
+  ok(
+    !ms.outline && ms.input === 'none' && ms.border === '2px',
+    `M6 : après un clic, un seul contour de 2 px (${JSON.stringify(ms)})`,
+  );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/f2-question${sfx}.png` });
   // Mauvaise réponse : correction par texte et icône, explication, revoir l'étape
   await page.getByLabel('Dans les paramètres').check();

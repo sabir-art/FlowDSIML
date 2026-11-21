@@ -167,28 +167,40 @@ body {
   object-fit: contain;
   user-select: none;
 }
-/* L38-11 : bascule du cadrage automatique (petit écran) */
+/* L38-11 / MOB-01 M5 : bascule du cadrage automatique (petit écran), en lien de 14 px sous la capture */
 .p-autozoom {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 3;
+  align-self: flex-end;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 32px;
-  padding: 0 10px;
+  min-height: 44px;
+  padding: 0 2px;
   border: 0;
-  border-radius: 999px;
-  background: rgb(8 8 8 / 0.72);
-  color: #fff;
-  font-size: 13px;
+  background: none;
+  /* Couleur du texte : lisible quel que soit le thème (la couleur de marque peut manquer de contraste) */
+  color: var(--p-text);
+  font-size: 14px;
   font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
 }
-.p-autozoom:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+/* MOB-01 M5 : sur petit écran, la capture commence 12 px sous l'en-tête (plus de centrage vertical) */
+.p-root.is-compact .p-stage-wrap {
+  align-items: flex-start;
+  padding-top: 12px;
+}
+.p-root.is-compact .p-stage-wrap:has(> .p-autozoom) {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+/* Place réservée au lien sous la capture (44 px) */
+.p-root.is-compact .p-stage-wrap:has(> .p-autozoom) > .p-stage {
+  width: min(100cqw, (100cqh - 56px) * var(--ratio, 1.6));
+}
+.p-root.is-compact .p-stage-wrap:has(> .p-autozoom) > .p-win {
+  width: min(100cqw, (100cqh - 56px - var(--bar)) * var(--ratio, 1.6));
 }
 .p-img-missing {
   position: absolute;
@@ -800,9 +812,14 @@ a.p-btn:hover {
   padding: 9px 13px;
   background: color-mix(in srgb, var(--p-primary) 8%, var(--p-surface));
 }
+/* MOB-01 M6 : un seul indicateur. L'anneau de focus (clavier seulement) est porté par l'option,
+   pas par le bouton radio ; après un clic, l'option choisie garde son seul contour de 2 px. */
 .p-quiz-option:has(:focus-visible) {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--fd-color-focus, #1f7fb6);
   outline-offset: 2px;
+}
+.p-root .p-quiz-option input:focus-visible {
+  box-shadow: none;
 }
 .p-quiz-option[aria-disabled='true'] {
   cursor: default;
