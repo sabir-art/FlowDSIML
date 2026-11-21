@@ -133,3 +133,6 @@ revoke all on function public.steps_html_capture_guard() from public, anon, auth
 drop trigger if exists steps_html_capture_guard on public.steps;
 create trigger steps_html_capture_guard before insert or update of html_path on public.steps
   for each row execute function public.steps_html_capture_guard();
+
+-- ===== Article d'aide « Capturer en HTML » (mention d'autorisation, L49 §6) =====
+insert into public.help_articles (slug) values ('capturer-html') on conflict do nothing;

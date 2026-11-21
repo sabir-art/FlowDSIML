@@ -64,7 +64,7 @@ export function NewDemoDialog({
     ? (last as ContentType)
     : 'captures';
   // L49 P1 : captures HTML désactivées par un admin : Démo HTML et Sandbox visibles, désactivés, avec la raison
-  const htmlCapture = useHtmlCapture(open ? ws : undefined);
+  const htmlCapture = useHtmlCapture(ws);
   const htmlOff = htmlCapture.mode === 'disabled';
   const usable = (k: ContentType) => !htmlOff || k === 'captures';
   const firstType = (): ContentType => {
@@ -92,6 +92,14 @@ export function NewDemoDialog({
     } else if (!open && d.open) d.close();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- à l'ouverture seulement
   }, [open, defaultFolder]);
+
+  // Réglage lu après l'ouverture : un type devenu indisponible repasse sur « Démo par captures »
+  useEffect(() => {
+    if (usable(type)) return;
+    setType('captures');
+    setStep(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- usable dépend seulement de htmlOff
+  }, [htmlOff, type]);
 
   /** Garde le type choisi (défaut suivant, préremplissage de l'extension) ; échec sans conséquence. */
   const next = () => {

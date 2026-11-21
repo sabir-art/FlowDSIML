@@ -131,6 +131,9 @@ jobs:
       - name: Sandbox L48-G (liens sans page)
         if: always()
         run: cd apps/web && node e2e/l48g-liens.e2e.cjs
+      - name: L49 P1 réglage « Captures HTML » (radios, domaines, lecture seule, types désactivés, mention)
+        if: always()
+        run: cd apps/web && node e2e/l49-reglage.e2e.cjs
       - name: Éditeur L48-E (rail d'outils, panneau, flou en modale)
         if: always()
         run: cd apps/web && node e2e/l48e-editeur.e2e.cjs
