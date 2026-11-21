@@ -39,7 +39,8 @@
 }
 .ab-card {
   display: grid;
-  gap: 2px;
+  /* §18.6 : 8 px au moins entre l'en-tête et la valeur */
+  gap: 6px;
   padding: 10px;
   border: 1px solid var(--fd-color-border);
   border-radius: var(--fd-radius-md);
@@ -56,7 +57,8 @@
 .ab-card-head {
   display: flex;
   align-items: center;
-  gap: 6px;
+  /* §18.6 : 8 px au moins entre frères */
+  gap: 8px;
   min-width: 0;
 }
 .ab-card-name {
@@ -84,6 +86,9 @@
   accent-color: var(--fd-color-primary);
 }
 .ab-b {
+  /* §18.6 : écarts posés par le conteneur */
+  display: grid;
+  gap: 8px;
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--fd-color-border);

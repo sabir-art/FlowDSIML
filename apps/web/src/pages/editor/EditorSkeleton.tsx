@@ -166,7 +166,10 @@ export function EditorSkeleton({
               <div className="stage-inner">
                 <div className="frame fd-player-scope frame--fit">
                   <div className="browser browser--classic" aria-hidden="true">
-                    <span className="browser-row">
+                    <span
+                      className="browser-row"
+                      /* §18.6 : pastilles de fenêtre du faux navigateur, décor */ data-gap-exempt=""
+                    >
                       <i />
                       <i />
                       <i />

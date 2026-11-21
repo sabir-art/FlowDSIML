@@ -1,7 +1,8 @@
 /* L27-06 : carte « Règles de partage » */
 .sr-card {
   display: grid;
-  gap: 4px;
+  /* §18.6 : 8 px au moins entre les rangées et la légende */
+  gap: 8px;
   padding: 20px;
   margin-bottom: 16px;
 }

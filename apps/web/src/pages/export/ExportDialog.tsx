@@ -871,6 +871,7 @@ export function ExportDialog({
     <dialog
       ref={ref}
       className={small ? 'x15-dialog x15-small' : 'x15-dialog x15-dlg'}
+      /* §18.6 : deux volets accolés (options, aperçu sur fond) */ data-gap-exempt=""
       role={phase.kind === 'error' ? 'alertdialog' : undefined}
       aria-labelledby={`${id}-t`}
       aria-describedby={phase.kind === 'error' ? `${id}-d` : undefined}

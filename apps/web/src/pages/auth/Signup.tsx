@@ -179,7 +179,11 @@ export function Signup() {
                 aria-describedby={errors.password ? 'password-error pwd-help' : 'pwd-help'}
                 aria-invalid={errors.password ? true : undefined}
               />
-              <div className="pwd-meter" aria-hidden="true">
+              <div
+                className="pwd-meter"
+                aria-hidden="true"
+                /* §18.6 : jauge de robustesse, segments accolés */ data-gap-exempt=""
+              >
                 {[0, 1, 2, 3].map((i) => (
                   <span key={i} className={i < segments ? 'on' : undefined} />
                 ))}

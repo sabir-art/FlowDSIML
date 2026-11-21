@@ -1076,8 +1076,11 @@ function MiniPreview({ demoId, previewUrl }: { demoId: string; previewUrl: strin
   return (
     // L19b : seul le lecteur garde le thème de la démo ; le cadre suit le thème de l'app
     <div className="preview-box">
-      <div className="mini-player fd-player-scope">
-        <div className="bar">
+      <div
+        className="mini-player fd-player-scope"
+        /* §18.6 : aperçu miniature : barre et écran accolés */ data-gap-exempt=""
+      >
+        <div className="bar" /* §18.6 : points de fenêtre de l’aperçu, décor */ data-gap-exempt="">
           <i />
           <i />
           <i />

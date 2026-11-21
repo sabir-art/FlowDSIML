@@ -86,17 +86,33 @@ export function HtmlStep({
     };
   }, [h.url]);
 
-  // Mise à l'échelle : la page garde sa largeur capturée
+  // Mise à l'échelle : la page garde sa largeur capturée et tient dans la scène, en largeur comme en
+  // hauteur (comme les captures image) ; sinon elle débordait sur la barre du haut et les contrôles
   useEffect(() => {
     const el = box.current;
-    if (!el) return;
+    const step = el?.parentElement;
+    if (!el || !step) return;
+    const wrap = el.closest<HTMLElement>('.p-stage-wrap');
     const ro = new ResizeObserver(() => {
-      setScale(Math.min(1, el.clientWidth / vw));
-      setBoxW(el.clientWidth);
+      const full = step.clientWidth;
+      let availH = Infinity;
+      if (wrap) {
+        const cs = getComputedStyle(wrap);
+        // Hauteur de la scène, moins ce qui accompagne le cadre (repère « page interactive »)
+        availH =
+          wrap.clientHeight -
+          parseFloat(cs.paddingTop) -
+          parseFloat(cs.paddingBottom) -
+          (step.offsetHeight - el.offsetHeight);
+      }
+      const s = Math.min(1, full / vw, availH > 0 ? availH / vh : 1);
+      setScale(s);
+      setBoxW(Math.min(full, Math.floor(vw * s)));
     });
-    ro.observe(el);
+    ro.observe(step);
+    if (wrap) ro.observe(wrap);
     return () => ro.disconnect();
-  }, [vw]);
+  }, [vw, vh]);
 
   /** Opérations envoyées à la page : variables résolues, images https ou data:image seulement. */
   const ops = useMemo<FrameOp[]>(
@@ -174,7 +190,11 @@ export function HtmlStep({
   const title = h.title || step.title || '';
   return (
     <div class="p-html-step">
-      <div class="p-html-frame" ref={box} style={{ height: `${Math.round(vh * scale)}px` }}>
+      <div
+        class="p-html-frame"
+        ref={box}
+        style={{ height: `${Math.round(vh * scale)}px`, width: boxW ? `${boxW}px` : '100%' }}
+      >
         {doc ? (
           <iframe
             ref={frame}

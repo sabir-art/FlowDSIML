@@ -2824,6 +2824,8 @@
 .svt-body {
   display: grid;
   gap: var(--fd-space-3);
+  /* §18.6 : corps de modale à 16 px de l'en-tête */
+  padding-top: var(--fd-space-4);
 }
 .svt-caps {
   display: grid;

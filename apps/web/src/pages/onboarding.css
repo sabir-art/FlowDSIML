@@ -20,7 +20,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  /* §18.6 : 8 px au moins entre frères */
+  gap: 8px;
 }
 .obx-progress__bars {
   display: flex;
@@ -219,7 +220,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  /* §18.6 : 8 px au moins entre frères */
+  gap: 8px;
   min-width: 240px;
   padding: 28px;
 }

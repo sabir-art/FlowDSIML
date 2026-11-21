@@ -93,7 +93,7 @@ export function SettingsShell({
       <div className="page-head">
         <div>
           <nav className="st-crumb" aria-label={t('settings.breadcrumb')}>
-            <ol>
+            <ol /* §18.6 : fil d’Ariane : texte en ligne et séparateurs */ data-gap-exempt="">
               <li>
                 <Link to="/settings/workspace">{t('settings.title')}</Link>
               </li>

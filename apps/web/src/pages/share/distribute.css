@@ -23,6 +23,12 @@
   gap: 12px;
   padding: 20px 24px 12px;
 }
+.dif-dialog .modal-head > div {
+  /* §18.6 : titre et ligne d'état (pastille) posés par le conteneur, à 8 px */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .dif-dialog .modal-head h2 {
   margin: 0;
   font-size: 18px;
@@ -73,11 +79,11 @@
   place-items: center;
 }
 .dif-sub {
-  margin: 2px 0 0;
+  margin: 0;
   font-size: 13px;
   color: var(--fd-color-text-muted);
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
   flex-wrap: wrap;
 }

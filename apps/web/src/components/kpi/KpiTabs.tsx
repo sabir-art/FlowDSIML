@@ -265,7 +265,7 @@ export function TrendChart({
       ) : !cur ? (
         <p className="kpi-chart__none">{t('kpi.noDaily')}</p>
       ) : (
-        <figure className="kpi-chart__fig">
+        <figure className="kpi-chart__fig" /* §18.6 : graphique et dates de son axe */ data-gap-exempt="">
           <svg
             className="kpi-chart__svg"
             viewBox={`0 0 ${W} ${H}`}

@@ -205,7 +205,10 @@ export function Layout() {
   );
 
   return (
-    <div className={`shell${open ? ' nav-open' : ''}${rail ? ' shell--rail' : ''}`}>
+    <div
+      className={`shell${open ? ' nav-open' : ''}${rail ? ' shell--rail' : ''}`}
+      /* §18.6 : colonnes de la mise en page (barre latérale, contenu) */ data-gap-exempt=""
+    >
       <a
         className="skip-link"
         href="#main"

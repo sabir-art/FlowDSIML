@@ -362,7 +362,7 @@ export function CenterSettings() {
                 {t('center.addressLabel')}
               </label>
               <div className="url-row">
-                <div className="url-f">
+                <div className="url-f" /* §18.6 : préfixe soudé au champ */ data-gap-exempt="">
                   <span>{centerUrl(PLAYER_URL, '').replace(/^https?:\/\//, '')}</span>
                   <input
                     id="c-slug"
@@ -892,7 +892,11 @@ export function CenterSettings() {
                       .filter((x) => x.visible && x.info!.published > 0)
                       .slice(0, 4)
                       .map((x) => (
-                        <div className="m-c" key={x.id}>
+                        <div
+                          className="m-c"
+                          key={x.id}
+                          /* §18.6 : vignette illustrative (traits de texte simulés) */ data-gap-exempt=""
+                        >
                           <div className="cv" />
                           <div className="tt">{x.info!.title}</div>
                           <div className="ln" />

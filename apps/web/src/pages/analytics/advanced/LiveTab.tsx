@@ -238,6 +238,7 @@ export function LiveTab({
                       <td>
                         <span
                           className="steps-mini"
+                          /* §18.6 : points d’étapes accolés */ data-gap-exempt=""
                           role="img"
                           aria-label={t('analytics.adv.live.stepsSeen', { n: seen, total })}
                         >

@@ -44,7 +44,10 @@ export function BrowserBar({
   const withTabs = tabs.length > 0 && frame.style !== 'minimal';
   return (
     <div className={`browser browser--${frame.style}${withTabs ? ' has-tabs' : ''}`} aria-hidden="true">
-      <span className="browser-row">
+      <span
+        className="browser-row"
+        /* §18.6 : pastilles de fenêtre du faux navigateur, décor */ data-gap-exempt=""
+      >
         {dots}
         {withTabs ? (
           <span className="browser-tabs">

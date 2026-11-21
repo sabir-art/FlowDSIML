@@ -477,7 +477,11 @@ export function Onboarding() {
             aria-valuenow={index + 1}
             aria-valuetext={t('onboarding.stepOf', { n: index + 1, total })}
           >
-            <span className="obx-progress__bars" aria-hidden="true">
+            <span
+              className="obx-progress__bars"
+              aria-hidden="true"
+              /* §18.6 : barre de progression segmentée, segments accolés */ data-gap-exempt=""
+            >
               {steps.map((s, i) => (
                 <span key={s} className={i <= index ? 'on' : undefined} />
               ))}

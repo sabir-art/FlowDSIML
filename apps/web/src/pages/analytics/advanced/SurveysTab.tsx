@@ -224,6 +224,7 @@ export function NpsCard({ q }: { q: SurveyQuestion }) {
       )}
       <div
         className="nps"
+        /* §18.6 : barres empilées du NPS, accolées */ data-gap-exempt=""
         role="img"
         aria-label={t('analytics.adv.tests.npsAria', {
           values: h.map((n, i) => `${i}\u00a0: ${n}`).join(', '),

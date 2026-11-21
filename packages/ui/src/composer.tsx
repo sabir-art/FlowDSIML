@@ -149,6 +149,7 @@ export function Composer({
       <form
         ref={form}
         className={`fd-composer${error ? ' is-error' : ''}${disabled ? ' is-disabled' : ''}`}
+        /* §18.6 : champ et sa barre d’outils forment un seul contrôle */ data-gap-exempt=""
         onSubmit={(e) => {
           e.preventDefault();
           if (!empty && !sending && !disabled) onSubmit();

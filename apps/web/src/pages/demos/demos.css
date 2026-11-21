@@ -415,6 +415,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* §18.6 : titre et bouton Fermer à 8 px au moins (390 px) */
+  gap: var(--fd-space-2);
   margin-bottom: var(--fd-space-4);
 }
 .nd-head h2 {
@@ -706,7 +708,8 @@ button.nd-src:focus-visible {
 .tpl-prev ol {
   display: grid;
   gap: 4px;
-  margin: 4px 0 0;
+  /* §18.6 : 8 px au moins sous le titre du chapitre */
+  margin: 8px 0 0;
   padding-left: 22px;
   font-size: 13px;
 }

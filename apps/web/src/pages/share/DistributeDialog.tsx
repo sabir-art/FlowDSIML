@@ -1017,7 +1017,7 @@ function IntranetPanel({
         <div>
           <span className="t-label dif-lbl">{t('distribute.intranet.preview')}</span>
           <div className="dif-prev" role="img" aria-label={t('distribute.intranet.previewLabel')}>
-            <div className="bar">
+            <div className="bar" /* §18.6 : points de fenêtre de l’aperçu, décor */ data-gap-exempt="">
               <i />
               <i />
               <i />

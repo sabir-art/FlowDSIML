@@ -122,6 +122,9 @@ jobs:
       - name: Aucun défilement horizontal dans les panneaux et les pages (1 440 et 390 px, outils de l'éditeur)
         if: always()
         run: cd apps/web && node e2e/defilement-horizontal.e2e.cjs
+      - name: Espacements mesurés §18.6 (toutes les routes, clair et sombre, 1440 et 390 px)
+        if: always()
+        run: cd apps/web && node e2e/espacements.e2e.cjs
       - name: Paramètres, 24 px entre les blocs (clair et sombre)
         if: always()
         run: cd apps/web && node e2e/parametres-espacement.e2e.cjs

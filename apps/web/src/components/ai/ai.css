@@ -16,6 +16,9 @@
 }
 .mk .ai-quota {
   margin-top: var(--fd-space-5);
+  /* §18.6 : jauge et légende à 8 px */
+  display: grid;
+  gap: 8px;
 }
 .mk .ai-bar {
   height: 6px;

@@ -87,7 +87,11 @@ export function StyleCard({
         </span>
       )}
       {byline && <span className="sty-by t-caption muted">{byline}</span>}
-      <span className="sty-swatches" aria-hidden="true">
+      <span
+        className="sty-swatches"
+        aria-hidden="true"
+        /* §18.6 : pastilles de couleur accolées (nuancier) */ data-gap-exempt=""
+      >
         {[tokens.primary, tokens.hotspot, tokens.background].map((c, i) => (
           <span key={i} style={{ background: c }} />
         ))}

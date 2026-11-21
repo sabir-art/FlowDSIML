@@ -22,7 +22,7 @@ export function BrandMark({
     <img src={src} alt={APP_NAME} width={w} height={h} className={`brand-mark__logo ${cls}`} />
   );
   return (
-    <span className="brand-mark">
+    <span className="brand-mark" /* §18.6 : logo et sous-titre forment un seul bloc */ data-gap-exempt="">
       {img(logo, 'brand-mark__logo--light', width, size)}
       {img(logoDark, 'brand-mark__logo--dark', width, size)}
       {subtitle && <span className="brand-mark__sub">{subtitle}</span>}
