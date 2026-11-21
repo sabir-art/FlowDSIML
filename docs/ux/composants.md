@@ -694,3 +694,22 @@ S'applique aux menus (⋯, compte, workspace), select personnalisés, popovers, 
   4. je lance `boutons-natifs.e2e.cjs` et le contrôle des espacements (§15.4 bis) ;
   5. les captures vont sur le tracker. Un écran n'est « conforme » que si les captures en clair et en sombre ont été regardées.
 - Un défaut visible sur une capture que je n'ai pas prise reste un défaut de validation : la recette doit dire quelles captures ont été regardées.
+
+### 18.6 Espacements mesurables (retour client du 21 novembre)
+Le client trouve les espacements négligés. Règle vérifiée automatiquement (e2e `espacements.e2e.cjs`, sur toutes les routes, en clair et en sombre, à 1440 px et à 390 px) :
+
+| Cas | Écart mesuré (bord à bord) | Exemples |
+|---|---|---|
+| Deux éléments **frères** visibles empilés ou côte à côte, dans un même conteneur | **8 px au moins** (jamais 0) | lignes d'une liste d'éléments cliquables, boutons d'une barre, champs d'un groupe |
+| Une **liste** et son **action** (« Ajouter… », « Nouveau… », « Voir tout ») | **12 à 16 px** | liste des hotspots et « Ajouter un hotspot », étapes du guide et « Ajouter une étape », dossiers et « Nouveau dossier » |
+| Deux **cartes** empilées | **24 px** | Paramètres, Analytics, Démos |
+| Blocs d'un corps de modale | 16 px au moins (§18.2) | |
+| Aide sous son champ | 6 px (exception admise, même groupe) | |
+
+- **Exceptions** (exclues du contrôle par attribut `data-gap-exempt`, à justifier dans le code) :
+  - éléments qui se touchent volontairement : segmentés, onglets accolés, groupes de boutons soudés ;
+  - lignes d'un tableau ou d'une liste à filets, où l'écart est assuré par le padding des lignes (au moins 8 px de padding vertical) ;
+  - texte en ligne.
+- **Mesure** : `getBoundingClientRect()` de chaque paire de frères visibles (hauteur et largeur > 0, hors `position: absolute` ou `fixed`). L'écart est la distance entre les bords qui se font face. Le test liste chaque écart sous le minimum, avec la route, le sélecteur des deux éléments et la valeur.
+- **Mise en œuvre** : poser l'écart sur le **conteneur** (`display: flex` ou `grid` avec `gap`), jamais avec des marges isolées sur les enfants. Les classes de section (`.sec`, `.settings-main`, `.dialog-body`) portent leur `gap`.
+- **Recette** : dans chaque recette UX, je contrôle les espacements élément par élément sur les captures, et je joins le relevé du test.

@@ -1,7 +1,7 @@
 # Retours client du 21 novembre (prioritaires)
 
 > Relevé sur `claude/dev-mvp` (c63b0e4), en clair et en sombre, avec le faux backend et des données fictives (Acme, `@example.com`).
-> Règles : `composants.md` §15, §17 et §18. Chaque point a une recette mesurable (§6).
+> Règles : `composants.md` §15, §17 et §18. Chaque point a une recette mesurable (§10).
 
 ## 1. Éditeur : les commentaires dans un panneau en bas du canevas
 
@@ -112,7 +112,48 @@
 - Dans le Profil, « E-mail quand un lead est collecté » et « Résumé hebdomadaire des vues » affichent « Bientôt » avec un point d'état. Règle §18.4 et L50 X4 : « Bientôt » s'écrit en texte de 13 px `text-muted`, **sans point**. L'interrupteur est désactivé (`disabled`).
 - Rechercher dans toute l'app les autres « Bientôt » rendus par `fd-status` (`Status` avec le texte `shell.soon`), et les passer en `soon-text`.
 
-## 6. Recette (captures réelles en clair et en sombre)
+## 6. Barre latérale principale repliable en rail d'icônes
+
+- **Replié** : un rail de **64 px**.
+  - En haut, le logo réduit à son icône (32 px), puis les icônes de navigation (20 px dans des cibles de 44 × 44 px, centrées). L'élément actif garde son fond (§18.3).
+  - En bas : Extension, Centre d'aide, Paramètres, puis l'avatar (32 px, photo ou initiale, §4).
+  - Le sélecteur d'espace devient la pastille de l'espace (32 px).
+  - Pas de texte.
+- **Survol du rail** : après 150 ms, la barre se déplie à sa largeur actuelle **par-dessus** le contenu, avec une ombre `--fd-shadow-lg`. Elle ne pousse pas le contenu, et se replie 300 ms après la sortie de la souris.
+- **Bouton d'épinglage**, en haut de la barre (icône `panel-left`, 32 × 32 px), **au même endroit dans les deux états** :
+  - « Épingler la barre latérale » : elle reste dépliée et pousse le contenu, comme aujourd'hui ;
+  - « Réduire la barre latérale » : elle redevient un rail.
+  - `aria-pressed` indique l'état épinglé.
+- **État retenu par utilisateur** (`localStorage` `fd.sidebar` : `pinned` ou `rail`). Par défaut, elle est épinglée à partir de 1440 px et en rail en dessous.
+- **Clavier** :
+  - le focus qui entre dans le rail le déplie, et il reste déplié tant que le focus y est ;
+  - Échap le replie et rend le focus à l'élément actif du rail.
+- **Noms accessibles** : chaque icône du rail est un lien qui garde son nom accessible (le libellé masqué visuellement). Une infobulle affiche ce libellé au survol et au focus, après 300 ms, à droite de l'icône.
+- **Mobile** (< 1024 px) : comportement actuel, inchangé.
+
+## 7. Colonne Dossiers : masquer et afficher, au même endroit
+
+**Constat.** Une fois la colonne repliée, le bouton « Dossiers » réapparaît loin, à côté des filtres : on ne retrouve pas la colonne.
+
+- **Repliée**, la colonne devient un **rail de 48 px**, **au même endroit**, sur toute la hauteur (§2.1), avec :
+  - en haut, le bouton de bascule (icône `panel-left-open`, 32 × 32 px), nommé « Afficher les dossiers » ;
+  - dessous, l'icône `folder` avec le nombre de dossiers en 11 px `text-muted`.
+- **Dépliée** : le même bouton de bascule (icône `panel-left-close`), nommé « Masquer les dossiers », **à la même position** que dans le rail (même `top` et même `left`, mesuré).
+- Le bouton « Dossiers » placé à côté des filtres est **retiré** à partir de 1024 px. Sous 1024 px, le filtre « Dossier » de la barre de liste reste.
+- Ce rail est le même qu'au §2.2 (1024 à 1279 px), et suit la même logique que le rail de la barre latérale (§6) : même largeur d'icône, même bouton, même infobulle.
+
+## 8. Éditeur : liste des hotspots
+
+- « Ajouter un hotspot » est collé au dernier hotspot de la liste (`HotspotsTool.tsx`, conteneur `.sec` sans écart).
+- **Règle §18.6** : 4 px entre deux lignes de la liste (lignes de 36 px qui ont leur propre padding), **12 px** entre la liste et « Ajouter un hotspot ». C'est le même modèle pour toutes les listes du panneau : étapes du guide, variables, sondages.
+- La correction se fait par le `gap` de `.sec`, pour tous les panneaux de l'éditeur, et non par une marge sur ce bouton.
+
+## 9. Espacements partout (le client insiste)
+
+- La règle mesurable est au §18.6 de `composants.md`. Le dev écrit `espacements.e2e.cjs`, qui la vérifie sur toutes les routes, en clair et en sombre, à 1440 et 390 px. Il ajoute ce test à la CI.
+- Le relevé du test est joint à chaque livraison. Je contrôle les captures élément par élément.
+
+## 10. Recette (captures réelles en clair et en sombre)
 
 | # | Contrôle | Mesure attendue |
 |---|---|---|
@@ -128,3 +169,7 @@
 | 10 | L'image envoyée fait 256 × 256 px en WebP, sans EXIF | faux stockage |
 | 11 | Plus aucun « Bientôt » avec un point dans l'app | `boutons-natifs` ou e2e : aucun `.fd-status` qui contient « Bientôt » |
 | 12 | axe sans violation grave ; `boutons-natifs.e2e.cjs` passe sur l'éditeur avec le panneau déplié | |
+| 13 | Barre latérale : rail de 64 px ; survol → dépliée par-dessus, sans décaler le contenu (le `left` du contenu ne change pas) ; épinglée → elle pousse le contenu ; état gardé au rechargement ; focus au clavier → dépliée, Échap → repliée ; chaque icône a un nom accessible et une infobulle | rects, arbre d'accessibilité |
+| 14 | Colonne Dossiers : le bouton de bascule a la même position (`top`, `left`) repliée et dépliée ; « Afficher les dossiers » et « Masquer les dossiers » ; plus de bouton « Dossiers » près des filtres à partir de 1024 px | rects |
+| 15 | Éditeur : 12 px entre le dernier hotspot et « Ajouter un hotspot » ; même écart pour les étapes du guide | mesure |
+| 16 | `espacements.e2e.cjs` passe sur toutes les routes, en clair et en sombre, à 1440 et 390 px | relevé joint |
