@@ -9,6 +9,17 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const MARIE = '0b5c1f0e-0000-4000-8000-0000000000b1';
 const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
 
+/** Attend qu'une condition sur l'état réel (faux backend, page) soit vraie ; renvoie la dernière valeur. */
+async function until(read, test, timeout = 15000) {
+  const end = Date.now() + timeout;
+  let v = await read();
+  while (!test(v) && Date.now() < end) {
+    await new Promise((r) => setTimeout(r, 50));
+    v = await read();
+  }
+  return v;
+}
+
 (async () => {
   const b = await chromium.launch();
   const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
@@ -35,6 +46,8 @@ const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
   await page.waitForSelector('.cm');
   const input = page.getByRole('textbox', { name: 'Nouveau commentaire' });
   await input.click();
+  // Le panneau (recadrage du canevas, focus) ne doit jamais recréer le composeur pendant la saisie
+  await input.evaluate((el) => (el.dataset.e2eSame = '1'));
   await input.type('Bonjour @ma');
   const list = page.getByRole('listbox', { name: 'Membres à mentionner' });
   await list.waitFor();
@@ -87,8 +100,15 @@ const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
   await input.type('merci');
   await input.press('Enter');
   await page.waitForSelector('.cm-item .cm-mtag');
-  const stored = state.tables.step_comments.at(-1).body;
-  ok(stored === `Bonjour @[Mathis Martin](${MATHIS}) merci`, 'L22-07 : format stocké @[Nom](uuid)');
+  // Enregistrement capturé par le faux backend (le fil peut s'afficher avant, de façon optimiste)
+  const stored = await until(
+    () => state.tables.step_comments.at(-1)?.body,
+    (v) => v === `Bonjour @[Mathis Martin](${MATHIS}) merci`,
+  );
+  ok(
+    stored === `Bonjour @[Mathis Martin](${MATHIS}) merci`,
+    `L22-07 : format stocké @[Nom](uuid) (${stored})`,
+  );
   ok(
     (await page.locator('.cm-item .cm-mtag').textContent()) === '@Mathis Martin',
     'L22-07 : pastille dans le fil',
@@ -100,7 +120,16 @@ const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
   await input.press('Escape');
   await input.press('Enter');
   await page.waitForFunction(() => document.querySelectorAll('.cm-item').length === 2);
-  ok(state.tables.step_comments.at(-1).body === 'Voir @Inconnu', 'L22-07 : @texte libre non converti');
+  const free = await until(
+    () => state.tables.step_comments.at(-1)?.body,
+    (v) => v === 'Voir @Inconnu',
+  );
+  ok(free === 'Voir @Inconnu', `L22-07 : @texte libre non converti (${free})`);
+
+  ok(
+    (await page.locator('.cm-compose textarea[data-e2e-same="1"]').count()) === 1,
+    'composeur jamais recréé pendant la saisie et les envois (même nœud)',
+  );
 
   // Modifier un commentaire garde la mention
   const item = page.locator('.cm-item').first();
@@ -108,15 +137,23 @@ const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
   await item.getByRole('button', { name: /Actions|Plus/ }).click();
   await page.getByRole('menuitem', { name: 'Modifier' }).click();
   const edit = page.getByRole('textbox', { name: /Modifier/ });
-  ok((await edit.inputValue()) === 'Bonjour @Mathis Martin merci', 'L22-07 : modification en texte lisible');
+  await edit.waitFor();
+  // Champ de modification rempli (texte lisible) avant d'y écrire
+  const shown = await until(
+    () => edit.inputValue(),
+    (v) => v === 'Bonjour @Mathis Martin merci',
+  );
+  ok(shown === 'Bonjour @Mathis Martin merci', `L22-07 : modification en texte lisible (${shown})`);
   await edit.press('End');
   await edit.type(' !');
   await edit.press('Enter');
-  await page.waitForTimeout(400);
+  const edited = await until(
+    () => state.tables.step_comments.find((c) => c.body.startsWith('Bonjour'))?.body,
+    (v) => v === `Bonjour @[Mathis Martin](${MATHIS}) merci !`,
+  );
   ok(
-    state.tables.step_comments.find((c) => c.body.startsWith('Bonjour')).body ===
-      `Bonjour @[Mathis Martin](${MATHIS}) merci !`,
-    'L22-07 : mention conservée après modification',
+    edited === `Bonjour @[Mathis Martin](${MATHIS}) merci !`,
+    `L22-07 : mention conservée après modification (${edited})`,
   );
 
   ok(errors.length === 0, `aucune erreur JavaScript${errors.length ? ` (${errors.join(' | ')})` : ''}`);
