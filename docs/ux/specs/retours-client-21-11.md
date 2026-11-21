@@ -126,10 +126,11 @@
   - Le sélecteur d'espace devient la pastille de l'espace (32 px).
   - Pas de texte.
 - **Survol du rail** : après 150 ms, la barre se déplie à sa largeur actuelle **par-dessus** le contenu, avec une ombre `--fd-shadow-lg`. Elle ne pousse pas le contenu, et se replie 300 ms après la sortie de la souris.
-- **Bouton d'épinglage**, en haut de la barre (icône `panel-left`, 32 × 32 px), **au même endroit dans les deux états** :
-  - « Épingler la barre latérale » : elle reste dépliée et pousse le contenu, comme aujourd'hui ;
-  - « Réduire la barre latérale » : elle redevient un rail.
-  - `aria-pressed` indique l'état épinglé.
+- **Bouton d'épinglage**, en haut de la barre, au-dessus du logo (icône `panel-left`, 32 × 32 px, à 16 px du bord gauche et du bord haut), **au même endroit dans les trois états** (rail, survol, épinglée) :
+  - nom accessible fixe, « Épingler la barre latérale », avec `aria-pressed` pour l'état (motif bouton bascule de l'APG : un libellé qui change en même temps qu'`aria-pressed` se contredit à la lecture) ;
+  - l'infobulle dit l'action : « Épingler la barre latérale » en rail, « Réduire la barre latérale » quand elle est épinglée ;
+  - épinglée, la barre reste dépliée et pousse le contenu ; réduite, elle redevient un rail.
+- **Arbitrages de la recette (a27bc43)** : un clic souris dans la barre dépliée au survol ne la garde pas ouverte (seul le focus clavier le fait) ; après Échap, le prochain déplacement du focus dans la barre la redéplie ; le titre « Formation » devient un filet de 1 px dans le rail ; l'avatar reste l'initiale jusqu'au §4.
 - **État retenu par utilisateur** (`localStorage` `fd.sidebar` : `pinned` ou `rail`). Par défaut, elle est épinglée à partir de 1440 px et en rail en dessous.
 - **Clavier** :
   - le focus qui entre dans le rail le déplie, et il reste déplié tant que le focus y est ;
