@@ -52,6 +52,12 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       (await me.getByRole('link').getAttribute('href')) === `#/d/${F('a2')}?c=ml-exemple&f=${F('f1')}`,
       'L14-01 : reprise sur le module en cours',
     );
+    // MOB-01 M9 : le module en texte au-dessus, puis « Reprendre »
+    ok(
+      (await me.getByRole('link').textContent()).trim() === 'Reprendre' &&
+        /Module suivant/.test(await me.locator('.nx').textContent()),
+      'M9 : « Reprendre » avec le module suivant en texte au-dessus',
+    );
     ok((await p.locator('.fc').count()) === 4, 'L14-01 : une carte par formation');
     ok(
       (await p.locator('.fc').first().locator('a, button').count()) === 0,
@@ -147,7 +153,7 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       'L14-05 : score du module validé',
     );
     ok(
-      (await p.locator('.fp-head .hb').textContent()).includes('1 sur 3 validé'),
+      (await p.locator('.fp-head .fp-progress').textContent()).includes('1 sur 3 validé'),
       'L14-05 : l’expiré ne compte pas dans la progression',
     );
     await p.goto(`${PLAYER}/#/c/ml-exemple`);

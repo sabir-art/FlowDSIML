@@ -157,7 +157,8 @@ const dict = {
       meCount_one: 'module validé',
       meCount_other: 'modules validés',
       meAria: '{{pct}}\u202f% de la formation validés',
-      resume: 'Reprendre «\u202f{{module}}\u202f»',
+      resume: 'Reprendre',
+      nextModule: 'Module suivant\u202f: {{module}}',
       anonLabel: 'Suivre sa progression',
       anonTitle: 'Retrouvez votre progression',
       anonText:
@@ -556,7 +557,8 @@ const dict = {
       meCount_one: 'module validated',
       meCount_other: 'modules validated',
       meAria: '{{pct}}% of the course validated',
-      resume: 'Resume “{{module}}”',
+      resume: 'Resume',
+      nextModule: 'Next module: {{module}}',
       anonLabel: 'Track your progress',
       anonTitle: 'Find your progress',
       anonText:

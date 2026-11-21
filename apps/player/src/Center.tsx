@@ -344,11 +344,20 @@ function Home({ t, data, views, route }: { t: Dict; data: CenterData; views: Pat
             >
               <span style={{ width: `${(me.validated / Math.max(1, me.total)) * 100}%` }} />
             </span>
+            {/* MOB-01 M9 : le module en texte au-dessus, puis le bouton « Reprendre » (couleur du thème) */}
             {me.next && (
-              <a href={centerModuleHref(me.next.demoId, { slug: route.slug, pathId: me.path.id })}>
-                {fmt(c, 'resume', { module: me.next.title })}
-                <ArrowRight aria-hidden="true" />
-              </a>
+              <>
+                <span class="nx" id="ctr-me-next">
+                  {fmt(c, 'nextModule', { module: me.next.title })}
+                </span>
+                <a
+                  href={centerModuleHref(me.next.demoId, { slug: route.slug, pathId: me.path.id })}
+                  aria-describedby="ctr-me-next"
+                >
+                  {c.resume}
+                  <ArrowRight aria-hidden="true" />
+                </a>
+              </>
             )}
           </aside>
         ) : !data.visitor ? (
@@ -776,8 +785,8 @@ function PathPage({
           )}
         </div>
         {v.identified && (
-          <span class={`hb hb--lg${v.done ? ' ok' : ''}`}>
-            <Award aria-hidden="true" />
+          // MOB-01 M2 : « 2 sur 2 validés » en texte de 13 px atténué (plus de pastille)
+          <span class="fp-progress">
             {fmt(c, 'progress', { count: v.validated, n: v.validated, total: v.total })}
           </span>
         )}
