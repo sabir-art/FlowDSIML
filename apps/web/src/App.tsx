@@ -49,6 +49,9 @@ const WorkspaceSettings = lazyRest(() =>
 const UsagePage = lazyRest(() =>
   import('./pages/settings/UsagePage').then((m) => ({ default: m.UsagePage })),
 );
+const TagsSettings = lazyRest(() =>
+  import('./pages/settings/tags/TagsSettings').then((m) => ({ default: m.TagsSettings })),
+);
 const GlossarySettings = lazyRest(() =>
   import('./pages/settings/GlossarySettings').then((m) => ({ default: m.GlossarySettings })),
 );
@@ -263,6 +266,7 @@ export function App() {
                     <Route path="/settings/usage" element={<UsagePage />} />
                     {/* L48-A : « Plans et facturation » devient « Utilisation » ; « Fonctions à venir » supprimée */}
                     <Route path="/settings/plans" element={<Navigate to="/settings/usage" replace />} />
+                    <Route path="/settings/tags" element={<TagsSettings />} />
                     <Route path="/settings/soon" element={<Navigate to="/settings/workspace" replace />} />
                     <Route path="/settings/brand" element={<BrandSettings />} />
                     <Route path="/settings/brand/page" element={<BrandPublicPage />} />

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { FilterContent } from './toolbar/ListToolbar';
-import { Plus, Search, Settings, Tag as TagIcon, Trash2, X } from 'lucide-react';
+import { Check, Plus, Search, Settings, Tag as TagIcon, Trash2, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../lib/supabase';
 import { check } from '../lib/useAction';
@@ -125,24 +125,55 @@ export function useWorkspaceTags(wsId: string | undefined) {
 }
 export type WorkspaceTags = ReturnType<typeof useWorkspaceTags>;
 
-/** Choix de couleur parmi les 8 de la palette (pastilles nommées). */
-function ColorPicker({ value, onChange }: { value: TagColor; onChange: (c: TagColor) => void }) {
+/**
+ * Choix de couleur parmi les 8 de la palette : pastilles nommées en radiogroup, aux flèches (un seul arrêt de
+ * tabulation). La pastille choisie porte un anneau et une coche, jamais la couleur seule. `large` : 28 px (L52).
+ */
+export function TagColorPicker({
+  value,
+  onChange,
+  large = false,
+  label,
+}: {
+  value: TagColor;
+  onChange: (c: TagColor) => void;
+  large?: boolean;
+  label?: string;
+}) {
   const { t } = useTranslation();
+  const move = (e: React.KeyboardEvent<HTMLButtonElement>, i: number) => {
+    const d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!d) return;
+    e.preventDefault();
+    const next = TAG_COLORS[(i + d + TAG_COLORS.length) % TAG_COLORS.length]!;
+    onChange(next);
+    const group = e.currentTarget.parentElement;
+    requestAnimationFrame(() => group?.querySelector<HTMLButtonElement>(`[data-color="${next}"]`)?.focus());
+  };
   return (
-    <span className="tg-colors" role="radiogroup" aria-label={t('tags.color')}>
-      {TAG_COLORS.map((c) => (
+    <span
+      className={`tg-colors${large ? ' tg-colors--lg' : ''}`}
+      role="radiogroup"
+      aria-label={label ?? t('tags.color')}
+    >
+      {TAG_COLORS.map((c, i) => (
         <button
           key={c}
           type="button"
           role="radio"
+          data-color={c}
           aria-checked={value === c}
+          tabIndex={value === c ? 0 : -1}
           aria-label={t(`tags.colors.${c}`)}
           className={`sw sw--${c}`}
+          onKeyDown={(e) => move(e, i)}
           onClick={(e) => {
             e.stopPropagation();
             onChange(c);
           }}
-        />
+        >
+          {value === c && <Check aria-hidden="true" />}
+        </button>
       ))}
     </span>
   );
@@ -205,7 +236,7 @@ export function TagPicker({ demoId, store }: { demoId: string; store: WorkspaceT
             <Plus aria-hidden="true" />
             {t('tags.create', { name: q.trim() })}
           </button>
-          <ColorPicker value={color} onChange={setColor} />
+          <TagColorPicker value={color} onChange={setColor} />
         </div>
       )}
       {store.error && (
@@ -441,7 +472,7 @@ export function ManageTagsDialog({ store, onClose }: { store: WorkspaceTags; onC
                       if (v && v !== x.name) void store.update(x.id, { name: v });
                     }}
                   />
-                  <ColorPicker
+                  <TagColorPicker
                     value={x.color as TagColor}
                     onChange={(c) => void store.update(x.id, { color: c })}
                   />

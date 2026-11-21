@@ -46,6 +46,24 @@ function seedDiffusion(d) {
 }
 
 /** L23 : un webhook actif et deux envois (données fictives). */
+/** L52 : trois étiquettes, dont une sans démo. */
+function seedTags(d) {
+  const ws = d.tables.workspaces[0].id;
+  const demo = d.tables.demos[0].id;
+  d.tables.tags = [
+    ['Outil CRM', 'violet'],
+    ['Accueil', 'teal'],
+    ['Réglementaire', 'raspberry'],
+  ].map(([name, color], i) => ({
+    id: `tg-${i}`,
+    workspace_id: ws,
+    name,
+    color,
+    created_at: '2026-11-01T00:00:00Z',
+  }));
+  d.tables.demo_tags = [0, 1].map((i) => ({ demo_id: demo, tag_id: `tg-${i}`, workspace_id: ws }));
+}
+
 function seedGlossary(d) {
   const ws = d.tables.workspaces[0].id;
   d.tables.glossary_terms = [
@@ -746,6 +764,9 @@ const APP_PAGES = [
   { name: 'Variables', route: '/#/settings/variables' },
   { name: 'Glossaire (vide)', route: '/#/settings/glossary' },
   { name: 'Glossaire', route: '/#/settings/glossary', seed: seedGlossary },
+  // L52 : Étiquettes (vide, puis liste)
+  { name: 'Étiquettes (vide)', route: '/#/settings/tags' },
+  { name: 'Étiquettes', route: '/#/settings/tags', seed: seedTags },
   { name: 'Intégrations', route: '/#/settings/integrations', seed: seedWebhooks },
   { name: 'Intégrations (aucune)', route: '/#/settings/integrations?categorie=connectees' },
   { name: 'Intégrations · webhooks', route: '/#/settings/integrations/webhooks', seed: seedWebhooks },

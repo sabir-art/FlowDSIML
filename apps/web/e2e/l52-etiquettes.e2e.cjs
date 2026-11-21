@@ -2,6 +2,10 @@
  * Recette L52 (spec docs/ux/specs/l52-etiquettes.md). Données fictives (acme.example).
  *  - P1 : les 8 couleurs sur des cartes de Démos ; contraste au-dessus de 4,5:1 (axe et calcul), en clair et en sombre ;
  *    l'orange a le texte #8F5300.
+ *  - P2 (recette 1, 4, 5, 7, 9) : /settings/tags trié par nom, « 8 sur 20 », lien « n démos » vers Démos filtré
+ *    (?etiquettes=), tri par nombre de démos ; suppression confirmée (les démos restent) ; couleur Sarcelle (anneau,
+ *    coche, flèches) ; lecteur sans bouton ni menu ; clavier (menu, renommage Entrée et Échap) ; création, nom pris ;
+ *    état vide.
  * Usage : node e2e/l52-etiquettes.e2e.cjs
  */
 const { chromium } = require('playwright');
@@ -96,6 +100,298 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
       `${theme} : axe color-contrast sur les cartes (${r.violations.length} violation)`,
     );
     await page.context().close();
+  }
+
+  // ===== P2 : page Paramètres › Contenu › Étiquettes =====
+  const PAGE_TAGS = [
+    ['Accueil', 'teal', 6],
+    ['Logiciel métier', 'blue', 12],
+    ['Nouveaux agents', 'green', 9],
+    ['Outil CRM', 'violet', 7],
+    ['Outil métier', 'orange', 7],
+    ['Pilotage', 'plum', 3],
+    ['Réglementaire', 'raspberry', 0],
+    ['Tutoriel interne', 'slate', 2],
+  ];
+  const pageSeed = ({ tags = PAGE_TAGS, role } = {}) => {
+    const s = seed();
+    const ws = s.tables.workspaces[0].id;
+    const base = s.tables.demos[1];
+    for (let i = 0; i < 10; i++)
+      s.tables.demos.push({
+        ...base,
+        id: `0b5c1f0e-0000-4000-8000-0000000003${String(i).padStart(2, '0')}`,
+        title: `Démo ${i + 1}`,
+      });
+    s.tables.tags = tags.map(([name, color], i) => ({
+      id: `0b5c1f0e-0000-4000-8000-0000000052${String(i).padStart(2, '0')}`,
+      workspace_id: ws,
+      name,
+      color,
+      created_at: new Date().toISOString(),
+    }));
+    const ids = s.tables.demos.map((d) => d.id);
+    s.tables.demo_tags = [];
+    tags.forEach(([, , n], i) => {
+      for (let k = 0; k < n; k++)
+        s.tables.demo_tags.push({
+          demo_id: ids[(k + i) % ids.length],
+          tag_id: s.tables.tags[i].id,
+          workspace_id: ws,
+        });
+    });
+    if (role) {
+      s.tables.members[0].role = role;
+      s.role = role;
+    }
+    return s;
+  };
+  const openPage = async (s, path = '/settings/tags') => {
+    const page = await (
+      await b.newContext({ viewport: { width: 1440, height: 1000 }, locale: 'fr-FR' })
+    ).newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    const state = await install(page, s);
+    await page.goto(`${APP}/#${path}`);
+    return { page, state };
+  };
+  const names = (page) => page.locator('.tgs-row:not(.tgs-row--head) .tgs-name .tg').allTextContents();
+
+  // Recette 1 : liste, compteur, tri, lien vers Démos filtré
+  {
+    const { page, state } = await openPage(pageSeed());
+    await page.locator('.tgs-row .tg').first().waitFor();
+    ok(
+      JSON.stringify(await names(page)) === JSON.stringify(PAGE_TAGS.map((x) => x[0])),
+      'recette 1 : liste triée par nom',
+    );
+    ok((await page.locator('.tgs-quota').innerText()) === '8 sur 20', '« 8 sur 20 »');
+    ok(
+      (await page.getByRole('columnheader', { name: 'Nom' }).getAttribute('aria-sort')) === 'ascending',
+      'en-tête Nom : aria-sort="ascending"',
+    );
+    ok(
+      (await page.locator('.tgs-row', { hasText: 'Réglementaire' }).getByText('Aucune démo').count()) === 1 &&
+        (await page.locator('.tgs-row', { hasText: 'Réglementaire' }).getByRole('link').count()) === 0,
+      '« Aucune démo », sans lien',
+    );
+    await page.getByRole('button', { name: 'Démos' }).click();
+    ok(
+      (await names(page))[0] === 'Logiciel métier' &&
+        (await page.getByRole('columnheader', { name: 'Démos' }).getAttribute('aria-sort')) === 'descending',
+      'tri par nombre de démos (le plus grand en tête, aria-sort)',
+    );
+    // Lecteur d'écran et lien : « 3 démos avec l'étiquette Pilotage »
+    await page.getByRole('link', { name: '3 démos avec l’étiquette Pilotage' }).click();
+    await page.waitForSelector('.demo-card');
+    await page.waitForTimeout(300);
+    const pil = state.tables.tags.find((x) => x.name === 'Pilotage').id;
+    ok(page.url().includes(`etiquettes=${pil}`), 'Démos : ?etiquettes=<id> dans l’adresse');
+    ok((await page.locator('.demo-card').count()) === 3, 'Démos filtré sur l’étiquette (3 démos)');
+    ok(
+      (await page.locator('.tg-filter').getAttribute('class')).includes('fd-filter--active'),
+      'filtre Étiquettes prérempli et actif',
+    );
+    await page.locator('.tg-filter').click();
+    await page.getByRole('button', { name: 'Effacer' }).click();
+    await page.waitForTimeout(200);
+    ok(!page.url().includes('etiquettes='), 'vider le filtre efface ?etiquettes=');
+    await page.context().close();
+  }
+
+  // Recette 4 : suppression confirmée, les démos restent
+  {
+    const { page, state } = await openPage(pageSeed());
+    await page.locator('.tgs-row .tg').first().waitFor();
+    const before = state.tables.demos.length;
+    await page.getByRole('button', { name: 'Plus d’actions pour Pilotage' }).click();
+    await page.getByRole('menuitem', { name: 'Supprimer' }).click();
+    const dlg = page.getByRole('dialog', { name: 'Supprimer « Pilotage » ?' });
+    await dlg.waitFor();
+    ok(
+      /Elle sera retirée de 3 démos\. Les démos ne sont pas supprimées\./.test(await dlg.innerText()),
+      'recette 4 : la confirmation cite 3 démos',
+    );
+    await dlg.getByRole('button', { name: 'Supprimer' }).click();
+    await page.waitForTimeout(400);
+    ok(
+      !state.tables.tags.some((x) => x.name === 'Pilotage') && state.tables.demos.length === before,
+      'étiquette supprimée, démos conservées',
+    );
+    ok(!(await names(page)).includes('Pilotage'), 'ligne retirée de la liste');
+    // Sans démo : « Aucune démo ne l'utilise. »
+    await page.getByRole('button', { name: 'Plus d’actions pour Réglementaire' }).click();
+    await page.getByRole('menuitem', { name: 'Supprimer' }).click();
+    const d2 = page.getByRole('dialog', { name: 'Supprimer « Réglementaire » ?' });
+    await d2.waitFor();
+    ok(/Aucune démo ne l’utilise\./.test(await d2.innerText()), 'sans démo : « Aucune démo ne l’utilise. »');
+    await d2.getByRole('button', { name: 'Annuler' }).click();
+    await page.context().close();
+  }
+
+  // Recette 5 et 9 : couleur, clavier, renommage, création
+  {
+    const { page, state } = await openPage(pageSeed());
+    await page.locator('.tgs-row .tg').first().waitFor();
+    // Menu aux flèches
+    await page.getByRole('button', { name: 'Plus d’actions pour Outil CRM' }).focus();
+    await page.keyboard.press('Enter');
+    await page.getByRole('menuitem', { name: 'Renommer' }).waitFor();
+    await page.keyboard.press('ArrowDown');
+    ok(
+      (await page.evaluate(() => document.activeElement?.textContent)) === 'Couleur',
+      'recette 9 : menu « Plus d’actions » aux flèches',
+    );
+    await page.keyboard.press('Enter');
+    const colors = page.getByRole('radiogroup', { name: 'Couleur' });
+    await colors.waitFor();
+    ok(
+      (await colors.getByRole('radio', { name: 'Violet' }).getAttribute('aria-checked')) === 'true' &&
+        (await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))) === 'Violet',
+      'fenêtre Couleur : la couleur actuelle cochée et focalisée',
+    );
+    await page.keyboard.press('ArrowLeft');
+    await page.waitForTimeout(300);
+    const crm = () => state.tables.tags.find((x) => x.name === 'Outil CRM');
+    ok(
+      crm().color === 'teal' &&
+        (await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))) === 'Sarcelle',
+      'recette 9 : pastilles aux flèches (Violet → Sarcelle)',
+    );
+    const teal = colors.getByRole('radio', { name: 'Sarcelle' });
+    const ring = await teal.evaluate((el) => ({
+      checked: el.getAttribute('aria-checked'),
+      icon: !!el.querySelector('svg'),
+      shadow: getComputedStyle(el).boxShadow,
+    }));
+    ok(
+      ring.checked === 'true' && ring.icon && /0px 0px 0px 4px/.test(ring.shadow),
+      `recette 5 : Sarcelle choisie, anneau et coche (${ring.shadow})`,
+    );
+    ok(
+      (
+        await page.locator('.tgs-row', { hasText: 'Outil CRM' }).locator('.tg').getAttribute('class')
+      ).includes('tg--teal'),
+      'aperçu de la ligne changé tout de suite',
+    );
+    // Échap ferme d'abord l'infobulle de la pastille focalisée (WCAG 1.4.13), puis la fenêtre
+    await page.keyboard.press('Escape');
+    if (await page.locator('.tgs-pop').count()) await page.keyboard.press('Escape');
+    ok(
+      (await page.locator('.tgs-pop').count()) === 0 &&
+        (await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))) ===
+          'Plus d’actions pour Outil CRM',
+      'Échap : focus rendu au bouton de la ligne',
+    );
+
+    // Renommage : Échap annule, Entrée valide, nom pris refusé
+    const openRename = async (name) => {
+      await page.getByRole('button', { name: `Plus d’actions pour ${name}` }).click();
+      await page.getByRole('menuitem', { name: 'Renommer' }).click();
+      const field = page.getByRole('textbox', { name: `Renommer ${name}` });
+      await field.waitFor();
+      return field;
+    };
+    let field = await openRename('Accueil');
+    ok(
+      await field.evaluate((el) => el.selectionStart === 0 && el.selectionEnd === el.value.length),
+      'renommage : texte sélectionné',
+    );
+    await field.fill('Accueil des agents');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    ok(
+      state.tables.tags.some((x) => x.name === 'Accueil'),
+      'recette 9 : Échap annule le renommage',
+    );
+    field = await openRename('Accueil');
+    await field.fill('Accueil des agents');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(400);
+    ok(
+      state.tables.tags.some((x) => x.name === 'Accueil des agents'),
+      'recette 9 : Entrée valide le renommage',
+    );
+    field = await openRename('Outil métier');
+    await field.fill('outil crm');
+    await page.keyboard.press('Enter');
+    ok(
+      (await page.getByRole('alert').filter({ hasText: 'Cette étiquette existe déjà.' }).count()) === 1 &&
+        (await field.getAttribute('aria-invalid')) === 'true',
+      'nom déjà pris (casse ignorée) : « Cette étiquette existe déjà. »',
+    );
+    await page.keyboard.press('Escape');
+
+    // Création : ligne en tête, couleur proposée, Créer
+    await page.getByRole('button', { name: 'Nouvelle étiquette' }).click();
+    const nameField = page.getByRole('textbox', { name: 'Nom', exact: true });
+    await nameField.waitFor();
+    ok(await nameField.evaluate((el) => el === document.activeElement), 'création : focus sur le nom');
+    await nameField.fill('Nouvelle');
+    await page.getByRole('button', { name: 'Créer', exact: true }).click();
+    await page.waitForTimeout(400);
+    const created = state.tables.tags.find((x) => x.name === 'Nouvelle');
+    // Outil CRM est passé en Sarcelle : le violet est la seule couleur libre
+    ok(
+      !!created && created.color === 'violet',
+      `étiquette créée, couleur proposée : la seule libre (${created?.color})`,
+    );
+    ok((await page.locator('.tgs-quota').innerText()) === '9 sur 20', 'compteur mis à jour (9 sur 20)');
+    await page.context().close();
+  }
+
+  // 390 px : pas de défilement horizontal
+  {
+    const page = await (
+      await b.newContext({ viewport: { width: 390, height: 844 }, locale: 'fr-FR' })
+    ).newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, pageSeed());
+    await page.goto(`${APP}/#/settings/tags`);
+    await page.locator('.tgs-row .tg').first().waitFor();
+    const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    ok(over <= 0, `390 px : pas de défilement horizontal (${over} px)`);
+    await page.context().close();
+  }
+
+  // Recette 7 : rôle Lecteur
+  {
+    const { page } = await openPage(pageSeed({ role: 'viewer' }));
+    await page.locator('.tgs-row .tg').first().waitFor();
+    ok(
+      (await page.getByText('Seuls les éditeurs peuvent modifier les étiquettes.').count()) === 1 &&
+        (await page.getByRole('button', { name: 'Nouvelle étiquette' }).count()) === 0 &&
+        (await page.getByRole('button', { name: /Plus d’actions pour/ }).count()) === 0 &&
+        (await names(page)).length === 8,
+      'recette 7 : lecteur, liste visible sans bouton ni menu',
+    );
+    await page.context().close();
+  }
+
+  // État vide et limite de 20
+  {
+    const { page } = await openPage(pageSeed({ tags: [] }));
+    await page.getByText('Aucune étiquette pour l’instant').waitFor();
+    ok(
+      (await page.getByText('Créez-en une ici, ou depuis la carte d’une démo.').count()) === 1 &&
+        (await page.getByRole('button', { name: 'Nouvelle étiquette' }).count()) === 1,
+      'état vide : titre, phrase, bouton',
+    );
+    await page.context().close();
+    const twenty = Array.from({ length: 20 }, (_, i) => [
+      `Étiquette ${String(i + 1).padStart(2, '0')}`,
+      'blue',
+      0,
+    ]);
+    const { page: p20 } = await openPage(pageSeed({ tags: twenty }));
+    await p20.locator('.tgs-row .tg').first().waitFor();
+    const btn = p20.getByRole('button', { name: 'Nouvelle étiquette' });
+    ok(
+      (await btn.getAttribute('aria-disabled')) === 'true' &&
+        (await btn.getAttribute('title')) === '20 étiquettes au plus par espace.',
+      'à 20 : « Nouvelle étiquette » désactivé, raison en infobulle',
+    );
+    await p20.context().close();
   }
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);

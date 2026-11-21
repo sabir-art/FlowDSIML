@@ -42,7 +42,8 @@ const GROUPS: Array<{ key: string; entries: Entry[] }> = [
       { label: 'settings.variables', to: '/settings/variables' },
       // L17 : glossaire, propriétaires, admins et éditeurs (les lecteurs ne voient pas l'entrée)
       { label: 'settings.glossary', to: '/settings/glossary', perm: 'demo.edit' },
-      { label: 'settings.tags' },
+      // L52 : étiquettes, lisibles par tous les rôles (lecture seule sans le droit d'édition)
+      { label: 'settings.tags', to: '/settings/tags' },
       { label: 'ai.name', to: '/settings/ai' },
     ],
   },

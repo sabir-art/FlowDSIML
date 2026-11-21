@@ -1708,32 +1708,90 @@
   cursor: pointer;
   padding: 0;
 }
+.tg-colors .sw {
+  display: inline-grid;
+  place-items: center;
+  color: #fff;
+}
+.tg-colors .sw svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3;
+}
+/* L52 §2.3 : pastilles dans la teinte du texte de l'étiquette (coche blanche lisible) ; choisie : anneau
+   de 2 px `text` et coche (jamais la couleur seule) */
 .tg-colors .sw[aria-checked='true'] {
-  box-shadow: 0 0 0 2px var(--fd-color-primary);
+  box-shadow:
+    0 0 0 2px var(--fd-color-surface),
+    0 0 0 4px var(--fd-color-text);
+}
+.tg-colors--lg {
+  display: grid;
+  grid-template-columns: repeat(4, 28px);
+  gap: 12px;
+  margin: 0;
+}
+.tg-colors--lg .sw {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  box-shadow: none;
+}
+.tg-colors--lg .sw svg {
+  width: 16px;
+  height: 16px;
 }
 .sw--blue {
-  background: var(--fd-bleu-400);
+  background: var(--fd-bleu-700);
 }
 .sw--green {
-  background: var(--fd-vert-400);
+  background: var(--fd-vert-700);
 }
 .sw--orange {
-  background: var(--fd-orange-400);
+  background: var(--fd-tag-orange-text);
 }
 .sw--raspberry {
-  background: var(--fd-framboise-400);
+  background: var(--fd-framboise-700);
 }
 .sw--slate {
-  background: var(--fd-ardoise-400);
+  background: var(--fd-ardoise-700);
 }
 .sw--teal {
-  background: var(--fd-sarcelle-400);
+  background: var(--fd-sarcelle-700);
 }
 .sw--violet {
+  background: var(--fd-violet-700);
+}
+/* Sombre : teintes 400 (visibles sur la surface sombre), coche foncée */
+:root[data-theme='dark'] .tg-colors .sw {
+  color: #0b0d10;
+}
+:root[data-theme='dark'] .sw--blue {
+  background: var(--fd-bleu-400);
+}
+:root[data-theme='dark'] .sw--green {
+  background: var(--fd-vert-400);
+}
+:root[data-theme='dark'] .sw--orange {
+  background: var(--fd-orange-400);
+}
+:root[data-theme='dark'] .sw--raspberry {
+  background: var(--fd-framboise-400);
+}
+:root[data-theme='dark'] .sw--plum {
+  background: var(--fd-prune-400);
+}
+:root[data-theme='dark'] .sw--slate {
+  background: var(--fd-ardoise-400);
+}
+:root[data-theme='dark'] .sw--teal {
+  background: var(--fd-sarcelle-400);
+}
+:root[data-theme='dark'] .sw--violet {
   background: var(--fd-violet-400);
 }
 .sw--plum {
-  background: var(--fd-prune-400);
+  background: var(--fd-prune-700);
 }
 .tg-help,
 .tg-err {

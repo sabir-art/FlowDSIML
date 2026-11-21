@@ -1,0 +1,422 @@
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { ArrowDown, ArrowUp, Plus, Tag as TagIcon } from 'lucide-react';
+import { Empty } from '@flowdsiml/ui';
+import { SettingsShell } from '../SettingsShell';
+import { supabase } from '../../../lib/supabase';
+import { useWorkspace } from '../../../workspace/WorkspaceProvider';
+import { Menu } from '../../../components/Menu';
+import { useConfirm } from '../../../components/ConfirmDialog';
+import {
+  TAG_COLORS,
+  TAG_LIMIT,
+  TagChip,
+  TagColorPicker,
+  useWorkspaceTags,
+  type TagColor,
+  type TagRow,
+} from '../../../components/Tags';
+import './tags.css';
+
+const NAME_MAX = 32;
+type Sort = { by: 'name' | 'demos'; dir: 'asc' | 'desc' };
+
+/** §2.1 : première des 8 couleurs pas encore utilisée, sinon la moins utilisée. */
+export function proposedColor(tags: Array<Pick<TagRow, 'color'>>): TagColor {
+  const uses = new Map<TagColor, number>(TAG_COLORS.map((c) => [c, 0]));
+  for (const x of tags)
+    if (uses.has(x.color as TagColor)) uses.set(x.color as TagColor, uses.get(x.color as TagColor)! + 1);
+  return [...TAG_COLORS].sort((a, b) => uses.get(a)! - uses.get(b)!)[0]!;
+}
+
+/** Nom déjà pris (sans tenir compte de la casse ni des espaces autour), hors l'étiquette elle-même. */
+const taken = (tags: TagRow[], name: string, self?: string) =>
+  tags.find(
+    (x) => x.id !== self && x.name.trim().toLocaleLowerCase('fr') === name.trim().toLocaleLowerCase('fr'),
+  );
+
+/**
+ * L52 §1-2 : Paramètres › Contenu › Étiquettes. Une carte, une ligne par étiquette (pastille, nombre de démos
+ * vers Démos filtré, menu Renommer / Couleur / Supprimer), tri par nom ou nombre de démos, création en tête de
+ * liste. Lecteurs : la même liste, sans bouton ni menu.
+ */
+export function TagsSettings() {
+  const { t } = useTranslation();
+  const { current, can } = useWorkspace();
+  const ws = current!;
+  const store = useWorkspaceTags(ws.id);
+  const editable = can('demo.edit');
+  const [confirmDialog, ask] = useConfirm();
+  const [live, setLive] = useState<Set<string> | null>(null);
+  const [sort, setSort] = useState<Sort>({ by: 'name', dir: 'asc' });
+  const [creating, setCreating] = useState(false);
+  const [renaming, setRenaming] = useState<string | null>(null);
+  const [coloring, setColoring] = useState<string | null>(null);
+  const limitId = useId();
+
+  // Démos non supprimées : le compte de chaque ligne est celui que montre Démos filtré
+  useEffect(() => {
+    void supabase
+      .from('demos')
+      .select('id')
+      .eq('workspace_id', ws.id)
+      .is('deleted_at', null)
+      .then((r) => setLive(new Set((r.data ?? []).map((d) => d.id))));
+  }, [ws.id, store.links]);
+
+  const count = (id: string) =>
+    store.links.filter((l) => l.tag_id === id && (!live || live.has(l.demo_id))).length;
+  const rows = useMemo(() => {
+    const list = [...store.tags];
+    const byName = (a: TagRow, b: TagRow) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
+    list.sort((a, b) =>
+      sort.by === 'name'
+        ? byName(a, b) * (sort.dir === 'asc' ? 1 : -1)
+        : (count(a.id) - count(b.id)) * (sort.dir === 'asc' ? 1 : -1) || byName(a, b),
+    );
+    return list;
+  }, [store.tags, store.links, live, sort]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const full = store.tags.length >= TAG_LIMIT;
+  const loaded = live !== null;
+
+  async function remove(tag: TagRow) {
+    const n = count(tag.id);
+    const yes = await ask({
+      title: t('tags.deleteTitle', { name: tag.name }),
+      body: <p>{n ? t('tags.deleteBody', { count: n }) : t('tags.deleteUnused')}</p>,
+      confirmLabel: t('tags.deleteAction'),
+      danger: true,
+    });
+    if (yes) await store.remove(tag.id);
+  }
+
+  const header = (by: Sort['by'], label: string) => {
+    const on = sort.by === by;
+    return (
+      <span
+        role="columnheader"
+        aria-sort={on ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+        className={on ? 'is-sorted' : undefined}
+      >
+        <button
+          type="button"
+          className="tgs-sort"
+          onClick={() =>
+            setSort(
+              on
+                ? { by, dir: sort.dir === 'asc' ? 'desc' : 'asc' }
+                : { by, dir: by === 'name' ? 'asc' : 'desc' },
+            )
+          }
+        >
+          {label}
+          {on && (sort.dir === 'asc' ? <ArrowUp aria-hidden="true" /> : <ArrowDown aria-hidden="true" />)}
+        </button>
+      </span>
+    );
+  };
+
+  const newButton = (
+    <button
+      type="button"
+      className="btn btn-primary btn-sm"
+      aria-disabled={full || undefined}
+      aria-describedby={full ? limitId : undefined}
+      title={full ? t('tags.wsLimit', { n: TAG_LIMIT }) : undefined}
+      onClick={() => {
+        if (full) return;
+        setRenaming(null);
+        setCreating(true);
+      }}
+    >
+      <Plus aria-hidden="true" />
+      {t('tags.new')}
+    </button>
+  );
+
+  return (
+    <SettingsShell>
+      <section className="tgs-page" aria-labelledby="st-title">
+        <div className="tgs-head">
+          <p className="muted">{t('tags.pageSub')}</p>
+          {editable && loaded && store.tags.length > 0 && (
+            <div className="tgs-acts">
+              <span className="tgs-quota">{t('tags.quota', { n: store.tags.length, max: TAG_LIMIT })}</span>
+              {newButton}
+              {full && (
+                <span id={limitId} className="sr-only">
+                  {t('tags.wsLimit', { n: TAG_LIMIT })}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        {!editable && <p className="tgs-ro">{t('tags.readOnly')}</p>}
+        {store.error && (
+          <p className="error-msg" role="alert">
+            {store.error}
+          </p>
+        )}
+
+        {loaded && store.tags.length === 0 && !creating ? (
+          <Empty
+            variant="compact"
+            icon={<TagIcon />}
+            title={t('tags.emptyTitle')}
+            body={t('tags.emptyBody')}
+            action={editable ? newButton : undefined}
+          />
+        ) : (
+          loaded && (
+            <div className="tgs-card" role="table" aria-label={t('tags.tableLabel')}>
+              <div className="tgs-row tgs-row--head" role="row">
+                {header('name', t('tags.colName'))}
+                {header('demos', t('tags.colDemos'))}
+                <span role="columnheader">
+                  <span className="sr-only">{t('glossary.actions')}</span>
+                </span>
+              </div>
+              {creating && (
+                <CreateRow
+                  tags={store.tags}
+                  onCancel={() => setCreating(false)}
+                  onCreate={async (name, color) => {
+                    if (await store.create(name, color)) setCreating(false);
+                  }}
+                />
+              )}
+              {rows.map((tag) => {
+                const n = count(tag.id);
+                return (
+                  <div key={tag.id} className="tgs-row" role="row">
+                    <span role="cell" className="tgs-name">
+                      {renaming === tag.id ? (
+                        <RenameField
+                          tag={tag}
+                          tags={store.tags}
+                          onDone={async (name) => {
+                            if (name !== null && name !== tag.name) {
+                              if (!(await store.update(tag.id, { name }))) return;
+                            }
+                            setRenaming(null);
+                          }}
+                        />
+                      ) : (
+                        <TagChip tag={tag} />
+                      )}
+                    </span>
+                    <span role="cell">
+                      {n ? (
+                        <Link
+                          className="tgs-count"
+                          to={`/?etiquettes=${tag.id}`}
+                          aria-label={t('tags.demosOf', { count: n, name: tag.name })}
+                        >
+                          {t('tags.demos', { count: n })}
+                        </Link>
+                      ) : (
+                        <span className="tgs-count">{t('tags.noDemo')}</span>
+                      )}
+                    </span>
+                    <span role="cell" className="tgs-more">
+                      {editable && (
+                        <Menu
+                          label={t('tags.more', { name: tag.name })}
+                          items={[
+                            {
+                              label: t('tags.renameAction'),
+                              onSelect: () => {
+                                setCreating(false);
+                                setRenaming(tag.id);
+                              },
+                            },
+                            { label: t('tags.colorAction'), onSelect: () => setColoring(tag.id) },
+                            'separator',
+                            { label: t('tags.deleteAction'), danger: true, onSelect: () => void remove(tag) },
+                          ]}
+                        />
+                      )}
+                      {coloring === tag.id && (
+                        <ColorPopover
+                          tag={tag}
+                          onPick={(c) => void store.update(tag.id, { color: c })}
+                          onClose={() => setColoring(null)}
+                        />
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )
+        )}
+      </section>
+      {confirmDialog}
+    </SettingsShell>
+  );
+}
+
+/** §2.1 : ligne de création en tête de liste (nom, couleur, Créer ; Échap annule). */
+function CreateRow({
+  tags,
+  onCancel,
+  onCreate,
+}: {
+  tags: TagRow[];
+  onCancel: () => void;
+  onCreate: (name: string, color: TagColor) => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [name, setName] = useState('');
+  const [color, setColor] = useState<TagColor>(() => proposedColor(tags));
+  const errId = useId();
+  const dup = name.trim() ? taken(tags, name) : undefined;
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || dup) return;
+    void onCreate(name.trim(), color);
+  };
+  return (
+    <form
+      className="tgs-row tgs-row--edit"
+      role="row"
+      onSubmit={submit}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          onCancel();
+        }
+      }}
+    >
+      <span role="cell" className="tgs-edit">
+        <input
+          className="input input-sm"
+          aria-label={t('tags.name')}
+          maxLength={NAME_MAX}
+          autoFocus
+          value={name}
+          aria-invalid={dup ? true : undefined}
+          aria-describedby={dup ? errId : undefined}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <TagColorPicker value={color} onChange={setColor} />
+        <button type="submit" className="btn btn-primary btn-sm" disabled={!name.trim() || !!dup}>
+          {t('tags.createAction')}
+        </button>
+      </span>
+      {dup && (
+        <p id={errId} className="tgs-err" role="alert">
+          {t('tags.duplicate')}
+        </p>
+      )}
+    </form>
+  );
+}
+
+/** §2.2 : renommage dans la ligne. Entrée valide, Échap annule, la perte du focus valide. */
+function RenameField({
+  tag,
+  tags,
+  onDone,
+}: {
+  tag: TagRow;
+  tags: TagRow[];
+  onDone: (name: string | null) => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [value, setValue] = useState(tag.name);
+  const ref = useRef<HTMLInputElement>(null);
+  const cancelled = useRef(false);
+  const errId = useId();
+  const dup = value.trim() ? taken(tags, value, tag.id) : undefined;
+  useEffect(() => ref.current?.select(), []);
+  const commit = () => {
+    if (cancelled.current) return;
+    const v = value.trim();
+    if (!v || v === tag.name) return void onDone(null);
+    if (dup) return;
+    void onDone(v);
+  };
+  return (
+    <span className="tgs-rename">
+      <span className="tgs-edit">
+        <input
+          ref={ref}
+          className="input input-sm"
+          aria-label={t('tags.rename', { name: tag.name })}
+          maxLength={NAME_MAX}
+          value={value}
+          aria-invalid={dup ? true : undefined}
+          aria-describedby={dup ? errId : undefined}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              commit();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              e.stopPropagation();
+              cancelled.current = true;
+              void onDone(null);
+            }
+          }}
+        />
+        <span className="tgs-hint">{t('tags.enterToSave')}</span>
+      </span>
+      {dup && (
+        <span id={errId} className="tgs-err" role="alert">
+          {t('tags.duplicate')}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/** §2.3 : petite fenêtre des 8 pastilles (28 px), accrochée au menu de la ligne ; l'aperçu change tout de suite. */
+function ColorPopover({
+  tag,
+  onPick,
+  onClose,
+}: {
+  tag: TagRow;
+  onPick: (c: TagColor) => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const ref = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  // Écouteurs posés une seule fois : retirés et reposés à chaque rendu, ils manqueraient la touche
+  // qui déclenche ce rendu (un écouteur retiré pendant la diffusion d'un événement n'est plus appelé)
+  const close = useRef(onClose);
+  close.current = onClose;
+  useEffect(() => {
+    // Retour du focus au bouton « Plus d'actions » de la ligne (le menu l'a déjà refermé)
+    const trigger =
+      ref.current?.parentElement?.querySelector<HTMLElement>('button[aria-haspopup]') ??
+      (document.activeElement as HTMLElement | null);
+    ref.current?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current();
+    const onDown = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && close.current();
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onDown);
+      trigger?.focus();
+    };
+  }, []);
+  return (
+    <div ref={ref} className="tgs-pop" role="dialog" aria-labelledby={titleId}>
+      <p id={titleId} className="tgs-pop__t">
+        {t('tags.colorOf', { name: tag.name })}
+      </p>
+      <TagColorPicker large value={tag.color as TagColor} onChange={onPick} label={t('tags.color')} />
+      <p className="tgs-pop__name" aria-hidden="true">
+        {t(`tags.colors.${tag.color}`)}
+      </p>
+    </div>
+  );
+}

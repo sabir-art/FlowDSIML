@@ -231,7 +231,18 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const [moving, setMoving] = useState<Demo | null>(null);
   // L12-07 : étiquettes des démos (filtre, pastilles, menu de la carte)
   const tagStore = useWorkspaceTags(ws.id);
-  const [tagFilter, setTagFilter] = useState<string[]>([]);
+  // L52 §1 : filtre Étiquettes dans l'adresse (?etiquettes=id1,id2), combiné à ?dossier= et ?vue=
+  // État local (la case suit le clic sans attendre la navigation), recopié depuis l'adresse quand elle change
+  const urlTags = params.get('etiquettes') ?? '';
+  const [tagFilter, setTagState] = useState<string[]>(() => urlTags.split(',').filter(Boolean));
+  useEffect(() => setTagState(urlTags.split(',').filter(Boolean)), [urlTags]);
+  const setTagFilter = (ids: string[]) => {
+    setTagState(ids);
+    const next = new URLSearchParams(params);
+    if (ids.length) next.set('etiquettes', ids.join(','));
+    else next.delete('etiquettes');
+    setParams(next, { replace: true });
+  };
   const [tagMode, setTagMode] = useState<'any' | 'all'>('any');
   const [tagging, setTagging] = useState<Demo | null>(null);
   const [managingTags, setManagingTags] = useState(false);
