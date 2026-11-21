@@ -6,6 +6,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { fromMore } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -72,9 +73,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
-  const btn = page.getByRole('button', { name: 'Suggestions' });
-  ok((await btn.count()) === 1, 'Bouton « Suggestions » dans la barre de l’éditeur');
-  await btn.click();
+  // L48-E §6 : « Suggestions » est dans le menu « Plus d’options » de la barre
+  await fromMore(page, 'Suggestions');
   const panel = page.getByRole('dialog', { name: 'Suggestions' });
   await panel.waitFor();
   const checks = panel.locator('.ai-sg-badge.is-local');

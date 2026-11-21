@@ -4,6 +4,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { fromMore } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -50,7 +51,7 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
   if (SHOTS) await page.locator('.notes-sec').screenshot({ path: `${SHOTS}/l22-01-notes${sfx}.png` });
 
   // L22-02 : lancement depuis la barre de l'éditeur
-  await page.getByRole('button', { name: 'Présenter', exact: true }).click();
+  await fromMore(page, 'Présenter');
   const dlg = page.getByRole('dialog', { name: /Présenter/ });
   await dlg.waitFor();
   ok(

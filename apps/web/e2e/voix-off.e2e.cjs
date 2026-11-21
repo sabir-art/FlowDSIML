@@ -6,6 +6,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
@@ -62,6 +63,8 @@ function wav(sec) {
   const s1 = () => state.tables.steps.find((s) => s.demo_id === DEMO && s.position === 0);
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
+  // L48-E : la voix off est l'outil « Voix off » du rail
+  await openTool(page, 'voice');
   const sec = page.locator('.voice-sec');
   await sec.waitFor();
   ok(/Voix off/i.test(await sec.innerText()), 'section « Voix off » dans l’onglet Étape');

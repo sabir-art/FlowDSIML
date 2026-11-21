@@ -41,7 +41,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.goto(`${APP}/#/settings/glossary`);
 
   // L17-07 : vide
-  await page.getByRole('heading', { name: 'Aucun terme pour l’instant' }).waitFor();
+  await page.getByRole('heading', { name: 'Ajoutez votre premier terme' }).waitFor();
   ok(
     (await page.getByRole('link', { name: 'Glossaire' }).count()) === 1,
     'Onglet Glossaire dans la navigation',

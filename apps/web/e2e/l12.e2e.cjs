@@ -1,6 +1,7 @@
 /** L12 : gains rapides de l'éditeur (libellés, style, rechercher-remplacer, annulation, raccourcis). */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -117,8 +118,11 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.keyboard.press('Escape');
 
   // L12-01 : masque opaque (outil B, Aplat, couleur, texte), puis toutes les étapes
+  // L48-E §4 : B ouvre la fenêtre « Flou », avec son propre canevas
   await page.keyboard.press('b');
-  const box = await page.locator('.canvas-frame').boundingBox();
+  const blurDlg = page.locator('dialog[open]', { has: page.locator('#blurm-title') });
+  await blurDlg.waitFor();
+  const box = await blurDlg.locator('.canvas-frame').boundingBox();
   await page.mouse.move(box.x + box.width * 0.1, box.y + box.height * 0.1);
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.2, { steps: 5 });
@@ -147,20 +151,12 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByLabel('Cette étape seulement').check();
   await page.waitForTimeout(900);
   ok(!(st('s2').blurs || []).some((b) => b.text === 'Donnée masquée'), 'L12-01 : copies retirées');
+  await blurDlg.getByRole('button', { name: 'Appliquer le flou' }).click();
+  await blurDlg.waitFor({ state: 'detached' }).catch(() => {});
 
-  // L12-02 : zoom déplaçable au clavier
-  await page
-    .getByRole('button', { name: /Retour à l’étape|Étape/ })
-    .first()
-    .click()
-    .catch(() => {});
-  await page.keyboard.press('Escape');
-  await page
-    .getByLabel('Zoomer sur une zone')
-    .check()
-    .catch(async () => {
-      await page.locator('#zoom-on').check();
-    });
+  // L12-02 : zoom déplaçable au clavier (L48-E : outil « Zoom » du rail)
+  await openTool(page, 'zoom');
+  await page.locator('#zoom-on').check();
   await page.waitForSelector('.canvas-zoom');
   await page
     .getByRole('radio', { name: '300 %' })

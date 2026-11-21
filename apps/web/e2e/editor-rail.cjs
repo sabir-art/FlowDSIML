@@ -6,10 +6,18 @@
  * comments, assistant, settings.
  */
 async function openTool(page, tool) {
+  // Le rail et le panneau mémorisé apparaissent au même rendu : attendre le rail avant de décider
+  await page.locator('.ed-rail').waitFor();
   const panel = page.locator(`[data-tool-panel="${tool}"]`);
   if ((await panel.count()) === 0) await page.locator(`[data-tool="${tool}"]`).first().click();
   await panel.waitFor();
   return panel;
 }
 
-module.exports = { openTool };
+/** L48-E §6 : actions de la démo dans le menu « Plus d’options » de la barre (Présenter, Exporter…). */
+async function fromMore(page, label) {
+  await page.getByRole('button', { name: 'Plus d’options' }).click();
+  await page.getByRole('menuitem', { name: label }).click();
+}
+
+module.exports = { openTool, fromMore };

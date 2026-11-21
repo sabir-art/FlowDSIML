@@ -5,6 +5,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -42,7 +43,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const before = { x: h1().x, y: h1().y, path: imgs()[0].image_path };
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
-  await page.locator('.ed-rail [data-tool="settings"][aria-pressed="false"]').click();
+  await openTool(page, 'settings');
   const sec = page.locator('.fmt-sec');
   await sec.waitFor();
   ok(/Toutes les captures font 1 100 × 750\./.test(sp(await sec.innerText())), 'constat : une seule taille');
@@ -106,7 +107,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   // Recadrer en 4:3 avec un repère au bord : signalé avant d'appliquer
   t.hotspots.find((h) => h.id === 'h1');
   await page.reload();
-  await page.locator('.ed-rail [data-tool="settings"][aria-pressed="false"]').click();
+  await openTool(page, 'settings');
   await sec.waitFor();
   await sec.getByRole('radio', { name: 'Personnalisé' }).check();
   await sec.getByLabel('Largeur (px)').fill('700');

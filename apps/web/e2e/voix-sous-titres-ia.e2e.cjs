@@ -7,6 +7,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -122,6 +123,7 @@ function prepare(over = {}) {
     await install(page, state);
     await page.goto(`${APP}/#/demos/${DEMO}/edit`);
     await page.locator('[data-step-index="0"]').click();
+    await openTool(page, 'voice');
     await page.locator('.voice-sec').waitFor();
   };
   const railTo = async (title) => {
@@ -261,6 +263,8 @@ function prepare(over = {}) {
 
   // ===== L30-11 : sous-titres d'une vidéo =====
   await railTo('Saisie de la fiche');
+  // L48-E : les sous-titres de la vidéo sont dans l'outil « Étape »
+  await openTool(page, 'step');
   await page.getByRole('button', { name: 'Transcription automatique' }).click();
   await ask.waitFor();
   ok(/\(12\ss\)/.test(await ask.textContent()), 'Modale : durée de la vidéo');
@@ -375,6 +379,7 @@ function prepare(over = {}) {
   await entry.hover();
   await shot('l30-13-desactive');
   await railTo('Saisie de la fiche');
+  await openTool(page, 'step');
   ok(
     (await page.getByRole('button', { name: 'Transcription automatique' }).getAttribute('aria-disabled')) ===
       'true',

@@ -5,6 +5,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { fromMore } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -40,7 +41,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(demo().presenter_notes?.startsWith('Introduction'), 'notes de la démo enregistrées');
 
   // ===== Lancement avec « Piloter depuis mon téléphone » =====
-  await page.getByRole('button', { name: 'Présenter', exact: true }).click();
+  await fromMore(page, 'Présenter');
   const launch = page.getByRole('dialog', { name: /Présenter/ });
   await launch.waitFor();
   await launch.getByRole('radio', { name: /Un seul écran/ }).check();

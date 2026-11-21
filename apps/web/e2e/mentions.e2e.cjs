@@ -1,6 +1,7 @@
 /** L22-07 : mention @ dans un commentaire (liste de membres, pastille, retour arrière, format stocké). */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
@@ -35,6 +36,7 @@ const MATHIS = '0b5c1f0e-0000-4000-8000-0000000000b3';
   await install(page, state);
 
   await page.goto(`${BASE}/#/demos/${DEMO}/edit`);
+  await openTool(page, 'comments');
   await page.waitForSelector('.cm');
   const input = page.getByRole('textbox', { name: 'Nouveau commentaire' });
   await input.click();

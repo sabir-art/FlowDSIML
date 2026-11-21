@@ -5,6 +5,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
@@ -110,6 +111,8 @@ const AIDE = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</st
     (await page.locator('.browser-row--url .url').textContent()) === 'aide.acme-analytics.example/rapports',
     'adresse de la capture sous les onglets',
   );
+  // L48-E : l'onglet de la capture est dans l'outil « Image » du rail
+  await openTool(page, 'image');
   const sel = page.getByLabel('Onglet', { exact: true });
   ok(
     (await sel.locator('option').allTextContents()).join('|') ===
