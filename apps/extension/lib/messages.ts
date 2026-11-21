@@ -122,6 +122,8 @@ export interface RecordingStatus {
   tabs?: TrackedTab[];
   /** L25-01 : onglets où le protocole DevTools est attaché (taille, capture pleine page). */
   debugged?: number[];
+  /** Option B : taille de fenêtre à rétablir à la fin (taille d'onglet obtenue par windows.update). */
+  restoreWindow?: { id: number; width: number; height: number; state: string } | null;
   /** L26-04 : capture guidée (démo à compléter). */
   fill?: FillTarget | null;
 }

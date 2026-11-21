@@ -131,6 +131,13 @@ const fr = {
   checkData: 'Vérifier les données avant l’envoi',
   checkDataHelp: 'Toujours active\u202f: chaque capture, dans chaque onglet.',
   fullPageHelp: 'Chaque capture garde la page entière, pour animer le défilement dans l’éditeur.',
+  // EXT-STORE, option B (docs/ux/store/README.md §6.0) : version de la boutique sans debugger
+  soon: 'Bientôt',
+  typeMobileSoonHelp: 'Pas encore disponible dans cette version de l’extension.',
+  fullPageHelpVisible: 'Chaque clic donne une capture de la partie visible de la page.',
+  fullPageSoon: 'Page entière · Bientôt',
+  tabSizeHelpWindow:
+    'La fenêtre est redimensionnée le temps de la capture : la page peut différer de quelques pixels de la taille choisie.',
   tabChip: 'Onglet {{n}} · {{title}}',
   tabAnnounce: 'Capture dans l’onglet {{n}}\u202f: {{title}}',
   // L26-04 : capture guidée d'une démo créée depuis un modèle
@@ -282,6 +289,12 @@ const en: typeof fr = {
   checkData: 'Check data before sending',
   checkDataHelp: 'Always on: every capture, in every tab.',
   fullPageHelp: 'Each capture keeps the whole page, to animate scrolling in the editor.',
+  soon: 'Coming soon',
+  typeMobileSoonHelp: 'Not yet available in this version of the extension.',
+  fullPageHelpVisible: 'Each click gives a capture of the visible part of the page.',
+  fullPageSoon: 'Whole page · Coming soon',
+  tabSizeHelpWindow:
+    'The window is resized during the capture: the page may differ by a few pixels from the chosen size.',
   tabChip: 'Tab {{n}} · {{title}}',
   tabAnnounce: 'Capturing in tab {{n}}: {{title}}',
   fillLabel: 'Demo',

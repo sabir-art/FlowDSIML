@@ -35,7 +35,7 @@ Contrôle rapide du manifeste :
 unzip -p apps/extension/.output/*.zip manifest.json
 ```
 
-Attendu : `"name": "TutoClick Capture"`, pas de `host_permissions`, `optional_host_permissions: ["<all_urls>"]`.
+Attendu : `"name": "TutoClick Capture"`, pas de `debugger` dans `permissions`, pas de `host_permissions`, `optional_host_permissions: ["<all_urls>"]`. Les limites de cette version sont dans [`fiche.md`](fiche.md) §4.
 
 ## 3. Créer l’article
 
@@ -56,6 +56,5 @@ Attendu : `"name": "TutoClick Capture"`, pas de `host_permissions`, `optional_ho
 
 ## 5. Avant l’envoi : à confirmer
 
-- [ ] Arbitrage du chef sur `debugger` (obligatoire avec justification, ou retiré du build).
 - [ ] Le DPO confirme les données déclarées (`fiche.md` §3) et la politique de confidentialité, dont la région d’hébergement (Union européenne).
-- [ ] La capture 1 montre « Espace » dans le popup (le Lead UX la reprend).
+- [ ] La capture 1 montre « Espace » et « Format mobile » en « Bientôt » dans le popup (le Lead UX la reprend).

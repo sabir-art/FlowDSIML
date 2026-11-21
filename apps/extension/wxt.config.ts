@@ -17,9 +17,17 @@ export default defineConfig({
     description:
       'Créez une démo interactive en parcourant votre logiciel : chaque clic devient une étape, avec sa bulle d’explication.',
     // EXT-STORE : permissions minimales. L'accès aux sites est facultatif, demandé au clic sur « Démarrer »
-    // avec une explication (lib/permissions.ts). `debugger` ne peut pas être facultative dans Chrome
-    // (référence chrome.permissions) : obligatoire en attendant l'arbitrage du chef.
-    permissions: ['activeTab', 'storage', 'scripting', 'tabs', 'tabCapture', 'offscreen', 'debugger'],
+    // avec une explication (lib/permissions.ts). `debugger` ne peut pas être facultative dans Chrome :
+    // option B (décision du chef) = absente de la version de la boutique ; WXT_DEBUGGER=1 rétablit l'option A.
+    permissions: [
+      'activeTab',
+      'storage',
+      'scripting',
+      'tabs',
+      'tabCapture',
+      'offscreen',
+      ...(process.env.WXT_DEBUGGER === '1' ? (['debugger'] as const) : []),
+    ],
     // F7 : raccourcis pendant l'enregistrement vidéo
     commands: {
       'rec-pause': { suggested_key: { default: 'Alt+Shift+P' }, description: 'Pause ou reprise' },

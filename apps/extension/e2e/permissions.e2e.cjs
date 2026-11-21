@@ -30,6 +30,7 @@ const ok = (c, m) => {
     manifest.name === 'TutoClick Capture' && manifest.description.length <= 132,
     'manifeste : nom et résumé',
   );
+  ok(!manifest.permissions.includes('debugger'), 'manifeste : pas de debugger (option B)');
 
   const ctx = await chromium.launchPersistentContext(fs.mkdtempSync(path.join(os.tmpdir(), 'fd-ext-')), {
     headless: true,
@@ -52,6 +53,28 @@ const ok = (c, m) => {
     'rien demandé à l’ouverture',
   );
 
+  // Option B : Format mobile visible, désactivé, « Bientôt » ; page entière en « Bientôt »
+  const mobile = popup.locator('input[name="mode"][value="mobile"]');
+  ok(
+    (await mobile.isDisabled()) &&
+      (await popup.locator('#mobile-soon').innerText()) === 'Bientôt' &&
+      (await popup.locator('#mobile-help').innerText()) ===
+        'Pas encore disponible dans cette version de l’extension.',
+    'Format mobile : visible, désactivé, « Bientôt »',
+  );
+  await popup.check('input[name="mode"][value="clicks"]');
+  ok(
+    (await popup.locator('#opt-full').innerText()) ===
+      'Chaque clic donne une capture de la partie visible de la page.' &&
+      (await popup.locator('#full-soon').innerText()) === 'Page entière · Bientôt',
+    'page entière : partie visible, « Page entière · Bientôt »',
+  );
+  ok(
+    (await popup.locator('#tabsize-h').innerText()).startsWith(
+      'La fenêtre est redimensionnée le temps de la capture',
+    ),
+    'taille de l’onglet : par la fenêtre',
+  );
   await popup.check('input[name="mode"][value="html"]');
   await popup.click('#start');
   await popup.locator('#perm').waitFor();

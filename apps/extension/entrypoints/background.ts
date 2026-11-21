@@ -15,6 +15,7 @@ import { fullHeight } from '@/lib/fullpage';
 import { htmlStore } from '@/lib/htmlStore';
 import { elapsed } from '@/lib/video';
 import { videoStore } from '@/lib/videoStore';
+import { DEBUGGER } from '@/lib/config';
 
 /**
  * Service worker MV3. L'état d'enregistrement vit dans storage.session (le worker peut être arrêté).
@@ -98,6 +99,8 @@ async function captureMobile(tabId: number): Promise<string> {
 async function attach(tabId: number): Promise<boolean> {
   const s = await getState();
   if (s.debugged?.includes(tabId)) return true;
+  // Option B : pas de protocole DevTools dans la version de la boutique
+  if (!DEBUGGER) return false;
   try {
     await dbg().attach({ tabId }, '1.3');
   } catch {
@@ -123,6 +126,11 @@ async function prepareTab(tabId: number, s: RecordingStatus) {
     }
     return;
   }
+  // Option B : la taille d'onglet passe par la fenêtre (inexacte de quelques pixels), le premier onglet seulement
+  if (!DEBUGGER) {
+    if (s.size && !s.restoreWindow) await resizeWindow(tabId, s.size);
+    return;
+  }
   // Capture à chaque clic : le protocole sert aussi à la capture pleine page
   const need = !!s.size || s.mode === 'clicks';
   if (!need || !(await attach(tabId))) return;
@@ -136,10 +144,36 @@ async function prepareTab(tabId: number, s: RecordingStatus) {
       })
       .catch(() => undefined);
 }
-/** Remet chaque onglet à sa taille et détache le protocole. */
+/** Option B : fenêtre redimensionnée pour que la zone de la page ait la taille choisie (bord du navigateur compris). */
+async function resizeWindow(tabId: number, size: { w: number; h: number }) {
+  try {
+    const tab = await browser.tabs.get(tabId);
+    const win = await browser.windows.get(tab.windowId);
+    if (!win.id || !win.width || !win.height || !tab.width || !tab.height) return;
+    await setState({
+      restoreWindow: { id: win.id, width: win.width, height: win.height, state: win.state ?? 'normal' },
+    });
+    await browser.windows.update(win.id, {
+      state: 'normal',
+      width: size.w + (win.width - tab.width),
+      height: size.h + (win.height - tab.height),
+    });
+  } catch {
+    /* fenêtre fermée ou plein écran imposé : la capture garde la taille actuelle */
+  }
+}
+/** Remet chaque onglet à sa taille et détache le protocole (option B : rend sa taille à la fenêtre). */
 async function releaseTabs(s: RecordingStatus) {
   for (const tabId of s.debugged ?? []) await stopEmulation(tabId);
-  await setState({ debugged: [] });
+  const w = s.restoreWindow;
+  if (w)
+    await browser.windows
+      .update(
+        w.id,
+        w.state === 'normal' ? { width: w.width, height: w.height } : { state: w.state as 'maximized' },
+      )
+      .catch(() => undefined);
+  await setState({ debugged: [], restoreWindow: null });
 }
 /** Capture du viewport (et de la page entière si le protocole est attaché). */
 async function shoot(
@@ -278,10 +312,13 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
   const first = await browser.tabs.get(req.tabId);
   await setState({
     debugged: [],
+    restoreWindow: null,
     tabs: [{ id: req.tabId, n: 1, title: (first.title ?? '').slice(0, 120) }],
     followTabs: mode !== 'video' && !!req.followTabs,
     size: mode === 'clicks' || mode === 'html' ? (req.size ?? null) : null,
   });
+  if (mode === 'mobile' && !DEBUGGER)
+    throw new Error('Format mobile : pas encore disponible dans cette version.');
   if (mode === 'mobile' && req.viewport) {
     await emulate(req.tabId, req.viewport);
     await setState({ debugged: [req.tabId] });

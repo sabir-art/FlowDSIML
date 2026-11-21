@@ -4,7 +4,7 @@ import '@flowdsiml/ui/tooltip.css';
 import './style.css';
 import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
-import { APP_URL } from '@/lib/config';
+import { APP_URL, DEBUGGER } from '@/lib/config';
 import { APP_NAME } from '@flowdsiml/core';
 import { installTooltips } from '@flowdsiml/ui/tooltip';
 import type { CaptureMode, FillTarget, PopupRequest, RecordingStatus } from '@/lib/messages';
@@ -62,6 +62,19 @@ createIcons({ icons: ICONS, attrs: { width: 16, height: 16, 'stroke-width': 2, '
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const show = (id: string, visible: boolean) => ($(id).hidden = !visible);
 
+// EXT-STORE, option B : sans debugger, Format mobile et page entière restent visibles en « Bientôt »
+if (!DEBUGGER) {
+  const mobile = document.querySelector<HTMLInputElement>('input[name="mode"][value="mobile"]')!;
+  mobile.disabled = true;
+  mobile.closest('label')?.classList.add('is-soon');
+  $('mobile-help').textContent = strings.typeMobileSoonHelp;
+  $('mobile-soon').textContent = strings.soon;
+  $('mobile-soon').hidden = false;
+  $('opt-full').textContent = strings.fullPageHelpVisible;
+  $('full-soon').textContent = strings.fullPageSoon;
+  $('tabsize-h').textContent = strings.tabSizeHelpWindow;
+}
+
 // F7 : type de capture (clics, vidéo de l'onglet, format mobile)
 const mode = (): CaptureMode =>
   (document.querySelector<HTMLInputElement>('input[name="mode"]:checked')?.value as CaptureMode) ?? 'clicks';
@@ -74,6 +87,7 @@ function syncMode() {
   show('opt-desk', m !== 'video');
   show('size-field', m === 'clicks' || m === 'html');
   show('opt-full', m === 'clicks' || m === 'mobile');
+  show('full-soon', !DEBUGGER && m === 'clicks');
   // L25-01 : l'aide de la vérification est portée par l'interrupteur « Vérifier les données »
   show('hint', false);
   for (const el of document.querySelectorAll<HTMLElement>('.start-ico')) el.hidden = el.dataset.for !== m;
@@ -118,7 +132,7 @@ function viewport(): { w: number; h: number } {
 void browser.storage.local.get('fd.lastMode').then((r) => {
   const saved = r['fd.lastMode'] as string | undefined;
   const input = document.querySelector<HTMLInputElement>(`input[name="mode"][value="${saved}"]`);
-  if (input) input.checked = true;
+  if (input && !input.disabled) input.checked = true;
   syncMode();
 });
 syncMode();
@@ -292,7 +306,8 @@ async function currentNeed(): Promise<PermissionNeed> {
   return permissionNeed({
     mode: mode(),
     size: sizeKey(),
-    hasDebugger,
+    // Option B : rien à demander pour debugger (absent du manifeste ; taille par la fenêtre)
+    hasDebugger: !DEBUGGER || hasDebugger,
     hasSites,
     fullLater: !!later[FULL_LATER_KEY],
   });
@@ -339,7 +354,7 @@ async function afterAnswer(n: PermissionNeed) {
     );
   } else if (n.sites && !hasSites) denied(strings.dbgDeniedSites);
   else denied(null);
-  await startCapture(hasDebugger);
+  await startCapture(!DEBUGGER || hasDebugger);
 }
 // La demande doit partir du clic (geste de l'utilisateur) : aucun appel asynchrone avant elle
 $('perm-allow').addEventListener('click', () => {
