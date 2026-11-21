@@ -36,6 +36,11 @@
 | M8 | Quiz, réussite | Pastille vert-jaune « Module validé » sous l'anneau. | Texte de 14 px 600, en `success`, avec l'icône `award` de 16 px (M2). |
 | M9 | Centre | « Reprendre "Fiches usagers" » est un bouton noir sur l'aplat vert. | Avec M2 : bouton `primary` « Reprendre », et le nom du module en texte au-dessus. |
 
+### 2.1 Surfaces de contenu en sombre (arbitrage du 21 novembre)
+- La bulle d'étape et la carte du quiz restent claires en sombre : c'est la règle PLY-01, « Surfaces de la démo restées claires ». Le thème de la démo (fond, texte, couleur) s'impose aux surfaces de contenu, comme aux captures.
+- L'interface du lecteur suit le thème de l'apprenant : en-tête, barre du lecteur, « Voir tout l'écran » (`--p-chrome-text`).
+- On ne change pas cette règle dans MOB-01.
+
 ## 3. Priorités
 
 1. **M7** : l'apprenant ne voit pas comment réessayer. C'est bloquant sur mobile.
