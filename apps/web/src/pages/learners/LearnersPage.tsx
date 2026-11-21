@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { toCsv } from '@flowdsiml/core';
 import type { Json } from '@flowdsiml/supabase-types';
-import { Alert, Button, Empty } from '@flowdsiml/ui';
+import { Alert, Button, Empty, Status } from '@flowdsiml/ui';
 import { NoMatch } from '../../components/empty/NoMatch';
 import { supabase } from '../../lib/supabase';
 import { downloadText } from '../../lib/download';
@@ -77,6 +77,13 @@ const STATUS_ICON: Record<LearnerStatus, ReactNode> = {
   stale: <BellRing {...ICON} />,
   quiz: <CircleX {...ICON} />,
 };
+// Audit L50 A2/X4 : statut en texte de 14 px avec un point de 8 px (orange « À relancer », rouge « Quiz non validé »)
+const STATUS_TONE: Record<LearnerStatus, 'success' | 'neutral' | 'warning' | 'danger'> = {
+  done: 'success',
+  active: 'neutral',
+  stale: 'warning',
+  quiz: 'danger',
+};
 const STATUS_CLASS: Record<LearnerStatus, string> = {
   done: 'done',
   active: 'prog',
@@ -87,10 +94,9 @@ const STATUS_CLASS: Record<LearnerStatus, string> = {
 export function StatusBadge({ status, children }: { status: LearnerStatus; children?: ReactNode }) {
   const { t } = useTranslation();
   return (
-    <span className={`st-badge ${STATUS_CLASS[status]}`}>
-      {STATUS_ICON[status]}
+    <Status tone={STATUS_TONE[status]} className={`st-badge ${STATUS_CLASS[status]}`}>
       {children ?? t(`learners.status.${status}`)}
-    </span>
+    </Status>
   );
 }
 

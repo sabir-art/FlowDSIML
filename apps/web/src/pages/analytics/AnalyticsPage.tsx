@@ -41,6 +41,7 @@ import { DemosTab } from './DemosTab';
 import { DevicesWidget, ReturningWidget, SourcesWidget, StepsWidget } from './widgets';
 import './advanced/advanced.css';
 import './analytics.css';
+import { Status } from '@flowdsiml/ui';
 
 /** L19b : « page » = lecteur affiché dans la page publique. */
 type Source = 'direct' | 'embed' | 'link' | 'page';
@@ -336,7 +337,7 @@ export function AnalyticsPage() {
               icon: <Calendar />,
               disabled: true,
               hint: t('shell.soon'),
-              end: <span className="badge an-soon">{t('shell.soon')}</span>,
+              end: <Status size="sm">{t('shell.soon')}</Status>,
               onSelect: () => undefined,
             },
           ]}
@@ -757,7 +758,9 @@ function Sessions({
                   <td className="r">{dur(s.duration_s)}</td>
                   <td className="r">
                     {s.completed ? (
-                      <span className="badge badge-success">{t('analytics.completed')}</span>
+                      <Status size="sm" tone="success">
+                        {t('analytics.completed')}
+                      </Status>
                     ) : (
                       <span className="num">
                         {(s.max_step ?? -1) + 1} / {s.steps_total}

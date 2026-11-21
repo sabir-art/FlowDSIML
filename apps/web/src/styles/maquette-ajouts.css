@@ -89,7 +89,7 @@
 .mk .oauth {
   margin-top: 32px;
 }
-.mk .oauth .badge {
+.mk .oauth .fd-status {
   margin-left: 4px;
 }
 .mk .auth-submit {
@@ -228,7 +228,7 @@
   margin-top: 4px;
 }
 
-.mk .btn[aria-disabled='true'] .badge {
+.mk .btn[aria-disabled='true'] .fd-status {
   opacity: 1;
 }
 /* Neutralise le .segmented global de l'app (bordure, séparateurs) dans les écrans refaits */
@@ -276,9 +276,6 @@
 }
 .mk .an-toolbar {
   margin-bottom: 16px;
-}
-.mk .an-soon {
-  height: 16px;
 }
 .mk .segmented button svg {
   width: 16px;
@@ -890,6 +887,9 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.mk .sh-import-err {
+  white-space: normal;
+}
 .mk .sh-import-ko td {
   background: var(--fd-color-surface-sunken);
 }
@@ -1489,10 +1489,6 @@
   align-items: center;
   gap: 8px;
 }
-.mk .sec-title .badge {
-  text-transform: none;
-  letter-spacing: 0;
-}
 .mk .sec > .field + .field,
 .mk .sec > .field + .help {
   margin-top: 12px;
@@ -1530,11 +1526,6 @@
 .mk .hs-panel .segmented button:disabled {
   cursor: not-allowed;
   opacity: 0.75;
-}
-.mk .badge-xs {
-  height: 16px;
-  padding: 0 5px;
-  font-size: 10px;
 }
 .mk .rte {
   border: 1px solid var(--fd-color-border-strong);
@@ -2144,8 +2135,8 @@
 .mk .btn.st-danger-btn {
   color: var(--fd-color-danger);
 }
-.mk .st-gen label .badge,
-.mk .st-pf label .badge {
+.mk .st-gen label .fd-status,
+.mk .st-pf label .fd-status {
   margin-left: 6px;
   vertical-align: 1px;
 }
@@ -2161,7 +2152,7 @@
 .mk .st-pf-notif {
   margin-top: 12px;
 }
-.mk .st-pf .setting .badge {
+.mk .st-pf .setting .fd-status {
   margin-left: 6px;
 }
 .mk .st-pf-pwd {
@@ -2890,20 +2881,6 @@
 .mk .soon-badge {
   flex: none;
   margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--fd-color-surface-sunken);
-  color: var(--fd-color-text-muted);
-  box-shadow: inset 0 0 0 1px var(--fd-color-border);
-  font: 700 var(--fd-text-caption-size) var(--fd-font-sans);
-  white-space: nowrap;
-}
-.mk .soon-badge svg {
-  width: 12px;
-  height: 12px;
 }
 .mk .soon-body {
   margin: 0;
@@ -2950,14 +2927,8 @@
 }
 .mk .an-visit {
   display: flex;
-  align-items: center;
-  gap: 4px;
   margin-top: 4px;
   width: fit-content;
-}
-.mk .an-visit svg {
-  width: 12px;
-  height: 12px;
 }
 .mk .an-measure {
   max-width: 560px;

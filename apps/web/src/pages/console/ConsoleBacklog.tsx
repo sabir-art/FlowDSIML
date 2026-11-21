@@ -29,6 +29,7 @@ import {
   type ItemStatus,
   type Priority,
 } from './shared';
+import { Status } from '@flowdsiml/ui';
 
 const COLUMNS: ItemStatus[] = ['triage', 'planned', 'in_progress', 'done'];
 
@@ -268,7 +269,11 @@ function Card({
           </span>
           <span>{t('console.bl.feedbackN', { count: item.feedback })}</span>
           {n && <span>#{n}</span>}
-          {item.announced && <span className="badge badge-primary">{t('console.bl.announced')}</span>}
+          {item.announced && (
+            <Status size="sm" tone="brand">
+              {t('console.bl.announced')}
+            </Status>
+          )}
         </span>
         {item.article && <span className="console-card__art fd-muted">{articleTitle(item.article)}</span>}
       </button>
@@ -356,7 +361,7 @@ function ItemDrawer({
     >
       <aside className="modal console-drawer" role="dialog" aria-modal="true" aria-labelledby="dr-t">
         <div className="modal-head">
-          <span className="badge">{t(`console.status.${d.status}`)}</span>
+          <Status size="sm">{t(`console.status.${d.status}`)}</Status>
           <h2 id="dr-t">{t('console.bl.item')}</h2>
           <span className="fd-muted" role="status">
             {saved ? t('console.bl.saved') : t('console.bl.saving')}

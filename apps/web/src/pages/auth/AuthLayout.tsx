@@ -9,6 +9,7 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import type { FieldErrors } from '../../lib/validation';
+import { Status } from '@flowdsiml/ui';
 
 /** Message d'erreur de champ au format de la maquette (`.error-msg`). */
 export function MkFieldError({ id, errors }: { id: string; errors: FieldErrors }) {
@@ -175,7 +176,7 @@ export function AuthLayout({
                 <Link className="t-caption subtle" to="/legal/terms">
                   {t('auth.terms')}
                 </Link>
-                <span className="badge">{t('shell.soon')}</span>
+                <Status size="sm">{t('shell.soon')}</Status>
               </span>
             </div>
           )}

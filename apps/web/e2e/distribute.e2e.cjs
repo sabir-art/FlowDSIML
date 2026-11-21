@@ -616,7 +616,7 @@ function seedDistribute(s, { published = true } = {}) {
   );
   const lmsRow = dlg.locator('.dif-list li', { hasText: 'LMS · SCORM 1.2' });
   ok(
-    (await lmsRow.locator('.badge').textContent()) === 'Version ancienne',
+    (await lmsRow.locator('.fd-status').textContent()) === 'Version ancienne',
     'Où : paquet « Version ancienne »',
   );
   ok(!/vue/.test(await lmsRow.textContent()), 'Où : aucune vue inventée pour un paquet SCORM');

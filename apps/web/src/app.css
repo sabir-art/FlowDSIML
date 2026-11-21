@@ -832,10 +832,6 @@
 }
 
 /* Formulaires non inclus dans le plan */
-.badge-warning {
-  background: var(--fd-color-warning-soft);
-  color: var(--fd-color-text);
-}
 .help-warning {
   display: flex;
   align-items: center;
@@ -1327,10 +1323,6 @@
   padding: 1px 5px;
   border: 1px solid var(--fd-color-border);
   border-radius: 4px;
-}
-.menu-soon {
-  font-size: 10px;
-  padding: 0 6px;
 }
 /* DSH-08 : pied des modales séparé du corps par un filet, avec plus d'air */
 .dialog .dialog-actions {

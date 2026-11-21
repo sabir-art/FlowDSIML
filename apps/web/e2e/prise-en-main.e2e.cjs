@@ -101,7 +101,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     'parcours : 1 sur 5 (modules disponibles)',
   );
   ok(
-    (await ac.locator('li').nth(0).locator('.fd-badge', { hasText: 'Bientôt' }).count()) === 1,
+    (await ac.locator('li').nth(0).locator('.fd-status', { hasText: 'Bientôt' }).count()) === 1,
     'sans démo : badge « Bientôt »',
   );
   ok(/Revoir/.test(await ac.locator('li').nth(1).innerText()), 'module fait : « Revoir »');

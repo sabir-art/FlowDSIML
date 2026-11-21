@@ -19,7 +19,7 @@ import { useToast } from '../../../components/Toast';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { Loading } from '../../../components/guards';
 import type { Segment } from './SegmentsTab';
-import { Empty } from '@flowdsiml/ui';
+import { Empty, Status } from '@flowdsiml/ui';
 
 export type Alert = Tables<'alerts'>;
 export const TRIGGERS = [
@@ -139,9 +139,9 @@ export function AlertsTab({
                 )}
                 <span className="t-caption muted l19-block">{l.meta}</span>
               </span>
-              <span className={`badge${a.active ? ' badge-success' : ''}`}>
+              <Status size="sm" tone={a.active ? 'success' : 'neutral'}>
                 {a.active ? t('analytics.adv.al.active') : t('analytics.adv.al.paused')}
-              </span>
+              </Status>
               <span className="switch">
                 <input
                   type="checkbox"

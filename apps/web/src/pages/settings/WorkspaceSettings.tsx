@@ -10,6 +10,7 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
 import { WsLogo } from '../../components/WorkspaceSwitcher';
 import { SUPPORT_EMAIL_RE, SUPPORT_HTTPS_RE } from '../../lib/support';
+import { Status } from '@flowdsiml/ui';
 
 const HTTPS = /^https:\/\/\S+$/;
 
@@ -41,7 +42,7 @@ export function WorkspaceSettings() {
   const [counts, setCounts] = useState<{ demos: number; leads: number } | null>(null);
   const { busy, error, run } = useAction();
   const editable = can('workspace.settings');
-  const soon = <span className="badge">{t('shell.soon')}</span>;
+  const soon = <Status size="sm">{t('shell.soon')}</Status>;
 
   const reset = () => {
     setName(ws.name);

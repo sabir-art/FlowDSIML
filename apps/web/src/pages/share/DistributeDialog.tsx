@@ -71,6 +71,7 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import './distribute.css';
+import { Status } from '@flowdsiml/ui';
 
 interface Info {
   demo: Tables<'demos'>;
@@ -383,10 +384,9 @@ export function DistributeDialog({
             <p className="dif-sub">
               {published ? (
                 <>
-                  <span className={`badge ${modified ? 'badge-warning' : 'badge-success'}`}>
-                    <span className="dot" />
+                  <Status size="sm" tone={modified ? 'warning' : 'success'}>
                     {t(modified ? 'distribute.modified' : 'distribute.published_badge')}
-                  </span>
+                  </Status>
                   {info.version?.published_at
                     ? t('distribute.versionOn', {
                         n: info.version.number,
@@ -396,10 +396,7 @@ export function DistributeDialog({
                 </>
               ) : (
                 <>
-                  <span className="badge">
-                    <span className="dot" />
-                    {t('distribute.draft')}
-                  </span>
+                  <Status size="sm">{t('distribute.draft')}</Status>
                   {t('distribute.neverPublished')}
                 </>
               )}
@@ -1367,11 +1364,9 @@ function WherePanel({
   const { t } = useTranslation();
   if (rows === null) return <p className="muted">{t('common.loading')}</p>;
   const badge = (text: string, tone: 'success' | 'warning' | 'neutral') => (
-    <span
-      className={`badge${tone === 'success' ? ' badge-success' : tone === 'warning' ? ' badge-warning' : ''}`}
-    >
+    <Status size="sm" tone={tone}>
       {text}
-    </span>
+    </Status>
   );
   const line = (
     r: WhereRow,

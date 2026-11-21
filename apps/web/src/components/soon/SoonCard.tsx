@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock } from 'lucide-react';
+import { Status } from '@flowdsiml/ui';
 
 /**
  * Vague B : carte « à venir » (docs/ux/specs/vague-b.md §1). Bordure pointillée, badge « Bientôt
@@ -37,10 +37,9 @@ export function SoonCard({
         <H className="soon-title" id={`${id}-t`}>
           {t(`soon.${k}.title`)}
         </H>
-        <span className="soon-badge">
-          <Clock aria-hidden="true" />
+        <Status size="sm" className="soon-badge">
           {t('soon.badge')}
-        </span>
+        </Status>
       </div>
       <p className="soon-body">{t(`soon.${k}.body`)}</p>
       {Array.isArray(items) && (

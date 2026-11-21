@@ -20,6 +20,7 @@ import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useAuth } from '../../../auth/AuthProvider';
 import { PRESETS, asStyleTokens, pickTokens, sameTokens, type StyleTokens } from './presets';
 import './styles.css';
+import { Status } from '@flowdsiml/ui';
 
 const NAME_MAX = 40;
 type WsStyle = Tables<'themes'>;
@@ -79,9 +80,9 @@ export function StyleCard({
         <span className="sty-name">
           {name}
           {badges.map((b) => (
-            <span key={b.text} className={`badge badge-xs${b.tone ? ` badge-${b.tone}` : ''}`}>
+            <Status key={b.text} size="sm" tone={b.tone ?? 'neutral'}>
               {b.text}
-            </span>
+            </Status>
           ))}
         </span>
       )}
@@ -177,7 +178,11 @@ export function StylesSection({
     <div className="sec sty-sec">
       <div className="sec-title">
         <span id="sty-title">{t('editor.styles.title')}</span>
-        {!active && <span className="badge badge-xs sty-custom">{t('editor.styles.custom')}</span>}
+        {!active && (
+          <Status size="sm" className="sty-custom">
+            {t('editor.styles.custom')}
+          </Status>
+        )}
       </div>
       <div className="sty-grid" role="group" aria-labelledby="sty-title">
         {PRESETS.map((p) => (

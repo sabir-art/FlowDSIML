@@ -6,7 +6,7 @@ import { supabase } from '../../../lib/supabase';
 import { formatDate, formatNumber } from '../../../lib/format';
 import { Loading } from '../../../components/guards';
 import { abOutcome, type AbCounts } from '../../editor/ab/abResult';
-import { Empty } from '@flowdsiml/ui';
+import { Empty, Status } from '@flowdsiml/ui';
 import { ListChecks } from 'lucide-react';
 
 export interface SurveyQuestion {
@@ -251,9 +251,11 @@ function AbCard({ ab, step, demo }: { ab: AbRow; step: number; demo: string }) {
       <div className="row between">
         <h2 className="t-h3">{t('analytics.adv.tests.abTitle', { n: step })}</h2>
         {ab.status === 'running' ? (
-          <span className="badge badge-success">{t('editor.ab.running', { n: day })}</span>
+          <Status size="sm" tone="success">
+            {t('editor.ab.running', { n: day })}
+          </Status>
         ) : (
-          <span className="badge">{t('analytics.adv.tests.abEnded')}</span>
+          <Status size="sm">{t('analytics.adv.tests.abEnded')}</Status>
         )}
       </div>
       <p className="t-caption muted l19-q">

@@ -7,7 +7,7 @@ import { check, useAction } from '../../lib/useAction';
 import { formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { YesNo } from '../../components/YesNo';
-import { Empty } from '@flowdsiml/ui';
+import { Empty, Status } from '@flowdsiml/ui';
 
 interface LeadRow {
   id: string;
@@ -189,7 +189,9 @@ export function LeadsMkTable({
                   <td>{l.demo_id ? title(l.demo_id) : '—'}</td>
                   <td className="r">
                     {l.completed ? (
-                      <span className="badge badge-success">{t('analytics.completed')}</span>
+                      <Status size="sm" tone="success">
+                        {t('analytics.completed')}
+                      </Status>
                     ) : (
                       <span className="num">
                         {(l.max_step ?? -1) + 1} / {l.steps_total}

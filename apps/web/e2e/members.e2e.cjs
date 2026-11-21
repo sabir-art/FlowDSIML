@@ -24,10 +24,12 @@ const SHOTS = process.env.SHOTS_DIR;
       'Espace|Marque|Contenu|Connexions|Mon compte',
     'Paramètres : cinq groupes',
   );
+  const soon = await page.locator('.snav .snav-item--soon').allTextContents();
+  const links = await page.locator('.snav a.snav-item').count();
   ok(
-    (await page.locator('.snav a.snav-item').count()) === 12 &&
-      (await page.locator('.snav .snav-item--soon').count()) === 4,
-    'Paramètres : 12 sections et 4 « Bientôt » (Domaine, Étiquettes, Clés d’accès, Notifications)',
+    // L52 : « Étiquettes » est une section active ; restent « Bientôt » : Domaine, Clés d'accès, Notifications
+    links === 13 && soon.length === 3,
+    `Paramètres : 13 sections et 3 « Bientôt » (${links} ; ${soon.join(', ')})`,
   );
   ok(
     (await page.getByRole('navigation', { name: 'Fil d’Ariane' }).innerText()).replace(/\s+/g, ' ').trim() ===

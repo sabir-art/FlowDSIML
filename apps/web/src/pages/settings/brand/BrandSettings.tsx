@@ -31,6 +31,7 @@ import { STYLE_NAME_MAX, copyName, isHex, logoError, nameTaken } from './brand';
 import { StyleDialog } from './StyleDialog';
 import '../../editor/styles/styles.css';
 import './brand.css';
+import { Status } from '@flowdsiml/ui';
 
 type WsStyle = Tables<'themes'>;
 /** Couleurs de la marque par défaut (charte DSI, valeurs des démos). */
@@ -641,7 +642,7 @@ export function BrandPublicPage() {
         <div className="card-head">
           <div>
             <h2 className="t-h3" id="br-pp-t">
-              {t('brand.pageTitle')} <span className="badge">{t('shell.soon')}</span>
+              {t('brand.pageTitle')} <Status size="sm">{t('shell.soon')}</Status>
             </h2>
             <p className="t-caption muted">{t('brand.pageHelp')}</p>
           </div>

@@ -55,6 +55,7 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
+import { Status } from '@flowdsiml/ui';
 
 type Tab = 'link' | 'embed' | 'perso' | 'access' | 'page';
 type LinkStats = Record<string, { views: number; last: string | null }>;
@@ -607,7 +608,9 @@ export function SharePage() {
                               <th scope="row" className="sh-row-h">
                                 {l.name || '—'}
                                 {!l.is_active && (
-                                  <span className="badge sh-state">{t('share.disabled')}</span>
+                                  <Status size="sm" className="sh-state">
+                                    {t('share.disabled')}
+                                  </Status>
                                 )}
                               </th>
                               {hasCohort && (
@@ -622,20 +625,22 @@ export function SharePage() {
                                   </span>
                                 ))}
                                 {l.expires_at && (
-                                  <span className={`badge ${expired ? '' : 'badge-warning'}`}>
+                                  <Status size="sm" tone={expired ? 'neutral' : 'warning'}>
                                     {expired
                                       ? t('share.expired')
                                       : t('share.expiresOn', {
                                           date: formatDate(l.expires_at, { day: 'numeric', month: 'short' }),
                                         })}
-                                  </span>
+                                  </Status>
                                 )}
                                 {!vars.length && !l.expires_at && <span className="muted">—</span>}
                               </td>
                               <td>
                                 {l.page_enabled && l.page_code ? (
                                   <div className="sh-pp-cell">
-                                    <span className="badge badge-success">{t('share.pp.badgeOn')}</span>
+                                    <Status size="sm" tone="success">
+                                      {t('share.pp.badgeOn')}
+                                    </Status>
                                     {/* L25-13 : adresse de la page (/p/<démo>/<code>), copiable */}
                                     <span className="sh-pp-url">
                                       <span className="t-mono" title={personalPageUrl(demoId, l.page_code)}>
@@ -657,7 +662,7 @@ export function SharePage() {
                                     </span>
                                   </div>
                                 ) : (
-                                  <span className="badge">{t('share.pp.badgeOff')}</span>
+                                  <Status size="sm">{t('share.pp.badgeOff')}</Status>
                                 )}
                               </td>
                               <td className="r sh-views">
@@ -1009,7 +1014,7 @@ function EmbedPanel({
       <hr className="divider sh-hr" />
       <div className="setting">
         <span className="t-label">
-          {t('share.clickToStart')} <span className="badge">{t('shell.soon')}</span>
+          {t('share.clickToStart')} <Status size="sm">{t('shell.soon')}</Status>
         </span>
         <span className="switch">
           <input type="checkbox" disabled aria-label={t('share.clickToStart')} />

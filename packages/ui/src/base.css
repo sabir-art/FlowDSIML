@@ -455,6 +455,45 @@ input[type='radio'] {
   color: var(--fd-color-text-muted);
   font: 600 var(--fd-text-caption-size) / 1 var(--fd-font-sans);
 }
+/* Audit L50 X4 : état en texte avec un point de 8 px (pas de pastille, pas de fond coloré) */
+.fd-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 14px / 1.3 var(--fd-font-sans);
+  color: var(--fd-color-text);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fd-status::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fd-status-dot, var(--fd-color-text-muted));
+}
+.fd-status--sm {
+  font-size: 13px;
+}
+.fd-status--neutral {
+  color: var(--fd-color-text-muted);
+}
+.fd-status--success {
+  --fd-status-dot: var(--fd-color-success);
+}
+.fd-status--warning {
+  --fd-status-dot: var(--fd-color-warning);
+}
+.fd-status--danger {
+  --fd-status-dot: var(--fd-color-danger);
+}
+.fd-status--info {
+  --fd-status-dot: var(--fd-color-info);
+}
+.fd-status--brand {
+  --fd-status-dot: var(--fd-color-primary);
+}
 .fd-table {
   width: 100%;
   border-collapse: collapse;

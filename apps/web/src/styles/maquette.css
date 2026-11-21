@@ -472,29 +472,9 @@
   color: var(--fd-color-text-muted);
   white-space: nowrap;
 }
-.mk .badge-success {
-  background: var(--fd-color-success-soft);
-  color: var(--fd-color-success);
-}
-.mk .badge-warning {
-  background: var(--fd-color-warning-soft);
-  color: var(--fd-color-warning);
-}
-.mk .badge-danger {
-  background: var(--fd-color-danger-soft);
-  color: var(--fd-color-danger);
-}
-.mk .badge-info {
-  background: var(--fd-color-info-soft);
-  color: var(--fd-color-info);
-}
 .mk .badge-primary {
   background: var(--fd-color-primary-soft);
   color: var(--fd-color-primary-soft-text);
-}
-.mk .badge-accent {
-  background: var(--fd-color-accent-soft);
-  color: var(--fd-color-accent-soft-text);
 }
 .mk .dot {
   width: 6px;

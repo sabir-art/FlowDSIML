@@ -28,7 +28,7 @@ import { avatarTone } from '../../lib/avatarTone';
 import { useNotifications, type NotificationItem } from './useNotifications';
 import { NOTIFICATION_KINDS, badge, bodyParts, grouped, notificationHref } from './notifications';
 import './notifications.css';
-import { Empty } from '@flowdsiml/ui';
+import { Empty, Status } from '@flowdsiml/ui';
 
 type Filter = 'all' | 'mention' | 'unread';
 const FILTERS: Filter[] = ['all', 'mention', 'unread'];
@@ -318,7 +318,7 @@ export function NotificationBell() {
                   <li>
                     <label className="fd-switch is-soon">
                       <span>
-                        {t('notifications.p_digest')} <span className="fd-badge">{t('shell.soon')}</span>
+                        {t('notifications.p_digest')} <Status size="sm">{t('shell.soon')}</Status>
                       </span>
                       <input type="checkbox" role="switch" checked={false} disabled />
                       <span className="fd-switch__track" aria-hidden="true" />

@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Download, Upload, X } from 'lucide-react';
 import { downloadText } from '../../lib/download';
 import { COHORT_MAX, previewImport, TEMPLATE, type ImportPreview, type ImportRow } from './linksCsv';
+import { Status } from '@flowdsiml/ui';
 
 export function ImportLinksDialog({
   existing,
@@ -215,11 +216,13 @@ export function ImportLinksDialog({
                               <td className="sh-import-cohort">{r.cohort || '—'}</td>
                               <td>
                                 {r.errors.length ? (
-                                  <span className="badge badge-danger">
+                                  <Status size="sm" tone="danger" className="sh-import-err">
                                     {r.errors.map((e) => t(`share.import.err.${e}`)).join(' · ')}
-                                  </span>
+                                  </Status>
                                 ) : (
-                                  <span className="badge badge-success">{t('share.import.ok')}</span>
+                                  <Status size="sm" tone="success">
+                                    {t('share.import.ok')}
+                                  </Status>
                                 )}
                               </td>
                             </tr>

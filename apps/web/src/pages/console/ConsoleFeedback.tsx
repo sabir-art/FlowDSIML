@@ -346,7 +346,7 @@ function Comments({ days, ws, article }: { days: number; ws: string; article: st
                   </span>
                 )}
                 {c.status === 'linked' && (
-                  <span className="badge badge-primary console-status">
+                  <span className="console-status">
                     <Link2 aria-hidden="true" />
                     {t('console.fb.statusLinked', { title: c.itemTitle ?? '' })}
                   </span>

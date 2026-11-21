@@ -44,7 +44,7 @@ import {
   Shapes,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { Alert, Button, Empty, Select } from '@flowdsiml/ui';
+import { Alert, Button, Empty, Select, Status } from '@flowdsiml/ui';
 import { NoMatch } from '../../components/empty/NoMatch';
 import { ExtensionDialog } from '../../components/ExtensionDialog';
 import { completionRate, contentType, countTrend, rateTrend, type ContentType } from '@flowdsiml/core';
@@ -588,6 +588,9 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     !!publishedAt[d.id] &&
     new Date(d.updated_at).getTime() - new Date(publishedAt[d.id]!).getTime() > 2000;
   const statusOf = (d: Demo) => (isModified(d) ? 'modified' : d.status);
+  // Audit L50 X4 : statut en texte avec un point de 8 px (publiée, modifiée, brouillon)
+  const toneOf = (d: Demo) =>
+    statusOf(d) === 'published' ? 'success' : statusOf(d) === 'modified' ? 'warning' : 'neutral';
 
   async function copyLink(d: Demo) {
     try {
@@ -647,7 +650,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
             label: t('demos.archive'),
             icon: <Archive />,
             disabled: true,
-            end: <span className="fd-badge menu-soon">{t('shell.soon')}</span>,
+            end: <Status size="sm">{t('shell.soon')}</Status>,
             onSelect: () => {},
           },
           'separator',
@@ -1143,13 +1146,13 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                           </td>
                         )}
                         <td>
-                          <span className={`fd-badge status-${statusOf(d)}`}>
+                          <Status size="sm" tone={toneOf(d)}>
                             {t(`status.${statusOf(d)}`)}
-                          </span>
+                          </Status>
                           {lockedIds.has(d.id) && (
-                            <span className="fd-badge fd-badge--warning" title={t('rules.accessToFixHelp')}>
+                            <Status size="sm" tone="warning" title={t('rules.accessToFixHelp')}>
                               {t('rules.accessToFix')}
-                            </span>
+                            </Status>
                           )}
                         </td>
                         <td className="fd-muted">{folders.find((f) => f.id === d.folder_id)?.name ?? '—'}</td>
@@ -1215,11 +1218,13 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                         <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
                       </div>
                       <div className="demo-meta">
-                        <span className={`fd-badge status-${statusOf(d)}`}>{t(`status.${statusOf(d)}`)}</span>
+                        <Status size="sm" tone={toneOf(d)}>
+                          {t(`status.${statusOf(d)}`)}
+                        </Status>
                         {lockedIds.has(d.id) && (
-                          <span className="fd-badge fd-badge--warning" title={t('rules.accessToFixHelp')}>
+                          <Status size="sm" tone="warning" title={t('rules.accessToFixHelp')}>
                             {t('rules.accessToFix')}
-                          </span>
+                          </Status>
                         )}
                         <span>
                           {/* L48-G §4 : un Sandbox dit toujours son nombre de pages */}

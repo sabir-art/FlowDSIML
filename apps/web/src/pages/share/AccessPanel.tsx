@@ -10,6 +10,7 @@ import { useToast } from '../../components/Toast';
 import { useShareRules } from '../../lib/shareRules';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { DomainConfig, InviteConfig } from './AccessEmail';
+import { Status } from '@flowdsiml/ui';
 
 type Access = Pick<
   Tables<'demo_access'>,
@@ -196,7 +197,7 @@ export function AccessPanel({
     }
   }, [access.mode, access.expires_at]);
 
-  const soon = <span className="badge">{t('shell.soon')}</span>;
+  const soon = <Status size="sm">{t('shell.soon')}</Status>;
   const modes: Array<{ id: Mode; icon: ReactNode; available: boolean }> = [
     { id: 'link', icon: <Globe aria-hidden="true" />, available: true },
     { id: 'password', icon: <Key aria-hidden="true" />, available: true },

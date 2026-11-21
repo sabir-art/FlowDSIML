@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { Repeat, ShieldCheck, X } from 'lucide-react';
+import { ShieldCheck, X } from 'lucide-react';
+import { Status } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
@@ -18,17 +19,18 @@ export type Returning =
       topDemos: Array<{ demoId: string; title: string; visitors: number; returning: number }>;
     };
 
-/** Badge « Nouveau » ou « Récurrent · visite n° n » (texte, jamais la couleur seule). */
+/** « Nouveau » ou « Récurrent · visite n° n » : état en texte avec un point (audit L50 X4). */
 export function VisitBadge({ no }: { no: number | null | undefined }) {
   const { t } = useTranslation();
   if (!no) return null;
   return no >= 2 ? (
-    <span className="badge an-visit an-visit-ret">
-      <Repeat aria-hidden="true" />
+    <Status size="sm" tone="brand" className="an-visit an-visit-ret">
       {t('analytics.ret.badgeRet', { n: no })}
-    </span>
+    </Status>
   ) : (
-    <span className="badge an-visit">{t('analytics.ret.badgeNew')}</span>
+    <Status size="sm" className="an-visit">
+      {t('analytics.ret.badgeNew')}
+    </Status>
   );
 }
 

@@ -31,42 +31,6 @@
   }
 }
 
-/* Statuts : texte + icône, jamais en framboise */
-.st-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: var(--fd-text-caption-size);
-  font-weight: 700;
-  white-space: nowrap;
-}
-.st-badge svg {
-  width: 14px;
-  height: 14px;
-  flex: none;
-}
-.st-badge.done {
-  background: var(--fd-color-hero);
-  color: var(--fd-color-on-hero);
-}
-.st-badge.prog {
-  background: var(--fd-color-info-soft);
-  color: var(--fd-color-text);
-}
-.st-badge.relance {
-  background: var(--fd-color-warning-soft);
-  color: var(--fd-color-text);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fd-orange-500) 45%, transparent);
-}
-.st-badge.relance svg {
-  color: var(--fd-orange-600, var(--fd-orange-500));
-}
-.st-badge.quiz {
-  background: var(--fd-color-danger-soft, var(--fd-color-warning-soft));
-  color: var(--fd-color-text);
-}
 .l13-quizleft {
   display: block;
   margin-top: 4px;

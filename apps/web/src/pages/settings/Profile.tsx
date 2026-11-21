@@ -8,6 +8,7 @@ import { setLocale } from '../../i18n';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { useToast } from '../../components/Toast';
 import { MyDataCard } from './MyDataCard';
+import { Status } from '@flowdsiml/ui';
 
 /**
  * Paramètres › Mon profil (PRM-09), mise en page de la maquette : une carte à sections en deux colonnes
@@ -23,7 +24,7 @@ export function Profile() {
   const [password, setPassword] = useState('');
   const info = useAction();
   const pwd = useAction();
-  const soon = <span className="badge">{t('shell.soon')}</span>;
+  const soon = <Status size="sm">{t('shell.soon')}</Status>;
 
   const reset = () => {
     if (!profile) return;

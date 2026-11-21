@@ -15,6 +15,7 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { SettingsShell } from './SettingsShell';
+import { Status } from '@flowdsiml/ui';
 
 interface MemberRow {
   user_id: string;
@@ -82,7 +83,7 @@ export function Members() {
   }, [load]);
 
   const roles = assignableRoles(myRole);
-  const soon = <span className="fd-badge menu-soon">{t('shell.soon')}</span>;
+  const soon = <Status size="sm">{t('shell.soon')}</Status>;
   const needle = q.trim().toLowerCase();
   const match = (name: string, email: string, role: WorkspaceRole) =>
     (!needle || name.toLowerCase().includes(needle) || email.toLowerCase().includes(needle)) &&
@@ -246,7 +247,11 @@ export function Members() {
                             </span>
                             <div>
                               <b>{m.full_name || m.email}</b>
-                              {me && <span className="badge st-you">{t('members.you')}</span>}
+                              {me && (
+                                <Status size="sm" className="st-you">
+                                  {t('members.you')}
+                                </Status>
+                              )}
                               {m.full_name && <div className="t-caption subtle">{m.email}</div>}
                             </div>
                           </div>
@@ -277,9 +282,7 @@ export function Members() {
                               ))}
                             </select>
                           ) : (
-                            <span className={`badge${m.role === 'owner' ? ' badge-primary' : ''}`}>
-                              {t(`roles.${m.role}`)}
-                            </span>
+                            <span>{t(`roles.${m.role}`)}</span>
                           )}
                         </td>
                         {/* La dernière activité n'est pas encore enregistrée */}
@@ -327,10 +330,12 @@ export function Members() {
                           </div>
                         </td>
                         <td>
-                          <span className="badge">{t(`roles.${i.role}`)}</span>
+                          <span>{t(`roles.${i.role}`)}</span>
                         </td>
                         <td>
-                          <span className="badge badge-warning">{t('members.pendingBadge')}</span>
+                          <Status size="sm" tone="warning">
+                            {t('members.pendingBadge')}
+                          </Status>
                         </td>
                         <td className="r">
                           <Menu

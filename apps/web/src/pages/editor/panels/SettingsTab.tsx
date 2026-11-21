@@ -11,6 +11,7 @@ import { ClipboardList, Database, Lock, Presentation } from 'lucide-react';
 import { DATASET_OPEN } from '../html/ChartFields';
 import { publishedColumns, useDataset } from '../data/datasetStore';
 import { DEMO_TAG_LIMIT, TAG_COLORS, TAG_LIMIT, useWorkspaceTags } from '../../../components/Tags';
+import { Status } from '@flowdsiml/ui';
 
 /** Interrupteur de la maquette (.setting + .switch). */
 function SettingSwitch({
@@ -72,7 +73,7 @@ export function SettingsTab({
     editor.updateDemo({ settings: { ...settings, ...patch } as DemoSettings as never });
   const autoplay = { enabled: false, delayMs: 4000, ...settings.autoplay };
   const checklist = { enabled: false, title: '', position: 'right' as const, ...settings.checklist };
-  const soon = <span className="badge badge-xs">{t('shell.soon')}</span>;
+  const soon = <Status size="sm">{t('shell.soon')}</Status>;
   const wsGlossary =
     (ws?.settings as { glossary?: { underline?: boolean } } | null)?.glossary?.underline !== false;
   const form = editor.forms[0];

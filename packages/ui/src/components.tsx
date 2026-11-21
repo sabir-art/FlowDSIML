@@ -1,4 +1,10 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  HTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+} from 'react';
 import { ChevronDown, CircleAlert, CircleCheck, Info, TriangleAlert } from 'lucide-react';
 
 type Variant = 'default' | 'primary' | 'accent' | 'danger' | 'ghost';
@@ -93,6 +99,31 @@ export function Alert({
       <Icon aria-hidden="true" />
       <div className="fd-alert__body">{children}</div>
     </div>
+  );
+}
+
+/** Audit L50 X4 : un état dit en texte, avec un point de 8 px (jamais une pastille ni un fond coloré).
+ *  Les pastilles restent pour les étiquettes choisies par l'utilisateur. */
+export function Status({
+  tone = 'neutral',
+  size = 'md',
+  className = '',
+  children,
+  ...rest
+}: {
+  tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'brand';
+  /** md : 14 px ; sm : 13 px (dans une ligne de texte, un menu ou un libellé). */
+  size?: 'md' | 'sm';
+  className?: string;
+  children: ReactNode;
+} & Omit<HTMLAttributes<HTMLSpanElement>, 'className' | 'children'>) {
+  return (
+    <span
+      className={`fd-status fd-status--${tone}${size === 'sm' ? ' fd-status--sm' : ''}${className ? ` ${className}` : ''}`}
+      {...rest}
+    >
+      {children}
+    </span>
   );
 }
 

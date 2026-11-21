@@ -10,6 +10,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import { asCta, type StepRow } from '../types';
 import { abOutcome, type AbCounts, type AbGoal } from './abResult';
 import './ab.css';
+import { Status } from '@flowdsiml/ui';
 
 export type AbTest = Tables<'ab_tests'>;
 type VariantB = { title?: string; body?: string; cta?: { label: string; url: string } | null };
@@ -236,7 +237,9 @@ export function AbSection({
       {dialog}
       <div className="sec-title">
         {t('editor.ab.title')}
-        <span className="badge badge-success">{t('editor.ab.running', { n: day })}</span>
+        <Status size="sm" tone="success">
+          {t('editor.ab.running', { n: day })}
+        </Status>
       </div>
       <div className="ab-cards">
         {card('A')}

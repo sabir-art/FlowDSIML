@@ -7,6 +7,7 @@ import { useToast } from '../Toast';
 import { AiRequestError, aiBlock, callAi, useAiStatus } from '../../lib/ai';
 import { useBlockText } from './AiWrite';
 import './ai.css';
+import { Status } from '@flowdsiml/ui';
 
 export interface GenStep {
   title: string;
@@ -259,7 +260,7 @@ export function GenerateDialog({
                 tabIndex={-1}
                 title={t('ai.generate.fromHtmlSoon')}
               >
-                {t('ai.generate.fromHtml')} <span className="fd-badge">{t('shell.soon')}</span>
+                {t('ai.generate.fromHtml')} <Status size="sm">{t('shell.soon')}</Status>
               </button>
             </div>
             <div role="tabpanel" id="ai-gen-panel" aria-labelledby="ai-gen-tab-text" className="stack">

@@ -16,6 +16,7 @@ import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Menu } from '../../components/Menu';
 import { cleanDomain } from '../learners/progress';
+import { Status } from '@flowdsiml/ui';
 
 type Invite = Pick<Tables<'demo_access_invites'>, 'email' | 'invited_at' | 'last_sent_at' | 'opened_at'>;
 /** Un lien d'accès personnel vaut 1 heure (otp_expiry du projet). */
@@ -162,11 +163,12 @@ export function InviteConfig({
                       {i.email}
                     </th>
                     <td>
-                      <span
-                        className={`badge${st === 'opened' ? ' badge-success' : st === 'expired' ? ' badge-warning' : ''}`}
+                      <Status
+                        size="sm"
+                        tone={st === 'opened' ? 'success' : st === 'expired' ? 'warning' : 'neutral'}
                       >
                         {t(`access.inv.status.${st}`)}
-                      </span>
+                      </Status>
                     </td>
                     <td className="muted">{i.opened_at ? formatRelativeShort(i.opened_at) : '—'}</td>
                     <td className="r">

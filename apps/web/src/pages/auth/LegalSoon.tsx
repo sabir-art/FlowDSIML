@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthLayout } from './AuthLayout';
+import { Status } from '@flowdsiml/ui';
 
 /** Pages légales (conditions d'utilisation, confidentialité) : pas encore rédigées, annoncées « Bientôt ». */
 export function LegalSoon() {
@@ -10,7 +11,7 @@ export function LegalSoon() {
   return (
     <AuthLayout title={t(`legal.${doc}`)} footer={false}>
       <p className="muted t-lg legal-soon">
-        <span className="badge">{t('shell.soon')}</span> {t('legal.soon')}
+        <Status size="sm">{t('shell.soon')}</Status> {t('legal.soon')}
       </p>
       <p className="auth-switch">
         <Link to="/">{t('legal.back')}</Link>

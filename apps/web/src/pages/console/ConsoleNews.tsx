@@ -11,6 +11,7 @@ import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { ARTICLES } from '../../help/articles';
 import { WriteButton, articleTitle, rpcError, type Item } from './shared';
+import { Status } from '@flowdsiml/ui';
 
 export interface News {
   id: string;
@@ -154,7 +155,9 @@ function NewsPreview({ title, body, article }: { title: string; body: string; ar
     <article className="fd-card news-card">
       <p className="news-card__meta">
         <span>{formatDate(new Date().toISOString())}</span>
-        <span className="badge badge-primary">{t('news.new')}</span>
+        <Status size="sm" tone="brand">
+          {t('news.new')}
+        </Status>
       </p>
       <h3 className="news-card__t">{title || '…'}</h3>
       <p className="news-card__b">{body || '…'}</p>

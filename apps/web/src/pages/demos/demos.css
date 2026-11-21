@@ -123,14 +123,6 @@
   font-size: var(--fd-text-caption-size);
   color: var(--fd-color-text-muted);
 }
-.status-published {
-  background: var(--fd-color-trend-up-soft);
-  color: var(--fd-color-trend-up);
-}
-.status-draft {
-  background: var(--fd-color-icon-chip);
-  color: var(--fd-color-text-muted);
-}
 
 /* Carte « Nouvelle démo » : bordure pointillée, bouton rond au centre */
 .demo-new {
@@ -203,21 +195,6 @@
 @media (max-width: 640px) {
   .search-pill {
     width: 100%;
-  }
-}
-/* DSH-10 : publiée puis modifiée (changements non publiés) */
-.status-modified {
-  background: var(--fd-orange-100);
-  color: var(--fd-orange-800);
-}
-:root[data-theme='dark'] .status-modified {
-  background: color-mix(in srgb, var(--fd-orange-500) 22%, transparent);
-  color: var(--fd-orange-200);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .status-modified {
-    background: color-mix(in srgb, var(--fd-orange-500) 22%, transparent);
-    color: var(--fd-orange-200);
   }
 }
 /* DSH-02 : vue liste */
@@ -906,12 +883,6 @@ button.nd-src:focus-visible {
     grid-column: 2;
     justify-self: start;
   }
-}
-/* L27-07 : démo bloquée par les règles de partage (« Accès à régler ») */
-.fd-badge--warning {
-  background: var(--fd-color-warning-soft);
-  color: var(--fd-color-text);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fd-color-warning) 45%, transparent);
 }
 /* L27-09 : accès au dossier */
 .fa-dialog {

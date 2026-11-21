@@ -12,6 +12,7 @@ import { useHelp } from '../../help/HelpProvider';
 import { articleBySlug } from '../../help/articles';
 import { notifyNewsSeen } from './platform';
 import './console.css';
+import { Status } from '@flowdsiml/ui';
 
 interface News {
   id: string;
@@ -50,7 +51,11 @@ export function NewsPage() {
         <article key={n.id} className="fd-card news-card">
           <p className="news-card__meta">
             <time dateTime={n.publishedAt}>{formatDate(n.publishedAt)}</time>
-            {n.unread && <span className="badge badge-primary">{t('news.new')}</span>}
+            {n.unread && (
+              <Status size="sm" tone="brand">
+                {t('news.new')}
+              </Status>
+            )}
           </p>
           <h2 className="news-card__t">{n.title}</h2>
           <p className="news-card__b">{n.body}</p>

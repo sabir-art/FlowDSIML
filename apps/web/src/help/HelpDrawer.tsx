@@ -27,6 +27,7 @@ import {
   type Article,
 } from './articles';
 import './help.css';
+import { Status } from '@flowdsiml/ui';
 
 function Marked({ text, terms }: { text: string; terms: string[] }) {
   return (
@@ -230,7 +231,11 @@ export function HelpDrawer({
                     >
                       <Play aria-hidden="true" />
                       {t('help.tour')}
-                      {!tour && <span className="fd-badge help-soon">{t('shell.soon')}</span>}
+                      {!tour && (
+                        <Status size="sm" className="help-soon">
+                          {t('shell.soon')}
+                        </Status>
+                      )}
                     </button>
                   </section>
                 )}

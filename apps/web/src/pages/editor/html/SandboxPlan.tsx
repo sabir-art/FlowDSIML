@@ -18,6 +18,7 @@ import { deadLinks, ignoredOf, sandboxGraph, type DeadLink, type SbNode } from '
 import { upsertOp } from './htmlModel';
 import { Menu } from '../../../components/Menu';
 import { useHtmlCapture } from '../../../lib/htmlCapture';
+import { Status } from '@flowdsiml/ui';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
 
@@ -215,8 +216,16 @@ export function SandboxPlan({
                     className={`sbnode${n.start ? ' start' : ''}${n.orphan ? ' warn' : ''}`}
                     style={{ left: p.x, top: p.y, width: W, height: H }}
                   >
-                    {n.start && <span className="badge badge-success">{t('editor.sandbox.start')}</span>}
-                    {n.orphan && <span className="badge badge-warning">{t('editor.sandbox.toLink')}</span>}
+                    {n.start && (
+                      <Status size="sm" tone="success">
+                        {t('editor.sandbox.start')}
+                      </Status>
+                    )}
+                    {n.orphan && (
+                      <Status size="sm" tone="warning">
+                        {t('editor.sandbox.toLink')}
+                      </Status>
+                    )}
                     <div className="mini">
                       <Code {...ICON} />
                     </div>
@@ -418,7 +427,7 @@ export function SandboxPlan({
         </div>
         <div className="setting is-soon">
           <label className="t-label" htmlFor="sb-guide">
-            {t('editor.sandbox.guide')} <span className="badge">{t('editor.sandbox.soon')}</span>
+            {t('editor.sandbox.guide')} <Status size="sm">{t('editor.sandbox.soon')}</Status>
           </label>
           <span className="switch">
             <input id="sb-guide" type="checkbox" checked={false} disabled aria-disabled="true" readOnly />
@@ -427,7 +436,7 @@ export function SandboxPlan({
         </div>
         <button type="button" className="btn btn-secondary btn-sm" disabled>
           <Plus {...ICON} />
-          {t('editor.sandbox.addPage')} <span className="badge">{t('editor.sandbox.soon')}</span>
+          {t('editor.sandbox.addPage')} <Status size="sm">{t('editor.sandbox.soon')}</Status>
         </button>
         <fieldset className="sb-keys">
           <legend>{t('editor.sandbox.keyPages')}</legend>
