@@ -63,22 +63,29 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       (await p.locator('.fc').first().locator('a, button').count()) === 0,
       'L14-01 : un seul lien par carte, sans bouton',
     );
-    ok(
-      (await p.locator('.fc').first().textContent()).includes('Étape 4 sur 7'),
-      'L14-01 : module en cours avec l’étape',
-    );
-    ok(
-      (await p.locator('.fc').first().textContent()).includes('Après le module 2'),
-      'L14-01 : module verrouillé (ordre imposé)',
-    );
-    ok(
-      (await p.locator('.fc', { hasText: 'Statistiques' }).locator('.hb.key').count()) === 1,
-      'L14-01 : badge « Mot de passe »',
-    );
-    ok(
-      (await p.locator('.fc', { hasText: 'Accueil' }).textContent()).includes('Expiré'),
-      'L14-01 : badge « Expiré »',
-    );
+    // MOB-01 M4 : carte réduite (état en texte, une ligne, barre de 6 px, chevron), sans liste de modules
+    {
+      const first = p.locator('.fc').first();
+      const card = await first.evaluate((el) => ({
+        st: el.querySelector('.fc-st')?.textContent,
+        meta: el.querySelector('.meta')?.textContent,
+        bar: Math.round(el.querySelector('.fc-bar')?.getBoundingClientRect().height ?? 0),
+        cov: Math.round(el.querySelector('.cov').getBoundingClientRect().height),
+        chev: !!el.querySelector('.fc-chev'),
+        lists: el.querySelectorAll('ol, li').length,
+        pills: el.querySelectorAll('.hb').length,
+      }));
+      ok(
+        card.st === 'En cours' &&
+          /module(s)? sur \d+ validé/.test(card.meta) &&
+          card.bar === 6 &&
+          card.cov === 120 &&
+          card.chev &&
+          card.lists === 0 &&
+          card.pills === 0,
+        `M4 : carte réduite, état en texte, barre de 6 px, sans liste de modules (${JSON.stringify(card)})`,
+      );
+    }
     ok(!/\d+\s*min\b/.test(await p.locator('.ctr-grid').textContent()), 'L14-01 : aucune durée inventée');
     ok(
       (await p.locator('meta[name="robots"]').getAttribute('content')) === 'noindex, nofollow',
@@ -123,6 +130,10 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       'L14-05 : page de la formation sans nouvel appel',
     );
     ok(
+      (await p.locator('.fp-list li', { hasText: 'Indicateurs' }).textContent()).includes('Expiré'),
+      'L14-05 : badge « Expiré » sur la page de la formation',
+    );
+    ok(
       (await p.locator('.fp-list li', { hasText: 'Rapport' }).textContent()).includes(
         'Protégé par mot de passe',
       ),
@@ -132,6 +143,18 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       (await p.locator('.fp-list li', { hasText: 'Rapport' }).getByRole('link').getAttribute('href')) ===
         `#/d/${F('c3')}?c=ml-exemple&f=${F('f3')}`,
       'L14-05 : « Commencer » ouvre le lecteur (écran mot de passe L11)',
+    );
+    await p.close();
+  }
+
+  // MOB-01 M4 : l'état des modules (étape, verrou) est sur la page de la formation
+  {
+    const { p } = await center(`/f/${F('f1')}?l=jeton-alex-0001`);
+    await p.waitForSelector('.fp-list');
+    ok(
+      (await p.locator('.fp-list li.cur').textContent()).includes('étape 4 sur 7') &&
+        (await p.locator('.fp-list').textContent()).includes('Après le module 2'),
+      'L14-05 : module en cours avec l’étape, module verrouillé (ordre imposé)',
     );
     await p.close();
   }
@@ -158,11 +181,6 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     );
     await p.goto(`${PLAYER}/#/c/ml-exemple`);
     await p.waitForSelector('.fc');
-    ok(
-      (await p.locator('.fc', { hasText: 'Statistiques' }).locator('.note').textContent()) ===
-        '+ 1 module expiré',
-      'L14-01 : note « + 1 module expiré »',
-    );
     const foot = p.locator('.ctr-foot');
     ok(
       (await foot.textContent()).match(/Accessibilité.: non évaluée/) !== null &&

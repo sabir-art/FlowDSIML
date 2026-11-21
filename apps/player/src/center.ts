@@ -90,14 +90,10 @@ export interface PathView {
   started: boolean;
   done: boolean;
   badge: 'done' | 'current' | 'new' | null;
-  cta: 'resume' | 'start' | 'review';
   modules: ModuleView[];
   /** Premier module à faire (reprise), s'il est ouvert. */
   next: CenterModule | null;
-  optional: number;
   quizzes: number;
-  /** Modules expirés au-delà des 3 premiers (note « + n module(s) expiré(s) »). */
-  expiredHidden: number;
 }
 
 export function pathView(p: CenterPath, identified: boolean): PathView {
@@ -128,12 +124,9 @@ export function pathView(p: CenterPath, identified: boolean): PathView {
     started,
     done,
     badge: done ? 'done' : started ? 'current' : p.isNew ? 'new' : null,
-    cta: done ? 'review' : started ? 'resume' : 'start',
     modules: views,
     next,
-    optional: live.filter((m) => !m.required).length,
     quizzes: live.filter((m) => m.hasQuiz).length,
-    expiredHidden: mods.slice(3).filter((m) => m.access === 'expired').length,
   };
 }
 

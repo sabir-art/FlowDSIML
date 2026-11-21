@@ -1,18 +1,14 @@
-import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   ArrowRight,
   Award,
   BookOpen,
-  CircleCheck,
-  CircleDot,
+  ChevronRight,
   Clock,
   Code,
   Download,
   Key,
-  Lock,
   Mail,
-  Play,
   Search,
   User,
   X,
@@ -33,7 +29,6 @@ import {
   type CenterData,
   type CenterDemo,
   type CenterPath,
-  type ModuleView,
   type PathView,
 } from './center';
 import { brandingUrl } from './config';
@@ -592,131 +587,52 @@ function DemoCard({ c, d, q }: { c: C; d: CenterDemo; q: string }) {
   );
 }
 
-function ModuleIcon({ m }: { m: ModuleView }) {
-  if (m.kind === 'ok') return <CircleCheck />;
-  if (m.kind === 'cur') return <Play />;
-  if (m.kind === 'lock') return <Lock />;
-  if (m.kind === 'expired') return <Clock />;
-  return <CircleDot />;
-}
-
-function ModuleState({ c, m, identified }: { c: C; m: ModuleView; identified: boolean }): ComponentChildren {
-  if (m.kind === 'ok') return <span class="s ok">{c.ok}</span>;
-  if (m.kind === 'cur') return <span class="s">{fmt(c, 'step', { n: m.step, total: m.total })}</span>;
-  if (m.kind === 'lock') return <span class="s">{fmt(c, 'after', { n: m.after })}</span>;
-  if (m.kind === 'password')
-    return (
-      <span class="hb key">
-        <Key aria-hidden="true" />
-        {c.password}
-      </span>
-    );
-  if (m.kind === 'expired')
-    return (
-      <span class="hb exp">
-        <Clock aria-hidden="true" />
-        {c.expired}
-      </span>
-    );
-  // Sans identification, pas d'état (et aucune durée inventée)
-  return identified ? <span class="s">{c.todo}</span> : null;
-}
-
-/** Carte de formation : un seul lien, aucun bouton à l'intérieur. */
+/** Carte de formation (MOB-01 M4) : un seul lien, vignette, titre, état, une ligne et la barre.
+ *  La liste des modules reste sur la page de la formation. */
 function PathCard({ c, v, q, href }: { c: C; v: PathView; q: string; href: string }) {
   const p = v.path;
   const cover = p.modules[0]?.cover ?? null;
-  const meta = [
-    fmt(c, p.ordered ? 'metaOrdered' : 'metaFree', { count: p.modules.length }),
-    v.quizzes ? fmt(c, 'quiz', { count: v.quizzes }) : c.noQuizLower,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-  // Une seule mention en pied de carte (retour L14-01) : les modules au-delà des 3 premiers y sont
-  // annoncés comme expirés, facultatifs ou simplement « + n module(s) ».
-  const hiddenMore = Math.max(0, p.modules.length - 3 - v.expiredHidden);
-  const note = v.done
-    ? c.allValidated
-    : v.expiredHidden
-      ? fmt(c, 'expiredMore', { count: v.expiredHidden })
-      : v.optional
-        ? fmt(c, 'optional', { count: v.optional })
-        : hiddenMore
-          ? fmt(c, 'more', { count: hiddenMore })
-          : v.identified && !v.started
-            ? c.notStarted
-            : v.quizzes
-              ? fmt(c, 'quiz', { count: v.quizzes })
-              : c.noQuiz;
-  const curIdx = v.modules.findIndex((m) => m.kind === 'cur');
+  // Une seule ligne : « 1 module sur 4 validé · 4 modules » une fois commencée
+  const line = v.started
+    ? [
+        fmt(c, 'cardProgress', { count: v.validated, n: v.validated, total: v.total }),
+        fmt(c, 'modules', { count: p.modules.length }),
+      ].join(' · ')
+    : [
+        fmt(c, p.ordered ? 'metaOrdered' : 'metaFree', { count: p.modules.length }),
+        v.quizzes ? fmt(c, 'quiz', { count: v.quizzes }) : c.noQuizLower,
+      ].join(' · ');
+  const status =
+    v.badge === 'current'
+      ? c.badgeCurrent
+      : v.badge === 'done'
+        ? c.badgeDone
+        : v.badge === 'new'
+          ? c.badgeNew
+          : null;
   return (
-    <a class="fc" href={href}>
+    <a class="fc fc--path" href={href}>
       <span class="cov">
         {cover ? <img class="fc-img" src={cover} alt="" loading="lazy" /> : <span class="fc-shot" />}
-        {v.badge === 'current' && (
-          <span class="hb cur st">
-            <Play aria-hidden="true" />
-            {c.badgeCurrent}
-          </span>
-        )}
-        {v.badge === 'done' && (
-          <span class="hb ok st">
-            <Award aria-hidden="true" />
-            {c.badgeDone}
-          </span>
-        )}
-        {v.badge === 'new' && <span class="hb st">{c.badgeNew}</span>}
       </span>
       <span class="bd">
-        <h3>
-          <Hl text={p.title} q={q} />
-        </h3>
-        {p.tags.length > 0 && (
-          <span class="tgs">
-            {p.tags.map((x) => (
-              <Tag key={x.name} name={x.name} color={x.color} q={q} />
-            ))}
-          </span>
-        )}
-        <span class="meta">{meta}</span>
-        {v.started && (
-          <span class={`fc-pg${v.done ? ' done' : ''}`}>
-            <span
-              class="bar"
-              role="img"
-              aria-label={fmt(c, 'progressAria', { n: v.validated, total: v.total })}
-            >
-              <span style={{ width: `${(v.validated / Math.max(1, v.total)) * 100}%` }} />
-            </span>
-            <span>{fmt(c, 'progress', { count: v.validated, n: v.validated, total: v.total })}</span>
-          </span>
-        )}
-        <ol aria-label={c.modulesAria}>
-          {p.modules.slice(0, 3).map((m, i) => {
-            const st = v.modules[i]!;
-            return (
-              <li key={m.demoId} class={i === curIdx ? 'cur' : st.kind === 'lock' ? 'lock' : undefined}>
-                <span
-                  class={`ic${st.kind === 'ok' ? ' ok' : st.kind === 'cur' ? ' cur' : ''}`}
-                  aria-hidden="true"
-                >
-                  <ModuleIcon m={st} />
-                </span>
-                <span>
-                  {i + 1} · <Hl text={m.title} q={q} />
-                </span>
-                <ModuleState c={c} m={st} identified={v.identified} />
-              </li>
-            );
-          })}
-        </ol>
-        <span class="ft">
-          <span class="note">{note}</span>
-          <span class={`cta${v.cta === 'review' ? ' cta--sec' : ''}`}>
-            {v.cta === 'review' ? c.ctaReview : v.cta === 'resume' ? c.ctaResume : c.ctaStart}
-            {v.cta !== 'review' && <ArrowRight aria-hidden="true" />}
-          </span>
+        <span class="fc-hd">
+          <h3>
+            <Hl text={p.title} q={q} />
+          </h3>
+          <ChevronRight class="fc-chev" aria-hidden="true" />
         </span>
+        {status && <span class={`fc-st${v.badge === 'done' ? ' ok' : ''}`}>{status}</span>}
+        <span class="meta">{line}</span>
+        {v.started && (
+          <span
+            class="fc-bar"
+            role="img"
+            aria-label={fmt(c, 'progressAria', { n: v.validated, total: v.total })}
+          >
+            <span style={{ width: `${(v.validated / Math.max(1, v.total)) * 100}%` }} />
+          </span>
+        )}
       </span>
     </a>
   );

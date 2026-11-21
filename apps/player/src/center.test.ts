@@ -55,27 +55,19 @@ describe('centre de formation', () => {
       { kind: 'password' },
       { kind: 'lock', after: 4 },
     ]);
-    expect([v.validated, v.total, v.started, v.done, v.badge, v.cta, v.optional]).toEqual([
-      1,
-      5,
-      true,
-      false,
-      'current',
-      'resume',
-      1,
-    ]);
+    expect([v.validated, v.total, v.started, v.done, v.badge]).toEqual([1, 5, true, false, 'current']);
     expect(v.next?.title).toBe('Fiches usagers');
   });
 
   it('sans identification : aucune progression, rien de verrouillé', () => {
     const v = pathView(p, false);
     expect(v.modules.map((m) => m.kind)).toEqual(['todo', 'todo', 'todo', 'password', 'todo']);
-    expect([v.validated, v.started, v.badge, v.cta]).toEqual([0, false, null, 'start']);
+    expect([v.validated, v.started, v.badge]).toEqual([0, false, null]);
   });
 
   it('formation terminée quand les modules obligatoires sont validés ; badge Nouveau sinon', () => {
     const done = path({ modules: [mod('a', { status: 'validated' }), mod('b', { required: false })] });
-    expect(pathView(done, true)).toMatchObject({ done: true, badge: 'done', cta: 'review' });
+    expect(pathView(done, true)).toMatchObject({ done: true, badge: 'done' });
     expect(pathView(path({ isNew: true, modules: [mod('a')] }), true).badge).toBe('new');
     const exp = pathView(
       path({
