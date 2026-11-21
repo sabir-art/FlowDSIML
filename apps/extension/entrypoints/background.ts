@@ -15,7 +15,8 @@ import { fullHeight } from '@/lib/fullpage';
 import { htmlStore } from '@/lib/htmlStore';
 import { elapsed } from '@/lib/video';
 import { videoStore } from '@/lib/videoStore';
-import { DEBUGGER } from '@/lib/config';
+import { APP_URL, DEBUGGER } from '@/lib/config';
+import { ATTACH_TTL_MS, originOf, parseAttach, type PendingAttach } from '@/lib/external';
 
 /**
  * Service worker MV3. L'état d'enregistrement vit dans storage.session (le worker peut être arrêté).
@@ -492,6 +493,56 @@ async function onHtmlBar(m: HtmlBarRequest): Promise<unknown> {
   return null;
 }
 
+/** Attend qu'un onglet ait fini de charger (30 s au plus). */
+function tabLoaded(tabId: number): Promise<void> {
+  return new Promise((resolve) => {
+    const done = () => {
+      browser.tabs.onUpdated.removeListener(on);
+      clearTimeout(timer);
+      resolve();
+    };
+    const on = (id: number, info: { status?: string }) => {
+      if (id === tabId && info.status === 'complete') done();
+    };
+    const timer = setTimeout(done, 30_000);
+    browser.tabs.onUpdated.addListener(on);
+  });
+}
+
+/**
+ * EXT-CONNECT : « Capturer cette page » d'un Sandbox. Ouvre l'adresse et rattache la capture HTML à ce
+ * Sandbox. Avec l'accès au site déjà accordé, la capture démarre aussitôt ; sinon l'utilisateur clique sur
+ * l'extension dans le nouvel onglet (« Démarrer » demande l'accès, comme d'habitude) : aucune permission de plus.
+ */
+async function onExternal(
+  msg: unknown,
+  sender: Browser.runtime.MessageSender,
+): Promise<{ ok: true; started: boolean } | { ok: false; error: string }> {
+  const from = sender.origin ?? (sender.url ? (originOf(sender.url) ?? undefined) : undefined);
+  const parsed = parseAttach(msg, from, originOf(APP_URL));
+  if (!parsed.ok) return parsed;
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return { ok: false, error: 'signed-out' };
+  if ((await getState()).recording) return { ok: false, error: 'busy' };
+  const { req } = parsed;
+  const attach: PendingAttach = { ...req, origin: originOf(req.url)!, at: Date.now() };
+  await browser.storage.local.set({ 'fd.attach': attach });
+  const tab = await browser.tabs.create({ url: req.url, active: true });
+  if (tab.id === undefined) return { ok: false, error: 'tab' };
+  const granted = await browser.permissions.contains({ origins: [`${attach.origin}/*`] }).catch(() => false);
+  if (!granted) return { ok: true, started: false };
+  await tabLoaded(tab.id);
+  await start({
+    type: 'fd:start',
+    workspaceId: req.workspaceId,
+    title: '',
+    tabId: tab.id,
+    mode: 'html',
+    followTabs: true,
+  });
+  return { ok: true, started: true };
+}
+
 async function stop(): Promise<RecordingStatus> {
   const state = await getState();
   if (state.mode === 'video') return stopVideo();
@@ -501,8 +552,14 @@ async function stop(): Promise<RecordingStatus> {
       if (t.id >= 0)
         await browser.tabs.sendMessage(t.id, { type: 'fd:recorder-stop' }).catch(() => undefined);
     if (state.workspaceId && (await htmlStore.count()) > 0) {
+      // EXT-CONNECT : capture rattachée à un Sandbox du même espace (posée par l'app)
+      const attach = (await browser.storage.local.get('fd.attach'))['fd.attach'] as PendingAttach | undefined;
+      const appendTo =
+        attach && attach.workspaceId === state.workspaceId && Date.now() - attach.at < ATTACH_TTL_MS
+          ? attach.demoId
+          : undefined;
       await browser.storage.local.set({
-        'fd.htmlReview': { workspaceId: state.workspaceId, title: state.title || 'Nouvelle démo' },
+        'fd.htmlReview': { workspaceId: state.workspaceId, title: state.title || 'Nouvelle démo', appendTo },
       });
       await browser.tabs.create({ url: browser.runtime.getURL('/html-review.html') });
     }
@@ -559,6 +616,10 @@ export default defineBackground(() => {
       if (cmd === 'rec-stop') void onVideoBar({ type: 'fd:video-stop' });
     });
   });
+  // EXT-CONNECT : seul message accepté depuis l'app (origine contrôlée, schéma strict)
+  browser.runtime.onMessageExternal.addListener((msg: unknown, sender) =>
+    onExternal(msg, sender).catch(() => ({ ok: false as const, error: 'internal' })),
+  );
   browser.runtime.onMessage.addListener((msg: unknown, sender) => {
     const m = msg as ClickPayload | PopupRequest | VideoBarRequest | { type: string };
     if (m.type.startsWith('fd:rec-')) return undefined; // messages destinés au document hors écran

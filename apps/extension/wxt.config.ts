@@ -48,6 +48,12 @@ export default defineConfig({
     // Sans accès aux sites, activeTab couvre la page ouverte au démarrage. Avec, la barre est réinjectée
     // après un changement de page et dans les onglets suivis, et captureVisibleTab reste possible.
     optional_host_permissions: ['<all_urls>'],
+    // EXT-CONNECT : seule l'app peut envoyer un message à l'extension, depuis son origine exacte (sans joker).
+    // WXT_APP_URL : localhost par défaut en développement ; zip:prod exige l'adresse https de production.
+    // Ce n'est pas une permission : rien de plus n'est demandé à l'installation (voir docs/extension/store).
+    externally_connectable: {
+      matches: [`${new URL(process.env.WXT_APP_URL || 'http://localhost:5173').origin}/*`],
+    },
     action: { default_title: APP_NAME },
   },
 });

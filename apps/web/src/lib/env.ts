@@ -16,3 +16,8 @@ export const REMOTE_ORIGIN: string = (
 ).replace(/\/$/, '');
 /** L48-A §1 : page de l'extension dans la boutique du navigateur (variable de build ; vide : pas de lien). */
 export const EXTENSION_URL: string = (import.meta.env.VITE_EXTENSION_URL || '').trim();
+/**
+ * EXT-CONNECT : identifiant de l'extension (Chrome Web Store, ou chargée en développement). Vide :
+ * « Capturer cette page » du Sandbox explique comment installer l'extension.
+ */
+export const EXTENSION_ID: string = (import.meta.env.VITE_EXTENSION_ID || '').trim();

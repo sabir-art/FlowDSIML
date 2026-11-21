@@ -19,6 +19,9 @@ import { upsertOp } from './htmlModel';
 import { Menu } from '../../../components/Menu';
 import { useHtmlCapture } from '../../../lib/htmlCapture';
 import { Status } from '@flowdsiml/ui';
+import { useToast } from '../../../components/Toast';
+import { captureInExtension } from '../../../lib/extensionLink';
+import { EXTENSION_URL } from '../../../lib/env';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
 
@@ -64,6 +67,34 @@ export function SandboxPlan({
   const { t } = useTranslation();
   const demo = editor.demo!;
   const htmlOff = useHtmlCapture(demo.workspace_id).mode === 'disabled';
+  const toast = useToast();
+  // EXT-CONNECT : « Capturer cette page » ouvre l'adresse dans l'extension, capture HTML rattachée à ce Sandbox
+  async function capture(d: DeadLink) {
+    const r = await captureInExtension({ demoId: demo.id, workspaceId: demo.workspace_id, url: d.url });
+    if (r.ok) return toast(t(r.started ? 'editor.sandbox.capStarted' : 'editor.sandbox.capOpened'));
+    if (r.error === 'unavailable')
+      return toast(
+        t('editor.sandbox.capUnavailable'),
+        EXTENSION_URL
+          ? {
+              label: t('editor.sandbox.capInstall'),
+              onClick: () => window.open(EXTENSION_URL, '_blank', 'noopener,noreferrer'),
+            }
+          : undefined,
+        { tone: 'warning' },
+      );
+    toast(
+      t(
+        r.error === 'signed-out'
+          ? 'editor.sandbox.capSignedOut'
+          : r.error === 'busy'
+            ? 'editor.sandbox.capBusy'
+            : 'editor.sandbox.capError',
+      ),
+      undefined,
+      { tone: 'warning' },
+    );
+  }
   const pages = editor.steps.filter((s) => s.kind === 'html');
   const sb = sandboxOf(demo.sandbox, pages);
   const { nodes } = useMemo(() => sandboxGraph(editor.steps, demo.sandbox), [editor.steps, demo.sandbox]);
@@ -267,15 +298,11 @@ export function SandboxPlan({
                 {t('editor.sandbox.deadTitle')} <span className="sb-deadpanel__n">({dead.length})</span>
               </h3>
               {dead.length > 0 && <p className="help">{t(`editor.sandbox.deadHelp.${sb.unlinked}`)}</p>}
-              {/* L49 P1 : captures HTML désactivées par un admin : la raison la plus forte, à la place de « Bientôt » */}
-              {htmlOff ? (
-                <p id="sb-dead-soon" className="help">
+              {/* L49 P1 : captures HTML désactivées par un admin : l'action est désactivée avec la raison */}
+              {htmlOff && (
+                <p id="sb-dead-off" className="help">
                   {t('htmlCapture.blockedByAdmin')}
                 </p>
-              ) : (
-                <span id="sb-dead-soon" className="sr-only">
-                  {t('editor.sandbox.deadCaptureSoon')}
-                </span>
               )}
               <ul className="sb-deadlist">
                 {dead.map((d) => (
@@ -286,16 +313,18 @@ export function SandboxPlan({
                     </span>
                     {!readOnly && (
                       <span className="sb-deadlist__actions">
-                        {/* L48-G écart 3 : une action visible ; « Bientôt » jusqu'à la liaison avec l'extension */}
+                        {/* L48-G écart 3 et EXT-CONNECT : capture dans l'extension, rattachée à ce Sandbox */}
                         <button
                           type="button"
                           className="fd-btn fd-btn--sm"
-                          aria-disabled="true"
-                          aria-describedby="sb-dead-soon"
+                          aria-disabled={htmlOff || undefined}
+                          aria-describedby={htmlOff ? 'sb-dead-off' : undefined}
+                          onClick={() => {
+                            if (!htmlOff) void capture(d);
+                          }}
                         >
                           <Camera {...ICON} />
                           {t('editor.sandbox.deadCapture')}
-                          {!htmlOff && <span className="sb-deadlist__soon">{t('shell.soon')}</span>}
                         </button>
                         <a className="link-button" href={d.url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink {...ICON} />

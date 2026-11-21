@@ -126,7 +126,7 @@ function card(p: PendingHtmlPage, i: number): HTMLLIElement {
 async function main() {
   const pages = (await htmlStore.all()).sort((a, b) => a.order - b.order);
   const target = (await browser.storage.local.get('fd.htmlReview'))['fd.htmlReview'] as
-    { workspaceId: string; title: string } | undefined;
+    { workspaceId: string; title: string; appendTo?: string } | undefined;
   const send = $<HTMLButtonElement>('send');
   if (!pages.length || !target) {
     alert(s.hrNone);
@@ -170,6 +170,11 @@ async function main() {
   const linked = pages.length > 2 && pages.filter((p) => p.clickSel).length < pages.length - 1;
   if (preset ?? (linked ? 'sandbox' : null))
     (document.querySelector(`input[value="${preset ?? 'sandbox'}"]`) as HTMLInputElement).checked = true;
+  // EXT-CONNECT : capture lancée depuis un Sandbox de l'app : les pages s'y ajoutent, pas de type à choisir
+  if (target.appendTo) {
+    $('attach').hidden = false;
+    (document.querySelector('fieldset.kinds') as HTMLElement).hidden = true;
+  }
   send.addEventListener('click', async () => {
     send.disabled = true;
     alert(null);
@@ -177,11 +182,15 @@ async function main() {
       .value as HtmlDemoKind;
     const total = pages.filter((p) => !p.tooBig).length;
     try {
-      const demoId = await sendHtml(pages, { ...target, kind }, (done) => {
-        $('progress').textContent = fmt(s.hrSending, { done, total });
-      });
+      const demoId = await sendHtml(
+        pages,
+        { ...target, kind: target.appendTo ? 'sandbox' : kind },
+        (done) => {
+          $('progress').textContent = fmt(s.hrSending, { done, total });
+        },
+      );
       await htmlStore.clear();
-      await browser.storage.local.remove('fd.htmlReview');
+      await browser.storage.local.remove(['fd.htmlReview', 'fd.attach']);
       $('progress').textContent = s.hrSent;
       location.href = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit`;
     } catch {

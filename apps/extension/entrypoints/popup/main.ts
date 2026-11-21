@@ -9,6 +9,7 @@ import { APP_NAME, htmlCaptureVerdict, parseHtmlCapture } from '@flowdsiml/core'
 import { installTooltips } from '@flowdsiml/ui/tooltip';
 import type { CaptureMode, FillTarget, PopupRequest, RecordingStatus } from '@/lib/messages';
 import { lang, stepsCaptured, strings } from '@/lib/i18n';
+import { attachFor, type PendingAttach } from '@/lib/external';
 import {
   Check,
   Code,
@@ -304,6 +305,27 @@ async function render() {
   show('setup', true);
   await loadWorkspaces();
   await Promise.all([loadFills(), syncHtmlRule()]);
+  await syncAttach();
+}
+
+/** EXT-CONNECT : onglet ouvert depuis un Sandbox de l'app : capture HTML et espace du Sandbox présélectionnés. */
+async function syncAttach() {
+  const pendingAttach = (await browser.storage.local.get('fd.attach'))['fd.attach'] as
+    PendingAttach | undefined;
+  const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+  const a = attachFor(pendingAttach, tab?.url, Date.now());
+  show('attach-note', !!a);
+  if (!a) return;
+  const ws = $<HTMLSelectElement>('workspace');
+  if ([...ws.options].some((o) => o.value === a.workspaceId) && ws.value !== a.workspaceId) {
+    ws.value = a.workspaceId;
+    ws.dispatchEvent(new Event('change'));
+  }
+  const html = document.querySelector<HTMLInputElement>('input[name="mode"][value="html"]');
+  if (html && !html.checked && !html.disabled) {
+    html.checked = true;
+    html.dispatchEvent(new Event('change', { bubbles: true }));
+  }
 }
 
 $<HTMLAnchorElement>('signup-link').href = `${APP_URL.replace(/\/$/, '')}/#/signup`;

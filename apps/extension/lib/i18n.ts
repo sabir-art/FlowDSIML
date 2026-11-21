@@ -152,6 +152,9 @@ const fr = {
   htmlHelp:
     'Chaque page visitée après un clic est copiée (scripts retirés, champs vidés, données personnelles remplacées). Pour une application à page unique, utilisez « Capturer cette page ».',
   startHtml: 'Démarrer la capture HTML',
+  // EXT-CONNECT : capture demandée depuis un Sandbox de l'app
+  attachNote: 'Page demandée depuis le Sandbox : elle y sera ajoutée après vérification.',
+  hrAttach: 'Ces pages seront ajoutées au Sandbox d’où vous avez lancé la capture.',
   htmlBar: 'Capture HTML en cours',
   htmlCapturePage: 'Capturer cette page',
   htmlShortcutCapture: 'Capturer cette page\u202f: Alt + Maj + M',
@@ -353,6 +356,8 @@ const en: typeof fr = {
   htmlHelp:
     'Each page visited after a click is copied (scripts removed, fields emptied, personal data replaced). For a single-page app, use “Capture this page”.',
   startHtml: 'Start HTML capture',
+  attachNote: 'Page requested from the Sandbox: it will be added to it after review.',
+  hrAttach: 'These pages will be added to the Sandbox you started the capture from.',
   htmlBar: 'HTML capture in progress',
   htmlCapturePage: 'Capture this page',
   htmlShortcutCapture: 'Capture this page: Alt + Shift + M',

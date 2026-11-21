@@ -488,8 +488,3 @@
 .sb-deadlist__actions .grow {
   flex: 1;
 }
-.sb-deadlist__soon {
-  margin-inline-start: 4px;
-  font-weight: 400;
-  color: var(--fd-color-text-muted);
-}

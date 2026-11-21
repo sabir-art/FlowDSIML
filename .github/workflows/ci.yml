@@ -97,6 +97,8 @@ jobs:
           VITE_SUPABASE_URL: https://api.tutoclick.example
           VITE_PLAYER_URL: https://demos.tutoclick.example
           VITE_APP_ORIGIN: http://localhost:5173
+          # EXT-CONNECT : identifiant fictif ; les e2e simulent chrome.runtime (aucune extension réelle)
+          VITE_EXTENSION_ID: abcdefghijklmnopabcdefghijklmnop
         run: |
           (cd apps/web && nohup pnpm exec vite --port 5173 --strictPort > /tmp/web.log 2>&1 &)
           (cd apps/player && nohup pnpm exec vite --port 5174 --strictPort > /tmp/player.log 2>&1 &)
@@ -261,6 +263,8 @@ jobs:
           VITE_PLAYER_URL: https://demos.tutoclick.example
           # Origine réelle de l'app servie par vite : le lecteur en aperçu n'accepte que ses messages
           VITE_APP_ORIGIN: http://localhost:5173
+          # EXT-CONNECT : identifiant fictif ; les e2e simulent chrome.runtime (aucune extension réelle)
+          VITE_EXTENSION_ID: abcdefghijklmnopabcdefghijklmnop
         run: |
           (cd apps/web && nohup pnpm exec vite --port 5173 --strictPort > /tmp/web.log 2>&1 &)
           (cd apps/player && nohup pnpm exec vite --port 5174 --strictPort > /tmp/player.log 2>&1 &)

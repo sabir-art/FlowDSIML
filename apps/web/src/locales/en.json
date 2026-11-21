@@ -1355,7 +1355,13 @@
       "mapRegion": "Page map",
       "deadOpen": "Open the page",
       "deadMore": "More actions for “{{link}}”",
-      "deadCaptureSoon": "Capture from the map: coming soon, with the extension."
+      "capStarted": "HTML capture started in a new tab: the page will be added to this Sandbox after review.",
+      "capOpened": "Page opened in a new tab: click the TutoClick extension, then “Start HTML capture”.",
+      "capUnavailable": "The TutoClick extension is not available in this browser.",
+      "capInstall": "Install the extension",
+      "capSignedOut": "Sign in to the TutoClick extension, then try again.",
+      "capBusy": "A capture is already running in the extension. Finish it, then try again.",
+      "capError": "The capture could not start. Try again."
     },
     "importUnverified": "This image is not checked automatically: blur personal data before publishing.",
     "noFormShort": "No form",

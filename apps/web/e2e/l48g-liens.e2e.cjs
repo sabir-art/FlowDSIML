@@ -128,10 +128,49 @@ const pages = [
   );
   const first = items.first();
   const cap = first.getByRole('button', { name: /Capturer cette page/ });
+  // EXT-CONNECT : l'action est active ; sans extension dans le navigateur, elle le dit
   ok(
-    (await cap.getAttribute('aria-disabled')) === 'true' && (await cap.innerText()).includes('Bientôt'),
-    'écart 3 : « Capturer cette page » visible, désactivée, « Bientôt »',
+    (await cap.getAttribute('aria-disabled')) === null && !(await cap.innerText()).includes('Bientôt'),
+    'EXT-CONNECT : « Capturer cette page » active, sans « Bientôt »',
   );
+  await cap.click();
+  ok(
+    await p
+      .getByText('L’extension TutoClick n’est pas disponible dans ce navigateur.')
+      .waitFor({ timeout: 3000 })
+      .then(() => true)
+      .catch(() => false),
+    'EXT-CONNECT : sans extension, message clair',
+  );
+  // Extension simulée : un seul message, au schéma attendu, sans jeton
+  await p.evaluate(() => {
+    window.__sent = [];
+    window.chrome = {
+      runtime: {
+        sendMessage: (id, msg, cb) => {
+          window.__sent.push({ id, msg });
+          setTimeout(() => cb({ ok: true, started: false }), 0);
+        },
+      },
+    };
+  });
+  await cap.click();
+  await p.getByText('Page ouverte dans un nouvel onglet', { exact: false }).waitFor({ timeout: 3000 });
+  const sent = await p.evaluate(() => window.__sent);
+  const firstUrl = await first.locator('.sb-deadlist__path span[title]').getAttribute('title');
+  ok(
+    sent.length === 1 &&
+      sent[0].id === 'abcdefghijklmnopabcdefghijklmnop' &&
+      Object.keys(sent[0].msg).sort().join() === 'demoId,type,url,v,workspaceId' &&
+      sent[0].msg.type === 'fd:sandbox-attach' &&
+      sent[0].msg.v === 1 &&
+      sent[0].msg.demoId === DEMO &&
+      sent[0].msg.url === firstUrl,
+    `EXT-CONNECT : message unique au schéma attendu (${JSON.stringify(sent)})`,
+  );
+  await p.evaluate(() => {
+    delete window.chrome;
+  });
   ok(
     (await first.getByRole('button', { name: 'Relier à une page' }).count()) === 0 &&
       (await first.getByRole('button', { name: 'Laisser le message' }).count()) === 0,

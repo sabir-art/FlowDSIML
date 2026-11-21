@@ -37,7 +37,7 @@ async function ingest(
 
 export async function sendHtml(
   pages: PendingHtmlPage[],
-  target: { workspaceId: string; title: string; kind: HtmlDemoKind },
+  target: { workspaceId: string; title: string; kind: HtmlDemoKind; appendTo?: string },
   onProgress: (done: number) => void,
 ): Promise<string> {
   const { data: s } = await supabase.auth.getSession();
@@ -45,22 +45,38 @@ export async function sendHtml(
   if (!user || !s.session) throw new Error('Non connecté');
   const ordered = [...pages].sort((a, b) => a.order - b.order).filter((p) => !p.tooBig);
   const stepIds = ordered.map(() => crypto.randomUUID());
-  const demo = await supabase
-    .from('demos')
-    .insert({
-      workspace_id: target.workspaceId,
-      title: target.title.slice(0, 160),
-      created_by: user.id,
-      kind: target.kind,
-      sandbox:
-        target.kind === 'sandbox'
-          ? ({ start: stepIds[0], autoLink: true, unlinked: 'toast', guide: false, keyPages: [] } as Json)
-          : null,
-    })
-    .select('id')
-    .single();
-  if (demo.error) throw demo.error;
-  const demoId = demo.data.id;
+  let demoId: string;
+  let first = 0;
+  if (target.appendTo) {
+    // EXT-CONNECT : pages ajoutées à la fin d'un Sandbox existant ; la base (RLS) vérifie le droit de le
+    // modifier. Les liens restés sans page se relient d'eux-mêmes par l'adresse (réglage autoLink).
+    demoId = target.appendTo;
+    const last = await supabase
+      .from('steps')
+      .select('position')
+      .eq('demo_id', demoId)
+      .order('position', { ascending: false })
+      .limit(1);
+    if (last.error) throw last.error;
+    first = (last.data?.[0]?.position ?? -1) + 1;
+  } else {
+    const demo = await supabase
+      .from('demos')
+      .insert({
+        workspace_id: target.workspaceId,
+        title: target.title.slice(0, 160),
+        created_by: user.id,
+        kind: target.kind,
+        sandbox:
+          target.kind === 'sandbox'
+            ? ({ start: stepIds[0], autoLink: true, unlinked: 'toast', guide: false, keyPages: [] } as Json)
+            : null,
+      })
+      .select('id')
+      .single();
+    if (demo.error) throw demo.error;
+    demoId = demo.data.id;
+  }
   for (const [i, p] of ordered.entries()) {
     const path = await ingest(s.session.access_token, target.workspaceId, demoId, p.html, p.url, p.security);
     const ops: HtmlOp[] = [];
@@ -71,7 +87,7 @@ export async function sendHtml(
       id: stepIds[i],
       demo_id: demoId,
       workspace_id: target.workspaceId,
-      position: i,
+      position: first + i,
       kind: 'html',
       title: (p.clickLabel || p.title || `Page ${i + 1}`).slice(0, 200),
       page_url: p.url.slice(0, 2000),

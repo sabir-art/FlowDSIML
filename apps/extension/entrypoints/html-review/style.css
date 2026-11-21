@@ -142,6 +142,10 @@ h2 {
   gap: 12px;
   flex-wrap: wrap;
 }
+/* EXT-CONNECT : masqué quand les pages s'ajoutent à un Sandbox (l'attribut hidden doit primer sur display) */
+.kinds[hidden] {
+  display: none;
+}
 .kinds legend {
   font-weight: 600;
   margin-bottom: 8px;
