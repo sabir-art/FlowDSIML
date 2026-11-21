@@ -2,6 +2,8 @@
 
 > Retour client du 21/11 : 15 captures d'un éditeur de démos concurrent, décrites par le chef (les captures restent hors du dépôt, qui est public). Le client juge TutoClick « lourd ». Ce document compare les deux outils à partir de TutoClick sur `claude/dev-mvp` (172daf6) : en-tête, menu d'ajout, rail d'outils, panneaux, page Partager. Il liste les écarts par priorité, puis spécifie les P1.
 >
+> **Validé par le chef le 21/11** : P1 1 à 5 tels quels, P2 et P3 validés. Ordre de la file du dev : logo, NAV-02 et §11, ICON-01, éditeur P1, MOTION-01, P2.
+>
 > Hors périmètre (règles fermes) : campagnes CRM et marketing automation, réseaux sociaux (outil interne), domaine personnalisé, SSO.
 
 ## 1. Écarts
@@ -21,7 +23,7 @@
 | # | Écart | Cible |
 |---|---|---|
 | P2-1 | **IA regroupée** : les fonctions existent mais sont dispersées (rédaction, « Traduire la démo… » dans le menu, voix de synthèse dans le panneau Voix off, Assistant dans le rail). | Une modale « Améliorer avec l'IA » (400 px) en 3 onglets segmentés, Textes, Voix off et Traduction : langue, style, consigne complémentaire, puis interrupteurs « Pop-up d'accueil », « Pop-up de fin » et « Zoom automatique ». Pied : Annuler, puis « Générer ». Rien n'est appliqué sans validation (règle IA existante). L'Assistant reste dans le rail. |
-| P2-2 | **En-tête de l'éditeur** : retour, titre fixe, annuler et rétablir, Édition / Aperçu, ⋯, Partager, Publier. | Titre modifiable sur place (icône crayon de 16 px au survol), auteur en dessous (12 px, `text-muted`). Onglets segmentés Édition · Aperçu · Analytics · Leads : Analytics et Leads ouvrent les pages existantes, filtrées sur la démo. |
+| P2-2 | **En-tête de l'éditeur** : retour, titre fixe, annuler et rétablir, Édition / Aperçu, ⋯, Partager, Publier. | Titre modifiable sur place (icône crayon de 16 px au survol), auteur en dessous (12 px, `text-muted`). Onglets segmentés **au centre de l'en-tête** : Édition · Aperçu · Analytics · Leads. Analytics et Leads ouvrent les pages existantes, filtrées sur la démo. Le passage d'un onglet à l'autre suit MOTION-01. |
 | P2-3 | **Masquer une étape** : il faut d'abord le support du lecteur. | Étape masquée : sautée par le lecteur, vignette à 50 % d'opacité, badge « Masquée ». L'entrée du menu (§2) est en « Bientôt » tant que le lecteur ne la gère pas. |
 
 ### P3 : plus tard
