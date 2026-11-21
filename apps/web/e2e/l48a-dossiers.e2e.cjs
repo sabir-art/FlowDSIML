@@ -49,6 +49,11 @@ const seed = () => {
   const col = page.getByRole('navigation', { name: 'Dossiers' });
   await col.waitFor();
   const cards = () => page.locator('.demo-card:not(.demo-new)').count();
+  // Nombre de cartes attendu après un changement de vue (le rendu peut suivre l'URL sous charge)
+  const cardsAre = async (n) => {
+    for (let i = 0; i < 50 && (await cards()) !== n; i++) await page.waitForTimeout(100);
+    return (await cards()) === n;
+  };
   const countOf = async (name) =>
     Number(
       await col
@@ -81,7 +86,7 @@ const seed = () => {
       'Démos Onboarding',
     'fil d’Ariane « Démos > Onboarding »',
   );
-  ok((await cards()) === live.filter((d) => d.folder_id === 'f-3').length, 'cartes du dossier seulement');
+  ok(await cardsAre(live.filter((d) => d.folder_id === 'f-3').length), 'cartes du dossier seulement');
 
   // Compteurs selon le statut
   await page.getByRole('button', { name: /^Publiées/ }).click();
@@ -107,11 +112,11 @@ const seed = () => {
   await col.getByRole('link', { name: /^Mes démos/ }).click();
   await page.waitForURL(/vue=mes-demos/);
   await page.waitForTimeout(200);
-  ok((await cards()) === live.filter((d) => d.created_by === 'u-alice').length, 'Mes démos : ?vue=mes-demos');
+  ok(await cardsAre(live.filter((d) => d.created_by === 'u-alice').length), 'Mes démos : ?vue=mes-demos');
   await col.getByRole('link', { name: /^Archivées/ }).click();
   await page.waitForURL(/vue=archivees/);
   await page.waitForTimeout(200);
-  ok((await cards()) === 1 && (await countOf('Archivées')) === 1, 'Archivées : ?vue=archivees');
+  ok((await cardsAre(1)) && (await countOf('Archivées')) === 1, 'Archivées : ?vue=archivees');
   await col.getByRole('link', { name: /^Toutes les démos/ }).click();
   await page.waitForTimeout(200);
 
@@ -171,7 +176,7 @@ const seed = () => {
   await page.getByRole('button', { name: /^Créé par\s*: Tous/ }).click();
   await page.getByRole('menuitem', { name: 'Moi' }).click();
   await page.waitForTimeout(200);
-  ok((await cards()) === live.filter((d) => d.created_by === 'u-alice').length, '« Créé par : Moi »');
+  ok(await cardsAre(live.filter((d) => d.created_by === 'u-alice').length), '« Créé par : Moi »');
   const axe = await new AxeBuilder({ page }).exclude('.demo-cover').analyze();
   const bad = axe.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
   ok(bad.length === 0, `axe : Démos avec colonne (${bad.map((v) => v.id).join(', ')})`);
