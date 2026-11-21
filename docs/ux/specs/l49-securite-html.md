@@ -192,10 +192,13 @@
 | `htmlSecurity.safeBody` / `removedBody` | Rien d'actif à retirer sur cette page. / Tout ce qui pouvait s'exécuter ou envoyer des données a été retiré. La page est publiable. |
 | `htmlSecurity.summary` | {{pages}} pages nettoyées : {{removed}} éléments actifs retirés, {{dangerous}} liens dangereux bloqués |
 | `htmlSecurity.detail` | Détail |
-| `htmlSecurity.c.scripts` … `c.other` | les libellés du tableau du §3, au singulier et au pluriel (`_one`, `_other`) |
+| `htmlSecurity.c.scripts` … `c.other` | les libellés du tableau du §3, au singulier et au pluriel (`_one`, `_other`), avec une majuscule initiale dans la liste des compteurs (« Script retiré », « Actions au clic retirées ») |
 | `htmlSecurity.dangerous` | Liens dangereux bloqués : {{count}} (vérifiés par Google Safe Browsing) |
 | `htmlSecurity.gsbUnavailable` | Vérification Google indisponible |
-| `htmlSecurity.checklist` | {{count}} pages analysées : {{safe}} sûres, {{removed}} avec éléments retirés |
+| `htmlSecurity.checklistTotal_one` / `_other` | 1 page analysée / {{count}} pages analysées |
+| `htmlSecurity.checklistSafe_one` / `_other` | 1 sûre / {{count}} sûres |
+| `htmlSecurity.checklistRemoved` | {{count}} avec éléments retirés |
+| Assemblage (corrigé le 21 novembre) | Total, « : », puis les morceaux non nuls séparés par « , » : « 3 pages analysées : 2 sûres, 1 avec éléments retirés », « 2 pages analysées : 2 sûres ». Pour une seule page : « 1 page analysée : sûre » ou « 1 page analysée : avec éléments retirés ». |
 | `extLinks.title` | Liens externes · {{count}} |
 | `extLinks.allow` | Autoriser le lien {{text}} |
 | `extLinks.off` / `on` | Désactivé / Autorisé |
