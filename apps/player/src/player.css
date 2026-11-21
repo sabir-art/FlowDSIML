@@ -1391,7 +1391,8 @@ a.p-btn:hover {
 }
 .is-dark .p-top,
 .is-dark .p-branding,
-.is-dark .p-video__nosound {
+.is-dark .p-video__nosound,
+.is-dark .p-autozoom {
   color: var(--p-chrome-text);
 }
 .is-dark .p-meta {

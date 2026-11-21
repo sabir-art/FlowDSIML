@@ -173,24 +173,18 @@ export function Quiz({
           <p role="status" class="p-quiz-line">
             {survey
               ? q.surveyLine
-              : passed
-                ? fmt(q, 'scoreLine', {
+              : // MOB-01 M7 et retour UX : une ligne, en réussite comme en échec,
+                // « 1 bonne réponse sur 3 · il vous reste 2 tentatives »
+                canRetry && Number.isFinite(left)
+                ? fmt(q, 'resultLine', {
                     correctText: fmt(q, 'correctCount', { count: result.correct }),
                     total: result.total,
-                    score: result.score,
-                    threshold: quiz.threshold,
+                    count: left,
                   })
-                : // MOB-01 M7 : une ligne, « 1 bonne réponse sur 3 · il vous reste 2 tentatives »
-                  canRetry && Number.isFinite(left)
-                  ? fmt(q, 'failLine', {
-                      correctText: fmt(q, 'correctCount', { count: result.correct }),
-                      total: result.total,
-                      count: left,
-                    })
-                  : fmt(q, 'failLineNoCount', {
-                      correctText: fmt(q, 'correctCount', { count: result.correct }),
-                      total: result.total,
-                    })}
+                : fmt(q, 'resultLineNoCount', {
+                    correctText: fmt(q, 'correctCount', { count: result.correct }),
+                    total: result.total,
+                  })}
           </p>
           {phase.saveError && <p class="p-quiz-note">{q.sendError}</p>}
           {!survey && (

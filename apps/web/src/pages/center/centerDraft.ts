@@ -7,7 +7,6 @@ export interface CenterDraft {
   title?: string;
   intro?: string;
   brand?: string;
-  accent?: string;
   style?: CenterStyle;
   logoPath?: string | null;
   help?: string;

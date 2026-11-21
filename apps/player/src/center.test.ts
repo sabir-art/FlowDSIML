@@ -128,9 +128,9 @@ describe('centre de formation', () => {
 
   it('couleurs : texte lisible sur la couleur principale, styles prédéfinis', () => {
     expect(contrast('#FFFFFF', '#000000')).toBeCloseTo(21, 0);
-    expect(themeVars({ brand: '#A3195B', accent: null, style: 'workspace' })['--brand-on']).toBe('#FFFFFF');
-    expect(themeVars({ brand: '#F2E94E', accent: null, style: 'workspace' })['--brand-on']).toBe('#12161B');
-    expect(themeVars({ brand: '#A3195B', accent: null, style: 'sober' })['--brand']).toBe('#12161B');
+    expect(themeVars({ brand: '#A3195B', style: 'workspace' })['--brand-on']).toBe('#FFFFFF');
+    expect(themeVars({ brand: '#F2E94E', style: 'workspace' })['--brand-on']).toBe('#12161B');
+    expect(themeVars({ brand: '#A3195B', style: 'sober' })['--brand']).toBe('#12161B');
   });
 });
 

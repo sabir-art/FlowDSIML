@@ -379,7 +379,6 @@ function Home({ t, data, views, route }: { t: Dict; data: CenterData; views: Pat
               aria-pressed={tag === x.name}
               onClick={() => go({ tag: tag === x.name ? '' : x.name })}
             >
-              <span class={`dot dot--${tagCls(x.color)}`} aria-hidden="true" />
               {x.name}
             </button>
           ))}
@@ -509,7 +508,6 @@ function DemoHome({ t, data, route }: { t: Dict; data: CenterData; route: Route 
               aria-pressed={tag === x.name}
               onClick={() => go({ tag: tag === x.name ? '' : x.name })}
             >
-              <span class={`dot dot--${tagCls(x.color)}`} aria-hidden="true" />
               {x.name}
             </button>
           ))}

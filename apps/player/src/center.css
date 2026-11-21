@@ -1,8 +1,4 @@
-/* L14 : centre de formation public, d'après docs/ux/maquettes/refonte/l14-centre.html.
-   Jetons propres pilotés par la couleur du workspace (--brand) et la couleur d'accent (--accent). */
-.ctr {
-  --accent: #95c11f;
-}
+/* L14 : centre de formation public, d'après docs/ux/maquettes/refonte/l14-centre.html. */
 /* ===== Page publique : jetons propres, pilotés par la couleur du workspace (--brand) ===== */
 .ctr {
   --brand: #a3195b;

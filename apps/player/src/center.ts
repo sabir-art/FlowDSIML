@@ -37,7 +37,6 @@ export interface CenterInfo {
   title: string;
   intro: string;
   brand: string | null;
-  accent: string | null;
   style: 'workspace' | 'sober' | 'dark' | 'contrast';
   logoPath: string | null;
   help: string;
@@ -200,24 +199,21 @@ export function contrast(a: string, b: string): number {
 }
 const HEX = /^#[0-9a-f]{6}$/i;
 export const DEFAULT_BRAND = '#A3195B';
-export const DEFAULT_ACCENT = '#95C11F';
 
 /** Variables CSS de la page selon le style prédéfini et les couleurs du workspace. */
-export function themeVars(c: Pick<CenterInfo, 'brand' | 'accent' | 'style'>): Record<string, string> {
+export function themeVars(c: Pick<CenterInfo, 'brand' | 'style'>): Record<string, string> {
   const brand =
     c.style === 'sober' || c.style === 'contrast'
       ? '#12161B'
       : c.brand && HEX.test(c.brand)
         ? c.brand
         : DEFAULT_BRAND;
-  const accent = c.accent && HEX.test(c.accent) ? c.accent : DEFAULT_ACCENT;
-  if (c.style === 'dark') return { '--accent': accent };
+  if (c.style === 'dark') return {};
   const on = contrast(brand, '#FFFFFF') >= 4.5 ? '#FFFFFF' : '#12161B';
   return {
     '--brand': brand,
     '--brand-on': on,
     '--brand-soft': `color-mix(in srgb, ${brand} 10%, #FFFFFF)`,
-    '--accent': accent,
   };
 }
 

@@ -46,7 +46,6 @@ import './center.css';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 const ICON = { size: 16, strokeWidth: 1.75, 'aria-hidden': true } as const;
-const BLACK = '#080808';
 const MAX_LOGO = 512 * 1024;
 
 type Row = {
@@ -78,8 +77,8 @@ export function CenterSettings() {
     },
   );
   const [slugState, setSlugState] = useState<'ok' | 'taken' | 'invalid' | 'checking'>('ok');
-  const [colorErr, setColorErr] = useState<{ brand?: string; accent?: string }>({});
-  const [colors, setColors] = useState({ brand: '', accent: '' });
+  const [colorErr, setColorErr] = useState<string | undefined>();
+  const [brandInput, setBrandInput] = useState('');
   const [password, setPassword] = useState('');
   const [managing, setManaging] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -159,7 +158,7 @@ export function CenterSettings() {
     if (allowed) void load();
   }, [allowed, ws]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(
-    () => setColors({ brand: draft.brand ?? '#A3195B', accent: draft.accent ?? '#95C11F' }),
+    () => setBrandInput(draft.brand ?? '#A3195B'),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [loaded],
   );
@@ -214,22 +213,16 @@ export function CenterSettings() {
   const pending = row?.published ? pendingChanges(row.draft, row.published) : null;
   const url = centerUrl(PLAYER_URL, row?.slug ?? slug);
 
-  function setColor(key: 'brand' | 'accent', value: string) {
-    setColors((c) => ({ ...c, [key]: value }));
-    if (!/^#[0-9a-fA-F]{6}$/.test(value)) {
-      setColorErr((e) => ({ ...e, [key]: t('center.colorFormat') }));
-      return;
-    }
-    const r = key === 'brand' ? contrastRatio(value, '#FFFFFF') : contrastRatio(value, BLACK);
-    if (r < 4.5) {
-      setColorErr((e) => ({
-        ...e,
-        [key]: t(key === 'brand' ? 'center.brandTooLight' : 'center.accentTooDark', { ratio: ratio(r) }),
-      }));
-      return;
-    }
-    setColorErr((e) => ({ ...e, [key]: undefined }));
-    update({ [key]: value.toUpperCase() });
+  // Couleur principale du centre (la couleur d'accent a été retirée : la clé stockée est ignorée)
+  const brandOk = /^#[0-9a-fA-F]{6}$/.test(brandInput);
+  const brandRatio = brandOk ? contrastRatio(brandInput, '#FFFFFF') : 0;
+  function setBrandColor(value: string) {
+    setBrandInput(value);
+    if (!/^#[0-9a-fA-F]{6}$/.test(value)) return setColorErr(t('center.colorFormat'));
+    const r = contrastRatio(value, '#FFFFFF');
+    if (r < 4.5) return setColorErr(t('center.brandTooLight', { ratio: ratio(r) }));
+    setColorErr(undefined);
+    update({ brand: value.toUpperCase() });
   }
 
   async function uploadLogo(file: File) {
@@ -283,7 +276,7 @@ export function CenterSettings() {
   const logoUrl = draft.logoPath
     ? supabase.storage.from('branding').getPublicUrl(draft.logoPath).data.publicUrl
     : null;
-  const brand = colorErr.brand ? (draft.brand ?? '#A3195B') : colors.brand;
+  const brand = colorErr ? (draft.brand ?? '#A3195B') : brandInput;
 
   return (
     <div className="mk cfg14-page">
@@ -496,52 +489,41 @@ export function CenterSettings() {
               </div>
             </div>
             <div className="two">
-              {(['brand', 'accent'] as const).map((k) => {
-                const value = colors[k];
-                const ok = /^#[0-9a-fA-F]{6}$/.test(value);
-                const r = ok
-                  ? k === 'brand'
-                    ? contrastRatio(value, '#FFFFFF')
-                    : contrastRatio(value, BLACK)
-                  : 0;
-                return (
-                  <div className="fd-field" key={k}>
-                    <label className="fd-label" htmlFor={`c-${k}`}>
-                      {t(`center.${k}`)}
-                    </label>
-                    <div className="col-f">
-                      <input
-                        type="color"
-                        className="sw"
-                        aria-label={t(`center.${k}Picker`)}
-                        value={ok ? value : '#000000'}
-                        onChange={(e) => setColor(k, e.target.value.toUpperCase())}
-                      />
-                      <input
-                        id={`c-${k}`}
-                        type="text"
-                        value={value}
-                        maxLength={7}
-                        spellCheck={false}
-                        aria-describedby={`c-${k}-h`}
-                        aria-invalid={!!colorErr[k] || undefined}
-                        onChange={(e) => setColor(k, e.target.value.trim())}
-                      />
-                    </div>
-                    {colorErr[k] ? (
-                      <span className="err-line" id={`c-${k}-h`} role="alert">
-                        <CircleAlert aria-hidden="true" />
-                        {colorErr[k]}
-                      </span>
-                    ) : (
-                      <span className="ok-line" id={`c-${k}-h`}>
-                        <CircleCheck aria-hidden="true" />
-                        {t(k === 'brand' ? 'center.brandOk' : 'center.accentOk', { ratio: ratio(r) })}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+              <div className="fd-field">
+                <label className="fd-label" htmlFor="c-brand">
+                  {t('center.brand')}
+                </label>
+                <div className="col-f">
+                  <input
+                    type="color"
+                    className="sw"
+                    aria-label={t('center.brandPicker')}
+                    value={brandOk ? brandInput : '#000000'}
+                    onChange={(e) => setBrandColor(e.target.value.toUpperCase())}
+                  />
+                  <input
+                    id="c-brand"
+                    type="text"
+                    value={brandInput}
+                    maxLength={7}
+                    spellCheck={false}
+                    aria-describedby="c-brand-h"
+                    aria-invalid={!!colorErr || undefined}
+                    onChange={(e) => setBrandColor(e.target.value.trim())}
+                  />
+                </div>
+                {colorErr ? (
+                  <span className="err-line" id="c-brand-h" role="alert">
+                    <CircleAlert aria-hidden="true" />
+                    {colorErr}
+                  </span>
+                ) : (
+                  <span className="ok-line" id="c-brand-h">
+                    <CircleCheck aria-hidden="true" />
+                    {t('center.brandOk', { ratio: ratio(brandRatio) })}
+                  </span>
+                )}
+              </div>
             </div>
             <p className="fd-help cfg-help">{t('center.colorsHelp')}</p>
           </section>
