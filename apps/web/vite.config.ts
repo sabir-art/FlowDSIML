@@ -45,5 +45,9 @@ export default defineConfig({
       },
     },
   },
-  test: { environment: 'jsdom' },
+  // Tests unitaires : adresse et clé fictives (les vraies valeurs ne servent qu'au build)
+  test: {
+    environment: 'jsdom',
+    env: { VITE_SUPABASE_URL: 'https://api.tutoclick.example', VITE_SUPABASE_ANON_KEY: 'test' },
+  },
 });
