@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CircleAlert } from 'lucide-react';
 import { HTML_SECURITY_KEYS, type HtmlSecurityReport, htmlSecurityStatus } from '@flowdsiml/core';
 import type { StepRow } from '../types';
 
@@ -14,7 +15,7 @@ export function stepSecurity(step: Pick<StepRow, 'html_meta'>): HtmlSecurityRepo
  * jamais la couleur seule), une phrase, puis « Détail » qui déplie les compteurs du serveur.
  */
 export function HtmlSecurity({ step }: { step: StepRow }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const id = useId();
   const [open, setOpen] = useState(false);
   const r = stepSecurity(step);
@@ -51,6 +52,31 @@ export function HtmlSecurity({ step }: { step: StepRow }) {
                 <span className="hsec-n">{r[k] ?? 0}</span>
               </li>
             ))}
+            {/* L49 §4.1 : Google Safe Browsing (ligne toujours affichée, même à 0) */}
+            {r.safeBrowsing === 'unavailable' ? (
+              <li className="hsec-gsb-off">
+                <span>
+                  <CircleAlert size={16} aria-hidden="true" /> {t('htmlSecurity.gsbUnavailable')}
+                  {r.analyzedAt && (
+                    <span className="hsec-when">
+                      {t('htmlSecurity.gsbLast', {
+                        date: new Date(r.analyzedAt).toLocaleString(i18n.language, {
+                          dateStyle: 'short',
+                          timeStyle: 'short',
+                        }),
+                      })}
+                    </span>
+                  )}
+                </span>
+              </li>
+            ) : (
+              r.safeBrowsing === 'ok' && (
+                <li>
+                  <span>{t('htmlSecurity.dangerous', { count: r.dangerousLinks ?? 0 })}</span>
+                  <span className="hsec-n">{r.dangerousLinks ?? 0}</span>
+                </li>
+              )
+            )}
           </ul>
         </>
       )}

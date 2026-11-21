@@ -456,3 +456,7 @@ verify_jwt = true
 [functions.html-ingest]
 enabled = true
 verify_jwt = true
+
+[functions.html-recheck]
+enabled = true
+verify_jwt = true

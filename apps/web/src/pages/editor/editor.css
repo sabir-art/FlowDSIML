@@ -3455,3 +3455,22 @@
   font-size: 13px;
   color: var(--fd-color-text-muted);
 }
+.xlinks-blocked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fd-color-danger);
+}
+.hsec-gsb-off > span {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+.hsec-when {
+  flex-basis: 100%;
+  color: var(--fd-color-text-muted);
+  font-size: 12px;
+}

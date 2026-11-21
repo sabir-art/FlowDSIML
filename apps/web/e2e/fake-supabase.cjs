@@ -514,6 +514,37 @@ async function install(page, state = seed()) {
         });
       return json(route, 400, { error: 'bad_action' });
     }
+    // L49 §4.1 : nouvelle vérification Safe Browsing à la publication. state.flaggedUrls : adresses
+    // signalées (simulées, aucun appel réel) ; comme le serveur, retire les autorisations concernées.
+    if (p.startsWith('/functions/v1/html-recheck')) {
+      const b = JSON.parse(req.postData() || '{}');
+      const flagged = new Set(state.flaggedUrls || []);
+      const blocked = [];
+      const changed = [];
+      for (const st of t.steps.filter((x) => x.demo_id === b.demoId && x.kind === 'html')) {
+        const meta = st.html_meta || {};
+        const hit = (st.html_ops || []).filter((o) => o.op === 'extlink' && flagged.has(o.value));
+        if (!hit.length) continue;
+        const sec = meta.security || {};
+        const list = [...new Set([...(sec.blocked || []), ...hit.map((o) => o.value)])];
+        st.html_meta = {
+          ...meta,
+          security: { ...sec, blocked: list, dangerousLinks: list.length, safeBrowsing: 'ok' },
+        };
+        st.html_ops = st.html_ops.filter((o) => !hit.includes(o));
+        changed.push(st);
+        for (const o of hit)
+          blocked.push({
+            stepId: st.id,
+            text: (meta.links || []).find((l) => l.sel === o.sel)?.label || o.value,
+          });
+      }
+      return json(route, 200, {
+        status: 'ok',
+        blocked,
+        steps: changed.map((x) => ({ id: x.id, html_meta: x.html_meta, html_ops: x.html_ops })),
+      });
+    }
     // L23 : envoi immédiat (test, rejeu) ; résultat réglable par state.dispatchResult
     if (p.startsWith('/functions/v1/webhooks-dispatch')) {
       const d = (t.webhook_deliveries || []).find(

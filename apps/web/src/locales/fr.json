@@ -5256,7 +5256,11 @@
       "piiReplaced_other": "données personnelles remplacées",
       "other_one": "autre élément retiré",
       "other_other": "autres éléments retirés"
-    }
+    },
+    "dangerous_one": "lien dangereux bloqué (vérifié par Google Safe Browsing)",
+    "dangerous_other": "liens dangereux bloqués (vérifiés par Google Safe Browsing)",
+    "gsbUnavailable": "Vérification Google indisponible",
+    "gsbLast": "Dernière tentative : {{date}}"
   },
   "extLinks": {
     "title": "Liens externes · {{count}}",
@@ -5266,6 +5270,9 @@
     "insecure": "Adresse non sécurisée",
     "outside": "Ce lien mène hors de la démo.",
     "mod": "Lien externe autorisé : {{domain}}",
-    "untitled": "Lien sans texte"
+    "untitled": "Lien sans texte",
+    "blocked": "Bloqué, site signalé",
+    "gsbRetry": "Vérification Google indisponible, réessayez plus tard",
+    "blockedLater": "Le lien {{text}} mène à un site signalé : il a été bloqué."
   }
 }

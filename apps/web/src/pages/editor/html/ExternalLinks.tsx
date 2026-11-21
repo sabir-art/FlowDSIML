@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
+import { ShieldAlert } from 'lucide-react';
 import { EXTLINK_RE, isExternalLink } from '@flowdsiml/core';
 import { Switch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import type { StepRow } from '../types';
 import { opOn, removeOp, upsertOp } from './htmlModel';
+import { stepSecurity } from './HtmlSecurity';
 
 interface MetaLink {
   sel: string;
@@ -11,12 +13,17 @@ interface MetaLink {
   label?: string;
 }
 
-/** Liens de la page vers un autre domaine (L49 §4), d'après les liens repérés à la capture. */
+/**
+ * Liens de la page vers un autre domaine (L49 §4), d'après les liens repérés à la capture, et liens
+ * signalés par Google Safe Browsing même internes (L49 §4.1).
+ */
 export function externalLinks(step: Pick<StepRow, 'html_meta'>): MetaLink[] {
   const meta = (step.html_meta ?? {}) as { url?: string; links?: MetaLink[] };
+  const blocked = new Set(stepSecurity(step)?.blocked ?? []);
   const seen = new Set<string>();
   return (meta.links ?? []).filter((l) => {
-    if (!l?.sel || !l.href || seen.has(l.sel) || !isExternalLink(l.href, meta.url)) return false;
+    if (!l?.sel || !l.href || seen.has(l.sel)) return false;
+    if (!isExternalLink(l.href, meta.url) && !blocked.has(l.href)) return false;
     seen.add(l.sel);
     return true;
   });
@@ -38,6 +45,9 @@ export function ExternalLinks({
   const { t } = useTranslation();
   const links = externalLinks(step);
   if (!links.length) return null;
+  const report = stepSecurity(step);
+  const blocked = new Set(report?.blocked ?? []);
+  const gsbDown = report?.safeBrowsing === 'unavailable';
   return (
     <div className="sec xlinks">
       <div className="sec-title">{t('extLinks.title', { count: links.length })}</div>
@@ -52,7 +62,18 @@ export function ExternalLinks({
                 <b>{text}</b>
                 <code>{l.href}</code>
               </div>
-              {secure ? (
+              {blocked.has(l.href) ? (
+                // L49 §4.1 : interrupteur retiré (pas grisé), texte danger sans badge ni fond
+                <span className="xlinks-blocked">
+                  <ShieldAlert size={16} aria-hidden="true" />
+                  {t('extLinks.blocked')}
+                </span>
+              ) : !secure ? (
+                <span className="xlinks-reason">{t('extLinks.insecure')}</span>
+              ) : gsbDown && !op ? (
+                // Nouveau lien : autorisation refusée tant que la vérification n'a pas répondu
+                <span className="xlinks-reason">{t('extLinks.gsbRetry')}</span>
+              ) : (
                 <Switch
                   className="xlinks-switch"
                   label={op ? t('extLinks.on') : t('extLinks.off')}
@@ -65,8 +86,6 @@ export function ExternalLinks({
                       : upsertOp(editor, step, { sel: l.sel, op: 'extlink', value: l.href }, 'step')
                   }
                 />
-              ) : (
-                <span className="xlinks-reason">{t('extLinks.insecure')}</span>
               )}
             </li>
           );

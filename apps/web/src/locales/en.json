@@ -5256,7 +5256,11 @@
       "piiReplaced_other": "personal data items replaced",
       "other_one": "other element removed",
       "other_other": "other elements removed"
-    }
+    },
+    "dangerous_one": "dangerous link blocked (checked by Google Safe Browsing)",
+    "dangerous_other": "dangerous links blocked (checked by Google Safe Browsing)",
+    "gsbUnavailable": "Google check unavailable",
+    "gsbLast": "Last attempt: {{date}}"
   },
   "extLinks": {
     "title": "External links · {{count}}",
@@ -5266,6 +5270,9 @@
     "insecure": "Insecure address",
     "outside": "This link leads outside the demo.",
     "mod": "External link allowed: {{domain}}",
-    "untitled": "Link without text"
+    "untitled": "Link without text",
+    "blocked": "Blocked, flagged site",
+    "gsbRetry": "Google check unavailable, try again later",
+    "blockedLater": "The link {{text}} leads to a flagged site: it has been blocked."
   }
 }

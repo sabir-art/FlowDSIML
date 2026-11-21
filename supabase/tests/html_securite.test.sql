@@ -1,7 +1,7 @@
 -- Tests pgTAP : L49 P2, rapport d'analyse de sécurité (compteurs du serveur, jamais ceux du navigateur).
 begin;
 set search_path = public, extensions;
-select plan(10);
+select plan(13);
 
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000491a1', 'olga-sec@acme.example');
 create function pg_temp.login(uid uuid) returns void language plpgsql as $$
@@ -54,6 +54,16 @@ insert into public.steps (id, demo_id, workspace_id, position, kind, html_path, 
 select ok((select not (html_meta ? 'security') from public.steps where id = '00000000-0000-0000-0000-0000000491e2'),
   'page sans compteurs : pas de rapport');
 
+-- P4 : une autorisation vers une adresse signalée est retirée à l'écriture
+reset role;
+update public.html_page_security set security = security || '{"blocked":["https://testsafebrowsing.appspot.com/s/malware.html"]}'
+  where path = (select a from p);
+select pg_temp.login('00000000-0000-0000-0000-0000000491a1');
+update public.steps set html_ops = '[{"id":"e1","sel":"a.x","op":"extlink","value":"https://testsafebrowsing.appspot.com/s/malware.html","scope":"step"},{"id":"e2","sel":"a.y","op":"extlink","value":"https://docs.globex.example/","scope":"step"}]'
+  where id = '00000000-0000-0000-0000-0000000491e1';
+select is((select jsonb_agg(o ->> 'id') from public.steps, jsonb_array_elements(html_ops) o where id = '00000000-0000-0000-0000-0000000491e1'),
+  '["e2"]'::jsonb, 'P4 : lien signalé jamais autorisé (opération retirée)');
+
 -- Table fermée à l'app
 select throws_ok($$ select * from public.html_page_security $$, '42501', null, 'lecture directe refusée');
 select throws_ok($$ insert into public.html_page_security (path, workspace_id, security)
@@ -63,6 +73,9 @@ reset role;
 -- Validation de html_meta.security
 select ok(public.html_meta_ok('{"security":{"scripts":1,"safeBrowsing":"ok"}}'), 'html_meta : rapport valide accepté');
 select ok(not public.html_meta_ok('{"security":{"scripts":1.5}}'), 'html_meta : compteur non entier refusé');
+select ok(public.html_security_ok('{"dangerousLinks":1,"blocked":["https://testsafebrowsing.appspot.com/s/malware.html"],"safeBrowsing":"ok"}'),
+  'P4 : adresses signalées acceptées');
+select ok(not public.html_security_ok('{"blocked":[1]}'), 'P4 : liste des adresses signalées : chaînes seulement');
 
 select * from finish();
 rollback;

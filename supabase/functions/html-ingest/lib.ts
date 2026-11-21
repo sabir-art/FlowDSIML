@@ -48,10 +48,19 @@ export function sanitizeCss(css: string): string {
     .replace(/url\(\s*(['"]?)\s*(javascript|vbscript):[^)]*\)/gi, 'url()');
 }
 
+const absolute = (v: string, pageUrl: string | null) => {
+  try {
+    return new URL(v, pageUrl ?? undefined).href;
+  } catch {
+    return v;
+  }
+};
+
 function cleanAttribs(
   tag: string,
   attribs: Record<string, string>,
   pageUrl: string | null,
+  flagged: Set<string>,
 ): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(attribs)) {
@@ -71,6 +80,13 @@ function cleanAttribs(
     if (tag === 'option' && name === 'selected') continue;
     if (tag === 'form' && ['action', 'method', 'target'].includes(name)) continue;
     if (tag === 'a' && name === 'target') continue;
+    // L49 §4.1 : lien signalé par Google Safe Browsing, bloqué (jamais autorisable), interne ou non
+    if (tag === 'a' && name === 'href' && flagged.has(absolute(v, pageUrl))) {
+      out['data-tc-href'] = v;
+      out['data-tc-ext'] = 'blocked';
+      continue;
+    }
+    if (tag === 'img' && name === 'src' && flagged.has(absolute(v, pageUrl))) continue;
     // L49 §4 : lien externe désactivé par défaut ; l'adresse est gardée pour l'éditeur (autorisation)
     if (tag === 'a' && name === 'href' && isExternal(v, pageUrl)) {
       out['data-tc-href'] = v;
@@ -82,8 +98,15 @@ function cleanAttribs(
   return out;
 }
 
-/** `pageUrl` (adresse de la page capturée) : les liens vers un autre domaine sont désactivés (L49 §4). */
-export function sanitizePage(html: string, pageUrl: string | null = null): string {
+/**
+ * `pageUrl` (adresse de la page capturée) : les liens vers un autre domaine sont désactivés (L49 §4) ;
+ * `flagged` : adresses signalées par Safe Browsing, bloquées (L49 §4.1).
+ */
+export function sanitizePage(
+  html: string,
+  pageUrl: string | null = null,
+  flagged: Set<string> = new Set(),
+): string {
   const clean = sanitizeHtml(html, {
     allowedTags: false,
     allowedAttributes: false,
@@ -99,7 +122,7 @@ export function sanitizePage(html: string, pageUrl: string | null = null): strin
     transformTags: {
       '*': (tagName: string, attribs: Record<string, string>) => ({
         tagName,
-        attribs: cleanAttribs(tagName.toLowerCase(), attribs, pageUrl),
+        attribs: cleanAttribs(tagName.toLowerCase(), attribs, pageUrl, flagged),
       }),
     },
   });

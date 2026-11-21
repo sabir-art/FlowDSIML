@@ -161,6 +161,8 @@ export function sanitizeDom(root: Element, pageUrl?: string): HtmlSecurityCounts
 export type HtmlSecurityReport = Partial<HtmlSecurityCounts> & {
   dangerousLinks?: number;
   safeBrowsing?: 'ok' | 'unavailable';
+  /** L49 §4.1 : adresses signalées par Google Safe Browsing (liens bloqués). */
+  blocked?: string[];
   analyzedAt?: string;
 };
 export type HtmlSecurityStatus = 'safe' | 'removed' | 'partial';

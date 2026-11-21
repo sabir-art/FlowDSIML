@@ -190,3 +190,16 @@ Deno.test(
     assert(!/evil\.example|data-tc-ext="on"/.test(out), 'marques de la page reçue retirées');
   },
 );
+
+// ===== L49 P4 : lien signalé par Safe Browsing =====
+import { pageUrls } from './security.ts';
+
+Deno.test('lien signalé : bloqué (jamais autorisable), interne ou externe ; image signalée sans src', () => {
+  const bad = 'https://testsafebrowsing.appspot.com/s/malware.html';
+  const html = `<a href="${bad}">piège</a><a href="https://app.example.com/x">ok</a><img src="${bad}">`;
+  assertEquals(pageUrls(html, 'https://app.example.com/'), [bad, 'https://app.example.com/x']);
+  const out = sanitizePage(html, 'https://app.example.com/', new Set([bad]));
+  assertMatch(out, /<a data-tc-href="https:\/\/testsafebrowsing[^"]*" data-tc-ext="blocked">piège<\/a>/);
+  assertMatch(out, /href="https:\/\/app\.example\.com\/x"/);
+  assert(!/<img[^>]*src=/.test(out), out);
+});

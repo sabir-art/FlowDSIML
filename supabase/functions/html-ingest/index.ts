@@ -8,11 +8,14 @@
 //  * L49 P2 : { security } = compteurs de l'extension sur la page d'origine. Le serveur compte à nouveau
 //    sur la page reçue, garde le plus grand des deux par compteur et l'enregistre dans
 //    html_page_security ; un déclencheur le recopie dans steps.html_meta.security. Renvoie { path, security }.
+//  * L49 P4 : liens et images vérifiés par Google Safe Browsing (safebrowsing.ts) ; un lien signalé est
+//    bloqué (data-tc-ext="blocked") et compté. Ni la clé ni les adresses ne sont journalisées.
 // JWT vérifié par la plateforme (config.toml : verify_jwt = true), puis ici l'utilisateur et son rôle.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { MAX_BYTES, captureVerdict, inert, sanitizePage } from './lib.ts';
-import { countSecurity, mergeSecurity } from './security.ts';
+import { countSecurity, mergeSecurity, pageUrls } from './security.ts';
+import { checkUrls } from './safebrowsing.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const RANK: Record<string, number> = { viewer: 1, editor: 2, admin: 3, owner: 4 };
@@ -108,11 +111,19 @@ Deno.serve(async (req) => {
   if (verdict === 'BAD_URL') return json(400, { error: 'BAD_REQUEST' });
   if (verdict !== 'ok') return json(403, { error: verdict });
 
+  // L49 §4.1 : liens et images vérifiés par Google Safe Browsing (préfixes de hachage seulement)
+  const gsb = await checkUrls(
+    pageUrls(body.html, String(body.url)),
+    Deno.env.get('GOOGLE_SAFE_BROWSING_API_KEY'),
+  );
   const security = {
     ...mergeSecurity(countSecurity(body.html, String(body.url)), body.security),
+    dangerousLinks: gsb.flagged.size,
+    blocked: [...gsb.flagged].slice(0, 300),
+    safeBrowsing: gsb.status,
     analyzedAt: new Date().toISOString(),
   };
-  const page = sanitizePage(body.html, String(body.url));
+  const page = sanitizePage(body.html, String(body.url), gsb.flagged);
   if (!inert(page)) return json(422, { error: 'NOT_INERT' });
   const bytes = new TextEncoder().encode(page);
   if (bytes.length > MAX_BYTES) return json(413, { error: 'TOO_BIG' });

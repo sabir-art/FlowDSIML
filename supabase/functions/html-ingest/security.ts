@@ -122,3 +122,25 @@ export function mergeSecurity(server: SecurityCounts, declared: unknown): Securi
   }
   return out;
 }
+
+/** L49 §4.1 : adresses http(s) de la page à vérifier (liens et images), absolues, sans doublon. */
+export function pageUrls(html: string, pageUrl: string | null): string[] {
+  const out = new Set<string>();
+  const add = (v: string | undefined) => {
+    if (!v) return;
+    try {
+      const u = new URL(v, pageUrl ?? undefined);
+      if (u.protocol === 'http:' || u.protocol === 'https:') out.add(u.href);
+    } catch {
+      /* adresse illisible : ignorée */
+    }
+  };
+  const walk = (n: Node) => {
+    const tag = n.name?.toLowerCase();
+    if (tag === 'a') add(n.attribs?.href ?? n.attribs?.['data-tc-href']);
+    if (tag === 'img') add(n.attribs?.src);
+    for (const ch of n.children ?? []) walk(ch);
+  };
+  walk(parseDocument(html) as unknown as Node);
+  return [...out];
+}

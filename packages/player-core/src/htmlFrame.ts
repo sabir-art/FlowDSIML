@@ -486,7 +486,7 @@ export const FRAME_RUNTIME = `(function () {
       else if (o.op === 'image' && el.tagName === 'IMG' && safeImg(o.value)) { keepSize(el); el.style.objectFit = o.fit === 'cover' ? 'cover' : 'contain'; el.setAttribute('src', o.value); el.removeAttribute('srcset'); }
       else if (o.op === 'mask' && el.tagName === 'IMG') { keepSize(el); el.style.backgroundColor = bgOf(el.parentElement || el); el.setAttribute('src', BLANK); el.removeAttribute('srcset'); el.setAttribute('alt', ''); el.setAttribute('data-fd-masked', ''); }
       else if (o.op === 'chart') drawChart(el, o.value);
-      else if (o.op === 'extlink' && el.hasAttribute('data-tc-ext')) el.setAttribute('data-fd-ext', String(o.id));
+      else if (o.op === 'extlink' && el.getAttribute('data-tc-ext') === 'off') el.setAttribute('data-fd-ext', String(o.id));
     }
     if (mode === 'player') {
       for (var j = 0; j < autoLinks.length; j++) {
@@ -618,7 +618,8 @@ export const FRAME_RUNTIME = `(function () {
     if (linked) post({ t: 'go', step: linked.getAttribute('data-fd-link') });
     // L49 §4 : lien externe autorisé (le lecteur demande confirmation) ou désactivé
     else if (ext && ext.hasAttribute('data-fd-ext')) post({ t: 'ext', id: ext.getAttribute('data-fd-ext') });
-    else if (ext) { if (unlinked !== 'none') post({ t: 'unlinked', ext: true }); }
+    // L49 §4.1 : lien signalé par Safe Browsing (data-tc-ext="blocked") : rien ne se passe
+    else if (ext) { if (ext.getAttribute('data-tc-ext') === 'off' && unlinked !== 'none') post({ t: 'unlinked', ext: true }); }
     else if (actionable && unlinked !== 'none') post({ t: 'unlinked' });
   }, true);
   document.addEventListener('submit', function (e) { e.preventDefault(); }, true);

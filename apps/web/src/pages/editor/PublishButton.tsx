@@ -1,14 +1,15 @@
 import { AlertTriangle, Loader2, Rocket } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { branchIssues } from './branch';
 import { firstMissingRule } from './rules';
 import { publishedColumns, useDataset } from './data/datasetStore';
-import { asAction, asStepOptions, beforeAfterComplete } from './types';
+import { asAction, asStepOptions, beforeAfterComplete, type StepRow } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { canPublishWith, useShareRules } from '../../lib/shareRules';
 import { Button } from '@flowdsiml/ui';
 import { publishDemo } from '../../lib/publish';
+import { supabase } from '../../lib/supabase';
 import { errorMessage } from '../../lib/errors';
 import type { DemoEditor } from './useDemoEditor';
 import { GdprDialog, type GdprAck } from './GdprDialog';
@@ -87,8 +88,13 @@ export function PublishButton({
   // REV-09 : le message bloquant s'affiche en infobulle sous le bouton, avec « Aller à l'étape n »
   const [error, setErrorState] = useState<{ text: string; step?: number } | null>(null);
   const setError = (text: string | null, step?: number) => setErrorState(text ? { text, step } : null);
-  // Le message d'une tentative précédente disparaît dès que les étapes changent (corrigées)
-  useEffect(() => setErrorState(null), [editor.steps]);
+  // Le message d'une tentative précédente disparaît dès que les étapes changent (corrigées), sauf celui
+  // posé avec le rechargement qui les change (L49 : liens bloqués à la publication)
+  const pendingError = useRef<{ text: string; step?: number } | null>(null);
+  useEffect(() => {
+    setErrorState(pendingError.current);
+    pendingError.current = null;
+  }, [editor.steps]);
   const demo = editor.demo!;
   const { current } = useWorkspace();
   const restricted = !canPublishWith(useShareRules(demo.workspace_id), current?.role);
@@ -157,6 +163,34 @@ export function PublishButton({
     setError(null);
     try {
       await editor.flush();
+      // L49 §4.1 : nouvelle vérification Google Safe Browsing des pages HTML. Un lien autorisé devenu
+      // dangereux est bloqué par le serveur : l'auteur le voit avant de publier à nouveau. Vérification
+      // indisponible : la publication continue (les liens restent désactivés par défaut).
+      if (editor.steps.some((s) => s.kind === 'html' && s.html_path)) {
+        const { data } = await supabase.functions
+          .invoke<{
+            blocked?: Array<{ stepId: string; text: string }>;
+            steps?: Array<Pick<StepRow, 'id' | 'html_meta' | 'html_ops'>>;
+          }>('html-recheck', {
+            body: { demoId: demo.id },
+          })
+          .catch(() => ({ data: null }));
+        const blocked = data?.blocked ?? [];
+        if (blocked.length) {
+          const msg = {
+            text: [...new Set(blocked.map((b) => t('extLinks.blockedLater', { text: b.text })))].join(' '),
+            step: editor.steps.findIndex((s) => s.id === blocked[0]!.stepId),
+          };
+          pendingError.current = msg;
+          // Étapes à jour (lien bloqué, autorisation retirée) reprises sur place : l'éditeur reste ouvert
+          editor.batch(() => {
+            for (const s of data?.steps ?? [])
+              editor.updateStep(s.id, { html_meta: s.html_meta, html_ops: s.html_ops });
+          });
+          setErrorState(msg);
+          return;
+        }
+      }
       const res = await publishDemo(demo.id, ack, (d, total) =>
         setProgress(`${Math.round((d / total) * 100)} %`),
       );
