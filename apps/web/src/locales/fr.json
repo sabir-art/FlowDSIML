@@ -43,7 +43,9 @@
     "utilities": "Utilitaires",
     "extension": "Extension",
     "helpCenter": "Centre d’aide",
-    "sandbox": "Sandbox"
+    "sandbox": "Sandbox",
+    "pinSidebar": "Épingler la barre latérale",
+    "collapseSidebar": "Réduire la barre latérale"
   },
   "roles": {
     "owner": "Propriétaire",

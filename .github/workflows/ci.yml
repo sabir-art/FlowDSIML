@@ -137,6 +137,9 @@ jobs:
       - name: Colonne Dossiers pleine hauteur, rail et tiroir (retours client 2 et 7)
         if: always()
         run: cd apps/web && node e2e/colonne-dossiers.e2e.cjs
+      - name: Barre latérale repliable en rail (retour client 6)
+        if: always()
+        run: cd apps/web && node e2e/barre-laterale-rail.e2e.cjs
       - name: États vides L48-B (page Démos neuve, recherche sans résultat)
         if: always()
         run: cd apps/web && node e2e/l48b-vides.e2e.cjs

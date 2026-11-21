@@ -43,7 +43,9 @@
     "utilities": "Utilities",
     "extension": "Extension",
     "helpCenter": "Help centre",
-    "sandbox": "Sandbox"
+    "sandbox": "Sandbox",
+    "pinSidebar": "Pin the sidebar",
+    "collapseSidebar": "Collapse the sidebar"
   },
   "roles": {
     "owner": "Owner",

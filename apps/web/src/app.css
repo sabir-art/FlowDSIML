@@ -1927,3 +1927,100 @@ button.fd-nav__item:hover {
   overflow-x: clip;
   overscroll-behavior-x: contain;
 }
+
+/* ---- Retours client 21/11 §6 : barre latérale repliable en rail de 64 px (≥ 1 024 px) ---- */
+.sidebar__pin {
+  flex: none;
+  align-self: flex-start;
+  width: 32px;
+  height: 32px;
+  margin-bottom: calc(-1 * var(--fd-space-2));
+}
+.brand__symbol {
+  display: block;
+}
+@media (min-width: 1024px) {
+  .shell--rail {
+    grid-template-columns: var(--fd-layout-sidebar-width-collapsed, 64px) minmax(0, 1fr);
+  }
+  /* Le rail garde sa colonne de 64 px ; déplié, il passe par-dessus le contenu sans le pousser */
+  .shell--rail .sidebar {
+    z-index: calc(var(--fd-z-sticky) + 1);
+    width: var(--fd-layout-sidebar-width-collapsed, 64px);
+    /* Même marge haute qu'épinglée : le bouton d'épinglage ne bouge pas */
+    padding: var(--fd-space-6) 10px;
+    overflow-x: hidden;
+    transition: width var(--fd-motion-duration-fast, 120ms) var(--fd-motion-ease-standard, ease);
+  }
+  .shell--rail .sidebar[data-expanded='true'] {
+    width: var(--fd-layout-sidebar-width, 256px);
+    box-shadow: var(--fd-shadow-lg);
+  }
+  /* Bouton d'épinglage et icônes à la même abscisse, replié ou déplié (16 px du bord) */
+  .shell--rail .sidebar__pin,
+  .shell--rail .brand {
+    margin-left: 6px;
+    padding: 0;
+  }
+  .shell--rail .fd-nav__item {
+    flex: none;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .fd-nav__item {
+    width: 44px;
+  }
+  /* Replié : libellés masqués visuellement (noms accessibles gardés) */
+  .shell--rail .sidebar[data-expanded='false'] :is(.fd-nav__label, .ws-text, .user-text) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .fd-nav__section {
+    height: 1px;
+    margin: 11px 12px;
+    padding: 0;
+    overflow: hidden;
+    color: transparent;
+    background: var(--fd-color-border);
+  }
+  /* Espace : la pastille seule (32 px) */
+  .shell--rail .sidebar[data-expanded='false'] .ws-switch {
+    width: 44px;
+    justify-content: center;
+    padding: 6px;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .ws-switch > svg {
+    display: none;
+  }
+  /* Compte : l'avatar seul ; le bouton du menu le recouvre (cliquable, atteignable au clavier) */
+  .shell--rail .sidebar[data-expanded='false'] .user-block {
+    position: relative;
+    width: 44px;
+    justify-content: center;
+    padding: 6px;
+    background: none;
+    box-shadow: none;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .user-block .menu,
+  .shell--rail .sidebar[data-expanded='false'] .user-block .menu-trigger {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .user-block .menu-trigger {
+    border-radius: var(--fd-radius-full);
+  }
+  .shell--rail .sidebar[data-expanded='false'] .user-block .menu-trigger > * {
+    opacity: 0;
+  }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .shell--rail .sidebar {
+    transition: none;
+  }
+}
