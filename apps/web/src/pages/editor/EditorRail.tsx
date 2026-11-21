@@ -11,7 +11,6 @@ import {
   Droplet,
   GitBranch,
   Image as ImageIcon,
-  MessageSquare,
   Mic,
   MousePointerClick,
   Palette,
@@ -35,7 +34,6 @@ export type ToolId =
   | 'crop'
   | 'image'
   | 'design'
-  | 'comments'
   | 'assistant'
   | 'settings';
 
@@ -43,7 +41,8 @@ export const TOOL_GROUPS: Array<{ key: string; tools: ToolId[] }> = [
   { key: 'content', tools: ['step', 'cta', 'hotspots', 'voice', 'next'] },
   { key: 'screen', tools: ['blur', 'zoom', 'crop', 'image'] },
   { key: 'look', tools: ['design'] },
-  { key: 'collab', tools: ['comments', 'assistant'] },
+  // Retours client 21/11 §1 : les Commentaires sont dans le panneau sous le canevas, plus dans le rail
+  { key: 'collab', tools: ['assistant'] },
 ];
 /** Ordre du rail (raccourcis Alt + 1 à 9 sur les 9 premiers). */
 export const TOOL_ORDER: ToolId[] = [...TOOL_GROUPS.flatMap((g) => g.tools), 'settings'];
@@ -59,7 +58,6 @@ const ICONS: Record<ToolId, LucideIcon> = {
   crop: Crop,
   image: ImageIcon,
   design: Palette,
-  comments: MessageSquare,
   assistant: Sparkles,
   settings: Settings,
 };
@@ -79,15 +77,12 @@ export function EditorRail({
   active,
   onToggle,
   disabled,
-  dot,
   hidden = [],
 }: {
   active: ToolId | null;
   onToggle: (t: ToolId) => void;
   /** Raison de l'indisponibilité, par outil (absent : disponible). */
   disabled: Partial<Record<ToolId, string>>;
-  /** Point de 8 px (commentaire non lu). */
-  dot?: Partial<Record<ToolId, boolean>>;
   /** Outils hors droits (ex. Assistant pour un lecteur). */
   hidden?: ToolId[];
 }) {
@@ -132,7 +127,6 @@ export function EditorRail({
         onClick={() => !reason && onToggle(id)}
       >
         <Icon aria-hidden="true" />
-        {dot?.[id] && <span className="ed-rail__dot" aria-hidden="true" />}
         {reason && (
           <span id={`rail-why-${id}`} className="sr-only">
             {reason}
@@ -172,24 +166,17 @@ export function EditorRail({
 export function ToolPanel({
   id,
   title,
-  wide = false,
   onClose,
   children,
 }: {
   id: ToolId | 'form';
   title: string;
-  /** Commentaires et Assistant : 400 px. */
-  wide?: boolean;
   onClose: () => void;
   children: ReactNode;
 }) {
   const { t } = useTranslation();
   return (
-    <aside
-      className={`ed-tool fd-dense${wide ? ' ed-tool--wide' : ''}`}
-      aria-labelledby="ed-tool-title"
-      data-tool-panel={id}
-    >
+    <aside className="ed-tool fd-dense" aria-labelledby="ed-tool-title" data-tool-panel={id}>
       <header className="ed-tool__head">
         <h2 id="ed-tool-title" tabIndex={-1}>
           {title}

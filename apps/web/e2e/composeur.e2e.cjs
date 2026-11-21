@@ -26,8 +26,10 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   };
   const open = async (state, viewport = { width: 1440, height: 900 }) => {
     const ctx = await themedContext(b, { viewport });
-    // L48-E : les commentaires sont un outil du rail (dernier outil ouvert gardé)
-    await ctx.addInitScript(() => localStorage.setItem('fd.editor.tool', 'comments'));
+    // Retours client 21/11 §1 : panneau Commentaires sous le canevas, déplié (état retenu)
+    await ctx.addInitScript(() =>
+      localStorage.setItem('fd.comments.dock', JSON.stringify({ open: true, height: 320 })),
+    );
     const page = await ctx.newPage();
     page.on('pageerror', (e) => errors.push(e.message));
     await install(page, state);
@@ -55,8 +57,9 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
     'aide dans le placeholder',
   );
   ok(
-    /Interne à l’équipe, jamais publié\./.test(await page.locator('.cm-head').textContent()),
-    'mention de contexte sous le titre du panneau',
+    /Interne à l’équipe, jamais publié\./.test(await page.locator('.cm-dock__private').textContent()) &&
+      (await input.getAttribute('aria-describedby'))?.includes('cm-private'),
+    'mention de contexte dans la barre du panneau, liée au champ',
   );
   ok(
     (await input.getAttribute('aria-describedby'))?.split(' ').includes('cm-private'),
@@ -103,10 +106,11 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
     oy: el.style.overflowY,
   }));
   ok(
-    h.h <= 192 + 13 && h.h >= 176 && h.sh > h.h && h.oy === 'auto',
-    `8 lignes au plus, puis défilement (${h.h} px)`,
+    // Panneau Commentaires sous le canevas (21/11 §1) : 4 lignes de 24 px au plus
+    h.h <= 96 + 13 && h.h >= 88 && h.sh > h.h && h.oy === 'auto',
+    `4 lignes au plus dans le panneau, puis défilement (${h.h} px)`,
   );
-  ok(await send.isVisible(), 'barre d’actions visible au-delà de 8 lignes');
+  ok(await send.isVisible(), 'barre d’actions visible au-delà de 4 lignes');
   if (SHOTS) await page.locator('.cm').screenshot({ path: `${SHOTS}/l43-multiligne${sfx}.png` });
 
   // Compteur à partir de 80 % (400 / 500)

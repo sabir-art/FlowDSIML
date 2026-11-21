@@ -566,7 +566,13 @@
       "composeLabel": "Nouveau commentaire",
       "saveSubmit": "Enregistrer",
       "enterKey": "Entrée",
-      "counter": "{{count}} / {{max}}"
+      "counter": "{{count}} / {{max}}",
+      "dockNone": "Commentaires, aucun ouvert",
+      "dockOpen_one": "Commentaires, {{count}} ouvert",
+      "dockOpen_other": "Commentaires, {{count}} ouverts",
+      "dockUnread_one": "Commentaires, {{count}} ouvert, dont {{unread}} non lu",
+      "dockUnread_other": "Commentaires, {{count}} ouverts, dont {{unread}} non lus",
+      "dockResize": "Hauteur du panneau Commentaires"
     },
     "autoplay": "Lecture automatique",
     "autoplayHelp": "Avance seule ; s’arrête sur un formulaire, un menu de choix ou la dernière étape.",
@@ -891,7 +897,6 @@
       "crop": "Recadrage",
       "image": "Image",
       "design": "Design",
-      "comments": "Commentaires",
       "assistant": "Assistant",
       "settings": "Réglages de la démo",
       "group": {
@@ -1016,7 +1021,8 @@
       "space": "Espace",
       "del": "Suppr",
       "esc": "Échap",
-      "help": "Les raccourcis à une lettre (H, B, ?) sont inactifs pendant la saisie de texte."
+      "help": "Les raccourcis à une lettre (H, B, ?) sont inactifs pendant la saisie de texte.",
+      "comments": "Ouvrir ou fermer les commentaires"
     },
     "maskTag": "Masque",
     "zoomLevel": "Niveau",

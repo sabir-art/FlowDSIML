@@ -519,13 +519,13 @@ const APP_PAGES = [
       await p.waitForTimeout(400);
     },
   },
-  // L48-E : commentaires dans le rail, flou en modale plein écran
+  // Retours client 21/11 §1 : commentaires sous le canevas ; L48-E : flou en modale plein écran
   {
     name: 'Éditeur · Commentaires',
     route: `/#/demos/${DEMO}/edit`,
     open: async (p) => {
-      await p.locator('.ed-rail [data-tool="comments"]').click();
-      await p.locator('.ed-tool .cm').waitFor();
+      await p.locator('.cm-dock__toggle').click();
+      await p.locator('.cm-dock .cm').waitFor();
     },
   },
   {

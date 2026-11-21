@@ -225,6 +225,9 @@ jobs:
       - name: Éditeur L48-E (rail d'outils, panneau, flou en modale)
         if: always()
         run: cd apps/web && node e2e/l48e-editeur.e2e.cjs
+      - name: Commentaires sous le canevas (retour client 1)
+        if: always()
+        run: cd apps/web && node e2e/commentaires-dock.e2e.cjs
       - name: Assistant de démarrage L48-C (5 étapes, reprise, extension détectée, Nouvel espace)
         if: always()
         run: cd apps/web && node e2e/onboarding-import.e2e.cjs

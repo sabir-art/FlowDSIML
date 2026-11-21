@@ -3152,15 +3152,6 @@
   outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
   outline-offset: 2px;
 }
-.mk .ed-rail__dot {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--fd-color-primary);
-}
 
 .mk .ed-tool {
   flex: 0 0 360px;
@@ -3170,10 +3161,6 @@
   min-height: 0;
   background: var(--fd-color-surface);
   border-left: 1px solid var(--fd-color-border);
-}
-.mk .ed-tool--wide {
-  flex-basis: 400px;
-  width: 400px;
 }
 .mk .ed-tool__head {
   flex: none;
@@ -3209,14 +3196,6 @@
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
-}
-.mk .ed-tool__body:has(> .cm) {
-  padding: 0;
-}
-.mk .ed-tool .cm--side {
-  height: 100%;
-  border: 0;
-  border-radius: 0;
 }
 .mk .ed-tool__why {
   margin: 0;
@@ -3482,4 +3461,163 @@
   margin: 4px 0 0;
   font-size: 12px;
   color: var(--fd-color-text-muted);
+}
+
+/* ---- Retours client 21/11 §1 : panneau Commentaires sous le canevas ---- */
+.mk .cm-dock {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  height: 40px;
+  min-height: 0;
+  background: var(--fd-color-surface);
+  border-top: 1px solid var(--fd-color-border);
+  transition: height var(--fd-motion-duration-fast, 120ms) ease;
+}
+.mk .cm-dock.is-resizing {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk .cm-dock {
+    transition: none;
+  }
+}
+/* Poignée : 8 px de zone de saisie, trait centré de 32 × 4 px */
+.mk .cm-dock__handle {
+  position: absolute;
+  top: -5px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 8px;
+  cursor: row-resize;
+  touch-action: none;
+}
+.mk .cm-dock__handle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: calc(50% - 16px);
+  width: 32px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fd-color-border-strong);
+}
+.mk .cm-dock__handle:focus-visible {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: -2px;
+}
+.mk .cm-dock__bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-3);
+  height: 40px;
+  padding: 0 var(--fd-space-3);
+}
+.mk .cm-dock__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--fd-space-2);
+  border: 0;
+  border-radius: var(--fd-radius-md);
+  background: transparent;
+  color: var(--fd-color-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mk .cm-dock__toggle:hover {
+  background: color-mix(in srgb, var(--fd-color-text) 6%, transparent);
+}
+.mk .cm-dock__toggle:focus-visible {
+  outline: 2px solid var(--fd-color-focus, var(--fd-color-primary));
+  outline-offset: 2px;
+}
+.mk .cm-dock__toggle svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.mk .cm-dock__badge {
+  display: inline-grid;
+  place-items: center;
+  height: 18px;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.mk .cm-dock__badge.is-unread {
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary);
+}
+.mk .cm-dock__private {
+  margin-left: auto;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.mk .cm-dock__private > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mk .cm-dock__private svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.mk .cm-dock__step {
+  flex: none;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+  white-space: nowrap;
+}
+.mk .cm-dock__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.mk .cm-dock__body[hidden] {
+  display: none;
+}
+.mk .cm-dock .cm--dock {
+  flex: 1;
+}
+/* Pas de carte dans le panneau : la liste défile, le champ de saisie reste collé en bas */
+.mk .cm-dock .cm-card {
+  /* Pas d'écart entre blocs : l'en-tête masqué et la région annoncée (sr-only) en prendraient un chacun */
+  gap: 0;
+  padding: 0 var(--fd-space-4) var(--fd-space-3);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.mk .cm-dock .cm-head:has(.cm-head__end > *, .cm-offline) {
+  padding-bottom: var(--fd-space-2);
+}
+.mk .cm-dock .cm-compose {
+  margin-top: var(--fd-space-2);
+  padding-top: var(--fd-space-2);
+}
+/* État vide sur une ligne : le panneau peut ne faire que 160 px */
+.mk .cm-dock .fd-empty {
+  padding: var(--fd-space-2) 0;
+}
+.mk .cm-dock .fd-empty__icon {
+  display: none;
 }

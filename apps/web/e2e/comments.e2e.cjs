@@ -1,7 +1,7 @@
 /** Test e2e du panneau Commentaires de l'éditeur (faux Supabase). */
 const { chromium } = require('playwright');
 const { install } = require('./fake-supabase.cjs');
-const { openTool } = require('./editor-rail.cjs');
+const { openComments } = require('./editor-rail.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -9,11 +9,6 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
-  // Panneau Commentaires replié par défaut depuis la conformité EDT-01 : on l'ouvre pour ces tests
-  await ctx.addInitScript(() => {
-    if (localStorage.getItem('fd.editor.comments.collapsed') === null)
-      localStorage.setItem('fd.editor.comments.collapsed', '0');
-  });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const state = await install(page);
@@ -23,8 +18,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   };
 
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
-  // L48-E : les commentaires sont un outil du rail
-  await openTool(page, 'comments');
+  // Retours client 21/11 §1 : panneau Commentaires sous le canevas
+  await openComments(page);
   await page.waitForSelector('.cm');
   ok((await page.locator('.cm').textContent()).includes('Aucun commentaire sur cette étape'), 'état vide');
   ok(
@@ -55,7 +50,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     (await page.locator('.rail-comments').first().textContent()).includes('1'),
     'badge sur la vignette du rail',
   );
-  ok((await page.locator('.cm-count').textContent()) === '1 ouvert', 'badge « n ouverts »');
+  // Retours client 21/11 §1 : badge du panneau (seul indicateur), lu (son propre commentaire)
+  ok(
+    (await page.locator('.cm-dock__badge').textContent()) === '1' &&
+      !(await page.locator('.cm-dock__badge').evaluate((el) => el.classList.contains('is-unread'))) &&
+      (await page.locator('.cm-dock__toggle').getAttribute('aria-label')) === 'Commentaires, 1 ouvert',
+    'badge « 1 », nom accessible « Commentaires, 1 ouvert »',
+  );
   ok(
     (await page.locator('.rail-list .step').first().textContent()).includes('1 commentaire ouvert'),
     'nombre de commentaires dans le nom accessible de l’étape',
