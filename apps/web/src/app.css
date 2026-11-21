@@ -1862,6 +1862,7 @@ button.fd-nav__item:hover {
 /* « Bientôt » en texte (jamais en pastille) à côté d'une fonction pas encore livrée */
 .soon-text {
   color: var(--fd-color-text-muted);
+  font-size: 13px;
   font-weight: 500;
 }
 
