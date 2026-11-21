@@ -147,6 +147,7 @@ http
           workspaceId: b.workspaceId,
           demoId: b.demoId,
           size: (b.html || '').length,
+          security: b.security,
         });
         log[log.length - 1].html = b.html;
         return send(200, { path: `${b.workspaceId}/${b.demoId}/${require('crypto').randomUUID()}.html` });

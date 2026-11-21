@@ -3376,3 +3376,48 @@
 .blurm-zones > li.is-selected > .sp-item {
   background: var(--fd-color-surface-sunken);
 }
+
+/* L49 §3 : « Sécurité de la page » (statut en point de 8 px et texte, sans badge ni fond) */
+.hsec-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.hsec-status .link-button {
+  margin-left: auto;
+}
+.hsec-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.hsec-dot.is-safe {
+  background: var(--fd-color-success);
+}
+.hsec-dot.is-removed {
+  background: var(--fd-color-warning);
+}
+.hsec-dot.is-partial {
+  background: var(--fd-color-text-muted);
+}
+.hsec .help {
+  margin: 6px 0 0;
+}
+.hsec-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.hsec-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+.hsec-n {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}

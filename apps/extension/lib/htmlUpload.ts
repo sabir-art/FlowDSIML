@@ -17,6 +17,7 @@ async function ingest(
   demoId: string,
   html: string,
   url: string,
+  security: unknown,
 ): Promise<string> {
   const res = await fetch(`${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/html-ingest`, {
     method: 'POST',
@@ -25,8 +26,9 @@ async function ingest(
       apikey: SUPABASE_ANON_KEY,
       'content-type': 'application/json',
     },
-    // L49 : l'adresse de la page (celle de html_meta.url) sert au réglage « Captures HTML » de l'espace
-    body: JSON.stringify({ workspaceId, demoId, html, url }),
+    // L49 : l'adresse de la page (celle de html_meta.url) sert au réglage « Captures HTML » de l'espace ;
+    // les compteurs de la page d'origine complètent ceux que le serveur recalcule (rapport, L49 §3)
+    body: JSON.stringify({ workspaceId, demoId, html, url, security }),
   });
   const body = (await res.json().catch(() => ({}))) as { path?: string; error?: string };
   if (!res.ok || !body.path) throw new Error(body.error ?? `HTTP ${res.status}`);
@@ -60,7 +62,7 @@ export async function sendHtml(
   if (demo.error) throw demo.error;
   const demoId = demo.data.id;
   for (const [i, p] of ordered.entries()) {
-    const path = await ingest(s.session.access_token, target.workspaceId, demoId, p.html, p.url);
+    const path = await ingest(s.session.access_token, target.workspaceId, demoId, p.html, p.url, p.security);
     const ops: HtmlOp[] = [];
     const next = stepIds[i + 1];
     if (p.clickSel && next)

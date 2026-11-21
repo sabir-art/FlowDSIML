@@ -5,12 +5,15 @@ import {
   ListTodo,
   MessageSquareLock,
   Shield,
+  ShieldCheck,
   Sparkles,
   TriangleAlert,
 } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
+import { htmlSecurityStatus } from '@flowdsiml/core';
+import { stepSecurity } from './html/HtmlSecurity';
 import { asBeforeAfter, type StepRow } from './types';
 import { todoLines, type TodoItem } from './publishTodo';
 
@@ -75,7 +78,7 @@ export function GdprDialog({
 }: {
   open: boolean;
   steps: (Pick<StepRow, 'blurs' | 'element_meta'> &
-    Partial<Pick<StepRow, 'kind' | 'options' | 'html_ops'>>)[];
+    Partial<Pick<StepRow, 'kind' | 'options' | 'html_ops' | 'html_meta'>>)[];
   publicEnabled: boolean;
   onConfirm: (ack: GdprAck) => void;
   onReview: (stepIndex: number) => void;
@@ -102,6 +105,11 @@ export function GdprDialog({
   const [fictional, setFictional] = useState(false);
   const id = useId();
   const sum = gdprSummary(steps);
+  // L49 §3 : pages HTML analysées (information, ne bloque pas la publication)
+  const scanned = steps.flatMap((s) => {
+    const r = s.kind === 'html' ? stepSecurity({ html_meta: s.html_meta ?? null }) : null;
+    return r ? [htmlSecurityStatus(r)] : [];
+  });
   const ready = reviewed && fictional;
 
   useEffect(() => {
@@ -233,6 +241,16 @@ export function GdprDialog({
                 <li className="is-warning">
                   <Database aria-hidden="true" />
                   {t('editor.gdpr.dataset', { rows: dataset.rows, columns: dataset.columns })}
+                </li>
+              )}
+              {scanned.length > 0 && (
+                <li>
+                  <ShieldCheck aria-hidden="true" />
+                  {t('htmlSecurity.checklist', {
+                    count: scanned.length,
+                    safe: scanned.filter((x) => x === 'safe').length,
+                    removed: scanned.filter((x) => x === 'removed').length,
+                  })}
                 </li>
               )}
               <li>

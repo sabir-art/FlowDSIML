@@ -19,6 +19,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import type { StepRow } from '../types';
 import { ChartFields } from './ChartFields';
 import { StyleFields } from './StyleFields';
+import { HtmlSecurity } from './HtmlSecurity';
 import {
   asOps,
   frameSend,
@@ -235,6 +236,7 @@ export function HtmlFields({
           })}
         </ul>
       </div>
+      <HtmlSecurity key={step.id} step={step} />
       <div className="sec">
         <p className="help" style={{ margin: 0 }}>
           {t('editor.html.reminder')}

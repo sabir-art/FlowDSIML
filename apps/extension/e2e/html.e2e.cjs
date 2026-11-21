@@ -150,6 +150,15 @@ const WS = '11111111-1111-1111-1111-111111111111';
     ing.length === 3 && ing.every((l) => JSON.parse(l.body).workspaceId === WS),
     'pages envoyées à html-ingest',
   );
+  // L49 §3 : compteurs de la page d'origine envoyés avec chaque page (le serveur recompte de son côté)
+  const KEYS = ['scripts', 'handlers', 'frames', 'forms', 'externalLinks', 'piiReplaced', 'other'];
+  ok(
+    ing.every((l) => {
+      const sec = JSON.parse(l.body).security;
+      return sec && KEYS.every((k) => Number.isInteger(sec[k]) && sec[k] >= 0);
+    }),
+    'L49 : compteurs du rapport envoyés avec chaque page',
+  );
   const demo = JSON.parse(log.find((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/demos')).body);
   ok(
     demo.kind === 'sandbox' && demo.sandbox?.autoLink === true && demo.sandbox.unlinked === 'toast',

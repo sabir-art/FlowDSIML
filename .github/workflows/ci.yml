@@ -140,6 +140,9 @@ jobs:
       - name: L49 P1 réglage « Captures HTML » (radios, domaines, lecture seule, types désactivés, mention)
         if: always()
         run: cd apps/web && node e2e/l49-reglage.e2e.cjs
+      - name: Rapport d'analyse de sécurité L49 (Sécurité de la page, statut, détail des compteurs, liste avant publication)
+        if: always()
+        run: cd apps/web && node e2e/l49-rapport.e2e.cjs
       - name: Éditeur L48-E (rail d'outils, panneau, flou en modale)
         if: always()
         run: cd apps/web && node e2e/l48e-editeur.e2e.cjs

@@ -5,10 +5,14 @@
 //  * L49 P1 : { url } = adresse de la page (enregistrée ensuite dans html_meta.url). Réglage « Captures
 //    HTML » de l'espace : 403 HTML_CAPTURE_DISABLED ou HTML_CAPTURE_DOMAIN ; l'hôte vient de cette adresse,
 //    jamais d'un en-tête. Un déclencheur sur steps applique la même règle à l'adresse enregistrée.
+//  * L49 P2 : { security } = compteurs de l'extension sur la page d'origine. Le serveur compte à nouveau
+//    sur la page reçue, garde le plus grand des deux par compteur et l'enregistre dans
+//    html_page_security ; un déclencheur le recopie dans steps.html_meta.security. Renvoie { path, security }.
 // JWT vérifié par la plateforme (config.toml : verify_jwt = true), puis ici l'utilisateur et son rôle.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { MAX_BYTES, captureVerdict, inert, sanitizePage } from './lib.ts';
+import { countSecurity, mergeSecurity } from './security.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const RANK: Record<string, number> = { viewer: 1, editor: 2, admin: 3, owner: 4 };
@@ -76,7 +80,7 @@ Deno.serve(async (req) => {
   if (declared > MAX_BODY) return json(413, { error: 'TOO_BIG' });
   const raw = await readCapped(req);
   if (raw === null) return json(413, { error: 'TOO_BIG' });
-  let body: { workspaceId?: unknown; demoId?: unknown; html?: unknown; url?: unknown };
+  let body: { workspaceId?: unknown; demoId?: unknown; html?: unknown; url?: unknown; security?: unknown };
   try {
     body = JSON.parse(raw);
   } catch {
@@ -104,6 +108,10 @@ Deno.serve(async (req) => {
   if (verdict === 'BAD_URL') return json(400, { error: 'BAD_REQUEST' });
   if (verdict !== 'ok') return json(403, { error: verdict });
 
+  const security = {
+    ...mergeSecurity(countSecurity(body.html, String(body.url)), body.security),
+    analyzedAt: new Date().toISOString(),
+  };
   const page = sanitizePage(body.html);
   if (!inert(page)) return json(422, { error: 'NOT_INERT' });
   const bytes = new TextEncoder().encode(page);
@@ -115,5 +123,10 @@ Deno.serve(async (req) => {
     upsert: false,
   });
   if (up.error) return json(400, { error: 'STORAGE' });
-  return json(200, { path });
+  const rec = await admin.from('html_page_security').insert({ path, workspace_id: ws, security });
+  if (rec.error) {
+    await admin.storage.from('html').remove([path]);
+    return json(400, { error: 'STORAGE' });
+  }
+  return json(200, { path, security });
 });

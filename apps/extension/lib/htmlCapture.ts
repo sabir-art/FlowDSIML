@@ -1,4 +1,5 @@
 import {
+  type HtmlSecurityCounts,
   HTML_MAX_BYTES,
   neutralText,
   neutralizeText,
@@ -26,6 +27,8 @@ export interface HtmlCapture {
   blurred: number;
   /** Graphiques canvas convertis en image (non modifiables comme du texte). */
   canvases: number;
+  /** L49 §3 : rapport d'analyse (ce qui a été retiré ou neutralisé sur la page d'origine). */
+  security: HtmlSecurityCounts;
 }
 
 /** Récupère une ressource (image → data: WebP, police → data:, CSS → texte) par le service. */
@@ -118,15 +121,21 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
 
   // Données repérées : texte remplacé dans la source et flou
   const blurredEls = new Set<Element>();
+  let piiReplaced = 0;
   for (const d of detections) {
     if (d.node && d.start !== undefined && d.end !== undefined) {
       const t = map.get(d.node) as Text | undefined;
-      if (t)
+      if (t) {
         t.data = t.data.slice(0, d.start) + neutralText(t.data.slice(d.start, d.end)) + t.data.slice(d.end);
+        piiReplaced++;
+      }
     }
     const el = map.get(d.el) as HTMLElement | undefined;
     if (!el) continue;
-    if (!d.node) neutralizeText(el);
+    if (!d.node) {
+      neutralizeText(el);
+      piiReplaced++;
+    }
     // Le nom de colonne ou la libellé ne sont pas floutés : seulement l'élément porteur
     el.setAttribute('style', `${el.getAttribute('style') ?? ''};${BLUR}`);
     el.setAttribute('data-fd-blurred', '');
@@ -208,7 +217,7 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     a.removeAttribute('target');
   }
 
-  sanitizeDom(clone);
+  const security = { ...sanitizeDom(clone, location.href), piiReplaced };
   const html = `<!doctype html>\n${clone.outerHTML}`;
   const bytes = new TextEncoder().encode(html).length;
   return {
@@ -221,5 +230,6 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     links,
     blurred: blurredEls.size,
     canvases,
+    security,
   };
 }

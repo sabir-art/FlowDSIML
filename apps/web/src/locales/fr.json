@@ -5228,5 +5228,34 @@
     "blockedDomain": "Ce site n’est pas dans la liste des domaines autorisés de votre espace (Sécurité > Captures HTML).",
     "notice": "Capturez uniquement des logiciels que vous êtes autorisé à reproduire. Certaines structures interdisent la copie HTML de leurs écrans : utilisez alors des captures d’écran.",
     "saved": "Réglage des captures HTML enregistré."
+  },
+  "htmlSecurity": {
+    "title": "Sécurité de la page",
+    "group": "Analyse de sécurité",
+    "safe": "Page sûre",
+    "removed": "Éléments retirés",
+    "partial": "Vérification partielle",
+    "safeBody": "Rien d’actif à retirer sur cette page.",
+    "removedBody": "Tout ce qui pouvait s’exécuter ou envoyer des données a été retiré. La page est publiable.",
+    "notAnalyzed": "Page capturée avant l’analyse de sécurité : pas de rapport.",
+    "detail": "Détail",
+    "checklist": "{{count}} pages analysées : {{safe}} sûres, {{removed}} avec éléments retirés",
+    "checklist_one": "{{count}} page analysée : {{safe}} sûre, {{removed}} avec éléments retirés",
+    "c": {
+      "scripts_one": "script retiré",
+      "scripts_other": "scripts retirés",
+      "handlers_one": "action au clic retirée",
+      "handlers_other": "actions au clic retirées",
+      "frames_one": "cadre intégré retiré",
+      "frames_other": "cadres intégrés retirés",
+      "forms_one": "formulaire neutralisé",
+      "forms_other": "formulaires neutralisés",
+      "externalLinks_one": "lien externe désactivé",
+      "externalLinks_other": "liens externes désactivés",
+      "piiReplaced_one": "donnée personnelle remplacée",
+      "piiReplaced_other": "données personnelles remplacées",
+      "other_one": "autre élément retiré",
+      "other_other": "autres éléments retirés"
+    }
   }
 }

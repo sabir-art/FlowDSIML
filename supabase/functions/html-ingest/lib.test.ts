@@ -111,3 +111,63 @@ Deno.test('L49 : adresse absente ou non http(s) refusée', async () => {
   ])
     assertEquals(await captureVerdict(u, rule('allowed')), 'BAD_URL');
 });
+
+// ===== L49 P2 : compteurs du rapport (même page et mêmes chiffres que packages/core/src/htmlSanitize.test.ts) =====
+import { countSecurity, mergeSecurity } from './security.ts';
+
+const SECURITY_PAGE = `<html><head><base href="https://evil.example/"><meta http-equiv="refresh" content="0"><link rel="stylesheet" href="x.css">
+<script>alert(1)</script><style>@import url(x.css); .a{width:expression(alert(1))}</style></head>
+<body onload="x()"><img src="a.png" onerror="x()" onclick="y()"><a href="javascript:alert(1)">a</a>
+<a href="https://app.example.com/ok">interne</a><a href="https://aide.app.example.com/doc">sous-domaine</a>
+<a href="https://docs.tiers.example/guide">externe 1</a><a href="http://autre.example/">externe 2</a><a href="mailto:x@example.com">m</a>
+<iframe src="https://tiers.example" onload="z()"></iframe><object data="x"><param name="a"></object><embed src="x">
+<form action="/send" method="post"><input name="n" value="Camille"><button formaction="/x">b</button></form><form><input></form>
+<div style="background:url(javascript:alert(1))">x</div><img src="data:text/html,x"><iframe srcdoc="<p>x</p>"></iframe>
+<svg><a href="javascript:x()"><set attributeName="href" to="javascript:x()"/></a></svg><noscript><script>x()</script></noscript></body></html>`;
+
+Deno.test('compteurs identiques à ceux de l’extension sur la page de test', () => {
+  assertEquals(countSecurity(SECURITY_PAGE, 'https://app.example.com/dossiers'), {
+    scripts: 4,
+    handlers: 3,
+    frames: 4,
+    forms: 1,
+    externalLinks: 2,
+    piiReplaced: 0,
+    other: 9,
+  });
+});
+
+Deno.test('page déjà nettoyée : plus rien à compter, sauf les liens externes', () => {
+  const page = sanitizePage(SECURITY_PAGE);
+  const c = countSecurity(page, 'https://app.example.com/dossiers');
+  assertEquals(
+    { ...c, externalLinks: 0 },
+    {
+      scripts: 0,
+      handlers: 0,
+      frames: 0,
+      forms: 0,
+      externalLinks: 0,
+      piiReplaced: 0,
+      other: 0,
+    },
+  );
+  assertEquals(c.externalLinks, 2);
+});
+
+Deno.test('compteurs déclarés : le plus grand des deux, valeurs illisibles ignorées', () => {
+  const server = { scripts: 1, handlers: 0, frames: 0, forms: 0, externalLinks: 2, piiReplaced: 0, other: 0 };
+  assertEquals(
+    mergeSecurity(server, {
+      scripts: 0,
+      handlers: 5,
+      frames: -1,
+      forms: 1.5,
+      piiReplaced: 3,
+      other: '9',
+      x: 7,
+    }),
+    { scripts: 1, handlers: 5, frames: 0, forms: 0, externalLinks: 2, piiReplaced: 3, other: 0 },
+  );
+  assertEquals(mergeSecurity(server, null), server);
+});
