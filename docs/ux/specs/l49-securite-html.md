@@ -119,6 +119,7 @@
   - le lien est compté dans `dangerousLinks`.
 - **Côté visiteur** : un lien signalé ne fait rien. Aucune ouverture, même si un ancien réglage l'avait autorisé : la vérification de la publication l'emporte.
 - **Re-vérification** : à chaque publication. Si un lien déjà autorisé est signalé plus tard, son autorisation est retirée, et une alerte apparaît dans l'éditeur : « Le lien {texte} mène à un site signalé : il a été bloqué. »
+  - Livré en b3db1ad, validé le 21 novembre : l'alerte s'affiche dans l'infobulle d'erreur du bouton Publier, avec « Aller à l'étape {n} ». Cette publication-là est arrêtée, pour que l'auteur voie le changement avant de republier ; la suivante passe, puisque le lien est désactivé.
 - **Indisponibilité** :
   - les liens restent désactivés par défaut ;
   - un lien déjà autorisé reste autorisé ;
