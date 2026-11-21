@@ -71,6 +71,15 @@ const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
     const fills = await page.$$eval('.lp .fd-bar__fill', (els) =>
       els.map((e) => getComputedStyle(e).backgroundColor),
     );
+    // X1 : fond des barres neutre (surface-sunken), plus orangé
+    const sunken = await cssColor(page, '--fd-color-surface-sunken');
+    const tracks = await page.$$eval('.lp .fd-bar', (els) =>
+      els.map((e) => getComputedStyle(e).backgroundColor),
+    );
+    ok(
+      tracks.length > 0 && tracks.every((c) => c === sunken),
+      `${theme} : X1, fond des barres en surface-sunken (${[...new Set(tracks)].join(', ')})`,
+    );
     ok(
       fills.length > 0 && fills.every((c) => c === text),
       `${theme} : X1, progression des apprenants en text (${[...new Set(fills)].join(', ')})`,

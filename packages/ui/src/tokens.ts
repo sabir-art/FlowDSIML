@@ -174,7 +174,8 @@ export const colors = {
     'chart-4': vert[400],
     'chart-5': prune[600],
     // refonte
-    'chart-track': orange[100],
+    // Audit L50 X1 : fond des barres neutre (surface-sunken), plus orangé
+    'chart-track': ardoise[50],
     'nav-active': noir[900],
     'on-nav-active': ardoise[0],
     'nav-hover': '#E6EBF1',
@@ -235,7 +236,7 @@ export const colors = {
     'chart-4': vert[400],
     'chart-5': prune[300],
     // refonte
-    'chart-track': '#33270F',
+    'chart-track': '#0F1216',
     'nav-active': '#F3F5F8',
     'on-nav-active': noir[900],
     'nav-hover': '#1C2128',
