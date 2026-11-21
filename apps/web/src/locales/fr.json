@@ -121,7 +121,8 @@
     "step2Title": "Guidez",
     "step2Body": "Ajoutez des bulles, floutez les données personnelles, adaptez les textes avec des variables.",
     "step3Title": "Diffusez",
-    "step3Body": "Une démo par procédure, un lien, un paquet SCORM ou l’intranet."
+    "step3Body": "Une démo par procédure, un lien, un paquet SCORM ou l’intranet.",
+    "googleConsent": "En continuant avec Google, vous acceptez les <terms>conditions d’utilisation</terms> et la <privacy>politique de confidentialité</privacy>."
   },
   "onboarding": {
     "progress": "Progression",
