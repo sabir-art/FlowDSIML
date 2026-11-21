@@ -57,10 +57,10 @@
 | `scripting` | Afficher la barre d'enregistrement dans la page capturée. | `background.ts` (`recorder.js`, `htmlbar.js`, `videobar.js`) |
 | `storage` | Garder la session de connexion et la capture en cours jusqu'à l'envoi. | `lib/supabase.ts`, écrans de vérification |
 | `tabCapture`, `offscreen` | Enregistrer la vidéo de l'onglet (type « Vidéo de l'onglet »). | `popup`, `background.ts`, `offscreen` |
-| `debugger` (facultative, demandée à l'usage) | Pendant l'enregistrement et sur les onglets capturés seulement : afficher la page en taille téléphone ou tablette (« Format mobile »), mettre l'onglet à la taille choisie, et garder la page entière à chaque capture pour animer le défilement. | `background.ts` : `Emulation.setDeviceMetricsOverride`, `Page.captureScreenshot` (`captureBeyondViewport`) |
+| `debugger` (obligatoire si on la garde : Chrome ne l'accepte pas en facultative, voir §6.0) | Pendant l'enregistrement et sur les onglets capturés seulement : afficher la page en taille téléphone ou tablette (« Format mobile »), mettre l'onglet à la taille choisie, et garder la page entière à chaque capture pour animer le défilement. | `background.ts` : `Emulation.setDeviceMetricsOverride`, `Page.captureScreenshot` (`captureBeyondViewport`) |
 | Accès aux sites (`<all_urls>`) | Capturer le logiciel web choisi par l'utilisateur, quelle que soit son adresse. | `host_permissions` |
 
-**Décision du chef (21 novembre)** : `debugger` passe en `optional_permissions` et n'est demandée qu'au moment où une fonction en a besoin (§6). Correction de ma première version : elle ne sert pas qu'au « Format mobile ». Le code l'utilise aussi pour la taille d'onglet imposée et pour la capture de la page entière en « Captures à chaque clic ». Sans elle, la capture à chaque clic marche quand même : elle garde seulement la partie visible de la page (`captureVisibleTab`).
+**`debugger` ne peut pas être facultative** : correction du 21 novembre, signalée par le dev et vérifiée dans la [référence chrome.permissions](https://developer.chrome.com/docs/extensions/reference/api/permissions), qui la range parmi les permissions jamais facultatives. Elle sert à 3 fonctions : le « Format mobile », la taille d'onglet imposée et la page entière en « Captures à chaque clic ». Sans elle, la capture à chaque clic marche quand même, en gardant seulement la partie visible de la page (`captureVisibleTab`). Arbitrage : §6.0.
 
 **Données déclarées** (à confirmer par le dev et le DPO avant l'envoi) :
 - informations d'authentification (adresse e-mail du compte TutoClick) ;
@@ -78,7 +78,31 @@
 
 **Décision du chef (21 novembre) : « Non répertoriée ».** On installe l'extension par son lien, et elle n'apparaît pas dans les recherches. La fiche et les visuels restent les mêmes.
 
-## 6. Demande de l'autorisation `debugger` dans l'extension
+## 6. Autorisations demandées à l'usage
+
+### 6.0 `debugger` : ma spec du §6 d'origine était infaisable, arbitrage demandé au chef
+Chrome refuse `debugger` dans `optional_permissions` : on ne peut pas la demander au moment de l'usage. Il reste deux options.
+
+| Option | Effet sur l'utilisateur | Effet sur la fiche |
+|---|---|---|
+| **A. Garder `debugger` obligatoire** | Les 3 fonctions marchent comme aujourd'hui. À l'installation, Chrome affiche un avertissement fort sur l'accès au débogueur et à la lecture des données des sites. | Justification du §3 à saisir. Revue de Google plus attentive. |
+| **B. Retirer `debugger` du build de la boutique** (proposition du dev) | « Format mobile » et « Taille de l'onglet » passent en « Bientôt », visibles et désactivés, pas masqués. « Captures à chaque clic » garde seulement la partie visible : le défilement animé dans l'éditeur n'est plus possible pour ces captures. | Plus d'avertissement fort, revue plus simple. |
+
+**Ma recommandation : B pour la première publication.**
+- L'extension est « Non répertoriée » et sert à des agents qui l'installent sur le poste de travail. Un avertissement « lire et modifier les données de tous les sites, débogueur » risque de bloquer l'installation (refus des agents, ou de la politique du poste), au moment même où l'on veut qu'ils l'adoptent.
+- Le cœur du service ne dépend pas de `debugger` : captures à chaque clic, capture HTML, vidéo de l'onglet et vérification des données personnelles.
+- On rouvrira « Format mobile » et la page entière dans une version 2 de l'extension, si les agents les demandent. Elle portera l'avertissement, expliqué dans l'article d'aide.
+
+**Textes en option B** :
+- sous « Format mobile » et « Taille de l'onglet » : « Bientôt » en texte gris à droite, et une aide de 13 px : « Pas encore disponible dans la version de la boutique. » ;
+- l'aide de « Captures à chaque clic » ne promet plus la page entière. Elle devient « Chaque clic donne une capture de la partie visible de la page. » à la place de `fullPageHelp` ;
+- la fiche (§2) ne cite plus le « format mobile » : la liste de l'étape 1 devient « captures à chaque clic, page HTML ou vidéo de l'onglet ».
+
+**Si le chef choisit A** : aucun encart n'est utile pour `debugger`. On ajoute une ligne à l'article d'aide « Installer l'extension » pour expliquer l'avertissement de Chrome.
+
+Les §6.1 à §6.5 ci-dessous gardent l'encart pour une **autorisation réellement facultative** : l'accès aux sites (§6.6). Leurs textes `debugger` ne s'appliquent pas, quelle que soit l'option.
+
+### 6.0 bis Ancienne spec (sans effet pour `debugger`)
 
 Chrome affiche sa propre fenêtre d'autorisation, que l'on ne peut pas modifier. Avant elle, le popup montre un **encart d'explication**, pour que la personne sache pourquoi on lui demande l'autorisation et ce qui se passe si elle refuse.
 
@@ -130,3 +154,16 @@ Chrome affiche sa propre fenêtre d'autorisation, que l'on ne peut pas modifier.
 - « Format mobile » sans autorisation : l'encart s'affiche. Un refus dans la fenêtre de Chrome : pas de capture, le message et le lien « Autoriser » sont là, et « Format mobile » reste choisi.
 - Autorisation accordée : plus aucun encart, et l'émulation fonctionne comme aujourd'hui.
 - §18 : l'encart utilise `fd-btn` et `.link-button` (aucun bouton natif) et met 16 px entre ses blocs ; captures en clair et en sombre.
+
+### 6.6 Accès aux sites (`<all_urls>` en facultatif), textes du dev validés
+Le même encart sert à demander l'accès aux sites, au moment où la capture doit suivre une autre page ou un autre onglet (`activeTab` suffit pour la page ouverte au démarrage).
+
+| Clé | Texte validé |
+|---|---|
+| `dbgWhySites` | Pour continuer la capture quand vous changez de page ou ouvrez un onglet depuis la page capturée, TutoClick doit pouvoir accéder aux pages que vous parcourez. |
+| `dbgWhatSites` | Rien n'est lu en dehors d'un enregistrement, et rien n'est envoyé avant votre vérification. |
+| `dbgDeniedSites` | La capture reste sur la page ouverte au démarrage. |
+
+- Les 3 textes sont exacts : les scripts de capture ne sont injectés qu'au démarrage (`content_scripts` vide dans le manifeste, `scripting` au lancement), et les écrans de vérification (`review`, `html-review`, `video-review`) précèdent tout envoi.
+- Le titre de l'encart et le lien « Autoriser » restent ceux du §6.2.
+- La ligne 3 du §6.2 (le bandeau de débogage) ne s'affiche pas pour l'accès aux sites, puisqu'elle ne concerne que `debugger`.
