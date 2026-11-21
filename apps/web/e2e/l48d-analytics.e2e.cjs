@@ -58,6 +58,16 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
         title,
       }),
     );
+    // L48-G : « Exporter » est une démo HTML (type dans le menu Démo)
+    const exp = '0b5c1f0e-0000-4000-8000-000000000103';
+    for (const position of [0, 1])
+      s.tables.steps.push({
+        ...s.tables.steps[0],
+        id: `0b5c1f0e-0000-4000-8000-00000000020${position}`,
+        demo_id: exp,
+        position,
+        kind: 'html',
+      });
     return s;
   };
 
@@ -110,6 +120,12 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     .or(p.getByRole('textbox', { name: 'Rechercher une démo' }));
   await search.waitFor();
   ok(await search.evaluate((el) => el === document.activeElement), 'recherche : focus à l’ouverture');
+  const badge = (name) =>
+    p.getByRole('menuitem', { name: new RegExp(`^${name}`) }).locator('.ct-badge > span[aria-hidden]');
+  ok(
+    (await badge('Exporter').innerText()) === 'HTML' && (await badge('Importer').innerText()) === 'Captures',
+    'L48-G : type de contenu de chaque démo dans le menu (HTML, Captures)',
+  );
   await search.fill('fiche');
   const shown = await p.getByRole('menuitem').allTextContents();
   ok(

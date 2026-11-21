@@ -727,6 +727,19 @@ async function install(page, state = seed()) {
       if (fn.startsWith('console_') && fn !== 'console_me') return consoleRpc(state, fn, a, route, json);
       switch (fn) {
         // L32 : lectures de démarrage regroupées (mêmes données que les lectures séparées)
+        case 'demo_step_counts': {
+          // L48-G : étapes et étapes HTML par démo de l'espace (filtre Démo d'Analytics, Parcours)
+          const ids = new Set(
+            t.demos.filter((d) => d.workspace_id === a.p_ws && !d.deleted_at).map((d) => d.id),
+          );
+          const out = {};
+          for (const st of (t.steps || []).filter((x) => ids.has(x.demo_id))) {
+            const c = (out[st.demo_id] ||= { n: 0, html: 0 });
+            c.n += 1;
+            if (st.kind === 'html') c.html += 1;
+          }
+          return json(route, 200, out);
+        }
         case 'dashboard_home': {
           // L32 : délai simulé (squelettes) et panne simulée (carte d'erreur)
           if (state.homeDelay) await new Promise((res) => setTimeout(res, state.homeDelay));

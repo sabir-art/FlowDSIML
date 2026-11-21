@@ -2,7 +2,7 @@ import { Calendar, Check, ChevronDown, Download, Info, Link2, Monitor, ShieldChe
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { completionRate, countTrend, rateTrend, toCsv } from '@flowdsiml/core';
+import { completionRate, countTrend, rateTrend, toCsv, type ContentType } from '@flowdsiml/core';
 import { MeasureDialog, VisitBadge, type Returning } from './returning';
 import {
   KPI_KEYS,
@@ -17,6 +17,8 @@ import {
   type SeriesDay,
 } from '../../components/kpi/KpiTabs';
 import { supabase } from '../../lib/supabase';
+import { loadDemoTypes } from '../../lib/demoTypes';
+import { TypeBadge } from '../../components/TypeBadge';
 import { downloadText } from '../../lib/download';
 import { formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -134,6 +136,8 @@ export function AnalyticsPage() {
   const segKey = JSON.stringify(pSegment);
   const [segInitial, setSegInitial] = useState<SegmentDef | null>(null);
   const [demos, setDemos] = useState<Array<{ id: string; title: string; folder: string | null }>>([]);
+  /** L48-G : type de contenu de chaque démo, en badge dans le filtre Démo. */
+  const [types, setTypes] = useState<Record<string, ContentType>>({});
   const [data, setData] = useState<WsAnalytics | null>(null);
   const [prev, setPrev] = useState<WsAnalytics | null>(null);
   // L47 : séries quotidiennes et détail par démo de chaque indicateur (période et précédente)
@@ -148,13 +152,14 @@ export function AnalyticsPage() {
     void Promise.all([
       supabase
         .from('demos')
-        .select('id, title, folder_id')
+        .select('id, title, folder_id, kind')
         .eq('workspace_id', ws.id)
         .is('deleted_at', null)
         .order('title'),
       supabase.from('folders').select('id, name').eq('workspace_id', ws.id),
     ]).then(([d, f]) => {
       const names = new Map((f.data ?? []).map((x) => [x.id, x.name]));
+      void loadDemoTypes(ws.id, d.data ?? []).then(setTypes);
       setDemos(
         (d.data ?? []).map((x) => ({
           id: x.id,
@@ -371,6 +376,7 @@ export function AnalyticsPage() {
                 ...demos.map((d) => ({
                   label: d.title,
                   icon: demo === d.id ? <Check /> : <span />,
+                  end: types[d.id] ? <TypeBadge type={types[d.id]!} /> : undefined,
                   onSelect: () => setDemo(d.id),
                 })),
               ]}

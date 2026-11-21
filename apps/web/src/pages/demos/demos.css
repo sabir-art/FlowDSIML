@@ -429,32 +429,6 @@
     display: none;
   }
 }
-/* L48-G §4 : badge de type (cartes, liste) */
-.ct-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: var(--fd-color-surface);
-  border: 1px solid var(--fd-color-border);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--fd-color-text);
-  white-space: nowrap;
-}
-.ct-badge svg {
-  width: 13px;
-  height: 13px;
-}
-.ct-badge--cover {
-  position: absolute;
-  top: calc(var(--fd-space-3) + 8px);
-  left: calc(var(--fd-space-3) + 8px);
-  z-index: 2;
-  pointer-events: none;
-}
 .nd-head {
   display: flex;
   align-items: center;

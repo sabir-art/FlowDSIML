@@ -39,6 +39,11 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     'L13-07 : méta du module (étapes, quiz, seuil)',
   );
   ok(
+    (await dlg.locator('.gm-mods li').count()) === (await dlg.locator('.gm-mods li .ct-badge').count()) &&
+      (await dlg.locator('.gm-mods li .ct-badge > span[aria-hidden]').first().innerText()) === 'Captures',
+    'L48-G : type de contenu sur chaque module',
+  );
+  ok(
     (await dlg.getByRole('button', { name: 'Monter le module Prise en main' }).isDisabled()) &&
       (await dlg.getByRole('button', { name: 'Descendre le module Quiz final' }).isDisabled()),
     'L13-07 : Monter et Descendre désactivés aux extrémités, noms qui citent le module',
@@ -74,7 +79,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   );
   await dlg
     .getByRole('combobox', { name: 'Ajouter un module' })
-    .selectOption({ label: 'Saisir un rendez-vous' });
+    .selectOption({ label: 'Saisir un rendez-vous · Captures' });
   await dlg.getByRole('button', { name: 'Ajouter un module' }).click();
   await page.waitForTimeout(400);
   const created = t.paths.find((p) => p.title === 'Accueil des jeunes');

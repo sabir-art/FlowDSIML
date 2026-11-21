@@ -869,3 +869,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* L48-G : type de contenu après le nom du module */
+.gm-mods .ct-badge {
+  margin-left: 8px;
+  vertical-align: 1px;
+}

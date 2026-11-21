@@ -1,6 +1,7 @@
 import { Code, Image, Map as MapIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ContentType } from '@flowdsiml/core';
+import './TypeBadge.css';
 
 /** L48-G §2 : icône Lucide de chaque type de contenu (image, code, map). */
 export const TYPE_ICON = { captures: Image, html: Code, sandbox: MapIcon } as const;

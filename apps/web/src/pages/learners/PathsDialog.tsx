@@ -3,8 +3,11 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Building2, ChevronDown, ChevronUp, GraduationCap, Plus, Trash2, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
+import type { ContentType } from '@flowdsiml/core';
 import { Alert, Button } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
+import { loadDemoTypes } from '../../lib/demoTypes';
+import { TypeBadge } from '../../components/TypeBadge';
 import { check, useAction } from '../../lib/useAction';
 import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
@@ -15,7 +18,7 @@ const NNBSP = String.fromCharCode(0x202f);
 type Path = Tables<'paths'>;
 type Mod = Tables<'path_modules'>;
 type Structure = Tables<'structures'>;
-type Demo = { id: string; title: string; current_version_id: string | null };
+type Demo = { id: string; title: string; current_version_id: string | null; kind: string };
 type DemoInfo = { steps: number; quiz: boolean; threshold: number };
 
 /**
@@ -40,6 +43,8 @@ export function PathsDialog({
   const [mods, setMods] = useState<Mod[]>([]);
   const [demos, setDemos] = useState<Demo[]>([]);
   const [info, setInfo] = useState<Record<string, DemoInfo>>({});
+  /** L48-G : type de contenu de chaque démo (badge des modules, choix de la démo à ajouter). */
+  const [types, setTypes] = useState<Record<string, ContentType>>({});
   const [structures, setStructures] = useState<Structure[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState('');
@@ -55,7 +60,7 @@ export function PathsDialog({
       supabase.from('path_modules').select('*').eq('workspace_id', wsId).order('position'),
       supabase
         .from('demos')
-        .select('id, title, current_version_id')
+        .select('id, title, current_version_id, kind')
         .eq('workspace_id', wsId)
         .is('deleted_at', null)
         .order('title'),
@@ -65,6 +70,7 @@ export function PathsDialog({
     setPaths(p.data ?? []);
     setMods(m.data ?? []);
     setDemos(list);
+    void loadDemoTypes(wsId, list).then(setTypes);
     setStructures((s.data ?? []).map((x) => ({ ...x, domains: x.domains ?? [] })));
     setCurrent((c) => (c && (p.data ?? []).some((x) => x.id === c) ? c : (p.data?.[0]?.id ?? null)));
     const ids = list.map((x) => x.current_version_id).filter((x): x is string => !!x);
@@ -367,6 +373,7 @@ export function PathsDialog({
                             </span>
                             <span>
                               <b>{name}</b>
+                              {types[m.demo_id] && <TypeBadge type={types[m.demo_id]!} />}
                               <span className="gm-meta">{moduleMeta(m.demo_id)}</span>
                             </span>
                             <label className="gm-req">
@@ -474,7 +481,8 @@ export function PathsDialog({
                         .filter((d) => !list.some((m) => m.demo_id === d.id))
                         .map((d) => (
                           <option key={d.id} value={d.id}>
-                            {d.title}
+                            {/* Liste native : le type en texte après le titre */}
+                            {types[d.id] ? `${d.title} · ${t(`ctype.short.${types[d.id]}`)}` : d.title}
                           </option>
                         ))}
                     </select>
