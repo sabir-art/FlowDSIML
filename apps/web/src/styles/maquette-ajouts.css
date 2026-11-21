@@ -3179,6 +3179,10 @@
   font: inherit;
   outline: none;
 }
+/* Un seul indicateur : celui du cadre (le halo global de .mk :focus-visible doublait le contour) */
+.mk .email-chips__input:focus-visible {
+  box-shadow: none;
+}
 .mk .email-chips__input::placeholder {
   color: var(--fd-color-text-subtle);
 }

@@ -288,7 +288,7 @@
       "owner": "Manage owners, delete the workspace"
     },
     "permsHelp": "“—”: action not allowed.",
-    "emailsHelp": "Separate addresses with a comma or a new line.",
+    "emailsHelp": "Confirm each address with a comma or Enter. You can paste several at once.",
     "roleDesc": {
       "editor": "Editor: creates and publishes demos",
       "viewer": "Viewer: views demos and analytics",

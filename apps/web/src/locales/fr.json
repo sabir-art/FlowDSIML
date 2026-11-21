@@ -288,7 +288,7 @@
       "owner": "Gestion des propriétaires, suppression de l’espace"
     },
     "permsHelp": "« — » : action non autorisée.",
-    "emailsHelp": "Séparez les adresses par une virgule ou un retour à la ligne.",
+    "emailsHelp": "Validez chaque adresse par une virgule ou Entrée. Vous pouvez en coller plusieurs.",
     "roleDesc": {
       "editor": "Éditeur : crée et publie des démos",
       "viewer": "Lecteur : consulte les démos et les analytics",
