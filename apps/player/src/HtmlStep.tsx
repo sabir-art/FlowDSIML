@@ -10,6 +10,9 @@ import {
 } from '@flowdsiml/player-core';
 import { fmt, type Dict } from './i18n';
 
+/** L49 §4 : seules les adresses https peuvent être ouvertes (même règle que l'éditeur et la base). */
+const EXTLINK_RE = /^https:\/\/[^\s"'<>]+$/;
+
 /**
  * A8 (L20) : étape HTML. La page capturée est rendue en iframe srcdoc sandbox (origine opaque, CSP
  * stricte, notre seul script) à la taille capturée, mise à l'échelle du lecteur. Elle reste du vrai
@@ -44,7 +47,9 @@ export function HtmlStep({
   const box = useRef<HTMLDivElement>(null);
   const [doc, setDoc] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
-  const [toast, setToast] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  /** L49 §4 : lien externe autorisé en attente de confirmation (adresse de l'opération). */
+  const [leave, setLeave] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
   const [boxW, setBoxW] = useState(0);
   const vw = h.viewport?.w ?? 1280;
@@ -89,6 +94,8 @@ export function HtmlStep({
         .filter(
           (o) => o.op !== 'image' || (typeof o.value === 'string' && /^(https:|data:image\/)/.test(o.value)),
         )
+        // L49 §4 : lien externe autorisé seulement vers une adresse https
+        .filter((o) => o.op !== 'extlink' || (typeof o.value === 'string' && EXTLINK_RE.test(o.value)))
         .map((o) => ({
           id: o.id,
           sel: o.sel,
@@ -120,13 +127,17 @@ export function HtmlStep({
         win.postMessage(init, '*');
       } else if (m.t === 'go') onGo(m.step);
       else if (m.t === 'unlinked') {
-        setToast(true);
-        window.setTimeout(() => setToast(false), 3000);
+        setToast(m.ext ? ht.outside : ht.unavailable);
+        window.setTimeout(() => setToast(null), 3000);
+      } else if (m.t === 'ext') {
+        // L'adresse vient de l'opération publiée, jamais de la page
+        const o = ops.find((x) => x.op === 'extlink' && x.id === m.id);
+        if (o && typeof o.value === 'string') setLeave(o.value);
       }
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [ops, sandbox, h.links, onGo]);
+  }, [ops, sandbox, h.links, onGo, ht]);
 
   const title = h.title || step.title || '';
   return (
@@ -153,9 +164,10 @@ export function HtmlStep({
           </p>
         )}
         <div class="p-html-toast" role="status" aria-live="polite">
-          {toast ? ht.unavailable : ''}
+          {toast ?? ''}
         </div>
       </div>
+      {leave && <LeaveDialog url={leave} ht={ht} onClose={() => setLeave(null)} />}
       {status && (
         <p class="p-html-key" aria-live="polite">
           {status}
@@ -170,5 +182,55 @@ export function HtmlStep({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * L49 §4 : « Vous quittez la démo ». Le domaine affiché est celui de l'adresse réelle, jamais le texte
+ * du lien (protection contre l'hameçonnage). « Rester dans la démo » a le focus ; « Ouvrir » ouvre un
+ * nouvel onglet depuis le lecteur, sans opener ni referrer (la page capturée garde son sandbox).
+ */
+function LeaveDialog({ url, ht, onClose }: { url: string; ht: Dict['html']; onClose: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const stay = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (d && !d.open) d.showModal();
+    stay.current?.focus();
+  }, []);
+  let domain = '';
+  try {
+    domain = new URL(url).hostname;
+  } catch {
+    /* adresse déjà validée (https) */
+  }
+  return (
+    <dialog
+      ref={ref}
+      class="p-leave"
+      aria-labelledby="p-leave-t"
+      aria-describedby="p-leave-b"
+      onClose={onClose}
+    >
+      <h2 id="p-leave-t">{ht.leaveTitle}</h2>
+      <p id="p-leave-b">
+        {ht.leaveBody} <strong>{domain}</strong>
+      </p>
+      <div class="p-leave-acts">
+        <button ref={stay} type="button" class="p-btn p-btn-secondary" onClick={() => ref.current?.close()}>
+          {ht.leaveStay}
+        </button>
+        <button
+          type="button"
+          class="p-btn p-btn-primary"
+          onClick={() => {
+            window.open(url, '_blank', 'noopener,noreferrer');
+            ref.current?.close();
+          }}
+        >
+          {ht.leaveOpen}
+        </button>
+      </div>
+    </dialog>
   );
 }

@@ -46,7 +46,8 @@ const empty = (): SecurityCounts => ({
 const cssHits = (css: string) => css.match(CSS_HITS)?.length ?? 0;
 const siteOf = (host: string) => host.toLowerCase().replace(/\.$/, '').split('.').slice(-2).join('.');
 
-function isExternal(href: string, pageUrl: string | null): boolean {
+/** Lien http(s) vers un autre domaine que celui de la page (L49 §4 ; même règle que isExternalLink du cœur). */
+export function isExternal(href: string, pageUrl: string | null): boolean {
   if (!pageUrl) return false;
   try {
     const u = new URL(href, pageUrl);

@@ -5257,5 +5257,15 @@
       "other_one": "other element removed",
       "other_other": "other elements removed"
     }
+  },
+  "extLinks": {
+    "title": "External links · {{count}}",
+    "allow": "Allow the link {{text}}",
+    "off": "Disabled",
+    "on": "Allowed",
+    "insecure": "Insecure address",
+    "outside": "This link leads outside the demo.",
+    "mod": "External link allowed: {{domain}}",
+    "untitled": "Link without text"
   }
 }

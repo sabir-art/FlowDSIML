@@ -314,6 +314,11 @@ const dict = {
       pageOf: 'Page {{n}} sur {{total}}',
       keyPages: 'Pages clés vues\u202f: {{seen}} sur {{total}}',
       restart: 'Revenir au départ',
+      outside: 'Ce lien mène hors de la démo.',
+      leaveTitle: 'Vous quittez la démo',
+      leaveBody: 'Ce lien ouvre un site extérieur dans un nouvel onglet\u202f:',
+      leaveStay: 'Rester dans la démo',
+      leaveOpen: 'Ouvrir',
     },
     video: {
       label: 'Vidéo de la démo',
@@ -702,6 +707,11 @@ const dict = {
       pageOf: 'Page {{n}} of {{total}}',
       keyPages: 'Key pages seen: {{seen}} of {{total}}',
       restart: 'Back to start',
+      outside: 'This link leads outside the demo.',
+      leaveTitle: 'You are leaving the demo',
+      leaveBody: 'This link opens an external site in a new tab:',
+      leaveStay: 'Stay in the demo',
+      leaveOpen: 'Open',
     },
     video: {
       label: 'Demo video',

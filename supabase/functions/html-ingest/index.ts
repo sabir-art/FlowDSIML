@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
     ...mergeSecurity(countSecurity(body.html, String(body.url)), body.security),
     analyzedAt: new Date().toISOString(),
   };
-  const page = sanitizePage(body.html);
+  const page = sanitizePage(body.html, String(body.url));
   if (!inert(page)) return json(422, { error: 'NOT_INERT' });
   const bytes = new TextEncoder().encode(page);
   if (bytes.length > MAX_BYTES) return json(413, { error: 'TOO_BIG' });

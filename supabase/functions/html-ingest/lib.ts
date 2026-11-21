@@ -2,6 +2,7 @@
 // déjà assainie par l'extension ; on ne lui fait pas confiance : tout ce qui peut exécuter du code,
 // charger un contenu tiers ou garder une saisie est retiré à nouveau. Bibliothèque sanitize-html (MIT).
 import sanitizeHtml from 'npm:sanitize-html@2.18.1';
+import { isExternal } from './security.ts';
 
 export const MAX_BYTES = 10 * 1024 * 1024;
 
@@ -47,10 +48,16 @@ export function sanitizeCss(css: string): string {
     .replace(/url\(\s*(['"]?)\s*(javascript|vbscript):[^)]*\)/gi, 'url()');
 }
 
-function cleanAttribs(tag: string, attribs: Record<string, string>): Record<string, string> {
+function cleanAttribs(
+  tag: string,
+  attribs: Record<string, string>,
+  pageUrl: string | null,
+): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(attribs)) {
     const name = k.toLowerCase();
+    // L49 §4 : marques réservées au serveur, jamais reprises de la page reçue
+    if (name.startsWith('data-tc-')) continue;
     if (
       name.startsWith('on') ||
       ['srcdoc', 'formaction', 'autofocus', 'nonce', 'integrity', 'http-equiv'].includes(name)
@@ -64,12 +71,19 @@ function cleanAttribs(tag: string, attribs: Record<string, string>): Record<stri
     if (tag === 'option' && name === 'selected') continue;
     if (tag === 'form' && ['action', 'method', 'target'].includes(name)) continue;
     if (tag === 'a' && name === 'target') continue;
+    // L49 §4 : lien externe désactivé par défaut ; l'adresse est gardée pour l'éditeur (autorisation)
+    if (tag === 'a' && name === 'href' && isExternal(v, pageUrl)) {
+      out['data-tc-href'] = v;
+      out['data-tc-ext'] = 'off';
+      continue;
+    }
     out[k] = name === 'style' ? sanitizeCss(v) : v;
   }
   return out;
 }
 
-export function sanitizePage(html: string): string {
+/** `pageUrl` (adresse de la page capturée) : les liens vers un autre domaine sont désactivés (L49 §4). */
+export function sanitizePage(html: string, pageUrl: string | null = null): string {
   const clean = sanitizeHtml(html, {
     allowedTags: false,
     allowedAttributes: false,
@@ -85,7 +99,7 @@ export function sanitizePage(html: string): string {
     transformTags: {
       '*': (tagName: string, attribs: Record<string, string>) => ({
         tagName,
-        attribs: cleanAttribs(tagName.toLowerCase(), attribs),
+        attribs: cleanAttribs(tagName.toLowerCase(), attribs, pageUrl),
       }),
     },
   });

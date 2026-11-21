@@ -5257,5 +5257,15 @@
       "other_one": "autre élément retiré",
       "other_other": "autres éléments retirés"
     }
+  },
+  "extLinks": {
+    "title": "Liens externes · {{count}}",
+    "allow": "Autoriser le lien {{text}}",
+    "off": "Désactivé",
+    "on": "Autorisé",
+    "insecure": "Adresse non sécurisée",
+    "outside": "Ce lien mène hors de la démo.",
+    "mod": "Lien externe autorisé : {{domain}}",
+    "untitled": "Lien sans texte"
   }
 }

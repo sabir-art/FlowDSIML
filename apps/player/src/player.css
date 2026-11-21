@@ -2936,3 +2936,31 @@ h1.p-title {
     display: inline-flex;
   }
 }
+
+/* L49 §4 : « Vous quittez la démo » (lien externe autorisé) */
+.p-leave {
+  max-width: min(440px, calc(100vw - 32px));
+  padding: 24px;
+  border: 1px solid color-mix(in srgb, var(--p-text, #080808) 14%, transparent);
+  border-radius: 12px;
+  background: var(--p-surface, #fff);
+  color: var(--p-text, #080808);
+}
+.p-leave::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+.p-leave h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+.p-leave p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.p-leave-acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}

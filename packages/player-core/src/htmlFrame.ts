@@ -13,7 +13,7 @@
 export interface FrameOp {
   id: string;
   sel: string;
-  op: 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart' | 'mask';
+  op: 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart' | 'mask' | 'extlink';
   /** L28-05 : image remplacée, Ajuster (contain, par défaut) ou Remplir (cover). */
   fit?: 'contain' | 'cover';
   /** L25-07 : style posé sur plusieurs éléments. */
@@ -84,7 +84,10 @@ export type FromFrame =
   | { fd: 1; t: 'ready'; h: number }
   | { fd: 1; t: 'applied'; notFound: string[]; h: number }
   | { fd: 1; t: 'go'; step: string }
-  | { fd: 1; t: 'unlinked' }
+  /** L49 §4 : clic sur un lien externe ; ext : désactivé (« Ce lien mène hors de la démo. »). */
+  | { fd: 1; t: 'unlinked'; ext?: true }
+  /** L49 §4 : lien externe autorisé ; le lecteur retrouve l'adresse par l'id de l'opération. */
+  | { fd: 1; t: 'ext'; id: string }
   | { fd: 1; t: 'select'; el: Selected | null }
   | { fd: 1; t: 'multi'; els: MultiEl[] }
   | { fd: 1; t: 'key'; key: 'edit' | 'hide' }
@@ -126,7 +129,11 @@ export function parseFromFrame(data: unknown): FromFrame | null {
     case 'go':
       return typeof m.step === 'string' && STEP_RE.test(m.step) ? { fd: 1, t: 'go', step: m.step } : null;
     case 'unlinked':
-      return { fd: 1, t: 'unlinked' };
+      return m.ext === true ? { fd: 1, t: 'unlinked', ext: true } : { fd: 1, t: 'unlinked' };
+    case 'ext':
+      return typeof m.id === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(m.id)
+        ? { fd: 1, t: 'ext', id: m.id }
+        : null;
     case 'scroll':
       return { fd: 1, t: 'scroll' };
     case 'key':
@@ -479,6 +486,7 @@ export const FRAME_RUNTIME = `(function () {
       else if (o.op === 'image' && el.tagName === 'IMG' && safeImg(o.value)) { keepSize(el); el.style.objectFit = o.fit === 'cover' ? 'cover' : 'contain'; el.setAttribute('src', o.value); el.removeAttribute('srcset'); }
       else if (o.op === 'mask' && el.tagName === 'IMG') { keepSize(el); el.style.backgroundColor = bgOf(el.parentElement || el); el.setAttribute('src', BLANK); el.removeAttribute('srcset'); el.setAttribute('alt', ''); el.setAttribute('data-fd-masked', ''); }
       else if (o.op === 'chart') drawChart(el, o.value);
+      else if (o.op === 'extlink' && el.hasAttribute('data-tc-ext')) el.setAttribute('data-fd-ext', String(o.id));
     }
     if (mode === 'player') {
       for (var j = 0; j < autoLinks.length; j++) {
@@ -604,9 +612,13 @@ export const FRAME_RUNTIME = `(function () {
       return;
     }
     var linked = t.closest('[data-fd-link]');
+    var ext = t.closest('[data-tc-ext]');
     var actionable = t.closest('a,button,[role=button],[role=link],[role=tab],[role=menuitem],input[type=submit],summary');
-    if (actionable || linked) e.preventDefault();
+    if (actionable || linked || ext) e.preventDefault();
     if (linked) post({ t: 'go', step: linked.getAttribute('data-fd-link') });
+    // L49 §4 : lien externe autorisé (le lecteur demande confirmation) ou désactivé
+    else if (ext && ext.hasAttribute('data-fd-ext')) post({ t: 'ext', id: ext.getAttribute('data-fd-ext') });
+    else if (ext) { if (unlinked !== 'none') post({ t: 'unlinked', ext: true }); }
     else if (actionable && unlinked !== 'none') post({ t: 'unlinked' });
   }, true);
   document.addEventListener('submit', function (e) { e.preventDefault(); }, true);

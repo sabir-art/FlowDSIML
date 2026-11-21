@@ -180,4 +180,12 @@ describe('htmlOps', () => {
     expect(m.hasAttribute('srcset')).toBe(false);
     expect(m.getAttribute('alt')).toBe('');
   });
+  it('L49 : lien externe autorisé, https seulement, sur l’étape', () => {
+    const op = (value: unknown, scope = 'step') => [{ id: 'x1', sel: 'a.doc', op: 'extlink', value, scope }];
+    expect(validHtmlOps(op('https://docs.example.com/guide'))).toBe(true);
+    expect(validHtmlOps(op('http://docs.example.com/'))).toBe(false);
+    expect(validHtmlOps(op('javascript:alert(1)'))).toBe(false);
+    expect(validHtmlOps(op(undefined))).toBe(false);
+    expect(validHtmlOps(op('https://docs.example.com/', 'all'))).toBe(false);
+  });
 });

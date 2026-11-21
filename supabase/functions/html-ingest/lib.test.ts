@@ -171,3 +171,22 @@ Deno.test('compteurs déclarés : le plus grand des deux, valeurs illisibles ign
   );
   assertEquals(mergeSecurity(server, null), server);
 });
+
+// ===== L49 P3 : liens externes désactivés par défaut =====
+Deno.test(
+  'liens vers un autre domaine : désactivés, adresse gardée ; internes et sous-domaines intacts',
+  () => {
+    const out = sanitizePage(
+      `<a href="https://app.example.com/a">i</a><a href="https://aide.app.example.com/b">s</a>
+     <a href="https://docs.tiers.example/guide">e</a><a href="/relatif">r</a>
+     <span data-tc-ext="on" data-tc-href="https://evil.example/">x</span>`,
+      'https://app.example.com/dossiers',
+    );
+    assertMatch(out, /href="https:\/\/app\.example\.com\/a"/);
+    assertMatch(out, /href="https:\/\/aide\.app\.example\.com\/b"/);
+    assertMatch(out, /href="\/relatif"/);
+    assertMatch(out, /<a data-tc-href="https:\/\/docs\.tiers\.example\/guide" data-tc-ext="off">e<\/a>/);
+    assert(!/href="https:\/\/docs\.tiers/.test(out.replace(/data-tc-href/g, '')), out);
+    assert(!/evil\.example|data-tc-ext="on"/.test(out), 'marques de la page reçue retirées');
+  },
+);

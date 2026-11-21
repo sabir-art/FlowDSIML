@@ -40,6 +40,15 @@ describe('htmlFrame', () => {
       step: '00000000-0000-0000-0000-000000000001',
     });
     expect(parseFromFrame({ fd: 1, t: 'go', step: 'javascript:x' })).toBeNull();
+    // L49 §4 : lien externe, par l'id de l'opération (jamais une adresse venue de la page)
+    expect(parseFromFrame({ fd: 1, t: 'ext', id: 'e1', url: 'https://evil.example' })).toEqual({
+      fd: 1,
+      t: 'ext',
+      id: 'e1',
+    });
+    expect(parseFromFrame({ fd: 1, t: 'ext', id: 'https://evil.example' })).toBeNull();
+    expect(parseFromFrame({ fd: 1, t: 'unlinked', ext: true })).toEqual({ fd: 1, t: 'unlinked', ext: true });
+    expect(parseFromFrame({ fd: 1, t: 'unlinked', ext: 'x' })).toEqual({ fd: 1, t: 'unlinked' });
     expect(parseFromFrame({ fd: 1, t: 'html', html: '<img onerror=x>' })).toBeNull();
     expect(parseFromFrame({ t: 'ready', h: 1 })).toBeNull();
     expect(

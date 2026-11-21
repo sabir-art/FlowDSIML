@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   BarChart3,
   Droplet,
+  ExternalLink,
   EyeOff,
   Image,
   ImageOff,
@@ -20,6 +21,7 @@ import type { StepRow } from '../types';
 import { ChartFields } from './ChartFields';
 import { StyleFields } from './StyleFields';
 import { HtmlSecurity } from './HtmlSecurity';
+import { ExternalLinks } from './ExternalLinks';
 import {
   asOps,
   frameSend,
@@ -33,6 +35,13 @@ import {
 } from './htmlModel';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
+const hostOf = (u: string) => {
+  try {
+    return new URL(u).hostname;
+  } catch {
+    return u;
+  }
+};
 const OP_ICON: Record<HtmlOp['op'], typeof PenLine> = {
   text: PenLine,
   hide: EyeOff,
@@ -43,6 +52,7 @@ const OP_ICON: Record<HtmlOp['op'], typeof PenLine> = {
   style: Paintbrush,
   chart: BarChart3,
   mask: ImageOff,
+  extlink: ExternalLink,
 };
 
 /**
@@ -116,6 +126,8 @@ export function HtmlFields({
         return t('editor.html.modImage');
       case 'mask':
         return t('editor.html.modMask');
+      case 'extlink':
+        return t('extLinks.mod', { domain: hostOf(typeof o.value === 'string' ? o.value : '') });
       default:
         return '';
     }
@@ -237,6 +249,7 @@ export function HtmlFields({
         </ul>
       </div>
       <HtmlSecurity key={step.id} step={step} />
+      <ExternalLinks editor={editor} step={step} readOnly={readOnly} />
       <div className="sec">
         <p className="help" style={{ margin: 0 }}>
           {t('editor.html.reminder')}

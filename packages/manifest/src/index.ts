@@ -373,7 +373,7 @@ export type HtmlChartValue = z.infer<typeof htmlChartSchema>;
 export const htmlOpSchema = z.object({
   id: z.string().max(40),
   sel: z.string().min(1).max(500),
-  op: z.enum(['text', 'hide', 'blur', 'link', 'image', 'remove', 'style', 'chart', 'mask']),
+  op: z.enum(['text', 'hide', 'blur', 'link', 'image', 'remove', 'style', 'chart', 'mask', 'extlink']),
   fit: z.enum(['contain', 'cover']).optional(),
   sels: z.array(z.string().min(1).max(500)).min(1).max(200).optional(),
   value: z.union([z.string().max(5000), htmlStyleSchema, htmlChartSchema]).optional(),

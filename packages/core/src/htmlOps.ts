@@ -5,7 +5,8 @@ import { applyVariables, type VariableValues } from './variables';
  * valeur) et non comme un DOM réécrit. Elles survivent à une nouvelle capture : un sélecteur qui ne
  * trouve plus rien est mis de côté (notFound), sans bloquer la publication.
  */
-export type HtmlOpKind = 'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart' | 'mask';
+export type HtmlOpKind =
+  'text' | 'hide' | 'blur' | 'link' | 'image' | 'remove' | 'style' | 'chart' | 'mask' | 'extlink';
 
 /**
  * L25-07 : style posé en masse. Liste blanche stricte (aucune chaîne CSS libre) : couleurs en
@@ -38,7 +39,8 @@ export interface HtmlOp {
   sels?: string[];
   /**
    * text : nouveau texte (variables {{…}} permises) ; link : id de l'étape ; image : chemin ;
-   * style : propriétés en liste blanche ; chart : type et valeurs.
+   * style : propriétés en liste blanche ; chart : type et valeurs ; extlink (L49 §4) : adresse https du
+   * lien externe autorisé (le lecteur ouvre celle-ci, jamais une adresse fournie par la page).
    */
   value?: string | HtmlStyle | HtmlChart;
   /** L28-05 : image remplacée : « contain » (Ajuster, par défaut) ou « cover » (Remplir). */
@@ -65,7 +67,10 @@ const KINDS: readonly HtmlOpKind[] = [
   'style',
   'chart',
   'mask',
+  'extlink',
 ];
+/** L49 §4 : seules les adresses https peuvent être autorisées. */
+export const EXTLINK_RE = /^https:\/\/[^\s"'<>]+$/;
 const ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
 const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -135,6 +140,14 @@ export function validHtmlOps(ops: unknown): ops is HtmlOp[] {
     if ((r.op === 'text' || r.op === 'link' || r.op === 'image') && typeof r.value !== 'string') return false;
     if (r.fit !== undefined && (r.op !== 'image' || (r.fit !== 'contain' && r.fit !== 'cover'))) return false;
     if (r.op === 'mask' && r.value !== undefined) return false;
+    if (
+      r.op === 'extlink' &&
+      (typeof r.value !== 'string' ||
+        r.value.length > 2000 ||
+        !EXTLINK_RE.test(r.value) ||
+        r.scope !== 'step')
+    )
+      return false;
     return true;
   });
 }
