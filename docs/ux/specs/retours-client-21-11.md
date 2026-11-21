@@ -1,7 +1,7 @@
 # Retours client du 21 novembre (prioritaires)
 
 > Relevé sur `claude/dev-mvp` (c63b0e4), en clair et en sombre, avec le faux backend et des données fictives (Acme, `@example.com`).
-> Règles : `composants.md` §15, §17 et §18. Chaque point a une recette mesurable (§10).
+> Règles : `composants.md` §15, §17 et §18. Chaque point a une recette mesurable (§11).
 
 ## 1. Éditeur : les commentaires dans un panneau en bas du canevas
 
@@ -153,7 +153,17 @@
 - La règle mesurable est au §18.6 de `composants.md`. Le dev écrit `espacements.e2e.cjs`, qui la vérifie sur toutes les routes, en clair et en sombre, à 1440 et 390 px. Il ajoute ce test à la CI.
 - Le relevé du test est joint à chaque livraison. Je contrôle les captures élément par élément.
 
-## 10. Recette (captures réelles en clair et en sombre)
+## 10. Éditeur : le panneau « Points d'intérêt » défile en largeur (bug client)
+
+- Au trackpad, le panneau « Points d'intérêt » glisse vers la gauche ou la droite : le contenu se décale et laisse un vide sur le côté.
+- Correction à la source, selon la règle §18.7 : le panneau et ses sections n'ont jamais `scrollWidth > clientWidth`. On vérifie en particulier :
+  - les champs en `width: 100%` avec bordure ;
+  - les sélecteurs CSS affichés (« Élément visé : … ») et les adresses, à couper avec `overflow-wrap: anywhere` ;
+  - les rangées flex sans `min-width: 0`.
+- e2e global : aucun conteneur sans `data-scroll-x` ne dépasse en largeur, sur toutes les routes et dans tous les panneaux de l'éditeur.
+- Dans la même capture, « Libre · Bientôt » a encore un point : à passer en texte, sans point (§5).
+
+## 11. Recette (captures réelles en clair et en sombre)
 
 | # | Contrôle | Mesure attendue |
 |---|---|---|
@@ -173,3 +183,5 @@
 | 14 | Colonne Dossiers : le bouton de bascule a la même position (`top`, `left`) repliée et dépliée ; « Afficher les dossiers » et « Masquer les dossiers » ; plus de bouton « Dossiers » près des filtres à partir de 1024 px | rects |
 | 15 | Éditeur : 12 px entre le dernier hotspot et « Ajouter un hotspot » ; même écart pour les étapes du guide | mesure |
 | 16 | `espacements.e2e.cjs` passe sur toutes les routes, en clair et en sombre, à 1440 et 390 px | relevé joint |
+| 17 | Panneau « Points d'intérêt » et tous les panneaux de l'éditeur : geste horizontal au trackpad et molette avec Maj → aucun déplacement, `scrollLeft === 0` ; e2e global « aucun débordement horizontal » vert | mesure |
+| 18 | « Libre · Bientôt » et tous les « Bientôt » de l'éditeur : texte sans point | captures |

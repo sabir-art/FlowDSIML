@@ -713,3 +713,10 @@ Le client trouve les espacements négligés. Règle vérifiée automatiquement (
 - **Mesure** : `getBoundingClientRect()` de chaque paire de frères visibles (hauteur et largeur > 0, hors `position: absolute` ou `fixed`). L'écart est la distance entre les bords qui se font face. Le test liste chaque écart sous le minimum, avec la route, le sélecteur des deux éléments et la valeur.
 - **Mise en œuvre** : poser l'écart sur le **conteneur** (`display: flex` ou `grid` avec `gap`), jamais avec des marges isolées sur les enfants. Les classes de section (`.sec`, `.settings-main`, `.dialog-body`) portent leur `gap`.
 - **Recette** : dans chaque recette UX, je contrôle les espacements élément par élément sur les captures, et je joins le relevé du test.
+
+### 18.7 Aucun défilement horizontal dans un panneau (bug client du 21 novembre)
+- Aucun conteneur ne défile en largeur, sauf ceux qui sont faits pour : canevas, tableaux larges avec en-tête figé, rangée de filtres qui défile (MOB-01 M3), éditeur de code. Ils portent `data-scroll-x` (justifié dans le code).
+- **Mesure** (e2e global) : pour chaque élément visible sans `data-scroll-x`, `scrollWidth - clientWidth <= 1`. Le test liste la route, le sélecteur, `scrollWidth` et `clientWidth`.
+- **Causes à traiter à la source** : enfant en `width: 100%` avec une marge ou une bordure (utiliser `box-sizing: border-box`) ; texte long sans `overflow-wrap: anywhere` (adresses, sélecteurs CSS, URL) ; `min-width` implicite des enfants flex (mettre `min-width: 0`) ; marges négatives.
+- `overflow-x: hidden` ne remplace pas la correction : il masque le débordement au trackpad mais coupe le contenu.
+- **Recette** : dans chaque panneau touché par un lot, je fais un geste horizontal au trackpad (molette horizontale) et à la molette avec Maj. Le contenu ne doit pas bouger, et `scrollLeft` reste à 0.
