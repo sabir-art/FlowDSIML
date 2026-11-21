@@ -3,8 +3,12 @@
  * dossiers de l'espace (sous-dossiers en retrait, un niveau affiché, puis un chevron), « Nouveau
  * dossier », Archivées. L'entrée choisie est dans l'adresse ; une carte de démo glissée sur un dossier
  * l'y range. Le menu « … » d'un dossier (ou clic droit) regroupe ses actions.
+ * Retours client 21/11 §2 et §7 : repliée, la colonne devient un rail de 48 px au même endroit ; le
+ * bouton de bascule garde sa position (top et left) dans les deux états. La liste défile à l'intérieur,
+ * « Nouveau dossier » et « Archivées » restent en bas. De 1 024 à 1 279 px, la colonne dépliée s'ouvre en
+ * tiroir de 280 px par-dessus le contenu (overlay).
  */
-import { useState, type DragEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type DragEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Archive,
@@ -14,6 +18,7 @@ import {
   Layers,
   Lock,
   PanelLeftClose,
+  PanelLeftOpen,
   Pencil,
   Plus,
   Trash2,
@@ -34,7 +39,9 @@ export function FolderColumn({
   editable,
   canManageAccess,
   onSelect,
-  onHide,
+  collapsed,
+  overlay = false,
+  onToggle,
   onNew,
   onRename,
   onAccess,
@@ -49,7 +56,11 @@ export function FolderColumn({
   editable: boolean;
   canManageAccess: boolean;
   onSelect: (s: Scope) => void;
-  onHide: () => void;
+  /** Rail de 48 px (repliée). */
+  collapsed: boolean;
+  /** Dépliée par-dessus le contenu (tiroir, 1 024 à 1 279 px). */
+  overlay?: boolean;
+  onToggle: () => void;
   /** Nouveau dossier (parent : sous-dossier). */
   onNew: (parent: string | null) => void;
   onRename: (f: FolderRow) => void;
@@ -184,9 +195,54 @@ export function FolderColumn({
     );
   };
 
+  // Tiroir : Échap et un clic dehors le ferment (le focus revient au bouton de bascule)
+  const nav = useRef<HTMLElement>(null);
+  const drawer = overlay && !collapsed;
+  useEffect(() => {
+    if (!drawer) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      onToggle();
+      requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.fcol__switch')?.focus());
+    };
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as Element;
+      if (!nav.current?.contains(target) && !target.closest?.('#fd-portal')) onToggle();
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onDown);
+    };
+  }, [drawer, onToggle]);
+
+  const toggle = (
+    <button
+      type="button"
+      className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm fcol__switch"
+      aria-label={t(collapsed ? 'folders.showColumn' : 'folders.hide')}
+      title={t(collapsed ? 'folders.showColumn' : 'folders.hide')}
+      aria-expanded={!collapsed}
+      onClick={onToggle}
+    >
+      {collapsed ? <PanelLeftOpen aria-hidden="true" /> : <PanelLeftClose aria-hidden="true" />}
+    </button>
+  );
+  if (collapsed)
+    return (
+      <nav className="fcol fcol--rail" aria-label={t('folders.title')}>
+        {toggle}
+        <span className="fcol__railcount" title={t('folders.title')}>
+          <Folder aria-hidden="true" />
+          <span>{folders.length}</span>
+        </span>
+      </nav>
+    );
   return (
-    <nav className="fcol" aria-label={t('folders.title')}>
+    <nav ref={nav} className={`fcol${drawer ? ' fcol--drawer' : ''}`} aria-label={t('folders.title')}>
       <div className="fcol__head">
+        {toggle}
         <h2 className="fcol__title">{t('folders.title')}</h2>
         {editable && (
           <button
@@ -198,32 +254,29 @@ export function FolderColumn({
             <Plus aria-hidden="true" />
           </button>
         )}
-        <button
-          type="button"
-          className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-          aria-label={t('folders.hide')}
-          onClick={onHide}
-        >
-          <PanelLeftClose aria-hidden="true" />
-        </button>
       </div>
-      <ul className="fcol__list" role="list">
-        {entry('all', <Layers aria-hidden="true" />, t(sandbox ? 'sandboxPage.all' : 'folders.all'))}
-        {entry('mine', <User aria-hidden="true" />, t(sandbox ? 'sandboxPage.mine' : 'folders.mine'))}
-      </ul>
-      <hr className="fcol__sep" />
-      <p className="fcol__section">{t('folders.space')}</p>
-      {tree(null, 0)}
-      {editable && (
-        <button type="button" className="fcol__new" onClick={() => onNew(null)}>
-          <FolderPlus aria-hidden="true" />
-          {t('demos.newFolder')}
-        </button>
-      )}
-      <hr className="fcol__sep" />
-      <ul className="fcol__list" role="list">
-        {entry('archived', <Archive aria-hidden="true" />, t('folders.archived'))}
-      </ul>
+      {/* La liste défile seule ; le bas de colonne reste visible */}
+      <div className="fcol__scroll">
+        <ul className="fcol__list" role="list">
+          {entry('all', <Layers aria-hidden="true" />, t(sandbox ? 'sandboxPage.all' : 'folders.all'))}
+          {entry('mine', <User aria-hidden="true" />, t(sandbox ? 'sandboxPage.mine' : 'folders.mine'))}
+        </ul>
+        <hr className="fcol__sep" />
+        <p className="fcol__section">{t('folders.space')}</p>
+        {tree(null, 0)}
+      </div>
+      <div className="fcol__foot">
+        {editable && (
+          <button type="button" className="fcol__new" onClick={() => onNew(null)}>
+            <FolderPlus aria-hidden="true" />
+            {t('demos.newFolder')}
+          </button>
+        )}
+        <hr className="fcol__sep" />
+        <ul className="fcol__list" role="list">
+          {entry('archived', <Archive aria-hidden="true" />, t('folders.archived'))}
+        </ul>
+      </div>
     </nav>
   );
 }

@@ -5214,6 +5214,7 @@
     "mine": "My demos",
     "space": "Workspace folders",
     "archived": "Archived",
+    "showColumn": "Show folders",
     "hide": "Hide folders",
     "newSub": "New subfolder",
     "actions": "Actions for folder {{name}}",

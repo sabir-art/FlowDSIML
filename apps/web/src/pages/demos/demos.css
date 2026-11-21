@@ -958,30 +958,94 @@ button.nd-src:focus-visible {
 .demos-layout {
   display: flex;
   align-items: flex-start;
-  min-height: 100%;
+  /* Retours client 21/11 §2.1 : la mise en page couvre toute la hauteur de la fenêtre. Elle reprend les
+     marges haute et basse de main (une colonne collante ne sort pas de son bloc conteneur), que le contenu
+     retrouve en padding. */
+  min-height: 100dvh;
+  margin: calc(-1 * var(--fd-space-6)) 0 calc(-1 * var(--fd-space-12));
 }
 .demos-main {
   flex: 1;
   min-width: 0;
+  padding: var(--fd-space-6) 0 var(--fd-space-12);
 }
-.fcol {
+/* Emplacement de la colonne : collant, du haut au bas de la fenêtre, comme la barre latérale. Sa largeur
+   ne change pas quand le tiroir s'ouvre (le contenu ne bouge pas). */
+.fcol-slot {
   position: sticky;
   top: 0;
   flex: none;
+  align-self: flex-start;
+  height: 100dvh;
+  margin: 0 var(--fd-space-8) 0 calc(-1 * var(--fd-space-8));
+}
+.fcol-slot--rail {
+  width: 48px;
+}
+.fcol {
+  display: flex;
+  flex-direction: column;
   width: 232px;
-  height: 100vh;
-  overflow-y: auto;
-  margin: calc(-1 * var(--fd-space-6)) var(--fd-space-8) 0 calc(-1 * var(--fd-space-8));
-  padding: var(--fd-space-6) var(--fd-space-3);
+  height: 100%;
+  padding: var(--fd-space-6) var(--fd-space-3) var(--fd-space-4) 8px;
   background: var(--fd-color-surface);
   border-right: 1px solid var(--fd-color-border);
+}
+/* §7 : rail de 48 px, bouton de bascule au même endroit que dans la colonne dépliée */
+.fcol--rail {
+  width: 48px;
+  align-items: flex-start;
+  gap: var(--fd-space-3);
+  padding-right: 8px;
+}
+.fcol .fcol__switch {
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+.fcol__railcount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 32px;
+  color: var(--fd-color-text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.fcol__railcount svg {
+  width: 18px;
+  height: 18px;
+}
+/* 1 024 à 1 279 px : tiroir de 280 px par-dessus le contenu, sans le pousser */
+.fcol--drawer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  width: 280px;
+  box-shadow: var(--fd-shadow-lg);
+}
+.fcol__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: clip;
+  overscroll-behavior: contain;
+  padding-left: 4px;
+}
+.fcol__foot {
+  flex: none;
+  padding: var(--fd-space-2) 0 0 4px;
 }
 .fcol__head {
   display: flex;
   align-items: center;
   gap: 4px;
+  /* Même hauteur que le bouton : la bascule est au même endroit repliée et dépliée */
+  height: 32px;
+  flex: none;
   margin-bottom: var(--fd-space-2);
-  padding-left: 8px;
 }
 .fcol__title {
   flex: 1;
@@ -1050,7 +1114,7 @@ button.nd-src:focus-visible {
 .fcol__item.is-active .fcol__count {
   color: inherit;
 }
-.fcol__toggle {
+.fcol .fcol__toggle {
   display: inline-grid;
   place-items: center;
   width: 20px;

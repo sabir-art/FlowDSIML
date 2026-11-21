@@ -182,16 +182,29 @@ const seed = () => {
   ok(bad.length === 0, `axe : Démos avec colonne (${bad.map((v) => v.id).join(', ')})`);
 
   // ===== Repli gardé =====
+  // Retours client 21/11 §7 : repliée, la colonne devient un rail au même endroit, bouton à la même place
+  const sw = page.locator('.fcol__switch');
+  const swOpen = await sw.boundingBox();
   await col.getByRole('button', { name: 'Masquer les dossiers' }).click();
   await page.reload();
   await page.locator('.demos-section .list-toolbar').waitFor();
+  const swRail = await sw.boundingBox();
   ok(
-    (await page.getByRole('navigation', { name: 'Dossiers' }).count()) === 0,
-    'repli gardé après rechargement',
+    (await page.locator('.fcol--rail').count()) === 1 &&
+      (await page.locator('.fcol--rail').evaluate((e) => e.getBoundingClientRect().width)) === 48,
+    'repli gardé après rechargement : rail de 48 px',
   );
-  await page.getByRole('button', { name: 'Dossiers', exact: true }).click();
-  await col.waitFor();
-  ok(true, '« Dossiers » rouvre la colonne');
+  ok(
+    Math.round(swOpen.x) === Math.round(swRail.x) && Math.round(swOpen.y) === Math.round(swRail.y),
+    `bascule à la même position repliée et dépliée (${Math.round(swRail.x)}, ${Math.round(swRail.y)})`,
+  );
+  ok(
+    (await page.getByRole('button', { name: 'Dossiers', exact: true }).count()) === 0,
+    'plus de bouton « Dossiers » près des filtres',
+  );
+  await page.getByRole('button', { name: 'Afficher les dossiers' }).click();
+  await col.locator('.fcol__head').waitFor();
+  ok(true, '« Afficher les dossiers » rouvre la colonne');
   await ctx.close();
 
   // ===== 1 023 px : filtre Dossier =====
