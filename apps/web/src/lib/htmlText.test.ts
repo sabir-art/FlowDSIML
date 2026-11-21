@@ -64,4 +64,33 @@ describe('L30-05 : capture HTML préparée pour l’IA', () => {
     expect(p.text.length).toBe(6000);
     expect(p.elements).toHaveLength(80);
   });
+
+  it('règle 3 : textes remplacés par l’auteur appliqués avant l’envoi (le nom d’origine ne part jamais)', () => {
+    const p = preparePage(
+      '<title>Fiche de Jean Dupont</title><body><h1>Dossier de Jean Dupont</h1><button class="u">Jean Dupont</button></body>',
+      [
+        { op: 'text', sel: 'h1', value: 'Dossier de Camille Exemple' },
+        { op: 'text', sel: 'button.u', value: 'Camille Exemple' },
+      ],
+    );
+    expect(p.text).toContain('Dossier de Camille Exemple');
+    expect(p.text).not.toContain('Jean Dupont');
+    expect(p.elements.map((e) => e.label)).toEqual(['Camille Exemple']);
+  });
+
+  it('règle 3 : e-mails et téléphones remplacés dans le texte, le titre et les libellés', () => {
+    const p = preparePage(
+      '<title>Contact jean.dupont@acme.example</title><body><p>Écrire à jean.dupont@acme.example, appeler le 06 12 34 56 78, ' +
+        'le 01.23.45.67.89, le +33 6 12 34 56 78 ou le +44 20 7946 0958.</p>' +
+        '<a href="mailto:x">support@acme.example</a><button>Appeler 0612345678</button></body>',
+      [],
+    );
+    const all = JSON.stringify(p);
+    for (const leak of ['jean.dupont', 'support@', '06 12 34', '01.23.45', '+33 6', '+44 20', '0612345678'])
+      expect(all).not.toContain(leak);
+    expect(p.text).toContain('[e-mail]');
+    expect(p.text).toContain('[téléphone]');
+    expect(p.title).toBe('Contact [e-mail]');
+    expect(p.elements.map((e) => e.label)).toEqual(['[e-mail]', 'Appeler [téléphone]']);
+  });
 });

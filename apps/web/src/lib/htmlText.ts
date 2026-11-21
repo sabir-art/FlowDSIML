@@ -22,6 +22,15 @@ const CLICKABLE =
 
 const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
 
+/**
+ * Règle 3 (L30) : adresses e-mail et numéros de téléphone (France et international) remplacés avant
+ * l'envoi, même sans flou posé par l'auteur.
+ */
+const EMAIL = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
+const PHONE =
+  /(?:\+\d{1,3}[\s.-]?(?:\(0\)[\s.-]?)?|\b0)\d(?:[\s.-]?\d{2}){4}\b|\+\d{1,3}(?:[\s.-]?\d{2,4}){2,5}\b/g;
+export const maskPersonal = (s: string) => s.replace(EMAIL, '[e-mail]').replace(PHONE, '[téléphone]');
+
 /** Sélecteur unique d'un élément dans son document (id sûr, sinon chemin nth-of-type depuis body). */
 export function uniqueSelector(el: Element): string | null {
   const doc = el.ownerDocument;
@@ -63,9 +72,18 @@ function labelOf(el: Element): string {
 
 export function preparePage(
   html: string,
-  ops: Array<{ op: string; sel: string; sels?: string[] }>,
+  ops: Array<{ op: string; sel: string; sels?: string[]; value?: unknown }>,
 ): { title: string; text: string; elements: PageElement[] } {
   const doc = new DOMParser().parseFromString(html, 'text/html');
+  // Ce que voit le visiteur : textes remplacés par l'auteur (un nom réel devenu fictif ne part jamais)
+  for (const o of ops) {
+    if (o.op !== 'text' || typeof o.value !== 'string') continue;
+    try {
+      doc.querySelectorAll(o.sel).forEach((n) => (n.textContent = o.value as string));
+    } catch {
+      /* sélecteur invalide : ignoré */
+    }
+  }
   // Sélecteurs calculés sur la page intacte (celle que voit le lecteur), avant tout retrait
   const sels = new Map<Element, string | null>();
   doc.body?.querySelectorAll(CLICKABLE).forEach((el) => sels.set(el, uniqueSelector(el)));
@@ -79,16 +97,16 @@ export function preparePage(
   // Jamais envoyé : scripts, styles, zones floutées à la capture, zones floutées, masquées ou retirées
   drop('script, style, noscript, template, iframe, object, embed, [data-fd-blurred], [aria-hidden="true"]');
   for (const o of ops) if (REMOVED_OPS.has(o.op)) [o.sel, ...(o.sels ?? [])].forEach(drop);
-  const title = clean(doc.title).slice(0, 200);
+  const title = maskPersonal(clean(doc.title)).slice(0, 200);
   const body = doc.body;
   const elements: PageElement[] = [];
   for (const [el, sel] of sels) {
     if (elements.length >= ELEMENTS_MAX) break;
     if (!sel || !el.isConnected || (el as HTMLElement).hidden) continue;
-    const label = labelOf(el);
+    const label = maskPersonal(labelOf(el)).slice(0, 80);
     if (!label || elements.some((e) => e.label === label)) continue;
     elements.push({ i: elements.length, label, sel });
   }
-  const text = clean(body?.textContent ?? '').slice(0, PAGE_TEXT_MAX);
+  const text = maskPersonal(clean(body?.textContent ?? '')).slice(0, PAGE_TEXT_MAX);
   return { title, text, elements };
 }
