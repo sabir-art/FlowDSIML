@@ -442,8 +442,8 @@ export function SharePage() {
                 <h2 className="t-label sh-h3" id="sh-params-h">
                   {t('share.urlParams')}
                 </h2>
-                {/* Zone défilante atteignable au clavier (RGAA 7.3) */}
-                <div className="code" tabIndex={0} role="region" aria-labelledby="sh-params-h">
+                {/* §18.7 : l'adresse revient à la ligne (plus de zone défilante, donc plus d'arrêt de tabulation) */}
+                <div className="code" role="region" aria-labelledby="sh-params-h">
                   {publicUrl}
                   {paramExample.map(([sep, k, v]) => (
                     <span key={k}>

@@ -693,8 +693,9 @@
   border-radius: var(--fd-radius-md);
   padding: 12px 14px;
   font: 12.5px/1.6 var(--fd-font-mono);
-  white-space: pre;
-  overflow-x: auto;
+  /* §18.7 : aucun défilement horizontal ; les URL et les longues lignes reviennent à la ligne */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   color: var(--fd-color-text);
   position: relative;
   margin: 0;
@@ -3131,4 +3132,23 @@
 .mk.st .st-body > :is(section, div):not(.card):only-of-type > * {
   margin-top: 0;
   margin-bottom: 0;
+}
+/* Retours client 21/11 §8 (§18.6) : section de liste de l'éditeur. 12 px entre la liste et son action,
+   4 px entre les lignes de 36 px (qui ont leur propre padding), posés par le gap des conteneurs */
+.mk .sec.sec--list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mk .sec.sec--list > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.mk .sec.sec--list > .btn {
+  align-self: flex-start;
+}
+.mk .sec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }

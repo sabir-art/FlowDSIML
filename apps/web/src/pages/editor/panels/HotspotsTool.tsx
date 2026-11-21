@@ -42,23 +42,27 @@ export function HotspotsTool({
   if (html)
     return (
       <div className="sp-panel">
-        <div className="sec">
+        <div className="sec sec--list">
           <div className="sec-title">
             {editor.demo?.kind === 'sandbox' ? t('editor.sandbox.guideListTitle') : t('editor.html.bubbles')}
           </div>
-          {hotspots.map((h, i) => (
-            <button
-              key={h.id}
-              type="button"
-              className="field-row sp-item"
-              onClick={() => setSelection({ kind: 'hotspot', id: h.id })}
-            >
-              <Target aria-hidden="true" />
-              <span className="grow">
-                {i + 1}. {h.title || t('editor.sandbox.guideNoTitle')}
-              </span>
-            </button>
-          ))}
+          {hotspots.length > 0 && (
+            <div className="sec-list">
+              {hotspots.map((h, i) => (
+                <button
+                  key={h.id}
+                  type="button"
+                  className="field-row sp-item"
+                  onClick={() => setSelection({ kind: 'hotspot', id: h.id })}
+                >
+                  <Target aria-hidden="true" />
+                  <span className="grow">
+                    {i + 1}. {h.title || t('editor.sandbox.guideNoTitle')}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
           {!readOnly && editor.demo?.kind === 'sandbox' && (
             <p className="help">{t('editor.sandbox.guideListHelp')}</p>
           )}
@@ -67,21 +71,26 @@ export function HotspotsTool({
     );
   return (
     <div className="sp-panel">
-      <div className="sec">
+      {/* §18.6 : 12 px entre la liste et « Ajouter un hotspot », 4 px entre les lignes (gap du conteneur) */}
+      <div className="sec sec--list">
         {hotspots.length === 0 && readOnly && <p className="help">{t('editor.noHotspot')}</p>}
-        {hotspots.map((h, i) => (
-          <button
-            key={h.id}
-            type="button"
-            className="field-row sp-item"
-            onClick={() => setSelection({ kind: 'hotspot', id: h.id })}
-          >
-            <Target aria-hidden="true" />
-            <span className="grow">
-              {i + 1}. {h.title || t('editor.untitled')}
-            </span>
-          </button>
-        ))}
+        {hotspots.length > 0 && (
+          <div className="sec-list">
+            {hotspots.map((h, i) => (
+              <button
+                key={h.id}
+                type="button"
+                className="field-row sp-item"
+                onClick={() => setSelection({ kind: 'hotspot', id: h.id })}
+              >
+                <Target aria-hidden="true" />
+                <span className="grow">
+                  {i + 1}. {h.title || t('editor.untitled')}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
         {!readOnly && (
           <button type="button" className="btn btn-secondary btn-sm" onClick={onAdd}>
             <Target aria-hidden="true" />

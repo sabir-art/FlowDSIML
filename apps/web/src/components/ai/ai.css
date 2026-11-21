@@ -161,6 +161,10 @@
   color: var(--fd-color-surface, #fff);
   font-size: 12px;
   line-height: 1.4;
+  /* Bug client (défilement horizontal du panneau) : le parent est en nowrap ; sans retour à la ligne,
+     l'infobulle cachée dépassait sa largeur maximale et élargissait la zone défilable du panneau */
+  white-space: normal;
+  overflow-wrap: anywhere;
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.12s;

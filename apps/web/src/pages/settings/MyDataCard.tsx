@@ -23,7 +23,8 @@ const FILES: Array<[key: string, file: string]> = [
   ['preferences', 'preferences.json'],
   ['publicationConfirmations', 'confirmations-de-publication.json'],
 ];
-const BUCKETS = ['captures', 'videos', 'voices', 'html', 'media'];
+// Retours client 21/11 : les logos de l'espace (branding) partent aussi avec un espace supprimé
+const BUCKETS = ['captures', 'videos', 'voices', 'html', 'media', 'branding'];
 
 /** Tous les fichiers sous un préfixe (dossiers parcourus jusqu'à 3 niveaux). */
 async function listAll(bucket: string, prefix: string, depth = 3): Promise<string[]> {
