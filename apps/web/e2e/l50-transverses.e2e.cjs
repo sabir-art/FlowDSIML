@@ -1,6 +1,6 @@
 /**
  * Audit L50, écarts transverses (docs/ux/audit/l50-audit-ui.md §12). Données fictives.
- *  - X2 : un seul indicateur de focus sur les champs (halo au clavier, bordure inchangée) ;
+ *  - X2, révisé par FIELD-01 : un seul indicateur de focus sur les champs (bordure prune et trait intérieur de 1 px, sans ombre extérieure) ;
  *  - X3 : pas d'aplat `hero` sur les cartes (Apprenants, centre de formation).
  * Usage : app web (:5173) et lecteur (:5174) lancés, puis `node e2e/l50-transverses.e2e.cjs`.
  */
@@ -39,24 +39,38 @@ const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
     state.learners = f.progress;
     state.learnerDetail = f.detail;
 
-    // ===== X2 : champ de recherche de Démos =====
+    // ===== X2 révisé par FIELD-01 : champ de recherche de Démos =====
     await page.goto(`${APP}/#/`);
     const search = page.getByRole('searchbox', { name: 'Rechercher une démo' });
     await search.waitFor();
+    // Styles calculés lus sans transition en cours (sinon couleurs intermédiaires)
+    await page.addStyleTag({ content: '*{transition:none!important}' });
     const before = await search.evaluate((el) => getComputedStyle(el).borderTopColor);
     // Au clavier : focus par Tab depuis l'élément précédent
     await search.focus();
     await search.evaluate((el) => el.blur());
     await page.keyboard.press('Shift+Tab');
     await page.keyboard.press('Tab');
+    const primary = await cssColor(page, '--fd-color-primary');
     const after = await search.evaluate((el) => ({
       focused: document.activeElement === el,
       border: getComputedStyle(el).borderTopColor,
       shadow: getComputedStyle(el).boxShadow,
+      outline: getComputedStyle(el).outlineStyle,
     }));
+    // FIELD-01 (remplace L50 X2) : bordure prune et trait intérieur de 1 px, un seul indicateur,
+    // ni outline ni ombre extérieure
+    const shadows = after.shadow.split(/,(?![^(]*\))/).map((x) => x.trim());
     ok(
-      after.focused && after.border === before && after.shadow !== 'none',
-      `${theme} : X2, focus au clavier : halo seul, bordure inchangée (${before} → ${after.border})`,
+      after.focused &&
+        before !== primary &&
+        after.border === primary &&
+        after.outline === 'none' &&
+        shadows.length === 1 &&
+        /inset/.test(shadows[0]) &&
+        shadows[0].startsWith(primary) &&
+        /0px 0px 0px 1px/.test(shadows[0]),
+      `${theme} : recherche des Démos au clavier : bordure prune et trait intérieur de 1 px, sans ombre extérieure (${before} → ${after.border} ; ${after.shadow})`,
     );
 
     // ===== X3 : cartes d'Apprenants sans aplat =====
