@@ -20,7 +20,7 @@
   - aucune donnée personnelle dans l'e-mail au-delà du **nom de l'espace** et du **nom de l'invitant**.
 - **Tests** : **aucun envoi réel**. Les e2e passent par un faux transport, et tout lien vers une adresse se fait avec `@example.com`.
 
-## 2. Budget d'envoi commun
+## 2. Budget d'envoi commun (confirmé par le chef le 21 novembre)
 
 - Un compteur journalier partagé (table `email_budget`, remise à zéro à minuit, heure de Paris) compte **tous les envois faits par l'app** : résumés et invitations.
 - **Plafond de l'app : 150 par jour.** Les 150 autres restent pour l'authentification, qui ne doit jamais être bloquée par un résumé.
@@ -58,9 +58,15 @@
 - Le lien « Ne plus recevoir ces e-mails » est une adresse avec un jeton à usage unique, valable 90 jours, propre à la personne. Il désactive l'option **sans connexion**, puis affiche une page simple : « Vous ne recevrez plus de notifications par e-mail. Vous pouvez les réactiver dans Paramètres › Notifications. »
 - L'e-mail porte aussi les en-têtes `List-Unsubscribe` et `List-Unsubscribe-Post: List-Unsubscribe=One-Click`, qui mènent à la même action.
 
-### 3.5 Envoi technique
-- Ce n'est pas un e-mail d'authentification. Une Edge Function `notify-email` l'envoie directement en SMTP (Brevo).
-- **Prérequis côté chef** : les identifiants SMTP Brevo en secrets de la fonction, sans nouveau compte. À dire au chef avant P2.
+### 3.5 Envoi technique (décidé par le chef le 21 novembre)
+- Ce n'est pas un e-mail d'authentification. Une Edge Function `notify-email` l'envoie par l'**API HTTP transactionnelle de Brevo** : `POST https://api.brevo.com/v3/smtp/email`, avec l'en-tête `api-key`. Pas de connexion SMTP depuis Deno.
+- Secret : `BREVO_API_KEY`, demandé au client par le chef. On ne l'écrit jamais dans le dépôt ni dans les journaux.
+- Les en-têtes `List-Unsubscribe` et `List-Unsubscribe-Post` passent dans le champ `headers` de l'appel.
+- **Sans le secret**, P2 se dégrade proprement :
+  - « Recevoir aussi par e-mail » reste affiché en « Bientôt », désactivé, comme aujourd'hui ;
+  - la tâche planifiée ne fait rien ;
+  - aucune erreur n'est visible ;
+  - P1 (invitations) n'en dépend pas.
 
 ## 4. Invitations d'équipe par e-mail
 
@@ -74,7 +80,7 @@
 - Texte : « {invitant} vous invite à rejoindre l'espace « {espace} » sur TutoClick. »
 - Rien d'autre : ni rôle, ni liste de membres, ni adresse de l'invitant.
 - Le lien d'action mène à l'acceptation de l'invitation (le jeton existant de `invitations`). L'invitation expire au bout de 14 jours, comme aujourd'hui : l'e-mail le dit.
-- **Personne qui a déjà un compte TutoClick** : Supabase Auth ne renvoie pas d'invitation à un compte existant. L'invitation apparaît alors dans **ses notifications de l'app** (« {invitant} vous invite à rejoindre « {espace} » »), avec Accepter et Refuser. Elle part aussi dans son résumé par e-mail, s'il est activé. Aucun autre e-mail.
+- **Personne qui a déjà un compte TutoClick** (confirmé par le chef le 21 novembre) : Supabase Auth ne renvoie pas d'invitation à un compte existant. L'invitation apparaît alors dans **ses notifications de l'app** (« {invitant} vous invite à rejoindre « {espace} » »), avec Accepter et Refuser. Elle part aussi dans son résumé par e-mail, s'il est activé. Aucun autre e-mail.
 
 ### 4.3 Limites et repli
 - Plafond : **20 invitations par heure et par espace** (comptées à l'envoi). Au-delà, la case est désactivée et la raison est écrite dessous : « 20 invitations par heure au plus. Vous pourrez en envoyer d'autres à {heure}. Les liens restent disponibles. »
@@ -109,7 +115,7 @@
 | Paquet | Contenu | Recette |
 |---|---|---|
 | **P1, budget et invitations** | `email_budget`, plafond de 20 par heure, case dans la modale, e-mail par `invite.html` avec `data`, repli sur le lien, invitation dans l'app pour un compte existant | recette 1 à 4, 8 |
-| **P2, résumé** | préférence, tâche planifiée, `notify-email` (SMTP), contenu, désinscription à un clic, ligne Utilisation | recette 5 à 7, 8 |
+| **P2, résumé** | préférence, tâche planifiée, `notify-email` (API HTTP Brevo, `BREVO_API_KEY`), contenu, désinscription à un clic, ligne Utilisation ; sans le secret, l'option reste en « Bientôt » | recette 5 à 9 |
 
 ## 7. Recette (aucun envoi réel : faux transport, adresses `@example.com`)
 
@@ -121,3 +127,4 @@
 6. Une notification lue dans l'app avant l'envoi n'est pas dans le résumé. Option désactivée : aucun e-mail.
 7. « Ne plus recevoir ces e-mails » : l'option est désactivée sans connexion, la page de confirmation s'affiche, et les en-têtes `List-Unsubscribe` sont présents.
 8. Budget : à 150 envois de l'app dans la journée, plus aucun résumé ni aucune invitation ne part (repli sur le lien), et l'authentification n'est pas touchée. La ligne Utilisation affiche « 150 sur 150 ».
+9. Sans `BREVO_API_KEY` : « Recevoir aussi par e-mail » reste en « Bientôt », désactivé, et la tâche planifiée n'appelle pas Brevo. Avec le secret (faux serveur Brevo en test) : l'appel part avec l'en-tête `api-key` et les en-têtes de désinscription, et la clé n'apparaît dans aucun journal.
