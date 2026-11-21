@@ -359,6 +359,28 @@ async function keyboard(p) {
       );
       await p.close();
     }
+    // Case à cocher invalide (inscription envoyée vide) : bordure rouge, comme les champs ; case dessinée
+    {
+      const p = await ctx.newPage();
+      await install(p, { ...seed(), signedOut: true });
+      await p.goto(`${APP}/#/signup`);
+      await p.locator('#consent').waitFor();
+      await p.addStyleTag({ content: '*{transition:none!important}' });
+      const T = await probeTokens(p);
+      await p.locator('form button[type=submit]').first().click();
+      await p.waitForFunction(
+        () => document.querySelector('#consent')?.getAttribute('aria-invalid') === 'true',
+      );
+      const c = await p.locator('#consent').evaluate((el) => ({
+        border: getComputedStyle(el).borderTopColor,
+        appearance: getComputedStyle(el).appearance,
+      }));
+      ok(
+        c.border === T.danger && c.appearance === 'none',
+        `case à cocher invalide (${theme}) : bordure rouge, case dessinée (${JSON.stringify(c)})`,
+      );
+      await p.close();
+    }
     // Bouton secondaire au clavier, puis champ à puces invalide (modale d'invitation)
     {
       const p = await ctx.newPage();

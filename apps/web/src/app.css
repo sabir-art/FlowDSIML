@@ -350,11 +350,13 @@
   flex-direction: column;
 }
 .menu-item {
+  /* COMP-01 (menus) : éléments de 36 px, 12 px de marge, icône de 16 px, 8 px d'écart */
   display: flex;
   align-items: center;
-  gap: var(--fd-space-2);
+  gap: 8px;
   width: 100%;
-  padding: 8px 10px;
+  min-height: 36px;
+  padding: 0 12px;
   border: 0;
   border-radius: var(--fd-radius-sm);
   background: none;
@@ -389,9 +391,21 @@
   height: 16px;
 }
 .menu-sep {
+  flex: none;
   height: 1px;
-  margin: var(--fd-space-1) 0;
+  margin: 4px 0;
   background: var(--fd-color-border);
+}
+/* Intitulé de groupe : 12 px majuscules, gris, aligné sur l'icône des éléments (12 px), 8 px au-dessus,
+   4 px au-dessous */
+.menu-group__label {
+  padding: 8px 12px 4px;
+  color: var(--fd-color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 .dialog {
   border: 0;
@@ -648,12 +662,27 @@
 
 /* Sélecteur de thème dans le menu du compte */
 .menu-radios {
+  /* Thème : libellé à gauche (aligné sur le texte des éléments), contrôle segmenté à droite */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--fd-space-3);
-  padding: var(--fd-space-1) var(--fd-space-2) var(--fd-space-1) var(--fd-space-3);
+  min-height: 36px;
+  padding: 0 4px 0 12px;
   font-size: var(--fd-font-sm);
+}
+/* Un seul contour léger autour du contrôle ; l'option choisie n'a qu'un fond prune doux et une icône
+   prune, sans bordure */
+.menu-radios .segmented {
+  border: 1px solid var(--fd-color-border);
+}
+.menu-radios .segmented button + button {
+  border-left: 0;
+}
+.menu-radios .segmented button[aria-checked='true'] {
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary);
+  border: 0;
 }
 .menu-radios__label {
   color: var(--fd-color-text);
