@@ -85,6 +85,7 @@
   - Les deux statuts sont publiables : « Éléments retirés » informe, il ne bloque pas.
 - **Où** :
   - **Extension**, écran « Vérification de la capture HTML » : rapport cumulé en tête (somme des pages) ; statut par page dans la liste ; un clic sur une page déplie son détail ; puis « Envoyer {n} pages ».
+    - Corrigé le 21 novembre : la vérification Google se fait sur le serveur, à l'envoi. L'extension ne connaît donc pas encore les liens dangereux. Son résumé omet la partie « liens dangereux bloqués », et une ligne de 12 px `text-muted` sous le rapport dit : « Les liens sont vérifiés par Google Safe Browsing à l'envoi. »
   - **Éditeur** (rail L48-E, outil **Étape**, page HTML) : une section « Sécurité de la page » en une ligne (statut, puis le lien « Détail » qui déplie les compteurs), puis la liste des liens externes (§4). Rien n'est ajouté sur la vignette de la colonne des étapes (§17.4).
   - **Liste de contrôle avant publication** : une ligne d'information « {n} pages analysées : {x} sûres, {y} avec éléments retirés », non bloquante.
 - **Accessibilité** : le rapport est un `role="group"` « Analyse de sécurité » ; les compteurs sont une liste ; les icônes sont `aria-hidden`.
