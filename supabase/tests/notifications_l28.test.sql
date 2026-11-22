@@ -68,6 +68,9 @@ select is(pg_temp.n('00000000-0000-0000-0000-0000000122a1', 'mention'), 1, 'dém
 insert into public.folders (id, workspace_id, name, restricted)
   values ('00000000-0000-0000-0000-0000000122f1', (select ws from ctx), 'RH', true);
 update public.demos set folder_id = '00000000-0000-0000-0000-0000000122f1' where id = '00000000-0000-0000-0000-0000000122d1';
+-- Eddie fait partie des membres du dossier : lui seul (avec les administrateurs) peut y écrire
+insert into public.folder_members (folder_id, user_id, workspace_id)
+  values ('00000000-0000-0000-0000-0000000122f1', '00000000-0000-0000-0000-0000000122a2', (select ws from ctx));
 select pg_temp.login('00000000-0000-0000-0000-0000000122a2');
 insert into public.step_comments (workspace_id, demo_id, step_id, body) values
   ((select ws from ctx), '00000000-0000-0000-0000-0000000122d1', '00000000-0000-0000-0000-0000000122e1',
@@ -85,8 +88,6 @@ reset role;
 select is(pg_temp.n('00000000-0000-0000-0000-0000000122a3', 'mention'), 2, 'membre choisi du dossier : notifiée');
 
 -- Réouverture : personne n'est notifié ; résolution : l'auteur l'est
-insert into public.folder_members (folder_id, user_id, workspace_id)
-  values ('00000000-0000-0000-0000-0000000122f1', '00000000-0000-0000-0000-0000000122a2', (select ws from ctx));
 update c set id = (select id from public.step_comments where body = 'Deuxième remarque');
 select pg_temp.login('00000000-0000-0000-0000-0000000122a1');
 select public.set_comment_resolved((select id from c), true);

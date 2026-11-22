@@ -3,7 +3,7 @@
 -- l'insertion et à la modification. Données fictives.
 begin;
 set search_path = public, extensions;
-select plan(13);
+select plan(24);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000091a1', 'admin-garde@example.com'),
@@ -90,6 +90,47 @@ select throws_ok($$ select public.finalize_publication('00000000-0000-0000-0000-
   'P0001', 'PLAN_LIMIT:published_demos', 'limite du plan atteinte : refusée');
 reset role;
 update public.workspaces set plan_code = 'enterprise' where id = (select ws from ctx);
+
+-- ===== 3. Dossier restreint : l'éditeur exclu n'écrit pas dedans =====
+select pg_temp.login('00000000-0000-0000-0000-0000000091a1');
+select public.set_folder_access('00000000-0000-0000-0000-0000000091f1', true,
+  array['00000000-0000-0000-0000-0000000091a2']::uuid[]);
+select pg_temp.login('00000000-0000-0000-0000-0000000091a3');
+select throws_ok($$ select public.finalize_publication('00000000-0000-0000-0000-0000000091e1') $$,
+  null, 'DEMO_NOT_FOUND', 'éditeur exclu : ne met pas en ligne une démo du dossier');
+select throws_ok($$ insert into public.steps (demo_id, workspace_id, position, image_path)
+                    values ('00000000-0000-0000-0000-0000000091d1', (select ws from ctx), 5, 'x/9.webp') $$,
+  '42501', null, 'éditeur exclu : pas d''étape dans une démo du dossier');
+select throws_ok($$ insert into public.share_links (demo_id, workspace_id, name, token)
+                    values ('00000000-0000-0000-0000-0000000091d1', (select ws from ctx), 'Lien', 'jeton-fictif-0001') $$,
+  '42501', null, 'éditeur exclu : pas de lien de partage sur une démo du dossier');
+select throws_ok($$ insert into public.chapters (demo_id, workspace_id, title, position)
+                    values ('00000000-0000-0000-0000-0000000091d1', (select ws from ctx), 'Chapitre', 0) $$,
+  '42501', null, 'éditeur exclu : pas de chapitre dans une démo du dossier');
+select throws_ok($$ insert into public.quiz_questions (demo_id, workspace_id, prompt)
+                    values ('00000000-0000-0000-0000-0000000091d1', (select ws from ctx), 'Question ?') $$,
+  '42501', null, 'éditeur exclu : pas de question de quiz dans une démo du dossier');
+select throws_ok($$ update public.steps set demo_id = '00000000-0000-0000-0000-0000000091d1'
+                     where id = '00000000-0000-0000-0000-0000000091b2' $$,
+  '42501', null, 'éditeur exclu : ne déplace pas une étape vers une démo du dossier');
+select throws_ok($$ insert into public.demos (workspace_id, folder_id, title)
+                    values ((select ws from ctx), '00000000-0000-0000-0000-0000000091f1', 'Intruse') $$,
+  '42501', null, 'éditeur exclu : pas de démo créée dans le dossier');
+select throws_ok($$ update public.demos set folder_id = '00000000-0000-0000-0000-0000000091f1'
+                     where id = '00000000-0000-0000-0000-0000000091d9' $$,
+  '42501', null, 'éditeur exclu : ne range pas une démo dans le dossier');
+select throws_ok($$ insert into public.folders (workspace_id, parent_id, name)
+                    values ((select ws from ctx), '00000000-0000-0000-0000-0000000091f1', 'Sous-dossier') $$,
+  '42501', null, 'éditeur exclu : pas de sous-dossier dans le dossier');
+
+-- L'éditrice autorisée écrit toujours
+select pg_temp.login('00000000-0000-0000-0000-0000000091a2');
+select lives_ok($$ insert into public.steps (demo_id, workspace_id, position, image_path)
+                   values ('00000000-0000-0000-0000-0000000091d1', (select ws from ctx), 5, 'x/9.webp') $$,
+  'éditrice autorisée : ajoute une étape dans le dossier');
+select lives_ok($$ insert into public.demos (workspace_id, folder_id, title)
+                   values ((select ws from ctx), '00000000-0000-0000-0000-0000000091f1', 'Légitime') $$,
+  'éditrice autorisée : crée une démo dans le dossier');
 
 select * from finish();
 rollback;
