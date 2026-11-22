@@ -5056,6 +5056,8 @@
     "team": "TutoClick team",
     "sub": "TutoClick team · all workspaces",
     "back": "Back to the app",
+    "backApp": "Application",
+    "backLabel": "Back to the application",
     "tabsLabel": "Console sections",
     "export": "Export",
     "undo": "Undo",
@@ -5069,6 +5071,8 @@
       "read_only": "Read only"
     },
     "tabs": {
+      "newCount_one": "{{count}} new",
+      "newCount_other": "{{count}} new",
       "overview": "Overview",
       "feedback": "Feedback",
       "feedbackN_one": "Feedback · {{count}} new",

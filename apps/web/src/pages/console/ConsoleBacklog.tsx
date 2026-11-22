@@ -70,7 +70,7 @@ export function Backlog() {
   const rejected = items.filter((i) => i.status === 'rejected');
   return (
     <div className="console-stack">
-      <h1 className="sr-only">{t('console.tabs.backlog')}</h1>
+      <h2 className="sr-only">{t('console.tabs.backlog')}</h2>
       <div className="console-card-head">
         <WriteButton className="fd-btn fd-btn--primary fd-btn--sm" onClick={() => setCreating(true)}>
           <Plus aria-hidden="true" />

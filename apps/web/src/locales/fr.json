@@ -5056,6 +5056,8 @@
     "team": "Équipe TutoClick",
     "sub": "Équipe TutoClick · tous les espaces",
     "back": "Retour à l’app",
+    "backApp": "Application",
+    "backLabel": "Retour à l’application",
     "tabsLabel": "Sections de la console",
     "export": "Exporter",
     "undo": "Annuler",
@@ -5069,6 +5071,8 @@
       "read_only": "Lecture seule"
     },
     "tabs": {
+      "newCount_one": "{{count}} nouveau",
+      "newCount_other": "{{count}} nouveaux",
       "overview": "Vue d’ensemble",
       "feedback": "Retours",
       "feedbackN_one": "Retours · {{count}} nouveau",

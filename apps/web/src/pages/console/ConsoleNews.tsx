@@ -92,7 +92,7 @@ export function NewsTab() {
   return (
     <div className="console-stack">
       {dialog}
-      <h1 className="sr-only">{t('console.tabs.news')}</h1>
+      <h2 className="sr-only">{t('console.tabs.news')}</h2>
       <div className="console-card-head">
         <WriteButton className="fd-btn fd-btn--primary fd-btn--sm" onClick={() => setEditing('new')}>
           <Plus aria-hidden="true" />

@@ -5,10 +5,11 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
 import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { BackButton } from '@flowdsiml/ui';
+import { HelpButton } from '../../help/HelpButton';
 import { supabase } from '../../lib/supabase';
-import { BrandMark } from '../../components/BrandMark';
 import { Loading } from '../../components/guards';
 import { usePlatformRole } from './platform';
 import { RoleCtx, useConsoleRole } from './shared';
@@ -20,6 +21,10 @@ import { Team } from './ConsoleTeam';
 import './console.css';
 
 let opened = false;
+
+const CrumbLink = (p: { to: string; className?: string; title?: string; children?: ReactNode }) => (
+  <Link {...p} />
+);
 
 export function ConsolePage() {
   const role = usePlatformRole();
@@ -62,12 +67,8 @@ function ConsoleFrame() {
   }, []);
   const tabs = [
     { to: '/console', end: true, label: t('console.tabs.overview') },
-    {
-      to: '/console/retours',
-      label: counts?.newComments
-        ? t('console.tabs.feedbackN', { count: counts.newComments })
-        : t('console.tabs.feedback'),
-    },
+    // Compteur des retours nouveaux en pastille ; le libellé complet reste le nom accessible
+    { to: '/console/retours', label: t('console.tabs.feedback'), count: counts?.newComments || 0 },
     {
       to: '/console/backlog',
       label: counts?.triage
@@ -77,26 +78,60 @@ function ConsoleFrame() {
     { to: '/console/nouveautes', label: t('console.tabs.news') },
     { to: '/console/equipe', label: t('console.tabs.team') },
   ];
+  const nav = (
+    <nav className="console-tabs" aria-label={t('console.tabsLabel')}>
+      {tabs.map((x) => (
+        <NavLink key={x.to} to={x.to} end={x.end} className="console-tab">
+          {x.label}
+          {x.count ? (
+            <>
+              <span className="console-tab__n" aria-hidden="true">
+                {x.count}
+              </span>
+              <span className="sr-only">{t('console.tabs.newCount', { count: x.count })}</span>
+            </>
+          ) : null}
+        </NavLink>
+      ))}
+    </nav>
+  );
   return (
     <div className="mk console">
-      <header className="console-head">
-        <BrandMark />
-        <div className="console-head__t">
-          <b>{t('console.entry')}</b>
-          <span>{t('console.sub')}</span>
+      {/* PAGE-01 §16.2 : variante éditeur de la barre commune (56 px, collante, filet), grille 1fr auto 1fr.
+          Elle remplace l'ancien en-tête et la rangée d'onglets ; le h1 de la Console est dans la barre. */}
+      <header className="fd-page-header fd-page-header--editor console-top" data-tip-side="bottom">
+        <div className="console-top__l">
+          <BackButton
+            to="/"
+            label={t('console.backApp')}
+            ariaLabel={t('console.backLabel')}
+            className="console-top__back"
+            as={CrumbLink}
+          />
+          {/* Sous 1 024 px : le retour en icône seule */}
+          <BackButton
+            to="/"
+            label=""
+            iconOnly
+            ariaLabel={t('console.backLabel')}
+            className="console-top__back-m"
+            as={CrumbLink}
+          />
+          <span className="console-top__sep" aria-hidden="true" />
+          <h1 className="console-top__t" data-tip={t('console.sub')} tabIndex={0}>
+            {t('console.entry')}
+          </h1>
         </div>
-        <Link className="fd-btn fd-btn--sm" to="/">
-          <ArrowLeft aria-hidden="true" />
-          {t('console.back')}
-        </Link>
+        <div className="console-top__c">{nav}</div>
+        <div className="console-top__r">
+          <HelpButton className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm" />
+        </div>
       </header>
-      <nav className="console-tabs" aria-label={t('console.tabsLabel')}>
-        {tabs.map((x) => (
-          <NavLink key={x.to} to={x.to} end={x.end} className="console-tab">
-            {x.label}
-          </NavLink>
-        ))}
-      </nav>
+      {/* Sous 1 024 px : les onglets passent sous la barre, sur une ligne qui défile */}
+      {/* §18.7 : rangée d'onglets, défilement horizontal voulu sur mobile */}
+      <div className="console-tabrow" data-scroll-x="">
+        {nav}
+      </div>
       <main className="console-main" id="main">
         {role === 'read_only' && (
           <p className="console-ro" role="note">
