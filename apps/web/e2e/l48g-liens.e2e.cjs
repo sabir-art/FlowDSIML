@@ -201,7 +201,7 @@ const pages = [
   const aide = items.filter({ hasText: 'Aide' });
   await aide.getByRole('button', { name: 'Autres actions pour « Aide »' }).click();
   ok(
-    (await p.locator('.menu-group .menu-radios__label', { hasText: 'Relier à une page' }).count()) === 1,
+    (await p.locator('.menu-group__label', { hasText: 'Relier à une page' }).count()) === 1,
     'menu « … » : intitulé « Relier à une page » une seule fois',
   );
   await p.getByRole('menuitem', { name: 'Agenda' }).click();
