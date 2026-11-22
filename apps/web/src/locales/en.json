@@ -1849,6 +1849,24 @@
       "moved": "Step moved to position {{n}} of {{total}}.",
       "grabbed": "Step {{n}} grabbed. Arrows to move it, Space to drop.",
       "dropped": "Step dropped at position {{n}}."
+    },
+    "stepMenu": {
+      "actions": "Actions for step {{n}}",
+      "playFrom": "Play from step {{n}}",
+      "playFromShort": "Play from here",
+      "edit": "Edit",
+      "copy": "Copy",
+      "pasteAfter": "Paste after",
+      "cut": "Cut",
+      "duplicate": "Duplicate",
+      "hide": "Hide step",
+      "keyEnter": "Enter",
+      "keyDelete": "Del",
+      "copied": "Step {{n}} copied",
+      "pasted": "Step pasted at position {{n}}",
+      "duplicated": "Step duplicated at position {{n}}",
+      "deleted": "Step {{n}} deleted",
+      "deletedToast": "Step deleted"
     }
   },
   "status": {

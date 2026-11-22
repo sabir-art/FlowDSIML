@@ -121,9 +121,13 @@ const SHOTS = process.env.SHOTS_DIR;
   );
 
   // Réordonnancement
+  // P1-1 : « Monter » est dans le menu « … » de l'étape
   await page.locator('.rail-li').nth(2).hover();
-  await page.locator('.rail-li').nth(2).getByRole('button', { name: 'Monter' }).click();
-  await page.waitForTimeout(300);
+  await page.locator('.rail-li').nth(2).getByRole('button', { name: 'Actions de l’étape 3' }).click();
+  await page.getByRole('menuitem', { name: 'Monter' }).click();
+  await page.waitForFunction(
+    () => document.querySelectorAll('.rail-list .step .meta b')[1]?.textContent === 'Merci !',
+  );
   ok(
     (await page.locator('.rail-list .step .meta b').nth(1).textContent()) === 'Merci !',
     'étape déplacée vers le haut',

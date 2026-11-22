@@ -3907,3 +3907,50 @@
 .mk .rail-quiz:hover {
   background: var(--fd-color-nav-hover);
 }
+
+/* ---- P1-1 : actions d'une carte d'étape (« Lire depuis ici » et « … », 28 px) : au survol, au
+   focus clavier et sur l'étape choisie ---- */
+.mk .rail-acts {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: flex;
+  translate: 0 -50%;
+  opacity: 0;
+}
+.mk .rail-li:hover .rail-acts,
+.mk .rail-li:has(:focus-visible) .rail-acts,
+.mk .rail-li:has(.step[aria-current='step']) .rail-acts,
+.mk .rail-li:has(.menu-trigger[aria-expanded='true']) .rail-acts {
+  opacity: 1;
+}
+.mk .rail-acts :is(.rail-act, .menu-trigger) {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.mk .rail-acts :is(.rail-act, .menu-trigger):hover,
+.mk .rail-acts .menu-trigger[aria-expanded='true'] {
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-text);
+}
+.mk .rail-acts :is(.rail-act, .menu-trigger):focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.mk .rail-acts svg {
+  width: 16px;
+  height: 16px;
+}
+/* Le titre laisse la place aux deux actions */
+.mk .rail-li .step {
+  padding-right: 68px;
+}

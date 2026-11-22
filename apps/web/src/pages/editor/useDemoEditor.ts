@@ -529,6 +529,92 @@ export function useDemoEditor(demoId: string) {
           await persistOrder(steps.filter((s) => s.id !== id));
         }),
 
+      /**
+       * P1-1 : insère une copie d'une étape après `afterIndex` (dupliquer, coller, couper-coller), y
+       * compris depuis une autre démo de l'espace. Les fichiers sont copiés dans cette démo (aucun
+       * fichier partagé entre deux étapes), ainsi que les hotspots et leurs bulles. Venue d'une autre
+       * démo, l'étape perd son chapitre et son formulaire, et ses liens vers d'autres étapes.
+       */
+      pasteStep: (src: { step: StepRow; hotspots: HotspotRow[] }, afterIndex: number) =>
+        run(async () => {
+          await flush();
+          const sameDemo = src.step.demo_id === demoId;
+          const dir = `${demo!.workspace_id}/${demoId}`;
+          const copy = async (bucket: string, path: string | null) => {
+            if (!path) return null;
+            const ext = path.includes('.') ? path.slice(path.lastIndexOf('.')) : '';
+            const to = `${dir}/${crypto.randomUUID()}${ext}`;
+            const cp = await supabase.storage.from(bucket).copy(path, to);
+            if (cp.error) throw cp.error;
+            return to;
+          };
+          const {
+            id: _id,
+            created_at: _c,
+            updated_at: _u,
+            position: _p,
+            ...rest
+          } = src.step as StepRow & { created_at?: string; updated_at?: string };
+          void _id;
+          void _c;
+          void _u;
+          void _p;
+          const position = afterIndex + 1;
+          const { data, error } = await supabase
+            .from('steps')
+            .insert({
+              ...rest,
+              demo_id: demoId,
+              workspace_id: demo!.workspace_id,
+              position,
+              chapter_id: sameDemo ? rest.chapter_id : null,
+              gate_form_id: null,
+              image_path: await copy('captures', rest.image_path),
+              before_image_path: await copy('captures', rest.before_image_path),
+              snapshot_path: await copy('captures', rest.snapshot_path),
+              voice_path: await copy('voices', rest.voice_path),
+              video_path: await copy('videos', rest.video_path),
+              html_path: await copy('html', rest.html_path),
+            } as never)
+            .select()
+            .single();
+          if (error) throw error;
+          const step = data as StepRow;
+          const spots: HotspotRow[] = [];
+          for (const h of src.hotspots) {
+            const {
+              id: _hid,
+              created_at: _hc,
+              updated_at: _hu,
+              ...hrest
+            } = h as HotspotRow & { created_at?: string; updated_at?: string };
+            void _hid;
+            void _hc;
+            void _hu;
+            const act = hrest.action as { type?: string } | null;
+            const linked = !sameDemo && !!act && (act.type === 'goto' || act.type === 'chapter');
+            const ins = await supabase
+              .from('hotspots')
+              .insert({
+                ...hrest,
+                step_id: step.id,
+                demo_id: demoId,
+                workspace_id: demo!.workspace_id,
+                ...(linked ? { action: null } : {}),
+              } as never)
+              .select()
+              .single();
+            if (ins.error) throw ins.error;
+            spots.push(ins.data as HotspotRow);
+          }
+          setHotspots((l) => [...l, ...spots]);
+          const next = [...steps];
+          next.splice(position, 0, step);
+          await signImages([step]);
+          await persistOrder(next);
+          return step;
+        }),
+
       moveStep: (from: number, to: number) => run(() => persistOrder(moveItem(steps, from, to))),
 
       addHotspot: (stepId: string, x: number, y: number, title: string) =>

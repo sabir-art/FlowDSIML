@@ -13,7 +13,10 @@ export function PreviewDialog({
   manifest,
   onClose,
   startQuiz = false,
+  startStep,
 }: {
+  /** P1-1 : « Lire depuis ici » ouvre l'aperçu à cette étape (index à partir de 0). */
+  startStep?: number;
   manifest: Manifest | null;
   onClose: () => void;
   /** F2 : « Tester le quiz » ouvre l'aperçu directement sur le quiz (tentatives non comptées). */
@@ -39,7 +42,10 @@ export function PreviewDialog({
     const onMsg = (e: MessageEvent) => {
       if (e.origin !== origin || e.source !== frame.current?.contentWindow) return;
       if ((e.data as { type?: string })?.type === 'fd:preview-ready') {
-        frame.current?.contentWindow?.postMessage({ type: 'fd:preview', manifest, startQuiz }, origin);
+        frame.current?.contentWindow?.postMessage(
+          { type: 'fd:preview', manifest, startQuiz, startStep },
+          origin,
+        );
         setStatus('ready');
       }
     };
@@ -49,7 +55,7 @@ export function PreviewDialog({
       removeEventListener('message', onMsg);
       clearTimeout(timer);
     };
-  }, [manifest, origin, device, startQuiz]);
+  }, [manifest, origin, device, startQuiz, startStep]);
 
   return (
     <dialog ref={ref} className="preview-dialog" onClose={onClose} aria-label={t('editor.preview')}>

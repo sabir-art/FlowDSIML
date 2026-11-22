@@ -1849,6 +1849,24 @@
       "moved": "Étape déplacée en position {{n}} sur {{total}}.",
       "grabbed": "Étape {{n}} saisie. Flèches pour la déplacer, Espace pour la poser.",
       "dropped": "Étape posée en position {{n}}."
+    },
+    "stepMenu": {
+      "actions": "Actions de l’étape {{n}}",
+      "playFrom": "Lire depuis l’étape {{n}}",
+      "playFromShort": "Lire depuis ici",
+      "edit": "Modifier",
+      "copy": "Copier",
+      "pasteAfter": "Coller après",
+      "cut": "Couper",
+      "duplicate": "Dupliquer",
+      "hide": "Masquer l’étape",
+      "keyEnter": "Entrée",
+      "keyDelete": "Suppr",
+      "copied": "Étape {{n}} copiée",
+      "pasted": "Étape collée en position {{n}}",
+      "duplicated": "Étape dupliquée en position {{n}}",
+      "deleted": "Étape {{n}} supprimée",
+      "deletedToast": "Étape supprimée"
     }
   },
   "status": {
