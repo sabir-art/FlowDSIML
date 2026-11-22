@@ -433,6 +433,48 @@ Le client a corrigé la première décision : « le seul qui aura une couleur di
 - Dans un dossier ouvert, la phrase d'accès (« Tout l'espace peut voir ce dossier. ») passe dans le bouton « Accès au dossier » du PageHeader (son infobulle et sa fenêtre).
 - Maquettes : lot 2 (grille, liste, dossier, menu, nouvelle, vide), refaites le 22/11. Les lots 5 et 6 suivent la même règle quand ils sont repris.
 
+### 16.1 PAGE-01 vaut pour toutes les pages (rappel du client, 22/11)
+
+PAGE-01 est une structure **globale**. Toute route de l'app qui s'affiche dans la coque (barre latérale) a, en haut, **une seule barre `.fd-page-header`** :
+- 56 px de haut, collée en haut au défilement (`sticky`), fond du contenu, filet en bas ;
+- à gauche, le titre (14 px, 500), ou le fil d'Ariane qui se termine par le titre. Le **statut** de l'objet, s'il y en a un, est un **badge** juste après le titre : `pill` de 24 px, texte 12 px, et infobulle si le statut est abrégé (« Brouillon » : « Brouillon, jamais publié ») ;
+- à droite, les actions de la page (32 à 36 px), puis Aide et Notifications, alignées sur le même axe vertical que le titre ;
+- en dessous, le contenu. Il n'y a **aucun H1 en dehors de la barre**, ni de grand titre ou de sous-titre dans le contenu. Une phrase d'explication utile va en tête de la section qu'elle concerne.
+
+Les éditeurs (démo, quiz, présentation) utilisent la variante **`.fd-page-header--editor`** : même hauteur et même filet, avec à gauche le retour et le titre modifiable, au centre les onglets éventuels et à droite les actions (lot 3). C'est la même barre, pas une exception.
+
+**Hors coque**, sans barre latérale, donc sans PageHeader : connexion, inscription, mot de passe oublié, réinitialisation, invitation, désinscription, pages légales (lot 7, `AuthLayout`) ; l'onboarding (`/onboarding`, parcours plein écran) ; l'écran public de présentation (`/present/:id/screen`) ; la télécommande (`/t`) ; le lecteur. Ces écrans gardent **un seul H1** (visible ou `sr-only`) et aucune `.fd-page-header`. Le chef valide ou refuse cette liste.
+
+**Relevé du 22/11** (dev-mvp 4d15a25, 1440 px, 30 routes parcourues) :
+
+| Route | Page | Aujourd'hui | À faire |
+|---|---|---|---|
+| `/` | Démos | `.fd-page-header`, 1 H1 dans la barre | conforme (lot 2) |
+| `/sandbox` | Sandbox | idem | conforme |
+| `/settings/*` (14 routes, plus le détail d'un webhook) | Paramètres | idem | conforme |
+| `/center` | Parcours de formation (Centre) | `page-head` avec grand H1 et sous-titre « Brouillon · jamais publié », actions détachées du titre | barre : « Centre de formation » + badge « Brouillon » ; à droite « Aperçu » et « Publier le centre » ; libellé « Aperçu » du panneau de droite aligné sur le haut du premier bloc. Maquette `lot6-formation/centre-*` mise à jour |
+| `/learners` | Apprenants | `page-head--refonte`, H1 hors barre | barre « Apprenants », avec à côté le compte « 48 apprenants · 3 formations » en 13 px text-muted (maquette `lot6-formation/apprenants-*`) ; actions dans la barre |
+| `/learners` (tiroir d'un apprenant) | Détail apprenant | tiroir `l13-drawer` | pas de PageHeader (c'est un tiroir) ; en-tête du tiroir en H2 |
+| `/analytics` et `?tab=leads` | Analytics de l'espace | `page-head`, H1 hors barre | barre « Analytics » ; période et export à droite ; onglets en 1re ligne du contenu (PAGE-01 §16) |
+| `/demos/:id/analytics` | Analytics d'une démo | `page-head--refonte`, H1 « Démo CRM » | barre en fil d'Ariane « Démos › Démo CRM › Analytics » |
+| `/demos/:id/share` | Partager | `page-head`, H1 « Partager la démo » | barre en fil d'Ariane « Démos › Démo CRM › Partager » ; « Copier le lien » à droite |
+| `/demos/:id/distribute` | Diffuser | redirige vers l'éditeur (`?distribute=1`, modale) | rien de plus (c'est une modale) |
+| `/nouveautes` | Nouveautés | `page-head--refonte`, H1 hors barre | barre « Nouveautés » |
+| `/console/*` | Console (admin) | H1 `sr-only` par onglet, pas de barre | barre en fil d'Ariane « Console › onglet » ; onglets dans le contenu |
+| `/demos/:id/edit` | Éditeur | `ed-bar`, H1 « Éditeur : … » dans la barre | ajouter `.fd-page-header fd-page-header--editor` à `ed-bar` |
+| `/demos/:id/quiz` | Éditeur de quiz | `editor-bar`, H1 dans le contenu (`quiz-page__title`) | variante éditeur ; H1 dans la barre |
+| `/demos/:id/present` | Présentateur | `pr-head`, H1 `sr-only` | variante éditeur ; H1 dans la barre |
+| Aide, Extension, Nouvelle démo… | fenêtres et menus | modales et popovers | hors PageHeader (MODAL-01) |
+
+Reste à faire : 9 routes (Centre, Apprenants, Analytics ×2, Partager, Nouveautés, Console, Quiz, Présentateur) et la classe de variante sur l'Éditeur.
+
+**e2e `page-header.e2e.cjs`** : sur chaque route de la coque ci-dessus (démo du jeu fictif, 1440 et 390 px), vérifier :
+- exactement **une** `.fd-page-header` visible, dont le haut est à 0 (ou 56 px sur mobile, sous la barre mobile) ;
+- **aucun `h1`** (visible ou `sr-only`) hors de cette barre ;
+- `position: sticky` sur la barre, et un `border-bottom` non nul.
+
+Sur les routes hors coque : aucune `.fd-page-header`, et exactement un `h1`.
+
 ## 17. ONB-01 : prise en main dans un panneau à droite (retour client du 22/11, variante à choisir)
 
 - La prise en main **sort du flux** : elle ne pousse plus les démos vers le bas. C'est un **panneau vertical à droite**, sous le PageHeader, qui **partage l'espace** avec la page (le contenu se resserre, comme quand on replie une colonne). Ni modale, ni surcouche. Teinte COL-01, filet à gauche.

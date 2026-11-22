@@ -167,14 +167,24 @@ td.act, th.act { width: 48px; text-align: right; }
 .wbanner > svg { flex: none; margin-top: 1px; color: #A15C00; } [data-theme='dark'] .wbanner > svg { color: #E3A23B; }
 .wbanner div { flex: 1; display: grid; gap: 4px; } .wbanner span { color: var(--fd-color-text-muted); font-size: 13px; }
 .wbanner .btn { flex: none; height: 36px; }
-.wlog { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; padding-top: 16px; align-items: start; }
+.wlog { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; padding-top: 16px; align-items: start; }
+.wtab { min-width: 0; overflow-x: auto; }
+.wlog table { width: 100%; }
+.wlog :is(th, td) { padding-inline: 12px; white-space: nowrap; }
+.wlog td:nth-child(3) { line-height: 1.3; } .wlog :is(th, td).num { text-align: right; font-variant-numeric: tabular-nums; }
+.wat { display: block; padding-left: 20px; font: 400 12px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+.wmeta { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 4px 24px; margin: 0 0 4px; }
+.wmeta div { display: grid; gap: 2px; } .wmeta dt { font: 600 12px var(--fd-font-sans); color: var(--fd-color-text-muted); } .wmeta dd { margin: 0; font: 500 14px var(--fd-font-sans); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.chips { gap: 8px; } .chip:not(:has(.ib)) { padding: 0 12px; }
 .wlog table tr.sel td { background: var(--tint); }
 .wlog td { height: 48px; font-size: 14px; }
 .wdet { border: 1px solid var(--fd-color-border); border-radius: 12px; padding: 16px; display: grid; gap: 8px; min-width: 0; }
-.wdh { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; } .wdh .btn { height: 32px; font-size: 13px; }
+.wdh { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-bottom: 4px; } .wdh b { white-space: nowrap; font-size: 15px; } .wdh .btn { height: 32px; font-size: 13px; }
 .wdet h3 { margin: 8px 0 0; font: 600 12px var(--fd-font-sans); color: var(--fd-color-text-muted); }
-.code { margin: 0; padding: 12px; border-radius: 8px; background: var(--fd-color-surface-sunken); font: 12px/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color: var(--fd-color-text); white-space: pre-wrap; overflow-wrap: anywhere; }
-.mob .wlog { grid-template-columns: 1fr; }
+.code { margin: 0; padding: 12px; border-radius: 8px; background: var(--fd-color-surface-sunken); font: 12px/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color: var(--fd-color-text); white-space: pre; overflow-wrap: normal; overflow-x: auto; max-height: 320px; }
+.mob .wlog { grid-template-columns: minmax(0, 1fr); }
+.sec:has(> .wlog) { container: wl / inline-size; }
+@container wl (max-width: 799px) { .wlog { grid-template-columns: minmax(0, 1fr); } }
 .mob .wlog table thead { display: table-header-group; } .mob .wlog th:nth-child(2), .mob .wlog td:nth-child(2), .mob .wlog th:nth-child(4), .mob .wlog td:nth-child(4) { display: none; }
 .mob .wbanner { flex-wrap: wrap; } .mob .wbanner .btn { margin-left: 32px; }
 .mob .row.inl .ctl:has(.wst) { justify-content: flex-start; }
@@ -410,7 +420,7 @@ main.withp { display: flex; flex-direction: column; min-width: 0; }
 .cgrip.drag .cbtn { border-color: var(--fd-color-primary); color: var(--fd-color-primary); }
 .cgrip.closed { right: auto; left: -4px; }
 .cgrip.closed .cbtn { border-radius: 0 999px 999px 0; width: 18px; border-left: 0; }
-.cw { position: absolute; left: 18px; top: calc(50% - 40px); padding: 2px 8px; border-radius: 6px; background: var(--fd-color-text); color: var(--fd-color-surface); font: 600 12px var(--fd-font-sans); white-space: nowrap; }
+.cwid { position: absolute; left: 18px; top: calc(50% - 40px); padding: 2px 8px; border-radius: 6px; background: var(--fd-color-text); color: var(--fd-color-surface); font: 600 12px var(--fd-font-sans); white-space: nowrap; }
 .fclosed main { position: relative; }
 /* Variante B : la poignée n'apparaît qu'au survol ou au focus du bord */
 .cgrip.vb .cbtn { width: 24px; height: 24px; border-radius: 50%; }
