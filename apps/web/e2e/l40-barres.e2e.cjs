@@ -115,8 +115,9 @@ const measure = (bar) =>
         const sheet = p.getByRole('dialog', { name: 'Filtres' });
         await sheet.waitFor();
         ok(
-          (await sheet.getByRole('button', { name: /^Dossier/ }).count()) === 1,
-          'Démos 390 px : feuille « Filtres »',
+          (await sheet.getByRole('button', { name: /^Créé par/ }).count()) === 1 &&
+            (await sheet.getByRole('button', { name: /^Dossier/ }).count()) === 0,
+          'Démos 390 px : feuille « Filtres » (sans Dossier : tiroir de la barre mobile)',
         );
         await p.keyboard.press('Escape');
         await p.waitForTimeout(200);

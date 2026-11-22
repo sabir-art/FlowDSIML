@@ -216,8 +216,9 @@ const seed = () => {
   await p2.locator('.demos-section .list-toolbar').waitFor();
   ok(
     (await p2.getByRole('navigation', { name: 'Dossiers' }).count()) === 0 &&
-      (await p2.getByRole('button', { name: /^Dossier\s*: Tous/ }).count()) === 1,
-    '1 023 px : pas de colonne, filtre Dossier dans la barre',
+      (await p2.getByRole('button', { name: /^Dossier\s*:/ }).count()) === 0 &&
+      (await p2.getByRole('button', { name: 'Dossiers', exact: true }).count()) === 1,
+    '1 023 px : pas de colonne ni de filtre Dossier, bascule « Dossiers » dans la barre mobile (lot 2)',
   );
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);

@@ -53,19 +53,18 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await page.waitForTimeout(200);
     await page.screenshot({ path: `${SHOTS}/${name}${sfx}.png` });
   };
-  const openFolderMenu = async () => {
-    await page
-      .getByRole('button', { name: /^Dossier\s*:/ })
-      .first()
-      .click();
+  // Lot 2 : sous 1 024 px, les dossiers sont dans un tiroir ouvert depuis la barre mobile
+  const drawer = page.getByRole('dialog', { name: 'Dossiers' });
+  const openFolder = async (name) => {
+    await page.getByRole('button', { name: 'Dossiers', exact: true }).click();
+    await drawer.getByRole('link', { name }).click();
+    await drawer.waitFor({ state: 'detached' });
   };
 
   // ===== Administrateur (fonction ouverte à toutes les offres depuis L48-A) =====
   await page.goto(`${APP}/#/`);
-  await openFolderMenu();
-  await page.getByRole('menuitem', { name: /^RH/ }).click();
-  await openFolderMenu();
-  await page.getByRole('menuitem', { name: /Accès/ }).click();
+  await openFolder(/^RH/);
+  await page.getByRole('button', { name: 'Accès au dossier' }).click();
   const dlg = page.getByRole('dialog', { name: 'Accès au dossier « RH »' });
   await dlg.waitFor();
   ok(await dlg.getByRole('radio', { name: 'Tout l’espace' }).isChecked(), 'par défaut : tout l’espace');
@@ -101,25 +100,18 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
 
   // Cadenas et infobulle
-  await openFolderMenu();
-  const lock = page.getByRole('img', { name: 'Dossier restreint' });
+  await page.getByRole('button', { name: 'Dossiers', exact: true }).click();
+  const lock = drawer.getByRole('img', { name: 'Dossier restreint' });
   await lock.waitFor();
-  ok(
-    sp(await lock.getAttribute('title')) === 'Visible par 2 membres.',
-    'cadenas : « Visible par 2 membres. »',
-  );
   await page.keyboard.press('Escape');
+  await drawer.waitFor({ state: 'detached' });
+  ok(
+    sp(await page.locator('.demos-list-count').innerText()) === 'Visible par 2 membres.',
+    'cadenas dans le tiroir, « Visible par 2 membres. » sous le titre du dossier',
+  );
 
   // Déplacer une démo dans le dossier restreint : confirmation
-  await page
-    .getByRole('menuitem', { name: /Toutes/ })
-    .waitFor({ state: 'detached' })
-    .catch(() => {});
-  await openFolderMenu();
-  await page
-    .getByRole('menuitem', { name: /Tous les dossiers|Toutes/ })
-    .first()
-    .click();
+  await openFolder(/^Toutes les démos/);
   const card = page.locator('.demo-card').first();
   await card
     .getByRole('button', { name: /Actions|Plus/ })

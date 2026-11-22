@@ -22,11 +22,8 @@ import {
   Check,
   Copy,
   Download,
-  Folder,
   FolderInput,
   FolderOpen,
-  FolderPlus,
-  Layers,
   Lock,
   LayoutGrid,
   Link2,
@@ -39,7 +36,6 @@ import {
   Share2,
   Tag,
   Trash2,
-  User,
   Users,
   Map as MapIcon,
   Shapes,
@@ -749,7 +745,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     published: inView.filter((d) => d.status === 'published').length,
     draft: inView.filter((d) => d.status === 'draft').length,
   };
-  const inFolder = (id: Scope) => demos.filter((d) => inScope(d, id)).length;
   /** Compteur d'une entrée de la colonne : suit le filtre de statut (sauf Archivées). */
   const colCount = (s: Scope) =>
     demos.filter((d) => inScope(d, s) && (s === 'archived' || status === 'all' || d.status === status))
@@ -987,14 +982,12 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                 activeCount={
                   (status !== 'all' ? 1 : 0) +
                   (ctype !== 'all' ? 1 : 0) +
-                  (scope !== 'all' && !wide ? 1 : 0) +
                   (author !== 'all' ? 1 : 0) +
                   (tagFilter.length ? 1 : 0)
                 }
                 onReset={() => {
                   setStatus('all');
                   setCtype('all');
-                  if (!wide) setFolder('all');
                   setAuthor('all');
                   setTagFilter([]);
                 }}
@@ -1030,105 +1023,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                           icon: ctype === k ? <Check /> : <span />,
                           onSelect: () => setCtype(k),
                         }))}
-                      />
-                    )}
-                    {!wide && (
-                      <FilterMenu
-                        icon={<Folder />}
-                        label={t('demos.folderLabel')}
-                        value={
-                          folder === 'all'
-                            ? t('toolbar.all')
-                            : folder === 'none'
-                              ? t('demos.noFolder')
-                              : (folders.find((f) => f.id === folder)?.name ?? t('toolbar.all'))
-                        }
-                        active={folder !== 'all'}
-                        items={[
-                          {
-                            label: `${t('demos.allFolders')} · ${inFolder('all')}`,
-                            icon: scope === 'all' ? <Check /> : <Layers />,
-                            onSelect: () => setFolder('all'),
-                          },
-                          {
-                            label: `${t(sandbox ? 'sandboxPage.mine' : 'folders.mine')} · ${inFolder('mine')}`,
-                            icon: scope === 'mine' ? <Check /> : <User />,
-                            onSelect: () => setFolder('mine'),
-                          },
-                          {
-                            label: `${t('demos.noFolder')} · ${inFolder('none')}`,
-                            icon: folder === 'none' ? <Check /> : <FolderOpen />,
-                            onSelect: () => setFolder('none'),
-                          },
-                          ...(folders.length ? (['separator'] as const) : []),
-                          ...folders.map((f) => ({
-                            label: `${f.name} · ${inFolder(f.id)}`,
-                            icon: folder === f.id ? <Check /> : <Folder />,
-                            // L27-09 : dossier restreint (cadenas, nombre de membres qui le voient)
-                            end: f.restricted ? (
-                              <span
-                                role="img"
-                                aria-label={t('folderAccess.restricted')}
-                                title={t('folderAccess.visibleBy', {
-                                  count: memberCount - (hidden[f.id] ?? 0),
-                                })}
-                              >
-                                <Lock size={14} aria-hidden="true" />
-                              </span>
-                            ) : undefined,
-                            onSelect: () => setFolder(f.id),
-                          })),
-                          'separator',
-                          {
-                            label: `${t('folders.archived')} · ${inFolder('archived')}`,
-                            icon: scope === 'archived' ? <Check /> : <Archive />,
-                            onSelect: () => setFolder('archived'),
-                          },
-                          ...(editable
-                            ? ([
-                                'separator',
-                                {
-                                  label: t('demos.newFolder'),
-                                  icon: <FolderPlus />,
-                                  onSelect: () => {
-                                    setNewFolderParent(null);
-                                    setNewFolder('');
-                                  },
-                                },
-                                ...(current && folder !== 'all' && folder !== 'none'
-                                  ? [
-                                      {
-                                        label: t('demos.renameFolder', {
-                                          name: folders.find((f) => f.id === folder)?.name ?? '',
-                                        }),
-                                        icon: <Pencil />,
-                                        onSelect: () => {
-                                          const f = folders.find((x) => x.id === folder);
-                                          if (f) setRenaming({ id: f.id, name: f.name });
-                                        },
-                                      },
-                                      ...(can('workspace.settings')
-                                        ? [
-                                            {
-                                              label: t('folderAccess.menu'),
-                                              icon: <Lock />,
-                                              onSelect: () =>
-                                                setFolderAccess(folders.find((x) => x.id === folder) ?? null),
-                                            },
-                                          ]
-                                        : []),
-                                      {
-                                        label: t('demos.deleteFolderShort'),
-                                        icon: <Trash2 />,
-                                        danger: true,
-                                        onSelect: () =>
-                                          setFolderToDelete(folders.find((x) => x.id === folder) ?? null),
-                                      },
-                                    ]
-                                  : []),
-                              ] as Array<MenuItem | 'separator'>)
-                            : []),
-                        ]}
                       />
                     )}
                     <FilterMenu
@@ -1292,7 +1186,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                   setCtype('all');
                   setAuthor('all');
                   setTagFilter([]);
-                  if (!wide) setFolder('all');
                 }}
               />
             ) : view === 'list' ? (
