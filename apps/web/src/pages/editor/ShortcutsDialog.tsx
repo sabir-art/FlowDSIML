@@ -50,6 +50,13 @@ export function ShortcutsDialog({ onClose }: { onClose: () => void }) {
       rows: [
         [t('editor.keys.prevNext'), k('↑', '↓')],
         [t('editor.keys.moveStep'), k(t('editor.keys.space'), '+', '↑', '↓')],
+        // P1-1 : actions d'une étape, quand le focus est sur sa vignette
+        [t('editor.keys.moveStepAlt'), k('Alt', '↑', '↓')],
+        [t('editor.keys.copyStep'), k(ctrl, 'C')],
+        [t('editor.keys.pasteStep'), k(ctrl, 'V')],
+        [t('editor.keys.cutStep'), k(ctrl, 'X')],
+        [t('editor.keys.duplicateStep'), k(ctrl, 'D')],
+        [t('editor.keys.deleteStep'), k(t('editor.keys.del'))],
       ],
     },
     {

@@ -1095,7 +1095,13 @@
       "del": "Suppr",
       "esc": "Échap",
       "help": "Les raccourcis à une lettre (H, B, ?) sont inactifs pendant la saisie de texte.",
-      "comments": "Ouvrir ou fermer les commentaires"
+      "comments": "Ouvrir ou fermer les commentaires",
+      "moveStepAlt": "Monter ou descendre l’étape",
+      "copyStep": "Copier l’étape",
+      "pasteStep": "Coller après l’étape",
+      "cutStep": "Couper l’étape",
+      "duplicateStep": "Dupliquer l’étape",
+      "deleteStep": "Supprimer l’étape"
     },
     "maskTag": "Masque",
     "zoomLevel": "Niveau",

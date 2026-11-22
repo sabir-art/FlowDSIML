@@ -1095,7 +1095,13 @@
       "del": "Del",
       "esc": "Esc",
       "help": "Single-letter shortcuts (H, B, ?) are disabled while typing.",
-      "comments": "Open or close comments"
+      "comments": "Open or close comments",
+      "moveStepAlt": "Move the step up or down",
+      "copyStep": "Copy the step",
+      "pasteStep": "Paste after the step",
+      "cutStep": "Cut the step",
+      "duplicateStep": "Duplicate the step",
+      "deleteStep": "Delete the step"
     },
     "maskTag": "Mask",
     "zoomLevel": "Level",
