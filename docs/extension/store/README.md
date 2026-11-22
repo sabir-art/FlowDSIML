@@ -42,7 +42,7 @@ Attendu : `"name": "TutoClick Capture"`, pas de `debugger` dans `permissions`, p
 1. Ouvrez le [tableau de bord développeur](https://chrome.google.com/webstore/devconsole), puis **Nouvel élément**.
 2. Téléversez l’archive `.zip` de l’étape 2.
 3. Onglet **Fiche** : copiez les textes de [`fiche.md`](fiche.md) §1 (nom, résumé, description, catégorie, langue).
-4. Visuels : téléversez `icone-128.png`, les 5 captures `capture-*-1280x800.png` dans l’ordre, et `vignette-440x280.png` (tous dans ce dossier).
+4. Visuels : téléversez `icone-128.png`, les 5 captures `capture-*-1280x800.png` dans l’ordre, , `vignette-440x280.png` et `marquee-1400x560.png` (tous dans ce dossier).
 5. Onglet **Pratiques de confidentialité** : objectif unique, justification de chaque autorisation, données déclarées et cases à cocher : [`fiche.md`](fiche.md) §3.
 6. Lien de la politique de confidentialité : `<adresse de l’app>/extension/confidentialite.html`. Ouvrez-le pour vérifier qu’il s’affiche.
 7. Onglet **Distribution** : visibilité **Non répertoriée**, régions selon votre choix.
