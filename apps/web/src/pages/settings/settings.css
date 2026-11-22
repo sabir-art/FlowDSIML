@@ -366,6 +366,8 @@
 
 /* ---- Tableaux du gabarit (§11.4, §11.8) : sans carte, posés sur le fond de contenu ---- */
 .stg-table {
+  /* La légende masquée (« sr-only », en position absolue) se place dans le tableau */
+  position: relative;
   width: 100%;
   border-collapse: collapse;
 }
