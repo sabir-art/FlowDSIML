@@ -11,11 +11,10 @@ import {
   CircleCheck,
   Clock,
   Copy,
-  Pause,
+  CirclePause,
   RefreshCw,
   RotateCw,
   Send,
-  TriangleAlert,
   Webhook as WebhookIcon,
 } from 'lucide-react';
 import { SettingsShell } from '../SettingsShell';
@@ -248,8 +247,8 @@ export function WebhookDetail() {
           </div>
         )}
         {hook.state === 'paused_auto' && (
-          <div className="wh-banner wh-banner--warn" role="status" data-gap-exempt="">
-            <TriangleAlert size={18} aria-hidden="true" />
+          <div className="wh-banner wh-banner--pause" role="status" data-gap-exempt="">
+            <CirclePause size={18} aria-hidden="true" />
             <div>
               <b>{t('integrations.pausedBanner', { date: day(hook.updated_at) })}</b>
               <span>{t('integrations.pausedAdvice')}</span>
@@ -324,11 +323,11 @@ export function WebhookDetail() {
               </div>
             </div>
             <div className="stg-ctl wh-state-ctl">
-              <span className={`wh-st wh-st--${hook.state === 'active' ? 'ok' : 'wait'}`}>
+              <span className={`wh-st wh-st--${hook.state === 'active' ? 'ok' : 'pause'}`}>
                 {hook.state === 'active' ? (
                   <CircleCheck size={16} aria-hidden="true" />
                 ) : (
-                  <Pause size={16} aria-hidden="true" />
+                  <CirclePause size={16} aria-hidden="true" />
                 )}
                 {t(
                   hook.state === 'active'

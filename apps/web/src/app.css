@@ -103,11 +103,13 @@
   border-right: 1px solid var(--fd-color-border);
 }
 .brand {
-  margin-bottom: 8px;
+  /* Recette du 22/11 (R2) : la carte de l'espace commence à 152 px */
+  margin-bottom: 7px;
   padding: 0 var(--fd-space-2);
 }
 .sidebar .ws-wrap {
-  margin-bottom: 4px;
+  /* 14 px entre le sélecteur d'espace et la première entrée (R2) */
+  margin-bottom: 6px;
 }
 /* LOGO-01 : le logo complet inclut sa zone de protection (§16.3), pas de marge en plus ; 224 px */
 .brand:has(> .brand-mark--full) {
@@ -2091,4 +2093,16 @@ button.fd-nav__item:hover {
   .auth-mark--compact {
     display: inline-flex;
   }
+}
+
+/* ICON-01 : trait rendu constant. 2,25 jusqu'à 16 px (1,5 px rendu), 2,1 en 20 px (1,75 px rendu).
+   Spécificité nulle : les composants qui fixent leur trait (boutons, navigation, indicateurs) priment. */
+:where(.lucide) {
+  stroke-width: 2.25;
+}
+:where(.lucide[width='20']) {
+  stroke-width: 2.1;
+}
+:where(.lucide[width='24'], .lucide[width='28'], .lucide[width='32']) {
+  stroke-width: 1.75;
 }

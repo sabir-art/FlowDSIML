@@ -466,6 +466,19 @@ a.int-row--link:focus-visible {
 .wh-banner--danger > svg {
   color: var(--fd-color-danger);
 }
+/* Pause : ambre de la maquette du détail d'un webhook (4,9:1 en clair, 8,2:1 en sombre) */
+.wh-banner--pause > svg,
+.wh-st--pause > svg {
+  color: #a15c00;
+}
+[data-theme='dark'] :is(.wh-banner--pause, .wh-st--pause) > svg {
+  color: #e3a23b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) :is(.wh-banner--pause, .wh-st--pause) > svg {
+    color: #e3a23b;
+  }
+}
 .wh-banner > div {
   display: grid;
   flex: 1;
@@ -605,10 +618,16 @@ a.int-row--link:focus-visible {
 }
 .wh-det__head {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+/* Le titre peut passer sur deux lignes ; le bouton reste à droite, sur la même ligne */
+.wh-det__head > b {
+  min-width: 0;
+}
+.wh-det__head > .fd-btn {
+  flex: none;
 }
 .wh-det h3 {
   margin: 8px 0 0;
@@ -635,6 +654,10 @@ a.int-row--link:focus-visible {
   }
 }
 @media (max-width: 767px) {
+  /* Le journal garde son en-tête (Date, Statut) sous 768 px */
+  .wh-log .stg-table thead {
+    display: table-header-group;
+  }
   .stg-row--inline .wh-state-ctl {
     justify-content: flex-start;
   }
