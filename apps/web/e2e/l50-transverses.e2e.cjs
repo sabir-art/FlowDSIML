@@ -45,7 +45,10 @@ const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
     await search.waitFor();
     // Styles calculés lus sans transition en cours (sinon couleurs intermédiaires)
     await page.addStyleTag({ content: '*{transition:none!important}' });
-    const before = await search.evaluate((el) => getComputedStyle(el).borderTopColor);
+    // Lot 2 : la recherche est dans le PageHeader ; son cadre (« ph-search ») porte la bordure et le focus
+    const before = await search.evaluate(
+      (el) => getComputedStyle(el.closest('.ph-search') || el).borderTopColor,
+    );
     // Au clavier : focus par Tab depuis l'élément précédent
     await search.focus();
     await search.evaluate((el) => el.blur());
@@ -54,8 +57,8 @@ const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
     const primary = await cssColor(page, '--fd-color-primary');
     const after = await search.evaluate((el) => ({
       focused: document.activeElement === el,
-      border: getComputedStyle(el).borderTopColor,
-      shadow: getComputedStyle(el).boxShadow,
+      border: getComputedStyle(el.closest('.ph-search') || el).borderTopColor,
+      shadow: getComputedStyle(el.closest('.ph-search') || el).boxShadow,
       outline: getComputedStyle(el).outlineStyle,
     }));
     // FIELD-01 (remplace L50 X2) : bordure prune et trait intérieur de 1 px, un seul indicateur,
