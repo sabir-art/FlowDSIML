@@ -719,10 +719,16 @@ fieldset.stg-row {
 }
 /* Captures HTML : domaines autorisés */
 .hc-domains {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 420px;
+  display: grid;
+  gap: 8px;
+  max-width: 460px;
+  margin: 4px 0 8px 28px;
+}
+.hc-domains .stg-error {
+  margin: 0;
+}
+.hc-modes .hc-notice {
+  margin-top: 8px;
 }
 .hc-chips {
   display: flex;
@@ -735,12 +741,16 @@ fieldset.stg-row {
 .hc-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   height: 28px;
-  padding: 0 4px 0 10px;
+  padding: 0 2px 0 10px;
   border-radius: 999px;
   background: #eef0f3;
-  font-size: 13px;
+  font: 500 13px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.hc-chip:not(:has(.hc-chip__remove)) {
+  padding-right: 10px;
 }
 [data-theme='dark'] .hc-chip {
   background: #252b33;
@@ -753,8 +763,8 @@ fieldset.stg-row {
 .hc-chip__remove {
   display: grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -770,6 +780,23 @@ fieldset.stg-row {
   flex: 1;
   min-width: 0;
   border-radius: 10px;
+}
+.stg-sec .hc-add .fd-btn {
+  flex: none;
+  height: 40px;
+  min-height: 40px;
+}
+@media (max-width: 767px) {
+  /* Sous 768 px : sans retrait, le champ puis le bouton sur toute la largeur */
+  .hc-domains {
+    margin-left: 0;
+  }
+  .hc-add {
+    flex-direction: column;
+  }
+  .hc-add .fd-input {
+    flex: none;
+  }
 }
 .sr-role {
   margin: 12px 0 0;

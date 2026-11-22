@@ -66,7 +66,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await radio('Seulement sur ces domaines').check();
   const input = card.getByLabel('Ajouter un domaine');
   await input.fill('https://crm.partenaire.example/chemin');
-  await card.getByRole('button', { name: 'Ajouter', exact: true }).click();
+  await card.getByRole('button', { name: 'Ajouter le domaine' }).click();
   ok(
     (await card.getByRole('alert').innerText()).includes('sans « https:// » ni chemin'),
     'domaine invalide refusé avec un message',
@@ -78,7 +78,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await input.fill('vieux.example.org');
   await input.press('Enter');
   ok(
-    JSON.stringify(await card.locator('.hc-chip .t-mono').allInnerTexts()) ===
+    JSON.stringify(await card.locator('.hc-chip .hc-chip__name').allInnerTexts()) ===
       JSON.stringify(['app.example.com', '*.outils.example', 'vieux.example.org']),
     'pastilles : minuscules, joker',
   );

@@ -5404,6 +5404,9 @@
     "deadLinks_other": "{{count}} links without a page"
   },
   "htmlCapture": {
+    "addDomain": "Add the domain",
+    "domainPlaceholder": "e.g. intranet.acme.example",
+    "domainHelp": "Exact match. For subdomains, use *. (e.g. *.acme.example), which does not cover the bare domain.",
     "title": "HTML captures",
     "help": "An HTML capture copies the structure of pages (HTML demo, Sandbox). A screenshot only copies an image.",
     "legend": "Allow HTML captures",
