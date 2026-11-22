@@ -269,12 +269,15 @@ export function Layout() {
           {!drawer && (
             <button
               type="button"
-              className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm sidebar__pin"
+              className={`fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm sidebar__pin${rail ? ' sidebar__pin--rail' : ''}`}
               aria-label={pinned ? t('nav.collapseSidebar') : t('nav.expandSidebar')}
               aria-expanded={pinned}
               data-tip={pinned ? t('nav.collapseSidebar') : t('nav.expandSidebar')}
               onClick={togglePin}
             >
+              {/* NAV-04 §14 bis : dans le rail, le symbole TutoClick au repos ; l'icône « Déplier » au survol
+                  et au focus, au même endroit (fondu croisé en CSS) */}
+              {rail && <img src={symbol} alt="" aria-hidden="true" className="sidebar__pin-symbol" />}
               <PanneauIcon />
             </button>
           )}

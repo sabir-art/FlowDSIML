@@ -1875,6 +1875,55 @@ button.fd-nav__item:hover {
   height: 32px;
 }
 /* ICON-01 : icône « panneau » de 20 px, trait 2,1 */
+/* NAV-04 §14 bis : en tête du rail, le symbole TutoClick (32 px) au repos ; au survol, au focus clavier et
+   quand le rail est déplié par-dessus le contenu, le même bouton devient « Déplier » (carré prune du
+   symbole dans les deux thèmes, icône blanche). Fondu croisé de 150 ms, sans mouvement. */
+.fd-btn.sidebar__pin--rail {
+  position: relative;
+  border-radius: 8px;
+  color: #fff;
+  transition: background-color 150ms ease-out;
+}
+.sidebar__pin-symbol {
+  position: absolute;
+  inset: 0;
+  width: 32px;
+  height: 32px;
+  transition: opacity 150ms ease-out;
+}
+.fd-btn.sidebar__pin--rail > svg {
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+.fd-btn.sidebar__pin--rail:is(:hover, :focus-visible),
+.sidebar[data-expanded='true'] .fd-btn.sidebar__pin--rail {
+  background: #a3195b;
+  color: #fff;
+}
+.fd-btn.sidebar__pin--rail:hover {
+  background: #85164b;
+}
+:is(.fd-btn.sidebar__pin--rail:is(:hover, :focus-visible), .sidebar[data-expanded='true'] .sidebar__pin--rail)
+  > .sidebar__pin-symbol {
+  opacity: 0;
+}
+:is(.fd-btn.sidebar__pin--rail:is(:hover, :focus-visible), .sidebar[data-expanded='true'] .sidebar__pin--rail)
+  > svg {
+  opacity: 1;
+}
+.fd-btn.sidebar__pin--rail:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--fd-color-nav-bg),
+    0 0 0 4px var(--fd-color-focus);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fd-btn.sidebar__pin--rail,
+  .sidebar__pin-symbol,
+  .fd-btn.sidebar__pin--rail > svg {
+    transition: none;
+  }
+}
 /* Sous 1 024 px (tiroir) : inchangé, le logo de 224 px sans filet */
 @media (max-width: 1023px) {
   .sidebar__head {

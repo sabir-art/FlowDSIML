@@ -142,6 +142,38 @@ const geo = (p) =>
     'libellés masqués visuellement',
   );
   ok(g.logo === null, 'NAV-04 : pas de logo dans le rail replié');
+  // NAV-04 §14 bis : le symbole TutoClick au repos ; « Déplier » (icône panneau) au survol et au focus
+  const pinState = (want) =>
+    p
+      .waitForFunction(
+        (w) => {
+          const b = document.querySelector('.sidebar__pin');
+          const sym = b.querySelector('.sidebar__pin-symbol');
+          const ico = b.querySelector('svg');
+          const o = (el) => Number(getComputedStyle(el).opacity);
+          return sym && (w === 'symbole' ? o(sym) === 1 && o(ico) === 0 : o(sym) === 0 && o(ico) === 1);
+        },
+        want,
+        { timeout: 3000 },
+      )
+      .then(
+        () => true,
+        () => false,
+      );
+  ok(await pinState('symbole'), '§14 bis : au repos, le symbole TutoClick est visible, l’icône masquée');
+  await p.locator('.sidebar__pin').focus();
+  await p.keyboard.press('Shift+Tab');
+  await p.keyboard.press('Tab');
+  const pinFocus = await geo(p);
+  ok(
+    (await pinState('deplier')) && Math.round(pinFocus.pin.x) === 16 && Math.round(pinFocus.pin.y) === 30,
+    '§14 bis : au focus clavier, l’icône « Déplier » remplace le symbole, au même endroit',
+  );
+  await p.keyboard.press('Escape');
+  await p.evaluate(() => document.activeElement?.blur());
+  await p.mouse.move(700, 400);
+  await p.locator('.sidebar[data-expanded="false"]').waitFor();
+  ok(await pinState('symbole'), '§14 bis : le symbole revient quand le focus et le pointeur sortent');
   ok(g.over <= 1, 'aucun défilement horizontal');
 
   // Survol : 150 ms, par-dessus, sans pousser ; repli 300 ms après la sortie
@@ -156,6 +188,7 @@ const geo = (p) =>
     `survol : déplié à 256 px par-dessus, contenu immobile (main ${g.main})`,
   );
   ok(g.shadow !== 'none', 'ombre portée quand il est déplié');
+  ok(await pinState('deplier'), '§14 bis : rail déplié au survol, le bouton est en état « Déplier »');
   ok(
     Math.round(g.pin.x) === 16 && Math.round(g.pin.y) === 30 && g.logo && Math.round(g.logo.x) === 56,
     `NAV-04 : au survol le bouton garde sa place (x ${Math.round(g.pin.x)}), le logo vient à sa droite (x ${g.logo && Math.round(g.logo.x)})`,
