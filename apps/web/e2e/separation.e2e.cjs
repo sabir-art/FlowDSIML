@@ -5,7 +5,8 @@
  *  1. pas de chevauchement : deux colonnes, panneau.left − conteneur du tableau.right ≥ 24 ; une colonne,
  *     panneau.top − tableau.bottom ≥ 24 ;
  *  2. pas de débordement : aucune cellule plus large que sa boîte, aucun tableau plus large que son
- *     conteneur sans overflow-x auto ou scroll ;
+ *     conteneur sans overflow-x auto ou scroll ; à 1440 et 1280 px, le tableau du webhook ne défile pas à
+ *     l'horizontale, même avec une ligne en attente d'un nouvel essai ;
  *  3. en-tête du panneau : titre sur une ligne, 12 px au moins jusqu'au bouton quand ils sont côte à côte ;
  *  4. pastilles en lecture seule : 8 px au moins entre deux voisines, 12 px de padding horizontal ;
  *  5. nombres : aucun texte visible (hors pre et code) avec une espace ordinaire dans un nombre, entre un
@@ -79,6 +80,9 @@ function webhook() {
     const m = n.nodeValue.match(BAD);
     if (m) out.push(`espace ordinaire dans « ${n.nodeValue.trim().slice(0, 60)} » (${m[0]})`);
   }
+  // 2 bis. le tableau du webhook ne défile pas à l'horizontale quand il a la place (1440 et 1280 px)
+  if (innerWidth >= 1280 && box.scrollWidth > box.clientWidth + 1)
+    out.push(`le tableau défile à l'horizontale (${box.scrollWidth} > ${box.clientWidth})`);
   // 6. blocs de code
   for (const pre of det.querySelectorAll('pre')) {
     const cs = getComputedStyle(pre);
@@ -106,6 +110,11 @@ function webhook() {
       attempt: 2,
       duration_ms: 2010,
       response_body: 'Retry-After: 120',
+    });
+    // En attente d'un nouvel essai : la colonne Durée garde la durée, le délai est dit dans le panneau
+    Object.assign(row, {
+      status: 'pending',
+      next_attempt_at: new Date(Date.now() + 4 * 60_000).toISOString(),
     });
     row.payload = { id: 'evt_fictif', type: 'demo.completed', created_at: '2026-11-22T08:51:02Z', data: {} };
   };

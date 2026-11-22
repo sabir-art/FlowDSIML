@@ -205,7 +205,20 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
       /HTTP 503/.test(await panel.textContent()),
     'L23-05 : statut de la ligne et panneau de l’envoi',
   );
-  ok((await rows.filter({ hasText: 'essai dans' }).count()) === 1, 'L23-05 : « essai dans n min »');
+  // SPLIT-01 : le prochain essai est dit dans le panneau, sous « Essai » ; la colonne Durée garde la durée
+  ok(
+    (await rows.filter({ hasText: 'essai dans' }).count()) === 0,
+    'L23-05 : plus de « essai dans n min » dans le tableau',
+  );
+  await rows
+    .filter({ hasText: /Essai\s[1-5] sur/ })
+    .first()
+    .click();
+  ok(
+    /nouvel essai dans \d+\smin/.test(await panel.locator('.wh-meta').textContent()),
+    'L23-05 : « nouvel essai dans n min » dans le panneau',
+  );
+  await deadRow.click();
   await shot('05-detail');
   // L23-06 : test en échec
   state.dispatchResult = { status: 404, duration_ms: 210, error: 'HTTP 404' };

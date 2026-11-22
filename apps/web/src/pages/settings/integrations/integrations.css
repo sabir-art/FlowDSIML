@@ -672,6 +672,11 @@ a.int-row--link:focus-visible {
   font: 600 12px var(--fd-font-sans);
   color: var(--fd-color-text-muted);
 }
+/* Prochain essai, sous la valeur « Essai » */
+.wh-meta dd.wh-meta__next {
+  font: 400 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
 .wh-meta dd {
   margin: 0;
   font: 500 14px var(--fd-font-sans);

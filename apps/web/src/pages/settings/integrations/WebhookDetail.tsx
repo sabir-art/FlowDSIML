@@ -128,17 +128,13 @@ export function WebhookDetail() {
 
   /** NUM-01 : milliers et unité séparés par une espace insécable (« 2 010 ms »). */
   const ms = (n: number) => `${formatNumber(n)}\u00a0ms`;
-  const duration = (d: Delivery) => {
-    if (d.status === 'success' || (d.event_type === 'ping' && d.status === 'failed'))
-      return ms(d.duration_ms ?? 0);
-    if (d.status === 'pending' && d.response_status !== null) {
-      const min = Math.max(1, Math.round((Date.parse(d.next_attempt_at) - Date.now()) / 60_000));
-      return t('integrations.retryIn', { count: min });
-    }
-    if (d.status === 'pending' || d.status === 'sending') return '…';
-    // Échec : la durée de la réponse (l'essai est dit dans le statut)
-    return d.duration_ms != null ? ms(d.duration_ms) : '–';
-  };
+  /** Durée du dernier essai, toujours ; « – » s'il n'y en a pas encore (SPLIT-01, recette du 22/11). */
+  const duration = (d: Delivery) => (d.duration_ms != null ? ms(d.duration_ms) : '–');
+  /** Envoi en attente d'un nouvel essai : délai en minutes, sinon null. */
+  const retryMin = (d: Delivery) =>
+    d.status === 'pending' && d.response_status !== null
+      ? Math.max(1, Math.round((Date.parse(d.next_attempt_at) - Date.now()) / 60_000))
+      : null;
 
   const onRowKey = (e: KeyboardEvent<HTMLTableRowElement>, d: Delivery) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -486,6 +482,11 @@ export function WebhookDetail() {
                       <div>
                         <dt>{t('integrations.attemptLabel')}</dt>
                         <dd>{t('integrations.attemptOf', { n: sel.attempt })}</dd>
+                        {retryMin(sel) !== null && (
+                          <dd className="wh-meta__next">
+                            {t('integrations.retryIn', { count: retryMin(sel)! })}
+                          </dd>
+                        )}
                       </div>
                     )}
                   </dl>
