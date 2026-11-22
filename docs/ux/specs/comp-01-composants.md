@@ -517,3 +517,52 @@ Même séparateur, mais la pastille (ronde, 24 px) n'apparaît qu'au survol ou a
 ### 19.3 Maquettes
 
 `lot2-demos/dossiers-poignee` (dépliée, format A), `dossiers-redim` (glissement à 300 px), `dossiers-replie` (repliée), `dossiers-poignee-b` (variante B au survol) ; 1440, clair et sombre. L'en-tête de la colonne n'a plus que « Dossiers » et « Nouveau dossier ».
+
+## 20. SPLIT-01 : tableau et panneau de détail côte à côte (retour client du 22/11, page d'un webhook)
+
+Le client a relevé, sur la page de détail d'un webhook, des chevauchements et des textes collés. **La maquette du lot 1 portait elle-même ces défauts** : elle est corrigée (`lot1-parametres/webhook-*`, avec des captures à 1280 et 1024 px). La règle vaut pour tout tableau qui ouvre un panneau de détail à côté de lui.
+
+### 20.1 Mise en page
+
+- Une grille de deux colonnes : `minmax(0, 1fr)` pour le tableau et **320 px** pour le panneau, avec une **gouttière de 24 px** (`--fd-space-6`). Jamais de proportions `3fr / 2fr` : le panneau a une largeur fixe et le tableau prend le reste.
+- **Le tableau est dans un conteneur à lui** (`min-width: 0; overflow-x: auto`). S'il ne tient pas, il défile dans son conteneur. Il ne passe jamais sous le panneau. La ligne choisie (fond `tint`) s'arrête au bord du tableau.
+- **Empilement**. Quand la zone fait moins de 800 px de large, le panneau passe sous le tableau, à 24 px. On le mesure avec une requête de conteneur sur la section (`container: wl / inline-size` puis `@container wl (max-width: 799px)`), et non avec la largeur de la fenêtre, parce que la barre latérale et la colonne des Paramètres changent la place disponible. Pour les Paramètres de l'app, cela donne deux colonnes à 1440 px et à 1280 px, et une seule à 1024 px.
+- Les cellules ont un padding horizontal de 12 px et ne passent pas à la ligne (`nowrap`). La seule cellule sur deux lignes est le statut, et c'est voulu : « HTTP 503 » sur la première ligne, puis « Essai 2 sur 6 » en dessous, en 12 px `text-muted`, aligné sur le texte et non sur l'icône. Fini le « HTTP 503 · essai 2 sur 6 » qui se coupait au hasard.
+- Les colonnes de nombres (Durée) sont alignées à droite, en chiffres tabulaires, en-tête compris.
+
+### 20.2 Panneau « Envoi sélectionné »
+
+- L'en-tête tient sur une seule ligne : le titre « Envoi sélectionné » (15 px, 600, `nowrap`) à gauche, le bouton secondaire de 32 px **« Rejouer »** (icône `RotateCcw`) à droite, avec 12 px d'écart au moins. Si la place manque, le bouton passe en dessous (`flex-wrap`, 8 px). Le titre ne se coupe jamais.
+- Sous l'en-tête, trois valeurs côte à côte : **Statut** (HTTP 503), **Durée** (2 010 ms), **Essai** (2 sur 6). L'étiquette est en 12 px, 600, `text-muted`, et la valeur en 14 px, 500, `nowrap`. La durée et l'essai ne sont plus noyés dans le bloc « Réponse ».
+- « Corps envoyé » et « Réponse » sont des `pre` en `white-space: pre`, sans `overflow-wrap`, avec `overflow-x: auto`, 320 px de haut au plus (défilement vertical au-delà) et `tabindex="0"`, pour défiler au clavier. Le JSON est indenté à 2 espaces et un objet imbriqué s'écrit sur plusieurs lignes : on ne coupe jamais une valeur (« 2026-11-22T08:51:02Z » reste entier). « Réponse » montre la ligne de statut HTTP et les en-têtes ou le corps reçus, 1 024 caractères au plus.
+
+### 20.3 Pastilles d'événements
+
+Les pastilles sans bouton de retrait ont un padding horizontal de **12 px** (`--fd-space-3`). L'écart entre elles est de **8 px** (`--fd-space-2`), et leur hauteur de 28 px. Cela vaut partout où l'app affiche une liste de pastilles en lecture seule (événements d'un webhook, étiquettes, domaines…).
+
+## 21. NUM-01 : un nombre ne se coupe jamais de son unité
+
+- Entre un nombre et son unité, on met une **espace insécable U+00A0** : 2 010 ms, 5 min, 6 h, 2 Mo, 512 px, 44 %. Même chose dans « 2 sur 6 » et « 1 membre sur 5 », entre « sur » et le nombre qui suit.
+- Le séparateur des milliers est lui aussi U+00A0, comme le fait déjà `formatNumber` (`lib/format.ts`). Tout nombre affiché passe donc par `formatNumber` ou `formatPercent`. Aujourd'hui, la durée d'un envoi de webhook est affichée brute (`${d.duration_ms} ms`, soit « 2010 ms »).
+- Pour les textes traduits, l'insécable est écrit dans le fichier de langue (`{{n}} min`). J'ai relevé **87 chaînes** de `fr.json` avec une espace ordinaire avant une unité ou après « sur ». Elles sont à corriger en une seule fois, et `en.json` aussi pour les unités.
+- Les pourcentages calculés (« 44 % », « plus 25 % par rapport à… ») suivent la même règle.
+
+## 22. Contrôles automatiques (e2e `separation.e2e.cjs`)
+
+Ce test passe à **1440, 1280, 1180, 1024 et 390 px**, en clair et en sombre, sur la page d'un webhook avec une ligne choisie (durée de 4 chiffres, statut avec essai). Il passe aussi sur les autres pages qui ont un tableau.
+
+1. **Pas de chevauchement** : avec deux colonnes, `panneau.left − conteneurDuTableau.right ≥ 24`. Avec une seule colonne, `panneau.top − tableau.bottom ≥ 24`.
+2. **Pas de débordement** : aucune cellule n'a `scrollWidth > clientWidth + 1`. Aucun tableau ne dépasse son conteneur sans un `overflow-x` à `auto` ou `scroll`.
+3. **En-tête du panneau** : la hauteur du titre égale une seule ligne. L'écart entre le titre et le bouton est d'au moins 12 px.
+4. **Pastilles** : un écart d'au moins 8 px entre deux pastilles voisines, et un padding horizontal d'au moins 12 px.
+5. **Nombres** : aucun nœud de texte visible, hors `pre` et `code`, ne correspond à `/\d \d{3}\b|\d (ms|min|s|h|j|Mo|Ko|Go|px|%)(?![\wÀ-ÿ])|sur \d/`, avec une espace U+0020.
+6. **pre** : `white-space` vaut `pre` et `overflow-x` vaut `auto`.
+
+### 22.1 Passage sur les autres tableaux et panneaux (22/11, dev-mvp 13c1904)
+
+J'ai passé 17 pages à 1440, 1280 et 1024 px : Accueil, Analytics, Leads, Apprenants, Centre, Utilisation, Équipe, Intégrations, Webhooks, Étiquettes, Variables, Glossaire, Offres, Sécurité, et pour une démo, Analytics, Partager et Diffuser. Résultats :
+
+- **aucune cellule qui déborde**, aucun tableau plus large que son conteneur, aucune gouttière sous 24 px. Sur la page du webhook, l'app a déjà 24 px entre le tableau et le panneau, et empile sous 1 101 px de fenêtre ;
+- les défauts qui restent sur cette page : le titre « Envoi sélectionné » sur deux lignes, le JSON coupé (`pre-wrap` et `anywhere`), « HTTP 503 · essai 2 sur 6 » sur deux lignes au hasard, la durée non formatée, les pastilles à 6 px d'écart et 10 px de padding, et les proportions `3fr / 2fr` ;
+- **NUM-01** : des espaces ordinaires sur l'Accueil (« 44 % », « plus 25 % »), l'Analytics (« 160 · 60 % »), l'Utilisation et les Offres (« 0 Mo sur 500 Mo », « 12 sur 500 requêtes », « 0 sur 5 min »), l'Équipe (« 1 membre sur 5 ») et le Centre (« 512 Ko »).
+- Les autres panneaux latéraux (Segments de l'Analytics avancé, tiroir des Apprenants, tiroir de la Console) sont soit des tiroirs superposés, soit des cartes à côté d'un formulaire. Ils ne relèvent pas de cette règle. Le test 2 les couvre tout de même.
