@@ -32,11 +32,24 @@ const json = (status: number, body: unknown) =>
     headers: { ...corsHeaders, 'content-type': 'application/json' },
   });
 
+/** IP posée par la plateforme (comme open-demo) : jamais la première valeur de x-forwarded-for, que le client choisit. */
+function clientIp(req: Request): string {
+  const cf = req.headers.get('cf-connecting-ip')?.trim();
+  if (cf) return cf;
+  const real = req.headers.get('x-real-ip')?.trim();
+  if (real) return real;
+  const xff = (req.headers.get('x-forwarded-for') ?? '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
+  return xff[xff.length - 1] ?? 'unknown';
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
   if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
 
-  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0]!.trim() || 'unknown';
+  const ip = clientIp(req);
   if (rateLimited(ip)) return json(429, { error: 'rate_limited' });
 
   const text = await req.text();
