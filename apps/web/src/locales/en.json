@@ -291,6 +291,8 @@
     "transfer": "Transfer ownership",
     "removeFromWs": "Remove from workspace",
     "removeMember": "Remove member",
+    "roleChanged": "{{name}}’s role: {{role}}.",
+    "invitedShort": "Invited on {{date}}",
     "invitedOn": "Invitation sent on {{date}}",
     "pendingBadge": "Pending",
     "linkCopied": "Invitation link copied.",
@@ -344,7 +346,7 @@
     "colStatus": "Status",
     "statusActive": "Active",
     "statusInvited": "Invited",
-    "changeRole": "Change role",
+    "changeRole": "Role",
     "copyInviteLink": "Copy invitation link",
     "noMatch": "No member matches this search.",
     "roleHelp": {

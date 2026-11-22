@@ -16,6 +16,7 @@ import {
   Star,
   Trash2,
   UserPlus,
+  UserMinus,
 } from 'lucide-react';
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
@@ -86,6 +87,7 @@ export function Members() {
   const [inviting, setInviting] = useState(
     () => new URLSearchParams(location.hash.split('?')[1] ?? '').get('invite') === '1',
   );
+  const toast = useToast();
   const { error, success, run } = useAction();
   const ws = current!;
   const myRole = ws.role as Role;
@@ -171,13 +173,15 @@ export function Members() {
 
   const shown = members.filter((m) => match(m.full_name, m.email));
   const shownInvites = canManage ? invites.filter((i) => match('', i.email)) : [];
+  // Décision UX du 22/11 : le rôle change tout de suite, un toast le confirme (« Rôle de Bob Martin : Admin. »)
   const setRoleOf = (m: MemberRow, role: WorkspaceRole) =>
     void run(async () => {
       check(
         await supabase.from('members').update({ role }).eq('workspace_id', ws.id).eq('user_id', m.user_id),
       );
+      toast(t('members.roleChanged', { name: m.full_name || m.email, role: t(`roles.${role}`) }));
       await load();
-    }, t('common.saved'));
+    });
 
   return (
     <SettingsShell
@@ -255,13 +259,18 @@ export function Members() {
               const label = m.full_name || m.email;
               const items: Array<MenuItem | 'separator'> = editable
                 ? [
-                    ...roles.map((r) => ({
-                      label: t(`roles.${r}`),
-                      group: t('members.changeRole'),
-                      icon: m.role === r ? <Check /> : <span />,
-                      current: m.role === r,
-                      onSelect: () => (m.role === r ? undefined : setRoleOf(m, r as WorkspaceRole)),
-                    })),
+                    // Admin, Éditeur, Lecteur ; le rôle Propriétaire ne se donne pas ici (transfert de propriété à part)
+                    ...[...roles]
+                      .reverse()
+                      .filter((r) => r !== 'owner')
+                      .map((r) => ({
+                        label: t(`roles.${r}`),
+                        group: t('members.changeRole'),
+                        icon: m.role === r ? <Check /> : <span />,
+                        current: m.role === r,
+                        radio: true,
+                        onSelect: () => (m.role === r ? undefined : setRoleOf(m, r as WorkspaceRole)),
+                      })),
                     'separator' as const,
                     {
                       // Transfert de propriété : pas encore disponible (« Bientôt »)
@@ -273,7 +282,7 @@ export function Members() {
                     },
                     {
                       label: t('members.removeFromWs'),
-                      icon: <Trash2 />,
+                      icon: <UserMinus />,
                       danger: true,
                       onSelect: () => void remove(m),
                     },
@@ -322,13 +331,14 @@ export function Members() {
                     <span className="avatar st-pending-av" aria-hidden="true">
                       {i.email.slice(0, 1).toUpperCase()}
                     </span>
-                    <span
-                      className="stg-who__name stg-muted"
-                      title={t('members.invitedOn', {
-                        date: formatDate(i.created_at, { day: 'numeric', month: 'short' }),
-                      })}
-                    >
-                      {i.email}
+                    {/* Date d'envoi en 2e ligne (lisible au toucher), pas en infobulle */}
+                    <span className="st-invite-who">
+                      <span className="stg-who__name stg-muted">{i.email}</span>
+                      <span className="stg-table__sub">
+                        {t('members.invitedShort', {
+                          date: formatDate(i.created_at, { day: 'numeric', month: 'short' }),
+                        })}
+                      </span>
                     </span>
                   </span>
                 </td>

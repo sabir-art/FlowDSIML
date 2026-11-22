@@ -945,3 +945,13 @@ fieldset.stg-row {
   font: 600 14px var(--fd-font-sans);
   color: var(--fd-color-text);
 }
+
+/* Équipe : invitation en attente, adresse puis date d'envoi sur deux lignes */
+.st-invite-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.st-invite-who .stg-table__sub {
+  font-weight: 400;
+}

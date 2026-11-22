@@ -291,6 +291,8 @@
     "transfer": "Transférer la propriété",
     "removeFromWs": "Retirer de l’espace",
     "removeMember": "Retirer le membre",
+    "roleChanged": "Rôle de {{name}} : {{role}}.",
+    "invitedShort": "Invitée le {{date}}",
     "invitedOn": "Invitation envoyée le {{date}}",
     "pendingBadge": "En attente",
     "linkCopied": "Lien d’invitation copié.",
@@ -344,7 +346,7 @@
     "colStatus": "Statut",
     "statusActive": "Actif",
     "statusInvited": "Invité",
-    "changeRole": "Modifier le rôle",
+    "changeRole": "Rôle",
     "copyInviteLink": "Copier le lien d’invitation",
     "noMatch": "Aucun membre ne correspond à cette recherche.",
     "roleHelp": {
