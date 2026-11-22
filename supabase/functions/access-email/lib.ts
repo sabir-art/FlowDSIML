@@ -2,7 +2,8 @@
 // doubles : aucun envoi réel en test). Les envois passent par Supabase Auth (SMTP de l'espace TutoClick) :
 //  - invite  : un admin de l'espace envoie le lien d'accès aux adresses invitées d'une démo ;
 //  - request : un visiteur demande un lien pour une démo « Sur invitation » ou « Par domaine e-mail » ;
-//  - link    : un éditeur copie un lien d'accès personnel (rien n'est envoyé).
+//  - link    : un éditeur copie un lien d'accès personnel (rien n'est envoyé). Ce lien est un jeton signé,
+//              limité à la démo et à l'adresse : il ne passe pas par Auth (ni compte, ni session).
 // Droits, adresses autorisées et plafonds sont décidés en base (access_email_reserve, access_link_check).
 
 export type Reason = 'forbidden' | 'not_found' | 'not_allowed' | 'domain_refused' | 'rate_limited';
@@ -34,8 +35,8 @@ export interface Deps {
   magicLink(email: string, redirectTo: string): Promise<boolean>;
   /** app_metadata.kind = 'visitor' (comptes créés ici) et textes du gabarit (user_metadata). */
   markVisitor(id: string, meta: Meta, isNew: boolean): Promise<void>;
-  /** Lien d'accès sans envoi (magiclink, ou invite pour une adresse sans compte). */
-  generateLink(email: string, redirectTo: string, meta: Meta): Promise<string | null>;
+  /** Jeton d'accès signé, limité à cette démo et à cette adresse (jamais un lien de session Auth). */
+  signLink(demoId: string, email: string): Promise<string | null>;
   playerUrl: string;
 }
 
@@ -123,11 +124,11 @@ export async function handle(
     if (!EMAIL.test(email)) return { status: 400, body: { error: 'bad_email' } };
     const r = await deps.linkCheck(demoId, email, user.id);
     if (!r.ok) return { status: r.reason === 'forbidden' ? 403 : 404, body: { error: r.reason } };
-    const url = await deps.generateLink(email, redirectFor(deps.playerUrl, demoId), {
-      demo_title: r.demoTitle,
-      workspace_name: r.workspace,
-    });
-    return url ? { status: 200, body: { url } } : { status: 502, body: { error: 'link_failed' } };
+    // Quel que soit le compte derrière l'adresse (membre, admin, visiteur, aucun) : aucun appel à Auth
+    const token = await deps.signLink(demoId, r.email);
+    return token
+      ? { status: 200, body: { url: `${redirectFor(deps.playerUrl, demoId)}#access_token=${token}` } }
+      : { status: 502, body: { error: 'link_failed' } };
   }
 
   return { status: 400, body: { error: 'bad_action' } };

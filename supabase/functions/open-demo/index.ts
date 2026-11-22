@@ -8,6 +8,7 @@
 // CORS : toute origine en lecture (le lecteur peut être intégré), sans cookies ni identifiants.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { isAccessLink, verifyAccessLink } from '../_shared/accessLink.ts';
 
 const MAX_BODY = 4_000;
 const SIGN_TTL = 3600;
@@ -134,7 +135,11 @@ Deno.serve(async (req) => {
   let email: string | null = null;
   const accessToken =
     typeof body.accessToken === 'string' && body.accessToken.length <= 4096 ? body.accessToken : null;
-  if (accessToken) {
+  if (accessToken && isAccessLink(accessToken)) {
+    // Lien copié par un éditeur : jeton signé pour cette démo et cette adresse, sans compte ni session
+    const secret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    email = secret ? await verifyAccessLink(secret, demoId, accessToken) : null;
+  } else if (accessToken) {
     const { data } = await supabase.auth.getUser(accessToken);
     if (data.user?.email && data.user.email_confirmed_at) email = data.user.email.toLowerCase();
     // Session de ce seul lien (scope local) : les autres sessions du compte ne sont pas touchées

@@ -31,7 +31,7 @@ function fake(over: Partial<Deps> = {}, reserve?: (email: string) => Reserve) {
       calls.push(`mark:${id}:${meta.workspace_name}:${isNew}`);
       return Promise.resolve();
     },
-    generateLink: (email) => Promise.resolve(`https://api.tutoclick.example/verify?for=${email}`),
+    signLink: (demoId, email) => Promise.resolve(`tcl1.${demoId}.${email}`),
     ...over,
   };
   return { deps, calls };
@@ -128,7 +128,7 @@ Deno.test('invitation : 50 adresses au plus, toutes valides', async () => {
   );
 });
 
-Deno.test('lien à copier : aucun envoi, URL rendue', async () => {
+Deno.test('lien à copier : aucun envoi, jeton limité à la démo dans le fragment', async () => {
   const { deps, calls } = fake();
   const r = await handle(
     { action: 'link', demoId: DEMO, email: 'sami@nord.example' },
@@ -136,8 +136,27 @@ Deno.test('lien à copier : aucun envoi, URL rendue', async () => {
     null,
     deps,
   );
-  assertEquals(r.body, { url: 'https://api.tutoclick.example/verify?for=sami@nord.example' });
+  assertEquals(r.body, {
+    url: `https://demos.tutoclick.example/?acces=${DEMO}#access_token=tcl1.${DEMO}.sami@nord.example`,
+  });
   assertEquals(calls, []);
+});
+
+Deno.test('lien à copier : compte existant (membre ou visiteur), aucun appel à Auth', async () => {
+  for (const email of ['connu@nord.example', 'connu.visiteur@nord.example']) {
+    const { deps, calls } = fake();
+    const r = await handle({ action: 'link', demoId: DEMO, email }, 'jwt-admin', null, deps);
+    assertEquals(r.status, 200);
+    // Ni invitation, ni lien magique, ni modification de compte : rien qui ouvre une session
+    assertEquals(calls, []);
+    assertEquals(String(r.body.url).includes('/verify'), false);
+    assertEquals(String(r.body.url).split('#access_token=')[1], `tcl1.${DEMO}.${email}`);
+  }
+});
+
+Deno.test('lien à copier : la dépendance ne peut plus fabriquer de lien Auth', () => {
+  const { deps } = fake();
+  assertEquals('generateLink' in deps, false);
 });
 
 Deno.test('démo invalide refusée', async () => {

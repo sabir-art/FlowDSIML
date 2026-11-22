@@ -6,6 +6,7 @@
 // dans les redirections d'Auth). Les IP ne sont jamais stockées : empreinte HMAC salée (IP + démo).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { signAccessLink } from '../_shared/accessLink.ts';
 import { handle, type Deps, type Meta, type Reserve } from './lib.ts';
 
 const MAX_BODY = 8_000;
@@ -90,16 +91,9 @@ const deps = (playerUrl: string): Deps => ({
     return !error;
   },
   markVisitor,
-  async generateLink(email, redirectTo, meta) {
-    const acc = (await admin.rpc('access_account_of', { p_email: email })).data as { id: string } | null;
-    const { data, error } = await admin.auth.admin.generateLink(
-      acc
-        ? { type: 'magiclink', email, options: { redirectTo } }
-        : { type: 'invite', email, options: { redirectTo, data: meta } },
-    );
-    if (error || !data.properties?.action_link) return null;
-    if (!acc && data.user) await markVisitor(data.user.id, meta, true);
-    return data.properties.action_link;
+  async signLink(demoId, email) {
+    const secret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    return secret ? signAccessLink(secret, demoId, email) : null;
   },
 });
 
