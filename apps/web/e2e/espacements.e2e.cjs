@@ -176,7 +176,7 @@ function gaps({ min, cards }) {
         // Aide sous son champ : 6 px admis (§18.6)
         if (b.matches('.help, .fd-help, .error-msg, .fd-error, small, .ok-line') && gap >= 4) continue;
         // Libellé au-dessus de son champ : même groupe (4 px au moins)
-        if (a.matches('label, .fd-label, .t-label, .fd-modal__label, legend') && gap >= 4) continue;
+        if (a.matches('label, .fd-label, .t-label, legend') && gap >= 4) continue;
         // Titre puis sa ligne de texte (sous-titre, mention) : typographie
         if (
           (a.matches('h1, h2, h3, h4, h5, h6') || a.querySelector(':scope > :is(h1, h2, h3, h4, h5, h6)')) &&
