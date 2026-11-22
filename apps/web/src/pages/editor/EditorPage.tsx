@@ -770,6 +770,8 @@ export function EditorPage() {
                 maxLength={160}
                 disabled={readOnly}
                 value={editor.demo.title}
+                /* Titre tronqué par « … » quand la place manque : l'infobulle le donne en entier */
+                title={editor.demo.title}
                 /* Le champ suit la longueur du titre : le crayon reste collé au texte */
                 size={Math.max(4, Math.min(48, editor.demo.title.length + 1))}
                 onChange={(e) => editor.updateDemo({ title: e.target.value })}
@@ -987,7 +989,7 @@ export function EditorPage() {
             {t('editor.share')}
           </Link>
           {can('demo.publish') && (
-            <span className="tc-cta-grad ed-publish">
+            <span className="ed-publish">
               <PublishButton
                 editor={editor}
                 republishLabel={t('publish.publish')}
