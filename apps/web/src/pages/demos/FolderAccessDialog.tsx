@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Modal } from '@flowdsiml/ui';
 import { AvatarPhoto } from '../../components/AvatarPhoto';
-import { Info, Search, X } from 'lucide-react';
+import { Info, Lock, Search } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
 import { check } from '../../lib/useAction';
@@ -31,17 +32,12 @@ export function FolderAccessDialog({
   onSaved: () => void;
 }) {
   const { t } = useTranslation();
-  const ref = useRef<HTMLDialogElement>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [restricted, setRestricted] = useState(folder.restricted);
   const [chosen, setChosen] = useState<Set<string>>(new Set());
   const [q, setQ] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    const d = ref.current;
-    if (d && !d.open) d.showModal();
-  }, []);
   useEffect(() => {
     void Promise.all([
       supabase.rpc('list_members', { p_workspace: folder.workspace_id }),
@@ -69,7 +65,7 @@ export function FolderAccessDialog({
         }),
       );
       onSaved();
-      ref.current?.close();
+      onClose();
     } catch (e) {
       setErr(errorMessage(t, e));
     } finally {
@@ -78,19 +74,32 @@ export function FolderAccessDialog({
   }
 
   return (
-    <dialog ref={ref} className="mk fa-dialog" aria-labelledby="fa-t" onClose={onClose}>
-      <div className="modal-head">
-        <h2 id="fa-t">{t('folderAccess.title', { name: folder.name })}</h2>
-        <button
-          type="button"
-          className="btn btn-ghost btn-icon btn-sm"
-          aria-label={t('common.close')}
-          onClick={() => ref.current?.close()}
-        >
-          <X aria-hidden="true" />
-        </button>
-      </div>
-      <div className="modal-body fa-body">
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      className="fa-dialog"
+      icon={<Lock />}
+      title={t('folderAccess.title', { name: folder.name })}
+      closeLabel={t('common.close')}
+      footer={
+        <>
+          <button type="button" className="fd-btn" onClick={onClose}>
+            {t('common.cancel')}
+          </button>
+          <button
+            type="button"
+            className="fd-btn fd-btn--primary"
+            disabled={busy}
+            onClick={() => void save()}
+          >
+            {t('common.save')}
+          </button>
+        </>
+      }
+    >
+      {/* MODAL-01 : le cadre vient de Modal ; le contenu garde ses styles (« mk ») */}
+      <div className="mk fa-body">
         <fieldset className="fa-choices">
           <legend className="sr-only">{t('folderAccess.who')}</legend>
           <label className="check">
@@ -162,14 +171,6 @@ export function FolderAccessDialog({
           </p>
         )}
       </div>
-      <div className="modal-foot">
-        <button type="button" className="btn btn-secondary" onClick={() => ref.current?.close()}>
-          {t('common.cancel')}
-        </button>
-        <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void save()}>
-          {t('common.save')}
-        </button>
-      </div>
-    </dialog>
+    </Modal>
   );
 }
