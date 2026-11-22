@@ -264,3 +264,94 @@
   color: var(--fd-color-text-muted);
   white-space: nowrap;
 }
+
+/* Deux formulaires qui se suivent (Profil : informations, puis mot de passe) : même écart qu'entre sections */
+.st-wrap--plain > form + form,
+.st-wrap--plain > form + .stg-sec,
+.st-wrap--plain > .stg-sec + .stg-sec {
+  margin-top: 32px;
+}
+/* Champ verrouillé (e-mail du profil) : fond sunken, filet border, texte text-muted */
+.st-wrap--plain .fd-input.stg-input--locked {
+  border-color: var(--fd-color-border);
+  background-color: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+/* Photo de profil : vignette ronde de 64 px */
+.st-wrap--plain .avatar.pf-photo__avatar {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  font-size: 22px;
+}
+/* « Retirer » : action danger discrète à côté du bouton */
+.stg-link-danger {
+  height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-danger);
+  font: 500 14px var(--fd-font-sans);
+  cursor: pointer;
+}
+.stg-link-danger:hover {
+  background: var(--fd-color-nav-hover);
+}
+/* Segmenté compact (Apparence) : pilule sunken, option choisie sur la surface */
+.st-wrap--plain .segmented.stg-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+}
+.st-wrap--plain .segmented.stg-seg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  font: 500 13px var(--fd-font-sans);
+  cursor: pointer;
+}
+.st-wrap--plain .segmented.stg-seg button[aria-checked='true'] {
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: 0 1px 2px rgb(8 10 14 / 0.08);
+}
+/* Message d'état sous un en-tête de section (export terminé) */
+.stg-status {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.stg-status:empty {
+  display: none;
+}
+.st-wrap--plain .st-mydata-bar {
+  height: 4px;
+  margin-top: 12px;
+  border-radius: 2px;
+  background: var(--fd-color-primary);
+  opacity: 0.5;
+}
+/* Mesures des maquettes : icônes de bouton de 16 px, interrupteur de rangée sans hauteur minimale */
+.st-wrap--plain .fd-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.stg-row--inline .fd-switch {
+  min-height: 20px;
+}
+.st-wrap--plain .segmented.stg-seg {
+  width: fit-content;
+  border: 0;
+  box-shadow: none;
+}

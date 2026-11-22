@@ -69,12 +69,15 @@ async function png(page, w, h) {
       (await row.getByRole('button', { name: 'Retirer' }).count()) === 0,
     '« Choisir une photo », pas de « Retirer » sans photo',
   );
-  ok((await row.locator('.help').innerText()) === 'JPG, PNG ou WebP, 2 Mo au plus.', 'aide sous la ligne');
+  ok(
+    (await row.locator('.stg-help').innerText()) === 'JPG, PNG ou WebP, 2 Mo au plus.',
+    'aide sous le libellé « Photo »',
+  );
   ok(
     await page
-      .locator('.form-sec')
+      .locator('.stg-sec')
       .first()
-      .locator('.field')
+      .locator('.stg-row')
       .first()
       .evaluate((el) => el.classList.contains('pf-photo')),
     'la ligne « Photo » est avant « Nom »',

@@ -9,7 +9,7 @@
  */
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImagePlus } from 'lucide-react';
+import { CircleAlert, ImagePlus } from 'lucide-react';
 import { Button } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check } from '../../lib/useAction';
@@ -74,16 +74,21 @@ export function ProfilePhoto() {
   }
 
   return (
-    <div className="field pf-photo">
-      <span className="fd-label" id="pf-photo-label">
-        {t('profile.photo.label')}
-      </span>
-      <div className="pf-photo__row">
-        <span className="avatar pf-photo__avatar" aria-hidden="true">
-          {initials(profile?.full_name || user?.email || '?')}
-          <AvatarPhoto userId={user?.id} />
-        </span>
-        <div className="pf-photo__actions">
+    <div className="stg-row pf-photo">
+      <div className="stg-text" data-gap-exempt="">
+        <div className="stg-lab" id="pf-photo-label">
+          {t('profile.photo.label')}
+        </div>
+        <div id="pf-photo-help" className="stg-help">
+          {t('profile.photo.help')}
+        </div>
+      </div>
+      <div className="stg-ctl">
+        <div className="stg-lr">
+          <span className="avatar pf-photo__avatar" aria-hidden="true">
+            {initials(profile?.full_name || user?.email || '?')}
+            <AvatarPhoto userId={user?.id} />
+          </span>
           <Button
             icon={<ImagePlus aria-hidden="true" />}
             aria-describedby="pf-photo-help"
@@ -93,25 +98,18 @@ export function ProfilePhoto() {
             {t('profile.photo.choose')}
           </Button>
           {path && (
-            <button
-              type="button"
-              className="link-button pf-photo__remove"
-              onClick={() => void remove()}
-              disabled={busy}
-            >
+            <button type="button" className="stg-link-danger" onClick={() => void remove()} disabled={busy}>
               {t('profile.photo.remove')}
             </button>
           )}
         </div>
+        {error && (
+          <p className="stg-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
+            {error}
+          </p>
+        )}
       </div>
-      <span id="pf-photo-help" className="help">
-        {t('profile.photo.help')}
-      </span>
-      {error && (
-        <p className="pf-photo__error" role="alert">
-          {error}
-        </p>
-      )}
       <input
         ref={input}
         type="file"

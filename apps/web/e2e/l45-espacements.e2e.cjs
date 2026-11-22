@@ -195,16 +195,19 @@ async function gap(p, a, b) {
   // ===== Paramètres (E16 à E20) =====
   await appPage(b, page('Profil'), 'light', async (p) => {
     const e16 = await p.evaluate(() => {
-      const c = document.querySelector('.st-mydata');
+      // Gabarit du §11 (lot 1) : le bouton est dans l'en-tête de section, à droite du texte (16 px au moins)
+      const c = document.querySelector('.st-mydata .stg-sec__head');
       return Math.round(
-        c.querySelector('.st-mydata-act').getBoundingClientRect().top -
-          c.querySelector('p.muted').getBoundingClientRect().bottom,
+        c.querySelector('.stg-sec__acts').getBoundingClientRect().left -
+          c.querySelector('p').getBoundingClientRect().right,
       );
     });
-    ok(near(e16, 12), `E16 : « Mes données » texte → bouton : ${e16} px (12)`);
+    ok(e16 >= 16, `E16 : « Mes données » texte → bouton : ${e16} px (16 au moins)`);
     const e17 = await p.evaluate(() => {
       const lang = document.querySelector('label[for="loc"]').getBoundingClientRect().left;
-      const app = document.querySelector('.st-pf-fs legend').getBoundingClientRect().left;
+      const app = [...document.querySelectorAll('.st-pf .stg-lab')]
+        .find((l) => l.textContent.trim() === 'Apparence')
+        .getBoundingClientRect().left;
       return Math.round(app - lang);
     });
     ok(e17 === 0, `E17 : « Apparence » aligné sur « Langue » (${e17} px)`);

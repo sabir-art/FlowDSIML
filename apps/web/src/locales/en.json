@@ -186,7 +186,7 @@
   "myData": {
     "title": "My data",
     "exportBody": "A .zip file with your personal data: profile, workspaces and roles, comments, notifications, preferences and publication confirmations. Demos belong to the workspace: they are not included.",
-    "export": "Download my data (.zip)",
+    "export": "Download (.zip)",
     "preparing": "Preparing the file…",
     "readme": "Export of your TutoClick personal data ({{date}}).\n\nprofil.json: your account (email address, name, language, creation date).\nespaces-et-roles.json: the workspaces you belong to, your role and when you joined.\ncommentaires.json: the comments you wrote in demos.\nnotifications.json: your notifications (type, demo, date, read).\npreferences.json: your notification preferences and muted demos.\nconfirmations-de-publication.json: your confirmations before public publications.\n\nDemos belong to their workspace and are not included.\n",
     "delete": "Delete my account",
@@ -208,12 +208,14 @@
     "errPassword": "Incorrect password.",
     "deletedNotice": "Your account has been deleted.",
     "done": "File downloaded. It is not kept on our servers.",
-    "exportFailed": "The file could not be prepared. Try again."
+    "exportFailed": "The file could not be prepared. Try again.",
+    "deleteHelp": "Deleting your account erases your personal data. Demos stay in their workspace.",
+    "danger": "Danger zone"
   },
   "profile": {
     "title": "My profile",
-    "passwordHint": "You can set a password to sign in without an emailed link.",
-    "changePassword": "Change password",
+    "passwordHint": "To sign in without an emailed link.",
+    "changePassword": "Password",
     "passwordUpdated": "Password updated.",
     "emailHint": "Contact support to change your email.",
     "section": "Profile",
@@ -240,7 +242,13 @@
       "preview": "Preview",
       "zoom": "Zoom",
       "save": "Save photo"
-    }
+    },
+    "infoTitle": "Photo and details",
+    "infoHelp": "Your name and photo appear in comments and the team list.",
+    "passwordNew": "New password",
+    "passwordHelp": "At least 8 characters.",
+    "passwordConfirm": "Confirmation",
+    "passwordMismatch": "The two passwords do not match."
   },
   "members": {
     "title": "Members",

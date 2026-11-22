@@ -278,7 +278,12 @@ export function Layout() {
         </div>
         {/* CAD-02 : sélecteur de workspace toujours visible (maquette) */}
         <WorkspaceSwitcher />
-        <nav aria-label={t('nav.main')} className="fd-nav">
+        <nav
+          aria-label={t('nav.main')}
+          className="fd-nav"
+          /* §18.6 : éléments à 2 px, titre de groupe à 6 px de sa première entrée (NAV-02 §11.7.2) */
+          data-gap-exempt=""
+        >
           {/* RF6 : « Démos » reste actif dans les sous-pages d'une démo (analytics, partage…) */}
           {item('/', path === '/' || path.startsWith('/demos/'), <LayoutGrid {...ICON} />, t('nav.demos'))}
           {/* L48-G §4 : le Sandbox a sa propre entrée (pages reliées, exploration libre) */}

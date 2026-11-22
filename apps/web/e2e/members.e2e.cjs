@@ -159,8 +159,9 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.locator('.st-nav').getByRole('link', { name: 'Profil' }).click();
   await page.waitForSelector('#fn');
   ok(
-    (await page.locator('.st-pf .form-sec .intro h2').allTextContents()).join('|') === 'Profil|Préférences',
-    'PRM-09 : sections Profil et Préférences',
+    (await page.locator('.st-pf .stg-sec__head h2').allTextContents()).join('|') ===
+      'Photo et informations|Préférences',
+    'Profil : sections « Photo et informations » et « Préférences »',
   );
 
   await page.getByRole('link', { name: 'Général' }).click();

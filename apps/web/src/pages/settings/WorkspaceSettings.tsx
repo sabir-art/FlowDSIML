@@ -169,10 +169,11 @@ export function WorkspaceSettings() {
               <p>{t('workspace.identityHelp')}</p>
             </div>
           </div>
-          {/* §18.6 : rangées à filets, l'écart est porté par leur padding de 20 px */}
+          {/* §18.6 : rangées à filets, l'écart est porté par leur padding de 20 px ; dans une rangée,
+              l'aide suit son libellé à 4 px (maquette, « aide sous son champ ») */}
           <div data-gap-exempt="">
             <div className="stg-row">
-              <div>
+              <div className="stg-text" data-gap-exempt="">
                 <div className="stg-lab">
                   {t('workspace.logo')} {soon}
                 </div>
@@ -188,7 +189,7 @@ export function WorkspaceSettings() {
               </div>
             </div>
             <div className="stg-row">
-              <div>
+              <div className="stg-text" data-gap-exempt="">
                 <label className="stg-lab" htmlFor="ws-name">
                   {t('workspace.wsName')}
                 </label>
@@ -207,7 +208,7 @@ export function WorkspaceSettings() {
               </div>
             </div>
             <div className="stg-row">
-              <div>
+              <div className="stg-text" data-gap-exempt="">
                 <label className="stg-lab" htmlFor="ws-site">
                   {t('workspace.website')}
                 </label>
@@ -234,7 +235,7 @@ export function WorkspaceSettings() {
               </div>
             </div>
             <div className="stg-row">
-              <div>
+              <div className="stg-text" data-gap-exempt="">
                 <label className="stg-lab" htmlFor="ws-slug">
                   {t('workspace.slug')}
                 </label>
@@ -272,7 +273,7 @@ export function WorkspaceSettings() {
           </div>
           <div data-gap-exempt="">
             <div className="stg-row">
-              <div>
+              <div className="stg-text" data-gap-exempt="">
                 <label className="stg-lab" htmlFor="ws-privacy">
                   {t('workspace.privacyUrl')}
                 </label>
@@ -302,7 +303,7 @@ export function WorkspaceSettings() {
               </div>
             </div>
             <div className="stg-row">
-              <div>
+              <div className="stg-text" data-gap-exempt="">
                 <label className="stg-lab" htmlFor="ws-help">
                   {t('help.contactLabel')}
                 </label>
@@ -331,7 +332,7 @@ export function WorkspaceSettings() {
               </div>
             </div>
             <div className="stg-row stg-row--inline">
-              <div>
+              <div className="stg-text" data-gap-exempt="">
                 <div className="stg-lab" id="ws-public-label">
                   {t('workspace.publicLinks')}
                 </div>
@@ -378,7 +379,7 @@ export function WorkspaceSettings() {
           </div>
           <div data-gap-exempt="">
             <div className="stg-row">
-              <div>
+              <div className="stg-text" data-gap-exempt="">
                 <label className="stg-lab" htmlFor="ws-lang">
                   {t('workspace.defaultLang')} {soon}
                 </label>
@@ -391,7 +392,7 @@ export function WorkspaceSettings() {
               </div>
             </div>
             <div className="stg-row">
-              <div>
+              <div className="stg-text" data-gap-exempt="">
                 <label className="stg-lab" htmlFor="ws-tz">
                   {t('workspace.timezone')} {soon}
                 </label>

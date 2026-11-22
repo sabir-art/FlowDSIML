@@ -113,7 +113,14 @@ function SettingsNav() {
   return (
     <nav className="st-nav" aria-label={t('settings.sections')}>
       {GROUPS.map((g) => (
-        <div key={g.key} className="st-nav__grp" role="group" aria-labelledby={`st-g-${g.key}`}>
+        <div
+          key={g.key}
+          className="st-nav__grp"
+          role="group"
+          aria-labelledby={`st-g-${g.key}`}
+          /* §18.6 : titre de groupe à 6 px de sa première entrée (NAV-02 §11.7.2, mesure de la spec) */
+          data-gap-exempt=""
+        >
           <p id={`st-g-${g.key}`} className="st-nav__title">
             {t(`settings.grp.${g.key}`)}
           </p>

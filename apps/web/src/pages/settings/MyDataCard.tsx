@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Download, Trash2 } from 'lucide-react';
+import { CircleAlert, Download } from 'lucide-react';
+import { Button } from '@flowdsiml/ui';
 import { strToU8, zipSync } from 'fflate';
 import { supabase } from '../../lib/supabase';
 import { errorMessage } from '../../lib/errors';
@@ -192,42 +193,43 @@ export function MyDataCard() {
   };
   const ready = !!email.trim() && sure && (!check?.hasPassword || !!password);
   return (
-    <section className="card st-gen st-mydata" aria-labelledby="md-title">
-      <div className="form-sec">
-        <div className="intro">
-          <h2 className="t-h3" id="md-title">
-            {t('myData.title')}
-          </h2>
-        </div>
-        <div>
-          <p className="muted">{t('myData.exportBody')}</p>
-          <div className="row wrap st-mydata-act">
-            <button
-              type="button"
-              className="btn btn-secondary"
+    <>
+      <section className="stg-sec st-mydata" aria-labelledby="md-title">
+        <div className="stg-sec__head">
+          <div>
+            <h2 id="md-title">{t('myData.title')}</h2>
+            <p>{t('myData.exportBody')}</p>
+          </div>
+          <div className="stg-sec__acts">
+            <Button
+              icon={<Download aria-hidden="true" />}
               disabled={exporting}
               onClick={() => void prepareExport()}
             >
-              <Download aria-hidden="true" />
               {exporting ? t('myData.preparing') : t('myData.export')}
-            </button>
-            <span className="help" role="status">
-              {exported ? t('myData.done') : ''}
-            </span>
+            </Button>
           </div>
-          {exporting && <div className="st-mydata-bar" aria-hidden="true" />}
-          {exportErr && (
-            <p className="field-error" role="alert">
-              {exportErr}
-            </p>
-          )}
-          <hr className="divider" />
-          <button type="button" className="btn btn-secondary st-mydata-del" onClick={() => void openDelete()}>
-            <Trash2 aria-hidden="true" />
-            {t('myData.delete')}
-          </button>
         </div>
-      </div>
+        {exporting && <div className="st-mydata-bar" aria-hidden="true" />}
+        <p className="stg-status" role="status">
+          {exported ? t('myData.done') : ''}
+        </p>
+        {exportErr && (
+          <p className="stg-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
+            {exportErr}
+          </p>
+        )}
+      </section>
+      <section className="stg-danger" aria-labelledby="md-danger">
+        <div>
+          <h2 id="md-danger">{t('myData.danger')}</h2>
+          <p>{t('myData.deleteHelp')}</p>
+        </div>
+        <Button className="stg-btn-danger st-mydata-del" onClick={() => void openDelete()}>
+          {t('myData.delete')}
+        </Button>
+      </section>
 
       <dialog
         ref={dlg}
@@ -353,6 +355,6 @@ export function MyDataCard() {
           </form>
         ) : null}
       </dialog>
-    </section>
+    </>
   );
 }
