@@ -292,7 +292,15 @@ const MB = 1024 * 1024;
         !/atteinte/.test(await ai.innerText()),
       'Assistance IA : 2 %, sans pastille',
     );
-    ok(/Remise à zéro le 1er décembre/.test(await ai.innerText()), 'remise à zéro le 1er du mois');
+    // Décision UX du 22/11 : la remise à zéro est dite une fois, sous « Ressources du mois »
+    ok(
+      /Remise à zéro le 1er décembre\./.test(
+        await page.getByRole('region', { name: 'Ressources du mois' }).locator('.stg-sec__head').innerText(),
+      ) &&
+        (await page.locator('.stg-sec__head h2').allTextContents()).join('|') ===
+          'Contenu et équipe|Ressources du mois',
+      'deux sections ; remise à zéro le 1er du mois sous « Ressources du mois »',
+    );
     const pub = page.locator('.us-row', { hasText: 'Démos publiées' });
     ok(
       (await pub.getByRole('meter').count()) === 0 && /sans limite/.test(await pub.innerText()),
