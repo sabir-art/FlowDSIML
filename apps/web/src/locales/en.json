@@ -3,6 +3,14 @@
     "name": "{{app}}"
   },
   "common": {
+    "colorPalette": "Brand colours",
+    "colorShade": "Saturation and brightness",
+    "colorHue": "Hue",
+    "colorHex": "Hex code",
+    "openCalendar": "Open the calendar",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "openTimes": "Choose a time",
     "loading": "Loading…",
     "save": "Save",
     "saved": "Changes saved.",

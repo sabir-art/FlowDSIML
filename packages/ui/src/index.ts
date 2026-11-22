@@ -11,3 +11,5 @@ export { PageHeader, Breadcrumb, BackButton } from './navigation';
 export type { Crumb, NavLinkComponent } from './navigation';
 export { Modal } from './modal';
 export { Slider } from './slider';
+export { DateField, TimeField } from './datefield';
+export { ColorSwatch } from './colorswatch';

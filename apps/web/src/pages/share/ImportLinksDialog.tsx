@@ -117,7 +117,10 @@ export function ImportLinksDialog({
                   id={`${ids}-f`}
                   type="file"
                   accept=".csv,text/csv"
-                  hidden
+                  /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (!f) return;
@@ -131,6 +134,7 @@ export function ImportLinksDialog({
                     className="btn btn-secondary btn-sm"
                     aria-labelledby={`${ids}-fl ${ids}-fb`}
                     aria-describedby={`${ids}-fn`}
+                    aria-controls={`${ids}-f`}
                     onClick={() => fileRef.current?.click()}
                   >
                     <Upload aria-hidden="true" />

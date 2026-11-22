@@ -223,9 +223,11 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
           ref={file}
           type="file"
           accept=".csv,text/csv"
-          hidden
-          aria-hidden="true"
+          /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+          id="datasetdialog-file"
+          className="sr-only"
           tabIndex={-1}
+          aria-hidden="true"
           onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) void onFile(f);
@@ -248,7 +250,12 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
               </span>
             </div>
             <div className="ds-start">
-              <Button size="sm" disabled={readOnly} onClick={() => file.current?.click()}>
+              <Button
+                size="sm"
+                disabled={readOnly}
+                aria-controls="datasetdialog-file"
+                onClick={() => file.current?.click()}
+              >
                 {t('editor.dataset.replace')}
               </Button>
               {ws && !readOnly && !generating && (
@@ -260,7 +267,12 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
           </div>
         ) : (
           <div className="ds-start">
-            <Button icon={<Upload />} disabled={readOnly} onClick={() => file.current?.click()}>
+            <Button
+              icon={<Upload />}
+              disabled={readOnly}
+              aria-controls="datasetdialog-file"
+              onClick={() => file.current?.click()}
+            >
               {t('editor.dataset.import')}
             </Button>
             {ws && !readOnly && !generating && (

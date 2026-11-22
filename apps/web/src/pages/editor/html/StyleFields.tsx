@@ -8,7 +8,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import type { StepRow } from '../types';
 import { commonShort } from './HtmlCanvas';
 import { addStyleOp, frameSend, htmlSteps, setHtmlEdit, useHtmlEdit } from './htmlModel';
-import { Select } from '@flowdsiml/ui';
+import { Select, ColorSwatch } from '@flowdsiml/ui';
 
 const HEX = /^#[0-9A-Fa-f]{6}$/;
 export const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28, 32, 40, 48] as const;
@@ -77,14 +77,19 @@ export function StyleFields({
     <div className="field">
       <label htmlFor={`st-${k}`}>{label}</label>
       <div className="st-color">
-        <input
-          type="color"
-          aria-label={t('editor.data.pick', { label })}
+        <ColorSwatch
+          label={t('editor.data.pick', { label })}
+          labels={{
+            palette: t('common.colorPalette'),
+            shade: t('common.colorShade'),
+            hue: t('common.colorHue'),
+            hex: t('common.colorHex'),
+          }}
           value={
             HEX.test(f[k]) ? f[k] : k === 'color' ? (els[0]?.color ?? '#000000') : (els[0]?.bg ?? '#FFFFFF')
           }
           disabled={readOnly}
-          onChange={(e) => set(k, e.target.value.toUpperCase())}
+          onChange={(c) => set(k, c)}
         />
         <input
           id={`st-${k}`}

@@ -180,7 +180,11 @@ export function MediaLibrary({
         <input
           ref={input}
           type="file"
-          hidden
+          /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+          id="medialibrary-file"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
           accept={ACCEPT}
           onChange={(e) => {
             if (e.target.files) void upload(e.target.files);
@@ -255,6 +259,7 @@ export function MediaLibrary({
             type="button"
             className={`md-drop md-drop--first${drag ? ' is-over' : ''}`}
             disabled={busy}
+            aria-controls="medialibrary-file"
             onClick={() => input.current?.click()}
             onDragOver={(e) => {
               e.preventDefault();
@@ -275,6 +280,7 @@ export function MediaLibrary({
                   type="button"
                   className={`md-drop${drag ? ' is-over' : ''}`}
                   disabled={busy}
+                  aria-controls="medialibrary-file"
                   onClick={() => input.current?.click()}
                   onDragOver={(e) => {
                     e.preventDefault();

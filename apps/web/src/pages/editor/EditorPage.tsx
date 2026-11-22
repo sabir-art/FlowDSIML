@@ -683,6 +683,7 @@ export function EditorPage() {
             <button
               type="button"
               className="btn btn-secondary btn-sm"
+              aria-controls="editorpage-file"
               onClick={() => replacePicker.current?.click()}
             >
               <ImagePlus aria-hidden="true" />
@@ -1187,7 +1188,11 @@ export function EditorPage() {
           ref={replacePicker}
           type="file"
           accept="image/png,image/jpeg,image/webp"
-          hidden
+          /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+          id="editorpage-file"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
           aria-label={t('editor.toolReplace')}
           onChange={(e) => {
             const f = e.target.files?.[0];

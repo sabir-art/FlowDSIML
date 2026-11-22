@@ -218,6 +218,7 @@ export function NewDemoDialog({
                   type="button"
                   className="nd-src"
                   disabled={busy}
+                  aria-controls="newdemodialog-file"
                   onClick={() => picker.current?.click()}
                 >
                   <ImagePlus aria-hidden="true" />
@@ -232,7 +233,11 @@ export function NewDemoDialog({
                   type="file"
                   accept={IMAGE_ACCEPT}
                   multiple
-                  hidden
+                  /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+                  id="newdemodialog-file"
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
                   aria-label={t('demos.newImport')}
                   onChange={async (e) => {
                     const files = [...(e.target.files ?? [])];

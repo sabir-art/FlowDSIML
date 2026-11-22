@@ -121,6 +121,9 @@ jobs:
       - name: Aucun bouton à l'apparence native (toutes les pages)
         if: always()
         run: cd apps/web && node e2e/boutons-natifs.e2e.cjs
+      - name: Aucun contrôle natif visible, listes et menus ouverts (COMP-01)
+        if: always()
+        run: cd apps/web && node e2e/controles-natifs.e2e.cjs
       - name: Aucun défilement horizontal dans les panneaux et les pages (1 440 et 390 px, outils de l'éditeur)
         if: always()
         run: cd apps/web && node e2e/defilement-horizontal.e2e.cjs

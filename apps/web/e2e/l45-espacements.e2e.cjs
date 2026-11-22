@@ -213,30 +213,31 @@ async function gap(p, a, b) {
     ok(e17 === 0, `E17 : « Apparence » aligné sur « Langue » (${e17} px)`);
     return [];
   });
+  // Lot 1 de la refonte : Thème et couleurs au gabarit des Paramètres (rangées de 20 px, filet entre elles)
   await appPage(b, page('Marque'), 'light', async (p) => {
     const m = await p.evaluate(() => {
       const r = (el) => el.getBoundingClientRect();
       const col = document.querySelector('[aria-labelledby="br-col-t"]');
-      const lastField = [...col.querySelectorAll('.br-colors')].at(-1);
-      const save = col.querySelector('.br-actions');
+      const fields = [...col.querySelectorAll('.br-colr')];
       const sty = document.querySelector('[aria-labelledby="br-sty-t"]');
-      const mine = sty.querySelector('#br-mine-t');
       return {
-        e18: save ? Math.round(r(save).top - r(lastField).bottom) : null,
-        e20: Math.round(r(mine.nextElementSibling).top - r(mine).bottom),
+        e18: Math.round(r(fields[1]).top - r(fields[1].closest('.stg-row')).top),
+        e20: Math.round(r(sty.querySelector('.br-st')).top - r(sty.querySelector('.stg-sec__head')).bottom),
       };
     });
-    ok(near(m.e18, 24), `E18 : couleurs → « Enregistrer » : ${m.e18} px (24)`);
-    ok(near(m.e20, 12), `E20 : « Styles de l’espace » → contenu : ${m.e20} px (12)`);
+    ok(near(m.e18, 20), `E18 : filet → couleur d’accent : ${m.e18} px (20)`);
+    ok(near(m.e20, 20), `E20 : en-tête « Styles des démos » → première carte : ${m.e20} px (20)`);
     return [];
   });
   // L48-A : la page publique a sa propre route (Paramètres > Marque > Page publique)
   await appPage(b, page('Page publique'), 'light', async (p) => {
     const e19 = await p.evaluate(() => {
-      const f = [...document.querySelectorAll('[aria-labelledby="br-pp-t"] > .field')];
-      return Math.round(f[1].getBoundingClientRect().top - f[0].getBoundingClientRect().bottom);
+      const f = [...document.querySelectorAll('[aria-labelledby="br-pp-t"] .stg-two')];
+      return Math.round(
+        f[1].getBoundingClientRect().top - f[1].closest('.stg-row').getBoundingClientRect().top,
+      );
     });
-    ok(near(e19, 24), `E19 : « Bouton principal » → « Bouton secondaire » : ${e19} px (24)`);
+    ok(near(e19, 20), `E19 : filet → « Bouton secondaire » : ${e19} px (20)`);
     return [];
   });
 

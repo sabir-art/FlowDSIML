@@ -100,7 +100,13 @@ const GROUP = 'Session du 12 novembre';
   await dlg.waitFor();
   ok(
     (await dlg.getByRole('button', { name: /Choisir un fichier/ }).isVisible()) &&
-      !(await dlg.locator('input[type=file]').isVisible()) &&
+      // COMP-01 §5 : le champ reste dans la page, masqué en sr-only (rogné), jamais en display: none
+      (await dlg
+        .locator('input[type=file]')
+        .evaluate(
+          (el) =>
+            el.classList.contains('sr-only') && getComputedStyle(el).clip === 'rect(0px, 0px, 0px, 0px)',
+        )) &&
       (await dlg.locator('.sh-file-name').textContent()) === 'Aucun fichier choisi',
     'Lead UX : bouton « Choisir un fichier » (champ natif masqué)',
   );

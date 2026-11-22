@@ -1,0 +1,102 @@
+/* COMP-01 §4 : pastille de couleur et son sélecteur maison (aucun contrôle natif) */
+.fd-color {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 10px;
+  background: var(--fd-color-value);
+  cursor: pointer;
+}
+.fd-color:hover:not(:disabled) {
+  border-color: var(--fd-color-border-field-hover);
+}
+.fd-color:focus-visible,
+.fd-color[aria-expanded='true'] {
+  outline: none;
+  border-color: var(--fd-color-primary);
+  box-shadow:
+    inset 0 0 0 1px var(--fd-color-primary),
+    inset 0 0 0 3px var(--fd-color-surface);
+}
+.fd-color:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.fd-color-pop {
+  gap: 12px;
+  width: 248px;
+  padding: 12px;
+  overflow: visible;
+}
+.fd-color-pop__palette {
+  display: flex;
+  justify-content: space-between;
+}
+/* Pastille de 24 px ; choisie : double anneau (surface puis texte) */
+.fd-color-pop__sw {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fd-color-value);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.16);
+  color: #ffffff;
+  cursor: pointer;
+}
+.fd-color-pop__sw[aria-label='#FFFFFF'],
+.fd-color-pop__sw[aria-label='#95C11F'],
+.fd-color-pop__sw[aria-label='#F39200'] {
+  color: #080808;
+}
+.fd-color-pop__sw[aria-checked='true'],
+.fd-color-pop__sw:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--fd-color-surface),
+    0 0 0 4px var(--fd-color-text);
+}
+.fd-color-pop__shade {
+  position: relative;
+  height: 140px;
+  border-radius: 8px;
+  background:
+    linear-gradient(to top, #000000, transparent),
+    linear-gradient(to right, #ffffff, hsl(var(--fd-color-hue) 100% 50%));
+  cursor: crosshair;
+  touch-action: none;
+}
+.fd-color-pop__hue {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+  cursor: pointer;
+  touch-action: none;
+}
+.fd-color-pop__shade:focus-visible,
+.fd-color-pop__hue:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-color-pop__dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4);
+  pointer-events: none;
+}
+.fd-color-pop__hue .fd-color-pop__dot {
+  top: 50%;
+}
+.fd-color-pop .fd-color-pop__hex {
+  height: 36px;
+  font-variant-numeric: tabular-nums;
+}

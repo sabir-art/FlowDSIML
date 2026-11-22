@@ -388,6 +388,7 @@ export function Onboarding() {
             type="button"
             className="link-button"
             disabled={busy}
+            aria-controls="onboarding-file"
             onClick={() => picker.current?.click()}
           >
             {t('onboarding.importInstead')}
@@ -400,7 +401,11 @@ export function Onboarding() {
             type="file"
             accept={IMAGE_ACCEPT}
             multiple
-            hidden
+            /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+            id="onboarding-file"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
             aria-label={t('onboarding.importInstead')}
             onChange={(e) => {
               const files = [...(e.target.files ?? [])];

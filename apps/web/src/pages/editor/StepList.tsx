@@ -438,7 +438,13 @@ export function StepList({
           <input
             ref={file}
             type="file"
-            hidden
+            /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+            id="steplist-file"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            /* Ouvert par l'entrée « Image » du menu « Ajouter une étape » : le champ porte son nom */
+            aria-label={t('editor.add.image')}
             accept="image/png,image/jpeg,image/webp"
             onChange={(e) => {
               const f = e.target.files?.[0];

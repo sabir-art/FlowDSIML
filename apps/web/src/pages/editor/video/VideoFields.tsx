@@ -216,7 +216,12 @@ export function VideoFields({
             {t('editor.video.editCaptions', { count: v.captions.length })}
           </button>
           {!readOnly && (
-            <button type="button" className="btn btn-secondary btn-sm" onClick={() => file.current?.click()}>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              aria-controls="videofields-file"
+              onClick={() => file.current?.click()}
+            >
               <Upload aria-hidden="true" />
               {t('editor.video.importVtt')}
             </button>
@@ -224,7 +229,11 @@ export function VideoFields({
           <input
             ref={file}
             type="file"
-            hidden
+            /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+            id="videofields-file"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
             accept=".vtt,text/vtt"
             onChange={(e) => {
               const f = e.target.files?.[0];

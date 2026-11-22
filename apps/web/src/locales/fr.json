@@ -3,6 +3,14 @@
     "name": "{{app}}"
   },
   "common": {
+    "colorPalette": "Couleurs de la marque",
+    "colorShade": "Saturation et luminosité",
+    "colorHue": "Teinte",
+    "colorHex": "Code hexadécimal",
+    "openCalendar": "Ouvrir le calendrier",
+    "prevMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "openTimes": "Choisir une heure",
     "loading": "Chargement…",
     "save": "Enregistrer",
     "saved": "Modifications enregistrées.",

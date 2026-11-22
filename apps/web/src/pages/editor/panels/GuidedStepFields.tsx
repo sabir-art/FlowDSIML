@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { VarTextField } from '../vars/VarTextField';
 import { useVarCatalog } from '../../../lib/varCatalog';
 import type { ChoiceAction, StepOptions } from '@flowdsiml/manifest';
-import { Button, Field, Select, Switch } from '@flowdsiml/ui';
+import { Button, Field, Select, Switch, ColorSwatch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asAction, asStepOptions, type StepRow } from '../types';
 import { loopsWithoutExit, unreachableSteps } from '../reachability';
@@ -160,14 +160,19 @@ export function GuidedStepFields({
                 </div>
               </Field>
               {opts.background === 'color' && (
-                <Field label={t('editor.advanced.popup.bgColor')} htmlFor="gp-bg">
+                <Field label={t('editor.advanced.popup.bgColor')}>
                   <div className="row">
-                    <input
-                      id="gp-bg"
-                      type="color"
+                    <ColorSwatch
+                      label={t('editor.advanced.popup.bgColor')}
+                      labels={{
+                        palette: t('common.colorPalette'),
+                        shade: t('common.colorShade'),
+                        hue: t('common.colorHue'),
+                        hex: t('common.colorHex'),
+                      }}
                       disabled={readOnly}
                       value={opts.bgColor}
-                      onChange={(e) => set({ bgColor: e.target.value.toUpperCase() })}
+                      onChange={(c) => set({ bgColor: c })}
                     />
                     <code>{opts.bgColor.toUpperCase()}</code>
                   </div>
