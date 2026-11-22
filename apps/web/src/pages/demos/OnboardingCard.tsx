@@ -1,23 +1,31 @@
 /**
- * L26-01 : « Prise en main de votre espace », en tête de la page Démos (remplace « Premiers pas »).
+ * ONB-01 (COMP-01 §17, variante B « étape suivante ») : la prise en main sort du flux de la page Démos.
+ * Un bouton « Prise en main 2/7 » avec son anneau, dans le PageHeader, ouvre un panneau à droite qui
+ * partage l'espace avec la page (tiroir par la droite sous 1 024 px). Le panneau montre la prochaine étape
+ * en grand, puis « À faire ensuite » en lignes, puis « Terminées » replié.
  * 7 étapes cochées automatiquement (calculées côté serveur : workspace_onboarding). Propriétaires et
- * administrateurs voient les 7 étapes, éditeurs les étapes 3 à 5, lecteurs rien. La prochaine étape
- * conseillée a le bouton principal. « Masquer » vaut pour la personne ; « Reprendre » est dans l'aide.
- * À 7 sur 7 : « Votre espace est prêt » pendant 7 jours.
+ * administrateurs voient les 7 étapes, éditeurs les étapes 3 à 5, lecteurs rien. Quand tout est fait, le
+ * bouton disparaît ; « Reprendre la prise en main » reste dans l'aide.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
+  Camera,
   ChevronDown,
-  ChevronUp,
-  Circle,
+  ChevronRight,
   CircleCheck,
   EyeOff,
   Info,
-  Play,
+  Palette,
   PartyPopper,
-  Sparkles,
+  Play,
+  Puzzle,
+  Rocket,
+  Send,
+  UserPlus,
+  X,
+  type LucideIcon,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -29,7 +37,15 @@ import { EXTENSION_URL } from '../../lib/env';
 const STEPS = ['brand', 'extension', 'capture', 'pii', 'publish', 'invite', 'distribute'] as const;
 type Step = (typeof STEPS)[number];
 const EDITOR_STEPS: Step[] = ['capture', 'pii', 'publish'];
-const WEEK = 7 * 24 * 3600 * 1000;
+const ICONS: Record<Step, LucideIcon> = {
+  brand: Palette,
+  extension: Puzzle,
+  capture: Camera,
+  pii: EyeOff,
+  publish: Rocket,
+  invite: UserPlus,
+  distribute: Send,
+};
 
 interface State {
   steps: Record<Step, boolean>;
@@ -75,19 +91,119 @@ export function useOnboarding({ deferred = false }: { deferred?: boolean } = {})
 }
 export type Onboarding = ReturnType<typeof useOnboarding>;
 
-export function OnboardingCard({
+/** Étapes visibles pour la personne, et avancement ; null si la prise en main ne la concerne pas. */
+export function onboardingProgress(state: State | null, admin: boolean, editor: boolean) {
+  if (!state || !editor) return null;
+  const visible: Step[] = admin ? [...STEPS] : EDITOR_STEPS;
+  const done = visible.filter((s) => state.steps[s]);
+  return { visible, done, n: done.length, total: visible.length, complete: done.length === visible.length };
+}
+
+/** Préférence « panneau ouvert », gardée par personne et par espace. */
+export function useOnboardingOpen(wsId: string) {
+  const key = `fd.onb.open.${wsId}`;
+  const [open, setOpenState] = useState(() => {
+    try {
+      return localStorage.getItem(key) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const setOpen = useCallback(
+    (v: boolean) => {
+      setOpenState(v);
+      try {
+        localStorage.setItem(key, v ? '1' : '0');
+      } catch {
+        /* préférence non gardée */
+      }
+    },
+    [key],
+  );
+  // « Reprendre la prise en main » depuis l'aide : le panneau s'ouvre (même quand tout est fait)
+  const [resumed, setResumed] = useState(false);
+  useEffect(() => {
+    const on = () => {
+      setResumed(true);
+      setOpen(true);
+    };
+    addEventListener('fd:onboarding', on);
+    return () => removeEventListener('fd:onboarding', on);
+  }, [setOpen]);
+  return [open, setOpen, resumed] as const;
+}
+
+/** Anneau de progression de 18 px (décoratif : le nombre est dans le libellé du bouton). */
+function Ring({ n, total }: { n: number; total: number }) {
+  const c = 2 * Math.PI * 7;
+  return (
+    <svg className="onb-ring" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <circle cx="9" cy="9" r="7" fill="none" stroke="var(--fd-color-border)" strokeWidth="2.5" />
+      {n > 0 && (
+        <circle
+          cx="9"
+          cy="9"
+          r="7"
+          fill="none"
+          stroke="var(--fd-color-primary)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeDasharray={`${(n / total) * c} ${c}`}
+          transform="rotate(-90 9 9)"
+        />
+      )}
+    </svg>
+  );
+}
+
+/** Point d'entrée dans le PageHeader : « Prise en main 2/7 » (l'anneau seul, 44 px, sous 1 024 px). */
+export function OnboardingButton({
   onb,
+  open,
+  onToggle,
+}: {
+  onb: Onboarding;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const { t } = useTranslation();
+  const { current, can } = useWorkspace();
+  const admin = current?.role === 'owner' || current?.role === 'admin';
+  const p = onboardingProgress(onb.state, admin, can('demo.edit'));
+  if (!p || p.complete) return null;
+  return (
+    <button
+      type="button"
+      id="onb-toggle"
+      className={`fd-btn onb-btn${open ? ' is-open' : ''}`}
+      aria-expanded={open}
+      aria-controls={open ? 'onb-panel' : undefined}
+      onClick={onToggle}
+    >
+      <Ring n={p.n} total={p.total} />
+      <span className="onb-btn__t">{t('onb.button')}</span>
+      {/* Le nom accessible reprend le texte visible (« Prise en main 3/7 »), suivi de sa lecture en clair */}
+      <span className="onb-btn__n">{`${p.n}/${p.total}`}</span>
+      <span className="sr-only">{t('onb.buttonHint', { count: p.n, total: p.total })}</span>
+    </button>
+  );
+}
+
+export function OnboardingPanel({
+  onb,
+  drawer,
+  onClose,
   onCapture,
   latestDemoId,
   publishedDemoId,
-  collapsedByDefault = false,
 }: {
   onb: Onboarding;
+  /** Sous 1 024 px : tiroir modal par la droite. */
+  drawer: boolean;
+  onClose: () => void;
   onCapture: () => void;
   latestDemoId: string | null;
   publishedDemoId: string | null;
-  /** Repliée par défaut (page Démos sans démo). */
-  collapsedByDefault?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -95,46 +211,47 @@ export function OnboardingCard({
   const { current, can } = useWorkspace();
   const ws = current!;
   const admin = ws.role === 'owner' || ws.role === 'admin';
-  const { state, setState } = onb;
-  const [open, setOpen] = useState(() => {
-    try {
-      const v = localStorage.getItem(`fd.onb.collapsed.${ws.id}`);
-      // L48-B §4 : repliée au-dessus de l'état vide tant que l'espace n'a aucune démo
-      return v === null ? !collapsedByDefault : v !== '1';
-    } catch {
-      return !collapsedByDefault;
-    }
-  });
+  const { state } = onb;
   const [tour, setTour] = useState<{ id: string; title: string } | null>(null);
+  const [showDone, setShowDone] = useState(false);
+  const panel = useRef<HTMLElement>(null);
 
-  if (!state || !can('demo.edit') || state.hiddenAt) return null;
-  const visible = admin ? [...STEPS] : EDITOR_STEPS;
-  const n = visible.filter((s) => state.steps[s]).length;
-  const complete = n === visible.length;
-  // 7 sur 7 : « Votre espace est prêt » pendant 7 jours, puis la carte disparaît
-  if (complete && admin && state.doneAt && Date.now() - Date.parse(state.doneAt) > WEEK) return null;
-  if (complete && !admin) return null;
-
-  const hide = () => {
-    setState((s) => (s ? { ...s, hiddenAt: new Date().toISOString() } : s));
-    void supabase
-      .from('onboarding_prefs')
-      .upsert(
-        { workspace_id: ws.id, hidden_at: new Date().toISOString() },
-        { onConflict: 'user_id,workspace_id' },
-      )
-      .then(() => undefined);
-  };
-  const toggle = () => {
-    setOpen((o) => {
-      try {
-        localStorage.setItem(`fd.onb.collapsed.${ws.id}`, o ? '1' : '0');
-      } catch {
-        /* préférence non gardée */
+  // Tiroir : focus dans le panneau à l'ouverture, piégé ; Échap ferme et rend le focus au bouton d'entrée
+  useEffect(() => {
+    if (!drawer) return;
+    const el = panel.current;
+    el?.querySelector<HTMLElement>('button')?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
       }
-      return !o;
-    });
-  };
+      if (e.key !== 'Tab' || !el) return;
+      const f = [...el.querySelectorAll<HTMLElement>('button, a[href]')].filter(
+        (x) => !x.hasAttribute('disabled'),
+      );
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (!first || !last) return;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.getElementById('onb-toggle')?.focus();
+    };
+  }, [drawer, onClose]);
+
+  const p = onboardingProgress(state, admin, can('demo.edit'));
+  if (!p || !state) return null;
+
   const howTo = async (el: HTMLElement) => {
     // « Voir comment » : visite guidée de l'étape (§3.3), sinon l'article d'aide
     const data = (await loadTours()).find((x) => x.key === MODULE_TOUR.flouter);
@@ -169,103 +286,153 @@ export function OnboardingCard({
       }
     }
   };
-  const next = visible.find((s) => !state.steps[s]);
-  const half = Math.ceil(visible.length / 2);
+  /** §18.4 : extension pas encore publiée, « Bientôt » à la place de l'action. */
+  const soon = (s: Step) => s === 'extension' && !EXTENSION_URL;
+  const todo = p.visible.filter((s) => !state.steps[s]);
+  // La prochaine étape conseillée est la première qui a une action
+  const next = todo.find((s) => !soon(s)) ?? null;
+  const later = todo.filter((s) => s !== next);
+  const NextIcon = next ? ICONS[next] : null;
+  const nextAction = next ? action(next) : null;
 
-  if (complete)
-    return (
-      <section className="fd-card onb-card onb-card--done" aria-labelledby="onb-t">
-        <div className="onb-head">
-          <span className="fd-icon-chip" aria-hidden="true">
-            <PartyPopper />
-          </span>
-          <div className="onb-titles">
-            <h2 id="onb-t">{t('onb.ready')}</h2>
-            <p>{t('onb.readyBody')}</p>
-          </div>
-          <button type="button" className="fd-btn fd-btn--ghost fd-btn--sm" onClick={hide}>
-            {t('onb.hideShort')}
-          </button>
-        </div>
-      </section>
-    );
-
-  return (
-    <section className="fd-card onb-card" aria-labelledby="onb-t">
-      <div className="onb-head">
-        <span className="fd-icon-chip" aria-hidden="true">
-          <Sparkles />
-        </span>
-        <div className="onb-titles">
-          <h2 id="onb-t">{t('onb.title')}</h2>
-          <p>{t('onb.sub', { count: n, total: visible.length })}</p>
-        </div>
-        <div
-          className="onb-bar"
-          role="progressbar"
-          aria-label={t('onb.title')}
-          aria-valuemin={0}
-          aria-valuemax={visible.length}
-          aria-valuenow={n}
-          aria-valuetext={t('onb.valuetext', { count: n, total: visible.length })}
-        >
-          <span style={{ width: `${(n / visible.length) * 100}%` }} />
-        </div>
+  const content = (
+    <aside
+      ref={panel}
+      id="onb-panel"
+      className={`onb-panel${drawer ? ' onb-panel--drawer' : ''}`}
+      aria-labelledby="onb-t"
+      role={drawer ? 'dialog' : undefined}
+      aria-modal={drawer ? true : undefined}
+    >
+      <div className="onb-panel__head">
+        <h2 id="onb-t">{t('onb.panelTitle')}</h2>
         <button
           type="button"
-          className="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon"
-          aria-label={t(open ? 'onb.collapse' : 'onb.expand')}
-          aria-expanded={open}
-          aria-controls={open ? 'onb-list' : undefined}
-          onClick={toggle}
+          className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+          aria-label={t('onb.hide')}
+          onClick={onClose}
         >
-          {open ? <ChevronUp aria-hidden="true" /> : <ChevronDown aria-hidden="true" />}
+          <X aria-hidden="true" />
         </button>
       </div>
-      {open && (
+      <div
+        className="onb-bar"
+        role="progressbar"
+        aria-label={t('onb.title')}
+        aria-valuemin={0}
+        aria-valuemax={p.total}
+        aria-valuenow={p.n}
+        aria-valuetext={t('onb.valuetext', { count: p.n, total: p.total })}
+      >
+        <span style={{ width: `${(p.n / p.total) * 100}%` }} />
+      </div>
+      <p className="onb-panel__sub">{t('onb.sub', { count: p.n, total: p.total })}</p>
+
+      {p.complete && (
+        // Tout est fait : rouvert depuis l'aide, le panneau le dit et garde la liste des étapes
+        <div className="onb-next" data-gap-exempt="">
+          <span className="onb-tile" aria-hidden="true">
+            <PartyPopper />
+          </span>
+          <b>{t('onb.ready')}</b>
+          <span className="onb-next__h">{t('onb.readyBody')}</span>
+        </div>
+      )}
+      {next && NextIcon && nextAction && (
+        // §18.6 : carte de l'étape conseillée, écarts internes de 6 px (maquette onb-b)
+        <div className="onb-next" data-gap-exempt="">
+          <span className="onb-next__k">{t('onb.nextKicker')}</span>
+          <span className="onb-tile" aria-hidden="true">
+            <NextIcon />
+          </span>
+          <b>{t(`onb.s.${next}`)}</b>
+          <span className="onb-next__h">{t(`onb.h.${next}`)}</span>
+          <button
+            type="button"
+            className="fd-btn fd-btn--primary"
+            onClick={(e) => nextAction.go(e.currentTarget)}
+          >
+            {nextAction.play && <Play aria-hidden="true" />}
+            {nextAction.label}
+          </button>
+        </div>
+      )}
+
+      {later.length > 0 && (
         <>
-          <ol id="onb-list" className="onb-list" style={{ gridTemplateRows: `repeat(${half}, auto)` }}>
-            {visible.map((s) => {
-              const ok = state.steps[s];
+          <h3 className="onb-h3">
+            {t('onb.todo')} <span className="onb-n">{later.length}</span>
+          </h3>
+          {/* §18.6 : lignes à filets de 44 px, l'écart est porté par leur hauteur */}
+          <ul className="onb-rows" data-gap-exempt="">
+            {later.map((s) => {
+              const Icon = ICONS[s];
               const a = action(s);
-              const isNext = s === next;
               return (
-                <li key={s} className={ok ? 'done' : isNext ? 'next' : undefined}>
-                  {ok ? <CircleCheck aria-hidden="true" /> : <Circle aria-hidden="true" />}
-                  <span>
-                    <b>{t(`onb.s.${s}`)}</b>
-                    <small>{isNext ? t('onb.nextHint') : t(`onb.h.${s}`)}</small>
-                  </span>
-                  {ok ? (
-                    <span className="sr-only">{t('onb.done')}</span>
-                  ) : s === 'extension' && !EXTENSION_URL ? (
-                    // §18.4 : extension pas encore publiée : « Bientôt » en texte à la place de « Installer »
-                    <span className="onb-soon">{t('shell.soon')}</span>
+                <li key={s}>
+                  {soon(s) ? (
+                    <div className="onb-row">
+                      <span className="onb-tile onb-tile--sm" aria-hidden="true">
+                        <Icon />
+                      </span>
+                      <b>{t(`onb.s.${s}`)}</b>
+                      <span className="onb-soon">{t('shell.soon')}</span>
+                    </div>
                   ) : (
-                    <button
-                      type="button"
-                      className={`fd-btn fd-btn--sm${isNext ? ' fd-btn--primary' : ''}`}
-                      onClick={(e) => a.go(e.currentTarget)}
-                    >
-                      {a.play && <Play aria-hidden="true" />}
-                      {a.label}
+                    <button type="button" className="onb-row" onClick={(e) => a.go(e.currentTarget)}>
+                      <span className="onb-tile onb-tile--sm" aria-hidden="true">
+                        <Icon />
+                      </span>
+                      <b>{t(`onb.s.${s}`)}</b>
+                      <ChevronRight aria-hidden="true" />
                     </button>
                   )}
                 </li>
               );
             })}
-          </ol>
-          <div className="onb-foot">
-            <Info aria-hidden="true" />
-            <span className="onb-grow">{t(admin ? 'onb.footAdmin' : 'onb.footEditor')}</span>
-            <button type="button" className="fd-btn fd-btn--ghost fd-btn--sm" onClick={hide}>
-              <EyeOff aria-hidden="true" />
-              {t('onb.hide')}
-            </button>
-          </div>
+          </ul>
         </>
       )}
+
+      {p.n > 0 && (
+        <>
+          <button
+            type="button"
+            className="onb-done"
+            aria-expanded={showDone}
+            aria-controls={showDone ? 'onb-done-list' : undefined}
+            onClick={() => setShowDone((v) => !v)}
+          >
+            {showDone ? <ChevronDown aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
+            {t('onb.doneList')} <span className="onb-n">{p.n}</span>
+          </button>
+          {showDone && (
+            <ul id="onb-done-list" className="onb-rows onb-rows--done" data-gap-exempt="">
+              {p.done.map((s) => (
+                <li key={s}>
+                  <div className="onb-row">
+                    <CircleCheck aria-hidden="true" />
+                    <b>{t(`onb.s.${s}`)}</b>
+                    <span className="sr-only">{t('onb.done')}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+
+      <div className="onb-panel__foot">
+        <Info aria-hidden="true" />
+        <span>{t(admin ? 'onb.footShort' : 'onb.footEditor')}</span>
+      </div>
       {tour && <TourDialog tourId={tour.id} title={tour.title} onClose={() => setTour(null)} />}
-    </section>
+    </aside>
+  );
+  if (!drawer) return content;
+  return (
+    <div className="onb-sheet" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      {content}
+    </div>
   );
 }

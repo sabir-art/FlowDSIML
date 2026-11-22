@@ -3743,6 +3743,14 @@
     "bubblesLocked": "Sans captures, pas de bulles"
   },
   "onb": {
+    "panelTitle": "Prise en main",
+    "button": "Prise en main",
+    "buttonHint_one": "({{count}} étape sur {{total}})",
+    "buttonHint_other": "({{count}} étapes sur {{total}})",
+    "nextKicker": "Prochaine étape",
+    "todo": "À faire ensuite",
+    "doneList": "Terminées",
+    "footShort": "Visible par les propriétaires et administrateurs.",
     "title": "Prise en main de votre espace",
     "sub_one": "{{count}} étape sur {{total}}. Elles se cochent seules quand vous les faites.",
     "sub_other": "{{count}} étapes sur {{total}}. Elles se cochent seules quand vous les faites.",

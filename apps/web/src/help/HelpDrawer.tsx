@@ -52,20 +52,11 @@ export function HelpDrawer({
   const { current, can } = useWorkspace();
   const ws = current!;
   const navigate = useNavigate();
-  // L26-01 : « Reprendre la prise en main » quand la personne l'a masquée
-  const [resume, setResume] = useState(false);
-  useEffect(() => {
-    if (!can('demo.edit')) return;
-    void supabase
-      .from('onboarding_prefs')
-      .select('hidden_at')
-      .eq('workspace_id', ws.id)
-      .maybeSingle()
-      .then(({ data }) => setResume(!!data?.hidden_at));
-  }, [ws.id, can]);
+  // ONB-01 : « Reprendre la prise en main » reste dans l'aide pour qui peut modifier des démos, même
+  // quand le bouton du PageHeader a disparu (toutes les étapes faites)
+  const resume = can('demo.edit');
   const reopenOnboarding = async () => {
     await supabase.from('onboarding_prefs').delete().eq('workspace_id', ws.id);
-    setResume(false);
     window.dispatchEvent(new Event('fd:onboarding'));
     onClose();
     navigate('/');

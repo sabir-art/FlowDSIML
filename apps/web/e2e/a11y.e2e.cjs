@@ -224,6 +224,15 @@ const APP_PAGES = [
   { name: 'Inscription', route: '/#/signup', signedOut: true },
   { name: 'Mot de passe oublié', route: '/#/forgot-password', signedOut: true },
   { name: 'Démos', route: '/#/' },
+  // ONB-01 : panneau de prise en main ouvert (variante B), à droite du contenu
+  {
+    name: 'Démos · prise en main',
+    route: '/#/',
+    open: async (p) => {
+      await p.locator('#onb-toggle').click();
+      await p.locator('#onb-panel').waitFor();
+    },
+  },
   // L48-C : assistant de démarrage (profil, espace, usage, extension, première capture)
   { name: 'Onboarding · profil', route: '/#/onboarding' },
   ...['espace', 'usage', 'extension', 'première capture'].map((name, i) => ({

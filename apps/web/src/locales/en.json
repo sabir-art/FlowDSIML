@@ -3743,6 +3743,14 @@
     "bubblesLocked": "No screenshots, no bubbles"
   },
   "onb": {
+    "panelTitle": "Getting started",
+    "button": "Getting started",
+    "buttonHint_one": "({{count}} step of {{total}})",
+    "buttonHint_other": "({{count}} steps of {{total}})",
+    "nextKicker": "Next step",
+    "todo": "Up next",
+    "doneList": "Done",
+    "footShort": "Visible to owners and admins.",
     "title": "Getting started with your workspace",
     "sub_one": "{{count}} of {{total}} steps. They check themselves as you do them.",
     "sub_other": "{{count}} of {{total}} steps. They check themselves as you do them.",
