@@ -588,3 +588,54 @@
 .stg-table td > b {
   font-weight: 600;
 }
+
+/* Utilisation : jauge de 8 px, valeur dessous en 13 px ; états à partir de 80 % */
+.stg-meter {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #eef0f3;
+}
+[data-theme='dark'] .stg-meter {
+  background: #252b33;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .stg-meter {
+    background: #252b33;
+  }
+}
+.stg-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--fd-color-primary);
+}
+.us-row--full .stg-meter > span {
+  background: var(--fd-color-danger);
+}
+.us-val {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.us-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: var(--fd-color-warning);
+}
+.us-state--full {
+  color: var(--fd-color-danger);
+}
+.us-blocked {
+  margin: 0;
+}
+.us-ask {
+  color: var(--fd-color-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}

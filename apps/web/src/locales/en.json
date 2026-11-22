@@ -5249,7 +5249,8 @@
       "storage": "Storage",
       "members": "Members",
       "published": "Published demos",
-      "retention": "Statistics retention"
+      "retention": "Statistics retention",
+      "emails": "Emails sent today"
     },
     "blocked": {
       "ai": "AI assistance requests are blocked until the reset.",
@@ -5259,7 +5260,9 @@
       "tts": "Text-to-speech is blocked until the reset.",
       "stt": "Automatic captions are blocked until the reset."
     },
-    "setSupport": "Set the support link"
+    "setSupport": "Set the support link",
+    "title": "Usage",
+    "ratio": "{{used}} of {{limit}}"
   },
   "extension": {
     "installTitle": "Install the extension",

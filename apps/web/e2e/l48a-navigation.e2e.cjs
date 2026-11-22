@@ -219,11 +219,11 @@ const MB = 1024 * 1024;
         .trim() === 'Espace Utilisation',
       'fil d’Ariane « Espace › Utilisation »',
     );
-    ok((await page.locator('.us-row').count()) === 7, 'sept lignes de quota');
+    ok((await page.locator('.us-row:not(.us-emails)').count()) === 7, 'sept lignes de quota');
     // L48-03 : voix de synthèse et sous-titres, deux lignes distinctes (minutes)
     ok(
       (await page.locator('.us-row', { hasText: 'Voix de synthèse' }).getByRole('meter').count()) === 1 &&
-        /0 \/ 5 min/.test(await page.locator('.us-row', { hasText: 'Sous-titres' }).innerText()),
+        /0 sur 5 min/.test(await page.locator('.us-row', { hasText: 'Sous-titres' }).innerText()),
       'voix de synthèse et sous-titres : deux jauges en minutes',
     );
     // NAV-02 §11.7.2 : actif = fond nav-active, texte text en 600, aria-current, ni ombre ni bordure ;

@@ -170,10 +170,11 @@ async function invite(page, emails) {
     const line = page.locator('.us-emails');
     await line.waitFor();
     ok(
-      (await line.innerText()) === 'E-mails envoyés aujourd’hui : 150 sur 150' &&
-        (await line.evaluate((el) => getComputedStyle(el).fontSize)) === '14px' &&
-        (await line.locator('[role=meter]').count()) === 0,
-      'Utilisation : « 150 sur 150 », 14 px, sans jauge',
+      // Lot 1 (maquette Utilisation) : une rangée comme les autres quotas, avec sa jauge
+      (await line.locator('.stg-lab').innerText()) === 'E-mails envoyés aujourd’hui' &&
+        (await line.locator('.us-val').innerText()).trim() === '150 sur 150' &&
+        (await line.getByRole('meter').getAttribute('aria-valuenow')) === '100',
+      'Utilisation : rangée « E-mails envoyés aujourd’hui », « 150 sur 150 », jauge à 100 %',
     );
     await page.close();
   }
