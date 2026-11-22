@@ -24,7 +24,17 @@ const PAGES = [
 ];
 
 /** Pages déjà refaites selon le gabarit du §11 (une entrée par page livrée du lot 1). */
-const REFAITES = ['workspace', 'profile', 'members', 'variables', 'usage', 'privacy', 'security', 'brand'];
+const REFAITES = [
+  'workspace',
+  'profile',
+  'members',
+  'variables',
+  'usage',
+  'privacy',
+  'security',
+  'brand',
+  'brand/page',
+];
 
 const ok = (c, l) => {
   console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
@@ -53,8 +63,13 @@ const ok = (c, l) => {
           /^(SECTION|DIV)$/.test(only.tagName)
             ? only
             : body;
+        // Le bandeau d'information de tête (« stg-banner », note de lecture seule) est à 24 px de la
+        // première section (maquettes du lot 1) : il n'entre pas dans la mesure entre sections
         const k = [...box.children].filter(
-          (c) => c.tagName !== 'DIALOG' && c.getBoundingClientRect().height > 0,
+          (c) =>
+            c.tagName !== 'DIALOG' &&
+            c.getAttribute('role') !== 'note' &&
+            c.getBoundingClientRect().height > 0,
         );
         return k
           .slice(1)

@@ -697,54 +697,66 @@ function StylesSection({ wsId, isAdmin, canCreate }: { wsId: string; isAdmin: bo
   );
 }
 
-/** L48-A §4 : Paramètres > Marque > Page publique (PRM-07) : boutons et mention du produit, « Bientôt ». */
+/**
+ * L48-A §4, lot 1 de la refonte (maquette lot1-parametres/page-publique) : Paramètres › Page publique.
+ * Réglages visibles mais pas encore actifs : bandeau d'information, champs et interrupteur désactivés.
+ */
 export function BrandPublicPage() {
   const { t } = useTranslation();
+  const soon = <span className="stg-soon">{t('shell.soon')}</span>;
+  const cta = (n: 1 | 2) => (
+    <div className="stg-row">
+      <div className="stg-text" data-gap-exempt="">
+        <label className="stg-lab" htmlFor={`br-c${n}`}>
+          {t(`brand.cta${n}`)} {soon}
+        </label>
+        {n === 2 && <div className="stg-help">{t('brand.optional')}</div>}
+      </div>
+      <div className="stg-ctl">
+        <div className="stg-two">
+          <input id={`br-c${n}`} className="fd-input" disabled placeholder={t('brand.ctaLabel')} />
+          <input className="fd-input" disabled placeholder="https://…" aria-label={t(`brand.cta${n}Url`)} />
+        </div>
+      </div>
+    </div>
+  );
   return (
-    <SettingsShell>
-      <section className="card br-card" aria-labelledby="br-pp-t">
-        <div className="card-head">
+    <SettingsShell
+      legacy={false}
+      actions={
+        <>
+          <Button disabled>{t('common.cancel')}</Button>
+          <Button variant="primary" disabled>
+            {t('common.save')}
+          </Button>
+        </>
+      }
+    >
+      <p className="stg-banner" role="note">
+        <Info size={16} aria-hidden="true" />
+        <span>{t('brand.pageSoon')}</span>
+      </p>
+      <section className="stg-sec" aria-labelledby="br-pp-t">
+        <div className="stg-sec__head">
           <div>
-            <h2 className="t-h3" id="br-pp-t">
-              {t('brand.pageTitle')} <span className="soon-text">{t('shell.soon')}</span>
-            </h2>
-            <p className="t-caption muted">{t('brand.pageHelp')}</p>
+            <h2 id="br-pp-t">{t('brand.pageHead')}</h2>
+            <p>{t('brand.pageHelp')}</p>
           </div>
         </div>
-        <div className="field">
-          <label htmlFor="br-c1">{t('brand.cta1')}</label>
-          <div className="st-pair">
-            <input id="br-c1" className="input" disabled placeholder={t('brand.ctaLabel')} />
-            <input
-              className="input t-mono"
-              disabled
-              placeholder="https://…"
-              aria-label={t('brand.cta1Url')}
-            />
+        {cta(1)}
+        {cta(2)}
+        <div className="stg-row stg-row--inline">
+          <div className="stg-text" data-gap-exempt="">
+            <div className="stg-lab" id="br-wm">
+              {t('brand.hideBranding', { app: APP_NAME })} {soon}
+            </div>
           </div>
-        </div>
-        <div className="field">
-          <label htmlFor="br-c2">
-            {t('brand.cta2')} <span className="opt">{t('plans.optional')}</span>
-          </label>
-          <div className="st-pair">
-            <input id="br-c2" className="input" disabled placeholder={t('brand.ctaLabel')} />
-            <input
-              className="input t-mono"
-              disabled
-              placeholder="https://…"
-              aria-label={t('brand.cta2Url')}
-            />
+          <div className="stg-ctl">
+            <label className="fd-switch">
+              <input type="checkbox" role="switch" disabled aria-labelledby="br-wm" />
+              <span className="fd-switch__track" aria-hidden="true" />
+            </label>
           </div>
-        </div>
-        <div className="setting st-pf-notif">
-          <div>
-            <b id="br-wm">{t('brand.hideBranding', { app: APP_NAME })}</b>
-          </div>
-          <span className="switch">
-            <input type="checkbox" disabled aria-labelledby="br-wm" />
-            <span />
-          </span>
         </div>
       </section>
     </SettingsShell>

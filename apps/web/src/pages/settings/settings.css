@@ -785,3 +785,19 @@ fieldset.stg-row {
 .sr-c-warn {
   color: var(--fd-color-warning);
 }
+
+/* Bandeau d'information en tête de page (réglages « Bientôt ») */
+.stg-banner {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 24px;
+  padding: 12px 16px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+  font-size: 13px;
+}
+.stg-banner > svg {
+  flex: none;
+}
