@@ -1867,7 +1867,10 @@
       "duplicated": "Étape dupliquée en position {{n}}",
       "deleted": "Étape {{n}} supprimée",
       "deletedToast": "Étape supprimée"
-    }
+    },
+    "hideSteps": "Masquer les étapes",
+    "showSteps": "Afficher les étapes",
+    "stepPill": "Étape {{n}} : {{title}}"
   },
   "status": {
     "draft": "Brouillon",

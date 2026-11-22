@@ -258,6 +258,23 @@ export function EditorPage() {
   const readOnly = !can('demo.edit');
   const narrow = useNarrow(1024);
   const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);
+  /** Lot 3 : colonne Étapes repliée en rail de 48 px ; le choix est gardé sur ce navigateur. */
+  const [stepsCollapsed, setStepsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('fd.editor.steps') === '0';
+    } catch {
+      return false;
+    }
+  });
+  const toggleSteps = () =>
+    setStepsCollapsed((c) => {
+      try {
+        localStorage.setItem('fd.editor.steps', c ? '1' : '0');
+      } catch {
+        /* préférence non gardée */
+      }
+      return !c;
+    });
   /** P1-1 : « Lire depuis ici » : étape de départ de l'aperçu. */
   const [previewStart, setPreviewStart] = useState<number | undefined>(undefined);
   // L12 : rechercher-remplacer (pastilles du rail) et modale des raccourcis
@@ -1022,8 +1039,10 @@ export function EditorPage() {
         </div>
       )}
       <div className="ed-body">
-        <nav className="rail" aria-label={t('editor.steps')}>
+        <nav className={`rail${stepsCollapsed ? ' rail--collapsed' : ''}`} aria-label={t('editor.steps')}>
           <StepList
+            collapsed={stepsCollapsed}
+            onToggle={toggleSteps}
             editor={editor}
             current={index}
             onSelect={(i) => {

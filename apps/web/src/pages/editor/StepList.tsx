@@ -47,6 +47,7 @@ import { Fragment, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
+import { PanneauIcon } from '../../components/PanneauIcon';
 import { copyStepToClipboard, readStepClipboard, useStepClipboard, type StepClip } from './stepClipboard';
 
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -65,7 +66,12 @@ export function StepList({
   presenceNames = {},
   onPlayFrom,
   onEdit,
+  collapsed = false,
+  onToggle,
 }: {
+  /** Lot 3 : colonne repliée en rail de 48 px (pastilles numérotées, « Ajouter une étape » en icône). */
+  collapsed?: boolean;
+  onToggle?: () => void;
   /** P1-1 : « Lire depuis ici » ouvre l'aperçu à cette étape. */
   onPlayFrom?: (i: number) => void;
   /** P1-1 : « Modifier » choisit l'étape et ouvre le panneau Étape. */
@@ -372,18 +378,62 @@ export function StepList({
     <>
       {/* Lot 3 : en-tête (nom et nombre), puis « Ajouter une étape » en bouton pleine largeur */}
       <div className="rail-head">
-        <b className="t-label">
-          {t('editor.steps')} <span className="subtle">{editor.steps.length}</span>
-        </b>
+        {!collapsed && (
+          <b className="t-label">
+            {t('editor.steps')} <span className="subtle">{editor.steps.length}</span>
+          </b>
+        )}
+        {onToggle && (
+          <button
+            type="button"
+            className="rail-toggle"
+            aria-label={t(collapsed ? 'editor.showSteps' : 'editor.hideSteps')}
+            title={t(collapsed ? 'editor.showSteps' : 'editor.hideSteps')}
+            aria-expanded={!collapsed}
+            onClick={onToggle}
+          >
+            <PanneauIcon />
+          </button>
+        )}
       </div>
+      {collapsed && (
+        <>
+          {/* Rail : une pastille par étape (son numéro, son titre en infobulle), l'étape choisie en prune */}
+          <ol className="rail-pills" aria-label={t('editor.steps')}>
+            {editor.steps.map((s, i) => (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  className="rail-pill"
+                  aria-current={i === current && !selectedFormId ? 'step' : undefined}
+                  aria-label={t('editor.stepPill', { n: i + 1, title: s.title || t('editor.untitled') })}
+                  data-tip={s.title || t('editor.untitled')}
+                  data-tip-side="right"
+                  onClick={() => onSelect(i)}
+                >
+                  {i + 1}
+                </button>
+              </li>
+            ))}
+          </ol>
+          {!readOnly && (
+            <div className="rail-pills__add">
+              <Menu label={t('editor.addStep')} align="start" icon={<Plus />} items={addItems} />
+            </div>
+          )}
+        </>
+      )}
       {!readOnly && (
         <div className="rail-foot">
-          <Menu
-            label={t('editor.addStep')}
-            align="start"
-            trigger={{ icon: <Plus />, text: t('editor.addStep'), block: true }}
-            items={addItems}
-          />
+          {/* Replié : le bouton est en icône dans le rail ; le champ fichier reste ici */}
+          {!collapsed && (
+            <Menu
+              label={t('editor.addStep')}
+              align="start"
+              trigger={{ icon: <Plus />, text: t('editor.addStep'), block: true }}
+              items={addItems}
+            />
+          )}
           <input
             ref={file}
             type="file"

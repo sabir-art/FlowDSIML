@@ -174,6 +174,36 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   );
   await page.keyboard.press('Escape');
 
+  // ===== Colonne repliée : rail de 48 px, pastilles numérotées =====
+  const total = await cards.count();
+  await page.getByRole('button', { name: 'Masquer les étapes' }).click();
+  const show = page.getByRole('button', { name: 'Afficher les étapes' });
+  await show.waitFor();
+  ok(
+    Math.round((await page.locator('.rail').boundingBox()).width) === 48 &&
+      (await page.locator('.rail-pill').count()) === total,
+    `colonne repliée : rail de 48 px, ${total} pastilles`,
+  );
+  ok(
+    (await show.getAttribute('aria-expanded')) === 'false' &&
+      (await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))) ===
+        'Afficher les étapes',
+    'bascule : aria-expanded à jour, focus gardé',
+  );
+  await page.locator('.rail-pill').nth(1).click();
+  ok(
+    (await page.locator('.rail-pill[aria-current="step"]').innerText()).trim() === '2' &&
+      /^Étape 2 : /.test(await page.locator('.rail-pill').nth(1).getAttribute('aria-label')),
+    'pastille : choisit l’étape, nom accessible avec le titre',
+  );
+  ok(
+    (await page.getByRole('button', { name: 'Ajouter une étape' }).count()) === 1,
+    '« Ajouter une étape » en bouton d’icône dans le rail',
+  );
+  await show.click();
+  await cards.first().waitFor();
+  ok((await cards.count()) === total, 'colonne dépliée : les cartes reviennent');
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' / ')}` : ''}`);
   await b.close();
 })().catch((e) => {

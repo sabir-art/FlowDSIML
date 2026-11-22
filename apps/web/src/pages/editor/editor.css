@@ -3974,3 +3974,94 @@
 .mk .step:focus-visible .n {
   visibility: hidden;
 }
+
+/* ---- Lot 3 : bascule de la colonne Étapes et rail de 48 px (pastilles numérotées de 32 px) ---- */
+.mk .rail-toggle {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.mk .rail-toggle:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.mk .rail-toggle:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.mk .ed-body > .rail.rail--collapsed {
+  flex-basis: 48px;
+  width: 48px;
+}
+.mk .rail--collapsed .rail-head {
+  justify-content: center;
+  padding: 0 8px;
+}
+/* Le champ fichier de « Ajouter une étape » reste dans la page (masqué) ; son bouton est dans le rail */
+.mk .rail--collapsed :is(.rail-list, .rail-quiz),
+.mk .rail--collapsed .rail-foot > :not(input) {
+  display: none;
+}
+.mk .rail--collapsed .rail-foot {
+  padding: 0;
+}
+.mk .rail-pills {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  justify-items: center;
+  gap: 6px;
+  min-height: 0;
+  margin: 0;
+  padding: 4px 8px 12px;
+  overflow-y: auto;
+  list-style: none;
+}
+.mk .rail-pill {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  font: 500 12px var(--fd-font-sans);
+  cursor: pointer;
+}
+.mk .rail-pill:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+/* Étape choisie : pastille prune */
+.mk .rail-pill[aria-current='step'] {
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary);
+  font-weight: 600;
+}
+.mk .rail-pill:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.mk .rail-pills__add {
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: 12px 8px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .rail-pills__add .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
