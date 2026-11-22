@@ -12,6 +12,17 @@
 <li>Modale « Depuis une autre démo » : 720 px, liste des démos à gauche (lecture seule grisée), vignettes à cocher, pied avec le compte et les actions.</li>
 <li>Mobile : barre avec retour, titre et Partager ; bandeau « L'éditeur s'utilise sur ordinateur », Voir la démo, étapes avec leurs commentaires.</li>
 </ul>
+<h2>Recette du 22/11 : rail d’outils et panneau de 320 px (dev-mvp 13c1904)</h2>
+<ul>
+<li><b>Conformes</b>, en clair et en sombre : rail de 48 px, outils de 36 px groupés avec leurs filets, Réglages en bas ; panneau de 320 px, en-tête « Étape » avec sa croix, sections Étape 1, Accessibilité, Animation et Organisation. Les aides de l’app plus longues que la maquette sont gardées : ce sont les textes réels.</li>
+<li><b>P1</b> : « Variable » porte l’icône <code>Braces</code> (accolades), comme Variables dans la navigation (ICON-01), et non <code>Plus</code>.</li>
+<li><b>P2</b> : le texte alternatif est un champ multiligne qui grandit avec son contenu (FIELD-01), sans poignée de redimensionnement native (<code>resize: none</code>).</li>
+<li><b>P3</b> : les aides des champs sont en 13 px <code>text-muted</code> (app : 12 px).</li>
+<li><b>P4</b> : le segmenté Animation prend toute la largeur du panneau (287 px, segments égaux), comme ALIGN-01 (app : 235 px).</li>
+<li><b>P5</b> : Chapitre et Formulaire de lead sont des Select de 40 px en 14 px (FIELD-01) ; l’app les fait en 32 px et 13 px.</li>
+<li><b>P6</b> : « Supprimer l’étape » est en pied fixe du panneau, toujours visible (y 852 à 1440 × 900), au-dessus d’un filet. Aujourd’hui il est en bas du contenu qui défile (y 1326).</li>
+<li><b>P7</b> : dans le rail, « Assistant » à y 490 (app : 503). L’écart entre deux groupes d’outils est le même partout : un filet avec 8 px de chaque côté.</li>
+</ul>
 <h2>Recette du 22/11 : colonne Étapes, menu ⋯ et rail (dev-mvp 45d745f)</h2>
 <ul>
 <li><b>Conformes</b>, en clair et en sombre. Au survol, au focus et sur l’étape choisie : « Lire depuis ici » et ⋯ (28 px), la poignée <code>GripVertical</code> à la place du numéro, la carte reste à 64 px. Menu ⋯ de 240 px (aussi au clic droit) avec Modifier, Copier, Coller après, Couper, Dupliquer, Monter, Descendre, Masquer l’étape · Bientôt, puis Supprimer en danger, chaque entrée avec son raccourci. Rail replié de 48 px : pastilles de 32 px, l’étape choisie en prune, nom accessible « Étape n : titre ». Quiz en <code>ListChecks</code>.</li>
