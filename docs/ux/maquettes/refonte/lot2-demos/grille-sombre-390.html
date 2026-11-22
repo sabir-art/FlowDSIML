@@ -184,6 +184,17 @@ td.act, th.act { width: 48px; text-align: right; }
 .wlog td:nth-child(2) { white-space: nowrap; }
 .mob .wbanner .btn { margin-left: 32px; } .mob .wbanner div { flex-basis: calc(100% - 32px); }
 .mob .addd .inp { flex: none; }
+/* NAV-04 (22/11) : logo et bouton de repli sur une ligne, filet dessous, puis le sélecteur d'espace */
+.side .sbh { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--fd-color-border); }
+.side .sbh .logo { width: 184px; margin: 0; } .side .sbh .pin { margin: 0; flex: none; }
+.snav:not(.fold) { padding-top: 16px; }
+/* ALIGN-01 (22/11) : un seul bord droit par ligne de réglage, celui du filet */
+.ctl, .ctl.wide { max-width: none; }
+.ctl .inp, .ctl .inp.short, .ctl .two, .ctl .meter, .ctl .lr, .ctl .colr { width: 100%; max-width: none; }
+.ctl .colr { display: flex; gap: 8px; } .ctl .colr .inp { flex: 1; }
+.ctl > .seg { display: flex; width: 100%; margin: 0; } .ctl > .seg button { flex: 1; justify-content: center; }
+body:not(.mob) .ctl > .btn, body:not(.mob) .ctl > .val { align-self: flex-end; } .ctl > .val { text-align: right; }
+body:not(.mob) .ctl > .lr { justify-content: flex-end; }
 /* Lot 2 : Démos et Dossiers */
 .wrap.wide { max-width: 1200px; }
 .ph .pt { padding: 0; font: 600 16px var(--fd-font-sans); }

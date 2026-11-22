@@ -184,6 +184,20 @@ td.act, th.act { width: 48px; text-align: right; }
 .wlog td:nth-child(2) { white-space: nowrap; }
 .mob .wbanner .btn { margin-left: 32px; } .mob .wbanner div { flex-basis: calc(100% - 32px); }
 .mob .addd .inp { flex: none; }
+/* NAV-04 (22/11) : logo et bouton de repli sur une ligne, filet dessous, puis le sélecteur d'espace */
+.side .sbh { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--fd-color-border); }
+.side .sbh .logo { width: 184px; margin: 0; } .side .sbh .pin { margin: 0; flex: none; }
+.snav:not(.fold) { padding-top: 16px; }
+/* ALIGN-01 (22/11) : un seul bord droit par ligne de réglage, celui du filet */
+.ctl, .ctl.wide { max-width: none; }
+.ctl .inp, .ctl .inp.short, .ctl .two, .ctl .meter, .ctl .lr, .ctl .colr { width: 100%; max-width: none; }
+.ctl .colr { display: flex; gap: 8px; } .ctl .colr .inp { flex: 1; }
+.ctl > .seg { display: flex; width: 100%; margin: 0; } .ctl > .seg button { flex: 1; justify-content: center; }
+body:not(.mob) .ctl > .btn, body:not(.mob) .ctl > .val { align-self: flex-end; } .ctl > .val { text-align: right; }
+body:not(.mob) .ctl > .lr { justify-content: flex-end; }
+.ctl .doms { max-width: none; }
+body:not(.mob) .ctl .doms { width: calc(100% - 28px); box-sizing: border-box; }
+.ctl .doms { grid-template-columns: minmax(0, 1fr); } .ctl .doms > * { min-width: 0; }
 </style></head><body class="mob">
 <div class="mbar"><button class="ib" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu" aria-hidden="true"><path d="M4 5h16"></path><path d="M4 12h16"></path><path d="M4 19h16"></path></svg></button><img src="../../../brand-tutoclic/production/symbole-tutoclick.svg" alt="TutoClick" width="32" height="32"><span class="grow"></span><button class="ib" aria-label="Aide"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-question-mark" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></button><button class="ib" aria-label="Notifications, aucune non lue"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg></button></div>
 <div class="shell">

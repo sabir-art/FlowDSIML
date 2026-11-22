@@ -267,7 +267,7 @@ Tous ces composants vivent dans `packages/ui`.
 - **À gauche**, dans cet ordre : un `BackButton` s'il y en a un (§12.3), puis le `Breadcrumb` (§12.2), ou le titre de la page quand il n'y a pas de parent.
 - **À droite** : les actions de la page (32 à 40 px), avec un gap de 8 px. Un bouton primaire au plus.
 - **Outils globaux, tout à droite** (décision UX du 21/11, question du dev sur le lot 1) : un filet vertical de 1 × 20 px `border`, puis **Aide** (`CircleQuestionMark`) et **Notifications** (`Bell`, avec la pastille de non-lus), en boutons icône ghost de **32 px** et icônes de 16 px. Noms accessibles : « Aide » et « Notifications, n non lues ». Ils sont dans **chaque** PageHeader de l'app (pas dans l'éditeur, qui garde sa barre propre, ni dans le lecteur). Sous 768 px, ils passent dans la barre mobile du haut, à droite, en cibles de 44 px et icônes de 20 px. Ils ne vont pas dans la barre latérale : « Centre d'aide » y reste l'entrée vers la documentation, l'icône Aide ouvre le tiroir d'aide de la page courante.
-- **Barre latérale, bouton d'épinglage** : inchangé (§6 de `retours-client-21-11.md`), en haut de la barre, au-dessus du logo, à 16 px des bords. Il manquait dans les maquettes des lots 1, 2, 5 et 6 : elles sont corrigées.
+- **Barre latérale, bouton de repli** : remplacé par NAV-04 (§14, retour client du 22/11). Il n'est plus au-dessus du logo, mais sur la même ligne que lui, à droite.
 - **Le titre n'apparaît qu'une fois.** Le dernier élément du fil d'Ariane, ou le titre de la barre, est le `<h1>` de la page, en 14 px 500. **Plus jamais de grand H1** sous un fil d'Ariane qui dit la même chose.
 - **Pages sans parent**, comme Démos, Analytics, Apprenants ou Sandbox (premières pages de navigation) :
   - le PageHeader porte le titre en 14 px 600, et les actions de la page ;
@@ -376,3 +376,38 @@ Chaque écran a sa maquette, dans le nouveau système (NAV-02, COMP-01, FIELD-01
 6. Apprenants et Parcours
 7. Pages d'authentification et pages légales
 8. Lecteur
+
+
+## 13. ALIGN-01 : un seul bord droit par ligne de réglage (retour client du 22/11)
+
+Le client veut que tout commence et finisse au même endroit, bien calé. Sur la page Profil en ligne, les champs, les listes, les segmentés, les interrupteurs et les boutons s'arrêtaient chacun à un endroit différent.
+
+### 13.1 Règle
+
+- Une ligne de réglage (libellé et aide à gauche, contrôle à droite) a **un seul bord droit : celui de son filet**. La colonne de contrôle commence à une abscisse unique (40 % de la ligne + 24 px, comme aujourd'hui) et **finit exactement à la fin du filet**. Aucun `max-width` sur la colonne.
+- **Prennent toute la colonne** : champs texte, listes (Select, y compris les courtes : Langue, Durée, Fuseau), champ couleur (pastille + hexadécimal), jauges, segmentés (segments de largeur égale), zones de dépôt, groupe « champ + bouton » (adresse avec copie, ajout de domaine), blocs de code.
+- **Se calent à droite, sur la fin du filet** : interrupteur, bouton d'action seul (« Mettre à jour le mot de passe », « Télécharger (.zip) », « Renouveler »), valeur texte non modifiable (« 12 mois », « 365 jours »), état avec son bouton (« Actif » + « Désactiver »), groupe avatar + bouton (photo, logo).
+- **Deux champs côte à côte** (nouveau mot de passe et confirmation) : 50/50 de la colonne, 12 px d'écart, le second finit sur le filet.
+- **Listes de choix** (radios, cases, pastilles d'événements, puces de domaines) : elles commencent au début de la colonne, ce sont des contenus ; leurs groupes d'ajout finissent sur le filet.
+- **En-tête de section** : ses boutons (« Demander plus à la DSI », « Nouveau style ») finissent sur la fin du filet de la section.
+- **Zone de danger** : le cadre va du début à la fin du filet ; son bouton finit à 16 px de son bord droit.
+- Sous 768 px : la colonne passe sous le libellé et prend toute la largeur ; interrupteurs et valeurs restent à droite, sur la même ligne que le libellé.
+
+### 13.2 Contrôle automatique
+
+Ajouter à l'e2e d'espacements (§18.6) : pour chaque ligne de réglage des 14 pages des Paramètres et du détail d'un webhook, à 1440 et à 1024 px, **le bord droit du dernier contrôle est égal au bord droit du filet, à ±1 px**. Seules les listes de choix (radios, cases, pastilles) sont exemptées. Même contrôle pour les boutons d'en-tête de section.
+
+### 13.3 Maquettes
+
+Lots 1, 2, 5 et 6 refaits avec cette règle (captures du 22/11). Exemple : `lot1-parametres/profil-clair-1440`.
+
+## 14. NAV-04 : en-tête de la barre latérale (retour client du 22/11)
+
+Le bouton de repli, seul au-dessus du logo, créait un grand vide en tête de la barre et de la colonne des Paramètres.
+
+- **Une ligne en tête** : le logo complet à gauche (avec « Porté par la DSIML », 184 px de large dans une barre de 256 px), le bouton de repli à droite (32 px, icône panneau, 20 px trait 2,1, `aria-label="Replier la barre latérale"`, `aria-expanded="true"`), centrés verticalement. Marges de la barre : 16 px.
+- **Un filet dessous** (1 px `border`, 16 px au-dessus et 16 px au-dessous), comme celui au-dessus du bloc profil, puis le sélecteur d'espace.
+- **Colonne secondaire** (Paramètres) : elle commence en haut, avec 16 px de marge. « ESPACE » est à la même hauteur que le haut du logo, sans vide en tête. La colonne Dossiers garde son en-tête (« Dossiers », bascule) en haut, elle aussi.
+- **Barre repliée** (rail de 64 px) : seul le bouton de dépli en tête, centré (`aria-label="Déplier la barre latérale"`, `aria-expanded="false"`), le filet dessous, puis les icônes de navigation. Pas de logo dans le rail : il revient quand on déplie.
+- Sous 1 024 px : inchangé (barre mobile).
+- Mesures de la maquette (lot 1, 1440) : logo de 184 × 60 à x 16, y 16 ; bouton à x 208, y 30 ; sélecteur d'espace à y 111 ; « ESPACE » à y 16.
