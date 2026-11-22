@@ -103,7 +103,7 @@ export function EditorSkeleton({
           <Share2 aria-hidden="true" />
           {t('editor.share')}
         </button>
-        <span className="tc-cta-grad ed-publish">
+        <span className="ed-publish">
           <button type="button" className="btn btn-primary btn-sm" disabled>
             <Rocket aria-hidden="true" />
             {t('publish.publish')}
