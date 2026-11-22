@@ -203,12 +203,44 @@ export function StepList({
 
   return (
     <>
+      {/* Lot 3 : en-tête (nom et nombre), puis « Ajouter une étape » en bouton pleine largeur */}
       <div className="rail-head">
         <b className="t-label">
-          {t('editor.steps')} <span className="subtle">· {editor.steps.length}</span>
+          {t('editor.steps')} <span className="subtle">{editor.steps.length}</span>
         </b>
-        {!readOnly && <Menu label={t('editor.addStep')} align="start" icon={<Plus />} items={addItems} />}
       </div>
+      {!readOnly && (
+        <div className="rail-foot">
+          <Menu
+            label={t('editor.addStep')}
+            align="start"
+            trigger={{ icon: <Plus />, text: t('editor.addStep'), block: true }}
+            items={addItems}
+          />
+          <input
+            ref={file}
+            type="file"
+            /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+            id="steplist-file"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            /* Ouvert par l'entrée « Image » du menu « Ajouter une étape » : le champ porte son nom */
+            aria-label={t('editor.add.image')}
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              // REV-07 : avertissement à l'import (aucune détection automatique)
+              if (f)
+                void editor.addImageStep(current, f).then((r) => {
+                  onSelect(current + 1);
+                  if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
+                });
+              e.target.value = '';
+            }}
+          />
+        </div>
+      )}
       <span className="sr-only" aria-live="assertive">
         {announce}
       </span>
@@ -426,38 +458,6 @@ export function StepList({
                   })}
           </span>
         </Link>
-      )}
-      {!readOnly && (
-        <div className="rail-foot">
-          <Menu
-            label={t('editor.addStep')}
-            align="start"
-            trigger={{ icon: <Plus />, text: t('editor.addStep'), block: true }}
-            items={addItems}
-          />
-          <input
-            ref={file}
-            type="file"
-            /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
-            id="steplist-file"
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden="true"
-            /* Ouvert par l'entrée « Image » du menu « Ajouter une étape » : le champ porte son nom */
-            aria-label={t('editor.add.image')}
-            accept="image/png,image/jpeg,image/webp"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              // REV-07 : avertissement à l'import (aucune détection automatique)
-              if (f)
-                void editor.addImageStep(current, f).then((r) => {
-                  onSelect(current + 1);
-                  if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
-                });
-              e.target.value = '';
-            }}
-          />
-        </div>
       )}
     </>
   );

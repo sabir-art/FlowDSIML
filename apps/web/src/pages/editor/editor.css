@@ -3796,3 +3796,114 @@
 .mk .ed-bar .fd-back:hover {
   color: var(--fd-color-text);
 }
+
+/* ---- Lot 3 : colonne Étapes (264 px, fond de navigation). En-tête de 32 px, « Ajouter une étape »
+   en bouton pleine largeur, cartes d'étape, « Ajouter un quiz » en pied ---- */
+.mk.ed {
+  --fd-layout-editor-rail-width: 264px;
+}
+.mk .ed-body > .rail {
+  padding: 12px 0 0;
+  background: var(--fd-color-nav-bg);
+}
+.mk .rail-head {
+  height: 32px;
+  flex: none;
+  margin-bottom: 8px;
+  padding: 0 12px;
+}
+.mk .rail-head .t-label {
+  font: 600 14px var(--fd-font-sans);
+}
+.mk .rail-head .subtle {
+  margin-left: 2px;
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
+}
+.mk .rail-foot {
+  flex: none;
+  padding: 0 12px 8px;
+  border-top: 0;
+}
+.mk .rail-foot .menu-trigger {
+  height: 36px;
+  border-radius: 999px;
+}
+.mk .rail-list {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 4px 12px 12px;
+}
+/* Plus de pointillés entre les étapes : les cartes se suivent à 6 px */
+.mk .rail-li + .rail-li .step::before {
+  content: none;
+}
+.mk .step {
+  grid-template-columns: 16px 72px minmax(0, 1fr);
+  align-items: center;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+}
+.mk .step:hover {
+  background: var(--fd-color-nav-hover);
+}
+/* Étape choisie : fond du contenu, trait prune de 2 px (bordure et trait intérieur) */
+.mk .step[aria-current='step'] {
+  background: var(--fd-color-content-bg);
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.mk .step .n {
+  padding-top: 0;
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.mk .step .th {
+  width: 72px;
+  height: 46px;
+  aspect-ratio: auto;
+}
+.mk .step .meta {
+  display: grid;
+  gap: 2px;
+}
+.mk .step .meta b {
+  font-size: 13px;
+  line-height: 16px;
+}
+.mk .step .icons {
+  margin-top: 0;
+  color: var(--fd-color-text-muted);
+}
+.mk .step .icons svg {
+  width: 16px;
+  height: 16px;
+}
+/* « Ajouter un quiz » : bouton ghost pleine largeur de 36 px, séparé par un filet, en bas */
+.mk .rail-quiz {
+  flex: none;
+  justify-content: center;
+  height: 36px;
+  margin: 12px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: 600 14px var(--fd-font-sans);
+  position: relative;
+}
+.mk .rail-quiz::before {
+  content: '';
+  position: absolute;
+  top: -13px;
+  right: -12px;
+  left: -12px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .rail-quiz svg {
+  color: inherit;
+}
+.mk .rail-quiz:hover {
+  background: var(--fd-color-nav-hover);
+}
