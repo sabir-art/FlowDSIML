@@ -183,8 +183,11 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
 
   // L23-05 : détail, journal, panneau, rejeu
   await page.getByRole('link', { name: 'https://hooks.acme.example/tutoclick' }).click();
-  await page.waitForSelector('.wh-detail');
-  ok(/tcsec_•+/.test(await page.textContent('.l23 .secret code')), 'L23-05 : secret masqué');
+  await page.waitForSelector('.wh-log');
+  ok(
+    /^Secret masqué, se terminant par \S+$/.test((await page.textContent('.l23 .wh-secret-text')).trim()),
+    'L23-05 : secret masqué (seule la fin est dite)',
+  );
   ok((await page.getByRole('button', { name: /Afficher/ }).count()) === 0, 'L23-05 : pas de bouton Afficher');
   const rows = page.locator('.l23-log tbody tr');
   ok((await rows.count()) === 4, 'L23-05 : journal');
@@ -197,24 +200,25 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   );
   const panel = page.getByRole('complementary', { name: 'Envoi sélectionné' });
   ok(
-    /essai 6 sur 6/.test(await panel.textContent()) && /HTTP 503/.test(await panel.textContent()),
-    'L23-05 : panneau de l’envoi',
+    /HTTP 503 · essai 6 sur 6/.test(await deadRow.textContent()) &&
+      /HTTP 503/.test(await panel.textContent()),
+    'L23-05 : statut de la ligne et panneau de l’envoi',
   );
   ok((await rows.filter({ hasText: 'essai dans' }).count()) === 1, 'L23-05 : « essai dans n min »');
   await shot('05-detail');
   // L23-06 : test en échec
   state.dispatchResult = { status: 404, duration_ms: 210, error: 'HTTP 404' };
   await page.getByRole('button', { name: 'Envoyer un test' }).click();
-  const alert = page.locator('.l23 .alert-danger[role="alert"]');
+  const alert = page.locator('.l23 .wh-banner--danger[role="alert"]');
   await alert.waitFor();
   ok(
-    /Le test a échoué : HTTP 404 en 210 ms\. L’adresse ne répond pas/.test(
+    /Le test a échoué : HTTP 404 en 210 ms\.\s*L’adresse ne répond pas/.test(
       (await alert.textContent()).replace(/ /g, ' '),
     ),
     'L23-06 : bandeau avec code et conseil',
   );
   ok(
-    (await page.locator('.l23-log tbody tr').first().locator('.badge', { hasText: 'Test' }).count()) === 1,
+    /Test/.test(await page.locator('.l23-log tbody tr').first().locator('td').nth(1).textContent()),
     'L23-06 : ligne ping « Test » en tête',
   );
   ok(t.webhooks[0].failures === 0, 'L23-06 : le test ne compte pas dans les échecs');
@@ -250,7 +254,7 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
 
   // L23-07 : pause automatique
   await page.goto(`${BASE}/#/settings/integrations/wh-pause`);
-  const pauseBanner = page.locator('.l23 .alert-warning[role="status"]');
+  const pauseBanner = page.locator('.l23 .wh-banner--warn[role="status"]');
   await pauseBanner.waitFor();
   ok(
     /après 6 échecs consécutifs/.test(await pauseBanner.textContent()),
@@ -262,19 +266,20 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
     'L23-07 : test et désactiver masqués',
   );
   ok(
-    !/échec/.test(await page.locator('.l23-head p.muted').textContent()),
-    'L23-07 : en-tête sur une ligne (badge · créé le…), sans le nombre d’échecs',
+    !/échec/.test(await page.locator('.l23 .stg-sec__head p').first().textContent()),
+    'L23-07 : sous-titre « créé le… », sans le nombre d’échecs',
   );
   await page.locator('.l23-log tbody tr').first().click();
-  const attempt = page.locator('.l23 aside .l23-attempt');
   ok(
-    /^essai 6 sur 6$/.test((await attempt.textContent()).trim()),
-    'L23-07 : « Essai 6 sur 6 » sur sa ligne, sans « · »',
+    /essai 6 sur 6$/.test(
+      (await page.locator('.l23-log tbody tr').first().locator('.wh-st').textContent()).trim(),
+    ),
+    'L23-07 : « essai 6 sur 6 » dans le statut de la ligne',
   );
   ok((await page.locator('.toast').count()) === 0, 'L23-07 : aucun toast');
   await shot('07-pause');
   await page.getByRole('button', { name: 'Réactiver' }).click();
-  await page.waitForFunction(() => !document.querySelector('.l23 .alert-warning'));
+  await page.waitForFunction(() => !document.querySelector('.l23 .wh-banner--warn'));
   ok(t.webhooks.find((w) => w.id === 'wh-pause').state === 'active', 'L23-07 : Réactiver');
 
   // Accès : un éditeur ne voit ni l'onglet ni la page

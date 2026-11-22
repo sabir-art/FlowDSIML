@@ -444,3 +444,204 @@ a.int-row--link:focus-visible {
   color: var(--fd-color-text);
   word-break: break-all;
 }
+
+/* Lot 1 de la refonte : détail d'un webhook (maquettes webhook et webhook-pause) */
+.wh-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 14px 16px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+  font-size: 14px;
+}
+.wh-banner > svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--fd-color-warning);
+}
+.wh-banner--danger > svg {
+  color: var(--fd-color-danger);
+}
+.wh-banner > div {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+.wh-banner > div > span {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.wh-banner .fd-btn {
+  flex: none;
+  height: 36px;
+  min-height: 36px;
+}
+.wh-copy {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.wh-copy .fd-input {
+  flex: 1;
+  min-width: 0;
+}
+.wh-copy__btn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.wh-copy__btn:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.wh-copy__btn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.wh-chips .hc-chip {
+  padding-right: 10px;
+}
+/* État et statut : icône et texte, jamais la couleur seule */
+.wh-st {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 13px var(--fd-font-sans);
+  color: var(--fd-color-text);
+  white-space: nowrap;
+}
+.wh-st > svg {
+  flex: none;
+}
+.wh-st--ok > svg {
+  color: var(--fd-color-success);
+}
+.wh-st--ko > svg {
+  color: var(--fd-color-danger);
+}
+.wh-st--wait > svg {
+  color: var(--fd-color-warning);
+}
+.stg-row--inline .wh-state-ctl {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+.wh-secret-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.wh-mono {
+  font-family: var(--fd-font-mono);
+  font-size: 13px;
+}
+.wh-log {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 24px;
+  align-items: start;
+  padding-top: 16px;
+}
+.wh-log .stg-table td {
+  height: 48px;
+  font-size: 14px;
+}
+.wh-log .stg-table td {
+  white-space: nowrap;
+}
+/* Le statut peut passer sur deux lignes : le tableau tient toujours dans sa colonne */
+.wh-log .stg-table td:nth-child(3),
+.wh-log .stg-table td:nth-child(3) .wh-st {
+  white-space: normal;
+}
+.wh-log .stg-table {
+  min-width: 0;
+}
+.wh-log .stg-table :is(th, td) {
+  padding-inline: 8px;
+}
+.wh-log .wh-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.wh-log tbody tr {
+  cursor: pointer;
+}
+.wh-log tbody tr.tr-sel td {
+  background: var(--fd-color-tint);
+}
+.wh-log tbody tr:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.wh-log-empty {
+  margin: 0;
+  padding: 24px 12px;
+}
+.wh-det {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+}
+.wh-det__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.wh-det h3 {
+  margin: 8px 0 0;
+  font: 600 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.wh-code {
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text);
+  font: 12px / 1.5 var(--fd-font-mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.wh-code:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+@media (max-width: 1100px) {
+  .wh-log {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 767px) {
+  .stg-row--inline .wh-state-ctl {
+    justify-content: flex-start;
+  }
+  .wh-banner > div {
+    flex-basis: calc(100% - 32px);
+  }
+  .wh-banner .fd-btn {
+    margin-left: 30px;
+  }
+}
