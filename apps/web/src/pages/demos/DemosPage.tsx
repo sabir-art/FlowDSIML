@@ -855,7 +855,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
       )}
       <div className="demos-main">
         {pageHead(false)}
-        <div className="stack page-wide demos-wrap">
+        <div className={`stack page-wide demos-wrap${scopeName ? ' demos-wrap--scoped' : ''}`}>
           <Suspense fallback={null}>
             {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
             {distributing && <DistributeDialog demoId={distributing} onClose={() => setDistributing(null)} />}

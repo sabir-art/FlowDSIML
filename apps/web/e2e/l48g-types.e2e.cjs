@@ -185,7 +185,9 @@ function data() {
   // ===== Page Sandbox =====
   await nav.getByRole('link', { name: 'Sandbox' }).click();
   await p.getByRole('heading', { level: 1, name: 'Sandbox' }).waitFor();
-  await p.locator('.demo-card').first().waitFor();
+  // La liste de la page Démos peut rester affichée un instant : on attend celle de la page Sandbox
+  await card('Portail à explorer').waitFor();
+  await p.waitForFunction(() => document.querySelectorAll('.demo-card').length === 1);
   ok(
     JSON.stringify(await titles()) === JSON.stringify(['Portail à explorer']),
     'Sandbox : seulement les Sandbox',

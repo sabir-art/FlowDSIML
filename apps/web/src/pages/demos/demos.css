@@ -1036,8 +1036,7 @@ button.nd-src:focus-visible {
   color: var(--fd-color-text-muted);
 }
 .onb-foot > .fd-btn {
-  margin-right: 12px;
-  padding: 0 8px;
+  padding: 0 12px;
   color: var(--fd-color-text);
 }
 .onb-grow {
@@ -1128,6 +1127,10 @@ button.nd-src:focus-visible {
 }
 .demos-wrap > .demos-section {
   margin-top: 8px;
+}
+/* Dossier ouvert, Mes démos, Archivées : la liste est le premier bloc, à 32 px du haut du contenu */
+.demos-wrap--scoped > .demos-section {
+  margin-top: 32px;
 }
 /* L27-09 : accès au dossier */
 .fa-dialog {
@@ -1510,19 +1513,23 @@ button.nd-src:focus-visible {
   right: 2px;
   opacity: 0;
 }
+/* Après un clic, la ligne active garde son compteur : le « … » ne vient qu'au survol et au focus clavier */
 .fcol__row:hover .fcol__more,
-.fcol__row:focus-within .fcol__more {
+.fcol__row:has(:focus-visible) .fcol__more,
+.fcol__row:has([aria-expanded='true']) .fcol__more {
   opacity: 1;
 }
 .fcol__row:hover .fcol__count,
-.fcol__row:focus-within .fcol__count {
+.fcol__row:has(:focus-visible) .fcol__count,
+.fcol__row:has([aria-expanded='true']) .fcol__count {
   visibility: hidden;
 }
 .fcol__section {
   /* §18.3 : titre de groupe commun, 24 px au-dessus et 6 px au-dessous */
   margin: 24px 12px 6px;
   padding: 0;
-  font: 600 11px / 16px var(--fd-font-sans);
+  /* Interligne de 13 px : les 24 et 6 px sont mesurés au texte (recette UX D1) */
+  font: 600 11px / 13px var(--fd-font-sans);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--fd-color-text-muted);
@@ -1685,12 +1692,9 @@ button.nd-src:focus-visible {
   }
 }
 @media (max-width: 767px) {
-  /* « il y a 3 jours » peut passer sur deux lignes ; l'adresse du nom se coupe */
-  .demo-table td.nowrap {
+  /* Le nom passe à la ligne entre les mots, jamais au milieu ; la date tient sur une ligne (D4) */
+  .demo-table .tg-add {
     white-space: normal;
-  }
-  .demo-table .dt-name a {
-    overflow-wrap: anywhere;
   }
 }
 /* Lot 2 : sous 1 024 px, tiroir des dossiers ouvert depuis la barre mobile (voile, 300 px au plus) */
@@ -1742,4 +1746,21 @@ button.nd-src:focus-visible {
 .demos-section .fd-empty--page .fd-empty__actions {
   gap: 12px;
   margin-top: 8px;
+}
+/* « Nouvelle démo » sous 480 px : feuille du bas (D5), pas en plein écran */
+@media (max-width: 479px) {
+  .fd-modal.new-demo-dialog {
+    top: auto;
+    bottom: 0;
+    height: auto;
+    max-height: calc(100dvh - 24px);
+    margin: auto 0 0;
+    border: 1px solid var(--fd-color-border);
+    border-bottom: 0;
+    border-radius: 16px 16px 0 0;
+  }
+  .new-demo-dialog .fd-modal__box {
+    height: auto;
+    max-height: calc(100dvh - 24px);
+  }
 }
