@@ -1,3 +1,4 @@
+import { safeExternalUrl } from '@flowdsiml/manifest';
 import { useState } from 'preact/hooks';
 import { useModalFocus } from './modalFocus';
 import type { LeadForm as LeadFormT } from '@flowdsiml/manifest';
@@ -102,7 +103,7 @@ export function LeadForm({
           {privacyUrl && (
             <>
               {' '}
-              <a href={privacyUrl} target="_blank" rel="noopener noreferrer">
+              <a href={safeExternalUrl(privacyUrl) ?? undefined} target="_blank" rel="noopener noreferrer">
                 {t.privacy}
               </a>
             </>

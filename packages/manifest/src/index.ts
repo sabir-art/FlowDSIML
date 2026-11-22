@@ -33,19 +33,52 @@ export type Mask = z.infer<typeof maskSchema>;
 
 export const placementSchema = z.enum(['auto', 'top', 'bottom', 'left', 'right']);
 
-export const hotspotActionSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('next') }),
-  z.object({ type: z.literal('goto'), stepId: z.string() }),
-  z.object({ type: z.literal('url'), url: z.string().url(), newTab: z.boolean().default(true) }),
-  z.object({ type: z.literal('none') }),
-]);
+/**
+ * Adresse externe sûre : https uniquement (http accepté pour localhost, en développement). Rend l'adresse
+ * telle quelle, ou null. Sert au schéma ET au rendu (lecteur, page publique, centre) : une adresse d'un
+ * autre schéma (javascript:, data:, http distant…) n'est jamais ouverte ni posée dans un lien.
+ */
+export function safeExternalUrl(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const value = raw.trim();
+  let u: URL;
+  try {
+    u = new URL(value);
+  } catch {
+    return null;
+  }
+  if (u.protocol === 'https:') return value;
+  if (u.protocol === 'http:' && (u.hostname === 'localhost' || u.hostname === '127.0.0.1')) return value;
+  return null;
+}
+const safeUrl = z
+  .string()
+  .url()
+  .refine((v) => safeExternalUrl(v) !== null, { message: 'https attendu' });
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+
+/** Lecture tolérante : une action « url » à l'adresse refusée (lien ancien) devient « aucune action ». */
+export const hotspotActionSchema = z.preprocess(
+  (v) => (isRecord(v) && v.type === 'url' && safeExternalUrl(v.url) === null ? { type: 'none' } : v),
+  z.discriminatedUnion('type', [
+    z.object({ type: z.literal('next') }),
+    z.object({ type: z.literal('goto'), stepId: z.string() }),
+    z.object({ type: z.literal('url'), url: safeUrl, newTab: z.boolean().default(true) }),
+    z.object({ type: z.literal('none') }),
+  ]),
+);
 export type HotspotAction = z.infer<typeof hotspotActionSchema>;
 
-export const ctaSchema = z.object({
+const ctaObject = z.object({
   label: z.string().max(80),
-  url: z.string().url(),
+  url: safeUrl,
 });
-export type Cta = z.infer<typeof ctaSchema>;
+/** Lecture tolérante : un bouton d'action à l'adresse refusée (lien ancien) est retiré (null). */
+export const ctaSchema = z.preprocess(
+  (v) => (isRecord(v) && safeExternalUrl(v.url) === null ? null : v),
+  ctaObject.nullable(),
+);
+export type Cta = z.infer<typeof ctaObject>;
 
 export const hotspotSchema = rectSchema.extend({
   id: z.string(),
@@ -54,7 +87,7 @@ export const hotspotSchema = rectSchema.extend({
   body: z.string().max(4000).default(''),
   placement: placementSchema.default('auto'),
   action: hotspotActionSchema.default({ type: 'next' }),
-  cta: ctaSchema.nullable().default(null),
+  cta: ctaSchema.default(null),
   pulse: z.boolean().default(true),
   /** F1 : « beacon » = Walkthrough (pastille + bulle) ; « spotlight » = zone éclairée, reste assombri. */
   style: z.enum(['beacon', 'spotlight']).default('beacon').catch('beacon'),
@@ -460,7 +493,7 @@ export const stepSchema = z.object({
   zoom: zoomSchema.nullable().default(null),
   /** Formulaire de lead affiché avant cette étape. */
   gateFormId: z.string().nullable().default(null),
-  cta: ctaSchema.nullable().default(null),
+  cta: ctaSchema.default(null),
   options: stepOptionsSchema,
 });
 export type Step = z.infer<typeof stepSchema>;
@@ -634,7 +667,7 @@ export const manifestSchema = z.object({
   /** F2 : quiz après la dernière étape (null si le module n'en a pas). */
   quiz: quizSchema.nullable().default(null).catch(null),
   /** Bouton d'action du client, affiché en permanence dans la barre du player (P6). */
-  cta: ctaSchema.nullable().default(null),
+  cta: ctaSchema.default(null),
   /** P13 : politique de confidentialité du workspace (https), affichée sous les formulaires de lead. */
   privacyUrl: z.string().url().startsWith('https://').nullable().default(null).catch(null),
   /**
@@ -667,7 +700,7 @@ export const manifestSchema = z.object({
       b: z.object({
         title: z.string().max(200).default(''),
         body: z.string().max(4000).default(''),
-        cta: ctaSchema.nullable().default(null),
+        cta: ctaSchema.default(null),
       }),
     })
     .nullable()

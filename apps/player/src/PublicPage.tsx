@@ -1,3 +1,4 @@
+import { safeExternalUrl } from '@flowdsiml/manifest';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { ArrowRight, Clock, EyeOff, Lock, Play, Users } from 'lucide-preact';
 import { personalTitle } from '@flowdsiml/core';
@@ -150,7 +151,12 @@ export function PublicPage({ id, code }: { id: string; code?: string }) {
         )}
         <b>{info.workspace}</b>
         {cta && (
-          <a class="pill pill-p pp-cta" href={cta.url} target="_blank" rel="noopener noreferrer">
+          <a
+            class="pill pill-p pp-cta"
+            href={safeExternalUrl(cta.url) ?? undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {cta.label}
           </a>
         )}
@@ -218,7 +224,12 @@ export function PublicPage({ id, code }: { id: string; code?: string }) {
               <h2>{endTitle || cta.label}</h2>
               {endTitle && endBody && <p>{endBody}</p>}
             </div>
-            <a class="pill pill-k" href={cta.url} target="_blank" rel="noopener noreferrer">
+            <a
+              class="pill pill-k"
+              href={safeExternalUrl(cta.url) ?? undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               {cta.label}
               <ArrowRight {...ICON} />
             </a>
@@ -245,14 +256,14 @@ export function PublicPage({ id, code }: { id: string; code?: string }) {
         {info.privacyUrl && (
           <>
             <span aria-hidden="true">·</span>
-            <a href={info.privacyUrl} target="_blank" rel="noopener noreferrer">
+            <a href={safeExternalUrl(info.privacyUrl) ?? undefined} target="_blank" rel="noopener noreferrer">
               {p.privacy}
             </a>
           </>
         )}
         <span aria-hidden="true">·</span>
         {info.a11yUrl ? (
-          <a href={info.a11yUrl} target="_blank" rel="noopener noreferrer">
+          <a href={safeExternalUrl(info.a11yUrl) ?? undefined} target="_blank" rel="noopener noreferrer">
             {fmt(p, 'a11y', { status: a11y })}
           </a>
         ) : (

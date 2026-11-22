@@ -1,3 +1,4 @@
+import { openExternal } from './openExternal';
 import { mediaPublicUrl } from './config';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
@@ -287,7 +288,7 @@ function LeaveDialog({ url, ht, onClose }: { url: string; ht: Dict['html']; onCl
           type="button"
           class="p-btn p-btn-primary"
           onClick={() => {
-            window.open(url, '_blank', 'noopener,noreferrer');
+            openExternal(url, '_blank');
             ref.current?.close();
           }}
         >

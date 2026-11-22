@@ -1,3 +1,4 @@
+import { safeExternalUrl } from '@flowdsiml/manifest';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import {
@@ -122,7 +123,12 @@ export function SysScreen({
           </button>
         )}
         {site && (
-          <a class="p-btn p-btn-secondary p-sys-act" href={site} target="_blank" rel="noopener noreferrer">
+          <a
+            class="p-btn p-btn-secondary p-sys-act"
+            href={safeExternalUrl(site) ?? undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <ExternalLink size={16} aria-hidden="true" />
             {fmt(g, 'visit', { site: new URL(site).host })}
           </a>

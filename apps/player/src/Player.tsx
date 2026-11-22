@@ -1,3 +1,4 @@
+import { openExternal } from './openExternal';
 import { ModalBox } from './modalFocus';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
@@ -583,7 +584,7 @@ export function Player({
   function follow(action: (typeof choices)[number]['action']) {
     const target = choiceTarget(m, action, index);
     if (!target) return;
-    if (target.kind === 'url') window.open(target.url, '_blank', 'noopener');
+    if (target.kind === 'url') openExternal(target.url, '_blank');
     else if (target.kind === 'end') {
       markSeen(index);
       setEnded(true);
@@ -597,7 +598,7 @@ export function Player({
   function onHotspot(h: Hotspot) {
     tracker.track('hotspot_click', { stepId: step.id, hotspotId: h.id, stepIndex: index });
     if (h.action.type === 'url') {
-      window.open(h.action.url, h.action.newTab ? '_blank' : '_top', 'noopener');
+      openExternal(h.action.url, h.action.newTab ? '_blank' : '_top');
       return;
     }
     if (h.action.type === 'next' && ruleTarget(m, index, { ...memory.current, vars: values, variant }))
@@ -617,7 +618,7 @@ export function Player({
   function onCta(url: string, label: string) {
     tracker.track('cta_click', { stepId: step.id, stepIndex: index, props: { label: label.slice(0, 80) } });
     // L46-bis : variables de l'adresse encodées (paramètre vide si aucune valeur)
-    window.open(applyUrlVariables(url, values, defaults), '_blank', 'noopener');
+    openExternal(applyUrlVariables(url, values, defaults), '_blank');
   }
 
   function toggleFullscreen() {

@@ -1,3 +1,4 @@
+import { safeExternalUrl } from '@flowdsiml/manifest';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   ArrowRight,
@@ -187,7 +188,11 @@ function Center({
     info.kind === 'demo' && info.a11y === 'non_evalue'
       ? c.demoA11yNone // A8 : « non conforme » par défaut, jamais « partiellement » sans audit
       : (c[`a11y_${info.a11y}`] ?? c.a11y_non_evalue);
-  const help = info.help ? (info.help.includes('@') ? `mailto:${info.help}` : info.help) : null;
+  const help = info.help
+    ? info.help.includes('@')
+      ? `mailto:${info.help}`
+      : safeExternalUrl(info.help)
+    : null;
   // A8 : Demo Center (démos ouvertes, sans compte ni progression)
   const demoCenter = info.kind === 'demo';
 
@@ -213,7 +218,12 @@ function Center({
         </a>
         {demoCenter && info.cta?.url && (
           <span class="sp">
-            <a class="ctr-contact" href={info.cta.url} target="_blank" rel="noopener noreferrer">
+            <a
+              class="ctr-contact"
+              href={safeExternalUrl(info.cta.url) ?? undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               {info.cta.label || c.demoContact}
             </a>
           </span>
@@ -260,8 +270,8 @@ function Center({
       )}
       <footer class="ctr-foot">
         <span>{info.workspace}</span>
-        {info.a11yUrl ? <a href={info.a11yUrl}>{a11y}</a> : <span>{a11y}</span>}
-        {info.privacyUrl && <a href={info.privacyUrl}>{c.privacy}</a>}
+        {safeExternalUrl(info.a11yUrl) ? <a href={info.a11yUrl}>{a11y}</a> : <span>{a11y}</span>}
+        {safeExternalUrl(info.privacyUrl) && <a href={info.privacyUrl ?? undefined}>{c.privacy}</a>}
         {help && <a href={help}>{c.help}</a>}
         <span>{t.madeWith}</span>
       </footer>

@@ -1,3 +1,4 @@
+import { safeExternalUrl } from '@flowdsiml/manifest';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Info, ShieldCheck, X } from 'lucide-preact';
 import type { Dict } from './i18n';
@@ -64,7 +65,7 @@ export function InfoDialog({
             {saved ? t.measureSaved : ''}
           </p>
           {privacyUrl && (
-            <a href={privacyUrl} target="_blank" rel="noopener noreferrer">
+            <a href={safeExternalUrl(privacyUrl) ?? undefined} target="_blank" rel="noopener noreferrer">
               {t.privacy}
             </a>
           )}
