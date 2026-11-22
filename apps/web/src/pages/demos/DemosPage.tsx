@@ -640,7 +640,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   }
   /** Cadre de la page : PageHeader sur toute la largeur, contenu sur 1 200 px au plus. */
   const frame = (body: ReactNode) => (
-    <div className="demos-layout">
+    <div className="demos-layout" data-gap-exempt="">
       <div className="demos-main">
         {pageHead(true)}
         <div className="stack page-wide demos-wrap">{body}</div>
@@ -765,7 +765,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     views: t('demos.sortViews'),
   };
   return (
-    <div className="demos-layout">
+    <div className="demos-layout" data-gap-exempt="">
       {wide && (
         <div className={`fcol-slot${colCollapsed || !xl ? ' fcol-slot--rail' : ''}`}>
           <FolderColumn
@@ -838,7 +838,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                   ],
                 ] as const
               ).map(([k, label, value, trend]) => (
-                <Link key={k} className="kpi-sc" to={`/analytics?indicateur=${k}`}>
+                // Indicateur : écarts internes de 4 px (maquette du lot 2)
+                <Link key={k} className="kpi-sc" to={`/analytics?indicateur=${k}`} data-gap-exempt="">
                   <span className="kpi-tab__l">{label}</span>
                   <span className="kpi-tab__v">{value}</span>
                   {kpis.prev ? (
@@ -1215,13 +1216,23 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                   <thead>
                     <tr>
                       <th scope="col">{t('demos.colName')}</th>
-                      {!sandbox && <th scope="col">{t('ctype.col')}</th>}
-                      <th scope="col">{t('demos.colStatus')}</th>
-                      <th scope="col">{t('demos.colFolder')}</th>
-                      <th scope="col" className="r">
+                      {!sandbox && (
+                        <th scope="col" className="dt-md">
+                          {t('ctype.col')}
+                        </th>
+                      )}
+                      <th scope="col" className="dt-md">
+                        {t('demos.colStatus')}
+                      </th>
+                      {/* Décision UX du 22/11 : Dossier et Complétion masquées sous 1 280 px */}
+                      <th scope="col" className="dt-xl">
+                        {t('demos.colFolder')}
+                      </th>
+                      <th scope="col">{t('tags.title')}</th>
+                      <th scope="col" className="r dt-md">
                         {t('demos.colViews')}
                       </th>
-                      <th scope="col" className="r">
+                      <th scope="col" className="r dt-xl">
                         {t('demos.colCompletion')}
                       </th>
                       <th scope="col">{t('demos.colUpdated')}</th>
@@ -1243,14 +1254,13 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                               </span>
                               <Link to={`/demos/${d.id}/edit`}>{d.title}</Link>
                             </span>
-                            <CardTags demo={d} store={tagStore} editable={editable} list />
                           </td>
                           {!sandbox && (
-                            <td>
+                            <td className="dt-md">
                               <TypeBadge type={typeOf(d)} />
                             </td>
                           )}
-                          <td>
+                          <td className="dt-md">
                             <Status size="sm" tone={toneOf(d)}>
                               {t(`status.${statusOf(d)}`)}
                             </Status>
@@ -1260,11 +1270,14 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                               </Status>
                             )}
                           </td>
-                          <td className="fd-muted">
+                          <td className="fd-muted dt-xl">
                             {folders.find((f) => f.id === d.folder_id)?.name ?? '—'}
                           </td>
-                          <td className="r num">{formatNumber(s?.views ?? 0)}</td>
-                          <td className="r nowrap">
+                          <td>
+                            <CardTags demo={d} store={tagStore} editable={editable} list />
+                          </td>
+                          <td className="r num dt-md">{formatNumber(s?.views ?? 0)}</td>
+                          <td className="r nowrap dt-xl">
                             <span className="dt-rate">
                               <span className="dt-bar" aria-hidden="true">
                                 <span style={{ width: `${rate}%` }} />

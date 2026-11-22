@@ -1652,9 +1652,12 @@
 .tg-add:hover {
   text-decoration: underline;
 }
-.demo-card:not(:hover, :focus-within) .tg-card--empty:not(.is-open),
-tr:not(:hover, :focus-within) .tg-card--empty:not(.is-open) {
-  opacity: 0;
+/* Sans survol (écran tactile), « + Étiquette » reste visible (décision UX du 22/11) */
+@media (hover: hover) {
+  .demo-card:not(:hover, :focus-within) .tg-card--empty:not(.is-open),
+  tr:not(:hover, :focus-within) .tg-card--empty:not(.is-open) {
+    opacity: 0;
+  }
 }
 .tg-card .tg-pop {
   top: calc(100% + 6px);

@@ -198,16 +198,20 @@
   width: 16px;
   height: 16px;
 }
+/* Mesures de la maquette (titre centré à 28 px, statut à 50 px) avec 8 px entre titre et statut (§18.6) */
 .demo-body {
   display: grid;
   gap: 6px;
-  padding: 12px 16px 14px;
+  padding: 14px 16px;
 }
 .demo-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 32px;
+  min-height: 28px;
+}
+.demo-head + .demo-meta {
+  margin-top: 2px;
 }
 .demo-head h3 {
   flex: 1;
@@ -235,7 +239,7 @@
 .demo-head .menu {
   position: relative;
   z-index: var(--fd-z-raised);
-  margin-right: -8px;
+  margin: -2px -8px -2px 0;
 }
 .demo-head .menu-trigger {
   width: 32px;
@@ -276,7 +280,8 @@
 .demo-body .tg-line {
   gap: 6px;
 }
-.demo-body .tg-add {
+.demo-body .tg-add,
+.demo-table .tg-add {
   display: inline-flex;
   align-items: center;
   height: 24px;
@@ -287,7 +292,8 @@
   font: 500 12px var(--fd-font-sans);
   box-sizing: border-box;
 }
-.demo-body .tg-add:hover {
+.demo-body .tg-add:hover,
+.demo-table .tg-add:hover {
   text-decoration: none;
   color: var(--fd-color-text);
   border-color: var(--fd-color-border-field-hover);
@@ -1596,6 +1602,94 @@ button.nd-src:focus-visible {
   color: var(--fd-color-danger);
   font-weight: 600;
 }
+/* Étiquettes dans leur colonne (décision UX du 22/11) */
 .demo-table .tg-row--list {
-  margin: 2px 0 6px 52px;
+  margin: 0;
+}
+/* Dossier et Complétion : quand le tableau a la place (960 px), soit un écran de 1 280 px sans la
+   colonne Dossiers ; jamais de défilement horizontal (§18.7) */
+.demo-table-wrap {
+  container-type: inline-size;
+}
+@container (max-width: 959px) {
+  .demo-table .dt-xl {
+    display: none;
+  }
+}
+/* Sous 768 px : Nom, Étiquettes, Modifiée et le menu (maquette de la vue liste à 390 px) */
+@media (max-width: 767px) {
+  .demo-table .dt-md {
+    display: none;
+  }
+  .demo-table th:first-child {
+    min-width: 0;
+  }
+  .demo-table .dt-name {
+    gap: 8px;
+  }
+}
+/* Vue liste : type en icône et texte (sans pastille), statut comme sur les cartes */
+.demo-table .ct-badge {
+  gap: 6px;
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fd-color-text-muted);
+  font: 400 14px var(--fd-font-sans);
+}
+.demo-table .ct-badge svg {
+  width: 16px;
+  height: 16px;
+}
+.demo-table .fd-status {
+  gap: 6px;
+  font: 500 12px / 15px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.demo-table .fd-status::before {
+  width: 7px;
+  height: 7px;
+}
+/* Le nom garde la largeur : au moins 240 px, deux lignes au plus */
+.demo-table th:first-child {
+  min-width: 200px;
+}
+.demo-table .dt-name a {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.demo-table .tg-add,
+.demo-table .ct-badge {
+  white-space: nowrap;
+}
+/* Tableau étroit (tablette) : le nom se resserre pour que tout tienne sans défilement */
+@container (max-width: 759px) {
+  .demo-table th:first-child {
+    min-width: 140px;
+  }
+  .demo-table :is(th, td) {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+}
+@media (max-width: 767px) {
+  .demo-table :is(th, td) {
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+  .demo-table th:first-child {
+    min-width: 0;
+  }
+}
+@media (max-width: 767px) {
+  /* « il y a 3 jours » peut passer sur deux lignes ; l'adresse du nom se coupe */
+  .demo-table td.nowrap {
+    white-space: normal;
+  }
+  .demo-table .dt-name a {
+    overflow-wrap: anywhere;
+  }
 }
