@@ -169,3 +169,10 @@
     transition: none;
   }
 }
+
+/* PAGE-01 §16.1 : variante des éditeurs (démo, quiz). Même hauteur, même filet, même accroche en haut ;
+   la disposition intérieure (retour, titre modifiable, onglets, actions) appartient à l'éditeur. */
+.fd-page-header--editor {
+  position: sticky;
+  top: 0;
+}

@@ -76,7 +76,8 @@ export function QuizEditorPage() {
 
   return (
     <main className="quiz-page">
-      <header className="editor-bar" data-tip-side="bottom">
+      {/* PAGE-01 §16.1 : variante éditeur de la barre commune (56 px, filet), le h1 est dans la barre */}
+      <header className="fd-page-header fd-page-header--editor editor-bar" data-tip-side="bottom">
         <Link
           to={`/demos/${demoId}/edit`}
           className="fd-btn fd-btn--round btn-surface"

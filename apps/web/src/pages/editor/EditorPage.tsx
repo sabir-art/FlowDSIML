@@ -772,10 +772,11 @@ export function EditorPage() {
           onClose={() => setPresenting(false)}
         />
       )}
-      <h1 className="sr-only">
-        {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
-      </h1>
-      <header className="ed-bar" data-tip-side="bottom">
+      {/* PAGE-01 §16.1 : variante éditeur de la barre commune ; le h1 de la page est dans la barre */}
+      <header className="fd-page-header fd-page-header--editor ed-bar" data-tip-side="bottom">
+        <h1 className="sr-only">
+          {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
+        </h1>
         {/* Lot 3 : retour « Démos », filet, titre modifiable sur place (crayon), puis auteur, statut et
             enregistrement sur une ligne de 12 px */}
         <div className="ed-bar__l">

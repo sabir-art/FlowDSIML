@@ -28,6 +28,11 @@ const SHELL = [
   ['Partager', `/demos/${DEMO}/share`],
   ['Nouveautés', '/nouveautes'],
 ];
+// Éditeurs : variante `.fd-page-header--editor` de la même barre (≥ 1 024 px, écran étroit en dessous)
+const EDITORS = [
+  ['Éditeur', `/demos/${DEMO}/edit`],
+  ['Éditeur de quiz', `/demos/${DEMO}/quiz`],
+];
 const OUTSIDE = [
   ['Connexion', '/login'],
   ['Mentions légales', '/legal/terms'],
@@ -91,6 +96,19 @@ function measure() {
       );
       await p.context().close();
     }
+  for (const [name, route] of EDITORS) {
+    const p = await open(route, 1440, false);
+    await p
+      .locator('.fd-page-header--editor')
+      .waitFor({ timeout: 10000 })
+      .catch(() => undefined);
+    const m = await p.evaluate(measure);
+    ok(
+      m.bars === 1 && m.top === 0 && m.sticky === 'sticky' && m.rule >= 1 && m.h1In === 1 && !m.h1Out.length,
+      `${name} : variante éditeur, une barre en haut avec son filet et le seul h1 (${m.bars} barre, haut ${m.top}, ${m.sticky}, h1 hors barre ${m.h1Out.length})`,
+    );
+    await p.context().close();
+  }
   for (const [name, route] of OUTSIDE) {
     const p = await open(route, 1440, true);
     const m = await p.evaluate(measure);
