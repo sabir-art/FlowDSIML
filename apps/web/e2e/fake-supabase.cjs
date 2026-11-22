@@ -199,7 +199,7 @@ function seed() {
           w: 0.208,
           h: 0.07,
           title: 'Créez une opportunité',
-          body: 'Bienvenue {{company|chez vous}} : cliquez sur « + Nouvelle opportunité ».',
+          body: 'Bienvenue chez {{company|vous}} : cliquez sur « + Nouvelle opportunité ».',
           placement: 'auto',
           action: { type: 'next' },
           cta: null,

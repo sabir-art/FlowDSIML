@@ -7,8 +7,22 @@ export type VariableValues = Record<string, string | undefined>;
 const VAR_WITH_SPACE_RE = new RegExp(`([ \\u00a0\\u202f]?)${VAR_RE.source}`, 'g');
 
 /**
- * Remplace les variables. Une variable sans valeur (ni valeur, ni défaut) disparaît avec l'espace
- * qui la précède : « Bienvenue {{first_name}} ! » → « Bienvenue ! », jamais « Bienvenue  ! » (PL3).
+ * Ordre des valeurs (spec L46, « Ordre des valeurs ») : la valeur connue, puis le repli de la pastille
+ * (`{{clé|repli}}`, un repli par insertion), puis le défaut de l'espace. Le même ordre vaut partout :
+ * éditeur, lecteur, SCORM, exports, liens personnalisés, voix de synthèse.
+ */
+function resolve(
+  key: string,
+  inlineDefault: string | undefined,
+  values: VariableValues,
+  defaults: VariableValues,
+) {
+  return values[key]?.trim() || (inlineDefault ?? '').trim() || defaults[key]?.trim() || '';
+}
+
+/**
+ * Remplace les variables. Une variable sans valeur (ni valeur, ni repli, ni défaut) disparaît avec
+ * l'espace qui la précède : « Bienvenue {{first_name}} ! » → « Bienvenue ! », jamais « Bienvenue  ! » (PL3).
  */
 export function applyVariables(
   text: string,
@@ -18,7 +32,7 @@ export function applyVariables(
   wrap: [string, string] = ['', ''],
 ): string {
   return text.replace(VAR_WITH_SPACE_RE, (_m, space: string, key: string, inlineDefault?: string) => {
-    const v = values[key]?.trim() || defaults[key]?.trim() || (inlineDefault ?? '').trim();
+    const v = resolve(key, inlineDefault, values, defaults);
     return v ? space + wrap[0] + v + wrap[1] : '';
   });
 }
@@ -33,7 +47,7 @@ export function applyUrlVariables(
   defaults: VariableValues = {},
 ): string {
   return url.replace(VAR_RE, (_m, key: string, inlineDefault?: string) =>
-    encodeURIComponent(values[key]?.trim() || defaults[key]?.trim() || (inlineDefault ?? '').trim()),
+    encodeURIComponent(resolve(key, inlineDefault, values, defaults)),
   );
 }
 

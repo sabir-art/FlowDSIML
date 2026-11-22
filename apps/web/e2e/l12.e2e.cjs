@@ -92,7 +92,7 @@ const SHOTS = process.env.SHOTS_DIR;
   );
   await page.fill('#find-q', 'company');
   ok(
-    (await page.locator('.find .count').textContent()).includes('0 sur 0'),
+    (await page.locator('.find .count').textContent()).includes('0 sur\u00a00'),
     'L12-04 : une variable n’est jamais un résultat',
   );
   await page.keyboard.press('Escape');

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyUrlVariables,
   applyVariables,
   assignableRoles,
   can,
@@ -19,6 +20,27 @@ describe('variables', () => {
       'Bonjour ami de Acme',
     );
     expect(applyVariables('{{company}}', {}, { company: 'Votre société' })).toBe('Votre société');
+  });
+  it('ordre des valeurs : valeur connue, repli de la pastille, défaut de l’espace, disparition (L46)', () => {
+    const text = 'Bienvenue chez {{company|vous}}';
+    const defaults = { company: 'votre entreprise' };
+    // Sans valeur : le repli de la pastille passe avant le défaut de l'espace
+    expect(applyVariables(text, {}, defaults)).toBe('Bienvenue chez vous');
+    // Avec une valeur : elle passe avant tout
+    expect(applyVariables(text, { company: 'Acme' }, defaults)).toBe('Bienvenue chez Acme');
+    // Sans repli dans la pastille : le défaut de l'espace
+    expect(applyVariables('Bienvenue chez {{company}}', {}, defaults)).toBe(
+      'Bienvenue chez votre entreprise',
+    );
+    // Rien du tout : la variable disparaît avec l'espace qui la précède
+    expect(applyVariables('Bienvenue chez {{company}}', {})).toBe('Bienvenue chez');
+    // Même ordre dans une adresse (valeur encodée)
+    expect(applyUrlVariables('https://x.example/?c={{company|vous}}', {}, defaults)).toBe(
+      'https://x.example/?c=vous',
+    );
+    expect(applyUrlVariables('https://x.example/?c={{company|vous}}', { company: 'A & B' }, defaults)).toBe(
+      'https://x.example/?c=A%20%26%20B',
+    );
   });
   it('variable vide : pas de double espace ni d’espace orpheline (PL3)', () => {
     expect(applyVariables('Bienvenue {{first_name}}', {})).toBe('Bienvenue');
