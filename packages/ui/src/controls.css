@@ -66,20 +66,25 @@
   min-height: 24px;
   cursor: pointer;
 }
+/* La case réelle couvre tout l'interrupteur (invisible) : le clic l'atteint toujours, souris ou tactile */
 .fd-switch input {
   position: absolute;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   margin: 0;
+  opacity: 0;
+  cursor: inherit;
 }
 .fd-switch__track {
+  /* COMP-01 §7 : 36 × 20 px, piste border-field, primary une fois activé, bouton rond de 16 px */
   position: relative;
   flex: none;
-  width: 40px;
-  height: 24px;
+  width: 36px;
+  height: 20px;
   border-radius: 999px;
-  background: var(--fd-color-border-strong);
+  background: var(--fd-color-border-field);
   transition: background-color 120ms ease;
 }
 .fd-switch__track::after {
@@ -87,21 +92,26 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: var(--fd-color-surface);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+  background: #fff;
   transition: transform 120ms ease;
 }
 .fd-switch input:checked + .fd-switch__track {
-  background: var(--fd-color-nav-active);
+  background: var(--fd-color-primary);
 }
 .fd-switch input:checked + .fd-switch__track::after {
+  background: var(--fd-color-on-primary);
   transform: translateX(16px);
 }
+/* Focus clavier (FIELD-01 §11.4) : trait intérieur de 2 px, prune sur la piste grise, surface sur la prune */
 .fd-switch input:focus-visible + .fd-switch__track {
   box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-switch input:checked:focus-visible + .fd-switch__track {
+  background: var(--fd-color-primary-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-surface);
 }
 .fd-switch input:disabled + .fd-switch__track,
 .fd-switch input[aria-disabled='true'] + .fd-switch__track {
@@ -174,8 +184,8 @@
 .fd-segmented--strong > button[aria-pressed='true'],
 .fd-segmented--strong > button[aria-checked='true'],
 .fd-segmented--strong > button[aria-selected='true'] {
-  background: var(--fd-color-nav-active);
-  color: var(--fd-color-on-nav-active);
+  background: var(--fd-color-surface-inverse);
+  color: var(--fd-color-text-inverse);
   box-shadow: none;
 }
 .fd-segmented > button:focus-visible {
@@ -289,6 +299,8 @@
 .fd-filter {
   gap: 6px;
   padding: 0 var(--fd-space-3) 0 14px;
+  /* Filtre de barre de liste : 13 px (les boutons secondaires sont à 14 px), pour tenir sur une ligne */
+  font-size: var(--fd-text-label-size);
 }
 .fd-filter svg {
   flex: none;
@@ -405,4 +417,52 @@
 }
 .fd-empty--compact .fd-empty__actions {
   margin: 0;
+}
+
+/* COMP-01 §6 : curseur. Piste de 4 px, remplie en primary ; poignée de 20 px, bordure primary de 2 px */
+.fd-slider {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+.fd-slider__track {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  left: 0;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--fd-color-border);
+}
+.fd-slider__fill {
+  display: block;
+  width: calc(10px + (100% - 20px) * var(--fd-slider-pct-n, 0));
+  height: 100%;
+  background: var(--fd-color-primary);
+}
+.fd-slider__thumb {
+  position: absolute;
+  top: 2px;
+  left: calc((100% - 20px) * var(--fd-slider-pct-n, 0));
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--fd-color-primary);
+  border-radius: 50%;
+  background: var(--fd-color-surface);
+  box-shadow: 0 1px 2px rgb(8 10 14 / 0.16);
+}
+/* Focus clavier (FIELD-01 §11.4) : anneau intérieur de 2 px, sans contour extérieur */
+.fd-slider__thumb:focus-visible {
+  outline: none;
+  border-color: var(--fd-color-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-slider[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
 }

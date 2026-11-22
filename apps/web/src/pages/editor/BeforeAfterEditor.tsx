@@ -214,7 +214,11 @@ export function BeforeAfterFields({
           ref={file}
           type="file"
           accept={TYPES.join(',')}
-          hidden
+          /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+          id="beforeaftereditor-file"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
           onChange={(e) => {
             void onFile(e.target.files?.[0]);
             e.target.value = '';

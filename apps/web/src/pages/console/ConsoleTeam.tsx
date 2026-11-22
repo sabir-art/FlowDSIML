@@ -12,6 +12,7 @@ import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { WriteButton, actionLabel, exportCsv, rpcError, useConsoleRole } from './shared';
 import type { PlatformRole } from './platform';
+import { Select } from '@flowdsiml/ui';
 
 interface Owner {
   userId: string;
@@ -109,8 +110,8 @@ export function Team() {
                     <small className="console-sub">{o.email}</small>
                   </th>
                   <td>
-                    <select
-                      className="input input-sm"
+                    <Select
+                      size="sm"
                       aria-label={t('console.tm.roleOf', { name: o.name || o.email })}
                       value={o.role}
                       disabled={!admin || o.me}
@@ -118,7 +119,7 @@ export function Team() {
                     >
                       <option value="admin">{t('console.role.admin')}</option>
                       <option value="read_only">{t('console.role.read_only')}</option>
-                    </select>
+                    </Select>
                   </td>
                   <td className="fd-muted">{o.lastActivity ? formatDateTime(o.lastActivity) : '—'}</td>
                   <td className="r">
@@ -145,25 +146,25 @@ export function Team() {
           </h2>
           <label className="console-filter">
             <span>{t('console.tm.person')}</span>
-            <select className="input input-sm" value={who} onChange={(e) => setWho(e.target.value)}>
+            <Select size="sm" value={who} onChange={(e) => setWho(e.target.value)}>
               <option value="">{t('console.fb.all')}</option>
               {team.map((o) => (
                 <option key={o.userId} value={o.userId}>
                   {o.name || o.email}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label className="console-filter">
             <span>{t('console.tm.action')}</span>
-            <select className="input input-sm" value={what} onChange={(e) => setWhat(e.target.value)}>
+            <Select size="sm" value={what} onChange={(e) => setWhat(e.target.value)}>
               <option value="">{t('console.fb.all')}</option>
               {actions.map((a) => (
                 <option key={a} value={a}>
                   {actionLabel(t, a)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <button
             type="button"
@@ -270,15 +271,10 @@ function AddOwner({ onClose, onAdded }: { onClose: () => void; onAdded: () => vo
           </div>
           <div className="field">
             <label htmlFor="ao-role">{t('console.tm.role')}</label>
-            <select
-              id="ao-role"
-              className="input"
-              value={role}
-              onChange={(e) => setRole(e.target.value as PlatformRole)}
-            >
+            <Select id="ao-role" value={role} onChange={(e) => setRole(e.target.value as PlatformRole)}>
               <option value="read_only">{t('console.role.read_only')}</option>
               <option value="admin">{t('console.role.admin')}</option>
-            </select>
+            </Select>
           </div>
         </div>
         <div className="modal-foot">

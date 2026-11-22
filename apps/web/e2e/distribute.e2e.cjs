@@ -12,6 +12,7 @@ const { seedExport } = require('./export-data.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const { PUBLIC_PLAYER } = require('./fake-supabase.cjs');
+const { pick } = require('./_select.cjs');
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const LMS = 'http://lms.exemple.test';
@@ -455,12 +456,12 @@ function seedDistribute(s, { published = true } = {}) {
     /intranet\.acme\.example\/outils/.test(await dlg.locator('.dif-prev .bar').textContent()),
     'Aperçu : barre d’adresse avec le domaine',
   );
-  await dlg.getByLabel('Taille', { exact: true }).selectOption('fixed');
+  await pick(dlg.getByLabel('Taille', { exact: true }), 'fixed');
   ok(
     (await dlg.getByLabel('Largeur (px)').count()) === 1 && /width:960px;height:600px/.test(await code()),
     'Taille fixe : largeur et hauteur',
   );
-  await dlg.getByLabel('Taille', { exact: true }).selectOption('fluid');
+  await pick(dlg.getByLabel('Taille', { exact: true }), 'fluid');
   ok(
     (await dlg.locator('.dif-prev .emb').evaluate((el) => el.getBoundingClientRect().width)) >
       0.9 * (await dlg.locator('.dif-prev .pg').evaluate((el) => el.clientWidth - 28)),
@@ -474,8 +475,8 @@ function seedDistribute(s, { published = true } = {}) {
     (await dlg.getByLabel('Texte du bouton').inputValue()) === 'Lancer le tutoriel',
     'Texte du bouton par défaut',
   );
-  await dlg.getByLabel('Position').selectOption('float');
-  await dlg.getByLabel('Langue de l’interface').selectOption('en');
+  await pick(dlg.getByLabel('Position'), 'float');
+  await pick(dlg.getByLabel('Langue de l’interface'), 'en');
   const popup = await code();
   ok(
     popup.includes(`data-tutoclick="${DEMO}"`) &&

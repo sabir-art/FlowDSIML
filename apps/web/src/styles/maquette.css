@@ -5,7 +5,8 @@
   font-size: var(--fd-text-body-size);
   line-height: var(--fd-text-body-line);
   color: var(--fd-color-text);
-  background: var(--fd-color-bg);
+  /* NAV-02 : les écrans sont posés sur le fond du contenu (content-bg), sans aplat propre */
+  background: transparent;
   -webkit-font-smoothing: antialiased;
 }
 .mk *,
@@ -215,8 +216,10 @@
 .mk .btn-secondary {
   background: var(--fd-color-surface);
   color: var(--fd-color-text);
-  border-color: var(--fd-color-border-strong);
-  box-shadow: var(--fd-shadow-xs);
+  /* Même règle que .fd-btn (décision UX du 22/11) : contour border-field, 14 px en 600, sans ombre */
+  border-color: var(--fd-color-border-field);
+  font-size: 14px;
+  font-weight: 600;
 }
 .mk .btn-secondary:hover {
   background: var(--fd-color-surface-hover);
@@ -492,7 +495,6 @@
   background: var(--fd-color-surface);
   border: 1px solid var(--fd-color-border);
   border-radius: var(--fd-radius-lg);
-  box-shadow: var(--fd-shadow-xs);
 }
 .mk .card-pad {
   padding: var(--fd-space-6);

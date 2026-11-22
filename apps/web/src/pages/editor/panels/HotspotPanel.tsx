@@ -21,6 +21,7 @@ import { CtaFields } from './CtaFields';
 import { AiBadge, AiWrite, isAiApplied } from '../../../components/ai/AiWrite';
 import { AiSpellAll } from '../../../components/ai/AiSpellAll';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
+import { Select } from '@flowdsiml/ui';
 
 type Side = 'top' | 'bottom' | 'left' | 'right';
 /** Grille 3 × 3 de la maquette : les côtés correspondent aux placements gérés par le player ;
@@ -375,9 +376,9 @@ export function HotspotPanel({
 
       <div className="sec">
         <div className="sec-title">{t('editor.action')}</div>
-        <select
+        <Select
           id="hs-action"
-          className="select input-sm"
+          size="sm"
           aria-label={t('editor.action')}
           disabled={readOnly || !advances}
           value={advances ? action.type : 'next'}
@@ -391,14 +392,14 @@ export function HotspotPanel({
           <option value="demo" disabled>
             {t('editor.hs.openDemo')} ({t('shell.soon')})
           </option>
-        </select>
+        </Select>
         {!advances && <p className="help">{t('editor.hs.noAdvanceHelp')}</p>}
         {action.type === 'goto' && (
           <div className="field">
             <label htmlFor="hs-goto">{t('editor.targetStep')}</label>
-            <select
+            <Select
               id="hs-goto"
-              className="select input-sm"
+              size="sm"
               disabled={readOnly}
               value={action.stepId}
               onChange={(e) => set({ action: { type: 'goto', stepId: e.target.value } })}
@@ -408,7 +409,7 @@ export function HotspotPanel({
                   {i + 1}. {s.title || t('editor.untitled')}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         )}
         {action.type === 'url' && (

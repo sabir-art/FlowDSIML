@@ -6,7 +6,7 @@ import { supabase } from '../../../lib/supabase';
 import { formatNumber, formatRelativeShort } from '../../../lib/format';
 import { initials } from '../../../lib/initials';
 import { Loading } from '../../../components/guards';
-import { Empty } from '@flowdsiml/ui';
+import { Empty, Select } from '@flowdsiml/ui';
 import { Radio } from 'lucide-react';
 
 interface LiveVisitor {
@@ -124,8 +124,8 @@ export function LiveTab({
         {/* L19-01 / 02 : la démo est toujours nommée en tête de ligne (« Démo CRM · actualisé… ») */}
         <div className="l19-livehead-l">
           {!demo && (
-            <select
-              className="select input-sm"
+            <Select
+              size="sm"
               aria-label={t('analytics.adv.live.demo')}
               value={target}
               onChange={(e) => setTarget(e.target.value)}
@@ -135,7 +135,7 @@ export function LiveTab({
                   {d.title}
                 </option>
               ))}
-            </select>
+            </Select>
           )}
           <p className="muted">
             <b>{title}</b> · {t('analytics.adv.live.refresh')}

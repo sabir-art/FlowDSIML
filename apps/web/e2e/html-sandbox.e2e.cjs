@@ -6,6 +6,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -171,9 +172,9 @@ const pages = [
   }
 
   // Réglages enregistrés
-  await p.getByLabel('Clic sur un élément non relié').selectOption('highlight');
+  await pick(p.getByLabel('Clic sur un élément non relié'), 'highlight');
   await p.getByRole('checkbox', { name: 'Agenda' }).uncheck();
-  await p.getByLabel('Page de départ').selectOption(ID(2));
+  await pick(p.getByLabel('Page de départ'), ID(2));
   await p.waitForTimeout(1400);
   ok(demo.sandbox.unlinked === 'highlight', 'clic non relié : mise en évidence');
   ok(demo.sandbox.keyPages.length === 3 && !demo.sandbox.keyPages.includes(ID(3)), 'pages clés choisies');

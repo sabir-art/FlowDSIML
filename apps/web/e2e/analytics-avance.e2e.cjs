@@ -5,6 +5,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick, optionsOf } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000002';
@@ -202,7 +203,7 @@ const live = (n) => ({
   // ===== L19-03 : sondages et tests =====
   await page.locator('.an-more').click();
   await page.getByRole('menuitem', { name: 'Sondages et tests' }).click();
-  await page.getByLabel('Démo analysée').selectOption(DEMO);
+  await pick(page.getByLabel('Démo analysée'), DEMO);
   await page.getByRole('heading', { name: 'Test A/B · étape 3' }).waitFor();
   ok(new URL(page.url().replace('#/', '')).searchParams.get('tab') === 'tests', 'onglet gardé dans l’URL');
   ok((await page.getByText('B mène de 11 points sur 412 visiteurs.').count()) === 1, 'A/B : phrase prudente');
@@ -231,7 +232,7 @@ const live = (n) => ({
   await page.getByRole('heading', { name: 'Nouveau segment' }).waitFor();
   await page.getByRole('button', { name: 'Ajouter un filtre' }).click();
   const fd = page.getByRole('dialog', { name: 'Ajouter un filtre' });
-  await fd.getByLabel('Valeur de la condition 1').selectOption('mobile');
+  await pick(fd.getByLabel('Valeur de la condition 1'), 'mobile');
   await fd.getByRole('button', { name: 'Appliquer' }).click();
   await page.getByRole('button', { name: 'Retirer le filtre Type d’appareil' }).waitFor();
   ok(/"device","is","mobile"/.test(decodeURIComponent(page.url())), 'filtre gardé dans l’URL');
@@ -240,13 +241,13 @@ const live = (n) => ({
   await page.getByRole('button', { name: 'Ajouter une condition' }).click();
   ok((await page.locator('fieldset.cond').count()) === 2, 'constructeur prérempli + une condition');
   ok(
-    (await page.getByLabel('Critère de la condition 2').locator('option[disabled]').allTextContents()).some(
-      (x) => /Ville · Bientôt/.test(x),
+    (await optionsOf(page.getByLabel('Critère de la condition 2'), { disabled: true })).some((x) =>
+      /Ville · Bientôt/.test(x),
     ),
     'critères à venir : affichés désactivés avec « Bientôt »',
   );
-  await page.getByLabel('Critère de la condition 2').selectOption('completed');
-  await page.getByLabel('Valeur de la condition 2').selectOption('false');
+  await pick(page.getByLabel('Critère de la condition 2'), 'completed');
+  await pick(page.getByLabel('Valeur de la condition 2'), 'false');
   await page.getByText('200 visiteurs correspondent').waitFor({ timeout: 3000 });
   ok(true, 'compteur en direct (ET)');
   await page.getByRole('radio', { name: 'Au moins une (OU)' }).click();
@@ -309,7 +310,7 @@ const live = (n) => ({
   await page.getByText(/Aucune alerte/).waitFor();
   await page.getByRole('button', { name: 'Nouvelle alerte' }).click();
   const dlg = page.getByRole('dialog', { name: 'Nouvelle alerte' });
-  await dlg.getByLabel('Quand').selectOption('completion_below');
+  await pick(dlg.getByLabel('Quand'), 'completion_below');
   ok((await dlg.getByLabel('Seuil (%)').count()) === 1, 'seuil en % pour la complétion');
   ok((await dlg.getByText('hooks.acme.example').count()) === 1, 'webhook abonné : domaine affiché');
   ok(await dlg.getByRole('checkbox', { name: /E-mail/ }).isDisabled(), 'e-mail « Bientôt »');
@@ -319,7 +320,7 @@ const live = (n) => ({
       (await dlg.locator('.is-soon .soon-text').count()) === 2,
     '§17.4 : « Bientôt » en texte gris, sans pastille',
   );
-  await dlg.getByLabel('Démo').selectOption(DEMO);
+  await pick(dlg.getByLabel('Démo'), DEMO);
   await dlg.getByRole('checkbox', { name: /Webhook/ }).check();
   await dlg.getByRole('radio', { name: 'Résumé quotidien (9 h)' }).click();
   await dlg.getByLabel('Seuil (%)').fill('0');
@@ -341,7 +342,7 @@ const live = (n) => ({
   ok((await page.getByText('En pause').count()) === 1, 'badge « En pause »');
   // Modifier
   await page.getByRole('button', { name: 'Nouveau lead' }).click();
-  await page.getByRole('dialog', { name: 'Modifier l’alerte' }).getByLabel('Quand').selectOption('cta');
+  await pick(page.getByRole('dialog', { name: 'Modifier l’alerte' }).getByLabel('Quand'), 'cta');
   await page
     .getByRole('dialog', { name: 'Modifier l’alerte' })
     .getByRole('button', { name: 'Enregistrer' })
@@ -377,7 +378,7 @@ const live = (n) => ({
     await shot('l19-02-temps-reel-vide');
     await page.locator('.an-more').click();
     await page.getByRole('menuitem', { name: 'Sondages et tests' }).click();
-    await page.getByLabel('Démo analysée').selectOption(DEMO);
+    await pick(page.getByLabel('Démo analysée'), DEMO);
     await page.getByRole('heading', { name: 'Test A/B · étape 3' }).waitFor();
     ok(
       (await page.getByText('Les filtres ne s’appliquent pas encore à cet onglet.').count()) === 1,
@@ -388,8 +389,8 @@ const live = (n) => ({
     await page.getByRole('menuitem', { name: 'Segments' }).click();
     await page.getByRole('heading', { name: 'Nouveau segment' }).waitFor();
     await page.getByRole('button', { name: 'Ajouter une condition' }).click();
-    await page.getByLabel('Critère de la condition 1').selectOption('device');
-    await page.getByLabel('Valeur de la condition 1').selectOption('mobile');
+    await pick(page.getByLabel('Critère de la condition 1'), 'device');
+    await pick(page.getByLabel('Valeur de la condition 1'), 'mobile');
     await page.waitForTimeout(600);
     ok((await page.locator('.l19-saved li, .l19-saved tr').count()) >= 3, 'L19-04 : 3 segments enregistrés');
     await shot('l19-04-segments');
@@ -406,8 +407,8 @@ const live = (n) => ({
       el.style.minWidth = '100%';
     });
     ok(
-      (await crit.locator('option[disabled]').count()) > 0 &&
-        (await crit.locator('option[disabled]').allTextContents()).every((x) => /Bientôt/.test(x)),
+      (await optionsOf(crit, { disabled: true })).length > 0 &&
+        (await optionsOf(crit, { disabled: true })).every((x) => /Bientôt/.test(x)),
       'L19-04 : critères indisponibles désactivés, badge « Bientôt »',
     );
     await shot('l19-04-criteres');
@@ -425,8 +426,8 @@ const live = (n) => ({
     await shot('l19-05-alertes');
     await page.getByRole('button', { name: 'Nouvelle alerte' }).click();
     const nd = page.getByRole('dialog', { name: 'Nouvelle alerte' });
-    await nd.getByLabel('Quand').selectOption('completion_below');
-    await nd.getByLabel('Démo').selectOption(DEMO);
+    await pick(nd.getByLabel('Quand'), 'completion_below');
+    await pick(nd.getByLabel('Démo'), DEMO);
     await nd.getByRole('checkbox', { name: /Webhook/ }).check();
     await nd.getByRole('radio', { name: 'Résumé quotidien (9 h)' }).click();
     await shot('l19-06-nouvelle-alerte');
@@ -457,7 +458,7 @@ const live = (n) => ({
   ok(await p2.getByRole('switch').first().isDisabled(), 'lecteur : interrupteurs désactivés');
   await p2.locator('.an-more').click();
   await p2.getByRole('menuitem', { name: 'Sondages et tests' }).click();
-  await p2.getByLabel('Démo analysée').selectOption(DEMO);
+  await pick(p2.getByLabel('Démo analysée'), DEMO);
   await p2.getByText('Les réponses écrites sont lisibles par les éditeurs.').waitFor();
   ok(
     (await p2.getByRole('button', { name: /réponses écrites/ }).count()) === 0,

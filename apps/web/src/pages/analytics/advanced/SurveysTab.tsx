@@ -6,7 +6,7 @@ import { supabase } from '../../../lib/supabase';
 import { formatDate, formatNumber } from '../../../lib/format';
 import { Loading } from '../../../components/guards';
 import { abOutcome, type AbCounts } from '../../editor/ab/abResult';
-import { Empty, Status } from '@flowdsiml/ui';
+import { Empty, Status, Select } from '@flowdsiml/ui';
 import { ListChecks } from 'lucide-react';
 
 export interface SurveyQuestion {
@@ -95,8 +95,9 @@ export function SurveysTab({
 
   if (!target) return <div className="card empty">{t('analytics.adv.tests.empty')}</div>;
   const picker = !demo && (
-    <select
-      className="select input-sm l19-picker"
+    <Select
+      size="sm"
+      className="l19-picker"
       aria-label={t('analytics.adv.tests.demo')}
       value={target}
       onChange={(e) => setTarget(e.target.value)}
@@ -106,7 +107,7 @@ export function SurveysTab({
           {d.title}
         </option>
       ))}
-    </select>
+    </Select>
   );
   if (!res)
     return (

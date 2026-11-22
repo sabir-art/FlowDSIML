@@ -63,7 +63,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     (await card.getByRole('link', { name: 'Voir les plans' }).count()) === 0,
     'L48-A : plus de « Voir les plans »',
   );
-  await card.getByRole('button', { name: 'Enregistrer les règles' }).waitFor();
+  await page.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).waitFor();
   ok(true, 'L48-A : offre Free, règles modifiables par un admin');
   await shot('l27-10-regles-plan');
 
@@ -71,8 +71,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   t.workspaces[0].plan_code = 'enterprise';
   await page.reload();
   await card.waitFor();
-  await card.getByRole('button', { name: 'Enregistrer les règles' }).waitFor();
-  const save = card.getByRole('button', { name: 'Enregistrer les règles' });
+  // Lot 1 : un seul « Enregistrer », dans la barre de page
+  const save = page.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' });
+  await save.waitFor();
   ok(await save.isDisabled(), 'Enregistrer inactif sans changement');
   ok(
     (await card.getByRole('checkbox', { name: /Sur invitation/ }).isChecked()) &&
@@ -93,11 +94,12 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await card.getByRole('checkbox', { name: 'Avec un mot de passe' }).check();
   await card.getByRole('checkbox', { name: /Sur invitation/ }).check();
   await card.getByRole('checkbox', { name: /Par domaine e-mail/ }).check();
-  await card.getByRole('combobox', { name: 'Durée maximale des liens' }).selectOption('30');
+  // Select maison (COMP-01) : ouverture, puis choix de l'option
+  await card.getByRole('combobox', { name: 'Durée maximale des liens' }).click();
+  await page.getByRole('option', { name: '30 jours' }).click();
   await card.getByRole('radio', { name: 'Administrateurs et propriétaires seulement' }).check();
   await card
-    .getByRole('switch', { name: /Autoriser les exports/ })
-    .or(card.getByRole('checkbox', { name: /Autoriser les exports/ }))
+    .getByRole('switch', { name: /Exports hors de/ })
     .first()
     .uncheck();
   ok(!(await save.isDisabled()), 'Enregistrer actif dès qu’une valeur change');

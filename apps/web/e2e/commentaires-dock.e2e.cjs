@@ -12,6 +12,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const EDIT = `${APP}/#/demos/${DEMO}/edit`;
@@ -311,7 +312,7 @@ const badge = (p) =>
   // ===== Zoom 100 % : la sélection reste visible au-dessus du panneau =====
   {
     const p = await open(b, state(0), { viewport: { width: 1280, height: 800 } });
-    await p.locator('.stage-zoom').selectOption('100');
+    await pick(p.locator('.stage-zoom'), '100');
     await p.locator('.canvas-hotspot').first().click();
     await p.waitForTimeout(300);
     await p.locator('.cm-dock__toggle').click();

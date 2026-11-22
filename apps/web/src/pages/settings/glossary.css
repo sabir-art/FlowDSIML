@@ -1,71 +1,26 @@
-/* L17 : Paramètres › Glossaire */
-.gl-head {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.gl-head > div:first-child {
-  flex: 1 1 360px;
-}
-.gl-head .muted {
-  margin-top: 4px;
-  max-width: 560px;
-}
-.gl-acts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: flex-start;
-}
-.gl-search {
-  width: 280px;
-  max-width: 100%;
-}
-.st .gl-table tbody th[scope='row'] {
-  text-align: left;
-  font-size: 14px;
-  font-weight: 600;
+/* L17, lot 1 de la refonte : Paramètres › Glossaire (gabarit « stg- » de settings.css) */
+.gl-table tbody th[scope='row'] {
+  height: 56px;
+  padding: 0 12px;
+  font: 600 14px var(--fd-font-sans);
   color: var(--fd-color-text);
-  text-transform: none;
-  letter-spacing: normal;
   white-space: nowrap;
 }
-.gl-old {
-  white-space: nowrap;
+.gl-page p.stg-table__empty {
+  margin: 0;
+  padding: 24px 12px;
 }
-.gl-old {
-  color: var(--fd-color-text-muted);
+.gl-table td.stg-muted {
+  white-space: nowrap;
 }
 .gl-def {
-  min-width: 240px;
+  min-width: 200px;
 }
-.gl-nomatch {
-  padding: 16px 20px;
+.gl-table .gl-num {
+  text-align: right;
 }
-.gl-setting {
-  margin-top: 16px;
-  padding: 16px 20px;
-}
-.gl-setting .setting {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 0;
-  cursor: pointer;
-}
-.gl-setting .help {
-  display: block;
-}
-.gl-modal {
-  max-width: 520px;
-}
-.gl-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.gl-imp-help {
+  margin: 0;
 }
 .gl-counter {
   text-align: right;
@@ -87,17 +42,6 @@
   max-height: 160px;
   overflow: auto;
 }
-.st .gl-page .empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-  padding: 40px 20px;
-}
-.st .gl-page .empty .muted {
-  max-width: 480px;
-}
 .gl-file {
   display: flex;
   align-items: center;
@@ -108,14 +52,4 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* L17-06 : pas de bordure sous la dernière ligne (elle dépassait sous les coins arrondis) */
-.gl-table tbody tr:last-child > * {
-  border-bottom: 0;
-}
-.gl-table-wrap,
-.card:has(> .gl-table),
-.card:has(> div > .gl-table) {
-  overflow: hidden;
 }

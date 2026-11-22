@@ -1,8 +1,12 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@flowdsiml/ui';
+import { CircleHelp, TriangleAlert } from 'lucide-react';
+import { Button, Modal } from '@flowdsiml/ui';
 
-/** Modale de confirmation (remplace confirm/prompt natifs). `requireText` : saisie exacte exigée. */
+/**
+ * Modale de confirmation (remplace confirm/prompt natifs), au format MODAL-01. `requireText` : saisie
+ * exacte exigée. Entrée dans le champ valide ; sans champ, le focus va à « Annuler ».
+ */
 export function ConfirmDialog({
   open,
   title,
@@ -12,6 +16,7 @@ export function ConfirmDialog({
   requireText,
   secondary,
   requireLabel,
+  icon,
   onConfirm,
   onClose,
 }: {
@@ -25,64 +30,31 @@ export function ConfirmDialog({
   secondary?: { label: string; onSelect: () => void };
   /** Libellé du champ de saisie (sinon « Saisissez … pour confirmer »). */
   requireLabel?: ReactNode;
+  /** Icône de la tuile d'en-tête (par défaut : point d'interrogation, ou alerte pour `danger`). */
+  icon?: ReactNode;
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const ref = useRef<HTMLDialogElement>(null);
-  const titleId = useId();
+  const formId = useId();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
-
   useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) {
-      setText('');
-      d.showModal();
-    } else if (!open && d.open) d.close();
+    if (open) setText('');
   }, [open]);
 
   const blocked = requireText !== undefined && text !== requireText;
   return (
-    <dialog ref={ref} className="dialog dialog-confirm" onClose={onClose} aria-labelledby={titleId}>
-      <form
-        method="dialog"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          if (blocked) return;
-          setBusy(true);
-          try {
-            await onConfirm();
-            onClose();
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        {/* PRM-05 / PRM-06 : en-tête, corps et pied séparés, comme les modales de la maquette */}
-        <div className="dialog-head">
-          <h2 id={titleId}>{title}</h2>
-        </div>
-        {(body || requireText !== undefined) && (
-          <div className="dialog-body">
-            {body}
-            {requireText !== undefined && (
-              <label className="fd-field dialog-require">
-                <span className="fd-label">
-                  {requireLabel ?? t('common.typeToConfirm', { text: requireText })}
-                </span>
-                <input
-                  className="fd-input"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  autoFocus
-                />
-              </label>
-            )}
-          </div>
-        )}
-        <div className="dialog-actions">
+    <Modal
+      open={open}
+      onClose={onClose}
+      icon={icon ?? (danger ? <TriangleAlert /> : <CircleHelp />)}
+      tone={danger ? 'danger' : 'default'}
+      title={title}
+      closeLabel={t('common.close')}
+      className="dialog-confirm"
+      footer={
+        <>
           {secondary ? (
             <Button
               onClick={() => {
@@ -95,12 +67,49 @@ export function ConfirmDialog({
           ) : (
             <Button onClick={onClose}>{t('common.cancel')}</Button>
           )}
-          <Button type="submit" variant={danger ? 'danger' : 'primary'} disabled={blocked || busy}>
+          <Button
+            type="submit"
+            form={formId}
+            variant={danger ? 'danger' : 'primary'}
+            disabled={blocked || busy}
+          >
             {confirmLabel}
           </Button>
-        </div>
+        </>
+      }
+    >
+      <form
+        id={formId}
+        className="dialog-form"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (blocked) return;
+          setBusy(true);
+          try {
+            await onConfirm();
+            onClose();
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        {body && <div className="dialog-body">{body}</div>}
+        {requireText !== undefined && (
+          <div className="fd-modal__field dialog-require">
+            <label htmlFor={`${formId}-t`}>
+              {requireLabel ?? t('common.typeToConfirm', { text: requireText })}
+            </label>
+            <input
+              id={`${formId}-t`}
+              className="fd-input"
+              autoComplete="off"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+          </div>
+        )}
       </form>
-    </dialog>
+    </Modal>
   );
 }
 

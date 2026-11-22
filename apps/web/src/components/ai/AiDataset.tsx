@@ -5,6 +5,7 @@ import { labelType, personalColumn } from '@flowdsiml/core';
 import { AiRequestError, aiBlock, callAi, useAiStatus } from '../../lib/ai';
 import { useBlockText } from './AiWrite';
 import './ai.css';
+import { Select } from '@flowdsiml/ui';
 
 export const DATASET_ROWS = [10, 20, 50] as const;
 
@@ -121,8 +122,7 @@ export function AiDataset({
           </label>
           <label className="fd-field">
             <span className="fd-label">{t('ai.dataset.rows')}</span>
-            <select
-              className="fd-input"
+            <Select
               value={rows}
               disabled={phase === 'busy'}
               onChange={(e) => setRows(Number(e.target.value) as (typeof DATASET_ROWS)[number])}
@@ -132,7 +132,7 @@ export function AiDataset({
                   {n}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         </>
       )}

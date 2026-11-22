@@ -20,7 +20,7 @@ import {
   Upload,
 } from 'lucide-react';
 import type { Json } from '@flowdsiml/supabase-types';
-import { Alert, Button } from '@flowdsiml/ui';
+import { Alert, Button, Select, ColorSwatch } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { contrastRatio } from '../../lib/contrast';
@@ -494,12 +494,16 @@ export function CenterSettings() {
                   {t('center.brand')}
                 </label>
                 <div className="col-f">
-                  <input
-                    type="color"
-                    className="sw"
-                    aria-label={t('center.brandPicker')}
+                  <ColorSwatch
+                    label={t('center.brandPicker')}
+                    labels={{
+                      palette: t('common.colorPalette'),
+                      shade: t('common.colorShade'),
+                      hue: t('common.colorHue'),
+                      hex: t('common.colorHex'),
+                    }}
                     value={brandOk ? brandInput : '#000000'}
-                    onChange={(e) => setBrandColor(e.target.value.toUpperCase())}
+                    onChange={(c) => setBrandColor(c)}
                   />
                   <input
                     id="c-brand"
@@ -691,9 +695,8 @@ export function CenterSettings() {
                 <label className="fd-label" htmlFor="c-a11y">
                   {t('center.a11y')}
                 </label>
-                <select
+                <Select
                   id="c-a11y"
-                  className="fd-input"
                   aria-describedby="c-a11y-h"
                   value={draft.a11y ?? 'non_evalue'}
                   onChange={(e) => update({ a11y: e.target.value as CenterDraft['a11y'] })}
@@ -703,7 +706,7 @@ export function CenterSettings() {
                       {t(`center.a11y_${a}`)}
                     </option>
                   ))}
-                </select>
+                </Select>
                 <span className="fd-help" id="c-a11y-h">
                   {t('center.a11yHelp')}
                 </span>

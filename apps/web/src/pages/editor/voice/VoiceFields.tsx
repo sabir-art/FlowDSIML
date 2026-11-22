@@ -291,6 +291,7 @@ export function VoiceFields({
                 type="button"
                 className="btn btn-secondary btn-sm"
                 disabled={busy}
+                aria-controls="voicefields-file"
                 onClick={() => file.current?.click()}
               >
                 <Upload aria-hidden="true" />
@@ -389,6 +390,7 @@ export function VoiceFields({
                 type="button"
                 className="btn btn-secondary btn-sm"
                 disabled={busy}
+                aria-controls="voicefields-file"
                 onClick={() => file.current?.click()}
               >
                 <Upload aria-hidden="true" />
@@ -418,7 +420,11 @@ export function VoiceFields({
       <input
         ref={file}
         type="file"
-        hidden
+        /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+        id="voicefields-file"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
         accept={VOICE_ACCEPT}
         aria-label={t('editor.voice.import')}
         onChange={(e) => {

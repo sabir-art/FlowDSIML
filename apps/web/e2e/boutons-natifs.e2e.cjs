@@ -51,7 +51,7 @@ const DIALOGS = [
     name: 'Dialogue Activer l’Assistance IA',
     route: '/#/settings/ai',
     open: async (p) => {
-      await p.getByRole('switch', { name: 'Activer l’Assistance IA pour cet espace' }).click();
+      await p.getByRole('switch', { name: 'Activer l’Assistance IA' }).click();
       await p.getByRole('dialog', { name: 'Activer l’Assistance IA ?' }).waitFor();
     },
   },

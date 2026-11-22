@@ -166,7 +166,7 @@ const manifests = {
     'sous-titres activés (voix)',
   );
   const slider = p.getByRole('slider', { name: 'Position dans la vidéo' });
-  ok((await slider.getAttribute('max')) === '10000', 'durée après coupe (10 s)');
+  ok((await slider.getAttribute('aria-valuemax')) === '10000', 'durée après coupe (10 s)');
   ok((await p.locator('.p-video__mark').count()) === 1, 'pause marquée sur la barre');
   await p.locator('video').evaluate((v) => v.play());
   await p.getByRole('dialog', { name: 'Le formulaire' }).waitFor({ timeout: 15000 });

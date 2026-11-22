@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import type { StepRow } from '../types';
 import { allTabs, capturedTab, showTabs, stepTab } from './tabs';
+import { Select } from '@flowdsiml/ui';
 
 /** L25-06 : section « Onglet de la capture » du panneau Étape (étapes capturées avec le suivi). */
 export function CaptureTabFields({
@@ -27,9 +28,9 @@ export function CaptureTabFields({
         <label className="t-label" htmlFor="cap-tab">
           {t('editor.capture.tab')}
         </label>
-        <select
+        <Select
           id="cap-tab"
-          className="select input-sm"
+          size="sm"
           value={tab.n}
           disabled={readOnly}
           aria-describedby={tab.n > 1 ? 'cap-tab-h' : undefined}
@@ -47,7 +48,7 @@ export function CaptureTabFields({
                 {t('editor.capture.tabOption', { n: x.n, title: x.n === tab.n ? tab.title : x.title })}
               </option>
             ))}
-        </select>
+        </Select>
         {tab.n > 1 && (
           <span className="help" id="cap-tab-h">
             {tab.n === 2 ? t('editor.capture.tabHelp2') : t('editor.capture.tabHelpN', { n: tab.n })}

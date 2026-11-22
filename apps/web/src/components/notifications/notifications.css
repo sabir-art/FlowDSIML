@@ -18,7 +18,7 @@
   color: #ffffff;
   font: 700 11px/18px var(--fd-font-sans);
   text-align: center;
-  box-shadow: 0 0 0 2px var(--fd-color-bg);
+  box-shadow: 0 0 0 2px var(--fd-color-content-bg);
 }
 .nb-pop {
   position: absolute;

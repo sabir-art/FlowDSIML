@@ -55,8 +55,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     (await mail.count()) === 1 && (await mail.innerText()).includes('En attendant, un webhook'),
     'Intégrations : ligne e-mailing « En attendant, un webhook… »',
   );
-  if (SHOTS)
-    await page.locator('.int-card-list').screenshot({ path: `${SHOTS}/vb-02-integrations${sfx}.png` });
+  if (SHOTS) await page.locator('.int').screenshot({ path: `${SHOTS}/vb-02-integrations${sfx}.png` });
   await mail.getByRole('link', { name: 'Utiliser un webhook' }).click();
   await page.waitForURL(/settings\/integrations\/webhooks/);
   ok(true, 'lien vers les webhooks');
@@ -71,21 +70,20 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'champ des métadonnées désactivé',
   );
   ok(
-    await page
-      .getByLabel('URL des métadonnées du fournisseur')
-      .evaluate(
-        (el) =>
-          getComputedStyle(el).borderStyle === 'dashed' && getComputedStyle(el).cursor === 'not-allowed',
-      ),
+    await page.getByLabel('URL des métadonnées du fournisseur').evaluate(
+      // FIELD-01 (gabarit du lot 1) : fond « surface-sunken », bordure neutre, curseur interdit
+      (el) =>
+        getComputedStyle(el).backgroundColor === 'rgb(246, 248, 250)' &&
+        getComputedStyle(el).cursor === 'not-allowed',
+    ),
     'champ des métadonnées : aspect désactivé',
   );
+  // Maquette lot1-parametres/securite : l'alternative est l'aide du champ, sans encadré ni lien
   ok(
-    /lien d’invitation et domaines autorisés/.test(await page.locator('.soon-why').innerText()),
-    'encadré « En attendant : lien d’invitation et domaines autorisés »',
-  );
-  ok(
-    (await page.locator('.soon-why').getByRole('link', { name: 'Inviter des membres' }).count()) === 1,
-    'lien vers Membres',
+    /En attendant\s?: lien d’invitation et domaines autorisés/.test(
+      await page.locator('#soon-sso-help').innerText(),
+    ),
+    'aide du champ : « En attendant : lien d’invitation et domaines autorisés »',
   );
   await noV2('Sécurité');
   await full('vb-03-securite');

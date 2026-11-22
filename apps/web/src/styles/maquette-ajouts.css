@@ -286,106 +286,6 @@
   padding: var(--fd-space-4);
 }
 
-/* ---- Paramètres (PRM-01) : styles de page et styles en ligne de parametres.html ---- */
-.mk.st {
-  background: transparent;
-}
-.mk .settings {
-  display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
-  gap: 32px;
-  align-items: start;
-}
-.mk .snav {
-  /* §18.3 : navigation groupée. Survol : voile neutre (fonce en clair, éclaircit en sombre) */
-  --snav-hover: color-mix(in srgb, var(--fd-color-text) 6%, transparent);
-  --snav-active-bg: var(--fd-color-surface);
-  --snav-active-edge: 0 1px 2px rgb(8 10 14 / 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  position: sticky;
-  top: 24px;
-}
-/* Sombre : actif en surface-raised, bordure de 1 px (ombre interne, sans décalage), pas d'ombre portée */
-[data-theme='dark'] .mk .snav {
-  --snav-active-bg: var(--fd-color-surface-raised);
-  --snav-active-edge: inset 0 0 0 1px var(--fd-color-border);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .mk .snav {
-    --snav-active-bg: var(--fd-color-surface-raised);
-    --snav-active-edge: inset 0 0 0 1px var(--fd-color-border);
-  }
-}
-.mk .snav .snav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: var(--fd-radius-md);
-  color: var(--fd-color-text);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-}
-.mk .snav .snav-item:hover {
-  background: var(--snav-hover);
-  color: var(--fd-color-text);
-  text-decoration: none;
-}
-.mk .snav .snav-item.is-active {
-  /* §18.3 : seul élément à fond plein ; graisse 600 et ombre (bordure en sombre), jamais la couleur seule */
-  background: var(--snav-active-bg);
-  color: var(--fd-color-text);
-  font-weight: 600;
-  box-shadow: var(--snav-active-edge);
-}
-.mk .snav .snav-item:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
-}
-/* Groupes : 2 px entre éléments, 24 px avant le titre suivant (pas au-dessus du premier) */
-.mk .snav-grp {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.mk .snav-grp + .snav-grp {
-  margin-top: 24px;
-}
-.mk .snav .snav-item--soon,
-.mk .snav .snav-item--soon:hover {
-  background: none;
-  cursor: default;
-}
-.mk .snav .snav-item--soon em {
-  margin-left: auto;
-  font-style: normal;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--fd-color-text-muted);
-}
-.mk .st-crumb ol {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-  margin: 0 0 4px;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
-  color: var(--fd-color-text-muted);
-}
-.mk .st-crumb li {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.mk .st-crumb a {
-  color: inherit;
-}
 /* L48-A §6 : Utilisation, une ligne par quota (nom, barre fine, chiffre), état à partir de 80 % */
 .mk .us-head {
   display: flex;
@@ -494,21 +394,6 @@
     display: none;
   }
 }
-.mk .snav svg {
-  width: 18px;
-  height: 18px;
-}
-.mk .snav .grp {
-  /* Étiquette, pas un lien : boîte serrée, 6 px jusqu'au premier élément (4 + écart de 2) */
-  margin: 0 0 4px;
-  padding: 0 12px;
-  font: 600 11px / 16px var(--fd-font-sans);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--fd-color-text-muted);
-  cursor: default;
-  user-select: none;
-}
 .mk .form-sec {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -526,21 +411,6 @@
   width: auto;
 }
 @media (max-width: 900px) {
-  .mk .settings {
-    /* §18.7 : minmax(0, …) sinon la piste prend la largeur min-content de la nav en ligne */
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .mk .snav {
-    position: static;
-    flex-direction: row;
-    overflow-x: auto;
-  }
-  .mk .snav .grp {
-    display: none;
-  }
-  .mk .snav-grp {
-    display: contents;
-  }
   .mk .form-sec {
     grid-template-columns: 1fr;
   }
@@ -3096,22 +2966,6 @@
   align-self: flex-start;
 }
 
-/* L48-F F5 : Paramètres, téléphone et tablette : Aide et Notifications restent sur la ligne du titre
-   (la règle générale des en-têtes leur donne une ligne entière en dessous de 1 100 px) */
-@media (max-width: 1099px) {
-  .mk.st > .page-head {
-    flex-wrap: nowrap;
-    align-items: flex-start;
-  }
-  .mk.st > .page-head > div:first-child {
-    min-width: 0;
-  }
-  .mk.st > .page-head .page-head__actions {
-    flex: none;
-    width: auto;
-    margin-left: auto;
-  }
-}
 /* E-mails P1 : « E-mails envoyés aujourd'hui : n sur 150 », 14 px, sans jauge */
 .mk .us-emails {
   margin: 16px 0 0;
@@ -3127,14 +2981,14 @@
 }
 /* Retours client 21/11 §3 : un seul espacement de 24 px entre les blocs des Paramètres (description, cartes,
    tableaux), posé par le conteneur de la page ou par son enveloppe unique ; aucun bloc n'a de marge propre */
-.mk.st .st-body,
-.mk.st .st-body > :is(section, div):not(.card):only-of-type {
+.mk.st-wrap,
+.mk.st-wrap > :is(section, div):not(.card):only-of-type {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
-.mk.st .st-body > *,
-.mk.st .st-body > :is(section, div):not(.card):only-of-type > * {
+.mk.st-wrap > *,
+.mk.st-wrap > :is(section, div):not(.card):only-of-type > * {
   margin-top: 0;
   margin-bottom: 0;
 }
@@ -3160,7 +3014,7 @@
 
 /* Inviter des membres (retour client 21/11) : adresses en puces dans un seul champ de 40 px qui grandit.
    Même cadre et même focus que les autres champs (FIELD-01 les fera évoluer ensemble). */
-.mk .email-chips {
+.email-chips {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -3172,18 +3026,18 @@
   background: var(--fd-color-surface);
   cursor: text;
 }
-.mk .email-chips:focus-within {
+.email-chips:focus-within {
   border-color: var(--fd-color-primary);
   box-shadow: inset 0 0 0 1px var(--fd-color-primary);
 }
-.mk .email-chips.is-invalid {
+.email-chips.is-invalid {
   border-color: var(--fd-color-danger);
 }
-.mk .email-chips.is-invalid:focus-within {
+.email-chips.is-invalid:focus-within {
   border-color: var(--fd-color-danger);
   box-shadow: inset 0 0 0 1px var(--fd-color-danger);
 }
-.mk .email-chips__input {
+.email-chips__input {
   flex: 1 1 160px;
   min-width: 0;
   height: 30px;
@@ -3195,13 +3049,13 @@
   outline: none;
 }
 /* Un seul indicateur : celui du cadre (le halo global de .mk :focus-visible doublait le contour) */
-.mk .email-chips__input:focus-visible {
+.email-chips__input:focus-visible {
   box-shadow: none;
 }
-.mk .email-chips__input::placeholder {
+.email-chips__input::placeholder {
   color: var(--fd-color-text-subtle);
 }
-.mk .email-chip {
+.email-chip {
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -3213,17 +3067,17 @@
   color: var(--fd-color-text);
   font-size: 13px;
 }
-.mk .email-chip.is-invalid {
+.email-chip.is-invalid {
   background: var(--fd-color-danger-soft);
   color: var(--fd-color-danger);
   text-decoration: underline wavy;
 }
-.mk .email-chip__text {
+.email-chip__text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.mk .email-chip__remove {
+.email-chip__remove {
   display: grid;
   place-items: center;
   width: 22px;
@@ -3235,11 +3089,11 @@
   color: var(--fd-color-text-muted);
   cursor: pointer;
 }
-.mk .email-chip__remove:hover {
+.email-chip__remove:hover {
   background: var(--fd-color-border);
   color: var(--fd-color-text);
 }
-.mk .email-chip__remove svg {
+.email-chip__remove svg {
   width: 14px;
   height: 14px;
 }

@@ -7,6 +7,7 @@ import { AvatarPhoto } from '../AvatarPhoto';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { HelpButton } from '../../help/HelpButton';
+import { useMediaQuery } from '../../lib/useMediaQuery';
 import {
   ArrowLeft,
   AtSign,
@@ -48,7 +49,7 @@ const KIND_ICON = {
   invite: UserPlus,
 };
 
-export function NotificationBell() {
+function BellPanel() {
   const { t } = useTranslation();
   const id = useId();
   const n = useNotifications();
@@ -624,4 +625,13 @@ function InviteRow({
       </span>
     </li>
   );
+}
+
+/**
+ * Aide et cloche, montées une seule fois (deux cloches ouvriraient deux fois le même canal temps réel) :
+ * dans la barre mobile sous 1 024 px (`topbar`), dans l'en-tête de la page au-delà.
+ */
+export function NotificationBell({ topbar = false }: { topbar?: boolean }) {
+  const mobile = useMediaQuery('(max-width: 1023px)');
+  return mobile === topbar ? <BellPanel /> : null;
 }

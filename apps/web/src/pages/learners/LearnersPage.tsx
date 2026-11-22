@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { toCsv } from '@flowdsiml/core';
 import type { Json } from '@flowdsiml/supabase-types';
-import { Alert, Button, Empty, Status } from '@flowdsiml/ui';
+import { Alert, Button, Empty, Status, Select } from '@flowdsiml/ui';
 import { NoMatch } from '../../components/empty/NoMatch';
 import { supabase } from '../../lib/supabase';
 import { downloadText } from '../../lib/download';
@@ -1402,8 +1402,8 @@ function LearnerDrawer({
         <div className="body">
           <label className="fd-field l13-structure">
             <span className="fd-label">{t('learners.filters.structure')}</span>
-            <select
-              className="fd-select fd-select--sm"
+            <Select
+              size="sm"
               value={l.structureId ?? ''}
               onChange={async (e) => {
                 await supabase
@@ -1419,7 +1419,7 @@ function LearnerDrawer({
                   {s.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           {/* L38-3 : groupe porté par le lien personnalisé de l'apprenant */}
           {l.linkId && (

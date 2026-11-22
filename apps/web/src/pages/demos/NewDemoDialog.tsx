@@ -14,6 +14,7 @@ import { TypeBadge } from '../../components/TypeBadge';
 import { EXTENSION_URL } from '../../lib/env';
 import { useHtmlCapture } from '../../lib/htmlCapture';
 import { HtmlCaptureNotice } from '../../components/HtmlCaptureNotice';
+import { Select } from '@flowdsiml/ui';
 
 /**
  * DSH-06, L48-G §3 : « Nouvelle démo » en deux étapes.
@@ -217,6 +218,7 @@ export function NewDemoDialog({
                   type="button"
                   className="nd-src"
                   disabled={busy}
+                  aria-controls="newdemodialog-file"
                   onClick={() => picker.current?.click()}
                 >
                   <ImagePlus aria-hidden="true" />
@@ -231,7 +233,11 @@ export function NewDemoDialog({
                   type="file"
                   accept={IMAGE_ACCEPT}
                   multiple
-                  hidden
+                  /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+                  id="newdemodialog-file"
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
                   aria-label={t('demos.newImport')}
                   onChange={async (e) => {
                     const files = [...(e.target.files ?? [])];
@@ -302,14 +308,14 @@ export function NewDemoDialog({
           {type !== 'captures' && <HtmlCaptureNotice className="nd-notice" />}
           <label className="fd-field nd-folder">
             <span className="fd-label">{t('demos.colFolder')}</span>
-            <select className="fd-input" value={folder} onChange={(e) => setFolder(e.target.value)}>
+            <Select value={folder} onChange={(e) => setFolder(e.target.value)}>
               <option value="">{t('demos.noFolder')}</option>
               {folders.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <div className="dialog-actions nd-actions">
             <button type="button" className="fd-btn" onClick={() => setStep(1)}>

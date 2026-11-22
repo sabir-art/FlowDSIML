@@ -36,6 +36,7 @@ import {
 import { useAuth } from '../auth/AuthProvider';
 import { useHelp } from '../help/HelpProvider';
 import { ExtensionDialog } from './ExtensionDialog';
+import { LazyNotificationBell } from './notifications/LazyNotificationBell';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { setLocale } from '../i18n';
 import { supabase } from '../lib/supabase';
@@ -238,6 +239,10 @@ export function Layout() {
         <span className="brand">
           <img src={symbol} alt={APP_NAME} width={32} height={32} className="brand__symbol" />
         </span>
+        {/* Lot 1 (UX, 21/11) : sous 1 024 px, Aide et Notifications à droite de la barre mobile */}
+        <div className="topbar__tools">
+          <LazyNotificationBell topbar />
+        </div>
       </header>
       <aside
         data-tip-side="right"
@@ -273,7 +278,12 @@ export function Layout() {
         </div>
         {/* CAD-02 : sélecteur de workspace toujours visible (maquette) */}
         <WorkspaceSwitcher />
-        <nav aria-label={t('nav.main')} className="fd-nav">
+        <nav
+          aria-label={t('nav.main')}
+          className="fd-nav"
+          /* §18.6 : éléments à 2 px, titre de groupe à 6 px de sa première entrée (NAV-02 §11.7.2) */
+          data-gap-exempt=""
+        >
           {/* RF6 : « Démos » reste actif dans les sous-pages d'une démo (analytics, partage…) */}
           {item('/', path === '/' || path.startsWith('/demos/'), <LayoutGrid {...ICON} />, t('nav.demos'))}
           {/* L48-G §4 : le Sandbox a sa propre entrée (pages reliées, exploration libre) */}

@@ -1,0 +1,175 @@
+/* COMP-01 §3 : date et heure maison. Champ composé (FIELD-01 §11.3) : le groupe porte la bordure et
+   l'anneau de focus, la saisie et le bouton n'en ont pas. */
+.fd-date {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  transition:
+    border-color var(--fd-motion-duration-fast) var(--fd-motion-ease-standard),
+    box-shadow var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
+}
+.fd-date:hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+.fd-date:focus-within {
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.fd-date:has(.fd-date__input[aria-invalid='true']) {
+  border-color: var(--fd-color-danger);
+}
+.fd-date[data-disabled] {
+  border-color: var(--fd-color-border);
+  background: var(--fd-color-surface-sunken);
+}
+.fd-date .fd-date__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 12px;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  background: none;
+  color: var(--fd-color-text);
+  font: 400 14px var(--fd-font-sans);
+}
+.fd-date .fd-date__input::placeholder {
+  color: var(--fd-color-text-subtle);
+}
+.fd-date .fd-date__input:disabled {
+  color: var(--fd-color-text-muted);
+  cursor: not-allowed;
+}
+.fd-date__btn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-right: 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.fd-date__btn:hover:not(:disabled) {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.fd-date__btn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-date__btn:disabled {
+  cursor: not-allowed;
+}
+
+/* Calendrier : popover de 280 px, grille de 7 jours */
+.fd-cal {
+  width: 280px;
+  padding: 12px;
+  overflow: visible;
+}
+.fd-cal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.fd-cal__month {
+  font: 600 14px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.fd-cal__month::first-letter {
+  text-transform: uppercase;
+}
+.fd-cal__nav {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.fd-cal__nav:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.fd-cal__nav:focus-visible,
+.fd-cal__day:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-cal__grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.fd-cal__grid th {
+  height: 28px;
+  padding: 0;
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+  text-align: center;
+}
+.fd-cal__grid td {
+  padding: 1px;
+  text-align: center;
+}
+.fd-cal__day {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text);
+  font: 400 13px var(--fd-font-sans);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.fd-cal__day:hover:not(:disabled) {
+  background: var(--fd-color-nav-hover);
+}
+.fd-cal__day[data-out] {
+  color: var(--fd-color-text-subtle);
+}
+.fd-cal__day[data-today] {
+  border-color: var(--fd-color-border-field);
+}
+.fd-cal__day[aria-pressed='true'] {
+  border-color: var(--fd-color-primary);
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary);
+  font-weight: 600;
+}
+.fd-cal__day[aria-pressed='true']:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--fd-color-surface);
+}
+.fd-cal__day:disabled {
+  color: var(--fd-color-text-subtle);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Heures : liste de créneaux, mêmes options que le Select */
+.fd-time-pop {
+  width: 120px;
+}
+.fd-time-pop .fd-opt.is-active {
+  background: var(--fd-color-nav-hover);
+}

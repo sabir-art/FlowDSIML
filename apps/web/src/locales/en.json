@@ -3,6 +3,14 @@
     "name": "{{app}}"
   },
   "common": {
+    "colorPalette": "Brand colours",
+    "colorShade": "Saturation and brightness",
+    "colorHue": "Hue",
+    "colorHex": "Hex code",
+    "openCalendar": "Open the calendar",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "openTimes": "Choose a time",
     "loading": "Loading…",
     "save": "Save",
     "saved": "Changes saved.",
@@ -186,7 +194,7 @@
   "myData": {
     "title": "My data",
     "exportBody": "A .zip file with your personal data: profile, workspaces and roles, comments, notifications, preferences and publication confirmations. Demos belong to the workspace: they are not included.",
-    "export": "Download my data (.zip)",
+    "export": "Download (.zip)",
     "preparing": "Preparing the file…",
     "readme": "Export of your TutoClick personal data ({{date}}).\n\nprofil.json: your account (email address, name, language, creation date).\nespaces-et-roles.json: the workspaces you belong to, your role and when you joined.\ncommentaires.json: the comments you wrote in demos.\nnotifications.json: your notifications (type, demo, date, read).\npreferences.json: your notification preferences and muted demos.\nconfirmations-de-publication.json: your confirmations before public publications.\n\nDemos belong to their workspace and are not included.\n",
     "delete": "Delete my account",
@@ -208,12 +216,14 @@
     "errPassword": "Incorrect password.",
     "deletedNotice": "Your account has been deleted.",
     "done": "File downloaded. It is not kept on our servers.",
-    "exportFailed": "The file could not be prepared. Try again."
+    "exportFailed": "The file could not be prepared. Try again.",
+    "deleteHelp": "Deleting your account erases your personal data. Demos stay in their workspace.",
+    "danger": "Danger zone"
   },
   "profile": {
     "title": "My profile",
-    "passwordHint": "You can set a password to sign in without an emailed link.",
-    "changePassword": "Change password",
+    "passwordHint": "To sign in without an emailed link.",
+    "changePassword": "Password",
     "passwordUpdated": "Password updated.",
     "emailHint": "Contact support to change your email.",
     "section": "Profile",
@@ -240,7 +250,13 @@
       "preview": "Preview",
       "zoom": "Zoom",
       "save": "Save photo"
-    }
+    },
+    "infoTitle": "Photo and details",
+    "infoHelp": "Your name and photo appear in comments and the team list.",
+    "passwordNew": "New password",
+    "passwordHelp": "At least 8 characters.",
+    "passwordConfirm": "Confirmation",
+    "passwordMismatch": "The two passwords do not match."
   },
   "members": {
     "title": "Members",
@@ -256,7 +272,7 @@
     "confirmRemove": "Remove {{email}}?",
     "confirmLeave": "Leave this workspace?",
     "emails": "Email addresses",
-    "emailsPlaceholder": "mary@acme.example, paul@acme.example",
+    "emailsPlaceholder": "Add an address…",
     "invalidEmails": "Invalid addresses: {{list}}",
     "member": "Member",
     "countOf_one": "{{count}} member of {{limit}}.",
@@ -317,7 +333,33 @@
       "failed": "Email not sent",
       "budget": "Daily email limit reached",
       "rateLimit": "Hourly limit reached"
-    }
+    },
+    "inviteShort": "Invite",
+    "subOf_one": "{{count}} member out of {{limit}}. Invitations expire after 14 days.",
+    "subOf_other": "{{count}} members out of {{limit}}. Invitations expire after 14 days.",
+    "subUnlimited_one": "{{count}} member. Invitations expire after 14 days.",
+    "subUnlimited_other": "{{count}} members. Invitations expire after 14 days.",
+    "colName": "Name",
+    "colEmail": "Email",
+    "colStatus": "Status",
+    "statusActive": "Active",
+    "statusInvited": "Invited",
+    "changeRole": "Change role",
+    "copyInviteLink": "Copy invitation link",
+    "noMatch": "No member matches this search.",
+    "roleHelp": {
+      "viewer": "Views demos and analytics.",
+      "editor": "Creates, edits and publishes demos.",
+      "admin": "Also manages members and the workspace.",
+      "owner": "All rights, including deleting the workspace."
+    },
+    "sendN_one": "Send {{count}} invitation",
+    "sendN_other": "Send {{count}} invitations",
+    "sendNone": "Send invitations",
+    "sentTitle": "Invitations sent",
+    "sentBody_one": "{{count}} invitation sent. If the email does not arrive, share the link yourself.",
+    "sentBody_other": "{{count}} invitations sent. If the email does not arrive, share the link yourself.",
+    "done": "Done"
   },
   "workspace": {
     "title": "Workspace settings",
@@ -346,7 +388,7 @@
     "timezone": "Analytics time zone",
     "saved": "Settings saved",
     "dangerHelp": "Irreversible actions.",
-    "deleteHintCounts": "Deletes {{demos}}, their analytics and their leads. Members lose access.",
+    "deleteHintCounts": "Deleting the workspace erases {{demos}}, their statistics and their leads. Members lose access.",
     "deleteTitle": "Delete “{{name}}”?",
     "deleteBodyCounts": "This cannot be undone: {{demos}}, their analytics and {{leads}} will be deleted.",
     "deleteForever": "Delete permanently",
@@ -355,7 +397,14 @@
     "nDemos_one": "the demo",
     "nDemos_other": "the {{n}} demos",
     "nLeads_one": "{{n}} lead",
-    "nLeads_other": "{{n}} leads"
+    "nLeads_other": "{{n}} leads",
+    "logo": "Logo",
+    "slugPrefix": "tutoclick/",
+    "websitePlaceholder": "https://…",
+    "privacyPlaceholder": "https://…",
+    "supportPlaceholder": "name@domain.com",
+    "ownDemos_one": "its demo",
+    "ownDemos_other": "its {{n}} demos"
   },
   "errors": {
     "generic": "Something went wrong: {{message}}",
@@ -2754,11 +2803,11 @@
     "usage": "Usage",
     "brandTheme": "Theme and colours",
     "publicPage": "Public page",
-    "domain": "Domain",
     "tags": "Tags",
     "keys": "Access keys",
     "notifications": "Notifications",
     "breadcrumb": "Breadcrumb",
+    "backTo": "Back to Settings",
     "grp": {
       "space": "Workspace",
       "brand": "Brand",
@@ -2781,13 +2830,19 @@
     "hotspot": "Hotspot dot",
     "font": "Font",
     "pageTitle": "Public page",
-    "pageHelp": "The header shown around demos shared by link.",
+    "pageHelp": "Shown around your demos shared by link.",
+    "pageHead": "Public page header",
+    "pageSoon": "The public page is coming soon. Its settings are visible but not active yet.",
+    "optional": "Optional.",
     "cta1": "Primary button",
     "cta1Url": "Primary button URL",
     "cta2": "Secondary button",
     "cta2Url": "Secondary button URL",
     "ctaLabel": "Label",
     "hideBranding": "Hide “Made with {{app}}”",
+    "logoDrop": "Drop a logo",
+    "logoPick": "Choose a file",
+    "or": "or",
     "editorNote": "Only owners and admins can change the brand and the default style.",
     "logoTitle": "Logo",
     "logoHelp": "Shown in the header, the training center and public pages.",
@@ -2801,16 +2856,16 @@
     "logoFormat": "This format is not accepted. Choose a PNG, JPEG, WebP or SVG file.",
     "logoSize": "The file is larger than 2 MB.",
     "colorsTitle": "Brand colors",
-    "colorsHelp": "Used by the training center, public pages and the header logo. They do not change demo styles.",
+    "colorsHelp": "Training centre, public pages and header logo. Does not change demo styles.",
     "accent": "Accent color",
-    "whiteRatio": "Contrast with white: {{ratio}}:1, {{verdict}}",
+    "whiteRatio": "White text on this colour: {{ratio}}:1, {{verdict}}.",
     "ok": "compliant",
     "notOk": "insufficient",
     "proposed": "Suggested color: {{color}}.",
     "useColor": "Use this color",
     "colorsSaved": "Brand colors saved.",
     "stylesTitle": "Demo styles",
-    "stylesHelp": "The default style applies to demos that have not chosen a style in the Design tool.",
+    "stylesHelp": "The default style applies to demos with no style chosen in the Design tool.",
     "newStyle": "New style",
     "builtin": "Built-in styles",
     "mine": "Workspace styles",
@@ -4084,6 +4139,7 @@
     "title": "Integrations",
     "sub": "Send your demos’ events to your tools.",
     "webhooks": "Webhooks",
+    "webhooksRow": "A signed HTTPS call for each event.",
     "webhooksSub": "A signed HTTPS call for each chosen event.",
     "add": "Add a webhook",
     "emptyTitle": "No webhooks",
@@ -4210,14 +4266,21 @@
     "pausedCount_one": "{{count}} paused after failures",
     "pausedCount_other": "{{count}} paused after failures",
     "noneConnected": "No active connection",
+    "catSub": {
+      "automation": "Send your demo events to your tools.",
+      "communication": "Notify your team where it talks.",
+      "audience": "Follow your demos’ audience in your analytics tool.",
+      "crm": "Link your demos to your user follow-up."
+    },
     "needOther": "Need another connection?",
-    "askIt": "Ask your IT department",
+    "askIt": "Contact support",
     "setSupport": "Set the support link",
     "requestSubject": "Connection request",
     "emailingWhy": "Meanwhile, a webhook can feed these tools.",
     "useWebhook": "Use a webhook"
   },
   "glossary": {
+    "playerTitle": "In the player",
     "title": "Glossary",
     "intro": "Former terms and their replacements. In the player, terms found in bubbles are underlined and explained.",
     "import": "Import a CSV",
@@ -4236,7 +4299,7 @@
     "delete": "Delete",
     "noMatch": "No term matches “{{q}}”.",
     "emptyTitle": "Add your first term",
-    "emptyBody": "Add the words that change with the new tool: the former term, the new one and a short definition. You can also import a CSV file (columns: nouveau, ancien, definition, formes).",
+    "emptyBody": "The old term, the new one and a short definition. You can also import a CSV.",
     "underline": "Underline terms in the player",
     "underlineHelp": "For every demo in the workspace. Each demo can turn it off in its Settings.",
     "underlineOn": "Terms will be underlined in the player",
@@ -4349,7 +4412,9 @@
         "Mandatory SSO sign-in"
       ],
       "field": "Identity provider metadata URL",
-      "why": "Requires a SAML-compatible hosting plan. Meanwhile: invitation links and allowed domains."
+      "why": "Requires a SAML-compatible hosting plan. Meanwhile: invitation links and allowed domains.",
+      "sub": "Sign in with your organisation account.",
+      "wait": "Meanwhile: invitation link and allowed domains."
     },
     "inviteMembers": "Invite members",
     "security": "Security",
@@ -4362,7 +4427,10 @@
     "edit": "Edit",
     "leadsTitle": "Lead retention",
     "leadsRetention_one": "Leads are deleted after {{count}} day.",
-    "leadsRetention_other": "Leads are deleted after {{count}} days."
+    "leadsRetention_other": "Leads are deleted after {{count}} days.",
+    "returningTitle": "Returning visitors",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days"
   },
   "rules": {
     "title": "Sharing rules",
@@ -4379,7 +4447,7 @@
     "publishHelp": "“Distribute” covers the SCORM package, intranet embedding, the public page and HTML and MP4 exports.",
     "publish_editor": "Editors, admins and owners",
     "publish_admin": "Admins and owners only",
-    "exports": "Export downloads",
+    "exports": "Exports outside {{app}}",
     "exportsLabel": "Allow exports outside {{app}} (SCORM, HTML, MP4, PDF)",
     "exportsHelp": "When off, these exports are disabled in the app for every role. Existing distributions stay online.",
     "footer": "These rules apply to the whole workspace. Admins and owners see them here; editors see them in Share.",
@@ -4405,7 +4473,8 @@
     "maxFixed": "Maximum duration set by the workspace: {{n}} days.",
     "accessToFix": "Access to fix",
     "accessToFixHelp": "Demo not accessible: the workspace rules require a password.",
-    "keptMode": "Kept for this link. This mode is no longer offered: disabled by the workspace rules."
+    "keptMode": "Kept for this link. This mode is no longer offered: disabled by the workspace rules.",
+    "sub": "They apply to the whole workspace. Editors see them in Share."
   },
   "folderAccess": {
     "menu": "Access",
@@ -4481,7 +4550,7 @@
     },
     "settings": {
       "sub": "Text proposals, translations and suggestions in the editor. Nothing is applied without your approval.",
-      "switch": "Turn on AI Assist for this workspace",
+      "switch": "Turn on AI Assist",
       "on": "On.",
       "off": "Off.",
       "readOnly": "Only owners and admins can change this setting.",
@@ -5208,7 +5277,8 @@
       "storage": "Storage",
       "members": "Members",
       "published": "Published demos",
-      "retention": "Statistics retention"
+      "retention": "Statistics retention",
+      "emails": "Emails sent today"
     },
     "blocked": {
       "ai": "AI assistance requests are blocked until the reset.",
@@ -5218,7 +5288,9 @@
       "tts": "Text-to-speech is blocked until the reset.",
       "stt": "Automatic captions are blocked until the reset."
     },
-    "setSupport": "Set the support link"
+    "setSupport": "Set the support link",
+    "title": "Usage",
+    "ratio": "{{used}} of {{limit}}"
   },
   "extension": {
     "installTitle": "Install the extension",

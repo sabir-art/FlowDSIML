@@ -85,7 +85,7 @@ const hook = (id, state, ws) => ({
   ok(true, '« Connecter » ouvre « Ajouter un webhook »');
   await p.keyboard.press('Escape');
   // Demande à la DSI
-  const href = await p.getByRole('link', { name: 'Faire une demande à la DSI' }).getAttribute('href');
+  const href = await p.getByRole('link', { name: 'Contactez le support' }).getAttribute('href');
   ok(href === 'mailto:dsi@acme.example?subject=Demande%20de%20connexion', `demande à la DSI : ${href}`);
   // Connectées, vide
   await p.getByRole('radio', { name: 'Connectées' }).click();
@@ -139,7 +139,7 @@ const hook = (id, state, ws) => ({
   await q.locator('.l23 tbody tr').first().waitFor();
   ok((await q.locator('.l23 tbody tr').count()) === 3, 'page Webhooks : la liste');
   ok(
-    (await q.locator('.st-crumb').innerText()).includes('Intégrations') &&
+    (await q.locator('.fd-crumb').innerText()).includes('Intégrations') &&
       (await q.getByRole('heading', { level: 1 }).innerText()) === 'Webhooks',
     'page Webhooks : fil « … › Intégrations », titre « Webhooks »',
   );
@@ -149,7 +149,7 @@ const hook = (id, state, ws) => ({
   );
   await axe(q, 'page Webhooks');
   await q.goto(`${APP}/#/settings/integrations/wh-1`);
-  await q.locator('.st-crumb').getByRole('link', { name: 'Webhooks' }).waitFor();
+  await q.locator('.fd-crumb').getByRole('link', { name: 'Webhooks' }).waitFor();
   ok(true, 'détail : fil « … › Intégrations › Webhooks »');
   await q.goto(`${APP}/#/settings/integrations#webhooks`);
   await q.waitForURL(/settings\/integrations\/webhooks$/);
@@ -159,12 +159,17 @@ const hook = (id, state, ws) => ({
   // ===== 390 px =====
   const m = await open(seed(), '/settings/integrations', 390);
   await m.locator('.int-list').first().waitFor();
-  ok(await m.getByRole('combobox', { name: 'Catégorie' }).isVisible(), '390 px : select « Catégorie »');
+  // Maquette lot1-parametres/integrations (390 px) : le filtre segmenté passe à la ligne, sans liste native
+  ok(
+    (await m.getByRole('radio', { name: /^Mesure d.audience$/ }).isVisible()) &&
+      (await m.locator('.int select').count()) === 0,
+    '390 px : filtre segmenté sur plusieurs lignes, aucun select natif',
+  );
   ok(
     await m.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
     '390 px : pas de défilement horizontal',
   );
-  await m.getByRole('combobox', { name: 'Catégorie' }).selectOption('audience');
+  await m.getByRole('radio', { name: /^Mesure d.audience$/ }).click();
   await m.waitForURL(/categorie=mesure/);
   // Attendre que la liste soit stable (l'ancienne liste disparaît après le changement de catégorie)
   const two = await m

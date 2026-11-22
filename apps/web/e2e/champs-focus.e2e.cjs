@@ -386,10 +386,10 @@ async function keyboard(p) {
       const p = await ctx.newPage();
       await install(p, seed());
       await p.goto(`${APP}/#/settings/members`);
-      await p.getByRole('button', { name: 'Inviter des membres' }).click();
+      await p.getByRole('button', { name: 'Inviter', exact: true }).click();
       await p.addStyleTag({ content: '*{transition:none!important}' });
       const T = await probeTokens(p);
-      const sec = p.locator('[role=dialog] .btn-secondary').first();
+      const sec = p.locator('dialog.fd-modal[open] .fd-modal__foot .fd-btn:not(.fd-btn--primary)').first();
       await p.keyboard.press('Shift');
       await sec.focus();
       const ks = await style(sec);
@@ -398,7 +398,10 @@ async function keyboard(p) {
         `bouton secondaire au clavier (${theme}) : sa bordure en prune sur 2 px (${JSON.stringify(ks)})`,
       );
       await p.locator('#inv-email').fill('pas-un-email');
-      await p.getByRole('button', { name: 'Envoyer les invitations' }).click();
+      await p
+        .locator('dialog.fd-modal[open]')
+        .getByRole('button', { name: /^Envoyer/ })
+        .click();
       await p.locator('#inv-email-error').waitFor();
       const grp = p.locator('.email-chips');
       await p.addStyleTag({ content: '*{transition:none!important}' });

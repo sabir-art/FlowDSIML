@@ -7,6 +7,7 @@ const { install, seed } = require('./fake-supabase.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const { PUBLIC_PLAYER } = require('./fake-supabase.cjs');
+const { pick } = require('./_select.cjs');
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -38,7 +39,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     .locator('.ed-rail [data-tool="step"][aria-pressed="false"]')
     .click()
     .catch(() => {});
-  await app.selectOption('#st-gate', { index: 1 });
+  await pick(app.locator('#st-gate'), { index: 1 });
   await app.waitForTimeout(900);
   app.on('dialog', (d) => {
     errors.push(`dialog: ${d.message()}`);
@@ -268,7 +269,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     websiteUrl: 'https://acme.example',
   };
   await app.getByLabel('Date d’expiration').check();
-  await app.fill('#acc-exp-d', '2025-01-15');
+  // COMP-01 §3 : date maison, saisie « jj/mm/aaaa » validée à la sortie du champ
+  await app.fill('#acc-exp-d', '15/01/2025');
+  await app.keyboard.press('Tab');
   await app.waitForTimeout(400);
   ok(!!state.tables.demo_access[0].expires_at, 'L11-05 : date d’expiration enregistrée');
   const g3 = await ctx.newPage();

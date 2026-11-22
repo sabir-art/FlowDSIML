@@ -15,6 +15,7 @@ import { VideoFields } from '../video/VideoFields';
 import { HtmlFields } from '../html/HtmlFields';
 import { CaptureTabFields } from '../capture/CaptureFields';
 import { AnimationFields } from '../capture/AnimationFields';
+import { Select } from '@flowdsiml/ui';
 
 export function StepPanel({
   editor,
@@ -306,9 +307,9 @@ export function StepPanel({
             <div className="sec-title">{t('editor.end.organisation')}</div>
             <div className="field">
               <label htmlFor="st-chapter">{t('editor.chapter')}</label>
-              <select
+              <Select
                 id="st-chapter"
-                className="select input-sm"
+                size="sm"
                 disabled={readOnly}
                 value={step.chapter_id ?? ''}
                 onChange={(e) => editor.updateStep(step.id, { chapter_id: e.target.value || null })}
@@ -319,13 +320,13 @@ export function StepPanel({
                     {c.title || t('editor.untitled')}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div className="field">
               <label htmlFor="st-gate">{t('editor.gateForm')}</label>
-              <select
+              <Select
                 id="st-gate"
-                className="select input-sm"
+                size="sm"
                 disabled={readOnly || !editor.forms.length}
                 value={step.gate_form_id ?? ''}
                 onChange={(e) => editor.updateStep(step.id, { gate_form_id: e.target.value || null })}
@@ -336,7 +337,7 @@ export function StepPanel({
                     {f.title}
                   </option>
                 ))}
-              </select>
+              </Select>
               {/* L18-01 : libellé court dans le select, explication en aide */}
               {!editor.forms.length && <p className="help">{t('editor.noForm')}</p>}
             </div>

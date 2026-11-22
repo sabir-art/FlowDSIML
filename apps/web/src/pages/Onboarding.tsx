@@ -26,6 +26,7 @@ import { createDemoFromImages, IMAGE_ACCEPT } from './demos/importImages';
 import { orderedCategories, type UseCase } from './demos/templates';
 import './onboarding.css';
 import { PendingInvites } from '../components/PendingInvites';
+import { Select } from '@flowdsiml/ui';
 
 type StepId = 'profile' | 'space' | 'use' | 'ext' | 'capture';
 const FULL: StepId[] = ['profile', 'space', 'use', 'ext', 'capture'];
@@ -227,14 +228,14 @@ export function Onboarding() {
           </label>
           <label className="fd-field">
             <span className="fd-label">{t('onboarding.job')}</span>
-            <select className="fd-input" value={job} onChange={(e) => setJob(e.target.value)}>
+            <Select value={job} onChange={(e) => setJob(e.target.value)}>
               <option value="">{t('onboarding.jobNone')}</option>
               {JOBS.map((j) => (
                 <option key={j} value={j}>
                   {t(`onboarding.jobs.${j}`)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         </div>
       </>
@@ -387,6 +388,7 @@ export function Onboarding() {
             type="button"
             className="link-button"
             disabled={busy}
+            aria-controls="onboarding-file"
             onClick={() => picker.current?.click()}
           >
             {t('onboarding.importInstead')}
@@ -399,7 +401,11 @@ export function Onboarding() {
             type="file"
             accept={IMAGE_ACCEPT}
             multiple
-            hidden
+            /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+            id="onboarding-file"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
             aria-label={t('onboarding.importInstead')}
             onChange={(e) => {
               const files = [...(e.target.files ?? [])];

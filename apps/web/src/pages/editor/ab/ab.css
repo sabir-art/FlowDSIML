@@ -81,9 +81,13 @@
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
-.ab-sec input[type='range'] {
-  width: 100%;
-  accent-color: var(--fd-color-primary);
+/* Libellé du curseur maison (COMP-01 §6) : même dessin que les libellés de champ */
+.mk .ab-sec .field > #ab-split-l {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fd-color-text);
 }
 .ab-b {
   /* §18.6 : écarts posés par le conteneur */

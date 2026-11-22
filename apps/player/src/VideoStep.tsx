@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Step } from '@flowdsiml/manifest';
 import { Captions, Maximize, Pause, Play, RotateCw, Volume2, VolumeX, VideoOff } from 'lucide-preact';
 import { fmt, type Dict } from './i18n';
+import { Slider } from './Slider';
 import {
   captionAt,
   clock,
@@ -228,16 +229,15 @@ export function VideoStep({
           {clock(edited)} / {clock(total)}
         </span>
         <span class="p-video__track">
-          <input
-            type="range"
+          <Slider
             min={0}
             max={total}
             step={1000}
-            value={edited}
-            aria-label={vt.position}
-            aria-valuetext={fmt(vt, 'valueText', { now: clock(edited), total: clock(total) })}
-            onInput={(e) => seek(Number((e.target as HTMLInputElement).value))}
-            onKeyDown={(e) => e.stopPropagation()}
+            value={Math.min(total, Math.max(0, edited))}
+            label={vt.position ?? ''}
+            valueText={fmt(vt, 'valueText', { now: clock(edited), total: clock(total) })}
+            onChange={seek}
+            stopKeys
           />
           {pauses.map((x) => (
             <i

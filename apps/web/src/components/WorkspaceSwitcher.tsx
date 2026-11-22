@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Check, ChevronDown, Plus } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { useToast } from './Toast';
@@ -61,7 +61,7 @@ export function WorkspaceSwitcher() {
                 <b>{current.name}</b>
                 <small>{meta}</small>
               </span>
-              <ChevronDown size={16} aria-hidden="true" />
+              <ChevronsUpDown size={16} aria-hidden="true" />
             </>
           ),
         }}

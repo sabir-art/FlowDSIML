@@ -12,6 +12,7 @@ const fs = require('fs');
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { learnersFixture } = require('./learners-data.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -130,7 +131,7 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       ).endsWith(`/demos/${DEMO}/distribute`),
       'n° 7 : lien vers le paquet SCORM (Diffuser)',
     );
-    await card.getByLabel('Position').selectOption({ label: 'Module 1' });
+    await pick(card.getByLabel('Position'), { label: 'Module 1' });
     await card.getByRole('button', { name: 'Ajouter à la formation' }).click();
     await card.getByText('Module 1 de « Logiciel métier ».').waitFor();
     const mods = t.path_modules.filter((m) => m.path_id === 'p-1').sort((a, b) => a.position - b.position);

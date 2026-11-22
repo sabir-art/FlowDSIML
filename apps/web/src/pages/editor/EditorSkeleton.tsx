@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, MoreHorizontal, Plus, Redo2, Rocket, Share2, Undo2 } from 'lucide-react';
 import { Sk } from '../../components/Skeleton';
+import { Select } from '@flowdsiml/ui';
 
 const ratioKey = (demoId: string) => `fd.ed.r.${demoId}`;
 
@@ -158,9 +159,9 @@ export function EditorSkeleton({
               <span className="t-caption muted sk-line">{showBlocks && <Sk w={160} />}</span>
               {/* Ligne « plus long que prévu » dans l'en-tête : aucun décalage de la scène */}
               {after || <span className="grow" />}
-              <select className="select input-sm stage-zoom" aria-label={t('editor.zoom')} disabled>
+              <Select size="sm" className="stage-zoom" aria-label={t('editor.zoom')} disabled>
                 <option>{t('editor.zoomFit')}</option>
-              </select>
+              </Select>
             </div>
             <div className="stage-main">
               <div className="stage-inner">

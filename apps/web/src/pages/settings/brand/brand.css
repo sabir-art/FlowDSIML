@@ -1,35 +1,46 @@
-/* L27 §3 : Paramètres > Marque */
-.br-page {
-  display: grid;
-  gap: 16px;
-}
-.br-card {
-  display: grid;
-  /* L45 (E18, E19) : groupe → groupe et dernier champ → validation à 24 px */
-  gap: var(--fd-gap-group);
-  padding: 20px;
-}
-.mk .br-card > *,
-.mk .br-card > .field + .field {
-  margin: 0;
-}
-/* Titre de la carte → premier contenu : 16 px */
-.mk .br-card > .card-head + * {
-  margin-top: calc(var(--fd-gap-title) - var(--fd-gap-group));
-}
-.br-card .card-head {
-  padding: 0;
-  margin: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  flex-wrap: wrap;
-}
+/* Paramètres › Thème et couleurs (maquette lot1-parametres/theme) : sections au gabarit « stg- » */
 .br-note {
   display: flex;
   gap: 8px;
-  align-items: flex-start;
+  align-items: center;
+  margin: 0 0 24px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.br-note > svg {
+  flex: none;
+}
+/* Zone de dépôt du logo : pointillé de 1,5 px, rayon de 12 px */
+.br-drop {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 24px;
+  border: 1.5px dashed var(--fd-color-border-field);
+  border-radius: 12px;
+  color: var(--fd-color-text-muted);
+  text-align: center;
+}
+.br-drop.is-over {
+  border-color: var(--fd-color-primary);
+  background: var(--fd-color-nav-hover);
+}
+.br-drop b {
+  font-weight: 600;
+  color: var(--fd-color-text);
+}
+.stg-sec .br-drop .fd-btn:not(.fd-btn--ghost) {
+  height: 32px;
+  min-height: 32px;
+  margin-left: 4px;
+  padding: 0 12px;
+}
+.stg-sec .br-drop .fd-btn--ghost,
+.stg-sec .br-actions .fd-btn--ghost {
+  height: 32px;
+  min-height: 32px;
+  padding: 0 8px;
+  color: var(--fd-color-text);
 }
 .br-logos {
   display: grid;
@@ -40,7 +51,7 @@
   display: grid;
   place-items: center;
   padding: 16px;
-  border-radius: var(--fd-radius-md);
+  border-radius: 12px;
   border: 1px solid var(--fd-color-border);
 }
 .br-logo img {
@@ -54,90 +65,134 @@
 .br-logo--dark {
   background: #0b0d10;
 }
-.br-logo-empty {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px;
-  border: 1px dashed var(--fd-color-border);
-  border-radius: var(--fd-radius-md);
-  color: var(--fd-color-text-muted);
-}
 .br-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
-.br-colors {
-  display: grid;
-  align-items: start;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.br-sub {
+.br-none {
   margin: 0;
-  text-transform: none;
-  letter-spacing: normal;
-  font-size: 13px;
-  font-weight: 600;
 }
-.br-grid {
+/* Couleur : pastille de 40 px puis le code hexadécimal */
+.br-colr {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.br-swatch {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.1);
+}
+[data-theme='dark'] .br-swatch {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .br-swatch {
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+  }
+}
+.br-warn {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  color: var(--fd-color-text);
+}
+.br-warn > svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--fd-color-warning);
+}
+/* Styles des démos : 3 colonnes (2 sous 1 100 px), cartes à filet, bandeau de 56 px */
+.br-styles {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 16px;
   margin: 0;
-  padding: 0;
+  padding: 20px 0 0;
+  list-style: none;
 }
-.br-grid .sty-view {
-  height: 84px;
+.br-st {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  overflow: hidden;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
 }
-.br-empty {
-  margin: 0;
+.br-st__band {
+  grid-column: 1 / -1;
+  height: 56px;
+  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.06);
 }
-/* L45 (E20) : sous-titre → son contenu à 12 px */
-.mk .br-card > .br-sub + * {
-  margin-top: calc(var(--fd-gap-action) - var(--fd-gap-group));
+.br-st__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+.br-st__meta > b {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.br-st__meta .stg-pill {
+  align-self: flex-start;
+}
+.br-st__warn {
+  gap: 4px;
+  color: var(--fd-color-text);
+}
+.br-st__warn > svg {
+  color: var(--fd-color-warning);
+}
+.br-st .menu-trigger {
+  width: 32px;
+  height: 32px;
+  margin: 6px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
 }
 .br-rename {
   display: grid;
   gap: 4px;
-  padding-right: 22px;
 }
-/* Modale « Modifier le style » : champs à gauche, aperçu à droite */
-.br-dialog {
-  width: min(860px, calc(100vw - 32px));
-  border: 0;
-  padding: 0;
-  border-radius: var(--fd-radius-lg, 16px);
-  background: var(--fd-color-surface);
-  color: var(--fd-color-text);
-  box-shadow: var(--fd-shadow-lg);
+@media (max-width: 1100px) {
+  .br-styles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
-.br-dialog::backdrop {
-  background: rgb(12 10 9 / 0.45);
+@media (max-width: 767px) {
+  .br-st .menu-trigger {
+    width: 44px;
+    height: 44px;
+    margin: 0;
+  }
 }
+/* Modale « Modifier le style » (MODAL-01, xl) : champs à gauche, aperçu à droite */
 .br-sd {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 20px;
-  max-height: min(70vh, 640px);
-  overflow: auto;
+  gap: 24px;
+  align-items: start;
 }
 .br-sd-fields {
   display: grid;
-  gap: 4px;
+  gap: 16px;
   align-content: start;
 }
-.br-fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0;
+.br-sd .br-colr .fd-input {
+  max-width: 240px;
 }
-.br-fieldset legend {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 6px;
+.br-sd-use {
+  justify-self: start;
+  align-self: flex-start;
+}
+.br-sd-note {
+  margin: 0;
 }
 .br-sd-preview {
   position: sticky;
@@ -199,15 +254,8 @@
   font-size: 12px;
   padding: 4px 12px;
 }
-@media (max-width: 1200px) {
-  .br-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 @media (max-width: 640px) {
-  .br-grid,
   .br-logos,
-  .br-colors,
   .br-sd {
     grid-template-columns: 1fr;
   }
@@ -215,19 +263,9 @@
     position: static;
   }
 }
-.mk .br-colors > .field + .field,
-.br-colors > .field {
-  margin: 0;
-}
 .br-confirm p {
   margin: 0;
 }
 .br-confirm p + p {
   margin-top: 8px;
-}
-.br-color-ro {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0;
 }

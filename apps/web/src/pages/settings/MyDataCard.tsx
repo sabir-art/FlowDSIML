@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Download, Trash2 } from 'lucide-react';
+import { CircleAlert, Download, TriangleAlert, UsersRound } from 'lucide-react';
+import { Button, Modal } from '@flowdsiml/ui';
 import { strToU8, zipSync } from 'fflate';
 import { supabase } from '../../lib/supabase';
 import { errorMessage } from '../../lib/errors';
@@ -60,7 +61,6 @@ export function MyDataCard() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [reauth, setReauth] = useState(false);
-  const dlg = useRef<HTMLDialogElement>(null);
 
   // Retour de « Me reconnecter » : la modale de suppression se rouvre
   useEffect(() => {
@@ -71,13 +71,6 @@ export function MyDataCard() {
     void openDelete();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    const d = dlg.current;
-    if (!d) return;
-    if (check && !d.open) d.showModal();
-    else if (!check && d.open) d.close();
-  }, [check]);
 
   async function prepareExport() {
     setExporting(true);
@@ -192,167 +185,164 @@ export function MyDataCard() {
   };
   const ready = !!email.trim() && sure && (!check?.hasPassword || !!password);
   return (
-    <section className="card st-gen st-mydata" aria-labelledby="md-title">
-      <div className="form-sec">
-        <div className="intro">
-          <h2 className="t-h3" id="md-title">
-            {t('myData.title')}
-          </h2>
-        </div>
-        <div>
-          <p className="muted">{t('myData.exportBody')}</p>
-          <div className="row wrap st-mydata-act">
-            <button
-              type="button"
-              className="btn btn-secondary"
+    <>
+      <section className="stg-sec st-mydata" aria-labelledby="md-title">
+        <div className="stg-sec__head">
+          <div>
+            <h2 id="md-title">{t('myData.title')}</h2>
+            <p>{t('myData.exportBody')}</p>
+          </div>
+          <div className="stg-sec__acts">
+            <Button
+              icon={<Download aria-hidden="true" />}
               disabled={exporting}
               onClick={() => void prepareExport()}
             >
-              <Download aria-hidden="true" />
               {exporting ? t('myData.preparing') : t('myData.export')}
-            </button>
-            <span className="help" role="status">
-              {exported ? t('myData.done') : ''}
-            </span>
+            </Button>
           </div>
-          {exporting && <div className="st-mydata-bar" aria-hidden="true" />}
-          {exportErr && (
-            <p className="field-error" role="alert">
-              {exportErr}
-            </p>
-          )}
-          <hr className="divider" />
-          <button type="button" className="btn btn-secondary st-mydata-del" onClick={() => void openDelete()}>
-            <Trash2 aria-hidden="true" />
-            {t('myData.delete')}
-          </button>
         </div>
-      </div>
+        {exporting && <div className="st-mydata-bar" aria-hidden="true" />}
+        <p className="stg-status" role="status">
+          {exported ? t('myData.done') : ''}
+        </p>
+        {exportErr && (
+          <p className="stg-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
+            {exportErr}
+          </p>
+        )}
+      </section>
+      <section className="stg-danger" aria-labelledby="md-danger">
+        <div>
+          <h2 id="md-danger">{t('myData.danger')}</h2>
+          <p>{t('myData.deleteHelp')}</p>
+        </div>
+        <Button className="stg-btn-danger st-mydata-del" onClick={() => void openDelete()}>
+          {t('myData.delete')}
+        </Button>
+      </section>
 
-      <dialog
-        ref={dlg}
-        className="mk dialog st-mydata-dlg"
-        aria-labelledby="md-dlg-t"
+      <Modal
+        open={!!check}
         onClose={() => setCheck(null)}
+        size="md"
+        tone={blocked ? 'default' : 'danger'}
+        icon={blocked ? <UsersRound /> : <TriangleAlert />}
+        title={t(blocked ? 'myData.blockedTitle' : 'myData.confirmTitle')}
+        closeLabel={t('common.close')}
+        className="st-mydata-dlg"
+        footer={
+          blocked ? (
+            <Button onClick={() => setCheck(null)}>{t('common.close')}</Button>
+          ) : (
+            <>
+              <Button onClick={() => setCheck(null)}>{t('common.cancel')}</Button>
+              <Button variant="danger" type="submit" form="md-form" disabled={!ready || busy || needReauth}>
+                {t('myData.deleteConfirm')}
+              </Button>
+            </>
+          )
+        }
       >
         {check && blocked ? (
-          <>
-            <div className="modal-head">
-              <h2 id="md-dlg-t">{t('myData.blockedTitle')}</h2>
-            </div>
-            <div className="modal-body">
-              <p>{t('myData.blockedBody')}</p>
-              <ul className="st-mydata-list">
-                {check.blocking.map((w) => (
-                  <li key={w.id}>
-                    <b>{w.name}</b>{' '}
-                    <button
-                      type="button"
-                      className="mk-link-inline"
-                      onClick={() => {
-                        select(w.id);
-                        setCheck(null);
-                        navigate('/settings/members');
-                      }}
-                    >
-                      {t('myData.changeOwner')}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="modal-foot">
-              <button type="button" className="btn btn-secondary" onClick={() => setCheck(null)}>
-                {t('common.close')}
-              </button>
-            </div>
-          </>
+          <div className="st-mydata-body">
+            <p>{t('myData.blockedBody')}</p>
+            <ul className="st-mydata-list">
+              {check.blocking.map((w) => (
+                <li key={w.id}>
+                  <b>{w.name}</b>
+                  <Button
+                    onClick={() => {
+                      select(w.id);
+                      setCheck(null);
+                      navigate('/settings/members');
+                    }}
+                  >
+                    {t('myData.changeOwner')}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : check ? (
           <form
+            id="md-form"
+            className="st-mydata-body"
             onSubmit={(e) => {
               e.preventDefault();
               if (ready && !busy) void confirmDelete();
             }}
           >
-            <div className="modal-head">
-              <h2 id="md-dlg-t">{t('myData.confirmTitle')}</h2>
-            </div>
-            <div className="modal-body">
-              <p>{t('myData.confirmBody')}</p>
-              {needReauth && (
-                <div className="alert alert-warning st-mydata-reauth" role="alert">
-                  <p>{t('myData.errReauth')}</p>
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => void reconnect()}>
-                    {t('myData.reconnect')}
-                  </button>
-                </div>
-              )}
-              {check.solo.map((w) => (
-                <p key={w.id} className="alert alert-warning st-mydata-solo" role="note">
-                  {t('myData.soloDeleted', { name: w.name, count: w.demos })}
+            <p>{t('myData.confirmBody')}</p>
+            {needReauth && (
+              <div className="st-mydata-reauth" role="alert">
+                <p className="st-mydata-warn">
+                  <TriangleAlert size={16} aria-hidden="true" />
+                  <span>{t('myData.errReauth')}</span>
                 </p>
-              ))}
-              {!needReauth && (
-                <>
-                  <div className="field">
-                    <label htmlFor="md-email">{t('myData.email')}</label>
+                <Button onClick={() => void reconnect()}>{t('myData.reconnect')}</Button>
+              </div>
+            )}
+            {check.solo.map((w) => (
+              <p key={w.id} className="st-mydata-warn st-mydata-solo" role="note">
+                <TriangleAlert size={16} aria-hidden="true" />
+                <span>{t('myData.soloDeleted', { name: w.name, count: w.demos })}</span>
+              </p>
+            ))}
+            {!needReauth && (
+              <>
+                <div className="fd-modal__field">
+                  <label htmlFor="md-email">{t('myData.email')}</label>
+                  <input
+                    id="md-email"
+                    className="fd-input"
+                    type="email"
+                    autoComplete="email"
+                    name="email"
+                    value={email}
+                    aria-describedby="md-email-h"
+                    onChange={(e) => {
+                      setErr(null);
+                      setEmail(e.target.value);
+                    }}
+                  />
+                  <span className="stg-help" id="md-email-h">
+                    {t('myData.emailHelp', { email: user?.email ?? '' })}
+                  </span>
+                </div>
+                {check.hasPassword && (
+                  <div className="fd-modal__field">
+                    <label htmlFor="md-pwd">{t('myData.password')}</label>
                     <input
-                      id="md-email"
-                      className="input"
-                      type="email"
-                      autoComplete="email"
-                      name="email"
-                      value={email}
-                      aria-describedby="md-email-h"
+                      id="md-pwd"
+                      className="fd-input"
+                      type="password"
+                      autoComplete="current-password"
+                      name="password"
+                      value={password}
                       onChange={(e) => {
                         setErr(null);
-                        setEmail(e.target.value);
+                        setPassword(e.target.value);
                       }}
                     />
-                    <span className="help" id="md-email-h">
-                      {t('myData.emailHelp', { email: user?.email ?? '' })}
-                    </span>
                   </div>
-                  {check.hasPassword && (
-                    <div className="field">
-                      <label htmlFor="md-pwd">{t('myData.password')}</label>
-                      <input
-                        id="md-pwd"
-                        className="input"
-                        type="password"
-                        autoComplete="current-password"
-                        name="password"
-                        value={password}
-                        onChange={(e) => {
-                          setErr(null);
-                          setPassword(e.target.value);
-                        }}
-                      />
-                    </div>
-                  )}
-                  <label className="check">
-                    <input type="checkbox" checked={sure} onChange={(e) => setSure(e.target.checked)} />
-                    {t('myData.sure')}
-                  </label>
-                </>
-              )}
-              {err && !needReauth && (
-                <p className="field-error" role="alert">
-                  {err}
-                </p>
-              )}
-            </div>
-            <div className="modal-foot">
-              <button type="button" className="btn btn-secondary" onClick={() => setCheck(null)}>
-                {t('common.cancel')}
-              </button>
-              <button type="submit" className="btn btn-danger" disabled={!ready || busy || needReauth}>
-                {t('myData.deleteConfirm')}
-              </button>
-            </div>
+                )}
+                <label className="stg-opt">
+                  <input type="checkbox" checked={sure} onChange={(e) => setSure(e.target.checked)} />
+                  <span>{t('myData.sure')}</span>
+                </label>
+              </>
+            )}
+            {err && !needReauth && (
+              <p className="stg-error" role="alert">
+                <CircleAlert size={16} aria-hidden="true" />
+                {err}
+              </p>
+            )}
           </form>
         ) : null}
-      </dialog>
-    </section>
+      </Modal>
+    </>
   );
 }

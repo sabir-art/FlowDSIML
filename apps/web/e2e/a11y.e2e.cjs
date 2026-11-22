@@ -685,7 +685,7 @@ const APP_PAGES = [
       await p.getByRole('button', { name: 'Nouveau style' }).click();
       await p.getByRole('textbox', { name: 'Texte de la bulle', exact: true }).fill('#C8CCD2');
       await p.keyboard.press('Tab');
-      await p.waitForSelector('dialog[open] .alert');
+      await p.waitForSelector('dialog[open] [role="status"]');
     },
   },
   {
@@ -732,7 +732,7 @@ const APP_PAGES = [
     },
     open: async (p) => {
       await p.getByRole('checkbox', { name: 'Toute personne avec le lien' }).uncheck();
-      await p.getByRole('button', { name: 'Enregistrer les règles' }).click();
+      await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).click();
       await p.waitForSelector('dialog[open]');
     },
   },

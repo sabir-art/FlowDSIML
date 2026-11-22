@@ -7,6 +7,7 @@ const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { picked } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -56,7 +57,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     'formats en boutons radio',
   );
   ok(
-    (await sec.getByLabel('Largeur de sortie').inputValue()) === '1280',
+    (await picked(sec.getByLabel('Largeur de sortie'))) === '1280',
     'largeur de sortie : la plus proche des captures (1 280)',
   );
 

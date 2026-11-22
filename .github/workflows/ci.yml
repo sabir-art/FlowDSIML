@@ -121,6 +121,9 @@ jobs:
       - name: Aucun bouton à l'apparence native (toutes les pages)
         if: always()
         run: cd apps/web && node e2e/boutons-natifs.e2e.cjs
+      - name: Aucun contrôle natif visible, listes et menus ouverts (COMP-01)
+        if: always()
+        run: cd apps/web && node e2e/controles-natifs.e2e.cjs
       - name: Aucun défilement horizontal dans les panneaux et les pages (1 440 et 390 px, outils de l'éditeur)
         if: always()
         run: cd apps/web && node e2e/defilement-horizontal.e2e.cjs
@@ -133,6 +136,9 @@ jobs:
       - name: Barres de liste L40 (40 px, une ligne à 1 440 px, feuille Filtres sous 768 px)
         if: always()
         run: cd apps/web && node e2e/l40-barres.e2e.cjs
+      - name: "NAV-02 et NAV-03 (surfaces, PageHeader, fil d'Ariane, retour, accueil mobile des Paramètres)"
+        if: always()
+        run: cd apps/web && node e2e/navigation.e2e.cjs
       - name: Navigation L48-A (barre latérale, Extension, Paramètres groupés, Utilisation)
         if: always()
         run: cd apps/web && node e2e/l48a-navigation.e2e.cjs

@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 import { ChevronRight, MoveHorizontal } from 'lucide-preact';
 import type { ImageRef, Mask, Step } from '@flowdsiml/manifest';
 import type { Dict } from './i18n';
+import { Slider } from './Slider';
 
 const ICON = { size: 18, strokeWidth: 2, 'aria-hidden': true } as const;
 
@@ -123,16 +124,15 @@ export function BeforeAfterStep({
                   <span class="p-ba-pill p-ba-pill--after">{la}</span>
                 </div>
               </div>
-              <input
+              <Slider
                 class="p-ba-range"
-                type="range"
                 min={0}
                 max={100}
                 step={5}
                 value={value}
-                aria-label={t.baSlider}
-                aria-valuetext={t.baSliderValue.replace('{{n}}', String(value))}
-                onInput={(e) => setValue(Number((e.target as HTMLInputElement).value))}
+                label={t.baSlider}
+                valueText={t.baSliderValue.replace('{{n}}', String(value))}
+                onChange={setValue}
               />
             </div>
           </div>

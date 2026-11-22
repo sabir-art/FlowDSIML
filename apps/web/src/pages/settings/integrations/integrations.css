@@ -48,6 +48,8 @@
   align-items: center;
   justify-content: center;
   min-width: 40px;
+  /* « .st » est aussi le cadre des Paramètres (hauteur de fenêtre) : on la neutralise ici */
+  min-height: 0;
   height: 22px;
   padding: 0 6px;
   border-radius: 6px;
@@ -233,62 +235,51 @@
   background: var(--fd-color-warning);
 }
 
-/* L48-F §1 : catalogue des intégrations (filtre segmenté, une carte, une liste) */
-/* L48-F F2 : 16 px entre la phrase et le segmenté, puis entre la carte et la ligne de demande */
-.mk .int-sub {
-  margin: 0 0 16px;
-}
-.int-filter {
-  margin-bottom: 16px;
-}
-.int-select {
-  display: none;
-}
-.int-card-list {
-  padding: 8px 24px;
-}
-.int-group + .int-group {
-  margin-top: 8px;
-}
-/* L48-F F1 : titre de groupe en 12 px 600 text-muted (plus fort que la règle des h2 de la coquille) */
-.mk .int-group__t {
-  margin: 16px 0 4px;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 600;
-  color: var(--fd-color-text-muted);
+/* L48-F §1, lot 1 de la refonte (maquette lot1-parametres/integrations) : filtre segmenté, une section
+   par catégorie, une carte à filet par intégration (tuile de 40 px, nom et phrase, état à droite). */
+.st-wrap--plain .segmented.stg-seg.int-seg {
+  margin-bottom: 24px;
 }
 .int-list {
-  list-style: none;
+  display: grid;
+  gap: 12px;
   margin: 0;
-  padding: 0;
+  padding: 20px 0 0;
+  list-style: none;
 }
-.int-list > li + li {
-  border-top: 1px solid var(--fd-color-border);
+.int-list--bare {
+  padding-top: 0;
 }
 .int-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 12px;
   align-items: center;
-  gap: 16px;
-  min-height: 72px;
-  padding: 12px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
   color: inherit;
   text-decoration: none;
 }
-.int-row--link:hover .int-row__txt b {
-  text-decoration: underline;
+a.int-row--link:hover {
+  background: var(--fd-color-nav-hover);
+}
+a.int-row--link:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .int-row__logo {
-  flex: none;
-  width: 32px;
-  height: 32px;
   display: grid;
   place-items: center;
-  color: var(--fd-color-text-muted);
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  color: var(--fd-color-text);
 }
 .int-row__logo img {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 .int-row__logo svg {
@@ -296,23 +287,27 @@
   height: 20px;
 }
 .int-row__txt {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  display: grid;
-  gap: 2px;
-  font-size: 13px;
-  color: var(--fd-color-text-muted);
 }
 .int-row__txt b {
-  font-size: 15px;
   font-weight: 600;
   color: var(--fd-color-text);
 }
-.int-row__warn {
+.int-row__txt > span {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.int-row__txt a {
+  color: var(--fd-color-primary);
+}
+.int-row__txt .int-row__warn {
   color: var(--fd-color-warning);
 }
 .int-row__state {
-  flex: none;
+  display: flex;
+  align-items: center;
 }
 .int-soon {
   font-size: 13px;
@@ -321,8 +316,10 @@
 .int-on {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+  white-space: nowrap;
 }
 .int-on > i {
   width: 8px;
@@ -333,24 +330,117 @@
 .int-on svg {
   width: 16px;
   height: 16px;
+}
+.int-need {
+  margin: 24px 0 0;
+  font-size: 13px;
   color: var(--fd-color-text-muted);
 }
-.mk .int-need {
-  margin: 16px 0 0;
-  font-size: 14px;
-  color: var(--fd-color-text-muted);
+.int-need a {
+  color: var(--fd-color-primary);
 }
+/* Sous 768 px, la page Webhooks s'ouvre par sa ligne (maquette : pas de bouton dans l'en-tête) */
 @media (max-width: 767px) {
-  .int-seg {
+  .fd-page-header__actions > .int-wh-link {
     display: none;
   }
-  .int-select {
-    display: grid;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-  .int-card-list {
-    padding: 4px 16px;
-  }
+}
+
+/* Lot 1 de la refonte : page Webhooks au gabarit (tableau « stg-table », modales MODAL-01) */
+.wh-table {
+  overflow-x: auto;
+}
+.wh-table .wh-url {
+  display: block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 13px var(--fd-font-mono);
+  color: var(--fd-color-text);
+}
+.wh-table td {
+  white-space: nowrap;
+}
+.wh-table .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+.wh-when {
+  font-size: 13px;
+}
+.wh-fail {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+/* Événement : pastille grise en chasse fixe */
+.wh-evp {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+  font: 500 12px var(--fd-font-mono);
+  white-space: nowrap;
+}
+.wh-events {
+  padding: 0;
+}
+.wh-events > legend {
+  margin-bottom: 8px;
+  padding: 0;
+}
+.wh-events .ev-list {
+  gap: 8px 16px;
+}
+.wh-events .stg-opt small {
+  display: block;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.wh-events .stg-error {
+  margin: 8px 0 0;
+}
+.wh-warn {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  font-size: 13px;
+}
+.wh-warn > svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--fd-color-warning);
+}
+.wh-format {
+  margin: 0;
+}
+.wh-secret {
+  display: grid;
+  gap: 16px;
+}
+.wh-secret > p {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+}
+.wh-secret .secret {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+}
+.wh-secret .secret code {
+  flex: 1;
+  min-width: 0;
+  font: 500 13px var(--fd-font-mono);
+  color: var(--fd-color-text);
+  word-break: break-all;
 }

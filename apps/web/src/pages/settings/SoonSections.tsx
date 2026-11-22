@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { Pencil, Plus, Trash2, X } from 'lucide-react';
+import { Braces, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { extractVariableKeys } from '@flowdsiml/core';
 import { SettingsShell } from './SettingsShell';
@@ -14,8 +14,7 @@ import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Menu } from '../../components/Menu';
 import '../editor/vars/vars.css';
-import { Empty } from '@flowdsiml/ui';
-import { Braces } from 'lucide-react';
+import { Button, Empty, Modal } from '@flowdsiml/ui';
 
 type Row = Tables<'variables'>;
 
@@ -75,22 +74,23 @@ export function VariablesSettings() {
   }
 
   return (
-    <SettingsShell>
+    <SettingsShell
+      legacy={false}
+      actions={
+        editable ? (
+          <Button variant="primary" icon={<Plus aria-hidden="true" />} onClick={() => setEditing('new')}>
+            {t('vars.new')}
+          </Button>
+        ) : undefined
+      }
+    >
       {dialog}
-      <section className="card st-vars" aria-labelledby="var-title">
-        <div className="card-head">
+      <section className="stg-sec st-vars" aria-labelledby="var-title">
+        <div className="stg-sec__head">
           <div>
-            <h2 className="t-h3" id="var-title">
-              {t('settings.variables')}
-            </h2>
-            <p className="t-caption muted">{t('vars.intro')}</p>
+            <h2 id="var-title">{t('settings.variables')}</h2>
+            <p>{t('vars.intro')}</p>
           </div>
-          {editable && (
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => setEditing('new')}>
-              <Plus aria-hidden="true" />
-              {t('vars.new')}
-            </button>
-          )}
         </div>
         {vars && vars.length === 0 ? (
           <Empty
@@ -100,70 +100,76 @@ export function VariablesSettings() {
             body={t('vars.emptyBody')}
             action={
               editable ? (
-                <button type="button" className="fd-btn fd-btn--primary" onClick={() => setEditing('new')}>
-                  <Plus aria-hidden="true" />
+                <Button
+                  variant="primary"
+                  icon={<Plus aria-hidden="true" />}
+                  onClick={() => setEditing('new')}
+                >
                   {t('vars.new')}
-                </button>
+                </Button>
               ) : undefined
             }
           />
         ) : (
-          <div className="table-wrap">
-            <table className="table st-vars-table">
-              <caption className="sr-only">{t('settings.variables')}</caption>
-              <thead>
-                <tr>
-                  <th scope="col">{t('vars.name')}</th>
-                  <th scope="col">{t('vars.example')}</th>
-                  <th scope="col">{t('vars.ifUnknown')}</th>
-                  <th scope="col" className="r">
-                    {t('vars.usedIn')}
+          <table className="stg-table st-vars-table">
+            <caption className="sr-only">{t('settings.variables')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t('vars.name')}</th>
+                <th scope="col" className="stg-table__m-hide">
+                  {t('vars.example')}
+                </th>
+                <th scope="col" className="stg-table__m-hide">
+                  {t('vars.ifUnknown')}
+                </th>
+                <th scope="col">{t('vars.usedIn')}</th>
+                {editable && (
+                  <th scope="col" className="stg-table__act">
+                    <span className="sr-only">{t('vars.actions')}</span>
                   </th>
-                  {editable && (
-                    <th scope="col">
-                      <span className="sr-only">{t('vars.actions')}</span>
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {(vars ?? []).map((v) => {
-                  const name = v.label || labelFromKey(v.key);
-                  return (
-                    <tr key={v.id}>
-                      <td>
-                        <b>{name}</b>
-                        {v.description && <small className="st-vars-desc">{v.description}</small>}
+                )}
+              </tr>
+            </thead>
+            {/* §18.6 : lignes à filets de 56 px, l'écart est porté par la hauteur des lignes */}
+            <tbody data-gap-exempt="">
+              {(vars ?? []).map((v) => {
+                const name = v.label || labelFromKey(v.key);
+                return (
+                  <tr key={v.id}>
+                    <td>
+                      <b>{name}</b>
+                      {v.description && <small className="stg-table__sub">{v.description}</small>}
+                    </td>
+                    <td className="stg-table__m-hide">{v.example || <span className="stg-muted">—</span>}</td>
+                    <td className="stg-table__m-hide">
+                      {v.default_value || <span className="stg-muted">—</span>}
+                    </td>
+                    <td>
+                      {usage[v.key]
+                        ? t('vars.demos', { count: usage[v.key], n: formatNumber(usage[v.key]!) })
+                        : t('vars.unused')}
+                    </td>
+                    {editable && (
+                      <td className="stg-table__act">
+                        <Menu
+                          label={t('vars.actionsFor', { name })}
+                          items={[
+                            { label: t('vars.edit'), icon: <Pencil />, onSelect: () => setEditing(v) },
+                            {
+                              label: t('vars.delete'),
+                              icon: <Trash2 />,
+                              danger: true,
+                              onSelect: () => void remove(v),
+                            },
+                          ]}
+                        />
                       </td>
-                      <td>{v.example || '—'}</td>
-                      <td className="muted">{v.default_value || '—'}</td>
-                      <td className="r t-num">
-                        {usage[v.key]
-                          ? t('vars.demos', { count: usage[v.key], n: formatNumber(usage[v.key]!) })
-                          : t('vars.unused')}
-                      </td>
-                      {editable && (
-                        <td className="r">
-                          <Menu
-                            label={t('vars.actionsFor', { name })}
-                            items={[
-                              { label: t('vars.edit'), icon: <Pencil />, onSelect: () => setEditing(v) },
-                              {
-                                label: t('vars.delete'),
-                                icon: <Trash2 />,
-                                danger: true,
-                                onSelect: () => void remove(v),
-                              },
-                            ]}
-                          />
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         )}
       </section>
       {editing && (
@@ -211,12 +217,6 @@ function VariableDrawer({
   const [fallback, setFallback] = useState(row?.default_value ?? '');
   const [err, setErr] = useState<string | null>(null);
   const { busy, error, run } = useAction();
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!label.trim() || !example.trim()) return setErr(t('vars.required'));
@@ -249,24 +249,24 @@ function VariableDrawer({
     v: string,
     set: (s: string) => void,
     max: number,
-    opts: { required?: boolean; help?: string; autoFocus?: boolean } = {},
+    opts: { required?: boolean; help?: string } = {},
   ) => (
-    <div className="field">
+    <div className="fd-modal__field">
       <label htmlFor={id}>
-        {name} {!opts.required && <span className="opt">{t('plans.optional')}</span>}
+        {name} {!opts.required && <span className="stg-soon">{t('plans.optional')}</span>}
       </label>
       <input
         id={id}
-        className="input"
+        className="fd-input"
         maxLength={max}
         required={opts.required}
-        autoFocus={opts.autoFocus}
+        autoComplete="off"
         value={v}
         aria-describedby={opts.help ? `${id}-h` : undefined}
         onChange={(e) => set(e.target.value)}
       />
       {opts.help && (
-        <span className="help" id={`${id}-h`}>
+        <span className="stg-help" id={`${id}-h`}>
           {opts.help}
         </span>
       )}
@@ -274,57 +274,42 @@ function VariableDrawer({
   );
 
   return (
-    <div
-      className="modal-backdrop var-drawer-back"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <form
-        className="modal var-drawer"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="var-drawer-t"
-        onSubmit={submit}
-      >
-        <div className="modal-head">
-          <h2 id="var-drawer-t">{row ? t('vars.editTitle') : t('vars.new')}</h2>
-          <button
-            type="button"
-            className="btn btn-ghost btn-icon btn-sm"
-            aria-label={t('common.close')}
-            onClick={onClose}
-          >
-            <X aria-hidden="true" />
-          </button>
-        </div>
-        <div className="modal-body fd-stack">
-          {(error || err) && (
-            <div className="alert alert-danger" role="alert">
-              {error || err}
-            </div>
-          )}
-          {field('var-label', t('vars.name'), label, setLabel, 40, { required: true, autoFocus: true })}
-          {field('var-desc', t('vars.description'), description, setDescription, 80)}
-          {field('var-ex', t('vars.example'), example, setExample, 80, {
-            required: true,
-            help: t('vars.exampleHelp'),
-          })}
-          {field('var-value', t('vars.value'), value, setValue, 200, { help: t('vars.valueHelp') })}
-          {field('var-fb', t('vars.ifUnknown'), fallback, setFallback, 40, { help: t('vars.ifUnknownHelp') })}
-          {row && (
-            <p className="help">
-              {t('vars.keyForCsv')} <span className="t-mono">{row.key}</span>
-            </p>
-          )}
-        </div>
-        <div className="modal-foot">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            {t('common.cancel')}
-          </button>
-          <button type="submit" className="btn btn-primary" disabled={busy}>
+    <Modal
+      open
+      onClose={onClose}
+      icon={<Braces />}
+      title={row ? t('vars.editTitle') : t('vars.new')}
+      closeLabel={t('common.close')}
+      className="var-drawer"
+      footer={
+        <>
+          <Button onClick={onClose}>{t('common.cancel')}</Button>
+          <Button variant="primary" type="submit" form="var-form" aria-disabled={busy || undefined}>
             {row ? t('common.save') : t('vars.create')}
-          </button>
-        </div>
+          </Button>
+        </>
+      }
+    >
+      <form id="var-form" className="st-invite__form" onSubmit={submit}>
+        {(error || err) && (
+          <div className="alert alert-danger" role="alert">
+            {error || err}
+          </div>
+        )}
+        {field('var-label', t('vars.name'), label, setLabel, 40, { required: true })}
+        {field('var-desc', t('vars.description'), description, setDescription, 80)}
+        {field('var-ex', t('vars.example'), example, setExample, 80, {
+          required: true,
+          help: t('vars.exampleHelp'),
+        })}
+        {field('var-value', t('vars.value'), value, setValue, 200, { help: t('vars.valueHelp') })}
+        {field('var-fb', t('vars.ifUnknown'), fallback, setFallback, 40, { help: t('vars.ifUnknownHelp') })}
+        {row && (
+          <p className="stg-help">
+            {t('vars.keyForCsv')} <span className="t-mono">{row.key}</span>
+          </p>
+        )}
       </form>
-    </div>
+    </Modal>
   );
 }

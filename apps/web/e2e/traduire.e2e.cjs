@@ -6,6 +6,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick, optionsOf } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -61,7 +62,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.getByRole('menuitem', { name: 'Traduire la démo…' }).click();
   const dlg = page.getByRole('dialog', { name: 'Traduire la démo' });
   await dlg.waitFor();
-  const opts = await dlg.getByLabel('Langue cible').locator('option').allTextContents();
+  const opts = await optionsOf(dlg.getByLabel('Langue cible'));
   ok(
     opts.join(',') === 'Anglais,Espagnol,Allemand,Italien,Portugais,Arabe',
     `6 langues cibles (hors langue de la démo) : ${opts}`,
@@ -110,7 +111,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.waitForSelector('.canvas-frame img');
   await page.getByRole('button', { name: 'Plus d’options' }).click();
   await page.getByRole('menuitem', { name: 'Traduire la démo…' }).click();
-  await dlg.getByLabel('Langue cible').selectOption('ar');
+  await pick(dlg.getByLabel('Langue cible'), 'ar');
   await dlg.getByRole('button', { name: 'Préparer la traduction' }).click();
   await dlg.getByRole('button', { name: 'Créer la copie' }).waitFor();
   ok((await dlg.locator('tbody textarea').first().getAttribute('dir')) === 'rtl', 'Arabe : champs en rtl');

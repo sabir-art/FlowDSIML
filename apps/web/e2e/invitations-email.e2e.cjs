@@ -22,8 +22,8 @@ function admin(extra = {}) {
 
 async function invite(page, emails) {
   await page.goto(`${APP}/#/settings/members`);
-  await page.getByRole('button', { name: 'Inviter des membres' }).click();
-  await page.waitForSelector('[role=dialog]');
+  await page.getByRole('button', { name: 'Inviter', exact: true }).click();
+  await page.waitForSelector('dialog.fd-modal[open]');
   await page.fill('#inv-email', emails);
 }
 
@@ -45,24 +45,30 @@ async function invite(page, emails) {
     await invite(page, 'marie@acme.example, paul@acme.example');
     ok(
       (await page.getByLabel('Envoyer l’invitation par e-mail').count()) === 0 &&
-        (await page.locator('[role=dialog] input[type=checkbox]').count()) === 0,
+        (await page.locator('dialog.fd-modal[open] input[type=checkbox]').count()) === 0,
       'plus de case « Envoyer l’invitation par e-mail »',
     );
     ok(
-      (await page.getByRole('button', { name: 'Envoyer les invitations' }).count()) === 1,
-      'bouton « Envoyer les invitations »',
+      (await page.getByRole('button', { name: 'Envoyer 2 invitations' }).count()) === 1,
+      'bouton « Envoyer 2 invitations »',
     );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-01-modale.png` });
-    await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
+    await page
+      .locator('dialog.fd-modal[open]')
+      .getByRole('button', { name: /^Envoyer/ })
+      .click();
     await page.getByText('2 invitations envoyées.').waitFor();
     ok(
-      (await page.locator('.inv-results li').count()) === 2 &&
+      (await page.locator('.inv-result').count()) === 2 &&
         (await page.locator('.inv-results__status.is-sent').count()) === 2 &&
         (await page.getByRole('button', { name: 'Copier le lien de marie@acme.example' }).count()) === 1,
       'confirmation dans la modale : « Invitation envoyée » et « Copier le lien » par adresse',
     );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-01-confirmation.png` });
-    await page.locator('[role=dialog] .modal-foot').getByRole('button', { name: 'Fermer' }).click();
+    await page
+      .locator('dialog.fd-modal[open] .fd-modal__foot')
+      .getByRole('button', { name: 'Terminé' })
+      .click();
     ok(state.tables.invitations.length === 2, 'deux invitations créées');
     const sent = state.inviteEmails || [];
     ok(
@@ -116,7 +122,10 @@ async function invite(page, emails) {
       `plafond atteint : raison écrite avant l’envoi (${reason})`,
     );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-02-plafond.png` });
-    await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
+    await page
+      .locator('dialog.fd-modal[open]')
+      .getByRole('button', { name: /^Envoyer/ })
+      .click();
     await page.getByRole('button', { name: 'Copier le lien de sarah@acme.example' }).waitFor();
     ok(
       state.tables.invitations.length === 21 &&
@@ -136,7 +145,10 @@ async function invite(page, emails) {
     const state = admin(extra);
     const page = await open(state);
     await invite(page, 'marie@acme.example');
-    await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
+    await page
+      .locator('dialog.fd-modal[open]')
+      .getByRole('button', { name: /^Envoyer/ })
+      .click();
     await page.getByText('L’e-mail n’a pas pu partir. Copiez le lien et envoyez-le vous-même.').waitFor();
     ok(
       state.tables.invitations.length === 1 &&
@@ -158,10 +170,11 @@ async function invite(page, emails) {
     const line = page.locator('.us-emails');
     await line.waitFor();
     ok(
-      (await line.innerText()) === 'E-mails envoyés aujourd’hui : 150 sur 150' &&
-        (await line.evaluate((el) => getComputedStyle(el).fontSize)) === '14px' &&
-        (await line.locator('[role=meter]').count()) === 0,
-      'Utilisation : « 150 sur 150 », 14 px, sans jauge',
+      // Lot 1 (maquette Utilisation) : une rangée comme les autres quotas, avec sa jauge
+      (await line.locator('.stg-lab').innerText()) === 'E-mails envoyés aujourd’hui' &&
+        (await line.locator('.us-val').innerText()).trim() === '150 sur 150' &&
+        (await line.getByRole('meter').getAttribute('aria-valuenow')) === '100',
+      'Utilisation : rangée « E-mails envoyés aujourd’hui », « 150 sur 150 », jauge à 100 %',
     );
     await page.close();
   }
@@ -172,7 +185,10 @@ async function invite(page, emails) {
     const page = await open(state);
     await invite(page, 'paul@acme.example, marie@acme.example');
     const reply = page.waitForResponse((r) => r.url().includes('/functions/v1/invite-email'));
-    await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
+    await page
+      .locator('dialog.fd-modal[open]')
+      .getByRole('button', { name: /^Envoyer/ })
+      .click();
     const body = await (await reply).json();
     await page.getByText('2 invitations envoyées.').waitFor();
     ok(

@@ -1,0 +1,914 @@
+/* Paramètres, lot 1 de la refonte : gabarit des pages (§11 de retours-client-21-11.md), porté des
+   maquettes docs/ux/maquettes/refonte/lot1-parametres. Sections sans carte séparées par des filets,
+   rangées « libellé et aide | contrôle », Zone de danger encadrée. Le cadre (navigation, barre de page)
+   est dans styles/parametres.css. Classes préfixées « stg- ». */
+.st-wrap--plain {
+  color: var(--fd-color-text);
+  font: 400 14px / 1.5 var(--fd-font-sans);
+}
+.stg-sec + .stg-sec {
+  margin-top: 32px;
+}
+/* En-tête de section : titre 16 px 600, sous-titre 13 px, action à droite, filet 16 px sous le texte */
+.stg-sec__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.stg-sec__head h2 {
+  margin: 0;
+  font: 600 16px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.stg-sec__head p {
+  margin: 4px 0 0;
+  max-width: 60ch;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.stg-sec__acts {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+.stg-sec .fd-btn:not(.fd-btn--primary, .fd-btn--danger, .fd-btn--ghost) {
+  height: 36px;
+  min-height: 36px;
+}
+
+/* Rangée de réglage : libellé et aide sur 40 %, contrôle sur 60 % (420 px au plus), padding de 20 px */
+.stg-row {
+  display: grid;
+  grid-template-columns: 40% minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding: 20px 0;
+}
+.stg-row + .stg-row {
+  border-top: 1px solid var(--fd-color-border);
+}
+.stg-row--inline {
+  align-items: center;
+}
+.stg-row--inline .stg-ctl {
+  align-items: flex-end;
+}
+.stg-lab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font: 600 14px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.stg-help {
+  display: block;
+  max-width: 46ch;
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.stg-ctl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 420px;
+  min-width: 0;
+}
+.stg-ctl--wide {
+  max-width: none;
+}
+/* Données courtes (adresse personnalisée, langue, fuseau horaire) : 240 px */
+.stg-short {
+  max-width: 240px;
+}
+.stg-lr {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.stg-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Champs du gabarit (FIELD-01) : 40 px, rayon de 10 px, bordure border-field */
+.st-wrap--plain .fd-input {
+  border-radius: 10px;
+  font-size: 14px;
+}
+/* Champ à préfixe (§11.3) : le groupe porte la bordure et le focus, l'input intérieur n'a rien */
+.stg-group {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  transition:
+    border-color var(--fd-motion-duration-fast) var(--fd-motion-ease-standard),
+    box-shadow var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
+}
+.stg-group:hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+.stg-group:focus-within {
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.stg-group__pre {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 10px;
+  border-right: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+  font-size: 13px;
+}
+.stg-group input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 12px 0 8px;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background: none;
+  color: var(--fd-color-text);
+  font: 400 14px var(--fd-font-sans);
+}
+.stg-group:has(input:disabled) {
+  border-color: var(--fd-color-border);
+  background: var(--fd-color-surface-sunken);
+}
+.stg-group input:disabled {
+  color: var(--fd-color-text-muted);
+  cursor: not-allowed;
+}
+/* Message d'erreur sous le champ : 13 px danger, icône CircleAlert, 6 px sous le champ */
+.stg-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -2px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-danger);
+}
+.stg-error > svg {
+  flex: none;
+}
+
+/* Vignette carrée du logo de l'espace (56 px) */
+.stg-logo {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--fd-prune-100, #f3d3e2);
+  color: var(--fd-prune-700, #85164b);
+  font: 700 20px / 1 var(--fd-font-sans);
+}
+[data-theme='dark'] .stg-logo {
+  background: #3a1527;
+  color: #e3a9c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .stg-logo {
+    background: #3a1527;
+    color: #e3a9c4;
+  }
+}
+
+/* Zone de danger : encadré à part, filet danger à 35 %, aucun aplat rouge (§11.5) */
+.stg-danger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-top: 32px;
+  padding: 20px 24px;
+  border: 1px solid color-mix(in srgb, var(--fd-color-danger) 35%, transparent);
+  border-radius: 16px;
+}
+.stg-danger h2 {
+  margin: 0;
+  font: 600 16px var(--fd-font-sans);
+  color: var(--fd-color-danger);
+}
+.stg-danger p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+/* Bouton destructif en contour : fond surface, texte et bordure danger */
+.stg-btn-danger {
+  background: var(--fd-color-surface);
+  border-color: var(--fd-color-danger);
+  color: var(--fd-color-danger);
+  box-shadow: none;
+}
+.stg-btn-danger:hover {
+  background: var(--fd-color-danger-soft);
+  border-color: var(--fd-color-danger);
+  color: var(--fd-color-danger);
+}
+
+/* ---- Sous 768 px : une colonne ---- */
+@media (max-width: 767px) {
+  .stg-sec__head {
+    flex-direction: column;
+  }
+  .stg-sec__acts {
+    flex-wrap: wrap;
+  }
+  .stg-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .stg-row--inline {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .stg-two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stg-danger {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Un bouton « Bientôt » (aria-disabled) reste lisible : pas de voile (décision UX du 22/11) */
+.st-wrap--plain .fd-btn[aria-disabled='true'] {
+  opacity: 1;
+  cursor: not-allowed;
+}
+/* Boutons du gabarit : padding de 16 px (maquettes du lot 1) */
+.st-wrap--plain .fd-btn {
+  padding: 0 16px;
+}
+/* « Bientôt » : texte de 13 px text-muted, sans point */
+.stg-soon {
+  font: 400 13px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+  white-space: nowrap;
+}
+
+/* Deux formulaires qui se suivent (Profil : informations, puis mot de passe) : même écart qu'entre sections */
+.st-wrap--plain > form + form,
+.st-wrap--plain > form + .stg-sec,
+.st-wrap--plain > .stg-sec + .stg-sec {
+  margin-top: 32px;
+}
+/* Champ verrouillé (e-mail du profil) : fond sunken, filet border, texte text-muted */
+.st-wrap--plain .fd-input.stg-input--locked {
+  border-color: var(--fd-color-border);
+  background-color: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+/* Photo de profil : vignette ronde de 64 px */
+.st-wrap--plain .avatar.pf-photo__avatar {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  font-size: 22px;
+}
+/* « Retirer » : action danger discrète à côté du bouton */
+.stg-link-danger {
+  height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-danger);
+  font: 500 14px var(--fd-font-sans);
+  cursor: pointer;
+}
+.stg-link-danger:hover {
+  background: var(--fd-color-nav-hover);
+}
+/* Segmenté compact (Apparence) : pilule sunken, option choisie sur la surface */
+.st-wrap--plain .segmented.stg-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+}
+.st-wrap--plain .segmented.stg-seg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  font: 500 13px var(--fd-font-sans);
+  cursor: pointer;
+}
+.st-wrap--plain .segmented.stg-seg button[aria-checked='true'] {
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: 0 1px 2px rgb(8 10 14 / 0.08);
+}
+/* Message d'état sous un en-tête de section (export terminé) */
+.stg-status {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.stg-status:empty {
+  display: none;
+}
+.st-wrap--plain .st-mydata-bar {
+  height: 4px;
+  margin-top: 12px;
+  border-radius: 2px;
+  background: var(--fd-color-primary);
+  opacity: 0.5;
+}
+/* Mesures des maquettes : icônes de bouton de 16 px, interrupteur de rangée sans hauteur minimale */
+.st-wrap--plain .fd-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.stg-row--inline .fd-switch {
+  min-height: 20px;
+}
+.st-wrap--plain .segmented.stg-seg {
+  width: fit-content;
+  border: 0;
+  box-shadow: none;
+}
+/* FIELD-01 : le champ verrouillé et le segmenté gardent leur indicateur de focus (trait prune de 2 px) */
+.st-wrap--plain .fd-input.stg-input--locked:focus {
+  border-color: var(--fd-color-primary);
+}
+.st-wrap--plain .segmented.stg-seg button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+
+/* ---- Tableaux du gabarit (§11.4, §11.8) : sans carte, posés sur le fond de contenu ---- */
+.stg-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.stg-table th {
+  padding: 12px;
+  border-bottom: 1px solid var(--fd-color-border);
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+  text-align: left;
+  white-space: nowrap;
+}
+.stg-table td {
+  height: 56px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.stg-table .stg-table__act {
+  width: 48px;
+  text-align: right;
+}
+.stg-table__empty {
+  color: var(--fd-color-text-muted);
+  text-align: center;
+}
+.stg-who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  font-weight: 600;
+}
+.stg-who__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stg-muted {
+  color: var(--fd-color-text-muted);
+  font-weight: 400;
+}
+/* Pastille d'état grise de 24 px */
+.stg-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eef0f3;
+  color: var(--fd-color-text-muted);
+  font: 500 12px var(--fd-font-sans);
+  white-space: nowrap;
+}
+[data-theme='dark'] .stg-pill {
+  background: #252b33;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .stg-pill {
+    background: #252b33;
+  }
+}
+/* Bouton « ⋯ » d'une ligne : 32 px */
+.stg-table .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+/* Recherche d'en-tête de section : 260 px, 36 px, indice de raccourci à droite */
+.stg-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 260px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text-subtle);
+  transition:
+    border-color var(--fd-motion-duration-fast) var(--fd-motion-ease-standard),
+    box-shadow var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
+}
+.stg-search:hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+.stg-search:focus-within {
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.stg-search > svg {
+  flex: none;
+}
+.stg-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background: none;
+  color: var(--fd-color-text);
+  font: 400 14px var(--fd-font-sans);
+}
+.stg-search input::placeholder {
+  color: var(--fd-color-text-subtle);
+  opacity: 1;
+}
+.stg-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.stg-search kbd {
+  flex: none;
+  padding: 0 4px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 4px;
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+/* Bouton d'information de 20 px (à côté de « Rôle ») et son popover de 360 px */
+.stg-info-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  vertical-align: middle;
+  cursor: pointer;
+}
+.stg-info-btn:hover {
+  color: var(--fd-color-text);
+}
+.stg-info-pop {
+  width: 360px;
+  padding: 14px 16px;
+}
+.stg-info-pop table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.stg-info-pop :is(th, td) {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--fd-color-border);
+  font: 400 12px / 1.4 var(--fd-font-sans);
+  text-align: left;
+}
+.stg-info-pop thead th {
+  font-weight: 500;
+  color: var(--fd-color-text-muted);
+}
+.stg-info-pop tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+.stg-info-pop td {
+  text-align: center;
+}
+.stg-info-pop td svg {
+  color: var(--fd-color-text);
+}
+
+/* Modale d'invitation (MODAL-01) */
+.st-invite__form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.inv-result label {
+  justify-content: space-between;
+}
+.inv-result__row {
+  display: flex;
+  gap: 8px;
+}
+.inv-result__row .fd-input {
+  flex: 1;
+  min-width: 0;
+  border-radius: 10px;
+}
+.inv-results__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 400;
+}
+.inv-results__status.is-failed {
+  color: var(--fd-color-danger);
+}
+
+@media (max-width: 767px) {
+  .stg-search {
+    width: 100%;
+  }
+  .stg-sec__acts:has(> .stg-search) {
+    width: 100%;
+  }
+  .stg-table thead {
+    display: none;
+  }
+  .stg-table .stg-table__m-hide {
+    display: none;
+  }
+  .stg-table td {
+    padding: 0 6px;
+  }
+}
+
+/* Deuxième ligne d'une cellule (description d'une variable) */
+.stg-table__sub {
+  display: block;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.stg-table td > b {
+  font-weight: 600;
+}
+
+/* Utilisation : jauge de 8 px, valeur dessous en 13 px ; états à partir de 80 % */
+.stg-meter {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #eef0f3;
+}
+[data-theme='dark'] .stg-meter {
+  background: #252b33;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .stg-meter {
+    background: #252b33;
+  }
+}
+.stg-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--fd-color-primary);
+}
+.us-row--full .stg-meter > span {
+  background: var(--fd-color-danger);
+}
+.us-val {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.us-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: var(--fd-color-warning);
+}
+.us-state--full {
+  color: var(--fd-color-danger);
+}
+.us-blocked {
+  margin: 0;
+}
+.us-ask {
+  color: var(--fd-color-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ---- Groupes d'options (radios, cases) d'une rangée : COMP-01 §7, maquette Sécurité ---- */
+.stg-fieldset {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+}
+fieldset.stg-row {
+  padding: 20px 0;
+}
+.stg-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stg-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+.stg-opt > span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.stg-opt b {
+  font-weight: 600;
+}
+.stg-opt .stg-help {
+  margin-top: 0;
+}
+/* Radio de 18 px : rond, bordure de 1,5 px ; choisi : bordure primary et point de 8 px */
+.stg-opt input[type='radio'] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  border: 1.5px solid var(--fd-color-border-field);
+  border-radius: 50%;
+  background: var(--fd-color-surface);
+  cursor: pointer;
+}
+.stg-opt input[type='radio']::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: transparent;
+}
+.stg-opt input[type='radio']:checked {
+  border-color: var(--fd-color-primary);
+}
+.stg-opt input[type='radio']:checked::after {
+  background: var(--fd-color-primary);
+}
+/* Case de 18 px, rayon de 5 px, bordure de 1,5 px */
+.stg-opt input[type='checkbox'] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  border-width: 1.5px;
+  border-radius: 5px;
+}
+.stg-opt :is(input[type='radio'], input[type='checkbox']):focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.stg-opt :is(input[type='radio'], input[type='checkbox'])[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+/* Captures HTML : domaines autorisés */
+.hc-domains {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+}
+.hc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  border-radius: 999px;
+  background: #eef0f3;
+  font-size: 13px;
+}
+[data-theme='dark'] .hc-chip {
+  background: #252b33;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .hc-chip {
+    background: #252b33;
+  }
+}
+.hc-chip__remove {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.hc-add {
+  display: flex;
+  gap: 8px;
+}
+.hc-add .fd-input {
+  flex: 1;
+  min-width: 0;
+  border-radius: 10px;
+}
+.sr-role {
+  margin: 12px 0 0;
+}
+.sr-c-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sr-c-warn {
+  color: var(--fd-color-warning);
+}
+/* Modale des liens non conformes : la liste puis « et n autres » à 8 px */
+.sr-c-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sr-c-body > .stg-help {
+  margin: 0;
+}
+
+/* Bandeau d'information en tête de page (réglages « Bientôt ») */
+.stg-banner {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 24px;
+  padding: 12px 16px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+  font-size: 13px;
+}
+.stg-banner > svg {
+  flex: none;
+}
+
+/* État vide d'une section : tuile de 48 px, titre de 15 px, texte de 13 px, action */
+.stg-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+}
+.stg-empty__tile {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.stg-empty h3 {
+  margin: 4px 0 0;
+  font: 600 15px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.stg-empty p {
+  max-width: 46ch;
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.stg-empty__acts {
+  margin-top: 8px;
+}
+
+/* Assistance IA : réglage de l'espace */
+.ai-error {
+  margin: 16px 0 0;
+}
+.ai-settings .stg-meter > span,
+.ai-audio .stg-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fd-color-primary);
+}
+.stg-opt.is-soon {
+  cursor: default;
+  color: var(--fd-color-text-muted);
+}
+.ai-renews {
+  padding-top: 4px;
+}
+.ai-consent {
+  display: grid;
+  gap: 16px;
+}
+.ai-consent p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--fd-color-text-muted);
+}
+
+/* Profil › Mes données : modale de suppression du compte (MODAL-01) */
+.st-mydata-body {
+  display: grid;
+  gap: 16px;
+}
+.st-mydata-body > p {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+}
+.st-mydata-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.st-mydata-list > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.st-mydata-body > .st-mydata-warn,
+.st-mydata-reauth .st-mydata-warn {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text);
+}
+.st-mydata-warn > svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--fd-color-warning);
+}
+.st-mydata-reauth {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}

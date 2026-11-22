@@ -7,6 +7,7 @@ const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick, optionsOf } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const SHOTS = process.env.SHOTS_DIR;
@@ -115,7 +116,7 @@ const AIDE = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</st
   await openTool(page, 'image');
   const sel = page.getByLabel('Onglet', { exact: true });
   ok(
-    (await sel.locator('option').allTextContents()).join('|') ===
+    (await optionsOf(sel)).join('|') ===
       'Onglet 2 · Aide · Acme Analytics|Onglet 1 · Rapports · Acme Analytics',
     'select des onglets (celui de l’étape en premier)',
   );
@@ -138,13 +139,13 @@ const AIDE = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</st
   ok(s2.options.tab?.n === 2, 'l’onglet de l’étape est conservé');
   await sw.check();
   await page.waitForTimeout(500);
-  await sel.selectOption('1');
+  await pick(sel, '1');
   await page.waitForTimeout(700);
   ok(
     s2.options.tab?.n === 1 && (await page.locator('[data-step-index="1"] .rail-tab').count()) === 0,
     'étape rattachée à l’onglet 1 : plus de puce',
   );
-  await sel.selectOption('2');
+  await pick(sel, '2');
   await page.waitForTimeout(500);
 
   // ===== Lecteur : barre d'onglets, passage animé et annonce =====

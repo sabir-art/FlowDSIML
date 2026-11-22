@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
-import { Alert } from '@flowdsiml/ui';
+import { Alert, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { CATEGORIES, copyImagesIntoTemplate, type TemplateCategory } from '../demos/templates';
@@ -102,17 +102,13 @@ export function SaveTemplateDialog({
           </label>
           <label className="fd-field">
             <span className="fd-label">{t('templates.save.category')}</span>
-            <select
-              className="fd-input"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as TemplateCategory)}
-            >
+            <Select value={category} onChange={(e) => setCategory(e.target.value as TemplateCategory)}>
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>
                   {t(`templates.cat.${c}`)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <fieldset className="svt-caps">
             <legend className="fd-label">{t('templates.save.captures')}</legend>

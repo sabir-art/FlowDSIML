@@ -80,14 +80,15 @@ a:focus-visible:is(:not([class]), [class^='t-'], .link, .mk-link) {
   padding: 0 var(--fd-space-5);
   /* Refonte DSI : tous les boutons sont des pilules. */
   border-radius: var(--fd-radius-full);
-  border: 1px solid var(--fd-color-border);
+  /* Bouton secondaire, règle de toute l'app (décision UX du 22/11) : contour border-field, 14 px en
+     600, sans ombre */
+  border: 1px solid var(--fd-color-border-field);
   background: var(--fd-color-surface);
   color: var(--fd-color-text);
-  font: 600 var(--fd-text-label-size) / 1 var(--fd-font-sans);
+  font: 600 14px / 1 var(--fd-font-sans);
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: var(--fd-shadow-xs);
   transition:
     background var(--fd-motion-duration-fast) var(--fd-motion-ease-standard),
     border-color var(--fd-motion-duration-fast);
@@ -204,8 +205,8 @@ a:focus-visible:is(:not([class]), [class^='t-'], .link, .mk-link) {
   background: var(--fd-color-primary-hover);
 }
 .fd-btn--round.fd-btn--inverse {
-  background: var(--fd-color-nav-active);
-  color: var(--fd-color-on-nav-active);
+  background: var(--fd-color-surface-inverse);
+  color: var(--fd-color-text-inverse);
 }
 .fd-btn--sm.fd-btn--icon {
   width: var(--fd-layout-control-height-sm);
@@ -494,20 +495,10 @@ input[type='checkbox']:disabled {
 /* Surfaces */
 .fd-card {
   background: var(--fd-color-surface);
-  /* Refonte DSI : grandes cartes blanches très arrondies, sans bordure dure, ombre très douce.
-     Bordure transparente conservée pour le mode contraste élevé (forced-colors). */
-  border: 1px solid transparent;
+  /* NAV-02 : sur le contenu blanc, la carte garde un filet de 1 px et n'a plus d'ombre au repos */
+  border: 1px solid var(--fd-color-border);
   border-radius: var(--fd-radius-2xl);
   padding: var(--fd-space-6);
-  box-shadow: var(--fd-shadow-sm);
-}
-[data-theme='dark'] .fd-card {
-  border-color: var(--fd-color-border);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']):not([data-theme='dark']) .fd-card {
-    border-color: var(--fd-color-border);
-  }
 }
 .fd-alert {
   padding: var(--fd-space-3) var(--fd-space-4);
@@ -631,22 +622,22 @@ input[type='checkbox']:disabled {
 /* badges de tendance, barres de graphique (spec : docs/ux/refonte.md) */
 /* ------------------------------------------------------------------ */
 
-/* Navigation latérale en pilules : actif = pilule noire pleine, texte et icône blancs */
+/* NAV-02 (retours client 21/11 §11.7.2) : éléments de 40 px, rayon de 8 px, gris au repos ;
+   actif = fond nav-active, texte text en 600, ni ombre ni bordure (plus de pilule noire) */
 .fd-nav {
   display: flex;
   flex-direction: column;
-  gap: var(--fd-space-1);
+  gap: 2px;
 }
 .fd-nav__item {
   display: flex;
   align-items: center;
-  gap: var(--fd-space-3);
-  height: 44px;
-  padding: 0 var(--fd-space-4);
-  border-radius: var(--fd-radius-full);
-  /* §18.3 (C9) : éléments inactifs en couleur text */
-  color: var(--fd-color-text);
-  font: 600 var(--fd-text-body-size) / 1 var(--fd-font-sans);
+  gap: 12px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+  font: 500 14px / 1 var(--fd-font-sans);
   text-decoration: none;
   transition: background var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
 }
@@ -663,14 +654,15 @@ input[type='checkbox']:disabled {
 .fd-nav__item[aria-current='page'],
 .fd-nav__item.is-active {
   background: var(--fd-color-nav-active);
-  color: var(--fd-color-on-nav-active);
+  color: var(--fd-color-text);
+  font-weight: 600;
 }
 .fd-nav__section {
-  /* §18.3 : titre de groupe commun (11 px 600 capitales, text-muted), 24 px au-dessus et 6 px en dessous,
-     écart de 4 px de .fd-nav compris */
-  margin: 20px 0 2px;
-  padding: 0 var(--fd-space-4);
-  font: 600 11px / 16px var(--fd-font-sans);
+  /* Titre de groupe (11 px 600 capitales, text-muted) : 24 px au-dessus et 6 px en dessous,
+     écart de 2 px de .fd-nav compris */
+  margin: 22px 0 4px;
+  padding: 0 12px;
+  font: 600 11px var(--fd-font-sans);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--fd-color-text-muted);

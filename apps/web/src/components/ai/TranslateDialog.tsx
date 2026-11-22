@@ -10,6 +10,7 @@ import { useToast } from '../Toast';
 import { AiRequestError, aiBlock, callAi, useAiStatus } from '../../lib/ai';
 import { useBlockText } from './AiWrite';
 import './ai.css';
+import { Select } from '@flowdsiml/ui';
 
 /** Langues proposées (spec L30 §4). */
 export const TRANSLATE_LANGS = ['fr', 'en', 'es', 'de', 'it', 'pt', 'ar'] as const;
@@ -214,9 +215,8 @@ export function TranslateDialog({
               <>
                 <div className="field">
                   <label htmlFor="ai-tr-lang">{t('ai.translate.target')}</label>
-                  <select
+                  <Select
                     id="ai-tr-lang"
-                    className="select"
                     value={target}
                     disabled={phase === 'busy'}
                     onChange={(e) => setTarget(e.target.value as TranslateLang)}
@@ -226,7 +226,7 @@ export function TranslateDialog({
                         {t(`ai.lang.${l}`)}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
                 <p className="help">{t('ai.translate.copyHelp')}</p>
               </>

@@ -29,7 +29,7 @@ import {
   type ItemStatus,
   type Priority,
 } from './shared';
-import { Status } from '@flowdsiml/ui';
+import { Status, Select } from '@flowdsiml/ui';
 
 const COLUMNS: ItemStatus[] = ['triage', 'planned', 'in_progress', 'done'];
 
@@ -407,9 +407,8 @@ function ItemDrawer({
           </fieldset>
           <div className="field">
             <label htmlFor="it-prio">{t('console.bl.priority')}</label>
-            <select
+            <Select
               id="it-prio"
-              className="input"
               disabled={!admin}
               value={d.priority}
               onChange={(e) => patch({ priority: e.target.value as Priority })}
@@ -419,13 +418,12 @@ function ItemDrawer({
                   {t(`console.priority.${p}`)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="field">
             <label htmlFor="it-art">{t('console.bl.article')}</label>
-            <select
+            <Select
               id="it-art"
-              className="input"
               disabled={!admin}
               value={d.article ?? ''}
               onChange={(e) => patch({ article: e.target.value || null })}
@@ -436,7 +434,7 @@ function ItemDrawer({
                   {a.title}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="field">
             <label htmlFor="it-gh">
@@ -576,34 +574,24 @@ export function ItemDialog({
           </div>
           <div className="field">
             <label htmlFor="ni-prio">{t('console.bl.priority')}</label>
-            <select
-              id="ni-prio"
-              className="input"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as Priority)}
-            >
+            <Select id="ni-prio" value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
               {PRIORITIES.map((p) => (
                 <option key={p} value={p}>
                   {t(`console.priority.${p}`)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="field">
             <label htmlFor="ni-art">{t('console.bl.article')}</label>
-            <select
-              id="ni-art"
-              className="input"
-              value={article}
-              onChange={(e) => setArticle(e.target.value)}
-            >
+            <Select id="ni-art" value={article} onChange={(e) => setArticle(e.target.value)}>
               <option value="">{t('console.bl.noArticle')}</option>
               {ARTICLES.map((a) => (
                 <option key={a.slug} value={a.slug}>
                   {a.title}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="field">
             <label htmlFor="ni-gh">

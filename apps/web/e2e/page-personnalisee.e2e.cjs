@@ -7,6 +7,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick, optionsOf } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const SHOTS = process.env.SHOTS_DIR;
@@ -93,12 +94,12 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.fill('#sh-v-company', 'Globex');
   await page.fill('#sh-pp-msg', 'Bonjour Marie, voici la démo dont nous avons parlé.');
   ok(sp(await page.textContent('#sh-pp-msg-c')) === '51 / 400 caractères', 'compteur du message');
-  const opts = await page.locator('#sh-pp-sign option').allTextContents();
+  const opts = await optionsOf(page.locator('#sh-pp-sign'));
   ok(
     opts.includes('Camille Fictive') && !opts.some((o) => o.includes('@')),
     'signature : noms seulement, jamais l’e-mail',
   );
-  await page.selectOption('#sh-pp-sign', CAMILLE);
+  await pick(page.locator('#sh-pp-sign'), CAMILLE);
   await page.fill('#sh-pp-url', 'http://www.globex.example');
   ok(
     sp(await page.textContent('#sh-pp-url-e')) === 'Saisissez une adresse qui commence par https://',

@@ -1,66 +1,40 @@
-/* L52 §1 : Paramètres › Contenu › Étiquettes (maquette l52-etiquettes.html, composants §17) */
-.mk .tgs-page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  min-width: 0;
-}
-.mk .tgs-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.mk .tgs-head > p {
-  margin: 0;
-}
-.mk .tgs-acts {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.mk .tgs-quota {
+/* L52 §1, lot 1 de la refonte : Paramètres › Étiquettes (gabarit « stg- » de settings.css). Liste à
+   filets sans carte : pastille, nombre de démos, menu « ⋯ ». */
+.tgs-quota {
   font-size: 13px;
   color: var(--fd-color-text-muted);
 }
-.mk .tgs-acts .btn[aria-disabled='true'] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.mk .tgs-ro {
-  margin: 0;
-  font-size: 14px;
+.tgs-ro {
+  margin: 16px 0 0;
+  font-size: 13px;
   color: var(--fd-color-text-muted);
 }
-.mk .tgs-card {
-  background: var(--fd-color-surface);
-  border-radius: 20px;
-  padding: 8px 28px 12px;
+.tgs-error {
+  margin: 16px 0 0;
 }
-.mk .tgs-row {
+.tgs-row {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 180px 40px;
+  grid-template-columns: minmax(0, 1fr) 180px 48px;
   align-items: center;
   gap: 16px;
   min-height: 56px;
-  border-top: 1px solid var(--fd-color-border);
+  padding: 0 12px;
+  border-bottom: 1px solid var(--fd-color-border);
 }
-.mk .tgs-row--head {
-  min-height: 44px;
-  border-top: 0;
-  font-size: 13px;
+.tgs-row--head {
+  min-height: 42px;
+  font: 500 12px var(--fd-font-sans);
   color: var(--fd-color-text-muted);
 }
-.mk .tgs-name {
+.tgs-name {
   min-width: 0;
 }
-.mk .tgs-name > .tg,
-.mk .tgs-row--edit .tg {
+.tgs-name > .tg,
+.tgs-row--edit .tg {
   justify-self: start;
 }
-.mk .tgs-sort {
+.tgs-sort {
   all: unset;
   display: inline-flex;
   align-items: center;
@@ -69,61 +43,67 @@
   cursor: pointer;
   border-radius: var(--fd-radius-sm);
 }
-.mk .tgs-sort:focus-visible {
+.tgs-sort:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
-.mk .tgs-sort svg {
+.tgs-sort svg {
   width: 14px;
   height: 14px;
 }
-.mk .is-sorted .tgs-sort {
+.is-sorted .tgs-sort {
   color: var(--fd-color-text);
   font-weight: 600;
 }
-.mk .tgs-count {
+.tgs-count {
   font-size: 14px;
   color: var(--fd-color-text-muted);
   text-decoration: none;
 }
-.mk a.tgs-count:hover {
+a.tgs-count:hover {
   color: var(--fd-color-primary);
   text-decoration: underline;
 }
-.mk .tgs-more {
+.tgs-more {
   position: relative;
   justify-self: end;
 }
-.mk .tgs-edit {
+.tgs-more .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+.tgs-edit {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
-.mk .tgs-edit .input {
+.tgs-edit .fd-input {
   width: 280px;
   max-width: 100%;
 }
-.mk .tgs-rename {
+.tgs-rename {
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 8px 0;
 }
-.mk .tgs-hint {
+.tgs-hint {
   font-size: 13px;
   color: var(--fd-color-text-muted);
 }
-.mk .tgs-row--edit {
+.tgs-row--edit {
   grid-template-columns: minmax(0, 1fr);
-  padding: 10px 0;
+  padding: 12px;
 }
-.mk .tgs-err {
+.tgs-err {
   margin: 0;
   font-size: 13px;
   color: var(--fd-color-danger);
 }
-.mk .tgs-pop {
+.tgs-pop {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
@@ -133,33 +113,35 @@
   border-radius: 16px;
   box-shadow: var(--fd-shadow-lg);
 }
-.mk .tgs-pop__t {
+.tgs-pop__t {
   margin: 4px 12px 0;
   white-space: nowrap;
   font-size: 13px;
   font-weight: 600;
 }
-.mk .tgs-pop .tg-colors--lg {
+.tgs-pop .tg-colors--lg {
   padding: 12px;
 }
-.mk .tgs-pop__name {
+.tgs-pop__name {
   margin: 0 12px 8px;
   font-size: 12px;
   color: var(--fd-color-text-muted);
 }
-@media (max-width: 600px) {
-  .mk .tgs-card {
-    padding: 4px 16px 8px;
-  }
-  .mk .tgs-row {
-    grid-template-columns: minmax(0, 1fr) auto 40px;
-    gap: 8px;
-  }
-}
-.mk .tgs-err .link-button {
+.tgs-err .link-button {
   margin-left: 6px;
   font-size: 13px;
   font-weight: 600;
+}
+@media (max-width: 767px) {
+  .tgs-row {
+    grid-template-columns: minmax(0, 1fr) auto 44px;
+    gap: 8px;
+    padding: 0;
+  }
+  .tgs-more .menu-trigger {
+    width: 44px;
+    height: 44px;
+  }
 }
 /* §2.4 : « Avec » : autres étiquettes, pastille et nombre de démos (liste de choix dans la modale) */
 .tgs-merge {

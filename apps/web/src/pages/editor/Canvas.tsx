@@ -728,7 +728,12 @@ function ToCaptureCanvas({
         <p className="fd-muted">{t('editor.toCapture.order', { n, total: todo.length })}</p>
         {!readOnly && (
           <>
-            <button type="button" className="fd-btn fd-btn--primary" onClick={() => file.current?.click()}>
+            <button
+              type="button"
+              className="fd-btn fd-btn--primary"
+              aria-controls="canvas-file"
+              onClick={() => file.current?.click()}
+            >
               <ImagePlus aria-hidden="true" />
               {t('editor.toCapture.button')}
             </button>
@@ -736,9 +741,11 @@ function ToCaptureCanvas({
               ref={file}
               type="file"
               accept="image/png,image/jpeg,image/webp"
-              hidden
-              aria-hidden="true"
+              /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+              id="canvas-file"
+              className="sr-only"
               tabIndex={-1}
+              aria-hidden="true"
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 e.target.value = '';

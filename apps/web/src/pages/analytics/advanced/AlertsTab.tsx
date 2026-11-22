@@ -19,7 +19,7 @@ import { useToast } from '../../../components/Toast';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { Loading } from '../../../components/guards';
 import type { Segment } from './SegmentsTab';
-import { Empty, Status } from '@flowdsiml/ui';
+import { Empty, Status, Select } from '@flowdsiml/ui';
 
 export type Alert = Tables<'alerts'>;
 export const TRIGGERS = [
@@ -314,35 +314,25 @@ function AlertDialog({
         <div className="modal-body col l19-form">
           <div className="field">
             <label htmlFor={`${id}-q`}>{t('analytics.adv.al.when')}</label>
-            <select
-              id={`${id}-q`}
-              className="select"
-              value={trigger}
-              onChange={(e) => setTrigger(e.target.value as Trigger)}
-            >
+            <Select id={`${id}-q`} value={trigger} onChange={(e) => setTrigger(e.target.value as Trigger)}>
               {TRIGGERS.map((k) => (
                 <option key={k} value={k}>
                   {t(`analytics.adv.al.w_${k}`)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           {trigger === 'structure_below_goal' ? (
             <div className="field">
               <label htmlFor={`${id}-p`}>{t('analytics.adv.al.path')}</label>
-              <select
-                id={`${id}-p`}
-                className="select"
-                value={path}
-                onChange={(e) => setPath(e.target.value)}
-              >
+              <Select id={`${id}-p`} value={path} onChange={(e) => setPath(e.target.value)}>
                 {paths.length === 0 && <option value="">{t('analytics.adv.al.noPath')}</option>}
                 {paths.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.title || t('demos.untitled')}
                   </option>
                 ))}
-              </select>
+              </Select>
               <p className="help">{t('analytics.adv.al.pathHelp')}</p>
             </div>
           ) : (
@@ -364,19 +354,14 @@ function AlertDialog({
               )}
               <div className="field">
                 <label htmlFor={`${id}-d`}>{t('analytics.adv.al.demo')}</label>
-                <select
-                  id={`${id}-d`}
-                  className="select"
-                  value={demo}
-                  onChange={(e) => setDemo(e.target.value)}
-                >
+                <Select id={`${id}-d`} value={demo} onChange={(e) => setDemo(e.target.value)}>
                   <option value="">{t('analytics.allDemos')}</option>
                   {demos.map((d) => (
                     <option key={d.id} value={d.id}>
                       {d.title}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
           )}
@@ -385,19 +370,14 @@ function AlertDialog({
               <label htmlFor={`${id}-g`}>
                 {t('analytics.adv.al.segment')} <span className="opt">{t('analytics.adv.al.optional')}</span>
               </label>
-              <select
-                id={`${id}-g`}
-                className="select"
-                value={segment}
-                onChange={(e) => setSegment(e.target.value)}
-              >
+              <Select id={`${id}-g`} value={segment} onChange={(e) => setSegment(e.target.value)}>
                 <option value="">{t('analytics.adv.al.allVisitors')}</option>
                 {segments.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
           {trigger === 'completion_below' && <p className="help">{t('analytics.adv.al.completionHelp')}</p>}

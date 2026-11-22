@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button, Select } from '@flowdsiml/ui';
 import { SettingsShell } from './SettingsShell';
 import { MeasureDialog } from '../analytics/returning';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -14,27 +15,49 @@ export function PrivacySettings() {
   const on = current?.visit_measure !== false;
   const gap = current?.visit_gap_minutes === 1440 ? t('analytics.ret.gap24h') : t('analytics.ret.gap30');
   return (
-    <SettingsShell>
-      <section className="soon-page" aria-labelledby="st-title">
-        <p className="muted">{t('privacy.sub')}</p>
-        <div className="card card-pad">
-          <div className="setting">
-            <div>
-              <b>{t('analytics.ret.measureTitle')}</b>
-              <p className="t-caption muted">
-                {on ? t('privacy.measureOn', { gap }) : t('analytics.ret.off')}
-              </p>
-            </div>
-            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setOpen(true)}>
-              {t('privacy.edit')}
-            </button>
+    <SettingsShell legacy={false}>
+      <section className="stg-sec" aria-labelledby="pv-title">
+        <div className="stg-sec__head">
+          <div>
+            <h2 id="pv-title">{t('analytics.ret.measureTitle')}</h2>
+            <p>{t('privacy.sub')}</p>
           </div>
-          <div className="setting">
-            <div>
-              <b>{t('privacy.leadsTitle')}</b>
-              <p className="t-caption muted">
+        </div>
+        {/* §18.6 : rangées à filets, l'écart est porté par leur padding de 20 px */}
+        <div data-gap-exempt="">
+          <div className="stg-row stg-row--inline">
+            <div className="stg-text" data-gap-exempt="">
+              <div className="stg-lab">{t('privacy.returningTitle')}</div>
+              <div className="stg-help">{on ? t('privacy.measureOn', { gap }) : t('analytics.ret.off')}</div>
+            </div>
+            <div className="stg-ctl">
+              <Button onClick={() => setOpen(true)}>{t('privacy.edit')}</Button>
+            </div>
+          </div>
+          <div className="stg-row">
+            <div className="stg-text" data-gap-exempt="">
+              <label className="stg-lab" htmlFor="pv-leads">
+                {t('privacy.leadsTitle')}
+              </label>
+              <div id="pv-leads-help" className="stg-help">
                 {t('privacy.leadsRetention', { count: analyticsRetentionDays })}
-              </p>
+              </div>
+            </div>
+            <div className="stg-ctl">
+              {/* La durée suit les limites de l'espace : elle n'est pas réglable ici */}
+              <Select
+                id="pv-leads"
+                className="stg-short"
+                disabled
+                aria-describedby="pv-leads-help"
+                value={String(analyticsRetentionDays)}
+                options={[
+                  {
+                    value: String(analyticsRetentionDays),
+                    label: t('privacy.days', { count: analyticsRetentionDays }),
+                  },
+                ]}
+              />
             </div>
           </div>
         </div>

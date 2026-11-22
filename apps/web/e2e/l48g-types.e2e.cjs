@@ -9,6 +9,7 @@
 const { chromium } = require('playwright');
 const { AxeBuilder } = require('@axe-core/playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { pick, picked } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 
 /** Trois démos : captures (seed), HTML (2 étapes html), Sandbox. */
@@ -131,16 +132,13 @@ function data() {
   ok(s.user.user_metadata.content_type === 'sandbox', 'type gardé dans le compte (extension)');
   await axe(p, 'nouvelle démo · étape 2');
   // Retour sans perte
-  await nd
-    .getByLabel('Dossier')
-    .selectOption({ index: 1 })
-    .catch(() => {});
-  const folderVal = await nd.getByLabel('Dossier').inputValue();
+  await pick(nd.getByLabel('Dossier'), { index: 1 }).catch(() => nd.page().keyboard.press('Escape'));
+  const folderVal = await picked(nd.getByLabel('Dossier'));
   await nd.getByRole('button', { name: 'Retour' }).click();
   ok(await nd.getByRole('radio', { name: /Sandbox/ }).isChecked(), 'Retour : type conservé');
   await nd.getByRole('radio', { name: /captures/ }).check();
   await nd.getByRole('button', { name: 'Continuer', exact: true }).click();
-  ok((await nd.getByLabel('Dossier').inputValue()) === folderVal, 'Retour : dossier conservé');
+  ok((await picked(nd.getByLabel('Dossier'))) === folderVal, 'Retour : dossier conservé');
   ok(
     (await nd.getByRole('button', { name: /Importer des images/ }).count()) === 1 &&
       (await nd.getByRole('button', { name: /Partir d’un modèle/ }).count()) === 1,

@@ -546,7 +546,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     await page.getByText('Aucune étiquette pour l’instant').waitFor();
     ok(
       (await page.getByText('Créez-en une ici, ou depuis la carte d’une démo.').count()) === 1 &&
-        (await page.getByRole('button', { name: 'Nouvelle étiquette' }).count()) === 1,
+        (await page.locator('.stg-empty').getByRole('button', { name: 'Nouvelle étiquette' }).count()) === 1,
       'état vide : titre, phrase, bouton',
     );
     await page.context().close();

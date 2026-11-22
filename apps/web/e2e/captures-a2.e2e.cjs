@@ -9,6 +9,7 @@ const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -108,7 +109,7 @@ const QID = (n) => `0b5c1f0e-0000-4000-8000-0000000000b${n}`;
     .getByLabel('Texte', { exact: true })
     .fill('Vous allez planifier un premier rendez-vous en trois étapes.');
   await page.getByLabel('Bouton', { exact: true }).fill('Commencer');
-  await page.getByLabel('Chapitre', { exact: true }).selectOption({ label: 'Créer la fiche' });
+  await pick(page.getByLabel('Chapitre', { exact: true }), { label: 'Créer la fiche' });
   await page.waitForTimeout(900);
   ok(
     (await page.locator('.canvas-popup').innerText()).includes('Commencer'),

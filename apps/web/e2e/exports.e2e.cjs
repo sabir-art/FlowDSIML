@@ -2,6 +2,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { seedExport } = require('./export-data.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -141,12 +142,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     await p.getByRole('radio', { name: /Rapide/ }).click();
     ok(/^10,5 secondes/.test(await help(p)), 'L15-02 : vitesse rapide');
-    await p.getByLabel('Étapes', { exact: true }).selectOption('range');
-    await p.getByLabel(/^À l.étape/).selectOption('2');
+    await pick(p.getByLabel('Étapes', { exact: true }), 'range');
+    await pick(p.getByLabel(/^À l.étape/), '2');
     ok(/^4,5 secondes/.test(await help(p)), 'L15-02 : plage de 3 étapes');
     await p.getByRole('switch', { name: 'Lecture en boucle' }).click();
     ok(/lecture unique/.test(await help(p)), 'L15-02 : lecture unique');
-    await p.getByLabel('Taille').selectOption('640');
+    await pick(p.getByLabel('Taille'), '640');
     ok(
       (await p.locator('.gif-meta span').textContent()).startsWith('Étape'),
       'L15-02 : barre « Étape n sur N »',
@@ -215,7 +216,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     const { p } = await open();
     await openFromMenu(p);
     await p.getByRole('radio', { name: /GIF animé/ }).click();
-    await p.getByLabel('Taille').selectOption('1280');
+    await pick(p.getByLabel('Taille'), '1280');
     await p.getByRole('button', { name: 'Exporter en GIF' }).click();
     await p.waitForSelector('[role="progressbar"]');
     ok(

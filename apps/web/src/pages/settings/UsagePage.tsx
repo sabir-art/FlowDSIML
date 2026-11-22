@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { TriangleAlert } from 'lucide-react';
+import { Mail, TriangleAlert } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { formatNumber } from '../../lib/format';
 import { useAiStatus } from '../../lib/ai';
@@ -24,7 +24,7 @@ interface Usage {
 /** Une ligne : nom et explication, jauge (sauf sans limite), valeur et état à partir de 80 %. */
 interface Row {
   key: string;
-  note: string;
+  note?: string;
   used: number;
   limit: number | null;
   /** Texte de la valeur (« 412 / 500 requêtes », « 24 · sans limite », « 24 mois »). */
@@ -122,7 +122,7 @@ export function UsagePage() {
       limit: l?.members ?? null,
       value:
         l?.members != null
-          ? `${num(usage.members)} / ${num(l.members)}`
+          ? t('usage.ratio', { used: num(usage.members), limit: num(l.members) })
           : t('usage.unlimitedValue', { used: num(usage.members) }),
       blocked: t('usage.blocked.members'),
     },
@@ -133,7 +133,7 @@ export function UsagePage() {
       limit: l?.published_demos ?? null,
       value:
         l?.published_demos != null
-          ? `${num(usage.published_demos)} / ${num(l.published_demos)}`
+          ? t('usage.ratio', { used: num(usage.published_demos), limit: num(l.published_demos) })
           : t('usage.unlimitedValue', { used: num(usage.published_demos) }),
       blocked: t('usage.blocked.published'),
     },
@@ -145,9 +145,20 @@ export function UsagePage() {
       noMeter: true,
       value: retentionMonths !== null ? t('usage.months', { count: retentionMonths }) : '–',
     },
+    // E-mails du jour (administrateurs) : même rangée que les autres quotas
+    ...(emails
+      ? [
+          {
+            key: 'emails',
+            used: emails.sent,
+            limit: emails.cap,
+            value: t('usage.ratio', { used: num(emails.sent), limit: num(emails.cap) }),
+          } as Row,
+        ]
+      : []),
   ];
 
-  const askButton = (className: string, label: string): ReactNode =>
+  const askLink = (className: string, label: ReactNode): ReactNode =>
     ask ? (
       <a
         className={className}
@@ -160,65 +171,77 @@ export function UsagePage() {
     ) : null;
 
   return (
-    <SettingsShell>
-      <section className="us-page" aria-labelledby="st-title">
-        <div className="us-head">
-          <p className="muted">{t('usage.sub', { workspace: current.name })}</p>
-          {askButton('fd-btn', t('usage.ask'))}
-          {/* L48-01 (U2) : sans lien du support, les administrateurs sont invités à le renseigner */}
-          {!ask && can('workspace.settings') && (
-            <Link className="fd-btn" to="/settings/workspace">
-              {t('usage.setSupport')}
-            </Link>
-          )}
+    <SettingsShell legacy={false}>
+      <section className="stg-sec us-page" aria-labelledby="us-title">
+        <div className="stg-sec__head">
+          <div>
+            <h2 id="us-title">{t('usage.title')}</h2>
+            <p>{t('usage.sub', { workspace: current.name })}</p>
+          </div>
+          <div className="stg-sec__acts">
+            {askLink(
+              'fd-btn',
+              <>
+                <Mail size={16} aria-hidden="true" />
+                {t('usage.ask')}
+              </>,
+            )}
+            {/* Sans lien du support, les administrateurs sont invités à le renseigner */}
+            {!ask && can('workspace.settings') && (
+              <Link className="fd-btn" to="/settings/workspace">
+                {t('usage.setSupport')}
+              </Link>
+            )}
+          </div>
         </div>
-        {ask && <p className="us-hint">{t('usage.hint')}</p>}
-        <ul className="us-card">
+        {/* §18.6 : rangées à filets, l'écart est porté par leur padding de 20 px */}
+        <div data-gap-exempt="">
           {rows.map((r) => {
             const pct = r.limit ? Math.min(100, Math.round((r.used / r.limit) * 100)) : null;
-            const state = pct === null ? '' : pct >= 100 ? 'full' : pct >= 80 ? 'warn' : '';
+            const state =
+              pct === null || r.key === 'emails' ? '' : pct >= 100 ? 'full' : pct >= 80 ? 'warn' : '';
             const name = t(`usage.rows.${r.key}`);
             return (
-              <li key={r.key} className={`us-row${state ? ` us-row--${state}` : ''}`}>
-                <span className="us-name">
-                  <b>{name}</b>
-                  {r.note && <small>{r.note}</small>}
-                </span>
-                {pct !== null && !r.noMeter ? (
-                  <span
-                    className="us-bar"
-                    role="meter"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={pct}
-                    aria-label={t('usage.meter', { name, pct })}
-                  >
-                    <i style={{ width: `${pct}%` }} />
-                  </span>
-                ) : (
-                  <span className="us-bar-none" />
-                )}
-                <span className="us-val">
-                  {r.value}
-                  {state && (
-                    <small className={`us-state us-state--${state}`}>
-                      <TriangleAlert size={14} aria-hidden="true" />
-                      {t(state === 'full' ? 'usage.full' : 'usage.near')}
-                    </small>
+              <div
+                key={r.key}
+                className={`stg-row us-row${state ? ` us-row--${state}` : ''}${r.key === 'emails' ? ' us-emails' : ''}`}
+              >
+                <div className="stg-text" data-gap-exempt="">
+                  <div className="stg-lab">{name}</div>
+                  {r.note && <div className="stg-help">{r.note}</div>}
+                </div>
+                <div className="stg-ctl">
+                  {pct !== null && !r.noMeter && (
+                    <div
+                      className="stg-meter"
+                      role="meter"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={pct}
+                      aria-label={t('usage.meter', { name, pct })}
+                    >
+                      <span style={{ width: `${pct}%` }} />
+                    </div>
                   )}
-                </span>
-                {state === 'full' && (
-                  <p className="us-blocked">
-                    {r.blocked} {askButton('link-button', t('usage.askMore'))}
-                  </p>
-                )}
-              </li>
+                  <span className="stg-help us-val">
+                    {r.value}
+                    {state && (
+                      <span className={`us-state us-state--${state}`}>
+                        <TriangleAlert size={16} aria-hidden="true" />
+                        {t(state === 'full' ? 'usage.full' : 'usage.near')}
+                      </span>
+                    )}
+                  </span>
+                  {state === 'full' && (
+                    <p className="stg-help us-blocked">
+                      {r.blocked} {askLink('us-ask', t('usage.askMore'))}
+                    </p>
+                  )}
+                </div>
+              </div>
             );
           })}
-        </ul>
-        {emails && (
-          <p className="us-emails">{t('usage.emailsToday', { n: num(emails.sent), cap: num(emails.cap) })}</p>
-        )}
+        </div>
       </section>
     </SettingsShell>
   );

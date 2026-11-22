@@ -71,7 +71,7 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import './distribute.css';
-import { Status } from '@flowdsiml/ui';
+import { Status, Select } from '@flowdsiml/ui';
 
 interface Info {
   demo: Tables<'demos'>;
@@ -931,15 +931,16 @@ function IntranetPanel({
                 <label className="t-label" htmlFor={`${id}-size`}>
                   {t('distribute.intranet.size')}
                 </label>
-                <select
+                <Select
                   id={`${id}-size`}
-                  className="select input-sm dif-auto"
+                  size="sm"
+                  className="dif-auto"
                   value={size}
                   onChange={(e) => setSize(e.target.value as 'fluid' | 'fixed')}
                 >
                   <option value="fluid">{t('distribute.intranet.fluid')}</option>
                   <option value="fixed">{t('distribute.intranet.fixed')}</option>
-                </select>
+                </Select>
               </div>
               {size === 'fixed' && (
                 <div className="dif-wh">
@@ -986,15 +987,16 @@ function IntranetPanel({
                 <label className="t-label" htmlFor={`${id}-pos`}>
                   {t('distribute.intranet.position')}
                 </label>
-                <select
+                <Select
                   id={`${id}-pos`}
-                  className="select input-sm dif-auto"
+                  size="sm"
+                  className="dif-auto"
                   value={position}
                   onChange={(e) => setPosition(e.target.value as 'inline' | 'float')}
                 >
                   <option value="inline">{t('distribute.intranet.inline')}</option>
                   <option value="float">{t('distribute.intranet.float')}</option>
-                </select>
+                </Select>
               </div>
             </>
           )}
@@ -1002,16 +1004,17 @@ function IntranetPanel({
             <label className="t-label" htmlFor={`${id}-lang`}>
               {t('distribute.intranet.lang')}
             </label>
-            <select
+            <Select
               id={`${id}-lang`}
-              className="select input-sm dif-auto"
+              size="sm"
+              className="dif-auto"
               value={lang}
               onChange={(e) => setLang(e.target.value as 'demo' | 'fr' | 'en')}
             >
               <option value="demo">{t('distribute.intranet.langDemo')}</option>
               <option value="fr">Français</option>
               <option value="en">English</option>
-            </select>
+            </Select>
           </div>
         </div>
         <div>

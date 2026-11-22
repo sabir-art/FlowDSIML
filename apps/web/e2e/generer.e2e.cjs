@@ -7,6 +7,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick, optionsOf } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -183,18 +184,18 @@ const SHOTS = process.env.SHOTS_DIR;
       !(await dlg.getByRole('tab', { name: 'Capture HTML' }).innerText()).includes('Bientôt'),
     'onglet « Capture HTML » actif, sans « Bientôt »',
   );
-  const pick = dlg.getByLabel('Page capturée');
-  await pick.waitFor();
+  const captured = dlg.getByLabel('Page capturée');
+  await captured.waitFor();
   ok(
-    (await pick.locator('option').allInnerTexts()).some((o) => o.endsWith('› Liste des usagers')),
+    (await optionsOf(captured)).some((o) => o.endsWith('› Liste des usagers')),
     'page proposée : « Démo › Page »',
   );
   ok(
     (await dlg.locator('#ai-gen-html-help').innerText()).includes('Seul le texte de la page part vers l’IA'),
     'mention : texte seul, sans zones floutées',
   );
-  await pick.selectOption({
-    label: (await pick.locator('option').allInnerTexts()).find((o) => o.endsWith('› Liste des usagers')),
+  await pick(captured, {
+    label: (await optionsOf(captured)).find((o) => o.endsWith('› Liste des usagers')),
   });
   await shot('l30-05-html');
   await dlg.getByRole('button', { name: 'Proposer les étapes' }).click();

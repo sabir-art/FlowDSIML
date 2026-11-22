@@ -8,16 +8,18 @@ import { check, useAction } from '../../lib/useAction';
 import { formatNumber } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
-import { WsLogo } from '../../components/WorkspaceSwitcher';
+import { CircleAlert } from 'lucide-react';
+import { Button, Select } from '@flowdsiml/ui';
 import { SUPPORT_EMAIL_RE, SUPPORT_HTTPS_RE } from '../../lib/support';
 
 const HTTPS = /^https:\/\/\S+$/;
 
 /**
- * Paramètres › Général (PRM-11), mise en page de la maquette parametres.html : une carte à sections
- * en deux colonnes (Identité, Confidentialité et partage, Langue et région), pied Annuler / Enregistrer,
- * puis la zone de danger. Le site web est rangé dans workspaces.settings (comme la politique de
- * confidentialité) ; le logo, la langue par défaut et le fuseau horaire sont annoncés Bientôt.
+ * Paramètres › Général, maquette lot1-parametres/general : trois sections posées sur le fond de contenu
+ * (Identité, Confidentialité et partage, Langue et région) en rangées « libellé et aide | contrôle »,
+ * Annuler et Enregistrer dans la barre de page, puis la Zone de danger encadrée à part. Le site web est
+ * rangé dans workspaces.settings (comme la politique de confidentialité) ; le logo, la langue des
+ * nouvelles démos et le fuseau horaire sont annoncés « Bientôt ».
  */
 export function WorkspaceSettings() {
   const { t } = useTranslation();
@@ -41,7 +43,7 @@ export function WorkspaceSettings() {
   const [counts, setCounts] = useState<{ demos: number; leads: number } | null>(null);
   const { busy, error, run } = useAction();
   const editable = can('workspace.settings');
-  const soon = <span className="soon-text">{t('shell.soon')}</span>;
+  const soon = <span className="stg-soon">{t('shell.soon')}</span>;
 
   const reset = () => {
     setName(ws.name);
@@ -129,236 +131,299 @@ export function WorkspaceSettings() {
 
   const errFor = (id: string) =>
     urlError?.id === id ? (
-      <p id={`${id}-error`} className="field-error">
+      <p id={`${id}-error`} className="stg-error">
+        <CircleAlert size={16} aria-hidden="true" />
         {urlError.text}
       </p>
     ) : null;
-  const described = (id: string, help: string) => (urlError?.id === id ? `${id}-error ${help}` : help);
+  const described = (id: string, help?: string) =>
+    [urlError?.id === id ? `${id}-error` : null, help].filter(Boolean).join(' ') || undefined;
 
   return (
-    <SettingsShell>
+    <SettingsShell
+      legacy={false}
+      actions={
+        editable ? (
+          <>
+            <Button onClick={reset} disabled={busy}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="primary" type="submit" form="ws-form" disabled={busy}>
+              {t('common.save')}
+            </Button>
+          </>
+        ) : undefined
+      }
+    >
       {dialog}
-      <form className="card st-gen" onSubmit={save}>
+      <form id="ws-form" onSubmit={save} noValidate={false}>
         {error && (
-          <div className="alert alert-danger st-gen-alert" role="alert">
+          <div className="alert alert-danger" role="alert">
             {error}
           </div>
         )}
-        <div className="form-sec">
-          <div className="intro">
-            <h2 className="t-h3">{t('workspace.identity')}</h2>
-            <p className="t-caption muted">{t('workspace.identityHelp')}</p>
+        <section className="stg-sec" aria-labelledby="ws-sec-identity">
+          <div className="stg-sec__head">
+            <div>
+              <h2 id="ws-sec-identity">{t('workspace.identity')}</h2>
+              <p>{t('workspace.identityHelp')}</p>
+            </div>
           </div>
-          <div>
-            <div className="logo-up">
-              <WsLogo name={name || ws.name} />
-              <div className="col">
-                <span className="row st-logo-btn">
-                  <button type="button" className="btn btn-secondary btn-sm" aria-disabled="true">
-                    {t('workspace.changeLogo')}
-                  </button>
-                  {soon}
-                </span>
-                <span className="help">{t('workspace.logoHelp')}</span>
+          {/* §18.6 : rangées à filets, l'écart est porté par leur padding de 20 px ; dans une rangée,
+              l'aide suit son libellé à 4 px (maquette, « aide sous son champ ») */}
+          <div data-gap-exempt="">
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <div className="stg-lab">
+                  {t('workspace.logo')} {soon}
+                </div>
+                <div className="stg-help">{t('workspace.logoHelp')}</div>
+              </div>
+              <div className="stg-ctl">
+                <div className="stg-lr">
+                  <span className="stg-logo" aria-hidden="true">
+                    {((name || ws.name).trim()[0] ?? '?').toUpperCase()}
+                  </span>
+                  <Button aria-disabled="true">{t('workspace.changeLogo')}</Button>
+                </div>
               </div>
             </div>
-            <div className="field st-gen-first">
-              <label htmlFor="ws-name">{t('workspace.wsName')}</label>
-              <input
-                id="ws-name"
-                className="input"
-                required
-                maxLength={80}
-                disabled={!editable}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="ws-site">{t('workspace.website')}</label>
-              <input
-                id="ws-site"
-                className="input"
-                type="url"
-                inputMode="url"
-                placeholder="https://…"
-                maxLength={500}
-                disabled={!editable}
-                value={website}
-                aria-invalid={urlError?.id === 'ws-site' ? true : undefined}
-                aria-describedby={urlError?.id === 'ws-site' ? 'ws-site-error' : undefined}
-                onChange={(e) => {
-                  setWebsite(e.target.value);
-                  setUrlError(null);
-                }}
-              />
-              {errFor('ws-site')}
-            </div>
-            <div className="field">
-              <label htmlFor="ws-slug">{t('workspace.slug')}</label>
-              <input
-                id="ws-slug"
-                className="input"
-                required
-                pattern="[a-z0-9][a-z0-9-]{1,59}"
-                disabled={!editable}
-                value={slug}
-                aria-describedby="ws-slug-help"
-                onChange={(e) => setSlug(e.target.value)}
-              />
-              <span id="ws-slug-help" className="help">
-                {t('workspace.slugHelp')}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="form-sec">
-          <div className="intro">
-            <h2 className="t-h3">{t('workspace.sharing')}</h2>
-            <p className="t-caption muted">{t('workspace.sharingHelp')}</p>
-          </div>
-          <div>
-            <div className="field">
-              <label htmlFor="ws-privacy">{t('workspace.privacyUrl')}</label>
-              <input
-                id="ws-privacy"
-                className="input"
-                type="url"
-                inputMode="url"
-                placeholder="https://…"
-                maxLength={500}
-                disabled={!editable}
-                value={privacyUrl}
-                aria-invalid={urlError?.id === 'ws-privacy' ? true : undefined}
-                aria-describedby={described('ws-privacy', 'ws-privacy-help')}
-                onChange={(e) => {
-                  setPrivacyUrl(e.target.value);
-                  setUrlError(null);
-                }}
-              />
-              {errFor('ws-privacy')}
-              <span id="ws-privacy-help" className="help">
-                {t('workspace.privacyUrlHelp')}
-              </span>
-            </div>
-            <div className="field">
-              <label htmlFor="ws-help">{t('help.contactLabel')}</label>
-              <input
-                id="ws-help"
-                className="input"
-                inputMode="email"
-                placeholder="support@exemple.example"
-                maxLength={500}
-                disabled={!editable}
-                value={helpContact}
-                aria-invalid={urlError?.id === 'ws-help' ? true : undefined}
-                aria-describedby={described('ws-help', 'ws-help-help')}
-                onChange={(e) => {
-                  setHelpContact(e.target.value);
-                  setUrlError(null);
-                }}
-              />
-              {errFor('ws-help')}
-              <span id="ws-help-help" className="help">
-                {t('help.contactHelp')}
-              </span>
-            </div>
-            <div className="setting">
-              <div>
-                <b id="ws-public-label">{t('workspace.publicLinks')}</b>
-                <p id="ws-public-help" className="t-caption muted">
-                  {t('workspace.publicLinksHelp')}
-                  {!editable && ` ${t('workspace.publicLinksAdmin')}`}
-                </p>
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <label className="stg-lab" htmlFor="ws-name">
+                  {t('workspace.wsName')}
+                </label>
               </div>
-              <span className="switch">
+              <div className="stg-ctl">
                 <input
-                  type="checkbox"
-                  aria-labelledby="ws-public-label"
-                  aria-describedby="ws-public-help"
-                  checked={ws.public_links_enabled}
-                  disabled={!editable || busy}
+                  id="ws-name"
+                  className="fd-input"
+                  required
+                  maxLength={80}
+                  autoComplete="organization"
+                  disabled={!editable}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <label className="stg-lab" htmlFor="ws-site">
+                  {t('workspace.website')}
+                </label>
+              </div>
+              <div className="stg-ctl">
+                <input
+                  id="ws-site"
+                  className="fd-input"
+                  type="url"
+                  inputMode="url"
+                  autoComplete="url"
+                  placeholder={t('workspace.websitePlaceholder')}
+                  maxLength={500}
+                  disabled={!editable}
+                  value={website}
+                  aria-invalid={urlError?.id === 'ws-site' ? true : undefined}
+                  aria-describedby={described('ws-site')}
                   onChange={(e) => {
-                    const enabled = e.target.checked;
-                    void run(async () => {
-                      check(
-                        await supabase
-                          .from('workspaces')
-                          .update({ public_links_enabled: enabled })
-                          .eq('id', ws.id),
-                      );
-                      await reload();
-                      toast(t('workspace.saved'));
-                    });
+                    setWebsite(e.target.value);
+                    setUrlError(null);
                   }}
                 />
-                <span />
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="form-sec">
-          <div className="intro">
-            <h2 className="t-h3">{t('workspace.region')}</h2>
-          </div>
-          <div>
-            <div className="field">
-              <label htmlFor="ws-lang">
-                {t('workspace.defaultLang')} {soon}
-              </label>
-              <select id="ws-lang" className="select" disabled defaultValue="fr">
-                <option value="fr">Français</option>
-                <option value="en">English</option>
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="ws-tz">
-                {t('workspace.timezone')} {soon}
-              </label>
-              <select id="ws-tz" className="select" disabled defaultValue="Europe/Paris">
-                <option value="Europe/Paris">Europe/Paris</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {editable && (
-          <div className="form-sec st-gen-foot">
-            <button type="button" className="btn btn-secondary" onClick={reset} disabled={busy}>
-              {t('common.cancel')}
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={busy}>
-              {t('common.save')}
-            </button>
-          </div>
-        )}
-
-        {can('workspace.delete') && (
-          <div className="form-sec st-danger">
-            <div className="intro">
-              <h2 className="t-h3">{t('workspace.danger')}</h2>
-              <p className="t-caption muted">{t('workspace.dangerHelp')}</p>
-            </div>
-            <div className="row between wrap st-danger-row">
-              <div>
-                <b>{t('workspace.delete')}</b>
-                <p className="t-caption muted">
-                  {counts?.demos
-                    ? t('workspace.deleteHintCounts', {
-                        demos: t('workspace.nDemos', { count: counts.demos, n: formatNumber(counts.demos) }),
-                      })
-                    : t('workspace.deleteHint')}
-                </p>
+                {errFor('ws-site')}
               </div>
-              <button type="button" className="btn btn-secondary st-danger-btn" onClick={() => void remove()}>
-                {t('workspace.delete')}
-              </button>
+            </div>
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <label className="stg-lab" htmlFor="ws-slug">
+                  {t('workspace.slug')}
+                </label>
+                <div id="ws-slug-help" className="stg-help">
+                  {t('workspace.slugHelp')}
+                </div>
+              </div>
+              <div className="stg-ctl">
+                <div className="stg-group stg-short">
+                  <span className="stg-group__pre" aria-hidden="true">
+                    {t('workspace.slugPrefix')}
+                  </span>
+                  <input
+                    id="ws-slug"
+                    required
+                    pattern="[a-z0-9][a-z0-9-]{1,59}"
+                    autoComplete="off"
+                    disabled={!editable}
+                    value={slug}
+                    aria-describedby="ws-slug-help"
+                    onChange={(e) => setSlug(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        )}
+        </section>
+
+        <section className="stg-sec" aria-labelledby="ws-sec-sharing">
+          <div className="stg-sec__head">
+            <div>
+              <h2 id="ws-sec-sharing">{t('workspace.sharing')}</h2>
+              <p>{t('workspace.sharingHelp')}</p>
+            </div>
+          </div>
+          <div data-gap-exempt="">
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <label className="stg-lab" htmlFor="ws-privacy">
+                  {t('workspace.privacyUrl')}
+                </label>
+                <div id="ws-privacy-help" className="stg-help">
+                  {t('workspace.privacyUrlHelp')}
+                </div>
+              </div>
+              <div className="stg-ctl">
+                <input
+                  id="ws-privacy"
+                  className="fd-input"
+                  type="url"
+                  inputMode="url"
+                  autoComplete="off"
+                  placeholder={t('workspace.privacyPlaceholder')}
+                  maxLength={500}
+                  disabled={!editable}
+                  value={privacyUrl}
+                  aria-invalid={urlError?.id === 'ws-privacy' ? true : undefined}
+                  aria-describedby={described('ws-privacy', 'ws-privacy-help')}
+                  onChange={(e) => {
+                    setPrivacyUrl(e.target.value);
+                    setUrlError(null);
+                  }}
+                />
+                {errFor('ws-privacy')}
+              </div>
+            </div>
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <label className="stg-lab" htmlFor="ws-help">
+                  {t('help.contactLabel')}
+                </label>
+                <div id="ws-help-help" className="stg-help">
+                  {t('help.contactHelp')}
+                </div>
+              </div>
+              <div className="stg-ctl">
+                <input
+                  id="ws-help"
+                  className="fd-input"
+                  inputMode="email"
+                  autoComplete="off"
+                  placeholder={t('workspace.supportPlaceholder')}
+                  maxLength={500}
+                  disabled={!editable}
+                  value={helpContact}
+                  aria-invalid={urlError?.id === 'ws-help' ? true : undefined}
+                  aria-describedby={described('ws-help', 'ws-help-help')}
+                  onChange={(e) => {
+                    setHelpContact(e.target.value);
+                    setUrlError(null);
+                  }}
+                />
+                {errFor('ws-help')}
+              </div>
+            </div>
+            <div className="stg-row stg-row--inline">
+              <div className="stg-text" data-gap-exempt="">
+                <div className="stg-lab" id="ws-public-label">
+                  {t('workspace.publicLinks')}
+                </div>
+                <div id="ws-public-help" className="stg-help">
+                  {t('workspace.publicLinksHelp')}
+                  {!editable && ` ${t('workspace.publicLinksAdmin')}`}
+                </div>
+              </div>
+              <div className="stg-ctl">
+                <label className="fd-switch">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    aria-labelledby="ws-public-label"
+                    aria-describedby="ws-public-help"
+                    checked={ws.public_links_enabled}
+                    disabled={!editable || busy}
+                    onChange={(e) => {
+                      const enabled = e.target.checked;
+                      void run(async () => {
+                        check(
+                          await supabase
+                            .from('workspaces')
+                            .update({ public_links_enabled: enabled })
+                            .eq('id', ws.id),
+                        );
+                        await reload();
+                        toast(t('workspace.saved'));
+                      });
+                    }}
+                  />
+                  <span className="fd-switch__track" aria-hidden="true" />
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="stg-sec" aria-labelledby="ws-sec-region">
+          <div className="stg-sec__head">
+            <div>
+              <h2 id="ws-sec-region">{t('workspace.region')}</h2>
+            </div>
+          </div>
+          <div data-gap-exempt="">
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <label className="stg-lab" htmlFor="ws-lang">
+                  {t('workspace.defaultLang')} {soon}
+                </label>
+              </div>
+              <div className="stg-ctl">
+                <Select id="ws-lang" className="stg-short" disabled defaultValue="fr">
+                  <option value="fr">Français</option>
+                  <option value="en">English</option>
+                </Select>
+              </div>
+            </div>
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <label className="stg-lab" htmlFor="ws-tz">
+                  {t('workspace.timezone')} {soon}
+                </label>
+              </div>
+              <div className="stg-ctl">
+                <Select id="ws-tz" className="stg-short" disabled defaultValue="Europe/Paris">
+                  <option value="Europe/Paris">Europe/Paris</option>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </section>
       </form>
+
+      {can('workspace.delete') && (
+        <section className="stg-danger" aria-labelledby="ws-danger">
+          <div>
+            <h2 id="ws-danger">{t('workspace.danger')}</h2>
+            <p>
+              {counts?.demos
+                ? t('workspace.deleteHintCounts', {
+                    demos: t('workspace.ownDemos', { count: counts.demos, n: formatNumber(counts.demos) }),
+                  })
+                : t('workspace.deleteHint')}
+            </p>
+          </div>
+          <Button className="stg-btn-danger" onClick={() => void remove()}>
+            {t('workspace.delete')}
+          </Button>
+        </section>
+      )}
     </SettingsShell>
   );
 }

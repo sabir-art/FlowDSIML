@@ -80,6 +80,7 @@ import { DatasetDialog } from './data/DatasetDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
+import { Select } from '@flowdsiml/ui';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
 const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
@@ -682,6 +683,7 @@ export function EditorPage() {
             <button
               type="button"
               className="btn btn-secondary btn-sm"
+              aria-controls="editorpage-file"
               onClick={() => replacePicker.current?.click()}
             >
               <ImagePlus aria-hidden="true" />
@@ -1020,8 +1022,9 @@ export function EditorPage() {
                 ))}
               </div>
             )}
-            <select
-              className="select input-sm stage-zoom"
+            <Select
+              size="sm"
+              className="stage-zoom"
               aria-label={t('editor.zoom')}
               value={zoom}
               onChange={(e) => setZoom(e.target.value as Zoom)}
@@ -1029,7 +1032,7 @@ export function EditorPage() {
               <option value="fit">{t('editor.zoomFit')}</option>
               <option value="50">50 %</option>
               <option value="100">100 %</option>
-            </select>
+            </Select>
           </div>
           {findOpen && (
             <FindBar
@@ -1185,7 +1188,11 @@ export function EditorPage() {
           ref={replacePicker}
           type="file"
           accept="image/png,image/jpeg,image/webp"
-          hidden
+          /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+          id="editorpage-file"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
           aria-label={t('editor.toolReplace')}
           onChange={(e) => {
             const f = e.target.files?.[0];

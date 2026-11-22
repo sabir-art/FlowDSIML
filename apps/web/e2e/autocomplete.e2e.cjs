@@ -40,7 +40,7 @@ const EXTRA = [
     name: 'Inviter des membres',
     route: '/#/settings/members',
     open: async (p) => {
-      await p.getByRole('button', { name: 'Inviter des membres' }).click();
+      await p.getByRole('button', { name: 'Inviter', exact: true }).click();
       await p.locator('#inv-email').waitFor();
     },
   },

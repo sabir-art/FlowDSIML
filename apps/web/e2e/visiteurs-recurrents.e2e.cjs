@@ -8,6 +8,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { optionsOf } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const SHOTS = process.env.SHOTS_DIR;
@@ -158,8 +159,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const fd = page.getByRole('dialog', { name: 'Ajouter un filtre' });
   const crit = fd.getByLabel('Critère de la condition 1');
   ok(
-    (await crit.locator('option:not([disabled])', { hasText: 'Visiteur récurrent' }).count()) === 1 &&
-      !(await crit.locator('option[disabled]').allTextContents()).some((x) => /Nouveau ou récurrent/.test(x)),
+    (await optionsOf(crit, { raw: true })).filter((o) => !o.disabled && /Visiteur récurrent/.test(o.label))
+      .length === 1 &&
+      !(await optionsOf(crit, { disabled: true })).some((x) => /Nouveau ou récurrent/.test(x)),
     'segment : « Visiteur récurrent » sans « Bientôt »',
   );
   await page.keyboard.press('Escape');
@@ -168,12 +170,12 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.goto(`${APP}/#/settings/privacy`);
   await page.getByRole('heading', { level: 1, name: 'Confidentialité' }).waitFor();
   ok(
-    sp(await page.locator('.setting').first().innerText()).includes('nouvelle visite après 30 minutes'),
+    sp(await page.locator('.stg-row').first().innerText()).includes('nouvelle visite après 30 minutes'),
     'Confidentialité : état',
   );
   // 171 : durée de conservation des leads, celle du plan (Pro : 365 jours)
   ok(
-    sp(await page.locator('.setting').nth(1).innerText()).includes(
+    sp(await page.locator('.stg-row').nth(1).innerText()).includes(
       'Les leads sont supprimés après 365 jours.',
     ),
     'Confidentialité : conservation des leads',

@@ -1964,51 +1964,48 @@ h1.p-title {
 .p-ba-tags .p-ba-pill {
   align-self: auto;
 }
-.p-ba-range {
-  /* L17-04 : piste et poignée aux couleurs du thème (lisibles en clair et en sombre) */
+/* COMP-01 §6 : curseur maison du lecteur. Piste de 4 px, remplie à la couleur du thème ; poignée de 20 px */
+.p-slider {
+  position: relative;
   width: 100%;
   height: 24px;
-  margin: 0;
-  appearance: none;
-  background: transparent;
   cursor: pointer;
+  touch-action: none;
+  user-select: none;
 }
-.p-ba-range::-webkit-slider-runnable-track {
-  height: 6px;
-  border-radius: 3px;
+.p-slider__track {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  left: 0;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
   background: color-mix(in srgb, var(--p-text) 22%, transparent);
 }
-.p-ba-range::-moz-range-track {
-  height: 6px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--p-text) 22%, transparent);
-}
-.p-ba-range::-moz-range-progress {
-  height: 6px;
-  border-radius: 3px;
+.p-slider__fill {
+  display: block;
+  width: calc(10px + (100% - 20px) * var(--p-slider-n, 0));
+  height: 100%;
   background: var(--p-primary);
 }
-.p-ba-range::-webkit-slider-thumb {
-  appearance: none;
+.p-slider__thumb {
+  position: absolute;
+  top: 2px;
+  left: calc((100% - 20px) * var(--p-slider-n, 0));
+  box-sizing: border-box;
   width: 20px;
   height: 20px;
-  margin-top: -7px;
+  border: 2px solid var(--p-primary);
   border-radius: 50%;
-  background: var(--p-primary);
-  box-shadow: 0 0 0 3px var(--p-surface);
+  background: var(--p-surface);
+  box-shadow: 0 1px 2px rgb(8 10 14 / 0.16);
 }
-.p-ba-range::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--p-primary);
-  box-shadow: 0 0 0 3px var(--p-surface);
-}
-.p-ba-range:focus-visible {
+/* Focus clavier : anneau intérieur de 2 px, sans contour extérieur (FIELD-01 §11.4) */
+.p-slider__thumb:focus-visible {
   outline: none;
+  border-color: var(--p-focus);
   box-shadow: inset 0 0 0 2px var(--p-focus);
-  border-radius: 6px;
 }
 .p-ba-seg {
   align-self: flex-start;
@@ -2206,20 +2203,16 @@ h1.p-title {
 .is-dark .p-ba-seg button:not([aria-pressed='true']) {
   color: var(--p-chrome-text);
 }
-/* L17-04 : en sombre, piste claire sur le chrome du lecteur */
-.is-dark .p-ba-range::-webkit-slider-runnable-track {
+/* L17-04 : en sombre, piste claire et poignée sur le chrome du lecteur */
+.is-dark .p-ba-range .p-slider__track {
   background: color-mix(in srgb, var(--p-chrome-text) 28%, transparent);
 }
-.is-dark .p-ba-range::-moz-range-track {
-  background: color-mix(in srgb, var(--p-chrome-text) 28%, transparent);
-}
-.is-dark .p-ba-range::-webkit-slider-thumb {
+.is-dark .p-ba-range .p-slider__fill {
   background: var(--p-chrome-primary, var(--p-primary));
-  box-shadow: 0 0 0 3px var(--p-chrome);
 }
-.is-dark .p-ba-range::-moz-range-thumb {
-  background: var(--p-chrome-primary, var(--p-primary));
-  box-shadow: 0 0 0 3px var(--p-chrome);
+.is-dark .p-ba-range .p-slider__thumb {
+  border-color: var(--p-chrome-primary, var(--p-primary));
+  background: var(--p-chrome);
 }
 /* L17-10 : en sombre, le tiroir suit le chrome du lecteur */
 .is-dark .p-gloss-drawer {
@@ -2471,10 +2464,6 @@ h1.p-title {
   flex: 1;
   display: flex;
   align-items: center;
-}
-.p-video__track input {
-  width: 100%;
-  accent-color: var(--p-primary);
 }
 .p-video__mark {
   position: absolute;

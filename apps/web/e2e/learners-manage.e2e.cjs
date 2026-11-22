@@ -2,6 +2,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { learnersFixture, seedPathTables } = require('./learners-data.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 
 (async () => {
@@ -77,9 +78,9 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     (await dlg.locator('.gm-item[aria-current="true"] b').textContent()) === 'Accueil des jeunes',
     'L13-07 : formation créée et choisie',
   );
-  await dlg
-    .getByRole('combobox', { name: 'Ajouter un module' })
-    .selectOption({ label: 'Saisir un rendez-vous · Captures' });
+  await pick(dlg.getByRole('combobox', { name: 'Ajouter un module' }), {
+    label: 'Saisir un rendez-vous · Captures',
+  });
   await dlg.getByRole('button', { name: 'Ajouter un module' }).click();
   await page.waitForTimeout(400);
   const created = t.paths.find((p) => p.title === 'Accueil des jeunes');

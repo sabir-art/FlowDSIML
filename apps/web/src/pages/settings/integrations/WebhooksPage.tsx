@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Copy, Plus, Send, Webhook as WebhookIcon, X } from 'lucide-react';
+import { CircleAlert, Copy, KeyRound, Plus, Send, TriangleAlert, Webhook as WebhookIcon } from 'lucide-react';
 import { SettingsShell } from '../SettingsShell';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useToast } from '../../../components/Toast';
@@ -32,7 +32,7 @@ import {
   type Webhook,
 } from './webhooks';
 import './integrations.css';
-import { Empty } from '@flowdsiml/ui';
+import { Button, Modal } from '@flowdsiml/ui';
 
 export function WebhooksPage() {
   const { t } = useTranslation();
@@ -70,12 +70,17 @@ export function WebhooksPage() {
   const sub = { title: t('integrations.webhooks') };
   if (!allowed)
     return (
-      <SettingsShell sub={sub}>
-        <div className="empty" role="status">
-          <h2 className="t-h3">{t('integrations.noAccess')}</h2>
-          <Link className="btn btn-secondary btn-sm" to="/settings/workspace">
-            {t('integrations.backGeneral')}
-          </Link>
+      <SettingsShell sub={sub} legacy={false}>
+        <div className="stg-empty" role="status">
+          <span className="stg-empty__tile" aria-hidden="true">
+            <WebhookIcon size={20} />
+          </span>
+          <h2>{t('integrations.noAccess')}</h2>
+          <div className="stg-empty__acts">
+            <Link className="fd-btn" to="/settings/workspace">
+              {t('integrations.backGeneral')}
+            </Link>
+          </div>
         </div>
       </SettingsShell>
     );
@@ -88,120 +93,119 @@ export function WebhooksPage() {
     }
     void load();
   };
+  const addButton = (
+    <Button variant="primary" icon={<Plus size={16} />} onClick={() => setEditing('new')}>
+      {t('integrations.add')}
+    </Button>
+  );
 
   return (
-    <SettingsShell sub={sub}>
-      <section className="l23" aria-labelledby="st-title">
-        <div className="row between wrap l23-head">
-          <p className="muted">{t('integrations.webhooksSub')}</p>
-          {hooks && hooks.length > 0 && (
-            <button type="button" className="btn btn-primary" onClick={() => setEditing('new')}>
-              <Plus aria-hidden="true" />
-              {t('integrations.add')}
-            </button>
-          )}
+    <SettingsShell sub={sub} legacy={false} actions={addButton}>
+      <section className="stg-sec l23" aria-labelledby="wh-title">
+        <div className="stg-sec__head">
+          <div>
+            <h2 id="wh-title">{t('integrations.webhooks')}</h2>
+            <p>{t('integrations.webhooksSub')}</p>
+          </div>
         </div>
-        <div className="card">
-          {hooks === null ? null : hooks.length === 0 ? (
-            <Empty
-              level={3}
-              icon={<WebhookIcon />}
-              title={t('integrations.emptyTitle')}
-              body={t('integrations.emptyBody')}
-              action={
-                <button type="button" className="fd-btn fd-btn--primary" onClick={() => setEditing('new')}>
-                  <Plus aria-hidden="true" />
-                  {t('integrations.add')}
-                </button>
-              }
-            />
-          ) : (
-            <div className="table-wrap">
-              <table className="table">
-                <caption className="sr-only">{t('integrations.tableCaption')}</caption>
-                <thead>
-                  <tr>
-                    <th>{t('integrations.colUrl')}</th>
-                    <th>{t('integrations.colEvents')}</th>
-                    <th>{t('integrations.colState')}</th>
-                    <th>{t('integrations.colLast')}</th>
-                    <th>
-                      <span className="sr-only">{t('integrations.colActions')}</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {hooks.map((h) => {
-                    const d = last[h.id];
-                    return (
-                      <tr key={h.id}>
-                        <td>
-                          <Link className="wh-url" to={`/settings/integrations/${h.id}`} title={h.url}>
-                            {h.url}
-                          </Link>
-                          {h.name && <div className="t-caption subtle">{h.name}</div>}
-                        </td>
-                        <td>
-                          <EventBadges events={h.events} />
-                        </td>
-                        <td>
-                          <StateBadge h={h} />
-                        </td>
-                        <td>
-                          {d ? (
-                            <>
-                              <span className={`st ${statusKind(d)}`}>{statusText(d)}</span>{' '}
-                              <span className="t-caption muted">{formatRelativeShort(d.created_at)}</span>
-                            </>
-                          ) : (
-                            <span className="t-caption muted">{t('integrations.never')}</span>
-                          )}
-                        </td>
-                        <td className="r">
-                          <Menu
-                            label={t('integrations.actionsFor', { host: hostOf(h.url) })}
-                            items={[
-                              {
-                                label: t('integrations.sendTest'),
-                                icon: <Send />,
-                                onSelect: () => void test(h),
+        {hooks === null ? null : hooks.length === 0 ? (
+          <div className="stg-empty">
+            <span className="stg-empty__tile" aria-hidden="true">
+              <WebhookIcon size={20} />
+            </span>
+            <h3>{t('integrations.emptyTitle')}</h3>
+            <p>{t('integrations.emptyBody')}</p>
+            <div className="stg-empty__acts">{addButton}</div>
+          </div>
+        ) : (
+          <div className="wh-table">
+            <table className="stg-table">
+              <caption className="sr-only">{t('integrations.tableCaption')}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t('integrations.colUrl')}</th>
+                  <th scope="col" className="stg-table__m-hide">
+                    {t('integrations.colEvents')}
+                  </th>
+                  <th scope="col">{t('integrations.colState')}</th>
+                  <th scope="col" className="stg-table__m-hide">
+                    {t('integrations.colLast')}
+                  </th>
+                  <th scope="col" className="stg-table__act">
+                    <span className="sr-only">{t('integrations.colActions')}</span>
+                  </th>
+                </tr>
+              </thead>
+              {/* §18.6 : lignes à filets de 56 px, l'écart est porté par la hauteur des lignes */}
+              <tbody data-gap-exempt="">
+                {hooks.map((h) => {
+                  const d = last[h.id];
+                  return (
+                    <tr key={h.id}>
+                      <td>
+                        <Link className="wh-url" to={`/settings/integrations/${h.id}`} title={h.url}>
+                          {h.url}
+                        </Link>
+                        {h.name && <div className="stg-table__sub">{h.name}</div>}
+                      </td>
+                      <td className="stg-table__m-hide">
+                        <EventBadges events={h.events} />
+                      </td>
+                      <td>
+                        <StateBadge h={h} />
+                      </td>
+                      <td className="stg-table__m-hide">
+                        {d ? (
+                          <>
+                            <span className={`st ${statusKind(d)}`}>{statusText(d)}</span>{' '}
+                            <span className="stg-muted wh-when">{formatRelativeShort(d.created_at)}</span>
+                          </>
+                        ) : (
+                          <span className="stg-muted wh-when">{t('integrations.never')}</span>
+                        )}
+                      </td>
+                      <td className="stg-table__act">
+                        <Menu
+                          label={t('integrations.actionsFor', { host: hostOf(h.url) })}
+                          items={[
+                            {
+                              label: t('integrations.sendTest'),
+                              icon: <Send />,
+                              onSelect: () => void test(h),
+                            },
+                            {
+                              label: t(h.state === 'active' ? 'integrations.disable' : 'integrations.enable'),
+                              onSelect: () =>
+                                void setState(h.id, h.state === 'active' ? 'paused' : 'active').then(load),
+                            },
+                            { label: t('integrations.edit'), onSelect: () => setEditing(h) },
+                            {
+                              label: t('integrations.delete'),
+                              danger: true,
+                              onSelect: async () => {
+                                if (
+                                  await ask({
+                                    title: t('integrations.deleteTitle', { host: hostOf(h.url) }),
+                                    body: t('integrations.deleteBody'),
+                                    confirmLabel: t('integrations.delete'),
+                                    danger: true,
+                                  })
+                                ) {
+                                  await deleteWebhook(h.id);
+                                  void load();
+                                }
                               },
-                              {
-                                label: t(
-                                  h.state === 'active' ? 'integrations.disable' : 'integrations.enable',
-                                ),
-                                onSelect: () =>
-                                  void setState(h.id, h.state === 'active' ? 'paused' : 'active').then(load),
-                              },
-                              { label: t('integrations.edit'), onSelect: () => setEditing(h) },
-                              {
-                                label: t('integrations.delete'),
-                                danger: true,
-                                onSelect: async () => {
-                                  if (
-                                    await ask({
-                                      title: t('integrations.deleteTitle', { host: hostOf(h.url) }),
-                                      body: t('integrations.deleteBody'),
-                                      confirmLabel: t('integrations.delete'),
-                                      danger: true,
-                                    })
-                                  ) {
-                                    await deleteWebhook(h.id);
-                                    void load();
-                                  }
-                                },
-                              },
-                            ]}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                            },
+                          ]}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
       {editing && ws && (
         <WebhookForm
@@ -246,11 +250,11 @@ export function EventBadges({ events, max = 2 }: { events: string[]; max?: numbe
   return (
     <div className="wh-ev">
       {events.slice(0, max).map((e) => (
-        <span key={e} className="badge">
+        <span key={e} className="wh-evp">
           {e}
         </span>
       ))}
-      {events.length > max && <span className="badge">+{events.length - max}</span>}
+      {events.length > max && <span className="wh-evp">+{events.length - max}</span>}
     </div>
   );
 }
@@ -264,9 +268,7 @@ export function StateBadge({ h, inline = false }: { h: Webhook; inline?: boolean
     return (
       <>
         <span className="wh-state wh-state--warn">{t('integrations.pausedAuto')}</span>
-        {!inline && (
-          <div className="t-caption subtle">{t('integrations.failures', { count: h.failures })}</div>
-        )}
+        {!inline && <div className="wh-fail">{t('integrations.failures', { count: h.failures })}</div>}
       </>
     );
   return <span className="wh-state">{t('integrations.disabled')}</span>;
@@ -335,104 +337,20 @@ export function WebhookForm({
   };
 
   return (
-    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <form
-        className="modal l23-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={`${id}-t`}
-        onSubmit={submit}
-        onKeyDown={(e) => e.key === 'Escape' && onClose()}
-        noValidate
-      >
-        <div className="modal-head">
-          <h2 id={`${id}-t`}>{t(hook ? 'integrations.editTitle' : 'integrations.addTitle')}</h2>
-          <button
-            type="button"
-            className="btn btn-ghost btn-icon btn-sm"
-            aria-label={t('common.close')}
-            onClick={onClose}
-          >
-            <X aria-hidden="true" />
-          </button>
-        </div>
-        <div className="modal-body">
-          <div className="field">
-            <label htmlFor={`${id}-u`}>{t('integrations.url')}</label>
-            <input
-              ref={urlRef}
-              id={`${id}-u`}
-              className="input t-mono"
-              type="url"
-              inputMode="url"
-              placeholder="https://"
-              value={url}
-              aria-invalid={urlErr || undefined}
-              aria-describedby={`${id}-ue`}
-              onChange={(e) => setUrl(e.target.value)}
-              onBlur={() => url && setUrlErr(!urlOk(url))}
-            />
-            <span className={`help${urlErr ? ' is-error' : ''}`} id={`${id}-ue`}>
-              {t('integrations.urlError')}
-            </span>
-          </div>
-          <div className="field l23-gap">
-            <label htmlFor={`${id}-n`}>
-              {t('integrations.name')} <span className="opt">{t('integrations.optional')}</span>
-            </label>
-            <input
-              id={`${id}-n`}
-              className="input"
-              maxLength={60}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <fieldset className="l23-fs" aria-describedby={evErr ? `${id}-ee` : undefined}>
-            <legend className="t-label">{t('integrations.events')}</legend>
-            <div className="ev-list">
-              {WEBHOOK_EVENTS.map((ev) => (
-                <label key={ev}>
-                  <input
-                    type="checkbox"
-                    checked={events.includes(ev)}
-                    onChange={(e) => toggle(ev, e.target.checked)}
-                  />
-                  <span>
-                    {t(`integrations.ev_${ev.replace('.', '_')}`)}
-                    <small>
-                      <code>{ev}</code>
-                      {ev === 'lead.created' && ` · ${t('integrations.evLeadHint')}`}
-                    </small>
-                  </span>
-                </label>
-              ))}
-            </div>
-            {evErr && (
-              <p className="help is-error" id={`${id}-ee`} role="alert">
-                {t('integrations.eventsRequired')}
-              </p>
-            )}
-          </fieldset>
-          {events.includes('lead.created') && (
-            <div className="alert alert-warning l23-gap" role="status">
-              <span>{t('integrations.gdpr')}</span>
-            </div>
-          )}
-          <p className="help l23-gap">{t('integrations.formatHelp')}</p>
-          {err && (
-            <div className="alert alert-danger l23-gap" role="alert">
-              <span>{err}</span>
-            </div>
-          )}
-        </div>
-        <div className="modal-foot">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            {t('common.cancel')}
-          </button>
-          <button
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      icon={<WebhookIcon />}
+      title={t(hook ? 'integrations.editTitle' : 'integrations.addTitle')}
+      closeLabel={t('common.close')}
+      footer={
+        <>
+          <Button onClick={onClose}>{t('common.cancel')}</Button>
+          <Button
+            variant="primary"
             type="submit"
-            className="btn btn-primary"
+            form={`${id}-f`}
             aria-disabled={!events.length || busy || undefined}
             onClick={(e) => {
               if (!events.length) {
@@ -442,10 +360,89 @@ export function WebhookForm({
             }}
           >
             {t(hook ? 'integrations.save' : 'integrations.create')}
-          </button>
+          </Button>
+        </>
+      }
+    >
+      <form id={`${id}-f`} className="st-invite__form wh-form" onSubmit={submit} noValidate>
+        <div className="fd-modal__field">
+          <label htmlFor={`${id}-u`}>{t('integrations.url')}</label>
+          <input
+            ref={urlRef}
+            id={`${id}-u`}
+            className="fd-input"
+            type="url"
+            inputMode="url"
+            autoComplete="off"
+            spellCheck={false}
+            placeholder="https://…"
+            value={url}
+            aria-invalid={urlErr || undefined}
+            aria-describedby={`${id}-ue`}
+            onChange={(e) => setUrl(e.target.value)}
+            onBlur={() => url && setUrlErr(!urlOk(url))}
+          />
+          <span className={urlErr ? 'stg-error' : 'stg-help'} id={`${id}-ue`}>
+            {urlErr && <CircleAlert size={16} aria-hidden="true" />}
+            {t('integrations.urlError')}
+          </span>
         </div>
+        <div className="fd-modal__field">
+          <label htmlFor={`${id}-n`}>
+            {t('integrations.name')} <span className="stg-soon">{t('integrations.optional')}</span>
+          </label>
+          <input
+            id={`${id}-n`}
+            className="fd-input"
+            autoComplete="off"
+            maxLength={60}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <fieldset className="stg-fieldset wh-events" aria-describedby={evErr ? `${id}-ee` : undefined}>
+          <legend className="fd-modal__label">{t('integrations.events')}</legend>
+          {/* §18.6 : cases d'un même groupe à 8 px (COMP-01) */}
+          <div className="ev-list" data-gap-exempt="">
+            {WEBHOOK_EVENTS.map((ev) => (
+              <label key={ev} className="stg-opt">
+                <input
+                  type="checkbox"
+                  checked={events.includes(ev)}
+                  onChange={(e) => toggle(ev, e.target.checked)}
+                />
+                <span>
+                  {t(`integrations.ev_${ev.replace('.', '_')}`)}
+                  <small>
+                    <code>{ev}</code>
+                    {ev === 'lead.created' && ` · ${t('integrations.evLeadHint')}`}
+                  </small>
+                </span>
+              </label>
+            ))}
+          </div>
+          {evErr && (
+            <p className="stg-error" id={`${id}-ee`} role="alert">
+              <CircleAlert size={16} aria-hidden="true" />
+              {t('integrations.eventsRequired')}
+            </p>
+          )}
+        </fieldset>
+        {events.includes('lead.created') && (
+          <p className="wh-warn" role="status">
+            <TriangleAlert size={16} aria-hidden="true" />
+            <span>{t('integrations.gdpr')}</span>
+          </p>
+        )}
+        <p className="stg-help wh-format">{t('integrations.formatHelp')}</p>
+        {err && (
+          <p className="stg-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
+            {err}
+          </p>
+        )}
       </form>
-    </div>
+    </Modal>
   );
 }
 
@@ -466,49 +463,24 @@ export function SecretDialog({
   const id = useId();
   const [copied, setCopied] = useState(false);
   const [failure, setFailure] = useState<SendResult | null>(null);
-  const copyRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => copyRef.current?.focus(), []);
+  const boxRef = useRef<HTMLDivElement>(null);
+  // Après l'ouverture de la modale : le focus va à « Copier »
+  useEffect(() => boxRef.current?.querySelector('button')?.focus(), []);
   return (
-    <div className="modal-backdrop">
-      <div
-        className="modal l23-modal-sm"
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby={`${id}-t`}
-        aria-describedby={`${id}-d`}
-      >
-        <div className="modal-head">
-          <h2 id={`${id}-t`}>{title}</h2>
-        </div>
-        <div className="modal-body">
-          <p className="muted" id={`${id}-d`}>
-            {t('integrations.secretBody')} <b>{t('integrations.secretOnce')}</b>{' '}
-            {t('integrations.secretLost')}
-          </p>
-          <div className="secret l23-gap">
-            <code>{secret}</code>
-            <button
-              ref={copyRef}
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => {
-                void navigator.clipboard?.writeText(secret).catch(() => undefined);
-                toast(t('integrations.copied'));
-              }}
-            >
-              <Copy aria-hidden="true" />
-              {t('integrations.copy')}
-            </button>
-          </div>
-          <label className="check l23-gap">
-            <input type="checkbox" checked={copied} onChange={(e) => setCopied(e.target.checked)} />
-            {t('integrations.copiedCheck')}
-          </label>
-        </div>
-        <div className="modal-foot">
-          <button
-            type="button"
-            className="btn btn-secondary"
+    <Modal
+      open
+      onClose={() => undefined}
+      size="md"
+      role="alertdialog"
+      dismissible={false}
+      describedBy={`${id}-d`}
+      icon={<KeyRound />}
+      title={title}
+      closeLabel={t('common.close')}
+      footer={
+        <>
+          <Button
+            icon={<Send size={16} />}
             onClick={async () => {
               try {
                 const r = await onTest();
@@ -519,19 +491,39 @@ export function SecretDialog({
               }
             }}
           >
-            <Send aria-hidden="true" />
             {t('integrations.sendTest')}
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
+          </Button>
+          <Button
+            variant="primary"
             aria-disabled={!copied || undefined}
             onClick={() => copied && onDone(failure)}
           >
             {t('integrations.done')}
-          </button>
+          </Button>
+        </>
+      }
+    >
+      <div className="wh-secret">
+        <p id={`${id}-d`}>
+          {t('integrations.secretBody')} <b>{t('integrations.secretOnce')}</b> {t('integrations.secretLost')}
+        </p>
+        <div className="secret" ref={boxRef}>
+          <code>{secret}</code>
+          <Button
+            icon={<Copy size={16} />}
+            onClick={() => {
+              void navigator.clipboard?.writeText(secret).catch(() => undefined);
+              toast(t('integrations.copied'));
+            }}
+          >
+            {t('integrations.copy')}
+          </Button>
         </div>
+        <label className="stg-opt">
+          <input type="checkbox" checked={copied} onChange={(e) => setCopied(e.target.checked)} />
+          <span>{t('integrations.copiedCheck')}</span>
+        </label>
       </div>
-    </div>
+    </Modal>
   );
 }

@@ -41,14 +41,14 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const card = page.locator('.st-mydata');
   await card.waitFor();
   ok(
-    /Un fichier \.zip avec vos données personnelles : profil, espaces et rôles, commentaires, notifications, préférences et confirmations de publication\./.test(
+    /Un fichier \.zip avec votre profil, vos espaces et rôles, vos commentaires et préférences\./.test(
       sp(await card.innerText()),
     ),
     'texte : contenu exact de l’export',
   );
   const [dl] = await Promise.all([
     page.waitForEvent('download'),
-    card.getByRole('button', { name: 'Télécharger mes données (.zip)' }).click(),
+    card.getByRole('button', { name: 'Télécharger (.zip)' }).click(),
   ]);
   await card
     .getByRole('status')
@@ -82,7 +82,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(JSON.parse(strFromU8(files['profil.json'])).email === state.user.email, 'profil exporté');
 
   // Seule propriétaire d'un espace avec d'autres membres : bloquée
-  await card.getByRole('button', { name: 'Supprimer mon compte' }).click();
+  await page.locator('.stg-danger').getByRole('button', { name: 'Supprimer mon compte' }).click();
   const blocked = page.getByRole('dialog', { name: 'Transférez d’abord vos espaces' });
   await blocked.waitFor();
   ok(
@@ -94,7 +94,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await page.mouse.move(0, 0);
     await blocked.screenshot({ path: `${SHOTS}/l28-08-bloque${sfx}.png` });
   }
-  await blocked.getByRole('button', { name: 'Fermer' }).click();
+  await blocked.locator('.fd-modal__foot').getByRole('button', { name: 'Fermer' }).click();
 
   // Seule membre : l'espace est supprimé avec le compte
   t.members.splice(
@@ -105,7 +105,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   // Compte sans mot de passe, connexion de plus de 5 minutes : reconnexion d'abord
   state.hasPassword = false;
   state.recentAuth = false;
-  await card.getByRole('button', { name: 'Supprimer mon compte' }).click();
+  await page.locator('.stg-danger').getByRole('button', { name: 'Supprimer mon compte' }).click();
   const dlgR = page.getByRole('dialog', { name: 'Supprimer votre compte ?' });
   await dlgR.waitFor();
   ok(
@@ -123,7 +123,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await dlgR.getByRole('button', { name: 'Annuler' }).click();
   state.hasPassword = true;
   state.recentAuth = true;
-  await card.getByRole('button', { name: 'Supprimer mon compte' }).click();
+  await page.locator('.stg-danger').getByRole('button', { name: 'Supprimer mon compte' }).click();
   const dlg = page.getByRole('dialog', { name: 'Supprimer votre compte ?' });
   await dlg.waitFor();
   const text = sp(await dlg.innerText());

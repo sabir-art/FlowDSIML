@@ -1,0 +1,160 @@
+/*
+ * NAV-03 (comp-01-composants.md §12) : PageHeader, Breadcrumb et BackButton.
+ * Barre fixe de 56 px sur le fond du contenu, filet en bas ; focus clavier FIELD-01 §11.4 (trait intérieur de 2 px).
+ */
+.fd-page-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 32px;
+  background: var(--fd-color-content-bg);
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.fd-page-header__title,
+.fd-crumb h1 {
+  margin: 0;
+  padding: 0 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: 500 14px / 1.5 var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.fd-page-header__title {
+  font-weight: 600;
+}
+.fd-page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex: none;
+}
+.fd-page-header__actions .fd-btn {
+  height: 36px;
+  padding: 0 14px;
+}
+.fd-page-header__sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--fd-color-border);
+}
+.fd-page-header__actions > .fd-page-header__sep:first-child {
+  margin-left: 0;
+}
+.fd-page-header__tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fd-page-header__tools .fd-btn--icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--fd-color-text-muted);
+}
+.fd-page-header__tools .fd-btn--icon svg {
+  width: 16px;
+  height: 16px;
+}
+/* Sous 1 024 px, Aide et Notifications sont dans la barre mobile du haut */
+@media (max-width: 1023px) {
+  .fd-page-header__sep,
+  .fd-page-header__tools {
+    display: none;
+  }
+}
+
+.fd-crumb {
+  min-width: 0;
+}
+.fd-crumb ol {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fd-crumb li {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  color: var(--fd-color-text-subtle);
+}
+.fd-crumb__sep {
+  flex: none;
+}
+.fd-crumb__link,
+.fd-back {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  color: var(--fd-color-text-muted);
+  font: 500 14px / 1.5 var(--fd-font-sans);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
+}
+.fd-crumb__link {
+  height: 28px;
+  padding: 0 6px;
+}
+.fd-back {
+  flex: none;
+  gap: 4px;
+  height: 32px;
+  padding: 0 10px 0 6px;
+  border-radius: 8px;
+}
+.fd-back--icon {
+  justify-content: center;
+  width: 32px;
+  padding: 0;
+}
+.fd-crumb__link:hover,
+.fd-back:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.fd-crumb__link:focus-visible,
+.fd-back:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+
+.fd-page-header .fd-page-header__mback {
+  display: none;
+}
+/* Sous 768 px : bouton retour en icône vers le parent, la page courante en titre (600) */
+@media (max-width: 767px) {
+  .fd-page-header {
+    padding: 0 16px;
+  }
+  .fd-page-header .fd-page-header__mback {
+    display: inline-flex;
+  }
+  .fd-page-header--mback .fd-crumb li:not(:last-child) {
+    display: none;
+  }
+  .fd-page-header--mback .fd-crumb h1 {
+    padding: 0;
+    font-weight: 600;
+  }
+  /* Maquettes à 390 px : l'action principale seule dans la barre (Annuler disparaît) */
+  .fd-page-header__actions:has(> .fd-btn--primary) > .fd-btn:not(.fd-btn--primary) {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fd-crumb__link,
+  .fd-back {
+    transition: none;
+  }
+}

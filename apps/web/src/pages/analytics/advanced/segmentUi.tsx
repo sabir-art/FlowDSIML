@@ -12,6 +12,7 @@ import {
   type Field,
 } from './segmentModel';
 import { regionName } from './LiveTab';
+import { Select } from '@flowdsiml/ui';
 
 type Demos = Array<{ id: string; title: string }>;
 const GROUPS = ['visit', 'device', 'path', 'actions'] as const;
@@ -62,12 +63,7 @@ function FieldSelect({
 }) {
   const { t } = useTranslation();
   return (
-    <select
-      className="select input-sm"
-      aria-label={label}
-      value={value}
-      onChange={(e) => onChange(e.target.value as Field)}
-    >
+    <Select size="sm" aria-label={label} value={value} onChange={(e) => onChange(e.target.value as Field)}>
       {GROUPS.map((g) => (
         <optgroup key={g} label={t(`analytics.adv.seg.g_${g}`)}>
           {FIELD_ORDER.filter((f) => FIELDS[f].group === g).map((f) => (
@@ -83,7 +79,7 @@ function FieldSelect({
           ))}
         </optgroup>
       ))}
-    </select>
+    </Select>
   );
 }
 
@@ -109,24 +105,19 @@ function ValueInput({
   const bad = !conditionValid(c);
   if (f.kind === 'bool')
     return (
-      <select
-        className="select input-sm"
+      <Select
+        size="sm"
         aria-label={label}
         value={String(c.value)}
         onChange={(e) => onChange(e.target.value === 'true')}
       >
         <option value="true">{t('common.yes')}</option>
         <option value="false">{t('common.no')}</option>
-      </select>
+      </Select>
     );
   if (f.kind === 'list' || f.kind === 'demo')
     return (
-      <select
-        className="select input-sm"
-        aria-label={label}
-        value={String(c.value)}
-        onChange={(e) => onChange(e.target.value)}
-      >
+      <Select size="sm" aria-label={label} value={String(c.value)} onChange={(e) => onChange(e.target.value)}>
         {f.kind === 'demo'
           ? demos.map((d) => (
               <option key={d.id} value={d.id}>
@@ -138,7 +129,7 @@ function ValueInput({
                 {t(`analytics.adv.seg.v_${c.field}_${v}`)}
               </option>
             ))}
-      </select>
+      </Select>
     );
   if (f.kind === 'number')
     return (
@@ -197,8 +188,8 @@ export function ConditionRow({
         value={c.field}
         onChange={(f) => onChange(defaultCondition(f, demos[0]?.id))}
       />
-      <select
-        className="select input-sm"
+      <Select
+        size="sm"
         aria-label={t('analytics.adv.seg.operatorN', { n })}
         value={c.op}
         onChange={(e) => onChange({ ...c, op: e.target.value as Condition['op'] })}
@@ -208,7 +199,7 @@ export function ConditionRow({
             {t(`analytics.adv.seg.op_${o}`)}
           </option>
         ))}
-      </select>
+      </Select>
       <ValueInput
         c={c}
         demos={demos}

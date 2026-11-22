@@ -10,6 +10,7 @@ import { useToast } from '../../components/Toast';
 import { useShareRules } from '../../lib/shareRules';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { DomainConfig, InviteConfig } from './AccessEmail';
+import { DateField, TimeField } from '@flowdsiml/ui';
 
 type Access = Pick<
   Tables<'demo_access'>,
@@ -426,30 +427,32 @@ export function AccessPanel({
           <div className="l11-exp-grid">
             <div className="field">
               <label htmlFor="acc-exp-d">{t('access.expDate')}</label>
-              <input
+              <DateField
                 id="acc-exp-d"
-                className="input"
-                type="date"
                 value={date || (maxDate ? isoToParis(maxDate.toISOString()).date : '')}
                 max={maxDate ? isoToParis(maxDate.toISOString()).date : undefined}
                 disabled={!editable}
-                onChange={(e) => {
-                  setDate(e.target.value);
-                  saveExpiration(true, e.target.value, time);
+                labels={{
+                  open: t('common.openCalendar'),
+                  previous: t('common.prevMonth'),
+                  next: t('common.nextMonth'),
+                }}
+                onChange={(v) => {
+                  setDate(v);
+                  saveExpiration(true, v, time);
                 }}
               />
             </div>
             <div className="field">
               <label htmlFor="acc-exp-h">{t('access.expTime')}</label>
-              <input
+              <TimeField
                 id="acc-exp-h"
-                className="input"
-                type="time"
                 value={time}
                 disabled={!editable}
-                onChange={(e) => {
-                  setTime(e.target.value);
-                  if (date) saveExpiration(true, date, e.target.value);
+                labels={{ open: t('common.openTimes') }}
+                onChange={(v) => {
+                  setTime(v);
+                  if (date) saveExpiration(true, date, v);
                 }}
               />
             </div>

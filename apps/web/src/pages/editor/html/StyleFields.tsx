@@ -8,6 +8,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import type { StepRow } from '../types';
 import { commonShort } from './HtmlCanvas';
 import { addStyleOp, frameSend, htmlSteps, setHtmlEdit, useHtmlEdit } from './htmlModel';
+import { Select, ColorSwatch } from '@flowdsiml/ui';
 
 const HEX = /^#[0-9A-Fa-f]{6}$/;
 export const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28, 32, 40, 48] as const;
@@ -76,14 +77,19 @@ export function StyleFields({
     <div className="field">
       <label htmlFor={`st-${k}`}>{label}</label>
       <div className="st-color">
-        <input
-          type="color"
-          aria-label={t('editor.data.pick', { label })}
+        <ColorSwatch
+          label={t('editor.data.pick', { label })}
+          labels={{
+            palette: t('common.colorPalette'),
+            shade: t('common.colorShade'),
+            hue: t('common.colorHue'),
+            hex: t('common.colorHex'),
+          }}
           value={
             HEX.test(f[k]) ? f[k] : k === 'color' ? (els[0]?.color ?? '#000000') : (els[0]?.bg ?? '#FFFFFF')
           }
           disabled={readOnly}
-          onChange={(e) => set(k, e.target.value.toUpperCase())}
+          onChange={(c) => set(k, c)}
         />
         <input
           id={`st-${k}`}
@@ -147,9 +153,9 @@ export function StyleFields({
       <div className="st-row">
         <div className="field">
           <label htmlFor="st-size">{t('editor.data.size')}</label>
-          <select
+          <Select
             id="st-size"
-            className="input input-sm"
+            size="sm"
             value={f.fontSize}
             disabled={readOnly}
             onChange={(e) => set('fontSize', e.target.value)}
@@ -160,13 +166,13 @@ export function StyleFields({
                 {t('editor.data.px', { n: s })}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="field">
           <label htmlFor="st-weight">{t('editor.data.weight')}</label>
-          <select
+          <Select
             id="st-weight"
-            className="input input-sm"
+            size="sm"
             value={f.fontWeight}
             disabled={readOnly}
             onChange={(e) => set('fontWeight', e.target.value)}
@@ -177,7 +183,7 @@ export function StyleFields({
                 {t(`editor.data.weight_${w}`)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
       {color('background', t('editor.data.background'))}

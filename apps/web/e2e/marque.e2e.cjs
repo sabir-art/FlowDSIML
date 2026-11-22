@@ -85,14 +85,21 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.goto(`${APP}/#/settings/brand`);
   const logo = page.getByRole('region', { name: 'Logo' });
   await logo.waitFor();
+  const header = page.locator('.fd-page-header');
   ok(
-    (await page.locator('.br-card h3').allTextContents()).slice(0, 3).join('|') ===
+    (await page.locator('.stg-sec__head h2').allTextContents()).join('|') ===
       'Logo|Couleurs de la marque|Styles des démos',
-    'trois cartes dans l’ordre',
+    'trois sections dans l’ordre',
   );
   ok(
-    /Aucun logo\. Le nom de l’espace est affiché à la place\./.test(await logo.innerText()),
-    'logo : état vide',
+    /Déposez un logo ou\s*Choisir un fichier\s*ou\s*Médiathèque/.test(
+      sp(await logo.locator('.br-drop').innerText()),
+    ),
+    'logo : zone de dépôt (état vide)',
+  );
+  ok(
+    await header.getByRole('button', { name: 'Enregistrer' }).isDisabled(),
+    '« Enregistrer » désactivé sans changement',
   );
   const file = logo.locator('input[type=file]');
   await file.setInputFiles({ name: 'logo.gif', mimeType: 'image/gif', buffer: Buffer.from('GIF89a') });
@@ -121,13 +128,15 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await primary.blur();
   const warn = colors.getByRole('status').first();
   ok(
-    /Contraste avec le blanc : 1,\d:1, insuffisant/.test(sp(await warn.innerText())),
-    'contraste insuffisant annoncé',
+    /Texte blanc sur cette couleur : 1,\d:1, insuffisant\. Couleur proposée : #[0-9A-F]{6}\./.test(
+      sp(await warn.innerText()),
+    ),
+    'contraste insuffisant annoncé, couleur proposée',
   );
-  await warn.getByRole('button', { name: 'Utiliser cette couleur' }).click();
-  ok(/conforme/.test(sp(await colors.locator('.field').first().innerText())), 'couleur proposée appliquée');
-  await colors.getByRole('button', { name: 'Enregistrer' }).click();
-  await page.waitForTimeout(300);
+  await colors.getByRole('button', { name: 'Utiliser cette couleur' }).click();
+  ok(/conforme/.test(sp(await colors.locator('.stg-row').first().innerText())), 'couleur proposée appliquée');
+  await header.getByRole('button', { name: 'Enregistrer' }).click();
+  await page.getByText('Couleurs de la marque enregistrées.').waitFor();
   ok(
     /^#[0-9A-F]{6}$/.test(t.workspaces[0].brand_primary || '') && t.workspaces[0].brand_primary !== '#9AD1C8',
     'couleurs enregistrées',
@@ -135,9 +144,22 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // Styles
   const styles = page.getByRole('region', { name: 'Styles des démos' });
-  const builtin = styles.getByRole('list', { name: 'Styles livrés' });
-  const mine = styles.getByRole('list', { name: 'Styles de l’espace' });
-  ok((await builtin.getByRole('listitem').count()) === 6, '6 styles livrés');
+  // Une seule grille : les 6 styles livrés puis ceux de l'espace
+  const builtin = styles.getByRole('list');
+  const mine = builtin;
+  ok(
+    (await builtin.getByRole('listitem').count()) === 7 &&
+      (await builtin.getByRole('listitem').nth(6).innerText()).includes('Acme bleu'),
+    '6 styles livrés puis le style de l’espace',
+  );
+  ok(
+    (await builtin
+      .getByRole('listitem')
+      .nth(3)
+      .locator('.br-st__band')
+      .evaluate((el) => getComputedStyle(el).backgroundColor)) === 'rgb(28, 33, 40)',
+    'bandeau : la bulle sombre pour « Nuit »',
+  );
   const current = styles.locator('[aria-current="true"]');
   ok(
     (await current.count()) === 1 && /DSI Prune\s*Par défaut/.test(await current.innerText()),
@@ -224,7 +246,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await del.getByRole('button', { name: 'Supprimer' }).click();
   await page.getByText('Style supprimé.').waitFor();
   ok(!t.themes.some((x) => x.name === 'Acme pâle'), 'style supprimé');
-  await page.getByRole('button', { name: 'Annuler' }).click();
+  await page.getByRole('status').getByRole('button', { name: 'Annuler' }).click();
   await mine.getByText('Acme pâle').waitFor();
   ok(
     t.themes.some((x) => x.name === 'Acme pâle'),
@@ -264,7 +286,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     'éditeur : logo en lecture',
   );
   ok(
-    (await colors.getByRole('button', { name: 'Enregistrer' }).count()) === 0 &&
+    (await header.getByRole('button', { name: 'Enregistrer' }).count()) === 0 &&
       (await colors.getByRole('textbox').count()) === 0 &&
       /#5C7D78/.test(await colors.innerText()),
     'éditeur : couleurs en lecture seule',
@@ -293,19 +315,21 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.keyboard.press('Escape');
   await shot('l27-05-marque-editeur');
 
-  // 390 px : une colonne
-  await page.setViewportSize({ width: 390, height: 844 });
-  const cols = await page
-    .locator('.br-grid')
-    .first()
-    .evaluate((g) => getComputedStyle(g).gridTemplateColumns.split(' ').length);
-  ok(cols === 1, `390 px : une colonne (${cols})`);
-  await page.setViewportSize({ width: 1024, height: 800 });
-  const cols2 = await page
-    .locator('.br-grid')
-    .first()
-    .evaluate((g) => getComputedStyle(g).gridTemplateColumns.split(' ').length);
-  ok(cols2 === 2, `1 024 px : deux colonnes (${cols2})`);
+  // Grille : 3 colonnes à 1 440 px, 2 à 390 px (maquette lot1-parametres/theme), sans défilement horizontal
+  const colsAt = async (width) => {
+    await page.setViewportSize({ width, height: 844 });
+    return page
+      .locator('.br-styles')
+      .evaluate((g) => getComputedStyle(g).gridTemplateColumns.split(' ').length);
+  };
+  const c390 = await colsAt(390);
+  ok(c390 === 2, `390 px : deux colonnes (${c390})`);
+  const sw = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  ok(sw <= 1, `390 px : pas de défilement horizontal (${sw})`);
+  const c1440 = await colsAt(1440);
+  ok(c1440 === 3, `1 440 px : trois colonnes (${c1440})`);
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();

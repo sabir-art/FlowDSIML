@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, Pencil, Plus, Search, Trash2, Upload, X } from 'lucide-react';
+import { BookA, CircleAlert, Download, Pencil, Plus, Search, Trash2, Upload } from 'lucide-react';
 import type { Json, Tables } from '@flowdsiml/supabase-types';
 import { foldText } from '@flowdsiml/core';
 import { SettingsShell } from './SettingsShell';
@@ -23,8 +23,7 @@ import {
   type ImportPreview,
 } from './glossaryCsv';
 import './glossary.css';
-import { Empty } from '@flowdsiml/ui';
-import { BookA } from 'lucide-react';
+import { Button, Modal } from '@flowdsiml/ui';
 
 type Term = Tables<'glossary_terms'>;
 
@@ -88,148 +87,161 @@ export function GlossarySettings() {
     void reload();
   }
 
-  if (!editable) return <SettingsShell>{null}</SettingsShell>;
+  if (!editable) return <SettingsShell legacy={false}>{null}</SettingsShell>;
 
+  const full = (terms?.length ?? 0) >= GLOSSARY_MAX;
   return (
-    <SettingsShell>
-      <section className="gl-page" aria-labelledby="st-title">
-        <div className="gl-head">
-          <div>
-            <p className="muted">{t('glossary.intro')}</p>
-          </div>
-          <div className="gl-acts">
-            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setImporting(true)}>
-              <Upload aria-hidden="true" />
-              {t('glossary.import')}
-            </button>
-            {!!terms?.length && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => downloadText('glossaire.csv', exportCsv(terms))}
-              >
-                <Download aria-hidden="true" />
-                {t('glossary.export')}
-              </button>
-            )}
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              disabled={(terms?.length ?? 0) >= GLOSSARY_MAX}
-              onClick={() => setEditing('new')}
+    <SettingsShell
+      legacy={false}
+      actions={
+        <>
+          <Button icon={<Upload size={16} />} onClick={() => setImporting(true)}>
+            {t('glossary.import')}
+          </Button>
+          {!!terms?.length && (
+            <Button
+              icon={<Download size={16} />}
+              onClick={() => downloadText('glossaire.csv', exportCsv(terms))}
             >
-              <Plus aria-hidden="true" />
-              {t('glossary.add')}
-            </button>
+              {t('glossary.export')}
+            </Button>
+          )}
+          <Button
+            variant="primary"
+            icon={<Plus size={16} />}
+            disabled={full}
+            onClick={() => setEditing('new')}
+          >
+            {t('glossary.add')}
+          </Button>
+        </>
+      }
+    >
+      <section className="stg-sec gl-page" aria-labelledby="gl-title">
+        <div className="stg-sec__head">
+          <div>
+            <h2 id="gl-title">{t('glossary.title')}</h2>
+            <p>{t('glossary.intro')}</p>
           </div>
+          {!!terms?.length && (
+            <div className="stg-sec__acts">
+              <label className="stg-search">
+                <span className="sr-only">{t('glossary.search')}</span>
+                <Search size={16} aria-hidden="true" />
+                <input
+                  type="search"
+                  placeholder={t('glossary.search')}
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+              </label>
+            </div>
+          )}
         </div>
 
         {terms && terms.length === 0 ? (
-          <Empty
-            icon={<BookA />}
-            title={t('glossary.emptyTitle')}
-            body={t('glossary.emptyBody')}
-            action={
-              <button type="button" className="fd-btn fd-btn--primary" onClick={() => setEditing('new')}>
-                <Plus aria-hidden="true" />
+          <div className="stg-empty">
+            <span className="stg-empty__tile" aria-hidden="true">
+              <BookA size={20} />
+            </span>
+            <h3>{t('glossary.emptyTitle')}</h3>
+            <p>{t('glossary.emptyBody')}</p>
+            <div className="stg-empty__acts">
+              <Button variant="primary" icon={<Plus size={16} />} onClick={() => setEditing('new')}>
                 {t('glossary.add')}
-              </button>
-            }
-            secondary={
-              <button type="button" className="fd-btn" onClick={() => setImporting(true)}>
-                <Upload aria-hidden="true" />
-                {t('glossary.import')}
-              </button>
-            }
-          />
+              </Button>
+            </div>
+          </div>
         ) : (
           <>
-            <div className="card">
-              <div className="card-head">
-                <div className="input-affix gl-search">
-                  <Search aria-hidden="true" />
-                  <input
-                    className="input input-sm"
-                    type="search"
-                    placeholder={t('glossary.search')}
-                    aria-label={t('glossary.search')}
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                  />
-                </div>
-                <span className="t-caption muted" role="status">
-                  {terms ? t('glossary.count', { count: shown.length }) : ''}
-                </span>
-              </div>
-              <div className="table-wrap">
-                <table className="table gl-table">
-                  <caption className="sr-only">{t('glossary.caption')}</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">{t('glossary.colTerm')}</th>
-                      <th scope="col">{t('glossary.colOld')}</th>
-                      <th scope="col">{t('glossary.colDef')}</th>
-                      <th scope="col" className="r">
-                        {t('glossary.colModules')}
-                      </th>
-                      <th scope="col">
-                        <span className="sr-only">{t('glossary.actions')}</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {shown.map((x) => (
-                      <tr key={x.id}>
-                        <th scope="row">{x.term}</th>
-                        <td className="gl-old">{x.old_term ? <s>{x.old_term}</s> : null}</td>
-                        <td className="gl-def">{x.definition}</td>
-                        <td className="r num">{formatNumber(usage[x.id] ?? 0)}</td>
-                        <td className="r">
-                          <Menu
-                            label={t('glossary.actionsFor', { term: x.term })}
-                            items={[
-                              {
-                                label: t('glossary.edit'),
-                                icon: <Pencil aria-hidden="true" />,
-                                onSelect: () => setEditing(x),
-                              },
-                              {
-                                label: t('glossary.delete'),
-                                icon: <Trash2 aria-hidden="true" />,
-                                danger: true,
-                                onSelect: () => setDeleting(x),
-                              },
-                            ]}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {terms && shown.length === 0 && (
-                  <p className="muted gl-nomatch">{t('glossary.noMatch', { q: q.trim() })}</p>
-                )}
-              </div>
-            </div>
-            <div className="card gl-setting">
-              <label className="setting">
-                <span>
-                  <span className="t-label">{t('glossary.underline')}</span>
-                  <span className="help">{t('glossary.underlineHelp')}</span>
-                </span>
-                <span className="switch">
-                  <input
-                    type="checkbox"
-                    checked={underline}
-                    onChange={(e) => void toggleUnderline(e.target.checked)}
-                  />
-                  <span aria-hidden="true" />
-                </span>
-              </label>
-            </div>
+            <p className="sr-only" role="status">
+              {terms ? t('glossary.count', { count: shown.length }) : ''}
+            </p>
+            <table className="stg-table gl-table">
+              <caption className="sr-only">{t('glossary.caption')}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t('glossary.colTerm')}</th>
+                  <th scope="col">{t('glossary.colOld')}</th>
+                  <th scope="col" className="stg-table__m-hide">
+                    {t('glossary.colDef')}
+                  </th>
+                  <th scope="col" className="gl-num stg-table__m-hide">
+                    {t('glossary.colModules')}
+                  </th>
+                  <th scope="col" className="stg-table__act">
+                    <span className="sr-only">{t('glossary.actions')}</span>
+                  </th>
+                </tr>
+              </thead>
+              {/* §18.6 : lignes à filets, l'écart est porté par la hauteur des lignes */}
+              <tbody data-gap-exempt="">
+                {shown.map((x) => (
+                  <tr key={x.id}>
+                    <th scope="row">{x.term}</th>
+                    <td className="stg-muted">{x.old_term ? <s>{x.old_term}</s> : null}</td>
+                    <td className="gl-def stg-table__m-hide">{x.definition}</td>
+                    <td className="gl-num num stg-table__m-hide">{formatNumber(usage[x.id] ?? 0)}</td>
+                    <td className="stg-table__act">
+                      <Menu
+                        label={t('glossary.actionsFor', { term: x.term })}
+                        items={[
+                          {
+                            label: t('glossary.edit'),
+                            icon: <Pencil aria-hidden="true" />,
+                            onSelect: () => setEditing(x),
+                          },
+                          {
+                            label: t('glossary.delete'),
+                            icon: <Trash2 aria-hidden="true" />,
+                            danger: true,
+                            onSelect: () => setDeleting(x),
+                          },
+                        ]}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {terms && shown.length === 0 && (
+              <p className="stg-table__empty">{t('glossary.noMatch', { q: q.trim() })}</p>
+            )}
           </>
         )}
       </section>
+      {!!terms?.length && (
+        <section className="stg-sec" aria-labelledby="gl-player">
+          <div className="stg-sec__head">
+            <div>
+              <h2 id="gl-player">{t('glossary.playerTitle')}</h2>
+            </div>
+          </div>
+          <div className="stg-row stg-row--inline">
+            <div className="stg-text" data-gap-exempt="">
+              <div className="stg-lab" id="gl-ul">
+                {t('glossary.underline')}
+              </div>
+              <div className="stg-help" id="gl-ul-h">
+                {t('glossary.underlineHelp')}
+              </div>
+            </div>
+            <div className="stg-ctl">
+              <label className="fd-switch">
+                <input
+                  type="checkbox"
+                  role="switch"
+                  aria-labelledby="gl-ul"
+                  aria-describedby="gl-ul-h"
+                  checked={underline}
+                  onChange={(e) => void toggleUnderline(e.target.checked)}
+                />
+                <span className="fd-switch__track" aria-hidden="true" />
+              </label>
+            </div>
+          </div>
+        </section>
+      )}
 
       {editing && (
         <TermDialog
@@ -296,11 +308,6 @@ function TermDialog({
   const [forms, setForms] = useState((term?.forms ?? []).join(', '));
   const [errs, setErrs] = useState<{ term?: string; def?: string }>({});
   const { busy, error, run } = useAction();
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -328,121 +335,110 @@ function TermDialog({
     });
   }
 
-  const titleKey = term ? 'glossary.editTitle' : 'glossary.addTitle';
+  const opt = <span className="stg-soon">{t('glossary.optional')}</span>;
+  const err = (id: string, text?: string) =>
+    text && (
+      <p id={id} className="stg-error">
+        <CircleAlert size={16} aria-hidden="true" />
+        {text}
+      </p>
+    );
   return (
-    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <form
-        className="modal gl-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="gl-term-t"
-        onSubmit={submit}
-        noValidate
-      >
-        <div className="modal-head">
-          <h2 id="gl-term-t">{t(titleKey)}</h2>
-          <button
-            type="button"
-            className="btn btn-ghost btn-icon btn-sm"
-            aria-label={t('common.close')}
-            onClick={onClose}
-          >
-            <X aria-hidden="true" />
-          </button>
-        </div>
-        <div className="modal-body gl-fields">
-          {error && (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-          )}
-          <div className="field">
-            <label htmlFor="gl-new">{t('glossary.fTerm')}</label>
-            <input
-              id="gl-new"
-              className="input"
-              autoFocus
-              maxLength={TERM_MAX}
-              value={name}
-              aria-invalid={errs.term ? true : undefined}
-              aria-describedby={errs.term ? 'gl-new-err' : undefined}
-              onChange={(e) => {
-                setName(e.target.value);
-                setErrs((x) => ({ ...x, term: undefined }));
-              }}
-            />
-            {errs.term && (
-              <p id="gl-new-err" className="field-error">
-                {errs.term}
-              </p>
-            )}
-          </div>
-          <div className="field">
-            <label htmlFor="gl-old">
-              {t('glossary.fOld')} <span className="opt">{t('glossary.optional')}</span>
-            </label>
-            <input
-              id="gl-old"
-              className="input"
-              maxLength={TERM_MAX}
-              value={old}
-              aria-describedby="gl-old-help"
-              onChange={(e) => setOld(e.target.value)}
-            />
-            <span id="gl-old-help" className="help">
-              {t('glossary.fOldHelp')}
-            </span>
-          </div>
-          <div className="field">
-            <label htmlFor="gl-def">{t('glossary.fDef')}</label>
-            <textarea
-              id="gl-def"
-              className="textarea"
-              rows={3}
-              maxLength={DEF_MAX}
-              value={def}
-              aria-invalid={errs.def ? true : undefined}
-              aria-describedby={errs.def ? 'gl-def-err gl-def-n' : 'gl-def-n'}
-              onChange={(e) => {
-                setDef(e.target.value);
-                setErrs((x) => ({ ...x, def: undefined }));
-              }}
-            />
-            {errs.def && (
-              <p id="gl-def-err" className="field-error">
-                {errs.def}
-              </p>
-            )}
-            <span id="gl-def-n" className="help num gl-counter">
-              {def.length} / {DEF_MAX}
-            </span>
-          </div>
-          <div className="field">
-            <label htmlFor="gl-forms">
-              {t('glossary.fForms')} <span className="opt">{t('glossary.optional')}</span>
-            </label>
-            <input
-              id="gl-forms"
-              className="input"
-              value={forms}
-              aria-describedby="gl-forms-help"
-              onChange={(e) => setForms(e.target.value)}
-            />
-            <span id="gl-forms-help" className="help">
-              {t('glossary.fFormsHelp')}
-            </span>
-          </div>
-        </div>
-        <div className="modal-foot">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            {t('common.cancel')}
-          </button>
-          <button type="submit" className="btn btn-primary" disabled={busy}>
+    <Modal
+      open
+      onClose={onClose}
+      icon={<BookA />}
+      title={t(term ? 'glossary.editTitle' : 'glossary.addTitle')}
+      closeLabel={t('common.close')}
+      footer={
+        <>
+          <Button onClick={onClose}>{t('common.cancel')}</Button>
+          <Button variant="primary" type="submit" form="gl-form" disabled={busy}>
             {term ? t('common.save') : t('glossary.addGo')}
-          </button>
+          </Button>
+        </>
+      }
+    >
+      <form id="gl-form" className="st-invite__form" onSubmit={submit} noValidate>
+        {error && (
+          <p className="stg-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
+            {error}
+          </p>
+        )}
+        <div className="fd-modal__field">
+          <label htmlFor="gl-new">{t('glossary.fTerm')}</label>
+          <input
+            id="gl-new"
+            className="fd-input"
+            autoFocus
+            autoComplete="off"
+            maxLength={TERM_MAX}
+            value={name}
+            aria-invalid={errs.term ? true : undefined}
+            aria-describedby={errs.term ? 'gl-new-err' : undefined}
+            onChange={(e) => {
+              setName(e.target.value);
+              setErrs((x) => ({ ...x, term: undefined }));
+            }}
+          />
+          {err('gl-new-err', errs.term)}
+        </div>
+        <div className="fd-modal__field">
+          <label htmlFor="gl-old">
+            {t('glossary.fOld')} {opt}
+          </label>
+          <input
+            id="gl-old"
+            className="fd-input"
+            autoComplete="off"
+            maxLength={TERM_MAX}
+            value={old}
+            aria-describedby="gl-old-help"
+            onChange={(e) => setOld(e.target.value)}
+          />
+          <span id="gl-old-help" className="stg-help">
+            {t('glossary.fOldHelp')}
+          </span>
+        </div>
+        <div className="fd-modal__field">
+          <label htmlFor="gl-def">{t('glossary.fDef')}</label>
+          <textarea
+            id="gl-def"
+            className="fd-textarea"
+            rows={3}
+            maxLength={DEF_MAX}
+            value={def}
+            aria-invalid={errs.def ? true : undefined}
+            aria-describedby={errs.def ? 'gl-def-err gl-def-n' : 'gl-def-n'}
+            onChange={(e) => {
+              setDef(e.target.value);
+              setErrs((x) => ({ ...x, def: undefined }));
+            }}
+          />
+          {err('gl-def-err', errs.def)}
+          <span id="gl-def-n" className="stg-help num gl-counter">
+            {def.length} / {DEF_MAX}
+          </span>
+        </div>
+        <div className="fd-modal__field">
+          <label htmlFor="gl-forms">
+            {t('glossary.fForms')} {opt}
+          </label>
+          <input
+            id="gl-forms"
+            className="fd-input"
+            autoComplete="off"
+            value={forms}
+            aria-describedby="gl-forms-help"
+            onChange={(e) => setForms(e.target.value)}
+          />
+          <span id="gl-forms-help" className="stg-help">
+            {t('glossary.fFormsHelp')}
+          </span>
         </div>
       </form>
-    </div>
+    </Modal>
   );
 }
 
@@ -464,11 +460,6 @@ function ImportDialog({
   const [fileName, setFileName] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const { busy, error, run } = useAction();
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
 
   async function pick(file: File | undefined) {
     setPreview(null);
@@ -499,93 +490,78 @@ function ImportDialog({
 
   const count = preview ? preview.add.length + preview.update.length : 0;
   return (
-    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal gl-modal" role="dialog" aria-modal="true" aria-labelledby="gl-imp-t">
-        <div className="modal-head">
-          <h2 id="gl-imp-t">{t('glossary.importTitle')}</h2>
-          <button
-            type="button"
-            className="btn btn-ghost btn-icon btn-sm"
-            aria-label={t('common.close')}
-            onClick={onClose}
-          >
-            <X aria-hidden="true" />
-          </button>
-        </div>
-        <div className="modal-body gl-fields">
-          {error && (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-          )}
-          <p className="muted">{t('glossary.importHelp')}</p>
-          <div className="field">
-            <label htmlFor="gl-file">{t('glossary.importFile')}</label>
-            {/* Sélecteur natif masqué (son libellé suit la langue du navigateur) : bouton traduit */}
-            <input
-              id="gl-file"
-              ref={fileRef}
-              type="file"
-              accept=".csv,text/csv"
-              className="sr-only"
-              tabIndex={-1}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                setFileName(f?.name ?? '');
-                void pick(f);
-              }}
-            />
-            <div className="gl-file">
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => fileRef.current?.click()}
-              >
-                <Upload aria-hidden="true" />
-                {t('glossary.chooseFile')}
-              </button>
-              <span className={fileName ? undefined : 'muted'}>{fileName || t('glossary.noFile')}</span>
-            </div>
-          </div>
-          {readErr && (
-            <p className="field-error" role="alert">
-              {t('glossary.importError')}
-            </p>
-          )}
-          {preview && (
-            <div className="gl-preview" role="status">
-              <ul className="gl-counts">
-                <li>{t('glossary.importAdd', { count: preview.add.length })}</li>
-                <li>{t('glossary.importUpdate', { count: preview.update.length })}</li>
-                <li>{t('glossary.importSkipped', { count: preview.skipped.length })}</li>
-              </ul>
-              {preview.skipped.length > 0 && (
-                <ul className="gl-skipped">
-                  {preview.skipped.map((s) => (
-                    <li key={s.line}>
-                      {t('glossary.importLine', { line: s.line, reason: t(`glossary.reason.${s.reason}`) })}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {count === 0 && <p className="muted">{t('glossary.importNothing')}</p>}
-            </div>
-          )}
-        </div>
-        <div className="modal-foot">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            {t('common.cancel')}
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={!preview || count === 0 || busy}
-            onClick={() => void go()}
-          >
+    <Modal
+      open
+      onClose={onClose}
+      icon={<Upload />}
+      title={t('glossary.importTitle')}
+      closeLabel={t('common.close')}
+      footer={
+        <>
+          <Button onClick={onClose}>{t('common.cancel')}</Button>
+          <Button variant="primary" disabled={!preview || count === 0 || busy} onClick={() => void go()}>
             {t('glossary.importGo')}
-          </button>
+          </Button>
+        </>
+      }
+    >
+      <div className="st-invite__form">
+        {error && (
+          <p className="stg-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
+            {error}
+          </p>
+        )}
+        <p className="stg-help gl-imp-help">{t('glossary.importHelp')}</p>
+        <div className="fd-modal__field">
+          <label htmlFor="gl-file">{t('glossary.importFile')}</label>
+          {/* Sélecteur natif masqué (son libellé suit la langue du navigateur) : bouton traduit */}
+          <input
+            id="gl-file"
+            ref={fileRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="sr-only"
+            tabIndex={-1}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              setFileName(f?.name ?? '');
+              void pick(f);
+            }}
+          />
+          <div className="gl-file">
+            <Button icon={<Upload size={16} />} onClick={() => fileRef.current?.click()}>
+              {t('glossary.chooseFile')}
+            </Button>
+            <span className={fileName ? undefined : 'stg-muted'}>{fileName || t('glossary.noFile')}</span>
+          </div>
         </div>
+        {readErr && (
+          <p className="stg-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
+            {t('glossary.importError')}
+          </p>
+        )}
+        {preview && (
+          <div className="gl-preview" role="status">
+            <ul className="gl-counts">
+              <li>{t('glossary.importAdd', { count: preview.add.length })}</li>
+              <li>{t('glossary.importUpdate', { count: preview.update.length })}</li>
+              <li>{t('glossary.importSkipped', { count: preview.skipped.length })}</li>
+            </ul>
+            {preview.skipped.length > 0 && (
+              <ul className="gl-skipped">
+                {preview.skipped.map((s) => (
+                  <li key={s.line}>
+                    {t('glossary.importLine', { line: s.line, reason: t(`glossary.reason.${s.reason}`) })}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {count === 0 && <p className="stg-muted">{t('glossary.importNothing')}</p>}
+          </div>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }

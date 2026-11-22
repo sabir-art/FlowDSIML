@@ -43,8 +43,11 @@ export function Button({
   );
 }
 
-/** Liste déroulante avec chevron dessiné (pas celui du navigateur), espacé de la bordure. */
-export function Select({
+/**
+ * Liste déroulante NATIVE habillée (chevron dessiné). En cours de retrait : COMP-01 la remplace par
+ * `Select` (select.tsx). Gardée pour les écrans qui ne sont pas encore migrés.
+ */
+export function NativeSelect({
   inline,
   className = '',
   children,

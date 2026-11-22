@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Building2, ChevronDown, ChevronUp, GraduationCap, Plus, Trash2, X } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import type { ContentType } from '@flowdsiml/core';
-import { Alert, Button } from '@flowdsiml/ui';
+import { Alert, Button, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { loadDemoTypes } from '../../lib/demoTypes';
 import { TypeBadge } from '../../components/TypeBadge';
@@ -470,8 +470,7 @@ export function PathsDialog({
                       );
                     }}
                   >
-                    <select
-                      className="fd-input"
+                    <Select
                       aria-label={t('learners.paths.addModule')}
                       value={pick}
                       onChange={(e) => setPick(e.target.value)}
@@ -485,7 +484,7 @@ export function PathsDialog({
                             {types[d.id] ? `${d.title} · ${t(`ctype.short.${types[d.id]}`)}` : d.title}
                           </option>
                         ))}
-                    </select>
+                    </Select>
                     <Button type="submit" icon={<Plus />} disabled={!pick}>
                       {t('learners.paths.addModule')}
                     </Button>

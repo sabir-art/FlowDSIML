@@ -175,7 +175,7 @@ const SHOTS = process.env.SHOTS_DIR;
   );
 
   // Réglage « Souligner les termes »
-  const sw = page.getByRole('checkbox', { name: /Souligner les termes dans le lecteur/ });
+  const sw = page.getByRole('switch', { name: /Souligner les termes dans le lecteur/ });
   ok(await sw.isChecked(), 'Soulignement activé par défaut');
   await sw.uncheck();
   await page.waitForTimeout(300);

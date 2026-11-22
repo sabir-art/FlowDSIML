@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Database, Info, TriangleAlert, Upload, WandSparkles, X } from 'lucide-react';
 import { readDataset, type CsvEncoding, type CsvSeparator, type DatasetError } from '@flowdsiml/core';
 import type { DatasetBinding } from '@flowdsiml/manifest';
-import { Button } from '@flowdsiml/ui';
+import { Button, Select } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asOps, htmlSelection, shortTrail } from '../html/htmlModel';
 import { DATASET_OPEN } from '../html/ChartFields';
@@ -223,9 +223,11 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
           ref={file}
           type="file"
           accept=".csv,text/csv"
-          hidden
-          aria-hidden="true"
+          /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+          id="datasetdialog-file"
+          className="sr-only"
           tabIndex={-1}
+          aria-hidden="true"
           onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) void onFile(f);
@@ -248,7 +250,12 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
               </span>
             </div>
             <div className="ds-start">
-              <Button size="sm" disabled={readOnly} onClick={() => file.current?.click()}>
+              <Button
+                size="sm"
+                disabled={readOnly}
+                aria-controls="datasetdialog-file"
+                onClick={() => file.current?.click()}
+              >
                 {t('editor.dataset.replace')}
               </Button>
               {ws && !readOnly && !generating && (
@@ -260,7 +267,12 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
           </div>
         ) : (
           <div className="ds-start">
-            <Button icon={<Upload />} disabled={readOnly} onClick={() => file.current?.click()}>
+            <Button
+              icon={<Upload />}
+              disabled={readOnly}
+              aria-controls="datasetdialog-file"
+              onClick={() => file.current?.click()}
+            >
               {t('editor.dataset.import')}
             </Button>
             {ws && !readOnly && !generating && (
@@ -331,8 +343,8 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
                   <tr key={c}>
                     <th scope="row">{c}</th>
                     <td>
-                      <select
-                        className="input input-sm"
+                      <Select
+                        size="sm"
                         aria-label={t('editor.dataset.bindCol', { name: c })}
                         disabled={readOnly}
                         value={binds[c] ?? ''}
@@ -344,7 +356,7 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
                             {x.label}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     </td>
                   </tr>
                 ))}
