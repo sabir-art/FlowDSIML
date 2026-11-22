@@ -243,6 +243,8 @@ export function Layout() {
         <div className="topbar__tools">
           <LazyNotificationBell topbar />
         </div>
+        {/* Lot 2 : emplacement d'une action de page dans la barre mobile (bascule « Dossiers » de Démos) */}
+        <div className="topbar__slot" id="topbar-slot" />
       </header>
       <aside
         data-tip-side="right"

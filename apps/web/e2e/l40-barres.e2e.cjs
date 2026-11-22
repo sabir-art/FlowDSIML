@@ -103,7 +103,7 @@ const measure = (bar) =>
       ok(await noHScroll(p), `Démos ${w} px : pas de défilement horizontal`);
       if (w === 390) {
         ok(
-          (await p.getByRole('button', { name: /^Dossier/ }).count()) === 0,
+          (await p.getByRole('button', { name: /^Dossier\s*:/ }).count()) === 0,
           'Démos 390 px : filtres dans la feuille',
         );
         ok(

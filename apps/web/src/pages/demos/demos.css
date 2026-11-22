@@ -1693,3 +1693,18 @@ button.nd-src:focus-visible {
     overflow-wrap: anywhere;
   }
 }
+/* Lot 2 : sous 1 024 px, tiroir des dossiers ouvert depuis la barre mobile (voile, 300 px au plus) */
+.fcol-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: var(--fd-z-modal);
+  background: rgb(8 10 14 / 0.45);
+}
+.fcol-sheet > .fcol--drawer {
+  right: 0;
+  left: auto;
+  width: min(300px, 86vw);
+  height: 100dvh;
+  border-right: 0;
+  border-left: 1px solid var(--fd-color-border);
+}

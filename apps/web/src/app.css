@@ -2115,3 +2115,23 @@ button.fd-nav__item:hover {
 :where(.lucide[width='24'], .lucide[width='28'], .lucide[width='32']) {
   stroke-width: 1.75;
 }
+
+/* Lot 2 : action de page dans la barre mobile (cible de 44 px, icône de 20 px) */
+.topbar__slot {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .topbar__slot:not(:empty) {
+    display: flex;
+    margin-left: 4px;
+  }
+  .topbar__slot .fd-btn--icon {
+    width: 44px;
+    height: 44px;
+  }
+  .topbar__slot .fd-btn--icon > svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.1;
+  }
+}

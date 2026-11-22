@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { withRestLocale } from '../../i18n';
 import {
@@ -71,6 +72,7 @@ import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
 import { CardTags, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
 import { DEMO_DRAG, FolderColumn, type Scope } from './FolderColumn';
+import { PanneauIcon } from '../../components/PanneauIcon';
 import { useMediaQuery } from '../../lib/useMediaQuery';
 import { LazyNotificationBell } from '../../components/notifications/LazyNotificationBell';
 
@@ -204,6 +206,10 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const xl = useMediaQuery('(min-width: 1280px)');
   const [drawer, setDrawer] = useState(false);
   const colCollapsed = xl ? colHidden : !drawer;
+  // Lot 2 : sous 1 024 px, la bascule « Dossiers » est dans la barre mobile et ouvre un tiroir
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => setSlot(document.getElementById('topbar-slot')), []);
+  const foldersBtn = useRef<HTMLButtonElement>(null);
   const toggleCol = useCallback(() => {
     if (xl) hideCol(!colHidden);
     else setDrawer((o) => !o);
@@ -766,6 +772,61 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   };
   return (
     <div className="demos-layout" data-gap-exempt="">
+      {!wide &&
+        slot &&
+        createPortal(
+          <button
+            ref={foldersBtn}
+            type="button"
+            className="fd-btn fd-btn--ghost fd-btn--icon"
+            aria-label={t('folders.title')}
+            aria-expanded={drawer}
+            onClick={() => setDrawer(true)}
+          >
+            <PanneauIcon />
+          </button>,
+          slot,
+        )}
+      {!wide && drawer && (
+        <div className="fcol-sheet">
+          <FolderColumn
+            folders={folders}
+            scope={scope}
+            count={colCount}
+            editable={editable}
+            canManageAccess={can('workspace.settings')}
+            onSelect={(s) => {
+              setFolder(s);
+              setDrawer(false);
+            }}
+            collapsed={false}
+            overlay
+            onToggle={() => {
+              setDrawer(false);
+              foldersBtn.current?.focus();
+            }}
+            onNew={(parent) => {
+              setDrawer(false);
+              setNewFolderParent(parent);
+              setNewFolder('');
+            }}
+            onRename={(f) => {
+              setDrawer(false);
+              setRenaming({ id: f.id, name: f.name });
+            }}
+            onAccess={(f) => {
+              setDrawer(false);
+              setFolderAccess(f);
+            }}
+            onDelete={(f) => {
+              setDrawer(false);
+              setFolderToDelete(f);
+            }}
+            onDropDemo={requestMove}
+            sandbox={sandbox}
+          />
+        </div>
+      )}
       {wide && (
         <div className={`fcol-slot${colCollapsed || !xl ? ' fcol-slot--rail' : ''}`}>
           <FolderColumn
