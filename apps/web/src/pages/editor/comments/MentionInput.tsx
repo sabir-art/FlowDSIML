@@ -89,6 +89,18 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function Ment
   const acId = listId ?? `${id}-ac`;
   const list = useRef<HTMLDivElement>(null);
   const [below, setBelow] = useState(false);
+  // Curseur à poser après la prochaine mise à jour du champ, dans le même rendu (useLayoutEffect).
+  // Un requestAnimationFrame arrivait après les frappes suivantes et ramenait le curseur en arrière
+  // (« merci » saisi juste après une mention devenait « ercim »).
+  const pendingCaret = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const el = ta.current;
+    const caret = pendingCaret.current;
+    if (!el || caret === null) return;
+    pendingCaret.current = null;
+    if (document.activeElement !== el) el.focus();
+    el.setSelectionRange(caret, caret);
+  });
 
   useEffect(() => onOpenChange?.(open || noOne), [open, noOne, onOpenChange]);
   // Au-dessus du cadre ; dessous si la place manque (règle de placement L44)
@@ -116,10 +128,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function Ment
     setDismissed(null);
     setQuery({ start: caret - 1, query: '' });
     setActive(0);
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(caret, caret);
-    });
+    pendingCaret.current = caret;
   }, [openSignal, value, mentions, onValueChange]);
 
   const refreshQuery = (text: string, caret: number) => {
@@ -139,10 +148,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function Ment
       : [...mentions, { name, id: m.user_id }];
     onValueChange(r.text, next);
     setQuery(null);
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(r.caret, r.caret);
-    });
+    pendingCaret.current = r.caret;
   };
 
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -179,7 +185,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, Props>(function Ment
         if (r) {
           e.preventDefault();
           onValueChange(r.text, mentions);
-          requestAnimationFrame(() => el.setSelectionRange(r.caret, r.caret));
+          pendingCaret.current = r.caret;
           return;
         }
       }
