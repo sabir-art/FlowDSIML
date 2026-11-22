@@ -431,11 +431,11 @@ Le client veut que le rail replié garde la marque en tête, comme dans l'outil 
 
 ### 14 ter. Le logo ramène à l'accueil (décision du chef, 22/11)
 
-- **Barre dépliée** : le logo complet (184 px) est un **lien** vers l'accueil, la page Démos (`#/`), nommé « TutoClick, accueil » (`<a aria-label="TutoClick, accueil">` ; l'image dedans a `alt=""`). Au survol, curseur main, sans fond ni soulignement. Au focus clavier, l'anneau extérieur COMP-01 §6 autour du logo, avec un rayon de 8. Le bouton « Replier » à côté ne change pas. Sur la page Démos elle-même, le lien reste actif (il revient à la vue par défaut, filtres conservés), sans `aria-current`.
+- **Barre dépliée** : le logo complet (184 px) est un **lien** vers l'accueil, la page Démos (`#/`), nommé « Démos, accueil de TutoClick » (`<a aria-label="Démos, accueil de TutoClick">` ; l'image dedans a `alt=""`). Au survol, curseur main, sans fond ni soulignement. Au focus clavier, l'anneau extérieur COMP-01 §6 autour du logo, avec un rayon de 8. Le bouton « Replier » à côté ne change pas. Sur la page Démos elle-même, le lien reste actif (il revient à la vue par défaut, filtres conservés), sans `aria-current`.
 - **Rail replié** (§14 bis) : en tête, le bouton « Déplier », qui ne mène pas à l'accueil. Depuis le rail, l'accueil s'atteint par l'entrée Démos, comme dans Guideflow.
 - **Hors coque, quand le logo est affiché** (onboarding, pages légales, connexion) : le logo mène à l'accueil si l'utilisateur est connecté, sinon à la page de connexion. Même nom accessible et même focus. Exception : pendant l'onboarding, en cours de création de l'espace, le logo n'est pas un lien, pour ne pas faire quitter l'étape par erreur.
-- **Mobile** (barre mobile, symbole de 32 px) : même règle, le symbole est un lien vers l'accueil, « TutoClick, accueil ».
-- e2e : depuis une page des Paramètres, un clic sur le logo de la barre dépliée mène à `#/` (Démos), et la touche Entrée sur le lien au focus aussi. Le nom accessible est « TutoClick, accueil ». Dans le rail, le bouton en tête déplie la barre et ne navigue pas.
+- **Mobile** (barre mobile, symbole de 32 px) : même règle, le symbole est un lien vers l’accueil, « Démos, accueil de TutoClick ».
+- e2e : depuis une page des Paramètres, un clic sur le logo de la barre dépliée mène à `#/` (Démos), et la touche Entrée sur le lien au focus aussi. Le nom accessible est « Démos, accueil de TutoClick ». Dans le rail, le bouton en tête déplie la barre et ne navigue pas.
 
 ## 15. COL-01 : seule la barre latérale principale est teintée (retour client du 22/11, révisé)
 
