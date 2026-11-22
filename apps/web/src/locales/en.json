@@ -51,8 +51,8 @@
     "extension": "Extension",
     "helpCenter": "Help centre",
     "sandbox": "Sandbox",
-    "pinSidebar": "Pin the sidebar",
-    "collapseSidebar": "Collapse the sidebar"
+    "collapseSidebar": "Collapse the sidebar",
+    "expandSidebar": "Expand the sidebar"
   },
   "roles": {
     "owner": "Owner",
@@ -976,7 +976,6 @@
         "content": "Content",
         "screen": "Screen",
         "look": "Appearance",
-        "collab": "Collaborate",
         "demo": "Demo"
       },
       "why": {
@@ -1095,7 +1094,13 @@
       "del": "Del",
       "esc": "Esc",
       "help": "Single-letter shortcuts (H, B, ?) are disabled while typing.",
-      "comments": "Open or close comments"
+      "comments": "Open or close comments",
+      "moveStepAlt": "Move the step up or down",
+      "copyStep": "Copy the step",
+      "pasteStep": "Paste after the step",
+      "cutStep": "Cut the step",
+      "duplicateStep": "Duplicate the step",
+      "deleteStep": "Delete the step"
     },
     "maskTag": "Mask",
     "zoomLevel": "Level",
@@ -1849,7 +1854,28 @@
       "moved": "Step moved to position {{n}} of {{total}}.",
       "grabbed": "Step {{n}} grabbed. Arrows to move it, Space to drop.",
       "dropped": "Step dropped at position {{n}}."
-    }
+    },
+    "stepMenu": {
+      "actions": "Actions for step {{n}}",
+      "playFrom": "Play from step {{n}}",
+      "playFromShort": "Play from here",
+      "edit": "Edit",
+      "copy": "Copy",
+      "pasteAfter": "Paste after",
+      "cut": "Cut",
+      "duplicate": "Duplicate",
+      "hide": "Hide step",
+      "keyEnter": "Enter",
+      "keyDelete": "Del",
+      "copied": "Step {{n}} copied",
+      "pasted": "Step pasted at position {{n}}",
+      "duplicated": "Step duplicated at position {{n}}",
+      "deleted": "Step {{n}} deleted",
+      "deletedToast": "Step deleted"
+    },
+    "hideSteps": "Hide steps",
+    "showSteps": "Show steps",
+    "stepPill": "Step {{n}}: {{title}}"
   },
   "status": {
     "draft": "Draft",

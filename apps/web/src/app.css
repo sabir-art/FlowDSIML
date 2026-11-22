@@ -103,9 +103,24 @@
   border-right: 1px solid var(--fd-color-border);
 }
 .brand {
-  /* Recette du 22/11 (R2) : la carte de l'espace commence à 152 px */
-  margin-bottom: 7px;
   padding: 0 var(--fd-space-2);
+}
+/* NAV-04 (COMP-01 §14) : logo de 184 px à gauche, bouton de repli à droite, filet dessous ; le sélecteur
+   d'espace suit à 111 px du haut (16 + 60 + 16 + filet + 8 de gap + 10) */
+.sidebar__head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 77px;
+  margin-bottom: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.sidebar__head > .brand {
+  display: flex;
+  padding: 0;
 }
 .sidebar .ws-wrap {
   /* 14 px entre le sélecteur d'espace et la première entrée (R2) */
@@ -1856,12 +1871,19 @@ button.fd-nav__item:hover {
 /* ---- Retours client 21/11 §6 : barre latérale repliable en rail de 64 px (≥ 1 024 px) ---- */
 .sidebar__pin {
   flex: none;
-  align-self: flex-start;
   width: 32px;
   height: 32px;
-  margin-bottom: 4px;
 }
 /* ICON-01 : icône « panneau » de 20 px, trait 2,1 */
+/* Sous 1 024 px (tiroir) : inchangé, le logo de 224 px sans filet */
+@media (max-width: 1023px) {
+  .sidebar__head {
+    min-height: 0;
+    margin-bottom: 7px;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+}
 .fd-btn.sidebar__pin > svg {
   width: 20px;
   height: 20px;
@@ -1887,11 +1909,17 @@ button.fd-nav__item:hover {
     width: var(--fd-layout-sidebar-width, 256px);
     box-shadow: var(--fd-shadow-lg);
   }
-  /* Bouton d'épinglage et icônes à la même abscisse, replié ou déplié (16 px du bord) */
-  .shell--rail .sidebar__pin,
-  .shell--rail .brand {
+  /* Rail : le bouton en tête, à 16 px du bord, replié comme déplié au survol ; le logo vient à sa droite */
+  .shell--rail .sidebar__head {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    width: 236px;
+  }
+  .shell--rail .sidebar[data-expanded='false'] .sidebar__head {
+    width: 44px;
+  }
+  .shell--rail .sidebar__pin {
     margin-left: 6px;
-    padding: 0;
   }
   .shell--rail .fd-nav__item {
     flex: none;

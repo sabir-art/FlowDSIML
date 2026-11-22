@@ -243,6 +243,8 @@ function LogoSection({
           ) : isAdmin ? (
             <div
               className={over ? 'br-drop is-over' : 'br-drop'}
+              /* ALIGN-01 : la zone de dépôt prend toute la colonne ; l'e2e mesure son cadre */
+              data-align-zone=""
               onDragOver={(e) => {
                 e.preventDefault();
                 setOver(true);

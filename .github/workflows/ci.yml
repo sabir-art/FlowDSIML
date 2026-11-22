@@ -257,6 +257,9 @@ jobs:
       - name: Éditeur L48-E (rail d'outils, panneau, flou en modale)
         if: always()
         run: cd apps/web && node e2e/l48e-editeur.e2e.cjs
+      - name: 'Éditeur : menu d’une étape (copier, coller, dupliquer, supprimer, raccourcis)'
+        if: always()
+        run: cd apps/web && node e2e/etapes-menu.e2e.cjs
       - name: Commentaires sous le canevas (retour client 1)
         if: always()
         run: cd apps/web && node e2e/commentaires-dock.e2e.cjs

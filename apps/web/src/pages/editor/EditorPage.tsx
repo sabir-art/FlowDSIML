@@ -7,7 +7,7 @@ import {
   Copy,
   LayoutTemplate,
   Download,
-  GraduationCap,
+  ListChecks,
   ImagePlus,
   Keyboard,
   PenLine,
@@ -258,6 +258,25 @@ export function EditorPage() {
   const readOnly = !can('demo.edit');
   const narrow = useNarrow(1024);
   const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);
+  /** Lot 3 : colonne Étapes repliée en rail de 48 px ; le choix est gardé sur ce navigateur. */
+  const [stepsCollapsed, setStepsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('fd.editor.steps') === '0';
+    } catch {
+      return false;
+    }
+  });
+  const toggleSteps = () =>
+    setStepsCollapsed((c) => {
+      try {
+        localStorage.setItem('fd.editor.steps', c ? '1' : '0');
+      } catch {
+        /* préférence non gardée */
+      }
+      return !c;
+    });
+  /** P1-1 : « Lire depuis ici » : étape de départ de l'aperçu. */
+  const [previewStart, setPreviewStart] = useState<number | undefined>(undefined);
   // L12 : rechercher-remplacer (pastilles du rail) et modale des raccourcis
   const [findOpen, setFindOpen] = useState(false);
   const [findHits, setFindHits] = useState<Record<number, number>>({});
@@ -542,7 +561,8 @@ export function EditorPage() {
       </EditorSkeleton>
     );
 
-  function preview() {
+  function preview(from?: number) {
+    setPreviewStart(typeof from === 'number' ? from : undefined);
     setPreviewManifest(buildDraftManifest(editor, ws?.name ?? ''));
   }
 
@@ -820,7 +840,7 @@ export function EditorPage() {
               type="button"
               aria-checked={!!previewManifest}
               role="radio"
-              onClick={preview}
+              onClick={() => preview()}
               disabled={!editor.steps.length}
             >
               {t('editor.preview')}
@@ -929,7 +949,7 @@ export function EditorPage() {
               {
                 label:
                   t('editor.quiz.open') + (editor.questions.length ? ` (${editor.questions.length})` : ''),
-                icon: <GraduationCap />,
+                icon: <ListChecks />,
                 onSelect: () => navigate(`/demos/${demoId}/quiz`),
               },
               {
@@ -1019,8 +1039,10 @@ export function EditorPage() {
         </div>
       )}
       <div className="ed-body">
-        <nav className="rail" aria-label={t('editor.steps')}>
+        <nav className={`rail${stepsCollapsed ? ' rail--collapsed' : ''}`} aria-label={t('editor.steps')}>
           <StepList
+            collapsed={stepsCollapsed}
+            onToggle={toggleSteps}
             editor={editor}
             current={index}
             onSelect={(i) => {
@@ -1028,6 +1050,12 @@ export function EditorPage() {
               setSelection({ kind: 'step' });
             }}
             readOnly={readOnly}
+            onPlayFrom={(i) => preview(i)}
+            onEdit={(i) => {
+              setIndex(i);
+              setSelection({ kind: 'step' });
+              setPanel('step');
+            }}
             findHits={findOpen ? findHits : undefined}
             openComments={comments.openByStep}
             presence={byStep}
@@ -1250,7 +1278,14 @@ export function EditorPage() {
           }}
         />
       </div>
-      <PreviewDialog manifest={previewManifest} onClose={() => setPreviewManifest(null)} />
+      <PreviewDialog
+        manifest={previewManifest}
+        startStep={previewStart}
+        onClose={() => {
+          setPreviewManifest(null);
+          setPreviewStart(undefined);
+        }}
+      />
     </main>
   );
 }

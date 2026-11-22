@@ -3796,3 +3796,416 @@
 .mk .ed-bar .fd-back:hover {
   color: var(--fd-color-text);
 }
+
+/* ---- Lot 3 : colonne Étapes (264 px, fond de navigation). En-tête de 32 px, « Ajouter une étape »
+   en bouton pleine largeur, cartes d'étape, « Ajouter un quiz » en pied ---- */
+.mk.ed {
+  --fd-layout-editor-rail-width: 264px;
+}
+.mk .ed-body > .rail {
+  padding: 12px 0 0;
+  background: var(--fd-color-nav-bg);
+}
+.mk .rail-head {
+  height: 32px;
+  flex: none;
+  margin-bottom: 8px;
+  padding: 0 12px;
+}
+.mk .rail-head .t-label {
+  font: 600 14px var(--fd-font-sans);
+}
+.mk .rail-head .subtle {
+  margin-left: 2px;
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
+}
+.mk .rail-foot {
+  flex: none;
+  margin-bottom: 8px;
+  padding: 0 12px;
+  border-top: 0;
+}
+.mk .rail-foot .menu-trigger {
+  height: 36px;
+  border-radius: 999px;
+}
+.mk .rail-list {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 4px 12px 12px;
+}
+/* Plus de pointillés entre les étapes : les cartes se suivent à 6 px */
+.mk .rail-li + .rail-li .step::before {
+  content: none;
+}
+.mk .step {
+  grid-template-columns: 16px 72px minmax(0, 1fr);
+  align-items: center;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+}
+.mk .step:hover {
+  background: var(--fd-color-nav-hover);
+}
+/* Étape choisie : fond du contenu, trait prune de 2 px (bordure et trait intérieur) */
+.mk .step[aria-current='step'] {
+  background: var(--fd-color-content-bg);
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.mk .step .n {
+  padding-top: 0;
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.mk .step .th {
+  width: 72px;
+  height: 46px;
+  aspect-ratio: auto;
+}
+.mk .step .meta {
+  display: grid;
+  gap: 2px;
+}
+.mk .step .meta b {
+  font-size: 13px;
+  line-height: 16px;
+}
+.mk .step .icons {
+  margin-top: 0;
+  color: var(--fd-color-text-muted);
+}
+.mk .step .icons svg {
+  width: 16px;
+  height: 16px;
+}
+/* « Ajouter un quiz » : bouton ghost pleine largeur de 36 px, séparé par un filet, en bas */
+.mk .rail-quiz {
+  flex: none;
+  justify-content: center;
+  height: 36px;
+  margin: 12px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: 600 14px var(--fd-font-sans);
+  position: relative;
+}
+.mk .rail-quiz::before {
+  content: '';
+  position: absolute;
+  top: -13px;
+  right: -12px;
+  left: -12px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .rail-quiz svg {
+  color: inherit;
+}
+.mk .rail-quiz:hover {
+  background: var(--fd-color-nav-hover);
+}
+
+/* ---- P1-1 : actions d'une carte d'étape (« Lire depuis ici » et « … », 28 px) : au survol, au
+   focus clavier et sur l'étape choisie ---- */
+.mk .rail-acts {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: flex;
+  translate: 0 -50%;
+  opacity: 0;
+}
+.mk .rail-li:hover .rail-acts,
+.mk .rail-li:has(:focus-visible) .rail-acts,
+.mk .rail-li:has(.step[aria-current='step']) .rail-acts,
+.mk .rail-li:has(.menu-trigger[aria-expanded='true']) .rail-acts {
+  opacity: 1;
+}
+.mk .rail-acts :is(.rail-act, .menu-trigger) {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.mk .rail-acts :is(.rail-act, .menu-trigger):hover,
+.mk .rail-acts .menu-trigger[aria-expanded='true'] {
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-text);
+}
+.mk .rail-acts :is(.rail-act, .menu-trigger):focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.mk .rail-acts svg {
+  width: 16px;
+  height: 16px;
+}
+/* Le titre laisse la place aux deux actions */
+.mk .rail-li .step {
+  padding-right: 68px;
+}
+/* Au survol et au focus clavier, la poignée (GripVertical, 16 px) remplace le numéro, à sa place */
+.mk .step .grip {
+  left: 9px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  color: var(--fd-color-text-muted);
+}
+.mk .step .grip svg {
+  width: 16px;
+  height: 16px;
+}
+.mk .rail-li:hover .step .grip,
+.mk .step:focus-visible .grip {
+  opacity: 1;
+}
+.mk .rail-li:hover .step .n,
+.mk .step:focus-visible .n {
+  visibility: hidden;
+}
+
+/* ---- Lot 3 : bascule de la colonne Étapes et rail de 48 px (pastilles numérotées de 32 px) ---- */
+.mk .rail-toggle {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.mk .rail-toggle:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.mk .rail-toggle:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.mk .ed-body > .rail.rail--collapsed {
+  flex-basis: 48px;
+  width: 48px;
+}
+.mk .rail--collapsed .rail-head {
+  justify-content: center;
+  padding: 0 8px;
+}
+/* Le champ fichier de « Ajouter une étape » reste dans la page (masqué) ; son bouton est dans le rail */
+.mk .rail--collapsed :is(.rail-list, .rail-quiz),
+.mk .rail--collapsed .rail-foot > :not(input) {
+  display: none;
+}
+.mk .rail--collapsed .rail-foot {
+  padding: 0;
+}
+.mk .rail-pills {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  justify-items: center;
+  gap: 6px;
+  min-height: 0;
+  margin: 0;
+  padding: 4px 8px 12px;
+  overflow-y: auto;
+  list-style: none;
+}
+.mk .rail-pill {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  font: 500 12px var(--fd-font-sans);
+  cursor: pointer;
+}
+.mk .rail-pill:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+/* Étape choisie : pastille prune */
+.mk .rail-pill[aria-current='step'] {
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary);
+  font-weight: 600;
+}
+.mk .rail-pill:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.mk .rail-pills__add {
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: 12px 8px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .rail-pills__add .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+
+/* ---- Lot 3 : rail d'outils de 48 px et panneau de 320 px (fond du contenu, filets) ---- */
+.mk .ed-rail {
+  flex-basis: 48px;
+  background: var(--fd-color-content-bg);
+}
+.mk .ed-rail__grp + .ed-rail__grp::before {
+  width: 20px;
+  /* 8 px de chaque côté du filet, l'écart du groupe compris */
+  margin: 8px auto 4px;
+  background: var(--fd-color-border);
+}
+.mk .ed-rail__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+.mk .ed-rail__btn:hover {
+  background: var(--fd-color-nav-hover);
+}
+/* Outil actif : nav-active et filet intérieur de 1 px */
+.mk .ed-rail__btn.is-active {
+  background: var(--fd-color-nav-active);
+  box-shadow: inset 0 0 0 1px var(--fd-color-border);
+}
+.mk .ed-rail__btn.is-active:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.mk .ed-tool {
+  flex-basis: 320px;
+  width: 320px;
+  background: var(--fd-color-content-bg);
+}
+.mk .ed-tool__head {
+  height: 52px;
+}
+.mk .ed-tool__head h2 {
+  font: 600 15px var(--fd-font-sans);
+}
+/* Sections d'un bord à l'autre, séparées par un filet ; titres de 12 px en majuscules */
+.mk .ed-tool .sec {
+  margin: 0 -16px;
+  padding: 16px;
+  border-top: 0;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mk .ed-tool .sec:first-child {
+  margin-top: -16px;
+  padding-top: 16px;
+}
+/* Après l'en-tête d'un hotspot : 8 px, puis la section */
+.mk .ed-tool .hs-head + .sec {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--fd-color-border);
+}
+/* Panneau Étape : sa première section suit une modale fermée, on remonte le panneau lui-même */
+.mk .ed-tool .sp-panel {
+  margin-top: -16px;
+}
+.mk .ed-tool .sec-title {
+  font: 600 12px var(--fd-font-sans);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+/* « Supprimer l'étape » : bouton ghost danger en pied, sans filet */
+.mk .ed-tool .sp-foot {
+  padding: 16px 0 0;
+  border-top: 0;
+}
+@media (max-width: 1279px) {
+  .mk .ed-body > .ed-tool {
+    right: 48px;
+  }
+}
+.mk .ed-tool .sp-panel > .sec,
+.mk .ed-tool .sp-panel > :first-child:not(.sec) + .sec {
+  padding-top: 16px;
+}
+.mk .ed-tool .sp-foot .fd-btn {
+  height: 32px;
+  min-height: 32px;
+  padding: 0 8px;
+}
+/* Panneau de 320 px : Réenregistrer, Remplacer et Supprimer restent sur une ligne */
+.mk .ed-tool .voice-sec .voice-actions {
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+.mk .ed-tool .voice-sec .voice-actions .btn-sm:not(.btn-icon) {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding-inline: 6px;
+  gap: 4px;
+  overflow: hidden;
+  font-size: 13px;
+}
+/* Panneau de 320 px : l'entrée IA indisponible et son lien passent à la ligne plutôt que de déborder */
+.mk .ed-tool .ai-disabled-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+/* Titre de section des notes : il tient sur une ligne avec sa mention « Privées » (L45 E5) */
+.mk .ed-tool .notes-sec .sec-title {
+  letter-spacing: 0.03em;
+}
+.mk .ed-tool .notes-sec .lock {
+  letter-spacing: 0;
+}
+
+/* ---- Recette UX du lot 3 (13c1904), P2 à P6 ---- */
+/* P2 : texte alternatif sans poignée native, il grandit avec son contenu */
+.mk .ed-tool #st-alt {
+  min-height: 72px;
+  resize: none;
+  field-sizing: content;
+}
+/* P3 : aides des champs en 13 px */
+.mk .ed-tool .help {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+/* P4 : segmenté Animation sur toute la largeur du panneau, segments égaux (ALIGN-01) */
+.mk .ed-tool .cap-anim > .segmented {
+  display: flex;
+  width: 100%;
+}
+.mk .ed-tool .cap-anim > .segmented > button {
+  flex: 1;
+  justify-content: center;
+}
+/* P6 : « Supprimer l'étape » en pied fixe du panneau, toujours visible, au-dessus d'un filet */
+.mk .ed-tool .sp-foot {
+  position: sticky;
+  /* Le bas collant se mesure dans la zone de contenu : -16 px pour toucher le bord du panneau */
+  bottom: -16px;
+  z-index: 1;
+  margin: 0 -16px -16px;
+  padding: 16px;
+  border-top: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface);
+}

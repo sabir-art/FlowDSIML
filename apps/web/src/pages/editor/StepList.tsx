@@ -9,6 +9,13 @@ import type { PresencePayload } from './presence/presence';
 import { RailWho } from './presence/PresenceUI';
 import {
   TriangleAlert,
+  ClipboardPaste,
+  Copy,
+  CopyPlus,
+  EyeOff,
+  Pencil,
+  Scissors,
+  Trash2,
   PanelsTopLeft,
   ArrowDown,
   AudioLines,
@@ -20,7 +27,7 @@ import {
   Flag,
   CornerDownRight,
   GitBranch,
-  GraduationCap,
+  ListChecks,
   GripVertical,
   ImageOff,
   ImagePlus,
@@ -36,10 +43,14 @@ import {
 } from 'lucide-react';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { asSettings, asStepOptions, type StepRow } from './types';
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
+import { PanneauIcon } from '../../components/PanneauIcon';
+import { copyStepToClipboard, readStepClipboard, useStepClipboard, type StepClip } from './stepClipboard';
+
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 import type { DemoEditor } from './useDemoEditor';
 
 export function StepList({
@@ -53,7 +64,18 @@ export function StepList({
   onSelectForm,
   presence = {},
   presenceNames = {},
+  onPlayFrom,
+  onEdit,
+  collapsed = false,
+  onToggle,
 }: {
+  /** Lot 3 : colonne repliée en rail de 48 px (pastilles numérotées, « Ajouter une étape » en icône). */
+  collapsed?: boolean;
+  onToggle?: () => void;
+  /** P1-1 : « Lire depuis ici » ouvre l'aperçu à cette étape. */
+  onPlayFrom?: (i: number) => void;
+  /** P1-1 : « Modifier » choisit l'étape et ouvre le panneau Étape. */
+  onEdit?: (i: number) => void;
   editor: DemoEditor;
   current: number;
   onSelect: (i: number) => void;
@@ -84,6 +106,157 @@ export function StepList({
   const [over, setOver] = useState<number | null>(null);
   const file = useRef<HTMLInputElement>(null);
   const chapterTitle = (id: string | null) => editor.chapters.find((c) => c.id === id)?.title;
+
+  // ===== P1-1 : actions d'une étape (menu « … », clic droit et raccourcis de la liste) =====
+  const clip = useStepClipboard();
+  // Le toast « Annuler » agit après un rendu : il passe par l'éditeur à jour, pas par celui du clic
+  const live = useRef(editor);
+  live.current = editor;
+  const mod = IS_MAC ? '⌘' : 'Ctrl';
+  /** L'étape de fin (« Merci ! ») ne se copie pas, ne se coupe pas, ne se duplique pas et ne se supprime pas. */
+  const isEnd = (s: StepRow, i: number) => i === editor.steps.length - 1 && s.kind === 'text';
+  const snapshot = (s: StepRow): StepClip => ({
+    step: s,
+    hotspots: editor.hotspots.filter((h) => h.step_id === s.id),
+  });
+  const copyStep = (s: StepRow, i: number) => {
+    copyStepToClipboard(snapshot(s));
+    setAnnounce(t('editor.stepMenu.copied', { n: i + 1 }));
+  };
+  const pasteAfter = async (i: number) => {
+    const c = readStepClipboard();
+    if (!c) return;
+    const made = await editor.pasteStep(c, i);
+    if (!made) return;
+    onSelect(i + 1);
+    setAnnounce(t('editor.stepMenu.pasted', { n: i + 2 }));
+  };
+  const duplicateStep = async (s: StepRow, i: number) => {
+    const made = await editor.pasteStep(snapshot(s), i);
+    if (!made) return;
+    onSelect(i + 1);
+    setAnnounce(t('editor.stepMenu.duplicated', { n: i + 2 }));
+  };
+  /** Suppression sans confirmation : elle s'annule depuis le toast pendant 6 s. */
+  const removeStep = async (s: StepRow, i: number) => {
+    const snap = snapshot(s);
+    await editor.deleteStep(s.id);
+    onSelect(Math.max(0, Math.min(i, editor.steps.length - 2)));
+    setAnnounce(t('editor.stepMenu.deleted', { n: i + 1 }));
+    toast(t('editor.stepMenu.deletedToast'), {
+      label: t('common.undo'),
+      durationMs: 6000,
+      onClick: () => void live.current.pasteStep(snap, i - 1).then((made) => made && onSelect(i)),
+    });
+  };
+  const cutStep = (s: StepRow, i: number) => {
+    copyStepToClipboard(snapshot(s));
+    void removeStep(s, i);
+  };
+  /** Monter ou descendre d'un rang (menu et Alt + flèches) : le focus suit, le déplacement est annoncé. */
+  const moveBy = (i: number, d: -1 | 1) => {
+    const to = i + d;
+    if (to < 0 || to >= editor.steps.length) return;
+    void editor.moveStep(i, to).then(() => {
+      onSelect(to);
+      focusStep(to);
+      setAnnounce(t('editor.stepMove.moved', { n: to + 1, total: editor.steps.length }));
+    });
+  };
+  const stepMenu = (s: StepRow, i: number): Array<MenuItem | 'separator'> => {
+    const end = isEnd(s, i);
+    const kbd = (k: string) => <kbd className="menu-kbd">{k}</kbd>;
+    return [
+      {
+        label: t('editor.stepMenu.edit'),
+        icon: <Pencil />,
+        end: kbd(t('editor.stepMenu.keyEnter')),
+        onSelect: () => (onEdit ? onEdit(i) : onSelect(i)),
+      },
+      ...(end
+        ? []
+        : [
+            {
+              label: t('editor.stepMenu.copy'),
+              icon: <Copy />,
+              end: kbd(`${mod} C`),
+              onSelect: () => copyStep(s, i),
+            },
+          ]),
+      {
+        label: t('editor.stepMenu.pasteAfter'),
+        icon: <ClipboardPaste />,
+        end: kbd(`${mod} V`),
+        disabled: !clip,
+        onSelect: () => void pasteAfter(i),
+      },
+      ...(end
+        ? []
+        : [
+            {
+              label: t('editor.stepMenu.cut'),
+              icon: <Scissors />,
+              end: kbd(`${mod} X`),
+              onSelect: () => cutStep(s, i),
+            },
+            {
+              label: t('editor.stepMenu.duplicate'),
+              icon: <CopyPlus />,
+              end: kbd(`${mod} D`),
+              onSelect: () => void duplicateStep(s, i),
+            },
+          ]),
+      {
+        label: t('editor.moveUp'),
+        icon: <ArrowUp />,
+        end: kbd('Alt ↑'),
+        disabled: i === 0,
+        onSelect: () => moveBy(i, -1),
+      },
+      {
+        label: t('editor.moveDown'),
+        icon: <ArrowDown />,
+        end: kbd('Alt ↓'),
+        disabled: i === editor.steps.length - 1,
+        onSelect: () => moveBy(i, 1),
+      },
+      {
+        label: t('editor.stepMenu.hide'),
+        icon: <EyeOff />,
+        disabled: true,
+        end: <span className="soon-text">{t('shell.soon')}</span>,
+        onSelect: () => undefined,
+      },
+      ...(end
+        ? []
+        : ([
+            'separator',
+            {
+              label: t('common.delete'),
+              icon: <Trash2 />,
+              danger: true,
+              end: kbd(t('editor.stepMenu.keyDelete')),
+              onSelect: () => void removeStep(s, i),
+            },
+          ] as Array<MenuItem | 'separator'>)),
+    ];
+  };
+  /** Raccourcis de la liste : seulement quand le focus est sur une vignette d'étape. */
+  const onStepShortcut = (e: KeyboardEvent<HTMLElement>, s: StepRow, i: number) => {
+    if (readOnly || !(e.target as HTMLElement).classList.contains('step')) return false;
+    const cmd = e.metaKey || e.ctrlKey;
+    const k = e.key.toLowerCase();
+    const end = isEnd(s, i);
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) moveBy(i, e.key === 'ArrowUp' ? -1 : 1);
+    else if (cmd && k === 'c' && !end) copyStep(s, i);
+    else if (cmd && k === 'v') void pasteAfter(i);
+    else if (cmd && k === 'x' && !end) cutStep(s, i);
+    else if (cmd && k === 'd' && !end) void duplicateStep(s, i);
+    else if (!cmd && (e.key === 'Delete' || e.key === 'Backspace') && !end) void removeStep(s, i);
+    else return false;
+    e.preventDefault();
+    return true;
+  };
 
   const addItems: Array<MenuItem | 'separator'> = [
     // EDT-03 : ordre et libellés de la maquette
@@ -203,12 +376,88 @@ export function StepList({
 
   return (
     <>
+      {/* Lot 3 : en-tête (nom et nombre), puis « Ajouter une étape » en bouton pleine largeur */}
       <div className="rail-head">
-        <b className="t-label">
-          {t('editor.steps')} <span className="subtle">· {editor.steps.length}</span>
-        </b>
-        {!readOnly && <Menu label={t('editor.addStep')} align="start" icon={<Plus />} items={addItems} />}
+        {!collapsed && (
+          <b className="t-label">
+            {t('editor.steps')} <span className="subtle">{editor.steps.length}</span>
+          </b>
+        )}
+        {onToggle && (
+          <button
+            type="button"
+            className="rail-toggle"
+            aria-label={t(collapsed ? 'editor.showSteps' : 'editor.hideSteps')}
+            title={t(collapsed ? 'editor.showSteps' : 'editor.hideSteps')}
+            aria-expanded={!collapsed}
+            onClick={onToggle}
+          >
+            <PanneauIcon />
+          </button>
+        )}
       </div>
+      {collapsed && (
+        <>
+          {/* Rail : une pastille par étape (son numéro, son titre en infobulle), l'étape choisie en prune */}
+          <ol className="rail-pills" aria-label={t('editor.steps')}>
+            {editor.steps.map((s, i) => (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  className="rail-pill"
+                  aria-current={i === current && !selectedFormId ? 'step' : undefined}
+                  aria-label={t('editor.stepPill', { n: i + 1, title: s.title || t('editor.untitled') })}
+                  data-tip={s.title || t('editor.untitled')}
+                  data-tip-side="right"
+                  onClick={() => onSelect(i)}
+                >
+                  {i + 1}
+                </button>
+              </li>
+            ))}
+          </ol>
+          {!readOnly && (
+            <div className="rail-pills__add">
+              <Menu label={t('editor.addStep')} align="start" icon={<Plus />} items={addItems} />
+            </div>
+          )}
+        </>
+      )}
+      {!readOnly && (
+        <div className="rail-foot">
+          {/* Replié : le bouton est en icône dans le rail ; le champ fichier reste ici */}
+          {!collapsed && (
+            <Menu
+              label={t('editor.addStep')}
+              align="start"
+              trigger={{ icon: <Plus />, text: t('editor.addStep'), block: true }}
+              items={addItems}
+            />
+          )}
+          <input
+            ref={file}
+            type="file"
+            /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+            id="steplist-file"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            /* Ouvert par l'entrée « Image » du menu « Ajouter une étape » : le champ porte son nom */
+            aria-label={t('editor.add.image')}
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              // REV-07 : avertissement à l'import (aucune détection automatique)
+              if (f)
+                void editor.addImageStep(current, f).then((r) => {
+                  onSelect(current + 1);
+                  if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
+                });
+              e.target.value = '';
+            }}
+          />
+        </div>
+      )}
       <span className="sr-only" aria-live="assertive">
         {announce}
       </span>
@@ -299,7 +548,19 @@ export function StepList({
                   aria-current={i === current && !selectedFormId ? 'step' : undefined}
                   data-step-index={i}
                   onClick={() => onSelect(i)}
-                  onKeyDown={(e) => onRailKey(e, i)}
+                  onKeyDown={(e) => {
+                    if (!onStepShortcut(e, s, i)) onRailKey(e, i);
+                  }}
+                  onContextMenu={(e) => {
+                    // Clic droit : le même menu que « … »
+                    if (readOnly) return;
+                    e.preventDefault();
+                    (
+                      e.currentTarget.parentElement?.querySelector(
+                        '.rail-acts .menu-trigger',
+                      ) as HTMLElement | null
+                    )?.click();
+                  }}
                 >
                   {!readOnly && (
                     <span className="grip" aria-hidden="true">
@@ -382,26 +643,23 @@ export function StepList({
                     </span>
                   </span>
                 </button>
-                {!readOnly && (
-                  <span className="rail-move">
+                {/* P1-1 : « Lire depuis ici » et le menu de l'étape, au survol, au focus et sur l'étape choisie */}
+                <span className="rail-acts">
+                  {onPlayFrom && (
                     <button
                       type="button"
-                      aria-label={t('editor.moveUp')}
-                      disabled={i === 0}
-                      onClick={() => void editor.moveStep(i, i - 1).then(() => onSelect(i - 1))}
+                      className="rail-act"
+                      aria-label={t('editor.stepMenu.playFrom', { n: i + 1 })}
+                      title={t('editor.stepMenu.playFromShort')}
+                      onClick={() => onPlayFrom(i)}
                     >
-                      <ArrowUp aria-hidden="true" />
+                      <Play aria-hidden="true" />
                     </button>
-                    <button
-                      type="button"
-                      aria-label={t('editor.moveDown')}
-                      disabled={i === editor.steps.length - 1}
-                      onClick={() => void editor.moveStep(i, i + 1).then(() => onSelect(i + 1))}
-                    >
-                      <ArrowDown aria-hidden="true" />
-                    </button>
-                  </span>
-                )}
+                  )}
+                  {!readOnly && (
+                    <Menu wide label={t('editor.stepMenu.actions', { n: i + 1 })} items={stepMenu(s, i)} />
+                  )}
+                </span>
               </li>
             </Fragment>
           );
@@ -414,7 +672,7 @@ export function StepList({
           className={`rail-quiz${editor.questions.length ? '' : ' rail-quiz--add'}`}
           to={`/demos/${editor.demo.id}/quiz`}
         >
-          {editor.questions.length ? <GraduationCap aria-hidden="true" /> : <Plus aria-hidden="true" />}
+          <ListChecks aria-hidden="true" />
           <span>
             {!editor.questions.length
               ? t('editor.railQuizAdd')
@@ -426,38 +684,6 @@ export function StepList({
                   })}
           </span>
         </Link>
-      )}
-      {!readOnly && (
-        <div className="rail-foot">
-          <Menu
-            label={t('editor.addStep')}
-            align="start"
-            trigger={{ icon: <Plus />, text: t('editor.addStep'), block: true }}
-            items={addItems}
-          />
-          <input
-            ref={file}
-            type="file"
-            /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
-            id="steplist-file"
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden="true"
-            /* Ouvert par l'entrée « Image » du menu « Ajouter une étape » : le champ porte son nom */
-            aria-label={t('editor.add.image')}
-            accept="image/png,image/jpeg,image/webp"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              // REV-07 : avertissement à l'import (aucune détection automatique)
-              if (f)
-                void editor.addImageStep(current, f).then((r) => {
-                  onSelect(current + 1);
-                  if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
-                });
-              e.target.value = '';
-            }}
-          />
-        </div>
       )}
     </>
   );

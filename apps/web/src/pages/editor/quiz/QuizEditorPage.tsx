@@ -3,9 +3,8 @@ import {
   ArrowLeft,
   ArrowUp,
   CircleCheck,
-  GraduationCap,
-  GripVertical,
   ListChecks,
+  GripVertical,
   Play,
   Plus,
   Trash2,
@@ -130,7 +129,7 @@ export function QuizEditorPage() {
           ) : (
             <div className="quiz-empty">
               <span className="fd-icon-chip" aria-hidden="true">
-                <GraduationCap />
+                <ListChecks />
               </span>
               <p>{t('editor.quiz.noQuestion')}</p>
               {!readOnly && (

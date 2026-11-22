@@ -51,8 +51,8 @@
     "extension": "Extension",
     "helpCenter": "Centre d’aide",
     "sandbox": "Sandbox",
-    "pinSidebar": "Épingler la barre latérale",
-    "collapseSidebar": "Réduire la barre latérale"
+    "collapseSidebar": "Replier la barre latérale",
+    "expandSidebar": "Déplier la barre latérale"
   },
   "roles": {
     "owner": "Propriétaire",
@@ -976,7 +976,6 @@
         "content": "Contenu",
         "screen": "Écran",
         "look": "Apparence",
-        "collab": "Collaborer",
         "demo": "Démo"
       },
       "why": {
@@ -1095,7 +1094,13 @@
       "del": "Suppr",
       "esc": "Échap",
       "help": "Les raccourcis à une lettre (H, B, ?) sont inactifs pendant la saisie de texte.",
-      "comments": "Ouvrir ou fermer les commentaires"
+      "comments": "Ouvrir ou fermer les commentaires",
+      "moveStepAlt": "Monter ou descendre l’étape",
+      "copyStep": "Copier l’étape",
+      "pasteStep": "Coller après l’étape",
+      "cutStep": "Couper l’étape",
+      "duplicateStep": "Dupliquer l’étape",
+      "deleteStep": "Supprimer l’étape"
     },
     "maskTag": "Masque",
     "zoomLevel": "Niveau",
@@ -1849,7 +1854,28 @@
       "moved": "Étape déplacée en position {{n}} sur {{total}}.",
       "grabbed": "Étape {{n}} saisie. Flèches pour la déplacer, Espace pour la poser.",
       "dropped": "Étape posée en position {{n}}."
-    }
+    },
+    "stepMenu": {
+      "actions": "Actions de l’étape {{n}}",
+      "playFrom": "Lire depuis l’étape {{n}}",
+      "playFromShort": "Lire depuis ici",
+      "edit": "Modifier",
+      "copy": "Copier",
+      "pasteAfter": "Coller après",
+      "cut": "Couper",
+      "duplicate": "Dupliquer",
+      "hide": "Masquer l’étape",
+      "keyEnter": "Entrée",
+      "keyDelete": "Suppr",
+      "copied": "Étape {{n}} copiée",
+      "pasted": "Étape collée en position {{n}}",
+      "duplicated": "Étape dupliquée en position {{n}}",
+      "deleted": "Étape {{n}} supprimée",
+      "deletedToast": "Étape supprimée"
+    },
+    "hideSteps": "Masquer les étapes",
+    "showSteps": "Afficher les étapes",
+    "stepPill": "Étape {{n}} : {{title}}"
   },
   "status": {
     "draft": "Brouillon",

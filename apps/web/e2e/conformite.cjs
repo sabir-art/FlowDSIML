@@ -320,7 +320,7 @@ const SCREENS = {
       await p.waitForTimeout(200);
     },
     async prepare(p) {
-      await p.locator('.rail-head').getByRole('button', { name: 'Ajouter une étape' }).click();
+      await p.locator('.rail-foot').getByRole('button', { name: 'Ajouter une étape' }).click();
       await p.waitForTimeout(300);
     },
   },

@@ -258,24 +258,25 @@ export function Layout() {
         data-expanded={rail ? String(expanded) : undefined}
         {...railEvents}
       >
-        {!drawer && (
-          // §6 : même place épinglée ou en rail ; nom stable, état dans aria-pressed (motif bouton bascule)
-          <button
-            type="button"
-            className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm sidebar__pin"
-            aria-label={t('nav.pinSidebar')}
-            aria-pressed={pinned}
-            data-tip={pinned ? t('nav.collapseSidebar') : t('nav.pinSidebar')}
-            onClick={togglePin}
-          >
-            <PanneauIcon />
-          </button>
-        )}
-        <div className="brand">
-          {collapsedRail ? (
-            <img src={symbol} alt={APP_NAME} width={32} height={32} className="brand__symbol" />
-          ) : (
-            <BrandMark full width={224} />
+        {/* NAV-04 (COMP-01 §14) : logo à gauche et bouton de repli à droite sur une ligne, filet dessous.
+            Rail replié : le bouton seul ; déplié au survol, il garde sa place et le logo vient à sa droite. */}
+        <div className="sidebar__head">
+          {!collapsedRail && (
+            <div className="brand">
+              <BrandMark full width={drawer ? 224 : 184} />
+            </div>
+          )}
+          {!drawer && (
+            <button
+              type="button"
+              className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm sidebar__pin"
+              aria-label={pinned ? t('nav.collapseSidebar') : t('nav.expandSidebar')}
+              aria-expanded={pinned}
+              data-tip={pinned ? t('nav.collapseSidebar') : t('nav.expandSidebar')}
+              onClick={togglePin}
+            >
+              <PanneauIcon />
+            </button>
           )}
         </div>
         {/* CAD-02 : sélecteur de workspace toujours visible (maquette) */}

@@ -106,7 +106,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.keyboard.press('Escape');
   await drawer.waitFor({ state: 'detached' });
   ok(
-    sp(await page.locator('.demos-list-count').innerText()) === 'Visible par 2 membres.',
+    // PAGE-01 : la phrase d'accès est portée par le bouton « Accès au dossier » (infobulle et description)
+    sp(await page.locator('#folder-access-hint').textContent()) === 'Visible par 2 membres.' &&
+      sp(await page.getByRole('button', { name: 'Accès au dossier' }).getAttribute('data-tip')) ===
+        'Visible par 2 membres.',
     'cadenas dans le tiroir, « Visible par 2 membres. » sous le titre du dossier',
   );
 

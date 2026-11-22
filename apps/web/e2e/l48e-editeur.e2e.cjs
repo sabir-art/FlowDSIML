@@ -55,7 +55,14 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
   // ===== Rail =====
   ok((await rail.getAttribute('aria-orientation')) === 'vertical', 'rail vertical');
-  ok((await rail.getByRole('group').count()) === 5, 'groupes : Contenu, Écran, Apparence, Collaborer, Démo');
+  // Recette du lot 3 (P7) : Design et Assistant dans le même groupe, un filet entre les groupes
+  ok((await rail.getByRole('group').count()) === 4, 'groupes : Contenu, Écran, Apparence, Démo');
+  ok(
+    (await rail
+      .locator('button[data-tool="assistant"]')
+      .evaluate((el) => Math.round(el.getBoundingClientRect().top))) === 490,
+    'P7 : « Assistant » à y 490',
+  );
   // Retours client 21/11 §1 : Commentaires sortis du rail (panneau sous le canevas)
   ok((await rail.locator('button[data-tool]').count()) === 12, '12 outils');
   ok((await p.locator('.ed-tool').count()) === 1, 'un panneau ouvert (Étape par défaut)');
@@ -187,10 +194,21 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   {
     const act = rail.locator('.ed-rail__btn.is-active').first();
     await p.mouse.click(5, 5);
-    const sh = await act.evaluate(
-      (el) => getComputedStyle(el).boxShadow + '|' + getComputedStyle(el).outlineStyle,
+    // Lot 3 : outil actif sur nav-active avec un filet intérieur de 1 px (couleur de bordure) ; le trait
+    // de focus de 2 px n'apparaît qu'au clavier
+    const sh = await act.evaluate((el) => {
+      const probe = document.createElement('i');
+      probe.style.color = 'var(--fd-color-border)';
+      el.append(probe);
+      const border = getComputedStyle(probe).color;
+      probe.remove();
+      const c = getComputedStyle(el);
+      return { shadow: c.boxShadow, outline: c.outlineStyle, border };
+    });
+    ok(
+      sh.outline === 'none' && sh.shadow === `${sh.border} 0px 0px 0px 1px inset`,
+      `E1 : outil actif avec un filet de 1 px, sans trait de focus hors clavier (${sh.shadow})`,
     );
-    ok(sh === 'none|none', `E1 : outil actif sans contour hors focus clavier (${sh})`);
   }
 
   // ===== Flou en modale =====

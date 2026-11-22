@@ -147,6 +147,11 @@ function App() {
               preview: true,
               // « Tester le quiz » (éditeur) : l'aperçu s'ouvre directement sur le quiz
               startQuiz: (e.data as { startQuiz?: boolean }).startQuiz === true,
+              // « Lire depuis ici » (éditeur) : l'aperçu commence à l'étape choisie
+              startStep:
+                typeof (e.data as { startStep?: unknown }).startStep === 'number'
+                  ? (e.data as { startStep: number }).startStep
+                  : undefined,
             });
         };
         addEventListener('message', onMsg);

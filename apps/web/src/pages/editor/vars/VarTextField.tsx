@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Bold as BoldIcon, Italic as ItalicIcon, Link2, Plus } from 'lucide-react';
+import { Bold as BoldIcon, Braces, Italic as ItalicIcon, Link2 } from 'lucide-react';
 import { EditorContent, useEditor, type Editor } from '@tiptap/react';
 import { Node, mergeAttributes } from '@tiptap/core';
 import Document from '@tiptap/extension-document';
@@ -442,7 +442,7 @@ export function VarTextField({
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => setCat({ rect: addBtn.current!.getBoundingClientRect(), brace: null })}
       >
-        <Plus aria-hidden="true" />
+        <Braces aria-hidden="true" />
         {t('variables.add')}
       </button>
     );
