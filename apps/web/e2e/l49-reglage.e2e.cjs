@@ -158,6 +158,11 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
     (await c2.locator('.hc-ro').innerText()) === 'Modifiable par un admin',
     'éditeur : « Modifiable par un admin »',
   );
+  // Le réglage arrive après la carte : on attend le choix enregistré avant de lire les autres
+  await c2
+    .getByRole('radio', { name: /^Seulement sur ces domaines/, checked: true })
+    .waitFor()
+    .catch(() => {});
   ok(
     (await c2.getByRole('radio', { name: /^Seulement sur ces domaines/ }).isChecked()) &&
       (await c2.getByRole('radio', { name: /^Désactivées/ }).getAttribute('aria-disabled')) === 'true',
