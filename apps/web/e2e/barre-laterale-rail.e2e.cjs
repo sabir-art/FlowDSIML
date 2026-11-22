@@ -229,6 +229,28 @@ const geo = (p) =>
     'réduire : rail, retenu (rail)',
   );
 
+  // ===== NAV-04 §14 ter : le logo ramène à l'accueil ; dans le rail, le bouton déplie sans naviguer =====
+  await p.goto(`${APP}/#/settings/profile`);
+  await p.locator('.st-nav').waitFor();
+  await p.locator('.sidebar__pin').click();
+  ok(
+    /#\/settings\/profile$/.test(p.url()),
+    '§14 ter : dans le rail, le bouton déplie la barre sans naviguer',
+  );
+  const home = p.getByRole('link', { name: 'Démos, accueil de TutoClick' });
+  await home.click();
+  await p.waitForURL(/#\/$/);
+  ok(true, '§14 ter : un clic sur le logo ramène à l’accueil (#/)');
+  await p.goto(`${APP}/#/settings/profile`);
+  await p.locator('.st-nav').waitFor();
+  await home.focus();
+  await p.keyboard.press('Enter');
+  await p.waitForURL(/#\/$/);
+  ok(true, '§14 ter : Entrée sur le logo ramène à l’accueil');
+  // La page Démos est affichée : son entrée de navigation est l'élément courant
+  await p.locator('.fd-nav__item[aria-current="page"]', { hasText: 'Démos' }).waitFor();
+  ok((await home.getAttribute('aria-current')) === null, '§14 ter : pas d’aria-current sur le logo');
+  await p.locator('.sidebar__pin').click();
   ok(p.errors.length === 0, `aucune erreur JS (${p.errors.join(' | ')})`);
   await p.context().close();
 
