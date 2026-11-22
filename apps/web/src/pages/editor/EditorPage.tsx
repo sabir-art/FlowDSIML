@@ -2,7 +2,6 @@ import { SettingsTab } from './panels/SettingsTab';
 import { FormPanel } from './panels/FormPanel';
 import { FormPreview } from './FormPreview';
 import {
-  ArrowLeft,
   CircleHelp,
   Clock,
   Copy,
@@ -20,6 +19,7 @@ import {
   Undo2,
   Languages,
   Lightbulb,
+  Pencil,
 } from 'lucide-react';
 import { EditorRail, TOOL_KEY, TOOL_ORDER, ToolPanel, savedTool, type ToolId } from './EditorRail';
 import { HotspotsTool } from './panels/HotspotsTool';
@@ -27,7 +27,7 @@ import { BlurModal } from './BlurModal';
 import { AssistantPanel } from '../../components/ai/AssistantPanel';
 import { SuggestionsPanel } from '../../components/ai/SuggestionsPanel';
 import { TranslateDialog } from '../../components/ai/TranslateDialog';
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useToast } from '../../components/Toast';
 import { activityOf, type EditTable, type PresencePayload } from './presence/presence';
 import { usePresenceCalm, usePresenceChannel } from './presence/usePresence';
@@ -80,7 +80,7 @@ import { DatasetDialog } from './data/DatasetDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
-import { Select } from '@flowdsiml/ui';
+import { BackButton, Select } from '@flowdsiml/ui';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
 const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
@@ -89,6 +89,10 @@ const DistributeDialog = lazy(() =>
 );
 
 type Zoom = 'fit' | '50' | '100';
+
+const CrumbLink = (p: { to: string; className?: string; title?: string; children?: ReactNode }) => (
+  <Link {...p} />
+);
 
 export function EditorPage() {
   const { t } = useTranslation();
@@ -547,6 +551,8 @@ export function EditorPage() {
   const unpublished =
     editor.demo.status !== 'published' ||
     (publishedAt !== null && Date.parse(editor.demo.updated_at) > Date.parse(publishedAt) + 2000);
+  /** Auteur de la démo (ligne sous le titre), quand son nom est connu. */
+  const author = editor.demo.created_by ? (names[editor.demo.created_by] ?? null) : null;
   // L48-E §2 : outils sans objet pour l'étape : visibles, désactivés, avec la raison
   const capOnly = t('editor.rail.why.capture');
   const noStep = step ? undefined : t('editor.rail.why.noStep');
@@ -750,220 +756,258 @@ export function EditorPage() {
         {t('editor.pageTitle', { title: editor.demo.title || t('demos.untitled') })}
       </h1>
       <header className="ed-bar" data-tip-side="bottom">
-        <Link to="/" className="btn btn-ghost btn-sm btn-icon" aria-label={t('editor.backToDemos')}>
-          <ArrowLeft aria-hidden="true" />
-        </Link>
-        <input
-          className="ed-title"
-          aria-label={t('editor.demoTitle')}
-          maxLength={160}
-          disabled={readOnly}
-          value={editor.demo.title}
-          onChange={(e) => editor.updateDemo({ title: e.target.value })}
-        />
-        {/* L48-E §6 : état en texte, sans pastille : « Enregistré · Non publié » */}
-        <span className="ed-state">
-          <span role="status" aria-live="polite">
-            {t(`editor.save_${editor.saveState === 'idle' ? 'saved' : editor.saveState}`)}
-          </span>
-          {unpublished && (
-            <span className="ed-state__unpub">
-              <i aria-hidden="true" />
-              {editor.demo.status === 'published' ? t('editor.unpublishedChanges') : t('editor.notPublished')}
+        {/* Lot 3 : retour « Démos », filet, titre modifiable sur place (crayon), puis auteur, statut et
+            enregistrement sur une ligne de 12 px */}
+        <div className="ed-bar__l">
+          <BackButton to="/" label={t('demos.title')} ariaLabel={t('editor.backToDemos')} as={CrumbLink} />
+          <span className="ed-vsep" aria-hidden="true" />
+          {/* §18.6 : titre et ligne d'état forment un bloc (19 + 15 px, maquette du lot 3) */}
+          <div className="ed-tt" data-gap-exempt="">
+            <label className="ed-tt__h">
+              <input
+                className="ed-title"
+                aria-label={t('editor.demoTitle')}
+                maxLength={160}
+                disabled={readOnly}
+                value={editor.demo.title}
+                /* Le champ suit la longueur du titre : le crayon reste collé au texte */
+                size={Math.max(4, Math.min(48, editor.demo.title.length + 1))}
+                onChange={(e) => editor.updateDemo({ title: e.target.value })}
+              />
+              {!readOnly && <Pencil className="ed-tt__pen" size={16} aria-hidden="true" />}
+            </label>
+            {/* L48-E §6 : état en texte : auteur · statut · « Enregistré » */}
+            <span className="ed-state" data-gap-exempt="">
+              {author && (
+                <>
+                  <span className="ed-state__author">{author}</span>
+                  <span aria-hidden="true">·</span>
+                </>
+              )}
+              <span
+                className={`ed-state__st${editor.demo.status === 'published' && !unpublished ? ' is-pub' : ''}`}
+              >
+                <i aria-hidden="true" />
+                {unpublished
+                  ? editor.demo.status === 'published'
+                    ? t('editor.unpublishedChanges')
+                    : t('editor.notPublished')
+                  : t(`status.${editor.demo.status}`)}
+              </span>
+              <span aria-hidden="true">·</span>
+              <span role="status" aria-live="polite">
+                {t(`editor.save_${editor.saveState === 'idle' ? 'saved' : editor.saveState}`)}
+              </span>
             </span>
-          )}
-        </span>
-        <span className="grow" />
-        {user && (
-          <PresenceStack
-            others={others}
-            names={names}
-            stepIndexOf={stepIndexOf}
-            me={{ id: user.id, name: names[user.id] || user.email || '?' }}
-            myStep={safeIndex}
-            onGo={(i) => {
-              setIndex(i);
-              setSelection({ kind: 'step' });
-            }}
-          />
-        )}
-        {/* L12 : annuler / rétablir (Ctrl Z, Ctrl Maj Z) */}
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm btn-icon"
-          aria-label={t('editor.undo')}
-          title={`${t('editor.undo')} (${isMac ? '⌘' : 'Ctrl'} Z)`}
-          disabled={readOnly || !editor.canUndo}
-          onClick={() => editor.undo()}
-        >
-          <Undo2 aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm btn-icon"
-          aria-label={t('editor.redo')}
-          title={`${t('editor.redo')} (${isMac ? '⌘' : 'Ctrl'} ${t('editor.keys.shift')} Z)`}
-          disabled={readOnly || !editor.canRedo}
-          onClick={() => editor.redo()}
-        >
-          <Redo2 aria-hidden="true" />
-        </button>
-        <div className="segmented" role="radiogroup" aria-label={t('editor.mode')}>
-          {/* EDT-12 : le segmenté passe sur « Aperçu » pendant l'aperçu */}
-          <button
-            type="button"
-            aria-checked={!previewManifest}
-            role="radio"
-            onClick={() => setPreviewManifest(null)}
-          >
-            {t('editor.modeEdit')}
-          </button>
-          <button
-            type="button"
-            aria-checked={!!previewManifest}
-            role="radio"
-            onClick={preview}
-            disabled={!editor.steps.length}
-          >
-            {t('editor.preview')}
-          </button>
+          </div>
         </div>
-        <Menu
-          label={t('editor.more')}
-          items={[
-            // L48-E §6 : Présenter, Diffuser, Exporter, Traduire, Rédiger, Quiz, Rechercher ; puis l'aide
-            {
-              label: t('present.button'),
-              icon: <Presentation />,
-              disabled: !editor.steps.length,
-              onSelect: () => setPresenting(true),
-            },
-            ...(can('demo.edit')
-              ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(true) }]
-              : []),
-            {
-              label: t('export.menu'),
-              icon: <Download />,
-              // L27 : exports hors de l'app interdits par les règles de l'espace
-              disabled: !rules.exports_allowed,
-              hint: rules.exports_allowed ? undefined : t('rules.errExports'),
-              onSelect: () => setExporting(true),
-            },
-            // L30-03 : copie traduite (Assistance IA)
-            ...(can('demo.edit')
-              ? [{ label: t('ai.translate.menu'), icon: <Languages />, onSelect: () => setTranslating(true) }]
-              : []),
-            // L30-02 : « Rédiger les textes » ouvre le menu Assistance IA de la première bulle de l'étape
-            {
-              label: t('editor.aiWriter'),
-              icon: <PenLine />,
-              disabled: !firstBubble,
-              hint: firstBubble ? undefined : t('ai.write.noBubble'),
-              onSelect: () => {
-                if (!firstBubble) return;
-                setSelection({ kind: 'hotspot', id: firstBubble });
-                window.setTimeout(
-                  () =>
-                    document.querySelector<HTMLButtonElement>('.ai-write .menu-trigger, .ai-entry')?.focus(),
-                  50,
-                );
-              },
-            },
-            // L30-04 : suggestions de l'IA (l'ancienne ampoule de l'en-tête)
-            ...(can('demo.edit') && ws
-              ? [
-                  {
-                    label: t('ai.suggest.open_btn'),
-                    icon: <Lightbulb />,
-                    onSelect: () => {
-                      if (panel === 'assistant') setPanelState(null);
-                      setSuggesting(true);
-                    },
-                  },
-                ]
-              : []),
-            {
-              label: t('editor.quiz.open') + (editor.questions.length ? ` (${editor.questions.length})` : ''),
-              icon: <GraduationCap />,
-              onSelect: () => navigate(`/demos/${demoId}/quiz`),
-            },
-            {
-              label: t('editor.find.label'),
-              icon: <Search />,
-              end: <kbd className="menu-kbd">{isMac ? '⌘' : 'Ctrl'} F</kbd>,
-              onSelect: () => setFindOpen(true),
-            },
-            'separator',
-            {
-              label: t('editor.shortcuts'),
-              icon: <Keyboard />,
-              end: <kbd className="menu-kbd">?</kbd>,
-              onSelect: () => setKeysOpen(true),
-            },
-            ...(help
-              ? [
-                  {
-                    label: t('help.open'),
-                    icon: <CircleHelp />,
-                    end: <kbd className="menu-kbd">F1</kbd>,
-                    onSelect: () => help.toggle(),
-                  },
-                ]
-              : []),
-            {
-              label: t('editor.versions'),
-              icon: <Clock />,
-              disabled: true,
-              end: <span className="menu-soon-text">{t('shell.soon')}</span>,
-              onSelect: () => undefined,
-            },
-            ...(can('demo.edit')
-              ? ([
-                  'separator',
-                  {
-                    label: t('editor.duplicateDemo'),
-                    icon: <Copy />,
-                    onSelect: () =>
-                      void supabase.rpc('duplicate_demo', { p_demo: demoId }).then(({ data }) => {
-                        const id =
-                          typeof data === 'string' ? data : (data as unknown as { id?: string } | null)?.id;
-                        navigate(id ? `/demos/${id}/edit` : '/');
-                      }),
-                  },
-                  {
-                    label: t('templates.save.menu'),
-                    icon: <LayoutTemplate />,
-                    onSelect: () => setSavingTpl(true),
-                  },
-                ] as const)
-              : []),
-          ]}
-        />
-        <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/share`}>
-          <Share2 aria-hidden="true" />
-          {t('editor.share')}
-        </Link>
-        {can('demo.publish') && (
-          <span className="tc-cta-grad ed-publish">
-            <PublishButton
-              editor={editor}
-              republishLabel={t('publish.publish')}
-              onReviewStep={(i) => {
+        {/* Lot 3 : onglets segmentés au centre. Édition et Aperçu basculent sur place ; Analytics et Leads
+            ouvrent les pages de la démo */}
+        <div className="ed-tabs">
+          <div className="ed-tabs__modes" role="radiogroup" aria-label={t('editor.mode')}>
+            {/* EDT-12 : le segmenté passe sur « Aperçu » pendant l'aperçu */}
+            <button
+              type="button"
+              aria-checked={!previewManifest}
+              role="radio"
+              onClick={() => setPreviewManifest(null)}
+            >
+              {t('editor.modeEdit')}
+            </button>
+            <button
+              type="button"
+              aria-checked={!!previewManifest}
+              role="radio"
+              onClick={preview}
+              disabled={!editor.steps.length}
+            >
+              {t('editor.preview')}
+            </button>
+          </div>
+          <Link to={`/demos/${demoId}/analytics`}>{t('nav.analytics')}</Link>
+          <Link to={`/demos/${demoId}/analytics?indicateur=leads`}>{t('kpi.leads')}</Link>
+        </div>
+        <div className="ed-bar__r">
+          {user && (
+            <PresenceStack
+              others={others}
+              names={names}
+              stepIndexOf={stepIndexOf}
+              me={{ id: user.id, name: names[user.id] || user.email || '?' }}
+              myStep={safeIndex}
+              onGo={(i) => {
                 setIndex(i);
                 setSelection({ kind: 'step' });
-                setPanel('step');
               }}
-              onRename={() =>
-                requestAnimationFrame(() => {
-                  const el = document.querySelector<HTMLInputElement>('.ed-title');
-                  el?.focus();
-                  el?.select();
-                })
-              }
-              onPlan={sandbox ? () => setPlanView(true) : undefined}
             />
-          </span>
-        )}
+          )}
+          {/* L12 : annuler / rétablir (Ctrl Z, Ctrl Maj Z) */}
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-icon"
+            aria-label={t('editor.undo')}
+            title={`${t('editor.undo')} (${isMac ? '⌘' : 'Ctrl'} Z)`}
+            disabled={readOnly || !editor.canUndo}
+            onClick={() => editor.undo()}
+          >
+            <Undo2 aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-icon"
+            aria-label={t('editor.redo')}
+            title={`${t('editor.redo')} (${isMac ? '⌘' : 'Ctrl'} ${t('editor.keys.shift')} Z)`}
+            disabled={readOnly || !editor.canRedo}
+            onClick={() => editor.redo()}
+          >
+            <Redo2 aria-hidden="true" />
+          </button>
+          <Menu
+            label={t('editor.more')}
+            items={[
+              // L48-E §6 : Présenter, Diffuser, Exporter, Traduire, Rédiger, Quiz, Rechercher ; puis l'aide
+              {
+                label: t('present.button'),
+                icon: <Presentation />,
+                disabled: !editor.steps.length,
+                onSelect: () => setPresenting(true),
+              },
+              ...(can('demo.edit')
+                ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(true) }]
+                : []),
+              {
+                label: t('export.menu'),
+                icon: <Download />,
+                // L27 : exports hors de l'app interdits par les règles de l'espace
+                disabled: !rules.exports_allowed,
+                hint: rules.exports_allowed ? undefined : t('rules.errExports'),
+                onSelect: () => setExporting(true),
+              },
+              // L30-03 : copie traduite (Assistance IA)
+              ...(can('demo.edit')
+                ? [
+                    {
+                      label: t('ai.translate.menu'),
+                      icon: <Languages />,
+                      onSelect: () => setTranslating(true),
+                    },
+                  ]
+                : []),
+              // L30-02 : « Rédiger les textes » ouvre le menu Assistance IA de la première bulle de l'étape
+              {
+                label: t('editor.aiWriter'),
+                icon: <PenLine />,
+                disabled: !firstBubble,
+                hint: firstBubble ? undefined : t('ai.write.noBubble'),
+                onSelect: () => {
+                  if (!firstBubble) return;
+                  setSelection({ kind: 'hotspot', id: firstBubble });
+                  window.setTimeout(
+                    () =>
+                      document
+                        .querySelector<HTMLButtonElement>('.ai-write .menu-trigger, .ai-entry')
+                        ?.focus(),
+                    50,
+                  );
+                },
+              },
+              // L30-04 : suggestions de l'IA (l'ancienne ampoule de l'en-tête)
+              ...(can('demo.edit') && ws
+                ? [
+                    {
+                      label: t('ai.suggest.open_btn'),
+                      icon: <Lightbulb />,
+                      onSelect: () => {
+                        if (panel === 'assistant') setPanelState(null);
+                        setSuggesting(true);
+                      },
+                    },
+                  ]
+                : []),
+              {
+                label:
+                  t('editor.quiz.open') + (editor.questions.length ? ` (${editor.questions.length})` : ''),
+                icon: <GraduationCap />,
+                onSelect: () => navigate(`/demos/${demoId}/quiz`),
+              },
+              {
+                label: t('editor.find.label'),
+                icon: <Search />,
+                end: <kbd className="menu-kbd">{isMac ? '⌘' : 'Ctrl'} F</kbd>,
+                onSelect: () => setFindOpen(true),
+              },
+              'separator',
+              {
+                label: t('editor.shortcuts'),
+                icon: <Keyboard />,
+                end: <kbd className="menu-kbd">?</kbd>,
+                onSelect: () => setKeysOpen(true),
+              },
+              ...(help
+                ? [
+                    {
+                      label: t('help.open'),
+                      icon: <CircleHelp />,
+                      end: <kbd className="menu-kbd">F1</kbd>,
+                      onSelect: () => help.toggle(),
+                    },
+                  ]
+                : []),
+              {
+                label: t('editor.versions'),
+                icon: <Clock />,
+                disabled: true,
+                end: <span className="menu-soon-text">{t('shell.soon')}</span>,
+                onSelect: () => undefined,
+              },
+              ...(can('demo.edit')
+                ? ([
+                    'separator',
+                    {
+                      label: t('editor.duplicateDemo'),
+                      icon: <Copy />,
+                      onSelect: () =>
+                        void supabase.rpc('duplicate_demo', { p_demo: demoId }).then(({ data }) => {
+                          const id =
+                            typeof data === 'string' ? data : (data as unknown as { id?: string } | null)?.id;
+                          navigate(id ? `/demos/${id}/edit` : '/');
+                        }),
+                    },
+                    {
+                      label: t('templates.save.menu'),
+                      icon: <LayoutTemplate />,
+                      onSelect: () => setSavingTpl(true),
+                    },
+                  ] as const)
+                : []),
+            ]}
+          />
+          <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/share`}>
+            <Share2 aria-hidden="true" />
+            {t('editor.share')}
+          </Link>
+          {can('demo.publish') && (
+            <span className="tc-cta-grad ed-publish">
+              <PublishButton
+                editor={editor}
+                republishLabel={t('publish.publish')}
+                onReviewStep={(i) => {
+                  setIndex(i);
+                  setSelection({ kind: 'step' });
+                  setPanel('step');
+                }}
+                onRename={() =>
+                  requestAnimationFrame(() => {
+                    const el = document.querySelector<HTMLInputElement>('.ed-title');
+                    el?.focus();
+                    el?.select();
+                  })
+                }
+                onPlan={sandbox ? () => setPlanView(true) : undefined}
+              />
+            </span>
+          )}
+        </div>
       </header>
       {editor.lastError != null && (
         <div className="ed-error">
