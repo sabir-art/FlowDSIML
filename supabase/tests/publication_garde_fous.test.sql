@@ -3,7 +3,7 @@
 -- l'insertion et à la modification. Données fictives.
 begin;
 set search_path = public, extensions;
-select plan(5);
+select plan(13);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000091a1', 'admin-garde@example.com'),
@@ -55,6 +55,41 @@ select is((select status::text from public.demos where id = '00000000-0000-0000-
   'la démo créée est un brouillon');
 select lives_ok($$ select public.duplicate_demo('00000000-0000-0000-0000-0000000091d2') $$,
   'dupliquer une démo fonctionne toujours');
+
+-- ===== 2. finalize_publication =====
+select throws_ok($$ select public.finalize_publication('00000000-0000-0000-0000-0000000091e2') $$,
+  'P0001', 'VERSION_OUTDATED', 'une ancienne version ne peut pas être remise en ligne');
+select throws_ok($$ select public.finalize_publication('00000000-0000-0000-0000-0000000091e4') $$,
+  null, 'DEMO_NOT_FOUND', 'démo supprimée : refusée');
+select lives_ok($$ select public.finalize_publication('00000000-0000-0000-0000-0000000091e3') $$,
+  'dernière version, règle par défaut : une éditrice met en ligne');
+select is((select status::text || ':' || current_version_id from public.demos where id = '00000000-0000-0000-0000-0000000091d2'),
+  'published:00000000-0000-0000-0000-0000000091e3', 'la démo est publiée sur sa dernière version');
+
+-- Règle « seuls les administrateurs publient », puis dépublication par l'admin
+select pg_temp.login('00000000-0000-0000-0000-0000000091a1');
+select public.set_share_rules((select ws from ctx), array['link', 'password'], null, 'admin', true);
+select public.unpublish_demo('00000000-0000-0000-0000-0000000091d2');
+select pg_temp.login('00000000-0000-0000-0000-0000000091a2');
+select throws_ok($$ select public.finalize_publication('00000000-0000-0000-0000-0000000091e3') $$,
+  '42501', 'RULE_PUBLISH', 'règle admin : une éditrice ne remet pas en ligne une démo dépubliée');
+select is((select status::text from public.demos where id = '00000000-0000-0000-0000-0000000091d2'), 'draft',
+  'la démo reste dépubliée');
+select pg_temp.login('00000000-0000-0000-0000-0000000091a1');
+select lives_ok($$ select public.finalize_publication('00000000-0000-0000-0000-0000000091e3') $$,
+  'règle admin : l''admin met en ligne');
+select public.set_share_rules((select ws from ctx), array['link', 'password'], null, 'editor', true);
+
+-- Limite du plan : 3 démos publiées en Free
+reset role;
+update public.workspaces set plan_code = 'free' where id = (select ws from ctx);
+insert into public.demos (workspace_id, title, status) values
+  ((select ws from ctx), 'Publiée 2', 'published'), ((select ws from ctx), 'Publiée 3', 'published');
+select pg_temp.login('00000000-0000-0000-0000-0000000091a2');
+select throws_ok($$ select public.finalize_publication('00000000-0000-0000-0000-0000000091e1') $$,
+  'P0001', 'PLAN_LIMIT:published_demos', 'limite du plan atteinte : refusée');
+reset role;
+update public.workspaces set plan_code = 'enterprise' where id = (select ws from ctx);
 
 select * from finish();
 rollback;
