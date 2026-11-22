@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'rea
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CircleAlert, ArrowDown, ArrowUp, Plus, Tag as TagIcon } from 'lucide-react';
-import { Empty } from '@flowdsiml/ui';
+import { Button } from '@flowdsiml/ui';
 import { SettingsShell } from '../SettingsShell';
 import { supabase } from '../../../lib/supabase';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -113,9 +113,9 @@ export function TagsSettings() {
   };
 
   const newButton = (
-    <button
-      type="button"
-      className="btn btn-primary btn-sm"
+    <Button
+      variant="primary"
+      icon={<Plus size={16} />}
       aria-disabled={full || undefined}
       aria-describedby={full ? limitId : undefined}
       title={full ? t('tags.wsLimit', { n: TAG_LIMIT }) : undefined}
@@ -125,20 +125,21 @@ export function TagsSettings() {
         setCreating(true);
       }}
     >
-      <Plus aria-hidden="true" />
       {t('tags.new')}
-    </button>
+    </Button>
   );
 
   return (
-    <SettingsShell>
-      <section className="tgs-page" aria-labelledby="st-title">
-        <div className="tgs-head">
-          <p className="muted">{t('tags.pageSub')}</p>
-          {editable && loaded && store.tags.length > 0 && (
-            <div className="tgs-acts">
+    <SettingsShell legacy={false} actions={editable && loaded ? newButton : undefined}>
+      <section className="stg-sec tgs-page" aria-labelledby="tgs-title">
+        <div className="stg-sec__head">
+          <div>
+            <h2 id="tgs-title">{t('settings.tags')}</h2>
+            <p>{t('tags.pageSub')}</p>
+          </div>
+          {loaded && store.tags.length > 0 && (
+            <div className="stg-sec__acts">
               <span className="tgs-quota">{t('tags.quota', { n: store.tags.length, max: TAG_LIMIT })}</span>
-              {newButton}
               {full && (
                 <span id={limitId} className="sr-only">
                   {t('tags.wsLimit', { n: TAG_LIMIT })}
@@ -149,24 +150,26 @@ export function TagsSettings() {
         </div>
         {!editable && <p className="tgs-ro">{t('tags.readOnly')}</p>}
         {store.error && (
-          <p className="error-msg" role="alert">
-            <CircleAlert aria-hidden="true" />
+          <p className="stg-error tgs-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
             {store.error}
           </p>
         )}
 
         {loaded && store.tags.length === 0 && !creating ? (
-          <Empty
-            variant="compact"
-            icon={<TagIcon />}
-            title={t('tags.emptyTitle')}
-            body={t('tags.emptyBody')}
-            action={editable ? newButton : undefined}
-          />
+          <div className="stg-empty">
+            <span className="stg-empty__tile" aria-hidden="true">
+              <TagIcon size={20} />
+            </span>
+            <h3>{t('tags.emptyTitle')}</h3>
+            <p>{t('tags.emptyBody')}</p>
+            {editable && <div className="stg-empty__acts">{newButton}</div>}
+          </div>
         ) : (
           loaded && (
             <div className="tgs-card" role="table" aria-label={t('tags.tableLabel')}>
-              <div className="tgs-row tgs-row--head" role="row">
+              {/* §18.6 : lignes à filets de 56 px, l'écart est porté par la hauteur des lignes */}
+              <div className="tgs-row tgs-row--head" role="row" data-gap-exempt="">
                 {header('name', t('tags.colName'))}
                 {header('demos', t('tags.colDemos'))}
                 <span role="columnheader">
@@ -338,7 +341,8 @@ function CreateRow({
     >
       <span role="cell" className="tgs-edit">
         <input
-          className="input input-sm"
+          className="fd-input"
+          autoComplete="off"
           aria-label={t('tags.name')}
           maxLength={NAME_MAX}
           autoFocus
@@ -348,9 +352,9 @@ function CreateRow({
           onChange={(e) => setName(e.target.value)}
         />
         <TagColorPicker value={color} onChange={setColor} />
-        <button type="submit" className="btn btn-primary btn-sm" disabled={!name.trim() || !!dup}>
+        <Button type="submit" variant="primary" disabled={!name.trim() || !!dup}>
           {t('tags.createAction')}
-        </button>
+        </Button>
       </span>
       {dup && (
         <p id={errId} className="tgs-err" role="alert">
@@ -393,7 +397,8 @@ function RenameField({
       <span className="tgs-edit">
         <input
           ref={ref}
-          className="input input-sm"
+          className="fd-input"
+          autoComplete="off"
           aria-label={t('tags.rename', { name: tag.name })}
           maxLength={NAME_MAX}
           value={value}

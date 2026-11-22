@@ -34,6 +34,8 @@ const REFAITES = [
   'security',
   'brand',
   'brand/page',
+  'glossary',
+  'tags',
 ];
 
 const ok = (c, l) => {
