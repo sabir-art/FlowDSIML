@@ -668,3 +668,17 @@ a.int-row--link:focus-visible {
     margin-left: 30px;
   }
 }
+/* 390 px : l'adresse tronquée laisse la place à l'état et au menu, sans défilement horizontal (§18.7) */
+@media (max-width: 767px) {
+  .wh-table .stg-table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  .wh-table .stg-table th:last-child,
+  .wh-table .stg-table td.stg-table__act {
+    width: 48px;
+  }
+  .wh-table .wh-url {
+    max-width: 100%;
+  }
+}

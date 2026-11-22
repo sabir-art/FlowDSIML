@@ -119,8 +119,8 @@ export function WebhooksPage() {
           </div>
         ) : (
           <div className="wh-table">
-            <table className="stg-table">
-              <caption className="sr-only">{t('integrations.tableCaption')}</caption>
+            {/* Nom accessible par aria-label : une caption sr-only élargissait la zone défilante à 390 px */}
+            <table className="stg-table" aria-label={t('integrations.tableCaption')}>
               <thead>
                 <tr>
                   <th scope="col">{t('integrations.colUrl')}</th>
