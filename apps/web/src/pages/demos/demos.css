@@ -1165,11 +1165,8 @@ button.nd-src:focus-visible {
 .demos-wrap.stack {
   gap: 24px;
 }
-/* PAGE-01 : la barre de filtres est le premier bloc, à 120 px du haut (maquettes du lot 2 du 22/11),
+/* PAGE-01 (COMP-01 §16) : la barre de filtres est le premier bloc, à 32 px sous le PageHeader (y 88),
    partout : toutes les démos, dossier ouvert, Mes démos, Archivées */
-.demos-wrap > .demos-section {
-  margin-top: 32px;
-}
 /* L27-09 : accès au dossier */
 .fa-body {
   display: grid;
