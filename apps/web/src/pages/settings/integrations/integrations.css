@@ -48,6 +48,8 @@
   align-items: center;
   justify-content: center;
   min-width: 40px;
+  /* « .st » est aussi le cadre des Paramètres (hauteur de fenêtre) : on la neutralise ici */
+  min-height: 0;
   height: 22px;
   padding: 0 6px;
   border-radius: 6px;
@@ -342,4 +344,103 @@ a.int-row--link:focus-visible {
   .fd-page-header__actions > .int-wh-link {
     display: none;
   }
+}
+
+/* Lot 1 de la refonte : page Webhooks au gabarit (tableau « stg-table », modales MODAL-01) */
+.wh-table {
+  overflow-x: auto;
+}
+.wh-table .wh-url {
+  display: block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 13px var(--fd-font-mono);
+  color: var(--fd-color-text);
+}
+.wh-table td {
+  white-space: nowrap;
+}
+.wh-table .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+.wh-when {
+  font-size: 13px;
+}
+.wh-fail {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+/* Événement : pastille grise en chasse fixe */
+.wh-evp {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+  font: 500 12px var(--fd-font-mono);
+  white-space: nowrap;
+}
+.wh-events {
+  padding: 0;
+}
+.wh-events > legend {
+  margin-bottom: 8px;
+  padding: 0;
+}
+.wh-events .ev-list {
+  gap: 8px 16px;
+}
+.wh-events .stg-opt small {
+  display: block;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.wh-events .stg-error {
+  margin: 8px 0 0;
+}
+.wh-warn {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  font-size: 13px;
+}
+.wh-warn > svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--fd-color-warning);
+}
+.wh-format {
+  margin: 0;
+}
+.wh-secret {
+  display: grid;
+  gap: 16px;
+}
+.wh-secret > p {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+}
+.wh-secret .secret {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+}
+.wh-secret .secret code {
+  flex: 1;
+  min-width: 0;
+  font: 500 13px var(--fd-font-mono);
+  color: var(--fd-color-text);
+  word-break: break-all;
 }

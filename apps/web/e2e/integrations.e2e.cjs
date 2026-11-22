@@ -55,16 +55,16 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   // L23-02 : vide, onglet « Intégrations » pour un propriétaire
   // L48-F §2 : la liste des webhooks a sa page
   await page.goto(`${BASE}/#/settings/integrations/webhooks`);
-  await page.waitForSelector('.l23 .fd-empty');
+  await page.waitForSelector('.l23 .stg-empty');
   ok(
     (await page.locator('.st-nav').getByRole('link', { name: 'Intégrations' }).count()) === 1,
     'L23 : onglet Intégrations (propriétaire)',
   );
-  ok(/Aucun webhook/.test(await page.textContent('.l23 .fd-empty')), 'L23-02 : état vide');
+  ok(/Aucun webhook/.test(await page.textContent('.l23 .stg-empty')), 'L23-02 : état vide');
   await shot('02-vide');
 
   // L23-03 : créer (erreur d'adresse, événements, rappel RGPD)
-  await page.locator('.l23 .fd-empty').getByRole('button', { name: 'Ajouter un webhook' }).click();
+  await page.locator('.l23 .stg-empty').getByRole('button', { name: 'Ajouter un webhook' }).click();
   const dlg = page.getByRole('dialog', { name: 'Ajouter un webhook' });
   await dlg.waitFor();
   const url = dlg.getByLabel('Adresse de réception');

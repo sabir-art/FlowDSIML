@@ -18,6 +18,9 @@ export function Modal({
   footer,
   closeLabel,
   className = '',
+  dismissible = true,
+  role,
+  describedBy,
   children,
 }: {
   open: boolean;
@@ -34,6 +37,15 @@ export function Modal({
   /** Nom accessible du bouton Fermer (« Fermer »). */
   closeLabel: string;
   className?: string;
+  /**
+   * `false` : ni bouton Fermer, ni Échap, ni clic sur le voile (ex. secret affiché une seule fois) ;
+   * seule une action du pied ferme la modale.
+   */
+  dismissible?: boolean;
+  /** `alertdialog` pour un message qui exige une réponse. */
+  role?: 'alertdialog';
+  /** Id du texte qui décrit la modale (aria-describedby). */
+  describedBy?: string;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -54,11 +66,16 @@ export function Modal({
     <dialog
       ref={ref}
       className={`fd-modal fd-modal--${size}${tone === 'danger' ? ' fd-modal--danger' : ''} ${className}`.trim()}
+      role={role}
       aria-labelledby={`${id}-t`}
+      aria-describedby={describedBy}
       onClose={onClose}
+      onCancel={(e) => {
+        if (!dismissible) e.preventDefault();
+      }}
       onClick={(e) => {
         // Clic sur le voile (la cible est le dialog lui-même) : ferme
-        if (e.target === ref.current) ref.current?.close();
+        if (dismissible && e.target === ref.current) ref.current?.close();
       }}
     >
       {open && (
@@ -68,14 +85,16 @@ export function Modal({
               {icon}
             </span>
             <h2 id={`${id}-t`}>{title}</h2>
-            <button
-              type="button"
-              className="fd-modal__close"
-              aria-label={closeLabel}
-              onClick={() => ref.current?.close()}
-            >
-              <X size={16} aria-hidden="true" />
-            </button>
+            {dismissible && (
+              <button
+                type="button"
+                className="fd-modal__close"
+                aria-label={closeLabel}
+                onClick={() => ref.current?.close()}
+              >
+                <X size={16} aria-hidden="true" />
+              </button>
+            )}
           </div>
           <div className="fd-modal__body">{children}</div>
           {footer ? <div className="fd-modal__foot">{footer}</div> : null}

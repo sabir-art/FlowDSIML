@@ -38,6 +38,7 @@ const REFAITES = [
   'tags',
   'ai',
   'integrations',
+  'integrations/webhooks',
 ];
 
 const ok = (c, l) => {
