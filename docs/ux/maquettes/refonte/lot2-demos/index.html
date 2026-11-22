@@ -10,6 +10,28 @@
 <li>Carte : vignette avec le type, titre et menu ⋯, statut (point et libellé), méta, étiquettes. Le menu ⋯ suit COMP-01 §8.</li>
 <li>Mobile : barre de l'app avec la bascule des dossiers (tiroir), PageHeader avec « Nouvelle », filtres regroupés dans « Filtres », cartes sur une colonne, modale en feuille du bas.</li>
 </ul>
+<h2>Réponses du 22/11 aux points a, b, c du dev</h2>
+<ul>
+<li><b>a. Colonnes Dossier et Complétion</b> : validé. Elles sont masquées quand le tableau fait moins de 960 px (requête de conteneur), et non sous 1 280 px de fenêtre.</li>
+<li><b>b. Carte</b> : validé. Ligne du titre de 28 px, 8 px dessous ; les positions restent celles de la maquette.</li>
+<li><b>c. Barre de liste à 390 px</b> : validé. Statut segmenté sur toute la largeur, puis Filtres, tri, grille / liste sur la 2e ligne. Les maquettes mobiles (grille, liste, dossier, menu) sont refaites sur ce modèle.</li>
+<li><b>Bascule « Dossiers » dans la barre mobile</b> (tiroir sous 1 024 px) : oui, à faire comme prévu.</li>
+<li><b>Étape 2 de « Nouvelle démo » (source)</b> : garde le gabarit MODAL-01 de 560 px. Je fais la maquette ; elle arrive dans ce lot.</li>
+<li><b>État vide</b> : on garde l’état de l’app, aux textes réels : prise en main repliée, « Toutes les démos », carte « Créez votre première démo » avec « Nouvelle démo » et « Voir un exemple · Bientôt ». Ma maquette proposait « Partir d’un modèle », qui n’existe pas. Elle est refaite sur l’app.</li>
+</ul>
+<h2>Recette du 22/11 sur dev-mvp dceb309 : à reprendre</h2>
+<p>Six écrans, en clair et en sombre, à 1440 et 390 px. Aucune erreur JS, aucun défilement horizontal. La modale « Nouvelle démo » mesure 560 × 516,5 px, conforme. Les écarts dus aux données de test (2 démos au lieu de 4, vraies vignettes) ne sont pas comptés.</p>
+<ul>
+<li><b>D1, colonne Dossiers</b> : 6 px entre le titre de groupe « Dossiers de l’espace » et la première ligne ; l’app en met 8 (« Formation accueil » à y 190 au lieu de 187, à 2 dossiers près).</li>
+<li><b>D2, dossier ouvert</b> : le titre « n démos » commence à y 120, comme le haut du contenu des autres vues. L’app le place à y 96, soit 24 px trop haut.</li>
+<li><b>D3, prise en main</b> : « Masquer la prise en main » est un bouton ghost de taille sm, avec 12 px de marge intérieure ; l’app en met 8 (193 px de large au lieu de 201).</li>
+<li><b>D4, vue liste à 390 px</b> : le nom de la démo ne se coupe jamais au milieu d’un mot (« Onboardin / g »). Il passe à la ligne entre deux mots, ou se tronque avec « … ». La date reste sur une ligne (<code>white-space: nowrap</code>).</li>
+<li><b>D5, « Nouvelle démo » à 390 px</b> : c’est une feuille du bas (MODAL-01), haute selon son contenu (556 px), avec des coins supérieurs de 16 px, le fond de la page visible au-dessus et le pied collé en bas. L’app ouvre une modale plein écran.</li>
+<li><b>Dossier ouvert, colonne</b> : la ligne active garde son compteur ; le ⋯ du dossier n’apparaît qu’au survol et au focus de la ligne. Le PageHeader porte déjà le ⋯.</li>
+<li><b>Menu ⋯ d’une carte</b> : les actions réelles de l’app (Ouvrir dans l’éditeur, Présenter, Partager, Diffuser, Analytics, Exporter, Copier le lien, Dupliquer, Étiquettes, Déplacer vers…, Archiver · Bientôt, Supprimer) font foi.</li>
+</ul>
+<p><b>Conformes</b> : PageHeader, indicateurs, prise en main (hors D3), barre de liste, cartes, grille, vue liste à 1440, modale à 1440, état vide.</p>
+<p><b>Lot 1</b> : les deux derniers détails du bandeau de pause (0d5be3f) sont conformes ; le texte est à x 65 sur 78 px, avec l’icône Play.</p>
 <h2>Décisions du 22/11 (10 questions du dev) : elles font foi</h2>
 <ul>
 <li><b>1. Indicateurs</b> : on garde le libellé de l’app, « vs 30 j précédents » (L47), en 12 px, <code>text-muted</code>, sur deux lignes si besoin. La maquette sera alignée.</li>
