@@ -616,6 +616,10 @@ button.nd-src:focus-visible {
   font: 600 14px / 21px var(--fd-font-sans);
   color: var(--fd-color-text);
 }
+/* Raison d'une ligne désactivée : sur sa ligne, 4 px sous l'aide (recette UX, E3) */
+.nd-src__why {
+  margin-top: 4px;
+}
 .nd-src > .nd-src__go {
   flex: none;
   width: 16px;

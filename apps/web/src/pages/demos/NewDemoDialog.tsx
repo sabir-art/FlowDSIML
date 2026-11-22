@@ -333,7 +333,8 @@ export function NewDemoDialog({
                       </span>
                     )}
                   </span>
-                  {!aiLink && <ChevronRight className="nd-src__go" aria-hidden="true" />}
+                  {/* Ligne désactivée : pas de chevron, comme les lignes « Bientôt » */}
+                  {!aiDisabled && <ChevronRight className="nd-src__go" aria-hidden="true" />}
                 </button>
                 {aiLink && (
                   <Link className="fd-btn fd-btn--ghost fd-btn--sm nd-ai__link" to="/settings/ai">

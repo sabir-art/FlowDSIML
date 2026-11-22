@@ -150,9 +150,9 @@ function data() {
     'Captures : images et modèle',
   );
   ok(
-    // Images et modèle ont un chevron ; la ligne de l'IA aussi, sauf coupée (« Ouvrir le réglage » à sa place)
+    // Images et modèle ont un chevron ; la ligne de l'IA aussi, sauf désactivée (comme une ligne « Bientôt »)
     (await nd.locator('.nd-sources .nd-src__go').count()) +
-      (await nd.locator('.nd-sources .nd-ai__link').count()) ===
+      (await nd.locator('.nd-sources .nd-ai .nd-src[aria-disabled="true"]').count()) ===
       3 && (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
     'écart 2 : sources en liste avec chevron, Retour et Annuler',
   );
