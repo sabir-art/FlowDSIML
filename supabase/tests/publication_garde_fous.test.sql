@@ -3,7 +3,7 @@
 -- l'insertion et à la modification. Données fictives.
 begin;
 set search_path = public, extensions;
-select plan(28);
+select plan(30);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000091a1', 'admin-garde@example.com'),
@@ -143,6 +143,18 @@ select is(public.demo_visible_to('00000000-0000-0000-0000-0000000091d1', '000000
   'éditeur exclu : la démo du dossier restreint ne lui est pas visible');
 select is(public.demo_visible_to('00000000-0000-0000-0000-0000000091d1', '00000000-0000-0000-0000-0000000091a2'), true,
   'éditrice autorisée : la démo lui est visible');
+reset role;
+
+-- ===== 5. Commentaires : résoudre suit le filtre de dossier =====
+insert into public.step_comments (id, workspace_id, demo_id, step_id, author_id, body) values
+  ('00000000-0000-0000-0000-0000000091c1', (select ws from ctx), '00000000-0000-0000-0000-0000000091d1',
+   '00000000-0000-0000-0000-0000000091b1', '00000000-0000-0000-0000-0000000091a2', 'Note fictive');
+select pg_temp.login('00000000-0000-0000-0000-0000000091a3');
+select throws_ok($$ select public.set_comment_resolved('00000000-0000-0000-0000-0000000091c1', true) $$,
+  null, 'COMMENT_NOT_FOUND', 'éditeur exclu : ne résout pas un commentaire du dossier');
+select pg_temp.login('00000000-0000-0000-0000-0000000091a2');
+select lives_ok($$ select public.set_comment_resolved('00000000-0000-0000-0000-0000000091c1', true) $$,
+  'éditrice autorisée : résout le commentaire');
 reset role;
 
 select * from finish();
