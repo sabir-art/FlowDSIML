@@ -140,6 +140,29 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await count(n0 + 2);
   ok((await titles())[1] === before[0], 'toast « Annuler » : l’étape revient à sa place');
 
+  // ===== Alt + flèches : déplacement annoncé =====
+  const order0 = await titles();
+  await cards.nth(0).focus();
+  await page.keyboard.press('Alt+ArrowDown');
+  await page.waitForFunction(
+    (first) => document.querySelectorAll('.rail-list .step .meta b')[1]?.textContent === first,
+    order0[0],
+  );
+  await page
+    .locator('[aria-live="assertive"]', { hasText: /Étape déplacée en position 2 sur \d+\./ })
+    .waitFor({ state: 'attached' });
+  ok(true, 'Alt ↓ : étape déplacée en position 2, annoncée');
+  ok(
+    await page.evaluate(() => document.activeElement?.getAttribute('data-step-index') === '1'),
+    'le focus suit l’étape déplacée',
+  );
+  await page.keyboard.press('Alt+ArrowUp');
+  await page.waitForFunction(
+    (first) => document.querySelectorAll('.rail-list .step .meta b')[0]?.textContent === first,
+    order0[0],
+  );
+  ok(true, 'Alt ↑ : l’étape revient en position 1');
+
   // ===== Étape de fin =====
   const last = (await cards.count()) - 1;
   await openMenu(last);

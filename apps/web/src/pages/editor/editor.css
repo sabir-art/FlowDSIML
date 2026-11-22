@@ -3954,3 +3954,23 @@
 .mk .rail-li .step {
   padding-right: 68px;
 }
+/* Au survol et au focus clavier, la poignée (GripVertical, 16 px) remplace le numéro, à sa place */
+.mk .step .grip {
+  left: 9px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  color: var(--fd-color-text-muted);
+}
+.mk .step .grip svg {
+  width: 16px;
+  height: 16px;
+}
+.mk .rail-li:hover .step .grip,
+.mk .step:focus-visible .grip {
+  opacity: 1;
+}
+.mk .rail-li:hover .step .n,
+.mk .step:focus-visible .n {
+  visibility: hidden;
+}

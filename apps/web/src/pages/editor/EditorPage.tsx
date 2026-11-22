@@ -7,7 +7,7 @@ import {
   Copy,
   LayoutTemplate,
   Download,
-  GraduationCap,
+  ListChecks,
   ImagePlus,
   Keyboard,
   PenLine,
@@ -932,7 +932,7 @@ export function EditorPage() {
               {
                 label:
                   t('editor.quiz.open') + (editor.questions.length ? ` (${editor.questions.length})` : ''),
-                icon: <GraduationCap />,
+                icon: <ListChecks />,
                 onSelect: () => navigate(`/demos/${demoId}/quiz`),
               },
               {

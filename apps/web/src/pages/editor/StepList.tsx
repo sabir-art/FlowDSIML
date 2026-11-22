@@ -27,7 +27,7 @@ import {
   Flag,
   CornerDownRight,
   GitBranch,
-  GraduationCap,
+  ListChecks,
   GripVertical,
   ImageOff,
   ImagePlus,
@@ -147,6 +147,16 @@ export function StepList({
     copyStepToClipboard(snapshot(s));
     void removeStep(s, i);
   };
+  /** Monter ou descendre d'un rang (menu et Alt + flèches) : le focus suit, le déplacement est annoncé. */
+  const moveBy = (i: number, d: -1 | 1) => {
+    const to = i + d;
+    if (to < 0 || to >= editor.steps.length) return;
+    void editor.moveStep(i, to).then(() => {
+      onSelect(to);
+      focusStep(to);
+      setAnnounce(t('editor.stepMove.moved', { n: to + 1, total: editor.steps.length }));
+    });
+  };
   const stepMenu = (s: StepRow, i: number): Array<MenuItem | 'separator'> => {
     const end = isEnd(s, i);
     const kbd = (k: string) => <kbd className="menu-kbd">{k}</kbd>;
@@ -193,14 +203,16 @@ export function StepList({
       {
         label: t('editor.moveUp'),
         icon: <ArrowUp />,
+        end: kbd('Alt ↑'),
         disabled: i === 0,
-        onSelect: () => void editor.moveStep(i, i - 1).then(() => onSelect(i - 1)),
+        onSelect: () => moveBy(i, -1),
       },
       {
         label: t('editor.moveDown'),
         icon: <ArrowDown />,
+        end: kbd('Alt ↓'),
         disabled: i === editor.steps.length - 1,
-        onSelect: () => void editor.moveStep(i, i + 1).then(() => onSelect(i + 1)),
+        onSelect: () => moveBy(i, 1),
       },
       {
         label: t('editor.stepMenu.hide'),
@@ -229,7 +241,8 @@ export function StepList({
     const cmd = e.metaKey || e.ctrlKey;
     const k = e.key.toLowerCase();
     const end = isEnd(s, i);
-    if (cmd && k === 'c' && !end) copyStep(s, i);
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) moveBy(i, e.key === 'ArrowUp' ? -1 : 1);
+    else if (cmd && k === 'c' && !end) copyStep(s, i);
     else if (cmd && k === 'v') void pasteAfter(i);
     else if (cmd && k === 'x' && !end) cutStep(s, i);
     else if (cmd && k === 'd' && !end) void duplicateStep(s, i);
@@ -609,7 +622,7 @@ export function StepList({
           className={`rail-quiz${editor.questions.length ? '' : ' rail-quiz--add'}`}
           to={`/demos/${editor.demo.id}/quiz`}
         >
-          {editor.questions.length ? <GraduationCap aria-hidden="true" /> : <Plus aria-hidden="true" />}
+          <ListChecks aria-hidden="true" />
           <span>
             {!editor.questions.length
               ? t('editor.railQuizAdd')

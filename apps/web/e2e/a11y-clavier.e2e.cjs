@@ -190,7 +190,9 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     await ctx.close();
     const e = await app(`/#/demos/${DEMO}/edit`);
     // État réel, pas un délai : le titre de la page suit le chargement de la démo
-    await e.p.waitForFunction(() => / · TutoClick$/.test(document.title)).catch(() => {});
+    await e.p
+      .waitForFunction(() => /Créer|Démo|démo/.test(document.title) && / · TutoClick$/.test(document.title))
+      .catch(() => {});
     ok(
       /Créer|Démo|démo/.test(await e.p.title()) && / · TutoClick$/.test(await e.p.title()),
       `A11Y-01 : titre de l’éditeur avec la démo (${await e.p.title()})`,
