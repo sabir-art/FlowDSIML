@@ -416,6 +416,19 @@ Le bouton de repli, seul au-dessus du logo, créait un grand vide en tête de la
 - Nom du bouton : « Replier la barre latérale » / « Déplier la barre latérale », avec `aria-expanded` (plus d'`aria-pressed`).
 
 
+### 14 bis. Rail replié : le logo en tête, qui devient « Déplier » au survol (retour client du 22/11)
+
+Le client veut que le rail replié garde la marque en tête, comme dans l'outil de référence (Guideflow) : le logo, puis le bouton « Déplier » au survol.
+
+- **Au repos** : en tête du rail, à la place du bouton nu, le **symbole TutoClick** tel quel (carré prune avec la flèche, `symbole-tutoclick.svg`) en **32 × 32 px**, la même taille que la pastille de l'espace dessous. Il est à x 16, y 30, comme le bouton d'aujourd'hui. Il est dessiné dans le bouton, ce n'est pas une image à part.
+- **Au survol et au focus clavier** : le symbole laisse place, au même endroit et à la même taille, au bouton « Déplier » : carré de 32 px, rayon 8, fond prune **#A3195B dans les deux thèmes** (la couleur du symbole, pas le jeton `primary`, trop pâle en sombre), icône panneau de 20 px blanche. Au survol, fond #85164B, et l'infobulle « Déplier la barre latérale » à droite. Au focus clavier : anneau extérieur `0 0 0 2px nav-bg, 0 0 0 4px focus` (COMP-01 §6).
+- **Transition** (MOTION-01) : fondu croisé des opacités en 150 ms `ease-out`, sans mouvement ni changement de taille. Si `prefers-reduced-motion`, la bascule est immédiate.
+- **Un seul bouton** : c'est le même `<button>` dans les trois états, avec `aria-label="Déplier la barre latérale"` et `aria-expanded="false"`. Le symbole est décoratif (`alt=""` ou `aria-hidden`). Au clic : la barre se déplie et s'épingle, comme aujourd'hui.
+- **Survol du rail** (la barre se déplie par-dessus le contenu, §14) : ce bouton reste à x 16, y 30, en état « Déplier », et le logo complet vient à sa droite (x 56). Rien ne bouge sous le curseur.
+- Dessous, rien ne change : le filet (y 92), la pastille de l'espace (y 111), puis la navigation. **La barre dépliée et épinglée ne change pas** : logo complet à gauche, bouton « Replier » à droite.
+- Maquettes : `lot1-parametres/rail-repos`, `rail-survol` et `rail-focus`, à 1440 px, en clair et en sombre.
+- e2e : dans le rail, le bouton en tête a le nom « Déplier la barre latérale » et `aria-expanded="false"` ; au repos, le symbole est visible (opacité 1) ; au survol et au focus, l'icône panneau est visible et le symbole à l'opacité 0 ; position 16, 30, 32 × 32 dans les trois états.
+
 ## 15. COL-01 : seule la barre latérale principale est teintée (retour client du 22/11, révisé)
 
 Le client a corrigé la première décision : « le seul qui aura une couleur différente, c'est la barre du logo ».
