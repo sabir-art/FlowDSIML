@@ -193,6 +193,9 @@ async function keyboard(p) {
       const el = document.activeElement;
       if (!el || el === document.body || el.matches('input, textarea, select, [role="combobox"]'))
         return null;
+      // Poignée du curseur (COMP-01 §6, recette UX du 22/11) : anneau extérieur voulu, la poignée étant
+      // de la couleur du focus ; c'est la seule exception à « aucun contour ajouté »
+      if (el.matches('.fd-slider__thumb, .p-slider__thumb')) return null;
       const cs = getComputedStyle(el);
       let scope = document.body;
       const css = (n) => getComputedStyle(scope).getPropertyValue(n).trim();
