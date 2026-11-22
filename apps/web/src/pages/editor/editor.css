@@ -3822,7 +3822,8 @@
 }
 .mk .rail-foot {
   flex: none;
-  padding: 0 12px 8px;
+  margin-bottom: 8px;
+  padding: 0 12px;
   border-top: 0;
 }
 .mk .rail-foot .menu-trigger {
@@ -4111,10 +4112,15 @@
   border-top: 0;
   border-bottom: 1px solid var(--fd-color-border);
 }
-.mk .ed-tool .sec:first-child,
-.mk .ed-tool .hs-head + .sec {
+.mk .ed-tool .sec:first-child {
   margin-top: -16px;
   padding-top: 16px;
+}
+/* Après l'en-tête d'un hotspot : 8 px, puis la section */
+.mk .ed-tool .hs-head + .sec {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--fd-color-border);
 }
 /* Panneau Étape : sa première section suit une modale fermée, on remonte le panneau lui-même */
 .mk .ed-tool .sp-panel {
@@ -4152,6 +4158,19 @@
 .mk .ed-tool .voice-sec .voice-actions .btn-sm:not(.btn-icon) {
   flex: 0 1 auto;
   min-width: 0;
-  padding-inline: 8px;
+  padding-inline: 6px;
+  gap: 4px;
+  overflow: hidden;
   font-size: 13px;
+}
+/* Panneau de 320 px : l'entrée IA indisponible et son lien passent à la ligne plutôt que de déborder */
+.mk .ed-tool .ai-disabled-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+/* Titre de section des notes : la mention « privé » passe dessous quand la ligne est pleine */
+.mk .ed-tool .notes-sec .sec-title {
+  flex-wrap: wrap;
+  row-gap: var(--fd-space-2);
 }
