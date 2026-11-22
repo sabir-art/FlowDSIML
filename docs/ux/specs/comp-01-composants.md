@@ -76,7 +76,7 @@ Tous les composants vivent dans `packages/ui`. Leur popover est le même pour to
 
 - **Nuancier de la marque** : 8 pastilles de 24 px (prune, framboise, prune-700, les trois couleurs de la DSIML, encre, blanc). La pastille choisie porte un double anneau (2 px `surface`, puis 2 px `text`). C'est un `radiogroup` : flèches pour se déplacer, Espace pour choisir.
 - **Champ hexadécimal** de 180 px, avec un aperçu de 20 px. Saisie validée en direct, et message d'erreur sous le champ.
-- **« Autre couleur… »** ouvre un popover avec un sélecteur maison : une zone de teinte et saturation, une barre de teinte, et la valeur en hexadécimal. Tout se règle à la souris et au clavier, avec les flèches.
+- **Sélecteur libre** : validé le 22/11, il est affiché directement sous les pastilles dans le même popover (pas de bouton « Autre couleur… » intermédiaire). C'est un sélecteur maison : une zone de teinte et saturation, une barre de teinte, et la valeur en hexadécimal. Tout se règle à la souris et au clavier, avec les flèches.
 - **Contraste affiché** sous le champ (« Texte blanc sur cette couleur : 7,4:1 »). Il passe en `danger` sous 4,5:1. On garde la logique actuelle des Styles.
 
 ## 5. Fichier
@@ -95,7 +95,7 @@ Tous les composants vivent dans `packages/ui`. Leur popover est le même pour to
 - **ARIA et clavier** :
   - `role="slider"`, avec `aria-valuemin`, `aria-valuemax`, `aria-valuenow` et un `aria-valuetext` lisible (« 160 % ») ;
   - flèches pour un pas, Page haut et bas pour 10 pas, Début et Fin pour les bornes.
-- Focus : anneau `focus` de 2 px autour de la poignée.
+- Focus : anneau **extérieur** de 2 px en `focus`, séparé de la poignée par 2 px de `surface` (`box-shadow: 0 0 0 2px var(--fd-color-surface), 0 0 0 4px var(--fd-color-focus)`). La couleur `focus` étant la même prune que la bordure de la poignée, changer seulement la bordure ne se voit pas (recette du 22/11 : focus invisible, WCAG 2.4.7).
 
 ## 7. Cases, radios, interrupteurs
 
@@ -133,6 +133,14 @@ Tous les composants vivent dans `packages/ui`. Leur popover est le même pour to
 - Mesures : 40 px, 36 px, rayon, ombre.
 - Contrastes : texte des options à 4,5:1, état sélectionné non porté par la seule couleur (coche, graisse).
 - Défilement horizontal (§18.7) et espacements (§18.6) sur les pages migrées.
+
+### 10.1 Recette du 22/11 (dev-mvp 0f9f638)
+
+- **Date** (Partager > Accès) : conforme. Champ de 40 px, popover de 280 px, semaine du lundi, aujourd'hui cerclé, libellé complet du jour (« mercredi 30 décembre 2026 »), flèches et Page bas, Échap rend le focus au bouton. **À reprendre** : le mois s'écrit en minuscule (« novembre 2026 », pas « Novembre 2026 »).
+- **Heure** : conforme. Champ de 40 px, liste de 48 créneaux de 30 min, options de 36 px.
+- **Curseur** (seuil du quiz) : piste de 4 px, poignée de 20 px, `role="slider"`, `aria-valuetext` « 70 % », flèches, Page haut, Début et Fin conformes. **À reprendre** : le focus ne se voit pas (voir §6).
+- **Couleur** (Thème et couleurs) : conforme. 8 pastilles en `radiogroup`, double anneau sur la pastille choisie, sélecteur libre affiché directement (voir §4), contraste affiché.
+- Aucun contrôle natif visible sur ces pages.
 
 ## 11. FIELD-01 : une seule grille d'états pour tous les champs (décision du client, 21/11)
 
