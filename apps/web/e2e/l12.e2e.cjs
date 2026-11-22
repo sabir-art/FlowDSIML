@@ -80,7 +80,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.keyboard.press('Control+f');
   await page.waitForSelector('.find');
   await page.fill('#find-q', 'rapport');
-  ok(/1 sur 2/.test(await page.textContent('.find .count')), 'L12-04 : compteur « 1 sur n »');
+  ok(/1 sur\s2/.test(await page.textContent('.find .count')), 'L12-04 : compteur « 1 sur n »');
   ok((await page.locator('.rail-hits').count()) === 1, 'L12-04 : pastille orange sur la vignette');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l12-find.png` });
   await page.fill('.find input[aria-label="Remplacer par"]', 'tableau');

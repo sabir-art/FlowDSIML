@@ -95,7 +95,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await enable.click();
   await page.getByText('Assistance IA activée pour l’espace.').waitFor();
   ok(state.ai.enabled === true, 'Activation enregistrée (set_ai_settings)');
-  await page.getByText(/Ce mois-ci\s?: 12 demandes sur 500/).waitFor();
+  await page.getByText(/Ce mois-ci\s?: 12 demandes sur\s500/).waitFor();
   const bar = page.getByRole('progressbar').first();
   ok(
     (await bar.getAttribute('aria-valuenow')) === '12' && (await bar.getAttribute('aria-valuemax')) === '500',
@@ -137,7 +137,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.getByText('Voix de synthèse activée pour l’espace.').waitFor();
   ok(state.ai.features.voice === true, 'L30-10 : voix activée');
   ok(
-    /Voix de synthèse\s?: 0\ss sur 5\smin ce mois-ci/.test(await audio.textContent()),
+    /Voix de synthèse\s?: 0\ss sur\s5\smin ce mois-ci/.test(await audio.textContent()),
     'L30-10 : quota de la voix en secondes',
   );
   await shot('l30-10-reglage-active');

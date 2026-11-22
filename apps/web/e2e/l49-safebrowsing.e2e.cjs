@@ -92,7 +92,7 @@ const links = [
   await xl.waitFor();
   const row = (i) => xl.locator('li').nth(i);
   ok(
-    (await xl.locator('.sec-title').innerText()) === 'Liens externes · 3',
+    (await xl.locator('.sec-title').textContent()).trim() === 'Liens externes · 3',
     'lien signalé listé avec les liens externes',
   );
   const blocked = row(0).locator('.xlinks-blocked');

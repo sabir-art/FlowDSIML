@@ -200,7 +200,8 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   );
   const panel = page.getByRole('complementary', { name: 'Envoi sélectionné' });
   ok(
-    /HTTP 503 · essai 6 sur 6/.test(await deadRow.textContent()) &&
+    // SPLIT-01 : « HTTP 503 », puis « Essai 6 sur 6 » sur une 2e ligne
+    /HTTP 503\s*Essai\s6 sur\s6/.test(await deadRow.textContent()) &&
       /HTTP 503/.test(await panel.textContent()),
     'L23-05 : statut de la ligne et panneau de l’envoi',
   );
@@ -212,7 +213,7 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   const alert = page.locator('.l23 .wh-banner--danger[role="alert"]');
   await alert.waitFor();
   ok(
-    /Le test a échoué : HTTP 404 en 210 ms\.\s*L’adresse ne répond pas/.test(
+    /Le test a échoué : HTTP 404 en 210\sms\.\s*L’adresse ne répond pas/.test(
       (await alert.textContent()).replace(/ /g, ' '),
     ),
     'L23-06 : bandeau avec code et conseil',
@@ -226,10 +227,10 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   state.dispatchResult = null;
 
   // L23-05 (suite) : rejeu immédiat, après la capture du test
-  await panel.getByRole('button', { name: 'Rejouer maintenant' }).click();
+  await panel.getByRole('button', { name: 'Rejouer' }).click();
   await page.waitForSelector('.toast');
   ok(
-    /Envoi rejoué · HTTP 200 en 180 ms/.test(await page.textContent('.toast')),
+    /Envoi rejoué · HTTP 200 en 180\sms/.test(await page.textContent('.toast')),
     'L23-05 : rejeu immédiat avec résultat',
   );
   ok(
@@ -271,8 +272,8 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   );
   await page.locator('.l23-log tbody tr').first().click();
   ok(
-    /essai 6 sur 6$/.test(
-      (await page.locator('.l23-log tbody tr').first().locator('.wh-st').textContent()).trim(),
+    /Essai\s6 sur\s6$/.test(
+      (await page.locator('.l23-log tbody tr').first().locator('.wh-st2').textContent()).trim(),
     ),
     'L23-07 : « essai 6 sur 6 » dans le statut de la ligne',
   );

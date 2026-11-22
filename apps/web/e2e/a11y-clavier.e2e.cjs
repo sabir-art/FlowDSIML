@@ -414,10 +414,10 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
   {
     const { p, ctx } = await player(`/d/${DEMO}`);
     const live = p.locator('[aria-live=polite][aria-atomic=true]').first();
-    ok(/Étape 1 sur \d+/.test(await live.textContent()), 'Lecteur : étape 1 annoncée');
+    ok(/Étape 1 sur\s\d+/.test(await live.textContent()), 'Lecteur : étape 1 annoncée');
     await p.keyboard.press('ArrowRight');
     await p.waitForTimeout(400);
-    ok(/Étape 2 sur \d+/.test(await live.textContent()), 'Lecteur : → passe à l’étape 2, annoncée');
+    ok(/Étape 2 sur\s\d+/.test(await live.textContent()), 'Lecteur : → passe à l’étape 2, annoncée');
     await p.keyboard.press('ArrowLeft');
     await p.waitForTimeout(400);
     ok(/Étape 1 sur/.test(await live.textContent()), 'Lecteur : ← revient à l’étape 1');
@@ -445,7 +445,7 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       'A11Y-05 : h1 (titre de la démo) et main',
     );
     ok(
-      /^Capture de l’écran, étape 1 sur \d+/.test(
+      /^Capture de l’écran, étape 1 sur\s\d+/.test(
         (await p.locator('img.p-img').first().getAttribute('alt')) || '',
       ),
       'A11Y-06 : alternative « Capture de l’écran, étape n sur N : titre »',

@@ -170,7 +170,7 @@ const live = (n) => ({
     'anonymes : « Visiteur anonyme »',
   );
   ok(
-    /^Démo CRM · actualisé toutes les 10 s$/.test(
+    /^Démo CRM · actualisé toutes les 10\ss$/.test(
       (await page.locator('.l19-livehead p').textContent()).replace(/\s+/g, ' ').trim(),
     ),
     'en-tête : démo nommée, sans « · » orphelin',

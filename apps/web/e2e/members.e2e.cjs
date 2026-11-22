@@ -258,7 +258,7 @@ const SHOTS = process.env.SHOTS_DIR;
     const limited = (await seats.count()) === 1;
     ok(
       limited
-        ? /^2 membres en plus sur \d+\.$/.test(await seats.textContent())
+        ? /^2 membres en plus sur\s\d+\.$/.test(await seats.textContent())
         : !/siège/.test(await modal.innerText()),
       `membres ajoutés annoncés sans « sièges » (${limited ? await seats.textContent() : 'sans limite'})`,
     );

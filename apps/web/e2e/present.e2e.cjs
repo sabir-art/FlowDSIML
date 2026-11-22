@@ -97,10 +97,10 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
     (await page.locator('.notes li').first().textContent()) === NOTE,
     'L22-03 : notes en puces côté présentateur',
   );
-  ok(/Étape 1 sur 3/.test(await page.locator('.pr-count').textContent()), 'L22-03 : Étape 1 sur 3');
+  ok(/Étape 1 sur\s3/.test(await page.locator('.pr-count').textContent()), 'L22-03 : Étape 1 sur 3');
   const timer = page.getByRole('timer');
   ok(
-    /Temps écoulé : 0 min \d\d sur 15 min 00/.test(await timer.getAttribute('aria-label')),
+    /Temps écoulé : 0\smin \d\d sur\s15\smin 00/.test(await timer.getAttribute('aria-label')),
     'L22-03 : minuteur étiqueté',
   );
   ok((await timer.getAttribute('aria-live')) === null, 'L22-03 : minuteur jamais annoncé automatiquement');
@@ -160,7 +160,7 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
 
   // Terminer : bilan de fin (L26-12) avec la durée, puis retour à l'éditeur ; l'écran public se ferme
   await page.keyboard.press('Escape');
-  const rep = page.getByRole('dialog', { name: /Présentation terminée · 0 min \d\d/ });
+  const rep = page.getByRole('dialog', { name: /Présentation terminée · 0\smin \d\d/ });
   await rep.waitFor();
   ok(true, 'L22-03 / L26-12 : bilan de fin avec durée');
   await rep.getByRole('button', { name: 'Retour à l’éditeur' }).click();

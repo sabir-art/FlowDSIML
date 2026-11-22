@@ -117,7 +117,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   // Catégorie
   await cats.getByRole('button', { name: /^Réglementaire/ }).click();
   ok((await grid.getByRole('radio').count()) === 1, 'Réglementaire : 1 modèle');
-  ok(/seuil 70 %/.test(sp(await grid.getByRole('radio').first().innerText())), 'carte : seuil 70 %');
+  ok(/seuil 70\s%/.test(sp(await grid.getByRole('radio').first().innerText())), 'carte : seuil 70 %');
   await cats.getByRole('button', { name: /^Modèles de l’espace/ }).click();
   const mine = grid.getByRole('radio', { name: /Procédure DSI/ });
   ok(/Modèle de l’espace · 2 chapitres · 7 étapes/.test(sp(await mine.innerText())), 'modèle de l’espace');
@@ -167,7 +167,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const frame = page.locator('.canvas-tocapture');
   await frame.waitFor();
   ok(/Se connecter/.test(await frame.innerText()), 'cadre : titre de l’étape');
-  ok(/Étape à capturer 1 sur 6/.test(sp(await frame.innerText())), 'cadre : 1 sur 6');
+  ok(/Étape à capturer 1 sur\s6/.test(sp(await frame.innerText())), 'cadre : 1 sur 6');
   ok(
     (await frame.getByRole('button', { name: 'Importer une image' }).count()) === 1,
     'bouton « Importer une image »',

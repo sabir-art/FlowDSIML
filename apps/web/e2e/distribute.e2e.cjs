@@ -207,7 +207,7 @@ function seedDistribute(s, { published = true } = {}) {
       /SCORM 1\.2 · version 3 · réussite : toutes les étapes vues/.test(fileText),
     'Prêt : fichier, version, critère',
   );
-  ok(/\d+ Ko|\d+(,\d)? Mo/.test(fileText), 'Prêt : poids réel');
+  ok(/\d+\sKo|\d+(,\d)? Mo/.test(fileText), 'Prêt : poids réel');
   ok(/Paquet prêt\./.test(await dlg.locator('.alert-success').textContent()), 'Prêt : alerte de succès');
   await shot('03-scorm-pret');
   const [dl] = await Promise.all([

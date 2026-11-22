@@ -133,7 +133,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const area = page.getByLabel('Notes du présentateur');
   await area.fill('Insister : le bouton a changé de place\nMontrer l’étape 6 pour les doublons');
   await page.keyboard.press('ArrowRight');
-  ok(/Étape 2 sur 3/.test(await page.locator('.pr-count').innerText()), 'pendant la saisie : → désactivée');
+  ok(/Étape 2 sur\s3/.test(await page.locator('.pr-count').innerText()), 'pendant la saisie : → désactivée');
   await page.waitForTimeout(1200);
   ok(st('s2').presenter_notes.includes('Montrer l’étape 6'), 'modification enregistrée dans la démo');
   ok(
@@ -161,14 +161,14 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     .getByRole('group', { name: /Terminer la présentation/ })
     .getByRole('button', { name: 'Terminer' })
     .click();
-  const rep = page.getByRole('dialog', { name: /Présentation terminée · \d+ min \d\d/ });
+  const rep = page.getByRole('dialog', { name: /Présentation terminée · \d+\smin \d\d/ });
   await rep.waitFor({ timeout: 5000 });
   ok(true, 'téléphone « Terminer » : bilan de fin');
   await phone.getByText(/La présentation est terminée/).waitFor({ timeout: 5000 });
   ok(true, 'téléphone : fin annoncée');
   const rows = rep.getByRole('table').getByRole('row');
   ok((await rows.count()) === 4, 'bilan : tableau (en-tête et 3 étapes)');
-  ok(/Durée cible : 15 min/.test(sp(await rep.innerText())), 'bilan : durée cible');
+  ok(/Durée cible : 15\smin/.test(sp(await rep.innerText())), 'bilan : durée cible');
   ok(/gardé que pour vous, 30 jours/.test(sp(await rep.innerText())), 'bilan : conservation 30 jours');
   ok(
     /Notes modifiées pendant la présentation : 1 étape/.test(sp(await rep.innerText())),

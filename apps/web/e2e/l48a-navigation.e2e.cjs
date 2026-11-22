@@ -225,7 +225,7 @@ const MB = 1024 * 1024;
     // L48-03 : voix de synthèse et sous-titres, deux lignes distinctes (minutes)
     ok(
       (await page.locator('.us-row', { hasText: 'Voix de synthèse' }).getByRole('meter').count()) === 1 &&
-        /0 sur 5 min/.test(await page.locator('.us-row', { hasText: 'Sous-titres' }).innerText()),
+        /0 sur\s5\smin/.test(await page.locator('.us-row', { hasText: 'Sous-titres' }).innerText()),
       'voix de synthèse et sous-titres : deux jauges en minutes',
     );
     // NAV-02 §11.7.2 : actif = fond nav-active, texte text en 600, aria-current, ni ombre ni bordure ;
@@ -280,12 +280,15 @@ const MB = 1024 * 1024;
     const storage = page.locator('.us-row', { hasText: 'Stockage' });
     ok(
       (await storage.getByRole('meter').getAttribute('aria-valuenow')) === '100' &&
-        (await storage.getByRole('meter').getAttribute('aria-label')) === 'Stockage : 100 % utilisés',
+        (await storage.getByRole('meter').getAttribute('aria-label')) === 'Stockage : 100\u00a0% utilisés',
       'stockage : jauge à 100 %, nom « Stockage : 100 % utilisés »',
     );
     ok(/Limite atteinte/.test(await storage.innerText()), 'stockage : « Limite atteinte » en texte');
     ok(/Ajout de fichiers bloqué/.test(await storage.innerText()), 'stockage : conséquence écrite');
-    ok(/Médiathèque 300 Mo · vidéos 160 Mo · voix 40 Mo/.test(await storage.innerText()), 'détail par type');
+    ok(
+      /Médiathèque 300\sMo · vidéos 160\sMo · voix 40\sMo/.test(await storage.innerText()),
+      'détail par type',
+    );
     const ai = page.locator('.us-row', { hasText: 'Assistance IA' });
     ok(
       (await ai.getByRole('meter').getAttribute('aria-valuenow')) === '2' &&

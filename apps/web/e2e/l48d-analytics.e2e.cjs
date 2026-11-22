@@ -184,7 +184,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     (await p
       .locator('.an-demos__t tbody tr', { hasText: 'Planifier' })
       .locator('.an-demos__guide')
-      .innerText()) === 'Guide : 60 % terminé · 25 % ignoré',
+      .innerText()) === 'Guide : 60\u00a0% terminé · 25\u00a0% ignoré',
     'recette 10 : ligne du guide sous le Sandbox',
   );
   ok((await p.locator('.an-demos__guide').count()) === 1, 'ligne du guide : Sandbox seulement');

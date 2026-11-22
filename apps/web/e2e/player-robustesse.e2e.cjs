@@ -127,7 +127,7 @@ const LONG = manifest(
     down = false;
     await p.getByRole('button', { name: 'Réessayer' }).click();
     await p.locator('.p-img').waitFor();
-    ok(/Étape 1 sur 4/.test(await live(p).textContent()), 'Réseau rétabli + Réessayer : étape 1 affichée');
+    ok(/Étape 1 sur\s4/.test(await live(p).textContent()), 'Réseau rétabli + Réessayer : étape 1 affichée');
     ok(errors.length === 0, `Réseau coupé : aucune erreur JavaScript (${errors.join(' | ')})`);
     await ctx.close();
   }
@@ -207,7 +207,7 @@ const LONG = manifest(
       (await missing.textContent()).includes('Cette image n’a pas pu être chargée.'),
       'Démo supprimée : message à la place de la capture',
     );
-    ok(/Étape 3 sur 4/.test(await live(p).textContent()), 'Démo supprimée : l’étape reste annoncée');
+    ok(/Étape 3 sur\s4/.test(await live(p).textContent()), 'Démo supprimée : l’étape reste annoncée');
     ok(
       (await p.locator('.p-hotspot, .p-beacon, [class*=hotspot]').count()) > 0,
       'Démo supprimée : pastille encore là',
@@ -215,7 +215,7 @@ const LONG = manifest(
     // La navigation continue
     await p.keyboard.press('ArrowRight');
     await p.waitForTimeout(400);
-    ok(/Étape 4 sur 4/.test(await live(p).textContent()), 'Démo supprimée : → passe à l’étape 4');
+    ok(/Étape 4 sur\s4/.test(await live(p).textContent()), 'Démo supprimée : → passe à l’étape 4');
     ok(errors.length === 0, `Démo supprimée : aucune erreur JavaScript (${errors.join(' | ')})`);
     // Les statistiques partent par lot, 2 s après le dernier événement
     await p.waitForTimeout(2600);
@@ -264,7 +264,7 @@ const LONG = manifest(
     });
     await p.locator('.p-img').waitFor();
     const open = Date.now() - t0;
-    ok(/Étape 1 sur 200/.test(await live(p).textContent()), `200 étapes (${w}) : « Étape 1 sur 200 »`);
+    ok(/Étape 1 sur\s200/.test(await live(p).textContent()), `200 étapes (${w}) : « Étape 1 sur 200 »`);
     ok(open < 5000, `200 étapes (${w}) : ouverture en ${open} ms`);
     const nodes = await p.evaluate(() => document.querySelectorAll('*').length);
     ok(nodes < 3000, `200 étapes (${w}) : DOM raisonnable (${nodes} nœuds)`);
@@ -273,7 +273,7 @@ const LONG = manifest(
     for (let i = 0; i < 199; i++) await p.keyboard.press('ArrowRight');
     await p.waitForFunction(
       () =>
-        /Étape 200 sur 200/.test(
+        /Étape 200 sur\s200/.test(
           document.querySelector('[aria-live=polite][aria-atomic=true]')?.textContent ?? '',
         ),
       null,

@@ -73,7 +73,8 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Aide</titl
   const sec = ed.locator('.xlinks');
   await sec.waitFor();
   ok(
-    (await sec.locator('.sec-title').innerText()) === 'Liens externes · 2',
+    // Titre en capitales à l'écran (text-transform) : on compare le texte du document
+    (await sec.locator('.sec-title').textContent()).trim() === 'Liens externes · 2',
     'titre « Liens externes · 2 » (interne exclu)',
   );
   const items = sec.locator('li');

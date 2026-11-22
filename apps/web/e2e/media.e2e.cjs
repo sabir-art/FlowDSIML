@@ -75,7 +75,7 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
       (await dlg.getByRole('radio', { name: 'Logos' }).isDisabled()),
     'L18-04 : recherche et filtre présents, inactifs',
   );
-  ok(/0\s?Ko sur 500/.test(await dlg.textContent()), 'L18-04 : quota réel (0 Ko)');
+  ok(/0\s?Ko sur\s500/.test(await dlg.textContent()), 'L18-04 : quota réel (0 Ko)');
   await shot('l18-04-media-vide');
 
   // Imports
@@ -200,7 +200,7 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   await full.waitFor();
   ok(
     /Ajout de fichiers bloqué/.test(await full.innerText()) &&
-      /Stockage\s?: .* sur 500/.test(await full.innerText()) &&
+      /Stockage\s?: .* sur\s500/.test(await full.innerText()) &&
       (await full.getByRole('link', { name: 'Voir l’utilisation' }).getAttribute('href')) ===
         '#/settings/usage',
     'quota atteint : dialogue « Limite atteinte », chiffres, « Voir l’utilisation »',

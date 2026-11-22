@@ -171,7 +171,7 @@ const manifests = {
   await bubble(p).waitFor();
   const t1 = await bubble(p).innerText();
   ok(
-    /Vos rendez-vous/.test(t1) && /Étape 1 sur 4/.test(t1),
+    /Vos rendez-vous/.test(t1) && /Étape 1 sur\s4/.test(t1),
     'recette 1 : bulle 1 avec « Étape 1 sur 4 » (bulle supprimée ignorée)',
   );
   ok(/Explorer sans guide/.test(t1), 'recette 1 : « Explorer sans guide »');
@@ -187,7 +187,7 @@ const manifests = {
   ok((await pill(p).getAttribute('aria-haspopup')) === 'menu', 'pastille : aria-haspopup="menu"');
   ok(/Guide · 1\/4/.test(await pill(p).innerText()), 'pastille « Guide · 1/4 »');
   ok(
-    /Étape 1 sur 4 du guide : Vos rendez-vous/.test(
+    /Étape 1 sur\s4 du guide : Vos rendez-vous/.test(
       await p
         .locator('p.sr-only[aria-live="polite"]')
         .allInnerTexts()
@@ -209,7 +209,7 @@ const manifests = {
   await frame(p).locator('div.kpi').click();
   await p.waitForTimeout(300);
   ok(
-    /Étape 1 sur 4/.test(await bubble(p).innerText()),
+    /Étape 1 sur\s4/.test(await bubble(p).innerText()),
     'recette 3 : clic dans la zone, l’étape « next » ne change pas',
   );
   await bubble(p).getByRole('button', { name: 'Suivant' }).click();
@@ -244,7 +244,7 @@ const manifests = {
   await pill(p).click();
   await onPage(p, 'Agenda');
   await bubble(p).waitFor();
-  ok(/Étape 3 sur 4/.test(await bubble(p).innerText()), 'recette 4 : retour à l’étape 3 avec sa bulle');
+  ok(/Étape 3 sur\s4/.test(await bubble(p).innerText()), 'recette 4 : retour à l’étape 3 avec sa bulle');
 
   // ===== 9. Échap : pause, focus sur la pastille =====
   await p.keyboard.press('Escape');
@@ -290,7 +290,7 @@ const manifests = {
   ok((await pill(q).innerText()).includes('Reprendre le guide'), 'recette 5 : « Reprendre le guide »');
   await pill(q).click();
   await bubble(q).waitFor();
-  ok(/Étape 2 sur 4/.test(await bubble(q).innerText()), 'recette 5 : reprise à l’étape courante');
+  ok(/Étape 2 sur\s4/.test(await bubble(q).innerText()), 'recette 5 : reprise à l’étape courante');
   // Menu de la pastille : Quitter le guide
   await pill(q).click();
   ok(

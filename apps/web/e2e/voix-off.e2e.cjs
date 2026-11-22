@@ -79,7 +79,7 @@ function wav(sec) {
     '065 : « Générer à partir du texte » désactivé tant que l’Assistance IA ne l’est pas',
   );
   ok(
-    /Une piste par étape, 2 minutes au plus\. MP3, M4A, WAV ou WebM, 5 Mo au plus\./.test(
+    /Une piste par étape, 2 minutes au plus\. MP3, M4A, WAV ou WebM, 5\sMo au plus\./.test(
       sp(await sec.innerText()),
     ),
     'aide : limites de la piste',

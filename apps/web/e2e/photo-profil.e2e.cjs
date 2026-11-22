@@ -70,7 +70,7 @@ async function png(page, w, h) {
     '« Choisir une photo », pas de « Retirer » sans photo',
   );
   ok(
-    (await row.locator('.stg-help').innerText()) === 'JPG, PNG ou WebP, 2 Mo au plus.',
+    (await row.locator('.stg-help').innerText()) === 'JPG, PNG ou WebP, 2\u00a0Mo au plus.',
     'aide sous le libellé « Photo »',
   );
   ok(
@@ -100,7 +100,7 @@ async function png(page, w, h) {
     buffer: Buffer.alloc(2 * 1024 * 1024 + 1),
   });
   ok(
-    (await page.getByRole('alert').innerText()) === 'Cette image dépasse 2 Mo.',
+    (await page.getByRole('alert').innerText()) === 'Cette image dépasse 2\u00a0Mo.',
     'plus de 2 Mo : message en alerte',
   );
 
@@ -130,7 +130,7 @@ async function png(page, w, h) {
   ok(
     (await zoom.getAttribute('aria-valuemin')) === '100' &&
       (await zoom.getAttribute('aria-valuemax')) === '300' &&
-      (await zoom.getAttribute('aria-valuetext')) === '100 %',
+      (await zoom.getAttribute('aria-valuetext')) === '100\u00a0%',
     'zoom de 100 à 300 %',
   );
   const tx = () => dlg.locator('.pf-crop__box .pf-crop__img').evaluate((el) => el.style.transform);
@@ -147,8 +147,8 @@ async function png(page, w, h) {
   await page.keyboard.press('Home');
   for (let i = 0; i < 10; i++) await page.keyboard.press('PageUp');
   ok(
-    (await dlg.locator('.pf-crop__zoom .muted').innerText()) === '200 %' &&
-      (await zoom.getAttribute('aria-valuetext')) === '200 %',
+    (await dlg.locator('.pf-crop__zoom .muted').innerText()) === '200\u00a0%' &&
+      (await zoom.getAttribute('aria-valuetext')) === '200\u00a0%',
     'zoom à 200 % (Début puis 10 × Page haut)',
   );
   ok((await dlg.locator('input[type=range]').count()) === 0, 'aucun curseur natif');

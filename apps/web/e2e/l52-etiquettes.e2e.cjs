@@ -169,7 +169,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
       JSON.stringify(await names(page)) === JSON.stringify(PAGE_TAGS.map((x) => x[0])),
       'recette 1 : liste triée par nom',
     );
-    ok((await page.locator('.tgs-quota').innerText()) === '8 sur 20', '« 8 sur 20 »');
+    ok((await page.locator('.tgs-quota').innerText()) === '8 sur\u00a020', '« 8 sur 20 »');
     ok(
       (await page.getByRole('columnheader', { name: 'Nom' }).getAttribute('aria-sort')) === 'ascending',
       'en-tête Nom : aria-sort="ascending"',
@@ -340,7 +340,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
       !!created && created.color === 'violet',
       `étiquette créée, couleur proposée : la seule libre (${created?.color})`,
     );
-    ok((await page.locator('.tgs-quota').innerText()) === '9 sur 20', 'compteur mis à jour (9 sur 20)');
+    ok((await page.locator('.tgs-quota').innerText()) === '9 sur\u00a020', 'compteur mis à jour (9 sur 20)');
     await page.context().close();
   }
 

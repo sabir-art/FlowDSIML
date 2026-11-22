@@ -91,7 +91,7 @@ const RESUME = {
   await p.waitForSelector('.p-stage');
   await p.waitForTimeout(400);
   ok(
-    /4\s*\/\s*6|Étape 4|4 sur 6/.test(await p.locator('.p-root').textContent()),
+    /4\s*\/\s*6|Étape 4|4 sur\s6/.test(await p.locator('.p-root').textContent()),
     'L13 : lecteur ouvert à l’étape 4',
   );
   await p.close();

@@ -42,7 +42,7 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await page.waitForSelector('.kpi-chart__svg');
   ok((await page.locator('.kpi-chart__t').textContent()) === 'Vues par jour', 'titre « Vues par jour »');
   ok(
-    /Vues par jour sur 30 jours, comparé à la période précédente/.test(
+    /Vues par jour sur\s30 jours, comparé à la période précédente/.test(
       await page.locator('.kpi-chart__svg').getAttribute('aria-label'),
     ),
     'nom accessible du graphique',

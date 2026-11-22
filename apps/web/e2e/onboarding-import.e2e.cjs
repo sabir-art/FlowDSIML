@@ -53,7 +53,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const bar = page.getByRole('progressbar', { name: 'Progression' });
   await bar.waitFor();
   ok(
-    (await bar.getAttribute('aria-valuetext')) === 'Étape 1 sur 5' &&
+    (await bar.getAttribute('aria-valuetext')) === 'Étape 1 sur\u00a05' &&
       (await bar.getAttribute('aria-valuemax')) === '5',
     'étape 1 sur 5 (progressbar)',
   );
@@ -103,7 +103,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.getByRole('heading', { name: 'À quoi servira TutoClick ?' }).waitFor();
   ok(
     (await page.getByRole('checkbox', { name: /Former les conseillers/ }).isChecked()) &&
-      (await bar.getAttribute('aria-valuetext')) === 'Étape 3 sur 5',
+      (await bar.getAttribute('aria-valuetext')) === 'Étape 3 sur\u00a05',
     'rechargement : même étape, réponses gardées',
   );
   await shot('l48c-3-usage');

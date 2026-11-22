@@ -68,7 +68,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     ok(!(await p.getByRole('radio', { name: /Vidéo MP4/ }).isDisabled()), 'L25-11 : MP4 sélectionnable');
     ok((await p.locator('.x15-svg').count()) === 1, 'L15-01 : aperçu rendu');
-    ok((await p.locator('.x15-side .pager span').textContent()) === 'Page 1 sur 8', 'L15-01 : pager');
+    ok((await p.locator('.x15-side .pager span').textContent()) === 'Page 1 sur\u00a08', 'L15-01 : pager');
     await p.getByRole('button', { name: 'Page suivante' }).click();
     ok(
       (await p.locator('.x15-svg text').allTextContents()).join(' ').includes('Ouvrir le menu Usagers'),
@@ -168,7 +168,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     ok(gif.readUInt16LE(6) === 640 && gif.readUInt16LE(8) === 436, 'L15-02 : 640 px de large');
     await p.waitForSelector('text=GIF prêt');
     ok(
-      /4,5\ss · .* · 640 × 436 px/.test(await p.locator('.exp-file small').textContent()),
+      /4,5\ss · .* · 640 × 436\spx/.test(await p.locator('.exp-file small').textContent()),
       'L15-04 : durée et taille du GIF',
     );
     await p.close();

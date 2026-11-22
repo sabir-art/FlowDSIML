@@ -149,7 +149,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     order0[0],
   );
   await page
-    .locator('[aria-live="assertive"]', { hasText: /Étape déplacée en position 2 sur \d+\./ })
+    .locator('[aria-live="assertive"]', { hasText: /Étape déplacée en position 2 sur\s\d+\./ })
     .waitFor({ state: 'attached' });
   ok(true, 'Alt ↓ : étape déplacée en position 2, annoncée');
   ok(

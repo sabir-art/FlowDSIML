@@ -82,11 +82,11 @@ function data() {
     await nd.evaluate((d) => {
       const ids = (d.getAttribute('aria-labelledby') || '').split(' ');
       const name = ids.map((i) => document.getElementById(i)?.textContent ?? '').join(' ');
-      return ids.length === 2 && name.includes('Nouvelle démo') && name.includes('Étape 1 sur 2');
+      return ids.length === 2 && name.includes('Nouvelle démo') && name.includes('Étape 1 sur\u00a02');
     }),
     'titre annoncé avec « Étape 1 sur 2 »',
   );
-  ok((await nd.locator('.fd-modal__sub').innerText()).includes('Étape 1 sur 2'), 'Étape 1 sur 2');
+  ok((await nd.locator('.fd-modal__sub').innerText()).includes('Étape 1 sur\u00a02'), 'Étape 1 sur 2');
   const radios = nd.getByRole('radio');
   ok((await radios.count()) === 3, '3 types');
   ok(
@@ -209,7 +209,7 @@ function data() {
   await p.locator('.fd-page-header__actions').getByRole('button', { name: 'Nouveau Sandbox' }).click();
   await nd.waitFor();
   ok(
-    (await nd.locator('.fd-modal__sub').innerText()).includes('Étape 2 sur 2') &&
+    (await nd.locator('.fd-modal__sub').innerText()).includes('Étape 2 sur\u00a02') &&
       (await nd.locator('.fd-modal__head h2').innerText()).includes('Nouveau Sandbox'),
     '« Nouveau Sandbox » : directement l’étape 2',
   );
