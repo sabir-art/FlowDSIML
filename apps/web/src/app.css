@@ -1858,6 +1858,12 @@ button.fd-nav__item:hover {
   height: 32px;
   margin-bottom: 4px;
 }
+/* ICON-01 : icône « panneau » de 20 px, trait 2,1 */
+.fd-btn.sidebar__pin > svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.1;
+}
 .brand__symbol {
   display: block;
 }

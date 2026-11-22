@@ -772,19 +772,41 @@ button.nd-src:focus-visible {
 }
 /* L26-01 : « Prise en main de votre espace » */
 .onb-card {
-  margin-bottom: var(--fd-space-6);
+  /* Lot 2 : prise en main compacte, cadre à filet sans ombre, rayon de 16 px */
   padding: 0;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 16px;
+  background: none;
+  box-shadow: none;
 }
 .onb-card svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   flex: none;
 }
 .onb-head {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 18px 20px 14px;
+  gap: 12px;
+  padding: 16px 20px;
+}
+.onb-head > .fd-icon-chip {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: none;
+}
+.onb-head > .fd-icon-chip > svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.25;
+}
+.onb-head > .fd-btn--icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
 }
 .onb-titles {
   flex: 1;
@@ -792,19 +814,28 @@ button.nd-src:focus-visible {
 }
 .onb-titles h2 {
   margin: 0;
-  font-size: var(--fd-text-h3-size, 18px);
+  font: 600 15px / 1.5 var(--fd-font-sans);
 }
 .onb-titles p {
   margin: 2px 0 0;
-  font-size: var(--fd-text-caption-size);
+  font-size: 13px;
+  line-height: 1.38;
   color: var(--fd-color-text-muted);
 }
 .onb-bar {
-  width: 200px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--fd-color-surface-sunken, var(--fd-color-border));
+  width: 160px;
+  height: 6px;
+  border-radius: 3px;
+  background: #eef0f3;
   overflow: hidden;
+}
+[data-theme='dark'] .onb-bar {
+  background: #252b33;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .onb-bar {
+    background: #252b33;
+  }
 }
 .onb-bar > span {
   display: block;
@@ -816,48 +847,69 @@ button.nd-src:focus-visible {
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 16px;
+  gap: 4px 24px;
   margin: 0;
-  padding: 0 8px 8px;
+  padding: 0 20px 12px;
   list-style: none;
 }
 .onb-list li {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
-  gap: 10px;
+  grid-template-columns: 20px minmax(0, 1fr) 128px;
+  gap: 12px;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: var(--fd-radius-md);
+  min-height: 56px;
+  padding: 8px 12px;
+  border-radius: 10px;
 }
 .onb-list li > svg {
   width: 20px;
   height: 20px;
-  color: var(--fd-color-text-subtle);
+  color: var(--fd-color-text-muted);
 }
 .onb-list li.done > svg {
   color: var(--fd-color-success);
+}
+.onb-list li b {
+  display: block;
+  font: 600 14px / 18px var(--fd-font-sans);
 }
 .onb-list li.done b {
   font-weight: 500;
   color: var(--fd-color-text-muted);
   text-decoration: line-through;
 }
+/* Étape conseillée : fond teinté */
 .onb-list li.next {
-  background: var(--fd-color-surface-selected);
+  background: var(--fd-color-tint);
 }
 .onb-list small {
   display: block;
   font-size: 12px;
+  line-height: 18px;
   color: var(--fd-color-text-muted);
+}
+.onb-list li > :last-child {
+  justify-self: start;
+}
+.onb-list .fd-btn--sm,
+.onb-foot .fd-btn--sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
 }
 .onb-foot {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 20px 14px;
+  gap: 8px;
+  padding: 10px 20px;
   border-top: 1px solid var(--fd-color-border);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--fd-color-text-muted);
+}
+.onb-foot > .fd-btn {
+  margin-right: 12px;
+  padding: 0 8px;
+  color: var(--fd-color-text);
 }
 .onb-grow {
   flex: 1;
@@ -868,8 +920,16 @@ button.nd-src:focus-visible {
     grid-template-columns: 1fr;
     grid-template-rows: none !important;
   }
+}
+@media (max-width: 767px) {
+  .onb-list {
+    padding: 0 12px 12px;
+  }
   .onb-bar {
-    width: 120px;
+    display: none;
+  }
+  .onb-list li {
+    grid-template-columns: 20px minmax(0, 1fr) auto;
   }
 }
 /* Petits écrans : « Masquer la prise en main » passe sous le texte (pas de colonne étroite) */
@@ -883,7 +943,70 @@ button.nd-src:focus-visible {
   .onb-foot > .fd-btn {
     grid-column: 2;
     justify-self: start;
+    margin: 0 0 0 -8px;
   }
+}
+/* Lot 2 : indicateurs en bandeau sans ombre (rayon de 16 px, filets pleine hauteur) */
+.demos-wrap .kpi-short {
+  overflow: hidden;
+  border-radius: 16px;
+  background: none;
+}
+.demos-wrap .kpi-sc {
+  gap: 4px;
+  padding: 16px 20px;
+  border-radius: 0;
+}
+.demos-wrap .kpi-sc + .kpi-sc {
+  border-left: 1px solid var(--fd-color-border);
+}
+.demos-wrap .kpi-sc + .kpi-sc::before {
+  content: none;
+}
+.demos-wrap .kpi-sc .kpi-tab__l {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.demos-wrap .kpi-sc .kpi-tab__v {
+  font-size: 26px;
+  line-height: 33px;
+  letter-spacing: -0.01em;
+}
+.demos-wrap .kpi-sc .kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 18px;
+}
+.demos-wrap .kpi-sc .kpi-trend__v {
+  font-weight: 400;
+}
+.demos-wrap .kpi-sc .kpi-trend__v svg {
+  width: 16px;
+  height: 16px;
+}
+.demos-wrap .kpi-sc__go {
+  top: 16px;
+  right: 16px;
+}
+@media (max-width: 767px) {
+  .demos-wrap .kpi-short {
+    grid-template-columns: 1fr 1fr;
+  }
+  .demos-wrap .kpi-sc:nth-child(3) {
+    border-left: 0;
+  }
+  .demos-wrap .kpi-sc:nth-child(n + 3) {
+    border-top: 1px solid var(--fd-color-border);
+  }
+}
+/* Écarts de la page : 24 px entre les blocs, 32 px avant la liste */
+.demos-wrap.stack {
+  gap: 24px;
+}
+.demos-wrap > .demos-section {
+  margin-top: 8px;
 }
 /* L27-09 : accès au dossier */
 .fa-dialog {
@@ -956,19 +1079,106 @@ button.nd-src:focus-visible {
 }
 
 /* ---- L48-A §2 : colonne Dossiers (232 px, entre la barre latérale et le contenu) ---- */
+.main:has(> .demos-layout) {
+  /* NAV-03 : le PageHeader va d'un bord à l'autre ; le contenu porte ses marges */
+  padding: 0;
+}
 .demos-layout {
   display: flex;
   align-items: flex-start;
-  /* Retours client 21/11 §2.1 : la mise en page couvre toute la hauteur de la fenêtre. Elle reprend les
-     marges haute et basse de main (une colonne collante ne sort pas de son bloc conteneur), que le contenu
-     retrouve en padding. */
+  /* Retours client 21/11 §2.1 : la mise en page couvre toute la hauteur de la fenêtre */
   min-height: 100dvh;
-  margin: calc(-1 * var(--fd-space-6)) 0 calc(-1 * var(--fd-space-12));
 }
 .demos-main {
   flex: 1;
   min-width: 0;
-  padding: var(--fd-space-6) 0 var(--fd-space-12);
+}
+/* Contenu : 1 200 px au plus, marges de 32 px (20 et 16 px sous 768 px), maquettes du lot 2 */
+.demos-wrap {
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+@media (max-width: 767px) {
+  .demos-wrap {
+    padding: 20px 16px 48px;
+  }
+}
+/* Titre de la page d'accueil d'une rubrique : 16 px en 600 */
+.demos-main > .fd-page-header > .fd-page-header__title {
+  padding: 0;
+  font-size: 16px;
+}
+/* Recherche du PageHeader : 280 px, 36 px de haut, raccourci affiché (FIELD-01) */
+.ph-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 280px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text-subtle);
+  transition:
+    border-color var(--fd-motion-duration-fast) var(--fd-motion-ease-standard),
+    box-shadow var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
+}
+.ph-search:hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+.ph-search:focus-within {
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.ph-search > svg {
+  flex: none;
+}
+.ph-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background: none;
+  color: var(--fd-color-text);
+  font: 400 14px var(--fd-font-sans);
+}
+.ph-search input::placeholder {
+  color: var(--fd-color-text-subtle);
+  opacity: 1;
+}
+.ph-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.ph-search kbd {
+  flex: none;
+  padding: 0 4px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 4px;
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.ph-narrow {
+  display: none;
+}
+@media (max-width: 767px) {
+  .ph-wide {
+    display: none;
+  }
+  .ph-narrow {
+    display: inline;
+  }
+  .ph-search {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+  .ph-search kbd {
+    display: none;
+  }
 }
 /* Emplacement de la colonne : collant, du haut au bas de la fenêtre, comme la barre latérale. Sa largeur
    ne change pas quand le tiroir s'ouvre (le contenu ne bouge pas). */
@@ -978,7 +1188,6 @@ button.nd-src:focus-visible {
   flex: none;
   align-self: flex-start;
   height: 100dvh;
-  margin: 0 var(--fd-space-8) 0 calc(-1 * var(--fd-space-8));
   /* sticky crée un contexte d'empilement : le z-index du tiroir n'a d'effet qu'ici, au-dessus du contenu */
   z-index: var(--fd-z-sticky);
 }
@@ -990,8 +1199,9 @@ button.nd-src:focus-visible {
   flex-direction: column;
   width: 232px;
   height: 100%;
-  padding: var(--fd-space-6) var(--fd-space-3) var(--fd-space-4) 8px;
-  background: var(--fd-color-surface);
+  /* Lot 2 : colonne sur le fond de navigation (NAV-02), 12 px de marge, 24 px en bas */
+  padding: 12px 12px 24px;
+  background: var(--fd-color-nav-bg);
   border-right: 1px solid var(--fd-color-border);
 }
 /* §7 : rail de 48 px, bouton de bascule au même endroit que dans la colonne dépliée */
@@ -999,7 +1209,8 @@ button.nd-src:focus-visible {
   width: 48px;
   align-items: flex-start;
   gap: var(--fd-space-3);
-  padding-right: 8px;
+  /* La bascule reste à 12 px du bord, au même endroit que dans la colonne dépliée */
+  padding-right: 4px;
 }
 .fcol--rail .fcol__head {
   margin-bottom: 0;
@@ -1008,6 +1219,12 @@ button.nd-src:focus-visible {
   flex: none;
   width: 32px;
   height: 32px;
+}
+/* ICON-01 : icône « panneau » de 20 px, trait 2,1 */
+.fcol .fcol__switch > svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.1;
 }
 .fcol__railcount {
   display: flex;
@@ -1037,31 +1254,35 @@ button.nd-src:focus-visible {
   overflow-y: auto;
   overflow-x: clip;
   overscroll-behavior: contain;
-  padding-left: 4px;
 }
 .fcol__foot {
   flex: none;
-  padding: var(--fd-space-2) 0 0 4px;
+  padding-top: var(--fd-space-2);
 }
 .fcol__head {
   display: flex;
   align-items: center;
-  gap: 4px;
-  /* Même hauteur que le bouton : la bascule est au même endroit repliée et dépliée */
-  height: 32px;
+  gap: 6px;
+  /* 44 px, bascule au même endroit repliée et dépliée ; 10 px avant la première entrée */
+  height: 44px;
   flex: none;
-  margin-bottom: var(--fd-space-2);
+  margin-bottom: 10px;
 }
 .fcol__title {
   flex: 1;
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
 }
 .fcol__list {
+  display: grid;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.fcol__list .fcol__list {
+  margin-top: 2px;
 }
 .fcol__row {
   position: relative;
@@ -1078,27 +1299,28 @@ button.nd-src:focus-visible {
   display: flex;
   flex: 1;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
-  height: 36px;
-  padding: 0 8px;
-  border-radius: var(--fd-radius-md);
-  color: var(--fd-color-text);
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
   font-size: 14px;
+  font-weight: 500;
   text-decoration: none;
 }
 .fcol__item:hover {
-  background: var(--fd-color-surface-hover);
+  background: var(--fd-color-nav-hover);
 }
 .fcol__item svg {
   width: 16px;
   height: 16px;
   flex: none;
-  color: var(--fd-color-text-muted);
 }
+/* NAV-02 : entrée active sur nav-active, texte en 600 (pas de fond prune) */
 .fcol__item.is-active {
-  background: var(--fd-color-primary-soft);
-  color: var(--fd-color-primary-soft-text);
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-text);
   font-weight: 600;
 }
 .fcol__item.is-active svg {
@@ -1114,10 +1336,7 @@ button.nd-src:focus-visible {
 .fcol__count {
   font-variant-numeric: tabular-nums;
   color: var(--fd-color-text-muted);
-  font-size: 13px;
-}
-.fcol__item.is-active .fcol__count {
-  color: inherit;
+  font-size: 12px;
 }
 .fcol .fcol__toggle {
   display: inline-grid;
@@ -1153,18 +1372,9 @@ button.nd-src:focus-visible {
 .fcol__row:focus-within .fcol__count {
   visibility: hidden;
 }
-.fcol__sep {
-  margin: var(--fd-space-3) 8px;
-  border: 0;
-  border-top: 1px solid var(--fd-color-border);
-}
-/* 24 px du dernier élément au titre de groupe, filet compris (12 + 1 + 11) */
-.fcol__sep:has(+ .fcol__section) {
-  margin-bottom: 11px;
-}
 .fcol__section {
-  /* §18.3 : titre de groupe commun ; l'écart au-dessus est mesuré à 24 px (filet compris) */
-  margin: 0 8px 6px;
+  /* §18.3 : titre de groupe commun, 24 px au-dessus et 6 px au-dessous */
+  margin: 24px 12px 6px;
   padding: 0;
   font: 600 11px / 16px var(--fd-font-sans);
   letter-spacing: 0.06em;
@@ -1177,39 +1387,29 @@ button.nd-src:focus-visible {
   background: none;
   font: inherit;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 8px;
-  color: var(--fd-color-primary);
+  gap: 10px;
+  width: 100%;
+  height: 34px;
+  margin-top: 6px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
   font-size: 14px;
+  font-weight: 500;
+}
+.fcol__new:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.fcol__new:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .fcol__new svg {
   width: 16px;
   height: 16px;
-}
-.demos-crumb ol {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin: 0 0 2px;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
-  color: var(--fd-color-text-muted);
-}
-.demos-crumb li {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.demos-crumb svg {
-  width: 14px;
-  height: 14px;
-}
-.demos-crumb a {
-  color: inherit;
 }
 .demo-card[draggable='true'] {
   cursor: grab;

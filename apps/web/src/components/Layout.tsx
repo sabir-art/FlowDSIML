@@ -24,7 +24,6 @@ import {
   LogOut,
   Megaphone,
   Menu as MenuIcon,
-  PanelLeft,
   Plus,
   Puzzle,
   Route,
@@ -36,6 +35,7 @@ import {
 import { useAuth } from '../auth/AuthProvider';
 import { useHelp } from '../help/HelpProvider';
 import { ExtensionDialog } from './ExtensionDialog';
+import { PanneauIcon } from './PanneauIcon';
 import { LazyNotificationBell } from './notifications/LazyNotificationBell';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { setLocale } from '../i18n';
@@ -266,7 +266,7 @@ export function Layout() {
             data-tip={pinned ? t('nav.collapseSidebar') : t('nav.pinSidebar')}
             onClick={togglePin}
           >
-            <PanelLeft {...ICON} />
+            <PanneauIcon />
           </button>
         )}
         <div className="brand">

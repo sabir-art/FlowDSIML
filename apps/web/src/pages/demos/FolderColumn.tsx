@@ -17,14 +17,13 @@ import {
   FolderPlus,
   Layers,
   Lock,
-  PanelLeftClose,
-  PanelLeftOpen,
   Pencil,
   Plus,
   Trash2,
   User,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
+import { PanneauIcon } from '../../components/PanneauIcon';
 import { Menu, type MenuItem } from '../../components/Menu';
 
 type FolderRow = Tables<'folders'>;
@@ -235,7 +234,7 @@ export function FolderColumn({
       aria-expanded={!collapsed}
       onClick={onToggle}
     >
-      {collapsed ? <PanelLeftOpen aria-hidden="true" /> : <PanelLeftClose aria-hidden="true" />}
+      <PanneauIcon />
     </button>
   );
   // Un seul arbre pour le rail et la colonne : le bouton de bascule n'est jamais remonté (il garde le
@@ -273,18 +272,16 @@ export function FolderColumn({
               {entry('all', <Layers aria-hidden="true" />, t(sandbox ? 'sandboxPage.all' : 'folders.all'))}
               {entry('mine', <User aria-hidden="true" />, t(sandbox ? 'sandboxPage.mine' : 'folders.mine'))}
             </ul>
-            <hr className="fcol__sep" />
             <p className="fcol__section">{t('folders.space')}</p>
             {tree(null, 0)}
-          </div>
-          <div className="fcol__foot">
             {editable && (
               <button type="button" className="fcol__new" onClick={() => onNew(null)}>
                 <FolderPlus aria-hidden="true" />
                 {t('demos.newFolder')}
               </button>
             )}
-            <hr className="fcol__sep" />
+          </div>
+          <div className="fcol__foot">
             <ul className="fcol__list" role="list">
               {entry('archived', <Archive aria-hidden="true" />, t('folders.archived'))}
             </ul>

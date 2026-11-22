@@ -2738,7 +2738,8 @@
       "folderBody": "This folder is empty. Drag a demo from the list, or create one directly in “{{folder}}”.",
       "folderAction": "New demo in this folder",
       "example": "See an example"
-    }
+    },
+    "newShort": "New"
   },
   "a11y": {
     "skip": "Skip to content"
@@ -5332,7 +5333,9 @@
     "expand": "Expand {{name}}",
     "breadcrumb": "Breadcrumb",
     "author": "Created by",
-    "me": "Me"
+    "me": "Me",
+    "access": "Folder access",
+    "backTo": "Back to {{page}}"
   },
   "empty": {
     "searchBody_zero": "Check the spelling, or try another word.",
@@ -5409,7 +5412,8 @@
     "mine": "My Sandboxes",
     "search": "Search a Sandbox",
     "deadLinks_one": "{{count}} link without a page",
-    "deadLinks_other": "{{count}} links without a page"
+    "deadLinks_other": "{{count}} links without a page",
+    "newShort": "New"
   },
   "htmlCapture": {
     "addDomain": "Add the domain",

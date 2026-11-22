@@ -2738,7 +2738,8 @@
       "folderBody": "Ce dossier est vide. Glissez une démo depuis la liste, ou créez-en une directement dans « {{folder}} ».",
       "folderAction": "Nouvelle démo dans ce dossier",
       "example": "Voir un exemple"
-    }
+    },
+    "newShort": "Nouvelle"
   },
   "a11y": {
     "skip": "Aller au contenu"
@@ -5332,7 +5333,9 @@
     "expand": "Déplier {{name}}",
     "breadcrumb": "Fil d’Ariane",
     "author": "Créé par",
-    "me": "Moi"
+    "me": "Moi",
+    "access": "Accès au dossier",
+    "backTo": "Retour à {{page}}"
   },
   "empty": {
     "searchBody_zero": "Vérifiez l’orthographe, ou essayez un autre mot.",
@@ -5409,7 +5412,8 @@
     "mine": "Mes Sandbox",
     "search": "Rechercher un Sandbox",
     "deadLinks_one": "{{count}} lien sans page",
-    "deadLinks_other": "{{count}} liens sans page"
+    "deadLinks_other": "{{count}} liens sans page",
+    "newShort": "Nouveau"
   },
   "htmlCapture": {
     "addDomain": "Ajouter le domaine",

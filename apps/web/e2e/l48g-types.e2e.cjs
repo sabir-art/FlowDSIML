@@ -188,7 +188,7 @@ function data() {
   ok((await card('Portail à explorer').innerText()).includes('3 pages'), 'carte : « 3 pages »');
   ok((await p.getByRole('button', { name: /^Type\s*:/ }).count()) === 0, 'Sandbox : pas de filtre Type');
   {
-    const head = await p.locator('.page-head').boundingBox();
+    const head = await p.locator('.fd-page-header').boundingBox();
     ok(head.height < 70, `écart 4 : en-tête Sandbox sur une ligne (${Math.round(head.height)} px)`);
   }
   ok((await p.locator('.demo-new').count()) === 0, 'écart 5 : pas de carte « Nouvelle démo » fantôme');
@@ -197,7 +197,7 @@ function data() {
       (await p.getByPlaceholder('Rechercher un Sandbox').count()) === 1,
     'écart 6 : « Tous les Sandbox », « Rechercher un Sandbox »',
   );
-  await p.locator('.page-head__actions').getByRole('button', { name: 'Nouveau Sandbox' }).click();
+  await p.locator('.fd-page-header__actions').getByRole('button', { name: 'Nouveau Sandbox' }).click();
   await nd.waitFor();
   ok(
     (await nd.locator('#nd-step').innerText()).includes('Étape 2 sur 2') &&
