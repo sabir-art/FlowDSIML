@@ -104,7 +104,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await player.goto(`${publicUrl}?company=Acme`);
   await player.waitForSelector('.p-tip');
   ok(
-    (await player.textContent('.p-tip')).includes('Bienvenue Acme'),
+    (await player.textContent('.p-tip')).includes('Bienvenue chez Acme'),
     'variable {{company}} remplacée depuis l’URL',
   );
   if (SHOTS) await player.screenshot({ path: `${SHOTS}/player-1.png` });
@@ -145,7 +145,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await p2.goto(`${PLAYER}/#/l/${link.token}`);
   await p2.waitForSelector('.p-tip');
   ok(
-    (await p2.textContent('.p-tip')).includes('Bienvenue Globex'),
+    (await p2.textContent('.p-tip')).includes('Bienvenue chez Globex'),
     'lien personnalisé : variables pré-remplies',
   );
 
