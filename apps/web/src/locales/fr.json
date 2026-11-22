@@ -4265,6 +4265,7 @@
     "useWebhook": "Utiliser un webhook"
   },
   "glossary": {
+    "playerTitle": "Dans le lecteur",
     "title": "Glossaire",
     "intro": "Les anciens termes et leurs remplaçants. Dans le lecteur, les termes repérés dans les bulles sont soulignés et expliqués.",
     "import": "Importer un CSV",
@@ -4283,7 +4284,7 @@
     "delete": "Supprimer",
     "noMatch": "Aucun terme ne correspond à « {{q}} ».",
     "emptyTitle": "Ajoutez votre premier terme",
-    "emptyBody": "Ajoutez les mots qui changent avec le nouvel outil : l’ancien terme, le nouveau et une définition courte. Vous pouvez aussi importer un fichier CSV (colonnes : nouveau, ancien, definition, formes).",
+    "emptyBody": "L’ancien terme, le nouveau et une définition courte. Vous pouvez aussi importer un CSV.",
     "underline": "Souligner les termes dans le lecteur",
     "underlineHelp": "Pour toutes les démos de l’espace. Chaque démo peut le désactiver dans ses Réglages.",
     "underlineOn": "Les termes seront soulignés dans le lecteur",

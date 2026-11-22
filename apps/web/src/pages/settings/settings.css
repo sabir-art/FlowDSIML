@@ -801,3 +801,35 @@ fieldset.stg-row {
 .stg-banner > svg {
   flex: none;
 }
+
+/* État vide d'une section : tuile de 48 px, titre de 15 px, texte de 13 px, action */
+.stg-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+}
+.stg-empty__tile {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.stg-empty h3 {
+  margin: 4px 0 0;
+  font: 600 15px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.stg-empty p {
+  max-width: 46ch;
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.stg-empty__acts {
+  margin-top: 8px;
+}

@@ -4265,6 +4265,7 @@
     "useWebhook": "Use a webhook"
   },
   "glossary": {
+    "playerTitle": "In the player",
     "title": "Glossary",
     "intro": "Former terms and their replacements. In the player, terms found in bubbles are underlined and explained.",
     "import": "Import a CSV",
@@ -4283,7 +4284,7 @@
     "delete": "Delete",
     "noMatch": "No term matches “{{q}}”.",
     "emptyTitle": "Add your first term",
-    "emptyBody": "Add the words that change with the new tool: the former term, the new one and a short definition. You can also import a CSV file (columns: nouveau, ancien, definition, formes).",
+    "emptyBody": "The old term, the new one and a short definition. You can also import a CSV.",
     "underline": "Underline terms in the player",
     "underlineHelp": "For every demo in the workspace. Each demo can turn it off in its Settings.",
     "underlineOn": "Terms will be underlined in the player",
