@@ -155,6 +155,34 @@ td.act, th.act { width: 48px; text-align: right; }
 .mob .addd { flex-direction: column; } .mob .doms { margin-left: 0; }
 .doms { max-width: 460px; } .addd .inp { justify-content: flex-start; text-align: left; }
 .addd .inp .v { text-align: left; flex: 1; }
+/* Détail d'un webhook (22/11) */
+.mono { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; }
+.chip.mono { padding-right: 10px; }
+.wst { display: inline-flex; align-items: center; gap: 6px; font: 500 13px var(--fd-font-sans); color: var(--fd-color-text); white-space: nowrap; }
+.wst.on svg { color: var(--fd-color-success, #557014); } .wst.ko svg { color: var(--danger); } .wst.off svg { color: #A15C00; }
+[data-theme='dark'] .wst.off svg { color: #E3A23B; }
+.row.inl .ctl:has(.wst) { flex-direction: row; align-items: center; justify-content: flex-end; gap: 16px; }
+.sec2r { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.wbanner { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 32px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface-sunken); font-size: 14px; }
+.wbanner > svg { flex: none; margin-top: 1px; color: #A15C00; } [data-theme='dark'] .wbanner > svg { color: #E3A23B; }
+.wbanner div { flex: 1; display: grid; gap: 4px; } .wbanner span { color: var(--fd-color-text-muted); font-size: 13px; }
+.wbanner .btn { flex: none; height: 36px; }
+.wlog { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; padding-top: 16px; align-items: start; }
+.wlog table tr.sel td { background: var(--tint); }
+.wlog td { height: 48px; font-size: 14px; }
+.wdet { border: 1px solid var(--fd-color-border); border-radius: 12px; padding: 16px; display: grid; gap: 8px; min-width: 0; }
+.wdh { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; } .wdh .btn { height: 32px; font-size: 13px; }
+.wdet h3 { margin: 8px 0 0; font: 600 12px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+.code { margin: 0; padding: 12px; border-radius: 8px; background: var(--fd-color-surface-sunken); font: 12px/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color: var(--fd-color-text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.mob .wlog { grid-template-columns: 1fr; }
+.mob .wlog table thead { display: table-header-group; } .mob .wlog th:nth-child(2), .mob .wlog td:nth-child(2), .mob .wlog th:nth-child(4), .mob .wlog td:nth-child(4) { display: none; }
+.mob .wbanner { flex-wrap: wrap; } .mob .wbanner .btn { margin-left: 32px; }
+.mob .row.inl .ctl:has(.wst) { justify-content: flex-start; }
+.cp2 { display: flex; gap: 8px; align-items: center; } .cp2 .inp { flex: 1; min-width: 0; } .cp2 .ib { flex: none; width: 36px; height: 36px; }
+.wlog td:first-child, .wlog td.num, .wlog th.num { white-space: nowrap; }
+.mob .wlog td:nth-child(3) { display: table-cell; }
+.wlog td:nth-child(2) { white-space: nowrap; }
+.mob .wbanner .btn { margin-left: 32px; } .mob .wbanner div { flex-basis: calc(100% - 32px); }
 </style></head><body class="">
 
 <div class="shell">
