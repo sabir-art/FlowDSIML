@@ -12,6 +12,7 @@ import {
   Clock,
   Copy,
   CirclePause,
+  Play,
   RefreshCw,
   RotateCw,
   Send,
@@ -248,14 +249,14 @@ export function WebhookDetail() {
         )}
         {hook.state === 'paused_auto' && (
           <div className="wh-banner wh-banner--pause" role="status" data-gap-exempt="">
-            <CirclePause size={18} aria-hidden="true" />
+            <CirclePause size={20} aria-hidden="true" />
             <div>
               <b>{t('integrations.pausedBanner', { date: day(hook.updated_at) })}</b>
               <span>{t('integrations.pausedAdvice')}</span>
             </div>
             <Button
               variant="primary"
-              icon={<RefreshCw size={16} />}
+              icon={<Play size={16} />}
               onClick={() => void setState(hook.id, 'active').then(load)}
             >
               {t('integrations.enable')}

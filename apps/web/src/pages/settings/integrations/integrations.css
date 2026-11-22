@@ -350,9 +350,10 @@ a.int-row--link:focus-visible {
 .wh-table {
   overflow-x: auto;
 }
-.wh-table .wh-url {
+.l23 .wh-table .wh-url {
   display: block;
-  max-width: 240px;
+  /* Sous 768 px, l'adresse cède la place à l'état et au menu : le tableau ne déborde jamais (§18.7) */
+  max-width: min(240px, calc(100vw - 240px));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -361,6 +362,11 @@ a.int-row--link:focus-visible {
 }
 .wh-table td {
   white-space: nowrap;
+}
+@media (max-width: 767px) {
+  .wh-table td {
+    white-space: normal;
+  }
 }
 .wh-table .menu-trigger {
   width: 32px;
