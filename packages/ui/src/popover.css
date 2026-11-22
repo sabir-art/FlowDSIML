@@ -55,7 +55,8 @@
 }
 .fd-sel--sm {
   height: 32px;
-  padding: 0 10px;
+  /* Chevron à 12 px du bord (11 px + le filet), comme tous les chevrons de l'app */
+  padding: 0 11px 0 10px;
   border-radius: 8px;
   font-size: 13px;
 }

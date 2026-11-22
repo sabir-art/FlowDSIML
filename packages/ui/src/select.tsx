@@ -304,7 +304,7 @@ export function Select({
         className={`fd-sel${size === 'sm' ? ' fd-sel--sm' : ''}${open ? ' is-open' : ''} ${className}`.trim()}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-controls={listId}
+        aria-controls={open ? listId : undefined}
         aria-activedescendant={searchable ? undefined : activeId}
         aria-required={required || undefined}
         disabled={disabled}
