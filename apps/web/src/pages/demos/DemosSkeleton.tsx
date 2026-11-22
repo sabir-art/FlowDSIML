@@ -18,9 +18,11 @@ export function DemosSkeleton({ onboardingHeight }: { onboardingHeight: number }
         <div className="fd-card sk-reserve" style={{ height: onboardingHeight }} aria-hidden="true" />
       )}
       <section aria-labelledby="demos-list-title" className="demos-section">
-        <h2 id="demos-list-title" className="demos-list-title">
-          {t('demos.allDemos')}
-        </h2>
+        <div className="demos-list-head">
+          <h2 id="demos-list-title" className="demos-list-title">
+            {t('demos.allDemos')}
+          </h2>
+        </div>
         {/* Barre réelle et désactivée, sans compteur (même gabarit que la page, L40) */}
         <div className="fd-toolbar list-toolbar">
           <div className="fd-toolbar__group" role="group" aria-label={t('toolbar.filters')}>
@@ -101,7 +103,8 @@ function KpiSkeletonRow() {
   return (
     <div className="kpi-short" aria-hidden="true">
       {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="kpi-sc">
+        // Indicateur : écarts internes de 4 px (maquette du lot 2), comme dans la page chargée
+        <div key={i} className="kpi-sc" data-gap-exempt="">
           <span className="kpi-tab__l">
             <Sk w="60%" />
           </span>

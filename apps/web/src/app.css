@@ -1652,9 +1652,12 @@
 .tg-add:hover {
   text-decoration: underline;
 }
-.demo-card:not(:hover, :focus-within) .tg-card--empty:not(.is-open),
-tr:not(:hover, :focus-within) .tg-card--empty:not(.is-open) {
-  opacity: 0;
+/* Sans survol (écran tactile), « + Étiquette » reste visible (décision UX du 22/11) */
+@media (hover: hover) {
+  .demo-card:not(:hover, :focus-within) .tg-card--empty:not(.is-open),
+  tr:not(:hover, :focus-within) .tg-card--empty:not(.is-open) {
+    opacity: 0;
+  }
 }
 .tg-card .tg-pop {
   top: calc(100% + 6px);
@@ -1857,6 +1860,12 @@ button.fd-nav__item:hover {
   width: 32px;
   height: 32px;
   margin-bottom: 4px;
+}
+/* ICON-01 : icône « panneau » de 20 px, trait 2,1 */
+.fd-btn.sidebar__pin > svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.1;
 }
 .brand__symbol {
   display: block;
@@ -2105,4 +2114,43 @@ button.fd-nav__item:hover {
 }
 :where(.lucide[width='24'], .lucide[width='28'], .lucide[width='32']) {
   stroke-width: 1.75;
+}
+
+/* Lot 2 : action de page dans la barre mobile (cible de 44 px, icône de 20 px) */
+.topbar__slot {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .topbar__slot:not(:empty) {
+    display: flex;
+    margin-left: 4px;
+  }
+  .topbar__slot .fd-btn--icon {
+    width: 44px;
+    height: 44px;
+  }
+  .topbar__slot .fd-btn--icon > svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.1;
+  }
+}
+
+/* Menu « … » d'une démo : 240 px (maquette du lot 2) ; la feuille mobile garde sa largeur */
+.menu-list--wide:not(.menu-list--sheet) {
+  width: 240px;
+}
+
+/* En-tête commun des dialogues pas encore passés à MODAL-01 (Générer, visite guidée, modèle de l'éditeur) */
+.nd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* §18.6 : titre et bouton Fermer à 8 px au moins (390 px) */
+  gap: var(--fd-space-2);
+  margin-bottom: var(--fd-space-4);
+}
+.nd-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
 }

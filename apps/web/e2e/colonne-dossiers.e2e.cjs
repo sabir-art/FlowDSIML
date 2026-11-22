@@ -94,6 +94,8 @@ function seed() {
         continue;
       }
       // Recette UX : tri naturel (Dossier 2 avant Dossier 10)
+      // Les dossiers arrivent après la colonne : on attend le dernier avant de lire l'ordre
+      await page.locator('.fcol__row', { hasText: 'Dossier 27' }).waitFor({ state: 'attached' });
       const names = await page.locator('.fcol__row').allInnerTexts();
       const n = (x) => names.findIndex((t) => t.split('\n')[0].trim() === x);
       ok(

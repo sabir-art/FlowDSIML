@@ -13,6 +13,8 @@ export function Modal({
   onClose,
   icon,
   title,
+  subtitle,
+  footerLead,
   size = 'sm',
   tone = 'default',
   footer,
@@ -28,6 +30,10 @@ export function Modal({
   /** Icône Lucide de 18 px, dans la tuile de l'en-tête. */
   icon: ReactNode;
   title: string;
+  /** Ligne de 13 px sous le titre (ex. « Étape 1 sur 2 · Type de contenu ») ; elle complète le nom de la modale. */
+  subtitle?: ReactNode;
+  /** Texte d'aide à gauche du pied (12 px), masqué sous 480 px. */
+  footerLead?: ReactNode;
   /** sm = 400 px, md = 560 px, lg = 720 px, xl = 960 px ; plein écran sous 480 px. */
   size?: 'sm' | 'md' | 'lg' | 'xl';
   /** `danger` : tuile en rouge (suppression). */
@@ -68,7 +74,7 @@ export function Modal({
       className={`fd-modal fd-modal--${size}${tone === 'danger' ? ' fd-modal--danger' : ''} ${className}`.trim()}
       role={role}
       // Fermée, la modale n'a pas de contenu : ses références ARIA ne sont posées qu'à l'ouverture
-      aria-labelledby={open ? `${id}-t` : undefined}
+      aria-labelledby={open ? (subtitle ? `${id}-t ${id}-s` : `${id}-t`) : undefined}
       aria-describedby={open ? describedBy : undefined}
       onClose={onClose}
       onCancel={(e) => {
@@ -85,7 +91,16 @@ export function Modal({
             <span className="fd-modal__tile" aria-hidden="true">
               {icon}
             </span>
-            <h2 id={`${id}-t`}>{title}</h2>
+            {subtitle ? (
+              <div className="fd-modal__titles">
+                <h2 id={`${id}-t`}>{title}</h2>
+                <p className="fd-modal__sub" id={`${id}-s`}>
+                  {subtitle}
+                </p>
+              </div>
+            ) : (
+              <h2 id={`${id}-t`}>{title}</h2>
+            )}
             {dismissible && (
               <button
                 type="button"
@@ -98,7 +113,12 @@ export function Modal({
             )}
           </div>
           <div className="fd-modal__body">{children}</div>
-          {footer ? <div className="fd-modal__foot">{footer}</div> : null}
+          {footer ? (
+            <div className="fd-modal__foot">
+              {footerLead ? <span className="fd-modal__lead">{footerLead}</span> : null}
+              {footer}
+            </div>
+          ) : null}
         </div>
       )}
     </dialog>

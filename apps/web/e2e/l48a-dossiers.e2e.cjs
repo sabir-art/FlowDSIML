@@ -165,9 +165,9 @@ const seed = () => {
   // ===== Barre de liste =====
   const sort = page.locator('.fd-filter--sort');
   ok(
-    (await sort.boundingBox()).width === 40 &&
+    (await sort.boundingBox()).width === 36 &&
       (await page.getByRole('button', { name: /^Tri\s*: Modifiées récemment/ }).count()) === 1,
-    'colonne ouverte : tri en icône de 40 px, nom complet',
+    'colonne ouverte : tri en icône de 36 px (lot 2), nom complet',
   );
   await sort.click();
   const sorts = (await page.getByRole('menuitem').allTextContents()).map((s) => s.trim());
@@ -216,8 +216,9 @@ const seed = () => {
   await p2.locator('.demos-section .list-toolbar').waitFor();
   ok(
     (await p2.getByRole('navigation', { name: 'Dossiers' }).count()) === 0 &&
-      (await p2.getByRole('button', { name: /^Dossier\s*: Tous/ }).count()) === 1,
-    '1 023 px : pas de colonne, filtre Dossier dans la barre',
+      (await p2.getByRole('button', { name: /^Dossier\s*:/ }).count()) === 0 &&
+      (await p2.getByRole('button', { name: 'Dossiers', exact: true }).count()) === 1,
+    '1 023 px : pas de colonne ni de filtre Dossier, bascule « Dossiers » dans la barre mobile (lot 2)',
   );
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);

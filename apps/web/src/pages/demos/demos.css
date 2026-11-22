@@ -23,47 +23,168 @@
   /* FIELD-01 : même grille d'états que tous les champs (border-field, 3,07:1 ; sans ombre) */
 }
 
-/* L40 : titre de section sur sa ligne, barre de liste (16 px au-dessus et au-dessous), puis la liste */
+/* Lot 2 : titre de section (16 px en 600) et compteur, 12 px, barre de liste, 20 px, liste */
 .demos-section {
   display: flex;
   flex-direction: column;
-  gap: var(--fd-space-4);
-  margin-top: var(--fd-space-4);
+}
+.demos-list-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 .demos-list-title {
   margin: 0;
-  font-size: var(--fd-text-h2-size);
+  font: 600 16px / 21px var(--fd-font-sans);
+}
+.demos-list-count {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.demos-section > .list-toolbar {
+  gap: 8px;
+  margin-bottom: 20px;
+}
+/* Barre de liste du lot 2 : contrôles de 36 px, filtres à coins de 10 px (COMP-01) */
+.demos-section .list-toolbar .fd-btn {
+  height: 36px;
+}
+.demos-section .fd-toolbar .fd-segmented {
+  padding: 3px;
+  border: 0;
+}
+.demos-section .fd-toolbar .fd-segmented > button {
+  height: 30px;
+  min-height: 30px;
+  padding: 0 12px;
+  font: 500 13px var(--fd-font-sans);
+}
+.demos-section .fd-toolbar .fd-segmented > button:is([aria-pressed='true'], [aria-checked='true']) {
+  box-shadow: 0 1px 2px rgb(8 10 14 / 0.08);
+}
+.demos-section .fd-toolbar .fd-segmented--icons > button {
+  width: 32px;
+  padding: 0;
+}
+.demos-section .fd-toolbar .fd-segmented--icons svg {
+  width: 16px;
+  height: 16px;
+}
+.demos-section .fd-filter {
+  gap: 6px;
+  /* Chevron à 12 px du bord (bordure de 1 px comprise), règle des listes */
+  padding: 0 11px 0 10px;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  font: 500 13px var(--fd-font-sans);
+}
+/* Focus clavier (FIELD-01 §11.4) : trait intérieur de 2 px */
+.demos-section .fd-filter:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.demos-section .fd-filter:hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+/* Filtre au repos : son nom seul ; actif : la valeur choisie, en 600 */
+.demos-section .fd-filter:not(.fd-filter--sort) .fd-filter__icon {
+  display: none;
+}
+/* Masqués à l'œil seulement : le nom accessible reste « Créé par : Tous » */
+.demos-section .fd-filter .fd-filter__colon,
+.demos-section .fd-filter:not(.fd-filter--active, .fd-filter--sort, .list-toolbar__more) .fd-filter__value {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.demos-section .list-toolbar .fd-filter--compact:not(.fd-filter--active) {
+  width: auto;
+  padding: 0 11px 0 10px;
+}
+.demos-section .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__label {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+}
+.demos-section .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__chev {
+  display: inline;
+}
+.demos-section .fd-filter--active {
+  background: var(--fd-color-surface);
+  border-color: var(--fd-color-border-field);
+}
+.demos-section .fd-filter--active .fd-filter__value {
+  color: var(--fd-color-text);
+}
+/* Tri : icône seule, carré de 36 px */
+.demos-section .list-toolbar .fd-filter--sort {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+.demos-section .list-toolbar .fd-filter--sort :is(.fd-filter__label, .fd-filter__value) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.demos-section .list-toolbar .fd-filter--sort .fd-filter__chev {
+  display: none;
+}
+.demos-section .fd-toolbar__reset {
+  width: 36px;
+  border-radius: 10px;
 }
 
-/* Grille de cartes de démo */
+/* Grille de cartes de démo : colonnes de 240 px au moins, 24 px d'écart (16 px sous 768 px) */
 .demo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--fd-space-5);
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
+@media (max-width: 767px) {
+  .demo-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+/* Carte : filet, rayon de 16 px, sans ombre ; vignette pleine largeur */
 .demo-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: var(--fd-space-3);
-  transition: box-shadow var(--fd-motion-duration-fast, 120ms);
+  padding: 0;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 16px;
+  background: var(--fd-color-surface);
+  box-shadow: none;
+  transition: border-color var(--fd-motion-duration-fast, 120ms);
 }
 .demo-card:hover {
-  box-shadow: var(--fd-shadow-md);
+  border-color: var(--fd-color-border-field);
 }
 .demo-card:focus-within {
   box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
-/* Vignette arrondie dans un fond sunken, toujours claire (.fd-player-scope) */
+/* Vignette toujours claire (.fd-player-scope), filet en bas */
 .demo-cover {
   display: grid;
   place-items: center;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  border-radius: var(--fd-radius-xl);
+  border-radius: 15px 15px 0 0;
+  border-bottom: 1px solid var(--fd-color-border);
   background: var(--fd-color-surface-sunken);
   color: var(--fd-color-text-subtle);
 }
@@ -73,24 +194,35 @@
   object-fit: cover;
   object-position: top left;
 }
+.demo-card > .ct-badge--cover {
+  top: 10px;
+  left: 10px;
+  height: 24px;
+}
+.demo-card > .ct-badge--cover svg {
+  width: 16px;
+  height: 16px;
+}
+/* Mesures de la maquette (titre centré à 28 px, statut à 50 px) avec 8 px entre titre et statut (§18.6) */
 .demo-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fd-space-2);
-  padding: var(--fd-space-4) var(--fd-space-2) var(--fd-space-1);
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
 }
 .demo-head {
   display: flex;
-  align-items: flex-start;
-  gap: var(--fd-space-2);
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+.demo-head + .demo-meta {
+  margin-top: 2px;
 }
 .demo-head h3 {
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.35;
+  font: 600 15px / 19px var(--fd-font-sans);
 }
 .demo-link {
   color: inherit;
@@ -112,42 +244,64 @@
 .demo-head .menu {
   position: relative;
   z-index: var(--fd-z-raised);
+  margin: -2px -8px -2px 0;
+}
+.demo-head .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+.demo-head .menu-trigger[aria-expanded='true'] {
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-text);
 }
 .demo-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--fd-space-2);
-  font-size: var(--fd-text-caption-size);
+  gap: 4px 8px;
+  font-size: 12px;
+  line-height: 18px;
   color: var(--fd-color-text-muted);
 }
-
-/* Carte « Nouvelle démo » : bordure pointillée, bouton rond au centre */
-.demo-new {
-  display: flex;
-}
-.demo-new__btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--fd-space-2);
-  min-height: 260px;
-  padding: var(--fd-space-6);
-  border: 2px dashed var(--fd-color-border-strong);
-  border-radius: var(--fd-radius-2xl);
-  background: transparent;
+/* Statut : point de 7 px et libellé de 12 px en 500 */
+.demo-meta .fd-status {
+  gap: 6px;
+  font: 500 12px / 15px var(--fd-font-sans);
   color: var(--fd-color-text);
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
 }
-.demo-new__btn:hover {
-  background: var(--fd-color-surface-hover);
+.demo-meta .fd-status::before {
+  width: 7px;
+  height: 7px;
 }
-.demo-new__btn .fd-btn--round {
-  margin-bottom: var(--fd-space-2);
+/* Ligne des étiquettes : toujours 24 px, même vide */
+.demo-body > .tg-row {
+  min-height: 24px;
+  margin-top: 0;
+  gap: 6px;
+  align-items: center;
+}
+.demo-body .tg-line {
+  gap: 6px;
+}
+.demo-body .tg-add,
+.demo-table .tg-add {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px dashed var(--fd-color-border-field);
+  border-radius: 999px;
+  color: var(--fd-color-text-muted);
+  font: 500 12px var(--fd-font-sans);
+  box-sizing: border-box;
+}
+.demo-body .tg-add:hover,
+.demo-table .tg-add:hover {
+  text-decoration: none;
+  color: var(--fd-color-text);
+  border-color: var(--fd-color-border-field-hover);
 }
 
 .card-title {
@@ -168,26 +322,28 @@
 }
 .demo-cover-empty .fake {
   position: absolute;
-  inset: 12px;
-  border-radius: var(--fd-radius-md);
+  inset: 14% 10% 0;
+  border-radius: 8px 8px 0 0;
   background: var(--fd-color-surface);
-  box-shadow: var(--fd-shadow-xs);
+  box-shadow: 0 4px 12px rgb(8 10 14 / 0.08);
 }
 .demo-cover-empty .fake::before {
   content: '';
   position: absolute;
-  inset: 0 0 auto;
-  height: 14px;
-  border-radius: var(--fd-radius-md) var(--fd-radius-md) 0 0;
+  top: 10px;
+  left: calc(26% + 12px);
+  width: 40%;
+  height: 8px;
+  border-radius: 4px;
   background: var(--fd-color-border);
 }
 .demo-cover-empty .dot {
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--fd-color-hotspot);
-  box-shadow: 0 0 0 4px var(--fd-color-surface);
+  background: var(--fd-color-primary);
+  box-shadow: 0 0 0 2px #fff;
 }
 
 @media (max-width: 640px) {
@@ -196,9 +352,14 @@
   }
 }
 /* DSH-02 : vue liste */
+/* Lot 2 : tableau à filets sur le fond de la page (pas de carte), lignes de 56 px */
 .demo-table-wrap {
   padding: 0;
   overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 .demo-table td.nowrap {
   /* Complétion et Modifiée sur une ligne (les étiquettes passent à la ligne dans la colonne Nom) */
@@ -211,19 +372,35 @@
 }
 .demo-table th {
   text-align: left;
-  font: 600 var(--fd-text-caption-size) / 1.3 var(--fd-font-sans);
+  font: 500 12px / 1.5 var(--fd-font-sans);
   color: var(--fd-color-text-muted);
-  padding: 12px 16px;
+  padding: 12px;
   border-bottom: 1px solid var(--fd-color-border);
   white-space: nowrap;
 }
 .demo-table td {
-  padding: 10px 16px;
+  height: 56px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--fd-color-border);
   vertical-align: middle;
 }
-.demo-table tr:last-child td {
-  border-bottom: 0;
+.demo-table td:last-child,
+.demo-table th:last-child {
+  width: 48px;
+}
+.demo-table .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+@media (max-width: 767px) {
+  .demo-table thead {
+    display: none;
+  }
+  .demo-table td {
+    padding: 0 6px;
+  }
 }
 .demo-table .r {
   text-align: right;
@@ -246,8 +423,8 @@
 }
 .dt-thumb {
   flex: none;
-  width: 56px;
-  height: 35px;
+  width: 40px;
+  height: 26px;
   border-radius: 6px;
   overflow: hidden;
   background: var(--fd-color-surface-sunken);
@@ -278,21 +455,8 @@
   background: var(--fd-color-text);
   border-radius: inherit;
 }
-/* DSH-06 : modale « Nouvelle démo » */
-.new-demo-dialog {
-  width: min(880px, calc(100vw - 32px));
-}
-/* L48-G §3 : étape 1, type de contenu (3 cartes radio illustrées) */
-.nd-titles h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.nd-step {
-  margin: 4px 0 0;
-  font-size: var(--fd-text-caption-size);
-  color: var(--fd-color-text-muted);
-}
+/* DSH-06, lot 2 : modale « Nouvelle démo » au gabarit MODAL-01 (560 px) */
+/* Étape 1 : un choix par ligne (tuile de 40 px, nom et phrase, bouton radio de 18 px) */
 .nd-types {
   border: 0;
   margin: 0;
@@ -301,133 +465,103 @@
 }
 .nd-legend {
   padding: 0;
-  margin-bottom: var(--fd-space-3);
-  font-weight: 600;
+  margin-bottom: 6px;
+  font: 500 14px / 18px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
 }
 .nd-types__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--fd-space-3);
+  gap: 12px;
 }
 .nd-type {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid var(--fd-color-border);
-  border-radius: var(--fd-radius-lg);
-  background: var(--fd-color-surface);
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 18px;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 12px;
   cursor: pointer;
 }
-.nd-type.is-selected {
-  /* L48-G écart 1 : contour de 2 px couleur texte, ni fond ni bordure primaire */
-  border-color: transparent;
-  outline: 2px solid var(--fd-color-text);
-  outline-offset: -1px;
+.nd-type:hover {
+  border-color: var(--fd-color-border-field-hover);
 }
+.nd-type.is-selected {
+  border-color: var(--fd-color-primary);
+  background: var(--fd-color-tint);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.nd-type__tile {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+}
+.nd-type__tile > svg {
+  width: 18px;
+  height: 18px;
+}
+/* Bouton radio maison (COMP-01) : anneau de 18 px, point de 8 px */
 .nd-type input {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
   margin: 0;
-  accent-color: var(--fd-color-primary);
+  border: 1.5px solid var(--fd-color-border-field);
+  border-radius: 50%;
+  background: none;
+  cursor: inherit;
+}
+.nd-type input:checked {
+  border-color: var(--fd-color-primary);
+}
+.nd-type input:checked::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fd-color-primary);
+}
+.nd-type input:focus-visible {
+  outline: none;
 }
 .nd-type:has(input:focus-visible) {
-  outline: none;
   box-shadow: inset 0 0 0 2px var(--fd-color-focus);
-}
-.nd-art {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  display: block;
-}
-.nd-art__bg {
-  fill: var(--fd-color-surface-sunken);
-}
-.nd-art__card {
-  fill: var(--fd-color-surface);
-  stroke: var(--fd-color-border);
-}
-.nd-art__card--on {
-  stroke: var(--fd-color-primary);
-  stroke-width: 2;
-}
-.nd-art__line {
-  fill: var(--fd-color-border);
-}
-.nd-art__dash {
-  fill: none;
-  stroke: var(--fd-color-primary);
-  stroke-dasharray: 3 2;
-}
-.nd-art__stroke {
-  fill: none;
-  stroke: var(--fd-color-text-muted);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.nd-art__dot {
-  fill: var(--fd-color-primary);
-}
-.nd-art__bubble {
-  fill: var(--fd-color-text);
-}
-.nd-art__on {
-  fill: var(--fd-color-surface);
 }
 .nd-type__txt {
   display: grid;
-  gap: 6px;
-  font-size: var(--fd-text-caption-size);
+  min-width: 0;
+  font-size: 13px;
+  line-height: 19.5px;
   color: var(--fd-color-text-muted);
 }
 .nd-type__txt b {
-  font-size: 16px;
-  font-weight: 700;
+  font: 700 14px / 21px var(--fd-font-sans);
   color: var(--fd-color-text);
 }
-.nd-next {
-  margin: 0;
-  font-size: var(--fd-text-caption-size);
-  color: var(--fd-color-text-muted);
+.new-demo-dialog .fd-modal__foot > .nd-back {
+  margin-right: auto;
 }
-@media (max-width: 720px) {
-  .nd-types__grid {
-    grid-template-columns: 1fr;
-  }
-  .nd-type {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-  .nd-art {
-    width: 96px;
-    flex: none;
-  }
-  .nd-next {
-    display: none;
+.new-demo-dialog .fd-modal__foot > .nd-back + .nd-empty {
+  margin-left: -4px;
+}
+@media (max-width: 479px) {
+  .new-demo-dialog .fd-modal__foot {
+    flex-wrap: wrap;
   }
 }
-.nd-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  /* §18.6 : titre et bouton Fermer à 8 px au moins (390 px) */
-  gap: var(--fd-space-2);
-  margin-bottom: var(--fd-space-4);
-}
-.nd-head h2 {
-  margin: 0;
-  font-size: 1.25rem;
-}
-/* L48-G écart 2 : sources en liste (icône, nom, phrase, chevron) */
+/* Lot 2, étape 2 : sources en liste d'actions (bloc bordé de 12 px, lignes d'au moins 64 px) */
 .nd-sources {
   list-style: none;
   margin: 0;
   padding: 0;
   border: 1px solid var(--fd-color-border);
-  border-radius: var(--fd-radius-lg);
+  border-radius: 12px;
   overflow: hidden;
 }
 .nd-sources > li + li {
@@ -450,60 +584,103 @@ button.nd-src {
   cursor: pointer;
 }
 button.nd-src:hover:not(:disabled):not([aria-disabled='true']) {
-  background: var(--fd-color-surface-hover, var(--fd-color-surface-sunken));
+  background: var(--fd-color-surface-sunken);
 }
 button.nd-src:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
-.nd-src > svg {
+/* Tuile de 40 px, comme à l'étape 1 ; icône de 18 px */
+.nd-src__tile {
+  display: grid;
   flex: none;
-  width: 20px;
-  height: 20px;
-  color: var(--fd-color-text-muted);
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+}
+.nd-src__tile > svg {
+  width: 18px;
+  height: 18px;
 }
 .nd-src__txt {
   flex: 1;
   display: grid;
-  gap: 2px;
-  font-size: var(--fd-text-caption-size);
+  min-width: 0;
+  font-size: 13px;
+  line-height: 19.5px;
   color: var(--fd-color-text-muted);
 }
 .nd-src__txt b {
-  font-size: var(--fd-text-body-size);
-  font-weight: 600;
+  font: 600 14px / 21px var(--fd-font-sans);
   color: var(--fd-color-text);
 }
+/* Raison d'une ligne désactivée : sur sa ligne, 4 px sous l'aide (recette UX, E3) */
+.nd-src__why {
+  margin-top: 4px;
+}
 .nd-src > .nd-src__go {
+  flex: none;
   width: 16px;
   height: 16px;
+  color: var(--fd-color-text-muted);
 }
 .nd-src.is-soon .nd-src__txt b,
-.nd-src.is-soon > svg {
+.nd-src.is-soon .nd-src__tile,
+.nd-src[aria-disabled='true'] .nd-src__txt b,
+.nd-src[aria-disabled='true'] .nd-src__tile {
   color: var(--fd-color-text-muted);
 }
 .nd-src__soon {
   flex: none;
-  font-size: var(--fd-text-caption-size);
+  font-size: 13px;
   color: var(--fd-color-text-muted);
 }
 .nd-folder {
-  margin-top: var(--fd-space-4);
+  margin: 0;
 }
-/* L38-13 : lien « Ouvrir le réglage » sous la ligne IA (empilés, pas sur la même ligne) */
+/* Assistance IA coupée : « Ouvrir le réglage » en ghost sm à droite de la ligne (sous le texte sous 768 px) */
 .nd-ai {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   white-space: normal;
   gap: 0;
+  background: var(--fd-color-surface);
 }
-.nd-ai > a {
-  display: block;
-  padding: 0 16px 12px 48px;
-}
-.nd-actions .grow {
+.nd-ai > .nd-src {
   flex: 1;
+  min-width: 0;
+}
+.nd-ai > .nd-ai__link {
+  flex: none;
+  height: 32px;
+  margin-right: 16px;
+  padding: 0 12px;
+  font-size: 13px;
+  text-decoration: none;
+}
+@media (max-width: 767px) {
+  .nd-ai {
+    flex-wrap: wrap;
+  }
+  .nd-ai > .nd-src {
+    flex-basis: 100%;
+    align-items: flex-start;
+  }
+  /* 8 px entre la ligne et « Ouvrir le réglage » (§18.6), aligné sur le texte */
+  .nd-ai:has(> .nd-ai__link) > .nd-src {
+    padding-bottom: 4px;
+  }
+  .nd-ai > .nd-ai__link {
+    margin: 0 0 12px 68px;
+  }
+  .nd-src {
+    align-items: flex-start;
+  }
+  .nd-src > .nd-src__go {
+    align-self: center;
+  }
 }
 /* DSH-03 : bandeau « Premiers pas » (fond rosé, jauge couleur marque) */
 .gs-banner {
@@ -560,7 +737,8 @@ button.nd-src:focus-visible {
 }
 
 /* L26-04 : « Partir d'un modèle » (1 040 px, trois colonnes ; une seule sous 1 000 px) */
-.tpl-dialog {
+/* MODAL-01, taille xl élargie à 1 040 px (trois colonnes) */
+.fd-modal.tpl-dialog {
   width: min(1040px, calc(100vw - 32px));
 }
 .tpl-wrap {
@@ -772,19 +950,41 @@ button.nd-src:focus-visible {
 }
 /* L26-01 : « Prise en main de votre espace » */
 .onb-card {
-  margin-bottom: var(--fd-space-6);
+  /* Lot 2 : prise en main compacte, cadre à filet sans ombre, rayon de 16 px */
   padding: 0;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 16px;
+  background: none;
+  box-shadow: none;
 }
 .onb-card svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   flex: none;
 }
 .onb-head {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 18px 20px 14px;
+  gap: 12px;
+  padding: 16px 20px;
+}
+.onb-head > .fd-icon-chip {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: none;
+}
+.onb-head > .fd-icon-chip > svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.25;
+}
+.onb-head > .fd-btn--icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
 }
 .onb-titles {
   flex: 1;
@@ -792,19 +992,28 @@ button.nd-src:focus-visible {
 }
 .onb-titles h2 {
   margin: 0;
-  font-size: var(--fd-text-h3-size, 18px);
+  font: 600 15px / 1.5 var(--fd-font-sans);
 }
 .onb-titles p {
   margin: 2px 0 0;
-  font-size: var(--fd-text-caption-size);
+  font-size: 13px;
+  line-height: 1.38;
   color: var(--fd-color-text-muted);
 }
 .onb-bar {
-  width: 200px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--fd-color-surface-sunken, var(--fd-color-border));
+  width: 160px;
+  height: 6px;
+  border-radius: 3px;
+  background: #eef0f3;
   overflow: hidden;
+}
+[data-theme='dark'] .onb-bar {
+  background: #252b33;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .onb-bar {
+    background: #252b33;
+  }
 }
 .onb-bar > span {
   display: block;
@@ -816,48 +1025,68 @@ button.nd-src:focus-visible {
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 16px;
+  gap: 4px 24px;
   margin: 0;
-  padding: 0 8px 8px;
+  padding: 0 20px 12px;
   list-style: none;
 }
 .onb-list li {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
-  gap: 10px;
+  grid-template-columns: 20px minmax(0, 1fr) 128px;
+  gap: 12px;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: var(--fd-radius-md);
+  min-height: 56px;
+  padding: 8px 12px;
+  border-radius: 10px;
 }
 .onb-list li > svg {
   width: 20px;
   height: 20px;
-  color: var(--fd-color-text-subtle);
+  color: var(--fd-color-text-muted);
 }
 .onb-list li.done > svg {
   color: var(--fd-color-success);
+}
+.onb-list li b {
+  display: block;
+  font: 600 14px / 18px var(--fd-font-sans);
 }
 .onb-list li.done b {
   font-weight: 500;
   color: var(--fd-color-text-muted);
   text-decoration: line-through;
 }
+/* Étape conseillée : fond teinté */
 .onb-list li.next {
-  background: var(--fd-color-surface-selected);
+  background: var(--fd-color-tint);
 }
 .onb-list small {
   display: block;
   font-size: 12px;
+  line-height: 18px;
   color: var(--fd-color-text-muted);
+}
+.onb-list li > :last-child {
+  justify-self: start;
+}
+.onb-list .fd-btn--sm,
+.onb-foot .fd-btn--sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
 }
 .onb-foot {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 20px 14px;
+  gap: 8px;
+  padding: 10px 20px;
   border-top: 1px solid var(--fd-color-border);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--fd-color-text-muted);
+}
+.onb-foot > .fd-btn {
+  padding: 0 12px;
+  color: var(--fd-color-text);
 }
 .onb-grow {
   flex: 1;
@@ -868,36 +1097,91 @@ button.nd-src:focus-visible {
     grid-template-columns: 1fr;
     grid-template-rows: none !important;
   }
+}
+@media (max-width: 767px) {
+  .onb-list {
+    padding: 0 12px 12px;
+  }
   .onb-bar {
-    width: 120px;
+    display: none;
   }
 }
-/* Petits écrans : « Masquer la prise en main » passe sous le texte (pas de colonne étroite) */
-@media (max-width: 600px) {
-  .onb-foot {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: start;
-    row-gap: 8px;
+/* Sous 768 px : le pied garde l'icône d'information et le bouton ; la phrase reste lue */
+@media (max-width: 767px) {
+  .onb-foot > .onb-grow {
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
-  .onb-foot > .fd-btn {
-    grid-column: 2;
-    justify-self: start;
+}
+/* Lot 2 : indicateurs en bandeau sans ombre (rayon de 16 px, filets pleine hauteur) */
+.demos-wrap .kpi-short {
+  overflow: hidden;
+  border-radius: 16px;
+  background: none;
+}
+.demos-wrap .kpi-sc {
+  gap: 4px;
+  padding: 16px 20px;
+  border-radius: 0;
+}
+.demos-wrap .kpi-sc + .kpi-sc {
+  border-left: 1px solid var(--fd-color-border);
+}
+.demos-wrap .kpi-sc + .kpi-sc::before {
+  content: none;
+}
+.demos-wrap .kpi-sc .kpi-tab__l {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.demos-wrap .kpi-sc .kpi-tab__v {
+  font-size: 26px;
+  line-height: 33px;
+  letter-spacing: -0.01em;
+}
+.demos-wrap .kpi-sc .kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 18px;
+}
+.demos-wrap .kpi-sc .kpi-trend__v {
+  font-weight: 400;
+}
+.demos-wrap .kpi-sc .kpi-trend__v svg {
+  width: 16px;
+  height: 16px;
+}
+.demos-wrap .kpi-sc__go {
+  top: 16px;
+  right: 16px;
+}
+@media (max-width: 767px) {
+  .demos-wrap .kpi-short {
+    grid-template-columns: 1fr 1fr;
   }
+  .demos-wrap .kpi-sc:nth-child(3) {
+    border-left: 0;
+  }
+  .demos-wrap .kpi-sc:nth-child(n + 3) {
+    border-top: 1px solid var(--fd-color-border);
+  }
+}
+/* Écarts de la page : 24 px entre les blocs, 32 px avant la liste */
+.demos-wrap.stack {
+  gap: 24px;
+}
+.demos-wrap > .demos-section {
+  margin-top: 8px;
+}
+/* Dossier ouvert, Mes démos, Archivées : la liste est le premier bloc, à 32 px du haut du contenu */
+.demos-wrap--scoped > .demos-section {
+  margin-top: 32px;
 }
 /* L27-09 : accès au dossier */
-.fa-dialog {
-  width: min(520px, calc(100vw - 32px));
-  border: 0;
-  padding: 0;
-  border-radius: var(--fd-radius-lg, 16px);
-  background: var(--fd-color-surface);
-  color: var(--fd-color-text);
-  box-shadow: var(--fd-shadow-lg);
-}
-.fa-dialog::backdrop {
-  background: rgb(12 10 9 / 0.45);
-}
 .fa-body {
   display: grid;
   gap: 12px;
@@ -956,19 +1240,131 @@ button.nd-src:focus-visible {
 }
 
 /* ---- L48-A §2 : colonne Dossiers (232 px, entre la barre latérale et le contenu) ---- */
+.main:has(> .demos-layout) {
+  /* NAV-03 : le PageHeader va d'un bord à l'autre ; le contenu porte ses marges */
+  padding: 0;
+}
 .demos-layout {
   display: flex;
   align-items: flex-start;
-  /* Retours client 21/11 §2.1 : la mise en page couvre toute la hauteur de la fenêtre. Elle reprend les
-     marges haute et basse de main (une colonne collante ne sort pas de son bloc conteneur), que le contenu
-     retrouve en padding. */
+  /* Retours client 21/11 §2.1 : la mise en page couvre toute la hauteur de la fenêtre */
   min-height: 100dvh;
-  margin: calc(-1 * var(--fd-space-6)) 0 calc(-1 * var(--fd-space-12));
 }
 .demos-main {
   flex: 1;
   min-width: 0;
-  padding: var(--fd-space-6) 0 var(--fd-space-12);
+}
+/* Contenu : 1 200 px au plus, marges de 32 px (20 et 16 px sous 768 px), maquettes du lot 2 */
+.demos-wrap {
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+@media (max-width: 767px) {
+  .demos-wrap {
+    padding: 20px 16px 48px;
+  }
+}
+/* Titre de la page d'accueil d'une rubrique : 16 px en 600 */
+.demos-main > .fd-page-header > .fd-page-header__title {
+  padding: 0;
+  font-size: 16px;
+}
+/* Recherche du PageHeader : 280 px, 36 px de haut, raccourci affiché (FIELD-01) */
+.ph-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 280px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text-subtle);
+  transition:
+    border-color var(--fd-motion-duration-fast) var(--fd-motion-ease-standard),
+    box-shadow var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
+}
+.ph-search:hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+.ph-search:focus-within {
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.ph-search > svg {
+  flex: none;
+}
+.ph-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background: none;
+  color: var(--fd-color-text);
+  font: 400 14px var(--fd-font-sans);
+}
+.ph-search input::placeholder {
+  color: var(--fd-color-text-subtle);
+  opacity: 1;
+}
+.ph-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.ph-search kbd {
+  flex: none;
+  padding: 0 4px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 4px;
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.ph-narrow,
+.fd-btn.ph-search-btn {
+  display: none;
+}
+@media (max-width: 767px) {
+  .ph-wide {
+    display: none;
+  }
+  .ph-narrow {
+    display: inline;
+  }
+  /* Recherche repliée en bouton d'icône de 36 px ; ouverte, le champ prend la place du titre */
+  .fd-btn.ph-search-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--fd-color-text);
+  }
+  .fd-btn.ph-search-btn > svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.1;
+  }
+  .ph-search:not(.is-open) {
+    display: none;
+  }
+  .ph-search.is-open {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+  .fd-page-header:has(.ph-search.is-open) :is(.fd-page-header__title, .ph-search-btn) {
+    display: none;
+  }
+  .fd-page-header:has(.ph-search.is-open) .fd-page-header__actions {
+    flex: 1;
+    min-width: 0;
+  }
+  .ph-search kbd {
+    display: none;
+  }
 }
 /* Emplacement de la colonne : collant, du haut au bas de la fenêtre, comme la barre latérale. Sa largeur
    ne change pas quand le tiroir s'ouvre (le contenu ne bouge pas). */
@@ -978,7 +1374,6 @@ button.nd-src:focus-visible {
   flex: none;
   align-self: flex-start;
   height: 100dvh;
-  margin: 0 var(--fd-space-8) 0 calc(-1 * var(--fd-space-8));
   /* sticky crée un contexte d'empilement : le z-index du tiroir n'a d'effet qu'ici, au-dessus du contenu */
   z-index: var(--fd-z-sticky);
 }
@@ -990,8 +1385,9 @@ button.nd-src:focus-visible {
   flex-direction: column;
   width: 232px;
   height: 100%;
-  padding: var(--fd-space-6) var(--fd-space-3) var(--fd-space-4) 8px;
-  background: var(--fd-color-surface);
+  /* Lot 2 : colonne sur le fond de navigation (NAV-02), 12 px de marge, 24 px en bas */
+  padding: 12px 12px 24px;
+  background: var(--fd-color-nav-bg);
   border-right: 1px solid var(--fd-color-border);
 }
 /* §7 : rail de 48 px, bouton de bascule au même endroit que dans la colonne dépliée */
@@ -999,7 +1395,8 @@ button.nd-src:focus-visible {
   width: 48px;
   align-items: flex-start;
   gap: var(--fd-space-3);
-  padding-right: 8px;
+  /* La bascule reste à 12 px du bord, au même endroit que dans la colonne dépliée */
+  padding-right: 4px;
 }
 .fcol--rail .fcol__head {
   margin-bottom: 0;
@@ -1008,6 +1405,12 @@ button.nd-src:focus-visible {
   flex: none;
   width: 32px;
   height: 32px;
+}
+/* ICON-01 : icône « panneau » de 20 px, trait 2,1 */
+.fcol .fcol__switch > svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.1;
 }
 .fcol__railcount {
   display: flex;
@@ -1037,31 +1440,35 @@ button.nd-src:focus-visible {
   overflow-y: auto;
   overflow-x: clip;
   overscroll-behavior: contain;
-  padding-left: 4px;
 }
 .fcol__foot {
   flex: none;
-  padding: var(--fd-space-2) 0 0 4px;
+  padding-top: var(--fd-space-2);
 }
 .fcol__head {
   display: flex;
   align-items: center;
-  gap: 4px;
-  /* Même hauteur que le bouton : la bascule est au même endroit repliée et dépliée */
-  height: 32px;
+  gap: 6px;
+  /* 44 px, bascule au même endroit repliée et dépliée ; 10 px avant la première entrée */
+  height: 44px;
   flex: none;
-  margin-bottom: var(--fd-space-2);
+  margin-bottom: 10px;
 }
 .fcol__title {
   flex: 1;
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
 }
 .fcol__list {
+  display: grid;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.fcol__list .fcol__list {
+  margin-top: 2px;
 }
 .fcol__row {
   position: relative;
@@ -1078,27 +1485,28 @@ button.nd-src:focus-visible {
   display: flex;
   flex: 1;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
-  height: 36px;
-  padding: 0 8px;
-  border-radius: var(--fd-radius-md);
-  color: var(--fd-color-text);
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
   font-size: 14px;
+  font-weight: 500;
   text-decoration: none;
 }
 .fcol__item:hover {
-  background: var(--fd-color-surface-hover);
+  background: var(--fd-color-nav-hover);
 }
 .fcol__item svg {
   width: 16px;
   height: 16px;
   flex: none;
-  color: var(--fd-color-text-muted);
 }
+/* NAV-02 : entrée active sur nav-active, texte en 600 (pas de fond prune) */
 .fcol__item.is-active {
-  background: var(--fd-color-primary-soft);
-  color: var(--fd-color-primary-soft-text);
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-text);
   font-weight: 600;
 }
 .fcol__item.is-active svg {
@@ -1114,10 +1522,7 @@ button.nd-src:focus-visible {
 .fcol__count {
   font-variant-numeric: tabular-nums;
   color: var(--fd-color-text-muted);
-  font-size: 13px;
-}
-.fcol__item.is-active .fcol__count {
-  color: inherit;
+  font-size: 12px;
 }
 .fcol .fcol__toggle {
   display: inline-grid;
@@ -1145,28 +1550,23 @@ button.nd-src:focus-visible {
   right: 2px;
   opacity: 0;
 }
+/* Après un clic, la ligne active garde son compteur : le « … » ne vient qu'au survol et au focus clavier */
 .fcol__row:hover .fcol__more,
-.fcol__row:focus-within .fcol__more {
+.fcol__row:has(:focus-visible) .fcol__more,
+.fcol__row:has([aria-expanded='true']) .fcol__more {
   opacity: 1;
 }
 .fcol__row:hover .fcol__count,
-.fcol__row:focus-within .fcol__count {
+.fcol__row:has(:focus-visible) .fcol__count,
+.fcol__row:has([aria-expanded='true']) .fcol__count {
   visibility: hidden;
 }
-.fcol__sep {
-  margin: var(--fd-space-3) 8px;
-  border: 0;
-  border-top: 1px solid var(--fd-color-border);
-}
-/* 24 px du dernier élément au titre de groupe, filet compris (12 + 1 + 11) */
-.fcol__sep:has(+ .fcol__section) {
-  margin-bottom: 11px;
-}
 .fcol__section {
-  /* §18.3 : titre de groupe commun ; l'écart au-dessus est mesuré à 24 px (filet compris) */
-  margin: 0 8px 6px;
+  /* §18.3 : titre de groupe commun, 24 px au-dessus et 6 px au-dessous */
+  margin: 24px 12px 6px;
   padding: 0;
-  font: 600 11px / 16px var(--fd-font-sans);
+  /* Interligne de 13 px : les 24 et 6 px sont mesurés au texte (recette UX D1) */
+  font: 600 11px / 13px var(--fd-font-sans);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--fd-color-text-muted);
@@ -1177,39 +1577,29 @@ button.nd-src:focus-visible {
   background: none;
   font: inherit;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 8px;
-  color: var(--fd-color-primary);
+  gap: 10px;
+  width: 100%;
+  height: 34px;
+  margin-top: 6px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
   font-size: 14px;
+  font-weight: 500;
+}
+.fcol__new:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.fcol__new:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .fcol__new svg {
   width: 16px;
   height: 16px;
-}
-.demos-crumb ol {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin: 0 0 2px;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
-  color: var(--fd-color-text-muted);
-}
-.demos-crumb li {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.demos-crumb svg {
-  width: 14px;
-  height: 14px;
-}
-.demos-crumb a {
-  color: inherit;
 }
 .demo-card[draggable='true'] {
   cursor: grab;
@@ -1240,7 +1630,7 @@ button.nd-src:focus-visible {
 .nd-type.is-off {
   cursor: not-allowed;
 }
-.nd-type.is-off .nd-art {
+.nd-type.is-off .nd-type__tile {
   opacity: 0.55;
 }
 .nd-type__off {
@@ -1255,4 +1645,173 @@ button.nd-src:focus-visible {
 .sb-dead-count {
   color: var(--fd-color-danger);
   font-weight: 600;
+}
+/* Étiquettes dans leur colonne (décision UX du 22/11) */
+.demo-table .tg-row--list {
+  margin: 0;
+}
+/* Dossier et Complétion : quand le tableau a la place (960 px), soit un écran de 1 280 px sans la
+   colonne Dossiers ; jamais de défilement horizontal (§18.7) */
+.demo-table-wrap {
+  container-type: inline-size;
+}
+@container (max-width: 959px) {
+  .demo-table .dt-xl {
+    display: none;
+  }
+}
+/* Sous 768 px : Nom, Étiquettes, Modifiée et le menu (maquette de la vue liste à 390 px) */
+@media (max-width: 767px) {
+  .demo-table .dt-md {
+    display: none;
+  }
+  .demo-table th:first-child {
+    min-width: 0;
+  }
+  .demo-table .dt-name {
+    gap: 8px;
+  }
+}
+/* Vue liste : type en icône et texte (sans pastille), statut comme sur les cartes */
+.demo-table .ct-badge {
+  gap: 6px;
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fd-color-text-muted);
+  font: 400 14px var(--fd-font-sans);
+}
+.demo-table .ct-badge svg {
+  width: 16px;
+  height: 16px;
+}
+.demo-table .fd-status {
+  gap: 6px;
+  font: 500 12px / 15px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.demo-table .fd-status::before {
+  width: 7px;
+  height: 7px;
+}
+/* Le nom garde la largeur : au moins 240 px, deux lignes au plus */
+.demo-table th:first-child {
+  min-width: 200px;
+}
+.demo-table .dt-name a {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.demo-table .tg-add,
+.demo-table .ct-badge {
+  white-space: nowrap;
+}
+/* Tableau étroit (tablette) : le nom se resserre pour que tout tienne sans défilement */
+@container (max-width: 759px) {
+  .demo-table th:first-child {
+    min-width: 140px;
+  }
+  .demo-table :is(th, td) {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+}
+@media (max-width: 767px) {
+  .demo-table :is(th, td) {
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+  .demo-table th:first-child {
+    min-width: 0;
+  }
+}
+@media (max-width: 767px) {
+  /* Le nom passe à la ligne entre les mots, jamais au milieu ; la date tient sur une ligne (D4) */
+  .demo-table .tg-add {
+    white-space: normal;
+  }
+}
+/* Lot 2 : sous 1 024 px, tiroir des dossiers ouvert depuis la barre mobile (voile, 300 px au plus) */
+.fcol-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: var(--fd-z-modal);
+  background: rgb(8 10 14 / 0.45);
+}
+.fcol-sheet > .fcol--drawer {
+  right: 0;
+  left: auto;
+  width: min(300px, 86vw);
+  height: 100dvh;
+  border-right: 0;
+  border-left: 1px solid var(--fd-color-border);
+}
+/* Lot 2 : états vides de la page Démos (tuile de 48 px, titre de 15 px, texte de 13 px, sans cadre) */
+.demos-section .fd-empty--page {
+  gap: 8px;
+  padding: 96px 24px;
+  border: 0;
+  background: none;
+}
+.demos-section .fd-empty--page .fd-empty__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+}
+.demos-section .fd-empty--page .fd-empty__icon svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.75;
+}
+.demos-section .fd-empty--page .fd-empty__text {
+  gap: 8px;
+  margin-top: 4px;
+}
+.demos-section .fd-empty--page .fd-empty__title {
+  font: 600 15px / 19px var(--fd-font-sans);
+}
+.demos-section .fd-empty--page .fd-empty__body {
+  max-width: 46ch;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 19.5px;
+}
+.demos-section .fd-empty--page .fd-empty__actions {
+  gap: 12px;
+  margin-top: 8px;
+}
+/* « Nouvelle démo » sous 768 px : feuille du bas (D5), pas en plein écran */
+@media (max-width: 767px) {
+  .fd-modal.new-demo-dialog {
+    top: auto;
+    bottom: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: auto;
+    max-height: calc(100dvh - 24px);
+    margin: auto 0 0;
+    border: 1px solid var(--fd-color-border);
+    border-bottom: 0;
+    border-radius: 16px 16px 0 0;
+  }
+  .new-demo-dialog .fd-modal__box {
+    height: auto;
+    max-height: calc(100dvh - 24px);
+  }
+  .new-demo-dialog .fd-modal__foot {
+    flex-wrap: wrap;
+    row-gap: 8px;
+    border-radius: 0;
+  }
+  /* « Partir d'une démo vide » sur toute la largeur, au-dessus de Retour et Annuler */
+  .new-demo-dialog .fd-modal__foot > .nd-empty {
+    order: -1;
+    width: 100%;
+    margin: 0;
+    justify-content: center;
+  }
 }

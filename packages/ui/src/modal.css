@@ -117,6 +117,22 @@
   color: var(--fd-color-text-muted);
 }
 /* Pied : filet au-dessus, fond nav-bg, boutons à droite */
+.fd-modal__titles {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.fd-modal__sub {
+  margin: 0;
+  font: 400 13px / 1.5 var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.fd-modal__lead {
+  align-self: center;
+  margin-right: auto;
+  font: 400 12px / 1.5 var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
 .fd-modal__foot {
   display: flex;
   flex: none;
@@ -187,5 +203,8 @@
   }
   .fd-modal__foot {
     border-radius: 0;
+  }
+  .fd-modal__lead {
+    display: none;
   }
 }

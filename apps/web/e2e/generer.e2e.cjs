@@ -67,8 +67,9 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.waitForTimeout(300);
   ok((await card.getAttribute('aria-disabled')) === 'true', 'Carte désactivée (aria-disabled)');
   ok(
-    /Assistance IA désactivée dans cet espace/.test(await nd.locator('.ai-tip').textContent()),
-    'Infobulle de la règle 4',
+    /Assistance IA désactivée dans cet espace/.test(await nd.locator('#nd-ai-why').textContent()) &&
+      (await card.getAttribute('aria-describedby')) === 'nd-ai-why',
+    'Raison de la règle 4 reliée à la carte (lot 2 : texte, plus d’infobulle)',
   );
   await card.hover();
   await shot('l30-09-carte');

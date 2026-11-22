@@ -79,30 +79,35 @@ function data() {
   const nd = p.locator('dialog.new-demo-dialog[open]');
   await nd.waitFor();
   ok(
-    (await nd.getAttribute('aria-labelledby')) === 'nd-title nd-step',
+    await nd.evaluate((d) => {
+      const ids = (d.getAttribute('aria-labelledby') || '').split(' ');
+      const name = ids.map((i) => document.getElementById(i)?.textContent ?? '').join(' ');
+      return ids.length === 2 && name.includes('Nouvelle démo') && name.includes('Étape 1 sur 2');
+    }),
     'titre annoncé avec « Étape 1 sur 2 »',
   );
-  ok((await nd.locator('#nd-step').innerText()).includes('Étape 1 sur 2'), 'Étape 1 sur 2');
+  ok((await nd.locator('.fd-modal__sub').innerText()).includes('Étape 1 sur 2'), 'Étape 1 sur 2');
   const radios = nd.getByRole('radio');
   ok((await radios.count()) === 3, '3 types');
   ok(
-    (await nd.locator('.nd-type svg.nd-art[aria-hidden="true"]').count()) === 3,
-    'illustrations aria-hidden',
+    (await nd.locator('.nd-type .nd-type__tile[aria-hidden="true"] svg').count()) === 3,
+    'tuiles d’icône aria-hidden (lot 2 : un choix par ligne, MODAL-01)',
   );
   ok((await nd.locator('.nd-type li').count()) === 0, 'écart 1 : aucun point fort');
   {
+    // Lot 2 (MODAL-01) : choix sélectionné en trait prune de 2 px (bordure et trait intérieur), fond teinté
     const sel = await nd.locator('.nd-type.is-selected').evaluate((el) => {
       const c = getComputedStyle(el);
-      return {
-        ow: c.outlineWidth,
-        oc: c.outlineColor,
-        bg: c.backgroundColor,
-        tx: getComputedStyle(document.body).color,
-      };
+      const probe = document.createElement('i');
+      probe.style.color = 'var(--fd-color-primary)';
+      el.append(probe);
+      const primary = getComputedStyle(probe).color;
+      probe.remove();
+      return { bc: c.borderTopColor, bs: c.boxShadow, primary, ow: c.outlineStyle };
     });
     ok(
-      sel.ow === '2px' && sel.oc === sel.tx,
-      `écart 1 : sélection en contour 2 px couleur texte (${sel.ow} ${sel.oc})`,
+      sel.bc === sel.primary && sel.bs.includes('inset') && sel.bs.includes(sel.primary) && sel.ow === 'none',
+      `écart 1 : sélection en trait prune de 2 px, sans contour (${sel.bc} ; ${sel.bs})`,
     );
   }
   ok(await radios.first().isChecked(), 'par défaut : Démo par captures');
@@ -114,7 +119,7 @@ function data() {
   ok(await nd.getByRole('radio', { name: /Sandbox/ }).isChecked(), 'flèche droite : Sandbox');
   await nd.getByRole('button', { name: 'Continuer', exact: true }).click();
   ok(
-    (await nd.locator('#nd-title').innerText()).includes('Nouveau Sandbox'),
+    (await nd.locator('.fd-modal__head h2').innerText()).includes('Nouveau Sandbox'),
     'étape 2 : « Nouveau Sandbox »',
   );
   ok(
@@ -145,8 +150,10 @@ function data() {
     'Captures : images et modèle',
   );
   ok(
-    (await nd.locator('.nd-sources .nd-src__go').count()) === 3 &&
-      (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
+    // Images et modèle ont un chevron ; la ligne de l'IA aussi, sauf désactivée (comme une ligne « Bientôt »)
+    (await nd.locator('.nd-sources .nd-src__go').count()) +
+      (await nd.locator('.nd-sources .nd-ai .nd-src[aria-disabled="true"]').count()) ===
+      3 && (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
     'écart 2 : sources en liste avec chevron, Retour et Annuler',
   );
   // §18.4 : extension non publiée (pas de VITE_EXTENSION_URL en test) : source visible, désactivée, « Bientôt »
@@ -180,7 +187,9 @@ function data() {
   // ===== Page Sandbox =====
   await nav.getByRole('link', { name: 'Sandbox' }).click();
   await p.getByRole('heading', { level: 1, name: 'Sandbox' }).waitFor();
-  await p.locator('.demo-card').first().waitFor();
+  // La liste de la page Démos peut rester affichée un instant : on attend celle de la page Sandbox
+  await card('Portail à explorer').waitFor();
+  await p.waitForFunction(() => document.querySelectorAll('.demo-card').length === 1);
   ok(
     JSON.stringify(await titles()) === JSON.stringify(['Portail à explorer']),
     'Sandbox : seulement les Sandbox',
@@ -188,7 +197,7 @@ function data() {
   ok((await card('Portail à explorer').innerText()).includes('3 pages'), 'carte : « 3 pages »');
   ok((await p.getByRole('button', { name: /^Type\s*:/ }).count()) === 0, 'Sandbox : pas de filtre Type');
   {
-    const head = await p.locator('.page-head').boundingBox();
+    const head = await p.locator('.fd-page-header').boundingBox();
     ok(head.height < 70, `écart 4 : en-tête Sandbox sur une ligne (${Math.round(head.height)} px)`);
   }
   ok((await p.locator('.demo-new').count()) === 0, 'écart 5 : pas de carte « Nouvelle démo » fantôme');
@@ -197,11 +206,11 @@ function data() {
       (await p.getByPlaceholder('Rechercher un Sandbox').count()) === 1,
     'écart 6 : « Tous les Sandbox », « Rechercher un Sandbox »',
   );
-  await p.locator('.page-head__actions').getByRole('button', { name: 'Nouveau Sandbox' }).click();
+  await p.locator('.fd-page-header__actions').getByRole('button', { name: 'Nouveau Sandbox' }).click();
   await nd.waitFor();
   ok(
-    (await nd.locator('#nd-step').innerText()).includes('Étape 2 sur 2') &&
-      (await nd.locator('#nd-title').innerText()).includes('Nouveau Sandbox'),
+    (await nd.locator('.fd-modal__sub').innerText()).includes('Étape 2 sur 2') &&
+      (await nd.locator('.fd-modal__head h2').innerText()).includes('Nouveau Sandbox'),
     '« Nouveau Sandbox » : directement l’étape 2',
   );
   await p.keyboard.press('Escape');
@@ -213,8 +222,10 @@ function data() {
   await m.locator('.demo-card').first().waitFor();
   await m.getByRole('button', { name: 'Nouvelle démo' }).first().click();
   await m.locator('dialog.new-demo-dialog[open] .nd-type').first().waitFor();
-  const box = await m.locator('.nd-art').first().boundingBox();
-  ok(box && Math.round(box.width) === 96, `390 px : illustration de 96 px (${box && box.width})`);
+  // Fin de l'animation d'ouverture avant de mesurer
+  await m.waitForFunction(() => document.getAnimations().every((x) => x.playState !== 'running'));
+  const box = await m.locator('.nd-type__tile').first().boundingBox();
+  ok(box && Math.round(box.width) === 40, `390 px : tuile de 40 px (${box && box.width})`);
   ok(
     await m.evaluate(() => {
       const d = document.querySelector('dialog[open]');

@@ -59,8 +59,8 @@ const measure = (bar) =>
     await bar.waitFor();
     let m = await measure(bar);
     ok(
-      m.heights.length >= 5 && m.heights.every((h) => h === 40),
-      `Démos : contrôles de 40 px (${m.heights})`,
+      m.heights.length >= 5 && m.heights.every((h) => h === 36),
+      `Démos : contrôles de 36 px (lot 2) (${m.heights})`,
     );
     ok(m.lines === 1, 'Démos : une ligne sans filtre actif');
     ok(
@@ -84,7 +84,7 @@ const measure = (bar) =>
       'Démos : filtre Créé par actif',
     );
     m = await measure(bar);
-    ok(m.lines === 1 && m.heights.every((h) => h === 40), 'Démos : une ligne avec 2 filtres actifs');
+    ok(m.lines === 1 && m.heights.every((h) => h === 36), 'Démos : une ligne avec 2 filtres actifs');
     const status = (await bar.locator('[role=status]').textContent()).trim();
     ok(/^\d+ démos?$/.test(status), `Démos : nombre de résultats annoncé (« ${status} »)`);
     await bar.getByRole('button', { name: 'Réinitialiser les filtres' }).click();
@@ -103,20 +103,21 @@ const measure = (bar) =>
       ok(await noHScroll(p), `Démos ${w} px : pas de défilement horizontal`);
       if (w === 390) {
         ok(
-          (await p.getByRole('button', { name: /^Dossier/ }).count()) === 0,
+          (await p.getByRole('button', { name: /^Dossier\s*:/ }).count()) === 0,
           'Démos 390 px : filtres dans la feuille',
         );
         ok(
           (await p.getByRole('button', { name: /^Tri\s*: Modifiées récemment/ }).isVisible()) &&
-            (await p.locator('.fd-filter--sort').boundingBox()).width === 40,
+            (await p.locator('.fd-filter--sort').boundingBox()).width === 36,
           'Démos 390 px : tri en icône, nom accessible complet',
         );
         await p.getByRole('button', { name: /^Filtres/ }).click();
         const sheet = p.getByRole('dialog', { name: 'Filtres' });
         await sheet.waitFor();
         ok(
-          (await sheet.getByRole('button', { name: /^Dossier/ }).count()) === 1,
-          'Démos 390 px : feuille « Filtres »',
+          (await sheet.getByRole('button', { name: /^Créé par/ }).count()) === 1 &&
+            (await sheet.getByRole('button', { name: /^Dossier/ }).count()) === 0,
+          'Démos 390 px : feuille « Filtres » (sans Dossier : tiroir de la barre mobile)',
         );
         await p.keyboard.press('Escape');
         await p.waitForTimeout(200);

@@ -15,13 +15,12 @@ import {
   ShieldCheck,
   Target,
   Users,
-  X,
   type LucideIcon,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
 import { check, useAction } from '../../lib/useAction';
-import { Alert } from '@flowdsiml/ui';
+import { Alert, Modal } from '@flowdsiml/ui';
 import {
   orderedCategories,
   chaptersOf,
@@ -57,7 +56,6 @@ export function TemplatesDialog({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const ref = useRef<HTMLDialogElement>(null);
   const grid = useRef<HTMLDivElement>(null);
   const [list, setList] = useState<Template[] | null>(null);
   const [cat, setCat] = useState<Cat>('all');
@@ -71,15 +69,11 @@ export function TemplatesDialog({
   const { busy, error, run, setError } = useAction();
 
   useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) {
-      setCat('all');
-      setError(null);
-      setRenaming(null);
-      setDeleting(false);
-      d.showModal();
-    } else if (!open && d.open) d.close();
+    if (!open) return;
+    setCat('all');
+    setError(null);
+    setRenaming(null);
+    setDeleting(false);
   }, [open, setError]);
 
   useEffect(() => {
@@ -186,18 +180,32 @@ export function TemplatesDialog({
   let n = 0;
 
   return (
-    <dialog ref={ref} className="dialog tpl-dialog" onClose={onClose} aria-labelledby="tpl-title">
-      <div className="nd-head">
-        <h2 id="tpl-title">{t('templates.title')}</h2>
-        <button
-          type="button"
-          className="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon"
-          aria-label={t('common.close')}
-          onClick={onClose}
-        >
-          <X aria-hidden="true" />
-        </button>
-      </div>
+    <Modal
+      open={open}
+      onClose={onClose}
+      size="xl"
+      className="tpl-dialog"
+      icon={<LayoutTemplate />}
+      title={t('templates.title')}
+      closeLabel={t('common.close')}
+      footerLead={t('templates.hint')}
+      footer={
+        <>
+          <button type="button" className="fd-btn" onClick={onClose}>
+            {t('common.cancel')}
+          </button>
+          <button
+            type="button"
+            className="fd-btn fd-btn--primary"
+            disabled={!current || busy}
+            onClick={() => void applyTemplate(current)}
+          >
+            <LayoutTemplate aria-hidden="true" />
+            {t('templates.use')}
+          </button>
+        </>
+      }
+    >
       {error && <Alert kind="error">{error}</Alert>}
       <div className="tpl-wrap">
         <nav className="tpl-cats" aria-label={t('templates.cats')}>
@@ -388,21 +396,6 @@ export function TemplatesDialog({
           )}
         </aside>
       </div>
-      <div className="dialog-actions tpl-foot">
-        <span className="fd-muted tpl-hint">{t('templates.hint')}</span>
-        <button type="button" className="fd-btn" onClick={onClose}>
-          {t('common.cancel')}
-        </button>
-        <button
-          type="button"
-          className="fd-btn fd-btn--primary"
-          disabled={!current || busy}
-          onClick={() => void applyTemplate(current)}
-        >
-          <LayoutTemplate aria-hidden="true" />
-          {t('templates.use')}
-        </button>
-      </div>
-    </dialog>
+    </Modal>
   );
 }

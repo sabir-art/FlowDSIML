@@ -51,7 +51,10 @@ export function Menu({
   icon,
   custom,
   search,
+  wide = false,
 }: {
+  /** Menu de 240 px (menu « … » d'une démo, maquette du lot 2) ; sinon la largeur de son contenu. */
+  wide?: boolean;
   label: string;
   items: Array<MenuItem | MenuRadioGroup | 'separator'>;
   align?: 'start' | 'end';
@@ -221,7 +224,7 @@ export function Menu({
         createPortal(
           <div
             ref={list}
-            className={`menu-list${sheet ? ' menu-list--sheet' : ''}`}
+            className={`menu-list${sheet ? ' menu-list--sheet' : ''}${wide ? ' menu-list--wide' : ''}`}
             role="menu"
             id={id}
             aria-label={trigger ? trigger.text : label}

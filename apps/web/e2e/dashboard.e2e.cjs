@@ -61,7 +61,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: /^Brouillons · 1/ }).click();
   ok((await page.locator('.demo-card').count()) === 1, 'filtre par statut (segmenté)');
   await page.getByRole('button', { name: /^Toutes · 2/ }).click();
-  ok((await page.locator('.demo-new__btn').count()) === 1, 'carte « Nouvelle démo » en fin de grille');
+  ok(
+    (await page.locator('.demo-new__btn').count()) === 0,
+    'lot 2 : pas de carte « Nouvelle démo » en fin de grille (bouton du PageHeader)',
+  );
 
   // L48-A : colonne Dossiers (au-dessus de 1 024 px)
   ok((await page.locator('.folder-pills').count()) === 0, 'pas de rangée de dossiers');
@@ -74,9 +77,13 @@ const SHOTS = process.env.SHOTS_DIR;
   );
   await page.fill('dialog[open] input', 'Ventes');
   await page.keyboard.press('Enter');
-  await page.waitForTimeout(400);
+  // État réel, pas un délai : la modale se ferme une fois le dossier créé
+  const closed = await page
+    .waitForFunction(() => !document.querySelector('dialog[open]'))
+    .then(() => true)
+    .catch(() => false);
   ok(state.tables.folders.length === 1, 'dossier créé avec Entrée (modale, sans prompt natif)');
-  ok((await page.locator('dialog[open]').count()) === 0, 'REV-11 : la modale se ferme');
+  ok(closed, 'REV-11 : la modale se ferme');
 
   // Menu ⋯ d'une carte → Déplacer
   await page.getByRole('button', { name: 'Actions pour Démo CRM' }).click();

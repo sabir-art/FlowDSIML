@@ -46,10 +46,16 @@ const DEMO = '0b5c1f0e-0000-4000-8000-0000000000e1';
     await link.waitFor();
     const l = await link.boundingBox();
     const folder = await nd.locator('.nd-folder').boundingBox();
-    const card = await nd.locator('.nd-ai > .nd-src').boundingBox();
+    const row = await nd.locator('.nd-ai').boundingBox();
+    const text = await nd.locator('.nd-ai .nd-src__txt').boundingBox();
+    // Lot 2 (étape 2) : « Ouvrir le réglage » sur la ligne de l'IA, à droite du texte (dessous sous 768 px)
     ok(
-      !overlap(l, folder) && !overlap(l, card) && l.y >= card.y + card.height - 1,
-      `n° 13 (${viewport.width} px) : « Ouvrir le réglage » sous la ligne IA, sans recouvrir le dossier`,
+      !overlap(l, folder) &&
+        !overlap(l, text) &&
+        l.y >= row.y &&
+        l.y + l.height <= row.y + row.height + 1 &&
+        (viewport.width < 768 ? l.y >= text.y + text.height - 1 : l.x >= text.x + text.width - 1),
+      `n° 13 (${viewport.width} px) : « Ouvrir le réglage » sur la ligne IA, sans recouvrir le texte ni le dossier`,
     );
     await page.context().close();
   }

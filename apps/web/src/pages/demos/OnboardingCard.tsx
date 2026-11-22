@@ -8,7 +8,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronUp, Circle, CircleCheck, Info, Play, PartyPopper, Sparkles } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Circle,
+  CircleCheck,
+  EyeOff,
+  Info,
+  Play,
+  PartyPopper,
+  Sparkles,
+} from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useHelp } from '../../help/HelpProvider';
@@ -234,7 +244,7 @@ export function OnboardingCard({
                   ) : (
                     <button
                       type="button"
-                      className={`fd-btn fd-btn--sm ${isNext ? 'fd-btn--primary' : 'fd-btn--ghost'}`}
+                      className={`fd-btn fd-btn--sm${isNext ? ' fd-btn--primary' : ''}`}
                       onClick={(e) => a.go(e.currentTarget)}
                     >
                       {a.play && <Play aria-hidden="true" />}
@@ -249,6 +259,7 @@ export function OnboardingCard({
             <Info aria-hidden="true" />
             <span className="onb-grow">{t(admin ? 'onb.footAdmin' : 'onb.footEditor')}</span>
             <button type="button" className="fd-btn fd-btn--ghost fd-btn--sm" onClick={hide}>
+              <EyeOff aria-hidden="true" />
               {t('onb.hide')}
             </button>
           </div>
