@@ -320,7 +320,7 @@ function CropDialog({
         <div className="fd-modal__field pf-crop__zoom">
           <span className="fd-modal__label pf-crop__zoom-l">
             <span id={`${id}-z`}>{t('profile.photo.zoom')}</span>
-            <span className="muted">{pct} %</span>
+            <span className="muted">{`${pct}\u00a0%`}</span>
           </span>
           <Slider
             min={100}

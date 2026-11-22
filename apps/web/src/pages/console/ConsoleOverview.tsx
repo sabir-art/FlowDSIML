@@ -128,7 +128,7 @@ export function Overview() {
                         <span className="console-bar" aria-hidden="true">
                           <span style={{ width: `${sat}%` }} />
                         </span>
-                        {sat} %
+                        {`${sat}\u00a0%`}
                       </span>
                       <ChevronRight className="console-watch__chev" aria-hidden="true" />
                     </Link>

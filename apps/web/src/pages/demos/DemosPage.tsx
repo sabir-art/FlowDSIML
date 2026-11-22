@@ -1262,7 +1262,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                               <span className="dt-bar" aria-hidden="true">
                                 <span style={{ width: `${rate}%` }} />
                               </span>
-                              <span className="num">{rate} %</span>
+                              <span className="num">{`${rate}\u00a0%`}</span>
                             </span>
                           </td>
                           <td className="fd-muted nowrap">
