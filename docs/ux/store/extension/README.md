@@ -6,8 +6,7 @@ L'interface montrée est la vraie :
 - le popup de l'extension, construite à partir du code ;
 - l'écran « Vérifier les données avant l'envoi », avec ses flous réels ;
 - la barre de la capture HTML ;
-- le badge REC ;
-- les fenêtres Partager et SCORM des maquettes du lot 4.
+- le badge REC.
 
 Le logiciel capturé, « Acme RH », est fictif. Ses données sont inventées et ses e-mails sont en `@example.com`. Aucune marque tierce n'apparaît.
 
@@ -23,3 +22,20 @@ Le logiciel capturé, « Acme RH », est fictif. Ses données sont inventées et
 | `icone-128.png` | 128 × 128, RGBA | Icône de la boutique | Symbole LOGO-01 : 96 px de dessin, 16 px de marge transparente, net en 16, 32 et 48 px | |
 
 Le format mobile et la page entière sont « Bientôt » : aucun visuel ne les montre comme disponibles. Le popup de la capture 1 s'arrête au-dessus de la carte « Format mobile ».
+
+## Source de chaque bloc d'interface (mise à jour du 22/11)
+
+| Visuel | Bloc | Source |
+|---|---|---|
+| capture-1 | popup, badge REC | extension construite |
+| capture-1 | logiciel Acme RH | page fictive Acme RH (données inventées) |
+| capture-2 | colonne Étapes, canevas, point de clic et bulle « Créez la fiche » | capture de l'app en ligne (main 7888251), éditeur, démo fictive « Créer une fiche collaborateur » de 5 étapes |
+| capture-3 | « Vérifier les données avant l'envoi », flous | extension construite |
+| capture-4 | barre de la capture HTML, badge REC | extension construite |
+| capture-4 | barre vidéo | recopiée du code de l'extension (`videobar.content.ts`), non capturable en headless |
+| capture-5 | onglet « Lien » de Partager la démo | capture de l'app en ligne (main 7888251) ; l'adresse du lecteur est remplacée par `demos.acme.example` (domaine fictif) |
+| capture-5 | fenêtre « Diffuser », onglet SCORM | capture de l'app en ligne (main 7888251), démo publiée |
+| marquee | colonne Étapes et bulle | capture de l'app en ligne (main 7888251), comme capture-2 |
+| vignette | bouton, point de clic et bulle | dessin à la charte (petite taille, illustratif) |
+
+À refaire quand les lots 3 et 4 (nouvel éditeur, nouvelles pages Partager et Diffuser) seront en ligne.
