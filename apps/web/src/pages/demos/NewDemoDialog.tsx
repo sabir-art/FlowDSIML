@@ -311,12 +311,12 @@ export function NewDemoDialog({
               )}
             </li>
             {type === 'captures' && (
-              <li className="ai-disabled-wrap nd-ai">
+              <li className="nd-ai">
                 <button
                   type="button"
                   className="nd-src ai-entry"
                   aria-disabled={aiDisabled || undefined}
-                  aria-describedby={aiDisabled ? 'nd-ai-tip' : undefined}
+                  aria-describedby={aiDisabled ? 'nd-ai-why' : undefined}
                   onClick={() => !aiDisabled && onGenerate(folder || null)}
                 >
                   <span className="nd-src__tile" aria-hidden="true">
@@ -325,14 +325,16 @@ export function NewDemoDialog({
                   <span className="nd-src__txt">
                     <b>{t('ai.generate.card')}</b>
                     <span>{t('ai.generate.cardBody')}</span>
+                    {/* Recette UX (E1) : la raison est écrite sous l'aide, pas dans une infobulle ; avec
+                        « Ouvrir le réglage » à droite, elle reste lue mais n'est pas affichée */}
+                    {aiDisabled && (
+                      <span className={aiLink ? 'sr-only' : 'nd-src__why'} id="nd-ai-why">
+                        {blockText(aiOff, ai)}
+                      </span>
+                    )}
                   </span>
                   {!aiLink && <ChevronRight className="nd-src__go" aria-hidden="true" />}
                 </button>
-                {aiDisabled && (
-                  <span id="nd-ai-tip" className="ai-tip" role="tooltip">
-                    {blockText(aiOff, ai)}
-                  </span>
-                )}
                 {aiLink && (
                   <Link className="fd-btn fd-btn--ghost fd-btn--sm nd-ai__link" to="/settings/ai">
                     {t('ai.disabledAdmin')}
