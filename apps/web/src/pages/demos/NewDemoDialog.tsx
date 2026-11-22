@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronRight, ImagePlus, LayoutTemplate, Plus, Puzzle, WandSparkles } from 'lucide-react';
+import { ArrowLeft, ChevronRight, ImagePlus, LayoutTemplate, Plus, Puzzle, WandSparkles } from 'lucide-react';
 import type { ContentType } from '@flowdsiml/core';
 import { CONTENT_TYPES } from '@flowdsiml/core';
 import { aiBlock, useAiStatus } from '../../lib/ai';
@@ -10,7 +10,7 @@ import type { Tables } from '@flowdsiml/supabase-types';
 import { IMAGE_ACCEPT } from './importImages';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
-import { TypeBadge, TYPE_ICON } from '../../components/TypeBadge';
+import { TYPE_ICON } from '../../components/TypeBadge';
 import { EXTENSION_URL } from '../../lib/env';
 import { useHtmlCapture } from '../../lib/htmlCapture';
 import { HtmlCaptureNotice } from '../../components/HtmlCaptureNotice';
@@ -80,6 +80,8 @@ export function NewDemoDialog({
   // Règle 4 : désactivée (espace, fonction, rôle) ; quota atteint : la carte reste active (message dans l'aperçu)
   const aiOff = aiBlock(ai, 'generate');
   const aiDisabled = aiOff === 'disabled' || aiOff === 'role';
+  /** Assistance IA coupée et réglable par ce membre : « Ouvrir le réglage » à droite de la ligne. */
+  const aiLink = aiDisabled && aiOff === 'disabled' && !!ai?.canManage;
 
   useEffect(() => {
     if (!open) return;
@@ -158,6 +160,7 @@ export function NewDemoDialog({
         ) : (
           <>
             <button type="button" className="fd-btn nd-back" onClick={() => setStep(1)}>
+              <ArrowLeft aria-hidden="true" />
               {t('common.back')}
             </button>
             {emptyBtn}
@@ -209,16 +212,14 @@ export function NewDemoDialog({
         </fieldset>
       ) : (
         <>
-          {/* Étape 2 : rappel du type choisi, puis les sources */}
-          <p className="nd-chosen">
-            <TypeBadge type={type} />
-          </p>
           <ul className="nd-sources" aria-label={t('ctype.step2')}>
             <li>
               {extSoon ? (
                 // §18.4 : extension pas encore publiée : source visible, désactivée, « Bientôt »
                 <div className="nd-src is-soon" aria-disabled="true">
-                  <Puzzle aria-hidden="true" />
+                  <span className="nd-src__tile" aria-hidden="true">
+                    <Puzzle />
+                  </span>
                   <span className="nd-src__txt">
                     <b>{t('demos.newExtension')}</b>
                     <span>{t('extension.soonBody')}</span>
@@ -227,7 +228,9 @@ export function NewDemoDialog({
                 </div>
               ) : (
                 <button type="button" className="nd-src" onClick={onExtension}>
-                  <Puzzle aria-hidden="true" />
+                  <span className="nd-src__tile" aria-hidden="true">
+                    <Puzzle />
+                  </span>
                   <span className="nd-src__txt">
                     <b>{t('demos.newExtension')}</b>
                     <span>
@@ -247,7 +250,9 @@ export function NewDemoDialog({
                   aria-controls="newdemodialog-file"
                   onClick={() => picker.current?.click()}
                 >
-                  <ImagePlus aria-hidden="true" />
+                  <span className="nd-src__tile" aria-hidden="true">
+                    <ImagePlus />
+                  </span>
                   <span className="nd-src__txt">
                     <b>{t('demos.newImport')}</b>
                     <span>{t('demos.newImportBody')}</span>
@@ -282,7 +287,9 @@ export function NewDemoDialog({
             <li>
               {type === 'captures' ? (
                 <button type="button" className="nd-src" onClick={() => onTemplate(folder || null)}>
-                  <LayoutTemplate aria-hidden="true" />
+                  <span className="nd-src__tile" aria-hidden="true">
+                    <LayoutTemplate />
+                  </span>
                   <span className="nd-src__txt">
                     <b>{t('templates.title')}</b>
                     <span>{t('templates.cardBody')}</span>
@@ -292,7 +299,9 @@ export function NewDemoDialog({
               ) : (
                 // Aucun modèle HTML ni Sandbox pour l'instant : visible, désactivé, « Bientôt » en texte
                 <div className="nd-src is-soon" aria-disabled="true">
-                  <LayoutTemplate aria-hidden="true" />
+                  <span className="nd-src__tile" aria-hidden="true">
+                    <LayoutTemplate />
+                  </span>
                   <span className="nd-src__txt">
                     <b>{t('templates.title')}</b>
                     <span>{t(`ctype.noTemplate.${type}`)}</span>
@@ -310,20 +319,22 @@ export function NewDemoDialog({
                   aria-describedby={aiDisabled ? 'nd-ai-tip' : undefined}
                   onClick={() => !aiDisabled && onGenerate(folder || null)}
                 >
-                  <WandSparkles aria-hidden="true" />
+                  <span className="nd-src__tile" aria-hidden="true">
+                    <WandSparkles />
+                  </span>
                   <span className="nd-src__txt">
                     <b>{t('ai.generate.card')}</b>
                     <span>{t('ai.generate.cardBody')}</span>
                   </span>
-                  <ChevronRight className="nd-src__go" aria-hidden="true" />
+                  {!aiLink && <ChevronRight className="nd-src__go" aria-hidden="true" />}
                 </button>
                 {aiDisabled && (
                   <span id="nd-ai-tip" className="ai-tip" role="tooltip">
                     {blockText(aiOff, ai)}
                   </span>
                 )}
-                {aiDisabled && aiOff === 'disabled' && ai?.canManage && (
-                  <Link className="t-caption" to="/settings/ai">
+                {aiLink && (
+                  <Link className="fd-btn fd-btn--ghost fd-btn--sm nd-ai__link" to="/settings/ai">
                     {t('ai.disabledAdmin')}
                   </Link>
                 )}

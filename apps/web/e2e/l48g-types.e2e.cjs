@@ -150,8 +150,10 @@ function data() {
     'Captures : images et modèle',
   );
   ok(
-    (await nd.locator('.nd-sources .nd-src__go').count()) === 3 &&
-      (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
+    // Images et modèle ont un chevron ; la ligne de l'IA aussi, sauf coupée (« Ouvrir le réglage » à sa place)
+    (await nd.locator('.nd-sources .nd-src__go').count()) +
+      (await nd.locator('.nd-sources .nd-ai__link').count()) ===
+      3 && (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
     'écart 2 : sources en liste avec chevron, Retour et Annuler',
   );
   // §18.4 : extension non publiée (pas de VITE_EXTENSION_URL en test) : source visible, désactivée, « Bientôt »
@@ -220,6 +222,8 @@ function data() {
   await m.locator('.demo-card').first().waitFor();
   await m.getByRole('button', { name: 'Nouvelle démo' }).first().click();
   await m.locator('dialog.new-demo-dialog[open] .nd-type').first().waitFor();
+  // Fin de l'animation d'ouverture avant de mesurer
+  await m.waitForFunction(() => document.getAnimations().every((x) => x.playState !== 'running'));
   const box = await m.locator('.nd-type__tile').first().boundingBox();
   ok(box && Math.round(box.width) === 40, `390 px : tuile de 40 px (${box && box.width})`);
   ok(
