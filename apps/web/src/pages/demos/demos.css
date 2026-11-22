@@ -1385,9 +1385,9 @@ button.nd-src:focus-visible {
   flex-direction: column;
   width: 232px;
   height: 100%;
-  /* Lot 2 : colonne sur le fond de navigation (NAV-02), 12 px de marge, 24 px en bas */
+  /* COL-01 (COMP-01 §15) : colonne sur le blanc de la page, séparée par un filet ; 12 px de marge, 24 en bas */
   padding: 12px 12px 24px;
-  background: var(--fd-color-nav-bg);
+  background: var(--fd-color-surface);
   border-right: 1px solid var(--fd-color-border);
 }
 /* §7 : rail de 48 px, bouton de bascule au même endroit que dans la colonne dépliée */

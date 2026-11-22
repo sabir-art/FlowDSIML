@@ -1,6 +1,6 @@
 /*
  * Lot 1 Paramètres (maquettes docs/ux/maquettes/refonte/lot1-parametres) : NAV-02 et NAV-03.
- * Colonne de navigation pleine hauteur sur nav-bg, contenu blanc, PageHeader fixe, sections centrées (880 px).
+ * Colonne de navigation pleine hauteur sur le blanc de la page avec un filet (COL-01), contenu blanc, PageHeader fixe, sections centrées (880 px).
  */
 .main:has(> .st) {
   padding: 0;
@@ -25,7 +25,8 @@
   overflow-y: auto;
   /* NAV-04 : la colonne commence en haut, « ESPACE » à 16 px comme le haut du logo */
   padding: 16px 12px 24px;
-  background: var(--fd-color-nav-bg);
+  /* COL-01 (COMP-01 §15) : seule la barre latérale principale est teintée */
+  background: var(--fd-color-surface);
   border-right: 1px solid var(--fd-color-border);
 }
 .st-nav__grp {

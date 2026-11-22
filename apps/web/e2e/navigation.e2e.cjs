@@ -1,7 +1,7 @@
 /**
  * NAV-02 et NAV-03 (retours-client-21-11.md §11.7, comp-01-composants.md §12), pages passées à la
  * PageHeader. Lot 1 : les Paramètres. En clair et en sombre, à 1440 px puis à 390 px :
- *  - surfaces : nav-bg sur la barre latérale et la navigation des Paramètres, content-bg sur le contenu,
+ *  - surfaces : nav-bg sur la seule barre latérale (COL-01) ; navigation des Paramètres et contenu sur le blanc,
  *    filet de 1 px entre les colonnes ;
  *  - élément actif : fond nav-active, texte text en 600, aria-current, ni ombre ni bordure ;
  *  - PageHeader : barre fixe de 56 px avec un filet en bas, qui reste en haut au défilement ;
@@ -157,8 +157,8 @@ const TOKENS = {
           `${who} : Aide et Notifications après un filet, 32 px, icônes de 16 px (${JSON.stringify(m.tools)})`,
         );
         ok(
-          m.navBg === T.navBg && m.sideBg === T.navBg && m.mainBg === T.contentBg,
-          `${who} : nav-bg sur les deux colonnes, content-bg sur le contenu`,
+          m.navBg === T.contentBg && m.sideBg === T.navBg && m.mainBg === T.contentBg,
+          `${who} : COL-01, nav-bg sur la seule barre latérale, colonne des Paramètres et contenu sur le blanc`,
         );
         ok(m.navBorder === '1px' && m.sideBorder === '1px', `${who} : filet de 1 px entre les colonnes`);
         ok(
