@@ -77,9 +77,13 @@ const SHOTS = process.env.SHOTS_DIR;
   );
   await page.fill('dialog[open] input', 'Ventes');
   await page.keyboard.press('Enter');
-  await page.waitForTimeout(400);
+  // État réel, pas un délai : la modale se ferme une fois le dossier créé
+  const closed = await page
+    .waitForFunction(() => !document.querySelector('dialog[open]'))
+    .then(() => true)
+    .catch(() => false);
   ok(state.tables.folders.length === 1, 'dossier créé avec Entrée (modale, sans prompt natif)');
-  ok((await page.locator('dialog[open]').count()) === 0, 'REV-11 : la modale se ferme');
+  ok(closed, 'REV-11 : la modale se ferme');
 
   // Menu ⋯ d'une carte → Déplacer
   await page.getByRole('button', { name: 'Actions pour Démo CRM' }).click();

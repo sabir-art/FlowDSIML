@@ -543,6 +543,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     const root = sandbox ? t('sandboxPage.title') : t('demos.title');
     const searchLabel = t(sandbox ? 'sandboxPage.search' : 'demos.search');
     const dir = folders.find((f) => f.id === scope) ?? null;
+    // L48-B : espace sans démo, une seule action au centre ; ni recherche ni « Nouvelle démo » dans l'en-tête
+    const noDemos = !!demos && demos.length === 0;
     return (
       <PageHeader
         title={scopeName ?? root}
@@ -558,7 +560,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
         tools={<LazyNotificationBell />}
         actions={
           <>
-            {!scopeName && (
+            {!scopeName && !noDemos && (
               <button
                 type="button"
                 className="fd-btn fd-btn--ghost fd-btn--icon ph-search-btn"
@@ -573,7 +575,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                 <Search aria-hidden="true" />
               </button>
             )}
-            {!scopeName && (
+            {!scopeName && !noDemos && (
               <label className={`ph-search${searchOpen || q ? ' is-open' : ''}`}>
                 <span className="sr-only">{searchLabel}</span>
                 <Search size={16} aria-hidden="true" />
@@ -787,7 +789,31 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           slot,
         )}
       {!wide && drawer && (
-        <div className="fcol-sheet">
+        // T1 (recette UX) : avec le voile, le tiroir est modal ; Tab reste dans le tiroir
+        <div
+          className="fcol-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('folders.title')}
+          onKeyDown={(e) => {
+            if (e.key !== 'Tab') return;
+            const items = [
+              ...e.currentTarget.querySelectorAll<HTMLElement>(
+                'a[href], button:not(:disabled), [tabindex]:not([tabindex="-1"])',
+              ),
+            ].filter((x) => x.offsetParent !== null);
+            if (!items.length) return;
+            const first = items[0]!;
+            const last = items[items.length - 1]!;
+            if (e.shiftKey && document.activeElement === first) {
+              e.preventDefault();
+              last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+              e.preventDefault();
+              first.focus();
+            }
+          }}
+        >
           <FolderColumn
             folders={folders}
             scope={scope}
@@ -1351,7 +1377,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                             </time>
                           </td>
                           <td className="r">
-                            <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
+                            <Menu wide label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
                           </td>
                         </tr>
                       );
@@ -1398,7 +1424,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                               {d.title}
                             </Link>
                           </h3>
-                          <Menu label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
+                          <Menu wide label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
                         </div>
                         <div className="demo-meta">
                           <Status size="sm" tone={toneOf(d)}>

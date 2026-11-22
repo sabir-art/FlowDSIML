@@ -2135,3 +2135,8 @@ button.fd-nav__item:hover {
     stroke-width: 2.1;
   }
 }
+
+/* Menu « … » d'une démo : 240 px (maquette du lot 2) ; la feuille mobile garde sa largeur */
+.menu-list--wide:not(.menu-list--sheet) {
+  width: 240px;
+}
