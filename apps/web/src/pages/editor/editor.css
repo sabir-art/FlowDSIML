@@ -4176,3 +4176,36 @@
 .mk .ed-tool .notes-sec .lock {
   letter-spacing: 0;
 }
+
+/* ---- Recette UX du lot 3 (13c1904), P2 à P6 ---- */
+/* P2 : texte alternatif sans poignée native, il grandit avec son contenu */
+.mk .ed-tool #st-alt {
+  min-height: 72px;
+  resize: none;
+  field-sizing: content;
+}
+/* P3 : aides des champs en 13 px */
+.mk .ed-tool .help {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+/* P4 : segmenté Animation sur toute la largeur du panneau, segments égaux (ALIGN-01) */
+.mk .ed-tool .cap-anim > .segmented {
+  display: flex;
+  width: 100%;
+}
+.mk .ed-tool .cap-anim > .segmented > button {
+  flex: 1;
+  justify-content: center;
+}
+/* P6 : « Supprimer l'étape » en pied fixe du panneau, toujours visible, au-dessus d'un filet */
+.mk .ed-tool .sp-foot {
+  position: sticky;
+  /* Le bas collant se mesure dans la zone de contenu : -16 px pour toucher le bord du panneau */
+  bottom: -16px;
+  z-index: 1;
+  margin: 0 -16px -16px;
+  padding: 16px;
+  border-top: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface);
+}

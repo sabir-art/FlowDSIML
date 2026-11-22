@@ -309,7 +309,6 @@ export function StepPanel({
               <label htmlFor="st-chapter">{t('editor.chapter')}</label>
               <Select
                 id="st-chapter"
-                size="sm"
                 disabled={readOnly}
                 value={step.chapter_id ?? ''}
                 onChange={(e) => editor.updateStep(step.id, { chapter_id: e.target.value || null })}
@@ -326,7 +325,6 @@ export function StepPanel({
               <label htmlFor="st-gate">{t('editor.gateForm')}</label>
               <Select
                 id="st-gate"
-                size="sm"
                 disabled={readOnly || !editor.forms.length}
                 value={step.gate_form_id ?? ''}
                 onChange={(e) => editor.updateStep(step.id, { gate_form_id: e.target.value || null })}

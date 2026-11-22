@@ -40,9 +40,9 @@ export type ToolId =
 export const TOOL_GROUPS: Array<{ key: string; tools: ToolId[] }> = [
   { key: 'content', tools: ['step', 'cta', 'hotspots', 'voice', 'next'] },
   { key: 'screen', tools: ['blur', 'zoom', 'crop', 'image'] },
-  { key: 'look', tools: ['design'] },
   // Retours client 21/11 §1 : les Commentaires sont dans le panneau sous le canevas, plus dans le rail
-  { key: 'collab', tools: ['assistant'] },
+  // Recette du lot 3 (P7) : Design et Assistant forment un groupe, comme dans la maquette
+  { key: 'look', tools: ['design', 'assistant'] },
 ];
 /** Ordre du rail (raccourcis Alt + 1 à 9 sur les 9 premiers). */
 export const TOOL_ORDER: ToolId[] = [...TOOL_GROUPS.flatMap((g) => g.tools), 'settings'];

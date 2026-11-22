@@ -80,9 +80,9 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     'raccourcis affichés dans le menu',
   );
   ok(
-    (await page.getByRole('menuitem', { name: /Coller après/ }).getAttribute('aria-disabled')) === 'true' ||
-      (await page.getByRole('menuitem', { name: /Coller après/ }).isDisabled()),
-    '« Coller après » indisponible tant que rien n’est copié',
+    (await page.getByRole('menuitem', { name: /Coller après/ }).getAttribute('aria-disabled')) === 'true' &&
+      (await page.getByRole('menuitem', { name: /Coller après/ }).getAttribute('disabled')) === null,
+    'M1 : « Coller après » en aria-disabled="true" tant que rien n’est copié (pas d’attribut disabled)',
   );
   ok(
     /Bientôt/.test(await page.getByRole('menuitem', { name: /Masquer l’étape/ }).innerText()),

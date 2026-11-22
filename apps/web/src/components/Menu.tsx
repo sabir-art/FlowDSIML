@@ -281,8 +281,8 @@ export function Menu({
                       role={it.radio ? 'menuitemradio' : 'menuitem'}
                       aria-checked={it.radio ? !!it.current : undefined}
                       className={`menu-item${it.danger ? ' menu-item--danger' : ''}`}
-                      disabled={it.disabled && !it.hint}
-                      aria-disabled={it.disabled && it.hint ? 'true' : undefined}
+                      /* APG : une entrée indisponible reste atteignable aux flèches, annoncée désactivée */
+                      aria-disabled={it.disabled ? 'true' : undefined}
                       aria-describedby={it.disabled && it.hint ? `${id}-h${i}` : undefined}
                       title={it.disabled && it.hint ? it.hint : undefined}
                       aria-current={it.current && !it.radio ? 'true' : undefined}

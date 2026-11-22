@@ -55,7 +55,14 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
   // ===== Rail =====
   ok((await rail.getAttribute('aria-orientation')) === 'vertical', 'rail vertical');
-  ok((await rail.getByRole('group').count()) === 5, 'groupes : Contenu, Écran, Apparence, Collaborer, Démo');
+  // Recette du lot 3 (P7) : Design et Assistant dans le même groupe, un filet entre les groupes
+  ok((await rail.getByRole('group').count()) === 4, 'groupes : Contenu, Écran, Apparence, Démo');
+  ok(
+    (await rail
+      .locator('button[data-tool="assistant"]')
+      .evaluate((el) => Math.round(el.getBoundingClientRect().top))) === 490,
+    'P7 : « Assistant » à y 490',
+  );
   // Retours client 21/11 §1 : Commentaires sortis du rail (panneau sous le canevas)
   ok((await rail.locator('button[data-tool]').count()) === 12, '12 outils');
   ok((await p.locator('.ed-tool').count()) === 1, 'un panneau ouvert (Étape par défaut)');
