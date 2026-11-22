@@ -1,6 +1,7 @@
 /** Test e2e du tableau de bord des démos (faux Supabase). */
 const { chromium } = require('playwright');
 const { install } = require('./fake-supabase.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -81,9 +82,9 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: 'Actions pour Démo CRM' }).click();
   ok((await page.locator('[role=menuitem]').count()) >= 5, 'menu d’actions de la carte');
   await page.getByRole('menuitem', { name: 'Déplacer vers…' }).click();
-  await page.locator('dialog[open] select').selectOption({ label: 'Ventes' });
+  await pick(page.locator('dialog[open] [role="combobox"]'), { label: 'Ventes' });
   await page.waitForTimeout(300);
-  await page.locator('dialog[open]').getByRole('button', { name: 'Fermer' }).click();
+  await page.locator('dialog[open] .fd-modal__foot').getByRole('button', { name: 'Fermer' }).click();
   await col.getByRole('link', { name: /^Ventes/ }).click();
   await page.waitForTimeout(300);
   ok((await page.locator('.demo-card').count()) === 1, 'démo rangée dans le dossier');

@@ -7,6 +7,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const CAMILLE = '00000000-0000-4000-8000-0000000000c1';
@@ -125,7 +126,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     .first()
     .click();
   await page.getByRole('menuitem', { name: /Déplacer/ }).click();
-  await page.getByRole('combobox', { name: /Déplacer/ }).selectOption(FOLDER);
+  await pick(page.getByRole('combobox', { name: /Déplacer/ }), FOLDER);
   const confirm = page.getByRole('dialog').filter({ hasText: 'ne sera plus visible' });
   await confirm.waitFor();
   ok(

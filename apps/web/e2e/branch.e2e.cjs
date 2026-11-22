@@ -3,6 +3,7 @@ const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick, pickedLabel, optionsOf, picked } = require('./_select.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -54,8 +55,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok((await answers.inputValue()) === 'A\nB', 'L22-09 : réponses une par ligne');
   const dest2 = page.getByLabel('Destination de la règle 2');
   ok(
-    (await dest2.getAttribute('aria-invalid')) === 'true' &&
-      (await dest2.locator('option:checked').textContent()) === 'Étape supprimée',
+    (await dest2.getAttribute('aria-invalid')) === 'true' && (await pickedLabel(dest2)) === 'Étape supprimée',
     'L22-09 : règle vers une étape supprimée en erreur',
   );
   ok(
@@ -69,7 +69,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
   const elseSel = page.getByLabel('Destination par défaut');
   ok(
-    (await elseSel.locator('option:checked').textContent()) === 'Étape suivante (fin de la démo)',
+    (await pickedLabel(elseSel)) === 'Étape suivante (fin de la démo)',
     'L22-09 : « Sinon » sur « Étape suivante » par défaut',
   );
   if (SHOTS) {
@@ -95,7 +95,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok((await page.getByText(/Boucle sans sortie/).count()) === 0, 'L22-09 : la boucle a maintenant une issue');
 
   // Corriger la règle 2 ; une règle par réponse
-  await dest2.selectOption({ label: '2 · Écran 2' });
+  await pick(dest2, { label: '2 · Écran 2' });
   await page.waitForTimeout(900);
   ok(
     opts().choices[1].action.stepId === 's2' && (await dest2.getAttribute('aria-invalid')) === null,
@@ -104,7 +104,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.getByRole('button', { name: 'Ajouter une règle' }).click();
   await page.waitForTimeout(900);
   ok(
-    (await page.getByLabel('Réponse de la règle 3').inputValue()) === '2' &&
+    (await picked(page.getByLabel('Réponse de la règle 3'))) === '2' &&
       opts().choices[2].action.type === 'end',
     'L22-09 : nouvelle règle sur la première réponse libre',
   );
@@ -113,11 +113,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'L22-09 : une règle par réponse au plus',
   );
   ok(
-    await page.getByLabel('Réponse de la règle 3').locator('option[value="0"]').isDisabled(),
+    (await optionsOf(page.getByLabel('Réponse de la règle 3'), { raw: true })).find((o) => o.value === '0')
+      ?.disabled === true,
     'L22-09 : réponse déjà prise grisée',
   );
   await page.getByRole('button', { name: 'Supprimer la règle 3' }).click();
-  await elseSel.selectOption({ label: 'Fin de la démo' });
+  await pick(elseSel, { label: 'Fin de la démo' });
   await page.waitForTimeout(900);
   ok(
     opts().choices[2].action.type === 'end' && opts().branch.else.type === 'end',

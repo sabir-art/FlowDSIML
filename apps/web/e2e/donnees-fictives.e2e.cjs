@@ -8,6 +8,7 @@ const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -75,7 +76,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await dlg
     .getByLabel('Décrivez les colonnes')
     .fill('structure, nombre de jeunes suivis, taux d’entrée en formation');
-  await dlg.getByLabel('Nombre de lignes').selectOption('20');
+  await pick(dlg.getByLabel('Nombre de lignes'), '20');
   await shot('l30-06-saisie');
   await dlg.getByRole('button', { name: 'Générer', exact: true }).click();
   await dlg.getByRole('button', { name: 'Utiliser ce jeu de données' }).waitFor();

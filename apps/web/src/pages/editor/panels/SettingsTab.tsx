@@ -11,6 +11,7 @@ import { ClipboardList, Database, Lock, Presentation } from 'lucide-react';
 import { DATASET_OPEN } from '../html/ChartFields';
 import { publishedColumns, useDataset } from '../data/datasetStore';
 import { DEMO_TAG_LIMIT, TAG_COLORS, TAG_LIMIT, useWorkspaceTags } from '../../../components/Tags';
+import { Select } from '@flowdsiml/ui';
 
 /** Interrupteur de la maquette (.setting + .switch). */
 function SettingSwitch({
@@ -189,9 +190,9 @@ export function SettingsTab({
 
       <div className="sec">
         <div className="sec-title">{t('editor.settings.language')}</div>
-        <select
+        <Select
           id="th-locale"
-          className="select input-sm"
+          size="sm"
           aria-label={t('editor.settings.language')}
           disabled={readOnly}
           value={settings.locale ?? 'fr'}
@@ -217,7 +218,7 @@ export function SettingsTab({
           <option value="ar" lang="ar" dir="rtl">
             {'\u0627\u0644\u0639\u0631\u0628\u064a\u0629'}
           </option>
-        </select>
+        </Select>
       </div>
 
       <div className="sec">

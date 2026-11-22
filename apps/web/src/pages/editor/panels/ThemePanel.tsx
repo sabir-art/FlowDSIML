@@ -3,7 +3,7 @@ import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FrameFields } from '../capture/FrameFields';
 import { themeSchema, type Theme } from '@flowdsiml/manifest';
-import { Alert } from '@flowdsiml/ui';
+import { Alert, Select } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { SUPABASE_URL } from '../../../lib/env';
 import { contrastRatio, darkenToContrast } from '../../../lib/contrast';
@@ -162,9 +162,9 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
 
       <div className="sec">
         <div className="sec-title">{t('editor.design.typography')}</div>
-        <select
+        <Select
           id="th-font"
-          className="select input-sm"
+          size="sm"
           aria-label={t('editor.font')}
           disabled={readOnly}
           value={theme.fontUrl ? 'media' : theme.fontFamily}
@@ -180,7 +180,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
             </option>
           ))}
           <option value="media">{theme.fontUrl ? t('editor.design.fontMedia') : t('media.choose')}</option>
-        </select>
+        </Select>
       </div>
 
       <div className="sec">

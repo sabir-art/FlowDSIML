@@ -10,6 +10,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import { asSettings } from '../types';
 import { OUT_WIDTHS, type FitMode, type FormatId } from './format';
 import { applyFormat, formatSteps, planStep, renderPlan, type FormatChoice } from './applyFormat';
+import { Select } from '@flowdsiml/ui';
 
 const FORMATS: FormatId[] = ['original', '16:9', '16:10', '4:3', 'custom'];
 const MIN = 640;
@@ -217,9 +218,9 @@ export function FormatSection({ editor, readOnly }: { editor: DemoEditor; readOn
       {choice.format !== 'custom' && (
         <div className="field">
           <label htmlFor="fmt-out">{t('editor.format.outWidth')}</label>
-          <select
+          <Select
             id="fmt-out"
-            className="select input-sm"
+            size="sm"
             disabled={readOnly || !!busy}
             value={choice.outWidth}
             onChange={(e) => setChoice({ ...choice, outWidth: Number(e.target.value) })}
@@ -229,7 +230,7 @@ export function FormatSection({ editor, readOnly }: { editor: DemoEditor; readOn
                 {t('editor.format.px', { n: nf(w) })}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       )}
       {current && (

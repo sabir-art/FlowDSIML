@@ -20,7 +20,7 @@ import { GuideList } from './GuideList';
 import { guideHint, upsertOp } from './htmlModel';
 import { Menu } from '../../../components/Menu';
 import { useHtmlCapture } from '../../../lib/htmlCapture';
-import { Status } from '@flowdsiml/ui';
+import { Status, Select } from '@flowdsiml/ui';
 import { useToast } from '../../../components/Toast';
 import { captureInExtension } from '../../../lib/extensionLink';
 import { EXTENSION_URL } from '../../../lib/env';
@@ -435,9 +435,9 @@ export function SandboxPlan({
         </div>
         <div className="field">
           <label htmlFor="sb-start">{t('editor.sandbox.startPage')}</label>
-          <select
+          <Select
             id="sb-start"
-            className="select input-sm"
+            size="sm"
             value={sb.start ?? ''}
             disabled={readOnly}
             onChange={(e) => save({ start: e.target.value })}
@@ -447,7 +447,7 @@ export function SandboxPlan({
                 {title(p.id)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div>
           <div className="setting">
@@ -469,9 +469,9 @@ export function SandboxPlan({
         </div>
         <div className="field">
           <label htmlFor="sb-unlinked">{t('editor.sandbox.unlinked')}</label>
-          <select
+          <Select
             id="sb-unlinked"
-            className="select input-sm"
+            size="sm"
             value={sb.unlinked}
             disabled={readOnly}
             onChange={(e) => save({ unlinked: e.target.value })}
@@ -479,7 +479,7 @@ export function SandboxPlan({
             <option value="toast">{t('editor.sandbox.unlinkedToast')}</option>
             <option value="none">{t('editor.sandbox.unlinkedNone')}</option>
             <option value="highlight">{t('editor.sandbox.unlinkedHighlight')}</option>
-          </select>
+          </Select>
         </div>
         <div>
           <div className="setting">

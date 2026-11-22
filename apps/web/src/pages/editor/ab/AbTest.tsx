@@ -10,7 +10,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import { asCta, type StepRow } from '../types';
 import { abOutcome, type AbCounts, type AbGoal } from './abResult';
 import './ab.css';
-import { Status } from '@flowdsiml/ui';
+import { Status, Select } from '@flowdsiml/ui';
 
 export type AbTest = Tables<'ab_tests'>;
 type VariantB = { title?: string; body?: string; cta?: { label: string; url: string } | null };
@@ -255,9 +255,9 @@ export function AbSection({
       </p>
       <div className="field">
         <label htmlFor="ab-goal">{t('editor.ab.goal')}</label>
-        <select
+        <Select
           id="ab-goal"
-          className="select input-sm"
+          size="sm"
           disabled={readOnly}
           value={goal}
           onChange={(e) => void setOpt({ p_goal: e.target.value as AbGoal })}
@@ -267,7 +267,7 @@ export function AbSection({
               {t(`editor.ab.goal_${g}`)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="field">
         <label htmlFor="ab-split">{t('editor.ab.split')}</label>

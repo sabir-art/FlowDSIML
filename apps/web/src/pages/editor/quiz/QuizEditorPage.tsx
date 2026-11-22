@@ -14,7 +14,7 @@ import { useId, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Manifest } from '@flowdsiml/manifest';
-import { Alert, Button, Field, NativeSelect as Select, Switch } from '@flowdsiml/ui';
+import { Alert, Button, Field, Select, Switch } from '@flowdsiml/ui';
 import { errorMessage } from '../../../lib/errors';
 import { Loading } from '../../../components/guards';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';

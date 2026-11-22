@@ -11,7 +11,7 @@ import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { ARTICLES } from '../../help/articles';
 import { WriteButton, articleTitle, rpcError, type Item } from './shared';
-import { Status } from '@flowdsiml/ui';
+import { Status, Select } from '@flowdsiml/ui';
 
 export interface News {
   id: string;
@@ -256,19 +256,14 @@ export function NewsEditor({
               <label htmlFor="ne-art">
                 {t('console.nw.link')} <span className="opt">{t('plans.optional')}</span>
               </label>
-              <select
-                id="ne-art"
-                className="input"
-                value={article}
-                onChange={(e) => setArticle(e.target.value)}
-              >
+              <Select id="ne-art" value={article} onChange={(e) => setArticle(e.target.value)}>
                 <option value="">{t('console.bl.noArticle')}</option>
                 {ARTICLES.map((a) => (
                   <option key={a.slug} value={a.slug}>
                     {a.title}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <p className="help">{t('console.nw.audience')}</p>
           </div>

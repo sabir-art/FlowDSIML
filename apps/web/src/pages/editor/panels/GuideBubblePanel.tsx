@@ -10,6 +10,7 @@ import { sandboxOf } from '../draftManifest';
 import { ignoredOf } from '../html/sandboxGraph';
 import { fallbackRect, GUIDE_MAX, type GuideStepRef } from '../html/sandboxGuide';
 import { frameSend, setHtmlEdit, useHtmlEdit } from '../html/htmlModel';
+import { Select } from '@flowdsiml/ui';
 
 const PLACEMENTS = ['auto', 'top', 'bottom', 'left', 'right'] as const;
 
@@ -141,9 +142,9 @@ export function GuideBubblePanel({
         <label className="sec-title" htmlFor="gd-place">
           {t('editor.placement')}
         </label>
-        <select
+        <Select
           id="gd-place"
-          className="select input-sm"
+          size="sm"
           value={hotspot.placement}
           disabled={readOnly}
           onChange={(e) => set({ placement: e.target.value })}
@@ -153,7 +154,7 @@ export function GuideBubblePanel({
               {p === 'auto' ? t('editor.hs.autoPlacement') : t(`editor.placement_${p}`)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       {!isSandbox ? null : at >= 0 ? (
         <div className="sec">

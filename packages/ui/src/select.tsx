@@ -37,8 +37,9 @@ export interface SelectChangeEvent {
 export interface SelectProps {
   id?: string;
   name?: string;
-  value?: string;
-  defaultValue?: string;
+  /** Un nombre est accepté et lu comme du texte, comme le fait un `<select>`. */
+  value?: string | number;
+  defaultValue?: string | number;
   onChange?: (e: SelectChangeEvent) => void;
   /** Options en données ; sinon, les enfants `<option>` / `<optgroup>` sont lus. */
   options?: SelectOption[];
@@ -115,8 +116,8 @@ export function Select({
   const triggerId = id ?? `${auto}-t`;
   const listId = `${auto}-l`;
   const all = useMemo(() => options ?? fromChildren(children), [options, children]);
-  const [inner, setInner] = useState(defaultValue ?? all[0]?.value ?? '');
-  const current = value ?? inner;
+  const [inner, setInner] = useState(String(defaultValue ?? all[0]?.value ?? ''));
+  const current = value === undefined ? inner : String(value);
   const selected = all.find((o) => o.value === current);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -299,6 +300,7 @@ export function Select({
         type="button"
         id={triggerId}
         role="combobox"
+        data-value={current}
         className={`fd-sel${size === 'sm' ? ' fd-sel--sm' : ''}${open ? ' is-open' : ''} ${className}`.trim()}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -370,6 +372,7 @@ export function Select({
                     <div
                       id={optId(i)}
                       role="option"
+                      data-value={o.value}
                       aria-selected={isSel}
                       aria-disabled={o.disabled || undefined}
                       className={`fd-opt${i === active ? ' is-active' : ''}`}

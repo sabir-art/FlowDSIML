@@ -14,6 +14,7 @@ import { TypeBadge } from '../../components/TypeBadge';
 import { EXTENSION_URL } from '../../lib/env';
 import { useHtmlCapture } from '../../lib/htmlCapture';
 import { HtmlCaptureNotice } from '../../components/HtmlCaptureNotice';
+import { Select } from '@flowdsiml/ui';
 
 /**
  * DSH-06, L48-G §3 : « Nouvelle démo » en deux étapes.
@@ -302,14 +303,14 @@ export function NewDemoDialog({
           {type !== 'captures' && <HtmlCaptureNotice className="nd-notice" />}
           <label className="fd-field nd-folder">
             <span className="fd-label">{t('demos.colFolder')}</span>
-            <select className="fd-input" value={folder} onChange={(e) => setFolder(e.target.value)}>
+            <Select value={folder} onChange={(e) => setFolder(e.target.value)}>
               <option value="">{t('demos.noFolder')}</option>
               {folders.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <div className="dialog-actions nd-actions">
             <button type="button" className="fd-btn" onClick={() => setStep(1)}>

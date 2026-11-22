@@ -1,6 +1,7 @@
 /** Test e2e de l'éditeur (faux Supabase). Usage : app web lancée sur :5173 avec VITE_SUPABASE_ANON_KEY défini. */
 const { chromium } = require('playwright');
 const { install } = require('./fake-supabase.cjs');
+const { pick, picked } = require('./_select.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -163,7 +164,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: 'Placer avant l’étape suivante' }).click();
   await page.waitForTimeout(900);
   ok(
-    (await page.locator('#f-gate').inputValue()) === '2',
+    (await picked(page.locator('#f-gate'))) === '2',
     'EDT-08 : déplacer le formulaire dans le rail change l’étape déclencheuse',
   );
   await tool('Réglages de la démo');
@@ -220,7 +221,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.waitForSelector('.canvas-popup');
   ok((await page.locator('.canvas-choices li').count()) === 2, 'F1 : étape menu de choix (2 choix) créée');
   // L22-09 : réponses une par ligne, règles de suite (index 0 = « Étape suivante », 1 = première étape)
-  await page.getByLabel('Destination de la règle 1').selectOption({ index: 1 });
+  await pick(page.getByLabel('Destination de la règle 1'), { index: 1 });
   const answers = page.getByLabel('Réponses (une par ligne, 6 au plus)');
   const lines = (await answers.inputValue()).split('\n');
   await answers.fill(['Je suis conseiller', ...lines.slice(1)].join('\n'));

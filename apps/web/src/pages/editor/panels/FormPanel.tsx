@@ -8,6 +8,7 @@ import { VarTextField } from '../vars/VarTextField';
 import { useVarCatalog } from '../../../lib/varCatalog';
 import type { DemoEditor } from '../useDemoEditor';
 import { asFields, type FormField, type FormRow } from '../types';
+import { Select } from '@flowdsiml/ui';
 
 const OPTIONAL: Array<Omit<FormField, 'label'> & { labelKey: string }> = [
   { key: 'full_name', type: 'text', required: false, labelKey: 'editor.fieldName' },
@@ -218,9 +219,9 @@ export function FormPanel({
         <div className="sec-title">{t('editor.form.position')}</div>
         <div className="field">
           <label htmlFor="f-gate">{t('editor.form.beforeStepLabel')}</label>
-          <select
+          <Select
             id="f-gate"
-            className="select input-sm"
+            size="sm"
             disabled={readOnly}
             value={gateIndex}
             onChange={(e) => moveTo(Number(e.target.value))}
@@ -230,7 +231,7 @@ export function FormPanel({
                 {i + 1}. {s.title || t('editor.untitled')}
               </option>
             ))}
-          </select>
+          </Select>
           <span className="help">{t('editor.form.positionHelp')}</span>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CircleAlert, GraduationCap, PackageOpen } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { NativeSelect as Select } from '@flowdsiml/ui';
+import { Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 

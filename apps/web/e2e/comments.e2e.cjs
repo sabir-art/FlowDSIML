@@ -2,6 +2,7 @@
 const { chromium } = require('playwright');
 const { install } = require('./fake-supabase.cjs');
 const { openComments } = require('./editor-rail.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -120,7 +121,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await m.getByRole('button', { name: 'Envoyer', exact: true }).click();
   await m.waitForTimeout(300);
   ok(state.tables.step_comments.length === 1, 'mobile : réponse envoyée');
-  await m.selectOption('.editor-narrow__steps', '1');
+  await pick(m.locator('.editor-narrow__steps'), '1');
   ok((await m.locator('#cm-title').textContent()) === 'Commentaires · Étape 2', 'mobile : sélecteur d’étape');
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);

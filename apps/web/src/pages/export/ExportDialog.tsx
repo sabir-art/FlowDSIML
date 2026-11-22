@@ -71,6 +71,7 @@ import {
 } from './exportData';
 import { PdfPagePreview } from './PdfPagePreview';
 import './export.css';
+import { Select } from '@flowdsiml/ui';
 
 type Fmt = 'pdf' | 'gif' | 'mp4' | 'html';
 /** L25-12 : fichiers prêts (vidéo et sous-titres). */
@@ -1069,8 +1070,7 @@ function Options(p: {
                   <label className="fd-label" htmlFor={`${p.id}-fmt`}>
                     {t('export.paper')}
                   </label>
-                  <select
-                    className="fd-select"
+                  <Select
                     id={`${p.id}-fmt`}
                     value={pdf.orientation}
                     onChange={(e) =>
@@ -1079,17 +1079,17 @@ function Options(p: {
                   >
                     <option value="portrait">{t('export.a4portrait')}</option>
                     <option value="landscape">{t('export.a4landscape')}</option>
-                  </select>
+                  </Select>
                 </div>
                 <div className="fd-field">
                   <label className="fd-label" htmlFor={`${p.id}-lng`}>
                     {t('export.lang')}
                   </label>
-                  <select className="fd-select" id={`${p.id}-lng`} defaultValue="demo">
+                  <Select id={`${p.id}-lng`} defaultValue="demo">
                     <option value="demo">
                       {t(i18n.language.startsWith('en') ? 'export.langEn' : 'export.langFr')}
                     </option>
-                  </select>
+                  </Select>
                 </div>
               </div>
             )}
@@ -1111,8 +1111,7 @@ function Options(p: {
                   <label className="fd-label" htmlFor={`${p.id}-vfmt`}>
                     {t('export.frameFormat')}
                   </label>
-                  <select
-                    className="fd-select"
+                  <Select
                     id={`${p.id}-vfmt`}
                     value={mp4x.format}
                     onChange={(e) => setMp4x({ ...mp4x, format: e.target.value as Mp4Format })}
@@ -1122,15 +1121,14 @@ function Options(p: {
                         {t(`export.vfmt_${f.key}`)}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               ) : (
                 <div className="fd-field">
                   <label className="fd-label" htmlFor={`${p.id}-gsz`}>
                     {t('export.size')}
                   </label>
-                  <select
-                    className="fd-select"
+                  <Select
                     id={`${p.id}-gsz`}
                     value={gif.width}
                     onChange={(e) => setGif({ ...gif, width: Number(e.target.value) as GifOptions['width'] })}
@@ -1140,22 +1138,21 @@ function Options(p: {
                         {t(`export.size_${w}`)}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               )}
               <div className="fd-field">
                 <label className="fd-label" htmlFor={`${p.id}-grg`}>
                   {t('export.steps')}
                 </label>
-                <select
-                  className="fd-select"
+                <Select
                   id={`${p.id}-grg`}
                   value={gif.range}
                   onChange={(e) => setGif({ ...gif, range: e.target.value as 'all' | 'range' })}
                 >
                   <option value="all">{t('export.allSteps', { count: n })}</option>
                   <option value="range">{t('export.someSteps')}</option>
-                </select>
+                </Select>
               </div>
             </div>
             {gif.range === 'range' && (
@@ -1165,8 +1162,7 @@ function Options(p: {
                     <label className="fd-label" htmlFor={`${p.id}-${k}`}>
                       {t(`export.range_${k}`)}
                     </label>
-                    <select
-                      className="fd-select"
+                    <Select
                       id={`${p.id}-${k}`}
                       value={gif[k]}
                       onChange={(e) => {
@@ -1183,7 +1179,7 @@ function Options(p: {
                           {`${i + 1}. ${s.title || t('export.stepN', { n: i + 1 })}`}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                 ))}
               </div>

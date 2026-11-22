@@ -7,6 +7,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -64,7 +65,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   });
   ok(ring1 === 'none|none', `ouverture : titre focalisé sans anneau (${ring1})`);
   ok((await page.getByLabel('Prénom').inputValue()) === 'Alice', 'prénom prérempli depuis le profil');
-  await page.getByLabel('Fonction (facultatif)').selectOption('trainer');
+  await pick(page.getByLabel('Fonction (facultatif)'), 'trainer');
   ok(/Formateur ou formatrice/.test(await page.locator('.obx-preview').innerText()), 'aperçu : fonction');
   await shot('l48c-1-profil');
   await page.getByRole('button', { name: 'Continuer', exact: true }).click();

@@ -2,7 +2,8 @@
    Rayon de 10 px, filet de 1 px, ombre md, padding de 4 px, fond surface. Rendu dans le portail. */
 .fd-pop {
   position: fixed;
-  z-index: var(--fd-z-dropdown);
+  /* Au-dessus des voiles de modale (overlay, modal) : une liste ouverte depuis une modale reste cliquable */
+  z-index: var(--fd-z-popover);
   display: flex;
   flex-direction: column;
   padding: 4px;

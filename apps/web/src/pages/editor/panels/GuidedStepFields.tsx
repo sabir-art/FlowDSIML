@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { VarTextField } from '../vars/VarTextField';
 import { useVarCatalog } from '../../../lib/varCatalog';
 import type { ChoiceAction, StepOptions } from '@flowdsiml/manifest';
-import { Button, Field, NativeSelect as Select, Switch } from '@flowdsiml/ui';
+import { Button, Field, Select, Switch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asAction, asStepOptions, type StepRow } from '../types';
 import { loopsWithoutExit, unreachableSteps } from '../reachability';

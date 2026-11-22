@@ -1,6 +1,7 @@
 import { CircleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { personalTitle } from '@flowdsiml/core';
+import { Select } from '@flowdsiml/ui';
 
 /** L25-13 : réglages de la page personnalisée d'un lien. */
 export interface PersonalPageDraft {
@@ -127,9 +128,8 @@ export function PersonalPageFields({
           <div className="grid sh-vars">
             <div className="field">
               <label htmlFor="sh-pp-sign">{t('share.pp.signedBy')}</label>
-              <select
+              <Select
                 id="sh-pp-sign"
-                className="select"
                 value={draft.signedBy}
                 onChange={(e) => set({ signedBy: e.target.value })}
               >
@@ -139,14 +139,13 @@ export function PersonalPageFields({
                     {m.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             {datasetRows && (
               <div className="field">
                 <label htmlFor="sh-pp-row">{t('share.pp.datasetRow')}</label>
-                <select
+                <Select
                   id="sh-pp-row"
-                  className="select"
                   value={draft.datasetRow}
                   onChange={(e) => set({ datasetRow: e.target.value })}
                 >
@@ -156,7 +155,7 @@ export function PersonalPageFields({
                       {t('share.pp.rowN', { n: i + 1, label: r })}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             )}
           </div>

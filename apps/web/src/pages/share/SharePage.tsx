@@ -56,7 +56,7 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { NotificationBell } from '../../components/notifications/NotificationBell';
-import { Status } from '@flowdsiml/ui';
+import { Status, Select } from '@flowdsiml/ui';
 
 type Tab = 'link' | 'embed' | 'perso' | 'access' | 'page';
 type LinkStats = Record<string, { views: number; last: string | null }>;
@@ -1276,12 +1276,7 @@ function NewLinkDialog({
           {expires && (
             <div className="field">
               <label htmlFor="sh-days">{t('share.expiresAfter')}</label>
-              <select
-                id="sh-days"
-                className="select"
-                value={days}
-                onChange={(e) => setDays(Number(e.target.value))}
-              >
+              <Select id="sh-days" value={days} onChange={(e) => setDays(Number(e.target.value))}>
                 {[7, 30, 90].map((d) => (
                   <option key={d} value={d}>
                     {t('share.expiresIn', {
@@ -1290,7 +1285,7 @@ function NewLinkDialog({
                     })}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
         </div>

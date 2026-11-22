@@ -33,6 +33,7 @@ import {
 } from './webhooks';
 import { SecretDialog, StateBadge, resultText } from './WebhooksPage';
 import './integrations.css';
+import { Select } from '@flowdsiml/ui';
 
 export function WebhookDetail() {
   const { id = '' } = useParams();
@@ -277,15 +278,15 @@ export function WebhookDetail() {
           <div className="card l23-log">
             <div className="row between l23-log-head">
               <h3 className="t-h3">{t('integrations.logTitle')}</h3>
-              <select
-                className="select input-sm"
+              <Select
+                size="sm"
                 aria-label={t('integrations.logFilter')}
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as 'all' | 'failed')}
               >
                 <option value="all">{t('integrations.logAll')}</option>
                 <option value="failed">{t('integrations.logFailed')}</option>
-              </select>
+              </Select>
             </div>
             {shown.length === 0 ? (
               <p className="muted l23-log-empty">{t('integrations.logEmpty')}</p>

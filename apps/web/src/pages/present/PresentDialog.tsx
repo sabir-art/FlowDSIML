@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { CircleAlert, Play, Presentation, RefreshCw, X } from 'lucide-react';
 import { DEFAULT_PRESENT, screenUrl, toSearch, type PresentOptions } from './present';
 import './present.css';
+import { Select } from '@flowdsiml/ui';
 
 export function PresentDialog({
   demoId,
@@ -89,8 +90,7 @@ export function PresentDialog({
           <label className="fd-label" htmlFor={`${id}-s`}>
             {t('present.start')}
           </label>
-          <select
-            className="fd-select"
+          <Select
             id={`${id}-s`}
             value={o.start}
             onChange={(e) => setO({ ...o, start: Number(e.target.value) })}
@@ -100,7 +100,7 @@ export function PresentDialog({
                 {t('present.stepOption', { n: i + 1, title: s || t('editor.untitled') })}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="fd-field">
           <span className="fd-label" id={`${id}-tl`}>

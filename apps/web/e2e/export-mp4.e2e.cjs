@@ -8,6 +8,7 @@ const fs = require('fs');
 const { install, seed } = require('./fake-supabase.cjs');
 const { seedExport } = require('./export-data.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick, optionsOf } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -56,12 +57,9 @@ const SHOTS = process.env.SHOTS_DIR;
     const p = await open();
     await p.getByRole('radio', { name: /Vidéo MP4/ }).click();
     ok(await p.getByRole('radio', { name: /Vidéo MP4/ }).isChecked(), 'carte MP4 active');
-    const formats = await p
-      .getByLabel('Format de l’image')
-      .or(p.getByLabel("Format de l'image"))
-      .locator('option')
-      .allTextContents()
-      .then((a) => a.map(sp));
+    const formats = await optionsOf(
+      p.getByLabel('Format de l’image').or(p.getByLabel("Format de l'image")),
+    ).then((a) => a.map(sp));
     ok(
       formats.length === 4 &&
         formats[0].includes('1 920 × 1 080 (recommandé)') &&
@@ -85,9 +83,9 @@ const SHOTS = process.env.SHOTS_DIR;
       /n'est pas accessible|n’est pas accessible/.test(await p.locator('.x15-dialog').textContent()),
       'aide : accessibilité des sous-titres',
     );
-    await p.getByLabel('Étapes', { exact: true }).selectOption('range');
-    await p.getByLabel(/^À l.étape/).selectOption('2');
-    await p.getByLabel("Format de l'image").selectOption('1280x720');
+    await pick(p.getByLabel('Étapes', { exact: true }), 'range');
+    await pick(p.getByLabel(/^À l.étape/), '2');
+    await pick(p.getByLabel("Format de l'image"), '1280x720');
     await shot(p, 'l25-11-mp4');
 
     // ===== L25-12 : en cours puis prêt =====
@@ -154,7 +152,7 @@ const SHOTS = process.env.SHOTS_DIR;
     await p.getByRole('switch', { name: 'Écran de titre' }).click();
     // 1 étape × 2,5 s + vidéo gardée (12,008 − 8 s)
     ok(/^6,5 secondes/.test(await help(p)), `durée : étape vidéo coupée (${await help(p)})`);
-    await p.getByLabel("Format de l'image").selectOption('1280x720');
+    await pick(p.getByLabel("Format de l'image"), '1280x720');
     const [d] = await Promise.all([
       p.waitForEvent('download', { timeout: 120000 }),
       p.getByRole('button', { name: 'Exporter en MP4' }).click(),

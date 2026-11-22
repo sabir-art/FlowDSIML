@@ -6,6 +6,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick } = require('./_select.cjs');
 const BASE = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const sp = (s) => (s || '').replace(/[  ]/g, ' ');
@@ -230,7 +231,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   await sv.getByLabel('Nom du modèle').fill('Prise en main maison');
   await sv.getByLabel(/Description/).fill('Notre façon de présenter un outil.');
-  await sv.getByLabel('Catégorie').selectOption('logiciel');
+  await pick(sv.getByLabel('Catégorie'), 'logiciel');
   // Bilan RGPD : avec les captures, confirmation obligatoire
   await sv.getByRole('radio', { name: /Avec les captures/ }).check();
   ok(

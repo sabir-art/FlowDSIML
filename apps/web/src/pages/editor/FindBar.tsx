@@ -14,6 +14,7 @@ import {
   type TextField,
 } from './findReplace';
 import { useToast } from '../../components/Toast';
+import { Select } from '@flowdsiml/ui';
 
 /** Tous les textes modifiables de la démo, étape par étape. */
 export function collectFields(editor: DemoEditor): TextField[] {
@@ -235,8 +236,9 @@ export function FindBar({
         </button>
       </div>
       <div className="row-3">
-        <select
-          className="select input-sm grow"
+        <Select
+          size="sm"
+          className="grow"
           aria-label={t('editor.find.scope')}
           value={opts.scope}
           onChange={(e) => setOpts({ ...opts, scope: e.target.value as FindScope })}
@@ -246,7 +248,7 @@ export function FindBar({
               {t(`editor.find.scopes.${s}`)}
             </option>
           ))}
-        </select>
+        </Select>
         <button
           type="button"
           className="btn btn-secondary btn-sm"

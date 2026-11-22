@@ -8,6 +8,7 @@ import { AiRequestError, aiBlock, callAi, useAiStatus } from '../../lib/ai';
 import { useBlockText } from './AiWrite';
 import { preparePage, type PageElement } from '../../lib/htmlText';
 import './ai.css';
+import { Select } from '@flowdsiml/ui';
 
 export interface GenStep {
   title: string;
@@ -370,8 +371,7 @@ export function GenerateDialog({
               ) : (
                 <label className="fd-field">
                   <span className="fd-label">{t('ai.generate.htmlLabel')}</span>
-                  <select
-                    className="fd-input"
+                  <Select
                     value={pageId}
                     disabled={phase === 'busy' || !pages}
                     aria-describedby="ai-gen-html-help"
@@ -382,7 +382,7 @@ export function GenerateDialog({
                         {x.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                   <span className="fd-help" id="ai-gen-html-help">
                     {t('ai.generate.htmlHelp')}
                   </span>

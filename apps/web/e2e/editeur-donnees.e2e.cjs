@@ -7,6 +7,7 @@ const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick, optionsOf, pickedLabel } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const ONLY = (process.env.ONLY || 'styles,graphique,donnees,conditions').split(',');
@@ -119,8 +120,8 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       /Contraste sur le fond : \d+,\d:1/.test(await p.locator('.st-contrast').textContent()),
       `contraste affiché (${await p.locator('.st-contrast').textContent()})`,
     );
-    await p.getByLabel('Taille').selectOption('24');
-    await p.getByLabel('Graisse').selectOption('700');
+    await pick(p.getByLabel('Taille'), '24');
+    await pick(p.getByLabel('Graisse'), '700');
     await p.locator('.st-fields').getByRole('radio', { name: 'Toutes les étapes (2)' }).click();
     await shot('l25-07-masse');
     await p.locator('.st-fields').getByRole('button', { name: 'Appliquer' }).click();
@@ -257,15 +258,12 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       (await dlg.locator('.ds-table').first().locator('tbody tr').count()) === 3,
       'aperçu des 3 premières lignes',
     );
-    await dlg.getByRole('combobox', { name: 'Relier la colonne « rapports »' }).selectOption({ index: 1 });
-    const chosen = await dlg
-      .getByRole('combobox', { name: 'Relier la colonne « rapports »' })
-      .locator('option:checked')
-      .textContent();
+    await pick(dlg.getByRole('combobox', { name: 'Relier la colonne « rapports »' }), { index: 1 });
+    const chosen = await pickedLabel(dlg.getByRole('combobox', { name: 'Relier la colonne « rapports »' }));
     ok(chosen.startsWith('Élément b.value'), `colonne reliée à un élément (${chosen})`);
-    await dlg
-      .getByRole('combobox', { name: 'Relier la colonne « equipe »' })
-      .selectOption({ label: 'Variable {{company}}' });
+    await pick(dlg.getByRole('combobox', { name: 'Relier la colonne « equipe »' }), {
+      label: 'Variable {{company}}',
+    });
     const link = dlg.getByRole('radio', {
       name: 'Selon le lien personnalisé (colonne equipe = {{company}})',
     });
@@ -388,10 +386,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       'section « Suite de l’étape »',
     );
     const elseSel = sec.getByRole('combobox', { name: 'Destination par défaut' });
-    ok(
-      (await elseSel.locator('option:checked').textContent()) === 'Étape suivante (4)',
-      '« Sinon » : étape suivante par défaut',
-    );
+    ok((await pickedLabel(elseSel)) === 'Étape suivante (4)', '« Sinon » : étape suivante par défaut');
     await sec.getByRole('button', { name: 'Ajouter une règle' }).click();
     await p.waitForTimeout(300);
     const r1 = sec.getByRole('group', { name: 'Règle 1' });
@@ -408,27 +403,20 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
         1,
       'publication bloquée',
     );
-    const ops = await r1
-      .getByRole('combobox', { name: 'Opérateur, règle 1' })
-      .locator('option')
-      .allTextContents();
+    const ops = await optionsOf(r1.getByRole('combobox', { name: 'Opérateur, règle 1' }));
     ok(
       ops.join('|') === "est|n'est pas|contient|moins de|plus de",
       `opérateurs en liste fermée (${ops.join('|')})`,
     );
-    await r1
-      .getByRole('combobox', { name: 'Critère, règle 1' })
-      .selectOption({ label: 'Variable {{company}}' });
+    await pick(r1.getByRole('combobox', { name: 'Critère, règle 1' }), { label: 'Variable {{company}}' });
     await r1.getByRole('textbox', { name: 'Valeur, règle 1' }).fill('Acme');
-    await r1.getByRole('combobox', { name: 'Destination, règle 1' }).selectOption({ label: '5 · Merci !' });
+    await pick(r1.getByRole('combobox', { name: 'Destination, règle 1' }), { label: '5 · Merci !' });
     await sec.getByRole('button', { name: 'Ajouter une règle' }).click();
     const r2 = sec.getByRole('group', { name: 'Règle 2' });
-    await r2.getByRole('combobox', { name: 'Critère, règle 2' }).selectOption({ label: 'Score du quiz (%)' });
-    await r2.getByRole('combobox', { name: 'Opérateur, règle 2' }).selectOption({ label: 'moins de' });
+    await pick(r2.getByRole('combobox', { name: 'Critère, règle 2' }), { label: 'Score du quiz (%)' });
+    await pick(r2.getByRole('combobox', { name: 'Opérateur, règle 2' }), { label: 'moins de' });
     await r2.getByRole('textbox', { name: 'Valeur, règle 2' }).fill('50');
-    await r2
-      .getByRole('combobox', { name: 'Destination, règle 2' })
-      .selectOption({ label: 'Fin de la démo' });
+    await pick(r2.getByRole('combobox', { name: 'Destination, règle 2' }), { label: 'Fin de la démo' });
     await p.waitForTimeout(1500);
     const rules = st(2).options.rules;
     ok(
@@ -454,25 +442,23 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       .evaluate((el) => el.scrollIntoView({ block: 'end' }));
     await shot('l25-10-conditions');
     // Boucle sans sortie : 3 → 4 → 3
-    await r1.getByRole('combobox', { name: 'Destination, règle 1' }).selectOption({ label: '4 · Écran 2' });
-    await r2.getByRole('combobox', { name: 'Destination, règle 2' }).selectOption({ label: '4 · Écran 2' });
+    await pick(r1.getByRole('combobox', { name: 'Destination, règle 1' }), { label: '4 · Écran 2' });
+    await pick(r2.getByRole('combobox', { name: 'Destination, règle 2' }), { label: '4 · Écran 2' });
     await p.locator('[data-step-index="3"]').click();
     const sec4 = p.locator('.rules-sec');
     await sec4.getByRole('button', { name: 'Ajouter une règle' }).click();
-    await sec4
-      .getByRole('group', { name: 'Règle 1' })
-      .getByRole('combobox', { name: 'Destination, règle 1' })
-      .selectOption({ label: '3 · Écran 1' });
-    await sec4
-      .getByRole('combobox', { name: 'Destination par défaut' })
-      .selectOption({ label: '3 · Écran 1' });
+    await pick(
+      sec4.getByRole('group', { name: 'Règle 1' }).getByRole('combobox', { name: 'Destination, règle 1' }),
+      { label: '3 · Écran 1' },
+    );
+    await pick(sec4.getByRole('combobox', { name: 'Destination par défaut' }), { label: '3 · Écran 1' });
     await p.waitForTimeout(400);
     ok(
       (await sec4.getByText('Ce parcours peut tourner en rond').count()) === 1,
       'boucle sans sortie : alerte (non bloquante)',
     );
     await sec4.getByRole('button', { name: 'Supprimer la règle 1' }).click();
-    await sec4.getByRole('combobox', { name: 'Destination par défaut' }).selectOption({ index: 0 });
+    await pick(sec4.getByRole('combobox', { name: 'Destination par défaut' }), { index: 0 });
 
     // Lecteur : la première règle vraie s'applique ; sinon « Sinon »
     const manifest = {

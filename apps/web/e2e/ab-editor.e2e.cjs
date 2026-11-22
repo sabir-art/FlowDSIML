@@ -7,6 +7,7 @@
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
+const { pick } = require('./_select.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -87,17 +88,17 @@ const N = ' ';
   await sw.getByRole('radio', { name: /Variante B/ }).click();
 
   // Objectif et répartition
-  await panel.getByLabel('Objectif').selectOption('cta');
+  await pick(panel.getByLabel('Objectif'), 'cta');
   await panel.getByText('A mène de 10 points sur 412 visiteurs.').waitFor();
   ok(test.goal === 'cta', 'objectif changé sans redémarrer');
   ok(
     (await panel.getByRole('button', { name: 'Garder A et terminer' }).count()) === 1,
     'A mène : « Garder A et terminer »',
   );
-  await panel.getByLabel('Objectif').selectOption('lead');
+  await pick(panel.getByLabel('Objectif'), 'lead');
   await panel.getByText('Pas encore assez de visiteurs pour comparer.').waitFor();
   ok((await panel.locator('.ab-card--lead').count()) === 0, 'sous 50 visiteurs : aucun meneur');
-  await panel.getByLabel('Objectif').selectOption('completion');
+  await pick(panel.getByLabel('Objectif'), 'completion');
   // L18-02 : capture avec la section entière (cartes, champs de B, actions), répartition 50/50
   // cohérente avec 206 visiteurs de chaque côté
   ok(

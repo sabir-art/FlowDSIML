@@ -26,6 +26,7 @@ import { createDemoFromImages, IMAGE_ACCEPT } from './demos/importImages';
 import { orderedCategories, type UseCase } from './demos/templates';
 import './onboarding.css';
 import { PendingInvites } from '../components/PendingInvites';
+import { Select } from '@flowdsiml/ui';
 
 type StepId = 'profile' | 'space' | 'use' | 'ext' | 'capture';
 const FULL: StepId[] = ['profile', 'space', 'use', 'ext', 'capture'];
@@ -227,14 +228,14 @@ export function Onboarding() {
           </label>
           <label className="fd-field">
             <span className="fd-label">{t('onboarding.job')}</span>
-            <select className="fd-input" value={job} onChange={(e) => setJob(e.target.value)}>
+            <Select value={job} onChange={(e) => setJob(e.target.value)}>
               <option value="">{t('onboarding.jobNone')}</option>
               {JOBS.map((j) => (
                 <option key={j} value={j}>
                   {t(`onboarding.jobs.${j}`)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         </div>
       </>

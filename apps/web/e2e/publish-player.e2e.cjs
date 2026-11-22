@@ -7,6 +7,7 @@ const { install, seed } = require('./fake-supabase.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const { PUBLIC_PLAYER } = require('./fake-supabase.cjs');
+const { pick } = require('./_select.cjs');
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -38,7 +39,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     .locator('.ed-rail [data-tool="step"][aria-pressed="false"]')
     .click()
     .catch(() => {});
-  await app.selectOption('#st-gate', { index: 1 });
+  await pick(app.locator('#st-gate'), { index: 1 });
   await app.waitForTimeout(900);
   app.on('dialog', (d) => {
     errors.push(`dialog: ${d.message()}`);

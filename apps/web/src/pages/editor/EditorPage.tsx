@@ -80,6 +80,7 @@ import { DatasetDialog } from './data/DatasetDialog';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
+import { Select } from '@flowdsiml/ui';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
 const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
@@ -1020,8 +1021,9 @@ export function EditorPage() {
                 ))}
               </div>
             )}
-            <select
-              className="select input-sm stage-zoom"
+            <Select
+              size="sm"
+              className="stage-zoom"
               aria-label={t('editor.zoom')}
               value={zoom}
               onChange={(e) => setZoom(e.target.value as Zoom)}
@@ -1029,7 +1031,7 @@ export function EditorPage() {
               <option value="fit">{t('editor.zoomFit')}</option>
               <option value="50">50 %</option>
               <option value="100">100 %</option>
-            </select>
+            </Select>
           </div>
           {findOpen && (
             <FindBar
