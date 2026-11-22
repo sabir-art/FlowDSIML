@@ -462,7 +462,7 @@ Le client a corrigé la première décision : « le seul qui aura une couleur di
 
 PAGE-01 est une structure **globale**. Toute route de l'app qui s'affiche dans la coque (barre latérale) a, en haut, **une seule barre `.fd-page-header`** :
 - 56 px de haut, collée en haut au défilement (`sticky`), fond du contenu, filet en bas ;
-- à gauche, le titre (14 px, 500), ou le fil d'Ariane qui se termine par le titre. Le **statut** de l'objet, s'il y en a un, est un **badge** juste après le titre : `pill` de 24 px, texte 12 px, et infobulle si le statut est abrégé (« Brouillon » : « Brouillon, jamais publié ») ;
+- à gauche, le titre (16 px, 600, comme Démos et les maquettes des lots 2, 5 et 6), ou le fil d’Ariane qui se termine par le titre (14 px, 500). Le **statut** de l'objet, s'il y en a un, est un **badge** juste après le titre : `pill` de 24 px, texte 12 px, et infobulle si le statut est abrégé (« Brouillon » : « Brouillon, jamais publié ») ;
 - à droite, les actions de la page (32 à 36 px), puis Aide et Notifications, alignées sur le même axe vertical que le titre ;
 - en dessous, le contenu. Il n'y a **aucun H1 en dehors de la barre**, ni de grand titre ou de sous-titre dans le contenu. Une phrase d'explication utile va en tête de la section qu'elle concerne.
 
