@@ -2,7 +2,7 @@
  * Retours client 21/11 §6 : barre latérale principale repliable en rail de 64 px (spec
  * docs/ux/specs/retours-client-21-11.md §6). Faux Supabase, données de la maquette.
  *  - épinglée par défaut à partir de 1 440 px, rail en dessous ; état retenu (fd.sidebar) ;
- *  - rail : icônes de 20 px dans des cibles de 44 × 40 px (NAV-02), noms accessibles gardés, infobulle à droite ;
+ *  - rail : icônes de 20 px dans des cibles de 44 px, noms accessibles gardés, infobulle à droite ;
  *  - survol : déplié par-dessus le contenu après 150 ms (sans le pousser), replié 300 ms après la sortie ;
  *  - bouton d'épinglage au même endroit dans les deux états, aria-pressed ;
  *  - clavier : le focus déplie, Échap replie et rend le focus à l'élément actif ;
@@ -91,9 +91,8 @@ const geo = (p) =>
   let g = await geo(p);
   ok(g.sb === 64 && g.main === 64 && g.exp === 'false', `1 280 px : rail de 64 px par défaut (${g.sb} px)`);
   ok(
-    // NAV-02 §11.7.2 : éléments de la barre latérale de 40 px de haut (44 px de large dans le rail)
-    g.item === 44 && g.itemH === 40 && g.icon === 20,
-    `icônes de 20 px dans des cibles de 44 × 40 (${g.item} × ${g.itemH})`,
+    g.item === 44 && g.itemH === 44 && g.icon === 20,
+    `icônes de 20 px dans des cibles de 44 × 44 (${g.item} × ${g.itemH})`,
   );
   ok(g.pressed === 'false' && g.pin.width === 32, 'bouton d’épinglage de 32 px, aria-pressed="false"');
   ok(

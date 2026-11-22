@@ -23,6 +23,9 @@ const PAGES = [
   'profile',
 ];
 
+/** Pages déjà refaites selon le gabarit du §11 (une entrée par page livrée du lot 1). */
+const REFAITES = ['workspace'];
+
 const ok = (c, l) => {
   console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
   if (!c) process.exitCode = 1;
@@ -51,9 +54,11 @@ const ok = (c, l) => {
           .slice(1)
           .map((c, i) => Math.round(c.getBoundingClientRect().top - k[i].getBoundingClientRect().bottom));
       });
+      // Pages passées au gabarit du §11 (lot 1) : 32 px entre deux sections ; les autres : 24 px
+      const want = REFAITES.includes(p) ? 32 : 24;
       ok(
-        gaps.every((g) => g === 24),
-        `${p} (${scheme}) : 24 px entre les blocs (${gaps.join(', ') || 'un seul bloc'})`,
+        gaps.every((g) => g === want),
+        `${p} (${scheme}) : ${want} px entre les blocs (${gaps.join(', ') || 'un seul bloc'})`,
       );
     }
     await page.close();

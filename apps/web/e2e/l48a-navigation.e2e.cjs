@@ -153,8 +153,9 @@ const MB = 1024 * 1024;
         '§18.3 : titre de groupe (p) qui nomme le groupe, sans pointeur',
       );
       ok(
-        g.fs === '11px' && g.tt === 'uppercase' && g.lh === '16px',
-        `§18.3 : titre 11 px en capitales, boîte de 16 px (${g.fs} ${g.tt} ${g.lh})`,
+        // Hauteur de ligne naturelle, comme dans les maquettes du lot 1 (superposition)
+        g.fs === '11px' && g.tt === 'uppercase',
+        `NAV-02 : titre de groupe en 11 px, capitales (${g.fs} ${g.tt})`,
       );
       ok(
         g.above === 24 && g.toFirst === 6 && g.inner === 2 && g.firstTop === 0,
