@@ -67,8 +67,9 @@ export function Modal({
       ref={ref}
       className={`fd-modal fd-modal--${size}${tone === 'danger' ? ' fd-modal--danger' : ''} ${className}`.trim()}
       role={role}
-      aria-labelledby={`${id}-t`}
-      aria-describedby={describedBy}
+      // Fermée, la modale n'a pas de contenu : ses références ARIA ne sont posées qu'à l'ouverture
+      aria-labelledby={open ? `${id}-t` : undefined}
+      aria-describedby={open ? describedBy : undefined}
       onClose={onClose}
       onCancel={(e) => {
         if (!dismissible) e.preventDefault();
