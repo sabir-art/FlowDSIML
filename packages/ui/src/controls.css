@@ -95,7 +95,7 @@
   transition: transform 120ms ease;
 }
 .fd-switch input:checked + .fd-switch__track {
-  background: var(--fd-color-nav-active);
+  background: var(--fd-color-surface-inverse);
 }
 .fd-switch input:checked + .fd-switch__track::after {
   transform: translateX(16px);
@@ -174,8 +174,8 @@
 .fd-segmented--strong > button[aria-pressed='true'],
 .fd-segmented--strong > button[aria-checked='true'],
 .fd-segmented--strong > button[aria-selected='true'] {
-  background: var(--fd-color-nav-active);
-  color: var(--fd-color-on-nav-active);
+  background: var(--fd-color-surface-inverse);
+  color: var(--fd-color-text-inverse);
   box-shadow: none;
 }
 .fd-segmented > button:focus-visible {

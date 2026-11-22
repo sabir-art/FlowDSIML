@@ -2754,11 +2754,11 @@
     "usage": "Usage",
     "brandTheme": "Theme and colours",
     "publicPage": "Public page",
-    "domain": "Domain",
     "tags": "Tags",
     "keys": "Access keys",
     "notifications": "Notifications",
     "breadcrumb": "Breadcrumb",
+    "backTo": "Back to Settings",
     "grp": {
       "space": "Workspace",
       "brand": "Brand",

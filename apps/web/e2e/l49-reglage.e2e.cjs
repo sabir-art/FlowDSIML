@@ -41,7 +41,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await card.waitFor();
   ok((await card.locator('h3').innerText()) === 'Captures HTML', 'section « Captures HTML »');
   ok(
-    (await p.locator('.st-body section.card').first().getAttribute('class')).includes('hc-card'),
+    (await p.locator('.st-wrap section.card').first().getAttribute('class')).includes('hc-card'),
     'première section de Sécurité',
   );
   const radio = (name) => card.getByRole('radio', { name: new RegExp(`^${name}`) });

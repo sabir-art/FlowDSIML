@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './fonts.css';
 import '@flowdsiml/ui/base.css';
 import '@flowdsiml/ui/controls.css';
+import '@flowdsiml/ui/navigation.css';
 import './i18n';
 import { applyTheme, getTheme } from './lib/theme';
 import { installDialogFocusLoop } from './lib/dialogFocus';

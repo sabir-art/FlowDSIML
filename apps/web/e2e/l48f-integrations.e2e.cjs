@@ -139,7 +139,7 @@ const hook = (id, state, ws) => ({
   await q.locator('.l23 tbody tr').first().waitFor();
   ok((await q.locator('.l23 tbody tr').count()) === 3, 'page Webhooks : la liste');
   ok(
-    (await q.locator('.st-crumb').innerText()).includes('Intégrations') &&
+    (await q.locator('.fd-crumb').innerText()).includes('Intégrations') &&
       (await q.getByRole('heading', { level: 1 }).innerText()) === 'Webhooks',
     'page Webhooks : fil « … › Intégrations », titre « Webhooks »',
   );
@@ -149,7 +149,7 @@ const hook = (id, state, ws) => ({
   );
   await axe(q, 'page Webhooks');
   await q.goto(`${APP}/#/settings/integrations/wh-1`);
-  await q.locator('.st-crumb').getByRole('link', { name: 'Webhooks' }).waitFor();
+  await q.locator('.fd-crumb').getByRole('link', { name: 'Webhooks' }).waitFor();
   ok(true, 'détail : fil « … › Intégrations › Webhooks »');
   await q.goto(`${APP}/#/settings/integrations#webhooks`);
   await q.waitForURL(/settings\/integrations\/webhooks$/);

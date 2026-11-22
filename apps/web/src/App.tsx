@@ -43,6 +43,9 @@ const AcceptInvite = lazyRest(() =>
 );
 const Unsubscribe = lazyRest(() => import('./pages/Unsubscribe').then((m) => ({ default: m.Unsubscribe })));
 const Profile = lazyRest(() => import('./pages/settings/Profile').then((m) => ({ default: m.Profile })));
+const SettingsHome = lazyRest(() =>
+  import('./pages/settings/SettingsShell').then((m) => ({ default: m.SettingsHome })),
+);
 const Members = lazyRest(() => import('./pages/settings/Members').then((m) => ({ default: m.Members })));
 const WorkspaceSettings = lazyRest(() =>
   import('./pages/settings/WorkspaceSettings').then((m) => ({ default: m.WorkspaceSettings })),
@@ -263,6 +266,7 @@ export function App() {
                     <Route path="/learners" element={<LearnersPage />} />
                     <Route path="/center" element={<CenterSettings />} />
                     <Route path="/leads" element={<Navigate to="/analytics?tab=leads" replace />} />
+                    <Route path="/settings" element={<SettingsHome />} />
                     <Route path="/settings/profile" element={<Profile />} />
                     <Route path="/settings/members" element={<Members />} />
                     <Route path="/settings/workspace" element={<WorkspaceSettings />} />

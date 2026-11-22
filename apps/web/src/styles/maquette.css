@@ -5,7 +5,8 @@
   font-size: var(--fd-text-body-size);
   line-height: var(--fd-text-body-line);
   color: var(--fd-color-text);
-  background: var(--fd-color-bg);
+  /* NAV-02 : les écrans sont posés sur le fond du contenu (content-bg), sans aplat propre */
+  background: transparent;
   -webkit-font-smoothing: antialiased;
 }
 .mk *,
@@ -492,7 +493,6 @@
   background: var(--fd-color-surface);
   border: 1px solid var(--fd-color-border);
   border-radius: var(--fd-radius-lg);
-  box-shadow: var(--fd-shadow-xs);
 }
 .mk .card-pad {
   padding: var(--fd-space-6);

@@ -1,0 +1,116 @@
+/*
+ * Lot 1 Paramètres (maquettes docs/ux/maquettes/refonte/lot1-parametres) : NAV-02 et NAV-03.
+ * Colonne de navigation pleine hauteur sur nav-bg, contenu blanc, PageHeader fixe, sections centrées (880 px).
+ */
+.main:has(> .st) {
+  padding: 0;
+}
+.st {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  min-height: 100vh;
+}
+.st-main {
+  min-width: 0;
+  background: var(--fd-color-content-bg);
+}
+
+/* Navigation des Paramètres (NAV-02 §11.7.2) */
+.st-nav {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 72px 12px 24px;
+  background: var(--fd-color-nav-bg);
+  border-right: 1px solid var(--fd-color-border);
+}
+.st-nav__grp {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.st-nav__title {
+  /* 24 px au-dessus, 6 px jusqu'au premier élément (4 + écart de 2 du groupe) */
+  margin: 24px 0 4px 12px;
+  font: 600 11px / 16px var(--fd-font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fd-color-text-muted);
+  cursor: default;
+}
+.st-nav__grp:first-child .st-nav__title {
+  margin-top: 0;
+}
+.st-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+  font: 500 14px / 1.5 var(--fd-font-sans);
+  text-decoration: none;
+  transition: background var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
+}
+.st-nav__item > svg {
+  flex: none;
+}
+.st-nav__item > span:nth-of-type(1) {
+  flex: 1;
+  min-width: 0;
+}
+a.st-nav__item:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.st-nav__item[aria-current='page'] {
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-text);
+  font-weight: 600;
+}
+.st-nav__item[aria-disabled='true'] {
+  cursor: default;
+}
+.st-nav__soon {
+  font: 400 13px / 1.5 var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+
+/* Contenu centré (§11.1) */
+.st-wrap.mk {
+  background: none;
+}
+.st-wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+
+@media (max-width: 767px) {
+  .st {
+    display: block;
+    min-height: 0;
+  }
+  .st:not(.st--home) > .st-nav {
+    display: none;
+  }
+  .st--home .st-nav {
+    position: static;
+    height: auto;
+    padding: 20px 16px 48px;
+    background: var(--fd-color-content-bg);
+    border-right: 0;
+  }
+  .st-wrap {
+    padding: 20px 16px 48px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-nav__item {
+    transition: none;
+  }
+}

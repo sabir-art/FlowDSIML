@@ -57,7 +57,7 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   await page.goto(`${BASE}/#/settings/integrations/webhooks`);
   await page.waitForSelector('.l23 .fd-empty');
   ok(
-    (await page.locator('.snav').getByRole('link', { name: 'Intégrations' }).count()) === 1,
+    (await page.locator('.st-nav').getByRole('link', { name: 'Intégrations' }).count()) === 1,
     'L23 : onglet Intégrations (propriétaire)',
   );
   ok(/Aucun webhook/.test(await page.textContent('.l23 .fd-empty')), 'L23-02 : état vide');
@@ -281,7 +281,7 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   t.members[0].role = 'editor';
   await page.goto(`${BASE}/#/settings/workspace`);
   await page.reload();
-  await page.waitForSelector('.snav');
+  await page.waitForSelector('.st-nav');
   ok(
     (await page.getByRole('link', { name: 'Intégrations' }).count()) === 0,
     'Éditeur : pas d’onglet Intégrations',

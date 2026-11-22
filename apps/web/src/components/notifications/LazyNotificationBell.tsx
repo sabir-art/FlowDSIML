@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bell } from 'lucide-react';
 import { HelpButton } from '../../help/HelpButton';
+import { useMediaQuery } from '../../lib/useMediaQuery';
 import './notifications.css';
 
 const NotificationBell = lazy(() =>
@@ -12,8 +13,11 @@ const NotificationBell = lazy(() =>
  * L33 : cloche du tableau de bord chargée après le premier affichage (hors du chemin critique). En attendant,
  * mêmes boutons à la même place (aide et cloche sans compteur), aucun décalage.
  */
-export function LazyNotificationBell() {
+export function LazyNotificationBell({ topbar = false }: { topbar?: boolean }) {
   const { t } = useTranslation();
+  // Même règle que NotificationBell : une seule instance, barre mobile ou en-tête de page
+  const mobile = useMediaQuery('(max-width: 1023px)');
+  if (mobile !== topbar) return null;
   return (
     <Suspense
       fallback={
@@ -31,7 +35,7 @@ export function LazyNotificationBell() {
         </>
       }
     >
-      <NotificationBell />
+      <NotificationBell topbar={topbar} />
     </Suspense>
   );
 }

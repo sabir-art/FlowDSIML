@@ -2754,11 +2754,11 @@
     "usage": "Utilisation",
     "brandTheme": "Thème et couleurs",
     "publicPage": "Page publique",
-    "domain": "Domaine",
     "tags": "Étiquettes",
     "keys": "Clés d’accès",
     "notifications": "Notifications",
     "breadcrumb": "Fil d’Ariane",
+    "backTo": "Retour à Paramètres",
     "grp": {
       "space": "Espace",
       "brand": "Marque",

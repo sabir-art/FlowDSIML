@@ -11,6 +11,7 @@
     "./base.css": "./src/base.css",
     "./controls.css": "./src/controls.css",
     "./select.css": "./src/select.css",
+    "./navigation.css": "./src/navigation.css",
     "./tooltip": "./src/tooltip.ts",
     "./tooltip.css": "./src/tooltip.css"
   },

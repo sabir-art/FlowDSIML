@@ -190,9 +190,11 @@ export const colors = {
     // refonte
     // Audit L50 X1 : fond des barres neutre (surface-sunken), plus orangé
     'chart-track': ardoise[50],
-    'nav-active': noir[900],
-    'on-nav-active': ardoise[0],
-    'nav-hover': '#E6EBF1',
+    // NAV-02 (retours client 21/11 §11.7.1) : surfaces de navigation et fond du contenu
+    'nav-bg': '#F7F7F8',
+    'nav-hover': '#F0F1F3',
+    'nav-active': '#E9EBEE',
+    'content-bg': ardoise[0],
     hero: vert[400],
     'on-hero': noir[900],
     'hero-muted': '#2E3A0A',
@@ -256,9 +258,10 @@ export const colors = {
     'chart-5': prune[300],
     // refonte
     'chart-track': '#0F1216',
-    'nav-active': '#F3F5F8',
-    'on-nav-active': noir[900],
-    'nav-hover': '#1C2128',
+    'nav-bg': '#101317',
+    'nav-hover': '#1A1F26',
+    'nav-active': '#252B33',
+    'content-bg': '#15191F',
     hero: vert[400],
     'on-hero': noir[900],
     'hero-muted': '#2E3A0A',

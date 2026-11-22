@@ -59,8 +59,8 @@
   height: 22px;
   padding: 0 6px;
   border-radius: 999px;
-  background: var(--fd-color-nav-active, #080808);
-  color: var(--fd-color-on-nav-active, #fff);
+  background: var(--fd-color-surface-inverse);
+  color: var(--fd-color-text-inverse);
   font-size: 12px;
   font-weight: 700;
 }

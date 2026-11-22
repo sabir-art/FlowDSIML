@@ -36,6 +36,7 @@ import {
 import { useAuth } from '../auth/AuthProvider';
 import { useHelp } from '../help/HelpProvider';
 import { ExtensionDialog } from './ExtensionDialog';
+import { LazyNotificationBell } from './notifications/LazyNotificationBell';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { setLocale } from '../i18n';
 import { supabase } from '../lib/supabase';
@@ -238,6 +239,10 @@ export function Layout() {
         <span className="brand">
           <img src={symbol} alt={APP_NAME} width={32} height={32} className="brand__symbol" />
         </span>
+        {/* Lot 1 (UX, 21/11) : sous 1 024 px, Aide et Notifications à droite de la barre mobile */}
+        <div className="topbar__tools">
+          <LazyNotificationBell topbar />
+        </div>
       </header>
       <aside
         data-tip-side="right"

@@ -35,11 +35,11 @@ const ok = (c, l) => {
     await install(page, seedMaquette());
     for (const p of PAGES) {
       await page.goto(`${APP}/#/settings/${p}`);
-      await page.waitForSelector('.st-body > :not(dialog)');
+      await page.waitForSelector('.st-wrap > :not(dialog)');
       await page.waitForTimeout(500);
       // Écarts entre blocs visibles du conteneur (ou de son enveloppe unique)
       const gaps = await page.evaluate(() => {
-        const body = document.querySelector('.st-body');
+        const body = document.querySelector('.st-wrap');
         const vis = [...body.children].filter((c) => c.tagName !== 'DIALOG');
         const only = vis.length === 1 ? vis[0] : null;
         const box =

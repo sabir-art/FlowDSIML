@@ -72,8 +72,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.getByRole('heading', { name: 'Assistance IA', level: 1 }).waitFor();
   // L48-A §4 : Assistance IA est rangée dans le groupe « Contenu »
   const labels = await page
-    .locator('.snav-grp', { hasText: 'Contenu' })
-    .locator('.snav-item')
+    .locator('.st-nav__grp', { hasText: 'Contenu' })
+    .locator('.st-nav__item')
     .allTextContents();
   ok(labels.at(-1) === 'Assistance IA', 'L48-A : rubrique dans « Contenu », après Glossaire et Étiquettes');
   const sw = page.getByRole('switch', { name: 'Activer l’Assistance IA pour cet espace' });

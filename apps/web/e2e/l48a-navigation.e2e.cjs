@@ -106,7 +106,7 @@ const MB = 1024 * 1024;
     await page.waitForURL(/settings\/workspace/);
     for (const r of ['/#/settings/workspace', '/#/settings/glossary', '/#/settings/profile']) {
       await page.goto(`${APP}${r}`);
-      await page.locator('.snav').waitFor();
+      await page.locator('.st-nav').waitFor();
       ok(
         (await utils.locator('[aria-current="page"]').textContent())?.trim() === 'Paramètres',
         `Paramètres actif sur ${r}`,
@@ -115,9 +115,9 @@ const MB = 1024 * 1024;
     // Retour client : intitulés de groupe = étiquettes (non cliquables), 24 px au-dessus, entrées serrées
     {
       const g = await page.evaluate(() => {
-        const grps = [...document.querySelectorAll('.snav .snav-grp')];
-        const lab = grps[1].querySelector('.grp');
-        const items = [...grps[1].querySelectorAll('.snav-item')];
+        const grps = [...document.querySelectorAll('.st-nav .st-nav__grp')];
+        const lab = grps[1].querySelector('.st-nav__title');
+        const items = [...grps[1].querySelectorAll('.st-nav__item')];
         const r = (el) => el.getBoundingClientRect();
         const ls = getComputedStyle(lab);
         return {
@@ -126,8 +126,20 @@ const MB = 1024 * 1024;
           lh: ls.lineHeight,
           toFirst: Math.round(r(items[0]).top - r(lab).bottom),
           itemColor: getComputedStyle(items[0]).color,
-          text: getComputedStyle(document.body).color,
-          firstTop: Math.round(r(grps[0]).top - r(grps[0].parentElement).top),
+          muted: (() => {
+            const i = document.createElement('i');
+            i.style.color = 'var(--fd-color-text-muted)';
+            document.body.append(i);
+            const c = getComputedStyle(i).color;
+            i.remove();
+            return c;
+          })(),
+          // Sous le padding haut de la colonne (72 px, aligné sous le PageHeader)
+          firstTop: Math.round(
+            r(grps[0]).top -
+              r(grps[0].parentElement).top -
+              parseFloat(getComputedStyle(grps[0].parentElement).paddingTop),
+          ),
           tag: lab.tagName,
           role: grps[1].getAttribute('role'),
           named: grps[1].getAttribute('aria-labelledby') === lab.id,
@@ -148,7 +160,7 @@ const MB = 1024 * 1024;
         g.above === 24 && g.toFirst === 6 && g.inner === 2 && g.firstTop === 0,
         `§18.3 : 24 px avant le titre (${g.above}), 6 px jusqu'au premier élément (${g.toFirst}), 2 px entre éléments (${g.inner}), rien au-dessus du premier groupe (${g.firstTop})`,
       );
-      ok(g.itemColor === g.text, `§18.3 : éléments en couleur text (${g.itemColor})`);
+      ok(g.itemColor === g.muted, `NAV-02 : éléments au repos en text-muted (${g.itemColor})`);
     }
     // Retour client : au moins 16 px entre les blocs du corps de modale (Assistance IA)
     await page.goto(`${APP}/#/settings/ai`);
@@ -203,8 +215,8 @@ const MB = 1024 * 1024;
     ok(
       (await page.getByRole('navigation', { name: 'Fil d’Ariane' }).innerText())
         .replace(/\s+/g, ' ')
-        .trim() === 'Paramètres Espace Utilisation',
-      'fil d’Ariane « Paramètres > Espace > Utilisation »',
+        .trim() === 'Espace Utilisation',
+      'fil d’Ariane « Espace › Utilisation »',
     );
     ok((await page.locator('.us-row').count()) === 7, 'sept lignes de quota');
     // L48-03 : voix de synthèse et sous-titres, deux lignes distinctes (minutes)
@@ -213,42 +225,53 @@ const MB = 1024 * 1024;
         /0 \/ 5 min/.test(await page.locator('.us-row', { hasText: 'Sous-titres' }).innerText()),
       'voix de synthèse et sous-titres : deux jauges en minutes',
     );
-    // L48-01 (T5) : entrée active en fond surface, texte courant, graisse 600
-    const active = await page.locator('.snav .is-active').evaluate((el) => {
+    // NAV-02 §11.7.2 : actif = fond nav-active, texte text en 600, aria-current, ni ombre ni bordure ;
+    // survol = fond nav-hover, texte text, 500
+    const tok = (v) =>
+      page.evaluate((name) => {
+        const i = document.createElement('i');
+        i.style.color = `var(${name})`;
+        document.body.append(i);
+        const c = getComputedStyle(i).color;
+        i.remove();
+        return c;
+      }, v);
+    const [navActive, navHover, textColor] = [
+      await tok('--fd-color-nav-active'),
+      await tok('--fd-color-nav-hover'),
+      await tok('--fd-color-text'),
+    ];
+    const active = await page.locator('.st-nav a[aria-current="page"]').evaluate((el) => {
       const c = getComputedStyle(el);
-      const probe = document.createElement('span');
-      probe.style.color = 'var(--fd-color-text)';
-      probe.style.background = 'var(--fd-color-surface)';
-      document.body.append(probe);
-      const p = getComputedStyle(probe);
-      const r = { ok: c.color === p.color && c.backgroundColor === p.backgroundColor, w: c.fontWeight };
-      probe.remove();
-      return r;
-    });
-    ok(active.ok && active.w === '600', 'Paramètres : entrée active surface, texte, 600');
-    // §18.3 (d6eff17) : survol en voile neutre, distinct de l'actif (fond plein + ombre)
-    const other = page.locator('.snav .snav-item:not(.is-active)').first();
-    await other.hover();
-    const pair = await page.evaluate(() => {
-      const hov = document.querySelector('.snav .snav-item:not(.is-active):hover');
-      const act = document.querySelector('.snav .is-active');
-      const h = getComputedStyle(hov);
-      const a = getComputedStyle(act);
       return {
-        hbg: h.backgroundColor,
-        abg: a.backgroundColor,
-        hw: h.fontWeight,
-        hsh: h.boxShadow,
-        ash: a.boxShadow,
+        bg: c.backgroundColor,
+        color: c.color,
+        w: c.fontWeight,
+        sh: c.boxShadow,
+        bw: c.borderTopWidth,
       };
     });
     ok(
-      pair.hbg !== pair.abg &&
-        /rgba?\(.*0\.06\)|color\(srgb .* \/ 0\.06\)/.test(pair.hbg) &&
-        pair.hw === '500' &&
-        pair.hsh === 'none' &&
-        pair.ash !== 'none',
-      `Paramètres : survol (voile 6 %, 500, sans ombre) distinct de l'actif (${JSON.stringify(pair)})`,
+      active.bg === navActive &&
+        active.color === textColor &&
+        active.w === '600' &&
+        active.sh === 'none' &&
+        active.bw === '0px',
+      `Paramètres : entrée active nav-active, text, 600, sans ombre ni bordure (${JSON.stringify(active)})`,
+    );
+    await page.addStyleTag({ content: '*{transition:none!important}' });
+    await page.locator('.st-nav a.st-nav__item:not([aria-current])').first().hover();
+    const hov = await page.evaluate(() => {
+      const h = getComputedStyle(document.querySelector('.st-nav a.st-nav__item:not([aria-current]):hover'));
+      return { bg: h.backgroundColor, color: h.color, w: h.fontWeight, sh: h.boxShadow };
+    });
+    ok(
+      hov.bg === navHover &&
+        hov.bg !== active.bg &&
+        hov.color === textColor &&
+        hov.w === '500' &&
+        hov.sh === 'none',
+      `Paramètres : survol nav-hover, text, 500, distinct de l'actif (${JSON.stringify(hov)})`,
     );
     await page.mouse.move(0, 0);
     const storage = page.locator('.us-row', { hasText: 'Stockage' });

@@ -17,28 +17,32 @@ const SHOTS = process.env.SHOTS_DIR;
     if (!c) process.exitCode = 1;
   };
   await page.goto(`${APP}/#/settings/members`);
-  await page.waitForSelector('.snav');
-  // L48-A §4 : cinq groupes, « Bientôt » à sa place (sans lien), fil d'Ariane, h1 = nom de la section
+  await page.waitForSelector('.st-nav');
+  // NAV-02 : cinq groupes ; « Bientôt » sans lien (Clés d'accès, Notifications) ou avec lien (Page publique,
+  // réglages inactifs) ; NAV-03 : fil d'Ariane « Espace › Équipe », la page courante est le h1
   ok(
-    (await page.locator('.snav .grp').allTextContents()).join('|') ===
+    (await page.locator('.st-nav__title').allTextContents()).join('|') ===
       'Espace|Marque|Contenu|Connexions|Mon compte',
     'Paramètres : cinq groupes',
   );
-  const soon = await page.locator('.snav .snav-item--soon').allTextContents();
-  const links = await page.locator('.snav a.snav-item').count();
+  const soon = await page.locator('.st-nav [aria-disabled="true"]').allTextContents();
+  const links = await page.locator('.st-nav a.st-nav__item').count();
+  const soonLinks = await page.locator('.st-nav a.st-nav__item:has(.st-nav__soon)').allTextContents();
   ok(
-    // L52 : « Étiquettes » est une section active ; restent « Bientôt » : Domaine, Clés d'accès, Notifications
-    links === 13 && soon.length === 3,
-    `Paramètres : 13 sections et 3 « Bientôt » (${links} ; ${soon.join(', ')})`,
+    links === 13 && soon.length === 2 && soonLinks.length === 1 && soonLinks[0].startsWith('Page publique'),
+    `Paramètres : 13 sections dont Page publique en « Bientôt », 2 « Bientôt » sans lien, pas de Domaine (${links} ; ${soon.join(', ')} ; ${soonLinks.join(', ')})`,
   );
   ok(
     (await page.getByRole('navigation', { name: 'Fil d’Ariane' }).innerText()).replace(/\s+/g, ' ').trim() ===
-      'Paramètres Espace Équipe' &&
-      (await page.locator('.st-crumb [aria-current="page"]').textContent()) === 'Équipe' &&
-      (await page.getByRole('heading', { level: 1 }).textContent()) === 'Équipe',
-    'fil d’Ariane « Paramètres > Espace > Équipe » et titre « Équipe »',
+      'Espace Équipe' &&
+      (await page.locator('.fd-crumb h1[aria-current="page"]').textContent()) === 'Équipe' &&
+      (await page.getByRole('heading', { level: 1 }).count()) === 1,
+    'fil d’Ariane « Espace › Équipe », h1 unique « Équipe »',
   );
-  ok((await page.locator('.snav a.is-active').textContent()) === 'Équipe', 'entrée « Équipe » active');
+  ok(
+    (await page.locator('.st-nav a[aria-current="page"]').textContent()) === 'Équipe',
+    'entrée « Équipe » active',
+  );
   await page.waitForSelector('text=Thomas Bernard');
   ok((await page.locator('tbody tr').count()) >= 6, 'membres et invitation en attente');
   ok((await page.locator('text=En attente').count()) === 1, 'badge « En attente »');
@@ -142,7 +146,7 @@ const SHOTS = process.env.SHOTS_DIR;
   ok(!state.tables.members.some((m) => m.user_id === 'u-5'), 'membre retiré');
 
   // L48-A : la page publique a sa propre entrée (Marque > Page publique), toujours « Bientôt »
-  await page.getByRole('link', { name: 'Page publique' }).click();
+  await page.getByRole('link', { name: /^Page publique/ }).click();
   const pp = page.getByRole('region', { name: /Page publique/ });
   await pp.waitFor();
   ok(
@@ -152,7 +156,7 @@ const SHOTS = process.env.SHOTS_DIR;
 
   // PRM-08 (variables) : couvert par variables.e2e (L46)
 
-  await page.locator('.snav').getByRole('link', { name: 'Profil' }).click();
+  await page.locator('.st-nav').getByRole('link', { name: 'Profil' }).click();
   await page.waitForSelector('#fn');
   ok(
     (await page.locator('.st-pf .form-sec .intro h2').allTextContents()).join('|') === 'Profil|Préférences',
