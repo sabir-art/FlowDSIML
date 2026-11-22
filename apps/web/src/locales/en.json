@@ -1,4 +1,14 @@
 {
+  "dropzone": {
+    "title": "Drag a file here",
+    "none": "No file",
+    "dropHere": "Drop the file to import it",
+    "failed": "This file was not imported",
+    "sending": "Uploading…",
+    "pick": "Choose a file",
+    "replace": "Replace…",
+    "remove": "Remove the file"
+  },
   "app": {
     "name": "{{app}}"
   },
@@ -2882,8 +2892,9 @@
     "logoNone": "No logo. The workspace name is shown instead.",
     "logoAdd": "Upload a logo",
     "logoReplace": "Replace",
-    "logoRemove": "Remove",
+    "logoRemove": "Remove the logo",
     "logoFormats": "PNG, JPEG, WebP or SVG, 2 MB max.",
+    "logoFile": "{{name}} logo",
     "logoFormat": "This format is not accepted. Choose a PNG, JPEG, WebP or SVG file.",
     "logoSize": "The file is larger than 2 MB.",
     "colorsTitle": "Brand colors",

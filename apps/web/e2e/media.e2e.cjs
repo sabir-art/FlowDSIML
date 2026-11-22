@@ -124,7 +124,7 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   ok((await dlg.locator('.md-tile').count()) === 1, 'recherche');
   await dlg.getByRole('searchbox').fill('');
   await dlg.getByRole('button', { name: 'logo-acme.png' }).click();
-  ok((await dlg.locator('.md-foot').textContent()).includes(`sur 500${N}Mo`), 'pied : quota sur 500 Mo');
+  ok((await dlg.locator('.md-foot').textContent()).includes(`sur\u00a0500${N}Mo`), 'pied : quota sur 500 Mo');
   ok((await dlg.locator('.md-sel-warn').count()) === 0, 'logo : pas d’avertissement (autre fichier)');
   state.mediaReject = 'SVG_REJECTED';
   await importVia(svg, /^Importer/);

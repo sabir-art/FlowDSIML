@@ -2238,3 +2238,112 @@ button.fd-nav__item:hover {
   padding: 0;
   font-size: 16px;
 }
+
+/* ---- MEDIA-01 §18.1 : zone de dépôt (une rangée : aperçu, texte, une source par bouton) ---- */
+.fd-dz {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 88px;
+  padding: 16px;
+  border: 1.5px dashed var(--fd-color-border-field);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+}
+.fd-dz.is-filled,
+.fd-dz.is-busy {
+  border-style: solid;
+  border-color: var(--fd-color-border);
+}
+.fd-dz.is-drag {
+  border: 2px dashed var(--fd-color-primary);
+  background: color-mix(in srgb, var(--fd-color-primary) 7%, var(--fd-color-surface));
+}
+.fd-dz.is-error {
+  border: 1.5px solid var(--fd-color-danger);
+}
+.fd-dz__pre {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.fd-dz__pre > svg {
+  width: 20px;
+  height: 20px;
+}
+.fd-dz__pre--img {
+  width: 88px;
+  border: 1px solid var(--fd-color-border);
+}
+.fd-dz__pre--img > img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.fd-dz.is-drag .fd-dz__pre {
+  background: color-mix(in srgb, var(--fd-color-primary) 12%, transparent);
+  color: var(--fd-color-primary);
+}
+.fd-dz.is-error .fd-dz__pre,
+.fd-dz.is-error .fd-dz__txt > span {
+  color: var(--fd-color-danger);
+}
+.fd-dz__txt {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+.fd-dz__txt > b {
+  font: 600 14px var(--fd-font-sans);
+  color: var(--fd-color-text);
+  overflow-wrap: anywhere;
+}
+.fd-dz__txt > span {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.fd-dz__acts {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+.fd-dz .fd-dz__acts .fd-btn {
+  height: 36px;
+  min-height: 36px;
+}
+.fd-dz .fd-dz__acts .fd-dz__rm {
+  width: 36px;
+  color: var(--fd-color-text-muted);
+}
+.fd-dz .fd-dz__acts .fd-dz__rm:hover {
+  color: var(--fd-color-danger);
+}
+/* Dans une ligne de réglage : la zone passe sous le libellé, sur toute la ligne (ALIGN-01) */
+.stg-row:has(> .stg-ctl > .fd-dz) {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+@media (max-width: 767px) {
+  .fd-dz {
+    flex-wrap: wrap;
+  }
+  .fd-dz__txt {
+    flex-basis: calc(100% - 72px);
+  }
+  .fd-dz__acts {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .fd-dz__acts > .fd-btn:not(.fd-dz__rm) {
+    flex: 1;
+    justify-content: center;
+  }
+}
