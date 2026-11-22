@@ -20,7 +20,7 @@ export const FR: Record<string, string> = {
     '{{count}} apprenants ont échoué au quiz à leur dernière tentative · {{demo}}',
   'notifications.alert_completion_below':
     'Taux de complétion à {{value}} %, sous le seuil de {{threshold}} % · {{demo}}',
-  'notifications.alert_views_above': '{{value}} vues en 24 h, au-dessus du seuil de {{threshold}} · {{demo}}',
+  'notifications.alert_views_above': '{{value}} vues en 24 h, au-dessus du seuil de {{threshold}} · {{demo}}',
   'notifications.alert_structure_below_goal':
     'Une structure est à {{value}} % de personnes formées, sous l’objectif de {{threshold}} %',
   'demos.untitled': 'Nouvelle démo',

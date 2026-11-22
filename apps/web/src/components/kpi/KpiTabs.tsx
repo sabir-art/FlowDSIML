@@ -83,7 +83,7 @@ export function useTrendText() {
         };
       default:
         return {
-          short: `${sign(tr.value)}${n(tr.value)} %`,
+          short: `${sign(tr.value)}${n(tr.value)}\u00a0%`,
           suffix: t('kpi.vs', { count: days }),
           sr: t('kpi.srPct', { sign: word(tr.value), value: n(tr.value) }),
         };
@@ -244,7 +244,7 @@ export function TrendChart({
         return `${x.toFixed(1)},${y.toFixed(1)}`;
       })
       .join(' ');
-  const fmt = (v: number) => (rate ? `${Math.round(v * 100)} %` : formatNumber(v));
+  const fmt = (v: number) => (rate ? `${Math.round(v * 100)}\u00a0%` : formatNumber(v));
   return (
     <div className="kpi-chart">
       <header className="kpi-chart__head">
@@ -352,7 +352,7 @@ export function MetricTable({
   const by = activeCol.key;
   const sorted = [...rows].sort((a, b) => (b.values[by] ?? -1) - (a.values[by] ?? -1)).slice(0, 10);
   const cell = (c: { key: KpiKey; rate?: boolean }, v: number | undefined) =>
-    v === undefined ? '—' : c.rate ? `${Math.round(v * 100)} %` : formatNumber(v);
+    v === undefined ? '—' : c.rate ? `${Math.round(v * 100)}\u00a0%` : formatNumber(v);
   return (
     <section className="fd-card kpi-table">
       <h2 className="kpi-table__t">{title}</h2>

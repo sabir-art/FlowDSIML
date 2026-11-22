@@ -84,7 +84,7 @@ export function Overview() {
       <section className="fd-card console-stats" aria-label={t('console.ov.stats')}>
         {stat(
           t('console.ov.satisfaction'),
-          total ? `${Math.round((o.yes / total) * 100)} %` : '—',
+          total ? `${Math.round((o.yes / total) * 100)}\u00a0%` : '—',
           t('console.ov.yesNo', { yes: formatNumber(o.yes), no: formatNumber(o.no) }),
         )}
         {stat(

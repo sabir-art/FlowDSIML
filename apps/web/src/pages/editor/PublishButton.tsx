@@ -198,7 +198,7 @@ export function PublishButton({
         }
       }
       const res = await publishDemo(demo.id, ack, (d, total) =>
-        setProgress(`${Math.round((d / total) * 100)} %`),
+        setProgress(`${Math.round((d / total) * 100)}\u00a0%`),
       );
       await editor.reload();
       if (onPublished) onPublished(res.number);

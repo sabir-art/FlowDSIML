@@ -610,7 +610,7 @@ function Overview({
     {
       key: 'completion',
       label: t('kpi.completion'),
-      value: `${Math.round(rate * 100)} %`,
+      value: `${Math.round(rate * 100)}\u00a0%`,
       trend: prev ? rateTrend(rate, completionRate(prev.visitors, prev.completions), prev.visitors) : none,
     },
     {

@@ -728,7 +728,8 @@ fieldset.stg-row {
 .hc-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  /* SPLIT-01 §20.3 : 8 px entre deux pastilles */
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -744,8 +745,9 @@ fieldset.stg-row {
   font: 500 13px var(--fd-font-sans);
   color: var(--fd-color-text);
 }
+/* Pastille en lecture seule : 12 px de chaque côté */
 .hc-chip:not(:has(.hc-chip__remove)) {
-  padding-right: 10px;
+  padding: 0 12px;
 }
 [data-theme='dark'] .hc-chip {
   background: #252b33;

@@ -59,7 +59,7 @@ export function DemosTab({
   const show = (id: string, c: Col) => {
     const v = value(id, c);
     if (v === null) return <span className="an-dash">–</span>;
-    return c === 'completion' ? `${Math.round(v * 100)} %` : formatNumber(v);
+    return c === 'completion' ? `${Math.round(v * 100)}\u00a0%` : formatNumber(v);
   };
   const click = (c: Col) => {
     setSort((s) => (s.col === c ? { col: c, desc: !s.desc } : { col: c, desc: true }));

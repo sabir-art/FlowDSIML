@@ -15,7 +15,7 @@ export function Funnel({
   reachLabel: string;
   dropLabel: string;
 }) {
-  const pct = (v: number) => `${Math.round(v * 100)} %`;
+  const pct = (v: number) => `${Math.round(v * 100)}\u00a0%`;
   return (
     <table className="funnel">
       <thead className="sr-only">

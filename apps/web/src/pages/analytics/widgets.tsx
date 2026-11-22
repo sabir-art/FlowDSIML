@@ -94,7 +94,8 @@ export function Rows({ rows, label }: { rows: Row[]; label: string }) {
         <li key={r.key} className={r.danger ? 'is-danger' : undefined}>
           <span className="an-rows__l">{r.label}</span>
           <span className="an-rows__v">
-            {r.right ?? `${formatNumber(r.value)} · ${total ? Math.round((r.value / total) * 100) : 0} %`}
+            {r.right ??
+              `${formatNumber(r.value)} · ${total ? Math.round((r.value / total) * 100) : 0}\u00a0%`}
           </span>
           <span className="an-rows__bar" aria-hidden="true">
             <i style={{ width: `${(r.value / max) * 100}%` }} />
@@ -219,7 +220,7 @@ export function StepsWidget({
           key: String(r.stepIndex),
           label: `${r.stepIndex + 1}. ${label(r.stepIndex)}`,
           value: Math.round(r.reach * 100),
-          right: `${Math.round(r.reach * 100)} %${r.stepIndex > 0 ? ` · −${Math.round(r.dropOff * 100)} %` : ''}`,
+          right: `${Math.round(r.reach * 100)}\u00a0%${r.stepIndex > 0 ? ` · −${Math.round(r.dropOff * 100)}\u00a0%` : ''}`,
           danger: !!worst && r.stepIndex === worst.stepIndex && worst.dropOff >= 0.1,
         }))}
       />

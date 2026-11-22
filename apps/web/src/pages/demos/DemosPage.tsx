@@ -1068,7 +1068,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                     [
                       'completion',
                       t('kpi.completion'),
-                      `${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)} %`,
+                      `${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)}\u00a0%`,
                       rateTrend(
                         completionRate(kpis.cur.visitors, kpis.cur.completions),
                         kpis.prev ? completionRate(kpis.prev.visitors, kpis.prev.completions) : 0,

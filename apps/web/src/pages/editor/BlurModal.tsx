@@ -115,7 +115,7 @@ export function BlurModal({
             {/* E2 : le pourcentage entre − et +, « Ajuster » une seule fois (après) */}
             {zoom !== 'fit' && (
               <span className="blurm-zoom__v" aria-live="polite">
-                {`${Math.round(zoom * 100)} %`}
+                {`${Math.round(zoom * 100)}\u00a0%`}
               </span>
             )}
             <button

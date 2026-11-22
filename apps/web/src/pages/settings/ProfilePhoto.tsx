@@ -327,7 +327,7 @@ function CropDialog({
             max={300}
             step={1}
             value={pct}
-            valueText={`${pct} %`}
+            valueText={`${pct}\u00a0%`}
             aria-labelledby={`${id}-z`}
             disabled={!img}
             onChange={(v) => setZoom(v / 100)}

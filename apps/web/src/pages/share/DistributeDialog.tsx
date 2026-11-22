@@ -108,7 +108,7 @@ const formatSize = (n: number, lang: string) => {
   const mb = n / 1_000_000;
   const fmt = (x: number) =>
     new Intl.NumberFormat(lang === 'en' ? 'en-GB' : 'fr-FR', { maximumFractionDigits: 1 }).format(x);
-  return mb >= 1 ? `${fmt(mb)} Mo` : `${Math.max(1, Math.round(n / 1000))} Ko`;
+  return mb >= 1 ? `${fmt(mb)}\u00a0Mo` : `${Math.max(1, Math.round(n / 1000))}\u00a0Ko`;
 };
 
 /** Choix exclusif (radiogroup), comme les sélecteurs de la maquette. */
