@@ -128,6 +128,18 @@ td.act, th.act { width: 48px; text-align: right; }
 .ph .hdv { width: 1px; height: 20px; margin: 0 4px; background: var(--fd-color-border); }
 .ph .ib.h32 { width: 32px; height: 32px; color: var(--fd-color-text-muted); }
 .ph .acts + .hdv, .ph .sp + .hdv { margin-left: 0; }
+/* Questions du nouveau dev (22/11) : titres de groupe mesurés à 24 px au-dessus et 6 px au-dessous (gap de 2 px compris) ; cibles de 44 px dans la barre mobile */
+.side h3, .snav h3 { margin: 22px 0 4px 12px; }
+.mbar { gap: 4px; } .mbar img { margin-left: 4px; } .mbar .ib { width: 44px; height: 44px; border-radius: 10px; }
+/* Accueil des Paramètres sous 768 px */
+.ph .pt { padding: 0; font: 600 16px var(--fd-font-sans); }
+.shome { padding: 8px 16px 32px; }
+.shome h2 { margin: 24px 0 8px 4px; font: 600 11px var(--fd-font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+.shome ul { list-style: none; margin: 0; padding: 0; border: 1px solid var(--fd-color-border); border-radius: 12px; background: var(--fd-color-surface); overflow: hidden; }
+.shome li + li { border-top: 1px solid var(--fd-color-border); }
+.shome a { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 12px 0 16px; color: var(--fd-color-text); text-decoration: none; font: 500 15px var(--fd-font-sans); }
+.shome a > svg:first-child { color: var(--fd-color-text-muted); flex: none; } .shome a span:not(.soon) { flex: 1; } .shome a > svg:last-child { color: var(--fd-color-text-subtle); flex: none; }
+.shome a .soon { margin-right: 4px; }
 </style></head><body class="">
 
 <div class="shell">
