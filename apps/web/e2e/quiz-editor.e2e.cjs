@@ -6,6 +6,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 const SHOTS = process.env.SHOTS_DIR;
 const { sfx, themedContext } = require('./_theme.cjs');
 const { pick } = require('./_select.cjs');
+const { slide } = require('./_slider.cjs');
 
 (async () => {
   const b = await chromium.launch();
@@ -70,7 +71,7 @@ const { pick } = require('./_select.cjs');
   // Étape liée
   await pick(page.locator('#qz-step'), { index: 1 });
   // Seuil et tentatives
-  await page.locator('#qz-th').fill('80');
+  await slide(page.locator('#qz-th'), 80);
   await pick(page.locator('#qz-att'), '2');
   await page.waitForTimeout(900);
   ok(

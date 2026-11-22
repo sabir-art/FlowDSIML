@@ -10,7 +10,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import { asCta, type StepRow } from '../types';
 import { abOutcome, type AbCounts, type AbGoal } from './abResult';
 import './ab.css';
-import { Status, Select } from '@flowdsiml/ui';
+import { Status, Select, Slider } from '@flowdsiml/ui';
 
 export type AbTest = Tables<'ab_tests'>;
 type VariantB = { title?: string; body?: string; cta?: { label: string; url: string } | null };
@@ -270,18 +270,20 @@ export function AbSection({
         </Select>
       </div>
       <div className="field">
-        <label htmlFor="ab-split">{t('editor.ab.split')}</label>
-        <input
+        <span className="t-label" id="ab-split-l">
+          {t('editor.ab.split')}
+        </span>
+        <Slider
           id="ab-split"
-          type="range"
           min={10}
           max={90}
           step={10}
           disabled={readOnly}
           value={100 - test!.split_b}
-          aria-valuetext={t('editor.ab.splitValue', { a: 100 - test!.split_b, b: test!.split_b })}
+          valueText={t('editor.ab.splitValue', { a: 100 - test!.split_b, b: test!.split_b })}
+          aria-labelledby="ab-split-l"
           aria-describedby="ab-split-h"
-          onChange={(e) => void setOpt({ p_split: 100 - Number(e.target.value) })}
+          onChange={(v) => void setOpt({ p_split: 100 - v })}
         />
         <span className="ab-split-v" aria-hidden="true">
           A {100 - test!.split_b}&#8239;% · B {test!.split_b}&#8239;%

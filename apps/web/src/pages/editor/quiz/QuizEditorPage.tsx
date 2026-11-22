@@ -14,7 +14,7 @@ import { useId, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Manifest } from '@flowdsiml/manifest';
-import { Alert, Button, Field, Select, Switch } from '@flowdsiml/ui';
+import { Alert, Button, Field, Select, Switch, Slider } from '@flowdsiml/ui';
 import { errorMessage } from '../../../lib/errors';
 import { Loading } from '../../../components/guards';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -530,18 +530,18 @@ function QuizSettings({ editor, readOnly }: { editor: DemoEditor; readOnly: bool
         </span>
       </Field>
       {quiz.mode !== 'survey' && (
-        <Field label={t('editor.quiz.thresholdLabel', { value: quiz.threshold })} htmlFor="qz-th">
-          <input
+        <Field label={t('editor.quiz.thresholdLabel', { value: quiz.threshold })}>
+          <Slider
             id="qz-th"
             className="quiz-threshold"
-            type="range"
             min={0}
             max={100}
             step={5}
             disabled={readOnly}
             value={quiz.threshold}
-            aria-valuetext={t('editor.quiz.thresholdValue', { value: quiz.threshold })}
-            onChange={(e) => set({ threshold: Number(e.target.value) })}
+            valueText={t('editor.quiz.thresholdValue', { value: quiz.threshold })}
+            aria-label={t('editor.quiz.thresholdLabel', { value: quiz.threshold })}
+            onChange={(v) => set({ threshold: v })}
           />
         </Field>
       )}
