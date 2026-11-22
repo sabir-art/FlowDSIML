@@ -37,7 +37,9 @@ select (select ws from ctx), '00000000-0000-0000-0000-00000000dd01', 'v-d-' || i
        case when i = 1 then now() - interval '30 seconds' else now() - interval '3 hours' end
 from generate_series(1, 3) i;
 insert into public.events (workspace_id, demo_id, visitor_id, session_id, type, device, occurred_at)
-values ((select ws from ctx), '00000000-0000-0000-0000-00000000dd01', 'v-d-1', 's-d-1', 'cta_click', 'desktop', now() - interval '20 seconds');
+values ((select ws from ctx), '00000000-0000-0000-0000-00000000dd01', 'v-d-1', 's-d-1', 'cta_click', 'desktop',
+        -- « du jour » à l'heure de Paris, même juste après minuit : jamais avant le début du jour
+        greatest(now() - interval '20 seconds', date_trunc('day', now() at time zone 'Europe/Paris') at time zone 'Europe/Paris'));
 insert into public.leads (workspace_id, demo_id, visitor_id, email, consent)
 values ((select ws from ctx), '00000000-0000-0000-0000-00000000dd01', 'v-m-1', 'lea@acme.example', true);
 
