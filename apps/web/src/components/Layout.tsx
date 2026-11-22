@@ -1,11 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type FocusEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type ReactNode,
-} from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useMediaQuery } from '../lib/useMediaQuery';
 import { AvatarPhoto } from './AvatarPhoto';
 import { BrandMark } from './BrandMark';
@@ -60,8 +53,6 @@ function savedPinned(): boolean {
   return window.matchMedia('(min-width: 1440px)').matches;
 }
 /** Délais du rail : dépli au survol, repli après la sortie du pointeur. */
-const HOVER_IN = 150;
-const HOVER_OUT = 300;
 
 export function Layout() {
   const { t, i18n } = useTranslation();
@@ -80,68 +71,20 @@ export function Layout() {
   const menuBtn = useRef<HTMLButtonElement>(null);
   const sidebar = useRef<HTMLElement>(null);
   const drawer = useMediaQuery('(max-width: 1023px)');
-  // §6 : rail (≥ 1 024 px, non épinglé), déplié par-dessus le contenu au survol ou au focus
+  // §6 et NAV-04 : rail de 64 px (≥ 1 024 px, non épinglé). Il ne se déplie plus au survol ni au focus
+  // (retour client du 22/11) : seul le bouton « Déplier » ouvre la barre, qui reste alors ouverte.
   const [pinned, setPinned] = useState(savedPinned);
-  const [expanded, setExpanded] = useState(false);
   const rail = !drawer && !pinned;
-  const collapsedRail = rail && !expanded;
-  const hoverTimer = useRef(0);
-  /** Échap rend le focus à l'élément actif sans redéplier le rail (ce focus-là seulement). */
-  const escapedAt = useRef(0);
-  const justEscaped = () => performance.now() - escapedAt.current < 100;
+  const collapsedRail = rail;
   const togglePin = () => {
     const next = !pinned;
     setPinned(next);
-    setExpanded(false);
     try {
       localStorage.setItem(SIDEBAR_KEY, next ? 'pinned' : 'rail');
     } catch {
       /* stockage indisponible : l'état vaut pour la session */
     }
   };
-  useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
-  const railEvents = rail
-    ? {
-        onMouseEnter: () => {
-          window.clearTimeout(hoverTimer.current);
-          hoverTimer.current = window.setTimeout(() => setExpanded(true), HOVER_IN);
-        },
-        onMouseLeave: () => {
-          window.clearTimeout(hoverTimer.current);
-          hoverTimer.current = window.setTimeout(() => {
-            // Le focus clavier dans la barre la garde dépliée (pas celui laissé par un clic)
-            const el = document.activeElement;
-            if (!sidebar.current?.contains(el) || !el?.matches(':focus-visible')) setExpanded(false);
-          }, HOVER_OUT);
-        },
-        onFocus: (e: FocusEvent<HTMLElement>) => {
-          // Focus clavier seulement : un clic donne aussi le focus, et déplier à cet instant déplacerait
-          // l'élément sous le pointeur avant le relâchement (le clic tomberait à côté, ex. « Mon compte ») ;
-          // à la souris, c'est le survol qui déplie
-          if (justEscaped() || !(e.target as HTMLElement).matches(':focus-visible')) return;
-          window.clearTimeout(hoverTimer.current);
-          setExpanded(true);
-        },
-        onBlur: (e: FocusEvent<HTMLElement>) => {
-          const to = e.relatedTarget as Node | null;
-          // Un menu ouvert depuis la barre (portail) la garde dépliée
-          if (to && (sidebar.current?.contains(to) || document.getElementById('fd-portal')?.contains(to)))
-            return;
-          if (!sidebar.current?.matches(':hover')) setExpanded(false);
-        },
-        onKeyDown: (e: ReactKeyboardEvent<HTMLElement>) => {
-          if (e.key !== 'Escape' || !expanded || document.querySelector('#fd-portal [role=menu]')) return;
-          e.preventDefault();
-          escapedAt.current = performance.now();
-          setExpanded(false);
-          // L'élément actif de la page, sinon le premier
-          (
-            sidebar.current?.querySelector<HTMLElement>('.fd-nav__item[aria-current="page"]') ??
-            sidebar.current?.querySelector<HTMLElement>('.fd-nav__item')
-          )?.focus();
-        },
-      }
-    : {};
 
   // Ferme le menu mobile à chaque navigation.
   useEffect(() => setOpen(false), [location.pathname]);
@@ -255,16 +198,16 @@ export function Layout() {
         role={drawer ? 'dialog' : undefined}
         aria-modal={drawer && open ? true : undefined}
         aria-label={drawer ? t('nav.main') : undefined}
-        data-expanded={rail ? String(expanded) : undefined}
-        {...railEvents}
+        data-expanded={rail ? 'false' : undefined}
       >
         {/* NAV-04 (COMP-01 §14) : logo à gauche et bouton de repli à droite sur une ligne, filet dessous.
             Rail replié : le bouton seul ; déplié au survol, il garde sa place et le logo vient à sa droite. */}
         <div className="sidebar__head">
           {!collapsedRail && (
-            <div className="brand">
+            // Le logo complet mène à Démos ; on ne le voit jamais en même temps que « Déplier »
+            <Link className="brand" to="/" aria-label={t('nav.homeLogo')}>
               <BrandMark full width={drawer ? 224 : 184} />
-            </div>
+            </Link>
           )}
           {!drawer && (
             <button
@@ -276,7 +219,7 @@ export function Layout() {
               onClick={togglePin}
             >
               {/* NAV-04 §14 bis : dans le rail, le symbole TutoClick au repos ; l'icône « Déplier » au survol
-                  et au focus, au même endroit (fondu croisé en CSS) */}
+                  et au focus du bouton, au même endroit (fondu croisé en CSS) */}
               {rail && <img src={symbol} alt="" aria-hidden="true" className="sidebar__pin-symbol" />}
               <PanneauIcon />
             </button>
