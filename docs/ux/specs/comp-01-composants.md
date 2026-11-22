@@ -492,3 +492,28 @@ Toutes utilisent MEDIA-01, sous l'un de ses trois formats : **vignette** (72 px,
 | Partager, importer des liens (`share/ImportLinksDialog.tsx`) | .csv | Zone sans Médiathèque |
 
 Les dépôts de `FolderColumn`, `FormPanel`, `GuideList` et `QuizEditorPage` servent à réordonner des éléments, pas à envoyer des fichiers : hors MEDIA-01.
+
+
+## 19. COL-02 : poignée de bord des colonnes secondaires (retour client du 22/11)
+
+Le client voyait un doublon : la même icône panneau pour replier la barre latérale (NAV-04) et la colonne Dossiers. **L'icône panneau est réservée à la barre latérale principale.**
+
+### 19.1 Règle
+
+- Une colonne secondaire repliable (colonne Dossiers ; colonne Étapes de l'éditeur, qui perd aussi son icône panneau) n'a plus de bouton dans son en-tête. Elle a une **poignée sur son bord droit**, à cheval sur le filet.
+- **Format retenu (A, toujours visible)** : une pastille de 20 × 40 px (fond `surface`, bordure `border`, ombre légère), centrée verticalement dans la hauteur visible (`position: sticky`), avec un chevron de 14 px : `ChevronLeft` dépliée, `ChevronRight` repliée. C'est un **bouton** : « Replier les dossiers » / « Déplier les dossiers », `aria-expanded`, `aria-controls` (et « Replier les étapes » / « Déplier les étapes » dans l'éditeur).
+- **Redimensionnement** : toute la hauteur du filet (zone de prise de 12 px, curseur `col-resize`) est un **séparateur** : `role="separator"`, `aria-orientation="vertical"`, `aria-label="Largeur des dossiers"`, `aria-valuemin`, `aria-valuemax`, `aria-valuenow` (en px), `tabindex="0"`. Pendant le glissement, le filet passe en `primary` (2 px), la pastille aussi, et une bulle donne la largeur (« 300 px »). Au clavier, sur le séparateur : ← et → par 16 px, Début et Fin pour le minimum et le maximum, Entrée pour replier ou déplier.
+- **Bornes** : colonne Dossiers de 200 à 360 px (232 par défaut) ; colonne Étapes de 232 à 360 px (264 par défaut). En dessous du minimum pendant un glissement, la colonne se replie.
+- **Repliée** : la colonne Dossiers disparaît (largeur 0). Une demi-pastille de 18 × 40 px reste collée au bord gauche du contenu pour la rouvrir. La colonne Étapes devient son rail de 48 px (pastilles numérotées), avec la même poignée sur le bord du rail.
+- **Mémoire** : la largeur et l'état replié sont gardés par utilisateur (navigateur), séparément pour chaque colonne.
+- **Animation** (MOTION-01) : repli et dépli en 200 ms, `ease-out` sur la largeur, sans animation si `prefers-reduced-motion`. Pas d'animation pendant un glissement.
+- **Mobile (< 1 024 px)** : pas de poignée. La colonne Dossiers reste un tiroir ouvert par la bascule « Dossiers » de la barre mobile (§ lot 2).
+- La colonne des Paramètres ne se replie pas : pas de poignée.
+
+### 19.2 Variante B (proposée, non retenue par défaut)
+
+Même séparateur, mais la pastille (ronde, 24 px) n'apparaît qu'au survol ou au focus du bord. Plus discrète, mais moins découvrable ; à l'état replié, la demi-pastille reste toujours visible. Maquette `dossiers-poignee-b` (survol).
+
+### 19.3 Maquettes
+
+`lot2-demos/dossiers-poignee` (dépliée, format A), `dossiers-redim` (glissement à 300 px), `dossiers-replie` (repliée), `dossiers-poignee-b` (variante B au survol) ; 1440, clair et sombre. L'en-tête de la colonne n'a plus que « Dossiers » et « Nouveau dossier ».
