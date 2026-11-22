@@ -27,7 +27,6 @@ import {
   FolderOpen,
   FolderPlus,
   Layers,
-  MonitorPlay,
   Lock,
   LayoutGrid,
   Link2,
@@ -1210,7 +1209,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
               // L48-B : une seule action au centre, « Nouvelle démo », et « Voir un exemple » (pas encore de
               // démo d'exemple : lien désactivé, « Bientôt » en texte)
               <Empty
-                icon={<MonitorPlay />}
+                icon={<LayoutGrid />}
                 title={editable ? t('demos.empty.title') : t('demos.empty.titleViewer')}
                 body={editable ? t('demos.empty.body') : t('demos.empty.bodyViewer')}
                 action={

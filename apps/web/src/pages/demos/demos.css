@@ -1708,3 +1708,38 @@ button.nd-src:focus-visible {
   border-right: 0;
   border-left: 1px solid var(--fd-color-border);
 }
+/* Lot 2 : états vides de la page Démos (tuile de 48 px, titre de 15 px, texte de 13 px, sans cadre) */
+.demos-section .fd-empty--page {
+  gap: 8px;
+  padding: 96px 24px;
+  border: 0;
+  background: none;
+}
+.demos-section .fd-empty--page .fd-empty__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--fd-color-surface-sunken);
+}
+.demos-section .fd-empty--page .fd-empty__icon svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.75;
+}
+.demos-section .fd-empty--page .fd-empty__text {
+  gap: 8px;
+  margin-top: 4px;
+}
+.demos-section .fd-empty--page .fd-empty__title {
+  font: 600 15px / 19px var(--fd-font-sans);
+}
+.demos-section .fd-empty--page .fd-empty__body {
+  max-width: 46ch;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 19.5px;
+}
+.demos-section .fd-empty--page .fd-empty__actions {
+  gap: 12px;
+  margin-top: 8px;
+}
