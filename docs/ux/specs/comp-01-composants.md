@@ -433,6 +433,10 @@ Le client a corrigé la première décision : « le seul qui aura une couleur di
 - Dans un dossier ouvert, la phrase d'accès (« Tout l'espace peut voir ce dossier. ») passe dans le bouton « Accès au dossier » du PageHeader (son infobulle et sa fenêtre).
 - Maquettes : lot 2 (grille, liste, dossier, menu, nouvelle, vide), refaites le 22/11. Les lots 5 et 6 suivent la même règle quand ils sont repris.
 
+**Précisions du 22/11 (questions du dev)** :
+- La 1re ligne du contenu (filtres) est à **32 px sous le PageHeader, soit y 88** à 1440 px. Les maquettes du lot 2 la plaçaient à y 120 : la marge de section s'ajoutait au padding du contenu. Elles sont corrigées (`.wrap > .sec2:first-child { margin-top: 0 }`). Les indicateurs sont à y 140, la grille à y 275 ; dans un dossier et en liste, le tableau ou la grille est à y 140.
+- COL-01 dans l'éditeur : la colonne Étapes passe au **fond du contenu**, avec son filet. Dans l'éditeur, rien n'est teinté. La carte choisie garde sa bordure prune ; une carte survolée prend `nav-hover`. Les maquettes du lot 3 la dessinaient déjà ainsi.
+
 ### 16.1 PAGE-01 vaut pour toutes les pages (rappel du client, 22/11)
 
 PAGE-01 est une structure **globale**. Toute route de l'app qui s'affiche dans la coque (barre latérale) a, en haut, **une seule barre `.fd-page-header`** :

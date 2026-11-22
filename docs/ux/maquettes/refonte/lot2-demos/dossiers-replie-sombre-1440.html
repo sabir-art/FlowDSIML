@@ -425,6 +425,8 @@ main.withp { display: flex; flex-direction: column; min-width: 0; }
 /* Variante B : la poignée n'apparaît qu'au survol ou au focus du bord */
 .cgrip.vb .cbtn { width: 24px; height: 24px; border-radius: 50%; }
 .cgrip.vb:not(.hov) .cbtn { opacity: 0; }
+/* PAGE-01 : la 1re ligne du contenu commence 32 px sous le PageHeader (pas de marge de section en plus) */
+.wrap > .sec2:first-child { margin-top: 0; }
 </style></head><body class="">
 
 <div class="shell fclosed"><nav class="side" aria-label="Navigation principale"><div class="sbh"><img class="logo l" src="../../../brand-tutoclic/production/logo-tutoclick.svg" alt="TutoClick, porté par la DSIML"><img class="logo d" src="../../../brand-tutoclic/production/logo-tutoclick-sombre.svg" alt="TutoClick, porté par la DSIML"><button class="ib pin" aria-label="Replier la barre latérale" aria-expanded="true"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panneau" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="4"/><path d="M9.5 3v18"/><path d="M6.25 8h.01M6.25 12h.01M6.25 16h.01"/></svg></button></div>
