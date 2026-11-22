@@ -85,6 +85,8 @@ describe('divers', () => {
   it('protège le CSV', () => {
     expect(csvCell('=HYPERLINK("x")')).toBe(`"'=HYPERLINK(""x"")"`);
     expect(csvCell('a,b')).toBe('"a,b"');
+    expect(csvCell(-5)).toBe('-5');
+    expect(csvCell('-5+cmd')).toBe("'-5+cmd");
   });
   it('slugify', () => {
     expect(slugify('Démo CRM — Été 2026 !')).toBe('demo-crm-ete-2026');
