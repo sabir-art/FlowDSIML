@@ -411,3 +411,41 @@ Le bouton de repli, seul au-dessus du logo, créait un grand vide en tête de la
 - **Barre repliée** (rail de 64 px) : seul le bouton de dépli en tête, centré (`aria-label="Déplier la barre latérale"`, `aria-expanded="false"`), le filet dessous, puis les icônes de navigation. Pas de logo dans le rail : il revient quand on déplie.
 - Sous 1 024 px : inchangé (barre mobile).
 - Mesures de la maquette (lot 1, 1440) : logo de 184 × 60 à x 16, y 16 ; bouton à x 208, y 30 ; sélecteur d'espace à y 111 ; « ESPACE » à y 16.
+
+
+## 15. COL-01 : teinte des colonnes secondaires (retour client du 22/11, décision du chef)
+
+- Toute colonne secondaire (Paramètres, Dossiers, panneau de prise en main ONB-01, et toute colonne à venir) prend **la teinte de la barre latérale** (`--nav-bg` des maquettes, jeton de surface de navigation dans l'app), avec un **filet de 1 px `border`** du côté du contenu.
+- Seul le contenu reste sur le fond blanc (`surface`). Pas de troisième teinte.
+- Dans l'app aujourd'hui, la colonne Dossiers de Démos est blanche : elle passe à la teinte de navigation, comme celle des Paramètres. Les maquettes des lots 1 et 2 sont déjà ainsi.
+
+## 16. PAGE-01 : en-tête de page commun à toutes les pages principales (retour client du 22/11)
+
+- Démos, Sandbox, Parcours de formation, Analytics, Apprenants et toute page principale reprennent **exactement la barre des Paramètres** (PageHeader, §12.1) : même hauteur, filet dessous, titre ou fil d'Ariane à gauche (« Démos », « Démos › Formation accueil »), actions à droite (recherche, bouton de prise en main ONB-01, bouton principal), puis Aide et Notifications après leur filet.
+- **Le contenu ne répète pas le titre** : plus de grand H1 ni de sous-titre dans le contenu, plus de titre de section qui redit la page (« Toutes les démos »). Le nombre d'éléments est dans le segmenté (« Toutes · 4 »).
+- **La barre de filtres est la première ligne du contenu** (statut segmenté, Type, Créé par, Étiquettes, tri, grille / liste), à 32 px sous le PageHeader. Les indicateurs viennent ensuite, puis la liste.
+- Dans un dossier ouvert, la phrase d'accès (« Tout l'espace peut voir ce dossier. ») passe dans le bouton « Accès au dossier » du PageHeader (son infobulle et sa fenêtre).
+- Maquettes : lot 2 (grille, liste, dossier, menu, nouvelle, vide), refaites le 22/11. Les lots 5 et 6 suivent la même règle quand ils sont repris.
+
+## 17. ONB-01 : prise en main dans un panneau à droite (retour client du 22/11, variante à choisir)
+
+- La prise en main **sort du flux** : elle ne pousse plus les démos vers le bas. C'est un **panneau vertical à droite**, sous le PageHeader, qui **partage l'espace** avec la page (le contenu se resserre, comme quand on replie une colonne). Ni modale, ni surcouche. Teinte COL-01, filet à gauche.
+- **Point d'entrée visible dans le PageHeader** : bouton secondaire « Prise en main 2/7 », avec un anneau de progression de 18 px (`aria-expanded`, `aria-controls`). Il ouvre et ferme le panneau ; la croix du panneau le ferme aussi. Le choix est gardé pour l'utilisateur. Quand les 7 étapes sont faites, le bouton disparaît (et l'entrée reste dans Aide).
+- Avec le panneau ouvert, la barre de filtres passe au format compact (« Filtres ») et les indicateurs en 2 × 2, pour tenir dans la largeur restante.
+- **Mobile (< 1 024 px)** : le même contenu dans un **tiroir par la droite** (340 px, voile, `role="dialog"`, `aria-modal`, focus piégé, Échap ferme et rend le focus au bouton) ; le bouton d'entrée est l'anneau seul de 44 px dans la barre.
+- **Trois variantes à présenter au client** (maquettes `lot2-demos/onb-a`, `onb-b`, `onb-c`, en 1440 et 390, clair et sombre) :
+  - **A, liste complète** (360 px) : les 7 étapes en liste, l'étape conseillée en carte, chaque étape avec son action sous le texte, les étapes faites barrées.
+  - **B, étape suivante** (360 px) : une grande carte « Prochaine étape » avec son action principale, puis « À faire ensuite » en lignes compactes (chevron ou « Bientôt »), et « Terminées · 2 » replié.
+  - **C, par thème** (320 px) : trois groupes (Espace, Créer, Diffuser) avec leur compteur ; seule l'étape en cours est dépliée avec son action, les autres en une ligne avec un chevron.
+- Les textes sont ceux de l'app (7 étapes, dont « Flouter les données sensibles »). Le pied garde « Visible par les propriétaires et administrateurs. »
+
+## 18. MEDIA-01 : photo de profil et logo d'espace (retour client du 22/11)
+
+- **Un seul composant**, deux formes : **rond** (photo de profil) et **carré arrondi** (logo d'espace, rayon de 16 px). Taille de 72 px dans une ligne de réglage. Placé selon ALIGN-01 : calé à droite, sur la fin du filet ; l'aide (formats, taille) reste sous le libellé.
+- **L'image est le bouton** (`<button>`, nommé « Changer la photo de profil » ou « Changer le logo de l'espace ») : un clic ou Entrée ouvre le choix de fichier. Au **survol et au focus**, un voile (noir à 62 %) avec l'icône Camera et « Changer » ; l'image dessous est floutée. Au focus clavier, en plus, l'anneau `focus` de 2 px à 2 px du bord.
+- **Glisser-déposer** accepté sur l'image : pendant le survol avec un fichier, un bord pointillé de 2 px `primary`, un voile `primary` à 18 % et « Déposer ».
+- **Petit bouton ⋯** de 28 px, rond, en bas à droite de l'image (« Options pour la photo de profil », `aria-haspopup="menu"`) : un menu de 200 px avec « Remplacer… » (Upload) et « Retirer » (Trash2, couleur danger). Plus de lien rouge brut ni de bouton « Choisir une photo » à côté.
+- **Envoi** : voile, cercle de chargement et pourcentage (« 60 % »), `aria-busy="true"`. **Aperçu** : l'image choisie remplace tout de suite l'ancienne (le recadrage existant reste dans sa fenêtre).
+- **Erreur dans le cadre** : bord de 2 px `danger` et message sous l'image, en 12 px avec CircleAlert (« Format non accepté : JPG, PNG ou WebP, 2 Mo au plus. », ou la taille), `role="alert"`. L'ancienne image reste.
+- **Vide** (pas de photo ni de logo) : bord pointillé, icône Camera et « Ajouter » ; pas de bouton ⋯.
+- Maquettes : `lot1-parametres/media-01` (planche de tous les états, rond et carré, 1440 et 390, clair et sombre), et les lignes « Photo » de Profil et « Logo » de Général.

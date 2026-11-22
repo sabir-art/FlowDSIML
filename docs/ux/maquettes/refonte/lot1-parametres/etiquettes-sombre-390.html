@@ -198,6 +198,41 @@ body:not(.mob) .ctl > .lr { justify-content: flex-end; }
 .ctl .doms { max-width: none; }
 body:not(.mob) .ctl .doms { width: calc(100% - 28px); box-sizing: border-box; }
 .ctl .doms { grid-template-columns: minmax(0, 1fr); } .ctl .doms > * { min-width: 0; }
+/* MEDIA-01 : photo de profil et logo d'espace */
+.mdw { display: grid; justify-items: end; gap: 6px; }
+.md { position: relative; width: 72px; height: 72px; flex: none; }
+.mdi { position: relative; width: 72px; height: 72px; padding: 0; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); overflow: hidden; cursor: pointer; display: grid; place-items: center; font: inherit; color: inherit; }
+.md.rd .mdi { border-radius: 50%; } .md.sq .mdi { border-radius: 16px; }
+.mini { width: 100%; height: 100%; display: grid; place-items: center; background: var(--fd-prune-100, #F3D3E2); color: var(--fd-prune-700, #85164B); font: 700 26px var(--fd-font-sans); }
+[data-theme='dark'] .mini { background: #3A1527; color: #E3A9C4; }
+.mlg { width: 100%; height: 100%; display: grid; place-items: center; background: #1B3A4B; color: #fff; font: 800 15px/1 var(--fd-font-sans); letter-spacing: -.02em; }
+.mveil { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 2px; background: rgb(8 10 14 / .55); color: #fff; font: 600 12px var(--fd-font-sans); }
+.mveil.drop { background: color-mix(in srgb, var(--fd-color-primary) 18%, transparent); color: var(--fd-color-primary); }
+[data-theme='dark'] .mveil.drop { color: var(--fd-color-text); }
+.md.drag .mdi { border: 2px dashed var(--fd-color-primary); }
+.md.focus .mdi { outline: 2px solid var(--fd-color-focus, var(--fd-color-primary)); outline-offset: 2px; }
+.md.error .mdi { border: 2px solid var(--fd-color-danger, #C42B1C); }
+.md.empty .mdi { border: 1.5px dashed var(--fd-color-border-field, var(--field)); background: var(--fd-color-surface-sunken); }
+.mph { display: grid; justify-items: center; gap: 2px; color: var(--fd-color-text-muted); font: 600 11px var(--fd-font-sans); }
+.spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid rgb(255 255 255 / .35); border-top-color: #fff; }
+.mbadge { position: absolute; right: -4px; bottom: -4px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; padding: 0; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: 0 1px 3px rgb(8 10 14 / .12); cursor: pointer; }
+.md.sq .mbadge { right: -6px; bottom: -6px; }
+.mbadge.open { border-color: var(--fd-color-primary); }
+.mmenu { top: 80px; right: 0; width: 200px; }
+.mmenu .o { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 6px; font-size: 14px; } .mmenu .o.dng { color: var(--fd-color-danger, #C42B1C); }
+[data-theme='dark'] .mmenu .o.dng { color: #F97066; }
+.merr { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--fd-color-danger, #C42B1C); max-width: 260px; text-align: right; } [data-theme='dark'] .merr { color: #F97066; }
+.mgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px 16px; padding: 24px 0 8px; }
+.mcell { margin: 0; display: grid; justify-items: center; gap: 12px; } .mcell .mdw { justify-items: center; } .mcell .merr { text-align: center; max-width: 180px; justify-content: center; }
+.mcell figcaption { font-size: 12px; color: var(--fd-color-text-muted); }
+.mcell:has(.mmenu) { padding-bottom: 96px; }
+.mob .mgrid { grid-template-columns: 1fr 1fr; }
+.mob .ctl > .lr .mdw { justify-items: start; }
+.md.hover .mdi > span:first-child, .md.focus .mdi > span:first-child, .md.loading .mdi > span:first-child, .md.drag .mdi > span:first-child { filter: blur(3px); opacity: .45; }
+.mveil { background: rgb(8 10 14 / .62); }
+.mcell:has(.mmenu) { padding-bottom: 0; } .mcell .mdw:has(.mmenu) { margin-bottom: 92px; }
+.mcell .mmenu { top: 84px; left: 50%; right: auto; transform: translateX(-50%); width: 180px; }
+.mmenu { position: absolute; z-index: 6; padding: 4px; border-radius: 10px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-md, 0 6px 18px rgb(8 10 14 / .14)); }
 </style></head><body class="mob">
 <div class="mbar"><button class="ib" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu" aria-hidden="true"><path d="M4 5h16"></path><path d="M4 12h16"></path><path d="M4 19h16"></path></svg></button><img src="../../../brand-tutoclic/production/symbole-tutoclick.svg" alt="TutoClick" width="32" height="32"><span class="grow"></span><button class="ib" aria-label="Aide"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-question-mark" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></button><button class="ib" aria-label="Notifications, aucune non lue"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg></button></div>
 <div class="shell">
