@@ -732,7 +732,8 @@ button.nd-src:focus-visible {
 }
 
 /* L26-04 : « Partir d'un modèle » (1 040 px, trois colonnes ; une seule sous 1 000 px) */
-.tpl-dialog {
+/* MODAL-01, taille xl élargie à 1 040 px (trois colonnes) */
+.fd-modal.tpl-dialog {
   width: min(1040px, calc(100vw - 32px));
 }
 .tpl-wrap {
