@@ -28,23 +28,14 @@
   display: flex;
   flex-direction: column;
 }
-.demos-list-head {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.demos-list-title {
-  margin: 0;
-  font: 600 16px / 21px var(--fd-font-sans);
-}
-.demos-list-count {
-  font-size: 13px;
-  color: var(--fd-color-text-muted);
-}
+/* PAGE-01 (COMP-01 §16) : la barre de filtres est la première ligne du contenu, à 32 px du PageHeader ;
+   16 px jusqu'aux indicateurs ou à la liste, 24 px entre les indicateurs et la liste */
 .demos-section > .list-toolbar {
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+.demos-section > .kpi-short {
+  margin-bottom: 24px;
 }
 /* Barre de liste du lot 2 : contrôles de 36 px, filtres à coins de 10 px (COMP-01) */
 .demos-section .list-toolbar .fd-btn {
@@ -1170,15 +1161,13 @@ button.nd-src:focus-visible {
     border-top: 1px solid var(--fd-color-border);
   }
 }
-/* Écarts de la page : 24 px entre les blocs, 32 px avant la liste */
+/* Écarts de la page : 24 px entre les blocs */
 .demos-wrap.stack {
   gap: 24px;
 }
+/* PAGE-01 : la barre de filtres est le premier bloc, à 120 px du haut (maquettes du lot 2 du 22/11),
+   partout : toutes les démos, dossier ouvert, Mes démos, Archivées */
 .demos-wrap > .demos-section {
-  margin-top: 8px;
-}
-/* Dossier ouvert, Mes démos, Archivées : la liste est le premier bloc, à 32 px du haut du contenu */
-.demos-wrap--scoped > .demos-section {
   margin-top: 32px;
 }
 /* L27-09 : accès au dossier */

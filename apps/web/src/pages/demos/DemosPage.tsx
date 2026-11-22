@@ -541,6 +541,10 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     const dir = folders.find((f) => f.id === scope) ?? null;
     // L48-B : espace sans démo, une seule action au centre ; ni recherche ni « Nouvelle démo » dans l'en-tête
     const noDemos = !!demos && demos.length === 0;
+    const accessHint = (f: FolderRow) =>
+      f.restricted
+        ? t('folderAccess.visibleBy', { count: memberCount - (hidden[f.id] ?? 0) })
+        : t('folders.visibleAll');
     return (
       <PageHeader
         title={scopeName ?? root}
@@ -590,7 +594,19 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
               </label>
             )}
             {dir && can('workspace.settings') && (
-              <Button className="ph-wide" icon={<Lock />} onClick={() => setFolderAccess(dir)}>
+              <span id="folder-access-hint" className="sr-only">
+                {accessHint(dir)}
+              </span>
+            )}
+            {dir && can('workspace.settings') && (
+              <Button
+                className="ph-wide"
+                icon={<Lock />}
+                /* PAGE-01 : qui voit le dossier est dit par l'infobulle du bouton, plus dans le contenu */
+                data-tip={accessHint(dir)}
+                aria-describedby="folder-access-hint"
+                onClick={() => setFolderAccess(dir)}
+              >
                 {t('folders.access')}
               </Button>
             )}
@@ -759,7 +775,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           },
         }
       : {};
-  const openFolder = folders.find((f) => f.id === scope) ?? null;
   const sortLabels: Record<Sort, string> = {
     updated: t('demos.sortUpdated'),
     created: t('demos.sortCreated'),
@@ -884,96 +899,16 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           <LoadStatus loading={false} longLoad={sk.longLoad} busy="" done={t('loading.demosDone')} />
           {error && <Alert kind="error">{error}</Alert>}
 
-          {/* L48-B §4 : indicateurs masqués tant qu'aucune démo n'est publiée */}
-          {kpis && anyPublished && !sandbox && scope === 'all' && (
-            <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
-              {(
-                [
-                  [
-                    'views',
-                    t('kpi.views'),
-                    formatNumber(kpis.cur.views),
-                    countTrend(kpis.cur.views, kpis.prev?.views ?? 0),
-                  ],
-                  [
-                    'visitors',
-                    t('kpi.visitorsUnique'),
-                    formatNumber(kpis.cur.visitors),
-                    countTrend(kpis.cur.visitors, kpis.prev?.visitors ?? 0),
-                  ],
-                  [
-                    'completion',
-                    t('kpi.completion'),
-                    `${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)} %`,
-                    rateTrend(
-                      completionRate(kpis.cur.visitors, kpis.cur.completions),
-                      kpis.prev ? completionRate(kpis.prev.visitors, kpis.prev.completions) : 0,
-                      kpis.prev?.visitors ?? 0,
-                    ),
-                  ],
-                  [
-                    'leads',
-                    t('kpi.leads'),
-                    formatNumber(kpis.cur.leads),
-                    countTrend(kpis.cur.leads, kpis.prev?.leads ?? 0),
-                  ],
-                ] as const
-              ).map(([k, label, value, trend]) => (
-                // Indicateur : écarts internes de 4 px (maquette du lot 2)
-                <Link key={k} className="kpi-sc" to={`/analytics?indicateur=${k}`} data-gap-exempt="">
-                  <span className="kpi-tab__l">{label}</span>
-                  <span className="kpi-tab__v">{value}</span>
-                  {kpis.prev ? (
-                    <TrendBadge trend={trend} days={30} />
-                  ) : (
-                    <span className="kpi-trend">{'\u00a0'}</span>
-                  )}
-                  <span className="kpi-sc__go" aria-hidden="true">
-                    <span className="kpi-sc__go-t">{t('kpi.analytics')}</span>
-                    <ArrowRight />
-                  </span>
-                  <span className="sr-only">{t('kpi.seeAnalytics')}</span>
-                </Link>
-              ))}
-            </nav>
-          )}
-
-          {/* L26-01 : « Prise en main de votre espace », après les indicateurs (L32 §2) */}
-          {!sandbox && scope === 'all' && (
-            <OnboardingCard
-              onb={onb}
-              onCapture={openNew}
-              latestDemoId={demos[0]?.id ?? null}
-              publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
-              collapsedByDefault={demos.length === 0}
-            />
-          )}
-
           <section aria-labelledby="demos-list-title" className="demos-section">
-            <div className="demos-list-head">
-              {/* Lot 2 : dans un dossier, le titre est le nombre de démos, suivi de qui voit le dossier */}
-              <h2 id="demos-list-title" className="demos-list-title">
-                {scopeName
-                  ? t('demos.resultCount', { count: visible.length })
-                  : sandbox
-                    ? t('sandboxPage.all')
-                    : t('demos.allDemos')}
-              </h2>
-              {openFolder ? (
-                <span className="demos-list-count">
-                  {openFolder.restricted
-                    ? t('folderAccess.visibleBy', { count: memberCount - (hidden[openFolder.id] ?? 0) })
-                    : t('folders.visibleAll')}
-                </span>
-              ) : (
-                !scopeName &&
-                demos.length > 0 && (
-                  <span className="demos-list-count" aria-hidden="true">
-                    {t('demos.resultCount', { count: visible.length })}
-                  </span>
-                )
-              )}
-            </div>
+            {/* PAGE-01 (COMP-01 §16) : le contenu ne répète pas le titre de la page ; le titre de la liste reste
+                pour les lecteurs d'écran, le nombre est dans le segmenté (« Toutes · 4 ») */}
+            <h2 id="demos-list-title" className="sr-only">
+              {scopeName
+                ? t('demos.resultCount', { count: visible.length })
+                : sandbox
+                  ? t('sandboxPage.all')
+                  : t('demos.allDemos')}
+            </h2>
             {/* L40 : Statut, Dossier, Étiquettes et Réinitialiser à gauche ; tri et affichage à droite */}
             {/* L48-B §4 : pas de barre de liste tant qu'il n'y a aucune démo */}
             {demos.length > 0 && (
@@ -1109,6 +1044,72 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                     </div>
                   </>
                 }
+              />
+            )}
+
+            {/* PAGE-01 : la barre de filtres est la première ligne, les indicateurs viennent ensuite */}
+            {/* L48-B §4 : indicateurs masqués tant qu'aucune démo n'est publiée */}
+            {kpis && anyPublished && !sandbox && scope === 'all' && (
+              <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
+                {(
+                  [
+                    [
+                      'views',
+                      t('kpi.views'),
+                      formatNumber(kpis.cur.views),
+                      countTrend(kpis.cur.views, kpis.prev?.views ?? 0),
+                    ],
+                    [
+                      'visitors',
+                      t('kpi.visitorsUnique'),
+                      formatNumber(kpis.cur.visitors),
+                      countTrend(kpis.cur.visitors, kpis.prev?.visitors ?? 0),
+                    ],
+                    [
+                      'completion',
+                      t('kpi.completion'),
+                      `${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)} %`,
+                      rateTrend(
+                        completionRate(kpis.cur.visitors, kpis.cur.completions),
+                        kpis.prev ? completionRate(kpis.prev.visitors, kpis.prev.completions) : 0,
+                        kpis.prev?.visitors ?? 0,
+                      ),
+                    ],
+                    [
+                      'leads',
+                      t('kpi.leads'),
+                      formatNumber(kpis.cur.leads),
+                      countTrend(kpis.cur.leads, kpis.prev?.leads ?? 0),
+                    ],
+                  ] as const
+                ).map(([k, label, value, trend]) => (
+                  // Indicateur : écarts internes de 4 px (maquette du lot 2)
+                  <Link key={k} className="kpi-sc" to={`/analytics?indicateur=${k}`} data-gap-exempt="">
+                    <span className="kpi-tab__l">{label}</span>
+                    <span className="kpi-tab__v">{value}</span>
+                    {kpis.prev ? (
+                      <TrendBadge trend={trend} days={30} />
+                    ) : (
+                      <span className="kpi-trend">{'\u00a0'}</span>
+                    )}
+                    <span className="kpi-sc__go" aria-hidden="true">
+                      <span className="kpi-sc__go-t">{t('kpi.analytics')}</span>
+                      <ArrowRight />
+                    </span>
+                    <span className="sr-only">{t('kpi.seeAnalytics')}</span>
+                  </Link>
+                ))}
+              </nav>
+            )}
+
+            {/* L26-01 : « Prise en main de votre espace », après les indicateurs (L32 §2) */}
+            {!sandbox && scope === 'all' && (
+              <OnboardingCard
+                onb={onb}
+                onCapture={openNew}
+                latestDemoId={demos[0]?.id ?? null}
+                publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
+                collapsedByDefault={demos.length === 0}
               />
             )}
 

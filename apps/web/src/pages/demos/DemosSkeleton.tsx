@@ -12,17 +12,10 @@ export function DemosSkeleton({ onboardingHeight }: { onboardingHeight: number }
   const { t } = useTranslation();
   return (
     <>
-      <KpiSkeletonRow />
-      {/* Prise en main : place réservée à la hauteur de la dernière visite (rien si elle était masquée) */}
-      {onboardingHeight > 0 && (
-        <div className="fd-card sk-reserve" style={{ height: onboardingHeight }} aria-hidden="true" />
-      )}
       <section aria-labelledby="demos-list-title" className="demos-section">
-        <div className="demos-list-head">
-          <h2 id="demos-list-title" className="demos-list-title">
-            {t('demos.allDemos')}
-          </h2>
-        </div>
+        <h2 id="demos-list-title" className="sr-only">
+          {t('demos.allDemos')}
+        </h2>
         {/* Barre réelle et désactivée, sans compteur (même gabarit que la page, L40) */}
         <div className="fd-toolbar list-toolbar">
           <div className="fd-toolbar__group" role="group" aria-label={t('toolbar.filters')}>
@@ -72,6 +65,12 @@ export function DemosSkeleton({ onboardingHeight }: { onboardingHeight: number }
             </div>
           </div>
         </div>
+        {/* PAGE-01 : même ordre que la page chargée (filtres, indicateurs, liste) */}
+        <KpiSkeletonRow />
+        {/* Prise en main : place réservée à la hauteur de la dernière visite (rien si elle était masquée) */}
+        {onboardingHeight > 0 && (
+          <div className="fd-card sk-reserve" style={{ height: onboardingHeight }} aria-hidden="true" />
+        )}
         <ul className="demo-grid" aria-hidden="true">
           {Array.from({ length: 6 }, (_, i) => (
             <li key={i} className="fd-card demo-card">
