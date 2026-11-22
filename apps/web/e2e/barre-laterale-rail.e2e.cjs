@@ -3,10 +3,11 @@
  * docs/ux/specs/retours-client-21-11.md §6). Faux Supabase, données de la maquette.
  *  - épinglée par défaut à partir de 1 440 px, rail en dessous ; état retenu (fd.sidebar) ;
  *  - rail : icônes de 20 px dans des cibles de 44 px, noms accessibles gardés, infobulle à droite ;
- *  - survol : déplié par-dessus le contenu après 150 ms (sans le pousser), replié 300 ms après la sortie ;
- *  - NAV-04 (COMP-01 §14) : logo de 184 px à gauche et bouton de repli à droite sur une ligne, filet dessous ;
- *    rail : bouton seul en tête, il garde sa place au survol (le logo vient à sa droite) ; aria-expanded ;
- *  - clavier : le focus déplie, Échap replie et rend le focus à l'élément actif ;
+ *  - NAV-04 (COMP-01 §14) : épinglée, logo de 184 px à gauche (lien vers Démos) et bouton « Replier » à
+ *    droite sur une ligne, filet dessous ; aria-expanded ;
+ *  - rail (§14 bis, correction client du 22/11) : en tête le symbole TutoClick, qui devient le bouton
+ *    « Déplier » au survol et au focus ; le rail ne se déplie ni au survol ni au focus ; « Déplier » et le
+ *    logo complet ne sont jamais visibles ensemble ; le clic ouvre la barre, qui reste ouverte ;
  *  - sous 1 024 px : comportement inchangé (barre du haut et tiroir).
  */
 const { chromium } = require('playwright');
@@ -169,57 +170,45 @@ const geo = (p) =>
     (await pinState('deplier')) && Math.round(pinFocus.pin.x) === 16 && Math.round(pinFocus.pin.y) === 30,
     '§14 bis : au focus clavier, l’icône « Déplier » remplace le symbole, au même endroit',
   );
-  await p.keyboard.press('Escape');
+  ok(
+    pinFocus.sb === 64 && pinFocus.logo === null,
+    'au focus clavier, le rail reste à 64 px : « Déplier » sans le logo complet',
+  );
+  await p.locator('.fd-nav__item').first().focus();
+  ok((await geo(p)).sb === 64, 'focus sur une entrée du rail : il ne se déplie pas');
   await p.evaluate(() => document.activeElement?.blur());
   await p.mouse.move(700, 400);
-  await p.locator('.sidebar[data-expanded="false"]').waitFor();
   ok(await pinState('symbole'), '§14 bis : le symbole revient quand le focus et le pointeur sortent');
   ok(g.over <= 1, 'aucun défilement horizontal');
 
-  // Survol : 150 ms, par-dessus, sans pousser ; repli 300 ms après la sortie
-  await p.mouse.move(700, 400);
+  // Survol du rail : il ne se déplie plus (correction client) ; survol du bouton : « Déplier », sans logo
   await p.mouse.move(32, 300);
-  await p.waitForTimeout(60);
-  ok((await geo(p)).exp === 'false', 'survol : pas encore déplié à 60 ms');
-  await p.waitForTimeout(250);
+  await p.locator('.fd-tooltip').waitFor();
+  g = await geo(p);
+  ok(g.sb === 64 && g.main === 64 && g.logo === null, `survol du rail : il reste à 64 px (${g.sb} px)`);
+  await p.locator('.sidebar__pin').hover();
   g = await geo(p);
   ok(
-    g.exp === 'true' && g.sb === 256 && g.main === 64,
-    `survol : déplié à 256 px par-dessus, contenu immobile (main ${g.main})`,
+    (await pinState('deplier')) && g.sb === 64 && g.logo === null && Math.round(g.pin.x) === 16,
+    'survol du bouton : « Déplier » à la place du symbole, jamais avec le logo complet',
   );
-  ok(g.shadow !== 'none', 'ombre portée quand il est déplié');
-  ok(await pinState('deplier'), '§14 bis : rail déplié au survol, le bouton est en état « Déplier »');
-  ok(
-    Math.round(g.pin.x) === 16 && Math.round(g.pin.y) === 30 && g.logo && Math.round(g.logo.x) === 56,
-    `NAV-04 : au survol le bouton garde sa place (x ${Math.round(g.pin.x)}), le logo vient à sa droite (x ${g.logo && Math.round(g.logo.x)})`,
-  );
-  ok(
-    (await p.locator('.fd-nav__item').first().getAttribute('data-tip')) === null,
-    'déplié : plus d’infobulle (libellé visible)',
-  );
-  const iconRail = (await geo(p)).iconX;
-  await p.mouse.move(700, 400);
-  await p.waitForTimeout(150);
-  ok((await geo(p)).exp === 'true', 'sortie : encore déplié à 150 ms');
-  await p.waitForTimeout(300);
-  g = await geo(p);
-  ok(g.exp === 'false' && g.sb === 64, 'sortie : replié après 300 ms');
-  ok(Math.abs(g.iconX - iconRail) <= 1, 'les icônes ne bougent pas au dépli');
-
-  // Clic dans la barre dépliée au survol (Centre d'aide) : se replie quand le pointeur sort
-  await p.mouse.move(32, 300);
-  await p.waitForTimeout(300);
-  await p.getByRole('button', { name: 'Centre d’aide' }).click();
-  await p.keyboard.press('Escape'); // referme le centre d'aide
-  await p.mouse.move(700, 400);
-  await p.waitForTimeout(450);
-  ok((await geo(p)).exp === 'false', 'après un clic dans la barre, la sortie du pointeur la replie');
 
   // Épingler : pousse le contenu, retenu ; le bouton passe à droite du logo
   await p.locator('.sidebar__pin').click();
   await p.mouse.move(700, 400);
-  await p.waitForTimeout(400);
+  await p.locator('.sidebar .brand img').first().waitFor();
+  await p.waitForFunction(() => document.querySelector('#sidebar').getBoundingClientRect().width === 256);
   g = await geo(p);
+  ok(
+    (await p.locator('.sidebar .sidebar__pin-symbol').count()) === 0 &&
+      g.pinName === 'Replier la barre latérale',
+    'ouverte : le bouton est « Replier », plus de symbole ni de « Déplier »',
+  );
+  ok(
+    (await p.locator('.sidebar a.brand').getAttribute('href')) === '#/' &&
+      (await p.getByRole('link', { name: 'Démos, accueil de TutoClick' }).count()) === 1,
+    'ouverte : le logo complet est un lien vers Démos',
+  );
   ok(
     g.pressed === 'true' && g.sb === 256 && g.main === 256,
     'épinglée : 256 px, pousse le contenu, aria-expanded="true"',
@@ -234,30 +223,12 @@ const geo = (p) =>
   ok((await geo(p)).sb === 256, 'après rechargement : toujours épinglée');
   await p.locator('.sidebar__pin').click();
   await p.mouse.move(700, 400);
-  await p.waitForTimeout(400);
+  await p.waitForFunction(() => document.querySelector('#sidebar').getBoundingClientRect().width === 64);
   ok(
     (await geo(p)).sb === 64 && (await p.evaluate(() => localStorage.getItem('fd.sidebar'))) === 'rail',
     'réduire : rail, retenu (rail)',
   );
 
-  // Clavier : le focus déplie ; Échap replie et rend le focus à l'élément actif
-  await p.locator('main h1').click();
-  // Focus clavier (une touche d'abord, comme en arrivant par Tab) : seul le focus clavier déplie
-  await p.keyboard.press('Shift');
-  await p.locator('.fd-nav__item').first().focus();
-  await p.waitForTimeout(100);
-  ok((await geo(p)).exp === 'true', 'focus dans le rail : déplié');
-  await p.keyboard.press('Tab');
-  await p.waitForTimeout(100);
-  ok((await geo(p)).exp === 'true', 'tant que le focus y reste, il reste déplié');
-  await p.keyboard.press('Escape');
-  await p.waitForTimeout(100);
-  g = await geo(p);
-  const focused = await p.evaluate(() => document.activeElement?.getAttribute('aria-current'));
-  ok(g.exp === 'false' && focused === 'page', 'Échap : replié, focus sur l’élément actif (Analytics)');
-  await p.keyboard.press('Shift+Tab');
-  await p.waitForTimeout(100);
-  ok((await geo(p)).exp === 'true', 'nouveau déplacement du focus : déplié de nouveau');
   ok(p.errors.length === 0, `aucune erreur JS (${p.errors.join(' | ')})`);
   await p.context().close();
 

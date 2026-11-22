@@ -1875,8 +1875,8 @@ button.fd-nav__item:hover {
   height: 32px;
 }
 /* ICON-01 : icône « panneau » de 20 px, trait 2,1 */
-/* NAV-04 §14 bis : en tête du rail, le symbole TutoClick (32 px) au repos ; au survol, au focus clavier et
-   quand le rail est déplié par-dessus le contenu, le même bouton devient « Déplier » (carré prune du
+/* NAV-04 §14 bis : en tête du rail, le symbole TutoClick (32 px) au repos ; au survol et au focus clavier du
+   bouton, le même bouton devient « Déplier » (carré prune du
    symbole dans les deux thèmes, icône blanche). Fondu croisé de 150 ms, sans mouvement. */
 .fd-btn.sidebar__pin--rail {
   position: relative;
@@ -1895,20 +1895,17 @@ button.fd-nav__item:hover {
   opacity: 0;
   transition: opacity 150ms ease-out;
 }
-.fd-btn.sidebar__pin--rail:is(:hover, :focus-visible),
-.sidebar[data-expanded='true'] .fd-btn.sidebar__pin--rail {
+.fd-btn.sidebar__pin--rail:is(:hover, :focus-visible) {
   background: #a3195b;
   color: #fff;
 }
 .fd-btn.sidebar__pin--rail:hover {
   background: #85164b;
 }
-:is(.fd-btn.sidebar__pin--rail:is(:hover, :focus-visible), .sidebar[data-expanded='true'] .sidebar__pin--rail)
-  > .sidebar__pin-symbol {
+.fd-btn.sidebar__pin--rail:is(:hover, :focus-visible) > .sidebar__pin-symbol {
   opacity: 0;
 }
-:is(.fd-btn.sidebar__pin--rail:is(:hover, :focus-visible), .sidebar[data-expanded='true'] .sidebar__pin--rail)
-  > svg {
+.fd-btn.sidebar__pin--rail:is(:hover, :focus-visible) > svg {
   opacity: 1;
 }
 .fd-btn.sidebar__pin--rail:focus-visible {
@@ -1954,17 +1951,8 @@ button.fd-nav__item:hover {
     overflow-x: hidden;
     transition: width var(--fd-motion-duration-fast, 120ms) var(--fd-motion-ease-standard, ease);
   }
-  .shell--rail .sidebar[data-expanded='true'] {
-    width: var(--fd-layout-sidebar-width, 256px);
-    box-shadow: var(--fd-shadow-lg);
-  }
-  /* Rail : le bouton en tête, à 16 px du bord, replié comme déplié au survol ; le logo vient à sa droite */
+  /* Rail : le bouton seul en tête, à 16 px du bord (le rail ne se déplie plus au survol) */
   .shell--rail .sidebar__head {
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    width: 236px;
-  }
-  .shell--rail .sidebar[data-expanded='false'] .sidebar__head {
     width: 44px;
   }
   .shell--rail .sidebar__pin {
