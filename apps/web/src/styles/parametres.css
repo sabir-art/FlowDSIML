@@ -35,7 +35,8 @@
 .st-nav__title {
   /* 24 px au-dessus, 6 px jusqu'au premier élément (4 + écart de 2 du groupe) */
   margin: 24px 0 4px 12px;
-  font: 600 11px / 16px var(--fd-font-sans);
+  /* Hauteur de ligne naturelle, comme dans les maquettes (superposition) */
+  font: 600 11px var(--fd-font-sans);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--fd-color-text-muted);
@@ -98,13 +99,6 @@ a.st-nav__item:hover {
   .st:not(.st--home) > .st-nav {
     display: none;
   }
-  .st--home .st-nav {
-    position: static;
-    height: auto;
-    padding: 20px 16px 48px;
-    background: var(--fd-color-content-bg);
-    border-right: 0;
-  }
   .st-wrap {
     padding: 20px 16px 48px;
   }
@@ -113,4 +107,56 @@ a.st-nav__item:hover {
   .st-nav__item {
     transition: none;
   }
+}
+
+/* Accueil des Paramètres sous 768 px (maquette lot1-parametres/accueil) */
+.st-home {
+  padding: 8px 16px 32px;
+}
+.st-home h2 {
+  margin: 24px 0 8px 4px;
+  font: 600 11px var(--fd-font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fd-color-text-muted);
+}
+.st-home ul {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+}
+.st-home li + li {
+  border-top: 1px solid var(--fd-color-border);
+}
+.st-home__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 12px 0 16px;
+  color: var(--fd-color-text);
+  font: 500 15px var(--fd-font-sans);
+  text-decoration: none;
+}
+.st-home__row > svg:first-child {
+  flex: none;
+  color: var(--fd-color-text-muted);
+}
+.st-home__row > svg:last-child {
+  flex: none;
+  color: var(--fd-color-text-subtle);
+}
+.st-home__label {
+  flex: 1;
+  min-width: 0;
+}
+.st-home__row .stg-soon {
+  margin-right: 4px;
+}
+a.st-home__row:hover {
+  background: var(--fd-color-nav-hover);
 }

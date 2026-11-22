@@ -80,14 +80,15 @@ a:focus-visible:is(:not([class]), [class^='t-'], .link, .mk-link) {
   padding: 0 var(--fd-space-5);
   /* Refonte DSI : tous les boutons sont des pilules. */
   border-radius: var(--fd-radius-full);
-  border: 1px solid var(--fd-color-border);
+  /* Bouton secondaire, règle de toute l'app (décision UX du 22/11) : contour border-field, 14 px en
+     600, sans ombre */
+  border: 1px solid var(--fd-color-border-field);
   background: var(--fd-color-surface);
   color: var(--fd-color-text);
-  font: 600 var(--fd-text-label-size) / 1 var(--fd-font-sans);
+  font: 600 14px / 1 var(--fd-font-sans);
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: var(--fd-shadow-xs);
   transition:
     background var(--fd-motion-duration-fast) var(--fd-motion-ease-standard),
     border-color var(--fd-motion-duration-fast);
@@ -661,7 +662,7 @@ input[type='checkbox']:disabled {
      écart de 2 px de .fd-nav compris */
   margin: 22px 0 4px;
   padding: 0 12px;
-  font: 600 11px / 16px var(--fd-font-sans);
+  font: 600 11px var(--fd-font-sans);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--fd-color-text-muted);

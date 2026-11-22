@@ -216,8 +216,10 @@
 .mk .btn-secondary {
   background: var(--fd-color-surface);
   color: var(--fd-color-text);
-  border-color: var(--fd-color-border-strong);
-  box-shadow: var(--fd-shadow-xs);
+  /* Même règle que .fd-btn (décision UX du 22/11) : contour border-field, 14 px en 600, sans ombre */
+  border-color: var(--fd-color-border-field);
+  font-size: 14px;
+  font-weight: 600;
 }
 .mk .btn-secondary:hover {
   background: var(--fd-color-surface-hover);

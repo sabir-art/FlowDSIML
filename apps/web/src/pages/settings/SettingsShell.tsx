@@ -17,6 +17,7 @@ import {
   Sparkles,
   Tag,
   Users,
+  ChevronRight,
   type LucideIcon,
 } from 'lucide-react';
 import type { Action } from '@flowdsiml/core';
@@ -27,6 +28,7 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import '../../styles/parametres.css';
+import './settings.css';
 
 /** Une entrée : une route, ou « Bientôt » (jamais masquée, désactivée). */
 interface Entry {
@@ -147,12 +149,18 @@ export function SettingsShell({
   children,
   sub,
   actions,
+  legacy = true,
 }: {
   children: ReactNode;
   /** L48-F : sous-page d'une entrée (ex. Webhooks) : l'entrée devient un élément du fil, `title` est le h1. */
   sub?: { title: string; trail?: Crumb[] };
   /** Actions de la page (Annuler, Enregistrer, Inviter…), à droite du PageHeader. */
   actions?: ReactNode;
+  /**
+   * Page pas encore passée au gabarit du §11 : son contenu garde les styles hérités (« .mk »).
+   * Les pages refaites passent `legacy={false}` (classes « stg- » de settings.css).
+   */
+  legacy?: boolean;
 }) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
@@ -175,15 +183,20 @@ export function SettingsShell({
           labels={{ breadcrumb: t('settings.breadcrumb') }}
           as={CrumbLink}
         />
-        <div className="mk st-wrap">{children}</div>
+        <div className={legacy ? 'mk st-wrap' : 'st-wrap st-wrap--plain'}>{children}</div>
       </div>
     </div>
   );
 }
 
-/** /settings : la navigation sert de page d'accueil sous 768 px ; au-delà, on ouvre Général. */
+/**
+ * /settings : accueil des Paramètres sous 768 px (maquette lot1-parametres/accueil) ; au-delà, on ouvre
+ * Général. PageHeader « Paramètres » sans retour, puis un groupe par liste : lignes de 52 px (icône de
+ * 20 px, libellé en 15 px, « Bientôt », chevron) sur la surface, filet entre les lignes, rayon de 12 px.
+ */
 export function SettingsHome() {
   const { t } = useTranslation();
+  const { can } = useWorkspace();
   if (window.matchMedia('(min-width: 768px)').matches) return <Navigate to="/settings/workspace" replace />;
   return (
     <div className="st st--home">
@@ -194,7 +207,41 @@ export function SettingsHome() {
           labels={{ breadcrumb: t('settings.breadcrumb') }}
           as={CrumbLink}
         />
-        <SettingsNav />
+        <nav className="st-home" aria-label={t('settings.title')}>
+          {GROUPS.map((g) => (
+            <section key={g.key} aria-labelledby={`st-h-${g.key}`}>
+              <h2 id={`st-h-${g.key}`}>{t(`settings.grp.${g.key}`)}</h2>
+              {/* §18.6 : lignes à filets, l'écart est porté par leur hauteur de 52 px */}
+              <ul data-gap-exempt="">
+                {g.entries
+                  .filter((e) => !e.perm || can(e.perm))
+                  .map(({ label, icon: Icon, to, soon }) => {
+                    const inner = (
+                      <>
+                        <Icon size={20} aria-hidden="true" />
+                        <span className="st-home__label">{t(label)}</span>
+                        {(soon || !to) && <span className="stg-soon">{t('shell.soon')}</span>}
+                        <ChevronRight size={16} aria-hidden="true" />
+                      </>
+                    );
+                    return (
+                      <li key={label}>
+                        {to ? (
+                          <Link to={to} className="st-home__row">
+                            {inner}
+                          </Link>
+                        ) : (
+                          <span className="st-home__row" aria-disabled="true">
+                            {inner}
+                          </span>
+                        )}
+                      </li>
+                    );
+                  })}
+              </ul>
+            </section>
+          ))}
+        </nav>
       </div>
     </div>
   );

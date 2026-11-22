@@ -172,6 +172,16 @@
     background: var(--fd-color-nav-bg);
     border-bottom: 1px solid var(--fd-color-border);
   }
+  /* Décision UX du 22/11 : Menu, Aide et Notifications en cibles de 44 px, icônes de 20 px */
+  .topbar > .fd-btn--icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
+  .topbar > .fd-btn--icon svg {
+    width: 20px;
+    height: 20px;
+  }
   .topbar__tools {
     display: flex;
     align-items: center;

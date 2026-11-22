@@ -346,7 +346,7 @@
     "timezone": "Analytics time zone",
     "saved": "Settings saved",
     "dangerHelp": "Irreversible actions.",
-    "deleteHintCounts": "Deletes {{demos}}, their analytics and their leads. Members lose access.",
+    "deleteHintCounts": "Deleting the workspace erases {{demos}}, their statistics and their leads. Members lose access.",
     "deleteTitle": "Delete “{{name}}”?",
     "deleteBodyCounts": "This cannot be undone: {{demos}}, their analytics and {{leads}} will be deleted.",
     "deleteForever": "Delete permanently",
@@ -355,7 +355,14 @@
     "nDemos_one": "the demo",
     "nDemos_other": "the {{n}} demos",
     "nLeads_one": "{{n}} lead",
-    "nLeads_other": "{{n}} leads"
+    "nLeads_other": "{{n}} leads",
+    "logo": "Logo",
+    "slugPrefix": "tutoclick/",
+    "websitePlaceholder": "https://…",
+    "privacyPlaceholder": "https://…",
+    "supportPlaceholder": "name@domain.com",
+    "ownDemos_one": "its demo",
+    "ownDemos_other": "its {{n}} demos"
   },
   "errors": {
     "generic": "Something went wrong: {{message}}",

@@ -147,6 +147,10 @@
     padding: 0;
     font-weight: 600;
   }
+  /* Maquettes à 390 px : l'action principale seule dans la barre (Annuler disparaît) */
+  .fd-page-header__actions:has(> .fd-btn--primary) > .fd-btn:not(.fd-btn--primary) {
+    display: none;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .fd-crumb__link,
