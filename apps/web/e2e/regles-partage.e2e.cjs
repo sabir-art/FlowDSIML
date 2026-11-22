@@ -86,11 +86,19 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   // L39 : quatre modes ; on les décoche tous pour vérifier la règle « au moins un mode »
   await card.getByRole('checkbox', { name: /Sur invitation/ }).uncheck();
   await card.getByRole('checkbox', { name: /Par domaine e-mail/ }).uncheck();
-  ok(
-    (await card.getByRole('alert').innerText()) === 'Gardez au moins un mode d’accès.' &&
-      (await save.isDisabled()),
-    'au moins un mode',
+  // Attend l'alerte et l'état du bouton (lent sous charge en CI)
+  const modesAlert = card.getByRole('alert').filter({ hasText: 'Gardez au moins un mode d’accès.' });
+  const shown = await modesAlert.waitFor({ timeout: 5000 }).then(
+    () => true,
+    () => false,
   );
+  const locked = await page
+    .waitForFunction((el) => el?.disabled, await save.elementHandle(), { timeout: 5000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  ok(shown && locked, 'au moins un mode');
   await card.getByRole('checkbox', { name: 'Avec un mot de passe' }).check();
   await card.getByRole('checkbox', { name: /Sur invitation/ }).check();
   await card.getByRole('checkbox', { name: /Par domaine e-mail/ }).check();

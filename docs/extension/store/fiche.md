@@ -35,6 +35,7 @@
 | `icone-128.png` | 128 × 128 (icône de 96 px, marge transparente de 16 px) | Icône de la boutique |
 | `capture-1-1280x800.png` à `capture-5-1280x800.png` | 1280 × 800 | Captures d’écran (données fictives : espace Acme, outil ExampleCRM) |
 | `vignette-440x280.png` | 440 × 280 | Petite vignette promotionnelle |
+| `marquee-1400x560.png` | 1400 × 560 | Grande vignette promotionnelle (facultative, recommandée) |
 
 ## 3. Pratiques de confidentialité
 
