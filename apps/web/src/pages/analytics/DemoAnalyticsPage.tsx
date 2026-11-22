@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, Mail, Pencil, Route, Share2 } from 'lucide-react';
+import { Download, Mail, Route, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -25,8 +25,8 @@ import { formatNumber } from '../../lib/format';
 import { Loading } from '../../components/guards';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { LeadsTable } from './LeadsTable';
-import { NotificationBell } from '../../components/notifications/NotificationBell';
 import { ChartColumn } from 'lucide-react';
+import { AppPage } from '../../components/AppPage';
 
 interface Analytics {
   views: number;
@@ -190,30 +190,29 @@ export function DemoAnalyticsPage() {
   }
 
   return (
-    <div className="stack page-wide">
-      <header className="page-head page-head--refonte">
-        <Link className="fd-btn fd-btn--round btn-surface" to="/analytics" aria-label={t('common.back')}>
-          <ArrowLeft aria-hidden="true" />
-        </Link>
-        <div className="page-head__titles">
-          <h1>{demo.title}</h1>
-          <p className="page-head__sub">
-            {[
-              t(`status.${demo.status}`),
-              versionNumber ? t('analytics.versionN', { n: versionNumber }) : null,
-              t('share.stepCount', { count: totalSteps || steps.length }),
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </p>
-        </div>
-        <div className="page-head__actions">
-          <NotificationBell />
+    // PAGE-01 : fil d'Ariane « Démos › {démo} › Analytics », statut et version à côté, actions à droite
+    <AppPage
+      className="stack page-wide"
+      title={t('analytics.title')}
+      crumbs={[
+        { label: t('demos.title'), to: '/' },
+        { label: demo.title, to: `/demos/${demoId}/edit` },
+      ]}
+      mobileBack={{ to: '/analytics', ariaLabel: t('common.back') }}
+      after={
+        <span>
+          {[
+            t(`status.${demo.status}`),
+            versionNumber ? t('analytics.versionN', { n: versionNumber }) : null,
+            t('share.stepCount', { count: totalSteps || steps.length }),
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </span>
+      }
+      actions={
+        <>
           <PeriodPicker days={days} setDays={setDays} />
-          <Link className="fd-btn" to={`/demos/${demoId}/edit`}>
-            <Pencil size={16} aria-hidden="true" />
-            {t('share.backToEditor')}
-          </Link>
           <Link className="fd-btn" to={`/demos/${demoId}/share`}>
             <Share2 size={16} aria-hidden="true" />
             {t('editor.share')}
@@ -221,8 +220,9 @@ export function DemoAnalyticsPage() {
           <Button icon={<Download />} onClick={exportDaily} disabled={!data?.daily.length}>
             {t('analytics.export')}
           </Button>
-        </div>
-      </header>
+        </>
+      }
+    >
       {error && <Alert kind="error">{error}</Alert>}
       {!data ? (
         <Loading />
@@ -295,7 +295,7 @@ export function DemoAnalyticsPage() {
           )}
         </>
       )}
-    </div>
+    </AppPage>
   );
 }
 

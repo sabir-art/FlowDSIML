@@ -32,7 +32,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     'L13-01 : entrée Formation › Apprenants',
   );
   ok(
-    (await page.locator('.page-head__sub').textContent()).includes('41 apprenants · 3 formations'),
+    (await page.locator('.fd-page-header__after').textContent()).includes('41 apprenants · 3 formations'),
     'L13-01 : sous-titre compté',
   );
   ok(

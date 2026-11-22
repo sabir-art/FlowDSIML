@@ -13,6 +13,7 @@ import { articleBySlug } from '../../help/articles';
 import { notifyNewsSeen } from './platform';
 import './console.css';
 import { Status } from '@flowdsiml/ui';
+import { AppPage } from '../../components/AppPage';
 
 interface News {
   id: string;
@@ -34,13 +35,9 @@ export function NewsPage() {
     });
   }, []);
   return (
-    <div className="stack news-page">
-      <header className="page-head page-head--refonte">
-        <div className="page-head__titles">
-          <h1>{t('news.title')}</h1>
-          <p className="page-head__sub">{t('news.sub')}</p>
-        </div>
-      </header>
+    // PAGE-01 : barre « Nouveautés » ; la phrase d'explication ouvre le contenu
+    <AppPage title={t('news.title')} className="stack news-page">
+      <p className="news-intro">{t('news.sub')}</p>
       {list && list.length === 0 && (
         <div className="fd-card news-empty">
           <Megaphone aria-hidden="true" />
@@ -66,6 +63,6 @@ export function NewsPage() {
           )}
         </article>
       ))}
-    </div>
+    </AppPage>
   );
 }

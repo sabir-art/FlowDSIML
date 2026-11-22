@@ -30,7 +30,7 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
-import { NotificationBell } from '../../components/notifications/NotificationBell';
+import { AppPage } from '../../components/AppPage';
 import { LiveTab } from './advanced/LiveTab';
 import { SurveysTab } from './advanced/SurveysTab';
 import { SegmentsTab, type Segment } from './advanced/SegmentsTab';
@@ -272,17 +272,15 @@ export function AnalyticsPage() {
 
   const inMore = MORE.includes(tab);
   return (
-    <div className="mk an">
-      <div className="page-head">
-        <div>
-          <h1>{t('analytics.title')}</h1>
-          <p className="muted an-sub">{t('analytics.updated', { when: formatRelativeShort(loadedAt) })}</p>
-        </div>
-        <div className="row wrap an-head-actions">
-          <NotificationBell />
-        </div>
-      </div>
-
+    // PAGE-01 (COMP-01 §16.1) : barre « Analytics » avec la date de mise à jour ; les onglets sont la
+    // première ligne du contenu
+    <AppPage
+      className="mk an"
+      title={t('analytics.title')}
+      after={
+        <span className="an-sub">{t('analytics.updated', { when: formatRelativeShort(loadedAt) })}</span>
+      }
+    >
       {/* L48-D §1 : 4 onglets au premier niveau, puis « Plus » (menu), qui prend le nom de l'onglet ouvert */}
       {/* §18.7 : rangée d'onglets, défilement horizontal voulu sur mobile */}
       <div className="an-tabrow" data-scroll-x="">
@@ -548,7 +546,7 @@ export function AnalyticsPage() {
           />
         </section>
       )}
-    </div>
+    </AppPage>
   );
 }
 

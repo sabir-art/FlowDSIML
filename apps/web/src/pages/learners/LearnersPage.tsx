@@ -64,7 +64,7 @@ import {
 } from './progress';
 import { COHORT_MAX, cohorts } from '../share/linksCsv';
 import './learners.css';
-import { NotificationBell } from '../../components/notifications/NotificationBell';
+import { AppPageHeader } from '../../components/AppPage';
 
 const ICON = { size: 16, strokeWidth: 1.75, 'aria-hidden': true } as const;
 const PAGE = 50;
@@ -269,9 +269,11 @@ export function LearnersPage() {
 
   if (!allowed)
     return (
-      <div className="mk l13" id="main-learners">
+      <div className="pg">
         <Head data={null} />
-        <Alert kind="warning">{t('learners.forbidden')}</Alert>
+        <div className="pg-body mk l13" id="main-learners">
+          <Alert kind="warning">{t('learners.forbidden')}</Alert>
+        </div>
       </div>
     );
 
@@ -279,151 +281,153 @@ export function LearnersPage() {
     overlay?.kind === 'fiche' || overlay?.kind === 'erase' ? rows.find((r) => r.raw.id === overlay.id) : null;
 
   return (
-    <div className="mk l13">
+    <div className="pg">
       <Head
         data={data}
         onExport={() => setOverlay({ kind: 'export' })}
         onPaths={() => setOverlay({ kind: 'paths' })}
       />
-      {reminding && current && (
-        <ReminderDialog
-          ws={current}
-          count={reminding.length}
-          canSave={can('workspace.settings')}
-          onClose={() => setReminding(null)}
-          onSend={(text, keep) => {
-            const ids = reminding;
-            setReminding(null);
-            void sendReminder(ids, text, keep);
-          }}
-        />
-      )}
-      {(loadError || error) && <Alert kind="error">{loadError ?? error}</Alert>}
-      <div className="tabs l13-tabs" role="tablist" aria-label={t('learners.tabs.label')}>
-        {(['liste', 'formation'] as const).map((id) => (
-          <button
-            key={id}
-            role="tab"
-            type="button"
-            id={`l13-tab-${id}`}
-            aria-selected={tab === id}
-            aria-controls={tab === id ? `l13-panel-${id}` : undefined}
-            tabIndex={tab === id ? 0 : -1}
-            onClick={() => setParam({ tab: id === 'liste' ? null : id })}
-            onKeyDown={(e) => {
-              if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                const n = id === 'liste' ? 'formation' : 'liste';
-                setParam({ tab: n === 'liste' ? null : n });
-                document.getElementById(`l13-tab-${n}`)?.focus();
-              }
+      <div className="pg-body mk l13">
+        {reminding && current && (
+          <ReminderDialog
+            ws={current}
+            count={reminding.length}
+            canSave={can('workspace.settings')}
+            onClose={() => setReminding(null)}
+            onSend={(text, keep) => {
+              const ids = reminding;
+              setReminding(null);
+              void sendReminder(ids, text, keep);
             }}
-          >
-            {t(`learners.tabs.${id}`)}
-          </button>
-        ))}
+          />
+        )}
+        {(loadError || error) && <Alert kind="error">{loadError ?? error}</Alert>}
+        <div className="tabs l13-tabs" role="tablist" aria-label={t('learners.tabs.label')}>
+          {(['liste', 'formation'] as const).map((id) => (
+            <button
+              key={id}
+              role="tab"
+              type="button"
+              id={`l13-tab-${id}`}
+              aria-selected={tab === id}
+              aria-controls={tab === id ? `l13-panel-${id}` : undefined}
+              tabIndex={tab === id ? 0 : -1}
+              onClick={() => setParam({ tab: id === 'liste' ? null : id })}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                  const n = id === 'liste' ? 'formation' : 'liste';
+                  setParam({ tab: n === 'liste' ? null : n });
+                  document.getElementById(`l13-tab-${n}`)?.focus();
+                }
+              }}
+            >
+              {t(`learners.tabs.${id}`)}
+            </button>
+          ))}
+        </div>
+
+        {!data ? (
+          !loadError && <p className="fd-muted">{t('common.loading')}</p>
+        ) : data.paths.length === 0 ? (
+          <Empty
+            icon={<GraduationCap />}
+            title={t('learners.empty.noPath')}
+            body={can('members.manage') ? t('learners.empty.noPathHint') : t('learners.empty.askAdmin')}
+            action={
+              can('members.manage') ? (
+                <Button variant="primary" icon={<Plus />} onClick={() => setOverlay({ kind: 'paths' })}>
+                  {t('learners.paths.create')}
+                </Button>
+              ) : undefined
+            }
+          />
+        ) : tab === 'liste' ? (
+          <ListView
+            data={data}
+            rows={rows}
+            filtered={filtered}
+            filters={filters}
+            setParam={setParam}
+            page={Number(params.get('page') ?? '1') || 1}
+            setPage={(p) => setParams((x) => (x.set('page', String(p)), x), { replace: true })}
+            sort={(params.get('tri') as SortKey) || 'last'}
+            asc={params.get('ordre') !== 'desc'}
+            setSort={(k, asc) => setParam({ tri: k === 'last' ? null : k, ordre: asc ? null : 'desc' })}
+            selected={selected}
+            setSelected={setSelected}
+            onOpen={(id) => setOverlay({ kind: 'fiche', id })}
+            onRemind={(ids) => remind(ids)}
+            onGrant={(r) => void grant(r)}
+            onExport={() => setOverlay({ kind: 'export' })}
+            actions={actionItems}
+          />
+        ) : (
+          <FormationView
+            data={data}
+            rows={rows}
+            selectedPath={filters.path || data.paths[0]!.id}
+            filters={filters}
+            setParam={setParam}
+            onPick={(id) => setParam({ formation: id })}
+            onList={(patch) => setParam({ tab: null, ...patch })}
+            onExport={(path) => setOverlay({ kind: 'export', preset: { path } })}
+          />
+        )}
+
+        {fiche && (
+          <LearnerDrawer
+            row={fiche}
+            data={data!}
+            now={now}
+            canErase={can('members.manage')}
+            inert={overlay?.kind === 'erase'}
+            onClose={() => setOverlay(null)}
+            onRemind={() => remind([fiche.raw.id])}
+            onGrant={() => void grant(fiche)}
+            onExport={() => setOverlay({ kind: 'export', preset: { learner: fiche.raw.id } })}
+            onErase={() => setOverlay({ kind: 'erase', id: fiche.raw.id })}
+            onChanged={load}
+          />
+        )}
+        {overlay?.kind === 'erase' && fiche && (
+          <EraseDialog
+            row={fiche}
+            onCancel={() => setOverlay({ kind: 'fiche', id: fiche.raw.id })}
+            onErased={async () => {
+              setOverlay(null);
+              toast(t('learners.erase.done'));
+              setSelected(new Set());
+              await load();
+            }}
+          />
+        )}
+        {overlay?.kind === 'export' && data && current && (
+          <ExportDialog
+            data={data}
+            wsId={current.id}
+            rows={rows}
+            filtered={filtered}
+            filterLabel={filterSummary(t, data, filters)}
+            selected={rows.filter((r) => selected.has(r.raw.id))}
+            preset={overlay.preset}
+            onClose={() => setOverlay(null)}
+            onDone={(n) => {
+              setOverlay(null);
+              toast(t('learners.export.done', { count: n }));
+            }}
+          />
+        )}
+        {overlay?.kind === 'paths' && current && (
+          <PathsDialog
+            wsId={current.id}
+            counts={learnerCounts(rows)}
+            onClose={() => {
+              setOverlay(null);
+              void load();
+            }}
+          />
+        )}
       </div>
-
-      {!data ? (
-        !loadError && <p className="fd-muted">{t('common.loading')}</p>
-      ) : data.paths.length === 0 ? (
-        <Empty
-          icon={<GraduationCap />}
-          title={t('learners.empty.noPath')}
-          body={can('members.manage') ? t('learners.empty.noPathHint') : t('learners.empty.askAdmin')}
-          action={
-            can('members.manage') ? (
-              <Button variant="primary" icon={<Plus />} onClick={() => setOverlay({ kind: 'paths' })}>
-                {t('learners.paths.create')}
-              </Button>
-            ) : undefined
-          }
-        />
-      ) : tab === 'liste' ? (
-        <ListView
-          data={data}
-          rows={rows}
-          filtered={filtered}
-          filters={filters}
-          setParam={setParam}
-          page={Number(params.get('page') ?? '1') || 1}
-          setPage={(p) => setParams((x) => (x.set('page', String(p)), x), { replace: true })}
-          sort={(params.get('tri') as SortKey) || 'last'}
-          asc={params.get('ordre') !== 'desc'}
-          setSort={(k, asc) => setParam({ tri: k === 'last' ? null : k, ordre: asc ? null : 'desc' })}
-          selected={selected}
-          setSelected={setSelected}
-          onOpen={(id) => setOverlay({ kind: 'fiche', id })}
-          onRemind={(ids) => remind(ids)}
-          onGrant={(r) => void grant(r)}
-          onExport={() => setOverlay({ kind: 'export' })}
-          actions={actionItems}
-        />
-      ) : (
-        <FormationView
-          data={data}
-          rows={rows}
-          selectedPath={filters.path || data.paths[0]!.id}
-          filters={filters}
-          setParam={setParam}
-          onPick={(id) => setParam({ formation: id })}
-          onList={(patch) => setParam({ tab: null, ...patch })}
-          onExport={(path) => setOverlay({ kind: 'export', preset: { path } })}
-        />
-      )}
-
-      {fiche && (
-        <LearnerDrawer
-          row={fiche}
-          data={data!}
-          now={now}
-          canErase={can('members.manage')}
-          inert={overlay?.kind === 'erase'}
-          onClose={() => setOverlay(null)}
-          onRemind={() => remind([fiche.raw.id])}
-          onGrant={() => void grant(fiche)}
-          onExport={() => setOverlay({ kind: 'export', preset: { learner: fiche.raw.id } })}
-          onErase={() => setOverlay({ kind: 'erase', id: fiche.raw.id })}
-          onChanged={load}
-        />
-      )}
-      {overlay?.kind === 'erase' && fiche && (
-        <EraseDialog
-          row={fiche}
-          onCancel={() => setOverlay({ kind: 'fiche', id: fiche.raw.id })}
-          onErased={async () => {
-            setOverlay(null);
-            toast(t('learners.erase.done'));
-            setSelected(new Set());
-            await load();
-          }}
-        />
-      )}
-      {overlay?.kind === 'export' && data && current && (
-        <ExportDialog
-          data={data}
-          wsId={current.id}
-          rows={rows}
-          filtered={filtered}
-          filterLabel={filterSummary(t, data, filters)}
-          selected={rows.filter((r) => selected.has(r.raw.id))}
-          preset={overlay.preset}
-          onClose={() => setOverlay(null)}
-          onDone={(n) => {
-            setOverlay(null);
-            toast(t('learners.export.done', { count: n }));
-          }}
-        />
-      )}
-      {overlay?.kind === 'paths' && current && (
-        <PathsDialog
-          wsId={current.id}
-          counts={learnerCounts(rows)}
-          onClose={() => {
-            setOverlay(null);
-            void load();
-          }}
-        />
-      )}
     </div>
   );
 
@@ -439,60 +443,64 @@ export function LearnersPage() {
     const nav = useNavigate();
     const firstModules = (d?.paths ?? []).filter((p) => p.modules.length);
     return (
-      <div className="page-head page-head--refonte">
-        <div className="page-head__titles">
-          <h1>{t('learners.title')}</h1>
-          {d && (
-            <p className="page-head__sub">
-              {t('learners.sub', {
-                learners: t('learners.count', { count: d.learners.length }),
-                paths: t('learners.pathCount', { count: d.paths.length }),
-              })}
-            </p>
-          )}
-          {d && filters.group && (
-            <p className="page-head__sub l13-scope">
-              {t('learners.groupScope', {
-                group: filters.group === 'none' ? t('learners.noGroup') : filters.group,
-              })}
-            </p>
-          )}
-        </div>
-        {d && (
-          <div className="page-head__actions">
-            <NotificationBell />
-            {can('members.manage') && (
-              <Button icon={<Settings2 />} onClick={onPaths}>
-                {t('learners.paths.manage')}
+      // PAGE-01 : barre « Apprenants », le compte à côté du titre, les actions à droite
+      <AppPageHeader
+        title={t('learners.title')}
+        after={
+          d && (
+            <>
+              <span>
+                {t('learners.sub', {
+                  learners: t('learners.count', { count: d.learners.length }),
+                  paths: t('learners.pathCount', { count: d.paths.length }),
+                })}
+              </span>
+              {filters.group && (
+                <span className="l13-scope">
+                  {t('learners.groupScope', {
+                    group: filters.group === 'none' ? t('learners.noGroup') : filters.group,
+                  })}
+                </span>
+              )}
+            </>
+          )
+        }
+        actions={
+          d && (
+            <>
+              {can('members.manage') && (
+                <Button icon={<Settings2 />} onClick={onPaths}>
+                  {t('learners.paths.manage')}
+                </Button>
+              )}
+              <Button icon={<Download />} onClick={onExport} disabled={!d.learners.length}>
+                {t('learners.exportCsv')}
               </Button>
-            )}
-            <Button icon={<Download />} onClick={onExport} disabled={!d.learners.length}>
-              {t('learners.exportCsv')}
-            </Button>
-            {firstModules.length > 0 && (
-              <Menu
-                label={t('learners.invite')}
-                custom={{
-                  className: 'fd-btn fd-btn--primary',
-                  content: (
-                    <>
-                      <span className="fd-btn__icon" aria-hidden="true">
-                        <Mail />
-                      </span>
-                      {t('learners.invite')}
-                    </>
-                  ),
-                }}
-                items={firstModules.map((p) => ({
-                  label: p.title || t('learners.untitled'),
-                  icon: <GraduationCap />,
-                  onSelect: () => nav(`/demos/${p.modules[0]!.demoId}/share?tab=perso`),
-                }))}
-              />
-            )}
-          </div>
-        )}
-      </div>
+              {firstModules.length > 0 && (
+                <Menu
+                  label={t('learners.invite')}
+                  custom={{
+                    className: 'fd-btn fd-btn--primary',
+                    content: (
+                      <>
+                        <span className="fd-btn__icon" aria-hidden="true">
+                          <Mail />
+                        </span>
+                        {t('learners.invite')}
+                      </>
+                    ),
+                  }}
+                  items={firstModules.map((p) => ({
+                    label: p.title || t('learners.untitled'),
+                    icon: <GraduationCap />,
+                    onSelect: () => nav(`/demos/${p.modules[0]!.demoId}/share?tab=perso`),
+                  }))}
+                />
+              )}
+            </>
+          )
+        }
+      />
     );
   }
 }

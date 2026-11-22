@@ -77,7 +77,7 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       }));
       ok(
         card.st === 'En cours' &&
-          /module(s)? sur \d+ validé/.test(card.meta) &&
+          /module(s)? sur\s\d+ validé/.test(card.meta) &&
           card.bar === 6 &&
           card.cov === 120 &&
           card.chev &&
@@ -408,7 +408,7 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     // Statut rempli après le chargement des réglages : on attend le texte, sans délai fixe
     ok(
       await p
-        .locator('.page-head__sub', { hasText: '1 modification non publiée' })
+        .locator('.fd-page-header__after', { hasText: '1 modification non publiée' })
         .waitFor({ timeout: 5000 })
         .then(
           () => true,

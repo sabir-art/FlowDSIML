@@ -2219,3 +2219,22 @@ button.fd-nav__item:hover {
   margin: 0;
   font-size: 1.25rem;
 }
+
+/* ---- PAGE-01 (COMP-01 §16.1) : cadre commun des pages de la coque ---- */
+/* La barre va d'un bord à l'autre ; le contenu porte ses marges, première ligne à 32 px sous la barre */
+.main:has(> .pg) {
+  padding: 0;
+}
+.pg-body {
+  padding: var(--fd-space-8) var(--fd-space-8) var(--fd-space-12);
+}
+@media (max-width: 767px) {
+  .pg-body {
+    padding: 20px 16px 48px;
+  }
+}
+/* Titre de page de 16 px, aligné sur le contenu (comme Démos) */
+.pg > .fd-page-header > .fd-page-header__title {
+  padding: 0;
+  font-size: 16px;
+}

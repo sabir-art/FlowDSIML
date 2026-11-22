@@ -55,8 +55,8 @@ import { downloadText } from '../../lib/download';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
-import { NotificationBell } from '../../components/notifications/NotificationBell';
 import { Status, Select } from '@flowdsiml/ui';
+import { AppPage } from '../../components/AppPage';
 
 type Tab = 'link' | 'embed' | 'perso' | 'access' | 'page';
 type LinkStats = Record<string, { views: number; last: string | null }>;
@@ -275,49 +275,25 @@ export function SharePage() {
   ];
 
   return (
-    <div className="mk sh">
-      {dialog}
-      {exporting && (
-        <ExportDialog
-          demoId={demoId}
-          initialFormat={exporting === 'gif' ? 'gif' : undefined}
-          onClose={() => setExporting(false)}
-        />
-      )}
-      <div className="page-head">
-        <div>
-          <h1>{t('share.pageTitle')}</h1>
-          <p className="muted sh-sub">
-            {published && publishedAt ? (
-              <>
-                {t('share.publishedOn', { date: formatDateTime(publishedAt) })}
-                {pending && (
-                  <>
-                    {' · '}
-                    <Link to={`/demos/${demoId}/edit`}>{t('share.pendingChanges')}</Link>
-                  </>
-                )}
-              </>
-            ) : (
-              t('share.neverPublished', { title: demo.title })
-            )}
-          </p>
-          {published && ack && (
-            <p className="muted sh-sub sh-ack">
-              <ShieldCheck size={14} aria-hidden="true" />
-              {t('share.ackLine', { name: ack.name, date: formatDateTime(ack.at) })}
-            </p>
-          )}
-        </div>
-        <div className="row">
-          <a className="btn btn-secondary" href={`${url}?preview=1`} target="_blank" rel="noreferrer">
+    // PAGE-01 (COMP-01 §16.1) : fil d'Ariane « Démos › {démo} › Partager », actions dans la barre
+    <AppPage
+      className="mk sh"
+      title={t('share.crumb')}
+      crumbs={[
+        { label: t('demos.title'), to: '/' },
+        { label: demo.title, to: `/demos/${demoId}/edit` },
+      ]}
+      mobileBack={{ to: `/demos/${demoId}/edit`, ariaLabel: t('share.backToEditor') }}
+      actions={
+        <>
+          <a className="fd-btn" href={`${url}?preview=1`} target="_blank" rel="noreferrer">
             <Eye aria-hidden="true" />
             {t('share.preview')}
           </a>
           {/* L27 : exports hors de l'app interdits par les règles de l'espace */}
           <button
             type="button"
-            className="btn btn-secondary"
+            className="fd-btn"
             aria-disabled={rules.exports_allowed ? undefined : true}
             title={rules.exports_allowed ? undefined : t('rules.errExports')}
             onClick={() => rules.exports_allowed && setExporting(true)}
@@ -330,10 +306,40 @@ export function SharePage() {
               <PublishButton editor={editor} republishLabel={t('share.publishChanges')} />
             </span>
           )}
-        </div>
-        <div className="page-head__actions">
-          <NotificationBell />
-        </div>
+        </>
+      }
+    >
+      {dialog}
+      {exporting && (
+        <ExportDialog
+          demoId={demoId}
+          initialFormat={exporting === 'gif' ? 'gif' : undefined}
+          onClose={() => setExporting(false)}
+        />
+      )}
+      {/* État de publication : en tête du contenu, plus sous un grand titre */}
+      <div className="sh-pub">
+        <p className="muted sh-sub">
+          {published && publishedAt ? (
+            <>
+              {t('share.publishedOn', { date: formatDateTime(publishedAt) })}
+              {pending && (
+                <>
+                  {' · '}
+                  <Link to={`/demos/${demoId}/edit`}>{t('share.pendingChanges')}</Link>
+                </>
+              )}
+            </>
+          ) : (
+            t('share.neverPublished', { title: demo.title })
+          )}
+        </p>
+        {published && ack && (
+          <p className="muted sh-sub sh-ack">
+            <ShieldCheck size={14} aria-hidden="true" />
+            {t('share.ackLine', { name: ack.name, date: formatDateTime(ack.at) })}
+          </p>
+        )}
       </div>
       {params.get('published') && (
         <div className="alert alert-success sh-alert" role="status">
@@ -920,7 +926,7 @@ export function SharePage() {
           }}
         />
       )}
-    </div>
+    </AppPage>
   );
 }
 

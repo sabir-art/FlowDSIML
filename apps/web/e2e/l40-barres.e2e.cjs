@@ -202,7 +202,7 @@ const measure = (bar) =>
     // L48-D §2 : Exporter à la fin de la barre, « Mesure des visites » dans le menu « Plus » ; barre sous les onglets
     ok(
       (await page
-        .locator('.page-head')
+        .locator('.fd-page-header')
         .getByRole('button', { name: /Mesure des visites|Exporter/ })
         .count()) === 0 && (await bar.getByRole('button', { name: /^Exporter$/ }).count()) === 1,
       'Analytics : Exporter dans la barre, plus rien dans l’en-tête',

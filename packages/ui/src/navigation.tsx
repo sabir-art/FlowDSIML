@@ -94,12 +94,15 @@ export function PageHeader({
   crumbs = [],
   back,
   mobileBack,
+  after,
   actions,
   tools,
   labels,
   as,
 }: {
   title: string;
+  /** PAGE-01 §16.1 : à côté du titre, le statut de l'objet (badge) ou un compte (13 px, atténué). */
+  after?: ReactNode;
   crumbs?: Crumb[];
   back?: { to: string; label: string; ariaLabel: string };
   mobileBack?: { to: string; ariaLabel: string };
@@ -120,6 +123,7 @@ export function PageHeader({
       ) : (
         <h1 className="fd-page-header__title">{title}</h1>
       )}
+      {after && <div className="fd-page-header__after">{after}</div>}
       <div className="fd-page-header__actions">
         {actions}
         {tools && (

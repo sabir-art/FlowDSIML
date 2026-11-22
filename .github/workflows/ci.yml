@@ -133,6 +133,9 @@ jobs:
       - name: 'Tableau et panneau côte à côte, nombres et unités (SPLIT-01, NUM-01)'
         if: always()
         run: cd apps/web && node e2e/separation.e2e.cjs
+      - name: 'En-tête de page commun, un seul h1 dans la barre (PAGE-01)'
+        if: always()
+        run: cd apps/web && node e2e/page-header.e2e.cjs
       - name: Paramètres, 24 px entre les blocs (clair et sombre)
         if: always()
         run: cd apps/web && node e2e/parametres-espacement.e2e.cjs

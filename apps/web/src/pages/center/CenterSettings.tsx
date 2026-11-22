@@ -20,7 +20,7 @@ import {
   Upload,
 } from 'lucide-react';
 import type { Json } from '@flowdsiml/supabase-types';
-import { Alert, Button, Select, ColorSwatch } from '@flowdsiml/ui';
+import { Alert, Button, Select, ColorSwatch, Status } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { contrastRatio } from '../../lib/contrast';
@@ -43,7 +43,7 @@ import {
   type PathSummary,
 } from './centerDraft';
 import './center.css';
-import { NotificationBell } from '../../components/notifications/NotificationBell';
+import { AppPage } from '../../components/AppPage';
 
 const ICON = { size: 16, strokeWidth: 1.75, 'aria-hidden': true } as const;
 const MAX_LOGO = 512 * 1024;
@@ -279,26 +279,31 @@ export function CenterSettings() {
   const brand = colorErr ? (draft.brand ?? '#A3195B') : brandInput;
 
   return (
-    <div className="mk cfg14-page">
-      <div className="page-head page-head--refonte">
-        <div className="page-head__titles">
-          <h1>{t('center.title')}</h1>
-          <p className="page-head__sub">
-            {row?.published ? (
-              <>
-                {t('center.statusPublished')} ·{' '}
-                <a href={url} target="_blank" rel="noopener noreferrer">
-                  {url.replace(/^https?:\/\//, '')}
-                </a>
-                {pending ? ` · ${t('center.pending', { count: pending })}` : ''}
-              </>
-            ) : (
-              t('center.statusDraft')
-            )}
-          </p>
-        </div>
-        <div className="page-head__actions">
-          <NotificationBell />
+    // PAGE-01 (COMP-01 §16.1) : barre « Centre de formation » avec le statut en badge, puis les actions
+    <AppPage
+      className="mk cfg14-page"
+      title={t('center.title')}
+      after={
+        row?.published ? (
+          <>
+            <Status size="sm" tone="success">
+              {t('center.statusPublished')}
+            </Status>
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              {url.replace(/^https?:\/\//, '')}
+            </a>
+            {pending ? <span>{t('center.pending', { count: pending })}</span> : null}
+          </>
+        ) : (
+          <span data-tip={t('center.statusDraft')}>
+            <Status size="sm" tone="neutral">
+              {t('center.statusDraftShort')}
+            </Status>
+          </span>
+        )
+      }
+      actions={
+        <>
           <a
             className={`fd-btn${row?.published ? '' : ' is-disabled'}`}
             href={row?.published ? url : undefined}
@@ -333,8 +338,9 @@ export function CenterSettings() {
           >
             {row?.published ? t('center.publishChanges') : t('center.publish')}
           </Button>
-        </div>
-      </div>
+        </>
+      }
+    >
       {error && <Alert kind="error">{error}</Alert>}
 
       <div className="cfg14">
@@ -932,7 +938,7 @@ export function CenterSettings() {
           }}
         />
       )}
-    </div>
+    </AppPage>
   );
 }
 

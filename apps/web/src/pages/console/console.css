@@ -459,3 +459,8 @@
     border-left: 0;
   }
 }
+.news-intro {
+  margin: 0;
+  font-size: 14px;
+  color: var(--fd-color-text-muted);
+}

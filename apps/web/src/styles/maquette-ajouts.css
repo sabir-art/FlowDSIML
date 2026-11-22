@@ -3124,3 +3124,12 @@
 .mk .inv-results__status.is-failed {
   color: var(--fd-color-warning);
 }
+/* PAGE-01 : état de publication en tête du contenu de Partager */
+.mk.sh .sh-pub {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.mk.sh .sh-pub > p {
+  margin: 0;
+}
