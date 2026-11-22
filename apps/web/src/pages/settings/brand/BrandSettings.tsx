@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { APP_NAME } from '@flowdsiml/core';
-import { Button } from '@flowdsiml/ui';
+import { Button, ColorSwatch } from '@flowdsiml/ui';
 import { SettingsShell } from '../SettingsShell';
 import { supabase } from '../../../lib/supabase';
 import { check } from '../../../lib/useAction';
@@ -223,12 +223,21 @@ function LogoSection({
                     >
                       {t('brand.logoReplace')}
                     </Button>
-                    <Button variant="ghost" onClick={() => void remove()}>
-                      {t('brand.logoRemove')}
-                    </Button>
                   </>
                 )}
-                {library}
+                <Button icon={<Images size={16} />} onClick={onLibrary}>
+                  {t('media.open')}
+                </Button>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    className="stg-link-danger"
+                    icon={<Trash2 size={16} />}
+                    onClick={() => void remove()}
+                  >
+                    {t('brand.logoRemove')}
+                  </Button>
+                )}
               </div>
             </>
           ) : isAdmin ? (
@@ -323,7 +332,21 @@ function ColorsSection({
         </div>
         <div className="stg-ctl">
           <div className="br-colr">
-            <span className="br-swatch" style={{ background: v }} aria-hidden="true" />
+            {isAdmin ? (
+              <ColorSwatch
+                value={v}
+                label={t('brand.picker', { label })}
+                labels={{
+                  palette: t('common.colorPalette'),
+                  shade: t('common.colorShade'),
+                  hue: t('common.colorHue'),
+                  hex: t('common.colorHex'),
+                }}
+                onChange={(c) => setVals({ ...vals, [key]: c })}
+              />
+            ) : (
+              <span className="br-swatch" style={{ background: v }} aria-hidden="true" />
+            )}
             {isAdmin ? (
               <input
                 id={id}

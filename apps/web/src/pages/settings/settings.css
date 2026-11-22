@@ -912,3 +912,9 @@ fieldset.stg-row {
   gap: 12px;
   justify-items: start;
 }
+
+/* Valeur non modifiable d'une rangée : texte de 14 px en 600, à droite */
+.pv-value {
+  font: 600 14px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}

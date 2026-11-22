@@ -35,12 +35,18 @@
   margin-left: 4px;
   padding: 0 12px;
 }
-.stg-sec .br-drop .fd-btn--ghost,
-.stg-sec .br-actions .fd-btn--ghost {
+.stg-sec .br-drop .fd-btn--ghost {
   height: 32px;
   min-height: 32px;
   padding: 0 8px;
   color: var(--fd-color-text);
+}
+/* « Retirer » le logo : ghost de 36 px en danger, comme la photo de profil */
+.stg-sec .br-actions .fd-btn--ghost.stg-link-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fd-color-danger);
 }
 .br-logos {
   display: grid;
