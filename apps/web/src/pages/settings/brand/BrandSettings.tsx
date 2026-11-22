@@ -1,8 +1,17 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type DragEvent,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  CircleAlert,
   Copy,
-  Image as ImageIcon,
+  ImageUp,
   Images,
   Info,
   Pencil,
@@ -10,10 +19,10 @@ import {
   Star,
   Trash2,
   TriangleAlert,
-  Upload,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { APP_NAME } from '@flowdsiml/core';
+import { Button } from '@flowdsiml/ui';
 import { SettingsShell } from '../SettingsShell';
 import { supabase } from '../../../lib/supabase';
 import { check } from '../../../lib/useAction';
@@ -24,49 +33,86 @@ import { useToast } from '../../../components/Toast';
 import { Menu, type MenuItem } from '../../../components/Menu';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { MediaLibrary } from '../../../components/media/MediaLibrary';
-import { StyleCard } from '../../editor/styles/StylesSection';
 import { PRESETS, asStyleTokens, type StyleTokens } from '../../editor/styles/presets';
 import { styleOk } from '../../editor/styles/styleCheck';
 import { STYLE_NAME_MAX, copyName, isHex, logoError, nameTaken } from './brand';
 import { StyleDialog } from './StyleDialog';
-import '../../editor/styles/styles.css';
 import './brand.css';
 
 type WsStyle = Tables<'themes'>;
 /** Couleurs de la marque par défaut (charte DSI, valeurs des démos). */
 const DEFAULT_PRIMARY = '#A3195B';
 const DEFAULT_ACCENT = '#D60B52';
+type Colors = { primary: string; accent: string };
 
 /**
- * L27-01 / L27-05 : Paramètres > Marque. Trois cartes : logo, couleurs de la marque, styles des démos.
- * Droits (§2) vérifiés par la base ; l'interface n'affiche que les actions permises.
+ * L27-01 / L27-05, lot 1 de la refonte (maquette lot1-parametres/theme) : Paramètres › Thème et couleurs.
+ * Trois sections sans carte : logo, couleurs de la marque, styles des démos. Les couleurs s'enregistrent
+ * par « Enregistrer » du PageHeader. Droits (§2) vérifiés par la base ; l'interface n'affiche que les
+ * actions permises.
  */
 export function BrandSettings() {
   const { t } = useTranslation();
-  const { current, can } = useWorkspace();
+  const { current, can, reload } = useWorkspace();
+  const toast = useToast();
   const ws = current!;
   const isAdmin = can('workspace.settings');
   const [library, setLibrary] = useState(false);
+  const saved: Colors = {
+    primary: ws.brand_primary ?? DEFAULT_PRIMARY,
+    accent: ws.brand_accent ?? DEFAULT_ACCENT,
+  };
+  const [vals, setVals] = useState(saved);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => setVals(saved), [saved.primary, saved.accent]); // eslint-disable-line react-hooks/exhaustive-deps
+  const dirty = vals.primary !== saved.primary || vals.accent !== saved.accent;
+  async function save() {
+    setBusy(true);
+    try {
+      check(
+        await supabase
+          .from('workspaces')
+          .update({ brand_primary: vals.primary, brand_accent: vals.accent })
+          .eq('id', ws.id),
+      );
+      await reload();
+      toast(t('brand.colorsSaved'));
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
-    <SettingsShell>
-      <div className="br-page">
-        {!isAdmin && (
-          <div className="alert alert-info br-note" role="note">
-            <Info aria-hidden="true" />
-            <span>{t('brand.editorNote')}</span>
-          </div>
-        )}
-        <LogoCard ws={ws} isAdmin={isAdmin} onLibrary={() => setLibrary(true)} />
-        <ColorsCard ws={ws} isAdmin={isAdmin} />
-        <StylesCard wsId={ws.id} isAdmin={isAdmin} canCreate={can('demo.edit')} />
-        {library && <MediaLibrary wsId={ws.id} onClose={() => setLibrary(false)} />}
-      </div>
+    <SettingsShell
+      legacy={false}
+      actions={
+        isAdmin ? (
+          <>
+            <Button onClick={() => setVals(saved)} disabled={busy || !dirty}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="primary" onClick={() => void save()} disabled={busy || !dirty}>
+              {t('common.save')}
+            </Button>
+          </>
+        ) : undefined
+      }
+    >
+      {!isAdmin && (
+        <p className="br-note" role="note">
+          <Info size={16} aria-hidden="true" />
+          <span>{t('brand.editorNote')}</span>
+        </p>
+      )}
+      <LogoSection ws={ws} isAdmin={isAdmin} onLibrary={() => setLibrary(true)} />
+      <ColorsSection vals={vals} setVals={setVals} isAdmin={isAdmin} />
+      <StylesSection wsId={ws.id} isAdmin={isAdmin} canCreate={can('demo.edit')} />
+      {library && <MediaLibrary wsId={ws.id} onClose={() => setLibrary(false)} />}
     </SettingsShell>
   );
 }
 
 // ===== §3.1 Logo =====
-function LogoCard({
+function LogoSection({
   ws,
   isAdmin,
   onLibrary,
@@ -80,6 +126,7 @@ function LogoCard({
   const input = useRef<HTMLInputElement>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [over, setOver] = useState(false);
   const url = ws.logo_path
     ? supabase.storage.from('branding').getPublicUrl(ws.logo_path).data.publicUrl
     : null;
@@ -109,92 +156,133 @@ function LogoCard({
     if (old) void supabase.storage.from('branding').remove([old]);
     await reload();
   }
+  const onDrop = (e: DragEvent) => {
+    e.preventDefault();
+    setOver(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f && !busy) void upload(f);
+  };
+  const library = (
+    <Button variant="ghost" icon={<Images size={16} />} onClick={onLibrary}>
+      {t('media.open')}
+    </Button>
+  );
+  const file = isAdmin && (
+    <input
+      ref={input}
+      type="file"
+      hidden
+      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+      onChange={(e) => {
+        const f = e.target.files?.[0];
+        e.target.value = '';
+        if (f) void upload(f);
+      }}
+    />
+  );
 
   return (
-    <section className="card br-card" aria-labelledby="br-logo-t">
-      <div className="card-head">
+    <section className="stg-sec" aria-labelledby="br-logo-t">
+      <div className="stg-sec__head">
         <div>
-          <h3 className="t-h3" id="br-logo-t">
-            {t('brand.logoTitle')}
-          </h3>
-          <p className="t-caption muted">{t('brand.logoHelp')}</p>
+          <h2 id="br-logo-t">{t('brand.logoTitle')}</h2>
+          <p>{t('brand.logoHelp')}</p>
         </div>
-        <button type="button" className="btn btn-secondary btn-sm" onClick={onLibrary}>
-          <Images aria-hidden="true" />
-          {t('media.open')}
-        </button>
       </div>
-      {url ? (
-        <div className="br-logos">
-          <div className="br-logo br-logo--light">
-            <img src={url} alt={t('brand.logoOnLight', { name: ws.name })} />
-          </div>
-          <div className="br-logo br-logo--dark">
-            <img src={url} alt={t('brand.logoOnDark', { name: ws.name })} />
-          </div>
-        </div>
-      ) : (
-        <div className="br-logo-empty">
-          <ImageIcon aria-hidden="true" />
-          <span>{t('brand.logoNone')}</span>
-        </div>
-      )}
-      {isAdmin && (
-        <div className="br-actions">
-          <input
-            ref={input}
-            type="file"
-            hidden
-            accept="image/png,image/jpeg,image/webp,image/svg+xml"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              e.target.value = '';
-              if (f) void upload(f);
-            }}
-          />
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            disabled={busy}
-            aria-describedby={err ? 'br-logo-err' : 'br-logo-formats'}
-            onClick={() => input.current?.click()}
-          >
-            <Upload aria-hidden="true" />
-            {url ? t('brand.logoReplace') : t('brand.logoAdd')}
-          </button>
-          {url && (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => void remove()}>
-              {t('brand.logoRemove')}
-            </button>
-          )}
-          <span id="br-logo-formats" className="t-caption muted">
+      <div className="stg-row">
+        <div className="stg-text" data-gap-exempt="">
+          <div className="stg-lab">{t('brand.logoTitle')}</div>
+          <div id="br-logo-formats" className="stg-help">
             {t('brand.logoFormats')}
-          </span>
+          </div>
         </div>
-      )}
-      {err && (
-        <p id="br-logo-err" className="field-error" role="alert">
-          {err}
-        </p>
-      )}
+        <div className="stg-ctl stg-ctl--wide">
+          {url ? (
+            <>
+              <div className="br-logos">
+                <div className="br-logo br-logo--light">
+                  <img src={url} alt={t('brand.logoOnLight', { name: ws.name })} />
+                </div>
+                <div className="br-logo br-logo--dark">
+                  <img src={url} alt={t('brand.logoOnDark', { name: ws.name })} />
+                </div>
+              </div>
+              <div className="br-actions">
+                {isAdmin && (
+                  <>
+                    {file}
+                    <Button
+                      disabled={busy}
+                      aria-describedby={err ? 'br-logo-err' : 'br-logo-formats'}
+                      onClick={() => input.current?.click()}
+                    >
+                      {t('brand.logoReplace')}
+                    </Button>
+                    <Button variant="ghost" onClick={() => void remove()}>
+                      {t('brand.logoRemove')}
+                    </Button>
+                  </>
+                )}
+                {library}
+              </div>
+            </>
+          ) : isAdmin ? (
+            <div
+              className={over ? 'br-drop is-over' : 'br-drop'}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setOver(true);
+              }}
+              onDragLeave={() => setOver(false)}
+              onDrop={onDrop}
+            >
+              {file}
+              <ImageUp size={24} strokeWidth={1.75} aria-hidden="true" />
+              <span>
+                <b>{t('brand.logoDrop')}</b> {t('brand.or')}{' '}
+                <Button
+                  disabled={busy}
+                  aria-describedby={err ? 'br-logo-err' : 'br-logo-formats'}
+                  onClick={() => input.current?.click()}
+                >
+                  {t('brand.logoPick')}
+                </Button>
+              </span>
+              <span className="stg-help">
+                {t('brand.or')} {library}
+              </span>
+            </div>
+          ) : (
+            <>
+              <p className="stg-help br-none">{t('brand.logoNone')}</p>
+              <div className="br-actions">{library}</div>
+            </>
+          )}
+          {err && (
+            <p id="br-logo-err" className="stg-error" role="alert">
+              <CircleAlert size={16} aria-hidden="true" />
+              {err}
+            </p>
+          )}
+        </div>
+      </div>
     </section>
   );
 }
 
 // ===== §3.2 Couleurs de la marque =====
-function ColorsCard({ ws, isAdmin }: { ws: Tables<'workspaces'>; isAdmin: boolean }) {
+function ColorsSection({
+  vals,
+  setVals,
+  isAdmin,
+}: {
+  vals: Colors;
+  setVals: (v: Colors) => void;
+  isAdmin: boolean;
+}) {
   const { t } = useTranslation();
-  const { reload } = useWorkspace();
-  const toast = useToast();
-  const saved = {
-    primary: ws.brand_primary ?? DEFAULT_PRIMARY,
-    accent: ws.brand_accent ?? DEFAULT_ACCENT,
-  };
-  const [vals, setVals] = useState(saved);
-  useEffect(() => setVals(saved), [saved.primary, saved.accent]); // eslint-disable-line react-hooks/exhaustive-deps
-  const dirty = vals.primary !== saved.primary || vals.accent !== saved.accent;
 
-  const field = (key: 'primary' | 'accent', label: string) => {
+  const field = (key: keyof Colors, label: string) => {
     const v = vals[key];
     const r = contrastRatio(v, '#FFFFFF');
     const fix = r < 4.5 ? darkenToContrast(v) : null;
@@ -204,102 +292,112 @@ function ColorsCard({ ws, isAdmin }: { ws: Tables<'workspaces'>; isAdmin: boolea
       verdict: r >= 4.5 ? t('brand.ok') : t('brand.notOk'),
     });
     return (
-      <div className="field">
-        {isAdmin ? <label htmlFor={id}>{label}</label> : <span className="t-label">{label}</span>}
-        {isAdmin ? (
-          <div className="color-row">
-            <input
-              className="swatch"
-              type="color"
-              aria-label={t('brand.picker', { label })}
-              value={v}
-              onChange={(e) => setVals({ ...vals, [key]: e.target.value.toUpperCase() })}
-            />
-            <input
-              id={id}
-              className="input input-sm t-mono"
-              maxLength={7}
-              defaultValue={v}
-              key={v}
-              onBlur={(e) => {
-                const x = e.target.value.trim().toUpperCase();
-                if (isHex(x)) setVals({ ...vals, [key]: x });
-                else e.target.value = v;
-              }}
-            />
+      <div className="stg-row" data-color={key}>
+        <div className="stg-text" data-gap-exempt="">
+          {isAdmin ? (
+            <label className="stg-lab" htmlFor={id}>
+              {label}
+            </label>
+          ) : (
+            <div className="stg-lab">{label}</div>
+          )}
+          {r >= 4.5 ? (
+            <div id={`${id}-help`} className="stg-help">
+              {ratio}
+            </div>
+          ) : (
+            <div id={`${id}-help`} className="stg-help br-warn" role="status">
+              <TriangleAlert size={16} aria-hidden="true" />
+              <span>
+                {ratio}
+                {fix && <> {t('brand.proposed', { color: fix })}</>}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="stg-ctl">
+          <div className="br-colr">
+            <span className="br-swatch" style={{ background: v }} aria-hidden="true" />
+            {isAdmin ? (
+              <input
+                id={id}
+                className="fd-input stg-short"
+                maxLength={7}
+                spellCheck={false}
+                autoComplete="off"
+                aria-describedby={`${id}-help`}
+                defaultValue={v}
+                key={v}
+                onBlur={(e) => {
+                  const x = e.target.value.trim().toUpperCase();
+                  if (isHex(x)) setVals({ ...vals, [key]: x });
+                  else e.target.value = v;
+                }}
+              />
+            ) : (
+              // Lecture seule (éditeur) : pastille et valeur, comme du texte
+              <span id={id}>{v}</span>
+            )}
           </div>
-        ) : (
-          // Lecture seule (éditeur) : pastille et valeur, comme du texte
-          <p className="br-color-ro" id={id}>
-            <span className="st-swatch" style={{ background: v }} aria-hidden="true" />
-            <span className="t-mono">{v}</span>
-          </p>
-        )}
-        {r >= 4.5 ? (
-          <span className="help">{ratio}</span>
-        ) : (
-          <div className="alert alert-warning th-warn" role="status">
-            <TriangleAlert aria-hidden="true" />
-            <span className="t-caption">
-              {ratio}.
-              {fix && (
-                <>
-                  {' '}
-                  {t('brand.proposed', { color: fix })}{' '}
-                  {isAdmin && (
-                    <button
-                      type="button"
-                      className="mk-link"
-                      onClick={() => setVals({ ...vals, [key]: fix })}
-                    >
-                      {t('brand.useColor')}
-                    </button>
-                  )}
-                </>
-              )}
-            </span>
-          </div>
-        )}
+          {fix && isAdmin && (
+            <Button onClick={() => setVals({ ...vals, [key]: fix })}>{t('brand.useColor')}</Button>
+          )}
+        </div>
       </div>
     );
   };
 
   return (
-    <section className="card br-card" aria-labelledby="br-col-t">
-      <div className="card-head">
+    <section className="stg-sec" aria-labelledby="br-col-t">
+      <div className="stg-sec__head">
         <div>
-          <h3 className="t-h3" id="br-col-t">
-            {t('brand.colorsTitle')}
-          </h3>
-          <p className="t-caption muted">{t('brand.colorsHelp')}</p>
+          <h2 id="br-col-t">{t('brand.colorsTitle')}</h2>
+          <p>{t('brand.colorsHelp')}</p>
         </div>
       </div>
-      <div className="br-colors">
-        {field('primary', t('brand.primary'))}
-        {field('accent', t('brand.accent'))}
-      </div>
-      {isAdmin && (
-        <div className="br-actions">
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            disabled={!dirty}
-            onClick={async () => {
-              check(
-                await supabase
-                  .from('workspaces')
-                  .update({ brand_primary: vals.primary, brand_accent: vals.accent })
-                  .eq('id', ws.id),
-              );
-              await reload();
-              toast(t('brand.colorsSaved'));
-            }}
-          >
-            {t('common.save')}
-          </button>
-        </div>
-      )}
+      {field('primary', t('brand.primary'))}
+      {field('accent', t('brand.accent'))}
     </section>
+  );
+}
+
+/** Couleur du bandeau : la bulle quand elle est sombre (Nuit, Contraste élevé), sinon la couleur principale. */
+const bandColor = (k: StyleTokens) => (contrastRatio(k.surface, '#FFFFFF') >= 4.5 ? k.surface : k.primary);
+
+/** Carte d'un style : bandeau de couleur, nom, pastilles, menu « ⋯ ». */
+function StyleItem({
+  name,
+  tokens,
+  isDefault,
+  byline,
+  nameSlot,
+  menu,
+}: {
+  name: string;
+  tokens: StyleTokens;
+  isDefault: boolean;
+  byline?: string;
+  nameSlot?: ReactNode;
+  menu?: ReactNode;
+}) {
+  const { t } = useTranslation();
+  return (
+    <li className="br-st" aria-current={isDefault ? 'true' : undefined}>
+      <span className="br-st__band" style={{ background: bandColor(tokens) }} aria-hidden="true" />
+      {/* §18.6 : nom, auteur et pastilles forment un seul bloc de texte (4 px, mesure de la maquette) */}
+      <div className="br-st__meta" data-gap-exempt="">
+        {nameSlot || <b>{name}</b>}
+        {byline && <span className="stg-help">{byline}</span>}
+        {isDefault && <span className="stg-pill">{t('editor.styles.default')}</span>}
+        {!styleOk(tokens) && (
+          <span className="stg-pill br-st__warn">
+            <TriangleAlert size={14} aria-hidden="true" />
+            {t('brand.lowContrast')}
+          </span>
+        )}
+      </div>
+      {menu}
+    </li>
   );
 }
 
@@ -312,7 +410,7 @@ type Editing = {
   name: string;
 };
 
-function StylesCard({ wsId, isAdmin, canCreate }: { wsId: string; isAdmin: boolean; canCreate: boolean }) {
+function StylesSection({ wsId, isAdmin, canCreate }: { wsId: string; isAdmin: boolean; canCreate: boolean }) {
   const { t } = useTranslation();
   const toast = useToast();
   const uid = useAuth().user?.id;
@@ -345,11 +443,6 @@ function StylesCard({ wsId, isAdmin, canCreate }: { wsId: string; isAdmin: boole
   const presetName = (id: string) => t(`editor.styles.preset_${id}`);
   const defaultTokens = defaultRow ? asStyleTokens(defaultRow.tokens) : PRESETS[0]!.tokens;
   const takenNames = mine.map((m) => m.name);
-  const sample = { title: t('editor.styles.sampleTitle'), next: t('editor.styles.sampleNext') };
-  const badges = (isDefault: boolean, tokens: StyleTokens) => [
-    ...(isDefault ? [{ text: t('editor.styles.default') }] : []),
-    ...(styleOk(tokens) ? [] : [{ text: t('brand.lowContrast'), tone: 'warning' as const }]),
-  ];
 
   const duplicate = (name: string, tokens: StyleTokens) =>
     setEditing({
@@ -392,30 +485,25 @@ function StylesCard({ wsId, isAdmin, canCreate }: { wsId: string; isAdmin: boole
   };
 
   return (
-    <section className="card br-card" aria-labelledby="br-sty-t">
-      <div className="card-head">
+    <section className="stg-sec" aria-labelledby="br-sty-t">
+      <div className="stg-sec__head">
         <div>
-          <h3 className="t-h3" id="br-sty-t">
-            {t('brand.stylesTitle')}
-          </h3>
-          <p className="t-caption muted">{t('brand.stylesHelp')}</p>
+          <h2 id="br-sty-t">{t('brand.stylesTitle')}</h2>
+          <p>{t('brand.stylesHelp')}</p>
         </div>
         {canCreate && (
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => setEditing({ mode: 'new', source: '', tokens: defaultTokens, name: '' })}
-          >
-            <Plus aria-hidden="true" />
-            {t('brand.newStyle')}
-          </button>
+          <div className="stg-sec__acts">
+            <Button
+              icon={<Plus size={16} />}
+              onClick={() => setEditing({ mode: 'new', source: '', tokens: defaultTokens, name: '' })}
+            >
+              {t('brand.newStyle')}
+            </Button>
+          </div>
         )}
       </div>
 
-      <h4 className="br-sub" id="br-builtin-t">
-        {t('brand.builtin')}
-      </h4>
-      <div className="br-grid" role="list" aria-labelledby="br-builtin-t">
+      <ul className="br-styles" aria-labelledby="br-sty-t">
         {PRESETS.map((p) => {
           const name = presetName(p.id);
           const isDefault = defaultKey === p.id;
@@ -434,126 +522,103 @@ function StylesCard({ wsId, isAdmin, canCreate }: { wsId: string; isAdmin: boole
               : []),
           ];
           return (
-            <div role="listitem" key={p.id}>
-              <StyleCard
-                name={name}
-                tokens={p.tokens}
-                current={isDefault}
-                badges={badges(isDefault, p.tokens)}
-                sample={sample}
-                menu={
-                  items.length > 0 && (
-                    <span className="sty-menu">
-                      <Menu label={t('editor.styles.actionsFor', { name })} items={items} />
-                    </span>
-                  )
-                }
-              />
-            </div>
+            <StyleItem
+              key={p.id}
+              name={name}
+              tokens={p.tokens}
+              isDefault={isDefault}
+              menu={
+                items.length > 0 && <Menu label={t('editor.styles.actionsFor', { name })} items={items} />
+              }
+            />
           );
         })}
-      </div>
-
-      <h4 className="br-sub" id="br-mine-t">
-        {t('brand.mine')}
-      </h4>
-      {rows && mine.length === 0 ? (
-        <p className="t-caption muted br-empty">{t('brand.mineEmpty')}</p>
-      ) : (
-        <div className="br-grid" role="list" aria-labelledby="br-mine-t">
-          {mine.map((m) => {
-            const tokens = asStyleTokens(m.tokens);
-            const own = isAdmin || (canCreate && m.created_by === uid);
-            const items: MenuItem[] = [
-              ...(own
-                ? [
-                    {
-                      label: t('brand.edit'),
-                      icon: <Pencil />,
-                      onSelect: () =>
-                        setEditing({ mode: 'edit', source: m.name, id: m.id, tokens, name: m.name }),
-                    },
-                    {
-                      label: t('editor.styles.rename'),
-                      icon: <Pencil />,
-                      onSelect: () => setRenaming({ id: m.id, value: m.name, err: null }),
-                    },
-                  ]
-                : []),
-              ...(canCreate
-                ? [{ label: t('brand.duplicate'), icon: <Copy />, onSelect: () => duplicate(m.name, tokens) }]
-                : []),
-              ...(isAdmin && !m.is_default
-                ? [
-                    {
-                      label: t('brand.setDefault'),
-                      icon: <Star />,
-                      onSelect: () => askDefault(m.name, { id: m.id }),
-                    },
-                  ]
-                : []),
-              ...(isAdmin
-                ? [
-                    {
-                      label: t('editor.styles.delete'),
-                      icon: <Trash2 />,
-                      danger: true,
-                      disabled: m.is_default,
-                      hint: m.is_default ? t('brand.deleteDefault') : undefined,
-                      onSelect: () => setDeleting(m),
-                    },
-                  ]
-                : []),
-            ];
-            const r = renaming?.id === m.id ? renaming : null;
-            return (
-              <div role="listitem" key={m.id}>
-                <StyleCard
-                  name={m.name}
-                  tokens={tokens}
-                  current={m.is_default}
-                  badges={badges(m.is_default, tokens)}
-                  byline={
-                    m.created_by && names[m.created_by]
-                      ? t('brand.by', { name: names[m.created_by] })
-                      : undefined
-                  }
-                  sample={sample}
-                  nameSlot={
-                    r && (
-                      <span className="br-rename">
-                        <input
-                          className="input input-sm"
-                          autoFocus
-                          maxLength={STYLE_NAME_MAX}
-                          aria-label={t('brand.renameLabel', { name: m.name })}
-                          aria-invalid={r.err ? true : undefined}
-                          aria-describedby={r.err ? `br-rn-${m.id}` : undefined}
-                          value={r.value}
-                          onChange={(e) => setRenaming({ ...r, value: e.target.value, err: null })}
-                          onKeyDown={(e) => onRenameKey(e, m.id)}
-                        />
-                        {r.err && (
-                          <span id={`br-rn-${m.id}`} className="field-error" role="alert">
-                            {r.err}
-                          </span>
-                        )}
+        {mine.map((m) => {
+          const tokens = asStyleTokens(m.tokens);
+          const own = isAdmin || (canCreate && m.created_by === uid);
+          const items: MenuItem[] = [
+            ...(own
+              ? [
+                  {
+                    label: t('brand.edit'),
+                    icon: <Pencil />,
+                    onSelect: () =>
+                      setEditing({ mode: 'edit', source: m.name, id: m.id, tokens, name: m.name }),
+                  },
+                  {
+                    label: t('editor.styles.rename'),
+                    icon: <Pencil />,
+                    onSelect: () => setRenaming({ id: m.id, value: m.name, err: null }),
+                  },
+                ]
+              : []),
+            ...(canCreate
+              ? [{ label: t('brand.duplicate'), icon: <Copy />, onSelect: () => duplicate(m.name, tokens) }]
+              : []),
+            ...(isAdmin && !m.is_default
+              ? [
+                  {
+                    label: t('brand.setDefault'),
+                    icon: <Star />,
+                    onSelect: () => askDefault(m.name, { id: m.id }),
+                  },
+                ]
+              : []),
+            ...(isAdmin
+              ? [
+                  {
+                    label: t('editor.styles.delete'),
+                    icon: <Trash2 />,
+                    danger: true,
+                    disabled: m.is_default,
+                    hint: m.is_default ? t('brand.deleteDefault') : undefined,
+                    onSelect: () => setDeleting(m),
+                  },
+                ]
+              : []),
+          ];
+          const r = renaming?.id === m.id ? renaming : null;
+          return (
+            <StyleItem
+              key={m.id}
+              name={m.name}
+              tokens={tokens}
+              isDefault={m.is_default}
+              byline={
+                m.created_by && names[m.created_by] ? t('brand.by', { name: names[m.created_by] }) : undefined
+              }
+              nameSlot={
+                r && (
+                  <span className="br-rename">
+                    <input
+                      className="fd-input"
+                      autoFocus
+                      maxLength={STYLE_NAME_MAX}
+                      aria-label={t('brand.renameLabel', { name: m.name })}
+                      aria-invalid={r.err ? true : undefined}
+                      aria-describedby={r.err ? `br-rn-${m.id}` : undefined}
+                      value={r.value}
+                      onChange={(e) => setRenaming({ ...r, value: e.target.value, err: null })}
+                      onKeyDown={(e) => onRenameKey(e, m.id)}
+                    />
+                    {r.err && (
+                      <span id={`br-rn-${m.id}`} className="stg-error" role="alert">
+                        <CircleAlert size={16} aria-hidden="true" />
+                        {r.err}
                       </span>
-                    )
-                  }
-                  menu={
-                    items.length > 0 && (
-                      <span className="sty-menu">
-                        <Menu label={t('editor.styles.actionsFor', { name: m.name })} items={items} />
-                      </span>
-                    )
-                  }
-                />
-              </div>
-            );
-          })}
-        </div>
-      )}
+                    )}
+                  </span>
+                )
+              }
+              menu={
+                items.length > 0 && (
+                  <Menu label={t('editor.styles.actionsFor', { name: m.name })} items={items} />
+                )
+              }
+            />
+          );
+        })}
+      </ul>
 
       {editing && (
         <StyleDialog

@@ -24,7 +24,7 @@ const PAGES = [
 ];
 
 /** Pages déjà refaites selon le gabarit du §11 (une entrée par page livrée du lot 1). */
-const REFAITES = ['workspace', 'profile', 'members', 'variables', 'usage', 'privacy', 'security'];
+const REFAITES = ['workspace', 'profile', 'members', 'variables', 'usage', 'privacy', 'security', 'brand'];
 
 const ok = (c, l) => {
   console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
