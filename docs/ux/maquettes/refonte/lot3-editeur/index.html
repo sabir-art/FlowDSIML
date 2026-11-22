@@ -12,10 +12,19 @@
 <li>Modale « Depuis une autre démo » : 720 px, liste des démos à gauche (lecture seule grisée), vignettes à cocher, pied avec le compte et les actions.</li>
 <li>Mobile : barre avec retour, titre et Partager ; bandeau « L'éditeur s'utilise sur ordinateur », Voir la démo, étapes avec leurs commentaires.</li>
 </ul>
+<h2>Recette du 22/11 : colonne Étapes et « Publier » (dev-mvp a00f232)</h2>
+<ul>
+<li><b>H1 : conforme.</b> « Publier » est en prune uni (97,8 × 36 px). En sombre, c’est le jeton <code>--fd-color-primary</code> (#CF86A9) qui fait foi. Le #D9619A cité plus haut venait de la palette des graphiques : il est corrigé.</li>
+<li><b>Colonne Étapes : conforme</b>, en clair et en sombre. Elle fait 264 px sur le fond de navigation ; « Ajouter une étape » mesure 239 × 36 ; les cartes, 239 × 64, sont à y 156, 226 et 296 ; l’étape choisie porte le trait prune de 2 px ; « Ajouter un quiz » est en pied, avec son filet. Les vignettes et les icônes d’état viennent des données.</li>
+<li><b>a. Colonne repliée</b> : un rail de 48 px, comme la colonne Dossiers. On y trouve la bascule « Afficher les étapes » (icône panneau, même place que dépliée), puis les numéros d’étape en pastilles de 32 px, avec l’étape choisie en prune et une infobulle portant le titre. En bas, « Ajouter une étape » devient un bouton icône Plus.</li>
+<li><b>b.</b> « Lire depuis ici » et ⋯ : la suite prévue, avec P1-1.</li>
+<li><b>c. Quiz</b> : l’icône <code>ListChecks</code>, pour « Ajouter un quiz » comme pour la ligne d’un quiz existant (« 3 questions · seuil 70 % », libellé gardé). Jamais <code>GraduationCap</code>, réservé à Apprenants (ICON-01, table mise à jour dans <code>composants.md</code>).</li>
+<li><b>d. Monter / Descendre et poignée</b> : gardés pour réordonner au clavier. Ils n’apparaissent qu’au survol et au focus de la carte, à la place de « Lire depuis ici » et ⋯ qui glissent à gauche, sans changer la hauteur de 64 px. La poignée utilise <code>GripVertical</code> (16 px, <code>text-subtle</code>).</li>
+</ul>
 <h2>Recette du 22/11 : en-tête de l’éditeur (dev-mvp 171c0c3) et réponses du dev</h2>
 <ul>
 <li><b>Conforme à 1440, en clair et en sombre</b> : retour « Démos », filet, titre (texte à x 109) avec son crayon, ligne d’état, onglets segmentés centrés, Annuler / Rétablir, ⋯, Partager. À 1 100 px, les onglets se rangent sans chevauchement ni débordement.</li>
-<li><b>H1, à reprendre : « Publier »</b> est un bouton principal en prune uni (<code>--fd-color-primary</code> : #A3195B en clair, #D9619A en sombre). L’app l’affiche en framboise (#D60B52). Il n’y a pas de dégradé (question 2).</li>
+<li><b>H1, à reprendre : « Publier »</b> est un bouton principal en prune uni (<code>--fd-color-primary</code> : #A3195B en clair, #CF86A9 en sombre, valeurs du jeton du dépôt). L’app l’affiche en framboise (#D60B52). Il n’y a pas de dégradé (question 2).</li>
 <li><b>1. « Améliorer avec l’IA »</b> : à faire avec sa modale, plus tard dans le lot 3. Pas de bouton intermédiaire vers le menu ⋯. La recette de l’en-tête sera close à ce moment-là.</li>
 <li><b>3. État sous le titre</b> : on garde « Modifications non publiées » ou « Non publié » avec le point (recette client L48-E).</li>
 <li><b>4. Leads</b> : d’accord, il ouvre l’Analytics de la démo sur l’indicateur Leads.</li>

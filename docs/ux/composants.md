@@ -378,6 +378,7 @@ Un rectangle aux grands arrondis (rx 4 au lieu de 2), une colonne de gauche avec
 | Aide, centre d'aide | `CircleQuestionMark` | Remplacer (capture) | `Replace` |
 | Extension | `Puzzle` | Masquer une étape | `EyeOff` |
 | Notifications | `Bell` (jamais `BellRing`) | Supprimer | `Trash2` |
+| Quiz (ajouter, ligne du quiz, éditeur de quiz) | `ListChecks` (jamais `GraduationCap`, réservé aux Apprenants) | Réordonner (poignée) | `GripVertical` |
 | IA, assistant, génération | `Sparkles` (jamais `WandSparkles`) | Plus d'actions | `Ellipsis` |
 | Clé d'accès | `KeyRound` (jamais `Key`) | Sécurité | `ShieldCheck` (jamais `Shield`) |
 | Ajouter une image | `ImagePlus` | Remplacer l'image | `ImageUp` |
