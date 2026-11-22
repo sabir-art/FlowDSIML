@@ -13,6 +13,7 @@
     "./select.css": "./src/select.css",
     "./navigation.css": "./src/navigation.css",
     "./popover.css": "./src/popover.css",
+    "./modal.css": "./src/modal.css",
     "./tooltip": "./src/tooltip.ts",
     "./tooltip.css": "./src/tooltip.css"
   },

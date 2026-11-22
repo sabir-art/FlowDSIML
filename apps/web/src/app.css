@@ -159,6 +159,9 @@
 @media (max-width: 1023px) {
   .shell {
     grid-template-columns: 1fr;
+    /* La barre mobile garde sa hauteur ; le contenu prend le reste (sinon une page courte laisse un vide
+       entre la barre et le contenu) */
+    grid-template-rows: auto minmax(0, 1fr);
   }
   .topbar {
     position: sticky;

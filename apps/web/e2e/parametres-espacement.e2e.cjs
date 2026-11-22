@@ -24,7 +24,7 @@ const PAGES = [
 ];
 
 /** Pages déjà refaites selon le gabarit du §11 (une entrée par page livrée du lot 1). */
-const REFAITES = ['workspace', 'profile'];
+const REFAITES = ['workspace', 'profile', 'members'];
 
 const ok = (c, l) => {
   console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
@@ -45,8 +45,14 @@ const ok = (c, l) => {
         const body = document.querySelector('.st-wrap');
         const vis = [...body.children].filter((c) => c.tagName !== 'DIALOG');
         const only = vis.length === 1 ? vis[0] : null;
+        // Une section du gabarit (« stg-sec ») est un bloc : on ne mesure pas son intérieur
         const box =
-          only && !only.classList.contains('card') && /^(SECTION|DIV)$/.test(only.tagName) ? only : body;
+          only &&
+          !only.classList.contains('card') &&
+          !only.classList.contains('stg-sec') &&
+          /^(SECTION|DIV)$/.test(only.tagName)
+            ? only
+            : body;
         const k = [...box.children].filter(
           (c) => c.tagName !== 'DIALOG' && c.getBoundingClientRect().height > 0,
         );

@@ -45,22 +45,153 @@ const SHOTS = process.env.SHOTS_DIR;
   );
   await page.waitForSelector('text=Thomas Bernard');
   ok((await page.locator('tbody tr').count()) >= 6, 'membres et invitation en attente');
-  ok((await page.locator('text=En attente').count()) === 1, 'badge « En attente »');
+  ok(
+    (await page.locator('.stg-pill', { hasText: 'Invité' }).count()) === 1 &&
+      (await page.locator('.stg-pill', { hasText: 'Actif' }).count()) >= 5,
+    'statut en pastille : « Actif » pour les membres, « Invité » pour l’invitation',
+  );
+  // §11.8 : tableau sans carte, lignes de 56 px, colonnes Nom, E-mail, Rôle, Statut
+  {
+    const tb = await page.evaluate(() => ({
+      cols: [...document.querySelectorAll('.stg-table thead th')].map((th) => th.textContent.trim()),
+      rows: [...document.querySelectorAll('.stg-table tbody tr')].map(
+        (r) => r.getBoundingClientRect().height,
+      ),
+      card: !!document.querySelector('.stg-table').closest('.card'),
+    }));
+    ok(
+      tb.cols.slice(0, 4).join('|') === 'Nom|E-mail|Rôle|Statut' && tb.cols[4] === 'Actions' && !tb.card,
+      `tableau sans carte, colonnes Nom, E-mail, Rôle, Statut (${tb.cols.join('|')})`,
+    );
+    ok(
+      tb.rows.every((h) => h >= 56),
+      `lignes de 56 px au moins (${Math.min(...tb.rows)})`,
+    );
+  }
 
   await page.fill('input[type=search]', 'nina');
   ok((await page.locator('table').first().locator('tbody tr').count()) === 1, 'recherche d’un membre');
   await page.fill('input[type=search]', '');
-  // L40 : filtre de rôle en menu
-  await page.getByRole('button', { name: /^Rôle/ }).click();
-  await page.getByRole('menuitem', { name: 'Éditeur' }).click();
-  ok((await page.locator('table').first().locator('tbody tr').count()) === 3, 'filtre par rôle');
-  await page.getByRole('button', { name: /^Rôle/ }).click();
-  await page.getByRole('menuitem', { name: 'Tous les rôles' }).click();
+  // §11.8 : Ctrl + K (ou ⌘K) place le focus dans la recherche
+  await page.locator('h2', { hasText: 'Membres' }).click();
+  await page.keyboard.press('Control+k');
+  ok(
+    await page.locator('.stg-search input').evaluate((el) => el === document.activeElement),
+    'Ctrl + K : focus dans la recherche',
+  );
+  // §11.8 : « Ce que chaque rôle peut faire » dans un popover d'information de 360 px
+  {
+    const info = page.locator('.stg-table').getByRole('button', { name: 'Ce que chaque rôle peut faire' });
+    await info.click();
+    const pop = page.locator('.stg-info-pop');
+    await pop.waitFor();
+    // Mesure après l'animation d'ouverture (MOTION-01 : mise à l'échelle de 200 ms)
+    await pop.evaluate((el) => Promise.all(el.getAnimations().map((x) => x.finished)));
+    ok(
+      (await info.getAttribute('aria-expanded')) === 'true' &&
+        Math.round((await pop.boundingBox()).width) === 360 &&
+        (await pop.locator('tbody tr').count()) >= 4,
+      'popover des rôles : 360 px, tableau des droits, aria-expanded',
+    );
+    await page.keyboard.press('Escape');
+    await pop.waitFor({ state: 'detached' });
+    ok(
+      (await info.getAttribute('aria-expanded')) === 'false' &&
+        (await info.evaluate((el) => el === document.activeElement)),
+      'popover des rôles : Échap ferme et rend le focus au bouton',
+    );
+    ok((await page.locator('.st-perms').count()) === 0, 'le tableau des droits a quitté la page');
+  }
+  // §11.8 : le rôle se change par le menu « ⋯ » (plus de liste dans la ligne)
+  ok(
+    (await page.locator('.stg-table select, .stg-table [role=combobox]').count()) === 0,
+    'rôle en texte simple',
+  );
+  await page.getByRole('button', { name: 'Actions pour Nina Roux' }).click();
+  await page.getByRole('menuitem', { name: 'Lecteur' }).click();
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('.stg-table tbody tr')].some(
+      (r) => r.textContent.includes('Nina Roux') && r.children[2].textContent.trim() === 'Lecteur',
+    ),
+  );
+  ok(
+    state.tables.members.find((m) => m.user_id === 'u-5')?.role === 'viewer',
+    'menu « ⋯ » › Modifier le rôle : rôle enregistré',
+  );
 
-  await page.getByRole('button', { name: 'Inviter des membres' }).click();
-  await page.waitForSelector('[role=dialog]');
+  await page.getByRole('button', { name: 'Inviter', exact: true }).click();
+  const modal = page.locator('dialog.fd-modal[open]');
+  await modal.waitFor();
+  await modal.evaluate((el) => Promise.all(el.getAnimations().map((x) => x.finished)));
+  // MODAL-01 : en-tête séparé (tuile de 40 px, titre, Fermer), corps de 24 px, pied teinté à droite
+  {
+    const m = await modal.evaluate((d) => {
+      const r = (s) => d.querySelector(s).getBoundingClientRect();
+      const cs = (s) => getComputedStyle(d.querySelector(s));
+      return {
+        w: Math.round(d.getBoundingClientRect().width),
+        tile: [r('.fd-modal__tile').width, r('.fd-modal__tile').height].join('x'),
+        title: d.querySelector('.fd-modal__head h2').textContent,
+        close: d.querySelector('.fd-modal__close').getAttribute('aria-label'),
+        headBorder: cs('.fd-modal__head').borderBottomWidth,
+        pad: cs('.fd-modal__body').padding,
+        gap: cs('.st-invite__form').rowGap,
+        foot: cs('.fd-modal__foot').backgroundColor,
+        footAlign: cs('.fd-modal__foot').justifyContent,
+        labelled: d.getAttribute('aria-labelledby') === d.querySelector('.fd-modal__head h2').id,
+        focus: document.activeElement.id,
+      };
+    });
+    ok(
+      m.w === 400 &&
+        m.tile === '40x40' &&
+        m.title === 'Inviter des membres' &&
+        m.close === 'Fermer' &&
+        m.headBorder === '1px' &&
+        m.pad === '24px' &&
+        m.gap === '24px' &&
+        m.foot === 'rgb(247, 247, 248)' &&
+        m.footAlign === 'flex-end' &&
+        m.labelled,
+      `MODAL-01 : 400 px, tuile de 40 px, corps et gap de 24 px, pied teinté à droite (${JSON.stringify(m)})`,
+    );
+    ok(m.focus === 'inv-email', `MODAL-01 : focus sur le premier champ à l’ouverture (${m.focus})`);
+  }
+  // Rôle : Select maison avec une description par rôle, Propriétaire non proposé
+  {
+    const role = page.locator('#inv-role');
+    await role.focus();
+    await page.keyboard.press('Enter');
+    const opts = modal.locator('[role=option]');
+    await opts.first().waitFor();
+    ok(
+      (await role.getAttribute('aria-expanded')) === 'true' &&
+        (await opts.locator('.fd-opt__label').allTextContents()).join('|') === 'Lecteur|Éditeur|Admin' &&
+        (await opts.locator('.fd-opt__desc').count()) === 3,
+      'Rôle : Lecteur, Éditeur, Admin avec leur description ; liste rendue dans la modale',
+    );
+    // Clavier : Flèche bas puis Entrée choisit Admin ; Échap ferme sans changer
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    ok(
+      (await role.innerText()).trim() === 'Admin' && (await role.getAttribute('aria-expanded')) === 'false',
+      'Select au clavier : Entrée ouvre, Flèche bas et Entrée choisissent, la liste se referme',
+    );
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('Escape');
+    ok(
+      (await role.innerText()).trim() === 'Admin' &&
+        (await role.evaluate((el) => el === document.activeElement)) &&
+        (await modal.count()) === 1,
+      'Select au clavier : Échap ferme sans changer, le focus revient au déclencheur, la modale reste ouverte',
+    );
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('Enter');
+  }
   // Retour client 21/11 : plus de case à cocher, adresses en puces dans un vrai champ e-mail
-  ok((await page.locator('[role=dialog] input[type=checkbox]').count()) === 0, 'aucune case à cocher');
+  ok((await modal.locator('input[type=checkbox]').count()) === 0, 'aucune case à cocher');
   const addr = page.locator('#inv-email');
   ok(
     (await addr.evaluate((el) => [el.type, el.name, el.autocomplete, el.inputMode, el.tagName].join('|'))) ===
@@ -72,8 +203,12 @@ const SHOTS = process.env.SHOTS_DIR;
     'libellé « Adresses e-mail » relié au champ',
   );
   await addr.fill('pas-un-email');
-  await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
-  ok((await page.locator('#inv-email-error').count()) === 1, 'adresse invalide signalée');
+  await modal.getByRole('button', { name: /^Envoyer/ }).click();
+  ok(
+    (await page.locator('#inv-email-error').count()) === 1 &&
+      (await page.locator('#inv-email-error svg.lucide-circle-alert').count()) === 1,
+    'adresse invalide signalée sous le champ, avec l’icône CircleAlert',
+  );
   ok(
     (await addr.getAttribute('aria-invalid')) === 'true' &&
       /inv-email-error/.test(await addr.getAttribute('aria-describedby')),
@@ -113,13 +248,24 @@ const SHOTS = process.env.SHOTS_DIR;
     ok(
       limited
         ? /^2 membres en plus sur \d+\.$/.test(await seats.textContent())
-        : !/siège/.test(await page.locator('[role=dialog]').innerText()),
+        : !/siège/.test(await modal.innerText()),
       `membres ajoutés annoncés sans « sièges » (${limited ? await seats.textContent() : 'sans limite'})`,
     );
   }
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/PRM-04-invitation.png` });
-  await page.getByRole('button', { name: 'Envoyer les invitations' }).click();
+  ok(
+    (await modal.locator('.fd-modal__foot button').allTextContents()).join('|') ===
+      'Annuler|Envoyer 2 invitations',
+    'pied : Annuler, puis « Envoyer 2 invitations »',
+  );
+  await modal.getByRole('button', { name: 'Envoyer 2 invitations' }).click();
   await page.getByText('2 invitations envoyées.').first().waitFor();
+  ok(
+    (await modal.locator('.fd-modal__head h2').textContent()) === 'Invitations envoyées' &&
+      (await modal.locator('.fd-modal__tile svg.lucide-mail-check').count()) === 1 &&
+      (await modal.locator('.fd-modal__foot button').allTextContents()).join('|') === 'Terminé',
+    'confirmation dans la même modale : tuile MailCheck, « Invitations envoyées », pied « Terminé »',
+  );
   ok(state.tables.invitations.length === 3, 'deux invitations créées');
   ok(
     (await page.locator('.inv-results__status.is-sent').allTextContents()).join('|') ===
@@ -127,7 +273,8 @@ const SHOTS = process.env.SHOTS_DIR;
       (await page.getByRole('button', { name: /^Copier le lien de / }).count()) === 2,
     'confirmation : « Invitation envoyée » et « Copier le lien » pour chaque adresse',
   );
-  await page.locator('[role=dialog] .modal-foot').getByRole('button', { name: 'Fermer' }).click();
+  await modal.locator('.fd-modal__foot').getByRole('button', { name: 'Terminé' }).click();
+  await modal.waitFor({ state: 'detached' });
 
   await page.getByRole('button', { name: 'Actions pour Nina Roux' }).click();
   ok(

@@ -264,7 +264,7 @@
     "confirmRemove": "Retirer {{email}} ?",
     "confirmLeave": "Quitter cet espace ?",
     "emails": "Adresses e-mail",
-    "emailsPlaceholder": "marie@acme.example, paul@acme.example",
+    "emailsPlaceholder": "Ajouter une adresse…",
     "invalidEmails": "Adresses invalides : {{list}}",
     "member": "Membre",
     "countOf_one": "{{count}} membre sur {{limit}}.",
@@ -325,7 +325,33 @@
       "failed": "E-mail non envoyé",
       "budget": "Limite d’e-mails du jour atteinte",
       "rateLimit": "Plafond horaire atteint"
-    }
+    },
+    "inviteShort": "Inviter",
+    "subOf_one": "{{count}} membre sur {{limit}}. Les invitations expirent au bout de 14 jours.",
+    "subOf_other": "{{count}} membres sur {{limit}}. Les invitations expirent au bout de 14 jours.",
+    "subUnlimited_one": "{{count}} membre. Les invitations expirent au bout de 14 jours.",
+    "subUnlimited_other": "{{count}} membres. Les invitations expirent au bout de 14 jours.",
+    "colName": "Nom",
+    "colEmail": "E-mail",
+    "colStatus": "Statut",
+    "statusActive": "Actif",
+    "statusInvited": "Invité",
+    "changeRole": "Modifier le rôle",
+    "copyInviteLink": "Copier le lien d’invitation",
+    "noMatch": "Aucun membre ne correspond à cette recherche.",
+    "roleHelp": {
+      "viewer": "Consulte les démos et les analytics.",
+      "editor": "Crée, modifie et publie des démos.",
+      "admin": "Gère aussi les membres et l’espace.",
+      "owner": "Tous les droits, y compris la suppression de l’espace."
+    },
+    "sendN_one": "Envoyer {{count}} invitation",
+    "sendN_other": "Envoyer {{count}} invitations",
+    "sendNone": "Envoyer les invitations",
+    "sentTitle": "Invitations envoyées",
+    "sentBody_one": "{{count}} invitation envoyée. Si l’e-mail n’arrive pas, transmettez le lien vous-même.",
+    "sentBody_other": "{{count}} invitations envoyées. Si l’e-mail n’arrive pas, transmettez le lien vous-même.",
+    "done": "Terminé"
   },
   "workspace": {
     "title": "Paramètres de l’espace",

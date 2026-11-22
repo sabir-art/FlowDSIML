@@ -8,7 +8,14 @@ export type Placement = 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
 export const VIEWPORT_MARGIN = 8;
 const GAP = 4;
 
-export function getPortal(): HTMLElement {
+/**
+ * Conteneur des overlays. Un `<dialog>` ouvert par showModal() est dans la couche supérieure du
+ * navigateur : un overlay rendu ailleurs passerait dessous. Avec `anchor`, l'overlay est donc rendu dans
+ * la modale qui contient son déclencheur ; sinon dans le portail unique #fd-portal.
+ */
+export function getPortal(anchor?: Element | null): HTMLElement {
+  const dialog = anchor?.closest<HTMLElement>('dialog[open]');
+  if (dialog) return dialog;
   let el = document.getElementById('fd-portal');
   if (!el) {
     el = document.createElement('div');

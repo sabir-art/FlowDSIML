@@ -264,7 +264,7 @@
     "confirmRemove": "Remove {{email}}?",
     "confirmLeave": "Leave this workspace?",
     "emails": "Email addresses",
-    "emailsPlaceholder": "mary@acme.example, paul@acme.example",
+    "emailsPlaceholder": "Add an address…",
     "invalidEmails": "Invalid addresses: {{list}}",
     "member": "Member",
     "countOf_one": "{{count}} member of {{limit}}.",
@@ -325,7 +325,33 @@
       "failed": "Email not sent",
       "budget": "Daily email limit reached",
       "rateLimit": "Hourly limit reached"
-    }
+    },
+    "inviteShort": "Invite",
+    "subOf_one": "{{count}} member out of {{limit}}. Invitations expire after 14 days.",
+    "subOf_other": "{{count}} members out of {{limit}}. Invitations expire after 14 days.",
+    "subUnlimited_one": "{{count}} member. Invitations expire after 14 days.",
+    "subUnlimited_other": "{{count}} members. Invitations expire after 14 days.",
+    "colName": "Name",
+    "colEmail": "Email",
+    "colStatus": "Status",
+    "statusActive": "Active",
+    "statusInvited": "Invited",
+    "changeRole": "Change role",
+    "copyInviteLink": "Copy invitation link",
+    "noMatch": "No member matches this search.",
+    "roleHelp": {
+      "viewer": "Views demos and analytics.",
+      "editor": "Creates, edits and publishes demos.",
+      "admin": "Also manages members and the workspace.",
+      "owner": "All rights, including deleting the workspace."
+    },
+    "sendN_one": "Send {{count}} invitation",
+    "sendN_other": "Send {{count}} invitations",
+    "sendNone": "Send invitations",
+    "sentTitle": "Invitations sent",
+    "sentBody_one": "{{count}} invitation sent. If the email does not arrive, share the link yourself.",
+    "sentBody_other": "{{count}} invitations sent. If the email does not arrive, share the link yourself.",
+    "done": "Done"
   },
   "workspace": {
     "title": "Workspace settings",

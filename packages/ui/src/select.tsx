@@ -388,7 +388,7 @@ export function Select({
               {shown.length === 0 && <div className="fd-sel-empty">{emptyLabel}</div>}
             </div>
           </div>,
-          getPortal(),
+          getPortal(trigger.current),
         )}
     </>
   );
