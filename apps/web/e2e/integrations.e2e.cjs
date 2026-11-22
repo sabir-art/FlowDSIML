@@ -287,9 +287,9 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
     'Éditeur : pas d’onglet Intégrations',
   );
   await page.goto(`${BASE}/#/settings/integrations`);
-  await page.waitForSelector('.empty');
+  await page.waitForSelector('.stg-empty');
   ok(
-    /Vous n’avez pas accès à cette page/.test(await page.textContent('.empty')),
+    /Vous n’avez pas accès à cette page/.test(await page.textContent('.stg-empty')),
     'Éditeur : accès refusé, retour vers Général',
   );
 

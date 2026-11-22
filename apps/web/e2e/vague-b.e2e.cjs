@@ -55,8 +55,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     (await mail.count()) === 1 && (await mail.innerText()).includes('En attendant, un webhook'),
     'Intégrations : ligne e-mailing « En attendant, un webhook… »',
   );
-  if (SHOTS)
-    await page.locator('.int-card-list').screenshot({ path: `${SHOTS}/vb-02-integrations${sfx}.png` });
+  if (SHOTS) await page.locator('.int').screenshot({ path: `${SHOTS}/vb-02-integrations${sfx}.png` });
   await mail.getByRole('link', { name: 'Utiliser un webhook' }).click();
   await page.waitForURL(/settings\/integrations\/webhooks/);
   ok(true, 'lien vers les webhooks');

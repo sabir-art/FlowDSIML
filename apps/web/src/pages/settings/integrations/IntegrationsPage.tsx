@@ -16,7 +16,7 @@ import {
   Users,
   Webhook as WebhookIcon,
 } from 'lucide-react';
-import { Empty } from '@flowdsiml/ui';
+import { Button } from '@flowdsiml/ui';
 import { SettingsShell } from '../SettingsShell';
 import slackLogo from '../../../assets/brands/slack.svg';
 import zapierLogo from '../../../assets/brands/zapier.svg';
@@ -88,12 +88,17 @@ export function IntegrationsPage() {
 
   if (!allowed)
     return (
-      <SettingsShell>
-        <div className="empty" role="status">
-          <h2 className="t-h3">{t('integrations.noAccess')}</h2>
-          <Link className="btn btn-secondary btn-sm" to="/settings/workspace">
-            {t('integrations.backGeneral')}
-          </Link>
+      <SettingsShell legacy={false}>
+        <div className="stg-empty" role="status">
+          <span className="stg-empty__tile" aria-hidden="true">
+            <Unlink size={20} />
+          </span>
+          <h2>{t('integrations.noAccess')}</h2>
+          <div className="stg-empty__acts">
+            <Link className="fd-btn" to="/settings/workspace">
+              {t('integrations.backGeneral')}
+            </Link>
+          </div>
         </div>
       </SettingsShell>
     );
@@ -107,14 +112,12 @@ export function IntegrationsPage() {
       key="webhooks"
       icon={<WebhookIcon />}
       name={t('integrations.webhooks')}
-      body={t('integrations.webhooksSub')}
+      body={t('integrations.webhooksRow')}
       warn={pausedAuto ? t('integrations.pausedCount', { count: pausedAuto }) : undefined}
       to={hooks && hooks.length > 0 ? '/settings/integrations/webhooks' : undefined}
       state={
         hooks === null ? null : hooks.length === 0 ? (
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setAdding(true)}>
-            {t('integrations.connect')}
-          </button>
+          <Button onClick={() => setAdding(true)}>{t('integrations.connect')}</Button>
         ) : (
           <span className="int-on">
             <i aria-hidden="true" />
@@ -180,74 +183,71 @@ export function IntegrationsPage() {
   };
 
   return (
-    <SettingsShell>
-      <section className="l23 int" aria-labelledby="st-title">
-        <p className="muted int-sub">{t('integrations.sub')}</p>
-        <div className="int-filter">
-          <div
-            ref={segRef}
-            className="fd-segmented int-seg"
-            role="radiogroup"
-            aria-label={t('integrations.category')}
-          >
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                type="button"
-                role="radio"
-                data-f={f}
-                aria-checked={filter === f}
-                tabIndex={filter === f ? 0 : -1}
-                onClick={() => setFilter(f)}
-                onKeyDown={(e) => onSegKey(e, f)}
-              >
-                {t(`integrations.cat.${f}`)}
-              </button>
-            ))}
-          </div>
-          <label className="int-select">
-            <span>{t('integrations.category')}</span>
-            <select className="select" value={filter} onChange={(e) => setFilter(e.target.value as Filter)}>
-              {FILTERS.map((f) => (
-                <option key={f} value={f}>
-                  {t(`integrations.cat.${f}`)}
-                </option>
-              ))}
-            </select>
-          </label>
+    <SettingsShell
+      legacy={false}
+      actions={
+        <Link className="fd-btn int-wh-link" to="/settings/integrations/webhooks">
+          <WebhookIcon size={16} aria-hidden="true" />
+          {t('integrations.webhooks')}
+        </Link>
+      }
+    >
+      <div className="l23 int">
+        <div
+          ref={segRef}
+          className="segmented stg-seg int-seg"
+          role="radiogroup"
+          aria-label={t('integrations.category')}
+          /* §18.6 : filtre à 24 px de la première section (maquette lot1-parametres/integrations) */
+          data-gap-exempt=""
+        >
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              type="button"
+              role="radio"
+              data-f={f}
+              aria-checked={filter === f}
+              tabIndex={filter === f ? 0 : -1}
+              onClick={() => setFilter(f)}
+              onKeyDown={(e) => onSegKey(e, f)}
+            >
+              {t(`integrations.cat.${f}`)}
+            </button>
+          ))}
         </div>
-        <div className="card int-card-list">
-          {filter === 'all' ? (
-            CATS.map((c) => (
-              <div key={c} className="int-group" role="group" aria-labelledby={`int-g-${c}`}>
-                <h2 className="int-group__t" id={`int-g-${c}`}>
-                  {t(`integrations.cat.${c}`)}
-                </h2>
-                <ul className="int-list">{rowsOf(c)}</ul>
-              </div>
-            ))
-          ) : filter === 'connected' ? (
-            hooks === null ? null : active > 0 ? (
-              <ul className="int-list">{webhookRow}</ul>
-            ) : (
-              <Empty
-                variant="compact"
-                level={2}
-                icon={<Unlink />}
-                title={t('integrations.noneConnected')}
-                action={
-                  <button type="button" className="link-button" onClick={() => setAdding(true)}>
-                    {t('integrations.add')}
-                  </button>
-                }
-              />
-            )
+        {filter === 'connected' ? (
+          hooks === null ? null : active > 0 ? (
+            <ul className="int-list int-list--bare">{webhookRow}</ul>
           ) : (
-            <ul className="int-list">{rowsOf(filter)}</ul>
-          )}
-        </div>
-        {/* §1.1 : une ligne de texte, sans encadré */}
-        <p className="int-need">
+            <div className="stg-empty">
+              <span className="stg-empty__tile" aria-hidden="true">
+                <Unlink size={20} />
+              </span>
+              <h2>{t('integrations.noneConnected')}</h2>
+              <div className="stg-empty__acts">
+                <Button onClick={() => setAdding(true)}>{t('integrations.add')}</Button>
+              </div>
+            </div>
+          )
+        ) : (
+          (filter === 'all' ? CATS : [filter]).map((c) => (
+            <section key={c} className="stg-sec int-group" aria-labelledby={`int-g-${c}`}>
+              <div className="stg-sec__head">
+                <div>
+                  <h2 className={filter === 'all' ? 'int-group__t' : undefined} id={`int-g-${c}`}>
+                    {t(`integrations.cat.${c}`)}
+                  </h2>
+                  <p>{t(`integrations.catSub.${c}`)}</p>
+                </div>
+              </div>
+              {/* §18.6 : cartes de la liste à 12 px (maquette lot1-parametres/integrations) */}
+              <ul className="int-list">{rowsOf(c)}</ul>
+            </section>
+          ))
+        )}
+        {/* §1.1 : une ligne de texte, sans encadré, à 24 px de la dernière carte (maquette) */}
+        <p className="int-need" data-gap-exempt="">
           {t('integrations.needOther')}{' '}
           {ask ? (
             <a href={ask} target={ask.startsWith('https:') ? '_blank' : undefined} rel="noopener noreferrer">
@@ -258,8 +258,9 @@ export function IntegrationsPage() {
               {t('integrations.setSupport')}
             </Link>
           )}
+          .
         </p>
-      </section>
+      </div>
       {adding && ws && (
         <WebhookForm
           ws={ws}

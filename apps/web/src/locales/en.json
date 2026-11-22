@@ -4131,6 +4131,7 @@
     "title": "Integrations",
     "sub": "Send your demos’ events to your tools.",
     "webhooks": "Webhooks",
+    "webhooksRow": "A signed HTTPS call for each event.",
     "webhooksSub": "A signed HTTPS call for each chosen event.",
     "add": "Add a webhook",
     "emptyTitle": "No webhooks",
@@ -4257,8 +4258,14 @@
     "pausedCount_one": "{{count}} paused after failures",
     "pausedCount_other": "{{count}} paused after failures",
     "noneConnected": "No active connection",
+    "catSub": {
+      "automation": "Send your demo events to your tools.",
+      "communication": "Notify your team where it talks.",
+      "audience": "Follow your demos’ audience in your analytics tool.",
+      "crm": "Link your demos to your user follow-up."
+    },
     "needOther": "Need another connection?",
-    "askIt": "Ask your IT department",
+    "askIt": "Contact support",
     "setSupport": "Set the support link",
     "requestSubject": "Connection request",
     "emailingWhy": "Meanwhile, a webhook can feed these tools.",

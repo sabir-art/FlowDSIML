@@ -37,6 +37,7 @@ const REFAITES = [
   'glossary',
   'tags',
   'ai',
+  'integrations',
 ];
 
 const ok = (c, l) => {
@@ -72,6 +73,8 @@ const ok = (c, l) => {
           (c) =>
             c.tagName !== 'DIALOG' &&
             c.getAttribute('role') !== 'note' &&
+            // Filtre et ligne de texte hors sections (24 px, mesure des maquettes), déclarés par la page
+            !c.hasAttribute('data-gap-exempt') &&
             c.getBoundingClientRect().height > 0,
         );
         return k
