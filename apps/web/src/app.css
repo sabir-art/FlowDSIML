@@ -2347,3 +2347,186 @@ button.fd-nav__item:hover {
     justify-content: center;
   }
 }
+
+/* ---- MEDIA-01 (COMP-01 §18) : vignette de 72 px, ronde (photo) ou carrée arrondie (logo) ---- */
+.fd-mt-wrap {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+.fd-mt {
+  position: relative;
+  flex: none;
+  width: 72px;
+  height: 72px;
+}
+.fd-mt__img {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.fd-mt--round .fd-mt__img {
+  border-radius: 50%;
+}
+.fd-mt--square .fd-mt__img {
+  border-radius: 16px;
+}
+.fd-mt__pic {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  transition:
+    filter var(--fd-motion-duration-fast) var(--fd-motion-ease-standard),
+    opacity var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
+}
+.fd-mt__pic > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.fd-mt--square .fd-mt__pic > img {
+  object-fit: contain;
+}
+.fd-mt__ini {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary);
+  font: 700 26px var(--fd-font-sans);
+}
+.fd-mt__ini::before {
+  content: attr(data-ini);
+}
+/* Voile au survol et au focus : « Changer » sur l'image floutée */
+.fd-mt__veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2px;
+  background: rgb(8 10 14 / 0.62);
+  color: #ffffff;
+  font: 600 12px var(--fd-font-sans);
+  opacity: 0;
+  transition: opacity var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
+}
+.fd-mt__veil > svg {
+  width: 18px;
+  height: 18px;
+}
+.fd-mt__img:is(:hover, :focus-visible) .fd-mt__veil,
+.fd-mt.is-drag .fd-mt__veil,
+.fd-mt.is-busy .fd-mt__veil {
+  opacity: 1;
+}
+.fd-mt__img:is(:hover, :focus-visible) .fd-mt__pic,
+.fd-mt.is-drag .fd-mt__pic,
+.fd-mt.is-busy .fd-mt__pic {
+  filter: blur(3px);
+  opacity: 0.45;
+}
+/* Focus clavier (FIELD-01 §11.4, contrôlé par boutons-focus) : bordure et trait intérieur de 2 px, ni
+   contour ni ombre extérieure */
+.fd-mt__img:focus-visible {
+  outline: none;
+  border-color: var(--fd-color-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-mt.is-drag .fd-mt__img {
+  border: 2px dashed var(--fd-color-primary);
+}
+.fd-mt__veil--drop {
+  background: color-mix(in srgb, var(--fd-color-primary) 18%, transparent);
+  color: var(--fd-color-primary);
+}
+.fd-mt.is-error .fd-mt__img {
+  border: 2px solid var(--fd-color-danger);
+}
+/* Vide : bord pointillé, « Ajouter » toujours lisible */
+.fd-mt.is-empty .fd-mt__img {
+  border: 1.5px dashed var(--fd-color-border-field);
+  background: var(--fd-color-surface-sunken);
+}
+.fd-mt.is-empty .fd-mt__veil {
+  background: none;
+  color: var(--fd-color-text-muted);
+  opacity: 1;
+}
+/* Bouton ⋯ de 28 px, en bas à droite de l'image */
+.fd-mt .menu {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+}
+.fd-mt--square .menu {
+  right: -6px;
+  bottom: -6px;
+}
+.fd-mt__more {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 50%;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: 0 1px 3px rgb(8 10 14 / 0.12);
+  cursor: pointer;
+}
+.fd-mt__more > svg {
+  width: 16px;
+  height: 16px;
+}
+.fd-mt__more[aria-expanded='true'] {
+  border-color: var(--fd-color-primary);
+}
+.fd-mt__more:focus-visible {
+  outline: none;
+  border-color: var(--fd-color-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-mt__err {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 260px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--fd-color-danger);
+  text-align: right;
+}
+.fd-mt__err > svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fd-mt__pic,
+  .fd-mt__veil {
+    transition: none;
+  }
+}
+@media (max-width: 767px) {
+  .fd-mt-wrap {
+    justify-items: start;
+  }
+  .fd-mt__err {
+    text-align: left;
+  }
+}

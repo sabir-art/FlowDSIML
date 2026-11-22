@@ -1,7 +1,8 @@
 /**
  * Retours client 21/11 §4 : photo de profil (spec docs/ux/specs/retours-client-21-11.md §4).
  * Faux Supabase, images générées dans le test (aucune donnée réelle).
- *  - ligne « Photo » en tête du Profil : avatar de 64 px (initiale), « Choisir une photo », aide ;
+ *  - ligne « Photo » en tête du Profil (MEDIA-01) : vignette ronde de 72 px, qui est le bouton « Changer la
+ *    photo de profil » ; bouton ⋯ avec « Remplacer… » et « Retirer » quand une photo est en place ; aide ;
  *  - erreurs : type refusé, plus de 2 Mo (role=alert) ;
  *  - « Recadrer la photo » : zone carrée, aperçu rond de 96 px, zoom de 100 à 300 %, flèches de 8 px ;
  *  - envoi : 256 × 256 WebP réencodé dans le navigateur, chemin <uid>/<uuid>.webp, avatar_path ;
@@ -61,13 +62,22 @@ async function png(page, w, h) {
   await row.waitFor();
 
   // ===== Ligne « Photo » =====
-  const av = await page.locator('.pf-photo__avatar').boundingBox();
-  ok(Math.round(av.width) === 64 && Math.round(av.height) === 64, 'avatar de 64 px');
-  ok((await page.locator('.pf-photo__avatar').innerText()).trim() === 'A', 'sans photo : l’initiale');
+  const thumb = row.getByRole('button', { name: 'Changer la photo de profil' });
+  const av = await thumb.boundingBox();
+  ok(Math.round(av.width) === 72 && Math.round(av.height) === 72, 'MEDIA-01 : vignette ronde de 72 px');
+  ok((await row.locator('.fd-mt__ini').getAttribute('data-ini')) === 'A', 'sans photo : l’initiale');
+  {
+    const rb = await row.boundingBox();
+    ok(
+      Math.abs(av.x + av.width - (rb.x + rb.width)) <= 1,
+      'ALIGN-01 : la vignette est calée sur la fin du filet',
+    );
+  }
   ok(
-    (await row.getByRole('button', { name: 'Choisir une photo' }).count()) === 1 &&
-      (await row.getByRole('button', { name: 'Retirer' }).count()) === 0,
-    '« Choisir une photo », pas de « Retirer » sans photo',
+    (await thumb.count()) === 1 &&
+      (await row.getByRole('button', { name: 'Options pour la photo de profil' }).count()) === 0 &&
+      (await row.getByRole('button', { name: 'Choisir une photo' }).count()) === 0,
+    'l’image est le bouton ; pas de bouton ⋯ sans photo, plus de « Choisir une photo » à côté',
   );
   ok(
     (await row.locator('.stg-help').innerText()) === 'JPG, PNG ou WebP, 2\u00a0Mo au plus.',
@@ -171,8 +181,8 @@ async function png(page, w, h) {
   );
 
   // ===== La photo remplace l'initiale =====
-  await page.locator('.pf-photo__avatar .av-photo').waitFor();
-  const photo = await page.locator('.pf-photo__avatar .av-photo').evaluate((el) => ({
+  await row.locator('.fd-mt .av-photo').waitFor();
+  const photo = await row.locator('.fd-mt .av-photo').evaluate((el) => ({
     fit: getComputedStyle(el).objectFit,
     alt: el.getAttribute('alt'),
     src: el.getAttribute('src'),
@@ -182,18 +192,30 @@ async function png(page, w, h) {
     'Profil : photo (cover, décorative, URL signée)',
   );
   ok((await page.locator('.user-block .avatar .av-photo').count()) === 1, 'barre latérale : photo');
-  ok((await row.getByRole('button', { name: 'Retirer' }).count()) === 1, '« Retirer » apparaît');
+  const more = row.getByRole('button', { name: 'Options pour la photo de profil' });
+  ok(
+    (await more.count()) === 1 && (await more.getAttribute('aria-haspopup')) === 'menu',
+    'avec une photo : bouton ⋯ « Options pour la photo de profil »',
+  );
+  await more.click();
+  ok(
+    (await page.getByRole('menuitem').allInnerTexts()).map((x) => x.trim()).join('|') ===
+      'Remplacer…|Retirer',
+    'menu ⋯ : « Remplacer… » et « Retirer »',
+  );
+  await page.keyboard.press('Escape');
 
   // ===== Retirer =====
   const old = me.avatar_path;
-  await row.getByRole('button', { name: 'Retirer' }).click();
+  await more.click();
+  await page.getByRole('menuitem', { name: 'Retirer' }).click();
   await page.waitForTimeout(500);
   ok(
     me.avatar_path === null && !(`avatars/${old}` in state.storage),
     'Retirer : fichier supprimé, chemin effacé',
   );
   ok(
-    (await page.locator('.pf-photo__avatar .av-photo').count()) === 0 &&
+    (await row.locator('.fd-mt .av-photo').count()) === 0 &&
       (await page.locator('.user-block .avatar .av-photo').count()) === 0,
     'Retirer : l’initiale revient partout',
   );

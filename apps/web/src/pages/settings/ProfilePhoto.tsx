@@ -9,7 +9,7 @@
  */
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CircleAlert, Crop, ImagePlus } from 'lucide-react';
+import { CircleAlert, Crop } from 'lucide-react';
 import { Button, Modal, Slider } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check } from '../../lib/useAction';
@@ -17,6 +17,7 @@ import { useAuth } from '../../auth/AuthProvider';
 import { initials } from '../../lib/initials';
 import { AvatarPhoto, setAvatarPath } from '../../components/AvatarPhoto';
 import { useToast } from '../../components/Toast';
+import { MediaThumb } from '../../components/MediaThumb';
 
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -30,7 +31,6 @@ export function ProfilePhoto() {
   const { t } = useTranslation();
   const toast = useToast();
   const { user, profile, refreshProfile } = useAuth();
-  const input = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -84,47 +84,28 @@ export function ProfilePhoto() {
         </div>
       </div>
       <div className="stg-ctl">
-        <div className="stg-lr">
-          <span className="avatar pf-photo__avatar" aria-hidden="true">
-            {initials(profile?.full_name || user?.email || '?')}
-            <AvatarPhoto userId={user?.id} />
-          </span>
-          <Button
-            icon={<ImagePlus aria-hidden="true" />}
-            aria-describedby="pf-photo-help"
-            aria-controls="pf-photo-file"
-            onClick={() => input.current?.click()}
-            disabled={busy}
-          >
-            {t('profile.photo.choose')}
-          </Button>
-          {path && (
-            <button type="button" className="stg-link-danger" onClick={() => void remove()} disabled={busy}>
-              {t('profile.photo.remove')}
-            </button>
-          )}
-        </div>
-        {error && (
-          <p className="stg-error" role="alert">
-            <CircleAlert size={16} aria-hidden="true" />
-            {error}
-          </p>
-        )}
+        {/* MEDIA-01 : l'image est le bouton ; « Remplacer… » et « Retirer » dans le menu ⋯ */}
+        <MediaThumb
+          shape="round"
+          image={path ? <AvatarPhoto userId={user?.id} /> : null}
+          /* Initiales dessinées en CSS : elles ne s'ajoutent pas au texte du bouton */
+          fallback={
+            <span className="fd-mt__ini" data-ini={initials(profile?.full_name || user?.email || '?')} />
+          }
+          accept={TYPES.join(',')}
+          inputId="pf-photo-file"
+          describedBy="pf-photo-help"
+          labels={{
+            change: t('profile.photo.change'),
+            add: t('profile.photo.change'),
+            options: t('profile.photo.options'),
+          }}
+          busy={busy}
+          error={error || null}
+          onFile={pick}
+          onRemove={path ? () => void remove() : undefined}
+        />
       </div>
-      <input
-        ref={input}
-        type="file"
-        accept={TYPES.join(',')}
-        /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié au bouton */
-        id="pf-photo-file"
-        className="sr-only"
-        tabIndex={-1}
-        aria-hidden="true"
-        onChange={(e) => {
-          pick(e.target.files?.[0]);
-          e.target.value = '';
-        }}
-      />
       {file && (
         <CropDialog
           file={file}

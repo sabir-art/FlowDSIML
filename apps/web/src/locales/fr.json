@@ -1,4 +1,10 @@
 {
+  "mediaThumb": {
+    "change": "Changer",
+    "add": "Ajouter",
+    "drop": "Déposer",
+    "remove": "Retirer"
+  },
   "dropzone": {
     "title": "Glissez un fichier ici",
     "none": "Aucun fichier",
@@ -246,6 +252,8 @@
     "notifLead": "E-mail quand un lead est collecté",
     "notifWeekly": "Résumé hebdomadaire des vues",
     "photo": {
+      "change": "Changer la photo de profil",
+      "options": "Options pour la photo de profil",
       "label": "Photo",
       "choose": "Choisir une photo",
       "remove": "Retirer",
