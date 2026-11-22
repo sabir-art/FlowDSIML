@@ -6,8 +6,10 @@ on:
   pull_request:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Sur main, chaque commit garde sa CI jusqu'au bout (une CI complète par lot intégré) ;
+  # sur les autres branches, un nouveau push annule la CI en cours.
+  group: ci-${{ github.ref }}-${{ github.ref == 'refs/heads/main' && github.sha || 'latest' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   node:
