@@ -51,8 +51,8 @@
     "extension": "Extension",
     "helpCenter": "Centre d’aide",
     "sandbox": "Sandbox",
-    "pinSidebar": "Épingler la barre latérale",
-    "collapseSidebar": "Réduire la barre latérale"
+    "collapseSidebar": "Replier la barre latérale",
+    "expandSidebar": "Déplier la barre latérale"
   },
   "roles": {
     "owner": "Propriétaire",

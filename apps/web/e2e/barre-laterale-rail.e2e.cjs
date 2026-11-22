@@ -4,7 +4,8 @@
  *  - épinglée par défaut à partir de 1 440 px, rail en dessous ; état retenu (fd.sidebar) ;
  *  - rail : icônes de 20 px dans des cibles de 44 px, noms accessibles gardés, infobulle à droite ;
  *  - survol : déplié par-dessus le contenu après 150 ms (sans le pousser), replié 300 ms après la sortie ;
- *  - bouton d'épinglage au même endroit dans les deux états, aria-pressed ;
+ *  - NAV-04 (COMP-01 §14) : logo de 184 px à gauche et bouton de repli à droite sur une ligne, filet dessous ;
+ *    rail : bouton seul en tête, il garde sa place au survol (le logo vient à sa droite) ; aria-expanded ;
  *  - clavier : le focus déplie, Échap replie et rend le focus à l'élément actif ;
  *  - sous 1 024 px : comportement inchangé (barre du haut et tiroir).
  */
@@ -41,7 +42,15 @@ const geo = (p) =>
       main: Math.round(document.querySelector('main').getBoundingClientRect().left),
       exp: sb.dataset.expanded ?? null,
       pin: pin ? pin.getBoundingClientRect().toJSON() : null,
-      pressed: pin?.getAttribute('aria-pressed') ?? null,
+      pressed: pin?.getAttribute('aria-expanded') ?? null,
+      pinName: pin?.getAttribute('aria-label') ?? null,
+      logo: (() => {
+        const i = [...document.querySelectorAll('.sidebar .brand img')].find((x) => x.offsetParent);
+        return i ? i.getBoundingClientRect().toJSON() : null;
+      })(),
+      head: document.querySelector('.sidebar__head').getBoundingClientRect().toJSON(),
+      rule: getComputedStyle(document.querySelector('.sidebar__head')).borderBottomWidth,
+      ws: Math.round(document.querySelector('.sidebar .ws-switch').getBoundingClientRect().top),
       item: item ? Math.round(item.getBoundingClientRect().width) : 0,
       itemH: item ? Math.round(item.getBoundingClientRect().height) : 0,
       icon: icon ? Math.round(icon.width) : 0,
@@ -59,7 +68,20 @@ const geo = (p) =>
     const p = await open(b, 1440);
     const g = await geo(p);
     ok(g.sb === 256 && g.main === 256 && g.pressed === 'true', `1 440 px : épinglée par défaut (${g.sb} px)`);
-    // LOGO-01 (§16.5) : logo complet de 224 px, sans sous-titre ; fichier sombre en thème sombre, sans filtre
+    // NAV-04 : logo à gauche, bouton de repli à droite sur la même ligne, filet dessous, puis l'espace
+    ok(
+      g.pinName === 'Replier la barre latérale' &&
+        Math.round(g.logo.x) === 16 &&
+        Math.round(g.logo.y) === 16 &&
+        Math.round(g.pin.x) === 208 &&
+        Math.round(g.pin.y) === 30,
+      `NAV-04 : logo à 16,16 et bouton « Replier » à 208,30 (${Math.round(g.pin.x)},${Math.round(g.pin.y)})`,
+    );
+    ok(
+      g.rule === '1px' && g.ws === 111,
+      `NAV-04 : filet sous l'en-tête, sélecteur d'espace à 111 px (${g.ws})`,
+    );
+    // LOGO-01 (§16.5) : logo complet de 184 px (NAV-04), sans sous-titre ; fichier sombre en thème sombre, sans filtre
     const logo = () =>
       p.evaluate(() =>
         [...document.querySelectorAll('.sidebar .brand img')]
@@ -73,8 +95,8 @@ const geo = (p) =>
       );
     let l = await logo();
     ok(
-      l.length === 1 && l[0].w === 224 && l[0].alt === 'TutoClick, porté par la DSIML' && !l[0].dark,
-      `logo complet de 224 px (${JSON.stringify(l)})`,
+      l.length === 1 && l[0].w === 184 && l[0].alt === 'TutoClick, porté par la DSIML' && !l[0].dark,
+      `logo complet de 184 px (${JSON.stringify(l)})`,
     );
     ok((await p.locator('.sidebar .brand-mark__sub').count()) === 0, 'aucun sous-titre HTML sous le logo');
     await p.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
@@ -94,7 +116,14 @@ const geo = (p) =>
     g.item === 44 && g.itemH === 44 && g.icon === 20,
     `icônes de 20 px dans des cibles de 44 × 44 (${g.item} × ${g.itemH})`,
   );
-  ok(g.pressed === 'false' && g.pin.width === 32, 'bouton d’épinglage de 32 px, aria-pressed="false"');
+  ok(
+    g.pressed === 'false' && g.pin.width === 32 && g.pinName === 'Déplier la barre latérale',
+    'bouton « Déplier la barre latérale » de 32 px, aria-expanded="false"',
+  );
+  ok(
+    Math.round(g.pin.x) === 16 && Math.round(g.pin.y) === 30 && g.rule === '1px' && g.ws === 111,
+    `NAV-04 : bouton seul en tête du rail, centré (x ${Math.round(g.pin.x)}), filet, pastille de l'espace dessous`,
+  );
   ok(
     (await p.getByRole('link', { name: 'Démos', exact: true }).count()) === 1 &&
       (await p.getByRole('link', { name: 'Analytics', exact: true }).getAttribute('aria-current')) === 'page',
@@ -112,7 +141,7 @@ const geo = (p) =>
       .evaluate((el) => el.getBoundingClientRect().width)) <= 1,
     'libellés masqués visuellement',
   );
-  ok((await p.locator('.sidebar .brand__symbol').count()) === 1, 'logo réduit à son icône');
+  ok(g.logo === null, 'NAV-04 : pas de logo dans le rail replié');
   ok(g.over <= 1, 'aucun défilement horizontal');
 
   // Survol : 150 ms, par-dessus, sans pousser ; repli 300 ms après la sortie
@@ -127,6 +156,10 @@ const geo = (p) =>
     `survol : déplié à 256 px par-dessus, contenu immobile (main ${g.main})`,
   );
   ok(g.shadow !== 'none', 'ombre portée quand il est déplié');
+  ok(
+    Math.round(g.pin.x) === 16 && Math.round(g.pin.y) === 30 && g.logo && Math.round(g.logo.x) === 56,
+    `NAV-04 : au survol le bouton garde sa place (x ${Math.round(g.pin.x)}), le logo vient à sa droite (x ${g.logo && Math.round(g.logo.x)})`,
+  );
   ok(
     (await p.locator('.fd-nav__item').first().getAttribute('data-tip')) === null,
     'déplié : plus d’infobulle (libellé visible)',
@@ -149,19 +182,18 @@ const geo = (p) =>
   await p.waitForTimeout(450);
   ok((await geo(p)).exp === 'false', 'après un clic dans la barre, la sortie du pointeur la replie');
 
-  // Épingler : même place du bouton, pousse le contenu, retenu
-  const pinRail = g.pin;
+  // Épingler : pousse le contenu, retenu ; le bouton passe à droite du logo
   await p.locator('.sidebar__pin').click();
   await p.mouse.move(700, 400);
   await p.waitForTimeout(400);
   g = await geo(p);
   ok(
     g.pressed === 'true' && g.sb === 256 && g.main === 256,
-    'épinglée : 256 px, pousse le contenu, aria-pressed="true"',
+    'épinglée : 256 px, pousse le contenu, aria-expanded="true"',
   );
   ok(
-    Math.abs(g.pin.x - pinRail.x) <= 1 && Math.abs(g.pin.y - pinRail.y) <= 1,
-    `bouton d’épinglage au même endroit (${Math.round(pinRail.x)},${Math.round(pinRail.y)} → ${Math.round(g.pin.x)},${Math.round(g.pin.y)})`,
+    Math.round(g.pin.x) === 208 && Math.round(g.pin.y) === 30 && Math.round(g.logo.x) === 16,
+    `épinglée : logo à gauche, bouton à droite (${Math.round(g.pin.x)},${Math.round(g.pin.y)})`,
   );
   ok((await p.evaluate(() => localStorage.getItem('fd.sidebar'))) === 'pinned', 'état retenu : pinned');
   await p.reload();

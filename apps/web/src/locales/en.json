@@ -51,8 +51,8 @@
     "extension": "Extension",
     "helpCenter": "Help centre",
     "sandbox": "Sandbox",
-    "pinSidebar": "Pin the sidebar",
-    "collapseSidebar": "Collapse the sidebar"
+    "collapseSidebar": "Collapse the sidebar",
+    "expandSidebar": "Expand the sidebar"
   },
   "roles": {
     "owner": "Owner",

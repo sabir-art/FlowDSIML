@@ -23,7 +23,8 @@
   flex-direction: column;
   height: 100vh;
   overflow-y: auto;
-  padding: 72px 12px 24px;
+  /* NAV-04 : la colonne commence en haut, « ESPACE » à 16 px comme le haut du logo */
+  padding: 16px 12px 24px;
   background: var(--fd-color-nav-bg);
   border-right: 1px solid var(--fd-color-border);
 }
