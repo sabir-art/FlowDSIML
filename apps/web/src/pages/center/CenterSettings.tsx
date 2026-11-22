@@ -300,18 +300,15 @@ export function CenterSettings() {
       }
       actions={
         <>
-          <a
-            className={`fd-btn${row?.published ? '' : ' is-disabled'}`}
-            href={row?.published ? url : undefined}
-            aria-disabled={!row?.published}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span className="fd-btn__icon" aria-hidden="true">
-              <ExternalLink />
-            </span>
-            {t('center.open')}
-          </a>
+          {/* « Ouvrir » la page publiée : seulement quand le centre est publié (recette UX du 22/11) */}
+          {row?.published && (
+            <a className="fd-btn" href={url} target="_blank" rel="noopener noreferrer">
+              <span className="fd-btn__icon" aria-hidden="true">
+                <ExternalLink />
+              </span>
+              {t('center.open')}
+            </a>
+          )}
           <Button
             variant="primary"
             disabled={!canPublish || busy || slugState !== 'ok' || (!!row?.published && !pending)}
