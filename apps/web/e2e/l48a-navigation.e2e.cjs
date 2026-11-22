@@ -168,6 +168,8 @@ const MB = 1024 * 1024;
     await page.getByRole('switch', { name: 'Activer l’Assistance IA' }).click();
     const ai = page.getByRole('dialog', { name: 'Activer l’Assistance IA ?' });
     await ai.waitFor();
+    // La mesure attend la fin de l'animation d'ouverture (échelle) de la modale
+    await ai.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
     {
       const gap = await ai.locator('.ai-consent').evaluate((el) => {
         const k = [...el.children].filter((c) => c.getBoundingClientRect().height > 0);

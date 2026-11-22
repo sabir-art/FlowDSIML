@@ -1284,42 +1284,17 @@
   padding: var(--fd-space-4) var(--fd-space-5);
   border-top: 1px solid var(--fd-color-border);
 }
-/* PRM-05 / PRM-06 : boîte de confirmation de la maquette (400 px, rayon 20 px, en-tête / corps / pied) */
-.dialog.dialog-confirm {
-  width: min(400px, calc(100vw - 32px));
-  border-radius: 20px;
-  padding: 0;
-}
-.dialog-confirm .dialog-head {
-  padding: 20px 24px 0;
-}
-.dialog-confirm .dialog-head h2 {
-  margin: 0;
+/* Confirmation au format MODAL-01 (ConfirmDialog) : le texte, puis le champ de saisie exigé */
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 .dialog-confirm .dialog-body {
-  padding: 12px 24px 20px;
-  margin: 0;
+  font-size: 14px;
 }
-.dialog-confirm .dialog-head + .dialog-actions {
-  margin-top: 20px;
-}
-.dialog-confirm .dialog-require {
-  margin-top: 16px;
+.dialog-confirm .dialog-require b {
   color: var(--fd-color-text);
-}
-.dialog-confirm .dialog-require .fd-input {
-  border-radius: 12px;
-}
-.dialog.dialog-confirm .dialog-actions {
-  margin: 0;
-  padding: 16px 24px 20px;
-  border-top: 1px solid var(--fd-color-border);
-}
-.dialog-confirm .dialog-actions .fd-btn {
-  border-radius: 12px;
-}
-.dialog-confirm .dialog-actions .fd-btn:not(.fd-btn--primary):not(.fd-btn--danger) {
-  border-color: var(--fd-color-border-strong, #8793a3);
 }
 /* L12-07 : étiquettes des démos (palette DSI, une couleur par catégorie ; le nom est toujours écrit) */
 .tg-row {

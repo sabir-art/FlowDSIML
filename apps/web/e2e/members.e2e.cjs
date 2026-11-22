@@ -282,7 +282,7 @@ const SHOTS = process.env.SHOTS_DIR;
     'transfert : Bientôt',
   );
   await page.getByRole('menuitem', { name: 'Retirer de l’espace' }).click();
-  await page.waitForSelector('dialog[open] .dialog-head');
+  await page.waitForSelector('dialog[open] .fd-modal__head');
   ok(
     /^Retirer Nina Roux \?$/.test((await page.textContent('dialog[open] h2')).replace(/\u202f/g, ' ')) &&
       /Nina perdra l’accès/.test(await page.textContent('dialog[open] .dialog-body')),
@@ -294,7 +294,7 @@ const SHOTS = process.env.SHOTS_DIR;
 
   // L48-A : la page publique a sa propre entrée (Marque > Page publique), toujours « Bientôt »
   await page.getByRole('link', { name: /^Page publique/ }).click();
-  const pp = page.getByRole('region', { name: /Page publique/ });
+  const pp = page.getByRole('region', { name: 'En-tête de la page publique' });
   await pp.waitFor();
   ok(
     (await pp.locator('input:disabled').count()) >= 4 && /Bientôt/.test(await pp.innerText()),
