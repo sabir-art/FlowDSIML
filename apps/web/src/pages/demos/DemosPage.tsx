@@ -44,7 +44,7 @@ import {
   Shapes,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { Alert, Button, Empty, Select, Status } from '@flowdsiml/ui';
+import { Alert, Button, Empty, NativeSelect as Select, Status } from '@flowdsiml/ui';
 import { NoMatch } from '../../components/empty/NoMatch';
 import { ExtensionDialog } from '../../components/ExtensionDialog';
 import { completionRate, contentType, countTrend, rateTrend, type ContentType } from '@flowdsiml/core';

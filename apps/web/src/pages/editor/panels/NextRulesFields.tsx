@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, TriangleAlert } from 'lucide-react';
 import type { ChoiceAction, RuleCond } from '@flowdsiml/manifest';
-import { Button, Select } from '@flowdsiml/ui';
+import { Button, NativeSelect as Select } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asAction, asStepOptions, type StepRow } from '../types';
 import { isDead } from '../branch';

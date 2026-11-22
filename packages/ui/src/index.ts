@@ -1,6 +1,10 @@
 export { tokens } from './tokens';
 export type { Tokens } from './tokens';
-export { Button, Field, Card, Alert, Select, Checkbox, Switch, Empty, Status } from './components';
+export { Button, Field, Card, Alert, NativeSelect, Checkbox, Switch, Empty, Status } from './components';
+export { Select } from './select';
+export type { SelectProps, SelectOption, SelectChangeEvent } from './select';
+export { computePosition, getPortal, VIEWPORT_MARGIN } from './floating';
+export type { Placement, Rect } from './floating';
 export { Composer } from './composer';
 export type { ComposerProps, ComposerInputProps } from './composer';
 export { PageHeader, Breadcrumb, BackButton } from './navigation';

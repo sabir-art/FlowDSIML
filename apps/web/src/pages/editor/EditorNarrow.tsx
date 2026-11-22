@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Monitor } from 'lucide-react';
-import { Select } from '@flowdsiml/ui';
+import { NativeSelect as Select } from '@flowdsiml/ui';
 import type { Manifest } from '@flowdsiml/manifest';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useAuth } from '../../auth/AuthProvider';

@@ -74,12 +74,13 @@
   margin: 0;
 }
 .fd-switch__track {
+  /* COMP-01 §7 : 36 × 20 px, piste border-field, primary une fois activé, bouton rond de 16 px */
   position: relative;
   flex: none;
-  width: 40px;
-  height: 24px;
+  width: 36px;
+  height: 20px;
   border-radius: 999px;
-  background: var(--fd-color-border-strong);
+  background: var(--fd-color-border-field);
   transition: background-color 120ms ease;
 }
 .fd-switch__track::after {
@@ -87,21 +88,26 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: var(--fd-color-surface);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+  background: #fff;
   transition: transform 120ms ease;
 }
 .fd-switch input:checked + .fd-switch__track {
-  background: var(--fd-color-surface-inverse);
+  background: var(--fd-color-primary);
 }
 .fd-switch input:checked + .fd-switch__track::after {
+  background: var(--fd-color-on-primary);
   transform: translateX(16px);
 }
+/* Focus clavier (FIELD-01 §11.4) : trait intérieur de 2 px, prune sur la piste grise, surface sur la prune */
 .fd-switch input:focus-visible + .fd-switch__track {
   box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-switch input:checked:focus-visible + .fd-switch__track {
+  background: var(--fd-color-primary-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-surface);
 }
 .fd-switch input:disabled + .fd-switch__track,
 .fd-switch input[aria-disabled='true'] + .fd-switch__track {
