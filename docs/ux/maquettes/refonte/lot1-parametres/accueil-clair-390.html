@@ -233,6 +233,25 @@ body:not(.mob) .ctl .doms { width: calc(100% - 28px); box-sizing: border-box; }
 .mcell:has(.mmenu) { padding-bottom: 0; } .mcell .mdw:has(.mmenu) { margin-bottom: 92px; }
 .mcell .mmenu { top: 84px; left: 50%; right: auto; transform: translateX(-50%); width: 180px; }
 .mmenu { position: absolute; z-index: 6; padding: 4px; border-radius: 10px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-md, 0 6px 18px rgb(8 10 14 / .14)); }
+/* COL-01 (révisé le 22/11 par le client) : seule la barre latérale principale est teintée ; colonnes secondaires et panneaux sur le blanc de la page, avec filet */
+.snav { background: var(--fd-color-surface); }
+.onbp { background: var(--fd-color-surface); }
+/* MEDIA-01, zone de dépôt */
+.dz { display: flex; align-items: center; gap: 16px; min-height: 88px; padding: 16px; border: 1.5px dashed var(--field); border-radius: 12px; background: var(--fd-color-surface); box-sizing: border-box; }
+.dzp { flex: none; width: 56px; height: 56px; border-radius: 10px; display: grid; place-items: center; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); overflow: hidden; }
+.dzp.img { width: 88px; border: 1px solid var(--fd-color-border); } .dzp.img .mlg { font-size: 14px; }
+.dzt { flex: 1; min-width: 0; display: grid; gap: 4px; } .dzt b { font: 600 14px var(--fd-font-sans); color: var(--fd-color-text); overflow-wrap: anywhere; } .dzt span { font-size: 13px; color: var(--fd-color-text-muted); }
+.dza { flex: none; display: flex; align-items: center; gap: 8px; } .dza .btn { height: 36px; }
+.dz.filled { border-style: solid; border-color: var(--fd-color-border); }
+.dz.drag { border: 2px dashed var(--fd-color-primary); background: color-mix(in srgb, var(--fd-color-primary) 7%, var(--fd-color-surface)); } .dz.drag .dzp { color: var(--fd-color-primary); background: color-mix(in srgb, var(--fd-color-primary) 12%, transparent); }
+.dz.loading { border-style: solid; border-color: var(--fd-color-border); }
+.dzbar { display: block; height: 6px; border-radius: 999px; background: var(--fd-color-border); overflow: hidden; } .dzbar span { display: block; height: 100%; background: var(--fd-color-primary); }
+.dz.error { border: 1.5px solid var(--fd-color-danger, #C42B1C); } .dz.error .dzp { color: var(--fd-color-danger, #C42B1C); } .dz.error .dzt span { color: var(--fd-color-danger, #C42B1C); }
+[data-theme='dark'] .dz.error .dzp, [data-theme='dark'] .dz.error .dzt span { color: #F97066; }
+.dzlist { display: grid; gap: 20px; padding: 24px 0 8px; } .dzcell { margin: 0; display: grid; gap: 8px; } .dzcell figcaption { font-size: 12px; color: var(--fd-color-text-muted); }
+.mob .dz { flex-wrap: wrap; } .mob .dzt { flex-basis: calc(100% - 72px); } .mob .dza { width: 100%; flex-wrap: wrap; } .mob .dza .btn { flex: 1; justify-content: center; }
+.row:has(.dz) { grid-template-columns: 1fr; gap: 12px; }
+.mob .dza .ib { flex: none; }
 </style></head><body class="mob">
 <div class="mbar"><button class="ib" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu" aria-hidden="true"><path d="M4 5h16"></path><path d="M4 12h16"></path><path d="M4 19h16"></path></svg></button><img src="../../../brand-tutoclic/production/symbole-tutoclick.svg" alt="TutoClick" width="32" height="32"><span class="grow"></span><button class="ib" aria-label="Aide"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-question-mark" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></button><button class="ib" aria-label="Notifications, aucune non lue"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg></button></div>
 <div class="shell"><main><header class="ph"><h1 class="pt">Paramètres</h1></header>

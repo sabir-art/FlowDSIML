@@ -411,13 +411,19 @@ Le bouton de repli, seul au-dessus du logo, créait un grand vide en tête de la
 - **Barre repliée** (rail de 64 px) : seul le bouton de dépli en tête, centré (`aria-label="Déplier la barre latérale"`, `aria-expanded="false"`), le filet dessous, puis les icônes de navigation. Pas de logo dans le rail : il revient quand on déplie.
 - Sous 1 024 px : inchangé (barre mobile).
 - Mesures de la maquette (lot 1, 1440) : logo de 184 × 60 à x 16, y 16 ; bouton à x 208, y 30 ; sélecteur d'espace à y 111 ; « ESPACE » à y 16.
+- **Dépliée au survol** (rail ouvert par-dessus le contenu, non épinglé) : le bouton **reste à sa place du rail** (x 16) et le logo de 184 px vient à sa droite (x 56). Il ne bouge pas sous le curseur. Épinglée, c'est la disposition ci-dessus (logo à gauche, bouton à droite). Validé le 22/11 sur proposition du dev.
+- **Pastille de l'espace dans le rail** : elle reste, sous le filet, au-dessus des icônes de navigation (32 px, son infobulle donne le nom de l'espace).
+- Nom du bouton : « Replier la barre latérale » / « Déplier la barre latérale », avec `aria-expanded` (plus d'`aria-pressed`).
 
 
-## 15. COL-01 : teinte des colonnes secondaires (retour client du 22/11, décision du chef)
+## 15. COL-01 : seule la barre latérale principale est teintée (retour client du 22/11, révisé)
 
-- Toute colonne secondaire (Paramètres, Dossiers, panneau de prise en main ONB-01, et toute colonne à venir) prend **la teinte de la barre latérale** (`--nav-bg` des maquettes, jeton de surface de navigation dans l'app), avec un **filet de 1 px `border`** du côté du contenu.
-- Seul le contenu reste sur le fond blanc (`surface`). Pas de troisième teinte.
-- Dans l'app aujourd'hui, la colonne Dossiers de Démos est blanche : elle passe à la teinte de navigation, comme celle des Paramètres. Les maquettes des lots 1 et 2 sont déjà ainsi.
+Le client a corrigé la première décision : « le seul qui aura une couleur différente, c'est la barre du logo ».
+- **Seule la barre latérale principale** (logo, Démos, Sandbox, Parcours, Analytics, Apprenants, Paramètres…) garde la teinte de navigation.
+- **Tout le reste est sur le blanc de la page** (`surface`) : la colonne Dossiers, la colonne secondaire des Paramètres, le panneau de prise en main ONB-01 et toute colonne à venir. Chacune est séparée du contenu par un **filet de 1 px `border`**.
+- Dans ces colonnes blanches, l'entrée active garde son fond `nav-active`, et la carte « étape conseillée » d'ONB-01 prend le fond `tint` (prune à 6 %), sans bordure.
+- Conséquence dans l'app : la colonne des Paramètres, aujourd'hui teintée, passe au blanc. La colonne Dossiers reste blanche et gagne son filet.
+- Maquettes des lots 1, 2, 5 et 6 refaites le 22/11.
 
 ## 16. PAGE-01 : en-tête de page commun à toutes les pages principales (retour client du 22/11)
 
@@ -449,3 +455,40 @@ Le bouton de repli, seul au-dessus du logo, créait un grand vide en tête de la
 - **Erreur dans le cadre** : bord de 2 px `danger` et message sous l'image, en 12 px avec CircleAlert (« Format non accepté : JPG, PNG ou WebP, 2 Mo au plus. », ou la taille), `role="alert"`. L'ancienne image reste.
 - **Vide** (pas de photo ni de logo) : bord pointillé, icône Camera et « Ajouter » ; pas de bouton ⋯.
 - Maquettes : `lot1-parametres/media-01` (planche de tous les états, rond et carré, 1440 et 390, clair et sombre), et les lignes « Photo » de Profil et « Logo » de Général.
+
+### 18.1 Zone de dépôt (retour client du 22/11 sur le logo de Thème et couleurs)
+
+La zone jugée « très mal travaillée » mélangeait texte et boutons sur deux lignes bancales. C'était aussi le cas dans ma maquette, qui est refaite.
+- **Une seule rangée** : à gauche, l'aperçu (88 × 56, le fichier en place) ou une tuile d'icône de 56 px ; au centre, le titre (« Glissez un fichier ici », ou le nom du fichier) et une ligne d'aide (formats et taille, ou type, poids et date) ; à droite, **une source par bouton** : « Choisir un fichier » (Upload) et « Médiathèque » (Images), boutons secondaires de 36 px. **Jamais de bouton dans une phrase.**
+- Avec un fichier en place : « Remplacer… », « Médiathèque » et un bouton icône Trash2 « Retirer le logo ». Le cadre devient plein (bordure `border`).
+- **Glisser-déposer** : bordure pointillée de 2 px `primary`, fond `primary` à 7 %, « Déposez le fichier pour l'importer », boutons masqués.
+- **Envoi** : l'aperçu, le nom, une barre de progression (`role="progressbar"`) avec « 60 % · 14 Ko sur 24 Ko », et « Annuler ».
+- **Erreur** : bordure de 1,5 px `danger`, icône CircleAlert, « Ce fichier n'a pas été importé » puis la raison (`role="alert"`) ; les boutons restent pour réessayer.
+- Dans une ligne de réglage, la zone passe **sous le libellé** et prend toute la largeur de la ligne, jusqu'à la fin du filet (ALIGN-01). Sous 768 px, les boutons passent sous le texte, en pleine largeur.
+- Maquette : planche `media-01`, section « Zone de dépôt », et Thème et couleurs.
+
+### 18.2 Relevé des zones d'envoi de fichier de l'app (dev-mvp du 22/11)
+
+Toutes utilisent MEDIA-01, sous l'un de ses trois formats : **vignette** (72 px, image d'identité), **zone** (pleine largeur) ou **bouton compact** (bouton secondaire à icône dans une barre d'outils ou un panneau ; l'hôte accepte aussi le dépôt).
+
+| Écran (fichier) | Fichiers | Format MEDIA-01 |
+|---|---|---|
+| Profil, photo (`settings/ProfilePhoto.tsx`) | images | Vignette ronde |
+| Général, logo d'espace | images | Vignette carrée |
+| Centre de formation, logo (`center/CenterSettings.tsx`) | PNG, SVG, WebP | Vignette carrée |
+| Thème et couleurs, logo de marque (`settings/brand/BrandSettings.tsx`) | PNG, JPEG, WebP, SVG | Zone, avec Médiathèque |
+| Éditeur, Design, logo du thème (`editor/panels/ThemePanel.tsx`) | PNG, JPEG, WebP, SVG | Zone compacte du panneau, avec Médiathèque |
+| Médiathèque, ajout (`components/media/MediaLibrary.tsx`) | images | Zone en tête de la fenêtre |
+| Nouvelle démo, importer des images (`demos/NewDemoDialog.tsx`) | images, plusieurs | Zone (dans la ligne « Importer des images ») |
+| Démos, dépôt sur la page (`demos/DemosPage.tsx`) | images | Voile de dépôt sur toute la liste, même style que l'état glisser-déposer |
+| Onboarding, importer à la place (`Onboarding.tsx`) | images, plusieurs | Zone |
+| Éditeur, ajouter une étape image (`editor/StepList.tsx`) | PNG, JPEG, WebP | Bouton compact |
+| Éditeur, remplacer la capture (`editor/EditorPage.tsx`, `editor/Canvas.tsx`) | PNG, JPEG, WebP | Bouton compact ; le canevas accepte le dépôt |
+| Avant / après (`editor/BeforeAfterEditor.tsx`) | images | Deux zones avec aperçu (Avant, Après) |
+| Voix, importer un fichier (`editor/voice/VoiceFields.tsx`) | audio | Zone sans Médiathèque |
+| Vidéo, importer des sous-titres (`editor/video/VideoFields.tsx`) | .vtt | Zone sans Médiathèque |
+| Données, importer un CSV (`editor/data/DatasetDialog.tsx`) | .csv | Zone sans Médiathèque |
+| Glossaire, importer un CSV (`settings/GlossarySettings.tsx`) | .csv | Zone sans Médiathèque (exemple sur la planche) |
+| Partager, importer des liens (`share/ImportLinksDialog.tsx`) | .csv | Zone sans Médiathèque |
+
+Les dépôts de `FolderColumn`, `FormPanel`, `GuideList` et `QuizEditorPage` servent à réordonner des éléments, pas à envoyer des fichiers : hors MEDIA-01.
