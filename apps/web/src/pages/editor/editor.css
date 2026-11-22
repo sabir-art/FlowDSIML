@@ -4169,8 +4169,10 @@
   flex-wrap: wrap;
   max-width: 100%;
 }
-/* Titre de section des notes : la mention « privé » passe dessous quand la ligne est pleine */
+/* Titre de section des notes : il tient sur une ligne avec sa mention « Privées » (L45 E5) */
 .mk .ed-tool .notes-sec .sec-title {
-  flex-wrap: wrap;
-  row-gap: var(--fd-space-2);
+  letter-spacing: 0.03em;
+}
+.mk .ed-tool .notes-sec .lock {
+  letter-spacing: 0;
 }

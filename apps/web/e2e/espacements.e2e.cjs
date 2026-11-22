@@ -18,6 +18,9 @@
  * Bord mesuré : celui qui se voit. Une boîte sans fond, ni bordure, ni ombre ne compte que par son
  * contenu (son padding transparent n'éloigne rien à l'œil).
  *  - éléments qui se chevauchent (superpositions voulues).
+ * ALIGN-01 (COMP-01 §13) : sur les pages des Paramètres et le détail d'un webhook, à 1440 et 1024 px, le
+ * bord droit du dernier contrôle de chaque ligne de réglage est celui du filet, à ±1 px ; de même pour
+ * les boutons d'en-tête de section. Exemptées : les listes de choix (radios, cases, pastilles).
  * Usage : app web (:5173) et lecteur (:5174) lancés, puis `node e2e/espacements.e2e.cjs [filtre…]`.
  * Sortie : chaque écart fautif, avec la route, les sélecteurs des deux éléments et la valeur.
  */
@@ -191,6 +194,46 @@ function gaps({ min, cards }) {
   return out;
 }
 
+/** Dans la page (ALIGN-01) : lignes de réglage dont le dernier contrôle ne finit pas sur le filet. */
+function aligns() {
+  const out = [];
+  const CONTROLS =
+    'input:not([type=radio], [type=checkbox], [type=file], [type=hidden]), textarea, button:not(.segmented button), a.fd-btn, [role="combobox"], .fd-switch, .segmented, .stg-meter, .stg-group, .pv-value, .us-val, pre, [data-align-zone]';
+  const CHOICE = 'input[type=radio], input[type=checkbox], [role="radio"], [role="checkbox"]';
+  const shown = (el) => {
+    const r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    return r.width > 1 && r.height > 1 && cs.visibility !== 'hidden' && cs.position !== 'absolute';
+  };
+  const right = (list) => Math.max(...list.map((el) => el.getBoundingClientRect().right));
+  const label = (el) => (el.querySelector('.stg-lab, legend, h2')?.textContent || '').trim().slice(0, 40);
+  for (const row of document.querySelectorAll('.stg-row')) {
+    const ctl = row.querySelector(':scope > .stg-ctl');
+    if (!ctl || !shown(ctl) || ctl.closest('[data-align-exempt]')) continue;
+    // Listes de choix : des contenus, elles commencent au début de la colonne
+    const controls = [...ctl.querySelectorAll(CONTROLS)].filter(
+      // Une zone de dépôt compte par son cadre : ses boutons sont son contenu
+      (el) =>
+        shown(el) &&
+        !el.closest('label')?.querySelector(CHOICE) &&
+        !el.matches('.fd-switch *, [data-align-zone] *'),
+    );
+    if (!controls.length) continue;
+    const d = Math.round((row.getBoundingClientRect().right - right(controls)) * 10) / 10;
+    if (Math.abs(d) > 1) out.push(`ligne « ${label(row)} » : le contrôle finit à ${d} px du filet`);
+  }
+  for (const head of document.querySelectorAll('.stg-sec__head')) {
+    // Un segmenté compte par son cadre (ses segments sont en retrait de 3 px)
+    const btns = [...head.querySelectorAll('button:not(.segmented button), a.fd-btn, .segmented')].filter(
+      shown,
+    );
+    if (!btns.length) continue;
+    const d = Math.round((head.getBoundingClientRect().right - right(btns)) * 10) / 10;
+    if (Math.abs(d) > 1) out.push(`en-tête « ${label(head)} » : le bouton finit à ${d} px du filet`);
+  }
+  return out;
+}
+
 (async () => {
   const only = process.argv.slice(2);
   const b = await chromium.launch();
@@ -228,6 +271,22 @@ function gaps({ min, cards }) {
         console.log(`${m.length ? 'NOT OK' : 'ok'} - ${s.name} (${theme}, ${width} px)`);
         for (const x of m) console.log(`    ${x.a} | ${x.b} : ${x.gap} px (${x.axis}, ${x.need} attendus)`);
       }
+  // ===== ALIGN-01 : un seul bord droit par ligne de réglage (Paramètres, détail d'un webhook) =====
+  let off = 0;
+  for (const width of [1440, 1024])
+    for (const s of pages.filter((x) => x.kind === 'app' && /#\/settings\//.test(x.route) && !x.viewport)) {
+      let m;
+      try {
+        m = await appPage(b, { ...s, viewport: { width, height: 900 } }, 'light', (p) => p.evaluate(aligns));
+      } catch (e) {
+        m = [`contrôle impossible (${e.message.split('\n')[0]})`];
+      }
+      off += m.length;
+      console.log(`${m.length ? 'NOT OK' : 'ok'} - ALIGN-01 · ${s.name} (${width} px)`);
+      for (const x of m) console.log(`    ${x}`);
+    }
+  console.log(`${off} ligne(s) de réglage hors du filet`);
+  if (off) process.exitCode = 1;
   await b.close();
   console.log(
     `\n${bad} écart(s) sous le minimum sur ${pages.length} routes × ${themes.length} thème(s) × ${widths.length} largeur(s)`,

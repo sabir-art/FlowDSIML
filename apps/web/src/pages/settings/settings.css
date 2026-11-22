@@ -40,7 +40,8 @@
   min-height: 36px;
 }
 
-/* Rangée de réglage : libellé et aide sur 40 %, contrôle sur 60 % (420 px au plus), padding de 20 px */
+/* Rangée de réglage : libellé et aide sur 40 %, contrôle sur le reste, jusqu'à la fin du filet (ALIGN-01,
+   COMP-01 §13) ; padding de 20 px */
 .stg-row {
   display: grid;
   grid-template-columns: 40% minmax(0, 1fr);
@@ -77,15 +78,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-width: 420px;
   min-width: 0;
-}
-.stg-ctl--wide {
-  max-width: none;
-}
-/* Données courtes (adresse personnalisée, langue, fuseau horaire) : 240 px */
-.stg-short {
-  max-width: 240px;
 }
 .stg-lr {
   display: flex;
@@ -956,4 +949,37 @@ fieldset.stg-row {
 }
 .st-invite-who .stg-table__sub {
   font-weight: 400;
+}
+
+/* ---- ALIGN-01 (COMP-01 §13, retour client du 22/11) : un seul bord droit par ligne, celui du filet ---- */
+/* Segmentés : toute la colonne, segments de largeur égale */
+.stg-ctl > .segmented,
+.stg-ctl > .segmented.theme-switch {
+  display: flex;
+  width: 100%;
+  max-width: none;
+}
+.stg-ctl > .segmented > button {
+  flex: 1;
+  justify-content: center;
+}
+@media (min-width: 768px) {
+  /* Calés sur la fin du filet : bouton seul, valeur non modifiable, interrupteur, avatar + bouton */
+  .stg-ctl > :is(.fd-btn, .pv-value, .us-val, .fd-switch) {
+    align-self: flex-end;
+  }
+  .stg-ctl > .stg-lr {
+    justify-content: flex-end;
+  }
+  .stg-ctl > :is(.pv-value, .us-val) {
+    text-align: right;
+  }
+  /* Groupes d'actions sous un aperçu (logo de la marque) et valeur suivie de son bouton (secret d'un
+     webhook) : le dernier bouton finit sur le filet, même quand la ligne se replie */
+  .stg-ctl > .br-actions {
+    justify-content: flex-end;
+  }
+  .stg-ctl > .wh-secret-row > .fd-btn {
+    margin-left: auto;
+  }
 }
