@@ -485,10 +485,10 @@ Les éditeurs (démo, quiz, présentation) utilisent la variante **`.fd-page-hea
 | `/demos/:id/share` | Partager | `page-head`, H1 « Partager la démo » | barre en fil d'Ariane « Démos › Démo CRM › Partager » ; « Copier le lien » à droite |
 | `/demos/:id/distribute` | Diffuser | redirige vers l'éditeur (`?distribute=1`, modale) | rien de plus (c'est une modale) |
 | `/nouveautes` | Nouveautés | `page-head--refonte`, H1 hors barre | barre « Nouveautés » |
-| `/console/*` | Console (admin) | H1 `sr-only` par onglet, pas de barre | barre en fil d'Ariane « Console › onglet » ; onglets dans le contenu |
+| `/console/*` | Console (admin) | H1 `sr-only` par onglet, pas de barre | variante éditeur, voir §16.2 |
 | `/demos/:id/edit` | Éditeur | `ed-bar`, H1 « Éditeur : … » dans la barre | ajouter `.fd-page-header fd-page-header--editor` à `ed-bar` |
 | `/demos/:id/quiz` | Éditeur de quiz | `editor-bar`, H1 dans le contenu (`quiz-page__title`) | variante éditeur ; H1 dans la barre |
-| `/demos/:id/present` | Présentateur | `pr-head`, H1 `sr-only` | variante éditeur ; H1 dans la barre |
+| `/demos/:id/present` | Présentateur | `pr-head`, H1 `sr-only` | variante éditeur sombre, voir §16.2 |
 | Aide, Extension, Nouvelle démo… | fenêtres et menus | modales et popovers | hors PageHeader (MODAL-01) |
 
 Reste à faire : 9 routes (Centre, Apprenants, Analytics ×2, Partager, Nouveautés, Console, Quiz, Présentateur) et la classe de variante sur l'Éditeur.
@@ -499,6 +499,25 @@ Reste à faire : 9 routes (Centre, Apprenants, Analytics ×2, Partager, Nouveaut
 - `position: sticky` sur la barre, et un `border-bottom` non nul.
 
 Sur les routes hors coque : aucune `.fd-page-header`, et exactement un `h1`.
+
+### 16.2 Console et Présentateur : variante éditeur de la barre (questions du dev, 22/11)
+
+Ces deux écrans sont hors coque (pas de barre latérale). Ils prennent la **variante éditeur** `.fd-page-header--editor` : 56 px, collante, filet, et une grille de trois colonnes `1fr auto 1fr`.
+
+**Console** (`/console/*`, maquette `page01/console-*`). La barre **remplace** l'en-tête actuel (logo, « Console propriétaire », « Retour à l'app ») et la rangée d'onglets du dessous.
+- À gauche : BackButton « Application » (chevron, 32 px, vers `#/`), séparateur vertical de 24 px, puis le titre h1 « Console propriétaire » (14 px, 600). Le sous-titre « Équipe TutoClick · tous les espaces » passe en infobulle du titre.
+- Au centre : les onglets en segmenté (Vue d'ensemble, Retours avec son compteur en pastille prune, Backlog, Nouveautés, Équipe et journal). Ce sont des liens, avec `aria-current="page"` sur l'onglet actif.
+- À droite : Aide.
+- Contenu sur le fond du contenu (COL-01) : plus de fond gris, des cartes à filet. Largeur maximale de 1 232 px, centrée, 32 px de marge.
+- Mobile : BackButton icône seule, titre ; les onglets passent sous la barre, sur une ligne qui défile.
+- Il n'y a plus de h1 `sr-only` par onglet : le h1 est dans la barre, et chaque onglet ouvre son contenu par un h2.
+
+**Présentateur** (`/demos/:id/present`, maquette `page01/presentateur-sombre-*`). La barre reste **sombre**, car le mode présentation est toujours sombre, quel que soit le thème.
+- À gauche : BackButton « Éditeur », séparateur, h1 avec le titre de la démo (14 px, 600), puis « Présentation · étape 1 sur 3 » en 13 px text-muted.
+- Au centre : l'état de l'écran public, en pastille (« Écran public fermé » en ambre, avec « Rouvrir » ; « Écran public ouvert » en vert, avec « Fermer »).
+- À droite : « Piloter depuis mon téléphone » et « Terminer », deux boutons secondaires de 36 px.
+- Dessous, sans changement : la scène, la barre de commande (minuteur, Précédente, Suivante, Écran noir) et la colonne Notes, Étape suivante et Raccourcis. Rien ne flotte plus au-dessus de la scène.
+- Mobile : « Piloter depuis mon téléphone » devient un bouton icône ; la pastille de l'écran public est masquée, la télécommande étant faite pour le téléphone.
 
 ## 17. ONB-01 : prise en main dans un panneau à droite (retour client du 22/11, variante à choisir)
 
