@@ -168,14 +168,14 @@ a:focus-visible:is(:not([class]), [class^='t-'], .link, .mk-link) {
   width: 100%;
 }
 
-/* Icônes dans les boutons (lucide-react, stroke 1.75) : 18 px (md), 16 px (sm), 20 px (lg).
+/* ICON-01 : icônes des boutons en 16 px, trait 2,25 (1,5 px rendu) ; 20 px, trait 2,1 en grand.
    Couvre l'icône directe et celle du composant Button (`.fd-btn__icon`). */
 .fd-btn > svg,
 .fd-btn .fd-btn__icon > svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   flex: none;
-  stroke-width: 1.75;
+  stroke-width: 2.25;
 }
 .fd-btn--sm > svg,
 .fd-btn.fd-btn--sm .fd-btn__icon > svg {
@@ -186,6 +186,7 @@ a:focus-visible:is(:not([class]), [class^='t-'], .link, .mk-link) {
 .fd-btn.fd-btn--lg .fd-btn__icon > svg {
   width: 20px;
   height: 20px;
+  stroke-width: 2.1;
 }
 .fd-btn--icon {
   width: var(--fd-layout-control-height-md);
@@ -645,7 +646,7 @@ input[type='checkbox']:disabled {
   width: 20px;
   height: 20px;
   flex: none;
-  stroke-width: 1.75;
+  stroke-width: 2.1;
 }
 .fd-nav__item:hover {
   background: var(--fd-color-nav-hover);

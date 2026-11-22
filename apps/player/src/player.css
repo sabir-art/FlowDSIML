@@ -2001,11 +2001,12 @@ h1.p-title {
   background: var(--p-surface);
   box-shadow: 0 1px 2px rgb(8 10 14 / 0.16);
 }
-/* Focus clavier : anneau intérieur de 2 px, sans contour extérieur (FIELD-01 §11.4) */
+/* Focus clavier (COMP-01 §6) : anneau extérieur, séparé de la poignée par un trait de la surface */
 .p-slider__thumb:focus-visible {
   outline: none;
-  border-color: var(--p-focus);
-  box-shadow: inset 0 0 0 2px var(--p-focus);
+  box-shadow:
+    0 0 0 2px var(--p-surface),
+    0 0 0 4px var(--p-focus);
 }
 .p-ba-seg {
   align-self: flex-start;

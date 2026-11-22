@@ -90,9 +90,6 @@
   font: 600 14px var(--fd-font-sans);
   color: var(--fd-color-text);
 }
-.fd-cal__month::first-letter {
-  text-transform: uppercase;
-}
 .fd-cal__nav {
   display: grid;
   place-items: center;

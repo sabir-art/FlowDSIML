@@ -7,7 +7,7 @@ import './popover.css';
 import './colorswatch.css';
 
 /** Nuancier de la marque (COMP-01 §4) : prune, framboise, prune-700, les trois couleurs de la DSIML, encre, blanc. */
-const BRAND = ['#A3195B', '#D60B52', '#85164B', '#217BAC', '#95C11F', '#F39200', '#080808', '#FFFFFF'];
+const BRAND = ['#A3195B', '#D60B52', '#85164B', '#2897D5', '#95C11F', '#F39200', '#080808', '#FFFFFF'];
 
 const clamp = (n: number, a = 0, b = 1) => Math.min(b, Math.max(a, n));
 function hexToHsv(hex: string): { h: number; s: number; v: number } {

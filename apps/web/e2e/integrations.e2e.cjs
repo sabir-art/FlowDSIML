@@ -254,7 +254,7 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
 
   // L23-07 : pause automatique
   await page.goto(`${BASE}/#/settings/integrations/wh-pause`);
-  const pauseBanner = page.locator('.l23 .wh-banner--warn[role="status"]');
+  const pauseBanner = page.locator('.l23 .wh-banner--pause[role="status"]');
   await pauseBanner.waitFor();
   ok(
     /après 6 échecs consécutifs/.test(await pauseBanner.textContent()),
@@ -279,7 +279,7 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   ok((await page.locator('.toast').count()) === 0, 'L23-07 : aucun toast');
   await shot('07-pause');
   await page.getByRole('button', { name: 'Réactiver' }).click();
-  await page.waitForFunction(() => !document.querySelector('.l23 .wh-banner--warn'));
+  await page.waitForFunction(() => !document.querySelector('.l23 .wh-banner--pause'));
   ok(t.webhooks.find((w) => w.id === 'wh-pause').state === 'active', 'L23-07 : Réactiver');
 
   // Accès : un éditeur ne voit ni l'onglet ni la page
